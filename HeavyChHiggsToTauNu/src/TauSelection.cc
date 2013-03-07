@@ -36,28 +36,28 @@ namespace {
     
     // FIXME change to delta beta discriminators or eventually to continuous discriminator
     
-    if(a->tauID("byTightIsolation") > 0.5 && b->tauID("byTightIsolation") < 0.5)
+    if(a->tauID("byTightCombinedIsolationDeltaBetaCorr") > 0.5 && b->tauID("byTightCombinedIsolationDeltaBetaCorr") < 0.5)
       return true;
 
-    if(a->tauID("byMediumIsolation") > 0.5) {
-      if(b->tauID("byTightIsolation") > 0.5)
+    if(a->tauID("byMediumCombinedIsolationDeltaBetaCorr") > 0.5) {
+      if(b->tauID("byTightCombinedIsolationDeltaBetaCorr") > 0.5)
         return false;
-      if(b->tauID("byMediumIsolation") < 0.5)
+      if(b->tauID("byMediumCombinedIsolationDeltaBetaCorr") < 0.5)
         return true;
     }
 
-    if(a->tauID("byLooseIsolation") > 0.5) {
+    if(a->tauID("byLooseCombinedIsolationDeltaBetaCorr") > 0.5) {
       // assume that if tau is medium isolated, it is also tight isolated
-      if(b->tauID("byMediumIsolation") > 0.5)
+      if(b->tauID("byMediumCombinedIsolationDeltaBetaCorr") > 0.5)
         return false;
-      if(b->tauID("byLooseIsolation") < 0.5)
+      if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr") < 0.5)
         return true;
     }
 
-    if(a->tauID("byVLooseIsolation") > 0.5) {
-      if(b->tauID("byLooseIsolation") > 0.5)
+    if(a->tauID("byVLooseCombinedIsolationDeltaBetaCorr") > 0.5) {
+      if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr") > 0.5)
         return false;
-      if(b->tauID("byVLooseIsolation") < 0.5)
+      if(b->tauID("byVLooseCombinedIsolationDeltaBetaCorr") < 0.5)
         return true;
     }
 
@@ -309,7 +309,7 @@ namespace HPlus {
 
   const edm::Ptr<pat::Tau> TauSelection::Data::getSelectedTau() const {
     if (!fPassedEvent)
-      throw cms::Exception("Assert") << "TauSelection::Data::getSelectedTau() was called even though TauSelection::Data::passedEvent() is false. Please add to your code requirement that passedEvent is true before asking for getSelectedTau!";
+      throw cms::Exception("Assert") << "TauSelection::Data::getSelectedTau() was called even though TauSelection::Data::passedEvent() is false. Please add to your code requirement that passedEvent is true before asking for getSelectedTau!" << __FILE__ << ":" << __LINE__;
     return fSelectedTau;
   }
 
@@ -1280,14 +1280,18 @@ namespace HPlus {
     // Disable histogram filling and counter incrementing until the return call
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-    return tau->tauID(isolationString) > 0.5;
+    if (isolationString.size())
+      return tau->tauID(isolationString) > 0.5;
+    return fTauID->passIsolation(tau) > 0.5;
   }
 
   const double TauSelection::getIsolationValueOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString) const {
     // Disable histogram filling and counter incrementing until the return call
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-    return tau->tauID(isolationString);
+    if (isolationString.size())
+      return tau->tauID(isolationString);
+    return fTauID->passIsolation(tau);
   }
 
   const bool TauSelection::getPassesNProngsStatusOfTauObject(const edm::Ptr<pat::Tau>& tau) const {

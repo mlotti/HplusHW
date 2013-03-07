@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_CandViewDeltaRSelector_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_CandViewDeltaRSelector_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_ViewDeltaRSelector_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_ViewDeltaRSelector_h
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -16,15 +16,15 @@
 #include "DataFormats/Math/interface/deltaR.h"
 
 
-namespace hplus {
-  template <typename T>
-  class CandViewDeltaRSelector: public edm::EDProducer {
+namespace HPlus {
+  template <typename CandType, typename RefType>
+  class ViewDeltaRSelector: public edm::EDProducer {
   public:
-    explicit CandViewDeltaRSelector(const edm::ParameterSet&);
-    ~CandViewDeltaRSelector();
+    explicit ViewDeltaRSelector(const edm::ParameterSet&);
+    ~ViewDeltaRSelector();
 
   private:
-    typedef std::vector<T> CollectionType;
+    typedef std::vector<CandType> CollectionType;
 
     virtual void produce(edm::Event&, const edm::EventSetup&);
 
@@ -33,8 +33,8 @@ namespace hplus {
     const double maxDR_;
   };
 
-  template <typename T>
-  CandViewDeltaRSelector<T>::CandViewDeltaRSelector(const edm::ParameterSet& iConfig):
+  template <typename CandType, typename RefType>
+  ViewDeltaRSelector<CandType, RefType>::ViewDeltaRSelector(const edm::ParameterSet& iConfig):
     srcCand_(iConfig.getParameter<edm::InputTag>("src")),
     srcRef_(iConfig.getParameter<edm::InputTag>("refSrc")),
     maxDR_(iConfig.getParameter<double>("deltaR"))
@@ -42,20 +42,20 @@ namespace hplus {
     this->template produces<CollectionType>();
   }
 
-  template <typename T>
-  CandViewDeltaRSelector<T>::~CandViewDeltaRSelector() {}
+  template <typename CandType, typename RefType>
+  ViewDeltaRSelector<CandType, RefType>::~ViewDeltaRSelector() {}
 
-  template <typename T>
-  void CandViewDeltaRSelector<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    edm::Handle<edm::View<T> > hcand;
+  template <typename CandType, typename RefType>
+  void ViewDeltaRSelector<CandType, RefType>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    edm::Handle<edm::View<CandType> > hcand;
     iEvent.getByLabel(srcCand_, hcand);
 
-    edm::Handle<edm::View<reco::Candidate> > href;
+    edm::Handle<edm::View<RefType> > href;
     iEvent.getByLabel(srcRef_, href);
 
     std::auto_ptr<CollectionType> ret(new CollectionType());
 
-    for(typename edm::View<T>::const_iterator iCand = hcand->begin(); iCand != hcand->end(); ++iCand) {
+    for(typename edm::View<CandType>::const_iterator iCand = hcand->begin(); iCand != hcand->end(); ++iCand) {
       for(edm::View<reco::Candidate>::const_iterator iRef = href->begin(); iRef != href->end(); ++iRef) {
         if(reco::deltaR(*iCand, *iRef) < maxDR_) {
           ret->push_back(*iCand);

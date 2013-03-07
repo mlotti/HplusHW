@@ -11,6 +11,7 @@ def createEDFilter(param):
         histogramAmbientLevel = param.histogramAmbientLevel,
         trigger = param.trigger.clone(),
         tauTriggerEfficiencyScaleFactor = param.tauTriggerEfficiencyScaleFactor.clone(),
+        metTriggerEfficiencyScaleFactor = param.metTriggerEfficiencyScaleFactor.clone(),
         primaryVertexSelection = param.primaryVertexSelection.clone(),
         ElectronSelection = param.ElectronSelection.clone(),
         MuonSelection = param.MuonSelection.clone(),
@@ -46,4 +47,5 @@ def createEDFilter(param):
         oneProngTauSrc = cms.untracked.InputTag("VisibleTaus","HadronicTauOneProng"),
         tauEmbeddingStatus = cms.untracked.bool(False),
         metFilters = param.metFilters.clone(),
+        QCDTailKiller = param.QCDTailKiller.clone(),
     )

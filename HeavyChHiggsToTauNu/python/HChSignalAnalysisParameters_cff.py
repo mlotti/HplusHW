@@ -277,7 +277,36 @@ bTagging = cms.untracked.PSet(
 oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
  
 #deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
-deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees, for heavy charged Higgs
+deltaPhiTauMET = cms.untracked.double(180.0) # less than this value in degrees, for heavy charged Higgs
+
+QCDTailKiller = cms.untracked.PSet(
+    # Back to back (bottom right corner of 2D plane tau,MET vs. jet,MET)
+    backToBackJet1CutShape = cms.untracked.string("circular"), # options: noCut, rectangular, triangular, circular
+    backToBackJet1CutX = cms.untracked.double(40.0),
+    backToBackJet1CutY = cms.untracked.double(40.0),
+    backToBackJet2CutShape = cms.untracked.string("circular"),
+    backToBackJet2CutX = cms.untracked.double(30.0),
+    backToBackJet2CutY = cms.untracked.double(30.0),
+    backToBackJet3CutShape = cms.untracked.string("circular"),
+    backToBackJet3CutX = cms.untracked.double(30.0),
+    backToBackJet3CutY = cms.untracked.double(30.0),
+    backToBackJet4CutShape = cms.untracked.string("circular"),
+    backToBackJet4CutX = cms.untracked.double(30.0),
+    backToBackJet4CutY = cms.untracked.double(30.0),
+    # Collinear topology (top left corner of 2D plane tau,MET vs. jet,MET)
+    collinearJet1CutShape = cms.untracked.string("circular"),
+    collinearJet1CutX = cms.untracked.double(30.0),
+    collinearJet1CutY = cms.untracked.double(30.0),
+    collinearJet2CutShape = cms.untracked.string("circular"),
+    collinearJet2CutX = cms.untracked.double(30.0),
+    collinearJet2CutY = cms.untracked.double(30.0),
+    collinearJet3CutShape = cms.untracked.string("circular"),
+    collinearJet3CutX = cms.untracked.double(30.0),
+    collinearJet3CutY = cms.untracked.double(30.0),
+    collinearJet4CutShape = cms.untracked.string("circular"),
+    collinearJet4CutX = cms.untracked.double(30.0),
+    collinearJet4CutY = cms.untracked.double(30.0),
+)
 
 topReconstruction = cms.untracked.string("None") # Options: None
 
@@ -464,26 +493,34 @@ def cloneForHeavyAnalysis(lightModule):
     return heavyModule
 
 # Set trigger efficiency / scale factor depending on tau selection params
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as TriggerEfficiency
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
     if tausele.isolationDiscriminator.value() == "byVLooseCombinedIsolationDeltaBetaCorr":
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return TriggerEfficiency.tauLegEfficiency_byVLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
+            return tauTriggerEfficiency.tauLegEfficiency_byVLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
     elif tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr":
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return TriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
+            return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
         elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
-            return TriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA
+            return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA
     elif tausele.isolationDiscriminator.value() == "byMediumCombinedIsolationDeltaBetaCorr":
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return TriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium
+            return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium
         elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
-            return TriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA
-    raise Exception("Trigger efficencies/scale factors are only available for:\n  tau isolation: 'byVLooseCombinedIsolationDeltaBetaCorr', 'byLooseCombinedIsolationDeltaBetaCorr', 'byMediumCombinedIsolationDeltaBetaCorr'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
+            return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA
+    raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byVLooseCombinedIsolationDeltaBetaCorr', 'byLooseCombinedIsolationDeltaBetaCorr', 'byMediumCombinedIsolationDeltaBetaCorr'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
+
+metTriggerEfficiencyScaleFactor = cms.untracked.PSet(
+    dataParameters = cms.PSet(),
+    mcParameters = cms.PSet(),
+    dataSelect = cms.vstring(),
+    mcSelect = cms.string(""),
+    mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
+)
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
@@ -694,8 +731,15 @@ def changeJetCollection(**kwargs):
 
 def setJERSmearedJets(dataVersion):
     if dataVersion.isMC():
-        print "Using JER-smeared jets"
-        changeJetCollection(moduleLabel="smearedPatJets")
+        if jetSelection.src.value() == "selectedPatJets":
+            print "Using JER-smeared jets"
+            changeJetCollection(moduleLabel="smearedPatJets")
+        elif jetSelection.src.value() == "selectedPatJetsChs":
+            print "Using JER-smeared CHS jets"
+            changeJetCollection(moduleLabel="smearedPatJetsChs")
+        else:
+            raise Exception("Unsupported value for jet src %s, expected 'selectedPatJets' or 'selectedPatJetsChs'" % jetSelection.src.value())
+            
 
 def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow", useGSFElectrons=True):
     # Taus

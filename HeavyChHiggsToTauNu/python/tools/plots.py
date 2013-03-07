@@ -87,6 +87,7 @@ for mcEra in ["Summer11", "Fall11"]:
     "W1Jets_TuneZ2_%s"%mcEra: "W1Jets",
     "W2Jets_TuneZ2_%s"%mcEra: "W2Jets",
     "W3Jets_TuneZ2_%s"%mcEra: "W3Jets",
+    "W3Jets_TuneZ2_v2_%s"%mcEra: "W3Jets",
     "W4Jets_TuneZ2_%s"%mcEra: "W4Jets",
     "DYJetsToLL_M50_TuneZ2_%s"%mcEra:      "DYJetsToLL_M50",
 
@@ -1006,6 +1007,9 @@ class PlotRatioBase:
     def getFrame2(self):
         return self.cf.frame2
 
+    def hasFrame2(self):
+        return hasattr(self.cf, "frame2")
+
     ## Get the upper TPad
     def getPad1(self):
         return self.cf.pad1
@@ -1013,6 +1017,9 @@ class PlotRatioBase:
     ## Get the lower TPad
     def getPad2(self):
         return self.cf.pad2
+
+    def hasPad2(self):
+        return hasattr(self.cf, "pad2")
 
     ## Set the ratio histograms
     #
@@ -1688,6 +1695,7 @@ class PlotDrawer:
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
+    # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \param customizeBeforeDraw Function to customize the plot before drawing it
     # \param customizeBeforeSave Function to customize the plot before saving it
     # \param addLuminosityText   Should luminosity text be drawn?
@@ -1704,6 +1712,7 @@ class PlotDrawer:
                  opts={},
                  optsLog={},
                  opts2={},
+                 customizeBeforeFrame=None,
                  customizeBeforeDraw=None,
                  customizeBeforeSave=None,
                  addLuminosityText=False,
@@ -1723,6 +1732,7 @@ class PlotDrawer:
         self.optsLogDefault.update(optsLog)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
+        self.customizeBeforeFrameDefault = customizeBeforeFrame
         self.customizeBeforeDrawDefault = customizeBeforeDraw
         self.customizeBeforeSaveDefault = customizeBeforeSave
         self.addLuminosityTextDefault = addLuminosityText
@@ -1802,12 +1812,14 @@ class PlotDrawer:
                 xmin = histograms.th1Xmin(th1)
                 xmax = histograms.th1Xmax(th1)
                 nbins = (xmax-xmin)/rebinWidth
+                intbins = int(nbins+0.5)
                 # Check that the number of bins is integer
-                if abs(int(nbins) - nbins) > 1e-10:
-                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer" % (h.getName(), name, rebinWidth, xmin, xmax, nbins)
+                diff = abs(intbins - nbins)
+                if diff > 1e-3:
+                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer (diff is %g)" % (h.getName(), name, rebinWidth, xmin, xmax, nbins, diff)
                     return
 
-                nbins = int(nbins)
+                nbins = intbins
                 binLowEdgeList = [xmin + (xmax-xmin)/nbins*i for i in range(0, nbins+1)]
                 rebinned = th1.Rebin(nbins, th1.GetName(), array.array("d", binLowEdgeList))
                 h.setRootHisto(rebinned)
@@ -1845,7 +1857,12 @@ class PlotDrawer:
     # \li\a ratioYlabel  The Y axis title for the ratio pad (None for default)
     # \li\a ratioInvert  Should the ratio be inverted?
     # \li\a ratioIsBinomial  Is the ratio a binomial?
+    # \li\a customizeBeforeFrame Function customize the plot before creating the canvas and frame
     def createFrame(self, p, name, **kwargs):
+        customize = kwargs.get("customizeBeforeFrame", self.customizeBeforeFrameDefault)
+        if customize is not None:
+            customize(p)
+
         log = kwargs.get("log", self.logDefault)
 
         # Default values
@@ -1881,7 +1898,7 @@ class PlotDrawer:
 
         # Override ratio ytitle
         ratioYlabel = kwargs.get("ratioYlabel", self.ratioYlabelDefault)
-        if ratio and ratioYlabel != None:
+        if ratio and ratioYlabel is not None and p.hasFrame2():
             p.getFrame2().GetYaxis().SetTitle(ratioYlabel)
 
 

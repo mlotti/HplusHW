@@ -57,11 +57,13 @@ class ConfigBuilder:
                  histogramAmbientLevel = "Debug", # Set level of how many histograms are stored to files options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms),
                  histogramAmbientLevelOptimization = "Vital",
                  histogramAmbientLevelSystematics = "Systematics",
-                 applyTriggerScaleFactor = True, # Apply trigger scale factor or not
+                 applyTauTriggerScaleFactor = True, # Apply tau trigger scale factor or not
+                 applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
                 # tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
                  useTriggerMatchedTaus = True,
+                 useCHSJets = False,
                  useJERSmearedJets = True,
                  useBTagDB = False,
                  customizeLightAnalysis = None,
@@ -70,13 +72,14 @@ class ConfigBuilder:
                  doLightAnalysis = True,
                  doHeavyAnalysis = False,
 
+                 pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
                  printAnalyzerNames = False,
-                 inputWorkflow = "pattuple_v44_4", # Name of the workflow, whose output is used as an input, needed for WJets weighting
+                 inputWorkflow = "pattuple_v44_5", # Name of the workflow, whose output is used as an input, needed for WJets weighting
                  ):
         self.options, self.dataVersion = HChOptions.getOptionsDataVersion(dataVersion)
         self.dataEras = dataEras
@@ -94,10 +97,12 @@ class ConfigBuilder:
         self.doFillTree = doFillTree
         self.histogramAmbientLevel = histogramAmbientLevel
         self.histogramAmbientLevelSystematics = histogramAmbientLevelSystematics
-        self.applyTriggerScaleFactor = applyTriggerScaleFactor
+        self.applyTauTriggerScaleFactor = applyTauTriggerScaleFactor
+        self.applyMETTriggerScaleFactor = applyMETTriggerScaleFactor
         self.applyPUReweight = applyPUReweight
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
         self.useTriggerMatchedTaus = useTriggerMatchedTaus
+        self.useCHSJets = useCHSJets
         self.useJERSmearedJets = useJERSmearedJets
         self.useBTagDB = useBTagDB
         self.customizeLightAnalysis = customizeLightAnalysis
@@ -108,6 +113,7 @@ class ConfigBuilder:
         if not self.doLightAnalysis and not self.doHeavyAnalysis:
             raise Exception("At least one of doLightAnalysis and doHeavyAnalysis must be set to True (otherwise nothing is done)")
 
+        self.pickEvents = pickEvents
         self.doSystematics = doSystematics
         self.doJESVariation = doJESVariation
         self.doPUWeightVariation = doPUWeightVariation
@@ -172,6 +178,16 @@ class ConfigBuilder:
         def create(param):
             return [QCDMeasurementFactorised.createEDFilter(param)]
         return self._build(create, ["QCDMeasurement"])
+
+    ## Build configuration for EWK background coverage analysis job
+    #
+    # \return cms.Process object, should be assigned to a local
+    #         'process' variable in the analysis job configuration file
+    def buildEwkBackgroundCoverageAnalysis(self):
+        import HiggsAnalysis.HeavyChHiggsToTauNu.ewkBackgroundCoverageAnalysis as ewkBackgroundCoverageAnalysis
+        def create(param):
+            return [ewkBackgroundCoverageAnalysis.createEDAnalyze(param)]
+        return self._build(create, ["ewkBackgroundCoverageAnalysis"])
 
     ## Accumulate the number of analyzers to a category
     #
@@ -278,7 +294,7 @@ class ConfigBuilder:
 
                 for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
-                    if self.applyTriggerScaleFactor:
+                    if self.applyTauTriggerScaleFactor:
                         param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
@@ -340,15 +356,16 @@ class ConfigBuilder:
 
         # Construct normal path
         if not self.doOptimisation:
-            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
             for module, name in zip(analysisModules, analysisNames):
                 setattr(process, name, module)
                 path = cms.Path(process.commonSequence * module)
                 setattr(process, name+"Path", path)
-            # PickEvens only for the first analysis path
-            p = getattr(process, analysisNames[0]+"Path")
-            p *= process.PickEvents
-
+            if self.pickEvents:
+                process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
+                # PickEvens only for the first analysis path
+                p = getattr(process, analysisNames[0]+"Path")
+                p *= process.PickEvents
+    
             self._accumulateAnalyzers("Data eras", analysisNames)
 
             if self.doMETResolution:
@@ -469,13 +486,21 @@ class ConfigBuilder:
         else:
             param.setAllTauSelectionSrcSelectedPatTaus()
 
+        # CHS jets
+        if self.useCHSJets:
+            print "Using CHS jets"
+            param.changeJetCollection(moduleLabel="selectedPatJetsChs")
+
         # JER-smeared jets
         if self.useJERSmearedJets:
             param.setJERSmearedJets(self.dataVersion)
 
         # Trigger with scale factors (at the moment hard coded)
-        if self.applyTriggerScaleFactor and self.dataVersion.isMC():
-            param.tauTriggerEfficiencyScaleFactor.mode = "scaleFactor"
+        if self.dataVersion.isMC():
+            if self.applyTauTriggerScaleFactor:
+                param.tauTriggerEfficiencyScaleFactor.mode = "scaleFactor"
+            if self.applyMETTriggerScaleFactor:
+                param.metTriggerEfficiencyScaleFactor.mode = "scaleFactor"
 
         if self.doBTagTree:
             param.tree.fillNonIsoLeptonVars = True
@@ -538,9 +563,12 @@ class ConfigBuilder:
         #print "\nAnalysis is blind:", module.blindAnalysisStatus, "\n"
         print "Histogram level:", module.histogramAmbientLevel.value()
         print "Trigger:", module.trigger
-        print "Trigger scale factor mode:", module.tauTriggerEfficiencyScaleFactor.mode.value()
-        print "Trigger scale factor data:", module.tauTriggerEfficiencyScaleFactor.dataSelect.value()
-        print "Trigger scale factor MC:", module.tauTriggerEfficiencyScaleFactor.mcSelect.value()
+        print "Tau trigger scale factor mode:", module.tauTriggerEfficiencyScaleFactor.mode.value()
+        print "Tau trigger scale factor data:", module.tauTriggerEfficiencyScaleFactor.dataSelect.value()
+        print "Tau trigger scale factor MC:", module.tauTriggerEfficiencyScaleFactor.mcSelect.value()
+        print "MET trigger scale factor mode:", module.metTriggerEfficiencyScaleFactor.mode.value()
+        print "MET trigger scale factor data:", module.metTriggerEfficiencyScaleFactor.dataSelect.value()
+        print "MET trigger scale factor MC:", module.metTriggerEfficiencyScaleFactor.mcSelect.value()
         if hasattr(module, "metFilters"):
             print "MET filters", module.metFilters
         print "VertexWeight data distribution:",module.vertexWeight.dataPUdistribution.value()
@@ -549,14 +577,18 @@ class ConfigBuilder:
         #print "TauSelection algorithm:", module.tauSelection.selection.value()
         print "TauSelection algorithm:", module.tauSelection.selection.value()
         print "TauSelection src:", module.tauSelection.src.value()
-        print "TauVetoSelection src:", module.vetoTauSelection.tauSelection.src.value()
+        if hasattr(module, "vetoTauSelection"):
+            print "TauVetoSelection src:", module.vetoTauSelection.tauSelection.src.value()
         print "TauSelection isolation:", module.tauSelection.isolationDiscriminator.value()
         print "TauSelection operating mode:", module.tauSelection.operatingMode.value()
-        print "VetoTauSelection src:", module.vetoTauSelection.tauSelection.src.value()
-        print "Beta cut: ", module.jetSelection.betaCutSource.value(), module.jetSelection.betaCutDirection.value(), module.jetSelection.betaCut.value()
+        if hasattr(module, "vetoTauSelection"):
+            print "VetoTauSelection src:", module.vetoTauSelection.tauSelection.src.value()
+        if hasattr(module, "jetSelection"):
+            print "Beta cut: ", module.jetSelection.betaCutSource.value(), module.jetSelection.betaCutDirection.value(), module.jetSelection.betaCut.value()
         print "electrons: ", module.ElectronSelection
         print "muons: ", module.MuonSelection
-        print "jets: ", module.jetSelection
+        if hasattr(module, "jetSelection"):
+            print "jets: ", module.jetSelection
 
 
     ## Build array of analyzers to scan various tau againstElectron discriminators
@@ -718,20 +750,24 @@ class ConfigBuilder:
         module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
         module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
+        postfix = ""
+        if module.jetSelection.src.value()[-3:] == "Chs":
+            postfix = "Chs"
+
         names = []
         names.append(jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
         names.append(jesVariation.addTESVariation(process, name, "TESMinus", module, "Down", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
 
         if doJetUnclusteredVariation:
             # Do all variations beyond TES
-            names.append(jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up"))
-            names.append(jesVariation.addJESVariation(process, name, "JESMinus", module, "Down"))
+            names.append(jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up", postfix))
+            names.append(jesVariation.addJESVariation(process, name, "JESMinus", module, "Down", postfix))
     
-            names.append(jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up"))
-            names.append(jesVariation.addJERVariation(process, name, "JERMinus", module, "Down"))
+            names.append(jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up", postfix))
+            names.append(jesVariation.addJERVariation(process, name, "JERMinus", module, "Down", postfix))
     
-            names.append(jesVariation.addUESVariation(process, name, "METPlus",  module, "Up"))
-            names.append(jesVariation.addUESVariation(process, name, "METMinus", module, "Down"))
+            names.append(jesVariation.addUESVariation(process, name, "METPlus",  module, "Up", postfix))
+            names.append(jesVariation.addUESVariation(process, name, "METMinus", module, "Down", postfix))
 
         self._accumulateAnalyzers("JES variation", names)
 
@@ -740,6 +776,8 @@ class ConfigBuilder:
     # \param process                      cms.Process object
     # \param analysisNamesForSystematics  Names of the analysis modules for which the PU weight variation should be done
     def _buildPUWeightVariation(self, process, analysisNamesForSystematics, param):
+        if not self.applyPUReweight:
+            return
         if not (self.doPUWeightVariation or self.doSystematics):
             return
 

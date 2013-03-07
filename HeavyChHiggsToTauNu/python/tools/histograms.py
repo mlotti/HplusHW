@@ -7,6 +7,7 @@ import os, sys
 import glob
 import array
 import math
+import copy
 
 from optparse import OptionParser
 
@@ -33,6 +34,23 @@ cmsText = {
 
 ## Default energy text
 energyText = "7 TeV"
+
+## Generic settings class
+class Settings:
+    def __init__(self, **defaults):
+        self.data = copy.deepcopy(defaults)
+
+    def set(self, **kwargs):
+        for key, value in kwargs.iteritems():
+            if not key in self.data:
+                raise Exception("Not allowed to insert '%s', available settings: %s" % (key, ", ".join(self.data.keys())))
+            self.data[key] = value
+
+    def get(self, key, args=None):
+        if args is None:
+            return self.data[key]
+        else:
+            return args.get(key, self.data[key])
 
 ## Class to provide default positions of the various texts.
 #
@@ -119,6 +137,7 @@ def addText(x, y, text, *args, **kwargs):
     t = PlotText(x, y, text, *args, **kwargs)
     t.Draw()
 
+
 ## Class for drawing text to current TPad with TLaTeX
 #
 # Text can be added to plots in object-oriented way. Mainly intended
@@ -152,7 +171,81 @@ class PlotText:
     # Provides interface compatible with ROOT's drawable objects.
     def Draw(self, options=None):
         self.l.DrawLatex(self.x, self.y, self.text)        
-        
+
+
+## Class for drawing text and a background box
+class PlotTextBox:
+    ## Constructor
+    #
+    # \param xmin       X min coordinate of the box (NDC)
+    # \param ymin       Y min coordinate of the box (NDC) (if None, deduced automatically)
+    # \param xmax       X max coordinate of the box (NDC)
+    # \param ymax       Y max coordinate of the box (NDC)
+    # \param lineheight Line height
+    # \param fillColor  Fill color of the box
+    # \param transparent  Should the box be transparent? (in practive the TPave is not created)
+    # \param kwargs       Forwarded to histograms.PlotText.__init__()
+    def __init__(self, xmin, ymin, xmax, ymax, lineheight=0.04, fillColor=ROOT.kWhite, transparent=True, **kwargs):
+        # ROOT.TPave Set/GetX1NDC() etc don't seem to work as expected.
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
+        self.lineheight = lineheight
+        self.fillColor = fillColor
+        self.transparent = transparent
+        self.texts = []
+        self.textArgs = {}
+        self.textArgs.update(kwargs)
+
+        self.currenty = ymax
+
+    ## Add text to current position
+    def addText(self, text):
+        self.currenty -= self.lineheight
+        self.addPlotObject(PlotText(self.xmin+0.01, self.currenty, text, **self.textArgs))
+
+    ## Add PlotText object
+    def addPlotObject(self, obj):
+        self.texts.append(obj)
+
+    ## Move the box and the contained text objects
+    #
+    # \param dx  Movement in x (positive is to right)
+    # \param dy  Movement in y (positive is to up)
+    # \param dw  Increment of width (negative to decrease width)
+    # \param dh  Increment of height (negative to decrease height)
+    #
+    # \a dx and \a dy affect to both box and text objects, \a dw and
+    # \dh affect the box only.
+    def move(self, dx=0, dy=0, dw=0, dh=0):
+        self.xmin += dx
+        self.xmax += dx
+        if self.ymin is not None:
+            self.ymin += dy
+        self.ymax += dy
+
+        self.xmax += dw
+        if self.ymin is not None:
+            self.ymin -= dh
+
+        for t in self.texts:
+            t.x += dx
+            t.y += dy
+
+    ## Draw the box and the text to the current TPad
+    #
+    # \param options  Forwarded to ROOT.TPave.Draw(), and the Draw() of the contained objects
+    def Draw(self, options=""):
+        if not self.transparent:
+            ymin = self.ymin
+            if ymin is None:
+                ymin = self.currenty - 0.01
+            self.pave = ROOT.TPave(self.xmin, self.ymin, self.xmax, self.ymax, 0, "NDC")
+            self.pave.SetFillColor(self.fillColor)
+            self.pave.Draw(options)
+        for t in self.texts:
+            t.Draw(options)
 
 ## Draw the "CMS Preliminary" text to the current TPad
 #
@@ -209,6 +302,55 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     addText(x, y, lumiStr, textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
+
+## Class to create signal information box on plots
+class SignalTextCreator:
+    ## Constructor
+    #
+    # \param xmin       xmin coordinate of the box (NDC)
+    # \param ymax       ymax coordinate of the box (NDC)
+    # \param size       Text size
+    # \param lineheight Height of one line
+    # \param width      Width of the box
+    # \param kwargs     Keyword arguments, forwarded to histograms.PlotTextBox.__init__()
+    def __init__(self, xmin=0.6, ymax=0.9, size=20, lineheight=0.04, width=0.3, **kwargs):
+        self.settings = Settings(xmin=xmin, ymax=ymax, size=size, lineheight=lineheight, width=width,
+                                 mass=None, tanbeta=None, mu=None,
+                                 br_tH=None,
+                                 sigma_H=None, br_Htaunu=None)
+        self.boxArgs = {}
+        self.boxArgs.update(kwargs)
+
+    ## Set the signal information
+    def set(self, **kwargs):
+        self.settings.set(**kwargs)
+
+    ## Function call syntax to create histograms.PlotTextBox
+    def __call__(self, **kwargs):
+        xmin = self.settings.get("xmin", kwargs)
+        ymax = self.settings.get("ymax", kwargs)
+        size = self.settings.get("size", kwargs)
+        lineheight = self.settings.get("lineheight", kwargs)
+        width = self.settings.get("width", kwargs)
+
+        box = PlotTextBox(xmin, None, xmin+width, ymax, lineheight=lineheight, size=size, **self.boxArgs)
+
+        for attr, text in [
+            ("mass", "m_{H^{+}}=%d GeV/c^{2}"),
+            ("br_tH", "#it{B}(t #rightarrow bH^{+})=%.2f"),
+            ("sigma_H", "#sigma(H^{+})=%.1f pb"),
+            ("br_Htaunu", "#it{B}(H^{+} #rightarrow #tau#nu_{#tau})=%.2f"),
+            ("tanbeta", "tan#beta=%d"),
+            ("mu", "#mu=%d")]:
+
+            value = self.settings.get(attr, kwargs)
+            if value is not None:
+                box.addText(text % value)
+
+        return box
+
+createSignalText = SignalTextCreator()
+
 
 ## Class for generating legend creation functions with default positions.
 #
@@ -362,7 +504,7 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
     legend.SetY1(legend.GetY1() + dy)
     legend.SetY2(legend.GetY2() + dy)
 
-    legend.SetX1(legend.GetX1() + dw)
+    legend.SetX2(legend.GetX2() + dw)
     legend.SetY1(legend.GetY1() - dh) # negative dh should shrink the legend
     
     return legend
@@ -500,6 +642,10 @@ def th1ApplyBin(th1, function):
     for bin in xrange(0, th1.GetNbinsX()+2):
         th1.SetBinContent(bin, function(th1.GetBinContent(bin)))
 
+def th1ApplyBinError(th1, function):
+    for bin in xrange(0, th1.GetNbinsX()+2):
+        th1.SetBinError(bin, function(th1.GetBinError(bin)))
+                
 ## Convert TH1 distribution to TH1 of efficiency as a function of cut value
 #
 # \param hdist  TH1 distribution
@@ -508,6 +654,7 @@ def dist2eff(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
     th1ApplyBin(hpass, lambda value: value/total)
+    th1ApplyBinError(hpass, lambda value: math.sqrt(value)/total)
     return hpass
 
 ## Convert TH1 distribution to TH1 of 1-efficiency as a function of cut value
@@ -662,9 +809,22 @@ class CanvasFrame:
 
         _boundsArgs(histos, opts)
 
+        # Check if the first histogram has x axis bin labels
+        rootHisto = histos[0].getRootHisto()
+        hasBinLabels = isinstance(rootHisto, ROOT.TH1) and len(rootHisto.GetXaxis().GetBinLabel(1)) > 0
+        if hasBinLabels:
+            binWidth = histos[0].getBinWidth(1)
+            opts["nbinsx"] = int((opts["xmax"]-opts["xmin"])/binWidth +0.5)
+
         self.frame = _drawFrame(self.canvas, opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"], opts.get("nbins", None), opts.get("nbinsx", None), opts.get("nbinsy", None))
         self.frame.GetXaxis().SetTitle(histos[0].getXtitle())
         self.frame.GetYaxis().SetTitle(histos[0].getYtitle())
+
+        # Copy the bin labels
+        if hasBinLabels:
+            firstBin = rootHisto.FindFixBin(opts["xmin"])
+            for i in xrange(0, opts["nbinsx"]):
+                self.frame.GetXaxis().SetBinLabel(i+1, rootHisto.GetXaxis().GetBinLabel(firstBin+i))
 
     ## \var canvas
     # TCanvas for the canvas
@@ -762,13 +922,14 @@ class CanvasFrameTwo:
         opts2 = {}
         opts2.update(kwargs.get("opts2", {}))
 
-        if "xmin" in opts2 or "xmax" in opts2 or "nbins" in opts2:
-            raise Exception("No 'xmin', 'xmax', or 'nbins' allowed in opts2, values are taken from opts/opts1")
+        if "xmin" in opts2 or "xmax" in opts2 or "nbins" in opts2 or "nbinsx" in opts2:
+            raise Exception("No 'xmin', 'xmax', 'nbins', or 'nbinsy' allowed in opts2, values are taken from opts/opts1")
 
         _boundsArgs(histos1, opts1)
         opts2["xmin"] = opts1["xmin"]
         opts2["xmax"] = opts1["xmax"]
         opts2["nbins"] = opts1.get("nbins", None)
+        opts2["nbinsx"] = opts1.get("nbinsx", None)
 #        _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
         _boundsArgs(histos2, opts2) # HistoWrapper not needed anymore? Ratio is Histo
 
@@ -800,8 +961,15 @@ class CanvasFrameTwo:
         #xoffsetFactor = canvasFactor*2
         xoffsetFactor = 0.5*canvasFactor/(canvasFactor-1) * 1.3
 
+        # Check if the first histogram has x axis bin labels
+        rootHisto = histos1[0].getRootHisto()
+        hasBinLabels = isinstance(rootHisto, ROOT.TH1) and len(rootHisto.GetXaxis().GetBinLabel(1)) > 0
+        if hasBinLabels:
+            binWidth = histos1[0].getBinWidth(1)
+            opts1["nbinsx"] = int((opts1["xmax"]-opts1["xmin"])/binWidth +0.5)
+            opts2["nbinsx"] = opts1["nbinsx"]
 
-        self.frame1 = _drawFrame(self.pad1, opts1["xmin"], opts1["ymin"], opts1["xmax"], opts1["ymax"], opts1.get("nbins", None))
+        self.frame1 = _drawFrame(self.pad1, opts1["xmin"], opts1["ymin"], opts1["xmax"], opts1["ymax"], opts1.get("nbins", None), opts1.get("nbinsx", None), opts1.get("nbinsy", None))
         (labelSize, titleSize) = (self.frame1.GetXaxis().GetLabelSize(), self.frame1.GetXaxis().GetTitleSize())
         self.frame1.GetXaxis().SetLabelSize(0)
         self.frame1.GetXaxis().SetTitleSize(0)
@@ -809,7 +977,7 @@ class CanvasFrameTwo:
         self.frame1.GetYaxis().SetTitleOffset(self.frame1.GetYaxis().GetTitleOffset()*yoffsetFactor)
 
         self.canvas.cd(2)
-        self.frame2 = _drawFrame(self.pad2, opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"], opts2.get("nbins", None))
+        self.frame2 = _drawFrame(self.pad2, opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"], opts2.get("nbins", None), opts2.get("nbinsx", None))
         self.frame2.GetXaxis().SetTitle(histos1[0].getXtitle())
         self.frame2.GetYaxis().SetTitle(histos2[0].getYtitle())
         self.frame2.GetYaxis().SetTitleOffset(self.frame2.GetYaxis().GetTitleOffset()*yoffsetFactor)
@@ -819,6 +987,12 @@ class CanvasFrameTwo:
         self.canvas.cd(1)
         self.frame = FrameWrapper(self.pad1, self.frame1, self.pad2, self.frame2)
         self.pad = self.pad1
+
+        # Copy the bin labels
+        if hasBinLabels:
+            firstBin = rootHisto.FindFixBin(opts1["xmin"])
+            for i in xrange(0, opts1["nbinsx"]):
+                self.frame.GetXaxis().SetBinLabel(i+1, rootHisto.GetXaxis().GetBinLabel(firstBin+i))
 
     ## \var frame1
     # TH1 for the upper frame

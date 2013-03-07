@@ -61,8 +61,10 @@ namespace HPlus {
 
     fTree->Branch("weightPrescale", &fPrescaleWeight);
     fTree->Branch("weightPileup", &fPileupWeight);
-    fTree->Branch("weightTrigger", &fTriggerWeight);
-    fTree->Branch("weightTriggerAbsUnc", &fTriggerWeightAbsUnc);
+    fTree->Branch("weightTauTrigger", &fTauTriggerWeight);
+    fTree->Branch("weightTauTriggerAbsUnc", &fTauTriggerWeightAbsUnc);
+    fTree->Branch("weightMETTrigger", &fMETTriggerWeight);
+    fTree->Branch("weightMETTriggerAbsUnc", &fMETTriggerWeightAbsUnc);
     fTree->Branch("weightBTagging", &fBTaggingWeight);
     fTree->Branch("weightBTaggingAbsUnc", &fBTaggingWeightAbsUnc);
     fTree->Branch("weightAtFill", &fFillWeight);
@@ -86,6 +88,7 @@ namespace HPlus {
      
     fTree->Branch("jets_p4", &fJets);
     fTree->Branch("allIdentifiedJets_p4", &fAllIdentifiedJets);
+    fTree->Branch("selJetsInclTau_p4", &fSelJetsInclTau);
     fTree->Branch("jets_btag", &fJetsBtags);
     if(fFillJetEnergyFractions) {
       fTree->Branch("jets_chf", &fJetsChf); // charged hadron
@@ -128,6 +131,7 @@ namespace HPlus {
     fTree->Branch("MHT_p4", &fMHT);
     fTree->Branch("MHT_SelJets_p4", &fMHTSelJets);
     fTree->Branch("MHT_AllJets_p4", &fMHTAllJets);
+    fTree->Branch("vDiJetMassesNoTau", &vDiJetMassesNoTau);
 
     fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
@@ -222,6 +226,11 @@ namespace HPlus {
       fAllIdentifiedJets.push_back(allIdentifiedJets[i]->p4());}
   }
   
+  void SignalAnalysisTree::setSelJetsInclTau(const edm::PtrVector<pat::Jet>& selJetsInclTau){
+    for(size_t i=0; i<selJetsInclTau.size(); ++i) {
+      fSelJetsInclTau.push_back(selJetsInclTau[i]->p4());}
+  }
+  
 
   void SignalAnalysisTree::setMHTAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets){
     fMHTAllJets.SetXYZT(0., 0., 0., 0.);
@@ -264,19 +273,17 @@ namespace HPlus {
     // std::cout << "fill: 2" << std::endl;
     // MC matching of tau
     
-    // FIXME buggy code, fix it (match to visible taus instead of tau lepton, muons and electrons have no effect (gen is local variable)
-    
     if(!iEvent.isRealData()) {
       edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
       iEvent.getByLabel(fGenParticleSource, hgenparticles);
 
       // Try first genuine tau
-      const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 15, *tau, 0.5);
+      const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 15, *tau, 0.5, true); // true for visible tau matching
       if(!gen) { // then muon
-        const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 13, *tau, 0.5);
+        gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 13, *tau, 0.5);
       }
       if(!gen) { // finally electron
-        const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 11, *tau, 0.5);
+        gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 11, *tau, 0.5);
       }
       // std::cout << "fill: 3" << std::endl;
       if(gen) {
@@ -663,8 +670,10 @@ namespace HPlus {
 
     fPrescaleWeight = 1.0;
     fPileupWeight = 1.0;
-    fTriggerWeight = 1.0;
-    fTriggerWeightAbsUnc = nan;
+    fTauTriggerWeight = 1.0;
+    fTauTriggerWeightAbsUnc = nan;
+    fMETTriggerWeight = 1.0;
+    fMETTriggerWeightAbsUnc = nan;
     fBTaggingWeight = 1.0;
     fBTaggingWeightAbsUnc = nan;
     fFillWeight = 1.0;
@@ -687,6 +696,7 @@ namespace HPlus {
 
     fJets.clear();
     fAllIdentifiedJets.clear();
+    fSelJetsInclTau.clear();
     fJetsBtags.clear();
     fJetsFlavour.clear();
 
@@ -733,6 +743,7 @@ namespace HPlus {
     fPlanarity = nan;
     fCircularity = nan;
     bTauIsFake = false;
+    vDiJetMassesNoTau.clear();
   
     fDeltaPhi = nan;
 

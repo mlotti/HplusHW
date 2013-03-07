@@ -16,16 +16,27 @@ namespace HPlus {
     s << "ScaleFactorUncertainties";
     TFileDirectory myDir = fs->mkdir(s.str().c_str());
 
-    // Trigger SF
+    // Tau trigger SF
     s.str("");
-    s << "TriggerScaleFactor_" << name;
-    hTriggerSF = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
+    s << "TauTriggerScaleFactor_" << name;
+    hTauTriggerSF = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
     s.str("");
-    s << "TriggerScaleFactorAbsUncert_" << name;
-    hTriggerSFAbsUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 20000., 0., 2);
+    s << "TauTriggerScaleFactorAbsUncert_" << name;
+    hTauTriggerSFAbsUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 20000., 0., 2);
     s.str("");
-    s << "TriggerScaleFactorAbsUncertCounts_" << name;
-    hTriggerSFAbsUncertaintyCounts = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
+    s << "TauTriggerScaleFactorAbsUncertCounts_" << name;
+    hTauTriggerSFAbsUncertaintyCounts = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
+
+    // MET trigger SF
+    s.str("");
+    s << "METTriggerScaleFactor_" << name;
+    hMETTriggerSF = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
+    s.str("");
+    s << "METTriggerScaleFactorAbsUncert_" << name;
+    hMETTriggerSFAbsUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 20000., 0., 2);
+    s.str("");
+    s << "METTriggerScaleFactorAbsUncertCounts_" << name;
+    hMETTriggerSFAbsUncertaintyCounts = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
 
     // Fake tau SF / systematics
     s.str("");
@@ -65,16 +76,11 @@ namespace HPlus {
   ScaleFactorUncertaintyManager::~ScaleFactorUncertaintyManager() {}
 
   void ScaleFactorUncertaintyManager::setScaleFactorUncertainties(bool isFakeTau, double eventWeight,
-                                                                  double triggerSF, double triggerSFAbsUncertainty,
                                                                   double fakeTauSF, double fakeTauAbsUncertainty,
                                                                   double btagSF, double btagSFAbsUncertainty) {
     // To calculate relative uncertainty, use
     //   sqrt(sum_i((N_i * abs_uncert_i)^2)) / sum_i (N_i*w_i)
     //   i.e. sqrt(sum_i((getBinContent(i) * getBinCenter(i))^2) / AbsUncertaintyCounts->GetBinContent(0);
-    // Trigger SF
-    hTriggerSF->Fill(triggerSF);
-    hTriggerSFAbsUncertainty->Fill(triggerSFAbsUncertainty, eventWeight / triggerSF);
-    hTriggerSFAbsUncertaintyCounts->Fill(0.0, eventWeight); // weight should include also trg SF
     // Fake tau SF and systematics
     if (isFakeTau) {
       hFakeTauSF->Fill(fakeTauSF);
@@ -85,6 +91,20 @@ namespace HPlus {
     hBtagSF->Fill(btagSF);
     hBtagSFAbsUncertainty->Fill(btagSFAbsUncertainty, eventWeight / btagSF);
     hBtagSFAbsUncertaintyCounts->Fill(0.0, eventWeight); // weight should include also trg SF
+  }
+
+  void ScaleFactorUncertaintyManager::setTauTriggerScaleFactorUncertainty(double eventWeight, double triggerSF, double triggerSFAbsUncertainty) {
+    // TauTrigger SF
+    hTauTriggerSF->Fill(triggerSF);
+    hTauTriggerSFAbsUncertainty->Fill(triggerSFAbsUncertainty, eventWeight / triggerSF);
+    hTauTriggerSFAbsUncertaintyCounts->Fill(0.0, eventWeight); // weight should include also trg SF
+  }
+
+  void ScaleFactorUncertaintyManager::setMETTriggerScaleFactorUncertainty(double eventWeight, double triggerSF, double triggerSFAbsUncertainty) {
+    // METTrigger SF
+    hMETTriggerSF->Fill(triggerSF);
+    hMETTriggerSFAbsUncertainty->Fill(triggerSFAbsUncertainty, eventWeight / triggerSF);
+    hMETTriggerSFAbsUncertaintyCounts->Fill(0.0, eventWeight); // weight should include also trg SF
   }
 
   void ScaleFactorUncertaintyManager::setEmbeddingMuonEfficiencyUncertainty(double eventWeight, double muonEff, double muonEffAbsUncertainty) {

@@ -38,21 +38,43 @@ dirSig = "multicrab_signalAnalysisGenTau_systematics_120912_084953" # for 120911
 
 
 ## Tau analysis multicrab directories for embedding trials
-tauDirEmbs_120912 = [
-    "multicrab_analysis_systematics_v44_3_seed0_Run2011AB_120912_164347",
-    "multicrab_analysis_systematics_v44_3_seed1_Run2011AB_120912_172300",
-#    "multicrab_analysis_systematics_v44_3_seed2_Run2011AB_120912_180734",
-]
-tauDirEmbs_120913 = [ # TTJets only
-    "multicrab_analysis_v44_3_seed0_Run2011AB_120913_212539",
-#    "multicrab_analysis_v44_3_seed1_Run2011AB_120913_220249"
+tauDirEmbs = [ # TTJets only
+#    "multicrab_analysis_v44_4_2_seed0_Muon40_121016_092812"
+    "multicrab_analysis_v44_4_2_seed0_Muon40_121023_104038"
+#    "multicrab_analysis_v44_4_2_seed0_allGenuineTaus_121114_152418"
+
+#    "multicrab_analysis_v44_4_2_seed0_Run2011AB_121011_085855",
 ]
 ## Tau analysis multicrab directories for embedding trials
 #
 # This variable is used to select from possibly multiple sets of embedding directories
-tauDirEmbs = tauDirEmbs_120913
+#tauDirEmbs = tauDirEmbs_121011
 ## Tau analysis multicrab directory for normal MC
-tauDirSig = "multicrab_analysisTau_120822_200753"
+#tauDirSig = "multicrab_analysisTau_121009_112529" # 121011 # this is the one with "MostLikelySelected"
+tauDirSig = "multicrab_analysisTau_firstGenTau_121011_112052"
+#tauDirSig = "multicrab_analysisTau_firstGenTau40_121016_133933"
+#tauDirSig = "multicrab_analysisTau_121009_112529"
+
+
+class MuonAnalysisSelectorArgs(dataset.SelectorArgs):
+    def __init__(self, **kwargs):
+        dataset.SelectorArgs.__init__(self,
+                                      [("puWeight", ""),
+                                       ("isolationMode", "standard"),
+                                       ("bquarkMode", "disabled")
+                                       ],
+                                      **kwargs)
+
+class TauAnalysisSelectorArgs(dataset.SelectorArgs):
+    def __init__(self, **kwargs):
+        dataset.SelectorArgs.__init__(self,
+                                      [("puWeight", ""),
+                                       ("isEmbedded", False),
+                                       ("embeddingWTauMuFile", ""),
+                                       ("embeddingWTauMuPath", ""),
+                                       ("mcTauMode", ""),
+                                       ],
+                                      **kwargs)
 
 class Selections:
     def __init__(self, **kwargs):
@@ -118,7 +140,7 @@ def decayModeCheckCustomize(h):
     n = 16
     if hasattr(h, "getFrame1"):
         h.getFrame1().GetXaxis().SetNdivisions(n)
-        h.getFrame1().GetXaxis().SetNdivisions(n)
+        h.getFrame2().GetXaxis().SetNdivisions(n)
     else:
         h.getFrame().GetXaxis().SetNdivisions(n)
 
@@ -184,7 +206,7 @@ def scaleNormalization(obj):
         return
 
     #scaleMCfromWmunu(obj) # data/MC trigger correction
-#    scaleMuTriggerIdEff(obj)
+    scaleMuTriggerIdEff(obj)
     scaleWmuFraction(obj)
 
 ## Apply muon trigger and ID efficiency normalization
@@ -214,7 +236,7 @@ def scaleMuTriggerIdEff(obj):
 
     # From Sami for 44X, muon pT > 41
     # 20120902-160154
-    scaleMap = {
+    scaleMap41 = {
         # HLT_Mu20
         "160431-163261": 0.882968,
         # HLT_Mu24
@@ -238,13 +260,19 @@ def scaleMuTriggerIdEff(obj):
         # MC
         "MC": 0.888241,
         }
+    scaleMap40 = {"MC": 0.878604}
+    scaleMapOld = {"MC": 0.919829}
+
+    scaleMap = scaleMap41
+#    scaleMap = scaleMap40
+#    scaleMap = scaleMapOld
 
     # Transform to inverse
     for key in scaleMap.keys():
         scaleMap[key] = 1/scaleMap[key]
 
-    scaleHistosCounters(obj, scaleDataHisto, None, scaleMap)
-    scaleHistosCounters(obj, scaleMCHisto, None, scaleMap)
+    scaleHistosCounters(obj, scaleDataHisto, "scaleData", scaleMap)
+    scaleHistosCounters(obj, scaleMCHisto, "scaleMC", scaleMap)
 
 ## Apply W->tau->mu normalization
 #
@@ -252,7 +280,7 @@ def scaleMuTriggerIdEff(obj):
 def scaleWmuFraction(obj):
     Wtaumu = 0.038479
 
-    scaleHistosCounters(obj, scaleHisto, None, 1-Wtaumu)
+    scaleHistosCounters(obj, scaleHisto, "scale", 1-Wtaumu)
 
 ## Helper function to scale histos or counters
 #
@@ -284,7 +312,10 @@ def scalePlot(plot, function, scale):
 # \param methodName    Name of the counter.EventCounter method to apply
 # \param scale         Multiplication factor
 def scaleCounters(eventCounter, methodName, scale):
-    getattr(eventCounter, methodName)(scale)
+    s = scale
+    if isinstance(scale, dict):
+        s = scale["MC"]
+    getattr(eventCounter, methodName)(s)
 
 ## Helper function to scale dataset.DatasetRootHisto
 #
@@ -350,15 +381,15 @@ class DatasetsMany:
     ## Constructor
     #
     # \param dirs                      List of paths multicrab directories, either absolute or relative to working directory
-    # \param counters                  Directory in dataset TFiles containing the event counters
     # \param normalizeMCByCrossSection Normalize MC to cross section
     # \param normalizeMCByLuminosity   Normalize MC to data luminosity?
+    # \param kwargs                    Keyword arguments, forwarded to dataset.getDatasetsFromMulticrabCfg()
     #
     # Construct a dataset.DatasetManager object from each multicrab directory
-    def __init__(self, dirs, counters, normalizeMCByCrossSection=False, normalizeMCByLuminosity=False):
+    def __init__(self, dirs, normalizeMCByCrossSection=False, normalizeMCByLuminosity=False, **kwargs):
         self.datasetManagers = []
         for d in dirs:
-            datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=d+"/multicrab.cfg", counters=counters)
+            datasets = dataset.getDatasetsFromMulticrabCfg(directory=d, **kwargs)
             datasets.updateNAllEventsToPUWeighted()
             datasets.loadLuminosities()
             self.datasetManagers.append(datasets)
@@ -800,6 +831,14 @@ class EventCounterMany:
     # counter.CounterTable objects from the individual trials
     def getSubCounterTableFit(self, name):
         return counter.meanTableFit([ec.getSubCounterTable(name) for ec in self.eventCounters])
+
+    def constructMainTableTEfficiencies(self, function):
+        effs = self.eventCounters[0].getMainCounter().constructTEfficiencies(function)
+        for ec in self.eventCounters[1:]:
+            tmp = ec.getMainCounter().constructTEfficiencies(function)
+            for i, eff in enumerate(effs):
+                eff.Add(tmp[i])
+        return effs
 
     ## Get current normalization scheme string
     def getNormalizationString(self):

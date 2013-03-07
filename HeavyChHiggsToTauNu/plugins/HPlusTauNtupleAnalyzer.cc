@@ -23,6 +23,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeVertexBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeTriggerBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenParticleBranches.h"
 
 #include "TTree.h"
 
@@ -45,16 +47,19 @@ private:
   typedef HPlus::EventItem<XYZTLorentzVector> MetItem;
   typedef HPlus::EventItem<double> DoubleItem;
 
-  edm::InputTag fGenParticleSrc;
+  edm::InputTag fGenParticleTauSrc;
   edm::InputTag fSelectedPrimaryVertexSrc;
   edm::InputTag fGoodPrimaryVertexSrc;
 
   HPlus::TreeEventBranches fEventBranches;
+  HPlus::TreeGenBranches fGenBranches;
   HPlus::TreeVertexBranches fSelectedVertexBranches;
   HPlus::TreeVertexBranches fGoodVertexBranches;
   HPlus::TreeTriggerBranches fTriggerBranches;
   HPlus::TreeTauBranches fTauBranches;
   HPlus::TreeJetBranches fJetBranches;
+
+  HPlus::TreeGenParticleBranches fGenTaus;
 
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
@@ -64,12 +69,14 @@ private:
 };
 
 HPlusTauNtupleAnalyzer::HPlusTauNtupleAnalyzer(const edm::ParameterSet& iConfig):
-  fGenParticleSrc(iConfig.getParameter<edm::InputTag>("genParticleSrc")),
+  fGenParticleTauSrc(iConfig.getParameter<edm::InputTag>("genParticleTauSrc")),
+  fGenBranches(iConfig),
   fSelectedVertexBranches(iConfig, "selectedPrimaryVertex", "selectedPrimaryVertexSrc"),
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fTriggerBranches(iConfig),
   fTauBranches(iConfig),
-  fJetBranches(iConfig, false)
+  fJetBranches(iConfig, false),
+  fGenTaus("gentaus")
 {
 
   edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("mets");
@@ -88,11 +95,14 @@ HPlusTauNtupleAnalyzer::HPlusTauNtupleAnalyzer(const edm::ParameterSet& iConfig)
   fTree = fs->make<TTree>("tree", "Tree");
 
   fEventBranches.book(fTree);
+  fGenBranches.book(fTree);
   fSelectedVertexBranches.book(fTree);
   fGoodVertexBranches.book(fTree);
   fTriggerBranches.book(fTree);
   fTauBranches.book(fTree);
   fJetBranches.book(fTree);
+
+  fGenTaus.book(fTree);
 
   for(size_t i=0; i<fMets.size(); ++i) {
     fTree->Branch(fMets[i].name.c_str(), &(fMets[i].value));
@@ -108,11 +118,14 @@ void HPlusTauNtupleAnalyzer::reset() {
   double nan = std::numeric_limits<double>::quiet_NaN();
  
   fEventBranches.reset();
+  fGenBranches.reset();
   fSelectedVertexBranches.reset();
   fGoodVertexBranches.reset();
   fTriggerBranches.reset();
   fTauBranches.reset();
   fJetBranches.reset();
+
+  fGenTaus.reset();
 
   for(size_t i=0; i<fMets.size(); ++i) {
     fMets[i].value.SetXYZT(nan, nan, nan, nan);
@@ -131,16 +144,23 @@ void HPlusTauNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventS
   fGoodVertexBranches.setValues(iEvent);
   fTriggerBranches.setValues(iEvent);
 
-  edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
+  edm::Handle<edm::View<reco::GenParticle> > hgenparticlestau;
   if(!iEvent.isRealData())
-    iEvent.getByLabel(fGenParticleSrc, hgenparticles);
+    iEvent.getByLabel(fGenParticleTauSrc, hgenparticlestau);
 
   // Taus
   if(iEvent.isRealData()) {
     fTauBranches.setValues(iEvent);
   }
   else {
-    fTauBranches.setValues(iEvent, *hgenparticles);
+    fGenBranches.setValues(iEvent);
+    fTauBranches.setValues(iEvent, *hgenparticlestau);
+
+    for(edm::View<reco::GenParticle>::const_iterator iGen = hgenparticlestau->begin(); iGen != hgenparticlestau->end(); ++iGen) {
+      if(std::abs(iGen->pdgId()) == 15) {
+        fGenTaus.addValue(&(*iGen));
+      }
+    }
   }
 
   fJetBranches.setValues(iEvent);
