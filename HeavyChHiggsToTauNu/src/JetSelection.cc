@@ -42,6 +42,7 @@ namespace HPlus {
     fDeltaPhiMHTJet3(-1),
     fDeltaPhiMHTJet4(-1),
     fDeltaPhiMHTTau(-1),
+    fReferenceJetToTauDeltaR(-1),
     fReferenceJetToTauDeltaPt(999),
     fReferenceJetToTauPtRatio(999) {}
   JetSelection::Data::~Data() {}
@@ -556,12 +557,13 @@ namespace HPlus {
       double myDeltaR = reco::deltaR(tauObject->p4Jet(), **iter);
       if (myDeltaR < myMinDeltaR) {
         myMinDeltaR = myDeltaR;
-        if (myDeltaR < 0.1) {
+        if (myDeltaR < 0.4) {
           output.fReferenceJetToTau = *iter;
         }
       }
     }
     hReferenceJetToTauMatchingDeltaR->Fill(myMinDeltaR);
+    output.fReferenceJetToTauDeltaR = myMinDeltaR;
     if (output.fReferenceJetToTau.isNonnull()) {
       hReferenceJetToTauPartonFlavour->Fill(output.getReferenceJetToTauPartonFlavour());
       output.fReferenceJetToTauDeltaPt = tau->pt() - output.fReferenceJetToTau->pt();

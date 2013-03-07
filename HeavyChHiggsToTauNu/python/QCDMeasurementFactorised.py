@@ -40,6 +40,7 @@ def createEDFilter(param):
         pileupWeightReader = param.pileupWeightReader.clone(),
         wjetsWeightReader = param.wjetsWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
+        QCDTailKiller = param.QCDTailKiller.clone(),
         Tree = param.tree.clone(),
         eventCounter = param.eventCounter.clone(),
         tauEmbeddingStatus = cms.untracked.bool(False),

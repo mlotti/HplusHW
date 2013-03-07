@@ -283,7 +283,36 @@ bTagging = cms.untracked.PSet(
 oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
  
 #deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
-deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees, for heavy charged Higgs
+deltaPhiTauMET = cms.untracked.double(180.0) # less than this value in degrees, for heavy charged Higgs
+
+QCDTailKiller = cms.untracked.PSet(
+    # Back to back (bottom right corner of 2D plane tau,MET vs. jet,MET)
+    backToBackJet1CutShape = cms.untracked.string("circular"), # options: noCut, rectangular, triangular, circular
+    backToBackJet1CutX = cms.untracked.double(40.0),
+    backToBackJet1CutY = cms.untracked.double(40.0),
+    backToBackJet2CutShape = cms.untracked.string("circular"),
+    backToBackJet2CutX = cms.untracked.double(30.0),
+    backToBackJet2CutY = cms.untracked.double(30.0),
+    backToBackJet3CutShape = cms.untracked.string("circular"),
+    backToBackJet3CutX = cms.untracked.double(30.0),
+    backToBackJet3CutY = cms.untracked.double(30.0),
+    backToBackJet4CutShape = cms.untracked.string("circular"),
+    backToBackJet4CutX = cms.untracked.double(30.0),
+    backToBackJet4CutY = cms.untracked.double(30.0),
+    # Collinear topology (top left corner of 2D plane tau,MET vs. jet,MET)
+    collinearJet1CutShape = cms.untracked.string("circular"),
+    collinearJet1CutX = cms.untracked.double(30.0),
+    collinearJet1CutY = cms.untracked.double(30.0),
+    collinearJet2CutShape = cms.untracked.string("circular"),
+    collinearJet2CutX = cms.untracked.double(30.0),
+    collinearJet2CutY = cms.untracked.double(30.0),
+    collinearJet3CutShape = cms.untracked.string("circular"),
+    collinearJet3CutX = cms.untracked.double(30.0),
+    collinearJet3CutY = cms.untracked.double(30.0),
+    collinearJet4CutShape = cms.untracked.string("circular"),
+    collinearJet4CutX = cms.untracked.double(30.0),
+    collinearJet4CutY = cms.untracked.double(30.0),
+)
 
 topReconstruction = cms.untracked.string("None") # Options: None
 
