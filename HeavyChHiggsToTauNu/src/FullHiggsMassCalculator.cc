@@ -334,7 +334,7 @@ namespace HPlus {
     }
     // Set output
     output.fDiscriminant = discriminant;
-    output.fNeutrinoZSolution = neutrinoPzSolution2; // Which solution should be selected?
+    output.fNeutrinoZSolution = neutrinoPzSolution1; // Which solution should be selected?
     // Print information about the calculation steps
     std::cout << "FullHiggsMassCalculator: Reconstructing the neutrino p_z..." << std::endl;
     std::cout << "--- Tau reconstructed momentum = (" << pTau.Px() << ", " << pTau.Py() << ", " << pTau.Pz() << ")" << std::endl;
