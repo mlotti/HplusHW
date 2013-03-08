@@ -211,32 +211,6 @@ import BRdataInterface as br
 ## Default value of MSSM mu parameter
 defaultMu = 200
 
-## Mapping of WH dataset names to mass points
-whDatasetMass = {
-    # Logical names (see plots.py)
-    "TTToHplusBWB_M80": 80,
-    "TTToHplusBWB_M90": 90,
-    "TTToHplusBWB_M100": 100,
-    "TTToHplusBWB_M120": 120,
-    "TTToHplusBWB_M140": 140,
-    "TTToHplusBWB_M150": 150,
-    "TTToHplusBWB_M155": 155,
-    "TTToHplusBWB_M160": 160,
-
-}
-
-## Mapping of HH dataset names to mass points
-hhDatasetMass = {
-    "TTToHplusBHminusB_M80": 80,
-    "TTToHplusBHminusB_M90": 90,
-    "TTToHplusBHminusB_M100": 100,
-    "TTToHplusBHminusB_M120": 120,
-    "TTToHplusBHminusB_M140": 140,
-    "TTToHplusBHminusB_M150": 150,
-    "TTToHplusBHminusB_M155": 155,
-    "TTToHplusBHminusB_M160": 160,
-}
-
 ## Generic light H+ MSSM cross section
 #
 # \param function function to calculate the cross section from BR's
@@ -269,20 +243,53 @@ def hhTauNuCrossSection(br_tH, br_Htaunu, energy):
     xsec = ttCrossSection * br_tH*br_tH * br_Htaunu*br_Htaunu
     return (xsec, br_tH)
 
-def _setHplusCrossSectionsHelper(massList, datasets, function):
-    for name, mass in massList:
-        if not datasets.hasDataset(name):
-            continue
-        d = datasets.getDataset(name)
-        (crossSection, BRtH) = function(mass, d.getEnergy())
-        d.setCrossSection(crossSection)
-        if BRtH is not None:
-            d.setProperty("BRtH", BRtH)
-        print "Setting %s cross section to %f pb" % (name, crossSection)
+## Single H, H->tau nu cross section from BRs
+#
+# \param br_tH      BR(t -> b H+)
+# \param br_Htaunu  BR(H+ -> tau nu)
+# \param energy     sqrt(s) in TeV as string
+# \param channel    channel as string
+def hTauNuCrossSection(br_tH, br_Htaunu, energy, channel):
+    tCrossSection  = backgroundCrossSections.crossSection("T_"+channel, energy)
+    tCrossSection += backgroundCrossSections.crossSection("Tbar_"+channel, energy)
+    xsec = tCrossSection * br_tH * br_Htaunu
+    return (xsec, br_tH)
 
-def _setHplusCrossSections(datasets, whFunction, hhFunction):
-    _setHplusCrossSectionsHelper(whDatasetMass.iteritems(), datasets, whFunction)
-    _setHplusCrossSectionsHelper(hhDatasetMass.iteritems(), datasets, hhFunction)
+## Helper function to set a cross section of one signal dataset
+#
+# \param name     Name of the dataset
+# \param mass     H+ mass
+# \param datasets dataset.DatasetManager object
+# \param function Function taking the mass and energy, and returning cross section and BR(t->H+)
+def _setHplusCrossSectionsHelper(name, mass, datasets, function):
+    if not datasets.hasDataset(name):
+        return
+    d = datasets.getDataset(name)
+    (crossSection, BRtH) = function(mass, d.getEnergy())
+    d.setCrossSection(crossSection)
+    if BRtH is not None:
+        d.setProperty("BRtH", BRtH)
+    print "Setting %s cross section to %f pb" % (name, crossSection)
+
+## Helper function to set cross sections of all signal datasets
+#
+# \param datasets     dataset.DatasetManager object
+# \param whFunction   Function to calculate tt->WH cross section from
+#                     mass and energy, and returning cross section and
+#                     BR(t->H+)
+# \param hhFunction   Function to calculate tt->HH cross section from
+#                     mass and energy, and returning cross section and
+#                     BR(t->H+)
+# \param hFunction    Function to calculate t->H cross section from mass,
+#                     energy, and channel, and returning cross section
+#                     and BR(t->H+)
+def _setHplusCrossSections(datasets, whFunction, hhFunction, hFunction):
+    for mass in [80, 90, 100, 120, 140, 150, 155, 160]:
+        _setHplusCrossSectionsHelper("TTToHplusBWB_M%d"%mass, mass, datasets, whFunction)
+        _setHplusCrossSectionsHelper("TTToHplusBHminusB_M%d"%mass, mass, datasets, hhFunction)
+
+        for channel in ["s-channel", "t-channel", "tW-channel"]:
+            _setHplusCrossSectionsHelper("Hplus_taunu_%s_M%d"%(channel, mass), mass, datasets, lambda mass, energy: hFunction(mass, energy, channel))
 
 ## Set signal dataset cross sections to ttbar cross section
 #
@@ -301,9 +308,14 @@ def setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=defaultMu):
     histograms.createSignalText.set(tanbeta=tanbeta)
     if mu != defaultMu:
         histograms.createSignalText.set(mu=mu)
+
+    def singleHhelper(mass, energy, channel):
+        return lightCrossSectionMSSM(lambda br1, br2, en: hTauNuCrossSection(br1, br2, en, channel), mass, tanbeta, mu, energy)
+
     _setHplusCrossSections(datasets,
                            lambda mass, energy: lightCrossSectionMSSM(whTauNuCrossSection, mass, tanbeta, mu, energy),
-                           lambda mass, energy: lightCrossSectionMSSM(hhTauNuCrossSection, mass, tanbeta, mu, energy))
+                           lambda mass, energy: lightCrossSectionMSSM(hhTauNuCrossSection, mass, tanbeta, mu, energy),
+                           singleHhelper)
 
 ## Set signal dataset cross sections to cross section via BR
 #
@@ -315,7 +327,8 @@ def setHplusCrossSectionsToBR(datasets, br_tH, br_Htaunu):
     histograms.createSignalText.set(br_tH=br_tH)
     _setHplusCrossSections(datasets,
                            lambda mass, energy: whTauNuCrossSection(br_tH, br_Htaunu, energy),
-                           lambda mass, energy: hhTauNuCrossSection(br_tH, br_Htaunu, energy))
+                           lambda mass, energy: hhTauNuCrossSection(br_tH, br_Htaunu, energy),
+                           lambda mass, energy, channel: hTauNuCrossSection(br_tH, br_Htaunu, energy, channel))
 
 ## Set signal dataset cross sections to cross section (deprecated, only for compatibility)
 def setHplusCrossSections(datasets, tanbeta=20, mu=defaultMu, toTop=False):
@@ -331,18 +344,25 @@ def setHplusCrossSections(datasets, tanbeta=20, mu=defaultMu, toTop=False):
 # \param energy    sqrt(s) in TeV as string
 def printHplusCrossSections(tanbetas=[10, 20, 30, 40], mu=defaultMu, energy="7"):
     ttCrossSection = backgroundCrossSections.crossSection("TTJets", energy)
+    tCrossSection  = sum([backgroundCrossSections.crossSection("T_"+channel, energy)    for channel in ["s-channel", "t-channel", "tW-channel"]])
+    tCrossSection += sum([backgroundCrossSections.crossSection("Tbar_"+channel, energy) for channel in ["s-channel", "t-channel", "tW-channel"]])
     print "ttbar cross section %.1f pb" % ttCrossSection
+    print "single top cross section %.1f pb" % tCrossSection
     print "mu %.1f" % mu
     print
     for tanbeta in [10, 20, 30, 40]:
         print "="*98
         print "tan(beta) = %d" % tanbeta
-        print "H+ M (GeV) | BR(t->bH+) | BR(H+->taunu) | sigma(tt->tbH+->tbtaunu) | sigma(tt->bbH+H-->bbtautau) |"
+        print "H+ M (GeV) | BR(t->bH+) | BR(H+->taunu) | sigma(tt->tbH+->tbtaunu) | sigma(tt->bbH+H-->bbtautau) | sigma(t->bH+->btau) |"
         for mass in [90, 100, 120, 140, 150, 155, 160]:
             br_tH = br.getBR_top2bHp(mass, tanbeta, mu)
             br_Htaunu = br.getBR_Hp2tau(mass, tanbeta, mu)
 
-            print "%10d | %10f | %13f | %24f | %27f |" % (mass, br_tH, br_Htaunu, whTauNuCrossSectionMSSM(mass, tanbeta, mu, energy), hhTauNuCrossSectionMSSM(mass, tanbeta, mu, energy))
+            xsec_wh = lightCrossSectionMSSM(whTauNuCrossSection, mass, tanbeta, mu, energy)[0]
+            xsec_hh = lightCrossSectionMSSM(hhTauNuCrossSection, mass, tanbeta, mu, energy)[0]
+            xsec_h = sum([lightCrossSectionMSSM(lambda br1, br2, en: hTauNuCrossSection(br1, br2, en, channel), mass, tanbeta, mu, energy)[0] for channel in ["s-channel", "t-channel", "tW-channel"]])
+
+            print "%10d | %10f | %13f | %24f | %27f | %19f |" % (mass, br_tH, br_Htaunu, xsec_wh, xsec_hh, xsec_h)
 
 
 if __name__ == "__main__":
