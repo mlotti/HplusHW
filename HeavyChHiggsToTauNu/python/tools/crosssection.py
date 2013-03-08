@@ -237,16 +237,17 @@ hhDatasetMass = {
     "TTToHplusBHminusB_M160": 160,
 }
 
-## WH, H->tau nu MSSM cross section
+## Generic light H+ MSSM cross section
 #
+# \param function function to calculate the cross section from BR's
 # \param mass     H+ mass
 # \param tanbeta  tanbeta parameter
 # \param mu       mu parameter
-# \param energy     sqrt(s) in TeV as string
-def whTauNuCrossSectionMSSM(mass, tanbeta, mu, energy):
+# \param energy   sqrt(s) in TeV as string
+def lightCrossSectionMSSM(function, mass, tanbeta, mu, energy):
     br_tH = br.getBR_top2bHp(mass, tanbeta, mu)
     br_Htaunu = br.getBR_Hp2tau(mass, tanbeta, mu)
-    return whTauNuCrossSection(br_tH, br_Htaunu, energy)
+    return function(br_tH, br_Htaunu, energy)
 
 ## WH, H->tau nu cross section from BRs
 #
@@ -258,18 +259,6 @@ def whTauNuCrossSection(br_tH, br_Htaunu, energy):
     xsec = 2 * ttCrossSection * br_tH * (1-br_tH) * br_Htaunu
     return (xsec, br_tH)
 
-
-## HH, H->tau nu MSSM cross section
-#
-# \param mass     H+ mass
-# \param tanbeta  tanbeta parameter
-# \param mu       mu parameter
-# \param energy     sqrt(s) in TeV as string
-def hhTauNuCrossSectionMSSM(mass, tanbeta, mu, energy):
-    br_tH = br.getBR_top2bHp(mass, tanbeta, mu)
-    br_Htaunu = br.getBR_Hp2tau(mass, tanbeta, mu)
-    return hhTauNuCrossSection(br_tH, br_Htaunu, energy)
-
 ## HH, H->tau nu cross section from BRs
 #
 # \param br_tH      BR(t -> b H+)
@@ -279,7 +268,6 @@ def hhTauNuCrossSection(br_tH, br_Htaunu, energy):
     ttCrossSection = backgroundCrossSections.crossSection("TTJets", energy)
     xsec = ttCrossSection * br_tH*br_tH * br_Htaunu*br_Htaunu
     return (xsec, br_tH)
-
 
 def _setHplusCrossSectionsHelper(massList, datasets, function):
     for name, mass in massList:
@@ -314,8 +302,8 @@ def setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=defaultMu):
     if mu != defaultMu:
         histograms.createSignalText.set(mu=mu)
     _setHplusCrossSections(datasets,
-                           lambda mass, energy: whTauNuCrossSectionMSSM(mass, tanbeta, mu, energy),
-                           lambda mass, energy: hhTauNuCrossSectionMSSM(mass, tanbeta, mu, energy))
+                           lambda mass, energy: lightCrossSectionMSSM(whTauNuCrossSection, mass, tanbeta, mu, energy),
+                           lambda mass, energy: lightCrossSectionMSSM(hhTauNuCrossSection, mass, tanbeta, mu, energy))
 
 ## Set signal dataset cross sections to cross section via BR
 #
