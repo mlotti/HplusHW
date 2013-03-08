@@ -223,6 +223,15 @@ def lightCrossSectionMSSM(function, mass, tanbeta, mu, energy):
     br_Htaunu = br.getBR_Hp2tau(mass, tanbeta, mu)
     return function(br_tH, br_Htaunu, energy)
 
+## Heavy H+ MSSM cross section
+#
+# \param mass     H+ mass
+# \param tanbeta  tanbeta parameter
+# \param mu       mu parameter
+# \param energy   sqrt(s) in TeV as string
+def heavyCrossSectionMSSM(mass, tanbeta, mu, energy):
+    raise Exception("No heavy H+ cross sections yet!")
+
 ## WH, H->tau nu cross section from BRs
 #
 # \param br_tH      BR(t -> b H+)
@@ -283,13 +292,23 @@ def _setHplusCrossSectionsHelper(name, mass, datasets, function):
 # \param hFunction    Function to calculate t->H cross section from mass,
 #                     energy, and channel, and returning cross section
 #                     and BR(t->H+)
-def _setHplusCrossSections(datasets, whFunction, hhFunction, hFunction):
-    for mass in [80, 90, 100, 120, 140, 150, 155, 160]:
+# \param heavyFunction  Function to calculate heavy H+ cross section
+#                       from mass and energy, and returning cross
+#                       section and BR(t->H+)
+def _setHplusCrossSections(datasets, whFunction, hhFunction, hFunction, heavyFunction=None):
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+
+    for mass in plots._lightHplusMasses:
         _setHplusCrossSectionsHelper("TTToHplusBWB_M%d"%mass, mass, datasets, whFunction)
         _setHplusCrossSectionsHelper("TTToHplusBHminusB_M%d"%mass, mass, datasets, hhFunction)
 
         for channel in ["s-channel", "t-channel", "tW-channel"]:
             _setHplusCrossSectionsHelper("Hplus_taunu_%s_M%d"%(channel, mass), mass, datasets, lambda mass, energy: hFunction(mass, energy, channel))
+
+    if heavyFunction is not None:
+        for mass in plots._heavyHplusMasses:
+            _setHplusCrossSectionsHelper("HplusTB_M%d"%mass, mass, datasets, heavyFunction)
+
 
 ## Set signal dataset cross sections to ttbar cross section
 #
@@ -316,6 +335,7 @@ def setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=defaultMu):
                            lambda mass, energy: lightCrossSectionMSSM(whTauNuCrossSection, mass, tanbeta, mu, energy),
                            lambda mass, energy: lightCrossSectionMSSM(hhTauNuCrossSection, mass, tanbeta, mu, energy),
                            singleHhelper)
+#                           lambda mass, energy: heavyCrossSectionMSSM(mass, tanbeta, mu, energy)) # FIXME: uncomment when we get heavy H+ cross sections
 
 ## Set signal dataset cross sections to cross section via BR
 #
