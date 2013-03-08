@@ -54,19 +54,39 @@ trigger = cms.untracked.PSet(
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
 
 metFilters = cms.untracked.PSet(
+    # 2011 data
     beamHaloSrc = cms.untracked.InputTag("BeamHaloSummary"),
     beamHaloEnabled = cms.untracked.bool(True),
     HBHENoiseFilterSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducer", "HBHENoiseFilterResult"),
     HBHENoiseFilterEnabled = cms.untracked.bool(True),
     HBHENoiseFilterMETWGSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducerMETWG", "HBHENoiseFilterResult"),
-    HBHENoiseFilterMETWGEnabled = cms.untracked.bool(True),
+    HBHENoiseFilterMETWGEnabled = cms.untracked.bool(False), # Optional
     trackingFailureFilterSrc = cms.untracked.InputTag("trackingFailureFilter"),
     trackingFailureFilterEnabled = cms.untracked.bool(True),
-    EcalDeadCellEventFilterSrc = cms.untracked.InputTag("EcalDeadCellEventFilter"),
+    # Different for 2012 data than for 2011
+    EcalDeadCellEventFilterSrc = cms.untracked.InputTag("EcalDeadCellBoundaryEnergyFilter"),
     EcalDeadCellEventFilterEnabled = cms.untracked.bool(True),
-    EcalDeadCellTPFilterSrc = cms.untracked.InputTag("ecalDeadCellTPfilter"),
+    EcalDeadCellTPFilterSrc = cms.untracked.InputTag("EcalDeadCellTriggerPrimitiveFilter"),
     EcalDeadCellTPFilterEnabled = cms.untracked.bool(True),
-    triggerResultsSrc = cms.untracked.InputTag("TriggerResults", "", "HChPatTuple"),
+    # 2012 data
+    triggerResultsSrc = cms.untracked.InputTag("TriggerResults", "", "HChPatTuple"), # used for the strings below
+    hcalLaserFilterStrings = cms.untracked.vstring("hcallasereventfilter2012Path"),
+    hcalLaserFilterEnabled = cms.untracked.bool(True),
+    badEESuperCrystalFilterSrc = cms.untracked.InputTag("eeBadScFilter"),
+    badEESuperCrystalFilterEnabled = cms.untracked.bool(True),
+    EcalCrystalsWithLargeLaserCorrectionFilterSrc = cms.untracked.InputTag("ecalLaserCorrFilter"),
+    EcalCrystalsWithLargeLaserCorrectionFilterEnabled = cms.untracked.bool(True),
+    trackingOddEventFilterStrings = cms.untracked.vstring("logErrorTooManyTripletsPairsPath",
+                                                          "logErrorTooManyTripletsPairsMainIterationsPath",
+                                                          "logErrorTooManySeedsPath",
+                                                          "logErrorTooManySeedsMainIterationsPath",
+                                                          "manystripclus53XPath",
+                                                          "toomanystripclus53XPath"),
+    trackingOddEventFilterEnabled = cms.untracked.bool(False), # FIXME: disable because of bug in pattuple production
+    muonsWithWrongMomentaFilterSrc = cms.untracked.InputTag("greedyMuonPFCandidateFilter"),
+    muonsWithWrongMomentaFilterEnabled = cms.untracked.bool(True),
+    inconsistentMuonPFCandidateFilterSrc = cms.untracked.InputTag("inconsistentMuonPFCandidateFilter"),
+    inconsistentMuonPFCandidateFilterEnabled = cms.untracked.bool(True),
 )
 
 primaryVertexSelection = cms.untracked.PSet(
