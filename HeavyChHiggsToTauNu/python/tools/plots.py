@@ -43,6 +43,9 @@ import dataset
 import histograms
 import styles
 
+_lightHplusMasses = [80, 90, 100, 120, 140, 150, 155, 160]
+_heavyHplusMasses = [180, 190, 200, 220, 250, 300, 400, 500, 600]
+
 ## These MC datasets must be added together before any
 ## merging/renaming. They are split to two datasets just for more
 ## statistics. The mapping is used in the
@@ -58,7 +61,7 @@ _physicalMcAdd = {
     "QCD_Pt300to470_TuneZ2star_v2_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
     "QCD_Pt300to470_TuneZ2star_v3_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
 }
-for mass in [80, 90, 100, 120, 140, 150, 155, 160]:
+for mass in _lightHplusMasses:
     _physicalMcAdd["TTToHplusBWB_M%d_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
     _physicalMcAdd["TTToHplusBWB_M%d_ext_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
     if mass != 90:
@@ -81,14 +84,14 @@ _physicalToLogical = {
     "W3Jets_TuneZ2_Summer11": "W3Jets",
 }
 for mcEra in ["Summer11", "Fall11", "Summer12"]:
-    for mass in [80, 90, 100, 120, 140, 150, 155, 160]:
+    for mass in _lightHplusMasses:
         _physicalToLogical["TTToHplusBWB_M%d_%s"%(mass, mcEra)] = "TTToHplusBWB_M%d" % mass
         _physicalToLogical["TTToHplusBHminusB_M%d_%s"%(mass, mcEra)] = "TTToHplusBHminusB_M%d" % mass
         _physicalToLogical["Hplus_taunu_s-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_s-channel_M%d" % mass
         _physicalToLogical["Hplus_taunu_t-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_t-channel_M%d" % mass
         _physicalToLogical["Hplus_taunu_tW-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_tW-channel_M%d" % mass
 
-    for mass in [180, 190, 200, 220, 250, 300, 400, 500, 600]:
+    for mass in _heavyHplusMasses:
         _physicalToLogical["HplusTB_M%d_%s"%(mass, mcEra)] = "HplusTB_M%d" % mass
 
 for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
@@ -128,7 +131,7 @@ for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
 _ttSignalMerge = {}
 _tSignalMerge = {}
 _lightSignalMerge = {}
-for mass in [80, 90, 100, 120, 140, 150, 155, 160]:
+for mass in _lightHplusMasses:
     _ttSignalMerge["TTToHplusBWB_M%d"%mass] = "TTToHplus_M%d"%mass
     _ttSignalMerge["TTToHplusBHminusB_M%d"%mass] = "TTToHplus_M%d"%mass
 
@@ -172,38 +175,13 @@ _datasetMerge = {
 }
 
 ## Default ordering of datasets
-_datasetOrder = [
-    "Data",
-    "TTToHplusBWB_M80", 
-    "TTToHplusBWB_M90", 
-    "TTToHplusBWB_M100",
-    "TTToHplusBWB_M120",
-    "TTToHplusBWB_M140",
-    "TTToHplusBWB_M150",
-    "TTToHplusBWB_M155",
-    "TTToHplusBWB_M160",
-    "TTToHplusBHminusB_M80",
-    "TTToHplusBHminusB_M90",
-    "TTToHplusBHminusB_M100",
-    "TTToHplusBHminusB_M120",
-    "TTToHplusBHminusB_M140",
-    "TTToHplusBHminusB_M150",
-    "TTToHplusBHminusB_M155",
-    "TTToHplusBHminusB_M160",
-    "TTToHplus_M80",
-    "TTToHplus_M90",
-    "TTToHplus_M100",
-    "TTToHplus_M120",
-    "TTToHplus_M140",
-    "TTToHplus_M150",
-    "TTToHplus_M155",
-    "TTToHplus_M160",
-    "HplusTB_M180",
-    "HplusTB_M190",
-    "HplusTB_M200",
-    "HplusTB_M220",
-    "HplusTB_M250",
-    "HplusTB_M300",
+_datasetOrder = ["Data"]
+for process in ["TTToHplusBWB_M%d", "TTToHplusBHminusB_M%d", "TTToHplus_M%d", "Hplus_taunu_t-channel_M%d", "Hplus_taunu_tW-channel_M%d", "Hplus_taunu_s-channel_M%d", "Hplus_taunu_M%d", "TTOrTToHplus_M%d"]:
+    for mass in _lightHplusMasses:
+        _datasetOrder.append(process%mass)
+for mass in _heavyHplusMasses:
+    _datasetOrder.append("HplusTB_M%d"%mass)
+_datasetOrder.extend([
     "QCD",
     "QCDdata",
     "QCD_Pt20_MuEnriched",
@@ -218,48 +196,11 @@ _datasetOrder = [
     "DYJetsToLL",
     "SingleTop",
     "Diboson",
-]
+])
 
 ## Map the logical dataset names to legend labels
 _legendLabels = {
     "Data":                  "Data",
-
-    "TTToHplusBWB_M80":  "H^{+}W^{-} m_{H^{#pm}}=80", 
-    "TTToHplusBWB_M90":  "H^{+}W^{-} m_{H^{#pm}}=90", 
-    "TTToHplusBWB_M100": "H^{+}W^{-} m_{H^{#pm}}=100",
-    "TTToHplusBWB_M120": "H^{+}W^{-} m_{H^{#pm}}=120",
-    "TTToHplusBWB_M140": "H^{+}W^{-} m_{H^{#pm}}=140",
-    "TTToHplusBWB_M150": "H^{+}W^{-} m_{H^{#pm}}=150",
-    "TTToHplusBWB_M155": "H^{+}W^{-} m_{H^{#pm}}=155",
-    "TTToHplusBWB_M160": "H^{+}W^{-} m_{H^{#pm}}=160",
-
-    "TTToHplusBHminusB_M80":  "H^{+}H^{-} m_{H^{#pm}}=80",
-    "TTToHplusBHminusB_M90":  "H^{+}H^{-} m_{H^{#pm}}=90",
-    "TTToHplusBHminusB_M100": "H^{+}H^{-} m_{H^{#pm}}=100",
-    "TTToHplusBHminusB_M120": "H^{+}H^{-} m_{H^{#pm}}=120",
-    "TTToHplusBHminusB_M140": "H^{+}H^{-} m_{H^{#pm}}=140",
-    "TTToHplusBHminusB_M150": "H^{+}H^{-} m_{H^{#pm}}=150",
-    "TTToHplusBHminusB_M155": "H^{+}H^{-} m_{H^{#pm}}=155",
-    "TTToHplusBHminusB_M160": "H^{+}H^{-} m_{H^{#pm}}=160",
-
-    "TTToHplus_M80":  "H^{#pm} m_{H^{#pm}}=80",
-    "TTToHplus_M90":  "H^{#pm} m_{H^{#pm}}=90",
-    "TTToHplus_M100": "H^{#pm} m_{H^{#pm}}=100",
-    "TTToHplus_M120": "H^{#pm} m_{H^{#pm}}=120",
-    "TTToHplus_M140": "H^{#pm} m_{H^{#pm}}=140",
-    "TTToHplus_M150": "H^{#pm} m_{H^{#pm}}=150",
-    "TTToHplus_M155": "H^{#pm} m_{H^{#pm}}=155",
-    "TTToHplus_M160": "H^{#pm} m_{H^{#pm}}=160",
-
-    "HplusTB_M180": "H^{#pm} m_{H^{#pm}}=180",
-    "HplusTB_M190": "H^{#pm} m_{H^{#pm}}=190",
-    "HplusTB_M200": "H^{#pm} m_{H^{#pm}}=200",
-    "HplusTB_M220": "H^{#pm} m_{H^{#pm}}=220",
-    "HplusTB_M250": "H^{#pm} m_{H^{#pm}}=250",
-    "HplusTB_M300": "H^{#pm} m_{H^{#pm}}=300",
-    "HplusTB_M400": "H^{#pm} m_{H^{#pm}}=400",
-    "HplusTB_M500": "H^{#pm} m_{H^{#pm}}=500",
-    "HplusTB_M600": "H^{#pm} m_{H^{#pm}}=600",
 
     "TTJets":                "t#bar{t}+jets",
     "TT":                    "t#bar{t}",
@@ -295,47 +236,24 @@ _legendLabels = {
     "T_s-channel":           "Single t (s channel)",
     "Tbar_s-channel":        "Single #bar{t} (s channel)",
 }
+for mass in _lightHplusMasses:
+    _legendLabels["TTToHplusBWB_M%d"%mass] = "H^{+}W^{-} m_{H^{#pm}}=%d"%mass
+    _legendLabels["TTToHplusBHminusB_M%d"%mass] = "H^{+}H^{-} m_{H^{#pm}}=%d" % mass
+    _legendLabels["TTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+
+    _legendLabels["Hplus_taunu_s-channel_M%d"%mass] = "t#rightarrowH^{+} (s) m_{H^{+}}=%d" % mass
+    _legendLabels["Hplus_taunu_t-channel_M%d"%mass] = "t#rightarrowH^{+} (t) m_{H^{+}}=%d" % mass
+    _legendLabels["Hplus_taunu_tW-channel_M%d"%mass] = "t#rightarrowH^{+} (tW) m_{H^{+}}=%d" % mass
+    _legendLabels["Hplus_taunu_M%d"%mass] = "t#rightarrowH^{+} m_{H^{+}}=%d" % mass
+
+    _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+for mass in _heavyHplusMasses:
+    _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {
     "Data":                  styles.dataStyle,
-
-    "TTToHplusBWB_M80":           styles.signal80Style,
-    "TTToHplusBWB_M90":           styles.signal90Style,
-    "TTToHplusBWB_M100":          styles.signal100Style,
-    "TTToHplusBWB_M120":          styles.signal120Style,
-    "TTToHplusBWB_M140":          styles.signal140Style,
-    "TTToHplusBWB_M150":          styles.signal150Style,
-    "TTToHplusBWB_M155":          styles.signal155Style,
-    "TTToHplusBWB_M160":          styles.signal160Style,
-
-    "TTToHplusBHminusB_M80":       styles.signalHH80Style,
-    "TTToHplusBHminusB_M90":       styles.signalHH90Style,
-    "TTToHplusBHminusB_M100":      styles.signalHH100Style,
-    "TTToHplusBHminusB_M120":      styles.signalHH120Style,
-    "TTToHplusBHminusB_M140":      styles.signalHH140Style,
-    "TTToHplusBHminusB_M150":      styles.signalHH150Style,
-    "TTToHplusBHminusB_M155":      styles.signalHH155Style,
-    "TTToHplusBHminusB_M160":      styles.signalHH160Style,
-
-    "TTToHplus_M80":           styles.signal80Style,
-    "TTToHplus_M90":           styles.signal90Style,
-    "TTToHplus_M100":          styles.signal100Style,
-    "TTToHplus_M120":          styles.signal120Style,
-    "TTToHplus_M140":          styles.signal140Style,
-    "TTToHplus_M150":          styles.signal150Style,
-    "TTToHplus_M155":          styles.signal155Style,
-    "TTToHplus_M160":          styles.signal160Style,
-
-    "HplusTB_M180": styles.signal180Style,
-    "HplusTB_M190": styles.signal190Style,
-    "HplusTB_M200": styles.signal200Style,
-    "HplusTB_M220": styles.signal220Style,
-    "HplusTB_M250": styles.signal250Style,
-    "HplusTB_M300": styles.signal300Style,
-    "HplusTB_M400": styles.signal400Style,
-    "HplusTB_M500": styles.signal500Style,
-    "HplusTB_M600": styles.signal600Style,
 
     "TTJets":                styles.ttStyle,
     "TT":                    styles.ttStyle,
@@ -352,10 +270,24 @@ _plotStyles = {
     "SingleTop":             styles.stStyle,
     "Diboson":               styles.dibStyle,
 }
+for mass in _lightHplusMasses:
+    _plotStyles["TTToHplusBWB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+    _plotStyles["TTToHplusBHminusB_M%d"%mass] = getattr(styles, "signalHH%dStyle"%mass)
+    _plotStyles["TTToHplus_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+
+    _plotStyles["Hplus_taunu_s-channel_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+    _plotStyles["Hplus_taunu_t-channel_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+    _plotStyles["Hplus_taunu_tW-channel_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+    _plotStyles["Hplus_taunu_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+
+    _plotStyles["TTOrTToHplus_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+for mass in _heavyHplusMasses:
+    _plotStyles["HplusTB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+
 
 ## Return True if name is from a signal dataset
 def isSignal(name):
-    return "TTToHplus" in name or "HplusTB" in name
+    return "TTToHplus" in name or "Hplus_taunu" in name or "TTOrTToHplus" in name or "HplusTB" in name
 
 
 ## Update the default legend labels
