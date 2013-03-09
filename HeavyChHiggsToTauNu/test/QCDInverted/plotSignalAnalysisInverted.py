@@ -1447,10 +1447,10 @@ def BtagEfficiencies(datasets):
         hmet100120 = met100120.histoMgr.getHisto("Data").getRootHisto().Clone("MET_InvertedTauIdJets100120")
         hmet120 = met120.histoMgr.getHisto("Data").getRootHisto().Clone("MET_InvertedTauIdJets120")
         if lastPtBin150:
-            hmet120150 = met120150.histoMgr.getHisto("Data").getRootHisto().Clone("MET_InvertedTauIdBtag120150")
-            hmet150 = met150.histoMgr.getHisto("Data").getRootHisto().Clone("MET_InvertedTauIdBtag150")
+            hmet120150 = met120150.histoMgr.getHisto("Data").getRootHisto().Clone("MET_InvertedTauIdJets120150")
+            hmet150 = met150.histoMgr.getHisto("Data").getRootHisto().Clone("MET_InvertedTauIdJets150")
         if lastPtBin120:
-            hmet120 = met120.histoMgr.getHisto("Data").getRootHisto().Clone("MET_InvertedTauIdBtag120")
+            hmet120 = met120.histoMgr.getHisto("Data").getRootHisto().Clone("MET_InvertedTauIdJets120")
         hmet = met.histoMgr.getHisto("Data").getRootHisto().Clone("MET_InvertedTauIdJets")
         
         met4050b = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MET_InvertedTauIdBtag4050")])
@@ -1504,10 +1504,10 @@ def BtagEfficiencies(datasets):
         hmet80100 = met80100.histoMgr.getHisto("Data").getRootHisto().Clone("MTInvertedTauIdJet80100")
         hmet100120 = met100120.histoMgr.getHisto("Data").getRootHisto().Clone("MTInvertedTauIdJet100120")
         if lastPtBin150:
-            hmet120150 = met120150.histoMgr.getHisto("Data").getRootHisto().Clone("MTInvertedTauIdBtag120150")
-            hmet150 = met150.histoMgr.getHisto("Data").getRootHisto().Clone("MTInvertedTauIdBtag150")
+            hmet120150 = met120150.histoMgr.getHisto("Data").getRootHisto().Clone("MTInvertedTauIdJet120150")
+            hmet150 = met150.histoMgr.getHisto("Data").getRootHisto().Clone("MTInvertedTauIdJet150")
         if lastPtBin120:
-            hmet120 = met120.histoMgr.getHisto("Data").getRootHisto().Clone("MTInvertedTauIdBtag120")
+            hmet120 = met120.histoMgr.getHisto("Data").getRootHisto().Clone("MTInvertedTauIdBJet120")
         hmet = met.histoMgr.getHisto("Data").getRootHisto().Clone("MTInvertedTauIdJet")
     
         met4050b = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTInvertedTauIdBtag4050")])

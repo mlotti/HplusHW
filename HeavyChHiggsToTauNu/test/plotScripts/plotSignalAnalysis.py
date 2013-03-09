@@ -14,6 +14,7 @@
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
@@ -95,7 +96,7 @@ def main():
         print "Int.Lumi (manually set)",mcOnlyLumi
     else:
         print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
-    print "norm=",datasets.getDataset("TTToHplusBWB_M120").getNormFactor()
+#    print "norm=",datasets.getDataset("TTToHplusBWB_M120").getNormFactor()
 
 
 
@@ -132,7 +133,7 @@ def main():
 
         
     # Remove QCD
-#    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
     histograms.createLegend.moveDefaults(dx=-0.02)
     histograms.createLegend.moveDefaults(dh=-0.03)
     
@@ -344,6 +345,8 @@ def doPlots(datasets):
 #    transverseMass2(createPlot("transverseMassFakeMetVeto"), "transverseMassFakeMetVeto", rebin=20)
 
     transverseMass2(createPlot("transverseMass"), "transverseMass", rebin=10, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
+    transverseMass2(createPlot("transverseMassAgainstTTCut"), "transverseMassAgainstTTCut", rebin=10, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
+   
     transverseMass2(createPlot("EWKFakeTausTransverseMass"), "EWKFakeTausTransverseMass", rebin=10, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
     
 ##    transverseMass2(createPlot("transverseMassDeltaPtCut"), "transverseMassDeltaPtCut", rebin=10, ratio=True,log=False, opts={"xmax": 300,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
@@ -370,10 +373,10 @@ def doPlots(datasets):
 #    deltaPhi2(createPlot("deltaPhiNoBtagging"), "DeltaPhiTauMetNoBtagging", rebin=10, ratio=True, opts={"ymaxfactor": 100}, moveLegend={"dx":-0.21}, textFunction=lambda: addMassBRText(x=0.2, y=0.87), cutLine=[160, 130])
 #    deltaPhi2(createPlot("FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet", rebin=2, opts={"ymaxfactor": 20}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
 
-    drawPlot(createPlot("DeltaR_TauMETJet1MET"), "DeltaR_TauMETJet1MET", rebin=5, log=False,xlabel="#DeltaR (#tauMet,jet1Met)", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
-    drawPlot(createPlot("DeltaR_TauMETJet2MET"), "DeltaR_TauMETJet2MET", rebin=5, log=False,xlabel="#DeltaR (#tauMet,jet1Met)", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
-    drawPlot(createPlot("DeltaR_TauMETJet3MET"), "DeltaR_TauMETJet3MET", rebin=5, log=False,xlabel="#DeltaR (#tauMet,jet1Met)", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
-    drawPlot(createPlot("DeltaR_TauMETJet4MET"), "DeltaR_TauMETJet4MET", rebin=5, log=False,xlabel="#DeltaR (#tauMet,jet1Met)", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    drawPlot(createPlot("DeltaR_TauMETJet1MET"), "DeltaR_TauMETJet1MET", rebin=5, log=False,xlabel="#DeltaR in #Delta#phi(#tau jet,MET) vs #Delta#phi(jet1,MET) plane", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    drawPlot(createPlot("DeltaR_TauMETJet2MET"), "DeltaR_TauMETJet2MET", rebin=5, log=False,xlabel="#DeltaR in #Delta#phi(#tau jet,MET) vs #Delta#phi(jet2,MET) plane", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    drawPlot(createPlot("DeltaR_TauMETJet3MET"), "DeltaR_TauMETJet3MET", rebin=5, log=False,xlabel="#DeltaR in #Delta#phi(#tau jet,MET) vs #Delta#phi(jet3,MET) plane", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    drawPlot(createPlot("DeltaR_TauMETJet4MET"), "DeltaR_TauMETJet4MET", rebin=5, log=False,xlabel="#DeltaR in #Delta#phi(#tau jet,MET) vs #Delta#phi(jet4,MET) plane", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
         
     # Set temporarily the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
@@ -429,10 +432,11 @@ def doPlots(datasets):
 #    zMassComparison(datasets)
 #    genQuarkComparison(datasets)
 #    topMassComparison(datasets)
-##    deltaPhiCorrelation(datasets)      
+##    deltaPhiCorrelation(datasets)
+#    deltaRComparison(datasets)
 #    topMassPurity(datasets) 
 #    vertexComparison(datasets)
-##    mtComparison(datasets)
+#    mtComparison(datasets)
 #    MetComparison(datasets)
 #    BetaComparison(datasets)
 #    HiggsMassComparison(datasets)
@@ -497,15 +501,17 @@ def vertexComparison(datasets):
             
 def deltaPhiCorrelation(datasets):
 
-#    deltaPhiVsJet1 = plots.PlotBase([datasets.getDataset("TTToHplus_M120").getDatasetRootHisto("DeltaPhiVsDeltaPhiMHTJet1")])
-    deltaPhiVsJet1 = plots.PlotBase([datasets.getDataset("HplusTB_M200").getDatasetRootHisto("DeltaPhiVsDeltaPhiMHTJet1")])
-    deltaPhiVsJet1.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+#    deltaPhiVsJet1 = plots.PlotBase([datasets.getDataset("HplusTB_M200").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet1")])
+    deltaPhiVsJet1 = plots.PlotBase([datasets.getDataset("TTToHplus_M120").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet1")])
+#    deltaPhiVsJet1 = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet1")])
+    deltaPhiVsJet1.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity()) 
     deltaPhiVsJet1._setLegendStyles()
     deltaPhiVsJet1._setLegendLabels()
     deltaPhiVsJet1.histoMgr.setHistoDrawStyleAll("P")
     deltaPhiVsJet1.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
-#    hdeltaPhiVsJet1 = deltaPhiVsJet1.histoMgr.getHisto("TTToHplus_M120").getRootHisto().Clone()
-    hdeltaPhiVsJet1 = deltaPhiVsJet1.histoMgr.getHisto("HplusTB_M200").getRootHisto().Clone()
+    hdeltaPhiVsJet1 = deltaPhiVsJet1.histoMgr.getHisto("TTToHplus_M120").getRootHisto().Clone()
+#    hdeltaPhiVsJet1 = deltaPhiVsJet1.histoMgr.getHisto("HplusTB_M200").getRootHisto().Clone()
+#    hdeltaPhiVsJet1 = deltaPhiVsJet1.histoMgr.getHisto("TTJets").getRootHisto().Clone()
     
     canvas55 = ROOT.TCanvas("canvas55","",500,500)
     
@@ -520,18 +526,20 @@ def deltaPhiCorrelation(datasets):
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
-    tex1 = ROOT.TLatex(0.55,0.88,"Signal, m_{H#pm} = 200 GeV")
+    tex1 = ROOT.TLatex(0.55,0.88,"Signal, m_{H#pm} = 120 GeV")
+#    tex1 = ROOT.TLatex(0.55,0.88,"ttbar + jets")
     tex1.SetNDC()
     tex1.SetTextSize(15)
     tex1.Draw()    
     hdeltaPhiVsJet1.GetXaxis().SetTitle("#Delta#phi(#tau jet,MET) (deg)")
     hdeltaPhiVsJet1.GetYaxis().SetTitle("#Delta#phi(MET,jet1) (deg) ")
     canvas55.Print("DeltaPhiVsDeltaPhiMETjet1_m120.png")
-    canvas55.Print("DeltaPhiVsDeltaPhiMETjet1_m120.C")
+    canvas55.Print("DeltaPhiVsDeltaPhiMETjet1_m200.C")
                                                                                             
 
-#    deltaPhiVsJet2 = plots.PlotBase([datasets.getDataset("TTToHplus_M120").getDatasetRootHisto("DeltaPhiVsDeltaPhiMHTJet2")])
-    deltaPhiVsJet2 = plots.PlotBase([datasets.getDataset("HplusTB_M200").getDatasetRootHisto("DeltaPhiVsDeltaPhiMHTJet2")])
+    deltaPhiVsJet2 = plots.PlotBase([datasets.getDataset("TTToHplus_M120").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet2")])
+#    deltaPhiVsJet2 = plots.PlotBase([datasets.getDataset("HplusTB_M200").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet2")])
+#    deltaPhiVsJet2 = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet2")])
     deltaPhiVsJet2.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         
     deltaPhiVsJet2._setLegendStyles()
@@ -539,8 +547,9 @@ def deltaPhiCorrelation(datasets):
     deltaPhiVsJet2.histoMgr.setHistoDrawStyleAll("P")
     deltaPhiVsJet2.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
    # deltaPhiVsJet2.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-#    hdeltaPhiVsJet2 = deltaPhiVsJet2.histoMgr.getHisto("TTToHplus_M120").getRootHisto().Clone()
-    hdeltaPhiVsJet2 = deltaPhiVsJet2.histoMgr.getHisto("HplusTB_M200").getRootHisto().Clone() 
+    hdeltaPhiVsJet2 = deltaPhiVsJet2.histoMgr.getHisto("TTToHplus_M120").getRootHisto().Clone()
+#    hdeltaPhiVsJet2 = deltaPhiVsJet2.histoMgr.getHisto("HplusTB_M200").getRootHisto().Clone()
+#    hdeltaPhiVsJet2 = deltaPhiVsJet2.histoMgr.getHisto("TTJets").getRootHisto().Clone()
     canvas56 = ROOT.TCanvas("canvas56","",500,500)
     
     hdeltaPhiVsJet2.RebinX(5)
@@ -554,7 +563,8 @@ def deltaPhiCorrelation(datasets):
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
-    tex1 = ROOT.TLatex(0.55,0.88,"Signal, m_{H#pm} = 200 GeV")
+    tex1 = ROOT.TLatex(0.55,0.88,"Signal, m_{H#pm} = 120 GeV")
+#    tex1 = ROOT.TLatex(0.55,0.88,"ttbar + jets")
     tex1.SetNDC()
     tex1.SetTextSize(15)
     tex1.Draw()
@@ -563,19 +573,20 @@ def deltaPhiCorrelation(datasets):
     hdeltaPhiVsJet2.GetXaxis().SetTitle("#Delta#phi(#tau jet,MET) (deg)")
     hdeltaPhiVsJet2.GetYaxis().SetTitle("#Delta#phi(MET,jet2) (deg) ")
     canvas56.Print("DeltaPhiVsDeltaPhiMETjet2_m120.png")
-    canvas56.Print("DeltaPhiVsDeltaPhiMETjet2_m120.C")
+    canvas56.Print("DeltaPhiVsDeltaPhiMETjet2_m200.C")
 
-    
-#    deltaPhiVsJet3 = plots.PlotBase([datasets.getDataset("TTToHplus_M120").getDatasetRootHisto("DeltaPhiVsDeltaPhiMHTJet3")])
-    deltaPhiVsJet3 = plots.PlotBase([datasets.getDataset("HplusTB_M200").getDatasetRootHisto("DeltaPhiVsDeltaPhiMHTJet3")]) 
+    deltaPhiVsJet3 = plots.PlotBase([datasets.getDataset("TTToHplus_M120").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet3")])    
+#    deltaPhiVsJet3 = plots.PlotBase([datasets.getDataset("HplusTB_M200").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet3")])
+#    deltaPhiVsJet3 = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet3")]) 
     deltaPhiVsJet3.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     deltaPhiVsJet3._setLegendStyles()
     deltaPhiVsJet3._setLegendLabels()
     deltaPhiVsJet3.histoMgr.setHistoDrawStyleAll("P")
     deltaPhiVsJet3.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
     
-#    hdeltaPhiVsJet3 = deltaPhiVsJet3.histoMgr.getHisto("TTToHplus_M120").getRootHisto().Clone()
-    hdeltaPhiVsJet3 = deltaPhiVsJet3.histoMgr.getHisto("HplusTB_M200").getRootHisto().Clone()
+    hdeltaPhiVsJet3 = deltaPhiVsJet3.histoMgr.getHisto("TTToHplus_M120").getRootHisto().Clone()
+#    hdeltaPhiVsJet3 = deltaPhiVsJet3.histoMgr.getHisto("HplusTB_M200").getRootHisto().Clone()
+#    hdeltaPhiVsJet3 = deltaPhiVsJet3.histoMgr.getHisto("TTJets").getRootHisto().Clone()
     canvas57 = ROOT.TCanvas("canvas57","",500,500)
     
     hdeltaPhiVsJet3.RebinX(5)
@@ -589,97 +600,68 @@ def deltaPhiCorrelation(datasets):
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
-    tex1 = ROOT.TLatex(0.55,0.88,"Signal, m_{H#pm} = 200 GeV")
+    tex1 = ROOT.TLatex(0.55,0.88,"Signal, m_{H#pm} = 120 GeV")
+#    tex1 = ROOT.TLatex(0.55,0.88,"ttbar + jets")
     tex1.SetNDC()
     tex1.SetTextSize(15)
     tex1.Draw()
     hdeltaPhiVsJet3.GetXaxis().SetTitle("#Delta#phi(#tau jet,MET) (deg)")
-    hdeltaPhiVsJet3.GetYaxis().SetTitle("#Delta#phi(MET,jet1) (deg) ")
+    hdeltaPhiVsJet3.GetYaxis().SetTitle("#Delta#phi(MET,jet3) (deg) ")
     canvas57.Print("DeltaPhiVsDeltaPhiMETjet3_m120.png")
-    canvas57.Print("DeltaPhiVsDeltaPhiMETjet3_m120.C")
+    canvas57.Print("DeltaPhiVsDeltaPhiMETjet3_m200.C")
 
 
+    deltaPhiVsJet4 = plots.PlotBase([datasets.getDataset("TTToHplus_M120").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet4")])
+#    deltaPhiVsJet4  = plots.PlotBase([datasets.getDataset("HplusTB_M200").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet4")]) 
+#    deltaPhiVsJet4 = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto("DeltaPhiVsDeltaPhiMETJet4")]) 
+    deltaPhiVsJet4.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    deltaPhiVsJet4._setLegendStyles()
+    deltaPhiVsJet4._setLegendLabels()
 
-    #deltaPhiVsTau = plots.PlotBase([datasets.getDataset("TTToHplus_M120").getDatasetRootHisto("DeltaPhiVsTransverseMass")])
-    deltaPhiVsTau = plots.PlotBase([datasets.getDataset("HplusTB_M200").getDatasetRootHisto("DeltaPhiVsTransverseMass")]) 
-    deltaPhiVsTau.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    deltaPhiVsTau._setLegendStyles()
-    deltaPhiVsTau._setLegendLabels()
-    deltaPhiVsTau.histoMgr.setHistoDrawStyleAll("P")
-    deltaPhiVsTau.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
-    
-    #hdeltaPhiVsTau = deltaPhiVsTau.histoMgr.getHisto("TTToHplus_M120").getRootHisto().Clone()
-    hdeltaPhiVsTau = deltaPhiVsTau.histoMgr.getHisto("HplusTB_M200").getRootHisto().Clone()
-    canvas70 = ROOT.TCanvas("canvas70","",500,500)
-    
-    hdeltaPhiVsTau.RebinX(5)
-    hdeltaPhiVsTau.RebinY(5)
-    hdeltaPhiVsTau.SetMarkerColor(4)
-    hdeltaPhiVsTau.SetMarkerSize(1)
-    hdeltaPhiVsTau.SetMarkerStyle(20)
-    hdeltaPhiVsTau.SetFillColor(4)
-    hdeltaPhiVsTau.Draw("colz")
+    deltaPhiVsJet4.histoMgr.setHistoDrawStyleAll("P")
+    deltaPhiVsJet4.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2)) 
+    hdeltaPhiVsJet4 = deltaPhiVsJet4.histoMgr.getHisto("TTToHplus_M120").getRootHisto().Clone()
+#    hdeltaPhiVsJet4 = deltaPhiVsJet4.histoMgr.getHisto("HplusTB_M200").getRootHisto().Clone()
+#    hdeltaPhiVsJet4 = deltaPhiVsJet4.histoMgr.getHisto("TTJets").getRootHisto().Clone()
+    canvas58 = ROOT.TCanvas("canvas58","",500,500)
+#    hdeltaPhiVsJet4.setDefaultStyles()
+    hdeltaPhiVsJet4.RebinX(5)
+    hdeltaPhiVsJet4.RebinY(5)
+    hdeltaPhiVsJet4.SetMarkerColor(4)
+    hdeltaPhiVsJet4.SetMarkerSize(1)
+    hdeltaPhiVsJet4.SetMarkerStyle(20)
+    hdeltaPhiVsJet4.SetFillColor(4)
+    hdeltaPhiVsJet4.Draw("colz")
     tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12 fb^{-1}       CMS Preliminary ")
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
     tex1 = ROOT.TLatex(0.55,0.88,"Signal, m_{H#pm} = 120 GeV")
+#    tex1 = ROOT.TLatex(0.55,0.88,"ttbar + jets")
     tex1.SetNDC()
     tex1.SetTextSize(15)
     tex1.Draw()
-    hdeltaPhiVsTau.GetXaxis().SetTitle("#Delta#phi(#tau jet,MET) (deg)")
-    hdeltaPhiVsTau.GetYaxis().SetTitle("m_{T}(#tau jet,MET) (GeV)  ")
-    canvas70.Print("DeltaPhiVsTransverseMass_m120.png")
-    canvas70.Print("DeltaPhiVsTransverseMass_m120.C")
-
-###################
-    if False:
-        deltaPhiVsTau3 = plots.PlotBase([datasets.getDataset("TTToHplus_M120").getDatasetRootHisto("DeltaPhiMHTTau3")])
-        #    deltaPhiVsJet3 = plots.PlotBase([datasets.getDataset("HplusTB_M200").getDatasetRootHisto("DeltaPhiMHTTau1")]) 
-        deltaPhiVsTau3.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-        deltaPhiVsTau3._setLegendStyles()
-        deltaPhiVsTau3._setLegendLabels()
-        deltaPhiVsTau3.histoMgr.setHistoDrawStyleAll("P")
-        deltaPhiVsTau3.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
-        
-        hdeltaPhiVsTau3 = deltaPhiVsTau3.histoMgr.getHisto("TTToHplus_M120").getRootHisto().Clone()
-        #    hdeltaPhiVsTau3 = hdeltaPhiVsTau3.histoMgr.getHisto("HplusTB_M200").getRootHisto().Clone()
-        canvas71 = ROOT.TCanvas("canvas71","",500,500)
-        
-        hdeltaPhiVsTau3.RebinX(5)
-        hdeltaPhiVsTau3.RebinY(5)
-        hdeltaPhiVsTau3.SetMarkerColor(4)
-        hdeltaPhiVsTau3.SetMarkerSize(1)
-        hdeltaPhiVsTau3.SetMarkerStyle(20)
-        hdeltaPhiVsTau3.SetFillColor(4)
-        hdeltaPhiVsTau3.Draw("colz")
-        tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12 fb^{-1}       CMS Preliminary ")
-        tex4.SetNDC()
-        tex4.SetTextSize(20)
-        tex4.Draw()
-        tex1 = ROOT.TLatex(0.55,0.88,"Signal, m_{H#pm} = 120 GeV")
-        tex1.SetNDC()
-        tex1.SetTextSize(15)
-        tex1.Draw()
-        hdeltaPhiVsTau3.GetXaxis().SetTitle("#Delta#phi(#tau jet,MET) (deg)")
-        hdeltaPhiVsTau3.GetYaxis().SetTitle("#Delta#phi(MHT,jet1) (deg) ")
-        canvas71.Print("DeltaPhiVsDeltaPhiMHTtau3_m120.png")
-        canvas71.Print("DeltaPhiVsDeltaPhiMHTtau3_m120.C")
+    hdeltaPhiVsJet4.GetXaxis().SetTitle("#Delta#phi(#tau jet,MET) (deg)")
+    hdeltaPhiVsJet4.GetYaxis().SetTitle("#Delta#phi(MET,jet4) (deg) ")
+    canvas58.Print("DeltaPhiVsDeltaPhiMETjet4_m120.png")
+    canvas58.Print("DeltaPhiVsDeltaPhiMETjet4_m200.C")
 
 
-def mtComparison(datasets):
+
+ 
+
+def deltaRComparison(datasets):
     massPoints = [
-        #"TTToHplusBWB_M150",
-        #"TTToHplusBWB_M90",
-        #"TTToHplusBWB_M100",
-        "HplusTB_M180",
-        "HplusTB_M200",
-        "HplusTB_M250",
-        "HplusTB_M300",
+        "TTToHplus_M80",
+        "TTToHplus_M120",
+        "TTToHplus_M160",
+        #"HplusTB_M180",
+        #"HplusTB_M200",
+        #"HplusTB_M300"
         ]
     
 #    mt = plots.PlotBase([datasets.getDataset(m).getDatasetRootHisto("transverseMass") for m in massPoints])
-    mt = plots.PlotBase([datasets.getDataset(m).getDatasetRootHisto("transverseMassAfterBtagging") for m in massPoints])
+    mt = plots.PlotBase([datasets.getDataset(m).getDatasetRootHisto("DeltaR_TauMETJet4MET") for m in massPoints])
     mt.setEnergy(datasets.getEnergies())
     
     #   plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section MUST BE OFF
@@ -706,9 +688,54 @@ def mtComparison(datasets):
 
 #    mt.histoMgr.setHistoDrawStyleAll("P")
 #    rtauGen(mt, "transverseMass_vs_mH", rebin=20, defaultStyles=False)
-    rtauGen(mt, "transverseMassAfterBtagging_signal", rebin=10, defaultStyles=False)
+    rtauGen(mt, "DeltaR_TauMETJet4MET_signalLight", rebin=5, defaultStyles=False)
 #    rtauGen(mt, "transverseRtau", rebin=5, ratio=True, defaultStyles=False)
 
+
+def mtComparison(datasets):
+    massPoints = [
+        #"TTToHplusBWB_M80",
+        #"TTToHplusBWB_M120",
+        #"TTToHplusBWB_M160",
+        "HplusTB_M180",
+        "HplusTB_M200",
+        #"HplusTB_M250",
+        "HplusTB_M300",
+        ]
+    
+#    mt = plots.PlotBase([datasets.getDataset(m).getDatasetRootHisto("transverseMass") for m in massPoints])
+#    mt = plots.PlotBase([datasets.getDataset(m).getDatasetRootHisto("transverseMassAfterBtagging") for m in massPoints])
+    mt = plots.PlotBase([datasets.getDataset(m).getDatasetRootHisto("transverseMassDeltaPhiJet4") for m in massPoints]) 
+#    mt = plots.PlotBase([datasets.getDataset(m).getDatasetRootHisto("transverseMassAgainstTTCut") for m in massPoints])
+    mt.setEnergy(datasets.getEnergies())
+    
+    #   plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section MUST BE OFF
+    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+#    mt.histoMgr.normalizeMCToOne(datasets.getDataset("Data").getLuminosity())    
+    mt._setLegendStyles()
+    mt._setLegendLabels()
+    st = [
+        styles.StyleCompound([styles.styles[3]]),
+        styles.StyleCompound([styles.styles[2]]),
+        styles.StyleCompound([styles.styles[1]]),
+        styles.StyleCompound([styles.styles[0]]),
+        ]
+    st[0].append(styles.StyleLine(lineWidth=3))
+    st[1].append(styles.StyleLine(lineStyle=2, lineWidth=3))
+    st[2].append(styles.StyleLine(lineStyle=3, lineWidth=3))
+    st[3].append(styles.StyleLine(lineStyle=4, lineWidth=3))
+
+    if len(massPoints) > len(st):
+        raise Exception("So far supporting max %d mass points" % len(st))
+
+    for i, histoName in enumerate(massPoints):
+        mt.histoMgr.forHisto(histoName, st[i])
+
+#    mt.histoMgr.setHistoDrawStyleAll("P")
+#    rtauGen(mt, "transverseMass_vs_mH", rebin=20, defaultStyles=False)
+#    rtauGen(mt, "transverseMassAfterBtagging_signalHeavy", rebin=10, defaultStyles=False)
+    rtauGen(mt, "transverseMassAfterDeltaPhiCuts_signalHeavy", rebin=10, defaultStyles=False)
+#    rtauGen(mt, "transverseMassAgainstTTCut_signalHeavy", rebin=10, defaultStyles=False)
     
 def MetComparison(datasets):
     mt = plots.PlotBase([
@@ -1146,7 +1173,6 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
     elif "vertices" in name:
         xlabel = "N_{vertices}"
 
-
         
     kwargs = {"ymin": 0.1, "xmax": 1.0}
 
@@ -1163,7 +1189,11 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
     elif "DecayMode" in name:
         kwargs = {"ymin": 0.1, "xmax": 1.1}
     elif "Beta" in name:
-        kwargs = {"ymin": 0.01, "xmax": 1.0}     
+        kwargs = {"ymin": 0.01, "xmax": 1.0}
+    elif "DeltaR_TauMETJet" in name:
+        kwargs = {"ymin": 0.01, "xmax": 260}
+        xlabel = "#DeltaR in #Delta#phi(#tau,MET) vs #Delta#phi(jet4,MET) plane "
+        ylabel = "Events" 
 #    kwargs["opts"] = {"ymin": 0, "xmax": 14, "ymaxfactor": 1.1}}
     if ratio:
         kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
@@ -1189,7 +1219,8 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
     if  "vertex" in name:
         histograms.addText(0.75, 0.9, "Data", 22) 
         plots._legendLabels["Data"] = "vertex3"
-
+    if "DeltaR_TauMETJet" in name:
+        h.getPad().SetLogy(False)
         
     h.histoMgr.addLuminosityText()
     common(h, xlabel, ylabel, addLuminosityText=False)

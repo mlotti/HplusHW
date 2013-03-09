@@ -162,12 +162,12 @@ namespace HPlus {
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
     Count fDeltaPhiTauMETCounter;
-    Count fDeltaPhiVSDeltaPhiMHTJet1CutCounter;
-    Count fDeltaPhiVSDeltaPhiMHTJet2CutCounter;
-    Count fDeltaPhiVSDeltaPhiMHTJet3CutCounter;
+    Count fDeltaPhiVSDeltaPhiMETJet1CutCounter;
+    Count fDeltaPhiVSDeltaPhiMETJet2CutCounter;
+    Count fDeltaPhiVSDeltaPhiMETJet3CutCounter;
+    Count fDeltaPhiVSDeltaPhiMETJet4CutCounter;
+    Count fDeltaPhiAgainstTTCutCounter;
     Count fDeltaPtJetTauCounter;
-    Count fDeltaPhiLow30Counter;
-    Count fDeltaPhiLow60Counter;
     Count fBjetVetoCounter;
     Count fMetCut80Counter;
     Count fMetCut100Counter;
@@ -175,8 +175,8 @@ namespace HPlus {
     Count fTransverseMass100CutCounter;
     Count fTransverseMass120CutCounter;
     Count fTransverseMass150CutCounter;
-    Count fTransverseMass100CutPhiLow30Counter;
-    Count fTransverseMass100CutPhiLow60Counter;
+    //    Count fTransverseMass100CutPhiLow30Counter;
+    //    Count fTransverseMass100CutPhiLow60Counter;
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
@@ -333,14 +333,16 @@ namespace HPlus {
 
     // MCAnalysis histograms
     
-    WrappedTH2 *hDeltaPhiVsDeltaPhiMHTJet1;
-    WrappedTH2 *hDeltaPhiVsDeltaPhiMHTJet2;
-    WrappedTH2 *hDeltaPhiVsDeltaPhiMHTJet3;
-    WrappedTH1 *hDeltaPhiMHTJet1;
+    WrappedTH2 *hDeltaPhiVsDeltaPhiMETJet1;
+    WrappedTH2 *hDeltaPhiVsDeltaPhiMETJet2;
+    WrappedTH2 *hDeltaPhiVsDeltaPhiMETJet3;
+    WrappedTH2 *hDeltaPhiVsDeltaPhiMETJet4;
+    WrappedTH1 *hDeltaPhiMETJet1;
     WrappedTH1 *hgenWmass;
     WrappedTH1 *hGenMET;
     WrappedTH1 *hdeltaPhiMetGenMet;
     WrappedTH1 *hdeltaEtMetGenMet;
+    WrappedTH1 *hTransverseMassAgainstTTCut;
     WrappedTH1 *htransverseMassMuonNotInTau;
     WrappedTH1 *htransverseMassElectronNotInTau;
     WrappedTH1 *htransverseMassTauNotInTau;
@@ -373,10 +375,10 @@ namespace HPlus {
     WrappedTH1 *hTransverseMass;
     WrappedTH1 *hTransverseMassAfterBtagging;
     WrappedTH1 *hTransverseMassDeltaPhiJet1;
-    WrappedTH1 *hTransverseMassDeltaPhiJet2;    
+    WrappedTH1 *hTransverseMassDeltaPhiJet2;
+    WrappedTH1 *hTransverseMassDeltaPhiJet3;
+    WrappedTH1 *hTransverseMassDeltaPhiJet4;    
     WrappedTH1 *hTransverseMassSecondBveto;
-    WrappedTH1 *hTransverseMassPhi30;
-    WrappedTH1 *hTransverseMassPhi60;
     WrappedTH1 *hTransverseMassMet80;
     WrappedTH1 *hTransverseMassMet100;
     WrappedTH1 *hTransverseMassNoBtagging;
@@ -389,11 +391,6 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassTauVeto;
     WrappedTH1 *hTransverseMassAfterDeltaPhi;
     WrappedTH1 *hEWKFakeTausTransverseMass;
-    WrappedTH1 *hTransverseMassFakeMetVeto;
-    WrappedTH1 *hTransverseMassAfterDeltaPhi160;
-    WrappedTH1 *hTransverseMassAfterDeltaPhi130;
-    WrappedTH1 *hTransverseMassAfterDeltaPhi90;
-    WrappedTH2 *hDeltaPhiVsTransverseMass;
     WrappedTH2 *hTransverseMassVsNjets;
     WrappedTH2 *hEWKFakeTausTransverseMassVsNjets;
     WrappedTH1 *hDeltaPtJetTau;

@@ -27,8 +27,10 @@ from InvertedTauID import *
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2011AB"
+dataEra = "Run2012ABC"
 
+searchMode = "Light"
+#searchMode = "Heavy"
 
 def main():
 
@@ -41,7 +43,8 @@ def main():
     
 
     # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs, counters=counters, dataEra=dataEra,  analysisBaseName="signalAnalysisInvertedTau")
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis) 
+#    datasets = dataset.getDatasetsFromMulticrabDirs(dirs, counters=counters, dataEra=dataEra,  analysisBaseName="signalAnalysisInvertedTau")
 ##    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
 
     # As we use weighted counters for MC normalisation, we have to
@@ -54,7 +57,7 @@ def main():
 
     # Include only 120 mass bin of HW and HH datasets
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
-
+    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     # Default merging nad ordering of data and MC datasets
     # All data datasets to "Data"
     # All QCD datasets to "QCD"
@@ -84,23 +87,23 @@ def main():
     invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
     invertedQCD.useErrorBars(errorBars)
 
-#    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBveto")
-#    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBveto")
-    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets") 
+#    metBase = plots.DataMCPlot(datasets, "Baseline/MET_BaseLineTauIdBveto")
+#    metInver = plots.DataMCPlot(datasets, "Baseline/MET_InvertedTauIdBveto")
+    metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLineTauIdJets")
+    metInver = plots.DataMCPlot(datasets, "Inverted/MET_InvertedTauIdJets") 
 
     # Rebin before subtracting
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
     
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJes")
-    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets") 
-    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
-    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
-#    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBveto")
-#    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBveto") 
-#    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBveto")
-#    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBveto")
+    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MET_InvertedTauIdJes")
+    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MET_InvertedTauIdJets") 
+    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MET_BaselineTauIdJets")
+    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MET_BaselineTauIdJets")
+#    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MET_InvertedTauIdBveto")
+#    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MET_InvertedTauIdBveto") 
+#    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MET_BaselineTauIdBveto")
+#    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MET_BaselineTauIdBveto")
 
     metBase_data.SetTitle("Data: BaseLine TauID")
     metInverted_data.SetTitle("Data: Inverted TauID")
