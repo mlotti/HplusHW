@@ -62,15 +62,17 @@ bool hasDaughter(const reco::Candidate& p, int id);
 void printImmediateDaughters(const reco::Candidate& p);
 void printDaughters(const reco::Candidate& p);
 
-namespace HPlus {
+namespace { 
+  // (Containing these variables in an anonymous namespace prevents them from being accessed from code in another file)
   // Set this variable to true if you want debug print statements to be activated
-  bool FullHiggsMassCalculator::bPrintDebugOutput = true;
+  const bool bPrintDebugOutput = false;
   // Set the physical particle masses required in the calculation (in GeV)
-  double FullHiggsMassCalculator::c_fPhysicalTopMass(172.4); // Use the same as in the generator!!!
-  double FullHiggsMassCalculator::c_fPhysicalTauMass(1.778);
-  double FullHiggsMassCalculator::c_fPhysicalBeautyMass(4.19);
+  const double c_fPhysicalTopMass = 172.4; // Use the same as in the generator!!!
+  const double c_fPhysicalTauMass = 1.778;
+  const double c_fPhysicalBeautyMass = 4.19;
+}
 
-  
+namespace HPlus {
   FullHiggsMassCalculator::Data::Data():
     bPassedEvent(false),
     fDiscriminant(0),
@@ -84,7 +86,7 @@ namespace HPlus {
     LorentzVector_bJetFourMomentum(),
     LorentzVector_visibleTauFourMomentum(),
     LorentzVector_neutrinosFourMomentum(),
-    strEventClassName("")
+    eEventClassCode()
   { }
   
   FullHiggsMassCalculator::Data::~Data() { }
@@ -221,7 +223,6 @@ namespace HPlus {
   const edm::Ptr<pat::Tau> myTau, const BTagging::Data& bData, const METSelection::Data& metData) {
     Data output;
 
-    // 0) Set this to true to print debug output
     if (bPrintDebugOutput) std::cout << "==================================================================" << std::endl;
 
     // 1) Find the b-jet that is closest to the selected tau in (eta, phi) space
@@ -238,13 +239,11 @@ namespace HPlus {
     // 2) Define b-jet, visible tau, and MET momentum vectors
     // TODO: check this
     if (bPrintDebugOutput) std::cout << "####### b-jet energy: " << myHiggsSideBJet->energy() << std::endl;
-
     TVector3 myBJetVector(myHiggsSideBJet->px(), myHiggsSideBJet->py(), myHiggsSideBJet->pz());
     // TODO: "visibleTau" is only used in MC. Invent a different name
     TVector3 myVisibleTauVector(myTau->px(), myTau->py(), myTau->pz());
     // This is the same MET as in the rest of the analysis (as it should be), normally (as of March 2013) Type 1 PF
     TVector3 myMETVector(metData.getSelectedMET()->px(), metData.getSelectedMET()->py(), metData.getSelectedMET()->pz());
-    
     ////////////////////////////////////////////////////////////////////////////////
     // Running the analysis with the correct GEN objects (so far for signal only: //
     ////////////////////////////////////////////////////////////////////////////////
@@ -257,7 +256,6 @@ namespace HPlus {
 //       myMETVector.SetZ(0.0);
 //     }
     ////////////////////////////////////////////////////////
-    
     if (bPrintDebugOutput) {
       std::cout << "myBJetVector components: " << myBJetVector.Px() << ", " << myBJetVector.Py() << ", " << myBJetVector.Pz()
 		<< std::endl;
@@ -272,6 +270,8 @@ namespace HPlus {
     // 4) Select which neutrino p_z solution is used for the mass calculations. For each selection method, do the following:
     //    Calculate the invariant mass of the top quark and the Higgs boson (or what might be one).
     //    Constructing the four-momenta first greatly simplifies the equations and makes the code more readable.
+    // NOTE: Do nothing (for now) if determinant was negative
+    // TODO: add a function for selecting a neutrino p_z solution according to a chosen method (specified by an argument)
     constructFourMomenta(myVisibleTauVector, myBJetVector, myMETVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
@@ -393,8 +393,8 @@ namespace HPlus {
       std::cout << "--- Z/X = " << TMath::Sqrt(A*A - MET.Perp2() * (1 - B*B)) / (1 - B*B) << std::endl;
       std::cout << "--- neutrinoPzSolution1 = " << neutrinoPzSolution1 << std::endl;
       std::cout << "--- neutrinoPzSolution2 = " << neutrinoPzSolution2 << std::endl;
-      std::cout << "--- angle1 = " << angle1 << std::endl;
-      std::cout << "--- angle2 = " << angle2 << std::endl;
+      std::cout << "--- angle1 = " << angle1 * TMath::RadToDeg() << " degrees" << std::endl;
+      std::cout << "--- angle2 = " << angle2 * TMath::RadToDeg() << " degrees" << std::endl;
     }
   }
 
@@ -470,81 +470,82 @@ namespace HPlus {
     hMETDeltaPt->Fill(metDeltaPt);
     hMETDeltaPhi->Fill(metDeltaPhi * 180.0 / TMath::Pi());
 
-    // Generate the "misidentification code" (an integer). It will be used to determine the event classes
-    int misidentificationCode = 0;
-    // **********************************************************************************************************
-    // Explanation: the misidentification code acts as a three-digit binary code eventual misidentifications
-    // (1 = misidentification, 0 = no misidentification)
-    // First digit: b-jet                          |      Example:   B M T
-    // Second digit: MET                           |                 -----
-    // Third digit: tau                            |                 1 0 1
-    // Example: misidentificationCode = 101 would mean that the b-jet was misidentified,
-    // the MET was identified correctly, and the tau was misidentified.
-    // **********************************************************************************************************
+    int eventClassCode = 0;
+    TString eventClassName;
     // NOTE: the if-statements below check if something does NOT pass the cuts!
     if (bDeltaR >= bDeltaRCut) {
-      misidentificationCode += 100;
+      eventClassCode += eOnlyBadBjet;
       increment(eventClass_AllBadBjet_SubCount);
     }
     if (metDeltaPt <= metDeltaPtLoCut || metDeltaPt >= metDeltaPtHiCut || TMath::Abs(metDeltaPhi) >= metDeltaPhiCut) {
-      misidentificationCode += 10;
+      eventClassCode += eOnlyBadMET;
       increment(eventClass_AllBadMET_SubCount);
     }
     if (tauDeltaR >= tauDeltaRCut) {
-      misidentificationCode += 1;
+      eventClassCode += eOnlyBadTau;
       increment(eventClass_AllBadTau_SubCount);
     }
-    if (bPrintDebugOutput) std::cout << "FullHiggsMassCalculator:   misidentificationCode = " << misidentificationCode << std::endl;
+    if (bPrintDebugOutput) std::cout << "FullHiggsMassCalculator:   eventClassCode = " << eventClassCode << std::endl;
     // Define and set the event classes. Informative histograms are filled and counters incremented for each class
-    switch (misidentificationCode) {
-    case 0:
-      output.strEventClassName = "Pure";
+    switch (eventClassCode) {
+    case ePure:
+      output.eEventClassCode = ePure;
+      eventClassName = "Pure";
       increment(eventClass_Pure_SubCount);
       if (output.fDiscriminant >= 0) hHiggsMassPure->Fill(output.fHiggsMassSolution);
       hDiscriminantPure->Fill(output.fDiscriminant);
       break;
-    case 1:
-      output.strEventClassName = "OnlyBadTau";
+    case eOnlyBadTau:
+      output.eEventClassCode = eOnlyBadTau;
+      eventClassName = "OnlyBadTau";
       increment(eventClass_OnlyBadTau_SubCount);
       if (output.fDiscriminant >= 0) hHiggsMassBadTau->Fill(output.fHiggsMassSolution);
       break;
-    case 10:
-      output.strEventClassName = "OnlyBadMET";
+    case eOnlyBadMET:
+      output.eEventClassCode = eOnlyBadMET;
+      eventClassName = "OnlyBadMET";
       increment(eventClass_OnlyBadMET_SubCount);
       if (output.fDiscriminant >= 0) hHiggsMassBadMET->Fill(output.fHiggsMassSolution);
       break;
-    case 11:
-      output.strEventClassName = "OnlyBadTauAndMET";
+    case eOnlyBadTauAndMET:
+      output.eEventClassCode = eOnlyBadTauAndMET;
+      eventClassName = "OnlyBadTauAndMET";
       increment(eventClass_OnlyBadTauAndMET_SubCount);
       if (output.fDiscriminant >= 0) hHiggsMassBadTauAndMET->Fill(output.fHiggsMassSolution);
       break;
-    case 100:
-      output.strEventClassName = "OnlyBadBjet";
+    case eOnlyBadBjet:
+      output.eEventClassCode = eOnlyBadBjet;
+      eventClassName = "OnlyBadBjet";
       increment(eventClass_OnlyBadBjet_SubCount);
       if (output.fDiscriminant >= 0) hHiggsMassBadBjet->Fill(output.fHiggsMassSolution);
       break;
-    case 101:
-      output.strEventClassName = "OnlyBadBjetAndTau";
+    case eOnlyBadBjetAndTau:
+      output.eEventClassCode = eOnlyBadBjetAndTau;
+      eventClassName = "OnlyBadBjetAndTau";
       increment(eventClass_OnlyBadBjetAndTau_SubCount);
       if (output.fDiscriminant >= 0) hHiggsMassBadBjetAndTau->Fill(output.fHiggsMassSolution);
       break;
-    case 110:
-      output.strEventClassName = "OnlyBadBjetAndMET";
+    case eOnlyBadBjetAndMET:
+      output.eEventClassCode = eOnlyBadBjetAndMET;
+      eventClassName = "OnlyBadBjetAndMET";
       increment(eventClass_OnlyBadBjetAndMET_SubCount);
       if (output.fDiscriminant >= 0) hHiggsMassBadBjetAndMET->Fill(output.fHiggsMassSolution);
       break;
-    case 111:
-      output.strEventClassName = "OnlyBadBjetAndMETAndTau";
+    case eOnlyBadBjetAndMETAndTau:
+      output.eEventClassCode = eOnlyBadBjetAndMETAndTau;
+      eventClassName = "OnlyBadBjetAndMETAndTau";
       increment(eventClass_OnlyBadBjetAndMETAndTau_SubCount);
       if (output.fDiscriminant >= 0) hHiggsMassBadBjetAndMETAndTau->Fill(output.fHiggsMassSolution);
       break;
     default:
-      output.strEventClassName = "######";
+      // Throw exception!
+      eventClassName = "######";
       if (bPrintDebugOutput) std::cout << "EVENT CLASSIFICATON FAILED!" << std::endl;
+      throw cms::Exception("LogicError") << "The event classification code received an invalid value. Please check FullHiggsMassCalculator.cc and .h";
     }
-    if (bPrintDebugOutput) std::cout << "strEventClassName = " << output.strEventClassName << std::endl;
+    if (bPrintDebugOutput) std::cout << "eventClassName = " << eventClassName << std::endl;
     // Also do histogramming and counting for the set of events, in which ANYTHING was misidentified ("impure events")
-    if (misidentificationCode > 0) {
+    if (eventClassCode > 0) {
       increment(eventClass_Impure_SubCount);
       if (output.fDiscriminant >= 0) hHiggsMassImpure->Fill(output.fHiggsMassSolution);
       hDiscriminantImpure->Fill(output.fDiscriminant);

@@ -34,11 +34,22 @@ namespace HPlus {
 
   class FullHiggsMassCalculator: public BaseSelection {
   public:
-    static bool bPrintDebugOutput; //RENAME: s_bPrintDebugOutput
-    // Physical parameters of the particles
-    static double c_fPhysicalTopMass;
-    static double c_fPhysicalTauMass;
-    static double c_fPhysicalBeautyMass;
+    enum EventClassCode {
+      // Explanation: the integers can be understood as a three-digit binary code keeping track of eventual misidentifications
+      // First digit: b-jet                          |      Example:   B M T
+      // Second digit: MET                           |                 -----
+      // Third digit: tau                            |                 1 0 1
+      // Example: misidentificationCode = 101 would mean that the b-jet was misidentified,
+      // the MET was identified correctly, and the tau was misidentified.
+      ePure = 0,
+      eOnlyBadTau = 1,
+      eOnlyBadMET = 10,
+      eOnlyBadTauAndMET = 11,
+      eOnlyBadBjet = 100,
+      eOnlyBadBjetAndTau = 101,
+      eOnlyBadBjetAndMET = 110,
+      eOnlyBadBjetAndMETAndTau = 111
+    };
 
     class Data {
     public:
@@ -53,9 +64,7 @@ namespace HPlus {
       const double getSelectedNeutrinoPzSolution() const { return fSelectedNeutrinoPzSolution; }
       const double getNeutrinoPtSolution() const { return fNeutrinoPtSolution; }
       const double getMCNeutrinoPz() const { return fMCNeutrinoPz; }
-      // string getEventClass()
-      
-      //      const edm::Ptr<pat::Jet>& getSelectedBjet() const { return fCalculator->selectedBjet; }
+      const EventClassCode getEventClassCode() const { return eEventClassCode; }
 
       friend class FullHiggsMassCalculator;
     private:
@@ -77,7 +86,7 @@ namespace HPlus {
       TLorentzVector LorentzVector_visibleTauFourMomentum;
       TLorentzVector LorentzVector_neutrinosFourMomentum;
       // Event classification results
-      TString strEventClassName;
+      EventClassCode eEventClassCode;
     };
 
     FullHiggsMassCalculator(EventCounter& eventCounter, HistoWrapper& histoWrapper);
