@@ -14,7 +14,6 @@ METHOD
 the mass of its grandmother top quark as a kinematical constraint:
                      t -> H+ b
                            `--> tau nu
-2) 
 
       Variable naming examples:
       *************************
@@ -23,6 +22,10 @@ the mass of its grandmother top quark as a kinematical constraint:
       MET (three-)vector       : MET
       energies                 : tauPlusBEnergy
       calculated solutions     : neutrinoPzSolutionMax, topMassSolution1 (contain the word "solution")
+
+SHORTCOMINGS
+1) Event classification does not check if anything is outside the detector acceptance area (eta > 2.1).
+This should not cause any significant error, though.
 */
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
@@ -46,20 +49,28 @@ the mass of its grandmother top quark as a kinematical constraint:
 #include "TMath.h"
 #include "TString.h"
 
-std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
-std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
-bool  hasImmediateMother(const reco::Candidate& p, int id);
-bool  hasMother(const reco::Candidate& p, int id);
-void  printImmediateMothers(const reco::Candidate& p);
-void  printMothers(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>  getImmediateDaughters(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p);
-bool  hasImmediateDaughter(const reco::Candidate& p, int id);
-bool  hasDaughter(const reco::Candidate& p, int id);
-void  printImmediateDaughters(const reco::Candidate& p);
+std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
+std::vector<const reco::GenParticle*> getMothers(const reco::Candidate& p);
+bool hasImmediateMother(const reco::Candidate& p, int id);
+bool hasMother(const reco::Candidate& p, int id);
+void printImmediateMothers(const reco::Candidate& p);
+void printMothers(const reco::Candidate& p);
+std::vector<const reco::GenParticle*> getImmediateDaughters(const reco::Candidate& p);
+std::vector<const reco::GenParticle*> getDaughters(const reco::Candidate& p);
+bool hasImmediateDaughter(const reco::Candidate& p, int id);
+bool hasDaughter(const reco::Candidate& p, int id);
+void printImmediateDaughters(const reco::Candidate& p);
 void printDaughters(const reco::Candidate& p);
 
 namespace HPlus {
+  // Set this variable to true if you want debug print statements to be activated
+  bool FullHiggsMassCalculator::bPrintDebugOutput = true;
+  // Set the physical particle masses required in the calculation (in GeV)
+  double FullHiggsMassCalculator::c_fPhysicalTopMass(172.4); // Use the same as in the generator!!!
+  double FullHiggsMassCalculator::c_fPhysicalTauMass(1.778);
+  double FullHiggsMassCalculator::c_fPhysicalBeautyMass(4.19);
+
+  
   FullHiggsMassCalculator::Data::Data():
     bPassedEvent(false),
     fDiscriminant(0),
@@ -73,13 +84,7 @@ namespace HPlus {
     LorentzVector_bJetFourMomentum(),
     LorentzVector_visibleTauFourMomentum(),
     LorentzVector_neutrinosFourMomentum(),
-    iMisidentificationCode(0),
-    strEventClassName(""),
-    // Set the physical particle masses required in the calculation (in GeV)
-    //c_fPhysicalTopMass(173.4),
-    c_fPhysicalTopMass(172.4), // Use the same as in the generator!!!
-    c_fPhysicalTauMass(1.778),
-    c_fPhysicalBeautyMass(4.19)
+    strEventClassName("")
   { }
   
   FullHiggsMassCalculator::Data::~Data() { }
@@ -157,7 +162,7 @@ namespace HPlus {
     hDiscriminantPure         = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DiscriminantPure",
 							  "DiscriminantPure", 100, -50000, 50000);
     hDiscriminantImpure       = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DiscriminantImpure",
-							"DiscriminantImpure", 100, -50000, 50000);
+							  "DiscriminantImpure", 100, -50000, 50000);
     hNeutrinosTauAngle1       = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NeutrinosTauAngle1",
 							  "Angle between neutrinos and tau;(degrees)", 180, -180, 180);
     hNeutrinosTauAngle2       = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NeutrinosTauAngle2",
@@ -177,7 +182,7 @@ namespace HPlus {
   FullHiggsMassCalculator::~FullHiggsMassCalculator() {}
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-  const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData) {
+  const TauSelection::Data& tauData, const BTagging::Data& bData, const METSelection::Data& metData) {
     ensureSilentAnalyzeAllowed(iEvent);
     // Disable histogram filling and counter incrementing until the return call
     // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
@@ -189,7 +194,7 @@ namespace HPlus {
   }
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-  const edm::Ptr<pat::Tau> myTau, const BTagging::Data bData, const METSelection::Data metData) {
+  const edm::Ptr<pat::Tau> myTau, const BTagging::Data& bData, const METSelection::Data& metData) {
     ensureSilentAnalyzeAllowed(iEvent);
     // Disable histogram filling and counter incrementing until the return call
     // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
@@ -199,7 +204,7 @@ namespace HPlus {
   }
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-  const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData) {
+  const TauSelection::Data& tauData, const BTagging::Data& bData, const METSelection::Data& metData) {
     ensureAnalyzeAllowed(iEvent);
     // If this method is called with tauData as an argument, get the selected tau from it and pass it on to privateAnalyze():
     const edm::Ptr<pat::Tau> myTau = tauData.getSelectedTau();
@@ -207,17 +212,17 @@ namespace HPlus {
   }
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-  const edm::Ptr<pat::Tau> myTau, const BTagging::Data bData, const METSelection::Data metData) {
+  const edm::Ptr<pat::Tau> myTau, const BTagging::Data& bData, const METSelection::Data& metData) {
     ensureAnalyzeAllowed(iEvent);
     return privateAnalyze(iEvent, iSetup, myTau, bData, metData);
   }
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-  const edm::Ptr<pat::Tau> myTau, const BTagging::Data bData, const METSelection::Data metData) {
+  const edm::Ptr<pat::Tau> myTau, const BTagging::Data& bData, const METSelection::Data& metData) {
     Data output;
-    Data physicalParameters; // this contains particles masses etc.
 
-    std::cout << "==================================================================" << std::endl;
+    // 0) Set this to true to print debug output
+    if (bPrintDebugOutput) std::cout << "==================================================================" << std::endl;
 
     // 1) Find the b-jet that is closest to the selected tau in (eta, phi) space
     //    This b-jet is assumed to come from the same top quark as a charged Higgs (hence, it belongs to the "Higgs side")
@@ -225,41 +230,60 @@ namespace HPlus {
     myHiggsSideBJet = FullHiggsMassCalculator::findHiggsSideBJet(bData, myTau);
     output.HiggsSideBJet = myHiggsSideBJet;
     if (output.HiggsSideBJet.isNull()) {
-      std::cout << "No reco Higgs side b-jet found!" << std::endl;
+      if (bPrintDebugOutput) std::cout << "No reco Higgs side b-jet found! The code will crash." << std::endl;
     } else {
-      std::cout << "Reco Higgs side b-jet found" << std::endl;
+      if (bPrintDebugOutput) std::cout << "Reco Higgs side b-jet found" << std::endl;
     }
 
     // 2) Define b-jet, visible tau, and MET momentum vectors
     // TODO: check this
-    std::cout << "####### b-jet energy: " << myHiggsSideBJet->energy() << std::endl;
+    if (bPrintDebugOutput) std::cout << "####### b-jet energy: " << myHiggsSideBJet->energy() << std::endl;
 
     TVector3 myBJetVector(myHiggsSideBJet->px(), myHiggsSideBJet->py(), myHiggsSideBJet->pz());
-    std::cout << "myBJetVector components: " << myBJetVector.Px() << ", " << myBJetVector.Py() << ", " << myBJetVector.Pz() 
-	      << std::endl;
     // TODO: "visibleTau" is only used in MC. Invent a different name
     TVector3 myVisibleTauVector(myTau->px(), myTau->py(), myTau->pz());
-    std::cout << "myVisibleTauVector components: " << myVisibleTauVector.Px() << ", " << myVisibleTauVector.Py() << ", "
-	      << myVisibleTauVector.Pz() << std::endl;
-    // This is the same MET as in the rest of the analysis (as it should be), by default: Type 1 PF
+    // This is the same MET as in the rest of the analysis (as it should be), normally (as of March 2013) Type 1 PF
     TVector3 myMETVector(metData.getSelectedMET()->px(), metData.getSelectedMET()->py(), metData.getSelectedMET()->pz());
-    std::cout << "myMETVector components: " << myMETVector.Px() << ", " << myMETVector.Py() << ", " << myMETVector.Pz() 
-	      << std::endl;
+    
+    ////////////////////////////////////////////////////////////////////////////////
+    // Running the analysis with the correct GEN objects (so far for signal only: //
+    ////////////////////////////////////////////////////////////////////////////////
+//     if (eventHasGenChargedHiggs(iEvent)) {
+//       reco::Candidate* myGenBJet = getGenHiggsSideBJet(iEvent);
+//       reco::Candidate* myGenTau = getGenTauFromHiggs(iEvent);
+//       myBJetVector.SetXYZ(myGenBJet->px(), myGenBJet->py(), myGenBJet->pz());
+//       myVisibleTauVector = getVisibleMomentum(*myGenTau);
+//       myMETVector = getGenMETVector(iEvent);
+//       myMETVector.SetZ(0.0);
+//     }
+    ////////////////////////////////////////////////////////
+    
+    if (bPrintDebugOutput) {
+      std::cout << "myBJetVector components: " << myBJetVector.Px() << ", " << myBJetVector.Py() << ", " << myBJetVector.Pz()
+		<< std::endl;
+      std::cout << "myVisibleTauVector components: " << myVisibleTauVector.Px() << ", " << myVisibleTauVector.Py() << ", " 
+		<< myVisibleTauVector.Pz() << std::endl;
+      std::cout << "myMETVector components: " << myMETVector.Px() << ", " << myMETVector.Py() << ", " << myMETVector.Pz()
+		<< std::endl;
+    }
 
-    // 3) Calculate
-    calculateNeutrinoPz(myVisibleTauVector, myBJetVector, myMETVector, physicalParameters, output);
-    constructFourMomenta(myVisibleTauVector, myBJetVector, myMETVector, physicalParameters, output);
+    // 3) Calculate the neutrino p_z solutions. Both are saved in output.
+    calculateNeutrinoPz(myVisibleTauVector, myBJetVector, myMETVector, output);
+    // 4) Select which neutrino p_z solution is used for the mass calculations. For each selection method, do the following:
+    //    Calculate the invariant mass of the top quark and the Higgs boson (or what might be one).
+    //    Constructing the four-momenta first greatly simplifies the equations and makes the code more readable.
+    constructFourMomenta(myVisibleTauVector, myBJetVector, myMETVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
 
-    // 4) If MC: Classify event according to what was identified correctly and what was not
+    // 5) If MC: Classify event according to what was identified correctly and what was not
     //    (the classification results are stored in output)
     if (!iEvent.isRealData()) {
-      std::cout << "Doing event classification" << std::endl;
+      if (bPrintDebugOutput) std::cout << "Doing Monte Carlo event classification" << std::endl;
       doEventClassification(iEvent, myBJetVector, myVisibleTauVector, myMETVector, output);
     }
 
-    // 5) Histograms are filled accordingly. There is a separate method to do this for MC and data
+    // 6) Histograms are filled accordingly. There is a separate method to do this for MC and data
     //    NOTE: events with no real neutrino p_z solutions are ignored at histogramming stage!
     if  (output.fDiscriminant >= 0.0) {
       if (!iEvent.isRealData()) {
@@ -302,14 +326,13 @@ namespace HPlus {
   }
 
   void FullHiggsMassCalculator::calculateNeutrinoPz(TVector3& pTau, TVector3& pB, TVector3& MET, 
-						    FullHiggsMassCalculator::Data& physicalParameters, 
 						    FullHiggsMassCalculator::Data& output) {
     increment(fAllSolutionsCutSubCount);
     // Get the on-shell particle masses
-    const double mTop = physicalParameters.c_fPhysicalTopMass;
-    const double mTau = physicalParameters.c_fPhysicalTauMass;
-    const double mB = physicalParameters.c_fPhysicalBeautyMass;
-    std::cout << "Top, tau, and beauty mass: " << mTop << ", " << mTau << ", " << mB << std::endl;
+    const double mTop = c_fPhysicalTopMass;
+    const double mTau = c_fPhysicalTauMass;
+    const double mB   = c_fPhysicalBeautyMass;
+    if (bPrintDebugOutput) std::cout << "Top, tau, and beauty mass: " << mTop << ", " << mTau << ", " << mB << std::endl;
     // Calculate quantities appearing in the calculation
     double bEnergy = TMath::Sqrt(mB * mB + pB.Mag2());
     double visibleTauEnergy = TMath::Sqrt(mTau * mTau + pTau.Mag2());
@@ -331,7 +354,7 @@ namespace HPlus {
     // If the discriminant is negative, there are two imaginary solutions
     else {
       increment(fNegativeDiscriminantCutSubCount);
-      std::cout << "DISCRIMINANT < 0!!!" << std::endl;
+      if (bPrintDebugOutput) std::cout << "DISCRIMINANT < 0!!!" << std::endl;
       // ***Strategy***
       // Set discriminant to zero
       neutrinoPzSolution1 = A*B / (1 - B*B);
@@ -355,22 +378,24 @@ namespace HPlus {
     }
 
     // Print information about the calculation steps
-    std::cout << "FullHiggsMassCalculator: Reconstructing the neutrino p_z..." << std::endl;
-    std::cout << "--- Tau reconstructed momentum = (" << pTau.Px() << ", " << pTau.Py() << ", " << pTau.Pz() << ")" << std::endl;
-    std::cout << "--- B-jet reconstructed momentum = (" << pB.Px() << ", " << pB.Py() << ", " << pB.Pz() << ")" << std::endl;
-    std::cout << "--- Neutrinos reconstructed momentum = (" << MET.Px() << ", " << MET.Py() << ", " << MET.Pz() << ")" << std::endl;
-    std::cout << "--- bEnergy = " << bEnergy << std::endl;
-    std::cout << "--- visibleTauEnergy = " << visibleTauEnergy << std::endl;
-    std::cout << "--- deltaSquaredMasses = " << deltaSquaredMasses << std::endl;    
-    std::cout << "--- A = " << A << std::endl;
-    std::cout << "--- B = " << B << std::endl;
-    std::cout << "--- discriminant = " << discriminant << std::endl;
-    std::cout << "--- Y/X = " << A*B / (1 - B*B) << std::endl;
-    std::cout << "--- Z/X = " << TMath::Sqrt(A*A - MET.Perp2() * (1 - B*B)) / (1 - B*B) << std::endl;
-    std::cout << "--- neutrinoPzSolution1 = " << neutrinoPzSolution1 << std::endl;
-    std::cout << "--- neutrinoPzSolution2 = " << neutrinoPzSolution2 << std::endl;
-    std::cout << "--- angle1 = " << angle1 << std::endl;
-    std::cout << "--- angle2 = " << angle2 << std::endl;
+    if (bPrintDebugOutput) {
+      std::cout << "FullHiggsMassCalculator: Reconstructing the neutrino p_z..." << std::endl;
+      std::cout << "--- Tau reconstructed momentum = (" << pTau.Px() << ", " << pTau.Py() << ", " << pTau.Pz() << ")" << std::endl;
+      std::cout << "--- B-jet reconstructed momentum = (" << pB.Px() << ", " << pB.Py() << ", " << pB.Pz() << ")" << std::endl;
+      std::cout << "--- Neutrinos reconstructed momentum = (" << MET.Px() << ", " << MET.Py() << ", "<< MET.Pz() << ")"<< std::endl;
+      std::cout << "--- bEnergy = " << bEnergy << std::endl;
+      std::cout << "--- visibleTauEnergy = " << visibleTauEnergy << std::endl;
+      std::cout << "--- deltaSquaredMasses = " << deltaSquaredMasses << std::endl;    
+      std::cout << "--- A = " << A << std::endl;
+      std::cout << "--- B = " << B << std::endl;
+      std::cout << "--- discriminant = " << discriminant << std::endl;
+      std::cout << "--- Y/X = " << A*B / (1 - B*B) << std::endl;
+      std::cout << "--- Z/X = " << TMath::Sqrt(A*A - MET.Perp2() * (1 - B*B)) / (1 - B*B) << std::endl;
+      std::cout << "--- neutrinoPzSolution1 = " << neutrinoPzSolution1 << std::endl;
+      std::cout << "--- neutrinoPzSolution2 = " << neutrinoPzSolution2 << std::endl;
+      std::cout << "--- angle1 = " << angle1 << std::endl;
+      std::cout << "--- angle2 = " << angle2 << std::endl;
+    }
   }
 
   double FullHiggsMassCalculator::getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz) {
@@ -379,14 +404,13 @@ namespace HPlus {
   }
 
   void FullHiggsMassCalculator::constructFourMomenta(TVector3& pTau, TVector3& pB, TVector3& MET, 
-						     FullHiggsMassCalculator::Data& physicalParameters, 
 						     FullHiggsMassCalculator::Data& output) {
     TLorentzVector visibleTauMomentum;
     TLorentzVector bJetMomentum;
     TLorentzVector neutrinosMomentum;
-    double visibleTauEnergy = TMath::Sqrt(TMath::Power(physicalParameters.c_fPhysicalTauMass,2) + TMath::Power(pTau.Px(),2) +
+    double visibleTauEnergy = TMath::Sqrt(TMath::Power(c_fPhysicalTauMass,2) + TMath::Power(pTau.Px(),2) +
 					  TMath::Power(pTau.Py(),2) + TMath::Power(pTau.Pz(),2));
-    double bJetEnergy = TMath::Sqrt(TMath::Power(physicalParameters.c_fPhysicalBeautyMass,2) + TMath::Power(pB.Px(),2) +
+    double bJetEnergy = TMath::Sqrt(TMath::Power(c_fPhysicalBeautyMass,2) + TMath::Power(pB.Px(),2) +
 				    TMath::Power(pB.Py(),2) + TMath::Power(pB.Pz(),2));
     double neutrinosEnergy = TMath::Sqrt(TMath::Power(MET.Px(),2) + TMath::Power(MET.Py(),2) +
 					 TMath::Power(output.fSelectedNeutrinoPzSolution,2));
@@ -396,24 +420,24 @@ namespace HPlus {
     output.LorentzVector_visibleTauFourMomentum = visibleTauMomentum;
     output.LorentzVector_bJetFourMomentum = bJetMomentum;
     output.LorentzVector_neutrinosFourMomentum = neutrinosMomentum;
-    //std::cout << "Norm of neutrino momentum four-vector (should be zero): " << neutrinosMomentum.M() << std::endl;
+    //if (bPrintDebugOutput) std::cout << "Norm of neutrino momentum four-vector (should be zero): " << neutrinosMomentum.M() << std::endl;
   }
 
   void FullHiggsMassCalculator::calculateTopMass(FullHiggsMassCalculator::Data& output) {
     TLorentzVector topMomentumSolution = output.LorentzVector_visibleTauFourMomentum + output.LorentzVector_bJetFourMomentum +
       output.LorentzVector_neutrinosFourMomentum;
     output.fTopMassSolution = topMomentumSolution.M();
-    std::cout << "output.fTopMassSolution: " << output.fTopMassSolution << std::endl;
+    if (bPrintDebugOutput) std::cout << "output.fTopMassSolution: " << output.fTopMassSolution << std::endl;
   }
   
   void FullHiggsMassCalculator::calculateHiggsMass(FullHiggsMassCalculator::Data& output) {
     TLorentzVector higgsMomentumSolution = output.LorentzVector_visibleTauFourMomentum + output.LorentzVector_neutrinosFourMomentum;
     output.fHiggsMassSolution = higgsMomentumSolution.M();
-    std::cout << "output.fHiggsMassSolution: " << output.fHiggsMassSolution << std::endl;
+    if (bPrintDebugOutput) std::cout << "output.fHiggsMassSolution: " << output.fHiggsMassSolution << std::endl;
   }
 
-  void FullHiggsMassCalculator::doEventClassification(const edm::Event& iEvent, TVector3 recoBJetVector, TVector3 recoTauVector,
-						      TVector3 recoMETVector, FullHiggsMassCalculator::Data& output) {
+  void FullHiggsMassCalculator::doEventClassification(const edm::Event& iEvent, TVector3& recoBJetVector, TVector3& recoTauVector,
+						      TVector3& recoMETVector, FullHiggsMassCalculator::Data& output) {
     // Declare variables used to classify events
     double bDeltaR     = 9999999;
     double tauDeltaR   = 9999999;
@@ -429,17 +453,17 @@ namespace HPlus {
     //bool myEventHasGenChargedHiggs = eventHasGenChargedHiggs(iEvent);
     // B-jet: compare RECO and GEN information
     bDeltaR = getClosestGenBQuarkDeltaR(iEvent, recoBJetVector);
-    std::cout << "****** bDeltaR: " << bDeltaR << std::endl;
+    if (bPrintDebugOutput) std::cout << "****** bDeltaR: " << bDeltaR << std::endl;
     // Tau: compare RECO and GEN information
     tauDeltaR = getClosestGenVisibleTauDeltaR(iEvent, recoTauVector);
-    std::cout << "****** tauDeltaR: " << tauDeltaR << std::endl;
+    if (bPrintDebugOutput) std::cout << "****** tauDeltaR: " << tauDeltaR << std::endl;
   
     // MET: compare RECO and GEN information
     TVector3 genMETVector = getGenMETVector(iEvent);
     metDeltaPt = recoMETVector.Pt() - genMETVector.Pt();
     metDeltaPhi = recoMETVector.DeltaPhi(genMETVector);
-    std::cout << "****** metDeltaPt = " << metDeltaPt << std::endl;
-    std::cout << "****** metDeltaPhi (in degrees) = " << metDeltaPhi * 180.0 / TMath::Pi() << std::endl;
+    if (bPrintDebugOutput) std::cout << "****** metDeltaPt = " << metDeltaPt << std::endl;
+    if (bPrintDebugOutput) std::cout << "****** metDeltaPhi (in degrees) = " << metDeltaPhi * 180.0 / TMath::Pi() << std::endl;
     // Put the comparison values in histograms
     hBDeltaR->Fill(bDeltaR);
     hTauDeltaR->Fill(tauDeltaR);
@@ -447,22 +471,32 @@ namespace HPlus {
     hMETDeltaPhi->Fill(metDeltaPhi * 180.0 / TMath::Pi());
 
     // Generate the "misidentification code" (an integer). It will be used to determine the event classes
-    // NOTE: the if-statements check if something does NOT pass the cuts!
+    int misidentificationCode = 0;
+    // **********************************************************************************************************
+    // Explanation: the misidentification code acts as a three-digit binary code eventual misidentifications
+    // (1 = misidentification, 0 = no misidentification)
+    // First digit: b-jet                          |      Example:   B M T
+    // Second digit: MET                           |                 -----
+    // Third digit: tau                            |                 1 0 1
+    // Example: misidentificationCode = 101 would mean that the b-jet was misidentified,
+    // the MET was identified correctly, and the tau was misidentified.
+    // **********************************************************************************************************
+    // NOTE: the if-statements below check if something does NOT pass the cuts!
     if (bDeltaR >= bDeltaRCut) {
-      output.iMisidentificationCode += 100;
+      misidentificationCode += 100;
       increment(eventClass_AllBadBjet_SubCount);
     }
     if (metDeltaPt <= metDeltaPtLoCut || metDeltaPt >= metDeltaPtHiCut || TMath::Abs(metDeltaPhi) >= metDeltaPhiCut) {
-      output.iMisidentificationCode += 10;
+      misidentificationCode += 10;
       increment(eventClass_AllBadMET_SubCount);
     }
     if (tauDeltaR >= tauDeltaRCut) {
-      output.iMisidentificationCode += 1;
+      misidentificationCode += 1;
       increment(eventClass_AllBadTau_SubCount);
     }
-    std::cout << "FullHiggsMassCalculator:   output.iMisidentificationCode = " << output.iMisidentificationCode << std::endl;
+    if (bPrintDebugOutput) std::cout << "FullHiggsMassCalculator:   misidentificationCode = " << misidentificationCode << std::endl;
     // Define and set the event classes. Informative histograms are filled and counters incremented for each class
-    switch (output.iMisidentificationCode) {
+    switch (misidentificationCode) {
     case 0:
       output.strEventClassName = "Pure";
       increment(eventClass_Pure_SubCount);
@@ -506,11 +540,11 @@ namespace HPlus {
       break;
     default:
       output.strEventClassName = "######";
-      std::cout << "EVENT CLASSIFICATON FAILED!" << std::endl;
+      if (bPrintDebugOutput) std::cout << "EVENT CLASSIFICATON FAILED!" << std::endl;
     }
-    std::cout << "strEventClassName = " << output.strEventClassName << std::endl;
+    if (bPrintDebugOutput) std::cout << "strEventClassName = " << output.strEventClassName << std::endl;
     // Also do histogramming and counting for the set of events, in which ANYTHING was misidentified ("impure events")
-    if (output.iMisidentificationCode > 0) {
+    if (misidentificationCode > 0) {
       increment(eventClass_Impure_SubCount);
       if (output.fDiscriminant >= 0) hHiggsMassImpure->Fill(output.fHiggsMassSolution);
       hDiscriminantImpure->Fill(output.fDiscriminant);
