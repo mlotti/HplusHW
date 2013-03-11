@@ -1436,15 +1436,16 @@ class Dataset:
     # \param name    Path of the ROOT TTree relative to the analysis
     #                root directory
     #
-    # \return ROOT.TChain
+    # \return pair (ROOT.TChain, \a realName)
     #
     # If name starts with slash ('/'), it is interpreted as a absolute
     # path within the ROOT file.
     def createRootChain(self, treeName):
-        chain = ROOT.TChain(self._translateName(treeName))
+        realName = self._translateName(treeName)
+        chain = ROOT.TChain(realName)
         for f in self.files:
             chain.Add(f.GetName())
-        return chain
+        return (chain, realName)
 
     ## Get arbitrary ROOT object from the file
     #
@@ -2754,7 +2755,7 @@ class NtupleCache:
         argsNamed = ROOT.TNamed("selectorArgs", str(selectorArgs))
         argsNamed.Write()
 
-        tree = dataset.createRootChain(self.treeName)
+        (tree, realTreeName) = dataset.createRootChain(self.treeName)
 
         N = tree.GetEntries()
         useMaxEvents = False
