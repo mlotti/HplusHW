@@ -83,11 +83,11 @@ namespace HPlus {
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
       if (TMath::Abs(p.pdgId()) == 37) {
-	std::cout << "Event has a genuine charged Higgs boson!" << std::endl;
+	//std::cout << "Event has a genuine charged Higgs boson!" << std::endl;
 	return true;
       }
     }
-    std::cout << "Event does not have a genuine charged Higgs boson." << std::endl;
+    //std::cout << "Event does not have a genuine charged Higgs boson." << std::endl;
     return false;
   }
 
@@ -108,7 +108,7 @@ namespace HPlus {
     }
     if (!myHiggsSideTop) return NULL;
     return myHiggsSideTop;
-    std::cout << "EventClassification: First Higgs side top selected!" << std::endl;
+    //std::cout << "EventClassification: First Higgs side top selected!" << std::endl;
   }
 
   reco::Candidate* getGenHiggsSideBJet(const edm::Event& iEvent) {
@@ -126,7 +126,7 @@ namespace HPlus {
         while (myStatus) {
           if (!myBMother)  myStatus = false;
           else {
-	    std::cout << "EventClassification: B quark mother = " << myBMother->pdgId() << std::endl;
+	    //std::cout << "EventClassification: B quark mother = " << myBMother->pdgId() << std::endl;
             if (TMath::Abs(myBMother->pdgId()) == 6) {
               myStatus = false;
               // Below is where we check if the b jet comes from the Higgs side top.   
@@ -143,7 +143,7 @@ namespace HPlus {
       }
     }
     if (!myHiggsSideBJet) return NULL;
-    std::cout << "FullMass: Higgs side bjet found, pt=" << myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
+    //std::cout << "FullMass: Higgs side bjet found, pt=" << myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
     return myHiggsSideBJet;
   }
 
@@ -284,7 +284,7 @@ namespace HPlus {
 				    myVisibleTauMomentum.Px() - tauDaughter.px(),
 				    myVisibleTauMomentum.Py() - tauDaughter.py(),
 				    myVisibleTauMomentum.Pz() - tauDaughter.pz());
-	std::cout << "EventClassification: neutrino (ID = " << tauDaughterId << ") momentum subtracted from tau momentum" << std::endl;
+	//std::cout << "EventClassification: neutrino (ID = " << tauDaughterId << ") momentum subtracted from tau momentum" << std::endl;
       }
     }
     return myVisibleTauMomentum;
@@ -324,8 +324,8 @@ namespace HPlus {
 // 	myGenMET += currentNeutrinoVector;
 //       }
     }
-    std::cout << "EventClassification:   Old GenMET.Pt() = " << oldGenMET.Pt() << std::endl;
-    std::cout << "EventClassification:   New GenMET.Pt() = " << myGenMET.Pt() << std::endl;
+    //std::cout << "EventClassification:   Old GenMET.Pt() = " << oldGenMET.Pt() << std::endl;
+    //std::cout << "EventClassification:   New GenMET.Pt() = " << myGenMET.Pt() << std::endl;
     return myGenMET;
   }
   
@@ -467,7 +467,7 @@ namespace HPlus {
 // 					higgsDaughter.px() - tauDaughter.px(),
 // 					higgsDaughter.py() - tauDaughter.py(),
 // 					higgsDaughter.pz() - tauDaughter.pz());
-// 	    std::cout << "EventClassification: neutrino momentum removed from tau momentum" << std::endl;
+// 	    //std::cout << "EventClassification: neutrino momentum removed from tau momentum" << std::endl;
 // 	  }
 // 	  // If tau daughter is a charged pion or kaon // CHECK IF THIS IS CORRECT!
 // 	  if (abs(tauDaughterId) == 211 || abs(tauDaughterId) == 321) {
@@ -496,7 +496,7 @@ namespace HPlus {
 //     }
 //     if (!myHiggsLine) return -1;
 //     return myHiggsLine;
-//     std::cout << "EventClassification: First Higgs line is " << myHiggsLine << std::endl;
+//     //std::cout << "EventClassification: First Higgs line is " << myHiggsLine << std::endl;
 //   }
 
 // tau decay produces neutrino; use visibleTau (1-prong)
@@ -509,14 +509,14 @@ namespace HPlus {
 
 //     edm::Handle <reco::GenParticleCollection> genParticles;
 //     iEvent.getByLabel("genParticles", genParticles);
-//     //std::cout << "matchfinding:" << std::endl;
+//     ////std::cout << "matchfinding:" << std::endl;
 //     for (size_t i=0; i < genParticles->size(); ++i) {
 //       const reco::Candidate & p = (*genParticles)[i];
 //       // If a GEN tau is found...
 //       if (std::abs(p.pdgId()) == 15) {
 // 	// ... check if there is a RECO tau within deltaR < 0.1
 // 	if (tau && reco::deltaR(p, tau.p4()) < 0.1) {
-// 	  std::cout << "Hooooraaaaayyyy!" << std::endl;
+// 	  //std::cout << "Hooooraaaaayyyy!" << std::endl;
 // 	  identifiedGenuineTauCount++;
 //  	}
 // 	// ... or if there is no reconstructed tau (i.e. tau is null pointer)
@@ -530,8 +530,8 @@ namespace HPlus {
 //       }
 //     }
 
-//     std::cout << "identified genuine taus:   " << identifiedGenuineTauCount << std::endl;
-//     std::cout << "unidentified genuine taus: " << unidentifiedGenuineTauCount << std::endl;
-//     std::cout << "fake taus in event with genuine taus: " << fakeTauInEventWithGenuineTauCount << std::endl;
+//     //std::cout << "identified genuine taus:   " << identifiedGenuineTauCount << std::endl;
+//     //std::cout << "unidentified genuine taus: " << unidentifiedGenuineTauCount << std::endl;
+//     //std::cout << "fake taus in event with genuine taus: " << fakeTauInEventWithGenuineTauCount << std::endl;
 //   }
 
