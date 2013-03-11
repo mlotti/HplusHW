@@ -1257,7 +1257,7 @@ class DatasetRootHistoMergedMC(DatasetRootHistoCompoundBase):
 # into two datasets.
 # 
 # See also the documentation of DatasetRootHisto class.
-class DatasetRootHistoAddedMC(DatasetRootHistoBase):
+class DatasetRootHistoAddedMC(DatasetRootHistoCompoundBase):
     ## Constructor.
     # 
     # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
@@ -1317,10 +1317,6 @@ class DatasetRootHistoAddedMC(DatasetRootHistoBase):
             for i, drh in enumerate(self.histoWrappers):
                 drh.modifyRootHisto(function)
 
-    ## Get list of the bin labels of the first of the merged histogram.
-    def getBinLabels(self):
-        return self.histoWrappers[0].getBinLabels()
-
     ## Set the current normalization scheme to 'to one'.
     # 
     # The histogram is normalized to unit area.
@@ -1373,14 +1369,7 @@ class DatasetRootHistoAddedMC(DatasetRootHistoBase):
     # is just the sum of the MC events of the separate datasets
     # which in general have different cross sections).
     def _normalizedHistogram(self):
-        hsum = self.histoWrappers[0].getHistogram() # we get a clone
-        for h in self.histoWrappers[1:]:
-            histo = h.getHistogram()
-            if histo.GetNbinsX() != hsum.GetNbinsX():
-                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
-
-            hsum.Add(histo)
-            histo.Delete()
+        hsum = self._getSumHistogram()
 
         if self.normalization == "none":
             return hsum
