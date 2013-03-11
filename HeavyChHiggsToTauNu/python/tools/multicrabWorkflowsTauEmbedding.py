@@ -326,6 +326,13 @@ def addEmbeddingEmbedding_v44_4_2(datasets):
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef("/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed1-2dedf078d8faded30b2dddce6fe8cdec/USER"),
         })
 
+def addEmbeddingEmbedding_v44_4_3(datasets):
+    skimVersion = "tauembedding_skim_v44_4_2"
+
+    addEmbeddingEmbedding_44X(skimVersion, "v44_4_3_seed0", datasets, {
+        "TTJets_TuneZ2_Fall11":               TaskDef(""),
+        })
+
 
 def addEmbedding_SKELETON(datasets):
     definitions = {
