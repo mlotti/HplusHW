@@ -192,12 +192,19 @@ namespace HPlus {
       sAlpha.fHt = 0.;
       sAlpha.fDeltaHt = 0.;
       sAlpha.fMHt = 0.;
-      sKinematics.fQOne = 0.;
-      sKinematics.fQTwo = 0.;
-      sKinematics.fQThree = 0.;
-      sKinematics.fSphericity = 0.;
-      sKinematics.fAplanarity = 0.;
-      sKinematics.fCircularity = 0.;
+      //
+      sMomentumTensor.fQOne = 0.;
+      sMomentumTensor.fQTwo = 0.;
+      sMomentumTensor.fQThree = 0.;
+      sMomentumTensor.fSphericity = 0.;
+      sMomentumTensor.fAplanarity = 0.;
+      sMomentumTensor.fCircularity = 0.;
+      //
+      sSpherocityTensor.fQOne = 0.0;
+      sSpherocityTensor.fQTwo = 0.0;
+      sSpherocityTensor.fQThree = 0.0;
+      sSpherocityTensor.fCparameter = 0.0;
+      sSpherocityTensor.fDparameter = 0.0;
     }
   EvtTopology::Data::~Data() {}
 
@@ -210,12 +217,16 @@ namespace HPlus {
     fAplanarityCut(iConfig.getUntrackedParameter<double>("aplanarity")),
     fPlanarityCut(iConfig.getUntrackedParameter<double>("planarity")),
     fCircularityCut(iConfig.getUntrackedParameter<double>("circularity")),
+    fCparameterCut(iConfig.getUntrackedParameter<double>("Cparameter")),
+    fDparameterCut(iConfig.getUntrackedParameter<double>("Dparameter")),
     fEvtTopologyCount(eventCounter.addSubCounter("EvtTopology main","EvtTopology cut")),
     fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT")),
     fSphericityCutCount(eventCounter.addSubCounter("EvtTopology", "sphericity")),
     fAplanarityCutCount(eventCounter.addSubCounter("EvtTopology", "aplanarity")),
     fPlanarityCutCount(eventCounter.addSubCounter("EvtTopology", "planarity")),
-    fCircularityCutCount(eventCounter.addSubCounter("EvtTopology", "circularity"))
+    fCircularityCutCount(eventCounter.addSubCounter("EvtTopology", "circularity")),
+    fCparameterCutCount(eventCounter.addSubCounter("EvtTopology", "Cparameter")),
+    fDparameterCutCount(eventCounter.addSubCounter("EvtTopology", "Dparameter"))
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("EvtTopology");
@@ -224,6 +235,8 @@ namespace HPlus {
     hAplanarity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "aplanarity", "aplanarity", 10, 0.0, 0.5);
     hPlanarity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "aplanarity", "aplanarity", 10, 0.0, 0.5);
     hCircularity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "aplanarity", "aplanarity", 20, 0.0, 1.0);
+    hCparameter = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Cparameter", "Cparameter", 20, 0.0, 1.0);
+    hDparameter = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Dparameter", "Dparameter", 20, 0.0, 1.0);
   }
 
   EvtTopology::~EvtTopology() {}
@@ -248,17 +261,20 @@ namespace HPlus {
     Data output;
     /// Calcuate standard event-shape-variables (e.g sphericity, aplanarity, planarity, alphaT)
 
-    vector<float> EigenValues = CalcMomentumTensorEigenValues(iEvent, iSetup, jets, output);
+    vector<float> MomentumTensor_EigenValues = CalcMomentumTensorEigenValues(iEvent, iSetup, jets, output);
+    vector<float> SpherocityTensor_EigenValues = CalcSpherocityTensorEigenValues(iEvent, iSetup, jets, output);
+
     // return output;
-    bool bPassedSphericity    = CalcSphericity(EigenValues, output);
-    bool bPassedAplanarity    = CalcAplanarity(EigenValues, output);
-    bool bPassedPlanarity     = CalcPlanarity(EigenValues, output);
-    bool bPassedCircularity   = CalcCircularity(jets, output);
-    bool bPassedAlphaT        = CalcAlphaT(iEvent, iSetup, tau, jets, output); // tau is used in W invariant mass reconstruction in the pseudo-jets created for alphaT
+    bool bPassedSphericity     = CalcSphericity(MomentumTensor_EigenValues, output);
+    bool bPassedAplanarity     = CalcAplanarity(MomentumTensor_EigenValues, output);
+    bool bPassedPlanarity      = CalcPlanarity(MomentumTensor_EigenValues, output);
+    bool bPassedCircularity    = CalcCircularity(jets, output);
+    bool bPassedAlphaT         = CalcAlphaT(iEvent, iSetup, tau, jets, output); // tau is used in W invariant mass reconstruction in the pseudo-jets created for alphaT
+    bool bPassedCandDparamCuts = CalcCandDParameters(SpherocityTensor_EigenValues, output);
 
     /// Determine if event has passed the Event-Topology cuts
     bool bPassedCuts = false;
-    bPassedCuts = bPassedSphericity * bPassedAplanarity * bPassedPlanarity * bPassedCircularity * bPassedAlphaT;
+    bPassedCuts = bPassedSphericity * bPassedAplanarity * bPassedPlanarity * bPassedCircularity * bPassedAlphaT * bPassedCandDparamCuts;
 
     if(bPassedCuts){
       increment(fEvtTopologyCount);
@@ -422,7 +438,7 @@ namespace HPlus {
     /// and is symmetric: Mij = Mji
     MomentumTensor*=1/(MomentumTensor[0][0]+MomentumTensor[1][1]+MomentumTensor[2][2]);
 
-    /// Find the EigenValues Q1 + Q2 + Q3 = 1  0 <= Q1 <= Q2 <= Q3
+    /// Find the MomentumTensor_EigenValues Q1 + Q2 + Q3 = 1  0 <= Q1 <= Q2 <= Q3
     TMatrixDSymEigen eigen(MomentumTensor);
     TVectorD eigenvals = eigen.GetEigenValues();
     vector<float> eigenvalues(3);
@@ -441,13 +457,133 @@ namespace HPlus {
     }
     
     /// Sanity check on eigenvalues: Q1 + Q2 + Q3 = 1
-    output.sKinematics.fQOne   = eigenvalues[0];
-    output.sKinematics.fQTwo   = eigenvalues[1];
-    output.sKinematics.fQThree = eigenvalues[2];
+    output.sMomentumTensor.fQOne   = eigenvalues[0];
+    output.sMomentumTensor.fQTwo   = eigenvalues[1];
+    output.sMomentumTensor.fQThree = eigenvalues[2];
 
     return eigenvalues;
   
   }
+
+
+  vector<float> EvtTopology::CalcSpherocityTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output){
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// C, D parameters
+    /// Need all particles in event to calculate kinematic variables. Use all tracks (ch. particles) instead.
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /* Change jets-loop to tracks-loop once Track collection is available in pattuples
+    // Create and attach handle to All Tracks collection
+    edm::Handle<reco::TrackCollection> myTracksHandle;
+    iEvent.getByLabel("generalTracks", myTracksHandle);
+    */
+
+    /// Attempt to remedy absence of tracks by using all jets in the event    
+    TMatrixDSym SpherocityTensor(3);
+    SpherocityTensor.Zero();
+
+    /// Sanity check: at least 3 jets
+    if( (jets.size()) < 3 ){
+      throw cms::Exception("LogicError") << "Expected at least 3 jets for the normalised momentum tensor, only found " << jets.size() + 1 << " at " << __FILE__ << ":" << __LINE__ << std::endl;
+    }
+
+    /// Declare momentum vector to be filled with jet's momentum components
+    float momentum[3];
+    float momentumMag = 0.0;
+    float momentumMagSum = 0.0;
+
+    for(int j = 0; j < 3; j++) momentum[j]=0;
+
+    /// Loop over all selected jets
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {    
+      edm::Ptr<pat::Jet> iJet = *iter;
+
+      momentumMag = TMath::Abs(iJet->p());
+      momentum[0] = iJet->px();
+      momentum[1] = iJet->py();
+      momentum[2] = iJet->pz();
+      momentumMagSum = momentumMagSum + momentumMag;
+
+      /// Fill the momentum tensor
+      for (unsigned int i=0; i < 3; i++){
+	for (unsigned int j=0; j <= i; j++){
+	  SpherocityTensor[i][j] += momentum[i]*momentum[j]/momentumMag;
+	}
+      }
+    }//eof: jet loop
+    
+    /// Calculate the normalised-to-1 momentum tensor =  sum{p_j[a]*p_j[b]}/sum{p_j**2} 
+    /// Thus the SpherocityTensor has a unit trace: Mxx + Myy + Mzz = 1, 
+    /// and is symmetric: Mij = Mji
+    SpherocityTensor*=1/(momentumMagSum);
+
+    /// Find the SpherocityTensor_EigenValues Q1 + Q2 + Q3 = 1  0 <= Q1 <= Q2 <= Q3
+    TMatrixDSymEigen eigen(SpherocityTensor);
+    TVectorD eigenvals = eigen.GetEigenValues();
+    vector<float> eigenvalues(3);
+    eigenvalues[0] = eigenvals[0]; // Q1
+    eigenvalues[1] = eigenvals[1]; // Q2
+    eigenvalues[2] = eigenvals[2]; // Q3
+    /// Sort the eigenvalues
+    sort( eigenvalues.begin(), eigenvalues.end() );
+
+    /// Sanity check on eigenvalues: 0 <= Q1 <= Q2 <= Q3
+    if(!(eigenvalues[0] >= 0 && eigenvalues[1] >= eigenvalues[0] && eigenvalues[2] >= eigenvalues[1])){
+      eigenvalues[0] = -1;
+      eigenvalues[1] = -1;
+      eigenvalues[2] = -1;
+      //throw cms::Exception("LogicError") << "Failure of requirement that eigenvalues are ordered as 0 <= Q1 <= Q2 <= Q3 at " << __FILE__ << ":" << __LINE__ << std::endl;
+    }
+    
+    /// Sanity check on eigenvalues: Q1 + Q2 + Q3 = 1
+    output.sSpherocityTensor.fQOne   = eigenvalues[0];
+    output.sSpherocityTensor.fQTwo   = eigenvalues[1];
+    output.sSpherocityTensor.fQThree = eigenvalues[2];
+    // std::cout << "*** eigenvalues[0] = " <<  eigenvalues[0] << ", eigenvalues[1] = " <<  eigenvalues[1] << ", eigenvalues[2] = " <<  eigenvalues[2] << std::endl;
+    
+    return eigenvalues;
+  
+  }
+
+  bool EvtTopology::CalcCandDParameters(vector<float> eigenvalues, EvtTopology::Data& output){
+
+    bool bPassedCut = false;
+    bool bPassedCparameterCut = false;
+    bool bPassedDparameterCut = false;
+
+    /// For events with planar topology "C" ranges between 0 and 3/4 and "D" is equal to zero
+    /// For large number of particles in the final state, both "C" and "D" are close to unity
+    /// Thus "C" provides a measure of the multi-jet structure of an event with special emphasis on planar events,
+    /// while "D" measures the deviation from planarity of events by receiving major contribution from events with four or more jets.
+    float Cparameter = 3*(eigenvalues[0]*eigenvalues[1] + eigenvalues[1]*eigenvalues[2] + eigenvalues[2]*eigenvalues[0]);
+    float Dparameter = 27*(eigenvalues[0]*eigenvalues[1]*eigenvalues[2]);
+    output.sSpherocityTensor.fCparameter = Cparameter;
+    output.sSpherocityTensor.fDparameter = Dparameter;
+    // std::cout << "*** Cparameter = " << Cparameter << ", Dparameter = " << Dparameter << std::endl;
+
+    /// Check whether cut is passed
+    if( output.sSpherocityTensor.fCparameter > fCparameterCut){
+      bPassedCparameterCut = true;
+      increment(fCparameterCutCount);
+    }
+
+    if( output.sSpherocityTensor.fCparameter > fDparameterCut){
+      bPassedDparameterCut = true;
+      increment(fDparameterCutCount);
+    }
+
+    bPassedCut = bPassedCparameterCut*bPassedDparameterCut;
+
+    /// Fill Histos
+    hCparameter->Fill(output.sSpherocityTensor.fCparameter);
+    hDparameter->Fill(output.sSpherocityTensor.fDparameter);
+
+    return bPassedCut;
+
+  }
+
+
 
   bool EvtTopology::CalcSphericity(vector<float> eigenvalues, EvtTopology::Data& output){
 
@@ -455,7 +591,7 @@ namespace HPlus {
     /// Sphericity (S) = 3/2*(Q1+Q2)    0 <= S <= 1
     /// S = 1 for spherical, S= 3/4 for planar, S= 0 for linear events
 
-    if (output.sKinematics.fQOne < 0) return false;
+    if (output.sMomentumTensor.fQOne < 0) return false;
     
     bool bPassedCut = false;
     float sphericity = (1.5*(eigenvalues[0]+eigenvalues[1]));
@@ -464,16 +600,16 @@ namespace HPlus {
       throw cms::Exception("LogicError") << "Expected sphericity to be in range  0 <= S <=1, was " << sphericity << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
     /// NOTE: sphericity is collinear unsafe (e.g. pi0 -> gamma gamma: use pi0 or decay products changes result)      
-    output.sKinematics.fSphericity = sphericity;
+    output.sMomentumTensor.fSphericity = sphericity;
 
     /// Check whether cut is passed
-    if( output.sKinematics.fSphericity > fSphericityCut){
+    if( output.sMomentumTensor.fSphericity > fSphericityCut){
       bPassedCut = true;
       increment(fSphericityCutCount);
     }
           
     /// Fill Histos
-    hSphericity->Fill(output.sKinematics.fSphericity);
+    hSphericity->Fill(output.sMomentumTensor.fSphericity);
 
     return bPassedCut;
   }
@@ -483,23 +619,23 @@ namespace HPlus {
     /// Aplanarity (A) = 3/2*(Q1)    0 <= A <= 0.5    
     /// A = 0.5 for spherical, A=0 for planar/linear events
 
-    if (output.sKinematics.fQOne < 0) return false;
+    if (output.sMomentumTensor.fQOne < 0) return false;
 
     bool bPassedCut = false;
     float aplanarity = (1.5*eigenvalues[0]);
     if ( !(aplanarity <= 0.5 && aplanarity >=0) ){
       throw cms::Exception("LogicError") << "Expected aplanarity to be in range  0 <= A <=0.5, was " << aplanarity << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
-    output.sKinematics.fAplanarity = aplanarity;
+    output.sMomentumTensor.fAplanarity = aplanarity;
 
     /// Check whether cut is passed
-    if( output.sKinematics.fAplanarity > fAplanarityCut){
+    if( output.sMomentumTensor.fAplanarity > fAplanarityCut){
       bPassedCut = true;
       increment(fAplanarityCutCount);
     }
           
     /// Fill Histos
-    hAplanarity->Fill(output.sKinematics.fAplanarity);
+    hAplanarity->Fill(output.sMomentumTensor.fAplanarity);
 
     return bPassedCut;
   }
@@ -512,23 +648,23 @@ namespace HPlus {
     /// TextBook definition for Planarity:
     /// Planarity (P) = 3/2*(S-2A) = Q2-Q1     0 <= P <= 0.5
 
-    if (output.sKinematics.fQOne < 0) return false;
+    if (output.sMomentumTensor.fQOne < 0) return false;
     
     bool bPassedCut = false;
     float planarity = (eigenvalues[1]-eigenvalues[0]);
     if ( !(planarity <= 0.5 && planarity >=0) ){
       throw cms::Exception("LogicError") << "Expected planarity to be in range  0 <= P <=0.5, was " << planarity << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
-    output.sKinematics.fPlanarity = planarity;
+    output.sMomentumTensor.fPlanarity = planarity;
 
     /// Check whether cut is passed
-    if( output.sKinematics.fPlanarity > fPlanarityCut){
+    if( output.sMomentumTensor.fPlanarity > fPlanarityCut){
       bPassedCut = true;
       increment(fPlanarityCutCount);
     }
           
     /// Fill Histos
-    hPlanarity->Fill(output.sKinematics.fPlanarity);
+    hPlanarity->Fill(output.sMomentumTensor.fPlanarity);
 
     return bPassedCut;
   }
@@ -539,7 +675,7 @@ namespace HPlus {
     /// Circularity (C) = 2*min(Q1,Q2)/(Q1+Q2)  0 <= C <= 1
     /// C = 1 for spherical, C = 0 for linear events
     
-    if (output.sKinematics.fQOne < 0) return false;
+    if (output.sMomentumTensor.fQOne < 0) return false;
     
     bool bPassedCut = false;
     float circularity = -1, phi=0.0, area = 0.0;
@@ -571,16 +707,16 @@ namespace HPlus {
     if ( !(circularity <= 1.0 && circularity >=0) ){
       throw cms::Exception("LogicError") << "Expected circularity to be in range  0 <= C <=1.0, was " << circularity << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
-    output.sKinematics.fCircularity = circularity;
+    output.sMomentumTensor.fCircularity = circularity;
     
     /// Check whether cut is passed
-    if( output.sKinematics.fCircularity > fCircularityCut){
+    if( output.sMomentumTensor.fCircularity > fCircularityCut){
       bPassedCut = true;
       increment(fCircularityCutCount);
     }
     
     /// Fill Histos
-    hCircularity->Fill(output.sKinematics.fCircularity);
+    hCircularity->Fill(output.sMomentumTensor.fCircularity);
     
     return bPassedCut;
   }

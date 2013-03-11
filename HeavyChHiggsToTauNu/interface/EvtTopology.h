@@ -69,7 +69,14 @@ namespace HPlus {
       float fAplanarity;
       float fPlanarity;
       float fCircularity;
-    } KinStruc;
+    } MomentumTensorStruc;
+    typedef struct {
+      float fQOne;
+      float fQTwo;
+      float fQThree;
+      float fCparameter;
+      float fDparameter;
+    } SpherocityTensorStruc;
 
     /**
      * Class to encapsulate the access to the data members of
@@ -85,19 +92,23 @@ namespace HPlus {
       ~Data();
 
       const bool passedEvent() const { return fPassedEvent; }
-      const double getSphericity() const { return sKinematics.fSphericity; }
-      const double getPlanarity() const { return sKinematics.fPlanarity; }
-      const double getAplanarity() const { return sKinematics.fAplanarity; }
-      const double getCircularity() const { return sKinematics.fCircularity; }
+      const double getSphericity() const { return sMomentumTensor.fSphericity; }
+      const double getPlanarity() const { return sMomentumTensor.fPlanarity; }
+      const double getAplanarity() const { return sMomentumTensor.fAplanarity; }
+      const double getCircularity() const { return sMomentumTensor.fCircularity; }
+      const double getCparameter() const { return sSpherocityTensor.fCparameter; }
+      const double getDparameter() const { return sSpherocityTensor.fDparameter; }
       const EvtTopology::AlphaStruc alphaT() const { return sAlpha; }
-      const EvtTopology::KinStruc Kinematics() const { return sKinematics; }
+      const EvtTopology::MomentumTensorStruc MomentumTensor() const { return sMomentumTensor; }
+      const EvtTopology::SpherocityTensorStruc SpherocityTensor() const { return sSpherocityTensor; }
 
       friend class EvtTopology;
 
     private:
       bool fPassedEvent;
       EvtTopology::AlphaStruc sAlpha;
-      EvtTopology::KinStruc sKinematics;
+      EvtTopology::MomentumTensorStruc sMomentumTensor;
+      EvtTopology::SpherocityTensorStruc sSpherocityTensor;
     };
 
     EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -112,10 +123,13 @@ namespace HPlus {
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
     bool CalcAlphaT(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
     vector<float> CalcMomentumTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
+    vector<float> CalcSpherocityTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
+    bool CalcCandDParameters(vector<float> eigenvalues, EvtTopology::Data& output);
     bool CalcSphericity(vector<float> eigenvalues, EvtTopology::Data& output);
     bool CalcAplanarity(vector<float> eigenvalues, EvtTopology::Data& output);
     bool CalcPlanarity(vector<float> eigenvalues, EvtTopology::Data& output);
     bool CalcCircularity(const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
+
     // Input parameters
     // std::string fDiscriminator;
     // double fDiscrCut;
@@ -124,6 +138,8 @@ namespace HPlus {
     const double fAplanarityCut;
     const double fPlanarityCut;
     const double fCircularityCut;
+    const double fCparameterCut;
+    const double fDparameterCut;
 
     // Counters
     Count fEvtTopologyCount;
@@ -132,6 +148,8 @@ namespace HPlus {
     Count fAplanarityCutCount;
     Count fPlanarityCutCount;
     Count fCircularityCutCount;
+    Count fCparameterCutCount;
+    Count fDparameterCutCount;
 
     // Histograms
     WrappedTH1 *hAlphaT;
@@ -139,6 +157,8 @@ namespace HPlus {
     WrappedTH1 *hAplanarity;
     WrappedTH1 *hPlanarity;
     WrappedTH1 *hCircularity;
+    WrappedTH1 *hCparameter;
+    WrappedTH1 *hDparameter;
     /*
       WrappedTH1 *hDiJetInvMass;
       WrappedTH1 *hDiJetInvMassCutFail;

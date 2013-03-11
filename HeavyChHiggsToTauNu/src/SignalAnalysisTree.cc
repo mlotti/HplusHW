@@ -120,13 +120,19 @@ namespace HPlus {
     fTree->Branch("topreco_p4", &fTop);
 
     fTree->Branch("alphaT", &fAlphaT);
-    fTree->Branch("QOne", &fQOne);
-    fTree->Branch("QTwo", &fQTwo);
-    fTree->Branch("QThree", &fQThree);
+    fTree->Branch("MomentumTensor_QOne", &fMomentumTensor_QOne);
+    fTree->Branch("MomentumTensor_QTwo", &fMomentumTensor_QTwo);
+    fTree->Branch("MomentumTensor_QThree", &fMomentumTensor_QThree);
     fTree->Branch("sphericity", &fSphericity);
     fTree->Branch("aplanarity", &fAplanarity);
     fTree->Branch("planarity", &fPlanarity);
     fTree->Branch("circularity", &fCircularity);
+    fTree->Branch("SpherocityTensor_QOne", &fSpherocityTensor_QOne);
+    fTree->Branch("SpherocityTensor_QTwo", &fSpherocityTensor_QTwo);
+    fTree->Branch("SpherocityTensor_QThree", &fSpherocityTensor_QThree);
+    fTree->Branch("Cparameter", &fCparameter);
+    fTree->Branch("Dparameter", &fDparameter);
+
     fTree->Branch("TauIsFake", &bTauIsFake);
     fTree->Branch("MHT_p4", &fMHT);
     fTree->Branch("MHT_SelJets_p4", &fMHTSelJets);
@@ -735,13 +741,19 @@ namespace HPlus {
     fTop.SetXYZT(nan, nan, nan, nan);
 
     fAlphaT = nan;
-    fQOne = nan;
-    fQTwo = nan;
-    fQThree = nan;
+    fMomentumTensor_QOne = nan;
+    fMomentumTensor_QTwo = nan;
+    fMomentumTensor_QThree = nan;
     fSphericity = nan;
     fAplanarity = nan;
     fPlanarity = nan;
     fCircularity = nan;
+    fSpherocityTensor_QOne = nan;
+    fSpherocityTensor_QTwo = nan;
+    fSpherocityTensor_QThree = nan;
+    fCparameter = nan;
+    fDparameter = nan;
+
     bTauIsFake = false;
     vDiJetMassesNoTau.clear();
   

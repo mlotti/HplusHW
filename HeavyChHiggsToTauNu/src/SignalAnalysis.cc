@@ -795,12 +795,14 @@ namespace HPlus {
       // Sphericity, Aplanarity, Planarity, alphaT
       fTree.setDiJetMassesNoTau(evtTopologyData.alphaT().vDiJetMassesNoTau);
       fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
-      fTree.setSphericity(evtTopologyData.Kinematics().fSphericity);
-      fTree.setAplanarity(evtTopologyData.Kinematics().fAplanarity);
-      fTree.setPlanarity(evtTopologyData.Kinematics().fPlanarity);
-      fTree.setCircularity(evtTopologyData.Kinematics().fCircularity);
-      fTree.setMomentumTensorEigenvalues(evtTopologyData.Kinematics().fQOne, evtTopologyData.Kinematics().fQTwo, evtTopologyData.Kinematics().fQThree);
-
+      fTree.setSphericity(evtTopologyData.MomentumTensor().fSphericity);
+      fTree.setAplanarity(evtTopologyData.MomentumTensor().fAplanarity);
+      fTree.setPlanarity(evtTopologyData.MomentumTensor().fPlanarity);
+      fTree.setCircularity(evtTopologyData.MomentumTensor().fCircularity);
+      fTree.setMomentumTensorEigenvalues(evtTopologyData.MomentumTensor().fQOne, evtTopologyData.MomentumTensor().fQTwo, evtTopologyData.MomentumTensor().fQThree);
+      fTree.setSpherocityTensorEigenvalues(evtTopologyData.SpherocityTensor().fQOne, evtTopologyData.SpherocityTensor().fQTwo, evtTopologyData.SpherocityTensor().fQThree);
+      fTree.setCparameter(evtTopologyData.SpherocityTensor().fCparameter);
+      fTree.setDparameter(evtTopologyData.SpherocityTensor().fDparameter);
       fTree.setAllJets(jetData.getAllIdentifiedJets());
       fTree.setSelJetsInclTau(jetData.getSelectedJetsIncludingTau());
       fTree.setMHT(jetData.getMHTvector());
