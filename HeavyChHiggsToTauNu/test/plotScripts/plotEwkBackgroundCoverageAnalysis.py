@@ -11,9 +11,11 @@
 ######################################################################
 
 import math
+from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -40,8 +42,8 @@ def leptonVetoLabels(obj2):
     
 
 
-def main():
-    datasets = dataset.getDatasetsFromMulticrabCfg(dataEra=dataEra, weightedCounters=False)
+def main(opts):
+    datasets = dataset.getDatasetsFromMulticrabCfg(directory=opts.mdir, dataEra=dataEra, weightedCounters=False)
 #    datasets = dataset.getDatasetsFromRootFiles([("TTJets_TuneZ2_Summer11", "histograms.root")], counters=counters, dataEra=dataEra, analysisBaseName=analysis, weightedCounters=False)
 
     plots.mergeRenameReorderForDataMC(datasets)
@@ -440,4 +442,9 @@ def createDrawPlot(name, h):
     p.save()
 
 if __name__ == "__main__":
-    main()
+    parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
+    parser.add_option("--mdir", dest="mdir", default=".",
+                      help="Multicrab directory (default '.')")
+    (opts, args) = parser.parse_args()
+
+    main(opts)

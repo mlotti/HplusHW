@@ -554,8 +554,6 @@ def _mergeStackHelper(datasetList, nameList, task):
     return (selected, notSelected, firstIndex)
 
 
-_th1_re = re.compile(">>\s*(?P<name>\S+)\s*\((?P<nbins>\S+)\s*,\s*(?P<min>\S+)\s*,\s*(?P<max>\S+)\s*\)")
-_th1name_re = re.compile(">>\s*(?P<name>\S+)")
 ## Helper class for obtaining histograms from TTree
 #
 # This class provides an easy way to get a histogram from a TTree. It
@@ -653,11 +651,6 @@ class TreeDraw:
             return h
 
         varexp = self.varexp
-        m = _th1_re.search(varexp)
-        h = None
-        #if m:
-        #    varexp = _th1_re.sub(">>"+m.group("name"), varexp)
-        #    h = ROOT.TH1D(m.group("name"), varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
         
         # e to have TH1.Sumw2() to be called before filling the histogram
         # goff to not to draw anything on the screen
@@ -667,26 +660,11 @@ class TreeDraw:
         option = opt+"goff"
         nentries = tree.Draw(varexp, selection, option)
         if nentries < 0:
-            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (treeName, varexp, selection, option))
+            raise Exception("Error when calling TTree.Draw with the following parameters for dataset %s, nentries=%d\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (dataset.getName(), nentries, treeName, varexp, selection, option))
         h = tree.GetHistogram()
-        if h != None:
-            h = h.Clone(h.GetName()+"_cloned")
-        else:
-            m = _th1_re.search(varexp)
-            if m:
-                h = ROOT.TH1F("tmp", varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
-            else:
-                m = _th1name_re.search(varexp)
-                if m:
-                    h = ROOT.gDirectory.Get(m.group("name"))
-                    h = h.Clone(h.GetName()+"_cloned")
-                    if nentries == 0:
-                        h.Scale(0)
-
-                    if h == None:
-                        raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', unable to infer the histogram limits,  and did not find objectr from gDirectory, from the varexp %s" % (rootFile.GetName(), selection, varexp))
-                else:
-                    raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', and unable to infer the histogram limits or name from the varexp %s" % (rootFile.GetName(), selection, varexp))
+        if h == None: # need '==' to compare null TH1
+            print >>sys.stderr, "WARNING: TTree.Draw with the following parameters returned null histogram for dataset %s (%d entries)\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (dataset.getName(), nentries, treeName, varexp, selection, option)
+            return None
 
         h.SetName(dataset.getName()+"_"+h.GetName())
         h.SetDirectory(0)
@@ -885,6 +863,8 @@ class DatasetRootHistoBase:
     ## Get a clone of the wrapped histogram normalized as requested.
     def getHistogram(self):
         h = self._normalizedHistogram()
+        if h is None:
+            return h
 
         if self.multiplication != None:
             h = _normalizeToFactor(h, self.multiplication)
@@ -923,6 +903,8 @@ class DatasetRootHisto(DatasetRootHistoBase):
 
     ## Get list of the bin labels of the histogram.
     def getBinLabels(self):
+        if self.histo is None:
+            return None
         return [x[0] for x in _histoToCounter(self.histo)]
 
     def forEach(self, function, datasetRootHisto1=None):
@@ -949,6 +931,9 @@ class DatasetRootHisto(DatasetRootHistoBase):
 
     ## Return normalized clone of the original TH1
     def _normalizedHistogram(self):
+        if self.histo is None:
+            return None
+
         # Always return a clone of the original
         h = self.histo.Clone()
         h.SetDirectory(0)
@@ -1004,12 +989,57 @@ class DatasetRootHisto(DatasetRootHistoBase):
     # String representing the current normalization scheme
 
 
+## Base class for merged data/Mc histograms and the corresponding datasets
+class DatasetRootHistoCompoundBase(DatasetRootHistoBase):
+    ## Constructor.
+    # 
+    # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
+    # \param mergedDataset   The corresponding dataset.DatasetMerged object
+    def __init__(self, histoWrappers, mergedDataset):
+        DatasetRootHistoBase.__init__(self, mergedDataset)
+        self.histoWrappers = histoWrappers
+        self.normalization = "none"
+
+    ## Get list of the bin labels of the first of the merged histogram.
+    def getBinLabels(self):
+        for drh in self.histoWrappers:
+            ret = drh.getBinLabels()
+            if ret is not None:
+                return ret
+        return None
+
+   ## Calculate the sum of the histograms (i.e. merge).
+   # 
+   # Intended to be called from the deriving classes
+    def _getSumHistogram(self):
+        # Loop until we have a real TH1 (not None)
+        hsum = None
+        for i, drh in enumerate(self.histoWrappers):
+            hsum = drh.getHistogram() # we get a clone
+            if hsum is not None:
+                break
+
+        for h in self.histoWrappers[i+1:]:
+            histo = h.getHistogram()
+            if histo.GetNbinsX() != hsum.GetNbinsX():
+                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[i].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
+
+            hsum.Add(histo)
+            histo.Delete()
+        return hsum
+
+    ## \var histoWrappers
+    # List of underlying dataset.DatasetRootHisto objects
+    ## \var normalization
+    # String representing the current normalization scheme
+
+
 ## Wrapper for a merged TH1 histograms from data and the corresponding Datasets.
 #
 # The merged data histograms can only be normalized 'to one'.
 #
 # \see dataset.DatasetRootHisto class.
-class DatasetRootHistoMergedData(DatasetRootHistoBase):
+class DatasetRootHistoMergedData(DatasetRootHistoCompoundBase):
     ## Constructor.
     # 
     # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
@@ -1018,10 +1048,7 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
     # The constructor checks that all histoWrappers are data, and
     # are not yet normalized.
     def __init__(self, histoWrappers, mergedDataset):
-        DatasetRootHistoBase.__init__(self, mergedDataset)
-
-        self.histoWrappers = histoWrappers
-        self.normalization = "none"
+        DatasetRootHistoCompoundBase.__init__(self, histoWrappers, mergedDataset)
         for h in self.histoWrappers:
             if not h.isData():
                 raise Exception("Histograms to be merged must come from data (%s is not data)" % h.getDataset().getName())
@@ -1071,29 +1098,11 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
             for i, drh in enumerate(self.histoWrappers):
                 drh.modifyRootHisto(function)
 
-    ## Get list of the bin labels of the first of the merged histogram.
-    def getBinLabels(self):
-        return self.histoWrappers[0].getBinLabels()
-
     ## Set the current normalization scheme to 'to one'.
     #
     # The histogram is normalized to unit area.
     def normalizeToOne(self):
         self.normalization = "toOne"
-
-   ## Calculate the sum of the histograms (i.e. merge).
-   # 
-   # Intended for internal use only.
-    def _getSumHistogram(self):
-        hsum = self.histoWrappers[0].getHistogram() # we get a clone
-        for h in self.histoWrappers[1:]:
-            histo = h.getHistogram()
-            if histo.GetNbinsX() != hsum.GetNbinsX():
-                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
-
-            hsum.Add(histo)
-            histo.Delete()
-        return hsum
 
     ## Merge the histograms and apply the current normalization.
     # 
@@ -1101,21 +1110,19 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
     # anything it wishes with it.
     def _normalizedHistogram(self):
         hsum = self._getSumHistogram()
+        if hsum is None:
+            return None
+
         if self.normalization == "toOne":
             return _normalizeToOne(hsum)
         else:
             return hsum
 
-    ## \var histoWrappers
-    # List of underlying dataset.DatasetRootHisto objects
-    ## \var normalization
-    # String representing the current normalization scheme
-
 
 ## Wrapper for a merged TH1 histograms from MC and the corresponding Datasets.
 # 
 # See also the documentation of DatasetRootHisto class.
-class DatasetRootHistoMergedMC(DatasetRootHistoBase):
+class DatasetRootHistoMergedMC(DatasetRootHistoCompoundBase):
     ## Constructor.
     # 
     # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
@@ -1124,9 +1131,7 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
     # The constructor checks that all histoWrappers are MC, and are
     # not yet normalized.
     def __init__(self, histoWrappers, mergedDataset):
-        DatasetRootHistoBase.__init__(self, mergedDataset)
-        self.histoWrappers = histoWrappers
-        self.normalization = "none"
+        DatasetRootHistoCompoundBase.__init__(self, histoWrappers, mergedDataset)
         for h in self.histoWrappers:
             if not h.isMC():
                 raise Exception("Histograms to be merged must come from MC")
@@ -1174,10 +1179,6 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
         else:
             for i, drh in enumerate(self.histoWrappers):
                 drh.modifyRootHisto(function)
-
-    ## Get list of the bin labels of the first of the merged histogram.
-    def getBinLabels(self):
-        return self.histoWrappers[0].getBinLabels()
 
     ## Set the current normalization scheme to 'to one'.
     # 
@@ -1239,25 +1240,14 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
         if self.normalization == "none":
             raise Exception("Merged MC histograms must be normalized to something!")
 
-        hsum = self.histoWrappers[0].getHistogram() # we get a clone
-        for h in self.histoWrappers[1:]:
-            histo = h.getHistogram()
-            if histo.GetNbinsX() != hsum.GetNbinsX():
-                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
-
-            hsum.Add(histo)
-            histo.Delete()
+        hsum = self._getSumHistogram()
+        if hsum is None:
+            return hsum
 
         if self.normalization == "toOne":
             return _normalizeToOne(hsum)
         else:
             return hsum
-
-    ## \var histoWrappers
-    # List of underlying dataset.DatasetRootHisto objects
-    ## \var normalization
-    # String representing the current normalization scheme
-
 
 ## Wrapper for a added TH1 histograms from MC and the corresponding Datasets.
 #
@@ -1613,15 +1603,16 @@ class Dataset:
     # \param name    Path of the ROOT TTree relative to the analysis
     #                root directory
     #
-    # \return ROOT.TChain
+    # \return pair (ROOT.TChain, \a realName)
     #
     # If name starts with slash ('/'), it is interpreted as a absolute
     # path within the ROOT file.
     def createRootChain(self, treeName):
-        chain = ROOT.TChain(self._translateName(treeName))
+        realName = self._translateName(treeName)
+        chain = ROOT.TChain(realName)
         for f in self.files:
             chain.Add(f.GetName())
-        return chain
+        return (chain, realName)
 
     ## Get arbitrary ROOT object from the file
     #
@@ -3047,7 +3038,7 @@ class NtupleCache:
         argsNamed = ROOT.TNamed("selectorArgs", str(selectorArgs))
         argsNamed.Write()
 
-        tree = dataset.createRootChain(self.treeName)
+        (tree, realTreeName) = dataset.createRootChain(self.treeName)
 
         N = tree.GetEntries()
         useMaxEvents = False
