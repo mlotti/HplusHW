@@ -283,7 +283,7 @@ class Workflow:
         return copy.deepcopy(self)
 
     def hasAtMostOutput(self):
-        return self.source == None and self.args == None and self.trigger == None and self.triggerOR == None and self.skimConfig == None and self.output_file == None and len(self.crabLines) == 0
+        return self.source == None and len(self.args) == 0 and self.trigger == None and self.triggerOR == None and self.skimConfig == None and self.output_file == None and len(self.crabLines) == 0
 
     def _ensureConsistency(self):
         if self.trigger != None and self.triggerOR != None:
