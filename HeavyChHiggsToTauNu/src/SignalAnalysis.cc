@@ -809,6 +809,7 @@ namespace HPlus {
       fTree.setMHTSelJets(jetData.getSelectedJets());
       fTree.setMHTAllJets(jetData.getAllIdentifiedJets());
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
+      fTree.setNonIsoLeptons(muonVetoData.getNonIsolatedMuons(), electronVetoData.getNonIsolatedElectrons());
       fTree.fill(iEvent, tauData.getSelectedTau(), jetData.getSelectedJets());
       return true;
     }
