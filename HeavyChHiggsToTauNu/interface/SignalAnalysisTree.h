@@ -94,6 +94,7 @@ namespace HPlus {
     void setCircularity(double circularity) { fCircularity = circularity; }
     void setCparameter(double Cparameter) { fCparameter = Cparameter; }
     void setDparameter(double Dparameter) { fDparameter = Dparameter; }
+    void setJetThrust(double jetThrust) { fJetThrust = jetThrust; }
     void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
     void setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
     void setSelJetsInclTau(const edm::PtrVector<pat::Jet>& selJetsInclTau);
@@ -262,6 +263,7 @@ namespace HPlus {
     double fSpherocityTensor_QThree;
     double fCparameter;
     double fDparameter;
+    double fJetThrust;
     bool bTauIsFake;
     std::vector<float> vDiJetMassesNoTau;
     double fDeltaPhi;

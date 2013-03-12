@@ -803,6 +803,7 @@ namespace HPlus {
       fTree.setSpherocityTensorEigenvalues(evtTopologyData.SpherocityTensor().fQOne, evtTopologyData.SpherocityTensor().fQTwo, evtTopologyData.SpherocityTensor().fQThree);
       fTree.setCparameter(evtTopologyData.SpherocityTensor().fCparameter);
       fTree.setDparameter(evtTopologyData.SpherocityTensor().fDparameter);
+      fTree.setJetThrust(evtTopologyData.SpherocityTensor().fJetThrust);
       fTree.setAllJets(jetData.getAllIdentifiedJets());
       fTree.setSelJetsInclTau(jetData.getSelectedJetsIncludingTau());
       fTree.setMHT(jetData.getMHTvector());

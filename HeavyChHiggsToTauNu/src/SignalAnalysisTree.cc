@@ -132,6 +132,7 @@ namespace HPlus {
     fTree->Branch("SpherocityTensor_QThree", &fSpherocityTensor_QThree);
     fTree->Branch("Cparameter", &fCparameter);
     fTree->Branch("Dparameter", &fDparameter);
+    fTree->Branch("jetThrust", &fJetThrust);
 
     fTree->Branch("TauIsFake", &bTauIsFake);
     fTree->Branch("MHT_p4", &fMHT);
@@ -753,6 +754,7 @@ namespace HPlus {
     fSpherocityTensor_QThree = nan;
     fCparameter = nan;
     fDparameter = nan;
+    fJetThrust = nan;
 
     bTauIsFake = false;
     vDiJetMassesNoTau.clear();

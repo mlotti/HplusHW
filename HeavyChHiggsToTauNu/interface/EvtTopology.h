@@ -76,6 +76,7 @@ namespace HPlus {
       float fQThree;
       float fCparameter;
       float fDparameter;
+      float fJetThrust;
     } SpherocityTensorStruc;
 
     /**
@@ -98,6 +99,7 @@ namespace HPlus {
       const double getCircularity() const { return sMomentumTensor.fCircularity; }
       const double getCparameter() const { return sSpherocityTensor.fCparameter; }
       const double getDparameter() const { return sSpherocityTensor.fDparameter; }
+      const double getJetThrust() const { return sSpherocityTensor.fJetThrust; }
       const EvtTopology::AlphaStruc alphaT() const { return sAlpha; }
       const EvtTopology::MomentumTensorStruc MomentumTensor() const { return sMomentumTensor; }
       const EvtTopology::SpherocityTensorStruc SpherocityTensor() const { return sSpherocityTensor; }
@@ -129,6 +131,7 @@ namespace HPlus {
     bool CalcAplanarity(vector<float> eigenvalues, EvtTopology::Data& output);
     bool CalcPlanarity(vector<float> eigenvalues, EvtTopology::Data& output);
     bool CalcCircularity(const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
+    bool CalcJetThrust(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
 
     // Input parameters
     // std::string fDiscriminator;
@@ -140,6 +143,7 @@ namespace HPlus {
     const double fCircularityCut;
     const double fCparameterCut;
     const double fDparameterCut;
+    const double fJetThrustCut;
 
     // Counters
     Count fEvtTopologyCount;
@@ -150,6 +154,7 @@ namespace HPlus {
     Count fCircularityCutCount;
     Count fCparameterCutCount;
     Count fDparameterCutCount;
+    Count fJetThrustCutCount;
 
     // Histograms
     WrappedTH1 *hAlphaT;

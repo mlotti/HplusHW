@@ -193,18 +193,19 @@ namespace HPlus {
       sAlpha.fDeltaHt = 0.;
       sAlpha.fMHt = 0.;
       //
-      sMomentumTensor.fQOne = 0.;
-      sMomentumTensor.fQTwo = 0.;
-      sMomentumTensor.fQThree = 0.;
-      sMomentumTensor.fSphericity = 0.;
-      sMomentumTensor.fAplanarity = 0.;
-      sMomentumTensor.fCircularity = 0.;
+      sMomentumTensor.fQOne   = 0.0;
+      sMomentumTensor.fQTwo   = 0.0;
+      sMomentumTensor.fQThree = 0.0;
+      sMomentumTensor.fSphericity  = 0.0;
+      sMomentumTensor.fAplanarity  = 0.0;
+      sMomentumTensor.fCircularity = 0.0;
       //
-      sSpherocityTensor.fQOne = 0.0;
-      sSpherocityTensor.fQTwo = 0.0;
+      sSpherocityTensor.fQOne   = 0.0;
+      sSpherocityTensor.fQTwo   = 0.0;
       sSpherocityTensor.fQThree = 0.0;
       sSpherocityTensor.fCparameter = 0.0;
       sSpherocityTensor.fDparameter = 0.0;
+      sSpherocityTensor.fJetThrust  = 0.0;
     }
   EvtTopology::Data::~Data() {}
 
@@ -219,6 +220,7 @@ namespace HPlus {
     fCircularityCut(iConfig.getUntrackedParameter<double>("circularity")),
     fCparameterCut(iConfig.getUntrackedParameter<double>("Cparameter")),
     fDparameterCut(iConfig.getUntrackedParameter<double>("Dparameter")),
+    fJetThrustCut(iConfig.getUntrackedParameter<double>("jetThrust")),
     fEvtTopologyCount(eventCounter.addSubCounter("EvtTopology main","EvtTopology cut")),
     fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT")),
     fSphericityCutCount(eventCounter.addSubCounter("EvtTopology", "sphericity")),
@@ -226,7 +228,8 @@ namespace HPlus {
     fPlanarityCutCount(eventCounter.addSubCounter("EvtTopology", "planarity")),
     fCircularityCutCount(eventCounter.addSubCounter("EvtTopology", "circularity")),
     fCparameterCutCount(eventCounter.addSubCounter("EvtTopology", "Cparameter")),
-    fDparameterCutCount(eventCounter.addSubCounter("EvtTopology", "Dparameter"))
+    fDparameterCutCount(eventCounter.addSubCounter("EvtTopology", "Dparameter")),
+    fJetThrustCutCount(eventCounter.addSubCounter("EvtTopology", "jetThurst"))
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("EvtTopology");
@@ -271,10 +274,11 @@ namespace HPlus {
     bool bPassedCircularity    = CalcCircularity(jets, output);
     bool bPassedAlphaT         = CalcAlphaT(iEvent, iSetup, tau, jets, output); // tau is used in W invariant mass reconstruction in the pseudo-jets created for alphaT
     bool bPassedCandDparamCuts = CalcCandDParameters(SpherocityTensor_EigenValues, output);
+    bool bPassedJetThrust      = CalcJetThrust(iEvent, iSetup, jets, output);
 
     /// Determine if event has passed the Event-Topology cuts
     bool bPassedCuts = false;
-    bPassedCuts = bPassedSphericity * bPassedAplanarity * bPassedPlanarity * bPassedCircularity * bPassedAlphaT * bPassedCandDparamCuts;
+    bPassedCuts = bPassedSphericity * bPassedAplanarity * bPassedPlanarity * bPassedCircularity * bPassedAlphaT * bPassedCandDparamCuts * bPassedJetThrust;
 
     if(bPassedCuts){
       increment(fEvtTopologyCount);
@@ -466,6 +470,61 @@ namespace HPlus {
   }
 
 
+  bool EvtTopology::CalcJetThrust(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output){
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Jet Thrust (Tz)
+    /// Need all particles in event to calculate kinematic variables. Use all tracks (ch. particles) instead.
+    /// The jet thrust  is different from the standard definition of thrust (T), where the thrust axis has to be
+    /// searched for by maximising the thrust in the expression. For Tz, the thrust axis is defined by the virtual boson axis.
+    /// http://www.desy.de/~heramc/proceedings/wg20/mccance.ps.gz
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bool bPassedCut = false;
+
+    /// Sanity check: at least 3 jets
+    if( (jets.size()) < 3 ){
+      throw cms::Exception("LogicError") << "Expected at least 3 jets for the normalised momentum tensor, only found " << jets.size() + 1 << " at " << __FILE__ << ":" << __LINE__ << std::endl;
+    }
+
+    /// Declare momentum vector to be filled with jet's momentum components
+    float momentum[3];
+    float momentumMag = 0.0;
+    float momentumMagSum = 0.0;
+    float momentumZ = 0.0;
+    float momentumZSum = 0.0;
+    float jetThrust = 0.0;
+    
+    // Initialise the momentum vectors
+    for(int j = 0; j < 3; j++) momentum[j]=0;
+
+    /// Loop over all selected jets
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {    
+      edm::Ptr<pat::Jet> iJet = *iter;
+
+      // iJet->boostToCM();  //fixme
+      momentumMag = TMath::Abs(iJet->p());
+      momentumMagSum = momentumMagSum + momentumMag;
+      momentumZ = TMath::Abs(iJet->pz());
+      momentumZSum = momentumZSum + momentumZ;
+
+    }//eof: jet loop
+
+    jetThrust = momentumZSum/momentumMagSum;
+    
+    // std::cout << "*** jetThrust = " << jetThrust << std::endl;
+    output.sSpherocityTensor.fJetThrust  = jetThrust;
+
+    if( output.sSpherocityTensor.fJetThrust > fJetThrustCut){
+      bPassedCut = true;
+      increment(fJetThrustCutCount);
+    }
+    
+    return bPassedCut;
+  
+  }
+
+
   vector<float> EvtTopology::CalcSpherocityTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output){
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -499,6 +558,7 @@ namespace HPlus {
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {    
       edm::Ptr<pat::Jet> iJet = *iter;
 
+      // iJet->boostToCM(); //fixme
       momentumMag = TMath::Abs(iJet->p());
       momentum[0] = iJet->px();
       momentum[1] = iJet->py();
