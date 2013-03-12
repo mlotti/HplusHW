@@ -199,6 +199,7 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
 
         wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow=sourceWorkflow, workflowName="tauembedding_embedding_"+version)
         wf.source.lumiMask = None # be agnostic for lumi mask
+        wf.setOutputFile("embedded.root")
 
         # CRAB configuration lines
         wf.addCrabLine("CMSSW.total_number_of_lumis = -1")

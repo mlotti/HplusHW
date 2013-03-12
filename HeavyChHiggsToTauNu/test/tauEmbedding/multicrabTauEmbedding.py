@@ -205,7 +205,7 @@ def createTasks(opts, step, version=None):
         if "HOST" in os.environ and "lxplus" in os.environ["HOST"]:
             scheduler = "remoteGlidein"
         args = {}
-        if step in "analysisTau":
+        if step == "analysisTau":
             args["copy_data"] = True
             args["userLines"] = [
                 "user_remote_dir = analysisTau_%s" % time.strftime("%y%m%d_%H%M%S"),
@@ -254,8 +254,8 @@ def createTasks(opts, step, version=None):
         multicrab.addCommonLine("CMSSW.output_file = histograms.root")
 
     # Let's do the naming like this until we get some answer from crab people
-    if step in ["skim", "embedding"]:
-        multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
+#    if step in ["skim", "embedding"]:
+#        multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
 
     # For this workflow we need one additional command line argument
     if step == "signalAnalysisGenTau":
@@ -265,6 +265,12 @@ def createTasks(opts, step, version=None):
         multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
     else:
         multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist_noStageout)
+
+    if step in ["skim", "embedding"]:
+        def addCopyConfig(dataset):
+            dataset.appendLine("USER.additional_input_files = copy_cfg.py")
+            dataset.appendCopyFile("../copy_cfg.py")
+        multicrab.forEachDataset(addCopyConfig)            
 
     # Create multicrab task(s)
     prefix = "multicrab_"+step+dirName
