@@ -141,7 +141,96 @@ class InvertedTauID:
 
         st.append(styles.StyleFill(fillColor=0))
         plot.histoMgr.forHisto(objectName, st)
+        
 
+    def plotHisto(self,histo1,name,norm=1):
+
+	h1 = histo1.Clone("h1")
+#	if norm == 1:
+#        h1.Scale(1/h1.GetMaximum())
+#        h2.Scale(1/h2.GetMaximum())
+
+	# check that no bin has negative value, negative values possible after subtracting EWK from data  
+        iBin = 1
+        nBins = h1.GetNbinsX()
+        while iBin < nBins:
+	    value1 = h1.GetBinContent(iBin)
+
+	    if value1 < 0:
+		h1.SetBinContent(iBin,0)
+
+            iBin = iBin + 1
+
+
+        h1.GetYaxis().SetTitle("Events / 20 GeV")
+        h1.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV)")
+        if "BtagEffInMet"  in name: 
+            h1.GetYaxis().SetTitle("Events / 20 GeV")
+            h1.GetXaxis().SetTitle("MET (GeV)")
+
+        
+        plot = plots.ComparisonPlot(
+            histograms.Histo(h1, "Inv"),
+            histograms.Histo(h1, "Base"),
+            )
+            # Set the styles
+        st1 = styles.getDataStyle().clone()
+        st2 = st1.clone()
+        st2.append(styles.StyleMarker(markerColor=ROOT.kRed))
+	plot.histoMgr.forHisto("Base", st1)
+        plot.histoMgr.forHisto("Inv", st2)
+        
+        # Set the legend labels
+        ploat.histoMgr.setHistoLegendLabelMany({"Inv": h1.GetTitle(), "Base": h1.GetTitle()})
+#        plot.histoMgr.setHistoLegendLabelMany({"Inv": "with b tagging","Base": "with b-jet veto"})
+        if "InvertedVsBaseline"  in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "Factorised"  in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "b tagging","Base": "b-tagging factorization"})
+
+        if "BtagEffInMet"  in name:    
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "with b tagging","Base": "without b tagging "})
+    
+
+       # Set the legend styles
+        plot.histoMgr.setHistoLegendStyleAll("P")
+        
+        # Set the drawing styles
+        plot.histoMgr.setHistoDrawStyleAll("EP")
+        
+        # Create frame with a ratio pad
+        plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "xmax": 300},
+                         createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                        )
+
+        if "Purity"  in name:
+            plot.createFrame("comparison"+self.label, opts={"ymin":1e-2,  "ymaxfactor": 0.2, "xmax": 300, "ymax": 1000},
+                             createRatio=False,  opts2={"ymin": 0, "ymax": 2})
+                    
+#            plot.createFrame("comparison"+self.label, opts={"ymin":1e-2,  "ymaxfactor": 0.2, "xmax": 300, "ymax": 1000},
+#                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+#                             )
+
+        # Set Y axis of the upper pad to logarithmic
+        plot.getPad1().SetLogy(False)
+        if "BtagEffInMet"  in name:
+            plot.getPad1().SetLogy(True)
+            
+#	plot.setLegend(histograms.createLegend(0.5,0.75,0.95,0.9))
+
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        if "BvetoDphiInvertedVsBaseline"  in name:
+            histograms.addText(0.5, 0.6, "b-jet veto and #Delta#phi cuts", 25)
+        if "BvetoInvertedVsBaseline"  in name:
+            histograms.addText(0.5, 0.6, "b-jet veto ", 25)  
+        if "Factorised"  in name:
+            histograms.addText(0.5, 0.6, "#Delta#phi cuts", 25)             
+        plot.draw()
+        plot.save()
+
+        
     def mtComparison(self,histo1,histo2,name,norm=1):
 
 	h1 = histo1.Clone("h1")
@@ -203,10 +292,13 @@ class InvertedTauID:
         plot.histoMgr.setHistoDrawStyleAll("EP")
         
         # Create frame with a ratio pad
-        plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "xmax": 300},
-                         createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
-                        )
-
+        if "Factorised"  in name:
+            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "xmax": 300},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                             )
+        #if "Purity"  in name:
+        plot.createFrame("purity"+self.label, opts={"ymin":1e-1, "xmax": 300},
+                         createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot 
         if "BtagEffInMet"  in name:
             plot.createFrame("comparison"+self.label, opts={"ymin":1e-2,  "ymaxfactor": 0.2, "xmax": 300, "ymax": 1000},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
@@ -234,6 +326,8 @@ class InvertedTauID:
         plot.draw()
         plot.save()
 
+
+        
     def comparison(self,histo1,histo2,norm=1):
 
 	h1 = histo1.Clone("h1")
