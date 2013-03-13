@@ -325,7 +325,8 @@ namespace HPlus {
 //       }
     }
     //std::cout << "EventClassification:   Old GenMET.Pt() = " << oldGenMET.Pt() << std::endl;
-    //std::cout << "EventClassification:   New GenMET.Pt() = " << myGenMET.Pt() << std::endl;
+    std::cout << "EventClassification:   GenMET.Pt() = " << myGenMET.Pt() << std::endl;
+    std::cout << "EventClassification:   GenNeutrinoPz = " << myGenMET.Pz() << std::endl;
     return myGenMET;
   }
   

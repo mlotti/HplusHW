@@ -39,8 +39,6 @@ namespace HPlus {
       // First digit: b-jet                          |      Example:   B M T
       // Second digit: MET                           |                 -----
       // Third digit: tau                            |                 1 0 1
-      // Example: misidentificationCode = 101 would mean that the b-jet was misidentified,
-      // the MET was identified correctly, and the tau was misidentified.
       ePure = 0,
       eOnlyBadTau = 1,
       eOnlyBadMET = 10,
@@ -49,6 +47,13 @@ namespace HPlus {
       eOnlyBadBjetAndTau = 101,
       eOnlyBadBjetAndMET = 110,
       eOnlyBadBjetAndMETAndTau = 111
+    };
+    
+    enum PzSelectionMethod {
+      eGreater,
+      eSmaller,
+      eTauNuAngleMax,
+      eTauNuAngleMin
     };
 
     class Data {
@@ -68,6 +73,8 @@ namespace HPlus {
 
       friend class FullHiggsMassCalculator;
     private:
+      double fRecoBjetEnergy; // temporary
+      double fRecoTauEnergy;  // temporary
       bool bPassedEvent;
       edm::Ptr<pat::Jet> HiggsSideBJet;
       // Calculated results
@@ -101,15 +108,15 @@ namespace HPlus {
 		 const BTagging::Data& bData, const METSelection::Data& metData);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau, 
 		 const BTagging::Data& bData, const METSelection::Data& metData);
-
-    void myBJet();
+    //void myBJet(); // marked for deletion
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau, 
 			const BTagging::Data& bData, const METSelection::Data& metData);
     edm::Ptr<pat::Jet> findHiggsSideBJet(const BTagging::Data bData, const edm::Ptr<pat::Tau> myTau);
-    //bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
     void calculateNeutrinoPz(TVector3& pTau, TVector3& pB, TVector3& MET, FullHiggsMassCalculator::Data& output);
+    void selectNeutrinoPzSolution(PzSelectionMethod selectionMethod, TVector3& pTau,
+				  TVector3& MET, FullHiggsMassCalculator::Data& output);
     double getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
     void constructFourMomenta(TVector3& pTau, TVector3& pB, TVector3& MET, FullHiggsMassCalculator::Data& output);
     void calculateTopMass(FullHiggsMassCalculator::Data& output);
@@ -143,32 +150,14 @@ namespace HPlus {
 
 
     // Histograms 
-    WrappedTH1* hSolution1PzDifference;
-    WrappedTH1* hSolution2PzDifference;
-    WrappedTH2* hSolution12PzDifference;
     WrappedTH1* hHiggsMass;
-    WrappedTH1* hHiggsMassDPz100;
-    WrappedTH1* hHiggsMass_TauBmatch;
-    WrappedTH1* hHiggsMass_TauBMETmatch;
-    //WrappedTH1* hHiggsMassReal;
-    //WrappedTH1* hHiggsMassImaginary;
+    WrappedTH1* hHiggsMass_greater;
+    WrappedTH1* hHiggsMass_smaller;
+    WrappedTH1* hHiggsMass_tauNuAngleMax;
+    WrappedTH1* hHiggsMass_tauNuAngleMin;
     WrappedTH1* hTopMass;
-    //WrappedTH1* hTopMassRejected;
-    //WrappedTH1* hTopMassReal;
-    //WrappedTH1* hTopMassRealRejected;
-    //WrappedTH1* hTopMassImaginary;
-    //WrappedTH1* hTopMassImaginaryRejected;
-    
-    // Neutrino longitudinal momentum histograms
     WrappedTH1* hSelectedNeutrinoPzSolution;
-    WrappedTH1* hNeutrinoPtSolution;
-    WrappedTH1* hNeutrinoPtDifference;
-    //WrappedTH1* hTrueHiggsMass;
-    //WrappedTH1* hHiggsMassNoActualHiggs;
-    //WrappedTH1* hHiggsMassCorrectId;
-    //WrappedTH1* hHiggsMassIncorrectId;
 
-    // Higgs mass histograms
     WrappedTH1* hHiggsMassPure;
     WrappedTH1* hHiggsMassImpure;
     WrappedTH1* hHiggsMassBadTau;
