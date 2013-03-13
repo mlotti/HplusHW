@@ -3,6 +3,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 
+// #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
+
 #include "TLorentzVector.h"
 
 #include "FWCore/Framework/interface/EDFilter.h"
@@ -210,6 +212,7 @@ namespace HPlus {
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
+    //STEFAN    fEventClassification()
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper),
@@ -531,9 +534,15 @@ namespace HPlus {
     fCommonPlotsAfterVertexSelection->fill();
     //hSelectionFlow->Fill(kSignalOrderVertexSelection);
     fCommonPlots.fillControlPlots(iEvent, pvData);
-
 //------ TauID
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
+//     if(!tauData.passedEvent()) return false; // Require at least one tau
+//     std::cout << "Tau found!" << std::endl;
+//     checkIfGenuineTau(iEvent, tauData.getSelectedTau());
+//     //checkIfGenuineTau(iEvent, *(tauData.getSelectedTau()));
+
+    // TauID
+    //TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
 
     fTauSelection.analyseFakeTauComposition(fFakeTauIdentifier,iEvent);
 
@@ -786,18 +795,22 @@ namespace HPlus {
       // Sphericity, Aplanarity, Planarity, alphaT
       fTree.setDiJetMassesNoTau(evtTopologyData.alphaT().vDiJetMassesNoTau);
       fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
-      fTree.setSphericity(evtTopologyData.Kinematics().fSphericity);
-      fTree.setAplanarity(evtTopologyData.Kinematics().fAplanarity);
-      fTree.setPlanarity(evtTopologyData.Kinematics().fPlanarity);
-      fTree.setCircularity(evtTopologyData.Kinematics().fCircularity);
-      fTree.setMomentumTensorEigenvalues(evtTopologyData.Kinematics().fQOne, evtTopologyData.Kinematics().fQTwo, evtTopologyData.Kinematics().fQThree);
-
+      fTree.setSphericity(evtTopologyData.MomentumTensor().fSphericity);
+      fTree.setAplanarity(evtTopologyData.MomentumTensor().fAplanarity);
+      fTree.setPlanarity(evtTopologyData.MomentumTensor().fPlanarity);
+      fTree.setCircularity(evtTopologyData.MomentumTensor().fCircularity);
+      fTree.setMomentumTensorEigenvalues(evtTopologyData.MomentumTensor().fQOne, evtTopologyData.MomentumTensor().fQTwo, evtTopologyData.MomentumTensor().fQThree);
+      fTree.setSpherocityTensorEigenvalues(evtTopologyData.SpherocityTensor().fQOne, evtTopologyData.SpherocityTensor().fQTwo, evtTopologyData.SpherocityTensor().fQThree);
+      fTree.setCparameter(evtTopologyData.SpherocityTensor().fCparameter);
+      fTree.setDparameter(evtTopologyData.SpherocityTensor().fDparameter);
+      fTree.setJetThrust(evtTopologyData.SpherocityTensor().fJetThrust);
       fTree.setAllJets(jetData.getAllIdentifiedJets());
       fTree.setSelJetsInclTau(jetData.getSelectedJetsIncludingTau());
       fTree.setMHT(jetData.getMHTvector());
       fTree.setMHTSelJets(jetData.getSelectedJets());
       fTree.setMHTAllJets(jetData.getAllIdentifiedJets());
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
+      fTree.setNonIsoLeptons(muonVetoData.getNonIsolatedMuons(), electronVetoData.getNonIsolatedElectrons());
       fTree.fill(iEvent, tauData.getSelectedTau(), jetData.getSelectedJets());
       return true;
     }

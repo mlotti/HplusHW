@@ -79,14 +79,22 @@ namespace HPlus {
     void setAlphaT(double alphaT) { fAlphaT = alphaT; }
     void setTauIsFake(bool tauIsFake) { bTauIsFake = tauIsFake; }
     void setMomentumTensorEigenvalues(double QOne, double QTwo, double QThree) { 
-      fQOne   = QOne; 
-      fQTwo   = QTwo; 
-      fQThree = QThree; 
+      fMomentumTensor_QOne   = QOne; 
+      fMomentumTensor_QTwo   = QTwo; 
+      fMomentumTensor_QThree = QThree; 
+    }
+    void setSpherocityTensorEigenvalues(double QOne, double QTwo, double QThree) { 
+      fSpherocityTensor_QOne   = QOne; 
+      fSpherocityTensor_QTwo   = QTwo; 
+      fSpherocityTensor_QThree = QThree; 
     }
     void setSphericity(double sphericity) { fSphericity = sphericity; }
     void setAplanarity(double aplanarity) { fAplanarity = aplanarity; }
     void setPlanarity(double planarity) { fPlanarity = planarity; }
     void setCircularity(double circularity) { fCircularity = circularity; }
+    void setCparameter(double Cparameter) { fCparameter = Cparameter; }
+    void setDparameter(double Dparameter) { fDparameter = Dparameter; }
+    void setJetThrust(double jetThrust) { fJetThrust = jetThrust; }
     void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
     void setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
     void setSelJetsInclTau(const edm::PtrVector<pat::Jet>& selJetsInclTau);
@@ -243,13 +251,19 @@ namespace HPlus {
     XYZTLorentzVector fTop;
 
     double fAlphaT;
-    double fQOne;
-    double fQTwo;
-    double fQThree;
+    double fMomentumTensor_QOne;
+    double fMomentumTensor_QTwo;
+    double fMomentumTensor_QThree;
     double fSphericity;
     double fAplanarity;
     double fPlanarity;
     double fCircularity;
+    double fSpherocityTensor_QOne;
+    double fSpherocityTensor_QTwo;
+    double fSpherocityTensor_QThree;
+    double fCparameter;
+    double fDparameter;
+    double fJetThrust;
     bool bTauIsFake;
     std::vector<float> vDiJetMassesNoTau;
     double fDeltaPhi;
