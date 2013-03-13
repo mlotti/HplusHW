@@ -391,10 +391,10 @@ class InvertedTauID:
         print histo.GetName(),"Integral",histo.Integral(0,histo.GetNbinsX(),"width")
         histograms.addText(0.4,0.7,"Integral = %s ev"% integralValue)
 
-        match = re.search("/\S+aseline",histo.GetName())
+        match = re.search("/\S+baseline",histo.GetName(),re.IGNORECASE)
         if match:
             self.nBaseQCD = integralValue
-        match = re.search("/\S+nverted",histo.GetName())
+        match = re.search("/\S+inverted",histo.GetName(),re.IGNORECASE)
         if match:
             self.nInvQCD = integralValue
             
