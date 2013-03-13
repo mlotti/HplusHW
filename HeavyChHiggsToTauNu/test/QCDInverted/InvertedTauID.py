@@ -846,7 +846,7 @@ class InvertedTauID:
         QCDfractionInBaseLineEventsError = self.QCDfractionError
 	self.normalizationForInvertedEvents = nQCDbaseline*QCDfractionInBaseLineEvents/nQCDinverted
         self.normalizationForInvertedEWKEvents = nQCDbaseline*(1-QCDfractionInBaseLineEvents)/nQCDinverted
-        ratio = nQCDbaseline/nQCDinverted
+        ratio = float(nQCDbaseline)/nQCDinverted
 	normalizationForInvertedEventsError = sqrt(ratio*(1+ratio/nQCDinverted))*QCDfractionInBaseLineEvents +QCDfractionInBaseLineEventsError*ratio        
 	self.normFactors.append(self.normalizationForInvertedEvents)
         self.normFactorsEWK.append(self.normalizationForInvertedEWKEvents)
