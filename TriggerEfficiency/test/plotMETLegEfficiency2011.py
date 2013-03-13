@@ -220,7 +220,7 @@ class Plotter:
         weights = []
         for dataset in datasets:
 
-            tree = dataset._getRootHisto("analysis/TTEffTree")[0]
+            tree = dataset.createRootChain("analysis/TTEffTree")
 
             if tree.GetEntries() == 0:
                 continue

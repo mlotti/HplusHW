@@ -199,18 +199,17 @@ addPrimaryVertexSelection(process, process.commonSequence)
 # Pileup weights
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 puWeights = [
-    ("Run2011A", "Run2011A"),
-    ("Run2011B", "Run2011B"),
-    ("Run2011AB", "Run2011AB")
+    "Run2011A",
+    "Run2011B",
+    "Run2011AB",
     ]
-for era, name in puWeights:
-    modname = "pileupWeight"+name
-    setattr(process, modname, cms.EDProducer("HPlusVertexWeightProducer",
-        alias = cms.string(modname),
-    ))
-    param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=era)
-    insertPSetContentsTo(param.vertexWeight.clone(), getattr(process, modname))
-    process.commonSequence.insert(0, getattr(process, modname))
+puWeightNames = []
+for era in puWeights:
+    prodName = param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=era)
+    puWeightNames.append(prodName)
+    process.commonSequence.remove(getattr(process, prodName))
+    process.commonSequence.insert(0, getattr(process, prodName))
+
 # FIXME: this is only a consequence of the swiss-knive effect...
 process.commonSequence.remove(process.goodPrimaryVertices)
 process.commonSequence.insert(0, process.goodPrimaryVertices)
@@ -249,22 +248,37 @@ additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(proce
 #taus = cms.InputTag("patTaus"+PF2PATVersion+"TauEmbeddingMuonMatched")
 taus = cms.InputTag(param.tauSelectionHPSMediumTauBased.src.value())
 
-# FIXME
-# Temporary, for ttbar only
-process.genTaus = cms.EDFilter("GenParticleSelector",
+process.genTauVisibleSequence = tauEmbeddingCustomisations.addTauEmbeddingMuonTausUsingVisible(process)
+process.commonSequence *= process.genTauVisibleSequence
+taus = cms.InputTag("tauEmbeddingGenTauVisibleMatchTauMatched")
+
+process.genTausOriginal = cms.EDFilter("GenParticleSelector",
     src = cms.InputTag("genParticles", "", "HLT"),
-    cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1 && abs(mother().pdgId()) == 24")
+    cut = cms.string(tauEmbeddingCustomisations.generatorTauSelection % tauEmbeddingCustomisations.generatorTauPt)
 )
-process.patTausGenMatched= cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",
-    src = cms.InputTag("selectedPatTausHpsPFTau"),
-    refSrc = cms.InputTag("genTaus"),
-    maxDeltaR = cms.double(0.5),
-)
-process.mergedPatTaus = cms.EDProducer("HPlusPATTauMerger",
-    src = cms.VInputTag(taus.value(), "patTausGenMatched")
-)
-process.commonSequence *= (process.genTaus * process.patTausGenMatched * process.mergedPatTaus)
-taus = cms.InputTag("mergedPatTaus")
+process.commonSequence *= process.genTausOriginal
+
+# FIXME
+lookOriginalGenTaus = False
+if lookOriginalGenTaus:
+    # Temporary, for ttbar only
+    process.genTaus = cms.EDFilter("GenParticleSelector",
+        src = cms.InputTag("genParticles", "", "HLT"),
+        cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1 && abs(mother().pdgId()) == 24")
+    )
+    process.genTausVisible = cms.EDProducer("HPlusGenVisibleTauComputer",
+        src = cms.InputTag("genTaus")
+    )
+    process.patTausGenMatched= cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
+        src = cms.InputTag("selectedPatTausHpsPFTau"),
+        refSrc = cms.InputTag("genTausVisible"),
+        maxDeltaR = cms.double(0.5),
+    )
+    process.mergedPatTaus = cms.EDProducer("HPlusPATTauMerger",
+        src = cms.VInputTag(taus.value(), "patTausGenMatched")
+    )
+    process.commonSequence *= (process.genTaus * process.genTausVisible * process.patTausGenMatched * process.mergedPatTaus)
+    taus = cms.InputTag("mergedPatTaus")
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
@@ -306,6 +320,8 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
 
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),
+    genTauOriginalSrc = cms.InputTag("genTausOriginal"),
+    genTauEmbeddedSrc = cms.InputTag("tauEmbeddingGenTauVisibleMatchGenTaus"),
     mets = cms.PSet(
         pfMet_p4 = cms.InputTag(pfMET.value()),
         pfMetOriginal_p4 = cms.InputTag(pfMETOriginal.value()),
@@ -325,8 +341,8 @@ if False and dataVersion.isMC(): # FIXME
     ntuple.mets.genMetCaloAndNonPromptOriginal_p4 = cms.InputTag("genMetCaloAndNonPrompt", "", hltProcess)
     ntuple.mets.genMetNuSumEmbedded_p4 = cms.InputTag("genMetNuEmbedded")
     ntuple.mets.genMetNuSumOriginal_p4 = cms.InputTag("genMetNuOriginal")
-for era, name in puWeights:
-    setattr(ntuple.doubles, "weightPileup_"+name, cms.InputTag("pileupWeight"+name))
+for era, src in zip(puWeights, puWeightNames):
+    setattr(ntuple.doubles, "weightPileup_"+era, cms.InputTag(src))
 
 addAnalysis(process, "tauNtuple", ntuple,
             preSequence=process.commonSequence,
@@ -340,7 +356,7 @@ for label, module in process.producers_().iteritems():
     if module.type_() == "EventCountProducer":
         eventCounters.append(label)
 prototype = cms.EDProducer("HPlusEventCountProducer",
-    weightSrc = cms.InputTag("pileupWeight"+puWeights[-1][1])
+    weightSrc = cms.InputTag(puWeightNames[-1])
 )
 for label in eventCounters:
     process.globalReplace(label, prototype.clone())

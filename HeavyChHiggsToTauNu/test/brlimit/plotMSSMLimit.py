@@ -84,7 +84,12 @@ def main():
 
     # Interpret in MSSM
     xVariable = "mHp"
-    selection = "mu==200&&Xt==2000&&m2==200"
+####    selection = "mu==200&&Xt==2000&&m2==200"
+    selection = "mu==200"
+#    scenario = "MSSM m_{h}^{max}"
+#    scenario = "MSSM light stop"
+#    scenario = "MSSM m_{h}^{mod+}"
+    scenario = "MSSM m_{h}^{mod-}"
 
     for key in graphs.keys():
 #        removeNotValid = not (key in ["exp1", "exp2"])
@@ -95,9 +100,9 @@ def main():
 
     graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
 #    graphs["Allowed"] = db.mhLimit("mHp",selection,"125.9+-0.6+-0.2")
-    graphs["Allowed"] = db.mhLimit("mHp",selection,"125.9+-3.0")
+    graphs["Allowed"] = db.mhLimit("mh","mHp",selection,"125.9+-3.0")
     
-    doPlot("limitsTanb_mh", graphs, limits, limit.mHplus())
+    doPlot("limitsTanb_mh", graphs, limits, limit.mHplus(),scenario)
 
 #    xVariable = "mA"
 #    for key in graphs.keys():
@@ -155,7 +160,7 @@ def main():
     doPlotMu("limitsTanb_"+xVariable, vgraphs, st, limits, xLabel, variationVariable)
 
     
-def doPlot(name, graphs, limits, xlabel):
+def doPlot(name, graphs, limits, xlabel, scenario):
     obs = graphs["obs"]
     excluded = ROOT.TGraph(obs)
     excluded.SetName("ExcludedArea")
@@ -228,7 +233,8 @@ def doPlot(name, graphs, limits, xlabel):
     x = 0.2
     histograms.addText(x, 0.9, limit.process, size=size)
     histograms.addText(x, 0.863, limits.getFinalstateText(), size=size)
-    histograms.addText(x, 0.815, "MSSM m_{h}^{max}", size=size)
+####    histograms.addText(x, 0.815, "MSSM m_{h}^{max}", size=size)
+    histograms.addText(x, 0.815,scenario, size=size)
 #    histograms.addText(x, 0.775, limit.BRassumption, size=size)
 #    histograms.addText(x, 0.735, "#mu=%d %s"%(mu, limit.massUnit()), size=size)
     histograms.addText(0.7, 0.23, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)

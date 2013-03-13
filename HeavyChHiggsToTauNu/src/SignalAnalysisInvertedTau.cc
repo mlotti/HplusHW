@@ -74,6 +74,7 @@ namespace HPlus {
     fBaselineDeltaPhiTauMETCounter(eventCounter.addCounter("Baseline: DeltaPhi(Tau,MET) upper limit")),
     fBaselineDeltaPhiVSDeltaPhiMHTJet1CutCounter(eventCounter.addCounter("Baseline: DeltaPhi(Jets,MET) vs DeltaPhi cut")),
     fOneTauCounter(eventCounter.addCounter("Baseline, taus = 1")),
+    /*
     fTauFakeScaleFactorCounter(eventCounter.addCounter("Inverted: tau fake scale factor, all cands")),
     fTauTriggerScaleFactorCounter(eventCounter.addCounter("Inverted: tau trigger scale factor, all cands")),
     fTauVetoAfterTauIDCounter(eventCounter.addCounter("Inverted: Taus found")),
@@ -100,6 +101,48 @@ namespace HPlus {
     fTopChiSelectionCounter(eventCounter.addCounter("Inverted: Top ChiSelection cut")),
     fTopWithBSelectionCounter(eventCounter.addCounter("Inverted: Top with B Selection cut")),
     ftransverseMassCut100TopCounter(eventCounter.addCounter("Inverted: transverseMass > 100 top cut")),
+    */
+    fBaselineDphi130Counter(eventCounter.addCounter("Baseline, deltaPhi130")),
+    fBaselineTopChiSelectionCounter(eventCounter.addCounter("Top BaselineChiSelection cut")),
+    fTauVetoAfterTauIDCounter(eventCounter.addCounter("Veto on isolated taus")),
+    fElectronVetoCounter(eventCounter.addCounter("electron veto")),
+    fMuonVetoCounter(eventCounter.addCounter("muon veto")),
+    fNJetsCounter(eventCounter.addCounter("njets")),
+    fBTaggingBeforeMETCounter(eventCounter.addCounter("btagging before MET")),
+    fMETCounter(eventCounter.addCounter("MET")),
+    fRtauAfterMETCounter(eventCounter.addCounter("Rtau after MET cut")),
+    fBjetVetoCounter(eventCounter.addCounter("Veto on hard b jets")),
+    fBvetoCounter(eventCounter.addCounter("Veto on b jets after MET")),
+    fBvetoDeltaPhiCounter(eventCounter.addCounter("Veto on b jets after MET and Dphi")),
+    fBTaggingCounter(eventCounter.addCounter("btagging")),
+    fBTaggingScaleFactorInvertedCounter(eventCounter.addCounter("btagging scale factor inverted")),
+    fQCDTailKillerCounter(eventCounter.addCounter("QCD tail killer")),
+    fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
+    fDeltaPhiVSDeltaPhiMetJetCutCounter(eventCounter.addCounter("DeltaPhi(Jet,MET) vs DeltaPhi cut")),
+    fDeltaPhiVSDeltaPhiMHTJet1CutCounter(eventCounter.addCounter("DeltaPhi(Jet1,MHT) vs DeltaPhi cut")),
+    fDeltaPhiVSDeltaPhiMHTJet2CutCounter(eventCounter.addCounter("DeltaPhi(Jet2,MHT) vs DeltaPhi cut")),
+    fDeltaPhiVSDeltaPhiMHTJet3CutCounter(eventCounter.addCounter("DeltaPhi(Jet3,MHT) vs DeltaPhi cut")),
+    fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET lower limit")),
+    //    fDeltaPhiTauMET140Counter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit 140")),
+    //    fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET lower limit")),
+    fHiggsMassCutCounter(eventCounter.addCounter("HiggsMassCut")),
+    fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET160 limit")),
+    fdeltaPhiTauMET130Counter(eventCounter.addCounter("deltaPhiTauMET130 limit")),
+    fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
+    fdeltaPhiTauMET160FakeMetCounter(eventCounter.addCounter("deltaPhi160 and fake MET veto")),
+    fTopRtauDeltaPhiFakeMETCounter(eventCounter.addCounter("TopRtauDeltaPhiFakeMET cuts")),
+    fRtauAfterCutsCounter(eventCounter.addCounter("RtauAfterCuts")),
+    fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
+    ftransverseMassCut80Counter(eventCounter.addCounter("transverseMass > 60")),
+    ftransverseMassCut100Counter(eventCounter.addCounter("transverseMass > 80")),
+    ftransverseMassCut80NoRtauCounter(eventCounter.addCounter("transverseMass > 60 no Rtau")),
+    ftransverseMassCut100NoRtauCounter(eventCounter.addCounter("transverseMass > 80 no Rtau")),
+    fZmassVetoCounter(eventCounter.addCounter("ZmassVetoCounter")),
+    fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
+    fTopChiSelectionCounter(eventCounter.addCounter("Top ChiSelection cut")),
+    fTopWithBSelectionCounter(eventCounter.addCounter("Top with B Selection cut")),
+    ftransverseMassCut100TopCounter(eventCounter.addCounter("transverseMass > 100 top cut")),
+
 
 
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
@@ -131,6 +174,7 @@ namespace HPlus {
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
+    fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WjetsWeight"),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
@@ -986,6 +1030,7 @@ namespace HPlus {
 
 
 
+    /*
 
           
     //FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
@@ -995,6 +1040,22 @@ namespace HPlus {
        
     TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+=======
+    */
+    //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(selectedInvertedTau), jetDataInverted.getSelectedJetsIncludingTau()); 
+    //    FakeMETVeto::Data fakeMETDataInverted = fFakeMETVeto.analyze(iEvent, iSetup, selectedInvertedTau, jetDataInverted.getSelectedJets(), metDataInverted.getSelectedMET());
+    //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau()); 
+    //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
+   
+    hClosestDeltaPhiInverted->Fill(fakeMETDataInverted.closestDeltaPhi());
+    if ( selectedInvertedTau->pt() > 120 ) hClosestDeltaPhiInverted120->Fill(fakeMETDataInverted.closestDeltaPhi()); 
+    if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hClosestDeltaPhiInverted100120->Fill(fakeMETDataInverted.closestDeltaPhi()); 
+    if ( selectedInvertedTau->pt() > 80 && selectedInvertedTau->pt() < 100 ) hClosestDeltaPhiInverted80100->Fill(fakeMETDataInverted.closestDeltaPhi()); 
+    if ( selectedInvertedTau->pt() > 70 && selectedInvertedTau->pt() < 80 ) hClosestDeltaPhiInverted7080->Fill(fakeMETDataInverted.closestDeltaPhi()); 
+    if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hClosestDeltaPhiInverted6070->Fill(fakeMETDataInverted.closestDeltaPhi()); 
+    if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hClosestDeltaPhiInverted5060->Fill(fakeMETDataInverted.closestDeltaPhi()); 
+    if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hClosestDeltaPhiInverted4050->Fill(fakeMETDataInverted.closestDeltaPhi());
+
 
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
  

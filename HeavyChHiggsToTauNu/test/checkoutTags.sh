@@ -72,14 +72,21 @@ set -e
 # 12.10.2012/M.Kortelainen CMSSW_5_3_5 Updated PAT tags
 # 25.10.2012/M.Kortelainen CMSSW_5_3_5 Updated for running runMEtUncertainties() multiple times
 # 26.10.2012/M.Kortelainen CMSSW_5_3_5 Updated metUncertaintyTools
+# 12.12.2012/M.Kortelainen CMSSW_5_3_7 Updated tau/PAT tags
+# 3.1.2013/M.Kortelainen CMSSW_5_3_7 Updated tau tags
+# 9.1.2013/M.Kortelainen CMSSW_5_3_7_patch4 Updated PAT tags
+# 12.2.2013/M.Kortelainen CMSSW_5_3_7_patch6 Backported technical change in pat::Jet
+# 20.2.2013/M.Kortelainen CMSSW_5_3_/_patch6 Updated PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
 # PAT
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes52X
-addpkg DataFormats/PatCandidates V06-05-06-02
-addpkg PhysicsTools/PatAlgos     V08-09-42
+addpkg DataFormats/PatCandidates V06-05-06-07
+addpkg PhysicsTools/PatAlgos     V08-09-52
+addpkg DataFormats/StdDictionaries V00-02-14
+addpkg FWCore/GuiBrowsers V00-00-70
 # We don't need the code (it's the same as in the release), but a ROOT
 # file for jet smearing needs to be in the developer area at the moment
 # (see )
@@ -88,22 +95,20 @@ addpkg PhysicsTools/PatUtils V03-09-27
 cvs up -r 1.25 PhysicsTools/PatUtils/python/tools/metUncertaintyTools.py
 cvs up -r 1.19.8.1 PhysicsTools/PatAlgos/python/tools/helpers.py
 rm PhysicsTools/PatUtils/plugins/MinPatMETProducer.cc
+# Backport technical change in pat::Jet to reduce space
+cvs up -j 1.83 -j 1.84 DataFormats/PatCandidates/src/classes_def.xml
+
+# Latest EGM isolation definition (whatever that is)
+addpkg RecoParticleFlow/PFProducer V15-02-06
 
 # Tau+PAT
 # https://hypernews.cern.ch/HyperNews/CMS/get/tauid/252.html
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#2012_CMSSW_4_X_X_Recipe
 #
 # Tau
-addpkg RecoTauTag/RecoTau         V01-04-17 #equivalent to 04-14
-addpkg RecoTauTag/Configuration   V01-04-03
-addpkg CondFormats/EgammaObjects  V00-04-01
-addpkg PhysicsTools/IsolationAlgos # You need to recompile PAT packages which depend on DataFormats/TauReco
-# PAT
-##### New tau discriminators, electron MVA discriminator
-cvs up -r 1.57 PhysicsTools/PatAlgos/python/tools/tauTools.py
-cvs up -r 1.13 PhysicsTools/PatAlgos/python/producersLayer1/tauProducer_cff.py
-cvs up -r 1.15 PhysicsTools/PatAlgos/python/recoLayer0/tauDiscriminators_cff.py
-cvs up -r 1.5 RecoTauTag/Configuration/python/updateHPSPFTaus_cff.py
+addpkg RecoTauTag/RecoTau         V01-04-23
+addpkg RecoTauTag/Configuration   V01-04-10
+addpkg CondFormats/EgammaObjects  V00-04-00
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities

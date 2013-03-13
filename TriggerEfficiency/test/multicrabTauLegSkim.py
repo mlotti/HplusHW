@@ -12,7 +12,8 @@ datasets_TauPlusX = [
     "TauPlusX_191043-193621_2012A_Jul13",
     "TauPlusX_193834-196531_2012B_Jul13",
     "TauPlusX_198022-198523_2012C_Aug24",
-    "TauPlusX_198941-203742_2012C_Prompt",
+    "TauPlusX_198941-199608_2012C_Prompt",
+    "TauPlusX_199698-203742_2012C_Prompt",
     "TauPlusX_203777-208686_2012D_Prompt",
 ]
 

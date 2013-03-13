@@ -11,9 +11,11 @@
 ######################################################################
 
 import math
+from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -23,8 +25,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import *
 
-analysis = "ewkBackgroundCoverageAnalysis"
-counters = analysis+"/counters"
+#analysis = "ewkBackgroundCoverageAnalysis"
 dataEra = "Run2011AB"
 
 # Enumerations
@@ -41,8 +42,8 @@ def leptonVetoLabels(obj2):
     
 
 
-def main():
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra, analysisBaseName=analysis, weightedCounters=False)
+def main(opts):
+    datasets = dataset.getDatasetsFromMulticrabCfg(directory=opts.mdir, dataEra=dataEra, weightedCounters=False)
 #    datasets = dataset.getDatasetsFromRootFiles([("TTJets_TuneZ2_Summer11", "histograms.root")], counters=counters, dataEra=dataEra, analysisBaseName=analysis, weightedCounters=False)
 
     plots.mergeRenameReorderForDataMC(datasets)
@@ -163,7 +164,7 @@ def process(datasets, datasetName, postfix, countName):
                      "AfterBTag": "passBTag",
                      "AfterAllSelections": "passDeltaPhi"}[postfix]
 
-    treeDraw = dataset.TreeDraw(analysis+"/tree", varexp="LeptonVetoStatus:TauIDStatus >>htemp(%d,0,%d, %d,0,%d" % (Enum.tauSize, Enum.tauSize, Enum.leptonSize, Enum.leptonSize))
+    treeDraw = dataset.TreeDraw("tree", varexp="LeptonVetoStatus:TauIDStatus >>htemp(%d,0,%d, %d,0,%d" % (Enum.tauSize, Enum.tauSize, Enum.leptonSize, Enum.leptonSize))
 
     for name, obj2, obj2Type in [
         ("tau1_electron2", "e_{2}", Enum.obj2Electron),
@@ -282,7 +283,7 @@ def process(datasets, datasetName, postfix, countName):
 def calculatePlot(dset, neventsCount, name, postfix, treeDraw=None, rejected=None, embedding=None, faketau=None, case1=None, case2=None, case3=None, case4=None):
     datasetName = dset.getName()
     if treeDraw is None:
-        h = dset.getDatasetRootHisto(analysis+"/"+name+"_"+postfix).getHistogram()
+        h = dset.getDatasetRootHisto(name+"_"+postfix).getHistogram()
     else:
         h = dset.getDatasetRootHisto(treeDraw).getHistogram()
     ROOT.gStyle.SetPaintTextFormat(".0f")
@@ -334,7 +335,7 @@ def calculatePlot(dset, neventsCount, name, postfix, treeDraw=None, rejected=Non
 
 def createMuon2Plot(dset, name, postfix):
     datasetName = dset.getName()
-    treeDraw = dataset.TreeDraw(analysis+"/tree", selection="Obj2Type == 3 && LeptonVetoStatus == 0 && (TauIDStatus == 1 || TauIDStatus == 2 || TauIDStatus == 3)") # nothing passes lepton veto
+    treeDraw = dataset.TreeDraw("tree", selection="Obj2Type == 3 && LeptonVetoStatus == 0 && (TauIDStatus == 1 || TauIDStatus == 2 || TauIDStatus == 3)") # nothing passes lepton veto
 
     tdFullIsolation = treeDraw.clone(varexp="(muon2_f_chargedHadronIso + max(muon2_f_photonIso+muon2_f_neutralHadronIso-0.5*muon2_f_puChargedHadronIso, 0))/muon2_p4.Pt() >>tmp(50, 0, 0.5)")
     tdChargedIsolation = treeDraw.clone(varexp="(muon2_f_chargedHadronIso)/muon2_p4.Pt() >>tmp(50, 0, 0.5)")
@@ -368,7 +369,7 @@ def createTransverseMassPlot(*args, **kwargs):
     
 def createTransverseMassPlotInternal(dset, name, postfix, normalizeToOne, nominalSelection, compareSelection, nominalLegend="Nominal", compareLegend="Compare", moveLegend={}):
     datasetName = dset.getName()
-    treeDraw = dataset.TreeDraw(analysis+"/tree", varexp="TauMETTransverseMass >>tmp(10,0,200)")
+    treeDraw = dataset.TreeDraw("tree", varexp="TauMETTransverseMass >>tmp(10,0,200)")
 
     tdNominal = treeDraw.clone(selection=nominalSelection)#selection="Obj2Type == 3 && LeptonVetoStatus == 0 && (TauIDStatus == 1 || TauIDStatus == 2 || TauIDStatus == 3)") # FIXME
     tdCompare = treeDraw.clone(selection=compareSelection)
@@ -441,4 +442,9 @@ def createDrawPlot(name, h):
     p.save()
 
 if __name__ == "__main__":
-    main()
+    parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
+    parser.add_option("--mdir", dest="mdir", default=".",
+                      help="Multicrab directory (default '.')")
+    (opts, args) = parser.parse_args()
+
+    main(opts)

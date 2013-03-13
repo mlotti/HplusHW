@@ -80,7 +80,7 @@ class ConfigBuilder:
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
                  printAnalyzerNames = False,
-                 inputWorkflow = "pattuple_v53_1", # Name of the workflow, whose output is used as an input, needed for WJets weighting
+                 inputWorkflow = "pattuple_v53_2", # Name of the workflow, whose output is used as an input, needed for WJets weighting
                  ):
         self.options, self.dataVersion = HChOptions.getOptionsDataVersion(dataVersion)
         self.dataEras = dataEras
@@ -225,9 +225,7 @@ class ConfigBuilder:
 
         if self.printAnalyzerNames:
             print "Analyzer module names:"
-            names = []
-            for x in self.numberOfAnalyzers.itervalues():
-                names.extend(x)
+            names = self.getAnalyzerModuleNames()
             names.sort()
             for name in names:
                 print "  %s" % name
@@ -239,6 +237,12 @@ class ConfigBuilder:
                 print "Total number of analyzers (%d) is over the suggested limit (%d), it might take loong to run and merge output" % (s, tooManyAnalyzersLimit)
             else:
                 raise Exception("Total number of analyzers (%d) exceeds the suggested limit (%d). If you're sure you want to run so many analyzers, add 'allowTooManyAnalyzers=True' to the ConfigBuilder() constructor call." % (s, tooManyAnalyzersLimit))
+
+    def getAnalyzerModuleNames(self):
+        names = []
+        for x in self.numberOfAnalyzers.itervalues():
+            names.extend(x)
+        return names        
 
     ## Do the actual building of the configuration
     #
@@ -451,7 +455,10 @@ class ConfigBuilder:
             fileNames = cms.untracked.vstring()
         )
         if self.useDefaultInputFiles:
-            process.source.fileNames.append(self.dataVersion.getAnalysisDefaultFileMadhatter())
+            if self.options.doPat == 0:
+                process.source.fileNames.append(self.dataVersion.getAnalysisDefaultFileMadhatter())
+            else:
+                process.source.fileNames.append(self.dataVersion.getPatDefaultFileMadhatter())
         if self.options.tauEmbeddingInput != 0:
             if self.options.doPat != 0:
                 raise Exception("In tau embedding input mode, doPat must be 0 (from v44_4 onwards)")
@@ -530,34 +537,35 @@ class ConfigBuilder:
     # \param process  cms.Process object
     # \param param    HChSignalAnalysisParameters_cff module object
     def _useBTagDB(self, process, param):
-       if not self.useBTagDB:
-           return
-       else: 
-           process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGCSV_hplusBtagDB_TTJets")
-           process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.BTagPerformanceProducer_cfi")
-           #param.btagging.discriminator = 
-           
-       ## else:
-##            process.load("CondCore.DBCommon.CondDBCommon_cfi")
-##         #MC measurements 
-##            process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
-##            process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
-##         #Data measurements
-##            process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
-##            process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
-##         #User DB for btag eff
-##            if options.runOnCrab != 0:
-##                print "BTagDB: Assuming that you are running on CRAB"
-##                btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
-##            else:
-##                print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
-##             # This way signalAnalysis can be ran from any directory
-##                import os
-##                btagDB = "sqlite_file:%s/src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db" % os.environ["CMSSW_BASE"]
-##            process.CondDBCommon.connect = btagDB
-##            process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
-##            process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
-##            param.bTagging.UseBTagDB  = False
+        if not self.useBTagDB:
+            return
+
+        process.load("CondCore.DBCommon.CondDBCommon_cfi")
+        #MC measurements
+        process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
+        process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
+            
+        #Data measurements
+        process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB2013")
+        process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB2013")
+#        process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
+#        process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+        #User DB for btag eff
+        if options.runOnCrab != 0:
+            print "BTagDB: Assuming that you are running on CRAB"  
+            btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
+        else:
+            print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"                                      
+            # This way signalAnalysis can be ran from any directory                                                                                                                         
+            import os                                                                                                                                                                       
+            btagDB = "sqlite_file:%s/src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db" % os.environ["CMSSW_BASE"]
+        process.CondDBCommon.connect = btagDB
+        #process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
+        #process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
+        process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGCSVM_hplusBtagDB_TTJets")
+        process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGCSVM_hplusBtagDB_TTJets")
+        param.bTagging.UseBTagDB  = False
+
 
     ## Setup for tau embedding input
     #

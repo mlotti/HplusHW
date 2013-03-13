@@ -9,20 +9,20 @@ cfg = "signalAnalysis_cfg.py"
 multicrab = Multicrab("crab_analysis.cfg", cfg)
 
 # Select the workflow (version corresponds to pattuples)
-#workflow = "analysis_v44_4"
+#workflow = "analysis_v44_5"
 
 # Tau+MET trigger
-workflow = "analysis_taumet_v53_1"
+workflow = "analysis_taumet_v53_2"
 
 # QuadJet80 tritgger
-#workflow = "analysis_quadjet_v53_1"
+#workflow = "analysis_quadjet_v53_2"
 
 # QuadJet75_55_38_20_BTagIP_VBF trigger
-#workflow = "analysis_quadjetbtag_v53_1"
+#workflow = "analysis_quadjetbtag_v53_2"
 
 # QuadPFJet75_55_38_20_BTagCSV_VBF trigger for data
 # QuadPFJetXX_61_44_31_BTagCSV_VBF trigger for MC, XX specified below with mc_pfjettrigger variable
-#workflow = "analysis_quadpfjetbtag_v53_1"
+#workflow = "analysis_quadpfjetbtag_v53_2"
 mc_pfjettrigger = "78"
 #mc_pfjettrigger = "82"
 
@@ -38,6 +38,11 @@ runPatOnTheFly = False
 #runPatOnTheFly = True
 if runPatOnTheFly:
     raise Exception("runPatOnTheFly is not supported ATM")
+
+# For minimal set of datasets remove the 200k signal samples, and
+# single top signal samples
+minimalDatasets = True
+minimalDatasets = False
 
 
 # Uncomment below the datasets you want to process
@@ -87,11 +92,11 @@ datasetsMC_2011 = [
         "QCD_Pt120to170_TuneZ2_Fall11",
         "QCD_Pt170to300_TuneZ2_Fall11",
         "QCD_Pt300to470_TuneZ2_Fall11",
-#       "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
         "TTJets_TuneZ2_Fall11",
         "WJets_TuneZ2_Fall11",
+        "W1Jets_TuneZ2_Fall11",
         "W2Jets_TuneZ2_Fall11",
-        "W3Jets_TuneZ2_Fall11",
+        "W3Jets_TuneZ2_v2_Fall11",
         "W4Jets_TuneZ2_Fall11",
         "DYJetsToLL_M50_TuneZ2_Fall11",
         "T_t-channel_TuneZ2_Fall11",
@@ -111,9 +116,10 @@ datasetsData_Tau_2012 = [
     "Tau_191043-193621_2012A_Jul13",
     "Tau_193834-196531_2012B_Jul13",
     "Tau_198022-198523_2012C_Aug24",
-    "Tau_198941-200601_2012C_Prompt",
-    "Tau_200961-202504_2012C_Prompt",
-    "Tau_202792-203742_2012C_Prompt",
+    "Tau_198941-202504_2012C_Prompt",
+    "Tau_201191-201191_2012C_Dec11",
+    "Tau_202972-203742_2012C_Prompt",
+    "Tau_203777-208686_2012D_Prompt",
 ]
 
 datasetsData_MultiJet_2012 = [
@@ -123,12 +129,25 @@ datasetsData_MultiJet_2012 = [
     "MultiJet_193834-194225_2012B_Jul13",
     "MultiJet_194270-196531_2012B_Jul13",
     "MultiJet_198022-198523_2012C_Aug24",
-    "MultiJet_198941-200601_2012C_Prompt",
-    "MultiJet_200961-202504_2012C_Prompt",
-    "MultiJet_202792-203742_2012C_Prompt",
+    "MultiJet_198941-203742_2012C_Prompt",
+    "MultiJet_203777-208686_2012D_Prompt",
 ]
 
-datasetsMC_2012 = [
+datasetsData_BJetPlusX_2012 = [
+    "MultiJet_190456-190738_2012A_Jul13",
+    "MultiJet_190782-190949_2012A_Aug06",
+    "MultiJet_191043-193621_2012A_Jul13",
+    "BJetPlusX_193834-194225_2012B_Jul13",
+    "BJetPlusX_194270-196531_2012B_Jul13",
+    "BJetPlusX_198022-198523_2012C_Aug24",
+    "BJetPlusX_198941-203742_2012C_Prompt",
+    "BJetPlusX_201191-201191_2012C_Dec11",
+    "BJetPlusX_203777-208686_2012D_Prompt",
+]
+
+datasetsMC_2012 = []
+if not minimalDatasets:
+    datasetsMC_2012.extend([
     "TTToHplusBWB_M80_Summer12",
     "TTToHplusBWB_M90_Summer12",
     "TTToHplusBWB_M100_Summer12",
@@ -139,13 +158,30 @@ datasetsMC_2012 = [
     "TTToHplusBWB_M160_Summer12",
 
     "TTToHplusBHminusB_M80_Summer12",
-#    "TTToHplusBHminusB_M90_Summer12",
     "TTToHplusBHminusB_M100_Summer12",
     "TTToHplusBHminusB_M120_Summer12",
     "TTToHplusBHminusB_M140_Summer12",
     "TTToHplusBHminusB_M150_Summer12",
     "TTToHplusBHminusB_M155_Summer12",
     "TTToHplusBHminusB_M160_Summer12",
+
+    "Hplus_taunu_t-channel_M80_Summer12",
+    "Hplus_taunu_t-channel_M90_Summer12",
+    "Hplus_taunu_t-channel_M100_Summer12",
+    "Hplus_taunu_t-channel_M120_Summer12",
+    "Hplus_taunu_t-channel_M140_Summer12",
+    "Hplus_taunu_t-channel_M150_Summer12",
+    "Hplus_taunu_t-channel_M155_Summer12",
+    "Hplus_taunu_t-channel_M160_Summer12",
+
+    "Hplus_taunu_tW-channel_M80_Summer12",
+    "Hplus_taunu_tW-channel_M90_Summer12",
+    "Hplus_taunu_tW-channel_M100_Summer12",
+    "Hplus_taunu_tW-channel_M120_Summer12",
+    "Hplus_taunu_tW-channel_M140_Summer12",
+    "Hplus_taunu_tW-channel_M150_Summer12",
+    "Hplus_taunu_tW-channel_M155_Summer12",
+    "Hplus_taunu_tW-channel_M160_Summer12",
 
     "Hplus_taunu_s-channel_M80_Summer12",
     "Hplus_taunu_s-channel_M90_Summer12",
@@ -162,6 +198,36 @@ datasetsMC_2012 = [
     "HplusTB_M220_Summer12",
     "HplusTB_M250_Summer12",
     "HplusTB_M300_Summer12",
+    ])
+
+datasetsMC_2012.extend([
+    "TTToHplusBWB_M80_ext_Summer12",
+    "TTToHplusBWB_M90_ext_Summer12",
+    "TTToHplusBWB_M100_ext_Summer12",
+    "TTToHplusBWB_M120_ext_Summer12",
+    "TTToHplusBWB_M140_ext_Summer12",
+    "TTToHplusBWB_M150_ext_Summer12",
+    "TTToHplusBWB_M155_ext_Summer12",
+    "TTToHplusBWB_M160_ext_Summer12",
+
+    "TTToHplusBHminusB_M80_ext_Summer12",
+    "TTToHplusBHminusB_M90_Summer12",
+    "TTToHplusBHminusB_M100_ext_Summer12",
+    "TTToHplusBHminusB_M120_ext_Summer12",
+    "TTToHplusBHminusB_M140_ext_Summer12",
+    "TTToHplusBHminusB_M150_ext_Summer12",
+    "TTToHplusBHminusB_M155_ext_Summer12",
+    "TTToHplusBHminusB_M160_ext_Summer12",
+
+    "HplusTB_M180_ext_Summer12",
+    "HplusTB_M190_ext_Summer12",
+    "HplusTB_M200_ext_Summer12",
+    "HplusTB_M220_ext_Summer12",
+    "HplusTB_M250_ext_Summer12",
+    "HplusTB_M300_ext_Summer12",
+    "HplusTB_M400_Summer12",
+    "HplusTB_M500_Summer12",
+    "HplusTB_M600_Summer12",
 
     "QCD_Pt30to50_TuneZ2star_Summer12",
     "QCD_Pt50to80_TuneZ2star_Summer12",
@@ -191,13 +257,12 @@ datasetsMC_2012 = [
     "Tbar_tW-channel_TuneZ2star_Summer12",
     "T_s-channel_TuneZ2star_Summer12",
     "Tbar_s-channel_TuneZ2star_Summer12",
-]
+])
 
 def mcWorkflow():
     if "quadpfjetbtag" in workflow:
         return workflow.replace("quadpfjetbtag", "quadpfjet%sbtag" % mc_pfjettrigger)
     return workflow
-
 # Disable W+jets weighting if requested
 if not doWJetsWeighting:
     for name in [
@@ -223,11 +288,14 @@ elif "v53" in workflow:
     if "taumet" in workflow:
         datasets.extend(datasetsData_Tau_2012)
         datasets.extend(datasetsMC_2012)
-    elif "quadjet" in workflow:
+    elif "quadjet_" in workflow:
         datasets.extend(datasetsData_MultiJet_2012)
         datasets.extend(datasetsMC_2012)
-    elif "quadpfjet" in workflow:
-        datasets.extend(datasetsData_MultiJet_2012)
+    elif "quadjetbtag" in workflow:
+        datasets.extend(datasetsData_BJetPlusX_2012)
+        datasets.extend(datasetsMC_2012)
+    elif "quadpfjetbtag" in workflow:
+        datasets.extend(datasetsData_BJetPlusX_2012)
     else:
         raise Exception("Unsupported workflow %s" % workflow)
 

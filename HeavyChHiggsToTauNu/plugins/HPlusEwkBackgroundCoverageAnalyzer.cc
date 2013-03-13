@@ -395,7 +395,7 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
 HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm::ParameterSet& iConfig):
   fEventWeight(iConfig),
   fHistoWrapper(fEventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
-  eventCounter(iConfig, fEventWeight, fHistoWrapper),
+  eventCounter(iConfig, fEventWeight, fHistoWrapper, HPlus::HistoWrapper::kSystematics),
   fGenParticleSrc(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
   fEmbeddingMuonSrc(iConfig.getUntrackedParameter<edm::InputTag>("embeddingMuonSrc")),
   fVertexSrc(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc")),

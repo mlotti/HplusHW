@@ -46,8 +46,8 @@ config = {
         "recoProcess": "RECO",
 #        "signalTrigger": "HLT_IsoPFTau35_Trk20_MET60_v2",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-08Nov2011-v1/AOD/E8B13C66-A70B-E111-B8C5-001EC9B09F59.root",
-        # trigger HLT_IsoPFTau35_Trk20_MET45_v4 
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau/Run2011A_08Nov2011_v1_AOD_160431_pattuple_v44_4/22fa40c1fbac4684dd3ccb0e713bd4b5/pattuple_103_1_Gr3.root",
+        # trigger HLT_MediumIsoPFTau35_Trk20_MET60_v1
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_173236-173692_2011A_Nov08/Tau/Run2011A_08Nov2011_v1_AOD_173236_173692_pattuple_v44_5/1b3ed6acb33bc8106ac34fb558c6831f/pattuple_28_1_fzD.root",
     },
     "44Xmc_highPU": {
         "simProcess": "SIM",
@@ -63,7 +63,7 @@ config = {
         "recoProcess": "RECO",
         "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/28ACFF78-0237-E111-97C7-00261894397B.root", 
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/f16be938188c46248667b60f0c9e7452/pattuple_7_1_ozc.root", # TTJets, v44_4
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5/778bc6993dea1b89668515c3036cbe70/pattuple_9_1_6C1.root", # TTJets, v44_5
     },
     "44XmcAve32": {
         "simProcess": "SIM",
@@ -74,34 +74,47 @@ config = {
         "patMadhatter": "file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root",
     },
     "53Xdata13Jul2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
-        "globalTag": "FT_53_V6_AN2::All",
+        "globalTag": "FT_53_V6C_AN3::All",
 #        "signalTrigger": ["HLT_QuadJet80_v2", "HLT_QuadJet75_55_38_20_BTagIP_VBF_v3", "HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"],
 #        "patMadhatter": "file:/mnt/flustre/mkortela/data/MultiJet/Run2012A-13Jul2012-v1/AOD/F4740DF9-26D6-E111-9BA6-003048FFD71E.root", # run 191700
+#        "signalTrigger": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+#        "patMadhatter": "file:/mnt/flustre/mkortela/data/BJetPlusX/Run2012B-13Jul2012-v1/AOD/FAD4AE2E-C8D4-E111-8B06-003048FFD728.root", # run 194424
+#        "signalTrigger": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4", "HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+#        "patMadhatter": "file:/mnt/flustre/mkortela/data/BJetPlusX/Run2012B-13Jul2012-v1/AOD/56624F47-77D3-E111-A63A-003048FFD760.root", # run 194050
+#        "signalTrigger": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4", "HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+#        "patMadhatter": "file:/mnt/flustre/mkortela/data/BJetPlusX/Run2012B-13Jul2012-v1/AOD/ACDDA8FD-E0D3-E111-B696-00304867924E.root", # run 194108-194224
+#
+#         "signalTrigger": ["HLT_QuadJet80_v1"]
+#         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/MultiJet_190456-190738_2012A_Jul13/MultiJet/Run2012A_13Jul2012_v1_AOD_190456_190738_pattuple_v53_2/96fa41b5518123a49a7bd0a10242f655/pattuple_29_1_ODs.root", # runs 190482-190688
     },
     "53Xdata06Aug2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
-        "globalTag": "FT_53_V6C_AN2::All",
+        "globalTag": "FT_53_V6C_AN3::All",
     },
     "53Xdata24Aug2012": {
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
-        "globalTag": "FT_53_V10_AN2::All",
+        "globalTag": "FT53_V10A_AN3::All",
 #        "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2012C-24Aug2012-v1/AOD/02698B5A-A0EE-E111-B4FB-0025901D4AF4.root",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/Tau_198022-198523_2012C_Aug24/Tau/Run2012C_24Aug2012_v1_AOD_198022_198523_pattuple_v53_2/63ff13540867be423a0bd89ddcd239a1/pattuple_98_1_c19.root",
     },
     "53XdataPromptCv2": {"triggerProcess": "HLT", "recoProcess": "RECO",
-        "globalTag": "GR_P_V41_AN2::All",
+        "globalTag": "GR_P_V42_AN3::All",
+    },
+    "53Xdata11Dec2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
+        "globalTag": "FT_P_V42C_AN3::All",
     },
     "53XdataPromptDv1": {"triggerProcess": "HLT", "recoProcess": "RECO",
-        "globalTag": "GR_P_V42_AN2::All",
+        "globalTag": "GR_P_V42_AN3::All",
     },
     "53XmcS10": {
         "simProcess": "SIM",
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
-        "globalTag": "START53_V7F::All",
+        "globalTag": "START53_V15::All",
         "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM/E6FBC572-20F5-E111-9CBD-00215E21DC60.root",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/TTToHplusBWB_M120_Summer12/TTToHplusBWB_M-120_8TeV-pythia6-tauola/Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1/cad8d1056ca20d363262a3efa1d97a74/pattuple_9_1_sH1.root"
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/TTToHplusBWB_M120_Summer12/TTToHplusBWB_M-120_8TeV-pythia6-tauola/Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_2/f3f6db3988d554ca655ef290b2e69c3e/pattuple_2_1_mkW.root"
     }
 }
 

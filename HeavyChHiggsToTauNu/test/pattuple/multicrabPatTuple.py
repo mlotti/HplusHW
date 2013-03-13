@@ -10,9 +10,10 @@ datasets_Tau = [
     "Tau_191043-193621_2012A_Jul13",
     "Tau_193834-196531_2012B_Jul13",
     "Tau_198022-198523_2012C_Aug24",
-    "Tau_198941-200601_2012C_Prompt",
-    "Tau_200961-202504_2012C_Prompt",
-    "Tau_202792-203742_2012C_Prompt",
+    "Tau_198941-202504_2012C_Prompt",
+    "Tau_201191-201191_2012C_Dec11",
+    "Tau_202972-203742_2012C_Prompt",
+    "Tau_203777-208686_2012D_Prompt",
 ]
 
 datasets_MultiJet = [
@@ -22,9 +23,17 @@ datasets_MultiJet = [
     "MultiJet_193834-194225_2012B_Jul13",
     "MultiJet_194270-196531_2012B_Jul13",
     "MultiJet_198022-198523_2012C_Aug24",
-    "MultiJet_198941-200601_2012C_Prompt",
-    "MultiJet_200961-202504_2012C_Prompt",
-    "MultiJet_202792-203742_2012C_Prompt",
+    "MultiJet_198941-203742_2012C_Prompt",
+    "MultiJet_203777-208686_2012D_Prompt",
+]
+
+datasets_BJetPlusX = [
+    "BJetPlusX_193834-194225_2012B_Jul13",
+    "BJetPlusX_194270-196531_2012B_Jul13",
+    "BJetPlusX_198022-198523_2012C_Aug24",
+    "BJetPlusX_198941-203742_2012C_Prompt",
+    "BJetPlusX_201191-201191_2012C_Dec11",
+    "BJetPlusX_203777-208686_2012D_Prompt",
 ]
 
 datasets_Signal = [
@@ -47,7 +56,7 @@ datasets_Signal = [
     "TTToHplusBWB_M160_ext_Summer12",
 
     "TTToHplusBHminusB_M80_Summer12",
-#    "TTToHplusBHminusB_M90_Summer12",
+    "TTToHplusBHminusB_M90_Summer12",
     "TTToHplusBHminusB_M100_Summer12",
     "TTToHplusBHminusB_M120_Summer12",
     "TTToHplusBHminusB_M140_Summer12",
@@ -56,7 +65,6 @@ datasets_Signal = [
     "TTToHplusBHminusB_M160_Summer12",
 
     "TTToHplusBHminusB_M80_ext_Summer12",
-#    "TTToHplusBHminusB_M90_ext_Summer12",
     "TTToHplusBHminusB_M100_ext_Summer12",
     "TTToHplusBHminusB_M120_ext_Summer12",
     "TTToHplusBHminusB_M140_ext_Summer12",
@@ -105,7 +113,7 @@ datasets_Signal = [
     "HplusTB_M190_ext_Summer12",
     "HplusTB_M200_ext_Summer12",
     "HplusTB_M220_ext_Summer12",
-#    "HplusTB_M250_ext_Summer12",
+    "HplusTB_M250_ext_Summer12",
     "HplusTB_M300_ext_Summer12",
 ]
 
@@ -148,11 +156,12 @@ datasets_SingleTop = [
     "Tbar_s-channel_TuneZ2star_Summer12",
 ]
 
-workflow = "pattuple_v53_1_2"
+workflow = "pattuple_v53_2"
 
 tasks = [
     ("Tau", datasets_Tau),
     ("MultiJet", datasets_MultiJet),
+    ("BJetPlusX", datasets_BJetPlusX),
     ("Signal", datasets_Signal),
     ("QCD_VV_SingleTop", datasets_QCD+datasets_VV+datasets_SingleTop),
     ("TT_EWK", datasets_TT_EWK),
@@ -175,7 +184,7 @@ for midfix, datasets in tasks:
     # writing to /store/group/local ...
     #multicrab.appendLineAll("USER.local_stage_out=1")
 
-    multicrab.appendLineAll("GRID.maxtarballsize = 35")
+    #multicrab.appendLineAll("GRID.maxtarballsize = 35")
 
     #def addCopyConfig(dataset):
     #    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
@@ -184,7 +193,7 @@ for midfix, datasets in tasks:
 
     multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
-    prefix = "multicrab_"+midfix
+    prefix = "multicrab_"+workflow+"_"+midfix
     configOnly = False # Create task configuration only?
     configOnly = True
     # Leave configOnly as false and specify site whitelist on command line when submitting the jobs

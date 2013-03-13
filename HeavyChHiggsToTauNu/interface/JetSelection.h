@@ -71,6 +71,7 @@ namespace HPlus {
       const double getDeltaPhiMHTTau() const { return fDeltaPhiMHTTau; }
       // Jet corresponding to tau
       const edm::Ptr<pat::Jet> getReferenceJetToTau() const { return fReferenceJetToTau; }
+      const double getReferenceJetToTauMatchDeltaR() const { return fReferenceJetToTauDeltaR; }
       const int getReferenceJetToTauPartonFlavour() const;
       const double getReferenceJetToTauDeltaPt() const { return fReferenceJetToTauDeltaPt; }
       const double getReferenceJetToTauPtRatio() const { return fReferenceJetToTauPtRatio; }
@@ -109,6 +110,7 @@ namespace HPlus {
       double fDeltaPhiMHTTau;
       // Jet corresponding to tau
       edm::Ptr<pat::Jet> fReferenceJetToTau;
+      double fReferenceJetToTauDeltaR;
       double fReferenceJetToTauDeltaPt;
       double fReferenceJetToTauPtRatio;
     };
@@ -118,6 +120,7 @@ namespace HPlus {
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
     // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices = 1);
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices = 1);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices = 1);
 

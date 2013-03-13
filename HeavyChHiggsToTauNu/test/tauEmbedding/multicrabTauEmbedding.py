@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 
+import os
 import re
+import time
 from optparse import OptionParser
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 # Default processing step
-#defaultStep = "skim"
+defaultStep = "skim"
 #defaultStep = "embedding"
-defaultStep = "analysis"
+#defaultStep = "analysis"
 #defaultStep = "analysisTau"
 #defaultStep = "signalAnalysis"
 #defaultStep = "signalAnalysisGenTau"
@@ -48,10 +50,12 @@ defaultVersions = [
 #    "v44_4_2_muiso0"
 #    "v44_4_2_muiso1"
 
-    "v44_4_2_seed0",
+#    "v44_4_2_seed0",
 #    "v44_4_2_seed1"
+
+    "v44_5" # skim version
 ]
-skimVersion = "v44_4_2"
+skimVersion = "v44_5"
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,         "config": "muonSkim_cfg.py"},
@@ -196,17 +200,31 @@ def main():
 def createTasks(opts, step, version=None):
     # Pick crab.cfg
     crabcfg = "crab.cfg"
+    crabcfgtemplate = None
+    scheduler = "arc"
     if step in ["analysis", "analysisTau", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis"]:
-        crabcfg = "../crab_analysis.cfg"
+        crabcfg = None
+        if "HOST" in os.environ and "lxplus" in os.environ["HOST"]:
+            scheduler = "remoteGlidein"
+        args = {}
+        if step in "analysisTau":
+            args["copy_data"] = True
+            args["userLines"] = [
+                "user_remote_dir = analysisTau_%s" % time.strftime("%y%m%d_%H%M%S"),
+                "storage_element = T2_FI_HIP"
+                ]
+        else:
+            args["return_data"] = True
+        crabcfgtemplate = crabCfgTemplate(scheduler=scheduler, **args)
 
     # Setup directory naming
     dirName = ""
-    if step in ["embedding", "analysis", "signalAnalysis", "EWKMatching"]:
+    if step in ["skim", "embedding", "analysis", "signalAnalysis", "EWKMatching"]:
         dirName += "_"+version
     dirName += opts.midfix
 
     # Create multicrab
-    multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
+    multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..", crabConfigTemplate=crabcfgtemplate)
 
 
     # Select the datasets based on the processing step and data era
@@ -230,15 +248,16 @@ def createTasks(opts, step, version=None):
 
     multicrab.extendDatasets(workflow, datasets)
 
-    multicrab.appendLineAll("GRID.maxtarballsize = 30")
+    if scheduler == "arc":
+        multicrab.appendLineAll("GRID.maxtarballsize = 30")
 #    if not step in ["skim", "analysisTau"]:
 #        multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
     if step in ["ewkBackgroundCoverageAnalysis"]:
         multicrab.addCommonLine("CMSSW.output_file = histograms.root")
 
     # Let's do the naming like this until we get some answer from crab people
-    if step in ["skim", "embedding"]:
-        multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
+    #if step in ["skim", "embedding"]:
+    #    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
 
     # For this workflow we need one additional command line argument
     if step == "signalAnalysisGenTau":
@@ -251,12 +270,11 @@ def createTasks(opts, step, version=None):
 
     # Create multicrab task(s)
     prefix = "multicrab_"+step+dirName
-    taskDirs = multicrab.createTasks(configOnly = opts.configOnly, prefix=prefix, over500JobsMode=Multicrab.SPLIT)
+    taskDirs = multicrab.createTasks(configOnly = opts.configOnly, prefix=prefix)
         
     # patch CMSSW.sh
     if not opts.configOnly and step in ["skim", "embedding"]:
         import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
-        import os
         for td, dsets in taskDirs:
             os.chdir(td)
             patch.main(Wrapper(dirs=dsets, input={"skim": "skim",

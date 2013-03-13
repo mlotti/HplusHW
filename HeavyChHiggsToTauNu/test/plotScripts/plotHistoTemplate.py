@@ -27,7 +27,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 analysis = "signalAnalysis"
 # Data era affects on the set of selected data datasets, and the PU
 # weights (via TDirectory name in histograms.root)
-dataEra = "Run2011A" #dataEra = "Run2011B" #dataEra = "Run2011AB"
+#dataEra = "Run2011A" #dataEra = "Run2011B" #dataEra = "Run2011AB"
+dataEra = "Run2012AB"
 
 mcOnly = False
 #mcOnly = True
@@ -75,6 +76,7 @@ def main():
     # Remove signals other than M120
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M%d"%lightHplusMassPoint in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_" in name, datasets.getAllDatasetNames()))
 
     # Change legend creator defaults
     histograms.createLegend.moveDefaults(dx=-0.05)
@@ -85,8 +87,14 @@ def main():
     #xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
     histograms.createSignalText.set(mass=lightHplusMassPoint)
 
-    # Merge signals into one dataset (per mass point)
+    # Merge TT->WH+ and TT->H+H- signals into one dataset (per mass point)
     plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
+
+    # Merge T->H+ signals into one dataset (per mass point)
+    #plots.mergeSingleTopHplus(datasets)
+
+    # Merge TT->WH+, TT->H+H-, and T->H+ signals into one dataset (per mass point)
+    #plots.mergeLightHplus(datasets)
 
     # Replace signal dataset with a signal+background dataset, where
     # the BR(t->H+) is taken into account for SM ttbar

@@ -91,33 +91,44 @@ datasets = DatasetSet([
     # Tau, Run2011A
     # Need two definitions, first is for pattuples, second is for
     # trigger MET-leg (first run of single tau trigger is 165970)
-    DataDataset("Tau_%s_2011A_Nov08",      runs=(160431, 167913), aod="/Tau/Run2011A-08Nov2011-v1/AOD"),
+    DataDataset("Tau_%s_2011A_Nov08",      runs=(160431, 167913), aod="/Tau/Run2011A-08Nov2011-v1/AOD"), # 20819377 events, 772 files
     DataDataset("Tau_%s_2011A_Nov08",      runs=(165970, 167913), aod="/Tau/Run2011A-08Nov2011-v1/AOD"),
-    #
-    DataDataset("Tau_%s_2011A_Nov08",      runs=(170722, 173198), aod="/Tau/Run2011A-08Nov2011-v1/AOD"), # break of range because of trigger eff. boundary
-    DataDataset("Tau_%s_2011A_Nov08",      runs=(173236, 173692), aod="/Tau/Run2011A-08Nov2011-v1/AOD"), # break of range because of trigger eff. boundary
+    # break of range because of trigger eff. boundary
+    DataDataset("Tau_%s_2011A_Nov08",      runs=(170722, 173198), aod="/Tau/Run2011A-08Nov2011-v1/AOD"), # 11790094 events, 476 files
+    DataDataset("Tau_%s_2011A_Nov08",      runs=(173236, 173692), aod="/Tau/Run2011A-08Nov2011-v1/AOD"), # 5402857 events, 241 files
     # Tau, Run2011B
-    DataDataset("Tau_%s_2011B_Nov19",      runs=(175832, 180252), aod="/Tau/Run2011B-19Nov2011-v1/AOD"),
+    DataDataset("Tau_%s_2011B_Nov19",      runs=(175832, 180252), aod="/Tau/Run2011B-19Nov2011-v1/AOD"), # 11511371 evetns, 640 files
 ])
 datasets.extend([
     # SingleMu, Run2011A
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(160431, 163261), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(163270, 163869), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(165088, 166150), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    #
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(166161, 166164), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(166346, 166346), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(166374, 167043), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(167078, 167913), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(170722, 172619), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(172620, 173198), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(173236, 173692), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
+    DataDataset("SingleMu_%s_2011A_Nov08", runs=(160431, 173692), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
     # SingleMu, Run2011B
-    DataDataset("SingleMu_%s_2011B_Nov19", runs=(173693, 177452), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011B_Nov19", runs=(177453, 178380), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011B_Nov19", runs=(178411, 179889), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011B_Nov19", runs=(179942, 180371), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"),
+    DataDataset("SingleMu_%s_2011B_Nov19", runs=(173693, 180371), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"), # for backward compatibility only
+    DataDataset("SingleMu_%s_2011B_Nov19", runs=(175832, 180252), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"), # 50367238 events, 3431 files
 ])
+# Split for backward compatibility, also for Mu-trigger thresholds
+datasets.splitDataByRuns("SingleMu_160431-173692_2011A_Nov08", [
+        (160431, 163261), # 38372194 events, 1415 files
+        (163270, 163869), # 27672323 events, 1062 files
+        (165088, 166150), # 30978754 events, 1202 files
+        (166161, 166164),       
+        (166346, 166346),
+        (166374, 167043),
+        (167078, 167913),
+        (170722, 172619),
+        (172620, 173198),
+        (173236, 173692), # 14714495 events, 660 files
+        ])
+datasets.splitDataByRuns("SingleMu_173693-180371_2011B_Nov19", [
+        (173693, 177452),
+        (177453, 178380),
+        (178411, 179889),
+        (179942, 180371),
+        ])
+# Split for Mu-trigger thresholds
+datasets.splitDataByRuns("SingleMu_160431-173692_2011A_Nov08", [
+        (166161, 173198), # 76283557 events, 3067 files
+        ])
 datasets.splitDataByRuns("SingleMu_165088-166150_2011A_Nov08", [
         (165088, 165633), # Split this run range into two (and keep original),
         (165970, 166150), # because IsoMu trigger changes between them
@@ -164,12 +175,14 @@ datasets.extend([
     MCDataset("ZZ_TuneZ2_Fall11", aod="/ZZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
     # EWK madgraph
     MCDataset("TTJets_TuneZ2_Fall11",             aod="/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
-    MCDataset("WJets_TuneZ2_Fall11",              aod="/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("WJets_TuneZ2_Fall11",              aod="/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # 81345381 events
+    MCDataset("W1Jets_TuneZ2_Fall11",             aod="/W1Jet_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # 76051609 events
     MCDataset("W2Jets_TuneZ2_Fall11",             aod="/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
     MCDataset("W3Jets_TuneZ2_Fall11",             aod="/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("W3Jets_TuneZ2_v2_Fall11",          aod="/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v2/AODSIM"), # has replaced v1
     MCDataset("W4Jets_TuneZ2_Fall11",             aod="/W4Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
-    MCDataset("DYJetsToLL_M50_TuneZ2_Fall11",     aod="/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
-    MCDataset("DYJetsToLL_M10to50_TuneZ2_Fall11", aod="/DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("DYJetsToLL_M50_TuneZ2_Fall11",     aod="/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # 36264432 events
+    MCDataset("DYJetsToLL_M10to50_TuneZ2_Fall11", aod="/DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # 31480628 events
     # SingleTop Powheg
     MCDataset("T_t-channel_TuneZ2_Fall11",     aod="/T_TuneZ2_t-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
     MCDataset("Tbar_t-channel_TuneZ2_Fall11",  aod="/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
@@ -195,6 +208,7 @@ datasets.extend([
     # Run212C
     DataDataset("Tau_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/Tau/Run2012C-24Aug2012-v1/AOD"), # 2212448 events, 190 files
     DataDataset("Tau_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 29597169 events, 2865 files
+    DataDataset("Tau_%s_2012C_Dec11",     reco="11Dec2012", runs=(201191, 201191), aod="/Tau/Run2012C-EcalRecover_11Dec2012-v1/AOD"), # 579104 events, 59 files
     # Run2012D
     DataDataset("Tau_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/Tau/Run2012D-PromptReco-v1/AOD"), # 34164175 events, 3593 files
 ])
@@ -208,7 +222,12 @@ datasets.splitDataByRuns("Tau_198941-203742_2012C_Prompt", [
         (200961, 202504), # 14232091 events, 1381 files  <--- This one has periods with 0T field
         (202792, 203742), # 1324177 events, 149 files
         ])
-
+# Splitting here because the last part of Run2012C has the fix for
+# high-pt taus
+datasets.splitDataByRuns("Tau_198941-203742_2012C_Prompt", [
+        (198941, 202504), # 28272992 events, 2716 files
+        (202972, 203742), # 1271834 events, 136 files
+])
 # MultiJet PD, QuadJet trigger for signal
 datasets.extend([
     # Run2012A
@@ -245,6 +264,7 @@ datasets.extend([
     # Run212C
     DataDataset("BJetPlusX_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/BJetPlusX/Run2012C-24Aug2012-v2/AOD"), # 2650602 events, 276 files
     DataDataset("BJetPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/BJetPlusX/Run2012C-PromptReco-v2/AOD"), # 33847953 events, 3420 files
+    DataDataset("BJetPlusX_%s_2012C_Dec11",     reco="11Dec2012", runs=(201191, 201191), aod="/BJetPlusX/Run2012C-EcalRecover_11Dec2012-v1/AOD"), # 668183 eventsm, 76 files
     # Run2012D
     DataDataset("BJetPlusX_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/BJetPlusX/Run2012D-PromptReco-v1/AOD"), # 40966073 events, 4467 files
 ])
@@ -263,7 +283,10 @@ datasets.extend([
     DataDataset("TauPlusX_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/TauPlusX/Run2012B-13Jul2012-v1/AOD"), # 39410283 events, 3013 files
     # Run212C
     DataDataset("TauPlusX_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/TauPlusX/Run2012C-24Aug2012-v1/AOD"), # 4067828 events, 313 files
-    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
+#    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
+    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 199608), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #                                   
+    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(199698, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
+    DataDataset("TauPlusX_%s_2012C_Dec11",     reco="11Dec2012", runs=(201191, 201191), aod="/TauPlusX/Run2012C-EcalRecover_11Dec2012-v1/AOD"), # 962881 events, 94 files
     # Run2012D
     DataDataset("TauPlusX_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/TauPlusX/Run2012D-PromptReco-v1/AOD"), # 59840242 events, 6068 files
 ])
@@ -278,6 +301,7 @@ datasets.extend([
     # SingleMu, Run212C
     DataDataset("SingleMu_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/SingleMu/Run2012C-24Aug2012-v1/AOD"), # 6076746 events, 460 files
     DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"), # 81770645 events, 7450 files
+    DataDataset("SingleMu_%s_2012C_Dec11",     reco="11Dec2012", runs=(201191, 201191), aod="/SingleMu/Run2012C-EcalRecover_11Dec2012-v1/AOD"), # 1619573 events, 145 files
     # SingleMu, Run2012D
     DataDataset("SingleMu_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/SingleMu/Run2012D-PromptReco-v1/AOD"), # 90255013 events, 8886 files
 ])
@@ -306,7 +330,7 @@ datasets.extend([
     MCDataset("TTToHplusBWB_M160_ext_Summer12", aod="/TTToHplusBWB_M-160_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     # Signal, tt -> H+H-, 200 kevt/sample
     MCDataset("TTToHplusBHminusB_M80_Summer12",  aod="/TTToHplusBHminusB_M-80_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-#    MCDataset("TTToHplusBHminusB_M90_Summer12",  aod="/TTToHplusBHminusB_M-90_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
+    MCDataset("TTToHplusBHminusB_M90_Summer12",  aod="/TTToHplusBHminusB_M-90_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"), # 1 Mevt
     MCDataset("TTToHplusBHminusB_M100_Summer12", aod="/TTToHplusBHminusB_M-100_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
     MCDataset("TTToHplusBHminusB_M120_Summer12", aod="/TTToHplusBHminusB_M-120_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
     MCDataset("TTToHplusBHminusB_M140_Summer12", aod="/TTToHplusBHminusB_M-140_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
@@ -315,7 +339,6 @@ datasets.extend([
     MCDataset("TTToHplusBHminusB_M160_Summer12", aod="/TTToHplusBHminusB_M-160_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
     # (Probably) extension, 1 Mevt/sample
     MCDataset("TTToHplusBHminusB_M80_ext_Summer12",  aod="/TTToHplusBHminusB_M-80_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
-#    MCDataset("TTToHplusBHminusB_M90_ext_Summer12",  aod=""),
     MCDataset("TTToHplusBHminusB_M100_ext_Summer12", aod="/TTToHplusBHminusB_M-100_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("TTToHplusBHminusB_M120_ext_Summer12", aod="/TTToHplusBHminusB_M-120_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("TTToHplusBHminusB_M140_ext_Summer12", aod="/TTToHplusBHminusB_M-140_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
@@ -365,7 +388,7 @@ datasets.extend([
     MCDataset("HplusTB_M190_ext_Summer12", aod="/HplusTB_M-190_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("HplusTB_M200_ext_Summer12", aod="/HplusTB_M-200_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("HplusTB_M220_ext_Summer12", aod="/HplusTB_M-220_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
-#    MCDataset("HplusTB_M250_ext_Summer12", aod=""),
+    MCDataset("HplusTB_M250_ext_Summer12", aod="/HplusTB_M-250_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("HplusTB_M300_ext_Summer12", aod="/HplusTB_M-300_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     # QCD backgrounds, 6 Mevt/sample
     MCDataset("QCD_Pt30to50_TuneZ2star_Summer12",        aod="/QCD_Pt-30to50_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM"),
@@ -428,16 +451,21 @@ multicrabWorkflowsPileupNtuple.addNtuple_53X(datasets)
 # Add pattuple definitions
 multicrabWorkflowsPattuple.addPattuple_v44_4(datasets)
 multicrabWorkflowsPattuple.addPattuple_v44_4_1(datasets)
+multicrabWorkflowsPattuple.addPattuple_v44_5_test1(datasets)
+multicrabWorkflowsPattuple.addPattuple_v44_5(datasets)
 
 multicrabWorkflowsPattuple.addPattuple_v53_1_test1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_1_1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_1_2(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_2_test1(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_2(datasets)
 
 # Add embedding definitions
 multicrabWorkflowsTauEmbedding.addEmbeddingAodAnalysis_44X(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_4_2(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_4_2(datasets)
+multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5(datasets)
 
 # Add muon tag&probe definitions
 multicrabWorkflowsMuonTagProbe.addMuonTagProbe_44X(datasets)

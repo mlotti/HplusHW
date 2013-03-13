@@ -7,6 +7,7 @@ import sys
 import os
 import re
 from optparse import OptionParser
+import ConfigParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTools as multicrabWorkflowsTools
 
@@ -33,10 +34,22 @@ def main(opts):
 
     # Obtain all jobs to be (re)submitted
     allJobs = []
+    seBlackLists = {}
     for task in taskDirs:
         if not os.path.exists(task):
             print "%s: Task directory missing" % task
             continue
+
+        cfgparser = ConfigParser.ConfigParser()
+        cfgparser.read(os.path.join(task, "share", "crab.cfg"))
+        if cfgparser.has_section("GRID"):
+            availableOptions = cfgparser.options("GRID")
+            blacklist = None
+            for ao in availableOptions:
+                if ao.lower() == "se_black_list":
+                    blacklist = cfgparser.get("GRID", ao)
+                    break
+            seBlackLists[task] = blacklist
 
         jobs = multicrab.crabStatusToJobs(task, printCrab=False)
         if not resubmitMode: # normal submission
@@ -94,7 +107,14 @@ def main(opts):
         # Actual submission
         for task, jobs in jobsToSubmit.iteritems():
             pretty = multicrab.prettyJobnums(jobs)
-            command = ["crab", "-c", task, submitCommand, pretty] + opts.crabArgs.split(" ") + crabOptions
+            command = ["crab", "-c", task, submitCommand, pretty]
+            if opts.crabArgs != "":
+                command.extend(opts.crabArgs.split(" "))
+            if len(crabOptions) > 0:
+                command.extend(crabOptions)
+            if opts.addSeBlackList != "":
+                command.extend(["-GRID.se_black_list="+seBlackLists[task]+","+opts.addSeBlackList])
+
             print "Submitting %d jobs from task %s" % (len(jobs), task)
             print "Command", " ".join(command)
             if not opts.test:
@@ -137,20 +157,26 @@ if __name__ == "__main__":
     parser.add_option("--crabArgs", dest="crabArgs", default="",
                       help="String of options to pass to CRAB")
     parser.add_option("--toSites", dest="toSites", default="",
-                      help="Comma separated list of sites to submit jobs. Jobs are submitted in a round-robin way to these sites. (conflicts with -GRID.(se|ce)_(white|black)_list in --crabArgs)")
+                      help="Comma separated list of sites to submit jobs. Jobs are submitted in a round-robin way to these sites. (conflicts with --addSeBackList and with -GRID.(se|ce)_(white|black)_list in --crabArgs)")
+    parser.add_option("--addSeBlackList", dest="addSeBlackList", default="",
+                      help="Comma separated list of sites to *add* to the se_black_list in multicrab.cfg. (conflicts with --toSites and with -GRID.(se|ce)_(white|black)_list in --crabArgs)")
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
 
-    if len(opts.resubmit) > 0 and (opts.firstJob != -1 or opts.lastJob != -1):
-        print "--resubmit conflicts with --firstJob and --lastJob"
-        print opts.firstJob, opts.lastJob
-        sys.exit(1)
+    if opts.resubmit != "" and (opts.firstJob != -1 or opts.lastJob != -1):
+        parser.error("--resubmit conflicts with --firstJob and --lastJob")
 
-    if len(opts.toSites) > 0:
+    if opts.toSites != "" and opts.addSeBlackList != "":
+            parser.error("--toSites conflicts with --addSeBlackList")
+
+    if opts.toSites != "" or opts.addSeBlackList != "":
         tmp = opts.crabArgs.lower()
         if "-grid.se" in tmp or "-grid.ce" in tmp:
-            print "--toSites conflicts with '-GRID.(se|ce)_(white|black)_list' in --crabArgs"
-            sys.exit(1)
+            if opts.toSites != "":
+                mode = "--toSites"
+            elif opts.addSeBlackList != "":
+                mode = "--addSeBlackList"
+            parser.error("%s conflicts with '-GRID.(se|ce)_(white|black)_list' in --crabArgs" % mode)
 
     sys.exit(main(opts))
 

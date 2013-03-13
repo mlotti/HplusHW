@@ -26,6 +26,8 @@ namespace HPlus {
     fJetType1Threshold(iConfig.getUntrackedParameter<double>("jetType1Threshold")),
     fJetOffsetCorrLabel(iConfig.getUntrackedParameter<std::string>("jetOffsetCorrLabel")),
     //fType2ScaleFactor(iConfig.getUntrackedParameter<double>("type2ScaleFactor")),
+    fTypeIAllEvents(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction all events")),
+    fTypeITauRefJetFound(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction tau reference jet found")),
     fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut"))
   {
     edm::Service<TFileService> fs;
@@ -156,8 +158,13 @@ namespace HPlus {
      * correction for that particula jet.
      */
 
+    increment(fTypeIAllEvents);
+
     if(type == kRaw)
       throw cms::Exception("Assert") << "METSelection::undoJetCorrectionForSelectedTau should not be called for raw MET" << std::endl;
+
+    const pat::Tau *tau = dynamic_cast<const pat::Tau *>(selectedTau.get());
+
 
     // Find the hadronic jet corresponding to the selected tau
     double minDR = fTauJetMatchingCone;
@@ -165,18 +172,29 @@ namespace HPlus {
     //std::cout << std::endl;
     for(size_t i=0; i<allJets.size(); ++i) {
       double dr = reco::deltaR(*selectedTau, *(allJets[i]));
+
       /*
-      std::cout << "Tau   pt " << selectedTau->pt() << " eta " << selectedTau->eta() << " phi " << selectedTau->phi() << std::endl
-                << "  jet pt " << allJets[i]->pt()  << " eta " << allJets[i]->eta()  << " phi " << allJets[i]->phi() 
-                << " DR " << dr << std::endl;
+      std::cout << "Jet         pt " << allJets[i]->pt()  << " eta " << allJets[i]->eta()  << " phi " << allJets[i]->phi() << std::endl
+                << "   tau      pt " << selectedTau->pt() << " eta " << selectedTau->eta() << " phi " << selectedTau->phi() << " DR " << dr << std::endl
+                << "   tau rjet pt " << tau->p4Jet().pt() << " eta " << tau->p4Jet().eta() << " phi " << tau->p4Jet().phi() << " DR " << reco::deltaR(tau->p4Jet(), *(allJets[i])) << std::endl;
       */
+
       if(dr < minDR) {
         minDR = dr;
         selectedJet = allJets[i];
       }
     }
-    if(selectedJet.isNull())
-      throw cms::Exception("Assert") << "METSelection: Did not find the hadronic jet corresponding to the selected tau jet" << std::endl;
+    // It can happen that the JER smearing causes the tau reference
+    // jet to have pt < 10, which is not stored in our pattuples. Here
+    // it is assumed that this is what happens if the reference jet is
+    // not found. The frequency of this must be monitored with the
+    // counters.
+    if(selectedJet.isNull()) {
+      //throw cms::Exception("Assert") << "METSelection: Did not find the hadronic jet corresponding to the selected tau jet" << std::endl;
+      return *met;
+    }
+
+    increment(fTypeITauRefJetFound);
 
     // The code doing the correction is at
     // JetMETCorrections/Type1MET/interface/PFJetMETcorrInputProducerT.h

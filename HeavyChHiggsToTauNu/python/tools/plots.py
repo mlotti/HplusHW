@@ -43,6 +43,9 @@ import dataset
 import histograms
 import styles
 
+_lightHplusMasses = [80, 90, 100, 120, 140, 150, 155, 160]
+_heavyHplusMasses = [180, 190, 200, 220, 250, 300, 400, 500, 600]
+
 ## These MC datasets must be added together before any
 ## merging/renaming. They are split to two datasets just for more
 ## statistics. The mapping is used in the
@@ -58,6 +61,15 @@ _physicalMcAdd = {
     "QCD_Pt300to470_TuneZ2star_v2_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
     "QCD_Pt300to470_TuneZ2star_v3_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
 }
+for mass in _lightHplusMasses:
+    _physicalMcAdd["TTToHplusBWB_M%d_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
+    _physicalMcAdd["TTToHplusBWB_M%d_ext_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
+    if mass != 90:
+        _physicalMcAdd["TTToHplusBHminusB_M%d_Summer12"%mass] = "TTToHplusBHminusB_M%d_Summer12"%mass
+        _physicalMcAdd["TTToHplusBHminusB_M%d_ext_Summer12"%mass] = "TTToHplusBHminusB_M%d_Summer12"%mass
+for mass in [180, 190, 200, 220, 250, 300]:
+    _physicalMcAdd["HplusTB_M%d_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
+    _physicalMcAdd["HplusTB_M%d_ext_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
 
 ## Map the physical dataset names to logical names
 #
@@ -72,32 +84,16 @@ _physicalToLogical = {
     "W3Jets_TuneZ2_Summer11": "W3Jets",
 }
 for mcEra in ["Summer11", "Fall11", "Summer12"]:
-    _physicalToLogical.update({
-    "TTToHplusBWB_M80_%s"%mcEra:  "TTToHplusBWB_M80",
-    "TTToHplusBWB_M90_%s"%mcEra:  "TTToHplusBWB_M90",
-    "TTToHplusBWB_M100_%s"%mcEra: "TTToHplusBWB_M100",
-    "TTToHplusBWB_M120_%s"%mcEra: "TTToHplusBWB_M120",
-    "TTToHplusBWB_M140_%s"%mcEra: "TTToHplusBWB_M140",
-    "TTToHplusBWB_M150_%s"%mcEra: "TTToHplusBWB_M150",
-    "TTToHplusBWB_M155_%s"%mcEra: "TTToHplusBWB_M155",
-    "TTToHplusBWB_M160_%s"%mcEra: "TTToHplusBWB_M160",
+    for mass in _lightHplusMasses:
+        _physicalToLogical["TTToHplusBWB_M%d_%s"%(mass, mcEra)] = "TTToHplusBWB_M%d" % mass
+        _physicalToLogical["TTToHplusBHminusB_M%d_%s"%(mass, mcEra)] = "TTToHplusBHminusB_M%d" % mass
+        _physicalToLogical["Hplus_taunu_s-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_s-channel_M%d" % mass
+        _physicalToLogical["Hplus_taunu_t-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_t-channel_M%d" % mass
+        _physicalToLogical["Hplus_taunu_tW-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_tW-channel_M%d" % mass
 
-    "TTToHplusBHminusB_M80_%s"%mcEra: "TTToHplusBHminusB_M80",
-    "TTToHplusBHminusB_M90_%s"%mcEra: "TTToHplusBHminusB_M90",
-    "TTToHplusBHminusB_M100_%s"%mcEra: "TTToHplusBHminusB_M100",
-    "TTToHplusBHminusB_M120_%s"%mcEra: "TTToHplusBHminusB_M120",
-    "TTToHplusBHminusB_M140_%s"%mcEra: "TTToHplusBHminusB_M140",
-    "TTToHplusBHminusB_M150_%s"%mcEra: "TTToHplusBHminusB_M150",
-    "TTToHplusBHminusB_M155_%s"%mcEra: "TTToHplusBHminusB_M155",
-    "TTToHplusBHminusB_M160_%s"%mcEra: "TTToHplusBHminusB_M160",
+    for mass in _heavyHplusMasses:
+        _physicalToLogical["HplusTB_M%d_%s"%(mass, mcEra)] = "HplusTB_M%d" % mass
 
-    "HplusTB_M180_%s"%mcEra: "HplusTB_M180",
-    "HplusTB_M190_%s"%mcEra: "HplusTB_M190",
-    "HplusTB_M200_%s"%mcEra: "HplusTB_M200",
-    "HplusTB_M220_%s"%mcEra: "HplusTB_M220",
-    "HplusTB_M250_%s"%mcEra: "HplusTB_M250",
-    "HplusTB_M300_%s"%mcEra: "HplusTB_M300",
-    })
 for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     _physicalToLogical.update({
     "TTJets_%s"%mcEra: "TTJets",
@@ -105,6 +101,7 @@ for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     "W1Jets_%s"%mcEra: "W1Jets",
     "W2Jets_%s"%mcEra: "W2Jets",
     "W3Jets_%s"%mcEra: "W3Jets",
+    "W3Jets_TuneZ2_v2_%s"%mcEra: "W3Jets",
     "W4Jets_%s"%mcEra: "W4Jets",
     "DYJetsToLL_M50_%s"%mcEra:      "DYJetsToLL_M50",
     "DYJetsToLL_M10to50_%s"%mcEra:  "DYJetsToLL_M10to50",
@@ -131,16 +128,20 @@ for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     })
 
 ## Map the datasets to be merged to the name of the merged dataset.
-_signalMerge = [
-    ("TTToHplusBWB_M80",  "TTToHplusBHminusB_M80",  "TTToHplus_M80"),
-    ("TTToHplusBWB_M90",  "TTToHplusBHminusB_M90",  "TTToHplus_M90"),
-    ("TTToHplusBWB_M100", "TTToHplusBHminusB_M100", "TTToHplus_M100"),
-    ("TTToHplusBWB_M120", "TTToHplusBHminusB_M120", "TTToHplus_M120"),
-    ("TTToHplusBWB_M140", "TTToHplusBHminusB_M140", "TTToHplus_M140"),
-    ("TTToHplusBWB_M150", "TTToHplusBHminusB_M150", "TTToHplus_M150"),
-    ("TTToHplusBWB_M155", "TTToHplusBHminusB_M155", "TTToHplus_M155"),
-    ("TTToHplusBWB_M160", "TTToHplusBHminusB_M160", "TTToHplus_M160"),
-]
+_ttSignalMerge = {}
+_tSignalMerge = {}
+_lightSignalMerge = {}
+for mass in _lightHplusMasses:
+    _ttSignalMerge["TTToHplusBWB_M%d"%mass] = "TTToHplus_M%d"%mass
+    _ttSignalMerge["TTToHplusBHminusB_M%d"%mass] = "TTToHplus_M%d"%mass
+
+    _tSignalMerge["Hplus_taunu_s-channel_M%d"%mass] = "Hplus_taunu_M%d" % mass
+    _tSignalMerge["Hplus_taunu_t-channel_M%d"%mass] = "Hplus_taunu_M%d" % mass
+    _tSignalMerge["Hplus_taunu_tW-channel_M%d"%mass] = "Hplus_taunu_M%d" % mass
+
+    _lightSignalMerge["TTToHplus_M%d"%mass] = "TTOrTToHplus_M%d"%mass
+    _lightSignalMerge["Hplus_taunu_M%d" % mass] = "TTOrTToHplus_M%d"%mass
+    
 _datasetMerge = {
     "QCD_Pt30to50":   "QCD",
     "QCD_Pt50to80":   "QCD",
@@ -174,38 +175,13 @@ _datasetMerge = {
 }
 
 ## Default ordering of datasets
-_datasetOrder = [
-    "Data",
-    "TTToHplusBWB_M80", 
-    "TTToHplusBWB_M90", 
-    "TTToHplusBWB_M100",
-    "TTToHplusBWB_M120",
-    "TTToHplusBWB_M140",
-    "TTToHplusBWB_M150",
-    "TTToHplusBWB_M155",
-    "TTToHplusBWB_M160",
-    "TTToHplusBHminusB_M80",
-    "TTToHplusBHminusB_M90",
-    "TTToHplusBHminusB_M100",
-    "TTToHplusBHminusB_M120",
-    "TTToHplusBHminusB_M140",
-    "TTToHplusBHminusB_M150",
-    "TTToHplusBHminusB_M155",
-    "TTToHplusBHminusB_M160",
-    "TTToHplus_M80",
-    "TTToHplus_M90",
-    "TTToHplus_M100",
-    "TTToHplus_M120",
-    "TTToHplus_M140",
-    "TTToHplus_M150",
-    "TTToHplus_M155",
-    "TTToHplus_M160",
-    "HplusTB_M180",
-    "HplusTB_M190",
-    "HplusTB_M200",
-    "HplusTB_M220",
-    "HplusTB_M250",
-    "HplusTB_M300",
+_datasetOrder = ["Data"]
+for process in ["TTToHplusBWB_M%d", "TTToHplusBHminusB_M%d", "TTToHplus_M%d", "Hplus_taunu_t-channel_M%d", "Hplus_taunu_tW-channel_M%d", "Hplus_taunu_s-channel_M%d", "Hplus_taunu_M%d", "TTOrTToHplus_M%d"]:
+    for mass in _lightHplusMasses:
+        _datasetOrder.append(process%mass)
+for mass in _heavyHplusMasses:
+    _datasetOrder.append("HplusTB_M%d"%mass)
+_datasetOrder.extend([
     "QCD",
     "QCDdata",
     "QCD_Pt20_MuEnriched",
@@ -220,45 +196,11 @@ _datasetOrder = [
     "DYJetsToLL",
     "SingleTop",
     "Diboson",
-]
+])
 
 ## Map the logical dataset names to legend labels
 _legendLabels = {
     "Data":                  "Data",
-
-    "TTToHplusBWB_M80":  "H^{+}W^{-} m_{H^{#pm}}=80", 
-    "TTToHplusBWB_M90":  "H^{+}W^{-} m_{H^{#pm}}=90", 
-    "TTToHplusBWB_M100": "H^{+}W^{-} m_{H^{#pm}}=100",
-    "TTToHplusBWB_M120": "H^{+}W^{-} m_{H^{#pm}}=120",
-    "TTToHplusBWB_M140": "H^{+}W^{-} m_{H^{#pm}}=140",
-    "TTToHplusBWB_M150": "H^{+}W^{-} m_{H^{#pm}}=150",
-    "TTToHplusBWB_M155": "H^{+}W^{-} m_{H^{#pm}}=155",
-    "TTToHplusBWB_M160": "H^{+}W^{-} m_{H^{#pm}}=160",
-
-    "TTToHplusBHminusB_M80":  "H^{+}H^{-} m_{H^{#pm}}=80",
-    "TTToHplusBHminusB_M90":  "H^{+}H^{-} m_{H^{#pm}}=90",
-    "TTToHplusBHminusB_M100": "H^{+}H^{-} m_{H^{#pm}}=100",
-    "TTToHplusBHminusB_M120": "H^{+}H^{-} m_{H^{#pm}}=120",
-    "TTToHplusBHminusB_M140": "H^{+}H^{-} m_{H^{#pm}}=140",
-    "TTToHplusBHminusB_M150": "H^{+}H^{-} m_{H^{#pm}}=150",
-    "TTToHplusBHminusB_M155": "H^{+}H^{-} m_{H^{#pm}}=155",
-    "TTToHplusBHminusB_M160": "H^{+}H^{-} m_{H^{#pm}}=160",
-
-    "TTToHplus_M80":  "H^{#pm} m_{H^{#pm}}=80",
-    "TTToHplus_M90":  "H^{#pm} m_{H^{#pm}}=90",
-    "TTToHplus_M100": "H^{#pm} m_{H^{#pm}}=100",
-    "TTToHplus_M120": "H^{#pm} m_{H^{#pm}}=120",
-    "TTToHplus_M140": "H^{#pm} m_{H^{#pm}}=140",
-    "TTToHplus_M150": "H^{#pm} m_{H^{#pm}}=150",
-    "TTToHplus_M155": "H^{#pm} m_{H^{#pm}}=155",
-    "TTToHplus_M160": "H^{#pm} m_{H^{#pm}}=160",
-
-    "HplusTB_M180": "H^{#pm} m_{H^{#pm}}=180",
-    "HplusTB_M190": "H^{#pm} m_{H^{#pm}}=190",
-    "HplusTB_M200": "H^{#pm} m_{H^{#pm}}=200",
-    "HplusTB_M220": "H^{#pm} m_{H^{#pm}}=220",
-    "HplusTB_M250": "H^{#pm} m_{H^{#pm}}=250",
-    "HplusTB_M300": "H^{#pm} m_{H^{#pm}}=300",
 
     "TTJets":                "t#bar{t}+jets",
     "TT":                    "t#bar{t}",
@@ -294,44 +236,24 @@ _legendLabels = {
     "T_s-channel":           "Single t (s channel)",
     "Tbar_s-channel":        "Single #bar{t} (s channel)",
 }
+for mass in _lightHplusMasses:
+    _legendLabels["TTToHplusBWB_M%d"%mass] = "H^{+}W^{-} m_{H^{#pm}}=%d"%mass
+    _legendLabels["TTToHplusBHminusB_M%d"%mass] = "H^{+}H^{-} m_{H^{#pm}}=%d" % mass
+    _legendLabels["TTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+
+    _legendLabels["Hplus_taunu_s-channel_M%d"%mass] = "t#rightarrowH^{+} (s) m_{H^{+}}=%d" % mass
+    _legendLabels["Hplus_taunu_t-channel_M%d"%mass] = "t#rightarrowH^{+} (t) m_{H^{+}}=%d" % mass
+    _legendLabels["Hplus_taunu_tW-channel_M%d"%mass] = "t#rightarrowH^{+} (tW) m_{H^{+}}=%d" % mass
+    _legendLabels["Hplus_taunu_M%d"%mass] = "t#rightarrowH^{+} m_{H^{+}}=%d" % mass
+
+    _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+for mass in _heavyHplusMasses:
+    _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {
     "Data":                  styles.dataStyle,
-
-    "TTToHplusBWB_M80":           styles.signal80Style,
-    "TTToHplusBWB_M90":           styles.signal90Style,
-    "TTToHplusBWB_M100":          styles.signal100Style,
-    "TTToHplusBWB_M120":          styles.signal120Style,
-    "TTToHplusBWB_M140":          styles.signal140Style,
-    "TTToHplusBWB_M150":          styles.signal150Style,
-    "TTToHplusBWB_M155":          styles.signal155Style,
-    "TTToHplusBWB_M160":          styles.signal160Style,
-
-    "TTToHplusBHminusB_M80":       styles.signalHH80Style,
-    "TTToHplusBHminusB_M90":       styles.signalHH90Style,
-    "TTToHplusBHminusB_M100":      styles.signalHH100Style,
-    "TTToHplusBHminusB_M120":      styles.signalHH120Style,
-    "TTToHplusBHminusB_M140":      styles.signalHH140Style,
-    "TTToHplusBHminusB_M150":      styles.signalHH150Style,
-    "TTToHplusBHminusB_M155":      styles.signalHH155Style,
-    "TTToHplusBHminusB_M160":      styles.signalHH160Style,
-
-    "TTToHplus_M80":           styles.signal80Style,
-    "TTToHplus_M90":           styles.signal90Style,
-    "TTToHplus_M100":          styles.signal100Style,
-    "TTToHplus_M120":          styles.signal120Style,
-    "TTToHplus_M140":          styles.signal140Style,
-    "TTToHplus_M150":          styles.signal150Style,
-    "TTToHplus_M155":          styles.signal155Style,
-    "TTToHplus_M160":          styles.signal160Style,
-
-    "HplusTB_M180": styles.signal180Style,
-    "HplusTB_M190": styles.signal190Style,
-    "HplusTB_M200": styles.signal200Style,
-    "HplusTB_M220": styles.signal220Style,
-    "HplusTB_M250": styles.signal250Style,
-    "HplusTB_M300": styles.signal300Style,
 
     "TTJets":                styles.ttStyle,
     "TT":                    styles.ttStyle,
@@ -348,10 +270,24 @@ _plotStyles = {
     "SingleTop":             styles.stStyle,
     "Diboson":               styles.dibStyle,
 }
+for mass in _lightHplusMasses:
+    _plotStyles["TTToHplusBWB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+    _plotStyles["TTToHplusBHminusB_M%d"%mass] = getattr(styles, "signalHH%dStyle"%mass)
+    _plotStyles["TTToHplus_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+
+    _plotStyles["Hplus_taunu_s-channel_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+    _plotStyles["Hplus_taunu_t-channel_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+    _plotStyles["Hplus_taunu_tW-channel_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+    _plotStyles["Hplus_taunu_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+
+    _plotStyles["TTOrTToHplus_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+for mass in _heavyHplusMasses:
+    _plotStyles["HplusTB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+
 
 ## Return True if name is from a signal dataset
 def isSignal(name):
-    return "TTToHplus" in name or "HplusTB" in name
+    return "TTToHplus" in name or "Hplus_taunu" in name or "TTOrTToHplus" in name or "HplusTB" in name
 
 
 ## Update the default legend labels
@@ -480,13 +416,17 @@ def mergeRenameReorderForDataMC(datasetMgr, keepSourcesMC=False):
 
 ## Merge WH and HH datasets for each mass point
 #
-# The dataset names to be merged are defined in plots._signalMerge list
+# The dataset names to be merged are defined in plots._ttSignalMerge list
 def mergeWHandHH(datasetMgr):
-    names = datasetMgr.getAllDatasetNames()
-    for signalWH, signalHH, target in _signalMerge:
-        if signalWH in names and signalHH in names:
-            datasetMgr.merge(target, [signalWH, signalHH])
+    datasetMgr.mergeMany(_ttSignalMerge)
 
+def mergeSingleTopHplus(datasetMgr):
+    datasetMgr.mergeMany(_tSignalMerge)
+
+def mergeLightHplus(datasetMgr):
+    mergeWHandHH(datasetMgr)
+    mergeSingleTopHplus(datasetMgr)
+    datasetMgr.mergeMany(_lightSignalMerge)    
 
 def replaceLightHplusWithSignalPlusBackground(datasetMgr, backgroundsWithoutTT=None):
     if backgroundsWithoutTT is None:
@@ -1032,6 +972,9 @@ class PlotRatioBase:
     def getFrame2(self):
         return self.cf.frame2
 
+    def hasFrame2(self):
+        return hasattr(self.cf, "frame2")
+
     ## Get the upper TPad
     def getPad1(self):
         return self.cf.pad1
@@ -1039,6 +982,9 @@ class PlotRatioBase:
     ## Get the lower TPad
     def getPad2(self):
         return self.cf.pad2
+
+    def hasPad2(self):
+        return hasattr(self.cf, "pad2")
 
     ## Set the ratio histograms
     #
@@ -1714,6 +1660,7 @@ class PlotDrawer:
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
+    # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \param customizeBeforeDraw Function to customize the plot before drawing it
     # \param customizeBeforeSave Function to customize the plot before saving it
     # \param addLuminosityText   Should luminosity text be drawn?
@@ -1730,6 +1677,7 @@ class PlotDrawer:
                  opts={},
                  optsLog={},
                  opts2={},
+                 customizeBeforeFrame=None,
                  customizeBeforeDraw=None,
                  customizeBeforeSave=None,
                  addLuminosityText=False,
@@ -1749,6 +1697,7 @@ class PlotDrawer:
         self.optsLogDefault.update(optsLog)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
+        self.customizeBeforeFrameDefault = customizeBeforeFrame
         self.customizeBeforeDrawDefault = customizeBeforeDraw
         self.customizeBeforeSaveDefault = customizeBeforeSave
         self.addLuminosityTextDefault = addLuminosityText
@@ -1828,12 +1777,14 @@ class PlotDrawer:
                 xmin = histograms.th1Xmin(th1)
                 xmax = histograms.th1Xmax(th1)
                 nbins = (xmax-xmin)/rebinWidth
+                intbins = int(nbins+0.5)
                 # Check that the number of bins is integer
-                if abs(int(nbins) - nbins) > 1e-10:
-                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer" % (h.getName(), name, rebinWidth, xmin, xmax, nbins)
+                diff = abs(intbins - nbins)
+                if diff > 1e-3:
+                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer (diff is %g)" % (h.getName(), name, rebinWidth, xmin, xmax, nbins, diff)
                     return
 
-                nbins = int(nbins)
+                nbins = intbins
                 binLowEdgeList = [xmin + (xmax-xmin)/nbins*i for i in range(0, nbins+1)]
                 rebinned = th1.Rebin(nbins, th1.GetName(), array.array("d", binLowEdgeList))
                 h.setRootHisto(rebinned)
@@ -1871,7 +1822,12 @@ class PlotDrawer:
     # \li\a ratioYlabel  The Y axis title for the ratio pad (None for default)
     # \li\a ratioInvert  Should the ratio be inverted?
     # \li\a ratioIsBinomial  Is the ratio a binomial?
+    # \li\a customizeBeforeFrame Function customize the plot before creating the canvas and frame
     def createFrame(self, p, name, **kwargs):
+        customize = kwargs.get("customizeBeforeFrame", self.customizeBeforeFrameDefault)
+        if customize is not None:
+            customize(p)
+
         log = kwargs.get("log", self.logDefault)
 
         # Default values
@@ -1907,7 +1863,7 @@ class PlotDrawer:
 
         # Override ratio ytitle
         ratioYlabel = kwargs.get("ratioYlabel", self.ratioYlabelDefault)
-        if ratio and ratioYlabel != None:
+        if ratio and ratioYlabel is not None and p.hasFrame2():
             p.getFrame2().GetYaxis().SetTitle(ratioYlabel)
 
 

@@ -94,35 +94,35 @@ tauSelectionBase = cms.untracked.PSet(
 # Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)
 
 tauSelectionHPSTightTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTau",
+    src = "selectedPatTaus",
     selection = "HPSTauBased",
     isolationDiscriminator = "byTightCombinedIsolationDeltaBetaCorr",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSMediumTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTau",
+    src = "selectedPatTaus",
     selection = "HPSTauBased",
     isolationDiscriminator = "byMediumCombinedIsolationDeltaBetaCorr",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSLooseTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTau",
+    src = "selectedPatTaus",
     selection = "HPSTauBased",
     isolationDiscriminator = "byLooseCombinedIsolationDeltaBetaCorr",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTau",
+    src = "selectedPatTaus",
     selection = "HPSTauBased",
     isolationDiscriminator = "byVLooseCombinedIsolationDeltaBetaCorr",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
-    src = "selectedPatTausHpsPFTau",
+    src = "selectedPatTaus",
 #    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     ptCut = cms.untracked.double(20), # jet pt > value
     etaCut = cms.untracked.double(2.4), # jet |eta| < value
@@ -283,7 +283,36 @@ bTagging = cms.untracked.PSet(
 oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
  
 #deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
-deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees, for heavy charged Higgs
+deltaPhiTauMET = cms.untracked.double(180.0) # less than this value in degrees, for heavy charged Higgs
+
+QCDTailKiller = cms.untracked.PSet(
+    # Back to back (bottom right corner of 2D plane tau,MET vs. jet,MET)
+    backToBackJet1CutShape = cms.untracked.string("circular"), # options: noCut, rectangular, triangular, circular
+    backToBackJet1CutX = cms.untracked.double(40.0),
+    backToBackJet1CutY = cms.untracked.double(40.0),
+    backToBackJet2CutShape = cms.untracked.string("circular"),
+    backToBackJet2CutX = cms.untracked.double(30.0),
+    backToBackJet2CutY = cms.untracked.double(30.0),
+    backToBackJet3CutShape = cms.untracked.string("circular"),
+    backToBackJet3CutX = cms.untracked.double(30.0),
+    backToBackJet3CutY = cms.untracked.double(30.0),
+    backToBackJet4CutShape = cms.untracked.string("circular"),
+    backToBackJet4CutX = cms.untracked.double(30.0),
+    backToBackJet4CutY = cms.untracked.double(30.0),
+    # Collinear topology (top left corner of 2D plane tau,MET vs. jet,MET)
+    collinearJet1CutShape = cms.untracked.string("circular"),
+    collinearJet1CutX = cms.untracked.double(30.0),
+    collinearJet1CutY = cms.untracked.double(30.0),
+    collinearJet2CutShape = cms.untracked.string("circular"),
+    collinearJet2CutX = cms.untracked.double(30.0),
+    collinearJet2CutY = cms.untracked.double(30.0),
+    collinearJet3CutShape = cms.untracked.string("circular"),
+    collinearJet3CutX = cms.untracked.double(30.0),
+    collinearJet3CutY = cms.untracked.double(30.0),
+    collinearJet4CutShape = cms.untracked.string("circular"),
+    collinearJet4CutX = cms.untracked.double(30.0),
+    collinearJet4CutY = cms.untracked.double(30.0),
+)
 
 topReconstruction = cms.untracked.string("None") # Options: None
 
@@ -297,7 +326,10 @@ EvtTopology = cms.untracked.PSet(
     sphericity = cms.untracked.double(-5.0),
     aplanarity = cms.untracked.double(-5.0),
     planarity = cms.untracked.double(-5.0),
-    circularity = cms.untracked.double(-5.0)
+    circularity = cms.untracked.double(-5.0),
+    Cparameter = cms.untracked.double(-5.0),
+    Dparameter = cms.untracked.double(-5.0),
+    jetThrust = cms.untracked.double(-5.0),
 )
 
 ElectronSelection = cms.untracked.PSet(
@@ -553,7 +585,10 @@ def setDataTriggerEfficiency(dataVersion, era, pset):
     elif era == "Run2012B":
         pset.dataSelect = ["runs_193834_196531"]
     elif era == "Run2012C":
-        pset.dataSelect = ["runs_198022_202585"]
+#        pset.dataSelect = ["runs_198022_202585"]
+        pset.dataSelect = ["runs_198022_203742"] # FIXME: temporary fix
+    elif era == "Run2012D":
+        pset.dataSelect = ["runs_202807_208686"]
     elif era == "Run2012AB":
         pset.dataSelect = ["runs_190456_196531"]
     elif era == "Run2012ABC":
@@ -561,7 +596,7 @@ def setDataTriggerEfficiency(dataVersion, era, pset):
     elif era == "Run2012ABCD":
         pset.dataSelect = ["runs_190456_208686"]
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012AB', 'Run2012ABC', 'Run2012ABCD'")
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012AB', 'Run2012ABC', 'Run2012ABCD'" % era)
 
 
 # Weighting by instantaneous luminosity, and the number of true
@@ -586,11 +621,12 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
         psetReader.enabled = False
         return
     else:
-        raise Exception("No PU reweighting support for anything else than Fall11 S6 scenario at the moment")
+        raise Exception("No PU reweighting support for anything else than Fall11 S6 or Summer12 S10 scenarios at the moment")
     pset.enabled = True
     psetReader.enabled = True
 
-    if era in ["Run2011A", "Run2011B", "Run2012A", "Run2012B", "Run2012C", "Run2012AB", "Run2012ABC"]:
+    list2012 = ["Run2011A", "Run2011B", "Run2012A", "Run2012B", "Run2012C", "Run2012D", "Run2012AB", "Run2012ABC", "Run2012ABCD"]
+    if era in list2012:
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era.replace("Run","")+suffix+".root"
         if "Run2011" in era:
             pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_"+era.replace("Run","")+".root"
@@ -598,7 +634,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
         pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_2011AB.root"
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012ABC' " % era)
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', %s" % (era, ", ".join(["'%s'"%x for x in list2012])))
     pset.dataPUdistributionLabel = "pileup"
     # Make procuder for weights and add it to common sequence
     tmp = pset.clone()
@@ -680,10 +716,10 @@ def setAllTauSelectionSrc(src):
     tauSelectionHPSLooseTauBased.src        = src
 
 def setAllTauSelectionSrcSelectedPatTaus():
-    setAllTauSelectionSrc("selectedPatTausHpsPFTau")
+    setAllTauSelectionSrc("selectedPatTaus")
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
-    setAllTauSelectionSrc("patTausHpsPFTauTriggerMatched")
+    setAllTauSelectionSrc("patTausTriggerMatched")
     
 def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, additionalCounters):
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis

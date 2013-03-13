@@ -20,6 +20,9 @@ class NEvents:
             enabled = cms.bool(True),
             sampleJetBin = cms.int32(-1),
             inclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_WJets", "7")),
+            jetBin1 = cms.PSet(
+                exclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_W1Jets", "7")),
+            ),
             jetBin2 = cms.PSet(
                 exclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_W2Jets", "7")),
             ),
@@ -34,7 +37,7 @@ class NEvents:
         # Assume that if no era is given, on PU reweighting is done
         if era == None or len(era) == 0:
             pset.inclusiveNevents = cms.double(self.inclusive_v1)
-            for jetBin in [2, 3, 4]:
+            for jetBin in [1, 2, 3, 4]:
                 getattr(pset, "jetBin%d"%jetBin).exclusiveNevents = cms.double(getattr(self, "jet%d"%jetBin))
 
             return pset
@@ -46,7 +49,7 @@ class NEvents:
         pset.inclusiveNevents = cms.double(
             weightedAllEvents("WJets_TuneZ2_Fall11", self.inclusive_v1)
         )
-        for jetBin in [2, 3, 4]:
+        for jetBin in [1, 2, 3, 4]:
             getattr(pset, "jetBin%d"%jetBin).exclusiveNevents = cms.double(weightedAllEvents("W%dJets_TuneZ2_Fall11"%jetBin, getattr(self, "jet%d"%jetBin)))
 
         return pset
@@ -95,6 +98,9 @@ class NEvents:
         return pset
 
 # Non-pu-reweighted events
+# These are obtained by running the signal analysis once (e.g. without
+# W+jets weights) and recording the numbers of all unweighted events
+# here.
 _wjetsNumberOfEvents = {
     "pattuple_v44_4": NEvents(inclusive_v1=81345384,
                               inclusive_v2=None,
@@ -102,6 +108,12 @@ _wjetsNumberOfEvents = {
                               jet2=25400546,
                               jet3=6533053,
                               jet4=12608390),
+    "pattuple_v44_5": NEvents(inclusive_v1=81345384,
+                              inclusive_v2=None,
+                              jet1=76051616,
+                              jet2=25400546,
+                              jet3=7541595,
+                              jet4=13133738),
     "pattuple_v53_1_test1": NEvents(inclusive_v1=2504608,
                                     inclusive_v2=3458492,
                                     jet1=2314140,
@@ -110,6 +122,12 @@ _wjetsNumberOfEvents = {
                                     jet4=218488),
     "pattuple_v53_1": NEvents(inclusive_v1=18393090,
                               inclusive_v2=56094032,
+                              jet1=23141596,
+                              jet2=34044920,
+                              jet3=15539503,
+                              jet4=13382803),
+    "pattuple_v53_2": NEvents(inclusive_v1=18393090,
+                              inclusive_v2=57709900,
                               jet1=23141596,
                               jet2=34044920,
                               jet3=15539503,

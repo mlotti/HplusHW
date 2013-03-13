@@ -51,9 +51,9 @@ def mA():
 
 ## Labels for the final states
 _finalstateLabels = {
-    "taujets": "#tau_{h}+jets",
-    "etau"   : "e#tau_{h}",
-    "mutau"  : "#mu#tau_{h}",
+    "taujets": "^{}#tau_{h}+jets",
+    "etau"   : "e^{}#tau_{h}",
+    "mutau"  : "#mu^{}#tau_{h}",
     "emu"    : "e#mu",
 }
 
