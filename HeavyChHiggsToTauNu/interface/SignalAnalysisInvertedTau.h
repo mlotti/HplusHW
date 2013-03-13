@@ -267,7 +267,7 @@ namespace HPlus {
     HistogramsInBins *hMTBaselineTauIdBveto;
     HistogramsInBins *hMTBaselineTauIdBvetoDphi;
     HistogramsInBins *hMTBaselineTauIdPhi;
-
+    HistogramsInBins *hMTBaselineThirdDeltaPhiCut;
 
 
     WrappedTH1 *hDeltaR_TauMETJet1MET;
