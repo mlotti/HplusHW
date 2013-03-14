@@ -52,13 +52,11 @@ void printImmediateDaughters(const reco::Candidate& p);
 void printDaughters(const reco::Candidate& p);
 
 namespace HPlus {
-
-//   edm::Service<TFileService> fs;
-//   // Create folder to hold histograms
-//   TFileDirectory myDir = fs->mkdir("EventClassification");
-
-//------------------------> PRIVATE MEMBER FUNCTIONS <------------------------
-
+//   EventClassification::EventClassification(EventCounter& eventCounter, HistoWrapper& histoWrapper):
+//     BaseSelection(eventCounter, histoWrapper) {}
+  
+//   EventClassification::~EventClassification() {}
+  
   size_t getHiggsLine(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -75,8 +73,6 @@ namespace HPlus {
     return 999999999;
   }
 
-//------------------------> PUBLIC MEMBER FUNCTIONS <-------------------------
-
   bool eventHasGenChargedHiggs(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -90,8 +86,7 @@ namespace HPlus {
     //std::cout << "Event does not have a genuine charged Higgs boson." << std::endl;
     return false;
   }
-
-  // Improvement: return HiggsSideTopLine instead of pointer to reco::Candidate?
+  
   reco::Candidate* getGenHiggsSideTop(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -146,45 +141,6 @@ namespace HPlus {
     //std::cout << "FullMass: Higgs side bjet found, pt=" << myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
     return myHiggsSideBJet;
   }
-
-//   reco::Candidate* getGenHiggsSideBJetVector(const edm::Event& iEvent) {
-//     edm::Handle <reco::GenParticleCollection> genParticles;
-//     iEvent.getByLabel("genParticles", genParticles);
-//     TVector3 myGenHiggsSideBJetVector(0.0, 0.0, 0.0);
-//     // Look at Higgs side top daughters to find b-jet.    
-//     reco::Candidate* myHiggsSideTop = getGenHiggsSideTop(iEvent); // ->CHECK!
-//     if (!myHiggsSideTop) return myGenHiggsSideBJetVector;
-//     for (size_t i=0; i < genParticles->size(); ++i) {
-//       const reco::Candidate & p = (*genParticles)[i];
-//       if (TMath::Abs(p.pdgId()) == 5) { // or 
-// 	reco::Candidate* myBMother = const_cast<reco::Candidate*>(p.mother());
-//         bool myStatus = true;
-//         while (myStatus) {
-//           if (!myBMother)  myStatus = false;
-//           else {
-// 	    std::cout << "EventClassification: B quark mother = " << myBMother->pdgId() << std::endl;
-//             if (TMath::Abs(myBMother->pdgId()) == 6) {
-//               myStatus = false;
-//               // Below is where we check if the b jet comes from the Higgs side top.   
-// 	      double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myBMother->p4(), myHiggsSideTop->p4());
-//               if (myDeltaR < 0.01) {
-// 		myGenHiggsSideBJetVector.SetXYZ(p.px(), p.py(), p.pz());
-//                 myHiggsSideBJet = const_cast<reco::Candidate*>(&p);
-//                 i = genParticles->size(); // to end the enclosing for loop
-//               }
-//             }
-//             if (myStatus)
-//               myBMother = const_cast<reco::Candidate*>(myBMother->mother());
-//           }
-//         }
-//       }
-//     }
-//     std::cout << "FullMass: Higgs side bjet found, pt=" << std::endl;
-//     //<< myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
-//     return myGenHiggsSideBJetVector;
-//   }
-  
-  //bool eventHasTauFromHiggs() {}
 
   reco::Candidate* getGenTauFromHiggs(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
@@ -290,7 +246,7 @@ namespace HPlus {
     return myVisibleTauMomentum;
   }
 
-  TVector3 getGenMETVector(const edm::Event& iEvent) {
+  TVector3 calculateGenMETVectorFromNeutrinos(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
     int pId = 9999999;
@@ -316,20 +272,13 @@ namespace HPlus {
 	currentNeutrinoVector.SetXYZ(p.px(), p.py(), p.pz());
 	myGenMET += currentNeutrinoVector;
       }
-
-//       if (hasImmediateMother(p,12) || hasImmediateMother(p,14) || hasImmediateMother(p,16) ||
-// 	  hasImmediateMother(p,-12) || hasImmediateMother(p,-14) || hasImmediateMother(p,-16)) continue;
-//       if (TMath::Abs(pId) == 12 || TMath::Abs(pId) == 14 || TMath::Abs(pId) == 16) {
-// 	currentNeutrinoVector.SetXYZ(p.px(), p.py(), p.pz());
-// 	myGenMET += currentNeutrinoVector;
-//       }
     }
     //std::cout << "EventClassification:   Old GenMET.Pt() = " << oldGenMET.Pt() << std::endl;
     std::cout << "EventClassification:   GenMET.Pt() = " << myGenMET.Pt() << std::endl;
     std::cout << "EventClassification:   GenNeutrinoPz = " << myGenMET.Pz() << std::endl;
     return myGenMET;
   }
-  
+
   bool hasGenVisibleTauWithinDeltaR(const edm::Event& iEvent, TVector3 recoTauVector, double deltaRCut) {
     TVector3 genVisibleTauVector(0.0, 0.0, 0.0);
     edm::Handle <reco::GenParticleCollection> genParticles;

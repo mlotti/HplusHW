@@ -178,7 +178,8 @@ namespace HPlus {
   FullHiggsMassCalculator::~FullHiggsMassCalculator() {}
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-  const TauSelection::Data& tauData, const BTagging::Data& bData, const METSelection::Data& metData) {
+  const TauSelection::Data& tauData, const BTagging::Data& bData, const METSelection::Data& metData, 
+  const GenParticleAnalysis::Data* genDataPtr) {
     ensureSilentAnalyzeAllowed(iEvent);
     // Disable histogram filling and counter incrementing until the return call
     // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
@@ -186,35 +187,39 @@ namespace HPlus {
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
     // If this method is called with tauData as an argument, get the selected tau from it and pass it on to privateAnalyze():
     const edm::Ptr<pat::Tau> myTau = tauData.getSelectedTau();
-    return privateAnalyze(iEvent, iSetup, myTau, bData, metData);
+    return privateAnalyze(iEvent, iSetup, myTau, bData, metData, genDataPtr);
   }
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-  const edm::Ptr<pat::Tau> myTau, const BTagging::Data& bData, const METSelection::Data& metData) {
+  const edm::Ptr<pat::Tau> myTau, const BTagging::Data& bData, const METSelection::Data& metData, 
+  const GenParticleAnalysis::Data* genDataPtr) {
     ensureSilentAnalyzeAllowed(iEvent);
     // Disable histogram filling and counter incrementing until the return call
     // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-    return privateAnalyze(iEvent, iSetup, myTau, bData, metData);
+    return privateAnalyze(iEvent, iSetup, myTau, bData, metData, genDataPtr);
   }
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-  const TauSelection::Data& tauData, const BTagging::Data& bData, const METSelection::Data& metData) {
+  const TauSelection::Data& tauData, const BTagging::Data& bData, const METSelection::Data& metData, 
+  const GenParticleAnalysis::Data* genDataPtr) {
     ensureAnalyzeAllowed(iEvent);
     // If this method is called with tauData as an argument, get the selected tau from it and pass it on to privateAnalyze():
     const edm::Ptr<pat::Tau> myTau = tauData.getSelectedTau();
-    return privateAnalyze(iEvent, iSetup, myTau, bData, metData);
+    return privateAnalyze(iEvent, iSetup, myTau, bData, metData, genDataPtr);
   }
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-  const edm::Ptr<pat::Tau> myTau, const BTagging::Data& bData, const METSelection::Data& metData) {
+  const edm::Ptr<pat::Tau> myTau, const BTagging::Data& bData, const METSelection::Data& metData, 
+  const GenParticleAnalysis::Data* genDataPtr) {
     ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, myTau, bData, metData);
+    return privateAnalyze(iEvent, iSetup, myTau, bData, metData, genDataPtr);
   }
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-  const edm::Ptr<pat::Tau> myTau, const BTagging::Data& bData, const METSelection::Data& metData) {
+  const edm::Ptr<pat::Tau> myTau, const BTagging::Data& bData, const METSelection::Data& metData, 
+  const GenParticleAnalysis::Data* genDataPtr) {
     Data output;
     if (bPrintDebugOutput) std::cout << "==================================================================" << std::endl;
 
@@ -240,23 +245,27 @@ namespace HPlus {
     // This is the same MET as in the rest of the analysis (as it should be), normally (as of March 2013) Type 1 PF
     TVector3 myMETVector(metData.getSelectedMET()->px(), metData.getSelectedMET()->py(), metData.getSelectedMET()->pz());
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // Running the analysis with the correct GEN objects (so far for signal only: //
-    ////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////
+    // Running the analysis with the correct GEN objects (so far for signal only): //
+    /////////////////////////////////////////////////////////////////////////////////
     bool doForGen = true;
     if (doForGen) {
-      if (eventHasGenChargedHiggs(iEvent)) {
+      if (!iEvent.isRealData() && eventHasGenChargedHiggs(iEvent)) {
 	reco::Candidate* myGenBJet = getGenHiggsSideBJet(iEvent);
-	reco::Candidate* myGenTau = getGenTauFromHiggs(iEvent);
 	myBJetVector.SetXYZ(myGenBJet->px(), myGenBJet->py(), myGenBJet->pz());
+	reco::Candidate* myGenTau = getGenTauFromHiggs(iEvent);
 	myVisibleTauVector = getVisibleMomentum(*myGenTau);
-	myMETVector = getGenMETVector(iEvent);
-	myMETVector.SetZ(0.0);
+	if (genDataPtr != NULL) {
+	  edm::Ptr<reco::GenMET> myGenMET = genDataPtr->getGenMET();
+	  myMETVector.SetXYZ(myGenMET->px(), myGenMET->py(), myGenMET->pz());
+	} else {
+	  myMETVector = calculateGenMETVectorFromNeutrinos(iEvent);
+	}
       }
     }
-    ////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////
 
     if (bPrintDebugOutput) {
       std::cout << "myBJetVector components: " << myBJetVector.Px() << ", " << myBJetVector.Py() << ", " << myBJetVector.Pz()
@@ -304,7 +313,8 @@ namespace HPlus {
     //    (the classification results are stored in output)
     if (!iEvent.isRealData()) {
       if (bPrintDebugOutput) std::cout << "Doing Monte Carlo event classification" << std::endl;
-      doEventClassification(iEvent, myBJetVector, myVisibleTauVector, myMETVector, output);
+      doEventClassification(iEvent, myBJetVector, myVisibleTauVector, myMETVector, output, genDataPtr);
+      //doEventClassification(iEvent, myBJetVector, myVisibleTauVector, myMETVector, output);
     }
 
     // 6) Histograms are filled accordingly. There is a separate method to do this for MC and data
@@ -503,7 +513,8 @@ namespace HPlus {
   }
 
   void FullHiggsMassCalculator::doEventClassification(const edm::Event& iEvent, TVector3& recoBJetVector, TVector3& recoTauVector,
-						      TVector3& recoMETVector, FullHiggsMassCalculator::Data& output) {
+						      TVector3& recoMETVector, FullHiggsMassCalculator::Data& output,
+						      const GenParticleAnalysis::Data* genDataPtr) {
     // Declare variables used to classify events
     double bDeltaR     = 9999;
     double tauDeltaR   = 9999;
@@ -525,7 +536,15 @@ namespace HPlus {
     if (bPrintDebugOutput) std::cout << "****** tauDeltaR: " << tauDeltaR << std::endl;
   
     // MET: compare RECO and GEN information
-    TVector3 genMETVector = getGenMETVector(iEvent);
+    TVector3 genMETVector;
+    if (genDataPtr != NULL) {
+      // This is the entirely correct way, will work if GenParticleAnalysis::Data is available
+      edm::Ptr<reco::GenMET> myGenMET = genDataPtr->getGenMET();
+      genMETVector.SetXYZ(myGenMET->px(), myGenMET->py(), myGenMET->pz());
+    } else {
+      // This way is approximate, but will work even if GenParticleAnalysis::Data is unavailable
+      genMETVector = calculateGenMETVectorFromNeutrinos(iEvent);
+    }
     metDeltaPt = recoMETVector.Pt() - genMETVector.Pt();
     metDeltaPhi = recoMETVector.DeltaPhi(genMETVector);
     if (bPrintDebugOutput) std::cout << "****** metDeltaPt = " << metDeltaPt << std::endl;

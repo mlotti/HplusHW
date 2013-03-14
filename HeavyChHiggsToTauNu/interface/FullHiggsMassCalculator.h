@@ -10,6 +10,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -101,18 +102,23 @@ namespace HPlus {
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData,
-		       const BTagging::Data& bData, const METSelection::Data& metData);
+		       const BTagging::Data& bData, const METSelection::Data& metData, 
+		       const GenParticleAnalysis::Data* genDataPtr = NULL);
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau,
-		       const BTagging::Data& bData, const METSelection::Data& metData);
+		       const BTagging::Data& bData, const METSelection::Data& metData, 
+		       const GenParticleAnalysis::Data* genDataPtr = NULL);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, 
-		 const BTagging::Data& bData, const METSelection::Data& metData);
+		 const BTagging::Data& bData, const METSelection::Data& metData, 
+		 const GenParticleAnalysis::Data* genDataPtr = NULL);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau, 
-		 const BTagging::Data& bData, const METSelection::Data& metData);
+		 const BTagging::Data& bData, const METSelection::Data& metData, 
+		 const GenParticleAnalysis::Data* genDataPtr = NULL);
     //void myBJet(); // marked for deletion
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau, 
-			const BTagging::Data& bData, const METSelection::Data& metData);
+			const BTagging::Data& bData, const METSelection::Data& metData,
+			const GenParticleAnalysis::Data* genDataPtr = NULL);
     edm::Ptr<pat::Jet> findHiggsSideBJet(const BTagging::Data bData, const edm::Ptr<pat::Tau> myTau);
     void calculateNeutrinoPz(TVector3& pTau, TVector3& pB, TVector3& MET, FullHiggsMassCalculator::Data& output);
     void selectNeutrinoPzSolution(PzSelectionMethod selectionMethod, TVector3& pTau,
@@ -122,7 +128,8 @@ namespace HPlus {
     void calculateTopMass(FullHiggsMassCalculator::Data& output);
     void calculateHiggsMass(FullHiggsMassCalculator::Data& output);
     void doEventClassification(const edm::Event& iEvent, TVector3& myBJetVector, TVector3& myVisibleTauVector, 
-			       TVector3& myMETVector, FullHiggsMassCalculator::Data& output);
+			       TVector3& myMETVector, FullHiggsMassCalculator::Data& output, 
+			       const GenParticleAnalysis::Data* genDataPtr = NULL);
     void fillHistograms_MC(FullHiggsMassCalculator::Data& output);
     void fillHistograms_Data(FullHiggsMassCalculator::Data& output);
 
