@@ -256,7 +256,8 @@ namespace HPlus {
 	reco::Candidate* myGenTau = getGenTauFromHiggs(iEvent);
 	myVisibleTauVector = getVisibleMomentum(*myGenTau);
 	if (genDataPtr != NULL) {
-	  edm::Ptr<reco::GenMET> myGenMET = genDataPtr->getGenMET();
+	  edm::Ptr<reco::GenMET> myGenMET = genDataPtr->getGenMET(); // TODO: this is the ENTIRE MET of the event, still not what
+	  // we want. We want the momenta of the two tau neutrinos only.
 	  myMETVector.SetXYZ(myGenMET->px(), myGenMET->py(), myGenMET->pz());
 	} else {
 	  myMETVector = calculateGenMETVectorFromNeutrinos(iEvent);

@@ -56,7 +56,21 @@ namespace HPlus {
 //     BaseSelection(eventCounter, histoWrapper) {}
   
 //   EventClassification::~EventClassification() {}
-  
+
+  bool eventHasGenChargedHiggs(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      if (TMath::Abs(p.pdgId()) == 37) {
+	//std::cout << "Event has a genuine charged Higgs boson!" << std::endl;
+	return true;
+      }
+    }
+    //std::cout << "Event does not have a genuine charged Higgs boson." << std::endl;
+    return false;
+  }
+
   size_t getHiggsLine(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -73,18 +87,16 @@ namespace HPlus {
     return 999999999;
   }
 
-  bool eventHasGenChargedHiggs(const edm::Event& iEvent) {
+  reco::Candidate* getChargedHiggs(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
-    for (size_t i=0; i < genParticles->size(); ++i) {
-      const reco::Candidate & p = (*genParticles)[i];
-      if (TMath::Abs(p.pdgId()) == 37) {
-	//std::cout << "Event has a genuine charged Higgs boson!" << std::endl;
-	return true;
-      }
-    }
-    //std::cout << "Event does not have a genuine charged Higgs boson." << std::endl;
-    return false;
+    size_t myHiggsLine = getHiggsLine(iEvent);
+    if (myHiggsLine > 999999) return NULL;
+    // Grab charged Higgs
+    const reco::Candidate& chargedHiggs = (*genParticles)[myHiggsLine];
+    return &const_cast<reco::Candidate&>(chargedHiggs); // This complicated expression is required to get rid of the constness
+    // It can be read as follows: return the address of the reco::Candidate object "chargedHiggs" after making it volatile
+    // (as opposed to const) as a pointer.
   }
   
   reco::Candidate* getGenHiggsSideTop(const edm::Event& iEvent) {
@@ -167,6 +179,31 @@ namespace HPlus {
     return NULL;
   }
 
+  reco::Candidate* getGenNeutrinoFromHiggs(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    //    reco::Candidate& myTauFromHiggs;
+    size_t myHiggsLine = getHiggsLine(iEvent);
+    if (myHiggsLine > 999999) return NULL;
+    // Grab charged Higgs and get its daughters
+    const reco::Candidate& chargedHiggs = (*genParticles)[myHiggsLine];    
+    std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(chargedHiggs);
+    int daughterId = 9999999;
+    for(size_t d=0; d<daughters.size(); ++d) {
+      //const reco::GenParticle daughterParticle = *daughters[d];
+      const reco::Candidate& daughterParticle = *daughters[d];
+      daughterId = daughterParticle.pdgId();
+      // If tau neutrino among immediate daughters
+      if (abs(daughterId) == 16) {
+	//myTauFromHiggs = const_cast<reco::Candidate*>(&daughterParticle);
+	//myTauFromHiggs = const_cast<reco::Candidate*>(&daughterParticle);
+	reco::Candidate* myNeutrinoFromHiggs = const_cast<reco::Candidate*>(&daughterParticle);
+	return myNeutrinoFromHiggs;
+      }
+    }
+    return NULL;    
+}
+
   TVector3 getGenTauFromHiggsVector(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -244,6 +281,25 @@ namespace HPlus {
       }
     }
     return myVisibleTauMomentum;
+  }
+
+  TVector3 getInvisibleMomentum(const reco::Candidate& tau) {
+    std::vector<const reco::GenParticle*> tauDaughters = getImmediateDaughters(tau);
+    int tauDaughterId = 9999999;
+    TVector3 myInvisibleTauMomentum(0.0, 0.0, 0.0);
+    for(size_t t=0; t<tauDaughters.size(); ++t) {
+      const reco::Candidate& tauDaughter = *tauDaughters[t];
+      tauDaughterId = tauDaughter.pdgId();
+      // If a tau neutrino is found, add its momentum to get the invisible part
+      if (abs(tauDaughterId) == 12 || abs(tauDaughterId) == 14 || abs(tauDaughterId) == 16) {
+	myInvisibleTauMomentum.SetXYZ(
+				    myInvisibleTauMomentum.Px() + tauDaughter.px(),
+				    myInvisibleTauMomentum.Py() + tauDaughter.py(),
+				    myInvisibleTauMomentum.Pz() + tauDaughter.pz());
+	//std::cout << "EventClassification: neutrino (ID = " << tauDaughterId << ") momentum added to tau invisible momentum" << std::endl;
+      }
+    }
+    return myInvisibleTauMomentum;
   }
 
   TVector3 calculateGenMETVectorFromNeutrinos(const edm::Event& iEvent) {

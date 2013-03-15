@@ -34,24 +34,27 @@ namespace HPlus {
 //     EventClassification(EventCounter& eventCounter, HistoWrapper& histoWrapper);
 //     ~EventClassification();
     
-bool eventHasGenChargedHiggs(const edm::Event& iEvent);
-size_t getHiggsLine(const edm::Event& iEvent);
-//size_t getFirstHiggsLine(const edm::Event& iEvent);
-//size_t getLastHiggsLine(const edm::Event& iEvent);
-reco::Candidate* getGenHiggsSideTop(const edm::Event& iEvent);
-reco::Candidate* getGenHiggsSideBJet(const edm::Event& iEvent);
-//TVector3 getGenHiggsSideBJetVector(const edm::Event& iEvent);
-reco::Candidate* getGenTauFromHiggs(const edm::Event& iEvent);
-TVector3 getGenTauFromHiggsVector(const edm::Event& iEvent);
-bool decaysHadronically(const reco::Candidate& tau);
-//bool decaysToOneProng(reco::Candidate* tau);
-TVector3 getVisibleMomentum(const reco::Candidate& tau);
-TVector3 calculateGenMETVectorFromNeutrinos(const edm::Event& iEvent);
-bool hasGenVisibleTauWithinDeltaR(const edm::Event& iEvent, TVector3 recoTauVector, double deltaRCut);
-double getClosestGenVisibleTauDeltaR(const edm::Event& iEvent, TVector3 recoTauVector);
-bool hasGenBQuarkWithinDeltaR(const edm::Event& iEvent, TVector3 recoBJetVector, double deltaRCut);
-double getClosestGenBQuarkDeltaR(const edm::Event& iEvent, TVector3 recoBJetVector);
-void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau);
-// };
+  bool eventHasGenChargedHiggs(const edm::Event& iEvent);
+  size_t getHiggsLine(const edm::Event& iEvent);
+  reco::Candidate* getChargedHiggs(const edm::Event& iEvent);
+  //size_t getFirstHiggsLine(const edm::Event& iEvent);
+  //size_t getLastHiggsLine(const edm::Event& iEvent);
+  reco::Candidate* getGenHiggsSideTop(const edm::Event& iEvent);
+  reco::Candidate* getGenHiggsSideBJet(const edm::Event& iEvent);
+  //TVector3 getGenHiggsSideBJetVector(const edm::Event& iEvent);
+  reco::Candidate* getGenTauFromHiggs(const edm::Event& iEvent);
+  reco::Candidate* getGenNeutrinoFromHiggs(const edm::Event& iEvent);
+  TVector3 getGenTauFromHiggsVector(const edm::Event& iEvent);
+  bool decaysHadronically(const reco::Candidate& tau);
+  //bool decaysToOneProng(reco::Candidate* tau);
+  TVector3 getVisibleMomentum(const reco::Candidate& tau);
+  TVector3 getInvisibleMomentum(const reco::Candidate& tau);
+  TVector3 calculateGenMETVectorFromNeutrinos(const edm::Event& iEvent);
+  bool hasGenVisibleTauWithinDeltaR(const edm::Event& iEvent, TVector3 recoTauVector, double deltaRCut);
+  double getClosestGenVisibleTauDeltaR(const edm::Event& iEvent, TVector3 recoTauVector);
+  bool hasGenBQuarkWithinDeltaR(const edm::Event& iEvent, TVector3 recoBJetVector, double deltaRCut);
+  double getClosestGenBQuarkDeltaR(const edm::Event& iEvent, TVector3 recoBJetVector);
+  void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau);
+  // };
 }
 #endif
