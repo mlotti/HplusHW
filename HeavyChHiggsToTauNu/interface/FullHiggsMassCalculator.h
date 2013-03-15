@@ -57,27 +57,29 @@ namespace HPlus {
       eTauNuAngleMin
     };
 
+    enum InputDataType {
+      eRECO,
+      eGEN,
+      eGEN_NeutrinosReplacedWithMET
+    };
+
     class Data {
     public:
       Data();
       ~Data();
       const bool passedEvent() const { return bPassedEvent; }
       //const edm::Ptr<pat::Jet>& getBjetHiggsSide() const { return BjetHiggsSide; }
-      const edm::Ptr<pat::Jet>& getHiggsSideBJet() const { return HiggsSideBJet; }
       const double getDiscriminant() const { return fDiscriminant; }
       const double getHiggsMass() const { return fHiggsMassSolution; }
       const double getTopMass() const { return fTopMassSolution; }
       const double getSelectedNeutrinoPzSolution() const { return fSelectedNeutrinoPzSolution; }
       const double getNeutrinoPtSolution() const { return fNeutrinoPtSolution; }
-      const double getMCNeutrinoPz() const { return fMCNeutrinoPz; }
+      const double getTrueNeutrinoPz() const { return fTrueNeutrinoPz; }
       const EventClassCode getEventClassCode() const { return eEventClassCode; }
 
       friend class FullHiggsMassCalculator;
     private:
-      double fRecoBjetEnergy; // temporary
-      double fRecoTauEnergy;  // temporary
       bool bPassedEvent;
-      edm::Ptr<pat::Jet> HiggsSideBJet;
       // Calculated results
       double fDiscriminant;
       double fTopMassSolution;
@@ -86,13 +88,18 @@ namespace HPlus {
       double fSelectedNeutrinoPzSolution;
       double fNeutrinoPtSolution;
       double fHiggsMassSolution;
-      double fMCNeutrinoPz;
+      double fTrueNeutrinoPz;
       TVector3 visibleTau;
       TVector3 mcNeutrinos;
       TVector3 mcBjetHiggsSide;
       TLorentzVector LorentzVector_bJetFourMomentum;
       TLorentzVector LorentzVector_visibleTauFourMomentum;
       TLorentzVector LorentzVector_neutrinosFourMomentum;
+      // Neutrino p_z solution selection
+      bool bSelectionGreaterCorrect;
+      bool bSelectionSmallerCorrect;
+      bool bSelectionTauNuAngleMaxCorrect;
+      bool bSelectionTauNuAngleMinCorrect;
       // Event classification results
       EventClassCode eEventClassCode;
     };
@@ -113,32 +120,43 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau, 
 		 const BTagging::Data& bData, const METSelection::Data& metData, 
 		 const GenParticleAnalysis::Data* genDataPtr = NULL);
-    //void myBJet(); // marked for deletion
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau, 
 			const BTagging::Data& bData, const METSelection::Data& metData,
 			const GenParticleAnalysis::Data* genDataPtr = NULL);
-    edm::Ptr<pat::Jet> findHiggsSideBJet(const BTagging::Data bData, const edm::Ptr<pat::Tau> myTau);
-    void calculateNeutrinoPz(TVector3& pTau, TVector3& pB, TVector3& MET, FullHiggsMassCalculator::Data& output);
-    void selectNeutrinoPzSolution(PzSelectionMethod selectionMethod, TVector3& pTau,
-				  TVector3& MET, FullHiggsMassCalculator::Data& output);
+    edm::Ptr<pat::Jet> findHiggsSideBJet(const BTagging::Data bData, const edm::Ptr<pat::Tau> myTau); // TODO: change name
+    // "selectBJetClosestToTau"?
+    void doCalculations(TVector3& tauVector, TVector3& bJetVector, TVector3& METVector,
+			FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
+    void calculateNeutrinoPz(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
+    void selectNeutrinoPzSolution(TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output,
+				  PzSelectionMethod selectionMethod);
     double getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
-    void constructFourMomenta(TVector3& pTau, TVector3& pB, TVector3& MET, FullHiggsMassCalculator::Data& output);
+    bool solution1IsClosestToTrueValue(FullHiggsMassCalculator::Data& output);
+    void constructFourMomenta(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
     void calculateTopMass(FullHiggsMassCalculator::Data& output);
     void calculateHiggsMass(FullHiggsMassCalculator::Data& output);
-    void doEventClassification(const edm::Event& iEvent, TVector3& myBJetVector, TVector3& myVisibleTauVector, 
-			       TVector3& myMETVector, FullHiggsMassCalculator::Data& output, 
+    void doEventClassification(const edm::Event& iEvent, TVector3& bJetVector, TVector3& tauVector, 
+			       TVector3& METVector, FullHiggsMassCalculator::Data& output, 
 			       const GenParticleAnalysis::Data* genDataPtr = NULL);
-    void fillHistograms_MC(FullHiggsMassCalculator::Data& output);
-    void fillHistograms_Data(FullHiggsMassCalculator::Data& output);
-
+    void doCountingAndHistogramming(FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
+    //    ***NEW METHODS***
+    //void calculateMETComposition(...);
+    
   private:
 
     // Counters
-    Count fAllSolutionsCutSubCount;
+    // Discriminant and neutrino p_z calculation
+    Count fAllSolutionsCutSubCount; // all calculations
     Count fPositiveDiscriminantCutSubCount;
     Count fNegativeDiscriminantCutSubCount;
+    // Selection of the neutrino p_z solution
+    Count fAllSelections_SubCount;
+    Count fSelectionGreaterCorrect_SubCount;
+    Count fSelectionSmallerCorrect_SubCount;
+    Count fSelectionTauNuAngleMaxCorrect_SubCount;
+    Count fSelectionTauNuAngleMinCorrect_SubCount;
     // two main categories of events (pure or impure):
     Count eventClass_Pure_SubCount;
     Count eventClass_Impure_SubCount;
@@ -157,12 +175,20 @@ namespace HPlus {
 
 
     // Histograms 
+    // The most important ones at the moment
     WrappedTH1* hHiggsMass;
+    WrappedTH1* hHiggsMass_GEN;
+    WrappedTH1* hHiggsMass_GEN_NeutrinosReplacedWithMET;
+    WrappedTH1* hDiscriminant;
+    WrappedTH1* hDiscriminant_GEN;
+    WrappedTH1* hDiscriminant_GEN_NeutrinosReplacedWithMET;
+
     WrappedTH1* hHiggsMass_greater;
     WrappedTH1* hHiggsMass_smaller;
     WrappedTH1* hHiggsMass_tauNuAngleMax;
     WrappedTH1* hHiggsMass_tauNuAngleMin;
-    WrappedTH1* hTopMass;
+    WrappedTH1* hTopMassSolution;
+    WrappedTH1* hTopInvariantMassInGenerator;
     WrappedTH1* hSelectedNeutrinoPzSolution;
 
     WrappedTH1* hHiggsMassPure;
