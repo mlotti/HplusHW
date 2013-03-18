@@ -161,11 +161,11 @@ datasets_SingleTop = [
 ]
 
 #workflow = "analysis_quadjetleg_v53_v1"
-workflow = "triggerQuadJet_skim_v53_v1"
+workflow = "triggerQuadJet_skim_v53_v2"
 
 
 tasks = [
-     ("QuadJetLeg", datasets_SingleMu),#+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
+     ("QuadJetLeg", datasets_SingleMu+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
 #("QCD_tot_HLT",datasets_QCD),
 #    ("Tau", datasets_Tau),
 #    ("MultiJet", datasets_MultiJet),
@@ -192,7 +192,7 @@ for midfix, datasets in tasks:
     #multicrab.appendLineAll("USER.local_stage_out=1")
 
     multicrab.appendLineAll("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/TriggerQuadJet/CMSSW_5_3_X")
-    multicrab.appendLineAll("GRID.maxtarballsize = 35")
+    multicrab.appendLineAll("GRID.maxtarballsize = 40")
 
     #def addCopyConfig(dataset):
     #    dataset.appendLine("USER.additional_input_files = copy_cfg.py")

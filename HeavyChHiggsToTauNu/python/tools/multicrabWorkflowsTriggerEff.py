@@ -83,7 +83,7 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 dataset.addWorkflow(Workflow("triggerTauLeg_analysis_"+version, triggerOR=[mcTriggerTauLeg], **commonArgs))
 
 
-def addTauLegSkim_53X_v1(datasets):
+def addTauLegSkim_53X_v2(datasets):
     definitions = {
         "TauPlusX_190456-190738_2012A_Jul13":  TaskDef(""),
         "TauPlusX_190782-190949_2012A_Aug06":  TaskDef(""),
@@ -102,7 +102,7 @@ def addTauLegSkim_53X_v1(datasets):
         "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12":       TaskDef(""),
         }
         
-    addTauLegSkim_53X("v53_v1", datasets, definitions)
+    addTauLegSkim_53X("v53_v2", datasets, definitions)
 
 
 
@@ -214,7 +214,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 # For MC, also construct one analysis workflow per trigger type                                                                                        
                 dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=[mcTriggerMETLeg], **commonArgs))
 
-def addMetLegSkim_53X_v1(datasets):
+def addMetLegSkim_53X_v2(datasets):
     definitions = {                                                                          
         "Tau_190456-190738_2012A_Jul13":          TaskDef(""),                               
         "Tau_190782-190949_2012A_Aug06":          TaskDef(""),                               
@@ -256,7 +256,7 @@ def addMetLegSkim_53X_v1(datasets):
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),                               
         }
                                                                                              
-    addMetLegSkim_53X("v53_v1", datasets, definitions)                                        
+    addMetLegSkim_53X("v53_v2", datasets, definitions)                                        
 
 def addMetLegSkim_44X(version, datasets, updateDefinitions):
     mcTrigger = "HLT_MediumIsoPFTau35_Trk20_v1"
@@ -532,7 +532,7 @@ def addQuadJetSkim_53X(version, datasets, updateDefinitions, skim=None):
                 # For MC, also construct one analysis workflow per trigger type                                                                            
                 dataset.addWorkflow(Workflow("triggerQuadJet_analysis_"+version, triggerOR=[mcTriggerSingleMu], **commonArgs))
                     
-def addQuadJetSkim_53X_v1(datasets):
+def addQuadJetSkim_53X_v2(datasets):
     definitions = {
 #        "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
 #        "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
@@ -583,5 +583,5 @@ def addQuadJetSkim_53X_v1(datasets):
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),                               
         }
     
-    addQuadJetSkim_53X("v53_v1", datasets, definitions) 
+    addQuadJetSkim_53X("v53_v2", datasets, definitions) 
     
