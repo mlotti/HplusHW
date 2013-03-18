@@ -152,7 +152,7 @@ datasets_SingleTop = [
 ]
 
 #workflow = "analysis_metleg_v53_v1"
-workflow = "triggerMetLeg_skim_v53_v1"
+workflow = "triggerMetLeg_skim_v53_v2"
 
 tasks = [
      ("MetLeg", datasets_Tau+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
@@ -181,7 +181,7 @@ for midfix, datasets in tasks:
     #multicrab.appendLineAll("USER.local_stage_out=1")
 
     multicrab.appendLineAll("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X")
-    multicrab.appendLineAll("GRID.maxtarballsize = 35")
+    multicrab.appendLineAll("GRID.maxtarballsize = 40")
 
     #def addCopyConfig(dataset):
     #    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
