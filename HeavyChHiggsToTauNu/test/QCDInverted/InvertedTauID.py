@@ -190,7 +190,7 @@ class InvertedTauID:
         st1 = styles.getDataStyle().clone()
         st2 = st1.clone()
         st2.append(styles.StyleMarker(markerColor=ROOT.kRed))
-	plot.histoMgr.forHisto("Inv", st1)
+	plot.histoMgr.forHisto("Inv", st2)
         plot.histoMgr.forHisto("Base", st2)
         
         # Set the legend labels
@@ -228,7 +228,7 @@ class InvertedTauID:
         if "DeltaPhi160" in name:
             plot.createFrame("purity"+self.label, opts={"ymin":0.2,"ymax":1.0, "xmax": 300},
                              createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
-        if "DeltaPhiCuts" in name:
+        if "AllDeltaPhiCuts" or "DeltaPhiJet1Cuts" or "DeltaPhiJet2Cuts"  in name:
             plot.createFrame("purity"+self.label, opts={"ymin":-0.2,"ymax":1.0, "xmax": 300},
                              createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
         if "DeltaPhiAndAgainsttt" in name:
@@ -268,10 +268,14 @@ class InvertedTauID:
             histograms.addText(0.5, 0.3, "No #Delta#phi cuts", 28)
         if "DeltaPhi160"  in name:
             histograms.addText(0.5, 0.3, "#Delta#phi(#tau jet,MET) < 160^{o}", 28)
-#        if "DeltaPhiCuts"  in name:
-#            histograms.addText(0.2, 0.8, "Cuts in #Delta#phi(#tau jet,MET) vs #Delta#phi(jet,MET) plane", 24)
+        if "DeltaPhiJet1Cuts" in name:
+            histograms.addText(0.3, 0.4, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1,MET) cut", 24)
+        if "DeltaPhiJet2Cuts" in name:
+            histograms.addText(0.2, 0.4, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1/2,MET) cuts", 24)          
+        if "AllDeltaPhiCuts"  in name:
+            histograms.addText(0.2, 0.8, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1/2/3,MET) cuts", 24)
         if "DeltaPhiAndAgainsttt" in name:
-            histograms.addText(0.2, 0.88, "Cuts in #Delta#phi(#tau jet,MET) vs #Delta#phi(jet,MET) plane", 20)
+            histograms.addText(0.2, 0.88, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1/2/3,MET) cuts", 20)
             histograms.addText(0.2, 0.83, "Cut against tt+jets", 23)
         
         plot.draw()

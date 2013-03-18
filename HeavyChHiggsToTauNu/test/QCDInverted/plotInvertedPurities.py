@@ -257,6 +257,10 @@ def invertedPurities(datasets):
     DphiEWKAll = []
     DphiAllremovett = []
     DphiEWKAllremovett = []
+    DphiJet1=[]
+    DphiEWKJet1=[]
+    DphiJet2=[]
+    DphiEWKJet2=[]
     hmt = []
     hmtb = [] 
     hmtv = []
@@ -294,21 +298,23 @@ def invertedPurities(datasets):
         mt_tmp._setLegendStyles()
         mt_tmp._setLegendLabels()
         mt_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mt_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mt_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mt = mt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
 #        mt.Scale(normData[ptbin])
-      
+        DphiJet2.append(mt)
+        
         mtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedSecondDeltaPhiCut"+ptbin)])
         mtEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         mtEWK_tmp._setLegendStyles()
         mtEWK_tmp._setLegendLabels()
         mtEWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mtEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mtEWK = mtEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
 #        mtEWK.Scale(normEWK[ptbin])
 #        mt.Add(mtEWK, -1)
 #        hmt.append(mt)
-
+        DphiEWKJet2.append(mtEWK)
+        
         purity = -999
         error = -999
         if mt.Integral() > 0:
@@ -396,9 +402,10 @@ def invertedPurities(datasets):
         mtphj1_tmp._setLegendStyles()
         mtphj1_tmp._setLegendLabels()
         mtphj1_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mtphj1_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtphj1_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mtphj1 = mtphj1_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
 #        mtphj1.Scale(normData[ptbin])
+        DphiJet1.append(mtphj1)
         
         mtphj1EWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedFirstDeltaPhiCut"+ptbin)])
         #mtphj1EWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTInvertedTauIdMet"+ptbin)])
@@ -406,12 +413,13 @@ def invertedPurities(datasets):
         mtphj1EWK_tmp._setLegendStyles()
         mtphj1EWK_tmp._setLegendLabels()
         mtphj1EWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mtphj1EWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtphj1EWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mtphj1EWK = mtphj1EWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
 #        mtphj1EWK.Scale(normEWK[ptbin])
 #        mtphj1.Add(mtphj1EWK, -1)
 #        hmtphj1.append(mtphj1)
-        
+        DphiEWKJet1.append(mtphj1EWK)
+ 
         purity = -999
         error = -999
         if mtphj1.Integral() > 0:
@@ -609,8 +617,37 @@ def invertedPurities(datasets):
     for histo in DphiEWKAll:
         mtDphiAllEWK.Add(histo)
 
-
-### Mt Mt all dphi cuts 
+### Mt Mt dphi jet1 
+    mtDphiJet1 = DphiJet1[0].Clone("mt")
+    mtDphiJet1.SetName("mt")
+    mtDphiJet1.SetTitle("Inverted tau Mt")
+    mtDphiJet1.Reset()
+    for histo in DphiJet1:
+        mtDphiJet1.Add(histo)
+        
+    mtDphiEWKJet1 = DphiEWKJet1[0].Clone("mtewk")
+    mtDphiEWKJet1.SetName("MTewk")
+    mtDphiEWKJet1.SetTitle("Inverted tau Met")
+    mtDphiEWKJet1.Reset()
+    for histo in DphiEWKJet1:
+        mtDphiEWKJet1.Add(histo)
+        
+### Mt Mt dphi jet2 
+    mtDphiJet2 = DphiJet2[0].Clone("mt")
+    mtDphiJet2.SetName("mt")
+    mtDphiJet2.SetTitle("Inverted tau Mt")
+    mtDphiJet2.Reset()
+    for histo in DphiJet2:
+        mtDphiJet2.Add(histo)
+        
+    mtDphiEWKJet2 = DphiEWKJet2[0].Clone("mtewk")
+    mtDphiEWKJet2.SetName("MTewk")
+    mtDphiEWKJet2.SetTitle("Inverted tau Met")
+    mtDphiEWKJet2.Reset()
+    for histo in DphiEWKJet2:
+        mtDphiEWKJet2.Add(histo)
+        
+### Mt Mt all dphi + tt cuts 
     mtDphiAllremovett = DphiAllremovett[0].Clone("mt")
     mtDphiAllremovett.SetName("mt")
     mtDphiAllremovett.SetTitle("Inverted tau Mt")
@@ -657,8 +694,24 @@ def invertedPurities(datasets):
     mtQCD.Add(mtDphiAllEWK,-1)
     mtQCD.Divide(mtDphiAll)    
     mtqcd = mtQCD.Clone("mtqcd")
-    invertedQCD.setLabel("MtDeltaPhiCuts")
-    invertedQCD.mtComparison(mtQCD, mtQCD,"MtDeltaPhiCuts")
+    invertedQCD.setLabel("MtAllDeltaPhiCuts")
+    invertedQCD.mtComparison(mtQCD, mtQCD,"MtAllDeltaPhiCuts")
+    ##########################################
+# mt purity jet1 deltaPhi cuts 
+    mtQCD = mtDphiJet1.Clone("QCD")
+    mtQCD.Add(mtDphiEWKJet1,-1)
+    mtQCD.Divide(mtDphiJet1)    
+    mtqcd = mtQCD.Clone("mtqcd")
+    invertedQCD.setLabel("MtDeltaPhiJet1Cuts")
+    invertedQCD.mtComparison(mtQCD, mtQCD,"MtDeltaPhiJet1Cuts")
+    ##########################################
+# mt purity jet2 deltaPhi cuts 
+    mtQCD = mtDphiJet2.Clone("QCD")
+    mtQCD.Add(mtDphiEWKJet2,-1)
+    mtQCD.Divide(mtDphiJet2)    
+    mtqcd = mtQCD.Clone("mtqcd")
+    invertedQCD.setLabel("MtDeltaPhiJet2Cuts")
+    invertedQCD.mtComparison(mtQCD, mtQCD,"MtDeltaPhiJet2Cuts")
     ##########################################
 # mt purity all deltaPhi cuts and against tt cut
     mtQCD = mtDphiAllremovett.Clone("QCD")

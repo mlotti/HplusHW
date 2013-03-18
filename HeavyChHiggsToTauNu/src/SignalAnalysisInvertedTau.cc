@@ -345,7 +345,7 @@ namespace HPlus {
     fEventWeight.multiplyWeight(prescaleWeight);
     fTree.setPrescaleWeight(prescaleWeight);
 
- 
+
 
     // Pileup weight
     double myWeightBeforePileupReweighting = fEventWeight.getWeight();
