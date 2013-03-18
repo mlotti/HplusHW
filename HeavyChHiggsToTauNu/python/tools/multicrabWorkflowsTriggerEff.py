@@ -63,6 +63,7 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 "args": wf.args,
                 "skimConfig": skim
                 }
+            commonArgs["args"]["trgAnalysis"] = "TauLeg"
 
             if dataset.isData():
                 # For data, construct one analysis workflow per trigger type
@@ -195,6 +196,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 "args": wf.args,                                                                                                                                       
                 "skimConfig": skim                                                                                                                                     
                 }
+            commonArgs["args"]["trgAnalysis"] = "MetLeg"
 
             if dataset.isData():                                                                                                                                       
                 # For data, construct one analysis workflow per trigger type                                                                                           
@@ -513,6 +515,7 @@ def addQuadJetSkim_53X(version, datasets, updateDefinitions, skim=None):
                 "args": wf.args,
                 "skimConfig": skim
                 }
+            commonArgs["args"]["trgAnalysis"] = "QuadJet"
             
             if dataset.isData():                                                                                                                                       
                 # For data, construct one analysis workflow per trigger type                                                                                           
