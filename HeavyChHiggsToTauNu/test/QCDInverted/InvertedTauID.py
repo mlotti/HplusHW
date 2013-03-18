@@ -141,7 +141,147 @@ class InvertedTauID:
 
         st.append(styles.StyleFill(fillColor=0))
         plot.histoMgr.forHisto(objectName, st)
+        
 
+
+    def mtComparison(self,histo1,histo2,name,norm=1):
+
+	h1 = histo1.Clone("h1")
+	h2 = histo2.Clone("h2")
+#	if norm == 1:
+#        h1.Scale(1/h1.GetMaximum())
+#        h2.Scale(1/h2.GetMaximum())
+
+	# check that no bin has negative value, negative values possible after subtracting EWK from data  
+        iBin = 1
+        nBins = h1.GetNbinsX()
+        while iBin < nBins:
+	    value1 = h1.GetBinContent(iBin)
+	    value2 = h2.GetBinContent(iBin)
+
+	    if value1 < 0:
+		h1.SetBinContent(iBin,0)
+
+            if value2 < 0:
+                h2.SetBinContent(iBin,0)
+
+            iBin = iBin + 1
+
+
+        h1.GetYaxis().SetTitle("Events / 20 GeV")
+        h1.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV)")
+        if "BtagEffInMet" in name: 
+            h1.GetYaxis().SetTitle("Events / 20 GeV")
+            h1.GetXaxis().SetTitle("MET (GeV)")
+            
+        if "Purity" and "Met"  in name: 
+            h1.GetYaxis().SetTitle("QCD purity")
+            h1.GetXaxis().SetTitle("MET (GeV)")
+            
+        if "Purity" and "Mt"  in name: 
+            h1.GetYaxis().SetTitle("QCD purity")
+            h1.GetXaxis().SetTitle("m_{T}(#tau jet,MET) (GeV)")
+        
+        plot = plots.ComparisonPlot(
+            histograms.Histo(h1, "Inv"),
+            histograms.Histo(h2, "Base"),
+            )
+            # Set the styles
+        st1 = styles.getDataStyle().clone()
+        st2 = st1.clone()
+        st2.append(styles.StyleMarker(markerColor=ROOT.kRed))
+	plot.histoMgr.forHisto("Inv", st2)
+        plot.histoMgr.forHisto("Base", st2)
+        
+        # Set the legend labels
+        plot.histoMgr.setHistoLegendLabelMany({"Inv": h1.GetTitle(), "Base": h2.GetTitle()})
+#        plot.histoMgr.setHistoLegendLabelMany({"Inv": "with b tagging","Base": "with b-jet veto"})
+        if "InvertedVsBaseline"  in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "Factorised"  in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "b tagging","Base": "b-tagging factorization"})
+
+        if "BtagEffInMet"  in name:    
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "with b tagging","Base": "without b tagging "})
+    
+
+       # Set the legend styles
+        plot.histoMgr.setHistoLegendStyleAll("P")
+    
+        
+        # Set the drawing styles
+        plot.histoMgr.setHistoDrawStyleAll("EP")
+                
+
+        # Create frame with a ratio pad
+        
+        if "Factorised"  in name:
+            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "xmax": 300},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                             )
+        if "Purity" and "Met"  in name:
+            plot.createFrame("purity"+self.label, opts={"ymin":0.6,"ymax":1.05, "xmax": 300},
+                             createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
+        if "NoDeltaPhi"  in name:
+            plot.createFrame("purity"+self.label, opts={"ymin":-0.2, "xmax": 300},
+                             createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
+        if "DeltaPhi160" in name:
+            plot.createFrame("purity"+self.label, opts={"ymin":0.2,"ymax":1.0, "xmax": 300},
+                             createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
+        if "AllDeltaPhiCuts" or "DeltaPhiJet1Cuts" or "DeltaPhiJet2Cuts"  in name:
+            plot.createFrame("purity"+self.label, opts={"ymin":-0.2,"ymax":1.0, "xmax": 300},
+                             createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
+        if "DeltaPhiAndAgainsttt" in name:
+            plot.createFrame("purity"+self.label, opts={"ymin":-0.2,"ymax":1.0, "xmax": 300},
+                             createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot  
+        if "BtagEffInMet"  in name:
+            plot.createFrame("comparison"+self.label, opts={"ymin":1e-2,  "ymaxfactor": 0.2, "xmax": 300, "ymax": 1000},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                             )
+                    
+#        if "BvetoInvertedVsBaseline"  in name:
+#            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1,"ymax":200, "ymaxfactor": 0.2, "xmax": 300},
+#                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot            
+        # Set Y axis of the upper pad to logarithmic
+        if "Purity"  in name:        
+            plot.getPad().SetLogy(False)       
+        if "Factorised"  in name:        
+            plot.getPad1().SetLogy(False)
+        if "BtagEffInMet"  in name:
+            plot.getPad1().SetLogy(True)
+            
+       # if "Purity"  in name:            
+       #	plot.setLegend(histograms.createLegend(0.5,0.75,0.95,0.9))
+
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        if "BvetoDphiInvertedVsBaseline"  in name:
+            histograms.addText(0.5, 0.6, "b-jet veto and #Delta#phi cuts", 25)
+        if "BvetoInvertedVsBaseline"  in name:
+            histograms.addText(0.5, 0.6, "b-jet veto ", 25)  
+        if "Factorised"  in name:
+            histograms.addText(0.5, 0.6, "#Delta#phi cuts", 25)
+        if "Purity" and "Met"  in name:
+            histograms.addText(0.2, 0.3, "Purity after jet selection", 25)
+        if "NoDeltaPhi"  in name:
+            histograms.addText(0.5, 0.3, "No #Delta#phi cuts", 28)
+        if "DeltaPhi160"  in name:
+            histograms.addText(0.5, 0.3, "#Delta#phi(#tau jet,MET) < 160^{o}", 28)
+        if "DeltaPhiJet1Cuts" in name:
+            histograms.addText(0.3, 0.4, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1,MET) cut", 24)
+        if "DeltaPhiJet2Cuts" in name:
+            histograms.addText(0.2, 0.4, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1/2,MET) cuts", 24)          
+        if "AllDeltaPhiCuts"  in name:
+            histograms.addText(0.2, 0.8, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1/2/3,MET) cuts", 24)
+        if "DeltaPhiAndAgainsttt" in name:
+            histograms.addText(0.2, 0.88, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1/2/3,MET) cuts", 20)
+            histograms.addText(0.2, 0.83, "Cut against tt+jets", 23)
+        
+        plot.draw()
+        plot.save()
+
+        
     def comparison(self,histo1,histo2,norm=1):
 
 	h1 = histo1.Clone("h1")

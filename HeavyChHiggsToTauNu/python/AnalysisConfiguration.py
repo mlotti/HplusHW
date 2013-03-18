@@ -62,7 +62,7 @@ class ConfigBuilder:
                  applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
-                # tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
+#                 tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
                  doTriggerMatching = True,
                  useCHSJets = False,
                  useJERSmearedJets = True,
