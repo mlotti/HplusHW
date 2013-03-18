@@ -155,7 +155,9 @@ namespace HPlus {
     Count fTausExistCounter;
     Count fTauFakeScaleFactorBaselineCounter;
     Count fTauTriggerScaleFactorBaselineCounter;
-    Count fOneTauCounter;
+
+    Count fOneTauCounter; 
+
     Count fBaselineTauIDCounter;
     Count fBaselineEvetoCounter;
     Count fBaselineMuvetoCounter;
@@ -169,6 +171,7 @@ namespace HPlus {
 
   
     Count fTauVetoAfterTauIDCounter;
+
     Count fTauFakeScaleFactorCounter;
     Count fTauTriggerScaleFactorCounter;
     Count fElectronVetoCounter;
@@ -242,6 +245,7 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassNoMet;
     WrappedTH1 *hTransverseMassNoMetBtag;
  
+    WrappedTH2 *hTransverseMassVsDphi;
    
    
     WrappedTH1 *hTransverseMassTopChiSelection;

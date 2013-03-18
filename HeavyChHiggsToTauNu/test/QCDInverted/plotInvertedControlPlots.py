@@ -119,7 +119,7 @@ def main():
     datasets_lands = datasets.deepCopy()
 
     # Set the signal cross sections to the ttbar for datasets for lands
-    xsect.setHplusCrossSectionsToTop(datasets_lands)
+#    xsect.setHplusCrossSectionsToTop(datasets_lands)
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
     xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.01, br_Htaunu=1)

@@ -74,7 +74,7 @@ namespace HPlus {
     fBaselineDeltaPhiTauMETCounter(eventCounter.addCounter("Baseline: DeltaPhi(Tau,MET) upper limit")),
     fBaselineDeltaPhiVSDeltaPhiMHTJet1CutCounter(eventCounter.addCounter("Baseline: DeltaPhi(Jets,MET) vs DeltaPhi cut")),
     fOneTauCounter(eventCounter.addCounter("Baseline, taus = 1")),
-    /*
+    // confligt starts
     fTauFakeScaleFactorCounter(eventCounter.addCounter("Inverted: tau fake scale factor, all cands")),
     fTauTriggerScaleFactorCounter(eventCounter.addCounter("Inverted: tau trigger scale factor, all cands")),
     fTauVetoAfterTauIDCounter(eventCounter.addCounter("Inverted: Taus found")),
@@ -88,6 +88,7 @@ namespace HPlus {
     fBvetoDeltaPhiCounter(eventCounter.addCounter("Inverted: Veto on b jets after MET and Dphi")),
     fBTaggingCounter(eventCounter.addCounter("Inverted: btagging")),
     fBTaggingScaleFactorInvertedCounter(eventCounter.addCounter("Inverted: btagging scale factor")),
+    fQCDTailKillerCounter(eventCounter.addCounter("QCD tail killer")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("Inverted: DeltaPhi(Tau,MET) upper limit")),
     fDeltaPhiVSDeltaPhiMETJet1CutCounter(eventCounter.addCounter("Inverted:DeltaPhi(Jet1,MET) vs DeltaPhi cut")),
     fDeltaPhiVSDeltaPhiMETJet2CutCounter(eventCounter.addCounter("Inverted:DeltaPhi(Jet2,MET) vs DeltaPhi cut")),
@@ -101,7 +102,9 @@ namespace HPlus {
     fTopChiSelectionCounter(eventCounter.addCounter("Inverted: Top ChiSelection cut")),
     fTopWithBSelectionCounter(eventCounter.addCounter("Inverted: Top with B Selection cut")),
     ftransverseMassCut100TopCounter(eventCounter.addCounter("Inverted: transverseMass > 100 top cut")),
-    */
+    
+
+    /*
     fBaselineDphi130Counter(eventCounter.addCounter("Baseline, deltaPhi130")),
     fBaselineTopChiSelectionCounter(eventCounter.addCounter("Top BaselineChiSelection cut")),
     fTauVetoAfterTauIDCounter(eventCounter.addCounter("Veto on isolated taus")),
@@ -142,7 +145,7 @@ namespace HPlus {
     fTopChiSelectionCounter(eventCounter.addCounter("Top ChiSelection cut")),
     fTopWithBSelectionCounter(eventCounter.addCounter("Top with B Selection cut")),
     ftransverseMassCut100TopCounter(eventCounter.addCounter("transverseMass > 100 top cut")),
-
+    */
 
 
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
@@ -217,7 +220,7 @@ namespace HPlus {
     //    hDeltaPhiAfterVeto= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiAfterVeto", "deltaPhiAfterVeto", 180, 0., 180.);
     hDeltaPhiAfterJets= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted , "deltaPhiAfterJets", "deltaPhiAfterJets", 180, 0., 180.);
     
-
+    hTransverseMassVsDphi = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "transverseMassVsDphi", "transverseMassVsDphi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.,180,0.,180.);
     hSelectedTauEt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_pT_AfterTauID", "SelectedTau_pT_AfterTauID;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 200, 0.0, 400.0);    
     hSelectedTauEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_eta_AfterTauID", "SelectedTau_eta_AfterTauID;#tau #eta;N_{events} / 0.1", 150, -3.0, 3.0);   
     hSelectedTauEtAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedInvertedTauAfterCuts", "SelectedInvertedTauAfterCuts", 100, 0.0, 400.0);
@@ -408,7 +411,7 @@ namespace HPlus {
     increment(fPrimaryVertexCounter);
     //hSelectionFlow->Fill(kSignalOrderVertexSelection);
 
-
+   
   
     // Tau-candidate selection
    
@@ -453,7 +456,7 @@ namespace HPlus {
     std::string myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr";
     
   
-
+  
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
   // baseline tau-id (full tauID) and selection starts 
@@ -478,7 +481,7 @@ namespace HPlus {
       myOneProngRtauPassedIsolatedTaus.push_back(*iTau);          
     }
    
-  
+
 
 
     if ( myOneProngRtauPassedIsolatedTaus.size() > 0) {
@@ -690,7 +693,7 @@ namespace HPlus {
 
  		
     //		if (DeltaR_TauMETJet2MET > 100 && DeltaR_TauMETJet3MET > 100 && DeltaR_TauMETJet4MET > 100 ) {
-    if ( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 < Rcut || deltaPhiMetJet3 < Rcut  ) return false;		       
+    if ( deltaPhiMetJet1 < Rcut || deltaPhiMetJet2 < Rcut || deltaPhiMetJet3 < Rcut  ) return false;		       
     increment(fBaselineDeltaPhiVSDeltaPhiMHTJet1CutCounter); 
        
 
@@ -947,9 +950,8 @@ namespace HPlus {
     hDeltaPhiInverted->Fill(selectedTau->pt(),deltaPhi);  
 
     hDeltaPhiVsDeltaPhiMETJet1Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet1);
-    hDeltaPhiVsDeltaPhiMETJet2Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet2); 
 
-
+    hTransverseMassVsDphi->Fill(transverseMass,deltaPhi);
 
     // mT with deltaPhi(tau,met)
     if (deltaPhi < fDeltaPhiCutValue) {
@@ -959,7 +961,7 @@ namespace HPlus {
     }
 
 
-     // cut in  DeltaPhiMHTJet1 
+     // cut in  DeltaPhiMETJet1 
     
     // if (DeltaR_TauMETJet1MET < 100 ) return false; 
     if ( deltaPhiMetJet1  < Rcut ) return false;
@@ -968,11 +970,10 @@ namespace HPlus {
     increment(fDeltaPhiVSDeltaPhiMETJet1CutCounter);
     hMTInvertedFirstDeltaPhiCut->Fill(selectedTau->pt(), transverseMass);     
        
-    hDeltaPhiVsDeltaPhiMETJet2Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet3); 
-
+    hDeltaPhiVsDeltaPhiMETJet2Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet2); 
    
     
-    // cut in  DeltaPhiMHTJet2 
+    // cut in  DeltaPhiMETJet2 
     
     // if (DeltaR_TauMETJet2MET < 100 ) return false; 
     if ( deltaPhiMetJet2  < Rcut ) return false;
@@ -985,12 +986,11 @@ namespace HPlus {
     hMTInvertedSecondDeltaPhiCut->Fill(selectedTau->pt(), transverseMass); 
         
     hDeltaPhiVsDeltaPhiMETJet3Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet3); 
-    //     hDeltaPhiVsDeltaPhiMHTJet2Inverted->Fill(selectedTau->pt(),deltaPhi,jetData.getDeltaPhiMHTJet2());
     
     
     
      
-    // add cut in  DeltaPhiMHTJet2     
+    // add cut in  DeltaPhiMETJet3     
     if(deltaPhiMetJet3 <  Rcut   ) return false;   
     //     if (DeltaR_TauMETJet3MET < 100 ) return false;    
     increment(fDeltaPhiVSDeltaPhiMETJet3CutCounter);
@@ -1000,18 +1000,13 @@ namespace HPlus {
      hMTInvertedThirdDeltaPhiCut->Fill(selectedTau->pt(), transverseMass);      
    
 
-    // mT with deltaPhi(tau,met) vs deltaPhi(jet2,Met)
-     //    hMTInvertedSecondDeltaPhiCut->Fill(selectedTau->pt(), transverseMass); 
 
 
-
-     // add cut in  DeltaPhiMHTJet3 
+     // add cut in  DeltaPhiMETJet4 
     //    if( deltaPhiMetJet4  < Rcut ) return false;  
     //   if (DeltaR_TauMETJet4MET < 100 ) return false;
 
     increment(fDeltaPhiVSDeltaPhiMETJet4CutCounter);
-        // mT with deltaPhi(tau,met) vs deltaPhi(jet3,Met)
-    //    hMTInvertedThirdDeltaPhiCut->Fill(selectedTau->pt(), transverseMass);
     hTransverseMass->Fill(transverseMass); 
   
   
@@ -1030,7 +1025,7 @@ namespace HPlus {
 
 
 
-    /*
+   
 
           
     //FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
@@ -1040,8 +1035,9 @@ namespace HPlus {
        
     TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+    /*
 =======
-    */
+   
     //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(selectedInvertedTau), jetDataInverted.getSelectedJetsIncludingTau()); 
     //    FakeMETVeto::Data fakeMETDataInverted = fFakeMETVeto.analyze(iEvent, iSetup, selectedInvertedTau, jetDataInverted.getSelectedJets(), metDataInverted.getSelectedMET());
     //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau()); 
@@ -1055,7 +1051,7 @@ namespace HPlus {
     if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hClosestDeltaPhiInverted6070->Fill(fakeMETDataInverted.closestDeltaPhi()); 
     if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hClosestDeltaPhiInverted5060->Fill(fakeMETDataInverted.closestDeltaPhi()); 
     if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hClosestDeltaPhiInverted4050->Fill(fakeMETDataInverted.closestDeltaPhi());
-
+*/
 
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
  
