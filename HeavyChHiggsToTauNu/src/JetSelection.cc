@@ -118,14 +118,14 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("JetSelection");
 
-    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_pt", "identified jet_pt", 120, 0., 600.);
+    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt", "identified jet_pt", 120, 0., 600.);
     hPtCentral = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt_central", "identified jet_pt_central", 120, 0., 600.);
-    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_eta", "identified jet_eta", 100, -5., 5.);
-    hPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_phi", "identified jet_phi", 72, -3.1415926, 3.1415926);
-    hPtIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_pt_including_tau", "jet_pt_including_tau", 120, 0., 600.);
-    hEtaIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_eta_including_tau", "jet_eta_including_tau", 100, -5., 5.);
-    hPhiIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_phi_including_tau", "jet_phi_including_tau", 72, -3.1415926, 3.1415926);
-    hNumberOfSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 30, 0., 30.);
+    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_eta", "identified jet_eta", 100, -5., 5.);
+    hPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_phi", "identified jet_phi", 72, -3.1415926, 3.1415926);
+    hPtIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt_including_tau", "jet_pt_including_tau", 120, 0., 600.);
+    hEtaIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_eta_including_tau", "jet_eta_including_tau", 100, -5., 5.);
+    hPhiIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_phi_including_tau", "jet_phi_including_tau", 72, -3.1415926, 3.1415926);
+    hNumberOfSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 30, 0., 30.);
     hjetEMFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jetEMFraction", "jetEMFraction", 100, 0., 1.0);
     hjetChargedEMFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "chargedJetEMFraction", "chargedJetEMFraction", 100, 0., 1.0);
     hjetMaxEMFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jetMaxEMFraction", "jetMaxEMFraction", 100, 0., 1.0);
@@ -193,8 +193,8 @@ namespace HPlus {
     hTowersAreaSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySelectedJetsDir, "jet_TowersArea", "jet_TowersArea", 100, 0., 10.);
     hJetChargeSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySelectedJetsDir, "jet_JECFactor", "jet_JECFactor", 10, -5., 5.);
     hPtDiffToGenJetSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySelectedJetsDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
-    hDeltaPtJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, mySelectedJetsDir, "deltaPtTauJet", "deltaPtTauJet ", 200, -100., 100.);
-    hDeltaRJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, mySelectedJetsDir, "deltaRTauJet", "deltaRTauJet ", 120, 0., 6.);
+    hDeltaPtJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySelectedJetsDir, "deltaPtTauJet", "deltaPtTauJet ", 200, -100., 100.);
+    hDeltaRJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySelectedJetsDir, "deltaRTauJet", "deltaRTauJet ", 120, 0., 6.);
 
     // MHT related
     TFileDirectory myMHTDir = myDir.mkdir("MHT");
