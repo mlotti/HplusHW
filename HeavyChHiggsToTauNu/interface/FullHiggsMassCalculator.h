@@ -96,10 +96,10 @@ namespace HPlus {
       TLorentzVector LorentzVector_visibleTauFourMomentum;
       TLorentzVector LorentzVector_neutrinosFourMomentum;
       // Neutrino p_z solution selection
-      bool bSelectionGreaterCorrect;
-      bool bSelectionSmallerCorrect;
-      bool bSelectionTauNuAngleMaxCorrect;
-      bool bSelectionTauNuAngleMinCorrect;
+      double fNeutrinoPzSolutionGreater;
+      double fNeutrinoPzSolutionSmaller;
+      double fNeutrinoPzSolutionTauNuAngleMax;
+      double fNeutrinoPzSolutionTauNuAngleMin;
       // Event classification results
       EventClassCode eEventClassCode;
     };
@@ -130,10 +130,10 @@ namespace HPlus {
     void doCalculations(TVector3& tauVector, TVector3& bJetVector, TVector3& METVector,
 			FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
     void calculateNeutrinoPz(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
-    void selectNeutrinoPzSolution(TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output,
+    double selectNeutrinoPzSolution(TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output,
 				  PzSelectionMethod selectionMethod);
     double getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
-    bool solution1IsClosestToTrueValue(FullHiggsMassCalculator::Data& output);
+    bool selectedSolutionIsClosestToTrueValue(double selectedSolution, FullHiggsMassCalculator::Data& output);
     void constructFourMomenta(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
     void calculateTopMass(FullHiggsMassCalculator::Data& output);
     void calculateHiggsMass(FullHiggsMassCalculator::Data& output);
@@ -141,8 +141,7 @@ namespace HPlus {
 			       TVector3& METVector, FullHiggsMassCalculator::Data& output, 
 			       const GenParticleAnalysis::Data* genDataPtr = NULL);
     void doCountingAndHistogramming(FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
-    //    ***NEW METHODS***
-    //void calculateMETComposition(...);
+    void analyzeMETComposition(TVector3& recoMETVector, TVector3& genBothNeutrinosVector, TVector3& genMETVector);
     
   private:
 
