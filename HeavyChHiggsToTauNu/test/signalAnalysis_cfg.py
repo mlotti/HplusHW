@@ -7,8 +7,8 @@ dataVersion="44XmcS6"     # Fall11 MC
 
 dataEras = [
     "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
-#    "Run2011A",
-#    "Run2011B",
+    "Run2011A",
+    "Run2011B",
 ]
 
 
@@ -48,7 +48,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #customizeHeavyAnalysis=customize,
                         #useCHSJets=True,
                         #doAgainstElectronScan=True,
-                        doTauIsolationAndJetPUScan=True,
+                        #doTauIsolationAndJetPUScan=True,
                         #doSystematics=True,
                         #histogramAmbientLevel = "Vital",
                         #doOptimisation=True, optimisationScheme=myOptimisation
