@@ -365,25 +365,26 @@ namespace HPlus {
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == GEN) hHiggsMass_greater->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN) hHiggsMass_greater->Fill(output.fHiggsMassSolution);
     // Selection method: smaller
     output.fNeutrinoPzSolutionSmaller = selectNeutrinoPzSolution(tauVector, bJetVector, output, eSmaller);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == GEN) hHiggsMass_smaller->Fill(output.fHiggsMassSolution);
-    // Selection method: tauNuAngleMax
-    output.fNeutrinoPzSolutionTauNuAngleMax = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuAngleMax);
-    constructFourMomenta(tauVector, bJetVector, METVector, output);
-    calculateTopMass(output);
-    calculateHiggsMass(output);
-    if (myInputDataType == GEN) hHiggsMass_tauNuAngleMax->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN) hHiggsMass_smaller->Fill(output.fHiggsMassSolution);
     // Selection method: tauNuAngleMin
     output.fNeutrinoPzSolutionTauNuAngleMin = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuAngleMin);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == GEN) hHiggsMass_tauNuAngleMin->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN) hHiggsMass_tauNuAngleMin->Fill(output.fHiggsMassSolution);
+    // NOTE: THE LAST CALCULATION DETERMINES WHICH SELECTION METHOD IS USED FOR THE MAIN OUTPUT:
+    // Selection method: tauNuAngleMax
+    output.fNeutrinoPzSolutionTauNuAngleMax = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuAngleMax);
+    constructFourMomenta(tauVector, bJetVector, METVector, output);
+    calculateTopMass(output);
+    calculateHiggsMass(output);
+    if (myInputDataType == eGEN) hHiggsMass_tauNuAngleMax->Fill(output.fHiggsMassSolution);
 
     doCountingAndHistogramming(output, myInputDataType);
   }
