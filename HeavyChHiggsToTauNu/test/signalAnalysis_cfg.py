@@ -7,8 +7,8 @@ dataVersion="44XmcS6"     # Fall11 MC
 
 dataEras = [
     "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
-    "Run2011A",
-    "Run2011B",
+#    "Run2011A",
+#    "Run2011B",
 ]
 
 
@@ -35,9 +35,10 @@ myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 
 def customize(signalAnalysis):
     # Apply beta cut for jets to reject PU jets
-    signalAnalysis.jetSelection.betaCut = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
+#    signalAnalysis.jetSelection.jetPileUpWorkingPoint = "tight" # 
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
 #    signalAnalysis.MET.METCut = 100.0 
+    print "Customisations done"
         
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
@@ -47,6 +48,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #customizeHeavyAnalysis=customize,
                         #useCHSJets=True,
                         #doAgainstElectronScan=True,
+                        doTauIsolationAndJetPUScan=True,
                         #doSystematics=True,
                         #histogramAmbientLevel = "Vital",
                         #doOptimisation=True, optimisationScheme=myOptimisation

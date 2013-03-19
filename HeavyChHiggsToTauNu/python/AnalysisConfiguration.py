@@ -48,7 +48,8 @@ class ConfigBuilder:
                  useDefaultInputFiles = True,
                  edmOutput = False,
                  # Optional options
-                 doAgainstElectronScan = False, # Scan against electron discriminators
+                 doAgainstElectronScan = False, # Scan against electron and muon discriminators
+                 doTauIsolationAndJetPUScan = False, # Scan tau isolation and jet PU discriminators
                  doBTagTree = False, # fill tree for btagging eff study
                  doMETResolution = False, # Make MET resolution histograms
                  tauEmbeddingFinalizeMuonSelection = True, # With tau embedding input, tighten the muon selection
@@ -90,6 +91,7 @@ class ConfigBuilder:
         self.edmOutput = edmOutput
 
         self.doAgainstElectronScan = doAgainstElectronScan
+        self.doTauIsolationAndJetPUScan = doTauIsolationAndJetPUScan
         self.doBTagTree = doBTagTree
         self.doMETResolution = doMETResolution
         self.tauEmbeddingFinalizeMuonSelection = tauEmbeddingFinalizeMuonSelection
@@ -381,6 +383,9 @@ class ConfigBuilder:
         # Against electron scan
         self._buildAgainstElectronScan(process, analysisModules, analysisNames)
 
+        # scan for tau isolation and jet PU ID
+        self._buildTauIsolationAndJetPUScan(process, analysisModules, analysisNames)
+
         # Tau embedding-like preselection for normal MC
         analysisNamesForSystematics.extend(self._buildTauEmbeddingLikePreselection(process, analysisModules, analysisNames, additionalCounters))
 
@@ -407,6 +412,12 @@ class ConfigBuilder:
             )
             process.outpath = cms.EndPath(process.out)
 
+        # Set PU ID src for modules
+        import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as parameters
+        for module, name in zip(analysisModules, analysisNames):
+           parameters.setJetPUIdSrc(module.jetSelection, name)
+
+        # Check number of analyzers
         self._checkNumberOfAnalyzers()
 
         return process
@@ -606,13 +617,13 @@ class ConfigBuilder:
             "byMediumIsolationMVA2"
             ]
         muonDiscriminators = [
-            "againstMuonLoose2",
+            #"againstMuonLoose2",
             "againstMuonMedium2",
             "againstMuonTight2"
             ]
         electronDiscriminators = [
-            "againstElectronLooseMVA3",
-            "againstElectronMediumMVA3",
+            #"againstElectronLooseMVA3",
+            #"againstElectronMediumMVA3",
             "againstElectronTightMVA3",
             "againstElectronVTightMVA3"
             ]
@@ -625,13 +636,46 @@ class ConfigBuilder:
                         mod.tauSelection.isolationDiscriminator = tauIsol
                         mod.tauSelection.againstElectronDiscriminator = eleDisc
                         mod.tauSelection.againstMuonDiscriminator = muonDisc
-                        modName = name+eleDisc[0].upper()+eleDisc[1:]+muonDisc[0].upper()+muonDisc[1:]+tauIsol[0].upper()+tauIsol[1:]
+                        modName = name+"Opt"+eleDisc[0].upper()+eleDisc[1:]+muonDisc[0].upper()+muonDisc[1:]+tauIsol[0].upper()+tauIsol[1:]
                         setattr(process, modName, mod)
                         names.append(modName)
                         path = cms.Path(process.commonSequence * mod)
                         setattr(process, modName+"Path", path)
         self._accumulateAnalyzers("AgainstElectron/AgainstMuon scan", names)
- 
+
+    ## Build array of analyzers to scan various tau isolation and jet PU ID discriminators
+    #
+    # \param process          cms.Process object
+    # \param analysisModules  List of analysis modules to be used as prototypes
+    # \param analysisNames    List of analysis module names
+    def _buildTauIsolationAndJetPUScan(self, process, analysisModules, analysisNames):
+        if not self.doTauIsolationAndJetPUScan:
+            return
+
+        myTauIsolation = [
+            "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+            "byMediumCombinedIsolationDeltaBetaCorr3Hits",
+            "byMediumIsolationMVA2"
+            ]
+        jetPUIDType = ["full", "cutbased", "philv1", "simple"]
+        jetPUIDWP = ["tight", "medium", "loose"]
+
+        names = []
+        for module, name in zip(analysisModules, analysisNames):
+            for idType in jetPUIDType:
+                for idWP in jetPUIDWP:
+                    for tauIsol in myTauIsolation:
+                        mod = module.clone()
+                        mod.tauSelection.isolationDiscriminator = tauIsol
+                        mod.jetSelection.jetPileUpType = idType
+                        mod.jetSelection.jetPileUpWorkingPoint = idWP
+                        modName = name+"Opt"+idType[0].upper()+idType[1:]+idWP[0].upper()+idWP[1:]+tauIsol[0].upper()+tauIsol[1:]
+                        setattr(process, modName, mod)
+                        names.append(modName)
+                        path = cms.Path(process.commonSequence * mod)
+                        setattr(process, modName+"Path", path)
+        self._accumulateAnalyzers("TauIsolation/JetPUID scan", names)
+
     ## Build "tau embedding"-like preselection for normal MC
     #
     # \param process             cms.Process object
@@ -758,7 +802,7 @@ class ConfigBuilder:
         module = getattr(process, name)
 
         module = module.clone()
-        module.Tree.fill = False        
+        module.Tree.fill = False
         module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
         module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
