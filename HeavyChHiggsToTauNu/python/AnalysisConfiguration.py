@@ -135,7 +135,7 @@ class ConfigBuilder:
             if self.options.tauEmbeddingInput != 0:
                 raise Exception("There are no WJets weights for embedding yet")
 
-        if self.doOptimisation:
+        if self.doOptimisation or self.doAgainstElectronScan or self.doTauIsolationAndJetPUScan:
             #self.doSystematics = True            # Make sure that systematics are run
             self.doFillTree = False              # Make sure that tree filling is disabled or root file size explodes
             self.histogramAmbientLevel = histogramAmbientLevelOptimization # Set histogram level to least histograms to reduce output file sizes
@@ -628,6 +628,7 @@ class ConfigBuilder:
             "againstElectronVTightMVA3"
             ]
         names = []
+        modules = []
         for module, name in zip(analysisModules, analysisNames):
             for eleDisc in electronDiscriminators:
                 for muonDisc in muonDiscriminators:
@@ -639,9 +640,12 @@ class ConfigBuilder:
                         modName = name+"Opt"+eleDisc[0].upper()+eleDisc[1:]+muonDisc[0].upper()+muonDisc[1:]+tauIsol[0].upper()+tauIsol[1:]
                         setattr(process, modName, mod)
                         names.append(modName)
+                        modules.append(mod)
                         path = cms.Path(process.commonSequence * mod)
                         setattr(process, modName+"Path", path)
         self._accumulateAnalyzers("AgainstElectron/AgainstMuon scan", names)
+        analysisModules.extend(modules)
+        analysisNames.extend(names)
 
     ## Build array of analyzers to scan various tau isolation and jet PU ID discriminators
     #
@@ -661,6 +665,7 @@ class ConfigBuilder:
         jetPUIDWP = ["tight", "medium", "loose"]
 
         names = []
+        modules = []
         for module, name in zip(analysisModules, analysisNames):
             for idType in jetPUIDType:
                 for idWP in jetPUIDWP:
@@ -672,9 +677,12 @@ class ConfigBuilder:
                         modName = name+"Opt"+idType[0].upper()+idType[1:]+idWP[0].upper()+idWP[1:]+tauIsol[0].upper()+tauIsol[1:]
                         setattr(process, modName, mod)
                         names.append(modName)
+                        modules.append(mod)
                         path = cms.Path(process.commonSequence * mod)
                         setattr(process, modName+"Path", path)
         self._accumulateAnalyzers("TauIsolation/JetPUID scan", names)
+        analysisModules.extend(modules)
+        analysisNames.extend(names)
 
     ## Build "tau embedding"-like preselection for normal MC
     #
