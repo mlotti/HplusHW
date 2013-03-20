@@ -3,6 +3,7 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_EventCounter_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TemporaryDisabler.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include <boost/utility.hpp>
 #include <utility>
@@ -42,7 +43,7 @@ namespace HPlus {
   public:
     typedef HPlus::TemporaryDisabler<EventCounter> TemporaryDisabler;
 
-    EventCounter(const edm::ParameterSet& iConfig, const EventWeight& eventWeight, HistoWrapper& histoWrapper);
+    EventCounter(const edm::ParameterSet& iConfig, const EventWeight& eventWeight, HistoWrapper& histoWrapper, HistoWrapper::HistoLevel subCounterLevel=HistoWrapper::kInformative);
     ~EventCounter();
 
     Count addCounter(const std::string& name);
@@ -66,6 +67,7 @@ namespace HPlus {
     const EventWeight& fEventWeight;
     HistoWrapper& fHistoWrapper;
     std::string label;
+    const HistoWrapper::HistoLevel fSubCounterLevel;
     bool printMainCounter;
     bool printSubCounters;
     bool fIsEnabled;

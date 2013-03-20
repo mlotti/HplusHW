@@ -83,6 +83,9 @@ config = {
 #        "patMadhatter": "file:/mnt/flustre/mkortela/data/BJetPlusX/Run2012B-13Jul2012-v1/AOD/56624F47-77D3-E111-A63A-003048FFD760.root", # run 194050
 #        "signalTrigger": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4", "HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
 #        "patMadhatter": "file:/mnt/flustre/mkortela/data/BJetPlusX/Run2012B-13Jul2012-v1/AOD/ACDDA8FD-E0D3-E111-B696-00304867924E.root", # run 194108-194224
+#
+#         "signalTrigger": ["HLT_QuadJet80_v1"]
+#         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/MultiJet_190456-190738_2012A_Jul13/MultiJet/Run2012A_13Jul2012_v1_AOD_190456_190738_pattuple_v53_2/96fa41b5518123a49a7bd0a10242f655/pattuple_29_1_ODs.root", # runs 190482-190688
     },
     "53Xdata06Aug2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "FT_53_V6C_AN3::All",
