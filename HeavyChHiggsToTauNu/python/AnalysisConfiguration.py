@@ -50,6 +50,7 @@ class ConfigBuilder:
                  # Optional options
                  doAgainstElectronScan = False, # Scan against electron and muon discriminators
                  doTauIsolationAndJetPUScan = False, # Scan tau isolation and jet PU discriminators
+                 doBTagScan = False, # Scan various btag working points to obtain MC efficiencies
                  doBTagTree = False, # fill tree for btagging eff study
                  doMETResolution = False, # Make MET resolution histograms
                  tauEmbeddingFinalizeMuonSelection = True, # With tau embedding input, tighten the muon selection
@@ -92,6 +93,7 @@ class ConfigBuilder:
 
         self.doAgainstElectronScan = doAgainstElectronScan
         self.doTauIsolationAndJetPUScan = doTauIsolationAndJetPUScan
+        self.doBTagScan = doBTagScan
         self.doBTagTree = doBTagTree
         self.doMETResolution = doMETResolution
         self.tauEmbeddingFinalizeMuonSelection = tauEmbeddingFinalizeMuonSelection
@@ -219,7 +221,9 @@ class ConfigBuilder:
 
         if self.printAnalyzerNames:
             print "Analyzer module names:"
-            names = self.getAnalyzerModuleNames()
+            names = []
+            for x in self.numberOfAnalyzers.itervalues():
+                names.extend(x)
             names.sort()
             for name in names:
                 print "  %s" % name
@@ -231,12 +235,6 @@ class ConfigBuilder:
                 print "Total number of analyzers (%d) is over the suggested limit (%d), it might take loong to run and merge output" % (s, tooManyAnalyzersLimit)
             else:
                 raise Exception("Total number of analyzers (%d) exceeds the suggested limit (%d). If you're sure you want to run so many analyzers, add 'allowTooManyAnalyzers=True' to the ConfigBuilder() constructor call." % (s, tooManyAnalyzersLimit))
-
-    def getAnalyzerModuleNames(self):
-        names = []
-        for x in self.numberOfAnalyzers.itervalues():
-            names.extend(x)
-        return names        
 
     ## Do the actual building of the configuration
     #
@@ -390,6 +388,9 @@ class ConfigBuilder:
         # scan for tau isolation and jet PU ID
         self._buildTauIsolationAndJetPUScan(process, analysisModules, analysisNames)
 
+        # scan various btagging working points
+        self._buildBTagScan(process, analysisModules, analysisNames)
+
         # Tau embedding-like preselection for normal MC
         analysisNamesForSystematics.extend(self._buildTauEmbeddingLikePreselection(process, analysisModules, analysisNames, additionalCounters))
 
@@ -449,10 +450,7 @@ class ConfigBuilder:
             fileNames = cms.untracked.vstring()
         )
         if self.useDefaultInputFiles:
-            if self.options.doPat == 0:
-                process.source.fileNames.append(self.dataVersion.getAnalysisDefaultFileMadhatter())
-            else:
-                process.source.fileNames.append(self.dataVersion.getPatDefaultFileMadhatter())
+            process.source.fileNames.append(self.dataVersion.getAnalysisDefaultFileMadhatter())
         if self.options.tauEmbeddingInput != 0:
             if self.options.doPat != 0:
                 raise Exception("In tau embedding input mode, doPat must be 0 (from v44_4 onwards)")
@@ -688,6 +686,46 @@ class ConfigBuilder:
                         path = cms.Path(process.commonSequence * mod)
                         setattr(process, modName+"Path", path)
         self._accumulateAnalyzers("TauIsolation/JetPUID scan", names)
+        analysisModules.extend(modules)
+        analysisNames.extend(names)
+
+    ## Build array of analyzers to scan various tau isolation and jet PU ID discriminators
+    #
+    # \param process          cms.Process object
+    # \param analysisModules  List of analysis modules to be used as prototypes
+    # \param analysisNames    List of analysis module names
+    def _buildBTagScan(self, process, analysisModules, analysisNames):
+        if not self.doBTagScan:
+            return
+        #OP: JPL = 0.275, JPM = 0.545, JPT = 0.790, CSVL = 0.244, CSVM = 0.679, CSVT = 0.898
+        myCSVWorkingPoints = [0.244, 0.679, 0.898]
+        myJPTWorkingPoints = [0.275, 0.545, 0.790]
+
+        names = []
+        modules = []
+        for module, name in zip(analysisModules, analysisNames):
+            for csv in myCSVWorkingPoints:
+                mod = module.clone()
+                mod.bTagging.discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags")
+                mod.bTagging.leadingDiscriminatorCut = csv
+                modName = name+"OptBtagCSV"+str(csv).replace(".","")
+                setattr(process, modName, mod)
+                names.append(modName)
+                modules.append(mod)
+                path = cms.Path(process.commonSequence * mod)
+                setattr(process, modName+"Path", path)
+        for module, name in zip(analysisModules, analysisNames):
+            for jpt in myJPTWorkingPoints:
+                mod = module.clone()
+                mod.bTagging.discriminator = cms.untracked.string("jetProbabilityBJetTags")
+                mod.bTagging.leadingDiscriminatorCut = jpt
+                modName = name+"OptBtagJPT"+str(jpt).replace(".","")
+                setattr(process, modName, mod)
+                names.append(modName)
+                modules.append(mod)
+                path = cms.Path(process.commonSequence * mod)
+                setattr(process, modName+"Path", path)
+        self._accumulateAnalyzers("btag efficiency scan", names)
         analysisModules.extend(modules)
         analysisNames.extend(names)
 
