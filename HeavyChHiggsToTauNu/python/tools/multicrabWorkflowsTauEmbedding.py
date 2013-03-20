@@ -32,6 +32,7 @@ def addEmbeddingAodAnalysis_44X(datasets):
         source = Source("AOD", number_of_jobs=taskDef.njobsIn)
         wf = Workflow("embeddingAodAnalysis_44X", source=source, output_file="histograms.root")
         wf.addCrabLine("CMSSW.total_number_of_lumis = -1")
+        wf.addArg("doPat", 1)
         dataset.addWorkflow(wf)
 
 def getDefaultDefinitions_44X():
@@ -216,6 +217,7 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
 
         wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow=sourceWorkflow, workflowName="tauembedding_embedding_"+version)
         wf.source.lumiMask = None # be agnostic for lumi mask
+        wf.setOutputFile("embedded.root")
 
         # CRAB configuration lines
         wf.addCrabLine("CMSSW.total_number_of_lumis = -1")

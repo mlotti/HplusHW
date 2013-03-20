@@ -328,7 +328,10 @@ EvtTopology = cms.untracked.PSet(
     sphericity = cms.untracked.double(-5.0),
     aplanarity = cms.untracked.double(-5.0),
     planarity = cms.untracked.double(-5.0),
-    circularity = cms.untracked.double(-5.0)
+    circularity = cms.untracked.double(-5.0),
+    Cparameter = cms.untracked.double(-5.0),
+    Dparameter = cms.untracked.double(-5.0),
+    jetThrust = cms.untracked.double(-5.0),
 )
 
 ElectronSelection = cms.untracked.PSet(
