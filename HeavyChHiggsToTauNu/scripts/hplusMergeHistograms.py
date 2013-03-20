@@ -77,42 +77,64 @@ def main(opts, args):
             if not os.path.isfile(f):
                 raise Exception("File %s is marked as output file in the  CMSSW_N.stdout, but does not exist" % f)
 
-        print "Task %s, merging %d file(s)" % (d, len(files))
+        filesSplit = []
+        if opts.filesPerMerge < 0:
+            filesSplit = [(0, files)]
+        else:
+            i = 0
+            def beg(ind):
+                return ind*opts.filesPerMerge
+            def end(ind):
+                return (ind+1)*opts.filesPerMerge
+            while beg(i) < len(files):
+                filesSplit.append((i, files[beg(i):end(i)]))
+                i += 1
+
+        if len(filesSplit) == 1:
+            print "Task %s, merging %d file(s)" % (d, len(files))
+        else:
+            print "Task %s, merging %d file(s) to %d files" % (d, len(files), len(filesSplit))
 
         # If testing, end this iteration here
         if opts.test:
             continue
 
-        mergeName = os.path.join(d, "res", opts.output % d)
-        #cmd = "mergeTFileServiceHistograms -o %s -i %s" % ("histograms-"+d+".root", " ".join(files))
-        #print files
-        #ret = subprocess.call(["mergeTFileServiceHistograms",
-        #                       "-o", mergeName,
-        #                       "-i"]+files)
-           
-        if os.path.exists(mergeName):
-            shutil.move(mergeName, mergeName+".backup")
+        for index, inputFiles in filesSplit:
+            tmp = d
+            if len(filesSplit) > 1:
+                tmp += "-%d" % index
+            mergeName = os.path.join(d, "res", opts.output % tmp)
+            #cmd = "mergeTFileServiceHistograms -o %s -i %s" % ("histograms-"+d+".root", " ".join(files))
+            #print files
+            #ret = subprocess.call(["mergeTFileServiceHistograms",
+            #                       "-o", mergeName,
+            #                       "-i"]+files)
+               
+            if os.path.exists(mergeName):
+                shutil.move(mergeName, mergeName+".backup")
 
-        cmd = ["hadd"]
-        if opts.filesInSE:
-            cmd.append("-T") # don't merge TTrees via xrootd
-        cmd.append(mergeName)
-        cmd.extend(files)
+            cmd = ["hadd"]
+            if opts.filesInSE:
+                cmd.append("-T") # don't merge TTrees via xrootd
+            cmd.append(mergeName)
+            cmd.extend(files)
 
-        p = subprocess.Popen(["hadd", mergeName]+files, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = p.communicate()[0]
-        ret = p.returncode
-        if ret != 0:
-            print output
-            print "Merging failed with exit code %d" % ret
-            return 1
+            p = subprocess.Popen(["hadd", mergeName]+inputFiles, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            output = p.communicate()[0]
+            ret = p.returncode
+            if ret != 0:
+                print output
+                print "Merging failed with exit code %d" % ret
+                return 1
 
-        # FIXME: add here reading of first xrootd file, finding all TTrees, and writing the TList to mergeName file
-        if opts.filesInSE:
-            raise Exception("--filesInSE feature is not fully implemented")
-        
-        mergedFiles.append((mergeName, files))
+            # FIXME: add here reading of first xrootd file, finding all TTrees, and writing the TList to mergeName file
+            if opts.filesInSE:
+                raise Exception("--filesInSE feature is not fully implemented")
 
+            if len(filesSplit) > 1:
+                print "  done %d" % index
+            mergedFiles.append((mergeName, inputFiles))
+    
     # If testing, finish here
     if opts.test:
         return 0
@@ -142,9 +164,14 @@ if __name__ == "__main__":
                       help="Just test, do not do any merging or deleting (might be useful for checking what would happen)")
     parser.add_option("--delete", dest="delete", default=False, action="store_true",
                       help="Delete the source files to save disk space (default is to keep the files)")
+    parser.add_option("--filesPerMerge", dest="filesPerMerge", default=-1, type="int",
+                      help="Merge at most this many files together, possibly resulting to multiple merged files. Use case: large ntuples. (default: -1 to merge all files to one)")
     parser.add_option("--filesInSE", dest="filesInSE", default=False, action="store_true",
                       help="The ROOT files to be merged are in an SE, merge the files from there. File locations are read from CMSSW_*.stdout files. NOTE: TTrees are not merged (it is assumed that due to TTrees the files are so big that they have to be stored in SE), but are replaced with TList of strings of the PFN's of the files via xrootd protocol.")
     
     (opts, args) = parser.parse_args()
+
+    if opts.filesPerMerge == 0:
+        parser.error("--filesPerMerge must be non-zero")
 
     sys.exit(main(opts, args))

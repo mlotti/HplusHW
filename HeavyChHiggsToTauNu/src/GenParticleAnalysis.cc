@@ -99,6 +99,10 @@ namespace HPlus {
 
     hTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genTopPt", "genTopPt", 300, 0., 600);
     hTopPt_wrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genTopPt_wrongB", "genTopPt_wrongB", 300, 0., 600);
+    hTopToChHiggsMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopToChHiggsMass", "genTopToChHiggsMass", 300, 0., 600);
+    hTopToWBosonMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopToWBosonMass", "genTopToWBosonMass", 300, 0., 600);
+    hFullHiggsMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genFullHiggsMass", "genFullHiggsMass", 300, 0., 600);
+    hTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopPt", "genTopPt", 300, 0., 600);
     hGenMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genMET", "genMET", 40, 0., 400);
     hWPt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genWPt", "genWPt", 120, 0., 600);
     hWEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genWEta", "genWEta", 100, -5., 5.);    
@@ -520,8 +524,6 @@ namespace HPlus {
         }
       }
     }
-    
-        
         
     // loop over all genParticles, search tops that decay to u and d and calculate pt
     // also calculate the "wrong" pt, by picking the b quark that does not come from the t
@@ -571,6 +573,95 @@ namespace HPlus {
         hTopPt_wrongB->Fill(sqrt(px_wrong*px_wrong+py_wrong*py_wrong));
       }
     }
+
+    // Loop over all gen particles, find tops that decay via t -> Wb and t -> Hb
+    // and add their masses to different histograms
+    for (size_t i=0; i < genParticles->size(); ++i){
+      const reco::Candidate & p = (*genParticles)[i];
+      int id = p.pdgId();
+      if ( abs(id) != 6 || hasImmediateMother(p,id)) continue;
+      std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
+      int daughterId=9999;
+      double px = 0, py = 0, pz = 0, E = 0;
+      bool decaysToChHiggs = false;
+      bool decaysToWBoson = false;
+      for(size_t d=0; d<daughters.size(); ++d) {
+        const reco::GenParticle dparticle = *daughters[d];
+        daughterId = dparticle.pdgId();
+	// If top decays to W boson (and b quark):
+        if( abs(daughterId) == 24 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+	  decaysToWBoson = true;
+        }
+	// If top decays to charged Higgs boson (and b quark):
+        if( abs(daughterId) == 37 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+	  decaysToChHiggs = true;
+        }
+	// In either case (t -> Wb || t -> Hb), add four momentum of b quark
+        if( abs(daughterId) == 5 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+        }
+      }
+      if(decaysToWBoson) {
+        hTopToWBosonMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
+      }
+      if(decaysToChHiggs) {
+        hTopToChHiggsMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
+      }
+    }
+
+    // Loop over all gen particles, find charged Higgs bosons decaying to tau+nu and put their full mass
+    // in a histogram (i.e. norm of four-momentum)
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      int id = p.pdgId();
+      // If charged Higgs
+      if ( abs(id) != 37 || hasImmediateMother(p,id)) continue;
+      std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
+      int daughterId=9999;
+      double px = 0, py = 0, pz = 0, E = 0;
+      bool tauFound = false;
+      bool neutrinoFound = false;
+      for(size_t d=0; d<daughters.size(); ++d) {
+        const reco::GenParticle dparticle = *daughters[d];
+        daughterId = dparticle.pdgId();
+	// If tau among immediate daughters
+        if( abs(daughterId) == 15 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+	  //	  std::cout << "Tau found." << std::endl;
+	  tauFound = true;
+        }
+	// If tau neutrino among immediate daughters
+        if( abs(daughterId) == 16 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+	  neutrinoFound = true;
+        }
+      } // end of loop over daughters of charged Higgs
+      // If both tau and tau neutrino found among immediate daughters, add mass to histogram
+      if( tauFound && neutrinoFound) {
+	hFullHiggsMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
+	//	  std::cout << "Mass put in histogram" << std::endl;
+      }
+      else {
+	//	  std::cout << "Charged Higgs boson NOT decaying to tauNu found" << std::endl;
+      }
+    }    
 
     return output;
   }

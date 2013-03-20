@@ -124,6 +124,9 @@ namespace HPlus {
     WrappedTH1 *hGenDeltaRTopSide;
     WrappedTH1 *hTopPt;
     WrappedTH1 *hTopPt_wrongB;
+    WrappedTH1 *hTopToChHiggsMass;
+    WrappedTH1 *hTopToWBosonMass;
+    WrappedTH1 *hFullHiggsMass;
     WrappedTH1 *hGenMET;
     WrappedTH1 *hWPt;
     WrappedTH1 *hWEta;
