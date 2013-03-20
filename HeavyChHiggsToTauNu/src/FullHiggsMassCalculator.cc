@@ -115,13 +115,13 @@ namespace HPlus {
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
-    hHiggsMass                = histoWrapper.makeTH<TH1F>(HistoWrapper::kInfomative, myDir, "HiggsMass",
+    hHiggsMass                = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass",
                                                           "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMassDPz100          = histoWrapper.makeTH<TH1F>(HistoWrapper::kInfomative, myDir, "HiggsMassDPz100", 
+    hHiggsMassDPz100          = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassDPz100", 
 							  "Higgs massDPz100;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMass_TauBmatch      = histoWrapper.makeTH<TH1F>(HistoWrapper::kInfomative, myDir, "HiggsMassTauBmatch", 
+    hHiggsMass_TauBmatch      = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassTauBmatch", 
 							  "Higgs massTauBmatch;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMass_TauBMETmatch   = histoWrapper.makeTH<TH1F>(HistoWrapper::kInfomative, myDir, "HiggsMassTauBMETmatch",
+    hHiggsMass_TauBMETmatch   = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassTauBMETmatch",
 							  "Higgs massTauBMETmatch;m_{H^{+}} (GeV)", 100, 0, 500);
     // Informative histograms
     hTopMass                  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass", 
