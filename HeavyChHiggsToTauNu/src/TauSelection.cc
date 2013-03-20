@@ -372,7 +372,7 @@ namespace HPlus {
       "TauSelection_cleaned_tau_candidates_pt",
       "cleaned_tau_candidates_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
-    hPtSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir,
+    hPtSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_selected_taus_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
@@ -385,7 +385,7 @@ namespace HPlus {
       "TauSelection_cleaned_tau_candidates_eta",
       "cleaned_tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-    hEtaSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir,
+    hEtaSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_selected_taus_eta",
       "selected_tau_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
@@ -427,7 +427,7 @@ namespace HPlus {
       "TauSelection_cleaned_tau_candidates_N",
       "cleaned_tau_candidates_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
-    hNumberOfSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir,
+    hNumberOfSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_selected_taus_N",
       "selected_tau_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
@@ -470,14 +470,14 @@ namespace HPlus {
     hTightIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_TightIsoNCands", "Number of isolation candidates in Tight", 100, 0, 100);
 
     // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
-    hTauIdOperatingMode = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 3, 0., 3.);
+    hTauIdOperatingMode = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 3, 0., 3.);
     if (hTauIdOperatingMode->isActive()) {
       hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
       hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Normal tau ID");
       hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "tauCandidateSelectionOnly");
     }
     // Sorting category in tau candidate selection
-    hTauIdCandidateSelectionSortCategory = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "CandidateSelectionSortCategory", "CandidateSelectionSortCategory;;N_{events}", 10, 0., 10.);
+    hTauIdCandidateSelectionSortCategory = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "CandidateSelectionSortCategory", "CandidateSelectionSortCategory;;N_{events}", 10, 0., 10.);
     if (hTauIdCandidateSelectionSortCategory->isActive()) {
       hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(1, "Beginning");
       hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(2, "None pass isol.");

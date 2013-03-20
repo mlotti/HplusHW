@@ -99,13 +99,13 @@ primaryVertexSelection = cms.untracked.PSet(
 tauSelectionBase = cms.untracked.PSet(
     # Operating mode options: 'standard'
     operatingMode = cms.untracked.string("standard"), # Standard tau ID (Tau candidate selection + tau ID applied)
-    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
+    src = cms.untracked.InputTag("selectedPatTaus"),
     selection = cms.untracked.string(""),
 #    ptCut = cms.untracked.double(50), # jet pt > value for heavy charged Higgs
     ptCut = cms.untracked.double(41), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
-    againstElectronDiscriminator = cms.untracked.string("againstElectronTightMVA3"), # discriminator against electrons
+    againstElectronDiscriminator = cms.untracked.string("againstElectronVTightMVA3"), # discriminator against electrons
     againstMuonDiscriminator = cms.untracked.string("againstMuonTight2"), # discriminator for against muons
     applyVetoForDeadECALCells = cms.untracked.bool(False), # set to true to exclude taus that are pointing to a dead ECAL cell
     deadECALCellsDeltaR = cms.untracked.double(0.01), # min allowed DeltaR to a dead ECAL cell
@@ -141,15 +141,14 @@ tauSelectionHPSLooseTauBased = tauSelectionBase.clone(
 
 # Very loose working point is no longer supported
 #tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
-    #src = "selectedPatTausHpsPFTau",
+    #src = "selectedPatTaus",
     #selection = "HPSTauBased",
     #isolationDiscriminator = "byVLooseCombinedIsolationDeltaBetaCorr",
     #isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 #)
 
 vetoTauBase = tauSelectionHPSLooseTauBased.clone(
-    src = "selectedPatTausHpsPFTau",
-#    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
+    src = "selectedPatTaus",
     ptCut = cms.untracked.double(20), # jet pt > value
     etaCut = cms.untracked.double(2.4), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(5.0), # ldg. track > value
@@ -232,8 +231,7 @@ jetSelectionBase = cms.untracked.PSet(
     cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets around tau jet
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(3), # minimum number of selected jets # FIXME rename minNumber to jetNumber
-    jetNumber = cms.untracked.uint32(3), # minimum number of selected jets # FIXME rename minNumber to jetNumber
+    jetNumber = cms.untracked.uint32(3), # minimum number of selected jets
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
     # Jet ID cuts
     jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.99),
@@ -243,12 +241,12 @@ jetSelectionBase = cms.untracked.PSet(
     jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
     jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
     # Pileup cleaning
-
-    betaCut = cms.untracked.double(0.2), # default 0.2
-
-    betaCutSource = cms.untracked.string("Beta"), # tag name in user floats
-    betaCutDirection = cms.untracked.string("GT"), # direction of beta cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
-    # Veto event if jet hits dead ECAL cell
+    jetPileUpJetCollectionPrefix = cms.untracked.string("puJetMva"),
+    jetPileUpType = cms.untracked.string("full"), # options: 'full' (BDT based), 'cutbased', 'philv1', 'simple'
+    jetPileUpWorkingPoint = cms.untracked.string("tight"), # options: tight, medium, loose
+    jetPileUpMVAValues = cms.untracked.InputTag("","",""), # will be set by the function setJetPUIdSrc from AnalysisConfiguration
+    jetPileUpIdFlag = cms.untracked.InputTag("","",""), # will be set by the function setJetPUIdSrc from AnalysisConfiguration
+    # Veto event if jet hits dead ECAL cell - experimental, do not use for latest greatest results!
     applyVetoForDeadECALCells = cms.untracked.bool(False),
     deadECALCellsVetoDeltaR = cms.untracked.double(0.07),
     # Experimental
@@ -267,7 +265,7 @@ jetSelectionTight = jetSelectionBase.clone(
     jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.90),
 )
 
-jetSelection = jetSelectionLoose # set default jet selection
+jetSelection = jetSelectionTight # set default jet selection
 
 MET = cms.untracked.PSet(
     rawSrc = cms.untracked.InputTag("patPFMet"), # PF MET
@@ -771,6 +769,42 @@ def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, ad
                     preSequence=seq,
                     additionalCounters=additionalCounters)
 
+def setJetPUIdSrc(jetSelectionPSet, moduleName):
+    # Check PUID type validity
+    myPUIDType = jetSelectionPSet.jetPileUpType.value()
+    myValidPUIDTypes = ["full", "cutbased", "philv1", "simple"]
+    if not (myPUIDType in myValidPUIDTypes):
+        raise Exception("jet PU ID type '%s' is not valid! (options: %s)"%(myPUIDType,", ".join(map(str, myValidPUIDTypes))))
+    # Check PUID working point validity
+    myPUIDWP = jetSelectionPSet.jetPileUpWorkingPoint.value()
+    myValidPUIDWPs = ["tight", "medium", "loose"]
+    if not (myPUIDWP in myValidPUIDWPs):
+        raise Exception("jet PU ID working point '%s' is not valid! (options: %s)"%(myPUIDWP,", ".join(map(str, myValidPUIDWPs))))
+    # Set jet PU ID src
+    mySrc = jetSelection.src.value()
+    mySrc.replace("Chs","") # Take out the suffix to reduce if sentences
+    myPileUpSrc = ""
+    if mySrc == "selectedPatJets":
+        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()
+    elif mySrc == "shiftedPatJetsEnDownForCorrMEt":
+        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForshiftedPatJetsEnDownForCorrMEt"
+    elif mySrc == "shiftedPatJetsEnUpForCorrMEt":
+        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForshiftedPatJetsEnUpForCorrMEt"
+    elif mySrc == "smearedPatJets":
+        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForsmearedPatJets"
+    elif mySrc == "smearedPatJetsResDown":
+        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForsmearedPatJetsResDown"
+    elif mySrc == "smearedPatJetsResUp":
+        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForsmearedPatJetsResUp"
+    else:
+        raise Exception("Cannot set jet PU ID src for unknown jet src '%s' in module '%s'"%(jetSelection.src.value(),moduleName))
+    # Add suffix
+    if "Chs" in jetSelection.src.value():
+        myPileUpSrc += "Chs"
+    jetSelectionPSet.jetPileUpMVAValues = cms.untracked.InputTag(myPileUpSrc, myPUIDType+"Discriminant", "HChPatTuple")
+    jetSelectionPSet.jetPileUpIdFlag = cms.untracked.InputTag(myPileUpSrc, myPUIDType+"Id", "HChPatTuple")
+    print "Jet PU Id src set to '%s' based on jet source '%s' in module '%s'"%(myPileUpSrc,jetSelection.src.value(),moduleName)
+
 def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processName=None):
     for tag in inputTags:
         if moduleLabel != None:
@@ -793,7 +827,6 @@ def setJERSmearedJets(dataVersion):
             changeJetCollection(moduleLabel="smearedPatJetsChs")
         else:
             raise Exception("Unsupported value for jet src %s, expected 'selectedPatJets' or 'selectedPatJetsChs'" % jetSelection.src.value())
-            
 
 def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow", useGSFElectrons=True):
     # Taus

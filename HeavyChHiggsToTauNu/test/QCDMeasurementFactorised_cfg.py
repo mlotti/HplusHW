@@ -33,8 +33,7 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.disableMaxVariations()
 
 def customize(signalAnalysis):
-    # Apply beta cut for jets to reject PU jets
-    signalAnalysis.jetSelection.betaCut = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
+    print "customisation applied"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
