@@ -8,8 +8,8 @@ dataVersion="53XmcS10"
 dataEras = [
     "Run2012ABC", # This is the one for pickEvents, and for counter printout in CMSSW job
     "Run2012AB",
-    "Run2012A",
-    "Run2012B",
+#    "Run2012A",
+#    "Run2012B",
     "Run2012C",
 ]
 
@@ -36,7 +36,6 @@ myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 #myOptimisation.disableMaxVariations()
 
 def customize(signalAnalysis):
-    # Apply beta cut for jets to reject PU jets
 #    signalAnalysis.jetSelection.jetPileUpWorkingPoint = "tight" # 
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
 #    signalAnalysis.MET.METCut = 100.0 
@@ -53,7 +52,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #doTriggerMatching=False,
                         #useCHSJets=True,
                         #doAgainstElectronScan=True,
-                        doTauIsolationAndJetPUScan=True,
+                        #doTauIsolationAndJetPUScan=True,
                         #doSystematics=True,
                         #histogramAmbientLevel = "Vital",
                         #doOptimisation=True, optimisationScheme=myOptimisation
