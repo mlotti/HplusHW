@@ -64,7 +64,7 @@ void printDaughters(const reco::Candidate& p);
 
 namespace HPlus {
   // Set this variable to true if you want debug print statements to be activated
-  bool FullHiggsMassCalculator::bPrintDebugOutput = true;
+  bool FullHiggsMassCalculator::bPrintDebugOutput = false;
   // Set the physical particle masses required in the calculation (in GeV)
   double FullHiggsMassCalculator::c_fPhysicalTopMass(172.4); // Use the same as in the generator!!!
   double FullHiggsMassCalculator::c_fPhysicalTauMass(1.778);
