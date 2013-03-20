@@ -116,7 +116,7 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
     hHiggsMass                = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass",
-							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+                                                          "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMassDPz100          = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassDPz100", 
 							  "Higgs massDPz100;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMass_TauBmatch      = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassTauBmatch", 
