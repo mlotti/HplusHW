@@ -249,7 +249,7 @@ class Workflow:
     # \param output_file CMSSW output file name (if not default)
     # \param crabLines   Individual lines to add to multicrab.cfg for this workflow
     def __init__(self, name, output=None, source=None,
-                 args=None, trigger=None, triggerOR=None, skimConfig=None, output_file=None, crabLines=[]):
+                 args=None, trigger=None, triggerOR=None, skimConfig=None, output_file=None, crabLines=None):
         self.name = name
         self.output = output
         self.source = source
@@ -258,7 +258,12 @@ class Workflow:
         self.triggerOR = triggerOR
         self.skimConfig = skimConfig
         self.output_file = output_file
-        self.crabLines = []
+        self.crabLines = crabLines
+
+        if self.args is None:
+            self.args = {}
+        if self.crabLines is None:
+            self.crabLines = []
 
         self._ensureConsistency()
 
@@ -271,6 +276,9 @@ class Workflow:
     def removeArg(self, argName):
         del self.args[argName]
 
+    def setOutputFile(self, output_file):
+        self.output_file = output_file
+
     def getName(self):
         return self.name
 
@@ -278,7 +286,7 @@ class Workflow:
         return copy.deepcopy(self)
 
     def hasAtMostOutput(self):
-        return self.source == None and self.args == None and self.trigger == None and self.triggerOR == None and self.skimConfig == None and self.output_file == None and len(self.crabLines) == 0
+        return self.source == None and len(self.args) == 0 and self.trigger == None and self.triggerOR == None and self.skimConfig == None and self.output_file == None and len(self.crabLines) == 0
 
     def _ensureConsistency(self):
         if self.trigger != None and self.triggerOR != None:
