@@ -352,9 +352,16 @@ class BRXSDatabaseInterface:
             for i in range(0,len(upper_x00)):
                 x.append(upper_x00[i])
                 y.append(upper_y00[i])
+            x.append(600)
+            y.append(100)
                                                 
         if len(x) == 0:
             return None
+
+	if higgs == "mH":
+	    x.append(0)
+            y.append(100)
+
         #for i in range(0,len(x)):
         #    print "m,tanb",x[i],y[i]
         

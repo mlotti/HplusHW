@@ -19,7 +19,8 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         "TauPlusX_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  3, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v4"]),                
         "TauPlusX_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 20, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v5"]),                
         "TauPlusX_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  2, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),                
-        "TauPlusX_198941-203742_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 10, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),                
+        "TauPlusX_198941-199608_2012C_Prompt": TaskDef(njobsIn= 500, njobsOut= 10, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),
+        "TauPlusX_199698-203742_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 30, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
         "TauPlusX_203777-208686_2012D_Prompt": TaskDef(njobsIn=3600, njobsOut= 360, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
 
         "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":    TaskDefMC(njobsIn= 40, njobsOut= 10),                                                   
@@ -62,6 +63,7 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 "args": wf.args,
                 "skimConfig": skim
                 }
+            commonArgs["args"]["trgAnalysis"] = "TauLeg"
 
             if dataset.isData():
                 # For data, construct one analysis workflow per trigger type
@@ -82,14 +84,15 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 dataset.addWorkflow(Workflow("triggerTauLeg_analysis_"+version, triggerOR=[mcTriggerTauLeg], **commonArgs))
 
 
-def addTauLegSkim_53X_v1(datasets):
+def addTauLegSkim_53X_v2(datasets):
     definitions = {
         "TauPlusX_190456-190738_2012A_Jul13":  TaskDef(""),
         "TauPlusX_190782-190949_2012A_Aug06":  TaskDef(""),
         "TauPlusX_191043-193621_2012A_Jul13":  TaskDef(""),
         "TauPlusX_193834-196531_2012B_Jul13":  TaskDef(""),
         "TauPlusX_198022-198523_2012C_Aug24":  TaskDef(""),
-        "TauPlusX_198941-203742_2012C_Prompt": TaskDef(""),
+        "TauPlusX_198941-199608_2012C_Prompt": TaskDef(""),
+        "TauPlusX_199698-203742_2012C_Prompt": TaskDef(""),
         "TauPlusX_203777-208686_2012D_Prompt": TaskDef(""),
         
         "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":    TaskDef(""),
@@ -100,7 +103,7 @@ def addTauLegSkim_53X_v1(datasets):
         "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12":       TaskDef(""),
         }
         
-    addTauLegSkim_53X("v53_v1", datasets, definitions)
+    addTauLegSkim_53X("v53_v2", datasets, definitions)
 
 
 
@@ -193,6 +196,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 "args": wf.args,                                                                                                                                       
                 "skimConfig": skim                                                                                                                                     
                 }
+            commonArgs["args"]["trgAnalysis"] = "MetLeg"
 
             if dataset.isData():                                                                                                                                       
                 # For data, construct one analysis workflow per trigger type                                                                                           
@@ -212,7 +216,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 # For MC, also construct one analysis workflow per trigger type                                                                                        
                 dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=[mcTriggerMETLeg], **commonArgs))
 
-def addMetLegSkim_53X_v1(datasets):
+def addMetLegSkim_53X_v2(datasets):
     definitions = {                                                                          
         "Tau_190456-190738_2012A_Jul13":          TaskDef(""),                               
         "Tau_190782-190949_2012A_Aug06":          TaskDef(""),                               
@@ -254,7 +258,7 @@ def addMetLegSkim_53X_v1(datasets):
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),                               
         }
                                                                                              
-    addMetLegSkim_53X("v53_v1", datasets, definitions)                                        
+    addMetLegSkim_53X("v53_v2", datasets, definitions)                                        
 
 def addMetLegSkim_44X(version, datasets, updateDefinitions):
     mcTrigger = "HLT_MediumIsoPFTau35_Trk20_v1"
@@ -427,11 +431,26 @@ def addQuadJetSkim_53X(version, datasets, updateDefinitions, skim=None):
                                                "HLT_Mu50_eta2p1_v6", "HLT_RelIso1p0Mu5_v4", "HLT_RelIso1p0Mu20_v1", "HLT_IsoMu15_eta2p1_L1ETM20_v5", "HLT_IsoMu20_eta2p1_v5",                                                                           
                                                "HLT_IsoMu24_v15", "HLT_IsoMu24_eta2p1_v13", "HLT_IsoMu30_v9", "HLT_IsoMu30_eta2p1_v13", "HLT_IsoMu34_eta2p1_v11",                                                                                       
                                                "HLT_IsoMu40_eta2p1_v8", "HLT_Mu40_eta2p1_Track50_dEdx3p6_v3", "HLT_Mu40_eta2p1_Track60_dEdx3p7_v3" ]),
-        "SingleMu_198941-203742_2012C_Prompt": TaskDef(njobsIn= 490, njobsOut= 4, triggerOR=["HLT_Mu5_v18","HLT_Mu8_v16","HLT_Mu12_v16","HLT_Mu17_v3","HLT_Mu17_v5","HLT_Mu12_eta2p1_L1Mu10erJetC12WdEtaPhi1DiJetsC_v3","HLT_Mu15_eta2p1_v3",           
-                                               "HLT_Mu24_v14", "HLT_Mu24_eta2p1_v3", "HLT_Mu24_eta2p1_v3", "HLT_Mu30_v14", "HLT_Mu30_eta2p1_v3", "HLT_Mu40_v12", "HLT_Mu40_eta2p1_v9",                                                                  
-                                               "HLT_Mu50_eta2p1_v6", "HLT_RelIso1p0Mu5_v4", "HLT_RelIso1p0Mu20_v1", "HLT_IsoMu15_eta2p1_L1ETM20_v5", "HLT_IsoMu20_eta2p1_v5",                                                                           
-                                               "HLT_IsoMu24_v15", "HLT_IsoMu24_eta2p1_v13", "HLT_IsoMu30_v9", "HLT_IsoMu30_eta2p1_v13", "HLT_IsoMu34_eta2p1_v11",                                                                                       
-                                               "HLT_IsoMu40_eta2p1_v8", "HLT_Mu40_eta2p1_Track50_dEdx3p6_v3", "HLT_Mu40_eta2p1_Track60_dEdx3p7_v3" ]),
+#        "SingleMu_198941-203742_2012C_Prompt": TaskDef(njobsIn= 490, njobsOut= 4, triggerOR=["HLT_Mu5_v18","HLT_Mu8_v16","HLT_Mu12_v16","HLT_Mu17_v3","HLT_Mu17_v5","HLT_Mu12_eta2p1_L1Mu10erJetC12WdEtaPhi1DiJetsC_v3","HLT_Mu15_eta2p1_v3",           
+#                                               "HLT_Mu24_v14", "HLT_Mu24_eta2p1_v3", "HLT_Mu24_eta2p1_v3", "HLT_Mu30_v14", "HLT_Mu30_eta2p1_v3", "HLT_Mu40_v12", "HLT_Mu40_eta2p1_v9",                                                                  
+#                                               "HLT_Mu50_eta2p1_v6", "HLT_RelIso1p0Mu5_v4", "HLT_RelIso1p0Mu20_v1", "HLT_IsoMu15_eta2p1_L1ETM20_v5", "HLT_IsoMu20_eta2p1_v5",                                                                           
+#                                               "HLT_IsoMu24_v15", "HLT_IsoMu24_eta2p1_v13", "HLT_IsoMu30_v9", "HLT_IsoMu30_eta2p1_v13", "HLT_IsoMu34_eta2p1_v11",                                                                                       
+#                                               "HLT_IsoMu40_eta2p1_v8", "HLT_Mu40_eta2p1_Track50_dEdx3p6_v3", "HLT_Mu40_eta2p1_Track60_dEdx3p7_v3" ]),
+	"SingleMu_198941-199608_2012C_Prompt": TaskDef(njobsIn= 490, njobsOut= 4, triggerOR=[ "HLT_Mu5_v19","HLT_Mu8_v17","HLT_Mu12_v17","HLT_Mu17_v4","HLT_Mu12_eta2p1_L1Mu10erJetC12WdEtaPhi1DiJetsC_v5",         
+                                                "HLT_Mu15_eta2p1_L1Mu10erJetC12WdEtaPhi1DiJetsC_v1","HLT_Mu15_eta2p1_v4","HLT_Mu24_v15","HLT_Mu24_eta2p1_v4","HLT_Mu30_v15","HLT_Mu30_eta2p1_v4",                   
+                                                "HLT_Mu40_v13","HLT_Mu40_eta2p1_v10","HLT_Mu50_eta2p1_v7","HLT_RelIso1p0Mu5_v5","HLT_RelIso1p0Mu20_v2","HLT_IsoMu15_eta2p1_L1ETM20_v6",                             
+                                                "HLT_IsoMu20_eta2p1_v6","HLT_IsoMu24_v16","HLT_IsoMu24_eta2p1_v14","HLT_IsoMu30_v10","HLT_IsoMu30_eta2p1_v14","HLT_IsoMu34_eta2p1_v12",                             
+                                                "HLT_IsoMu40_eta2p1_v9","HLT_Mu40_eta2p1_Track50_dEdx3p6_v4","HLT_Mu40_eta2p1_Track60_dEdx3p7_v4" ]),
+	"SingleMu_199698-202504_2012C_Prompt": TaskDef(njobsIn= 490, njobsOut= 4, triggerOR=[ "HLT_Mu5_v20","HLT_Mu8_v18","HLT_Mu12_v18","HLT_Mu17_v5","HLT_Mu12_eta2p1_L1Mu10erJetC12WdEtaPhi1DiJetsC_v6",         
+                                                "HLT_Mu15_eta2p1_L1Mu10erJetC12WdEtaPhi1DiJetsC_v2","HLT_Mu15_eta2p1_v5","HLT_Mu24_v16","HLT_Mu24_eta2p1_v5","HLT_Mu30_v16","HLT_Mu30_eta2p1_v5",                   
+                                                "HLT_Mu40_v14","HLT_Mu40_eta2p1_v11","HLT_Mu50_eta2p1_v8","HLT_RelIso1p0Mu5_v6","HLT_RelIso1p0Mu20_v3","HLT_IsoMu15_eta2p1_L1ETM20_v7",                             
+                                                "HLT_IsoMu20_eta2p1_v7","HLT_IsoMu24_v17","HLT_IsoMu24_eta2p1_v15","HLT_IsoMu30_v11","HLT_IsoMu30_eta2p1_v15","HLT_IsoMu34_eta2p1_v13",                             
+                                                "HLT_IsoMu40_eta2p1_v10","HLT_Mu40_eta2p1_Track50_dEdx3p6_v5","HLT_Mu40_eta2p1_Track60_dEdx3p7_v5"]),
+	"SingleMu_202970-203742_2012C_Prompt": TaskDef(njobsIn= 490, njobsOut= 4, triggerOR=[ "HLT_Mu5_v20","HLT_Mu8_v18","HLT_Mu12_v18","HLT_Mu17_v5","HLT_Mu12_eta2p1_L1Mu10erJetC12WdEtaPhi1DiJetsC_v7", "HLT_Mu15_eta2p1_v5",
+                                               "HLT_Mu24_v16", "HLT_Mu24_eta2p1_v5","HLT_Mu30_v16", "HLT_Mu30_eta2p1_v5", "HLT_Mu40_v14","HLT_Mu40_eta2p1_v11",              
+                                               "HLT_Mu50_eta2p1_v8", "HLT_RelIso1p0Mu5_v6", "HLT_RelIso1p0Mu20_v3", "HLT_IsoMu15_eta2p1_L1ETM20_v7", "HLT_IsoMu20_eta2p1_v7",
+                                               "HLT_IsoMu24_v17", "HLT_IsoMu24_eta2p1_v15", "HLT_IsoMu30_v11", "HLT_IsoMu30_eta2p1_v15", "HLT_IsoMu34_eta2p1_v13",
+                                               "HLT_IsoMu40_eta2p1_v10", "HLT_Mu40_eta2p1_Track50_dEdx3p6_v5", "HLT_Mu40_eta2p1_Track60_dEdx3p7_v5"]),
 	"SingleMu_203777-208686_2012D_Prompt": TaskDef(njobsIn= 490, njobsOut= 4, triggerOR=["HLT_Mu5_v18","HLT_Mu5_v20","HLT_Mu8_v16","HLT_Mu12_v18","HLT_Mu17_v3","HLT_Mu17_v5","HLT_Mu12_eta2p1_L1Mu10erJetC12WdEtaPhi1DiJetsC_v3", "HLT_Mu12_eta2p1_L1Mu10erJetC12WdEtaPhi1DiJetsC_v7","HLT_Mu15_eta2p1_L1Mu10erJetC12WdEtaPhi1DiJetsC_v3","HLT_Mu15_eta2p1_v3",
                                                "HLT_Mu24_v14","HLT_Mu24_v16", "HLT_Mu24_eta2p1_v5","HLT_Mu24_eta2p1_v3", "HLT_Mu30_v14","HLT_Mu30_v16", "HLT_Mu30_eta2p1_v3", "HLT_Mu30_eta2p1_v5","HLT_Mu40_v12", "HLT_Mu40_v14", "HLT_Mu40_eta2p1_v11","HLT_Mu40_eta2p1_v9",
                                                "HLT_Mu50_eta2p1_v6", "HLT_RelIso1p0Mu5_v4", "HLT_RelIso1p0Mu20_v1", "HLT_IsoMu15_eta2p1_L1ETM20_v5", "HLT_IsoMu20_eta2p1_v5",
@@ -511,6 +530,7 @@ def addQuadJetSkim_53X(version, datasets, updateDefinitions, skim=None):
                 "args": wf.args,
                 "skimConfig": skim
                 }
+            commonArgs["args"]["trgAnalysis"] = "QuadJet"
             
             if dataset.isData():                                                                                                                                       
                 # For data, construct one analysis workflow per trigger type                                                                                           
@@ -530,7 +550,7 @@ def addQuadJetSkim_53X(version, datasets, updateDefinitions, skim=None):
                 # For MC, also construct one analysis workflow per trigger type                                                                            
                 dataset.addWorkflow(Workflow("triggerQuadJet_analysis_"+version, triggerOR=[mcTriggerSingleMu], **commonArgs))
                     
-def addQuadJetSkim_53X_v1(datasets):
+def addQuadJetSkim_53X_v2(datasets):
     definitions = {
 #        "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
 #        "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
@@ -548,7 +568,10 @@ def addQuadJetSkim_53X_v1(datasets):
 	"SingleMu_191043-193621_2012A_Jul13":     TaskDef(""),
 	"SingleMu_193834-196531_2012B_Jul13":     TaskDef(""),
 	"SingleMu_198022-198523_2012C_Aug24":     TaskDef(""),
-	"SingleMu_198941-203742_2012C_Prompt":    TaskDef(""),
+#	"SingleMu_198941-203742_2012C_Prompt":    TaskDef(""),
+	"SingleMu_198941-199608_2012C_Prompt":    TaskDef(""),
+	"SingleMu_199698-202504_2012C_Prompt":    TaskDef(""),
+	"SingleMu_202970-203742_2012C_Prompt":    TaskDef(""),
 	"SingleMu_203777-208686_2012D_Prompt":    TaskDef(""),
 
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef(""),                               
@@ -581,5 +604,5 @@ def addQuadJetSkim_53X_v1(datasets):
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),                               
         }
     
-    addQuadJetSkim_53X("v53_v1", datasets, definitions) 
+    addQuadJetSkim_53X("v53_v2", datasets, definitions) 
     

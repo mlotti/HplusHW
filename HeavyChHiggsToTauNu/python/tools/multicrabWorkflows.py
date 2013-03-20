@@ -283,7 +283,9 @@ datasets.extend([
     DataDataset("TauPlusX_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/TauPlusX/Run2012B-13Jul2012-v1/AOD"), # 39410283 events, 3013 files
     # Run212C
     DataDataset("TauPlusX_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/TauPlusX/Run2012C-24Aug2012-v1/AOD"), # 4067828 events, 313 files
-    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
+#    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
+    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 199608), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #                                   
+    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(199698, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
     DataDataset("TauPlusX_%s_2012C_Dec11",     reco="11Dec2012", runs=(201191, 201191), aod="/TauPlusX/Run2012C-EcalRecover_11Dec2012-v1/AOD"), # 962881 events, 94 files
     # Run2012D
     DataDataset("TauPlusX_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/TauPlusX/Run2012D-PromptReco-v1/AOD"), # 59840242 events, 6068 files
@@ -299,6 +301,9 @@ datasets.extend([
     # SingleMu, Run212C
     DataDataset("SingleMu_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/SingleMu/Run2012C-24Aug2012-v1/AOD"), # 6076746 events, 460 files
     DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"), # 81770645 events, 7450 files
+    DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 199608), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"),
+    DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(199698, 202504), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"),
+    DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(202970, 203742), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"),
     DataDataset("SingleMu_%s_2012C_Dec11",     reco="11Dec2012", runs=(201191, 201191), aod="/SingleMu/Run2012C-EcalRecover_11Dec2012-v1/AOD"), # 1619573 events, 145 files
     # SingleMu, Run2012D
     DataDataset("SingleMu_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/SingleMu/Run2012D-PromptReco-v1/AOD"), # 90255013 events, 8886 files
@@ -469,9 +474,9 @@ multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5(datasets)
 multicrabWorkflowsMuonTagProbe.addMuonTagProbe_44X(datasets)
 
 # Add trigger efficiency definitions
-multicrabWorkflowsTriggerEff.addTauLegSkim_53X_v1(datasets)
-multicrabWorkflowsTriggerEff.addMetLegSkim_53X_v1(datasets)
-multicrabWorkflowsTriggerEff.addQuadJetSkim_53X_v1(datasets)
+multicrabWorkflowsTriggerEff.addTauLegSkim_53X_v2(datasets)
+multicrabWorkflowsTriggerEff.addMetLegSkim_53X_v2(datasets)
+multicrabWorkflowsTriggerEff.addQuadJetSkim_53X_v2(datasets)
 
 def printAllDatasets():
     for d in datasets.getDatasetList():
