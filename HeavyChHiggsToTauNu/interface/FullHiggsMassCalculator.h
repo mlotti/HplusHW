@@ -54,7 +54,9 @@ namespace HPlus {
       eGreater,
       eSmaller,
       eTauNuAngleMax,
-      eTauNuAngleMin
+      eTauNuAngleMin,
+      eTauNuDeltaEtaMax,
+      eTauNuDeltaEtaMin
     };
 
     enum InputDataType {
@@ -100,6 +102,8 @@ namespace HPlus {
       double fNeutrinoPzSolutionSmaller;
       double fNeutrinoPzSolutionTauNuAngleMax;
       double fNeutrinoPzSolutionTauNuAngleMin;
+      double fNeutrinoPzSolutionTauNuDeltaEtaMax;
+      double fNeutrinoPzSolutionTauNuDeltaEtaMin;
       // Event classification results
       EventClassCode eEventClassCode;
     };
@@ -133,6 +137,7 @@ namespace HPlus {
     double selectNeutrinoPzSolution(TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output,
 				  PzSelectionMethod selectionMethod);
     double getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
+    double getDeltaEtaBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
     bool selectedSolutionIsClosestToTrueValue(double selectedSolution, FullHiggsMassCalculator::Data& output);
     void constructFourMomenta(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
     void calculateTopMass(FullHiggsMassCalculator::Data& output);
@@ -156,6 +161,8 @@ namespace HPlus {
     Count fSelectionSmallerCorrect_SubCount;
     Count fSelectionTauNuAngleMaxCorrect_SubCount;
     Count fSelectionTauNuAngleMinCorrect_SubCount;
+    Count fSelectionTauNuDeltaEtaMaxCorrect_SubCount;
+    Count fSelectionTauNuDeltaEtaMinCorrect_SubCount;
     // two main categories of events (pure or impure):
     Count eventClass_Pure_SubCount;
     Count eventClass_Impure_SubCount;
@@ -182,14 +189,38 @@ namespace HPlus {
     WrappedTH1* hDiscriminant_GEN;
     WrappedTH1* hDiscriminant_GEN_NeutrinosReplacedWithMET;
 
-    WrappedTH1* hHiggsMass_greater;
-    WrappedTH1* hHiggsMass_smaller;
-    WrappedTH1* hHiggsMass_tauNuAngleMax;
-    WrappedTH1* hHiggsMass_tauNuAngleMin;
     WrappedTH1* hTopMassSolution;
     WrappedTH1* hTopInvariantMassInGenerator;
     WrappedTH1* hSelectedNeutrinoPzSolution;
 
+    // Histograms for all the different solution selection methods
+    //---RECO:
+    WrappedTH1* hHiggsMass_greater;
+    WrappedTH1* hHiggsMass_smaller;
+    WrappedTH1* hHiggsMass_tauNuAngleMax;
+    WrappedTH1* hHiggsMass_tauNuAngleMin;
+    WrappedTH1* hHiggsMass_tauNuDeltaEtaMax;
+    WrappedTH1* hHiggsMass_tauNuDeltaEtaMin;
+    //---GEN:
+    WrappedTH1* hHiggsMass_GEN_greater;
+    WrappedTH1* hHiggsMass_GEN_smaller;
+    WrappedTH1* hHiggsMass_GEN_tauNuAngleMax;
+    WrappedTH1* hHiggsMass_GEN_tauNuAngleMin;
+    WrappedTH1* hHiggsMass_GEN_tauNuDeltaEtaMax;
+    WrappedTH1* hHiggsMass_GEN_tauNuDeltaEtaMin;
+    //---GEN, neutrinos replaced with GENMET:
+    WrappedTH1* hHiggsMass_GEN_NuToMET_greater;
+    WrappedTH1* hHiggsMass_GEN_NuToMET_smaller;
+    WrappedTH1* hHiggsMass_GEN_NuToMET_tauNuAngleMax;
+    WrappedTH1* hHiggsMass_GEN_NuToMET_tauNuAngleMin;
+    WrappedTH1* hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMax;
+    WrappedTH1* hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMin;
+
+    // Neutrino solution selection histograms
+    WrappedTH1* hNeutrinosTauAngle1;
+    WrappedTH1* hNeutrinosTauAngle2;
+
+    // Event classification histograms
     WrappedTH1* hHiggsMassPure;
     WrappedTH1* hHiggsMassImpure;
     WrappedTH1* hHiggsMassBadTau;
@@ -201,10 +232,6 @@ namespace HPlus {
     WrappedTH1* hHiggsMassBadBjetAndMETAndTau;
     WrappedTH1* hDiscriminantPure;
     WrappedTH1* hDiscriminantImpure;
-
-    // Neutrino solution selection histograms
-    WrappedTH1* hNeutrinosTauAngle1;
-    WrappedTH1* hNeutrinosTauAngle2;
 
     // Event classification variable histograms
     WrappedTH1* hBDeltaR;

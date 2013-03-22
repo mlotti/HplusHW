@@ -128,7 +128,11 @@ namespace HPlus {
     fSelectionTauNuAngleMaxCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator",
 								       "TauNuAngleMax solution closest")),
     fSelectionTauNuAngleMinCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", 
-								       "TauNuAngleMin solution closest"))
+								       "TauNuAngleMin solution closest")),
+    fSelectionTauNuDeltaEtaMaxCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", 
+									  "TauNuDeltaEtaMax solution closest")),
+    fSelectionTauNuDeltaEtaMinCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", 
+									  "TauNuDeltaEtaMax solution closest"))
   {
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
@@ -149,15 +153,56 @@ namespace HPlus {
     hDiscriminant_GEN_NeutrinosReplacedWithMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
 									   "Discriminant_GEN_NeutrinosReplacedWithMET",
 									   "Discriminant", 100, -50000, 50000);
-    hHiggsMass_greater        = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass_greater", 
-							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMass_smaller        = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass_smaller", 
-							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMass_tauNuAngleMax  = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass_tauNuAngleMax", 
-							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMass_tauNuAngleMin  = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass_tauNuAngleMin", 
-							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     // Informative histograms
+    // Histograms for all the different solution selection methods
+    //---RECO:
+    hHiggsMass_greater        = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_greater", 
+							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_smaller        = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_smaller", 
+							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_tauNuAngleMax  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_tauNuAngleMax", 
+							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_tauNuAngleMin  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_tauNuAngleMin", 
+							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_tauNuDeltaEtaMax = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_tauNuDeltaEtaMax", 
+							    "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_tauNuDeltaEtaMin = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_tauNuDeltaEtaMin", 
+							    "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    //---GEN:
+    hHiggsMass_GEN_greater        = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_GEN_greater", 
+							      "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_GEN_smaller        = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_GEN_smaller", 
+							      "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_GEN_tauNuAngleMax  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_GEN_tauNuAngleMax", 
+							      "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_GEN_tauNuAngleMin  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_GEN_tauNuAngleMin", 
+							      "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_GEN_tauNuDeltaEtaMax = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
+								"HiggsMass_GEN_tauNuDeltaEtaMax", 
+								"Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_GEN_tauNuDeltaEtaMin = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
+								"HiggsMass_GEN_tauNuDeltaEtaMin", 
+								"Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    //---GEN, neutrinos replaced with GENMET:
+    hHiggsMass_GEN_NuToMET_greater        = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
+								      "HiggsMass_GEN_NuToMET_greater", 
+								      "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_GEN_NuToMET_smaller        = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
+								      "HiggsMass_GEN_NuToMET_smaller", 
+								      "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_GEN_NuToMET_tauNuAngleMax  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
+								      "HiggsMass_GEN_NuToMET_tauNuAngleMax", 
+								      "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_GEN_NuToMET_tauNuAngleMin  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
+								      "HiggsMass_GEN_NuToMET_tauNuAngleMin", 
+								      "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMax = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
+									"HiggsMass_GEN_NuToMET_tauNuDeltaEtaMax", 
+									"Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMin = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
+									"HiggsMass_GEN_NuToMET_tauNuDeltaEtaMin", 
+									"Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    // Others and event classification:
     hTopMassSolution          = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassSolution", 
 							  "Top mass solution;m_{top} (GeV)", 100, 0, 500);
     hSelectedNeutrinoPzSolution = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedNeutrinoPzSolution", 
@@ -365,26 +410,50 @@ namespace HPlus {
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == eGEN) hHiggsMass_greater->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eRECO) hHiggsMass_greater->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN) hHiggsMass_GEN_greater->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_greater->Fill(output.fHiggsMassSolution);
     // Selection method: smaller
     output.fNeutrinoPzSolutionSmaller = selectNeutrinoPzSolution(tauVector, bJetVector, output, eSmaller);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == eGEN) hHiggsMass_smaller->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eRECO) hHiggsMass_smaller->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN) hHiggsMass_GEN_smaller->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_smaller->Fill(output.fHiggsMassSolution);
     // Selection method: tauNuAngleMin
     output.fNeutrinoPzSolutionTauNuAngleMin = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuAngleMin);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == eGEN) hHiggsMass_tauNuAngleMin->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eRECO) hHiggsMass_tauNuAngleMin->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuAngleMin->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuAngleMin->Fill(output.fHiggsMassSolution);
+    // Selection method: TauNuDeltaEtaMax
+    output.fNeutrinoPzSolutionTauNuDeltaEtaMax = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuDeltaEtaMax);
+    constructFourMomenta(tauVector, bJetVector, METVector, output);
+    calculateTopMass(output);
+    calculateHiggsMass(output);
+    if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolution);
+    // Selection method: TauNuDeltaEtaMin
+    output.fNeutrinoPzSolutionTauNuDeltaEtaMin = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuDeltaEtaMin);
+    constructFourMomenta(tauVector, bJetVector, METVector, output);
+    calculateTopMass(output);
+    calculateHiggsMass(output);
+    if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolution);
     // NOTE: THE LAST CALCULATION DETERMINES WHICH SELECTION METHOD IS USED FOR THE MAIN OUTPUT:
     // Selection method: tauNuAngleMax
     output.fNeutrinoPzSolutionTauNuAngleMax = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuAngleMax);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == eGEN) hHiggsMass_tauNuAngleMax->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eRECO) hHiggsMass_tauNuAngleMax->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuAngleMax->Fill(output.fHiggsMassSolution);
+    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuAngleMax->Fill(output.fHiggsMassSolution);
 
     doCountingAndHistogramming(output, myInputDataType);
   }
@@ -455,9 +524,13 @@ namespace HPlus {
     // Calculate some auxiliary quantities that may or may not be used for selecting a solution
     double angle1 = getAngleBetweenNeutrinosAndTau(pTau, MET, solution1);
     double angle2 = getAngleBetweenNeutrinosAndTau(pTau, MET, solution2);
+    double deltaEta1 = getDeltaEtaBetweenNeutrinosAndTau(pTau, MET, solution1);
+    double deltaEta2 = getDeltaEtaBetweenNeutrinosAndTau(pTau, MET, solution2);
     if (bPrintDebugOutput) {
       std::cout << "--- angle1 = " << angle1 * TMath::RadToDeg() << " degrees" << std::endl;
       std::cout << "--- angle2 = " << angle2 * TMath::RadToDeg() << " degrees" << std::endl;
+      std::cout << "--- deltaEta1 = " << deltaEta1 << std::endl;
+      std::cout << "--- deltaEta2 = " << deltaEta2 << std::endl;
     }
 
     // Select a solution using the desired method
@@ -484,6 +557,16 @@ namespace HPlus {
       if (bPrintDebugOutput) std::cout << "select the solution which minimizes the angle between the tau and the neutrinos"
 				       << std::endl;
       break;
+    case eTauNuDeltaEtaMax:
+      if (deltaEta1 > deltaEta2) selectSolution1 = true;
+      if (bPrintDebugOutput) std::cout << "select the solution which maximizes the eta difference between the tau and the neutrinos"
+				       << std::endl;
+      break;
+    case eTauNuDeltaEtaMin:
+      if (deltaEta1 < deltaEta2) selectSolution1 = true;
+      if (bPrintDebugOutput) std::cout << "select the solution which minimizes the eta difference between the tau and the neutrinos"
+				       << std::endl;
+      break;
     default:
       // Throw exception!
       throw cms::Exception("LogicError")
@@ -503,6 +586,11 @@ namespace HPlus {
   double FullHiggsMassCalculator::getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPzSolution) {
     TVector3 neutrinoVector(MET.Px(), MET.Py(), neutrinoPzSolution);
     return neutrinoVector.Angle(pTau);
+  }
+
+  double FullHiggsMassCalculator::getDeltaEtaBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPzSolution) {
+    TVector3 neutrinoVector(MET.Px(), MET.Py(), neutrinoPzSolution);
+    return TMath::Abs(neutrinoVector.Eta() - pTau.Eta());
   }
 
   bool FullHiggsMassCalculator::selectedSolutionIsClosestToTrueValue(double selectedSolution, 
@@ -573,6 +661,10 @@ namespace HPlus {
 	increment(fSelectionTauNuAngleMaxCorrect_SubCount);
       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuAngleMin, output))
 	increment(fSelectionTauNuAngleMinCorrect_SubCount);
+      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output))
+	increment(fSelectionTauNuDeltaEtaMaxCorrect_SubCount);
+      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output))
+	increment(fSelectionTauNuDeltaEtaMinCorrect_SubCount);
       break;
     case eGEN:
       hDiscriminant_GEN->Fill(output.fDiscriminant);
