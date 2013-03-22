@@ -15,6 +15,7 @@
 #include "DataFormats/Math/interface/deltaR.h"
 
 //#include<iostream>
+#include<string>
 
 namespace HPlus {
   template <typename CandType, typename RefType>
@@ -30,6 +31,7 @@ namespace HPlus {
 
     edm::InputTag srcCand_;
     edm::InputTag srcRef_;
+    std::string moduleLabel_;
     const double maxDR_;
   };
 
@@ -37,6 +39,7 @@ namespace HPlus {
   ViewClosestDeltaRSelector<CandType, RefType>::ViewClosestDeltaRSelector(const edm::ParameterSet& iConfig):
     srcCand_(iConfig.getParameter<edm::InputTag>("src")),
     srcRef_(iConfig.getParameter<edm::InputTag>("refSrc")),
+    moduleLabel_(iConfig.getParameter<std::string>("@module_label")),
     maxDR_(iConfig.getParameter<double>("maxDeltaR"))
   {
     this->template produces<CollectionType>();
@@ -69,8 +72,8 @@ namespace HPlus {
       }
       if(iSel != hcand->end()) {
         /*
-        std::cout << "Reference object " << (iRef-href->begin()) << " (pt,eta,phi) " << iRef->pt() << ", " << iRef->eta() << ", " << iRef->phi()
-                  << ") selected object " << (iSel-hcand->end()) << " (pt,eta,phi) " << iSel->pt() << ", " << iSel->eta() << ", " << iSel->phi()
+        std::cout << moduleLabel_ << ": Reference object " << (iRef-href->begin()) << " (pt,eta,phi) " << iRef->pt() << ", " << iRef->eta() << ", " << iRef->phi()
+                  << ") selected object " << (iSel-hcand->begin()) << " (pt,eta,phi) " << iSel->pt() << ", " << iSel->eta() << ", " << iSel->phi()
                   << ") deltaR " << selDR
                   << std::endl;
         */
@@ -78,7 +81,7 @@ namespace HPlus {
       }
     }
 
-    //std::cout << "Inserting " << ret->size() << " objects" << std::endl;
+    //std::cout << moduleLabel_ << ": Inserting " << ret->size() << " objects" << std::endl;
     iEvent.put(ret);
 
   }
