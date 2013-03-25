@@ -26,7 +26,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from InvertedTauID import *
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2012ABC"
+dataEra = "Run2012ABCD"
 
 
 searchMode = "Light"
@@ -40,8 +40,8 @@ def usage():
 
 def main(argv):
 
-    HISTONAME = "TauIdJets"
-#    HISTONAME = "TauIdBtag"
+#    HISTONAME = "TauIdJets"
+    HISTONAME = "TauIdBtag"
 #    HISTONAME = "TauIdBveto"
     
     dirs = []
@@ -70,6 +70,8 @@ def main(argv):
     # Include only 120 mass bin of HW and HH datasets
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_t-channel" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_tW-channel" in name, datasets.getAllDatasetNames()))
     # Default merging nad ordering of data and MC datasets
     # All data datasets to "Data"
     # All QCD datasets to "QCD"

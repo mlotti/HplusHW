@@ -60,7 +60,7 @@ searchMode = "Light"
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2012ABC"
+dataEra = "Run2012ABCD"
 
 print "dataEra"
 
@@ -110,6 +110,8 @@ def main():
     # Remove signals other than M120
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_t-channel" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_tW-channel" in name, datasets.getAllDatasetNames()))
     datasets.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
     datasets.remove(filter(lambda name: "W2Jets" in name, datasets.getAllDatasetNames()))        
     datasets.remove(filter(lambda name: "W3Jets" in name, datasets.getAllDatasetNames()))
@@ -206,8 +208,21 @@ except ImportError:
     print "    WARNING, QCDInvertedBtaggingFactors.py not found!"
     print
 
+
+try:   
+    from QCDInvertedBtaggingToBvetoAfterMetFactors  import *
+except ImportError:   
+    print
+    print "    WARNING, QCDInvertedBtaggingToBvetoAfterMetFactors.py not found!"
+    print
+
     
- 
+try:  
+    from QCDInvertedBtaggingtoBvetoFactors import *
+except ImportError:   
+    print
+    print "    WARNING, QCDInvertedBtaggingtoBvetoFactors.py not found!"
+    print 
     
 ptbins = [
     "4050",
@@ -228,16 +243,28 @@ def normalisation():
     normFactorisedData = {}
     normFactorisedEWK = {}
     
+    normBtagToBveto = {}
+    normBtagToBvetoEWK = {}
+    print "-------------------"
+#    print "btaggingFactors ", btaggingToBvetoAfterMetFactors
+    print "-------------------"
     norm_inc = QCDInvertedNormalization["inclusive"]
     normEWK_inc = QCDInvertedNormalization["inclusiveEWK"]    
     normFactorised_inc = norm_inc  * btaggingFactors["inclusive"]
     normFactorisedEWK_inc = normEWK_inc * btaggingFactors["inclusive"]
+
+    normBtagToBveto_inc = norm_inc  * btaggingFactors["inclusive"]
+    normBtagToBvetoEWK_inc = normEWK_inc * btaggingFactors["inclusive"]
     
     for bin in ptbins: 
         normData[bin] = QCDInvertedNormalization[bin]
         normEWK[bin] = QCDInvertedNormalization[bin+"EWK"]
         normFactorisedData[bin] = QCDInvertedNormalization[bin] *  btaggingFactors[bin]
         normFactorisedEWK[bin] = QCDInvertedNormalization[bin+"EWK"] * btaggingFactors[bin]
+        #normBtagToBveto[bin] = QCDInvertedNormalization[bin] *  btaggingToBvetoFactors[bin]
+        #normBtagToBvetoEWK[bin] = QCDInvertedNormalization[bin+"EWK"] * btaggingToBvetoFactors[bin]
+        normBtagToBveto[bin] = QCDInvertedNormalization[bin] *  btaggingToBvetoAfterMetFactors[bin]
+        normBtagToBvetoEWK[bin] = QCDInvertedNormalization[bin+"EWK"] * btaggingToBvetoAfterMetFactors[bin]
     print "inclusive norm", norm_inc,normEWK_inc
     print "norm factors", normData
     print "norm factors EWK", normEWK
@@ -245,8 +272,13 @@ def normalisation():
     print "inclusive factorised norm", normFactorised_inc,normFactorisedEWK_inc
     print "norm factors factorised", normFactorisedData
     print "norm factors EWK factorised", normFactorisedEWK
+    
+    print "inclusive BtagToBveto  norm", normBtagToBveto_inc,normBtagToBvetoEWK_inc
+    print "norm factors BtagToBveto ", normBtagToBveto
+    print "norm factors EWK BtagToBveto ", normBtagToBvetoEWK
+    
              
-    return normData,normEWK,normFactorisedData,normFactorisedEWK
+    return normData,normEWK,normFactorisedData,normFactorisedEWK,normBtagToBveto,normBtagToBvetoEWK
 
 
 def normalisationInclusive():
@@ -260,7 +292,7 @@ def normalisationInclusive():
 
 def controlPlots(datasets):
     
-    normData,normEWK,normFactorisedData,normFactorisedEWK=normalisation()
+    normData,normEWK,normFactorisedData,normFactorisedEWK,normBtagToBveto,normBtagToBvetoEWK=normalisation()
     norm_inc,normEWK_inc = normalisationInclusive()
 
 
@@ -282,6 +314,8 @@ def controlPlots(datasets):
     hmtphj2= []
     hmtremovett = []
     hmtfac = []
+    hmtvetoNor= []
+    hmtPhivetoNor = []
     
 ## histograms in bins, normalisation and substraction of EWK contribution
     ## mt with 2dim deltaPhi cut
@@ -315,7 +349,7 @@ def controlPlots(datasets):
         mtfac_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
         mtfac = mtfac_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mtfac.Scale(normFactorisedData[ptbin])
-#        mtfac.Scale(normData[ptbin])
+        mtfac.Scale(normData[ptbin])
         
 #        hmtfac.append(mt)        
         mtfacEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedNoBtaggingDphiCuts"+ptbin)])
@@ -331,7 +365,7 @@ def controlPlots(datasets):
         hmtfac.append(mtfac)
 
         
-        # mt after b tagging
+        # mt after b tagging, no deltaPhi cuts
         mtb_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedTauIdBtag"+ptbin)])
         mtb_tmp._setLegendStyles()
         mtb_tmp._setLegendLabels()
@@ -477,7 +511,63 @@ def controlPlots(datasets):
         mtPhiEWKv = mtPhiEWKv_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
         mtPhiEWKv.Scale(normEWK[ptbin])
         mtPhiv.Add(mtPhiEWKv, -1)
-        hmtPhiv.append(mtPhiv)       
+        hmtPhiv.append(mtPhiv)
+
+
+ #######################   
+                
+        ## mt with b veto cut and NORMALISATION
+        mtveto_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedTauIdBveto"+ptbin)])
+        mtveto_tmp._setLegendStyles()
+        mtveto_tmp._setLegendLabels()
+        mtveto_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        mtveto_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtvetoNor = mtveto_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+        mtvetoNor.Scale(normBtagToBveto[ptbin])
+        ## test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! normalize with 0.138
+#        mtvetoNor.Scale(normData[ptbin])
+#        mtvetoNor.Scale(0.17)
+#        hmt.append(mt)        
+        mtEWKveto_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedTauIdBveto"+ptbin)])
+        mtEWKveto_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+        mtEWKveto_tmp._setLegendStyles()
+        mtEWKveto_tmp._setLegendLabels()
+        mtEWKveto_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        mtEWKveto_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtEWKvetoNor = mtEWKveto_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+        mtEWKvetoNor.Scale(normBtagToBvetoEWK[ptbin])
+#        mtEWKvetoNor.Scale(normEWK[ptbin])
+#        mtEWKvetoNor.Scale(0.5576)
+        mtvetoNor.Add(mtEWKvetoNor, -1)
+        hmtvetoNor.append(mtvetoNor)
+#        hmt.append(mt)
+
+# mt b veto with Dphi cut 
+        mtPhiveto_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedTauIdBvetoDphi"+ptbin)])
+        mtPhiveto_tmp._setLegendStyles()
+        mtPhiveto_tmp._setLegendLabels()
+        mtPhiveto_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        mtPhiveto_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtPhivetoNor = mtPhiveto_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+        mtPhivetoNor.Scale(normBtagToBveto[ptbin])
+#        mtPhivetoNor.Scale(normData[ptbin])
+#        mtPhivetoNor.Scale(0.17)
+
+        
+        mtPhiEWKveto_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedTauIdBvetoDphi"+ptbin)])
+        mtPhiEWKveto_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+        mtPhiEWKveto_tmp._setLegendStyles()
+        mtPhiEWKveto_tmp._setLegendLabels()
+        mtPhiEWKveto_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        mtPhiEWKveto_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtPhiEWKvetoNor = mtPhiEWKveto_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+        mtPhiEWKvetoNor.Scale(normBtagToBvetoEWK[ptbin])
+#        mtPhiEWKvetoNor.Scale(normEWK[ptbin])
+#        mtPhiEWKvetoNor.Scale(0.5576)
+        mtPhivetoNor.Add(mtPhiEWKvetoNor, -1)
+        hmtPhivetoNor.append(mtPhivetoNor)  
+########################################
+        
         ### MET
         mmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MET_InvertedTauIdJets"+ptbin)])
         mmt_tmp._setLegendStyles()
@@ -645,7 +735,7 @@ def controlPlots(datasets):
         mtFactorised.Add(histo)  
     print "Integral with bins - EWK = ",mtFactorised.Integral()
 
-
+# mt with btagging, no deltaPhi cuts
     hmtSumb = hmtb[0].Clone("mtSumb")
     hmtSumb.SetName("transverseMassBtag")
     hmtSumb.SetTitle("Inverted tau ID")
@@ -675,7 +765,27 @@ def controlPlots(datasets):
         hmtPhivSum.Add(histo)  
     print "Integral with bins phi cut Bveto - EWK  = ",hmtPhivSum.Integral()
 
+## mt with bveto normalised
+    mtvetoNor = hmtvetoNor[0].Clone("mtVetoSum")
+    mtvetoNor.SetName("transverseMassBvetoNor")
+    mtvetoNor.SetTitle("Inverted tau ID")
+    mtvetoNor.Reset()
+    print "check hmtsum B veto norm",mtvetoNor.GetEntries()
+    for histo in hmtvetoNor:
+        mtvetoNor.Add(histo)  
+    print "Integral with bins Bveto normalised- EWK  = ",mtvetoNor.Integral()
 
+## mt with bveto normalised, deltaPhi cuts
+    mtPhivetoNor = hmtPhivetoNor[0].Clone("mtVetoSum")
+    mtPhivetoNor.SetName("transverseMassBvetoNor")
+    mtPhivetoNor.SetTitle("Inverted tau ID")
+    mtPhivetoNor.Reset()
+    print "check hmtsum B veto norm",mtPhivetoNor.GetEntries()
+    for histo in hmtPhivetoNor:
+        mtPhivetoNor.Add(histo)  
+    print "Integral with bins Bveto Phi normalised- EWK  = ",mtPhivetoNor.Integral()
+
+    
     Againsttt = hmtremovett[0].Clone("mtremovett")
     Againsttt.SetName("transverseMassAgainstTTcut")
     Againsttt.SetTitle("Inverted tau ID")
@@ -1073,20 +1183,36 @@ def controlPlots(datasets):
 # mt inverted-baseline comparison with bveto and deltaPhi cuts
     bvetoDphi_inverted = hmtPhivSum.Clone("hmtPhivSum")
     bvetoDphi_baseline = hmtPhivBaseline_QCD.Clone("hmtPhivBaseline_QCD")
-    invertedQCD.setLabel("MtPhiCutBvetoInvertedVsBaseline")
-    invertedQCD.mtComparison(bvetoDphi_inverted, bvetoDphi_baseline,"BvetoDphiInvertedVsBaseline")
+    invertedQCD.setLabel("MtBvetoDphiInvertedVsBaseline")
+    invertedQCD.mtComparison(bvetoDphi_inverted, bvetoDphi_baseline,"MtBvetoDphiInvertedVsBaseline")
     
 # mt inverted-baseline comparison with btagging and deltaPhi cuts
     btagDphi_inverted = mtHMTjet2Cut.Clone("mtHMTjet2Cut")
     btagDphi_baseline = hmtBaseline_QCD.Clone("hmtBaseline_QCD")
     invertedQCD.setLabel("MtPhiCutBtagInvertedVsBaseline")
-    invertedQCD.mtComparison(btagDphi_inverted, btagDphi_baseline,"BtagDphiInvertedVsBaseline")
+    invertedQCD.mtComparison(btagDphi_inverted, btagDphi_baseline,"MtPhiCutBtagInvertedVsBaseline")
+
+
+    
+# mt inverted comparison bveto normalised and  btagging,  deltaPhi cuts
+    btagDphi_inverted = mtHMTjet2Cut.Clone("mtHMTjet2Cut")
+    bvetoNorDphi_inverted = mtPhivetoNor.Clone("hmtBaseline_QCD")
+    invertedQCD.setLabel("MtPhiCutNormalisedBveto")
+    invertedQCD.mtComparison(btagDphi_inverted , bvetoNorDphi_inverted,"MtPhiCutNormalisedBveto")
+
+
+
+# mt inverted comparison bveto normalised and  btagging,  no deltaPhi cuts
+    btag_inverted = hmtSumb.Clone("mtSumb")
+    bvetoNor_inverted = mtvetoNor.Clone("hmtBaseline_QCD")
+    invertedQCD.setLabel("MtNormalisedBveto")
+    invertedQCD.mtComparison(btag_inverted , bvetoNor_inverted,"MtNormalisedBveto")
     
 # mt inverted-inverted factorized comparison with btagging and deltaPhi cuts
     btagDphi_inverted = mtHMTjet2Cut.Clone("mtHMTjet2Cut")
     btagDphi_factorised =  mtFactorised.Clone("mtFactorised")
     invertedQCD.setLabel("MtPhiCutBtagInvertedVsFactorised")
-    invertedQCD.mtComparison(btagDphi_inverted, btagDphi_factorised,"BtagDphiInvertedVsFactorised")
+#    invertedQCD.mtComparison(btagDphi_inverted, btagDphi_factorised,"BtagDphiInvertedVsFactorised")
    
 # mt shape comparison bveto vs btag
     btagged_nor = mtHMTjet2Cut.Clone("mtj2")
@@ -1098,7 +1224,7 @@ def controlPlots(datasets):
     print "bveto_nor",bveto_nor.GetEntries()
 
     invertedQCD.setLabel("mtBTagVsBvetoInverted")
-    invertedQCD.mtComparison(btagged_nor, bveto_nor,"BTagVsBveto")
+    invertedQCD.mtComparison(btagged_nor, bveto_nor,"mtBTagVsBvetoInverted")
 
   
     canvas725 = ROOT.TCanvas("canvas725","",500,500)

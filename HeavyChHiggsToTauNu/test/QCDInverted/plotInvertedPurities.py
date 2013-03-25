@@ -60,7 +60,7 @@ searchMode = "Light"
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2012ABC"
+dataEra = "Run2012ABCD"
 
 print "dataEra"
 
@@ -275,6 +275,8 @@ def invertedPurities(datasets):
     hmtphj1= []
     hmtphj2= []
     hmtremovett = []
+    DphiEWKAllbveto= []
+    DphiAllbveto= []
     purityMet= []
     purityErrMet= []
     purityMtRemovett = []
@@ -289,7 +291,8 @@ def invertedPurities(datasets):
     purityErrMtDeltaPhiCut = []
     purityMtAfterBtagging = []
     purityErrMtAfterBtagging = []
-
+    purityMTInvertedTauIdBvetoDphi = []
+    purityErrMTInvertedTauIdBvetoDphi = []
     
 ## histograms in bins, normalisation and substraction of EWK contribution
     ## mt with 2dim deltaPhi cut
@@ -319,7 +322,7 @@ def invertedPurities(datasets):
         error = -999
         if mt.Integral() > 0:
             purity = (mt.Integral() - mtEWK.Integral())/ mt.Integral()
-            error = sqrt(purity*(1+purity)/mt.Integral())
+            error = sqrt(purity*(1+purity))/mt.Integral()
             purityMtSecondDeltaPhiCut.append(purity)
             purityErrMtSecondDeltaPhiCut.append(error)                         
 #        print " pt bin ", ptbin, " purity Mt Second Delta Phi Cut    = ",purity, " error ",error
@@ -354,7 +357,7 @@ def invertedPurities(datasets):
         error = -999
         if mtb.Integral() > 0:
             purity = (mtb.Integral() - mtbEWK.Integral())/ mtb.Integral()
-            error = sqrt(purity*(1+purity)/mtb.Integral())
+            error = sqrt(purity*(1+purity))/mtb.Integral()
             purityMtAfterBtagging.append(purity)
             purityErrMtAfterBtagging.append(error)                         
 #        print " pt bin ", ptbin, " purity Mt After Btagging    = ",purity, " error ",error 
@@ -387,7 +390,7 @@ def invertedPurities(datasets):
         error = -999
         if mtph.Integral() > 0:
             purity = (mtph.Integral() - mtphEWK.Integral())/ mtph.Integral()
-            error = sqrt(purity*(1+purity)/mtph.Integral())
+            error = sqrt(purity*(1+purity))/mtph.Integral()
             purityMtDeltaPhiCut.append(purity)
             purityErrMtDeltaPhiCut.append(error)                         
 #        print " pt bin ", ptbin, " purity Mt DeltaPhi Cut    = ",purity, " error ",error 
@@ -424,7 +427,7 @@ def invertedPurities(datasets):
         error = -999
         if mtphj1.Integral() > 0:
             purity = (mtphj1.Integral() - mtphj1EWK.Integral())/ mtphj1.Integral()
-            error = sqrt(purity*(1+purity)/mtphj1.Integral())
+            error = sqrt(purity*(1+purity))/mtphj1.Integral()
             purityMtFirstDeltaPhiCut.append(purity)
             purityErrMtFirstDeltaPhiCut.append(error)                         
 #        print " pt bin ", ptbin, " purity Mt First Delta Phi Cut    = ",purity, " error ",error 
@@ -458,7 +461,7 @@ def invertedPurities(datasets):
         error = -999
         if mtphj2.Integral() > 0:
             purity = (mtphj2.Integral() - mtphj2EWK.Integral())/ mtphj2.Integral()
-            error = sqrt(purity*(1+purity)/mtphj2.Integral())
+            error = sqrt(purity*(1+purity))/mtphj2.Integral()
             purityMtThirdDeltaPhiCut.append(purity)
             purityErrMtThirdDeltaPhiCut.append(error)                         
  #       print " pt bin ", ptbin, " purity Mt Third Delta Phi Cut    = ",purity, " error ",error 
@@ -491,10 +494,10 @@ def invertedPurities(datasets):
         error = -999
         if  mtremovett.Integral() > 0:
             purity = (mtremovett.Integral() - mtremovettEWK.Integral())/ mtremovett.Integral()
-            error = sqrt(purity*(1+purity)/mtremovett.Integral())
+            error = sqrt(purity*(1+purity))/mtremovett.Integral()
             purityMtRemovett.append(purity)
             purityErrMtRemovett.append(error)                         
-        
+            print "mtremovett.Integral() ",mtremovett.Integral(), " mmtEWK.Integral() ",   mtremovettEWK.Integral()      
 
  #######################   
         
@@ -507,7 +510,7 @@ def invertedPurities(datasets):
         mmt_tmp.histoMgr.setHistoDrawStyleAll("P") 
         mmt_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mmt = mmt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
-        mmt.Scale(normData[ptbin])
+##        mmt.Scale(normData[ptbin])
         hmet.append(mmt)
         
         mmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MET_InvertedTauIdJets"+ptbin)])
@@ -517,18 +520,56 @@ def invertedPurities(datasets):
         mmtEWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
         mmtEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mmtEWK = mmtEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
-        mmtEWK.Scale(normEWK[ptbin])
+##        mmtEWK.Scale(normEWK[ptbin])
         mmt.Add(mmtEWK, -1)
         hmetQCD.append(mmt)
         hmetEWK.append(mmtEWK)
+
         
         purity = -999
         error = -999
         if mmt.Integral() > 0:
             purity = (mmt.Integral() - mmtEWK.Integral())/ mmt.Integral()
-            error = sqrt(purity*(1+purity)/mmt.Integral())
+            error = sqrt(purity*(1+purity))/mmt.Integral()
             purityMet.append(purity)
-            purityErrMet.append(error)                         
+            purityErrMet.append(error)
+##            print "mmt.Integral() ",mmt.Integral(), " mmtEWK.Integral() ",   mmtEWK.Integral()
+
+
+
+
+############################################
+        
+        # mt after all cuts
+        mtphj2_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedTauIdBvetoDphi"+ptbin)])
+        mtphj2_tmp._setLegendStyles()
+        mtphj2_tmp._setLegendLabels()
+        mtphj2_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        mtphj2_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+        mtphj2 = mtphj2_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+#        mtphj2.Scale(normData[ptbin])
+#        hmt.append(mt)
+        DphiAllbveto.append(mtphj2)
+        mtphj2EWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedTauIdBvetoDphi"+ptbin)])
+        mtphj2EWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+        mtphj2EWK_tmp._setLegendStyles()
+        mtphj2EWK_tmp._setLegendLabels()
+        mtphj2EWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        mtphj2EWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+        mtphj2EWK = mtphj2EWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+#        mtphj2EWK.Scale(normEWK[ptbin])
+#        mtphj2.Add(mtphj2EWK, -1)
+#        hmtphj2.append(mtphj2)
+        DphiEWKAllbveto.append(mtphj2EWK)
+        
+        purity = -999
+        error = -999
+        if mtphj2.Integral() > 0:
+            purity = (mtphj2.Integral() - mtphj2EWK.Integral())/ mtphj2.Integral()
+            error = sqrt(purity*(1+purity))/mtphj2.Integral()
+            purityMTInvertedTauIdBvetoDphi.append(purity)
+            purityErrMTInvertedTauIdBvetoDphi.append(error)                         
+ #       print " pt bin ", ptbin, " purity Mt Third Delta Phi Cut    = ",purity, " error ",error 
 
 
 
@@ -538,7 +579,8 @@ def invertedPurities(datasets):
     print " purity Mt DeltaPhi160 Cut    = ",purityMtDeltaPhiCut, " error ",purityErrMtDeltaPhiCut
     print " purity Mt First DeltaPhi Cut    = ",purityMtFirstDeltaPhiCut, " error ",purityErrMtFirstDeltaPhiCut
     print " purity Mt Second DeltaPhi Cut    = ",purityMtSecondDeltaPhiCut, " error ",purityErrMtSecondDeltaPhiCut 
-    print " purity Mt Third Delta Phi Cut    = ",purityMtThirdDeltaPhiCut, " error ",purityErrMtThirdDeltaPhiCut 
+    print " purity Mt Third Delta Phi Cut    = ",purityMtThirdDeltaPhiCut, " error ",purityErrMtThirdDeltaPhiCut
+    print " purity Mt b veto deltaPhi Cuts    = ",purityMTInvertedTauIdBvetoDphi, " error ",purityErrMTInvertedTauIdBvetoDphi
     print " purity Mt Remove tt    = ",purityMtRemovett, " error ",purityErrMtRemovett
 
 
@@ -617,6 +659,23 @@ def invertedPurities(datasets):
     for histo in DphiEWKAll:
         mtDphiAllEWK.Add(histo)
 
+
+ ### Mt bveto all dphi cuts 
+    mtDphiAllbveto = DphiAllbveto[0].Clone("mt")
+    mtDphiAllbveto.SetName("mt")
+    mtDphiAllbveto.SetTitle("Inverted tau Mt")
+    mtDphiAllbveto.Reset()
+    for histo in DphiAllbveto:
+        mtDphiAllbveto.Add(histo)
+        
+    mtDphiAllEWKbveto = DphiEWKAllbveto[0].Clone("mtewk")
+    mtDphiAllEWKbveto.SetName("MTewk")
+    mtDphiAllEWKbveto.SetTitle("Inverted tau Met")
+    mtDphiAllEWKbveto.Reset()
+    for histo in DphiEWKAllbveto:
+        mtDphiAllEWKbveto.Add(histo)
+
+        
 ### Mt Mt dphi jet1 
     mtDphiJet1 = DphiJet1[0].Clone("mt")
     mtDphiJet1.SetName("mt")
@@ -647,7 +706,7 @@ def invertedPurities(datasets):
     for histo in DphiEWKJet2:
         mtDphiEWKJet2.Add(histo)
         
-### Mt Mt all dphi + tt cuts 
+### Mt  all dphi + tt cuts 
     mtDphiAllremovett = DphiAllremovett[0].Clone("mt")
     mtDphiAllremovett.SetName("mt")
     mtDphiAllremovett.SetTitle("Inverted tau Mt")
@@ -696,6 +755,21 @@ def invertedPurities(datasets):
     mtqcd = mtQCD.Clone("mtqcd")
     invertedQCD.setLabel("MtAllDeltaPhiCuts")
     invertedQCD.mtComparison(mtQCD, mtQCD,"MtAllDeltaPhiCuts")
+
+    ##########################################
+# mt bveto purity all deltaPhi cuts
+## test
+    invertedQCD.setLabel("testMtbveto")
+    invertedQCD.mtComparison(mtDphiAllbveto, mtDphiAllbveto,"testMtbveto")
+    invertedQCD.setLabel("testEWKMtbveto")
+    invertedQCD.mtComparison(mtDphiAllEWKbveto, mtDphiAllEWKbveto,"testEWKMtbveto")
+    
+    mtQCD = mtDphiAllbveto.Clone("QCD")
+    mtQCD.Add(mtDphiAllEWKbveto,-1)
+    mtQCD.Divide(mtDphiAllbveto)    
+    mtqcd = mtQCD.Clone("mtqcd")
+    invertedQCD.setLabel("MtbvetoAllDeltaPhiCuts")
+    invertedQCD.mtComparison(mtQCD, mtQCD,"MtbvetoAllDeltaPhiCuts")
     ##########################################
 # mt purity jet1 deltaPhi cuts 
     mtQCD = mtDphiJet1.Clone("QCD")
@@ -731,6 +805,33 @@ def invertedPurities(datasets):
     ptbin = array.array("d",[45, 55, 65, 75, 90, 110 ,150])
 
     
+    graph = TGraphErrors(7, ptbin, array.array("d",purityMTInvertedTauIdBvetoDphi),ptbin_error,array.array("d",purityErrMTInvertedTauIdBvetoDphi))    
+    graph.SetMaximum(1.0)
+    graph.SetMinimum(0.6)
+    graph.SetMarkerStyle(kFullCircle)
+    graph.SetMarkerColor(kBlue)
+    graph.SetMarkerSize(1)
+    graph.GetYaxis().SetTitle("QCD purity")
+    graph.GetXaxis().SetTitle("p_{T}^{#tau jet} [GeV/c]")
+### Re-draw graph and update canvas and gPad
+    graph.Draw("AP")
+    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              12.2 fb^{-1}             CMS preliminary")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    tex1 = ROOT.TLatex(0.35,0.35,"B-tagging factorisation")
+    tex1.SetNDC()
+    tex1.SetTextSize(25)
+    tex1.Draw()
+    tex2 = ROOT.TLatex(0.35,0.27,"#Delta#phi cuts" )
+    tex2.SetNDC()
+    tex2.SetTextSize(25)
+    tex2.Draw()
+
+    cEff.Update()
+    cEff.SaveAs("purityMTInvertedTauIdBvetoDphiBins.png")            
+
+  
     graph = TGraphErrors(7, ptbin, array.array("d",purityMet),ptbin_error,array.array("d",purityErrMet))    
     graph.SetMaximum(1.1)
     graph.SetMinimum(0.8)
@@ -757,7 +858,6 @@ def invertedPurities(datasets):
     cEff.Update()
     cEff.SaveAs("purityMetPtBins.png")            
   
-
 ## Mt without deltaPhi cuts
     cEff = TCanvas ("MtNoDeltaPhiCutsPurity", "MtNoDeltaPhiCutsPurity", 1)
     cEff.cd()     

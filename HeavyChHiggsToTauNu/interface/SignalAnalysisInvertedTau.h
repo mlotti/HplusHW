@@ -244,6 +244,7 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassBeforeVeto;
     WrappedTH1 *hTransverseMassNoMet;
     WrappedTH1 *hTransverseMassNoMetBtag;
+    WrappedTH1 *hTransverseMassTailKiller;
  
     WrappedTH2 *hTransverseMassVsDphi;
    
@@ -269,6 +270,9 @@ namespace HPlus {
     HistogramsInBins *hMETBaselineTauIdBtag;
     HistogramsInBins *hMETBaselineTauIdBveto;
     // baseline MT histos
+
+    HistogramsInBins *hMTInvertedTauIdBtagNoMetCut;
+    HistogramsInBins *hMTInvertedTauIdBvetoNoMetCut;
     HistogramsInBins *hMTBaselineTauIdJet;
     HistogramsInBins *hMTBaselineTauIdBtag;
     HistogramsInBins *hMTBaselineTauIdBveto;
@@ -315,6 +319,7 @@ namespace HPlus {
     HistogramsInBins *hMTInvertedFirstDeltaPhiCut;
     HistogramsInBins *hMTInvertedThirdDeltaPhiCut;
     HistogramsInBins *hMTInvertedAgainstTTCut;
+    HistogramsInBins *hMTInvertedTauIdBvetoDphiAgainstTTCut;
     HistogramsInBins *hTopMass;
     HistogramsInBins *hHiggsMass;
     HistogramsInBins *hHiggsMassPhi;
@@ -332,11 +337,18 @@ namespace HPlus {
    
     WrappedTH1 *hMTInvertedTauIdJets; 
     WrappedTH1 *hSelectedTauEt;
+    WrappedTH1 *hSelectedTauEtTauVeto;
+    WrappedTH1 *hSelectedTauEtJetCut;
+    WrappedTH1 *hSelectedTauEtMetCut;
+    WrappedTH1 *hSelectedTauEtBtagging;
+    WrappedTH1 *hSelectedTauEtDeltaPhiJet1Cut;
+    WrappedTH1 *hSelectedTauEtDeltaPhiJet12Cut;
+    WrappedTH1 *hSelectedTauEtDeltaPhiJet123Cut;
+    WrappedTH1 *hSelectedTauEtDeltaPhiJetsAgainstTTCut;
     WrappedTH1 *hSelectedTauEta;
     WrappedTH1 *hSelectedTauPhi;
     WrappedTH1 *hSelectedTauRtau;
     WrappedTH1 *hSelectedTauLeadingTrackPt;
-    WrappedTH1 *hSelectedTauEtMetCut;
     WrappedTH1 *hSelectedTauEtaMetCut;
     WrappedTH1 *hSelectedTauPhiMetCut;
     WrappedTH1 *hSelectedTauEtAfterCuts;
@@ -345,7 +357,7 @@ namespace HPlus {
     WrappedTH1 *hNonQCDTypeIISelectedTauEtAfterCuts;
     WrappedTH1 *hNonQCDTypeIISelectedTauEtaAfterCuts;
     WrappedTH1 *hTransverseMassDeltaPhiUpperCutFakeMet; 
-    WrappedTH1 *hSelectedTauRtauMetCut;
+
 
     WrappedTH1 *hSelectionFlow;
 
