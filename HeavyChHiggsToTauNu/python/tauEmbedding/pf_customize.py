@@ -427,6 +427,7 @@ def addPAT(process, options, dataVersion):
             "drop *_selectedPatPhotons_*_"+skimProcessName,
             "drop *_generalTracks20eta2p5_*_"+skimProcessName,
             "drop *_goodJets*_*_"+skimProcessName,
+            "keep *_selectedPatTaus*_*_"+skimProcessName,
 
             "drop *_dimuonsGlobal_*_"+processName,
             "drop *_tmfTracks_*_"+processName,

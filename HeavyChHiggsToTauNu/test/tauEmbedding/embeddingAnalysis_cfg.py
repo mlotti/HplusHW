@@ -269,15 +269,32 @@ if lookOriginalGenTaus:
     process.genTausVisible = cms.EDProducer("HPlusGenVisibleTauComputer",
         src = cms.InputTag("genTaus")
     )
-    process.patTausGenMatched= cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
+    process.patTausNotYetSelected = cms.EDProducer("PATTauCleaner",
         src = cms.InputTag("selectedPatTausHpsPFTau"),
+        preselection = cms.string(""),
+        checkOverlaps = cms.PSet(
+            embeddedTaus = cms.PSet(
+                src       = cms.InputTag(taus.value()),
+                algorithm = cms.string("byDeltaR"),
+                preselection        = cms.string(""),
+                deltaR              = cms.double(0.1),
+                checkRecoComponents = cms.bool(False),
+                pairCut             = cms.string(""),
+                requireNoOverlaps   = cms.bool(True),
+            ),
+        ),
+        finalCut = cms.string("")
+    )
+    process.patTausGenMatched= cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
+#        src = cms.InputTag("selectedPatTausHpsPFTau"),
+        src = cms.InputTag("patTausNotYetSelected"),
         refSrc = cms.InputTag("genTausVisible"),
         maxDeltaR = cms.double(0.5),
     )
     process.mergedPatTaus = cms.EDProducer("HPlusPATTauMerger",
         src = cms.VInputTag(taus.value(), "patTausGenMatched")
     )
-    process.commonSequence *= (process.genTaus * process.genTausVisible * process.patTausGenMatched * process.mergedPatTaus)
+    process.commonSequence *= (process.genTaus * process.genTausVisible * process.patTausNotYetSelected * process.patTausGenMatched * process.mergedPatTaus)
     taus = cms.InputTag("mergedPatTaus")
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig

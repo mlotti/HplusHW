@@ -300,7 +300,7 @@ class BRXSDatabaseInterface:
                 y.append(lower_y00[j])
 
         tanbStart = 10
-        if higgs == "mH":
+        if higgs == "mH" or higgs == "mA":
             tanbStart = 1
         lower_y0,lower_x0 = self.getLimits(higgs,"tanb",xVariableName,selection+"&&tanb>=%s"%tanbStart,self.lowerLimit(mhMeasurement))
         upper_y0,upper_x0 = self.getLimits(higgs,"tanb",xVariableName,selection+"&&tanb>=%s"%tanbStart,self.upperLimit(mhMeasurement))
@@ -352,9 +352,17 @@ class BRXSDatabaseInterface:
             for i in range(0,len(upper_x00)):
                 x.append(upper_x00[i])
                 y.append(upper_y00[i])
+
+            x.append(600)
+            y.append(100)
                                                 
         if len(x) == 0:
             return None
+
+	if higgs == "mH":
+	    x.append(0)
+            y.append(100)
+
         #for i in range(0,len(x)):
         #    print "m,tanb",x[i],y[i]
         
@@ -537,6 +545,28 @@ class BRXSDatabaseInterface:
 
     def addExperimentalBRLimit(self,mass,limit):
 	self.expLimit[str(int(mass))] = str(limit)
+
+    def excluded(self,obsGraph,name):
+
+        excluded = ROOT.TGraph(obsGraph)
+        excluded.SetName(name)
+        excluded.SetFillColor(ROOT.kGray)
+        excluded.SetPoint(excluded.GetN(), -1, 1)
+        excluded.SetPoint(excluded.GetN(), -1, 100)
+        if not obsGraph.GetY()[0] == 100:
+            excluded.SetPoint(excluded.GetN(), obsGraph.GetX()[0], 100)
+        excluded.SetPoint(excluded.GetN(), obsGraph.GetX()[0], obsGraph.GetY()[0])
+        excluded.SetFillStyle(3354)
+        excluded.SetLineWidth(0)
+        excluded.SetLineColor(ROOT.kWhite)
+
+        N = excluded.GetN() 
+        for i in range(N):
+            j = N - i - 1
+            if j > 0 and excluded.GetY()[j] == 100 and excluded.GetY()[j-1] == 100:
+                excluded.RemovePoint(j)
+
+        return excluded
 
     def passed(self,selection):
         epsilon = 0.001
@@ -842,13 +872,12 @@ def test():
 
 	db = BRXSDatabaseInterface(match.group(0))
 #	db.Print()
-        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mHp==155&&mu==200&&Xt==2000&&m2==200")
+#        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mHp==155&&mu==200&&Xt==2000&&m2==200")
 #        db.Print(variable="BR_Hp_taunu",selection="mHp==155&&mu==200&&Xt==2000&&m2==200")
-        """
-	db.setSelection("mu==200&&Xt==2000&&m2==200")
 
-        db.mhLimit("mHp","mu==200&&Xt==2000&&m2==200","125.9+-0.6+-0.2")
-        """
+#	db.setSelection("mu==500")
+        db.mhLimit("mh","mHp","mu==200","125.9+-3.0")
+
         """
         x = array('d',[100.0,110,120.0,140.0,150.0,155.0,160.0,160.0,155.0,150.0,140.0,120.0,100.0])
         y = array('d',[7.4,7.4,5.93285611233,4.08070975404,2.74869717846,1.0,1.0,1.0,1.0,1.0,1.7449304635,2.63037522267,3.28961963754])

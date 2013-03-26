@@ -152,6 +152,7 @@ class InvertedTauID:
 #        h1.Scale(1/h1.GetMaximum())
 #        h2.Scale(1/h2.GetMaximum())
 
+
 	# check that no bin has negative value, negative values possible after subtracting EWK from data  
         iBin = 1
         nBins = h1.GetNbinsX()
@@ -234,7 +235,8 @@ class InvertedTauID:
     
         if "NormalisedBveto"  in name:    
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "b tagging","Base": "b veto normalized "})
-
+        if "MtPhiCutAgainstTTNormalisedBveto" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "b tagging","Base": "b veto normalized "})
             
        # Set the legend styles
         plot.histoMgr.setHistoLegendStyleAll("P")
@@ -304,6 +306,12 @@ class InvertedTauID:
             plot.createFrame("comparison"+self.label, opts={"ymin":1e-1,"ymax": 50, "ymaxfactor": 0.2, "xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
+                             
+        if "MtPhiCutAgainstTTNormalisedBveto" in name:
+            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1,"ymax": 22, "ymaxfactor": 0.2, "xmax": 300},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+
+                             )
         if "mtBTagVsBvetoInverted" in name:
             plot.createFrame("comparison"+self.label, opts={"ymin":1e-1,"ymaxfactor": 0.2, "xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
@@ -316,10 +324,12 @@ class InvertedTauID:
         if "BtagToBvetoEffVsMt"  in name:
             plot.createFrame("efficiency"+self.label, opts={"ymin":0.,"ymax":0.3, "xmax": 300},
                              createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
+
             
         if "BtagToBvetoEff"  in name:
             plot.createFrame("efficiency"+self.label, opts={"ymin":0., "xmax": 300},
                              createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
+
 
         if "BtagToBvetoEffNoMetVsMt"  in name:
             plot.createFrame("efficiency"+self.label, opts={"ymin":0.,"ymax":0.3, "xmax": 300},
@@ -348,6 +358,9 @@ class InvertedTauID:
             plot.setLegend(histograms.createLegend(0.5,0.75,0.95,0.9))
         if "MtPhiCutNormalisedBveto" in name:            
             plot.setLegend(histograms.createLegend(0.5,0.75,0.95,0.9))
+            
+        if "MtPhiCutAgainstTTNormalisedBveto" in name:
+            plot.setLegend(histograms.createLegend(0.5,0.75,0.95,0.9))
 
             
         histograms.addCmsPreliminaryText()
@@ -361,6 +374,9 @@ class InvertedTauID:
             histograms.addText(0.3, 0.8, "B tagging to B veto ratio", 25)
         if "MtPhiCutNormalisedBveto" in name:
             histograms.addText(0.6, 0.6, "#Delta#phi cuts", 30)
+        if "MtPhiCutAgainstTTNormalisedBveto" in name:
+            histograms.addText(0.55, 0.65, "#Delta#phi cuts", 25)
+            histograms.addText(0.55, 0.55, "Cut against tt+jets", 25)
         if "BvetoDphiInvertedVsBaseline"  in name:
             histograms.addText(0.5, 0.6, "b-jet veto and #Delta#phi cuts", 25)
         if "BvetoInvertedVsBaseline"  in name:

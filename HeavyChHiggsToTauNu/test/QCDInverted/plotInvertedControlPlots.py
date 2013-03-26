@@ -316,6 +316,7 @@ def controlPlots(datasets):
     hmtfac = []
     hmtvetoNor= []
     hmtPhivetoNor = []
+    hmtPhivetoNortt = []
     
 ## histograms in bins, normalisation and substraction of EWK contribution
     ## mt with 2dim deltaPhi cut
@@ -565,7 +566,34 @@ def controlPlots(datasets):
 #        mtPhiEWKvetoNor.Scale(normEWK[ptbin])
 #        mtPhiEWKvetoNor.Scale(0.5576)
         mtPhivetoNor.Add(mtPhiEWKvetoNor, -1)
-        hmtPhivetoNor.append(mtPhivetoNor)  
+        hmtPhivetoNor.append(mtPhivetoNor)
+
+# mt b veto with Dphi cut and against tt cut 
+        mtPhivetott_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedTauIdBvetoDphiAgainstTTCut"+ptbin)])
+        mtPhivetott_tmp._setLegendStyles()
+        mtPhivetott_tmp._setLegendLabels()
+        mtPhivetott_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        mtPhivetott_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtPhivetoNortt = mtPhivetott_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+        mtPhivetoNortt.Scale(normBtagToBveto[ptbin])
+#        mtPhivetoNor.Scale(normData[ptbin])
+#        mtPhivetoNor.Scale(0.17)
+
+        
+        mtPhiEWKvetott_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedTauIdBvetoDphiAgainstTTCut"+ptbin)])
+        mtPhiEWKvetott_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+        mtPhiEWKvetott_tmp._setLegendStyles()
+        mtPhiEWKvetott_tmp._setLegendLabels()
+        mtPhiEWKvetott_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        mtPhiEWKvetott_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtPhiEWKvetoNortt = mtPhiEWKvetott_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+        mtPhiEWKvetoNortt.Scale(normBtagToBvetoEWK[ptbin])
+#        mtPhiEWKvetoNor.Scale(normEWK[ptbin])
+#        mtPhiEWKvetoNor.Scale(0.5576)
+        mtPhivetoNortt.Add(mtPhiEWKvetoNortt, -1)
+        hmtPhivetoNortt.append(mtPhivetoNortt)
+
+        
 ########################################
         
         ### MET
@@ -765,6 +793,8 @@ def controlPlots(datasets):
         hmtPhivSum.Add(histo)  
     print "Integral with bins phi cut Bveto - EWK  = ",hmtPhivSum.Integral()
 
+
+###############################################
 ## mt with bveto normalised
     mtvetoNor = hmtvetoNor[0].Clone("mtVetoSum")
     mtvetoNor.SetName("transverseMassBvetoNor")
@@ -784,6 +814,16 @@ def controlPlots(datasets):
     for histo in hmtPhivetoNor:
         mtPhivetoNor.Add(histo)  
     print "Integral with bins Bveto Phi normalised- EWK  = ",mtPhivetoNor.Integral()
+
+## mt with bveto normalised, deltaPhi cuts
+    mtPhivetoNortt = hmtPhivetoNortt[0].Clone("mtVetoSum")
+    mtPhivetoNortt.SetName("transverseMassBvetoNor")
+    mtPhivetoNortt.SetTitle("Inverted tau ID")
+    mtPhivetoNortt.Reset()
+    print "check hmtsum B veto norm",mtPhivetoNortt.GetEntries()
+    for histo in hmtPhivetoNortt:
+        mtPhivetoNortt.Add(histo)  
+    print "Integral with bins Bveto Phi normalised- EWK  = ",mtPhivetoNortt.Integral()
 
     
     Againsttt = hmtremovett[0].Clone("mtremovett")
@@ -1200,6 +1240,11 @@ def controlPlots(datasets):
     invertedQCD.setLabel("MtPhiCutNormalisedBveto")
     invertedQCD.mtComparison(btagDphi_inverted , bvetoNorDphi_inverted,"MtPhiCutNormalisedBveto")
 
+# mt inverted comparison bveto normalised, btagging,  deltaPhi and againstt cuts
+    btagDphitt_inverted = Againsttt.Clone("mtAgainsttt")
+    bvetoNorDphitt_inverted = mtPhivetoNortt.Clone("Againsttt_bveto")
+    invertedQCD.setLabel("MtPhiCutAgainstTTNormalisedBveto")
+    invertedQCD.mtComparison(btagDphitt_inverted , bvetoNorDphitt_inverted,"MtPhiCutAgainstTTNormalisedBveto")
 
 
 # mt inverted comparison bveto normalised and  btagging,  no deltaPhi cuts
