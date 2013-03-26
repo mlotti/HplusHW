@@ -94,9 +94,12 @@ def purityGraph(i,datasets,histo):
     invertedData = inverted.histoMgr.getHisto("Data").getRootHisto().Clone(histo)
     invertedEWK  = inverted.histoMgr.getHisto("EWK").getRootHisto().Clone(histo)
 
-    numerator = invertedData
+    numerator = invertedData.Clone()
+    numerator.SetName("numerator")
     numerator.Add(invertedEWK,-1)
-    denominator = invertedData
+    denominator = invertedData.Clone()
+    denominator.SetName("denominator")
+
     purity = ROOT.TEfficiency(numerator,denominator)
     purity.SetStatisticOption(ROOT.TEfficiency.kFNormal)
 
