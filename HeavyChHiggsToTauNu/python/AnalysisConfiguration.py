@@ -618,17 +618,19 @@ class ConfigBuilder:
 
         myTauIsolation = [
             "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+            "byMediumCombinedIsolationDeltaBetaCorr",
             "byMediumCombinedIsolationDeltaBetaCorr3Hits",
-            "byMediumIsolationMVA2"
+            #"byMediumIsolationMVA2"
             ]
         muonDiscriminators = [
             #"againstMuonLoose2",
-            "againstMuonMedium2",
+            #"againstMuonMedium2",
             "againstMuonTight2"
             ]
         electronDiscriminators = [
             #"againstElectronLooseMVA3",
             #"againstElectronMediumMVA3",
+            "againstElectronTight",
             "againstElectronTightMVA3",
             "againstElectronVTightMVA3"
             ]
@@ -664,10 +666,20 @@ class ConfigBuilder:
         myTauIsolation = [
             "byLooseCombinedIsolationDeltaBetaCorr3Hits",
             "byMediumCombinedIsolationDeltaBetaCorr3Hits",
+            "byTightCombinedIsolationDeltaBetaCorr3Hits",
+            "byLooseIsolationMVA2",
             "byMediumIsolationMVA2"
             ]
-        jetPUIDType = ["full", "cutbased", "philv1", "simple"]
-        jetPUIDWP = ["tight", "medium", "loose"]
+        jetPUIDType = ["none",
+                       "full",
+                       #"cutbased",
+                       #"philv1",
+                       #"simple"
+                       ]
+        jetPUIDWP = ["tight",
+                     #"medium",
+                     #"loose"
+                     ]
 
         names = []
         modules = []
