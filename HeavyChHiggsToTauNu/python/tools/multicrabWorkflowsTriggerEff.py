@@ -14,14 +14,14 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         return TaskDef(triggerOR=mcTriggers, **kwargs)
 
     defaultDefinitions = {
-        "TauPlusX_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  1, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v3"]),                
-        "TauPlusX_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  1, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v4"]),                
-        "TauPlusX_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  3, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v4"]),                
-        "TauPlusX_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 20, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v5"]),                
-        "TauPlusX_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  2, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),                
-        "TauPlusX_198941-199608_2012C_Prompt": TaskDef(njobsIn= 500, njobsOut= 10, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),
-        "TauPlusX_199698-203742_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 30, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
-        "TauPlusX_203777-208686_2012D_Prompt": TaskDef(njobsIn=3600, njobsOut= 360, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
+        "TauPlusX_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  10, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v3"]),                
+        "TauPlusX_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  10, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v4"]),                
+        "TauPlusX_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  50, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v4"]),                
+        "TauPlusX_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 400, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v5"]),                
+        "TauPlusX_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut= 50, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),                
+        "TauPlusX_198941-199608_2012C_Prompt": TaskDef(njobsIn= 500, njobsOut= 250, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),
+        "TauPlusX_199698-203742_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 150, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
+        "TauPlusX_203777-208686_2012D_Prompt": TaskDef(njobsIn=3600, njobsOut= 500, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
 
         "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":    TaskDefMC(njobsIn= 40, njobsOut= 10),                                                   
         "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12": TaskDefMC(njobsIn= 2000, njobsOut= 200),                                                
