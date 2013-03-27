@@ -386,7 +386,10 @@ def addEmbeddingSkim_v44_5(datasets):
         "SingleMu_166161-173198_2011A_Nov08": TaskDef(""),
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(""),
         "SingleMu_175832-180252_2011B_Nov19": TaskDef(""),
-        "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
+        # 8055624 events, 4989 jobs
+        # User mean 3192.2, min 16.7, max 6071.3
+        # Mean 339.4 MB, min 4.1 MB, max 376.1 MB
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_5-a9adb1d2c9d25e1e9802345c8c130cf6/USER", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
         "WJets_TuneZ2_Fall11":                TaskDef(""),
         "W1Jets_TuneZ2_Fall11":               TaskDef(""),
         "W2Jets_TuneZ2_Fall11":               TaskDef(""),

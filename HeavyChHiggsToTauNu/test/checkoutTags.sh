@@ -78,6 +78,8 @@ set -e
 # 12.2.2013/M.Kortelainen CMSSW_5_3_7_patch6 Backported technical change in pat::Jet
 # 20.2.2013/M.Kortelainen CMSSW_5_3_/_patch6 Updated PAT tags
 # 19.3.2013/LAW CMSSW_5_3_7 Added jet PU ID
+# 27.3.2013/M.Kortelainen CMSSW_4_4_5 Fixed re-running of the script
+
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -126,6 +128,7 @@ cvs co -r V00-04-11 RecoBTag/PerformanceDB
 # Type I/II MET
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
 # Nothing to add on 535, but let's keep the reference
+
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
