@@ -811,6 +811,15 @@ namespace HPlus {
       fTree.setMHTAllJets(jetData.getAllIdentifiedJets());
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
       fTree.setNonIsoLeptons(muonVetoData.getNonIsolatedMuons(), electronVetoData.getNonIsolatedElectrons());
+      // FullH+ mass
+      FullHiggsMassCalculator::Data FullHiggsMassDataTmp = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+      fTree.setHplusMassDiscriminant(FullHiggsMassData.getDiscriminant());
+      fTree.setHplusMassHiggsMass(FullHiggsMassData.getHiggsMass());
+      fTree.setHplusMassTopMass(FullHiggsMassData.getTopMass());
+      fTree.setHplusMassSelectedNeutrinoPzSolution(FullHiggsMassData.getSelectedNeutrinoPzSolution());
+      fTree.setHplusMassNeutrinoPtSolution(FullHiggsMassData.getNeutrinoPtSolution());
+      fTree.setHplusMassMCNeutrinoPz(FullHiggsMassData.getMCNeutrinoPz());
+
       fTree.fill(iEvent, tauData.getSelectedTau(), jetData.getSelectedJets());
       return true;
     }
