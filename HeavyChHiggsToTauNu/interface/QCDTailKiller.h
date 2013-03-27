@@ -81,7 +81,7 @@ namespace HPlus {
       WrappedTH2* hAfterAllCuts;
     };
 
-    QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string postfix="");
     ~QCDTailKiller();
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters

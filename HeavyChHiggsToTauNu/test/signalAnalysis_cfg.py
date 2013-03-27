@@ -55,6 +55,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #useCHSJets=True,
                         #doAgainstElectronScan=True,
                         #doTauIsolationAndJetPUScan=True,
+                        #doBTagScan=True,
                         #doSystematics=True,
                         #histogramAmbientLevel = "Vital",
                         #doOptimisation=True, optimisationScheme=myOptimisation

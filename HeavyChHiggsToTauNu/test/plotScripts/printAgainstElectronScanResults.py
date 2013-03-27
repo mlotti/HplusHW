@@ -122,6 +122,7 @@ def main(opts):
                   "Tau_175832-180252_2011B_Nov19"]
     myFilters = ["AgainstElectronVTightMVA3",
                  "AgainstMuonTight2"]
+    myFilters = []
     myHistonameData = "CommonPlots/AtEveryStep/Selected/nVertices"
     myHistoname = "CommonPlots/AtEveryStep/Selected/tau_fakeStatus"
     myHistoname = "CommonPlots/AtEveryStep/JetSelection/tau_fakeStatus"

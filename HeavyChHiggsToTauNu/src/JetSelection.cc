@@ -253,10 +253,12 @@ namespace HPlus {
     iEvent.getByLabel(fSrc, hjets);
 
     edm::Handle<edm::ValueMap<float> > myJetPUIDMVA;
-    iEvent.getByLabel(fJetPileUpMVAValuesSrc, myJetPUIDMVA);
+    if (fJetPileUpMVAValuesSrc.label() != "None")
+      iEvent.getByLabel(fJetPileUpMVAValuesSrc, myJetPUIDMVA);
 
     edm::Handle<edm::ValueMap<int> > myJetPUIDFlag;
-    iEvent.getByLabel(fJetPileUpIdFlagSrc, myJetPUIDFlag);
+    if (fJetPileUpMVAValuesSrc.label() != "None")
+      iEvent.getByLabel(fJetPileUpIdFlagSrc, myJetPUIDFlag);
 
     const edm::PtrVector<pat::Jet>& jets(hjets->ptrVector());
 
@@ -330,14 +332,16 @@ namespace HPlus {
       increment(fEMfractionCutSubCount);
 
       // Jet PU ID
-      float myPUIDMVAValue = (*myJetPUIDMVA)[iJet];
-      int myPUIDFlag = (*myJetPUIDFlag)[iJet];
-      hJetPUIDMvaResult->Fill(myPUIDMVAValue);
-      if (!PileupJetIdentifier::passJetId(myPUIDFlag, fJetPileUpWorkingPoint)) {
-        // Count how many jets, that otherwise would have been selected, are killed by jet PU ID
-        if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut)
-          ++killedByJetPUIDCut;
-        continue;
+      if (fJetPileUpMVAValuesSrc.label() != "None") {
+        float myPUIDMVAValue = (*myJetPUIDMVA)[iJet];
+        int myPUIDFlag = (*myJetPUIDFlag)[iJet];
+        hJetPUIDMvaResult->Fill(myPUIDMVAValue);
+        if (!PileupJetIdentifier::passJetId(myPUIDFlag, fJetPileUpWorkingPoint)) {
+          // Count how many jets, that otherwise would have been selected, are killed by jet PU ID
+          if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut)
+            ++killedByJetPUIDCut;
+          continue;
+        }
       }
       increment(fJetPUIDSubCount);
       ++jetPUIDPassed;
