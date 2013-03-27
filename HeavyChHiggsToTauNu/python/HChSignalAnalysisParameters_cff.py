@@ -88,7 +88,7 @@ tauSelectionBase = cms.untracked.PSet(
     againstMuonDiscriminator = cms.untracked.string("againstMuonTight2"), # discriminator for against muons
     applyVetoForDeadECALCells = cms.untracked.bool(False), # set to true to exclude taus that are pointing to a dead ECAL cell
     deadECALCellsDeltaR = cms.untracked.double(0.01), # min allowed DeltaR to a dead ECAL cell
-    isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
+    isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr3Hits"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
     nprongs = cms.untracked.uint32(1), # number of prongs (options: 1, 3, or 13 == 1 || 3)
