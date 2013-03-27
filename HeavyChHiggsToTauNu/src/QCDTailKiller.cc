@@ -138,14 +138,15 @@ namespace HPlus {
     hAfterAllCuts->Fill(x,y);
   }
 
-  QCDTailKiller::QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+  QCDTailKiller::QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string postfix=""):
     BaseSelection(eventCounter, histoWrapper),
     fMaxEntries(4),
-    fSubCountAllEvents(eventCounter.addSubCounter("QCDTailKiller", "All events")),
-    fSubCountPassedEvents(eventCounter.addSubCounter("QCDTailKiller", "Passed events"))
+    fSubCountAllEvents(eventCounter.addSubCounter("QCDTailKiller"+postfix, "All events")),
+    fSubCountPassedEvents(eventCounter.addSubCounter("QCDTailKiller"+postfix, "Passed events"))
   {
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("QCDTailKiller");
+    std::string myDirName = "QCDTailKiller"+postfix;
+    TFileDirectory myDir = fs->mkdir(myDirName);
     TFileDirectory myBackToBackDir = myDir.mkdir("BackToBackSystem");
     TFileDirectory myCollinearDir = myDir.mkdir("CollinearSystem");
 
