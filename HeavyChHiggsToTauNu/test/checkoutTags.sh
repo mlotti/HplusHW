@@ -71,6 +71,7 @@ set -e
 # 31.1.2013/M.Kortelainen CMSSW_4_4_5 Updated PAT, tau, and lumi tags
 # 5.2.2013/M.Kortelainen CMSSW_4_4_5 Backported runMEtUncertainties, technical fix to pat::Jet
 # 19.3.2013/LAW CMSSW_4_4_5 Added jet PU ID
+# 27.3.2013/M.Kortelainen CMSSW_4_4_5 Fixed re-running of the script
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -123,6 +124,7 @@ addpkg PhysicsTools/PatUtils      b4_2_X_cvMEtCorr_13Feb2012_JEC11V12 # this app
 addpkg DataFormats/METReco        V03-03-07
 
 ##### back-port of post-fixedrunMEtUncertainties()
+cvs up -C PhysicsTools/PatUtils/python/tools/metUncertaintyTools.py
 patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PatUtils_metUncertaintyTools_b4_2_X_cvMEtCorr_13Feb2012_JEC11V12.patch
 cvs up -j 1.19 -j 1.20 PhysicsTools/PatAlgos/python/tools/helpers.py
 
