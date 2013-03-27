@@ -75,7 +75,7 @@ def main():
     plot.createFrame("purity", opts={"xmin": 40, "ymin": 0., "ymax": 1.2})
     plot.frame.GetXaxis().SetTitle("tau p_{T} (GeV/c)")
     plot.frame.GetYaxis().SetTitle("Purity")
-
+    plot.setEnergy(datasets.getEnergies())
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
     plot.setLegend(histograms.createLegend(0.6, 0.3, 0.8, 0.4))
