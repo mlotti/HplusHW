@@ -48,7 +48,9 @@ class ConfigBuilder:
                  useDefaultInputFiles = True,
                  edmOutput = False,
                  # Optional options
-                 doAgainstElectronScan = False, # Scan against electron discriminators
+                 doAgainstElectronScan = False, # Scan against electron and muon discriminators
+                 doTauIsolationAndJetPUScan = False, # Scan tau isolation and jet PU discriminators
+                 doBTagScan = False, # Scan various btag working points to obtain MC efficiencies
                  doBTagTree = False, # fill tree for btagging eff study
                  doMETResolution = False, # Make MET resolution histograms
                  tauEmbeddingFinalizeMuonSelection = True, # With tau embedding input, tighten the muon selection
@@ -90,6 +92,8 @@ class ConfigBuilder:
         self.edmOutput = edmOutput
 
         self.doAgainstElectronScan = doAgainstElectronScan
+        self.doTauIsolationAndJetPUScan = doTauIsolationAndJetPUScan
+        self.doBTagScan = doBTagScan
         self.doBTagTree = doBTagTree
         self.doMETResolution = doMETResolution
         self.tauEmbeddingFinalizeMuonSelection = tauEmbeddingFinalizeMuonSelection
@@ -133,7 +137,7 @@ class ConfigBuilder:
             if self.options.tauEmbeddingInput != 0:
                 raise Exception("There are no WJets weights for embedding yet")
 
-        if self.doOptimisation:
+        if self.doOptimisation or self.doAgainstElectronScan or self.doTauIsolationAndJetPUScan:
             #self.doSystematics = True            # Make sure that systematics are run
             self.doFillTree = False              # Make sure that tree filling is disabled or root file size explodes
             self.histogramAmbientLevel = histogramAmbientLevelOptimization # Set histogram level to least histograms to reduce output file sizes
@@ -217,7 +221,9 @@ class ConfigBuilder:
 
         if self.printAnalyzerNames:
             print "Analyzer module names:"
-            names = self.getAnalyzerModuleNames()
+            names = []
+            for x in self.numberOfAnalyzers.itervalues():
+                names.extend(x)
             names.sort()
             for name in names:
                 print "  %s" % name
@@ -229,12 +235,6 @@ class ConfigBuilder:
                 print "Total number of analyzers (%d) is over the suggested limit (%d), it might take loong to run and merge output" % (s, tooManyAnalyzersLimit)
             else:
                 raise Exception("Total number of analyzers (%d) exceeds the suggested limit (%d). If you're sure you want to run so many analyzers, add 'allowTooManyAnalyzers=True' to the ConfigBuilder() constructor call." % (s, tooManyAnalyzersLimit))
-
-    def getAnalyzerModuleNames(self):
-        names = []
-        for x in self.numberOfAnalyzers.itervalues():
-            names.extend(x)
-        return names        
 
     ## Do the actual building of the configuration
     #
@@ -385,6 +385,12 @@ class ConfigBuilder:
         # Against electron scan
         self._buildAgainstElectronScan(process, analysisModules, analysisNames)
 
+        # scan for tau isolation and jet PU ID
+        self._buildTauIsolationAndJetPUScan(process, analysisModules, analysisNames)
+
+        # scan various btagging working points
+        self._buildBTagScan(process, analysisModules, analysisNames)
+
         # Tau embedding-like preselection for normal MC
         analysisNamesForSystematics.extend(self._buildTauEmbeddingLikePreselection(process, analysisModules, analysisNames, additionalCounters))
 
@@ -411,6 +417,12 @@ class ConfigBuilder:
             )
             process.outpath = cms.EndPath(process.out)
 
+        # Set PU ID src for modules
+        import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as parameters
+        for module, name in zip(analysisModules, analysisNames):
+           parameters.setJetPUIdSrc(module.jetSelection, name)
+
+        # Check number of analyzers
         self._checkNumberOfAnalyzers()
 
         return process
@@ -438,10 +450,7 @@ class ConfigBuilder:
             fileNames = cms.untracked.vstring()
         )
         if self.useDefaultInputFiles:
-            if self.options.doPat == 0:
-                process.source.fileNames.append(self.dataVersion.getAnalysisDefaultFileMadhatter())
-            else:
-                process.source.fileNames.append(self.dataVersion.getPatDefaultFileMadhatter())
+            process.source.fileNames.append(self.dataVersion.getAnalysisDefaultFileMadhatter())
         if self.options.tauEmbeddingInput != 0:
             if self.options.doPat != 0:
                 raise Exception("In tau embedding input mode, doPat must be 0 (from v44_4 onwards)")
@@ -590,8 +599,8 @@ class ConfigBuilder:
         print "TauSelection operating mode:", module.tauSelection.operatingMode.value()
         if hasattr(module, "vetoTauSelection"):
             print "VetoTauSelection src:", module.vetoTauSelection.tauSelection.src.value()
-        if hasattr(module, "jetSelection"):
-            print "Beta cut: ", module.jetSelection.betaCutSource.value(), module.jetSelection.betaCutDirection.value(), module.jetSelection.betaCut.value()
+        #if hasattr(module, "jetSelection"):
+        #    print "Beta cut: ", module.jetSelection.betaCutSource.value(), module.jetSelection.betaCutDirection.value(), module.jetSelection.betaCut.value()
         print "electrons: ", module.ElectronSelection
         print "muons: ", module.MuonSelection
         if hasattr(module, "jetSelection"):
@@ -607,26 +616,131 @@ class ConfigBuilder:
         if not self.doAgainstElectronScan:
             return
 
-        myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr"
+        myTauIsolation = [
+            "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+            "byMediumCombinedIsolationDeltaBetaCorr",
+            "byMediumCombinedIsolationDeltaBetaCorr3Hits",
+            #"byMediumIsolationMVA2"
+            ]
+        muonDiscriminators = [
+            #"againstMuonLoose2",
+            #"againstMuonMedium2",
+            "againstMuonTight2"
+            ]
         electronDiscriminators = [
-            "againstElectronLoose",
-            "againstElectronMedium",
+            #"againstElectronLooseMVA3",
+            #"againstElectronMediumMVA3",
             "againstElectronTight",
-            "againstElectronMVA"
+            "againstElectronTightMVA3",
+            "againstElectronVTightMVA3"
             ]
         names = []
+        modules = []
         for module, name in zip(analysisModules, analysisNames):
             for eleDisc in electronDiscriminators:
+                for muonDisc in muonDiscriminators:
+                    for tauIsol in myTauIsolation:
+                        mod = module.clone()
+                        mod.tauSelection.isolationDiscriminator = tauIsol
+                        mod.tauSelection.againstElectronDiscriminator = eleDisc
+                        mod.tauSelection.againstMuonDiscriminator = muonDisc
+                        modName = name+"Opt"+eleDisc[0].upper()+eleDisc[1:]+muonDisc[0].upper()+muonDisc[1:]+tauIsol[0].upper()+tauIsol[1:]
+                        setattr(process, modName, mod)
+                        names.append(modName)
+                        modules.append(mod)
+                        path = cms.Path(process.commonSequence * mod)
+                        setattr(process, modName+"Path", path)
+        self._accumulateAnalyzers("AgainstElectron/AgainstMuon scan", names)
+        analysisModules.extend(modules)
+        analysisNames.extend(names)
+
+    ## Build array of analyzers to scan various tau isolation and jet PU ID discriminators
+    #
+    # \param process          cms.Process object
+    # \param analysisModules  List of analysis modules to be used as prototypes
+    # \param analysisNames    List of analysis module names
+    def _buildTauIsolationAndJetPUScan(self, process, analysisModules, analysisNames):
+        if not self.doTauIsolationAndJetPUScan:
+            return
+
+        myTauIsolation = [
+            "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+            "byMediumCombinedIsolationDeltaBetaCorr3Hits",
+            "byTightCombinedIsolationDeltaBetaCorr3Hits",
+            "byLooseIsolationMVA2",
+            "byMediumIsolationMVA2"
+            ]
+        jetPUIDType = ["none",
+                       "full",
+                       #"cutbased",
+                       #"philv1",
+                       #"simple"
+                       ]
+        jetPUIDWP = ["tight",
+                     #"medium",
+                     #"loose"
+                     ]
+
+        names = []
+        modules = []
+        for module, name in zip(analysisModules, analysisNames):
+            for idType in jetPUIDType:
+                for idWP in jetPUIDWP:
+                    for tauIsol in myTauIsolation:
+                        mod = module.clone()
+                        mod.tauSelection.isolationDiscriminator = tauIsol
+                        mod.jetSelection.jetPileUpType = idType
+                        mod.jetSelection.jetPileUpWorkingPoint = idWP
+                        modName = name+"Opt"+idType[0].upper()+idType[1:]+idWP[0].upper()+idWP[1:]+tauIsol[0].upper()+tauIsol[1:]
+                        setattr(process, modName, mod)
+                        names.append(modName)
+                        modules.append(mod)
+                        path = cms.Path(process.commonSequence * mod)
+                        setattr(process, modName+"Path", path)
+        self._accumulateAnalyzers("TauIsolation/JetPUID scan", names)
+        analysisModules.extend(modules)
+        analysisNames.extend(names)
+
+    ## Build array of analyzers to scan various tau isolation and jet PU ID discriminators
+    #
+    # \param process          cms.Process object
+    # \param analysisModules  List of analysis modules to be used as prototypes
+    # \param analysisNames    List of analysis module names
+    def _buildBTagScan(self, process, analysisModules, analysisNames):
+        if not self.doBTagScan:
+            return
+        #OP: JPL = 0.275, JPM = 0.545, JPT = 0.790, CSVL = 0.244, CSVM = 0.679, CSVT = 0.898
+        myCSVWorkingPoints = [0.244, 0.679, 0.898]
+        myJPTWorkingPoints = [0.275, 0.545, 0.790]
+
+        names = []
+        modules = []
+        for module, name in zip(analysisModules, analysisNames):
+            for csv in myCSVWorkingPoints:
                 mod = module.clone()
-                mod.tauSelection.isolationDiscriminator = myTauIsolation
-                mod.tauSelection.againstElectronDiscriminator = eleDisc
-                modName = name+eleDisc[0].upper()+eleDisc[1:]
+                mod.bTagging.discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags")
+                mod.bTagging.leadingDiscriminatorCut = csv
+                modName = name+"OptBtagCSV"+str(csv).replace(".","")
                 setattr(process, modName, mod)
                 names.append(modName)
+                modules.append(mod)
                 path = cms.Path(process.commonSequence * mod)
                 setattr(process, modName+"Path", path)
-        self._accumulateAnalyzers("AgainstElectron scan", names)
- 
+        for module, name in zip(analysisModules, analysisNames):
+            for jpt in myJPTWorkingPoints:
+                mod = module.clone()
+                mod.bTagging.discriminator = cms.untracked.string("jetProbabilityBJetTags")
+                mod.bTagging.leadingDiscriminatorCut = jpt
+                modName = name+"OptBtagJPT"+str(jpt).replace(".","")
+                setattr(process, modName, mod)
+                names.append(modName)
+                modules.append(mod)
+                path = cms.Path(process.commonSequence * mod)
+                setattr(process, modName+"Path", path)
+        self._accumulateAnalyzers("btag efficiency scan", names)
+        analysisModules.extend(modules)
+        analysisNames.extend(names)
+
     ## Build "tau embedding"-like preselection for normal MC
     #
     # \param process             cms.Process object
@@ -753,7 +867,7 @@ class ConfigBuilder:
         module = getattr(process, name)
 
         module = module.clone()
-        module.Tree.fill = False        
+        module.Tree.fill = False
         module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
         module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 

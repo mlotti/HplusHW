@@ -70,6 +70,7 @@ set -e
 # 17.9.2012/M.Kortelainen CMSSW_4_4_4 Cut-based electron ID tag
 # 31.1.2013/M.Kortelainen CMSSW_4_4_5 Updated PAT, tau, and lumi tags
 # 5.2.2013/M.Kortelainen CMSSW_4_4_5 Backported runMEtUncertainties, technical fix to pat::Jet
+# 19.3.2013/LAW CMSSW_4_4_5 Added jet PU ID
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -102,6 +103,14 @@ cvs up -r 1.52.10.4 PhysicsTools/PatAlgos/python/tools/tauTools.py
 ####addpkg RecoJets/Configuration     V02-04-17
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
 addpkg PhysicsTools/Utilities     V08-03-17
+
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
+# https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1417.html
+cvs co -r V00-03-01 -d CMGTools/External UserCode/CMG/CMGTools/External
+rm CMGTools/External/src/PileupJetIdAlgoSubStructure.cc
+rm CMGTools/External/interface/PileupJetIdAlgoSubstructure.h
+cvs up -r V00-02-10 CMGTools/External/src/classes.h
+cvs up -r V00-02-10 CMGTools/External/src/classes_def.xml
 
 # btagging scale factors
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagPerformanceDBV2
