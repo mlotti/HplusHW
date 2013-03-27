@@ -138,7 +138,7 @@ namespace HPlus {
     hAfterAllCuts->Fill(x,y);
   }
 
-  QCDTailKiller::QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string postfix=""):
+  QCDTailKiller::QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string postfix):
     BaseSelection(eventCounter, histoWrapper),
     fMaxEntries(4),
     fSubCountAllEvents(eventCounter.addSubCounter("QCDTailKiller"+postfix, "All events")),
