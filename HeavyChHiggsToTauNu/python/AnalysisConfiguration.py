@@ -77,6 +77,7 @@ class ConfigBuilder:
 
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
+                 doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
@@ -92,6 +93,7 @@ class ConfigBuilder:
         self.useDefaultInputFiles = useDefaultInputFiles
         self.edmOutput = edmOutput
 
+        self.doQCDTailKillerScenarios = doQCDTailKillerScenarios
         self.doAgainstElectronScan = doAgainstElectronScan
         self.doTauIsolationAndJetPUScan = doTauIsolationAndJetPUScan
         self.doBTagScan = doBTagScan
@@ -403,6 +405,9 @@ class ConfigBuilder:
                 self._accumulateAnalyzers("Optimisation", names)
                 analysisNamesForSystematics.extend(names)
 
+        # QCD tail killer scenarios
+        self._buildQCDTailKillerScenarios(process, analysisModules, analysisNames)
+
         # Against electron scan
         self._buildAgainstElectronScan(process, analysisModules, analysisNames)
 
@@ -634,6 +639,68 @@ class ConfigBuilder:
         if hasattr(module, "jetSelection"):
             print "jets: ", module.jetSelection
 
+
+    ## Build array of analyzers to scan various QCD tail killer scenarios
+    #
+    # \param process          cms.Process object
+    # \param analysisModules  List of analysis modules to be used as prototypes
+    # \param analysisNames    List of analysis module names
+    def _buildQCDTailKillerScenarios(self, process, analysisModules, analysisNames):
+        def createQCDTailKillerModule(process, modulePrefix, mod, names, modules):
+            modName = name+"Opt"+modulePrefix
+            if "Opt" in name:
+                modName = name+modulePrefix
+            setattr(process, modName, mod)
+            names.append(modName)
+            modules.append(mod)
+            path = cms.Path(process.commonSequence * mod)
+            setattr(process, modName+"Path", path)
+
+        if not self.doQCDTailKillerScenarios:
+            return
+
+        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import QCDTailKillerBin
+        names = []
+        modules = []
+        for module, name in zip(analysisModules, analysisNames):
+            # Loose scenario
+            mod = module.clone()
+            mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
+                QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+                QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+                QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
+                QCDTailKillerBin("circular", 40.0, 40.0), # jet 4
+            )
+            mod.QCDTailKiller.collinear = cms.untracked.VPSet()
+            createQCDTailKillerModule(process, "QCDTailKillerLoose", mod, names, modules)
+            # Medium scenario
+            mod = module.clone()
+            mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
+                QCDTailKillerBin("circular", 60.0, 60.0), # jet 1
+                QCDTailKillerBin("circular", 60.0, 60.0), # jet 2
+                QCDTailKillerBin("circular", 60.0, 60.0), # jet 3
+                QCDTailKillerBin("circular", 60.0, 60.0), # jet 4
+            )
+            mod.QCDTailKiller.collinear = cms.untracked.VPSet()
+            createQCDTailKillerModule(process, "QCDTailKillerMedium", mod, names, modules)
+            # Tight scenario
+            mod = module.clone()
+            mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
+                QCDTailKillerBin("circular", 60.0, 60.0), # jet 1
+                QCDTailKillerBin("circular", 60.0, 60.0), # jet 2
+                QCDTailKillerBin("circular", 60.0, 60.0), # jet 3
+                QCDTailKillerBin("circular", 60.0, 60.0), # jet 4
+            )
+            mod.QCDTailKiller.collinear = cms.untracked.VPSet(
+                QCDTailKillerBin("circular", 30.0, 30.0), # jet 1
+                QCDTailKillerBin("circular", 30.0, 30.0), # jet 2
+                QCDTailKillerBin("circular", 30.0, 30.0), # jet 3
+                QCDTailKillerBin("circular", 30.0, 30.0), # jet 4
+            )
+            createQCDTailKillerModule(process, "QCDTailKillerTight", mod, names, modules)
+        self._accumulateAnalyzers("Modules for QCDTailKiller scenarios", names)
+        analysisModules.extend(modules)
+        analysisNames.extend(names)
 
     ## Build array of analyzers to scan various tau againstElectron discriminators
     #

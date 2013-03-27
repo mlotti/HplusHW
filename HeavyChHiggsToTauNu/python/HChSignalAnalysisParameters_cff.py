@@ -312,33 +312,32 @@ oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
 #deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
 deltaPhiTauMET = cms.untracked.double(180.0) # less than this value in degrees, for heavy charged Higgs
 
+def QCDTailKillerBin(cutShape, cutX, cutY):
+    validShapes = ["noCut", "rectangular", "triangular", "circular"]
+    if cutShape not in validShapes:
+        raise Exception("QCDTailKiller config for cut shape '%s' is not valid! (options: %s)"%(cutShape,", ".join(map(str, validShapes))))
+    return cms.untracked.PSet(
+        CutShape = cms.untracked.string(cutShape), # options: noCut, rectangular, triangular, circular
+        CutX = cms.untracked.double(cutX),
+        CutY = cms.untracked.double(cutY) # for circular this value is not considered
+        )
+
 QCDTailKiller = cms.untracked.PSet(
+    maxJetsToConsider = cms.untracked.uint32(4),
     # Back to back (bottom right corner of 2D plane tau,MET vs. jet,MET)
-    backToBackJet1CutShape = cms.untracked.string("circular"), # options: noCut, rectangular, triangular, circular
-    backToBackJet1CutX = cms.untracked.double(40.0),
-    backToBackJet1CutY = cms.untracked.double(40.0),
-    backToBackJet2CutShape = cms.untracked.string("circular"),
-    backToBackJet2CutX = cms.untracked.double(30.0),
-    backToBackJet2CutY = cms.untracked.double(30.0),
-    backToBackJet3CutShape = cms.untracked.string("circular"),
-    backToBackJet3CutX = cms.untracked.double(30.0),
-    backToBackJet3CutY = cms.untracked.double(30.0),
-    backToBackJet4CutShape = cms.untracked.string("circular"),
-    backToBackJet4CutX = cms.untracked.double(30.0),
-    backToBackJet4CutY = cms.untracked.double(30.0),
+    backToBack = cms.untracked.VPSet(
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 4
+    ),
     # Collinear topology (top left corner of 2D plane tau,MET vs. jet,MET)
-    collinearJet1CutShape = cms.untracked.string("circular"),
-    collinearJet1CutX = cms.untracked.double(30.0),
-    collinearJet1CutY = cms.untracked.double(30.0),
-    collinearJet2CutShape = cms.untracked.string("circular"),
-    collinearJet2CutX = cms.untracked.double(30.0),
-    collinearJet2CutY = cms.untracked.double(30.0),
-    collinearJet3CutShape = cms.untracked.string("circular"),
-    collinearJet3CutX = cms.untracked.double(30.0),
-    collinearJet3CutY = cms.untracked.double(30.0),
-    collinearJet4CutShape = cms.untracked.string("circular"),
-    collinearJet4CutX = cms.untracked.double(30.0),
-    collinearJet4CutY = cms.untracked.double(30.0),
+    collinear = cms.untracked.VPSet(
+        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 1
+        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 2
+        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 3
+        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
+    ),
 )
 
 topReconstruction = cms.untracked.string("None") # Options: None
