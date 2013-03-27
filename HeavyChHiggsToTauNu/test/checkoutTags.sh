@@ -77,6 +77,7 @@ set -e
 # 9.1.2013/M.Kortelainen CMSSW_5_3_7_patch4 Updated PAT tags
 # 12.2.2013/M.Kortelainen CMSSW_5_3_7_patch6 Backported technical change in pat::Jet
 # 20.2.2013/M.Kortelainen CMSSW_5_3_/_patch6 Updated PAT tags
+# 19.3.2013/LAW CMSSW_5_3_7 Added jet PU ID
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -113,6 +114,10 @@ addpkg CondFormats/EgammaObjects  V00-04-00
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
 
+
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
+# https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1417.html
+cvs co -r V00-03-01 -d CMGTools/External UserCode/CMG/CMGTools/External
 
 # btagging scale factors
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagPerformanceDBV2

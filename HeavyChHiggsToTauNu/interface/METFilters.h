@@ -22,23 +22,50 @@ namespace HPlus {
 
     bool passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup);
   private:
+    // Input items
+    const edm::InputTag fBeamHaloFilterSrc;
+    const bool fBeamHaloFilterEnabled;
+    const edm::InputTag fHBHENoiseFilterSrc;
+    const bool fHBHENoiseFilterEnabled;
+    const edm::InputTag fHBHENoiseFilterMETWGSrc;
+    const bool fHBHENoiseFilterMETWGEnabled;
+    const edm::InputTag fTrackingFailureFilterSrc;
+    const bool fTrackingFailureFilterEnabled;
+    const edm::InputTag fEcalDeadCellEventFilterSrc;
+    const bool fEcalDeadCellEventFilterEnabled;
+    const edm::InputTag fEcalDeadCellTPFilterSrc;
+    const bool fEcalDeadCellTPFilterEnabled;
+    const edm::InputTag fTriggerResultsSrc; // used to store some met filters as trigger paths
+    std::vector<std::string> fHcalLaserFilterStrings;
+    const bool fHcalLaserFilterEnabled;
+    const edm::InputTag fBadEESuperCrystalFilterSrc;
+    const bool fBadEESuperCrystalFilterEnabled;
+    const edm::InputTag fEcalCrystalsWithLargeLaserCorrectionFilterSrc;
+    const bool fEcalCrystalsWithLargeLaserCorrectionFilterEnabled;
+    std::vector<std::string> fTrackingOddEventFilterStrings;
+    const bool fTrackingOddEventFilterEnabled;
+    const edm::InputTag fMuonsWithWrongMomentaFilterSrc;
+    const bool fMuonsWithWrongMomentaFilterEnabled;
+    const edm::InputTag fInconsistentMuonPFCandidateFilterSrc;
+    const bool fInconsistentMuonPFCandidateFilterEnabled;
+
+    // Subcounters
     Count fAllEventCounter;
+    Count fBeamHaloFilterCounter;
     Count fHBHENoiseFilterCounter;
-    Count fAllPassedCounter;
-    edm::InputTag fHBHENoiseFilterSrc;
-    bool fHBHENoiseFilterEnabled;
-
     Count fHBHENoiseFilterMETWGCounter;
-    edm::InputTag fHBHENoiseFilterMETWGSrc;
-    bool fHBHENoiseFilterMETWGEnabled;
-
-    Count ftrackingFailureFilterCounter;
-    edm::InputTag ftrackingFailureFilterSrc;
-    bool ftrackingFailureFilterEnabled;
-
+    Count fTrackingFailureFilterCounter;
     Count fEcalDeadCellEventFilterCounter;
-    edm::InputTag fEcalDeadCellEventFilterSrc;
-    bool fEcalDeadCellEventFilterEnabled;
+    Count fEcalDeadCellTPFilterCounter;
+    Count fHcalLaserFilterCounter;
+    Count fBadEESuperCrystalFilterCounter;
+    Count fEcalCrystalsWithLargeLaserCorrectionFilterCounter;
+    Count fTrackingOddEventFilterCounter;
+    Count fMuonsWithWrongMomentaFilterCounter;
+    Count fInconsistentMuonPFCandidateFilterCounter;
+    Count fAllPassedCounter;
+    
+    bool fTriggerResultsListPrintedStatus;
   };
 }
 
