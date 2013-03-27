@@ -1249,6 +1249,12 @@ class DatasetRootHistoMergedMC(DatasetRootHistoCompoundBase):
         else:
             return hsum
 
+    ## \var histoWrappers
+    # List of underlying dataset.DatasetRootHisto objects
+    ## \var normalization
+    # String representing the current normalization scheme
+
+
 ## Wrapper for a added TH1 histograms from MC and the corresponding Datasets.
 #
 # Here "Adding" is like merging, but for datasets which have the same
@@ -1389,7 +1395,6 @@ class DatasetRootHistoAddedMC(DatasetRootHistoCompoundBase):
     # List of underlying dataset.DatasetRootHisto objects
     ## \var normalization
     # String representing the current normalization scheme
-
 
 class AnalysisNotFoundException(Exception):
     def __init__(self, message):
