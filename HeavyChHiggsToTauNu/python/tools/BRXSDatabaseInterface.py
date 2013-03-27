@@ -354,16 +354,15 @@ class BRXSDatabaseInterface:
                 y.append(upper_y00[i])
             x.append(600)
             y.append(100)
+
+        if higgs == "mH":
+            x.append(600)
+            x.append(0)
                                                 
         if len(x) == 0:
             return None
 
-	if higgs == "mH":
-	    x.append(0)
-            y.append(100)
 
-#        for i in range(0,len(x)):
-#            print "m,tanb",x[i],y[i]
         
         retGraph = ROOT.TGraph(len(x),array('d',x,),array('d',y))
         retGraph.SetName("mhLimit")
