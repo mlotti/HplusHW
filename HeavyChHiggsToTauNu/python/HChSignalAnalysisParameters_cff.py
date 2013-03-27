@@ -84,11 +84,11 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(41), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
-    againstElectronDiscriminator = cms.untracked.string("againstElectronVTightMVA3"), # discriminator against electrons
+    againstElectronDiscriminator = cms.untracked.string("againstElectronTightMVA3"), # discriminator against electrons
     againstMuonDiscriminator = cms.untracked.string("againstMuonTight2"), # discriminator for against muons
     applyVetoForDeadECALCells = cms.untracked.bool(False), # set to true to exclude taus that are pointing to a dead ECAL cell
     deadECALCellsDeltaR = cms.untracked.double(0.01), # min allowed DeltaR to a dead ECAL cell
-    isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr3Hits"), # discriminator for isolation
+    isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
     nprongs = cms.untracked.uint32(1), # number of prongs (options: 1, 3, or 13 == 1 || 3)
@@ -730,7 +730,7 @@ def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, ad
 def setJetPUIdSrc(jetSelectionPSet, moduleName):
     # Check PUID type validity
     myPUIDType = jetSelectionPSet.jetPileUpType.value()
-    myValidPUIDTypes = ["full", "cutbased", "philv1", "simple"]
+    myValidPUIDTypes = ["full", "cutbased", "philv1", "simple", "none"]
     if not (myPUIDType in myValidPUIDTypes):
         raise Exception("jet PU ID type '%s' is not valid! (options: %s)"%(myPUIDType,", ".join(map(str, myValidPUIDTypes))))
     # Check PUID working point validity
@@ -759,8 +759,12 @@ def setJetPUIdSrc(jetSelectionPSet, moduleName):
     # Add suffix
     if "Chs" in jetSelection.src.value():
         myPileUpSrc += "Chs"
-    jetSelectionPSet.jetPileUpMVAValues = cms.untracked.InputTag(myPileUpSrc, myPUIDType+"Discriminant", "HChPatTuple")
-    jetSelectionPSet.jetPileUpIdFlag = cms.untracked.InputTag(myPileUpSrc, myPUIDType+"Id", "HChPatTuple")
+    if myPUIDType != "none":
+        jetSelectionPSet.jetPileUpMVAValues = cms.untracked.InputTag(myPileUpSrc, myPUIDType+"Discriminant", "HChPatTuple")
+        jetSelectionPSet.jetPileUpIdFlag = cms.untracked.InputTag(myPileUpSrc, myPUIDType+"Id", "HChPatTuple")
+    else:
+        jetSelectionPSet.jetPileUpMVAValues = cms.untracked.InputTag("None")
+        jetSelectionPSet.jetPileUpIdFlag = cms.untracked.InputTag("None")
     print "Jet PU Id src set to '%s' based on jet source '%s' in module '%s'"%(myPileUpSrc,jetSelection.src.value(),moduleName)
 
 def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processName=None):
