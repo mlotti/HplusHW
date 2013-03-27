@@ -138,9 +138,9 @@ namespace HPlus {
     hAfterAllCuts->Fill(x,y);
   }
 
-  QCDTailKiller::QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string postfix=""):
+  QCDTailKiller::QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string postfix):
     BaseSelection(eventCounter, histoWrapper),
-    fMaxEntries(4),
+    fMaxEntries(iConfig.getUntrackedParameter<uint32_t>("maxJetsToConsider")),
     fSubCountAllEvents(eventCounter.addSubCounter("QCDTailKiller"+postfix, "All events")),
     fSubCountPassedEvents(eventCounter.addSubCounter("QCDTailKiller"+postfix, "Passed events"))
   {
@@ -151,38 +151,36 @@ namespace HPlus {
     TFileDirectory myCollinearDir = myDir.mkdir("CollinearSystem");
 
     // Create and initialise cut items for back to back system
-    for (int i = 0; i < fMaxEntries; ++i) {
+    std::vector<edm::ParameterSet> myBackToBackPSets = iConfig.getUntrackedParameter<std::vector<edm::ParameterSet> >("backToBack");
+    for (size_t i = 0; i < fMaxEntries; ++i) {
       std::stringstream myStream;
       myStream << "BackToBackJet" << i+1;
       fBackToBackJetCut.push_back(CutItem(eventCounter, myStream.str(), QCDTailKiller::kCutLowerRightCorner));
-      std::stringstream myShapeStream;
-      myShapeStream << "backToBackJet" << i+1 << "CutShape";
-      std::stringstream myXCutStream;
-      myXCutStream << "backToBackJet" << i+1 << "CutX";
-      std::stringstream myYCutStream;
-      myYCutStream << "backToBackJet" << i+1 << "CutY";
-      fBackToBackJetCut[i].initialise(histoWrapper, myBackToBackDir,
-                                      iConfig.getUntrackedParameter<std::string>(myShapeStream.str()),
-                                      iConfig.getUntrackedParameter<double>(myXCutStream.str()),
-                                      iConfig.getUntrackedParameter<double>(myYCutStream.str()),
-                                      i+1);
+      if (i < myBackToBackPSets.size()) {
+        fBackToBackJetCut[i].initialise(histoWrapper, myBackToBackDir,
+                                        myBackToBackPSets[i].getUntrackedParameter<std::string>("CutShape"),
+                                        myBackToBackPSets[i].getUntrackedParameter<double>("CutX"),
+                                        myBackToBackPSets[i].getUntrackedParameter<double>("CutY"),
+                                        i+1);
+      } else {
+        fBackToBackJetCut[i].initialise(histoWrapper, myBackToBackDir, "noCut", 0.0, 0.0, i+1);
+      }
     }
     // Create and initialise cut items for collinear system
-    for (int i = 0; i < fMaxEntries; ++i) {
+    std::vector<edm::ParameterSet> myCollinearPSets = iConfig.getUntrackedParameter<std::vector<edm::ParameterSet> >("collinear");
+    for (size_t i = 0; i < fMaxEntries; ++i) {
       std::stringstream myStream;
       myStream << "CollinearJet" << i+1;
-      fCollinearJetCut.push_back(CutItem(eventCounter, myStream.str(), QCDTailKiller::kCutUpperLeftCorner));
-      std::stringstream myShapeStream;
-      myShapeStream << "collinearJet" << i+1 << "CutShape";
-      std::stringstream myXCutStream;
-      myXCutStream << "collinearJet" << i+1 << "CutX";
-      std::stringstream myYCutStream;
-      myYCutStream << "collinearJet" << i+1 << "CutY";
-      fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir,
-                                     iConfig.getUntrackedParameter<std::string>(myShapeStream.str()),
-                                     iConfig.getUntrackedParameter<double>(myXCutStream.str()),
-                                     iConfig.getUntrackedParameter<double>(myYCutStream.str()),
-                                     i+1);
+      fCollinearJetCut.push_back(CutItem(eventCounter, myStream.str(), QCDTailKiller::kCutLowerRightCorner));
+      if (i < myCollinearPSets.size()) {
+        fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir,
+                                        myCollinearPSets[i].getUntrackedParameter<std::string>("CutShape"),
+                                        myCollinearPSets[i].getUntrackedParameter<double>("CutX"),
+                                        myCollinearPSets[i].getUntrackedParameter<double>("CutY"),
+                                        i+1);
+      } else {
+        fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir, "noCut", 0.0, 0.0, i+1);
+      }
     }
   }
 
@@ -215,7 +213,7 @@ namespace HPlus {
     // Loop over the jet list (it might contain also the jet corresponding to tau depending on which list is supplied to the analyse method)
     output.fPassedEvent = true;
     size_t i = 0;
-    while (i < jets.size() && static_cast<int>(i) < fMaxEntries && output.fPassedEvent) {
+    while (i < jets.size() && i < fMaxEntries && output.fPassedEvent) {
       // Obtain delta phi between jet and MET
       double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met) * 57.3;
       if (fBackToBackJetCut[i].passedCut(myDeltaPhiTauMET, myDeltaPhiJetMET)) {
@@ -229,7 +227,7 @@ namespace HPlus {
       ++i;
     }
     i = 0;
-    while (i < jets.size() && static_cast<int>(i) < fMaxEntries && output.fPassedEvent) {
+    while (i < jets.size() && i < fMaxEntries && output.fPassedEvent) {
       // Obtain delta phi between jet and MET
       double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met) * 57.3;
       if (fCollinearJetCut[i].passedCut(myDeltaPhiTauMET, myDeltaPhiJetMET)) {
@@ -246,8 +244,8 @@ namespace HPlus {
     // Event passed cuts, now fill histograms after all cuts
     increment(fSubCountPassedEvents);
     i = 0;
-    while (i < jets.size() && static_cast<int>(i) < fMaxEntries) {
-      double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met);
+    while (i < jets.size() && i < fMaxEntries) {
+      double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met) * 57.3;
       fCollinearJetCut[i].fillAfterAllCuts(myDeltaPhiTauMET, myDeltaPhiJetMET);
       fBackToBackJetCut[i].fillAfterAllCuts(myDeltaPhiTauMET, myDeltaPhiJetMET);
       ++i;
