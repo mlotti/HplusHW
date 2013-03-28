@@ -102,11 +102,11 @@ namespace HPlus {
     void setMHTAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
     void setMHTSelJets(const edm::PtrVector<pat::Jet>& jets);
     // Full H+ mass
-    void setHplusMassDiscriminant(double hplusMassDiscriminant) { return fHplusMassDiscriminant = hplusMassDiscriminant; }
-    void setHplusMassHiggsMass(double higgsMassSolution) { return fHplusMassSolution = higgsMassSolution; }
-    void setHplusMassTopMass(double hplusMassTopMassSolution) { return fHplusMassTopMassSolution = hplusMassTopMassSolution; }
-    void setHplusMassSelectedNeutrinoPzSolution(double hplusMassSelectedNeutrinoPzSolution) { return fHplusMassSelectedNeutrinoPzSolution = hplusMassSelectedNeutrinoPzSolution; }
-    void setHplusMassNeutrinoPtSolution(double hplusMassSelectedNeutrinoPtSolution) { return fHplusMassSelectedNeutrinoPtSolution =  hplusMassSelectedNeutrinoPtSolution; }
+    void setHplusMassDiscriminant(double hplusMassDiscriminant) { fHplusMassDiscriminant = hplusMassDiscriminant; }
+    void setHplusMassHiggsMass(double higgsMassSolution) { fHplusMassSolution = higgsMassSolution; }
+    void setHplusMassTopMass(double hplusMassTopMassSolution) { fHplusMassTopMassSolution = hplusMassTopMassSolution; }
+    void setHplusMassSelectedNeutrinoPzSolution(double hplusMassSelectedNeutrinoPzSolution) { fHplusMassSelectedNeutrinoPzSolution = hplusMassSelectedNeutrinoPzSolution; }
+    void setHplusMassNeutrinoPtSolution(double hplusMassSelectedNeutrinoPtSolution) { fHplusMassSelectedNeutrinoPtSolution =  hplusMassSelectedNeutrinoPtSolution; }
     void setHplusMassMCNeutrinoPz(double hplusMassMCNeutrinoPz) {  fHplusMassMCNeutrinoPz = hplusMassMCNeutrinoPz; }
 
     void fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau,

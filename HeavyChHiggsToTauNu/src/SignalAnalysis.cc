@@ -811,14 +811,16 @@ namespace HPlus {
       fTree.setMHTAllJets(jetData.getAllIdentifiedJets());
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
       fTree.setNonIsoLeptons(muonVetoData.getNonIsolatedMuons(), electronVetoData.getNonIsolatedElectrons());
-      // FullH+ mass
-      FullHiggsMassCalculator::Data FullHiggsMassDataTmp = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
-      fTree.setHplusMassDiscriminant(FullHiggsMassData.getDiscriminant());
-      fTree.setHplusMassHiggsMass(FullHiggsMassData.getHiggsMass());
-      fTree.setHplusMassTopMass(FullHiggsMassData.getTopMass());
-      fTree.setHplusMassSelectedNeutrinoPzSolution(FullHiggsMassData.getSelectedNeutrinoPzSolution());
-      fTree.setHplusMassNeutrinoPtSolution(FullHiggsMassData.getNeutrinoPtSolution());
-      fTree.setHplusMassMCNeutrinoPz(FullHiggsMassData.getMCNeutrinoPz());
+      if (tauData.passedEvent() && btagData.passedEvent()) {
+	// FullH+ mass
+	FullHiggsMassCalculator::Data FullHiggsMassDataTmp = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+	fTree.setHplusMassDiscriminant(FullHiggsMassDataTmp.getDiscriminant());
+	fTree.setHplusMassHiggsMass(FullHiggsMassDataTmp.getHiggsMass());
+	fTree.setHplusMassTopMass(FullHiggsMassDataTmp.getTopMass());
+	fTree.setHplusMassSelectedNeutrinoPzSolution(FullHiggsMassDataTmp.getSelectedNeutrinoPzSolution());
+	fTree.setHplusMassNeutrinoPtSolution(FullHiggsMassDataTmp.getNeutrinoPtSolution());
+	fTree.setHplusMassMCNeutrinoPz(FullHiggsMassDataTmp.getMCNeutrinoPz());
+      }
 
       fTree.fill(iEvent, tauData.getSelectedTau(), jetData.getSelectedJets());
       return true;
