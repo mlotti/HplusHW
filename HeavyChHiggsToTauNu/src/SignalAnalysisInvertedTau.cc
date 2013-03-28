@@ -293,6 +293,9 @@ namespace HPlus {
     hSelectedTauEtJetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterJetCut", "SelectedTau_pT_AfterJetCut", 200, 0.0, 400.0);
     hSelectedTauEtMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut", 200, 0.0, 400.0);
     hSelectedTauEtBtagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterBtagging", "SelectedTau_pT_AfterBtagging", 200, 0.0, 400.0);
+    hSelectedTauEtBjetVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterBveto", "SelectedTau_pT_AfterBveto", 200, 0.0, 400.0);
+    hSelectedTauEtBjetVetoPhiCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterBvetoPhiCuts", "SelectedTau_pT_AfterBvetoPhiCuts", 200, 0.0, 400.0);
+
     hSelectedTauEtDeltaPhiJet1Cut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterDeltaPhiJet1Cut", "SelectedTau_pT_AfterDeltaPhiJet1Cut", 200, 0.0, 400.0);
     hSelectedTauEtDeltaPhiJet12Cut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterDeltaPhiJet12Cut", "SelectedTau_pT_AfterDeltaPhiJet12Cut", 200, 0.0, 400.0);
     hSelectedTauEtDeltaPhiJet123Cut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterDeltaPhiJet123Cut", "SelectedTau_pT_AfterDeltaPhiJet123Cut", 200, 0.0, 400.0);
@@ -911,7 +914,7 @@ namespace HPlus {
       increment(fBvetoCounter); 
   
       hMTInvertedTauIdBveto->Fill(selectedTau->pt(), transverseMass);
-
+      hSelectedTauEtBjetVeto->Fill(selectedTau->pt());
   // mt  with b veto and deltaPhi
       //      if (DeltaR_TauMETJet2MET > 100 && DeltaR_TauMETJet3MET > 100 && DeltaR_TauMETJet4MET > 100 ) {      
       if ( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut  ) {
@@ -919,6 +922,7 @@ namespace HPlus {
 	hMTInvertedTauIdBvetoDphi->Fill(selectedTau->pt(),transverseMass);
 	if( deltaPhiMetJet1  < triangleCut ) {
 	  hMTInvertedTauIdBvetoDphiAgainstTTCut->Fill(selectedTau->pt(),transverseMass);
+	  hSelectedTauEtBjetVetoPhiCuts->Fill(selectedTau->pt());
 	}	
       }
     }

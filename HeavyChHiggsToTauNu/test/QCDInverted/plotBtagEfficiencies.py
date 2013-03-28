@@ -550,7 +550,7 @@ def controlPlots(datasets):
     metbtag = metb.Clone("metb")
     metbjetveto = metbveto.Clone("met")
     invertedQCD.setLabel("BtagToBvetoEfficiency")
-    invertedQCD.mtComparison(metbtag, metbjetveto,"BtagToBvetoEff")
+    invertedQCD.mtComparison(metbtag, metbjetveto,"BtagToBvetoEfficiency")
 
     
     fOUT = open("btaggingFactors","w")

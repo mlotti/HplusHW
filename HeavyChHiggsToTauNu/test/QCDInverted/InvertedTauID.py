@@ -326,7 +326,7 @@ class InvertedTauID:
                              createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
 
             
-        if "BtagToBvetoEff"  in name:
+        if "BtagToBvetoEfficiency"  in name:
             plot.createFrame("efficiency"+self.label, opts={"ymin":0., "xmax": 300},
                              createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
 

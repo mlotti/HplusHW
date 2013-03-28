@@ -20,12 +20,14 @@ dataEra = "Run2012ABCD"
 HISTONAMES = []
 #HISTONAMES.append("SelectedTau_pT_AfterTauID")
 #HISTONAMES.append("SelectedInvertedTauAfterCuts")
-HISTONAMES.append("SelectedTau_pT_AfterMetCut")
+#HISTONAMES.append("SelectedTau_pT_AfterMetCut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterRtauCut")
-#HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
+###HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterDeltaPhiJet1Cut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterDeltaPhiJet12Cut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterDeltaPhiJet123Cut")
@@ -55,6 +57,7 @@ def main():
 
     dirs = []
     dirs.append(sys.argv[1])
+
         
     datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis)
     datasets.loadLuminosities()
@@ -81,15 +84,18 @@ def main():
         match = name_re.search(histo)
         if match:
             name = match.group("name")
-        legends["Purity%s"%i] = name
-
-    plot.createFrame("purity", opts={"xmin": 40,"xmax": 300, "ymin": 0., "ymax": 1.2})
-    plot.frame.GetXaxis().SetTitle("tau p_{T} (GeV/c)")
-    plot.frame.GetYaxis().SetTitle("Purity")
+        #legends["Purity%s"%i] = name
+        #legends["Purity%s"%i] = "#Delta#phi cuts and cut against tt+jets"
+        #legends["Purity%s"%i] = "#Delta#phi(jet1, MET) cut"
+        #legends["Purity%s"%i] = "After isolated #tau-jet veto"
+        legends["Purity%s"%i] = "After b-jet veto"        
+    plot.createFrame("purity", opts={"xmin": 40,"xmax": 300, "ymin": 0.5, "ymax": 1.1})
+    plot.frame.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
+    plot.frame.GetYaxis().SetTitle("QCD purity")
 
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
-    plot.setLegend(histograms.createLegend(0.6, 0.3, 0.8, 0.4))
+    plot.setLegend(histograms.createLegend(0.2, 0.8, 0.8, 0.95))
 
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
@@ -105,20 +111,14 @@ def purityGraph(i,datasets,histo):
     invertedData = inverted.histoMgr.getHisto("Data").getRootHisto().Clone(histo)
     invertedEWK  = inverted.histoMgr.getHisto("EWK").getRootHisto().Clone(histo)
 
-    numerator = invertedData
+    numerator = invertedData.Clone()
+    numerator.SetName("numerator")
     numerator.Add(invertedEWK,-1)
-    denominator = invertedData
-    iBin = 1
-    nBins = numerator.GetNbinsX()
-    while iBin < nBins:
-        print "inverted ",iBin,invertedData.GetBinContent(iBin) 
-        iBin = iBin + 1
-        
-    iBin = 1
-    while iBin < nBins:
-        print "invertedEWK ",iBin,invertedEWK.GetBinContent(iBin) 
-        iBin = iBin + 1
-        
+
+    denominator = invertedData.Clone()
+    denominator.SetName("denominator")
+
+
     purity = ROOT.TEfficiency(numerator,denominator)
     purity.SetStatisticOption(ROOT.TEfficiency.kFNormal)
 

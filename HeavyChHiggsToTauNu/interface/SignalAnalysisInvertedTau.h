@@ -341,6 +341,8 @@ namespace HPlus {
     WrappedTH1 *hSelectedTauEtJetCut;
     WrappedTH1 *hSelectedTauEtMetCut;
     WrappedTH1 *hSelectedTauEtBtagging;
+    WrappedTH1 *hSelectedTauEtBjetVeto;
+    WrappedTH1 *hSelectedTauEtBjetVetoPhiCuts;
     WrappedTH1 *hSelectedTauEtDeltaPhiJet1Cut;
     WrappedTH1 *hSelectedTauEtDeltaPhiJet12Cut;
     WrappedTH1 *hSelectedTauEtDeltaPhiJet123Cut;
