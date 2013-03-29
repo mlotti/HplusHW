@@ -134,6 +134,14 @@ namespace HPlus {
     fTree->Branch("Dparameter", &fDparameter);
     fTree->Branch("jetThrust", &fJetThrust);
 
+    // Full H+ mass
+    fTree->Branch("hplusMassDiscriminant", &fHplusMassDiscriminant);
+    fTree->Branch("hplusMassSolution", &fHplusMassSolution);
+    fTree->Branch("hplusMassTopMassSolution", &fHplusMassTopMassSolution);
+    fTree->Branch("hplusMassSelectedNeutrinoPzSolution", &fHplusMassSelectedNeutrinoPzSolution);
+    fTree->Branch("hplusMassSelectedNeutrinoPtSolution", &fHplusMassSelectedNeutrinoPtSolution);
+    fTree->Branch("hplusMassMCNeutrinoPz", &fHplusMassMCNeutrinoPz);
+
     fTree->Branch("TauIsFake", &bTauIsFake);
     fTree->Branch("MHT_p4", &fMHT);
     fTree->Branch("MHT_SelJets_p4", &fMHTSelJets);
@@ -755,6 +763,14 @@ namespace HPlus {
     fCparameter = nan;
     fDparameter = nan;
     fJetThrust = nan;
+
+    // Full H+ mass
+    fHplusMassDiscriminant = nan;
+    fHplusMassSolution = nan;
+    fHplusMassTopMassSolution = nan;
+    fHplusMassSelectedNeutrinoPzSolution = nan;
+    fHplusMassSelectedNeutrinoPtSolution = nan;
+    fHplusMassMCNeutrinoPz = nan;
 
     bTauIsFake = false;
     vDiJetMassesNoTau.clear();

@@ -1808,6 +1808,8 @@ class PlotDrawer:
             # bin widths) explicitly specifying the bin low edges is
             # the only way which works
             def rebinToWidth(h):
+                if(rebinWidth==-1):
+                    return
                 th1 = h.getRootHisto()
                 xmin = histograms.th1Xmin(th1)
                 xmax = histograms.th1Xmax(th1)
