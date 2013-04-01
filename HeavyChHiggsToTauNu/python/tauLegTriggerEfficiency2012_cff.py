@@ -10,6 +10,86 @@ def triggerBin(pt, efficiency, uncertainty):
         uncertainty = cms.double(uncertainty)
     )
 
+tauLegEfficiency_noscalefactors = cms.untracked.PSet(
+    dataParameters = cms.PSet(
+        # Run2012A
+        runs_190456_193621 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(193621),
+            luminosity = cms.double(697), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        # Run2012B
+        runs_193834_196531 = cms.PSet(
+            firstRun = cms.uint32(193834),
+            lastRun = cms.uint32(196531),
+            luminosity = cms.double(4428), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        # Run2012C
+        runs_198022_202585 = cms.PSet(
+            firstRun = cms.uint32(198022),
+            lastRun = cms.uint32(202585),
+            luminosity = cms.double(6610), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        # Run2012A+B
+        runs_190456_196531 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(196531),
+            luminosity = cms.double(5126), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        # Run2012A+B+C
+        runs_190456_202585 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(202585),
+            luminosity = cms.double(11736), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+    ),
+    mcParameters = cms.PSet(
+        Summer12_PU_2012AB = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        Summer12_PU_2012C = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        Summer12_PU_2012D = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        Summer12_PU_2012ABC = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+    ),
+    dataSelect = cms.vstring(),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
+    mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
+)
+
 
 tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium = cms.untracked.PSet(
     # The selected triggers for the efficiency. If one trigger is

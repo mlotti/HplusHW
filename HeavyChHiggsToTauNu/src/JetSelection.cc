@@ -8,6 +8,7 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
@@ -67,22 +68,22 @@ namespace HPlus {
     fJetIdMinChargedHadronEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMinChargedHadronEnergyFraction")),
     fJetIdMinChargedMultiplicity(iConfig.getUntrackedParameter<uint32_t>("jetIdMinChargedMultiplicity")),
     fJetIdMaxChargedEMEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxChargedEMEnergyFraction")),
-    fBetaCut(iConfig.getUntrackedParameter<double>("betaCut"), iConfig.getUntrackedParameter<std::string>("betaCutDirection")),
-    fBetaSrc(iConfig.getUntrackedParameter<std::string>("betaCutSource")),
+    fJetPileUpMVAValuesSrc(iConfig.getUntrackedParameter<edm::InputTag>("jetPileUpMVAValues")),
+    fJetPileUpIdFlagSrc(iConfig.getUntrackedParameter<edm::InputTag>("jetPileUpIdFlag")),
     fApplyVetoForDeadECALCells(iConfig.getUntrackedParameter<bool>("applyVetoForDeadECALCells")),
     fDeadECALCellsVetoDeltaR(iConfig.getUntrackedParameter<double>("deadECALCellsVetoDeltaR")),
     fAllCount(eventCounter.addSubCounter("Jet main","All events")),
     fDeadECALCellVetoCount(eventCounter.addSubCounter("Jet main","Dead ECAL cells veto")),
     fCleanCutCount(eventCounter.addSubCounter("Jet main","Jet cleaning")),
     fJetIdCount(eventCounter.addSubCounter("Jet main", "Jet ID")),
-    fBetaCutCount(eventCounter.addSubCounter("Jet main","beta cut")),
+    fJetPUIDCount(eventCounter.addSubCounter("Jet main","Jet PU ID")),
     fEMfractionCutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac ")),
     fEtaCutCount(eventCounter.addSubCounter("Jet main","Jet eta cut")),
     fPtCutCount(eventCounter.addSubCounter("Jet main","Jet pt cut")),
     fAllSubCount(eventCounter.addSubCounter("Jet selection", "all jets")),
     fEMfraction08CutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac < 0.8")),
     fEMfraction07CutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac < 0.7")),
-    fEventKilledByBetaCutCount(eventCounter.addSubCounter("Jet main","Event killed by beta cut")),
+    fEventKilledByJetPUIDCount(eventCounter.addSubCounter("Jet main","Event killed by jet PU ID")),
     fCleanCutSubCount(eventCounter.addSubCounter("Jet selection", "cleaning")),
     fneutralHadronEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "neutralHadronEnergyFractionCut")),
     fneutralEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "neutralEmEnergyFractionCut")),
@@ -92,22 +93,39 @@ namespace HPlus {
     fchargedEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "chargedEmEnergyFractionCut")),
     fJetIdSubCount(eventCounter.addSubCounter("Jet selection", "Jet ID")),
     fEMfractionCutSubCount(eventCounter.addSubCounter("Jet selection", "EMfraction")),
-    fBetaCutSubCount(eventCounter.addSubCounter("Jet selection", "Beta cut")),
+    fJetPUIDSubCount(eventCounter.addSubCounter("Jet selection", "Jet PU ID")),
     fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut")),
     fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut")),
     fJetToTauReferenceJetNotIdentifiedCount(eventCounter.addSubCounter("Jet selection", "jet->tau ref.jet not identified"))
   {
+    // Check input for jet PU ID
+    if (fJetPileUpMVAValuesSrc.label() == "")
+      throw cms::Exception("Config") << "JetSelection: Jet PU ID MVA values inputtag is empty! Check that it gets set automatically!";
+    if (fJetPileUpIdFlagSrc.label() == "")
+      throw cms::Exception("Config") << "JetSelection: Jet PU ID decision flags values inputtag is empty! Check that it gets set automatically!";
+    // Remaining jet PU ID options are checked at config creation level, now parse working point
+    std::string myPUIDWP = iConfig.getUntrackedParameter<std::string>("jetPileUpWorkingPoint");
+    if (myPUIDWP == "loose")
+      fJetPileUpWorkingPoint = PileupJetIdentifier::kLoose;
+    else if (myPUIDWP == "medium")
+      fJetPileUpWorkingPoint = PileupJetIdentifier::kMedium;
+    else if (myPUIDWP == "tight")
+      fJetPileUpWorkingPoint = PileupJetIdentifier::kTight;
+    else
+      throw cms::Exception("Config") << "JetSelection: Jet PU ID working point '" << myPUIDWP << "' is not valide! Check your config!";
+
+    // Create histograms
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("JetSelection");
 
-    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_pt", "identified jet_pt", 120, 0., 600.);
+    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt", "identified jet_pt", 120, 0., 600.);
     hPtCentral = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt_central", "identified jet_pt_central", 120, 0., 600.);
-    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_eta", "identified jet_eta", 100, -5., 5.);
-    hPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_phi", "identified jet_phi", 72, -3.1415926, 3.1415926);
-    hPtIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_pt_including_tau", "jet_pt_including_tau", 120, 0., 600.);
-    hEtaIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_eta_including_tau", "jet_eta_including_tau", 100, -5., 5.);
-    hPhiIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_phi_including_tau", "jet_phi_including_tau", 72, -3.1415926, 3.1415926);
-    hNumberOfSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 30, 0., 30.);
+    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_eta", "identified jet_eta", 100, -5., 5.);
+    hPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_phi", "identified jet_phi", 72, -3.1415926, 3.1415926);
+    hPtIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt_including_tau", "jet_pt_including_tau", 120, 0., 600.);
+    hEtaIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_eta_including_tau", "jet_eta_including_tau", 100, -5., 5.);
+    hPhiIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_phi_including_tau", "jet_phi_including_tau", 72, -3.1415926, 3.1415926);
+    hNumberOfSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 30, 0., 30.);
     hjetEMFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jetEMFraction", "jetEMFraction", 100, 0., 1.0);
     hjetChargedEMFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "chargedJetEMFraction", "chargedJetEMFraction", 100, 0., 1.0);
     hjetMaxEMFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jetMaxEMFraction", "jetMaxEMFraction", 100, 0., 1.0);
@@ -128,18 +146,7 @@ namespace HPlus {
     hMinEtaOfSelectedJetToGap = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "minEtaOfSelectedJetToGap", "minEtaOfSelectedJetToGap;abs(jet #eta - 1.5);Events", 60, 0, 3.0);
 
     // Histograms for PU analysis
-    hBetaGenuine = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "betaGenuine", "betaGenuine;#beta variable, PV jets;Events", 100, 0., 1.);
-    hBetaStarGenuine = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "betaStarGenuine", "betaStarGenuine;#beta* variable, PV jets;Events", 100, 0., 1.);
-    hMeanDRgenuine = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "meanDRGenuine", "meanDRGenuine;Mean #DeltaR, PV jets;Events", 100, 0., 4.);
-    hBetaFake = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "betaPU", "betaPU;#beta variable, PU jets;Events", 100, 0., 1.);
-    hBetaStarFake = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "betaStarPU", "betaStarPU;#beta* variable, PU jets;Events", 100, 0., 1.);
-    hMeanDRfake = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "meanDRPU", "meanDRPU;Mean #DeltaR, PU jets;Events", 100, 0., 4.);
-    hBetaVsPUgenuine = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "betaVsPUGenuine", "betaVSPUGenuine;#beta variable, PV jets;Number of vertices", 100, 0., 1., 50, 0., 50.);
-    hBetaStarVsPUgenuine = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "betaVsPUStarGenuine", "betaStarVsPUGenuine;#beta* variable, PV jets;Events", 100, 0., 1., 50, 0., 50.);
-    hMeanDRVsPUgenuine = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "meanDRVsPUGenuine", "meanDRVsPUGenuine;Mean #DeltaR, PV jets;Events", 100, 0., 4., 50, 0., 50.);
-    hBetaVsPUfake = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "betaVsPUFake", "betaVsPUFake;#beta variable, PU jets;Events", 100, 0., 1., 50, 0., 50.);
-    hBetaStarVsPUfake = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "betaStarVsPUFake", "betaStarVsPUFake;#beta* variable, PU jets;Events", 100, 0., 1., 50, 0., 50.);
-    hMeanDRVsPUfake = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "meanDRVsPUFake", "meanDRVsPUFake;Mean #DeltaR, PU jets;Events", 100, 0., 4., 50, 0., 50.);
+    hJetPUIDMvaResult = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_PUIDmva", "jet_PUIDmva;MVA value;N_{Events}", 100, -1.0, 1.0);
 
     // Histograms for excluded jets (i.e. matching in DeltaR to tau jet)
     TFileDirectory myExcludedJetsDir = myDir.mkdir("ExcludedJets");
@@ -186,8 +193,8 @@ namespace HPlus {
     hTowersAreaSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySelectedJetsDir, "jet_TowersArea", "jet_TowersArea", 100, 0., 10.);
     hJetChargeSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySelectedJetsDir, "jet_JECFactor", "jet_JECFactor", 10, -5., 5.);
     hPtDiffToGenJetSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySelectedJetsDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
-    hDeltaPtJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, mySelectedJetsDir, "deltaPtTauJet", "deltaPtTauJet ", 200, -100., 100.);
-    hDeltaRJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, mySelectedJetsDir, "deltaRTauJet", "deltaRTauJet ", 120, 0., 6.);
+    hDeltaPtJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySelectedJetsDir, "deltaPtTauJet", "deltaPtTauJet ", 200, -100., 100.);
+    hDeltaRJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySelectedJetsDir, "deltaRTauJet", "deltaRTauJet ", 120, 0., 6.);
 
     // MHT related
     TFileDirectory myMHTDir = myDir.mkdir("MHT");
@@ -245,12 +252,20 @@ namespace HPlus {
     edm::Handle<edm::View<pat::Jet> > hjets;
     iEvent.getByLabel(fSrc, hjets);
 
+    edm::Handle<edm::ValueMap<float> > myJetPUIDMVA;
+    if (fJetPileUpMVAValuesSrc.label() != "None")
+      iEvent.getByLabel(fJetPileUpMVAValuesSrc, myJetPUIDMVA);
+
+    edm::Handle<edm::ValueMap<int> > myJetPUIDFlag;
+    if (fJetPileUpMVAValuesSrc.label() != "None")
+      iEvent.getByLabel(fJetPileUpIdFlagSrc, myJetPUIDFlag);
+
     const edm::PtrVector<pat::Jet>& jets(hjets->ptrVector());
 
     size_t cleanPassed = 0;
     size_t jetIdPassed = 0;
-    size_t killedByBetaCut = 0;
-    size_t betaCutPassed = 0;
+    size_t killedByJetPUIDCut = 0;
+    size_t jetPUIDPassed = 0;
     size_t ptCutPassed = 0;
     size_t etaCutPassed = 0;
     double maxEMfraction = 0;
@@ -316,20 +331,25 @@ namespace HPlus {
       ++EMfractionCutPassed;
       increment(fEMfractionCutSubCount);
 
-      // against PU cut (beta or betaStar)
-      if (!passBetaCut(iJet, iEvent, nVertices)) {
-        // Count how many jets, that otherwise would have been selected, are killed by beta cut
-        if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut)
-          ++killedByBetaCut;
-        continue;
+      // Jet PU ID
+      if (fJetPileUpMVAValuesSrc.label() != "None") {
+        float myPUIDMVAValue = (*myJetPUIDMVA)[iJet];
+        int myPUIDFlag = (*myJetPUIDFlag)[iJet];
+        hJetPUIDMvaResult->Fill(myPUIDMVAValue);
+        if (!PileupJetIdentifier::passJetId(myPUIDFlag, fJetPileUpWorkingPoint)) {
+          // Count how many jets, that otherwise would have been selected, are killed by jet PU ID
+          if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut)
+            ++killedByJetPUIDCut;
+          continue;
+        }
       }
-      increment(fBetaCutSubCount);
-      ++betaCutPassed;
+      increment(fJetPUIDSubCount);
+      ++jetPUIDPassed;
       hPtIncludingTau->Fill(iJet->pt());
       hEtaIncludingTau->Fill(iJet->eta());
       hPhiIncludingTau->Fill(iJet->phi());
 
-      // Jet identification and beta cuts done, store jet to list of all jets
+      // Jet identification and jet PU ID cuts done, store jet to list of all jets
       output.fAllIdentifiedJets.push_back(iJet);
       if (iJet->pt() > fPtCut && (std::abs(iJet->eta()) < fEtaCut)) {
         output.fSelectedJetsIncludingTau.push_back(iJet);
@@ -402,8 +422,8 @@ namespace HPlus {
 
     output.fPassedEvent = fNumberOfJets.passedCut(output.fSelectedJets.size());
 
-    if (fNumberOfJets.passedCut(output.fSelectedJets.size()+killedByBetaCut)) {
-      increment(fEventKilledByBetaCutCount);
+    if (fNumberOfJets.passedCut(output.fSelectedJets.size()+killedByJetPUIDCut)) {
+      increment(fEventKilledByJetPUIDCount);
     }
 
     if (fNumberOfJets.passedCut(cleanPassed))
@@ -416,8 +436,8 @@ namespace HPlus {
     if (fNumberOfJets.passedCut(jetIdPassed))
       increment(fJetIdCount);
 
-    if (fNumberOfJets.passedCut(betaCutPassed))
-      increment(fBetaCutCount);
+    if (fNumberOfJets.passedCut(jetPUIDPassed))
+      increment(fJetPUIDCount);
 
     if(fNumberOfJets.passedCut(EMfractionCutPassed))
       increment(fEMfractionCutCount);
@@ -493,53 +513,6 @@ namespace HPlus {
 
     // Everything has been done now return
     return output;
-  }
-
-  bool JetSelection::passBetaCut(const edm::Ptr<pat::Jet>& jet, const edm::Event& iEvent, int nVertices) {
-    double myBeta = jet->userFloat("Beta");
-    //double myBetaMax = jet->userFloat("BetaMax");
-    double myBetaStar = jet->userFloat("BetaStar");
-    double myMeanDR = jet->userFloat("DRMean");
-
-    //bool myIsPVJetStatusByLdgTrack = (jet->userInt("LdgTrackBelongsToSelectedPV") == 1);
-    // Do MC matching of jet to a quark or gluon
-    //double minDeltaR = 99999;
-    bool myIsPVJetStatusByMCMatching = false;
-    if (!iEvent.isRealData()) {
-      edm::Handle <reco::GenParticleCollection> genParticles;
-      iEvent.getByLabel("genParticles", genParticles);
-      for (size_t i=0; i < genParticles->size(); ++i) {
-        const reco::Candidate & p = (*genParticles)[i];
-        if ((std::abs(p.pdgId()) >= 1 && std::abs(p.pdgId()) <= 5) || std::abs(p.pdgId()) == 21) {
-          // Particle is a quark (not a top quark) or a gluon
-          if (p.pt() > 15) {
-            // Quark or gluon momentum is at least 15 GeV
-            if (reco::deltaR(p, *jet) < 0.3) {
-              myIsPVJetStatusByMCMatching = true;
-            }
-          }
-        }
-      }
-    }
-    // Fill histograms after eta and pt cuts
-    if (std::abs(jet->eta()) < fEtaCut && jet->pt() > fPtCut) {
-      if (myIsPVJetStatusByMCMatching) {
-        hBetaGenuine->Fill(myBeta);
-        hBetaStarGenuine->Fill(myBetaStar);
-        hMeanDRgenuine->Fill(myMeanDR);
-        hBetaVsPUgenuine->Fill(myBeta, nVertices);
-        hBetaStarVsPUgenuine->Fill(myBetaStar, nVertices);
-        hMeanDRVsPUgenuine->Fill(myMeanDR, nVertices);
-      } else {
-        hBetaFake->Fill(myBeta);
-        hBetaStarFake->Fill(myBetaStar);
-        hMeanDRfake->Fill(myMeanDR);
-        hBetaVsPUfake->Fill(myBeta, nVertices);
-        hBetaStarVsPUfake->Fill(myBetaStar, nVertices);
-        hMeanDRVsPUfake->Fill(myMeanDR, nVertices);
-      }
-    }
-    return fBetaCut.passedCut(jet->userFloat(fBetaSrc));
   }
 
   void JetSelection::obtainReferenceJetToTau(const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::Candidate>& tau, JetSelection::Data& output) {

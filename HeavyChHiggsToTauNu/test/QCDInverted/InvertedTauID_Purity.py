@@ -84,6 +84,7 @@ def main():
         match = name_re.search(histo)
         if match:
             name = match.group("name")
+
         #legends["Purity%s"%i] = name
         #legends["Purity%s"%i] = "#Delta#phi cuts and cut against tt+jets"
         #legends["Purity%s"%i] = "#Delta#phi(jet1, MET) cut"
@@ -92,6 +93,14 @@ def main():
     plot.createFrame("purity", opts={"xmin": 40,"xmax": 300, "ymin": 0.5, "ymax": 1.1})
     plot.frame.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
     plot.frame.GetYaxis().SetTitle("QCD purity")
+
+
+#        legends["Purity%s"%i] = name
+
+#    plot.createFrame("purity", opts={"xmin": 40, "ymin": 0., "ymax": 1.2})
+#    plot.frame.GetXaxis().SetTitle("tau p_{T} (GeV/c)")
+#    plot.frame.GetYaxis().SetTitle("Purity")
+    plot.setEnergy(datasets.getEnergies())
 
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
@@ -118,6 +127,11 @@ def purityGraph(i,datasets,histo):
     denominator = invertedData.Clone()
     denominator.SetName("denominator")
 
+
+    numerator.Divide(denominator)
+    purityGraph = ROOT.TGraphAsymmErrors(numerator)
+
+    """
 
     purity = ROOT.TEfficiency(numerator,denominator)
     purity.SetStatisticOption(ROOT.TEfficiency.kFNormal)
@@ -166,11 +180,12 @@ def purityGraph(i,datasets,histo):
     weights = []
     weights.append(1)
 
-    defaults = {"drawStyle": "EP","legendStyle": "p"}
-
     purityGraph = ROOT.TEfficiency.Combine(collection,"",len(weights),array.array("d",weights))
+    """
     purityGraph.SetMarkerStyle(20+i)
     purityGraph.SetMarkerColor(2+i)
+
+    defaults = {"drawStyle": "EP","legendStyle": "p"}
     
     return histograms.Histo(purityGraph, "Purity%s"%i, **defaults)
     

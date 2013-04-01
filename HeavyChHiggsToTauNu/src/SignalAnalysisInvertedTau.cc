@@ -942,15 +942,12 @@ namespace HPlus {
     }
     */
 
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
 
-
-    /* 
- //------ Improved delta phi cut, a.k.a. QCD tail killer // FIXME: place of cut still to be determined
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
     if (qcdTailKillerData.passedEvent()) {
       increment(fQCDTailKillerCounter);
     }   
-    */
+
 
  // mt for inverted tau with b tagging , no deltaPhi cuts  
     hMTInvertedTauIdBtag->Fill(selectedTau->pt(), transverseMass);

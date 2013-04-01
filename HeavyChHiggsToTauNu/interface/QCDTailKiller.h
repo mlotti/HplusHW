@@ -81,7 +81,7 @@ namespace HPlus {
       WrappedTH2* hAfterAllCuts;
     };
 
-    QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string postfix="");
     ~QCDTailKiller();
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
@@ -91,7 +91,7 @@ namespace HPlus {
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau>& tau, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met);
     /// Number of jets to consider
-    const int fMaxEntries;
+    const uint32_t fMaxEntries;
     // Cut items for back to back (tau,MET) topology
     std::vector<CutItem> fBackToBackJetCut;
     // Cut items for collinear (tau,MET) topology
