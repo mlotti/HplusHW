@@ -38,8 +38,8 @@ namespace HPlus {
     // Create histograms
     TFileDirectory myDir = fs->mkdir("FakeTauIdentifier_"+label);
 
-    //    hTauMatchType = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TauMatchType", "TauMatchType", 13, 0, 13);
-    hTauMatchType = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TauMatchType", "TauMatchType", kkNumberOfSelectedTauMatchTypes, 0, kkNumberOfSelectedTauMatchTypes);
+    //    hTauMatchType = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauMatchType", "TauMatchType", 13, 0, 13);
+    hTauMatchType = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauMatchType", "TauMatchType", kkNumberOfSelectedTauMatchTypes, 0, kkNumberOfSelectedTauMatchTypes);
 
     if (hTauMatchType->isActive()) {
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkNoMC, "NoMatch");
@@ -58,7 +58,7 @@ namespace HPlus {
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkOneProngTauToTauAndTauOutsideAcceptance, "genuine 1-pr. hadr. #tau, #tau outside");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkJetToTauAndTauOutsideAcceptance, "jet#rightarrow#tau, #tau outside");
     }
-    hTauOrigin = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TauOrigin", "TauOrigin", 7, 0, 7);
+    hTauOrigin = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauOrigin", "TauOrigin", 7, 0, 7);
     if (hTauOrigin->isActive()) {
       hTauOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
       hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");
@@ -68,7 +68,7 @@ namespace HPlus {
       hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tau#tau");
       hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromHplusTau, "from H+#rightarrow#tau");
     }
-    hMuOrigin = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MuOrigin", "MuOrigin", 7, 0, 7);
+    hMuOrigin = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuOrigin", "MuOrigin", 7, 0, 7);
     if (hMuOrigin->isActive()) {
       hMuOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
       hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");
@@ -78,7 +78,7 @@ namespace HPlus {
       hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tautau");
       hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromHplusTau, "from H+#rightarrow#tau");
     }
-    hElectronOrigin = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "ElectronOrigin", "ElectronOrigin", 7, 0, 7);
+    hElectronOrigin = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronOrigin", "ElectronOrigin", 7, 0, 7);
     if (hElectronOrigin->isActive()) {
       hElectronOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
       hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");

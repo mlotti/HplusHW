@@ -706,7 +706,7 @@ namespace HPlus {
     //    if (!tauData.selectedTauPassesRtau()) return false;
     
     
-    std::string myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr";
+    std::string myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr3Hits";
     
     /*    edm::PtrVector<pat::Tau> myBestTauCandidate;    
     if (myOneProngRtauPassedTaus.size())
@@ -738,7 +738,7 @@ namespace HPlus {
       
       if ( (*iTau)->tauID(myTauIsolation) < 0.5 ) continue;
 	//	std::cout <<"PASSES TAU DISCR" << std::endl;
-      hTauDiscriminator->Fill((*iTau)->tauID("byRawCombinedIsolationDeltaBetaCorr"));
+      hTauDiscriminator->Fill((*iTau)->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits"));
       increment(fTausExistCounter);
   
 	

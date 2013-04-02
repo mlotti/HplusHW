@@ -295,10 +295,10 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
         elif ndigis <= -1:
             format = ".%df" % (abs(ndigis)+1)
             format = "%"+format
-        lumiStr += format % (lumi/1000)
+        lumiStr += format % (lumiInFb)
 
     lumiStr += " "+unit
-    
+
     addText(x, y, lumiStr, textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))

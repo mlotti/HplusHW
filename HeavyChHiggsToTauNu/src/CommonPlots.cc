@@ -15,7 +15,7 @@ namespace HPlus {
     TFileDirectory myDir = dir.mkdir(label.c_str());
     // Create histograms
     hNVertices = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "nVertices", "Number of vertices;N_{vertices};N_{events}", 60, 0, 60);
-    hFakeTauStatus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tau_fakeStatus", "tau_fakeStatus;N_{events}", 11, 0, 11);
+    hFakeTauStatus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "tau_fakeStatus", "tau_fakeStatus;N_{events}", 11, 0, 11);
     if (hFakeTauStatus->isActive()) {
       // items labeled 'main count' sum up to Nevents (useful if you want to know the fractions)
       hFakeTauStatus->GetXaxis()->SetBinLabel(1, "All events"); // control to give Nevents
