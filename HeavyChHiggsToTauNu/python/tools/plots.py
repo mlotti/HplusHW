@@ -1358,6 +1358,8 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
         if normalizeToLumi == None:
             self.histoMgr.normalizeMCByLuminosity()
         else:
+            if datasetMgr.hasDataset("Data"):
+                raise Exception("Got 'normalizeToLumi' while there is 'Data' dataset. You should use the 'Data' luminosity instead (i.e. do not give 'normalizeToLumi')")
             self.histoMgr.normalizeMCToLuminosity(normalizeToLumi)
 
         self._setLegendStyles()
