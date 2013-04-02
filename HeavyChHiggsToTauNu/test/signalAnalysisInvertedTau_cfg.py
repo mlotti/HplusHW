@@ -6,8 +6,8 @@ dataVersion="53XmcS10"
 #dataVersion="53Xdata24Aug2012" # Now we have multiple dataVersions for data too, see HChDataVersion for them
 
 dataEras = [
-#    "Run2012ABCD", # This is the one for pickEvents, and for counter printout in CMSSW job
-#    "Run2012ABC",
+    "Run2012ABCD", # This is the one for pickEvents, and for counter printout in CMSSW job
+    "Run2012ABC",
     "Run2012AB",
 #    "Run2012A",
 #    "Run2012B",
