@@ -45,10 +45,11 @@ jetFunctions = cms.PSet(
 tauFunctions = cms.PSet()
 _tauIds = [
     "decayModeFinding",
-    "againstMuonLoose", "againstMuonTight",
-    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA",
-    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
+    "againstMuonLoose", "againstMuonTight", "againstMuonTight2",
+    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA", "againstElectronTightMVA3", "againstElectronVTightMVA3",
+#    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
     "byLooseCombinedIsolationDeltaBetaCorr", "byMediumCombinedIsolationDeltaBetaCorr", "byTightCombinedIsolationDeltaBetaCorr",
+    "byLooseCombinedIsolationDeltaBetaCorr3Hits", "byMediumCombinedIsolationDeltaBetaCorr3Hits", "byTightCombinedIsolationDeltaBetaCorr3Hits",
     ]
 for name in _tauIds:
     setattr(tauFunctions, name, cms.string("tauID('%s')"%name))
