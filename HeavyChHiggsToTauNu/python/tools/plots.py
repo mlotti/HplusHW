@@ -1697,6 +1697,8 @@ class PlotDrawer:
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
+    # \param rebin               Default rebin value (passed to Th1::Rebin; if list, passed as double array)
+    # \param rebinToWidthX       Default width of X bins to rebin to
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \param customizeBeforeDraw Function to customize the plot before drawing it
     # \param customizeBeforeSave Function to customize the plot before saving it
@@ -1714,6 +1716,8 @@ class PlotDrawer:
                  opts={},
                  optsLog={},
                  opts2={},
+                 rebin=None,
+                 rebinToWidthX=None,
                  customizeBeforeFrame=None,
                  customizeBeforeDraw=None,
                  customizeBeforeSave=None,
@@ -1734,6 +1738,8 @@ class PlotDrawer:
         self.optsLogDefault.update(optsLog)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
+        self.rebinDefault = rebin
+        self.rebinToWidthXDefault = rebinToWidthX
         self.customizeBeforeFrameDefault = customizeBeforeFrame
         self.customizeBeforeDrawDefault = customizeBeforeDraw
         self.customizeBeforeSaveDefault = customizeBeforeSave
@@ -1786,41 +1792,52 @@ class PlotDrawer:
     #
     # \b Note: Almost no error checking is done, except what is done in ROOT.
     def rebin(self, p, name, **kwargs):
-        if "rebin" in kwargs and "rebinToWidthX" in kwargs:
-            raise Exception("Only one of 'rebin' and 'rebinToWidthX' may be given as an argument")
+        rebin = kwargs.get("rebin", self.rebinDefault)
+        rebinToWidthX = kwargs.get("rebinToWidthX", self.rebinToWidthXDefault)
+
+        # Use the one given as argument if both are non-None
+        if rebin is not None and rebinToWidthX is not None:
+            if "rebin" in kwargs:
+                rebinToWidthX = None
+            if "rebinToWidthX" in kwargs:
+                rebin = None
+
+            if rebin is not None and rebinToWidthX is not None:
+                raise Exception("Only one of 'rebin' and 'rebinToWidthX' may be given as an argument.")
+
+            if rebin is not None:
+                print "Plot '%s', argument 'rebin=%s' overrides the default 'rebinToWidthX=%s'" % (name, str(rebin), str(self.rebinToWidthXDefault))
+            if rebinToWidthX is not None:
+                print "Plot '%s', argument 'rebinToWidthX=%s' overrides the default 'rebin=%s'" % (name, str(rebinToWidthX), str(self.rebinDefault))
+
 
         rebinFunction = None
-        if "rebin" in kwargs:
-            reb = kwargs["rebin"]
-            if isinstance(reb, list):
-                if len(reb) < 2:
+        if rebin is not None:
+            if isinstance(rebin, list):
+                if len(rebin) < 2:
                     raise Exception("If 'rebin' is a list, it must have at least two elements")
-                n = len(reb)-1
+                n = len(rebin)-1
                 def rebinList(h):
                     th1 = h.getRootHisto()
-                    rebinned = th1.Rebin(n, th1.GetName(), array.array("d", reb))
+                    rebinned = th1.Rebin(n, th1.GetName(), array.array("d", rebin))
                     h.setRootHisto(rebinned)
                 rebinFunction = rebinList
-            elif reb > 1:
-                rebinFunction = lambda h: h.getRootHisto().Rebin(reb)
-        elif "rebinToWidthX" in kwargs:
-            rebinWidth = kwargs["rebinToWidthX"]
-
+            elif rebin > 1:
+                rebinFunction = lambda h: h.getRootHisto().Rebin(rebin)
+        elif rebinToWidthX is not None:
             # In general (also if the original histogram has variable
             # bin widths) explicitly specifying the bin low edges is
             # the only way which works
             def rebinToWidth(h):
-                if(rebinWidth==-1):
-                    return
                 th1 = h.getRootHisto()
                 xmin = histograms.th1Xmin(th1)
                 xmax = histograms.th1Xmax(th1)
-                nbins = (xmax-xmin)/rebinWidth
+                nbins = (xmax-xmin)/rebinToWidthX
                 intbins = int(nbins+0.5)
                 # Check that the number of bins is integer
                 diff = abs(intbins - nbins)
                 if diff > 1e-3:
-                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer (diff is %g)" % (h.getName(), name, rebinWidth, xmin, xmax, nbins, diff)
+                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer (diff is %g)" % (h.getName(), name, rebinToWidthX, xmin, xmax, nbins, diff)
                     return
 
                 nbins = intbins
