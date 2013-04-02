@@ -1568,6 +1568,11 @@ class Dataset:
         else:
             return self._analysisDirectoryName + name
 
+    ## Get the ParameterSet stored in the ROOT file
+    def getParameterSet(self):
+        (objs, realNames) = self.getRootObjects("parameterSet")
+        return objs[0].GetTitle()        
+
     ## Get ROOT histogram
     #
     # \param name    Path of the ROOT histogram relative to the analysis
