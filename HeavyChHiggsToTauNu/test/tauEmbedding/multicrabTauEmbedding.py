@@ -249,7 +249,7 @@ def createTasks(opts, step, version=None):
     multicrab.extendDatasets(workflow, datasets)
 
     if scheduler == "arc":
-        multicrab.appendLineAll("GRID.maxtarballsize = 30")
+        multicrab.appendLineAll("GRID.maxtarballsize = 50")
 #    if not step in ["skim", "analysisTau"]:
 #        multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
     if step in ["ewkBackgroundCoverageAnalysis"]:
@@ -272,7 +272,10 @@ def createTasks(opts, step, version=None):
         def addCopyConfig(dataset):
             dataset.appendLine("USER.additional_input_files = copy_cfg.py")
             dataset.appendCopyFile("../copy_cfg.py")
-        multicrab.forEachDataset(addCopyConfig)            
+        multicrab.forEachDataset(addCopyConfig)
+
+    if step == "embedding":
+        multicrab.addCommonLine("GRID.max_rss = 3000")
 
     # Create multicrab task(s)
     prefix = "multicrab_"+step+dirName
