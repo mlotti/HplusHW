@@ -31,10 +31,19 @@ tauLegEfficiency_noscalefactors = cms.untracked.PSet(
             ),
         ),
         # Run2012C
-        runs_198022_202585 = cms.PSet(
+        runs_198022_203742 = cms.PSet(
             firstRun = cms.uint32(198022),
-            lastRun = cms.uint32(202585),
-            luminosity = cms.double(6610), # 1/pb
+            lastRun = cms.uint32(203742),
+            luminosity = cms.double(6892), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        # Run2012D
+        runs_202807_208686 = cms.PSet(
+            firstRun = cms.uint32(202807),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(7274), # 1/pb
             bins = cms.VPSet(
                 triggerBin(20.0, 1.0, 0.0),
             ),
@@ -53,6 +62,15 @@ tauLegEfficiency_noscalefactors = cms.untracked.PSet(
             firstRun = cms.uint32(190456),
             lastRun = cms.uint32(202585),
             luminosity = cms.double(11736), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        # Run2012A+B+C+D
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
             bins = cms.VPSet(
                 triggerBin(20.0, 1.0, 0.0),
             ),
