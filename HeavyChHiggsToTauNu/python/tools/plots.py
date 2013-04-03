@@ -1689,6 +1689,7 @@ class PlotDrawer:
     ## Constructor, set the defaults here
     #
     # \param ylabel              Default Y axis title
+    # \param zlabel              Default Z axis title (None for not to show)
     # \param log                 Should Y axis be in log scale by default?
     # \param ratio               Should the ratio pad be drawn?
     # \param ratioYlabel         The Y axis title for the ratio pad (None for default)
@@ -1711,6 +1712,7 @@ class PlotDrawer:
     # \param cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis
     def __init__(self,
                  ylabel="Occurrances / %.0f",
+                 zlabel=None,
                  log=False,
                  ratio=False,
                  ratioYlabel=None,
@@ -1733,6 +1735,7 @@ class PlotDrawer:
                  cmsText=None,
                  ):
         self.ylabelDefault = ylabel
+        self.zlabelDefault = zlabel
         self.logDefault = log
         self.ratioDefault = ratio
         self.ratioYlabelDefault = ratioYlabel
@@ -2000,6 +2003,7 @@ class PlotDrawer:
     #
     # <b>Keyword arguments</b>
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
+    # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
     # \lu\a customizeBeforeDraw Function to customize the plot object before drawing the plot
     # \lu\a customizeBeforeSave Function to customize the plot object before saving the plot
@@ -2021,6 +2025,14 @@ class PlotDrawer:
             customize(p)
         
         p.draw()
+
+        # Updates the possible Z axis label styles
+        # Does nothing if the Z axis does not exist
+        zlabel = kwargs.get("zlabel", self.zlabelDefault)
+        paletteAxis = histograms.updatePaletteStyle(p.histoMgr.getHistos()[0].getRootHisto())
+        if zlabel is not None and paletteAxis != None:
+            paletteAxis.GetAxis().SetTitle(zlabel)
+
         cmsText = kwargs.get("cmsText", self.cmsTextDefault)
         histograms.addCmsPreliminaryText(text=cmsText)
         p.addEnergyText()

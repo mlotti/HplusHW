@@ -512,6 +512,8 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
 
 ## Update the style of palette Z axis according to ROOT.gStyle.
 #
+# \return TPalatteAxis object, or None if it doesn't exist
+#
 # This function is needed because the style is not propageted to the Z
 # axis automatically. It is recommended to call this every time
 # something is drawn with an option "Z"
@@ -519,11 +521,19 @@ def updatePaletteStyle(histo):
     ROOT.gPad.Update()
     paletteAxis = histo.GetListOfFunctions().FindObject("palette")
     if paletteAxis == None:
-        return
-    paletteAxis.SetLabelColor(ROOT.gStyle.GetLabelColor())
-    paletteAxis.SetLabelFont(ROOT.gStyle.GetLabelFont())
-    paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset())
-    paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize())
+        return None
+    paletteAxis.SetLabelColor(ROOT.gStyle.GetLabelColor("Z"))
+    paletteAxis.SetLabelFont(ROOT.gStyle.GetLabelFont("Z"))
+    paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset("Z"))
+    paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize("Z"))
+
+    axis = paletteAxis.GetAxis()
+    axis.SetTitleColor(ROOT.gStyle.GetTitleColor("Z"))
+    axis.SetTitleFont(ROOT.gStyle.GetTitleFont("Z"))
+    axis.SetTitleOffset(ROOT.gStyle.GetTitleOffset("Z"))
+    axis.SetTitleSize(ROOT.gStyle.GetTitleSize("Z"))
+
+    return paletteAxis
 
 ## Sum TH1 histograms
 #
