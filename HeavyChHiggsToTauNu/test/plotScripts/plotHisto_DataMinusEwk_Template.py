@@ -15,7 +15,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
-from HistoHelper import *
+from HistoHelperNew import *
 
 ######################################################################
 ### Define options and declarations
@@ -64,10 +64,11 @@ yMinPurity     = 0.1 #0.9 #0.5
 yMaxPurity     = 1.005 #1.005
 MyLumi         = 2.3*1000 #(pb)
 myAnalysis     = "signalAnalysisLight"
+pSetToPrint    = "TTToHplusBHminusB_M120_Fall11"
 #myDataEra      = "Run2011A"
 #myDataEra      = "Run2011B" 
 myDataEra      = "Run2011AB"
-multicrabPath  = ["/Users/attikis/my_work/cms/lxplus/FullHplusMass_FromStefan_130327_142054/"]
+multicrabPath  = "/Users/attikis/my_work/cms/lxplus/FullHplusMass_FromStefan_130327_142054/"
 ROOT.gROOT.SetBatch( getBool("bBatchMode") )
 
 ######################################################################
@@ -78,21 +79,18 @@ def main():
     ### Get the desired datasets 
     datasets = getDatasets(multicrabPath, myDataEra)
 
-    ### Get the histogram names, xLabels, yLabels and binWidths. All three are connected with unique histogram name-key.
-    histoDict, xLabelDict, yLabelDict, binWidthXDict = GetDictionaries()
-
-    ### Plot all histograms defined in the histoDict found in the file HistoHelper.py
-    doPlots(datasets, histoDict, xLabelDict, yLabelDict, binWidthXDict, SaveExtension="")
+    ### Plot all histograms defined in the HistoTemplateList found in the file HistoHelper.py
+    doPlots(datasets, HistoTemplateList, SaveExtension="")
 
     return
 
 ######################################################################
-def doPlots(datasets, histoDict, xLabelDict, yLabelDict, binWidthXDict, SaveExtension):
+def doPlots(datasets, HistoTemplateList, SaveExtension):
     '''
-    def doPlots(datasets, histoDict, xLabelDict, yLabelDict, binWidthXDict, SaveExtension):
+    def doPlots(datasets, HistoTemplateList, SaveExtension):
     '''
 
-    doTH1Plots(datasets, histoDict, xLabelDict, yLabelDict, binWidthXDict, SaveExtension="TH1" + SaveExtension)
+    doTH1Plots(datasets, HistoTemplateList, SaveExtension="TH1" + SaveExtension)
 
     return
 
@@ -104,11 +102,13 @@ def getDatasets(multicrabPath, myDataEra):
 
     ### Get the ROOT files for all datasets, merge datasets and reorder them
     print "*** Obtaining datasets from: %s" % (multicrabPath)
-    datasets = dataset.getDatasetsFromMulticrabDirs(multicrabPath, dataEra=myDataEra)
+    datasets = dataset.getDatasetsFromMulticrabCfg(directory=multicrabPath, dataEra=myDataEra)
+    # print "*** Available datasets: %s" % (datasets.getAllDatasetNames())
 
     ### Print PSets used in ROOT-file generation
-    printPSet( getBool("bPrintPSet"), folderName=myAnalysis+myDataEra)
-    
+    if getBool("bPrintPSet"):
+        print datasets.getDataset(pSetToPrint).getParameterSet()
+        
     ### Take care of PU weighting, luminosity, signal merging etc... of the datatasets
     manageDatasets(datasets)
 
@@ -192,34 +192,23 @@ def createTH1Plot(datasets, name, **kwargs):
     args = {}
     args.update(kwargs)
     
-    ### Proceed differently for MC-only plots and Data-MC plots
+    ### Proceed differently for Stacking and No-Stacking of plots
     if getBool("bRemoveData"):
-        if not ("normalizeToOne" in args and args["normalizeToOne"]):
-            args["normalizeToLumi"] = MyLumi
+        args["normalizeToLumi"] = MyLumi
+    p = plots.DataMCPlot(datasets, name, **args)
+    p.setDefaultStyles()
 
-        p = plots.MCPlot(datasets, name, **args)
-        if getBool("bStackHistos"):
-            p.setDefaultStyles()
-        else:
-            p.setDefaultStyles()
-            p.histoMgr.setHistoDrawStyleAll("P")
-            p.histoMgr.setHistoLegendStyleAll("P")
-    else:
-        p = plots.DataMCPlot(datasets, name, **kwargs)
-        if getBool("bStackHistos"):
-            p.setDefaultStyles()
-        else:
-            p.setDefaultStyles()
-            p.histoMgr.setHistoDrawStyleAll("P")
-            p.histoMgr.setHistoLegendStyleAll("P")
+    if not getBool("bStackHistos"):
+        p.histoMgr.setHistoDrawStyleAll("P")
+        p.histoMgr.setHistoLegendStyleAll("P")
     
     return p
 
 ######################################################################
-def doTH1Plots(datasets, histoDict, xLabelDict, yLabelDict, binWidthXDict, SaveExtension):
+def doTH1Plots(datasets, HistoTemplateList, SaveExtension):
     ''' 
-    def doTH1Plots(datasets, histoDict, xLabelDict, yLabelDict, binWidthXDict, SaveExtension):
-    Loops over all dictionaries defined in HistoHelper.py and customises each plot accordingly. 
+    def doTH1Plots(datasets, HistoTemplateList, SaveExtension):
+    Loops over all histograms defined in HistoHelper.py and customises each plot accordingly. 
     The global boolean options are also taken care of including x- and y- min, max, ratio, logY, etc..
     '''
     
@@ -228,45 +217,46 @@ def doTH1Plots(datasets, histoDict, xLabelDict, yLabelDict, binWidthXDict, SaveE
     else:
         drawPlot = plots.PlotDrawer(stackMCHistograms=getBool("bStackHistos"), addMCUncertainty=getBool("bAddMCUncertainty"), log=getBool("bLogY"), ratio=getBool("bRatio"), addLuminosityText=getBool("bAddLumiText"), opts={"ymaxfactor": yMaxFactor}, opts2={"ymin": yMinRatio, "ymax": yMaxRatio}, optsLog={"ymaxfactor": yMaxFactorLog})
     
-    ### Loop over all hName and expressions in the histogram dictionary "histoDict". Create & Draw plot
-    counter=0        
-    for key in histoDict:
-        if "_Vs_" in key:
-            continue
-        hName = key
-        histo = histoDict[key]
-        fileName = "%s_%s" % (hName, SaveExtension)
-        xLabel = xLabelDict[hName]
-        yLabel = yLabelDict[hName]
-        iBinWidth = binWidthXDict[hName]
 
-        ### Go ahead and draw the plot
-        histograms.createLegend.setDefaults(x1=xLegMin, x2= xLegMax, y1 = yLegMin, y2=yLegMax)
-        p = createTH1Plot(datasets, histo, normalizeToOne = getBool("bNormalizeToOne"))
+    ### Go ahead and draw the plot
+    histograms.createLegend.setDefaults(x1=xLegMin, x2= xLegMax, y1 = yLegMin, y2=yLegMax)
+
+    ### Loop over all hName and expressions in the histogram list. Create & Draw plot
+    counter=0        
+    for h in HistoTemplateList:
+        hName     = h.name
+        hPath     = h.path
+        fileName  = "%s_%s" % (hName, SaveExtension)
+        xLabel    = h.xlabel
+        yLabel    = h.ylabel
+        iBinWidth = h.binWidthX
+        if "_Vs_" in hName:
+            continue
+
+        p = createTH1Plot(datasets, hPath, normalizeToOne = getBool("bNormalizeToOne"))
         if not getBool("bStackHistos"):
             drawPlot(p, fileName, rebinToWidthX=iBinWidth)
         else:
             drawPlot(p, fileName + "_Stacked", xlabel=xLabel, ylabel=yLabel, rebinToWidthX=iBinWidth)
 
-        ### Do Data plots with QCD=Data-EwkMc. Only executed if certain (boolean) conditions are met.
-        if getBool("bDataMinusEwk") and not getBool("bRemoveData"):
+    ### Do Data plots with QCD=Data-EwkMc. Only executed if certain (boolean) conditions are met.
+    if getBool("bDataMinusEwk") and not getBool("bRemoveData"):
 
-            if getBool("bCustomRange"):
-                drawPlot2 = plots.PlotDrawer(stackMCHistograms=getBool("bStackHistos"), addMCUncertainty=False, log=getBool("bLogY"), ratio=False, addLuminosityText=getBool("bAddLumiText"), ratioYlabel="Ratio", opts={"ymin": yMin, "ymax": yMax}, optsLog={"ymin": yMinLog, "ymax": yMaxLog})
-            else:
-                drawPlot2 = plots.PlotDrawer(stackMCHistograms=getBool("bStackHistos"), addMCUncertainty=False, log=getBool("bLogY"), ratio=False, addLuminosityText=getBool("bAddLumiText"), opts={"ymaxfactor": yMaxFactor}, optsLog={"ymaxfactor": yMaxFactorLog})
-
-
-        doDataMinusEWk(p, drawPlot2, datasets, histo, hName, xLabel, yLabel, iBinWidth, SaveExtension, hType={"TH1": True})
+        if getBool("bCustomRange"):
+            drawPlot2 = plots.PlotDrawer(stackMCHistograms=getBool("bStackHistos"), addMCUncertainty=False, log=getBool("bLogY"), ratio=False, addLuminosityText=getBool("bAddLumiText"), ratioYlabel="Ratio", opts={"ymin": yMin, "ymax": yMax}, optsLog={"ymin": yMinLog, "ymax": yMaxLog})
+        else:
+            drawPlot2 = plots.PlotDrawer(stackMCHistograms=getBool("bStackHistos"), addMCUncertainty=False, log=getBool("bLogY"), ratio=False, addLuminosityText=getBool("bAddLumiText"), opts={"ymaxfactor": yMaxFactor}, optsLog={"ymaxfactor": yMaxFactorLog})
+            
+        doDataMinusEwk(p, drawPlot2, datasets, hPath, hName, xLabel, yLabel, iBinWidth, SaveExtension, hType={"TH1": True})
 
     return
 
 ######################################################################
-def doDataMinusEWk(p, drawPlot, datasets, histo, hName, xLabel, yLabel, binWidth, SaveExtension, **kwargs):
+def doDataMinusEwk(p, drawPlot, datasets, hPath, hName, xLabel, yLabel, binWidth, SaveExtension, **kwargs):
     '''
-    def doDataMinusEWk(p, drawPlot, datasets, histo, hName, xLabel, yLabel, SaveExtension):
+    def doDataMinusEwk(p, drawPlot, datasets, hPath, hName, xLabel, yLabel, SaveExtension):
     For each histogram plotted with doPlots() an identical one with QCD=Data-Ewk MC is also plotted using this method.
-    Loops over all dictionaries defined in HistoHelper.py and customises each plot accordingly. 
+    Loops over all histograms defined in HistoHelper.py and customises each plot accordingly. 
     The global boolean options are also taken care of including x- and y- min, max, ratio, logY, etc..
     '''
 
@@ -283,9 +273,9 @@ def doDataMinusEWk(p, drawPlot, datasets, histo, hName, xLabel, yLabel, binWidth
         return
 
     if "TH1" in hType:
-        p2 = createTH1Plot(datasets, histo, normalizeToOne = False)
+        p2 = createTH1Plot(datasets, hPath, normalizeToOne = False)
     else:
-        p2 = createTH2Plot(datasets, histo, normalizeToOne = False)
+        p2 = createTH2Plot(datasets, hPath, normalizeToOne = False)
 
     hDataClone = p.histoMgr.getHisto("Data").getRootHisto().Clone("hData_Clone")
     if (p.histoMgr.getHisto("Data").getRootHisto()) == None:
@@ -298,10 +288,10 @@ def doDataMinusEWk(p, drawPlot, datasets, histo, hName, xLabel, yLabel, binWidth
     for h in p.histoMgr.getHistos():
         htmp = h.getRootHisto()
         if("StackedMC" in htmp.GetName()):
-            hStackedMC = p.histoMgr.getHisto("StackedMC").getRootHisto().Clone("hStackedMC_Clone")
+            hStackedMC = htmp.Clone("hStackedMC_Clone")
             for htmp in hStackedMC.GetHists():
                 #print "***1) histo = ", (htmp.GetName())
-                if( "Data" in htmp.GetName() or "TTToHplus" in htmp.GetName() or "sum_errors" in htmp.GetName() ):
+                if (htmp.GetName() in ["Data", "TTToHplus", "sum_errors"]):
                     continue
                 elif( "QCD" in htmp.GetName() ):
                     qcd = htmp
