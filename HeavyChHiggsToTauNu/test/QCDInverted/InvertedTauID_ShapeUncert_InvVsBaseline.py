@@ -27,7 +27,7 @@ from InvertedTauID import *
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2012ABC"
+dataEra = "Run2012ABCD"
 
 searchMode = "Light"
 #searchMode = "Heavy"
@@ -93,8 +93,8 @@ def main():
     metInver = plots.DataMCPlot(datasets, "Inverted/MET_InvertedTauIdJets") 
 
     # Rebin before subtracting
-    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
+    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
     metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MET_InvertedTauIdJes")
     metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MET_InvertedTauIdJets") 
