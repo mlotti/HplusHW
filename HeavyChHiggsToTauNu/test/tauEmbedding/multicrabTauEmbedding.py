@@ -67,7 +67,8 @@ config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,
           "EWKMatching":          {"workflow": "tauembedding_analysis_%s",               "config": "../EWKMatching_cfg.py"},
           "muonAnalysis":         {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "muonAnalysisFromSkim_cfg.py"},
           "caloMetEfficiency":    {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "caloMetEfficiency_cfg.py"},
-          "ewkBackgroundCoverageAnalysis":{"workflow": "analysis_v44_4",                         "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
+          "ewkBackgroundCoverageAnalysis":    {"workflow": "analysis_v44_4",             "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
+          "ewkBackgroundCoverageAnalysisAod": {"workflow": "embeddingAodAnalysis_44X",   "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
           }
 
 
@@ -174,7 +175,7 @@ def main():
         versions = defaultVersions
 
     tmp = "Processing step %s" % step
-    if step in ["skim", "embedding", "analysis", "signalAnalysis","EWKMatching", "ewkBackgroundCoverageAnalysis"]:
+    if step in ["skim", "embedding", "analysis", "signalAnalysis","EWKMatching", "ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
         inputOutput = "input"
         if step in ["skim", "embedding"]:
             inputOutput = "output"
@@ -231,7 +232,7 @@ def createTasks(opts, step, version=None):
     datasets = []
     if step in ["analysisTau", "signalAnalysisGenTau"]:
         datasets.extend(datasetsMCnoQCD)
-    elif step in ["ewkBackgroundCoverageAnalysis"]:
+    elif step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
         datasets.extend(datasetsMCTTWJets)
     else:
     #    datasets.extend(datasetsData2010)
@@ -252,7 +253,7 @@ def createTasks(opts, step, version=None):
         multicrab.appendLineAll("GRID.maxtarballsize = 50")
 #    if not step in ["skim", "analysisTau"]:
 #        multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
-    if step in ["ewkBackgroundCoverageAnalysis"]:
+    if step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
         multicrab.addCommonLine("CMSSW.output_file = histograms.root")
 
     # Let's do the naming like this until we get some answer from crab people
