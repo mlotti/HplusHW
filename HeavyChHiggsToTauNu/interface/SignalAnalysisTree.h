@@ -101,6 +101,13 @@ namespace HPlus {
     void setMHT(const XYZTLorentzVector& MHT) { fMHT = MHT; }
     void setMHTAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
     void setMHTSelJets(const edm::PtrVector<pat::Jet>& jets);
+    // Full H+ mass
+    void setHplusMassDiscriminant(double hplusMassDiscriminant) { fHplusMassDiscriminant = hplusMassDiscriminant; }
+    void setHplusMassHiggsMass(double higgsMassSolution) { fHplusMassSolution = higgsMassSolution; }
+    void setHplusMassTopMass(double hplusMassTopMassSolution) { fHplusMassTopMassSolution = hplusMassTopMassSolution; }
+    void setHplusMassSelectedNeutrinoPzSolution(double hplusMassSelectedNeutrinoPzSolution) { fHplusMassSelectedNeutrinoPzSolution = hplusMassSelectedNeutrinoPzSolution; }
+    void setHplusMassNeutrinoPtSolution(double hplusMassSelectedNeutrinoPtSolution) { fHplusMassSelectedNeutrinoPtSolution =  hplusMassSelectedNeutrinoPtSolution; }
+    void setHplusMassMCNeutrinoPz(double hplusMassMCNeutrinoPz) {  fHplusMassMCNeutrinoPz = hplusMassMCNeutrinoPz; }
 
     void fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau,
               const edm::PtrVector<pat::Jet>& jets);
@@ -272,6 +279,14 @@ namespace HPlus {
 
     // Gen level stuff
     XYZTLorentzVector fGenMet;
+
+    // Full H+ mass
+    double fHplusMassDiscriminant;
+    double fHplusMassSolution;
+    double fHplusMassTopMassSolution;
+    double fHplusMassSelectedNeutrinoPzSolution;
+    double fHplusMassSelectedNeutrinoPtSolution;
+    double fHplusMassMCNeutrinoPz;
 
     // Tau embedding stuff
     std::auto_ptr<TreeMuonBranches> fTauEmbeddingMuon;
