@@ -100,6 +100,10 @@ def purityGraph(i,datasets,histo):
     denominator = invertedData.Clone()
     denominator.SetName("denominator")
 
+    numerator.Divide(denominator)
+    purityGraph = ROOT.TGraphAsymmErrors(numerator)
+
+    """
     purity = ROOT.TEfficiency(numerator,denominator)
     purity.SetStatisticOption(ROOT.TEfficiency.kFNormal)
 
@@ -109,11 +113,12 @@ def purityGraph(i,datasets,histo):
     weights = []
     weights.append(1)
 
-    defaults = {"drawStyle": "EP","legendStyle": "p"}
-
     purityGraph = ROOT.TEfficiency.Combine(collection,"",len(weights),array.array("d",weights))
+    """
     purityGraph.SetMarkerStyle(20+i)
     purityGraph.SetMarkerColor(2+i)
+
+    defaults = {"drawStyle": "EP","legendStyle": "p"}
     
     return histograms.Histo(purityGraph, "Purity%s"%i, **defaults)
     

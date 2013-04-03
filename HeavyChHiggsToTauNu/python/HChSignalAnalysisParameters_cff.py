@@ -474,15 +474,18 @@ tree = cms.untracked.PSet(
         "byTightCombinedIsolationDeltaBetaCorr",
         "byMediumCombinedIsolationDeltaBetaCorr",
         "byLooseCombinedIsolationDeltaBetaCorr",
-        #"byTightIsolation",
-        #"byMediumIsolation",
-        #"byLooseIsolation",
+        "byTightCombinedIsolationDeltaBetaCorr3Hits",
+        "byMediumCombinedIsolationDeltaBetaCorr3Hits",
+        "byLooseCombinedIsolationDeltaBetaCorr3Hits",
         "againstElectronMVA",
+        "againstElectronTightMVA3",
         "againstElectronLoose",
         "againstElectronMedium",
         "againstElectronTight",
         "againstMuonLoose",
         "againstMuonTight",
+        "againstMuonTight2",
+
     ),
     genParticleSrc = cms.untracked.InputTag("genParticles")
 )
