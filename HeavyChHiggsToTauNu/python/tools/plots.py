@@ -1699,6 +1699,8 @@ class PlotDrawer:
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
     # \param rebin               Default rebin value (passed to Th1::Rebin; if list, passed as double array)
     # \param rebinToWidthX       Default width of X bins to rebin to
+    # \param createLegend        Default legend creation parameters (None to not to create legend)
+    # \param moveLegend          Default legend moving parameters (after creation)
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \param customizeBeforeDraw Function to customize the plot before drawing it
     # \param customizeBeforeSave Function to customize the plot before saving it
@@ -1718,6 +1720,8 @@ class PlotDrawer:
                  opts2={},
                  rebin=None,
                  rebinToWidthX=None,
+                 createLegend={},
+                 moveLegend={},
                  customizeBeforeFrame=None,
                  customizeBeforeDraw=None,
                  customizeBeforeSave=None,
@@ -1740,6 +1744,8 @@ class PlotDrawer:
         self.opts2Default.update(opts2)
         self.rebinDefault = rebin
         self.rebinToWidthXDefault = rebinToWidthX
+        self.createLegendDefault = createLegend
+        self.moveLegendDefault = moveLegend
         self.customizeBeforeFrameDefault = customizeBeforeFrame
         self.customizeBeforeDrawDefault = customizeBeforeDraw
         self.customizeBeforeSaveDefault = customizeBeforeSave
@@ -1929,11 +1935,14 @@ class PlotDrawer:
     # \param kwargs  Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
+    # \li\a createLegend  Dictionary forwarded to histograms.creteLegend() (if None, don't create legend)
     # \li\a moveLegend    Dictionary forwarded to histograms.moveLegend() after creating the legend
     #
     # The default legend position should be set by modifying histograms.createLegend (see histograms.LegendCreator())
     def setLegend(self, p, **kwargs):
-        p.setLegend(histograms.moveLegend(histograms.createLegend(), **(kwargs.get("moveLegend", {}))))
+        createLegend = kwargs.get("createLegend", self.createLegendDefault)
+        if createLegend is not None:
+            p.setLegend(histograms.moveLegend(histograms.createLegend(**createLegend), **(kwargs.get("moveLegend", self.moveLegendDefault))))
 
     ## Add cut box and/or line to the plot
     #
