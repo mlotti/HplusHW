@@ -87,14 +87,14 @@ def main():
     invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
     invertedQCD.useErrorBars(errorBars)
 
-#    metBase = plots.DataMCPlot(datasets, "Baseline/MET_BaseLineTauIdBveto")
-#    metInver = plots.DataMCPlot(datasets, "Baseline/MET_InvertedTauIdBveto")
-    metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLineTauIdJets")
-    metInver = plots.DataMCPlot(datasets, "Inverted/MET_InvertedTauIdJets") 
+    metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLineTauIdBveto")
+    metInver = plots.DataMCPlot(datasets, "Inverted/MET_InvertedTauIdBveto")
+#    metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLineTauIdJets")
+#    metInver = plots.DataMCPlot(datasets, "Inverted/MET_InvertedTauIdJets") 
 
     # Rebin before subtracting
-    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
+    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
     
     metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MET_InvertedTauIdJes")
     metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MET_InvertedTauIdJets") 

@@ -338,6 +338,10 @@ QCDTailKiller = cms.untracked.PSet(
         QCDTailKillerBin("noCut", 0.0, 0.0), # jet 2
         QCDTailKillerBin("noCut", 0.0, 0.0), # jet 3
         QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
+        #QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
+        #QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
+        #QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+        #QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4      
     ),
 
 )

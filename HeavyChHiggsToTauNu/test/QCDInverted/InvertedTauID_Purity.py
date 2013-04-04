@@ -26,11 +26,11 @@ HISTONAMES = []
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterDeltaPhiJet1Cut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterDeltaPhiJet12Cut")
-#HISTONAMES.append("Inverted/SelectedTau_pT_AfterDeltaPhiJet123Cut")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterDeltaPhiJet123Cut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterDeltaPhiJetsAgainstTTCut")
 
 
@@ -84,23 +84,14 @@ def main():
         match = name_re.search(histo)
         if match:
             name = match.group("name")
-
         #legends["Purity%s"%i] = name
         #legends["Purity%s"%i] = "#Delta#phi cuts and cut against tt+jets"
         #legends["Purity%s"%i] = "#Delta#phi(jet1, MET) cut"
         #legends["Purity%s"%i] = "After isolated #tau-jet veto"
         legends["Purity%s"%i] = "After b-jet veto"        
-    plot.createFrame("purity", opts={"xmin": 40,"xmax": 300, "ymin": 0.5, "ymax": 1.1})
+    plot.createFrame("purity", opts={"xmin": 40,"xmax": 300, "ymin": 0.0, "ymax": 1.1})
     plot.frame.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
     plot.frame.GetYaxis().SetTitle("QCD purity")
-
-
-#        legends["Purity%s"%i] = name
-
-#    plot.createFrame("purity", opts={"xmin": 40, "ymin": 0., "ymax": 1.2})
-#    plot.frame.GetXaxis().SetTitle("tau p_{T} (GeV/c)")
-#    plot.frame.GetYaxis().SetTitle("Purity")
-    plot.setEnergy(datasets.getEnergies())
 
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
@@ -115,7 +106,7 @@ def main():
             
 def purityGraph(i,datasets,histo):
     inverted = plots.DataMCPlot(datasets, histo)
-    inverted.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    inverted.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
     invertedData = inverted.histoMgr.getHisto("Data").getRootHisto().Clone(histo)
     invertedEWK  = inverted.histoMgr.getHisto("EWK").getRootHisto().Clone(histo)
@@ -127,11 +118,6 @@ def purityGraph(i,datasets,histo):
     denominator = invertedData.Clone()
     denominator.SetName("denominator")
 
-
-    numerator.Divide(denominator)
-    purityGraph = ROOT.TGraphAsymmErrors(numerator)
-
-    """
 
     purity = ROOT.TEfficiency(numerator,denominator)
     purity.SetStatisticOption(ROOT.TEfficiency.kFNormal)
@@ -180,12 +166,11 @@ def purityGraph(i,datasets,histo):
     weights = []
     weights.append(1)
 
+    defaults = {"drawStyle": "EP","legendStyle": "p"}
+
     purityGraph = ROOT.TEfficiency.Combine(collection,"",len(weights),array.array("d",weights))
-    """
     purityGraph.SetMarkerStyle(20+i)
     purityGraph.SetMarkerColor(2+i)
-
-    defaults = {"drawStyle": "EP","legendStyle": "p"}
     
     return histograms.Histo(purityGraph, "Purity%s"%i, **defaults)
     

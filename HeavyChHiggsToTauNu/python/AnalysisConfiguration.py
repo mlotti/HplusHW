@@ -717,10 +717,15 @@ class ConfigBuilder:
                 QCDTailKillerBin("noCut", 80.0, 80.0), # jet 4
             )
             mod.QCDTailKiller.collinear = cms.untracked.VPSet(
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+                QCDTailKillerBin("triangular", 90.0, 90.0), # jet 1
+                QCDTailKillerBin("triangular", 90.0, 90.0), # jet 2
+                QCDTailKillerBin("triangular", 90.0, 90.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
+                
+                #QCDTailKillerBin("noCut", 0.0, 0.0), # jet 1
+                #QCDTailKillerBin("noCut", 0.0, 0.0), # jet 2
+                #QCDTailKillerBin("noCut", 0.0, 0.0), # jet 3
+                #QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
             createQCDTailKillerModule(process, "QCDTailKillerTightPlus", mod, names, modules)
         self._accumulateAnalyzers("Modules for QCDTailKiller scenarios", names)
