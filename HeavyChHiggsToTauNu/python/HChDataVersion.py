@@ -104,6 +104,9 @@ config = {
     "53XdataPromptDv1": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "GR_P_V42_AN3::All",
     },
+    "53Xdata22Jan2013": {"triggerProcess": "HLT", "recoProcess": "RECO",
+        "globalTag": "FT_53_V21_AN3::All",
+    },
     "53XmcS10": {
         "simProcess": "SIM",
         "triggerProcess": "HLT",

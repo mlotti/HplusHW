@@ -291,6 +291,45 @@ datasets.extend([
     DataDataset("SingleMu_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/SingleMu/Run2012D-PromptReco-v1/AOD"), # 90255013 events, 8886 files
 ])
 
+########
+# ReRecos (Jan22)
+
+# Tau(Parked) PD, tau+MET trigger for signal, tau trigger for MET trigger efficiency measurement
+datasets.extend([
+    DataDataset("Tau_%s_2012A_Jan22",       reco="22Jan2013", runs=(190456, 193621), aod="/Tau/Run2012A-22Jan2013-v1/AOD"), # FIXME: run range from DAS
+    DataDataset("TauParked_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/TauParked/Run2012B-22Jan2013-v1/AOD"), # FIXME: run range from DAS
+    DataDataset("TauParked_%s_2012C_Jan22", reco="22Jan2013", runs=(198022, 203742), aod="/TauParked/Run2012C-22Jan2013-v1/AOD"), # FIXME: run range from DAS
+    DataDataset("TauParked_%s_2012D_Jan22", reco="22Jan2013", runs=(203777, 208686), aod="/TauParked/Run2012D-22Jan2013-v1/AOD"), # FIXME: run range from DAS
+])
+
+# TauPlusX PD, IsoMu+MET, IsoMu+MET+Tau triggers for tau trigger efficiency measurement
+datasets.extend([
+    DataDataset("TauPlusX_%s_2012A_Jan22", reco="22Jan2013", runs=(190456, 193621), aod="/TauPlusX/Run2012A-22Jan2013-v1/AOD"), # FIXME: run range from DAS
+    DataDataset("TauPlusX_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/TauPlusX/Run2012B-22Jan2013-v1/AOD"), # FIXME: run range from DAS
+])
+
+# MultiJet(Parked) PD, QuadJet trigger for signal
+# Commented for now, until the corresponding GlobalTags have been added to HChDataVersion.py
+datasets.extend([
+    DataDataset("MultiJet_%s_2012A_Jan22",        reco="22Jan2013", runs=(190456, 193621), aod="/MultiJet/Run2012A-22Jan2013-v1/AOD"), # FIXME: run range from DAS
+#    DataDataset("MultiJet1Parked_%s_2012B_Nov05", reco="05Nov2012", runs=(193834, 196531), aod="/MultiJet1Parked/Run2012B-05Nov2012-v1/AOD"), # FIXME: run range from DAS
+#    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012", runs=(198022, 198523), aod="/MultiJet1Parked/Run2012C-part1_05Nov2012-v1/AOD"), # FIXME: run range from DAS
+#    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012", runs=(198941, 203742), aod="/MultiJet1Parked/Run2012C-part2_05Nov2012-v1/AOD"), # FIXME: run range from DAS
+#    DataDataset("MultiJet1Parked_%s_2012D_Dec10", reco="10Dec2012", runs=(203777, 207779), aod="/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD"), # FIXME: run range from DAS
+#    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013", runs=(207883, 208307), aod="/MultiJet1Parked/Run2012D-part2_PixelRecover_17Jan2013-v1/AOD"), # FIXME: run range from DAS
+])
+
+# BJetPlusX PD, QuadJet trigger for signal
+datasets.extend([
+    DataDataset("BJetPlusX_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/BJetPlusX/Run2012B-22Jan2013-v1/AOD"), # FIXME: run range from DAS
+])
+
+# SingleMu PD, Mu trigger for embedding, IsoMu trigger for muon efficiency measurement
+datasets.extend([
+    DataDataset("SingleMu_%s_2012A_Jan22", reco="22Jan2013", runs=(190456, 193621), aod="/SingleMu/Run2012A-22Jan2013-v1/AOD"), # FIXME: run range from DAS
+    DataDataset("SingleMu_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/SingleMu/Run2012B-22Jan2013-v1/AOD"), # FIXME: run range from DAS
+])
+
 
 datasets.extend([
     ## Summer12 MC (DR53X) FIXME many cross sections missing
