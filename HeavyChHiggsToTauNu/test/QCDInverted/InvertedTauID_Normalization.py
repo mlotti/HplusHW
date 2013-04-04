@@ -28,6 +28,10 @@ from InvertedTauID import *
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
 
+
+searchMode = "Light"
+#searchMode = "Heavy"
+
 def usage():
     print "\n"
     print "### Usage:   InvertedTauID_Normalization.py <multicrab dir>\n"
@@ -51,7 +55,8 @@ def main(argv):
     
     # Create all datasets from a multicrab task
     # datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
+    #datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
    
     # As we use weighted counters for MC normalisation, we have to
@@ -64,7 +69,9 @@ def main(argv):
 
     # Include only 120 mass bin of HW and HH datasets
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
-
+    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_t-channel" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_tW-channel" in name, datasets.getAllDatasetNames()))
     # Default merging nad ordering of data and MC datasets
     # All data datasets to "Data"
     # All QCD datasets to "QCD"
@@ -95,9 +102,9 @@ def main(argv):
 
 
 
-    bins = ["inclusive"]
+#    bins = ["inclusive"]
 #    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
-#    bins = ["4050","5060","6070","7080","80100","100120","120"]
+    bins = ["4050","5060","6070","7080","80100","100120","120"]
 #    bins = ["4050"]
             
 
@@ -108,16 +115,16 @@ def main(argv):
 	if bin == "inclusive":
 	    bin = ""
 
-        metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLine"+HISTONAME+bin)
-        metInver = plots.DataMCPlot(datasets, analysis+"/MET_Inverted"+HISTONAME+bin)
+        metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLine"+HISTONAME+bin)
+        metInver = plots.DataMCPlot(datasets, "Inverted/MET_Inverted"+HISTONAME+bin)
         # Rebin before subtracting
-        metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-        metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+        metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
 
-        metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_Inverted"+HISTONAME+bin)
-        metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_Inverted"+HISTONAME+bin)
-        metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_Baseline"+HISTONAME+bin)
-        metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_Baseline"+HISTONAME+bin)
+        metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MET_Inverted"+HISTONAME+bin)
+        metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MET_Inverted"+HISTONAME+bin)
+        metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline/MET_BaseLine"+HISTONAME+bin)
+        metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("Baseline/MET_BaseLine"+HISTONAME+bin)
 
         metBase_QCD = metBase_data.Clone("QCD")
         metBase_QCD.Add(metBase_EWK,-1)
