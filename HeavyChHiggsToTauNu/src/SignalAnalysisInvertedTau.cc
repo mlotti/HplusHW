@@ -629,7 +629,7 @@ namespace HPlus {
     double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metData.getSelectedMET()) );
     double deltaPhiBaseline = DeltaPhi::reconstruct(*(selectedTau), *(metData.getSelectedMET())) * 57.3; // converted to degrees 
 
-    /*    
+    
     // deltaPhiJetMet	      
     int ijet = 0;
     double deltaPhiMetJet1 = -999;
@@ -676,12 +676,7 @@ namespace HPlus {
       }      
       ++njets;
     }	      
-    */
-
     
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
-
-
 	      
     //------ mT after jets and met in bins
     hMTBaselineTauIdJet->Fill(selectedTau->pt() ,transverseMass );	
@@ -691,8 +686,8 @@ namespace HPlus {
       hMTBaselineTauIdBveto->Fill(selectedTau->pt() ,transverseMass );
      
     // mT with b veto and deltaPhi cuts  in bins 
-      //      if( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut ) {
-      if (qcdTailKillerData.passedEvent()) {
+      if( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut ) {
+	//if (DeltaR_TauMETJet2MET > 100 && DeltaR_TauMETJet3MET > 100 && DeltaR_TauMETJet4MET > 100 ) {
 	hMTBaselineTauIdBvetoDphi->Fill(selectedTau->pt() ,transverseMass );	
       }
     }
@@ -713,8 +708,9 @@ namespace HPlus {
 
     if (deltaPhiBaseline < fDeltaPhiCutValue ) increment(fBaselineDeltaPhiTauMETCounter);
 
-    if (!qcdTailKillerData.passedEvent())return false;			
-      //    if ( deltaPhiMetJet1 < Rcut || deltaPhiMetJet2 < Rcut || deltaPhiMetJet3 < Rcut  ) return false;		       
+ 		
+    //		if (DeltaR_TauMETJet2MET > 100 && DeltaR_TauMETJet3MET > 100 && DeltaR_TauMETJet4MET > 100 ) {
+    if ( deltaPhiMetJet1 < Rcut || deltaPhiMetJet2 < Rcut || deltaPhiMetJet3 < Rcut  ) return false;		       
     increment(fBaselineDeltaPhiVSDeltaPhiMHTJet1CutCounter); 
        
 
@@ -741,7 +737,7 @@ namespace HPlus {
 
  
    
-    /*
+
     int ijet = 0;
     double deltaPhiMetJet1 = -999;
     double deltaPhiMetJet2 = -999;
@@ -773,7 +769,7 @@ namespace HPlus {
     if ( deltaPhi > (180-radius)) Rcut = sqrt(radius*radius - (180-deltaPhi)*(180-deltaPhi));
     //    std::cout << " Rcut " <<  Rcut  << " deltaPhi " <<  deltaPhi  << std::endl;
 
-    */   
+   
   
     hSelectionFlow->Fill(kSignalOrderTauID);
   /*
@@ -903,10 +899,9 @@ namespace HPlus {
    // deltaPhi before b tagging  
     hDeltaPhiInvertedNoB->Fill(selectedTau->pt(),deltaPhi);  
 
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
-
-    if (qcdTailKillerData.passedEvent()) {
-      //    if ( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut   ) { 
+ 
+    if ( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut   ) {
+      //    if (DeltaR_TauMETJet2MET > 100 && DeltaR_TauMETJet3MET > 100 && DeltaR_TauMETJet4MET > 100 ) {      
       // mt  before b tagging with deltaPhi for factorising b tagging 
       hMTInvertedNoBtaggingDphiCuts->Fill(selectedTau->pt(), transverseMass);       
       hNBInvertedTauIdJetDphi->Fill(selectedTau->pt(), btagData.getSelectedJets().size()); 
@@ -920,15 +915,15 @@ namespace HPlus {
   
       hMTInvertedTauIdBveto->Fill(selectedTau->pt(), transverseMass);
       hSelectedTauEtBjetVeto->Fill(selectedTau->pt());
-  // mt  with b veto and deltaPhi  
-      if (qcdTailKillerData.passedEvent()) {    
-	//      if ( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut  ) {
+  // mt  with b veto and deltaPhi
+      //      if (DeltaR_TauMETJet2MET > 100 && DeltaR_TauMETJet3MET > 100 && DeltaR_TauMETJet4MET > 100 ) {      
+      if ( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut  ) {
 	increment(fBvetoDeltaPhiCounter); 
 	hMTInvertedTauIdBvetoDphi->Fill(selectedTau->pt(),transverseMass);
-	//	if( deltaPhiMetJet1  < triangleCut ) {
-	//	  hMTInvertedTauIdBvetoDphiAgainstTTCut->Fill(selectedTau->pt(),transverseMass);
-	hSelectedTauEtBjetVetoPhiCuts->Fill(selectedTau->pt());
-	  //	}	
+	if( deltaPhiMetJet1  < triangleCut ) {
+	  hMTInvertedTauIdBvetoDphiAgainstTTCut->Fill(selectedTau->pt(),transverseMass);
+	  hSelectedTauEtBjetVetoPhiCuts->Fill(selectedTau->pt());
+	}	
       }
     }
   
@@ -947,7 +942,11 @@ namespace HPlus {
     }
     */
 
- 
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+
+    if (qcdTailKillerData.passedEvent()) {
+      increment(fQCDTailKillerCounter);
+    }   
 
 
  // mt for inverted tau with b tagging , no deltaPhi cuts  
@@ -955,7 +954,7 @@ namespace HPlus {
    // deltaPhi with b tagging
     hDeltaPhiInverted->Fill(selectedTau->pt(),deltaPhi);  
 
-    //    hDeltaPhiVsDeltaPhiMETJet1Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet1);
+    hDeltaPhiVsDeltaPhiMETJet1Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet1);
 
     hTransverseMassVsDphi->Fill(transverseMass,deltaPhi);
 
@@ -968,43 +967,50 @@ namespace HPlus {
 
 
      // cut in  DeltaPhiMETJet1 
-    if (!qcdTailKillerData.passedEvent()) return false;   
-    increment(fQCDTailKillerCounter);
-
+    
+    // if (DeltaR_TauMETJet1MET < 100 ) return false; 
+    if ( deltaPhiMetJet1  < Rcut ) return false;
     
     // mT with deltaPhi(tau,met) vs deltaPhi(jet1,Met)
     increment(fDeltaPhiVSDeltaPhiMETJet1CutCounter);
 
     hMTInvertedFirstDeltaPhiCut->Fill(selectedTau->pt(), transverseMass);     
        
-    //    hDeltaPhiVsDeltaPhiMETJet2Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet2); 
+    hDeltaPhiVsDeltaPhiMETJet2Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet2); 
     hSelectedTauEtDeltaPhiJet1Cut->Fill(selectedTau->pt());   
     
     // cut in  DeltaPhiMETJet2 
-    //    if ( deltaPhiMetJet2  < Rcut ) return false;
     
-    //    hDeltaPhiVsDeltaPhiMETJet2InvertedAfterCut->Fill(selectedTau->pt(),deltaPhi, deltaPhiMetJet2);
+    // if (DeltaR_TauMETJet2MET < 100 ) return false; 
+    if ( deltaPhiMetJet2  < Rcut ) return false;
+    
+    hDeltaPhiVsDeltaPhiMETJet2InvertedAfterCut->Fill(selectedTau->pt(),deltaPhi, deltaPhiMetJet2);
     
     // mT with deltaPhi(tau,met) vs deltaPhi(jet1,Met)
     increment(fDeltaPhiVSDeltaPhiMETJet2CutCounter);
     
     hMTInvertedSecondDeltaPhiCut->Fill(selectedTau->pt(), transverseMass); 
         
-    //    hDeltaPhiVsDeltaPhiMETJet3Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet3); 
+    hDeltaPhiVsDeltaPhiMETJet3Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet3); 
     hSelectedTauEtDeltaPhiJet12Cut->Fill(selectedTau->pt());    
     
     
      
     // add cut in  DeltaPhiMETJet3     
-    //    if(deltaPhiMetJet3 <  Rcut   ) return false;     
+    if(deltaPhiMetJet3 <  Rcut   ) return false;   
+    //     if (DeltaR_TauMETJet3MET < 100 ) return false;    
     increment(fDeltaPhiVSDeltaPhiMETJet3CutCounter);
     
-    //    hDeltaPhiVsDeltaPhiMETJet4Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet4); 
+    hDeltaPhiVsDeltaPhiMETJet4Inverted->Fill(selectedTau->pt(),deltaPhi,deltaPhiMetJet4); 
     //      hDeltaPhiVsDeltaPhiMHTJet3Inverted->Fill(selectedTau->pt(),deltaPhi,jetData.getDeltaPhiMHTJet3());
      hMTInvertedThirdDeltaPhiCut->Fill(selectedTau->pt(), transverseMass);      
     hSelectedTauEtDeltaPhiJet123Cut->Fill(selectedTau->pt());   
 
 
+
+     // add cut in  DeltaPhiMETJet4 
+    //    if( deltaPhiMetJet4  < Rcut ) return false;  
+    //   if (DeltaR_TauMETJet4MET < 100 ) return false;
 
     increment(fDeltaPhiVSDeltaPhiMETJet4CutCounter);
     hTransverseMass->Fill(transverseMass); 
@@ -1012,11 +1018,11 @@ namespace HPlus {
   
 
 
-    //    if( deltaPhiMetJet1  < triangleCut ) {
+    if( deltaPhiMetJet1  < triangleCut ) {
       increment(fDeltaPhiAgainstTTCutCounter);  
       hMTInvertedAgainstTTCut->Fill(selectedTau->pt(), transverseMass); 
       hSelectedTauEtDeltaPhiJetsAgainstTTCut->Fill(selectedTau->pt());
-      //    }
+    }
 
 
 
