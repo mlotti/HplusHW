@@ -325,7 +325,6 @@ def QCDTailKillerBin(cutShape, cutX, cutY):
 QCDTailKiller = cms.untracked.PSet(
     maxJetsToConsider = cms.untracked.uint32(4),
     # Back to back (bottom right corner of 2D plane tau,MET vs. jet,MET)
-
     backToBack = cms.untracked.VPSet(
         QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
         QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
@@ -338,12 +337,7 @@ QCDTailKiller = cms.untracked.PSet(
         QCDTailKillerBin("noCut", 0.0, 0.0), # jet 2
         QCDTailKillerBin("noCut", 0.0, 0.0), # jet 3
         QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
-        #QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-        #QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-        #QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
-        #QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4      
     ),
-
 )
 
 topReconstruction = cms.untracked.string("None") # Options: None

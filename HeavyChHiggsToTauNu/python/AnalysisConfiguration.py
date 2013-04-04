@@ -64,7 +64,7 @@ class ConfigBuilder:
                  applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
-#                 tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
+                # tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
                  doTriggerMatching = True,
                  useCHSJets = False,
                  useJERSmearedJets = True,
@@ -717,14 +717,9 @@ class ConfigBuilder:
                 QCDTailKillerBin("noCut", 80.0, 80.0), # jet 4
             )
             mod.QCDTailKiller.collinear = cms.untracked.VPSet(
-               # QCDTailKillerBin("triangular", 90.0, 90.0), # jet 1
-               # QCDTailKillerBin("triangular", 90.0, 90.0), # jet 2
-               # QCDTailKillerBin("triangular", 90.0, 90.0), # jet 3
-               # QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
-                
-                QCDTailKillerBin("noCut", 0.0, 0.0), # jet 1
-                QCDTailKillerBin("noCut", 0.0, 0.0), # jet 2
-                QCDTailKillerBin("noCut", 0.0, 0.0), # jet 3
+                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
+                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
+                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
             createQCDTailKillerModule(process, "QCDTailKillerTightPlus", mod, names, modules)

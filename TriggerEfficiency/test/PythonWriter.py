@@ -80,10 +80,10 @@ class PythonWriter:
             name      = ns[0]
             selection = ns[1]
 
-#            #fOUT.write("\ntauLegEfficiency_"+name+" = cms.untracked.PSet(\n")
-#            fOUT.write("\n"+name+" = cms.untracked.PSet(\n")
+            #fOUT.write("\ntauLegEfficiency_"+name+" = cms.untracked.PSet(\n")
+            fOUT.write("\n"+name+" = cms.untracked.PSet(\n")
 
-            fOUT.write("\ntauLegEfficiency_"+name+" = cms.untracked.PSet(\n")
+############            fOUT.write("\ntauLegEfficiency_"+name+" = cms.untracked.PSet(\n")
 
 
             fOUT.write("    # The selected triggers for the efficiency. If one trigger is\n")
