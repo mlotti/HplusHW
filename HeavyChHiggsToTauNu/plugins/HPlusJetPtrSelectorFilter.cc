@@ -11,6 +11,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
+#include<algorithm>
+#include<iterator>
+
 class HPlusJetPtrSelectorFilter: public edm::EDFilter {
  public:
 
@@ -29,6 +32,7 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
   HPlus::EventCounter eventCounter;
   HPlus::JetSelection fJetSelection;
   edm::InputTag fTauSrc;
+  bool fRemoveTau;
   bool fFilter;
   bool fThrow;
 
@@ -45,6 +49,7 @@ HPlusJetPtrSelectorFilter::HPlusJetPtrSelectorFilter(const edm::ParameterSet& iC
   eventCounter(iConfig, eventWeight, histoWrapper),
   fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, histoWrapper),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
+  fRemoveTau(iConfig.getParameter<bool>("removeTau")),
   fFilter(iConfig.getParameter<bool>("filter")),
   fThrow(iConfig.getParameter<bool>("throw"))
 {
@@ -60,23 +65,36 @@ bool HPlusJetPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock,
 }
 
 bool HPlusJetPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  edm::Handle<edm::View<reco::Candidate> > hcand;
-  iEvent.getByLabel(fTauSrc, hcand);
+  HPlus::JetSelection::Data jetData;
 
-  bool passed = false;
-  if (hcand->size() != 1) {
-    if(fThrow || hcand->size() != 0)
-      throw cms::Exception("LogicError") << "Tried to make jet selection with tau collection size " 
-                                         << hcand->size() << " != 1!"
-                                         << std::endl;
-  }
-  else {
-    HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, hcand->ptrAt(0));
-    if(jetData.passedEvent()) {
-      passed = true;
-      iEvent.put(std::auto_ptr<Product>(new Product(jetData.getSelectedJets())));
+  if(fRemoveTau) {
+    edm::Handle<edm::View<reco::Candidate> > hcand;
+    iEvent.getByLabel(fTauSrc, hcand);
+
+    if (hcand->size() != 1) {
+      if(fThrow || hcand->size() != 0)
+        throw cms::Exception("LogicError") << "Tried to make jet selection with tau collection size " 
+                                           << hcand->size() << " != 1!"
+                                           << std::endl;
+    }
+    else {
+      jetData = fJetSelection.analyze(iEvent, iSetup, hcand->ptrAt(0));
     }
   }
+  else {
+    jetData = fJetSelection.silentAnalyze(iEvent, iSetup);
+  }
+   
+  bool passed = false;
+  std::auto_ptr<Product> selectedJets(new Product());
+  if(jetData.passedEvent()) {
+    passed = true;
+    for(size_t i=0; i<jetData.getSelectedJets().size(); ++i) {
+      selectedJets->push_back(jetData.getSelectedJets()[i]);
+    }
+  }
+  iEvent.put(selectedJets);
+
   std::auto_ptr<bool> p(new bool(passed));
   iEvent.put(p);
 
