@@ -790,7 +790,7 @@ class CanvasFrame:
     #
     # \param histoManager  histograms.HistoManager object to take the histograms for automatic axis ranges
     # \param name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
-    # \param canvasMod     Dictionary for modifying the canvas/pad properties (see below)
+    # \param canvasOpts    Dictionary for modifying the canvas/pad properties (see below)
     # \param kwargs        Keyword arguments for frame bounds (forwarded to histograms._boundsArgs())
     #
     # <b>Keyword arguments</b>
@@ -799,7 +799,7 @@ class CanvasFrame:
     #
     # <b>Canvas modification parameters</b>
     # \li\a addWidth   Add this to the width of the canvas (e.g. for COLZ)
-    def __init__(self, histoManager, name, canvasMod={}, **kwargs):
+    def __init__(self, histoManager, name, canvasOpts={}, **kwargs):
         histos = []
         if isinstance(histoManager, list):
             histos = histoManager[:]
@@ -808,7 +808,7 @@ class CanvasFrame:
         if len(histos) == 0:
             raise Exception("Empty set of histograms!")
 
-        canvasAddWidth = canvasMod.get("addWidth", None)
+        canvasAddWidth = canvasOpts.get("addWidth", None)
 
         if canvasAddWidth is not None:
             cw = ROOT.gStyle.GetCanvasDefW()

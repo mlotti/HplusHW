@@ -1714,7 +1714,7 @@ class PlotDrawer:
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
-    # \param canvasMod           Default canvas modifications (see histograms.CanvasFrame)
+    # \param canvasOpts          Default canvas modifications (see histograms.CanvasFrame)
     # \param rebin               Default rebin value (passed to Th1::Rebin; if list, passed as double array)
     # \param rebinToWidthX       Default width of X bins to rebin to
     # \param createLegend        Default legend creation parameters (None to not to create legend)
@@ -1737,7 +1737,7 @@ class PlotDrawer:
                  opts={},
                  optsLog={},
                  opts2={},
-                 canvasMod=None,
+                 canvasOpts=None,
                  rebin=None,
                  rebinToWidthX=None,
                  createLegend={},
@@ -1763,7 +1763,7 @@ class PlotDrawer:
         self.optsLogDefault.update(optsLog)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
-        self.canvasModDefault = canvasMod
+        self.canvasOptsDefault = canvasOpts
         self.rebinDefault = rebin
         self.rebinToWidthXDefault = rebinToWidthX
         self.createLegendDefault = createLegend
@@ -1930,7 +1930,7 @@ class PlotDrawer:
     # \li\a log          Should Y axis be in log scale? (default given in __init__()/setDefaults())
     # \li\a opts         Frame bounds (defaults given in __init__()/setDefaults())
     # \li\a opts2        Ratio pad bounds (defaults given in __init__()/setDefaults())
-    # \lu\a canvasMod    Dictionary for canvas modifications
+    # \lu\a canvasOpts   Dictionary for canvas modifications
     # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
     # \li\a ratioYlabel  The Y axis title for the ratio pad (None for default)
     # \li\a ratioInvert  Should the ratio be inverted?
@@ -1961,9 +1961,9 @@ class PlotDrawer:
             args["invertRatio"] = True
         if self._getValue("ratioIsBinomial", p, kwargs):
             args["ratioIsBinomial"] = True
-        canvasMod = self._getValue("canvasMod", p, kwargs)
-        if canvasMod is not None:
-            args["canvasMod"] = canvasMod
+        canvasOpts = self._getValue("canvasOpts", p, kwargs)
+        if canvasOpts is not None:
+            args["canvasOpts"] = canvasOpts
 
         # Create frame
         p.createFrame(name, **args)
