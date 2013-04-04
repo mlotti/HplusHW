@@ -261,8 +261,10 @@ process.genTausOriginal = cms.EDFilter("GenParticleSelector",
 process.commonSequence *= process.genTausOriginal
 
 # FIXME
-lookOriginalGenTaus = False
+lookOriginalGenTaus = True
 if lookOriginalGenTaus:
+    process.muonFinalSelectionJetSelectionFilter.removeTau = False
+
     # Temporary, for ttbar only
     process.genTaus = cms.EDFilter("GenParticleSelector",
         src = cms.InputTag("genParticles", "", "HLT"),
@@ -334,8 +336,10 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = analysisConfig.tauFunctions.clone(),
 
+    jetSrc = cms.InputTag("muonFinalSelectionJetSelectionFilter"),
 #    jetSrc = cms.InputTag("selectedPatJets"),
-#    jetFunctions = analysisConfig.jetFunctions.clone(),
+    jetFunctions = analysisConfig.jetFunctions.clone(),
+    jetPileupIDs = analysisConfig.jetPileupIDs.clone(),
 
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),
@@ -349,7 +353,11 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     doubles = cms.PSet(),
     bools = cms.PSet()
 )
-
+for name in ntuple.jetPileupIDs.parameterNames_():
+    pset = ntuple.jetPileupIDs.getParameter(name)
+    for tagname in pset.parameterNames_():
+        tag = pset.getParameter(tagname)
+        tag.setProcessName(tauEmbeddingCustomisations.skimProcessName)
 
 if False and dataVersion.isMC(): # FIXME
     ntuple.mets.genMetTrueEmbedded_p4 = cms.InputTag("genMetTrueEmbedded")

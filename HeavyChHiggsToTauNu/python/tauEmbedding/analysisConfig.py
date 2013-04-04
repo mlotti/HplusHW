@@ -42,6 +42,18 @@ jetFunctions = cms.PSet(
     betaStar = cms.string("userFloat('BetaStar')"),
 )
 
+def puID(name):
+    return cms.PSet(
+        mvaSrc = cms.InputTag("puJetMva", "%sDiscriminant" % name),
+        flagSrc = cms.InputTag("puJetMva", "%sId" % name),
+    )
+jetPileupIDs = cms.PSet(
+    fullId = puID("full"),
+    cutbased = puID("cutbased"),
+    simpleId = puID("simple"),
+    philv1 = puID("philv1"),
+)
+
 tauFunctions = cms.PSet()
 _tauIds = [
     "decayModeFinding",
