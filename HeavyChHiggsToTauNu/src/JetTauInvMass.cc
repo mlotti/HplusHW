@@ -22,8 +22,8 @@ namespace HPlus {
     fInvMassCutCount(eventCounter.addSubCounter("Jet-Tau invariant mass", "Jet-Tau invariant mass"))
   {
     edm::Service<TFileService> fs;
-    hTauJetMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TauJetMass", "TauJetMass", 400, 0., 400.);
-    hClosestMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TauJetMassClosest", "TauJetMassClosest", 400, 0., 400.);
+    hTauJetMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "TauJetMass", "TauJetMass", 400, 0., 400.);
+    hClosestMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "TauJetMassClosest", "TauJetMassClosest", 400, 0., 400.);
   }
 
   JetTauInvMass::~JetTauInvMass() {}

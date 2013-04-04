@@ -1407,6 +1407,11 @@ class Dataset:
         else:
             return self._analysisDirectoryName + name
 
+    ## Get the ParameterSet stored in the ROOT file
+    def getParameterSet(self):
+        (objs, realNames) = self.getRootObjects("parameterSet")
+        return objs[0].GetTitle()        
+
     ## Get ROOT histogram
     #
     # \param name    Path of the ROOT histogram relative to the analysis
@@ -2313,6 +2318,15 @@ class DatasetManager:
 
     def printDatasetTree(self):
         print self.formatDatasetTree()
+
+    ## Prints the parameterSet of some Dataset
+    #
+    # Absolutely no guarantees of which Dataset the parameterSet is
+    # from will not be given.
+    def printSelections(self):
+        namePSets = self.datasets[0].forEach(lambda d: (d.getName(), d.getParameterSet()))
+        print "ParameterSet for dataset", namePSets[0][0]
+        print namePSets[0][1]
 
     ## \var datasets
     # List of dataset.Dataset (or dataset.DatasetMerged) objects to manage

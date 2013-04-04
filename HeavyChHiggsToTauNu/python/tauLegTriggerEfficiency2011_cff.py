@@ -10,6 +10,65 @@ def triggerBin(pt, efficiency, uncertainty):
         uncertainty = cms.double(uncertainty)
     )
 
+tauLegEfficiency_noscalefactors = cms.untracked.PSet(
+    dataParameters = cms.PSet(
+        runs_160404_167913 = cms.PSet(
+            firstRun = cms.uint32(160404),
+            lastRun = cms.uint32(167913),
+            luminosity = cms.double(1197), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0)
+            ),
+        ),
+        # L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60 (Run2011A)
+        runs_170722_173198 = cms.PSet(
+            firstRun = cms.uint32(170722),
+            lastRun = cms.uint32(173198),
+            luminosity = cms.double(870.119), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0)
+            ),
+        ),
+        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011A)
+        runs_173236_173692 = cms.PSet(
+            firstRun = cms.uint32(173236),
+            lastRun = cms.uint32(173692),
+            luminosity = cms.double(265.715), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0)
+            ),
+        ),
+        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
+        runs_175832_180252 = cms.PSet(
+            firstRun = cms.uint32(175832),
+            lastRun = cms.uint32(180252),
+            luminosity = cms.double(2762), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0)
+            ),
+        ),
+    ),
+    mcParameters = cms.PSet(
+        Fall11_PU_2011A = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        Fall11_PU_2011B = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        Fall11_PU_2011AB = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+    ),
+    dataSelect = cms.vstring(),
+    mcSelect = cms.string("Fall11_PU_2011AB"),
+    mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
+)
 
 tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium = cms.untracked.PSet(
     # The selected triggers for the efficiency. If one trigger is

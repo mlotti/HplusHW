@@ -36,6 +36,7 @@
 import sys
 import array
 import math
+import copy
 
 import ROOT
 
@@ -754,6 +755,8 @@ class PlotBase:
         self.plotObjectsBefore = []
         self.plotObjectsAfter = []
 
+        self.drawOptions = {}
+
     ## Set the default legend styles
     #
     # Default is "F", except for data "P" and for signal MC "L"
@@ -930,6 +933,14 @@ class PlotBase:
                 s = ", ".join(self.energies)
                 s += " TeV"
         histograms.addEnergyText(x, y, s)
+
+    ## Update drawing options
+    #
+    # \param kwargs   Keyword arguments (see plots.PlotDrawer())
+    def setDrawOptions(self, **kwargs):
+        # kwargs may contain dictionaries, we want to take a copy of
+        # all of them
+        self.drawOptions.update(copy.deepcopy(kwargs))
 
     ## Save the plot to file(s)
     #
@@ -1358,6 +1369,8 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
         if normalizeToLumi == None:
             self.histoMgr.normalizeMCByLuminosity()
         else:
+            if datasetMgr.hasDataset("Data"):
+                raise Exception("Got 'normalizeToLumi' while there is 'Data' dataset. You should use the 'Data' luminosity instead (i.e. do not give 'normalizeToLumi')")
             self.histoMgr.normalizeMCToLuminosity(normalizeToLumi)
 
         self._setLegendStyles()
@@ -1653,6 +1666,11 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
 # overridden with the call arguments. The keyword argument names for
 # the setting/modifying the parameters are the same for all ways.
 #
+# The plot classes deriving from plots.PlotBase can also have draw
+# options specified. These options override the default values
+# (specified in the constructor and/or setDefaults()). The options
+# given in __call__() override again the plot-object options.
+#
 # With this class, adding a new plot to a plotscript can be as short
 # as one line of code. There are plenty of examples in the existing
 # plot scripts, but some examples are shown below to demonstrate the
@@ -1687,6 +1705,7 @@ class PlotDrawer:
     ## Constructor, set the defaults here
     #
     # \param ylabel              Default Y axis title
+    # \param zlabel              Default Z axis title (None for not to show)
     # \param log                 Should Y axis be in log scale by default?
     # \param ratio               Should the ratio pad be drawn?
     # \param ratioYlabel         The Y axis title for the ratio pad (None for default)
@@ -1695,6 +1714,11 @@ class PlotDrawer:
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
+    # \param canvasOpts          Default canvas modifications (see histograms.CanvasFrame)
+    # \param rebin               Default rebin value (passed to Th1::Rebin; if list, passed as double array)
+    # \param rebinToWidthX       Default width of X bins to rebin to
+    # \param createLegend        Default legend creation parameters (None to not to create legend)
+    # \param moveLegend          Default legend moving parameters (after creation)
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \param customizeBeforeDraw Function to customize the plot before drawing it
     # \param customizeBeforeSave Function to customize the plot before saving it
@@ -1704,6 +1728,7 @@ class PlotDrawer:
     # \param cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis
     def __init__(self,
                  ylabel="Occurrances / %.0f",
+                 zlabel=None,
                  log=False,
                  ratio=False,
                  ratioYlabel=None,
@@ -1712,6 +1737,11 @@ class PlotDrawer:
                  opts={},
                  optsLog={},
                  opts2={},
+                 canvasOpts=None,
+                 rebin=None,
+                 rebinToWidthX=None,
+                 createLegend={},
+                 moveLegend={},
                  customizeBeforeFrame=None,
                  customizeBeforeDraw=None,
                  customizeBeforeSave=None,
@@ -1721,6 +1751,7 @@ class PlotDrawer:
                  cmsText=None,
                  ):
         self.ylabelDefault = ylabel
+        self.zlabelDefault = zlabel
         self.logDefault = log
         self.ratioDefault = ratio
         self.ratioYlabelDefault = ratioYlabel
@@ -1732,6 +1763,11 @@ class PlotDrawer:
         self.optsLogDefault.update(optsLog)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
+        self.canvasOptsDefault = canvasOpts
+        self.rebinDefault = rebin
+        self.rebinToWidthXDefault = rebinToWidthX
+        self.createLegendDefault = createLegend
+        self.moveLegendDefault = moveLegend
         self.customizeBeforeFrameDefault = customizeBeforeFrame
         self.customizeBeforeDrawDefault = customizeBeforeDraw
         self.customizeBeforeSaveDefault = customizeBeforeSave
@@ -1748,6 +1784,34 @@ class PlotDrawer:
             if not hasattr(self, name+"Default"):
                 raise Exception("No default value for '%s'"%name)
             setattr(self, name+"Default", value)
+
+    def _getValue(self, attr, p, args, attrPostfix="", **kwargs):
+        def _update(oldVal, newVal):
+            if oldVal is None:
+                return copy.deepcopy(newVal)
+            if newVal is None:
+                return None
+            if hasattr(oldVal, "update"):
+                oldVal.update(newVal)
+                return oldVal
+            return newVal
+
+        if "default" in kwargs:
+            defaultValue = kwargs["default"]
+        else:
+            defaultValue = getattr(self, attr+attrPostfix+"Default")
+        ret = copy.deepcopy(defaultValue)
+
+        try:
+            ret = _update(ret, p.drawOptions[attr+attrPostfix])
+        except KeyError:
+            pass
+        try:
+            ret = _update(ret, args[attr])
+        except KeyError:
+            pass
+
+        return ret
 
     ## Draw the plot with function call syntax
     #
@@ -1784,26 +1848,39 @@ class PlotDrawer:
     #
     # \b Note: Almost no error checking is done, except what is done in ROOT.
     def rebin(self, p, name, **kwargs):
-        if "rebin" in kwargs and "rebinToWidthX" in kwargs:
-            raise Exception("Only one of 'rebin' and 'rebinToWidthX' may be given as an argument")
+        rebin = self._getValue("rebin", p, kwargs)
+        rebinToWidthX = self._getValue("rebinToWidthX", p, kwargs)
+
+        # Use the one given as argument if both are non-None
+        if rebin is not None and rebinToWidthX is not None:
+            if "rebin" in kwargs:
+                rebinToWidthX = None
+            if "rebinToWidthX" in kwargs:
+                rebin = None
+
+            if rebin is not None and rebinToWidthX is not None:
+                raise Exception("Only one of 'rebin' and 'rebinToWidthX' may be given as an argument.")
+
+            if rebin is not None:
+                print "Plot '%s', argument 'rebin=%s' overrides the default 'rebinToWidthX=%s'" % (name, str(rebin), str(self.rebinToWidthXDefault))
+            if rebinToWidthX is not None:
+                print "Plot '%s', argument 'rebinToWidthX=%s' overrides the default 'rebin=%s'" % (name, str(rebinToWidthX), str(self.rebinDefault))
+
 
         rebinFunction = None
-        if "rebin" in kwargs:
-            reb = kwargs["rebin"]
-            if isinstance(reb, list):
-                if len(reb) < 2:
+        if rebin is not None:
+            if isinstance(rebin, list):
+                if len(rebin) < 2:
                     raise Exception("If 'rebin' is a list, it must have at least two elements")
-                n = len(reb)-1
+                n = len(rebin)-1
                 def rebinList(h):
                     th1 = h.getRootHisto()
-                    rebinned = th1.Rebin(n, th1.GetName(), array.array("d", reb))
+                    rebinned = th1.Rebin(n, th1.GetName(), array.array("d", rebin))
                     h.setRootHisto(rebinned)
                 rebinFunction = rebinList
-            elif reb > 1:
-                rebinFunction = lambda h: h.getRootHisto().Rebin(reb)
-        elif "rebinToWidthX" in kwargs:
-            rebinWidth = kwargs["rebinToWidthX"]
-
+            elif rebin > 1:
+                rebinFunction = lambda h: h.getRootHisto().Rebin(rebin)
+        elif rebinToWidthX is not None:
             # In general (also if the original histogram has variable
             # bin widths) explicitly specifying the bin low edges is
             # the only way which works
@@ -1811,12 +1888,12 @@ class PlotDrawer:
                 th1 = h.getRootHisto()
                 xmin = histograms.th1Xmin(th1)
                 xmax = histograms.th1Xmax(th1)
-                nbins = (xmax-xmin)/rebinWidth
+                nbins = (xmax-xmin)/rebinToWidthX
                 intbins = int(nbins+0.5)
                 # Check that the number of bins is integer
                 diff = abs(intbins - nbins)
                 if diff > 1e-3:
-                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer (diff is %g)" % (h.getName(), name, rebinWidth, xmin, xmax, nbins, diff)
+                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer (diff is %g)" % (h.getName(), name, rebinToWidthX, xmin, xmax, nbins, diff)
                     return
 
                 nbins = intbins
@@ -1837,10 +1914,10 @@ class PlotDrawer:
     # \li\a  stackMCHistograms   Should MC histograms be stacked? (default given in __init__()/setDefaults())
     # \li\a  addMCUncertainty    If MC histograms are stacked, should MC total (stat) uncertainty be drawn? (default given in __init__()/setDefaults())
     def stackMCHistograms(self, p, **kwargs):
-        stack = kwargs.get("stackMCHistograms", self.stackMCHistogramsDefault)
+        stack = self._getValue("stackMCHistograms", p, kwargs)
         if stack:
             p.stackMCHistograms()
-            if kwargs.get("addMCUncertainty", self.addMCUncertaintyDefault):
+            if self._getValue("addMCUncertainty", p, kwargs):
                 p.addMCUncertainty()
 
     ## Stack MC histograms
@@ -1853,51 +1930,48 @@ class PlotDrawer:
     # \li\a log          Should Y axis be in log scale? (default given in __init__()/setDefaults())
     # \li\a opts         Frame bounds (defaults given in __init__()/setDefaults())
     # \li\a opts2        Ratio pad bounds (defaults given in __init__()/setDefaults())
+    # \lu\a canvasOpts   Dictionary for canvas modifications
     # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
     # \li\a ratioYlabel  The Y axis title for the ratio pad (None for default)
     # \li\a ratioInvert  Should the ratio be inverted?
     # \li\a ratioIsBinomial  Is the ratio a binomial?
     # \li\a customizeBeforeFrame Function customize the plot before creating the canvas and frame
     def createFrame(self, p, name, **kwargs):
-        customize = kwargs.get("customizeBeforeFrame", self.customizeBeforeFrameDefault)
+        customize = self._getValue("customizeBeforeFrame", p, kwargs)
         if customize is not None:
             customize(p)
 
-        log = kwargs.get("log", self.logDefault)
+        log = self._getValue("log", p, kwargs)
 
-        # Default values
-        _opts = {}
+        optsPostfix = ""
         if log:
-            _opts.update(self.optsLogDefault)
-        else:
-            _opts.update(self.optsDefault)
-        _opts2 = {}
-        _opts2.update(self.opts2Default)
-
-        # Update from arg
-        _opts.update(kwargs.get("opts", {}))
-        _opts2.update(kwargs.get("opts2", {}))
+            optsPostfix = "Log"
+        _opts = self._getValue("opts", p, kwargs, optsPostfix)
+        _opts2 = self._getValue("opts2", p, kwargs)
 
         # Not all plot objects have createRatio keyword argument in their createFrame() method
         args = {
             "opts": _opts,
             "opts2": _opts2,
         }
-        ratio = kwargs.get("ratio", self.ratioDefault)
+        ratio = self._getValue("ratio", p, kwargs)
         if ratio:
             args["createRatio"] = True
-        if kwargs.get("ratioInvert", self.ratioInvertDefault):
+        if self._getValue("ratioInvert", p, kwargs):
             args["invertRatio"] = True
-        if kwargs.get("ratioIsBinomial", self.ratioIsBinomialDefault):
+        if self._getValue("ratioIsBinomial", p, kwargs):
             args["ratioIsBinomial"] = True
+        canvasOpts = self._getValue("canvasOpts", p, kwargs)
+        if canvasOpts is not None:
+            args["canvasOpts"] = canvasOpts
 
         # Create frame
         p.createFrame(name, **args)
         if log:
             p.getPad().SetLogy(log)
 
-        # Override ratio ytitle
-        ratioYlabel = kwargs.get("ratioYlabel", self.ratioYlabelDefault)
+        # Override ratio ytitletd
+        ratioYlabel = self._getValue("ratioYlabel", p, kwargs)
         if ratio and ratioYlabel is not None and p.hasFrame2():
             p.getFrame2().GetYaxis().SetTitle(ratioYlabel)
 
@@ -1908,11 +1982,15 @@ class PlotDrawer:
     # \param kwargs  Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
+    # \li\a createLegend  Dictionary forwarded to histograms.creteLegend() (if None, don't create legend)
     # \li\a moveLegend    Dictionary forwarded to histograms.moveLegend() after creating the legend
     #
     # The default legend position should be set by modifying histograms.createLegend (see histograms.LegendCreator())
     def setLegend(self, p, **kwargs):
-        p.setLegend(histograms.moveLegend(histograms.createLegend(), **(kwargs.get("moveLegend", {}))))
+        createLegend = self._getValue("createLegend", p, kwargs)
+        moveLegend = self._getValue("moveLegend", p, kwargs)
+        if createLegend is not None:
+            p.setLegend(histograms.moveLegend(histograms.createLegend(**createLegend), **moveLegend))
 
     ## Add cut box and/or line to the plot
     #
@@ -1923,8 +2001,8 @@ class PlotDrawer:
     # \li\a   cutLine   If given (and not None), should be a cut value or a list of cut values. Cut lines are drawn to the value points.
     # \li\a   cutBox    If given (and not None), should be a cut box specification or a list of specifications. For each specification, cut box and/or line is drawn according to the specification. Specification is a dictionary holding the parameters to plots._createCutBoxAndLine
     def addCutLineBox(self, p, **kwargs):
-        cutLine = kwargs.get("cutLine", None)
-        cutBox = kwargs.get("cutBox", None)
+        cutLine = self._getValue("cutLine", p, kwargs, default=None)
+        cutBox = self._getValue("cutBox", p, kwargs, default=None)
         if cutLine != None and cutBox != None:
             raise Exception("Both cutLine and cutBox were given, only either one can exist")
 
@@ -1963,6 +2041,7 @@ class PlotDrawer:
     #
     # <b>Keyword arguments</b>
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
+    # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
     # \lu\a customizeBeforeDraw Function to customize the plot object before drawing the plot
     # \lu\a customizeBeforeSave Function to customize the plot object before saving the plot
@@ -1972,25 +2051,33 @@ class PlotDrawer:
     # axis titles, and "CMS Preliminary", "sqrt(s)" and luminosity
     # texts.
     def finish(self, p, xlabel, **kwargs):
-        ylab = kwargs.get("ylabel", self.ylabelDefault)
+        ylab = self._getValue("ylabel", p, kwargs)
         if "%" in ylab:
             ylab = ylab % p.binWidth()
 
         p.frame.GetXaxis().SetTitle(xlabel)
         p.frame.GetYaxis().SetTitle(ylab)
 
-        customize = kwargs.get("customizeBeforeDraw", self.customizeBeforeDrawDefault)
+        customize = self._getValue("customizeBeforeDraw", p, kwargs)
         if customize != None:
             customize(p)
         
         p.draw()
-        cmsText = kwargs.get("cmsText", self.cmsTextDefault)
+
+        # Updates the possible Z axis label styles
+        # Does nothing if the Z axis does not exist
+        zlabel = self._getValue("zlabel", p, kwargs)
+        paletteAxis = histograms.updatePaletteStyle(p.histoMgr.getHistos()[0].getRootHisto())
+        if zlabel is not None and paletteAxis != None:
+            paletteAxis.GetAxis().SetTitle(zlabel)
+
+        cmsText = self._getValue("cmsText", p, kwargs)
         histograms.addCmsPreliminaryText(text=cmsText)
         p.addEnergyText()
-        if kwargs.get("addLuminosityText", self.addLuminosityTextDefault):
+        if self._getValue("addLuminosityText", p, kwargs):
             p.addLuminosityText()
 
-        customize2 = kwargs.get("customizeBeforeSave", self.customizeBeforeSaveDefault)
+        customize2 = self._getValue("customizeBeforeSave", p, kwargs)
         if customize2 is not None:
             customize2(p)
 

@@ -453,7 +453,7 @@ namespace HPlus {
     //    if (!tauData.selectedTauPassesRtau()) return false;
     
     
-    std::string myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr";
+    std::string myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr3Hits";
     
   
   
@@ -468,6 +468,26 @@ namespace HPlus {
       
       // tau isolation
       if ( (*iTau)->tauID(myTauIsolation) < 0.5 ) continue;
+      //<<<<<<< HEAD
+      //=======
+	//	std::cout <<"PASSES TAU DISCR" << std::endl;
+      hTauDiscriminator->Fill((*iTau)->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits"));
+      increment(fTausExistCounter);
+  
+	
+      FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
+      //	FakeTauIdentifier::MCSelectedTauMatchType tauMatchData.getTauMatchType() = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
+      //      bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
+      // Below "genuine tau" is in the context of embedding (i.e. irrespective of the tau decay)
+      if((fOnlyGenuineTaus && !fFakeTauIdentifier.isEmbeddingGenuineTau(tauMatchData.getTauMatchType()))) continue;
+	
+      // Apply scale factor for fake tau
+      if (!iEvent.isRealData())
+	fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), (*iTau)->eta()));
+      // plot leading track without pt cut
+      increment(fTauFakeScaleFactorCounter);
+
+      //>>>>>>> sami2011/2011
       
       hTauDiscriminator->Fill((*iTau)->tauID("byRawCombinedIsolationDeltaBetaCorr"));
       increment(fTausExistCounter);  
@@ -945,12 +965,14 @@ namespace HPlus {
 
    // mt for inverted tau with b tagging
 
-    /*
-    if(fQCDTailKiller.passedEvent()) {    
-      increment(fQCDTailKillerCounter);		
-      hTransverseMassTailKiller->Fill(transverseMass); 
-    }  
-    */
+
+
+
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());	
+
+    if (qcdTailKillerData.passedEvent()) {
+      increment(fQCDTailKillerCounter);
+    }
     
     hMTInvertedTauIdBtag->Fill(selectedTau->pt(), transverseMass);
    // deltaPhi with b tagging
