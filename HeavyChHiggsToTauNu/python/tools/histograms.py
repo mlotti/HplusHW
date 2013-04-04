@@ -815,7 +815,7 @@ class CanvasFrame:
         # Infer the default based on the existence of COLZ drawing option
         canvasAddWidth = None
         for h in histos:
-            if "COLZ" in h.getDrawStyle():
+            if "colz" in h.getDrawStyle().lower():
                 canvasAddWidth = 0.13
 
         canvasAddWidth = canvasOpts.get("addWidth", canvasAddWidth)
