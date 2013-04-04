@@ -402,11 +402,11 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
 
         # Winter13 Reprocessing
         ## Tau
-        "Tau_190456-193621_2012A_Jan22":       TaskDef(njobsIn= 200, njobsOut= 6), # FIXME: set njobsOut
-        "TauParked_193834-196531_2012B_Jan22": TaskDef(njobsIn=1800, njobsOut=25), # FIXME: set njobsOut
-        "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=2200, njobsOut=40), # FIXME: set njobsOut
-        "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn=  40, njobsOut= 1), # FIXME: set njobsOut
-        "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=4000, njobsOut=50), # FIXME: set njobsOut
+        "Tau_190456-193621_2012A_Jan22":       TaskDef(njobsIn= 300, njobsOut= 6), # FIXME: set njobsOut
+        "TauParked_193834-196531_2012B_Jan22": TaskDef(njobsIn=2500, njobsOut=25), # FIXME: set njobsOut
+        "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=3000, njobsOut=40), # FIXME: set njobsOut
+        "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn=  50, njobsOut= 1), # FIXME: set njobsOut
+        "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=7000, njobsOut=50), # FIXME: set njobsOut
 
         # MC, triggered with mcTrigger
         "TTToHplusBWB_M80_Summer12":        TaskDefMC(njobsIn=25, njobsOut=1),
