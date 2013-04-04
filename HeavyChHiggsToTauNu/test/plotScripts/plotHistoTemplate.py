@@ -167,6 +167,21 @@ def doPlots(datasets):
     # TH2 and COLZ, disable legend
     drawPlot(createTH2Plot("TauSelection/TauSelection_selected_taus_eta_vs_phi", "TTJets"), "selectedtau_etavsphi_ttjets", xlabel="#tau #eta", ylabel="#tau #phi", zlabel="Events", log=False, createLegend=None)
 
+    # Examples of couple of palettes available in (recent) ROOT and which might be better than the rainbow
+    # http://root.cern.ch/drupal/content/rainbow-color-map
+    def drawExample(postfix):
+        drawPlot(createTH2Plot("TauSelection/TauSelection_selected_taus_eta_vs_phi", "TTJets"), "selectedtau_etavsphi_ttjets_"+postfix, xlabel="#tau #eta", ylabel="#tau #phi", zlabel="Events", log=False, createLegend=None)
+    tdrstyle.setDarkBodyRadiatorPalette()
+    drawExample("darkbodyradiator")
+
+    tdrstyle.setDeepSeaPalette()
+    drawExample("deepsea")
+
+    tdrstyle.setGreyScalePalette()
+    drawExample("greyscale")
+
+    tdrstyle.setTwoColorHuePalette()
+    drawExample("twocolorhue")
    
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
