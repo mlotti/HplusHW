@@ -798,7 +798,11 @@ class CanvasFrame:
     # \li\a opts2  Ignored, existence allowed only for compatibility with histograms.CanvasFrameTwo
     #
     # <b>Canvas modification parameters</b>
-    # \li\a addWidth   Add this to the width of the canvas (e.g. for COLZ)
+    # \li\a addWidth   Add this to the width of the canvas (e.g. for
+    #                  COLZ). If COLZ exists in any the drawing
+    #                  options of any input histogram, a default value
+    #                  of 0.13 is used (this can be disabled with
+    #                  explicit value None).
     def __init__(self, histoManager, name, canvasOpts={}, **kwargs):
         histos = []
         if isinstance(histoManager, list):
@@ -808,7 +812,13 @@ class CanvasFrame:
         if len(histos) == 0:
             raise Exception("Empty set of histograms!")
 
-        canvasAddWidth = canvasOpts.get("addWidth", None)
+        # Infer the default based on the existence of COLZ drawing option
+        canvasAddWidth = None
+        for h in histos:
+            if "COLZ" in h.getDrawStyle():
+                canvasAddWidth = 0.13
+
+        canvasAddWidth = canvasOpts.get("addWidth", canvasAddWidth)
 
         if canvasAddWidth is not None:
             cw = ROOT.gStyle.GetCanvasDefW()
@@ -1117,6 +1127,10 @@ class Histo:
     # \param drawStyle  new draw style
     def setDrawStyle(self, drawStyle):
         self.drawStyle = drawStyle
+
+    ## Get the histogram draw style
+    def getDrawStyle(self):
+        return self.drawStyle
 
     ## Set the legend label
     #
