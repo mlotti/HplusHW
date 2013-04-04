@@ -131,15 +131,15 @@ namespace {
       bool resA = fTauID->passIsolation(tauA);
       bool resB = fTauID->passIsolation(tauB);
       /*
-      std::cout << "  Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits")
-                << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits")
+      std::cout << "  Isolation " << resA << " (" << tauA->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits")
+                << ") " << resB << " (" << tauB->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits")
                 << ")" << std::endl;
       */
       if(resA != resB)
         return resA;
       if(!resA && !resB)
         // Both fail isolation, comparison by isolation is ok
-        return tauA->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits") < tauB->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits");
+        return tauA->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits") < tauB->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits");
 
       // Both pass isolation, compare by pt
       return tauA->pt() > tauB->pt();
@@ -253,14 +253,14 @@ namespace {
       resA = fTauID->passIsolation(tauA);
       resB = fTauID->passIsolation(tauB);
       /*
-      std::cout << "Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits")
-                << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits")
+      std::cout << "Isolation " << resA << " (" << tauA->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits")
+                << ") " << resB << " (" << tauB->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits")
                 << ")" << std::endl;
       */
       if(resA != resB)
         return resA;
       if(!resA && !resB)
-        return tauA->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits") < tauB->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits");
+        return tauA->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits") < tauB->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits");
 
       // nprongs
       resA = fTauID->passNProngsCut(tauA);
