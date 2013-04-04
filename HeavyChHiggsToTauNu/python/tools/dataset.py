@@ -2586,6 +2586,15 @@ class DatasetManager:
     def printDatasetTree(self):
         print self.formatDatasetTree()
 
+    ## Prints the parameterSet of some Dataset
+    #
+    # Absolutely no guarantees of which Dataset the parameterSet is
+    # from will not be given.
+    def printSelections(self):
+        namePSets = self.datasets[0].forEach(lambda d: (d.getName(), d.getParameterSet()))
+        print "ParameterSet for dataset", namePSets[0][0]
+        print namePSets[0][1]
+
     ## \var datasets
     # List of dataset.Dataset (or dataset.DatasetMerged) objects to manage
     ## \var datasetMap
