@@ -33,6 +33,7 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
   HPlus::JetSelection fJetSelection;
   edm::InputTag fTauSrc;
   bool fRemoveTau;
+  bool fAllowEmptyTau;
   bool fFilter;
   bool fThrow;
 
@@ -50,6 +51,7 @@ HPlusJetPtrSelectorFilter::HPlusJetPtrSelectorFilter(const edm::ParameterSet& iC
   fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, histoWrapper),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
   fRemoveTau(iConfig.getParameter<bool>("removeTau")),
+  fAllowEmptyTau(iConfig.getParameter<bool>("allowEmptyTau")),
   fFilter(iConfig.getParameter<bool>("filter")),
   fThrow(iConfig.getParameter<bool>("throw"))
 {
@@ -71,14 +73,17 @@ bool HPlusJetPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
     edm::Handle<edm::View<reco::Candidate> > hcand;
     iEvent.getByLabel(fTauSrc, hcand);
 
-    if (hcand->size() != 1) {
-      if(fThrow || hcand->size() != 0)
+    if(fAllowEmptyTau && hcand->size() == 0) {
+      jetData = fJetSelection.silentAnalyze(iEvent, iSetup);
+    }
+    else if (hcand->size() != 1) {
+      if(fThrow)
         throw cms::Exception("LogicError") << "Tried to make jet selection with tau collection size " 
                                            << hcand->size() << " != 1!"
                                            << std::endl;
     }
     else {
-      jetData = fJetSelection.analyze(iEvent, iSetup, hcand->ptrAt(0));
+      jetData = fJetSelection.silentAnalyze(iEvent, iSetup, hcand->ptrAt(0));
     }
   }
   else {
