@@ -364,19 +364,19 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
     # Goal is to have ~150kevents/job for analysis phase
     defaultDefinitions = {
         # njobsOut is just a guess
-        "Tau_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  1),
-        "Tau_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  1),
-        "Tau_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  4),
+        "Tau_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  25, njobsOut=  1), # aim 22
+        "Tau_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  15, njobsOut=  1), # aim 10
+        "Tau_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 130, njobsOut=  4), # aim 90
         "Tau_193834-196531_2012B_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut= 25),
-        "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  3),
+        "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 130, njobsOut=  3), # aim 85
         # The following three could be combined in the subsequent pattuple processings
         "Tau_198941-200601_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 10),
         "Tau_200961-202504_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 12),
         "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1),
         # Below is the combination of the above two, plus the third one with modified first run
-        "Tau_198941-202504_2012C_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut= 40),
-        "Tau_201191-201191_2012C_Dec11":  TaskDef(nlumisPerJobIn=1, njobsOut=  1),
-        "Tau_202972-203742_2012C_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut=  1),
+        "Tau_198941-202504_2012C_Prompt": TaskDef(njobsIn=2200, njobsOut= 40), # aim 1700
+        "Tau_201191-201191_2012C_Dec11":  TaskDef(njobsIn=20,   njobsOut=  1), # aim 18
+        "Tau_202972-203742_2012C_Prompt": TaskDef(njobsIn=40,   njobsOut=  1), # aim 34
         "Tau_203777-208686_2012D_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut= 50),
 
         ## MultiJet
@@ -404,11 +404,11 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
 
         # Winter13 Reprocessing
         ## Tau
-        "Tau_190456-193621_2012A_Jan22":       TaskDef(njobsIn= 300, njobsOut= 6), # FIXME: set njobsOut
-        "TauParked_193834-196531_2012B_Jan22": TaskDef(njobsIn=2500, njobsOut=25), # FIXME: set njobsOut
-        "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=3000, njobsOut=40), # FIXME: set njobsOut
-        "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn=  50, njobsOut= 1), # FIXME: set njobsOut
-        "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=7000, njobsOut=50), # FIXME: set njobsOut
+        "Tau_190456-193621_2012A_Jan22":       TaskDef(njobsIn= 300, njobsOut= 6), # aim 200, FIXME: set njobsOut
+        "TauParked_193834-196531_2012B_Jan22": TaskDef(njobsIn=2500, njobsOut=25), # aim 1800, FIXME: set njobsOut
+        "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=3000, njobsOut=40), # aim 2200, FIXME: set njobsOut
+        "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn=  50, njobsOut= 1), # aim 40, FIXME: set njobsOut
+        "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=7000, njobsOut=50), # aim 4000, FIXME: set njobsOut
 
         # MC, triggered with mcTrigger
         "TTToHplusBWB_M80_Summer12":        TaskDefMC(njobsIn=25, njobsOut=1),
@@ -1904,6 +1904,15 @@ def addPattuple_v53_2(datasets):
         }
 
     addPattuple_53X("v53_2", datasets, definitions)
+
+def addPattuple_v53_3_test1(datasets):
+    definitions = {
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
+        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
+        }
+
+    addPattuple_53X("v53_3_test1", datasets, definitions)
+
 
 # Skeleton
 def addPattuple_vNEXT_SKELETON_53X(datasets):
