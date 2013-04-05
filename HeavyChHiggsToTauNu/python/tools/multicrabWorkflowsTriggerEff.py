@@ -42,6 +42,9 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
 
         # Construct processing workflow
         wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName, skimConfig=skim)
+
+        # Set tau-leg specific customizations on job configuration
+        wf.addArg("customizeConfig", "TauLegZMuTauFilter")
                                                                                                                                                                  
         # Setup the publish name
 #        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "analysis_tauleg_"+version)
