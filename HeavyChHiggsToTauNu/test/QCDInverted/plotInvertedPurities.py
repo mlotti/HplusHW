@@ -34,6 +34,7 @@ from InvertedTauID import *
 
 # Configuration
 analysis = "signalAnalysisInvertedTau"
+#analysis = "signalAnalysisInvertedTauOptQCDTailKillerLoose"
 #analysis = "signalOptimisation"
 #analysis = "signalAnalysisJESMinus03eta02METMinus10"
 #analysis = "EWKFakeTauAnalysisJESMinus03eta02METMinus10"
@@ -62,6 +63,8 @@ searchMode = "Light"
 #dataEra = "Run2011B"
 dataEra = "Run2012ABCD"
 
+optMode = "OptQCDTailKillerLoose"
+
 print "dataEra"
 
 def usage():
@@ -81,7 +84,7 @@ def main():
 
     # Read the datasets
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis) 
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode) 
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
 #    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
 #    datasets.updateNAllEventsToPUWeighted()
@@ -803,6 +806,7 @@ def invertedPurities(datasets):
     cEff.cd()
     ptbin_error = array.array("d",[5, 5, 5, 5, 10, 10 ,30])
     ptbin = array.array("d",[45, 55, 65, 75, 90, 110 ,150])
+
 
     
     graph = TGraphErrors(7, ptbin, array.array("d",purityMTInvertedTauIdBvetoDphi),ptbin_error,array.array("d",purityErrMTInvertedTauIdBvetoDphi))    

@@ -263,7 +263,7 @@ def controlPlots(datasets):
     effBvetoArray = []
     effArrayMt= []
     effArrayMtNoMet= []
-
+    effErrArrayMtNoMet= []
     
 ## histograms in bins, normalisation and substraction of EWK contribution
     ## mt with 2dim deltaPhi cut
@@ -343,7 +343,7 @@ def controlPlots(datasets):
 
 ## normalization  mT(btag/bveto)        
         eff = mmtb.Integral()/mmtbveto.Integral()
-        ereff = sqrt(eff*(1+eff)/mmtbveto.Integral())
+        ereff = sqrt(eff*(1-eff))/mmtbveto.Integral()
         print " pt bin ", ptbin, " btag/bveto  efficiency   = ",eff, " error ",ereff
         effBvetoArray.append(eff)
 
@@ -396,9 +396,10 @@ def controlPlots(datasets):
 
 ## normalization  mT(btag/bveto)        
         eff = mmtb.Integral()/mmtbveto.Integral()
-        ereff = sqrt(eff*(1+eff)/mmtbveto.Integral())
+        ereff = sqrt(eff*(1-eff))/mmtbveto.Integral()
         print " pt bin ", ptbin, " btag/bveto  efficiency mt  = ",eff, " error ",ereff
         effArrayMtNoMet.append(eff)
+        effErrArrayMtNoMet.append(ereff)
         
 #############################################
         ###  with MET cut 
@@ -552,6 +553,44 @@ def controlPlots(datasets):
     invertedQCD.setLabel("BtagToBvetoEfficiency")
     invertedQCD.mtComparison(metbtag, metbjetveto,"BtagToBvetoEfficiency")
 
+### Create and customise TGraph
+    cEff = TCanvas ("Efficiency", "Efficiency", 1)
+    cEff.cd()
+    ptbin_error = array.array("d",[5, 5, 5, 5, 10, 10 ,30])
+    ptbin = array.array("d",[45, 55, 65, 75, 90, 110 ,150])
+
+
+## Mt 2nd deltaPhi cut
+    cEff = TCanvas ("MtSecondDeltaCutPurity", "MtFirstSecondPhiCutPurity", 1)
+    cEff.cd()     
+    graph = TGraphErrors(7, ptbin, array.array("d",effArrayMtNoMet),ptbin_error,array.array("d",effErrArrayMtNoMet))    
+    graph.SetMaximum(0.2)
+    graph.SetMinimum(0.0)
+    graph.SetMarkerStyle(kFullCircle)
+    graph.SetMarkerColor(kBlue)
+    graph.SetMarkerSize(1)
+    graph.GetYaxis().SetTitle("N_{b tagged}/N_{b veto}")
+    graph.GetXaxis().SetTitle("p_{T}^{#tau jet} [GeV]")
+### Re-draw graph and update canvas and gPad
+    graph.Draw("AP")
+    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              12.2 fb^{-1}             CMS preliminary")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    tex1 = ROOT.TLatex(0.2,0.88,"All selection cuts")
+    tex1.SetNDC()
+    tex1.SetTextSize(22)
+#    tex1.Draw()
+    tex2 = ROOT.TLatex(0.5,0.8,"No MET cut" )
+    tex2.SetNDC()
+    tex2.SetTextSize(24)
+    tex2.Draw()
+
+    cEff.Update()
+    cEff.SaveAs("btaggingEffNoMetVsPtTau.png")
+
+
+##################################3
     
     fOUT = open("btaggingFactors","w")
 
