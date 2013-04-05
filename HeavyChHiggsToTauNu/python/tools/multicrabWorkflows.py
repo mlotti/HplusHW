@@ -309,9 +309,54 @@ datasets.extend([
     DataDataset("SingleMu_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/SingleMu/Run2012D-PromptReco-v1/AOD"), # 90255013 events, 8886 files
 ])
 
+########
+# ReRecos (Jan22)
+
+# Tau(Parked) PD, tau+MET trigger for signal, tau trigger for MET trigger efficiency measurement
+datasets.extend([
+    DataDataset("Tau_%s_2012A_Jan22",       reco="22Jan2013", runs=(190456, 193621), aod="/Tau/Run2012A-22Jan2013-v1/AOD"), # 4316637 events, 317 files
+    DataDataset("TauParked_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/TauParked/Run2012B-22Jan2013-v1/AOD"), # 46187183 events, 3416 files
+    DataDataset("TauParked_%s_2012C_Jan22", reco="22Jan2013", runs=(198022, 203742), aod="/TauParked/Run2012C-22Jan2013-v1/AOD"), # 58152493 events, 4385 files
+    DataDataset("TauParked_%s_2012D_Jan22", reco="22Jan2013", runs=(203777, 208686), aod="/TauParked/Run2012D-22Jan2013-v1/AOD"), # 63220920 events, 5127 files
+])
+# Splitting here because the last part of Run2012C has the fix for
+# high-pt taus
+datasets.splitDataByRuns("TauParked_198022-203742_2012C_Jan22", [
+        (198022, 202504), # 56890206 events, 4301 files
+        (202972, 203742), # 4122415 events, 307 files
+])
+
+# TauPlusX PD, IsoMu+MET, IsoMu+MET+Tau triggers for tau trigger efficiency measurement
+datasets.extend([
+    DataDataset("TauPlusX_%s_2012A_Jan22", reco="22Jan2013", runs=(190456, 193621), aod="/TauPlusX/Run2012A-22Jan2013-v1/AOD"), # 7350406 events, 487 files
+    DataDataset("TauPlusX_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/TauPlusX/Run2012B-22Jan2013-v1/AOD"), # 39411579 events, 3006 files
+])
+
+# MultiJet(Parked) PD, QuadJet trigger for signal
+# Commented for now, until the corresponding GlobalTags have been added to HChDataVersion.py
+datasets.extend([
+    DataDataset("MultiJet_%s_2012A_Jan22",        reco="22Jan2013", runs=(190456, 193621), aod="/MultiJet/Run2012A-22Jan2013-v1/AOD"), # 11068071 events, 879 files
+#    DataDataset("MultiJet1Parked_%s_2012B_Nov05", reco="05Nov2012", runs=(193834, 196531), aod="/MultiJet1Parked/Run2012B-05Nov2012-v1/AOD"),
+#    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012", runs=(198022, 198523), aod="/MultiJet1Parked/Run2012C-part1_05Nov2012-v1/AOD"), # FIXME: run range from DAS
+#    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012", runs=(198941, 203742), aod="/MultiJet1Parked/Run2012C-part2_05Nov2012-v1/AOD"), # FIXME: run range from DAS
+#    DataDataset("MultiJet1Parked_%s_2012D_Dec10", reco="10Dec2012", runs=(203777, 207779), aod="/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD"), # FIXME: run range from DAS
+#    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013", runs=(207883, 208307), aod="/MultiJet1Parked/Run2012D-part2_PixelRecover_17Jan2013-v1/AOD"), # FIXME: run range from DAS
+])
+
+# BJetPlusX PD, QuadJet trigger for signal
+datasets.extend([
+    DataDataset("BJetPlusX_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/BJetPlusX/Run2012B-22Jan2013-v1/AOD"), # 27868808 events, 2289 files
+])
+
+# SingleMu PD, Mu trigger for embedding, IsoMu trigger for muon efficiency measurement
+datasets.extend([
+    DataDataset("SingleMu_%s_2012A_Jan22", reco="22Jan2013", runs=(190456, 193621), aod="/SingleMu/Run2012A-22Jan2013-v1/AOD"), # 19785316 events, 817 files
+    DataDataset("SingleMu_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/SingleMu/Run2012B-22Jan2013-v1/AOD"), # 59516381 events, 4204 files
+])
+
 
 datasets.extend([
-    ## Summer12 MC (DR53X) FIXME many cross sections missing
+    ## Summer12 MC (DR53X)
     #
     # Signal, tt -> H+W, 200 kevt/sample
     MCDataset("TTToHplusBWB_M80_Summer12",  aod="/TTToHplusBWB_M-80_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),

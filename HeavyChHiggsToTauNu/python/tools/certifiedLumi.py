@@ -22,6 +22,8 @@ files = {
     "06Aug2012ReReco": "Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_JSON.txt",
     "24Aug2012ReReco": "Cert_198022-198523_8TeV_24Aug2012ReReco_Collisions12_JSON.txt",
     "11Dec2012ReReco": "Cert_201191-201191_8TeV_11Dec2012ReReco-recover_Collisions12_JSON.txt",
+    # 53X Winter13 ReReco
+#    "22Jan2013ReReco": "NOT_YET_AVAILABLE_PLACEHOLDER",
 }
 
 ## Get a JSON file name
