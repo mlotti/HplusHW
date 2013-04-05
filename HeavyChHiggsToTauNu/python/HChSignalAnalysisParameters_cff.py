@@ -811,8 +811,8 @@ def setJetPUIdSrc(jetSelectionPSet, moduleName):
     if "Chs" in jetSelection.src.value():
         myPileUpSrc += "Chs"
     if myPUIDType != "none":
-        jetSelectionPSet.jetPileUpMVAValues = cms.untracked.InputTag(myPileUpSrc, myPUIDType+"Discriminant", "HChPatTuple")
-        jetSelectionPSet.jetPileUpIdFlag = cms.untracked.InputTag(myPileUpSrc, myPUIDType+"Id", "HChPatTuple")
+        jetSelectionPSet.jetPileUpMVAValues = cms.untracked.InputTag(myPileUpSrc, myPUIDType+"Discriminant")
+        jetSelectionPSet.jetPileUpIdFlag = cms.untracked.InputTag(myPileUpSrc, myPUIDType+"Id")
     else:
         jetSelectionPSet.jetPileUpMVAValues = cms.untracked.InputTag("None")
         jetSelectionPSet.jetPileUpIdFlag = cms.untracked.InputTag("None")

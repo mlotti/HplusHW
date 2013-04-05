@@ -6,6 +6,8 @@ from FWCore.ParameterSet.Modules import _Module
 
 import FWCore.ParameterSet.VarParsing as VarParsing
 
+import PhysicsTools.PatAlgos.tools.helpers as helpers
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 # Note: This file is adapted from TauAnalysis/MCEmbeddingTools/python/pf_01_customizeAll.py
@@ -239,6 +241,7 @@ def customise(process):
         process.muons.PFCandidates = cms.InputTag("particleFlowTmpMixed")
 
         for p in process.paths:
+            pth = getattr(process, p)
             if "particleFlow" in pth.moduleNames():
                 pth.replace(process.particleFlow, process.particleFlowORG*process.particleFlow)
             if "muons" in pth.moduleNames():
@@ -360,15 +363,90 @@ def customise(process):
 
     return process
 
+def replaceInAllPathsAndSequences(process, old, new, exceptions=[]):
+    for pthName, pth in process.paths_().iteritems():
+        if pthName not in exceptions:
+            pth.replace(old, new)
+    for seqName, seq in process.sequences_().iteritems():
+        if seqName not in exceptions:
+            seq.replace(old, new)
+
+def replaceInputTagInAllSequences(process, oldName, newName, exceptions=[]):
+    for seqName, seq in process.sequences_().iteritems():
+        if seqName not in exceptions:
+            helpers.massSearchReplaceAnyInputTag(seq, cms.InputTag(oldName), cms.InputTag(newName))
 
 def addPAT(process, options, dataVersion):
     options.doPat = 1
     options.tauEmbeddingInput = 1
 
+    f = open("configDumpEmbedDebug.py", "w")
+    f.write(process.dumpPython())
+    f.close()
+
     #process.options.wantSummary = cms.untracked.bool(True)
 
     # Hacks to get PAT to work in a process with RECO
     process.recoPFJets.remove(process.kt6PFJets)
+    process.recoAllPFJets.remove(process.kt6PFJets)
+
+    origPostfix = "Orig"
+    clashingSequences = [
+        "muonPFIsolationSequence",
+        "pfPhotonIsolationSequence",
+        "pfElectronIsolationSequence",
+        ]
+    sequencesNoReplaceInputTag = clashingSequences+[
+        "photonPFIsolationDepositsSequence",
+        "electronPFIsolationDepositsSequence",
+        ]
+
+    modulesInClashingSequences = [
+    ]
+    for name in ["Charged", "ChargedAll", "Gamma", "Neutral", "PU"]:
+        modulesInClashingSequences.extend([
+                "muPFIsoDeposit"+name,
+                "muPFIsoValue%s03"%name,
+                "muPFIsoValue%s04"%name,
+                "phPFIsoDeposit"+name,
+                "phPFIsoValue%s03PFId"%name,
+                "phPFIsoValue%s04PFId"%name,
+                "elPFIsoDeposit"+name,
+                "elPFIsoValue%s03PFId"%name,
+                "elPFIsoValue%s04PFId"%name,
+                ])
+    for name in ["Charged", "Neutral", "Photons"]:
+        modulesInClashingSequences.extend([
+                "isoDepPhotonWith"+name,
+                "isoValPhotonWith"+name,
+                "isoDepElectronWith"+name,
+                "isoValElectronWith"+name, 
+               ])
+        
+
+    clashingModules = ["pfSelectedElectrons", "pfSelectedPhotons"]
+
+    for name in clashingSequences:
+        oldSeq = getattr(process, name)
+        helpers.cloneProcessingSnippet(process, getattr(process, name), origPostfix)
+        newSeq = getattr(process, name+origPostfix)
+
+        replaceInAllPathsAndSequences(process, oldSeq, newSeq)
+
+    for name in modulesInClashingSequences:
+        replaceInputTagInAllSequences(process, name, name+origPostfix, exceptions=sequencesNoReplaceInputTag)
+
+    for name in clashingModules:
+        newName = name+origPostfix
+        mod = getattr(process, name)
+        newMod = mod.clone()
+        setattr(process, newName, newMod)
+        replaceInAllPathsAndSequences(process, mod, newMod, exceptions=sequencesNoReplaceInputTag)
+        replaceInputTagInAllSequences(process, name, newName, exceptions=sequencesNoReplaceInputTag)
+
+    f = open("configDumpEmbedDebug2.py", "w")
+    f.write(process.dumpPython())
+    f.close()
 
     # Set the output module name
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple as patConf
@@ -392,6 +470,18 @@ def addPAT(process, options, dataVersion):
 
     # Add PAT
     process.commonPatSequence, additionalCounters = patConf.addPatOnTheFly(process, options, dataVersion)
+
+    # More hacks to get PAT to work in this process
+    for name in ["tauIsoDepositPF"+x for x in ["Candidates", "ChargedHadrons", "NeutralHadrons", "Gammas"]]+["tauMatch", "tauGenJetMatch", "patTaus", "selectedPatTaus", "cleanPatTaus", "cleanPatJets", "countPatTaus"]:
+        process.patDefaultSequence.remove(getattr(process, name))
+        delattr(process, name)
+    del process.patPFTauIsolation
+    del process.selectedPatCandidates
+    del process.countPatCandidates
+    del process.cleanPatCandidates
+    del process.makePatTaus
+    del process.patCandidates
+    process.patPF2PATSequenceChs.remove(process.pfTauSequenceChs)
 
     # Select the tau matching to the muon already here
     # Also remove the embedding muon from the selected muons
