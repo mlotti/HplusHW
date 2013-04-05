@@ -659,14 +659,17 @@ class StandardPATBuilder(PATBuilderBase):
         outdict = self.process.outputModules_()
         if outdict.has_key(outputModuleName):
             outputModule = outputModuleName
+
+        for postfix in jetPostfixes:
             # Reset the OutputModule outputCommands to catch the event
             # content modifications done in the runMEtUncertainties.
             # Resetting is fine since the outputCommands are saved in
             # addPF2PAT() before a call to this method, and they are
             # set to proper values after a call to this method.
-            getattr(self.process, outputModule).outputCommands = []
+            if outputModule != "":
+                getattr(self.process, outputModule).outputCommands = []
+                
 
-        for postfix in jetPostfixes:
             jets = getattr(self.process, "selectedPatJets"+postfix).src.value()
 
             # Smear the jet energies by JER data/MC difference for MC only

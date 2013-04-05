@@ -18,7 +18,7 @@ tightenedMuons = cms.EDFilter("PATMuonSelector",
         "&& numberOfMatchedStations() > 1"
         "&& abs(dB()) < 0.2" 
         "&& innerTrack().hitPattern().numberOfValidPixelHits() > 0"
-        "&& track().hitPattern().trackerLauersWithMeasurement() > 8"
+        "&& track().hitPattern().trackerLayersWithMeasurement() > 8"
     )
 )
 tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",

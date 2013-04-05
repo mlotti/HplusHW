@@ -4,6 +4,7 @@
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
+#include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
@@ -37,8 +38,27 @@ namespace HPlus {
     typedef math::XYZTLorentzVector XYZTLorentzVector;
     typedef HPlus::TreeFunctionVectorBranch<pat::Jet> JetFunctionBranch;
 
+    struct PileupID {
+      PileupID(const std::string& prefix, const edm::InputTag& mvaSrc, const edm::InputTag& flagSrc);
+      ~PileupID();
+
+      void book(TTree *tree);
+      void setValues(const edm::Event& iEvent, const edm::PtrVector<pat::Jet>& jets);
+      void reset();
+
+      std::string fPrefix;
+      edm::InputTag fMVAValueSrc;
+      edm::InputTag fIDFlagSrc;
+
+      std::vector<double> fMVAValue;
+      std::vector<bool> fIDFlagLoose;
+      std::vector<bool> fIDFlagMedium;
+      std::vector<bool> fIDFlagTight;
+    };
+
     std::vector<XYZTLorentzVector> fJets;
     std::vector<JetFunctionBranch> fJetsFunctions;
+    std::vector<PileupID> fJetsPileupIDs;
 
     std::vector<double> fJetsChf;
     std::vector<double> fJetsNhf;

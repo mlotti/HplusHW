@@ -77,7 +77,9 @@ def constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow, workflowNa
                     "Aug06": "06Aug2012ReReco",
                     "Aug24": "24Aug2012ReReco",
                     "Dec11": "11Dec2012ReReco",
-                    "Prompt": "PromptReco12"
+                    "Prompt": "PromptReco12",
+                    # Winter13 Rereco
+                    "Jan22": "22Jan2013ReReco",
                     }[reco]
             except KeyError:
                 raise Exception("No output lumi mask defined for reco '%s' (dataset %s). Define one in python/tools/certifiedLumi.py, and add a 'link' to a dictionary in here" % (reco, dataset.getName()))
@@ -292,6 +294,16 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
             "Tau_201191-201191_2012C_Dec11": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9"],
             "Tau_202972-203742_2012C_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
             "Tau_203777-208686_2012D_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
+
+            # Winter13 Reprocessing
+            "Tau_190456-193621_2012A_Jan22": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2", # 190456-190738
+                                              "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3", # 190782-191411
+                                              "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v4"],# 191691-193621
+            "TauParked_193834-196531_2012B_Jan22": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"],
+            "TauParked_198022-202504_2012C_Jan22": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",  # 198022-199608
+                                                    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9"],  # 199698-202504
+            "TauParked_202972-203742_2012C_Jan22": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
+            "TauParked_203777-208686_2012D_Jan22": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
         }
 
 
@@ -389,6 +401,14 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "BJetPlusX_198941-203742_2012C_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut=40),
         "BJetPlusX_201191-201191_2012C_Dec11":  TaskDef(nlumisPerJobIn=1, njobsOut= 1),
         "BJetPlusX_203777-208686_2012D_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut=50),
+
+        # Winter13 Reprocessing
+        ## Tau
+        "Tau_190456-193621_2012A_Jan22":       TaskDef(njobsIn= 300, njobsOut= 6), # FIXME: set njobsOut
+        "TauParked_193834-196531_2012B_Jan22": TaskDef(njobsIn=2500, njobsOut=25), # FIXME: set njobsOut
+        "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=3000, njobsOut=40), # FIXME: set njobsOut
+        "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn=  50, njobsOut= 1), # FIXME: set njobsOut
+        "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=7000, njobsOut=50), # FIXME: set njobsOut
 
         # MC, triggered with mcTrigger
         "TTToHplusBWB_M80_Summer12":        TaskDefMC(njobsIn=25, njobsOut=1),
@@ -1510,6 +1530,13 @@ def addPattuple_v53_2(datasets):
         # Mean 66.7 MB, min 1.6 MB, max 133.7 MB
         "BJetPlusX_203777-208686_2012D_Prompt":   TaskDef("/BJetPlusX/local-Run2012D_PromptReco_v1_AOD_203777_208686_pattuple_v53_2-f6bb0dc7e2833904d68de61382eb29fb/USER"),
 
+        #### Winter13 Reprocessing
+        "Tau_190456-193621_2012A_Jan22":       TaskDef(""),
+        "TauParked_193834-196531_2012B_Jan22": TaskDef(""),
+        "TauParked_198022-202504_2012C_Jan22": TaskDef(""),
+        "TauParked_202972-203742_2012C_Jan22": TaskDef(""),
+        "TauParked_203777-208686_2012D_Jan22": TaskDef(""),
+        
         # 27900-37203 events, 26 jobs
         # User mean 3088.7, min 39.2, max 3945.0
         # Mean 121.2 MB, min 1.8 MB, max 131.3 MB
@@ -1906,6 +1933,13 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "BJetPlusX_198941-203742_2012C_Prompt":   TaskDef(""),
         "BJetPlusX_201191-201191_2012C_Dec11":    TaskDef(""),
         "BJetPlusX_203777-208686_2012D_Prompt":   TaskDef(""),
+
+        #### Winter13 Reprocessing
+        "Tau_190456-193621_2012A_Jan22":       TaskDef(""),
+        "TauParked_193834-196531_2012B_Jan22": TaskDef(""),
+        "TauParked_198022-202504_2012C_Jan22": TaskDef(""),
+        "TauParked_202972-203742_2012C_Jan22": TaskDef(""),
+        "TauParked_203777-208686_2012D_Jan22": TaskDef(""),
 
         "TTToHplusBWB_M80_Summer12":              TaskDef(""),
         "TTToHplusBWB_M90_Summer12":              TaskDef(""),
