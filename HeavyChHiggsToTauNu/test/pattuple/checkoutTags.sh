@@ -7,13 +7,11 @@ set -e
 # 19.1.2012 M.Kortelainen CMSSW_4_4_2_patch9 Added tag for GenFilters
 # 17.9.2012 M.Kortelainen CMSSW_4_4_4 Added tag for electron MVA ID
 # 12.10.2012 M.Kortelainen CMSSW_5_3_5 MET filters
+# 5.4.2013 M.Kortelainen CMSSW_5_3_9_patch2 Removed PileupJetID tag (it has been moved to ../checkoutTags.sh)
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#A_Central_Filter_Package_RecoMET
 # Package needed for CSC Beam Halo Filter
 cvs co -r V00-00-08 RecoMET/METAnalyzers
-
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
-cvs co -r V00-02-10 -d CMGTools/External UserCode/CMG/CMGTools/External
 
 # Tracking filters
 # https://twiki.cern.ch/twiki/bin/view/CMS/TrackingPOGFilters
