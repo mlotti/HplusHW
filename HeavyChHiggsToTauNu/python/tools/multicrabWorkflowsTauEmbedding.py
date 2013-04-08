@@ -418,7 +418,7 @@ def addEmbeddingEmbedding_v44_5(datasets):
     def addEmbedding(version, definitions):
         addEmbeddingEmbedding_44X(skimVersion, version, datasets, definitions)
 
-    addEmbedding("v44_5", {
+    addEmbedding("v44_5_notrg0", {
         # 5450710 events, 2064 jobs
         # User mean 12419.3, min 3119.2, max 16291.2
         # Mean 422.7 MB, min 327.1 MB, max 555.4 MB
