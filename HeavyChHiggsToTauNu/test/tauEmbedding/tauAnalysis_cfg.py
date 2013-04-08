@@ -37,7 +37,7 @@ process.source = cms.Source('PoolSource',
 #        "file:/mnt/flustre/wendland/AODSIM_PU_S6_START44_V9B_7TeV/Fall11_TTJets_TuneZ2_7TeV-madgraph-tauola_AODSIM_PU_S6_START44_V9B-v1_testfile.root"
         "file:/mnt/flustre/mkortela/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/82A96ABF-C736-E111-8E5D-0030486790C0.root" # has lumi 255000, which induces a bug
     ),
-    lumisToProcess = cms.untracked.VLuminosityBlockRange("1:255000"),
+#    lumisToProcess = cms.untracked.VLuminosityBlockRange("1:255000"),
 #    eventsToProcess = cms.untracked.VEventRange("1:255000:76484768"),
 )
 
@@ -137,8 +137,10 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     tauSrc = cms.InputTag(param.tauSelection.src.value()), # this is set in addEmbeddingLikePreselection()
     tauFunctions = analysisConfig.tauFunctions.clone(),
 
-    jetSrc = cms.InputTag(param.jetSelection.src.value()),
+#    jetSrc = cms.InputTag(param.jetSelection.src.value()),
+    jetSrc = cms.InputTag("embeddingLikePreselectionCleanedJets"),
     jetFunctions = analysisConfig.jetFunctions.clone(),
+    jetPileupIDs = analysisConfig.jetPileupIDs.clone(),
 
     genParticleSrc = cms.InputTag("genParticles"),
 # For tau MC matching, use the same collection which was used in preselection
@@ -173,6 +175,7 @@ if addSignalAnalysis:
     # Run signal analysis module on the same go with the embedding preselection without tau+MET trigger
     import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
     module = signalAnalysis.createEDFilter(param)
+    param.setJetPUIdSrc(module.jetSelection, "")
     module.Tree.fill = cms.untracked.bool(False)
     module.histogramAmbientLevel = "Systematics"
 
