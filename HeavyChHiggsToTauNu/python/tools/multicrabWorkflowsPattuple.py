@@ -374,7 +374,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "Tau_200961-202504_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 12),
         "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1),
         # Below is the combination of the above two, plus the third one with modified first run
-        "Tau_198941-202504_2012C_Prompt": TaskDef(njobsIn=2200, njobsOut= 40), # aim 1700
+        "Tau_198941-202504_2012C_Prompt": TaskDef(njobsIn=2800, njobsOut= 40), # aim 1700
         "Tau_201191-201191_2012C_Dec11":  TaskDef(njobsIn=20,   njobsOut=  1), # aim 18
         "Tau_202972-203742_2012C_Prompt": TaskDef(njobsIn=40,   njobsOut=  1), # aim 34
         "Tau_203777-208686_2012D_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut= 50),
@@ -420,14 +420,14 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "TTToHplusBWB_M155_Summer12":       TaskDefMC(njobsIn=25, njobsOut=2),
         "TTToHplusBWB_M160_Summer12":       TaskDefMC(njobsIn=25, njobsOut=2),
 
-        "TTToHplusBWB_M80_ext_Summer12":    TaskDefMC(njobsIn=130, njobsOut=7),
-        "TTToHplusBWB_M90_ext_Summer12":    TaskDefMC(njobsIn=130, njobsOut=7),
-        "TTToHplusBWB_M100_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=15),
-        "TTToHplusBWB_M120_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=7),
-        "TTToHplusBWB_M140_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=9),
-        "TTToHplusBWB_M150_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=9),
-        "TTToHplusBWB_M155_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=9),
-        "TTToHplusBWB_M160_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=15),
+        "TTToHplusBWB_M80_ext_Summer12":    TaskDefMC(njobsIn=90, njobsOut=7),
+        "TTToHplusBWB_M90_ext_Summer12":    TaskDefMC(njobsIn=90, njobsOut=7),
+        "TTToHplusBWB_M100_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=15),
+        "TTToHplusBWB_M120_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=7),
+        "TTToHplusBWB_M140_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=9),
+        "TTToHplusBWB_M150_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=9),
+        "TTToHplusBWB_M155_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=9),
+        "TTToHplusBWB_M160_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=15),
 
         "TTToHplusBHminusB_M80_Summer12":        TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=100, njobsOut=7),
