@@ -1907,8 +1907,14 @@ def addPattuple_v53_2(datasets):
 
 def addPattuple_v53_3_test1(datasets):
     definitions = {
-        "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
-        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
+        # 163630 events, 91 jobs
+        # User mean 5026.9, min 28.5, max 6298.7
+        # Mean 180.8 MB, min 1.8 MB, max 191.6 MB
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test1-bcf1eb633671b514e9c5d99b6a7d2ccb/USER"),
+        # 3498600 events, 1703 jobs
+        # User mean 3597.1, min 220.1, max 26645.1
+        # Mean 65.6 MB, min 4.1 MB, max 276.5 MB
+        "Tau_198941-202504_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_pattuple_v53_3_198941_202504_test1-924ba6f2695898f1942a58457f274ada/USER"),
         }
 
     addPattuple_53X("v53_3_test1", datasets, definitions)
