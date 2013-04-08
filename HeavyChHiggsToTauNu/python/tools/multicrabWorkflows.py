@@ -330,6 +330,7 @@ datasets.splitDataByRuns("TauParked_198022-203742_2012C_Jan22", [
 datasets.extend([
     DataDataset("TauPlusX_%s_2012A_Jan22", reco="22Jan2013", runs=(190456, 193621), aod="/TauPlusX/Run2012A-22Jan2013-v1/AOD"), # 7350406 events, 487 files
     DataDataset("TauPlusX_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/TauPlusX/Run2012B-22Jan2013-v1/AOD"), # 39411579 events, 3006 files
+    DataDataset("TauPlusX_%s_2012C_Jan22", reco="22Jan2013", runs=(198022, 203742), aod="/TauPlusX/Run2012C-22Jan2013-v1/AOD"), # 53083103 events, 7862 files
 ])
 
 # MultiJet(Parked) PD, QuadJet trigger for signal
