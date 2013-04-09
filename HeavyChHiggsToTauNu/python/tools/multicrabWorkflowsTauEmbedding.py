@@ -23,8 +23,8 @@ def addEmbeddingGenTauSkim_44X(version, datasets, updateDefinitions):
         name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
         wf.addCrabLine("USER.publish_data_name = "+name)
 
-        wf.addArg("skimConfig", "SkimGenTau_cff")
-        
+        wf.addArg("customizeConfig", "CustomGenTauSkim")
+
         dataset.addWorkflow(wf)
         if wf.output is not None:
             dataset.addWorkflow(Workflow("tauembedding_gentauanalysis_"+version, source=Source(workflowName),
