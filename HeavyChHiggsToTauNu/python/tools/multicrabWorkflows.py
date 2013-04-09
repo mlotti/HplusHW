@@ -195,6 +195,7 @@ multicrabWorkflowsPattuple.addPattuple_v44_5(datasets)
 # Add embedding definitions
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_4_2(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_4_2(datasets)
+multicrabWorkflowsTauEmbedding.addEmbeddingGenTauSkim_v44_5(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5(datasets)
 
 # Add muon tag&probe definitions

@@ -54,12 +54,15 @@ defaultVersions = [
     "v44_5" # skim version
 ]
 skimVersion = "v44_5"
+genTauSkimVersion = "v44_5"
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,         "config": "muonSkim_cfg.py"},
           "embedding":            {"workflow": "tauembedding_embedding_%s",              "config": "embed.py"},
           "analysis":             {"workflow": "tauembedding_analysis_%s",               "config": "embeddingAnalysis_cfg.py"},
-          "analysisTau":          {"workflow": "AOD is the input, wf missing?",          "config": "tauAnalysis_cfg.py"},
+          "genTauSkim":           {"workflow": "tauembedding_gentauskim_"+genTauSkimVersion,     "config": "../pattuple/patTuple_cfg.py"},
+          "analysisTau":          {"workflow": "tauembedding_gentauanalysis_"+genTauSkimVersion, "config": "tauAnalysis_cfg.py"},
+          "analysisTauAod":       {"workflow": "AOD is the input, wf missing?",          "config": "tauAnalysis_cfg.py"},
           "signalAnalysis":       {"workflow": "tauembedding_analysis_%s",               "config": "../signalAnalysis_cfg.py"},
           "signalAnalysisGenTau": {"workflow": "analysis_v44_4",                         "config": "../signalAnalysis_cfg.py"},
           "EWKMatching":          {"workflow": "tauembedding_analysis_%s",               "config": "../EWKMatching_cfg.py"},
@@ -202,6 +205,8 @@ def createTasks(opts, step, version=None):
     dirName = ""
     if step in ["skim", "embedding", "analysis", "signalAnalysis", "EWKMatching"]:
         dirName += "_"+version
+    if step in ["genTauSkim", "analysisTau"]:
+        dirName += "_"+genTauSkimVersion
     dirName += opts.midfix
 
     # Create multicrab
@@ -210,7 +215,7 @@ def createTasks(opts, step, version=None):
 
     # Select the datasets based on the processing step and data era
     datasets = []
-    if step in ["analysisTau", "signalAnalysisGenTau"]:
+    if step in ["analysisTauAod", "signalAnalysisGenTau", "genTauSkim", "analysisTau"]:
         datasets.extend(datasetsMCnoQCD)
     else:
     #    datasets.extend(datasetsData2010)
@@ -222,13 +227,13 @@ def createTasks(opts, step, version=None):
 
     # Setup the version number for tauembedding_{embedding,analysis} workflows
     workflow = config[step]["workflow"]
-    if step in ["embedding", "analysis", "signalAnalysis","EWKMatching"]:
+    if step in ["embedding", "analysis", "signalAnalysis", "EWKMatching"]:
         workflow = workflow % version
 
     multicrab.extendDatasets(workflow, datasets)
 
     multicrab.appendLineAll("GRID.maxtarballsize = 30")
-    if not step in ["skim", "analysisTau"]:
+    if not step in ["skim", "genTauSkim", "analysisTauAod"]:
         multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
 
     # Let's do the naming like this until we get some answer from crab people
@@ -246,13 +251,15 @@ def createTasks(opts, step, version=None):
     taskDirs = multicrab.createTasks(configOnly = opts.configOnly, prefix=prefix)
         
     # patch CMSSW.sh
-    if not opts.configOnly and step in ["skim", "embedding"]:
+    if not opts.configOnly and step in ["skim", "embedding", "genTauSkim"]:
         import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
         import os
         for td, dsets in taskDirs:
             os.chdir(td)
             patch.main(Wrapper(dirs=dsets, input={"skim": "skim",
-                                                  "embedding": "embedded"}[step]))
+                                                  "embedding": "embedded",
+                                                  "genTauSkim": "pattuple",
+                                                  }[step]))
             os.chdir("..")
 
     if len(taskDirs) > 1:
