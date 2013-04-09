@@ -88,8 +88,10 @@ namespace HPlus {
       double fTopMassSolution;
       double fNeutrinoPzSolution1;
       double fNeutrinoPzSolution2;
-      double fModifiedMET;
       double fSelectedNeutrinoPzSolution;
+      double fModifiedMETSolution1;
+      double fModifiedMETSolution2;
+      double fSelectedModifiedMETSolution;
       double fNeutrinoPtSolution;
       double fHiggsMassSolution;
       double fTrueNeutrinoPz;
@@ -142,15 +144,18 @@ namespace HPlus {
     double getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
     double getDeltaEtaBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
     bool selectedSolutionIsClosestToTrueValue(double selectedSolution, FullHiggsMassCalculator::Data& output);
-    //bool selectedSolutionGivesVectorClosestToTrue(double selectedSolution, FullHiggsMassCalculator::Data& output);
+    bool selectedSolutionGivesVectorClosestToTrue(const edm::Event& iEvent, double selectedSolution,
+						  FullHiggsMassCalculator::Data& output, TVector3& MET);
     void constructFourMomenta(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
-    void calculateTopMass(FullHiggsMassCalculator::Data& output);
+    void calculateTopMass(TVector3& tauVector, TVector3& bJetVector, TVector3& METVector,
+			  FullHiggsMassCalculator::Data& output);
     void calculateHiggsMass(FullHiggsMassCalculator::Data& output);
     void doEventClassification(const edm::Event& iEvent, TVector3& bJetVector, TVector3& tauVector, 
 			       TVector3& METVector, FullHiggsMassCalculator::Data& output, 
 			       const GenParticleAnalysis::Data* genDataPtr = NULL);
     void applyCuts(FullHiggsMassCalculator::Data& output);
-    void doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
+    void doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, InputDataType myInputDataType,
+				    TVector3& METVector);
     void analyzeMETComposition(TVector3& recoMETVector, TVector3& genBothNeutrinosVector, TVector3& genMETVector);
     
   private:

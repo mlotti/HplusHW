@@ -88,8 +88,10 @@ namespace HPlus {
     fTopMassSolution(0),
     fNeutrinoPzSolution1(0),
     fNeutrinoPzSolution2(0),
-    fModifiedMET(0),
     fSelectedNeutrinoPzSolution(0),
+    fModifiedMETSolution1(0),
+    fModifiedMETSolution2(0),
+    fSelectedModifiedMETSolution(0),
     fNeutrinoPtSolution(0),
     fHiggsMassSolution(0),
     fTrueNeutrinoPz(0),
@@ -417,8 +419,7 @@ namespace HPlus {
 
     // Selection method: greater
     output.fNeutrinoPzSolutionGreater = selectNeutrinoPzSolution(tauVector, bJetVector, output, eGreater);
-    constructFourMomenta(tauVector, bJetVector, METVector, output);
-    calculateTopMass(output);
+    calculateTopMass(tauVector, bJetVector, METVector, output);
     calculateHiggsMass(output);
     if (output.bPassedEvent) {
       if (myInputDataType == eRECO) hHiggsMass_greater->Fill(output.fHiggsMassSolution);
@@ -427,8 +428,7 @@ namespace HPlus {
     }
     // Selection method: smaller
     output.fNeutrinoPzSolutionSmaller = selectNeutrinoPzSolution(tauVector, bJetVector, output, eSmaller);
-    constructFourMomenta(tauVector, bJetVector, METVector, output);
-    calculateTopMass(output);
+    calculateTopMass(tauVector, bJetVector, METVector, output);
     calculateHiggsMass(output);
     if (output.bPassedEvent) {
       if (myInputDataType == eRECO) hHiggsMass_smaller->Fill(output.fHiggsMassSolution);
@@ -437,8 +437,7 @@ namespace HPlus {
     }
     // Selection method: tauNuAngleMin
     output.fNeutrinoPzSolutionTauNuAngleMin = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuAngleMin);
-    constructFourMomenta(tauVector, bJetVector, METVector, output);
-    calculateTopMass(output);
+    calculateTopMass(tauVector, bJetVector, METVector, output);
     calculateHiggsMass(output);
     if (output.bPassedEvent) {
       if (myInputDataType == eRECO) hHiggsMass_tauNuAngleMin->Fill(output.fHiggsMassSolution);
@@ -447,8 +446,7 @@ namespace HPlus {
     }
     // Selection method: TauNuDeltaEtaMax
     output.fNeutrinoPzSolutionTauNuDeltaEtaMax = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuDeltaEtaMax);
-    constructFourMomenta(tauVector, bJetVector, METVector, output);
-    calculateTopMass(output);
+    calculateTopMass(tauVector, bJetVector, METVector, output);
     calculateHiggsMass(output);
     if (output.bPassedEvent) {
       if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolution);
@@ -458,8 +456,7 @@ namespace HPlus {
     }
     // Selection method: TauNuDeltaEtaMin
     output.fNeutrinoPzSolutionTauNuDeltaEtaMin = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuDeltaEtaMin);
-    constructFourMomenta(tauVector, bJetVector, METVector, output);
-    calculateTopMass(output);
+    calculateTopMass(tauVector, bJetVector, METVector, output);
     calculateHiggsMass(output);
     if (output.bPassedEvent) {
       if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolution);
@@ -470,8 +467,7 @@ namespace HPlus {
     // NOTE: THE LAST CALCULATION DETERMINES WHICH SELECTION METHOD IS USED FOR THE MAIN OUTPUT:
     // Selection method: tauNuAngleMax
     output.fNeutrinoPzSolutionTauNuAngleMax = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuAngleMax);
-    constructFourMomenta(tauVector, bJetVector, METVector, output);
-    calculateTopMass(output);
+    calculateTopMass(tauVector, bJetVector, METVector, output);
     calculateHiggsMass(output);
     if (output.bPassedEvent) {
       if (myInputDataType == eRECO) hHiggsMass_tauNuAngleMax->Fill(output.fHiggsMassSolution);
@@ -479,7 +475,7 @@ namespace HPlus {
       if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuAngleMax->Fill(output.fHiggsMassSolution);
     }
 
-    doCountingAndHistogramming(iEvent, output, myInputDataType);
+    doCountingAndHistogramming(iEvent, output, myInputDataType, METVector);
   }
 
   void FullHiggsMassCalculator::calculateNeutrinoPz(TVector3& pB, TVector3& pTau, TVector3& MET, 
@@ -530,11 +526,9 @@ namespace HPlus {
 	double modifiedMETSolution2 = (deltaSquaredMasses / 2.0 - bEnergy * visibleTauEnergy + pB.Dot(pTau)) / 
 	  (- pB.Pt() * TMath::Cos(pB.DeltaPhi(MET)) - pTau.Pt() * TMath::Cos(pTau.DeltaPhi(MET))
 	   - TMath::Sqrt((bEnergy + visibleTauEnergy)*(bEnergy + visibleTauEnergy) - (pB.Pz() + pTau.Pz())*(pB.Pz() + pTau.Pz())));
-	// Select the MET solution that is closer to the original value
-	if (TMath::Abs(modifiedMETSolution1 - MET.Perp()) < TMath::Abs(modifiedMETSolution2 - MET.Perp()))
-	  output.fModifiedMET = modifiedMETSolution1;
-	else 
-	  output.fModifiedMET = modifiedMETSolution2;
+	// Set output:
+	output.fModifiedMETSolution1 = modifiedMETSolution1;
+	output.fModifiedMETSolution2 = modifiedMETSolution2;
 	// // VALIDATION:
 // 	TVector3 modifiedMETVector1;
 // 	modifiedMETVector1.SetPtEtaPhi(modifiedMETSolution1, MET.Eta(), MET.Phi());
@@ -709,14 +703,33 @@ namespace HPlus {
     return true;
   }
 
-//   bool FullHiggsMassCalculator::selectedSolutionGivesVectorClosestToTrue(double selectedSolution,
-// 									 FullHiggsMassCalculator::Data& output) {
-//     return true;
-//   }
+  bool FullHiggsMassCalculator::selectedSolutionGivesVectorClosestToTrue(const edm::Event& iEvent, double selectedSolution,
+									 FullHiggsMassCalculator::Data& output, TVector3& MET) {
+    // Construct the reconstructed neutrino momentum vectors for both solutions
+    TVector3 reconstructedNeutrinoMomentum1(MET.Px(), MET.Py(), output.fNeutrinoPzSolution1);
+    TVector3 reconstructedNeutrinoMomentum2(MET.Px(), MET.Py(), output.fNeutrinoPzSolution2);
+    // Get the true neutrino momentum vector (this is a bit tedious)
+    reco::Candidate* genTau = getGenTauFromHiggs(iEvent);
+    reco::Candidate* genNeutrino1 = getGenNeutrinoFromHiggs(iEvent);
+    TVector3 neutrino1Vector(genNeutrino1->px(), genNeutrino1->py(), genNeutrino1->pz());
+    TVector3 neutrino2Vector = getInvisibleMomentum(*genTau);
+    TVector3 trueNeutrinoMomentum = neutrino1Vector + neutrino2Vector;
+    // Calculate difference vectors
+    TVector3 difference1 = reconstructedNeutrinoMomentum1 - trueNeutrinoMomentum;
+    TVector3 difference2 = reconstructedNeutrinoMomentum1 - trueNeutrinoMomentum;
+    // Find out which solution (1 or 2) was selected:
+    if (TMath::Abs(selectedSolution - output.fNeutrinoPzSolution1) <= TMath::Abs(selectedSolution - output.fNeutrinoPzSolution2)) {
+      // ...solution 1 was selected. Return false if it doesn't give a vector that is closer to the true one:
+      if (difference1.Mag() > difference2.Mag()) return false;
+    } else {
+      // ...solution 2 was selected. Return false if it doesn't give a vector that is closer to the true one:
+      if (difference2.Mag() > difference1.Mag()) return false;
+    }
+    return true;
+  }
 
   void FullHiggsMassCalculator::constructFourMomenta(TVector3& pB, TVector3& pTau, TVector3& MET, 
 						     FullHiggsMassCalculator::Data& output) {
-    if (output.bNegativeDiscriminantRecovered) MET.SetPerp(output.fModifiedMET);
     TLorentzVector visibleTauMomentum;
     TLorentzVector bJetMomentum;
     TLorentzVector neutrinosMomentum;
@@ -734,7 +747,10 @@ namespace HPlus {
     output.LorentzVector_neutrinosFourMomentum = neutrinosMomentum;
   }
 
-  void FullHiggsMassCalculator::calculateTopMass(FullHiggsMassCalculator::Data& output) {
+  void FullHiggsMassCalculator::calculateTopMass(TVector3& tauVector, TVector3& bJetVector, TVector3& METVector, 
+						 FullHiggsMassCalculator::Data& output) {
+    //if (output.bNegativeDiscriminantRecovered) MET.SetPerp(output.fModifiedMET);
+    constructFourMomenta(tauVector, bJetVector, METVector, output);
     TLorentzVector topMomentumSolution = output.LorentzVector_visibleTauFourMomentum + output.LorentzVector_bJetFourMomentum +
       output.LorentzVector_neutrinosFourMomentum;
     output.fTopMassSolution = topMomentumSolution.M();
@@ -753,7 +769,7 @@ namespace HPlus {
   }
   
   void FullHiggsMassCalculator::doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, 
-							   InputDataType myInputDataType) {
+							   InputDataType myInputDataType, TVector3& METVector) {
     // Apply cuts:
     applyCuts(output);
 
@@ -767,17 +783,33 @@ namespace HPlus {
       // Counters (note: only incremented if the event has passed)
       increment(fAllSelections_SubCount);
       if (iEvent.isRealData()) break; // The true solution is not known for real data.
-      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionGreater, output))
+      // Two criteria for determining which one is the better solution are currently implemented. Uncomment the one to use.
+      // 1. The one that is closer to the true solution:
+//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionGreater, output))
+// 	increment(fSelectionGreaterCorrect_SubCount);
+//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionSmaller, output))
+// 	increment(fSelectionSmallerCorrect_SubCount);
+//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuAngleMax, output))
+// 	increment(fSelectionTauNuAngleMaxCorrect_SubCount);
+//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuAngleMin, output))
+// 	increment(fSelectionTauNuAngleMinCorrect_SubCount);
+//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output))
+// 	increment(fSelectionTauNuDeltaEtaMaxCorrect_SubCount);
+//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output))
+// 	increment(fSelectionTauNuDeltaEtaMinCorrect_SubCount);
+      // 2. The one that gives a smaller vector distance between the true and the reconstructed vector (i.e. also takes into 
+      // account the other components:
+      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionGreater, output, METVector))
 	increment(fSelectionGreaterCorrect_SubCount);
-      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionSmaller, output))
+      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionSmaller, output, METVector))
 	increment(fSelectionSmallerCorrect_SubCount);
-      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuAngleMax, output))
+      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuAngleMax, output, METVector))
 	increment(fSelectionTauNuAngleMaxCorrect_SubCount);
-      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuAngleMin, output))
+      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuAngleMin, output, METVector))
 	increment(fSelectionTauNuAngleMinCorrect_SubCount);
-      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output))
+      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output, METVector))
 	increment(fSelectionTauNuDeltaEtaMaxCorrect_SubCount);
-      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output))
+      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output, METVector))
 	increment(fSelectionTauNuDeltaEtaMinCorrect_SubCount);
       break;
     case eGEN:
