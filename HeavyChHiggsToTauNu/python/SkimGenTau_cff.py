@@ -8,6 +8,8 @@ import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 
+skimGenTauTausCountAll = cms.EDProducer("EventCountProducer")
+
 skimGenTauTaus = cms.EDFilter("GenParticleSelector",
     src = cms.InputTag("genParticles"),
     cut = cms.string(customisations.generatorTauSelection % customisations.generatorTauPt)
@@ -19,11 +21,13 @@ skimGenTauTausFilter = cms.EDFilter("CandViewCountFilter",
 skimGenTauTausCount = cms.EDProducer("EventCountProducer")
 
 skimGenTauSequence = cms.Sequence(
+    skimGenTauTausCountAll +
     skimGenTauTaus +
     skimGenTauTausFilter +
     skimGenTauTausCount
 )
 
 counters = [
+    "skimGenTauTausCountAll",
     "skimGenTauTausCount"
 ]
