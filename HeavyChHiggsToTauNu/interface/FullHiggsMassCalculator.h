@@ -82,11 +82,13 @@ namespace HPlus {
       friend class FullHiggsMassCalculator;
     private:
       bool bPassedEvent;
+      bool bNegativeDiscriminantRecovered;
       // Calculated results
       double fDiscriminant;
       double fTopMassSolution;
       double fNeutrinoPzSolution1;
       double fNeutrinoPzSolution2;
+      double fModifiedMET;
       double fSelectedNeutrinoPzSolution;
       double fNeutrinoPtSolution;
       double fHiggsMassSolution;
@@ -134,6 +136,7 @@ namespace HPlus {
     void doCalculations(TVector3& tauVector, TVector3& bJetVector, TVector3& METVector,
 			FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
     void calculateNeutrinoPz(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
+    //bool calculateModifiedMET(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
     double selectNeutrinoPzSolution(TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output,
 				  PzSelectionMethod selectionMethod);
     double getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
@@ -145,6 +148,7 @@ namespace HPlus {
     void doEventClassification(const edm::Event& iEvent, TVector3& bJetVector, TVector3& tauVector, 
 			       TVector3& METVector, FullHiggsMassCalculator::Data& output, 
 			       const GenParticleAnalysis::Data* genDataPtr = NULL);
+    void applyCuts(FullHiggsMassCalculator::Data& output);
     void doCountingAndHistogramming(FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
     void analyzeMETComposition(TVector3& recoMETVector, TVector3& genBothNeutrinosVector, TVector3& genMETVector);
     
@@ -188,6 +192,7 @@ namespace HPlus {
     WrappedTH1* hDiscriminant;
     WrappedTH1* hDiscriminant_GEN;
     WrappedTH1* hDiscriminant_GEN_NeutrinosReplacedWithMET;
+    WrappedTH2* h2TransverseMassAndInvariantMass;
 
     WrappedTH1* hTopMassSolution;
     WrappedTH1* hTopInvariantMassInGenerator;

@@ -69,6 +69,9 @@ namespace {
   // (Containing these variables in an anonymous namespace prevents them from being accessed from code in another file)
   // Set this variable to true if you want debug print statements to be activated
   const bool bPrintDebugOutput = false;
+  // Set this variable to true if you want to recover events with a negative discriminant using a special algorithm instead of
+  // discarding them
+  const bool bTryRecoveringNegativeDiscriminants = false;
   // Set the physical particle masses required in the calculation (in GeV)
   // Note: these are the values used in the generator. Therefore, they should also be used here even if they no longer correspond
   //       to the latest values given by the Particle Data Group.
@@ -81,9 +84,11 @@ namespace HPlus {
   FullHiggsMassCalculator::Data::Data():
     bPassedEvent(false),
     fDiscriminant(0),
+    bNegativeDiscriminantRecovered(false),
     fTopMassSolution(0),
     fNeutrinoPzSolution1(0),
     fNeutrinoPzSolution2(0),
+    fModifiedMET(0),
     fSelectedNeutrinoPzSolution(0),
     fNeutrinoPtSolution(0),
     fHiggsMassSolution(0),
@@ -132,7 +137,7 @@ namespace HPlus {
     fSelectionTauNuDeltaEtaMaxCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", 
 									  "TauNuDeltaEtaMax solution closest")),
     fSelectionTauNuDeltaEtaMinCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", 
-									  "TauNuDeltaEtaMax solution closest"))
+									  "TauNuDeltaEtaMin solution closest"))
   {
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
@@ -153,6 +158,9 @@ namespace HPlus {
     hDiscriminant_GEN_NeutrinosReplacedWithMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
 									   "Discriminant_GEN_NeutrinosReplacedWithMET",
 									   "Discriminant", 100, -50000, 50000);
+    h2TransverseMassAndInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, "TransMassVsInvMass", 
+	                      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
+								 100, 0, 500, 100, 0, 500);
     // Informative histograms
     // Histograms for all the different solution selection methods
     //---RECO:
@@ -297,6 +305,7 @@ namespace HPlus {
     // Define a FullHiggsMassCalculator::Data object to hold many different values of interest and be returned at the end.
     Data output;
     if (bPrintDebugOutput) std::cout << "==================================================================" << std::endl;
+    std::cout << "==================================================================" << std::endl;
 
     // CALCULATION USING RECONSTRUCTED MOMENTA
     // ---------------------------------------
@@ -321,8 +330,8 @@ namespace HPlus {
     if (!iEvent.isRealData())
       doEventClassification(iEvent, recoBJetVector, recoTauVector, recoMETVector, output, genDataPtr);
 
-    // The rest of the analysis is only done for MC signal events (at least for now)
-    if (iEvent.isRealData() || !eventHasGenChargedHiggs(iEvent)) return output;
+    // The rest of the analysis is only done for MC signal events with a light charged Higgs (at least for now)
+    if (iEvent.isRealData() || !eventHasLightChargedHiggs(iEvent)) return output;
 
     // Histogram the invariant mass of the top mother of the Higgs.
     hTopInvariantMassInGenerator->Fill(getGenHiggsSideTop(iEvent)->mass());
@@ -410,56 +419,71 @@ namespace HPlus {
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == eRECO) hHiggsMass_greater->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN) hHiggsMass_GEN_greater->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_greater->Fill(output.fHiggsMassSolution);
+    if (output.bPassedEvent) {
+      if (myInputDataType == eRECO) hHiggsMass_greater->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN) hHiggsMass_GEN_greater->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_greater->Fill(output.fHiggsMassSolution);
+    }
     // Selection method: smaller
     output.fNeutrinoPzSolutionSmaller = selectNeutrinoPzSolution(tauVector, bJetVector, output, eSmaller);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == eRECO) hHiggsMass_smaller->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN) hHiggsMass_GEN_smaller->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_smaller->Fill(output.fHiggsMassSolution);
+    if (output.bPassedEvent) {
+      if (myInputDataType == eRECO) hHiggsMass_smaller->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN) hHiggsMass_GEN_smaller->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_smaller->Fill(output.fHiggsMassSolution);
+    }
     // Selection method: tauNuAngleMin
     output.fNeutrinoPzSolutionTauNuAngleMin = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuAngleMin);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == eRECO) hHiggsMass_tauNuAngleMin->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuAngleMin->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuAngleMin->Fill(output.fHiggsMassSolution);
+    if (output.bPassedEvent) {
+      if (myInputDataType == eRECO) hHiggsMass_tauNuAngleMin->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuAngleMin->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuAngleMin->Fill(output.fHiggsMassSolution);
+    }
     // Selection method: TauNuDeltaEtaMax
     output.fNeutrinoPzSolutionTauNuDeltaEtaMax = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuDeltaEtaMax);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolution);
+    if (output.bPassedEvent) {
+      if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN_NeutrinosReplacedWithMET) 
+	hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolution);
+    }
     // Selection method: TauNuDeltaEtaMin
     output.fNeutrinoPzSolutionTauNuDeltaEtaMin = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuDeltaEtaMin);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolution);
+    if (output.bPassedEvent) {
+      if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN_NeutrinosReplacedWithMET) 
+	hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolution);
+    }
     // NOTE: THE LAST CALCULATION DETERMINES WHICH SELECTION METHOD IS USED FOR THE MAIN OUTPUT:
     // Selection method: tauNuAngleMax
     output.fNeutrinoPzSolutionTauNuAngleMax = selectNeutrinoPzSolution(tauVector, bJetVector, output, eTauNuAngleMax);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMass(output);
     calculateHiggsMass(output);
-    if (myInputDataType == eRECO) hHiggsMass_tauNuAngleMax->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuAngleMax->Fill(output.fHiggsMassSolution);
-    if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuAngleMax->Fill(output.fHiggsMassSolution);
+    if (output.bPassedEvent) {
+      if (myInputDataType == eRECO) hHiggsMass_tauNuAngleMax->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuAngleMax->Fill(output.fHiggsMassSolution);
+      if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuAngleMax->Fill(output.fHiggsMassSolution);
+    }
 
     doCountingAndHistogramming(output, myInputDataType);
   }
 
   void FullHiggsMassCalculator::calculateNeutrinoPz(TVector3& pB, TVector3& pTau, TVector3& MET, 
 						    FullHiggsMassCalculator::Data& output) {
+    output.bNegativeDiscriminantRecovered = false; // THIS IS IMPORTANT!
     increment(fAllSolutionsCutSubCount);
     // Get the on-shell particle masses
     const double mTop = c_fPhysicalTopMass;
@@ -467,8 +491,8 @@ namespace HPlus {
     const double mB   = c_fPhysicalBeautyMass;
     if (bPrintDebugOutput) std::cout << "Top, tau, and beauty mass: " << mTop << ", " << mTau << ", " << mB << std::endl;
     // Calculate quantities appearing in the calculation
-    double bEnergy = TMath::Sqrt(mB * mB + pB.Mag2()); // TODO: what should be taken as the energy?
-    double visibleTauEnergy = TMath::Sqrt(mTau * mTau + pTau.Mag2()); // TODO: what should be taken as the energy?
+    double bEnergy = TMath::Sqrt(mB * mB + pB.Mag2());
+    double visibleTauEnergy = TMath::Sqrt(mTau * mTau + pTau.Mag2());
     double deltaSquaredMasses = mTop * mTop - mB * mB - mTau * mTau;
     double A = (deltaSquaredMasses / 2.0 - bEnergy * visibleTauEnergy + pB.Dot(pTau) +
 		pB.XYvector() * MET.XYvector() + pTau.XYvector() * MET.XYvector()) / (bEnergy + visibleTauEnergy);
@@ -481,21 +505,85 @@ namespace HPlus {
     // If the discriminant is positive, there are two real solutions
     if (discriminant >= 0.0) {
       increment(fPositiveDiscriminantCutSubCount);
-      neutrinoPzSolution1 = (A*B + TMath::Sqrt(A*A - MET.Perp2() * (1 - B*B)))/(1 - B*B);
-      neutrinoPzSolution2 = (A*B - TMath::Sqrt(A*A - MET.Perp2() * (1 - B*B)))/(1 - B*B);
+      neutrinoPzSolution1 = (A*B + TMath::Sqrt(discriminant))/(1 - B*B);
+      neutrinoPzSolution2 = (A*B - TMath::Sqrt(discriminant))/(1 - B*B);
     }
-    // If the discriminant is negative, there are two imaginary solutions
+    // If the discriminant is negative, there are two complex (and hence unphysical) solutions. We try to remedy this as follows.
+    // Negative discriminant recovery strategy:
+    //  * Set discriminant to zero and calculate (unambiguous) neutrino p_z
+    //  * Solve MET value from requirement "discriminant = 0". (Which is a quadratic equation with two real solutions for MET)
+    //  * Select the value that is closer to the original value (minimal modification principle)
+    // [* Could be implemented later: if the new MET differs from the original MET by more than some cut value, reject event]
     else {
       increment(fNegativeDiscriminantCutSubCount);
       if (bPrintDebugOutput) std::cout << "DISCRIMINANT < 0!!!" << std::endl;
-      // Set discriminant to zero
+      // Set discriminant to zero and calculate neutrino p_z (the two solutions are equal)
       neutrinoPzSolution1 = A*B / (1 - B*B);
       neutrinoPzSolution2 = A*B / (1 - B*B);
+      if (bTryRecoveringNegativeDiscriminants) {
+	output.bNegativeDiscriminantRecovered = true;
+	// Calculate solutions for the modified MET value.
+	double modifiedMETSolution1 = (deltaSquaredMasses / 2.0 - bEnergy * visibleTauEnergy + pB.Dot(pTau)) / 
+	  (- pB.Pt() * TMath::Cos(pB.DeltaPhi(MET)) - pTau.Pt() * TMath::Cos(pTau.DeltaPhi(MET))
+	   + TMath::Sqrt((bEnergy + visibleTauEnergy)*(bEnergy + visibleTauEnergy) - (pB.Pz() + pTau.Pz())*(pB.Pz() + pTau.Pz())));
+	double modifiedMETSolution2 = (deltaSquaredMasses / 2.0 - bEnergy * visibleTauEnergy + pB.Dot(pTau)) / 
+	  (- pB.Pt() * TMath::Cos(pB.DeltaPhi(MET)) - pTau.Pt() * TMath::Cos(pTau.DeltaPhi(MET))
+	   - TMath::Sqrt((bEnergy + visibleTauEnergy)*(bEnergy + visibleTauEnergy) - (pB.Pz() + pTau.Pz())*(pB.Pz() + pTau.Pz())));
+	// Select the MET solution that is closer to the original value
+	if (TMath::Abs(modifiedMETSolution1 - MET.Perp()) < TMath::Abs(modifiedMETSolution2 - MET.Perp()))
+	  output.fModifiedMET = modifiedMETSolution1;
+	else 
+	  output.fModifiedMET = modifiedMETSolution2;
+	// // VALIDATION:
+// 	TVector3 modifiedMETVector1;
+// 	modifiedMETVector1.SetPtEtaPhi(modifiedMETSolution1, MET.Eta(), MET.Phi());
+// 	TVector3 modifiedMETVector2 = MET;
+// 	//modifiedMETVector1.SetPerp(modifiedMETSolution1);
+// 	modifiedMETVector2.SetPerp(modifiedMETSolution2);
+// 	double modifiedA1 = (deltaSquaredMasses / 2.0 - bEnergy * visibleTauEnergy + pB.Dot(pTau) +
+// 			     pB.XYvector() * modifiedMETVector1.XYvector() + pTau.XYvector() * modifiedMETVector1.XYvector()) 
+// 	  / (bEnergy + visibleTauEnergy);
+// 	std::cout << "A = " << A << std::endl;
+// 	std::cout << "modifiedA1 = " << modifiedA1 << std::endl;
+// 	std::cout << modifiedMETSolution1*modifiedMETSolution1 << " = " << modifiedMETVector1.Perp2() << std::endl;
+// 	double modifiedA2 = (deltaSquaredMasses / 2.0 - bEnergy * visibleTauEnergy + pB.Dot(pTau) +
+// 			     pB.XYvector() * modifiedMETVector2.XYvector() + pTau.XYvector() * modifiedMETVector2.XYvector()) 
+// 	  / (bEnergy + visibleTauEnergy);
+// 	double modifiedDiscriminant1 = modifiedA1*modifiedA1 - modifiedMETVector1.Perp2() * (1 - B*B);
+// 	double modifiedDiscriminant2 = modifiedA2*modifiedA2 - modifiedMETVector2.Perp2() * (1 - B*B);
+// 	bool bPrintDebugOutput_recovery = true; // DELETE LATER
+// 	if (bPrintDebugOutput_recovery) {
+// 	  std::cout << "_______________________ original MET: " << MET.Perp() << std::endl;
+// 	  std::cout << "_______________________ modifiedMETSolution1 = " << modifiedMETSolution1 << std::endl;
+// 	  std::cout << "_______________________ modifiedMETSolutionA = " << modifiedMETSolutionA << std::endl;
+// 	  std::cout << "_______________________ modifiedMETSolution2 = " << modifiedMETSolution2 << std::endl;
+// 	  std::cout << "_______________________ modifiedMETSolutionB = " << modifiedMETSolutionB << std::endl;
+// 	  std::cout << "_______________________ discriminant for modifiedMETSolution1: " << modifiedDiscriminant1 << std::endl;
+// 	  std::cout << "_______________________ discriminant for modifiedMETSolution2: " << modifiedDiscriminant2 << std::endl;
+// 	  std::cout << "(checking phi before and after calculation) " <<  MET.Phi() << " = " 
+// 		    << modifiedMETVector1.Phi() << std::endl;
+// 	}
+// 	// DELETE --->
+// 	modifiedMETSolution1 = MET.Perp();
+// 	modifiedMETVector1.SetPtEtaPhi(modifiedMETSolution1, MET.Eta(), MET.Phi());
+//       modifiedA1 = (deltaSquaredMasses / 2.0 - bEnergy * visibleTauEnergy + pB.Dot(pTau) +
+// 		    pB.XYvector() * modifiedMETVector1.XYvector() + pTau.XYvector() * modifiedMETVector1.XYvector())
+// 	/ (bEnergy + visibleTauEnergy);
+//       modifiedDiscriminant1 = modifiedA1*modifiedA1 - modifiedMETVector1.Perp2() * (1 - B*B);
+//       std::cout << discriminant << " = " << modifiedDiscriminant1 << std::endl;
+//       // <--- /DELETE
+//       // output.fSelectedModifiedMETValue = ...
+//       // ---> in constructFourMomenta: (met).SetPerp(output.fSelectedModifiedMETValue);
+      }
     }
     // Set output
     output.fDiscriminant = discriminant;
     output.fNeutrinoPzSolution1 = neutrinoPzSolution1;
     output.fNeutrinoPzSolution2 = neutrinoPzSolution2;
+    if (output.fDiscriminant >= 0 || output.bNegativeDiscriminantRecovered)
+      output.bPassedEvent = true;
+    else 
+      output.bPassedEvent = false;
     // Print information about the calculation steps
     if (bPrintDebugOutput) {
       std::cout << "FullHiggsMassCalculator: Reconstructing the neutrino p_z..." << std::endl;
@@ -514,7 +602,7 @@ namespace HPlus {
       std::cout << "--- neutrinoPzSolution2 = " << neutrinoPzSolution2 << std::endl;
     }
   }
-  
+
   double FullHiggsMassCalculator::selectNeutrinoPzSolution(TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output, 
 							 PzSelectionMethod selectionMethod) {
     // The following two variables (solution1, solution2) are only introduced to improve code readability!
@@ -532,6 +620,12 @@ namespace HPlus {
       std::cout << "--- deltaEta1 = " << deltaEta1 << std::endl;
       std::cout << "--- deltaEta2 = " << deltaEta2 << std::endl;
     }
+    if (deltaEta1 > deltaEta2 && angle1 > angle2)
+      std::cout << "1" << std::endl;
+    else if (deltaEta1 < deltaEta2 && angle1 < angle2)
+      std::cout << "1" << std::endl;
+    else
+      std::cout << "0" << std::endl;
 
     // Select a solution using the desired method
     // Initialize...
@@ -590,13 +684,16 @@ namespace HPlus {
 
   double FullHiggsMassCalculator::getDeltaEtaBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPzSolution) {
     TVector3 neutrinoVector(MET.Px(), MET.Py(), neutrinoPzSolution);
-    return TMath::Abs(neutrinoVector.Eta() - pTau.Eta());
+    //return TMath::Abs(neutrinoVector.Eta() - pTau.Eta());
+
+    // TODO, IMPORTANT!!!! REMOVE THIS AND UNCOMMENT THE LINE ABOVE. THIS IS ONLY FOR TESTING!
+    return neutrinoVector.DeltaR(pTau);
   }
 
   bool FullHiggsMassCalculator::selectedSolutionIsClosestToTrueValue(double selectedSolution, 
 								     FullHiggsMassCalculator::Data& output) {
+    if (!output.bPassedEvent) return false;
     if (selectedSolution > 999999.0) return false; // Always return false if the solution was not calculated
-    if (output.fDiscriminant < 0.0) return false; // Always return false if there were no real solutions
     // Note: this method will also return true if the two solutions were equal
     // Otherwise, find out which solution (1 or 2) was selected:
     if (TMath::Abs(selectedSolution - output.fNeutrinoPzSolution1) <= TMath::Abs(selectedSolution - output.fNeutrinoPzSolution2)) {
@@ -613,6 +710,7 @@ namespace HPlus {
 
   void FullHiggsMassCalculator::constructFourMomenta(TVector3& pB, TVector3& pTau, TVector3& MET, 
 						     FullHiggsMassCalculator::Data& output) {
+    if (output.bNegativeDiscriminantRecovered) MET.SetPerp(output.fModifiedMET);
     TLorentzVector visibleTauMomentum;
     TLorentzVector bJetMomentum;
     TLorentzVector neutrinosMomentum;
@@ -643,15 +741,23 @@ namespace HPlus {
     if (bPrintDebugOutput) std::cout << "output.fHiggsMassSolution: " << output.fHiggsMassSolution << std::endl;
   }
 
+  void FullHiggsMassCalculator::applyCuts(FullHiggsMassCalculator::Data& output) {
+    if (140.0 < output.fTopMassSolution < 200.0) output.bPassedEvent = false;
+      //TMath::Output(output.fModifiedMET - <original MET>)
+  }
+
   void FullHiggsMassCalculator::doCountingAndHistogramming(FullHiggsMassCalculator::Data& output, InputDataType myInputDataType) {
+    // Apply cuts:
+    applyCuts(output);
+
     switch (myInputDataType) {
     case eRECO:
       hDiscriminant->Fill(output.fDiscriminant);
-      if (output.fDiscriminant < 0) break;
+      if (!output.bPassedEvent) break;
       hHiggsMass->Fill(output.fHiggsMassSolution);
       hTopMassSolution->Fill(output.fTopMassSolution);
       hSelectedNeutrinoPzSolution->Fill(output.fSelectedNeutrinoPzSolution);
-      // Counters (note: only incremented if discriminant non-negative)
+      // Counters (note: only incremented if the event has passed)
       increment(fAllSelections_SubCount);
       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionGreater, output))
 	increment(fSelectionGreaterCorrect_SubCount);
@@ -668,13 +774,13 @@ namespace HPlus {
       break;
     case eGEN:
       hDiscriminant_GEN->Fill(output.fDiscriminant);
-      if (output.fDiscriminant < 0) break;
+      if (!output.bPassedEvent) break;
       hHiggsMass_GEN->Fill(output.fHiggsMassSolution);
       //hTopMassSolution_GEN->Fill(output.fTopMassSolution);
       break;
     case eGEN_NeutrinosReplacedWithMET:
       hDiscriminant_GEN_NeutrinosReplacedWithMET->Fill(output.fDiscriminant);
-      if (output.fDiscriminant < 0) break;
+      if (!output.bPassedEvent) break;
       hHiggsMass_GEN_NeutrinosReplacedWithMET->Fill(output.fHiggsMassSolution);
       //hTopMassSolution_GEN_NeutrinosReplacedWithMET->Fill(output.fTopMassSolution);
       break;
@@ -699,7 +805,6 @@ namespace HPlus {
     double metDeltaPtHiCut  =  40.0; // GeV
     double metDeltaPhiCut   =  15.0 * TMath::DegToRad(); // The first number is the cut angle in deg, which is then converted to rad
 
-    //bool myEventHasGenChargedHiggs = eventHasGenChargedHiggs(iEvent);
     // B-jet: compare RECO and GEN information
     bDeltaR = getClosestGenBQuarkDeltaR(iEvent, bJetVector);
     if (bPrintDebugOutput) std::cout << "****** bDeltaR: " << bDeltaR << std::endl;
@@ -749,50 +854,50 @@ namespace HPlus {
       output.eEventClassCode = ePure;
       eventClassName = "Pure";
       increment(eventClass_Pure_SubCount);
-      if (output.fDiscriminant >= 0) hHiggsMassPure->Fill(output.fHiggsMassSolution);
+      if (output.bPassedEvent) hHiggsMassPure->Fill(output.fHiggsMassSolution);
       hDiscriminantPure->Fill(output.fDiscriminant);
       break;
     case eOnlyBadTau:
       output.eEventClassCode = eOnlyBadTau;
       eventClassName = "OnlyBadTau";
       increment(eventClass_OnlyBadTau_SubCount);
-      if (output.fDiscriminant >= 0) hHiggsMassBadTau->Fill(output.fHiggsMassSolution);
+      if (output.bPassedEvent) hHiggsMassBadTau->Fill(output.fHiggsMassSolution);
       break;
     case eOnlyBadMET:
       output.eEventClassCode = eOnlyBadMET;
       eventClassName = "OnlyBadMET";
       increment(eventClass_OnlyBadMET_SubCount);
-      if (output.fDiscriminant >= 0) hHiggsMassBadMET->Fill(output.fHiggsMassSolution);
+      if (output.bPassedEvent) hHiggsMassBadMET->Fill(output.fHiggsMassSolution);
       break;
     case eOnlyBadTauAndMET:
       output.eEventClassCode = eOnlyBadTauAndMET;
       eventClassName = "OnlyBadTauAndMET";
       increment(eventClass_OnlyBadTauAndMET_SubCount);
-      if (output.fDiscriminant >= 0) hHiggsMassBadTauAndMET->Fill(output.fHiggsMassSolution);
+      if (output.bPassedEvent) hHiggsMassBadTauAndMET->Fill(output.fHiggsMassSolution);
       break;
     case eOnlyBadBjet:
       output.eEventClassCode = eOnlyBadBjet;
       eventClassName = "OnlyBadBjet";
       increment(eventClass_OnlyBadBjet_SubCount);
-      if (output.fDiscriminant >= 0) hHiggsMassBadBjet->Fill(output.fHiggsMassSolution);
+      if (output.bPassedEvent) hHiggsMassBadBjet->Fill(output.fHiggsMassSolution);
       break;
     case eOnlyBadBjetAndTau:
       output.eEventClassCode = eOnlyBadBjetAndTau;
       eventClassName = "OnlyBadBjetAndTau";
       increment(eventClass_OnlyBadBjetAndTau_SubCount);
-      if (output.fDiscriminant >= 0) hHiggsMassBadBjetAndTau->Fill(output.fHiggsMassSolution);
+      if (output.bPassedEvent) hHiggsMassBadBjetAndTau->Fill(output.fHiggsMassSolution);
       break;
     case eOnlyBadBjetAndMET:
       output.eEventClassCode = eOnlyBadBjetAndMET;
       eventClassName = "OnlyBadBjetAndMET";
       increment(eventClass_OnlyBadBjetAndMET_SubCount);
-      if (output.fDiscriminant >= 0) hHiggsMassBadBjetAndMET->Fill(output.fHiggsMassSolution);
+      if (output.bPassedEvent) hHiggsMassBadBjetAndMET->Fill(output.fHiggsMassSolution);
       break;
     case eOnlyBadBjetAndMETAndTau:
       output.eEventClassCode = eOnlyBadBjetAndMETAndTau;
       eventClassName = "OnlyBadBjetAndMETAndTau";
       increment(eventClass_OnlyBadBjetAndMETAndTau_SubCount);
-      if (output.fDiscriminant >= 0) hHiggsMassBadBjetAndMETAndTau->Fill(output.fHiggsMassSolution);
+      if (output.bPassedEvent) hHiggsMassBadBjetAndMETAndTau->Fill(output.fHiggsMassSolution);
       break;
     default:
       // Throw exception!
@@ -805,7 +910,7 @@ namespace HPlus {
     // Also do histogramming and counting for the set of events, in which ANYTHING was misidentified ("impure events")
     if (eventClassCode > 0) {
       increment(eventClass_Impure_SubCount);
-      if (output.fDiscriminant >= 0) hHiggsMassImpure->Fill(output.fHiggsMassSolution);
+      if (output.bPassedEvent) hHiggsMassImpure->Fill(output.fHiggsMassSolution);
       hDiscriminantImpure->Fill(output.fDiscriminant);
     }
   }

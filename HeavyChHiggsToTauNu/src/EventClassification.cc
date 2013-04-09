@@ -57,14 +57,17 @@ namespace HPlus {
   
 //   EventClassification::~EventClassification() {}
 
-  bool eventHasGenChargedHiggs(const edm::Event& iEvent) {
+  bool eventHasLightChargedHiggs(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
       if (TMath::Abs(p.pdgId()) == 37) {
-	//std::cout << "Event has a genuine charged Higgs boson!" << std::endl;
-	return true;
+	// check if the H+ is light
+	if (p.mass() < 166.0) {
+	  //std::cout << "Event has a genuine light charged Higgs boson!" << std::endl;
+	  return true;
+	}
       }
     }
     //std::cout << "Event does not have a genuine charged Higgs boson." << std::endl;

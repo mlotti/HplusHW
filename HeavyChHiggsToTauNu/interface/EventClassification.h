@@ -34,7 +34,7 @@ namespace HPlus {
 //     EventClassification(EventCounter& eventCounter, HistoWrapper& histoWrapper);
 //     ~EventClassification();
     
-  bool eventHasGenChargedHiggs(const edm::Event& iEvent);
+  bool eventHasLightChargedHiggs(const edm::Event& iEvent);
   size_t getHiggsLine(const edm::Event& iEvent);
   reco::Candidate* getChargedHiggs(const edm::Event& iEvent);
   //size_t getFirstHiggsLine(const edm::Event& iEvent);
