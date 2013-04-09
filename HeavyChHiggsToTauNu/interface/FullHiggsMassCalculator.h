@@ -133,7 +133,7 @@ namespace HPlus {
 			const GenParticleAnalysis::Data* genDataPtr = NULL);
     edm::Ptr<pat::Jet> findHiggsSideBJet(const BTagging::Data bData, const edm::Ptr<pat::Tau> myTau); // TODO: change name
     // "selectBJetClosestToTau"?
-    void doCalculations(TVector3& tauVector, TVector3& bJetVector, TVector3& METVector,
+    void doCalculations(const edm::Event& iEvent, TVector3& tauVector, TVector3& bJetVector, TVector3& METVector,
 			FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
     void calculateNeutrinoPz(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
     //bool calculateModifiedMET(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
@@ -142,6 +142,7 @@ namespace HPlus {
     double getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
     double getDeltaEtaBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
     bool selectedSolutionIsClosestToTrueValue(double selectedSolution, FullHiggsMassCalculator::Data& output);
+    //bool selectedSolutionGivesVectorClosestToTrue(double selectedSolution, FullHiggsMassCalculator::Data& output);
     void constructFourMomenta(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
     void calculateTopMass(FullHiggsMassCalculator::Data& output);
     void calculateHiggsMass(FullHiggsMassCalculator::Data& output);
@@ -149,7 +150,7 @@ namespace HPlus {
 			       TVector3& METVector, FullHiggsMassCalculator::Data& output, 
 			       const GenParticleAnalysis::Data* genDataPtr = NULL);
     void applyCuts(FullHiggsMassCalculator::Data& output);
-    void doCountingAndHistogramming(FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
+    void doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
     void analyzeMETComposition(TVector3& recoMETVector, TVector3& genBothNeutrinosVector, TVector3& genMETVector);
     
   private:

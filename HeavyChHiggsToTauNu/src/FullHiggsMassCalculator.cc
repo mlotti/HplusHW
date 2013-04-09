@@ -325,7 +325,7 @@ namespace HPlus {
       std::cout << "recoTauVector: " << recoTauVector.Px() << ", " << recoTauVector.Py() << ", " << recoTauVector.Pz() << std::endl;
       std::cout << "recoMETVector: " << recoMETVector.Px() << ", " << recoMETVector.Py() << ", " << recoMETVector.Pz() << std::endl;
     }
-    doCalculations(recoBJetVector, recoTauVector, recoMETVector, output, eRECO);
+    doCalculations(iEvent, recoBJetVector, recoTauVector, recoMETVector, output, eRECO);
     // Classify MC events according to what was identified correctly and what was not
     if (!iEvent.isRealData())
       doEventClassification(iEvent, recoBJetVector, recoTauVector, recoMETVector, output, genDataPtr);
@@ -349,7 +349,7 @@ namespace HPlus {
     TVector3 genBothNeutrinosVector = myNeutrino1Vector + myNeutrino2Vector;
     // Set true value of neutrino p_z
     output.fTrueNeutrinoPz = genBothNeutrinosVector.Pz();
-    doCalculations(genBJetVector, genVisibleTauVector, genBothNeutrinosVector, output, eGEN);
+    doCalculations(iEvent, genBJetVector, genVisibleTauVector, genBothNeutrinosVector, output, eGEN);
 
     // NOTE: doEventClassification should only be called once for each event. DO NOT uncomment this line without commenting above!
     // doEventClassification(iEvent, genBJetVector, genVisibleTauVector, genBothNeutrinosVector, output, genDataPtr);
@@ -368,7 +368,7 @@ namespace HPlus {
     } else {
       genMETVector = calculateGenMETVectorFromNeutrinos(iEvent);
     }
-    doCalculations(genBJetVector, genVisibleTauVector, genMETVector, output, eGEN_NeutrinosReplacedWithMET);
+    doCalculations(iEvent, genBJetVector, genVisibleTauVector, genMETVector, output, eGEN_NeutrinosReplacedWithMET);
 
     // Now we can also analyze the composition of the MET
     analyzeMETComposition(recoMETVector, genBothNeutrinosVector, genMETVector);
@@ -404,7 +404,8 @@ namespace HPlus {
     return selectedRecoBJet;
   }
 
-  void FullHiggsMassCalculator::doCalculations(TVector3& tauVector, TVector3& bJetVector, TVector3& METVector, 
+  void FullHiggsMassCalculator::doCalculations(const edm::Event& iEvent, TVector3& tauVector, TVector3& bJetVector, 
+					       TVector3& METVector, 
 					       FullHiggsMassCalculator::Data& output, InputDataType myInputDataType) {
     // Outline:
     // - Calculate the neutrino p_z solutions. Both are saved in output.
@@ -478,7 +479,7 @@ namespace HPlus {
       if (myInputDataType == eGEN_NeutrinosReplacedWithMET) hHiggsMass_GEN_NuToMET_tauNuAngleMax->Fill(output.fHiggsMassSolution);
     }
 
-    doCountingAndHistogramming(output, myInputDataType);
+    doCountingAndHistogramming(iEvent, output, myInputDataType);
   }
 
   void FullHiggsMassCalculator::calculateNeutrinoPz(TVector3& pB, TVector3& pTau, TVector3& MET, 
@@ -708,6 +709,11 @@ namespace HPlus {
     return true;
   }
 
+//   bool FullHiggsMassCalculator::selectedSolutionGivesVectorClosestToTrue(double selectedSolution,
+// 									 FullHiggsMassCalculator::Data& output) {
+//     return true;
+//   }
+
   void FullHiggsMassCalculator::constructFourMomenta(TVector3& pB, TVector3& pTau, TVector3& MET, 
 						     FullHiggsMassCalculator::Data& output) {
     if (output.bNegativeDiscriminantRecovered) MET.SetPerp(output.fModifiedMET);
@@ -740,13 +746,14 @@ namespace HPlus {
     output.fHiggsMassSolution = higgsMomentumSolution.M();
     if (bPrintDebugOutput) std::cout << "output.fHiggsMassSolution: " << output.fHiggsMassSolution << std::endl;
   }
-
+  
   void FullHiggsMassCalculator::applyCuts(FullHiggsMassCalculator::Data& output) {
     if (140.0 < output.fTopMassSolution < 200.0) output.bPassedEvent = false;
-      //TMath::Output(output.fModifiedMET - <original MET>)
+    //TMath::Output(output.fModifiedMET - <original MET>)
   }
-
-  void FullHiggsMassCalculator::doCountingAndHistogramming(FullHiggsMassCalculator::Data& output, InputDataType myInputDataType) {
+  
+  void FullHiggsMassCalculator::doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, 
+							   InputDataType myInputDataType) {
     // Apply cuts:
     applyCuts(output);
 
@@ -759,6 +766,7 @@ namespace HPlus {
       hSelectedNeutrinoPzSolution->Fill(output.fSelectedNeutrinoPzSolution);
       // Counters (note: only incremented if the event has passed)
       increment(fAllSelections_SubCount);
+      if (iEvent.isRealData()) break; // The true solution is not known for real data.
       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionGreater, output))
 	increment(fSelectionGreaterCorrect_SubCount);
       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionSmaller, output))
