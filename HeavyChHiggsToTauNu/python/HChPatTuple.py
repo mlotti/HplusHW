@@ -65,6 +65,7 @@ class PATBuilder:
         if options.tauEmbeddingInput != 0:
             # Add the tau embedding counters, if that's the input
             import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
+            self.counters.extend(MuonSelection.getMuonPreSelectionCountersForEmbedding())
             self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding(dataVersion))
 #            self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlow"))
 #            self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlowChs"))
