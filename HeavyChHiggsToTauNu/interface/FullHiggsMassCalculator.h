@@ -76,7 +76,7 @@ namespace HPlus {
       const double getTopMass() const { return fTopMassSolution; }
       const double getSelectedNeutrinoPzSolution() const { return fSelectedNeutrinoPzSolution; }
       const double getNeutrinoPtSolution() const { return fNeutrinoPtSolution; }
-      const double getTrueNeutrinoPz() const { return fTrueNeutrinoPz; }
+      const double getMCNeutrinoPz() const { return fTrueNeutrinoPz; }
       const EventClassCode getEventClassCode() const { return eEventClassCode; }
 
       friend class FullHiggsMassCalculator;
@@ -157,22 +157,21 @@ namespace HPlus {
     void doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, InputDataType myInputDataType,
 				    TVector3& METVector);
     void analyzeMETComposition(TVector3& recoMETVector, TVector3& genBothNeutrinosVector, TVector3& genMETVector);
-    
-  private:
 
+  private:
     // Counters
     // Discriminant and neutrino p_z calculation
-    Count fAllSolutionsCutSubCount; // all calculations
-    Count fPositiveDiscriminantCutSubCount;
-    Count fNegativeDiscriminantCutSubCount;
+    Count allEvents_SubCount; // all calculations
+    Count positiveDiscriminant_SubCount;
+    Count negativeDiscriminant_SubCount;
     // Selection of the neutrino p_z solution
-    Count fAllSelections_SubCount;
-    Count fSelectionGreaterCorrect_SubCount;
-    Count fSelectionSmallerCorrect_SubCount;
-    Count fSelectionTauNuAngleMaxCorrect_SubCount;
-    Count fSelectionTauNuAngleMinCorrect_SubCount;
-    Count fSelectionTauNuDeltaEtaMaxCorrect_SubCount;
-    Count fSelectionTauNuDeltaEtaMinCorrect_SubCount;
+    Count passedEvents_SubCount;
+    Count selectionGreaterCorrect_SubCount;
+    Count selectionSmallerCorrect_SubCount;
+    Count selectionTauNuAngleMaxCorrect_SubCount;
+    Count selectionTauNuAngleMinCorrect_SubCount;
+    Count selectionTauNuDeltaEtaMaxCorrect_SubCount;
+    Count selectionTauNuDeltaEtaMinCorrect_SubCount;
     // two main categories of events (pure or impure):
     Count eventClass_Pure_SubCount;
     Count eventClass_Impure_SubCount;
@@ -189,20 +188,26 @@ namespace HPlus {
     Count eventClass_AllBadMET_SubCount;
     Count eventClass_AllBadBjet_SubCount;
 
-
     // Histograms 
     // The most important ones at the moment
     WrappedTH1* hHiggsMass;
+    WrappedTH1* hHiggsMassPositiveDiscriminant;
+    WrappedTH1* hHiggsMassNegativeDiscriminant;
     WrappedTH1* hHiggsMass_GEN;
     WrappedTH1* hHiggsMass_GEN_NeutrinosReplacedWithMET;
     WrappedTH1* hDiscriminant;
     WrappedTH1* hDiscriminant_GEN;
     WrappedTH1* hDiscriminant_GEN_NeutrinosReplacedWithMET;
-    WrappedTH2* h2TransverseMassAndInvariantMass;
+    WrappedTH2* h2TransverseMassVsInvariantMass;
+    WrappedTH2* h2TransverseMassVsInvariantMassPositiveDiscriminant;
+    WrappedTH2* h2TransverseMassVsInvariantMassNegativeDiscriminant;
 
     WrappedTH1* hTopMassSolution;
     WrappedTH1* hTopInvariantMassInGenerator;
     WrappedTH1* hSelectedNeutrinoPzSolution;
+    
+    // Histograms that may be used to identify good cut possibilities
+    WrappedTH1* hMETSignificance;
 
     // Histograms for all the different solution selection methods
     //---RECO:
