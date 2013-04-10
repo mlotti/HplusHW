@@ -56,9 +56,9 @@ namespace HPlus {
     hEtaBjetTauSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtaBjetTauSideTrue", "EtaBjetTauSideTrue", 250, -5., 5.);
     hPtBjetTopSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "PtBjetTopSideTrue", "PtBjetTopSideTrue", 200, 0., 400.);
     hEtaBjetTopSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtaBjetTopSideTrue", "EtaBjetTopSideTrue", 250, -5.,5.);
-    hMassTopTop = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MassTopTop_matchJets", "MassTopTop_matchJets",400, 0.,400.);
-    hMassTopHiggs = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MassTopHiggs_matchJets", "MassTopHiggs_matchJets",400, 0.,400.);
-    hMassW = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MassW_matchJets", "MassW_matchJets",300, 0.,300.);
+    hMassTopTop = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MassTopTop_matchJets", "MassTopTop_matchJets",400, 0.,400.);
+    hMassTopHiggs = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MassTopHiggs_matchJets", "MassTopHiggs_matchJets",400, 0.,400.);
+    hMassW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MassW_matchJets", "MassW_matchJets",300, 0.,300.);
     hPtTopTop = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "PtTopTop_matchJets", "PtTopTop_matchJets",200, 0.,400.);
     hPtTopHiggs = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "PtTopHiggs_matchJets", "PtTopHiggs_matchJets",200, 0.,400.);
     hPtW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "PtW_matchJets", "PtW_matchJets",200, 0.,400.);

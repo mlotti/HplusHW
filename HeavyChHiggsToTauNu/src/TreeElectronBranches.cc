@@ -23,7 +23,8 @@ namespace HPlus {
     fVertexSrc(vertexSrc),
     fBeamspotSrc(iConfig.getParameter<edm::InputTag>("beamspotSrc")),
     fRhoSrc(iConfig.getParameter<edm::InputTag>("electronRhoSrc")),
-    fPrefix(prefix+"_")
+    fPrefix(prefix+"_"),
+    fElectronsGenMatch(fPrefix+"genmatch")
   {
     edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("electronFunctions");
     std::vector<std::string> names = pset.getParameterNames();
@@ -40,9 +41,7 @@ namespace HPlus {
     for(size_t i=0; i<fElectronsFunctions.size(); ++i) {
       fElectronsFunctions[i].book(tree);
     }
-    tree->Branch((fPrefix+"pdgid").c_str(), &fElectronsPdgId);
-    tree->Branch((fPrefix+"mother_pdgid").c_str(), &fElectronsMotherPdgId);
-    tree->Branch((fPrefix+"grandmother_pdgid").c_str(), &fElectronsGrandMotherPdgId);
+    fElectronsGenMatch.book(tree);
     tree->Branch((fPrefix+"hasGsfTrack").c_str(), &fElectronsHasGsfTrack);
     tree->Branch((fPrefix+"hasSuperCluster").c_str(), &fElectronsHasSuperCluster);
     tree->Branch((fPrefix+"cutBasedIdVeto").c_str(), &fElectronsCutBasedIdVeto);
@@ -87,24 +86,7 @@ namespace HPlus {
     for(size_t i=0; i<helectrons->size(); ++i) {
       const pat::Electron& electron = helectrons->at(i);
       const reco::GenParticle *gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 11, electron, 0.5);
-
-      int pdgId = 0;
-      int motherPdgId = 0;
-      int grandMotherPdgId = 0;
-      if(gen) {
-        pdgId = gen->pdgId();
-        const reco::GenParticle *mother = GenParticleTools::findMother(gen);
-        if(mother) {
-          motherPdgId = mother->pdgId();
-          const reco::GenParticle *grandMother = GenParticleTools::findMother(mother);
-          if(grandMother)
-            grandMotherPdgId = grandMother->pdgId();
-        }
-      }
-
-      fElectronsPdgId.push_back(pdgId);
-      fElectronsMotherPdgId.push_back(motherPdgId);
-      fElectronsGrandMotherPdgId.push_back(grandMotherPdgId);
+      fElectronsGenMatch.addValue(gen);
     }
 
     return helectrons->size();
@@ -142,9 +124,7 @@ namespace HPlus {
     fElectrons.clear();
     for(size_t i=0; i<fElectronsFunctions.size(); ++i)
       fElectronsFunctions[i].reset();
-    fElectronsPdgId.clear();
-    fElectronsMotherPdgId.clear();
-    fElectronsGrandMotherPdgId.clear();
+    fElectronsGenMatch.reset();
     fElectronsHasGsfTrack.clear();
     fElectronsHasSuperCluster.clear();
     fElectronsCutBasedIdVeto.clear();

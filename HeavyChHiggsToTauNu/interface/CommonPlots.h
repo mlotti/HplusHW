@@ -83,15 +83,19 @@ namespace HPlus {
     WrappedTH1* hTauEta;
     WrappedTH1* hTauPhi;
     WrappedTH1* hRtau;
-    WrappedTH1* hFakeTauCategory;
-    WrappedTH1* hElectronSelectedPt;
-    WrappedTH1* hMuonSelectedPt;
+    WrappedTH1* hSelectedElectrons;
+    WrappedTH1* hSelectedMuons;
     WrappedTH1* hNjets;
+    WrappedTH1* hNjetsAllIdentified;
+    WrappedTH1* hMETRaw;
     WrappedTH1* hMET;
     WrappedTH1* hMETphi;
     WrappedTH1* hNbjets;
     WrappedTH1* hDeltaPhiTauMET;
-    WrappedTH1* hDeltaPhiJetMET;
+    WrappedTH1* hDeltaR_TauMETJet1MET;
+    WrappedTH1* hDeltaR_TauMETJet2MET;
+    WrappedTH1* hDeltaR_TauMETJet3MET;
+    WrappedTH1* hDeltaR_TauMETJet4MET;
     WrappedTH1* hTransverseMass;
   };
 
@@ -123,7 +127,7 @@ namespace HPlus {
 
     /// unique filling methods (to be called before return statement)
     void fillControlPlots(const TriggerSelection::Data& data);
-    void fillControlPlots(const VertexSelection::Data& data);
+    void fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data);
     void fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData);
     void fillControlPlots(const ElectronSelection::Data& data);
     void fillControlPlots(const MuonSelection::Data& data);
@@ -151,6 +155,9 @@ namespace HPlus {
     TFileDirectory fEveryStepDirectory;
     /// Normalisation analysis object
     NormalisationAnalysis fNormalisationAnalysis;
+    /// Selection objects
+    TauSelection* fTauSelection;
+    FakeTauIdentifier* fFakeTauIdentifier;
     /// Cached data objects from silent analyze
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;

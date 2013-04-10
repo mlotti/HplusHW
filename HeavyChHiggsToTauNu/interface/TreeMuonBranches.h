@@ -9,6 +9,7 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeFunctionBranch.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenParticleBranches.h"
 
 #include<vector>
 #include<string>
@@ -30,15 +31,17 @@ namespace HPlus {
     ~TreeMuonBranches();
 
     void book(TTree *tree);
+
     size_t setValues(const edm::Event& iEvent);
     size_t setValues(const edm::Event& iEvent, const edm::View<reco::GenParticle>& genParticles);
+
+    void setValues(const edm::PtrVector<pat::Muon>& muons);
+
     void reset();
 
     const edm::InputTag& getInputTag() const { return fMuonSrc; }
 
   private:
-    void setValues(const edm::View<pat::Muon>& muons);
-
     edm::InputTag fMuonSrc;
     std::string fPrefix;
 
@@ -47,9 +50,7 @@ namespace HPlus {
 
     std::vector<XYZTLorentzVector> fMuons;
     std::vector<MuonFunctionBranch> fMuonsFunctions;
-    std::vector<int> fMuonsPdgId;
-    std::vector<int> fMuonsMotherPdgId;
-    std::vector<int> fMuonsGrandMotherPdgId;
+    TreeGenParticleBranches fMuonsGenMatch;
   };
 }
 

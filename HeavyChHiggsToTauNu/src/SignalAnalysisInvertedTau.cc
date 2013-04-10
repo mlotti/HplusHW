@@ -63,7 +63,7 @@ namespace HPlus {
     fRtauAfterTauIDCounter(eventCounter.addCounter("Rtau, all tau candidates")),
     fTausExistCounter(eventCounter.addCounter("Baseline, isolation, all cands")),
     fTauFakeScaleFactorCounter(eventCounter.addCounter("Baseline, tau fake scale factor, all cands")),
-    fTriggerScaleFactorCounter(eventCounter.addCounter("Baseline, trigger scale factor, all cands")),  
+    fTauTriggerScaleFactorCounter(eventCounter.addCounter("Baseline, tau trigger scale factor, all cands")),  
     fBaselineTauIDCounter(eventCounter.addCounter("Baseline, at least one tau")),
     fBaselineEvetoCounter(eventCounter.addCounter("Baseline,electron veto")),
     fBaselineMuvetoCounter(eventCounter.addCounter("Baseline,muon veto")),
@@ -86,6 +86,7 @@ namespace HPlus {
     fBjetVetoCounter(eventCounter.addCounter("Veto on hard b jets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fBTaggingScaleFactorInvertedCounter(eventCounter.addCounter("btagging scale factor inverted")),
+    fQCDTailKillerCounter(eventCounter.addCounter("QCD tail killer")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
     fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET lower limit")),
     //    fDeltaPhiTauMET140Counter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit 140")),
@@ -132,10 +133,12 @@ namespace HPlus {
     fCorrelationAnalysis(eventCounter, fHistoWrapper, "HistoName"),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTauTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("tauTriggerEfficiencyScaleFactor"), fHistoWrapper),
+    fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
     //    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
+    fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WjetsWeight"),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
@@ -703,7 +706,7 @@ namespace HPlus {
     //    if (!tauData.selectedTauPassesRtau()) return false;
     
     
-    std::string myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr";
+    std::string myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr3Hits";
     
     /*    edm::PtrVector<pat::Tau> myBestTauCandidate;    
     if (myOneProngRtauPassedTaus.size())
@@ -735,7 +738,7 @@ namespace HPlus {
       
       if ( (*iTau)->tauID(myTauIsolation) < 0.5 ) continue;
 	//	std::cout <<"PASSES TAU DISCR" << std::endl;
-      hTauDiscriminator->Fill((*iTau)->tauID("byRawCombinedIsolationDeltaBetaCorr"));
+      hTauDiscriminator->Fill((*iTau)->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits"));
       increment(fTausExistCounter);
   
 	
@@ -755,8 +758,8 @@ namespace HPlus {
       if(iEvent.isRealData())
 	fTauTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
       // Apply trigger scale factor here, because it depends only on tau
-      TauTriggerEfficiencyScaleFactor::Data triggerWeight = fTauTriggerEfficiencyScaleFactor.applyEventWeight((**iTau), iEvent.isRealData(), fEventWeight);
-      increment(fTriggerScaleFactorCounter);
+      TauTriggerEfficiencyScaleFactor::Data tauTriggerWeight = fTauTriggerEfficiencyScaleFactor.applyEventWeight((**iTau), iEvent.isRealData(), fEventWeight);
+      increment(fTauTriggerScaleFactorCounter);
       
       if(fProduce) {
 	std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
@@ -812,6 +815,7 @@ namespace HPlus {
 
 	  if(jetDataBase.passedEvent()) {
 	    increment(fBaselineJetsCounter);
+
 
 	    //	    METSelection::Data metDataBase = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetDataBase.getAllJets());
 
@@ -1331,9 +1335,9 @@ namespace HPlus {
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetDataInverted.getSelectedJets(), btagDataInverted.getSelectedJets());
     // Calculate alphaT
 
-    //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(selectedInvertedTau), jetDataInverted.getSelectedJets()); 
+    //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(selectedInvertedTau), jetDataInverted.getSelectedJetsIncludingTau()); 
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, selectedInvertedTau, jetDataInverted.getSelectedJets(), metDataInverted.getSelectedMET());
-    //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJets()); 
+    //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau()); 
       //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
 
     double topMass = TopChiSelectionData.getTopMass();

@@ -34,32 +34,31 @@ namespace {
     // they are bullet proof way of using exactly the same isolation
     // defitions as in the discriminators
     
-    // FIXME change to delta beta discriminators or eventually to continuous discriminator
-    
-    if(a->tauID("byTightIsolation") > 0.5 && b->tauID("byTightIsolation") < 0.5)
+    if(a->tauID("byTightCombinedIsolationDeltaBetaCorr3Hits") > 0.5 && b->tauID("byTightCombinedIsolationDeltaBetaCorr3Hits") < 0.5)
       return true;
 
-    if(a->tauID("byMediumIsolation") > 0.5) {
-      if(b->tauID("byTightIsolation") > 0.5)
+    if(a->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits") > 0.5) {
+      if(b->tauID("byTightCombinedIsolationDeltaBetaCorr3Hits") > 0.5)
         return false;
-      if(b->tauID("byMediumIsolation") < 0.5)
+      if(b->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits") < 0.5)
         return true;
     }
 
-    if(a->tauID("byLooseIsolation") > 0.5) {
+    if(a->tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5) {
       // assume that if tau is medium isolated, it is also tight isolated
-      if(b->tauID("byMediumIsolation") > 0.5)
+      if(b->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits") > 0.5)
         return false;
-      if(b->tauID("byLooseIsolation") < 0.5)
+      if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits") < 0.5)
         return true;
     }
 
-    if(a->tauID("byVLooseIsolation") > 0.5) {
-      if(b->tauID("byLooseIsolation") > 0.5)
-        return false;
-      if(b->tauID("byVLooseIsolation") < 0.5)
-        return true;
-    }
+    // VLoose isolation does not exist anymore
+//     if(a->tauID("byVLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5) {
+//       if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5)
+//         return false;
+//       if(b->tauID("byVLooseCombinedIsolationDeltaBetaCorr3Hits") < 0.5)
+//         return true;
+//     }
 
     // At this point both a and b are in the same isolation class, and
     // we need a continous isolation variable. This is calculated by
@@ -132,15 +131,15 @@ namespace {
       bool resA = fTauID->passIsolation(tauA);
       bool resB = fTauID->passIsolation(tauB);
       /*
-      std::cout << "  Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr")
-                << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr")
+      std::cout << "  Isolation " << resA << " (" << tauA->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits")
+                << ") " << resB << " (" << tauB->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits")
                 << ")" << std::endl;
       */
       if(resA != resB)
         return resA;
       if(!resA && !resB)
         // Both fail isolation, comparison by isolation is ok
-        return tauA->tauID("byRawCombinedIsolationDeltaBetaCorr") < tauB->tauID("byRawCombinedIsolationDeltaBetaCorr");
+        return tauA->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits") < tauB->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits");
 
       // Both pass isolation, compare by pt
       return tauA->pt() > tauB->pt();
@@ -254,14 +253,14 @@ namespace {
       resA = fTauID->passIsolation(tauA);
       resB = fTauID->passIsolation(tauB);
       /*
-      std::cout << "Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr")
-                << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr")
+      std::cout << "Isolation " << resA << " (" << tauA->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits")
+                << ") " << resB << " (" << tauB->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits")
                 << ")" << std::endl;
       */
       if(resA != resB)
         return resA;
       if(!resA && !resB)
-        return tauA->tauID("byRawCombinedIsolationDeltaBetaCorr") < tauB->tauID("byRawCombinedIsolationDeltaBetaCorr");
+        return tauA->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits") < tauB->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits");
 
       // nprongs
       resA = fTauID->passNProngsCut(tauA);
@@ -309,7 +308,7 @@ namespace HPlus {
 
   const edm::Ptr<pat::Tau> TauSelection::Data::getSelectedTau() const {
     if (!fPassedEvent)
-      throw cms::Exception("Assert") << "TauSelection::Data::getSelectedTau() was called even though TauSelection::Data::passedEvent() is false. Please add to your code requirement that passedEvent is true before asking for getSelectedTau!";
+      throw cms::Exception("Assert") << "TauSelection::Data::getSelectedTau() was called even though TauSelection::Data::passedEvent() is false. Please add to your code requirement that passedEvent is true before asking for getSelectedTau!" << __FILE__ << ":" << __LINE__;
     return fSelectedTau;
   }
 
@@ -373,7 +372,7 @@ namespace HPlus {
       "TauSelection_cleaned_tau_candidates_pt",
       "cleaned_tau_candidates_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
-    hPtSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir,
+    hPtSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_selected_taus_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
@@ -386,7 +385,7 @@ namespace HPlus {
       "TauSelection_cleaned_tau_candidates_eta",
       "cleaned_tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-    hEtaSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir,
+    hEtaSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_selected_taus_eta",
       "selected_tau_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
@@ -428,7 +427,7 @@ namespace HPlus {
       "TauSelection_cleaned_tau_candidates_N",
       "cleaned_tau_candidates_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
-    hNumberOfSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir,
+    hNumberOfSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_selected_taus_N",
       "selected_tau_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
@@ -465,20 +464,20 @@ namespace HPlus {
     }
 
     // Isolation variables
-    hVLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_VLooseIsoNCands", "Number of isolation candidates in VLoose", 100, 0, 100);
+    //hVLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_VLooseIsoNCands", "Number of isolation candidates in VLoose", 100, 0, 100);
     hLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_LooseIsoNCands", "Number of isolation candidates in Loose", 100, 0, 100);
     hMediumIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_MediumIsoNCands", "Number of isolation candidates in Medium", 100, 0, 100);
     hTightIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_TightIsoNCands", "Number of isolation candidates in Tight", 100, 0, 100);
 
     // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
-    hTauIdOperatingMode = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 3, 0., 3.);
+    hTauIdOperatingMode = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 3, 0., 3.);
     if (hTauIdOperatingMode->isActive()) {
       hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
       hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Normal tau ID");
       hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "tauCandidateSelectionOnly");
     }
     // Sorting category in tau candidate selection
-    hTauIdCandidateSelectionSortCategory = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "CandidateSelectionSortCategory", "CandidateSelectionSortCategory;;N_{events}", 10, 0., 10.);
+    hTauIdCandidateSelectionSortCategory = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "CandidateSelectionSortCategory", "CandidateSelectionSortCategory;;N_{events}", 10, 0., 10.);
     if (hTauIdCandidateSelectionSortCategory->isActive()) {
       hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(1, "Beginning");
       hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(2, "None pass isol.");
@@ -997,7 +996,7 @@ namespace HPlus {
       ObtainMCPurity(tau, iEvent, hMCPurityOfTauCandidates);
     }
 
-    hVLooseIsoNcands->Fill(tau->userInt("byVLooseOccupancy"));
+    //hVLooseIsoNcands->Fill(tau->userInt("byVLooseOccupancy"));
     hLooseIsoNcands->Fill(tau->userInt("byLooseOccupancy"));
     hMediumIsoNcands->Fill(tau->userInt("byMediumOccupancy"));
     hTightIsoNcands->Fill(tau->userInt("byTightOccupancy"));
@@ -1280,14 +1279,18 @@ namespace HPlus {
     // Disable histogram filling and counter incrementing until the return call
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-    return tau->tauID(isolationString) > 0.5;
+    if (isolationString.size())
+      return tau->tauID(isolationString) > 0.5;
+    return fTauID->passIsolation(tau) > 0.5;
   }
 
   const double TauSelection::getIsolationValueOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString) const {
     // Disable histogram filling and counter incrementing until the return call
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-    return tau->tauID(isolationString);
+    if (isolationString.size())
+      return tau->tauID(isolationString);
+    return fTauID->passIsolation(tau);
   }
 
   const bool TauSelection::getPassesNProngsStatusOfTauObject(const edm::Ptr<pat::Tau>& tau) const {

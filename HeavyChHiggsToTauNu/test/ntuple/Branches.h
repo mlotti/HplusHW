@@ -100,8 +100,11 @@ class MuonCollection {
 public:
   class Muon {
   public:
+    Muon();
     Muon(MuonCollection *mc, size_t i);
     ~Muon();
+
+    void ensureValidity() const;
 
     size_t index() const { return fIndex; }
 
@@ -116,6 +119,7 @@ public:
     double neutralHadronIso() { return fCollection->fNeutralHadronIso.value()[fIndex]; }
     double photonIso() { return fCollection->fPhotonIso.value()[fIndex]; }
 
+    const math::XYZTLorentzVector& genMatchP4() { return fCollection->fGenMatchP4.value()[fIndex]; }
     int pdgId() { return fCollection->fPdgId.value()[fIndex]; }
     int motherPdgId() { return fCollection->fMotherPdgId.value()[fIndex]; }
     int grandMotherPdgId() { return fCollection->fGrandMotherPdgId.value()[fIndex]; }
@@ -170,6 +174,7 @@ private:
   BranchObj<std::vector<double> > fNeutralHadronIso;
   BranchObj<std::vector<double> > fPhotonIso;
 
+  BranchObj<std::vector<math::XYZTLorentzVector> > fGenMatchP4;
   BranchObj<std::vector<int> > fPdgId;
   BranchObj<std::vector<int> > fMotherPdgId;
   BranchObj<std::vector<int> > fGrandMotherPdgId;
@@ -180,6 +185,7 @@ class EmbeddingMuonCollection: public MuonCollection {
 public:
   class Muon: public MuonCollection::Muon {
   public:
+    Muon();
     Muon(EmbeddingMuonCollection *mc, size_t i);
     ~Muon();
 
@@ -243,6 +249,7 @@ public:
 
     double superClusterEta() { return fCollection->fSuperClusterEta.value()[fIndex]; }
 
+    const math::XYZTLorentzVector& genMatchP4() { return fCollection->fGenMatchP4.value()[fIndex]; }
     int pdgId() { return fCollection->fPdgId.value()[fIndex]; }
     int motherPdgId() { return fCollection->fMotherPdgId.value()[fIndex]; }
     int grandMotherPdgId() { return fCollection->fGrandMotherPdgId.value()[fIndex]; }
@@ -296,6 +303,7 @@ private:
 
   BranchObj<std::vector<double> > fSuperClusterEta;
 
+  BranchObj<std::vector<math::XYZTLorentzVector> > fGenMatchP4;
   BranchObj<std::vector<int> > fPdgId;
   BranchObj<std::vector<int> > fMotherPdgId;
   BranchObj<std::vector<int> > fGrandMotherPdgId;
@@ -435,6 +443,12 @@ public:
 
     double mediumCombinedIsolationDeltaBetaCorr() { return fCollection->fMediumCombinedIsolationDeltaBetaCorr.value()[fIndex]; }
 
+    const math::XYZTLorentzVector& genMatchP4() { return fCollection->fGenMatchP4.value()[fIndex]; }
+    const math::XYZTLorentzVector& genMatchVisibleP4() { return fCollection->fGenMatchVisibleP4.value()[fIndex]; }
+    int pdgId() { return fCollection->fPdgId.value()[fIndex]; }
+    int motherPdgId() { return fCollection->fMotherPdgId.value()[fIndex]; }
+    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId.value()[fIndex]; }
+
   protected:
     TauCollection *fCollection;
     size_t fIndex;
@@ -443,7 +457,7 @@ public:
   TauCollection(const std::string prefix = "taus");
   ~TauCollection();
 
-  void setupBranches(TTree *tree);
+  void setupBranches(TTree *tree, bool isMC);
   void setEntry(Long64_t entry) {
     fP4.setEntry(entry);
     fLeadPFChargedHadrCandP4.setEntry(entry);
@@ -457,6 +471,12 @@ public:
     fAgainstElectronTight.setEntry(entry);
     fAgainstElectronMVA.setEntry(entry);
     fMediumCombinedIsolationDeltaBetaCorr.setEntry(entry);
+
+    fGenMatchP4.setEntry(entry);
+    fGenMatchVisibleP4.setEntry(entry);
+    fPdgId.setEntry(entry);
+    fMotherPdgId.setEntry(entry);
+    fGrandMotherPdgId.setEntry(entry);
   }
 
   size_t size() {
@@ -486,7 +506,60 @@ private:
   BranchObj<std::vector<double> > fAgainstElectronMVA;
 
   BranchObj<std::vector<double> > fMediumCombinedIsolationDeltaBetaCorr;
+
+  BranchObj<std::vector<math::XYZTLorentzVector> > fGenMatchP4;
+  BranchObj<std::vector<math::XYZTLorentzVector> > fGenMatchVisibleP4;
+  BranchObj<std::vector<int> > fPdgId;
+  BranchObj<std::vector<int> > fMotherPdgId;
+  BranchObj<std::vector<int> > fGrandMotherPdgId;
 };
 
+
+// GenParticles
+class GenParticleCollection {
+public:
+  class GenParticle {
+  public:
+    GenParticle(GenParticleCollection *gpc, size_t i);
+    ~GenParticle();
+
+    size_t index() const { return fIndex; }
+    const math::XYZTLorentzVector& p4() { return fCollection->fP4.value()[fIndex]; }
+    int pdgId() { return fCollection->fPdgId.value()[fIndex]; }
+    int motherPdgId() { return fCollection->fMotherPdgId.value()[fIndex]; }
+    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId.value()[fIndex]; }
+
+  protected:
+    GenParticleCollection *fCollection;
+    size_t fIndex;
+  };
+
+  GenParticleCollection(const std::string& prefix);
+  ~GenParticleCollection();
+
+  void setupBranches(TTree *tree);
+  void setEntry(Long64_t entry) {
+    fP4.setEntry(entry);
+    fPdgId.setEntry(entry);
+    fMotherPdgId.setEntry(entry);
+    fGrandMotherPdgId.setEntry(entry);
+  }
+
+  size_t size() {
+    return fP4.value().size();
+  }
+  GenParticle get(size_t i) {
+    return GenParticle(this, i);
+  }
+
+protected:
+  std::string fPrefix;
+
+private:
+  BranchObj<std::vector<math::XYZTLorentzVector> > fP4;
+  BranchObj<std::vector<int> > fPdgId;
+  BranchObj<std::vector<int> > fMotherPdgId;
+  BranchObj<std::vector<int> > fGrandMotherPdgId;
+};
 
 #endif

@@ -1,6 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 #include "FWCore/Utilities/interface/Exception.h"
@@ -35,10 +34,11 @@ namespace HPlus {
     return index;
   }
 
-  EventCounter::EventCounter(const edm::ParameterSet& iConfig, const EventWeight& eventWeight, HistoWrapper& histoWrapper):
+  EventCounter::EventCounter(const edm::ParameterSet& iConfig, const EventWeight& eventWeight, HistoWrapper& histoWrapper, HistoWrapper::HistoLevel subCounterLevel):
     fEventWeight(eventWeight),
     fHistoWrapper(histoWrapper),
     label(iConfig.getParameter<std::string>("@module_label")),
+    fSubCounterLevel(subCounterLevel),
     fIsEnabled(true)
   {
     allCounters_.push_back(Counter("counter")); // ensure main counter has always index 0
@@ -111,7 +111,7 @@ namespace HPlus {
     std::string cat("EventCounts");
     for(std::vector<Counter>::const_iterator iCounter = allCounters_.begin(); iCounter != allCounters_.end(); ++iCounter) {
       // Main counter has highest level, others are informative (i.e. are not needed for datacards)
-      HistoWrapper::HistoLevel level = HistoWrapper::kInformative;
+      HistoWrapper::HistoLevel level = fSubCounterLevel;
       if(iCounter == allCounters_.begin())
         level = HistoWrapper::kSystematics;
 

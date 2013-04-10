@@ -24,7 +24,7 @@ namespace HPlus {
     template <typename Collection>
     void setValues(const Collection& collection) {
       for(typename Collection::const_iterator iter = collection.begin(); iter != collection.end(); ++iter) {
-        fValues.push_back(this->fFunction(*iter));
+        fValues.push_back(this->fFunction(maybe_deref(*iter)));
       }
     }
 
@@ -33,6 +33,15 @@ namespace HPlus {
     }
 
   private:
+    static const T& maybe_deref(const T& ref) {
+      return ref;
+    }
+
+    static const T& maybe_deref(const edm::Ptr<T>& ptr) {
+      return *ptr;
+    }
+
+
     std::string fName;
     StringObjectFunction<T> fFunction;
     std::vector<double> fValues;

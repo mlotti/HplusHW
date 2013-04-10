@@ -52,9 +52,9 @@ def main(opts):
     for task in taskDirs:
         if not os.path.exists(task):
             if opts.showMissing:
-                print "%s: Task directory missing" % task
+                print >>sys.stderr, "%s: Task directory missing" % task
             continue
-        
+
         jobs = multicrab.crabStatusToJobs(task, opts.printCrab)
 
         jobSummaries = {}

@@ -20,7 +20,9 @@ namespace HPlus {
   MuonSelection::Data::Data():
     fSelectedMuonPt(0.),
     fSelectedMuonEta(0.),
-    fSelectedMuonPtBeforePtCut(0.) {}
+    fSelectedMuonPtBeforePtCut(0.),
+    fHasMuonFromCjetStatus(false),
+    fHasMuonFromBjetStatus(false) {}
   MuonSelection::Data::~Data() {}
 
   MuonSelection::MuonSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
@@ -251,6 +253,9 @@ namespace HPlus {
       double myIsolation = myChHadronIso + std::max(myNeutralHadronIso + myPhotonIso - 0.5 * myPUChHadronIso, 0.0);
       double relIsol = myIsolation / myMuonPt;
       hMuonRelIsol->Fill(relIsol);
+
+      if(myMuonPt >= fMuonPtCut && std::abs(myMuonEta) < fMuonEtaCut)
+        output.fSelectedMuonsBeforeIsolation.push_back(*iMuon);
 
       // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Basline_muon_selections_for_2011
       if (relIsol < 0.12) {

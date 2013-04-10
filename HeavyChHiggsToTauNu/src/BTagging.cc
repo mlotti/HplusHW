@@ -248,8 +248,8 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("Btagging");
-    hDiscr = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
-    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_pt", "bjet_pt", 100, 0., 500.);
+    hDiscr = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
+    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet_pt", "bjet_pt", 100, 0., 500.);
     hDiscrB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
     hPtBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVM_pt", "realbjetCSVM_pt", 100, 0., 500.);
     hEtaBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVM_eta", "realbjetCSVM_eta", 100, -5., 5.);
@@ -266,22 +266,44 @@ namespace HPlus {
     hEtaQnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_eta", "realqjetNotag_pt", 100, -5., 5.);
     hPt1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 100, 0., 500.);
     hPt2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 100, 0., 500.);
-    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_eta", "bjet_pt", 100, -5., 5.);
+    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet_eta", "bjet_pt", 100, -5., 5.);
     hEta1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
     hEta2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
-    hNumberOfBtaggedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 10, 0., 10.);
-    hNumberOfBtaggedJetsIncludingSubLeading = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJetsIncludingSubLeading", "NumberOfBtaggedJetsIncludingSubLeading", 10, 0., 10.);
-    hMCMatchForPassedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MCMatchForPassedJets", "MCMatchForPassedJets;;N_{jets}", 3, 0., 3.);
+    hNumberOfBtaggedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 10, 0., 10.);
+    hNumberOfBtaggedJetsIncludingSubLeading = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfBtaggedJetsIncludingSubLeading", "NumberOfBtaggedJetsIncludingSubLeading", 10, 0., 10.);
+    hMCMatchForPassedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MCMatchForPassedJets", "MCMatchForPassedJets;;N_{jets}", 3, 0., 3.);
     if (hMCMatchForPassedJets->isActive()) {
       hMCMatchForPassedJets->GetXaxis()->SetBinLabel(1, "b jet");
       hMCMatchForPassedJets->GetXaxis()->SetBinLabel(2, "light jet");
       hMCMatchForPassedJets->GetXaxis()->SetBinLabel(3, "no match");
     }
 
+    // MC btagging and mistagging efficiency
+    TFileDirectory myMCEffDir = myDir.mkdir("MCEfficiency");
+    hMCAllBJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "AllBJetsByPt", "AllBJetsByPt;b jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
+    hMCAllCJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "AllCJetsByPt", "AllCJetsByPt;c jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
+    hMCAllLightJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "AllLightJetsByPt", "AllLightJetsByPt;udsg jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
+    hMCBtaggedBJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "TaggedBJetsByPt", "TaggedBJetsByPt;b jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
+    hMCBtaggedCJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "TaggedCJetsByPt", "TaggedCJetsByPt;c jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
+    hMCBtaggedLightJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "TaggedLightJetsByPt", "TaggedLightJetsByPt;udsg jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
+    hMCBmistaggedBJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "MistaggedBJetsByPt", "MistaggedBJetsByPt;b jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
+    hMCBmistaggedCJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "MistaggedCJetsByPt", "MistaggedCJetsByPt;c jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
+    hMCBmistaggedLightJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "MistaggedLightJetsByPt", "MistaggedLightJetsByPt;udsg jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
+
+    hMCAllBJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "AllBJetsByPtAndEta", "AllBJetsByPtAndEta;b jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
+    hMCAllCJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "AllCJetsByPtAndEta", "AllCJetsByPtAndEta;c jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
+    hMCAllLightJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "AllLightJetsByPtAndEta", "AllLightJetsByPtAndEta;udsg jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
+    hMCBtaggedBJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "TaggedBJetsByPtAndEta", "TaggedBJetsByPtAndEta;b jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
+    hMCBtaggedCJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "TaggedCJetsByPtAndEta", "TaggedCJetsByPtAndEta;c jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
+    hMCBtaggedLightJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "TaggedLightJetsByPtAndEta", "TaggedLightJetsByPtAndEta;udsg jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
+    hMCBmistaggedBJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "MistaggedBJetsByPtAndEta", "MistaggedBJetsByPtAndEta;b jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
+    hMCBmistaggedCJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "MistaggedCJetsByPtAndEta", "MistaggedCJetsByPtAndEta;c jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
+    hMCBmistaggedLightJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "MistaggedLightJetsByPtAndEta", "MistaggedLightJetsByPtAndEta;udsg jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
+
     // Scale factor histograms (needed for evaluating syst. uncertainty of btagging in datacard generator)
-    hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
-    hBTagRelativeUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 3000, 0., 3.);
-    hBTagAbsoluteUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 3000, 0., 3.);
+    hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
+    hBTagRelativeUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 3000, 0., 3.);
+    hBTagAbsoluteUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 3000, 0., 3.);
 
     // BTagging scale factors from DB
     if(FactorsFromDB) {
@@ -291,6 +313,7 @@ namespace HPlus {
     else
       btagDB = 0;
 
+    // OBSOLETE
     // BTagging scale factors for b-flavor jets (source: BTV-11-001)
     double fScaleFactorBFlavor = 0.95;
     double fScaleFactorBFlavorUncertainty = 0.05;
@@ -381,8 +404,9 @@ namespace HPlus {
     output.fSelectedJets.reserve(jets.size());
     output.fSelectedSubLeadingJets.reserve(jets.size());
     // Initialise internal variables
-    bool bmatchedJet = false;
-    bool qmatchedJet = false;
+    bool bJetIsMCb = false;
+    bool bJetIsMCc = false;
+    bool bJetIsMCLightQuark = false;
     bool bMatch = false;
     bool qMatch = false;
 
@@ -394,83 +418,92 @@ namespace HPlus {
 
       increment(fAllSubCount);
 
+//       if (!iEvent.isRealData()) {
+// 	edm::Handle <reco::GenParticleCollection> genParticles;
+// 	iEvent.getByLabel("genParticles", genParticles);
+// 
+// 	for (size_t i=0; i < genParticles->size(); ++i){
+// 	  const reco::Candidate & p = (*genParticles)[i];
+// 	  int id = p.pdgId();
+// 	  if ( abs(id) != 5 || hasImmediateMother(p,5) || hasImmediateMother(p,-5) )continue;
+// 	  //	  printImmediateMothers(p);
+// 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(iJet->p4(),p.p4() );
+// 	  if ( deltaR < 0.2) bMatch = true;
+// 	  //	  std::cout << "  bmatch   "  <<  p.pdgId()   << std::endl;
+// 	} 
+// 
+// 	for (size_t i=0; i < genParticles->size(); ++i){
+// 	  const reco::Candidate & p = (*genParticles)[i];
+// 	  int id = p.pdgId();
+// 	  if ( abs(id) > 4 &&  p.pdgId() != 21 )continue;
+// 	  if ( hasImmediateMother(p,1) || hasImmediateMother(p,-1) )continue;
+// 	  if ( hasImmediateMother(p,2) || hasImmediateMother(p,-2) )continue;
+// 	  if ( hasImmediateMother(p,3) || hasImmediateMother(p,-3) )continue;
+// 	  if ( hasImmediateMother(p,4) || hasImmediateMother(p,-4) )continue;
+// 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(iJet->p4(),p.p4() );
+// 	  if ( deltaR < 0.2) qMatch = true;
+// 	  //	  std::cout << "  qmatch   "  <<  p.pdgId()   << std::endl;
+// 
+// 	}
+
       if (!iEvent.isRealData()) {
-	edm::Handle <reco::GenParticleCollection> genParticles;
-	iEvent.getByLabel("genParticles", genParticles);
-
-	for (size_t i=0; i < genParticles->size(); ++i){
-	  const reco::Candidate & p = (*genParticles)[i];
-	  int id = p.pdgId();
-	  if ( abs(id) != 5 || hasImmediateMother(p,5) || hasImmediateMother(p,-5) )continue;
-	  //	  printImmediateMothers(p);
-	  double deltaR = ROOT::Math::VectorUtil::DeltaR(iJet->p4(),p.p4() );
-	  if ( deltaR < 0.2) bMatch = true;
-	  //	  std::cout << "  bmatch   "  <<  p.pdgId()   << std::endl;
-	} 
-
-	for (size_t i=0; i < genParticles->size(); ++i){
-	  const reco::Candidate & p = (*genParticles)[i];
-	  int id = p.pdgId();
-	  if ( abs(id) > 4 &&  p.pdgId() != 21 )continue;
-	  if ( hasImmediateMother(p,1) || hasImmediateMother(p,-1) )continue;
-	  if ( hasImmediateMother(p,2) || hasImmediateMother(p,-2) )continue;
-	  if ( hasImmediateMother(p,3) || hasImmediateMother(p,-3) )continue;
-	  if ( hasImmediateMother(p,4) || hasImmediateMother(p,-4) )continue;
-	  double deltaR = ROOT::Math::VectorUtil::DeltaR(iJet->p4(),p.p4() );
-	  if ( deltaR < 0.2) qMatch = true;
-	  //	  std::cout << "  qmatch   "  <<  p.pdgId()   << std::endl;
-
-	}
-	//////////////////////////////////////////////
         int myFlavor = std::abs(iJet->partonFlavour());
         if (myFlavor == 5) {
-          bmatchedJet = true;
+          bJetIsMCb = true;
+        } else if (myFlavor == 4) {
+          bJetIsMCc = true;
         } else {
-          qmatchedJet = true;
+          bJetIsMCLightQuark = true;
         }
       }
-      if( bmatchedJet )   increment(fTaggedAllRealBJetsSubCount);
+
+      if (bJetIsMCb)   increment(fTaggedAllRealBJetsSubCount);
 
       float discr = iJet->bDiscriminator(fDiscriminator);
       //      if (bmatchedJet ) {
-      if (bMatch ) {
-	hPtBnoTag->Fill(iJet->pt());
-	hEtaBnoTag->Fill(iJet->eta());
-	//	std::cout << " discr. b-matched   "  << discr << " discr cut   "  << fDiscrCut  << std::endl;	
-	//	if(discr > fDiscrCut ) {
-	if(discr > 0.898) {
-	  hPtBCSVT->Fill(iJet->pt());
-	  hEtaBCSVT->Fill(iJet->eta());
-	}
-	if(discr > 0.679) {
-	  hPtBCSVM->Fill(iJet->pt());
-	  hEtaBCSVM->Fill(iJet->eta());
-	}
-	hDiscrB->Fill(discr);
-      }
-      //      if (qmatchedJet ) {
-      if (qMatch ) {
-	hPtQnoTag->Fill(iJet->pt());
-	hEtaQnoTag->Fill(iJet->eta());
-	//	std::cout << " discr. q-matched  "  << discr <<  discr << " discr cut   "  << fDiscrCut << std::endl;
-	//	if(discr > fDiscrCut ) {
-	if(discr > 0.898) {
-	  hPtQCSVT->Fill(iJet->pt());
-	  hEtaQCSVT->Fill(iJet->eta());
-	}
-	if(discr > 0.679) {
-	  hPtQCSVM->Fill(iJet->pt());
-	  hEtaQCSVM->Fill(iJet->eta());
-	}
-	hDiscrQ->Fill(discr);
-      }
+//       if (bMatch ) {
+// 	hPtBnoTag->Fill(iJet->pt());
+// 	hEtaBnoTag->Fill(iJet->eta());
+// 	//	std::cout << " discr. b-matched   "  << discr << " discr cut   "  << fDiscrCut  << std::endl;	
+// 	//	if(discr > fDiscrCut ) {
+// 	if(discr > 0.898) {
+// 	  hPtBCSVT->Fill(iJet->pt());
+// 	  hEtaBCSVT->Fill(iJet->eta());
+// 	}
+// 	if(discr > 0.679) {
+// 	  hPtBCSVM->Fill(iJet->pt());
+// 	  hEtaBCSVM->Fill(iJet->eta());
+// 	}
+// 	hDiscrB->Fill(discr);
+//       }
+//       //      if (qmatchedJet ) {
+//       if (qMatch ) {
+// 	hPtQnoTag->Fill(iJet->pt());
+// 	hEtaQnoTag->Fill(iJet->eta());
+// 	//	std::cout << " discr. q-matched  "  << discr <<  discr << " discr cut   "  << fDiscrCut << std::endl;
+// 	//	if(discr > fDiscrCut ) {
+// 	if(discr > 0.898) {
+// 	  hPtQCSVT->Fill(iJet->pt());
+// 	  hEtaQCSVT->Fill(iJet->eta());
+// 	}
+// 	if(discr > 0.679) {
+// 	  hPtQCSVM->Fill(iJet->pt());
+// 	  hEtaQCSVM->Fill(iJet->eta());
+// 	}
+// 	hDiscrQ->Fill(discr);
+//       }
 
       // pt cut
       if(iJet->pt() < fPtCut ) continue;
       increment(fTaggedPtCutSubCount);
+
       // eta cut
       if(fabs(iJet->eta()) > fEtaCut ) continue;
       increment(fTaggedEtaCutSubCount);
+
+      // Analyze MC tag / mistag efficiencies
+      analyzeMCTagEfficiencyByJetFlavour(iJet, bJetIsMCb, bJetIsMCc, bJetIsMCLightQuark);
+
       // discriminator cut
       hDiscr->Fill(discr);
       if (discr > fLeadingDiscrCut) {
@@ -489,7 +522,7 @@ namespace HPlus {
         output.fMaxDiscriminatorValue = discr;
 
       //++passed;
-      if( bmatchedJet )   increment(fTaggedTaggedRealBJetsSubCount);
+      if (bJetIsMCb) increment(fTaggedTaggedRealBJetsSubCount);
 
     } // end of jet loop
 
@@ -528,6 +561,46 @@ namespace HPlus {
     return output;
   }
 
+  void BTagging::analyzeMCTagEfficiencyByJetFlavour(const edm::Ptr<pat::Jet>& jet, const bool isBJet, const bool isCJet, const bool isLightJet) {
+    // Plot histograms for leading discriminator
+    if (isBJet) {
+      hMCAllBJetsByPt->Fill(jet->pt());
+      hMCAllBJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+    } else if (isCJet) {
+      hMCAllCJetsByPt->Fill(jet->pt());
+      hMCAllCJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+    } else if (isLightJet) {
+      hMCAllLightJetsByPt->Fill(jet->pt());
+      hMCAllLightJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+    }
+    bool myPassedLeadingDiscriminator = jet->bDiscriminator(fDiscriminator) > fLeadingDiscrCut;
+    if (myPassedLeadingDiscriminator) {
+      // jet passed b tag
+      if (isBJet) {
+        hMCBtaggedBJetsByPt->Fill(jet->pt());
+        hMCBtaggedBJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+      } else if (isCJet) {
+        hMCBtaggedCJetsByPt->Fill(jet->pt());
+        hMCBtaggedCJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+      } else if (isLightJet) {
+        hMCBtaggedLightJetsByPt->Fill(jet->pt());
+        hMCBtaggedLightJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+      }
+    } else {
+      // jet did not pass b tag
+      if (isBJet) {
+        hMCBmistaggedBJetsByPt->Fill(jet->pt());
+        hMCBmistaggedBJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+      } else if (isCJet) {
+        hMCBmistaggedCJetsByPt->Fill(jet->pt());
+        hMCBmistaggedCJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+      } else if (isLightJet) {
+        hMCBmistaggedLightJetsByPt->Fill(jet->pt());
+        hMCBmistaggedLightJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+      }
+    }
+  }
+  
   void BTagging::calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, BTagging::Data& btagData) {
     // Count number of b jets and light jets
 ////    int nBJetsPassed = 0;
