@@ -1,3 +1,6 @@
+// double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
+// MET.significance() cut (plot distribution first and look for a good spot to cut)
+
 /*
 FullHiggsMassCalculator.cc
 
@@ -68,10 +71,10 @@ void printDaughters(const reco::Candidate& p);
 namespace { 
   // (Containing these variables in an anonymous namespace prevents them from being accessed from code in another file)
   // Set this variable to true if you want debug print statements to be activated
-  const bool bPrintDebugOutput = false;
+  const bool bPrintDebugOutput = true;
   // Set this variable to true if you want to recover events with a negative discriminant using a special algorithm instead of
   // discarding them
-  const bool bTryRecoveringNegativeDiscriminants = false;
+  const bool bTryRecoveringNegativeDiscriminants = true;
   // Set the physical particle masses required in the calculation (in GeV)
   // Note: these are the values used in the generator. Therefore, they should also be used here even if they no longer correspond
   //       to the latest values given by the Particle Data Group.
@@ -529,46 +532,6 @@ namespace HPlus {
 	// Set output:
 	output.fModifiedMETSolution1 = modifiedMETSolution1;
 	output.fModifiedMETSolution2 = modifiedMETSolution2;
-	// // VALIDATION:
-// 	TVector3 modifiedMETVector1;
-// 	modifiedMETVector1.SetPtEtaPhi(modifiedMETSolution1, MET.Eta(), MET.Phi());
-// 	TVector3 modifiedMETVector2 = MET;
-// 	//modifiedMETVector1.SetPerp(modifiedMETSolution1);
-// 	modifiedMETVector2.SetPerp(modifiedMETSolution2);
-// 	double modifiedA1 = (deltaSquaredMasses / 2.0 - bEnergy * visibleTauEnergy + pB.Dot(pTau) +
-// 			     pB.XYvector() * modifiedMETVector1.XYvector() + pTau.XYvector() * modifiedMETVector1.XYvector()) 
-// 	  / (bEnergy + visibleTauEnergy);
-// 	std::cout << "A = " << A << std::endl;
-// 	std::cout << "modifiedA1 = " << modifiedA1 << std::endl;
-// 	std::cout << modifiedMETSolution1*modifiedMETSolution1 << " = " << modifiedMETVector1.Perp2() << std::endl;
-// 	double modifiedA2 = (deltaSquaredMasses / 2.0 - bEnergy * visibleTauEnergy + pB.Dot(pTau) +
-// 			     pB.XYvector() * modifiedMETVector2.XYvector() + pTau.XYvector() * modifiedMETVector2.XYvector()) 
-// 	  / (bEnergy + visibleTauEnergy);
-// 	double modifiedDiscriminant1 = modifiedA1*modifiedA1 - modifiedMETVector1.Perp2() * (1 - B*B);
-// 	double modifiedDiscriminant2 = modifiedA2*modifiedA2 - modifiedMETVector2.Perp2() * (1 - B*B);
-// 	bool bPrintDebugOutput_recovery = true; // DELETE LATER
-// 	if (bPrintDebugOutput_recovery) {
-// 	  std::cout << "_______________________ original MET: " << MET.Perp() << std::endl;
-// 	  std::cout << "_______________________ modifiedMETSolution1 = " << modifiedMETSolution1 << std::endl;
-// 	  std::cout << "_______________________ modifiedMETSolutionA = " << modifiedMETSolutionA << std::endl;
-// 	  std::cout << "_______________________ modifiedMETSolution2 = " << modifiedMETSolution2 << std::endl;
-// 	  std::cout << "_______________________ modifiedMETSolutionB = " << modifiedMETSolutionB << std::endl;
-// 	  std::cout << "_______________________ discriminant for modifiedMETSolution1: " << modifiedDiscriminant1 << std::endl;
-// 	  std::cout << "_______________________ discriminant for modifiedMETSolution2: " << modifiedDiscriminant2 << std::endl;
-// 	  std::cout << "(checking phi before and after calculation) " <<  MET.Phi() << " = " 
-// 		    << modifiedMETVector1.Phi() << std::endl;
-// 	}
-// 	// DELETE --->
-// 	modifiedMETSolution1 = MET.Perp();
-// 	modifiedMETVector1.SetPtEtaPhi(modifiedMETSolution1, MET.Eta(), MET.Phi());
-//       modifiedA1 = (deltaSquaredMasses / 2.0 - bEnergy * visibleTauEnergy + pB.Dot(pTau) +
-// 		    pB.XYvector() * modifiedMETVector1.XYvector() + pTau.XYvector() * modifiedMETVector1.XYvector())
-// 	/ (bEnergy + visibleTauEnergy);
-//       modifiedDiscriminant1 = modifiedA1*modifiedA1 - modifiedMETVector1.Perp2() * (1 - B*B);
-//       std::cout << discriminant << " = " << modifiedDiscriminant1 << std::endl;
-//       // <--- /DELETE
-//       // output.fSelectedModifiedMETValue = ...
-//       // ---> in constructFourMomenta: (met).SetPerp(output.fSelectedModifiedMETValue);
       }
     }
     // Set output
@@ -609,18 +572,6 @@ namespace HPlus {
     double angle2 = getAngleBetweenNeutrinosAndTau(pTau, MET, solution2);
     double deltaEta1 = getDeltaEtaBetweenNeutrinosAndTau(pTau, MET, solution1);
     double deltaEta2 = getDeltaEtaBetweenNeutrinosAndTau(pTau, MET, solution2);
-    if (bPrintDebugOutput) {
-      std::cout << "--- angle1 = " << angle1 * TMath::RadToDeg() << " degrees" << std::endl;
-      std::cout << "--- angle2 = " << angle2 * TMath::RadToDeg() << " degrees" << std::endl;
-      std::cout << "--- deltaEta1 = " << deltaEta1 << std::endl;
-      std::cout << "--- deltaEta2 = " << deltaEta2 << std::endl;
-    }
-    if (deltaEta1 > deltaEta2 && angle1 > angle2)
-      std::cout << "1" << std::endl;
-    else if (deltaEta1 < deltaEta2 && angle1 < angle2)
-      std::cout << "1" << std::endl;
-    else
-      std::cout << "0" << std::endl;
 
     // Select a solution using the desired method
     // Initialize...
@@ -749,12 +700,57 @@ namespace HPlus {
 
   void FullHiggsMassCalculator::calculateTopMass(TVector3& tauVector, TVector3& bJetVector, TVector3& METVector, 
 						 FullHiggsMassCalculator::Data& output) {
-    //if (output.bNegativeDiscriminantRecovered) MET.SetPerp(output.fModifiedMET);
-    constructFourMomenta(tauVector, bJetVector, METVector, output);
-    TLorentzVector topMomentumSolution = output.LorentzVector_visibleTauFourMomentum + output.LorentzVector_bJetFourMomentum +
-      output.LorentzVector_neutrinosFourMomentum;
-    output.fTopMassSolution = topMomentumSolution.M();
-    if (bPrintDebugOutput) std::cout << "output.fTopMassSolution: " << output.fTopMassSolution << std::endl;
+    std::cout << "Original MET vector direction " << METVector.Phi() << std::endl;
+    if (!output.bNegativeDiscriminantRecovered) {
+      // For a positive discriminant (or if no recovery has been done):
+      constructFourMomenta(tauVector, bJetVector, METVector, output);
+      TLorentzVector topMomentumSolution = output.LorentzVector_visibleTauFourMomentum + output.LorentzVector_bJetFourMomentum +
+	output.LorentzVector_neutrinosFourMomentum;
+      output.fTopMassSolution = topMomentumSolution.M();
+      if (bPrintDebugOutput) std::cout << "output.fTopMassSolution: " << output.fTopMassSolution << std::endl;
+    } else {
+      // For a negative discriminant if recovery has been done:
+      // Calculate a top mass for each modified MET solution and pick the one that is closer to the top rest mass
+      // The first calculation:
+      TVector3 ModifiedMETVector1(METVector.Px(), METVector.Py(), METVector.Py());
+      ModifiedMETVector1.SetPerp(output.fModifiedMETSolution1);
+      std::cout << "Modified MET vector 1 direction " << ModifiedMETVector1.Phi() << std::endl;
+      constructFourMomenta(tauVector, bJetVector, ModifiedMETVector1, output);
+      TLorentzVector topMomentumSolution1 = output.LorentzVector_visibleTauFourMomentum + output.LorentzVector_bJetFourMomentum +
+        output.LorentzVector_neutrinosFourMomentum;
+      std::cout << "topMomentumSolution1 " << topMomentumSolution1.Px() << " " << topMomentumSolution1.Py() << " "<< topMomentumSolution1.Pz() << " " << topMomentumSolution1.E() << std::endl;
+      double TopMassSolution1 = topMomentumSolution1.M();
+      // The second calculation:
+      TVector3 ModifiedMETVector2(METVector.Px(), METVector.Py(), METVector.Py());
+      ModifiedMETVector2.SetPerp(output.fModifiedMETSolution2);
+      std::cout << "Modified MET vector 2 direction " << ModifiedMETVector2.Phi() << std::endl;
+      constructFourMomenta(tauVector, bJetVector, ModifiedMETVector2, output);
+      TLorentzVector topMomentumSolution2 = output.LorentzVector_visibleTauFourMomentum + output.LorentzVector_bJetFourMomentum +
+        output.LorentzVector_neutrinosFourMomentum;
+      std::cout << "topMomentumSolution2 " << topMomentumSolution2.Px() << " " << topMomentumSolution2.Py() << " " << topMomentumSolution2.Pz() << " " << topMomentumSolution2.E() << std::endl;
+      double TopMassSolution2 = topMomentumSolution2.M();
+      // Select the one closer to the top rest mass:
+      if (TMath::Abs(TopMassSolution1 - c_fPhysicalTopMass) < TMath::Abs(TopMassSolution2 - c_fPhysicalTopMass)) {
+	output.fTopMassSolution = TopMassSolution1;
+	output.fSelectedModifiedMETSolution = output.fModifiedMETSolution1;
+      } else {
+	output.fTopMassSolution = TopMassSolution2;
+	output.fSelectedModifiedMETSolution = output.fModifiedMETSolution2;
+      }
+      if (bPrintDebugOutput) {
+	std::cout << "*_*_*_*_*_*_*_*_*_*_*_*_*_*_*" << std::endl;
+	std::cout << "output.fModifiedMETSolution1 " << output.fModifiedMETSolution1 << std::endl;
+	std::cout << "output.fModifiedMETSolution2 " << output.fModifiedMETSolution2 << std::endl;
+	std::cout << "output.LorentzVector_neutrinosFourMomentum.E() " << output.LorentzVector_neutrinosFourMomentum.E() << std::endl;
+	std::cout << "output.LorentzVector_bJetFourMomentum.E() " << output.LorentzVector_bJetFourMomentum.E() << std::endl;
+	std::cout << "output.LorentzVector_visibleTauFourMomentum.E() " << output.LorentzVector_visibleTauFourMomentum.E() << std::endl;
+
+	std::cout << "*_*_*_*_*_*_*_*_*_*_*_*_*_*_*" << std::endl;
+	std::cout << "TopMassSolution1 = " << TopMassSolution1 << std::endl;
+ 	std::cout << "TopMassSolution2 = " << TopMassSolution2 << std::endl;
+	std::cout << "Selected top mass solution: " << output.fTopMassSolution << std::endl;
+      }
+    }
   }
   
   void FullHiggsMassCalculator::calculateHiggsMass(FullHiggsMassCalculator::Data& output) {
@@ -764,8 +760,9 @@ namespace HPlus {
   }
   
   void FullHiggsMassCalculator::applyCuts(FullHiggsMassCalculator::Data& output) {
-    if (140.0 < output.fTopMassSolution < 200.0) output.bPassedEvent = false;
-    //TMath::Output(output.fModifiedMET - <original MET>)
+    if (output.fTopMassSolution < 140.0 || output.fTopMassSolution > 200.0) output.bPassedEvent = false;
+    if (output.fDiscriminant < -20000) output.bPassedEvent = false;
+    //TMath::Abs(output.fModifiedMET - <original MET>)
   }
   
   void FullHiggsMassCalculator::doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, 
