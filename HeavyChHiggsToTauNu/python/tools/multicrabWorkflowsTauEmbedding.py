@@ -369,7 +369,10 @@ def addEmbeddingEmbedding_v44_4_2(datasets):
 
 def addEmbeddingGenTauSkim_v44_5(datasets):
     definitions = {
-        "TTJets_TuneZ2_Fall11":               TaskDef(""),
+        # 6662721 events, 4002 jobs
+        # User mean 2775.2, min 916.6, max 4447.0
+        # Mean 130.1 MB, min 44.1 MB, max 141.2 MB
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_gentauskim_v44_5-9ecb3a23e436fc2ffd8a803eac2a3a15/USER"),
         }
     addEmbeddingGenTauSkim_44X("v44_5", datasets, definitions)
 
