@@ -445,6 +445,9 @@ def _histoToDict(histo):
 ## Integrate TH1 to a Count
 def histoIntegrateToCount(histo):
     count = Count(0, 0)
+    if histo is None:
+        return count
+
     for bin in xrange(0, histo.GetNbinsX()+2):
         count.add(Count(histo.GetBinContent(bin), histo.GetBinError(bin)))
     return count
