@@ -7,6 +7,29 @@ from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePubli
 import multicrabDatasetsCommon as common
 from multicrabWorkflowsPattuple import constructProcessingWorkflow_44X
 
+def addEmbeddingGenTauSkim_44X(version, datasets, updateDefinitions):
+    # Tau+MET trigger has 5 % efficiency, GenTauSkim has 10 %, so 2x jobs
+    defaultDefinitions = {
+        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=4000, njobsOut=50),
+        }
+    workflowName = "tauembedding_gentauskim_"+version
+    updateTaskDefinitions(defaultDefinitions, updateDefinitions, workflowName)
+    for datasetName, taskDef in defaultDefinitions.iteritems():
+        dataset = datasets.getDataset(datasetName)
+        wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName)
+        if dataset.isData():
+            raise Exception("GenTauSkim workflow is not supported for data")
+        wf.addCrabLine("CMSSW.total_number_of_events = -1")
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
+        wf.addCrabLine("USER.publish_data_name = "+name)
+
+        wf.addArg("customizeConfig", "CustomGenTauSkim")
+
+        dataset.addWorkflow(wf)
+        if wf.output is not None:
+            dataset.addWorkflow(Workflow("tauembedding_gentauanalysis_"+version, source=Source(workflowName),
+                                         args=wf.args, output_file="histograms.root"))
+
 def addEmbeddingAodAnalysis_44X(datasets):
     njobs = {
         "WJets_TuneZ2_Fall11":               TaskDef(njobsIn=490),
@@ -378,6 +401,14 @@ def addEmbeddingEmbedding_v44_4_2(datasets):
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef("/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed1-2dedf078d8faded30b2dddce6fe8cdec/USER"),
         })
 
+def addEmbeddingGenTauSkim_v44_5(datasets):
+    definitions = {
+        # 6662721 events, 4002 jobs
+        # User mean 2775.2, min 916.6, max 4447.0
+        # Mean 130.1 MB, min 44.1 MB, max 141.2 MB
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_gentauskim_v44_5-9ecb3a23e436fc2ffd8a803eac2a3a15/USER"),
+        }
+    addEmbeddingGenTauSkim_44X("v44_5", datasets, definitions)
 
 def addEmbeddingSkim_v44_5(datasets):
     # Expecting 33 % file size increase w.r.t. v44_2 (237.7/186.5=27%
