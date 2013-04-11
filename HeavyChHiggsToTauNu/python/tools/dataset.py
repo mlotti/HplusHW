@@ -431,6 +431,9 @@ def _histoToDict(histo):
 ## Integrate TH1 to a Count
 def histoIntegrateToCount(histo):
     count = Count(0, 0)
+    if histo is None:
+        return count
+
     for bin in xrange(0, histo.GetNbinsX()+2):
         count.add(Count(histo.GetBinContent(bin), histo.GetBinError(bin)))
     return count
@@ -2318,6 +2321,15 @@ class DatasetManager:
 
     def printDatasetTree(self):
         print self.formatDatasetTree()
+
+    ## Prints the parameterSet of some Dataset
+    #
+    # Absolutely no guarantees of which Dataset the parameterSet is
+    # from will not be given.
+    def printSelections(self):
+        namePSets = self.datasets[0].forEach(lambda d: (d.getName(), d.getParameterSet()))
+        print "ParameterSet for dataset", namePSets[0][0]
+        print namePSets[0][1]
 
     ## \var datasets
     # List of dataset.Dataset (or dataset.DatasetMerged) objects to manage
