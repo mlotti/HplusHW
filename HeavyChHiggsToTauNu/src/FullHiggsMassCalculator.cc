@@ -324,7 +324,6 @@ namespace HPlus {
     // Define a FullHiggsMassCalculator::Data object to hold many different values of interest and be returned at the end.
     Data output;
     if (bPrintDebugOutput) std::cout << "==================================================================" << std::endl;
-    std::cout << "==================================================================" << std::endl;
 
     // CALCULATION USING RECONSTRUCTED MOMENTA
     // ---------------------------------------
@@ -676,30 +675,32 @@ namespace HPlus {
     return true;
   }
 
-  bool FullHiggsMassCalculator::selectedSolutionGivesVectorClosestToTrue(const edm::Event& iEvent, double selectedSolution,
-									 FullHiggsMassCalculator::Data& output, TVector3& MET) {
-    // Construct the reconstructed neutrino momentum vectors for both solutions
-    TVector3 reconstructedNeutrinoMomentum1(MET.Px(), MET.Py(), output.fNeutrinoPzSolution1);
-    TVector3 reconstructedNeutrinoMomentum2(MET.Px(), MET.Py(), output.fNeutrinoPzSolution2);
-    // Get the true neutrino momentum vector (this is a bit tedious)
-    reco::Candidate* genTau = getGenTauFromHiggs(iEvent);
-    reco::Candidate* genNeutrino1 = getGenNeutrinoFromHiggs(iEvent);
-    TVector3 neutrino1Vector(genNeutrino1->px(), genNeutrino1->py(), genNeutrino1->pz());
-    TVector3 neutrino2Vector = getInvisibleMomentum(*genTau);
-    TVector3 trueNeutrinoMomentum = neutrino1Vector + neutrino2Vector;
-    // Calculate difference vectors
-    TVector3 difference1 = reconstructedNeutrinoMomentum1 - trueNeutrinoMomentum;
-    TVector3 difference2 = reconstructedNeutrinoMomentum2 - trueNeutrinoMomentum;
-    // Find out which solution (1 or 2) was selected:
-    if (TMath::Abs(selectedSolution - output.fNeutrinoPzSolution1) <= TMath::Abs(selectedSolution - output.fNeutrinoPzSolution2)) {
-      // ...solution 1 was selected. Return false if it doesn't give a vector that is closer to the true one:
-      if (difference1.Mag() > difference2.Mag()) return false;
-    } else {
-      // ...solution 2 was selected. Return false if it doesn't give a vector that is closer to the true one:
-      if (difference2.Mag() > difference1.Mag()) return false;
-    }
-    return true;
-  }
+//   bool FullHiggsMassCalculator::selectedSolutionGivesVectorClosestToTrue(const edm::Event& iEvent, double selectedSolution,
+// 									 FullHiggsMassCalculator::Data& output, TVector3& MET) {
+//     if (!output.bPassedEvent) return false;
+//     if (selectedSolution > 999999.0) return false; // Always return false if the solution was not calculated
+//     // Construct the reconstructed neutrino momentum vectors for both solutions
+//     TVector3 reconstructedNeutrinoMomentum1(MET.Px(), MET.Py(), output.fNeutrinoPzSolution1);
+//     TVector3 reconstructedNeutrinoMomentum2(MET.Px(), MET.Py(), output.fNeutrinoPzSolution2);
+//     // Get the true neutrino momentum vector (this is a bit tedious)
+//     reco::Candidate* genTau = getGenTauFromHiggs(iEvent);
+//     reco::Candidate* genNeutrino1 = getGenNeutrinoFromHiggs(iEvent);
+//     TVector3 neutrino1Vector(genNeutrino1->px(), genNeutrino1->py(), genNeutrino1->pz());
+//     TVector3 neutrino2Vector = getInvisibleMomentum(*genTau);
+//     TVector3 trueNeutrinoMomentum = neutrino1Vector + neutrino2Vector;
+//     // Calculate difference vectors
+//     TVector3 difference1 = reconstructedNeutrinoMomentum1 - trueNeutrinoMomentum;
+//     TVector3 difference2 = reconstructedNeutrinoMomentum2 - trueNeutrinoMomentum;
+//     // Find out which solution (1 or 2) was selected:
+//     if (TMath::Abs(selectedSolution - output.fNeutrinoPzSolution1) <= TMath::Abs(selectedSolution - output.fNeutrinoPzSolution2)) {
+//       // ...solution 1 was selected. Return false if it doesn't give a vector that is closer to the true one:
+//       if (difference1.Mag() > difference2.Mag()) return false;
+//     } else {
+//       // ...solution 2 was selected. Return false if it doesn't give a vector that is closer to the true one:
+//       if (difference2.Mag() > difference1.Mag()) return false;
+//     }
+//     return true;
+//   }
 
   void FullHiggsMassCalculator::constructFourMomenta(TVector3& pB, TVector3& pTau, TVector3& MET, 
 						     FullHiggsMassCalculator::Data& output) {
@@ -770,7 +771,7 @@ namespace HPlus {
   }
   
   void FullHiggsMassCalculator::applyCuts(FullHiggsMassCalculator::Data& output) {
-    //if (output.fTopMassSolution < 140.0 || output.fTopMassSolution > 200.0) output.bPassedEvent = false;
+    if (output.fTopMassSolution < 140.0 || output.fTopMassSolution > 200.0) output.bPassedEvent = false;
     //if (output.fDiscriminant < -20000) output.bPassedEvent = false; // At -20000, the cut does not make much difference
     //TMath::Abs(output.fModifiedMET - <original MET>)
   }
@@ -803,32 +804,32 @@ namespace HPlus {
       // Two criteria for determining which one is the better solution are currently implemented. Uncomment the one to use.
       // When testing 2013-04-10, they gave essentially the same results.
       // 1. The one that is closer to the true solution:
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionGreater, output))
-// 	increment(selectionGreaterCorrect_SubCount);
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionSmaller, output))
-// 	increment(selectionSmallerCorrect_SubCount);
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuAngleMax, output))
-// 	increment(selectionTauNuAngleMaxCorrect_SubCount);
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuAngleMin, output))
-// 	increment(selectionTauNuAngleMinCorrect_SubCount);
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output))
-// 	increment(selectionTauNuDeltaEtaMaxCorrect_SubCount);
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output))
-// 	increment(selectionTauNuDeltaEtaMinCorrect_SubCount);
+      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionGreater, output))
+	increment(selectionGreaterCorrect_SubCount);
+      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionSmaller, output))
+	increment(selectionSmallerCorrect_SubCount);
+      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuAngleMax, output))
+	increment(selectionTauNuAngleMaxCorrect_SubCount);
+      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuAngleMin, output))
+	increment(selectionTauNuAngleMinCorrect_SubCount);
+      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output))
+	increment(selectionTauNuDeltaEtaMaxCorrect_SubCount);
+      if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output))
+	increment(selectionTauNuDeltaEtaMinCorrect_SubCount);
       // 2. The one that gives a smaller vector distance between the true and the reconstructed vector (i.e. also takes into 
       // account the other components):
-      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionGreater, output, METVector))
-	increment(selectionGreaterCorrect_SubCount);
-      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionSmaller, output, METVector))
-	increment(selectionSmallerCorrect_SubCount);
-      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuAngleMax, output, METVector))
-	increment(selectionTauNuAngleMaxCorrect_SubCount);
-      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuAngleMin, output, METVector))
-	increment(selectionTauNuAngleMinCorrect_SubCount);
-      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output, METVector))
-	increment(selectionTauNuDeltaEtaMaxCorrect_SubCount);
-      if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output, METVector))
-	increment(selectionTauNuDeltaEtaMinCorrect_SubCount);
+//       if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionGreater, output, METVector))
+// 	increment(selectionGreaterCorrect_SubCount);
+//       if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionSmaller, output, METVector))
+// 	increment(selectionSmallerCorrect_SubCount);
+//       if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuAngleMax, output, METVector))
+// 	increment(selectionTauNuAngleMaxCorrect_SubCount);
+//       if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuAngleMin, output, METVector))
+// 	increment(selectionTauNuAngleMinCorrect_SubCount);
+//       if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output, METVector))
+// 	increment(selectionTauNuDeltaEtaMaxCorrect_SubCount);
+//       if (selectedSolutionGivesVectorClosestToTrue(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output, METVector))
+// 	increment(selectionTauNuDeltaEtaMinCorrect_SubCount);
       break;
     case eGEN:
       hDiscriminant_GEN->Fill(output.fDiscriminant);

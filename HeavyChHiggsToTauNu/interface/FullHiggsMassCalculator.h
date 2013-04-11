@@ -144,8 +144,8 @@ namespace HPlus {
     double getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
     double getDeltaEtaBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
     bool selectedSolutionIsClosestToTrueValue(double selectedSolution, FullHiggsMassCalculator::Data& output);
-    bool selectedSolutionGivesVectorClosestToTrue(const edm::Event& iEvent, double selectedSolution,
-						  FullHiggsMassCalculator::Data& output, TVector3& MET);
+//     bool selectedSolutionGivesVectorClosestToTrue(const edm::Event& iEvent, double selectedSolution,
+// 						  FullHiggsMassCalculator::Data& output, TVector3& MET);
     void constructFourMomenta(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
     void calculateTopMass(TVector3& tauVector, TVector3& bJetVector, TVector3& METVector,
 			  FullHiggsMassCalculator::Data& output);
