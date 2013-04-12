@@ -2700,7 +2700,7 @@ class DatasetManagerCreator:
             if d.isData():
                 m = _dataDataEra_re.search(d.getName())
                 if m:
-                    dataEras[m.group("era")] = 1
+                    dataEras["Run"+m.group("era")] = 1
 
         self._dataDataEras = dataEras.keys()
         self._dataDataEras.sort()                
