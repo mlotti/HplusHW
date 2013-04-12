@@ -268,11 +268,15 @@ class InvertedTauID:
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
                     
-        if "BvetoInvertedVsBaseline"  in name:
-            plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1,"ymaxfactor": 0.2, "ymax": 200, "xmax": 300},
-                             createRatio=False, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+        if "MtBvetoInvertedVsBaseline"  in name:
+            plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1,"ymaxfactor": 0.2, "ymax": 100, "xmax": 300},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
- 
+        if "MtBvetoDphiInvertedVsBaseline"  in name:
+           plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1,"ymaxfactor": 0.2, "ymax": 100, "xmax": 300},
+                            createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                                                         )
+           
             
         if "MtNormalisedBveto" in name:
             plot.createFrame("comparison"+self.label, opts={"ymin":1e-1,"ymaxfactor": 0.2, "ymax": 100, "xmax": 300},
@@ -333,9 +337,9 @@ class InvertedTauID:
             histograms.addText(0.3, 0.8, "B tagging to B veto ratio", 25)
         if "MtPhiCutNormalisedBveto" in name:
             histograms.addText(0.6, 0.6, "#Delta#phi cuts", 30)
-        if "BvetoDphiInvertedVsBaseline"  in name:
+        if "MtBvetoDphiInvertedVsBaseline"  in name:
             histograms.addText(0.5, 0.6, "b-jet veto and #Delta#phi cuts", 25)
-        if "BvetoInvertedVsBaseline"  in name:
+        if "MtBvetoInvertedVsBaseline"  in name:
             histograms.addText(0.5, 0.6, "b-jet veto ", 25)  
         if "Factorised"  in name:
             histograms.addText(0.5, 0.6, "#Delta#phi cuts", 25)
@@ -521,7 +525,7 @@ class InvertedTauID:
         plot.histoMgr.setHistoDrawStyleAll("EP")
 
         # Create frame with a ratio pad
-        plot.createFrame("cuteff"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2, "xmax": 200},
+        plot.createFrame("cuteff"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2, "xmax": 90},
                          createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                          )
 
@@ -559,7 +563,7 @@ class InvertedTauID:
         plot2.histoMgr.forHisto("ShapeUncertainty", st1)
         plot2.histoMgr.setHistoDrawStyleAll("EP")
 #        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymax": 1})
-        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1, "xmax": 200})
+        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1, "xmax": 90})
 
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
@@ -568,7 +572,7 @@ class InvertedTauID:
 
 	rangeMin = hError.GetXaxis().GetXmin()
         rangeMax = hError.GetXaxis().GetXmax()
-	rangeMax = 70
+	rangeMax = 75
 #	rangeMax = 120
 #	rangeMax = 380
         
@@ -1068,7 +1072,7 @@ class InvertedTauID:
 	self.normalizationForInvertedEvents = nQCDbaseline*QCDfractionInBaseLineEvents/nQCDinverted
         self.normalizationForInvertedEWKEvents = nQCDbaseline*(1-QCDfractionInBaseLineEvents)/nQCDinverted
         ratio = float(nQCDbaseline)/nQCDinverted
-	normalizationForInvertedEventsError = sqrt(ratio*(1+ratio/nQCDinverted))*QCDfractionInBaseLineEvents +QCDfractionInBaseLineEventsError*ratio        
+	normalizationForInvertedEventsError = sqrt(ratio*(1-ratio/nQCDinverted))*QCDfractionInBaseLineEvents +QCDfractionInBaseLineEventsError*ratio        
 	self.normFactors.append(self.normalizationForInvertedEvents)
         self.normFactorsEWK.append(self.normalizationForInvertedEWKEvents)
 	self.labels.append(self.label)

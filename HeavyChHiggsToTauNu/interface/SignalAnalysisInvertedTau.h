@@ -269,13 +269,19 @@ namespace HPlus {
     HistogramsInBins *hMETBaselineTauIdJets;
     HistogramsInBins *hMETBaselineTauIdBtag;
     HistogramsInBins *hMETBaselineTauIdBveto;
+    HistogramsInBins *hMETBaselineTauIdBvetoTailKiller;
     // baseline MT histos
     HistogramsInBins *hMTBaselineTauIdJet;
     HistogramsInBins *hMTBaselineTauIdBtag;
     HistogramsInBins *hMTBaselineTauIdBveto;
+    HistogramsInBins *hMTBaselineTauIdBvetoTailKiller;
     HistogramsInBins *hMTBaselineTauIdBvetoDphi;
+    HistogramsInBins *hMTBaselineTauIdNoMetBveto;
+    HistogramsInBins *hMTBaselineTauIdNoMetBvetoTailKiller;
+    HistogramsInBins *hMTBaselineTauIdNoMetBtag;
+    HistogramsInBins *hMTBaselineTauIdNoMetBtagTailKiller;
     HistogramsInBins *hMTBaselineTauIdPhi;
-    HistogramsInBins *hMTBaselineThirdDeltaPhiCut;
+    HistogramsInBins *hMTBaselineTauIdAllCutsTailKiller;
 
 
     WrappedTH1 *hDeltaR_TauMETJet1MET;
@@ -304,7 +310,10 @@ namespace HPlus {
 
     //    HistogramsInBins *hDeltaPhiMHTJet1Inverted;
 
-
+    HistogramsInBins *hMTInvertedTauIdBtagNoMetCut;
+    HistogramsInBins *hMTInvertedTauIdBvetoNoMetCut; 
+    HistogramsInBins *hMTInvertedTauIdBtagNoMetCutTailKiller;
+    HistogramsInBins *hMTInvertedTauIdBvetoNoMetCutTailKiller; 
     HistogramsInBins *hMTInvertedTauIdJet;
     HistogramsInBins *hMTInvertedTauIdPhi; 
     HistogramsInBins *hMTInvertedNoBtaggingDphiCuts;
@@ -312,10 +321,7 @@ namespace HPlus {
     HistogramsInBins *hMTInvertedTauIdBtag;
     HistogramsInBins *hMTInvertedTauIdBvetoDphi;
     HistogramsInBins *hMTInvertedTauIdJetDphi;
-    HistogramsInBins *hMTInvertedSecondDeltaPhiCut;   
-    HistogramsInBins *hMTInvertedFirstDeltaPhiCut;
-    HistogramsInBins *hMTInvertedThirdDeltaPhiCut;
-    HistogramsInBins *hMTInvertedAgainstTTCut;
+    HistogramsInBins *hMTInvertedAllCutsTailKiller;
     HistogramsInBins *hTopMass;
     HistogramsInBins *hHiggsMass;
     HistogramsInBins *hHiggsMassPhi;
@@ -330,6 +336,18 @@ namespace HPlus {
 
 
 
+
+    WrappedTH1 *hSelectedTauEtTauVeto;
+    WrappedTH1 *hSelectedTauEtJetCut;
+    WrappedTH1 *hSelectedTauEtMetCut;
+    WrappedTH1 *hSelectedTauEtBtagging;
+    WrappedTH1 *hSelectedTauEtBjetVeto;
+    WrappedTH1 *hSelectedTauEtBjetVetoPhiCuts;
+    WrappedTH1 *hSelectedTauEtTailKiller;
+    //   WrappedTH1 *hSelectedTauEtDeltaPhiJet12Cut;
+    WrappedTH1 *hSelectedTauEtDeltaPhiJet123Cut;
+    WrappedTH1 *hSelectedTauEtDeltaPhiJetsAgainstTTCut;
+
    
     WrappedTH1 *hMTInvertedTauIdJets; 
     WrappedTH1 *hSelectedTauEt;
@@ -337,7 +355,7 @@ namespace HPlus {
     WrappedTH1 *hSelectedTauPhi;
     WrappedTH1 *hSelectedTauRtau;
     WrappedTH1 *hSelectedTauLeadingTrackPt;
-    WrappedTH1 *hSelectedTauEtMetCut;
+
     WrappedTH1 *hSelectedTauEtaMetCut;
     WrappedTH1 *hSelectedTauPhiMetCut;
     WrappedTH1 *hSelectedTauEtAfterCuts;
