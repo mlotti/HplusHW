@@ -300,20 +300,36 @@ def QCDTailKillerBin(cutShape, cutX, cutY):
 QCDTailKiller = cms.untracked.PSet(
     maxJetsToConsider = cms.untracked.uint32(4),
     # Back to back (bottom right corner of 2D plane tau,MET vs. jet,MET)
-    backToBack = cms.untracked.VPSet(
-        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
-        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
-        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
-        QCDTailKillerBin("circular", 40.0, 40.0), # jet 4
-    ),
+ #   backToBack = cms.untracked.VPSet(
+ #       QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+ #       QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+ #       QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
+ #       QCDTailKillerBin("circular", 40.0, 40.0), # jet 4
+ #   ),
     # Collinear topology (top left corner of 2D plane tau,MET vs. jet,MET)
-    collinear = cms.untracked.VPSet(
-        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 1
-        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 2
-        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 3
-        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
+ #   collinear = cms.untracked.VPSet(
+ #       QCDTailKillerBin("noCut", 0.0, 0.0), # jet 1
+ #       QCDTailKillerBin("noCut", 0.0, 0.0), # jet 2
+ #       QCDTailKillerBin("noCut", 0.0, 0.0), # jet 3
+ #       QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
+ #   ),
+
+    # Tight plus scenario
+    backToBack = cms.untracked.VPSet(
+        QCDTailKillerBin("circular", 80.0, 80.0), # jet 1
+        QCDTailKillerBin("circular", 80.0, 80.0), # jet 2
+        QCDTailKillerBin("circular", 80.0, 80.0), # jet 3
+        QCDTailKillerBin("noCut", 80.0, 80.0), # jet 4
     ),
+    collinear = cms.untracked.VPSet(
+        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
+   ),
 )
+
+
 
 topReconstruction = cms.untracked.string("None") # Options: None
 
