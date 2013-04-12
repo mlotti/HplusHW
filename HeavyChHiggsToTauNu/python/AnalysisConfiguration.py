@@ -648,7 +648,7 @@ class ConfigBuilder:
                 QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
                 QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
                 QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
-                QCDTailKillerBin("circular", 40.0, 40.0), # jet 4
+                QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
             mod.QCDTailKiller.collinear = cms.untracked.VPSet()
             createQCDTailKillerModule(process, "QCDTailKillerLoose", mod, names, modules)
