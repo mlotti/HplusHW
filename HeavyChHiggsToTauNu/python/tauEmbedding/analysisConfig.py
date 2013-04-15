@@ -42,13 +42,26 @@ jetFunctions = cms.PSet(
     betaStar = cms.string("userFloat('BetaStar')"),
 )
 
+def puID(name):
+    return cms.PSet(
+        mvaSrc = cms.InputTag("puJetMva", "%sDiscriminant" % name),
+        flagSrc = cms.InputTag("puJetMva", "%sId" % name),
+    )
+jetPileupIDs = cms.PSet(
+    fullId = puID("full"),
+    cutbased = puID("cutbased"),
+    simpleId = puID("simple"),
+    philv1 = puID("philv1"),
+)
+
 tauFunctions = cms.PSet()
 _tauIds = [
     "decayModeFinding",
-    "againstMuonLoose", "againstMuonTight",
-    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA",
-    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
+    "againstMuonLoose", "againstMuonTight", "againstMuonTight2",
+    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA", "againstElectronTightMVA3", "againstElectronVTightMVA3",
+#    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
     "byLooseCombinedIsolationDeltaBetaCorr", "byMediumCombinedIsolationDeltaBetaCorr", "byTightCombinedIsolationDeltaBetaCorr",
+    "byLooseCombinedIsolationDeltaBetaCorr3Hits", "byMediumCombinedIsolationDeltaBetaCorr3Hits", "byTightCombinedIsolationDeltaBetaCorr3Hits",
     ]
 for name in _tauIds:
     setattr(tauFunctions, name, cms.string("tauID('%s')"%name))

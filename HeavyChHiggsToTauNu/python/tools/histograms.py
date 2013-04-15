@@ -512,6 +512,8 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
 
 ## Update the style of palette Z axis according to ROOT.gStyle.
 #
+# \return TPalatteAxis object, or None if it doesn't exist
+#
 # This function is needed because the style is not propageted to the Z
 # axis automatically. It is recommended to call this every time
 # something is drawn with an option "Z"
@@ -519,11 +521,19 @@ def updatePaletteStyle(histo):
     ROOT.gPad.Update()
     paletteAxis = histo.GetListOfFunctions().FindObject("palette")
     if paletteAxis == None:
-        return
-    paletteAxis.SetLabelColor(ROOT.gStyle.GetLabelColor())
-    paletteAxis.SetLabelFont(ROOT.gStyle.GetLabelFont())
-    paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset())
-    paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize())
+        return None
+    paletteAxis.SetLabelColor(ROOT.gStyle.GetLabelColor("Z"))
+    paletteAxis.SetLabelFont(ROOT.gStyle.GetLabelFont("Z"))
+    paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset("Z"))
+    paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize("Z"))
+
+    axis = paletteAxis.GetAxis()
+    axis.SetTitleColor(ROOT.gStyle.GetTitleColor("Z"))
+    axis.SetTitleFont(ROOT.gStyle.GetTitleFont("Z"))
+    axis.SetTitleOffset(ROOT.gStyle.GetTitleOffset("Z"))
+    axis.SetTitleSize(ROOT.gStyle.GetTitleSize("Z"))
+
+    return paletteAxis
 
 ## Sum TH1 histograms
 #
@@ -780,12 +790,20 @@ class CanvasFrame:
     #
     # \param histoManager  histograms.HistoManager object to take the histograms for automatic axis ranges
     # \param name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
+    # \param canvasOpts    Dictionary for modifying the canvas/pad properties (see below)
     # \param kwargs        Keyword arguments for frame bounds (forwarded to histograms._boundsArgs())
     #
     # <b>Keyword arguments</b>
     # \li\a opts   If given, give \a opts to histograms._boundsArgs() instead of kwargs. No other keyword arguments are allowed (except opts2, see below).
     # \li\a opts2  Ignored, existence allowed only for compatibility with histograms.CanvasFrameTwo
-    def __init__(self, histoManager, name, **kwargs):
+    #
+    # <b>Canvas modification parameters</b>
+    # \li\a addWidth   Add this to the width of the canvas (e.g. for
+    #                  COLZ). If COLZ exists in any the drawing
+    #                  options of any input histogram, a default value
+    #                  of 0.13 is used (this can be disabled with
+    #                  explicit value None).
+    def __init__(self, histoManager, name, canvasOpts={}, **kwargs):
         histos = []
         if isinstance(histoManager, list):
             histos = histoManager[:]
@@ -794,8 +812,27 @@ class CanvasFrame:
         if len(histos) == 0:
             raise Exception("Empty set of histograms!")
 
+        # Infer the default based on the existence of COLZ drawing option
+        canvasAddWidth = None
+        for h in histos:
+            if "colz" in h.getDrawStyle().lower():
+                canvasAddWidth = 0.13
+
+        canvasAddWidth = canvasOpts.get("addWidth", canvasAddWidth)
+
+        if canvasAddWidth is not None:
+            cw = ROOT.gStyle.GetCanvasDefW()
+            prm = ROOT.gStyle.GetPadRightMargin()
+
+            ROOT.gStyle.SetCanvasDefW(int((1+canvasAddWidth)*cw))
+            ROOT.gStyle.SetPadRightMargin(canvasAddWidth+prm)
+
         self.canvas = ROOT.TCanvas(name)
         self.pad = self.canvas.GetPad(0)
+
+        if canvasAddWidth is not None:
+            ROOT.gStyle.SetCanvasDefW(cw)
+            ROOT.gStyle.SetPadRightMargin(prm)
 
         opts = kwargs
         if "opts" in kwargs:
@@ -1090,6 +1127,10 @@ class Histo:
     # \param drawStyle  new draw style
     def setDrawStyle(self, drawStyle):
         self.drawStyle = drawStyle
+
+    ## Get the histogram draw style
+    def getDrawStyle(self):
+        return self.drawStyle
 
     ## Set the legend label
     #

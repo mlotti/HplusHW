@@ -17,9 +17,15 @@ searchMode = "Light"
 #dataEra = "Run2011B"
 dataEra = "Run2012ABCD"
 
+binning = [41,50,60,70,80,100,120,150,200]
+
 HISTONAMES = []
-HISTONAMES.append("SelectedTau_pT_AfterTauID")
-HISTONAMES.append("SelectedTau_pT_AfterMetCut")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
+
 
 import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
@@ -72,16 +78,16 @@ def main():
             name = match.group("name")
         legends["Purity%s"%i] = name
 
-    plot.createFrame("purity", opts={"xmin": 40, "ymin": 0., "ymax": 1.2})
+    plot.createFrame("purity", opts={"xmin": 40, "xmax": 200, "ymin": 0., "ymax": 1.05})
     plot.frame.GetXaxis().SetTitle("tau p_{T} (GeV/c)")
     plot.frame.GetYaxis().SetTitle("Purity")
-    plot.setEnergy(datasets.getEnergies())
+#    plot.setEnergy(datasets.getEnergies())
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
     plot.setLegend(histograms.createLegend(0.6, 0.3, 0.8, 0.4))
 
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    histograms.addEnergyText(s="%s TeV"%(datasets.getEnergies()[0]))
     histograms.addLuminosityText(x=None, y=None, lumi=datasets.getDataset("Data").getLuminosity())
 
     plot.draw()
@@ -89,7 +95,8 @@ def main():
             
 def purityGraph(i,datasets,histo):
     inverted = plots.DataMCPlot(datasets, histo)
-    inverted.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+#    inverted.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+    inverted.histoMgr.forEachHisto(lambda h: h.setRootHisto(h.getRootHisto().Rebin(len(binning)-1,h.getRootHisto().GetName(),array.array('d',binning))))
     
     invertedData = inverted.histoMgr.getHisto("Data").getRootHisto().Clone(histo)
     invertedEWK  = inverted.histoMgr.getHisto("EWK").getRootHisto().Clone(histo)
