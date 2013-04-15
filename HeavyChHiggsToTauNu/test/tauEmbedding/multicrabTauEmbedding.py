@@ -8,8 +8,8 @@ from optparse import OptionParser
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 # Default processing step
-defaultStep = "skim"
-#defaultStep = "embedding"
+#defaultStep = "skim"
+defaultStep = "embedding"
 #defaultStep = "analysis"
 #defaultStep = "analysisTau"
 #defaultStep = "signalAnalysis"
@@ -53,7 +53,8 @@ defaultVersions = [
 #    "v44_4_2_seed0",
 #    "v44_4_2_seed1"
 
-    "v44_5" # skim version
+#    "v44_5_notrg0"
+    "v44_5_notrg1"
 ]
 skimVersion = "v44_5"
 genTauSkimVersion = "v44_5"
