@@ -24,3 +24,4 @@ HeavyChHiggsToTauNu/data
 *_C.so
 configDump*.py
 typescript
+*_backup

@@ -32,13 +32,13 @@ myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 #myOptimisation.disableMaxVariations()
 
 def customize(signalAnalysis):
-    # Apply beta cut for jets to reject PU jets
-    signalAnalysis.jetSelection.betaCut = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
+    print "Customisation applied"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=1000, # default is -1
                         customizeLightAnalysis=customize,
+                        #doQCDTailKillerScenarios=True,
                         #doAgainstElectronScan=True,
                         #doSystematics=True,
                         #histogramAmbientLevel = "Vital",

@@ -4,6 +4,8 @@
 #include <TStopwatch.h>
 #include <TH1F.h>
 #include <TDirectory.h>
+#include <TTree.h>
+#include <TFile.h>
 
 #include<iostream>
 #include<iomanip>
@@ -150,6 +152,8 @@ Bool_t SelectorImp::Notify() {
   // is started when using PROOF. It is normally not necessary to make changes
   // to the generated code, but the routine can be extended by the
   // user if needed. The return value is currently not used.
+
+  std::cout << "Processing file " << fChain->GetCurrentFile()->GetName() << std::endl;
 
   return kTRUE;
 }

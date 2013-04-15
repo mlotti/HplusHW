@@ -65,6 +65,17 @@ class MuonAnalysisSelectorArgs(dataset.SelectorArgs):
                                        ],
                                       **kwargs)
 
+class TauAnalysisSelectorArgs(dataset.SelectorArgs):
+    def __init__(self, **kwargs):
+        dataset.SelectorArgs.__init__(self,
+                                      [("puWeight", ""),
+                                       ("isEmbedded", False),
+                                       ("embeddingWTauMuFile", ""),
+                                       ("embeddingWTauMuPath", ""),
+                                       ("mcTauMode", ""),
+                                       ],
+                                      **kwargs)
+
 class Selections:
     def __init__(self, **kwargs):
         for key, value in kwargs.iteritems():
@@ -129,7 +140,7 @@ def decayModeCheckCustomize(h):
     n = 16
     if hasattr(h, "getFrame1"):
         h.getFrame1().GetXaxis().SetNdivisions(n)
-        h.getFrame1().GetXaxis().SetNdivisions(n)
+        h.getFrame2().GetXaxis().SetNdivisions(n)
     else:
         h.getFrame().GetXaxis().SetNdivisions(n)
 
@@ -370,16 +381,15 @@ class DatasetsMany:
     ## Constructor
     #
     # \param dirs                      List of paths multicrab directories, either absolute or relative to working directory
-    # \param counters                  Directory in dataset TFiles containing the event counters
     # \param normalizeMCByCrossSection Normalize MC to cross section
     # \param normalizeMCByLuminosity   Normalize MC to data luminosity?
     # \param kwargs                    Keyword arguments, forwarded to dataset.getDatasetsFromMulticrabCfg()
     #
     # Construct a dataset.DatasetManager object from each multicrab directory
-    def __init__(self, dirs, counters, normalizeMCByCrossSection=False, normalizeMCByLuminosity=False, **kwargs):
+    def __init__(self, dirs, normalizeMCByCrossSection=False, normalizeMCByLuminosity=False, **kwargs):
         self.datasetManagers = []
         for d in dirs:
-            datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=d+"/multicrab.cfg", counters=counters, **kwargs)
+            datasets = dataset.getDatasetsFromMulticrabCfg(directory=d, **kwargs)
             datasets.updateNAllEventsToPUWeighted()
             datasets.loadLuminosities()
             self.datasetManagers.append(datasets)

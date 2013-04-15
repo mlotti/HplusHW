@@ -1,5 +1,28 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
 
+#include "FWCore/Utilities/interface/Exception.h"
+
+namespace {
+  void visibleTauHelper(const reco::Candidate *cand, math::XYZTLorentzVector& result) {
+    // stable
+    if(cand->status() == 1) {
+      // ignore neutrinos
+      int pdgid = std::abs(cand->pdgId());
+      if(pdgid == 12 || pdgid == 14 || pdgid == 16)
+        return;
+
+      result += cand->p4();
+      if(cand->numberOfDaughters() > 0)
+        throw cms::Exception("Assert") << "Candidate has status 1, and " << cand->numberOfDaughters() << " daughters in " << __FILE__ << ":" << __LINE__;
+    }
+    else {
+      for(size_t i=0; i<cand->numberOfDaughters(); ++i) {
+        visibleTauHelper(cand->daughter(i), result);
+      }
+    }
+  }
+}
+
 namespace HPlus {
   namespace GenParticleTools {
     const reco::GenParticle *rewindChainUp(const reco::GenParticle *particle) {
@@ -123,18 +146,8 @@ namespace HPlus {
 
       tau = rewindChainDown(tau);
       math::XYZTLorentzVector result;
-      size_t nDaughters = tau->numberOfDaughters();
-      for(size_t i=0; i<nDaughters; ++i) {
-        int ida = std::abs(tau->daughter(i)->pdgId());
-        // ignore neutrinos
-        if(ida == 12 || ida == 14 || ida == 16)
-          continue;
-
-        result += tau->daughter(i)->p4();
-      }
-    
+      visibleTauHelper(tau, result);
       return result;
     }
-
   }
 }

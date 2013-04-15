@@ -21,6 +21,7 @@ class BTaggingScaleFactorFromDB;
 namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
+  class WrappedTH2;
 
   class BTagging: public BaseSelection {
     class BTaggingScaleFactor {
@@ -113,7 +114,7 @@ namespace HPlus {
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
-
+    void analyzeMCTagEfficiencyByJetFlavour(const edm::Ptr<pat::Jet>& jet, const bool isBJet, const bool isCJet, const bool isLightJet);
     void calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, BTagging::Data& btagData);
 
     // Input parameters
@@ -172,6 +173,25 @@ namespace HPlus {
     WrappedTH1 *hNumberOfBtaggedJetsIncludingSubLeading;
     WrappedTH1 *hMCMatchForPassedJets;
     WrappedTH1 *hControlBTagUncertaintyMode;
+    // MC btagging and mistagging efficiency
+    WrappedTH1 *hMCAllBJetsByPt;
+    WrappedTH1 *hMCAllCJetsByPt;
+    WrappedTH1 *hMCAllLightJetsByPt;
+    WrappedTH1 *hMCBtaggedBJetsByPt;
+    WrappedTH1 *hMCBtaggedCJetsByPt;
+    WrappedTH1 *hMCBtaggedLightJetsByPt;
+    WrappedTH1 *hMCBmistaggedBJetsByPt;
+    WrappedTH1 *hMCBmistaggedCJetsByPt;
+    WrappedTH1 *hMCBmistaggedLightJetsByPt;
+    WrappedTH2 *hMCAllBJetsByPtAndEta;
+    WrappedTH2 *hMCAllCJetsByPtAndEta;
+    WrappedTH2 *hMCAllLightJetsByPtAndEta;
+    WrappedTH2 *hMCBtaggedBJetsByPtAndEta;
+    WrappedTH2 *hMCBtaggedCJetsByPtAndEta;
+    WrappedTH2 *hMCBtaggedLightJetsByPtAndEta;
+    WrappedTH2 *hMCBmistaggedBJetsByPtAndEta;
+    WrappedTH2 *hMCBmistaggedCJetsByPtAndEta;
+    WrappedTH2 *hMCBmistaggedLightJetsByPtAndEta;
     // Scale factor histograms (needed for evaluating syst. uncertainty of btagging in datacard generator)
     WrappedTH1 *hScaleFactor;
     WrappedTH1 *hBTagAbsoluteUncertainty;

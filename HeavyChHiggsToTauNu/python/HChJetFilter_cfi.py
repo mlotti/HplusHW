@@ -9,3 +9,5 @@ hPlusJetPtrSelectorFilter = cms.EDFilter("HPlusJetPtrSelectorFilter",
         throw = cms.bool(True),
         eventCounter = param.eventCounter.clone()
 )
+# Set Jet PU ID source
+param.setJetPUIdSrc(hPlusJetPtrSelectorFilter.jetSelection,"hPlusJetPtrSelectorFilter")

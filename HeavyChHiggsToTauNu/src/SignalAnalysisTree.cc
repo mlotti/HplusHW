@@ -120,13 +120,28 @@ namespace HPlus {
     fTree->Branch("topreco_p4", &fTop);
 
     fTree->Branch("alphaT", &fAlphaT);
-    fTree->Branch("QOne", &fQOne);
-    fTree->Branch("QTwo", &fQTwo);
-    fTree->Branch("QThree", &fQThree);
+    fTree->Branch("MomentumTensor_QOne", &fMomentumTensor_QOne);
+    fTree->Branch("MomentumTensor_QTwo", &fMomentumTensor_QTwo);
+    fTree->Branch("MomentumTensor_QThree", &fMomentumTensor_QThree);
     fTree->Branch("sphericity", &fSphericity);
     fTree->Branch("aplanarity", &fAplanarity);
     fTree->Branch("planarity", &fPlanarity);
     fTree->Branch("circularity", &fCircularity);
+    fTree->Branch("SpherocityTensor_QOne", &fSpherocityTensor_QOne);
+    fTree->Branch("SpherocityTensor_QTwo", &fSpherocityTensor_QTwo);
+    fTree->Branch("SpherocityTensor_QThree", &fSpherocityTensor_QThree);
+    fTree->Branch("Cparameter", &fCparameter);
+    fTree->Branch("Dparameter", &fDparameter);
+    fTree->Branch("jetThrust", &fJetThrust);
+
+    // Full H+ mass
+    fTree->Branch("hplusMassDiscriminant", &fHplusMassDiscriminant);
+    fTree->Branch("hplusMassSolution", &fHplusMassSolution);
+    fTree->Branch("hplusMassTopMassSolution", &fHplusMassTopMassSolution);
+    fTree->Branch("hplusMassSelectedNeutrinoPzSolution", &fHplusMassSelectedNeutrinoPzSolution);
+    fTree->Branch("hplusMassSelectedNeutrinoPtSolution", &fHplusMassSelectedNeutrinoPtSolution);
+    fTree->Branch("hplusMassMCNeutrinoPz", &fHplusMassMCNeutrinoPz);
+
     fTree->Branch("TauIsFake", &bTauIsFake);
     fTree->Branch("MHT_p4", &fMHT);
     fTree->Branch("MHT_SelJets_p4", &fMHTSelJets);
@@ -273,19 +288,17 @@ namespace HPlus {
     // std::cout << "fill: 2" << std::endl;
     // MC matching of tau
     
-    // FIXME buggy code, fix it (match to visible taus instead of tau lepton, muons and electrons have no effect (gen is local variable)
-    
     if(!iEvent.isRealData()) {
       edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
       iEvent.getByLabel(fGenParticleSource, hgenparticles);
 
       // Try first genuine tau
-      const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 15, *tau, 0.5);
+      const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 15, *tau, 0.5, true); // true for visible tau matching
       if(!gen) { // then muon
-        const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 13, *tau, 0.5);
+        gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 13, *tau, 0.5);
       }
       if(!gen) { // finally electron
-        const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 11, *tau, 0.5);
+        gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 11, *tau, 0.5);
       }
       // std::cout << "fill: 3" << std::endl;
       if(gen) {
@@ -737,13 +750,28 @@ namespace HPlus {
     fTop.SetXYZT(nan, nan, nan, nan);
 
     fAlphaT = nan;
-    fQOne = nan;
-    fQTwo = nan;
-    fQThree = nan;
+    fMomentumTensor_QOne = nan;
+    fMomentumTensor_QTwo = nan;
+    fMomentumTensor_QThree = nan;
     fSphericity = nan;
     fAplanarity = nan;
     fPlanarity = nan;
     fCircularity = nan;
+    fSpherocityTensor_QOne = nan;
+    fSpherocityTensor_QTwo = nan;
+    fSpherocityTensor_QThree = nan;
+    fCparameter = nan;
+    fDparameter = nan;
+    fJetThrust = nan;
+
+    // Full H+ mass
+    fHplusMassDiscriminant = nan;
+    fHplusMassSolution = nan;
+    fHplusMassTopMassSolution = nan;
+    fHplusMassSelectedNeutrinoPzSolution = nan;
+    fHplusMassSelectedNeutrinoPtSolution = nan;
+    fHplusMassMCNeutrinoPz = nan;
+
     bTauIsFake = false;
     vDiJetMassesNoTau.clear();
   
