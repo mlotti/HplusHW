@@ -1931,6 +1931,14 @@ def addPattuple_v53_3_test2(datasets):
 
     addPattuple_53X("v53_3_test2", datasets, definitions)
 
+def addPattuple_v53_3_test3(datasets):
+    # Bugfix for LogErrorEventFilters
+    definitions = {
+        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
+        }
+
+    addPattuple_53X("v53_3_test3", datasets, definitions)
+
 
 # Skeleton
 def addPattuple_vNEXT_SKELETON_53X(datasets):
