@@ -1920,6 +1920,18 @@ def addPattuple_v53_3_test1(datasets):
     addPattuple_53X("v53_3_test1", datasets, definitions)
 
 
+def addPattuple_v53_3_test2(datasets):
+    # Same as test1, except START53_V15 GT
+    definitions = {
+# 163630 events, 91 jobs
+        # User mean 4031.2, min 84.8, max 6559.8
+        # Mean 180.8 MB, min 3.1 MB, max 191.2 MB
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test2-9cfaf7bc576a6d9f3488935d01684bea/USER"),
+        }
+
+    addPattuple_53X("v53_3_test2", datasets, definitions)
+
+
 # Skeleton
 def addPattuple_vNEXT_SKELETON_53X(datasets):
     definitions = {
