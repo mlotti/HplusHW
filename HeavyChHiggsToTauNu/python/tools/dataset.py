@@ -2331,6 +2331,11 @@ class DatasetManager:
         print "ParameterSet for dataset", namePSets[0][0]
         print namePSets[0][1]
 
+    def getSelections(self):
+        namePSets = self.datasets[0].forEach(lambda d: (d.getName(), d.getParameterSet()))
+        #print "ParameterSet for dataset", namePSets[0][0]
+        return namePSets[0][1]
+
     ## \var datasets
     # List of dataset.Dataset (or dataset.DatasetMerged) objects to manage
     ## \var datasetMap
@@ -2433,7 +2438,7 @@ class DatasetManagerCreator:
             if d.isData():
                 m = _dataDataEra_re.search(d.getName())
                 if m:
-                    dataEras[m.group("era")] = 1
+                    dataEras["Run"+m.group("era")] = 1
 
         self._dataDataEras = dataEras.keys()
         self._dataDataEras.sort()                
