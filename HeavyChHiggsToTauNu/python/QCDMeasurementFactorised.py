@@ -6,7 +6,7 @@ import FWCore.ParameterSet.Config as cms
 # HChSignalAnalysisParameters module is typically modified before
 # creating the EDFilter.
 def createEDFilter(param):
-    return cms.EDFilter("HPlusQCDMeasurementBasicFilter",
+    return cms.EDFilter("HPlusQCDMeasurementFactorisedFilter",
         blindAnalysisStatus = param.blindAnalysisStatus,
         histogramAmbientLevel = param.histogramAmbientLevel,
         trigger = param.trigger.clone(),
@@ -47,7 +47,7 @@ def createEDFilter(param):
         metFilters = param.metFilters.clone(),
         factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150.),
         factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
-        factorisationNVerticesBinLowEdges = cms.untracked.vint32(10),
+        factorisationNVerticesBinLowEdges = cms.untracked.vint32(10, 20),
         factorisationTransverseMassRange = cms.untracked.vdouble(40., 0., 400.),
         factorisationFullMassRange = cms.untracked.vdouble(50., 0., 500.),
     )
