@@ -462,7 +462,7 @@ def addEmbeddingEmbedding_v44_5(datasets):
         "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5c-2c4d260f86ba3e9db4d6ef0e80af6278/USER", args={"triggerMC": 0}, publishPostfix="c"),
         })
 
-    addEmbedding("v44_5_notrg1", {
+    addEmbedding("v44_5_notrg2", {
         "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 0}),
         })
 
