@@ -851,6 +851,7 @@ class StandardPATBuilder(PATBuilderBase):
             # https://twiki.cern.ch/twiki/bin/view/CMS/TrackingPOGFilters#Filters
             self.process.logErrorTooManyClusters = cms.EDFilter("LogErrorEventFilter",
                 src = cms.InputTag("logErrorHarvester"),
+                taggedMode = cms.untracked.bool(True),
                 maxErrorFractionInLumi = cms.double(1.0), 
                 maxErrorFractionInRun  = cms.double(1.0),
                 maxSavedEventsPerLumiAndError = cms.uint32(100000), 
@@ -858,10 +859,12 @@ class StandardPATBuilder(PATBuilderBase):
                 modulesToIgnore = cms.vstring("SeedGeneratorFromRegionHitsEDProducer:regionalCosmicTrackerSeeds",
                                               "PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg")
             )
-            self.logErrorTooManyClustersPath = cms.Path(self.process.logErrorTooManyClusters)
+            self.endSequence += self.process.logErrorTooManyClusters
+            self.outputCommands.append("keep *_logErrorTooManyClusters_*_*")
 
             self.process.logErrorTooManyTripletsPairs = cms.EDFilter("LogErrorEventFilter",
                 src = cms.InputTag("logErrorHarvester"),
+                taggedMode = cms.untracked.bool(True),
                 maxErrorFractionInLumi = cms.double(1.0), 
                 maxErrorFractionInRun  = cms.double(1.0), 
                 maxSavedEventsPerLumiAndError = cms.uint32(100000), 
@@ -869,10 +872,12 @@ class StandardPATBuilder(PATBuilderBase):
                 modulesToIgnore = cms.vstring("SeedGeneratorFromRegionHitsEDProducer:regionalCosmicTrackerSeeds",
                                               "PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg")
             )
-            self.process.logErrorTooManyTripletsPairsPath = cms.Path(self.process.logErrorTooManyTripletsPairs)
+            self.endSequence += self.process.logErrorTooManyTripletsPairs
+            self.outputCommands.append("keep *_logErrorTooManyTripletsPairs_*_*")
 
             self.process.logErrorTooManyTripletsPairsMainIterations = cms.EDFilter("LogErrorEventFilter",
                 src = cms.InputTag("logErrorHarvester"),
+                taggedMode = cms.untracked.bool(True),
                 maxErrorFractionInLumi = cms.double(1.0), 
                 maxErrorFractionInRun  = cms.double(1.0), 
                 maxSavedEventsPerLumiAndError = cms.uint32(100000), 
@@ -881,19 +886,23 @@ class StandardPATBuilder(PATBuilderBase):
                                              "SeedGeneratorFromRegionHitsEDProducer:pixelPairStepSeeds"
                                              )
                 )
-            self.process.logErrorTooManyTripletsPairsMainIterationsPath = cms.Path(self.process.logErrorTooManyTripletsPairsMainIterations)
+            self.endSequence += self.process.logErrorTooManyTripletsPairsMainIterations
+            self.outputCommands.append("keep *_logErrorTooManyTripletsPairsMainIterations_*_*")
 
             self.process.logErrorTooManySeeds = cms.EDFilter("LogErrorEventFilter",
                 src = cms.InputTag("logErrorHarvester"),
+                taggedMode = cms.untracked.bool(True),
                 maxErrorFractionInLumi = cms.double(1.0),
                 maxErrorFractionInRun  = cms.double(1.0),
                 maxSavedEventsPerLumiAndError = cms.uint32(100000), 
                 categoriesToWatch = cms.vstring("TooManySeeds"),
             )
-            self.process.logErrorTooManySeedsPath = cms.Path(self.process.logErrorTooManySeeds)
+            self.endSequence += self.process.logErrorTooManySeeds
+            self.outputCommands.append("keep *_logErrorTooManySeeds_*_*")
 
             self.process.logErrorTooManySeedsMainIterations = cms.EDFilter("LogErrorEventFilter",
                 src = cms.InputTag("logErrorHarvester"),
+                taggedMode = cms.untracked.bool(True),
                 maxErrorFractionInLumi = cms.double(1.0),
                 maxErrorFractionInRun  = cms.double(1.0),
                 maxSavedEventsPerLumiAndError = cms.uint32(100000), 
@@ -902,7 +911,8 @@ class StandardPATBuilder(PATBuilderBase):
                                              "CkfTrackCandidateMaker:pixelPairTrackCandidate"
                                              )
             )
-            self.process.logErrorTooManySeedsMainIterationsPath = cms.Path(self.process.logErrorTooManySeedsMainIterations)
+            self.endSequence += self.process.logErrorTooManySeedsMainIterations
+            self.outputCommands.append("keep *_logErrorTooManySeedsMainIterations_*_*")
 
             self.process.manystripclus53X = cms.EDFilter('ByClusterSummaryMultiplicityPairEventFilter',
                                                       multiplicityConfig = cms.PSet(
