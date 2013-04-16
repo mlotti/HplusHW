@@ -3,6 +3,7 @@
 import sys
 import os
 import ROOT
+import tarfile
 from optparse import OptionParser
 from datetime import date, time, datetime
 
@@ -10,25 +11,41 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 
 class HistogramInput:
-    def __init__(self, histoName, binWidth, logStatus=True):
-        self._histoName # can be a list (for backward compatibility)
+    def __init__(self, histoNameList, binWidth, logStatus=True):
+        # can be a list (for backward compatibility)
+        if isinstance(histoNameList,list):
+            self._histoNameList = histoNameList
+        else:
+            self._histoNameList = [histoNameList]
         self._binWidth = binWidth
         self._logStatus = logStatus
-    
-    def getName(self):
-        return self._histoName
+
+    def getHistoNameList(self):
+        return self._histoNameList
+
+    def getBinWidth(self):
+        return self._binWidth
 
     def getLogStatus(self):
         return self._logStatus
-        
-    def getHistogram(self, dataset):
-        roothisto = dataset.getDatasetRootHisto(name)
+
+    def getHistogram(self, dataset, isRef):
+        hname = None
+        for name in self._histoNameList:
+            if dataset.hasRootHisto(name):
+                hname = name
+        if hname == None:
+            if isRef:
+                raise Exception("Error: could not open histogram '%s' in reference file %s!"%(', '.join(map(str, self._histoNameList)),dataset.getName()))
+            else:
+                raise Exception("Error: could not open histogram '%s' in test file %s!"%(', '.join(map(str, self._histoNameList)),dataset.getName()))
+        roothisto = dataset.getDatasetRootHisto(hname)
         #roothisto.normalizeToOne()
         hnew = roothisto.getHistogram()
         # Rebin
         binwidth = hnew.GetXaxis().GetBinWidth(1)
-        if histoname[1] > binwidth:
-            hnew.Rebin(int(histoname[1] / binwidth))
+        if self._binWidth > binwidth:
+            hnew.Rebin(int(self._binWidth / binwidth))
         myName = "New"
         if isRef:
             myName = "Reference"
@@ -52,66 +69,110 @@ class HistogramInput:
         h.SetYTitle(hnew.GetYaxis().GetTitle())
         h.SetStats(1)
         h.SetName(myName)
-        return h
-    
+        # Set style
+        if isRef:
+            h.SetFillStyle(1001)
+            h.SetFillColor(ROOT.kBlue-6)
+            h.SetLineColor(ROOT.kBlue-6)
+            #statbox.SetTextColor(ROOT.kBlue-6)
+        else:
+            h.SetMarkerColor(ROOT.kBlack)
+            h.SetLineColor(ROOT.kBlack)
+            h.SetMarkerStyle(20)
+            h.SetMarkerSize(1.0)
+            #statbox.SetTextColor(ROOT.kBlack)
+        return (hname,h)
+
 # Groups histograms and counters around a theme; a separate page is created for each group
 class ValidateGroup:
     def __init__(self, groupName):
         self._groupName = groupName
-        self._counters = []
+        self._output = ""
+        self._myDifference = 0.0
+        self._counters = [] # list of count names (strings), main counters = "main"
+        self._readCounterCount = 0
         self._histograms = [] # list of HistogramInputs
         self._yellowWarnings = []
         self._redWarnings = []
 
     def addCounter(self, counterName):
         self._counters.append(counterName)
-        
+
     def addHistogram(self, histoName, binWidth, logStatus):
-        self._histograms.append(HistogramInput(histoName, binWidth, logStatus)
+        self._histograms.append(HistogramInput(histoName, binWidth, logStatus))
+
+    def getName(self):
+        return self._groupName
+
+    def getOutput(self):
+        return self._output
+
+    def getDifference(self):
+        return self._myDifference
 
     def getItemCount(self):
         return len(self._counters)+len(self._histograms)
+
+    def getReadCounterCount(self):
+        return self._readCounterCount
+
+    def getReadHistogramCount(self):
+        return len(self._histograms)
 
     def getRedWarnings(self):
         return self._redWarnings
 
     def getYellowWarnings(self):
         return self._yellowWarnings
-        
-    def doValidate(self, mydir, refDataset, refEventCounter, testDataset, testEventCounter):
+
+    def doValidate(self, mydir, refDataset, testDataset):
+        if not os.path.exists(mydir):
+            os.mkdir(mydir)
+        #myOutput = "<br><a href=#maintop>Back to datasets</a>\n"
         # validate counters
-        myCounterOutput = self._doValidateCounters(refDataset, refEventCounter, testDataset, testEventCounter)
+        self._myDifference = 0.0
+        myOutput = "<a name=mytop></a>"
+        #print "Generating validation counters"
+        self._readCounterCount = 0
+        if len(self._counters) > 0:
+            myOutput += "<h1>Counters for validation:</h1><br>\n"
+            myOutput += self._doValidateCounters(refDataset, testDataset)
+            myOutput += '<a href="#mytop">Back to top"</a><br>\n'
         # validate histograms
-        myHistoOutput = self._doValidateHistograms(refDataset, testDataset)
+        #print "Generating validation histograms"
+        if len(self._histograms) > 0:
+            myOutput += "<h1>Histograms for validation:</h1><br>\n"
+            myOutput += "Note: the underflow (overflow) bin is shown as the first (last) bin in the histogram<br>\n"
+            myOutput += "Color legend: blue histogram = reference, red points = dataset to be validated<br>\n"
+            myOutput += "Difference is defined as sum_i (abs(new_i / ref_i - 1.0)), where sum goes over the histogram bins<br><br>\n"
+            myOutput += self._doValidateHistograms(mydir, refDataset, testDataset)
+            myOutput += '<a href="#mytop">Back to top"</a><br>\n'
         # make html
-        myhtmlheader = "<html>\n<head>\n<title>ValidationResults</title>\n</head>\n<body>\n"
-        myhtmlfooter = "</body>\n</html>\n"
-        myhtmlname = "%s.html"%(self._groupName().replace(" ","_"))
-        myfile = open("%s/%s"%(mydir,myhtmlname),"w")
-        #myfile = open("index.html","w")
-        myfile.write(myhtmlheader)
-        myfile.write("<h1>Validation results for: "+mydir+"</h1><br>\n<hr><br>\n")
-        myfile.write(myCounterOutput)
-        myfile.write(myHistoOutput)
-        myfile.write(myhtmlfooter)
-        myfile.close()
-        return myhtmlname.replace(".html","")
+        self._output = myOutput
+        #makehtml(mydir,"index.html",myOutput+myCounterOutput+myHistoOutput)
+        #print "Histograms done for dataset",refDataset.getName()
+        #print "Legend: blue histogram = reference, red points = dataset to be validated\n"
 
     ### Counter based validation methods ------------------------------------------------
 
-    def _doValidateCounters(self, refDataset, refEventCounter, testDataset, testEventCounter):
+    def _doValidateCounters(self, refDataset, testDataset):
         myOutput = ""
+        # Get event counters
+        refEventCounter = counter.EventCounter(refDataset)
+        testEventCounter = counter.EventCounter(testDataset)
+        # Get sub counter names
         refSubCounterNames = refEventCounter.getSubCounterNames()
         testSubCounterNames = testEventCounter.getSubCounterNames()
+        # Loop over requested counter names
         for counterName in self._counters:
-            print ".. analyzing counter",counterName
+            #print ".. analyzing counter",counterName
             if counterName == "main":
-                myOutput += "<br>\n<b>Main counter: "+item+"</b><br>\n<br>\n"
+                myOutput += "<br>\n<b>Main counters</b><br>\n<br>\n"
                 refCounter = refEventCounter.getMainCounter().getTable()
                 testCounter = testEventCounter.getMainCounter().getTable()
                 myOutput += self._validateCounterValues(refCounter,testCounter)
             else:
-                myOutput += "<br>\n<b>Subcounter: "+item+"</b><br>\n<br>\n"
+                myOutput += "<br>\n<b>Subcounters: %s</b><br>\n<br>\n"%(counterName)
                 itemFoundStatus = False
                 for item in refSubCounterNames:
                     if item == counterName:
@@ -132,10 +193,11 @@ class ValidateGroup:
                 # Report items that were not found
                 if not itemFoundStatus:
                     print "      counter %s not found!"%counterName
+                    print "      Full counter list: main, %s"%(", ".join(map(str,refSubCounterNames)))
                     myOutput += "<b>Not found! Check name.</b><br>\n"
-            if "#d00000" in myOutput:
+            if "#b00000" in myOutput:
                 self._redWarnings = "Mismatch in counter group <b>%s</b><br>\n"%counterName
-            elif "#d0d000" in myOutput:
+            elif "#b0b000" in myOutput:
                 self._yellowWarnings = "Minor mismatch in counter group <b>%s</b><br>\n"%counterName
         return myOutput
 
@@ -154,13 +216,14 @@ class ValidateGroup:
         for row in rownames:
             myOutput += self._testCounterValues(oldrow, row, refCounter, testCounter)
             oldrow = row
+        self._readCounterCount += len(rownames)
         myOutput += "</table>\n"
         return myOutput
 
     def _testCounterValues(self, oldrow, row, refCounter, testCounter):
         # obtain event counts
-        value1 = findValue(row,refCounter)
-        value2 = findValue(row,testCounter)
+        value1 = self._findValue(row,refCounter)
+        value2 = self._findValue(row,testCounter)
         myOutput = "<tr>\n"
         myOutput += "<td><b>"+row+"</b></td>"
         if value2 >= 0:
@@ -172,11 +235,12 @@ class ValidateGroup:
         else:
             myOutput += "<td align=center>-</td>"
         if value1 == value2 and value1 > 0:
-            myOutput += "<td></td>"
+            myOutput += "<td bgcolor=#00b000>&nbsp;</td>"
         else:
             myratio = -1;
             if value1 > 0:
                 myratio = float(value2) / float(value1)
+                self._myDifference += abs(myratio-1.0)
             myOutput += self._getCounterAgreementColor(myratio)
         # obtain efficiencies
         oldvalue1 = 0
@@ -193,8 +257,14 @@ class ValidateGroup:
         myratio = -1.0;
         if eff1 > 0:
             myratio = eff2 / eff1
-        myOutput += "<td align=center>%1.5f</td>" % eff2
-        myOutput += "<td align=center>%1.5f</td>" % eff1
+        if eff2 > 0:
+            myOutput += "<td align=center>%1.5f</td>" % eff2
+        else:
+            myOutput += "<td align=center>-</td>"
+        if eff1 > 0:
+            myOutput += "<td align=center>%1.5f</td>" % eff1
+        else:
+            myOutput += "<td align=center>-</td>"
         myOutput += self._getCounterAgreementColor(myratio)
 
         myOutput += "</tr>\n"
@@ -212,141 +282,64 @@ class ValidateGroup:
     def _getCounterAgreementColor(self, ratio):
         myOutput = ""
         if abs(ratio+1) < 0.0001:
-            myOutput += "<td>-</td>"
+            myOutput += "<td align=center bgcolor=#00b000>-</td>"
         elif abs(ratio-1) < 0.0001:
-            myOutput += "<td></td>"
+            myOutput += "<td bgcolor=#00b000>&nbsp</td>"
         elif abs(ratio-1) < 0.01:
-            myOutput += "<td align=center>%1.5f</td>" % ratio
+            myOutput += "<td align=center bgcolor=#00b000>%1.5f</td>" % ratio
         elif abs(ratio-1) < 0.03:
-            myOutput += "<td align=center bgcolor=#d0d000>%1.5f</td>" % ratio
+            myOutput += "<td align=center bgcolor=#b0b000>%1.5f</td>" % ratio
         else:
-            myOutput += "<td align=center bgcolor=#d00000>%1.5f</td>" % ratio
+            myOutput += "<td align=center bgcolor=#b00000>%1.5f</td>" % ratio
         return myOutput
 
     ### Histogram based validation methods ------------------------------------------------
 
-    def _doValidateHistograms(self, refDataset, testDataset):
+    def _doValidateHistograms(self, mydir, refDataset, testDataset):
         mycolumns = 2
         myscale = 200.0 / float(mycolumns)
-        myindexcount = 0
-        # table of contents
-        myOutput += "List of histogram groups:</a><br>\n"
-        for group in histolist:
-            myOutput += "<a href=#idx"+str(myindexcount)+"_"+dataset1.getName()+">"+group[0]+"</a><br>\n"
-            myindexcount += 1
-        myOutput += "<br>\n"
-
+        myOutput = ""
         # histograms
         myindexcount = 0
-        mydifference = 0
-        for group in histolist:
-            myOutput += "<hr><h3><a name=idx"+str(myindexcount)+"_"+dataset1.getName()+">"+group[0]+"</a></h3><br>\n"
+        mycount = 0
+        myOutput += "<table>\n"
+        for h in self._histograms:
+            # Obtain histograms
+            #print "Obtaining histogram histogram %s"% ', '.join(map(str, h.getHistoNameList()))
+            (hrefname, hRef) = h.getHistogram(refDataset, True)
+            (htestname, hTest) = h.getHistogram(testDataset, False)
+            # Histograms exist
             myindexcount += 1
-            myOutput += "<table>\n"
-            mycount = 0
-            for histoname in group[1]:
-                print "Getting histogram",histoname[0]
-                if mycount == 0:
-                    myOutput += "<tr>\n"
-                mycount = mycount + 1
-                myOutput += "<td>"
-                # Failsafe for legacy histogram names
-                hname1 = None
-                hname2 = None
-                if isinstance(histoname[0],list):
-                    for aname in histoname[0]:
-                        if dataset1.hasRootHisto(aname):
-                            hname1 = aname
-                        if dataset2.hasRootHisto(aname):
-                            hname2 = aname
-                else:
-                    if dataset1.hasRootHisto(histoname[0]):
-                        hname1 = histoname[0]
-                    if dataset2.hasRootHisto(histoname[0]):
-                        hname2 = histoname[0]
-                # Check that histograms are found and make comparison plot
-                if hname1 != None and hname2 != None:
-                    # construct output name
-                    myname = hname1.replace("/", "_")
-                    # Obtain histograms and make canvas
-                    h1 = getHistogram(dataset1, histoname, hname1, True)
-                    #expandOverflowBins(h1)
-                    h2 = getHistogram(dataset2, histoname, hname2, False)
-                    #expandOverflowBins(h2)
-                    # Make sure that binning is compatible
-                    #print "binning:",h1.GetNbinsX(),h1.GetXaxis().GetXmin(),h1.GetXaxis().GetXmax()," / ",h2.GetNbinsX(),h2.GetXaxis().GetXmin(),h2.GetXaxis().GetXmax()
-                    #if h1.GetXaxis().GetXmax() > h2.GetXaxis().GetXmax():
-                        #nbins = (h1.GetXaxis().GetXmax()-h1.GetXaxis().GetXmin()) / h2.GetXaxis().GetBinWidth(1)
-                        #h2.GetXaxis().Set(int(nbins),h1.GetXaxis().GetXmin(),h1.GetXaxis().GetXmax())
-                        #print "- range changed:",h1.GetNbinsX(),h1.GetXaxis().GetXmin(),h1.GetXaxis().GetXmax()," / ",h2.GetNbinsX(),h2.GetXaxis().GetXmin(),h2.GetXaxis().GetXmax()
-                    #if h1.GetNbinsX() != h2.GetNbinsX():
-                        #if h1.GetNbinsX() > h2.GetNbinsX():
-                            #mystatus = False
-                            #i = 1
-                            #while not mystatus and i < 10:
-                                #if h1.GetNbinsX() * i % h2.GetNbinsX() == 0:
-                                    #h1.Rebin(floor(float(h1.GetNbinsX()) / float(h2.GetNbinsX())))
-                                    #h2.Rebin(i)
-                                    #print "rebin:",h1.GetNbinsX(),h1.GetXaxis().GetXmin(),h1.GetXaxis().GetXmax()," / ",h2.GetNbinsX(),h2.GetXaxis().GetXmin(),h2.GetXaxis().GetXmax()
-                                    #mystatus = True
-                                #i += 1
-                        #else:
-                            #if h2.GetNbinsX() % h1.GetNbinsX() == 0:
-                                #h2.Rebin(h2.GetNbinsX() / h1.GetNbinsX())
-                    # FIXME create plot here
-                    myOutput += "<br><img"
-                    #myOutput += " width=%f%%" % myscale
-                    #myOutput += " height=%f%%" % myscale
-                    myOutput += " src="+mydir+"/"+myname+".png alt="+histoName+"><br>"
-
-                else:
-                    # cannot create figure because one or both histograms are not available
-                    if hname1 == None:
-                        print "  Warning: Did not find histogram",histoname[0],"in",dataset1.getName()
-                        myOutput += "<text color=e00000>Not found for reference!</text><br>"
-                    if hname2 == None:
-                        print "  Warning: Did not find histogram",histoname[0],"in",dataset2.getName()
-                        myOutput += "<text color=e00000>Not found for new dataset!</text><br>"
-                hnamestr = None
-                if isinstance(histoname[0],list):
-                    hnamestr = "["
-                    for aname in histoname[0]:
-                        hnamestr += aname+" "
-                    hnamestr += "]"
-                else:
-                    hnamestr = histoname[0]
-                myOutput += "\n<br>src = "+hnamestr
-                myOutput += "<br>bin width = "+str(histoname[1])
-                myOutput += "<br>Difference = %1.3f\n" % mydifference
-                # close cell (and if necessary also row) in table
-                myOutput += "</td>\n"
-                if mycount == mycolumns:
-                    myOutput += "</tr>\n"
-                    mycount = 0
-            # close if necessary row in table
-            if mycount > 0:
+            if mycount == 0:
+                myOutput += "<tr>\n"
+            mycount += 1
+            myOutput += "<td>"
+            # construct output name
+            myname = hrefname.replace("/", "_")
+            # make canvas
+            mydifference = self._makePlot(mydir, myname, hRef, hTest, h.getLogStatus())
+            self._myDifference += abs(mydifference)
+            # Make output
+            myOutput += "<hr><h3>%s</h3><br>\n"%(myname)
+            myOutput += "<br><img"
+            #myOutput += " width=%f%%" % myscale
+            #myOutput += " height=%f%%" % myscale
+            myOutput += " src=%s.png alt=%s><br>"%(myname,myname)
+            myOutput += "\n<br>src = %s"%(", ".join(map(str, h.getHistoNameList())))
+            myOutput += "<br>bin width = "+str(h.getBinWidth())
+            myOutput += "<br>Difference = %1.3f\n" % mydifference
+            myOutput += "</td>\n"
+            # close cell (and if necessary also row) in table
+            if mycount == mycolumns:
                 myOutput += "</tr>\n"
-            myOutput += "</table>\n"
-            myOutput += "<a href=#histotop_"+dataset1.getName()+">Back to histogram list</a><br>\n"
-        print "\nHistograms done for dataset",dataset1.getName()
-        print "Legend: blue histogram = reference, red points = dataset to be validated\n"
-        return myOutput 
+                mycount = 0
+        # close if necessary row in table
+        if mycount > 0:
+            myOutput += "</tr>\n"
+        myOutput += "</table>\n"
+        return myOutput
 
-    def _getHistograms(self, refDataset, testDataset, histoInput):
-        hRef = histoInput.getHistogram(refDataset)
-        hRef.SetFillStyle(1001)
-        hRef.SetFillColor(ROOT.kBlue-6)
-        hRef.SetLineColor(ROOT.kBlue-6)
-        #statbox.SetTextColor(ROOT.kBlue-6)
-        hTest = histoInput.getHistogram(testDataset)
-        hTest.SetMarkerColor(ROOT.kBlack)
-        hTest.SetLineColor(ROOT.kBlack)
-        hTest.SetMarkerStyle(20)
-        hTest.SetMarkerSize(1.0)
-        #statbox.SetTextColor(ROOT.kBlack)
-        return (hRef, hTest)
-
-    def _makePlot(self, mydir, histoName, hRef, hTest)
+    def _makePlot(self, mydir, histoName, hRef, hTest, logStatus):
         # Create canvas
         canvas = ROOT.TCanvas(histoName, histoName, 600, 500)
         canvas.cd()
@@ -360,7 +353,7 @@ class ValidateGroup:
         myframe.SetTitleSize(0.06, "Y")
         myframe.SetLabelSize(0.05, "Y")
         myframe.GetYaxis().SetTitleOffset(0.75)
-        self._setFrameExtrema(myframe,hRef,hTest,histoname[2])
+        self._setFrameExtrema(myframe,hRef,hTest,logStatus)
         # Make agreement histograms
         hdiff = hTest.Clone("hdiffclone")
         hdiff.SetStats(0)
@@ -406,7 +399,7 @@ class ValidateGroup:
         mydifference = self._analyseHistoDiff(canvas, hRef, hTest)
         # Plot pad
         canvas.cd(1)
-        if histoname[2] == "log":
+        if logStatus == "log":
             canvas.GetPad(1).SetLogy()
         myframe.Draw()
         hRef.Draw("histo sames")
@@ -434,6 +427,8 @@ class ValidateGroup:
         canvas.Modified()
         canvas.Print(mydir+"/"+histoName+".png")
         canvas.Close()
+        # Return difference
+        return mydifference
 
     def _analyseHistoDiff(self, canvas, hRef, hTest):
         canvas.GetPad(1).SetFrameFillColor(4000)
@@ -457,7 +452,7 @@ class ValidateGroup:
                 canvas.GetPad(1).SetFillColor(ROOT.kOrange)
                 canvas.GetPad(2).SetFillColor(ROOT.kOrange)
         return diff
-        
+
     def _setCanvasDefinitions(self, canvas):
         canvas.Range(0,0,1,1)
         canvas.SetFrameFillColor(ROOT.TColor.GetColor("#fdffff"))
@@ -485,7 +480,7 @@ class ValidateGroup:
         myplotpad.SetRightMargin(0.05)
         myplotpad.SetTopMargin(0.065)
         myplotpad.SetBottomMargin(0.0)
-        
+
     def _setFrameExtrema(self, myframe, h1, h2, logstatus):
         # obtain and set x range
         xmin = h1.GetXaxis().GetXmin()
@@ -518,378 +513,433 @@ class ValidateGroup:
         if h2.GetMaximum() > h1.GetMaximum():
             ymax = h2.GetMaximum()
         myframe.SetMaximum(ymax*myscalefactor)
-        
-        
-def getDatasetNames(multiCrabDir,era,legacy=False):
-    datasets = None
-    if not legacy:
-        datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=multiCrabDir+"/multicrab.cfg",dataEra=era)
-        datasets.updateNAllEventsToPUWeighted()
-    else:
-        datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=multiCrabDir+"/multicrab.cfg")
-        #datasets.updateNAllEventsToPUWeighted()
-    #datasets.loadLuminosities(fname="dummy")
-    #datasets.printInfo()
-    return datasets.getAllDatasetNames()
 
-def validateDatasetExistence(dataset1names,dataset2names):
-    print
-    print "Validating dataset names.."
-    return validateNames(dataset1names,dataset2names)
+# Class for containing frame information
+class NavigationPanel:
+    def __init__(self, timeStamp):
+        self._timestamp = timeStamp
+        self._era = None
+        self._searchMode = None
+        self._variation = None
+        self._dataset = None
+        self._colorPanelHeader = '"#000060"'
+        self._colorPanelFontHeader = '"#f0f0f0"'
+        self._colorPanelContent = '"#6666cc"' #a0a0a0
+        self._colorInfoContent = '"#d0d0d0"'
+        self._colorPanelFontContent = '"#000000"'
+        self._colorPanelMajorDifference = '"#b00000"'
+        self._colorPanelOkDifference = '"#00b000"'
 
-def validateNames(names1,names2):
-    names = []
-    for name1 in names1:
-        match = False
-        for name2 in names2:
-            if name2 == name1:
-                match = True
-        if match:
-            names.append(name1)
+    def setTimestamp(self, t):
+        self._timestamp = t
+
+    def setModule(self, era, searchMode, variation):
+        self._era = era
+        self._searchMode = searchMode
+        self._variation = variation
+
+    def setDataset(self, dataset):
+        self._dataset = dataset
+
+    def makehtml(self, groups, groupOutput, mydir, myname):
+        # Table
+        myOutput = "<table border=0 cellpadding=4>\n"
+        myOutput += '<tr valign="top">\n'
+        myOutput += '<td bgcolor=%s>\n'%self._colorPanelContent
+        myOutput += self._generatePanel(groups)
+        myOutput += "</td>\n"
+        myOutput += '<td bgcolor=%s>\n'%self._colorInfoContent
+        myOutput += groupOutput
+        myOutput += "</td>\n"
+        myOutput += "</tr>\n"
+        myOutput += "</table>\n"
+        makehtml(mydir,myname,myOutput)
+
+    def _generatePanel(self, groups):
+        myOutput = "<table border=0 cellpadding=2>\n"
+        # Title
+        myOutput += self._generatePanelHeaderCell("")
+        myOutput += self._generatePanelHeaderCell("<h2>H+ Validation Suite</h2>")
+        myOutput += self._generatePanelHeaderCell("")
+        # Link
+        myOutput += self._generatePanelContentCell('<a href="../../index.html">Select dataset/module</a>')
+        # Header
+        myOutput += self._generatePanelHeaderCell("Time stamp")
+        myOutput += self._generatePanelContentCell(self._timestamp)
+        myOutput += self._generatePanelHeaderCell("Dataset")
+        myOutput += self._generatePanelContentCell(self._dataset)
+        myOutput += self._generatePanelHeaderCell("Data Era")
+        myOutput += self._generatePanelContentCell(self._era)
+        myOutput += self._generatePanelHeaderCell("Search Mode")
+        myOutput += self._generatePanelContentCell(self._searchMode)
+        myOutput += self._generatePanelHeaderCell("Variation")
+        myOutput += self._generatePanelContentCell(self._variation)
+        # Groups
+        myOutput += self._generatePanelHeaderCell("Selection groups")
+        for g in groups:
+            myOutput += '<tr>'
+            if g.getDifference() > 0.03:
+                myOutput += '<td bgcolor=%s>'%self._colorPanelMajorDifference
+            else:
+                myOutput += '<td bgcolor=%s>'%self._colorPanelOkDifference
+            myOutput += '<b><a href="%s.html">%s</a></b></td>'%(g.getName().replace(" ","_"),g.getName())
+            #myOutput += 'Delta=%.2f</td></tr>\n'%(g.getDifference())
+            myOutput += '</tr>\n'
+        # End of table
+        myOutput += self._generatePanelContentCell("&nbsp;")
+        myOutput += "</table>\n"
+        return myOutput
+
+    def _generatePanelHeaderCell(self, title):
+        myOutput = '<tr><td bgcolor=%s><font color=%s>'%(self._colorPanelHeader,self._colorPanelFontHeader)
+        myOutput += "<b>%s</b>"%title
+        myOutput += "</font></td></tr>\n"
+        return myOutput
+
+    def _generatePanelContentCell(self, entry):
+        myOutput = '<tr><td bgcolor=%s><font color=%s>'%(self._colorPanelContent,self._colorPanelFontContent)
+        if entry == None:
+            myOutput += "<b>(None)</b>"
         else:
-            print "    ",name1,"found in the reference datasets, but not in the validated datasets"
-    print
-    for name2 in names2:
-        match = False
-        for name1 in names1:
-            if name2 == name1:
-                match = True
-        if not match:
-            print "    ",name2,"found in the validated datasets, but not in the reference datasets"
-    print
+            myOutput += "<b>%s</b>"%(entry)
+        myOutput += "</font></td></tr>\n"
+        return myOutput
 
-    return names
+def addCommonPlotsAtEveryStep(commonPlotGroups,commonPlotItem,binWidth,options):
+    myGroup = ValidateGroup("CommonPlots_everystep_%s"%commonPlotItem)
+    for group in commonPlotGroups:
+        myGroup.addHistogram("CommonPlots/AtEveryStep/%s/%s"%(group,commonPlotItem), binWidth, options)
+    return myGroup
 
-
-
-
-
-
-
-
-
-
-
-def validateHistograms(mydir,dataset1,dataset2):
-    mysubdir = mydir+"/"+dataset1.getName()
-    if not os.path.exists(mysubdir):
-        os.mkdir(mysubdir)
-    mydir = dataset1.getName()
-
-    myOutput = "<br><a href=#maintop>Back to datasets</a>\n"
-    myOutput += "<h3><a name=histotop_"+dataset1.getName()+">Histograms for validation:</a></h3><br>\n"
-    myOutput += "Note: the underflow (overflow) bin is shown as the first (last) bin in the histogram<br>\n"
-    myOutput += "Color legend: blue histogram = reference, red points = dataset to be validated<br>\n"
-    myOutput += "Difference is defined as sum_i (abs(new_i / ref_i - 1.0)), where sum goes over the histogram bins<br><br>\n"
-    print "Generating validation histograms"
+def createValidateHistograms():
     # entry syntax: histogram_name_with_path, bin_width, linear/log
-    histolist = [
-        ["Primary vertices", [
-            ["Vertices/verticesBeforeWeight", 1, "log"],
-            ["Vertices/verticesAfterWeight", 1, "log"],
-            ["Vertices/verticesTriggeredBeforeWeight", 1, "log"],
-            ["Vertices/verticesTriggeredAfterWeight", 1, "log"],
-        ]],
-        ["Trigger matched tau collection", [
-            [["tauID/N_TriggerMatchedTaus","TauSelection/N_TriggerMatchedTaus"], 1, "log"],
-            [["tauID/N_TriggerMatchedSeparateTaus","TauSelection/N_TriggerMatchedSeparateTaus"], 1, "log"],
-            [["tauID/HPSDecayMode","TauSelection/TauCand_DecayModeFinding"], 1, "log"],
-            [["tauID/TauSelection_all_tau_candidates_N","TauSelection/TauSelection_all_tau_candidates_N"], 1, "log"],
-            [["tauID/TauSelection_all_tau_candidates_pt","TauSelection/TauSelection_all_tau_candidates_pt"], 5, "log"],
-            [["tauID/TauSelection_all_tau_candidates_eta","TauSelection/TauSelection_all_tau_candidates_eta"], 0.1, "log"],
-            [["tauID/TauSelection_all_tau_candidates_phi","TauSelection/TauSelection_all_tau_candidates_phi"], 3.14159265 / 36, "log"],
-            [["tauID/TauSelection_all_tau_candidates_MC_purity","TauSelection/TauSelection_all_tau_candidates_MC_purity"], 1, "log"]
-        ]],
-        ["Tau candidate selection", [
-            [["tauID/TauCand_JetPt","TauSelection/TauCand_JetPt"], 5, "log"],
-            [["tauID/TauCand_JetEta","TauSelection/TauCand_JetEta"], 0.1, "log"],
-            [["tauID/TauCand_LdgTrackPtCut","TauSelection/TauCand_LdgTrackPtCut"], 5, "log"],
-            [["tauID/TauSelection_cleaned_tau_candidates_N","TauSelection/TauSelection_cleaned_tau_candidates_N"], 1, "log"],
-            [["tauID/TauSelection_cleaned_tau_candidates_pt","TauSelection/TauSelection_cleaned_tau_candidates_pt"], 5, "log"],
-            [["tauID/TauSelection_cleaned_tau_candidates_eta","TauSelection/TauSelection_cleaned_tau_candidates_eta"], 0.1, "log"],
-            [["tauID/TauSelection_cleaned_tau_candidates_phi","TauSelection/TauSelection_cleaned_tau_candidates_phi"], 3.14159265 / 36, "log"],
-            [["tauID/TauSelection_cleaned_tau_candidates_MC_purity","TauSelection/TauSelection_cleaned_tau_candidates_MC_purity"], 1, "log"]
-        ]],
-        ["Tau ID", [
-            [["tauID/IsolationPFChargedHadrCandsPtSum","TauSelection/IsolationPFChargedHadrCandsPtSum"], 1, "log"],
-            [["tauID/IsolationPFGammaCandEtSum","TauSelection/IsolationPFGammaCandEtSum"], 1, "log"],
-            [["tauID/TauID_OneProngNumberCut","TauSelection/TauID_NProngsCut"], 1, "log"],
-            [["tauID/TauID_RtauCut","TauSelection/TauID_RtauCut"], 0.05, "log"],
-            [["tauID/TauSelection_selected_taus_N","TauSelection/TauSelection_selected_taus_N"], 1, "log"],
-            [["tauID/TauSelection_selected_taus_pt","TauSelection/TauSelection_selected_taus_pt"], 5, "log"],
-            [["tauID/TauSelection_selected_taus_eta","TauSelection/TauSelection_selected_taus_eta"], 0.1, "log"],
-            [["tauID/TauSelection_selected_taus_phi","TauSelection/TauSelection_selected_taus_phi"], 3.14159265 / 36, "log"],
-            [["tauID/TauSelection_selected_taus_MC_purity","TauSelection/TauSelection_selected_taus_MC_purity"], 1, "log"],
-            [["FakeTauIdentifier/TauMatchType","FakeTauIdentifier_TauID/TauMatchType"], 1, "log"],
-            [["FakeTauIdentifier/TauOrigin","FakeTauIdentifier_TauID/TauOrigin"], 1, "log"],
-            [["FakeTauIdentifier/MuOrigin","FakeTauIdentifier_TauID/MuOrigin"], 1, "log"],
-            [["FakeTauIdentifier/ElectronOrigin","FakeTauIdentifier_TauID/ElectronOrigin"], 1, "log"],
-        ]],
-        ["Tau after tau ID", [
-            ["SelectedTau/SelectedTau_pT_AfterTauID", 5, "log"],
-            ["SelectedTau/SelectedTau_eta_AfterTauID", 0.1, "log"],
-            ["SelectedTau/SelectedTau_phi_AfterTauID", 3.14159265 / 36, "log"],
-            ["SelectedTau/SelectedTau_Rtau_AfterTauID", 0.05, "log"],
-        ]],
-        ["Tau after all cuts", [
-            ["SelectedTau/SelectedTau_pT_AfterCuts", 10, "log"],
-            ["SelectedTau/SelectedTau_eta_AfterCuts", 0.2, "log"],
-            ["SelectedTau/SelectedTau_Rtau_AfterCuts", 0.05, "log"],
-#            [["SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts","SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts"], 10, "log"],
-#            [["SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts","SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts"], 0.2, "log"],
-        ]],
-        ["Electrons", [
-            ["ElectronSelection/ElectronPt_all", 5, "log"],
-            ["ElectronSelection/ElectronEta_all", 0.1, "log"],
-            ["ElectronSelection/ElectronPt_veto", 5, "log"],
-            ["ElectronSelection/ElectronEta_veto", 0.1, "log"],
-            ["ElectronSelection/NumberOfVetoElectrons", 1, "log"],
-            ["ElectronSelection/ElectronPt_medium", 5, "log"],
-            ["ElectronSelection/ElectronEta_medium", 0.1, "log"],
-            ["ElectronSelection/NumberOfMediumElectrons", 1, "log"],
-            ["ElectronSelection/ElectronPt_tight", 5, "log"],
-            ["ElectronSelection/ElectronEta_tight", 0.1, "log"],
-            ["ElectronSelection/NumberOfTightElectrons", 1, "log"],
-        ]],
-        ["Muons", [
-            ["MuonSelection/LooseMuonPt", 5, "log"],
-            ["MuonSelection/LooseMuonEta", 0.1, "log"],
-            ["MuonSelection/NumberOfLooseMuons", 1, "log"],
-            ["MuonSelection/TightMuonPt", 5, "log"],
-            ["MuonSelection/TightMuonEta", 0.1, "log"],
-            ["MuonSelection/NumberOfTightMuons", 1, "log"],
-            ["MuonSelection/MuonTransverseImpactParameter", 0.02, "log"],
-            ["MuonSelection/MuonDeltaIPz", 1, "log"],
-            ["MuonSelection/MuonRelIsol", 0.1, "log"],
-        ]],
-        ["All jets", [
-            ["JetSelection/jet_pt", 10, "log"],
-            ["JetSelection/jet_pt_central", 5, "log"],
-            ["JetSelection/jet_eta", 0.2, "log"],
-            ["JetSelection/jet_phi", 3.14159265 / 36, "log"],
-            ["JetSelection/jetEMFraction", 0.05, "log"],
-            ["JetSelection/firstJet_pt", 10, "log"],
-            ["JetSelection/firstJet_eta", 0.2, "log"],
-            ["JetSelection/firstJet_phi", 3.14159265 / 36, "log"],
-            ["JetSelection/secondJet_pt", 10, "log"],
-            ["JetSelection/secondJet_eta", 0.2, "log"],
-            ["JetSelection/secondJet_phi", 3.14159265 / 36, "log"],
-            ["JetSelection/thirdJet_pt", 10, "log"],
-            ["JetSelection/thirdJet_eta", 0.2, "log"],
-            ["JetSelection/thirdJet_phi", 3.14159265 / 36, "log"],
-        ]],
-        ["Selected jets", [
-            ["JetSelection/NumberOfSelectedJets", 1, "log"],
-            ["JetSelection/SelectedJets/jet_pt", 5, "log"],
-            ["JetSelection/SelectedJets/jet_eta", 0.2, "log"],
-            ["JetSelection/SelectedJets/jet_phi", 3.14159265 / 36, "log"],
-            ["JetSelection/SelectedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
-            ["JetSelection/SelectedJets/jet_NeutralHadronFraction", 0.05, "log"],
-            ["JetSelection/SelectedJets/jet_NeutralHadronMultiplicity", 1, "log"],
-            ["JetSelection/SelectedJets/jet_PhotonEnergyFraction", 0.05, "log"],
-            ["JetSelection/SelectedJets/jet_PhotonMultiplicity", 1, "log"],
-            ["JetSelection/SelectedJets/jet_ChargedHadronEnergyFraction", 0.05, "log"],
-            ["JetSelection/SelectedJets/jet_ChargedMultiplicity", 1, "log"],
-            ["JetSelection/SelectedJets/jet_PartonFlavour", 1, "log"],
-        ]],
-        ["Excluded jets, i.e. jets with DeltaR(jet, tau) < 0.5", [
-            ["JetSelection/ExcludedJets/jet_pt", 10, "log"],
-            ["JetSelection/ExcludedJets/jet_eta", 0.2, "log"],
-            ["JetSelection/ExcludedJets/jet_phi", 3.14159265 / 36, "log"],
-            ["JetSelection/ExcludedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
-            ["JetSelection/ExcludedJets/jet_NeutralHadronFraction", 0.05, "log"],
-            ["JetSelection/ExcludedJets/jet_NeutralHadronMultiplicity", 1, "log"],
-            ["JetSelection/ExcludedJets/jet_PhotonEnergyFraction", 0.05, "log"],
-            ["JetSelection/ExcludedJets/jet_PhotonMultiplicity", 1, "log"],
-            ["JetSelection/ExcludedJets/jet_ChargedHadronEnergyFraction", 0.05, "log"],
-            ["JetSelection/ExcludedJets/jet_ChargedMultiplicity", 1, "log"],
-            ["JetSelection/ExcludedJets/jet_PartonFlavour", 1, "log"],
-        ]],
-        ["MET", [
-            ["MET/met", 20, "log"],
-            ["MET/metSignif", 5, "log"],
-            ["MET/metSumEt", 20, "log"],
-        ]],
-        ["b-jet tagging", [
-            ["Btagging/NumberOfBtaggedJets", 1, "log"],
-            ["Btagging/jet_bdiscriminator", 0.1, "log"],
-            ["Btagging/bjet_pt", 10, "log"],
-            ["Btagging/bjet_eta", 0.2, "log"],
-            ["Btagging/bjet1_pt", 20, "log"],
-            ["Btagging/bjet1_eta", 0.2, "log"],
-            ["Btagging/bjet2_pt", 20, "log"],
-            ["Btagging/bjet2_eta", 0.2, "log"],
-            ["Btagging/MCMatchForPassedJets", 1, "log"],
-        ]],
-        ["Transverse mass", [
-            ["deltaPhi", 10, "linear"],
-            [["transverseMass","transverseMassAfterDeltaPhi160"], 20, "linear"],
-            [["NonQCDTypeIITransverseMassAfterDeltaPhi160","EWKFakeTausTransverseMass"], 20, "linear"],
-        ]]
-    ]
+    myGroups = []
+
+    myGroup = ValidateGroup("Main counters")
+    myGroup.addCounter("main")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("MET filters")
+    myGroup.addCounter("METFilters")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Primary vertices")
+    myGroup.addHistogram("Vertices/verticesBeforeWeight", 1, "log")
+    myGroup.addHistogram("Vertices/verticesAfterWeight", 1, "log")
+    myGroup.addHistogram("Vertices/verticesTriggeredBeforeWeight", 1, "log")
+    myGroup.addHistogram("Vertices/verticesTriggeredAfterWeight", 1, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Trigger matched tau collection")
+    myGroup.addCounter("Trigger")
+    myGroup.addCounter("Trigger debug")
+    myGroup.addHistogram(["tauID/N_TriggerMatchedTaus","TauSelection/N_TriggerMatchedTaus"], 1, "log")
+    myGroup.addHistogram(["tauID/N_TriggerMatchedSeparateTaus","TauSelection/N_TriggerMatchedSeparateTaus"], 1, "log")
+    myGroup.addHistogram(["tauID/HPSDecayMode","TauSelection/TauCand_DecayModeFinding"], 1, "log")
+    myGroup.addHistogram(["tauID/TauSelection_all_tau_candidates_N","TauSelection/TauSelection_all_tau_candidates_N"], 1, "log")
+    myGroup.addHistogram(["tauID/TauSelection_all_tau_candidates_pt","TauSelection/TauSelection_all_tau_candidates_pt"], 5, "log")
+    myGroup.addHistogram(["tauID/TauSelection_all_tau_candidates_eta","TauSelection/TauSelection_all_tau_candidates_eta"], 0.1, "log")
+    myGroup.addHistogram(["tauID/TauSelection_all_tau_candidates_phi","TauSelection/TauSelection_all_tau_candidates_phi"], 3.14159265 / 36, "log")
+    myGroup.addHistogram(["tauID/TauSelection_all_tau_candidates_MC_purity","TauSelection/TauSelection_all_tau_candidates_MC_purity"], 1, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Tau candidate selection")
+    myGroup.addHistogram(["tauID/TauCand_JetPt","TauSelection/TauCand_JetPt"], 5, "log")
+    myGroup.addHistogram(["tauID/TauCand_JetEta","TauSelection/TauCand_JetEta"], 0.1, "log")
+    myGroup.addHistogram(["tauID/TauCand_LdgTrackPtCut","TauSelection/TauCand_LdgTrackPtCut"], 5, "log")
+    myGroup.addHistogram(["tauID/TauSelection_cleaned_tau_candidates_N","TauSelection/TauSelection_cleaned_tau_candidates_N"], 1, "log")
+    myGroup.addHistogram(["tauID/TauSelection_cleaned_tau_candidates_pt","TauSelection/TauSelection_cleaned_tau_candidates_pt"], 5, "log")
+    myGroup.addHistogram(["tauID/TauSelection_cleaned_tau_candidates_eta","TauSelection/TauSelection_cleaned_tau_candidates_eta"], 0.1, "log")
+    myGroup.addHistogram(["tauID/TauSelection_cleaned_tau_candidates_phi","TauSelection/TauSelection_cleaned_tau_candidates_phi"], 3.14159265 / 36, "log")
+    myGroup.addHistogram(["tauID/TauSelection_cleaned_tau_candidates_MC_purity","TauSelection/TauSelection_cleaned_tau_candidates_MC_purity"], 1, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Tau ID")
+    myGroup.addCounter("TauIDPassedJets::TauSelection_HPS")
+    myGroup.addCounter("TauIDPassedEvt::TauSelection_HPS")
+    myGroup.addHistogram(["tauID/IsolationPFChargedHadrCandsPtSum","TauSelection/IsolationPFChargedHadrCandsPtSum"], 1, "log")
+    myGroup.addHistogram(["tauID/IsolationPFGammaCandEtSum","TauSelection/IsolationPFGammaCandEtSum"], 1, "log")
+    myGroup.addHistogram(["tauID/TauID_OneProngNumberCut","TauSelection/TauID_NProngsCut"], 1, "log")
+    myGroup.addHistogram(["tauID/TauID_RtauCut","TauSelection/TauID_RtauCut"], 0.05, "log")
+    myGroup.addHistogram(["tauID/TauSelection_selected_taus_N","TauSelection/TauSelection_selected_taus_N"], 1, "log")
+    myGroup.addHistogram(["tauID/TauSelection_selected_taus_pt","TauSelection/TauSelection_selected_taus_pt"], 5, "log")
+    myGroup.addHistogram(["tauID/TauSelection_selected_taus_eta","TauSelection/TauSelection_selected_taus_eta"], 0.1, "log")
+    myGroup.addHistogram(["tauID/TauSelection_selected_taus_phi","TauSelection/TauSelection_selected_taus_phi"], 3.14159265 / 36, "log")
+    myGroup.addHistogram(["tauID/TauSelection_selected_taus_MC_purity","TauSelection/TauSelection_selected_taus_MC_purity"], 1, "log")
+    myGroup.addHistogram(["FakeTauIdentifier/TauMatchType","FakeTauIdentifier_TauID/TauMatchType"], 1, "log")
+    myGroup.addHistogram(["FakeTauIdentifier/TauOrigin","FakeTauIdentifier_TauID/TauOrigin"], 1, "log")
+    myGroup.addHistogram(["FakeTauIdentifier/MuOrigin","FakeTauIdentifier_TauID/MuOrigin"], 1, "log")
+    myGroup.addHistogram(["FakeTauIdentifier/ElectronOrigin","FakeTauIdentifier_TauID/ElectronOrigin"], 1, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Tau after tau ID")
+    myGroup.addHistogram("SelectedTau/SelectedTau_pT_AfterTauID", 5, "log")
+    myGroup.addHistogram("SelectedTau/SelectedTau_eta_AfterTauID", 0.1, "log")
+    myGroup.addHistogram("SelectedTau/SelectedTau_phi_AfterTauID", 3.14159265 / 36, "log")
+    myGroup.addHistogram("SelectedTau/SelectedTau_Rtau_AfterTauID", 0.05, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Tau after all cuts")
+    myGroup.addHistogram("SelectedTau/SelectedTau_pT_AfterCuts", 10, "log")
+    myGroup.addHistogram("SelectedTau/SelectedTau_eta_AfterCuts", 0.2, "log")
+    myGroup.addHistogram("SelectedTau/SelectedTau_Rtau_AfterCuts", 0.05, "log")
+    #            myGroup.addHistogram("SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts","SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts"], 10, "log")
+    #            myGroup.addHistogram("SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts","SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts"], 0.2, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Veto tau selection")
+    myGroup.addCounter("VetoTauSelection")
+    myGroup.addCounter("TauIDPassedJets::TauVeto_HPS")
+    myGroup.addCounter("TauIDPassedEvt::TauVeto_HPS")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Electrons")
+    myGroup.addCounter("ElectronSelection")
+    myGroup.addHistogram("ElectronSelection/ElectronPt_all", 5, "log")
+    myGroup.addHistogram("ElectronSelection/ElectronEta_all", 0.1, "log")
+    myGroup.addHistogram("ElectronSelection/ElectronPt_veto", 5, "log")
+    myGroup.addHistogram("ElectronSelection/ElectronEta_veto", 0.1, "log")
+    myGroup.addHistogram("ElectronSelection/NumberOfVetoElectrons", 1, "log")
+    myGroup.addHistogram("ElectronSelection/ElectronPt_medium", 5, "log")
+    myGroup.addHistogram("ElectronSelection/ElectronEta_medium", 0.1, "log")
+    myGroup.addHistogram("ElectronSelection/NumberOfMediumElectrons", 1, "log")
+    myGroup.addHistogram("ElectronSelection/ElectronPt_tight", 5, "log")
+    myGroup.addHistogram("ElectronSelection/ElectronEta_tight", 0.1, "log")
+    myGroup.addHistogram("ElectronSelection/NumberOfTightElectrons", 1, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Muons")
+    myGroup.addCounter("MuonSelection")
+    myGroup.addHistogram("MuonSelection/LooseMuonPt", 5, "log")
+    myGroup.addHistogram("MuonSelection/LooseMuonEta", 0.1, "log")
+    myGroup.addHistogram("MuonSelection/NumberOfLooseMuons", 1, "log")
+    myGroup.addHistogram("MuonSelection/TightMuonPt", 5, "log")
+    myGroup.addHistogram("MuonSelection/TightMuonEta", 0.1, "log")
+    myGroup.addHistogram("MuonSelection/NumberOfTightMuons", 1, "log")
+    myGroup.addHistogram("MuonSelection/MuonTransverseImpactParameter", 0.02, "log")
+    myGroup.addHistogram("MuonSelection/MuonDeltaIPz", 1, "log")
+    myGroup.addHistogram("MuonSelection/MuonRelIsol", 0.1, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("All jets")
+    myGroup.addCounter("Jet main")
+    myGroup.addCounter("Jet selection")
+    myGroup.addHistogram("JetSelection/jet_pt", 10, "log")
+    myGroup.addHistogram("JetSelection/jet_pt_central", 5, "log")
+    myGroup.addHistogram("JetSelection/jet_eta", 0.2, "log")
+    myGroup.addHistogram("JetSelection/jet_phi", 3.14159265 / 36, "log")
+    myGroup.addHistogram("JetSelection/jetEMFraction", 0.05, "log")
+    myGroup.addHistogram("JetSelection/firstJet_pt", 10, "log")
+    myGroup.addHistogram("JetSelection/firstJet_eta", 0.2, "log")
+    myGroup.addHistogram("JetSelection/firstJet_phi", 3.14159265 / 36, "log")
+    myGroup.addHistogram("JetSelection/secondJet_pt", 10, "log")
+    myGroup.addHistogram("JetSelection/secondJet_eta", 0.2, "log")
+    myGroup.addHistogram("JetSelection/secondJet_phi", 3.14159265 / 36, "log")
+    myGroup.addHistogram("JetSelection/thirdJet_pt", 10, "log")
+    myGroup.addHistogram("JetSelection/thirdJet_eta", 0.2, "log")
+    myGroup.addHistogram("JetSelection/thirdJet_phi", 3.14159265 / 36, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Selected jets")
+    myGroup.addHistogram("JetSelection/NumberOfSelectedJets", 1, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_pt", 5, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_eta", 0.2, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_phi", 3.14159265 / 36, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_NeutralEmEnergyFraction", 0.05, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_NeutralHadronFraction", 0.05, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_NeutralHadronMultiplicity", 1, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_PhotonEnergyFraction", 0.05, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_PhotonMultiplicity", 1, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_ChargedHadronEnergyFraction", 0.05, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_ChargedMultiplicity", 1, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_PartonFlavour", 1, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Excluded jets, i.e. jets with DeltaR(jet, tau) < 0.5")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_pt", 10, "log")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_eta", 0.2, "log")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_phi", 3.14159265 / 36, "log")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_NeutralEmEnergyFraction", 0.05, "log")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_NeutralHadronFraction", 0.05, "log")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_NeutralHadronMultiplicity", 1, "log")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_PhotonEnergyFraction", 0.05, "log")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_PhotonMultiplicity", 1, "log")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_ChargedHadronEnergyFraction", 0.05, "log")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_ChargedMultiplicity", 1, "log")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_PartonFlavour", 1, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("MET")
+    myGroup.addHistogram("MET/met", 20, "log")
+    myGroup.addHistogram("MET/metSignif", 5, "log")
+    myGroup.addHistogram("MET/metSumEt", 20, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("b-jet tagging")
+    myGroup.addCounter("b-tagging")
+    myGroup.addHistogram("Btagging/NumberOfBtaggedJets", 1, "log")
+    myGroup.addHistogram("Btagging/jet_bdiscriminator", 0.1, "log")
+    myGroup.addHistogram("Btagging/bjet_pt", 10, "log")
+    myGroup.addHistogram("Btagging/bjet_eta", 0.2, "log")
+    myGroup.addHistogram("Btagging/bjet1_pt", 20, "log")
+    myGroup.addHistogram("Btagging/bjet1_eta", 0.2, "log")
+    myGroup.addHistogram("Btagging/bjet2_pt", 20, "log")
+    myGroup.addHistogram("Btagging/bjet2_eta", 0.2, "log")
+    myGroup.addHistogram("Btagging/MCMatchForPassedJets", 1, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("QCD tail killer")
+    myGroup.addCounter("QCDTailKiller")
+    myGroup.addHistogram("QCDTailKiller/BackToBackSystem/CircleCut_BackToBackJet1", 10, "log")
+    myGroup.addHistogram("QCDTailKiller/BackToBackSystem/CircleCut_BackToBackJet2", 10, "log")
+    myGroup.addHistogram("QCDTailKiller/BackToBackSystem/CircleCut_BackToBackJet3", 10, "log")
+    myGroup.addHistogram("QCDTailKiller/BackToBackSystem/CircleCut_BackToBackJet4", 10, "log")
+    myGroup.addHistogram("QCDTailKiller/CollinearSystem/CircleCut_CollinearJet1", 10, "log")
+    myGroup.addHistogram("QCDTailKiller/CollinearSystem/CircleCut_CollinearJet2", 10, "log")
+    myGroup.addHistogram("QCDTailKiller/CollinearSystem/CircleCut_CollinearJet3", 10, "log")
+    myGroup.addHistogram("QCDTailKiller/CollinearSystem/CircleCut_CollinearJet4", 10, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Transverse mass")
+    myGroup.addCounter("FullHiggsMassCalculator")
+    myGroup.addHistogram("deltaPhi", 10, "linear")
+    myGroup.addHistogram(["transverseMass","transverseMassAfterDeltaPhi160"], 20, "linear")
+    myGroup.addHistogram(["NonQCDTypeIITransverseMassAfterDeltaPhi160","EWKFakeTausTransverseMass"], 20, "linear")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("TopSelection (TopChi)")
+    myGroup.addCounter("top")
+    myGroup.addHistogram("TopChiSelection/PtTop", 10, "log")
+    myGroup.addHistogram("TopChiSelection/TopMass", 10, "log")
+    myGroup.addHistogram("TopChiSelection/WMass", 5, "log")
+    myGroup.addHistogram("TopChiSelection/Chi2Min", 0.2, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("Fake taus")
+    myGroup.addCounter("e->tau")
+    myGroup.addCounter("mu->tau")
+    myGroup.addCounter("jet->tau")
+    myGroup.addCounter("tau->tau")
+    myGroups.append(myGroup)
+
     # Add common plots
     myCommonPlots = ["VertexSelection","TauSelection","TauWeight","ElectronVeto","MuonVeto","JetSelection","MET","BTagging","Selected"]
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/nVertices"%item, 1, "log"])
-    histolist.append(["CommonPlots_everystep_vertices",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/tau_fakeStatus"%item, 1, "log"])
-    histolist.append(["CommonPlots_everystep_tau_fakeStatus",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/tau_pT"%item, 5, "log"])
-    histolist.append(["CommonPlots_everystep_tau_pT",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/tau_eta"%item, 0.1, "log"])
-    histolist.append(["CommonPlots_everystep_tau_eta",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/tau_phi"%item, 0.0873, "log"])
-    histolist.append(["CommonPlots_everystep_tau_phi",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/tau_Rtau"%item, 0.05, "log"])
-    histolist.append(["CommonPlots_everystep_tau_Rtau",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/electrons_N"%item, 1, "log"])
-    histolist.append(["CommonPlots_everystep_electrons_N",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/muons_N"%item, 1, "log"])
-    histolist.append(["CommonPlots_everystep_muons_N",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/jets_N"%item, 1, "log"])
-    histolist.append(["CommonPlots_everystep_jets_N",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/jets_N_allIdentified"%item, 1, "log"])
-    histolist.append(["CommonPlots_everystep_jets_N_allIdentified",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/MET_Raw"%item, 10, "log"])
-    histolist.append(["CommonPlots_everystep_MET_Raw",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/MET_MET"%item, 10, "log"])
-    histolist.append(["CommonPlots_everystep_MET_MET",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/MET_phi"%item, 0.0873, "log"])
-    histolist.append(["CommonPlots_everystep_MET_phi",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/bjets_N"%item, 1, "log"])
-    histolist.append(["CommonPlots_everystep_bjets_N",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/DeltaPhi_TauMET"%item, 10, "log"])
-    histolist.append(["CommonPlots_everystep_DeltaPhi_TauMET",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet1MET"%item, 10, "log"])
-    histolist.append(["CommonPlots_everystep_hDeltaR_TauMETJet1MET",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet2MET"%item, 10, "log"])
-    histolist.append(["CommonPlots_everystep_hDeltaR_TauMETJet2MET",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet3MET"%item, 10, "log"])
-    histolist.append(["CommonPlots_everystep_hDeltaR_TauMETJet3MET",myList])
-    myList = []
-    for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/transverseMass"%item, 20, "linear"])
-    histolist.append(["CommonPlots_everystep_transverseMass",myList])
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "nVertices", 1, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "tau_fakeStatus", 1, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "tau_pT", 10, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "tau_eta", 1, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "tau_phi", 0.0873, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "tau_Rtau", 0.1, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "electrons_N", 1, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "muons_N", 1, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "jets_N", 1, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "jets_N_allIdentified", 1, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "MET_Raw", 10, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "MET_MET", 10, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "MET_phi", 0.0873, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "bjets_N", 1, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "DeltaPhi_TauMET", 10, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "hDeltaR_TauMETJet1MET", 10, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "hDeltaR_TauMETJet2MET", 10, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "hDeltaR_TauMETJet3MET", 10, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "hDeltaR_TauMETJet4MET", 10, "log"))
+    myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "transverseMass", 20, "linear"))
 
+    myGroup = ValidateGroup("EvtTopology")
+    myGroup.addCounter("EvtTopology")
+    myGroup.addHistogram("EvtTopology/alphaT", 0.1, "log")
+    myGroup.addHistogram("EvtTopology/sphericity", 0.05, "log")
+    myGroup.addHistogram("EvtTopology/aplanarity", 0.05, "log")
+    myGroups.append(myGroup)
 
+    myGroup = ValidateGroup("MCinfo for selected events")
+    myGroup.addCounter("MCinfo for selected events")
+    myGroups.append(myGroup)
+    return myGroups
 
-def makehtml(mydir, myOutput):
-    myhtmlheader = "<html>\n<head>\n<title>ValidationResults</title>\n</head>\n<body>\n"
+def makehtml(mydir, myFilename, myOutput):
+    myhtmlheader = "<html>\n<head>\n<title>ValidationResults</title>\n</head>\n<body bgcolor=#6666cc>\n"
     myhtmlfooter = "</body>\n</html>\n"
-    myfile = open(mydir+"/index.html","w")
-    #myfile = open("index.html","w")
+    myfile = open("%s/%s.html"%(mydir,myFilename.replace(".html","").replace(" ","_")),"w")
     myfile.write(myhtmlheader)
-    myfile.write("<h1>Validation results for: "+mydir+"</h1><br>\n<hr><br>\n")
     myfile.write(myOutput)
     myfile.write(myhtmlfooter)
     myfile.close()
 
-def main(opts,era,analysisType=None):
+def main(opts,timeStamp,refDsetCreator,testDsetCreator,myValidateGroups,era,searchMode,analysisVariation,myBaseDir,myModuleDir):
+    myTotalCount = 0.0
+    for g in myValidateGroups:
+        myTotalCount += g.getItemCount()
+    # Create output directory
+    if not os.path.exists(myBaseDir+"/"+myModuleDir):
+        os.mkdir(myBaseDir+"/"+myModuleDir)
+    # Create Navigation panel
+    myPanel = NavigationPanel(timeStamp)
+    myPanel.setModule(era,searchMode,analysisVariation)
+    # Message to screen
+    print "\nValidating era = %s, searchMode = %s, analysisVariation = %s\n"%(era,searchMode,analysisVariation)
+    # Construct output
+    #myOutput = "<h1>Validation of datasets</h1><br>\n"
+    #myOutput = "<hr><br>\n"
+    #myOutput = "Era = %s<br>\n"%era
+    #myOutput += "SearchMode = %s<br>\n"%searchMode
+    #if analysisVariation != None:
+        #myOutput += "AnalysisVariation = no variation (default taken)<br>\n"
+    #else:
+        #myOutput += "AnalysisVariation = %s<br>\n"%analysisVariation
+    #myOutput = "<hr><br>\n"
+    # Obtain dataset managers (using default value for analysisName)
+    refDatasetMgr = refDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=analysisVariation)
+    testDatasetMgr = testDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=analysisVariation)
+    # Normalisation
+    refDatasetMgr.updateNAllEventsToPUWeighted()
+    testDatasetMgr.updateNAllEventsToPUWeighted()
+    # Find common dataset names
+    commonDatasetNames = compareLists(refDatasetMgr.getAllDatasetNames(),testDatasetMgr.getAllDatasetNames(),opts.dirs)
+    # Loop over common dataset names
+    #myOutput += "Following dataset names found in both reference and test multicrab directories<br>\n"
+    myOutput = "      <ul>\n"
+    myItemCount = 0.0
+    for dsetName in commonDatasetNames:
+        myReadCounterItemsCount = 0
+        myReadHistogramsCount = 0
+        print "  Dataset: %s"%dsetName
+        myPanel.setDataset(dsetName)
+        myOutput += '        <li><b><a href="%s.html">%s</a></b>'%(myModuleDir+"/"+dsetName+"/"+myValidateGroups[0].getName().replace(" ","_"),dsetName)
+        myGroupCount = 0
+        for g in myValidateGroups:
+            myGroupCount += 1
+            print "  ... validating group %d/%d: %s"%(myGroupCount, len(myValidateGroups), g.getName())
+            # Create output and histograms and cache difference for panel
+            #if not (myItemCount % 20):
+                #print "  ... validating histograms/counters %.2f"%(myItemCount/myTotalCount*100.0)
+            g.doValidate(myBaseDir+"/"+myModuleDir+"/"+dsetName, refDatasetMgr.getDataset(dsetName), testDatasetMgr.getDataset(dsetName))
+            myReadCounterItemsCount += g.getReadCounterCount()
+            myReadHistogramsCount += g.getReadHistogramCount()
+        # Create html subpages with panel
+        for g in myValidateGroups:
+            myPanel.makehtml(myValidateGroups,g.getOutput(),myBaseDir+"/"+myModuleDir+"/"+dsetName,g.getName())
+        myItemCount += 1.0
+        myOutput += " (subcounters=%d, histograms=%d)</li>\n"%(myReadCounterItemsCount,myReadHistogramsCount)
+    myOutput += "      </ul>\n"
+    # Save output
+    # Do not call close here, call it only once for dataset creators
+    return myOutput
 
-    referenceData = opts.reference
-    validateData  = opts.test
-
-    mytimestamp = datetime.now().strftime("%d%m%y_%H%M%S")
-    mydir = "validation_"+mytimestamp
-    if not os.path.exists(mydir):
-        os.mkdir(mydir)
-
-    myOutput = ""
-
-    print "Running script EventCounterValidation.py on"
-    print
-    print "          reference datasets = ",referenceData
-    print "    datasets to be validated = ",validateData
-    print
-
-    ROOT.gROOT.SetBatch() # no flashing canvases
-
-    #myOutput += "<b>Shell command that was run:</b>"
-    myOutput += "<br><br>\n"
-    myOutput += "<b>Reference multicrab directory:</b> "+referenceData+"<br>\n"
-    myOutput += "<b>New multicrab directory to be validated:</b> "+validateData+"<br>\n<hr><br>\n"
-
-    tmpRefDatasetNames = []
-    if opts.oldreference:
-        tmpRefDatasetNames = getDatasetNames(referenceData,era=era,legacy=True)
-    else:
-        tmpRefDatasetNames = getDatasetNames(referenceData,era=era,legacy=False)
-    tmpValDatasetNames = getDatasetNames(validateData,era=era)
-
-    # Find matching names
-    refDatasetNames = []
-    valDatasetNames = []
-    if opts.dirs == None:
-        print "Warning: you are producing plots for %d datasets! Pick with -d those you like if you want less"%len(tmpRefDatasetNames)
-        refDatasetNames = tmpRefDatasetNames
-        valDatasetNames = tmpValDatasetNames
-    else:
-        for name in opts.dirs:
-            if name in tmpRefDatasetNames:
-                refDatasetNames.append(name)
-            if name in tmpValDatasetNames:
-                valDatasetNames.append(name)
-
-    datasetNames = validateDatasetExistence(refDatasetNames,valDatasetNames)
-    myOutput += "<h3><a name=maintop>List of datasets analysed:</a></h3><br>\n"
-    for datasetname in datasetNames:
-        myOutput += "<a href=#dataset_"+datasetname+">"+datasetname+"</a><br>\n"
-    myOutput += "<hr><br>\n"
-    for datasetname in datasetNames:
-        print "\n\n"
-        print datasetname
-        myOutput += "<h2><a name=dataset_"+datasetname+">Dataset: "+datasetname+"</a></h2><br>\n"
-        refDatasets = []
-        if opts.oldreference:
-            refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname])
-        else:
-            refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],dataEra=era)
-        valDatasets = dataset.getDatasetsFromCrabDirs([validateData+"/"+datasetname],dataEra=era)
-
-        myOutput += validateCounters(refDatasets,valDatasets)
-        myOutput += validateHistograms(mydir,refDatasets.getDataset(datasetname),valDatasets.getDataset(datasetname))
-        myOutput += "<hr><br>\n"
-
-    print "\nResults saved into directory:",mydir
-    print "To view html version, use link "+mydir+"/index.html"
-    makehtml(mydir,myOutput)
+def compareLists(refList, testList, optList):
+    selectList = []
+    if optList == None:
+        optList = refList
+    for optItem in optList:
+        if optItem in refList and optItem in testList:
+            selectList.append(optItem)
+    #print "ref=",refList
+    #print "test=",testList
+    #print "sel=",selectList
+    return selectList
 
 if __name__ == "__main__":
+    ROOT.gROOT.SetBatch() # no flashing canvases
 
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("--ref", dest="reference", action="store", help="reference multicrab directory")
@@ -898,29 +948,86 @@ if __name__ == "__main__":
     parser.add_option("-d", dest="dirs", action="append", help="name of sample directory inside multicrab dir (multiple directories can be specified with multiple -d arguments)")
     parser.add_option("-v", dest="variation", action="append", help="name of variation")
     parser.add_option("-e", dest="era", action="append", help="name of era")
-    parser.add_option("-t", dest="type", action="append", help="name of analysis type")
+    parser.add_option("-m", dest="searchMode", action="append", help="name of search mode")
     (opts, args) = parser.parse_args()
 
     # Check that proper arguments were given
     mystatus = True
     if opts.reference == None:
-        print "Missing reference multicrab directory!\n"
+        print "Error: Missing reference multicrab directory!"
         mystatus = False
     if opts.test == None:
-        print "Missing multicrab directory for testing/validation!\n"
+        print "Error: Missing multicrab directory for testing/validation!"
         mystatus = False
     if opts.dirs == None:
-        print "Missing source for sample directories!\n"
-        mystatus = False
+        print "(optional) Missing source for sample directories (use -d if desired) will use all sample directories"
+        #mystatus = False
     if opts.era == None:
-        print "Missing specification for era!\n"
-        mystatus = False
+        print "(optional) Missing specification for era (use -e if desired) - will use all available eras"
+        #mystatus = False
+    if opts.searchMode == None:
+        print "(optional) Missing specification for searchMode (use -m if desired) - will use all available searchModes"
+        #mystatus = False
+    if opts.variation== None:
+        print "(optional) Missing specification for analysis variation (use -v if desired) - will use all available variations"
+        #mystatus = False
+
     if not mystatus:
         parser.print_help()
         sys.exit()
 
-    # Arguments are ok, proceed to run
-    for e in opts.era:
-        main(opts,e)
+    # Create dataset creators to see what's inside
+    refDsetCreator = dataset.readFromMulticrabCfg(directory=opts.reference)
+    testDsetCreator = dataset.readFromMulticrabCfg(directory=opts.test)
+    myEraList = compareLists(refDsetCreator.getDataDataEras(), testDsetCreator.getDataDataEras(), opts.era)
+    mySearchModeList = compareLists(refDsetCreator.getSearchModes(), testDsetCreator.getSearchModes(), opts.searchMode)
+    myVariationList = compareLists(refDsetCreator.getOptimizationModes(), testDsetCreator.getOptimizationModes(), opts.variation)
+    if len(myVariationList) == 0:
+        myVariationList.append(None)
+    # Create ValidateGroups
+    myValidateGroups = createValidateHistograms()
+    # Create output directory
+    myTimeStamp = datetime.now().strftime("%y%m%d_%H%M%S")
+    myDir = "validation_"+myTimeStamp
+    if not os.path.exists(myDir):
+        os.mkdir(myDir)
 
+    myMainFile = "<h1>Choose dataset:</h1><br>\n"
+    # Arguments are ok, proceed to run
+    myMainFile += "<ul>\n"
+    for e in myEraList:
+        # Format era properly
+        myMainFile += "  <li><b>Era =</b> %s</li>\n"%e
+        myMainFile += "  <ul>\n"
+        for m in mySearchModeList:
+            myMainFile += "    <li><b>SearchMode =</b> %s</li>\n"%m
+            myMainFile += "    <ul>\n"
+            if myVariationList[0] == None:
+                myHtmlRef="%s_%s_defaultAnalysis"%(e,m)
+                myMainFile += '      <li>Nominal analysis</li>\n'
+                myMainFile += main(opts,myTimeStamp,refDsetCreator,testDsetCreator,myValidateGroups,e,m,None,myDir,myHtmlRef)
+            else:
+                for v in myVariationList:
+                    myHtmlRef="%s_%s_%s"%(e,m,v)
+                    myMainFile += '      <li><b>Variation =</b> %s</li>\n'%(v)
+                    myMainFile += main(opts,myTimeStamp,refDsetCreator,testDsetCreator,myValidateGroups,e,m,v,myDir,myHtmlRef)
+            myMainFile += "    </ul>\n"
+        myMainFile += "  </ul>\n"
+    myMainFile += "</ul>\n"
+    myMainFile += "If not all eras / searchModes / variations are seen in the above list, then some of them do not exist in the reference or test multicrab directory.<br>\n"
+    myMainFile += "<hr>Created by script scripts/validate.py<br>\n"
+    # Make html page for choosing run
+    myPanel = NavigationPanel(myTimeStamp)
+    myPanel.makehtml([],myMainFile,myDir,"index.html")
+    # Make tar package
+    print "\nMaking tar package '%s.tgz' for exporting/archiving ..."%myDir
+    tar = tarfile.open("%s.tgz"%myDir, mode="w:gz")
+    tar.add(myDir)
+    tar.close()
+    # Final output
+    print "\nDone."
+    print "To browse, type:"
+    print "firefox %s/index.html"%myDir
+    print "\n(garbage collection might take some time before you can use the shell again ...)\n"
+    #vie datasetcreator -> main
 
