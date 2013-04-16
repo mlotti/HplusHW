@@ -244,7 +244,10 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
 
         # CRAB configuration lines
         wf.addCrabLine("CMSSW.total_number_of_lumis = -1")
-        wf.args["overrideBeamSpot"] = "1"
+
+        # Override the beamspot only for data
+        if dataset.isData():
+            wf.args["overrideBeamSpot"] = "1"
 
         # Setup the publish name
         path = wf.source.getDataForDataset(dataset).getDatasetPath().split("/")
@@ -263,7 +266,10 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
             args = {}
             args.update(wf.args)
             args["tauEmbeddingInput"] = "1"
-            del args["overrideBeamSpot"] # this is needed only for embedding jobs
+            try:
+                del args["overrideBeamSpot"] # this is needed only for embedding jobs
+            except KeyError:
+                pass
             wf_analysis = Workflow("tauembedding_analysis_"+version, source=Source("tauembedding_embedding_"+version),
                                    triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root")
             wf_analysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
