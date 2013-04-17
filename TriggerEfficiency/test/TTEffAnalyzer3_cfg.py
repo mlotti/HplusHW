@@ -105,23 +105,12 @@ print "GlobalTag="+dataVersion.getGlobalTag()
 #process.GlobalTag.pfnPrefix = cms.untracked.string('frontier://FrontierProd/')
 #print process.GlobalTag.globaltag
 
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
 
-#MET cleaning flag
-process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
-process.runMETCleaning = cms.Path(process.HBHENoiseFilterResultProducer)
-# MET type1 corr
-# Produce the rho for L1FastJet
-process.load('RecoJets.Configuration.RecoPFJets_cff')
-process.kt6PFJets.doRhoFastjet = True
-process.ak5PFJets.doAreaFastjet = True
-#process.ak5PFJetSequence = cms.Sequence(process.kt6PFJets*process.ak5PFJets)
-####process.load("JetMETCorrections.Type1MET.pfMETCorrections_cff")
+import HiggsAnalysis.HeavyChHiggsToTauNu.TauLegZMuTauFilter as TauLegZMuTauFilter
+additionalCounters.extend(TauLegZMuTauFilter.getSelectionCounters())
 
-#Physics bit ON
-process.load('HLTrigger.special.hltPhysicsDeclared_cfi')
-process.hltPhysicsDeclared.L1GtReadoutRecordTag = 'gtDigis'
-
-process.commonSequence = cms.Sequence()
 if dataVersion.isMC():
     process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
         GenParticles  = cms.untracked.InputTag("genParticles"),
@@ -224,9 +213,7 @@ process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
             "byMediumIsolationMVA2",
             "byTightIsolationMVA2",
         ),
-        Counters                = cms.VInputTag(cms.InputTag("TTEffSkimCounterAllEvents"),
-                                                cms.InputTag("TTEffSkimCounterSavedEvents")
-                                                ),
+	Counters                = cms.VInputTag([cms.InputTag(c) for c in additionalCounters]),
 	Selections = cms.vstring(
 	    "hPlusGlobalElectronVetoFilter",
 	    "hPlusGlobalMuonVetoFilter",
