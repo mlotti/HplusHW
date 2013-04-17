@@ -108,9 +108,6 @@ print "GlobalTag="+dataVersion.getGlobalTag()
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.TauLegZMuTauFilter as TauLegZMuTauFilter
-additionalCounters.extend(TauLegZMuTauFilter.getSelectionCounters())
-
 if dataVersion.isMC():
     process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
         GenParticles  = cms.untracked.InputTag("genParticles"),
@@ -141,6 +138,7 @@ if analysis == "TauLeg":
     process.muTauPairs = zmutau.muTauPairs.clone()
     process.muTauPairs.decay = cms.string('selectedPatMuons@+ selectedPatTaus@-')
     process.commonSequence *= process.muTauPairs
+    additionalCounters.extend(zmutau.getSelectionCounters())
 
 # Correction of reco::PFJets (from 5xy configuration due to JetMETCorrections/Modules ...
 process.ak5PFL1Offset = cms.ESProducer('L1OffsetCorrectionESProducer',
