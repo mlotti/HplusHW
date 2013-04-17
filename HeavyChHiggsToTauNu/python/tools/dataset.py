@@ -2391,7 +2391,7 @@ class DatasetPrecursor:
     def isMC(self):
         return not self.isData()
 
-_analysisNameSkipList = ["Plus", "Minus", "configInfo", "PUWeightProducer"]
+_analysisNameSkipList = ["SystVar", "configInfo", "PUWeightProducer"]
 _analysisSearchModes = ["Light", "Heavy"]
 _dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
 
