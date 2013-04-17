@@ -119,7 +119,7 @@ if dataVersion.isMC():
     )
 
     process.commonSequence += (
-        process.hltPhysicsDeclared+
+####        process.hltPhysicsDeclared+
 	process.TauMCProducer
     )
 
