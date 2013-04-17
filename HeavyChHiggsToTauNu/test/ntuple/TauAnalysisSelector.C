@@ -532,8 +532,6 @@ bool TauAnalysisSelector::process(Long64_t entry) {
     hTauLeadingTrackPt_AfterOneProng->Fill(tau.leadPFChargedHadrCandP4().Pt(), weight);
     hTauLeadingTrackP_AfterOneProng->Fill(tau.leadPFChargedHadrCandP4().P(), weight);
     hTauRtau_AfterOneProng->Fill(tau.rtau(), weight);
-
-    tmp.push_back(tau);
   }
   selectedTaus.swap(tmp);
   tmp.clear();
