@@ -1715,8 +1715,11 @@ class PlotDrawer:
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
     # \param canvasOpts          Default canvas modifications (see histograms.CanvasFrame)
-    # \param rebin               Default rebin value (passed to Th1::Rebin; if list, passed as double array)
+    # \param rebin               Alias for \a rebinX (for backward compatibility)
+    # \param rebinX              Default rebin X value (passed to TH1::Rebin or TH2::Rebin2D)
+    # \param rebinY              Default rebin Y value (passed to TH2::Rebin2D)
     # \param rebinToWidthX       Default width of X bins to rebin to
+    # \param rebinToWidthY       Default width of Y bins to rebin to (only applicable for TH2)
     # \param createLegend        Default legend creation parameters (None to not to create legend)
     # \param moveLegend          Default legend moving parameters (after creation)
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
@@ -1739,7 +1742,10 @@ class PlotDrawer:
                  opts2={},
                  canvasOpts=None,
                  rebin=None,
+                 rebinX=None,
+                 rebinY=None,
                  rebinToWidthX=None,
+                 rebinToWidthY=None,
                  createLegend={},
                  moveLegend={},
                  customizeBeforeFrame=None,
@@ -1765,7 +1771,10 @@ class PlotDrawer:
         self.opts2Default.update(opts2)
         self.canvasOptsDefault = canvasOpts
         self.rebinDefault = rebin
+        self.rebinXDefault = rebinX
+        self.rebinYDefault = rebinY
         self.rebinToWidthXDefault = rebinToWidthX
+        self.rebinToWidthYDefault = rebinToWidthY
         self.createLegendDefault = createLegend
         self.moveLegendDefault = moveLegend
         self.customizeBeforeFrameDefault = customizeBeforeFrame
@@ -1839,52 +1848,90 @@ class PlotDrawer:
     # \param kwargs  Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
-    # \li\a rebin          If given and large than 1, rebin all histograms in
-    #                      the plot. If list, pass it as a double array to
-    #                      TH1::Rebin()
+    # \li\a rebin          Alias for \a rebinX
+    # \li\a rebinX         If given and larger than 1, rebin all histograms in
+    #                      the plot (X axis for TH2). If list, pass it
+    #                      as a double array to TH1::Rebin()
+    # \li\a rebinY         If given and larger than 1, rebin all histograms in
+    #                      the plot (only applicable for Y axis of
+    #                      TH2)
     # \li\a rebinToWidthX  If given, rebin all histograms to this width of X bins.
+    # \li\a rebinToWidthY  If given, rebin all histograms to this width of Y bins.
     #
-    # \b Note: Only one of the arguments above can be given.
+    # \b Note: Only one argument above per axis can be given.
     #
     # \b Note: Almost no error checking is done, except what is done in ROOT.
     def rebin(self, p, name, **kwargs):
         rebin = self._getValue("rebin", p, kwargs)
+        rebinX = self._getValue("rebinX", p, kwargs)
+        rebinY = self._getValue("rebinY", p, kwargs)
         rebinToWidthX = self._getValue("rebinToWidthX", p, kwargs)
+        rebinToWidthY = self._getValue("rebinToWidthY", p, kwargs)
+
+        if rebin is not None and rebinX is not None:
+            raise Exception("Give either 'rebin' or 'rebinX', not both")
 
         # Use the one given as argument if both are non-None
-        if rebin is not None and rebinToWidthX is not None:
-            if "rebin" in kwargs:
+        if rebinX is not None and rebinToWidthX is not None:
+            if "rebin" in kwargs or "rebinX" in kwargs:
                 rebinToWidthX = None
             if "rebinToWidthX" in kwargs:
-                rebin = None
+                rebinX = None
 
-            if rebin is not None and rebinToWidthX is not None:
-                raise Exception("Only one of 'rebin' and 'rebinToWidthX' may be given as an argument.")
-
-            if rebin is not None:
-                print "Plot '%s', argument 'rebin=%s' overrides the default 'rebinToWidthX=%s'" % (name, str(rebin), str(self.rebinToWidthXDefault))
+            if rebinX is not None and rebinToWidthX is not None:
+                raise Exception("Only one of 'rebinX' and 'rebinToWidthX' may be given as an argument.")
+            if rebinX is not None:
+                print "Plot '%s', argument 'rebinX=%s' overrides the default 'rebinToWidthX=%s'" % (name, str(rebinX), str(self.rebinToWidthXDefault))
             if rebinToWidthX is not None:
-                print "Plot '%s', argument 'rebinToWidthX=%s' overrides the default 'rebin=%s'" % (name, str(rebinToWidthX), str(self.rebinDefault))
+                print "Plot '%s', argument 'rebinToWidthX=%s' overrides the default 'rebinX=%s'" % (name, str(rebinToWidthX), str(self.rebinXDefault))
+        if rebinY is not None and rebinToWidthY is not None:
+            if "rebinY" in kwargs:
+                rebinToWidthY = None
+            if "rebinToWidthY" in kwargs:
+                rebinY = None
+
+            if rebinY is not None and rebinToWidthY is not None:
+                raise Exception("Only one of 'rebinY' and 'rebinToWidthY' may be given as an argument.")
+            if rebinY is not None:
+                print "Plot '%s', argument 'rebinY=%s' overrides the default 'rebinToWidthY=%s'" % (name, str(rebinY), str(self.rebinToWidthYDefault))
+            if rebinToWidthY is not None:
+                print "Plot '%s', argument 'rebinToWidthY=%s' overrides the default 'rebinY=%s'" % (name, str(rebinToWidthY), str(self.rebinYDefault))
 
 
         rebinFunction = None
-        if rebin is not None:
-            if isinstance(rebin, list):
-                if len(rebin) < 2:
-                    raise Exception("If 'rebin' is a list, it must have at least two elements")
-                n = len(rebin)-1
-                def rebinList(h):
-                    th1 = h.getRootHisto()
-                    rebinned = th1.Rebin(n, th1.GetName(), array.array("d", rebin))
-                    h.setRootHisto(rebinned)
-                rebinFunction = rebinList
-            elif rebin > 1:
-                rebinFunction = lambda h: h.getRootHisto().Rebin(rebin)
-        elif rebinToWidthX is not None:
+        if rebinX is not None and isinstance(rebinX, list):
+            if len(rebinX) < 2:
+                raise Exception("If 'rebinX' is a list, it must have at least two elements")
+            n = len(rebinX)-1
+            def rebinList(h):
+                th1 = h.getRootHisto()
+                if hasattr(th1, "Rebin2D"):
+                    print >>sys.stderr, "WARNING: Plot '%s', trying to rebin TH2 histogram '%s' with nonequal bin sizes" % (name, h.getName())
+                    return
+                rebinned = th1.Rebin(n, th1.GetName(), array.array("d", rebinX))
+                h.setRootHisto(rebinned)
+
+            rebinFunction = rebinList
+        elif rebinX is not None or rebinY is not None:
+            rex = 1
+            rey = 1
+            if rebinX is not None:
+                rex = rebinX
+            if rebinY is not None:
+                rey = rebinY
+            def rebinXY(h):
+                th = h.getRootHisto()
+                if isinstance(th, ROOT.TH2):
+                    th.Rebin2D(rex, rey)
+                else:
+                    th.Rebin(rex)
+
+            rebinFunction = rebinXY
+        elif rebinToWidthX is not None or rebinToWidthY is not None:
             # In general (also if the original histogram has variable
             # bin widths) explicitly specifying the bin low edges is
             # the only way which works
-            def rebinToWidth(h):
+            def rebinToWidthTH1(h):
                 th1 = h.getRootHisto()
                 xmin = histograms.th1Xmin(th1)
                 xmax = histograms.th1Xmax(th1)
@@ -1893,13 +1940,53 @@ class PlotDrawer:
                 # Check that the number of bins is integer
                 diff = abs(intbins - nbins)
                 if diff > 1e-3:
-                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer (diff is %g)" % (h.getName(), name, rebinToWidthX, xmin, xmax, nbins, diff)
+                    print >>sys.stderr, "WARNING: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer (diff is %g)" % (h.getName(), name, rebinToWidthX, xmin, xmax, nbins, diff)
                     return
 
                 nbins = intbins
                 binLowEdgeList = [xmin + (xmax-xmin)/nbins*i for i in range(0, nbins+1)]
                 rebinned = th1.Rebin(nbins, th1.GetName(), array.array("d", binLowEdgeList))
                 h.setRootHisto(rebinned)
+
+            def rebinToWidth(h):
+                th = h.getRootHisto()
+                if not hasattr(th, "Rebin2D"):
+                    if rebinToWidthX is not None:
+                        rebinToWidthTH1(h)
+                        return
+                # General TH2 case, this is somewhat fishy case ...
+                xmin = histograms.th1Xmin(th)
+                xmax = histograms.th1Xmax(th)
+                ymin = histograms.th2Ymin(th)
+                ymax = histograms.th2Ymax(th)
+
+                intbinsx = th.GetNbinsX()
+                intbinsy = th.GetNbinsY()
+                if rebinToWidthX is not None:
+                    nbinsx = (xmax-xmin)/rebinToWidthX
+                    intbinsx = int(nbinsx+0.5)
+                else:
+                    nbinsx = intbinsx
+                if rebinToWidthY is not None:
+                    nbinsy = (ymax-ymin)/rebinToWidthY
+                    intbinsy = int(nbinsy+0.5)
+                else:
+                    nbinsy = intbinsy
+
+                # Check that the requested binning makes sense
+                remainderX = th.GetNbinsX() % intbinsx
+                remainderY = th.GetNbinsY() % intbinsy
+                if remainderX != 0:
+                    print >>sys.stderr, "WARNING: Trying to rebin histogram '%s' of plot '%s' for X bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not divisor of the number of bins %d, remainder is %d" % (h.getName(), name, rebinToWidthX, xmin, xmax, nbinsx, th.GetNbinsX(), remainderX)
+                    return
+                if remainderY != 0:
+                    print >>sys.stderr, "WARNING: Trying to rebin histogram '%s' of plot '%s' for Y bin width %g, the Y axis minimum is %g, maximum %g => number of bins would be %g, which is not divisor of the number of bins %d, remainder is %d" % (h.getName(), name, rebinToWidthY, ymin, ymax, nbinsy, th.GetNbinsY(), remainderY)
+                    return
+
+                rex = th.GetNbinsX()/intbinsx
+                rey = th.GetNbinsY()/intbinsy
+                th.Rebin2D(rex, rey)
+
             rebinFunction = rebinToWidth
 
         if rebinFunction is not None:
