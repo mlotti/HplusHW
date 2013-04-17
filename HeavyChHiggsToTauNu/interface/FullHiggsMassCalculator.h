@@ -72,9 +72,9 @@ namespace HPlus {
       const bool passedEvent() const { return bPassedEvent; }
       //const edm::Ptr<pat::Jet>& getBjetHiggsSide() const { return BjetHiggsSide; }
       const double getDiscriminant() const { return fDiscriminant; }
-      const double getHiggsMass() const { return fHiggsMassSolution; }
-      const double getTopMass() const { return fTopMassSolution; }
-      const double getSelectedNeutrinoPzSolution() const { return fSelectedNeutrinoPzSolution; }
+      const double getHiggsMass() const { return fHiggsMassSolutionSelected; }
+      const double getTopMass() const { return fTopMassSolutionSelected; }
+      const double getSelectedNeutrinoPzSolution() const { return fNeutrinoPzSolutionSelected; }
       const double getNeutrinoPtSolution() const { return fNeutrinoPtSolution; }
       const double getMCNeutrinoPz() const { return fTrueNeutrinoPz; }
       const EventClassCode getEventClassCode() const { return eEventClassCode; }
@@ -83,24 +83,32 @@ namespace HPlus {
     private:
       bool bPassedEvent;
       bool bNegativeDiscriminantRecovered;
+
       // Calculated results
       double fDiscriminant;
-      double fTopMassSolution;
+
+      double fTopMassSolutionSelected;
+      double fTopMassSolution1;
+      double fTopMassSolution2;
+
       double fNeutrinoPzSolution1;
       double fNeutrinoPzSolution2;
-      double fSelectedNeutrinoPzSolution;
+      double fNeutrinoPzSolutionSelected;
+
       double fModifiedMETSolution1;
       double fModifiedMETSolution2;
-      double fSelectedModifiedMETSolution;
+      double fModifiedMETSolutionSelected;
+
+      double fHiggsMassSolution1;
+      double fHiggsMassSolution2;
+      double fHiggsMassSolutionSelected;
+
       double fNeutrinoPtSolution;
-      double fHiggsMassSolution;
       double fTrueNeutrinoPz;
-      TVector3 visibleTau;
-      TVector3 mcNeutrinos;
-      TVector3 mcBjetHiggsSide;
-      TLorentzVector LorentzVector_bJetFourMomentum;
-      TLorentzVector LorentzVector_visibleTauFourMomentum;
-      TLorentzVector LorentzVector_neutrinosFourMomentum;
+      TLorentzVector bJetFourMomentum;
+      TLorentzVector visibleTauFourMomentum;
+      TLorentzVector neutrinosFourMomentum1;
+      TLorentzVector neutrinosFourMomentum2;
       // Neutrino p_z solution selection
       double fNeutrinoPzSolutionGreater;
       double fNeutrinoPzSolutionSmaller;
@@ -137,25 +145,30 @@ namespace HPlus {
     // "selectBJetClosestToTau"?
     void doCalculations(const edm::Event& iEvent, TVector3& tauVector, TVector3& bJetVector, TVector3& METVector,
 			FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
-    void calculateNeutrinoPz(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
+    void calculateNeutrinoPz(TVector3& pTau, TVector3& pB, TVector3& MET, FullHiggsMassCalculator::Data& output);
     //bool calculateModifiedMET(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
-    double selectNeutrinoPzSolution(TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output,
-				  PzSelectionMethod selectionMethod);
-    double getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
-    double getDeltaEtaBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
+    void selectNeutrinoPzAndHiggsMassSolution(FullHiggsMassCalculator::Data& output, PzSelectionMethod selectionMethod);
+    double getAngleBetweenNeutrinosAndTau(TLorentzVector& tauFourMom, TLorentzVector& neutrinosFourMom);
+    double getDeltaEtaBetweenNeutrinosAndTau(TLorentzVector& tauFourMom, TLorentzVector& neutrinosFourMom);
+    double getDeltaRBetweenNeutrinosAndTau(TLorentzVector& tauFourMom, TLorentzVector& neutrinosFourMom);
     bool selectedSolutionIsClosestToTrueValue(double selectedSolution, FullHiggsMassCalculator::Data& output);
+    bool selectedSolutionGivesBestHiggsMass(const edm::Event& iEvent, double selectedSolution,
+					    FullHiggsMassCalculator::Data& output);
+    bool neutrinoPzSolutionOneWasSelected(double selectedSolution, FullHiggsMassCalculator::Data& output);
+    bool neutrinoPzSolutionTwoWasSelected(double selectedSolution, FullHiggsMassCalculator::Data& output);
 //     bool selectedSolutionGivesVectorClosestToTrue(const edm::Event& iEvent, double selectedSolution,
 // 						  FullHiggsMassCalculator::Data& output, TVector3& MET);
-    void constructFourMomenta(TVector3& pB, TVector3& pTau, TVector3& MET, FullHiggsMassCalculator::Data& output);
-    void calculateTopMass(TVector3& tauVector, TVector3& bJetVector, TVector3& METVector,
-			  FullHiggsMassCalculator::Data& output);
-    void calculateHiggsMass(FullHiggsMassCalculator::Data& output);
+    void constructFourMomenta(TVector3& pTau, TVector3& pB, TVector3& MET, FullHiggsMassCalculator::Data& output);
+    void calculateTopMasses(FullHiggsMassCalculator::Data& output);
+    void selectModifiedMETSolution(FullHiggsMassCalculator::Data& output);
+    void calculateHiggsMasses(FullHiggsMassCalculator::Data& output);
+    bool modifiedMETSolutionOneWasSelected(FullHiggsMassCalculator::Data& output);
+    bool modifiedMETSolutionTwoWasSelected(FullHiggsMassCalculator::Data& output);
     void doEventClassification(const edm::Event& iEvent, TVector3& bJetVector, TVector3& tauVector, 
 			       TVector3& METVector, FullHiggsMassCalculator::Data& output, 
 			       const GenParticleAnalysis::Data* genDataPtr = NULL);
     void applyCuts(FullHiggsMassCalculator::Data& output);
-    void doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, InputDataType myInputDataType,
-				    TVector3& METVector);
+    void doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
     void analyzeMETComposition(TVector3& recoMETVector, TVector3& genBothNeutrinosVector, TVector3& genMETVector);
 
   private:
