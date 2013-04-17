@@ -13,18 +13,24 @@
 
 namespace {
   enum MCTauMode {
+    kMCTauZeroTaus,
     kMCTauOneTau,
     kMCTauTwoTaus,
+    kMCTauMoreThanTwoTaus,
     kMCTauNone
   };
 
   MCTauMode parseMCTauMode(const std::string& mode) {
     if(mode == "" || mode == "none")
       return kMCTauNone;
+    if(mode == "zeroTaus")
+      return kMCTauZeroTaus;
     if(mode == "oneTau")
       return kMCTauOneTau;
     if(mode == "twoTaus")
       return kMCTauTwoTaus;
+    if(mode == "moreThanTwoTaus")
+      return kMCTauMoreThanTwoTaus;
 
     std::stringstream ss;
     ss << "Gor mcTauMode " << mode << " which is not valid. Valid options are '', 'none', 'oneTau', 'twoTaus'";
@@ -286,12 +292,16 @@ bool TauAnalysisSelector::process(Long64_t entry) {
 
     if(fIsEmbedded) {
       // For embedded the embedded tau is counted as one
+      if(fMCTauMode == kMCTauZeroTaus) return true;
       if(fMCTauMode == kMCTauOneTau && ntaus != 0) return true;
       if(fMCTauMode == kMCTauTwoTaus && ntaus != 1) return true;
+      if(fMCTauMode == kMCTauMoreThanTwoTaus && ntaus < 2) return true;
     }
     else {
+      if(fMCTauMode == kMCTauZeroTaus && ntaus != 0) return true;
       if(fMCTauMode == kMCTauOneTau && ntaus != 1) return true;
       if(fMCTauMode == kMCTauTwoTaus && ntaus != 2) return true;
+      if(fMCTauMode == kMCTauMoreThanTwoTaus && ntaus < 3) return true;
     }
   }
   cTauMCSelection.increment();
@@ -305,7 +315,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
     if(embeddingMuon.p4().Pt() < 41) return true;
     //std::cout << "Muon pt " << muon.p4().Pt() << std::endl;
 
-    originalMuonIsWMu = std::abs(embeddingMuon.pdgId()) == 13 && std::abs(embeddingMuon.motherPdgId()) == 24;
+    originalMuonIsWMu = std::abs(embeddingMuon.pdgId()) == 13 && std::abs(embeddingMuon.motherPdgId()) == 24 && std::abs(embeddingMuon.grandMotherPdgId()) == 6;
     if(!originalMuonIsWMu) return true;
   }
   else {
