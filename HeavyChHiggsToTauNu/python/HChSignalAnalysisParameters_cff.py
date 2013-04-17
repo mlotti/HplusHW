@@ -743,20 +743,16 @@ def setJetPUIdSrc(jetSelectionPSet, moduleName):
     # Set jet PU ID src
     mySrc = jetSelectionPSet.src.value()
     mySrc.replace("Chs","") # Take out the suffix to reduce if sentences
-    myPileUpSrc = ""
-    if mySrc == "selectedPatJets":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()
-    elif mySrc == "shiftedPatJetsEnDownForCorrMEt":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForshiftedPatJetsEnDownForCorrMEt"
-    elif mySrc == "shiftedPatJetsEnUpForCorrMEt":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForshiftedPatJetsEnUpForCorrMEt"
-    elif mySrc == "smearedPatJets":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForsmearedPatJets"
-    elif mySrc == "smearedPatJetsResDown":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForsmearedPatJetsResDown"
-    elif mySrc == "smearedPatJetsResUp":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForsmearedPatJetsResUp"
-    else:
+    try:
+        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value() + {
+            "selectedPatJets":                "",
+            "smearedPatJets":                 "ForsmearedPatJets",
+            "shiftedPatJetsEnDownForCorrMEt": "ForshiftedPatJetsEnDownForCorrMEt",
+            "shiftedPatJetsEnUpForCorrMEt":   "ForshiftedPatJetsEnUpForCorrMEt",
+            "smearedPatJetsResDown":          "ForsmearedPatJetsResDown",
+            "smearedPatJetsResUp":            "ForsmearedPatJetsResUp",
+            }[mySrc]
+    except KeyError:
         raise Exception("Cannot set jet PU ID src for unknown jet src '%s' in module '%s'"%(jetSelection.src.value(),moduleName))
     # Add suffix
     if "Chs" in jetSelection.src.value():
