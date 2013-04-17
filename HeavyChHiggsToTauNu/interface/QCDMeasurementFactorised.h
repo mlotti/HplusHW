@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurementBasic_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurementBasic_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurementFactorised_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurementFactorised_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
@@ -54,7 +54,7 @@ namespace edm {
 }
 
 namespace HPlus {
-  class QCDMeasurementBasic {
+  class QCDMeasurementFactorised {
   enum QCDSelectionOrder {
     kQCDOrderTrigger,
     kQCDOrderVertexSelection,
@@ -71,8 +71,8 @@ namespace HPlus {
   };
 
   public:
-    explicit QCDMeasurementBasic(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::EventWeight& eventWeight, HPlus::HistoWrapper& histoWrapper);
-    ~QCDMeasurementBasic();
+    explicit QCDMeasurementFactorised(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::EventWeight& eventWeight, HPlus::HistoWrapper& histoWrapper);
+    ~QCDMeasurementFactorised();
 
     // Interface towards the EDProducer
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);

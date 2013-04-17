@@ -431,6 +431,9 @@ def _histoToDict(histo):
 ## Integrate TH1 to a Count
 def histoIntegrateToCount(histo):
     count = Count(0, 0)
+    if histo is None:
+        return count
+
     for bin in xrange(0, histo.GetNbinsX()+2):
         count.add(Count(histo.GetBinContent(bin), histo.GetBinError(bin)))
     return count
@@ -2328,6 +2331,11 @@ class DatasetManager:
         print "ParameterSet for dataset", namePSets[0][0]
         print namePSets[0][1]
 
+    def getSelections(self):
+        namePSets = self.datasets[0].forEach(lambda d: (d.getName(), d.getParameterSet()))
+        #print "ParameterSet for dataset", namePSets[0][0]
+        return namePSets[0][1]
+
     ## \var datasets
     # List of dataset.Dataset (or dataset.DatasetMerged) objects to manage
     ## \var datasetMap
@@ -2383,7 +2391,7 @@ class DatasetPrecursor:
     def isMC(self):
         return not self.isData()
 
-_analysisNameSkipList = ["Plus", "Minus", "configInfo", "PUWeightProducer"]
+_analysisNameSkipList = ["SystVar", "configInfo", "PUWeightProducer"]
 _analysisSearchModes = ["Light", "Heavy"]
 _dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
 
@@ -2430,7 +2438,7 @@ class DatasetManagerCreator:
             if d.isData():
                 m = _dataDataEra_re.search(d.getName())
                 if m:
-                    dataEras[m.group("era")] = 1
+                    dataEras["Run"+m.group("era")] = 1
 
         self._dataDataEras = dataEras.keys()
         self._dataDataEras.sort()                
@@ -2596,6 +2604,16 @@ class DatasetManagerCreator:
 
     def getDataDataEras(self):
         return self._dataDataEras
+
+    ## Return MC data eras, or data data eras if MC data era list is empty
+    #
+    # This is probably the typical use case when user wants "just the
+    # list of available data eras".
+    def getDataEras(self):
+        if len(self._mcDataEras) > 0:
+            return self._mcDataEras
+        else:
+            return self._dataDataEras
 
     def getOptimizationModes(self):
         return self._optimizationModes

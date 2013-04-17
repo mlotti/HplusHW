@@ -101,6 +101,9 @@ def main():
     # Create plots
     doPlots(datasets)
 
+    # Create counters
+    doCounters(datasets)
+
     if interactiveMode:
         raw_input("*** Press \"Enter\" to exit pyROOT: ")
 
@@ -167,6 +170,9 @@ def doPlots(datasets):
     # TH2 and COLZ, disable legend
     drawPlot(createTH2Plot("TauSelection/TauSelection_selected_taus_eta_vs_phi", "TTJets"), "selectedtau_etavsphi_ttjets", xlabel="#tau #eta", ylabel="#tau #phi", zlabel="Events", log=False, createLegend=None)
 
+    # Rebinning of TH2 (also rebinX and rebinY work)
+    drawPlot(createTH2Plot("TauSelection/TauSelection_selected_taus_eta_vs_phi", "TTJets"), "selectedtau_etavsphi_ttjets_rebin", xlabel="#tau #eta", ylabel="#tau #phi", zlabel="Events", log=False, createLegend=None, rebinToWidthX=0.2, rebinToWidthY=2*3.14159/24)
+
     # Examples of couple of palettes available in (recent) ROOT and which might be better than the rainbow
     # http://root.cern.ch/drupal/content/rainbow-color-map
     def drawExample(postfix):
@@ -182,6 +188,37 @@ def doPlots(datasets):
 
     tdrstyle.setTwoColorHuePalette()
     drawExample("twocolorhue")
+
+def doCounters(datasets):
+    # Create EventCounter object, holds all counters of all datasets
+    eventCounter = counter.EventCounter(datasets)
+
+    # Normalize counters
+    if mcOnly:
+        eventCounter.normalizeMCToLuminosity(mcOnlyLumi)
+    else:
+        eventCounter.normalizeMCByLuminosity()
+
+    # Get table (counter.CounterTable) of the main counter, format it
+    # with default formatting, and print
+    #print eventCounter.getMainCounterTable().format()
+
+    # Create LaTeX format, automatically adjust value precision by uncertainty
+    latexFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.4f", withPrecision=2))
+
+    # Get table of a subcounter, format it with a predefined format,
+    # and print
+    #print eventCounter.getSubCounterTable("TauIDPassedEvt::TauSelection_HPS").format(latexFormat)
+
+    # Create EventCounter from one dataset
+    eventCounter = counter.EventCounter(datasets.getAllDatasets()[0])
+    if mcOnly:
+        eventCounter.normalizeMCToLuminosity(mcOnlyLumi)
+    else:
+        eventCounter.normalizeMCByLuminosity()
+
+    #print eventCounter.getMainCounterTable().format()
+
    
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
