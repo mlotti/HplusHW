@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementBasic.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementFactorised.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 
@@ -8,7 +8,7 @@
 #include <iomanip>
 
 namespace HPlus {
-  QCDMeasurementBasic::QCDMeasurementBasic(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper):
+  QCDMeasurementFactorised::QCDMeasurementFactorised(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper):
     fEventWeight(eventWeight),
     fHistoWrapper(histoWrapper),
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
@@ -129,14 +129,14 @@ namespace HPlus {
     int myNVerticesBins = static_cast<int>(fNVerticesBinLowEdges.size()) + 1;
     // Transverse mass bins
     if (fTransverseMassRange.size() != 3)
-      throw cms::Exception("Configuration") << "QCDMeasurementBasic: need to provide config param. factorisationTransverseMassRange = (nbins, min, max)!";
+      throw cms::Exception("Configuration") << "QCDMeasurementFactorised: need to provide config param. factorisationTransverseMassRange = (nbins, min, max)!";
     double myDelta = (fTransverseMassRange[2]-fTransverseMassRange[1]) / fTransverseMassRange[0];
     for (double i = 0; i < fTransverseMassRange[0]; ++i) {
       fTransverseMassBinLowEdges.push_back(i * myDelta);
     }
     // Full mass bins
     if (fFullMassRange.size() != 3)
-      throw cms::Exception("Configuration") << "QCDMeasurementBasic: need to provide config param. factorisationFullMassRange = (nbins, min, max)!";
+      throw cms::Exception("Configuration") << "QCDMeasurementFactorised: need to provide config param. factorisationFullMassRange = (nbins, min, max)!";
     myDelta = (fFullMassRange[2]-fFullMassRange[1]) / fFullMassRange[0];
     for (double i = 0; i < fFullMassRange[0]; ++i) {
       fFullMassRange.push_back(i * myDelta);
@@ -266,13 +266,13 @@ namespace HPlus {
 
    }
 
-  QCDMeasurementBasic::~QCDMeasurementBasic() {}
+  QCDMeasurementFactorised::~QCDMeasurementFactorised() {}
 
-  bool QCDMeasurementBasic::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  bool QCDMeasurementFactorised::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     return analyze(iEvent, iSetup);
   }
 
-  bool QCDMeasurementBasic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  bool QCDMeasurementFactorised::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //------ Read the prescale for the event and set the event weight as the prescale
     fEventWeight.beginEvent();
     const double prescaleWeight = fPrescaleWeightReader.getWeight(iEvent, iSetup);
@@ -745,7 +745,7 @@ namespace HPlus {
   }
 
   // Returns index to tau pT bin; 0 is underflow and size() is highest bin
-  int QCDMeasurementBasic::getTauPtBinIndex(double pt) {
+  int QCDMeasurementFactorised::getTauPtBinIndex(double pt) {
     size_t mySize = fTauPtBinLowEdges.size();
     for (size_t i = 0; i < mySize; ++i) {
       if (pt < fTauPtBinLowEdges[i])
@@ -754,7 +754,7 @@ namespace HPlus {
     return static_cast<int>(mySize);
   }
 
-  int QCDMeasurementBasic::getTauEtaBinIndex(double eta) {
+  int QCDMeasurementFactorised::getTauEtaBinIndex(double eta) {
     size_t mySize = fTauEtaBinLowEdges.size();
     for (size_t i = 0; i < mySize; ++i) {
       if (eta < fTauEtaBinLowEdges[i])
@@ -763,7 +763,7 @@ namespace HPlus {
     return static_cast<int>(mySize);
   }
 
-  int QCDMeasurementBasic::getNVerticesBinIndex(int nvtx) {
+  int QCDMeasurementFactorised::getNVerticesBinIndex(int nvtx) {
     size_t mySize = fNVerticesBinLowEdges.size();
     for (size_t i = 0; i < mySize; ++i) {
       if (nvtx < fNVerticesBinLowEdges[i])
@@ -772,7 +772,7 @@ namespace HPlus {
     return static_cast<int>(mySize);
   }
 
-  int QCDMeasurementBasic::getMtBinIndex(double mt) {
+  int QCDMeasurementFactorised::getMtBinIndex(double mt) {
     size_t mySize = fTransverseMassRange.size();
     for (size_t i = 0; i < mySize; ++i) {
       if (mt < fTransverseMassRange[i])
@@ -781,7 +781,7 @@ namespace HPlus {
     return static_cast<int>(mySize);
   }
 
-  int QCDMeasurementBasic::getFullMassBinIndex(double mass) {
+  int QCDMeasurementFactorised::getFullMassBinIndex(double mass) {
     size_t mySize = fFullMassRange.size();
     for (size_t i = 0; i < mySize; ++i) {
       if (mass < fFullMassRange[i])
@@ -790,7 +790,7 @@ namespace HPlus {
     return static_cast<int>(mySize);
   }
 
-  void QCDMeasurementBasic::createShapeHistograms(edm::Service<TFileService>& fs, std::vector<WrappedTH1*>& container, std::string title, int nbins, double min, double max) {
+  void QCDMeasurementFactorised::createShapeHistograms(edm::Service<TFileService>& fs, std::vector<WrappedTH1*>& container, std::string title, int nbins, double min, double max) {
     std::stringstream myLabel;
     int myTauPtBins = static_cast<int>(fTauPtBinLowEdges.size()) + 1;
     int myTauEtaBins = static_cast<int>(fTauEtaBinLowEdges.size()) + 1;
@@ -808,7 +808,7 @@ namespace HPlus {
     }
   }
 
-  int QCDMeasurementBasic::getShapeBinIndex(int tauPtBin, int tauEtaBin, int nvtxBin) {
+  int QCDMeasurementFactorised::getShapeBinIndex(int tauPtBin, int tauEtaBin, int nvtxBin) {
     int myTauEtaBins = static_cast<int>(fTauEtaBinLowEdges.size()) + 1;
     int myNVerticesBins = static_cast<int>(fNVerticesBinLowEdges.size()) + 1;
     //std::cout << " bin=" << tauPtBin << " taueta=" << tauEtaBin << " nvtx=" << nvtxBin << std::endl;
@@ -816,7 +816,7 @@ namespace HPlus {
     return nvtxBin + tauEtaBin*myNVerticesBins + tauPtBin*myNVerticesBins*myTauEtaBins;
   }
 
-  void QCDMeasurementBasic::setAxisLabelsForTH3(WrappedTH3* h) {
+  void QCDMeasurementFactorised::setAxisLabelsForTH3(WrappedTH3* h) {
     // Set axis titles and labels
     if (h->isActive()) {
       h->getHisto()->SetXTitle("#tau p_{T}, GeV/c");
