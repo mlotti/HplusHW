@@ -207,7 +207,7 @@ def scaleNormalization(obj):
 
     #scaleMCfromWmunu(obj) # data/MC trigger correction
     scaleMuTriggerIdEff(obj)
-    scaleWmuFraction(obj)
+#    scaleWmuFraction(obj)
 
 ## Apply muon trigger and ID efficiency normalization
 #
@@ -266,6 +266,9 @@ def scaleMuTriggerIdEff(obj):
     scaleMap = scaleMap41
 #    scaleMap = scaleMap40
 #    scaleMap = scaleMapOld
+
+    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffs
+    scaleMap = {"MC": (0.955+0.9519)/2}
 
     # Transform to inverse
     for key in scaleMap.keys():
