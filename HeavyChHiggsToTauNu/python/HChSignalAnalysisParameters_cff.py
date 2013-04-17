@@ -741,7 +741,7 @@ def setJetPUIdSrc(jetSelectionPSet, moduleName):
     if not (myPUIDWP in myValidPUIDWPs):
         raise Exception("jet PU ID working point '%s' is not valid! (options: %s)"%(myPUIDWP,", ".join(map(str, myValidPUIDWPs))))
     # Set jet PU ID src
-    mySrc = jetSelection.src.value()
+    mySrc = jetSelectionPSet.src.value()
     mySrc.replace("Chs","") # Take out the suffix to reduce if sentences
     myPileUpSrc = ""
     if mySrc == "selectedPatJets":
