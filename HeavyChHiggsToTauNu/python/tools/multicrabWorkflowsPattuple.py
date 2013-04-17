@@ -1934,7 +1934,10 @@ def addPattuple_v53_3_test2(datasets):
 def addPattuple_v53_3_test3(datasets):
     # Bugfix for LogErrorEventFilters
     definitions = {
-        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
+        # 3498600 events, 1703 jobs
+        # User mean 3116.1, min 153.4, max 27006.0
+        # Mean 65.9 MB, min 4.6 MB, max 276.8 MB
+        "Tau_198941-202504_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_pattuple_v53_3_198941_202504_test3-b1ebb7e21c06710552994e7e8d474dd4/USER"),
         }
 
     addPattuple_53X("v53_3_test3", datasets, definitions)
