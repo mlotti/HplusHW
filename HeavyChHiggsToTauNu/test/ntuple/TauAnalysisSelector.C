@@ -556,5 +556,30 @@ bool TauAnalysisSelector::process(Long64_t entry) {
 
   // Tau ID finished
 
+  if(false) {
+    std::cout << "Event " << fEventInfo.event() << ":" << fEventInfo.lumi() << ":" << fEventInfo.run() << std::endl;
+    for(size_t i=0; i< selectedTaus.size(); ++i) {
+      TauCollection::Tau& tau = selectedTaus[i];
+      std::cout << "  selected tau pt " << tau.p4().Pt() << " eta " << tau.p4().Eta() << " phi " << tau.p4().Phi() << std::endl;
+      if(fIsEmbedded) {
+        embeddingMuon.ensureValidity();
+        double DR = ROOT::Math::VectorUtil::DeltaR(tau.p4(), embeddingMuon.p4());
+        if(DR < 0.5) {
+          std::cout << "    matched to embedding muon, DR " << DR << std::endl;
+        }
+      }
+      for(size_t j=0; j<fGenTaus.size(); ++j) {
+        GenParticleCollection::GenParticle gen = fGenTaus.get(j);
+        double DR = ROOT::Math::VectorUtil::DeltaR(tau.p4(), gen.p4());
+        if(DR < 0.5) {
+          std::cout << "    matched to generator tau, DR " << DR
+                    << " mother " << gen.motherPdgId()
+                    << " grandmother " << gen.grandMotherPdgId()
+                    << std::endl;
+        }
+      }
+    }
+  }
+
   return true;
 }
