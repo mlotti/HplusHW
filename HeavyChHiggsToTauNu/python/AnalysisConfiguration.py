@@ -155,6 +155,8 @@ class ConfigBuilder:
         if self.doBTagTree:
             self.tauSelectionOperatingMode = 'tauCandidateSelectionOnly'
 
+        self.systPrefix = "SystVar"
+
         self.numberOfAnalyzers = {}
         self.analyzerCategories = []
 
@@ -444,9 +446,8 @@ class ConfigBuilder:
             process.outpath = cms.EndPath(process.out)
 
         # Set PU ID src for modules
-        import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as parameters
-        for module, name in zip(analysisModules, analysisNames):
-           parameters.setJetPUIdSrc(module.jetSelection, name)
+        for name in self.getAnalyzerModuleNames():
+            param.setJetPUIdSrc(getattr(process, name).jetSelection, name)
 
         # Check number of analyzers
         self._checkNumberOfAnalyzers()
@@ -996,19 +997,19 @@ class ConfigBuilder:
             postfix = "Chs"
 
         names = []
-        names.append(jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
-        names.append(jesVariation.addTESVariation(process, name, "TESMinus", module, "Down", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
+        names.append(jesVariation.addTESVariation(process, name, self.systPrefix+"TESPlus",  module, "Up", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
+        names.append(jesVariation.addTESVariation(process, name, self.systPrefix+"TESMinus", module, "Down", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
 
         if doJetUnclusteredVariation:
             # Do all variations beyond TES
-            names.append(jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up", postfix))
-            names.append(jesVariation.addJESVariation(process, name, "JESMinus", module, "Down", postfix))
+            names.append(jesVariation.addJESVariation(process, name, self.systPrefix+"JESPlus",  module, "Up", postfix))
+            names.append(jesVariation.addJESVariation(process, name, self.systPrefix+"JESMinus", module, "Down", postfix))
     
-            names.append(jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up", postfix))
-            names.append(jesVariation.addJERVariation(process, name, "JERMinus", module, "Down", postfix))
+            names.append(jesVariation.addJERVariation(process, name, self.systPrefix+"JERPlus",  module, "Up", postfix))
+            names.append(jesVariation.addJERVariation(process, name, self.systPrefix+"JERMinus", module, "Down", postfix))
     
-            names.append(jesVariation.addUESVariation(process, name, "METPlus",  module, "Up", postfix))
-            names.append(jesVariation.addUESVariation(process, name, "METMinus", module, "Down", postfix))
+            names.append(jesVariation.addUESVariation(process, name, self.systPrefix+"METPlus",  module, "Up", postfix))
+            names.append(jesVariation.addUESVariation(process, name, self.systPrefix+"METMinus", module, "Down", postfix))
 
         self._accumulateAnalyzers("JES variation", names)
 
@@ -1058,9 +1059,10 @@ class ConfigBuilder:
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="up")
         path = cms.Path(process.commonSequence * module)
-        setattr(process, name+"PUWeightPlus", module)
-        setattr(process, name+"PUWeightPlusPath", path)
-        names.append(name+"PUWeightPlus")
+        modName = name+self.systPrefix+"PUWeightPlus"
+        setattr(process, modName, module)
+        setattr(process, modName+"Path", path)
+        names.append(modName)
 
         # Down variation
         module = getattr(process, name).clone()
@@ -1073,8 +1075,9 @@ class ConfigBuilder:
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="down")
         path = cms.Path(process.commonSequence * module)
-        setattr(process, name+"PUWeightMinus", module)
-        setattr(process, name+"PUWeightMinusPath", path)
-        names.append(name+"PUWeightMinus")
+        modName = name+self.systPrefix+"PUWeightMinus"
+        setattr(process, modName, module)
+        setattr(process, modName+"Path", path)
+        names.append(modName)
 
         self._accumulateAnalyzers("PU weight variation", names)

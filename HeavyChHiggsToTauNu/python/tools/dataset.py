@@ -2658,7 +2658,7 @@ class DatasetPrecursor:
     def isMC(self):
         return not self.isData()
 
-_analysisNameSkipList = ["Plus", "Minus", "configInfo", "PUWeightProducer"]
+_analysisNameSkipList = ["SystVar", "configInfo", "PUWeightProducer"]
 _analysisSearchModes = ["Light", "Heavy"]
 _dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
 
@@ -2881,6 +2881,16 @@ class DatasetManagerCreator:
 
     def getDataDataEras(self):
         return self._dataDataEras
+
+    ## Return MC data eras, or data data eras if MC data era list is empty
+    #
+    # This is probably the typical use case when user wants "just the
+    # list of available data eras".
+    def getDataEras(self):
+        if len(self._mcDataEras) > 0:
+            return self._mcDataEras
+        else:
+            return self._dataDataEras
 
     def getOptimizationModes(self):
         return self._optimizationModes

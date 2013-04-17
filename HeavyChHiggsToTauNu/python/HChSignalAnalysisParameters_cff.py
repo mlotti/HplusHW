@@ -783,29 +783,25 @@ def setJetPUIdSrc(jetSelectionPSet, moduleName):
     myPUIDType = jetSelectionPSet.jetPileUpType.value()
     myValidPUIDTypes = ["full", "cutbased", "philv1", "simple", "none"]
     if not (myPUIDType in myValidPUIDTypes):
-        raise Exception("jet PU ID type '%s' is not valid! (options: %s)"%(myPUIDType,", ".join(map(str, myValidPUIDTypes))))
+        raise Exception("jet PU ID type '%s' is not valid! (options: %s)"%(myPUIDType,", ".join(myValidPUIDTypes)))
     # Check PUID working point validity
     myPUIDWP = jetSelectionPSet.jetPileUpWorkingPoint.value()
     myValidPUIDWPs = ["tight", "medium", "loose"]
     if not (myPUIDWP in myValidPUIDWPs):
-        raise Exception("jet PU ID working point '%s' is not valid! (options: %s)"%(myPUIDWP,", ".join(map(str, myValidPUIDWPs))))
+        raise Exception("jet PU ID working point '%s' is not valid! (options: %s)"%(myPUIDWP,", ".join(myValidPUIDWPs)))
     # Set jet PU ID src
-    mySrc = jetSelection.src.value()
+    mySrc = jetSelectionPSet.src.value()
     mySrc.replace("Chs","") # Take out the suffix to reduce if sentences
-    myPileUpSrc = ""
-    if mySrc == "selectedPatJets":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()
-    elif mySrc == "shiftedPatJetsEnDownForCorrMEt":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForshiftedPatJetsEnDownForCorrMEt"
-    elif mySrc == "shiftedPatJetsEnUpForCorrMEt":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForshiftedPatJetsEnUpForCorrMEt"
-    elif mySrc == "smearedPatJets":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForsmearedPatJets"
-    elif mySrc == "smearedPatJetsResDown":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForsmearedPatJetsResDown"
-    elif mySrc == "smearedPatJetsResUp":
-        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value()+"ForsmearedPatJetsResUp"
-    else:
+    try:
+        myPileUpSrc = jetSelectionPSet.jetPileUpJetCollectionPrefix.value() + {
+            "selectedPatJets":                "",
+            "smearedPatJets":                 "ForsmearedPatJets",
+            "shiftedPatJetsEnDownForCorrMEt": "ForshiftedPatJetsEnDownForCorrMEt",
+            "shiftedPatJetsEnUpForCorrMEt":   "ForshiftedPatJetsEnUpForCorrMEt",
+            "smearedPatJetsResDown":          "ForsmearedPatJetsResDown",
+            "smearedPatJetsResUp":            "ForsmearedPatJetsResUp",
+            }[mySrc]
+    except KeyError:
         raise Exception("Cannot set jet PU ID src for unknown jet src '%s' in module '%s'"%(jetSelection.src.value(),moduleName))
     # Add suffix
     if "Chs" in jetSelection.src.value():
