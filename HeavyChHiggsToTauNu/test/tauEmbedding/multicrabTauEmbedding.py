@@ -53,7 +53,6 @@ defaultVersions = [
 #    "v44_4_2_seed0",
 #    "v44_4_2_seed1"
 
-#    "v44_5_notrg0"
     "v44_5_notrg2"
 ]
 skimVersion = "v44_5"
