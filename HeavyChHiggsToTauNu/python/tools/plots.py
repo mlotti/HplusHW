@@ -1912,22 +1912,7 @@ class PlotDrawer:
                 h.setRootHisto(rebinned)
 
             rebinFunction = rebinList
-        elif rebinX is not None or rebinY is not None:
-            rex = 1
-            rey = 1
-            if rebinX is not None:
-                rex = rebinX
-            if rebinY is not None:
-                rey = rebinY
-            def rebinXY(h):
-                th = h.getRootHisto()
-                if isinstance(th, ROOT.TH2):
-                    th.Rebin2D(rex, rey)
-                else:
-                    th.Rebin(rex)
-
-            rebinFunction = rebinXY
-        elif rebinToWidthX is not None or rebinToWidthY is not None:
+        else:
             # In general (also if the original histogram has variable
             # bin widths) explicitly specifying the bin low edges is
             # the only way which works
@@ -1951,40 +1936,45 @@ class PlotDrawer:
             def rebinToWidth(h):
                 th = h.getRootHisto()
                 if not hasattr(th, "Rebin2D"):
+                    if rebinX is not None:
+                        th.Rebin(rebinX)
                     if rebinToWidthX is not None:
                         rebinToWidthTH1(h)
-                        return
-                # General TH2 case, this is somewhat fishy case ...
-                xmin = histograms.th1Xmin(th)
-                xmax = histograms.th1Xmax(th)
-                ymin = histograms.th2Ymin(th)
-                ymax = histograms.th2Ymax(th)
+                    return
 
-                intbinsx = th.GetNbinsX()
-                intbinsy = th.GetNbinsY()
+                rex = 1
+                rey = 1
+
+                if rebinX is not None:
+                    rex = rebinX
+                if rebinY is not None:
+                    rey = rebinY
                 if rebinToWidthX is not None:
+                    xmin = histograms.th1Xmin(th)
+                    xmax = histograms.th1Xmax(th)
+
                     nbinsx = (xmax-xmin)/rebinToWidthX
                     intbinsx = int(nbinsx+0.5)
-                else:
-                    nbinsx = intbinsx
+                    
+                    # Check that the requested binning makes sense
+                    remainderX = th.GetNbinsX() % intbinsx
+                    if remainderX != 0:
+                        print >>sys.stderr, "WARNING: Trying to rebin histogram '%s' of plot '%s' for X bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not divisor of the number of bins %d, remainder is %d" % (h.getName(), name, rebinToWidthX, xmin, xmax, nbinsx, th.GetNbinsX(), remainderX)
+                        return
+                    rex = th.GetNbinsX()/intbinsx
                 if rebinToWidthY is not None:
+                    ymin = histograms.th2Ymin(th)
+                    ymax = histograms.th2Ymax(th)
                     nbinsy = (ymax-ymin)/rebinToWidthY
                     intbinsy = int(nbinsy+0.5)
-                else:
-                    nbinsy = intbinsy
 
-                # Check that the requested binning makes sense
-                remainderX = th.GetNbinsX() % intbinsx
-                remainderY = th.GetNbinsY() % intbinsy
-                if remainderX != 0:
-                    print >>sys.stderr, "WARNING: Trying to rebin histogram '%s' of plot '%s' for X bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not divisor of the number of bins %d, remainder is %d" % (h.getName(), name, rebinToWidthX, xmin, xmax, nbinsx, th.GetNbinsX(), remainderX)
-                    return
-                if remainderY != 0:
-                    print >>sys.stderr, "WARNING: Trying to rebin histogram '%s' of plot '%s' for Y bin width %g, the Y axis minimum is %g, maximum %g => number of bins would be %g, which is not divisor of the number of bins %d, remainder is %d" % (h.getName(), name, rebinToWidthY, ymin, ymax, nbinsy, th.GetNbinsY(), remainderY)
-                    return
+                    # Check that the requested binning makes sense
+                    remainderY = th.GetNbinsY() % intbinsy
+                    if remainderY != 0:
+                        print >>sys.stderr, "WARNING: Trying to rebin histogram '%s' of plot '%s' for Y bin width %g, the Y axis minimum is %g, maximum %g => number of bins would be %g, which is not divisor of the number of bins %d, remainder is %d" % (h.getName(), name, rebinToWidthY, ymin, ymax, nbinsy, th.GetNbinsY(), remainderY)
+                        return
+                    rey = th.GetNbinsY()/intbinsy
 
-                rex = th.GetNbinsX()/intbinsx
-                rey = th.GetNbinsY()/intbinsy
                 th.Rebin2D(rex, rey)
 
             rebinFunction = rebinToWidth
