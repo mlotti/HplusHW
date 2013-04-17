@@ -427,9 +427,8 @@ class ConfigBuilder:
             process.outpath = cms.EndPath(process.out)
 
         # Set PU ID src for modules
-        import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as parameters
-        for module, name in zip(analysisModules, analysisNames):
-           parameters.setJetPUIdSrc(module.jetSelection, name)
+        for name in self.getAnalyzerModuleNames():
+            param.setJetPUIdSrc(getattr(process, name).jetSelection, name)
 
         # Check number of analyzers
         self._checkNumberOfAnalyzers()
