@@ -67,7 +67,7 @@ namespace HPlus {
       int daughterPdgId = 0;
       XYZTLorentzVector matchP4Visible;
       fTausGenMatch.addValue(gen);
-      if(gen) {
+      if(gen && std::abs(gen->pdgId()) == 15) {
         const reco::GenParticle *daughter = GenParticleTools::findTauDaughter(gen);
         if(daughter)
           daughterPdgId = daughter->pdgId();

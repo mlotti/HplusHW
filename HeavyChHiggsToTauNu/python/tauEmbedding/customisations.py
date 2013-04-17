@@ -451,34 +451,43 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
     filter = prefix+"Filter"
     counter = prefix
 
-    from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
-    m1 = cleanPatJets.clone(
-        src = "selectedPatJets"+PF2PATVersion, # FIXME: should use the smeared collection for MC
-        preselection = cms.string(jetSelection),
-        checkOverlaps = cms.PSet(
-            muons = cms.PSet(
-                src                 = cms.InputTag(tauEmbeddingMuons),
-                algorithm           = cms.string("byDeltaR"),
-                preselection        = cms.string(""),
-                deltaR              = cms.double(0.1),
-                checkRecoComponents = cms.bool(False),
-                pairCut             = cms.string(""),
-                requireNoOverlaps   = cms.bool(True),
-            )
-        )
+    # from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
+    # m1 = cleanPatJets.clone(
+    #     src = "selectedPatJets"+PF2PATVersion, # FIXME: should use the smeared collection for MC
+    #     preselection = cms.string(jetSelection),
+    #     checkOverlaps = cms.PSet(
+    #         muons = cms.PSet(
+    #             src                 = cms.InputTag(tauEmbeddingMuons),
+    #             algorithm           = cms.string("byDeltaR"),
+    #             preselection        = cms.string(""),
+    #             deltaR              = cms.double(0.1),
+    #             checkRecoComponents = cms.bool(False),
+    #             pairCut             = cms.string(""),
+    #             requireNoOverlaps   = cms.bool(True),
+    #         )
+    #     )
+    # )
+    # m1.src.setProcessName(skimProcessName)
+    # m2 = cms.EDFilter("CandViewCountFilter",
+    #     src = cms.InputTag(selector),
+    #     minNumber = cms.uint32(3)
+    # )
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChJetFilter_cfi as jetFilter_cfi
+    m2 = jetFilter_cfi.hPlusJetPtrSelectorFilter.clone(
+        tauSrc = tauEmbeddingMuons,
+        histogramAmbientLevel = "Systematics",
     )
-    m1.src.setProcessName(skimProcessName)
-    m2 = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag(selector),
-        minNumber = cms.uint32(3)
-    )
+    m2.jetSelection.src.setProcessName(skimProcessName)
+    m2.jetSelection.jetPileUpMVAValues.setProcessName(skimProcessName)
+    m2.jetSelection.jetPileUpIdFlag.setProcessName(skimProcessName)
     m3 = cms.EDProducer("EventCountProducer")
 
-    setattr(process, selector, m1)
+    #setattr(process, selector, m1)
     setattr(process, filter, m2)
     setattr(process, counter, m3)
 
-    sequence *= (m1 * m2 * m3)
+    #sequence *= (m1 * m2 * m3)
+    sequence *= (m2 * m3)
 
     return [counter]
 
@@ -1087,29 +1096,38 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     )
 
     # 3 jets
-    from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
-    cleanedJets = cleanPatJets.clone(
-        src = cms.InputTag(param.jetSelection.src.value()),
-        preselection = cms.string(jetSelection),
-        checkOverlaps = cms.PSet(
-            genTaus = genTauCleanPSet.clone()
-        )
+    # from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
+    # cleanedJets = cleanPatJets.clone(
+    #     src = cms.InputTag(param.jetSelection.src.value()),
+    #     preselection = cms.string(jetSelection),
+    #     checkOverlaps = cms.PSet(
+    #         genTaus = genTauCleanPSet.clone()
+    #     )
+    # )
+    # cleanedJetsName = prefix+"CleanedJets"
+    # setattr(process, cleanedJetsName, cleanedJets)
+
+    # cleanedJetsFilter = cms.EDFilter("CandViewCountFilter",
+    #     src = cms.InputTag(cleanedJetsName),
+    #     minNumber = cms.uint32(3)
+    # )
+    # setattr(process, cleanedJetsName+"Filter", cleanedJetsFilter)
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChJetFilter_cfi as jetFilter_cfi
+    cleanedJets = jetFilter_cfi.hPlusJetPtrSelectorFilter.clone(
+        tauSrc = param.tauSelection.src.value(),
+        allowEmptyTau = True,
+        histogramAmbientLevel = "Systematics",
     )
     cleanedJetsName = prefix+"CleanedJets"
     setattr(process, cleanedJetsName, cleanedJets)
-
-    cleanedJetsFilter = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag(cleanedJetsName),
-        minNumber = cms.uint32(3)
-    )
-    setattr(process, cleanedJetsName+"Filter", cleanedJetsFilter)
 
     cleanedJetsCount = counterPrototype.clone()
     setattr(process, cleanedJetsName+"Count", cleanedJetsCount)
     counters.append(cleanedJetsName+"Count")
 
     genTauSequence *= (
-        cleanedJets * cleanedJetsFilter * cleanedJetsCount 
+        cleanedJets * #cleanedJetsFilter *
+        cleanedJetsCount 
     )
     setattr(process, prefix+"Sequence", genTauSequence)
     sequence *= genTauSequence

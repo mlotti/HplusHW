@@ -15,6 +15,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.BRXSDatabaseInterface as BRXSDB
 
 tanbMax = 65
+#GeVUnit = "GeV/c^{2}"
+GeVUnit = "GeV"
 
 ROOT.gROOT.LoadMacro("LHCHiggsUtils.cc")
 
@@ -55,7 +57,6 @@ def main():
     for i,m in enumerate(masses):
         db.addExperimentalBRLimit(m,brs[i])
 
-
     graphs = {}
     obs = limits.observedGraph()
     graphs["obs"] = obs
@@ -84,7 +85,17 @@ def main():
 
     # Interpret in MSSM
     xVariable = "mHp"
-    selection = "mu==200&&Xt==2000&&m2==200"
+####    selection = "mu==200&&Xt==2000&&m2==200"
+    selection = "mu==200"
+    scenario = "MSSM m_{h}^{max}"
+#    scenario = "MSSM m_{h}^{max up}"
+#    scenario = "MSSM m_{h}^{mod+}"
+#    scenario = "MSSM m_{h}^{mod-}"
+#    scenario = "MSSM #tau-phobic"        #mu=500
+#    scenario = "MSSM light #tilde{#tau}" #mu=500
+#    scenario = "MSSM light #tilde{t}" #mu=350
+#    scenario = "MSSM low m_{H}"	  #mu=1700
+
 
     for key in graphs.keys():
 #        removeNotValid = not (key in ["exp1", "exp2"])
@@ -95,9 +106,13 @@ def main():
 
     graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
 #    graphs["Allowed"] = db.mhLimit("mHp",selection,"125.9+-0.6+-0.2")
-    graphs["Allowed"] = db.mhLimit("mHp",selection,"125.9+-3.0")
+    graphs["Allowed"] = db.mhLimit("mh","mHp",selection,"125.9+-3.0")
+#    graphs["Allowed"] = db.mhLimit("mHA","mHp",selection,"125.9+-3.0")
+
+    graphs["excluded"] = db.excluded(graphs["obs"],"ExcludedArea")
     
-    doPlot("limitsTanb_mh", graphs, limits, limit.mHplus())
+#    doPlot("limitsTanb_mh", graphs, limits, limit.mHplus(),scenario)
+    doPlot("limitsmHpTanb_"+rootfile.replace(".root",""), graphs, limits, "m_{H^{+}} ("+GeVUnit+")",scenario)
 
 #    xVariable = "mA"
 #    for key in graphs.keys():
@@ -105,77 +120,8 @@ def main():
 #    doPlot("limitsTanb_ma", graphs, limits, limit.mA())
 
 
-    sys.exit()
 
-#    # SUSY parameter variations (mu, Xt, m2, mgluino, mSUSY, read from the db)
-
-    # x-axis and variation parameter definitions, y-axis=tanb
-#    xVariable = "mu"
-#    xLabel  = "#mu [GeV/c^{2}]"
-    
-    xVariable = "Xt"
-    xLabel  = "X_{t} [GeV/c^{2}]"
-
-#    xVariable = "m2"
-#    xLabel  = "M_{2} [GeV/c^{2}]"
-
-#    xVariable = "mGluino"
-#    xLabel  = "m_{#tilde{g}} [GeV/c^{2}]"
-
-#    xVariable = "mSUSY"
-#    xLabel  = "M_{SUSY} [GeV/c^{2}]"
-
-    variationVariable = "m_{H^{#pm}}"
-    variationValues   = [100,120,140,150,155,160]
-#    variationValues   = [100,120,140,150,160]
-    variationSelection = "mHp==%s"
-                    
-    vgraphs = []
-    for v in variationValues:
-        selection = variationSelection%v
-        xarray,tanbarray = db.getTanbLimits(xVariable,selection)
-        vgraphs.append((ROOT.TGraph(len(xarray),array.array('d',xarray),array.array('d',tanbarray)),v))
-                                
-    def muStyle(h, markerStyle, lineStyle, color):
-        rh = h.getRootHisto()
-        rh.SetMarkerStyle(markerStyle)
-        rh.SetMarkerColor(color)
-        rh.SetLineStyle(lineStyle)
-        rh.SetLineColor(color)
-        rh.SetLineWidth(504)
-        rh.SetFillStyle(3005)
-
-    st = [lambda h: muStyle(h, 21, 1, 1),
-          lambda h: muStyle(h, 20, 1, 4),
-          lambda h: muStyle(h, 20, 2, 1),
-          lambda h: muStyle(h, 21, 2, 4),
-          lambda h: muStyle(h, 20, 3, 1),
-          lambda h: muStyle(h, 21, 3, 4)]
-    
-    doPlotMu("limitsTanb_"+xVariable, vgraphs, st, limits, xLabel, variationVariable)
-
-    
-def doPlot(name, graphs, limits, xlabel):
-    obs = graphs["obs"]
-    excluded = ROOT.TGraph(obs)
-    excluded.SetName("ExcludedArea")
-    excluded.SetFillColor(ROOT.kGray)
-#    excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], tanbMax)
-#    excluded.SetPoint(excluded.GetN(), obs.GetX()[0], tanbMax)
-    excluded.SetPoint(excluded.GetN(), 0, 1)
-    excluded.SetPoint(excluded.GetN(), 0, tanbMax)
-    excluded.SetPoint(excluded.GetN(), obs.GetX()[0], tanbMax)
-    excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
-    """            
-    excluded.SetPoint(excluded.GetN(), obs.GetX()[0], tanbMax)
-    excluded.SetPoint(excluded.GetN(), 0, tanbMax)
-    excluded.SetPoint(excluded.GetN(), 0, 1)
-    excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], 1)
-    """
-    excluded.SetFillColor(ROOT.kGray)
-    excluded.SetFillStyle(3354)
-    excluded.SetLineWidth(0)
-    excluded.SetLineColor(ROOT.kWhite)
+def doPlot(name, graphs, limits, xlabel, scenario):
 
     expected = graphs["exp"]
     expected.SetLineStyle(2)
@@ -188,10 +134,11 @@ def doPlot(name, graphs, limits, xlabel):
             histograms.HistoGraph(graphs["obs"], "Observed", drawStyle="PL", legendStyle="lp"),
             histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
             histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L"),
-            histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(graphs["excluded"], "Excluded", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
             #histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
-            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{h} = 125.9#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
+####            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{h} = 125.9#pm3.0 "+GeVUnit, drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{H} = 125.9#pm3.0 "+GeVUnit, drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
             #histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
@@ -228,7 +175,8 @@ def doPlot(name, graphs, limits, xlabel):
     x = 0.2
     histograms.addText(x, 0.9, limit.process, size=size)
     histograms.addText(x, 0.863, limits.getFinalstateText(), size=size)
-    histograms.addText(x, 0.815, "MSSM m_{h}^{max}", size=size)
+####    histograms.addText(x, 0.815, "MSSM m_{h}^{max}", size=size)
+    histograms.addText(x, 0.815,scenario, size=size)
 #    histograms.addText(x, 0.775, limit.BRassumption, size=size)
 #    histograms.addText(x, 0.735, "#mu=%d %s"%(mu, limit.massUnit()), size=size)
     histograms.addText(0.7, 0.23, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
@@ -240,51 +188,6 @@ def doPlot(name, graphs, limits, xlabel):
     histograms.addText(x, 0.43, "CMS HIG-12-052", size=size)
 #    histograms.addText(x, 0.38, "JHEP07(2012)143", size=size)
                 
-    plot.save()
-
-def doPlotMu(name, graphs, styleList, limits, xlabel, legendVariable):
-    objs = []
-    ll = {}
-    for gr, mu in graphs:
-        objs.append(histograms.HistoGraph(gr, "Obs%d"%mu, drawStyle="LP", legendStyle="lp"))
-        ll["Obs%d"%mu] = "Observed, "+legendVariable+"=%d %s" % (mu, limit.massUnit())
-        N = gr.GetN()
-        for i in range(0,N):
-            j = N - 1 - i
-            if gr.GetY()[j] == 1:
-                gr.RemovePoint(j)
-
-    plot = plots.PlotBase(objs)
-    plot.histoMgr.forEachHisto(styles.Generator(styleList))
-    plot.histoMgr.setHistoLegendLabelMany(ll)
-    plot.setLegend(histograms.moveLegend(histograms.createLegend(0.57, 0.155, 0.87, 0.355), dx=-0.1))
-
-    plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax})
-    plot.frame.GetXaxis().SetTitle(xlabel)
-    plot.frame.GetXaxis().SetLabelSize(20)
-    plot.frame.GetYaxis().SetTitle(limit.tanblimit)
-
-    plot.draw()
-
-#    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
-
-    size = 20
-    x = 0.2
-    histograms.addText(x, 0.9, limit.process, size=size)
-    histograms.addText(x, 0.863, limits.getFinalstateText(), size=size)
-    histograms.addText(x, 0.815, "MSSM m_{h}^{max}", size=size)
-#    histograms.addText(x, 0.775, limit.BRassumption, size=size)
-
-    histograms.addText(x, 0.72, "FeynHiggs 2.9.4", size=size)
-    histograms.addText(x, 0.65, "Derived from", size=size)
-    histograms.addText(x, 0.6, "CMS HIG-11-019", size=size)
-    histograms.addText(x, 0.55, "JHEP07(2012)143", size=size)
-    
-    #Adding a LHC label:
-    ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
-                    
     plot.save()
 
 

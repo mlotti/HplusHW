@@ -23,9 +23,9 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FakeMETVeto");
     
-    hClosestDeltaPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
-    hClosestDeltaPhiToJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected jets);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
-    hClosestDeltaPhiToTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Closest_DeltaPhi_of_MET_and_taus", "min DeltaPhi(MET,selected taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
+    hClosestDeltaPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
+    hClosestDeltaPhiToJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected jets);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
+    hClosestDeltaPhiToTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Closest_DeltaPhi_of_MET_and_taus", "min DeltaPhi(MET,selected taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
     
     hClosestDeltaPhiZoom = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus_Zoom", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 2", 25, 0., 50.0);
     hClosestDeltaPhiToJetsZoom = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Closest_DeltaPhi_of_MET_and_selected_jets_Zoom", "min DeltaPhi(MET,selected jets);min(#Delta#phi(MET,jets)), degrees;N / 2", 25, 0., 50.0);

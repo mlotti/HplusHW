@@ -71,23 +71,43 @@ namespace HPlus {
 
     void setHltTaus(const pat::TriggerObjectRefVector& hltTaus);
     void setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
-
+    
+    void setDiJetMassesNoTau(std::vector<float> DiJetMassesNoTau){     
+      // vDiJetMassesNoTau.clear();
+      vDiJetMassesNoTau = DiJetMassesNoTau;
+    }
     void setAlphaT(double alphaT) { fAlphaT = alphaT; }
     void setTauIsFake(bool tauIsFake) { bTauIsFake = tauIsFake; }
     void setMomentumTensorEigenvalues(double QOne, double QTwo, double QThree) { 
-      fQOne   = QOne; 
-      fQTwo   = QTwo; 
-      fQThree = QThree; 
+      fMomentumTensor_QOne   = QOne; 
+      fMomentumTensor_QTwo   = QTwo; 
+      fMomentumTensor_QThree = QThree; 
+    }
+    void setSpherocityTensorEigenvalues(double QOne, double QTwo, double QThree) { 
+      fSpherocityTensor_QOne   = QOne; 
+      fSpherocityTensor_QTwo   = QTwo; 
+      fSpherocityTensor_QThree = QThree; 
     }
     void setSphericity(double sphericity) { fSphericity = sphericity; }
     void setAplanarity(double aplanarity) { fAplanarity = aplanarity; }
     void setPlanarity(double planarity) { fPlanarity = planarity; }
     void setCircularity(double circularity) { fCircularity = circularity; }
+    void setCparameter(double Cparameter) { fCparameter = Cparameter; }
+    void setDparameter(double Dparameter) { fDparameter = Dparameter; }
+    void setJetThrust(double jetThrust) { fJetThrust = jetThrust; }
     void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
     void setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
+    void setSelJetsInclTau(const edm::PtrVector<pat::Jet>& selJetsInclTau);
     void setMHT(const XYZTLorentzVector& MHT) { fMHT = MHT; }
     void setMHTAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
     void setMHTSelJets(const edm::PtrVector<pat::Jet>& jets);
+    // Full H+ mass
+    void setHplusMassDiscriminant(double hplusMassDiscriminant) { fHplusMassDiscriminant = hplusMassDiscriminant; }
+    void setHplusMassHiggsMass(double higgsMassSolution) { fHplusMassSolution = higgsMassSolution; }
+    void setHplusMassTopMass(double hplusMassTopMassSolution) { fHplusMassTopMassSolution = hplusMassTopMassSolution; }
+    void setHplusMassSelectedNeutrinoPzSolution(double hplusMassSelectedNeutrinoPzSolution) { fHplusMassSelectedNeutrinoPzSolution = hplusMassSelectedNeutrinoPzSolution; }
+    void setHplusMassNeutrinoPtSolution(double hplusMassSelectedNeutrinoPtSolution) { fHplusMassSelectedNeutrinoPtSolution =  hplusMassSelectedNeutrinoPtSolution; }
+    void setHplusMassMCNeutrinoPz(double hplusMassMCNeutrinoPz) {  fHplusMassMCNeutrinoPz = hplusMassMCNeutrinoPz; }
 
     void fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau,
               const edm::PtrVector<pat::Jet>& jets);
@@ -145,6 +165,7 @@ namespace HPlus {
 
     std::vector<XYZTLorentzVector> fJets;
     std::vector<XYZTLorentzVector> fAllIdentifiedJets;
+    std::vector<XYZTLorentzVector> fSelJetsInclTau;
     std::vector<double> fJetsBtags;
     std::vector<double> fJetsChf;
     std::vector<double> fJetsNhf;
@@ -237,21 +258,35 @@ namespace HPlus {
     XYZTLorentzVector fTop;
 
     double fAlphaT;
-    double fQOne;
-    double fQTwo;
-    double fQThree;
+    double fMomentumTensor_QOne;
+    double fMomentumTensor_QTwo;
+    double fMomentumTensor_QThree;
     double fSphericity;
     double fAplanarity;
     double fPlanarity;
     double fCircularity;
+    double fSpherocityTensor_QOne;
+    double fSpherocityTensor_QTwo;
+    double fSpherocityTensor_QThree;
+    double fCparameter;
+    double fDparameter;
+    double fJetThrust;
     bool bTauIsFake;
-
+    std::vector<float> vDiJetMassesNoTau;
     double fDeltaPhi;
 
     bool fPassedBTagging;
 
     // Gen level stuff
     XYZTLorentzVector fGenMet;
+
+    // Full H+ mass
+    double fHplusMassDiscriminant;
+    double fHplusMassSolution;
+    double fHplusMassTopMassSolution;
+    double fHplusMassSelectedNeutrinoPzSolution;
+    double fHplusMassSelectedNeutrinoPtSolution;
+    double fHplusMassMCNeutrinoPz;
 
     // Tau embedding stuff
     std::auto_ptr<TreeMuonBranches> fTauEmbeddingMuon;

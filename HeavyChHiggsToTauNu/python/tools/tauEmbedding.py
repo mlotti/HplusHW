@@ -140,7 +140,7 @@ def decayModeCheckCustomize(h):
     n = 16
     if hasattr(h, "getFrame1"):
         h.getFrame1().GetXaxis().SetNdivisions(n)
-        h.getFrame1().GetXaxis().SetNdivisions(n)
+        h.getFrame2().GetXaxis().SetNdivisions(n)
     else:
         h.getFrame().GetXaxis().SetNdivisions(n)
 
@@ -207,7 +207,7 @@ def scaleNormalization(obj):
 
     #scaleMCfromWmunu(obj) # data/MC trigger correction
     scaleMuTriggerIdEff(obj)
-    scaleWmuFraction(obj)
+#    scaleWmuFraction(obj)
 
 ## Apply muon trigger and ID efficiency normalization
 #
@@ -266,6 +266,9 @@ def scaleMuTriggerIdEff(obj):
     scaleMap = scaleMap41
 #    scaleMap = scaleMap40
 #    scaleMap = scaleMapOld
+
+    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffs
+    scaleMap = {"MC": (0.955+0.9519)/2}
 
     # Transform to inverse
     for key in scaleMap.keys():

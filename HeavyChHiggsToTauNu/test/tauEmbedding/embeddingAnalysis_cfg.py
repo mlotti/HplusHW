@@ -41,7 +41,9 @@ process.source = cms.Source('PoolSource',
 #         "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed0/2dedf078d8faded30b2dddce6fe8cdec/embedded_492_1_xUz.root",
 #         "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed0/2dedf078d8faded30b2dddce6fe8cdec/embedded_493_1_g1J.root",
         # should have lumi 336953
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed0/2dedf078d8faded30b2dddce6fe8cdec/embedded_955_1_PMC.root"
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed0/2dedf078d8faded30b2dddce6fe8cdec/embedded_955_1_PMC.root"
+
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5c/2c4d260f86ba3e9db4d6ef0e80af6278/embedded_69_1_35J.root"
     ),
     inputCommands = cms.untracked.vstring(
         "keep *",
@@ -259,7 +261,7 @@ process.genTausOriginal = cms.EDFilter("GenParticleSelector",
 process.commonSequence *= process.genTausOriginal
 
 # FIXME
-lookOriginalGenTaus = False
+lookOriginalGenTaus = True
 if lookOriginalGenTaus:
     # Temporary, for ttbar only
     process.genTaus = cms.EDFilter("GenParticleSelector",
@@ -269,16 +271,62 @@ if lookOriginalGenTaus:
     process.genTausVisible = cms.EDProducer("HPlusGenVisibleTauComputer",
         src = cms.InputTag("genTaus")
     )
-    process.patTausGenMatched= cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
+    process.patTausNotYetSelected = cms.EDProducer("PATTauCleaner",
         src = cms.InputTag("selectedPatTausHpsPFTau"),
+        preselection = cms.string(""),
+        checkOverlaps = cms.PSet(
+            embeddedTaus = cms.PSet(
+                src       = cms.InputTag(taus.value()),
+                algorithm = cms.string("byDeltaR"),
+                preselection        = cms.string(""),
+                deltaR              = cms.double(0.1),
+                checkRecoComponents = cms.bool(False),
+                pairCut             = cms.string(""),
+                requireNoOverlaps   = cms.bool(True),
+            ),
+        ),
+        finalCut = cms.string("")
+    )
+    process.patTausGenMatched= cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
+#        src = cms.InputTag("selectedPatTausHpsPFTau"),
+        src = cms.InputTag("patTausNotYetSelected"),
         refSrc = cms.InputTag("genTausVisible"),
         maxDeltaR = cms.double(0.5),
     )
     process.mergedPatTaus = cms.EDProducer("HPlusPATTauMerger",
         src = cms.VInputTag(taus.value(), "patTausGenMatched")
     )
-    process.commonSequence *= (process.genTaus * process.genTausVisible * process.patTausGenMatched * process.mergedPatTaus)
+    process.commonSequence *= (process.genTaus * process.genTausVisible * process.patTausNotYetSelected * process.patTausGenMatched * process.mergedPatTaus)
     taus = cms.InputTag("mergedPatTaus")
+
+
+    process.selectedPrimaryVertexAllEvents = cms.EDProducer("EventCountProducer")
+    process.selectedPrimaryVertexCountFilter = cms.EDFilter("VertexCountFilter",
+        src = cms.InputTag("selectedPrimaryVertex"),
+        minNumber = cms.uint32(1),
+        maxNumber = cms.uint32(999)
+    )
+    process.selectedPrimaryVertexSelected = cms.EDProducer("EventCountProducer")
+    process.commonSequence *= (process.selectedPrimaryVertexAllEvents * process.selectedPrimaryVertexCountFilter * process.selectedPrimaryVertexSelected)
+    additionalCounters.extend([
+            "selectedPrimaryVertexAllEvents",
+            "selectedPrimaryVertexSelected",
+            ])
+
+    process.mostLikelyMergedTau = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
+        eventCounter = param.eventCounter.clone(),
+        tauSelection = param.tauSelection.clone(),
+#        vertexSrc = cms.InputTag(param.primaryVertexSelection.selectedSrc.value()),
+        vertexSrc = cms.InputTag("selectedPrimaryVertex"),
+        histogramAmbientLevel = cms.untracked.string("Systematics"),
+    )
+    process.commonSequence.remove(process.muonFinalSelectionJetSelectionFilter)
+    process.commonSequence.remove(process.muonFinalSelectionJetSelection)
+    process.muonFinalSelectionJetSelectionFilter.tauSrc = "mostLikelyMergedTau"
+    process.muonFinalSelectionJetSelectionFilter.allowEmptyTau = True
+    process.commonSequence *= (process.mostLikelyMergedTau * process.muonFinalSelectionJetSelectionFilter * process.muonFinalSelectionJetSelection)
+    del additionalCounters[additionalCounters.index("muonFinalSelectionJetSelection")]
+    additionalCounters.append("muonFinalSelectionJetSelection")
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
@@ -315,8 +363,10 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = analysisConfig.tauFunctions.clone(),
 
+    jetSrc = cms.InputTag("muonFinalSelectionJetSelectionFilter"),
 #    jetSrc = cms.InputTag("selectedPatJets"),
-#    jetFunctions = analysisConfig.jetFunctions.clone(),
+    jetFunctions = analysisConfig.jetFunctions.clone(),
+    jetPileupIDs = analysisConfig.jetPileupIDs.clone(),
 
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),
@@ -330,7 +380,11 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     doubles = cms.PSet(),
     bools = cms.PSet()
 )
-
+for name in ntuple.jetPileupIDs.parameterNames_():
+    pset = ntuple.jetPileupIDs.getParameter(name)
+    for tagname in pset.parameterNames_():
+        tag = pset.getParameter(tagname)
+        tag.setProcessName(tauEmbeddingCustomisations.skimProcessName)
 
 if False and dataVersion.isMC(): # FIXME
     ntuple.mets.genMetTrueEmbedded_p4 = cms.InputTag("genMetTrueEmbedded")

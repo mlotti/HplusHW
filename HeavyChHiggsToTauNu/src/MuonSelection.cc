@@ -20,7 +20,9 @@ namespace HPlus {
   MuonSelection::Data::Data():
     fSelectedMuonPt(0.),
     fSelectedMuonEta(0.),
-    fSelectedMuonPtBeforePtCut(0.) {}
+    fSelectedMuonPtBeforePtCut(0.),
+    fHasMuonFromCjetStatus(false),
+    fHasMuonFromBjetStatus(false) {}
   MuonSelection::Data::~Data() {}
 
   MuonSelection::MuonSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):

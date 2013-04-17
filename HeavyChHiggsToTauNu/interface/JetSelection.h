@@ -12,6 +12,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeadECALCells.h"
+#include "CMGTools/External/interface/PileupJetIdentifier.h" // Will be at DataFormats/JetReco/interface from 6_x_y
 
 #include "DataFormats/Math/interface/LorentzVector.h"
 typedef math::XYZTLorentzVector LorentzVector;
@@ -47,6 +48,7 @@ namespace HPlus {
       const edm::PtrVector<pat::Jet>& getAllJets() const { return fAllJets; }
       const edm::PtrVector<pat::Jet>& getAllIdentifiedJets() const { return fAllIdentifiedJets; }
       const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fSelectedJets; }
+      const edm::PtrVector<pat::Jet>& getSelectedJetsIncludingTau() const { return fSelectedJetsIncludingTau; }
       const edm::PtrVector<pat::Jet>& getSelectedJetsPt20() const { return fSelectedJetsPt20; }
       const int getHadronicJetCount() const { return iNHadronicJets; }
       const int getHadronicJetCountInFwdDir() const { return iNHadronicJetsInFwdDir; }
@@ -70,6 +72,7 @@ namespace HPlus {
       const double getDeltaPhiMHTTau() const { return fDeltaPhiMHTTau; }
       // Jet corresponding to tau
       const edm::Ptr<pat::Jet> getReferenceJetToTau() const { return fReferenceJetToTau; }
+      const double getReferenceJetToTauMatchDeltaR() const { return fReferenceJetToTauDeltaR; }
       const int getReferenceJetToTauPartonFlavour() const;
       const double getReferenceJetToTauDeltaPt() const { return fReferenceJetToTauDeltaPt; }
       const double getReferenceJetToTauPtRatio() const { return fReferenceJetToTauPtRatio; }
@@ -83,6 +86,7 @@ namespace HPlus {
       edm::PtrVector<pat::Jet> fAllIdentifiedJets;
       // Selected jets
       edm::PtrVector<pat::Jet> fSelectedJets;
+      edm::PtrVector<pat::Jet> fSelectedJetsIncludingTau;
       edm::PtrVector<pat::Jet> fSelectedJetsPt20;
       // Not Selected jets
       edm::PtrVector<pat::Jet> fNotSelectedJets;
@@ -107,6 +111,7 @@ namespace HPlus {
       double fDeltaPhiMHTTau;
       // Jet corresponding to tau
       edm::Ptr<pat::Jet> fReferenceJetToTau;
+      double fReferenceJetToTauDeltaR;
       double fReferenceJetToTauDeltaPt;
       double fReferenceJetToTauPtRatio;
     };
@@ -116,12 +121,12 @@ namespace HPlus {
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
     // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices = 1);
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices = 1);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices = 1);
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices);
-    bool passBetaCut(const edm::Ptr<pat::Jet>& jet, const edm::Event& iEvent, int nVertices);
     void obtainReferenceJetToTau(const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::Candidate>& tau, JetSelection::Data& output);
     void calculateMHT(JetSelection::Data& output, const edm::Ptr<reco::Candidate>& tau);
     void plotSelectedJetHistograms(const edm::Ptr<pat::Jet>& jet, const bool isRealData);
@@ -140,11 +145,12 @@ namespace HPlus {
     const double fJetIdMinChargedHadronEnergyFraction;
     const uint32_t fJetIdMinChargedMultiplicity;
     const double fJetIdMaxChargedEMEnergyFraction;
-    DirectionalCut fBetaCut;
-    std::string fBetaSrc;
+    PileupJetIdentifier::Id fJetPileUpWorkingPoint;
+    edm::InputTag fJetPileUpMVAValuesSrc;
+    edm::InputTag fJetPileUpIdFlagSrc;
+    // Experimental input parameters
     const bool fApplyVetoForDeadECALCells;
     const double fDeadECALCellsVetoDeltaR;
-
     DeadECALCells fDeadECALCells;
 
     // Counters
@@ -152,14 +158,14 @@ namespace HPlus {
     Count fDeadECALCellVetoCount;
     Count fCleanCutCount;
     Count fJetIdCount;
-    Count fBetaCutCount;
+    Count fJetPUIDCount;
     Count fEMfractionCutCount;
     Count fEtaCutCount;
     Count fPtCutCount;
     Count fAllSubCount;
     Count fEMfraction08CutCount;
     Count fEMfraction07CutCount;
-    Count fEventKilledByBetaCutCount;
+    Count fEventKilledByJetPUIDCount;
     Count fCleanCutSubCount;
     Count fneutralHadronEnergyFractionCutSubCount;
     Count fneutralEmEnergyFractionCutSubCount;
@@ -169,7 +175,7 @@ namespace HPlus {
     Count fchargedEmEnergyFractionCutSubCount;
     Count fJetIdSubCount;
     Count fEMfractionCutSubCount;
-    Count fBetaCutSubCount;
+    Count fJetPUIDSubCount;
     Count fEtaCutSubCount;
     Count fPtCutSubCount;
     Count fJetToTauReferenceJetNotIdentifiedCount;
@@ -202,18 +208,7 @@ namespace HPlus {
     WrappedTH1 *hMinEtaOfSelectedJetToGap;
 
     // PU analysis
-    WrappedTH1 *hBetaGenuine;
-    WrappedTH1 *hBetaStarGenuine;
-    WrappedTH1 *hMeanDRgenuine;
-    WrappedTH1 *hBetaFake;
-    WrappedTH1 *hBetaStarFake;
-    WrappedTH1 *hMeanDRfake;
-    WrappedTH2 *hBetaVsPUgenuine;
-    WrappedTH2 *hBetaStarVsPUgenuine;
-    WrappedTH2 *hMeanDRVsPUgenuine;
-    WrappedTH2 *hBetaVsPUfake;
-    WrappedTH2 *hBetaStarVsPUfake;
-    WrappedTH2 *hMeanDRVsPUfake;
+    WrappedTH1 *hJetPUIDMvaResult;
 
     // Histograms for excluded jets (i.e. matching in DeltaR to tau jet)
     WrappedTH1 *hPtExcludedJets;

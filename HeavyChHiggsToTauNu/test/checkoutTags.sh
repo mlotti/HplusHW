@@ -68,7 +68,10 @@ set -e
 # 28.3.2012/S.Lehti       CMSSW_4_4_4 Moved master to 444/ 444 tags
 # 13.9.2012/M.Kortelainen CMSSW_4_4_4 Updated PAT and tau tags
 # 17.9.2012/M.Kortelainen CMSSW_4_4_4 Cut-based electron ID tag
-
+# 31.1.2013/M.Kortelainen CMSSW_4_4_5 Updated PAT, tau, and lumi tags
+# 5.2.2013/M.Kortelainen CMSSW_4_4_5 Backported runMEtUncertainties, technical fix to pat::Jet
+# 19.3.2013/LAW CMSSW_4_4_5 Added jet PU ID
+# 27.3.2013/M.Kortelainen CMSSW_4_4_5 Fixed re-running of the script
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -83,23 +86,32 @@ eval $(scram runtime -sh)
 # Tau
 addpkg DataFormats/TauReco        CMSSW_5_2_4 # yes, this is correct
 addpkg RecoTauTag/TauTagTools     CMSSW_5_2_4
-addpkg RecoTauTag/RecoTau         V01-04-17 #equivalent to 04-14
-addpkg RecoTauTag/Configuration   V01-04-03
-addpkg CondFormats/EgammaObjects  V00-04-01
+addpkg RecoTauTag/RecoTau         V01-04-23-4XX-00 # HCP + new discriminants
+addpkg RecoTauTag/Configuration   V01-04-10-4XX 
+addpkg CondFormats/EgammaObjects  V00-04-00
+
 addpkg PhysicsTools/IsolationAlgos # You need to recompile PAT packages which depend on DataFormats/TauReco
 # PAT
-addpkg DataFormats/PatCandidates  V06-05-01
-addpkg PhysicsTools/PatAlgos      V08-07-47
-addpkg PhysicsTools/PatUtils      V03-09-18-03
+addpkg DataFormats/PatCandidates V06-04-38
+addpkg PhysicsTools/PatAlgos     V08-07-51
+#addpkg PhysicsTools/PatUtils      V03-09-18-03 # checkout patUtils below
 addpkg CommonTools/ParticleFlow   V00-03-05-10
 addpkg FWCore/GuiBrowsers         V00-00-60
 ##### New tau discriminators, electron MVA discriminator
-cvs up -r 1.53 PhysicsTools/PatAlgos/python/tools/tauTools.py
+cvs up -r 1.52.10.4 PhysicsTools/PatAlgos/python/tools/tauTools.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 ####addpkg RecoJets/Configuration     V02-04-17
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
 addpkg PhysicsTools/Utilities     V08-03-17
+
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
+# https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1417.html
+cvs co -r V00-03-01 -d CMGTools/External UserCode/CMG/CMGTools/External
+rm CMGTools/External/src/PileupJetIdAlgoSubStructure.cc
+rm CMGTools/External/interface/PileupJetIdAlgoSubstructure.h
+cvs up -r V00-02-10 CMGTools/External/src/classes.h
+cvs up -r V00-02-10 CMGTools/External/src/classes_def.xml
 
 # btagging scale factors
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagPerformanceDBV2
@@ -111,9 +123,17 @@ addpkg JetMETCorrections/Type1MET V04-05-08
 addpkg PhysicsTools/PatUtils      b4_2_X_cvMEtCorr_13Feb2012_JEC11V12 # this appears to only add stuff on top of V03-09-18-02 in 444 release
 addpkg DataFormats/METReco        V03-03-07
 
+##### back-port of post-fixedrunMEtUncertainties()
+cvs up -C PhysicsTools/PatUtils/python/tools/metUncertaintyTools.py
+patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PatUtils_metUncertaintyTools_b4_2_X_cvMEtCorr_13Feb2012_JEC11V12.patch
+cvs up -j 1.19 -j 1.20 PhysicsTools/PatAlgos/python/tools/helpers.py
+
+# Backport technical change in pat::Jet to reduce space
+cvs up -j 1.83 -j 1.84 DataFormats/PatCandidates/src/classes_def.xml
+
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
-addpkg RecoLuminosity/LumiDB      V03-04-02
+addpkg RecoLuminosity/LumiDB      V04-01-09
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/EgammaCutBasedIdentification

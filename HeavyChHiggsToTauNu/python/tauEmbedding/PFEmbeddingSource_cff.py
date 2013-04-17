@@ -13,7 +13,13 @@ TauolaPolar = cms.PSet(
 ### Tighten the muon selection (but no isolation yet)
 tightenedMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("tightMuons"),
-    cut = cms.string("pt() > 40 && abs(eta()) < 2.1")
+    cut = cms.string(
+        "pt() > 40 && abs(eta()) < 2.1"
+        "&& numberOfMatchedStations() > 1"
+        "&& abs(dB()) < 0.2" 
+        "&& innerTrack().hitPattern().numberOfValidPixelHits() > 0"
+        "&& track().hitPattern().trackerLayersWithMeasurement() > 8"
+    )
 )
 tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("tightenedMuons"),

@@ -295,10 +295,10 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
         elif ndigis <= -1:
             format = ".%df" % (abs(ndigis)+1)
             format = "%"+format
-        lumiStr += format % (lumi/1000)
+        lumiStr += format % (lumiInFb)
 
     lumiStr += " "+unit
-    
+
     addText(x, y, lumiStr, textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
@@ -538,15 +538,23 @@ def sumRootHistos(rootHistos, postfix="_sum"):
     return h
 
 def th1Xmin(th1):
+    if th1 is None:
+        return None
     return th1.GetXaxis().GetBinLowEdge(th1.GetXaxis().GetFirst())
 
 def th1Xmax(th1):
+    if th1 is None:
+        return None
     return th1.GetXaxis().GetBinUpEdge(th1.GetXaxis().GetLast())
 
 def th2Ymin(th2):
+    if th2 is None:
+        return None
     return th2.GetYaxis().GetBinLowEdge(th2.GetYaxis().GetFirst())
 
 def th2Ymax(th2):
+    if th2 is None:
+        return None
     return th2.GetYaxis().GetBinUpEdge(th2.GetYaxis().GetLast())
 
 ## Helper function for lessThan/greaterThan argument handling
@@ -642,6 +650,10 @@ def th1ApplyBin(th1, function):
     for bin in xrange(0, th1.GetNbinsX()+2):
         th1.SetBinContent(bin, function(th1.GetBinContent(bin)))
 
+def th1ApplyBinError(th1, function):
+    for bin in xrange(0, th1.GetNbinsX()+2):
+        th1.SetBinError(bin, function(th1.GetBinError(bin)))
+                
 ## Convert TH1 distribution to TH1 of efficiency as a function of cut value
 #
 # \param hdist  TH1 distribution
@@ -650,6 +662,7 @@ def dist2eff(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
     th1ApplyBin(hpass, lambda value: value/total)
+    th1ApplyBinError(hpass, lambda value: math.sqrt(value)/total)
     return hpass
 
 ## Convert TH1 distribution to TH1 of 1-efficiency as a function of cut value
@@ -804,9 +817,22 @@ class CanvasFrame:
 
         _boundsArgs(histos, opts)
 
+        # Check if the first histogram has x axis bin labels
+        rootHisto = histos[0].getRootHisto()
+        hasBinLabels = isinstance(rootHisto, ROOT.TH1) and len(rootHisto.GetXaxis().GetBinLabel(1)) > 0
+        if hasBinLabels:
+            binWidth = histos[0].getBinWidth(1)
+            opts["nbinsx"] = int((opts["xmax"]-opts["xmin"])/binWidth +0.5)
+
         self.frame = _drawFrame(self.canvas, opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"], opts.get("nbins", None), opts.get("nbinsx", None), opts.get("nbinsy", None))
         self.frame.GetXaxis().SetTitle(histos[0].getXtitle())
         self.frame.GetYaxis().SetTitle(histos[0].getYtitle())
+
+        # Copy the bin labels
+        if hasBinLabels:
+            firstBin = rootHisto.FindFixBin(opts["xmin"])
+            for i in xrange(0, opts["nbinsx"]):
+                self.frame.GetXaxis().SetBinLabel(i+1, rootHisto.GetXaxis().GetBinLabel(firstBin+i))
 
     ## \var canvas
     # TCanvas for the canvas
@@ -904,13 +930,14 @@ class CanvasFrameTwo:
         opts2 = {}
         opts2.update(kwargs.get("opts2", {}))
 
-        if "xmin" in opts2 or "xmax" in opts2 or "nbins" in opts2:
-            raise Exception("No 'xmin', 'xmax', or 'nbins' allowed in opts2, values are taken from opts/opts1")
+        if "xmin" in opts2 or "xmax" in opts2 or "nbins" in opts2 or "nbinsx" in opts2:
+            raise Exception("No 'xmin', 'xmax', 'nbins', or 'nbinsy' allowed in opts2, values are taken from opts/opts1")
 
         _boundsArgs(histos1, opts1)
         opts2["xmin"] = opts1["xmin"]
         opts2["xmax"] = opts1["xmax"]
         opts2["nbins"] = opts1.get("nbins", None)
+        opts2["nbinsx"] = opts1.get("nbinsx", None)
 #        _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
         _boundsArgs(histos2, opts2) # HistoWrapper not needed anymore? Ratio is Histo
 
@@ -942,8 +969,15 @@ class CanvasFrameTwo:
         #xoffsetFactor = canvasFactor*2
         xoffsetFactor = 0.5*canvasFactor/(canvasFactor-1) * 1.3
 
+        # Check if the first histogram has x axis bin labels
+        rootHisto = histos1[0].getRootHisto()
+        hasBinLabels = isinstance(rootHisto, ROOT.TH1) and len(rootHisto.GetXaxis().GetBinLabel(1)) > 0
+        if hasBinLabels:
+            binWidth = histos1[0].getBinWidth(1)
+            opts1["nbinsx"] = int((opts1["xmax"]-opts1["xmin"])/binWidth +0.5)
+            opts2["nbinsx"] = opts1["nbinsx"]
 
-        self.frame1 = _drawFrame(self.pad1, opts1["xmin"], opts1["ymin"], opts1["xmax"], opts1["ymax"], opts1.get("nbins", None))
+        self.frame1 = _drawFrame(self.pad1, opts1["xmin"], opts1["ymin"], opts1["xmax"], opts1["ymax"], opts1.get("nbins", None), opts1.get("nbinsx", None), opts1.get("nbinsy", None))
         (labelSize, titleSize) = (self.frame1.GetXaxis().GetLabelSize(), self.frame1.GetXaxis().GetTitleSize())
         self.frame1.GetXaxis().SetLabelSize(0)
         self.frame1.GetXaxis().SetTitleSize(0)
@@ -951,7 +985,7 @@ class CanvasFrameTwo:
         self.frame1.GetYaxis().SetTitleOffset(self.frame1.GetYaxis().GetTitleOffset()*yoffsetFactor)
 
         self.canvas.cd(2)
-        self.frame2 = _drawFrame(self.pad2, opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"], opts2.get("nbins", None))
+        self.frame2 = _drawFrame(self.pad2, opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"], opts2.get("nbins", None), opts2.get("nbinsx", None))
         self.frame2.GetXaxis().SetTitle(histos1[0].getXtitle())
         self.frame2.GetYaxis().SetTitle(histos2[0].getYtitle())
         self.frame2.GetYaxis().SetTitleOffset(self.frame2.GetYaxis().GetTitleOffset()*yoffsetFactor)
@@ -961,6 +995,12 @@ class CanvasFrameTwo:
         self.canvas.cd(1)
         self.frame = FrameWrapper(self.pad1, self.frame1, self.pad2, self.frame2)
         self.pad = self.pad1
+
+        # Copy the bin labels
+        if hasBinLabels:
+            firstBin = rootHisto.FindFixBin(opts1["xmin"])
+            for i in xrange(0, opts1["nbinsx"]):
+                self.frame.GetXaxis().SetBinLabel(i+1, rootHisto.GetXaxis().GetBinLabel(firstBin+i))
 
     ## \var frame1
     # TH1 for the upper frame
@@ -1074,6 +1114,9 @@ class Histo:
     def addToLegend(self, legend):
         if self.legendLabel == None:
             return
+        if self.rootHisto is None:
+            print >>sys.stderr, "WARNING: Trying to add Histo %s to the legend, but rootHisto is None" % self.getName()
+            return
 
         h = self.rootHisto
 
@@ -1106,6 +1149,9 @@ class Histo:
     #
     # \param opt  Drawing options (in addition to the draw style)
     def draw(self, opt):
+        if self.rootHisto is None:
+            print >>sys.stderr, "WARNING: Trying to draw Histo %s, but rootHisto is None" % self.getName()
+            return
         self.rootHisto.Draw(self.drawStyle+" "+opt)
 
     ## Get the minimum value of the X axis
@@ -1125,6 +1171,8 @@ class Histo:
 
     ## Get the maximum value of the Y axis
     def getYmax(self):
+        if self.rootHisto is None:
+            return None
         if isinstance(self.rootHisto, ROOT.TH2):
             return th2Ymax(self.rootHisto)
         else:
@@ -1132,16 +1180,22 @@ class Histo:
 
     ## Get the X axis title
     def getXtitle(self):
+        if self.rootHisto is None:
+            return None
         return self.rootHisto.GetXaxis().GetTitle()
 
     ## Get the Y axis title
     def getYtitle(self):
+        if self.rootHisto is None:
+            return None
         return self.rootHisto.GetYaxis().GetTitle()
 
     ## Get the width of a bin
     #
     # \param bin  Bin number
     def getBinWidth(self, bin):
+        if self.rootHisto is None:
+            return None
         return self.rootHisto.GetBinWidth(bin)
 
     ## \var rootHisto
@@ -1195,9 +1249,13 @@ class HistoTotalUncertainty(Histo):
         rootHistos = []
         for h in histos:
             if hasattr(h, "getSumRootHisto"):
-                rootHistos.append(h.getSumRootHisto())
+                ret = h.getSumRootHisto()
             else:
-                rootHistos.append(h.getRootHisto())
+                ret = h.getRootHisto()
+            if ret is not None:
+                rootHistos.append(ret)
+        if len(rootHistos) == 0:
+            raise Exception("Got 0 histograms, or all input histograms are None")
 
         tmp = rootHistos[0].Clone()
         tmp.SetDirectory(0)
@@ -1224,7 +1282,9 @@ class HistoStacked(Histo):
         Histo.__init__(self, ROOT.THStack(name+"stackHist", name+"stackHist"), name, None, "HIST")
         self.histos = histos
 
-        rootHistos = [d.getRootHisto() for d in self.histos]
+        rootHistos = filter(lambda h: h is not None, [d.getRootHisto() for d in self.histos])
+        if len(rootHistos) == 0:
+            raise Exception("Got 0 histograms, or all input histograms are None")
         rootHistos.reverse()
         for h in rootHistos:
             self.rootHisto.Add(h)
@@ -1265,13 +1325,17 @@ class HistoStacked(Histo):
             h.call(function)
 
     def getXmin(self):
-        return min([h.getXmin() for h in self.histos])
+        return min(filter(lambda x: x is not None, [h.getXmin() for h in self.histos]))
 
     def getXmax(self):
-        return max([h.getXmax() for h in self.histos])
+        return max(filter(lambda x: x is not None, [h.getXmax() for h in self.histos]))
 
     def getBinWidth(self, bin):
-        return self.histos[0].getBinWidth(bin)
+        for h in self.histos:
+            w = h.getBinWidth(bin)
+            if w is not None:
+                return w
+        return None
 
     ## \var histos
     # List of histograms.Histo objects which are stacked

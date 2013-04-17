@@ -147,6 +147,7 @@
 # additional documentation.
 
 import os, re
+import sys
 import subprocess, errno
 import time
 import math
@@ -168,7 +169,7 @@ defaultSeBlacklist_noStageout = [
 #    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
     "kbfi.ee", # Files are not found, added 2012-09-28
     "cscs.ch", # Files are not found, added 2012-09-28
-    "roma1.infn.it", # Jobs don't finish, added 2012-10-26
+#    "roma1.infn.it", # Jobs don't finish, added 2012-10-26, commented 2013-02-25
     ]
 
 ## Default Storage Element (SE) black list for stageout jobs
@@ -181,7 +182,7 @@ defaultSeBlacklist_stageout = [
 #    "ingrid.pt", # Stageout failures, added 2011-10-26, commented 2011-12-02
     "ucsd.edu", # Stageout failures, added 2011-10-26 
     "pi.infn.it", # Stageout failures, added 2011-10-26
-    "lnl.infn.it", # Stageout failures, added 2011-12-02
+#    "lnl.infn.it", # Stageout failures, added 2011-12-02, commented 2013-02-25
 #    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
     "sprace.org.br", # Stageout failures. added 2011-12-02
     "knu.ac.kr", # Stageout failures, added 2011-12-02
@@ -515,6 +516,11 @@ def crabStatusOutput(task, printCrab):
             raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
     return output
 
+## Exception for something being wrong in the crab output
+class CrabOutputException(Exception):
+    def __init__(self, message):
+        Exception.__init__(self, message)
+
 ## Transform 'crab -status' output to list of multicrab.CrabJob objects
 #
 # \param task    CRAB task directory
@@ -523,12 +529,25 @@ def crabStatusOutput(task, printCrab):
 # \return List of multicrab.CrabJob objects
 def crabOutputToJobs(task, output):
     status_re = re.compile("(?P<id>\d+)\s+(?P<end>\S)\s+(?P<status>\S+)(\s+\(.*?\))?\s+(?P<action>\S+)\s+(?P<execode>\S+)?\s+(?P<jobcode>\S+)?\s+(?P<host>\S+)?")
+    total_re = re.compile("crab:\s+(?P<njobs>\d+)\s+Total\s+Jobs")
     jobs = {}
+    njobs = 0
+    total = None
     for line in output.split("\n"):
         m = status_re.search(line)
         if m:
             job = CrabJob(task, m)
             multicrabWorkflowsTools._addToDictList(jobs, job.status, job)
+            njobs += 1
+            continue
+        m = total_re.search(line)
+        if m:
+            total = int(m.group("njobs"))
+
+    if total is None:
+        raise CrabOutputException("Did not find total number of jobs from the crab output")
+    if total != njobs:
+        raise CrabOutputException("Crab says total number of jobs is %d, but only %d was found from the input" % (total, njobs))
     return jobs
 
 ## Convert argument to int if it is not None
@@ -544,8 +563,23 @@ def _intIfNotNone(n):
 #
 # \return List of multicrab.CrabJob objects
 def crabStatusToJobs(task, printCrab):
-    output = crabStatusOutput(task, printCrab)
-    return crabOutputToJobs(task, output)
+    # For some reason in lxplus sometimes the crab output is
+    # garbled. In case of value errors try 4 times.
+    maxTrials = 4
+    for i in xrange(0, maxTrials):
+        try:
+            output = crabStatusOutput(task, printCrab)
+            return crabOutputToJobs(task, output)
+        except ValueError, e:
+            if i == maxTrials-1:
+                raise e
+            print >>sys.stderr, "%s: Got garbled output from 'crab -status' (parse error), trying again" % task
+        except CrabOutputException, e:
+            if i == maxTrials-1:
+                raise e
+            print >>sys.stderr, "%s: Got garbled output from 'crab -status' (mismatch in number of jobs), trying again" % task
+
+    raise Exception("Assetion, this line should never be reached")
 
 ## Class for containing the information of finished CRAB job
 class CrabJob:

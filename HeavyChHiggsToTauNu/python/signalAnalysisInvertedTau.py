@@ -45,4 +45,5 @@ def createEDFilter(param):
         oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus","HadronicTauOneAndThreeProng"),
         tauEmbeddingStatus = cms.untracked.bool(False),
         metFilters = param.metFilters.clone(),
+        QCDTailKiller = param.QCDTailKiller.clone(),
     )
