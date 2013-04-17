@@ -59,6 +59,7 @@ private:
   Branch<unsigned> fSelectedVertexCount;
   Branch<unsigned> fVertexCount;
   //Branch<bool> fElectronVetoPassed;
+  Branch<bool> fMuTriggerPassed;
 
   const bool fIsEmbedded;
   TH1 *fEmbeddingWTauMuWeights;
@@ -91,6 +92,7 @@ private:
   EventCounter::Count cIsolation;
   EventCounter::Count cOneProng;
   EventCounter::Count cRtau;
+  EventCounter::Count cMuTrigger;
 
   // Histograms
   TH1 *hTauEta_AfterDecayModeFindingIsolation;
@@ -148,7 +150,8 @@ TauAnalysisSelector::TauAnalysisSelector(const std::string& puWeight, bool isEmb
   cAgainstMuon(fEventCounter.addCounter("Against muon")),
   cIsolation(fEventCounter.addCounter("Isolation")),
   cOneProng(fEventCounter.addCounter("One prong")),
-  cRtau(fEventCounter.addCounter("Rtau"))
+  cRtau(fEventCounter.addCounter("Rtau")),
+  cMuTrigger(fEventCounter.addCounter("Mu trigger"))
 {
   if(isEmbedded && !embeddingWTauMuFile.empty()) {
     TFile *file = TFile::Open(embeddingWTauMuFile.c_str());
@@ -217,6 +220,9 @@ void TauAnalysisSelector::setupBranches(TTree *tree) {
     fPuWeight.setupBranch(tree, fPuWeightName.c_str());
   fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertex_count");
   fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
+  if(fIsEmbedded) {
+    fMuTriggerPassed.setupBranch(tree, "trigger_Mu40_eta2p1");
+  }
 
   //fElectronVetoPassed.setupBranch(tree, "ElectronVetoPassed");
 
@@ -232,6 +238,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   fPuWeight.setEntry(entry);
   fSelectedVertexCount.setEntry(entry);
   fVertexCount.setEntry(entry);
+  fMuTriggerPassed.setEntry(entry);
 
   //fElectronVetoPassed.setEntry(entry);
 
@@ -547,6 +554,14 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   hVertexCount_AfterRtau->Fill(fVertexCount.value(), weight);
 
   // Tau ID finished
+
+  // Trigger
+  /*
+  if(fIsEmbedded) {
+    if(!fMuTriggerPassed.value()) return true;
+  }
+  */
+  cMuTrigger.increment();
 
   return true;
 }

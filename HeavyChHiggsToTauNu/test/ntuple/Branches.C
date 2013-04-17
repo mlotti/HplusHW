@@ -155,11 +155,14 @@ void TauCollection::setupBranches(TTree *tree, bool isMC) {
 
   fDecayModeFinding.setupBranch(tree, (fPrefix+"_f_decayModeFinding").c_str());
   fAgainstMuonTight.setupBranch(tree, (fPrefix+"_f_againstMuonTight").c_str());
+  fAgainstMuonTight2.setupBranch(tree, (fPrefix+"_f_againstMuonTight2").c_str());
   fAgainstElectronLoose.setupBranch(tree, (fPrefix+"_f_againstElectronLoose").c_str());
   fAgainstElectronMedium.setupBranch(tree, (fPrefix+"_f_againstElectronMedium").c_str());
   fAgainstElectronTight.setupBranch(tree, (fPrefix+"_f_againstElectronTight").c_str());
   fAgainstElectronMVA.setupBranch(tree, (fPrefix+"_f_againstElectronMVA").c_str());
+  fAgainstElectronTightMVA3.setupBranch(tree, (fPrefix+"_f_againstElectronTightMVA3").c_str());
   fMediumCombinedIsolationDeltaBetaCorr.setupBranch(tree, (fPrefix+"_f_byMediumCombinedIsolationDeltaBetaCorr").c_str());
+  fMediumCombinedIsolationDeltaBetaCorr3Hits.setupBranch(tree, (fPrefix+"_f_byMediumCombinedIsolationDeltaBetaCorr3Hits").c_str());
 
   if(isMC) {
     fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatch_p4").c_str());

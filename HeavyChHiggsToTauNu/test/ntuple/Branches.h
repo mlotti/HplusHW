@@ -435,13 +435,16 @@ public:
     double decayModeFinding() { return fCollection->fDecayModeFinding.value()[fIndex]; }
 
     double againstMuonTight() { return fCollection->fAgainstMuonTight.value()[fIndex]; }
+    double againstMuonTight2() { return fCollection->fAgainstMuonTight2.value()[fIndex]; }
 
     double againstElectronLoose() { return fCollection->fAgainstElectronLoose.value()[fIndex]; }
     double againstElectronMedium() { return fCollection->fAgainstElectronMedium.value()[fIndex]; }
     double againstElectronTight() { return fCollection->fAgainstElectronTight.value()[fIndex]; }
     double againstElectronMVA() { return fCollection->fAgainstElectronMVA.value()[fIndex]; }
+    double againstElectronTightMVA3() { return fCollection->fAgainstElectronTightMVA3.value()[fIndex]; }
 
     double mediumCombinedIsolationDeltaBetaCorr() { return fCollection->fMediumCombinedIsolationDeltaBetaCorr.value()[fIndex]; }
+    double mediumCombinedIsolationDeltaBetaCorr3Hits() { return fCollection->fMediumCombinedIsolationDeltaBetaCorr3Hits.value()[fIndex]; }
 
     const math::XYZTLorentzVector& genMatchP4() { return fCollection->fGenMatchP4.value()[fIndex]; }
     const math::XYZTLorentzVector& genMatchVisibleP4() { return fCollection->fGenMatchVisibleP4.value()[fIndex]; }
@@ -466,11 +469,14 @@ public:
 
     fDecayModeFinding.setEntry(entry);
     fAgainstMuonTight.setEntry(entry);
+    fAgainstMuonTight2.setEntry(entry);
     fAgainstElectronLoose.setEntry(entry);
     fAgainstElectronMedium.setEntry(entry);
     fAgainstElectronTight.setEntry(entry);
     fAgainstElectronMVA.setEntry(entry);
+    fAgainstElectronTightMVA3.setEntry(entry);
     fMediumCombinedIsolationDeltaBetaCorr.setEntry(entry);
+    fMediumCombinedIsolationDeltaBetaCorr3Hits.setEntry(entry);
 
     fGenMatchP4.setEntry(entry);
     fGenMatchVisibleP4.setEntry(entry);
@@ -499,13 +505,16 @@ private:
   BranchObj<std::vector<double> > fDecayModeFinding;
 
   BranchObj<std::vector<double> > fAgainstMuonTight;
+  BranchObj<std::vector<double> > fAgainstMuonTight2;
 
   BranchObj<std::vector<double> > fAgainstElectronLoose;
   BranchObj<std::vector<double> > fAgainstElectronMedium;
   BranchObj<std::vector<double> > fAgainstElectronTight;
   BranchObj<std::vector<double> > fAgainstElectronMVA;
+  BranchObj<std::vector<double> > fAgainstElectronTightMVA3;
 
   BranchObj<std::vector<double> > fMediumCombinedIsolationDeltaBetaCorr;
+  BranchObj<std::vector<double> > fMediumCombinedIsolationDeltaBetaCorr3Hits;
 
   BranchObj<std::vector<math::XYZTLorentzVector> > fGenMatchP4;
   BranchObj<std::vector<math::XYZTLorentzVector> > fGenMatchVisibleP4;
