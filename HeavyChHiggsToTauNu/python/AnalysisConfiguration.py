@@ -506,7 +506,7 @@ class ConfigBuilder:
 
         # Fragment to run PAT on the fly if requested from command line
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
-        process.commonSequence, additionalCounters = addPatOnTheFly(process, self.options, self.dataVersion)
+        process.commonSequence, additionalCounters = addPatOnTheFly(process, self.options, self.dataVersion, selectedPrimaryVertexFilter=True)
 
         # Add configuration information to histograms.root
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
