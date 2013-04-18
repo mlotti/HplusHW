@@ -178,11 +178,11 @@ class CellFormatBase:
         val = count.value()
         uUp = count.uncertaintyHigh()
         uDown = count.uncertaintyLow()
-        hasUncertainty = (uUp != None  and uDown != None)
+        hasUncertainty = (uUp is not None  and uDown is not None)
         if hasUncertainty:
             uncertaintiesSame = (uUp == 0 or abs(uUp-uDown)/uUp < self._uncertaintyEpsilon)
 
-        if self._withPrecision == None or not hasUncertainty:
+        if self._withPrecision is None or not hasUncertainty:
             value = self._valueFormat % val
             if hasUncertainty:
                 uUpf = self._uncertaintyFormat % uUp
@@ -190,18 +190,29 @@ class CellFormatBase:
         else:
             valDig = _numToDig(val)
             uncDig = min(_numToDig(uUp), _numToDig(uDown))
-            
+
+            position = uncDig - self._withPrecision
+            # See if number of uncertainty digits changes because of rounding of uncertainty
+            if position >= 0:
+                valDig = _numToDig(round(val, -position))
+                uncDig = min(_numToDig(round(uUp, -position)), _numToDig(round(uDown, -position)))
+                position = uncDig - self._withPrecision
+
             if self._valueType == "f":
-                if uncDig - self._withPrecision < 0:
-                    precision = abs(uncDig - self._withPrecision)
+                if position < 0:
+                    precision = abs(position)
                     if uncDig < 0:
                         precision -= 1
                 else:
+                    # This case is handled more below, need additional precision for the numbers
                     precision = 0
+                    val = round(val, -position)
+                    uUp = round(uUp, -position)
+                    uDown = round(uDown, -position)
                 valFmt = "%%.%df" % precision
                 uncFmt = valFmt
             elif self._valueType == "e":
-                precisionVal = valDig - uncDig + self._withPrecision - 1
+                precisionVal = valDig - position - 1
                 precisionUnc = self._withPrecision - 1
                 valFmt = "%%.%de" % precisionVal
                 uncFmt = "%%.%de" % precisionUnc
