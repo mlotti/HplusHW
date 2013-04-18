@@ -49,7 +49,8 @@ class PATBuilder:
                  doTotalKinematicsFilter=False,
                  doHBHENoiseFilter=False, doPhysicsDeclared=False,
                  selectedPrimaryVertexFilter=False,
-                 calculateEventCleaning=False):
+                 calculateEventCleaning=False,
+                 additionalPattupleCounters=[]): # possible additional counters from pattuple job
 
         self.process = process
         self.counters = []
@@ -74,6 +75,7 @@ class PATBuilder:
 
         if options.doPat == 0:
             # Not running PAT, assuming that the job is taking pattuples as input
+            self.counters.append(additionalPattupleCounters)
 
             # Add event filters if requested
             self.addFilters(dataVersion, sequence, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=False)
