@@ -15,6 +15,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistogramsInBins.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistogramsInBins2Dim.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexAssignmentAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetTauInvMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
@@ -35,6 +36,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
 
 namespace edm {
@@ -221,6 +223,8 @@ namespace HPlus {
     EvtTopology fEvtTopology;
     TauTriggerEfficiencyScaleFactor fTauTriggerEfficiencyScaleFactor;
     METTriggerEfficiencyScaleFactor fMETTriggerEfficiencyScaleFactor;
+    VertexAssignmentAnalysis fVertexAssignmentAnalysis;
+    METPhiOscillationCorrection fMETPhiOscillationCorrection;
 
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;

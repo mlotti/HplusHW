@@ -162,6 +162,7 @@ namespace HPlus {
     fJetTauInvMass(iConfig.getUntrackedParameter<edm::ParameterSet>("jetTauInvMass"), eventCounter, fHistoWrapper),
     fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper),
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
+
     fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
     fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
@@ -181,6 +182,8 @@ namespace HPlus {
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WjetsWeight"),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
+    fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
+    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper),
     // Non-QCD Type II related
     fNonQCDTypeIIGroup(eventCounter),
     fAllTausCounterGroup(eventCounter, "All"),
@@ -320,33 +323,36 @@ namespace HPlus {
    hDeltaR_TauMETJet4MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "DeltaR_TauMETJet4MET", "DeltaR_TauMETJet4MET ", 65, 0., 260.);
 
    
-
+   /*
    // Selection flow histogram
     hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
-   
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTrigger,"Trigger");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauCandidateSelection,"#tau cand.");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderElectronVeto,"Isol. e veto");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMuonVeto,"Isol. #mu veto");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderJetSelection,"N_{jets}");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauID,"tauID");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMET,"MET");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderBTag,"N_{b jets}");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderDeltaPhiTauMET,"#Delta#phi(#tau,MET)");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMaxDeltaPhiJetMET,"#Delta#phi(jet,MET)");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTopSelection,"top reco");
-
+    if(hSelectionFlow.isActive()) {
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTrigger,"Trigger");
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauCandidateSelection,"#tau cand.");
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderElectronVeto,"Isol. e veto");
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMuonVeto,"Isol. #mu veto");
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderJetSelection,"N_{jets}");
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauID,"tauID");
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMET,"MET");
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderBTag,"N_{b jets}");
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderDeltaPhiTauMET,"#Delta#phi(#tau,MET)");
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMaxDeltaPhiJetMET,"#Delta#phi(jet,MET)");
+      hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTopSelection,"top reco");
+    }
+   */
    
     hNonQCDTypeIISelectedTauEtAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NonQCDTypeII_SelectedTau_pT_AfterCuts", "SelectedTau_pT_AfterCuts;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 40, 0.0, 400.0);
     hNonQCDTypeIISelectedTauEtaAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NonQCDTypeII_SelectedTau_eta_AfterCuts", "SelectedTau_eta_AfterCuts;#tau #eta;N_{events} / 0.1", 30, -3.0, 3.0);
 
     fTree.init(*fs);
+  
   }
 
   SignalAnalysisInvertedTau::~SignalAnalysisInvertedTau() { }
 
   void SignalAnalysisInvertedTau::produces(edm::EDFilter *producer) const {
+   
     if(fProduce) {
       producer->produces<std::vector<pat::Tau> >("selectedTaus");
       producer->produces<std::vector<pat::Jet> >("selectedJets");
@@ -357,11 +363,10 @@ namespace HPlus {
     }
   }
 
-
+ 
 
   bool SignalAnalysisInvertedTau::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     fEventWeight.beginEvent();
-
     // set prescale
     const double prescaleWeight = fPrescaleWeightReader.getWeight(iEvent, iSetup);
     fEventWeight.multiplyWeight(prescaleWeight);
@@ -376,6 +381,7 @@ namespace HPlus {
       fEventWeight.multiplyWeight(myPileupWeight);
       fTree.setPileupWeight(myPileupWeight);
     }
+ 
 
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     size_t nVertices = pvData.getNumberOfAllVertices();
@@ -383,7 +389,7 @@ namespace HPlus {
     hVerticesAfterWeight->Fill(nVertices);
     fTree.setNvertices(nVertices);
     increment(fAllCounter);
-    hSelectionFlow->Fill(kQCDOrderVertexSelection);
+    //hSelectionFlow->Fill(kQCDOrderVertexSelection);
     
     // test for pile-up dependence
     //    if (nVertices > 12 )  return false;
@@ -412,7 +418,7 @@ namespace HPlus {
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
-    hSelectionFlow->Fill(kQCDOrderTrigger);
+    //hSelectionFlow->Fill(kQCDOrderTrigger);
   
     if(triggerData.hasTriggerPath()) // protection if TriggerSelection is disabled
       fTree.setHltTaus(triggerData.getTriggerTaus());
@@ -431,7 +437,7 @@ namespace HPlus {
     // Primary vertex
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
-    //hSelectionFlow->Fill(kSignalOrderVertexSelection);
+    ////hSelectionFlow->Fill(kSignalOrderVertexSelection);
 
    
   
@@ -445,7 +451,7 @@ namespace HPlus {
 
     // tauID cuts applied to inverted and baseline taus    
     // nprongs
-    hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
+    //hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
 
   
 
@@ -535,6 +541,7 @@ namespace HPlus {
 	fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), selectedTau->eta()));
       increment(fTauFakeScaleFactorBaselineCounter);
 
+      fVertexAssignmentAnalysis.analyze(iEvent, iSetup, iEvent.isRealData(), pvData.getSelectedVertex(), tauData.getSelectedTau(), tauMatchData.getTauMatchType());
       
       if(iEvent.isRealData())
 	fTauTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
@@ -664,7 +671,8 @@ namespace HPlus {
     
     if(!metData.passedEvent()) return false;
     increment(fBaselineMetCounter);
-	      
+    size_t nVertices = pvData.getNumberOfAllVertices();
+    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);	      
    
        //------ mT after jets and met in bins
     hMTBaselineTauIdJet->Fill(selectedTau->pt() ,transverseMass );	
@@ -724,7 +732,7 @@ namespace HPlus {
  
      
   
-    hSelectionFlow->Fill(kSignalOrderTauID);
+    //hSelectionFlow->Fill(kSignalOrderTauID);
   /*
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
@@ -748,7 +756,7 @@ namespace HPlus {
     ElectronSelection::Data electronVetoData = fElectronSelection.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
     increment(fElectronVetoCounter);
-    hSelectionFlow->Fill(kQCDOrderElectronVeto);  
+    //hSelectionFlow->Fill(kQCDOrderElectronVeto);  
 
   
         
@@ -765,7 +773,7 @@ namespace HPlus {
     MuonSelection::Data muonVetoData = fMuonSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return false;
     increment(fMuonVetoCounter);
-    hSelectionFlow->Fill(kQCDOrderMuonVeto);
+    //hSelectionFlow->Fill(kQCDOrderMuonVeto);
     
 
   
@@ -795,7 +803,7 @@ namespace HPlus {
     // Hadronic jet selection
     if(!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
-    hSelectionFlow->Fill(kQCDOrderJetSelection);
+    //hSelectionFlow->Fill(kQCDOrderJetSelection);
     hSelectedTauEtJetCut->Fill(selectedTau->pt());
    
  /*
@@ -842,8 +850,10 @@ namespace HPlus {
     // MET cut
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
+    size_t nVertices = pvData.getNumberOfAllVertices();
+    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);
 
-    hSelectionFlow->Fill(kQCDOrderMET);
+    //hSelectionFlow->Fill(kQCDOrderMET);
     hSelectedTauEtMetCut->Fill(selectedTau->pt());
     hSelectedTauEtaMetCut->Fill(selectedTau->eta());
     hSelectedTauPhiMetCut->Fill(selectedTau->phi());  
@@ -890,7 +900,7 @@ namespace HPlus {
     if(!btagData.passedEvent()) return false;
     // Apply scale factor as weight to event 
     increment(fBTaggingCounter);		
-    hSelectionFlow->Fill(kQCDOrderBTag);
+    //hSelectionFlow->Fill(kQCDOrderBTag);
 
     hSelectedTauEtBtagging->Fill(selectedTau->pt());
    
@@ -916,7 +926,7 @@ namespace HPlus {
     if (deltaPhi < fDeltaPhiCutValue) {
       hMTInvertedTauIdJetDphi->Fill(selectedTau->pt(),transverseMass);        
       increment(fDeltaPhiTauMETCounter);
-      hSelectionFlow->Fill(kQCDOrderDeltaPhiTauMET);   
+      //hSelectionFlow->Fill(kQCDOrderDeltaPhiTauMET);   
     }
 
     // tail killer cuts
@@ -1034,7 +1044,7 @@ namespace HPlus {
 
       if (TopWithBSelectionData.passedEvent() ) {
 	increment(fTopWithBSelectionCounter);
-	//      hSelectionFlow->Fill(kSignalOrderTopSelection);      
+	//      //hSelectionFlow->Fill(kSignalOrderTopSelection);      
 	hTransverseMassTopBjetSelection->Fill(transverseMass);     
       }    
     }

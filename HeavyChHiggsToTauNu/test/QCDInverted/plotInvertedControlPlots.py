@@ -606,6 +606,14 @@ def controlPlots(datasets):
     print "Integral inclusive - EWK, tailKiller = ",hmt_subs.Integral()
     print " "
 
+################################################
+
+#####  -------------- Comparison plots --------------------
+
+  
+    invertedQCD = InvertedTauID()
+    invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
+          
 #################################################
  ##  mT with TailKiller cuts
     mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaselineTauIdAllCutsTailKiller")])         
@@ -627,18 +635,6 @@ def controlPlots(datasets):
     hmtBaseline_QCD = hmtBaseline.Clone("QCD")
     hmtBaseline_QCD.Add(hmtEWK,-1)
 
-
-
-  
-    invertedQCD = InvertedTauID()
-    invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
-      
-  
-
-#####  -------------- Comparison plots --------------------
-    
-
-# mt all cuts
     invertedHisto = hmtSum.Clone("mtSum")
     baselineHisto = hmtBaseline_QCD.Clone("mtBaseline_QCD")
     print "invertedHisto ",invertedHisto.GetEntries()
@@ -768,10 +764,11 @@ def controlPlots(datasets):
     
     invertedHisto = bjet.Clone("bjets")
     baselineHisto = nbjets_QCD.Clone("bjets_QCD")    
-    print "invertedHisto ",invertedHisto.GetEntries()
-    print "baselineHisto ",invertedHisto.GetEntries()
+#    print "invertedHisto ",invertedHisto.GetEntries()
+#    print "baselineHisto ",invertedHisto.GetEntries()
     invertedQCD.setLabel("BjetsInvertedVsBaseline")
-    invertedQCD.controlPlots(invertedHisto, baselineHisto,"BjetsInvertedVsBaseline")
+#    invertedQCD.controlPlots(invertedHisto, baselineHisto,"BjetsInvertedVsBaseline")
+    invertedQCD.controlPlots(invertedHisto, invertedHisto,"BjetsInvertedVsBaseline",ratio=False)
 
 
 
@@ -802,11 +799,11 @@ def controlPlots(datasets):
 
     invertedHisto = jet.Clone("bjets")
     baselineHisto = Njets_QCD.Clone("bjets_QCD")    
-    print "invertedHisto ",invertedHisto.GetEntries()
-    print "baselineHisto ",invertedHisto.GetEntries()
+#    print "invertedHisto ",invertedHisto.GetEntries()
+#    print "baselineHisto ",invertedHisto.GetEntries()
     invertedQCD.setLabel("JetsInvertedVsBaseline")
-##    invertedQCD.controlPlots(invertedHisto, baselineHisto,"JetsInvertedVsBaseline")
-    invertedQCD.controlPlots(invertedHisto, invertedHisto,"JetsInvertedVsBaseline",ratio=False)
+    invertedQCD.controlPlots(invertedHisto, baselineHisto,"JetsInvertedVsBaseline")
+#    invertedQCD.controlPlots(invertedHisto, invertedHisto,"JetsInvertedVsBaseline",ratio=False)
 
 
 ################## N jets after MET
@@ -838,8 +835,8 @@ def controlPlots(datasets):
     print "invertedHisto ",invertedHisto.GetEntries()
     print "baselineHisto ",invertedHisto.GetEntries()
     invertedQCD.setLabel("JetsInvertedVsBaselineAfterMet")
-    invertedQCD.controlPlots(invertedHisto, baselineHisto,"JetsInvertedVsBaselineAfterMet",ratio=False)
-
+    invertedQCD.controlPlots(invertedHisto, baselineHisto,"JetsInvertedVsBaselineAfterMet")
+#    invertedQCD.controlPlots(invertedHisto, invertedHisto,"JetsInvertedVsBaselineAfterMet",ratio=False)
 
 
 
