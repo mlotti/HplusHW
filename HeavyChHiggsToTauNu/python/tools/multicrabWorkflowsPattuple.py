@@ -1942,6 +1942,14 @@ def addPattuple_v53_3_test3(datasets):
 
     addPattuple_53X("v53_3_test3", datasets, definitions)
 
+def addPattuple_v53_3_test4(datasets):
+    # Updated MET filters
+    definitions = {
+        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
+        }
+
+    addPattuple_53X("v53_3_test4", datasets, definitions)
+
 
 # Skeleton
 def addPattuple_vNEXT_SKELETON_53X(datasets):
