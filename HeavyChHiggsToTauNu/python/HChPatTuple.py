@@ -47,7 +47,7 @@ class PATBuilder:
     def __call__(self, process, options, dataVersion,
                  patArgs={},
                  doTotalKinematicsFilter=False,
-                 doHBHENoiseFilter=True, doPhysicsDeclared=False,
+                 doHBHENoiseFilter=False, doPhysicsDeclared=False,
                  selectedPrimaryVertexFilter=False,
                  calculateEventCleaning=False):
 
