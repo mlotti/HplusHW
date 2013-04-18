@@ -33,7 +33,19 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.disableMaxVariations()
 
 def customize(signalAnalysis):
-    print "customisation applied"
+    # Choice of tau selection for tau candidate selection
+    signalAnalysis.applyNprongsCutForTauCandidate = False,
+    signalAnalysis.applyRtauCutForTauCandidate = False,
+    # Binning of factorisation
+    signalAnalysis.factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150., 200., 300.),
+    signalAnalysis.factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
+    signalAnalysis.factorisationNVerticesBinLowEdges = cms.untracked.vint32(10, 20),
+    # Variation options
+    signalAnalysis.doAnalysisVariationWithTraditionalMethod = True,
+    signalAnalysis.doAnalysisVariationWithABCDMethod = True,
+    signalAnalysis.doAnalysisVariationWithDoubleABCDMethod = True,
+
+    print "customisations applied"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
