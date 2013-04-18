@@ -786,15 +786,25 @@ class PlotBase:
     #
     # \param obj      Object
     # \param option   Drawing option (given to obj.Draw())
-    def prependPlotObject(self, obj, option=""):
-        self.plotObjectsBefore.append( (obj, option) )
+    # \param index    Index in the list
+    def prependPlotObject(self, obj, option="", index=None):
+        t = (obj, option)
+        if index is None:
+            self.plotObjectsBefore.append(t)
+        else:
+            self.plotObjectsBefore.insert(index, t)
 
     ## Add an additional object to be drawn after the plot histograms/graphs
     #
     # \param obj      Object
     # \param option   Drawing option (given to obj.Draw())
-    def appendPlotObject(self, obj, option=""):
-        self.plotObjectsAfter.append( (obj, option) )
+    # \param index    Index in the list
+    def appendPlotObject(self, obj, option="", index=None):
+        t = (obj, option)
+        if index is None:
+            self.plotObjectsAfter.append(t)
+        else:
+            self.plotObjectsAfter.insert(index, t)
 
     ## Add cut box and/or line
     #
@@ -1680,6 +1690,7 @@ class PlotDrawer:
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
     # \param canvasOpts          Default canvas modifications (see histograms.CanvasFrame)
+    # \param backgroundColor     Default plot background color (None for white)
     # \param rebin               Alias for \a rebinX (for backward compatibility)
     # \param rebinX              Default rebin X value (passed to TH1::Rebin or TH2::Rebin2D)
     # \param rebinY              Default rebin Y value (passed to TH2::Rebin2D)
@@ -1706,6 +1717,7 @@ class PlotDrawer:
                  optsLog={},
                  opts2={},
                  canvasOpts=None,
+                 backgroundColor=None,
                  rebin=None,
                  rebinX=None,
                  rebinY=None,
@@ -1735,6 +1747,7 @@ class PlotDrawer:
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
         self.canvasOptsDefault = canvasOpts
+        self.backgroundColorDefault = backgroundColor
         self.rebinDefault = rebin
         self.rebinXDefault = rebinX
         self.rebinYDefault = rebinY
@@ -1962,7 +1975,7 @@ class PlotDrawer:
             if self._getValue("addMCUncertainty", p, kwargs):
                 p.addMCUncertainty()
 
-    ## Stack MC histograms
+    ## Create TCanvas and TH1 for the plot frame
     #
     # \param p       plots.PlotBase (or deriving) object
     # \param name    Plot file name
@@ -1978,6 +1991,7 @@ class PlotDrawer:
     # \li\a ratioInvert  Should the ratio be inverted?
     # \li\a ratioIsBinomial  Is the ratio a binomial?
     # \li\a customizeBeforeFrame Function customize the plot before creating the canvas and frame
+    # \li\a backgroundColor  Plot background color (None for white)
     def createFrame(self, p, name, **kwargs):
         customize = self._getValue("customizeBeforeFrame", p, kwargs)
         if customize is not None:
@@ -2017,6 +2031,14 @@ class PlotDrawer:
         if ratio and ratioYlabel is not None and p.hasFrame2():
             p.getFrame2().GetYaxis().SetTitle(ratioYlabel)
 
+        # Hack the background color
+        bkgColor = self._getValue("backgroundColor", p, kwargs)
+        if bkgColor is not None:
+            xaxis = p.getFrame().GetXaxis()
+            yaxis = p.getFrame().GetYaxis()
+            box = ROOT.TBox(xaxis.GetXmin(), yaxis.GetXmin(), xaxis.GetXmax(), yaxis.GetXmax())
+            box.SetFillColor(bkgColor)
+            p.prependPlotObject(box, index=0)
 
     ## Add a legend to the plot
     #
