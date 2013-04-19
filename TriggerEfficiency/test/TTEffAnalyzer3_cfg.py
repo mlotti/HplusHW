@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 import copy
 
-dataVersion="53XmcS10"
-#dataVersion="53XdataPromptCv2"
+#dataVersion="53XmcS10"
+dataVersion="53XdataPromptCv2"
 #isData = False
 runL1Emulator = False
 runOpenHLT = False
@@ -60,8 +60,8 @@ else:
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(   
 #        "file:/afs/cern.ch/work/s/slehti/TriggerMETLeg_Tau_173236-173692_2011A_Nov08_pattuple_9_1_LSf.root"
-#        "file:TTEffSkim.root"
-	"file:/tmp/slehti/TriggerMETLeg_Tau_Run2012C_PromptReco_v2_AOD_202792_203742_analysis_metleg_v53_v1_pattuple_28_1_L19.root"
+        "file:TTEffSkim.root"
+#	"file:/tmp/slehti/TriggerMETLeg_Tau_Run2012C_PromptReco_v2_AOD_202792_203742_analysis_metleg_v53_v1_pattuple_28_1_L19.root"
         )
     )
 
@@ -442,10 +442,14 @@ if analysis == "QuadJet":
 
 # The high purity selection (mainly for H+)
 process.load("HiggsAnalysis.TriggerEfficiency.HighPuritySelection_cff")
+import HiggsAnalysis.TriggerEfficiency.HighPuritySelection_cff as HighPurity
+highPurityCounters = additionalCounters
+highPurityCounters.extend(HighPurity.getSelectionCounters())
 process.TTEffAnalysisHLTPFTauHPSHighPurity = process.TTEffAnalysisHLTPFTauHPS.clone(
     LoopingOver = "selectedPatTausHpsPFTauHighPurity",
     MuonSource = "selectedPatMuonsHighPurity",
     MuonTauPairSource = "muTauPairsHighPurity",
+    Counters = cms.VInputTag([cms.InputTag(c) for c in highPurityCounters]),
     outputFileName = "tteffAnalysis-hltpftau-hpspftau-highpurity.root"
 )
 process.runTTEffAnaHighPurity = cms.Path(
