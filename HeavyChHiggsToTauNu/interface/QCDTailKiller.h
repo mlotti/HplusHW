@@ -42,6 +42,7 @@ namespace HPlus {
       const bool passedEvent() const { return fPassedEvent; }
       const bool passedBackToBackCuts() const;
       const bool passedCollinearCuts() const;
+      const int getNConsideredJets() const { return fMaxEntries; }
       /// Getters for counted values (in degreees)
       const double getDeltaPhiTauMET() const { return fDeltaPhiTauMET; }
       const double getDeltaPhiJetMET(int njet) const;
