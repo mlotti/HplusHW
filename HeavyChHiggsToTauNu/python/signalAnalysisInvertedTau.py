@@ -40,6 +40,7 @@ def createEDFilter(param):
         pileupWeightReader = param.pileupWeightReader.clone(),
         wjetsWeightReader = param.wjetsWeightReader.clone(),                   
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
+        embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(),
         Tree = param.tree.clone(),
         eventCounter = param.eventCounter.clone(),
         oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus","HadronicTauOneAndThreeProng"),

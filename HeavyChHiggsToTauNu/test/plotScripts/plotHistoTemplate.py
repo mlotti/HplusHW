@@ -170,8 +170,8 @@ def doPlots(datasets):
     # TH2 and COLZ, disable legend
     drawPlot(createTH2Plot("TauSelection/TauSelection_selected_taus_eta_vs_phi", "TTJets"), "selectedtau_etavsphi_ttjets", xlabel="#tau #eta", ylabel="#tau #phi", zlabel="Events", log=False, createLegend=None)
 
-    # Rebinning of TH2 (also rebinX and rebinY work)
-    drawPlot(createTH2Plot("TauSelection/TauSelection_selected_taus_eta_vs_phi", "TTJets"), "selectedtau_etavsphi_ttjets_rebin", xlabel="#tau #eta", ylabel="#tau #phi", zlabel="Events", log=False, createLegend=None, rebinToWidthX=0.2, rebinToWidthY=2*3.14159/24)
+    # Rebinning of TH2 (also rebinX and rebinY work), also background color
+    drawPlot(createTH2Plot("TauSelection/TauSelection_selected_taus_eta_vs_phi", "TTJets"), "selectedtau_etavsphi_ttjets_rebin", xlabel="#tau #eta", ylabel="#tau #phi", zlabel="Events", log=False, createLegend=None, rebinToWidthX=0.2, rebinToWidthY=2*3.14159/24, backgroundColor=ROOT.kGray)
 
     # Examples of couple of palettes available in (recent) ROOT and which might be better than the rainbow
     # http://root.cern.ch/drupal/content/rainbow-color-map
