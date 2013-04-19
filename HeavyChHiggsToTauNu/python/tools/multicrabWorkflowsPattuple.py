@@ -1945,7 +1945,10 @@ def addPattuple_v53_3_test3(datasets):
 def addPattuple_v53_3_test4(datasets):
     # Updated MET filters
     definitions = {
-        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
+        # 3498600 events, 1703 jobs
+        # User mean 3197.7, min 106.4, max 14338.6
+        # Mean 66.0 MB, min 4.7 MB, max 276.9 MB
+        "Tau_198941-202504_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_198941_202504_pattuple_v53_3_test4-fc12509d32dbe7cd07128ce5e0536686/USER"),
         }
 
     addPattuple_53X("v53_3_test4", datasets, definitions)
