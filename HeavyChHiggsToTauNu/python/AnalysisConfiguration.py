@@ -77,7 +77,7 @@ class ConfigBuilder:
 
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
-                 doQCDTailKillerScenarios = True, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
+                 doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
