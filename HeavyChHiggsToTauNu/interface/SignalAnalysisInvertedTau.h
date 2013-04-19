@@ -144,8 +144,8 @@ namespace HPlus {
 
 
     //    const double ftransverseMassCut;
-    const bool bBlindAnalysisStatus;
     const double fDeltaPhiCutValue;
+    const bool bBlindAnalysisStatus;
     Count fAllCounter;
     Count fWJetsWeightCounter;
     Count fVertexFilterCounter;
@@ -169,8 +169,8 @@ namespace HPlus {
     Count fBaselineBtagCounter;
     Count fBTaggingScaleFactorCounter;
     Count fBaselineDeltaPhiTauMETCounter;
-    //    Count fBaselineDeltaPhiMHTJet1CutCounter;
     Count fBaselineDeltaPhiVSDeltaPhiMHTJet1CutCounter;
+    //    Count fBaselineDeltaPhiMHTJet1CutCounter;
 
   
     Count fTauVetoAfterTauIDCounter;
@@ -356,6 +356,7 @@ namespace HPlus {
     WrappedTH1 *hSelectedTauEtBtagging;
     WrappedTH1 *hSelectedTauEtBjetVeto;
     WrappedTH1 *hSelectedTauEtBjetVetoPhiCuts;
+    WrappedTH1 *hSelectedTauEtTailKiller;
     WrappedTH1 *hSelectedTauEtDeltaPhiJet1Cut;
     WrappedTH1 *hSelectedTauEtDeltaPhiJet12Cut;
     WrappedTH1 *hSelectedTauEtDeltaPhiJet123Cut;
@@ -367,6 +368,7 @@ namespace HPlus {
 
     WrappedTH1 *hSelectedTauEtaMetCut;
     WrappedTH1 *hSelectedTauPhiMetCut;
+    WrappedTH1 *hSelectedTauRtauMetCut;
     WrappedTH1 *hSelectedTauEtAfterCuts;
     WrappedTH1 *hSelectedTauEtaAfterCuts;
     WrappedTH1 *hMetAfterCuts;

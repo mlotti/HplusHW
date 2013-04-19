@@ -64,6 +64,7 @@ namespace HPlus {
     fTausExistCounter(eventCounter.addCounter("Baseline: isolation, all passed taus")),
     fTauFakeScaleFactorBaselineCounter(eventCounter.addCounter("Baseline:tau fake scale factor, all passed taus")),
     fTauTriggerScaleFactorBaselineCounter(eventCounter.addCounter("Baseline:tau trig scale factor, all passed taus")),  
+    fOneTauCounter(eventCounter.addCounter("Baseline, taus = 1")),
     fBaselineTauIDCounter(eventCounter.addCounter("Baseline: at least one tau")),
     fBaselineEvetoCounter(eventCounter.addCounter("Baseline: electron veto")),
     fBaselineMuvetoCounter(eventCounter.addCounter("Baseline: muon veto")),
@@ -73,11 +74,10 @@ namespace HPlus {
     fBTaggingScaleFactorCounter(eventCounter.addCounter("Baseline: btagging scale factor")),
     fBaselineDeltaPhiTauMETCounter(eventCounter.addCounter("Baseline: DeltaPhi(Tau,MET) upper limit")),
     fBaselineDeltaPhiVSDeltaPhiMHTJet1CutCounter(eventCounter.addCounter("Baseline: DeltaPhi(Jets,MET) vs DeltaPhi cut")),
-    fOneTauCounter(eventCounter.addCounter("Baseline, taus = 1")),
     // confligt starts
+    fTauVetoAfterTauIDCounter(eventCounter.addCounter("Inverted: Taus found")),
     fTauFakeScaleFactorCounter(eventCounter.addCounter("Inverted: tau fake scale factor, all cands")),
     fTauTriggerScaleFactorCounter(eventCounter.addCounter("Inverted: tau trigger scale factor, all cands")),
-    fTauVetoAfterTauIDCounter(eventCounter.addCounter("Inverted: Taus found")),
     fElectronVetoCounter(eventCounter.addCounter("Inverted: electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("Inverted: muon veto")),
     fNJetsCounter(eventCounter.addCounter("Inverted: njets")),
@@ -162,10 +162,10 @@ namespace HPlus {
     fJetTauInvMass(iConfig.getUntrackedParameter<edm::ParameterSet>("jetTauInvMass"), eventCounter, fHistoWrapper),
     fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper),
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
-
-    fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
     fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
+
+    fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
     //    ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
@@ -174,6 +174,8 @@ namespace HPlus {
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTauTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("tauTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
+    fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
+    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper),
     //    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
@@ -182,8 +184,6 @@ namespace HPlus {
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WjetsWeight"),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
-    fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
-    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper),
     // Non-QCD Type II related
     fNonQCDTypeIIGroup(eventCounter),
     fAllTausCounterGroup(eventCounter, "All"),
@@ -335,7 +335,7 @@ namespace HPlus {
 
    // Selection flow histogram
     hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
-    if(hSelectionFlow.isActive()) {
+    if(hSelectionFlow->isActive()) {
       hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTrigger,"Trigger");
       hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
       hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauCandidateSelection,"#tau cand.");
@@ -349,8 +349,7 @@ namespace HPlus {
       hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMaxDeltaPhiJetMET,"#Delta#phi(jet,MET)");
       hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTopSelection,"top reco");
     }
-   */
-   
+
     hNonQCDTypeIISelectedTauEtAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NonQCDTypeII_SelectedTau_pT_AfterCuts", "SelectedTau_pT_AfterCuts;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 40, 0.0, 400.0);
     hNonQCDTypeIISelectedTauEtaAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NonQCDTypeII_SelectedTau_eta_AfterCuts", "SelectedTau_eta_AfterCuts;#tau #eta;N_{events} / 0.1", 30, -3.0, 3.0);
 
@@ -775,7 +774,7 @@ namespace HPlus {
     
  
     // Obtain MC matching
-    MCSelectedTauMatchType myTauMatch = matchTauToMC(iEvent, selectedTau);
+//    MCSelectedTauMatchType myTauMatch = matchTauToMC(iEvent, selectedTau);
  
   
     //Global electron veto
@@ -993,7 +992,7 @@ namespace HPlus {
 
     //    if( deltaPhiMetJet1  < triangleCut ) {
       increment(fDeltaPhiAgainstTTCutCounter);  
-      hMTInvertedAgainstTTCut->Fill(selectedTau->pt(), transverseMass); 
+////      hMTInvertedAgainstTTCut->Fill(selectedTau->pt(), transverseMass); 
       hSelectedTauEtDeltaPhiJetsAgainstTTCut->Fill(selectedTau->pt());
       //    }
 
