@@ -71,7 +71,7 @@ private:
   HPlus::TreeMuonBranches fMuonBranches;
   //HPlus::TreeElectronBranches fElectronBranches;
   HPlus::TreeTauBranches fTauBranches;
-  //HPlus::TreeJetBranches fJetBranches;
+  HPlus::TreeJetBranches fJetBranches;
 
   HPlus::TreeGenParticleBranches fGenTausOriginal;
   HPlus::TreeGenParticleBranches fGenTausEmbedded;
@@ -97,7 +97,7 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fMuonBranches(iConfig),
   //fElectronBranches(iConfig, fSelectedVertexBranches.getInputTag()),
   fTauBranches(iConfig),
-  //fJetBranches(iConfig, true)
+  fJetBranches(iConfig, false),
   fGenTausOriginal("gentausOriginal"),
   fGenTausEmbedded("gentausEmbedded")
 {
@@ -130,7 +130,7 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fMuonBranches.book(fTree);
   //fElectronBranches.book(fTree);
   fTauBranches.book(fTree);
-  //fJetBranches.book(fTree);
+  fJetBranches.book(fTree);
 
   fGenTausOriginal.book(fTree);
   fGenTausEmbedded.book(fTree);
@@ -160,7 +160,7 @@ void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   fMuonBranches.reset();
   //fElectronBranches.reset();
   fTauBranches.reset();
-  //fJetBranches.reset();
+  fJetBranches.reset();
 
   fGenTausOriginal.reset();
   fGenTausEmbedded.reset();
@@ -218,7 +218,7 @@ void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const ed
     }
   }
 
-  //fJetBranches.setValues(iEvent);
+  fJetBranches.setValues(iEvent);
 
   for(size_t i=0; i<fMets.size(); ++i) {
     edm::Handle<edm::View<reco::MET> > hmet;

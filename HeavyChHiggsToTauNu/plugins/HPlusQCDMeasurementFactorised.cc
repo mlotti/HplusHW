@@ -5,13 +5,13 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementBasic.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementFactorised.h"
 
-class HPlusQCDMeasurementBasicFilter : public edm::EDFilter {
+class HPlusQCDMeasurementFactorisedFilter : public edm::EDFilter {
  public:
 
-  explicit HPlusQCDMeasurementBasicFilter(const edm::ParameterSet&);
-  ~HPlusQCDMeasurementBasicFilter();
+  explicit HPlusQCDMeasurementFactorisedFilter(const edm::ParameterSet&);
+  ~HPlusQCDMeasurementFactorisedFilter();
 
  private:
   virtual void beginJob();
@@ -23,31 +23,31 @@ class HPlusQCDMeasurementBasicFilter : public edm::EDFilter {
   HPlus::EventWeight eventWeight;
   HPlus::HistoWrapper histoWrapper;
   HPlus::EventCounter eventCounter;
-  HPlus::QCDMeasurementBasic analysis;
+  HPlus::QCDMeasurementFactorised analysis;
 };
 
-HPlusQCDMeasurementBasicFilter::HPlusQCDMeasurementBasicFilter(const edm::ParameterSet& pset):
+HPlusQCDMeasurementFactorisedFilter::HPlusQCDMeasurementFactorisedFilter(const edm::ParameterSet& pset):
   eventWeight(pset),
   histoWrapper(eventWeight, pset.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   eventCounter(pset, eventWeight, histoWrapper),
   analysis(pset, eventCounter, eventWeight, histoWrapper)
 {
 }
-HPlusQCDMeasurementBasicFilter::~HPlusQCDMeasurementBasicFilter() {}
-void HPlusQCDMeasurementBasicFilter::beginJob() {}
+HPlusQCDMeasurementFactorisedFilter::~HPlusQCDMeasurementFactorisedFilter() {}
+void HPlusQCDMeasurementFactorisedFilter::beginJob() {}
 
-bool HPlusQCDMeasurementBasicFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+bool HPlusQCDMeasurementFactorisedFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
   eventCounter.endLuminosityBlock(iBlock, iSetup);
   return true;
 }
 
-bool HPlusQCDMeasurementBasicFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+bool HPlusQCDMeasurementFactorisedFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   return analysis.filter(iEvent, iSetup);
 }
 
-void HPlusQCDMeasurementBasicFilter::endJob() {
+void HPlusQCDMeasurementFactorisedFilter::endJob() {
   eventCounter.endJob();
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(HPlusQCDMeasurementBasicFilter);
+DEFINE_FWK_MODULE(HPlusQCDMeasurementFactorisedFilter);

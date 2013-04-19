@@ -58,7 +58,9 @@ searchMode = "Light"
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
+
 dataEra = "Run2012ABCD"
+
 
 print "dataEra"
 
@@ -255,13 +257,19 @@ def controlPlots(datasets):
     hmet = []
     hmetb = []
     effArray = []
+
+    effErrArray = []
+
     hmetbveto = []
     hmtBtag = []
     hmtBveto = []
     hmtNoMetBtag = []
     hmtNoMetBveto = []
     effBvetoArray = []
+    effErrBvetoArray = []
     effArrayMt= []
+    effErrArrayMt= []
+
     effArrayMtNoMet= []
     effErrArrayMtNoMet= []
     
@@ -314,9 +322,11 @@ def controlPlots(datasets):
         
         hmetb.append(mmtb)
         eff = mmtb.Integral()/mmt.Integral()
-        ereff = sqrt(eff*(1+eff)/mmt.Integral())
-        print " pt bin ", ptbin, " btag efficiency   = ",eff, " error ",ereff
+
+        ereff = sqrt(eff*(1-eff)/mmt.Integral())
+        print " pt bin ", ptbin, " btag efficiency  from MET = ",eff, " error ",ereff
         effArray.append(eff)
+        effErrArray.append(ereff)
 
 
         
@@ -343,63 +353,65 @@ def controlPlots(datasets):
 
 ## normalization  mT(btag/bveto)        
         eff = mmtb.Integral()/mmtbveto.Integral()
-        ereff = sqrt(eff*(1-eff))/mmtbveto.Integral()
-        print " pt bin ", ptbin, " btag/bveto  efficiency   = ",eff, " error ",ereff
-        effBvetoArray.append(eff)
 
+        ereff = sqrt(eff*(1-eff)/mmtbveto.Integral())
+        print " pt bin ", ptbin, " btag/bveto  efficiency from MET   = ",eff, " error ",ereff
+        effBvetoArray.append(eff)
+        effErrBvetoArray.append(ereff)
 
 ## with MT distribution 
-  
+        if False:  
         ###  no MET cut 
-        mmtb_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedTauIdBtagNoMetCut"+ptbin)])
-        mmtb_tmp._setLegendStyles()
-        mmtb_tmp._setLegendLabels()
-        mmtb_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mmtb_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-        mmtb = mmtb_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
-        mmtb.Scale(normData[ptbin])
-#        hmt.append(mt)
-
-        mmtbEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedTauIdBtagNoMetCut"+ptbin)])
-        mmtbEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-        mmtbEWK_tmp._setLegendStyles()
-        mmtbEWK_tmp._setLegendLabels()
-        mmtbEWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mmtbEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-        mmtbEWK = mmtbEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
-        mmtbEWK.Scale(normEWK[ptbin])
-        mmtb.Add(mmtbEWK, -1)
-
-        hmtNoMetBtag.append(mmtb)
+            mmtb_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedTauIdBtagNoMetCut"+ptbin)])
+            mmtb_tmp._setLegendStyles()
+            mmtb_tmp._setLegendLabels()
+            mmtb_tmp.histoMgr.setHistoDrawStyleAll("P") 
+            mmtb_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+            mmtb = mmtb_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+            mmtb.Scale(normData[ptbin])
+            #        hmt.append(mt)
+            
+            mmtbEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedTauIdBtagNoMetCut"+ptbin)])
+            mmtbEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+            mmtbEWK_tmp._setLegendStyles()
+            mmtbEWK_tmp._setLegendLabels()
+            mmtbEWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
+            mmtbEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+            mmtbEWK = mmtbEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+            mmtbEWK.Scale(normEWK[ptbin])
+            mmtb.Add(mmtbEWK, -1)
+            
+            hmtNoMetBtag.append(mmtb)
 
         
           ### MET with bvet
-        mmtbveto_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedTauIdBvetoNoMetCut"+ptbin)])
-        mmtbveto_tmp._setLegendStyles()
-        mmtbveto_tmp._setLegendLabels()
-        mmtbveto_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mmtbveto_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-        mmtbveto = mmtbveto_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
-        mmtbveto.Scale(normData[ptbin])
-#        hmt.append(mt)
-
-        mmtbvetoEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedTauIdBvetoNoMetCut"+ptbin)])
-        mmtbvetoEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-        mmtbvetoEWK_tmp._setLegendStyles()
-        mmtbvetoEWK_tmp._setLegendLabels()
-        mmtbvetoEWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mmtbvetoEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-        mmtbvetoEWK = mmtbvetoEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
-        mmtbvetoEWK.Scale(normEWK[ptbin])
-        mmtbveto.Add(mmtbvetoEWK, -1)        
-        hmtNoMetBveto.append(mmtbveto)
-
+            mmtbveto_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedTauIdBvetoNoMetCut"+ptbin)])
+            mmtbveto_tmp._setLegendStyles()
+            mmtbveto_tmp._setLegendLabels()
+            mmtbveto_tmp.histoMgr.setHistoDrawStyleAll("P") 
+            mmtbveto_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+            mmtbveto = mmtbveto_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+            mmtbveto.Scale(normData[ptbin])
+            #        hmt.append(mt)
+            
+            mmtbvetoEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedTauIdBvetoNoMetCut"+ptbin)])
+            mmtbvetoEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+            mmtbvetoEWK_tmp._setLegendStyles()
+            mmtbvetoEWK_tmp._setLegendLabels()
+            mmtbvetoEWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
+            mmtbvetoEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+            mmtbvetoEWK = mmtbvetoEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+            mmtbvetoEWK.Scale(normEWK[ptbin])
+            mmtbveto.Add(mmtbvetoEWK, -1)        
+            hmtNoMetBveto.append(mmtbveto)
+            
 ## normalization  mT(btag/bveto)        
-        eff = mmtb.Integral()/mmtbveto.Integral()
-        ereff = sqrt(eff*(1-eff))/mmtbveto.Integral()
-        print " pt bin ", ptbin, " btag/bveto  efficiency mt  = ",eff, " error ",ereff
-        effArrayMtNoMet.append(eff)
-        effErrArrayMtNoMet.append(ereff)
+            eff = mmtb.Integral()/mmtbveto.Integral()
+            ereff = sqrt(eff*(1-eff)/mmtbveto.Integral())
+            print " pt bin ", ptbin, " btag/bveto  efficiency from mt, no met cut  = ",eff, " error ",ereff
+            effArrayMtNoMet.append(eff)
+            effErrArrayMtNoMet.append(ereff)
+
         
 #############################################
         ###  with MET cut 
@@ -445,9 +457,12 @@ def controlPlots(datasets):
 
 ## normalization  mT(btag/bveto)        
         eff = mmtb.Integral()/mmtbveto.Integral()
-        ereff = sqrt(eff*(1+eff)/mmtbveto.Integral())
-        print " pt bin ", ptbin, " btag/bveto  efficiency mt  = ",eff, " error ",ereff
+
+        ereff = sqrt(eff*(1-eff)/mmtbveto.Integral())
+        print " pt bin ", ptbin, " btag/bveto  efficiency from mt  = ",eff, " error ",ereff
         effArrayMt.append(eff)
+        effErrArrayMt.append(ereff)
+
 
         
 ## sum histo bins     
@@ -478,23 +493,25 @@ def controlPlots(datasets):
         metbveto.Add(histo)
 
 ## with MT
-    
-    mtNoMetBtag = hmtNoMetBtag[0].Clone("mt")
-    mtNoMetBtag.SetName("MET")
-    mtNoMetBtag.SetTitle("Inverted tau Met")
-    mtNoMetBtag.Reset()
-    print "check MT btagging",mtNoMetBtag.GetEntries()
-    for histo in hmtNoMetBtag:
-        mtNoMetBtag.Add(histo)
 
-    
-    mtNoMetBveto = hmtNoMetBveto[0].Clone("mt")
-    mtNoMetBveto.SetName("MET")
-    mtNoMetBveto.SetTitle("Inverted tau Met")
-    mtNoMetBveto.Reset()
-    print "check MT bveto",mtNoMetBveto.GetEntries()
-    for histo in hmtNoMetBveto:
-        mtNoMetBveto.Add(histo)
+    if False:   
+        mtNoMetBtag = hmtNoMetBtag[0].Clone("mt")
+        mtNoMetBtag.SetName("MET")
+        mtNoMetBtag.SetTitle("Inverted tau Met")
+        mtNoMetBtag.Reset()
+        print "check MT btagging",mtNoMetBtag.GetEntries()
+        for histo in hmtNoMetBtag:
+            mtNoMetBtag.Add(histo)
+            
+            
+        mtNoMetBveto = hmtNoMetBveto[0].Clone("mt")
+        mtNoMetBveto.SetName("MET")
+        mtNoMetBveto.SetTitle("Inverted tau Met")
+        mtNoMetBveto.Reset()
+        print "check MT bveto",mtNoMetBveto.GetEntries()
+        for histo in hmtNoMetBveto:
+            mtNoMetBveto.Add(histo)
+
 
     mtBtag = hmtBtag[0].Clone("mt")
     mtBtag.SetName("MET")
@@ -527,12 +544,14 @@ def controlPlots(datasets):
     invertedQCD.mtComparison(BtaggingEffVsMet, BtaggingEffVsMet,"BtagToBvetoEffVsMet")
 
 
+    if False:
    ###  effisiency as a function of MT
-    mtWithBtagging = mtNoMetBtag.Clone("MT")
-    mtWithBtagging.Divide(mtNoMetBveto)
-    BtaggingEffNoMetVsMt = mtWithBtagging.Clone("Eff")
-    invertedQCD.setLabel("BtagToBvetoEffNoMetVsMt")
-    invertedQCD.mtComparison(BtaggingEffNoMetVsMt, BtaggingEffNoMetVsMt,"BtagToBvetoEffNoMetVsMt")
+        mtWithBtagging = mtNoMetBtag.Clone("MT")
+        mtWithBtagging.Divide(mtNoMetBveto)
+        BtaggingEffNoMetVsMt = mtWithBtagging.Clone("Eff")
+        invertedQCD.setLabel("BtagToBvetoEffNoMetVsMt")
+        invertedQCD.mtComparison(BtaggingEffNoMetVsMt, BtaggingEffNoMetVsMt,"BtagToBvetoEffNoMetVsMt")
+
 
     ###  effisiency as a function of MT
     mtWithBtagging = mtBtag.Clone("MT")
@@ -560,11 +579,43 @@ def controlPlots(datasets):
     ptbin = array.array("d",[45, 55, 65, 75, 90, 110 ,150])
 
 
-## Mt 2nd deltaPhi cut
-    cEff = TCanvas ("MtSecondDeltaCutPurity", "MtFirstSecondPhiCutPurity", 1)
+    if False:
+## no MET cut 
+        cEff = TCanvas ("btaggingEffNoMet", "btaggingEffNoMet", 1)
+        cEff.cd()     
+        graph = TGraphErrors(7, ptbin, array.array("d",effArrayMtNoMet),ptbin_error,array.array("d",effErrArrayMtNoMet))    
+        graph.SetMaximum(0.25)
+        graph.SetMinimum(0.0)
+        graph.SetMarkerStyle(kFullCircle)
+        graph.SetMarkerColor(kBlue)
+        graph.SetMarkerSize(1)
+        graph.GetYaxis().SetTitle("N_{b tagged}/N_{b veto}")
+        graph.GetXaxis().SetTitle("p_{T}^{#tau jet} [GeV]")
+### Re-draw graph and update canvas and gPad
+        graph.Draw("AP")
+        tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              19.6 fb^{-1}             CMS preliminary")
+        tex4.SetNDC()
+        tex4.SetTextSize(20)
+        tex4.Draw()
+        tex1 = ROOT.TLatex(0.2,0.88,"All selection cuts")
+        tex1.SetNDC()
+        tex1.SetTextSize(22)
+        #    tex1.Draw()
+        tex2 = ROOT.TLatex(0.5,0.8,"No MET cut" )
+        tex2.SetNDC()
+        tex2.SetTextSize(24)
+        tex2.Draw()
+
+        cEff.Update()
+        cEff.SaveAs("btagToBvetoEffNoMetVsPtTau_mt.png")
+
+
+
+## with MET cut 
+    cEff = TCanvas ("btaggingEff", "btaggingEff", 1)
     cEff.cd()     
-    graph = TGraphErrors(7, ptbin, array.array("d",effArrayMtNoMet),ptbin_error,array.array("d",effErrArrayMtNoMet))    
-    graph.SetMaximum(0.2)
+    graph = TGraphErrors(7, ptbin, array.array("d",effArrayMt),ptbin_error,array.array("d",effErrArrayMt))    
+    graph.SetMaximum(0.25)
     graph.SetMinimum(0.0)
     graph.SetMarkerStyle(kFullCircle)
     graph.SetMarkerColor(kBlue)
@@ -573,7 +624,40 @@ def controlPlots(datasets):
     graph.GetXaxis().SetTitle("p_{T}^{#tau jet} [GeV]")
 ### Re-draw graph and update canvas and gPad
     graph.Draw("AP")
-    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              12.2 fb^{-1}             CMS preliminary")
+
+    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              19.6 fb^{-1}             CMS preliminary")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    tex1 = ROOT.TLatex(0.2,0.88,"All selection cuts")
+    tex1.SetNDC()
+    tex1.SetTextSize(22)
+#    tex1.Draw()
+    tex2 = ROOT.TLatex(0.5,0.8,"After MET cut" )
+    tex2.SetNDC()
+    tex2.SetTextSize(24)
+    tex2.Draw()
+
+    cEff.Update()
+    cEff.SaveAs("btagToBvetoEffVsPtTau_mt.png")
+
+## no MET cut 
+    cEff = TCanvas ("btaggingEffNoMet", "btaggingEffNoMet", 1)
+    cEff.cd()     
+    graph = TGraphErrors(7, ptbin, array.array("d",effBvetoArray),ptbin_error,array.array("d",effErrBvetoArray))    
+    graph.SetMaximum(0.25)
+
+    graph.SetMinimum(0.0)
+    graph.SetMarkerStyle(kFullCircle)
+    graph.SetMarkerColor(kBlue)
+    graph.SetMarkerSize(1)
+    graph.GetYaxis().SetTitle("N_{b tagged}/N_{b veto}")
+    graph.GetXaxis().SetTitle("p_{T}^{#tau jet} [GeV]")
+### Re-draw graph and update canvas and gPad
+    graph.Draw("AP")
+
+    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              19.6 fb^{-1}             CMS preliminary")
+
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
@@ -587,7 +671,41 @@ def controlPlots(datasets):
     tex2.Draw()
 
     cEff.Update()
-    cEff.SaveAs("btaggingEffNoMetVsPtTau.png")
+
+    cEff.SaveAs("btagToBvetoEffNoMetVsPtTau.png")
+
+
+
+## with MET cut 
+    cEff = TCanvas ("btaggingEfficiency", "btaggingEfficiency", 1)
+    cEff.cd()     
+    graph = TGraphErrors(7, ptbin, array.array("d",effArray),ptbin_error,array.array("d",effErrArray))    
+    graph.SetMaximum(0.25)
+    graph.SetMinimum(0.0)
+    graph.SetMarkerStyle(kFullCircle)
+    graph.SetMarkerColor(kBlue)
+    graph.SetMarkerSize(1)
+    graph.GetYaxis().SetTitle("b-tagging efficiency")
+    graph.GetXaxis().SetTitle("p_{T}^{#tau jet} [GeV]")
+### Re-draw graph and update canvas and gPad
+    graph.Draw("AP")
+
+    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              19.6 fb^{-1}             CMS preliminary")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    tex1 = ROOT.TLatex(0.4,0.85,"Inverted #tau identification")
+    tex1.SetNDC()
+    tex1.SetTextSize(22)
+    tex1.Draw()
+    tex2 = ROOT.TLatex(0.4,0.78,"At least 3 jets" )
+    tex2.SetNDC()
+    tex2.SetTextSize(24)
+    tex2.Draw()
+
+    cEff.Update()
+    cEff.SaveAs("btaggingEffVsPtTau.png")
+
 
 
 ##################################3

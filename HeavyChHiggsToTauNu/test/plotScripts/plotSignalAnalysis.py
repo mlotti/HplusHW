@@ -47,7 +47,7 @@ searchMode = "Light"
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-#dataEra = "Run2011AB"
+dataEra = "Run2011AB"
 
 #dataEra = "Run2012A"
 #dataEra = "Run2012B"
