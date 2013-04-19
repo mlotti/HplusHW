@@ -15,13 +15,20 @@ searchMode = "Light"
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2012ABCD"
+dataEra = "Run2011AB"
 
-optMode = "OptQCDTailKillerLoose"
 
-binning = [41,50,60,70,80,100,120,150,200]
+optMode = "OptQCDTailKillerMedium"
+#optMode = ""
+
+#binning = [41,50,60,70,80,100,120,150,200]
+
+binning = [41,50,60,70,80,100,120,150,300]
 
 HISTONAMES = []
+
+
+
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
@@ -29,6 +36,7 @@ HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterDeltaPhiJetsAgainstTTCut")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts")
+
 
 import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
@@ -70,6 +78,7 @@ def main():
     style = tdrstyle.TDRStyle()
 
     plot = plots.PlotBase()
+    
 
     legends = {}
     name_re = re.compile("SelectedTau_pT_(?P<name>\S+)")
@@ -80,14 +89,32 @@ def main():
         if match:
             name = match.group("name")
         legends["Purity%s"%i] = name
+#        if "AfterMetCut"  in name:    
+#            legends["Purity%s"%i] = "MET > 60 GeV"
+        if "AfterMetCut"  in name:    
+            legends["Purity%s"%i] = "MET > 60 GeV"
+        if "AfterBtagging"  in name:    
+            legends["Purity%s"%i] = "B tagging"
+        if "AfterBveto"  in name:    
+            legends["Purity%s"%i] = "B-jet veto"
+        if "AfterBvetoPhiCuts"  in name:    
+            legends["Purity%s"%i] = "B-jet veto, TailKiller"
+        if "AfterDeltaPhiJetsAgainstTTCut"  in name:    
+            legends["Purity%s"%i] = "TailKiller" 
+    plot.createFrame("purityMedium", opts={"xmin": 40, "xmax": 200, "ymin": 0., "ymax": 1.05})
 
-    plot.createFrame("purity", opts={"xmin": 40, "xmax": 200, "ymin": 0., "ymax": 1.05})
     plot.frame.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
     plot.frame.GetYaxis().SetTitle("Purity")
 #    plot.setEnergy(datasets.getEnergies())
+
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
-    plot.setLegend(histograms.createLegend(0.4, 0.2, 0.85, 0.4))
+
+    plot.setLegend(histograms.createLegend(0.53, 0.2, 0.98, 0.4))
+    
+ 
+    histograms.addText(0.2, 0.3, "TailKiller: Medium", 18)
+
 
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText(s="%s TeV"%(datasets.getEnergies()[0]))

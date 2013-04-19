@@ -107,6 +107,11 @@ config = {
     "53XdataPromptDv1": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "GR_P_V42_AN3::All",
     },
+    "53Xdata22Jan2013": {"triggerProcess": "HLT", "recoProcess": "RECO",
+        "globalTag": "FT_53_V21_AN3::All",
+#        "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/TauParked/Run2012B-22Jan2013-v1/AOD/0AEC9EA9-776F-E211-9FB2-00266CF2ABA8.root",
+    },
     "53XmcS10": {
         "simProcess": "SIM",
         "triggerProcess": "HLT",

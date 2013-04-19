@@ -34,6 +34,9 @@ dataEra = "Run2012ABCD"
 searchMode = "Light"
 #searchMode = "Heavy"
 
+searchMode = "Light"
+#searchMode = "Heavy"
+
 def usage():
     print "\n"
     print "### Usage:   InvertedTauID_InvVsBaselineComparison.py <multicrab dir>\n"

@@ -48,7 +48,7 @@ def makeFakeRatePlot(histos, label, fileprefix, mydir):
     c = ROOT.TCanvas()
     c.SetLogy()
     hFrame = ROOT.TH1F("frame","frame",2,40,200)
-    hFrame.SetMinimum(1.0e-5)
+    hFrame.SetMinimum(1.0e-3)
     hFrame.SetMaximum(1.0)
     hFrame.Draw()
     hFrame.SetXTitle(label)
@@ -114,7 +114,7 @@ def makeDeltaPtPlot(histos, label, fileprefix, mydir):
 def main(opts):
     tdrstyle.TDRStyle()
     # loop over datasets
-    histoPath = "signalAnalysis%s/TauDebug/"%opts.era[0]
+    histoPath = "signalAnalysis%s%s/NormalisationAnalysis/TauFakeRate"%(opts.runType[0], opts.era[0])
     for mydir in opts.dirs:
         histosVsTauPt = []
         histosVsJetPt = []
@@ -143,7 +143,7 @@ def main(opts):
         histosDeltaPt.append([getHistogram(rootFile, "%s/TauVsJetDeltaPtuds"%histoPath), "uds#rightarrow#tau", -1, -1]);
         makeDeltaPtPlot(histosDeltaPt, "#tau p_{T} - ref.jet p_{T} , GeV/c", "tauRefJetDeltaPt", mydir)
         hDeltaPtMode0 = []
-        myPath = "signalAnalysis%s/"%opts.era[0]
+        myPath = "signalAnalysis%s%s"%(opts.runType[0],opts.era[0])
         hDeltaPtMode0.append([getHistogram(rootFile, "%s/DeltaPtDecayMode0"%myPath), "tau pT - jet pT", -1, -1]);
         hDeltaPtMode0.append([getHistogram(rootFile, "%s/DeltaPtDecayMode0NoNeutralHadrons"%myPath), "tau pT - jet pT*(1-neutralHadronEnergyFraction)", -1, -1]);
         makeDeltaPtPlot(hDeltaPtMode0, "e/jet#rightarrow#tau decay mode 0: #Delta p_{T}, GeV/c", "tauRefJetDeltaPtDecayMode0", mydir)
@@ -162,6 +162,7 @@ if __name__ == "__main__":
     parser.add_option("-d", dest="dirs", action="append", help="name of sample directory inside multicrab dir (multiple directories can be specified with multiple -d arguments)")
     parser.add_option("-v", dest="variation", action="append", help="name of variation")
     parser.add_option("-e", dest="era", action="append", help="name of era")
+    parser.add_option("-t", dest="runType", action="append", help="type of run (light / heavy)")
     (opts, args) = parser.parse_args()
 
     # Check that proper arguments were given

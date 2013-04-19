@@ -61,7 +61,9 @@ searchMode = "Light"
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2012ABCD"
+dataEra = "Run2011AB"
+
+optMode = "OptQCDTailKillerLoose"
 
 optMode = "OptQCDTailKillerLoose"
 
