@@ -1585,6 +1585,14 @@ def controlPlots(datasets):
     print "met after tauId ",allMet.GetEntries()
     invertedQCD.setLabel("MetBtaggingEfficiency")
     invertedQCD.efficiency(Btagging, allMet,"MetBtaggingEfficiency")
+    
+    # MET efficiency
+    Bveto = metBveto.Clone("metBveto")
+    allMet = met.Clone("met")
+    print " met batg",Bveto.GetEntries()
+    print "met after tauId ",allMet.GetEntries()
+    invertedQCD.setLabel("MetBvetoEfficiency")
+    invertedQCD.efficiency(Bveto, allMet,"MetBvetoEfficiency")
 
 # mt inverted-baseline comparison with bveto, closure
     bveto_inverted = hClosureBveto.Clone("hmtvSum")

@@ -195,7 +195,9 @@ class InvertedTauID:
             
         if "MetBtaggingEfficiency" in name:
            plot.histoMgr.setHistoLegendLabelMany({"Inv": "After b tagging","Base": "After #tau ID "})
-
+           
+        if "MetBvetoEfficiency" in name:
+           plot.histoMgr.setHistoLegendLabelMany({"Inv": "After b-jet veto","Base": "After #tau ID "})
 
            
        # Set the legend styles
@@ -213,13 +215,19 @@ class InvertedTauID:
             plot.createFrame("Efficiency"+self.label, opts={"ymin":0.1, "xmax": 300},
                              createRatio=True, opts2={"ymin": 0.01, "ymax": 1}, # bounds of the ratio plot
                              )
-       
+        if "MetBvetoEfficiency"  in name:
+            plot.createFrame("Efficiency"+self.label, opts={"ymin":0.1, "xmax": 300},
+                             createRatio=True, opts2={"ymin": 0.1, "ymax": 2}, # bounds of the ratio plot
+                             )       
             
         # Set Y axis of the upper pad to logarithmic
            
                
     
         if "MetBtaggingEfficiency"  in name:
+            plot.getPad1().SetLogy(True)
+            plot.getPad2().SetLogy(True)
+        if "MetBvetoEfficiency"  in name:
             plot.getPad1().SetLogy(True)
             plot.getPad2().SetLogy(True)
  #       if "BjetsInvertedVsBaseline"  in name:
@@ -232,7 +240,8 @@ class InvertedTauID:
         
         if "MetBtaggingEfficiency" in name:            
             plot.setLegend(histograms.createLegend(0.55,0.75,0.95,0.90))
-
+        if "MetBvetoEfficiency" in name:            
+            plot.setLegend(histograms.createLegend(0.55,0.75,0.95,0.90))
   
   
         histograms.addCmsPreliminaryText()
