@@ -296,6 +296,7 @@ namespace HPlus {
   const GenParticleAnalysis::Data* genDataPtr) {
     // Define a FullHiggsMassCalculator::Data object to hold many different values of interest and be returned at the end.
     Data output;
+
     if (bPrintDebugOutput) std::cout << "==================================================================" << std::endl;
 
     // CALCULATION USING RECONSTRUCTED MOMENTA
@@ -303,9 +304,12 @@ namespace HPlus {
     // Find the b-jet that is closest to the selected tau in (eta, phi) space this b-jet is assumed to come from the same 
     // side of the Feynman diagram as the selected tau.
     edm::Ptr<pat::Jet> selectedRecoBJet = FullHiggsMassCalculator::findHiggsSideBJet(bData, myTau);
-    if (bPrintDebugOutput) {
-      if (selectedRecoBJet.isNull()) std::cout << "No reco Higgs side b-jet found!The code will crash." << std::endl;
-      else std::cout << "Reco Higgs side b-jet found" << std::endl;
+    if (selectedRecoBJet.isNull()) {
+      // ...the event does not contain a tagged b-jet, set a few values and return:
+      if (bPrintDebugOutput) std::cout << "No reco Higgs side b-jet found!" << std::endl;
+      output.fHiggsMassSolutionSelected = -1;
+      output.bPassedEvent = false;
+      return output;
     }
     TVector3 recoBJetVector(selectedRecoBJet->px(), selectedRecoBJet->py(), selectedRecoBJet->pz());
     TVector3 recoTauVector(myTau->px(), myTau->py(), myTau->pz());
@@ -814,7 +818,8 @@ namespace HPlus {
   }
   
   void FullHiggsMassCalculator::applyCuts(FullHiggsMassCalculator::Data& output) {
-    if (output.fTopMassSolutionSelected < 140.0 || output.fTopMassSolutionSelected > 200.0) output.bPassedEvent = false;
+    //if (output.fTopMassSolutionSelected < 140.0 || output.fTopMassSolutionSelected > 200.0) output.bPassedEvent = false;
+    if (output.fTopMassSolutionSelected < 100.0 || output.fTopMassSolutionSelected > 240.0) output.bPassedEvent = false;
     //if (output.fDiscriminant < -20000) output.bPassedEvent = false; // At -20000, the cut does not make much difference
     //TMath::Abs(output.fModifiedMET - <original MET>)
   }

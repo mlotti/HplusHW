@@ -21,7 +21,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configurations
-multicrabDir = "../multicrab_130415_131721"
+#multicrabDir = "../multicrab_130418_114926"
+multicrabDir = "../multicrab_130417_135419"
+
+cutInfoSuffix = ""
+if multicrabDir == "../multicrab_130418_114926":
+    cutInfoSuffix = "_noTopMassCut"
+
 analysis = "signalAnalysis"
 # Data era affects on the set of selected data datasets, and the PU
 # weights (via TDirectory name in histograms.root)
@@ -29,8 +35,8 @@ analysis = "signalAnalysis"
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
 
-plotSignalOnly = True
-#plotSignalOnly = False
+#plotSignalOnly = True
+plotSignalOnly = False
 #plotAllMassPointsTogether = True
 plotAllMassPointsTogether = False
 mcOnly = True
@@ -38,7 +44,8 @@ mcOnly = True
 mcOnlyLumi = 5000 # 1/pb
 # Set lightHplusMassPoint to a value < 0 if you want to plot all the masses:
 #lightHplusMassPoint = 120
-lightHplusMassPoints = [80, 90, 100, 120, 140, 150, 155, 160]
+#lightHplusMassPoints = [80, 90, 100, 120, 140, 150, 155, 160]
+lightHplusMassPoints = [80, 100, 120, 140, 160]
 lightHplusTopBR = 0.02
 removeQCD = True
 #removeQCD = False
@@ -47,7 +54,17 @@ discriminantPlotBinWidth = 5000 # GeV^2
 #massPlotNormToOne = True
 massPlotNormToOne = False
 
+counterLabels = {
+    "Greater solution closest": "max-|p_{#nu, z}|",
+    "Smaller solution closest": "min-|p_{#nu, z}|",
+    "TauNuAngleMax solution closest": "max-#alpha_{#tau, #nu}",
+    "TauNuAngleMin solution closest": "min-#alpha_{#tau, #nu}",
+    "TauNuDeltaEtaMax solution closest": "max-#Delta#eta_{#tau, #nu}",
+    "TauNuDeltaEtaMin solution closest": "min-#Delta#eta_{#tau, #nu}",
+    }
 
+# Change legend creator defaults
+histograms.createLegend.moveDefaults(dx=-0.05)
 
 # main function
 def main():
@@ -93,10 +110,6 @@ def doEverything(lightHplusMassPoint):
     # Remove QCD datasets (because the simulated QCD background is negligible but has huge artefacts)
     if removeQCD:
         datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
-
-
-    # Change legend creator defaults
-    histograms.createLegend.moveDefaults(dx=-0.05)
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
     xsect.setHplusCrossSectionsToBR(datasets, br_tH=lightHplusTopBR, br_Htaunu=1)
@@ -144,6 +157,8 @@ def doEverything(lightHplusMassPoint):
     # Create plots
     doPlots(datasets, lightHplusMassPoint)
 
+    doCounters(datasets)
+
     if interactiveMode:
         raw_input("*** Press \"Enter\" to exit pyROOT: ")
 
@@ -152,7 +167,6 @@ def doEverything(lightHplusMassPoint):
 drawPlot = plots.PlotDrawer(log=True, addLuminosityText=True, stackMCHistograms=True, addMCUncertainty=True)
 if plotSignalOnly:
     drawPlot = plots.PlotDrawer(log=True, addLuminosityText=True, stackMCHistograms=False, addMCUncertainty=False)
-    
     
 
 # Define plots to draw
@@ -226,46 +240,60 @@ def doPlots(datasets, lightHplusMassPoint):
 
 
     # PLOT: top invariant mass in generator
-    drawPlot(createPlot("FullHiggsMass/TopInvariantMassInGenerator", normalizeToOne=massPlotNormToOne),
-             "TopInvariantMassInGenerator"+nameSuffix, xlabel="m(b, #tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth,
-             log=False, rebinToWidthX=massPlotBinWidth)
+#     drawPlot(createPlot("FullHiggsMass/TopInvariantMassInGenerator", normalizeToOne=massPlotNormToOne),
+#              "TopInvariantMassInGenerator"+nameSuffix, xlabel="m(b, #tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth,
+#              log=False, rebinToWidthX=massPlotBinWidth)
 
     # PLOT: Higgs invariant mass using the chosen selection method (RECO, GEN, GEN_NuToMET)
-    drawPlot(createPlot("FullHiggsMass/HiggsMass", normalizeToOne=massPlotNormToOne), "HiggsMass"+nameSuffix,
-             xlabel="m_{#tau, #nu_{#tau}}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
-    if plotSignalOnly:
-        drawPlot(createPlot("FullHiggsMass/HiggsMass_GEN", normalizeToOne=massPlotNormToOne),
-                 "HiggsMass_GEN"+nameSuffix+"_TauNuAngleMax",
-                 xlabel="m_{#tau, #nu_{#tau}} (MC truth)",
-                 ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
-        drawPlot(createPlot("FullHiggsMass/HiggsMass_GEN_NeutrinosReplacedWithMET", normalizeToOne=massPlotNormToOne),
-                 "HiggsMass_GEN_NuToMET"+nameSuffix+"_TauNuAngleMax",
-                 xlabel="m_{#tau, #nu_{#tau}} (MC truth, #nu_{#tau} #leftrightarrow  #slash{E}_{T})",
-                 ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
+    drawPlot(createPlot("FullHiggsMass/HiggsMass", normalizeToOne=massPlotNormToOne), "HiggsMass"+cutInfoSuffix+nameSuffix,
+             xlabel="m_{#tau, #nu_{#tau}}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+             cutLine=lightHplusMassPoint)
+#     if plotSignalOnly:
+#         drawPlot(createPlot("FullHiggsMass/HiggsMass_GEN", normalizeToOne=massPlotNormToOne),
+#                  "HiggsMass_GEN"+nameSuffix+"_TauNuAngleMax",
+#                  xlabel="m_{#tau, #nu_{#tau}} (MC truth)",
+#                  ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
+#         drawPlot(createPlot("FullHiggsMass/HiggsMass_GEN_NeutrinosReplacedWithMET", normalizeToOne=massPlotNormToOne),
+#                  "HiggsMass_GEN_NuToMET"+nameSuffix+"_TauNuAngleMax",
+#                  xlabel="m_{#tau, #nu_{#tau}} (MC truth, #nu_{#tau} #leftrightarrow  #slash{E}_{T})",
+#                  ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
+
+    # PLOT: Higgs invariant mass using the chosen selection method, positive discriminant only
+    drawPlot(createPlot("FullHiggsMass/HiggsMassPositiveDiscriminant", normalizeToOne=massPlotNormToOne),
+             "HiggsMassPosDisc"+nameSuffix,
+             xlabel="m_{#tau, #nu_{#tau}}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+             cutLine=lightHplusMassPoint)
+
+    # PLOT: Higgs invariant mass using the chosen selection method, negative discriminant only
+    drawPlot(createPlot("FullHiggsMass/HiggsMassNegativeDiscriminant", normalizeToOne=massPlotNormToOne),
+             "HiggsMassNegDisc"+cutInfoSuffix+nameSuffix,
+             xlabel="m_{#tau, #nu_{#tau}}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+             cutLine=lightHplusMassPoint)
+
 
     # PLOT: Higgs invariant mass for each different selection method
-    selectionMethods = [
-        "greater",
-        "smaller",
-        "tauNuAngleMax",
-        "tauNuAngleMin",
-        "tauNuDeltaEtaMax",
-        "tauNuDeltaEtaMin"
-        ]
-    for selectionMethod in selectionMethods:
-        drawPlot(createPlot("FullHiggsMass/HiggsMass_"+selectionMethod, normalizeToOne=massPlotNormToOne),
-                 "HiggsMass_"+selectionMethod+nameSuffix,
-                 xlabel="m_{#tau, #nu_{#tau}} ["+selectionMethod+"]", ylabel="Events / %d GeV"%massPlotBinWidth, log=False,
-                 rebinToWidthX=massPlotBinWidth)
-        if plotSignalOnly:
-            drawPlot(createPlot("FullHiggsMass/HiggsMass_GEN_"+selectionMethod, normalizeToOne=massPlotNormToOne),
-                     "HiggsMass_GEN_"+selectionMethod+nameSuffix,
-                     xlabel="m_{#tau, #nu_{#tau}} (MC truth) ["+selectionMethod+"]",
-                     ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
-            drawPlot(createPlot("FullHiggsMass/HiggsMass_GEN_NuToMET_"+selectionMethod, normalizeToOne=massPlotNormToOne),
-                     "HiggsMass_GEN_NuToMET_"+selectionMethod+nameSuffix,
-                     xlabel="m_{#tau, #nu_{#tau}} (MC truth, #nu_{#tau} #leftrightarrow  #slash{E}_{T}) ["+selectionMethod+"]",
-                     ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
+#     selectionMethods = [
+#         "greater",
+#         "smaller",
+#         "tauNuAngleMax",
+#         "tauNuAngleMin",
+#         "tauNuDeltaEtaMax",
+#         "tauNuDeltaEtaMin"
+#         ]
+#     for selectionMethod in selectionMethods:
+#         drawPlot(createPlot("FullHiggsMass/HiggsMass_"+selectionMethod, normalizeToOne=massPlotNormToOne),
+#                  "HiggsMass_"+selectionMethod+nameSuffix,
+#                  xlabel="m_{#tau, #nu_{#tau}} ["+selectionMethod+"]", ylabel="Events / %d GeV"%massPlotBinWidth, log=False,
+#                  rebinToWidthX=massPlotBinWidth)
+#         if plotSignalOnly:
+#             drawPlot(createPlot("FullHiggsMass/HiggsMass_GEN_"+selectionMethod, normalizeToOne=massPlotNormToOne),
+#                      "HiggsMass_GEN_"+selectionMethod+nameSuffix,
+#                      xlabel="m_{#tau, #nu_{#tau}} (MC truth) ["+selectionMethod+"]",
+#                      ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
+#             drawPlot(createPlot("FullHiggsMass/HiggsMass_GEN_NuToMET_"+selectionMethod, normalizeToOne=massPlotNormToOne),
+#                      "HiggsMass_GEN_NuToMET_"+selectionMethod+nameSuffix,
+#                      xlabel="m_{#tau, #nu_{#tau}} (MC truth, #nu_{#tau} #leftrightarrow  #slash{E}_{T}) ["+selectionMethod+"]",
+#                      ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
     
 
 #     # PLOT: HiggsMassPure
@@ -282,9 +310,16 @@ def doPlots(datasets, lightHplusMassPoint):
     # TH2 and COLZ, disable legend
     tdrstyle.setDeepSeaPalette()
     drawPlot(createTH2Plot("FullHiggsMass/TransMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
-             "TransMassVsInvMass"+nameSuffix,
-             xlabel="m_{T}", ylabel="m_{#tau, #nu_{#tau}}", zlabel="Events", log=False, createLegend=None,
-             opts={"xmax": 200, "ymax": 200})
+             "TransMassVsInvMass"+cutInfoSuffix+nameSuffix,
+             xlabel="(M_{H^{+}} = %d GeV)          m_{T}"%lightHplusMassPoint, ylabel="m_{#tau, #nu_{#tau}}",
+             zlabel="Events", log=False, createLegend=None,
+             opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+    if not plotSignalOnly:
+        drawPlot(createTH2Plot("FullHiggsMass/TransMassVsInvMass", "TTJets"),
+                 "TransMassVsInvMass_ttbarOnly"+cutInfoSuffix,
+                 xlabel="(t#bar{t} only)          m_{T}", ylabel="m_{#tau, #nu_{#tau}}", zlabel="Events",
+                 log=False, createLegend=None,
+                 opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
 
 #     # Examples of couple of palettes available in (recent) ROOT and which might be better than the rainbow
 #     # http://root.cern.ch/drupal/content/rainbow-color-map
@@ -327,19 +362,35 @@ def doPlots(datasets, lightHplusMassPoint):
              rebinToWidthX=discriminantPlotBinWidth, cutLine=0)
 
     # PLOT: Counters
-    counterLabels = ["eka", "toka", "kolmas", "neljas", "kuudes", "viides"]
-#     drh_reco = datasets.getDataset("TTToHplus_M%d"%lightHplusMassPoint).getDatasetRootHisto(
-#         "counters/FullHiggsMassCalculator")
-#     drh_reco.normalizeToLuminosity(mcOnlyLumi)
-#     h_reco = drh_reco.getHistogram()
     def renameLabels(p):
         axis = p.getFrame().GetXaxis()
-        for i in range(0, 5):
-            axis.SetBinLabel(i, counterLabels[i])
-        
-    drawPlot(createPlot("counters/FullHiggsMassCalculator", normalizeToOne=massPlotNormToOne), "Counters"+nameSuffix,
-             xlabel = "Event counters", ylabel = "Passed events", log=False, opts={"xmin": 4, "xmax": 10},
+        axis.LabelsOption("d")
+        axis.CenterLabels(True)
+        for i in range(1, 7):
+            axis.SetBinLabel(i, counterLabels[str(axis.GetBinLabel(i))])
+#            axis.SetBinLabel(i, counterLabels[i])
+    drawPlot(createPlot("counters/weighted/FullHiggsMassCalculator", normalizeToOne=massPlotNormToOne), "Counters"+nameSuffix,
+             xlabel = "", ylabel = "Event count", log=False, opts={"xmin": 4, "xmax": 10},
              customizeBeforeDraw=renameLabels)
+
+
+def doCounters(datasets):
+    # Create EventCounter object, holds all counters of all datasets
+    eventCounter = counter.EventCounter(datasets)
+
+    # Normalize counters
+    if mcOnly:
+        eventCounter.normalizeMCToLuminosity(mcOnlyLumi)
+    else:
+        eventCounter.normalizeMCByLuminosity()
+
+    # Create LaTeX format, automatically adjust value precision by uncertainty
+    latexFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.4f", withPrecision=2))
+
+    table = eventCounter.getSubCounterTable("FullHiggsMassCalculator")
+    table.renameRows(counterLabels)
+    print table.format(latexFormat)
+
 
 # Helper function to add mHplus and BR text  
 def addMassBRText(plot, x, y, lightHplusMassPoint):
