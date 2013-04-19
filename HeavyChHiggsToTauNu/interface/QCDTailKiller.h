@@ -40,6 +40,8 @@ namespace HPlus {
       ~Data();
 
       const bool passedEvent() const { return fPassedEvent; }
+      const bool passedBackToBackCuts() const;
+      const bool passedCollinearCuts() const;
       /// Getters for counted values (in degreees)
       const double getDeltaPhiTauMET() const { return fDeltaPhiTauMET; }
       const double getDeltaPhiJetMET(int njet) const;
