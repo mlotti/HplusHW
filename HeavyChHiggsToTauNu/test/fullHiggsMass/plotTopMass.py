@@ -43,28 +43,6 @@ if not mcOnly:
     datasets.loadLuminosities()
 datasets.updateNAllEventsToPUWeighted()
 
-# # Construct datasets as stated in the multicrab.cfg of the execution
-# # directory. The returned object is of type DatasetManager.
-# #datasets = dataset.getDatasetsFromMulticrabCfg(counters = "qcdMeasurementMethod2Part1Counters")
-# #datasets.updateNAllEventsToPUWeighted()
-
-# # Construct datasets from the given list of CRAB task directories
-# datasets = dataset.getDatasetsFromCrabDirs(["TTToHplusBWB_M120_Fall11"])
-# #datasets = dataset.getDatasetsFromCrabDirs(["TTbar_Htaunu_M80"])
-
-# # Construct datasets from a given list of (name, pathToRooTFile) pairs
-# #datasets = dataset.getDatasetsFromRootFiles([("QCD_Pt120to170", "QCD_Pt120to170/res/histograms-QCD_Pt120to170.root")])
-
-
-# Load dataset luminosities from a 'lumi.json' file
-#datasets.loadLuminosities()
-
-# Merge:
-#  - all data datasets to 'Data'
-#  - all QCD datasets to 'QCD'
-#  - all single top datasets to 'SingleTop'
-# Rename the physical dataset names to logical (essentially drop the Tune and Winter10)
-# Reorder to the 'standard' order, all 'nonstandard' are left to the end
 plots.mergeRenameReorderForDataMC(datasets)
 
 # This can be used to merge datasets:
