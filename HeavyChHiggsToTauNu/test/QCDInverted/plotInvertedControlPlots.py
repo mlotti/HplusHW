@@ -57,6 +57,8 @@ mcOnlyLumi = 5000 # pb
 searchMode = "Light"
 #searchMode = "Heavy"
 
+optMode = "OptQCDTailKillerTightPlus"
+
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
@@ -81,7 +83,7 @@ def main():
 
     # Read the datasets
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis) 
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode) 
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
 #    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
 #    datasets.updateNAllEventsToPUWeighted()
@@ -761,7 +763,7 @@ def controlPlots(datasets):
     print "check mtFactorised",mtFactorised.GetEntries()
     for histo in hmtfac:
         mtFactorised.Add(histo)  
-    print "Integral with bins - EWK = ",mtFactorised.Integral()
+    print "Integral with bins  factorised - EWK = ",mtFactorised.Integral()
 
 # mt with btagging, no deltaPhi cuts
     hmtSumb = hmtb[0].Clone("mtSumb")
@@ -771,7 +773,7 @@ def controlPlots(datasets):
     print "check hmtsum",hmtSum.GetEntries()
     for histo in hmtb:
         hmtSumb.Add(histo)  
-    print "Integral with bins - EWK = ",hmtSumb.Integral()
+    print "Integral with bins after B tagging- EWK = ",hmtSumb.Integral()
 #    print "Integral inclusive  = ",hmt.Integral()
 
 

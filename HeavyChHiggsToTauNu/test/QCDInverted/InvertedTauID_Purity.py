@@ -17,11 +17,18 @@ searchMode = "Light"
 #dataEra = "Run2011B"
 dataEra = "Run2012ABCD"
 
-binning = [41,50,60,70,80,100,120,150,300]
+optMode = "OptQCDTailKillerLoose"
+
+binning = [41,50,60,70,80,100,120,150,200]
 
 HISTONAMES = []
-HISTONAMES.append("SelectedTau_pT_AfterTauID")
-#HISTONAMES.append("SelectedTau_pT_AfterMetCut")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterDeltaPhiJetsAgainstTTCut")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts")
 
 import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
@@ -47,7 +54,7 @@ def main():
     dirs = []
     dirs.append(sys.argv[1])
         
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode)
     datasets.loadLuminosities()
     datasets.updateNAllEventsToPUWeighted()
 
@@ -74,16 +81,16 @@ def main():
             name = match.group("name")
         legends["Purity%s"%i] = name
 
-    plot.createFrame("purity", opts={"xmin": 40, "ymin": 0., "ymax": 1.2})
-    plot.frame.GetXaxis().SetTitle("tau p_{T} (GeV/c)")
+    plot.createFrame("purity", opts={"xmin": 40, "xmax": 200, "ymin": 0., "ymax": 1.05})
+    plot.frame.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
     plot.frame.GetYaxis().SetTitle("Purity")
-    plot.setEnergy(datasets.getEnergies())
+#    plot.setEnergy(datasets.getEnergies())
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
-    plot.setLegend(histograms.createLegend(0.6, 0.3, 0.8, 0.4))
+    plot.setLegend(histograms.createLegend(0.4, 0.2, 0.85, 0.4))
 
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    histograms.addEnergyText(s="%s TeV"%(datasets.getEnergies()[0]))
     histograms.addLuminosityText(x=None, y=None, lumi=datasets.getDataset("Data").getLuminosity())
 
     plot.draw()
