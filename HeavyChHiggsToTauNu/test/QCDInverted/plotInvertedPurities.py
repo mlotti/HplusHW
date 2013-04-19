@@ -34,6 +34,7 @@ from InvertedTauID import *
 
 # Configuration
 analysis = "signalAnalysisInvertedTau"
+#analysis = "signalAnalysisInvertedTauOptQCDTailKillerLoose"
 #analysis = "signalOptimisation"
 #analysis = "signalAnalysisJESMinus03eta02METMinus10"
 #analysis = "EWKFakeTauAnalysisJESMinus03eta02METMinus10"
@@ -60,7 +61,9 @@ searchMode = "Light"
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2012ABCD"
+dataEra = "Run2011AB"
+
+optMode = "OptQCDTailKillerLoose"
 
 print "dataEra"
 
@@ -81,7 +84,7 @@ def main():
 
     # Read the datasets
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis) 
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode) 
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
 #    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
 #    datasets.updateNAllEventsToPUWeighted()
@@ -322,7 +325,7 @@ def invertedPurities(datasets):
         error = -999
         if mt.Integral() > 0:
             purity = (mt.Integral() - mtEWK.Integral())/ mt.Integral()
-            error = sqrt(purity*(1+purity))/mt.Integral()
+            error = sqrt(purity*(1-purity)/mt.Integral())
             purityMtSecondDeltaPhiCut.append(purity)
             purityErrMtSecondDeltaPhiCut.append(error)                         
 #        print " pt bin ", ptbin, " purity Mt Second Delta Phi Cut    = ",purity, " error ",error
@@ -357,7 +360,7 @@ def invertedPurities(datasets):
         error = -999
         if mtb.Integral() > 0:
             purity = (mtb.Integral() - mtbEWK.Integral())/ mtb.Integral()
-            error = sqrt(purity*(1+purity))/mtb.Integral()
+            error = sqrt(purity*(1-purity)/mtb.Integral())
             purityMtAfterBtagging.append(purity)
             purityErrMtAfterBtagging.append(error)                         
 #        print " pt bin ", ptbin, " purity Mt After Btagging    = ",purity, " error ",error 
@@ -390,7 +393,7 @@ def invertedPurities(datasets):
         error = -999
         if mtph.Integral() > 0:
             purity = (mtph.Integral() - mtphEWK.Integral())/ mtph.Integral()
-            error = sqrt(purity*(1+purity))/mtph.Integral()
+            error = sqrt(purity*(1-purity)/mtph.Integral())
             purityMtDeltaPhiCut.append(purity)
             purityErrMtDeltaPhiCut.append(error)                         
 #        print " pt bin ", ptbin, " purity Mt DeltaPhi Cut    = ",purity, " error ",error 
@@ -427,7 +430,7 @@ def invertedPurities(datasets):
         error = -999
         if mtphj1.Integral() > 0:
             purity = (mtphj1.Integral() - mtphj1EWK.Integral())/ mtphj1.Integral()
-            error = sqrt(purity*(1+purity))/mtphj1.Integral()
+            error = sqrt(purity*(1-purity)/mtphj1.Integral())
             purityMtFirstDeltaPhiCut.append(purity)
             purityErrMtFirstDeltaPhiCut.append(error)                         
 #        print " pt bin ", ptbin, " purity Mt First Delta Phi Cut    = ",purity, " error ",error 
@@ -461,7 +464,7 @@ def invertedPurities(datasets):
         error = -999
         if mtphj2.Integral() > 0:
             purity = (mtphj2.Integral() - mtphj2EWK.Integral())/ mtphj2.Integral()
-            error = sqrt(purity*(1+purity))/mtphj2.Integral()
+            error = sqrt(purity*(1-purity)/mtphj2.Integral())
             purityMtThirdDeltaPhiCut.append(purity)
             purityErrMtThirdDeltaPhiCut.append(error)                         
  #       print " pt bin ", ptbin, " purity Mt Third Delta Phi Cut    = ",purity, " error ",error 
@@ -494,7 +497,7 @@ def invertedPurities(datasets):
         error = -999
         if  mtremovett.Integral() > 0:
             purity = (mtremovett.Integral() - mtremovettEWK.Integral())/ mtremovett.Integral()
-            error = sqrt(purity*(1+purity))/mtremovett.Integral()
+            error = sqrt(purity*(1-purity)/mtremovett.Integral())
             purityMtRemovett.append(purity)
             purityErrMtRemovett.append(error)                         
             print "mtremovett.Integral() ",mtremovett.Integral(), " mmtEWK.Integral() ",   mtremovettEWK.Integral()      
@@ -530,7 +533,7 @@ def invertedPurities(datasets):
         error = -999
         if mmt.Integral() > 0:
             purity = (mmt.Integral() - mmtEWK.Integral())/ mmt.Integral()
-            error = sqrt(purity*(1+purity))/mmt.Integral()
+            error = sqrt(purity*(1-purity)/mmt.Integral())
             purityMet.append(purity)
             purityErrMet.append(error)
 ##            print "mmt.Integral() ",mmt.Integral(), " mmtEWK.Integral() ",   mmtEWK.Integral()
@@ -566,7 +569,7 @@ def invertedPurities(datasets):
         error = -999
         if mtphj2.Integral() > 0:
             purity = (mtphj2.Integral() - mtphj2EWK.Integral())/ mtphj2.Integral()
-            error = sqrt(purity*(1+purity))/mtphj2.Integral()
+            error = sqrt(purity*(1-purity)/mtphj2.Integral())
             purityMTInvertedTauIdBvetoDphi.append(purity)
             purityErrMTInvertedTauIdBvetoDphi.append(error)                         
  #       print " pt bin ", ptbin, " purity Mt Third Delta Phi Cut    = ",purity, " error ",error 
@@ -729,7 +732,7 @@ def invertedPurities(datasets):
     metqcd = metQCD.Clone("metqcd")
     metinv = met.Clone("met")
     invertedQCD.setLabel("MetPurity")
-    invertedQCD.mtComparison(metqcd, metqcd,"MetPurity")
+#    invertedQCD.mtComparison(metqcd, metqcd,"MetPurity")
        
 ##########################################
 # mt purity no deltaPhi
@@ -760,9 +763,9 @@ def invertedPurities(datasets):
 # mt bveto purity all deltaPhi cuts
 ## test
     invertedQCD.setLabel("testMtbveto")
-    invertedQCD.mtComparison(mtDphiAllbveto, mtDphiAllbveto,"testMtbveto")
+#    invertedQCD.mtComparison(mtDphiAllbveto, mtDphiAllbveto,"testMtbveto")
     invertedQCD.setLabel("testEWKMtbveto")
-    invertedQCD.mtComparison(mtDphiAllEWKbveto, mtDphiAllEWKbveto,"testEWKMtbveto")
+#    invertedQCD.mtComparison(mtDphiAllEWKbveto, mtDphiAllEWKbveto,"testEWKMtbveto")
     
     mtQCD = mtDphiAllbveto.Clone("QCD")
     mtQCD.Add(mtDphiAllEWKbveto,-1)
@@ -803,6 +806,7 @@ def invertedPurities(datasets):
     cEff.cd()
     ptbin_error = array.array("d",[5, 5, 5, 5, 10, 10 ,30])
     ptbin = array.array("d",[45, 55, 65, 75, 90, 110 ,150])
+
 
     
     graph = TGraphErrors(7, ptbin, array.array("d",purityMTInvertedTauIdBvetoDphi),ptbin_error,array.array("d",purityErrMTInvertedTauIdBvetoDphi))    
