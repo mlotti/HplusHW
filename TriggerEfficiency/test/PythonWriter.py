@@ -83,6 +83,9 @@ class PythonWriter:
             #fOUT.write("\ntauLegEfficiency_"+name+" = cms.untracked.PSet(\n")
             fOUT.write("\n"+name+" = cms.untracked.PSet(\n")
 
+############            fOUT.write("\ntauLegEfficiency_"+name+" = cms.untracked.PSet(\n")
+
+
             fOUT.write("    # The selected triggers for the efficiency. If one trigger is\n")
             fOUT.write("    # given, the parametrization of it is used as it is (i.e.\n")
             fOUT.write("    # luminosity below is ignored). If multiple triggers are given,\n")
