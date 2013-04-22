@@ -47,7 +47,7 @@ searchMode = "Light"
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2011AB"
+#dataEra = "Run2011AB"
 
 #dataEra = "Run2012A"
 #dataEra = "Run2012B"
@@ -107,12 +107,12 @@ def main():
 #    datasets.getDataset("HplusTB_M300").setCrossSection(0.0334) # pb
 
     # sigma x BR for tanbeta=40 at 8 TeV (using tanbeta^2 dep)
-#    datasets.getDataset("HplusTB_M180").setCrossSection(0.9637) # pb
-#    datasets.getDataset("HplusTB_M190").setCrossSection(0.9637) # pb
+    datasets.getDataset("HplusTB_M180").setCrossSection(0.9637) # pb
+    datasets.getDataset("HplusTB_M190").setCrossSection(0.9637) # pb
     datasets.getDataset("HplusTB_M200").setCrossSection(0.5136) # pb
-#    datasets.getDataset("HplusTB_M220").setCrossSection(0.5136) # pb  
-#    datasets.getDataset("HplusTB_M250").setCrossSection(0.1394) # pb
-#    datasets.getDataset("HplusTB_M300").setCrossSection(0.0594) # pb
+    datasets.getDataset("HplusTB_M220").setCrossSection(0.5136) # pb  
+    datasets.getDataset("HplusTB_M250").setCrossSection(0.1394) # pb
+    datasets.getDataset("HplusTB_M300").setCrossSection(0.0594) # pb
 
     
     # Remove signals other than M120
@@ -295,8 +295,8 @@ def doPlots(datasets):
 #    drawPlot(createPlot("JetSelection/jet_phi"), "jetPhi", rebin=1, xlabel="#phi^{jet}", ylabel="Jets / %.2f", opts={"ymin": 20},textFunction=lambda: addMassBRText(x=0.3, y=0.87))
     drawPlot(createPlot("ControlPlots/Njets"), "NumberOfJets", xlabel="Number of selected jets", ylabel="Events", ratio=False, opts={"xmax": 11,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=3)
     
-#    drawPlot(createPlot("JetSelection/betaGenuine"), "betaGenuine", rebin=5,xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c",  opts={"ymaxfactor": 2},  moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06},textFunction=lambda: addMassBRText(x=0.6, y=0.3), cutLine=30)
-#    drawPlot(createPlot("JetSelection/betaPU"), "betaPU", rebin=5,  xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c", opts={"ymaxfactor": 5},moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.6, y=0.25), cutLine=30)
+    drawPlot(createPlot("JetSelection/betaGenuine"), "betaGenuine", rebin=5,xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c",  opts={"ymaxfactor": 2},  moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06},textFunction=lambda: addMassBRText(x=0.6, y=0.3), cutLine=30)
+    drawPlot(createPlot("JetSelection/betaPU"), "betaPU", rebin=5,  xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c", opts={"ymaxfactor": 5},moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.6, y=0.25), cutLine=30)
 
         
     # MET
