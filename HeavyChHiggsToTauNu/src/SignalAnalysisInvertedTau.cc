@@ -230,7 +230,7 @@ namespace HPlus {
     hSelectedTauRtau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_Rtau_AfterTauID", "SelectedTau_Rtau_AfterTauID;R_{#tau};N_{events} / 0.1", 240, 0., 1.2);
 
     hSelectedTauLeadingTrackPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_TauLeadingTrackPt", "SelectedTau_TauLeadingTrackPt;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 200, 0.0, 400.0);
-    hTransverseMassTailKiller = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTailKiller", "transverseMassTailKiller", 200, 0., 400.);   
+    //    hTransverseMassTailKiller = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "transverseMassTailKiller", "transverseMassTailKiller", 200, 0., 400.);   
 
     hMETBaselineTauId =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauId", 250, 0.0 , 500.0 );
     hMETBaselineTauIdJets =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdJets", 250, 0.0 , 500.0 );
@@ -245,8 +245,10 @@ namespace HPlus {
     //    hMTBaselineTauIdJetTailKiller = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdJetTailKiller", 200, 0.0, 400.0 );
     hMTBaselineTauIdBtag =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdBtag", 200, 0.0, 400.0 );
     //    hMTBaselineTauIdBvetoDphi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdBvetoDphi", 200, 0.0, 400.0 );
-    hMTBaselineTauIdPhi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdPhi", 200, 0.0, 400.0 );
-    hMTBaselineTauIdAllCutsTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaselineTauIdAllCutsTailKiller", 200, 0.0, 400.0 ); 
+    //    hMTBaselineTauIdPhi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdPhi", 200, 0.0, 400.0 );
+
+    hMTBaselineTauIdAllCutsTailKiller =  new HistogramsInBins(HistoWrapper::kSystematics, eventCounter, fHistoWrapper, "BaseLine","MTBaselineTauIdAllCutsTailKiller", 200, 0.0, 400.0 ); 
+
     hMTBaselineTauIdNoMetBveto =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaselineTauIdNoMetBveto", 200, 0.0, 400.0 );
     hMTBaselineTauIdNoMetBvetoTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaselineTauIdNoMetBvetoTailKiller", 200, 0.0, 400.0 );
     hMTBaselineTauIdNoMetBtag =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaselineTauIdNoMetBtag", 200, 0.0, 400.0 );
@@ -259,8 +261,10 @@ namespace HPlus {
     hMTInvertedTauIdBtag =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBtag", 200, 0.0, 400.0 ); 
     hMTInvertedTauIdNoBtagging=  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdNoBtagging", 200, 0.0, 400.0 ); 
     hMTInvertedTauIdBveto =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBveto", 200, 0.0, 400.0 ); 
-    hMTInvertedTauIdBvetoDphi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBvetoDphi", 200, 0.0, 400.0 ); 
-    hMTInvertedAllCutsTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedAllCutsTailKiller", 200, 0.0, 400.0 );
+    hMTInvertedTauIdBvetoDphi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBvetoDphi", 200, 0.0, 400.0 );
+ 
+    hMTInvertedAllCutsTailKiller =  new HistogramsInBins(HistoWrapper::kSystematics, eventCounter, fHistoWrapper, "Inverted","MTInvertedAllCutsTailKiller", 200, 0.0, 400.0 );
+
     hMTInvertedNoBtagging = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedNoBtagging", 200, 0.0, 400.0 );    
     hMTInvertedNoBtaggingTailKiller = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedNoBtaggingTailKiller", 200, 0.0, 400.0 );
 
@@ -718,7 +722,7 @@ namespace HPlus {
        
 
   // mT with b tagging and deltaPhi cuts 
-    hMTBaselineTauIdPhi->Fill(selectedTau->pt() ,transverseMass );
+    //    hMTBaselineTauIdPhi->Fill(selectedTau->pt() ,transverseMass );
     hMTBaselineTauIdAllCutsTailKiller->Fill(selectedTau->pt() ,transverseMass );    
     return true;
   }

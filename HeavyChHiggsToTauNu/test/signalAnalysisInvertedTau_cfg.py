@@ -38,7 +38,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilde
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=1000, # default is -1
                         customizeLightAnalysis=customize,
-                        doQCDTailKillerScenarios=True,
+                        doQCDTailKillerScenarios=False,
                         #doAgainstElectronScan=True,
                         doSystematics=True,
                         #histogramAmbientLevel = "Vital",
