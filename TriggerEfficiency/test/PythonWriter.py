@@ -15,7 +15,8 @@ class PythonWriter:
         def Print(self):
             print "check Parameters",self.name,self.label,self.runrange,self.lumi
 
-    def __init__(self):
+    def __init__(self,title):
+        self.title  = title
         self.ranges = []
         self.mcs    = []
         self.namedSelection = []
@@ -81,10 +82,7 @@ class PythonWriter:
             selection = ns[1]
 
             #fOUT.write("\ntauLegEfficiency_"+name+" = cms.untracked.PSet(\n")
-            fOUT.write("\n"+name+" = cms.untracked.PSet(\n")
-
-############            fOUT.write("\ntauLegEfficiency_"+name+" = cms.untracked.PSet(\n")
-
+            fOUT.write("\n"+self.title+"_"+name+" = cms.untracked.PSet(\n")
 
             fOUT.write("    # The selected triggers for the efficiency. If one trigger is\n")
             fOUT.write("    # given, the parametrization of it is used as it is (i.e.\n")
@@ -143,7 +141,7 @@ class PythonWriter:
     def writeBins(self,fOUT,label,eff,ihisto=0):
         fOUT.write("            bins = cms.VPSet(\n")
         nbins = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetN()
-        for i in range(nbins):
+        for i in range(1,nbins):
             binLowEdge = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetX()[i]
             binLowEdge-= eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorX(i)
             efficiency = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetY()[i]

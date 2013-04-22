@@ -77,7 +77,7 @@ class ConfigBuilder:
 
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
-                 doQCDTailKillerScenarios = True, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
+                 doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
@@ -353,8 +353,8 @@ class ConfigBuilder:
             module.Tree.fill = self.doFillTree
             module.histogramAmbientLevel = self.histogramAmbientLevel
             module.tauEmbeddingStatus = (self.options.tauEmbeddingInput != 0)
-#            if len(additionalCounters) > 0:
-#                module.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+            if len(additionalCounters) > 0:
+                module.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
         if len(analysisLightModules) > 0:
             analysisLightModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
             #analysisLightModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)

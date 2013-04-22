@@ -52,12 +52,27 @@ void printImmediateDaughters(const reco::Candidate& p);
 void printDaughters(const reco::Candidate& p);
 
 namespace HPlus {
+//   EventClassification::EventClassification(EventCounter& eventCounter, HistoWrapper& histoWrapper):
+//     BaseSelection(eventCounter, histoWrapper) {}
+  
+//   EventClassification::~EventClassification() {}
 
-//   edm::Service<TFileService> fs;
-//   // Create folder to hold histograms
-//   TFileDirectory myDir = fs->mkdir("EventClassification");
-
-//------------------------> PRIVATE MEMBER FUNCTIONS <------------------------
+  bool eventHasLightChargedHiggs(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      if (TMath::Abs(p.pdgId()) == 37) {
+	// check if the H+ is light
+	if (p.mass() < 166.0) {
+	  //std::cout << "Event has a genuine light charged Higgs boson!" << std::endl;
+	  return true;
+	}
+      }
+    }
+    //std::cout << "Event does not have a genuine charged Higgs boson." << std::endl;
+    return false;
+  }
 
   size_t getHiggsLine(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
@@ -75,23 +90,18 @@ namespace HPlus {
     return 999999999;
   }
 
-//------------------------> PUBLIC MEMBER FUNCTIONS <-------------------------
-
-  bool eventHasGenChargedHiggs(const edm::Event& iEvent) {
+  reco::Candidate* getChargedHiggs(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
-    for (size_t i=0; i < genParticles->size(); ++i) {
-      const reco::Candidate & p = (*genParticles)[i];
-      if (TMath::Abs(p.pdgId()) == 37) {
-	//std::cout << "Event has a genuine charged Higgs boson!" << std::endl;
-	return true;
-      }
-    }
-    //std::cout << "Event does not have a genuine charged Higgs boson." << std::endl;
-    return false;
+    size_t myHiggsLine = getHiggsLine(iEvent);
+    if (myHiggsLine > 999999) return NULL;
+    // Grab charged Higgs
+    const reco::Candidate& chargedHiggs = (*genParticles)[myHiggsLine];
+    return &const_cast<reco::Candidate&>(chargedHiggs); // This complicated expression is required to get rid of the constness
+    // It can be read as follows: return the address of the reco::Candidate object "chargedHiggs" after making it volatile
+    // (as opposed to const) as a pointer.
   }
-
-  // Improvement: return HiggsSideTopLine instead of pointer to reco::Candidate?
+  
   reco::Candidate* getGenHiggsSideTop(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -147,45 +157,6 @@ namespace HPlus {
     return myHiggsSideBJet;
   }
 
-//   reco::Candidate* getGenHiggsSideBJetVector(const edm::Event& iEvent) {
-//     edm::Handle <reco::GenParticleCollection> genParticles;
-//     iEvent.getByLabel("genParticles", genParticles);
-//     TVector3 myGenHiggsSideBJetVector(0.0, 0.0, 0.0);
-//     // Look at Higgs side top daughters to find b-jet.    
-//     reco::Candidate* myHiggsSideTop = getGenHiggsSideTop(iEvent); // ->CHECK!
-//     if (!myHiggsSideTop) return myGenHiggsSideBJetVector;
-//     for (size_t i=0; i < genParticles->size(); ++i) {
-//       const reco::Candidate & p = (*genParticles)[i];
-//       if (TMath::Abs(p.pdgId()) == 5) { // or 
-// 	reco::Candidate* myBMother = const_cast<reco::Candidate*>(p.mother());
-//         bool myStatus = true;
-//         while (myStatus) {
-//           if (!myBMother)  myStatus = false;
-//           else {
-// 	    std::cout << "EventClassification: B quark mother = " << myBMother->pdgId() << std::endl;
-//             if (TMath::Abs(myBMother->pdgId()) == 6) {
-//               myStatus = false;
-//               // Below is where we check if the b jet comes from the Higgs side top.   
-// 	      double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myBMother->p4(), myHiggsSideTop->p4());
-//               if (myDeltaR < 0.01) {
-// 		myGenHiggsSideBJetVector.SetXYZ(p.px(), p.py(), p.pz());
-//                 myHiggsSideBJet = const_cast<reco::Candidate*>(&p);
-//                 i = genParticles->size(); // to end the enclosing for loop
-//               }
-//             }
-//             if (myStatus)
-//               myBMother = const_cast<reco::Candidate*>(myBMother->mother());
-//           }
-//         }
-//       }
-//     }
-//     std::cout << "FullMass: Higgs side bjet found, pt=" << std::endl;
-//     //<< myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
-//     return myGenHiggsSideBJetVector;
-//   }
-  
-  //bool eventHasTauFromHiggs() {}
-
   reco::Candidate* getGenTauFromHiggs(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -210,6 +181,31 @@ namespace HPlus {
     }
     return NULL;
   }
+
+  reco::Candidate* getGenNeutrinoFromHiggs(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    //    reco::Candidate& myTauFromHiggs;
+    size_t myHiggsLine = getHiggsLine(iEvent);
+    if (myHiggsLine > 999999) return NULL;
+    // Grab charged Higgs and get its daughters
+    const reco::Candidate& chargedHiggs = (*genParticles)[myHiggsLine];    
+    std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(chargedHiggs);
+    int daughterId = 9999999;
+    for(size_t d=0; d<daughters.size(); ++d) {
+      //const reco::GenParticle daughterParticle = *daughters[d];
+      const reco::Candidate& daughterParticle = *daughters[d];
+      daughterId = daughterParticle.pdgId();
+      // If tau neutrino among immediate daughters
+      if (abs(daughterId) == 16) {
+	//myTauFromHiggs = const_cast<reco::Candidate*>(&daughterParticle);
+	//myTauFromHiggs = const_cast<reco::Candidate*>(&daughterParticle);
+	reco::Candidate* myNeutrinoFromHiggs = const_cast<reco::Candidate*>(&daughterParticle);
+	return myNeutrinoFromHiggs;
+      }
+    }
+    return NULL;    
+}
 
   TVector3 getGenTauFromHiggsVector(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
@@ -290,7 +286,26 @@ namespace HPlus {
     return myVisibleTauMomentum;
   }
 
-  TVector3 getGenMETVector(const edm::Event& iEvent) {
+  TVector3 getInvisibleMomentum(const reco::Candidate& tau) {
+    std::vector<const reco::GenParticle*> tauDaughters = getImmediateDaughters(tau);
+    int tauDaughterId = 9999999;
+    TVector3 myInvisibleTauMomentum(0.0, 0.0, 0.0);
+    for(size_t t=0; t<tauDaughters.size(); ++t) {
+      const reco::Candidate& tauDaughter = *tauDaughters[t];
+      tauDaughterId = tauDaughter.pdgId();
+      // If a tau neutrino is found, add its momentum to get the invisible part
+      if (abs(tauDaughterId) == 12 || abs(tauDaughterId) == 14 || abs(tauDaughterId) == 16) {
+	myInvisibleTauMomentum.SetXYZ(
+				    myInvisibleTauMomentum.Px() + tauDaughter.px(),
+				    myInvisibleTauMomentum.Py() + tauDaughter.py(),
+				    myInvisibleTauMomentum.Pz() + tauDaughter.pz());
+	//std::cout << "EventClassification: neutrino (ID = " << tauDaughterId << ") momentum added to tau invisible momentum" << std::endl;
+      }
+    }
+    return myInvisibleTauMomentum;
+  }
+
+  TVector3 calculateGenMETVectorFromNeutrinos(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
     int pId = 9999999;
@@ -316,19 +331,13 @@ namespace HPlus {
 	currentNeutrinoVector.SetXYZ(p.px(), p.py(), p.pz());
 	myGenMET += currentNeutrinoVector;
       }
-
-//       if (hasImmediateMother(p,12) || hasImmediateMother(p,14) || hasImmediateMother(p,16) ||
-// 	  hasImmediateMother(p,-12) || hasImmediateMother(p,-14) || hasImmediateMother(p,-16)) continue;
-//       if (TMath::Abs(pId) == 12 || TMath::Abs(pId) == 14 || TMath::Abs(pId) == 16) {
-// 	currentNeutrinoVector.SetXYZ(p.px(), p.py(), p.pz());
-// 	myGenMET += currentNeutrinoVector;
-//       }
     }
     //std::cout << "EventClassification:   Old GenMET.Pt() = " << oldGenMET.Pt() << std::endl;
-    //std::cout << "EventClassification:   New GenMET.Pt() = " << myGenMET.Pt() << std::endl;
+    std::cout << "EventClassification:   GenMET.Pt() = " << myGenMET.Pt() << std::endl;
+    std::cout << "EventClassification:   GenNeutrinoPz = " << myGenMET.Pz() << std::endl;
     return myGenMET;
   }
-  
+
   bool hasGenVisibleTauWithinDeltaR(const edm::Event& iEvent, TVector3 recoTauVector, double deltaRCut) {
     TVector3 genVisibleTauVector(0.0, 0.0, 0.0);
     edm::Handle <reco::GenParticleCollection> genParticles;

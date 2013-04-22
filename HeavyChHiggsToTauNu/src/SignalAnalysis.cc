@@ -320,7 +320,7 @@ namespace HPlus {
     htransverseMassTauFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassTauFound", "transverseMassTauFound", 200, 0., 400.);
 
 
-    hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     //<<<<<<< HEAD
 
     hTransverseMassAgainstTTCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassAgainstTTCut", "transverseMassAgainstTTCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
@@ -989,9 +989,8 @@ namespace HPlus {
 
 //------ Improved delta phi cut, a.k.a. QCD tail killer // FIXME: place of cut still to be determined
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
-    if (qcdTailKillerData.passedEvent()) {
-      increment(fQCDTailKillerCounter);
-    }
+    if (!qcdTailKillerData.passedEvent()) return false;
+    increment(fQCDTailKillerCounter);
 
 //------ Delta phi(tau,MET) cut
 
@@ -1284,7 +1283,8 @@ namespace HPlus {
     }
 
 
-    FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+    FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData,
+										       metData, &genData);
     double HiggsMass = FullHiggsMassData.getHiggsMass();
     if (HiggsMass > 100 && HiggsMass < 200 ) increment(fHiggsMassCutCounter);
     hFullMass->Fill(HiggsMass);
