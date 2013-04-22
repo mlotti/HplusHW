@@ -988,8 +988,8 @@ void TTEffAnalyzer2::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   edm::Handle<edm::View<pat::Tau> > htaus;
   iEvent.getByLabel(pfTauSrc_, htaus);
 
-  for(size_t i=0; i<htaus->size(); ++i) {
-    const pat::Tau& tau = htaus->at(i);
+  for(size_t iTau=0; iTau<htaus->size(); ++iTau) {
+    const pat::Tau& tau = htaus->at(iTau);
     PFTauPt_.push_back(tau.pt());
     PFTauEt_.push_back(tau.et());
     PFTauEta_.push_back(tau.eta());
