@@ -331,6 +331,7 @@ datasets.extend([
     DataDataset("TauPlusX_%s_2012A_Jan22", reco="22Jan2013", runs=(190456, 193621), aod="/TauPlusX/Run2012A-22Jan2013-v1/AOD"), # 7350406 events, 487 files
     DataDataset("TauPlusX_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/TauPlusX/Run2012B-22Jan2013-v1/AOD"), # 39411579 events, 3006 files
     DataDataset("TauPlusX_%s_2012C_Jan22", reco="22Jan2013", runs=(198022, 203742), aod="/TauPlusX/Run2012C-22Jan2013-v1/AOD"), # 53083103 events, 7862 files
+    DataDataset("TauPlusX_%s_2012D_Jan22", reco="22Jan2013", runs=(203777, 208686), aod="/TauPlusX/Run2012D-22Jan2013-v1/AOD"), # 63421453 events, 5395 files
 ])
 
 # MultiJet(Parked) PD, QuadJet trigger for signal
@@ -347,6 +348,8 @@ datasets.extend([
 # BJetPlusX PD, QuadJet trigger for signal
 datasets.extend([
     DataDataset("BJetPlusX_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/BJetPlusX/Run2012B-22Jan2013-v1/AOD"), # 27868808 events, 2289 files
+    DataDataset("BJetPlusX_%s_2012C_Jan22", reco="22Jan2013", runs=(198022, 203742), aod="/BJetPlusX/Run2012C-22Jan2013-v1/AOD"), # 36498856 events, 3091 files
+    DataDataset("BJetPlusX_%s_2012D_Jan22", reco="22Jan2013", runs=(203777, 208686), aod="/BJetPlusX/Run2012D-22Jan2013-v1/AOD"), # 40926332 events, 3943 files
 ])
 
 # SingleMu PD, Mu trigger for embedding, IsoMu trigger for muon efficiency measurement
