@@ -272,7 +272,15 @@ process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
         HltResults      = cms.InputTag("TriggerResults","",hltType),
 	TriggerEvent    = cms.InputTag("hltTriggerSummaryAOD","",hltType),
 	PatTriggerEvent = cms.InputTag("patTriggerEvent"),
-        HltObjectFilter = cms.InputTag("hltPFTau35TrackPt20LooseIsoProng2","",hltType),   
+        HltObjectLastFilter = cms.InputTag("hltPFTau35TrackPt20LooseIsoProng2","",hltType),
+        HltObjectFilters = cms.VInputTag([cms.InputTag(f, "", hltType) for f in [
+                "hltPFTau35",
+                "hltPFTau35Track",
+                "hltPFTau35TrackPt20",
+                "hltPFTau35TrackPt20LooseIso",
+                "hltPFTau35TrackPt20LooseIsoProng2",
+            ]]
+        ),
 #        HltObjectFilter = cms.InputTag("hltQuadJet80L1FastJet","",hltType),
         HltPaths = cms.vstring(
             "HLT_IsoMu17_v5", "HLT_IsoMu17_v6", "HLT_IsoMu17_v8", "HLT_IsoMu17_v9", "HLT_IsoMu17_v10", "HLT_IsoMu17_v11", "HLT_IsoMu17_v13", "HLT_IsoMu17_v14",

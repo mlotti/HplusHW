@@ -127,6 +127,20 @@ private:
     bool value;
   };
 
+  struct TriggerFilter {
+    TriggerFilter(const edm::InputTag& f): filter(f) {}
+    void book(TTree *tree, const std::string& prefix) {
+      tree->Branch((prefix+filter.label()).c_str(), &values);
+    }
+    void reset() {
+      objects.clear();
+      values.clear();
+    }
+    edm::InputTag filter;
+    std::vector<trigger::TriggerObject> objects;
+    std::vector<bool> values;
+  };
+
   struct MET {
     MET(const edm::InputTag& s, const std::string& n): src(s), name(n) {}
     void book(TTree *tree) {
@@ -234,6 +248,7 @@ private:
   std::vector<float> PFJet_l1JetMatchDR_;
 
   std::vector<int> PFTau_matchedHLTObject_;
+  std::vector<TriggerFilter> PFTau_matchedHLTObjectFilters_;
 
 
   // L2 per-tau
@@ -270,7 +285,7 @@ private:
 TTEffAnalyzer2::TTEffAnalyzer2(const edm::ParameterSet& iConfig):
   hltResultsSrc_(iConfig.getParameter<edm::InputTag>("HltResults")),
   hltEventSrc_(iConfig.getParameter<edm::InputTag>("TriggerEvent")),
-  hltFilterSrc_(iConfig.getParameter<edm::InputTag>("HltObjectFilter")),
+  hltFilterSrc_(iConfig.getParameter<edm::InputTag>("HltObjectLastFilter")),
   pfTauSrc_(iConfig.getParameter<edm::InputTag>("LoopingOver")),
   pileupSummaryInfoSrc_(iConfig.getParameter<edm::InputTag>("PileupSummaryInfoSource")),
   pfJetSrc_(iConfig.getParameter<edm::InputTag>("Jets")),
@@ -304,6 +319,11 @@ TTEffAnalyzer2::TTEffAnalyzer2(const edm::ParameterSet& iConfig):
     l1SelectNearest_ = false;
   else
     throw cms::Exception("Configuration") << "L1JetMatchingMode should be 'nearestDR' or 'highestEt', was '" << l1MatchMode << "'" << std::endl;
+
+  std::vector<edm::InputTag> hltFilters = iConfig.getParameter<std::vector<edm::InputTag> >("HltObjectFilters");
+  for(size_t i=0; i<hltFilters.size(); ++i) {
+    PFTau_matchedHLTObjectFilters_.push_back(TriggerFilter(hltFilters[i]));
+  }
 
   edm::ParameterSet qualityCuts = iConfig.getParameter<edm::ParameterSet>("L3IsoQualityCuts");
   l25FilterMinTrackPt_ = qualityCuts.getParameter<double>("minTrackPt");
@@ -416,6 +436,9 @@ TTEffAnalyzer2::TTEffAnalyzer2(const edm::ParameterSet& iConfig):
   tree_->Branch("PFJet_l1JetMatchDR", &PFJet_l1JetMatchDR_);
 
   tree_->Branch("PFTau_matchedHLTObject", &PFTau_matchedHLTObject_);
+  for(size_t i=0; i<PFTau_matchedHLTObjectFilters_.size(); ++i) {
+    PFTau_matchedHLTObjectFilters_[i].book(tree_, "PFTau_matchedHLTObject_");
+  }
 
   tree_->Branch("hasMatchedL2Jet", &l2HasMatchedL2Jet_);
   tree_->Branch("L2JetPt", &l2JetPt_);
@@ -506,6 +529,9 @@ void TTEffAnalyzer2::reset() {
   PFTau_l1JetsInMatchingCone_.clear();
   PFTau_l1JetMatchDR_.clear();
   PFTau_matchedHLTObject_.clear();
+  for(size_t i=0; i<PFTau_matchedHLTObjectFilters_.size(); ++i) {
+    PFTau_matchedHLTObjectFilters_[i].reset();
+  }
 
   PFJet_matchedL1_.clear();
   PFJet_l1JetsInMatchingCone_.clear();
@@ -659,6 +685,15 @@ void TTEffAnalyzer2::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		hltObjects.push_back(TO);
             }
 	}
+        for(size_t m=0; m<PFTau_matchedHLTObjectFilters_.size(); ++m) {
+          index = triggerObjs->filterIndex(PFTau_matchedHLTObjectFilters_[m].filter);
+          if(index < triggerObjs->sizeFilters()) {
+            const trigger::Keys& KEYS(triggerObjs->filterKeys(index));
+            for(size_t i=0; i<KEYS.size(); ++i) {
+              PFTau_matchedHLTObjectFilters_[m].objects.push_back(objs[KEYS[i]]);
+            }
+          }
+        }
   }else{
     edm::Handle<pat::TriggerEvent> patTrigger;
     if(iEvent.getByLabel(patTriggerEventSrc, patTrigger)){
@@ -667,6 +702,11 @@ void TTEffAnalyzer2::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
         for(unsigned int k=0; k < objects.size(); k++){
           if(patTrigger->objectInFilter(objects[k], filterName)){
             hltObjects.push_back(*objects[k]);
+          }
+          for(size_t m=0; m<PFTau_matchedHLTObjectFilters_.size(); ++m) {
+            if(patTrigger->objectInFilter(objects[k], PFTau_matchedHLTObjectFilters_[m].filter.label())) {
+              PFTau_matchedHLTObjectFilters_[m].objects.push_back(*objects[k]);
+            }
           }
           //std::cout << " hltObjects.size: " << hltObjects.size() << std::endl;
         }
@@ -981,6 +1021,17 @@ void TTEffAnalyzer2::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
     }
     PFTau_matchedHLTObject_.push_back(foundMatch);
+    for(size_t iFilter=0; iFilter<PFTau_matchedHLTObjectFilters_.size(); ++iFilter) {
+      TriggerFilter& tf = PFTau_matchedHLTObjectFilters_[iFilter];
+      bool found = false;
+      for(size_t iObj=0; iObj<tf.objects.size(); ++iObj) {
+        if(deltaR(tf.objects[iObj], tau) < jetMinDR) {
+          found = true;
+          break;
+        }
+      }
+      tf.values.push_back(found);
+    }
 
 
     if(!triggerBitsOnly) {
