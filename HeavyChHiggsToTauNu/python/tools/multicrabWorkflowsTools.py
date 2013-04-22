@@ -27,7 +27,7 @@ class _Constant:
 ## Constant for marking values to be disabled
 Disable = _Constant(1)
 
-_reco_name_re = re.compile("^(?P<reco>Run[^_]+(_[^_]+)+_v\d+_[^_]+_)")
+_reco_name_re = re.compile("^(?P<reco>Run[^_]+(_[^_]+)+?_v\d+_[^_]+_)")
 def updatePublishName(dataset, sourcePath, workflowName):
     path = sourcePath.split("/")
     name = path[2].replace("-", "_")

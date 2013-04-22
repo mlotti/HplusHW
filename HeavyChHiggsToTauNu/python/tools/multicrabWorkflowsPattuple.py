@@ -1920,6 +1920,40 @@ def addPattuple_v53_3_test1(datasets):
     addPattuple_53X("v53_3_test1", datasets, definitions)
 
 
+def addPattuple_v53_3_test2(datasets):
+    # Same as test1, except START53_V15 GT
+    definitions = {
+# 163630 events, 91 jobs
+        # User mean 4031.2, min 84.8, max 6559.8
+        # Mean 180.8 MB, min 3.1 MB, max 191.2 MB
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test2-9cfaf7bc576a6d9f3488935d01684bea/USER"),
+        }
+
+    addPattuple_53X("v53_3_test2", datasets, definitions)
+
+def addPattuple_v53_3_test3(datasets):
+    # Bugfix for LogErrorEventFilters
+    definitions = {
+        # 3498600 events, 1703 jobs
+        # User mean 3116.1, min 153.4, max 27006.0
+        # Mean 65.9 MB, min 4.6 MB, max 276.8 MB
+        "Tau_198941-202504_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_pattuple_v53_3_198941_202504_test3-b1ebb7e21c06710552994e7e8d474dd4/USER"),
+        }
+
+    addPattuple_53X("v53_3_test3", datasets, definitions)
+
+def addPattuple_v53_3_test4(datasets):
+    # Updated MET filters
+    definitions = {
+        # 3498600 events, 1703 jobs
+        # User mean 3197.7, min 106.4, max 14338.6
+        # Mean 66.0 MB, min 4.7 MB, max 276.9 MB
+        "Tau_198941-202504_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_198941_202504_pattuple_v53_3_test4-fc12509d32dbe7cd07128ce5e0536686/USER"),
+        }
+
+    addPattuple_53X("v53_3_test4", datasets, definitions)
+
+
 # Skeleton
 def addPattuple_vNEXT_SKELETON_53X(datasets):
     definitions = {
