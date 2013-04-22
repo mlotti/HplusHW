@@ -46,6 +46,7 @@ class CrossSectionList:
 # [4] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
 # [5] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopMC2011
 # [6] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma
+# [10] http://arxiv.org/abs/1303.6254
 
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt30to50", {
@@ -79,7 +80,9 @@ backgroundCrossSections = CrossSectionList(
             "7": 5.9, # [3]
             }),
     CrossSection("TTJets", {
-            "7": 165.0, # [3,4], approx. NNLO
+#            "7": 165.0, # [3,4], approx. NNLO
+            "7": 172.025, # [10], NNLO+NNLL
+            "8": 245.794, # [10], NNLO+NNLL 
             }),
     CrossSection("WJets", {
             "7": 31314.0, # [2], NNLO
