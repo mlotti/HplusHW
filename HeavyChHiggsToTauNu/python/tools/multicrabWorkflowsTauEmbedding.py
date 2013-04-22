@@ -404,7 +404,10 @@ def addEmbeddingEmbedding_v44_5(datasets):
         addEmbeddingEmbedding_44X(skimVersion, version, datasets, definitions)
 
     addEmbedding("v44_5_notrg2", {
-        "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 0}),
+        # 5458414 events, 2066 jobs
+        # User mean 12701.9, min 7665.2, max 17593.6
+        # Mean 414.2 MB, min 321.6 MB, max 543.0 MB
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_notrg2-398a1e0c60b666df745f371020ad555a/USER", args={"triggerMC": 0}),
         })
 
 
