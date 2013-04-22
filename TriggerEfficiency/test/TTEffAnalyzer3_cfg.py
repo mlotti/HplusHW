@@ -60,8 +60,9 @@ else:
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(   
 #        "file:/afs/cern.ch/work/s/slehti/TriggerMETLeg_Tau_173236-173692_2011A_Nov08_pattuple_9_1_LSf.root"
-        "file:TTEffSkim.root"
+#        "file:TTEffSkim.root"
 #	"file:/tmp/slehti/TriggerMETLeg_Tau_Run2012C_PromptReco_v2_AOD_202792_203742_analysis_metleg_v53_v1_pattuple_28_1_L19.root"
+       'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerTauLeg/CMSSW_5_3_X/TauPlusX/Run2012A_13Jul2012_v1_AOD_190456_190738_triggerTauLeg_noTauIDTestSkim2noJSON_v53_v2/a3e0eb2b4b011c1375d601a0aac09e7c/pattuple_9_1_Ygp.root'
         )
     )
 
