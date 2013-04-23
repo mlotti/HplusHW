@@ -25,6 +25,20 @@ namespace HPlus {
     }
   QCDTailKiller::Data::~Data() {}
 
+  const bool QCDTailKiller::Data::passedBackToBackCuts() const {
+    for (std::vector<bool>::const_iterator it = fPassedBackToBackJet.begin(); it != fPassedBackToBackJet.end(); ++it) {
+      if (!(*it)) return false;
+    }
+    return true;
+  }
+
+  const bool QCDTailKiller::Data::passedCollinearCuts() const {
+    for (std::vector<bool>::const_iterator it = fPassedCollinearJet.begin(); it != fPassedCollinearJet.end(); ++it) {
+      if (!(*it)) return false;
+    }
+    return true;
+  }
+
   const double QCDTailKiller::Data::getDeltaPhiJetMET(int njet) const {
     if (njet >= fMaxEntries)
       throw cms::Exception("LogicError") << "QCDTailKiller::Data::getDeltaPhiJetMET() Called for jet " << njet << " but only values 0-" << fMaxEntries << " are allowed!" << std::endl;

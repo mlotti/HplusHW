@@ -47,6 +47,7 @@ namespace HPlus {
     void setPrescaleWeight(double w) { fPrescaleWeight = w; }
     void setPileupWeight(double w)   { fPileupWeight = w; }
     void setWjetsWeight(double w)   { fWjetsWeight = w; }
+    void setTauFakeWeight(double w, double au)  { fTauFakeWeight = w; fTauFakeWeightAbsUnc = au; }
     void setTauTriggerWeight(double w, double au)  { fTauTriggerWeight = w; fTauTriggerWeightAbsUnc = au; }
     void setMETTriggerWeight(double w, double au)  { fMETTriggerWeight = w; fMETTriggerWeightAbsUnc = au; }
     void setFillWeight(double w)  { fFillWeight = w; }
@@ -142,7 +143,12 @@ namespace HPlus {
 
     double fPrescaleWeight;
     double fPileupWeight;
+<<<<<<< HEAD
     double fWjetsWeight;
+=======
+    double fTauFakeWeight;
+    double fTauFakeWeightAbsUnc; // These are the relative uncertainties
+>>>>>>> lauri/2011
     double fTauTriggerWeight;
     double fTauTriggerWeightAbsUnc;
     double fMETTriggerWeight;

@@ -213,6 +213,7 @@ namespace HPlus {
       delete (*it);
     hEveryStepHistograms.clear();
   }
+// FIXME: need to give separately selected tau !!!!
 
   void CommonPlots::initialize(const edm::Event& iEvent,
                                const edm::EventSetup& iSetup,
@@ -226,7 +227,34 @@ namespace HPlus {
                                BTagging& bJetSelection,
                                TopChiSelection& topChiSelection,
                                EvtTopology& evtTopology) {
-    fTauSelection = &tauSelection;
+    if (!vertexData.passedEvent()) return; // Require valid vertex
+    TauSelection::Data tauData = tauSelection.silentAnalyze(iEvent, iSetup, fVertexData.getSelectedVertex()->z());
+    initialize(iEvent,iSetup,
+               vertexData,
+               tauData,
+               fakeTauIdentifier,
+               eVeto,
+               muonVeto,
+               jetSelection,
+               metSelection,
+               bJetSelection,
+               topChiSelection,
+               evtTopology);
+  }
+
+  void CommonPlots::initialize(const edm::Event& iEvent,
+                               const edm::EventSetup& iSetup,
+                               VertexSelection::Data& vertexData,
+                               TauSelection::Data& tauData,
+                               FakeTauIdentifier& fakeTauIdentifier,
+                               ElectronSelection& eVeto,
+                               MuonSelection& muonVeto,
+                               JetSelection& jetSelection,
+                               METSelection& metSelection,
+                               BTagging& bJetSelection,
+                               TopChiSelection& topChiSelection,
+                               EvtTopology& evtTopology) {
+    //fTauSelection = &tauSelection;
     fFakeTauIdentifier = &fakeTauIdentifier;
     // Obtain data objects only, if they have not yet been cached
     //if (bDataObjectsCached) return;
@@ -234,7 +262,7 @@ namespace HPlus {
     // Obtain data objects
     fVertexData = vertexData;
     if (!vertexData.passedEvent()) return; // Require valid vertex
-    fTauData = tauSelection.silentAnalyze(iEvent, iSetup, fVertexData.getSelectedVertex()->z());
+    fTauData = tauData;
     if (fTauData.passedEvent())
       fFakeTauData = fakeTauIdentifier.silentMatchTauToMC(iEvent, *(fTauData.getSelectedTau()));
     fElectronData = eVeto.silentAnalyze(iEvent, iSetup);

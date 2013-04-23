@@ -61,6 +61,8 @@ namespace HPlus {
 
     fTree->Branch("weightPrescale", &fPrescaleWeight);
     fTree->Branch("weightPileup", &fPileupWeight);
+    fTree->Branch("weightTauFakes", &fTauFakeWeight);
+    fTree->Branch("weightTauFakesAbsUnc", &fTauFakeWeightAbsUnc);
     fTree->Branch("weightTauTrigger", &fTauTriggerWeight);
     fTree->Branch("weightTauTriggerAbsUnc", &fTauTriggerWeightAbsUnc);
     fTree->Branch("weightMETTrigger", &fMETTriggerWeight);
@@ -692,6 +694,8 @@ namespace HPlus {
 
     fPrescaleWeight = 1.0;
     fPileupWeight = 1.0;
+    fTauFakeWeight = 1.0;
+    fTauFakeWeightAbsUnc = nan;
     fTauTriggerWeight = 1.0;
     fTauTriggerWeightAbsUnc = nan;
     fMETTriggerWeight = 1.0;

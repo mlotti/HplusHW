@@ -15,7 +15,6 @@ def createEDFilter(param):
         primaryVertexSelection = param.primaryVertexSelection.clone(),
         ElectronSelection= param.ElectronSelection.clone(),
         MuonSelection = param.MuonSelection.clone(),
-        #GlobalMuonVeto = param.NonIsolatedMuonVeto.clone(),
         # Change default tau algorithm here as needed
         tauSelection = param.tauSelectionHPSMediumTauBased.clone(),
         fakeTauSFandSystematics = param.fakeTauSFandSystematics.clone(),
@@ -32,20 +31,33 @@ def createEDFilter(param):
         topChiSelection = param.topChiSelection.clone(),
         topWithBSelection = param.topWithBSelection.clone(),
         topWithWSelection = param.topWithWSelection.clone(),
+        topWithMHSelection = param.topWithMHSelection.clone(),
         forwardJetVeto = param.forwardJetVeto.clone(),
         transverseMassCut = param.transverseMassCut,
         EvtTopology = param.EvtTopology.clone(),
         prescaleWeightReader = param.prescaleWeightReader.clone(),
         vertexWeight = param.vertexWeight.clone(),
         pileupWeightReader = param.pileupWeightReader.clone(),
+        wjetsWeightReader = param.wjetsWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
-        QCDTailKiller = param.QCDTailKiller.clone(),
         Tree = param.tree.clone(),
         eventCounter = param.eventCounter.clone(),
+        oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus","HadronicTauOneAndThreeProng"),
+        oneProngTauSrc = cms.untracked.InputTag("VisibleTaus","HadronicTauOneProng"),
         tauEmbeddingStatus = cms.untracked.bool(False),
+        metFilters = param.metFilters.clone(),
+        QCDTailKiller = param.QCDTailKiller.clone(),
+        # Factorisation bin settings
         factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150., 200., 300.),
         factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
         factorisationNVerticesBinLowEdges = cms.untracked.vint32(10, 20),
         factorisationTransverseMassRange = cms.untracked.vdouble(40., 0., 400.),
         factorisationFullMassRange = cms.untracked.vdouble(50., 0., 500.),
+        # Tau candidate selection options
+        applyNprongsCutForTauCandidate = cms.untracked.bool(False),
+        applyRtauCutForTauCandidate = cms.untracked.bool(False),
+        # Analysis variation options
+        doAnalysisVariationWithTraditionalMethod = cms.untracked.bool(True),
+        doAnalysisVariationWithABCDMethod = cms.untracked.bool(False),
+        doAnalysisVariationWithDoubleABCDMethod = cms.untracked.bool(False),
     )
