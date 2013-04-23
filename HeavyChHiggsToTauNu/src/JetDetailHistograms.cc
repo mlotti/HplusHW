@@ -127,7 +127,7 @@ namespace HPlus {
     } else {
       hDataDrivenLeptonOverlaps->Fill(0);
     }
-    if (!isRealData) return;
+    if (isRealData) return;
 
     // MC-based values
     edm::Handle <edm::View<reco::GenParticle> > genParticles;
