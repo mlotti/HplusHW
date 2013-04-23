@@ -143,12 +143,9 @@ namespace HPlus {
 
     double fPrescaleWeight;
     double fPileupWeight;
-<<<<<<< HEAD
     double fWjetsWeight;
-=======
     double fTauFakeWeight;
     double fTauFakeWeightAbsUnc; // These are the relative uncertainties
->>>>>>> lauri/2011
     double fTauTriggerWeight;
     double fTauTriggerWeightAbsUnc;
     double fMETTriggerWeight;
