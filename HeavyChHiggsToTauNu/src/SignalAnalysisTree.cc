@@ -69,6 +69,7 @@ namespace HPlus {
     fTree->Branch("weightMETTriggerAbsUnc", &fMETTriggerWeightAbsUnc);
     fTree->Branch("weightBTagging", &fBTaggingWeight);
     fTree->Branch("weightBTaggingAbsUnc", &fBTaggingWeightAbsUnc);
+    fTree->Branch("weightWjets", &fWjetsWeight);
     fTree->Branch("weightAtFill", &fFillWeight);
 
     fTree->Branch("goodPrimaryVertices_n", &fNVertices);
@@ -90,6 +91,7 @@ namespace HPlus {
      
     fTree->Branch("jets_p4", &fJets);
     fTree->Branch("allIdentifiedJets_p4", &fAllIdentifiedJets);
+    fTree->Branch("selJets_p4", &fSelJets);
     fTree->Branch("selJetsInclTau_p4", &fSelJetsInclTau);
     fTree->Branch("jets_btag", &fJetsBtags);
     if(fFillJetEnergyFractions) {
@@ -246,6 +248,11 @@ namespace HPlus {
   void SignalAnalysisTree::setSelJetsInclTau(const edm::PtrVector<pat::Jet>& selJetsInclTau){
     for(size_t i=0; i<selJetsInclTau.size(); ++i) {
       fSelJetsInclTau.push_back(selJetsInclTau[i]->p4());}
+  }
+
+  void SignalAnalysisTree::setSelJets(const edm::PtrVector<pat::Jet>& selJets){
+    for(size_t i=0; i<selJets.size(); ++i) {
+      fSelJets.push_back(selJets[i]->p4());}
   }
   
 
@@ -715,6 +722,7 @@ namespace HPlus {
 
     fJets.clear();
     fAllIdentifiedJets.clear();
+    fSelJets.clear();
     fSelJetsInclTau.clear();
     fJetsBtags.clear();
     fJetsFlavour.clear();
