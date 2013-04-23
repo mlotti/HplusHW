@@ -145,6 +145,8 @@ namespace HPlus {
     hFourthJetPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "fourthJet_phi", "fourthJet_phi;#phi of fourth jet;Events", 72, -3.14159, 3.14159); 
     hMinEtaOfSelectedJetToGap = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "minEtaOfSelectedJetToGap", "minEtaOfSelectedJetToGap;abs(jet #eta - 1.5);Events", 60, 0, 3.0);
 
+    hDeltaPtJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "deltaPtTauJet", "deltaPtTauJet ", 200, -100., 100.);
+    hDeltaRJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "deltaRTauJet", "deltaRTauJet ", 120, 0., 6.);
     // Histograms for PU analysis
     hJetPUIDMvaResult = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_PUIDmva", "jet_PUIDmva;MVA value;N_{Events}", 100, -1.0, 1.0);
 
@@ -319,8 +321,8 @@ namespace HPlus {
         bool match = false;
         if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()) > fMaxDR)) {
           match = true;
-          output.fDeltaPtJetTau = iJet->pt()- (tau)->pt();
-          hDeltaPtJetTau->Fill(iJet->pt()- (tau)->pt());
+          output.fDeltaPtJetTau = iJet->pt() - (tau)->pt();
+          hDeltaPtJetTau->Fill(iJet->pt() - (tau)->pt());
         }
         if(match) {
           if (iJet->pt() > fPtCut && (std::abs(iJet->eta()) < fEtaCut)) {
