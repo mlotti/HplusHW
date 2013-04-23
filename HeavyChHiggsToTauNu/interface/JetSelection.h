@@ -3,6 +3,7 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_JetSelection_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetDetailHistograms.h"
 
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
@@ -129,8 +130,6 @@ namespace HPlus {
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices);
     void obtainReferenceJetToTau(const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::Candidate>& tau, JetSelection::Data& output);
     void calculateMHT(JetSelection::Data& output, const edm::Ptr<reco::Candidate>& tau);
-    void plotSelectedJetHistograms(const edm::Ptr<pat::Jet>& jet, const bool isRealData);
-    void plotExcludedJetHistograms(const edm::Ptr<pat::Jet>& jet, const bool isRealData);
 
     // Input parameters
     edm::InputTag fSrc;
@@ -211,48 +210,10 @@ namespace HPlus {
     WrappedTH1 *hJetPUIDMvaResult;
 
     // Histograms for excluded jets (i.e. matching in DeltaR to tau jet)
-    WrappedTH1 *hPtExcludedJets;
-    WrappedTH1 *hEtaExcludedJets;
-    WrappedTH1 *hPhiExcludedJets;
-    WrappedTH1 *hNeutralEmEnergyFractionExcludedJets;
-    WrappedTH1 *hNeutralMultiplicityExcludedJets;
-    WrappedTH1 *hNeutralHadronEnergyFractionExcludedJets;
-    WrappedTH1 *hNeutralHadronMultiplicityExcludedJets;
-    WrappedTH1 *hPhotonEnergyFractionExcludedJets;
-    WrappedTH1 *hPhotonMultiplicityExcludedJets;
-    WrappedTH1 *hMuonEnergyFractionExcludedJets;
-    WrappedTH1 *hMuonMultiplicityExcludedJets;
-    WrappedTH1 *hChargedHadronEnergyFractionExcludedJets;
-    WrappedTH1 *hChargedEmEnergyFractionExcludedJets;
-    WrappedTH1 *hChargedMultiplicityExcludedJets;
-    WrappedTH1 *hPartonFlavourExcludedJets;
-    WrappedTH1 *hJECFactorExcludedJets;
-    WrappedTH1 *hN60ExcludedJets;
-    WrappedTH1 *hTowersAreaExcludedJets;
-    WrappedTH1 *hJetChargeExcludedJets;
-    WrappedTH1 *hPtDiffToGenJetExcludedJets;
+    JetDetailHistograms* fExcludedJetsDetailHistograms;
 
     // Histograms for selected jets
-    WrappedTH1 *hPtSelectedJets;
-    WrappedTH1 *hEtaSelectedJets;
-    WrappedTH1 *hPhiSelectedJets;
-    WrappedTH1 *hNeutralEmEnergyFractionSelectedJets;
-    WrappedTH1 *hNeutralMultiplicitySelectedJets;
-    WrappedTH1 *hNeutralHadronEnergyFractionSelectedJets;
-    WrappedTH1 *hNeutralHadronMultiplicitySelectedJets;
-    WrappedTH1 *hPhotonEnergyFractionSelectedJets;
-    WrappedTH1 *hPhotonMultiplicitySelectedJets;
-    WrappedTH1 *hMuonEnergyFractionSelectedJets;
-    WrappedTH1 *hMuonMultiplicitySelectedJets;
-    WrappedTH1 *hChargedHadronEnergyFractionSelectedJets;
-    WrappedTH1 *hChargedEmEnergyFractionSelectedJets;
-    WrappedTH1 *hChargedMultiplicitySelectedJets;
-    WrappedTH1 *hPartonFlavourSelectedJets;
-    WrappedTH1 *hJECFactorSelectedJets;
-    WrappedTH1 *hN60SelectedJets;
-    WrappedTH1 *hTowersAreaSelectedJets;
-    WrappedTH1 *hJetChargeSelectedJets;
-    WrappedTH1 *hPtDiffToGenJetSelectedJets;
+    JetDetailHistograms* fSelectedJetsDetailHistograms;
     WrappedTH1 *hDeltaPtJetTau;
     WrappedTH1 *hDeltaRJetTau;
 

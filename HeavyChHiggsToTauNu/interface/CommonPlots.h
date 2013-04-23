@@ -121,6 +121,19 @@ namespace HPlus {
                     BTagging& bJetSelection,
                     TopChiSelection& topChiSelection,
                     EvtTopology& evtTopology);
+    /// Initialization where TauSelection::Data is used instead of TauSelection object (use for QCD measurements)
+    void initialize(const edm::Event& iEvent,
+                    const edm::EventSetup& iSetup,
+                    VertexSelection::Data& vertexData,
+                    TauSelection::Data& tauData,
+                    FakeTauIdentifier& fakeTauIdentifier,
+                    ElectronSelection& eVeto,
+                    MuonSelection& muonVeto,
+                    JetSelection& jetSelection,
+                    METSelection& metSelection,
+                    BTagging& bJetSelection,
+                    TopChiSelection& topChiSelection,
+                    EvtTopology& evtTopology);
 
     /// create object containing histograms to be filled after all (or almost all) selection steps
     CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
