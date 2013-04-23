@@ -163,7 +163,7 @@ namespace HPlus {
     HistoWrapper::HistoLevel fLevel;
   };
 
-  /// Wrapper class for TH3 object
+  /// Wrapper class for factorisation histograms (binning unfolded on y-axis and value(s) on x-axis)
   class WrappedUnfoldedFactorisationHisto {
   public:
     WrappedUnfoldedFactorisationHisto(HistoWrapper& histoWrapper, TH2* histo, HistoWrapper::HistoLevel level);
@@ -176,9 +176,9 @@ namespace HPlus {
     /// Returns the x axis of the histogram for bin label modification
     TAxis* GetXaxis() { return h->GetXaxis(); }
     /// Fills histogram (if it exists) with event weight
-    template<typename Arg1> void Fill(int factorisationBin, const Arg1& a1) { if (isActive()) h->Fill(a1, factorisationBin, fHistoWrapper.getWeight()); }
+    template<typename Arg1> void Fill(const Arg1& a1, int factorisationBin) { if (isActive()) h->Fill(a1, factorisationBin, fHistoWrapper.getWeight()); }
     /// Fills histogram (if it exists) with custom event weight
-    template<typename Arg1, typename Arg2> void Fill(int factorisationBin, const Arg1& a1, const Arg2& a2) { if (isActive()) h->Fill(a1, factorisationBin, a2); }
+    template<typename Arg1, typename Arg2> void Fill(const Arg1& a1, int factorisationBin, const Arg2& a2) { if (isActive()) h->Fill(a1, factorisationBin, a2); }
 
   private:
     HistoWrapper& fHistoWrapper;
