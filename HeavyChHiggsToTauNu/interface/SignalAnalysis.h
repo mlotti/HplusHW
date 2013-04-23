@@ -10,8 +10,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
@@ -26,16 +26,21 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexAssignmentAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingMuonIsolationQuantifier.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CommonPlots.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
@@ -75,8 +80,8 @@ namespace HPlus {
       Count fOneTauCounter;
       Count fElectronVetoCounter;
       Count fMuonVetoCounter;
-      Count fMETCounter;
       Count fNJetsCounter;
+      Count fMETCounter;
       //      Count fRtauAfterMetCounter;
       Count fBTaggingCounter;
       Count fDeltaPhiCounter;
@@ -106,7 +111,7 @@ namespace HPlus {
     kSignalOrderSelectedEvents
   };
   public:
-    explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+  explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper);
     ~SignalAnalysis();
 
     void produces(edm::EDFilter *producer) const;
@@ -118,6 +123,7 @@ namespace HPlus {
     CounterGroup* getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
     void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
     void doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData, const METSelection::Data& metData, const GenParticleAnalysis::Data& genData);
+    bool selectTailEvents(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisProducer
@@ -135,6 +141,7 @@ namespace HPlus {
 
 
     Count fAllCounter;
+    Count fWJetsWeightCounter;
     Count fMETFiltersCounter;
     Count fEmbeddingMuonEfficiencyCounter;
     Count fTriggerCounter;
@@ -142,17 +149,19 @@ namespace HPlus {
     Count fTausExistCounter;
     Count fTauFakeScaleFactorCounter;
     Count fOneTauCounter;
-    Count fTriggerScaleFactorCounter;
+    Count fTauTriggerScaleFactorCounter;
     Count fGenuineTauCounter;
     Count fVetoTauCounter;
     Count fElectronVetoCounter;
-    Count fElectronMatchingTauCounter;
+    //Count fElectronMatchingTauCounter;
     Count fMuonVetoCounter;
     Count fMetCutBeforeJetCutCounter;
     Count fNJetsCounter;
+    Count fMETTriggerScaleFactorCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
+    Count fQCDTailKillerCounter;
     Count fDeltaPhiTauMETCounter;
     Count fDeltaPtJetTauCounter;
     Count fDeltaPhiLow30Counter;
@@ -229,8 +238,8 @@ namespace HPlus {
 
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
-    GlobalElectronVeto fGlobalElectronVeto;
-    GlobalMuonVeto fGlobalMuonVeto;
+    ElectronSelection fElectronSelection;
+    MuonSelection fMuonSelection;
     TauSelection fTauSelection;
     VetoTauSelection fVetoTauSelection;
     JetSelection fJetSelection;
@@ -250,12 +259,17 @@ namespace HPlus {
     ForwardJetVeto fForwardJetVeto;
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
-    TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
+    TauTriggerEfficiencyScaleFactor fTauTriggerEfficiencyScaleFactor;
+    METTriggerEfficiencyScaleFactor fMETTriggerEfficiencyScaleFactor;
     EmbeddingMuonEfficiency fEmbeddingMuonEfficiency;
-    VertexWeightReader fVertexWeightReader;
+    WeightReader fPrescaleWeightReader;
+    WeightReader fPileupWeightReader;
+    WeightReader fWJetsWeightReader;
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;
+    QCDTailKiller fQCDTailKiller;
+    METPhiOscillationCorrection fMETPhiOscillationCorrection;
     TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
 
     SignalAnalysisTree fTree;
@@ -407,6 +421,7 @@ namespace HPlus {
     CounterGroup fMuonToTausCounterGroup;
     CounterGroup fMuonFromTauDecayToTausCounterGroup;
     CounterGroup fGenuineToTausCounterGroup;
+    CounterGroup fGenuineOneProngToTausCounterGroup;
     CounterGroup fJetToTausCounterGroup;
     CounterGroup fAllTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fElectronToTausAndTauOutsideAcceptanceCounterGroup;
@@ -414,6 +429,7 @@ namespace HPlus {
     CounterGroup fMuonToTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fMuonFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fGenuineOneProngToTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fJetToTausAndTauOutsideAcceptanceCounterGroup;
 
     WrappedTH1 *hEMFractionAll;
@@ -423,6 +439,39 @@ namespace HPlus {
 
     bool fProduce;
     bool fOnlyGenuineTaus; 
+    
+    
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode0;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode1;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode2;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode0NoNeutralHadrons;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode1NoNeutralHadrons;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons;
+
+    // Common plots
+    CommonPlots fCommonPlots;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTrigger;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeight;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTagging;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelected;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTail;
+
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelectionFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeightFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVetoFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVetoFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelectionFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailFakeTaus;
+
   };
 }
 

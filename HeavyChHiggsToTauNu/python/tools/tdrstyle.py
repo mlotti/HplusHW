@@ -176,6 +176,7 @@ class TDRStyle:
         # self.tdrStyle.SetBarWidth(Float_t barwidth = 0.5);
         # self.tdrStyle.SetPaintTextFormat(const char* format = "g");
         # self.tdrStyle.SetPalette(Int_t ncolors = 0, Int_t* colors = 0);
+        self.tdrStyle.SetPalette(1); # Set pre-defined palette ranging from blue to red
         # self.tdrStyle.SetTimeOffset(Double_t toffset);
         # self.tdrStyle.SetHistMinimumZero(kTRUE);
 
@@ -220,3 +221,48 @@ class TDRStyle:
     ## Set OptStat
     def setOptStat(self, stat):
         self.tdrStyle.SetOptStat(stat)
+
+
+## Set grid on or off
+#
+# \param onoff  If True (False), set the grid on (off)
+def setGrid(onoff):
+    ROOT.gStyle.SetPadGridX(onoff)
+    ROOT.gStyle.SetPadGridX(onoff)
+
+## Set OptStat
+def setOptStat(stat):
+    ROOT.gStyle.SetOptStat(stat)
+
+## Set "Deep Sea" palette (51)
+def setDeepSeaPalette():
+    ROOT.gStyle.SetPalette(51)
+
+# Set "Rainbow" palette (55)
+def setRainBowPalette():
+    ROOT.gStyle.SetPalette(1)
+
+# Set "Dark Body Radiator" palette (53)
+def setDarkBodyRadiatorPalette():
+    # Copied from TColor::SetPalette(53) of a recent ROOT
+    stops = [0.00, 0.25, 0.50, 0.75, 1.00]
+    red = [0.00, 0.50, 1.00, 1.00, 1.00]
+    green = [0.00, 0.00, 0.55, 1.00, 1.00]
+    blue = [0.00, 0.00, 0.00, 0.00, 1.00]
+    ret = ROOT.TColor.CreateGradientColorTable(len(stops), array("d", stops), array("d", red), array("d", green), array("d", blue), 255)
+
+# Set "Grey Scale" palette (52)
+def setGreyScalePalette():
+    stops = [0.00, 0.50, 1.00]
+    red = [0.00, 0.50, 1.00];
+    green = [0.00, 0.50, 1.00];
+    blue = [0.00, 0.50, 1.00];
+    ret = ROOT.TColor.CreateGradientColorTable(len(stops), array("d", stops), array("d", red), array("d", green), array("d", blue), 255)
+
+# Set "Two Color Hue" palette(54)
+def setTwoColorHuePalette():
+    stops = [0.00, 0.50, 1.00];
+    red = [ 0.00, 0.50, 1.00];
+    green = [0.00, 0.50, 1.00];
+    blue = [0.50, 0.50, 0.00];
+    ret = ROOT.TColor.CreateGradientColorTable(len(stops), array("d", stops), array("d", red), array("d", green), array("d", blue), 255)

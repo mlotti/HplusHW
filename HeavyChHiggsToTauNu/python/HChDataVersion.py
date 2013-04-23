@@ -46,8 +46,8 @@ config = {
         "recoProcess": "RECO",
 #        "signalTrigger": "HLT_IsoPFTau35_Trk20_MET60_v2",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-08Nov2011-v1/AOD/E8B13C66-A70B-E111-B8C5-001EC9B09F59.root",
-        # trigger HLT_IsoPFTau35_Trk20_MET45_v4 
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau/Run2011A_08Nov2011_v1_AOD_160431_pattuple_v44_4/22fa40c1fbac4684dd3ccb0e713bd4b5/pattuple_103_1_Gr3.root",
+        # trigger HLT_MediumIsoPFTau35_Trk20_MET60_v1
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_173236-173692_2011A_Nov08/Tau/Run2011A_08Nov2011_v1_AOD_173236_173692_pattuple_v44_5/1b3ed6acb33bc8106ac34fb558c6831f/pattuple_28_1_fzD.root",
     },
     "44Xmc_highPU": {
         "simProcess": "SIM",
@@ -63,7 +63,7 @@ config = {
         "recoProcess": "RECO",
         "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/28ACFF78-0237-E111-97C7-00261894397B.root", 
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/f16be938188c46248667b60f0c9e7452/pattuple_7_1_ozc.root", # TTJets, v44_4
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5/778bc6993dea1b89668515c3036cbe70/pattuple_9_1_6C1.root", # TTJets, v44_5
     },
     "44XmcAve32": {
         "simProcess": "SIM",
@@ -125,6 +125,12 @@ class DataVersion:
 
     def isHighPU(self):
         return self.isMC() and "highPU" in self.version
+
+    def is44X(self):
+        return "44X" in self.version
+
+    def is53X(self):
+        return "53X" in self.version
 
     def getTriggerProcess(self):
         return self.trigger

@@ -5,6 +5,7 @@ import sys
 import glob
 import shutil
 import tarfile
+import subprocess
 from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
@@ -14,6 +15,22 @@ def main(opts, args):
 
     crabdirs = multicrab.getTaskDirectories(opts)
     for d in crabdirs:
+        # Run crab -report
+        if opts.report:
+            multicrab.checkCrabInPath()
+            cmd = ["crab", "-report", "-c", d]
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            output = p.communicate()[0]
+            ret = p.returncode
+            if ret != 0:
+                print "Call to 'crab -report -d %s' failed with return value %d" % (d, ret)
+                print output
+                return 1
+
+        if os.path.exists(os.path.join(d, "task.tar.gz")):
+            print "Skipping %s, task.tar.gz already exists" % d
+            continue
+
         # Go to task directory (in order to get the paths in the archive correctly easily)
         os.chdir(d)
 
@@ -33,7 +50,8 @@ def main(opts, args):
         #print "\n".join(files)
 
         for f in files:
-            tar.add(f)
+            if os.path.exists(f):
+                tar.add(f)
         tar.close()
 
         # Keep share/crab.cfg
@@ -56,9 +74,13 @@ def main(opts, args):
 
         os.chdir(workdir)
 
+    return 0
+
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
     multicrab.addOptions(parser)
+    parser.add_option("--noreport", dest="report", action="store_false", default=True,
+                      help="Do not run 'crab -report'.")
 
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)

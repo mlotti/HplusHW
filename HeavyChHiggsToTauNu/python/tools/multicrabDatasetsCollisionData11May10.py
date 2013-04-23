@@ -20,6 +20,17 @@ datasets = {
                 "luminosity": 6.625000,
                 "number_of_jobs": 1
             },
+            "pattuple_v18_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v18_2-322d7a6c0312354f16bad76dbf6f2f25/USER",
+                "number_of_jobs": 1
+            },
+            "pattuple_v18_3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v18_3-172ee752d8cdcf2479297bbcbbc450d7/USER",
+                "number_of_jobs": 2,
+                "args": {"doTauHLTMatchingInAnalysis": "1"},
+            },
         }
     },
     "Tau_161217-163261_May10": {
@@ -33,6 +44,17 @@ datasets = {
                 "luminosity": 40.762000,
                 "number_of_jobs": 1
             },
+            "pattuple_v18_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v18_2-bc9738b682323bfade84362bc601e919/USER",
+                "number_of_jobs": 1
+            },
+            "pattuple_v18_3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v18_3-682e73b78660242aaa9ad84acfbb905d/USER",
+                "number_of_jobs": 2,
+                "args": {"doTauHLTMatchingInAnalysis": "1"},
+            },
         },
     },
     "Tau_163270-163869_May10": {
@@ -45,6 +67,17 @@ datasets = {
                 "datasetpath": "/Tau/local-May10ReReco_v1_AOD_163270_pattuple_v18-62e2e156bbf332fdc6c67ab8a6d7a4f0/USER",
                 "luminosity": 167.786000,
                 "number_of_jobs": 2
+            },
+            "pattuple_v18_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v18_2-299981d469467ce228236455770c7bc0/USER",
+                "number_of_jobs": 2
+            },
+            "pattuple_v18_3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v18_3-38e5d5a54e09db68c85b134fff29b7ae/USER",
+                "number_of_jobs": 4,
+                "args": {"doTauHLTMatchingInAnalysis": "1"},
             },
         }
     },

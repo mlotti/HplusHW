@@ -10,8 +10,8 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 namespace HPlus {
-  METSelection::Data::Data(const METSelection *metSelection, bool passedEvent):
-    fMETSelection(metSelection), fPassedEvent(passedEvent) {}
+  METSelection::Data::Data():
+    fPassedEvent(false) {}
   METSelection::Data::~Data() {}
 
   METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label):
@@ -42,8 +42,9 @@ namespace HPlus {
     }
     else
       throw cms::Exception("Configuration") << "Invalid value for select '" << select << "', valid values are raw, type1, type2" << std::endl;
-    
-    hMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "met", "met", 80, 0., 400.);
+
+    hMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "met", "met", 80, 0., 400.);
+    hMetPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metPhi", "met #phi", 72, -3.14159265, 3.14159265);
     hMetSignif = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metSignif", "metSignif", 100, 0., 50.);
     hMetSumEt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metSumEt", "metSumEt", 30, 0., 1500.);
     hMetDivSumEt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hMetDivSumEt", "hMetDivSumEt", 50, 0., 1.);
@@ -69,7 +70,8 @@ namespace HPlus {
   }
 
   METSelection::Data METSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
-    bool passEvent = false;
+    Data output;
+
     edm::Handle<edm::View<reco::MET> > hrawmet;
     iEvent.getByLabel(fRawSrc, hrawmet);
 
@@ -88,21 +90,14 @@ namespace HPlus {
     edm::Handle<edm::View<reco::MET> > htcmet;
     iEvent.getByLabel(fTcSrc, htcmet);
 
-    // Reset then handles
-    fRawMET = edm::Ptr<reco::MET>();
-    fType1MET = edm::Ptr<reco::MET>();
-    fType2MET = edm::Ptr<reco::MET>();
-    fCaloMET = edm::Ptr<reco::MET>();
-    fTcMET = edm::Ptr<reco::MET>();
-
     // Set the handles, if object available
     if(hrawmet.isValid())
-      fRawMET = hrawmet->ptrAt(0);
+      output.fRawMET = hrawmet->ptrAt(0);
     if(htype1met.isValid() && fType1Src.label() != "") {
-      fType1METCorrected.clear();
-      fType1MET = htype1met->ptrAt(0);
-      fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(fType1MET, selectedTau, allJets, kType1));
-      fType1MET = edm::Ptr<reco::MET>(&fType1METCorrected, 0);
+      output.fType1METCorrected.clear();
+      output.fType1MET = htype1met->ptrAt(0);
+      output.fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(output.fType1MET, selectedTau, allJets, kType1));
+      output.fType1MET = edm::Ptr<reco::MET>(&output.fType1METCorrected, 0);
     }
     /*
     if(htype2met.isValid()) {
@@ -113,9 +108,9 @@ namespace HPlus {
     }
     */
     if(hcalomet.isValid())
-      fCaloMET = hcalomet->ptrAt(0);
+      output.fCaloMET = hcalomet->ptrAt(0);
     if(htcmet.isValid())
-      fTcMET = htcmet->ptrAt(0);
+      output.fTcMET = htcmet->ptrAt(0);
 
     // Do the selection
     edm::Ptr<reco::MET> met;
@@ -130,6 +125,7 @@ namespace HPlus {
       throw cms::Exception("LogicError") << "This should never happen at " << __FILE__ << ":" << __LINE__ << std::endl;
 
     hMet->Fill(met->et());
+    hMetPhi->Fill(met->phi());
     hMetSignif->Fill(met->significance());
     hMetSumEt->Fill(met->sumEt());
     double sumEt = met->sumEt();
@@ -139,12 +135,14 @@ namespace HPlus {
     }
 
     if(met->et() > fMetCut) {
-      passEvent = true;
+      output.fPassedEvent = true;
       increment(fMetCutCount);
+    } else {
+      output.fPassedEvent = false;
     }
-    fSelectedMET = met;
-    
-    return Data(this, passEvent);
+    output.fSelectedMET = met;
+
+    return output;
   }
 
   reco::MET METSelection::undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, Select type) {

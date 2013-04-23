@@ -7,6 +7,7 @@ from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
@@ -15,9 +16,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 def main(opts):
     datasets = None
     if len(opts.files) > 0:
-        datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], counters=opts.counterdir, weightedCounters=opts.weighted)
+        datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], opts=opts, weightedCounters=opts.weighted)
     else:
-        datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, counters=opts.counterdir, weightedCounters=opts.weighted)
+        datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, weightedCounters=opts.weighted)
 
     if os.path.exists(opts.lumifile):
         datasets.loadLuminosities(opts.lumifile)
@@ -25,11 +26,12 @@ def main(opts):
     if opts.mergeData:
         datasets.mergeData()
 
-    counters = opts.counterdir
+#    counters = opts.counterDir
     if opts.weighted:
-        counters += "/weighted"
-        datasets.updateNAllEventsToPUWeighted()
-    eventCounter = counter.EventCounter(datasets, counters=counters)
+#        counters += "/weighted"
+        datasets.updateNAllEventsToPUWeighted(era=opts.dataEra)
+#    eventCounter = counter.EventCounter(datasets, counters=counters)
+    eventCounter = counter.EventCounter(datasets)
     
 
     print "============================================================"

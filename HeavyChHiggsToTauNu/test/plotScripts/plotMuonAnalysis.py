@@ -22,6 +22,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 analysis = "muonNtuple"
 counters = analysis+"Counters"
@@ -34,6 +35,7 @@ weight = {
     "Run2011B": "weightPileup_Run2011B",
     "Run2011AB": "weightPileup_Run2011AB",
     }[era]
+#weight = ""
 
 mcOnly = True
 mcOnly = False
@@ -42,9 +44,65 @@ mcLuminosity = 5049.069000
 mergeMC = True
 #mergeMC = False
 
+def splitWJets(datasets):
+    wjetsName = "WJets_TuneZ2_Fall11"
+
+    wjets = datasets.getDataset(wjetsName).deepCopy()
+    wjets.setName(wjetsName+"_B")
+    datasets.append(wjets)
+    datasets.rename(wjetsName, wjetsName+"_NoB")
+
+    plots._physicalToLogical.update({
+            wjetsName+"_NoB": "WJets_NoB",
+            wjetsName+"_B": "WJets_B",
+            })
+
+    wjetsIndex = plots._datasetOrder.index("WJets")
+    plots._datasetOrder.insert(wjetsIndex+1, "WJets_NoB")
+    plots._datasetOrder.insert(wjetsIndex+2, "WJets_B")
+    plots._legendLabels.update({
+            "WJets_NoB": "W+jets (no b)",
+            "WJets_B":   "W+b+jets",
+            })
+    wStyle = plots._plotStyles["WJets"]
+    w2Style = wStyle.clone()
+    w2Style.color = ROOT.kOrange+7
+    plots._plotStyles.update({
+            "WJets_NoB": wStyle,
+            "WJets_B": w2Style
+            })
+
+def splitDYJets(datasets):
+    dyjetsName = "DYJetsToLL_M50_TuneZ2_Fall11"
+
+    dyjets = datasets.getDataset(dyjetsName).deepCopy()
+    dyjets.setName(dyjetsName+"_B")
+    datasets.append(dyjets)
+    datasets.rename(dyjetsName, dyjetsName+"_NoB")
+
+    plots._physicalToLogical.update({
+            dyjetsName+"_NoB": "DYJetsToLL_NoB",
+            dyjetsName+"_B": "DYJetsToLL_B",
+            })
+
+    wjetsIndex = plots._datasetOrder.index("DYJetsToLL")
+    plots._datasetOrder.insert(wjetsIndex+1, "DYJetsToLL_NoB")
+    plots._datasetOrder.insert(wjetsIndex+2, "DYJetsToLL_B")
+    plots._legendLabels.update({
+            "DYJetsToLL_NoB": "Z/#gamma*+jets (no b)",
+            "DYJetsToLL_B":   "Z/#gamma*+b+jets",
+            })
+    dyStyle = plots._plotStyles["DYJetsToLL"]
+    dy2Style = dyStyle.clone()
+    dy2Style.color = ROOT.kTeal-8
+    plots._plotStyles.update({
+            "DYJetsToLL_NoB": dyStyle,
+            "DYJetsToLL_B": dy2Style
+            })
+
 def main():
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets.updateNAllEventsToPUWeighted(era=era.replace("AB", "A+B"))
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, weightedCounters=len(weight)>0)
+    datasets.updateNAllEventsToPUWeighted(era=era)
 
     if era == "Run2011A":
         datasets.remove(filter(lambda name: "2011B_" in name, datasets.getDataDatasetNames()))
@@ -77,10 +135,13 @@ def main():
 
     #datasetsMC = datasets.deepCopy()
     #datasetsMC.remove(datasets.getDataDatasetNames())
-    
+
+    splitWJets(datasets)
+    splitDYJets(datasets)
+
     if mergeMC:
         plots.mergeRenameReorderForDataMC(datasets)
-    
+
     styleGenerator = styles.generator(fill=True)
 
     style = tdrstyle.TDRStyle()
@@ -88,27 +149,49 @@ def main():
     plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
     histograms.createLegend.moveDefaults(dx=-0.04)
 
+    wtaumuRatioFile = ROOT.TFile.Open("embedding-wtaumuRatio.root", "RECREATE")
+#    ROOT.TH1.AddDirectory(False)
+
     selections = [
-        ("Full", "embedding"),
-        ("FullNoIso", "disabled"),
-        ("FullStandardIso", "standard"),
+#        ("FullTauLike", "taulike"),
+#        ("FullNoIso", "disabled"),
+#        ("FullStandardIso", "standard"),
         ("FullChargedHadrRelIso10", "chargedHadrRel10"),
-        ("FullChargedHadrRelIso15", "chargedHadrRel15"),
+#        ("FullChargedHadrRelIso15", "chargedHadrRel15"),
         ]
     for name, isolation in selections:
         ntupleCache = dataset.NtupleCache(analysis+"/tree", "MuonAnalysisSelector",
-                                          selectorArgs=[weight, isolation],
+                                          selectorArgs=tauEmbedding.MuonAnalysisSelectorArgs(puWeight=weight, isolationMode=isolation),
                                           cacheFileName="histogramCache-%s.root" % name,
                                           #process=False,
-                                          #maxEvents=1000,
+                                          maxEvents=10000,
                                           )
+        ntupleCache.setDatasetSelectorArgs({
+                "WJets_NoB": tauEmbedding.MuonAnalysisSelectorArgs(bquarkMode="breject"),
+                "WJets_B": tauEmbedding.MuonAnalysisSelectorArgs(bquarkMode="baccept"),
+                "DYJetsToLL_NoB": tauEmbedding.MuonAnalysisSelectorArgs(bquarkMode="breject"),
+                "DYJetsToLL_B": tauEmbedding.MuonAnalysisSelectorArgs(bquarkMode="baccept"),
+                })
 
 
         doPlots(datasets, name, ntupleCache)
         printCounters(datasets, name, ntupleCache)
+#        printCounters(datasets, name, ntupleCache, onlyDataset="TTJets")
 
-#        doPlotsWTauMu(datasets, name, "TTJets", ntupleCache)
-#        doPlotsWTauMu(datasets, name, "WJets", ntupleCache)
+        if False and name == "FullChargedHadrRelIso10":
+            directory = wtaumuRatioFile.mkdir(name)
+            ratios = []
+            for dname in ["TTJets", "WJets", "SingleTop"]:
+            #for dname in ["TTJets"]:
+                (ratio, fit) = doPlotsWTauMu(datasets, name, dname, ntupleCache)
+                cl = ratio.Clone()
+                cl.SetDirectory(directory)
+                ratios.append( (ratio, fit, dname) )
+
+            doPlotsWTauMuRatio(name, ratios)
+
+    wtaumuRatioFile.Write()
+    wtaumuRatioFile.Close()
 
 def doPlots(datasets, selectionName, ntupleCache):
     def createPlot(name, **kwargs):
@@ -131,19 +214,19 @@ def doPlots(datasets, selectionName, ntupleCache):
     drawPlot(createPlot(ntupleCache.histogram("transverseMassUncorrectedMet_AfterJetSelection")),
              prefix+"mt_log", "m_{T}(#mu, E_{T}^{miss}) (GeV/c^{2})", ylabel="Events / %.0f GeV/c^{2}")
 
-    plotEfficiency(datasets, ["Data", "TTJets", "WJets", "QCD_Pt20_MuEnriched"],
-                   allPath=ntupleCache.histogram("muonVertexCount_AfterDB"),
-                   passedPath=ntupleCache.histogram("muonVertexCount_AfterIsolation"),
-                   name=prefix+"muonIsolationEfficiency", xlabel="Number of good vertices", ylabel="Muon selection efficiency",
-                   rebinBins=range(0, 25)+[25, 30, 35, 40, 50]
-                   )
+    # plotEfficiency(datasets, ["Data", "TTJets", "WJets", "QCD_Pt20_MuEnriched"],
+    #                allPath=ntupleCache.histogram("muonVertexCount_AfterDB"),
+    #                passedPath=ntupleCache.histogram("muonVertexCount_AfterIsolation"),
+    #                name=prefix+"muonIsolationEfficiency", xlabel="Number of good vertices", ylabel="Muon selection efficiency",
+    #                rebinBins=range(0, 25)+[25, 30, 35, 40, 50]
+    #                )
 
-    plotEfficiency(datasets, ["TTJets", "WJets"],
-                   allPath=ntupleCache.histogram("muonVertexCount_AfterDB_MuFromW"),
-                   passedPath=ntupleCache.histogram("muonVertexCount_AfterIsolation_MuFromW"),
-                   name=prefix+"muonIsolationEfficiency_MuFromW", xlabel="Number of good vertices", ylabel="Muon selection efficiency",
-                   rebinBins=range(0, 25)+[25, 30, 35, 40, 50]
-                   )
+    # plotEfficiency(datasets, ["TTJets", "WJets"],
+    #                allPath=ntupleCache.histogram("muonVertexCount_AfterDB_MuFromW"),
+    #                passedPath=ntupleCache.histogram("muonVertexCount_AfterIsolation_MuFromW"),
+    #                name=prefix+"muonIsolationEfficiency_MuFromW", xlabel="Number of good vertices", ylabel="Muon selection efficiency",
+    #                rebinBins=range(0, 25)+[25, 30, 35, 40, 50]
+    #                )
                    
 
     if "NoIso" in selectionName:
@@ -195,13 +278,48 @@ def doPlotsWTauMu(datasets, name, datasetName, ntupleCache):
     # Take first unweighted histograms for the fraction plot
     drh_all = ds.getDatasetRootHisto(ntupleCache.histogram("selectedMuonPt_AfterJetSelection_Unweighted"))
     drh_pure = ds.getDatasetRootHisto(ntupleCache.histogram("selectedMuonPt_AfterJetSelection_MuFromW_Unweighted"))
-    hallUn = drh_all.getHistogram()
-    hpureUn = drh_pure.getHistogram()
+
+    def createTEfficiency(drhAll, drhPure):
+        hallUn = drhAll.getHistogram()
+        hpureUn = drhPure.getHistogram()
+        teff = ROOT.TEfficiency(hpureUn, hallUn)
+        teff.SetDirectory(0)
+        teff.SetWeight(drhAll.getDataset().getCrossSection())
+        return teff
+    teffs = drh_all.forEach(createTEfficiency, drh_pure)
+    #coll = ROOT.TList()
+    #for o in teffs:
+    #    coll.AddLast(o)
+    #ratio = ROOT.TEfficiency.Combine(coll)
+    ratio = teffs[0]
+    for e in teffs[1:]:
+        ratio.Add(e)
+    styles.getDataStyle().apply(ratio)
+    ratio.SetName(datasetName)
+
+    ROOT.gStyle.SetStatY(0.99)
+    ROOT.gStyle.SetStatX(0.52)
+    ROOT.gStyle.SetStatW(0.18)
+    ROOT.gStyle.SetStatH(0.23)
+
+    expFit = ROOT.TF1("purityFit",
+                      #"1/(1+[0]*exp(-[1]*x))",
+                      "1-[0]*exp(-[1]*x)",
+                      #"1-([0]/(x^[1]))",
+                      histograms.th1Xmin(ratio.GetPassedHistogram()), histograms.th1Xmax(ratio.GetPassedHistogram()))
+    expFit.SetParameter(0, 0.05)
+    #ratio.Fit(expFit)
+    expFit.SetLineColor(ROOT.kRed)
+    expFit.SetLineWidth(2)
+    expFit = None
 
     # Then the correctly weighted for the main plot
     drh_all = ds.getDatasetRootHisto(ntupleCache.histogram("selectedMuonPt_AfterJetSelection"))
     drh_pure = ds.getDatasetRootHisto(ntupleCache.histogram("selectedMuonPt_AfterJetSelection_MuFromW"))
-    lumi = datasets.getDataset("Data").getLuminosity()
+    if mcOnly:
+        lumi = mcLuminosity
+    else:
+        lumi = datasets.getDataset("Data").getLuminosity()
     drh_all.normalizeToLuminosity(lumi)
     drh_pure.normalizeToLuminosity(lumi)
     hall = drh_all.getHistogram()
@@ -211,6 +329,7 @@ def doPlotsWTauMu(datasets, name, datasetName, ntupleCache):
     hpure.SetName("Pure")
 
     p = plots.ComparisonPlot(hall, hpure)
+    p.setLuminosity(lumi)
     p.histoMgr.setHistoLegendLabelMany({
             "All": "All muons",
 #            "Pure": "W#rightarrow#tau#rightarrow#mu"
@@ -232,7 +351,7 @@ def doPlotsWTauMu(datasets, name, datasetName, ntupleCache):
 
     p.createFrame(era+"_"+name+"_selectedMuonPt_AFterJetSelection_MuFromW_"+datasetName, createRatio=True, opts={"ymin": 1e-1, "ymaxfactor": 2}, opts2={"ymin": 0.9, "ymax": 1.05}
                   )
-    p.setRatios([plots._createRatio(hpureUn, hallUn, "", isBinomial=True)])
+    p.setRatios([ratio])
     xmin = p.frame.GetXaxis().GetXmin()
     xmax = p.frame.GetXaxis().GetXmax()
     val = 1-0.038479
@@ -243,6 +362,8 @@ def doPlotsWTauMu(datasets, name, datasetName, ntupleCache):
     p.prependPlotObjectToRatio(l)
     #p.appendPlotObjectToRatio(histograms.PlotText(0.18, 0.61, "1-0.038", size=18, color=ROOT.kBlue))
     p.appendPlotObjectToRatio(histograms.PlotText(0.18, 0.61, "0.038", size=18, color=ROOT.kBlue))
+    if expFit is not None:
+        p.appendPlotObjectToRatio(expFit)
     p.getFrame2().GetYaxis().SetTitle("W#rightarrow#mu fraction")
 
     p.getPad().SetLogy(True)
@@ -255,17 +376,55 @@ def doPlotsWTauMu(datasets, name, datasetName, ntupleCache):
 
     p.frame.GetXaxis().SetTitle("Muon p_{T} (GeV/c)")
     p.frame.GetYaxis().SetTitle("Events / %.0f GeV/c" % p.binWidth())
-    p.appendPlotObject(histograms.PlotText(0.5, 0.9, plots._legendLabels.get(name, name), size=18))
+    p.appendPlotObject(histograms.PlotText(0.5, 0.9, plots._legendLabels.get(datasetName, datasetName), size=18))
 
     p.draw()
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
+    p.addLuminosityText()
     p.save()
 
+    return (ratio, expFit)
 
+def doPlotsWTauMuRatio(selectionName, ratios):
+    prefix = era+"_"+selectionName+"_"
+
+    st = [styles.StyleCompound(styles=[s, styles.StyleMarker(markerSize=1.5)]) for s in styles.getStyles()]
+
+    p = plots.PlotBase([x[0] for x in ratios])
+    p.histoMgr.setHistoDrawStyleAll("P")
+    p.histoMgr.setHistoLegendStyleAll("P")
+    p.histoMgr.forEachHisto(styles.Generator(st))
+
+    def customize(plot):
+        xmin = plot.frame.GetXaxis().GetXmin()
+        xmax = plot.frame.GetXaxis().GetXmax()
+
+        val = 1
+        l = ROOT.TLine(xmin, val, xmax, val)
+        l.SetLineWidth(2)
+        l.SetLineColor(ROOT.kRed)
+        l.SetLineStyle(2)
+        plot.prependPlotObject(l)
+
+        val = 1-0.038479
+        l = ROOT.TLine(xmin, val, xmax, val)
+        l.SetLineWidth(2)
+        l.SetLineColor(ROOT.kBlue)
+        l.SetLineStyle(4)
+        plot.prependPlotObject(l)
+        plot.appendPlotObject(histograms.PlotText(0.18, 0.57, "0.038", size=18, color=ROOT.kBlue))
+
+    plots.drawPlot(p, prefix+"WMuFraction", "Muon p_{T} (GeV/c)", ylabel="W#rightarrow#mu fraction",
+                   opts={"ymin": 0.9, "ymax": 1.02},
+                   moveLegend={"dh": -0.15, "dx": -0.5},
+                   customizeBeforeDraw=customize)
+
+    #for ratio, fit, dname in ratios:
+    #    pass
 
 printed = False
-def printCounters(datasets, selectionName, ntupleCache):
+def printCounters(datasets, selectionName, ntupleCache, onlyDataset=None):
     global printed
     if not printed:
         print "============================================================"
@@ -280,6 +439,9 @@ def printCounters(datasets, selectionName, ntupleCache):
     else:
         eventCounter = counter.EventCounter(datasets)
         counterPath = "counters/weighted/counter"
+
+    if onlyDataset != None:
+        eventCounter.removeColumns(filter(lambda n: n != onlyDataset, datasets.getAllDatasetNames()))
 
     eventCounter.getMainCounter().appendRows(ntupleCache.histogram(counterPath))
 

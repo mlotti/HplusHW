@@ -37,14 +37,15 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TriggerTauMETEmulation* TriggerTauMETEmulation, bool passedEvent);
+      Data();
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
 
+      friend class TriggerTauMETEmulation;
+
     private:
-      const TriggerTauMETEmulation *fTriggerTauMETEmulation;
-      const bool fPassedEvent;
+      bool fPassedEvent;
     };
 
     TriggerTauMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);

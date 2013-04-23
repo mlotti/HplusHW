@@ -3,6 +3,7 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_EventCounter_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TemporaryDisabler.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include <boost/utility.hpp>
 #include <utility>
@@ -20,6 +21,8 @@ namespace edm {
 class TFileDirectory;
 
 namespace HPlus {
+  class EventWeight;
+  class HistoWrapper;
   class Count;
 
   // Prevent copying
@@ -40,14 +43,13 @@ namespace HPlus {
   public:
     typedef HPlus::TemporaryDisabler<EventCounter> TemporaryDisabler;
 
-    EventCounter(const edm::ParameterSet& iConfig);
+    EventCounter(const edm::ParameterSet& iConfig, const EventWeight& eventWeight, HistoWrapper& histoWrapper, HistoWrapper::HistoLevel subCounterLevel=HistoWrapper::kInformative);
     ~EventCounter();
 
     Count addCounter(const std::string& name);
     Count addSubCounter(const std::string& base, const std::string& name);
 
     void incrementCount(size_t counterIndex, size_t countIndex, int value);
-    void setWeightPointer(const double* ptr) { eventWeightPointer = ptr; }
 
     void endLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup);
     void endJob();
@@ -62,9 +64,10 @@ namespace HPlus {
     std::vector<edm::InputTag> inputCountTags_;
     std::vector<Counter> allCounters_; // main counter is always at index 0
 
+    const EventWeight& fEventWeight;
+    HistoWrapper& fHistoWrapper;
     std::string label;
-    const double* eventWeightPointer;
-    mutable bool finalized;
+    const HistoWrapper::HistoLevel fSubCounterLevel;
     bool printMainCounter;
     bool printSubCounters;
     bool fIsEnabled;

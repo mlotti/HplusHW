@@ -147,6 +147,7 @@
 # additional documentation.
 
 import os, re
+import sys
 import subprocess, errno
 import time
 import math
@@ -168,7 +169,7 @@ defaultSeBlacklist_noStageout = [
 #    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
     "kbfi.ee", # Files are not found, added 2012-09-28
     "cscs.ch", # Files are not found, added 2012-09-28
-    "roma1.infn.it", # Jobs don't finish, added 2012-10-26
+#    "roma1.infn.it", # Jobs don't finish, added 2012-10-26, commented 2013-02-25
     ]
 
 ## Default Storage Element (SE) black list for stageout jobs
@@ -181,7 +182,7 @@ defaultSeBlacklist_stageout = [
 #    "ingrid.pt", # Stageout failures, added 2011-10-26, commented 2011-12-02
     "ucsd.edu", # Stageout failures, added 2011-10-26 
     "pi.infn.it", # Stageout failures, added 2011-10-26
-    "lnl.infn.it", # Stageout failures, added 2011-12-02
+#    "lnl.infn.it", # Stageout failures, added 2011-12-02, commented 2013-02-25
 #    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
     "sprace.org.br", # Stageout failures. added 2011-12-02
     "knu.ac.kr", # Stageout failures, added 2011-12-02
@@ -199,10 +200,12 @@ defaultSeBlacklist = defaultSeBlacklist_noStageout + defaultSeBlacklist_stageout
 #                  optional, to override the default behaviour of reading
 #                  the configuration file.
 # \param filename  Path to the multicrab.cfg file (default: 'multicrab.cfg')
+# \param directory Path to \a filename, allows specifying only the
+#                  directory of the default \a filename (default: '')
 # 
 # The order of the task names is the same as they are in the
 # configuration file.
-def getTaskDirectories(opts, filename="multicrab.cfg"):
+def getTaskDirectories(opts, filename="multicrab.cfg", directory=""):
     if hasattr(opts, "dirs") and len(opts.dirs) > 0:
         ret = []
         for d in opts.dirs:
@@ -212,14 +215,15 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
                 ret.append(d)
         return ret
     else:
-        if not os.path.exists(filename):
-            raise Exception("Multicrab configuration file '%s' does not exist" % filename)
+        fname = os.path.join(directory, filename)
+        if not os.path.exists(fname):
+            raise Exception("Multicrab configuration file '%s' does not exist" % fname)
 
-        directory = os.path.dirname(filename)
+        dirname = os.path.dirname(fname)
 
         mc_ignore = ["MULTICRAB", "COMMON"]
         mc_parser = ConfigParser.ConfigParser(dict_type=OrderedDict.OrderedDict)
-        mc_parser.read(filename)
+        mc_parser.read(fname)
 
         sections = mc_parser.sections()
 
@@ -239,7 +243,7 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
         if opts != None and opts.filter != "":
             fi = filt
 
-        return filter(fi, [os.path.join(directory, sec) for sec in sections])
+        return filter(fi, [os.path.join(dirname, sec) for sec in sections])
 
 ## Add common MultiCRAB options to OptionParser object.
 #
@@ -280,6 +284,61 @@ def createTaskDir(prefix="multicrab", postfix="", path=None):
         os.makedirs(dirname)
         break
     return dirname
+
+def crabCfgTemplate(scheduler="arc", return_data=None, copy_data=None, crabLines=[], cmsswLines=[], userLines=[], gridLines=[]):
+    if return_data is None and copy_data is None:
+        raise Exception("You must give either return_data or copy_data, you gave neither")
+    if return_data is not None and copy_data is not None:
+        raise Exception("You must give either return_data or copy_data, you gave both")
+    if copy_data is not None:
+        return_data = not copy_data
+    if return_data:
+        r = 1
+        c = 0
+    else:
+        r = 0
+        c = 1
+
+    lines = [
+        "[CRAB]",
+        "jobtype = cmssw",
+        "scheduler = %s" % scheduler,
+        ]
+    lines.extend(crabLines)
+    if len(cmsswLines) > 0:
+        lines.extend(["", "[CMSSW"])
+        lines.extend(cmsswLines)
+    lines.extend([
+        "",
+        "[USER]",
+        "return_data = %d" % r,
+        "copy_data = %d" % c,
+        ])
+    lines.extend(userLines)
+    lines.extend([
+        "",
+        "[GRID]",
+        "virtual_organization = cms"
+        ])
+    lines.extend(gridLines)
+
+    return "\n".join(lines)
+
+## Write git version information to a directory
+#
+# \param dirname  Path to multicrab directory
+def writeGitVersion(dirname):
+    version = git.getCommitId()
+    if version != None:
+        f = open(os.path.join(dirname, "codeVersion.txt"), "w")
+        f.write(version+"\n")
+        f.close()
+        f = open(os.path.join(dirname, "codeStatus.txt"), "w")
+        f.write(git.getStatus()+"\n")
+        f.close()
+        f = open(os.path.join(dirname, "codeDiff.txt"), "w")
+        f.write(git.getDiff()+"\n")
+        f.close()
 
 ## Print all multicrab datasets
 #
@@ -457,6 +516,11 @@ def crabStatusOutput(task, printCrab):
             raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
     return output
 
+## Exception for something being wrong in the crab output
+class CrabOutputException(Exception):
+    def __init__(self, message):
+        Exception.__init__(self, message)
+
 ## Transform 'crab -status' output to list of multicrab.CrabJob objects
 #
 # \param task    CRAB task directory
@@ -465,12 +529,25 @@ def crabStatusOutput(task, printCrab):
 # \return List of multicrab.CrabJob objects
 def crabOutputToJobs(task, output):
     status_re = re.compile("(?P<id>\d+)\s+(?P<end>\S)\s+(?P<status>\S+)(\s+\(.*?\))?\s+(?P<action>\S+)\s+(?P<execode>\S+)?\s+(?P<jobcode>\S+)?\s+(?P<host>\S+)?")
+    total_re = re.compile("crab:\s+(?P<njobs>\d+)\s+Total\s+Jobs")
     jobs = {}
+    njobs = 0
+    total = None
     for line in output.split("\n"):
         m = status_re.search(line)
         if m:
             job = CrabJob(task, m)
             multicrabWorkflowsTools._addToDictList(jobs, job.status, job)
+            njobs += 1
+            continue
+        m = total_re.search(line)
+        if m:
+            total = int(m.group("njobs"))
+
+    if total is None:
+        raise CrabOutputException("Did not find total number of jobs from the crab output")
+    if total != njobs:
+        raise CrabOutputException("Crab says total number of jobs is %d, but only %d was found from the input" % (total, njobs))
     return jobs
 
 ## Convert argument to int if it is not None
@@ -486,8 +563,23 @@ def _intIfNotNone(n):
 #
 # \return List of multicrab.CrabJob objects
 def crabStatusToJobs(task, printCrab):
-    output = crabStatusOutput(task, printCrab)
-    return crabOutputToJobs(task, output)
+    # For some reason in lxplus sometimes the crab output is
+    # garbled. In case of value errors try 4 times.
+    maxTrials = 4
+    for i in xrange(0, maxTrials):
+        try:
+            output = crabStatusOutput(task, printCrab)
+            return crabOutputToJobs(task, output)
+        except ValueError, e:
+            if i == maxTrials-1:
+                raise e
+            print >>sys.stderr, "%s: Got garbled output from 'crab -status' (parse error), trying again" % task
+        except CrabOutputException, e:
+            if i == maxTrials-1:
+                raise e
+            print >>sys.stderr, "%s: Got garbled output from 'crab -status' (mismatch in number of jobs), trying again" % task
+
+    raise Exception("Assetion, this line should never be reached")
 
 ## Class for containing the information of finished CRAB job
 class CrabJob:
@@ -768,15 +860,18 @@ class Multicrab:
     #                     of crabConfig
     # \param lumiMaskDir  The directory for lumi mask (aka JSON) files, can
     #                     be absolute or relative path
+    # \param crabConfigTemplate  String containing the crab.cfg. Either this ir crabConfig must be given
     # 
     # Parses the crabConfig file for CMSSW.pset and CMSSW.lumi_mask.
     # Ensures that the CMSSW configuration file exists.
-    def __init__(self, crabConfig, pyConfig=None, lumiMaskDir=""):
-        if not os.path.exists(crabConfig):
-            raise Exception("CRAB configuration file '%s' doesn't exist!" % crabConfig)
+    def __init__(self, crabConfig=None, pyConfig=None, lumiMaskDir="", crabConfigTemplate=None):
+        if crabConfig is None and crabConfigTemplate is None:
+            raise Exception("You must specify either crabConfig or crabConfigTemplate, you gave neither")
+        if crabConfig is not None and crabConfigTemplate is not None:
+            raise Exception("You must specify either crabConfig or crabConfigTemplate, you gave both")
 
-        self.crabConfig = os.path.basename(crabConfig)
-        self.filesToCopy = [crabConfig]
+        self.generatedFiles = []
+        self.filesToCopy = []
 
         self.commonLines = []
         self.lumiMaskDir = lumiMaskDir
@@ -786,18 +881,30 @@ class Multicrab:
         self.datasets = None
 
         # Read crab.cfg for lumi_mask and optionally pset
-        crab_parser = ConfigParser.ConfigParser()
-        crab_parser.read(crabConfig)
+        if crabConfig is not None:
+            if not os.path.exists(crabConfig):
+                raise Exception("CRAB configuration file '%s' doesn't exist!" % crabConfig)
 
-        optlist = ["lumi_mask"]
-        if pyConfig == None:
-            optlist.append("pset")
-        for opt in optlist:
-            try:
-                self.filesToCopy.append(crab_parser.get("CMSSW", opt))
-            except ConfigParser.NoOptionError:
-                pass
+            self.crabConfig = os.path.basename(crabConfig)
+            self.filesToCopy.append(crabConfig)            
 
+            crab_parser = ConfigParser.ConfigParser()
+            crab_parser.read(crabConfig)
+
+            optlist = ["lumi_mask"]
+            if pyConfig is None:
+                optlist.append("pset")
+            for opt in optlist:
+                try:
+                    self.filesToCopy.append(crab_parser.get("CMSSW", opt))
+                except ConfigParser.NoOptionError:
+                    pass
+                except ConfigParser.NoSectionError:
+                    pass
+        else:
+            self.crabConfig = "crab.cfg"
+            self.generatedFiles.append( ("crab.cfg", crabConfigTemplate) )
+    
         # If pyConfig is given, use it
         if pyConfig != None:
             if not os.path.exists(pyConfig):
@@ -961,6 +1068,17 @@ class Multicrab:
 
         return ret
 
+    ## Write generated files to a directory.
+    #
+    # \param directory   Directory where to write the generated files
+    #
+    # This method was intended to be called internally.
+    def _writeGeneratedFiles(self, directory):
+        for fname, content in self.generatedFiles:
+            f = open(os.path.join(directory, fname), "wb")
+            f.write(content)
+            f.close()
+
     ## Write the multicrab configuration to a given file name.
     #
     # \param filename      Write the configuration to this file
@@ -973,11 +1091,12 @@ class Multicrab:
         f.close()
 
         directory = os.path.dirname(filename)
+        self._writeGeneratedFiles(directory)
+
         for name in datasetNames:
             self.getDataset(name)._writeGeneratedFiles(directory)
 
         print "Wrote multicrab configuration to %s" % filename
-        
 
     ## Create the multicrab task.
     # 
@@ -1070,17 +1189,7 @@ class Multicrab:
 
         # Create code versions
 	if codeRepo == 'git':
-            version = git.getCommitId()
-            if version != None:
-                f = open(os.path.join(dirname, "codeVersion.txt"), "w")
-                f.write(version+"\n")
-                f.close()
-                f = open(os.path.join(dirname, "codeStatus.txt"), "w")
-                f.write(git.getStatus()+"\n")
-                f.close()
-                f = open(os.path.join(dirname, "codeDiff.txt"), "w")
-                f.write(git.getDiff()+"\n")
-                f.close()
+            writeGitVersion(dirname)
 
         files = self.filesToCopy[:]
         for name in dsetNames:

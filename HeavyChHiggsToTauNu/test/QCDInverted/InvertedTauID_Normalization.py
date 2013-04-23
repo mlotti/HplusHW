@@ -36,9 +36,9 @@ def usage():
 
 def main(argv):
 
-#    HISTONAME = "TauIdJets"
+    HISTONAME = "TauIdJets"
 #    HISTONAME = "TauIdBtag"
-    HISTONAME = "TauIdBveto"
+#    HISTONAME = "TauIdBveto"
     
     dirs = []
     if len(sys.argv) < 2:
@@ -95,9 +95,9 @@ def main(argv):
 
 
 
-#    bins = ["inclusive"]
+    bins = ["inclusive"]
 #    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
-    bins = ["4050","5060","6070","7080","80100","100120","120"]
+#    bins = ["4050","5060","6070","7080","80100","100120","120"]
 #    bins = ["4050"]
             
 

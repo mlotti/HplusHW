@@ -27,7 +27,7 @@ namespace HPlus {
     fDoFill(iConfig.getUntrackedParameter<bool>("fill")),
     fTauEmbeddingInput(iConfig.getUntrackedParameter<bool>("tauEmbeddingInput", false)),
     fFillJetEnergyFractions(iConfig.getUntrackedParameter<bool>("fillJetEnergyFractions", true)),
-    fillNonIsoLeptonVars(iConfig.getUntrackedParameter<bool>("fillNonIsoLeptonVars", false)),
+    fFillNonIsoLeptonVars(iConfig.getUntrackedParameter<bool>("fillNonIsoLeptonVars", false)),
     fGenParticleSource(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
     fTree(0)
   {
@@ -46,7 +46,7 @@ namespace HPlus {
     for(size_t i=0; i<tauIds.size(); ++i) {
       fTauIds.push_back(TauId(tauIds[i]));
     }
-//    fillNonIsoLeptonVars = false;
+
     reset();    
   }
   SignalAnalysisTree::~SignalAnalysisTree() {}
@@ -54,15 +54,19 @@ namespace HPlus {
   void SignalAnalysisTree::init(TFileDirectory& dir) {
     if(!fDoFill)
       return;
-
+    // std::cout << "Init: 1" << std::endl;
     fTree = dir.make<TTree>("tree", "Tree");
 
     fEventBranches.book(fTree);
 
     fTree->Branch("weightPrescale", &fPrescaleWeight);
     fTree->Branch("weightPileup", &fPileupWeight);
-    fTree->Branch("weightTrigger", &fTriggerWeight);
-    fTree->Branch("weightTriggerAbsUnc", &fTriggerWeightAbsUnc);
+    fTree->Branch("weightTauFakes", &fTauFakeWeight);
+    fTree->Branch("weightTauFakesAbsUnc", &fTauFakeWeightAbsUnc);
+    fTree->Branch("weightTauTrigger", &fTauTriggerWeight);
+    fTree->Branch("weightTauTriggerAbsUnc", &fTauTriggerWeightAbsUnc);
+    fTree->Branch("weightMETTrigger", &fMETTriggerWeight);
+    fTree->Branch("weightMETTriggerAbsUnc", &fMETTriggerWeightAbsUnc);
     fTree->Branch("weightBTagging", &fBTaggingWeight);
     fTree->Branch("weightBTaggingAbsUnc", &fBTaggingWeightAbsUnc);
     fTree->Branch("weightAtFill", &fFillWeight);
@@ -85,6 +89,8 @@ namespace HPlus {
     fTree->Branch("tau_daughter_pdgid", &fTauDaughterPdgId);
      
     fTree->Branch("jets_p4", &fJets);
+    fTree->Branch("allIdentifiedJets_p4", &fAllIdentifiedJets);
+    fTree->Branch("selJetsInclTau_p4", &fSelJetsInclTau);
     fTree->Branch("jets_btag", &fJetsBtags);
     if(fFillJetEnergyFractions) {
       fTree->Branch("jets_chf", &fJetsChf); // charged hadron
@@ -116,6 +122,33 @@ namespace HPlus {
     fTree->Branch("topreco_p4", &fTop);
 
     fTree->Branch("alphaT", &fAlphaT);
+    fTree->Branch("MomentumTensor_QOne", &fMomentumTensor_QOne);
+    fTree->Branch("MomentumTensor_QTwo", &fMomentumTensor_QTwo);
+    fTree->Branch("MomentumTensor_QThree", &fMomentumTensor_QThree);
+    fTree->Branch("sphericity", &fSphericity);
+    fTree->Branch("aplanarity", &fAplanarity);
+    fTree->Branch("planarity", &fPlanarity);
+    fTree->Branch("circularity", &fCircularity);
+    fTree->Branch("SpherocityTensor_QOne", &fSpherocityTensor_QOne);
+    fTree->Branch("SpherocityTensor_QTwo", &fSpherocityTensor_QTwo);
+    fTree->Branch("SpherocityTensor_QThree", &fSpherocityTensor_QThree);
+    fTree->Branch("Cparameter", &fCparameter);
+    fTree->Branch("Dparameter", &fDparameter);
+    fTree->Branch("jetThrust", &fJetThrust);
+
+    // Full H+ mass
+    fTree->Branch("hplusMassDiscriminant", &fHplusMassDiscriminant);
+    fTree->Branch("hplusMassSolution", &fHplusMassSolution);
+    fTree->Branch("hplusMassTopMassSolution", &fHplusMassTopMassSolution);
+    fTree->Branch("hplusMassSelectedNeutrinoPzSolution", &fHplusMassSelectedNeutrinoPzSolution);
+    fTree->Branch("hplusMassSelectedNeutrinoPtSolution", &fHplusMassSelectedNeutrinoPtSolution);
+    fTree->Branch("hplusMassMCNeutrinoPz", &fHplusMassMCNeutrinoPz);
+
+    fTree->Branch("TauIsFake", &bTauIsFake);
+    fTree->Branch("MHT_p4", &fMHT);
+    fTree->Branch("MHT_SelJets_p4", &fMHTSelJets);
+    fTree->Branch("MHT_AllJets_p4", &fMHTAllJets);
+    fTree->Branch("vDiJetMassesNoTau", &vDiJetMassesNoTau);
 
     fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
@@ -129,7 +162,7 @@ namespace HPlus {
       fTree->Branch("tecalomet_p4", &fTauEmbeddingCaloMet);
     }
 
-    if(fillNonIsoLeptonVars){
+    if(fFillNonIsoLeptonVars){
       // nonIsoMuons
       fTree->Branch("nonIsoMuons_p4", &fNonIsoMuons);
       fTree->Branch("nonIsoMuons_IsGlobalMuon", &fNonIsoMuons_IsGlobalMuon);
@@ -189,55 +222,87 @@ namespace HPlus {
       fTree->Branch("nonIsoElectrons_IPwrtBeamSpot" , & fNonIsoElectrons_IPwrtBeamSpot);
       fTree->Branch("nonIsoElectrons_ElectronMuonDeltaR" , & fNonIsoElectrons_ElectronMuonDeltaR);
     }
-  
+    // std::cout << "Init: 2" << std::endl;  
     reset();
   }
 
 
   void SignalAnalysisTree::setHltTaus(const pat::TriggerObjectRefVector& hltTaus) {
+    // std::cout << "setHltTaus: 1" << std::endl;  
     fHltTaus.clear();
     fHltTaus.reserve(hltTaus.size());
     for(size_t i=0; i<hltTaus.size(); ++i) {
       fHltTaus.push_back(hltTaus[i]->p4());
     }
+    // std::cout << "setHltTaus: 2" << std::endl;  
   }
  
-  void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
+
+  void SignalAnalysisTree::setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets){
+    for(size_t i=0; i<allIdentifiedJets.size(); ++i) {
+      fAllIdentifiedJets.push_back(allIdentifiedJets[i]->p4());}
+  }
+  
+  void SignalAnalysisTree::setSelJetsInclTau(const edm::PtrVector<pat::Jet>& selJetsInclTau){
+    for(size_t i=0; i<selJetsInclTau.size(); ++i) {
+      fSelJetsInclTau.push_back(selJetsInclTau[i]->p4());}
+  }
+  
+
+  void SignalAnalysisTree::setMHTAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets){
+    fMHTAllJets.SetXYZT(0., 0., 0., 0.);
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = allIdentifiedJets.begin(); iter != allIdentifiedJets.end(); ++iter) {
+      fMHTAllJets -= (*iter)->p4();
+    }
+  }
+  
+
+  void SignalAnalysisTree::setMHTSelJets(const edm::PtrVector<pat::Jet>& jets){
+    fMHTSelJets.SetXYZT(0., 0., 0., 0.);
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
+      fMHTSelJets -= (*iter)->p4();
+    }
+  }
+
+
+  void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau,
                                 const edm::PtrVector<pat::Jet>& jets) {
     if(!fDoFill)
       return;
-
-    if(taus.size() != 1)
-      throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
+    // std::cout << "fill: 1" << std::endl;  
+    // if(taus.size() != 1)
+    // throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
+    if(tau.isNull())
+      throw cms::Exception("LogicError") << "Tau object is zero pointer (did you forget to check that TauSelection::Data::passedEvent == true?)" << __FILE__ << ":" << __LINE__ << std::endl;
 
     // General event information
     fEventBranches.setValues(iEvent);
 
     // Selected tau
-    const pat::Tau& tau = *(taus[0]);
-    fTau = tau.p4();
-    fTauLeadingChCand = tau.leadPFChargedHadrCand()->p4();
-    fTauSignalChCands = tau.signalPFChargedHadrCands().size();
-    fTauEmFraction = tau.emFraction();
-    fTauDecayMode = tau.decayMode();
+    fTau = tau->p4();
+    fTauLeadingChCand = tau->leadPFChargedHadrCand()->p4();
+    fTauSignalChCands = tau->signalPFChargedHadrCands().size();
+    fTauEmFraction = tau->emFraction();
+    fTauDecayMode = tau->decayMode();
     for(size_t i=0; i<fTauIds.size(); ++i) {
-      fTauIds[i].value = tau.tauID(fTauIds[i].name) > 0.5;
+      fTauIds[i].value = tau->tauID(fTauIds[i].name) > 0.5;
     }
-
+    // std::cout << "fill: 2" << std::endl;
     // MC matching of tau
+    
     if(!iEvent.isRealData()) {
       edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
       iEvent.getByLabel(fGenParticleSource, hgenparticles);
 
       // Try first genuine tau
-      const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 15, tau, 0.5);
+      const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 15, *tau, 0.5, true); // true for visible tau matching
       if(!gen) { // then muon
-        const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 13, tau, 0.5);
+        gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 13, *tau, 0.5);
       }
       if(!gen) { // finally electron
-        const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 11, tau, 0.5);
+        gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 11, *tau, 0.5);
       }
-
+      // std::cout << "fill: 3" << std::endl;
       if(gen) {
         fTauPdgId = gen->pdgId();
         const reco::GenParticle *mother = GenParticleTools::findMother(gen);
@@ -255,22 +320,22 @@ namespace HPlus {
 
       }
     }
-
-
+    // std::cout << "fill: 4" << std::endl;
+  
     // Selected jets
     for(size_t i=0; i<jets.size(); ++i) {
       fJets.push_back(jets[i]->p4());
       fJetsBtags.push_back(jets[i]->bDiscriminator(fBdiscriminator));
 
       double eta = jets[i]->eta();
-
+      // std::cout << "fill: 4a" << std::endl;
       double chf = jets[i]->chargedHadronEnergyFraction();
       double nhf = jets[i]->neutralHadronEnergyFraction();
       double elf = jets[i]->chargedEmEnergyFraction();
       double phf = jets[i]->neutralEmEnergyFraction();
       // for some reason the muonEnergyFraction is calculated w.r.t. *corrected* energy in pat::Jet
       double muf = jets[i]->muonEnergy() / (jets[i]->jecFactor(0) * jets[i]->energy());
-
+      // std::cout << "fill: 4b" << std::endl;
       if(fFillJetEnergyFractions) {
         double sum = chf+nhf+elf+phf+muf;
         if(std::abs(sum - 1.0) > 0.000001) {
@@ -278,13 +343,14 @@ namespace HPlus {
                                          << " the sum-1 was " << (sum-1.0)
                                          << std::endl;
         }
+	// std::cout << "fill: 4c" << std::endl;
         fJetsChf.push_back(chf);
         fJetsNhf.push_back(nhf);
         fJetsElf.push_back(elf);
         fJetsPhf.push_back(phf);
         fJetsMuf.push_back(muf);
       }
-
+      // std::cout << "fill: 5" << std::endl;    
       int chm = jets[i]->chargedHadronMultiplicity();
       fJetsChm.push_back(chm);
       fJetsNhm.push_back(jets[i]->neutralHadronMultiplicity());
@@ -302,8 +368,9 @@ namespace HPlus {
                                                                       std::abs(eta) > 2.4) );
 
       fJetsArea.push_back(jets[i]->jetArea());
+      // std::cout << "fill: 6" << std::endl;
     }
-
+    // std::cout << "fill: 7" << std::endl;
     // Tau embedding (muon, mets) information
     if(fTauEmbeddingInput) {
       edm::Handle<edm::View<reco::MET> > hmet;
@@ -339,7 +406,9 @@ namespace HPlus {
     }
 
     // Fill the TTree, and reset branch variables to wait the next event
+    // std::cout << "fill: 8" << std::endl;
     fTree->Fill();
+    // std::cout << "fill: 9" << std::endl;
     reset();
   }
 
@@ -347,7 +416,7 @@ namespace HPlus {
   void SignalAnalysisTree::setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons) {
     if(!fDoFill)
       return;
-
+    // std::cout << "setNonIsoLeptons: 1" << std::endl;  
     if(nonIsoMuons.size() >= 1){
       // throw cms::Exception("LogicError") << "Expected nonIsoMuon collection size to be >=1, but  was " << nonIsoMuons.size() << " instead at " << __FILE__ << ":" << __LINE__ << std::endl;
       // loop over all muons
@@ -454,10 +523,11 @@ namespace HPlus {
 	fNonIsoMuons_EcalIso.push_back(myEcalIso);
 	fNonIsoMuons_HcalIso.push_back(myHcalIso);
 	fNonIsoMuons_RelIso.push_back(relIsol);
-
+	// std::cout << "setNonIsoLeptons: 2" << std::endl;  
       }//eof: for( nonIsoMuons )
+      // std::cout << "setNonIsoLeptons: 3" << std::endl;  
     }//eof: if
-    
+    // std::cout << "setNonIsoLeptons: 4" << std::endl;      
     if(nonIsoElectrons.size() >= 1){
 
       // Loop over all Electrons
@@ -519,7 +589,7 @@ namespace HPlus {
 	// a) Number of lost hits in the tracker
 	int iNLostHitsInTrker = myGsfTrackRef->hitPattern().numberOfLostHits();
 	fNonIsoElectrons_NLostHitsInTrker.push_back( iNLostHitsInTrker );
-	
+	// std::cout << "setNonIsoLeptons: 5" << std::endl;  	
 	/*
 	// For Photon Conversion Rejection (Searching for the partner conversion track in the GeneralTrack Collection
 	ConversionFinder convFinder;
@@ -559,7 +629,7 @@ namespace HPlus {
 	fNonIsoElectrons_EcalIso.push_back( myEcalIso );
 	fNonIsoElectrons_HcalIso.push_back( myHcalIso );
 	fNonIsoElectrons_RelIso.push_back( myRelativeIsolation );
-
+	// std::cout << "setNonIsoLeptons: 6" << std::endl;  
       
 	// 7) DeltaR between Electron candidate and any Global or Tracker Muon in the event whose number of hits in the inner tracker > 10
 	float myElectronMuonDeltaR = -1.00;
@@ -603,21 +673,26 @@ namespace HPlus {
       
       }//eof: for (nonIsoElectrons)
     }//eof: if
-    
+    // std::cout << "setNonIsoLeptons: 7" << std::endl;      
     return;
   }
 
 
 
   void SignalAnalysisTree::reset() {
+    // std::cout << "reset: 1" << std::endl;  
     double nan = std::numeric_limits<double>::quiet_NaN();
 
     fEventBranches.reset();
 
     fPrescaleWeight = 1.0;
     fPileupWeight = 1.0;
-    fTriggerWeight = 1.0;
-    fTriggerWeightAbsUnc = nan;
+    fTauFakeWeight = 1.0;
+    fTauFakeWeightAbsUnc = nan;
+    fTauTriggerWeight = 1.0;
+    fTauTriggerWeightAbsUnc = nan;
+    fMETTriggerWeight = 1.0;
+    fMETTriggerWeightAbsUnc = nan;
     fBTaggingWeight = 1.0;
     fBTaggingWeightAbsUnc = nan;
     fFillWeight = 1.0;
@@ -639,6 +714,8 @@ namespace HPlus {
     fTauDaughterPdgId = 0;
 
     fJets.clear();
+    fAllIdentifiedJets.clear();
+    fSelJetsInclTau.clear();
     fJetsBtags.clear();
     fJetsFlavour.clear();
 
@@ -663,6 +740,9 @@ namespace HPlus {
     fJetsTightId.clear();
 
     fRawMet.SetXYZT(nan, nan, nan, nan);
+    fMHT.SetXYZT(nan, nan, nan, nan);
+    fMHTSelJets.SetXYZT(nan, nan, nan, nan);
+    fMHTAllJets.SetXYZT(nan, nan, nan, nan);
     fRawMetSumEt = nan;
     fRawMetSignificance = nan;
 
@@ -674,6 +754,31 @@ namespace HPlus {
     fTop.SetXYZT(nan, nan, nan, nan);
 
     fAlphaT = nan;
+    fMomentumTensor_QOne = nan;
+    fMomentumTensor_QTwo = nan;
+    fMomentumTensor_QThree = nan;
+    fSphericity = nan;
+    fAplanarity = nan;
+    fPlanarity = nan;
+    fCircularity = nan;
+    fSpherocityTensor_QOne = nan;
+    fSpherocityTensor_QTwo = nan;
+    fSpherocityTensor_QThree = nan;
+    fCparameter = nan;
+    fDparameter = nan;
+    fJetThrust = nan;
+
+    // Full H+ mass
+    fHplusMassDiscriminant = nan;
+    fHplusMassSolution = nan;
+    fHplusMassTopMassSolution = nan;
+    fHplusMassSelectedNeutrinoPzSolution = nan;
+    fHplusMassSelectedNeutrinoPtSolution = nan;
+    fHplusMassMCNeutrinoPz = nan;
+
+    bTauIsFake = false;
+    vDiJetMassesNoTau.clear();
+  
     fDeltaPhi = nan;
 
     fPassedBTagging = false;
@@ -685,7 +790,7 @@ namespace HPlus {
     fTauEmbeddingMet.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingCaloMetNoHF.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingCaloMet.SetXYZT(nan, nan, nan, nan);
-
+    // std::cout << "reset: 2" << std::endl;  
     // nonIsoMuons
     fNonIsoMuons.clear();
     fNonIsoMuons_IsGlobalMuon.clear();
@@ -746,6 +851,6 @@ namespace HPlus {
     fNonIsoElectrons_HcalIso.clear();
     fNonIsoElectrons_RelIso.clear();
     fNonIsoElectrons_ElectronMuonDeltaR.clear();
-
+    // std::cout << "reset: 3" << std::endl;  
   }
 }

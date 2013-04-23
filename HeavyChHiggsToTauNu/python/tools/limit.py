@@ -51,9 +51,9 @@ def mA():
 
 ## Labels for the final states
 _finalstateLabels = {
-    "taujets": "#tau_{h}+jets",
-    "etau"   : "e#tau_{h}",
-    "mutau"  : "#mu#tau_{h}",
+    "taujets": "^{}#tau_{h}+jets",
+    "etau"   : "e^{}#tau_{h}",
+    "mutau"  : "#mu^{}#tau_{h}",
     "emu"    : "e#mu",
 }
 
@@ -195,7 +195,7 @@ class BRLimits:
                          array.array("d", self.observed)
                          )
         gr.SetMarkerStyle(21)
-        gr.SetMarkerSize(1.5)
+        gr.SetMarkerSize(1.3)
         gr.SetMarkerColor(ROOT.kBlack)
         gr.SetLineWidth(3)
         gr.SetLineColor(ROOT.kBlack)

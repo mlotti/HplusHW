@@ -1,6 +1,8 @@
 #include "Branches.h"
 
+#include<limits>
 #include<iostream>
+#include<stdexcept>
 
 //////////////////// EventInfo ////////////////////
 EventInfo::EventInfo() {}
@@ -14,10 +16,17 @@ void EventInfo::setupBranches(TTree *tree) {
 
 
 //////////////////// MuonCollection ////////////////////
+MuonCollection::Muon::Muon():
+  fCollection(0), fIndex(std::numeric_limits<size_t>::max())
+{}
 MuonCollection::Muon::Muon(MuonCollection *mc, size_t i):
   fCollection(mc), fIndex(i)
 {}
 MuonCollection::Muon::~Muon() {}
+void MuonCollection::Muon::ensureValidity() const {
+  if(!fCollection)
+    throw std::logic_error("Muon is not valid (fCollection is NULL)");
+}
 
 MuonCollection::MuonCollection(const std::string prefix):
   fPrefix(prefix)
@@ -37,13 +46,15 @@ void MuonCollection::setupBranches(TTree *tree, bool isMC) {
   fPhotonIso.setupBranch(tree, (fPrefix+"_f_photonIso").c_str());
 
   if(isMC) {
-    fPdgId.setupBranch(tree, (fPrefix+"_pdgid").c_str());
-    fMotherPdgId.setupBranch(tree, (fPrefix+"_mother_pdgid").c_str());
-    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
+    fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatch_p4").c_str());
+    fPdgId.setupBranch(tree, (fPrefix+"_genmatch_pdgid").c_str());
+    fMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_mother_pdgid").c_str());
+    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_grandmother_pdgid").c_str());
   }
 }
 
 //////////////////// EmbeddingMuonCollection ////////////////////
+EmbeddingMuonCollection::Muon::Muon(): MuonCollection::Muon() {}
 EmbeddingMuonCollection::Muon::Muon(EmbeddingMuonCollection *mc, size_t i): MuonCollection::Muon(mc, i) {}
 EmbeddingMuonCollection::Muon::~Muon() {}
 EmbeddingMuonCollection::EmbeddingMuonCollection(const std::string& postfix): fPostfix(postfix) {}
@@ -82,9 +93,10 @@ void ElectronCollection::setupBranches(TTree *tree, bool isMC) {
   fSuperClusterEta.setupBranch(tree, (fPrefix+"_f_superClusterEta").c_str());
 
   if(isMC) {
-    fPdgId.setupBranch(tree, (fPrefix+"_pdgid").c_str());
-    fMotherPdgId.setupBranch(tree, (fPrefix+"_mother_pdgid").c_str());
-    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
+    fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatch_p4").c_str());
+    fPdgId.setupBranch(tree, (fPrefix+"_genmatch_pdgid").c_str());
+    fMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_mother_pdgid").c_str());
+    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_grandmother_pdgid").c_str());
   }
 }
 
@@ -135,7 +147,7 @@ TauCollection::TauCollection(const std::string prefix):
 {}
 TauCollection::~TauCollection() {}
 
-void TauCollection::setupBranches(TTree *tree) {
+void TauCollection::setupBranches(TTree *tree, bool isMC) {
   fP4.setupBranch(tree, (fPrefix+"_p4").c_str());
   fLeadPFChargedHadrCandP4.setupBranch(tree, (fPrefix+"_leadPFChargedHadrCand_p4").c_str());
   fSignalPFChargedHadrCandsCount.setupBranch(tree, (fPrefix+"_signalPFChargedHadrCands_n").c_str());
@@ -148,4 +160,30 @@ void TauCollection::setupBranches(TTree *tree) {
   fAgainstElectronTight.setupBranch(tree, (fPrefix+"_f_againstElectronTight").c_str());
   fAgainstElectronMVA.setupBranch(tree, (fPrefix+"_f_againstElectronMVA").c_str());
   fMediumCombinedIsolationDeltaBetaCorr.setupBranch(tree, (fPrefix+"_f_byMediumCombinedIsolationDeltaBetaCorr").c_str());
+
+  if(isMC) {
+    fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatch_p4").c_str());
+    fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatchvisible_p4").c_str());
+    fPdgId.setupBranch(tree, (fPrefix+"_genmatch_pdgid").c_str());
+    fMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_mother_pdgid").c_str());
+    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_grandmother_pdgid").c_str());
+  }
+}
+
+//////////////////// GenParticleCollection ////////////////////
+GenParticleCollection::GenParticle::GenParticle(GenParticleCollection *gpc, size_t i):
+  fCollection(gpc), fIndex(i)
+{}
+GenParticleCollection::GenParticle::~GenParticle() {}
+
+GenParticleCollection::GenParticleCollection(const std::string& prefix):
+  fPrefix(prefix)
+{}
+GenParticleCollection::~GenParticleCollection() {}
+
+void GenParticleCollection::setupBranches(TTree *tree) {
+  fP4.setupBranch(tree, (fPrefix+"_p4").c_str());
+  fPdgId.setupBranch(tree, (fPrefix+"_pdgid").c_str());
+  fMotherPdgId.setupBranch(tree, (fPrefix+"_mother_pdgid").c_str());
+  fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
 }

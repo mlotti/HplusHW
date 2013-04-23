@@ -29,6 +29,11 @@ namespace HPlus {
     void ensureAnalyzeAllowed(const edm::Event& iEvent);
     void ensureSilentAnalyzeAllowed(const edm::Event& iEvent) const;
 
+    EventCounter& getEventCounter() const { return fEventCounter; }
+    HistoWrapper& getHistoWrapper() const { return fHistoWrapper; }
+    EventCounter* getEventCounterPointer() const { return &fEventCounter; }
+    HistoWrapper* getHistoWrapperPointer() const { return &fHistoWrapper; }
+    
   protected:
     EventCounter& fEventCounter;
     HistoWrapper& fHistoWrapper;

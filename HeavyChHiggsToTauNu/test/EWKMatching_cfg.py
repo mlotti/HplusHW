@@ -197,7 +197,7 @@ if applyTriggerScaleFactor and dataVersion.isMC():
 # Set the data scenario for vertex/pileup weighting
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
-param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.vertexWeightReader, era=puweight) # Reweight by true PU distribution
+param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.pileupWeightReader, era=puweight) # Reweight by true PU distribution
 param.setDataTriggerEfficiency(dataVersion, era=puweight)
 print "PU weight era =",puweight
 
@@ -231,8 +231,9 @@ process.signalAnalysis = cms.EDFilter("HPlusEWKMatchingFilter",
     MET = param.MET.clone(),
     bTagging = param.bTagging.clone(),
     deltaPhiTauMET = param.deltaPhiTauMET,
+    prescaleWeightReader = param.prescaleWeightReader.clone(),
     vertexWeight = param.vertexWeight.clone(),
-    vertexWeightReader = param.vertexWeightReader.clone(),
+    pileupWeightReader = param.pileupWeightReader.clone(),
     eventCounter = param.eventCounter.clone(),
 )
 #process.signalAnalysis.GlobalElectronVeto.ElectronCollectionName.setProcessName("")
@@ -287,7 +288,8 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
     process.commonSequence *= process.hplusPrescaleWeightProducer
-    process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+    process.signalAnalysis.prescaleWeightReader.weightSrc = "hplusPrescaleWeightProducer"
+    process.signalAnalysis.prescaleWeightReader.enabled = True
 
 # Print output
 #print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
@@ -475,14 +477,14 @@ def addPUWeightVariation(name):
     # Up variation
     module = getattr(process, name).clone()
     module.Tree.fill = False
-    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="up")
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, era=puweight, suffix="up")
     addAnalysis(process, name+"PUWeightPlus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
     # Down variation
     module = module.clone()
-    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="down")
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, era=puweight, suffix="down")
     addAnalysis(process, name+"PUWeightMinus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
