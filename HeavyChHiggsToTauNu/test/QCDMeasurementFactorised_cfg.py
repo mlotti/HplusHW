@@ -7,8 +7,8 @@ dataVersion="44XmcS6"     # Fall11 MC
 
 dataEras = [
     "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
-    "Run2011A",
-    "Run2011B",
+#    "Run2011A",
+#    "Run2011B",
 ]
 
 # Note: Keep number of variations below 200 to keep file sizes reasonable
@@ -34,25 +34,38 @@ myOptimisation = HPlusOptimisationScheme()
 
 def customize(signalAnalysis):
     # Choice of tau selection for tau candidate selection
-    signalAnalysis.applyNprongsCutForTauCandidate = False,
-    signalAnalysis.applyRtauCutForTauCandidate = False,
-    # Binning of factorisation
-    signalAnalysis.factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150., 200., 300.),
-    signalAnalysis.factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
-    signalAnalysis.factorisationNVerticesBinLowEdges = cms.untracked.vint32(10, 20),
+    signalAnalysis.applyNprongsCutForTauCandidate = False
+    signalAnalysis.applyRtauCutForTauCandidate = False
+    # Binning of factorisation (note that first bin is below the first number and last bin is greater than the last number)
+    signalAnalysis.factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150., 200., 300.)
+    signalAnalysis.factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5) # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
+    signalAnalysis.factorisationNVerticesBinLowEdges = cms.untracked.vint32(10)
     # Variation options
-    signalAnalysis.doAnalysisVariationWithTraditionalMethod = True,
-    signalAnalysis.doAnalysisVariationWithABCDMethod = True,
-    signalAnalysis.doAnalysisVariationWithDoubleABCDMethod = True,
-
-    print "customisations applied"
+    signalAnalysis.doAnalysisVariationWithTraditionalMethod = True
+    signalAnalysis.doAnalysisVariationWithABCDMethod = False
+    signalAnalysis.doAnalysisVariationWithDoubleABCDMethod = False
+    # MET cut
+    #signalAnalysis.MET.METCut = 60.0
+    #signalAnalysis.MET.METCut = 50.0
+    # Info
+    print "\n*** QCD factorised customisations applied ***"
+    print "- Nprongs cut included in tau candidate selections:",signalAnalysis.applyNprongsCutForTauCandidate.value()
+    print "- Rtau cut included in tau candidate selections:",signalAnalysis.applyRtauCutForTauCandidate.value()
+    print "- Traditional method used:",signalAnalysis.doAnalysisVariationWithTraditionalMethod.value()
+    print "- ABCD method (experimental) used:",signalAnalysis.doAnalysisVariationWithABCDMethod.value()
+    print "- Double ABCD method (very experymental) used:",signalAnalysis.doAnalysisVariationWithDoubleABCDMethod.value()
+    print "- MET cut:",signalAnalysis.MET.METCut.value()
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=1000, # default is -1
+                        customizeLightAnalysis=customize,
+                        #doHeavyAnalysis=True,
+                        #customizeHeavyAnalysis=customize,
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
                         #doAgainstElectronScan=True,
                         #doSystematics=True,
+                        doQCDTailKillerScenarios=True,
                         histogramAmbientLevel = "Informative", # Vital
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )
