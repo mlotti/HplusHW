@@ -214,13 +214,19 @@ namespace HPlus {
     WrappedTH2* h2TransverseMassVsInvariantMass;
     WrappedTH2* h2TransverseMassVsInvariantMassPositiveDiscriminant;
     WrappedTH2* h2TransverseMassVsInvariantMassNegativeDiscriminant;
+    WrappedTH2* h2TopMassVsInvariantMass;
 
     WrappedTH1* hTopMassSolution;
     WrappedTH1* hTopInvariantMassInGenerator;
     WrappedTH1* hSelectedNeutrinoPzSolution;
+
+    WrappedTH1* hHiggsMass_closerToRestMass;
+    WrappedTH1* hHiggsMass_furtherFromRestMass;
     
     // Histograms that may be used to identify good cut possibilities
     WrappedTH1* hMETSignificance;
+    WrappedTH1* hNeutrinoNumberInPassedEvents;
+    WrappedTH1* hNeutrinoNumberInRejectedEvents;
 
     // Histograms for all the different solution selection methods
     //---RECO:
@@ -237,6 +243,8 @@ namespace HPlus {
     WrappedTH1* hHiggsMass_GEN_tauNuAngleMin;
     WrappedTH1* hHiggsMass_GEN_tauNuDeltaEtaMax;
     WrappedTH1* hHiggsMass_GEN_tauNuDeltaEtaMin;
+    //WrappedTH1* hHiggsMass_GEN_closerToRestMass;
+    //WrappedTH1* hHiggsMass_GEN_furtherFromRestMass;
     //---GEN, neutrinos replaced with GENMET:
     WrappedTH1* hHiggsMass_GEN_NuToMET_greater;
     WrappedTH1* hHiggsMass_GEN_NuToMET_smaller;
@@ -244,6 +252,8 @@ namespace HPlus {
     WrappedTH1* hHiggsMass_GEN_NuToMET_tauNuAngleMin;
     WrappedTH1* hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMax;
     WrappedTH1* hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMin;
+    //WrappedTH1* hHiggsMass_GEN_NuToMET_closerToRestMass;
+    //WrappedTH1* hHiggsMass_GEN_NuToMET_furtherFromRestMass;
 
     // Neutrino solution selection histograms
     WrappedTH1* hNeutrinosTauAngle1;
