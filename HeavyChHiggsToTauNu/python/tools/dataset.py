@@ -138,7 +138,7 @@ def readFromMulticrabCfg(**kwargs):
         for task in taskDirs:
             found = False
             for e_re in exclude:
-                if e_re.search(task):
+                if e_re.search(os.path.basename(task)):
                     found = True
                     break
             if found:
@@ -151,7 +151,7 @@ def readFromMulticrabCfg(**kwargs):
         for task in taskDirs:
             found = False
             for i_re in include:
-                if i_re.search(task):
+                if i_re.search(os.path.basename(task)):
                     found = True
                     break
             if found:

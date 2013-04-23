@@ -57,7 +57,7 @@ mcOnlyLumi = 5000 # pb
 searchMode = "Light"
 #searchMode = "Heavy"
 
-optMode = "OptQCDTailKillerLoose"
+optMode = "OptQCDTailKillerTightPlus"
 #optMode = ""
 
 
@@ -326,6 +326,9 @@ def controlPlots(datasets):
     hmtPhivetoNortt = []
     hmetBtagging = []
     hmetBveto = []
+    closureAfterJets = []
+    closureAfterJetsTailKiller = []
+    NoBtaggingTailKiller = []
     
 ## histograms in bins, normalisation and substraction of EWK contribution
     ## mt with 2dim deltaPhi cut
@@ -354,18 +357,20 @@ def controlPlots(datasets):
 
         ### ---- mt for b tagging factorisation --------------
         ##  mt with factorised b tagging
-        mtfac_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedNoBtaggingDphiCuts"+ptbin)])
+        mtfac_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedNoBtaggingTailKiller"+ptbin)])
         mtfac_tmp._setLegendStyles()
         mtfac_tmp._setLegendLabels()
         mtfac_tmp.histoMgr.setHistoDrawStyleAll("P") 
         mtfac_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
         mtfac = mtfac_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+        mtNoBtaggingTailKiller = mtfac_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         ## Normalisation factorised!!!!!!!
         mtfac.Scale(normFactorisedData[ptbin])
         mtfac.Scale(normData[ptbin])
+        mtNoBtaggingTailKiller.Scale(normData[ptbin])
         
 #        hmtfac.append(mt)        
-        mtfacEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedNoBtaggingDphiCuts"+ptbin)])
+        mtfacEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedNoBtaggingTailKiller"+ptbin)])
         mtfacEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         mtfacEWK_tmp._setLegendStyles()
         mtfacEWK_tmp._setLegendLabels()
@@ -376,6 +381,11 @@ def controlPlots(datasets):
         mtfac.Add(mtfacEWK, -1)
 #        mtfac.Add(mtEWK, -1)        
         hmtfac.append(mtfac)
+        
+        mtNoBtaggingTailKillerEWK = mtfacEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()        
+        mtNoBtaggingTailKillerEWK.Scale(normData[ptbin])       
+        mtNoBtaggingTailKiller.Add(mtNoBtaggingTailKillerEWK, -1)
+        NoBtaggingTailKiller.append(mtNoBtaggingTailKiller)
 
         
         # ----------mt after b tagging, no deltaPhi cuts ---------------
@@ -419,8 +429,48 @@ def controlPlots(datasets):
         hmtph.append(mtph)
 
 
+ #######################   
+                
+        ## mt, no b tagging,  no MET cut, for closure test
+        afterJets_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedTauIdJet"+ptbin)])
+        afterJets_tmp._setLegendStyles()
+        afterJets_tmp._setLegendLabels()
+        afterJets_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        afterJets_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        afterJets = afterJets_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+        afterJets.Scale(normData[ptbin])
+        
+        afterJetsEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedTauIdJet"+ptbin)])
+        afterJetsEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+        afterJetsEWK_tmp._setLegendStyles()
+        afterJetsEWK_tmp._setLegendLabels()
+        afterJetsEWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        afterJetsEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        afterJetsEWK = afterJetsEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+        afterJetsEWK.Scale(normEWK[ptbin])
+        afterJets.Add(afterJetsEWK, -1)
+        closureAfterJets.append(afterJets)
 
 
+        ## mt, no b tagging,  no MET cut, TailKiller, for closure test
+        afterJetsTailKiller_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedTauIdJetTailKiller"+ptbin)])
+        afterJetsTailKiller_tmp._setLegendStyles()
+        afterJetsTailKiller_tmp._setLegendLabels()
+        afterJetsTailKiller_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        afterJetsTailKiller_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        afterJetsTailKiller = afterJetsTailKiller_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+        afterJetsTailKiller.Scale(normData[ptbin])
+        
+        afterJetsTailKillerEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedTauIdJetTailKiller"+ptbin)])
+        afterJetsTailKillerEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+        afterJetsTailKillerEWK_tmp._setLegendStyles()
+        afterJetsTailKillerEWK_tmp._setLegendLabels()
+        afterJetsTailKillerEWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
+        afterJetsTailKillerEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        afterJetsTailKillerEWK = afterJetsTailKillerEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+        afterJetsTailKillerEWK.Scale(normEWK[ptbin])
+        afterJetsTailKiller.Add(afterJetsTailKillerEWK, -1)
+        closureAfterJetsTailKiller.append(afterJetsTailKiller)
 
  #######################   
                 
@@ -788,7 +838,7 @@ def controlPlots(datasets):
     print "Integral: TailKiller cut- EWK = ",hmtSum.Integral()
 
 
-# mt with factorisation
+# mt with factorisation, no b tagging, met cut
     mtFactorised = hmtfac[0].Clone("mtSum")
     mtFactorised.SetName("transverseMass")
     mtFactorised.SetTitle("Inverted tau ID")
@@ -845,12 +895,43 @@ def controlPlots(datasets):
     hClosureBtagTailKiller.SetName("transverseMassBveto")
     hClosureBtagTailKiller.SetTitle("Inverted tau ID")
     hClosureBtagTailKiller.Reset()
-    print "check hmtsum B tag",hClosureBtagTailKiller.GetEntries()
+ #   print "check hmtsum B tag",hClosureBtagTailKiller.GetEntries()
     for histo in closureBtagTailKiller:
         hClosureBtagTailKiller.Add(histo)  
     print "Integral: Btag - EWK  = ",hClosureBtagTailKiller.Integral()
 
 
+## no met cut, no btagging,   with Met cut 
+    hNoBtaggingTailKiller = NoBtaggingTailKiller[0].Clone("hClosureNoBtag")
+    hNoBtaggingTailKiller.SetName("transverseMassNoBtagging")
+    hNoBtaggingTailKiller.SetTitle("Inverted tau ID")
+    hNoBtaggingTailKiller.Reset()
+#    print "check hmtsum after jets",hClosureAfterJets.GetEntries()
+    for histo in NoBtaggingTailKiller:
+        hNoBtaggingTailKiller.Add(histo)  
+    print "Integral: no btag - EWK  = ",hNoBtaggingTailKiller.Integral()
+
+    
+## no met cut, no btagging,   no Met cut 
+    hClosureAfterJets = closureAfterJets[0].Clone("hClosureAfterJets")
+    hClosureAfterJets.SetName("transverseMassNoMetCutNoBtagging")
+    hClosureAfterJets.SetTitle("Inverted tau ID")
+    hClosureAfterJets.Reset()
+#    print "check hmtsum after jets",hClosureAfterJets.GetEntries()
+    for histo in closureAfterJets:
+        hClosureAfterJets.Add(histo)  
+    print "Integral: no btag, no met cut - EWK  = ",hClosureAfterJets.Integral()
+    
+## no met cut, no btagging,  test tailKiller  no Met cut 
+    hClosureAfterJetsTailKiller = closureAfterJetsTailKiller[0].Clone("hClosureAfterJetsTailKiller")
+    hClosureAfterJetsTailKiller.SetName("transverseMassNoMetCutNoBtagging")
+    hClosureAfterJetsTailKiller.SetTitle("Inverted tau ID")
+    hClosureAfterJetsTailKiller.Reset()
+ #   print "check hmtsum after jets tail killer",hClosureAfterJetsTailKiller.GetEntries()
+    for histo in closureAfterJetsTailKiller:
+        hClosureAfterJetsTailKiller.Add(histo)  
+    print "Integral: no btag, no met cut, tailkiller - EWK  = ",hClosureAfterJetsTailKiller.Integral()
+    
 ###############################################
 ## mt with bveto normalised
     mtvetoNor = hmtvetoNor[0].Clone("mtVetoSum")
@@ -991,7 +1072,7 @@ def controlPlots(datasets):
             
     mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedAllCutsTailKiller")])
  
-    mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTauIdPhi")])
+    mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaselineTauIdAllCutsTailKiller")])
     closureBaselineBveto = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaselineTauIdNoMetBveto")])
     closureBaselineBvetoTailKiller = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaselineTauIdNoMetBvetoTailKiller")])
     closureBaselineBtag = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaselineTauIdNoMetBtag")])
@@ -1000,9 +1081,19 @@ def controlPlots(datasets):
     closureBaselineBvetoTailKillerEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaselineTauIdNoMetBvetoTailKiller")])
     closureBaselineBtagEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaselineTauIdNoMetBtag")])
     closureBaselineBtagTailKillerEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaselineTauIdNoMetBtagTailKiller")])
+
+    closureBaselineNoBtagging = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTaudNoBtagging")])
+    closureBaselineNoBtaggingTailKiller = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTaudNoBtaggingTailKiller")])
+    closureBaselineNoBtaggingEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTaudNoBtagging")])
+    closureBaselineNoBtaggingTailKillerEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTaudNoBtaggingTailKiller")])
+    
+    closureBaselineNoMetNoBtagging = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaselineTauIdNoMetBtagging")])
+    closureBaselineNoMetNoBtaggingTailKiller = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaselineTauIdNoMetBtaggingTailKiller")])
+    closureBaselineNoMetNoBtaggingEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaselineTauIdNoMetBtagging")])
+    closureBaselineNoMetNoBtaggingTailKillerEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaselineTauIdNoMetBtaggingTailKiller")])
     mtEWKBaseline = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdPhi")])
     mtvEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdBveto")]) 
-    mtPhivEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdBvetoDphi")])
+    mtPhivEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdBvetoTailKiller")])
 #    jmmtpEWKbaseline = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("ClosestDeltaPhiBaseline")])
 
 
@@ -1017,7 +1108,68 @@ def controlPlots(datasets):
     # norm = Norm_overall *(1-QCDfract) (0.034446/0.87 * 0.13 = 0.0051
     hmtEWKinverted.Scale(normEWK_inc)
 
- 
+     
+    closureBaselineNoMetNoBtagging._setLegendStyles()
+    closureBaselineNoMetNoBtagging._setLegendLabels()
+    closureBaselineNoMetNoBtagging.histoMgr.setHistoDrawStyleAll("P")
+    closureBaselineNoMetNoBtagging.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hclosureBaselineNoMetNoBtagging = closureBaselineNoMetNoBtagging.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MTBaselineTauIdNoMetBtagging")
+
+    closureBaselineNoMetNoBtaggingTailKiller._setLegendStyles()
+    closureBaselineNoMetNoBtaggingTailKiller._setLegendLabels()
+    closureBaselineNoMetNoBtaggingTailKiller.histoMgr.setHistoDrawStyleAll("P")
+    closureBaselineNoMetNoBtaggingTailKiller.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hclosureBaselineNoMetNoBtaggingTailKiller = closureBaselineNoMetNoBtaggingTailKiller.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MTBaselineTauIdNoMetBtaggingTailKiller")
+    
+    closureBaselineNoMetNoBtaggingEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    closureBaselineNoMetNoBtaggingEWK._setLegendStyles()
+    closureBaselineNoMetNoBtaggingEWK._setLegendLabels()
+    closureBaselineNoMetNoBtaggingEWK.histoMgr.setHistoDrawStyleAll("P")
+    closureBaselineNoMetNoBtaggingEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hclosureBaselineNoMetNoBtaggingEWK = closureBaselineNoMetNoBtaggingEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MTBaselineTauIdNoMetBtagging")
+
+    closureBaselineNoMetNoBtaggingTailKillerEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    closureBaselineNoMetNoBtaggingTailKillerEWK._setLegendStyles()
+    closureBaselineNoMetNoBtaggingTailKillerEWK._setLegendLabels()
+    closureBaselineNoMetNoBtaggingTailKillerEWK.histoMgr.setHistoDrawStyleAll("P")
+    closureBaselineNoMetNoBtaggingTailKillerEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hclosureBaselineNoMetNoBtaggingTailKillerEWK = closureBaselineNoMetNoBtaggingTailKillerEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MTBaselineTauIdNoMetBtaggingTailKiller")
+    
+ ## make baseline QCD
+    hclosureBaselineNoMetNoBtaggingTailKiller_QCD = hclosureBaselineNoMetNoBtaggingTailKiller.Clone("QCD")
+    hclosureBaselineNoMetNoBtaggingTailKiller_QCD.Add(hclosureBaselineNoMetNoBtaggingTailKillerEWK,-1)
+    
+    closureBaselineNoBtagging._setLegendStyles()
+    closureBaselineNoBtagging._setLegendLabels()
+    closureBaselineNoBtagging.histoMgr.setHistoDrawStyleAll("P")
+    closureBaselineNoBtagging.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hclosureBaselineNoBtagging = closureBaselineNoBtagging.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MTBaselineTauIdNoBtagging")
+
+    closureBaselineNoBtaggingTailKiller._setLegendStyles()
+    closureBaselineNoBtaggingTailKiller._setLegendLabels()
+    closureBaselineNoBtaggingTailKiller.histoMgr.setHistoDrawStyleAll("P")
+    closureBaselineNoBtaggingTailKiller.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hclosureBaselineNoBtaggingTailKiller = closureBaselineNoBtaggingTailKiller.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MTBaselineTauIdNoBtaggingTailKiller")
+    
+    closureBaselineNoBtaggingEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    closureBaselineNoBtaggingEWK._setLegendStyles()
+    closureBaselineNoBtaggingEWK._setLegendLabels()
+    closureBaselineNoBtaggingEWK.histoMgr.setHistoDrawStyleAll("P")
+    closureBaselineNoBtaggingEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hclosureBaselineNoBtaggingEWK = closureBaselineNoBtaggingEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MTBaselineTauIdNoBtagging")
+
+    closureBaselineNoBtaggingTailKillerEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    closureBaselineNoBtaggingTailKillerEWK._setLegendStyles()
+    closureBaselineNoBtaggingTailKillerEWK._setLegendLabels()
+    closureBaselineNoBtaggingTailKillerEWK.histoMgr.setHistoDrawStyleAll("P")
+    closureBaselineNoBtaggingTailKillerEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hclosureBaselineNoBtaggingTailKillerEWK = closureBaselineNoBtaggingTailKillerEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MTBaselineTauIdNoBtaggingTailKiller")
+
+    
+ ## make baseline QCD
+    hclosureBaselineNoBtaggingTailKiller_QCD = hclosureBaselineNoBtaggingTailKiller.Clone("QCD")
+    hclosureBaselineNoBtaggingTailKiller_QCD.Add(hclosureBaselineNoBtaggingTailKillerEWK,-1)
+
     
     closureBaselineBveto.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     closureBaselineBveto._setLegendStyles()
@@ -1057,6 +1209,124 @@ def controlPlots(datasets):
     
     hClosureBaselineBvetoTailKiller_QCD = hClosureBaselineBvetoTailKiller.Clone("QCD")
     hClosureBaselineBvetoTailKiller_QCD.Add(hClosureBaselineBvetoTailKillerEWK,-1)
+
+
+
+     
+    invertedQCD = InvertedTauID()
+    invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
+      
+  
+
+#####  -------------- Comparison plots --------------------
+    
+
+# MET efficiency
+    Btagging = metBtagging.Clone("metBtagging")
+    allMet = met.Clone("met")
+    print " met batg",Btagging.GetEntries()
+    print "met after tauId ",allMet.GetEntries()
+    invertedQCD.setLabel("MetBtaggingEfficiency")
+    invertedQCD.efficiency(Btagging, allMet,"MetBtaggingEfficiency")
+    
+    # MET efficiency
+    Bveto = metBveto.Clone("metBveto")
+    allMet = met.Clone("met")
+    print " met batg",Bveto.GetEntries()
+    print "met after tauId ",allMet.GetEntries()
+    invertedQCD.setLabel("MetBvetoEfficiency")
+    invertedQCD.efficiency(Bveto, allMet,"MetBvetoEfficiency")
+
+# mt inverted-baseline comparison with bveto, closure
+    bveto_inverted = hClosureBveto.Clone("hmtvSum")
+    bveto_baseline = hClosureBaselineBveto_QCD.Clone("hmtvBaseline_QCD")
+    print "bveto_inverted",bveto_inverted.GetEntries()
+    print "bveto_baseline ",bveto_baseline.GetEntries()
+    invertedQCD.setLabel("MtBvetoInvertedVsBaselineClosure")
+    invertedQCD.mtComparison(bveto_inverted, bveto_baseline,"MtBvetoInvertedVsBaselineClosure")
+    
+# mt inverted-baseline comparison with bveto and deltaPhi cuts, closure
+    bvetoDphi_inverted = hClosureBvetoTailKiller.Clone("hmtPhivSum")
+    bvetoDphi_baseline = hClosureBaselineBvetoTailKiller_QCD.Clone("hmtPhivBaseline_QCD")
+    invertedQCD.setLabel("MtBvetoInvertedVsBaselineTailKillerClosure")
+    invertedQCD.mtComparison(bvetoDphi_inverted, bvetoDphi_baseline,"MtBvetoInvertedVsBaselineTailKillerClosure")
+    
+
+# mt inverted-baseline comparison, no b tagging, no met cut  and deltaPhi cuts, closure
+    afterJets_inverted = hClosureAfterJetsTailKiller.Clone("afterjets")
+    afterJets_baseline = hclosureBaselineNoMetNoBtaggingTailKiller_QCD.Clone("afterjets_QCD")
+    invertedQCD.setLabel("MtAfterJetsInvertedVsBaselineTailKillerClosure")
+    invertedQCD.mtComparison(afterJets_inverted,afterJets_baseline,"MtAfterJetsInvertedVsBaselineTailKillerClosure")
+    
+# mt inverted-baseline comparison, no b tagging, with met cut  and deltaPhi cuts, closure
+    afterMet_inverted = hNoBtaggingTailKiller.Clone("afterMet")
+    afterMet_baseline = hclosureBaselineNoBtaggingTailKiller_QCD.Clone("aftermet_QCD")
+    invertedQCD.setLabel("MtNoBtaggingInvertedVsBaselineTailKillerClosure")
+    invertedQCD.mtComparison(afterMet_inverted,afterMet_baseline,"MtNoBtaggingInvertedVsBaselineTailKillerClosure")
+
+# mt inverted comparison bveto normalised and  btagging,  no deltaPhi cuts
+    btag_inverted = hmtSumb.Clone("mtSumb")
+    bvetoNor_inverted = mtvetoNor.Clone("hmtBaseline_QCD")
+    invertedQCD.setLabel("MtNormalisedBvetoNoDphiCuts")
+    invertedQCD.mtComparison(btag_inverted , bvetoNor_inverted,"MtNormalisedBvetoNoDphiCuts")
+    
+## mt inverted comparison bveto normalised and  btagging,  with deltaPhi cuts
+    btagTailKiller_inverted = hmtSum.Clone("mtSumb")
+    bvetoNorTailKiller_inverted = mtPhivetoNor.Clone("hmtBaseline_QCD")
+    invertedQCD.setLabel("MtNormalisedBvetoTailKiller")
+    invertedQCD.mtComparison(bvetoNorTailKiller_inverted, btagTailKiller_inverted ,"MtNormalisedBvetoTailKiller")
+
+
+   # mt inverted comparison bveto normalised and  btagging,  no deltaPhi cuts
+    btag_inverted = hmtSumb.Clone("mtSumb")
+    bvetoNor_inverted = mtvetoNor.Clone("hmtBaseline_QCD")
+    invertedQCD.setLabel("MtNormalisedBveto")
+    invertedQCD.mtComparison(btag_inverted , bvetoNor_inverted,"MtNormalisedBveto")
+
+   
+    bveto_inverted2 = hClosureBveto.Clone("ClosureBveto")
+    bveto_inverted2.Scale(1./hClosureBveto.GetMaximum())
+    btag_inverted2 = hClosureBtag.Clone("ClosureBtag")
+    btag_inverted2.Scale(1./hClosureBtag.GetMaximum())
+    invertedQCD.setLabel("MtBvetoBtagInvertedClosure")
+    invertedQCD.mtComparison(btag_inverted2 , bveto_inverted2,"MtBvetoBtagInvertedClosure")
+#    print "bveto_inverted2",bveto_inverted2.GetEntries()
+#    print "btag_inverted2 ",btag_inverted2.GetEntries()
+
+    bvetoTailKiller_inverted = hClosureBvetoTailKiller.Clone("hmtvSum")
+    bvetoTailKiller_inverted.Scale(1./hClosureBvetoTailKiller.GetMaximum())
+    btagTailKiller_inverted = hClosureBtagTailKiller.Clone("mtSumb")
+    btagTailKiller_inverted.Scale(1./hClosureBtagTailKiller.GetMaximum())
+    invertedQCD.setLabel("MtBvetoBtagInvertedTailKillerClosure")
+    invertedQCD.mtComparison(bvetoTailKiller_inverted , btagTailKiller_inverted,"MtBvetoBtagInvertedTailKillerClosure")
+
+    
+    afterJetsTailKiller_inverted2 = hClosureAfterJetsTailKiller.Clone("afterjets")
+    afterJetsTailKiller_inverted2.Scale(1./hClosureAfterJetsTailKiller.GetMaximum())
+    invertedQCD.setLabel("MtNoBtagBtagInvertedTailKillerClosure")
+    invertedQCD.mtComparison(afterJetsTailKiller_inverted2, btagTailKiller_inverted,"MtNoBtagBtagInvertedTailKillerClosure")
+
+    
+# mt inverted-inverted factorized comparison with btagging and deltaPhi cuts
+#    btagDphi_inverted = mtHMTjet2Cut.Clone("mtHMTjet2Cut")
+#    btagDphi_factorised =  mtFactorised.Clone("mtFactorised")
+#    invertedQCD.setLabel("MtPhiCutBtagInvertedVsFactorised")
+#    invertedQCD.mtComparison(btagDphi_inverted, btagDphi_factorised,"MtBtagDphiInvertedVsFactorised")
+   
+# mt shape comparison bveto vs btag
+    btagged_nor = mtFactorised.Clone("mtFactorised")
+    btagged_nor.Scale(1./mtFactorised.GetMaximum())
+    print "btagged_nor",btagged_nor.GetMaximum()
+    
+    bveto_nor = hmtPhivSum.Clone("hmtPhivSum")
+    bveto_nor.Scale(1./hmtPhivSum.GetMaximum())
+    print "bveto_nor",bveto_nor.GetMaximum()
+
+    invertedQCD.setLabel("mtBTagVsBvetoInverted")
+    invertedQCD.mtComparison(btagged_nor, bveto_nor,"mtBTagVsBvetoInverted")
+
+
+
 
     
     mt._setLegendStyles()
@@ -1125,7 +1395,7 @@ def controlPlots(datasets):
     mtBaseline._setLegendLabels()
     mtBaseline.histoMgr.setHistoDrawStyleAll("P")
     mtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
-    hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MTBaseLineTauIdBvetoTailKiller")
+    hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MTBaselineTauIdAllCutsTailKiller")
     #hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("MTBaselineTauIdJetPhi") 
    
     mtEWKBaseline.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
@@ -1134,7 +1404,7 @@ def controlPlots(datasets):
     mtEWKBaseline.histoMgr.setHistoDrawStyleAll("P")
     mtEWKBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
 #    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MTInvertedAllCutsTailKiller")
-    hmtEWK = mtEWKBaseline.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MTBaseLineTauIdBvetoTailKiller")
+    hmtEWK = mtEWKBaseline.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MTBaselineTauIdAllCutsTailKiller")
     
     hmtBaseline_QCD = hmtBaseline.Clone("QCD")
     hmtBaseline_QCD.Add(hmtEWK,-1)    
@@ -1520,6 +1790,7 @@ def controlPlots(datasets):
     canvas72.Print("transverseMassAfterBtagging.png")
     canvas72.Print("transverseMassAfterBtagging.C")
 
+
 ####################################################
 ### comparison plots
 
@@ -1614,49 +1885,13 @@ def controlPlots(datasets):
     invertedQCD.mtComparison(bvetoNorTailKiller_inverted, btagTailKiller_inverted ,"MtNormalisedBvetoTailKiller")
 
 
-   # mt inverted comparison bveto normalised and  btagging,  no deltaPhi cuts
-    btag_inverted = hmtSumb.Clone("mtSumb")
-    bvetoNor_inverted = mtvetoNor.Clone("hmtBaseline_QCD")
-    invertedQCD.setLabel("MtNormalisedBveto")
-    invertedQCD.mtComparison(btag_inverted , bvetoNor_inverted,"MtNormalisedBveto")
 
-   
-    bveto_inverted2 = hClosureBveto.Clone("ClosureBveto")
-    bveto_inverted2.Scale(1./hClosureBveto.GetMaximum())
-    btag_inverted2 = hClosureBtag.Clone("ClosureBtag")
-    btag_inverted2.Scale(1./hClosureBtag.GetMaximum())
-    invertedQCD.setLabel("MtBvetoBtagInvertedClosure")
-    invertedQCD.mtComparison(btag_inverted2 , bveto_inverted2,"MtBvetoBtagInvertedClosure")
-#    print "bveto_inverted2",bveto_inverted2.GetEntries()
-#    print "btag_inverted2 ",btag_inverted2.GetEntries()
 
-    bvetoTailKiller_inverted = hClosureBvetoTailKiller.Clone("hmtvSum")
-    bvetoTailKiller_inverted.Scale(1./hClosureBvetoTailKiller.GetMaximum())
-    btagTailKiller_inverted = hClosureBtagTailKiller.Clone("mtSumb")
-    btagTailKiller_inverted.Scale(1./hClosureBtagTailKiller.GetMaximum())
-    invertedQCD.setLabel("MtBvetoBtagInvertedTailKillerClosure")
-    invertedQCD.mtComparison(bvetoTailKiller_inverted , btagTailKiller_inverted,"MtBvetoBtagInvertedTailKillerClosure")
 
-    
-# mt inverted-inverted factorized comparison with btagging and deltaPhi cuts
-#    btagDphi_inverted = mtHMTjet2Cut.Clone("mtHMTjet2Cut")
-#    btagDphi_factorised =  mtFactorised.Clone("mtFactorised")
-#    invertedQCD.setLabel("MtPhiCutBtagInvertedVsFactorised")
-#    invertedQCD.mtComparison(btagDphi_inverted, btagDphi_factorised,"MtBtagDphiInvertedVsFactorised")
-   
-# mt shape comparison bveto vs btag
-    btagged_nor = mtFactorised.Clone("mtFactorised")
-    btagged_nor.Scale(1./mtFactorised.GetMaximum())
-    print "btagged_nor",btagged_nor.GetMaximum()
-    
-    bveto_nor = hmtPhivSum.Clone("hmtPhivSum")
-    bveto_nor.Scale(1./hmtPhivSum.GetMaximum())
-    print "bveto_nor",bveto_nor.GetMaximum()
 
-    invertedQCD.setLabel("mtBTagVsBvetoInverted")
-    invertedQCD.mtComparison(btagged_nor, bveto_nor,"mtBTagVsBvetoInverted")
+########################################################3
 
-  
+
     canvas725 = ROOT.TCanvas("canvas725","",500,500)
     bveto_nor.SetMarkerColor(4)
     bveto_nor.SetMarkerSize(1)

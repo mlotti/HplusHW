@@ -284,8 +284,12 @@ namespace HPlus {
     HistogramsInBins *hMTBaselineTauIdBvetoDphi;
     HistogramsInBins *hMTBaselineTauIdNoMetBveto;
     HistogramsInBins *hMTBaselineTauIdNoMetBvetoTailKiller;
+    HistogramsInBins *hMTBaselineTauIdNoMetNoBtagging;
+    HistogramsInBins *hMTBaselineTauIdNoMetNoBtaggingTailKiller;
     HistogramsInBins *hMTBaselineTauIdNoMetBtag;
     HistogramsInBins *hMTBaselineTauIdNoMetBtagTailKiller;
+    HistogramsInBins *hMTBaselineTauIdNoBtagging;
+    HistogramsInBins *hMTBaselineTauIdNoBtaggingTailKiller;
     HistogramsInBins *hMTBaselineTauIdPhi;
     HistogramsInBins *hMTBaselineTauIdAllCutsTailKiller;
 
@@ -324,12 +328,16 @@ namespace HPlus {
     HistogramsInBins *hMTInvertedTauIdBvetoNoMetCutTailKiller; 
 
     HistogramsInBins *hMTInvertedTauIdJet;
+    HistogramsInBins *hMTInvertedTauIdJetTailKiller;
     HistogramsInBins *hMTInvertedTauIdPhi; 
-    HistogramsInBins *hMTInvertedNoBtaggingDphiCuts;
+    HistogramsInBins *hMTInvertedNoBtaggingTailKiller;
+    HistogramsInBins *hMTInvertedTauIdNoBtagging;
     HistogramsInBins *hMTInvertedTauIdBveto;
     HistogramsInBins *hMTInvertedTauIdBtag;
     HistogramsInBins *hMTInvertedTauIdBvetoDphi;
     HistogramsInBins *hMTInvertedTauIdJetDphi;
+
+    HistogramsInBins *hMTInvertedNoBtagging;
 
     HistogramsInBins *hMTInvertedAllCutsTailKiller;
 
