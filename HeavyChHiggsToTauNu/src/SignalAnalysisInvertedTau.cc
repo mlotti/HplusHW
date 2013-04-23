@@ -272,7 +272,7 @@ namespace HPlus {
     //    hMTInvertedThirdDeltaPhiCut  =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedThirdDeltaPhiCut", 200, 0.0, 400.0 );
     //    hMTInvertedAgainstTTCut  =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedAgainstTTCut", 200, 0.0, 400.0 );
 
-    hMTInvertedNoBtaggingDphiCuts = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedNoBtaggingDphiCuts", 200, 0.0, 400.0 );
+//FIXME, either define, or remove. 23042013/S.Lehti    hMTInvertedNoBtaggingDphiCuts = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedNoBtaggingDphiCuts", 200, 0.0, 400.0 );
 
     hMTInvertedNoBtagging = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedNoBtagging", 200, 0.0, 400.0 );    
     hMTInvertedNoBtaggingTailKiller = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedNoBtaggingTailKiller", 200, 0.0, 400.0 );
