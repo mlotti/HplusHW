@@ -39,6 +39,8 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetDetailHistograms.h"
+
 #include <vector>
 #include <string>
 
@@ -60,9 +62,9 @@ namespace HPlus {
       /// Set pointer to current bin
       void setFactorisationBinForEvent(double pt, double eta, int nvtx);
       /// Create a histogram for a Nevent count in factorisation bins
-      void createCountHistogram(TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto* unfoldedHisto, std::string title);
+      void createCountHistogram(TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, std::string title);
       /// Create a histogram for a shape in factorisation bins
-      void createShapeHistogram(TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto* unfoldedHisto, std::string title, std::string label, int nbins, double min, double max);
+      void createShapeHistogram(TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, std::string title, std::string label, int nbins, double min, double max);
       /// Fill method for a factorisation histogram containting Nevents counts
       void fillNeventHistogram(WrappedUnfoldedFactorisationHisto* h);
       /// Fill method for a factorisation histogram containting Nevents counts, with unconventional weight
@@ -83,7 +85,7 @@ namespace HPlus {
       void checkProperBinning();
 
     private:
-      HistoWrapper fHistoWrapper;
+      HistoWrapper& fHistoWrapper;
       std::vector<double> fTauPtBinLowEdges;
       std::vector<double> fTauEtaBinLowEdges;
       std::vector<int> fNVerticesBinLowEdges;
@@ -109,7 +111,7 @@ namespace HPlus {
 
     class QCDFactorisedVariation {
     public:
-      QCDFactorisedVariation(edm::Service< TFileService >& fs, QCDFactorisedHistogramHandler& histoHandler, EventCounter& eventCounter, CommonPlots& commonPlots, QCDFactorisedVariationType methodType, std::string prefix);
+      QCDFactorisedVariation(edm::Service< TFileService >& fs, QCDFactorisedHistogramHandler* histoHandler, EventCounter& eventCounter, CommonPlots& commonPlots, QCDFactorisedVariationType methodType, std::string prefix);
       ~QCDFactorisedVariation();
 
       void doSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass);
@@ -125,7 +127,9 @@ namespace HPlus {
       Count fAfterLeg1Counter;
       Count fAfterLeg2Counter;
       Count fAfterLeg1AndLeg2Counter;
-      QCDFactorisedHistogramHandler fHistoHandler;
+      QCDFactorisedHistogramHandler* fHistoHandler;
+
+      // Common plots
       CommonPlotsFilledAtEveryStep* fCommonPlotsAfterStandardSelections;
       CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
       CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtag;
@@ -179,6 +183,7 @@ namespace HPlus {
 
   private:
     void doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronData, const MuonSelection::Data& muonData, const JetSelection::Data& jetData);
+    void testInvestigateCollinearEvents(const edm::Event& iEvent, const QCDTailKiller::Data& qcdTailKillerData, const JetSelection::Data& jetData, const ElectronSelection::Data& eData, const MuonSelection::Data& muData, const bool isRealData, const bool isFakeTau);
 
   private:
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
@@ -245,6 +250,16 @@ namespace HPlus {
     //FakeMETVeto fFakeMETVeto;
     QCDFactorisedHistogramHandler fQCDFactorisedHistogramHandler;
 
+    // Common plots
+    //CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTrigger;
+    //CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeight;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETScaleFactor;
+
     // Histograms
     WrappedTH1* hVerticesBeforeWeight;
     WrappedTH1* hVerticesAfterWeight;
@@ -263,6 +278,11 @@ namespace HPlus {
     QCDFactorisedVariation* fVariationABCDPlusTailKiller;
     QCDFactorisedVariation* fVariationABCDPlusMET30AndTailKiller;
     QCDFactorisedVariation* fVariationDoubleABCD;
+
+    // Tests
+    JetDetailHistograms* fCollinearSystemJetsFakingTauGenuineTaus;
+    JetDetailHistograms* fCollinearSystemJetsFakingTauFakeTaus;
+    JetDetailHistograms* fCollinearSystemJetsOppositeToTau;
 
   };
 }
