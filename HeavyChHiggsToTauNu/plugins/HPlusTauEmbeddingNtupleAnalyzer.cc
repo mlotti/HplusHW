@@ -32,6 +32,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeVertexBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeTriggerBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenParticleBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenTauBranches.h"
 
 #include "TTree.h"
 
@@ -73,8 +74,8 @@ private:
   HPlus::TreeTauBranches fTauBranches;
   HPlus::TreeJetBranches fJetBranches;
 
-  HPlus::TreeGenParticleBranches fGenTausOriginal;
-  HPlus::TreeGenParticleBranches fGenTausEmbedded;
+  HPlus::TreeGenTauBranches fGenTausOriginal;
+  HPlus::TreeGenTauBranches fGenTausEmbedded;
 
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;

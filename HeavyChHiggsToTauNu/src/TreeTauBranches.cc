@@ -39,8 +39,6 @@ namespace HPlus {
     }
 
     fTausGenMatch.book(tree);
-    tree->Branch("taus_genmatch_daughter_pdgid", &fTausDaughterPdgId);
-    tree->Branch("taus_genmatchvisible_p4", &fTausGenMatchVisible);
   }
 
   void TreeTauBranches::setValues(const edm::Event& iEvent) {
@@ -64,18 +62,7 @@ namespace HPlus {
         gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 11, tau, 0.5);
       }
 
-      int daughterPdgId = 0;
-      XYZTLorentzVector matchP4Visible;
       fTausGenMatch.addValue(gen);
-      if(gen && std::abs(gen->pdgId()) == 15) {
-        const reco::GenParticle *daughter = GenParticleTools::findTauDaughter(gen);
-        if(daughter)
-          daughterPdgId = daughter->pdgId();
-
-        matchP4Visible = GenParticleTools::calculateVisibleTau(gen);
-      }
-      fTausDaughterPdgId.push_back(daughterPdgId);
-      fTausGenMatchVisible.push_back(matchP4Visible);
     }
   }
 
@@ -107,7 +94,5 @@ namespace HPlus {
       fTausFunctions[i].reset();
 
     fTausGenMatch.reset();
-    fTausDaughterPdgId.clear();
-    fTausGenMatchVisible.clear();
   }
 }
