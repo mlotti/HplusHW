@@ -21,12 +21,17 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configurations
-#multicrabDir = "../multicrab_130418_114926"
-multicrabDir = "../multicrab_130417_135419"
+#multicrabDir = "../multicrab_130419_152407"   # 100 < top mass < 240
+#multicrabDir = "../multicrab_130418_114926"   # no top mass cut
+#multicrabDir = "../multicrab_130417_135419"   # 140 < top mass < 200
 
 cutInfoSuffix = ""
-if multicrabDir == "../multicrab_130418_114926":
+if multicrabDir == "../multicrab_130417_135419":
+    cutInfoSuffix = "_TopMassCut140-200"
+elif multicrabDir == "../multicrab_130418_114926":
     cutInfoSuffix = "_noTopMassCut"
+elif multicrabDir == "../multicrab_130419_152407":
+    cutInfoSuffix = "_TopMassCut100-240"
 
 analysis = "signalAnalysis"
 # Data era affects on the set of selected data datasets, and the PU
@@ -35,17 +40,16 @@ analysis = "signalAnalysis"
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
 
-#plotSignalOnly = True
-plotSignalOnly = False
+plotSignalOnly = True
+#plotSignalOnly = False
 #plotAllMassPointsTogether = True
 plotAllMassPointsTogether = False
 mcOnly = True
 #mcOnly = False
 mcOnlyLumi = 5000 # 1/pb
-# Set lightHplusMassPoint to a value < 0 if you want to plot all the masses:
 #lightHplusMassPoint = 120
-#lightHplusMassPoints = [80, 90, 100, 120, 140, 150, 155, 160]
-lightHplusMassPoints = [80, 100, 120, 140, 160]
+lightHplusMassPoints = [80, 90, 100, 120, 140, 150, 155, 160]
+#lightHplusMassPoints = [80, 100, 120, 140, 160]
 lightHplusTopBR = 0.02
 removeQCD = True
 #removeQCD = False
@@ -57,8 +61,8 @@ massPlotNormToOne = False
 counterLabels = {
     "Greater solution closest": "max-|p_{#nu, z}|",
     "Smaller solution closest": "min-|p_{#nu, z}|",
-    "TauNuAngleMax solution closest": "max-#alpha_{#tau, #nu}",
-    "TauNuAngleMin solution closest": "min-#alpha_{#tau, #nu}",
+    "TauNuAngleMax solution closest": "max-#xi_{#tau, #nu}",
+    "TauNuAngleMin solution closest": "min-#xi_{#tau, #nu}",
     "TauNuDeltaEtaMax solution closest": "max-#Delta#eta_{#tau, #nu}",
     "TauNuDeltaEtaMin solution closest": "min-#Delta#eta_{#tau, #nu}",
     }
@@ -207,6 +211,7 @@ def doPlots(datasets, lightHplusMassPoint):
             p.histoMgr.normalizeMCToLuminosity(lumi)
                 
         p.histoMgr.setHistoDrawStyleAll("COLZ")
+        #p.histoMgr.setHistoDrawStyleAll("SCAT")
         
         # Example how to set drawing options on the plot object
         # itself. These override the default, and the options given in
@@ -239,7 +244,10 @@ def doPlots(datasets, lightHplusMassPoint):
 
 
 
-    # PLOT: top invariant mass in generator
+    # PLOT: top invariant mass
+    drawPlot(createPlot("FullHiggsMass/TopMassSolution", normalizeToOne=massPlotNormToOne), "TopMass"+nameSuffix,
+             xlabel="m_{t}", ylabel="Events / %d GeV"%massPlotBinWidth, log=True, rebinToWidthX=massPlotBinWidth)
+        
 #     drawPlot(createPlot("FullHiggsMass/TopInvariantMassInGenerator", normalizeToOne=massPlotNormToOne),
 #              "TopInvariantMassInGenerator"+nameSuffix, xlabel="m(b, #tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth,
 #              log=False, rebinToWidthX=massPlotBinWidth)
@@ -320,6 +328,19 @@ def doPlots(datasets, lightHplusMassPoint):
                  xlabel="(t#bar{t} only)          m_{T}", ylabel="m_{#tau, #nu_{#tau}}", zlabel="Events",
                  log=False, createLegend=None,
                  opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+    # PLOT: Top mass versus invariant mass
+#     drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
+#              "TopMassVsInvMass"+cutInfoSuffix+nameSuffix,
+#              xlabel="(M_{H^{+}} = %d GeV)          m_{top}"%lightHplusMassPoint, ylabel="m_{#tau, #nu_{#tau}}",
+#              zlabel="Events", log=False, createLegend=None,
+#              opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+#     if not plotSignalOnly:
+#         drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
+#                  "TopMassVsInvMass_ttbarOnly"+cutInfoSuffix,
+#                  xlabel="(t#bar{t} only)          m_{top}", ylabel="m_{#tau, #nu_{#tau}}",
+#                  zlabel="Events", log=False, createLegend=None,
+#                  opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+        
 
 #     # Examples of couple of palettes available in (recent) ROOT and which might be better than the rainbow
 #     # http://root.cern.ch/drupal/content/rainbow-color-map
