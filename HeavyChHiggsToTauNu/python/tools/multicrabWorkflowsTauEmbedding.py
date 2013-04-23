@@ -28,7 +28,7 @@ def addEmbeddingGenTauSkim_44X(version, datasets, updateDefinitions):
         dataset.addWorkflow(wf)
         if wf.output is not None:
             dataset.addWorkflow(Workflow("tauembedding_gentauanalysis_"+version, source=Source(workflowName),
-                                         args=wf.args, output_file="histograms.root"))
+                                         args=wf.args, output_file="histograms.root", crabLines=["CMSSW.total_number_of_lumis = -1"]))
 
 def addEmbeddingAodAnalysis_44X(datasets):
     njobs = {

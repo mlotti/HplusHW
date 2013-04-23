@@ -104,7 +104,10 @@ process.commonSequence.insert(0, process.goodPrimaryVertices)
 # Embedding-like preselection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 #tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
-if options.doPat != 0:
+if options.doPat == 0:
+    import HiggsAnalysis.HeavyChHiggsToTauNu.CustomGenTauSkim as tauSkim
+    additionalCounters = tauSkim.getCounters() + additionalCounters
+else:
     # To optimise, perform the generator level preselection before running PAT
     counters = tauEmbeddingCustomisations.addGenuineTauPreselection(process, process.commonSequence, param, pileupWeight=puWeightNames[-1])
     process.commonSequence.remove(process.genuineTauPreselectionSequence)
