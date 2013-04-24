@@ -411,8 +411,8 @@ namespace HPlus {
     edm::PtrVector<pat::Tau> mySelectedTauList = tauCandidateDataTmp.getSelectedTausBeforeIsolation();
     // Apply nprongs if requested
     if (fApplyNprongsCutForTauCandidate) {
-      edm::PtrVector<pat::Tau> myTmpVector = mySelectedTauList;
-      for (edm::PtrVector<pat::Tau>::iterator iTau = myTmpVector.begin(); iTau != myTmpVector.end(); ++iTau) {
+      edm::PtrVector<pat::Tau> myTmpVector;
+      for (edm::PtrVector<pat::Tau>::iterator iTau = mySelectedTauList.begin(); iTau != mySelectedTauList.end(); ++iTau) {
         if (fTauSelection.getPassesNProngsStatusOfTauObject(*iTau))
           myTmpVector.push_back(*iTau);
       }
@@ -423,8 +423,8 @@ namespace HPlus {
     increment(fTausExistAfterNprongsCutCounter);
     // Apply Rtau cut if requested
     if (fApplyRtauCutForTauCandidate) {
-      edm::PtrVector<pat::Tau> myTmpVector = mySelectedTauList;
-      for (edm::PtrVector<pat::Tau>::iterator iTau = myTmpVector.begin(); iTau != myTmpVector.end(); ++iTau) {
+      edm::PtrVector<pat::Tau> myTmpVector;
+      for (edm::PtrVector<pat::Tau>::iterator iTau = mySelectedTauList.begin(); iTau != mySelectedTauList.end(); ++iTau) {
         if (fTauSelection.getPassesRtauStatusOfTauObject(*iTau))
           myTmpVector.push_back(*iTau);
       }
