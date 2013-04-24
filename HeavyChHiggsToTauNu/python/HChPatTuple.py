@@ -122,11 +122,14 @@ class PATBuilder:
 
             self.process.patSequence = self.addPat(dataVersion, patArgs=pargs, pvSelectionConfig=options.pvSelectionConfig)
         sequence *= self.process.eventPreSelection
-        sequence *= self.process.patSequence
 
         # Selects the first primary vertex, applies the quality cuts to it
         # Applies quality cuts to all vertices too
+        # Must be done before PAT sequence
         self.counters.extend(HChPrimaryVertex.addPrimaryVertexSelection(process, sequence, filter=selectedPrimaryVertexFilter))
+
+        # Add PAT sequence
+        sequence *= self.process.patSequence
 
         # Add event filters if requested
         self.addFilters(dataVersion, self.process.eventPreSelection, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=True)
