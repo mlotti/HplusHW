@@ -170,7 +170,8 @@ namespace HPlus {
     fHistoWrapper(histoWrapper),
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
-    fNormalisationAnalysis(eventCounter, histoWrapper) {
+    fNormalisationAnalysis(eventCounter, histoWrapper),
+    fTauSelection(0), fFakeTauIdentifier(0) {
       createHistograms();
   }
 
@@ -180,7 +181,8 @@ namespace HPlus {
     fHistoWrapper(histoWrapper),
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
-    fNormalisationAnalysis(eventCounter, histoWrapper) {
+    fNormalisationAnalysis(eventCounter, histoWrapper),
+    fTauSelection(0), fFakeTauIdentifier(0) {
       createHistograms();
   }
 
@@ -213,7 +215,6 @@ namespace HPlus {
       delete (*it);
     hEveryStepHistograms.clear();
   }
-// FIXME: need to give separately selected tau !!!!
 
   void CommonPlots::initialize(const edm::Event& iEvent,
                                const edm::EventSetup& iSetup,
@@ -228,7 +229,8 @@ namespace HPlus {
                                TopChiSelection& topChiSelection,
                                EvtTopology& evtTopology) {
     if (!vertexData.passedEvent()) return; // Require valid vertex
-    TauSelection::Data tauData = tauSelection.silentAnalyze(iEvent, iSetup, fVertexData.getSelectedVertex()->z());
+    fTauSelection = &tauSelection;
+    TauSelection::Data tauData = tauSelection.silentAnalyze(iEvent, iSetup, vertexData.getSelectedVertex()->z());
     initialize(iEvent,iSetup,
                vertexData,
                tauData,
@@ -304,7 +306,9 @@ namespace HPlus {
 
   void CommonPlots::fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data) {
     //fVertexData = data;
-    fNormalisationAnalysis.analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
+    if(fTauSelection && fFakeTauIdentifier) {
+      fNormalisationAnalysis.analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
+    }
   }
 
   void CommonPlots::fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData) {
