@@ -133,7 +133,7 @@ namespace HPlus {
     CounterGroup* getCounterGroupByTauMatch(MCSelectedTauMatchType tauMatch);
     void fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData, bool passedStatus = true, double value = 0);
 
-    bool doInvertedAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData);
+    bool doInvertedAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data genData);
     bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData);
 
     // We need a reference in order to use the same object (and not a
@@ -310,6 +310,7 @@ namespace HPlus {
     HistogramsInBins *hMETInvertedTauIdJets;
     HistogramsInBins *hMETInvertedTauIdBtag;  
     HistogramsInBins *hMETInvertedTauIdBveto;
+    HistogramsInBins *hMETInvertedAllCutsTailKiller;
     HistogramsInBins *hMet_AfterBTagging;
     HistogramsInBins *hNBInvertedTauIdJet;
     HistogramsInBins *hNBInvertedTauIdJetDphi;  
