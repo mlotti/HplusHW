@@ -228,7 +228,7 @@ namespace HPlus {
                                TopChiSelection& topChiSelection,
                                EvtTopology& evtTopology) {
     if (!vertexData.passedEvent()) return; // Require valid vertex
-    TauSelection::Data tauData = tauSelection.silentAnalyze(iEvent, iSetup, fVertexData.getSelectedVertex()->z());
+    TauSelection::Data tauData = tauSelection.silentAnalyze(iEvent, iSetup, vertexData.getSelectedVertex()->z());
     initialize(iEvent,iSetup,
                vertexData,
                tauData,
