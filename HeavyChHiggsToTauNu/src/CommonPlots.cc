@@ -170,7 +170,8 @@ namespace HPlus {
     fHistoWrapper(histoWrapper),
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
-    fNormalisationAnalysis(eventCounter, histoWrapper) {
+    fNormalisationAnalysis(eventCounter, histoWrapper),
+    fTauSelection(0), fFakeTauIdentifier(0) {
       createHistograms();
   }
 
@@ -180,7 +181,8 @@ namespace HPlus {
     fHistoWrapper(histoWrapper),
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
-    fNormalisationAnalysis(eventCounter, histoWrapper) {
+    fNormalisationAnalysis(eventCounter, histoWrapper),
+    fTauSelection(0), fFakeTauIdentifier(0) {
       createHistograms();
   }
 
@@ -228,6 +230,7 @@ namespace HPlus {
                                TopChiSelection& topChiSelection,
                                EvtTopology& evtTopology) {
     if (!vertexData.passedEvent()) return; // Require valid vertex
+    fTauSelection = &tauSelection;
     TauSelection::Data tauData = tauSelection.silentAnalyze(iEvent, iSetup, vertexData.getSelectedVertex()->z());
     initialize(iEvent,iSetup,
                vertexData,
@@ -304,7 +307,13 @@ namespace HPlus {
 
   void CommonPlots::fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data) {
     //fVertexData = data;
-    fNormalisationAnalysis.analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
+
+    // Matti 2013-04-24: The if below is to protect against segfault
+    // (mainly fTauSelection being null pointer). I don't know if it
+    // would make more sense to change something in the code logic.
+    if(fTauSelection && fFakeTauIdentifier) {
+      fNormalisationAnalysis.analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
+    }
   }
 
   void CommonPlots::fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData) {
