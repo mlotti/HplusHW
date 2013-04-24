@@ -46,6 +46,7 @@ namespace HPlus {
 
     void setPrescaleWeight(double w) { fPrescaleWeight = w; }
     void setPileupWeight(double w)   { fPileupWeight = w; }
+    void setWjetsWeight(double w)   { fWjetsWeight = w; }
     void setTauFakeWeight(double w, double au)  { fTauFakeWeight = w; fTauFakeWeightAbsUnc = au; }
     void setTauTriggerWeight(double w, double au)  { fTauTriggerWeight = w; fTauTriggerWeightAbsUnc = au; }
     void setMETTriggerWeight(double w, double au)  { fMETTriggerWeight = w; fMETTriggerWeightAbsUnc = au; }
@@ -98,6 +99,7 @@ namespace HPlus {
     void setJetThrust(double jetThrust) { fJetThrust = jetThrust; }
     void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
     void setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
+    void setSelJets(const edm::PtrVector<pat::Jet>& selJets);
     void setSelJetsInclTau(const edm::PtrVector<pat::Jet>& selJetsInclTau);
     void setMHT(const XYZTLorentzVector& MHT) { fMHT = MHT; }
     void setMHTAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
@@ -141,6 +143,7 @@ namespace HPlus {
 
     double fPrescaleWeight;
     double fPileupWeight;
+    double fWjetsWeight;
     double fTauFakeWeight;
     double fTauFakeWeightAbsUnc; // These are the relative uncertainties
     double fTauTriggerWeight;
@@ -168,6 +171,7 @@ namespace HPlus {
 
     std::vector<XYZTLorentzVector> fJets;
     std::vector<XYZTLorentzVector> fAllIdentifiedJets;
+    std::vector<XYZTLorentzVector> fSelJets;
     std::vector<XYZTLorentzVector> fSelJetsInclTau;
     std::vector<double> fJetsBtags;
     std::vector<double> fJetsChf;
