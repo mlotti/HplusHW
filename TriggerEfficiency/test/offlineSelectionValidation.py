@@ -5,8 +5,8 @@ import ROOT
 from array import array
 
 varexp = "PFTauPt>>hnumpt"
-#verbose = False
-verbose = True
+verbose = False
+#verbose = True
 
 varname = ""
 #varname = "MuonTauInvMass"
@@ -58,6 +58,22 @@ def analyse(fname):
 
     noSelection = ""
 
+    MuIsolation = "(MuonPFIsoChargedPt + MuonPFIsoNeutralEt + MuonPFIsoGammaEt)/MuonPt < 0.1"
+    MuFilter = "Sum$(%s) == 1"%MuIsolation
+    VetoMuonsHighPurity = "MuonPt > 15"
+    VetoMuonsHighPurity+= "&& abs(MuonEta) < 2.4"
+    VetoMuonsHighPurity+= "&& MuonIsGlobalMuon"
+    VetoMuonsHighPurity+= "&& (MuonPFIsoChargedPt + MuonPFIsoNeutralEt + MuonPFIsoGammaEt)/MuonPt < 0.15"
+    VetoMuFilter = "Sum$(%s) <= 1"%VetoMuonsHighPurity
+    TauSelection = "PFTauLeadChargedHadrCandPt > 20"
+    TauSelection+= "&& PFTau_decayModeFinding > 0.5"
+    TauSelection+= "&& PFTauProng == 1"
+    TauSelection+= "&& PFTau_againstMuonTight > 0.5"
+    TauSelection+= "&& PFTau_againstElectronTightMVA3 > 0.5"
+    TauSelection+= "&& PFTau_byMediumCombinedIsolationDeltaBetaCorr3Hits > 0.5"
+    TauFilter = "Sum$(%s) == 1"%TauSelection
+    HighPurityMuTauFilter = MuFilter+"&&"+VetoMuFilter+"&&"+TauFilter
+
     offlineSelectionHPlusBase = "PFTauPt > 20 && abs(PFTauEta) < 2.1"
     offlineSelectionHPlusBase += "&& PFTauLeadChargedHadrCandPt > 20"
     offlineSelectionHPlusBase += "&& PFTauProng == 1"
@@ -75,8 +91,9 @@ def analyse(fname):
 
     offlineSelections = []
     offlineSelections.append(namedselection("No selection",noSelection))
-    offlineSelections.append(namedselection("MediumMVA3",offlineSelectionMediumMVA3))
-    offlineSelections.append(namedselection("MediumMVA3b",offlineSelectionMediumMVA3b))
+    offlineSelections.append(namedselection("High purity muTau selection",HighPurityMuTauFilter))
+#    offlineSelections.append(namedselection("MediumMVA3",offlineSelectionMediumMVA3))
+#    offlineSelections.append(namedselection("MediumMVA3b",offlineSelectionMediumMVA3b))
 
 
     data = []
@@ -135,9 +152,9 @@ def printComparison(data1,counter1,name1,data2,counter2,name2):
     if not len(data1) == len(data2):
 	print "Warning, data1 size different from data2 size"
 	sys.exit()
-    if not len(counter1.names) == len(counter2.names):
-        print "Warning, counter1 size different from counter2 size"
-        sys.exit()
+####    if not len(counter1.names) == len(counter2.names):
+####        print "Warning, counter1 size different from counter2 size"
+####        sys.exit()
 
     pos1 = max(35,len("    Events found in "+name1)+1,len("    Events found in "+name2)+1)
     pos2 = max(10,len(name1)+1)
@@ -151,16 +168,33 @@ def printComparison(data1,counter1,name1,data2,counter2,name2):
     print
     print counterNames
     print
-    for i in range(len(counter1.names)):
-        binLabel = "    "+counter1.names[i]
+    for i in range(max(len(counter1.names),len(counter2.names))):
+	if len(counter1.names) > len(counter2.names):
+	    counterName = counter1.names[i]
+	    counter1Value = str(counter1.values[i])
+	    counter2Value = "-"
+	    for j in range(len(counter2.names)):
+		if counter2.names[j] == counterName:
+		    counter2Value = str(counter2.values[j])
+		    break
+	else:
+	    counterName = counter2.names[i]
+            counter2Value = str(counter2.values[i])
+	    counter1Value = "-"
+            for j in range(len(counter1.names)):
+                if counter1.names[j] == counterName:
+                    counter1Value = str(counter1.values[j])
+                    break
+
+        binLabel = "    "+counterName
         while len(binLabel) < pos1:
             binLabel += " "
         sys.stdout.write(binLabel)
-        counter1Content = str(counter1.values[i])
+        counter1Content = counter1Value
         while len(counter1Content) < pos2:
             counter1Content += " "
         sys.stdout.write(counter1Content)
-        sys.stdout.write(str(counter2.values[i]))
+        sys.stdout.write(counter2Value)
         sys.stdout.write("\n")
 
     for i in range(0,len(data1)):
@@ -197,9 +231,9 @@ def printComparison(data1,counter1,name1,data2,counter2,name2):
                         sys.stdout.write(" %s"%data1[i].var[j])
                         if data in data1sub:
                             sys.stdout.write("  Not found")
-                        sys.stdout.write("\n")
-                        print
-                        print "List of events not found: ("+str(len(data1sub))+")"
+                    sys.stdout.write("\n")
+                print
+                print "       List of events not found: ("+str(len(data1sub))+")"
                 for data in data1sub:
                     sys.stdout.write(data+",")
                 sys.stdout.write("\n")

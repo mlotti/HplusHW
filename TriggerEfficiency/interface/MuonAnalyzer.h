@@ -40,10 +40,11 @@ class MuonAnalyzer {
         edm::InputTag muTauPairSource;
 
         // Output variables
-	float muonPt,muonEta,muonPhi;
-        float muonIso03SumPt, muonIso03EmEt, muonIso03HadEt;
-        float muonPFIsoCharged, muonPFIsoNeutral, muonPFIsoGamma;
-        float muTauInvMass;
+	std::vector<float> muonPt,muonEta,muonPhi;
+        std::vector<float> muonIso03SumPt, muonIso03EmEt, muonIso03HadEt;
+        std::vector<float> muonPFIsoCharged, muonPFIsoNeutral, muonPFIsoGamma;
+	std::vector<bool>  muonIsGlobalMuon;
+//        float muTauInvMass;
 	int nMuons;
 };
 #endif
