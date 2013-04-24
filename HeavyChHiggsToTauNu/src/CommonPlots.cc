@@ -215,7 +215,6 @@ namespace HPlus {
       delete (*it);
     hEveryStepHistograms.clear();
   }
-// FIXME: need to give separately selected tau !!!!
 
   void CommonPlots::initialize(const edm::Event& iEvent,
                                const edm::EventSetup& iSetup,
@@ -307,10 +306,6 @@ namespace HPlus {
 
   void CommonPlots::fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data) {
     //fVertexData = data;
-
-    // Matti 2013-04-24: The if below is to protect against segfault
-    // (mainly fTauSelection being null pointer). I don't know if it
-    // would make more sense to change something in the code logic.
     if(fTauSelection && fFakeTauIdentifier) {
       fNormalisationAnalysis.analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
     }
