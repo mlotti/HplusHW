@@ -512,7 +512,7 @@ namespace HPlus {
 
 //------ Standard selections are done, fill tree and quit if user asked for it
     if (fTree.isActive()) {
-      doTreeFilling(iEvent, iSetup, pvData, mySelectedTau, electronData, muonData, jetData);
+      doTreeFilling(iEvent, iSetup, pvData, mySelectedTau, electronData, muonData, jetData, metData);
       return true;
     }
 
@@ -582,20 +582,13 @@ namespace HPlus {
     return true;
   }
 
-  void QCDMeasurementFactorised::doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronData, const MuonSelection::Data& muonData, const JetSelection::Data& jetData) {
-    // Obtain MET data
-    const METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetData.getAllJets());
+  void QCDMeasurementFactorised::doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronData, const MuonSelection::Data& muonData, const JetSelection::Data& jetData, const METSelection::Data& metData) {
     // Obtain btagging data
     const BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     // Obtain QCD tail killer
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
     // Obtain alphaT
     const EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(selectedTau), jetData.getSelectedJetsIncludingTau());
-    // Top reconstruction in different versions
-    const TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    const BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
-    const TopChiSelection::Data topChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    const TopWithBSelection::Data topWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), bjetSelectionData.getBjetTopSide());
 
     // FIXME: Add filling of tree for QCD tail killer
     // FIXME: Add filling of weights (wjets ...)
@@ -611,13 +604,49 @@ namespace HPlus {
     if(metData.getTcMET().isNonnull())
       fTree.setTcMET(metData.getTcMET());
     fTree.setFillWeight(fEventWeight.getWeight());
-    if (!iEvent.isRealData()) {
-      fEventWeight.multiplyWeight(btagData.getScaleFactor()); // needed to calculate the scale factor and the uncertainties
-    }
+    //if (!iEvent.isRealData()) {
+    //  fEventWeight.multiplyWeight(btagData.getScaleFactor()); // needed to calculate the scale factor and the uncertainties
+    //}
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
-    //fTree.setTop(TopSelectionData.getTopP4());
-    //fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
+    // Top reconstruction in different versions
+    if (selectedTau.isNonnull() && btagData.passedEvent()) {
+      //const TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+      //const BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+      const TopChiSelection::Data topChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+      //const TopWithBSelection::Data topWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), bjetSelectionData.getBjetTopSide());
+      fTree.setTop(topChiSelectionData.getTopP4());
+    }
+    // Sphericity, Aplanarity, Planarity, alphaT
+    fTree.setDiJetMassesNoTau(evtTopologyData.alphaT().vDiJetMassesNoTau);
+    fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
+    fTree.setSphericity(evtTopologyData.MomentumTensor().fSphericity);
+    fTree.setAplanarity(evtTopologyData.MomentumTensor().fAplanarity);
+    fTree.setPlanarity(evtTopologyData.MomentumTensor().fPlanarity);
+    fTree.setCircularity(evtTopologyData.MomentumTensor().fCircularity);
+    fTree.setMomentumTensorEigenvalues(evtTopologyData.MomentumTensor().fQOne, evtTopologyData.MomentumTensor().fQTwo, evtTopologyData.MomentumTensor().fQThree);
+    fTree.setSpherocityTensorEigenvalues(evtTopologyData.SpherocityTensor().fQOne, evtTopologyData.SpherocityTensor().fQTwo, evtTopologyData.SpherocityTensor().fQThree);
+    fTree.setCparameter(evtTopologyData.SpherocityTensor().fCparameter);
+    fTree.setDparameter(evtTopologyData.SpherocityTensor().fDparameter);
+    fTree.setJetThrust(evtTopologyData.SpherocityTensor().fJetThrust);
+    fTree.setAllJets(jetData.getAllIdentifiedJets());
+    fTree.setSelJets(jetData.getSelectedJets());
+    fTree.setSelJetsInclTau(jetData.getSelectedJetsIncludingTau());
+    fTree.setMHT(jetData.getMHTvector());
+    fTree.setMHTSelJets(jetData.getSelectedJets());
+    fTree.setMHTAllJets(jetData.getAllIdentifiedJets());
     //fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
+    fTree.setNonIsoLeptons(muonData.getNonIsolatedMuons(), electronData.getNonIsolatedElectrons());
+    if (selectedTau.isNonnull() && btagData.passedEvent()) {
+      // FullH+ mass
+      FullHiggsMassCalculator::Data FullHiggsMassDataTmp = fFullHiggsMassCalculator.analyze(iEvent, iSetup, selectedTau, btagData, metData);
+      fTree.setHplusMassDiscriminant(FullHiggsMassDataTmp.getDiscriminant());
+      fTree.setHplusMassHiggsMass(FullHiggsMassDataTmp.getHiggsMass());
+      fTree.setHplusMassTopMass(FullHiggsMassDataTmp.getTopMass());
+      fTree.setHplusMassSelectedNeutrinoPzSolution(FullHiggsMassDataTmp.getSelectedNeutrinoPzSolution());
+      fTree.setHplusMassNeutrinoPtSolution(FullHiggsMassDataTmp.getNeutrinoPtSolution());
+      fTree.setHplusMassMCNeutrinoPz(FullHiggsMassDataTmp.getMCNeutrinoPz());
+    }
+
     fTree.fill(iEvent, selectedTau, jetData.getSelectedJets());
   }
 
