@@ -58,14 +58,15 @@ def customize(signalAnalysis):
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
-                        maxEvents=1000, # default is -1
+                        maxEvents=-1,#1000, # default is -1
                         customizeLightAnalysis=customize,
                         #doHeavyAnalysis=True,
                         #customizeHeavyAnalysis=customize,
+                        doFillTree = True, #False
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
                         #doAgainstElectronScan=True,
                         #doSystematics=True,
-                        doQCDTailKillerScenarios=True,
+                        doQCDTailKillerScenarios=False, #True, Alexandros
                         histogramAmbientLevel = "Informative", # Vital
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )
