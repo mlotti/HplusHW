@@ -335,14 +335,13 @@ datasets.extend([
 ])
 
 # MultiJet(Parked) PD, QuadJet trigger for signal
-# Commented for now, until the corresponding GlobalTags have been added to HChDataVersion.py
 datasets.extend([
     DataDataset("MultiJet_%s_2012A_Jan22",        reco="22Jan2013", runs=(190456, 193621), aod="/MultiJet/Run2012A-22Jan2013-v1/AOD"), # 11068071 events, 879 files
-#    DataDataset("MultiJet1Parked_%s_2012B_Nov05", reco="05Nov2012", runs=(193834, 196531), aod="/MultiJet1Parked/Run2012B-05Nov2012-v1/AOD"),
-#    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012", runs=(198022, 198523), aod="/MultiJet1Parked/Run2012C-part1_05Nov2012-v1/AOD"), # FIXME: run range from DAS
-#    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012", runs=(198941, 203742), aod="/MultiJet1Parked/Run2012C-part2_05Nov2012-v1/AOD"), # FIXME: run range from DAS
-#    DataDataset("MultiJet1Parked_%s_2012D_Dec10", reco="10Dec2012", runs=(203777, 207779), aod="/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD"), # FIXME: run range from DAS
-#    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013", runs=(207883, 208307), aod="/MultiJet1Parked/Run2012D-part2_PixelRecover_17Jan2013-v1/AOD"), # FIXME: run range from DAS
+    DataDataset("MultiJet1Parked_%s_2012B_Nov05", reco="05Nov2012B", runs=(193834, 196531), aod="/MultiJet1Parked/Run2012B-05Nov2012-v2/AOD"), # 78067581 events,  7084 files
+    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012Cv1", runs=(198022, 198523), aod="/MultiJet1Parked/Run2012C-part1_05Nov2012-v2/AOD"), # 9209168 events, 626 files
+    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012Cv2", runs=(198941, 203742), aod="/MultiJet1Parked/Run2012C-part2_05Nov2012-v1/AOD"), # 130268374 events, 10136 files
+    DataDataset("MultiJet1Parked_%s_2012D_Dec10", reco="10Dec2012", runs=(203777, 207779), aod="/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD"), # 218620252 events, 22176 files
+    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013", runs=(207883, 208307), aod="/MultiJet1Parked/Run2012D-part2_PixelRecover_17Jan2013-v1/AOD"), # 20015244 events, 1878 files
 ])
 
 # BJetPlusX PD, QuadJet trigger for signal
