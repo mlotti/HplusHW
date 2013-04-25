@@ -72,6 +72,8 @@ namespace HPlus {
       const int getSelectedTauNProngsValue() const { return fSelectedTauNProngsValue; }
       /// Returns the Rtau value of the selected tau
       const double getSelectedTauRtauValue() const { return fSelectedTauRtauValue; }
+      /// Invalidate data object (as a safety precaution)
+      void invalidate() { fSelectedTau = edm::Ptr<pat::Tau>(); }
 
       friend class TauSelection;
 

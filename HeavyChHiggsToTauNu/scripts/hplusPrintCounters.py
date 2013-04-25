@@ -62,6 +62,15 @@ def main(opts):
         if opts.csv:
             formatFunc = lambda table: counter.counterEfficiency(table).format(counter.TableFormatText(cellFormat, columnSeparator=","), csvSplitter)
 
+    if opts.subCounter is not None:
+        print "============================================================"
+        print "Subcounter %s %s: " % (opts.subCounter, quantity)
+        print formatFunc(eventCounter.getSubCounterTable(opts.subCounter))
+        print
+
+        return 0
+
+
     print "============================================================"
     print "Main counter %s: " % quantity
     print formatFunc(eventCounter.getMainCounterTable())
@@ -94,6 +103,8 @@ if __name__ == "__main__":
 #                      help="Output format; available: 'text' (default: 'text')")
     parser.add_option("--mainCounterOnly", dest="mainCounterOnly", action="store_true", default=False,
                       help="By default the main counter and the subcounters are all printed. With this option only the main counter is printed")
+    parser.add_option("--subCounter", dest="subCounter", type="string", default=None,
+                      help="If given, print only this subcounter")
     parser.add_option("--format", dest="format", default="%.1f",
                        help="Value format string (default: '%.1f')")
     parser.add_option("--lumifile", dest="lumifile", type="string", default="lumi.json",

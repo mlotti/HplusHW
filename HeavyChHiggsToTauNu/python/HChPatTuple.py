@@ -47,8 +47,10 @@ class PATBuilder:
     def __call__(self, process, options, dataVersion,
                  patArgs={},
                  doTotalKinematicsFilter=False,
-                 doHBHENoiseFilter=True, doPhysicsDeclared=False,
-                 calculateEventCleaning=False):
+                 doHBHENoiseFilter=False, doPhysicsDeclared=False,
+                 selectedPrimaryVertexFilter=False,
+                 calculateEventCleaning=False,
+                 additionalPattupleCounters=[]): # possible additional counters from pattuple job
 
         self.process = process
         self.counters = []
@@ -73,6 +75,8 @@ class PATBuilder:
 
         if options.doPat == 0:
             # Not running PAT, assuming that the job is taking pattuples as input
+            for additionalPattupleCounter in additionalPattupleCounters:
+                self.counters.append(additionalPattupleCounter)
 
             # Add event filters if requested
             self.addFilters(dataVersion, sequence, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=False)
@@ -80,10 +84,10 @@ class PATBuilder:
             # Add primary vertex selection
             # Selects the first primary vertex, applies the quality cuts to it
             # Applies quality cuts to all vertices too
-            HChPrimaryVertex.addPrimaryVertexSelection(process, sequence)
+            self.counters.extend(HChPrimaryVertex.addPrimaryVertexSelection(process, sequence, filter=selectedPrimaryVertexFilter))
             if options.tauEmbeddingInput != 0:
                 # for embedding input, do vertex object selection for original event too
-                HChPrimaryVertex.addPrimaryVertexSelection(process, sequence, srcProcess=dataVersion.getRecoProcess(), postfix="Original")
+                self.counters.extend(HChPrimaryVertex.addPrimaryVertexSelection(process, sequence, srcProcess=dataVersion.getRecoProcess(), postfix="Original", filter=selectedPrimaryVertexFilter))
 
             if options.doTauHLTMatchingInAnalysis != 0:
                 raise Exception("doTauLHTMatchingInAnalysis is not supported at the moment")
@@ -118,6 +122,13 @@ class PATBuilder:
 
             self.process.patSequence = self.addPat(dataVersion, patArgs=pargs, pvSelectionConfig=options.pvSelectionConfig)
         sequence *= self.process.eventPreSelection
+
+        # Selects the first primary vertex, applies the quality cuts to it
+        # Applies quality cuts to all vertices too
+        # Must be done before PAT sequence
+        self.counters.extend(HChPrimaryVertex.addPrimaryVertexSelection(process, sequence, filter=selectedPrimaryVertexFilter))
+
+        # Add PAT sequence
         sequence *= self.process.patSequence
 
         # Add event filters if requested
@@ -1017,11 +1028,6 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, doChsJets=True, patA
                 ])
 
         sequence *= process.primaryVertexSelectionSequence
-
-    # Selects the first primary vertex, applies the quality cuts to it
-    # Applies quality cuts to all vertices too
-    HChPrimaryVertex.addPrimaryVertexSelection(process, sequence)
-
 
     # Adjust output commands
     if hasOut:
@@ -2214,11 +2220,6 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, doChs=False, patArgs={}, 
                 ])
 
         sequence *= process.primaryVertexSelectionSequence
-
-    # Selects the first primary vertex, applies the quality cuts to it
-    # Applies quality cuts to all vertices too
-    HChPrimaryVertex.addPrimaryVertexSelection(process, sequence)
-
 
     # Adjust output commands
     if out != None:

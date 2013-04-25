@@ -523,6 +523,7 @@ multicrabWorkflowsTauEmbedding.addEmbeddingAodAnalysis_44X(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_4_2(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_4_2(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5(datasets)
+multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_5(datasets)
 
 # Add muon tag&probe definitions
 multicrabWorkflowsMuonTagProbe.addMuonTagProbe_44X(datasets)

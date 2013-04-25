@@ -309,7 +309,7 @@ if "signalAnalysis" in cfg:
     output.append("pickEvents.txt")
 multicrab.addCommonLine("CMSSW.output_file = %s" % ",".join(output))
 
-multicrab.appendLineAll("GRID.maxtarballsize = 35")
+#multicrab.addCommonLine("GRID.maxtarballsize = 35")
 
 # Force all jobs go to jade, in some situations this might speed up
 # the analysis (e.g. when there are O(1000) Alice jobs queueing, all

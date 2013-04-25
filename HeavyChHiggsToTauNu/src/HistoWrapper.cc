@@ -41,6 +41,8 @@ namespace HPlus {
       delete *it;
     for (std::vector<WrappedTH3*>::iterator it = fAllTH3Histos.begin(); it != fAllTH3Histos.end(); ++it)
       delete *it;
+    for (std::vector<WrappedUnfoldedFactorisationHisto*>::iterator it = fAllUnfoldedFactorisationHistos.begin(); it != fAllUnfoldedFactorisationHistos.end(); ++it)
+      delete *it;
   }
 
   bool HistoWrapper::checkIfDirExists(TDirectory* d, std::string name) const {
@@ -82,5 +84,12 @@ namespace HPlus {
   fLevel(level) { }
 
   WrappedTH3::~WrappedTH3() { }
+
+  WrappedUnfoldedFactorisationHisto::WrappedUnfoldedFactorisationHisto(HistoWrapper& histoWrapper, TH2* histo, HistoWrapper::HistoLevel level)
+  : fHistoWrapper(histoWrapper),
+  h(histo),
+  fLevel(level) { }
+
+  WrappedUnfoldedFactorisationHisto::~WrappedUnfoldedFactorisationHisto() { }
 
 }

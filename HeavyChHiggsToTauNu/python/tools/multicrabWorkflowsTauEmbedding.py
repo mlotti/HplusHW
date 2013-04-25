@@ -225,7 +225,10 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
 
         # Setup the publish name
         path = wf.source.getDataForDataset(dataset).getDatasetPath().split("/")
-        name = path_re.sub("_tauembedding_embedding_"+version, path[2])
+        postfix = ""
+        if taskDef.publishPostfix is not None:
+            postfix = taskDef.publishPostfix
+        name = path_re.sub("_tauembedding_embedding_"+version+postfix, path[2])
         name = name.replace("local-", "")
         wf.addCrabLine("USER.publish_data_name = "+name)
 
@@ -408,6 +411,20 @@ def addEmbeddingSkim_v44_5(datasets):
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef(""),
         }
     addEmbeddingSkim_44X("v44_5", datasets, definitions)
+
+def addEmbeddingEmbedding_v44_5(datasets):
+    skimVersion = "tauembedding_skim_v44_5"
+
+    def addEmbedding(version, definitions):
+        addEmbeddingEmbedding_44X(skimVersion, version, datasets, definitions)
+
+    addEmbedding("v44_5", {
+        # 5450710 events, 2064 jobs
+        # User mean 12419.3, min 3119.2, max 16291.2
+        # Mean 422.7 MB, min 327.1 MB, max 555.4 MB
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5c-2c4d260f86ba3e9db4d6ef0e80af6278/USER", args={"triggerMC": 0}, publishPostfix="c"),
+        })
+
 
 def addEmbedding_SKELETON(datasets):
     definitions = {

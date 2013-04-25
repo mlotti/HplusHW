@@ -6,11 +6,13 @@ dataVersion="53XmcS10"
 #dataVersion="53Xdata24Aug2012" # Now we have multiple dataVersions for data too, see HChDataVersion for them
 
 dataEras = [
-    "Run2012ABC", # This is the one for pickEvents, and for counter printout in CMSSW job
-    "Run2012AB",
-    "Run2012A",
-    "Run2012B",
-    "Run2012C",
+    "Run2012ABCD", # This is the one for pickEvents, and for counter printout in CMSSW job
+#    "Run2012ABC",
+#    "Run2012AB",
+#    "Run2012A",
+#    "Run2012B",
+#    "Run2012C",
+#    "Run2012D",
 ]
 
 
@@ -37,19 +39,17 @@ myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 
 def customize(signalAnalysis):
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
-#    signalAnalysis.MET.METCut = 100.0 
+    signalAnalysis.MET.METCut = 50.0 
     print "Customisation applied"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1
                         customizeLightAnalysis=customize,
-                        #applyTriggerScaleFactor=False,
-                        #doTriggerMatching=False,
-                        #useCHSJets=True,
-                        #doQCDTailKillerScenarios=True,
+                        doQCDTailKillerScenarios=False,
                         #doAgainstElectronScan=True,
-                        doSystematics=False,
+                        doSystematics=True,
+
                         #histogramAmbientLevel = "Vital",
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )

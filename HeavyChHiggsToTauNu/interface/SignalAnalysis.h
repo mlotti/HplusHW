@@ -163,18 +163,21 @@ namespace HPlus {
     Count fBTaggingScaleFactorCounter;
     Count fQCDTailKillerCounter;
     Count fDeltaPhiTauMETCounter;
+    Count fDeltaPhiVSDeltaPhiMETJet1CutCounter;
+    Count fDeltaPhiVSDeltaPhiMETJet2CutCounter;
+    Count fDeltaPhiVSDeltaPhiMETJet3CutCounter;
+    Count fDeltaPhiVSDeltaPhiMETJet4CutCounter;
+    Count fDeltaPhiAgainstTTCutCounter;
     Count fDeltaPtJetTauCounter;
-    Count fDeltaPhiLow30Counter;
-    Count fDeltaPhiLow60Counter;
     Count fBjetVetoCounter;
     Count fMetCut80Counter;
     Count fMetCut100Counter;
     Count fHiggsMassCutCounter;
-    Count fTransverseMass80CutCounter;
     Count fTransverseMass100CutCounter;
     Count fTransverseMass120CutCounter;
-    Count fTransverseMass100CutPhiLow30Counter;
-    Count fTransverseMass100CutPhiLow60Counter;
+    Count fTransverseMass150CutCounter;
+    //    Count fTransverseMass100CutPhiLow30Counter;
+    //    Count fTransverseMass100CutPhiLow60Counter;
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
@@ -289,10 +292,17 @@ namespace HPlus {
     WrappedTH1 *hVerticesTriggeredAfterWeight;
 
     // MCAnalysis histograms
+    
+    WrappedTH2 *hDeltaPhiVsDeltaPhiMETJet1;
+    WrappedTH2 *hDeltaPhiVsDeltaPhiMETJet2;
+    WrappedTH2 *hDeltaPhiVsDeltaPhiMETJet3;
+    WrappedTH2 *hDeltaPhiVsDeltaPhiMETJet4;
+    WrappedTH1 *hDeltaPhiMETJet1;
     WrappedTH1 *hgenWmass;
     WrappedTH1 *hGenMET;
     WrappedTH1 *hdeltaPhiMetGenMet;
     WrappedTH1 *hdeltaEtMetGenMet;
+    WrappedTH1 *hTransverseMassAgainstTTCut;
     WrappedTH1 *htransverseMassMuonNotInTau;
     WrappedTH1 *htransverseMassElectronNotInTau;
     WrappedTH1 *htransverseMassTauNotInTau;
@@ -305,17 +315,33 @@ namespace HPlus {
     WrappedTH1 *htransverseMassLeptonFakeSignalTau;
     WrappedTH1 *htransverseMassNoObservableLeptons;
     WrappedTH1 *htransverseMassObservableLeptons;
-    
+    WrappedTH1 *htransverseMassElectronFromTauFound;
+    WrappedTH1 *htransverseMassElectronFromWFound;
+    WrappedTH1 *htransverseMassElectronFromBottomFound;
+    WrappedTH1 *htransverseMassElectronFound;
+    WrappedTH1 *htransverseMassMuonFromTauFound;
+    WrappedTH1 *htransverseMassMuonFromWFound;
+    WrappedTH1 *htransverseMassMuonFromBottomFound;
+    WrappedTH1 *htransverseMassMuonFound;
+    WrappedTH1 *htransverseMassTauFromWFound;
+    WrappedTH1 *htransverseMassTauFound;
+    WrappedTH1 *hDeltaR_TauMETJet1MET;
+    WrappedTH1 *hDeltaR_TauMETJet2MET;
+    WrappedTH1 *hDeltaR_TauMETJet3MET;
+    WrappedTH1 *hDeltaR_TauMETJet4MET;
+    WrappedTH1 *hDeltaPhiTauMET;
+
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;
-    WrappedTH1 *hTransverseMassDeltaPtCut;
+    WrappedTH1 *hTransverseMassAfterBtagging;
+    WrappedTH1 *hTransverseMassDeltaPhiJet1;
+    WrappedTH1 *hTransverseMassDeltaPhiJet2;
+    WrappedTH1 *hTransverseMassDeltaPhiJet3;
+    WrappedTH1 *hTransverseMassDeltaPhiJet4;    
     WrappedTH1 *hTransverseMassSecondBveto;
-    WrappedTH1 *hTransverseMassPhi30;
-    WrappedTH1 *hTransverseMassPhi60;
     WrappedTH1 *hTransverseMassMet80;
     WrappedTH1 *hTransverseMassMet100;
     WrappedTH1 *hTransverseMassNoBtagging;
-    WrappedTH1 *hTransverseMassNoBtaggingWithRtau;
     WrappedTH1 *hTransverseMassTopSelection;
     WrappedTH1 *hTransverseMassTopChiSelection;
     WrappedTH1 *hTransverseMassWmassCut;
@@ -325,11 +351,6 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassTauVeto;
     WrappedTH1 *hTransverseMassAfterDeltaPhi;
     WrappedTH1 *hEWKFakeTausTransverseMass;
-    WrappedTH1 *hTransverseMassFakeMetVeto;
-    WrappedTH1 *hTransverseMassAfterDeltaPhi160;
-    WrappedTH1 *hTransverseMassAfterDeltaPhi130;
-    WrappedTH1 *hTransverseMassAfterDeltaPhi90;
-    WrappedTH2 *hDeltaPhiVsTransverseMass;
     WrappedTH2 *hTransverseMassVsNjets;
     WrappedTH2 *hEWKFakeTausTransverseMassVsNjets;
     WrappedTH1 *hDeltaPtJetTau;

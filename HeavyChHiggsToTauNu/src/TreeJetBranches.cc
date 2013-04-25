@@ -5,12 +5,50 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/Common/interface/View.h"
+#include "DataFormats/Common/interface/ValueMap.h"
+
+#include "CMGTools/External/interface/PileupJetIdentifier.h" // Will be at DataFormats/JetReco/interface from 6_x_y
 
 #include "TTree.h"
 
 #include<string>
 
 namespace HPlus {
+  TreeJetBranches::PileupID::PileupID(const std::string& prefix, const edm::InputTag& mvaSrc, const edm::InputTag& flagSrc):
+    fPrefix(prefix), fMVAValueSrc(mvaSrc), fIDFlagSrc(flagSrc) {
+  }
+  TreeJetBranches::PileupID::~PileupID() {}
+  void TreeJetBranches::PileupID::book(TTree *tree) {
+    tree->Branch((fPrefix+"_discriminant").c_str(), &fMVAValue);
+    tree->Branch((fPrefix+"_loose").c_str(), &fIDFlagLoose);
+    tree->Branch((fPrefix+"_medium").c_str(), &fIDFlagMedium);
+    tree->Branch((fPrefix+"_tight").c_str(), &fIDFlagTight);
+  }
+  void TreeJetBranches::PileupID::setValues(const edm::Event& iEvent, const edm::PtrVector<pat::Jet>& jets) {
+    edm::Handle<edm::ValueMap<float> > hmva;
+    iEvent.getByLabel(fMVAValueSrc, hmva);
+
+    edm::Handle<edm::ValueMap<int> > hflag;
+    iEvent.getByLabel(fIDFlagSrc, hflag);
+
+    for(size_t i=0; i<jets.size(); ++i) {
+      fMVAValue.push_back((*hmva)[jets[i]]);
+
+      int flag = (*hflag)[jets[i]];
+
+      fIDFlagLoose.push_back(PileupJetIdentifier::passJetId(flag, PileupJetIdentifier::kLoose));
+      fIDFlagMedium.push_back(PileupJetIdentifier::passJetId(flag, PileupJetIdentifier::kMedium));
+      fIDFlagTight.push_back(PileupJetIdentifier::passJetId(flag, PileupJetIdentifier::kTight));
+    }
+  }
+  void TreeJetBranches::PileupID::reset() {
+    fMVAValue.clear();
+    fIDFlagLoose.clear();
+    fIDFlagMedium.clear();
+    fIDFlagTight.clear();
+  }
+
+
   TreeJetBranches::TreeJetBranches(const edm::ParameterSet& iConfig, bool jetComposition):
     fJetSrc(iConfig.getParameter<edm::InputTag>("jetSrc")),
     fJetComposition(jetComposition)
@@ -21,6 +59,14 @@ namespace HPlus {
     for(size_t i=0; i<names.size(); ++i) {
       fJetsFunctions.push_back(JetFunctionBranch("jets_f_"+names[i], pset.getParameter<std::string>(names[i])));
     }
+
+    edm::ParameterSet pset2 = iConfig.getParameter<edm::ParameterSet>("jetPileupIDs");
+    std::vector<std::string> names2 = pset2.getParameterNames();
+    fJetsPileupIDs.reserve(names2.size());
+    for(size_t i=0; i<names2.size(); ++i) {
+      edm::ParameterSet pset3 = pset2.getParameter<edm::ParameterSet>(names2[i]);
+      fJetsPileupIDs.push_back(PileupID("jets_puid_"+names2[i], pset3.getParameter<edm::InputTag>("mvaSrc"), pset3.getParameter<edm::InputTag>("flagSrc")));
+    }
   }
   TreeJetBranches::~TreeJetBranches() {}
 
@@ -29,6 +75,9 @@ namespace HPlus {
     tree->Branch("jets_p4", &fJets);
     for(size_t i=0; i<fJetsFunctions.size(); ++i) {
       fJetsFunctions[i].book(tree);
+    }
+    for(size_t i=0; i<fJetsPileupIDs.size(); ++i) {
+      fJetsPileupIDs[i].book(tree);
     }
 
     if(fJetComposition) {
@@ -53,11 +102,24 @@ namespace HPlus {
   }
 
   void TreeJetBranches::setValues(const edm::Event& iEvent) {
+    edm::PtrVector<pat::Jet> jets;
     edm::Handle<edm::View<pat::Jet> > hjets;
     iEvent.getByLabel(fJetSrc, hjets);
-
-    for(size_t i=0; i<hjets->size(); ++i) {
-      const pat::Jet& jet = hjets->at(i);
+    if(hjets.isValid()) {
+      jets = hjets->ptrVector();
+    }
+    else {
+      edm::Handle<edm::View<reco::Candidate> > hcands;
+      iEvent.getByLabel(fJetSrc, hcands);
+      jets = edm::PtrVector<pat::Jet>(hcands->id());
+      for(size_t i=0; i<hcands->size(); ++i) {
+        edm::Ptr<reco::Candidate> ptr = hcands->ptrAt(i);
+        jets.push_back(edm::Ptr<pat::Jet>(ptr.id(), dynamic_cast<const pat::Jet *>(ptr.get()), ptr.key()));
+      }
+    }
+    
+    for(size_t i=0; i<jets.size(); ++i) {
+      const pat::Jet& jet = *(jets[i]);
       fJets.push_back(jet.p4());
 
       double eta = jet.eta();
@@ -117,7 +179,10 @@ namespace HPlus {
     }
 
     for(size_t i=0; i<fJetsFunctions.size(); ++i) {
-      fJetsFunctions[i].setValues(*hjets);
+      fJetsFunctions[i].setValues(jets);
+    }
+    for(size_t i=0; i<fJetsPileupIDs.size(); ++i) {
+      fJetsPileupIDs[i].setValues(iEvent, jets);
     }
   }
 
@@ -125,6 +190,9 @@ namespace HPlus {
     fJets.clear();
     for(size_t i=0; i<fJetsFunctions.size(); ++i)
       fJetsFunctions[i].reset();
+    for(size_t i=0; i<fJetsPileupIDs.size(); ++i) {
+      fJetsPileupIDs[i].reset();
+    }
 
     if(fJetComposition) {
       fJetsChf.clear();
