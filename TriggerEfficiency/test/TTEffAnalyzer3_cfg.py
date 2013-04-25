@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 import copy
 
-dataVersion="53XmcS10"
-#dataVersion="53XdataPromptCv2"
+#dataVersion="53XmcS10"
+dataVersion="53XdataPromptCv2"
 #isData = False
 runL1Emulator = False
 runOpenHLT = False
@@ -61,7 +61,8 @@ else:
         fileNames = cms.untracked.vstring(   
 #        "file:/afs/cern.ch/work/s/slehti/TriggerMETLeg_Tau_173236-173692_2011A_Nov08_pattuple_9_1_LSf.root"
 #        "file:TTEffSkim.root"
-	"file:/tmp/slehti/TriggerMETLeg_Tau_Run2012C_PromptReco_v2_AOD_202792_203742_analysis_metleg_v53_v1_pattuple_28_1_L19.root"
+#	"file:/tmp/slehti/TriggerMETLeg_Tau_Run2012C_PromptReco_v2_AOD_202792_203742_analysis_metleg_v53_v1_pattuple_28_1_L19.root"
+       'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerTauLeg/CMSSW_5_3_X/TauPlusX/Run2012A_13Jul2012_v1_AOD_190456_190738_triggerTauLeg_noTauIDTestSkim2noJSON_v53_v2/a3e0eb2b4b011c1375d601a0aac09e7c/pattuple_9_1_Ygp.root'
         )
     )
 
@@ -271,7 +272,15 @@ process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
         HltResults      = cms.InputTag("TriggerResults","",hltType),
 	TriggerEvent    = cms.InputTag("hltTriggerSummaryAOD","",hltType),
 	PatTriggerEvent = cms.InputTag("patTriggerEvent"),
-        HltObjectFilter = cms.InputTag("hltPFTau35TrackPt20LooseIsoProng2","",hltType),   
+        HltObjectLastFilter = cms.InputTag("hltPFTau35TrackPt20LooseIsoProng2","",hltType),
+        HltObjectFilters = cms.VInputTag([cms.InputTag(f, "", hltType) for f in [
+                "hltPFTau35",
+                "hltPFTau35Track",
+                "hltPFTau35TrackPt20",
+                "hltPFTau35TrackPt20LooseIso",
+                "hltPFTau35TrackPt20LooseIsoProng2",
+            ]]
+        ),
 #        HltObjectFilter = cms.InputTag("hltQuadJet80L1FastJet","",hltType),
         HltPaths = cms.vstring(
             "HLT_IsoMu17_v5", "HLT_IsoMu17_v6", "HLT_IsoMu17_v8", "HLT_IsoMu17_v9", "HLT_IsoMu17_v10", "HLT_IsoMu17_v11", "HLT_IsoMu17_v13", "HLT_IsoMu17_v14",
@@ -442,10 +451,14 @@ if analysis == "QuadJet":
 
 # The high purity selection (mainly for H+)
 process.load("HiggsAnalysis.TriggerEfficiency.HighPuritySelection_cff")
+import HiggsAnalysis.TriggerEfficiency.HighPuritySelection_cff as HighPurity
+highPurityCounters = additionalCounters
+highPurityCounters.extend(HighPurity.getSelectionCounters())
 process.TTEffAnalysisHLTPFTauHPSHighPurity = process.TTEffAnalysisHLTPFTauHPS.clone(
     LoopingOver = "selectedPatTausHpsPFTauHighPurity",
     MuonSource = "selectedPatMuonsHighPurity",
     MuonTauPairSource = "muTauPairsHighPurity",
+    Counters = cms.VInputTag([cms.InputTag(c) for c in highPurityCounters]),
     outputFileName = "tteffAnalysis-hltpftau-hpspftau-highpurity.root"
 )
 process.runTTEffAnaHighPurity = cms.Path(

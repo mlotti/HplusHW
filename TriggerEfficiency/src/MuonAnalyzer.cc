@@ -8,6 +8,7 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
 #include <TTree.h>
@@ -34,9 +35,10 @@ void MuonAnalyzer::Setup(const edm::ParameterSet& iConfig,TTree *trigtree)
         trigtree->Branch("MuonPFIsoChargedPt", &muonPFIsoCharged);
         trigtree->Branch("MuonPFIsoNeutralEt", &muonPFIsoNeutral);
         trigtree->Branch("MuonPFIsoGammaEt", &muonPFIsoGamma);
+	trigtree->Branch("MuonIsGlobalMuon", &muonIsGlobalMuon);
 	trigtree->Branch("NMuons",&nMuons);
 
-        trigtree->Branch("MuonTauInvMass", &muTauInvMass);
+//        trigtree->Branch("MuonTauInvMass", &muTauInvMass);
 }
 
 void MuonAnalyzer::fill(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau) {
@@ -45,25 +47,40 @@ void MuonAnalyzer::fill(const edm::Event& iEvent, const edm::EventSetup& iSetup,
 
 void MuonAnalyzer::fill(const edm::Event& iEvent, const edm::EventSetup& iSetup, const LorentzVector& tau) {
 
-	muonPt  = -999;
-	muonEta = -999;
-	muonPhi = -999;
-        muonIso03SumPt = -999;
-        muonIso03EmEt = -999;
-        muonIso03HadEt = -999;
-        muonPFIsoCharged = -999;
-        muonPFIsoNeutral = -999;
-        muonPFIsoGamma = -999;
-	nMuons  = 0;
+	muonPt.clear();
+	muonEta.clear();
+	muonPhi.clear();
+        muonIso03SumPt.clear();
+        muonIso03EmEt.clear();
+        muonIso03HadEt.clear();
+        muonPFIsoCharged.clear();
+        muonPFIsoNeutral.clear();
+        muonPFIsoGamma.clear();
+	muonIsGlobalMuon.clear();
+//	nMuons  = 0;
 
-        muTauInvMass = 0;
+//        muTauInvMass = 0;
 
 //
-	edm::Handle<edm::View<pat::Muon> > muons;
-        iEvent.getByLabel(MuonSource, muons);
+	edm::Handle<edm::View<pat::Muon> > h_muons;
+        iEvent.getByLabel(MuonSource, h_muons);
+        edm::PtrVector<pat::Muon> muons = h_muons->ptrVector();
+        nMuons = h_muons->size();
 
-        nMuons = muons->size();
-
+	for(edm::PtrVector<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
+            muonPt.push_back((*iMuon)->pt());
+            muonEta.push_back((*iMuon)->eta());
+            muonPhi.push_back((*iMuon)->phi());
+            muonIso03SumPt.push_back((*iMuon)->isolationR03().sumPt);
+            muonIso03EmEt.push_back((*iMuon)->isolationR03().emEt);
+            muonIso03HadEt.push_back((*iMuon)->isolationR03().hadEt);
+               
+            muonPFIsoCharged.push_back((*iMuon)->userIsolation(pat::PfChargedHadronIso));
+            muonPFIsoNeutral.push_back((*iMuon)->userIsolation(pat::PfNeutralHadronIso));
+            muonPFIsoGamma.push_back((*iMuon)->userIsolation(pat::PfGammaIso));
+            muonIsGlobalMuon.push_back((*iMuon)->isGlobalMuon());
+	}
+/*
         edm::Handle<edm::View<reco::CompositeCandidate> > hpairs;
         iEvent.getByLabel(muTauPairSource, hpairs);
         if(hpairs.isValid() && !hpairs->empty()) {
@@ -88,8 +105,8 @@ void MuonAnalyzer::fill(const edm::Event& iEvent, const edm::EventSetup& iSetup,
 
           // Found mu-tau pair matching to the given tau
           if(muon) {
-            if(!pair)
-              throw cms::Exception("LogicError") << "MuonAnalyzer found a muon, but not the mu-tau pair. This needs some debugging." << std::endl;
+//            if(!pair)
+//              throw cms::Exception("LogicError") << "MuonAnalyzer found a muon, but not the mu-tau pair. This needs some debugging." << std::endl;
 
             muonPt  = muon->pt();
             muonEta = muon->eta();
@@ -101,9 +118,10 @@ void MuonAnalyzer::fill(const edm::Event& iEvent, const edm::EventSetup& iSetup,
             muonPFIsoCharged = muon->userIsolation(pat::PfChargedHadronIso);
             muonPFIsoNeutral = muon->userIsolation(pat::PfNeutralHadronIso);
             muonPFIsoGamma = muon->userIsolation(pat::PfGammaIso);
-
+	    muonIsGlobalMuon = muon->isGlobalMuon();
             muTauInvMass = pair->mass();
           }
         }
+*/
 }
 

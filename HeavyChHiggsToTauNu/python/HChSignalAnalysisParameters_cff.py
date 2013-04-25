@@ -468,7 +468,7 @@ topWithMHSelection = cms.untracked.PSet(
 
 tree = cms.untracked.PSet(
     fill = cms.untracked.bool(True),
-    fillJetEnergyFractions = cms.untracked.bool(True),
+    fillJetEnergyFractions = cms.untracked.bool(False), # Disabled by LAW on 25.4.2013 (not very useful anymore because jets are smeared)
     fillNonIsoLeptonVars = cms.untracked.bool(False),
     tauIDs = cms.untracked.vstring(
         "byTightCombinedIsolationDeltaBetaCorr",

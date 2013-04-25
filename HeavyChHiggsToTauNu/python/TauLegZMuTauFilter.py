@@ -2,9 +2,9 @@ import FWCore.ParameterSet.Config as cms
 
 hpsTauSelection =  "pt() > 15 && abs(eta()) < 2.5"
 hpsTauSelection += " && tauID('decayModeFinding') > 0.5"
-####hpsTauSelection += " && tauID('byLooseIsolation') > 0.5"
-hpsTauSelection += " && tauID('againstElectronLoose') > 0.5"
-hpsTauSelection += " && tauID('againstMuonLoose') > 0.5"
+hpsTauSelection += " && (tauID('byVLooseCombinedIsolationDeltaBetaCorr') > 0.5 || tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') > 0.5 || tauID('byLooseIsolationMVA') > 0.5 || tauID('byLooseIsolationMVA2') > 0.5)"
+hpsTauSelection += " && (tauID('againstElectronLoose') > 0.5 || tauID('againstElectronVLooseMVA2') > 0.5 || tauID('againstElectronLooseMVA3') > 0.5)"
+hpsTauSelection += " && (tauID('againstMuonLoose') > 0.5 || tauID('againstMuonLoose2') > 0.5)"
 
 muonSelection =  "isGlobalMuon() && isTrackerMuon()"
 muonSelection += "&& pt() > 15 & abs(eta()) < 2.5 "

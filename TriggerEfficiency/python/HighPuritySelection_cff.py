@@ -50,7 +50,15 @@ muTauPairsHighPurityFilter = cms.EDFilter("PATCandViewCountFilter",
     maxNumber = cms.uint32(1)
 )
 
+highPurityAllEvents      = cms.EDProducer("EventCountProducer")
+highPuritySelectedEvents = cms.EDProducer("EventCountProducer")
+
+def getSelectionCounters():
+    return ["highPurityAllEvents",
+            "highPuritySelectedEvents"]
+
 highPuritySequence = cms.Sequence(
+    highPurityAllEvents *    
     selectedPatMuonsHighPurity *
     selectedPatMuonsHighPurityFilter *
     vetoPatMuonsHighPurity *
@@ -58,5 +66,6 @@ highPuritySequence = cms.Sequence(
     selectedPatTausHpsPFTauHighPurity *
     selectedPatTausHpsPFTauHighPurityFilter *
     muTauPairsHighPurity *
-    muTauPairsHighPurityFilter
+    muTauPairsHighPurityFilter *
+    highPuritySelectedEvents
 )
