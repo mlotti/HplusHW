@@ -62,11 +62,11 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         customizeLightAnalysis=customize,
                         #doHeavyAnalysis=True,
                         #customizeHeavyAnalysis=customize,
-                        doFillTree = True, #False
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
                         #doAgainstElectronScan=True,
                         #doSystematics=True,
-                        doQCDTailKillerScenarios=False, #True, Alexandros
+                        doQCDTailKillerScenarios=True, #True,
+                        doFillTree=True, #False,
                         histogramAmbientLevel = "Informative", # Vital
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )
