@@ -333,8 +333,11 @@ namespace HPlus {
       }
     }
     //std::cout << "EventClassification:   Old GenMET.Pt() = " << oldGenMET.Pt() << std::endl;
-    std::cout << "EventClassification:   GenMET.Pt() = " << myGenMET.Pt() << std::endl;
-    std::cout << "EventClassification:   GenNeutrinoPz = " << myGenMET.Pz() << std::endl;
+
+    // LAW: commented out because it creates a lot of output to crab files.
+    // Please add a boolean option enable or just turn on when debugging
+    //std::cout << "EventClassification:   GenMET.Pt() = " << myGenMET.Pt() << std::endl;
+    //std::cout << "EventClassification:   GenNeutrinoPz = " << myGenMET.Pz() << std::endl;
     return myGenMET;
   }
 
