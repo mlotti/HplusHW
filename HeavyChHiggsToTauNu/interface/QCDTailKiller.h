@@ -43,7 +43,7 @@ namespace HPlus {
       const bool passedBackToBackCuts() const;
       const bool passedCollinearCuts() const;
       const int getNConsideredJets() const { return fMaxEntries; }
-      /// Getters for counted values (in degreees)
+      /// Getters for counted values (in degrees)
       const double getDeltaPhiTauMET() const { return fDeltaPhiTauMET; }
       const double getDeltaPhiJetMET(int njet) const;
       const double getRadiusFromBackToBackCorner(int njet) const { return std::sqrt(std::pow(180.-getDeltaPhiTauMET(),2)+std::pow(getDeltaPhiJetMET(njet),2)); }
