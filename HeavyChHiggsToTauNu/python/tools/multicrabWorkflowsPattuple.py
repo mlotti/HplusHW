@@ -1999,7 +1999,7 @@ def addPattuple_v53_3_test5(datasets):
     definitions = {
         "Tau_190456-190738_2012A_Jul13":          TaskDef(""),
         "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
-        "TauParked_202972-203742_2012C_Jan22":    TaskDef(""),
+        "TauParked_198022-202504_2012C_Jan22":    TaskDef(""),
         "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
         }
 
