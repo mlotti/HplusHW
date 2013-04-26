@@ -47,6 +47,7 @@ namespace HPlus {
       const double getDeltaPhiTauMET() const { return fDeltaPhiTauMET; }
       const double getDeltaPhiJetMET(int njet) const;
       const double getRadiusFromBackToBackCorner(int njet) const { return std::sqrt(std::pow(180.-getDeltaPhiTauMET(),2)+std::pow(getDeltaPhiJetMET(njet),2)); }
+      const double getRadiusFromCollinearCorner(int njet) const { return std::sqrt(std::pow(getDeltaPhiTauMET(),2)+std::pow(180.-getDeltaPhiJetMET(njet),2)); }
       const bool passBackToBackCutForJet(int njet) const;
       const bool passCollinearCutForJet(int njet) const;
 
