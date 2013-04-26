@@ -502,11 +502,6 @@ multicrabWorkflowsPattuple.addPattuple_v44_4_1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v44_5_test1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v44_5(datasets)
 
-multicrabWorkflowsPattuple.addPattuple_v53_1_test1(datasets)
-multicrabWorkflowsPattuple.addPattuple_v53_1(datasets)
-multicrabWorkflowsPattuple.addPattuple_v53_1_1(datasets)
-multicrabWorkflowsPattuple.addPattuple_v53_1_2(datasets)
-multicrabWorkflowsPattuple.addPattuple_v53_2_test1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_2(datasets)
 
 # Add embedding definitions
