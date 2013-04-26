@@ -77,6 +77,7 @@ namespace HPlus {
     void setHltTaus(const pat::TriggerObjectRefVector& hltTaus);
     void setRadiusFromBackToBackCornerJet(double RadiusFromBackToBackCorner);
     void setRadiusFromCollinearCornerJet(double RadiusFromCollinearCorner);
+    void setTailKillerYaxisIntercept(double TailKillerYaxisIntercept);
 
     void setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
     
@@ -295,6 +296,7 @@ namespace HPlus {
     bool bPassedTailKillerBackToBackCuts;
     std::vector<double> fRadiusFromBackToBackCorner;
     std::vector<double> fRadiusFromCollinearCorner;
+    std::vector<double> fTailKillerYaxisIntercept;
 
     // Gen level stuff
     XYZTLorentzVector fGenMet;

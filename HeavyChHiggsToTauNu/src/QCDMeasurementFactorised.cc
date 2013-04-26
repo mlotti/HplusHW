@@ -673,6 +673,7 @@ namespace HPlus {
     for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
       fTree.setRadiusFromBackToBackCornerJet(qcdTailKillerData.getRadiusFromBackToBackCorner(i));
       fTree.setRadiusFromCollinearCornerJet(qcdTailKillerData.getRadiusFromCollinearCorner(i));
+      fTree.setTailKillerYaxisIntercept(qcdTailKillerData.getTailKillerYaxisIntercept(i));
     }
 
     fTree.fill(iEvent, selectedTau, jetData.getSelectedJets());

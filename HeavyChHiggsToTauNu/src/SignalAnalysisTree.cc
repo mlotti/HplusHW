@@ -160,6 +160,7 @@ namespace HPlus {
     fTree->Branch("passedTailKillerBackToBackCuts", &bPassedTailKillerBackToBackCuts);
     fTree->Branch("radiusFromBackToBackCorner", &fRadiusFromBackToBackCorner);
     fTree->Branch("radiusFromCollinearCorner", &fRadiusFromCollinearCorner);
+    fTree->Branch("TailKillerYaxisIntercept", &fTailKillerYaxisIntercept);
 
     fTree->Branch("genMet_p4", &fGenMet);
 
@@ -252,6 +253,12 @@ namespace HPlus {
   void SignalAnalysisTree::setRadiusFromCollinearCornerJet(double RadiusFromCollinearCorner) {
     fRadiusFromCollinearCorner.push_back(RadiusFromCollinearCorner);
   }
+
+  void SignalAnalysisTree::setTailKillerYaxisIntercept(double TailKillerYaxisIntercept) {
+    // Assumes equilateral triangle in [x : y] = [DeltaPhi(tau, MET) : DeltaPhi(jet, MET)] plane. i.e. y = 1*x + c
+    fTailKillerYaxisIntercept.push_back(TailKillerYaxisIntercept);
+  }
+
 
   void SignalAnalysisTree::setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets){
     for(size_t i=0; i<allIdentifiedJets.size(); ++i) {

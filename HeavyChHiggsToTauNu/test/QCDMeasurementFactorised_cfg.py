@@ -33,7 +33,7 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.disableMaxVariations()
 
 ### Boolean flags
-bCustomizeTailKiller = False
+bCustomizeTailKiller = True
     
 def customize(signalAnalysis):
     # Choice of tau selection for tau candidate selection
@@ -59,14 +59,14 @@ def customize(signalAnalysis):
             QCDTailKillerBin("circular", 60.0, 60.0), # jet 1
             QCDTailKillerBin("circular", 60.0, 60.0), # jet 2
             QCDTailKillerBin("circular", 60.0, 60.0), # jet 3
-            QCDTailKillerBin("circular", 60.0, 60.0), # jet 4
+            QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
             )
         # Collinear
-        signalAnalysis.QCDTailKiller.backToBack.collinear = cms.untracked.VPSet(
+        signalAnalysis.QCDTailKiller.collinear = cms.untracked.VPSet(
             QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
             QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
             QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
-            QCDTailKillerBin("triangular", 40.0, 40.0), # jet 4
+            QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
             )
         
     # Info
@@ -88,7 +88,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
                         #doAgainstElectronScan=True,
                         #doSystematics=True,
-                        doQCDTailKillerScenarios=True, #True,
+                        doQCDTailKillerScenarios=False, #True,
                         doFillTree=True, #False,
                         histogramAmbientLevel = "Informative", # Vital
                         #doOptimisation=True, optimisationScheme=myOptimisation
