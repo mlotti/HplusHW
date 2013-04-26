@@ -58,6 +58,9 @@ namespace HPlus {
       fBTaggingWeight = scaleFactor;
       fBTaggingWeightAbsUnc = scaleFactorUnc;
     }
+    void setSetTailKillerCollinear (bool passed) {bPassedTailKillerCollinearCuts  = passed;}
+    void setSetTailKillerBackToBack(bool passed) {bPassedTailKillerBackToBackCuts = passed;}
+
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
     void setRawMET(const edm::Ptr<reco::MET>& met) {
@@ -283,6 +286,8 @@ namespace HPlus {
     double fDeltaPhi;
 
     bool fPassedBTagging;
+    bool bPassedTailKillerCollinearCuts;
+    bool bPassedTailKillerBackToBackCuts;
 
     // Gen level stuff
     XYZTLorentzVector fGenMet;

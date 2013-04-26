@@ -639,7 +639,7 @@ class ConfigBuilder:
         print "muons: ", module.MuonSelection
         if hasattr(module, "jetSelection"):
             print "jets: ", module.jetSelection
-
+        print "QCD Tail-Killer: ", module.QCDTailKiller
 
     ## Build array of analyzers to scan various QCD tail killer scenarios
     #

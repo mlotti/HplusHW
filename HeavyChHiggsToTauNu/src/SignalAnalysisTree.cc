@@ -154,6 +154,8 @@ namespace HPlus {
 
     fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
+    fTree->Branch("passedTailKillerCollinearCuts", &bPassedTailKillerCollinearCuts);
+    fTree->Branch("passedTailKillerBackToBackCuts", &bPassedTailKillerBackToBackCuts);
 
     fTree->Branch("genMet_p4", &fGenMet);
 
@@ -784,12 +786,14 @@ namespace HPlus {
     fHplusMassSelectedNeutrinoPtSolution = nan;
     fHplusMassMCNeutrinoPz = nan;
 
-    bTauIsFake = false;
+    bTauIsFake = nan;
     vDiJetMassesNoTau.clear();
   
     fDeltaPhi = nan;
 
-    fPassedBTagging = false;
+    fPassedBTagging = nan;
+    bPassedTailKillerCollinearCuts = nan;
+    bPassedTailKillerBackToBackCuts = nan;
 
     fGenMet.SetXYZT(nan, nan, nan, nan);
 
