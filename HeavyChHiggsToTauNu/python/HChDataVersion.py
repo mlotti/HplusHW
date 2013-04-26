@@ -87,6 +87,8 @@ config = {
 #
 #         "signalTrigger": ["HLT_QuadJet80_v1"]
 #         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/MultiJet_190456-190738_2012A_Jul13/MultiJet/Run2012A_13Jul2012_v1_AOD_190456_190738_pattuple_v53_2/96fa41b5518123a49a7bd0a10242f655/pattuple_29_1_ODs.root", # runs 190482-190688
+#          "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2",
+          "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2012A-13Jul2012-v1/AOD/E05D6B59-7AD6-E111-B68D-00A0D1EE8E00.root"
     },
     "53Xdata06Aug2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "FT_53_V6C_AN4::All",
@@ -120,6 +122,8 @@ config = {
     },
     "53Xdata10Dec2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "FT_P_V42_AN4::All",
+#        "signalTrigger": "HLT_QuadJet45_v1", # HLT_QuadJet50_v5
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD/A6AF3F14-3772-E211-B368-003048D47A78.root",
     },
     "53Xdata17Jan2013": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "FT_P_V42D_AN4::All",
