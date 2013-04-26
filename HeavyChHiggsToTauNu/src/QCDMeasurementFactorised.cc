@@ -647,9 +647,14 @@ namespace HPlus {
       fTree.setHplusMassNeutrinoPtSolution(FullHiggsMassDataTmp.getNeutrinoPtSolution());
       fTree.setHplusMassMCNeutrinoPz(FullHiggsMassDataTmp.getMCNeutrinoPz());
     }
-    fTree.setSetTailKillerBackToBack(qcdTailKillerData.passedBackToBackCuts());
-    fTree.setSetTailKillerCollinear(qcdTailKillerData.passedCollinearCuts());
-    
+    fTree.setSetPassedTailKillerBackToBack(qcdTailKillerData.passedBackToBackCuts());
+    fTree.setSetPassedTailKillerCollinear(qcdTailKillerData.passedCollinearCuts());
+
+    for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
+      fTree.setRadiusFromBackToBackCornerJet(qcdTailKillerData.getRadiusFromBackToBackCorner(i));
+      fTree.setRadiusFromCollinearCornerJet(qcdTailKillerData.getRadiusFromCollinearCorner(i));
+    }
+
     fTree.fill(iEvent, selectedTau, jetData.getSelectedJets());
   }
 

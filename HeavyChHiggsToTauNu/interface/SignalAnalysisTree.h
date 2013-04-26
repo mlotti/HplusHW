@@ -58,8 +58,8 @@ namespace HPlus {
       fBTaggingWeight = scaleFactor;
       fBTaggingWeightAbsUnc = scaleFactorUnc;
     }
-    void setSetTailKillerCollinear (bool passed) {bPassedTailKillerCollinearCuts  = passed;}
-    void setSetTailKillerBackToBack(bool passed) {bPassedTailKillerBackToBackCuts = passed;}
+    void setSetPassedTailKillerCollinear (bool passed) {bPassedTailKillerCollinearCuts  = passed;}
+    void setSetPassedTailKillerBackToBack(bool passed) {bPassedTailKillerBackToBackCuts = passed;}
 
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
@@ -75,6 +75,9 @@ namespace HPlus {
     void setTcMET(const edm::Ptr<reco::MET>& met) { fTcMet = met->p4(); }
 
     void setHltTaus(const pat::TriggerObjectRefVector& hltTaus);
+    void setRadiusFromBackToBackCornerJet(double RadiusFromBackToBackCorner);
+    void setRadiusFromCollinearCornerJet(double RadiusFromCollinearCorner);
+
     void setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
     
     void setDiJetMassesNoTau(std::vector<float> DiJetMassesNoTau){     
@@ -286,8 +289,12 @@ namespace HPlus {
     double fDeltaPhi;
 
     bool fPassedBTagging;
+
+    // Tail Killer
     bool bPassedTailKillerCollinearCuts;
     bool bPassedTailKillerBackToBackCuts;
+    std::vector<double> fRadiusFromBackToBackCorner;
+    std::vector<double> fRadiusFromCollinearCorner;
 
     // Gen level stuff
     XYZTLorentzVector fGenMet;
