@@ -33,7 +33,7 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.disableMaxVariations()
 
 ### Boolean flags
-bCustomizeTailKiller = True
+bCustomizeTailKiller = False
     
 def customize(signalAnalysis):
     # Choice of tau selection for tau candidate selection
@@ -62,7 +62,6 @@ def customize(signalAnalysis):
             QCDTailKillerBin("circular", 60.0, 60.0), # jet 4
             )
         # Collinear
-        print "\n*** HERE"
         signalAnalysis.QCDTailKiller.backToBack.collinear = cms.untracked.VPSet(
             QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
             QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2

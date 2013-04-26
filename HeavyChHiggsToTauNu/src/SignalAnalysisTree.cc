@@ -154,8 +154,12 @@ namespace HPlus {
 
     fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
+
+    // Tail Killer
     fTree->Branch("passedTailKillerCollinearCuts", &bPassedTailKillerCollinearCuts);
     fTree->Branch("passedTailKillerBackToBackCuts", &bPassedTailKillerBackToBackCuts);
+    fTree->Branch("radiusFromBackToBackCorner", &fRadiusFromBackToBackCorner);
+    fTree->Branch("radiusFromCollinearCorner", &fRadiusFromCollinearCorner);
 
     fTree->Branch("genMet_p4", &fGenMet);
 
@@ -230,7 +234,7 @@ namespace HPlus {
     reset();
   }
 
-
+  
   void SignalAnalysisTree::setHltTaus(const pat::TriggerObjectRefVector& hltTaus) {
     // std::cout << "setHltTaus: 1" << std::endl;  
     fHltTaus.clear();
@@ -240,7 +244,14 @@ namespace HPlus {
     }
     // std::cout << "setHltTaus: 2" << std::endl;  
   }
- 
+  
+  void SignalAnalysisTree::setRadiusFromBackToBackCornerJet(double RadiusFromBackToBackCorner){
+    fRadiusFromBackToBackCorner.push_back(RadiusFromBackToBackCorner);
+  }
+
+  void SignalAnalysisTree::setRadiusFromCollinearCornerJet(double RadiusFromCollinearCorner) {
+    fRadiusFromCollinearCorner.push_back(RadiusFromCollinearCorner);
+  }
 
   void SignalAnalysisTree::setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets){
     for(size_t i=0; i<allIdentifiedJets.size(); ++i) {
@@ -792,8 +803,12 @@ namespace HPlus {
     fDeltaPhi = nan;
 
     fPassedBTagging = nan;
-    bPassedTailKillerCollinearCuts = nan;
+
+    // Tail Killer
+    bPassedTailKillerCollinearCuts  = nan;
     bPassedTailKillerBackToBackCuts = nan;
+    fRadiusFromBackToBackCorner.clear();
+    fRadiusFromCollinearCorner.clear();
 
     fGenMet.SetXYZT(nan, nan, nan, nan);
 
