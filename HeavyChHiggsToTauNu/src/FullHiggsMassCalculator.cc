@@ -838,7 +838,7 @@ namespace HPlus {
   
   void FullHiggsMassCalculator::applyCuts(FullHiggsMassCalculator::Data& output) {
     //if (output.fTopMassSolutionSelected < 140.0 || output.fTopMassSolutionSelected > 200.0) output.bPassedEvent = false;
-    //if (output.fTopMassSolutionSelected < 100.0 || output.fTopMassSolutionSelected > 240.0) output.bPassedEvent = false;
+    if (output.fTopMassSolutionSelected < 100.0 || output.fTopMassSolutionSelected > 240.0) output.bPassedEvent = false;
     //if (output.fDiscriminant < -20000) output.bPassedEvent = false; // At -20000, the cut does not make much difference
     //TMath::Abs(output.fModifiedMET - <original MET>)
   }
@@ -859,9 +859,11 @@ namespace HPlus {
       // THESE HISTOGRAMS ARE FILLED EVEN IF THE EVENT DOES NOT PASS --->
       hTopMassSolution->Fill(output.fTopMassSolutionSelected);
       h2TopMassVsInvariantMass->Fill(output.fTopMassSolutionSelected, output.fHiggsMassSolutionSelected);
-      h2TopMassVsNeutrinoNumber->Fill(output.fTopMassSolutionSelected, getNumberOfNeutrinosInEvent(iEvent));
-      h2InvariantMassVsNeutrinoNumber->Fill(output.fHiggsMassSolutionSelected, getNumberOfNeutrinosInEvent(iEvent));
-      if (!output.bPassedEvent) hNeutrinoNumberInRejectedEvents->Fill(getNumberOfNeutrinosInEvent(iEvent));
+      if (!iEvent.isRealData()) {
+	h2TopMassVsNeutrinoNumber->Fill(output.fTopMassSolutionSelected, getNumberOfNeutrinosInEvent(iEvent));
+	h2InvariantMassVsNeutrinoNumber->Fill(output.fHiggsMassSolutionSelected, getNumberOfNeutrinosInEvent(iEvent));
+	if (!output.bPassedEvent) hNeutrinoNumberInRejectedEvents->Fill(getNumberOfNeutrinosInEvent(iEvent));
+      }
       if (!output.bPassedEvent) break;
       // THESE HISTOGRAMS ARE FILLED ONLY IF THE EVENT HAS PASSED --->
       hHiggsMass->Fill(output.fHiggsMassSolutionSelected);
