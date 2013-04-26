@@ -200,6 +200,8 @@ def createTasks(opts, step, version=None):
     crabcfg = "crab.cfg"
     if step in ["analysis", "analysisTau", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching"]:
         crabcfg = "../crab_analysis.cfg"
+    if step in ["genTauSkim"]:
+        crabcfg = "../pattuple/crab_pat.cfg"
 
     # Setup directory naming
     dirName = ""
@@ -245,6 +247,12 @@ def createTasks(opts, step, version=None):
         multicrab.appendArgAll("doTauEmbeddingLikePreselection=1")
 
     multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
+
+    if step in ["skim", "embedding", "genTauSkim"]:
+        def addCopyConfig(dataset):
+            dataset.appendLine("USER.additional_input_files = copy_cfg.py")
+            dataset.appendCopyFile("../copy_cfg.py")
+        multicrab.forEachDataset(addCopyConfig)
 
     # Create multicrab task(s)
     prefix = "multicrab_"+step+dirName
