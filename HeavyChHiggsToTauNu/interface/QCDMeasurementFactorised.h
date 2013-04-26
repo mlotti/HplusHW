@@ -273,10 +273,14 @@ namespace HPlus {
     QCDFactorisedVariation* fVariationTraditionalPlusMET30;
     QCDFactorisedVariation* fVariationTraditionalPlusTailKiller;
     QCDFactorisedVariation* fVariationTraditionalPlusMET30AndTailKiller;
+    QCDFactorisedVariation* fVariationTraditionalPlusCollinearTailKiller;
+    QCDFactorisedVariation* fVariationTraditionalPlusMET30AndCollinearTailKiller;
     QCDFactorisedVariation* fVariationABCDReference;
     QCDFactorisedVariation* fVariationABCDPlusMET30;
     QCDFactorisedVariation* fVariationABCDPlusTailKiller;
     QCDFactorisedVariation* fVariationABCDPlusMET30AndTailKiller;
+    QCDFactorisedVariation* fVariationABCDPlusCollinearTailKiller;
+    QCDFactorisedVariation* fVariationABCDPlusMET30AndCollinearTailKiller;
     QCDFactorisedVariation* fVariationDoubleABCD;
 
     // Tests

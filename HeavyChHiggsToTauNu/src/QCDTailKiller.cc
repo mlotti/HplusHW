@@ -127,12 +127,12 @@ namespace HPlus {
         if (fCutX == 0)
           throw cms::Exception("LogicError") << "QCDTailKiller::CutItem by name '"+fName+"' cutX is zero in triangular cut!" << std::endl;
         // y(x) = y0/x0 * x + 180 - y0
-        myPassedStatus = y > fCutY/fCutX * x + 180.0 - fCutY;
+        myPassedStatus = y < fCutY/fCutX * x + 180.0 - fCutY;
       } else {
         if (fCutX == 0)
           throw cms::Exception("LogicError") << "QCDTailKiller::CutItem by name '"+fName+"' cutX is zero in triangular cut!" << std::endl;
         // y(x) = y0/x0 * x + y0/x0*(180 - x0) = y0/x0 * (x+180-x0)
-        myPassedStatus = y < fCutY/fCutX * (x + 180.0 - fCutX);
+        myPassedStatus = y > fCutY/fCutX * (x + 180.0 - fCutX);
       }
     } else if (fCutShape == QCDTailKiller::kCircle) {
     // Circular cut
@@ -185,7 +185,7 @@ namespace HPlus {
     for (size_t i = 0; i < fMaxEntries; ++i) {
       std::stringstream myStream;
       myStream << "CollinearJet" << i+1;
-      fCollinearJetCut.push_back(CutItem(eventCounter, myStream.str(), QCDTailKiller::kCutLowerRightCorner));
+      fCollinearJetCut.push_back(CutItem(eventCounter, myStream.str(), QCDTailKiller::kCutUpperLeftCorner));
       if (i < myCollinearPSets.size()) {
         fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir,
                                         myCollinearPSets[i].getUntrackedParameter<std::string>("CutShape"),

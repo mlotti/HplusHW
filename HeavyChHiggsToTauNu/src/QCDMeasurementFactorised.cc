@@ -311,6 +311,10 @@ namespace HPlus {
                                                                   kQCDFactorisedTraditional, "TradPlusTailKiller");
       fVariationTraditionalPlusMET30AndTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
                                                                   kQCDFactorisedTraditional, "TradPlusMET30TailKiller");
+      fVariationTraditionalPlusCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
+                                                                  kQCDFactorisedTraditional, "TradPlusCollinearTailKiller");
+      fVariationTraditionalPlusMET30AndCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
+                                                                  kQCDFactorisedTraditional, "TradPlusMET30CollinearTailKiller");
     }
     if (fDoAnalysisVariationWithABCDMethod) {
       fVariationABCDReference = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
@@ -321,6 +325,10 @@ namespace HPlus {
                                                                   kQCDFactorisedABCD, "ABCDPlusTailKiller");
       fVariationABCDPlusMET30AndTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
                                                                   kQCDFactorisedABCD, "ABCDPlusMET30TailKiller");
+      fVariationABCDPlusCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
+                                                                  kQCDFactorisedABCD, "ABCDPlusCollinearTailKiller");
+      fVariationABCDPlusMET30AndCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
+                                                                  kQCDFactorisedABCD, "ABCDPlusMET30CollinearTailKiller");
     }
     if (fDoAnalysisVariationWithDoubleABCDMethod) {
       fVariationDoubleABCD = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
@@ -553,6 +561,12 @@ namespace HPlus {
       if (metData.getSelectedMET()->et() > 30.0 && qcdTailKillerData.passedEvent()) {
         fVariationTraditionalPlusMET30AndTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
       }
+      if (qcdTailKillerData.passedCollinearCuts()) {
+        fVariationTraditionalPlusCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
+      }
+      if (metData.getSelectedMET()->et() > 30.0 && qcdTailKillerData.passedCollinearCuts()) {
+        fVariationTraditionalPlusMET30AndCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
+      }
     }
     // ABCD method (experimental)
     if (fDoAnalysisVariationWithABCDMethod) {
@@ -568,6 +582,12 @@ namespace HPlus {
       // Both MET>30 cut and QCD tail killer applied
       if (metData.getSelectedMET()->et() > 30.0 && qcdTailKillerData.passedEvent()) {
         fVariationABCDPlusMET30AndTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
+      }
+      if (qcdTailKillerData.passedCollinearCuts()) {
+        fVariationABCDPlusCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
+      }
+      if (metData.getSelectedMET()->et() > 30.0 && qcdTailKillerData.passedCollinearCuts()) {
+        fVariationABCDPlusMET30AndCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
       }
     }
     // Double ABCD method (very experimental)
