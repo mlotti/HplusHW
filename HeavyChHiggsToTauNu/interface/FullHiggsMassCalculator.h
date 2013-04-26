@@ -151,9 +151,8 @@ namespace HPlus {
     double getAngleBetweenNeutrinosAndTau(TLorentzVector& tauFourMom, TLorentzVector& neutrinosFourMom);
     double getDeltaEtaBetweenNeutrinosAndTau(TLorentzVector& tauFourMom, TLorentzVector& neutrinosFourMom);
     double getDeltaRBetweenNeutrinosAndTau(TLorentzVector& tauFourMom, TLorentzVector& neutrinosFourMom);
-    bool selectedSolutionIsClosestToTrueValue(double selectedSolution, FullHiggsMassCalculator::Data& output);
-    bool selectedSolutionGivesBestHiggsMass(const edm::Event& iEvent, double selectedSolution,
-					    FullHiggsMassCalculator::Data& output);
+    bool isBetterSolution(const edm::Event& iEvent, double selectedSolution, FullHiggsMassCalculator::Data& output);
+    bool isBetterSolutionNoChargedHiggs(double selectedSolution, FullHiggsMassCalculator::Data& output);
     bool neutrinoPzSolutionOneWasSelected(double selectedSolution, FullHiggsMassCalculator::Data& output);
     bool neutrinoPzSolutionTwoWasSelected(double selectedSolution, FullHiggsMassCalculator::Data& output);
 //     bool selectedSolutionGivesVectorClosestToTrue(const edm::Event& iEvent, double selectedSolution,
@@ -215,13 +214,15 @@ namespace HPlus {
     WrappedTH2* h2TransverseMassVsInvariantMassPositiveDiscriminant;
     WrappedTH2* h2TransverseMassVsInvariantMassNegativeDiscriminant;
     WrappedTH2* h2TopMassVsInvariantMass;
+    WrappedTH2* h2TopMassVsNeutrinoNumber;
+    WrappedTH2* h2InvariantMassVsNeutrinoNumber;
 
     WrappedTH1* hTopMassSolution;
     WrappedTH1* hTopInvariantMassInGenerator;
     WrappedTH1* hSelectedNeutrinoPzSolution;
 
-    WrappedTH1* hHiggsMass_closerToRestMass;
-    WrappedTH1* hHiggsMass_furtherFromRestMass;
+    WrappedTH1* hHiggsMass_betterSolution;
+    WrappedTH1* hHiggsMass_worseSolution;
     
     // Histograms that may be used to identify good cut possibilities
     WrappedTH1* hMETSignificance;

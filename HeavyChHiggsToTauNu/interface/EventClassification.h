@@ -54,6 +54,7 @@ namespace HPlus {
   double getClosestGenVisibleTauDeltaR(const edm::Event& iEvent, TVector3 recoTauVector);
   bool hasGenBQuarkWithinDeltaR(const edm::Event& iEvent, TVector3 recoBJetVector, double deltaRCut);
   double getClosestGenBQuarkDeltaR(const edm::Event& iEvent, TVector3 recoBJetVector);
+  int getNumberOfNeutrinosInEvent(const edm::Event& iEvent);
   void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau);
   // };
 }

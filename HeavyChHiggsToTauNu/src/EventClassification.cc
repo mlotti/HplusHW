@@ -310,21 +310,12 @@ namespace HPlus {
     iEvent.getByLabel("genParticles", genParticles);
     int pId = 9999999;
     TVector3 myGenMET(0.0, 0.0, 0.0);
-    TVector3 oldGenMET(0.0, 0.0, 0.0);
     TVector3 currentNeutrinoVector(0.0, 0.0, 0.0); // auxiliary
     // Find neutrinos in the event and sum their transverse momenta. This will be the "GenNeutrinoMET"
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
       pId = p.pdgId();
       // Ignore daughters of neutrinos (to avoid multiple counting of neutrinos)
-      if (hasImmediateMother(p,12) || hasImmediateMother(p,14) || hasImmediateMother(p,16)) {
-	// do nothing
-      } else {
-	if (TMath::Abs(pId) == 12 || TMath::Abs(pId) == 14 || TMath::Abs(pId) == 16) {
-	  currentNeutrinoVector.SetXYZ(p.px(), p.py(), p.pz());
-	  oldGenMET += currentNeutrinoVector;
-	}
-      }
       if (hasImmediateMother(p,12) || hasImmediateMother(p,14) || hasImmediateMother(p,16) ||
 	  hasImmediateMother(p,-12) || hasImmediateMother(p,-14) || hasImmediateMother(p,-16)) continue;
       if (TMath::Abs(pId) == 12 || TMath::Abs(pId) == 14 || TMath::Abs(pId) == 16) {
@@ -332,7 +323,6 @@ namespace HPlus {
 	myGenMET += currentNeutrinoVector;
       }
     }
-    //std::cout << "EventClassification:   Old GenMET.Pt() = " << oldGenMET.Pt() << std::endl;
     std::cout << "EventClassification:   GenMET.Pt() = " << myGenMET.Pt() << std::endl;
     std::cout << "EventClassification:   GenNeutrinoPz = " << myGenMET.Pz() << std::endl;
     return myGenMET;
@@ -420,6 +410,29 @@ namespace HPlus {
     return smallestDeltaR; // will return a very large (initialization) value if no GEN b quark is found
   }
 
+  int getNumberOfNeutrinosInEvent(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    int pId = 9999999;
+    int numberOfNeutrinos = 0;
+    // Find neutrinos in the event
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      pId = p.pdgId();
+      // Ignore daughters of neutrinos (to avoid multiple counting of neutrinos)
+      if (hasImmediateMother(p,12) || hasImmediateMother(p,14) || hasImmediateMother(p,16) ||
+	  hasImmediateMother(p,-12) || hasImmediateMother(p,-14) || hasImmediateMother(p,-16)) continue;
+      if (TMath::Abs(pId) == 12 || TMath::Abs(pId) == 14 || TMath::Abs(pId) == 16) {
+	numberOfNeutrinos++;
+      }
+    }
+    return numberOfNeutrinos;
+  }
+
+  bool tauAndBJetFromSameTopQuark() {
+    // TODO!
+    return true;
+  }
   
 //   bool tauIsFromChargedHiggs() {
     
