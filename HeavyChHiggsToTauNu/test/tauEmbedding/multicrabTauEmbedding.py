@@ -214,6 +214,8 @@ def createTasks(opts, step, version=None):
     # Create multicrab
     multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
 
+    if step in ["skim", "embedding", "genTauSkim"]:
+        multicrab.addCommonLine("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/embedding/CMSSW_4_4_X")
 
     # Select the datasets based on the processing step and data era
     datasets = []
