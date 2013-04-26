@@ -336,12 +336,22 @@ datasets.extend([
 
 # MultiJet(Parked) PD, QuadJet trigger for signal
 datasets.extend([
-    DataDataset("MultiJet_%s_2012A_Jan22",        reco="22Jan2013", runs=(190456, 193621), aod="/MultiJet/Run2012A-22Jan2013-v1/AOD"), # 11068071 events, 879 files
-    DataDataset("MultiJet1Parked_%s_2012B_Nov05", reco="05Nov2012B", runs=(193834, 196531), aod="/MultiJet1Parked/Run2012B-05Nov2012-v2/AOD"), # 78067581 events,  7084 files
+    DataDataset("MultiJet_%s_2012A_Jan22",        reco="22Jan2013",    runs=(190456, 193621), aod="/MultiJet/Run2012A-22Jan2013-v1/AOD"), # 11068071 events, 879 files
+    DataDataset("MultiJet1Parked_%s_2012B_Nov05", reco="05Nov2012B",   runs=(193834, 196531), aod="/MultiJet1Parked/Run2012B-05Nov2012-v2/AOD"), # 78067581 events,  7084 files
     DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012Cv1", runs=(198022, 198523), aod="/MultiJet1Parked/Run2012C-part1_05Nov2012-v2/AOD"), # 9209168 events, 626 files
     DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012Cv2", runs=(198941, 203742), aod="/MultiJet1Parked/Run2012C-part2_05Nov2012-v1/AOD"), # 130268374 events, 10136 files
-    DataDataset("MultiJet1Parked_%s_2012D_Dec10", reco="10Dec2012", runs=(203777, 207779), aod="/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD"), # 218620252 events, 22176 files
-    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013", runs=(207883, 208307), aod="/MultiJet1Parked/Run2012D-part2_PixelRecover_17Jan2013-v1/AOD"), # 20015244 events, 1878 files
+    DataDataset("MultiJet1Parked_%s_2012D_Dec10", reco="10Dec2012",    runs=(203777, 207779), aod="/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD"), # 218620252 events, 22176 files
+    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013",    runs=(207875, 208686), aod="/MultiJet1Parked/Run2012D-part2_17Jan2013-v1/AOD"), # 28985011 events, 3051 files
+    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013",    runs=(207883, 208307), aod="/MultiJet1Parked/Run2012D-part2_PixelRecover_17Jan2013-v1/AOD"), # 20015244 events, 1878 files
+])
+datasets.splitDataByRuns("MultiJet1Parked_193834-196531_2012B_Nov05", [
+        (193834, 194225), # HLT_QuadJet50 is prescaled, use HLT_QuadJet80, 78059999 events, 6484 files
+        (194270, 196531), # HLT_QuadJet50 is unprescaled, 76705110 events, 6356 files
+])
+# Split to have separate pieces of this around PixelRecover
+datasets.splitDataByRuns("MultiJet1Parked_207875-208686_2012D_Jan17", [
+        (207875, 207882), # 395625 events, 35 files
+        (208339, 208686), # 28902576 events, 3043 files
 ])
 
 # BJetPlusX PD, QuadJet trigger for signal
@@ -350,6 +360,10 @@ datasets.extend([
     DataDataset("BJetPlusX_%s_2012C_Jan22", reco="22Jan2013", runs=(198022, 203742), aod="/BJetPlusX/Run2012C-22Jan2013-v1/AOD"), # 36498856 events, 3091 files
     DataDataset("BJetPlusX_%s_2012D_Jan22", reco="22Jan2013", runs=(203777, 208686), aod="/BJetPlusX/Run2012D-22Jan2013-v1/AOD"), # 40926332 events, 3943 files
 ])
+datasets.splitDataByRuns("BJetPlusX_193834-196531_2012B_Jan22", [
+        (193834, 194225), # This has both BTagCSV and BTagIP triggers, 6146763 events, 462 files
+        (194270, 196531), # This has only BTagIP trigger, 25513309 events, 2125 files
+        ])
 
 # SingleMu PD, Mu trigger for embedding, IsoMu trigger for muon efficiency measurement
 datasets.extend([
@@ -516,6 +530,7 @@ multicrabWorkflowsPattuple.addPattuple_v53_3_test1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_3_test2(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_3_test3(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_3_test4(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_3_test5(datasets)
 
 # Add embedding definitions
 multicrabWorkflowsTauEmbedding.addEmbeddingAodAnalysis_44X(datasets)
