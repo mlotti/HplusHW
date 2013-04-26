@@ -478,13 +478,18 @@ def _rescaleInfo(d):
     return ret
 
 
-## Normalize TH1 to unit area.
+## Normalize TH1/TH2/TH3 to unit area.
 # 
-# \param h   TH1 histogram
+# \param h   TH1/TH2/TH3 histogram
 # 
 # \return Normalized histogram (same as the argument object, i.e. no copy is made).
 def _normalizeToOne(h):
-    integral = h.Integral(0, h.GetNbinsX()+1)
+    if isinstance(h, ROOT.TH3):
+        integral = h.Integral(0, h.GetNbinsX()+1, 0, h.GetNbinsY()+1, 0, h+GetNbinsZ())
+    elif isinstance(h, ROOT.TH2):
+        integral = h.Integral(0, h.GetNbinsX()+1, 0, h.GetNbinsY()+1)
+    else:
+        integral = h.Integral(0, h.GetNbinsX()+1)
     if integral == 0:
         return h
     else:
