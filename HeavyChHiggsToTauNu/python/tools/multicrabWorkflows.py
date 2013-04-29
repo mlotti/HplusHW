@@ -370,6 +370,7 @@ datasets.extend([
     DataDataset("SingleMu_%s_2012A_Jan22", reco="22Jan2013", runs=(190456, 193621), aod="/SingleMu/Run2012A-22Jan2013-v1/AOD"), # 19785316 events, 817 files
     DataDataset("SingleMu_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/SingleMu/Run2012B-22Jan2013-v1/AOD"), # 59516381 events, 4204 files
     DataDataset("SingleMu_%s_2012C_Jan22", reco="22Jan2013", runs=(198022, 203742), aod="/SingleMu/Run2012C-22Jan2013-v1/AOD"), # 87683348 events, 6171 files
+    DataDataset("SingleMu_%s_2012D_Jan22", reco="22Jan2013", runs=(203777, 208686), aod="/SingleMu/Run2012D-22Jan2013-v1/AOD"), # 95089646 events, 7567 files
 ])
 
 
