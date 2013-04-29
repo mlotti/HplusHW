@@ -20,26 +20,14 @@ namespace {
 }
 
 namespace HPlus {
-  BinnedEfficiencyScaleFactor::Data::Data():
-    fWeight(1.0),
-    fWeightAbsUnc(0.0),
-    fWeightRelUnc(0.0) {}
+  BinnedEfficiencyScaleFactor::Data::Data() {}
   BinnedEfficiencyScaleFactor::Data::~Data() {}
 
   BinnedEfficiencyScaleFactor::BinnedEfficiencyScaleFactor(const edm::ParameterSet& iConfig):
+    EfficiencyScaleFactorBase(iConfig),
     fCurrentRunData(0) {
 
-    std::string mode = iConfig.getUntrackedParameter<std::string>("mode");
-    if(mode == "efficiency")
-      fMode = kEfficiency;
-    else if(mode == "scaleFactor")
-      fMode = kScaleFactor;
-    else if(mode == "disabled")
-      fMode = kDisabled;
-    else
-      throw cms::Exception("Configuration") << "BinnedEfficiencyScaleFactor: Unsupported value for parameter 'mode' " << mode << ", should be 'efficiency', 'scaleFactor', or 'disabled'" << std::endl;
-
-    if(fMode == kDisabled)
+    if(getMode() == kDisabled)
       return;
 
     edm::ParameterSet dataParameters = iConfig.getParameter<edm::ParameterSet>("dataParameters");
@@ -143,7 +131,7 @@ namespace HPlus {
 
 
   void BinnedEfficiencyScaleFactor::setRun(unsigned run) {
-    if(fMode == kDisabled)
+    if(getMode() == kDisabled)
       return;
 
     //std::cout << fDataValues.size() << fScaleValues.size() << std::endl;
@@ -226,12 +214,12 @@ namespace HPlus {
   BinnedEfficiencyScaleFactor::Data BinnedEfficiencyScaleFactor::getEventWeight(double value, bool isData) const {
     Data output;
 
-    if(fMode == kScaleFactor) {
+    if(getMode() == kScaleFactor) {
       output.fWeight = scaleFactor(value);
       output.fWeightAbsUnc = scaleFactorAbsoluteUncertainty(value);
       output.fWeightRelUnc = scaleFactorRelativeUncertainty(value);
     }
-    else if(fMode == kEfficiency) {
+    else if(getMode() == kEfficiency) {
       if(isData) {
         if(!fCurrentRunData)
           throw cms::Exception("LogicError") << "TBinnedEfficiencyScaleFactor: With efficiency mode and data input, must call setRun() before getEventWeight()" << std::endl;

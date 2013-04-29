@@ -2,43 +2,20 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_BinnedEfficiencyScaleFactor_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_BinnedEfficiencyScaleFactor_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EfficiencyScaleFactorBase.h"
+
 #include<vector>
 
-namespace edm {
-  class ParameterSet;
-}
 
 namespace HPlus {
-  class BinnedEfficiencyScaleFactor {
+  class BinnedEfficiencyScaleFactor: public EfficiencyScaleFactorBase {
   public:
-    enum Mode {
-      kEfficiency,
-      kScaleFactor,
-      kDisabled
-    };
-
-    class Data {
+    class Data: public EfficiencyScaleFactorBase::Data {
     public:
       Data();
       ~Data();
 
-      const double getEventWeight() const {
-        return fWeight;
-      }
-      const double getEventWeightAbsoluteUncertainty() const {
-        return fWeightAbsUnc;
-      }
-      const double getEventWeightRelativeUncertainty() const {
-        return fWeightRelUnc;
-      }
-
       friend class BinnedEfficiencyScaleFactor;
-
-    private:
-      double fWeight;
-      double fWeightAbsUnc;
-      double fWeightRelUnc;
-
     };
 
     explicit BinnedEfficiencyScaleFactor(const edm::ParameterSet& iConfig);
@@ -68,7 +45,6 @@ namespace HPlus {
     double binScaleFactorAbsoluteUncertainty(size_t bin) const { return fScaleUncertainties[bin]; }
 
     Data getEventWeight(double value, bool isData) const;
-    Mode getMode() const { return fMode; }
 
   private:
     struct DataValue {
@@ -93,8 +69,6 @@ namespace HPlus {
     std::vector<double> fScaleUncertainties;
 
     const DataValue *fCurrentRunData;
-
-    Mode fMode;
   };
 }
 
