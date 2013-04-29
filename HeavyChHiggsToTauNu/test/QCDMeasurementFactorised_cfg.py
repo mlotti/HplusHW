@@ -68,8 +68,8 @@ def customize(signalAnalysis):
             QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
             QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
             )
-        
-    # Info
+
+    # Info    
     print "\n*** QCD factorised customisations applied ***"
     print "- Nprongs cut included in tau candidate selections:",signalAnalysis.applyNprongsCutForTauCandidate.value()
     print "- Rtau cut included in tau candidate selections:",signalAnalysis.applyRtauCutForTauCandidate.value()

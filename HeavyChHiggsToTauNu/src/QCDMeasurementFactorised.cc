@@ -298,7 +298,7 @@ namespace HPlus {
     // Factorisation histograms are inside the nested variation class
 
     // Tree
-    fTree.enableNonIsoLeptons(true);
+    fTree.enableNonIsoLeptons(false);
     fTree.init(*fs);
 
     // Measurement variations
