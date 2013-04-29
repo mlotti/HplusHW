@@ -23,7 +23,7 @@ namespace HPlus {
   BinnedEfficiencyScaleFactor::Data::Data() {}
   BinnedEfficiencyScaleFactor::Data::~Data() {}
 
-  BinnedEfficiencyScaleFactor::BinnedEfficiencyScaleFactor(const edm::ParameterSet& iConfig):
+  BinnedEfficiencyScaleFactor::BinnedEfficiencyScaleFactor(const edm::ParameterSet& iConfig, const std::string& quantity):
     EfficiencyScaleFactorBase(iConfig),
     fCurrentRunData(0) {
 
@@ -44,7 +44,7 @@ namespace HPlus {
     edm::ParameterSet pset = mcParameters.getParameter<edm::ParameterSet>(mcSelect);
     std::vector<edm::ParameterSet> mcBins = pset.getParameter<std::vector<edm::ParameterSet> >("bins");
     for(size_t i=0; i<mcBins.size(); ++i) {
-      double bin = mcBins[i].getParameter<double>("pt");
+      double bin = mcBins[i].getParameter<double>(quantity);
       if(!fBinLowEdges.empty() && bin <= fBinLowEdges.back())
         throw cms::Exception("Configuration") << "BinnedEfficiencyScaleFactor:  Bins must be in an ascending order of lowEdges (new "
                                               << bin << " previous " << fBinLowEdges.back() << ")"
@@ -74,7 +74,7 @@ namespace HPlus {
       totalLuminosity += dv.luminosity;
 
       for(size_t i=0; i<dataBins.size(); ++i) {
-        double bin = dataBins[i].getParameter<double>("pt");
+        double bin = dataBins[i].getParameter<double>(quantity);
 
         if(!doubleEqual(bin, fBinLowEdges[i]))
           throw cms::Exception("Configuration") << "TauTriggerEfficiencyScaleFactor: Bin " << i << " in dataParameters." << *iSelect << " must have same low edge as mcParameters" << *iSelect << ", now data hs " << bin << " while mc has " << fBinLowEdges[i] << std::endl;

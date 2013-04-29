@@ -5,7 +5,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EfficiencyScaleFactorBase.h"
 
 #include<vector>
-
+#include<string>
 
 namespace HPlus {
   class BinnedEfficiencyScaleFactor: public EfficiencyScaleFactorBase {
@@ -18,7 +18,7 @@ namespace HPlus {
       friend class BinnedEfficiencyScaleFactor;
     };
 
-    explicit BinnedEfficiencyScaleFactor(const edm::ParameterSet& iConfig);
+    explicit BinnedEfficiencyScaleFactor(const edm::ParameterSet& iConfig, const std::string& quantity);
     ~BinnedEfficiencyScaleFactor();
 
     void setRun(unsigned run);
