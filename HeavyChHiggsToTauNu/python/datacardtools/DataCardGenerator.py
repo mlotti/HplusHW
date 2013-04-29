@@ -34,7 +34,7 @@ class DatacardQCDMethod:
     INVERTED = 2
 
 class DataCardGenerator:
-    def __init__(self, config, opts, QCDMethod, era, optimisationVariation):
+    def __init__(self, config, opts, QCDMethod, era, searchMode, optimizationMode):
 	self._dsetMgrs = None
 	self._config = config
 	self._opts = opts

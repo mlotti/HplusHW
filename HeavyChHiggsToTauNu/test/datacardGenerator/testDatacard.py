@@ -1,5 +1,5 @@
 DataCardName    = 'myDummyTestName'
-Path            = '/home/wendland/data/HIG-12-037/2012test'
+Path            = '/home/wendland/data/v445/met50'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 #MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [80,90,100,120,140,150,155,160]
@@ -9,12 +9,14 @@ MassPoints      = [120]
 BlindAnalysis   = True
 
 # Specify name of EDFilter or EDAnalyser process that produced the root files
+
+# FIXME: remove this block
 SignalAnalysis  = "signalAnalysis"
 EmbeddingAnalysis     = "signalAnalysis"
 #EmbeddingAnalysis     = "signalAnalysisCaloMet60TEff"
 #EmbeddingAnalysis     = "signalAnalysisCaloMet60"
-QCDFactorisedAnalysis = "QCDMeasurement"
-QCDInvertedAnalysis = "signalAnalysisInvertedTau"
+QCDFactorisedAnalysis = True
+QCDInvertedAnalysis = True
 
 RootFileName    = "histograms.root"
 
