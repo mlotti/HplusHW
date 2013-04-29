@@ -95,7 +95,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #doSystematics=True,
                         doQCDTailKillerScenarios=False, #True,
                         doFillTree=True, #False,
-                        histogramAmbientLevel = "Informative", # Vital
+                        histogramAmbientLevel = "Vital", # Informative
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )
 

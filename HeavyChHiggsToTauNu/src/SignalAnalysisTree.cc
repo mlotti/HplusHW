@@ -816,7 +816,7 @@ namespace HPlus {
     bPassedTailKillerBackToBackCuts = nan;
     fRadiusFromBackToBackCorner.clear();
     fRadiusFromCollinearCorner.clear();
-
+    fTailKillerYaxisIntercept.clear();
     fGenMet.SetXYZT(nan, nan, nan, nan);
 
     if(fTauEmbeddingMuon.get())
