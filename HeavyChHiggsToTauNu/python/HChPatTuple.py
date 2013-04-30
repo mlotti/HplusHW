@@ -602,10 +602,14 @@ class StandardPATBuilder(PATBuilderBase):
         # Add the continuous isolation discriminators
         addTauRawDiscriminators(patTaus)
 
-        # Remove iso deposits to save disk space
+        # Remove iso deposits to save disk space and time
         if not self.doPatTauIsoDeposits:
+            for isoDepName in patTaus.isoDeposits.parameterNames_():
+                inputLabel = getattr(patTaus.isoDeposits, isoDepName).getModuleLabel()
+                HChTools.removeEverywhere(self.process, inputLabel)
             patTaus.isoDeposits = cms.PSet()
-    
+            patTaus.userIsolation = cms.PSet()
+
         # Trigger matching
         if self.doTauHLTMatching:
             print "Tau HLT matching in PATTuple production is disabled. It should be done in the analysis jobs from now on."
@@ -976,8 +980,20 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, doChsJets=True, patA
         # Disable isolated muon/electron top projections before jet clustering
         process.pfNoMuonChs.enable = False
         process.pfNoElectronChs.enable = False
+
         # Disable jet-tau disambiguation (we do it ourselves in the analysis)
         process.pfNoTauChs.enable = False
+        # Remove all tau-related from the CHS sequence, we don't use
+        # CHS-tau and they just waste some precious time
+        process.PFBRECOChs.remove(process.pfTauSequenceChs)
+        for name in ["patHPSPFTauDiscriminationUpdateChs", "patPFTauIsolationChs", "patTausChs", "selectedPatTausChs", "countPatTausChs"]:
+            process.patDefaultSequenceChs.remove(getattr(process, name))
+
+        # Remove MET from CHS sequence, we don't use it and it just
+        # wastes some precious time
+        process.PFBRECOChs.remove(process.pfMETChs)
+        process.patDefaultSequenceChs.remove(process.patMETsChs)
+
 
         jetPostfixes.append("Chs")
         process.patDefaultSequence *= process.patPF2PATSequenceChs
