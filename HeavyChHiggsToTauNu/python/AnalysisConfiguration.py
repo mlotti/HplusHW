@@ -339,9 +339,17 @@ class ConfigBuilder:
         if len(analysisLightModules) > 0:
             analysisLightModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
             #analysisLightModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+            if hasattr(analysisLightModules[0], "tauTriggerEfficiencyScaleFactor"):
+                analysisLightModules[0].tauTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
+            if hasattr(analysisLightModules[0], "metTriggerEfficiencyScaleFactor"):
+                analysisLightModules[0].metTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
         if len(analysisHeavyModules) > 0:
             analysisHeavyModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
             #analysisHeavyModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+            if hasattr(analysisHeavyModules[0], "tauTriggerEfficiencyScaleFactor"):
+                analysisHeavyModules[0].tauTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
+            if hasattr(analysisHeavyModules[0], "metTriggerEfficiencyScaleFactor"):
+                analysisHeavyModules[0].metTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
 
         # Prescale fetching done automatically for data
         if self.dataVersion.isData() and self.options.tauEmbeddingInput == 0 and self.doPrescalesForData:
