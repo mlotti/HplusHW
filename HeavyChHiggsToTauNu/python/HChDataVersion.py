@@ -116,13 +116,16 @@ config = {
     },
     "53Xdata05Nov2012Cv1": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "FT53_V10A_AN4::All",
+#        "signalTrigger": "HLT_QuadJet50_v3", # HLT_QuadJet80_v4
+#        "patMadhatter": "file:/mnt/flustre/mkortela/data/MultiJet1Parked/Run2012C-part1_05Nov2012-v2/AOD/E0D4F4A8-394E-E211-9996-001E673967C5.root", # run 198202
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/MultiJet1Parked/Run2012C-part1_05Nov2012-v2/AOD/A8C34329-724E-E211-A6C9-001E67397003.root", # runs 198022, 198207, 198208
     },
     "53Xdata05Nov2012Cv2": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "FT_P_V42C_AN4::All",
     },
     "53Xdata10Dec2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "FT_P_V42_AN4::All",
-#        "signalTrigger": "HLT_QuadJet45_v1", # HLT_QuadJet50_v5
+#        "signalTrigger": "HLT_QuadJet45_v1", # HLT_QuadJet50_v5, HLT_QuadJet80_v6
         "patMadhatter": "file:/mnt/flustre/mkortela/data/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD/A6AF3F14-3772-E211-B368-003048D47A78.root",
     },
     "53Xdata17Jan2013": {"triggerProcess": "HLT", "recoProcess": "RECO",
