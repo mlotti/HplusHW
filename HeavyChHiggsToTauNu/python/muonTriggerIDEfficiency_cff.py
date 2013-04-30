@@ -42,10 +42,21 @@ efficiency_pt41 = cms.untracked.PSet(
         ),
     ),
     mcParameters = cms.PSet(
-        efficiency = cms.double(0.888241),
-        uncertainty = cms.double(0.000187),
+        Fall11_2012AB = cms.PSet(
+            efficiency = cms.double(0.888241),
+            uncertainty = cms.double(0.000187),
+        ),
     ),
-    mode = cms.string("disabled") # # efficiency, disabled
+    dataSelect = cms.vstring(
+        "Run2011A_Mu20",
+        "Run2011A_Mu24",
+        "Run2011A_Mu30",
+        "Run2011A_Mu40",
+        "Run2011A_Mu40_eta2p1",
+        "Run2011B_Mu40_eta2p1",
+    ),
+    mcSelect = cms.vstring("Fall11_2012AB"),
+    mode = cms.untracked.string("disabled") # # efficiency, disabled
 )
 
 efficiency = efficiency_pt41

@@ -503,8 +503,10 @@ namespace HPlus {
 
 //------ For embedding, apply the muon ID efficiency at this stage
     EmbeddingMuonEfficiency::Data embeddingMuonData;
-    if(bTauEmbeddingStatus)
-      embeddingMuonData = fEmbeddingMuonEfficiency.applyEventWeight(iEvent, fEventWeight);
+    if(bTauEmbeddingStatus) {
+      embeddingMuonData = fEmbeddingMuonEfficiency.getEventWeight(iEvent);
+      fEventWeight.multiplyWeight(embeddingMuonData.getEventWeight());
+    }
     increment(fEmbeddingMuonEfficiencyCounter);
 
 //------ Apply trigger and HLT_MET cut or trigger parametrisation

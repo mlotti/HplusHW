@@ -184,8 +184,9 @@ void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const ed
   fGoodVertexBranches.setValues(iEvent);
   fTriggerBranches.setValues(iEvent);
 
-  HPlus::EmbeddingMuonEfficiency::Data embeddingMuonData = fEmbeddingMuonEfficiency.applyEventWeight(iEvent, fEventWeight);
+  HPlus::EmbeddingMuonEfficiency::Data embeddingMuonData = fEmbeddingMuonEfficiency.getEventWeight(iEvent);
   fEmbeddingMuonEfficiencyWeight = embeddingMuonData.getEventWeight();
+  fEventWeight.multiplyWeight(fEmbeddingMuonEfficiencyWeight);
 
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesOriginal;
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesEmbedded;
