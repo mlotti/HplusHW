@@ -980,8 +980,20 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, doChsJets=True, patA
         # Disable isolated muon/electron top projections before jet clustering
         process.pfNoMuonChs.enable = False
         process.pfNoElectronChs.enable = False
+
         # Disable jet-tau disambiguation (we do it ourselves in the analysis)
         process.pfNoTauChs.enable = False
+        # Remove all tau-related from the CHS sequence, we don't use
+        # CHS-tau and they just waste some precious time
+        process.PFBRECOChs.remove(process.pfTauSequenceChs)
+        for name in ["patHPSPFTauDiscriminationUpdateChs", "patPFTauIsolationChs", "patTausChs", "selectedPatTausChs", "countPatTausChs"]:
+            process.patDefaultSequenceChs.remove(getattr(process, name))
+
+        # Remove MET from CHS sequence, we don't use it and it just
+        # wastes some precious time
+        process.PFBRECOChs.remove(process.pfMETChs)
+        process.patDefaultSequenceChs.remove(process.patMETsChs)
+
 
         jetPostfixes.append("Chs")
         process.patDefaultSequence *= process.patPF2PATSequenceChs
