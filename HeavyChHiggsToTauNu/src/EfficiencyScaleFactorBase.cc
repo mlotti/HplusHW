@@ -7,15 +7,16 @@
 namespace HPlus {
   EfficiencyScaleFactorBase::Data::Data():
     fWeight(1.0),
-    fWeightAbsUnc(0.0),
-    fWeightRelUnc(0.0)
+    fWeightAbsUnc(0.0)
   {}
   EfficiencyScaleFactorBase::Data::~Data() {}
 
   EfficiencyScaleFactorBase::EfficiencyScaleFactorBase(const edm::ParameterSet& iConfig) {
     std::string mode = iConfig.getUntrackedParameter<std::string>("mode");
-    if(mode == "efficiency")
-      fMode = kEfficiency;
+    if(mode == "dataEfficiency")
+      fMode = kDataEfficiency;
+    else if(mode == "mcEfficiency")
+      fMode = kMCEfficiency;
     else if(mode == "scaleFactor")
       fMode = kScaleFactor;
     else if(mode == "disabled")
