@@ -200,7 +200,7 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName="pattuple_"+version, skimConfig=skim)
 
         # Setup the publish name
-        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "pattuple_"+version)
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "pattuple_"+version, taskDef)
         wf.addCrabLine("USER.publish_data_name = "+name)
 
         # For MC, split by events, for data, split by lumi
@@ -234,7 +234,8 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
 def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
                     tauTriggers=None, quadPFJetBTagTriggers=None, quadJetBTagTriggers=None, quadJetTriggers=None):
     mcTriggerTauMET = "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"
-    mcTriggerQuadJet = "HLT_QuadJet80_v2"
+#    mcTriggerQuadJet = "HLT_QuadJet80_v2"
+    mcTriggerQuadJet = "HLT_QuadJet50_v2"
     mcTriggerQuadJetBTag = "HLT_QuadJet75_55_35_20_BTagIP_VBF_v3"
     mcTriggerQuadPFJet78BTag = "HLT_QuadPFJet78_61_44_31_BTagCSV_VBF_v1"
     mcTriggerQuadPFJet82BTag = "HLT_QuadPFJet78_61_44_31_BTagCSV_VBF_v1"
@@ -594,7 +595,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName="pattuple_"+version, skimConfig=skim)
 
         # Setup the publish name
-        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName, taskDef)
         wf.addCrabLine("USER.publish_data_name = "+name)
 
         # For MC, split by events, for data, split by lumi
@@ -2012,7 +2013,11 @@ def addPattuple_v53_3_test5(datasets):
         # 163630 events, 181 jobs
         # User mean 2665.6, min 143.3, max 3229.2
         # Mean 94.7 MB, min 4.3 MB, max 101.9 MB
-        "TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test5-85867175898a097ce4f3be7317a9d5ce/USER"),
+        #"TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test5-85867175898a097ce4f3be7317a9d5ce/USER"),
+        # 306072 events, 181 jobs
+        # User mean 4245.0, min 152.0, max 6150.1
+        # Mean 171.6 MB, min 6.4 MB, max 181.8 MB
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test5b-5e11b4e48595f7919f9b2bea54371f01/USER", publishPostfix="b"),
         }
 
     addPattuple_53X("v53_3_test5", datasets, definitions)
