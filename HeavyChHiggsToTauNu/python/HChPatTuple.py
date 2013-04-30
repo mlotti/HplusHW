@@ -602,10 +602,14 @@ class StandardPATBuilder(PATBuilderBase):
         # Add the continuous isolation discriminators
         addTauRawDiscriminators(patTaus)
 
-        # Remove iso deposits to save disk space
+        # Remove iso deposits to save disk space and time
         if not self.doPatTauIsoDeposits:
+            for isoDepName in patTaus.isoDeposits.parameterNames_():
+                inputLabel = getattr(patTaus.isoDeposits, isoDepName).getModuleLabel()
+                HChTools.removeEverywhere(self.process, inputLabel)
             patTaus.isoDeposits = cms.PSet()
-    
+            patTaus.userIsolation = cms.PSet()
+
         # Trigger matching
         if self.doTauHLTMatching:
             print "Tau HLT matching in PATTuple production is disabled. It should be done in the analysis jobs from now on."
