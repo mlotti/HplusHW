@@ -28,7 +28,7 @@ class _Constant:
 Disable = _Constant(1)
 
 _reco_name_re = re.compile("^(?P<reco>Run[^_]+(_[^_]+)+?_v\d+_[^_]+_)")
-def updatePublishName(dataset, sourcePath, workflowName):
+def updatePublishName(dataset, sourcePath, workflowName, taskDef=None):
     path = sourcePath.split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
@@ -42,6 +42,10 @@ def updatePublishName(dataset, sourcePath, workflowName):
             raise Exception("Regex '%s' did not find anything from '%s'" % (_reco_name_re.pattern, name))
         runs = dataset.getRuns()
         name = _reco_name_re.sub(m.group("reco")+str(runs[0])+"_"+str(runs[1])+"_", name)
+
+    if taskDef is not None and taskDef.publishPostfix is not None:
+        name += taskDef.publishPostfix
+
     return name
 
 ## Represents set of crab datasaets

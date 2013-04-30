@@ -200,7 +200,7 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName="pattuple_"+version, skimConfig=skim)
 
         # Setup the publish name
-        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "pattuple_"+version)
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "pattuple_"+version, taskDef)
         wf.addCrabLine("USER.publish_data_name = "+name)
 
         # For MC, split by events, for data, split by lumi
@@ -234,7 +234,8 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
 def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
                     tauTriggers=None, quadPFJetBTagTriggers=None, quadJetBTagTriggers=None, quadJetTriggers=None):
     mcTriggerTauMET = "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"
-    mcTriggerQuadJet = "HLT_QuadJet80_v2"
+#    mcTriggerQuadJet = "HLT_QuadJet80_v2"
+    mcTriggerQuadJet = "HLT_QuadJet50_v2"
     mcTriggerQuadJetBTag = "HLT_QuadJet75_55_35_20_BTagIP_VBF_v3"
     mcTriggerQuadPFJet78BTag = "HLT_QuadPFJet78_61_44_31_BTagCSV_VBF_v1"
     mcTriggerQuadPFJet82BTag = "HLT_QuadPFJet78_61_44_31_BTagCSV_VBF_v1"
@@ -468,14 +469,14 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "TTToHplusBWB_M155_Summer12":       TaskDefMC(njobsIn=25, njobsOut=2),
         "TTToHplusBWB_M160_Summer12":       TaskDefMC(njobsIn=25, njobsOut=2),
 
-        "TTToHplusBWB_M80_ext_Summer12":    TaskDefMC(njobsIn=90, njobsOut=7),
-        "TTToHplusBWB_M90_ext_Summer12":    TaskDefMC(njobsIn=90, njobsOut=7),
-        "TTToHplusBWB_M100_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=15),
-        "TTToHplusBWB_M120_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=7),
-        "TTToHplusBWB_M140_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=9),
-        "TTToHplusBWB_M150_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=9),
-        "TTToHplusBWB_M155_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=9),
-        "TTToHplusBWB_M160_ext_Summer12":   TaskDefMC(njobsIn=90, njobsOut=15),
+        "TTToHplusBWB_M80_ext_Summer12":    TaskDefMC(njobsIn=180, njobsOut=7), # FIXME: only these ones were doubled after QuadJet50
+        "TTToHplusBWB_M90_ext_Summer12":    TaskDefMC(njobsIn=180, njobsOut=7),
+        "TTToHplusBWB_M100_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=15),
+        "TTToHplusBWB_M120_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=7),
+        "TTToHplusBWB_M140_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=9),
+        "TTToHplusBWB_M150_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=9),
+        "TTToHplusBWB_M155_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=9),
+        "TTToHplusBWB_M160_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=15),
 
         "TTToHplusBHminusB_M80_Summer12":        TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=100, njobsOut=7),
@@ -594,7 +595,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName="pattuple_"+version, skimConfig=skim)
 
         # Setup the publish name
-        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName, taskDef)
         wf.addCrabLine("USER.publish_data_name = "+name)
 
         # For MC, split by events, for data, split by lumi
@@ -1997,10 +1998,26 @@ def addPattuple_v53_3_test4(datasets):
 def addPattuple_v53_3_test5(datasets):
     # Merge from 2012, 539patch3, updated MC GT
     definitions = {
-        "Tau_190456-190738_2012A_Jul13":          TaskDef(""),
-        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
-        "TauParked_202972-203742_2012C_Jan22":    TaskDef(""),
-        "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
+        # 64775 events, 22 jobs
+        # User mean 4485.6, min 984.1, max 10540.6
+        # Mean 89.8 MB, min 29.9 MB, max 181.7 MB
+        "Tau_190456-190738_2012A_Jul13":          TaskDef("/Tau/local-Run2012A_13Jul2012_v1_AOD_190456_190738_pattuple_v53_3_test5-8e693be4ac16fbb82b30871f0166f26e/USER"),
+        # 3498600 events, 1703 jobs
+        # User mean 3714.7, min 226.0, max 16583.1
+        # Mean 66.0 MB, min 4.7 MB, max 276.8 MB
+        "Tau_198941-202504_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_198941_202504_pattuple_v53_3_test5-dca45a3516bd0dde7fb4db5b5945639b/USER"),
+        # 3743753 events, 2133 jobs
+        # User mean 2720.5, min 433.0, max 14798.3
+        # Mean 57.8 MB, min 17.1 MB, max 150.9 MB
+        "TauParked_198022-202504_2012C_Jan22":    TaskDef("/TauParked/local-Run2012C_22Jan2013_v1_AOD_198022_202504_pattuple_v53_3_test5-5aca525901a83932ed951ba390842c52/USER"),
+        # 163630 events, 181 jobs
+        # User mean 2665.6, min 143.3, max 3229.2
+        # Mean 94.7 MB, min 4.3 MB, max 101.9 MB
+        #"TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test5-85867175898a097ce4f3be7317a9d5ce/USER"),
+        # 306072 events, 181 jobs
+        # User mean 4245.0, min 152.0, max 6150.1
+        # Mean 171.6 MB, min 6.4 MB, max 181.8 MB
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test5b-5e11b4e48595f7919f9b2bea54371f01/USER", publishPostfix="b"),
         }
 
     addPattuple_53X("v53_3_test5", datasets, definitions)
