@@ -1997,10 +1997,22 @@ def addPattuple_v53_3_test4(datasets):
 def addPattuple_v53_3_test5(datasets):
     # Merge from 2012, 539patch3, updated MC GT
     definitions = {
-        "Tau_190456-190738_2012A_Jul13":          TaskDef(""),
-        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
-        "TauParked_198022-202504_2012C_Jan22":    TaskDef(""),
-        "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
+        # 64775 events, 22 jobs
+        # User mean 4485.6, min 984.1, max 10540.6
+        # Mean 89.8 MB, min 29.9 MB, max 181.7 MB
+        "Tau_190456-190738_2012A_Jul13":          TaskDef("/Tau/local-Run2012A_13Jul2012_v1_AOD_190456_190738_pattuple_v53_3_test5-8e693be4ac16fbb82b30871f0166f26e/USER"),
+        # 3498600 events, 1703 jobs
+        # User mean 3714.7, min 226.0, max 16583.1
+        # Mean 66.0 MB, min 4.7 MB, max 276.8 MB
+        "Tau_198941-202504_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_198941_202504_pattuple_v53_3_test5-dca45a3516bd0dde7fb4db5b5945639b/USER"),
+        # 3743753 events, 2133 jobs
+        # User mean 2720.5, min 433.0, max 14798.3
+        # Mean 57.8 MB, min 17.1 MB, max 150.9 MB
+        "TauParked_198022-202504_2012C_Jan22":    TaskDef("/TauParked/local-Run2012C_22Jan2013_v1_AOD_198022_202504_pattuple_v53_3_test5-5aca525901a83932ed951ba390842c52/USER"),
+        # 163630 events, 181 jobs
+        # User mean 2665.6, min 143.3, max 3229.2
+        # Mean 94.7 MB, min 4.3 MB, max 101.9 MB
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test5-85867175898a097ce4f3be7317a9d5ce/USER"),
         }
 
     addPattuple_53X("v53_3_test5", datasets, definitions)
