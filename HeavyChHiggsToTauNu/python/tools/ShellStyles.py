@@ -24,3 +24,9 @@ def NormalStyle():
 def TestPassedStyle():
     # green text, bold
     return "\033[1;32m"
+
+def WarningLabel():
+    return "%sWarning:%s "%(WarningStyle(),NormalStyle())
+
+def ErrorLabel():
+    return "%sError:%s "%(ErrorStyle(),NormalStyle())
