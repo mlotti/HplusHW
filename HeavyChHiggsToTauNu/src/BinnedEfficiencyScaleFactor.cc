@@ -101,7 +101,7 @@ namespace HPlus {
           double lumi = fDataValues[iPeriod].luminosity;
           dataValue += lumi*fDataValues[iPeriod].values[i];
           double unc = lumi*fDataValues[iPeriod].uncertainties[i];
-          dataUncertaintySquared = unc*unc;
+          dataUncertaintySquared += unc*unc;
         }
         dataValue = dataValue / totalLuminosity;
         dataUncertaintySquared = dataUncertaintySquared / (totalLuminosity*totalLuminosity);
