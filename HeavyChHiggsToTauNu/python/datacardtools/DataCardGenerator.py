@@ -251,10 +251,8 @@ class DataCardGenerator:
 
         # Create columns (dataset groups)
         self.createDatacardColumns()
-        return
-        #FIXME continue
-        
         self.checkDatacardColumns()
+        return
 
         # create extractors and control plot extractors
         self.createExtractors()
