@@ -557,7 +557,7 @@ class ShapeExtractor(ExtractorBase):
                     print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeUp histo bin %d is negative (%f), it is forced to zero"%(k,myHistograms[0].GetBinContent(k))
                     myHistograms[1].SetBinContent(k, 0.0)
         # No source for histograms for empty column; create an empty histogram with correct dimensions
-        if (self.isRate() or self.isObservation()) and datasetColumn.typeIsEmptyColum():
+        if (self.isRate() or self.isObservation()) and datasetColumn.typeIsEmptyColumn():
             h = myShapeModifier.createEmptyShapeHistogram(myLabels[0])
             myHistograms.append(h)
         # Return result

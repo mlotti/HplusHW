@@ -236,7 +236,7 @@ class DatacardColumn():
         #sys.stdout.flush()
         myRateResult = None
         myRateHistograms = []
-        if self.typeIsEmptyColumnn() or dsetMgr == None:
+        if self.typeIsEmptyColumn() or dsetMgr == None:
             myRateResult = 0.0
             myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [], [], ExtractorMode.RATE, description="empty")
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
