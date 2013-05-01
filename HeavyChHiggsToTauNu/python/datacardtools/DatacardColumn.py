@@ -159,14 +159,14 @@ class DatacardColumn():
             myMsg += "Missing or empty field 'validMassPoints'! (list of integers) specifies for which mass points the column is enabled\n"
         if self._datasetType == MulticrabDirectoryDataType.UNKNOWN:
             myMsg += "Wrong 'datasetType' specified! Valid options are 'Signal', 'Embedding', 'QCD factorised', 'QCD inverted', and 'None'\n"
-        if self._datasetMgrColumn == "":
+        if self._datasetMgrColumn == "" and not self.typeIsEmptyColum():
             myMsg += "No dataset names defined!\n"
         if self.typeIsSignal() or self.typeIsEWK() or self.typeIsObservation():
             if self._rateCounter == "":
                 myMsg += "Missing or empty field 'rateCounter'! (string) Counter for rate to be used for column\n"
             if self._shapeHisto == "":
                 myMsg += "Missing or empty field 'shapeHisto'! (string) Name of histogram for shape \n"
-        elif self._datasetType == MulticrabDirectoryDataType.QCDFACTORISED:
+        elif self.typeIsQCDfactorised():
             # rate handled as spedial case, extra datasetMgrColumn are required for EWK MC
             if len(self._datasetMgrColumnForQCDMCEWK) == 0:
                 myMsg += "No datasets defined for MC EWK in data group for QCD factorised!\n"

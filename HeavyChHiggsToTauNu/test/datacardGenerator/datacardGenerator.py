@@ -35,6 +35,7 @@ def main(opts, moduleSelector):
     #ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
     #gc.set_debug(gc.DEBUG_STATS)
     print "Loading datacard:",opts.datacard
+    os.system("python %s"%opts.datacard) # Catch any errors in the input datacard
     config = load_module(opts.datacard)
 
     # If user insisted on certain QCD method on command line, produce datacards only for that QCD method
@@ -93,9 +94,21 @@ def main(opts, moduleSelector):
             for searchMode in moduleSelector.getSelectedSearchModes():
                 for optimizationMode in moduleSelector.getSelectedOptimizationModes():
                     myCounter += 1
-                    print "%sProducing datacard %d/%d ...%s\n"%(CaptionStyle(),myCounter,myDatacardCount),NormalStyle()
-                    DataCard.DataCardGenerator(config,opts,qcdMethod,era,searchMode,optimizationMode)
+                    print "%sProducing datacard %d/%d ...%s\n"%(CaptionStyle(),myCounter,myDatacardCount,NormalStyle())
+                    # Create the generator, check config file contents
+                    dcgen = DataCard.DataCardGenerator(opts, config, qcdMethod)
+                    # Tweak to provide the correct datasetMgrCreator to the generator
+                    myQCDDsetCreator = None
+                    if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
+                        myQCDDsetCreator = qcdFactorisedDsetCreator
+                    elif qcdMethod == DataCard.DatacardQCDMethod.INVERTED:
+                        myQCDDsetCreator = qcdInvertedDsetCreator
+                    dcgen.setDsetMgrCreators(signalDsetCreator,embeddingDsetCreator,myQCDDsetCreator)
+                    # Do the heavy stuff
+                    dcgen.doDatacard(era,searchMode,optimizationMode)
     print "\nDatacard generator is done."
+    if myDatacardCount > 10:
+        print "\n(collecting some garbage before handing the shell back to you)"
 
     #gc.collect()
     #ROOT.SetMemoryPolicy( ROOT.kMemoryHeuristics)
@@ -160,6 +173,7 @@ if __name__ == "__main__":
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
     parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
     parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
+    parser.add_option("--debugDatasets", dest="debugDatasets", action="store_true", default=False, help="Enable debugging print for datasetMgr contents")
     parser.add_option("--debugConfig", dest="debugConfig", action="store_true", default=False, help="Enable debugging print for config parsing")
     parser.add_option("--debugMining", dest="debugMining", action="store_true", default=False, help="Enable debugging print for data mining")
     parser.add_option("--debugQCD", dest="debugQCD", action="store_true", default=False, help="Enable debugging print for QCD measurement")

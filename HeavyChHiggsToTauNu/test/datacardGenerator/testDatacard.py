@@ -35,6 +35,9 @@ OptionDoControlPlots = False
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
 
+# Tolerance for throwing error on luminosity difference (0.01 = 1 percent agreement is required)
+ToleranceForLuminosityDifference = 0.01
+
 # Shape histogram definitions
 SignalShapeHisto = ""
 FakeShapeHisto = ""
@@ -151,7 +154,7 @@ QCDFactorisedValidationMtShapeSource = [
 # Observation definition (how to retrieve number of observed events)
 #
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ObservationInput
-Observation = ObservationInput(dirPrefix=SignalAnalysis,
+Observation = ObservationInput(#dirPrefix=SignalAnalysis,
                                rateCounter=SignalRateCounter,
                                datasetDefinitions=["Tau_"],
                                shapeHisto=SignalShapeHisto)
@@ -167,7 +170,7 @@ EWKFakeIdList = []
 
 signalTemplate = DataGroup(datasetType="Signal",
                            shapeHisto=SignalShapeHisto,
-                           dirPrefix=SignalAnalysis,
+                           #dirPrefix=SignalAnalysis,
                            rateCounter=SignalRateCounter)
 
 for mass in MassPoints:
@@ -194,10 +197,10 @@ if OptionMassShape == "TransverseMass":
         label        = "QCDfact",
         landsProcess = 3,
         validMassPoints = MassPoints,
-        dirPrefix   = QCDFactorisedAnalysis,
+        #dirPrefix   = QCDFactorisedAnalysis,
         datasetType  = "QCD factorised",
         datasetDefinitions = ["Tau_"],
-        MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
+        MCEWKDatasetDefinitions = ["TTJets","WJets","W1Jets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         #MCEWKDatasetDefinitions = ["TTJets","W2Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         nuisances    = ["12","13","40b"],
         QCDfactorisedInfo = { "afterBigboxSource": "factorisation/AfterJetSelection",
@@ -219,7 +222,7 @@ elif OptionMassShape == "FullMass":
         label        = "QCDfact",
         landsProcess = 3,
         validMassPoints = MassPoints,
-        dirPrefix   = QCDFactorisedAnalysis,
+        #dirPrefix   = QCDFactorisedAnalysis,
         datasetType  = "QCD factorised",
         datasetDefinitions = ["Tau_"],
         MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
@@ -246,7 +249,7 @@ DataGroups.append(DataGroup(
     datasetType  = "QCD inverted",
     datasetDefinitions   = "Data",
     shapeHisto   = "mtSum",
-    dirPrefix   = QCDInvertedAnalysis,
+    #dirPrefix   = QCDInvertedAnalysis,
     rateCounter  = "integral",
 #    additionalNormalisation = 1.0,
     nuisances    = ["41","42","43","44"] # FIXME: add shape stat, i.e. 40x
@@ -262,7 +265,7 @@ if not OptionReplaceEmbeddingByMC:
         datasetType  = "Embedding",
         #datasetDefinitions   = ["SingleMu"],
         datasetDefinitions   = ["Data"],
-        dirPrefix   = EmbeddingAnalysis,
+        #dirPrefix   = EmbeddingAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         additionalNormalisation = 1.0907,
@@ -312,8 +315,8 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 1,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions   = ["TTJets_"],
-        dirPrefix   = SignalAnalysis,
+        datasetDefinitions = ["TTJets_"],
+        #dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["01d","02","04","45","46","47","09","10b","28","33","34b","35"]
@@ -323,8 +326,8 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 5,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions   = ["WJets"],
-        dirPrefix   = SignalAnalysis,
+        datasetDefinitions = ["WJets","W1Jets","W2Jets","W3Jets","W4Jets"],
+        #dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["01d","02","04","45","46","47","09","11b","29","33","34b","37"]
@@ -334,8 +337,8 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 6,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions   = ["T_", "Tbar_"],
-        dirPrefix   = SignalAnalysis,
+        datasetDefinitions = ["T_", "Tbar_"],
+        #dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["01d","02","04","45","46","47","09","10b","30","33","34b","38"]
@@ -349,8 +352,8 @@ else:
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
         #datasetDefinitions = ["TTJets", "W2Jets","W3Jets","W4Jets", "Tbar_", "T_"],
-        datasetDefinitions = ["TTJets", "WJets", "Tbar_", "T_"],
-        dirPrefix   = SignalAnalysis,
+        datasetDefinitions = ["TTJets", "WJets", "W1Jets", "W2Jets", "W3Jets", "W4Jets", "Tbar_", "T_"],
+        #dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["01b","03","45","46","47","14","15","16","19","40"]
@@ -361,7 +364,7 @@ else:
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions   = ["DYJetsToLL"],
-        dirPrefix   = SignalAnalysis,
+        #dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["01","03","45","46","47","09","11","15b","16b","31","33","34","24"]
@@ -372,7 +375,7 @@ else:
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions   = ["WW","WZ","ZZ"],
-        dirPrefix   = SignalAnalysis,
+        #dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["01","03","45","46","47","09","11","15b","16b","32","33","34","27"]
