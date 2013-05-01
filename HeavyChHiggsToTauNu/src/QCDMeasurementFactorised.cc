@@ -34,7 +34,7 @@ namespace HPlus {
     initialize();
     // Set string for binning
     std::stringstream s;
-    s << "TauPt:" << fTauPtBinLowEdges.size()+1 << ":TauEta:" << fTauEtaBinLowEdges.size()+1 << ":Nvtx:" << fNVerticesBinLowEdges.size()+1;
+    s << "TauPt:" << fTauPtBinLowEdges.size()+1 << ":TauEta:" << fTauEtaBinLowEdges.size()+1 << ":Nvtx:" << fNVerticesBinLowEdges.size()+1 << ":";
     fBinningString = s.str();
   }
 
