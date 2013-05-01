@@ -8,14 +8,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 # data structures for the config file information
 
 class ObservationInput:
-    def __init__(self, dirPrefix, rateCounter, datasetDefinitions, shapeHisto):
-	self.setDirPrefix(dirPrefix)
+    def __init__(self, rateCounter, datasetDefinitions, shapeHisto):
 	self.setRateCounter(rateCounter)
 	self.setDatasetDefinitions(datasetDefinitions)
 	self.setShapeHisto(shapeHisto)
-
-    def setDirPrefix(self,dir):
-	self.dirPrefix = dir
 
     def setRateCounter(self,rateCounter):
 	self.rateCounter = rateCounter
@@ -26,9 +22,6 @@ class ObservationInput:
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
 
-    def getDirPrefix(self):
-        return self.dirPrefix
-
     def getRateCounter(self):
         return self.rateCounter
 
@@ -37,7 +30,6 @@ class ObservationInput:
 
     def Print(self):
 	print "ObservationInput :"
-	print "    dirPrefix   ",self.dirPrefix
 	print "    rate counter",self.rateCounter
 	print "    shapeHisto  ",self.shapeHisto
 
@@ -48,7 +40,6 @@ class DataGroup:
                  label = "", 
                  nuisances = [], 
                  shapeHisto = "", 
-                 dirPrefix = "",
                  rateCounter = "",
                  datasetType = "",
                  datasetDefinitions = [],
@@ -60,7 +51,6 @@ class DataGroup:
 	self.label         = label
 	self.nuisances     = nuisances
 	self.shapeHisto    = shapeHisto
-	self.dirPrefix    = dirPrefix
 	self.rateCounter   = rateCounter
         self.datasetType   = datasetType
         self.datasetDefinitions = datasetDefinitions
@@ -77,7 +67,6 @@ class DataGroup:
                          label        = self.label,
                          nuisances    = self.nuisances,
                          shapeHisto   = self.shapeHisto,
-                         dirPrefix   = self.dirPrefix,
                          rateCounter  = self.rateCounter,
                          datasetType  = self.datasetType,
                          datasetDefinitions = self.datasetDefinitions,
@@ -99,9 +88,6 @@ class DataGroup:
 
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
-
-    def setCounterHisto(self,dirPrefix):
-	self.dirPrefix = dirPrefix
 
     def setRateCounter(self, rateCounter):
         self.rateCounter = rateCounter
@@ -125,7 +111,6 @@ class DataGroup:
 	print "    Label        ",self.label
 	print "    LandS process",self.landsProcess
 	print "    Valid mass points",self.validMassPoints
-	print "    dir. prefix      ",self.dirPrefix
 	print "    datasetType  ",self.datasetType
 	print "    datasetDefinitions",self.datasetDefinitions
 	print "    MCEWKDatasetDefinitions",self.MCEWKDatasetDefinitions
@@ -206,9 +191,6 @@ class Nuisance:
     def setUpperValue(self,upperValue):
         self.upperValue = upperValue
 
-    def setCounterHisto(self, value):
-	self.dirPrefix = value
-
     def setCounter(self, value):
 	self.counter = value
 
@@ -243,8 +225,6 @@ class Nuisance:
         print "    Function      =",self.function
         if self.value > 0:
             print "    Value         =",self.value
-        if len(self.dirPrefix) > 0:
-            print "    CounterHisto  =",self.dirPrefix
         if len(self.counter) > 0:
             print "    Counter       =",self.counter
         if len(self.paths) > 0:
