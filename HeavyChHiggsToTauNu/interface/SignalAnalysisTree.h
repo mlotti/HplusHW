@@ -58,8 +58,8 @@ namespace HPlus {
       fBTaggingWeight = scaleFactor;
       fBTaggingWeightAbsUnc = scaleFactorUnc;
     }
-    void setSetPassedTailKillerCollinear (bool passed) {bPassedTailKillerCollinearCuts  = passed;}
-    void setSetPassedTailKillerBackToBack(bool passed) {bPassedTailKillerBackToBackCuts = passed;}
+    void setPassedTailKillerCollinear (bool passed) {bPassedTailKillerCollinearCuts  = passed;}
+    void setPassedTailKillerBackToBack(bool passed) {bPassedTailKillerBackToBackCuts = passed;}
 
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
