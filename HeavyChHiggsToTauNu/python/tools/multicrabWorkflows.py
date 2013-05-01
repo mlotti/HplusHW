@@ -187,9 +187,6 @@ datasets.extend([
 multicrabWorkflowsPileupNtuple.addNtuple_44X(datasets)
 
 # Add pattuple definitions
-multicrabWorkflowsPattuple.addPattuple_v44_4(datasets)
-multicrabWorkflowsPattuple.addPattuple_v44_4_1(datasets)
-multicrabWorkflowsPattuple.addPattuple_v44_5_test1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v44_5(datasets)
 
 # Add embedding definitions
