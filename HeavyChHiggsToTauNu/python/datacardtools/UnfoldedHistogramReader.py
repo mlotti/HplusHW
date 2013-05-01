@@ -27,11 +27,15 @@ class UnfoldedHistogramReader:
         self._binCount = []   # Each cell contains the nbins count of the nth dimension
         self._separator = ":" # Setting for decomposing bin information from histogram title
         self._debugStatus = debugStatus
+        self._factorisationCaptions = []
+        self._factorisationRanges = []
 
-    def getNbinsList(self):
+    def getNbinsList(self, h):
+        self._initialize(h)
         return self._binCount
 
-    def getBinLabelList(self):
+    def getBinLabelList(self, h):
+        self._initialize(h)
         return self._binLabels
 
     # Returns the event count of the factorisation bin [x,y,...]
@@ -85,6 +89,12 @@ class UnfoldedHistogramReader:
     def getContractedShapeCountUncertaintyForBin(self, factorisationAxisToKeep, factorisationBin, h, shapeBin):
         self._initialize(h)
         return sqrt(self._contractionRecursionUncertaintyForBin([], factorisationAxisToKeep, factorisationBin, h, shapeBin))
+
+    # Prints info about factorisation axes and ranges
+    def printFactorisationDefinitions(self):
+        print "Factorisation settings:"
+        for i in range(0,len(self._binLabels)):
+            print "  variable: %s, range={%s}"%(self._binLabels[i], '; '.join(map(str, self._factorisationRanges[i])))
 
     def _contractionRecursionForBin(self, binIndexList, factorisationAxisToKeep, factorisationBin, h, shapeBin):
         #print "recursion",binIndexList
@@ -159,12 +169,43 @@ class UnfoldedHistogramReader:
         myOutput = ""
         for i in range(0,myFactorisationBins):
             self._binLabels.append(myList[i*2])
-            self._binCount.append(int(myList[i*2+1]))
+            if myList[i*2+1].isdigit():
+                self._binCount.append(int(myList[i*2+1]))
+            else:
+                # try a bug fix by taking first character only
+                if myList[i*2+1][0].isdigit():
+                    print WarningLabel()+"UnfoldedHistogramReader::_initialize(): tried naive bug fix for last factorisation bin dimension (guessed dimension:%s)"%myList[i*2+1][0]
+                    self._binCount.append(int(myList[i*2+1][0]))
+                else:
+                    raise Exception(ErrorLabel()+"UnfoldedHistogramReader: failed to decompose histogram title (it should contain the bin label and nbins information for n bins separated with '%s'\nHistogram title was: %s"%(self._separator, myTitle))
             myOutput += "%s nbins=%d "%(self._binLabels[i], self._binCount[i])
         if self._debugStatus:
             print "UnfoldedHistogramReader: Histogram binning determined as : %s"%myOutput
         if len(self._binLabels) == 0:
-            raise Exception("Error in UnfoldedHistogramReader: failed to decompose histogram title (it should contain the bin label and nbins information for n bins separated with '%s'\nHistogram title was: %s"%(self._separator, myTitle))
+            raise Exception(ErrorLabel()+"UnfoldedHistogramReader: failed to decompose histogram title (it should contain the bin label and nbins information for n bins separated with '%s'\nHistogram title was: %s"%(self._separator, myTitle))
+        # Loop over y axis to find axis values
+        myBinCaptions = []
+        myBinRanges = []
+        for i in range(1,h.GetNbinsY()+1):
+            mySplitBin = h.GetYaxis().GetBinLabel(i).split("/")
+            # Obtain bin captions
+            if len(self._factorisationCaptions) == 0:
+                for s in mySplitBin:
+                    myCaption = ""
+                    if "=" in s:
+                        myCaption = s.split("=")[0]
+                    elif ">" in s:
+                        myCaption = s.split(">")[0]
+                    elif "<" in s:
+                        myCaption = s.split("<")[0]
+                    self._factorisationCaptions.append(myCaption)
+                    self._factorisationRanges.append([])
+            # Obtain range information
+            for k in range (0,len(mySplitBin)):
+                # Remove label and equal signs
+                s = mySplitBin[k].replace(self._factorisationCaptions[k],"").replace("=","")
+                if not s in self._factorisationRanges[k]:
+                    self._factorisationRanges[k].append(s)
 
     def _convertBinIndexListToUnfoldedIndex(self, factorisationBinIndexList):
         # y = x1 + x2*Nx1 + x3*Nx1*Nx2 + ...
