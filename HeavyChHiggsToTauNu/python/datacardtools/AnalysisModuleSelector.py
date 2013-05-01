@@ -16,7 +16,7 @@ class AnalysisModuleSelectorSource:
     def getDataEras(self):
         if self._dsetMgrCreator == None:
             return None
-        return self._dsetMgrCreator.getDataDataEras()
+        return self._dsetMgrCreator.getDataEras()
 
     def getSearchModes(self):
         if self._dsetMgrCreator == None:
@@ -26,7 +26,10 @@ class AnalysisModuleSelectorSource:
     def getOptimizationModes(self):
         if self._dsetMgrCreator == None:
             return None
-        return self._dsetMgrCreator.getOptimizationModes()
+        # Add reference mode
+        myList = [""]
+        myList.extend(self._dsetMgrCreator.getOptimizationModes())
+        return myList
 
     def getLabel(self):
         return self._label
@@ -160,7 +163,10 @@ class AnalysisModuleSelector:
         print "\nAvailable search mode options common for all multicrab directories:"
         print "(you may choose any with command line options, either with the digit shown below or the full name, example: -o 1-3,5)"
         for i in range (0,len(self._availableOptimizationModes)):
-            print "  %2d: %s"%(i, self._availableOptimizationModes[i].replace("Opt",""))
+            if self._availableOptimizationModes[i] == "":
+                print "  %2d: (nominal analysis)"%(i)
+            else:
+                print "  %2d: %s"%(i, self._availableOptimizationModes[i].replace("Opt",""))
 
     def _correctOptionsFormat(self, opts):
         # Make sure that format of options for eras, search modes, and optimization modes is fine
@@ -240,5 +246,8 @@ class AnalysisModuleSelector:
             if self._availableOptimizationModes[i] in self._selectedOptimizationModes:
                 myStr = mySelectedStr
                 mySuffix = mySelectedSuffix
-            print "%s%2d: %s%s"%(myStr, i, self._availableOptimizationModes[i].replace("Opt",""),mySuffix)
+            if self._availableOptimizationModes[i] == "":
+                print "%s%2d: (nominal)%s"%(myStr, i, mySuffix)
+            else:
+                print "%s%2d: %s%s"%(myStr, i, self._availableOptimizationModes[i].replace("Opt",""),mySuffix)
         print ""
