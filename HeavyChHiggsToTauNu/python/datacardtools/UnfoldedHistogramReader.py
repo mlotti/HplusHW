@@ -38,6 +38,12 @@ class UnfoldedHistogramReader:
         self._initialize(h)
         return self._binLabels
 
+    def getFactorisationCaptions(self):
+        return self._factorisationCaptions
+
+    def getFactorisationRanges(self):
+        return self._factorisationRanges
+
     # Returns the event count of the factorisation bin [x,y,...]
     def getEventCountForBin(self, factorisationBinIndexList, h):
         self._initialize(h)
@@ -69,6 +75,26 @@ class UnfoldedHistogramReader:
         if len(self._binCount) != len(factorisationBinIndexList):
             raise Exception("Error in UnfoldedHistogramReader::getEventCountForBin(): You asked for %d dimensions, but the histogram has %d dimensions (the dimension needs to be the same)!"%(len(factorisationBinIndexList), len(self._binCount)))
         return h.GetBinError(shapeBin, self._convertBinIndexListToUnfoldedIndex(factorisationBinIndexList)+1)
+
+    # Returns the event count of the unfolded factorisation bin
+    def getEventCountForUnfoldedBin(self, unfoldedBinIndex, h):
+        self._initialize(h)
+        return h.GetBinContent(1, unfoldedBinIndex+1)
+
+    # Returns the event count (stat.) uncertainty of the unfolded factorisation bin
+    def getEventCountUncertaintyForUnfoldedBin(self, unfoldedBinIndex, h):
+        self._initialize(h)
+        return h.GetBinError(1, unfoldedBinIndex+1)
+
+    # Returns the event count in a bin of a shape for the unfolded factorisation bin
+    def getShapeCountForUnfoldedBin(self, unfoldedBinIndex, h, shapeBin):
+        self._initialize(h)
+        return h.GetBinContent(shapeBin, unfoldedBinIndex+1)
+
+    # Returns the event count (stat.) uncertainty in a bin of a shape for the unfolded factorisation bin
+    def getShapeCountUncertaintyForUnfoldedBin(self, unfoldedBinIndex, h, shapeBin):
+        self._initialize(h)
+        return h.GetBinError(shapeBin, unfoldedBinIndex+1)
 
     # Returns the event count for a factorisation bin by contracting the other factorisation dimensions (i.e. reduce the factorisation dimensions to just the one specified)
     def getContractedEventCountForBin(self, factorisationAxisToKeep, factorisationBin, h):
@@ -174,7 +200,7 @@ class UnfoldedHistogramReader:
             else:
                 # try a bug fix by taking first character only
                 if myList[i*2+1][0].isdigit():
-                    print WarningLabel()+"UnfoldedHistogramReader::_initialize(): tried naive bug fix for last factorisation bin dimension (guessed dimension: %s, histo: )"%(myList[i*2+1][0],myList[i*2+1][1:])
+                    print WarningLabel()+"UnfoldedHistogramReader::_initialize(): tried naive bug fix for last factorisation bin dimension (guessed dimension: %s, histo: %s)"%(myList[i*2+1][0],myList[i*2+1][1:])
                     self._binCount.append(int(myList[i*2+1][0]))
                 else:
                     raise Exception(ErrorLabel()+"UnfoldedHistogramReader: failed to decompose histogram title (it should contain the bin label and nbins information for n bins separated with '%s'\nHistogram title was: %s"%(self._separator, myTitle))
