@@ -219,10 +219,11 @@ if OptionMassShape == "TransverseMass":
                               "basicMtHisto": QCDFactorisedStdSelVersion+"/MtAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
                               "validationMtShapeSource": QCDFactorisedValidationMtShapeSource, # FIXME check
                               "validationMtShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions, # FIXME check
-                              "assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ... # FIXME check
-                              "factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"], # FIXME check
+                              #"assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ... # not needed
+                              #"factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"], # not needed
                               #"METShapeCorrections": QCDFactorisationMETShapeCorrections,
                               #"MTShapeCorrections": QCDFactorisationMtShapeCorrections,
+                              #FIXME: add systematics definition (tau trg uncer as function of tau bins, trg MET leg, tauID, energy scales, btagging, xsection)
         }
     ))
 elif OptionMassShape == "FullMass":

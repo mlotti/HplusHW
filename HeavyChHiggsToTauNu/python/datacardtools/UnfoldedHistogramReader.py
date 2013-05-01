@@ -25,17 +25,19 @@ class UnfoldedHistogramReader:
     def __init__(self, debugStatus = False):
         self._binLabels = []  # Each cell contains the label of the nth dimension
         self._binCount = []   # Each cell contains the nbins count of the nth dimension
+        self._unfoldedBinCount = None
         self._separator = ":" # Setting for decomposing bin information from histogram title
         self._debugStatus = debugStatus
         self._factorisationCaptions = []
         self._factorisationRanges = []
 
-    def getNbinsList(self, h):
-        self._initialize(h)
+    def getNbinsList(self):
         return self._binCount
 
-    def getBinLabelList(self, h):
-        self._initialize(h)
+    def getUnfoldedBinCount(self):
+        return self._unfoldedBinCount
+
+    def getBinLabelList(self):
         return self._binLabels
 
     def getFactorisationCaptions(self):
@@ -43,6 +45,23 @@ class UnfoldedHistogramReader:
 
     def getFactorisationRanges(self):
         return self._factorisationRanges
+
+    # Decomposes the unfolded bin into the different axes of factorisation, returns a list of indices
+    def decomposeUnfoldedbin(self, unfoldedBinIndex):
+        myIndexList = []
+        for i in range(0,len(self._binCount)):
+            myIndexList.append(None)
+        myValue = unfoldedBinIndex
+        for i in range(0,len(self._binCount)):
+            myReversedIndex = len(self._binCount)-i-1
+            myProduct = 1
+            for j in range(0,myReversedIndex):
+                myProduct *= self._binCount[j]
+            #print i, myReversedIndex, myProduct
+            myIndexList[myReversedIndex] = int(myValue / myProduct)
+            myValue -= myIndexList[myReversedIndex] * myProduct
+        #print myIndexList
+        return myIndexList
 
     # Returns the event count of the factorisation bin [x,y,...]
     def getEventCountForBin(self, factorisationBinIndexList, h):
@@ -209,6 +228,7 @@ class UnfoldedHistogramReader:
             print "UnfoldedHistogramReader: Histogram binning determined as : %s"%myOutput
         if len(self._binLabels) == 0:
             raise Exception(ErrorLabel()+"UnfoldedHistogramReader: failed to decompose histogram title (it should contain the bin label and nbins information for n bins separated with '%s'\nHistogram title was: %s"%(self._separator, myTitle))
+        self._unfoldedBinCount = h.GetNbinsY()
         # Loop over y axis to find axis values
         myBinCaptions = []
         myBinRanges = []
@@ -275,6 +295,9 @@ def validate():
     print "validate: UnfoldedHistogramReader::_initialize():",check(len(r.getNbinsList()),3)
     # Test bin unfolding
     print "validate: UnfoldedHistogramReader::_convertBinIndexListToUnfoldedIndex():",check(r._convertBinIndexListToUnfoldedIndex([1,2,3]),45)
+    print "validate: UnfoldedHistogramReader::decomposeUnfoldedbin1(): ", check(r.decomposeUnfoldedbin(45)[0],1)
+    print "validate: UnfoldedHistogramReader::decomposeUnfoldedbin2(): ", check(r.decomposeUnfoldedbin(45)[1],2)
+    print "validate: UnfoldedHistogramReader::decomposeUnfoldedbin3(): ", check(r.decomposeUnfoldedbin(45)[2],3)
     # Test event counts
     print "validate: UnfoldedHistogramReader::getEventCountForBin(): ",check(r.getEventCountForBin([1,2,3],h),46)
     print "validate: UnfoldedHistogramReader::getEventCountUncertaintyForBin(): ",check(r.getEventCountUncertaintyForBin([1,2,3],h),sqrt(46))
