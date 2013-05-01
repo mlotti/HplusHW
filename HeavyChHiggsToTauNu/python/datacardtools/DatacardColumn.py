@@ -87,7 +87,6 @@ class DatacardColumn():
                  datasetMgrColumn = "",
                  datasetMgrColumnForQCDMCEWK = "",
                  additionalNormalisationFactor = 1.0,
-                 dirPrefix = "",
                  shapeHisto = ""):
         self._label = label
         self._landsProcess = landsProcess
@@ -114,7 +113,6 @@ class DatacardColumn():
         self._datasetMgrColumn = datasetMgrColumn
         self._datasetMgrColumnForQCDMCEWK  = datasetMgrColumnForQCDMCEWK
         self._additionalNormalisationFactor = additionalNormalisationFactor
-        self._dirPrefix = dirPrefix
         self._shapeHisto = shapeHisto
         self._isPrintable = True
         self.checkInputValidity()
@@ -219,10 +217,6 @@ class DatacardColumn():
     ## Returns dataset manager column for MC EWK in QCD factorised
     def getDatasetMgrColumnForQCDMCEWK(self):
         return self._datasetMgrColumnForQCDMCEWK
-
-    ## Returns the module name, i.e. directory prefix in the root file
-    def getDirPrefix(self):
-        return self._dirPrefix
 
     ## Get correct control plot
     def getControlPlotByTitle(self, title):
@@ -363,7 +357,6 @@ class DatacardColumn():
         print "  rate counter:", self._rateCounter
         if len(self._nuisanceIds) > 0:
             print "  nuisances:", self._nuisanceIds
-        print "  directory prefix for root file:", self._dirPrefix
         print "  shape histogram:", self._shapeHisto
 
 

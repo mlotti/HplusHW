@@ -276,6 +276,7 @@ class TableProducer:
 
     ## Generates nuisance table as list
     def _generateNuisanceTable(self,mass):
+        # TODO: merge nuisances (quadratic sum) together, if they apply to only one column (is mathematically equal treatrment, but makes datacard running faster)
         myResult = []
         # Loop over rows
         for n in sorted(self._extractors, key=lambda x: x.getId()):

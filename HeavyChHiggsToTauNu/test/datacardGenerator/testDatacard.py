@@ -54,8 +54,8 @@ if OptionMassShape == "TransverseMass":
                                   "xtitle": "Transverse mass / GeV",
                                   "ytitle": "Events" }
 elif OptionMassShape == "FullMass":
-    SignalShapeHisto = "FullHiggsMass/HiggsMass"
-    FakeShapeHisto = "FIXME" #### FIXME
+    SignalShapeHisto = "fullMass"
+    FakeShapeHisto = "EWKFakeTausFullMass"
     ShapeHistogramsDimensions = { "bins": 25,
                                   "rangeMin": 0.0,
                                   "rangeMax": 500.0,
@@ -421,8 +421,8 @@ Nuisances.append(Nuisance(
     distr         = "lnN",
     function      = "ScaleFactor",
     histoDir      = ["ScaleFactorUncertainties"],
-    histograms    = ["TriggerScaleFactorAbsUncert_AfterSelection"],
-    normalisation = ["TriggerScaleFactorAbsUncertCounts_AfterSelection"],
+    histograms    = ["TauTriggerScaleFactorAbsUncert_AfterSelection"],
+    normalisation = ["TauTriggerScaleFactorAbsUncertCounts_AfterSelection"],
 ))
 
 Nuisances.append(Nuisance(
@@ -479,10 +479,8 @@ Nuisances.append(Nuisance(
     distr         = "lnN",
     function      = "ScaleFactor",
     histoDir      = ["ScaleFactorUncertainties"],
-    histograms    = ["FakeTauAbsUncert_AfterSelection"],
-    normalisation = ["FakeTauAbsUncertCounts_AfterSelection"],
-    #function      = "Constant",
-    #value         = 0.15
+    histograms    = ["FakeTauAbsUncert_EWKFakeTausAfterSelection"],
+    normalisation = ["FakeTauAbsUncertCounts_EWKFakeTausAfterSelection"],
 ))
 
 if OptionIncludeSystematics:
@@ -569,8 +567,8 @@ Nuisances.append(Nuisance(
     label         = "lepton veto",
     distr         = "lnN",
     function      = "Ratio",
-    numerator     = "muon veto",
-    denominator   = "trigger scale factor",
+    numerator     = "muon veto", # main counter name after electron and muon veto
+    denominator   = "tau trigger scale factor", # main counter name before electron and muon veto
     scaling       = 0.02
 ))
 
@@ -1029,36 +1027,39 @@ ControlPlots.append(ControlPlotInput(
     flowPlotCaption  = "E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
-ControlPlots.append(ControlPlotInput(
-    title            = "DeltaPhi",
-    signalHHid       = [-1],
-    signalHWid       = [0],
-    QCDid            = [3],
-    embeddingId      = EmbeddingIdList,
-    EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "",
-    signalHistoName  = "deltaPhi",
-    EWKfakeHistoPath  = "",
-    EWKfakeHistoName  = "EWKFakeTausDeltaPhi",
-    QCDFactNormalisation = "factorisation/Leg1AfterBTagging",
-    QCDFactHistoPath = "shape_CtrlLeg1AfterDeltaPhiTauMET",
-    QCDFactHistoName = "CtrlLeg1AfterDeltaPhiTauMET",
-    details          = { "bins": 11,
-                         "rangeMin": 0.0,
-                         "rangeMax": 180.0,
-                         "variableBinSizeLowEdges": [0., 10., 20., 30., 40., 60., 80., 100., 120., 140., 160.], # if an empty list is given, then uniform bin width is used
-                         "binLabels": [], # leave empty to disable bin labels
-                         "xtitle": "#Delta#phi(#tau_{h},E_{T}^{miss})",
-                         "ytitle": "Events",
-                         "unit": "^{o}",
-                         "logy": True,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
-    blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
-    evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "N_{b jets}", # Leave blank if you don't want to include the item to the selection flow plot
-))
+#TODO: add as preselection for all ctrl plots in signal analysis MET30 and/or collinear tail killer and/or full tail killer
+#TODO: Add to signal analysis ctrl plots tail killer plots
+
+#ControlPlots.append(ControlPlotInput(
+    #title            = "DeltaPhi",
+    #signalHHid       = [-1],
+    #signalHWid       = [0],
+    #QCDid            = [3],
+    #embeddingId      = EmbeddingIdList,
+    #EWKfakeId        = EWKFakeIdList,
+    #signalHistoPath  = "",
+    #signalHistoName  = "deltaPhi",
+    #EWKfakeHistoPath  = "",
+    #EWKfakeHistoName  = "EWKFakeTausDeltaPhi",
+    #QCDFactNormalisation = "factorisation/Leg1AfterBTagging",
+    #QCDFactHistoPath = "shape_CtrlLeg1AfterDeltaPhiTauMET",
+    #QCDFactHistoName = "CtrlLeg1AfterDeltaPhiTauMET",
+    #details          = { "bins": 11,
+                         #"rangeMin": 0.0,
+                         #"rangeMax": 180.0,
+                         #"variableBinSizeLowEdges": [0., 10., 20., 30., 40., 60., 80., 100., 120., 140., 160.], # if an empty list is given, then uniform bin width is used
+                         #"binLabels": [], # leave empty to disable bin labels
+                         #"xtitle": "#Delta#phi(#tau_{h},E_{T}^{miss})",
+                         #"ytitle": "Events",
+                         #"unit": "^{o}",
+                         #"logy": True,
+                         #"DeltaRatio": 0.5,
+                         #"ymin": 0.9,
+                         #"ymax": -1},
+    #blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
+    #evaluationRange  = [], # specify range to be evaluated and saved into a file
+    #flowPlotCaption  = "N_{b jets}", # Leave blank if you don't want to include the item to the selection flow plot
+#))
 
 #ControlPlots.append(ControlPlotInput(
     #title            = "MaxDeltaPhi",

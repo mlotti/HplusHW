@@ -1149,7 +1149,6 @@ class QCDfactorisedColumn(DatacardColumn):
                  datasetMgrColumn = "",
                  datasetMgrColumnForQCDMCEWK = "",
                  additionalNormalisationFactor = 1.0,
-                 dirPrefix = "",
                  QCDfactorisedInfo = None,
                  debugMode = False):
         DatacardColumn.__init__(self,
@@ -1160,8 +1159,7 @@ class QCDfactorisedColumn(DatacardColumn):
                                 nuisanceIds = nuisanceIds,
                                 datasetMgrColumn = datasetMgrColumn,
                                 datasetMgrColumnForQCDMCEWK = datasetMgrColumnForQCDMCEWK,
-                                additionalNormalisationFactor = additionalNormalisationFactor,
-                                dirPrefix = dirPrefix)
+                                additionalNormalisationFactor = additionalNormalisationFactor)
         # Set source histograms
         self._afterBigboxSource = QCDfactorisedInfo["afterBigboxSource"]
         self._afterMETLegSource = QCDfactorisedInfo["afterMETLegSource"]

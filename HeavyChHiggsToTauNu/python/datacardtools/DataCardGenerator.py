@@ -43,15 +43,16 @@ class DatasetMgrCreatorManager:
         self._dsetMgrCreators = [signalDsetCreator, embeddingDsetCreator, qcdDsetCreator]
         self._dsetMgrs = []
         self._luminosities = []
+        self._mainCounterTables = []
         self._qcdMethodType = qcdMethodType
         if config.ToleranceForLuminosityDifference == None:
-            raise Exception(ErrorStyle()+"Error: Input datacard should contain entry for ToleranceForLuminosityDifference (for example: ToleranceForLuminosityDifference=0.01)!"+NormalStyle())
+            raise Exception(ErrorLabel()+"Input datacard should contain entry for ToleranceForLuminosityDifference (for example: ToleranceForLuminosityDifference=0.01)!"+NormalStyle())
         self._toleranceForLuminosityDifference = config.ToleranceForLuminosityDifference
         self._optionDebugConfig = opts.debugConfig
 
     def obtainDatasetMgrs(self, era, searchMode, optimizationMode):
         if len(self._dsetMgrs) > 0:
-            raise Exception(ErrorStyle()+"Error: DatasetMgrCreatorManager::obtainDatasetMgrs(...) was already called (dsetMgrs exist)!"+NormalStyle())
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) was already called (dsetMgrs exist)!"+NormalStyle())
         for dCreator in self._dsetMgrCreators:
             if dCreator != None:
                 # Create DatasetManager object and set pointer to the selected era, searchMode, and optimizationMode
@@ -75,12 +76,26 @@ class DatasetMgrCreatorManager:
                 self._luminosities.append(None)
         self._checkLuminosityMatching()
 
+    def cacheMainCounterTables(self):
+        # Note: needs to be called after all merging operations have been done
+        for i in range(0,len(self._dsetMgrs)):
+            if self.getDatasetMgr(i) == None:
+                self._mainCounterTables.append(None)
+            else:
+                # Obtain main counter tables
+                myEventCounter = counter.EventCounter(self.getDatasetMgr(i), countNameFunction=None, counters=None, mainCounterOnly=True)
+                myEventCounter.normalizeMCToLuminosity(self.getLuminosity(i))
+                self._mainCounterTables.append(myEventCounter.getMainCounterTable())
+
+    def getNmax(self):
+        return len(self._dsetMgrs)
+
     # Returns datasetMgr object, index must conform to DatacardDatasetMgrSourceType. Note: can return also a None object
     def getDatasetMgr(self, i):
         if len(self._dsetMgrs) == 0:
-            raise Exception(ErrorStyle()+"Error: DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!"+NormalStyle())
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!")
         if i < 0 or i >= len(self._dsetMgrs):
-            raise Exception(ErrorStyle()+"Error: DatasetMgrCreatorManager::getDatasetMgr(...) index = %d is out of range!"%i+NormalStyle())
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::getDatasetMgr(...) index = %d is out of range!"%i)
         return self._dsetMgrs[i]
 
     def getDatasetMgrLabel(self, i):
@@ -94,10 +109,21 @@ class DatasetMgrCreatorManager:
             if self._qcdMethodType == DatacardQCDMethod.INVERTED:
                 return "QCDinverted"
         else:
-            raise Exception(ErrorStyle()+"Error: DatasetMgrCreatorManager::getDatasetMgrLabel(...) index = %d is out of range!!"%i+NormalStyle())
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::getDatasetMgrLabel(...) index = %d is out of range!!"%i)
 
     def getLuminosity(self, i):
+        if len(self._luminosities) == 0:
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!")
+        if i < 0 or i >= len(self._dsetMgrs):
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::getLuminosity(...) index = %d is out of range!"%i)
         return self._luminosities[DatacardDatasetMgrSourceType.SIGNALANALYSIS]
+
+    def getMainCounterTable(self, i):
+        if len(self._mainCounterTables) == 0:
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::cacheMainCounterTables(...) needs to be called first!")
+        if i < 0 or i >= len(self._dsetMgrs):
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::getMainCounterTable(...) index = %d is out of range!"%i)
+        return self._mainCounterTables[i]
 
     # Merges the list of datasets (if they exist) into one object. The merged group is then used to access counters and histograms
     def mergeDatasets(self, i, mergeGroupLabel, searchNames):
@@ -125,7 +151,7 @@ class DatasetMgrCreatorManager:
                         myMatchedDatasetNames.append(dset)
                     myFoundStatus = True
             if not myFoundStatus and len(myAllDatasetNames) > 0:
-                print ErrorStyle()+"Error in dataset group '"+label+"':"+NormalStyle()+" cannot find datasetDefinition '"+dset+"'!"
+                print ErrorLabel()+" Dataset group '%s': cannot find datasetDefinition '%s'!"%(label,dset)
                 print "Options are: %s"%(', '.join(map(str, myAllDatasetNames)))
                 raise Exception()
         #if self._optionDebugConfig:
@@ -149,15 +175,15 @@ class DatasetMgrCreatorManager:
                 print "  %s: %s%f 1/pb%s"%(self.getDatasetMgrLabel(i),HighlightStyle(),self._luminosities[i],NormalStyle())
         # Compare luminosities to signal analysis
         if len(self._luminosities) == 0:
-            raise Exception(ErrorStyle()+"Error: DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!"+NormalStyle())
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!")
         mySignalLuminosity = self._luminosities[DatacardDatasetMgrSourceType.SIGNALANALYSIS]
         for i in range(1,len(self._luminosities)):
             if self._luminosities[i] != None:
                 myDiff = abs(self._luminosities[i] / mySignalLuminosity - 1.0)
                 if myDiff > self._toleranceForLuminosityDifference:
-                    raise Exception(ErrorStyle()+"Error: signal and embedding luminosities differ more than 1 %!"+NormalStyle())
+                    raise Exception(ErrorLabel()+"signal and embedding luminosities differ more than 1 %!")
                 elif myDiff > 0.0001:
-                    print "%sWarning:%s %s and %s luminosities differ slightly (%.2f %%)!"%(WarningStyle(),NormalStyle(),self.getDatasetMgrLabel(DatacardDatasetMgrSourceType.SIGNALANALYSIS),self.getDatasetMgrLabel(i),myDiff*100.0)
+                    print WarningLabel()+"%s and %s luminosities differ slightly (%.2f %%)!"%(self.getDatasetMgrLabel(DatacardDatasetMgrSourceType.SIGNALANALYSIS),self.getDatasetMgrLabel(i),myDiff*100.0)
         print ""
 
 class DataCardGenerator:
@@ -196,7 +222,7 @@ class DataCardGenerator:
         # Override options from command line (not used at the moment)
         #self.overrideConfigOptionsFromCommandLine()
         if self._QCDMethod != DatacardQCDMethod.FACTORISED and self._QCDMethod != DatacardQCDMethod.INVERTED:
-            raise Exception(ErrorStyle()+"Error: QCD method was not properly specified when creating DataCardGenerator!"+NormalStyle())
+            raise Exception(ErrorLabel()+"QCD method was not properly specified when creating DataCardGenerator!")
         if self._config.OptionReplaceEmbeddingByMC != None:
             self._replaceEmbeddingByMC = self._config.OptionReplaceEmbeddingByMC
 
@@ -252,7 +278,6 @@ class DataCardGenerator:
         # Create columns (dataset groups)
         self.createDatacardColumns()
         self.checkDatacardColumns()
-        return
 
         # create extractors and control plot extractors
         self.createExtractors()
@@ -260,6 +285,7 @@ class DataCardGenerator:
 
         # do data mining to cache results into datacard column objects
         self.doDataMining()
+        return
 
         # Make datacards
         # Store era / searchMode / optimizationMode combination as a string # FIXME
@@ -337,11 +363,11 @@ class DataCardGenerator:
         elif len(self._config.Nuisances) == 0:
             mymsg += "- need to specify at least one Nuisance to field 'Nuisances' (list of Nuisance objects)\n"
         if self._config.ControlPlots == None:
-            print WarningStyle()+"Warning:"+NormalStyle()+" You did not specify any ControlPlots in the config (ControlPlots is list of ControlPlotInput objects)!"
+            print WarningLabel()+"You did not specify any ControlPlots in the config (ControlPlots is list of ControlPlotInput objects)!"
             print "  Please check if this was intended."
         # determine if datacard was ok
         if mymsg != "":
-            print ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"+NormalStyle()
+            print ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"
             print mymsg
             raise Exception()
         return True
@@ -429,42 +455,39 @@ class DataCardGenerator:
                 # Provide debug print
                 if self._opts.debugConfig:
                     myColumn.printDebug()
+
+        # Cache main counter tables
+        self._dsetMgrManager.cacheMainCounterTables()
         print "Data groups converted to datacard columns\n"
 
         if self._opts.debugDatasets:
             self._dsetMgrManager.printDatasetMgrContents()
 
     def doDataMining(self):
-        # Obtain main counter tables
-        print "Obtaining main counter tables"
-        myEventCounterTables = []
-        for i in range(0,len(self._dsetMgrs)):
-            if self._dsetMgrManager.getDatasetMgr(i) != None:
-                # Obtain main event counter table
-                myEventCounter = counter.EventCounter(self._dsetMgrManager.getDatasetMgr(i),None,None,True)
-                myEventCounter.normalizeMCToLuminosity(self._dsetMgrManager.getLuminosity(i))
-                myEventCounterTables.append(myEventCounter.getMainCounterTable())
-            else:
-                myEventCounterTables.append(None)
         # Do data mining and cache results
-        print "Starting data mining"
-        if self._doSignalAnalysis:
+        print "\nStarting data mining"
+        if self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS) != None:
             # Handle observation separately
-            self._observation.doDataMining(self._config,self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS),self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),myEventCounterTables[1],self._extractors,self._controlPlotExtractors)
+            myDsetMgr = self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
+            myLuminosity = self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
+            myMainCounterTable = self._dsetMgrManager.getMainCounterTable(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
+            self._observation.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         for c in self._columns:
-            myIndex = 0
+            myDsetMgrIndex = 0
             if c.typeIsObservation() or c.typeIsSignal():
-                myIndex = 1
+                myDsetMgrIndex = 0
             if c.typeIsEWK():
-                myIndex = 2
+                myDsetMgrIndex = 1
             if c.typeIsQCD():
-                myIndex = 3
-            # Do mining for datacard columns
-            # check if the column Id is in the list of EWK fake taus
+                myDsetMgrIndex = 2
+            # Do mining for datacard columns (separately for EWK fake taus)
+            myDsetMgr = self._dsetMgrManager.getDatasetMgr(myDsetMgrIndex)
+            myLuminosity = self._dsetMgrManager.getLuminosity(myDsetMgrIndex)
+            myMainCounterTable = self._dsetMgrManager.getMainCounterTable(myDsetMgrIndex)
             if c.getLandsProcess() in self._config.EWKFakeIdList:
-                c.doDataMining(self._config,self._dsetMgrs[myIndex],luminosities[myIndex],myEventCounterTables[myIndex],self._extractors,self._controlPlotExtractorsEWKfake)
+                c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractorsEWKfake)
             else:
-                c.doDataMining(self._config,self._dsetMgrs[myIndex],luminosities[myIndex],myEventCounterTables[myIndex],self._extractors,self._controlPlotExtractors)
+                c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
 
     ## Closes files in dataset managers
@@ -487,7 +510,7 @@ class DataCardGenerator:
                         myFirstValue = c.getLandsProcess()
                     else:
                         if myFirstValue + i != c.getLandsProcess():
-                            print ErrorStyle()+"Error:"+NormalStyle()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
+                            print ErrorLabel()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
                             raise Exception()
                     i += 1
 
@@ -595,7 +618,7 @@ class DataCardGenerator:
             if n.isPrintable():
                 myCounter += 1
                 if int(n.getId()) != myCounter:
-                    print WarningStyle()+"Warning:"+NormalStyle()+" You have not declared a Nuisance or ReservedNuisance with id='%d'! (assuming consecutive numbers)"%myCounter
+                    print WarningLabel()+"You have not declared a Nuisance or ReservedNuisance with id='%d'! (assuming consecutive numbers)"%myCounter
                     myCounter = int(n.getId())
 
     def mergeNuisances(self):
