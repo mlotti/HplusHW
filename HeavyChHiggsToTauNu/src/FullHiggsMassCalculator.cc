@@ -341,8 +341,10 @@ namespace HPlus {
     // The rest of the analysis is only done for MC signal events with a light charged Higgs (at least for now)
     if (iEvent.isRealData() || !eventHasLightChargedHiggs(iEvent)) return output;
 
+    return output; // FIXME: LAW 01.05.2013: temporary return statement to keep code stable
+
     // Histogram the invariant mass of the top mother of the Higgs.
-    hTopInvariantMassInGenerator->Fill(getGenHiggsSideTop(iEvent)->mass());
+    hTopInvariantMassInGenerator->Fill(getGenHiggsSideTop(iEvent)->mass()); // LAW 01.05.2013: causes crash because of zero pointer
 
     // CALCULATION USING TRUE MOMENTA FROM MC
     // --------------------------------------
