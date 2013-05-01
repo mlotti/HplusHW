@@ -94,7 +94,7 @@ class UnfoldedHistogramReader:
     def printFactorisationDefinitions(self):
         print "Factorisation settings:"
         for i in range(0,len(self._binLabels)):
-            print "  variable: %s, range={%s}"%(self._binLabels[i], '; '.join(map(str, self._factorisationRanges[i])))
+            print "  variable: %s, binning={%s}"%(self._binLabels[i], '; '.join(map(str, self._factorisationRanges[i])))
 
     def _contractionRecursionForBin(self, binIndexList, factorisationAxisToKeep, factorisationBin, h, shapeBin):
         #print "recursion",binIndexList
@@ -174,7 +174,7 @@ class UnfoldedHistogramReader:
             else:
                 # try a bug fix by taking first character only
                 if myList[i*2+1][0].isdigit():
-                    print WarningLabel()+"UnfoldedHistogramReader::_initialize(): tried naive bug fix for last factorisation bin dimension (guessed dimension:%s)"%myList[i*2+1][0]
+                    print WarningLabel()+"UnfoldedHistogramReader::_initialize(): tried naive bug fix for last factorisation bin dimension (guessed dimension: %s, histo: )"%(myList[i*2+1][0],myList[i*2+1][1:])
                     self._binCount.append(int(myList[i*2+1][0]))
                 else:
                     raise Exception(ErrorLabel()+"UnfoldedHistogramReader: failed to decompose histogram title (it should contain the bin label and nbins information for n bins separated with '%s'\nHistogram title was: %s"%(self._separator, myTitle))
