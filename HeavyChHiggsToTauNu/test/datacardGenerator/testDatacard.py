@@ -69,6 +69,13 @@ DataCardName += "_"+OptionMassShape
 ##############################################################################
 # Specifications for QCD factorised
 
+QCDFactorisedStdSelVersion = "QCDfactorised_TradReference"
+#QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30"
+#QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusCollinearTailKiller"
+#QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30PlusCollinearTailKiller"
+#QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusTailKiller"
+#QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30PlusTailKiller"
+
 QCDFactorisedValidationMETShapeHistogramsDimensions = {  "bins": 7,
                                                          "rangeMin": 0.0,
                                                          "rangeMax": 100.0,
@@ -203,18 +210,19 @@ if OptionMassShape == "TransverseMass":
         MCEWKDatasetDefinitions = ["TTJets","WJets","W1Jets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         #MCEWKDatasetDefinitions = ["TTJets","W2Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         nuisances    = ["12","13","40b"],
-        QCDfactorisedInfo = { "afterBigboxSource": "factorisation/AfterJetSelection",
-                              "afterMETLegSource": "factorisation/Leg1AfterTopSelection",
-                              "afterTauLegSource": "factorisation/Leg2AfterTauID",
-                              "validationMETShapeSource": QCDFactorisedValidationMETShapeSource,
-                              "validationMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions,
-                              "basicMtHisto": "shape_MtShapesAfterFullMETLeg/MtShapesAfterFullMETLeg", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
-                              "validationMtShapeSource": QCDFactorisedValidationMtShapeSource,
-                              "validationMtShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions,
-                              "assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ...
-                              "factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"],
-                              "METShapeCorrections": QCDFactorisationMETShapeCorrections,
-                              "MTShapeCorrections": QCDFactorisationMtShapeCorrections,
+        QCDfactorisedInfo = { "afterStdSelSource": QCDFactorisedStdSelVersion+"/NevtAfterStandardSelections",
+                              "afterMETLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1",
+                              "afterTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg2",
+                              "afterMETandTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1AndLeg2", # for checking only
+                              "validationMETShapeSource": QCDFactorisedValidationMETShapeSource, # FIXME check
+                              "validationMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions, # FIXME check
+                              "basicMtHisto": QCDFactorisedStdSelVersion+"/MtAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
+                              "validationMtShapeSource": QCDFactorisedValidationMtShapeSource, # FIXME check
+                              "validationMtShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions, # FIXME check
+                              "assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ... # FIXME check
+                              "factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"], # FIXME check
+                              #"METShapeCorrections": QCDFactorisationMETShapeCorrections,
+                              #"MTShapeCorrections": QCDFactorisationMtShapeCorrections,
         }
     ))
 elif OptionMassShape == "FullMass":
@@ -225,10 +233,10 @@ elif OptionMassShape == "FullMass":
         #dirPrefix   = QCDFactorisedAnalysis,
         datasetType  = "QCD factorised",
         datasetDefinitions = ["Tau_"],
-        MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
+        MCEWKDatasetDefinitions = ["TTJets","WJets","W1Jets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         #MCEWKDatasetDefinitions = ["TTJets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         nuisances    = ["12","13","40b"],
-        QCDfactorisedInfo = { "afterBigboxSource": "factorisation/AfterJetSelection",
+        QCDfactorisedInfo = { "afterStdSelSource": "factorisation/AfterJetSelection",
                               "afterMETLegSource": "factorisation/Leg1AfterTopSelection",
                               "afterTauLegSource": "factorisation/Leg2AfterTauID",
                               "validationMETShapeSource": QCDFactorisedValidationMETShapeSource,

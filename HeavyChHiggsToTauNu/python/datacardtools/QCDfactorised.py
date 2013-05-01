@@ -7,6 +7,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.UnfoldedHistogramReader import *
 from math import pow,sqrt
 import os
 import sys
@@ -15,7 +16,6 @@ import ROOT
 ## Extracts data-MC EWK counts from a given point in the analysis
 class QCDEventCount():
     def __init__(self,
-                 histoPrefix,
                  histoName,
                  dsetMgr,
                  dsetMgrDataColumn,
@@ -26,11 +26,11 @@ class QCDEventCount():
         self._assumedMCEWKSystUncertainty = assumedMCEWKSystUncertainty
         # Obtain histograms
         try:
-            datasetRootHistoData = dsetMgr.getDataset(dsetMgrDataColumn).getDatasetRootHisto(histoPrefix+"/"+histoName)
+            datasetRootHistoData = dsetMgr.getDataset(dsetMgrDataColumn).getDatasetRootHisto(histoName)
         except Exception, e:
             raise Exception (ErrorStyle()+"Error in QCDfactorised/QCDEventCount:"+NormalStyle()+" cannot find histogram for data!\n  Message = %s!"%(str(e)))
         try:
-            datasetRootHistoMCEWK = dsetMgr.getDataset(dsetMgrMCEWKColumn).getDatasetRootHisto(histoPrefix+"/"+histoName)
+            datasetRootHistoMCEWK = dsetMgr.getDataset(dsetMgrMCEWKColumn).getDatasetRootHisto(histoName)
         except Exception, e:
             raise Exception (ErrorStyle()+"Error in QCDfactorised/QCDEventCount:"+NormalStyle()+" cannot find histogram for MC EWK!\n  Message = %s!"%(str(e)))
         datasetRootHistoMCEWK.normalizeToLuminosity(luminosity)
@@ -1199,28 +1199,29 @@ class QCDfactorisedColumn(DatacardColumn):
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
         print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
         if dsetMgr == None:
-            raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" You called data mining for QCD factorised, but you disabled it config. Such undertaking is currently not supported.")
+            raise Exception(ErrorLabel()+"You called data mining for QCD factorised, but it's multicrab directory is not there. Such undertaking is currently not supported.")
         print "... Calculating NQCD value ..."
         # Calculate correction for MET shape
-        self._calculateMETCorrectionFactors(dsetMgr, luminosity)
+        #self._calculateMETCorrectionFactors(dsetMgr, luminosity)
         # Make event count objects
-        myBigBoxEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=self._afterBigboxSource, luminosity=luminosity)
+        myStdSelEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=self._afterBigboxSource, luminosity=luminosity)
+        return
         myMETLegEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=self._afterMETLegSource, luminosity=luminosity)
         myTauLegEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=self._afterTauLegSource, luminosity=luminosity)
         # Make control plot for NQCD event counts
-        self._infoHistograms.extend(myBigBoxEventCount.getEventCountHistograms())
+        self._infoHistograms.extend(myStdSelEventCount.getEventCountHistograms())
         self._infoHistograms.extend(myMETLegEventCount.getEventCountHistograms())
         self._infoHistograms.extend(myTauLegEventCount.getEventCountHistograms())
         # Make control plot for negative NQCD entries
-        self._infoHistograms.extend(myBigBoxEventCount.getNegativeEventCountHistograms())
+        self._infoHistograms.extend(myStdSelEventCount.getNegativeEventCountHistograms())
         self._infoHistograms.extend(myMETLegEventCount.getNegativeEventCountHistograms())
         self._infoHistograms.extend(myTauLegEventCount.getNegativeEventCountHistograms())
         # Make purity histograms
-        self._infoHistograms.extend(myBigBoxEventCount.getPurityHistogram())
+        self._infoHistograms.extend(myStdSelEventCount.getPurityHistogram())
         self._infoHistograms.extend(myMETLegEventCount.getPurityHistogram())
         self._infoHistograms.extend(myTauLegEventCount.getPurityHistogram())
         # Calculate result of NQCD
-        myQCDCalculator = QCDfactorisedCalculator(myBigBoxEventCount, myMETLegEventCount, myTauLegEventCount, True)
+        myQCDCalculator = QCDfactorisedCalculator(myStdSelEventCount, myMETLegEventCount, myTauLegEventCount, True)
         self._yieldTable = myQCDCalculator.getYieldTable()
         self._compactYieldTable = myQCDCalculator.getCompactYieldTable()
         self._infoHistograms.extend(myQCDCalculator.getNQCDHistograms())
@@ -1230,14 +1231,14 @@ class QCDfactorisedColumn(DatacardColumn):
         # Print result
         print "... NQCD = %f +- %f (%% stat.) +- %f (%% syst.)"%(myQCDCalculator.getNQCD(),myQCDCalculator.getStatUncertainty(),myQCDCalculator.getSystUncertainty())
         print "... Contracted NQCD for x axis= %f +- %f (%% stat.) +- %f (%% syst.)"%(myQCDCalculator.getContractedNQCD("X"),myQCDCalculator.getContractedStatUncertainty("X"),myQCDCalculator.getContractedSystUncertainty("X"))
-        if myBigBoxEventCount.is2D() or myBigBoxEventCount.is3D():
+        if myStdSelEventCount.is2D() or myStdSelEventCount.is3D():
             print "... Contracted NQCD for y axis= %f +- %f (%% stat.) +- %f (%% syst.)"%(myQCDCalculator.getContractedNQCD("Y"),myQCDCalculator.getContractedStatUncertainty("Y"),myQCDCalculator.getContractedSystUncertainty("Y"))
-        if myBigBoxEventCount.is3D():
+        if myStdSelEventCount.is3D():
             print "... Contracted NQCD for z axis= %f +- %f (%% stat.) +- %f (%% syst.)"%(myQCDCalculator.getContractedNQCD("Z"),myQCDCalculator.getContractedStatUncertainty("Z"),myQCDCalculator.getContractedSystUncertainty("Z"))
         # Make shape histogram
-        print "... Calculating shape (looping over %d histograms)..."%myBigBoxEventCount.getTotalDimension()
+        print "... Calculating shape (looping over %d histograms)..."%myStdSelEventCount.getTotalDimension()
         myRateHistograms=[]
-        hRateShape = self._createShapeHistogram(config, dsetMgr, myQCDCalculator, myBigBoxEventCount, luminosity,
+        hRateShape = self._createShapeHistogram(config, dsetMgr, myQCDCalculator, myStdSelEventCount, luminosity,
                                                 config.ShapeHistogramsDimensions, self._label, self._dirPrefix, self._basicMtHisto,
                                                 saveDetailedInfo=True, makeCorrectionToShape=True) 
         # Normalise rate shape to NQCD
@@ -1245,7 +1246,7 @@ class QCDfactorisedColumn(DatacardColumn):
             hRateShape.Scale(myQCDCalculator.getNQCD() / hRateShape.Integral())
         myRateHistograms.append(hRateShape)
         # Obtain messages
-        self._messages.extend(myBigBoxEventCount.getMessages())
+        self._messages.extend(myStdSelEventCount.getMessages())
         self._messages.extend(myMETLegEventCount.getMessages())
         self._messages.extend(myTauLegEventCount.getMessages())
         # Cache result for rate
@@ -1256,10 +1257,10 @@ class QCDfactorisedColumn(DatacardColumn):
         # Make validation shapes
         print "... Producing validation histograms ..."
         for METshape in self._validationMETShapeSource:
-            self._createValidationHistograms(config,dsetMgr,myQCDCalculator,myBigBoxEventCount,luminosity,self._validationMETShapeDetails,
+            self._createValidationHistograms(config,dsetMgr,myQCDCalculator,myStdSelEventCount,luminosity,self._validationMETShapeDetails,
                                              "METvalidation", self._dirPrefix, METshape)
         for mTshape in self._validationMtShapeSource:
-            self._createValidationHistograms(config,dsetMgr,myQCDCalculator,myBigBoxEventCount,luminosity,self._validationMtShapeDetails,
+            self._createValidationHistograms(config,dsetMgr,myQCDCalculator,myStdSelEventCount,luminosity,self._validationMtShapeDetails,
                                              "mTvalidation", self._dirPrefix, mTshape)
         # Construct results for nuisances
         print "... Constructing result ..."
@@ -1308,11 +1309,11 @@ class QCDfactorisedColumn(DatacardColumn):
                 print "... Obtaining control plots ..."
                 if config.ControlPlots != None and dsetMgr != None:
                     for c in config.ControlPlots:
-                        hShape = self._createShapeHistogram(config, dsetMgr, myQCDCalculator, myBigBoxEventCount, luminosity,
+                        hShape = self._createShapeHistogram(config, dsetMgr, myQCDCalculator, myStdSelEventCount, luminosity,
                                                             c.details, c.title, self._dirPrefix+"/"+c.QCDFactHistoPath, c.QCDFactHistoName)
                         # Normalise
                         myEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=c.QCDFactNormalisation, luminosity=luminosity)
-                        myQCDCalculator = QCDfactorisedCalculator(myBigBoxEventCount, myEventCount, myTauLegEventCount)
+                        myQCDCalculator = QCDfactorisedCalculator(myStdSelEventCount, myEventCount, myTauLegEventCount)
                         hShape.Scale(myQCDCalculator.getNQCD() / hShape.Integral())
                         print "     "+c.title+", NQCD=%f"%myQCDCalculator.getNQCD()
                         myEventCount.clean()
@@ -1321,8 +1322,7 @@ class QCDfactorisedColumn(DatacardColumn):
         myQCDCalculator.clean()
 
     def _getQCDEventCount(self, dsetMgr, histoName, luminosity):
-        return QCDEventCount(histoPrefix=self._dirPrefix,
-                             histoName=histoName,
+        return QCDEventCount(histoName=histoName,
                              dsetMgr=dsetMgr,
                              dsetMgrDataColumn=self._datasetMgrColumn,
                              dsetMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,

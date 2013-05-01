@@ -142,7 +142,7 @@ class DatacardColumn():
         return self._datasetType == MulticrabDirectoryDataType.QCDINVERTED
 
     ## Returns true if the column is empty (uses no datasets)
-    def typeIsEmptyColum(self):
+    def typeIsEmptyColumn(self):
         return self._datasetType == MulticrabDirectoryDataType.DUMMY
 
     ## Checks that required fields have been supplied
@@ -157,7 +157,7 @@ class DatacardColumn():
             myMsg += "Missing or empty field 'validMassPoints'! (list of integers) specifies for which mass points the column is enabled\n"
         if self._datasetType == MulticrabDirectoryDataType.UNKNOWN:
             myMsg += "Wrong 'datasetType' specified! Valid options are 'Signal', 'Embedding', 'QCD factorised', 'QCD inverted', and 'None'\n"
-        if self._datasetMgrColumn == "" and not self.typeIsEmptyColum():
+        if self._datasetMgrColumn == "" and not self.typeIsEmptyColumn():
             myMsg += "No dataset names defined!\n"
         if self.typeIsSignal() or self.typeIsEWK() or self.typeIsObservation():
             if self._rateCounter == "":
@@ -170,7 +170,7 @@ class DatacardColumn():
                 myMsg += "No datasets defined for MC EWK in data group for QCD factorised!\n"
 ####        elif self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
 ####            myMsg += "FIXME: QCD inverted not implemented yet\n" # FIXME
-        if not self.typeIsEmptyColum() and not self.typeIsObservation():
+        if not self.typeIsEmptyColumn() and not self.typeIsObservation():
             if len(self._nuisanceIds) == 0:
                 myMsg += "Missing or empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
 
@@ -236,7 +236,7 @@ class DatacardColumn():
         #sys.stdout.flush()
         myRateResult = None
         myRateHistograms = []
-        if self.typeIsEmptyColum() or dsetMgr == None:
+        if self.typeIsEmptyColumnn() or dsetMgr == None:
             myRateResult = 0.0
             myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [], [], ExtractorMode.RATE, description="empty")
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
