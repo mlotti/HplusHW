@@ -22,7 +22,7 @@ namespace HPlus {
     else if(mode == "disabled")
       fMode = kDisabled;
     else
-      throw cms::Exception("Configuration") << "EfficiencyScaleFactorBase: Unsupported value for parameter 'mode' " << mode << ", should be 'efficiency', 'scaleFactor', or 'disabled'" << std::endl;
+      throw cms::Exception("Configuration") << "EfficiencyScaleFactorBase: Unsupported value for parameter 'mode' " << mode << ", should be 'dataEfficiency', 'mcEfficiency', 'scaleFactor', or 'disabled'" << std::endl;
   }
 
   EfficiencyScaleFactorBase::~EfficiencyScaleFactorBase() {}

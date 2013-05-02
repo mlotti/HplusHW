@@ -3,8 +3,9 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_EmbeddingMuonEfficiency_h
 
 #include "FWCore/Utilities/interface/InputTag.h"
+#include "DataFormats/Common/interface/Ptr.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ConstantEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EfficiencyScaleFactorBase.h"
 
 #include<vector>
 
@@ -46,14 +47,14 @@ namespace HPlus {
     EmbeddingMuonEfficiency(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper);
     ~EmbeddingMuonEfficiency();
 
-    void setRun(unsigned run) { fEfficiencyScaleFactor.setRun(run); }
+    void setRun(unsigned run) { fEfficiencyScaleFactor->setRun(run); }
 
     Data getEventWeight(const edm::Event& iEvent);
-    Data getEventWeight(const pat::Muon& muon, bool isData);
+    Data getEventWeight(const edm::Ptr<pat::Muon>& muon, bool isData) const;
 
   private:
     edm::InputTag fMuonSrc;
-    ConstantEfficiencyScaleFactor fEfficiencyScaleFactor;
+    EfficiencyScaleFactorBase *fEfficiencyScaleFactor;
   };
 }
 

@@ -43,9 +43,11 @@ namespace HPlus {
     };
 
     explicit EfficiencyScaleFactorBase(const edm::ParameterSet& iConfig);
-    ~EfficiencyScaleFactorBase();
+    virtual ~EfficiencyScaleFactorBase();
 
     Mode getMode() const { return fMode; }
+
+    virtual void setRun(unsigned run) = 0;
   private:
     Mode fMode;
   };

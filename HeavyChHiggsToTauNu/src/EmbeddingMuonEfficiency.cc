@@ -2,6 +2,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ConstantEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BinnedEfficiencyScaleFactor.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
@@ -22,34 +25,55 @@ namespace HPlus {
     if(isnan(fWeight))
       throw cms::Exception("Assert") << "EmbeddingMuonEfficiency::Data: This Data object was constructed with the default constructor, not with EmbeddingMuonEfficiency::getEventWeight(). There is something wrong in your code." << std::endl;
   }
-
+  
   EmbeddingMuonEfficiency::EmbeddingMuonEfficiency(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper):
-    //fMuonSrc(iConfig.getParameter<edm::InputTag>("muonSrc")),
-    fEfficiencyScaleFactor(iConfig)
-  {}
-  EmbeddingMuonEfficiency::~EmbeddingMuonEfficiency() {}
+    fMuonSrc(iConfig.getParameter<edm::InputTag>("muonSrc")),
+    fEfficiencyScaleFactor(0)
+  {
+    std::string type = iConfig.getUntrackedParameter<std::string>("type");
+    if(type == "constant")
+      fEfficiencyScaleFactor = new ConstantEfficiencyScaleFactor(iConfig);
+    else if(type == "binned")
+      fEfficiencyScaleFactor = new BinnedEfficiencyScaleFactor(iConfig, "eta");
+    else
+      throw cms::Exception("Configuration") << "EmbeddingMuonEfficiency: got invalid value for 'type' " << type 
+                                            << ", valid values are 'constant' and 'binned'";
+  }
+  EmbeddingMuonEfficiency::~EmbeddingMuonEfficiency() {
+    delete fEfficiencyScaleFactor;
+  }
 
   EmbeddingMuonEfficiency::Data EmbeddingMuonEfficiency::getEventWeight(const edm::Event& iEvent) {
-    if(fEfficiencyScaleFactor.getMode() == EfficiencyScaleFactorBase::kDisabled) {
+    if(fEfficiencyScaleFactor->getMode() == EfficiencyScaleFactorBase::kDisabled) {
       Data output;
       output.fWeight = 1.0;
       return output;
     }
 
-    // Obtain original muon
-    edm::Handle<edm::View<pat::Muon> > hmuon;
-    iEvent.getByLabel(fMuonSrc, hmuon);
+    if(dynamic_cast<const ConstantEfficiencyScaleFactor *>(fEfficiencyScaleFactor)) {
+      return getEventWeight(edm::Ptr<pat::Muon>(), iEvent.isRealData());
+    }
+    else {
+      // Obtain original muon
+      edm::Handle<edm::View<pat::Muon> > hmuon;
+      iEvent.getByLabel(fMuonSrc, hmuon);
 
-    if(hmuon->size() != 1)
-      throw cms::Exception("Assert") << "Read " << hmuon->size() << " muons for the original muon, expected exactly 1. Muon src was " << fMuonSrc.encode() << std::endl;
+      if(hmuon->size() != 1)
+        throw cms::Exception("Assert") << "Read " << hmuon->size() << " muons for the original muon, expected exactly 1. Muon src was " << fMuonSrc.encode() << std::endl;
 
-    setRun(iEvent.id().run());
-    return getEventWeight(hmuon->at(0), iEvent.isRealData());
-
+      setRun(iEvent.id().run());
+      return getEventWeight(hmuon->ptrAt(0), iEvent.isRealData());
+    }
   }
 
-  EmbeddingMuonEfficiency::Data EmbeddingMuonEfficiency::getEventWeight(const pat::Muon& muon, bool isData) {
-    Data output(fEfficiencyScaleFactor.getEventWeight(isData));
+  EmbeddingMuonEfficiency::Data EmbeddingMuonEfficiency::getEventWeight(const edm::Ptr<pat::Muon>& muon, bool isData) const {
+    Data output;
+    if(const ConstantEfficiencyScaleFactor *ceff = dynamic_cast<const ConstantEfficiencyScaleFactor *>(fEfficiencyScaleFactor)) {
+      output = Data(ceff->getEventWeight(isData));
+    }
+    else if(const BinnedEfficiencyScaleFactor *beff = dynamic_cast<const BinnedEfficiencyScaleFactor *>(fEfficiencyScaleFactor)) {
+      output = Data(beff->getEventWeight(muon->eta(), isData));
+    }
 
     // Weight is actually the inverse of the efficiency
     if(output.fWeight != 0.0) {
