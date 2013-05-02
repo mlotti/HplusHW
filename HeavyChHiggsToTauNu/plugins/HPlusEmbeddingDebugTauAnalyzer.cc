@@ -12,6 +12,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
 
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 class HPlusEmbeddingDebugTauAnalyzer: public edm::EDAnalyzer {
  public:
@@ -34,14 +36,29 @@ class HPlusEmbeddingDebugTauAnalyzer: public edm::EDAnalyzer {
   edm::InputTag jetSrc_;
   edm::InputTag genSrc_;
 
-  double tauPtCut_;
-  double tauEtaCut_;
+  const double tauPtCut_;
+  const double tauEtaCut_;
 
   HPlus::Count cAllEvents;
   HPlus::Count cGenTaus;
   HPlus::Count cGenTausAcceptance;
   HPlus::Count cOneGenTau;
   HPlus::Count cThreeJets;
+
+  HPlus::WrappedTH1 *hGenTauPt;
+  HPlus::WrappedTH1 *hGenTauPtVisible;
+  HPlus::WrappedTH1 *hGenTauEta;
+  HPlus::WrappedTH1 *hGenTauPhi;
+
+  HPlus::WrappedTH1 *hGenTauPt2;
+  HPlus::WrappedTH1 *hGenTauPtVisible2;
+  HPlus::WrappedTH1 *hGenTauEta2;
+  HPlus::WrappedTH1 *hGenTauPhi2;
+
+  HPlus::WrappedTH1 *hGenTauPt_AfterJets;
+  HPlus::WrappedTH1 *hGenTauPtVisible_AfterJets;
+  HPlus::WrappedTH1 *hGenTauEta_AfterJets;
+  HPlus::WrappedTH1 *hGenTauPhi_AfterJets;
 };
 
 HPlusEmbeddingDebugTauAnalyzer::HPlusEmbeddingDebugTauAnalyzer(const edm::ParameterSet& iConfig):
@@ -57,7 +74,26 @@ HPlusEmbeddingDebugTauAnalyzer::HPlusEmbeddingDebugTauAnalyzer(const edm::Parame
   cGenTausAcceptance(eventCounter.addCounter(">= 1 gen tau in acceptance")),
   cOneGenTau(eventCounter.addCounter("= 1 gen tau")),
   cThreeJets(eventCounter.addCounter("3 jets"))
-{}
+{
+  edm::Service<TFileService> fs;
+    // Save the module configuration to the output ROOT file as a TNamed object
+  fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
+
+  hGenTauPt = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau_pt", "Pt", 400, 0, 400);
+  hGenTauPtVisible = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau_pt_visible", "Visible pt", 400, 0, 400);
+  hGenTauEta = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau_eta", "Eta", 44, -2.1, 2.1);
+  hGenTauPhi = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau_phi", "Phi", 128, -3.2, 3.2);
+
+  hGenTauPt2 = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau2_pt", "Pt", 400, 0, 400);
+  hGenTauPtVisible2 = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau2_pt_visible", "Visible pt", 400, 0, 400);
+  hGenTauEta2 = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau2_eta", "Eta", 44, -2.1, 2.1);
+  hGenTauPhi2 = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau2_phi", "Phi", 128, -3.2, 3.2);
+
+  hGenTauPt_AfterJets = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau_afterjet_pt", "Pt", 400, 0, 400);
+  hGenTauPtVisible_AfterJets = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau_afterjet_pt_visible", "Visible pt", 400, 0, 400);
+  hGenTauEta_AfterJets = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau_afterjet_eta", "eta", 44, -2.1, 2.1);
+  hGenTauPhi_AfterJets = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "gentau_afterjet_phi", "phi", 128, -3.2, 3.2);
+}
 
 HPlusEmbeddingDebugTauAnalyzer::~HPlusEmbeddingDebugTauAnalyzer() {}
 
@@ -132,12 +168,29 @@ void HPlusEmbeddingDebugTauAnalyzer::analyze(const edm::Event& iEvent, const edm
     return;
   increment(cGenTausAcceptance);
 
+  if(wtaus.size() == 2) {
+    for(size_t i=0; i<wtaus.size(); ++i) {
+      const reco::GenParticle *genTau2 = wtaus[i];
+      math::XYZTLorentzVector genTauVisible2 = HPlus::GenParticleTools::calculateVisibleTau(genTau2);
+
+      hGenTauPt2->Fill(genTau2->pt());
+      hGenTauEta2->Fill(genTau2->eta());
+      hGenTauPhi2->Fill(genTau2->phi());
+      hGenTauPtVisible2->Fill(genTauVisible2.Pt());
+    }
+  }
+
   if(wtaus.size() != 1)
     return;
   increment(cOneGenTau);
 
   const reco::GenParticle *genTau = wtaus[0];
   math::XYZTLorentzVector genTauVisible = HPlus::GenParticleTools::calculateVisibleTau(genTau);
+
+  hGenTauPt->Fill(genTau->pt());
+  hGenTauEta->Fill(genTau->eta());
+  hGenTauPhi->Fill(genTau->phi());
+  hGenTauPtVisible->Fill(genTauVisible.Pt());
 
   edm::PtrVector<pat::Jet> jets;
   for(edm::View<pat::Jet>::const_iterator iJet = hjets->begin(); iJet != hjets->end(); ++iJet) {
@@ -150,6 +203,11 @@ void HPlusEmbeddingDebugTauAnalyzer::analyze(const edm::Event& iEvent, const edm
   if(jets.size() < 3)
     return;
   increment(cThreeJets);
+
+  hGenTauPt_AfterJets->Fill(genTau->pt());
+  hGenTauEta_AfterJets->Fill(genTau->eta());
+  hGenTauPhi_AfterJets->Fill(genTau->phi());
+  hGenTauPtVisible_AfterJets->Fill(genTauVisible.Pt());
 }
 
 //define this as a plug-in
