@@ -2404,6 +2404,13 @@ class DatasetPrecursor:
     def isMC(self):
         return not self.isData()
 
+    ## Close the ROOT files
+    def close():
+        for f in self._rootFiles:
+            f.close("R")
+            f.Delete()
+        self._rootFiles = []
+
 _analysisNameSkipList = [re.compile("^SystVar"), re.compile("configInfo"), re.compile("PUWeightProducer")]
 _analysisSearchModes = ["Light", "Heavy"]
 _dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
@@ -2692,6 +2699,10 @@ class DatasetManagerCreator:
                 print "  "+s
         print
 
+    ## Close the ROOT files
+    def close(self):
+        for precursor in self._precursors:
+            precursor.close()
 
 ## Helper class to plug NtupleCache to the existing framework
 #
