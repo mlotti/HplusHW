@@ -159,8 +159,10 @@ datasetsSignal = []
 
 def main():
     parser = OptionParser(usage="Usage: %prog [options]")
+    allSteps = config.keys()
+    allSteps.sort()
     parser.add_option("--step", dest="step", default=defaultStep,
-                      help="Processing step, one of %s (default: %s)" % (", ".join(config.keys()), defaultStep))
+                      help="Processing step, one of %s (default: %s)" % (", ".join(allSteps), defaultStep))
     parser.add_option("--version", dest="version", action="append", default=[],
                       help="Data version(s) to use as an input for 'analysis', 'signalAnalysis', or output for 'skim', 'embedding' (default: %s)" % ", ".join(defaultVersions))
     parser.add_option("--midfix", dest="midfix", default=dirPrefix,
@@ -203,15 +205,15 @@ def createTasks(opts, step, version=None):
     crabcfg = "crab.cfg"
     crabcfgtemplate = None
     scheduler = "arc"
-    if step in ["analysis", "analysisTau", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis"]:
+    if step in ["analysis", "analysisTau", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
         crabcfg = None
         if "HOST" in os.environ and "lxplus" in os.environ["HOST"]:
             scheduler = "remoteGlidein"
         args = {}
-        if step == "analysisTau":
+        if step in ["analysisTau", "ewkBackgroundCoverageAnalysisAod"]:
             args["copy_data"] = True
             args["userLines"] = [
-                "user_remote_dir = analysisTau_%s" % time.strftime("%y%m%d_%H%M%S"),
+                "user_remote_dir = %s_%s" % (step, time.strftime("%y%m%d_%H%M%S")),
                 "storage_element = T2_FI_HIP"
                 ]
         else:
