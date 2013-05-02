@@ -116,6 +116,7 @@ namespace HPlus {
     fTree->Branch("met_sumet", &fRawMetSumEt);
     fTree->Branch("met_significance", &fRawMetSignificance);
 
+    fTree->Branch("selectedMET_p4", &fSelectedMet);
     fTree->Branch("metType1_p4", &fType1Met);
     fTree->Branch("metType2_p4", &fType2Met);
     fTree->Branch("caloMet_p4", &fCaloMet);
@@ -152,7 +153,7 @@ namespace HPlus {
     fTree->Branch("MHT_AllJets_p4", &fMHTAllJets);
     fTree->Branch("vDiJetMassesNoTau", &vDiJetMassesNoTau);
 
-    fTree->Branch("deltaPhi", &fDeltaPhi);
+    // fTree->Branch("fakeMETClosestDeltaPhi", &fFakeMETClosestDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
 
     // Tail Killer
@@ -774,6 +775,7 @@ namespace HPlus {
     fRawMetSumEt = nan;
     fRawMetSignificance = nan;
 
+    fSelectedMet.SetXYZT(nan, nan, nan, nan);
     fType1Met.SetXYZT(nan, nan, nan, nan);
     fType2Met.SetXYZT(nan, nan, nan, nan);
     fCaloMet.SetXYZT(nan, nan, nan, nan);
@@ -807,7 +809,7 @@ namespace HPlus {
     bTauIsFake = nan;
     vDiJetMassesNoTau.clear();
   
-    fDeltaPhi = nan;
+    //fFakeMETClosestDeltaPhi = nan;
 
     fPassedBTagging = nan;
 

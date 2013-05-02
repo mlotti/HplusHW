@@ -1667,6 +1667,12 @@ class Dataset:
             # because null TObject == None, but is not None
             if o == None:
                 raise HistogramNotFoundException("Unable to find object '%s' (requested '%s') from file '%s'" % (realName, name, self.files[0].GetName()))
+
+            # http://root.cern.ch/phpBB3/viewtopic.php?f=14&t=15496
+            # This one seems to save quite a lot of "garbage
+            # collection" time
+            ROOT.SetOwnership(o, True)
+
             ret.append(o)
         return (ret, realName)
 
@@ -2671,6 +2677,13 @@ class DatasetPrecursor:
     def isMC(self):
         return not self.isData()
 
+    ## Close the ROOT files
+    def close():
+        for f in self._rootFiles:
+            f.close("R")
+            f.Delete()
+        self._rootFiles = []
+
 _analysisNameSkipList = [re.compile("^SystVar"), re.compile("configInfo"), re.compile("PUWeightProducer")]
 _analysisSearchModes = ["Light", "Heavy"]
 _dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
@@ -2969,6 +2982,10 @@ class DatasetManagerCreator:
                 print "  "+s
         print
 
+    ## Close the ROOT files
+    def close(self):
+        for precursor in self._precursors:
+            precursor.close()
 
 ## Helper class to plug NtupleCache to the existing framework
 #

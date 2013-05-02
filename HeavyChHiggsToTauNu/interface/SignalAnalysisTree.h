@@ -58,8 +58,8 @@ namespace HPlus {
       fBTaggingWeight = scaleFactor;
       fBTaggingWeightAbsUnc = scaleFactorUnc;
     }
-    void setSetPassedTailKillerCollinear (bool passed) {bPassedTailKillerCollinearCuts  = passed;}
-    void setSetPassedTailKillerBackToBack(bool passed) {bPassedTailKillerBackToBackCuts = passed;}
+    void setPassedTailKillerCollinear (bool passed) {bPassedTailKillerCollinearCuts  = passed;}
+    void setPassedTailKillerBackToBack(bool passed) {bPassedTailKillerBackToBackCuts = passed;}
 
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
@@ -68,6 +68,7 @@ namespace HPlus {
       fRawMetSumEt = met->sumEt();
       fRawMetSignificance = met->significance();
     }
+    void setSelectedMet(const edm::Ptr<reco::MET>& met) { fSelectedMet = met->p4(); }
     void setType1MET(const edm::Ptr<reco::MET>& met) { fType1Met = met->p4(); }
     void setType2MET(const edm::Ptr<reco::MET>& met) { fType2Met = met->p4(); }
     void setGenMET(const edm::Ptr<reco::GenMET>& met) { fGenMet = met->p4(); }
@@ -104,7 +105,7 @@ namespace HPlus {
     void setCparameter(double Cparameter) { fCparameter = Cparameter; }
     void setDparameter(double Dparameter) { fDparameter = Dparameter; }
     void setJetThrust(double jetThrust) { fJetThrust = jetThrust; }
-    void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
+    void setDeltaPhi(double deltaPhi) { fFakeMETClosestDeltaPhi = deltaPhi; }
     void setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
     void setSelJets(const edm::PtrVector<pat::Jet>& selJets);
     void setSelJetsInclTau(const edm::PtrVector<pat::Jet>& selJetsInclTau);
@@ -264,6 +265,7 @@ namespace HPlus {
     XYZTLorentzVector fMHTAllJets;
     double fRawMetSumEt;
     double fRawMetSignificance;
+    XYZTLorentzVector fSelectedMet;
     XYZTLorentzVector fType1Met;
     XYZTLorentzVector fType2Met;
     XYZTLorentzVector fCaloMet;
@@ -287,7 +289,7 @@ namespace HPlus {
     double fJetThrust;
     bool bTauIsFake;
     std::vector<float> vDiJetMassesNoTau;
-    double fDeltaPhi;
+    double fFakeMETClosestDeltaPhi;
 
     bool fPassedBTagging;
 
