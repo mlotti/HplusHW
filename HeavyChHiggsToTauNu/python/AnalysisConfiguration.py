@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions as HChOptions
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
 import HiggsAnalysis.HeavyChHiggsToTauNu.WJetsWeight as wjetsWeight
@@ -1040,3 +1041,18 @@ class ConfigBuilder:
         names.append(name+"PUWeightMinus")
 
         self._accumulateAnalyzers("PU weight variation", names)
+
+
+def addPuWeightProducers(dataVersion, process, commonSequence, dataEras, firstInSequence=False):
+    names = []
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+    for era in dataEras:
+        names.append(param.setPileupWeight(dataVersion, process, commonSequence))
+
+    if firstInSequence:
+        for name in names:
+            mod = getattr(process, name)
+            commonSequence.remove(mod)
+            commonSequence.insert(0, mod)
+
+    return names
