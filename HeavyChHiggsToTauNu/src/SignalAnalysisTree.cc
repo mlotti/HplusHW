@@ -116,6 +116,7 @@ namespace HPlus {
     fTree->Branch("met_sumet", &fRawMetSumEt);
     fTree->Branch("met_significance", &fRawMetSignificance);
 
+    fTree->Branch("selectedMET_p4", &fSelectedMet);
     fTree->Branch("metType1_p4", &fType1Met);
     fTree->Branch("metType2_p4", &fType2Met);
     fTree->Branch("caloMet_p4", &fCaloMet);
@@ -152,8 +153,15 @@ namespace HPlus {
     fTree->Branch("MHT_AllJets_p4", &fMHTAllJets);
     fTree->Branch("vDiJetMassesNoTau", &vDiJetMassesNoTau);
 
-    fTree->Branch("deltaPhi", &fDeltaPhi);
+    // fTree->Branch("fakeMETClosestDeltaPhi", &fFakeMETClosestDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
+
+    // Tail Killer
+    fTree->Branch("passedTailKillerCollinearCuts", &bPassedTailKillerCollinearCuts);
+    fTree->Branch("passedTailKillerBackToBackCuts", &bPassedTailKillerBackToBackCuts);
+    fTree->Branch("radiusFromBackToBackCorner", &fRadiusFromBackToBackCorner);
+    fTree->Branch("radiusFromCollinearCorner", &fRadiusFromCollinearCorner);
+    fTree->Branch("TailKillerYaxisIntercept", &fTailKillerYaxisIntercept);
 
     fTree->Branch("genMet_p4", &fGenMet);
 
@@ -228,7 +236,7 @@ namespace HPlus {
     reset();
   }
 
-
+  
   void SignalAnalysisTree::setHltTaus(const pat::TriggerObjectRefVector& hltTaus) {
     // std::cout << "setHltTaus: 1" << std::endl;  
     fHltTaus.clear();
@@ -238,7 +246,20 @@ namespace HPlus {
     }
     // std::cout << "setHltTaus: 2" << std::endl;  
   }
- 
+  
+  void SignalAnalysisTree::setRadiusFromBackToBackCornerJet(double RadiusFromBackToBackCorner){
+    fRadiusFromBackToBackCorner.push_back(RadiusFromBackToBackCorner);
+  }
+
+  void SignalAnalysisTree::setRadiusFromCollinearCornerJet(double RadiusFromCollinearCorner) {
+    fRadiusFromCollinearCorner.push_back(RadiusFromCollinearCorner);
+  }
+
+  void SignalAnalysisTree::setTailKillerYaxisIntercept(double TailKillerYaxisIntercept) {
+    // Assumes equilateral triangle in [x : y] = [DeltaPhi(tau, MET) : DeltaPhi(jet, MET)] plane. i.e. y = 1*x + c
+    fTailKillerYaxisIntercept.push_back(TailKillerYaxisIntercept);
+  }
+
 
   void SignalAnalysisTree::setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets){
     for(size_t i=0; i<allIdentifiedJets.size(); ++i) {
@@ -754,6 +775,7 @@ namespace HPlus {
     fRawMetSumEt = nan;
     fRawMetSignificance = nan;
 
+    fSelectedMet.SetXYZT(nan, nan, nan, nan);
     fType1Met.SetXYZT(nan, nan, nan, nan);
     fType2Met.SetXYZT(nan, nan, nan, nan);
     fCaloMet.SetXYZT(nan, nan, nan, nan);
@@ -784,13 +806,19 @@ namespace HPlus {
     fHplusMassSelectedNeutrinoPtSolution = nan;
     fHplusMassMCNeutrinoPz = nan;
 
-    bTauIsFake = false;
+    bTauIsFake = nan;
     vDiJetMassesNoTau.clear();
   
-    fDeltaPhi = nan;
+    //fFakeMETClosestDeltaPhi = nan;
 
-    fPassedBTagging = false;
+    fPassedBTagging = nan;
 
+    // Tail Killer
+    bPassedTailKillerCollinearCuts  = nan;
+    bPassedTailKillerBackToBackCuts = nan;
+    fRadiusFromBackToBackCorner.clear();
+    fRadiusFromCollinearCorner.clear();
+    fTailKillerYaxisIntercept.clear();
     fGenMet.SetXYZT(nan, nan, nan, nan);
 
     if(fTauEmbeddingMuon.get())
@@ -799,66 +827,69 @@ namespace HPlus {
     fTauEmbeddingCaloMetNoHF.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingCaloMet.SetXYZT(nan, nan, nan, nan);
     // std::cout << "reset: 2" << std::endl;  
-    // nonIsoMuons
-    fNonIsoMuons.clear();
-    fNonIsoMuons_IsGlobalMuon.clear();
-    fNonIsoMuons_IsTrackerMuon.clear();
-    fNonIsoMuons_AllMuons.clear();
-    fNonIsoMuons_AllGlobalMuons.clear();
-    fNonIsoMuons_AllStandAloneMuons.clear();
-    fNonIsoMuons_AllTrackerMuons.clear();
-    fNonIsoMuons_TrackerMuonArbitrated.clear();
-    fNonIsoMuons_AllArbitrated.clear();
-    fNonIsoMuons_GlobalMuonPromptTight.clear();
-    fNonIsoMuons_TMLastStationLoose.clear();
-    fNonIsoMuons_TMLastStationTight.clear();
-    fNonIsoMuons_TMOneStationLoose.clear();
-    fNonIsoMuons_TMLastStationOptimizedLowPtLoose.clear();
-    fNonIsoMuons_TMLastStationOptimizedLowPtTight.clear();
-    fNonIsoMuons_GMTkChiCompatibility.clear();
-    fNonIsoMuons_GMTkKinkTight.clear();
-    fNonIsoMuons_TMLastStationAngLoose.clear();
-    fNonIsoMuons_TMLastStationAngTight.clear();
-    fNonIsoMuons_TMLastStationOptimizedBarrelLowPtLoose.clear();
-    fNonIsoMuons_TMLastStationOptimizedBarrelLowPtTight.clear();
-    fNonIsoMuons_InnerTrackNTrkHits.clear();
-    fNonIsoMuons_InnerTrackNPixelHits.clear();
-    fNonIsoMuons_GlobalTrackNMuonHits.clear();
-    fNonIsoMuons_NormChiSquare.clear();
-    fNonIsoMuons_IPTwrtBeamLine.clear(); 
-    fNonIsoMuons_IPZwrtPV.clear();
-    fNonIsoMuons_TrackIso.clear();
-    fNonIsoMuons_EcalIso.clear();
-    fNonIsoMuons_HcalIso.clear();
-    fNonIsoMuons_RelIso.clear();
 
-    // nonIsoElectrons
-    fNonIsoElectrons.clear();
-    fNonIsoElectrons_GsfTrkRefIsNull.clear();
-    fNonIsoElectrons_SuperClusterRefIsNull.clear();
-    fNonIsoElectrons_SuperClusterRefEta.clear();
-    fNonIsoElectrons_SuperClusterRefPhi.clear();
-    fNonIsoElectrons_SimpleId_Loose.clear();
-    fNonIsoElectrons_SimpleId_RobustLoose.clear();
-    fNonIsoElectrons_SimpleId_Tight.clear();
-    fNonIsoElectrons_SimpleId_RobustTight.clear();
-    fNonIsoElectrons_SimpleId_RobustHighEnergy.clear();
-    fNonIsoElectrons_ID_EleId95relIso.clear();
-    fNonIsoElectrons_ID_EleId90relIso.clear();
-    fNonIsoElectrons_ID_EleId85relIso.clear(); 
-    fNonIsoElectrons_ID_EleId80relIso.clear();
-    fNonIsoElectrons_ID_EleId70relIso.clear();
-    fNonIsoElectrons_ID_EleId60relIso.clear();
-    fNonIsoElectrons_NLostHitsInTrker.clear();
-    fNonIsoElectrons_RelIso.clear();
-    fNonIsoElectrons_DeltaCotTheta.clear();
-    fNonIsoElectrons_DistanceOSTrk.clear();
-    fNonIsoElectrons_IPwrtBeamSpot.clear();
-    fNonIsoElectrons_TrackIso.clear();
-    fNonIsoElectrons_EcalIso.clear();
-    fNonIsoElectrons_HcalIso.clear();
-    fNonIsoElectrons_RelIso.clear();
-    fNonIsoElectrons_ElectronMuonDeltaR.clear();
-    // std::cout << "reset: 3" << std::endl;  
+    if(fFillNonIsoLeptonVars){
+      // nonIsoMuons
+      fNonIsoMuons.clear();
+      fNonIsoMuons_IsGlobalMuon.clear();
+      fNonIsoMuons_IsTrackerMuon.clear();
+      fNonIsoMuons_AllMuons.clear();
+      fNonIsoMuons_AllGlobalMuons.clear();
+      fNonIsoMuons_AllStandAloneMuons.clear();
+      fNonIsoMuons_AllTrackerMuons.clear();
+      fNonIsoMuons_TrackerMuonArbitrated.clear();
+      fNonIsoMuons_AllArbitrated.clear();
+      fNonIsoMuons_GlobalMuonPromptTight.clear();
+      fNonIsoMuons_TMLastStationLoose.clear();
+      fNonIsoMuons_TMLastStationTight.clear();
+      fNonIsoMuons_TMOneStationLoose.clear();
+      fNonIsoMuons_TMLastStationOptimizedLowPtLoose.clear();
+      fNonIsoMuons_TMLastStationOptimizedLowPtTight.clear();
+      fNonIsoMuons_GMTkChiCompatibility.clear();
+      fNonIsoMuons_GMTkKinkTight.clear();
+      fNonIsoMuons_TMLastStationAngLoose.clear();
+      fNonIsoMuons_TMLastStationAngTight.clear();
+      fNonIsoMuons_TMLastStationOptimizedBarrelLowPtLoose.clear();
+      fNonIsoMuons_TMLastStationOptimizedBarrelLowPtTight.clear();
+      fNonIsoMuons_InnerTrackNTrkHits.clear();
+      fNonIsoMuons_InnerTrackNPixelHits.clear();
+      fNonIsoMuons_GlobalTrackNMuonHits.clear();
+      fNonIsoMuons_NormChiSquare.clear();
+      fNonIsoMuons_IPTwrtBeamLine.clear(); 
+      fNonIsoMuons_IPZwrtPV.clear();
+      fNonIsoMuons_TrackIso.clear();
+      fNonIsoMuons_EcalIso.clear();
+      fNonIsoMuons_HcalIso.clear();
+      fNonIsoMuons_RelIso.clear();
+      
+      // nonIsoElectrons
+      fNonIsoElectrons.clear();
+      fNonIsoElectrons_GsfTrkRefIsNull.clear();
+      fNonIsoElectrons_SuperClusterRefIsNull.clear();
+      fNonIsoElectrons_SuperClusterRefEta.clear();
+      fNonIsoElectrons_SuperClusterRefPhi.clear();
+      fNonIsoElectrons_SimpleId_Loose.clear();
+      fNonIsoElectrons_SimpleId_RobustLoose.clear();
+      fNonIsoElectrons_SimpleId_Tight.clear();
+      fNonIsoElectrons_SimpleId_RobustTight.clear();
+      fNonIsoElectrons_SimpleId_RobustHighEnergy.clear();
+      fNonIsoElectrons_ID_EleId95relIso.clear();
+      fNonIsoElectrons_ID_EleId90relIso.clear();
+      fNonIsoElectrons_ID_EleId85relIso.clear(); 
+      fNonIsoElectrons_ID_EleId80relIso.clear();
+      fNonIsoElectrons_ID_EleId70relIso.clear();
+      fNonIsoElectrons_ID_EleId60relIso.clear();
+      fNonIsoElectrons_NLostHitsInTrker.clear();
+      fNonIsoElectrons_RelIso.clear();
+      fNonIsoElectrons_DeltaCotTheta.clear();
+      fNonIsoElectrons_DistanceOSTrk.clear();
+      fNonIsoElectrons_IPwrtBeamSpot.clear();
+      fNonIsoElectrons_TrackIso.clear();
+      fNonIsoElectrons_EcalIso.clear();
+      fNonIsoElectrons_HcalIso.clear();
+      fNonIsoElectrons_RelIso.clear();
+      fNonIsoElectrons_ElectronMuonDeltaR.clear();
+      // std::cout << "reset: 3" << std::endl;  
+    }//eof: if(fFillNonIsoLeptonVars){
   }
 }
