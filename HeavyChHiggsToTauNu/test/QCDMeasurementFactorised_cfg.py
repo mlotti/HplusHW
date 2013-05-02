@@ -40,7 +40,7 @@ def customize(signalAnalysis):
     signalAnalysis.applyNprongsCutForTauCandidate = False
     signalAnalysis.applyRtauCutForTauCandidate = False
     # Binning of factorisation (note that first bin is below the first number and last bin is greater than the last number)
-    signalAnalysis.factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150., 200., 300.)
+    signalAnalysis.factorisationTauPtBinLowEdges = cms.untracked.vdouble(41., 50., 60., 70., 80., 100., 120., 150., 200., 300.)
     signalAnalysis.factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5) # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
     signalAnalysis.factorisationNVerticesBinLowEdges = cms.untracked.vint32(10)
     # Variation options
