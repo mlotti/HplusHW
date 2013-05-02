@@ -284,9 +284,11 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
     # BJetPlusX Jul13 HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4: 1275/5000 = 0.25500
     #                 HLT_QuadJet75_55_38_20_BTagIP_VBF_v3: 858/5000 = 0.17160
     #                 OR:  1738/5000 = 0.35660
+    # MultiJet1Parked 05Nov 2012Cv2 HLT_QuadJet80_v4: 361/5000 = 0.072200
+    #                               HLT_QuadJet50_v3: 4928/5000 = 0.98560
     # MultiJet1Parked Dec10 HLT_QuadJet80_v6: 198/4722 = 0.041931
     #                       HLT_QuadJet50_v5: 2678/4722 = 0.56713
-    #                       HLT_QuadJet45_v1: /4722 =
+    #                       HLT_QuadJet45_v1: 4704/4722 = 0.99619
 
     if tauTriggers is None:
         tauTriggers = {
