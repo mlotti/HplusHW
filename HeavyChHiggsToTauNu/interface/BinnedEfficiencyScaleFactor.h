@@ -2,46 +2,23 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_BinnedEfficiencyScaleFactor_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_BinnedEfficiencyScaleFactor_h
 
-#include<vector>
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EfficiencyScaleFactorBase.h"
 
-namespace edm {
-  class ParameterSet;
-}
+#include<vector>
+#include<string>
 
 namespace HPlus {
-  class BinnedEfficiencyScaleFactor {
+  class BinnedEfficiencyScaleFactor: public EfficiencyScaleFactorBase {
   public:
-    enum Mode {
-      kEfficiency,
-      kScaleFactor,
-      kDisabled
-    };
-
-    class Data {
+    class Data: public EfficiencyScaleFactorBase::Data {
     public:
       Data();
       ~Data();
 
-      const double getEventWeight() const {
-        return fWeight;
-      }
-      const double getEventWeightAbsoluteUncertainty() const {
-        return fWeightAbsUnc;
-      }
-      const double getEventWeightRelativeUncertainty() const {
-        return fWeightRelUnc;
-      }
-
       friend class BinnedEfficiencyScaleFactor;
-
-    private:
-      double fWeight;
-      double fWeightAbsUnc;
-      double fWeightRelUnc;
-
     };
 
-    explicit BinnedEfficiencyScaleFactor(const edm::ParameterSet& iConfig);
+    explicit BinnedEfficiencyScaleFactor(const edm::ParameterSet& iConfig, const std::string& quantity);
     ~BinnedEfficiencyScaleFactor();
 
     void setRun(unsigned run);
@@ -64,37 +41,19 @@ namespace HPlus {
 
     size_t nbins() const { return fBinLowEdges.size(); }
     double binLowEdge(size_t bin) const { return fBinLowEdges[bin]; }
-    double binScaleFactor(size_t bin) const { return fScaleValues[bin]; }
-    double binScaleFactorAbsoluteUncertainty(size_t bin) const { return fScaleUncertainties[bin]; }
+    double binScaleFactor(size_t bin) const { return fData.fScaleValues[bin]; }
+    double binScaleFactorAbsoluteUncertainty(size_t bin) const { return fData.fScaleUncertainties[bin]; }
 
     Data getEventWeight(double value, bool isData) const;
-    Mode getMode() const { return fMode; }
 
   private:
-    struct DataValue {
-      unsigned firstRun;
-      unsigned lastRun;
-      double luminosity;
-      std::vector<double> values;
-      std::vector<double> uncertainties;
-    };
+    typedef EfficiencyScaleFactorData<std::vector<double> > EffData;
+
+    EffData fData;
 
     size_t index(double value) const;
 
     std::vector<double> fBinLowEdges;
-    std::vector<DataValue> fDataValues;
-
-    std::vector<double> fEffDataAverageValues;
-    std::vector<double> fEffDataAverageUncertainties;
-    std::vector<double> fEffMCValues;
-    std::vector<double> fEffMCUncertainties;
-
-    std::vector<double> fScaleValues;
-    std::vector<double> fScaleUncertainties;
-
-    const DataValue *fCurrentRunData;
-
-    Mode fMode;
   };
 }
 

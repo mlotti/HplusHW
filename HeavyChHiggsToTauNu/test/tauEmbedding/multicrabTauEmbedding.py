@@ -53,7 +53,6 @@ defaultVersions = [
 #    "v44_4_2_seed0",
 #    "v44_4_2_seed1"
 
-#    "v44_5_notrg0"
     "v44_5_notrg2"
 ]
 skimVersion = "v44_5"
@@ -65,7 +64,8 @@ config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,
           "analysis":             {"workflow": "tauembedding_analysis_%s",               "config": "embeddingAnalysis_cfg.py"},
           "genTauSkim":           {"workflow": "tauembedding_gentauskim_"+genTauSkimVersion,     "config": "../pattuple/patTuple_cfg.py"},
           "analysisTau":          {"workflow": "tauembedding_gentauanalysis_"+genTauSkimVersion, "config": "tauAnalysis_cfg.py"},
-          "analysisTauAod":       {"workflow": "AOD is the input, wf missing?",          "config": "tauAnalysis_cfg.py"},
+          "analysisTauAod":       {"workflow": "embeddingAodAnalysis_44X",               "config": "tauAnalysis_cfg.py"},
+          "muonDebugAnalysisAod": {"workflow": "embeddingAodAnalysis_44X",               "config": "genMuonDebugAnalysisAOD_cfg.py"},
           "signalAnalysis":       {"workflow": "tauembedding_analysis_%s",               "config": "../signalAnalysis_cfg.py"},
           "signalAnalysisGenTau": {"workflow": "analysis_v44_4",                         "config": "../signalAnalysis_cfg.py"},
           "EWKMatching":          {"workflow": "tauembedding_analysis_%s",               "config": "../EWKMatching_cfg.py"},
@@ -74,6 +74,12 @@ config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,
           "ewkBackgroundCoverageAnalysis":    {"workflow": "analysis_v44_4",             "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
           "ewkBackgroundCoverageAnalysisAod": {"workflow": "embeddingAodAnalysis_44X",   "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
           }
+
+updateNjobs = {
+    "muonDebugAnalysisAod": {
+        "TTJets_TuneZ2_Fall11": 100,
+    }
+}
 
 
 # "Midfix" for multicrab directory name
@@ -207,7 +213,7 @@ def createTasks(opts, step, version=None):
     crabcfg = "crab.cfg"
     crabcfgtemplate = None
     scheduler = "arc"
-    if step in ["analysis", "analysisTau", "analysisTauAod", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis"]:
+    if step in ["analysis", "analysisTau", "analysisTauAod", "muonDebugAnalysisAod", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis"]:
         crabcfg = None
         if "HOST" in os.environ and "lxplus" in os.environ["HOST"]:
             scheduler = "remoteGlidein"
@@ -236,7 +242,7 @@ def createTasks(opts, step, version=None):
 
     # Select the datasets based on the processing step and data era
     datasets = []
-    if step in ["analysisTauAod", "signalAnalysisGenTau", "genTauSkim", "analysisTau"]:
+    if step in ["analysisTauAod", "muonDebugAnalysisAod", "signalAnalysisGenTau", "genTauSkim", "analysisTau"]:
         datasets.extend(datasetsMCnoQCD)
     elif step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
         datasets.extend(datasetsMCTTWJets)
@@ -283,6 +289,16 @@ def createTasks(opts, step, version=None):
 
     if step == "embedding":
         multicrab.addCommonLine("GRID.max_rss = 3000")
+
+    # Override number of jobs if asked
+    if updateNjobs.has_key(step):
+        for dname, njobs in updateNjobs[step].iteritems():
+            try:
+                md = multicrab.getDataset(dname)
+            except KeyError:
+                continue
+            md.setNumberOfJobs(njobs)
+
 
     # Create multicrab task(s)
     prefix = "multicrab_"+step+dirName
