@@ -328,6 +328,27 @@ namespace HPlus {
     return myGenMET;
   }
 
+  TVector3 getTauNeutrinoMomentum(const edm::Event& iEvent) {
+    // Hopefully the tau neutrino momentum reflects the momentum of the neutrino pair well!
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    int pId = 9999999;
+    TVector3 myTauNeutrinoMomentum(0.0, 0.0, 0.0);
+    TVector3 currentNeutrinoVector(0.0, 0.0, 0.0); // auxiliary
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      pId = p.pdgId();
+      // Ignore daughters of neutrinos (to avoid multiple counting of neutrinos)
+      if (hasImmediateMother(p,16) || hasImmediateMother(p,-16)) continue;
+      if (TMath::Abs(pId) == 16) {
+	currentNeutrinoVector.SetXYZ(p.px(), p.py(), p.pz());
+	myTauNeutrinoMomentum += currentNeutrinoVector;
+      }
+    }
+    return myTauNeutrinoMomentum;
+  }
+
+
   bool hasGenVisibleTauWithinDeltaR(const edm::Event& iEvent, TVector3 recoTauVector, double deltaRCut) {
     TVector3 genVisibleTauVector(0.0, 0.0, 0.0);
     edm::Handle <reco::GenParticleCollection> genParticles;

@@ -218,7 +218,6 @@ namespace HPlus {
     WrappedTH2* h2InvariantMassVsNeutrinoNumber;
 
     WrappedTH1* hTopMassSolution;
-    WrappedTH1* hTopInvariantMassInGenerator;
     WrappedTH1* hSelectedNeutrinoPzSolution;
 
     WrappedTH1* hHiggsMass_betterSolution;

@@ -261,9 +261,6 @@ namespace HPlus {
                                                           "MET #Delta p_T;#Delta p_T (GeV)", 100, -200, 200);
     hMETDeltaPhi              = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METDeltaPhi",
                                                           "MET #Delta #phi;#Delta #phi (degrees)", 180, -180, 180);
-    // Generator information
-    hTopInvariantMassInGenerator = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopInvariantMassInGenerator",
-							     "Top invariant mass (GEN);m_{top} (GeV)", 100, 0, 500);
   }
 
   FullHiggsMassCalculator::~FullHiggsMassCalculator() {}
@@ -357,9 +354,6 @@ namespace HPlus {
 
     // The rest of the analysis is only done for MC signal events with a light charged Higgs (at least for now)
     if (iEvent.isRealData() || !eventHasLightChargedHiggs(iEvent)) return output;
-
-    // Histogram the invariant mass of the top mother of the Higgs.
-    hTopInvariantMassInGenerator->Fill(getGenHiggsSideTop(iEvent)->mass());
 
     // CALCULATION USING TRUE MOMENTA FROM MC
     // --------------------------------------
@@ -868,7 +862,7 @@ namespace HPlus {
       // THESE HISTOGRAMS ARE FILLED ONLY IF THE EVENT HAS PASSED --->
       hHiggsMass->Fill(output.fHiggsMassSolutionSelected);
       if (bPrintDebugOutput) std::cout << "Solution put in histogram HiggsMass: " << output.fHiggsMassSolutionSelected << std::endl;
-      hNeutrinoNumberInPassedEvents->Fill(getNumberOfNeutrinosInEvent(iEvent));
+      if (!iEvent.isRealData()) hNeutrinoNumberInPassedEvents->Fill(getNumberOfNeutrinosInEvent(iEvent));
       hSelectedNeutrinoPzSolution->Fill(output.fNeutrinoPzSolutionSelected);
       // Counters (note: only incremented if the event has passed)
       increment(passedEvents_SubCount);
