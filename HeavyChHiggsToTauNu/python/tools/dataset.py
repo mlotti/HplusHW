@@ -1506,6 +1506,12 @@ class Dataset:
             # because null TObject == None, but is not None
             if o == None:
                 raise HistogramNotFoundException("Unable to find object '%s' (requested '%s') from file '%s'" % (realName, name, self.files[0].GetName()))
+
+            # http://root.cern.ch/phpBB3/viewtopic.php?f=14&t=15496
+            # This one seems to save quite a lot of "garbage
+            # collection" time
+            ROOT.SetOwnership(o, True)
+
             ret.append(o)
         return (ret, realName)
 
