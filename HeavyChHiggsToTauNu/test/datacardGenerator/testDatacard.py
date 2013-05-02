@@ -1,5 +1,6 @@
 DataCardName    = 'myDummyTestName'
 Path            = '/home/wendland/data/v445/met50'
+#Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 #MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [80,90,100,120,140,150,155,160]
@@ -69,9 +70,9 @@ DataCardName += "_"+OptionMassShape
 ##############################################################################
 # Specifications for QCD factorised
 
-QCDFactorisedStdSelVersion = "QCDfactorised_TradReference"
+#QCDFactorisedStdSelVersion = "QCDfactorised_TradReference"
 #QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30"
-#QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusCollinearTailKiller"
+QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusCollinearTailKiller"
 #QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30PlusCollinearTailKiller"
 #QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusTailKiller"
 #QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30PlusTailKiller"

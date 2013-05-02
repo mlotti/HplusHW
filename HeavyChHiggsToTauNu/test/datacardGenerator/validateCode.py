@@ -3,6 +3,8 @@
 import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.UnfoldedHistogramReader as unfoldedHistogramReader
+import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.QCDfactorised as QCDfactorised
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 if __name__ == "__main__":
@@ -10,3 +12,4 @@ if __name__ == "__main__":
     print HighlightStyle()+"Validating code of datacard generator ...\n"+NormalStyle()
     # Code validation for unfolded histogram reader
     unfoldedHistogramReader.validate()
+    QCDfactorised.validateQCDCountObject()

@@ -21,7 +21,7 @@ class QCDCountObject:
                  mcStat,
                  mcSyst):
         # Note that the number in value() must be exactly the same in both Count objects
-        self._dataUncert = Count(value,dataStat)
+        self._dataUncert = Count(value,dataStat,0.0)
         self._mcUncert = Count(value,mcStat,mcSyst)
 
     def value(self):
@@ -65,7 +65,7 @@ class QCDCountObject:
         return Count(self.value(), self.uncertainty(), self.systUncertainty())
 
     def copy(self):
-        return QCDCountObject(self._dataUncert.value(), self._dataUncert.uncertainty(), self._mcUncert.value(), self._mcUncert.value())
+        return QCDCountObject(self._dataUncert.value(), self._dataUncert.uncertainty(), self._mcUncert.uncertainty(), self._mcUncert.systUncertainty())
 
     def add(self, count):
         self._dataUncert.add(count._dataUncert)
@@ -89,6 +89,12 @@ class QCDCountObject:
         self._mcUncert._value /= scalar
         self._mcUncert._uncertainty /= scalar
         self._mcUncert._systUncertainty /= scalar
+
+    def printContents(self):
+        print "(%s,%s,%s,%s)"%(self._dataUncert._value, self._dataUncert._uncertainty, self._mcUncert._uncertainty, self._mcUncert._systUncertainty)
+
+    def sanityCheck(self):
+        return abs(self._dataUncert._value-self._mcUncert._value) < 0.00001 and self._dataUncert._systUncertainty < 0.00001
 
 ## Extracts data-MC EWK counts from a given point in the analysis
 class QCDEventCount():
@@ -372,11 +378,11 @@ class QCDEventCount():
         myName = "Purity_StatOnly_%s"%self._histoname.replace("/","_")
         hStat = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
         hStat.SetYTitle("Purity")
-        hStat.SetMaximum(1.0)
+        hStat.SetMaximum(1.1)
         myName = "Purity_StatAndSyst_%s"%self._histoname.replace("/","_")
         hFull = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
         hFull.SetYTitle("Purity")
-        hFull.SetMaximum(1.0)
+        hFull.SetMaximum(1.1)
         for i in range(0,self._hData.GetNbinsY()):
             myPurity = self.getPurityForUnfoldedBin(i)
             if myPurity.value() > 0.0 and myPurity.value() < 0.5:
@@ -394,15 +400,15 @@ class QCDEventCount():
         myBinDimensions = self._reader.getNbinsList()
         for myDim in range(0, len(myBinDimensions)):
             myName = "Purity_%s_StatOnly_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCStat = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
+            hCStat = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
             hCStat.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
             hCStat.SetYTitle("Purity")
-            hCStat.SetMaximum(1.0)
+            hCStat.SetMaximum(1.1)
             myName = "Purity_%s_StatAndSyst_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCFull = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
+            hCFull = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
             hCFull.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
             hCFull.SetYTitle("Purity")
-            hCFull.SetMaximum(1.0)
+            hCFull.SetMaximum(1.1)
             for i in range(0, myBinDimensions[myDim]):
                 myPurity = self.getContracted1DPurity(i, myDim)
                 if myPurity.value() > 0.0 and myPurity.value() < 0.5:
@@ -425,18 +431,17 @@ class QCDEventCount():
         # Make uncontracted histograms (can be a loooot of bins)
         myName = "Nevents_StatOnly_%s"%self._histoname.replace("/","_")
         hStat = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
-        hStat.SetYTitle("dN_{events}/dbin width")
-        hStat.SetMaximum(1.0)
+        hStat.SetYTitle("N_{events}")
+        #hStat.SetMaximum(1.0)
         myName = "Nevents_StatAndSyst_%s"%self._histoname.replace("/","_")
         hFull = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
-        hFull.SetYTitle("dN_{events}/dbin width")
-        hFull.SetMaximum(1.0)
+        hFull.SetYTitle("N_{events}")
+        #hFull.SetMaximum(1.0)
         for i in range(0,self._hData.GetNbinsY()):
             myResult = self.getQCDCountForUnfoldedBin(i)
-            myBinWidth = self._hData.GetBinWidth(i+1)
-            hStat.SetBinContent(i+1, myResult.value() / myBinWidth)
-            hStat.SetBinError(i+1, myResult.uncertainty() / myBinWidth)
-            hFull.SetBinContent(i+1, myResult.value() / myBinWidth)
+            hStat.SetBinContent(i+1, myResult.value())
+            hStat.SetBinError(i+1, myResult.uncertainty())
+            hFull.SetBinContent(i+1, myResult.value())
             hFull.SetBinError(i+1, myResult.totalUncertainty())
             hStat.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
             hFull.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
@@ -446,22 +451,25 @@ class QCDEventCount():
         myBinDimensions = self._reader.getNbinsList()
         for myDim in range(0, len(myBinDimensions)):
             myName = "Nevents_%s_StatOnly_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCStat = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
+            hCStat = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
             hCStat.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
             hCStat.SetYTitle("dN_{events}/dbin width")
-            hCStat.SetMaximum(1.0)
+            #hCStat.SetMaximum(1.0)
             myName = "Nevents_%s_StatAndSyst_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCFull = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
+            hCFull = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
             hCFull.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
             hCFull.SetYTitle("dN_{events}/dbin width")
-            hCFull.SetMaximum(1.0)
+            #hCFull.SetMaximum(1.0)
             for i in range(0, myBinDimensions[myDim]):
                 myResult = self.getContracted1DQCDCount(i, myDim)
-                myBinWidth = self._hData.GetBinWidth(i+1)
+                myWidthString = self._reader.getFactorisationRanges()[myDim][i].split("..")
+                myBinWidth = 1
+                if len(myWidthString) == 2:
+                    myBinWidth = float(myWidthString[1]) - float(myWidthString[0])
                 hCStat.SetBinContent(i+1, myResult.value() / myBinWidth)
                 hCStat.SetBinError(i+1, myResult.uncertainty() / myBinWidth)
                 hCFull.SetBinContent(i+1, myResult.value() / myBinWidth)
-                hCFull.SetBinError(i+1, myResult.totalUncertainty())
+                hCFull.SetBinError(i+1, myResult.totalUncertainty() / myBinWidth)
                 hCStat.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[myDim][i])
                 hCFull.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[myDim][i])
             hlist.append(hCStat)
@@ -474,21 +482,20 @@ class QCDEventCount():
         # Make uncontracted histograms (can be a loooot of bins)
         myName = "NegativeNevents_StatOnly_%s"%self._histoname.replace("/","_")
         hStat = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
-        hStat.SetYTitle("dN_{events}/dbin width")
-        hStat.SetMaximum(1.0)
+        hStat.SetYTitle("N_{events}")
+        #hStat.SetMaximum(1.0)
         myName = "NegativeNevents_StatAndSyst_%s"%self._histoname.replace("/","_")
         hFull = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
-        hFull.SetYTitle("dN_{events}/dbin width")
-        hFull.SetMaximum(1.0)
+        hFull.SetYTitle("N_{events}")
+        #hFull.SetMaximum(1.0)
         for i in range(0,self._hData.GetNbinsY()):
             myResult = self.getQCDCountForUnfoldedBin(i, cleanNegativeValues=False)
-            myBinWidth = self._hData.GetBinWidth(i+1)
             if myResult.value() < 0: # Plot only negative values
                 myMsg = WarningLabel()+"QCD factorised: Negative NQCD count in %s for bin %s (%f +- %f +- %f)!"%(self._histoname,self._hData.GetYaxis().GetBinLabel(i+1),myResult.value(),myResult.uncertainty(),myResult.systUncertainty())
                 self._messages.append(myMsg)
-                hStat.SetBinContent(i+1, myResult.value() / myBinWidth)
-                hStat.SetBinError(i+1, myResult.uncertainty() / myBinWidth)
-                hFull.SetBinContent(i+1, myResult.value() / myBinWidth)
+                hStat.SetBinContent(i+1, myResult.value())
+                hStat.SetBinError(i+1, myResult.uncertainty())
+                hFull.SetBinContent(i+1, myResult.value())
                 hFull.SetBinError(i+1, myResult.totalUncertainty())
                 hStat.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
                 hFull.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
@@ -498,25 +505,28 @@ class QCDEventCount():
         myBinDimensions = self._reader.getNbinsList()
         for myDim in range(0, len(myBinDimensions)):
             myName = "NegativeNevents_%s_StatOnly_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCStat = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
+            hCStat = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
             hCStat.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
             hCStat.SetYTitle("dN_{events}/dbin width")
-            hCStat.SetMaximum(1.0)
+            #hCStat.SetMaximum(1.0)
             myName = "NegativeNevents_%s_StatAndSyst_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCFull = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
+            hCFull = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
             hCFull.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
             hCFull.SetYTitle("dN_{events}/dbin width")
-            hCFull.SetMaximum(1.0)
+            #hCFull.SetMaximum(1.0)
             for i in range(0, myBinDimensions[myDim]):
                 myMsg = WarningLabel()+"QCD factorised: Negative NQCD count in %s for contracted bin %s %s (%f +- %f +- %f)!"%(self._histoname,self._reader.getFactorisationCaptions()[myDim],self._reader.getFactorisationRanges()[myDim][i],myResult.value(),myResult.uncertainty(),myResult.systUncertainty())
                 self._messages.append(myMsg)
                 myResult = self.getContracted1DQCDCount(i, myDim, cleanNegativeValues=False)
-                myBinWidth = self._hData.GetBinWidth(i+1)
+                myWidthString = self._reader.getFactorisationRanges()[myDim][i].split("..")
+                myBinWidth = 1
+                if len(myWidthString) == 2:
+                    myBinWidth = float(myWidthString[1]) - float(myWidthString[0])
                 if myResult.value() < 0: # Plot only negative values
                     hCStat.SetBinContent(i+1, myResult.value() / myBinWidth)
                     hCStat.SetBinError(i+1, myResult.uncertainty() / myBinWidth)
                     hCFull.SetBinContent(i+1, myResult.value() / myBinWidth)
-                    hCFull.SetBinError(i+1, myResult.totalUncertainty())
+                    hCFull.SetBinError(i+1, myResult.totalUncertainty() / myBinWidth)
                     hCStat.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[myDim][i])
                     hCFull.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[myDim][i])
             hlist.append(hCStat)
@@ -757,7 +767,7 @@ class QCDfactorisedCalculator():
         myNbins = self._basicCount.getReader().getUnfoldedBinCount()
         hStat = ROOT.TH1F(myName,myName,myNbins,0.0,myNbins)
         hStat.SetYTitle("NQCD")
-        hStat.SetMaximum(1.0)
+        #hStat.SetMaximum(1.0)
         myName = "NQCD_StatAndSyst"
         hFull = ROOT.TH1F(myName,myName,myNbins,0.0,myNbins)
         hFull.SetYTitle("NQCD")
@@ -778,22 +788,26 @@ class QCDfactorisedCalculator():
         for myDim in range(0, len(myBinDimensions)):
             self._contractedNQCD.append(QCDCountObject(0.0, 0.0, 0.0, 0.0))
             myName = "NQCD_%s_StatOnly"%(self._basicCount.getReader().getBinLabelList()[myDim].replace(" ","_"))
-            hCStat = ROOT.TH1F(myName,myName,myNbins,0.0,myNbins)
+            hCStat = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0.0,myBinDimensions[myDim])
             hCStat.SetXTitle(self._basicCount.getReader().getFactorisationCaptions()[myDim])
-            hCStat.SetYTitle("NQCD")
-            hCStat.SetMaximum(1.0)
+            hCStat.SetYTitle("dN_{QCD}/dbin width")
+            #hCStat.SetMaximum(1.0)
             myName = "NQCD_%s_StatAndSyst"%(self._basicCount.getReader().getBinLabelList()[myDim].replace(" ","_"))
-            hCFull = ROOT.TH1F(myName,myName,myNbins,0.0,myNbins)
+            hCFull = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0.0,myBinDimensions[myDim])
             hCFull.SetXTitle(self._basicCount.getReader().getFactorisationCaptions()[myDim])
-            hCFull.SetYTitle("NQCD")
-            hCFull.SetMaximum(1.0)
+            hCFull.SetYTitle("dN_{QCD}/dbin width")
+            #hCFull.SetMaximum(1.0)
             for i in range(0, myBinDimensions[myDim]):
                 myResult = self.getContracted1DNQCDForBin(i, myDim)
+                myWidthString = self._basicCount.getReader().getFactorisationRanges()[myDim][i].split("..")
+                myBinWidth = 1
+                if len(myWidthString) == 2:
+                    myBinWidth = float(myWidthString[1]) - float(myWidthString[0])
                 self._contractedNQCD[myDim].add(myResult)
-                hCStat.SetBinContent(i+1, myResult.value())
-                hCStat.SetBinError(i+1, myResult.uncertainty())
-                hCFull.SetBinContent(i+1, myResult.value())
-                hCFull.SetBinError(i+1, myResult.totalUncertainty())
+                hCStat.SetBinContent(i+1, myResult.value() / myBinWidth)
+                hCStat.SetBinError(i+1, myResult.uncertainty() / myBinWidth)
+                hCFull.SetBinContent(i+1, myResult.value() / myBinWidth)
+                hCFull.SetBinError(i+1, myResult.totalUncertainty() / myBinWidth)
                 hCStat.GetXaxis().SetBinLabel(i+1,self._basicCount.getReader().getFactorisationRanges()[myDim][i])
                 hCFull.GetXaxis().SetBinLabel(i+1,self._basicCount.getReader().getFactorisationRanges()[myDim][i])
             self._nQCDHistograms.append(hCStat)
@@ -1048,7 +1062,7 @@ class QCDfactorisedColumn(DatacardColumn):
         # Calculate result of NQCD
         myQCDCalculator = QCDfactorisedCalculator(myStdSelEventCount, myMETLegEventCount, myTauLegEventCount, False) # FIXME set to True
         self._infoHistograms.extend(myQCDCalculator.getNQCDHistograms())
-        saveQCDInfoHistograms
+        self.saveQCDInfoHistograms(".")
         if False:
             # FIXME
             self._yieldTable = myQCDCalculator.getYieldTable()
@@ -1514,3 +1528,45 @@ class QCDfactorisedExtractor(ExtractorBase):
 
     ## var _QCDmode
     # keyword for returning the stat, syst, or shapeStat results
+
+def validateQCDCountObject():
+    def check(a,b):
+        if abs(a-b) < 0.00001:
+            return TestPassedStyle()+"PASSED"+NormalStyle()
+        else:
+            print ErrorStyle()+"FAILED (%f != %f)"%(a,b)+NormalStyle()
+            raise Exception("Error: validation test failed!")
+    print HighlightStyle()+"validate: QCDCountObject\n"+NormalStyle()
+    #aa = Count(25.0, 3.0, 0.0)
+    #bb = Count(30.0, 0.0, 2.0)
+    #cc = aa.copy()
+    #cc.multiply(bb)
+    #print cc._value, cc._uncertainty, cc._systUncertainty
+    a = QCDCountObject(25.0, 3.0, 0.0, 0.0)
+    #a.printContents()
+    b = QCDCountObject(30.0, 0.0, 2.0, 1.0)
+    #b.printContents()
+    c = a.copy()
+    c.add(b)
+    #c.printContents()
+    print "validate: QCDCountObject::add() value:",check(c.value(), 55.0)
+    print "validate: QCDCountObject::add() data uncert:",check(c._dataUncert.uncertainty(), 3.0)
+    print "validate: QCDCountObject::add() mc stat uncert:",check(c._mcUncert.uncertainty(), 2.0)
+    print "validate: QCDCountObject::add() mc stat uncert:",check(c._mcUncert.systUncertainty(), 1.0)
+    print "validate: QCDCountObject::sanityCheck() mc stat uncert:",check(c.sanityCheck(), True)
+    d = QCDCountObject(10.0, 4.0, 2.0, 3.0)
+    d.multiply(a)
+    #d.printContents()
+    print "validate: QCDCountObject::multiply() value:",check(d.value(), 250.0)
+    print "validate: QCDCountObject::multiply() data uncert:",check(d._dataUncert.uncertainty(), sqrt(10900.0))
+    print "validate: QCDCountObject::multiply() mc stat uncert:",check(d._mcUncert.uncertainty(), 50.0)
+    print "validate: QCDCountObject::multiply() mc stat uncert:",check(d._mcUncert.systUncertainty(), 75.0)
+    print "validate: QCDCountObject::sanityCheck() mc stat uncert:",check(d.sanityCheck(), True)
+    e = QCDCountObject(10.0, 4.0, 2.0, 3.0)
+    e.divide(a)
+    #e.printContents()
+    print "validate: QCDCountObject::divide() value:",check(e.value(), 0.4)
+    print "validate: QCDCountObject::divide() data uncert:",check(e._dataUncert.uncertainty(), 0.4*sqrt(109.0/625.0))
+    print "validate: QCDCountObject::divide() mc stat uncert:",check(e._mcUncert.uncertainty(), 0.4*2.0/10.0)
+    print "validate: QCDCountObject::divide() mc stat uncert:",check(e._mcUncert.systUncertainty(), 0.4*3.0/10.0)
+    print "validate: QCDCountObject::sanityCheck() mc stat uncert:",check(e.sanityCheck(), True)
