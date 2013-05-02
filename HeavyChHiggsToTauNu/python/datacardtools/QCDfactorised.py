@@ -1047,6 +1047,8 @@ class QCDfactorisedColumn(DatacardColumn):
         self._infoHistograms.extend(myTauLegEventCount.makePurityHistograms())
         # Calculate result of NQCD
         myQCDCalculator = QCDfactorisedCalculator(myStdSelEventCount, myMETLegEventCount, myTauLegEventCount, False) # FIXME set to True
+        self._infoHistograms.extend(myQCDCalculator.getNQCDHistograms())
+        saveQCDInfoHistograms
         if False:
             # FIXME
             self._yieldTable = myQCDCalculator.getYieldTable()
