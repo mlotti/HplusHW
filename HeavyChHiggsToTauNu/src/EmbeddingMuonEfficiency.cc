@@ -49,7 +49,13 @@ namespace HPlus {
   }
 
   EmbeddingMuonEfficiency::Data EmbeddingMuonEfficiency::getEventWeight(const pat::Muon& muon, bool isData) {
-    //return Data(fEfficiencyScaleFactor.getEventWeight(isData));
-    return Data();
+    Data output(fEfficiencyScaleFactor.getEventWeight(isData));
+
+    // Weight is actually the inverse of the efficiency
+    if(output.fWeight != 0.0) {
+      output.fWeightAbsUnc = output.fWeightAbsUnc / (output.fWeight*output.fWeight);
+      output.fWeight = 1.0/output.fWeight;
+    }
+    return output;
   }
 }
