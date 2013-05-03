@@ -78,6 +78,10 @@ def constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow, workflowNa
                     "Aug24": "24Aug2012ReReco",
                     "Dec11": "11Dec2012ReReco",
                     "Prompt": "PromptReco12",
+
+                    # I don't really know yet what should be used for MultiJet1Parked
+                    "Nov05": "PromptReco12",
+
                     # Winter13 Rereco
                     "Jan22": "22Jan2013ReReco",
                     }[reco]
