@@ -40,9 +40,9 @@ OptionBr = 0.01  # Br(t->bH+)
 ToleranceForLuminosityDifference = 0.01
 
 # Shape histogram definitions
-SignalShapeHisto = ""
-FakeShapeHisto = ""
-ShapeHistogramsDimensions = {}
+SignalShapeHisto = None
+FakeShapeHisto = None
+ShapeHistogramsDimensions = None
 
 if OptionMassShape == "TransverseMass":
     SignalShapeHisto = "transverseMass"
@@ -64,6 +64,23 @@ elif OptionMassShape == "FullMass":
                                   #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
                                   "xtitle": "Full mass / GeV",
                                   "ytitle": "Events" }
+elif OptionMassShape == "TransverseAndFullMass2D": # FIXME: preparing to add support, not yet working
+    SignalShapeHisto = "transverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
+    FakeShapeHisto = "EWKFakeTausTransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
+    ShapeHistogramsDimensions = [{ "bins": 10,
+                                  "rangeMin": 0.0,
+                                  "rangeMax": 400.0,
+                                  #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                                  "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
+                                  "xtitle": "Transverse mass / GeV",
+                                  "ytitle": "Events" },
+                                 { "bins": 25,
+                                   "rangeMin": 0.0,
+                                   "rangeMax": 500.0,
+                                   "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                                   #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
+                                   "xtitle": "Full mass / GeV",
+                                   "ytitle": "Events" }]
 
 DataCardName += "_"+OptionMassShape
 
@@ -217,7 +234,7 @@ if OptionMassShape == "TransverseMass":
                               "afterMETandTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1AndLeg2", # for checking only
                               "validationMETShapeSource": QCDFactorisedValidationMETShapeSource, # FIXME check
                               "validationMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions, # FIXME check
-                              "basicMtHisto": QCDFactorisedStdSelVersion+"/MtAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
+                              "finalShapeHisto": QCDFactorisedStdSelVersion+"/MtAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
                               "validationMtShapeSource": QCDFactorisedValidationMtShapeSource, # FIXME check
                               "validationMtShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions, # FIXME check
                               #"assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ... # not needed
@@ -243,7 +260,7 @@ elif OptionMassShape == "FullMass":
                               "afterTauLegSource": "factorisation/Leg2AfterTauID",
                               "validationMETShapeSource": QCDFactorisedValidationMETShapeSource,
                               "validationMETShapeDetails": [],
-                              "basicMtHisto": "shape_FullMassShapesAfterFullMETLeg/FullMassShapesAfterFullMETLeg", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
+                              "finalShapeHisto": "shape_FullMassShapesAfterFullMETLeg/FullMassShapesAfterFullMETLeg", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
                               "validationMtShapeSource": QCDFactorisedValidationMtShapeSource,
                               "validationMtShapeDetails": [],
                               "validationMtShapeSource": [],

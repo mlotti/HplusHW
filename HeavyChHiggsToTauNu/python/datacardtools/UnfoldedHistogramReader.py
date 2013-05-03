@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-
-# UnfoldedHistogramReader
+## \package UnfoldedHistogramReader
 #
 # Purpose: Provide tools for reading information out of unfolded histograms (factorisation or binned information)
 #
@@ -11,6 +9,8 @@
 #     . x-axis contains information for the factorisation bin (just one bin for event counts; n bins for a shape)
 #     . y-axis is the unfolded bin number (i.e. factorisation bin)
 #     . Unfolding of binning is done with formula: y = x1 + x2*Nx1 + x3*Nx1*Nx2 ... (Nx is the number of bins including under- and overflow for given dimension)
+#
+# Indexing starts always from zero; for accessing root items, one is added to the internal indexing
 #
 # Author: Lauri A. Wendland
 
@@ -84,60 +84,78 @@ class UnfoldedHistogramReader:
         return h.GetBinError(1, self._convertBinIndexListToUnfoldedIndex(factorisationBinIndexList)+1)
 
     # Returns the event count in a bin of a shape for the factorisation bin [x,y,...]
-    def getShapeCountForBin(self, factorisationBinIndexList, h, shapeBin):
+    def getShapeForBin(self, factorisationBinIndexList, h):
         self._initialize(h)
         # Check that binning dimension is correct
         if len(self._binCount) != len(factorisationBinIndexList):
             raise Exception("Error in UnfoldedHistogramReader::getEventCountForBin(): You asked for %d dimensions, but the histogram has %d dimensions (the dimension needs to be the same)!"%(len(factorisationBinIndexList), len(self._binCount)))
-        return h.GetBinContent(shapeBin, self._convertBinIndexListToUnfoldedIndex(factorisationBinIndexList)+1)
+        myResult = []
+        for i in range(0,h.GetNbinsX()):
+            myResult.append(h.GetBinContent(i+1, self._convertBinIndexListToUnfoldedIndex(factorisationBinIndexList)+1))
+        return myResult
 
     # Returns the event count (stat.) uncertainty in a bin of a shape for the factorisation bin [x,y,...]
-    def getShapeCountUncertaintyForBin(self, factorisationBinIndexList, h, shapeBin):
+    def getShapeUncertaintyForBin(self, factorisationBinIndexList, h):
         self._initialize(h)
         # Check that binning dimension is correct
         if len(self._binCount) != len(factorisationBinIndexList):
             raise Exception("Error in UnfoldedHistogramReader::getEventCountForBin(): You asked for %d dimensions, but the histogram has %d dimensions (the dimension needs to be the same)!"%(len(factorisationBinIndexList), len(self._binCount)))
-        return h.GetBinError(shapeBin, self._convertBinIndexListToUnfoldedIndex(factorisationBinIndexList)+1)
+        myResult = []
+        for i in range(0,h.GetNbinsX()):
+            myResult.append(h.GetBinError(i+1, self._convertBinIndexListToUnfoldedIndex(factorisationBinIndexList)+1))
+        return myResult
 
     # Returns the event count of the unfolded factorisation bin
-    def getEventCountForUnfoldedBin(self, unfoldedBinIndex, h):
+    def getEventCountByUnfoldedBin(self, unfoldedBinIndex, h):
         self._initialize(h)
         return h.GetBinContent(1, unfoldedBinIndex+1)
 
     # Returns the event count (stat.) uncertainty of the unfolded factorisation bin
-    def getEventCountUncertaintyForUnfoldedBin(self, unfoldedBinIndex, h):
+    def getEventCountUncertaintyByUnfoldedBin(self, unfoldedBinIndex, h):
         self._initialize(h)
         return h.GetBinError(1, unfoldedBinIndex+1)
 
-    # Returns the event count in a bin of a shape for the unfolded factorisation bin
-    def getShapeCountForUnfoldedBin(self, unfoldedBinIndex, h, shapeBin):
+    ## Returns a list of event counts for the unfolded factorisation bin
+    def getShapeByUnfoldedBin(self, unfoldedBinIndex, h):
         self._initialize(h)
-        return h.GetBinContent(shapeBin, unfoldedBinIndex+1)
+        myResult = []
+        for i in range(0,h.GetNbinsX()):
+            myResult.append(h.GetBinContent(i+1, unfoldedBinIndex+1))
+        return myResult
 
-    # Returns the event count (stat.) uncertainty in a bin of a shape for the unfolded factorisation bin
-    def getShapeCountUncertaintyForUnfoldedBin(self, unfoldedBinIndex, h, shapeBin):
+    ## Returns a list of event count (stat.) uncertainties for the unfolded factorisation bin
+    def getShapeUncertaintyByUnfoldedBin(self, unfoldedBinIndex, h):
         self._initialize(h)
-        return h.GetBinError(shapeBin, unfoldedBinIndex+1)
+        myResult = []
+        for i in range(0,h.GetNbinsX()):
+            myResult.append(h.GetBinError(i+1, unfoldedBinIndex+1))
+        return myResult
 
     # Returns the event count for a factorisation bin by contracting the other factorisation dimensions (i.e. reduce the factorisation dimensions to just the one specified)
     def getContractedEventCountForBin(self, factorisationAxisToKeep, factorisationBin, h):
         self._initialize(h)
-        return self._contractionRecursionForBin([], factorisationAxisToKeep, factorisationBin, h, 1)
+        return self._contractionRecursionForBin([], factorisationAxisToKeep, factorisationBin, h, 0)
 
     # Returns the event count (stat.) uncertainty for a factorisation bin by contracting the other factorisation dimensions (i.e. reduce the factorisation dimensions to just the one specified)
     def getContractedEventCountUncertaintyForBin(self, factorisationAxisToKeep, factorisationBin, h):
         self._initialize(h)
-        return sqrt(self._contractionRecursionUncertaintyForBin([], factorisationAxisToKeep, factorisationBin, h, 1))
+        return sqrt(self._contractionRecursionUncertaintyForBin([], factorisationAxisToKeep, factorisationBin, h, 0))
 
-    # Returns the event count for a factorisation bin by contracting the other factorisation dimensions (i.e. reduce the factorisation dimensions to just the one specified)
-    def getContractedShapeCountForBin(self, factorisationAxisToKeep, factorisationBin, h, shapeBin):
+    # Returns the event counts for a factorisation bin by contracting the other factorisation dimensions (i.e. reduce the factorisation dimensions to just the one specified)
+    def getContractedShapeForBin(self, factorisationAxisToKeep, factorisationBin, h):
         self._initialize(h)
-        return self._contractionRecursionForBin([], factorisationAxisToKeep, factorisationBin, h, shapeBin)
+        myResult = []
+        for i in range(0,h.GetNbinsX()):
+            myResult.append(self._contractionRecursionForBin([], factorisationAxisToKeep, factorisationBin, h, i))
+        return myResult
 
-    # Returns the event count (stat.) uncertainty for a factorisation bin by contracting the other factorisation dimensions (i.e. reduce the factorisation dimensions to just the one specified)
-    def getContractedShapeCountUncertaintyForBin(self, factorisationAxisToKeep, factorisationBin, h, shapeBin):
+    # Returns the event count (stat.) uncertainties for a factorisation bin by contracting the other factorisation dimensions (i.e. reduce the factorisation dimensions to just the one specified)
+    def getContractedShapeUncertaintyForBin(self, factorisationAxisToKeep, factorisationBin, h):
         self._initialize(h)
-        return sqrt(self._contractionRecursionUncertaintyForBin([], factorisationAxisToKeep, factorisationBin, h, shapeBin))
+        myResult = []
+        for i in range(0,h.GetNbinsX()):
+            myResult.append(sqrt(self._contractionRecursionUncertaintyForBin([], factorisationAxisToKeep, factorisationBin, h, i)))
+        return myResult
 
     # Prints info about factorisation axes and ranges
     def printFactorisationDefinitions(self):
@@ -145,17 +163,18 @@ class UnfoldedHistogramReader:
         for i in range(0,len(self._binLabels)):
             print "  variable: %s, binning={%s}"%(self._binLabels[i], '; '.join(map(str, self._factorisationRanges[i])))
 
+    ## Do the summing by recursion for a given shape bin at a time
     def _contractionRecursionForBin(self, binIndexList, factorisationAxisToKeep, factorisationBin, h, shapeBin):
         #print "recursion",binIndexList
         if len(binIndexList) == len(self._binCount):
             # On final axis, return value
             if len(binIndexList) != factorisationAxisToKeep:
                 #print "value=",h.GetBinContent(shapeBin, self._convertBinIndexListToUnfoldedIndex(binIndexList))
-                return h.GetBinContent(shapeBin, self._convertBinIndexListToUnfoldedIndex(binIndexList)+1)
+                return h.GetBinContent(shapeBin+1, self._convertBinIndexListToUnfoldedIndex(binIndexList)+1)
             else:
                 if binIndexList[len(binIndexList)] == factorisationBin:
                     #print "value=",h.GetBinContent(shapeBin, self._convertBinIndexListToUnfoldedIndex(binIndexList))
-                    return h.GetBinContent(shapeBin, self._convertBinIndexListToUnfoldedIndex(binIndexList)+1)
+                    return h.GetBinContent(shapeBin+1, self._convertBinIndexListToUnfoldedIndex(binIndexList)+1)
                 else:
                     #print "value=0"
                     return 0.0
@@ -184,9 +203,9 @@ class UnfoldedHistogramReader:
         if len(binIndexList) == len(self._binCount):
             # On final axis, return value
             if len(binIndexList) != factorisationAxisToKeep:
-                return h.GetBinError(shapeBin, self._convertBinIndexListToUnfoldedIndex(binIndexList)+1)**2
+                return h.GetBinError(shapeBin+1, self._convertBinIndexListToUnfoldedIndex(binIndexList)+1)**2
             else:
-                if binIndexList[len(binIndexList)] == factorisationBin:
+                if binIndexList[len(binIndexList+1)] == factorisationBin:
                     return h.GetBinError(shapeBin, self._convertBinIndexListToUnfoldedIndex(binIndexList)+1)**2
                 else:
                     return 0.0
@@ -208,7 +227,7 @@ class UnfoldedHistogramReader:
                 mySum += self._contractionRecursionUncertaintyForBin(myBinIndexList, factorisationAxisToKeep, factorisationBin, h, shapeBin)
             return mySum
 
-    # Decompose factorisation bin labels and nbins information from histogram title
+    ## Decompose factorisation bin labels and nbins information from histogram title
     def _initialize(self, h):
         if len(self._binLabels) > 0:
             return
@@ -309,12 +328,12 @@ def validate():
     print "validate: UnfoldedHistogramReader::getEventCountForBin(): ",check(r.getEventCountForBin([1,2,3],h),46)
     print "validate: UnfoldedHistogramReader::getEventCountUncertaintyForBin(): ",check(r.getEventCountUncertaintyForBin([1,2,3],h),sqrt(46))
     # Test shape counts
-    print "validate: UnfoldedHistogramReader::getShapeCountForBin(): ",check(r.getShapeCountForBin([3,1,2],h,3),32*3)
-    print "validate: UnfoldedHistogramReader::getShapeCountUncertaintyForBin(): ",check(r.getShapeCountUncertaintyForBin([3,1,2],h,3),sqrt(32*3))
+    print "validate: UnfoldedHistogramReader::getShapeForBin(): ",check(r.getShapeForBin([3,1,2],h)[2],32*3)
+    print "validate: UnfoldedHistogramReader::getShapeUncertaintyForBin(): ",check(r.getShapeUncertaintyForBin([3,1,2],h)[2],sqrt(32*3))
     # Test contracted event counts
     print "validate: UnfoldedHistogramReader::getContractedEventCountForBin(): ",check(r.getContractedEventCountForBin(0,0,h),276)
     print "validate: UnfoldedHistogramReader::getContractedEventCountUncertaintyForBin(): ",check(r.getContractedEventCountUncertaintyForBin(0,0,h),sqrt(276))
-    print "validate: UnfoldedHistogramReader::getContractedShapeCountForBin() test1: ",check(r.getContractedShapeCountForBin(2,1,h,1),222)
-    print "validate: UnfoldedHistogramReader::getContractedShapeCountUncertaintForBin() test1: ",check(r.getContractedShapeCountUncertaintyForBin(2,1,h,1),sqrt(222))
-    print "validate: UnfoldedHistogramReader::getContractedShapeCountForBin() test2: ",check(r.getContractedShapeCountForBin(2,1,h,4),888)
-    print "validate: UnfoldedHistogramReader::getContractedShapeCountUncertaintForBin() test2: ",check(r.getContractedShapeCountUncertaintyForBin(2,1,h,4),sqrt(888))
+    print "validate: UnfoldedHistogramReader::getContractedShapeCountForBin() test1: ",check(r.getContractedShapeForBin(2,1,h)[0],222)
+    print "validate: UnfoldedHistogramReader::getContractedShapeCountUncertaintForBin() test1: ",check(r.getContractedShapeUncertaintyForBin(2,1,h)[0],sqrt(222))
+    print "validate: UnfoldedHistogramReader::getContractedShapeCountForBin() test2: ",check(r.getContractedShapeForBin(2,1,h)[3],888)
+    print "validate: UnfoldedHistogramReader::getContractedShapeCountUncertaintForBin() test2: ",check(r.getContractedShapeUncertaintyForBin(2,1,h)[3],sqrt(888))

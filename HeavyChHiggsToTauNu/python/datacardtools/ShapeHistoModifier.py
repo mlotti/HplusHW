@@ -1,13 +1,15 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 import ROOT
 from array import array
-from math import pow,sqrt
+from math import sqrt
 
 ## Class for treating properly shape histograms with different axis ranges and or binning
 # Allows tuning of shape histogram without having to rerun full analysis
 # Note: After the adding is done, remember to call finalise! (adding treats errors as squares, finalising takes the sqrt of the squares)
 class ShapeHistoModifier():
     def __init__(self, histoSpecs, debugMode=False):
+        if isinstance(histoSpecs,list):
+            raise Exception(ErrorLabel()+"ShapeHistoModifier: Requested a %d-dimensional histogram, but code currently supports only 1 dimension!"%len(histoSpecs))
         self._nbins = histoSpecs["bins"]
         self._min = histoSpecs["rangeMin"]
         self._max = histoSpecs["rangeMax"]
@@ -94,7 +96,7 @@ class ShapeHistoModifier():
                     # This is last source bin for the destination
                     myDestBinWillChangeOnNextInteration = True
             countSum += source.GetBinContent(iSrc)
-            errorSum += pow(source.GetBinError(iSrc),2)
+            errorSum += source.GetBinError(iSrc)**2
             #print "iSrc=%d,iDest=%d, sum=%f +- %f"%(iSrc,iDest,countSum,errorSum)
             if myDestBinWillChangeOnNextInteration:
                 # Store result, Note: it is assumed here that bin error is squared!!!

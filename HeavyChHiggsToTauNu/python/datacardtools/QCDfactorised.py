@@ -166,7 +166,7 @@ class QCDEventCount:
                  luminosity):
         self._histoname = histoName
         # Obtain histograms
-        print "QCDfact: Obtaining count histogram: %s"%histoName
+        print "QCDfact: Obtaining factorisation histogram: %s"%histoName
         try:
             datasetRootHistoData = dsetMgr.getDataset(dsetMgrDataColumn).getDatasetRootHisto(histoName)
         except Exception, e:
@@ -197,8 +197,14 @@ class QCDEventCount:
             self._hMC.IsA().Destructor(self._hMC)
         self._messages = []
 
-    def obtainDimensions(self):
+    def getFactorisationDimensions(self):
         return self._reader.getNbinsList()
+
+    def getNShapeBins(self):
+        return self._hData.GetNbinsX()
+
+    def isShapeHistogram(self):
+        return self.getNShapeBins() > 1
 
     def getMessages(self):
         return self._messages
@@ -246,177 +252,152 @@ class QCDEventCount:
     def printFactorisationInfo(self):
         self._reader.printFactorisationDefinitions() # Assuming that reader._initialize() has already been called
 
-    ## Returns Count object for an unfolded bin of data
+    # Getters for data and MC counts --------------------------------------------------------------------------
+    ## Returns count objects for an unfolded bin of data
     # unfoldedBinIndex is the unfolded bin (numbering from zero)
-    def getDataCountObjectForUnfoldedBin(self, unfoldedBinIndex):
-        myValue = self._reader.getEventCountForUnfoldedBin(unfoldedBinIndex, self._hData)
-        myStatUncertainty = self._reader.getEventCountUncertaintyForUnfoldedBin(unfoldedBinIndex, self._hData)
-        return QCDCountObject(myValue, myStatUncertainty, 0.0, 0.0)
+    def getDataCountObjectsByUnfoldedBin(self, unfoldedBinIndex):
+        myValues = self._reader.getShapeByUnfoldedBin(unfoldedBinIndex, self._hData)
+        myStatUncertainties = self._reader.getShapeUncertaintyByUnfoldedBin(unfoldedBinIndex, self._hData)
+        myResult = []
+        for i in range(0,len(myValues)):
+            myResult.append(QCDCountObject(myValues[i], myStatUncertainties[i], 0.0, 0.0))
+        return myResult
 
-    ## Returns Count object for data
+    ## Returns count objects for data
     # factorisationBinIndexList is a list of indices corresponding to the factorisation bin
-    def getDataCountObject(self, factorisationBinIndexList):
-        myValue = self.getDataCount(factorisationBinIndexList)
-        myStatUncertainty = self.getDataError(factorisationBinIndexList)
-        return QCDCountObject(myValue, myStatUncertainty, 0.0, 0.0)
+    def getDataCountObjects(self, factorisationBinIndexList):
+        myValues = self._reader.getShapeForBin(factorisationBinIndexList, self._hData)
+        myStatUncertainties = self._reader.getShapeUncertaintyForBin(factorisationBinIndexList, self._hData)
+        myResult = []
+        for i in range(0,len(myValues)):
+            myResult.append(QCDCountObject(myValues[i], myStatUncertainties[i], 0.0, 0.0))
+        return myResult
 
-    ## Returns number of events for data
-    # factorisationBinIndexList is a list of indices corresponding to the factorisation bin
-    def getDataCount(self, factorisationBinIndexList):
-        return self._reader.getEventCountForBin(factorisationBinIndexList, self._hData)
-
-    ## Returns stat. error (data only)
-    # factorisationBinIndexList is a list of indices corresponding to the factorisation bin
-    def getDataError(self, factorisationBinIndexList):
-        return self._reader.getEventCountUncertaintyForBin(factorisationBinIndexList, self._hData)
-
-    ## Returns number of events for data contracted to one factorisation dimension
+    ## Returns count objects for data contracted to one factorisation dimension
     # axisIndexToKeep is the axis to be kept (for example: to keep first variable, ask for 0)
     # factorisationBinIndex is a list of indices corresponding to the factorisation bin
-    def getContracted1DDataCountObject(self, factorisationBinIndex, axisIndexToKeep):
-        myValue = self.getContracted1DDataCount(factorisationBinIndex, axisIndexToKeep)
-        myStatUncertainty = self.getContracted1DDataError(factorisationBinIndex, axisIndexToKeep)
-        return QCDCountObject(myValue, myStatUncertainty, 0.0, 0.0)
+    def getContracted1DDataCountObjects(self, factorisationBinIndex, axisIndexToKeep):
+        myValues = self._reader.getContractedShapeForBin(axisIndexToKeep, factorisationBinIndex, self._hData)
+        myStatUncertainties = self._reader.getContractedShapeUncertaintyForBin(axisIndexToKeep, factorisationBinIndex, self._hData)
+        myResult = []
+        for i in range(0,len(myValues)):
+            myResult.append(QCDCountObject(myValues[i], myStatUncertainties[i], 0.0, 0.0))
+        return myResult
 
-    ## Returns number of events for data contracted to one factorisation dimension
-    # axisIndexToKeep is the axis to be kept (for example: to keep first variable, ask for 0)
-    # factorisationBinIndex is a list of indices corresponding to the factorisation bin
-    def getContracted1DDataCount(self, factorisationBinIndex, axisIndexToKeep):
-        return self._reader.getContractedEventCountForBin(axisIndexToKeep, factorisationBinIndex, self._hData)
-
-    ## Returns stat. error (data only) contracted to one factorisation dimension
-    # axisIndexToKeep is the axis to be kept (for example: to keep first variable, ask for 0)
-    # factorisationBinIndex is a list of indices corresponding to the factorisation bin
-    def getContracted1DDataError(self, factorisationBinIndex, axisIndexToKeep):
-        return self._reader.getContractedEventCountUncertaintyForBin(axisIndexToKeep, factorisationBinIndex, self._hData)
-
-    ## Returns Count object for an unfolded bin of MC EWK
+    ## Returns count objects for an unfolded bin of MC EWK
     # unfoldedBinIndex is the unfolded bin (numbering from zero)
-    def getMCCountObjectForUnfoldedBin(self, unfoldedBinIndex):
-        myValue = self._reader.getEventCountForUnfoldedBin(unfoldedBinIndex, self._hMC)
-        myStatUncertainty = self._reader.getEventCountUncertaintyForUnfoldedBin(unfoldedBinIndex, self._hMC)
+    def getMCCountObjectsByUnfoldedBin(self, unfoldedBinIndex):
+        myValues = self._reader.getShapeByUnfoldedBin(unfoldedBinIndex, self._hMC)
+        myStatUncertainties = self._reader.getShapeUncertaintyByUnfoldedBin(unfoldedBinIndex, self._hMC)
         myTauPtIndex = self._reader.decomposeUnfoldedbin(unfoldedBinIndex)[self._tauPtAxisIndex]
-        mySystUncertainty = myValue * self.getEWKMCRelativeSystematicUncertainty(myTauPtIndex)
-        return QCDCountObject(myValue, 0.0, myStatUncertainty, mySystUncertainty)
+        mySystFactor = self.getEWKMCRelativeSystematicUncertainty(myTauPtIndex)
+        myResult = []
+        for i in range(0,len(myValues)):
+            mySystUncertainty = myValues[i] * mySystFactor
+            myResult.append(QCDCountObject(myValues[i], 0.0, myStatUncertainties[i], mySystUncertainty))
+        return myResult
 
-    ## Returns Count object for MC EWK
+    ## Returns count objects for MC EWK
     # factorisationBinIndexList is a list of indices corresponding to the factorisation bin
-    def getMCCountObject(self, factorisationBinIndexList):
-        myValue = self.getMCCount(factorisationBinIndexList)
-        myStatUncertainty = self.getMCStatError(factorisationBinIndexList)
-        mySystUncertainty = self.getMCSystError(factorisationBinIndexList)
-        return QCDCountObject(myValue, 0.0, myStatUncertainty, mySystUncertainty)
+    def getMCCountObjects(self, factorisationBinIndexList):
+        myValues = self._reader.getShapeForBin(factorisationBinIndexList, self._hMC)
+        myStatUncertainties = self._reader.getShapeUncertaintyForBin(factorisationBinIndexList, self._hMC)
+        mySystFactor = self.getEWKMCRelativeSystematicUncertainty(factorisationBinIndexList[self._tauPtAxisIndex])
+        myResult = []
+        for i in range(0,len(myValues)):
+            mySystUncertainty = myValues[i] * mySystFactor
+            myResult.append(QCDCountObject(myValues[i], 0.0, myStatUncertainties[i], mySystUncertainty))
+        return myResult
 
-    ## Returns number of events for MC
-    # factorisationBinIndexList is a list of indices corresponding to the factorisation bin
-    def getMCCount(self, factorisationBinIndexList):
-        return self._reader.getEventCountForBin(factorisationBinIndexList, self._hMC)
-
-    ## Returns stat. error (data only)
-    # factorisationBinIndexList is a list of indices corresponding to the factorisation bin
-    def getMCStatError(self, factorisationBinIndexList):
-        return self._reader.getEventCountUncertaintyForBin(factorisationBinIndexList, self._hMC)
-
-    ## Returns syst. error (MC only)
-    # factorisationBinIndexList is a list of indices corresponding to the factorisation bin
-    def getMCSystError(self, factorisationBinIndexList):
-        return self.getMCCount(factorisationBinIndexList) * self.getEWKMCRelativeSystematicUncertainty(factorisationBinIndexList[self._tauPtAxisIndex])
-
-    ## Returns number of events for MC contracted to one factorisation dimension
+    ## Returns count objects for MC contracted to one factorisation dimension
     # axisIndexToKeep is the axis to be kept (for example: to keep first variable, ask for 0)
     # factorisationBinIndex is a list of indices corresponding to the factorisation bin
-    def getContracted1DMCCountObject(self, factorisationBinIndex, axisIndexToKeep):
-        myValue = self.getContracted1DMCCount(factorisationBinIndex, axisIndexToKeep)
-        myStatUncertainty = self.getContracted1DMCStatError(factorisationBinIndex, axisIndexToKeep)
-        mySystUncertainty = self.getContracted1DMCSystError(factorisationBinIndex, axisIndexToKeep)
-        return QCDCountObject(myValue, 0.0, myStatUncertainty, mySystUncertainty)
+    def getContracted1DMCCountObjects(self, factorisationBinIndex, axisIndexToKeep):
+        myValues = self._reader.getContractedShapeForBin(axisIndexToKeep, factorisationBinIndex, self._hMC)
+        myStatUncertainties = self._reader.getContractedShapeUncertaintyForBin(axisIndexToKeep, factorisationBinIndex, self._hMC)
+        mySystFactor = self.getEWKMCRelativeSystematicUncertainty(999)
+        myResult = []
+        for i in range(0,len(myValues)):
+            mySystUncertainty = myValues[i] * mySystFactor
+            myResult.append(QCDCountObject(myValues[i], 0.0, myStatUncertainties[i], mySystUncertainty))
+        return myResult
 
-    ## Returns number of events for MC contracted to one factorisation dimension
-    # axisIndexToKeep is the axis to be kept (for example: to keep first variable, ask for 0)
-    # factorisationBinIndex is a list of indices corresponding to the factorisation bin
-    def getContracted1DMCCount(self, factorisationBinIndex, axisIndexToKeep):
-        return self._reader.getContractedEventCountForBin(axisIndexToKeep, factorisationBinIndex, self._hMC)
-
-    ## Returns stat. error (data only) contracted to one factorisation dimension
-    # axisIndexToKeep is the axis to be kept (for example: to keep first variable, ask for 0)
-    # factorisationBinIndex is a list of indices corresponding to the factorisation bin
-    def getContracted1DMCStatError(self, factorisationBinIndex, axisIndexToKeep):
-        return self._reader.getContractedEventCountUncertaintyForBin(axisIndexToKeep, factorisationBinIndex, self._hMC)
-
-    ## Returns stat. error (data only) contracted to one factorisation dimension
-    # axisIndexToKeep is the axis to be kept (for example: to keep first variable, ask for 0)
-    # factorisationBinIndex is a list of indices corresponding to the factorisation bin
-    def getContracted1DMCSystError(self, factorisationBinIndex, axisIndexToKeep):
-        # Calculation becomes difficult, make conservative approximation by taking worst case
-        return self.getContracted1DMCCount(factorisationBinIndex, axisIndexToKeep) * self.getEWKMCRelativeSystematicUncertainty(999)
+    # QCD count (data-EWK) calculation --------------------------------------------------------------------------------------
 
     ## Returns Count object for data-MC (uncertainty separately for stat. and syst. uncertainty)
     # factorisationBinIndexList is a list of indices corresponding to the factorisation bin
     def getQCDCount(self, factorisationBinIndexList, cleanNegativeValues=True):
-        myDataObject = self.getDataCountObject(factorisationBinIndexList)
-        myMCObject = self.getMCCountObject(factorisationBinIndexList)
-        myResult = myDataObject.copy()
-        myResult.subtract(myMCObject)
-        # Obtain uncertainty # Check negative result
-        if myResult.value() < 0.0:
-            if cleanNegativeValues:
-                myResult.setValue(0.0)
-            #myResultError = 0.0 do not set it to zero, but instead keep it as it is to be more realistic!
-        # Return result 
-        return myResult
+        myDataObjects = self.getDataCountObjects(factorisationBinIndexList)
+        myMCObjects = self.getMCCountObjects(factorisationBinIndexList)
+        return self._calculateQCDCount(myDataObjects, myMCObjects, cleanNegativeValues)
 
     ## Returns Count object for data-MC (uncertainty separately for stat. and syst. uncertainty)
     # unfoldedBinIndex is the unfolded bin (numbering from zero)
-    def getQCDCountForUnfoldedBin(self, unfoldedBinIndex, cleanNegativeValues=True):
-        myDataObject = self.getDataCountObjectForUnfoldedBin(unfoldedBinIndex)
-        myMCObject = self.getMCCountObjectForUnfoldedBin(unfoldedBinIndex)
-        myResult = myDataObject.copy()
-        myResult.subtract(myMCObject)
-        # Obtain uncertainty # Check negative result
-        if myResult.value() < 0.0:
-            if cleanNegativeValues:
-                myResult.setValue(0.0)
-            #myResultError = 0.0 do not set it to zero, but instead keep it as it is to be more realistic!
-        # Return result 
-        return myResult
+    def getQCDCountByUnfoldedBin(self, unfoldedBinIndex, cleanNegativeValues=True):
+        myDataObjects = self.getDataCountObjectsByUnfoldedBin(unfoldedBinIndex)
+        myMCObjects = self.getMCCountObjectsByUnfoldedBin(unfoldedBinIndex)
+        return self._calculateQCDCount(myDataObjects, myMCObjects, cleanNegativeValues)
 
     ## Returns Count object for data-MC for a bin on a variation parameter, other parameters are contracted (i.e. summed)
     # (uncertainty separately for stat. and syst. uncertainty)
     # factorisationBinIndex is a list of indices corresponding to the factorisation bin
     # axisIndexToKeep is the axis to be kept (for example: to keep first variable, ask for 0)
     def getContracted1DQCDCount(self, factorisationBinIndex, axisIndexToKeep, cleanNegativeValues=True):
-        myDataObject = self.getContracted1DDataCountObject(factorisationBinIndex, axisIndexToKeep)
-        myMCObject = self.getContracted1DMCCountObject(factorisationBinIndex, axisIndexToKeep)
-        myResult = myDataObject.copy()
-        myResult.subtract(myMCObject)
-        # Obtain uncertainty # Check negative result
-        if myResult.value() < 0:
-            if cleanNegativeValues:
-                myResult.setValue(0.0)
-            #myResultError = 0.0 do not set it to zero, but instead keep it as it is to be more realistic!
+        myDataObjects = self.getContracted1DDataCountObjects(factorisationBinIndex, axisIndexToKeep)
+        myMCObjects = self.getContracted1DMCCountObjects(factorisationBinIndex, axisIndexToKeep)
+        return self._calculateQCDCount(myDataObjects, myMCObjects, cleanNegativeValues)
+
+    def _calculateQCDCount(self, myDataObjects, myMCObjects, cleanNegativeValues):
+        myResult = []
+        for i in range(0,len(myDataObjects)):
+            r = myDataObjects[i].copy()
+            r.subtract(myMCObjects[i])
+            # Obtain uncertainty # Check negative result
+            if r.value() < 0.0:
+                if cleanNegativeValues:
+                    r.setValue(0.0)
+                #myResultError = 0.0 do not set it to zero, but instead keep it as it is to be more realistic!
+            myResult.append(r)
         # Return result
         return myResult
 
+    # Purity calculation --------------------------------------------------------------------------------------
     ## Getter for purity (data-MC)/data = 1-MC/data
     # Returns Count object
     def getPurity(self, factorisationBinIndexList):
-        myDataCount = self.getDataCountObject(factorisationBinIndexList)
-        myMCCount = self.getMCCountObject(factorisationBinIndexList)
-        return self._calculatePurity(myDataCount, myMCCount)
+        myDataCounts = self.getDataCountObjects(factorisationBinIndexList)
+        myMCCounts = self.getMCCountObjects(factorisationBinIndexList)
+        return self._calculatePurity(myDataCounts, myMCCounts)
 
     ## Getter for purity (data-MC)/data = 1-MC/data for unfolded bin index
     # Returns Count object
-    def getPurityForUnfoldedBin(self, unfoldedBinIndex):
-        myDataCount = self.getDataCountObjectForUnfoldedBin(unfoldedBinIndex)
-        myMCCount = self.getMCCountObjectForUnfoldedBin(unfoldedBinIndex)
-        return self._calculatePurity(myDataCount, myMCCount)
+    def getPurityByUnfoldedBin(self, unfoldedBinIndex):
+        myDataCounts = self.getDataCountObjectsByUnfoldedBin(unfoldedBinIndex)
+        myMCCounts = self.getMCCountObjectsByUnfoldedBin(unfoldedBinIndex)
+        return self._calculatePurity(myDataCounts, myMCCounts)
 
     ## Getter for purity (data-MC)/data = 1-MC/data contracted to one factorisation axis
     # Returns Count object
     def getContracted1DPurity(self, factorisationBinIndex, axisIndexToKeep):
-        myDataCount = self.getContracted1DDataCountObject(factorisationBinIndex, axisIndexToKeep)
-        myMCCount = self.getContracted1DMCCountObject(factorisationBinIndex, axisIndexToKeep)
-        return self._calculatePurity(myDataCount, myMCCount)
+        myDataCounts = self.getContracted1DDataCountObjects(factorisationBinIndex, axisIndexToKeep)
+        myMCCounts = self.getContracted1DMCCountObjects(factorisationBinIndex, axisIndexToKeep)
+        return self._calculatePurity(myDataCounts, myMCCounts)
+
+    ## Actual calculation of the purity value with Count objects
+    def _calculatePurity(self, data, mc):
+        myResult = []
+        for i in range(0,len(data)):
+            r = mc[i].copy()
+            if data[i].value() > 0:
+                r.divide(data[i])
+                r.setValue(1.0 - r.value())
+            else:
+                # Set purity value to zero, but count uncertainty properly
+                myDummyData = QCDCountObject(1.0, 1.0, 0.0, 0.0)
+                r.divide(myDummyData)
+                r.setValue(0.0)
+            myResult.append(r)
+        return myResult
 
     ## Getter for purity overall view
     # Returns two count objects (minimum purity and average purity weighted by NQCD counts)
@@ -426,94 +407,147 @@ class QCDEventCount:
         myPuritySum = QCDCountObject(0.0, 0.0, 0.0, 0.0)
         myWeightSum = 0.0
         for i in range(0,myNbins):
-            myPurity = self.getPurityForUnfoldedBin(i)
-            myMinPurity.minimum(myPurity)
-            myNQCD = self.getQCDCountForUnfoldedBin(i)
-            myPurity.multiplyByScalar(myNQCD.value())
-            myWeightSum += myNQCD.value()
-            myPuritySum.add(myPurity)
+            myPurities = self.getPurityByUnfoldedBin(i)
+            for k in range(0,len(myPurities)):
+                myMinPurity.minimum(myPurities[k])
+            myNQCD = self.getQCDCountByUnfoldedBin(i)
+            for k in range(0,len(myPurities)):
+                myElement = myPurities[k].copy()
+                myElement.multiplyByScalar(myNQCD[k].value())
+                myWeightSum += myNQCD[k].value()
+                myPuritySum.add(myElement)
         myPuritySum.divideByScalar(myWeightSum)
         return (myMinPurity, myPuritySum)
 
     ## Getter for purity (data-MC)/data = 1-MC/data contracted to one factorisation axis
     # Returns Count object
     def getContracted1DPurityInfo(self, axisIndexToKeep):
-        myNbins = self._reader.getNbinsList()[axisIndexToKeep]
+        myNbins = self.getFactorisationDimensions()[axisIndexToKeep]
         myMinPurity = QCDCountObject(10.0, 0.0, 0.0, 0.0)
         myPuritySum = QCDCountObject(0.0, 0.0, 0.0, 0.0)
         myWeightSum = 0.0
         for i in range(0,myNbins):
-            myPurity = self.getContracted1DPurity(i,axisIndexToKeep)
-            myMinPurity.minimum(myPurity)
+            myPurities = self.getContracted1DPurity(i,axisIndexToKeep)
+            for k in range(0,len(myPurities)):
+                myMinPurity.minimum(myPurities[k])
             myNQCD = self.getContracted1DQCDCount(i,axisIndexToKeep)
-            myPurity.multiplyByScalar(myNQCD.value())
-            myWeightSum += myNQCD.value()
-            myPuritySum.add(myPurity)
+            for k in range(0,len(myPurities)):
+                myElement = myPurities[k].copy()
+                myElement.multiplyByScalar(myNQCD[k].value())
+                myWeightSum += myNQCD[k].value()
+                myPuritySum.add(myElement)
         myPuritySum.divideByScalar(myWeightSum)
         return (myMinPurity, myPuritySum)
 
-    ## Actual calculation of the purity value with Count objects
-    def _calculatePurity(self, data, mc):
-        myResult = mc.copy()
-        if data.value() > 0:
-            myResult.divide(data)
-            myResult.setValue(1.0 - myResult.value())
+    # Returns a histogram for stat only and another one for full uncertainties
+    def _createEmptyHistograms(self, label, axisLabel, contractionDim=None, minimum=None, maximum=None):
+        s = label
+        if contractionDim != None:
+            s += "_%s"%self._reader.getBinLabelList()[contractionDim].replace(" ","_")
+        myStatName = "%s_StatOnly_%s"%(s, self._histoname.replace("/","_"))
+        myFullName = myStatName.replace("StatOnly","StatAndSyst")
+        hStat = None
+        hFull = None
+        nFactorisationBins = self._hData.GetNbinsY()
+        if contractionDim != None:
+            nFactorisationBins =  self.getFactorisationDimensions()[contractionDim]
+        # Create histogram objects
+        if self.isShapeHistogram():
+            nbins = self.getNShapeBins()
+            hStat = ROOT.TH2F(myStatName,myStatName,nbins,self._hData.GetYaxis().GetXmin(),self._hData.GetYaxis().GetXmax(),nFactorisationBins,0.0,nFactorisationBins)
+            hFull = ROOT.TH2F(myFullName,myFullName,nbins,self._hData.GetYaxis().GetXmin(),self._hData.GetYaxis().GetXmax(),nFactorisationBins,0.0,nFactorisationBins)
+            if contractionDim != None:
+                hStat.SetYTitle(self._reader.getFactorisationCaptions()[contractionDim])
+                hFull.SetYTitle(self._reader.getFactorisationCaptions()[contractionDim])
         else:
-            # Set purity value to zero, but count uncertainty properly
-            myDummyData = QCDCountObject(1.0, 1.0, 0.0, 0.0)
-            myResult.divide(myDummyData)
-            myResult.setValue(0.0)
-        return myResult
+            hStat = ROOT.TH1F(myStatName,myStatName,nFactorisationBins,0.0,nFactorisationBins)
+            hFull = ROOT.TH1F(myFullName,myFullName,nFactorisationBins,0.0,nFactorisationBins)
+            if contractionDim != None:
+                hStat.SetXTitle(self._reader.getFactorisationCaptions()[contractionDim])
+                hFull.SetXTitle(self._reader.getFactorisationCaptions()[contractionDim])
+            hStat.SetYTitle(axisLabel)
+            hFull.SetYTitle(axisLabel)
+        # Set minimum and maximum
+        if maximum != None:
+            if self.isShapeHistogram():
+                hStat.SetMaximum(maximum)
+                hFull.SetMaximum(maximum)
+            else:
+                hStat.SetMaximum(maximum*1.1)
+                hFull.SetMaximum(maximum*1.1)
+        if minimum != None:
+            hStat.SetMinimum(minimum)
+            hFull.SetMinimum(minimum)
+        # Make axis labels
+        if contractionDim == None:
+            for i in range(0,self._hData.GetNbinsY()):
+                if not self.isShapeHistogram():
+                    hStat.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
+                    hFull.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
+                else:
+                    hStat.GetYaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
+                    hFull.GetYaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
+        else:
+            for i in range(0,self.getFactorisationDimensions()[contractionDim]):
+                if not self.isShapeHistogram():
+                    hStat.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[contractionDim][i])
+                    hFull.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[contractionDim][i])
+                else:
+                    hStat.GetYaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[contractionDim][i])
+                    hFull.GetYaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[contractionDim][i])
+        if self.isShapeHistogram():
+            for k in range(0,self._hData.GetNbinsX()):
+                hStat.GetXaxis().SetBinLabel(k+1,self._hData.GetXaxis().GetBinLabel(k+1))
+                hFull.GetXaxis().SetBinLabel(k+1,self._hData.GetXaxis().GetBinLabel(k+1))
+        # Return histograms
+        return (hStat,hFull)
+
+    def _fillHistogramValues(self, hStat, hFull, resultObjects, factorisationBin):
+        if len(resultObjects) == 1:
+            # Count histogram - put factorisation bins on x axis
+            hStat.SetBinContent(factorisationBin+1, resultObjects[0].value())
+            hStat.SetBinError(factorisationBin+1, resultObjects[0].uncertainty())
+            hFull.SetBinContent(factorisationBin+1, resultObjects[0].value())
+            hFull.SetBinError(factorisationBin+1, resultObjects[0].totalUncertainty())
+        else:
+            # Shape histogram - put factorisation bins on y axis
+            for k in range(0,len(resultObjects)):
+                hStat.SetBinContent(k+1, factorisationBin+1, resultObjects[k].value())
+                hStat.SetBinError(k+1, factorisationBin+1, resultObjects[k].uncertainty())
+                hFull.SetBinContent(k+1, factorisationBin+1, resultObjects[k].value())
+                hFull.SetBinError(k+1, factorisationBin+1, resultObjects[k].totalUncertainty())
 
     ## Returns purity histograms (purity as function of the unfolded factorisation binning and contracted histograms)
     def makePurityHistograms(self):
         hlist = []
         # Make uncontracted histograms (can be a loooot of bins)
-        myName = "Purity_StatOnly_%s"%self._histoname.replace("/","_")
-        hStat = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
-        hStat.SetYTitle("Purity")
-        hStat.SetMaximum(1.1)
-        myName = "Purity_StatAndSyst_%s"%self._histoname.replace("/","_")
-        hFull = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
-        hFull.SetYTitle("Purity")
-        hFull.SetMaximum(1.1)
+        (hStat,hFull) = self._createEmptyHistograms("Purity","Purity",minimum=0.0,maximum=1.0)
         for i in range(0,self._hData.GetNbinsY()):
-            myPurity = self.getPurityForUnfoldedBin(i)
-            if myPurity.value() > 0.0 and myPurity.value() < 0.5:
-                myMsg = WarningLabel()+"QCD factorised: Low purity in %s for bin %s (%f +- %f +- %f)!"%(self._histoname,self._hData.GetYaxis().GetBinLabel(i+1),myPurity.value(),myPurity.uncertainty(),myPurity.systUncertainty())
-                self._messages.append(myMsg)
-            hStat.SetBinContent(i+1, myPurity.value())
-            hStat.SetBinError(i+1, myPurity.uncertainty())
-            hFull.SetBinContent(i+1, myPurity.value())
-            hFull.SetBinError(i+1, myPurity.totalUncertainty())
-            hStat.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
-            hFull.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
+            # Obtain values and fill histograms
+            myPurities = self.getPurityByUnfoldedBin(i)
+            self._fillHistogramValues(hStat,hFull,myPurities,i)
+            # Do additional checks
+            if not self.isShapeHistogram():
+                # Count histogram
+                if myPurities[0].value() > 0.0 and myPurities[0].value() < 0.5:
+                    myMsg = WarningLabel()+"QCD factorised: Low purity in %s for bin %s (%s)!"%(self._histoname,self._hData.GetYaxis().GetBinLabel(i+1),myPurities[0].getResultStringFull("%.4f"))
+                    self._messages.append(myMsg)
         hlist.append(hStat)
         hlist.append(hFull)
         # Make contracted histograms (easier to read)
-        myBinDimensions = self._reader.getNbinsList()
+        myBinDimensions = self.getFactorisationDimensions()
         for myDim in range(0, len(myBinDimensions)):
-            myName = "Purity_%s_StatOnly_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCStat = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
-            hCStat.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
-            hCStat.SetYTitle("Purity")
-            hCStat.SetMaximum(1.1)
-            myName = "Purity_%s_StatAndSyst_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCFull = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
-            hCFull.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
-            hCFull.SetYTitle("Purity")
-            hCFull.SetMaximum(1.1)
+            (hCStat,hCFull) = self._createEmptyHistograms("Purity","Purity",contractionDim=myDim,minimum=0.0,maximum=1.1)
             for i in range(0, myBinDimensions[myDim]):
-                myPurity = self.getContracted1DPurity(i, myDim)
-                if myPurity.value() > 0.0 and myPurity.value() < 0.5:
-                    myMsg = WarningLabel()+"QCD factorised: Low purity in %s for contracted bin %s %s (%f +- %f +- %f)!"%(self._histoname,self._reader.getFactorisationCaptions()[myDim],self._reader.getFactorisationRanges()[myDim][i],myPurity.value(),myPurity.uncertainty(),myPurity.systUncertainty())
-                    self._messages.append(myMsg)
-                hCStat.SetBinContent(i+1, myPurity.value())
-                hCStat.SetBinError(i+1, myPurity.uncertainty())
-                hCFull.SetBinContent(i+1, myPurity.value())
-                hCFull.SetBinError(i+1, myPurity.totalUncertainty())
-                hCStat.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[myDim][i])
-                hCFull.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[myDim][i])
+                # Obtain values and fill histograms
+                myPurities = self.getContracted1DPurity(i, myDim)
+                self._fillHistogramValues(hCStat,hCFull,myPurities,i)
+                # Do additional checks
+                if not self.isShapeHistogram():
+                    # Count histogram
+                    if myPurities[0].value() > 0.0 and myPurities[0].value() < 0.5:
+                        myMsg = WarningLabel()+"QCD factorised: Low purity in %s for contracted bin %s %s (%s)!"%(self._histoname,self._reader.getFactorisationCaptions()[myDim],self._reader.getFactorisationRanges()[myDim][i],myPurities[0].getResultStringFull("%.4f"))
+                        self._messages.append(myMsg)
             hlist.append(hCStat)
             hlist.append(hCFull)
         for h in hlist:
@@ -525,108 +559,77 @@ class QCDEventCount:
     def makeEventCountHistograms(self):
         hlist = []
         # Make uncontracted histograms (can be a loooot of bins)
-        myName = "Nevents_StatOnly_%s"%self._histoname.replace("/","_")
-        hStat = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
-        hStat.SetYTitle("N_{events}")
-        #hStat.SetMaximum(1.0)
-        myName = "Nevents_StatAndSyst_%s"%self._histoname.replace("/","_")
-        hFull = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
-        hFull.SetYTitle("N_{events}")
-        #hFull.SetMaximum(1.0)
+        (hStat,hFull) = self._createEmptyHistograms("Nevents","N_{events}")
         for i in range(0,self._hData.GetNbinsY()):
-            myResult = self.getQCDCountForUnfoldedBin(i)
-            hStat.SetBinContent(i+1, myResult.value())
-            hStat.SetBinError(i+1, myResult.uncertainty())
-            hFull.SetBinContent(i+1, myResult.value())
-            hFull.SetBinError(i+1, myResult.totalUncertainty())
-            hStat.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
-            hFull.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
+            # Obtain values and fill histograms
+            myResults = self.getQCDCountByUnfoldedBin(i)
+            self._fillHistogramValues(hStat,hFull,myResults,i)
         hlist.append(hStat)
         hlist.append(hFull)
         # Make contracted histograms (easier to read)
-        myBinDimensions = self._reader.getNbinsList()
+        myBinDimensions = self.getFactorisationDimensions()
         for myDim in range(0, len(myBinDimensions)):
-            myName = "Nevents_%s_StatOnly_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCStat = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
-            hCStat.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
-            hCStat.SetYTitle("dN_{events}/d%s"%self._reader.getFactorisationCaptions()[myDim])
-            #hCStat.SetMaximum(1.0)
-            myName = "Nevents_%s_StatAndSyst_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCFull = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
-            hCFull.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
-            hCFull.SetYTitle("dN_{events}/d%s"%self._reader.getFactorisationCaptions()[myDim])
-            #hCFull.SetMaximum(1.0)
+            myString = "Nevents"
+            if not self.isShapeHistogram():
+                myString = "dN_{events}/d(%s)"%self._reader.getFactorisationCaptions()[myDim]
+            (hCStat,hCFull) = self._createEmptyHistograms("Nevents",myString,contractionDim=myDim)
             for i in range(0, myBinDimensions[myDim]):
-                myResult = self.getContracted1DQCDCount(i, myDim)
-                myWidthString = self._reader.getFactorisationRanges()[myDim][i].split("..")
-                myBinWidth = 1
-                if len(myWidthString) == 2:
-                    myBinWidth = float(myWidthString[1]) - float(myWidthString[0])
-                hCStat.SetBinContent(i+1, myResult.value() / myBinWidth)
-                hCStat.SetBinError(i+1, myResult.uncertainty() / myBinWidth)
-                hCFull.SetBinContent(i+1, myResult.value() / myBinWidth)
-                hCFull.SetBinError(i+1, myResult.totalUncertainty() / myBinWidth)
-                hCStat.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[myDim][i])
-                hCFull.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[myDim][i])
+                # Obtain values and fill histograms
+                myResults = self.getContracted1DQCDCount(i, myDim)
+                if not self.isShapeHistogram():
+                    # Divide by bin width
+                    myWidthString = self._reader.getFactorisationRanges()[myDim][i].split("..")
+                    myBinWidth = 1
+                    if len(myWidthString) == 2:
+                        myBinWidth = float(myWidthString[1]) - float(myWidthString[0])
+                    for k in range(0,len(myResults)):
+                        myResults[k].divideByScalar(myBinWidth)
+                self._fillHistogramValues(hCStat,hCFull,myResults,i)
             hlist.append(hCStat)
             hlist.append(hCFull)
         for h in hlist:
             ROOT.SetOwnership(h, True)
         return hlist
 
+
     ## Returns histogram(s) for checking the impact of negative QCD counts
     def makeNegativeEventCountHistograms(self):
         hlist = []
         # Make uncontracted histograms (can be a loooot of bins)
-        myName = "NegativeNevents_StatOnly_%s"%self._histoname.replace("/","_")
-        hStat = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
-        hStat.SetYTitle("N_{events}")
-        #hStat.SetMaximum(1.0)
-        myName = "NegativeNevents_StatAndSyst_%s"%self._histoname.replace("/","_")
-        hFull = ROOT.TH1F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY())
-        hFull.SetYTitle("N_{events}")
-        #hFull.SetMaximum(1.0)
+        (hStat,hFull) = self._createEmptyHistograms("NegativeNevents","N_{events}")
         for i in range(0,self._hData.GetNbinsY()):
-            myResult = self.getQCDCountForUnfoldedBin(i, cleanNegativeValues=False)
-            if myResult.value() < 0: # Plot only negative values
-                myMsg = WarningLabel()+"QCD factorised: Negative NQCD count in %s for bin %s (%f +- %f +- %f)!"%(self._histoname,self._hData.GetYaxis().GetBinLabel(i+1),myResult.value(),myResult.uncertainty(),myResult.systUncertainty())
-                self._messages.append(myMsg)
-                hStat.SetBinContent(i+1, myResult.value())
-                hStat.SetBinError(i+1, myResult.uncertainty())
-                hFull.SetBinContent(i+1, myResult.value())
-                hFull.SetBinError(i+1, myResult.totalUncertainty())
-                hStat.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
-                hFull.GetXaxis().SetBinLabel(i+1,self._hData.GetYaxis().GetBinLabel(i+1))
+            # Obtain values and fill histograms
+            myResults = self.getQCDCountByUnfoldedBin(i)
+            # Fill only negative values
+            for k in range(0,len(myResults)):
+                if myResults[k].value() > 0:
+                    myResults[k] = QCDCountObject(0.0, 0.0, 0.0, 0.0)
+            self._fillHistogramValues(hStat,hFull,myResults,i)
         hlist.append(hStat)
         hlist.append(hFull)
         # Make contracted histograms (easier to read)
-        myBinDimensions = self._reader.getNbinsList()
+        myBinDimensions = self.getFactorisationDimensions()
         for myDim in range(0, len(myBinDimensions)):
-            myName = "NegativeNevents_%s_StatOnly_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCStat = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
-            hCStat.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
-            hCStat.SetYTitle("dN_{events}/d%s"%self._reader.getFactorisationCaptions()[myDim])
-            #hCStat.SetMaximum(1.0)
-            myName = "NegativeNevents_%s_StatAndSyst_%s"%(self._reader.getBinLabelList()[myDim].replace(" ","_"), self._histoname.replace("/","_"))
-            hCFull = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0,myBinDimensions[myDim])
-            hCFull.SetXTitle(self._reader.getFactorisationCaptions()[myDim])
-            hCFull.SetYTitle("dN_{events}/d%s"%self._reader.getFactorisationCaptions()[myDim])
-            #hCFull.SetMaximum(1.0)
+            myString = "Nevents"
+            if not self.isShapeHistogram():
+                myString = "dN_{events}/d(%s)"%self._reader.getFactorisationCaptions()[myDim]
+            (hCStat,hCFull) = self._createEmptyHistograms("NegativeNevents",myString,contractionDim=myDim)
             for i in range(0, myBinDimensions[myDim]):
-                myMsg = WarningLabel()+"QCD factorised: Negative NQCD count in %s for contracted bin %s %s (%f +- %f +- %f)!"%(self._histoname,self._reader.getFactorisationCaptions()[myDim],self._reader.getFactorisationRanges()[myDim][i],myResult.value(),myResult.uncertainty(),myResult.systUncertainty())
-                self._messages.append(myMsg)
-                myResult = self.getContracted1DQCDCount(i, myDim, cleanNegativeValues=False)
-                myWidthString = self._reader.getFactorisationRanges()[myDim][i].split("..")
-                myBinWidth = 1
-                if len(myWidthString) == 2:
-                    myBinWidth = float(myWidthString[1]) - float(myWidthString[0])
-                if myResult.value() < 0: # Plot only negative values
-                    hCStat.SetBinContent(i+1, myResult.value() / myBinWidth)
-                    hCStat.SetBinError(i+1, myResult.uncertainty() / myBinWidth)
-                    hCFull.SetBinContent(i+1, myResult.value() / myBinWidth)
-                    hCFull.SetBinError(i+1, myResult.totalUncertainty() / myBinWidth)
-                    hCStat.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[myDim][i])
-                    hCFull.GetXaxis().SetBinLabel(i+1,self._reader.getFactorisationRanges()[myDim][i])
+                # Obtain values and fill histograms
+                myResults = self.getContracted1DQCDCount(i, myDim)
+                if not self.isShapeHistogram():
+                    # Divide by bin width
+                    myWidthString = self._reader.getFactorisationRanges()[myDim][i].split("..")
+                    myBinWidth = 1
+                    if len(myWidthString) == 2:
+                        myBinWidth = float(myWidthString[1]) - float(myWidthString[0])
+                    for k in range(0,len(myResults)):
+                        myResults[k].divideByScalar(myBinWidth)
+                # Fill only negative values
+                for k in range(0,len(myResults)):
+                    if myResults[k].value() > 0:
+                        myResults[k] = QCDCountObject(0.0, 0.0, 0.0, 0.0)
+                self._fillHistogramValues(hCStat,hCFull,myResults,i)
             hlist.append(hCStat)
             hlist.append(hCFull)
         for h in hlist:
@@ -654,7 +657,6 @@ class QCDfactorisedCalculator:
             self._yieldTable = self._createYieldTable()
             self._compactYieldTable = self._createCompactYieldTable()
 
-
     def clean(self):
         self._basicCount.clean()
         self._leg1Counts.clean()
@@ -675,35 +677,15 @@ class QCDfactorisedCalculator:
     def getNQCDHistograms(self):
         return self._nQCDHistograms
 
-    #def getDataUncertainty(self):
-        #return self._dataUncertainty / self._NQCD
+    ## Returns reference to UnfoldedHistogramReader object - needed for accessing binning information
+    def getReaderObject(self):
+        return self._basicCount.getReader()
 
-    #def getMCStatUncertainty(self):
-        #return self._MCStatUncertainty / self._NQCD
+    def getLeg1EfficiencyByUnfoldedBin(self, unfoldedBinIndex):
+        return self._getEfficiencyByUnfoldedBin(self, self._leg1Counts, self._basicCount, unfoldedBinIndex)
 
-    #def getMCSystUncertainty(self):
-        #return self._MCSystUncertainty / self._NQCD
-
-    #def getStatUncertainty(self):
-        #return sqrt(pow(self._dataUncertainty,2)+pow(self._MCStatUncertainty,2)) / self._NQCD
-
-    #def getSystUncertainty(self):
-        #return self.getMCSystUncertainty()
-
-    #def getContractedStatUncertainty(self,axis):
-        #return sqrt(pow(self._contractedDataUncertainty[axis],2)+pow(self._contractedMCStatUncertainty[axis],2)) / self._contractedNQCD[axis]
-
-    #def getContractedSystUncertainty(self,axis):
-        #return self._contractedMCSystUncertainty[axis] / self._contractedNQCD[axis]
-
-    #def getTotalUncertainty(self):
-        #return sqrt(pow(self._dataUncertainty,2)+pow(self._MCStatUncertainty,2)+pow(self._getMCSystUncertainty,2)) / self._NQCD
-
-    def getLeg1EfficiencyForUnfoldedBin(self, unfoldedBinIndex):
-        return self._getEfficiencyForUnfoldedBin(self, self._leg1Counts, self._basicCount, unfoldedBinIndex)
-
-    def getLeg2EfficiencyForUnfoldedBin(self, unfoldedBinIndex):
-        return self._getEfficiencyForUnfoldedBin(self, self._leg2Counts, self._basicCount, unfoldedBinIndex)
+    def getLeg2EfficiencyByUnfoldedBin(self, unfoldedBinIndex):
+        return self._getEfficiencyByUnfoldedBin(self, self._leg2Counts, self._basicCount, unfoldedBinIndex)
 
     def getLeg1Efficiency(self, factorisationBinIndexList):
         return self._getEfficiency(self._leg1Counts, self._basicCount, factorisationBinIndexList)
@@ -711,33 +693,25 @@ class QCDfactorisedCalculator:
     def getLeg2Efficiency(self, factorisationBinIndexList):
         return self._getEfficiency(self._leg2Counts, self._basicCount, factorisationBinIndexList)
 
-    #def getLeg2EWKMCCounts(self, factorisationBinIndexList):
-        #return self._leg2Counts.getMCCount(idx,idy,idz)
-
-    #def getQCDBasicCounts(self,idx,idy=-1,idz=-1):
-        #return self._basicCount.getQCDCount(idx,idy,idz)
-
-    #def getLeg2StatUncertainty(self,idx,idy=-1,idz=-1):
-        #return sqrt(pow(self._leg2Counts.getMCStatError(idx,idy,idz),2)+pow(self._leg2Counts.getDataError(idx,idy,idz),2))
-
-    def _getEfficiencyForUnfoldedBin(self,numerator,denominator,unfoldedBinIndex):
-        numeratorCount = numerator.getQCDCountForUnfoldedBin(unfoldedBinIndex)
-        denominatorCount = denominator.getQCDCountForUnfoldedBin(unfoldedBinIndex)
-        myResult = QCDCountObject(0.0, 0.0, 0.0, 0.0)
-        if denominatorCount.value() > 0:
-            myResult = numeratorCount.copy()
-            myResult.divide(denominatorCount)
-            #print "1D eff: nom=%f, denom=%f, value=%f +- %f:"%(numeratorCount.value(),denominatorCount.value(),myValue,myError)
-        return myResult
+    def _getEfficiencyByUnfoldedBin(self,numerator,denominator,unfoldedBinIndex):
+        numeratorCounts = numerator.getQCDCountByUnfoldedBin(unfoldedBinIndex)
+        denominatorCounts = denominator.getQCDCountByUnfoldedBin(unfoldedBinIndex)
+        return self._calculateEfficiency(numeratorCounts,denominatorCounts)
 
     def _getEfficiency(self,numerator,denominator,factorisationBinIndexList):
-        numeratorCount = numerator.getQCDCount(factorisationBinIndexList)
-        denominatorCount = denominator.getQCDCount(factorisationBinIndexList)
-        myResult = QCDCountObject(0.0, 0.0, 0.0, 0.0)
-        if denominatorCount.value() > 0:
-            myResult = numeratorCount.copy()
-            myResult.divide(denominatorCount)
-            #print "1D eff: nom=%f, denom=%f, value=%f +- %f:"%(numeratorCount.value(),denominatorCount.value(),myValue,myError)
+        numeratorCounts = numerator.getQCDCount(factorisationBinIndexList)
+        denominatorCounts = denominator.getQCDCount(factorisationBinIndexList)
+        return self._calculateEfficiency(numeratorCounts,denominatorCounts)
+
+    def _calculateEfficiency(self,numerator,denominator):
+        myResult = []
+        for i in range(0, len(numerator)):
+            r = QCDCountObject(0.0, 0.0, 0.0, 0.0)
+            if denominator[i].value() > 0:
+                r = numerator[i].copy()
+                r.divide(denominator[i])
+                #print "1D eff: nom=%f, denom=%f, value=%f +- %f:"%(numeratorCount.value(),denominatorCount.value(),myValue,myError)
+            myResult.append(r)
         return myResult
 
     ## CLP cannot be applied straight away to case like (A1-B1) / (A2-B2)
@@ -758,14 +732,9 @@ class QCDfactorisedCalculator:
 
     ## Returns the efficiency for a bin on first variation parameter, other parameters are contracted (i.e. summed)
     def _getContracted1DEfficiency(self,numerator,denominator,factorisationBinIndex,axisIndexToKeep):
-        numeratorCount = numerator.getContracted1DQCDCount(factorisationBinIndex,axisIndexToKeep)
-        denominatorCount = denominator.getContracted1DQCDCount(factorisationBinIndex,axisIndexToKeep)
-        Result = QCDCountObject(0.0, 0.0, 0.0, 0.0)
-        if denominatorCount.value() > 0:
-            myResult = numeratorCount.copy()
-            myResult.divide(denominatorCount)
-            #print "1D eff: nom=%f, denom=%f, value=%f +- %f:"%(numeratorCount.value(),denominatorCount.value(),myValue,myError)
-        return myResult
+        numeratorCounts = numerator.getContracted1DQCDCount(factorisationBinIndex,axisIndexToKeep)
+        denominatorCounts = denominator.getContracted1DQCDCount(factorisationBinIndex,axisIndexToKeep)
+        return self._calculateEfficiency(numeratorCounts,denominatorCounts)
 
     def getLeg1EfficiencyHistograms(self):
         return self._createEfficiencyHistograms(self._leg1Counts, self._basicCount, "leg1")
@@ -776,46 +745,21 @@ class QCDfactorisedCalculator:
     def _createEfficiencyHistograms(self, numerator, denominator, suffix=""):
         hlist = []
         # Make uncontracted histograms (can be a loooot of bins)
-        myName = "Efficiency_%s_StatOnly"%suffix
-        myNbins = self._basicCount.getReader().getUnfoldedBinCount()
-        hStat = ROOT.TH1F(myName,myName,myNbins,0.0,myNbins)
-        hStat.SetYTitle("Efficiency of %s"%suffix)
-        #hStat.SetMaximum(1.0)
-        myName = "Efficiency_%s_StatAndSyst"%suffix
-        hFull = ROOT.TH1F(myName,myName,myNbins,0.0,myNbins)
-        hFull.SetYTitle("Efficiency of %s"%suffix)
-        #hFull.SetMaximum(1.0)
-        for i in range(0,myNbins):
-            myResult = self._getEfficiencyForUnfoldedBin(numerator, denominator, i)
-            hStat.SetBinContent(i+1, myResult.value())
-            hStat.SetBinError(i+1, myResult.uncertainty())
-            hFull.SetBinContent(i+1, myResult.value())
-            hFull.SetBinError(i+1, myResult.totalUncertainty())
-            hStat.GetXaxis().SetBinLabel(i+1,self._basicCount.getFactorisationBinLabel(i))
-            hFull.GetXaxis().SetBinLabel(i+1,self._basicCount.getFactorisationBinLabel(i))
+        (hStat,hFull) = self._basicCount._createEmptyHistograms("Efficiency","Efficiency")
+        for i in range(0,self._basicCount.getNFactorisationBins()):
+            # Obtain values and fill histograms
+            myResults = self._getEfficiencyByUnfoldedBin(numerator, denominator, i)
+            self._basicCount._fillHistogramValues(hStat,hFull,myResults,i)
         hlist.append(hStat)
         hlist.append(hFull)
         # Make contracted histograms (easier to read)
-        myBinDimensions = self._basicCount.getReader().getNbinsList()
+        myBinDimensions = self.getReaderObject().getNbinsList()
         for myDim in range(0, len(myBinDimensions)):
-            myName = "Efficiency_%s_%s_StatOnly"%(suffix,self._basicCount.getReader().getBinLabelList()[myDim].replace(" ","_"))
-            hCStat = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0.0,myBinDimensions[myDim])
-            hCStat.SetXTitle(self._basicCount.getReader().getFactorisationCaptions()[myDim])
-            hCStat.SetYTitle("Efficiency of %s"%suffix)
-            #hCStat.SetMaximum(1.0)
-            myName = "Efficiency_%s_%s_StatAndSyst"%(suffix,self._basicCount.getReader().getBinLabelList()[myDim].replace(" ","_"))
-            hCFull = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0.0,myBinDimensions[myDim])
-            hCFull.SetXTitle(self._basicCount.getReader().getFactorisationCaptions()[myDim])
-            hCFull.SetYTitle("Efficiency of %s"%suffix)
-            #hCFull.SetMaximum(1.0)
+            (hCStat,hCFull) = self._basicCount._createEmptyHistograms("Efficiency","Efficiency",contractionDim=myDim)
             for i in range(0, myBinDimensions[myDim]):
+                # Obtain values and fill histograms
                 myResult = self._getContracted1DEfficiency(numerator, denominator, i, myDim)
-                hCStat.SetBinContent(i+1, myResult.value())
-                hCStat.SetBinError(i+1, myResult.uncertainty())
-                hCFull.SetBinContent(i+1, myResult.value())
-                hCFull.SetBinError(i+1, myResult.totalUncertainty())
-                hCStat.GetXaxis().SetBinLabel(i+1,self._basicCount.getReader().getFactorisationRanges()[myDim][i])
-                hCFull.GetXaxis().SetBinLabel(i+1,self._basicCount.getReader().getFactorisationRanges()[myDim][i])
+                self._basicCount._fillHistogramValues(hStat,hFull,myResults,i)
             hlist.append(hCStat)
             hlist.append(hCFull)
         for h in hlist:
@@ -823,39 +767,42 @@ class QCDfactorisedCalculator:
         return hlist
 
     def getNQCD(self,factorisationBinIndexList):
-        myBasicCountObject = self._basicCount.getQCDCount(factorisationBinIndexList)
-        myLeg1CountObject = self._leg1Counts.getQCDCount(factorisationBinIndexList)
-        myLeg2CountObject = self._leg2Counts.getQCDCount(factorisationBinIndexList)
-        return self._calculateNQCD(myBasicCountObject, myLeg1CountObject, myLeg2CountObject)
+        myBasicCountObjects = self._basicCount.getQCDCount(factorisationBinIndexList)
+        myLeg1CountObjects = self._leg1Counts.getQCDCount(factorisationBinIndexList)
+        myLeg2CountObjects = self._leg2Counts.getQCDCount(factorisationBinIndexList)
+        return self._calculateNQCD(myBasicCountObjects, myLeg1CountObjects, myLeg2CountObjects)
 
-    def getNQCDForUnfoldedBin(self,unfoldedBinIndex):
-        myBasicCountObject = self._basicCount.getQCDCountForUnfoldedBin(unfoldedBinIndex)
-        myLeg1CountObject = self._leg1Counts.getQCDCountForUnfoldedBin(unfoldedBinIndex)
-        myLeg2CountObject = self._leg2Counts.getQCDCountForUnfoldedBin(unfoldedBinIndex)
-        return self._calculateNQCD(myBasicCountObject, myLeg1CountObject, myLeg2CountObject)
+    def getNQCDByUnfoldedBin(self,unfoldedBinIndex):
+        myBasicCountObjects = self._basicCount.getQCDCountByUnfoldedBin(unfoldedBinIndex)
+        myLeg1CountObjects = self._leg1Counts.getQCDCountByUnfoldedBin(unfoldedBinIndex)
+        myLeg2CountObjects = self._leg2Counts.getQCDCountByUnfoldedBin(unfoldedBinIndex)
+        return self._calculateNQCD(myBasicCountObjects, myLeg1CountObjects, myLeg2CountObjects)
 
     def getContracted1DNQCDForBin(self,factorisationBinIndex, axisIndexToKeep):
-        myBasicCountObject = self._basicCount.getContracted1DQCDCount(factorisationBinIndex, axisIndexToKeep)
-        myLeg1CountObject = self._leg1Counts.getContracted1DQCDCount(factorisationBinIndex, axisIndexToKeep)
-        myLeg2CountObject = self._leg2Counts.getContracted1DQCDCount(factorisationBinIndex, axisIndexToKeep)
-        return self._calculateNQCD(myBasicCountObject, myLeg1CountObject, myLeg2CountObject)
+        myBasicCountObjects = self._basicCount.getContracted1DQCDCount(factorisationBinIndex, axisIndexToKeep)
+        myLeg1CountObjects = self._leg1Counts.getContracted1DQCDCount(factorisationBinIndex, axisIndexToKeep)
+        myLeg2CountObjects = self._leg2Counts.getContracted1DQCDCount(factorisationBinIndex, axisIndexToKeep)
+        return self._calculateNQCD(myBasicCountObjects, myLeg1CountObjects, myLeg2CountObjects)
 
-    def _calculateNQCD(self, myBasicCountObject, myLeg1CountObject, myLeg2CountObject):
+    def _calculateNQCD(self, myBasicCountObjects, myLeg1CountObjects, myLeg2CountObjects):
         myResult = QCDCountObject(0.0, 0.0, 0.0, 0.0)
+        # Check if NQCD is being calculated on a shape
+        if len(myBasicCountObjects) != 1:
+            raise Exception(ErrorLabel()+"NQCD calculation is supposed to take place with event count histograms, not shape histograms!")
         # Protect calculation against div by zero
-        if (myBasicCountObject.value() > 0.0):
+        if (myBasicCountObjects[0].value() > 0.0):
             # Calculate uncertainty as f=a*b  (i.e. ignore basic counts uncertainty since it is the denominator to avoid double counting of uncertainties)
             # Note that this is more conservative than CLP
-            myResult = myLeg1CountObject.copy()
-            myResult.multiply(myLeg2CountObject)
-            myResult.divideByScalar(myBasicCountObject.value())
+            myResult = myLeg1CountObjects[0].copy()
+            myResult.multiply(myLeg2CountObjects[0])
+            myResult.divideByScalar(myBasicCountObjects[0].value())
             # df = sqrt((b*da)^2 + (a*db)^2)
             #myDataUncert   = sqrt(pow(myLeg2Counts*self._leg1Counts.getDataError(idx,idy,idz)  /myBasicCounts,2) + 
                                   #pow(myLeg1Counts*self._leg2Counts.getDataError(idx,idy,idz)  /myBasicCounts,2))
             #myMCStatUncert = sqrt(pow(myLeg2Counts*self._leg1Counts.getMCStatError(idx,idy,idz)/myBasicCounts,2) +
                                   #pow(myLeg1Counts*self._leg2Counts.getMCStatError(idx,idy,idz)/myBasicCounts,2))
-            #myLeg1Systematics = self._leg1Counts.getMCCountForUnfoldedBin(unfoldedBinIndex).value() * self.getEWKMCRelativeSystematicUncertainty(idx)
-            #myLeg2Systematics = self._leg2Counts.getMCCountForUnfoldedBin(unfoldedBinIndex).value() * self.getEWKMCRelativeSystematicUncertainty(idx)
+            #myLeg1Systematics = self._leg1Counts.getMCCountByUnfoldedBin(unfoldedBinIndex).value() * self.getEWKMCRelativeSystematicUncertainty(idx)
+            #myLeg2Systematics = self._leg2Counts.getMCCountByUnfoldedBin(unfoldedBinIndex).value() * self.getEWKMCRelativeSystematicUncertainty(idx)
             #myMCSystUncert = sqrt(pow(myLeg2Counts*myLeg1Systematics/myBasicCounts,2) +
                                   #pow(myLeg1Counts*myLeg2Systematics/myBasicCounts,2))
         return myResult
@@ -865,7 +812,7 @@ class QCDfactorisedCalculator:
         myQCDResult = QCDCountObject(0.0, 0.0, 0.0, 0.0)
         # Make uncontracted histograms (can be a loooot of bins)
         myName = "NQCD_StatOnly"
-        myNbins = self._basicCount.getReader().getUnfoldedBinCount()
+        myNbins = self.getReaderObject().getUnfoldedBinCount()
         hStat = ROOT.TH1F(myName,myName,myNbins,0.0,myNbins)
         hStat.SetYTitle("NQCD")
         #hStat.SetMaximum(1.0)
@@ -874,7 +821,7 @@ class QCDfactorisedCalculator:
         hFull.SetYTitle("NQCD")
         #hFull.SetMaximum(1.0)
         for i in range(0,myNbins):
-            myResult = self.getNQCDForUnfoldedBin(i)
+            myResult = self.getNQCDByUnfoldedBin(i)
             myQCDResult.add(myResult)
             hStat.SetBinContent(i+1, myResult.value())
             hStat.SetBinError(i+1, myResult.uncertainty())
@@ -894,22 +841,22 @@ class QCDfactorisedCalculator:
         (minPurity, avgPurity) = self._leg2Counts.getPurityInfo()
         self._result.setPurityInfo(minPurity, avgPurity, 2)
         # Make contracted histograms (easier to read)
-        myBinDimensions = self._basicCount.getReader().getNbinsList()
+        myBinDimensions = self.getReaderObject().getNbinsList()
         for myDim in range(0, len(myBinDimensions)):
             myContractedResult = (QCDCountObject(0.0, 0.0, 0.0, 0.0))
-            myName = "NQCD_%s_StatOnly"%(self._basicCount.getReader().getBinLabelList()[myDim].replace(" ","_"))
+            myName = "NQCD_%s_StatOnly"%(self.getReaderObject().getBinLabelList()[myDim].replace(" ","_"))
             hCStat = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0.0,myBinDimensions[myDim])
-            hCStat.SetXTitle(self._basicCount.getReader().getFactorisationCaptions()[myDim])
-            hCStat.SetYTitle("dN_{QCD}/d%s"%self._basicCount.getReader().getFactorisationCaptions()[myDim])
+            hCStat.SetXTitle(self.getReaderObject().getFactorisationCaptions()[myDim])
+            hCStat.SetYTitle("dN_{QCD}/d%s"%self.getReaderObject().getFactorisationCaptions()[myDim])
             #hCStat.SetMaximum(1.0)
-            myName = "NQCD_%s_StatAndSyst"%(self._basicCount.getReader().getBinLabelList()[myDim].replace(" ","_"))
+            myName = "NQCD_%s_StatAndSyst"%(self.getReaderObject().getBinLabelList()[myDim].replace(" ","_"))
             hCFull = ROOT.TH1F(myName,myName,myBinDimensions[myDim],0.0,myBinDimensions[myDim])
-            hCFull.SetXTitle(self._basicCount.getReader().getFactorisationCaptions()[myDim])
-            hCFull.SetYTitle("dN_{QCD}/d%s"%self._basicCount.getReader().getFactorisationCaptions()[myDim])
+            hCFull.SetXTitle(self.getReaderObject().getFactorisationCaptions()[myDim])
+            hCFull.SetYTitle("dN_{QCD}/d%s"%self.getReaderObject().getFactorisationCaptions()[myDim])
             #hCFull.SetMaximum(1.0)
             for i in range(0, myBinDimensions[myDim]):
                 myResult = self.getContracted1DNQCDForBin(i, myDim)
-                myWidthString = self._basicCount.getReader().getFactorisationRanges()[myDim][i].split("..")
+                myWidthString = self.getReaderObject().getFactorisationRanges()[myDim][i].split("..")
                 myBinWidth = 1
                 if len(myWidthString) == 2:
                     myBinWidth = float(myWidthString[1]) - float(myWidthString[0])
@@ -918,13 +865,13 @@ class QCDfactorisedCalculator:
                 hCStat.SetBinError(i+1, myResult.uncertainty() / myBinWidth)
                 hCFull.SetBinContent(i+1, myResult.value() / myBinWidth)
                 hCFull.SetBinError(i+1, myResult.totalUncertainty() / myBinWidth)
-                hCStat.GetXaxis().SetBinLabel(i+1,self._basicCount.getReader().getFactorisationRanges()[myDim][i])
-                hCFull.GetXaxis().SetBinLabel(i+1,self._basicCount.getReader().getFactorisationRanges()[myDim][i])
+                hCStat.GetXaxis().SetBinLabel(i+1,self.getReaderObject().getFactorisationRanges()[myDim][i])
+                hCFull.GetXaxis().SetBinLabel(i+1,self.getReaderObject().getFactorisationRanges()[myDim][i])
             self._nQCDHistograms.append(hCStat)
             self._nQCDHistograms.append(hCFull)
             # Save result
             self._contractedResults.append(None)
-            self._contractedResults[myDim] = QCDResultObject("contracted to %s axis"%self._basicCount.getReader().getBinLabelList()[myDim])
+            self._contractedResults[myDim] = QCDResultObject("contracted to %s axis"%self.getReaderObject().getBinLabelList()[myDim])
             self._contractedResults[myDim].setNQCDResult(myContractedResult)
             (minPurity, avgPurity) = self._basicCount.getContracted1DPurityInfo(0)
             self._contractedResults[myDim].setPurityInfo(minPurity, avgPurity, 0)
@@ -938,12 +885,12 @@ class QCDfactorisedCalculator:
 
     ## Create a full size table assuming 3D factorisation
     def _createYieldTable(self):
-        myBinDimensions = self._basicCount.getReader().getNbinsList()
-        myBinCaptions = self._basicCount.getReader().getFactorisationRanges()
+        myBinDimensions = self.getReaderObject().getNbinsList()
+        myBinCaptions = self.getReaderObject().getFactorisationRanges()
         for i in range(0,len(myBinCaptions)):
             for j in range(0,len(myBinCaptions[i])):
                 myBinCaptions[i][j] = myBinCaptions[i][j].replace("<","$<$").replace(">","$>$")
-        #myBinCaptions = self._basicCount.getReader().getFactorisationFullBinLabels()
+        #myBinCaptions = self.getReaderObject().getFactorisationFullBinLabels()
         ## Latexify bin captions
         #for i in range(0,len(myBinCaptions)):
             #for j in range(0,len(myBinCaptions[i])):
@@ -998,16 +945,16 @@ class QCDfactorisedCalculator:
                 for j in range(0,myBinDimensions[1]):
                     myTableStructure += "l"
                     myEtaCaption += "& \multicolumn{1}{c}{%s}"%myBinCaptions[1][j]
-                    myBasicDataRow += "& %s"%(self._basicCount.getDataCountObject([i,j,k]).getLatexStringNoSyst("%.1f"))
-                    myBasicEWKRow += "& %s"%(self._basicCount.getMCCountObject([i,j,k]).getLatexStringFull("%.1f"))
-                    myBasicPurityRow += "& %s"%(self._basicCount.getPurity([i,j,k]).getLatexStringFull("%.3f"))
-                    myMetDataRow += "& %s"%(self._leg1Counts.getDataCountObject([i,j,k]).getLatexStringNoSyst("%.1f"))
-                    myMetEWKRow += "& %s"%(self._leg1Counts.getMCCountObject([i,j,k]).getLatexStringFull("%.1f"))
-                    myMetPurityRow += "& %s"%(self._leg1Counts.getPurity([i,j,k]).getLatexStringFull("%.2f"))
-                    myTauDataRow += "& %s"%(self._leg2Counts.getDataCountObject([i,j,k]).getLatexStringNoSyst("%.1f"))
-                    myTauEWKRow += "& %s"%(self._leg2Counts.getMCCountObject([i,j,k]).getLatexStringFull("%.1f"))
-                    myTauPurityRow += "& %s"%(self._leg2Counts.getPurity([i,j,k]).getLatexStringFull("%.2f"))
-                    myMetEffRow += "& %s"%(self.getLeg1Efficiency([i,j,k]).getLatexStringFull("%.4f"))
+                    myBasicDataRow += "& %s"%(self._basicCount.getDataCountObjects([i,j,k])[0].getLatexStringNoSyst("%.1f"))
+                    myBasicEWKRow += "& %s"%(self._basicCount.getMCCountObjects([i,j,k])[0].getLatexStringFull("%.1f"))
+                    myBasicPurityRow += "& %s"%(self._basicCount.getPurity([i,j,k])[0].getLatexStringFull("%.3f"))
+                    myMetDataRow += "& %s"%(self._leg1Counts.getDataCountObjects([i,j,k])[0].getLatexStringNoSyst("%.1f"))
+                    myMetEWKRow += "& %s"%(self._leg1Counts.getMCCountObjects([i,j,k])[0].getLatexStringFull("%.1f"))
+                    myMetPurityRow += "& %s"%(self._leg1Counts.getPurity([i,j,k])[0].getLatexStringFull("%.2f"))
+                    myTauDataRow += "& %s"%(self._leg2Counts.getDataCountObjects([i,j,k])[0].getLatexStringNoSyst("%.1f"))
+                    myTauEWKRow += "& %s"%(self._leg2Counts.getMCCountObjects([i,j,k])[0].getLatexStringFull("%.1f"))
+                    myTauPurityRow += "& %s"%(self._leg2Counts.getPurity([i,j,k])[0].getLatexStringFull("%.2f"))
+                    myMetEffRow += "& %s"%(self.getLeg1Efficiency([i,j,k])[0].getLatexStringFull("%.4f"))
                     myNQCDRow += "& %s"%(self.getNQCD([i,j,k]).getLatexStringFull("%.1f"))
                 # Construct table
                 if k % 2 == 1: # FIXME assumed 2 bins for eta
@@ -1066,8 +1013,8 @@ class QCDfactorisedCalculator:
             s += "and %s"%ranges[len(ranges)-1]
             return s
 
-        myBinDimensions = self._basicCount.getReader().getNbinsList()
-        myBinCaptions = self._basicCount.getReader().getFactorisationRanges()
+        myBinDimensions = self.getReaderObject().getNbinsList()
+        myBinCaptions = self.getReaderObject().getFactorisationRanges()
         for i in range(0,len(myBinCaptions)):
             for j in range(0,len(myBinCaptions[i])):
                 myBinCaptions[i][j] = myBinCaptions[i][j].replace("<","$<$").replace(">","$>$")
@@ -1095,16 +1042,16 @@ class QCDfactorisedCalculator:
             myRanges.append(myBinCaptions[0][i])
             myPtCaption += "& %s \\GeVc"%(myBinCaptions[0][i])
             myTableStructure += "l"
-            myBasicDataRow += "& %s"%(self._basicCount.getContracted1DDataCountObject(i,0).getLatexStringNoSyst("%.1f"))
-            myBasicEWKRow += "& %s"%(self._basicCount.getContracted1DMCCountObject(i,0).getLatexStringFull("%.1f"))
-            myBasicPurityRow += "& %s"%(self._basicCount.getContracted1DPurity(i,0).getLatexStringFull("%.3f"))
-            myMetDataRow += "& %s"%(self._leg1Counts.getContracted1DDataCountObject(i,0).getLatexStringNoSyst("%.1f"))
-            myMetEWKRow += "& %s"%(self._leg1Counts.getContracted1DMCCountObject(i,0).getLatexStringFull("%.1f"))
-            myMetPurityRow += "& %s"%(self._leg1Counts.getContracted1DPurity(i,0).getLatexStringFull("%.2f"))
-            myTauDataRow += "& %s"%(self._leg2Counts.getContracted1DDataCountObject(i,0).getLatexStringNoSyst("%.1f"))
-            myTauEWKRow += "& %s"%(self._leg2Counts.getContracted1DMCCountObject(i,0).getLatexStringFull("%.1f"))
-            myTauPurityRow += "& %s"%(self._leg2Counts.getContracted1DPurity(i,0).getLatexStringFull("%.2f"))
-            myMetEffRow += "& %s"%(self.getContracted1DLeg1Efficiency(i,0).getLatexStringFull("%.4f"))
+            myBasicDataRow += "& %s"%(self._basicCount.getContracted1DDataCountObjects(i,0)[0].getLatexStringNoSyst("%.1f"))
+            myBasicEWKRow += "& %s"%(self._basicCount.getContracted1DMCCountObjects(i,0)[0].getLatexStringFull("%.1f"))
+            myBasicPurityRow += "& %s"%(self._basicCount.getContracted1DPurity(i,0)[0].getLatexStringFull("%.3f"))
+            myMetDataRow += "& %s"%(self._leg1Counts.getContracted1DDataCountObjects(i,0)[0].getLatexStringNoSyst("%.1f"))
+            myMetEWKRow += "& %s"%(self._leg1Counts.getContracted1DMCCountObjects(i,0)[0].getLatexStringFull("%.1f"))
+            myMetPurityRow += "& %s"%(self._leg1Counts.getContracted1DPurity(i,0)[0].getLatexStringFull("%.2f"))
+            myTauDataRow += "& %s"%(self._leg2Counts.getContracted1DDataCountObjects(i,0)[0].getLatexStringNoSyst("%.1f"))
+            myTauEWKRow += "& %s"%(self._leg2Counts.getContracted1DMCCountObjects(i,0)[0].getLatexStringFull("%.1f"))
+            myTauPurityRow += "& %s"%(self._leg2Counts.getContracted1DPurity(i,0)[0].getLatexStringFull("%.2f"))
+            myMetEffRow += "& %s"%(self.getContracted1DLeg1Efficiency(i,0)[0].getLatexStringFull("%.4f"))
             myNQCDRow += "& %s"%(self.getContracted1DNQCDForBin(i,0).getLatexStringFull("%.1f"))
             # Construct table
             if n == rows-1 or i == myBinDimensions[0]-1:
@@ -1223,6 +1170,7 @@ class QCDfactorisedColumn(DatacardColumn):
         self._infoHistograms.extend(myStdSelEventCount.makePurityHistograms())
         self._infoHistograms.extend(myMETLegEventCount.makePurityHistograms())
         self._infoHistograms.extend(myTauLegEventCount.makePurityHistograms())
+        self.saveQCDInfoHistograms(".") # FIXME temp
         # Calculate result of NQCD
         myQCDCalculator = QCDfactorisedCalculator(myStdSelEventCount, myMETLegEventCount, myTauLegEventCount, True)
         self._infoHistograms.extend(myQCDCalculator.getNQCDHistograms())
@@ -1232,7 +1180,7 @@ class QCDfactorisedColumn(DatacardColumn):
         # Make efficiency histograms
         self._infoHistograms.extend(myQCDCalculator.getLeg1EfficiencyHistograms())
         self._infoHistograms.extend(myQCDCalculator.getLeg2EfficiencyHistograms())
-        self.saveQCDInfoHistograms(".")
+        
         # Print result to screen
         print myQCDCalculator.getResult().getInfoString()
         for cr in myQCDCalculator.getContractedResultsList():
@@ -1240,11 +1188,12 @@ class QCDfactorisedColumn(DatacardColumn):
         # Make shape histogram
         myRateHistograms=[]
         if True:
-            print "... Calculating shape (looping over %d histograms)..."%myStdSelEventCount.getTotalDimension()
+            print "... Calculating shape histograms"
             myRateHistograms=[]
-            hRateShape = self._createShapeHistogram(config, dsetMgr, luminosity, myQCDCalculator,
-                                                    config.ShapeHistogramsDimensions, self._label, self._basicMtHisto,
-                                                    saveDetailedInfo=True, makeCorrectionToShape=True) 
+            hRateShape = self._createShapeHistogram(dsetMgr,luminosity,myQCDCalculator,
+                                                    histoSpecs=config.ShapeHistogramsDimensions,title=self._label,
+                                                    histoName=self._factorisedConfig["finalShapeHisto"],
+                                                    saveDetailedInfo=True,makeCorrectionToShape=True)
             # Normalise rate shape to NQCD
             if hRateShape.Integral() > 0:
                 hRateShape.Scale(myQCDCalculator.getNQCD() / hRateShape.Integral())
@@ -1376,161 +1325,152 @@ class QCDfactorisedColumn(DatacardColumn):
                     hMtMCEWK.IsA().Destructor(hMtMCEWK)
         h.IsA().Destructor(h)
 
-    def _createShapeHistogram(self, dsetMgr, QCDCalculator, luminosity, histoSpecs, title, histoName, saveDetailedInfo=False, makeCorrectionToShape=False):
+    def _createShapeHistogram(self, dsetMgr, luminosity, myQCDCalculator, histoSpecs, title, histoName, saveDetailedInfo=False, makeCorrectionToShape=False):
         # Create empty shape histogram
         myShapeModifier = ShapeHistoModifier(histoSpecs)
         h = myShapeModifier.createEmptyShapeHistogram(title)
         # Obtain bin dimensions
-        nbinsY = 1
-        if QCDCount.is2D() or QCDCount.is3D():
-            nbinsY = QCDCount.getNbinsY()
-        nbinsZ = 1
-        if QCDCount.is3D():
-            nbinsZ = QCDCount.getNbinsZ()
+        myNUnfoldedFactorisationBins = self.getReaderObject().getUnfoldedBinCount()
         # Create info histogram with all info in one
-        myName = "QCDFact_ShapeSummary_%s_Total"%title
-        hTot = ROOT.TH2F(myName,myName,h.GetNbinsX()*QCDCount.getNbinsY(),0,h.GetNbinsX()*QCDCount.getNbinsY(),QCDCount.getNbinsX()*QCDCount.getNbinsZ(),0,QCDCount.getNbinsX()*QCDCount.getNbinsZ())
-        hTot.SetZTitle("Events")
+        #myName = "QCDFact_ShapeSummary_%s_Total"%title
+        #hTot = ROOT.TH2F(myName,myName,h.GetNbinsX()*QCDCount.getNbinsY(),0,h.GetNbinsX()*QCDCount.getNbinsY(),QCDCount.getNbinsX()*QCDCount.getNbinsZ(),0,QCDCount.getNbinsX()*QCDCount.getNbinsZ())
+        #hTot.SetZTitle("Events")
         # Setup axis titles for total histogram
-        for i in range(1,h.GetNbinsX()+1):
-            for j in range(1,nbinsY+1):
-                if i == h.GetNbinsX()+1:
-                    hTot.GetXaxis().SetBinLabel(i+(j-1)*h.GetNbinsX(), "(>%d; "%(h.GetXaxis().GetBinUpEdge(i))+QCDCount.getBinLabel("Y",j))
-                else:
-                    hTot.GetXaxis().SetBinLabel(i+(j-1)*h.GetNbinsX(), "(%d-%d; "%(h.GetXaxis().GetBinLowEdge(i),h.GetXaxis().GetBinUpEdge(i))+QCDCount.getBinLabel("Y",j))
-        for i in range(1,QCDCount.getNbinsX()+1):
-            for k in range(1,nbinsZ+1):
-                hTot.GetYaxis().SetBinLabel(k+(i-1)*nbinsZ, "("+QCDCount.getBinLabel("X",i)+";"+QCDCount.getBinLabel("Z",k))
-        # Loop over bins
-        for i in range(1,QCDCount.getNbinsX()+1):
-            myName = "QCDFact_ShapeSummary_%s_ContractedX_bin_%d"%(title,i)
-            hTotContractedX = myShapeModifier.createEmptyShapeHistogram(myName)
-            myName = "QCDFact_ShapeSummary_%s_ContractedXContractedEff_bin_%d"%(title,i)
-            hTotContractedXeff = myShapeModifier.createEmptyShapeHistogram(myName)
-            for j in range(1,nbinsY+1):
-                for k in range(1,nbinsZ+1):
-                    # Determine suffix for histograms
-                    myFactorisationSuffix = "_%d"%(i-1)
-                    if QCDCount.is2D() or QCDCount.is3D():
-                        myFactorisationSuffix += "_%d"%(j-1)
-                    if QCDCount.is3D():
-                        myFactorisationSuffix += "_%d"%(k-1)
-                    # Get histograms for the bin for data and MC EWK
-                    myFullHistoName = "%s/%s%s"%(histoDir,histoName,myFactorisationSuffix)
-                    hMtData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
-                    hMtMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
-                    # Add proper systematics to shape for MC EWK
-                    for l in range (0, hMtMCEWK.GetNbinsX()+2):
-                        myAbsSystUncertainty = QCDCalculator.getEWKMCRelativeSystematicUncertainty(i)* hMtMCEWK.GetBinContent(l)
-                        hMtMCEWK.SetBinError(l,sqrt(pow(hMtMCEWK.GetBinError(l),2) + pow(myAbsSystUncertainty,2)))
-                    if self._debugMode:
-                        print "  QCDfactorised / %s: bin%s, data=%f, MC EWK=%f, QCD=%f"%(title,myFactorisationSuffix,hMtData.Integral(0,hMtData.GetNbinsX()+1),hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1),hMtData.Integral(0,hMtData.GetNbinsX()+1)-hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1))
-                    # Obtain empty histograms
-                    myOutHistoName = "QCDFact_%s_QCD_bin%s"%(title,myFactorisationSuffix)
-                    hMtBin = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
-                    hMtBinData = None
-                    hMtBinEWK = None
-                    if saveDetailedInfo:
-                        myOutHistoName = "QCDFact_%s_Data_bin%s"%(title,myFactorisationSuffix)
-                        hMtBinData = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
-                        myOutHistoName = "QCDFact_%s_MCEWK_bin%s"%(title,myFactorisationSuffix)
-                        hMtBinEWK = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
-                    # Add data to histograms
-                    myShapeModifier.addShape(source=hMtData,dest=hMtBin)
-                    myShapeModifier.addShape(source=hMtData,dest=hMtBinData)
-                    myShapeModifier.addShape(source=hMtMCEWK,dest=hMtBinEWK)
-                    # Subtract MC EWK from data to obtain QCD
-                    myMessages = []
-                    myMessages.extend(myShapeModifier.subtractShape(source=hMtMCEWK,dest=hMtBin,purityCheck=True))
-                    if len(myMessages) > 0:
-                        myTotal = hMtBin.Integral(0,hMtBin.GetNbinsX()+1)
-                        for m in myMessages:
-                            # Filter out only important warnings of inpurity (impact more than one percent to whole bin)
-                            if myTotal > 0.0:
-                                if m[1] / myTotal > 0.01:
-                                    self._messages.extend(WarningStyle()+"Warning:"+NormalStyle()+" low purity in QCD factorised shape for bin %d,%d,%d (impact %f events / total=%f : %s"%(i,j,k,m[1],myTotal,m[0]))
-                    # Finalise shape (underflow added to first bin, overflow added to last bin, variances converted to std.deviations)
-                    myShapeModifier.finaliseShape(dest=hMtBin)
-                    myShapeModifier.finaliseShape(dest=hMtBinData)
-                    myShapeModifier.finaliseShape(dest=hMtBinEWK)
-                    # Add to contracted histogram
-                    myShapeModifier.addShape(source=hMtBin,dest=hTotContractedXeff)
-                    # Multiply by efficiency of leg 2 (tau leg)
-                    myEfficiency = QCDCalculator.getLeg2Efficiency(i,j,k)
-                    if myEfficiency.value() > 0.0:
-                        myMCEWKLeg2Counts = QCDCalculator.getLeg2EWKMCCounts(i,j,k)
-                        myLeg2Stat = QCDCalculator.getLeg2StatUncertainty(i,j,k)
-                        myBasicCounts = QCDCalculator.getQCDBasicCounts(i,j,k).value()
-                        for l in range(1,hMtBin.GetNbinsX()+1):
-                            # the mT bin already contains stat + syst
-                            myStatUncertaintySquared = pow(myLeg2Stat,2)
-                            mySystUncertaintySquared = pow(myMCEWKLeg2Counts*QCDCalculator.getEWKMCRelativeSystematicUncertainty(i),2)
-                            hMtBin.SetBinError(l,sqrt(pow(hMtBin.GetBinError(l)*myEfficiency.value(),2)
-                                                     +pow(hMtBin.GetBinContent(l) / myBasicCounts,2)*(myStatUncertaintySquared+mySystUncertaintySquared)))
-                            hMtBin.SetBinContent(l,hMtBin.GetBinContent(l)*myEfficiency.value())
-                        if saveDetailedInfo:
-                            hMtBinData.Scale(myEfficiency.value()) #FIXME
-                            hMtBinEWK.Scale(myEfficiency.value())
-                    else:
-                        # Do not take this bin into account if cannot obtain efficiency
-                        hMtBin.Reset()
-                    if self._debugMode:
-                        print "  QCDfactorised / %s shape: bin %d_%d_%d, eff=%f, eff*QCD=%f"%(title,i,j,k,myEfficiency.value(),hMtBin.Integral())
-                    # Apply correction to mT
+        #for i in range(1,h.GetNbinsX()+1):
+            #for j in range(1,nbinsY+1):
+                #if i == h.GetNbinsX()+1:
+                    #hTot.GetXaxis().SetBinLabel(i+(j-1)*h.GetNbinsX(), "(>%d; "%(h.GetXaxis().GetBinUpEdge(i))+QCDCount.getBinLabel("Y",j))
+                #else:
+                    #hTot.GetXaxis().SetBinLabel(i+(j-1)*h.GetNbinsX(), "(%d-%d; "%(h.GetXaxis().GetBinLowEdge(i),h.GetXaxis().GetBinUpEdge(i))+QCDCount.getBinLabel("Y",j))
+        #for i in range(1,QCDCount.getNbinsX()+1):
+            #for k in range(1,nbinsZ+1):
+                #hTot.GetYaxis().SetBinLabel(k+(i-1)*nbinsZ, "("+QCDCount.getBinLabel("X",i)+";"+QCDCount.getBinLabel("Z",k))
+                
+        # Get input shape histograms for data and for MC
+        
+        # Loop over factorisation bins
+        for i in range(0,myNUnfoldedFactorisationBins):
+            #myName = "QCDFact_ShapeSummary_%s_ContractedX_bin_%d"%(title,i)
+            #hTotContractedX = myShapeModifier.createEmptyShapeHistogram(myName)
+            #myName = "QCDFact_ShapeSummary_%s_ContractedXContractedEff_bin_%d"%(title,i)
+            #hTotContractedXeff = myShapeModifier.createEmptyShapeHistogram(myName)
+            # Get histograms for the bin for data and MC EWK
+            myFullHistoName = "%s/%s%s"%(histoDir,histoName,myFactorisationSuffix)
+            hMtData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
+            hMtMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
+            # Add proper systematics to shape for MC EWK
+            for l in range (0, hMtMCEWK.GetNbinsX()+2):
+                myAbsSystUncertainty = QCDCalculator.getEWKMCRelativeSystematicUncertainty(i)* hMtMCEWK.GetBinContent(l)
+                hMtMCEWK.SetBinError(l,sqrt(pow(hMtMCEWK.GetBinError(l),2) + pow(myAbsSystUncertainty,2)))
+            if self._debugMode:
+                print "  QCDfactorised / %s: bin%s, data=%f, MC EWK=%f, QCD=%f"%(title,myFactorisationSuffix,hMtData.Integral(0,hMtData.GetNbinsX()+1),hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1),hMtData.Integral(0,hMtData.GetNbinsX()+1)-hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1))
+            # Obtain empty histograms
+            myOutHistoName = "QCDFact_%s_QCD_bin%s"%(title,myFactorisationSuffix)
+            hMtBin = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
+            hMtBinData = None
+            hMtBinEWK = None
+            if saveDetailedInfo:
+                myOutHistoName = "QCDFact_%s_Data_bin%s"%(title,myFactorisationSuffix)
+                hMtBinData = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
+                myOutHistoName = "QCDFact_%s_MCEWK_bin%s"%(title,myFactorisationSuffix)
+                hMtBinEWK = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
+            # Add data to histograms
+            myShapeModifier.addShape(source=hMtData,dest=hMtBin)
+            myShapeModifier.addShape(source=hMtData,dest=hMtBinData)
+            myShapeModifier.addShape(source=hMtMCEWK,dest=hMtBinEWK)
+            # Subtract MC EWK from data to obtain QCD
+            myMessages = []
+            myMessages.extend(myShapeModifier.subtractShape(source=hMtMCEWK,dest=hMtBin,purityCheck=True))
+            if len(myMessages) > 0:
+                myTotal = hMtBin.Integral(0,hMtBin.GetNbinsX()+1)
+                for m in myMessages:
+                    # Filter out only important warnings of inpurity (impact more than one percent to whole bin)
+                    if myTotal > 0.0:
+                        if m[1] / myTotal > 0.01:
+                            self._messages.extend(WarningStyle()+"Warning:"+NormalStyle()+" low purity in QCD factorised shape for bin %d,%d,%d (impact %f events / total=%f : %s"%(i,j,k,m[1],myTotal,m[0]))
+            # Finalise shape (underflow added to first bin, overflow added to last bin, variances converted to std.deviations)
+            myShapeModifier.finaliseShape(dest=hMtBin)
+            myShapeModifier.finaliseShape(dest=hMtBinData)
+            myShapeModifier.finaliseShape(dest=hMtBinEWK)
+            # Add to contracted histogram
+            myShapeModifier.addShape(source=hMtBin,dest=hTotContractedXeff)
+            # Multiply by efficiency of leg 2 (tau leg)
+            myEfficiency = QCDCalculator.getLeg2Efficiency(i,j,k)
+            if myEfficiency.value() > 0.0:
+                myMCEWKLeg2Counts = QCDCalculator.getLeg2EWKMCCounts(i,j,k)
+                myLeg2Stat = QCDCalculator.getLeg2StatUncertainty(i,j,k)
+                myBasicCounts = QCDCalculator.getQCDBasicCounts(i,j,k).value()
+                for l in range(1,hMtBin.GetNbinsX()+1):
+                    # the mT bin already contains stat + syst
+                    myStatUncertaintySquared = pow(myLeg2Stat,2)
+                    mySystUncertaintySquared = pow(myMCEWKLeg2Counts*QCDCalculator.getEWKMCRelativeSystematicUncertainty(i),2)
+                    hMtBin.SetBinError(l,sqrt(pow(hMtBin.GetBinError(l)*myEfficiency.value(),2)
+                                             +pow(hMtBin.GetBinContent(l) / myBasicCounts,2)*(myStatUncertaintySquared+mySystUncertaintySquared)))
+                    hMtBin.SetBinContent(l,hMtBin.GetBinContent(l)*myEfficiency.value())
+                if saveDetailedInfo:
+                    hMtBinData.Scale(myEfficiency.value()) #FIXME
+                    hMtBinEWK.Scale(myEfficiency.value())
+            else:
+                # Do not take this bin into account if cannot obtain efficiency
+                hMtBin.Reset()
+            if self._debugMode:
+                print "  QCDfactorised / %s shape: bin %d_%d_%d, eff=%f, eff*QCD=%f"%(title,i,j,k,myEfficiency.value(),hMtBin.Integral())
+            # Apply correction to mT
 ####
-                    if makeCorrectionToShape and False:
-                        # Get data and MC EWK histogram
-                        myFullHistoName = "%s_%d_%d_%d"%(self._MTCorrectionDetails["source"],i,j,k)
-                        hCorrData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
-                        hCorrMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
-                        # Add to shape
-                        hCorr = myShapeModifier.createEmptyShapeHistogram(title)
-                        myShapeModifier.addShape(source=hCorrData,dest=hCorr)
-                        myShapeModifier.subtractShape(source=hCorrMCEWK,dest=hCorr,purityCheck=False)
-                        myShapeModifier.finaliseShape(dest=Corr)
-                        # Calculate nominal integral and corrected integral
-                        myNominalCount = h.Integral()
-                        myCorrections = self._MTCorrectionDetails[self._MTCorrectionDetails["name"]+"_Correction_bin_%d"%(i)]
-                        myCorrectionUncertainty = self._MTCorrectionDetails[self._MTCorrectionDetails["name"]+"_CorrectionUncertainty_bin_%d"%(i)]
-                        myCorrectedCount = 0.0
-                        myCorrectedUncertainty = 0.0
-                        for l in range(1,h.GetNbinsX()+1):
-                            print "%f, %f"%( hCorr.GetBinContent(l), myCorrections[l-1])
-                            myCorrectedCount += hCorr.GetBinContent(l)*myCorrections[l-1]
-                            myCorrectedUncertainty += pow(hCorr.GetBinContent(l)*myCorrectionUncertainty[l-1],2)
-                        myCorrectedUncertainty = sqrt(myCorrectedUncertainty)
-                        print "*** MT correction %d: nominal = %f, corrected = %f +- %f"%(i,myNominalCount,myCorrectedCount,myCorrectedUncertainty)
-                        self._MTCorrectionFactorsForTauPtBins.append(myCorrectedCount)
-                        self._MTCorrectionFactorUncertaintyForTauPtBins.append(myCorrectedUncertainty)
-                        hCorrData.IsA().Destructor(hCorr)
-                        hCorrData.IsA().Destructor(hCorrData)
-                        hCorrMCEWK.IsA().Destructor(hCorrMCEWK)
+            if makeCorrectionToShape and False:
+                # Get data and MC EWK histogram
+                myFullHistoName = "%s_%d_%d_%d"%(self._MTCorrectionDetails["source"],i,j,k)
+                hCorrData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
+                hCorrMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
+                # Add to shape
+                hCorr = myShapeModifier.createEmptyShapeHistogram(title)
+                myShapeModifier.addShape(source=hCorrData,dest=hCorr)
+                myShapeModifier.subtractShape(source=hCorrMCEWK,dest=hCorr,purityCheck=False)
+                myShapeModifier.finaliseShape(dest=Corr)
+                # Calculate nominal integral and corrected integral
+                myNominalCount = h.Integral()
+                myCorrections = self._MTCorrectionDetails[self._MTCorrectionDetails["name"]+"_Correction_bin_%d"%(i)]
+                myCorrectionUncertainty = self._MTCorrectionDetails[self._MTCorrectionDetails["name"]+"_CorrectionUncertainty_bin_%d"%(i)]
+                myCorrectedCount = 0.0
+                myCorrectedUncertainty = 0.0
+                for l in range(1,h.GetNbinsX()+1):
+                    print "%f, %f"%( hCorr.GetBinContent(l), myCorrections[l-1])
+                    myCorrectedCount += hCorr.GetBinContent(l)*myCorrections[l-1]
+                    myCorrectedUncertainty += pow(hCorr.GetBinContent(l)*myCorrectionUncertainty[l-1],2)
+                myCorrectedUncertainty = sqrt(myCorrectedUncertainty)
+                print "*** MT correction %d: nominal = %f, corrected = %f +- %f"%(i,myNominalCount,myCorrectedCount,myCorrectedUncertainty)
+                self._MTCorrectionFactorsForTauPtBins.append(myCorrectedCount)
+                self._MTCorrectionFactorUncertaintyForTauPtBins.append(myCorrectedUncertainty)
+                hCorrData.IsA().Destructor(hCorr)
+                hCorrData.IsA().Destructor(hCorrData)
+                hCorrMCEWK.IsA().Destructor(hCorrMCEWK)
 ####
-                    # Add to total shape histogram
-                    myShapeModifier.addShape(source=hMtBin,dest=h) # important to do before handling negative bins
-                    myShapeModifier.addShape(source=hMtBin,dest=hTotContractedX)
-                    # Remove negative bins, but retain original normalisation
-                    #for a in range(1,hMtBin.GetNbinsX()+1):
-                        #if hMtBin.GetBinContent(a) < 0.0:
-                            ##print WarningStyle()+"Warning: QCD factorised"+NormalStyle()+" in mT shape bin %d,%d,%d, histo bin %d is negative (%f / tot:%f), it is set to zero but total normalisation is maintained"%(i,j,k,a,hMtBin.GetBinContent(a),hMtBin.Integral())
-                            #myIntegral = hMtBin.Integral()
-                            #hMtBin.SetBinContent(a,0.0)
-                            #if (hMtBin.Integral() > 0.0):
-                                #hMtBin.Scale(myIntegral / hMtBin.Integral())
-                    # Add to total info histogram
-                    for l in range (1, hMtBin.GetNbinsX()+1):
-                        hTot.SetBinContent(l+(j-1)*h.GetNbinsX(), k+(i-1)*nbinsZ, hMtBin.GetBinContent(l))
-                        hTot.SetBinError(l+(j-1)*h.GetNbinsX(), k+(i-1)*nbinsZ, hMtBin.GetBinError(l))
-                    # Store mT bin histogram for info
-                    if saveDetailedInfo:
-                        self._infoHistograms.append(hMtBin)
-                        self._infoHistograms.append(hMtBinData)
-                        self._infoHistograms.append(hMtBinEWK)
-                    else:
-                        hMtBin.IsA().Destructor(hMtBin)
-                    # Delete data and MC EWK histograms from memory
-                    hMtData.IsA().Destructor(hMtData)
-                    hMtMCEWK.IsA().Destructor(hMtMCEWK)
+            # Add to total shape histogram
+            myShapeModifier.addShape(source=hMtBin,dest=h) # important to do before handling negative bins
+            myShapeModifier.addShape(source=hMtBin,dest=hTotContractedX)
+            # Remove negative bins, but retain original normalisation
+            #for a in range(1,hMtBin.GetNbinsX()+1):
+                #if hMtBin.GetBinContent(a) < 0.0:
+                    ##print WarningStyle()+"Warning: QCD factorised"+NormalStyle()+" in mT shape bin %d,%d,%d, histo bin %d is negative (%f / tot:%f), it is set to zero but total normalisation is maintained"%(i,j,k,a,hMtBin.GetBinContent(a),hMtBin.Integral())
+                    #myIntegral = hMtBin.Integral()
+                    #hMtBin.SetBinContent(a,0.0)
+                    #if (hMtBin.Integral() > 0.0):
+                        #hMtBin.Scale(myIntegral / hMtBin.Integral())
+            # Add to total info histogram
+            for l in range (1, hMtBin.GetNbinsX()+1):
+                hTot.SetBinContent(l+(j-1)*h.GetNbinsX(), k+(i-1)*nbinsZ, hMtBin.GetBinContent(l))
+                hTot.SetBinError(l+(j-1)*h.GetNbinsX(), k+(i-1)*nbinsZ, hMtBin.GetBinError(l))
+            # Store mT bin histogram for info
+            if saveDetailedInfo:
+                self._infoHistograms.append(hMtBin)
+                self._infoHistograms.append(hMtBinData)
+                self._infoHistograms.append(hMtBinEWK)
+            else:
+                hMtBin.IsA().Destructor(hMtBin)
+            # Delete data and MC EWK histograms from memory
+            hMtData.IsA().Destructor(hMtData)
+            hMtMCEWK.IsA().Destructor(hMtMCEWK)
+                    
             myEfficiency = QCDCalculator.getContracted1DLeg2Efficiency(i,"X")
             myShapeModifier.finaliseShape(dest=hTotContractedX)
             myShapeModifier.finaliseShape(dest=hTotContractedXeff)
