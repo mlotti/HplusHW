@@ -35,8 +35,8 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
         args["triggerMC"] = 1
     if taskDef.args != None:
         args.update(taskDef.args)
-
-    wf = Workflow(workflowName, source=source, triggerOR=taskDef.triggerOR, args=args, output=output, **kwargs)
+        
+    wf = Workflow(workflowName, source=source, triggerOR=taskDef.triggerOR, args=args, output=output, dataVersionAppend=taskDef.dataVersionAppend, **kwargs)
     if taskDef.crabLines != None:
         for line in taskDef.crabLines:
             wf.addCrabLine(line)
@@ -168,7 +168,7 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         dataset.addWorkflow(wf)
         # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
         if wf.output != None:
-            dataset.addWorkflow(Workflow("analysis_"+version, source=Source("pattuple_"+version), triggerOR=taskDef.triggerOR, args=wf.args, skimConfig=skim))
+            dataset.addWorkflow(Workflow("analysis_"+version, source=Source("pattuple_"+version), triggerOR=taskDef.triggerOR, args=wf.args, dataVersionAppend=wf.dataVersionAppend, skimConfig=skim))
 
 ## Add v44_5 pattuple production workflows
 def addPattuple_v44_5(datasets):
