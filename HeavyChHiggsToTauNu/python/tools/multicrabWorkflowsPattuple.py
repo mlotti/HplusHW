@@ -28,8 +28,8 @@ def _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workfl
         args["triggerMC"] = 1
     if taskDef.args != None:
         args.update(taskDef.args)
-
-    wf = Workflow(workflowName, source=source, triggerOR=taskDef.triggerOR, args=args, output=output, **kwargs)
+        
+    wf = Workflow(workflowName, source=source, triggerOR=taskDef.triggerOR, args=args, output=output, dataVersionAppend=taskDef.dataVersionAppend, **kwargs)
     if taskDef.crabLines != None:
         for line in taskDef.crabLines:
             wf.addCrabLine(line)
@@ -213,7 +213,7 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         dataset.addWorkflow(wf)
         # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
         if wf.output != None:
-            dataset.addWorkflow(Workflow("analysis_"+version, source=Source("pattuple_"+version), triggerOR=taskDef.triggerOR, args=wf.args, skimConfig=skim))
+            dataset.addWorkflow(Workflow("analysis_"+version, source=Source("pattuple_"+version), triggerOR=taskDef.triggerOR, args=wf.args, dataVersionAppend=wf.dataVersionAppend, skimConfig=skim))
 
 
 ## Main function for generating 53X pattuples
@@ -613,7 +613,8 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
             commonArgs = {
                 "source": Source("pattuple_"+version),
                 "args": wf.args,
-                "skimConfig": skim
+                "skimConfig": skim,
+                "dataVersionAppend": wf.dataVersionAppend,
                 }
 
             if dataset.isData():
@@ -1954,7 +1955,7 @@ def addPattuple_v53_3_test1(datasets):
         # 163630 events, 91 jobs
         # User mean 5026.9, min 28.5, max 6298.7
         # Mean 180.8 MB, min 1.8 MB, max 191.6 MB
-        "TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test1-bcf1eb633671b514e9c5d99b6a7d2ccb/USER"),
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test1-bcf1eb633671b514e9c5d99b6a7d2ccb/USER", dataVersionAppend="test2"),
         # 3498600 events, 1703 jobs
         # User mean 3597.1, min 220.1, max 26645.1
         # Mean 65.6 MB, min 4.1 MB, max 276.5 MB
@@ -1970,7 +1971,7 @@ def addPattuple_v53_3_test2(datasets):
 # 163630 events, 91 jobs
         # User mean 4031.2, min 84.8, max 6559.8
         # Mean 180.8 MB, min 3.1 MB, max 191.2 MB
-        "TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test2-9cfaf7bc576a6d9f3488935d01684bea/USER"),
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_v53_3_test2-9cfaf7bc576a6d9f3488935d01684bea/USER", dataVersionAppend="test1"),
         }
 
     addPattuple_53X("v53_3_test2", datasets, definitions)

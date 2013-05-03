@@ -219,16 +219,20 @@ class Dataset:
     def constructMulticrabFragment(self, workflowName):
         out = StringIO.StringIO()
 
+        out.write("[%s]\n" % self.name)
+        (wfArgs, dataVersionAppend) = self.workflows[workflowName].constructMulticrabFragment(self, out)
+
+        dataVersion = self.dataVersion
+        if dataVersionAppend is not None:
+            dataVersion += dataVersionAppend
+
         args = [
-            "dataVersion=%s" % self.dataVersion,
+            "dataVersion=%s" % dataVersion,
             "energy=%s" % self.energy,
             ]
         
         if self.crossSection != None:
             args.append("crossSection=%g" % self.crossSection)
-
-        out.write("[%s]\n" % self.name)
-        args.extend(self.workflows[workflowName].constructMulticrabFragment(self, out))
 
         ret = out.getvalue()
         out.close()
@@ -252,8 +256,9 @@ class Workflow:
     # \param skimConfig  List of strings for skim configuration files (if many, OR of skims is taken)
     # \param output_file CMSSW output file name (if not default)
     # \param crabLines   Individual lines to add to multicrab.cfg for this workflow
+    # \param dataVersionAppend  String to append to Dataset's dataVersion for this workflow
     def __init__(self, name, output=None, source=None,
-                 args=None, trigger=None, triggerOR=None, skimConfig=None, output_file=None, crabLines=None):
+                 args=None, trigger=None, triggerOR=None, skimConfig=None, output_file=None, crabLines=None, dataVersionAppend=None):
         self.name = name
         self.output = output
         self.source = source
@@ -263,6 +268,7 @@ class Workflow:
         self.skimConfig = skimConfig
         self.output_file = output_file
         self.crabLines = crabLines
+        self.dataVersionAppend = dataVersionAppend
 
         if self.args is None:
             self.args = {}
@@ -303,6 +309,8 @@ class Workflow:
         out.write(prefix+'Workflow("%s",\n' % self.name)
         if self.source != None:
             out.write(prefix+prefix+"source="+str(self.source)+",\n")
+        if self.dataVersionAppend is not None:
+            out.write(prefix+prefix+'dataVersionAppend="'+self.dataVersionAppend+'",\n')
         if self.trigger != None:
             out.write(prefix+prefix+'trigger="'+self.trigger+'",\n')
         if self.triggerOR != None:
@@ -358,7 +366,7 @@ class Workflow:
             out.write(line)
             out.write("\n")
 
-        return args
+        return (args, self.dataVersionAppend)
 
 ## Makes an alias for a workflow name
 #
@@ -591,13 +599,15 @@ class TaskDef:
     # \li \a crabLines         Additional crab configuration lines to add for this task and dataset
     # \li \a args              Additional command line arguments to add for this task and dataset
     # \li \a publishPostfix    Postfix for publish name
+    # \li \a dataVersionAppend String to append to Dataset's dataVersion for the Workflow's of this task
     def __init__(self, outputPath=None, **kwargs):
         self.outputPath = outputPath
         self.options = ["njobsIn", "njobsOut",
                         "neventsPerJobIn", "neventsPerJobOut",
                         "nlumisPerJobIn", "nlumisPerJobOut",
                         "triggerOR", "triggerThrow",
-                        "crabLines", "args", "publishPostfix"]
+                        "crabLines", "args", "publishPostfix",
+                        "dataVersionAppend"]
 
         args = {}
         args.update(kwargs)
