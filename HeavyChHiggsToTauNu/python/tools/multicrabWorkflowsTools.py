@@ -220,6 +220,8 @@ class Dataset:
         if self.crossSection != None:
             args.append("crossSection=%g" % self.crossSection)
 
+        args.extend(wfArgs)
+
         ret = out.getvalue()
         out.close()
 
