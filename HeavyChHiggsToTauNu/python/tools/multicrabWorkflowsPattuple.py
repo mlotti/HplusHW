@@ -751,7 +751,7 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "Tau_203777-208686_2012D_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
 
         # Winter13 Reprocessing
-        "Tau_190456-193621-2012A_Jan22": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2", # 190456-190738
+        "Tau_190456-193621_2012A_Jan22": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2", # 190456-190738
                                           "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3", # 190782-191411
                                           "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v4"],# 191691-193621
         "TauParked_193834-196531_2012B_Jan22": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"],
