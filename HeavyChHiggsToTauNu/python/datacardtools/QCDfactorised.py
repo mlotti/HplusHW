@@ -1233,17 +1233,17 @@ class QCDfactorisedColumn(DatacardColumn):
         self._infoHistograms.extend(myQCDCalculator.getLeg1EfficiencyHistograms())
         self._infoHistograms.extend(myQCDCalculator.getLeg2EfficiencyHistograms())
         self.saveQCDInfoHistograms(".")
-        # Print result
+        # Print result to screen
         print myQCDCalculator.getResult().getInfoString()
         for cr in myQCDCalculator.getContractedResultsList():
             print cr.getInfoString()
         # Make shape histogram
         myRateHistograms=[]
-        if False:
+        if True:
             print "... Calculating shape (looping over %d histograms)..."%myStdSelEventCount.getTotalDimension()
             myRateHistograms=[]
-            hRateShape = self._createShapeHistogram(config, dsetMgr, myQCDCalculator, myStdSelEventCount, luminosity,
-                                                    config.ShapeHistogramsDimensions, self._label, self._dirPrefix, self._basicMtHisto,
+            hRateShape = self._createShapeHistogram(config, dsetMgr, luminosity, myQCDCalculator,
+                                                    config.ShapeHistogramsDimensions, self._label, self._basicMtHisto,
                                                     saveDetailedInfo=True, makeCorrectionToShape=True) 
             # Normalise rate shape to NQCD
             if hRateShape.Integral() > 0:
@@ -1262,11 +1262,11 @@ class QCDfactorisedColumn(DatacardColumn):
         # Make closure test histograms
         print "... Producing validation histograms ..."
         for METshape in self._validationMETShapeSource:
-            self._createValidationHistograms(config,dsetMgr,myQCDCalculator,myStdSelEventCount,luminosity,self._validationMETShapeDetails,
-                                             "METvalidation", self._dirPrefix, METshape)
+            self._createValidationHistograms(dsetMgr,luminosity,myQCDCalculator,self._validationMETShapeDetails,
+                                             "METvalidation", METshape)
         for mTshape in self._validationMtShapeSource:
-            self._createValidationHistograms(config,dsetMgr,myQCDCalculator,myStdSelEventCount,luminosity,self._validationMtShapeDetails,
-                                             "mTvalidation", self._dirPrefix, mTshape)
+            self._createValidationHistograms(dsetMgr,luminosity,myQCDCalculator,self._validationMtShapeDetails,
+                                             "mTvalidation", mTshape)
         # Construct results for nuisances
         print "... Constructing result ..."
         for nid in self._nuisanceIds:
@@ -1314,8 +1314,8 @@ class QCDfactorisedColumn(DatacardColumn):
                 print "... Obtaining control plots ..."
                 if config.ControlPlots != None and dsetMgr != None:
                     for c in config.ControlPlots:
-                        hShape = self._createShapeHistogram(config, dsetMgr, myQCDCalculator, myStdSelEventCount, luminosity,
-                                                            c.details, c.title, self._dirPrefix+"/"+c.QCDFactHistoPath, c.QCDFactHistoName)
+                        hShape = self._createShapeHistogram(config, luminosity, dsetMgr, myQCDCalculator,
+                                                            c.details, c.title, c.QCDFactHistoName)
                         # Normalise
                         myEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=c.QCDFactNormalisation, luminosity=luminosity)
                         myQCDCalculator = QCDfactorisedCalculator(myStdSelEventCount, myEventCount, myTauLegEventCount)
@@ -1350,7 +1350,7 @@ class QCDfactorisedColumn(DatacardColumn):
             for j in range(0,myBins[1]):
                 for k in range(0,myBins[2]):
                     # Get data and MC EWK histogram
-                    myFullHistoName = self._dirPrefix+"/%s_%d_%d_%d"%(self._METCorrectionDetails["source"],i,j,k)
+                    myFullHistoName = "/%s_%d_%d_%d"%(self._METCorrectionDetails["source"],i,j,k)
                     hMtData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
                     hMtMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
                     # Add to shape
@@ -1376,7 +1376,7 @@ class QCDfactorisedColumn(DatacardColumn):
                     hMtMCEWK.IsA().Destructor(hMtMCEWK)
         h.IsA().Destructor(h)
 
-    def _createShapeHistogram(self, config, dsetMgr, QCDCalculator, QCDCount, luminosity, histoSpecs, title, histoDir, histoName, saveDetailedInfo=False, makeCorrectionToShape=False):
+    def _createShapeHistogram(self, dsetMgr, QCDCalculator, luminosity, histoSpecs, title, histoName, saveDetailedInfo=False, makeCorrectionToShape=False):
         # Create empty shape histogram
         myShapeModifier = ShapeHistoModifier(histoSpecs)
         h = myShapeModifier.createEmptyShapeHistogram(title)
@@ -1480,7 +1480,7 @@ class QCDfactorisedColumn(DatacardColumn):
 ####
                     if makeCorrectionToShape and False:
                         # Get data and MC EWK histogram
-                        myFullHistoName = self._dirPrefix+"/%s_%d_%d_%d"%(self._MTCorrectionDetails["source"],i,j,k)
+                        myFullHistoName = "%s_%d_%d_%d"%(self._MTCorrectionDetails["source"],i,j,k)
                         hCorrData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
                         hCorrMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
                         # Add to shape
