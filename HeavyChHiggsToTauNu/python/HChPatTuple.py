@@ -986,7 +986,10 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, doChsJets=True, patA
         # Remove all tau-related from the CHS sequence, we don't use
         # CHS-tau and they just waste some precious time
         process.PFBRECOChs.remove(process.pfTauSequenceChs)
-        for name in ["patHPSPFTauDiscriminationUpdateChs", "patPFTauIsolationChs", "patTausChs", "selectedPatTausChs", "countPatTausChs"]:
+        remove = ["patHPSPFTauDiscriminationUpdateChs", "patPFTauIsolationChs", "patTausChs", "selectedPatTausChs", "countPatTausChs"]
+        if dataVersion.isMC():
+            remove.extend(["tauMatchChs", "tauGenJetsChs", "tauGenJetsSelectorAllHadronsChs", "tauGenJetMatchChs"])
+        for name in remove:
             process.patDefaultSequenceChs.remove(getattr(process, name))
 
         # Remove MET from CHS sequence, we don't use it and it just
