@@ -532,6 +532,7 @@ multicrabWorkflowsPattuple.addPattuple_v53_3_test2(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_3_test3(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_3_test4(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_3_test5(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_3(datasets)
 
 # Add embedding definitions
 multicrabWorkflowsTauEmbedding.addEmbeddingAodAnalysis_44X(datasets)

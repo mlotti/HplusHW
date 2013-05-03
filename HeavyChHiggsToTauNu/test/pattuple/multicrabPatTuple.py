@@ -36,12 +36,17 @@ datasets_BJetPlusX = [
     "BJetPlusX_203777-208686_2012D_Prompt",
 ]
 
-datasets_W13_Tau = [
+datasets_Tau_W13 = [
     "Tau_190456-193621_2012A_Jan22",
     "TauParked_193834-196531_2012B_Jan22",
     "TauParked_198022-202504_2012C_Jan22",
     "TauParked_202972-203742_2012C_Jan22",
     "TauParked_203777-208686_2012D_Jan22",
+]
+
+datasets_MultiJet_W13 = [
+    "MultiJet_190456-193621_2012A_Jan22",
+    "MultiJet1Parked_198022-198523_2012C_Nov05",
 ]
 
 datasets_Signal = [
@@ -164,13 +169,14 @@ datasets_SingleTop = [
     "Tbar_s-channel_TuneZ2star_Summer12",
 ]
 
-workflow = "pattuple_v53_3_test4"
+workflow = "pattuple_v53_3"
 
 tasks = [
     ("Tau", datasets_Tau),
     ("MultiJet", datasets_MultiJet),
     ("BJetPlusX", datasets_BJetPlusX),
-    ("Tau_W13", datasets_W13_Tau),
+    ("Tau_W13", datasets_Tau_W13),
+    ("MultiJet_W13", datasets_MultiJet_W13),
     ("Signal", datasets_Signal),
     ("QCD_VV_SingleTop", datasets_QCD+datasets_VV+datasets_SingleTop),
     ("TT_EWK", datasets_TT_EWK),
