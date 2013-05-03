@@ -14,9 +14,9 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         return TaskDef(triggerOR=mcTriggers, **kwargs)
 
     defaultDefinitions = {
-	"TauPlusX_190456-193621_2012A_Jan22": TaskDef(njobsIn= 200, njobsOut=  70,triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v3","HLT_IsoMu15_eta2p1_L1ETM20_v4"]),
+	"TauPlusX_190456-193621_2012A_Jan22": TaskDef(njobsIn= 200, njobsOut=  70,triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v3","HLT_IsoMu15_eta2p1_L1ETM20_v4"], triggerThrow=False),
         "TauPlusX_193834-196531_2012B_Jan22": TaskDef(njobsIn=2000, njobsOut= 400, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v5"]),
-        "TauPlusX_198022-203742_2012C_Jan22": TaskDef(njobsIn=2000, njobsOut= 400, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6","HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
+        "TauPlusX_198022-203742_2012C_Jan22": TaskDef(njobsIn=2000, njobsOut= 400, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6","HLT_IsoMu15_eta2p1_L1ETM20_v7"], triggerThrow=False),
         "TauPlusX_203777-208686_2012D_Jan22": TaskDef(njobsIn=3600, njobsOut= 500, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
 
         "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":    TaskDefMC(njobsIn= 40, njobsOut= 10),                                                   
@@ -41,7 +41,7 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
 
         # Set tau-leg specific customizations on job configuration
         wf.addArg("customizeConfig", "TauLegZMuTauFilter")
-                                                                                                                                                                 
+
         # Setup the publish name
 #        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "analysis_tauleg_"+version)
 	name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
