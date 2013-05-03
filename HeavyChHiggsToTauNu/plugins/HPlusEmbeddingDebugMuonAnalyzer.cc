@@ -43,7 +43,8 @@ class HPlusEmbeddingDebugMuonAnalyzer: public edm::EDAnalyzer {
   const double muonPtCut_;
   const double muonEtaCut_;
 
-  bool onlyGen_;
+  bool recoMuon_;
+  bool recoJets_;
 
   HPlus::Count cAllEvents;
   HPlus::Count cGenMuons;
@@ -61,13 +62,17 @@ class HPlusEmbeddingDebugMuonAnalyzer: public edm::EDAnalyzer {
   HPlus::WrappedTH1 *hGenMuonEta2;
   HPlus::WrappedTH1 *hGenMuonPhi2;
 
+  HPlus::WrappedTH1 *hGenMuonPt_AfterId;
+  HPlus::WrappedTH1 *hGenMuonEta_AfterId;
+  HPlus::WrappedTH1 *hGenMuonPhi_AfterId;
+
   HPlus::WrappedTH1 *hGenMuonPt_AfterJets;
   HPlus::WrappedTH1 *hGenMuonEta_AfterJets;
   HPlus::WrappedTH1 *hGenMuonPhi_AfterJets;
 
-  HPlus::WrappedTH1 *hRecoMuonPt;
-  HPlus::WrappedTH1 *hRecoMuonEta;
-  HPlus::WrappedTH1 *hRecoMuonPhi;
+  HPlus::WrappedTH1 *hRecoMuonPt_AfterId;
+  HPlus::WrappedTH1 *hRecoMuonEta_AfterId;
+  HPlus::WrappedTH1 *hRecoMuonPhi_AfterId;
 
   HPlus::WrappedTH1 *hRecoMuonPt_AfterJets;
   HPlus::WrappedTH1 *hRecoMuonEta_AfterJets;
@@ -84,7 +89,8 @@ HPlusEmbeddingDebugMuonAnalyzer::HPlusEmbeddingDebugMuonAnalyzer(const edm::Para
   genSrc_(iConfig.getUntrackedParameter<edm::InputTag>("genSrc")),
   muonPtCut_(iConfig.getUntrackedParameter<double>("muonPtCut")),
   muonEtaCut_(iConfig.getUntrackedParameter<double>("muonEtaCut")),
-  onlyGen_(iConfig.getUntrackedParameter<bool>("onlyGen", false)),
+  recoMuon_(iConfig.getUntrackedParameter<bool>("recoMuon", true)),
+  recoJets_(iConfig.getUntrackedParameter<bool>("recoJets", true)),
   cAllEvents(eventCounter.addCounter("All events")),
   cGenMuons(eventCounter.addCounter(">= 1 gen muon")),
   cGenMuonsAcceptance(eventCounter.addCounter(">= 1 gen muon in acceptance")),
@@ -105,7 +111,15 @@ HPlusEmbeddingDebugMuonAnalyzer::HPlusEmbeddingDebugMuonAnalyzer(const edm::Para
   hGenMuonEta2 = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon2_eta", "Eta", 44, -2.1, 2.1);
   hGenMuonPhi2 = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon2_phi", "Phi", 128, -3.2, 3.2);
 
-  if(!onlyGen_) {
+  if(recoMuon_) {
+    hGenMuonPt_AfterId = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon_afterid_pt", "Pt", 400, 0, 400);
+    hGenMuonEta_AfterId = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon_afterid_eta", "Eta", 44, -2.1, 2.1);
+    hGenMuonPhi_AfterId = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon_afterid_phi", "Phi", 128, -3.2, 3.2);
+
+    hRecoMuonPt_AfterId = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "recomuon_afterid_pt", "Pt", 400, 0, 400);
+    hRecoMuonEta_AfterId = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "recomuon_afterid_eta", "eta", 44, -2.1, 2.1);
+    hRecoMuonPhi_AfterId = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "recomuon_afterid_phi", "phi", 128, -3.2, 3.2);
+
     hGenMuonPt_AfterJets = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon_afterjet_pt", "Pt", 400, 0, 400);
     hGenMuonEta_AfterJets = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon_afterjet_eta", "eta", 44, -2.1, 2.1);
     hGenMuonPhi_AfterJets = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon_afterjet_phi", "phi", 128, -3.2, 3.2);
@@ -211,7 +225,7 @@ void HPlusEmbeddingDebugMuonAnalyzer::analyze(const edm::Event& iEvent, const ed
   hGenMuonEta->Fill(genMuon->eta());
   hGenMuonPhi->Fill(genMuon->phi());
 
-  if(!onlyGen_) {
+  if(recoMuon_) {
     edm::Ptr<pat::Muon> recoMuon;
     double minDR = 0.5;
     for(edm::View<pat::Muon>::const_iterator iMuon = hmuons->begin(); iMuon != hmuons->end(); ++iMuon) {
@@ -225,17 +239,27 @@ void HPlusEmbeddingDebugMuonAnalyzer::analyze(const edm::Event& iEvent, const ed
       return;
     increment(cRecoMuonFound);
 
-    edm::PtrVector<pat::Jet> jets;
-    for(edm::View<pat::Jet>::const_iterator iJet = hjets->begin(); iJet != hjets->end(); ++iJet) {
-      double DR = reco::deltaR(*recoMuon, *iJet);
-      if(DR < 0.5)
-        continue;
+    hGenMuonPt_AfterId->Fill(genMuon->pt());
+    hGenMuonEta_AfterId->Fill(genMuon->eta());
+    hGenMuonPhi_AfterId->Fill(genMuon->phi());
 
-      jets.push_back(hjets->ptrAt(iJet-hjets->begin()));
+    hRecoMuonPt_AfterId->Fill(recoMuon->pt());
+    hRecoMuonEta_AfterId->Fill(recoMuon->eta());
+    hRecoMuonPhi_AfterId->Fill(recoMuon->phi());
+
+    if(recoJets_) {
+      edm::PtrVector<pat::Jet> jets;
+      for(edm::View<pat::Jet>::const_iterator iJet = hjets->begin(); iJet != hjets->end(); ++iJet) {
+        double DR = reco::deltaR(*recoMuon, *iJet);
+        if(DR < 0.5)
+          continue;
+
+        jets.push_back(hjets->ptrAt(iJet-hjets->begin()));
+      }
+      if(jets.size() < 3)
+        return;
+      increment(cThreeJets);
     }
-    if(jets.size() < 3)
-      return;
-    increment(cThreeJets);
 
     HPlus::EmbeddingMuonEfficiency::Data embeddingMuonData = fEmbeddingMuonEfficiency.getEventWeight(recoMuon, iEvent.isRealData());
     fEventWeight.multiplyWeight(embeddingMuonData.getEventWeight());

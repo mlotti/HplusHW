@@ -25,15 +25,73 @@ additionalCounters = []
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 process.infoPath = HChTools.addConfigInfo(process, options, dataVersion)
 
+# do PAT muon stuff
+#doRecoMuon = False
+doRecoMuon = True
+process.commonSequence = cms.Sequence()
+if doRecoMuon:
+    # Gen-level filtering
+    process.allEvents = cms.EDProducer("EventCountProducer")
+    process.genMuons = cms.EDFilter("GenParticleSelector",
+        src = cms.InputTag("genParticles"),
+        cut = cms.string("abs(pdgId()) == 13 && pt() > 40 && abs(eta()) < 2.1 && abs(mother().pdgId()) != 13")
+    )
+    process.genMuonsFilter = cms.EDFilter("CandViewCountFilter",
+        src = cms.InputTag("genMuons"),
+        minNumber = cms.uint32(1),
+    )
+    process.genMuonsCount = cms.EDProducer("EventCountProducer")
+    process.commonSequence += (
+        process.allEvents +
+        process.genMuons +
+        process.genMuonsFilter +
+        process.genMuonsCount
+    )
+    additionalCounters.extend(["allEvents", "genMuonsCount"])
+
+    # PAT muons
+    options.doPat = 1
+    from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
+    process.fooSequenceSequence, fooCounters = addPatOnTheFly(process, options, dataVersion)
+    process.patMuons.userData.userFloats.src = []
+    process.selectedPatMuons.src = "patMuons"
+    process.commonSequence += (
+        process.pfParticleSelectionSequence +
+        process.muIsoSequence +
+        process.makePatMuons +
+        process.selectedPatMuons
+    )
+
+    # muon selection
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
+    MuonSelection.addMuonSelectionForEmbedding(process)
+    process.commonSequence += (
+#        process.muonSelectionAllEvents +
+        process.tightMuons
+#        process.tightMuonsFilter +
+#        process.muonSelectionMuons
+    )
+#    additionalCounters.extend(["muonSelectionAllEvents", "muonSelectionMuons"])
+
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff")
+    process.commonSequence += (
+        process.tightenedMuons
+#        process.tightenedMuonsFilter +
+#        process.tightenedMuonsCount
+    )
+#    additionalCounters.append("tightenedMuonsCount")
+
+
 # Configuration
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 analyzer = cms.EDAnalyzer("HPlusEmbeddingDebugMuonAnalyzer",
     muonSrc = cms.untracked.InputTag("tightenedMuons"),
     jetSrc = cms.untracked.InputTag("goodJets"),
     genSrc = cms.untracked.InputTag("genParticles"),
-    onlyGen = cms.untracked.bool(True),
+    recoMuon = cms.untracked.bool(doRecoMuon),
+    recoJets = cms.untracked.bool(False),
 
-    muonPtCut = cms.untracked.double(40),
+    muonPtCut = cms.untracked.double(41),
     muonEtaCut = cms.untracked.double(2.1),
 
     embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(
@@ -45,7 +103,7 @@ analyzer = cms.EDAnalyzer("HPlusEmbeddingDebugMuonAnalyzer",
 )
 
 HChTools.addAnalysis(process, "debugAnalyzer", analyzer,
-#                     preSequence=process.commonSequence,
+                     preSequence=process.commonSequence,
                      additionalCounters=additionalCounters)
 process.debugAnalyzer.eventCounter.printMainCounter = True
 
