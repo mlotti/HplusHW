@@ -8,14 +8,14 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff as m
 
 datasets_Tau = [
     "Tau_190456-190738_2012A_Jul13",
-    "Tau_190782-190949_2012A_Aug06",
-    "Tau_191043-193621_2012A_Jul13",
-    "Tau_193834-196531_2012B_Jul13",
-    "Tau_198022-198523_2012C_Aug24",
-    "Tau_198941-200601_2012C_Prompt",
-    "Tau_200961-202504_2012C_Prompt",
-    "Tau_202792-203742_2012C_Prompt",
-    "Tau_203777-208686_2012D_Prompt",
+#    "Tau_190782-190949_2012A_Aug06",
+#    "Tau_191043-193621_2012A_Jul13",
+#    "Tau_193834-196531_2012B_Jul13",
+#    "Tau_198022-198523_2012C_Aug24",
+#    "Tau_198941-200601_2012C_Prompt",
+#    "Tau_200961-202504_2012C_Prompt",
+#    "Tau_202792-203742_2012C_Prompt",
+#    "Tau_203777-208686_2012D_Prompt",
 ]
 
 datasets_MultiJet = [
@@ -152,10 +152,10 @@ datasets_SingleTop = [
 ]
 
 #workflow = "analysis_metleg_v53_v1"
-workflow = "triggerMetLeg_skim_v53_v2"
+workflow = "triggerMetLeg_skim_v53_v3"
 
 tasks = [
-     ("MetLeg", datasets_Tau+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
+     ("MetLeg", datasets_Tau),#+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
 #    ("Tau", datasets_Tau),
 #    ("MultiJet", datasets_MultiJet),
 #    ("Signal", datasets_Signal),

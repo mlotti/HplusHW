@@ -14,14 +14,10 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         return TaskDef(triggerOR=mcTriggers, **kwargs)
 
     defaultDefinitions = {
-        "TauPlusX_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  10, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v3"]),                
-        "TauPlusX_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  10, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v4"]),                
-        "TauPlusX_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  50, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v4"]),                
-        "TauPlusX_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 400, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v5"]),                
-        "TauPlusX_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut= 50, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),                
-        "TauPlusX_198941-199608_2012C_Prompt": TaskDef(njobsIn= 500, njobsOut= 250, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),
-        "TauPlusX_199698-203742_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 150, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
-        "TauPlusX_203777-208686_2012D_Prompt": TaskDef(njobsIn=3600, njobsOut= 500, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
+	"TauPlusX_190456-193621_2012A_Jan22": TaskDef(njobsIn= 200, njobsOut=  70,triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v3","HLT_IsoMu15_eta2p1_L1ETM20_v4"]),
+        "TauPlusX_193834-196531_2012B_Jan22": TaskDef(njobsIn=2000, njobsOut= 400, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v5"]),
+        "TauPlusX_198022-203742_2012C_Jan22": TaskDef(njobsIn=2000, njobsOut= 400, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6","HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
+        "TauPlusX_203777-208686_2012D_Jan22": TaskDef(njobsIn=3600, njobsOut= 500, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
 
         "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":    TaskDefMC(njobsIn= 40, njobsOut= 10),                                                   
         "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12": TaskDefMC(njobsIn= 2000, njobsOut= 200),                                                
@@ -87,16 +83,12 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 dataset.addWorkflow(Workflow("triggerTauLeg_analysis_"+version, triggerOR=[mcTriggerTauLeg], **commonArgs))
 
 
-def addTauLegSkim_53X_v2(datasets):
+def addTauLegSkim_53X_v3(datasets):
     definitions = {
-        "TauPlusX_190456-190738_2012A_Jul13":  TaskDef(""),
-        "TauPlusX_190782-190949_2012A_Aug06":  TaskDef(""),
-        "TauPlusX_191043-193621_2012A_Jul13":  TaskDef(""),
-        "TauPlusX_193834-196531_2012B_Jul13":  TaskDef(""),
-        "TauPlusX_198022-198523_2012C_Aug24":  TaskDef(""),
-        "TauPlusX_198941-199608_2012C_Prompt": TaskDef(""),
-        "TauPlusX_199698-203742_2012C_Prompt": TaskDef(""),
-        "TauPlusX_203777-208686_2012D_Prompt": TaskDef(""),
+        "TauPlusX_190456-193621_2012A_Jan22": TaskDef(""),
+        "TauPlusX_193834-196531_2012B_Jan22": TaskDef(""),
+        "TauPlusX_198022-203742_2012C_Jan22": TaskDef(""),
+        "TauPlusX_203777-208686_2012D_Jan22": TaskDef(""),
         
         "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":    TaskDef(""),
         "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12": TaskDef(""),
@@ -106,7 +98,7 @@ def addTauLegSkim_53X_v2(datasets):
         "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12":       TaskDef(""),
         }
         
-    addTauLegSkim_53X("v53_v2", datasets, definitions)
+    addTauLegSkim_53X("v53_v3", datasets, definitions)
 
 
 
@@ -219,7 +211,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 # For MC, also construct one analysis workflow per trigger type                                                                                        
                 dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=[mcTriggerMETLeg], **commonArgs))
 
-def addMetLegSkim_53X_v2(datasets):
+def addMetLegSkim_53X_v3(datasets):
     definitions = {                                                                          
         "Tau_190456-190738_2012A_Jul13":          TaskDef(""),                               
         "Tau_190782-190949_2012A_Aug06":          TaskDef(""),                               
@@ -261,7 +253,7 @@ def addMetLegSkim_53X_v2(datasets):
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),                               
         }
                                                                                              
-    addMetLegSkim_53X("v53_v2", datasets, definitions)                                        
+    addMetLegSkim_53X("v53_v3", datasets, definitions)                                        
 
 def addMetLegSkim_44X(version, datasets, updateDefinitions):
     mcTrigger = "HLT_MediumIsoPFTau35_Trk20_v1"
@@ -553,7 +545,7 @@ def addQuadJetSkim_53X(version, datasets, updateDefinitions, skim=None):
                 # For MC, also construct one analysis workflow per trigger type                                                                            
                 dataset.addWorkflow(Workflow("triggerQuadJet_analysis_"+version, triggerOR=[mcTriggerSingleMu], **commonArgs))
                     
-def addQuadJetSkim_53X_v2(datasets):
+def addQuadJetSkim_53X_v3(datasets):
     definitions = {
 #        "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
 #        "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
@@ -607,5 +599,5 @@ def addQuadJetSkim_53X_v2(datasets):
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),                               
         }
     
-    addQuadJetSkim_53X("v53_v2", datasets, definitions) 
+    addQuadJetSkim_53X("v53_v3", datasets, definitions) 
     
