@@ -101,8 +101,10 @@ def main(opts, moduleSelector):
                     myQCDDsetCreator = None
                     if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
                         myQCDDsetCreator = qcdFactorisedDsetCreator
+                        print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sfactorised%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
                     elif qcdMethod == DataCard.DatacardQCDMethod.INVERTED:
                         myQCDDsetCreator = qcdInvertedDsetCreator
+                        print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sinverted%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
                     dcgen.setDsetMgrCreators(signalDsetCreator,embeddingDsetCreator,myQCDDsetCreator)
                     # Do the heavy stuff
                     dcgen.doDatacard(era,searchMode,optimizationMode)

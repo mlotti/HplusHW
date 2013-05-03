@@ -28,6 +28,7 @@ class UnfoldedHistogramReader:
         self._unfoldedBinCount = None
         self._separator = ":" # Setting for decomposing bin information from histogram title
         self._debugStatus = debugStatus
+        self._factorisationFullBinLabels = []
         self._factorisationCaptions = []
         self._factorisationRanges = []
 
@@ -39,6 +40,9 @@ class UnfoldedHistogramReader:
 
     def getBinLabelList(self):
         return self._binLabels
+
+    def getFactorisationFullBinLabels(self):
+        return self._factorisationFullBinLabels
 
     def getFactorisationCaptions(self):
         return self._factorisationCaptions
@@ -244,10 +248,13 @@ class UnfoldedHistogramReader:
                         myCaption = s.split(">")[0]
                     elif "<" in s:
                         myCaption = s.split("<")[0]
+                    self._factorisationFullBinLabels.append([])
                     self._factorisationCaptions.append(myCaption)
                     self._factorisationRanges.append([])
             # Obtain range information
             for k in range (0,len(mySplitBin)):
+                if not mySplitBin[k] in self._factorisationFullBinLabels[k]:
+                    self._factorisationFullBinLabels[k].append(mySplitBin[k])
                 # Remove label and equal signs
                 s = mySplitBin[k].replace(self._factorisationCaptions[k],"").replace("=","")
                 if not s in self._factorisationRanges[k]:
