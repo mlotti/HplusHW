@@ -62,9 +62,10 @@ namespace HPlus {
     iEvent.getByLabel("genParticles", genParticles);
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
+      if (hasImmediateMother(p,37) || hasImmediateMother(p,-37)) continue;
       if (TMath::Abs(p.pdgId()) == 37) {
-	// check if the H+ is light
-	if (p.mass() < 166.0) {
+	//std::cout << p.numberOfMothers() << std::endl;
+	if (p.numberOfMothers() < 2) {
 	  //std::cout << "Event has a genuine light charged Higgs boson!" << std::endl;
 	  return true;
 	}

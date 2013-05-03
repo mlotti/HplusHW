@@ -30,8 +30,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 #multicrabDir = "../multicrab_130429_151753"   # no top mass cut
 #cutInfoSuffix = "_noTopMassCut"
 
-multicrabDirs   = ["multicrab_130429_151753", "multicrab_130429_163849"]
-cutInfoSuffixes = ["noTopMassCut", "topMassCut100-240"] #, "topMassCut140-200"]
+multicrabDirs   = ["multicrab_130429_151753", "multicrab_130429_163849", "multicrab_130502_201822"]
+cutInfoSuffixes = ["noTopMassCut", "topMassCut140-200", "topMassCut100-240"]
 
 #multicrabDir = "../multicrab_130424_001136"   # no top mass cut
 #multicrabDir = "../multicrab_130419_152407"   # 100 < top mass < 240
@@ -44,8 +44,8 @@ analysis = "signalAnalysis"
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
 
-plotSignalOnly = True
-#plotSignalOnly = False
+#plotSignalOnly = True
+plotSignalOnly = False
 #plotAllMassPointsTogether = True
 plotAllMassPointsTogether = False
 mcOnly = True
