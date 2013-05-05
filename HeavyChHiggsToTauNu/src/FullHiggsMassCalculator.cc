@@ -150,8 +150,25 @@ namespace HPlus {
 										    "TransMassVsInvMassNegativeDiscriminant", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
 				      100, 0, 500, 100, 0, 500);
-    hMETSignificance          = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METSignificance",
+    h2TopMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, "TopMassVsInvMass", 
+							 "TransMassVsInvMass;m_{top};Invariant mass m(#tau, #nu_{#tau});Events",
+							 100, 0, 500, 100, 0, 500);
+    h2TopMassVsNeutrinoNumber = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, "TopMassVsNeutrinoNumber",
+							  "TransMassVsNeutrinoNumber;m_{top};Number of neutrinos);Events",
+							  100, 0, 500, 10, 0, 10);
+    h2InvariantMassVsNeutrinoNumber = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, "InvMassVsNeutrinoNumber",
+						   "InvMassVsNeutrinoNumber;m(#tau,#nu_{#tau};Number of neutrinos);Events",
+								100, 0, 500, 10, 0, 10);
+    hHiggsMass_betterSolution = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_betterSolution", 
+							    "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_worseSolution = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_worseSolution", 
+							       "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hMETSignificance = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METSignificance",
 							  "METSignificance", 100, 0, 500);
+    hNeutrinoNumberInPassedEvents = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NeutrinoNumberInPassedEvents",
+							      "NeutrinoNumberInPassedEvents", 10, 0, 10);
+    hNeutrinoNumberInRejectedEvents = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NeutrinoNumberInRejectedEvents",
+								"NeutrinoNumberInRejectedEvents", 10, 0, 10);
 
     // Informative histograms
     // Histograms for all the different solution selection methods
@@ -244,9 +261,6 @@ namespace HPlus {
                                                           "MET #Delta p_T;#Delta p_T (GeV)", 100, -200, 200);
     hMETDeltaPhi              = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METDeltaPhi",
                                                           "MET #Delta #phi;#Delta #phi (degrees)", 180, -180, 180);
-    // Generator information
-    hTopInvariantMassInGenerator = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopInvariantMassInGenerator",
-							     "Top invariant mass (GEN);m_{top} (GeV)", 100, 0, 500);
   }
 
   FullHiggsMassCalculator::~FullHiggsMassCalculator() {}
@@ -340,11 +354,6 @@ namespace HPlus {
 
     // The rest of the analysis is only done for MC signal events with a light charged Higgs (at least for now)
     if (iEvent.isRealData() || !eventHasLightChargedHiggs(iEvent)) return output;
-
-    return output; // FIXME: LAW 01.05.2013: temporary return statement to keep code stable
-
-    // Histogram the invariant mass of the top mother of the Higgs.
-    hTopInvariantMassInGenerator->Fill(getGenHiggsSideTop(iEvent)->mass()); // LAW 01.05.2013: causes crash because of zero pointer
 
     // CALCULATION USING TRUE MOMENTA FROM MC
     // --------------------------------------
@@ -716,12 +725,14 @@ namespace HPlus {
       if (bPrintDebugOutput) std::cout << "select the smaller solution" << std::endl;
       break;
     case eTauNuAngleMax:
-      if (angle1 > angle2) selectSolution1 = true;
+      if (TMath::Abs(angle1) > TMath::Abs(angle2)) selectSolution1 = true;
+      //if (angle1 > angle2) selectSolution1 = true;
       if (bPrintDebugOutput) std::cout << "select the solution which maximizes the angle between the tau and the neutrinos"
 				       << std::endl;
       break;
     case eTauNuAngleMin:
-      if (angle1 < angle2) selectSolution1 = true;
+      if (TMath::Abs(angle1) < TMath::Abs(angle2)) selectSolution1 = true;
+      //if (angle1 < angle2) selectSolution1 = true;
       if (bPrintDebugOutput) std::cout << "select the solution which minimizes the angle between the tau and the neutrinos"
 				       << std::endl;
       break;
@@ -764,30 +775,14 @@ namespace HPlus {
   double FullHiggsMassCalculator::getDeltaRBetweenNeutrinosAndTau(TLorentzVector& tauFourMom, TLorentzVector& neutrinosFourMom) {
     return tauFourMom.DeltaR(neutrinosFourMom);
   }
-
-  bool FullHiggsMassCalculator::selectedSolutionIsClosestToTrueValue(double selectedSolution, 
-								     FullHiggsMassCalculator::Data& output) {
-    if (!output.bPassedEvent) return false;
-    if (selectedSolution > 999999.0) return false; // Always return false if the solution was not calculated
-    // Note: this method will also return true if the two solutions were equal
-    // Otherwise, find out which solution (1 or 2) was selected:
-    if (TMath::Abs(selectedSolution - output.fNeutrinoPzSolution1) <= TMath::Abs(selectedSolution - output.fNeutrinoPzSolution2)) {
-      // ...solution 1 was selected. Return false if it wasn't the closer one:
-      if (TMath::Abs(output.fNeutrinoPzSolution1 - output.fTrueNeutrinoPz) >
-	  TMath::Abs(output.fNeutrinoPzSolution2 - output.fTrueNeutrinoPz)) return false;
-    } else {
-      // ...solution 2 was selected. Return false if it wasn't the closer one:
-      if (TMath::Abs(output.fNeutrinoPzSolution2 - output.fTrueNeutrinoPz) >
-	  TMath::Abs(output.fNeutrinoPzSolution1 - output.fTrueNeutrinoPz)) return false;
-    }
-    return true;
-  }
-
-  bool FullHiggsMassCalculator::selectedSolutionGivesBestHiggsMass(const edm::Event& iEvent, double selectedSolution,
-								   FullHiggsMassCalculator::Data& output) {
-    if (!output.bPassedEvent || selectedSolution > 999999.0 || !eventHasLightChargedHiggs(iEvent)) return false;
+  
+  bool FullHiggsMassCalculator::isBetterSolution(const edm::Event& iEvent, double selectedSolution,
+						 FullHiggsMassCalculator::Data& output) {
     // Always return false if the event did not pass the selection in this file OR no valid p_z solution was calculated (for
-    // whatever reason) OR the event did not have a MC light charged Higgs
+    // whatever reason)
+    if (!output.bPassedEvent || selectedSolution > 999999.0) return false;
+    // If the event does not have a light charged Higgs, use the alternative method for determining the better solution.
+    if (!eventHasLightChargedHiggs(iEvent)) return isBetterSolutionNoChargedHiggs(selectedSolution, output);
     double trueHiggsMass = getChargedHiggs(iEvent)->mass();
     // Find out which solution (1 or 2) was selected:
     if (neutrinoPzSolutionOneWasSelected(selectedSolution, output)) {
@@ -796,6 +791,22 @@ namespace HPlus {
     } else if (neutrinoPzSolutionTwoWasSelected(selectedSolution, output)) {
       if (TMath::Abs(output.fHiggsMassSolution2 - trueHiggsMass) > TMath::Abs(output.fHiggsMassSolution1 - trueHiggsMass))
 	return false;
+    }
+    else return false; // Return false if the two p_z solutions were equal.
+    return true;
+  }
+
+  bool FullHiggsMassCalculator::isBetterSolutionNoChargedHiggs(double selectedSolution, FullHiggsMassCalculator::Data& output) {
+    // Always return false if the event did not pass the selection in this file OR no valid p_z solution was calculated (for
+    // whatever reason)
+    if (!output.bPassedEvent || selectedSolution > 999999.0) return false;
+    // Find out which solution (1 or 2) was selected:
+    if (neutrinoPzSolutionOneWasSelected(selectedSolution, output)) {
+      if (TMath::Abs(output.fNeutrinoPzSolution1 - output.fTrueNeutrinoPz) > 
+	  TMath::Abs(output.fNeutrinoPzSolution2 - output.fTrueNeutrinoPz)) return false;
+    } else if (neutrinoPzSolutionTwoWasSelected(selectedSolution, output)) {
+      if (TMath::Abs(output.fNeutrinoPzSolution2 - output.fTrueNeutrinoPz) >
+          TMath::Abs(output.fNeutrinoPzSolution1 - output.fTrueNeutrinoPz)) return false;
     }
     else return false; // Return false if the two p_z solutions were equal.
     return true;
@@ -839,43 +850,48 @@ namespace HPlus {
 	increment(negativeDiscriminant_SubCount);
 	if (output.bPassedEvent) hHiggsMassNegativeDiscriminant->Fill(output.fHiggsMassSolutionSelected);
       }
+      // THESE HISTOGRAMS ARE FILLED EVEN IF THE EVENT DOES NOT PASS --->
+      hTopMassSolution->Fill(output.fTopMassSolutionSelected);
+      h2TopMassVsInvariantMass->Fill(output.fTopMassSolutionSelected, output.fHiggsMassSolutionSelected);
+      if (!iEvent.isRealData()) {
+	h2TopMassVsNeutrinoNumber->Fill(output.fTopMassSolutionSelected, getNumberOfNeutrinosInEvent(iEvent));
+	h2InvariantMassVsNeutrinoNumber->Fill(output.fHiggsMassSolutionSelected, getNumberOfNeutrinosInEvent(iEvent));
+	if (!output.bPassedEvent) hNeutrinoNumberInRejectedEvents->Fill(getNumberOfNeutrinosInEvent(iEvent));
+      }
       if (!output.bPassedEvent) break;
+      // THESE HISTOGRAMS ARE FILLED ONLY IF THE EVENT HAS PASSED --->
       hHiggsMass->Fill(output.fHiggsMassSolutionSelected);
       if (bPrintDebugOutput) std::cout << "Solution put in histogram HiggsMass: " << output.fHiggsMassSolutionSelected << std::endl;
-      hTopMassSolution->Fill(output.fTopMassSolutionSelected);
+      if (!iEvent.isRealData()) hNeutrinoNumberInPassedEvents->Fill(getNumberOfNeutrinosInEvent(iEvent));
       hSelectedNeutrinoPzSolution->Fill(output.fNeutrinoPzSolutionSelected);
       // Counters (note: only incremented if the event has passed)
       increment(passedEvents_SubCount);
       if (iEvent.isRealData()) break; // The true solution is not known for real data.
+      // Fill histograms with better and worse solutions:
+      if (isBetterSolution(iEvent, output.fNeutrinoPzSolution1, output)) {
+	hHiggsMass_betterSolution->Fill(output.fHiggsMassSolution1);
+	hHiggsMass_worseSolution->Fill(output.fHiggsMassSolution2);
+      } else if (isBetterSolution(iEvent, output.fNeutrinoPzSolution2, output)) {
+	hHiggsMass_betterSolution->Fill(output.fHiggsMassSolution2);
+	hHiggsMass_worseSolution->Fill(output.fHiggsMassSolution1);
+      }
+      else { // the solutions are the same and both histograms are filled with any of them
+	hHiggsMass_betterSolution->Fill(output.fHiggsMassSolution1);
+	hHiggsMass_worseSolution->Fill(output.fHiggsMassSolution1);
+      }
       // The line below has the effect that the following counters are only incremented if the solutions were actually different!
       if (TMath::Abs(output.fNeutrinoPzSolution1 - output.fNeutrinoPzSolution2) < 0.001) break;
-      // Two criteria for determining which one is the better solution are currently implemented. Uncomment the one to use.
-      // When testing 2013-04-10, they gave essentially the same results.
-      // 1. The one that is closer to the true solution:
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionGreater, output))
-// 	increment(selectionGreaterCorrect_SubCount);
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionSmaller, output))
-// 	increment(selectionSmallerCorrect_SubCount);
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuAngleMax, output))
-// 	increment(selectionTauNuAngleMaxCorrect_SubCount);
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuAngleMin, output))
-// 	increment(selectionTauNuAngleMinCorrect_SubCount);
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output))
-// 	increment(selectionTauNuDeltaEtaMaxCorrect_SubCount);
-//       if (selectedSolutionIsClosestToTrueValue(output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output))
-// 	increment(selectionTauNuDeltaEtaMinCorrect_SubCount);
-      // 2. The one that gives a value for the Higgs mass that is closest to the true value
-      if (selectedSolutionGivesBestHiggsMass(iEvent, output.fNeutrinoPzSolutionGreater, output))
+      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionGreater, output)) // This method works for both signal and bkg events!
  	increment(selectionGreaterCorrect_SubCount);
-      if (selectedSolutionGivesBestHiggsMass(iEvent, output.fNeutrinoPzSolutionSmaller, output))
+      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionSmaller, output))
  	increment(selectionSmallerCorrect_SubCount);
-      if (selectedSolutionGivesBestHiggsMass(iEvent, output.fNeutrinoPzSolutionTauNuAngleMax, output))
+      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuAngleMax, output))
  	increment(selectionTauNuAngleMaxCorrect_SubCount);
-      if (selectedSolutionGivesBestHiggsMass(iEvent, output.fNeutrinoPzSolutionTauNuAngleMin, output))
+      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuAngleMin, output))
  	increment(selectionTauNuAngleMinCorrect_SubCount);
-      if (selectedSolutionGivesBestHiggsMass(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output))
+      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output))
  	increment(selectionTauNuDeltaEtaMaxCorrect_SubCount);
-      if (selectedSolutionGivesBestHiggsMass(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output))
+      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output))
  	increment(selectionTauNuDeltaEtaMinCorrect_SubCount);
       break;
     case eGEN:
@@ -921,11 +937,11 @@ namespace HPlus {
     // MET: compare RECO and GEN information
     TVector3 genMETVector;
     if (genDataPtr != NULL) {
-      // This is the entirely correct way, will work if GenParticleAnalysis::Data is available
+      // This gives the true GenMET, will work if GenParticleAnalysis::Data is available
       edm::Ptr<reco::GenMET> myGenMET = genDataPtr->getGenMET();
       genMETVector.SetXYZ(myGenMET->px(), myGenMET->py(), myGenMET->pz());
     } else {
-      // This way is approximate, but will work even if GenParticleAnalysis::Data is unavailable
+      // This gives an approximate GenMET, but will work even if GenParticleAnalysis::Data is unavailable
       genMETVector = calculateGenMETVectorFromNeutrinos(iEvent);
     }
     metDeltaPt = METVector.Pt() - genMETVector.Pt();
@@ -1019,6 +1035,9 @@ namespace HPlus {
       if (output.bPassedEvent) hHiggsMassImpure->Fill(output.fHiggsMassSolutionSelected);
       hDiscriminantImpure->Fill(output.fDiscriminant);
     }
+    // TODO! If the tau and b-jet were identified correctly, check if they came from the same quark (i.e. if the correct b-jet
+    //       was chosen by the mass calculation algorithm.
+    //if (tauAndBJetFromSameTopQuark(...)) ...
   }
 
   void FullHiggsMassCalculator::analyzeMETComposition(TVector3& recoMETVector, TVector3& genBothNeutrinosVector, 
