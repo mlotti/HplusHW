@@ -9,7 +9,7 @@
 
 interactiveMode = False
 
-import ROOT
+from ROOT import *
 ROOT.gROOT.SetBatch(not interactiveMode)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
@@ -21,12 +21,21 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configurations
-#multicrabDir = "../multicrab_130418_114926"
-multicrabDir = "../multicrab_130417_135419"
 
-cutInfoSuffix = ""
-if multicrabDir == "../multicrab_130418_114926":
-    cutInfoSuffix = "_noTopMassCut"
+# CORRUPTED:
+#multicrabDir = "../multicrab_130426_124616"   # 100 < top mass < 240 ???
+#cutInfoSuffix = "_TopMassCut100-240"
+#multicrabDir = "../multicrab_130429_002005"   # 140 < top mass < 200
+#cutInfoSuffix = "_TopMassCut140-200"
+#multicrabDir = "../multicrab_130429_151753"   # no top mass cut
+#cutInfoSuffix = "_noTopMassCut"
+
+multicrabDirs   = ["multicrab_130429_151753", "multicrab_130429_163849", "multicrab_130502_201822"]
+cutInfoSuffixes = ["noTopMassCut", "topMassCut140-200", "topMassCut100-240"]
+
+#multicrabDir = "../multicrab_130424_001136"   # no top mass cut
+#multicrabDir = "../multicrab_130419_152407"   # 100 < top mass < 240
+#multicrabDir = "../multicrab_130417_135419"   # 140 < top mass < 200
 
 analysis = "signalAnalysis"
 # Data era affects on the set of selected data datasets, and the PU
@@ -42,10 +51,9 @@ plotAllMassPointsTogether = False
 mcOnly = True
 #mcOnly = False
 mcOnlyLumi = 5000 # 1/pb
-# Set lightHplusMassPoint to a value < 0 if you want to plot all the masses:
 #lightHplusMassPoint = 120
-#lightHplusMassPoints = [80, 90, 100, 120, 140, 150, 155, 160]
-lightHplusMassPoints = [80, 100, 120, 140, 160]
+lightHplusMassPoints = [80, 90, 100, 120, 140, 150, 155, 160]
+#lightHplusMassPoints = [80, 100, 120, 140, 160]
 lightHplusTopBR = 0.02
 removeQCD = True
 #removeQCD = False
@@ -57,8 +65,8 @@ massPlotNormToOne = False
 counterLabels = {
     "Greater solution closest": "max-|p_{#nu, z}|",
     "Smaller solution closest": "min-|p_{#nu, z}|",
-    "TauNuAngleMax solution closest": "max-#alpha_{#tau, #nu}",
-    "TauNuAngleMin solution closest": "min-#alpha_{#tau, #nu}",
+    "TauNuAngleMax solution closest": "max-#xi_{#tau, #nu}",
+    "TauNuAngleMin solution closest": "min-#xi_{#tau, #nu}",
     "TauNuDeltaEtaMax solution closest": "max-#Delta#eta_{#tau, #nu}",
     "TauNuDeltaEtaMin solution closest": "min-#Delta#eta_{#tau, #nu}",
     }
@@ -68,10 +76,11 @@ histograms.createLegend.moveDefaults(dx=-0.05)
 
 # main function
 def main():
-    for lightHplusMassPoint in lightHplusMassPoints:
-        doEverything(lightHplusMassPoint)
+    for i in range(0, len(multicrabDirs)):
+        for lightHplusMassPoint in lightHplusMassPoints:
+            doEverything("../"+multicrabDirs[i], "_"+cutInfoSuffixes[i], lightHplusMassPoint)
 
-def doEverything(lightHplusMassPoint):
+def doEverything(multicrabDir, cutInfoSuffix, lightHplusMassPoint):
     print "MultiCRAB directory is", multicrabDir
     
     # Read the datasets, see twiki page for more examples
@@ -123,8 +132,6 @@ def doEverything(lightHplusMassPoint):
 
     # Merge signals into one dataset (per mass point)
     plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
-
-    
     
     # Replace signal dataset with a signal+background dataset, where
     # the BR(t->H+) is taken into account for SM ttbar
@@ -136,8 +143,6 @@ def doEverything(lightHplusMassPoint):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-
-
 
     # Calculate N_signal/N_background and Poisson significance of signal
     #numberOfSignalEvents = datasets.getDataset("TTToHplus_M120").getCrossSection() * myIntegratedLuminosity
@@ -151,16 +156,19 @@ def doEverything(lightHplusMassPoint):
     #d_ttjets = datasets.getDataset("TTJets")
     #print d_ttjets.getNAllEvents()
 
-
-
-
     # Create plots
-    doPlots(datasets, lightHplusMassPoint)
+    doPlots(datasets, cutInfoSuffix, lightHplusMassPoint)
 
+    # Print a counter table for use in LaTeX documents
     doCounters(datasets)
+
+    # Do plots with a fit
+    doFit(datasets, "HiggsMass", cutInfoSuffix, lightHplusMassPoint)
 
     if interactiveMode:
         raw_input("*** Press \"Enter\" to exit pyROOT: ")
+
+
 
 # Default plot drawing options, all of these can be overridden in the
 # individual drawPlot() calls
@@ -170,7 +178,7 @@ if plotSignalOnly:
     
 
 # Define plots to draw
-def doPlots(datasets, lightHplusMassPoint):
+def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
     def createPlot(name, massbr_x=0.67, massbr_y=0.58, normone_x=0.67, normone_y=0.58, **kwargs):
         args = {}
         args.update(kwargs)
@@ -207,6 +215,7 @@ def doPlots(datasets, lightHplusMassPoint):
             p.histoMgr.normalizeMCToLuminosity(lumi)
                 
         p.histoMgr.setHistoDrawStyleAll("COLZ")
+        #p.histoMgr.setHistoDrawStyleAll("SCAT")
         
         # Example how to set drawing options on the plot object
         # itself. These override the default, and the options given in
@@ -239,7 +248,10 @@ def doPlots(datasets, lightHplusMassPoint):
 
 
 
-    # PLOT: top invariant mass in generator
+    # PLOT: top invariant mass
+    drawPlot(createPlot("FullHiggsMass/TopMassSolution", normalizeToOne=massPlotNormToOne), "TopMass"+nameSuffix,
+             xlabel="m_{t}", ylabel="Events / %d GeV"%massPlotBinWidth, log=True, rebinToWidthX=massPlotBinWidth)
+        
 #     drawPlot(createPlot("FullHiggsMass/TopInvariantMassInGenerator", normalizeToOne=massPlotNormToOne),
 #              "TopInvariantMassInGenerator"+nameSuffix, xlabel="m(b, #tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth,
 #              log=False, rebinToWidthX=massPlotBinWidth)
@@ -257,6 +269,17 @@ def doPlots(datasets, lightHplusMassPoint):
 #                  "HiggsMass_GEN_NuToMET"+nameSuffix+"_TauNuAngleMax",
 #                  xlabel="m_{#tau, #nu_{#tau}} (MC truth, #nu_{#tau} #leftrightarrow  #slash{E}_{T})",
 #                  ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
+    # PLOT: Higgs invariant mass using the better and the worse solution, respectively
+    drawPlot(createPlot("FullHiggsMass/HiggsMass_betterSolution", normalizeToOne=massPlotNormToOne),
+             "HiggsMass_betterSolution"+cutInfoSuffix+nameSuffix,
+             xlabel="m_{#tau, #nu_{#tau}}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+             cutLine=lightHplusMassPoint)
+    drawPlot(createPlot("FullHiggsMass/HiggsMass_worseSolution", normalizeToOne=massPlotNormToOne),
+             "HiggsMass_worseSolution"+cutInfoSuffix+nameSuffix,
+             xlabel="m_{#tau, #nu_{#tau}}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+             cutLine=lightHplusMassPoint)
+
+
 
     # PLOT: Higgs invariant mass using the chosen selection method, positive discriminant only
     drawPlot(createPlot("FullHiggsMass/HiggsMassPositiveDiscriminant", normalizeToOne=massPlotNormToOne),
@@ -306,9 +329,10 @@ def doPlots(datasets, lightHplusMassPoint):
              "TransverseMass"+nameSuffix,
              xlabel="m_{T}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
 
-    # PLOT: Transverse mass versus invariant mass
-    # TH2 and COLZ, disable legend
+    # Set colour scheme for 2D plots
     tdrstyle.setDeepSeaPalette()
+
+    # PLOT: Transverse mass versus invariant mass
     drawPlot(createTH2Plot("FullHiggsMass/TransMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
              "TransMassVsInvMass"+cutInfoSuffix+nameSuffix,
              xlabel="(M_{H^{+}} = %d GeV)          m_{T}"%lightHplusMassPoint, ylabel="m_{#tau, #nu_{#tau}}",
@@ -320,6 +344,32 @@ def doPlots(datasets, lightHplusMassPoint):
                  xlabel="(t#bar{t} only)          m_{T}", ylabel="m_{#tau, #nu_{#tau}}", zlabel="Events",
                  log=False, createLegend=None,
                  opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+    # PLOT: Top mass versus invariant mass
+    drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
+             "TopMassVsInvMass"+cutInfoSuffix+nameSuffix,
+             xlabel="(M_{H^{+}} = %d GeV)          m_{top}"%lightHplusMassPoint, ylabel="m_{#tau, #nu_{#tau}}",
+             zlabel="Events", log=False, createLegend=None,
+             opts={"xmax": 500, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+    if not plotSignalOnly:
+        drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTJets"),
+                 "TopMassVsInvMass_ttbarOnly"+cutInfoSuffix,
+                 xlabel="(t#bar{t} only)          m_{top}", ylabel="m_{#tau, #nu_{#tau}}",
+                 zlabel="Events", log=False, createLegend=None,
+                 opts={"xmax": 500, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+    # PLOT: Top mass versus neutrino number
+    drawPlot(createTH2Plot("FullHiggsMass/TopMassVsNeutrinoNumber", "TTToHplus_M%d"%lightHplusMassPoint),
+             "TopMassVsNeutrinoNumber"+cutInfoSuffix+nameSuffix,
+             xlabel="(M_{H^{+}} = %d GeV)          m_{top}"%lightHplusMassPoint, ylabel="Number of neutrinos",
+             zlabel="Events", log=False, createLegend=None,
+             opts={"xmax": 500, "ymax": 8}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=1.0)
+    if not plotSignalOnly:
+        drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTJets"),
+                 "TopMassVsInvMass_ttbarOnly"+cutInfoSuffix,
+                 xlabel="(t#bar{t} only)          m_{top}", ylabel="Number of neutrinos",
+                 zlabel="Events", log=False, createLegend=None,
+                 opts={"xmax": 500, "ymax": 8}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+    
+        
 
 #     # Examples of couple of palettes available in (recent) ROOT and which might be better than the rainbow
 #     # http://root.cern.ch/drupal/content/rainbow-color-map
@@ -369,10 +419,22 @@ def doPlots(datasets, lightHplusMassPoint):
         for i in range(1, 7):
             axis.SetBinLabel(i, counterLabels[str(axis.GetBinLabel(i))])
 #            axis.SetBinLabel(i, counterLabels[i])
-    drawPlot(createPlot("counters/weighted/FullHiggsMassCalculator", normalizeToOne=massPlotNormToOne), "Counters"+nameSuffix,
+    drawPlot(createPlot("counters/weighted/FullHiggsMassCalculator", normalizeToOne=massPlotNormToOne),
+             "Counters"+cutInfoSuffix+nameSuffix,
              xlabel = "", ylabel = "Event count", log=False, opts={"xmin": 4, "xmax": 10},
              customizeBeforeDraw=renameLabels)
 
+# Helper function to add mHplus and BR text  
+def addMassBRText(plot, x, y, lightHplusMassPoint):
+    size = 20
+    separation = 0.04
+
+    if not plotAllMassPointsTogether:
+        massText = "m_{H^{+}} = %d GeV/c^{2}" % lightHplusMassPoint
+        plot.appendPlotObject(histograms.PlotText(x, y, massText, size=size))
+
+    brText = "#it{B}(t #rightarrow bH^{+})=%.2f" % lightHplusTopBR
+    plot.appendPlotObject(histograms.PlotText(x, y-separation, brText, size=size))
 
 def doCounters(datasets):
     # Create EventCounter object, holds all counters of all datasets
@@ -391,26 +453,80 @@ def doCounters(datasets):
     table.renameRows(counterLabels)
     print table.format(latexFormat)
 
+def Gaussian(x,par):
+    return par[0]*TMath.Gaus(x[0],par[1],par[2],1)
 
-# Helper function to add mHplus and BR text  
-def addMassBRText(plot, x, y, lightHplusMassPoint):
-    size = 20
-    separation = 0.04
+def BW(x,par):
+    return par[0]*TMath.BreitWigner(x[0],par[1],par[2])
 
-    if not plotAllMassPointsTogether:
-        massText = "m_{H^{+}} = %d GeV/c^{2}" % lightHplusMassPoint
-        plot.appendPlotObject(histograms.PlotText(x, y, massText, size=size))
-
-    brText = "#it{B}(t #rightarrow bH^{+})=%.2f" % lightHplusTopBR
-    plot.appendPlotObject(histograms.PlotText(x, y-separation, brText, size=size))
-
+def doFit(datasets, histoName, cutInfoSuffix, lightHplusMassPoint):
+    ## After standard cuts
+    invmass = plots.PlotBase(
+        [datasets.getDataset("TTToHplus_M%d"%lightHplusMassPoint).getDatasetRootHisto("FullHiggsMass/"+histoName)])
+    invmass.histoMgr.normalizeMCToLuminosity(mcOnlyLumi) # Could implement possibility to normalize to data lumi (as for plots)
+    invmass._setLegendStyles()
+    invmass._setLegendLabels()
+    invmass.histoMgr.setHistoDrawStyleAll("P")
+    invmass.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1)) # SET REBINNING HERE!
+    hinvmass = invmass.histoMgr.getHisto("TTToHplus_M%d"%lightHplusMassPoint).getRootHisto().Clone("FullHiggsMass/"+histoName)
     
+    canvas = TCanvas("canvas","",500,500)
+    hinvmass.GetYaxis().SetTitle("Events")
+    hinvmass.GetXaxis().SetTitle("m_{#tau, #nu_{#tau}} (GeV)")
+    #    hinvmass.GetYaxis().SetTitleSize(10.0)
+    #    hinvmass.GetXaxis().SetTitleSize(20.0)
+    hinvmass.Draw()
+    histo = hinvmass.Clone("histo")
+    #    rangeMin = hinvmass.GetXaxis().GetXmin()
+    #    rangeMax = hinvmass.GetXaxis().GetXmax()
+    rangeMin = 80
+    rangeMax = 170
+    if cutInfoSuffix == "_noTopMassCut":
+        rangeMax = 190
+    #rangeMax = lightHplusMassPoint + 50
+    
+    numberOfParameters = 3
+    
+    #    print "Fit range ",rangeMin, " - ",rangeMax
+    
+    class FitFunction:
+        def __call__( self, x, par ):
+            #return BW(x, par)
+            return Gaussian(x, par)
+        
+    theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+    theFit.SetParLimits(0,1,10000)
+    theFit.SetParLimits(1,0,500)
+    theFit.SetParLimits(2,0.1,200)
+    #    gStyle.SetOptFit(0)
+    
+    hinvmass.Fit(theFit,"WLR")
+    theFit.SetRange(rangeMin,rangeMax)
+    theFit.SetLineStyle(1)
+    theFit.SetLineWidth(2)
+    theFit.Draw("same")
+    tex4 = TLatex(0.2,0.97,"CMS Simulation")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    tex2 = TLatex(0.6,0.7,"tt->tbH^{#pm}")
+    tex2.SetNDC()
+    tex2.SetTextSize(20)
+    tex2.Draw()
+    tex3 = TLatex(0.6,0.6,"m_{H^{#pm}} = %d GeV"%lightHplusMassPoint)
+    tex3.SetNDC()
+    tex3.SetTextSize(20)
+    tex3.Draw()
+    #tex5 = ROOT.TLatex(0.6,0.5,"Matched jets")
+    #tex5.SetNDC()
+    #tex5.SetTextSize(20)
+    #tex5.Draw()
+    print "Fit range ",rangeMin, " - ",rangeMax
+    canvas.Print("Fit_"+histoName+cutInfoSuffix+"_M%d.png"%lightHplusMassPoint)
+        
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
     main()
-
-
-
 
 
 # For inspiration:
