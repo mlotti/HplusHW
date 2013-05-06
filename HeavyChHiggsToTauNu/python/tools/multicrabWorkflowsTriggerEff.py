@@ -530,7 +530,7 @@ def addQuadJetSkim_53X(version, datasets, updateDefinitions, skim=None):
                 dataset.addWorkflow(Workflow("triggerQuadJet_analysis_"+version, triggerOR=[mcTriggerSingleMu], **commonArgs))
                     
 def addQuadJetSkim_53X_v3(datasets):
-    definitions = {
+    dataDefinitions = {
 #        "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
 #        "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
 #        "MultiJet_190782-190949_2012A_Aug06":     TaskDef(""),
@@ -552,7 +552,8 @@ def addQuadJetSkim_53X_v3(datasets):
 	"SingleMu_199698-202504_2012C_Prompt":    TaskDef(""),
 	"SingleMu_202970-203742_2012C_Prompt":    TaskDef(""),
 	"SingleMu_203777-208686_2012D_Prompt":    TaskDef(""),
-
+    }
+    mcDefinitions = {
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef(""),                               
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDef(""),                               
         "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDef(""),                               
@@ -582,6 +583,12 @@ def addQuadJetSkim_53X_v3(datasets):
         "T_s-channel_TuneZ2star_Summer12":        TaskDef(""),                               
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),                               
         }
+
+    # Switch GlobalTag for MC to match to prompt reco
+    tmp = TaskDef(dataVersionAppend="prompt")
+    for n, td in mcDefinitions.iteritems():
+        td.update(tmp)
+    dataDefinitions.update(mcDefinitions)
     
-    addQuadJetSkim_53X("v53_v3", datasets, definitions) 
+    addQuadJetSkim_53X("v53_v3", datasets, dataDefinitions) 
     
