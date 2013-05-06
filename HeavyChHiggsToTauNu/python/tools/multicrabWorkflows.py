@@ -310,6 +310,27 @@ datasets.extend([
 ])
 
 ########
+# MultiJet1Parked ReReco, QuadJet trigger for signal
+datasets.extend([
+    DataDataset("MultiJet1Parked_%s_2012B_Nov05", reco="05Nov2012B",   runs=(193834, 196531), aod="/MultiJet1Parked/Run2012B-05Nov2012-v2/AOD"), # 78067581 events,  7084 files
+    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012Cv1", runs=(198022, 198523), aod="/MultiJet1Parked/Run2012C-part1_05Nov2012-v2/AOD"), # 9209168 events, 626 files
+    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012Cv2", runs=(198941, 203742), aod="/MultiJet1Parked/Run2012C-part2_05Nov2012-v2/AOD"), # 130268374 events, 10136 files
+    DataDataset("MultiJet1Parked_%s_2012D_Dec10", reco="10Dec2012",    runs=(203777, 207779), aod="/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD"), # 218620252 events, 22176 files
+    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013",    runs=(207875, 208686), aod="/MultiJet1Parked/Run2012D-part2_17Jan2013-v1/AOD"), # 28985011 events, 3051 files
+    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013",    runs=(207883, 208307), aod="/MultiJet1Parked/Run2012D-part2_PixelRecover_17Jan2013-v1/AOD"), # 20015244 events, 1878 files
+])
+datasets.splitDataByRuns("MultiJet1Parked_193834-196531_2012B_Nov05", [
+        (193834, 194225), # HLT_QuadJet50 is prescaled, use HLT_QuadJet80, 78059999 events, 6484 files
+        (194270, 196531), # HLT_QuadJet50 is unprescaled, 76705110 events, 6356 files
+])
+# Split to have separate pieces of this around PixelRecover
+datasets.splitDataByRuns("MultiJet1Parked_207875-208686_2012D_Jan17", [
+        (207875, 207882), # 395625 events, 35 files
+        (208339, 208686), # 28902576 events, 3043 files
+])
+
+
+########
 # ReRecos (Jan22)
 
 # Tau(Parked) PD, tau+MET trigger for signal, tau trigger for MET trigger efficiency measurement
@@ -334,24 +355,9 @@ datasets.extend([
     DataDataset("TauPlusX_%s_2012D_Jan22", reco="22Jan2013", runs=(203777, 208686), aod="/TauPlusX/Run2012D-22Jan2013-v1/AOD"), # 63421453 events, 5395 files
 ])
 
-# MultiJet(Parked) PD, QuadJet trigger for signal
+# MultiJet PD, QuadJet trigger for signal
 datasets.extend([
     DataDataset("MultiJet_%s_2012A_Jan22",        reco="22Jan2013",    runs=(190456, 193621), aod="/MultiJet/Run2012A-22Jan2013-v1/AOD"), # 11068071 events, 879 files
-    DataDataset("MultiJet1Parked_%s_2012B_Nov05", reco="05Nov2012B",   runs=(193834, 196531), aod="/MultiJet1Parked/Run2012B-05Nov2012-v2/AOD"), # 78067581 events,  7084 files
-    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012Cv1", runs=(198022, 198523), aod="/MultiJet1Parked/Run2012C-part1_05Nov2012-v2/AOD"), # 9209168 events, 626 files
-    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012Cv2", runs=(198941, 203742), aod="/MultiJet1Parked/Run2012C-part2_05Nov2012-v2/AOD"), # 130268374 events, 10136 files
-    DataDataset("MultiJet1Parked_%s_2012D_Dec10", reco="10Dec2012",    runs=(203777, 207779), aod="/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD"), # 218620252 events, 22176 files
-    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013",    runs=(207875, 208686), aod="/MultiJet1Parked/Run2012D-part2_17Jan2013-v1/AOD"), # 28985011 events, 3051 files
-    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013",    runs=(207883, 208307), aod="/MultiJet1Parked/Run2012D-part2_PixelRecover_17Jan2013-v1/AOD"), # 20015244 events, 1878 files
-])
-datasets.splitDataByRuns("MultiJet1Parked_193834-196531_2012B_Nov05", [
-        (193834, 194225), # HLT_QuadJet50 is prescaled, use HLT_QuadJet80, 78059999 events, 6484 files
-        (194270, 196531), # HLT_QuadJet50 is unprescaled, 76705110 events, 6356 files
-])
-# Split to have separate pieces of this around PixelRecover
-datasets.splitDataByRuns("MultiJet1Parked_207875-208686_2012D_Jan17", [
-        (207875, 207882), # 395625 events, 35 files
-        (208339, 208686), # 28902576 events, 3043 files
 ])
 
 # BJetPlusX PD, QuadJet trigger for signal
@@ -532,6 +538,7 @@ multicrabWorkflowsPattuple.addPattuple_v53_3_test2(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_3_test3(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_3_test4(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_3_test5(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_3_test6_quadjet(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_3_taumet(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_3_quadjet(datasets)
 

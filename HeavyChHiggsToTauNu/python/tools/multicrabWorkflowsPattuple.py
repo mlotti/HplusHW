@@ -779,9 +779,9 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
 
 
     quadJetTriggers = {
-        # Winter13 Reprocessing: 
-        "MultiJet_190456-193621_2012A_Jan22": ["HLT_QuadJet80_v1", # 190456-190738
-                                               "HLT_QuadJet80_v2"],# 190782-193621
+        "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadJet80_v1"],
+        "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadJet80_v2"],
+        "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadJet80_v2"],
         "MultiJet1Parked_193834-194225_2012B_Nov05": ["HLT_QuadJet80_v2"],
         "MultiJet1Parked_194270-196531_2012B_Nov05": ["HLT_QuadJet50_v2"],
         "MultiJet1Parked_198022-198523_2012C_Nov05": ["HLT_QuadJet50_v3"],
@@ -790,6 +790,9 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "MultiJet1Parked_207875-207882_2012D_Jan17": ["HLT_QuadJet45_v1"],
         "MultiJet1Parked_207883-208307_2012D_Jan17": ["HLT_QuadJet45_v1"],
         "MultiJet1Parked_208339-208686_2012D_Jan17": ["HLT_QuadJet45_v1"],
+
+#        "MultiJet_190456-193621_2012A_Jan22": ["HLT_QuadJet80_v1", # 190456-190738
+#                                               "HLT_QuadJet80_v2"],# 190782-193621
         }
 
     # Specifies the default
@@ -822,6 +825,13 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "Tau_202972-203742_2012C_Prompt": TaskDef(njobsIn=40,   njobsOut=  1), # aim 34
         "Tau_203777-208686_2012D_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut= 50),
 
+        ## MultiJet
+        "MultiJet_190456-190738_2012A_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut= 2),
+        "MultiJet_190782-190949_2012A_Aug06":  TaskDef(nlumisPerJobIn=1, njobsOut= 1),
+        "MultiJet_191043-193621_2012A_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut=15),
+        ## Skip most of Multi1JetParked for now, still unsure what to do with it in practice
+        "MultiJet1Parked_198022-198523_2012C_Nov05": TaskDef(nlumisPerJobIn=1, njobsOut=20), # FIXME: set njobsOut
+
         # Winter13 Reprocessing
         ## Tau
         "Tau_190456-193621_2012A_Jan22":       TaskDef(njobsIn= 300, njobsOut= 6), # aim 200, FIXME: set njobsOut
@@ -829,11 +839,6 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=3000, njobsOut=40), # aim 2200, FIXME: set njobsOut
         "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn=  50, njobsOut= 1), # aim 40, FIXME: set njobsOut
         "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=7000, njobsOut=50), # aim 4000, FIXME: set njobsOut
-
-        ## MultiJet
-        "MultiJet_190456-193621_2012A_Jan22":  TaskDef(nlumisPerJobIn=1, njobsOut=20), # FIXME: set njobsOut
-        ## Skip Multi1JetParked for now, still unsure what to do with it in practice
-        "MultiJet1Parked_198022-198523_2012C_Nov05": TaskDef(nlumisPerJobIn=1, njobsOut=20), # FIXME: set njobsOut
 
         # MC, triggered with mcTrigger
         # FIXME: QuadJet numbers of jobs have not been adjusted
@@ -2392,6 +2397,14 @@ def addPattuple_v53_3_test5(datasets):
 
     addPattuple_53X("v53_3_test5", datasets, definitions)
 
+def addPattuple_v53_3_test6_quadjet(datasets):
+    # To develop the skim
+    definitions = {
+        "MultiJet1Parked_198022-198523_2012C_Nov05": TaskDef(""),
+    }
+
+    addPattuple_53X_v2("quadjet_v53_3_test6", datasets, definitions)
+
 
 def addPattuple_v53_3_taumet(datasets):
     definitions = {
@@ -2520,10 +2533,13 @@ def addPattuple_v53_3_taumet(datasets):
     addPattuple_53X_v2("taumet_v53_3", datasets, definitions)
 
 def addPattuple_v53_3_quadjet(datasets):
-    definitions = {
-        "MultiJet_190456-193621_2012A_Jan22":        TaskDef(""),
+    dataDefinitions = {
+        "MultiJet_190456-190738_2012A_Jul13":  TaskDef(""),
+        "MultiJet_190782-190949_2012A_Aug06":  TaskDef(""),
+        "MultiJet_191043-193621_2012A_Jul13":  TaskDef(""),
         "MultiJet1Parked_198022-198523_2012C_Nov05": TaskDef(""),
-
+    }
+    mcDefinitions = {
         "TTToHplusBWB_M80_Summer12":              TaskDef(""),
         "TTToHplusBWB_M90_Summer12":              TaskDef(""),
         "TTToHplusBWB_M100_Summer12":             TaskDef(""),
@@ -2635,10 +2651,12 @@ def addPattuple_v53_3_quadjet(datasets):
 
     # Switch GlobalTag for MC to match to prompt reco
     tmp = TaskDef(dataVersionAppend="prompt")
-    for n, td in definitions.iteritems():
+    for n, td in mcDefinitions.iteritems():
         td.update(tmp)
 
-    addPattuple_53X_v2("quadjet_v53_3", datasets, definitions)
+    dataDefinitions.update(mcDefinitions)
+
+    addPattuple_53X_v2("quadjet_v53_3", datasets, dataDefinitions)
 
 
 # Skeleton
