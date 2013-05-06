@@ -50,6 +50,7 @@ class HPlusEmbeddingDebugMuonAnalyzer: public edm::EDAnalyzer {
   bool recoJets_;
 
   HPlus::Count cAllEvents;
+  HPlus::Count cPUReweight;
   HPlus::Count cGenMuons;
   HPlus::Count cGenMuonsAcceptance;
   HPlus::Count cOneGenMuon;
@@ -99,6 +100,7 @@ HPlusEmbeddingDebugMuonAnalyzer::HPlusEmbeddingDebugMuonAnalyzer(const edm::Para
   recoMuon_(iConfig.getUntrackedParameter<bool>("recoMuon", true)),
   recoJets_(iConfig.getUntrackedParameter<bool>("recoJets", true)),
   cAllEvents(eventCounter.addCounter("All events")),
+  cPUReweight(eventCounter.addCounter("PU reweighting")),
   cGenMuons(eventCounter.addCounter(">= 1 gen muon")),
   cGenMuonsAcceptance(eventCounter.addCounter(">= 1 gen muon in acceptance")),
   cOneGenMuon(eventCounter.addCounter("= 1 gen muon")),
@@ -153,6 +155,10 @@ void HPlusEmbeddingDebugMuonAnalyzer::analyze(const edm::Event& iEvent, const ed
   fEventWeight.beginEvent();
   increment(cAllEvents);
 
+  const double myPileupWeight = pileupWeight_.getWeight(iEvent, iSetup);
+  fEventWeight.multiplyWeight(myPileupWeight);
+  increment(cPUReweight);
+
   edm::Handle<edm::View<pat::Muon> > hmuons;
   iEvent.getByLabel(muonSrc_, hmuons);
 
@@ -161,9 +167,6 @@ void HPlusEmbeddingDebugMuonAnalyzer::analyze(const edm::Event& iEvent, const ed
 
   edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
   iEvent.getByLabel(genSrc_, hgenparticles);
-
-  const double myPileupWeight = pileupWeight_.getWeight(iEvent, iSetup);
-  fEventWeight.multiplyWeight(myPileupWeight);
 
   // Find W's
   const reco::GenParticle *W1 = 0;

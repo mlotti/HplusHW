@@ -51,23 +51,47 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 process.infoPath = HChTools.addConfigInfo(process, options, dataVersion)
 
 # Jet selection
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as muonSelection
-muonSelection.addMuonSelectionForEmbedding(process)
-process.commonSequence += (
-    process.goodJets +
-    process.goodJetFilter +
-    process.muonSelectionJets
-)
-additionalCounters.append("muonSelectionJets")
+doJetSelection = False
+#doJetSelection = True
+jetSrc = "selectedPatJets"
+if doJetSelection:
+    # Do also PV selection when doing jet selection
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex as HChPrimaryVertex
+    HChPrimaryVertex.addPrimaryVertexSelection(process, process.commonSequence)
+    process.selectedPrimaryVertexFilter = cms.EDFilter("VertexCountFilter",
+        src = cms.InputTag("selectedPrimaryVertex"),
+        minNumber = cms.uint32(1),
+        maxNumber = cms.uint32(999)
+    )
+    process.selectedPrimaryVertexCount = cms.EDProducer("EventCountProducer")
+    process.commonSequence += (
+        process.selectedPrimaryVertexFilter +
+        process.selectedPrimaryVertexCount
+    )
+    additionalCounters.append("selectedPrimaryVertexCount")
+
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as muonSelection
+    muonSelection.addMuonSelectionForEmbedding(process)
+    process.commonSequence += (
+        process.goodJets +
+        process.goodJetFilter +
+        process.muonSelectionJets
+    )
+    jetSrc = "goodJets"
+    additionalCounters.append("muonSelectionJets")
 
 # Configuration
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 analyzer = cms.EDAnalyzer("HPlusEmbeddingDebugTauAnalyzer",
-    jetSrc = cms.untracked.InputTag("goodJets"),
+    jetSrc = cms.untracked.InputTag("selectedPatJets"),
     genSrc = cms.untracked.InputTag("genParticles"),
 
-    tauPtCut = cms.untracked.double(40),
+    tauPtCut = cms.untracked.double(41),
     tauEtaCut = cms.untracked.double(2.1),
+
+    pileupWeightReader = param.pileupWeightReader.clone(
+        enabled = False
+    ),
 
     eventCounter = param.eventCounter.clone(),
     histogramAmbientLevel = cms.untracked.string("Informative"),
@@ -78,6 +102,13 @@ HChTools.addAnalysis(process, "debugAnalyzer", analyzer,
                      additionalCounters=additionalCounters)
 process.debugAnalyzer.eventCounter.printMainCounter = True
 
+for era, weight in zip(dataEras, puWeights):
+    m = analyzer.clone()
+    m.pileupWeightReader.weightSrc = weight
+    m.pileupWeightReader.enabled = True
+    HChTools.addAnalysis(process, "debugAnalyzer"+era, m,
+                         preSequence=process.commonSequence,
+                         additionalCounters=additionalCounters)
 
 f = open("configDumpEmbeddingDebugTauAnalysis.py", "w")
 f.write(process.dumpPython())

@@ -9,6 +9,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
 
@@ -36,10 +37,13 @@ class HPlusEmbeddingDebugTauAnalyzer: public edm::EDAnalyzer {
   edm::InputTag jetSrc_;
   edm::InputTag genSrc_;
 
+  HPlus::WeightReader pileupWeight_;
+
   const double tauPtCut_;
   const double tauEtaCut_;
 
   HPlus::Count cAllEvents;
+  HPlus::Count cPUReweight;
   HPlus::Count cGenTaus;
   HPlus::Count cGenTausAcceptance;
   HPlus::Count cOneGenTau;
@@ -67,9 +71,11 @@ HPlusEmbeddingDebugTauAnalyzer::HPlusEmbeddingDebugTauAnalyzer(const edm::Parame
   eventCounter(iConfig, fEventWeight, fHistoWrapper),
   jetSrc_(iConfig.getUntrackedParameter<edm::InputTag>("jetSrc")),
   genSrc_(iConfig.getUntrackedParameter<edm::InputTag>("genSrc")),
+  pileupWeight_(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
   tauPtCut_(iConfig.getUntrackedParameter<double>("tauPtCut")),
   tauEtaCut_(iConfig.getUntrackedParameter<double>("tauEtaCut")),
   cAllEvents(eventCounter.addCounter("All events")),
+  cPUReweight(eventCounter.addCounter("PU reweighting")),
   cGenTaus(eventCounter.addCounter(">= 1 gen tau")),
   cGenTausAcceptance(eventCounter.addCounter(">= 1 gen tau in acceptance")),
   cOneGenTau(eventCounter.addCounter("= 1 gen tau")),
@@ -107,6 +113,10 @@ void HPlusEmbeddingDebugTauAnalyzer::endJob() {
 void HPlusEmbeddingDebugTauAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   fEventWeight.beginEvent();
   increment(cAllEvents);
+
+  const double myPileupWeight = pileupWeight_.getWeight(iEvent, iSetup);
+  fEventWeight.multiplyWeight(myPileupWeight);
+  increment(cPUReweight);
 
   edm::Handle<edm::View<pat::Jet> > hjets;
   iEvent.getByLabel(jetSrc_, hjets);
