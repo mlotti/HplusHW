@@ -663,14 +663,30 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
 # to catch the commonalities such that the other addPattuple_v*()
 # functions would be as short as possible.
 def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
-    mcTriggerTauMET = "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"
-    mcTriggerQuadJet = "HLT_QuadJet50_v2"
-    mcTriggers = [
-        mcTriggerTauMET,
-        mcTriggerQuadJet,
-        ]
-    def TaskDefMC(**kwargs):
-        return TaskDef(triggerOR=mcTriggers, **kwargs)
+    if "taumet" in version:
+        mcTriggers = ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]
+    elif "quadjet" in version:
+        mcTriggers = ["HLT_QuadJet50_v2"]
+    else:
+        raise Exception("Unsupported pattuple version string '%s', it should contain either 'taumet' or 'quadjet'" % version)
+
+    class TauMET:
+        def __init__(self, **kwargs):
+            self.d = {}
+            self.d.update(kwargs)
+    class QuadJet:
+        def __init__(self, **kwargs):
+            self.d = {}
+            self.d.update(kwargs)
+
+    def TaskDefMC(taumet, quadjet, **kwargs):
+        args = {}
+        args.update(kwargs)
+        if "taumet" in version:
+            args.update(taumet.d)
+        elif "quadjet" in version:
+            args.update(quadjet.d)
+        return TaskDef(triggerOR=mcTriggers, **args)
 
     # Trigger selection efficiency for WH signal M120
     # HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6: 605/6048 = 0.10003
@@ -818,115 +834,116 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "MultiJet_190456-193621_2012A_Jan22":  TaskDef(nlumisPerJobIn=1, njobsOut=20), # FIXME: set njobsOut
         ## Skip Multi1JetParked for now, still unsure what to do with it in practice
         "MultiJet1Parked_198022-198523_2012C_Nov05": TaskDef(nlumisPerJobIn=1, njobsOut=20), # FIXME: set njobsOut
-        
+
         # MC, triggered with mcTrigger
-        "TTToHplusBWB_M80_Summer12":        TaskDefMC(njobsIn=40, njobsOut=1),
-        "TTToHplusBWB_M90_Summer12":        TaskDefMC(njobsIn=40, njobsOut=1),
-        "TTToHplusBWB_M100_Summer12":       TaskDefMC(njobsIn=40, njobsOut=1),
-        "TTToHplusBWB_M120_Summer12":       TaskDefMC(njobsIn=40, njobsOut=1),
-        "TTToHplusBWB_M140_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBWB_M150_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBWB_M155_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBWB_M160_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
+        # FIXME: QuadJet numbers of jobs have not been adjusted
+        "TTToHplusBWB_M80_Summer12":        TaskDefMC(TauMET(njobsIn=13, njobsOut=1), QuadJet(njobsIn=40, njobsOut=1)),
+        "TTToHplusBWB_M90_Summer12":        TaskDefMC(TauMET(njobsIn=13, njobsOut=1), QuadJet(njobsIn=40, njobsOut=1)),
+        "TTToHplusBWB_M100_Summer12":       TaskDefMC(TauMET(njobsIn=13, njobsOut=1), QuadJet(njobsIn=40, njobsOut=1)),
+        "TTToHplusBWB_M120_Summer12":       TaskDefMC(TauMET(njobsIn=13, njobsOut=1), QuadJet(njobsIn=40, njobsOut=1)),
+        "TTToHplusBWB_M140_Summer12":       TaskDefMC(TauMET(njobsIn=13, njobsOut=2), QuadJet(njobsIn=40, njobsOut=2)),
+        "TTToHplusBWB_M150_Summer12":       TaskDefMC(TauMET(njobsIn=13, njobsOut=2), QuadJet(njobsIn=40, njobsOut=2)),
+        "TTToHplusBWB_M155_Summer12":       TaskDefMC(TauMET(njobsIn=13, njobsOut=2), QuadJet(njobsIn=40, njobsOut=2)),
+        "TTToHplusBWB_M160_Summer12":       TaskDefMC(TauMET(njobsIn=13, njobsOut=2), QuadJet(njobsIn=40, njobsOut=2)),
 
-        "TTToHplusBWB_M80_ext_Summer12":    TaskDefMC(njobsIn=180, njobsOut=7),
-        "TTToHplusBWB_M90_ext_Summer12":    TaskDefMC(njobsIn=180, njobsOut=7),
-        "TTToHplusBWB_M100_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=15),
-        "TTToHplusBWB_M120_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=7),
-        "TTToHplusBWB_M140_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=9),
-        "TTToHplusBWB_M150_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=9),
-        "TTToHplusBWB_M155_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=9),
-        "TTToHplusBWB_M160_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=15),
+        "TTToHplusBWB_M80_ext_Summer12":    TaskDefMC(TauMET(njobsIn=60, njobsOut= 7), QuadJet(njobsIn=180, njobsOut= 7)),
+        "TTToHplusBWB_M90_ext_Summer12":    TaskDefMC(TauMET(njobsIn=60, njobsOut= 7), QuadJet(njobsIn=180, njobsOut= 7)),
+        "TTToHplusBWB_M100_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut=15), QuadJet(njobsIn=180, njobsOut=15)),
+        "TTToHplusBWB_M120_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut= 7), QuadJet(njobsIn=180, njobsOut= 7)),
+        "TTToHplusBWB_M140_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut= 9), QuadJet(njobsIn=180, njobsOut= 9)),
+        "TTToHplusBWB_M150_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut= 9), QuadJet(njobsIn=180, njobsOut= 9)),
+        "TTToHplusBWB_M155_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut= 9), QuadJet(njobsIn=180, njobsOut= 9)),
+        "TTToHplusBWB_M160_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut=15), QuadJet(njobsIn=180, njobsOut=15)),
 
-        "TTToHplusBHminusB_M80_Summer12":        TaskDefMC(njobsIn=35, njobsOut=1),
-        "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=180, njobsOut=7),
-        "TTToHplusBHminusB_M100_Summer12":       TaskDefMC(njobsIn=35, njobsOut=1),
-        "TTToHplusBHminusB_M120_Summer12":       TaskDefMC(njobsIn=35, njobsOut=1),
-        "TTToHplusBHminusB_M140_Summer12":       TaskDefMC(njobsIn=35, njobsOut=2),
-        "TTToHplusBHminusB_M150_Summer12":       TaskDefMC(njobsIn=35, njobsOut=2),
-        "TTToHplusBHminusB_M155_Summer12":       TaskDefMC(njobsIn=35, njobsOut=2),
-        "TTToHplusBHminusB_M160_Summer12":       TaskDefMC(njobsIn=35, njobsOut=2),
+        "TTToHplusBHminusB_M80_Summer12":        TaskDefMC(TauMET(njobsIn=10, njobsOut=1), QuadJet(njobsIn= 35, njobsOut=1)),
+        "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(TauMET(njobsIn=60, njobsOut=7), QuadJet(njobsIn=180, njobsOut=7)),
+        "TTToHplusBHminusB_M100_Summer12":       TaskDefMC(TauMET(njobsIn=10, njobsOut=1), QuadJet(njobsIn= 35, njobsOut=1)),
+        "TTToHplusBHminusB_M120_Summer12":       TaskDefMC(TauMET(njobsIn=10, njobsOut=1), QuadJet(njobsIn= 35, njobsOut=1)),
+        "TTToHplusBHminusB_M140_Summer12":       TaskDefMC(TauMET(njobsIn=10, njobsOut=2), QuadJet(njobsIn= 35, njobsOut=2)),
+        "TTToHplusBHminusB_M150_Summer12":       TaskDefMC(TauMET(njobsIn=10, njobsOut=2), QuadJet(njobsIn= 35, njobsOut=2)),
+        "TTToHplusBHminusB_M155_Summer12":       TaskDefMC(TauMET(njobsIn=10, njobsOut=2), QuadJet(njobsIn= 35, njobsOut=2)),
+        "TTToHplusBHminusB_M160_Summer12":       TaskDefMC(TauMET(njobsIn=10, njobsOut=2), QuadJet(njobsIn= 35, njobsOut=2)),
 
-        "TTToHplusBHminusB_M80_ext_Summer12":    TaskDefMC(njobsIn=180, njobsOut=7),
-        "TTToHplusBHminusB_M100_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=7),
-        "TTToHplusBHminusB_M120_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=7),
-        "TTToHplusBHminusB_M140_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=10),
-        "TTToHplusBHminusB_M150_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=10),
-        "TTToHplusBHminusB_M155_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=10),
-        "TTToHplusBHminusB_M160_ext_Summer12":   TaskDefMC(njobsIn=180, njobsOut=10),
+        "TTToHplusBHminusB_M80_ext_Summer12":    TaskDefMC(TauMET(njobsIn=60, njobsOut= 7), QuadJet(njobsIn=180, njobsOut= 7)),
+        "TTToHplusBHminusB_M100_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut= 7), QuadJet(njobsIn=180, njobsOut= 7)),
+        "TTToHplusBHminusB_M120_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut= 7), QuadJet(njobsIn=180, njobsOut= 7)),
+        "TTToHplusBHminusB_M140_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut=10), QuadJet(njobsIn=180, njobsOut=10)),
+        "TTToHplusBHminusB_M150_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut=10), QuadJet(njobsIn=180, njobsOut=10)),
+        "TTToHplusBHminusB_M155_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut=10), QuadJet(njobsIn=180, njobsOut=10)),
+        "TTToHplusBHminusB_M160_ext_Summer12":   TaskDefMC(TauMET(njobsIn=60, njobsOut=10), QuadJet(njobsIn=180, njobsOut=10)),
 
-        "Hplus_taunu_t-channel_M80_Summer12":    TaskDefMC(njobsIn=5, njobsOut=1),
-        "Hplus_taunu_t-channel_M90_Summer12":    TaskDefMC(njobsIn=5, njobsOut=1),
-        "Hplus_taunu_t-channel_M100_Summer12":   TaskDefMC(njobsIn=5, njobsOut=1),
-        "Hplus_taunu_t-channel_M120_Summer12":   TaskDefMC(njobsIn=5, njobsOut=1),
-        "Hplus_taunu_t-channel_M140_Summer12":   TaskDefMC(njobsIn=5, njobsOut=1),
-        "Hplus_taunu_t-channel_M150_Summer12":   TaskDefMC(njobsIn=5, njobsOut=1),
-        "Hplus_taunu_t-channel_M155_Summer12":   TaskDefMC(njobsIn=5, njobsOut=1),
-        "Hplus_taunu_t-channel_M160_Summer12":   TaskDefMC(njobsIn=5, njobsOut=1),
+        "Hplus_taunu_t-channel_M80_Summer12":    TaskDefMC(TauMET(njobsIn=2, njobsOut=1), QuadJet(njobsIn=5, njobsOut=1)),
+        "Hplus_taunu_t-channel_M90_Summer12":    TaskDefMC(TauMET(njobsIn=2, njobsOut=1), QuadJet(njobsIn=5, njobsOut=1)),
+        "Hplus_taunu_t-channel_M100_Summer12":   TaskDefMC(TauMET(njobsIn=2, njobsOut=1), QuadJet(njobsIn=5, njobsOut=1)),
+        "Hplus_taunu_t-channel_M120_Summer12":   TaskDefMC(TauMET(njobsIn=2, njobsOut=1), QuadJet(njobsIn=5, njobsOut=1)),
+        "Hplus_taunu_t-channel_M140_Summer12":   TaskDefMC(TauMET(njobsIn=2, njobsOut=1), QuadJet(njobsIn=5, njobsOut=1)),
+        "Hplus_taunu_t-channel_M150_Summer12":   TaskDefMC(TauMET(njobsIn=2, njobsOut=1), QuadJet(njobsIn=5, njobsOut=1)),
+        "Hplus_taunu_t-channel_M155_Summer12":   TaskDefMC(TauMET(njobsIn=2, njobsOut=1), QuadJet(njobsIn=5, njobsOut=1)),
+        "Hplus_taunu_t-channel_M160_Summer12":   TaskDefMC(TauMET(njobsIn=2, njobsOut=1), QuadJet(njobsIn=5, njobsOut=1)),
 
-        "Hplus_taunu_tW-channel_M80_Summer12":    TaskDefMC(njobsIn=10, njobsOut=1),
-        "Hplus_taunu_tW-channel_M90_Summer12":    TaskDefMC(njobsIn=10, njobsOut=1),
-        "Hplus_taunu_tW-channel_M100_Summer12":   TaskDefMC(njobsIn=10, njobsOut=1),
-        "Hplus_taunu_tW-channel_M120_Summer12":   TaskDefMC(njobsIn=10, njobsOut=1),
-        "Hplus_taunu_tW-channel_M140_Summer12":   TaskDefMC(njobsIn=10, njobsOut=1),
-        "Hplus_taunu_tW-channel_M150_Summer12":   TaskDefMC(njobsIn=10, njobsOut=1),
-        "Hplus_taunu_tW-channel_M155_Summer12":   TaskDefMC(njobsIn=10, njobsOut=1),
-        "Hplus_taunu_tW-channel_M160_Summer12":   TaskDefMC(njobsIn=10, njobsOut=1),
+        "Hplus_taunu_tW-channel_M80_Summer12":    TaskDefMC(TauMET(njobsIn=4, njobsOut=1), QuadJet(njobsIn=10, njobsOut=1)),
+        "Hplus_taunu_tW-channel_M90_Summer12":    TaskDefMC(TauMET(njobsIn=4, njobsOut=1), QuadJet(njobsIn=10, njobsOut=1)),
+        "Hplus_taunu_tW-channel_M100_Summer12":   TaskDefMC(TauMET(njobsIn=4, njobsOut=1), QuadJet(njobsIn=10, njobsOut=1)),
+        "Hplus_taunu_tW-channel_M120_Summer12":   TaskDefMC(TauMET(njobsIn=4, njobsOut=1), QuadJet(njobsIn=10, njobsOut=1)),
+        "Hplus_taunu_tW-channel_M140_Summer12":   TaskDefMC(TauMET(njobsIn=4, njobsOut=1), QuadJet(njobsIn=10, njobsOut=1)),
+        "Hplus_taunu_tW-channel_M150_Summer12":   TaskDefMC(TauMET(njobsIn=4, njobsOut=1), QuadJet(njobsIn=10, njobsOut=1)),
+        "Hplus_taunu_tW-channel_M155_Summer12":   TaskDefMC(TauMET(njobsIn=4, njobsOut=1), QuadJet(njobsIn=10, njobsOut=1)),
+        "Hplus_taunu_tW-channel_M160_Summer12":   TaskDefMC(TauMET(njobsIn=4, njobsOut=1), QuadJet(njobsIn=10, njobsOut=1)),
 
-        "Hplus_taunu_s-channel_M80_Summer12":       TaskDefMC(njobsIn=18, njobsOut=1),
-        "Hplus_taunu_s-channel_M90_Summer12":       TaskDefMC(njobsIn=18, njobsOut=1),
-        "Hplus_taunu_s-channel_M100_Summer12":      TaskDefMC(njobsIn=18, njobsOut=1),
-        "Hplus_taunu_s-channel_M120_Summer12":      TaskDefMC(njobsIn=18, njobsOut=1),
-        "Hplus_taunu_s-channel_M140_Summer12":      TaskDefMC(njobsIn=18, njobsOut=1),
-        "Hplus_taunu_s-channel_M150_Summer12":      TaskDefMC(njobsIn=18, njobsOut=1),
-        "Hplus_taunu_s-channel_M155_Summer12":      TaskDefMC(njobsIn=18, njobsOut=1),
-        "Hplus_taunu_s-channel_M160_Summer12":      TaskDefMC(njobsIn=18, njobsOut=1),
+        "Hplus_taunu_s-channel_M80_Summer12":       TaskDefMC(TauMET(njobsIn=6, njobsOut=1), QuadJet(njobsIn=18, njobsOut=1)),
+        "Hplus_taunu_s-channel_M90_Summer12":       TaskDefMC(TauMET(njobsIn=6, njobsOut=1), QuadJet(njobsIn=18, njobsOut=1)),
+        "Hplus_taunu_s-channel_M100_Summer12":      TaskDefMC(TauMET(njobsIn=6, njobsOut=1), QuadJet(njobsIn=18, njobsOut=1)),
+        "Hplus_taunu_s-channel_M120_Summer12":      TaskDefMC(TauMET(njobsIn=6, njobsOut=1), QuadJet(njobsIn=18, njobsOut=1)),
+        "Hplus_taunu_s-channel_M140_Summer12":      TaskDefMC(TauMET(njobsIn=6, njobsOut=1), QuadJet(njobsIn=18, njobsOut=1)),
+        "Hplus_taunu_s-channel_M150_Summer12":      TaskDefMC(TauMET(njobsIn=6, njobsOut=1), QuadJet(njobsIn=18, njobsOut=1)),
+        "Hplus_taunu_s-channel_M155_Summer12":      TaskDefMC(TauMET(njobsIn=6, njobsOut=1), QuadJet(njobsIn=18, njobsOut=1)),
+        "Hplus_taunu_s-channel_M160_Summer12":      TaskDefMC(TauMET(njobsIn=6, njobsOut=1), QuadJet(njobsIn=18, njobsOut=1)),
 
-        "HplusTB_M180_Summer12":       TaskDefMC(njobsIn=80, njobsOut=3),
-        "HplusTB_M190_Summer12":       TaskDefMC(njobsIn=80, njobsOut=3),
-        "HplusTB_M200_Summer12":       TaskDefMC(njobsIn=80, njobsOut=3),
-        "HplusTB_M220_Summer12":       TaskDefMC(njobsIn=80, njobsOut=4),
-        "HplusTB_M250_Summer12":       TaskDefMC(njobsIn=80, njobsOut=4),
-        "HplusTB_M300_Summer12":       TaskDefMC(njobsIn=80, njobsOut=5),
-        "HplusTB_M400_Summer12":       TaskDefMC(njobsIn=700, njobsOut=30),
-        "HplusTB_M500_Summer12":       TaskDefMC(njobsIn=700, njobsOut=30),
-        "HplusTB_M600_Summer12":       TaskDefMC(njobsIn=700, njobsOut=30),
+        "HplusTB_M180_Summer12":       TaskDefMC(TauMET(njobsIn=26, njobsOut=3), QuadJet(njobsIn=80, njobsOut=3)),
+        "HplusTB_M190_Summer12":       TaskDefMC(TauMET(njobsIn=26, njobsOut=3), QuadJet(njobsIn=80, njobsOut=3)),
+        "HplusTB_M200_Summer12":       TaskDefMC(TauMET(njobsIn=26, njobsOut=3), QuadJet(njobsIn=80, njobsOut=3)),
+        "HplusTB_M220_Summer12":       TaskDefMC(TauMET(njobsIn=26, njobsOut=4), QuadJet(njobsIn=80, njobsOut=4)),
+        "HplusTB_M250_Summer12":       TaskDefMC(TauMET(njobsIn=26, njobsOut=4), QuadJet(njobsIn=80, njobsOut=4)),
+        "HplusTB_M300_Summer12":       TaskDefMC(TauMET(njobsIn=26, njobsOut=5), QuadJet(njobsIn=80, njobsOut=5)),
+        "HplusTB_M400_Summer12":       TaskDefMC(TauMET(njobsIn=180, njobsOut=30), QuadJet(njobsIn=700, njobsOut=30)),
+        "HplusTB_M500_Summer12":       TaskDefMC(TauMET(njobsIn=180, njobsOut=30), QuadJet(njobsIn=700, njobsOut=30)),
+        "HplusTB_M600_Summer12":       TaskDefMC(TauMET(njobsIn=180, njobsOut=30), QuadJet(njobsIn=700, njobsOut=30)),
 
-        "HplusTB_M180_ext_Summer12":       TaskDefMC(njobsIn=350, njobsOut=15),
-        "HplusTB_M190_ext_Summer12":       TaskDefMC(njobsIn=350, njobsOut=15),
-        "HplusTB_M200_ext_Summer12":       TaskDefMC(njobsIn=350, njobsOut=20),
-        "HplusTB_M220_ext_Summer12":       TaskDefMC(njobsIn=350, njobsOut=20),
-        "HplusTB_M250_ext_Summer12":       TaskDefMC(njobsIn=350, njobsOut=20),
-        "HplusTB_M300_ext_Summer12":       TaskDefMC(njobsIn=350, njobsOut=20),
+        "HplusTB_M180_ext_Summer12":       TaskDefMC(TauMET(njobsIn=130, njobsOut=15), QuadJet(njobsIn=350, njobsOut=15)),
+        "HplusTB_M190_ext_Summer12":       TaskDefMC(TauMET(njobsIn=130, njobsOut=15), QuadJet(njobsIn=350, njobsOut=15)),
+        "HplusTB_M200_ext_Summer12":       TaskDefMC(TauMET(njobsIn=130, njobsOut=20), QuadJet(njobsIn=350, njobsOut=20)),
+        "HplusTB_M220_ext_Summer12":       TaskDefMC(TauMET(njobsIn=130, njobsOut=20), QuadJet(njobsIn=350, njobsOut=20)),
+        "HplusTB_M250_ext_Summer12":       TaskDefMC(TauMET(njobsIn=130, njobsOut=20), QuadJet(njobsIn=350, njobsOut=20)),
+        "HplusTB_M300_ext_Summer12":       TaskDefMC(TauMET(njobsIn=130, njobsOut=20), QuadJet(njobsIn=350, njobsOut=20)),
 
-        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn=  5, njobsOut=1),
-        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn=  5, njobsOut=1),
-        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(njobsIn= 25, njobsOut=1),
-        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 75, njobsOut=1),
-        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDefMC(njobsIn=250, njobsOut=2),
-        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=850, njobsOut=6),
-        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(njobsIn=670, njobsOut=6),
-        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=390, njobsOut=4),
-        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(njobsIn=2200, njobsOut=22),
+        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(TauMET(njobsIn=  5, njobsOut= 1), QuadJet(njobsIn=   5, njobsOut= 1)),
+        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(TauMET(njobsIn=  5, njobsOut= 1), QuadJet(njobsIn=   5, njobsOut= 1)),
+        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(TauMET(njobsIn= 10, njobsOut= 1), QuadJet(njobsIn=  25, njobsOut= 1)),
+        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDefMC(TauMET(njobsIn= 10, njobsOut= 1), QuadJet(njobsIn=  75, njobsOut= 1)),
+        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDefMC(TauMET(njobsIn= 10, njobsOut= 2), QuadJet(njobsIn= 250, njobsOut= 2)),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDefMC(TauMET(njobsIn= 40, njobsOut= 6), QuadJet(njobsIn= 850, njobsOut= 6)),
+        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(TauMET(njobsIn= 30, njobsOut= 6), QuadJet(njobsIn= 670, njobsOut= 6)),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(TauMET(njobsIn= 20, njobsOut= 4), QuadJet(njobsIn= 390, njobsOut= 4)),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(TauMET(njobsIn=100, njobsOut=22), QuadJet(njobsIn=2200, njobsOut=22)),
                                             
-        "WW_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=260, njobsOut=16),
-        "WZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=260, njobsOut=13),
-        "ZZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=260, njobsOut=10),
-        "TTJets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=1350, njobsOut=50),
-        "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(njobsIn= 90, njobsOut= 4, args={"wjetsWeighting": 1, "wjetBin": -1}),
-        "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(njobsIn=280, njobsOut=17, args={"wjetsWeighting": 1, "wjetBin": -1}),
-        "W1Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=170, njobsOut=10, args={"wjetsWeighting": 1, "wjetBin": 1}),
-        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=680, njobsOut=40, args={"wjetsWeighting": 1, "wjetBin": 2}),
-        "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=600, njobsOut=40, args={"wjetsWeighting": 1, "wjetBin": 3}),
-        "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=1050, njobsOut=60, args={"wjetsWeighting": 1, "wjetBin": 4}),
-        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=190, njobsOut=12),
-        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(njobsIn= 50, njobsOut= 1),
-        "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn=220, njobsOut= 5),
-        "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn=100, njobsOut= 3),
-        "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 60, njobsOut= 3),
-        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDefMC(njobsIn= 60, njobsOut= 3),
-        "T_s-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 15, njobsOut= 1),
-        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn=  7, njobsOut= 1),
+        "WW_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut=16), QuadJet(njobsIn=260, njobsOut=16)),
+        "WZ_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut=13), QuadJet(njobsIn=260, njobsOut=13)),
+        "ZZ_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut=10), QuadJet(njobsIn=260, njobsOut=10)),
+        "TTJets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn=450, njobsOut=50), QuadJet(njobsIn=1350, njobsOut=50)),
+        "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(TauMET(njobsIn= 30, njobsOut= 4), QuadJet(njobsIn=  90, njobsOut= 4), args={"wjetsWeighting": 1, "wjetBin": -1}),
+        "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(TauMET(njobsIn= 90, njobsOut=17), QuadJet(njobsIn= 280, njobsOut=17), args={"wjetsWeighting": 1, "wjetBin": -1}),
+        "W1Jets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn= 60, njobsOut=10), QuadJet(njobsIn= 170, njobsOut=10), args={"wjetsWeighting": 1, "wjetBin": 1}),
+        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn=220, njobsOut=40), QuadJet(njobsIn= 680, njobsOut=40), args={"wjetsWeighting": 1, "wjetBin": 2}),
+        "W3Jets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn=190, njobsOut=40), QuadJet(njobsIn= 600, njobsOut=40), args={"wjetsWeighting": 1, "wjetBin": 3}),
+        "W4Jets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn=350, njobsOut=60), QuadJet(njobsIn=1050, njobsOut=60), args={"wjetsWeighting": 1, "wjetBin": 4}),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(TauMET(njobsIn=60, njobsOut=12), QuadJet(njobsIn=190, njobsOut=12)),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(TauMET(njobsIn=10, njobsOut= 1), QuadJet(njobsIn= 50, njobsOut= 1)),
+        "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(TauMET(njobsIn=70, njobsOut= 5), QuadJet(njobsIn=220, njobsOut= 5)),
+        "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(TauMET(njobsIn=35, njobsOut= 3), QuadJet(njobsIn=100, njobsOut= 3)),
+        "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(TauMET(njobsIn=20, njobsOut= 3), QuadJet(njobsIn= 60, njobsOut= 3)),
+        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn=20, njobsOut= 3), QuadJet(njobsIn= 60, njobsOut= 3)),
+        "T_s-channel_TuneZ2star_Summer12":        TaskDefMC(TauMET(njobsIn= 5, njobsOut= 1), QuadJet(njobsIn= 15, njobsOut= 1)),
+        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDefMC(TauMET(njobsIn= 2, njobsOut= 1), QuadJet(njobsIn=  7, njobsOut= 1)),
         }
 
     # Set the multijet triggers on data
@@ -975,21 +992,23 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
                 "dataVersionAppend": wf.dataVersionAppend,
                 }
 
-            if dataset.isData():
-                # For data, construct one analysis workflow per trigger type
-                found = False
-                if datasetName in tauTriggers:
-                    found = True
-                    dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=tauTriggers[datasetName], **commonArgs))
-                if datasetName in quadJetTriggers:
-                    found = True
-                    dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
-                if not found:
-                    raise Exception("No trigger specified for dataset %s" % datasetName)
-            else:
-                # For MC, also construct one analysis workflow per trigger type
-                dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=[mcTriggerTauMET], **commonArgs))
-                dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=[mcTriggerQuadJet], **commonArgs))
+            dataset.addWorkflow("analysis_"+version, **commonArgs)
+#            if dataset.isData():
+#                # For data, construct one analysis workflow per trigger type
+#                found = False
+#                
+#                if datasetName in tauTriggers:
+#                    found = True
+#                    dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=tauTriggers[datasetName], **commonArgs))
+#                if datasetName in quadJetTriggers:
+#                    found = True
+#                    dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
+#                if not found:
+#                    raise Exception("No trigger specified for dataset %s" % datasetName)
+#            else:
+#                # For MC, also construct one analysis workflow per trigger type
+#                dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=[mcTriggerTauMET], **commonArgs))
+#                dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=[mcTriggerQuadJet], **commonArgs))
 
 
 ## Add v25b pattuples
@@ -2374,7 +2393,7 @@ def addPattuple_v53_3_test5(datasets):
     addPattuple_53X("v53_3_test5", datasets, definitions)
 
 
-def addPattuple_v53_3(datasets):
+def addPattuple_v53_3_taumet(datasets):
     definitions = {
         "Tau_193834-196531_2012B_Jul13":          TaskDef(""),
         "Tau_198022-198523_2012C_Aug24":          TaskDef(""),
@@ -2388,10 +2407,6 @@ def addPattuple_v53_3(datasets):
         "TauParked_198022-202504_2012C_Jan22":    TaskDef(""),
         "TauParked_202972-203742_2012C_Jan22":    TaskDef(""),
         "TauParked_203777-208686_2012D_Jan22":    TaskDef(""),
-
-        "MultiJet_190456-193621_2012A_Jan22":        TaskDef(""),
-        "MultiJet1Parked_198022-198523_2012C_Nov05": TaskDef(""),
-
 
         "TTToHplusBWB_M80_Summer12":              TaskDef(""),
         "TTToHplusBWB_M90_Summer12":              TaskDef(""),
@@ -2502,8 +2517,128 @@ def addPattuple_v53_3(datasets):
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),
         }
 
-    addPattuple_53X_v2("v53_3", datasets, definitions)
+    addPattuple_53X_v2("taumet_v53_3", datasets, definitions)
 
+def addPattuple_v53_3_quadjet(datasets):
+    definitions = {
+        "MultiJet_190456-193621_2012A_Jan22":        TaskDef(""),
+        "MultiJet1Parked_198022-198523_2012C_Nov05": TaskDef(""),
+
+        "TTToHplusBWB_M80_Summer12":              TaskDef(""),
+        "TTToHplusBWB_M90_Summer12":              TaskDef(""),
+        "TTToHplusBWB_M100_Summer12":             TaskDef(""),
+        "TTToHplusBWB_M120_Summer12":             TaskDef(""),
+        "TTToHplusBWB_M140_Summer12":             TaskDef(""),
+        "TTToHplusBWB_M150_Summer12":             TaskDef(""),
+        "TTToHplusBWB_M155_Summer12":             TaskDef(""),
+        "TTToHplusBWB_M160_Summer12":             TaskDef(""),
+
+        "TTToHplusBWB_M80_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M90_ext_Summer12":          TaskDef(""),
+#        "TTToHplusBWB_M100_ext_Summer12":         TaskDef("", args={"triggerMC": 0}, njobsIn=700), # non-triggered because of trigger studies
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M140_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M150_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M155_ext_Summer12":         TaskDef(""),
+#        "TTToHplusBWB_M160_ext_Summer12":         TaskDef("", args={"triggerMC": 0}, njobsIn=700), # non-triggered because of trigger studies
+
+        "TTToHplusBHminusB_M80_Summer12":         TaskDef(""),
+        "TTToHplusBHminusB_M90_Summer12":         TaskDef(""),
+        "TTToHplusBHminusB_M100_Summer12":        TaskDef(""),
+        "TTToHplusBHminusB_M120_Summer12":        TaskDef(""),
+        "TTToHplusBHminusB_M140_Summer12":        TaskDef(""),
+        "TTToHplusBHminusB_M150_Summer12":        TaskDef(""),
+        "TTToHplusBHminusB_M155_Summer12":        TaskDef(""),
+        "TTToHplusBHminusB_M160_Summer12":        TaskDef(""),
+
+        "TTToHplusBHminusB_M80_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M100_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M120_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M140_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M150_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M155_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M160_ext_Summer12":    TaskDef(""),
+
+        "Hplus_taunu_t-channel_M80_Summer12":     TaskDef(""),
+        "Hplus_taunu_t-channel_M90_Summer12":     TaskDef(""),
+        "Hplus_taunu_t-channel_M100_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M120_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M140_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M150_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M155_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M160_Summer12":    TaskDef(""),
+
+        "Hplus_taunu_tW-channel_M80_Summer12":    TaskDef(""),
+        "Hplus_taunu_tW-channel_M90_Summer12":    TaskDef(""),
+        "Hplus_taunu_tW-channel_M100_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M120_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M140_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M150_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M155_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M160_Summer12":   TaskDef(""),
+
+        "Hplus_taunu_s-channel_M80_Summer12":     TaskDef(""),
+        "Hplus_taunu_s-channel_M90_Summer12":     TaskDef(""),
+        "Hplus_taunu_s-channel_M100_Summer12":    TaskDef(""),
+        "Hplus_taunu_s-channel_M120_Summer12":    TaskDef(""),
+        "Hplus_taunu_s-channel_M140_Summer12":    TaskDef(""),
+        "Hplus_taunu_s-channel_M150_Summer12":    TaskDef(""),
+        "Hplus_taunu_s-channel_M155_Summer12":    TaskDef(""),
+        "Hplus_taunu_s-channel_M160_Summer12":    TaskDef(""),
+
+        "HplusTB_M180_Summer12":                  TaskDef(""),
+        "HplusTB_M190_Summer12":                  TaskDef(""),
+        "HplusTB_M200_Summer12":                  TaskDef(""),
+        "HplusTB_M220_Summer12":                  TaskDef(""),
+        "HplusTB_M250_Summer12":                  TaskDef(""),
+        "HplusTB_M300_Summer12":                  TaskDef(""),
+#        "HplusTB_M400_Summer12":                  TaskDef("", args={"triggerMC": 0}, njobsIn=700), # non-triggered because of trigger studies
+        "HplusTB_M500_Summer12":                  TaskDef(""),
+        "HplusTB_M600_Summer12":                  TaskDef(""),
+
+        "HplusTB_M180_ext_Summer12":              TaskDef(""),
+        "HplusTB_M190_ext_Summer12":              TaskDef(""),
+#        "HplusTB_M200_ext_Summer12":              TaskDef("", args={"triggerMC": 0}, njobsIn=700), # non-triggered because of trigger studies
+        "HplusTB_M220_ext_Summer12":              TaskDef(""),
+        "HplusTB_M250_ext_Summer12":              TaskDef(""),
+        "HplusTB_M300_ext_Summer12":              TaskDef(""),
+
+        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef(""),
+        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDef(""),
+        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDef(""),
+        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDef(""),
+        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDef(""),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDef(""),
+
+        "WW_TuneZ2star_Summer12":                 TaskDef(""),
+        "WZ_TuneZ2star_Summer12":                 TaskDef(""),
+        "ZZ_TuneZ2star_Summer12":                 TaskDef(""),
+        "TTJets_TuneZ2star_Summer12":             TaskDef(""),
+        "WJets_TuneZ2star_v1_Summer12":           TaskDef(""),
+        "WJets_TuneZ2star_v2_Summer12":           TaskDef(""),
+        "W1Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "W2Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "W3Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "W4Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef(""),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDef(""),
+        "T_t-channel_TuneZ2star_Summer12":        TaskDef(""),
+        "Tbar_t-channel_TuneZ2star_Summer12":     TaskDef(""),
+        "T_tW-channel_TuneZ2star_Summer12":       TaskDef(""),
+        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDef(""),
+        "T_s-channel_TuneZ2star_Summer12":        TaskDef(""),
+        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),
+        }
+
+    # Switch GlobalTag for MC to match to prompt reco
+    tmp = TaskDef(dataVersionAppend="prompt")
+    for n, td in definitions.iteritems():
+        td.update(tmp)
+
+    addPattuple_53X_v2("quadjet_v53_3", datasets, definitions)
 
 
 # Skeleton
