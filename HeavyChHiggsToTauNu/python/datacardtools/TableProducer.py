@@ -90,7 +90,7 @@ class TableProducer:
             if n.isPrintable():
                 self._nNuisances += 1
         # Make directory for output
-        self._dirname = "datacards_"+self._timestamp+self._config.DataCardName.replace(" ","_")+"_"+self._outputPrefix+"_"
+        self._dirname = "datacards_%s_%s_%s"%(self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
         os.mkdir(self._dirname)
         self._infoDirname = self._dirname + "/info"
         os.mkdir(self._infoDirname)
@@ -105,9 +105,9 @@ class TableProducer:
             if self._config.OptionDoControlPlots:
                 ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
             else:
-                print "\n"+HighlightStyle()+"Skipped making of data-driven Control plots."+NormalStyle()+" To enable, set OptionDoControlPlots = True in the input datacard."
+                print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
         else:
-            print "\n"+HighlightStyle()+"Skipped making of data-driven Control plots."+NormalStyle()+" To enable, set OptionDoControlPlots = True in the input datacard."
+            print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
 
         # Make other reports
         print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()
@@ -277,9 +277,50 @@ class TableProducer:
     ## Generates nuisance table as list
     def _generateNuisanceTable(self,mass):
         myResult = []
+        myVetoList = [] # List of nuisance id's to veto
+        mySingleList = [] # List of nuisance id's that apply only to single column
+        # Suppress nuisance rows that are not affecting anything
+        for n in sorted(self._extractors, key=lambda x: x.getId()):
+            myCount = 0
+            for c in self._datasetGroups:
+                if c.isActiveForMass(mass) and n.isPrintable() and c.hasNuisanceByMasterId(n.getId()):
+                    myCount += 1
+            if myCount == 0 and n.isPrintable():
+                print WarningLabel()+"Suppressed nuisance %s: '%s' because it does not affect any data column!"%(n.getId(),n.getDescription())
+                myVetoList.append(n.getId())
+            if myCount == 1:
+                mySingleList.append(n.getId())
+        # Merge nuisances (quadratic sum) together, if they apply to only one column (is mathematically equal treatrment, but makes datacard running faster)
+        # Note that it is not possible to merge physically the nuisances, because it would affect all other parts as well
+        # Only solution is to do a virtual merge affecting only this method
+        myVirtualMergeInformation = {}
+        myVirtuallyInactivatedIds = []
+        for c in self._datasetGroups:
+            if c.isActiveForMass(mass):
+                myFoundSingles = []
+                for n in self._extractors:
+                    if c.hasNuisanceByMasterId(n.getId()) and n.getId() in mySingleList and not n.isShapeNuisance():
+                        myFoundSingles.append(n.getId())
+                if len(myFoundSingles) > 1:
+                    # Do virtual merge
+                    myDescription = ""
+                    myValue = 0.0
+                    for n in sorted(self._extractors, key=lambda x: x.getId()):
+                        if n.getId() in myFoundSingles:
+                            if myDescription == "":
+                                myDescription = n.getDescription()
+                                myValue = c.getNuisanceResultByMasterId(n.getId())**2
+                            else:
+                                myDescription += " + "+n.getDescription()
+                                myValue += c.getNuisanceResultByMasterId(n.getId())**2
+                                myVetoList.append(n.getId())
+                    myVirtualMergeInformation[myFoundSingles[0]] = sqrt(myValue)
+                    myVirtualMergeInformation["%sdescription"%myFoundSingles[0]] = myDescription
+                    print WarningLabel()+"Combined nuisances '%s' for column %s!"%(myDescription, c.getLabel())
         # Loop over rows
         for n in sorted(self._extractors, key=lambda x: x.getId()):
-            if n.isPrintable():
+            if n.isPrintable() and n.getId() not in myVetoList:
+                # Suppress rows that are not affecting anything
                 myRow = ["%d"%int(n.getId()), n.getDistribution()]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
@@ -287,6 +328,8 @@ class TableProducer:
                         # Check that column has current nuisance or has nuisance that is slave to current nuisance
                         if c.hasNuisanceByMasterId(n.getId()):
                             myValue = c.getNuisanceResultByMasterId(n.getId())
+                            if n.getId() in myVirtualMergeInformation.keys():
+                                myValue = myVirtualMergeInformation[n.getId()] # Overwrite virtually merged value
                             myValueString = ""
                             # Check output format
                             if myValue == None or n.isShapeNuisance():
@@ -311,7 +354,10 @@ class TableProducer:
                             else:
                                 myRow.append("1")
                 # Add description to end of the row
-                myRow.append(n.getDescription())
+                if n.getId() in myVirtualMergeInformation.keys():
+                    myRow.append(myVirtualMergeInformation["%sdescription"%n.getId()])
+                else:
+                    myRow.append(n.getDescription())
                 myResult.append(myRow)
         return myResult
 

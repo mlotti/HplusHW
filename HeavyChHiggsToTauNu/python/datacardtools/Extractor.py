@@ -284,7 +284,7 @@ class PileupUncertaintyExtractor(ExtractorBase):
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.UP) #FIXME
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.DOWN) #FIXME
         for d in self._counterDirs:
-            myHistoName = datasetColumn.getDirPrefix()+d+"/counters/weighted/counter"
+            myHistoName = d+"/counters/weighted/counter"
             try:
                 datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             except Exception, e:
@@ -382,7 +382,9 @@ class ScaleFactorExtractor(ExtractorBase):
         for i in range (0, len(self._histoDirs)):
             myTotal = 0.0
             mySum = 0.0
-            myHistoName = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histograms[i]
+            myHistoName = self._histoDirs[i]+"/"+self._histograms[i]
+            if self._histoDirs[i] == "":
+                myHistoName = self._histograms[i]
             try:
                 myValueRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             except Exception, e:
@@ -391,7 +393,7 @@ class ScaleFactorExtractor(ExtractorBase):
             hValues = myValueRootHisto.getHistogram()
             if hValues == None:
                 raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot open histogram '"+myHistoName+"'!")
-            myHistoName = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._normalisation[i]
+            myHistoName = self._histoDirs[i]+"/"+self._normalisation[i]
             try:
                 myNormalisationRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             except Exception, e:
@@ -471,7 +473,7 @@ class ShapeExtractor(ExtractorBase):
         if self._distribution == "shapeQ":
             myNominalRateCount = mainCounterTable.getCount(rowName=self._counterItem, colName=datasetColumn.getDatasetMgrColumn()).value()
             for i in range (0, len(self._histoDirs)):
-                myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/counters/weighted/counter"
+                myHistoName = self._histoDirs[i]+"/counters/weighted/counter" #FIXME !!!! replace by using main counter table
                 try:
                     datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
                 except Exception, e:
@@ -509,8 +511,10 @@ class ShapeExtractor(ExtractorBase):
             # Create empty shape histogram
             h = myShapeModifier.createEmptyShapeHistogram(myLabels[i])
             # Obtain source histogram
-            myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/"+self._histograms[i]
-            print "group",datasetColumn.getLabel(),"id",self._exid,"histo",myHistoName
+            myHistoName = self._histoDirs[i]+"/"+self._histograms[i]
+            if self._histoDirs[i] == "":
+                myHistoName = self._histograms[i]
+            #print "group",datasetColumn.getLabel(),"id",self._exid,"histo",myHistoName
             try:
                 myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             except Exception, e:
@@ -553,7 +557,7 @@ class ShapeExtractor(ExtractorBase):
                     print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeUp histo bin %d is negative (%f), it is forced to zero"%(k,myHistograms[0].GetBinContent(k))
                     myHistograms[1].SetBinContent(k, 0.0)
         # No source for histograms for empty column; create an empty histogram with correct dimensions
-        if (self.isRate() or self.isObservation()) and datasetColumn.typeIsEmptyColum():
+        if (self.isRate() or self.isObservation()) and datasetColumn.typeIsEmptyColumn():
             h = myShapeModifier.createEmptyShapeHistogram(myLabels[0])
             myHistograms.append(h)
         # Return result
@@ -603,7 +607,9 @@ class ControlPlotExtractor(ExtractorBase):
         for i in range (0, len(self._histoDirs)):
             print "Extractor ",self._histoDirs[i],self._histoNames[i]
             # Obtain histogram from dataset
-            myHistoname = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histoNames[i]
+            myHistoname = self._histoDirs[i]+"/"+self._histoNames[i]
+            if self._histoDirs[i] == "":
+                myHistoname = self._histoNames[i]
             try:
                 myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoname)
             except Exception, e:

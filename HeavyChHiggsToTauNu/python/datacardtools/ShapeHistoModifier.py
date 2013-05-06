@@ -1,13 +1,15 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 import ROOT
 from array import array
-from math import pow,sqrt
+from math import sqrt
 
 ## Class for treating properly shape histograms with different axis ranges and or binning
 # Allows tuning of shape histogram without having to rerun full analysis
 # Note: After the adding is done, remember to call finalise! (adding treats errors as squares, finalising takes the sqrt of the squares)
 class ShapeHistoModifier():
     def __init__(self, histoSpecs, debugMode=False):
+        if isinstance(histoSpecs,list):
+            raise Exception(ErrorLabel()+"ShapeHistoModifier: Requested a %d-dimensional histogram, but code currently supports only 1 dimension!"%len(histoSpecs))
         self._nbins = histoSpecs["bins"]
         self._min = histoSpecs["rangeMin"]
         self._max = histoSpecs["rangeMax"]
@@ -94,7 +96,7 @@ class ShapeHistoModifier():
                     # This is last source bin for the destination
                     myDestBinWillChangeOnNextInteration = True
             countSum += source.GetBinContent(iSrc)
-            errorSum += pow(source.GetBinError(iSrc),2)
+            errorSum += source.GetBinError(iSrc)**2
             #print "iSrc=%d,iDest=%d, sum=%f +- %f"%(iSrc,iDest,countSum,errorSum)
             if myDestBinWillChangeOnNextInteration:
                 # Store result, Note: it is assumed here that bin error is squared!!!
@@ -135,11 +137,12 @@ class ShapeHistoModifier():
     def finaliseShape(self, dest):
         if dest == None:
             return
-        # Move underflow events to first bin
-        dest.SetBinContent(1, dest.GetBinContent(1)+dest.GetBinContent(0))
-        dest.SetBinError(1, dest.GetBinError(1)+dest.GetBinError(0))
-        dest.SetBinContent(0,0.0)
-        dest.SetBinError(0,0.0)
+        # Do not move underflow events to first bin !!!
+        if False:
+            dest.SetBinContent(1, dest.GetBinContent(1)+dest.GetBinContent(0))
+            dest.SetBinError(1, dest.GetBinError(1)+dest.GetBinError(0))
+            dest.SetBinContent(0,0.0)
+            dest.SetBinError(0,0.0)
         # Move overflow events to the last bin
         dest.SetBinContent(dest.GetNbinsX(), dest.GetBinContent(dest.GetNbinsX())+dest.GetBinContent(dest.GetNbinsX()+1))
         dest.SetBinError(dest.GetNbinsX(), dest.GetBinError(dest.GetNbinsX())+dest.GetBinError(dest.GetNbinsX()+1))
@@ -148,3 +151,17 @@ class ShapeHistoModifier():
         # Convert variances into uncertainties
         for iDest in range(0,dest.GetNbinsX()+2):
             dest.SetBinError(iDest, sqrt(dest.GetBinError(iDest)))
+
+    ## Set negative bins to zero, but keep normalisation
+    def correctNegativeBins(self, dest):
+        if dest == None:
+            return
+        myIntegral = dest.Integral(0,dest.GetNbinsX()+2)
+        for k in range(0,dest.GetNbinsX()+2):
+            if dest.GetBinContent(k) < 0.0:
+                dest.SetBinContent(k, 0.0)
+                # Keep uncertainty like it is
+        # Now rescale
+        myNewIntegral = dest.Integral(0,dest.GetNbinsX()+2)
+        dest.Scale(myIntegral / myNewIntegral)
+
