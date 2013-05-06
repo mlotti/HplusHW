@@ -2528,7 +2528,7 @@ class DatasetManager:
         for d in self.datasets:
             jsonname = os.path.join(d.basedir, fname)
             if not os.path.exists(jsonname):
-                print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist (using luminosity=1 for data)!" % jsonname
+                raise Exception("Luminosity JSON file '%s' does not exist. Have you run 'hplusLumiCalc.py' in your multicrab directory?" % jsonname)
                 for name in self.getDataDatasetNames():
                     self.getDataset(name).setLuminosity(1)
             else:
