@@ -10,6 +10,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
@@ -40,6 +41,8 @@ class HPlusEmbeddingDebugMuonAnalyzer: public edm::EDAnalyzer {
   edm::InputTag jetSrc_;
   edm::InputTag genSrc_;
 
+  HPlus::WeightReader pileupWeight_;
+
   const double muonPtCut_;
   const double muonEtaCut_;
 
@@ -61,6 +64,9 @@ class HPlusEmbeddingDebugMuonAnalyzer: public edm::EDAnalyzer {
   HPlus::WrappedTH1 *hGenMuonPt2;
   HPlus::WrappedTH1 *hGenMuonEta2;
   HPlus::WrappedTH1 *hGenMuonPhi2;
+
+  HPlus::WrappedTH1 *hGenMuonMatchMinDR;
+  HPlus::WrappedTH1 *hGenMuonMatchCount;
 
   HPlus::WrappedTH1 *hGenMuonPt_AfterId;
   HPlus::WrappedTH1 *hGenMuonEta_AfterId;
@@ -87,6 +93,7 @@ HPlusEmbeddingDebugMuonAnalyzer::HPlusEmbeddingDebugMuonAnalyzer(const edm::Para
   muonSrc_(iConfig.getUntrackedParameter<edm::InputTag>("muonSrc")),
   jetSrc_(iConfig.getUntrackedParameter<edm::InputTag>("jetSrc")),
   genSrc_(iConfig.getUntrackedParameter<edm::InputTag>("genSrc")),
+  pileupWeight_(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
   muonPtCut_(iConfig.getUntrackedParameter<double>("muonPtCut")),
   muonEtaCut_(iConfig.getUntrackedParameter<double>("muonEtaCut")),
   recoMuon_(iConfig.getUntrackedParameter<bool>("recoMuon", true)),
@@ -112,6 +119,9 @@ HPlusEmbeddingDebugMuonAnalyzer::HPlusEmbeddingDebugMuonAnalyzer(const edm::Para
   hGenMuonPhi2 = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon2_phi", "Phi", 128, -3.2, 3.2);
 
   if(recoMuon_) {
+    hGenMuonMatchMinDR = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kInformative, *fs, "genmuonmatch_mindr", "DR", 50, 0., 0.5);
+    hGenMuonMatchCount = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kInformative, *fs, "genmuonmatch_count", "Count", 10, 0, 10);
+
     hGenMuonPt_AfterId = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon_afterid_pt", "Pt", 400, 0, 400);
     hGenMuonEta_AfterId = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon_afterid_eta", "Eta", 44, -2.1, 2.1);
     hGenMuonPhi_AfterId = fHistoWrapper.makeTH<TH1F>(HPlus::HistoWrapper::kVital, *fs, "genmuon_afterid_phi", "Phi", 128, -3.2, 3.2);
@@ -151,6 +161,9 @@ void HPlusEmbeddingDebugMuonAnalyzer::analyze(const edm::Event& iEvent, const ed
 
   edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
   iEvent.getByLabel(genSrc_, hgenparticles);
+
+  const double myPileupWeight = pileupWeight_.getWeight(iEvent, iSetup);
+  fEventWeight.multiplyWeight(myPileupWeight);
 
   // Find W's
   const reco::GenParticle *W1 = 0;
@@ -228,16 +241,27 @@ void HPlusEmbeddingDebugMuonAnalyzer::analyze(const edm::Event& iEvent, const ed
   if(recoMuon_) {
     edm::Ptr<pat::Muon> recoMuon;
     double minDR = 0.5;
+    unsigned count = 0;
     for(edm::View<pat::Muon>::const_iterator iMuon = hmuons->begin(); iMuon != hmuons->end(); ++iMuon) {
       double DR = reco::deltaR(*iMuon, *genMuon);
       if(DR < minDR) {
         minDR = DR;
         recoMuon = hmuons->ptrAt(iMuon-hmuons->begin());
       }
+      if(DR < 0.5) {
+        ++count;
+        /*
+        std::cout << "gen    muon pt " << genMuon->pt() << " eta " << genMuon->eta() << " phi " << genMuon->phi() << std::endl
+                  << "  reco muon pt " << recoMuon->pt() << " eta " << recoMuon->eta() << " phi " << recoMuon->phi() << " DR " << DR << std::endl;
+        */
+      }
     }
+    hGenMuonMatchCount->Fill(count);
     if(recoMuon.isNull())
       return;
     increment(cRecoMuonFound);
+
+    hGenMuonMatchMinDR->Fill(minDR);
 
     hGenMuonPt_AfterId->Fill(genMuon->pt());
     hGenMuonEta_AfterId->Fill(genMuon->eta());

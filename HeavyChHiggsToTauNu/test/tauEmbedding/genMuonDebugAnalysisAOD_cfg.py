@@ -28,7 +28,6 @@ process.infoPath = HChTools.addConfigInfo(process, options, dataVersion)
 # do PAT muon stuff
 #doRecoMuon = False
 doRecoMuon = True
-doRecoMuonScaleCorrection = True
 process.commonSequence = cms.Sequence()
 if doRecoMuon:
     # Gen-level filtering
@@ -66,15 +65,14 @@ if doRecoMuon:
 
     # MuScleFit correction
     # https://twiki.cern.ch/twiki/bin/view/CMSPublic/MuScleFitCorrections2012
-    if doRecoMuonScaleCorrection:
-        process.muscleMuons = cms.EDProducer("MuScleFitPATMuonCorrector", 
-            src = cms.InputTag("selectedPatMuons"), 
-            debug = cms.bool(False), 
-            identifier = cms.string("Fall11_START44"), 
-            applySmearing = cms.bool(False), 
-            fakeSmearing = cms.bool(False)
-        )
-        process.commonSequence += process.muscleMuons
+    process.muscleMuons = cms.EDProducer("MuScleFitPATMuonCorrector", 
+        src = cms.InputTag("selectedPatMuons"), 
+        debug = cms.bool(False), 
+        identifier = cms.string("Fall11_START44"), 
+        applySmearing = cms.bool(False), 
+        fakeSmearing = cms.bool(False)
+    )
+    process.commonSequence += process.muscleMuons
 
     # muon selection
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
@@ -86,8 +84,11 @@ if doRecoMuon:
 #        process.muonSelectionMuons
     )
 #    additionalCounters.extend(["muonSelectionAllEvents", "muonSelectionMuons"])
-    if doRecoMuonScaleCorrection:
-        process.tightMuons.src = "muscleMuons"
+    process.tightMuonsMuscle = process.tightMuons.clone(
+        src = "muscleMuons"
+    )
+    process.commonSequence += process.tightMuonsMuscle
+
 
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff")
     process.commonSequence += (
@@ -96,6 +97,21 @@ if doRecoMuon:
 #        process.tightenedMuonsCount
     )
 #    additionalCounters.append("tightenedMuonsCount")
+    process.tightenedMuonsMuscle = process.tightenedMuons.clone(
+        src = "tightMuonsMuscle"
+    )
+    process.commonSequence += process.tightenedMuonsMuscle
+
+    # PV selection (no filtering) + PU weighting
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex as HChPrimaryVertex
+    HChPrimaryVertex.addPrimaryVertexSelection(process, process.commonSequence)
+    import HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration as AnalysisConfiguration
+    dataEras = [
+        "Run2011AB",
+        "Run2011A",
+        "Run2011B",
+        ]
+    puWeights = AnalysisConfiguration.addPuWeightProducers(dataVersion, process, process.commonSequence, dataEras)
 
 
 # Configuration
@@ -110,6 +126,10 @@ analyzer = cms.EDAnalyzer("HPlusEmbeddingDebugMuonAnalyzer",
     muonPtCut = cms.untracked.double(41),
     muonEtaCut = cms.untracked.double(2.1),
 
+    pileupWeightReader = param.pileupWeightReader.clone(
+        enabled = False
+    ),
+
     embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(
         mode = "mcEfficiency"
     ),
@@ -118,10 +138,36 @@ analyzer = cms.EDAnalyzer("HPlusEmbeddingDebugMuonAnalyzer",
     histogramAmbientLevel = cms.untracked.string("Informative"),
 )
 
+analyzerMuscle = analyzer.clone(
+    muonSrc = "tightenedMuonsMuscle"
+)
+
 HChTools.addAnalysis(process, "debugAnalyzer", analyzer,
                      preSequence=process.commonSequence,
                      additionalCounters=additionalCounters)
 process.debugAnalyzer.eventCounter.printMainCounter = True
+
+if doRecoMuon:
+    HChTools.addAnalysis(process, "debugAnalyzerMuscle", analyzerMuscle,
+                         preSequence=process.commonSequence,
+                         additionalCounters=additionalCounters)
+
+    for era, weight in zip(dataEras, puWeights):
+        m = analyzer.clone()
+        m.pileupWeightReader.weightSrc = weight
+        m.pileupWeightReader.enabled = True
+        HChTools.addAnalysis(process, "debugAnalyzer"+era, m,
+                             preSequence=process.commonSequence,
+                             additionalCounters=additionalCounters)
+
+        m = analyzerMuscle.clone()
+        m.pileupWeightReader.weightSrc = weight
+        m.pileupWeightReader.enabled = True
+        HChTools.addAnalysis(process, "debugAnalyzerMuscle"+era, m,
+                             preSequence=process.commonSequence,
+                             additionalCounters=additionalCounters)
+
+
 
 f = open("configDumpEmbeddingDebugMuonAnalysisAOD.py", "w")
 f.write(process.dumpPython())

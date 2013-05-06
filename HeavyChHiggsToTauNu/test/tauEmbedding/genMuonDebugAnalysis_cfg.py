@@ -72,8 +72,12 @@ analyzer = cms.EDAnalyzer("HPlusEmbeddingDebugMuonAnalyzer",
     jetSrc = cms.untracked.InputTag("goodJets"),
     genSrc = cms.untracked.InputTag("genParticles"),
 
-    muonPtCut = cms.untracked.double(40),
+    muonPtCut = cms.untracked.double(41),
     muonEtaCut = cms.untracked.double(2.1),
+
+    pileupWeightReader = param.pileupWeightReader.clone(
+        enabled = False
+    ),
 
     embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(
         mode = "mcEfficiency"
@@ -87,6 +91,14 @@ HChTools.addAnalysis(process, "debugAnalyzer", analyzer,
                      preSequence=process.commonSequence,
                      additionalCounters=additionalCounters)
 process.debugAnalyzer.eventCounter.printMainCounter = True
+
+for era, weight in zip(dataEras, puWeights):
+    m = analyzer.clone()
+    m.pileupWeightReader.weightSrc = weight
+    m.pileupWeightReader.enabled = True
+    HChTools.addAnalysis(process, "debugAnalyzer"+era, m,
+                         preSequence=process.commonSequence,
+                         additionalCounters=additionalCounters)
 
 
 f = open("configDumpEmbeddingDebugMuonAnalysis.py", "w")
