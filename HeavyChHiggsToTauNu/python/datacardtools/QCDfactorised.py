@@ -44,6 +44,12 @@ class QCDCountObject:
     def totalUncertainty(self):
         return sqrt(self.uncertainty()**2 + self.systUncertainty()**2)
 
+    def getRelativeStatUncertainty(self):
+        if self._dataUncert.value() > 0:
+            return self.uncertainty() / self._dataUncert.value()
+        else:
+            return 0.0
+
     def getRelativeDataStatUncertainty(self):
         if self._dataUncert.value() > 0:
             return self._dataUncert.uncertainty() / self._dataUncert.value()
@@ -1281,17 +1287,24 @@ class QCDfactorisedColumn(DatacardColumn):
         hRateShape = self._createShapeHistogram(dsetMgr,luminosity,myQCDCalculator,histoSpecs=config.ShapeHistogramsDimensions,title=self._label,
                                                 histoName=self._factorisedConfig["finalShapeHisto"],
                                                 saveDetailedInfo=False,makeCorrectionToShape=True,applyFullSystematics=False)
-        myRateHistograms.append(hRateShape)
+        # Closure tests for mT
+        hRateShapeContracted = []
+        for i in range(0, len(myQCDCalculator.getContractedResultsList())):
+            hRateShapeContracted.append(self._createContractedShapeHistogram(i,dsetMgr,luminosity,myQCDCalculator,histoSpecs=config.ShapeHistogramsDimensions,title=self._label,
+                                                                             histoName=self._factorisedConfig["finalShapeHisto"],
+                                                                             saveDetailedInfo=True,makeCorrectionToShape=True,applyFullSystematics=False))
         # Cache result for rate
+        #myRateHistograms.append(hRateShape)
+        #self._rateResult = ExtractorResult("rate",
+                                           #"rate",
+                                           #myQCDCalculator.getResult().getNQCDResult().value(),
+                                           #myRateHistograms)
+        # Take result from contracted tau pT configuration
+        myRateHistograms.append(hRateShapeContracted[0])
         self._rateResult = ExtractorResult("rate",
                                            "rate",
-                                           myQCDCalculator.getResult().getNQCDResult().value(),
+                                           myQCDCalculator.getContractedResultsList()[0].getNQCDResult().value(),
                                            myRateHistograms)
-        # Closure tests for mT
-        for i in range(0, len(myQCDCalculator.getContractedResultsList())):
-            self._createContractedShapeHistogram(i,dsetMgr,luminosity,myQCDCalculator,histoSpecs=config.ShapeHistogramsDimensions,title=None,
-                                                 histoName=self._factorisedConfig["finalShapeHisto"],
-                                                 saveDetailedInfo=True,makeCorrectionToShape=True,applyFullSystematics=False)
         # Obtain messages
         self._messages.extend(myStdSelEventCount.getMessages())
         self._messages.extend(myMETLegEventCount.getMessages())
@@ -1304,8 +1317,8 @@ class QCDfactorisedColumn(DatacardColumn):
                 self._createShapeHistogram(dsetMgr,luminosity,myQCDCalculator,histoSpecs=self._factorisedConfig["closureMETShapeDetails"],
                                            histoName=METshape,title=None,saveDetailedInfo=True,makeCorrectionToShape=True,applyFullSystematics=False)
                 for i in range(0, len(myQCDCalculator.getContractedResultsList())):
-                    self._createShapeHistogram(i,dsetMgr,luminosity,myQCDCalculator,histoSpecs=self._factorisedConfig["closureMETShapeDetails"],
-                                               histoName=METshape,title=None,saveDetailedInfo=True,makeCorrectionToShape=True,applyFullSystematics=False)
+                    self._createContractedShapeHistogram(i,dsetMgr,luminosity,myQCDCalculator,histoSpecs=self._factorisedConfig["closureMETShapeDetails"],
+                                                         histoName=METshape,title=None,saveDetailedInfo=True,makeCorrectionToShape=True,applyFullSystematics=False)
         # Construct results for nuisances
         print "... Constructing result ..."
         for nid in self._nuisanceIds:
@@ -1318,9 +1331,9 @@ class QCDfactorisedColumn(DatacardColumn):
                     myResult = 0.0
                     # Obtain result
                     if e.getQCDmode() == "statistics":
-                        myResult = myQCDCalculator.getResult().getNQCDResult().uncertainty()
+                        myResult = myQCDCalculator.getResult().getNQCDResult().getRelativeStatUncertainty()
                     elif e.getQCDmode() == "systematics":
-                        myResult = myQCDCalculator.getResult().getNQCDResult().systUncertainty()
+                        myResult = myQCDCalculator.getResult().getNQCDResult().getRelativeMCSystUncertainty()
                     # Obtain histograms
                     myHistograms = []
                     if e.getQCDmode() == "shapestat":
@@ -1356,13 +1369,17 @@ class QCDfactorisedColumn(DatacardColumn):
                         # Obtain normalisation
                         myEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=c.QCDFactNormalisation, luminosity=luminosity)
                         myQCDCalculator = QCDfactorisedCalculator(myStdSelEventCount, myEventCount, myTauLegEventCount, doHistograms=False)
-                        print myQCDCalculator.getResult().getInfoString()
+                        myQCDCalculator.getResult().getNQCDResult().printContents()
                         # Obtain shape histogram
-                        hShape = self._createShapeHistogram(dsetMgr,luminosity,myQCDCalculator,histoSpecs=c.details,
-                                                            histoName=c.QCDFactHistoName, title=c.title,
-                                                            saveDetailedInfo=False,makeCorrectionToShape=True,applyFullSystematics=False)
+                        #hShape = self._createShapeHistogram(dsetMgr,luminosity,myQCDCalculator,histoSpecs=c.details,
+                                                            #histoName=c.QCDFactHistoName, title=c.title,
+                                                            #saveDetailedInfo=False,makeCorrectionToShape=True,applyFullSystematics=False)
+                        hShape = self._createContractedShapeHistogram(0,dsetMgr,luminosity,myQCDCalculator,histoSpecs=c.details,
+                                                                      histoName=c.QCDFactHistoName, title=c.title,
+                                                                      saveDetailedInfo=False,makeCorrectionToShape=True,applyFullSystematics=False)
                         # Do normalisation
-                        hShape.Scale(myQCDCalculator.getResult().getNQCDResult().value() / hShape.Integral())
+                        #hShape.Scale(myQCDCalculator.getResult().getNQCDResult().value() / hShape.Integral())
+                        hShape.Scale(myQCDCalculator.getContractedResultsList()[0].getNQCDResult().value() / hShape.Integral())
                         print "     "+c.title+", NQCD=%f"%myQCDCalculator.getResult().getNQCDResult().value()
                         myEventCount.clean()
                         self._controlPlots.append(hShape)
@@ -1478,7 +1495,7 @@ class QCDfactorisedColumn(DatacardColumn):
                         # Filter out only important warnings of inpurity (impact more than one percent to whole bin)
                         if myTotal > 0.0:
                             if m[1] / myTotal > 0.01:
-                                self._messages.extend(WarningLabel()+"Low purity in QCD factorised shape %s for unfolded bin %d : %s"%(histoName, i, m[0]))
+                                self._messages.append(WarningLabel()+"Low purity in QCD factorised shape %s for unfolded bin %d : %s"%(histoName, i, m[0]))
                 # Save histograms
                 self._infoHistograms.append(hStatBin)
                 self._infoHistograms.append(hFullBin)
@@ -1501,10 +1518,13 @@ class QCDfactorisedColumn(DatacardColumn):
         sys.stdout.write("\n")
         if title == None:
             return None
+        h = None
         if applyFullSystematics:
-            return hFull.Clone(title)
+            h = hFull.Clone(title)
         else:
-            return hStat.Clone(title)
+            h = hStat.Clone(title)
+        h.SetTitle(title)
+        return h
 
     def _createContractedShapeHistogram(self, axisToKeep, dsetMgr, luminosity, myQCDCalculator, histoSpecs, title, histoName, saveDetailedInfo=False, makeCorrectionToShape=False, applyFullSystematics=False):
         # Open histograms and create QCD event object
@@ -1590,10 +1610,13 @@ class QCDfactorisedColumn(DatacardColumn):
         sys.stdout.write("\n")
         if title == None:
             return None
+        h = None
         if applyFullSystematics:
-            return hFull.Clone(title)
+            h = hFull.Clone(title)
         else:
-            return hStat.Clone(title)
+            h = hStat.Clone(title)
+        h.SetTitle(title)
+        return h
 
     ## Saves information histograms into a histogram
     def saveQCDInfoHistograms(self, outputDir):
