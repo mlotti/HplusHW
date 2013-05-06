@@ -28,6 +28,7 @@ process.infoPath = HChTools.addConfigInfo(process, options, dataVersion)
 # do PAT muon stuff
 #doRecoMuon = False
 doRecoMuon = True
+doRecoMuonScaleCorrection = True
 process.commonSequence = cms.Sequence()
 if doRecoMuon:
     # Gen-level filtering
@@ -55,12 +56,25 @@ if doRecoMuon:
     process.fooSequenceSequence, fooCounters = addPatOnTheFly(process, options, dataVersion)
     process.patMuons.userData.userFloats.src = []
     process.selectedPatMuons.src = "patMuons"
+    process.selectedPatMuons.cut = ""
     process.commonSequence += (
         process.pfParticleSelectionSequence +
         process.muIsoSequence +
         process.makePatMuons +
         process.selectedPatMuons
     )
+
+    # MuScleFit correction
+    # https://twiki.cern.ch/twiki/bin/view/CMSPublic/MuScleFitCorrections2012
+    if doRecoMuonScaleCorrection:
+        process.muscleMuons = cms.EDProducer("MuScleFitPATMuonCorrector", 
+            src = cms.InputTag("selectedPatMuons"), 
+            debug = cms.bool(False), 
+            identifier = cms.string("Fall11_START44"), 
+            applySmearing = cms.bool(False), 
+            fakeSmearing = cms.bool(False)
+        )
+        process.commonSequence += process.muscleMuons
 
     # muon selection
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
@@ -72,6 +86,8 @@ if doRecoMuon:
 #        process.muonSelectionMuons
     )
 #    additionalCounters.extend(["muonSelectionAllEvents", "muonSelectionMuons"])
+    if doRecoMuonScaleCorrection:
+        process.tightMuons.src = "muscleMuons"
 
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff")
     process.commonSequence += (
