@@ -150,3 +150,17 @@ class ShapeHistoModifier():
         # Convert variances into uncertainties
         for iDest in range(0,dest.GetNbinsX()+2):
             dest.SetBinError(iDest, sqrt(dest.GetBinError(iDest)))
+
+    ## Set negative bins to zero, but keep normalisation
+    def correctNegativeBins(self, dest):
+        if dest == None:
+            return
+        myIntegral = dest.Integral(0,dest.GetNbinsX()+2)
+        for k in range(0,dest.GetNbinsX()+2):
+            if dest.GetBinContent(k) < 0.0:
+                dest.SetBinContent(k, 0.0)
+                # Keep uncertainty like it is
+        # Now rescale
+        myNewIntegral = dest.Integral(0,dest.GetNbinsX()+2)
+        dest.Scale(myIntegral / myNewIntegral)
+

@@ -31,7 +31,7 @@ OptionMassShape = "TransverseMass"
 OptionReplaceEmbeddingByMC = True
 OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = False
+OptionDoControlPlots = not False
 
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
@@ -94,11 +94,12 @@ QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusCollinearTailKiller"
 #QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusTailKiller"
 #QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30PlusTailKiller"
 
-QCDFactorisedValidationMETShapeHistogramsDimensions = {  "bins": 7,
-                                                         "rangeMin": 0.0,
-                                                         "rangeMax": 100.0,
+QCDFactorisedValidationMETShapeHistogramsDimensions = {  "bins": 100,
+                                                         "rangeMin": 3.0,
+                                                         "rangeMax": 500.0,
                                                          #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                                                         "variableBinSizeLowEdges": [0,10,20,30,40,50,60], # if an empty list is given, then uniform bin width is used
+                                                         #"variableBinSizeLowEdges": [0,10,20,30,40,50,60], # if an empty list is given, then uniform bin width is used
+                                                         "variableBinSizeLowEdges": [],
                                                          "xtitle": "E_{T}^{miss}, GeV/c^{2}",
                                                          "ytitle": "Events"}
 QCDFactorisedValidationMtShapeHistogramsDimensions = { "bins": 9,
@@ -152,28 +153,6 @@ QCDFactorisationMtShapeCorrections = {
     "QCDfactorised_validation_mT_1D_Full_Correction_bin_7": [1.085690, 1.389372, 0.128390, 1.269037, 0.847800, 0.997187, 1.447119, 0.826870, 0.969181],
     "QCDfactorised_validation_mT_1D_Full_CorrectionUncertainty_bin_7": [0.818243, 0.872531, 0.251288, 0.851395, 0.550802, 0.506219, 0.658021, 0.424001, 0.373741],
 }
-QCDFactorisedValidationMETShapeSource = [
-    "shape_CtrlLeg1METAfterStandardSelections/CtrlLeg1METAfterStandardSelections",
-    "shape_CtrlLeg1METAfterStandardSelectionsMET20/CtrlLeg1METAfterStandardSelectionsMET20",
-    "shape_CtrlLeg1METAfterStandardSelectionsMET30/CtrlLeg1METAfterStandardSelectionsMET30",
-    "shape_CtrlLeg1METAfterTauIDNoRtau/CtrlLeg1METAfterTauIDNoRtau",
-    "shape_CtrlLeg1METAfterTauIDNoRtauMET20/CtrlLeg1METAfterTauIDNoRtauMET20",
-    "shape_CtrlLeg1METAfterTauIDNoRtauMET30/CtrlLeg1METAfterTauIDNoRtauMET30",
-    "shape_CtrlLeg1METAfterFullTauID/CtrlLeg1METAfterFullTauID",
-    "shape_CtrlLeg1METAfterFullTauIDMET20/CtrlLeg1METAfterFullTauIDMET20",
-    "shape_CtrlLeg1METAfterFullTauIDMET30/CtrlLeg1METAfterFullTauIDMET30",
-]
-QCDFactorisedValidationMtShapeSource = [
-    "shape_MtShapesAfterStandardSelection/MtShapesAfterStandardSelection",
-    "shape_MtShapesAfterStandardSelectionMET20/MtShapesAfterStandardSelectionMET20",
-    "shape_MtShapesAfterStandardSelectionMET30/MtShapesAfterStandardSelectionMET30",
-    "shape_MtShapesAfterTauIDNoRtau/MtShapesAfterTauIDNoRtau",
-    "shape_MtShapesAfterTauIDNoRtauMET20/MtShapesAfterTauIDNoRtauMET20",
-    "shape_MtShapesAfterTauIDNoRtauMET30/MtShapesAfterTauIDNoRtauMET30",
-    "shape_MtShapesAfterTauID/MtShapesAfterTauID",
-    "shape_MtShapesAfterTauIDMET20/MtShapesAfterTauIDMET20",
-    "shape_MtShapesAfterTauIDMET30/MtShapesAfterTauIDMET30",
-]
 
 ##############################################################################
 # Observation definition (how to retrieve number of observed events)
@@ -232,11 +211,14 @@ if OptionMassShape == "TransverseMass":
                               "afterMETLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1",
                               "afterTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg2",
                               "afterMETandTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1AndLeg2", # for checking only
-                              "validationMETShapeSource": QCDFactorisedValidationMETShapeSource, # FIXME check
-                              "validationMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions, # FIXME check
+                              "closureMETShapeSource": [QCDFactorisedStdSelVersion+"/CtrlMET",
+                                                        QCDFactorisedStdSelVersion+"/CtrlMETAfterLeg1",
+                                                        QCDFactorisedStdSelVersion+"/CtrlAfterLeg2"],
+                              "closureMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions,
                               "finalShapeHisto": QCDFactorisedStdSelVersion+"/MtAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
-                              "validationMtShapeSource": QCDFactorisedValidationMtShapeSource, # FIXME check
-                              "validationMtShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions, # FIXME check
+                              "closureShapeSource": [QCDFactorisedStdSelVersion+"/MtAfterStandardSelections",
+                                                     QCDFactorisedStdSelVersion+"/MtAfterLeg1",
+                                                     QCDFactorisedStdSelVersion+"/MtAfterLeg2"]
                               #"assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ... # not needed
                               #"factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"], # not needed
                               #"METShapeCorrections": QCDFactorisationMETShapeCorrections,
@@ -971,9 +953,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "Njets_AfterStandardSelections",
     EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "Njets_AfterStandardSelections",
-    QCDFactNormalisation = "factorisation/AfterJetSelection",
-    QCDFactHistoPath = "shape_CtrlLeg1AfterNjets",
-    QCDFactHistoName = "CtrlLeg1AfterNjets",
+    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlNjets",
+    QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlNjets",
     details          = { "bins": 5,
                          "rangeMin": 3.0,
                          "rangeMax": 8.0,
@@ -991,37 +972,37 @@ ControlPlots.append(ControlPlotInput(
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
-ControlPlots.append(ControlPlotInput(
-    title            = "MET",
-    signalHHid       = [-1],
-    signalHWid       = [0],
-    QCDid            = [3],
-    embeddingId      = EmbeddingIdList,
-    EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "ControlPlots",
-    signalHistoName  = "MET",
-    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
-    EWKfakeHistoName  = "MET",
-    QCDFactNormalisation = "factorisation/AfterJetSelection",
-    QCDFactHistoPath = "shape_CtrlLeg1AfterMET",
-    QCDFactHistoName = "CtrlLeg1AfterMET",
-    details          = { "bins": 13,
-                         "rangeMin": 0.0,
-                         "rangeMax": 500.0,
-                         #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                         "binLabels": [], # leave empty to disable bin labels
-                         "xtitle": "E_{T}^{miss}",
-                         "ytitle": "Events",
-                         "unit": "GeV",
-                         "logy": True,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
-    blindedRange     = [], # specify range min,max if blinding applies to this control plot
-    evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
-))
+if False: # FIXME
+    ControlPlots.append(ControlPlotInput(
+        title            = "MET",
+        signalHHid       = [-1],
+        signalHWid       = [0],
+        QCDid            = [3],
+        embeddingId      = EmbeddingIdList,
+        EWKfakeId        = EWKFakeIdList,
+        signalHistoPath  = "ControlPlots",
+        signalHistoName  = "MET",
+        EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "MET",
+        QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlNjets",
+        QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlMET",
+        details          = { "bins": 13,
+                             "rangeMin": 0.0,
+                             "rangeMax": 500.0,
+                             #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                             "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                             "binLabels": [], # leave empty to disable bin labels
+                             "xtitle": "E_{T}^{miss}",
+                             "ytitle": "Events",
+                             "unit": "GeV",
+                             "logy": True,
+                             "DeltaRatio": 0.5,
+                             "ymin": 0.9,
+                             "ymax": -1},
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
 
 ControlPlots.append(ControlPlotInput(
     title            = "BJetSelection",
@@ -1034,9 +1015,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "NBjets",
     EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "NBjets",
-    QCDFactNormalisation = "factorisation/Leg1AfterMET",
-    QCDFactHistoPath = "shape_CtrlLeg1AfterNbjets",
-    QCDFactHistoName = "CtrlLeg1AfterNbjets",
+    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlMET",
+    QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlNbjets",
     details          = { "bins": 5,
                          "rangeMin": 0.0,
                          "rangeMax": 5.0,
@@ -1068,9 +1048,8 @@ ControlPlots.append(ControlPlotInput(
     #signalHistoName  = "deltaPhi",
     #EWKfakeHistoPath  = "",
     #EWKfakeHistoName  = "EWKFakeTausDeltaPhi",
-    #QCDFactNormalisation = "factorisation/Leg1AfterBTagging",
-    #QCDFactHistoPath = "shape_CtrlLeg1AfterDeltaPhiTauMET",
-    #QCDFactHistoName = "CtrlLeg1AfterDeltaPhiTauMET",
+    #QCDFactNormalisation = QCDFactorisedStdSelVersion+"/factorisation/Leg1AfterBTagging",
+    #QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlLeg1AfterDeltaPhiTauMET", #FIXME
     #details          = { "bins": 11,
                          #"rangeMin": 0.0,
                          #"rangeMax": 180.0,
@@ -1097,9 +1076,8 @@ ControlPlots.append(ControlPlotInput(
     #EWKfakeId        = EWKFakeIdList,
     #signalHistoPath  = "",
     #signalHistoName  = "maxDeltaPhiJetMet",
-    #QCDFactNormalisation = "factorisation/Leg1AfterDeltaPhiTauMET",
-    #QCDFactHistoPath = "shape_CtrlLeg1AfterMaxDeltaPhiJetMET",
-    #QCDFactHistoName = "CtrlLeg1AfterMaxDeltaPhiJetMET",
+    #QCDFactNormalisation = QCDFactorisedStdSelVersion+"/factorisation/Leg1AfterDeltaPhiTauMET",
+    #QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlLeg1AfterMaxDeltaPhiJetMET", #FIXME
     #details          = { "bins": 18,
                          #"rangeMin": 0.0,
                          #"rangeMax": 180.0,
@@ -1126,9 +1104,8 @@ ControlPlots.append(ControlPlotInput(
     #EWKfakeId        = EWKFakeIdList,
     #signalHistoPath  = "TopChiSelection",
     #signalHistoName  = "WMass",
-    #QCDFactNormalisation = "factorisation/Leg1AfterDeltaPhiTauMET",
-    #QCDFactHistoPath = "shape_CtrlLeg1AfterTopMass",
-    #QCDFactHistoName = "CtrlLeg1AfterTopMass",
+    #QCDFactNormalisation = QCDFactorisedStdSelVersion+"/factorisation/Leg1AfterDeltaPhiTauMET",
+    #QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlLeg1AfterTopMass", #FIXME
     #details          = { "bins": 20,
                          #"rangeMin": 0.0,
                          #"rangeMax": 200.0,
@@ -1155,9 +1132,8 @@ ControlPlots.append(ControlPlotInput(
     #EWKfakeId        = EWKFakeIdList,
     #signalHistoPath  = "TopChiSelection",
     #signalHistoName  = "TopMass",
-    #QCDFactNormalisation = "factorisation/Leg1AfterDeltaPhiTauMET",
-    #QCDFactHistoPath = "shape_CtrlLeg1AfterTopMass",
-    #QCDFactHistoName = "CtrlLeg1AfterTopMass",
+    #QCDFactNormalisation = QCDFactorisedStdSelVersion+"/factorisation/Leg1AfterDeltaPhiTauMET",
+    #QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlLeg1AfterTopMass", #FIXME
     #details          = { "bins": 20,
                          #"rangeMin": 0.0,
                          #"rangeMax": 400.0,
@@ -1186,9 +1162,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "transverseMass",
     EWKfakeHistoPath  = "",
     EWKfakeHistoName  = "EWKFakeTausTransverseMass",
-    QCDFactNormalisation = "factorisation/Leg1AfterTopSelection",
-    QCDFactHistoPath = "shape_MtShapesAfterFullMETLeg",
-    QCDFactHistoName = "MtShapesAfterFullMETLeg",
+    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/NevtAfterLeg1",
+    QCDFactHistoName = QCDFactorisedStdSelVersion+"/MtAfterLeg1",
     details          = { "bins": 13,
                          "rangeMin": 0.0,
                          "rangeMax": 400.0,
@@ -1217,9 +1192,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "HiggsMass",
     EWKfakeHistoPath  = "",
     EWKfakeHistoName  = "EWKFakeTausFullMass",
-    QCDFactNormalisation = "factorisation/Leg1AfterTopSelection",
-    QCDFactHistoPath = "shape_FullMassShapesAfterFullMETLeg",
-    QCDFactHistoName = "FullMassShapesAfterFullMETLeg",
+    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/NevtAfterLeg1",
+    QCDFactHistoName = QCDFactorisedStdSelVersion+"/MassAfterLeg1",
     details          = { "bins": 13,
                          "rangeMin": 0.0,
                          "rangeMax": 500.0,
@@ -1237,34 +1211,35 @@ ControlPlots.append(ControlPlotInput(
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
-ControlPlots.append(ControlPlotInput(
-    title            = "NjetsAfterMET",
-    signalHHid       = [-1],
-    signalHWid       = [0],
-    QCDid            = [3],
-    embeddingId      = EmbeddingIdList,
-    EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "ControlPlots",
-    signalHistoName  = "NjetsAfterMET",
-    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
-    EWKfakeHistoName  = "NjetsAfterMET",
-    QCDFactNormalisation = "factorisation/Leg1AfterMET",
-    QCDFactHistoPath = "shape_CtrlLeg1NJetsAfterMET",
-    QCDFactHistoName = "CtrlLeg1NJetsAfterMET",
-    details          = { "bins": 5,
-                         "rangeMin": 3.0,
-                         "rangeMax": 8.0,
-                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                         "binLabels": ["3","4","5","6","7"], # leave empty to disable bin labels
-                         "xtitle": "Number of selected jets",
-                         "ytitle": "Events",
-                         "unit": "",
-                         "logy": True,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
-    blindedRange     = [], # specify range min,max if blinding applies to this control plot
-    evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
-))
+if False:
+    ControlPlots.append(ControlPlotInput(
+        title            = "NjetsAfterMET",
+        signalHHid       = [-1],
+        signalHWid       = [0],
+        QCDid            = [3],
+        embeddingId      = EmbeddingIdList,
+        EWKfakeId        = EWKFakeIdList,
+        signalHistoPath  = "ControlPlots",
+        signalHistoName  = "NjetsAfterMET",
+        EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "NjetsAfterMET",
+        QCDFactNormalisation = "Njets",
+        QCDFactHistoPath = QCDFactorisedStdSelVersion,
+        QCDFactHistoName = "", # FIXME
+        details          = { "bins": 5,
+                             "rangeMin": 3.0,
+                             "rangeMax": 8.0,
+                             "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                             "binLabels": ["3","4","5","6","7"], # leave empty to disable bin labels
+                             "xtitle": "Number of selected jets",
+                             "ytitle": "Events",
+                             "unit": "",
+                             "logy": True,
+                             "DeltaRatio": 0.5,
+                             "ymin": 0.9,
+                             "ymax": -1},
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
 
