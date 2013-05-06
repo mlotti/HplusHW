@@ -96,6 +96,9 @@ for era, weight in zip(dataEras, puWeights):
     m = analyzer.clone()
     m.pileupWeightReader.weightSrc = weight
     m.pileupWeightReader.enabled = True
+    if era in ["Run2011A", "Run2011B"]:
+        m.embeddingMuonEfficiency.mcSelect = era
+
     HChTools.addAnalysis(process, "debugAnalyzer"+era, m,
                          preSequence=process.commonSequence,
                          additionalCounters=additionalCounters)
