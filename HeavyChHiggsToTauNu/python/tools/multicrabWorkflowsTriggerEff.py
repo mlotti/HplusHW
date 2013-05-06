@@ -112,11 +112,11 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
 
     defaultDefinitions = {                                                                                                                                             
         # njobsOut is just a guess                  
-        "Tau_190456-193621_2012A_Jan22":       TaskDef(njobsIn= 300, njobsOut= 6),
-        "TauParked_193834-196531_2012B_Jan22": TaskDef(njobsIn=2500, njobsOut=25),
-        "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=3000, njobsOut=40),
-        "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn= 150, njobsOut= 1),
-        "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=7000, njobsOut=500),
+        "Tau_190456-193621_2012A_Jan22":       TaskDef(njobsIn= 300, njobsOut= 6, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v2","HLT_LooseIsoPFTau35_Trk20_Prong1_v3","HLT_LooseIsoPFTau35_Trk20_Prong1_v4"]),
+        "TauParked_193834-196531_2012B_Jan22": TaskDef(njobsIn=2500, njobsOut=25, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v6"]),
+        "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=3000, njobsOut=40, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v7","HLT_LooseIsoPFTau35_Trk20_Prong1_v9"]),
+        "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn= 150, njobsOut= 1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"]),
+        "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=7000, njobsOut=500, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"]),
                                                                                                                                                                        
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                  
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                  
