@@ -9,16 +9,6 @@ MassPoints      = [120]
 
 BlindAnalysis   = True
 
-# Specify name of EDFilter or EDAnalyser process that produced the root files
-
-# FIXME: remove this block
-SignalAnalysis  = "signalAnalysis"
-EmbeddingAnalysis     = "signalAnalysis"
-#EmbeddingAnalysis     = "signalAnalysisCaloMet60TEff"
-#EmbeddingAnalysis     = "signalAnalysisCaloMet60"
-QCDFactorisedAnalysis = True
-QCDInvertedAnalysis = True
-
 RootFileName    = "histograms.root"
 
 # Rate counter definitions
@@ -28,6 +18,8 @@ FakeRateCounter = "EWKfaketaus:SelectedEvents"
 # Options
 OptionMassShape = "TransverseMass"
 #OptionMassShape = "FullMass"
+#OptionMassShape = "TransverseAndFullMass2D" #FIXME not yet supported!!!
+
 OptionReplaceEmbeddingByMC = True
 OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
@@ -237,17 +229,23 @@ elif OptionMassShape == "FullMass":
         MCEWKDatasetDefinitions = ["TTJets","WJets","W1Jets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         #MCEWKDatasetDefinitions = ["TTJets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         nuisances    = ["12","13","40b"],
-        QCDfactorisedInfo = { "afterStdSelSource": "factorisation/AfterJetSelection",
-                              "afterMETLegSource": "factorisation/Leg1AfterTopSelection",
-                              "afterTauLegSource": "factorisation/Leg2AfterTauID",
-                              "validationMETShapeSource": QCDFactorisedValidationMETShapeSource,
-                              "validationMETShapeDetails": [],
-                              "finalShapeHisto": "shape_FullMassShapesAfterFullMETLeg/FullMassShapesAfterFullMETLeg", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
-                              "validationMtShapeSource": QCDFactorisedValidationMtShapeSource,
-                              "validationMtShapeDetails": [],
-                              "validationMtShapeSource": [],
-                              "assumedMCEWKSystUncertainty": 0.20,
-                              "factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"],
+        QCDfactorisedInfo = { "afterStdSelSource": QCDFactorisedStdSelVersion+"/NevtAfterStandardSelections",
+                              "afterMETLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1",
+                              "afterTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg2",
+                              "afterMETandTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1AndLeg2", # for checking only
+                              "closureMETShapeSource": [QCDFactorisedStdSelVersion+"/CtrlMET",
+                                                        QCDFactorisedStdSelVersion+"/CtrlMETAfterLeg1",
+                                                        QCDFactorisedStdSelVersion+"/CtrlAfterLeg2"],
+                              "closureMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions,
+                              "finalShapeHisto": QCDFactorisedStdSelVersion+"/MassAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
+                              "closureShapeSource": [QCDFactorisedStdSelVersion+"/MassAfterStandardSelections",
+                                                     QCDFactorisedStdSelVersion+"/MassAfterLeg1",
+                                                     QCDFactorisedStdSelVersion+"/MassAfterLeg2"]
+                              #"assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ... # not needed
+                              #"factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"], # not needed
+                              #"METShapeCorrections": QCDFactorisationMETShapeCorrections,
+                              #"MTShapeCorrections": QCDFactorisationMtShapeCorrections,
+                              #FIXME: add systematics definition (tau trg uncer as function of tau bins, trg MET leg, tauID, energy scales, btagging, xsection)
         }
     ))
 
@@ -325,7 +323,6 @@ if not OptionReplaceEmbeddingByMC:
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions = ["TTJets_"],
-        #dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["01d","02","04","45","46","47","09","10b","28","33","34b","35"]
@@ -336,7 +333,6 @@ if not OptionReplaceEmbeddingByMC:
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions = ["WJets","W1Jets","W2Jets","W3Jets","W4Jets"],
-        #dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["01d","02","04","45","46","47","09","11b","29","33","34b","37"]
@@ -347,54 +343,69 @@ if not OptionReplaceEmbeddingByMC:
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions = ["T_", "Tbar_"],
-        #dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["01d","02","04","45","46","47","09","10b","30","33","34b","38"]
     ))
 else:
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
-    EmbeddingIdList = [4,5,6]
+    EmbeddingIdList = [1,4,5,6,7]
     DataGroups.append(DataGroup(
-        label        = "MC_EWK_Tau",
+        label        = "MC_ttbar",
+        landsProcess = 1,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Signal",
+        datasetDefinitions = ["TTJets"],
+        rateCounter  = SignalRateCounter,
+        validMassPoints = MassPoints,
+        nuisances    = ["01b","02","03","45","46","47","09","10","14","15","28","33","34","40"]
+    ))
+    DataGroups.append(DataGroup(
+        label        = "MC_Wjets",
         landsProcess = 4,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        #datasetDefinitions = ["TTJets", "W2Jets","W3Jets","W4Jets", "Tbar_", "T_"],
-        datasetDefinitions = ["TTJets", "WJets", "W1Jets", "W2Jets", "W3Jets", "W4Jets", "Tbar_", "T_"],
-        #dirPrefix   = SignalAnalysis,
+        datasetDefinitions = ["WJets", "W1Jets", "W2Jets", "W3Jets", "W4Jets"],
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01b","03","45","46","47","14","15","16","19","40"]
+        nuisances    = ["01b","02","03","45","46","47","09","11","14","15","25","33","34","40"]
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_EWK_DY",
+        label        = "MC_1top",
         landsProcess = 5,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions   = ["DYJetsToLL"],
-        #dirPrefix   = SignalAnalysis,
+        datasetDefinitions = ["Tbar_", "T_"],
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","03","45","46","47","09","11","15b","16b","31","33","34","24"]
+        nuisances    = ["01b","02","03","45","46","47","09","10","14","15","26","33","34","40"]
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_EWK_VV",
+        label        = "MC_DY",
         landsProcess = 6,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions   = ["WW","WZ","ZZ"],
-        #dirPrefix   = SignalAnalysis,
+        datasetDefinitions   = ["DYJetsToLL"],
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","03","45","46","47","09","11","15b","16b","32","33","34","27"]
+        nuisances    = ["01","02","03","45","46","47","09","11","24","31","33","34","40"]
     ))
     DataGroups.append(DataGroup(
-        label        = "empty",
-        landsProcess = 1,
-        datasetType  = "None",
+        label        = "MC_VV",
+        landsProcess = 7,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Signal",
+        datasetDefinitions   = ["WW","WZ","ZZ"],
+        rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
+        nuisances    = ["01","02","03","45","46","47","09","11","32","33","34","27","40"]
     ))
+    #DataGroups.append(DataGroup(
+        #label        = "empty",
+        #landsProcess = 1,
+        #datasetType  = "None",
+        #validMassPoints = MassPoints,
+    #))
 
 
 # Reserve column 2

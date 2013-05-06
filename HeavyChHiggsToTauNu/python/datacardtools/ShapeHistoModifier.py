@@ -137,11 +137,12 @@ class ShapeHistoModifier():
     def finaliseShape(self, dest):
         if dest == None:
             return
-        # Move underflow events to first bin
-        dest.SetBinContent(1, dest.GetBinContent(1)+dest.GetBinContent(0))
-        dest.SetBinError(1, dest.GetBinError(1)+dest.GetBinError(0))
-        dest.SetBinContent(0,0.0)
-        dest.SetBinError(0,0.0)
+        # Do not move underflow events to first bin !!!
+        if False:
+            dest.SetBinContent(1, dest.GetBinContent(1)+dest.GetBinContent(0))
+            dest.SetBinError(1, dest.GetBinError(1)+dest.GetBinError(0))
+            dest.SetBinContent(0,0.0)
+            dest.SetBinError(0,0.0)
         # Move overflow events to the last bin
         dest.SetBinContent(dest.GetNbinsX(), dest.GetBinContent(dest.GetNbinsX())+dest.GetBinContent(dest.GetNbinsX()+1))
         dest.SetBinError(dest.GetNbinsX(), dest.GetBinError(dest.GetNbinsX())+dest.GetBinError(dest.GetNbinsX()+1))

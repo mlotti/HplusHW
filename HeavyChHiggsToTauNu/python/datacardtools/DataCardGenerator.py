@@ -50,6 +50,11 @@ class DatasetMgrCreatorManager:
         self._toleranceForLuminosityDifference = config.ToleranceForLuminosityDifference
         self._optionDebugConfig = opts.debugConfig
 
+    def closeManagers(self):
+        for dMgr in self._dsetMgrs:
+            if dMgr != None:
+                dMgr.close()
+
     def obtainDatasetMgrs(self, era, searchMode, optimizationMode):
         if len(self._dsetMgrs) > 0:
             raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) was already called (dsetMgrs exist)!"+NormalStyle())
@@ -211,23 +216,20 @@ class DataCardGenerator:
         #self._doQCDFactorised = False
         #self._variationPostfix = optimisationVariation
         #self._dataEra = era
-        
         #if self._QCDMethod == DatacardQCDMethod.FACTORISED:
             #self._doQCDFactorised = True
         #self._doQCDInverted = False
         #if self._QCDMethod == DatacardQCDMethod.INVERTED:
             #self._doQCDInverted = True
-            
-        return
         # Override options from command line (not used at the moment)
         #self.overrideConfigOptionsFromCommandLine()
-        if self._QCDMethod != DatacardQCDMethod.FACTORISED and self._QCDMethod != DatacardQCDMethod.INVERTED:
-            raise Exception(ErrorLabel()+"QCD method was not properly specified when creating DataCardGenerator!")
-        if self._config.OptionReplaceEmbeddingByMC != None:
-            self._replaceEmbeddingByMC = self._config.OptionReplaceEmbeddingByMC
+        #if self._QCDMethod != DatacardQCDMethod.FACTORISED and self._QCDMethod != DatacardQCDMethod.INVERTED:
+            #raise Exception(ErrorLabel()+"QCD method was not properly specified when creating DataCardGenerator!")
+        #if self._config.OptionReplaceEmbeddingByMC != None:
+            #self._replaceEmbeddingByMC = self._config.OptionReplaceEmbeddingByMC
 
         # Check that all necessary parameters have been specified in config file
-        myStatus = self.checkCfgFile()
+        myStatus = self._checkCfgFile()
         if not myStatus:
             myMsg = "Datacards will not be created for "
             if self._QCDMethod != DatacardQCDMethod.FACTORISED:
@@ -236,32 +238,20 @@ class DataCardGenerator:
                 myMsg += " QCD inverted"
             print myMsg+" (if this is not intented, check your config!)\n"
             return
-
         # Construct prefix for output name
         myOutputPrefix = ""
         if self._QCDMethod == DatacardQCDMethod.FACTORISED:
             myOutputPrefix += "QCDfact"
         elif self._QCDMethod == DatacardQCDMethod.INVERTED:
             myOutputPrefix += "QCDinv"
-        if self._replaceEmbeddingByMC:
+        if self._config.OptionReplaceEmbeddingByMC:
             myOutputPrefix += "_MCEWK"
+        self._outputPrefix = myOutputPrefix
 
         myMassRange = str(self._config.MassPoints[0])
         if len(self._config.MassPoints) > 0:
             myMassRange += "-"+str(self._config.MassPoints[len(self._config.MassPoints)-1])
         print "Cards will be generated for "+HighlightStyle()+myOutputPrefix+NormalStyle()+" in mass range "+HighlightStyle()+myMassRange+" GeV"+NormalStyle()
-
-        myMsg = ""
-        if era == None:
-            myMsg += "era = (default)"
-        else:
-            myMsg += "era = "+era
-        if optimisationVariation == None:
-            print " variation = (default)"
-        else:
-            print " variation = "+optimisationVariation
-        print "Evaluating case %s\n"%(myMsg)
-
 
     #def overrideConfigOptionsFromCommandLine(self):
         # Obtain QCD measurement method
@@ -271,9 +261,16 @@ class DataCardGenerator:
         print "DatasetManagerCreator objects passed"
 
     def doDatacard(self, era, searchMode, optimizationMode):
+        # Prepend era, searchMode, and optimizationMode to prefix
+        s = "%s_%s_"%(era, searchMode)
+        if optimizationMode == "":
+            s += "nominal"
+        else:
+            s += "%s"%optimizationMode
+        self._outputPrefix = s+"_"+self._outputPrefix
+
         # Get dataset managers for the era / searchMode / optimizationMode combination
         self._dsetMgrManager.obtainDatasetMgrs(era, searchMode, optimizationMode)
-
 
         # Create columns (dataset groups)
         self.createDatacardColumns()
@@ -285,16 +282,15 @@ class DataCardGenerator:
 
         # do data mining to cache results into datacard column objects
         self.doDataMining()
-        return
 
         # Make datacards
         # Store era / searchMode / optimizationMode combination as a string # FIXME
-        TableProducer(opts, config, myOutputPrefix, self._luminosity, self._observation, self._columns, self._extractors)
+        TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix, 
+                      luminosity=self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),
+                      observation=self._observation, datasetGroups=self._columns, extractors=self._extractors)
 
         # Close files
-        #self.closeFiles() # FIXME is this needed with datasetMgrCreator?
-
-
+        #self.closeFiles() # Do not close, will crash if done so, because configInfo histogram will not be found anymore !!!
 
     def _checkCfgFile(self):
         mymsg = ""
@@ -493,9 +489,7 @@ class DataCardGenerator:
     ## Closes files in dataset managers
     def closeFiles(self):
         print "Closing open input files"
-        for i in range(0,len(self._dsetMgrs)):
-            if self._dsetMgrManager.getDatasetMgr(i) != None:
-                self._dsetMgrManager.getDatasetMgr(i).close()
+        self._dsetMgrManager.closeManagers()
         print "DatasetManagers closed"
 
     ## Check landsProcess in datacard columns
