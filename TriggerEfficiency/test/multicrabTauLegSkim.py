@@ -8,9 +8,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff as m
 
 datasets_TauPlusX = [
     "TauPlusX_190456-193621_2012A_Jan22",
-#    "TauPlusX_193834-196531_2012B_Jan22",
-#    "TauPlusX_198022-203742_2012C_Jan22",
-#    "TauPlusX_203777-208686_2012D_Jan22",
+    "TauPlusX_193834-196531_2012B_Jan22",
+    "TauPlusX_198022-203742_2012C_Jan22",
+    "TauPlusX_203777-208686_2012D_Jan22",
 ]
 
 datasets_Tau = [
@@ -171,7 +171,7 @@ datasets_SingleTop = [
 workflow = "triggerTauLeg_skim_v53_v3"
 
 tasks = [
-     ("TauLeg", datasets_TauPlusX),#+datasets_DY),
+     ("TauLeg", datasets_TauPlusX+datasets_DY),
 #    ("MetLeg", datasets_Tau+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
 #    ("Tau", datasets_Tau),
 #    ("MultiJet", datasets_MultiJet),
