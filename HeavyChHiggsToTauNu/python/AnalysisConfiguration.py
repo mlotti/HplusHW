@@ -1047,7 +1047,7 @@ def addPuWeightProducers(dataVersion, process, commonSequence, dataEras, firstIn
     names = []
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
     for era in dataEras:
-        names.append(param.setPileupWeight(dataVersion, process, commonSequence))
+        names.append(param.setPileupWeight(dataVersion, process, commonSequence, era=era))
 
     if firstInSequence:
         for name in names:
