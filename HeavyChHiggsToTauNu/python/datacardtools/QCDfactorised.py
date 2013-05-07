@@ -1273,7 +1273,6 @@ class QCDfactorisedColumn(DatacardColumn):
         self._infoHistograms.extend(myQCDCalculator.getNQCDHistograms())
         self._yieldTable = myQCDCalculator.getYieldTable()
         self._compactYieldTable = myQCDCalculator.getCompactYieldTable()
-        self._infoHistograms.extend(myQCDCalculator.getNQCDHistograms())
         # Make efficiency histograms
         self._infoHistograms.extend(myQCDCalculator.getLeg1EfficiencyHistograms())
         self._infoHistograms.extend(myQCDCalculator.getLeg2EfficiencyHistograms())
@@ -1636,14 +1635,17 @@ class QCDfactorisedColumn(DatacardColumn):
         myDirs.append({})
         # Loop over info histograms
 
-        for h in self._infoHistograms:
-            histoname = h.GetName()
+        for k in range(0, len(self._infoHistograms)):
+            histoname = self._infoHistograms[k].GetName()
             # Determine base directory
             myBaseDirIndex = len(myBaseDirs)-1
             for i in range(0,len(self._contractedLabels)):
                 label = self._contractedLabels[i].replace(" ","_")
                 if label in histoname:
                     myBaseDirIndex = i
+                    self._infoHistograms[k].SetTitle(self._infoHistograms[k].GetTitle().replace(label+"_",""))
+                    self._infoHistograms[k].SetName(self._infoHistograms[k].GetName().replace(label+"_",""))
+                    histoname = self._infoHistograms[k].GetName()
             # Store bin histograms in dedicated subdirectory
             if "Shape" in histoname:
                 # Find stem
@@ -1659,10 +1661,10 @@ class QCDfactorisedColumn(DatacardColumn):
                 # Make new subdirectory if necessary
                 if not s in myDirs[myBaseDirIndex].keys():
                     myDirs[myBaseDirIndex][s] = myBaseDirs[myBaseDirIndex].mkdir(s)
-                h.SetDirectory(myDirs[myBaseDirIndex][s])
+                self._infoHistograms[k].SetDirectory(myDirs[myBaseDirIndex][s])
             # Store summary histogram in main directory
             else:
-                h.SetDirectory(myBaseDirs[myBaseDirIndex])
+                self._infoHistograms[k].SetDirectory(myBaseDirs[myBaseDirIndex])
 
         # Close root file
         myRootFile.Write()
