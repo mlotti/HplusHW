@@ -20,6 +20,10 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeEventBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeFunctionBranch.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventItem.h"
@@ -45,6 +49,9 @@ public:
 
 private:
   void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+  void endLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
+  void endJob();
+
   void reset();
 
   typedef math::XYZTLorentzVector XYZTLorentzVector;
@@ -55,8 +62,11 @@ private:
   typedef HPlus::EventItem<double> DoubleItem;
   typedef HPlus::EventItem<bool> BoolItem;
 
-  edm::InputTag fPatTriggerSrc;
+  HPlus::EventWeight fEventWeight;
+  HPlus::HistoWrapper fHistoWrapper;
+  HPlus::EventCounter eventCounter;
 
+  edm::InputTag fPatTriggerSrc;
 
   HPlus::TreeEventBranches fEventBranches;
   HPlus::TreeGenBranches fGenBranches;
@@ -90,9 +100,14 @@ private:
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
   std::vector<BoolItem> fBools;
+
+  HPlus::Count cAllEvents;
 };
 
 HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfig):
+  fEventWeight(iConfig),
+  fHistoWrapper(fEventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  eventCounter(iConfig, fEventWeight, fHistoWrapper),
   fPatTriggerSrc(iConfig.getParameter<edm::InputTag>("patTriggerEvent")),
   fGenBranches(iConfig),
   fSelectedVertexBranches(iConfig, "selectedPrimaryVertex", "selectedPrimaryVertexSrc"),
@@ -102,7 +117,8 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   fJetEnabled(iConfig.getParameter<bool>("jetEnabled")),
   fJetBranches(iConfig, false),
   fGenTTBarEnabled(iConfig.getParameter<bool>("genTTBarEnabled")),
-  fGenTTBarBranches("genttbarwdecays")
+  fGenTTBarBranches("genttbarwdecays"),
+  cAllEvents(eventCounter.addCounter("All events"))
 {
 
   edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("muonEfficiencies");
@@ -165,6 +181,13 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
 
 HPlusMuonNtupleAnalyzer::~HPlusMuonNtupleAnalyzer() {}
 
+void HPlusMuonNtupleAnalyzer::endLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+  eventCounter.endLuminosityBlock(iBlock, iSetup);
+}
+void HPlusMuonNtupleAnalyzer::endJob() {
+  eventCounter.endJob();
+}
+
 void HPlusMuonNtupleAnalyzer::reset() {
   double nan = std::numeric_limits<double>::quiet_NaN();
  
@@ -194,6 +217,9 @@ void HPlusMuonNtupleAnalyzer::reset() {
 }
 
 void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  fEventWeight.beginEvent();
+  increment(cAllEvents);
+
   fEventBranches.setValues(iEvent);
   fSelectedVertexBranches.setValues(iEvent);
   fGoodVertexBranches.setValues(iEvent);

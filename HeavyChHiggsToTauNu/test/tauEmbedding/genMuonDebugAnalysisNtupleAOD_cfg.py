@@ -147,6 +147,7 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
     bools = cms.PSet(),
 
     eventCounter = param.eventCounter.clone(),
+    histogramAmbientLevel = cms.untracked.string("Informative"),
 )
 for era, weight in zip(dataEras, puWeights):
     setattr(ntuple.doubles, "weightPileup_"+era, cms.InputTag(weight))
