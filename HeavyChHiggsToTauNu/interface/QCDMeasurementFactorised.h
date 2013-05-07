@@ -3,49 +3,46 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurementFactorised_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
-////#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedElectronVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
-////#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedMuonVeto.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
+// JetTauInvMass.h
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+// TriggerEmulationEfficiency.h
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
+//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
+//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectedEventsAnalyzer.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CommonPlots.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetDetailHistograms.h"
 
-#include "TTree.h"
 #include <vector>
+#include <string>
 
 namespace edm {
   class ParameterSet;
@@ -55,20 +52,127 @@ namespace edm {
 
 namespace HPlus {
   class QCDMeasurementFactorised {
-  enum QCDSelectionOrder {
-    kQCDOrderTrigger,
-    kQCDOrderVertexSelection,
-    kQCDOrderTauCandidateSelection,
-    kQCDOrderElectronVeto,
-    kQCDOrderMuonVeto,
-    kQCDOrderJetSelection,
-    kQCDOrderTauID,
-    kQCDOrderMET,
-    kQCDOrderBTag,
-    kQCDOrderDeltaPhiTauMET,
-    kQCDOrderMaxDeltaPhiJetMET,
-    kQCDOrderTopSelection
-  };
+    /// Helper class for handling the factorisation higtograms
+    class QCDFactorisedHistogramHandler {
+    public:
+      QCDFactorisedHistogramHandler(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper);
+      ~QCDFactorisedHistogramHandler();
+      /// Reset pointer to current bin
+      void initialize();
+      /// Set pointer to current bin
+      void setFactorisationBinForEvent(double pt, double eta, int nvtx);
+      /// Create a histogram for a Nevent count in factorisation bins
+      void createCountHistogram(TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, std::string title);
+      /// Create a histogram for a shape in factorisation bins
+      void createShapeHistogram(TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, std::string title, std::string label, int nbins, double min, double max);
+      /// Fill method for a factorisation histogram containting Nevents counts
+      void fillNeventHistogram(WrappedUnfoldedFactorisationHisto* h);
+      /// Fill method for a factorisation histogram containting Nevents counts, with unconventional weight
+      void fillNeventHistogram(WrappedUnfoldedFactorisationHisto* h, double weight);
+      /// Fill method for a factorisation histogram containting a shape
+      void fillShapeHistogram(WrappedUnfoldedFactorisationHisto* h, double value);
+      /// Fill method for a factorisation histogram containting a shape, with unconventional weight
+      void fillShapeHistogram(WrappedUnfoldedFactorisationHisto* h, double value, double weight);
+
+    private:
+      int getTauPtBinIndex(double pt);
+      int getTauEtaBinIndex(double eta);
+      int getNVerticesBinIndex(int nvtx);
+      int getMtBinIndex(double mt);
+      int getFullMassBinIndex(double mass);
+      int getShapeBinIndex(int tauPtBin, int tauEtaBin, int nvtxBin);
+      void setAxisLabelsForUnfoldedHisto(WrappedUnfoldedFactorisationHisto* h);
+      void checkProperBinning();
+
+    private:
+      HistoWrapper& fHistoWrapper;
+      std::vector<double> fTauPtBinLowEdges;
+      std::vector<double> fTauEtaBinLowEdges;
+      std::vector<int> fNVerticesBinLowEdges;
+      // Are the following needed?
+      std::vector<double> fTransverseMassRange; // Range from config
+      std::vector<double> fFullMassRange; // Range from config
+      std::vector<double> fTransverseMassBinLowEdges;
+      std::vector<double> fFullMassRangeBinLowEdges;
+      const int fNUnfoldedBins;
+      std::string fBinningString; // string holding the info of the binning
+      // Pointer to current bin
+      int fCurrentBinX;
+      int fCurrentBinY;
+      int fCurrentBinZ;
+      int fCurrentUnfoldedBin;
+    };
+
+    enum QCDFactorisedVariationType {
+      kQCDFactorisedTraditional,
+      kQCDFactorisedABCD,
+      kQCDFactorisedDoubleABCD
+    };
+
+    class QCDFactorisedVariation {
+    public:
+      QCDFactorisedVariation(edm::Service< TFileService >& fs, QCDFactorisedHistogramHandler* histoHandler, EventCounter& eventCounter, CommonPlots& commonPlots, QCDFactorisedVariationType methodType, std::string prefix);
+      ~QCDFactorisedVariation();
+
+      void doSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass);
+
+    private:
+      void doTraditionalSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass);
+      void doABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass);
+      void doDoubleABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass);
+
+    private:
+      QCDFactorisedVariationType fMethodType;
+      Count fAfterStandardSelectionsCounter;
+      Count fAfterLeg1Counter;
+      Count fAfterLeg2Counter;
+      Count fAfterLeg1AndLeg2Counter;
+      QCDFactorisedHistogramHandler* fHistoHandler;
+
+      // Common plots
+      CommonPlotsFilledAtEveryStep* fCommonPlotsAfterStandardSelections;
+      CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
+      CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtag;
+      CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg1;
+      CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg2;
+
+      // NQCD Histograms
+      WrappedUnfoldedFactorisationHisto* hNevtAfterStandardSelections;
+      WrappedUnfoldedFactorisationHisto* hNevtAfterLeg1;
+      WrappedUnfoldedFactorisationHisto* hNevtAfterLeg2;
+      WrappedUnfoldedFactorisationHisto* hNevtAfterLeg1AndLeg2;
+      // Shape histograms (some needed for closure test)
+      WrappedUnfoldedFactorisationHisto* hMtShapesAfterStandardSelections;
+      WrappedUnfoldedFactorisationHisto* hInvariantMassShapesAfterStandardSelections;
+      WrappedUnfoldedFactorisationHisto* hMtShapesAfterLeg1;
+      WrappedUnfoldedFactorisationHisto* hInvariantMassShapesAfterLeg1;
+      WrappedUnfoldedFactorisationHisto* hMtShapesAfterLeg1WithoutBtag;
+      WrappedUnfoldedFactorisationHisto* hMtShapesAfterLeg2;
+      WrappedUnfoldedFactorisationHisto* hInvariantMassShapesAfterLeg2;
+      WrappedUnfoldedFactorisationHisto* hMtShapesAfterLeg1AndLeg2;
+      WrappedUnfoldedFactorisationHisto* hInvariantMassShapesAfterLeg1AndLeg2;
+      // Data-driven control histograms
+      WrappedUnfoldedFactorisationHisto* hCtrlRtau;
+      WrappedUnfoldedFactorisationHisto* hCtrlNjets;
+      WrappedUnfoldedFactorisationHisto* hCtrlMET;
+      WrappedUnfoldedFactorisationHisto* hCtrlNbjets;
+      WrappedUnfoldedFactorisationHisto* hCtrlQCDTailKillerJet1;
+      WrappedUnfoldedFactorisationHisto* hCtrlQCDTailKillerJet2;
+      WrappedUnfoldedFactorisationHisto* hCtrlQCDTailKillerJet3;
+      WrappedUnfoldedFactorisationHisto* hCtrlQCDTailKillerJet4;
+      // Closure test oF MET
+      WrappedUnfoldedFactorisationHisto* hCtrlMETAfterLeg1;
+      WrappedUnfoldedFactorisationHisto* hCtrlMETAfterLeg2;
+      WrappedUnfoldedFactorisationHisto* hCtrlMETAfterBJets;
+    };
+
+    enum QCDSelectionOrder {
+      kQCDOrderTrigger,
+      kQCDOrderTauCandidateSelection,
+      kQCDOrderElectronVeto,
+      kQCDOrderMuonVeto,
+      kQCDOrderJetSelection
+    };
 
   public:
     explicit QCDMeasurementFactorised(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::EventWeight& eventWeight, HPlus::HistoWrapper& histoWrapper);
@@ -78,99 +182,83 @@ namespace HPlus {
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    /// Returns index to tau pT bin; 0 is underflow and size() is highest bin
-    int getTauPtBinIndex(double pt);
-    int getTauEtaBinIndex(double eta);
-    int getNVerticesBinIndex(int nvtx);
-    int getMtBinIndex(double mt);
-    int getFullMassBinIndex(double mass);
-    void createShapeHistograms(edm::Service< TFileService >& fs, std::vector< HPlus::WrappedTH1* >& container, string title, int nbins, double min, double max);
-    int getShapeBinIndex(int tauPtBin, int tauEtaBin, int nvtxBin);
-    void setAxisLabelsForTH3(WrappedTH3* h);
+    void doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronData, const MuonSelection::Data& muonData, const JetSelection::Data& jetData, const METSelection::Data& metData);
+    void testInvestigateCollinearEvents(const edm::Event& iEvent, const QCDTailKiller::Data& qcdTailKillerData, const JetSelection::Data& jetData, const ElectronSelection::Data& eData, const MuonSelection::Data& muData, const bool isRealData, const bool isFakeTau);
 
   private:
-
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
     HistoWrapper& fHistoWrapper;
     const double fDeltaPhiCutValue;
     const std::string fTopRecoName; // Name of selected top reconstruction algorithm
+    const bool fApplyNprongsCutForTauCandidate;
+    const bool fApplyRtauCutForTauCandidate;
+    const bool fDoAnalysisVariationWithTraditionalMethod;
+    const bool fDoAnalysisVariationWithABCDMethod;
+    const bool fDoAnalysisVariationWithDoubleABCDMethod;
 
-    std::vector<double> fTauPtBinLowEdges;
-    std::vector<double> fTauEtaBinLowEdges;
-    std::vector<int> fNVerticesBinLowEdges;
-    std::vector<double> fTransverseMassRange; // Range from config
-    std::vector<double> fFullMassRange; // Range from config
-    std::vector<double> fTransverseMassBinLowEdges;
-    std::vector<double> fFullMassRangeBinLowEdges;
-
-    // Counters - order is important
+    // Counters - do not change order
     Count fAllCounter;
-    Count fVertexReweighting;
     Count fWJetsWeightCounter;
     Count fMETFiltersCounter;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
-    Count fTausExistCounter;
-    Count fControlPlotsMultipleTausCounter;
-    Count fTauTriggerScaleFactorCounter;
+    Count fTausExistAfterCandidateSelectionCounter;
+    Count fTausExistAfterNprongsCutCounter;
+    Count fTausExistAfterRtauCutCounter;
+    Count fMultipleTausAfterTauSelection;
+    Count fTausAfterScaleFactorsCounter;
     Count fVetoTauCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
-    Count fFullTauIDCounter;
-    Count fMETCounter;
-    Count fBTaggingCounter;
-    Count fBTaggingScaleFactorCounter;
-    Count fQCDTailKillerCounter;
-    Count fDeltaPhiTauMETCounter;
-    Count fMaxDeltaPhiJetMETCounter;
-    Count fTopSelectionCounter;
-    Count fCoincidenceAfterMETCounter;
-    Count fCoincidenceAfterBjetsCounter;
-    Count fCoincidenceAfterDeltaPhiCounter;
-    Count fCoincidenceAfterSelectionCounter;
+    Count fMETTriggerScaleFactorCounter;
+    Count fStandardSelectionsCounter;
+    Count fStandardSelectionsWithMET30Counter;
+    Count fStandardSelectionsWithTailKillerCounter;
+    Count fStandardSelectionsWithTailKillerAndMET30Counter;
 
-    // Counters for propagating result into signal region from reversed rtau control region
-
-    // The order here defines the order the subcounters are printed at the program termination
+    // Do not change order
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
     TauSelection fTauSelection;
     VetoTauSelection fVetoTauSelection;
     ElectronSelection fElectronSelection;
-    //NonIsolatedElectronVeto fNonIsolatedElectronVeto;
     MuonSelection fMuonSelection;
-    //NonIsolatedMuonVeto fNonIsolatedMuonVeto;
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
-    //FakeMETVeto fFakeMETVeto;
-    DeltaPhi fDeltaPhi;
-    //TopSelection fTopSelection;
-    //ForwardJetVeto fForwardJetVeto;
-    TransverseMass fTransverseMass;
-    GenParticleAnalysis fGenparticleAnalysis;
     TopSelection fTopSelection;
     TopChiSelection fTopChiSelection;
     TopWithBSelection fTopWithBSelection;
     TopWithWSelection fTopWithWSelection;
     BjetSelection fBjetSelection;
-    EvtTopology fEvtTopology;
-
     FullHiggsMassCalculator fFullHiggsMassCalculator;
-    METFilters fMETFilters;
-    QCDTailKiller fQCDTailKiller;
-    WeightReader fPrescaleWeightReader;
-    WeightReader fPileupWeightReader;
-    FakeTauIdentifier fFakeTauIdentifier;
+    GenParticleAnalysis fGenparticleAnalysis;
+    //ForwardJetVeto fForwardJetVeto;
+    EvtTopology fEvtTopology;
     TauTriggerEfficiencyScaleFactor fTauTriggerEfficiencyScaleFactor;
     METTriggerEfficiencyScaleFactor fMETTriggerEfficiencyScaleFactor;
+    WeightReader fPrescaleWeightReader;
+    WeightReader fPileupWeightReader;
     WeightReader fWJetsWeightReader;
-
+    FakeTauIdentifier fFakeTauIdentifier;
+    METFilters fMETFilters;
+    QCDTailKiller fQCDTailKiller;
     SignalAnalysisTree fTree;
-    ScaleFactorUncertaintyManager fSFUncertaintyAfterStandardSelections;
+    CommonPlots fCommonPlots;
+    //FakeMETVeto fFakeMETVeto;
+    QCDFactorisedHistogramHandler fQCDFactorisedHistogramHandler;
+
+    // Common plots
+    //CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTrigger;
+    //CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeight;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETScaleFactor;
 
     // Histograms
     WrappedTH1* hVerticesBeforeWeight;
@@ -178,125 +266,27 @@ namespace HPlus {
     WrappedTH1* hVerticesTriggeredBeforeWeight;
     WrappedTH1* hVerticesTriggeredAfterWeight;
 
-    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsCollinear;
-    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsCollinearOpposite;
-    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsBackToBack;
-    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsBackToBackOpposite;
-    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsCollinearTight;
-    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsBackToBackTight;
-    WrappedTH2* hTauEtaVsPhiAfterMETLegCollinear;
-    WrappedTH2* hTauEtaVsPhiAfterMETLegCollinearOpposite;
-    WrappedTH2* hTauEtaVsPhiAfterMETLegBackToBack;
-    WrappedTH2* hTauEtaVsPhiAfterMETLegBackToBackOpposite;
-    WrappedTH2* hTauEtaVsPhiAfterMETLegCollinearTight;
-    WrappedTH2* hTauEtaVsPhiAfterMETLegBackToBackTight;
-    WrappedTH2* hTauEtaVsPhiAfterTauLegCollinear;
-    WrappedTH2* hTauEtaVsPhiAfterTauLegCollinearOpposite;
-    WrappedTH2* hTauEtaVsPhiAfterTauLegBackToBack;
-    WrappedTH2* hTauEtaVsPhiAfterTauLegBackToBackOpposite;
-    WrappedTH2* hTauEtaVsPhiAfterTauLegCollinearTight;
-    WrappedTH2* hTauEtaVsPhiAfterTauLegBackToBackTight;
+    WrappedTH1* hSelectionFlow;
 
-    WrappedTH2* hJetEtaVsPhiAfterBasicSelectionsCollinear;
-    WrappedTH2* hJetEtaVsPhiAfterBasicSelectionsCollinearTight;
-    WrappedTH2* hJetEtaVsPhiAfterBasicSelectionsBackToBack;
-    WrappedTH2* hJetEtaVsPhiAfterBasicSelectionsBackToBackTight;
-    WrappedTH2* hJetEtaVsPhiAfterMETLegCollinear;
-    WrappedTH2* hJetEtaVsPhiAfterMETLegCollinearTight;
-    WrappedTH2* hJetEtaVsPhiAfterMETLegBackToBack;
-    WrappedTH2* hJetEtaVsPhiAfterMETLegBackToBackTight;
-    WrappedTH2* hJetEtaVsPhiAfterTauLegCollinear;
-    WrappedTH2* hJetEtaVsPhiAfterTauLegCollinearTight;
-    WrappedTH2* hJetEtaVsPhiAfterTauLegBackToBack;
-    WrappedTH2* hJetEtaVsPhiAfterTauLegBackToBackTight;
+    // Measurement variations
+    QCDFactorisedVariation* fVariationTraditionalReference;
+    QCDFactorisedVariation* fVariationTraditionalPlusMET30;
+    QCDFactorisedVariation* fVariationTraditionalPlusTailKiller;
+    QCDFactorisedVariation* fVariationTraditionalPlusMET30AndTailKiller;
+    QCDFactorisedVariation* fVariationTraditionalPlusCollinearTailKiller;
+    QCDFactorisedVariation* fVariationTraditionalPlusMET30AndCollinearTailKiller;
+    QCDFactorisedVariation* fVariationABCDReference;
+    QCDFactorisedVariation* fVariationABCDPlusMET30;
+    QCDFactorisedVariation* fVariationABCDPlusTailKiller;
+    QCDFactorisedVariation* fVariationABCDPlusMET30AndTailKiller;
+    QCDFactorisedVariation* fVariationABCDPlusCollinearTailKiller;
+    QCDFactorisedVariation* fVariationABCDPlusMET30AndCollinearTailKiller;
+    QCDFactorisedVariation* fVariationDoubleABCD;
 
-    // Other histograms
-    WrappedTH1 *hSelectionFlow;
-
-    // NQCD factorisation in bins of tau jet pt, tau jet eta, and nvertices
-    WrappedTH3* hAfterJetSelection;
-    WrappedTH3* hAfterJetSelectionMET20;
-    WrappedTH3* hAfterJetSelectionMET30;
-    WrappedTH3* hLeg1AfterMET;
-    WrappedTH3* hLeg1AfterBTagging;
-    WrappedTH3* hLeg1AfterDeltaPhiTauMET;
-    WrappedTH3* hLeg1AfterMaxDeltaPhiJetMET;
-    WrappedTH3* hLeg1AfterTopSelection;
-    WrappedTH3* hLeg2AfterTauIDNoRtau;
-    WrappedTH3* hLeg2AfterTauIDNoRtauMET20;
-    WrappedTH3* hLeg2AfterTauIDNoRtauMET30;
-    WrappedTH3* hLeg2AfterTauID;
-    WrappedTH3* hLeg2AfterTauIDMET20;
-    WrappedTH3* hLeg2AfterTauIDMET30;
-
-    WrappedTH3* hABCDAfterBasicSelection;
-    WrappedTH3* hABCDAfterTauLeg;
-    WrappedTH3* hABCDAfterMETLeg;
-
-    // Mt shapesstd::vector<WrappedTH1*> hFeatureMinEtaOfSelectedJetToGap;
-    std::vector<WrappedTH1*> hMtShapesAfterStandardSelection;
-    std::vector<WrappedTH1*> hMtShapesAfterStandardSelectionMET20;
-    std::vector<WrappedTH1*> hMtShapesAfterStandardSelectionMET30;
-    std::vector<WrappedTH1*> hMtShapesAfterFullMETLeg;
-    std::vector<WrappedTH1*> hMtShapesAfterMet;
-    std::vector<WrappedTH1*> hMtShapesAfterMetAndBTagging;
-    std::vector<WrappedTH1*> hMtShapesAfterMetLegNoBtagging;
-    std::vector<WrappedTH1*> hMtShapesAfterTauIDNoRtau;
-    std::vector<WrappedTH1*> hMtShapesAfterTauID;
-    std::vector<WrappedTH1*> hMtShapesAfterTauIDNoRtauMET20;
-    std::vector<WrappedTH1*> hMtShapesAfterTauIDMET20;
-    std::vector<WrappedTH1*> hMtShapesAfterTauIDNoRtauMET30;
-    std::vector<WrappedTH1*> hMtShapesAfterTauIDMET30;
-    //std::vector<WrappedTH1*> hFullMassShapesAfterJetSelection;
-    std::vector<WrappedTH1*> hFullMassShapesAfterFullMETLeg;
-    //std::vector<WrappedTH1*> hFullMassShapesAfterMetLegNoBtagging;
-
-    std::vector<WrappedTH1*> hABCDMtShapesAfterBasicSelection;
-    std::vector<WrappedTH1*> hABCDMtShapesAfterTauLeg;
-    std::vector<WrappedTH1*> hABCDMtShapesAfterMETLeg;
-    std::vector<WrappedTH1*> hABCDMtShapesAfterMETLegNoBtag;
-
-    // Control plots
-    std::vector<WrappedTH1*> hCtrlNjets; // Njets in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlNjetsMET20; // Njets in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlNjetsMET30; // Njets in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlNjetsAfterMET; // Njets in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMETAfterStandardSelections; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMETAfterStandardSelectionsMET20; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMETAfterStandardSelectionsMET30; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMET; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMETAfterBtagging; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMETAfterTauIDNoRtau; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMETAfterTauIDNoRtauMET20; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMETAfterTauIDNoRtauMET30; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMETAfterFullTauID; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMETAfterFullTauIDMET20; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMETAfterFullTauIDMET30; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMETAfterBtaggingAndDeltaPhi; // MET in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlNbjets; // Nbjets in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlDeltaPhiTauMET; // DeltaPhi(tau,MET) in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlMaxDeltaPhiJetMET; // DeltaPhi(jet/tau,MET) in bins of tau pT
-    std::vector<WrappedTH1*> hCtrlTopMass; // top mass in bins of tau pT
-
-    // Control plots for ABCD
-    std::vector<WrappedTH1*> hABCDCtrlNJets;
-    std::vector<WrappedTH1*> hABCDCtrlMET;
-    std::vector<WrappedTH1*> hABCDCtrlNbjets;
-    std::vector<WrappedTH1*> hABCDCtrlDeltaPhiTauMET;
-
-    // Feature plots
-    std::vector<WrappedTH1*> hFeatureMinEtaOfSelectedJetToGapAfterBasicSelection;
-    std::vector<WrappedTH1*> hFeatureMinEtaOfSelectedJetToGapAfterMETLeg;
-    std::vector<WrappedTH1*> hFeatureMinEtaOfSelectedJetToGapAfterTauLeg;
-    std::vector<WrappedTH1*> hFeatureEtaSpreadOfSelectedJetsAfterBasicSelection;
-    std::vector<WrappedTH1*> hFeatureEtaSpreadOfSelectedJetsAfterMETLeg;
-    std::vector<WrappedTH1*> hFeatureEtaSpreadOfSelectedJetsAfterTauLeg;
-    std::vector<WrappedTH1*> hFeatureAverageEtaOfSelectedJetsAfterBasicSelection;
-    std::vector<WrappedTH1*> hFeatureAverageEtaOfSelectedJetsAfterMETLeg;
-    std::vector<WrappedTH1*> hFeatureAverageEtaOfSelectedJetsAfterTauLeg;
-    std::vector<WrappedTH1*> hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterBasicSelection; // Try to think of a longer name for sake of self documentation?
-    std::vector<WrappedTH1*> hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterMETLeg;
-    std::vector<WrappedTH1*> hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterTauLeg;
+    // Tests
+    JetDetailHistograms* fCollinearSystemJetsFakingTauGenuineTaus;
+    JetDetailHistograms* fCollinearSystemJetsFakingTauFakeTaus;
+    JetDetailHistograms* fCollinearSystemJetsOppositeToTau;
 
   };
 }

@@ -1883,6 +1883,8 @@ class PlotDrawer:
 
         if rebin is not None and rebinX is not None:
             raise Exception("Give either 'rebin' or 'rebinX', not both")
+        if rebin is not None:
+            rebinX = rebin
 
         # Use the one given as argument if both are non-None
         if rebinX is not None and rebinToWidthX is not None:

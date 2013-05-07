@@ -488,6 +488,7 @@ namespace HPlus {
     if(!iEvent.isRealData()) {
       const double wjetsWeight = fWJetsWeightReader.getWeight(iEvent, iSetup);
       fEventWeight.multiplyWeight(wjetsWeight);
+      fTree.setWjetsWeight(wjetsWeight);
     }
     increment(fWJetsWeightCounter);
 
@@ -805,6 +806,7 @@ namespace HPlus {
       fTree.setDparameter(evtTopologyData.SpherocityTensor().fDparameter);
       fTree.setJetThrust(evtTopologyData.SpherocityTensor().fJetThrust);
       fTree.setAllJets(jetData.getAllIdentifiedJets());
+      fTree.setSelJets(jetData.getSelectedJets());
       fTree.setSelJetsInclTau(jetData.getSelectedJetsIncludingTau());
       fTree.setMHT(jetData.getMHTvector());
       fTree.setMHTSelJets(jetData.getSelectedJets());

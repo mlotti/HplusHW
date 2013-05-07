@@ -32,16 +32,65 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
 #myOptimisation.disableMaxVariations()
 
+### Boolean flags
+bCustomizeTailKiller = True
+    
 def customize(signalAnalysis):
-    print "customisation applied"
+    # Choice of tau selection for tau candidate selection
+    signalAnalysis.applyNprongsCutForTauCandidate = False
+    signalAnalysis.applyRtauCutForTauCandidate = False
+    # Binning of factorisation (note that first bin is below the first number and last bin is greater than the last number)
+    signalAnalysis.factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150., 200., 300.)
+    signalAnalysis.factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5) # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
+    signalAnalysis.factorisationNVerticesBinLowEdges = cms.untracked.vint32(10)
+    # Variation options
+    signalAnalysis.doAnalysisVariationWithTraditionalMethod = True
+    signalAnalysis.doAnalysisVariationWithABCDMethod = False
+    signalAnalysis.doAnalysisVariationWithDoubleABCDMethod = False
+    # MET cut
+    #signalAnalysis.MET.METCut = 60.0
+    #signalAnalysis.MET.METCut = 50.0
+    # Tail-Killer 
+    if bCustomizeTailKiller:
+        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import QCDTailKillerBin
+        signalAnalysis.QCDTailKiller.maxJetsToConsider = cms.untracked.uint32(4)
+        # Back-To-Back
+        signalAnalysis.QCDTailKiller.backToBack = cms.untracked.VPSet(
+            QCDTailKillerBin("circular", 60.0, 60.0), # jet 1
+            QCDTailKillerBin("circular", 60.0, 60.0), # jet 2
+            QCDTailKillerBin("circular", 60.0, 60.0), # jet 3
+            QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
+            )
+        # Collinear
+        signalAnalysis.QCDTailKiller.collinear = cms.untracked.VPSet(
+            QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
+            QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
+            QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+            QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
+            )
 
+    # Info    
+    print "\n*** QCD factorised customisations applied ***"
+    print "- Nprongs cut included in tau candidate selections:",signalAnalysis.applyNprongsCutForTauCandidate.value()
+    print "- Rtau cut included in tau candidate selections:",signalAnalysis.applyRtauCutForTauCandidate.value()
+    print "- Traditional method used:",signalAnalysis.doAnalysisVariationWithTraditionalMethod.value()
+    print "- ABCD method (experimental) used:",signalAnalysis.doAnalysisVariationWithABCDMethod.value()
+    print "- Double ABCD method (very experymental) used:",signalAnalysis.doAnalysisVariationWithDoubleABCDMethod.value()
+    print "- MET cut:",signalAnalysis.MET.METCut.value()
+    print "- Tail-Killer:", signalAnalysis.QCDTailKiller
+    
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=1000, # default is -1
+                        customizeLightAnalysis=customize,
+                        #doHeavyAnalysis=True,
+                        #customizeHeavyAnalysis=customize,
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
                         #doAgainstElectronScan=True,
                         #doSystematics=True,
-                        histogramAmbientLevel = "Informative", # Vital
+                        doQCDTailKillerScenarios=False, #True,
+                        doFillTree=True, #False,
+                        histogramAmbientLevel = "Vital", # Informative
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )
 

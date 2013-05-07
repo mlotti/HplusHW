@@ -124,7 +124,7 @@ def readFromMulticrabCfg(**kwargs):
         for task in taskDirs:
             found = False
             for e_re in exclude:
-                if e_re.search(task):
+                if e_re.search(os.path.basename(task)):
                     found = True
                     break
             if found:
@@ -137,7 +137,7 @@ def readFromMulticrabCfg(**kwargs):
         for task in taskDirs:
             found = False
             for i_re in include:
-                if i_re.search(task):
+                if i_re.search(os.path.basename(task)):
                     found = True
                     break
             if found:
@@ -266,7 +266,7 @@ _optionDefaults = {
 ## Add common dataset options to OptionParser object.
 #
 # \param parser   OptionParser object
-def addOptions(parser, analysisName=None, searchMode=None, dataEra=None, optimizationMode=None):
+def addOptions(parser, analysisName=None, searchMode=None, dataEra=None, optimizationMode=None, systematicVariation=None):
     parser.add_option("-i", dest="input", type="string", default=_optionDefaults["input"],
                       help="Pattern for input root files (note: remember to escape * and ? !) (default: '%s')" % _optionDefaults["input"])
     parser.add_option("-f", dest="files", type="string", action="append", default=[],
@@ -279,6 +279,8 @@ def addOptions(parser, analysisName=None, searchMode=None, dataEra=None, optimiz
                       help="Override default dataEra (%s, plot script specific)" % dataEra)
     parser.add_option("--optimizationMode", dest="optimizationMode", type="string", default=optimizationMode,
                       help="Override default optimizationMode (%s, plot script specific)" % optimizationMode)
+    parser.add_option("--systematicVariation", dest="systematicVariation", type="string", default=systematicVariation,
+                      help="Override default systematicVariation (%s, plot script specific)" % systematicVariation)
     parser.add_option("--list", dest="listAnalyses", action="store_true", default=False,
                       help="List available analysis name information, and quit.")
     parser.add_option("--counterDir", "-c", dest="counterDir", type="string", default=None,
@@ -462,13 +464,18 @@ def _rescaleInfo(d):
     return ret
 
 
-## Normalize TH1 to unit area.
+## Normalize TH1/TH2/TH3 to unit area.
 # 
-# \param h   TH1 histogram
+# \param h   TH1/TH2/TH3 histogram
 # 
 # \return Normalized histogram (same as the argument object, i.e. no copy is made).
 def _normalizeToOne(h):
-    integral = h.Integral(0, h.GetNbinsX()+1)
+    if isinstance(h, ROOT.TH3):
+        integral = h.Integral(0, h.GetNbinsX()+1, 0, h.GetNbinsY()+1, 0, h+GetNbinsZ())
+    elif isinstance(h, ROOT.TH2):
+        integral = h.Integral(0, h.GetNbinsX()+1, 0, h.GetNbinsY()+1)
+    else:
+        integral = h.Integral(0, h.GetNbinsX()+1)
     if integral == 0:
         return h
     else:
@@ -1267,6 +1274,7 @@ class Dataset:
     # \param searchMode        String for search mode
     # \param dataEra           String for data era
     # \param optimizationMode  String for optimization mode (optional)
+    # \param systematicVariation String for systematic variation (optional)
     # \param weightedCounters  If True, pick the counters from the 'weighted' subdirectory
     # \param counterDir        Name of the directory in the ROOT file for
     #                          event counter histograms. If None is given,
@@ -1301,7 +1309,9 @@ class Dataset:
     # The \a useAnalysisNameOnly parameter is needed e.g. for ntuples
     # which store the era-specific weights to the tree itself, and
     # therefore the 
-    def __init__(self, name, tfiles, analysisName, searchMode=None, dataEra=None, optimizationMode=None, weightedCounters=True, counterDir="counters", useAnalysisNameOnly=False):
+    def __init__(self, name, tfiles, analysisName,
+                 searchMode=None, dataEra=None, optimizationMode=None, systematicVariation=None,
+                 weightedCounters=True, counterDir="counters", useAnalysisNameOnly=False):
         self.name = name
         self.files = tfiles
         if len(self.files) == 0:
@@ -1352,6 +1362,7 @@ class Dataset:
         self._searchMode = searchMode
         self._dataEra = dataEra
         self._optimizationMode = optimizationMode
+        self._systematicVariation = systematicVariation
         self._useAnalysisNameOnly = useAnalysisNameOnly
 
         self._analysisDirectoryName = self._analysisName
@@ -1362,6 +1373,8 @@ class Dataset:
                 self._analysisDirectoryName += self._dataEra
             if self._optimizationMode is not None:
                 self._analysisDirectoryName += self._optimizationMode
+            if self.isMC() and self._systematicVariation is not None:
+                self._analysisDirectoryName += self._systematicVariation
     
         # Check that analysis directory exists
         for f in self.files:
@@ -1395,7 +1408,7 @@ class Dataset:
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly)
+        d = Dataset(self.name, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._systematicVariation, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly)
         d.info.update(self.info)
         d.nAllEvents = self.nAllEvents
         return d
@@ -1493,6 +1506,12 @@ class Dataset:
             # because null TObject == None, but is not None
             if o == None:
                 raise HistogramNotFoundException("Unable to find object '%s' (requested '%s') from file '%s'" % (realName, name, self.files[0].GetName()))
+
+            # http://root.cern.ch/phpBB3/viewtopic.php?f=14&t=15496
+            # This one seems to save quite a lot of "garbage
+            # collection" time
+            ROOT.SetOwnership(o, True)
+
             ret.append(o)
         return (ret, realName)
 
@@ -2242,7 +2261,7 @@ class DatasetManager:
         for d in self.datasets:
             jsonname = os.path.join(d.basedir, fname)
             if not os.path.exists(jsonname):
-                print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist (using luminosity=1 for data)!" % jsonname
+                raise Exception("Luminosity JSON file '%s' does not exist. Have you run 'hplusLumiCalc.py' in your multicrab directory?" % jsonname)
                 for name in self.getDataDatasetNames():
                     self.getDataset(name).setLuminosity(1)
             else:
@@ -2391,7 +2410,14 @@ class DatasetPrecursor:
     def isMC(self):
         return not self.isData()
 
-_analysisNameSkipList = ["SystVar", "configInfo", "PUWeightProducer"]
+    ## Close the ROOT files
+    def close():
+        for f in self._rootFiles:
+            f.close("R")
+            f.Delete()
+        self._rootFiles = []
+
+_analysisNameSkipList = [re.compile("^SystVar"), re.compile("configInfo"), re.compile("PUWeightProducer")]
 _analysisSearchModes = ["Light", "Heavy"]
 _dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
 
@@ -2447,8 +2473,8 @@ class DatasetManagerCreator:
         contents = aux.listDirectoryContent(precursor.getFiles()[0], lambda key: key.IsFolder())
 
         def skipItem(name):
-            for skip in _analysisNameSkipList:
-                if skip in name:
+            for skip_re in _analysisNameSkipList:
+                if skip_re.search(name):
                     return False
             return True
         contents = filter(skipItem, contents)
@@ -2459,9 +2485,16 @@ class DatasetManagerCreator:
         searchModes = {}
         dataEras = {}
         optimizationModes = {}
+        systematicVariations = {}
 
         for d in contents:
             directoryName = d
+
+            # Look for systematic variation
+            start = directoryName.find("SystVar")
+            if start >= 0:
+                systematicVariations[directoryName[start:]] = 1
+                directoryName = directoryName[:start]
 
             # Look for optimization mode
             start = directoryName.find("Opt")
@@ -2491,11 +2524,13 @@ class DatasetManagerCreator:
         self._searchModes = searchModes.keys()
         self._mcDataEras = dataEras.keys()
         self._optimizationModes = optimizationModes.keys()
+        self._systematicVariations = systematicVariations.keys()
 
         self._analyses.sort()
         self._searchModes.sort()
         self._mcDataEras.sort()
         self._optimizationModes.sort()
+        self._systematicVariations.sort()
 
     ## Create DatasetManager
     #
@@ -2506,6 +2541,7 @@ class DatasetManagerCreator:
     # \li \a searchMode        String for search mode
     # \li \a dataEra           String for data era
     # \li \a optimizationMode  String for optimization mode (optional)
+    # \li \a systematicVariation String for systematic variation (optional)
     # \li \a opts              Optional OptionParser object. Should have options added with addOptions().
     #
     # The values of \a analysisName, \a searchMode, \a dataEra, and \a
@@ -2520,18 +2556,19 @@ class DatasetManagerCreator:
 
         # First check that if some of these is not given, if there is
         # exactly one it available, use that.
-        for arg, attr in [("analysisName", "_analyses"),
-                          ("searchMode", "_searchModes"),
-                          ("dataEra", "_mcDataEras"),
-                          ("optimizationMode", "_optimizationModes")]:
-            lst = getattr(self, attr)
+        for arg, attr in [("analysisName", "getAnalyses"),
+                          ("searchMode", "getSearchModes"),
+                          ("dataEra", "getDataEras"),
+                          ("optimizationMode", "getOptimizationModes"),
+                          ("systematicVariation", "getSystematicVariations")]:
+            lst = getattr(self, attr)()
             if arg not in _args and len(lst) == 1:
                 _args[arg] = lst[0]
 
         # Then override from command line options
         opts = kwargs.get("opts", None)
         if opts is not None:
-            for arg in ["analysisName", "searchMode", "dataEra", "optimizationMode", "counterDir"]:
+            for arg in ["analysisName", "searchMode", "dataEra", "optimizationMode", "systematicVariation", "counterDir"]:
                 o = getattr(opts, arg)
                 if o is not None:
                     _args[arg] = o
@@ -2539,7 +2576,7 @@ class DatasetManagerCreator:
 
         # Print the configuration
         parameters = []
-        for name in ["analysisName", "searchMode", "dataEra", "optimizationMode"]:
+        for name in ["analysisName", "searchMode", "dataEra", "optimizationMode", "systematicVariation"]:
             if name in _args:
                 value = _args[name]
                 parameters.append("%s='%s'" % (name, value))
@@ -2568,11 +2605,12 @@ class DatasetManagerCreator:
             except AnalysisNotFoundException, e:
                 msg = str(e)+"\n"
                 helpFound = False
-                for arg, attr in [("analysisName", "_analyses"),
-                                  ("searchMode", "_searchModes"),
-                                  ("dataEra", "_mcDataEras"),
-                                  ("optimizationMode", "_optimizationModes")]:
-                    lst = getattr(self, attr)
+                for arg, attr in [("analysisName", "getAnalyses"),
+                                  ("searchMode", "getSearchModes"),
+                                  ("dataEra", "getDataEras"),
+                                  ("optimizationMode", "getOptimizationModes"),
+                                  ("systematicVariation", "getSystematicVariations")]:
+                    lst = getattr(self, attr)()
                     if arg not in _args and len(lst) > 1:
                         msg += "You did not specify %s, while ROOT file contains %s\n" % (arg, ", ".join(lst))
                         helpFound = True
@@ -2618,6 +2656,9 @@ class DatasetManagerCreator:
     def getOptimizationModes(self):
         return self._optimizationModes
 
+    def getSystematicVariations(self):
+        return self._systematicVariations
+
     def printAnalyses(self):
         print "Analyses (analysisName):"
         for a in self._analyses:
@@ -2656,6 +2697,18 @@ class DatasetManagerCreator:
                 print "  "+o
         print
 
+        if len(self._systematicVariations) == 0:
+            print "No systematic variations"
+        else:
+            print "Systematic variations (systematicVariation):"
+            for s in self._systematicVariations:
+                print "  "+s
+        print
+
+    ## Close the ROOT files
+    def close(self):
+        for precursor in self._precursors:
+            precursor.close()
 
 ## Helper class to plug NtupleCache to the existing framework
 #

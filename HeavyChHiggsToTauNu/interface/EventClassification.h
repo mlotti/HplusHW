@@ -50,10 +50,12 @@ namespace HPlus {
   TVector3 getVisibleMomentum(const reco::Candidate& tau);
   TVector3 getInvisibleMomentum(const reco::Candidate& tau);
   TVector3 calculateGenMETVectorFromNeutrinos(const edm::Event& iEvent);
+  TVector3 getTauNeutrinoMomentum(const edm::Event& iEvent);
   bool hasGenVisibleTauWithinDeltaR(const edm::Event& iEvent, TVector3 recoTauVector, double deltaRCut);
   double getClosestGenVisibleTauDeltaR(const edm::Event& iEvent, TVector3 recoTauVector);
   bool hasGenBQuarkWithinDeltaR(const edm::Event& iEvent, TVector3 recoBJetVector, double deltaRCut);
   double getClosestGenBQuarkDeltaR(const edm::Event& iEvent, TVector3 recoBJetVector);
+  int getNumberOfNeutrinosInEvent(const edm::Event& iEvent);
   void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau);
   // };
 }
