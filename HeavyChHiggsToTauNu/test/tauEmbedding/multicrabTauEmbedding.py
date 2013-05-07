@@ -79,10 +79,10 @@ config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,
 updateNjobs = {
     "muonDebugAnalysisAod": {
         "TTJets_TuneZ2_Fall11": 100,
-    }
+    },
     "muonDebugAnalysisNtupleAod": {
         "TTJets_TuneZ2_Fall11": 500,
-    }
+    },
 }
 
 
