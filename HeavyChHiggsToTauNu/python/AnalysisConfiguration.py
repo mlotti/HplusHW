@@ -408,7 +408,7 @@ class ConfigBuilder:
                 analysisNamesForSystematics.extend(names)
 
         # QCD tail killer scenarios
-        self._buildQCDTailKillerScenarios(process, analysisModules, analysisNames)
+        analysisNamesForSystematics.extend(self._buildQCDTailKillerScenarios(process, analysisModules, analysisNames))
 
         # Against electron scan
         self._buildAgainstElectronScan(process, analysisModules, analysisNames)
@@ -658,7 +658,7 @@ class ConfigBuilder:
             setattr(process, modName+"Path", path)
 
         if not self.doQCDTailKillerScenarios:
-            return
+            return []
 
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import QCDTailKillerBin
         names = []
@@ -727,6 +727,8 @@ class ConfigBuilder:
         self._accumulateAnalyzers("Modules for QCDTailKiller scenarios", names)
         analysisModules.extend(modules)
         analysisNames.extend(names)
+
+        return names
 
     ## Build array of analyzers to scan various tau againstElectron discriminators
     #
