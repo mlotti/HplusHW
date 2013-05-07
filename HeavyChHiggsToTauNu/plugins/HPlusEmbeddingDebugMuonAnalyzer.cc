@@ -169,44 +169,14 @@ void HPlusEmbeddingDebugMuonAnalyzer::analyze(const edm::Event& iEvent, const ed
   iEvent.getByLabel(genSrc_, hgenparticles);
 
   // Find W's
-  const reco::GenParticle *W1 = 0;
-  const reco::GenParticle *W2 = 0;
-
-  for(edm::View<reco::GenParticle>::const_iterator iGen = hgenparticles->begin(); iGen != hgenparticles->end(); ++iGen) {
-    const reco::GenParticle *gen = &(*iGen);
-    if(std::abs(gen->pdgId()) != 24)
-      continue;
-
-    if(gen->mother() && std::abs(gen->mother()->pdgId()) != 6)
-      continue;
-
-    if(!W1)
-      W1 = gen;
-    else if(!W2)
-      W2 = gen;
-    else
-      throw cms::Exception("Assert") << "Third W from top? at " << __FILE__ << ":" << __LINE__ << std::endl;
-  }
-  if(!W1)
-    throw cms::Exception("Assert") << "W1 not found at " << __FILE__ << ":" << __LINE__  << std::endl;
-  if(!W2)
-    throw cms::Exception("Assert") << "W2 not found at " << __FILE__ << ":" << __LINE__  << std::endl;
-
-  const reco::GenParticle *W1daughter = HPlus::GenParticleTools::findMaxNonNeutrinoDaughter(W1);
-  const reco::GenParticle *W2daughter = HPlus::GenParticleTools::findMaxNonNeutrinoDaughter(W2);
-  if(!W1daughter)
-    throw cms::Exception("Assert") << "W1daughter not found at " << __FILE__ << ":" << __LINE__ << std::endl;
-  if(!W2daughter)
-    throw cms::Exception("Assert") << "W2daughter not found at " << __FILE__ << ":" << __LINE__ << std::endl;
-
   typedef std::vector<const reco::GenParticle *> GenVector;
   GenVector wmuons;
-  GenVector tmp;
-  if(std::abs(W1daughter->pdgId()) == 13)
-    wmuons.push_back(W1daughter);
-  if(std::abs(W2daughter->pdgId()) == 13)
-    wmuons.push_back(W2daughter);
-
+  GenVector tmp = HPlus::GenParticleTools::findTTBarWdecays(hgenparticles->ptrVector());
+  for(GenVector::const_iterator iGen = tmp.begin(); iGen != tmp.end(); ++iGen) {
+    if(std::abs((*iGen)->pdgId()) == 13)
+      wmuons.push_back(*iGen);
+  }
+  tmp.clear();
   if(wmuons.size() == 0)
     return;
   increment(cGenMuons);
