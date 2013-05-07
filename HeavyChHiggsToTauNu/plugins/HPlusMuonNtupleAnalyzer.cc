@@ -28,6 +28,10 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeVertexBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenParticleBranches.h"
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
 
 #include "TTree.h"
 
@@ -53,6 +57,7 @@ private:
 
   edm::InputTag fPatTriggerSrc;
 
+
   HPlus::TreeEventBranches fEventBranches;
   HPlus::TreeGenBranches fGenBranches;
   HPlus::TreeVertexBranches fSelectedVertexBranches;
@@ -61,7 +66,26 @@ private:
   //HPlus::TreeElectronBranches fElectronBranches;
   std::vector<double> fMuonJetMinDR;
 
+  bool fJetEnabled;
   HPlus::TreeJetBranches fJetBranches;
+
+  bool fGenTTBarEnabled;
+  HPlus::TreeGenParticleBranches fGenTTBarBranches;
+
+  struct MuonEff {
+    //MuonEff(const HPlus::EmbeddingMuonEfficiency *eff, const std::string& n): efficiency(eff), name(n) {}
+    //~MuonEff() {delete efficiency;}
+    MuonEff(const edm::ParameterSet& pset, const std::string& n): efficiency(pset), name(n) {}
+
+    void book(TTree *tree) { tree->Branch(name.c_str(), &values); }
+    void reset() { values.clear(); }
+
+    //const HPlus::EmbeddingMuonEfficiency *efficiency;
+    HPlus::EmbeddingMuonEfficiency efficiency;
+    std::string name;
+    std::vector<double> values;
+  };
+  std::vector<MuonEff> fMuonEffs;
 
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
@@ -75,11 +99,21 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fMuonBranches(iConfig),
   //fElectronBranches(iConfig, fSelectedVertexBranches.getInputTag()),
-  fJetBranches(iConfig, false)
+  fJetEnabled(iConfig.getParameter<bool>("jetEnabled")),
+  fJetBranches(iConfig, false),
+  fGenTTBarEnabled(iConfig.getParameter<bool>("genTTBarEnabled")),
+  fGenTTBarBranches("genttbarwdecays")
 {
 
-  edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("mets");
+  edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("muonEfficiencies");
   std::vector<std::string> names = pset.getParameterNames();
+  for(size_t i=0; i<names.size(); ++i) {
+    //fMuonEffs.push_back(MuonEff(new HPlus::EmbeddingMuonEfficiency(pset.getUntrackedParameter<edm::ParameterSet>(names[i])), "muon_efficiency_"+names[i]));
+    fMuonEffs.push_back(MuonEff(pset.getUntrackedParameter<edm::ParameterSet>(names[i]), "muon_efficiency_"+names[i]));
+  }
+
+  pset = iConfig.getParameter<edm::ParameterSet>("mets");
+  names = pset.getParameterNames();
   for(size_t i=0; i<names.size(); ++i) {
     fMets.push_back(MetItem(names[i], pset.getParameter<edm::InputTag>(names[i])));
   }
@@ -105,9 +139,18 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   fGoodVertexBranches.book(fTree);
   fMuonBranches.book(fTree);
   //fElectronBranches.book(fTree);
-  fTree->Branch("muons_jetMinDR", &fMuonJetMinDR);
 
-  fJetBranches.book(fTree);
+  if(fJetEnabled) {
+    fJetBranches.book(fTree);
+    fTree->Branch("muons_jetMinDR", &fMuonJetMinDR);
+  }
+
+  if(fGenTTBarEnabled)
+    fGenTTBarBranches.book(fTree);
+
+  for(size_t i=0; i<fMuonEffs.size(); ++i) {
+    fMuonEffs[i].book(fTree);
+  }
 
   for(size_t i=0; i<fMets.size(); ++i) {
     fTree->Branch(fMets[i].name.c_str(), &(fMets[i].value));
@@ -133,6 +176,11 @@ void HPlusMuonNtupleAnalyzer::reset() {
   //fElectronBranches.reset();
   fMuonJetMinDR.clear();
   fJetBranches.reset();
+  fGenTTBarBranches.reset();
+
+  for(size_t i=0; i<fMuonEffs.size(); ++i) {
+    fMuonEffs[i].reset();
+  }
 
   for(size_t i=0; i<fMets.size(); ++i) {
     fMets[i].value.SetXYZT(nan, nan, nan, nan);
@@ -166,20 +214,38 @@ void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
     fGenBranches.setValues(iEvent);
     fMuonBranches.setValues(iEvent, *hgenparticles);
     //fElectronBranches.setValues(iEvent, *hgenparticles);
-  }
 
-  fJetBranches.setValues(iEvent);
+    if(fGenTTBarEnabled) {
+      std::vector<const reco::GenParticle *> ttbarDecays = HPlus::GenParticleTools::findTTBarWdecays(hgenparticles->ptrVector());
+      for(size_t i=0; i<ttbarDecays.size(); ++i) {
+        fGenTTBarBranches.addValue(ttbarDecays[i]);
+      }
+    }
+  }
 
   edm::Handle<edm::View<pat::Muon> > hmuons;
   iEvent.getByLabel(fMuonBranches.getInputTag(), hmuons);
-  edm::Handle<edm::View<pat::Jet> > hjets;
-  iEvent.getByLabel(fJetBranches.getInputTag(), hjets);
-  for(size_t i=0; i<hmuons->size(); ++i) {
-    double minDR = 9999;
-    for(size_t j=0; j<hjets->size(); ++j) {
-      minDR = std::min(minDR, reco::deltaR(hmuons->at(i), hjets->at(j)));
+
+  for(size_t i=0; i<fMuonEffs.size(); ++i) {
+    for(size_t j=0; j<hmuons->size(); ++j) {
+      //HPlus::EmbeddingMuonEfficiency::Data data = fMuonEffs[i].efficiency->getEventWeight(hmuons->ptrAt(j), iEvent.isRealData());
+      HPlus::EmbeddingMuonEfficiency::Data data = fMuonEffs[i].efficiency.getEventWeight(hmuons->ptrAt(j), iEvent.isRealData());
+      fMuonEffs[i].values.push_back(data.getEfficiency());
     }
-    fMuonJetMinDR.push_back(minDR);
+  }
+
+  if(fJetEnabled) {
+    fJetBranches.setValues(iEvent);
+
+    edm::Handle<edm::View<pat::Jet> > hjets;
+    iEvent.getByLabel(fJetBranches.getInputTag(), hjets);
+    for(size_t i=0; i<hmuons->size(); ++i) {
+      double minDR = 9999;
+      for(size_t j=0; j<hjets->size(); ++j) {
+        minDR = std::min(minDR, reco::deltaR(hmuons->at(i), hjets->at(j)));
+      }
+      fMuonJetMinDR.push_back(minDR);
+    }
   }
 
   for(size_t i=0; i<fMets.size(); ++i) {

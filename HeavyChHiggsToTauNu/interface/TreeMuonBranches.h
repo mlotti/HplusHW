@@ -36,6 +36,7 @@ namespace HPlus {
     size_t setValues(const edm::Event& iEvent, const edm::View<reco::GenParticle>& genParticles);
 
     void setValues(const edm::PtrVector<pat::Muon>& muons);
+    void setValuesCorrected(const edm::PtrVector<pat::Muon>& muons);
 
     void reset();
 
@@ -43,14 +44,18 @@ namespace HPlus {
 
   private:
     edm::InputTag fMuonSrc;
+    edm::InputTag fMuonCorrectedSrc;
     std::string fPrefix;
 
     typedef math::XYZTLorentzVector XYZTLorentzVector;
     typedef HPlus::TreeFunctionVectorBranch<pat::Muon> MuonFunctionBranch;
 
     std::vector<XYZTLorentzVector> fMuons;
+    std::vector<XYZTLorentzVector> fMuonsCorrected;
     std::vector<MuonFunctionBranch> fMuonsFunctions;
     TreeGenParticleBranches fMuonsGenMatch;
+
+    bool fMuonCorrectedEnabled;
   };
 }
 

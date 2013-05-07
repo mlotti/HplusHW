@@ -14,8 +14,10 @@
 namespace HPlus {
   TreeMuonBranches::TreeMuonBranches(const edm::ParameterSet& iConfig, const std::string& prefix):
     fMuonSrc(iConfig.getParameter<edm::InputTag>("muonSrc")),
+    fMuonCorrectedSrc(iConfig.getParameter<edm::InputTag>("muonCorrectedSrc")),
     fPrefix(prefix+"_"),
-    fMuonsGenMatch(fPrefix+"genmatch")
+    fMuonsGenMatch(fPrefix+"genmatch"),
+    fMuonCorrectedEnabled(iConfig.getParameter<bool>("muonCorrectedEnabled"))
   {
     edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("muonFunctions");
     std::vector<std::string> names = pset.getParameterNames();
@@ -33,12 +35,25 @@ namespace HPlus {
       fMuonsFunctions[i].book(tree);
     }
     fMuonsGenMatch.book(tree);
+    if(fMuonCorrectedEnabled) {
+      tree->Branch((fPrefix+"correctedP4").c_str(), &fMuonsCorrected);
+    }
   }
 
   size_t TreeMuonBranches::setValues(const edm::Event& iEvent) {
     edm::Handle<edm::View<pat::Muon> > hmuons;
     iEvent.getByLabel(fMuonSrc, hmuons);
     setValues(hmuons->ptrVector());
+
+    if(fMuonCorrectedEnabled) {
+      edm::Handle<edm::View<pat::Muon> > hmuonscorr;
+      iEvent.getByLabel(fMuonCorrectedSrc, hmuonscorr);
+      setValuesCorrected(hmuonscorr->ptrVector());
+      if(hmuons->size() != hmuonscorr->size())
+        throw cms::Exception("Assert") << "Muon (src " << fMuonSrc.encode() << ") size " << hmuons->size()
+                                       << " != corrected muon (src " << fMuonCorrectedSrc.encode() << ") size " << hmuonscorr->size()
+                                       << std::endl;
+    }
 
     return hmuons->size();
   }
@@ -56,6 +71,16 @@ namespace HPlus {
       fMuonsGenMatch.addValue(gen);
     }
 
+    if(fMuonCorrectedEnabled) {
+      edm::Handle<edm::View<pat::Muon> > hmuonscorr;
+      iEvent.getByLabel(fMuonCorrectedSrc, hmuonscorr);
+      setValuesCorrected(hmuonscorr->ptrVector());
+      if(hmuons->size() != hmuonscorr->size()) 
+        throw cms::Exception("Assert") << "Muon (src " << fMuonSrc.encode() << ") size " << hmuons->size()
+                                       << " != corrected muon (src " << fMuonCorrectedSrc.encode() << ") size " << hmuonscorr->size()
+                                       << std::endl;
+    }
+
     return hmuons->size();
   }
 
@@ -69,8 +94,15 @@ namespace HPlus {
     }
   }
 
+  void TreeMuonBranches::setValuesCorrected(const edm::PtrVector<pat::Muon>& muons) {
+    for(size_t i=0; i<muons.size(); ++i) {
+      fMuonsCorrected.push_back(muons[i]->p4());
+    }
+  }
+
   void TreeMuonBranches::reset() {
     fMuons.clear();
+    fMuonsCorrected.clear();
     for(size_t i=0; i<fMuonsFunctions.size(); ++i)
       fMuonsFunctions[i].reset();
     fMuonsGenMatch.reset();
