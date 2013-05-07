@@ -304,13 +304,13 @@ def sumHistoBins(datasets,histoname,newname="",newtitle="",rebin = 1):
         histo = histo_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         histo.Scale(normData[ptbin])
 
-#        histoEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(histoname+ptbin)])
-#        histoEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-#	histoEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-#        histoEWK = histoEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
-#        histoEWK.Scale(normEWK[ptbin])
+        histoEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(histoname+ptbin)])
+        histoEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+	histoEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+        histoEWK = histoEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+        histoEWK.Scale(normEWK[ptbin])
 
-#        histo.Add(histoEWK, -1)
+        histo.Add(histoEWK, -1)
         histos.append(histo)
 
     sum = histos[0].Clone("sum")
