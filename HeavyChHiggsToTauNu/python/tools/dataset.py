@@ -1506,6 +1506,12 @@ class Dataset:
             # because null TObject == None, but is not None
             if o == None:
                 raise HistogramNotFoundException("Unable to find object '%s' (requested '%s') from file '%s'" % (realName, name, self.files[0].GetName()))
+
+            # http://root.cern.ch/phpBB3/viewtopic.php?f=14&t=15496
+            # This one seems to save quite a lot of "garbage
+            # collection" time
+            ROOT.SetOwnership(o, True)
+
             ret.append(o)
         return (ret, realName)
 
@@ -2255,7 +2261,7 @@ class DatasetManager:
         for d in self.datasets:
             jsonname = os.path.join(d.basedir, fname)
             if not os.path.exists(jsonname):
-                print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist (using luminosity=1 for data)!" % jsonname
+                raise Exception("Luminosity JSON file '%s' does not exist. Have you run 'hplusLumiCalc.py' in your multicrab directory?" % jsonname)
                 for name in self.getDataDatasetNames():
                     self.getDataset(name).setLuminosity(1)
             else:
@@ -2403,6 +2409,13 @@ class DatasetPrecursor:
 
     def isMC(self):
         return not self.isData()
+
+    ## Close the ROOT files
+    def close():
+        for f in self._rootFiles:
+            f.close("R")
+            f.Delete()
+        self._rootFiles = []
 
 _analysisNameSkipList = [re.compile("^SystVar"), re.compile("configInfo"), re.compile("PUWeightProducer")]
 _analysisSearchModes = ["Light", "Heavy"]
@@ -2692,6 +2705,10 @@ class DatasetManagerCreator:
                 print "  "+s
         print
 
+    ## Close the ROOT files
+    def close(self):
+        for precursor in self._precursors:
+            precursor.close()
 
 ## Helper class to plug NtupleCache to the existing framework
 #

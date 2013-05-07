@@ -608,12 +608,15 @@ namespace HPlus {
     const BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     // Obtain QCD tail killer
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    // const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET()); //testing
     // Obtain alphaT
     const EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(selectedTau), jetData.getSelectedJetsIncludingTau());
 
     // FIXME: Add filling of tree for QCD tail killer
     // FIXME: Add filling of weights (wjets ...)
     // Fill tree
+    if(metData.getSelectedMET().isNonnull())
+      fTree.setSelectedMet(metData.getSelectedMET());
     if(metData.getRawMET().isNonnull())
       fTree.setRawMET(metData.getRawMET());
     if(metData.getType1MET().isNonnull())
@@ -667,8 +670,8 @@ namespace HPlus {
       fTree.setHplusMassNeutrinoPtSolution(FullHiggsMassDataTmp.getNeutrinoPtSolution());
       fTree.setHplusMassMCNeutrinoPz(FullHiggsMassDataTmp.getMCNeutrinoPz());
     }
-    fTree.setSetPassedTailKillerBackToBack(qcdTailKillerData.passedBackToBackCuts());
-    fTree.setSetPassedTailKillerCollinear(qcdTailKillerData.passedCollinearCuts());
+    fTree.setPassedTailKillerBackToBack(qcdTailKillerData.passedBackToBackCuts());
+    fTree.setPassedTailKillerCollinear(qcdTailKillerData.passedCollinearCuts());
 
     for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
       fTree.setRadiusFromBackToBackCornerJet(qcdTailKillerData.getRadiusFromBackToBackCorner(i));
