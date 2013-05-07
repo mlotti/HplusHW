@@ -273,6 +273,8 @@ namespace HPlus {
     HistogramsInBins *hMETBaselineTauIdJets;
     HistogramsInBins *hMETBaselineTauIdBtag;
     HistogramsInBins *hMETBaselineTauIdBveto;
+    HistogramsInBins *hMETBaselineTauIdJetsCollinear;
+    HistogramsInBins *hMETBaselineTauIdBvetoCollinear;
     HistogramsInBins *hMETBaselineTauIdBvetoTailKiller;
     // baseline MT histos
     HistogramsInBins *hMTBaselineTauIdJet;
@@ -310,6 +312,8 @@ namespace HPlus {
     HistogramsInBins *hMETInvertedTauIdJets;
     HistogramsInBins *hMETInvertedTauIdBtag;  
     HistogramsInBins *hMETInvertedTauIdBveto;
+    HistogramsInBins *hMETInvertedTauIdJetsCollinear;
+    HistogramsInBins *hMETInvertedTauIdBvetoCollinear;
     HistogramsInBins *hMETInvertedAllCutsTailKiller;
     HistogramsInBins *hMet_AfterBTagging;
     HistogramsInBins *hNBInvertedTauIdJet;
@@ -336,16 +340,45 @@ namespace HPlus {
     HistogramsInBins *hMTInvertedAllCutsTailKiller;
     HistogramsInBins *hTopMass;
     HistogramsInBins *hHiggsMass;
-    HistogramsInBins *hHiggsMassPhi;
+
+    WrappedTH2 *hDeltaPhiJet1TauSel;
+    WrappedTH2 *hDeltaPhiJet1LeptonVeto;
+    WrappedTH2 *hDeltaPhiJet1MetCut;
+    WrappedTH2 *hDeltaPhiJet1Btagging;
+    WrappedTH2 *hDeltaPhiJet2TauSel;
+    WrappedTH2 *hDeltaPhiJet2LeptonVeto;
+    WrappedTH2 *hDeltaPhiJet2MetCut;
+    WrappedTH2 *hDeltaPhiJet2Btagging;
+    WrappedTH2 *hDeltaPhiJet3TauSel;
+    WrappedTH2 *hDeltaPhiJet3LeptonVeto;
+    WrappedTH2 *hDeltaPhiJet3MetCut;
+    WrappedTH2 *hDeltaPhiJet3Btagging;
+    WrappedTH2 *hDeltaPhiJet4TauSel;
+    WrappedTH2 *hDeltaPhiJet4LeptonVeto;
+    WrappedTH2 *hDeltaPhiJet4MetCut;
+    WrappedTH2 *hDeltaPhiJet4Btagging;
+
+    WrappedTH2 *hDeltaPhiJet1TauSelBaseline;
+    WrappedTH2 *hDeltaPhiJet1BtaggingBaseline;
+    WrappedTH2 *hDeltaPhiJet2TauSelBaseline;
+    WrappedTH2 *hDeltaPhiJet2BtaggingBaseline;
+    WrappedTH2 *hDeltaPhiJet3TauSelBaseline;
+    WrappedTH2 *hDeltaPhiJet3BtaggingBaseline;
+    WrappedTH2 *hDeltaPhiJet4TauSelBaseline;
+    WrappedTH2 *hDeltaPhiJet4BtaggingBaseline;
 
 
+    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet1TauSel; 
+    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet1LeptonVeto;
+    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet1MetCut; 
+    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet1Btagging;   
+   
 
-    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiMETJet1Inverted; 
-    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiMETJet2Inverted;
-    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiMETJet3Inverted; 
-    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiMETJet4Inverted;   
-    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiMETJet2InvertedAfterCut;
-
+    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2TauSel; 
+    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2LeptonVeto;
+    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2MetCut; 
+    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2Btagging;   
+   
 
 
 

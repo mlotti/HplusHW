@@ -25,9 +25,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 from InvertedTauID import *
 
-#dataEra = "Run2011A"
+dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2011AB"
+#dataEra = "Run2011AB"
 
 searchMode = "Light"
 #searchMode = "Heavy"
@@ -87,8 +87,10 @@ def main():
     invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
     invertedQCD.useErrorBars(errorBars)
 
-    metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLineTauIdBveto")
-    metInver = plots.DataMCPlot(datasets, "Inverted/MET_InvertedTauIdBveto")
+    metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLineTauIdBvetoCollinear")
+    metInver = plots.DataMCPlot(datasets, "Inverted/MET_InvertedTauIdBvetoCollinear")
+#    metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLineTauIdJetsCollinear")
+#    metInver = plots.DataMCPlot(datasets, "Inverted/MET_InvertedTauIdJetsCollinear")
 #    metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLineTauIdJets")
 #    metInver = plots.DataMCPlot(datasets, "Inverted/MET_InvertedTauIdJets") 
 
@@ -96,14 +98,20 @@ def main():
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
     
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MET_InvertedTauIdJes")
-    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MET_InvertedTauIdJets") 
-    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MET_BaselineTauIdJets")
-    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MET_BaselineTauIdJets")
-#    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MET_InvertedTauIdBveto")
-#    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MET_InvertedTauIdBveto") 
-#    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MET_BaselineTauIdBveto")
-#    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MET_BaselineTauIdBveto")
+#    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MET_InvertedTauIdJes")
+#    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MET_InvertedTauIdJets") 
+#    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MET_BaselineTauIdJets")
+#    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MET_BaselineTauIdJets")
+
+#    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MET_InvertedTauIdBvetoCollinear")
+#    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MET_InvertedTauIdBvetoCollinear") 
+#    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MET_BaselineTauIdBvetoCollinear")
+#    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MET_BaselineTauIdBvetoCollinear")
+    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MET_InvertedTauIdJetsCollinear")
+    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MET_InvertedTauIdJetsCollinear") 
+    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MET_BaselineTauIdJetsCollinear")
+    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MET_BaselineTauIdJetsCollinear")
+
 
     metBase_data.SetTitle("Data: BaseLine TauID")
     metInverted_data.SetTitle("Data: Inverted TauID")

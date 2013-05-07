@@ -33,10 +33,12 @@ myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 
 def customize(signalAnalysis):
     print "Customisation applied"
-
+#    signalAnalysis.MET.METCut = 50.
+    
+    
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
-                        maxEvents=1000, # default is -1
+                        maxEvents=-1, # default is -1
                         customizeLightAnalysis=customize,
                         doQCDTailKillerScenarios=True,
                         #doAgainstElectronScan=True,
