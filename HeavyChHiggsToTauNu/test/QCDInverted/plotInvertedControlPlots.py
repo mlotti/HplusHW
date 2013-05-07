@@ -65,7 +65,9 @@ optMode = "OptQCDTailKillerLoose"
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
 
-print "dataEra"
+print "dataEra",dataEra
+
+landsInput = "histogramsForLands.root"
 
 def usage():
     print "\n"
@@ -142,7 +144,7 @@ def main():
     doPlots(datasets)
 
     # Write mt histograms to ROOT file
-#    writeTransverseMass(datasets_lands)
+    writeTransverseMass(datasets_lands)
 
     # Print counters
     doCounters(datasets)
@@ -151,13 +153,13 @@ def main():
 def writeTransverseMass(datasets_lands):
     mt = plots.DataMCPlot(datasets_lands, "transverseMass")
     mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    f = ROOT.TFile.Open(output, "RECREATE")
+    f = ROOT.TFile.Open(landsInput, "RECREATE")
     mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_data")
     mt_data.SetDirectory(f)
     mt_hw = mt.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("mt_hw")
     mt_hw.SetDirectory(f)
-    mt_hh = mt.histoMgr.getHisto("TTToHplusBHminusB_M120").getRootHisto().Clone("mt_hh")
-    mt_hh.SetDirectory(f)
+#    mt_hh = mt.histoMgr.getHisto("TTToHplusBHminusB_M120").getRootHisto().Clone("mt_hh")
+#    mt_hh.SetDirectory(f)
     f.Write()
     f.Close()
 
@@ -292,6 +294,35 @@ def normalisationInclusive():
     print "inclusive norm", norm_inc,normEWK_inc       
     return norm_inc,normEWK_inc 
 
+def sumHistoBins(datasets,histoname,newname="",newtitle="",rebin = 1):
+    normData,normEWK,normFactorisedData,normFactorisedEWK,normBtagToBveto,normBtagToBvetoEWK=normalisation()
+
+    histos = []
+    for ptbin in ptbins:
+        histo_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(histoname+ptbin)])
+        histo_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+        histo = histo_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+        histo.Scale(normData[ptbin])
+
+#        histoEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(histoname+ptbin)])
+#        histoEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+#	histoEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+#        histoEWK = histoEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+#        histoEWK.Scale(normEWK[ptbin])
+
+#        histo.Add(histoEWK, -1)
+        histos.append(histo)
+
+    sum = histos[0].Clone("sum")
+    if len(newname)>0:
+        sum.SetName(newname)
+    if len(newtitle)>0:
+        sum.SetTitle(newtitle)
+    sum.Reset()
+
+    for histo in histos:
+        sum.Add(histo)
+    return sum
 
 def controlPlots(datasets):
     
@@ -313,8 +344,17 @@ def controlPlots(datasets):
     hjet = []
     hphi2 = []
 
+    testHisto = sumHistoBins(datasets,"Inverted/MTInvertedAllCutsTailKiller","transverseMass2","Inverted tau ID")
+    canvasTest = ROOT.TCanvas("testMt","",500,500)
+    canvasTest.cd()
+#    testHisto.Rebin(10)
+    testHisto.SetMarkerColor(4)
+    testHisto.SetMarkerSize(1)
+    testHisto.SetMarkerStyle(20)
+    testHisto.SetFillColor(4)
+    testHisto.Draw("EP")
+    canvasTest.Print("testMt.eps")    
 
-    
 ## histograms in bins, normalisation and substraction of EWK contribution
     ## mt with 2dim deltaPhi cut
     for ptbin in ptbins:
@@ -616,20 +656,20 @@ def controlPlots(datasets):
           
 #################################################
  ##  mT with TailKiller cuts
-    mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaselineTauIdAllCutsTailKiller")])         
+    mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTauIdAllCutsTailKiller")])         
     mtBaseline._setLegendStyles()
     mtBaseline._setLegendLabels()
     mtBaseline.histoMgr.setHistoDrawStyleAll("P")
     mtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
-    hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MTBaselineTauIdAllCutsTailKiller")
+    hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MTBaseLineTauIdAllCutsTailKiller")
     
-    mtEWKBaseline = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaselineTauIdAllCutsTailKiller")])   
+    mtEWKBaseline = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdAllCutsTailKiller")])   
     mtEWKBaseline.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mtEWKBaseline._setLegendStyles()
     mtEWKBaseline._setLegendLabels()
     mtEWKBaseline.histoMgr.setHistoDrawStyleAll("P")
     mtEWKBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
-    hmtEWK = mtEWKBaseline.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MTBaselineTauIdAllCutsTailKiller")
+    hmtEWK = mtEWKBaseline.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MTBaseLineTauIdAllCutsTailKiller")
 
     
     hmtBaseline_QCD = hmtBaseline.Clone("QCD")
@@ -640,7 +680,7 @@ def controlPlots(datasets):
     print "invertedHisto ",invertedHisto.GetEntries()
     print "baselineHisto ",invertedHisto.GetEntries()
     invertedQCD.setLabel("MtInvertedVsBaselineTailKiller")
-    invertedQCD.controlPlots(invertedHisto, baselineHisto,"MtInvertedVsBaselineTailKiller")
+    invertedQCD.controlPlots(invertedHisto, baselineHisto,"MtInvertedVsBaseLineTailKiller")
 
 
 
@@ -654,7 +694,7 @@ def controlPlots(datasets):
     mmtBaseline._setLegendLabels()
     mmtBaseline.histoMgr.setHistoDrawStyleAll("P")
     mmtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))  
-    hmmtBaseline = mmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MTBaselineTauIdJets")
+    hmmtBaseline = mmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MTBaseLineTauIdJets")
     
     mmtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mmtEWK._setLegendStyles()
@@ -674,173 +714,6 @@ def controlPlots(datasets):
     invertedQCD.controlPlots(invertedHisto, baselineHisto,"MetInvertedVsBaselineTailKiller")
 #######################################
 
-## Invariant mass
-    if False:
-        mHiggsBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/HiggsMass")])
-        mHiggsEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/HiggsMass")])        
-        
-        mHiggsBaseline._setLegendStyles()
-        mHiggsBaseline._setLegendLabels()
-        mHiggsBaseline.histoMgr.setHistoDrawStyleAll("P")
-        mHiggsBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))  
-        hmHiggsBaseline = mHiggsBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/HiggsMass")
-        
-        mHiggsEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-        mHiggsEWK._setLegendStyles()
-        mHiggsEWK._setLegendLabels()
-        mHiggsEWK.histoMgr.setHistoDrawStyleAll("P")
-        mHiggsEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))  
-        hmHiggsEWK = mHiggsEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MTBaselineTauIdJets")
-        
-        hmHiggs_QCD = hmHiggsBaseline.Clone("QCD")
-        hmHiggs_QCD.Add(hmHiggsEWK,-1)
-        
-        invertedHisto = higgsMass.Clone("met")
-        baselineHisto = hmHiggs_QCD.Clone("met_QCD")    
-        print "invertedHisto ",invertedHisto.GetEntries()
-        print "baselineHisto ",invertedHisto.GetEntries()
-        invertedQCD.setLabel("InvMassInvertedVsBaselineTailKiller")
-        invertedQCD.controlPlots(invertedHisto, baselineHisto,"InvMassInvertedVsBaselineTailKiller",ratio=False)
-
-####################################
-
-
-    ###  deltaPhi
-    fmtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/deltaPhiBaseline")])
-    fmtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/deltaPhiBaseline")])        
-
-
-    fmtBaseline._setLegendStyles()
-    fmtBaseline._setLegendLabels()
-    fmtBaseline.histoMgr.setHistoDrawStyleAll("P")
-    fmtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hfmtBaseline = fmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/MTBaselineTauIdJetPhi")
-    
-    fmtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    fmtEWK._setLegendStyles()
-    fmtEWK._setLegendLabels()
-    fmtEWK.histoMgr.setHistoDrawStyleAll("P")
-    fmtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hfmtEWK = fmtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MTBaselineTauIdJetPhi")
-
-
-
-    hDphi_QCD = hfmtBaseline.Clone("QCD")
-    hDphi_QCD.Add(hfmtEWK,-1)
-    
-    invertedHisto = DeltaPhi.Clone("dphi")
-    baselineHisto = hDphi_QCD.Clone("dphi_QCD")    
-    print "invertedHisto ",invertedHisto.GetEntries()
-    print "baselineHisto ",invertedHisto.GetEntries()
-    invertedQCD.setLabel("DphiInvertedVsBaseline")
-    invertedQCD.controlPlots(invertedHisto, baselineHisto,"DphiInvertedVsBaseline")
-
-
-
-
-################## N bjets
-    
-    bhmtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/NBBaselineTauIdJet")])
-    bhmtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/NBBaselineTauIdJet")])
- 
-    bhmtBaseline._setLegendStyles()
-    bhmtBaseline._setLegendLabels()
-    bhmtBaseline.histoMgr.setHistoDrawStyleAll("P")
-    bhmtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hbhmtBaseline = bhmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/NBBaselineTauIdJet")
-    
-    bhmtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    bhmtEWK._setLegendStyles()
-    bhmtEWK._setLegendLabels()
-    bhmtEWK.histoMgr.setHistoDrawStyleAll("P")
-    bhmtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hbhmtEWK =  bhmtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/NBBaselineTauIdJet")
-
-
-
-
-    nbjets_QCD = hbhmtBaseline.Clone("QCD")
-    nbjets_QCD.Add(hbhmtEWK,-1)
-    
-    invertedHisto = bjet.Clone("bjets")
-    baselineHisto = nbjets_QCD.Clone("bjets_QCD")    
-#    print "invertedHisto ",invertedHisto.GetEntries()
-#    print "baselineHisto ",invertedHisto.GetEntries()
-    invertedQCD.setLabel("BjetsInvertedVsBaseline")
-#    invertedQCD.controlPlots(invertedHisto, baselineHisto,"BjetsInvertedVsBaseline")
-    invertedQCD.controlPlots(invertedHisto, invertedHisto,"BjetsInvertedVsBaseline",ratio=False)
-
-
-
- ################## N jets
-    
- 
-    jBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/NJetBaselineTauIdJet")])
-    jEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/NJetBaselineTauIdJet")])
- 
- 
-           
-    jBaseline._setLegendStyles()
-    jBaseline._setLegendLabels()
-    jBaseline.histoMgr.setHistoDrawStyleAll("P")
-    jBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hjBaseline = jBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/NJetBaselineTauIdJet")
-    
-    jEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    jEWK._setLegendStyles()
-    jEWK._setLegendLabels()
-    jEWK.histoMgr.setHistoDrawStyleAll("P")
-    jEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hjEWK =  jEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/NJetBaselineTauIdJet")
-
-    Njets_QCD = hjBaseline.Clone("QCD")
-    Njets_QCD.Add(hjEWK,-1)
-
-
-    invertedHisto = jet.Clone("bjets")
-    baselineHisto = Njets_QCD.Clone("bjets_QCD")    
-#    print "invertedHisto ",invertedHisto.GetEntries()
-#    print "baselineHisto ",invertedHisto.GetEntries()
-    invertedQCD.setLabel("JetsInvertedVsBaseline")
-    invertedQCD.controlPlots(invertedHisto, baselineHisto,"JetsInvertedVsBaseline")
-#    invertedQCD.controlPlots(invertedHisto, invertedHisto,"JetsInvertedVsBaseline",ratio=False)
-
-
-################## N jets after MET
-    
-
-    jmBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/NJetBaselineTauIdJetMet")])
-    jmEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/NJetBaselineTauIdJetMet")])
-  
-    jmBaseline._setLegendStyles()
-    jmBaseline._setLegendLabels()
-    jmBaseline.histoMgr.setHistoDrawStyleAll("P")
-    jmBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hjmBaseline = jmBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/NJetBaselineTauIdJetMet")
-    
-    jmEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    jmEWK._setLegendStyles()
-    jmEWK._setLegendLabels()
-    jmEWK.histoMgr.setHistoDrawStyleAll("P")
-    jmEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hjmEWK =  jmEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("NBBaselineTauIdJet")
-    
-    
-    NjetsMet_QCD = hjmBaseline.Clone("QCD")
-    NjetsMet_QCD.Add(hjmEWK,-1)
-
-
-    invertedHisto = jetmet.Clone("bjets")
-    baselineHisto = NjetsMet_QCD.Clone("bjets_QCD")    
-    print "invertedHisto ",invertedHisto.GetEntries()
-    print "baselineHisto ",invertedHisto.GetEntries()
-    invertedQCD.setLabel("JetsInvertedVsBaselineAfterMet")
-    invertedQCD.controlPlots(invertedHisto, baselineHisto,"JetsInvertedVsBaselineAfterMet")
-#    invertedQCD.controlPlots(invertedHisto, invertedHisto,"JetsInvertedVsBaselineAfterMet",ratio=False)
-
-
-
-    
 
     canvas32 = ROOT.TCanvas("canvas32","",500,500)    
     hmtSum.SetMarkerColor(4)
@@ -848,18 +721,6 @@ def controlPlots(datasets):
     hmtSum.SetMarkerStyle(20)
     hmtSum.SetFillColor(4)
     hmtSum.Draw("EP")
-    
-    hmtBaseline_QCD = hmtBaseline.Clone("QCD")
-    hmtBaseline_QCD.Add(hmtEWK,-1)
-    hmtBaseline_QCD.SetMarkerColor(2)
-    hmtBaseline_QCD.SetMarkerSize(1)
-    hmtBaseline_QCD.SetMarkerStyle(21)
-#    hmtBaseline_QCD.Draw("same")            
-
-    tex2 = ROOT.TLatex(0.55,0.85,"Inverted #tau isolation")
-    tex2.SetNDC()
-    tex2.SetTextSize(20)
-    tex2.Draw()
     
     #    tex3 = ROOT.TLatex(0.55,0.75,"#Delta#phi(#tau jet, Met) < 160^{o}")
 #    tex3 = ROOT.TLatex(0.55,0.75,"2 Dim #Delta#phi cut")
@@ -877,17 +738,6 @@ def controlPlots(datasets):
     tex6.SetTextSize(20)
     tex6.Draw()    
 
-    
-    tex9 = ROOT.TLatex(0.55,0.78,"Baseline: Data-EWK") 
-    tex9.SetNDC()
-    tex9.SetTextSize(20)
-#    tex9.Draw()
-    marker9 = ROOT.TMarker(0.5,0.795,hmtBaseline_QCD.GetMarkerStyle())
-    marker9.SetNDC()
-    marker9.SetMarkerColor(hmtBaseline_QCD.GetMarkerColor())
-    marker9.SetMarkerSize(0.9*hmtBaseline_QCD.GetMarkerSize())
-#    marker9.Draw()
-    
     tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
 #    tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12.2 fb^{-1}       CMS Preliminary ")    
     tex4.SetNDC()
@@ -946,9 +796,7 @@ def controlPlots(datasets):
     tex4.SetTextSize(20)
     tex4.Draw()
     
-    hmt.GetYaxis().SetTitleOffset(1.5)
-    hmt.GetXaxis().SetTitle("CircleCut_BackToBackJet1")
-    hmt.GetYaxis().SetTitle("Events")
+
     canvas390.Print("CircleCut_BackToBackJet1.png")
     canvas390.Print("CircleCut_BackToBackJet1.C")
 
@@ -1168,137 +1016,9 @@ def controlPlots(datasets):
     tex4.SetTextSize(20)
     tex4.Draw()
     
-    hmt.GetYaxis().SetTitleOffset(1.5)
-    hmt.GetXaxis().SetTitle("CircleCut_CollinearJet1")
-    hmt.GetYaxis().SetTitle("Events")
+
     canvas391.Print("CircleCut_CollinearJet1.png")
     canvas391.Print("CircleCut_CollinearJet1.C")
-
-    
-####################################################
-# mt after b tagging
-    canvas72 = ROOT.TCanvas("canvas72","",500,500)    
-    hmtSumb.SetMarkerColor(4)
-    hmtSumb.SetMarkerSize(1)
-    hmtSumb.SetMarkerStyle(20)
-    hmtSumb.SetFillColor(4)
-    hmtSumb.Draw("EP")
-               
-
-    tex2 = ROOT.TLatex(0.55,0.85,"Inverted #tau isolation")
-    tex2.SetNDC()
-    tex2.SetTextSize(20)
-#    tex2.Draw()
-#    tex3 = ROOT.TLatex(0.55,0.75,"#Delta#phi(#tau jet, Met) < 160^{o}")
-#    tex3 = ROOT.TLatex(0.55,0.75,"2 Dim #Delta#phi cut")
-    tex3 = ROOT.TLatex(0.55,0.85,"No #Delta#phi cuts")
-    tex3.SetNDC()
-    tex3.SetTextSize(25)
-    tex3.Draw() 
-    marker2 = ROOT.TMarker(0.5,0.865,hmtSum.GetMarkerStyle())
-    marker2.SetNDC()
-    marker2.SetMarkerColor(hmtSum.GetMarkerColor())
-    marker2.SetMarkerSize(0.9*hmtSum.GetMarkerSize())
-#    marker2.Draw()
-    
-    
-    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
-#    tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12.2 fb^{-1}       CMS Preliminary ")    
-    tex4.SetNDC()
-    tex4.SetTextSize(20)
-    tex4.Draw()
-    
-    hmtSumb.GetYaxis().SetTitleOffset(1.5)
-    hmtSumb.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
-    hmtSumb.GetYaxis().SetTitle("Events / 20 GeV/c^{2}")
-    canvas72.Print("transverseMassAfterBtagging.png")
-    canvas72.Print("transverseMassAfterBtagging.C")
-
-####################################################
-### comparison plots
-
-
-
-#####  -------------- Comparison plots --------------------
-    
-
-# mt inverted-baseline comparison with bveto, closure
-    bveto_inverted = hClosureBveto.Clone("hmtvSum")
-    bveto_baseline = hClosureBaselineBveto_QCD.Clone("hmtvBaseline_QCD")
-    print "bveto_inverted",bveto_inverted.GetEntries()
-    print "bveto_baseline ",bveto_baseline.GetEntries()
-    invertedQCD.setLabel("MtBvetoInvertedVsBaselineClosure")
-    invertedQCD.mtComparison(bveto_inverted, bveto_baseline,"MtBvetoInvertedVsBaselineClosure")
-
-    
-# mt inverted-baseline comparison with bveto and deltaPhi cuts, closure
-    bvetoDphi_inverted = hClosureBvetoTailKiller.Clone("hmtPhivSum")
-    bvetoDphi_baseline = hClosureBaselineBvetoTailKiller_QCD.Clone("hmtPhivBaseline_QCD")
-    invertedQCD.setLabel("MtBvetoInvertedVsBaselineTailKillerClosure")
-    invertedQCD.mtComparison(bvetoDphi_inverted, bvetoDphi_baseline,"MtBvetoInvertedVsBaselineTailKillerClosure")
-    
-
-# mt inverted comparison bveto normalised and  btagging,  no deltaPhi cuts
-    btag_inverted = hmtSumb.Clone("mtSumb")
-    bvetoNor_inverted = mtvetoNor.Clone("hmtBaseline_QCD")
-    invertedQCD.setLabel("MtNormalisedBvetoNoDphiCuts")
-    invertedQCD.mtComparison(btag_inverted , bvetoNor_inverted,"MtNormalisedBvetoNoDphiCuts")
-    
-## mt inverted comparison bveto normalised and  btagging,  no deltaPhi cuts
-    btagTailKiller_inverted = hmtSum.Clone("mtSumb")
-    bvetoNorTailKiller_inverted = mtPhivetoNor.Clone("hmtBaseline_QCD")
-    invertedQCD.setLabel("MtNormalisedBvetoTailKiller")
-    invertedQCD.mtComparison(btagTailKiller_inverted , bvetoNorTailKiller_inverted,"MtNormalisedBvetoTailKiller")
-
-
-   # mt inverted comparison bveto normalised and  btagging,  no deltaPhi cuts
-    btag_inverted = hmtSumb.Clone("mtSumb")
-    bvetoNor_inverted = mtvetoNor.Clone("hmtBaseline_QCD")
-    invertedQCD.setLabel("MtNormalisedBveto")
-    invertedQCD.mtComparison(btag_inverted , bvetoNor_inverted,"MtNormalisedBveto")
-
-    
-    bveto_inverted2 = hClosureBveto.Clone("ClosureBveto")
-    bveto_inverted2.Scale(1./hClosureBveto.GetMaximum())
-    btag_inverted2 = hClosureBtag.Clone("ClosureBtag")
-    btag_inverted2.Scale(1./hClosureBtag.GetMaximum())
-    invertedQCD.setLabel("MtBvetoBtagInvertedClosure")
-    invertedQCD.mtComparison(btag_inverted2 , bveto_inverted2,"MtBvetoBtagInvertedClosure")
-#    print "bveto_inverted2",bveto_inverted2.GetEntries()
-#    print "btag_inverted2 ",btag_inverted2.GetEntries()
-
-    bvetoTailKiller_inverted = hClosureBvetoTailKiller.Clone("hmtvSum")
-    bvetoTailKiller_inverted.Scale(1./hClosureBvetoTailKiller.GetMaximum())
-    btagTailKiller_inverted = hClosureBtagTailKiller.Clone("mtSumb")
-    btagTailKiller_inverted.Scale(1./hClosureBtagTailKiller.GetMaximum())
-    invertedQCD.setLabel("MtBvetoBtagInvertedTailKillerClosure")
-    invertedQCD.mtComparison(bvetoTailKiller_inverted , btagTailKiller_inverted,"MtBvetoBtagInvertedTailKillerClosure")
-
-    
-# mt inverted-inverted factorized comparison with btagging and deltaPhi cuts
-#    btagDphi_inverted = mtHMTjet2Cut.Clone("mtHMTjet2Cut")
-#    btagDphi_factorised =  mtFactorised.Clone("mtFactorised")
-#    invertedQCD.setLabel("MtPhiCutBtagInvertedVsFactorised")
-#    invertedQCD.mtComparison(btagDphi_inverted, btagDphi_factorised,"MtBtagDphiInvertedVsFactorised")
-   
-# mt shape comparison bveto vs btag
-    btagged_nor = mtFactorised.Clone("mtFactorised")
-    btagged_nor.Scale(1./mtFactorised.GetMaximum())
-    print "btagged_nor",btagged_nor.GetMaximum()
-    
-    bveto_nor = hmtPhivSum.Clone("hmtPhivSum")
-    bveto_nor.Scale(1./hmtPhivSum.GetMaximum())
-    print "bveto_nor",bveto_nor.GetMaximum()
-
-    invertedQCD.setLabel("mtBTagVsBvetoInverted")
-    invertedQCD.mtComparison(btagged_nor, bveto_nor,"mtBTagVsBvetoInverted")
-
- 
-    
-  
-    
-    
-################ MET
 
     
 
@@ -1311,13 +1031,7 @@ def controlPlots(datasets):
     met.SetFillColor(4)    
     met.Draw("EP")
     
-    hmmtBaseline_QCD = hmmtBaseline.Clone("QCD")
-    hmmtBaseline_QCD.Add(hmmtEWK,-1)
-    hmmtBaseline_QCD.SetMarkerColor(2)
-    hmmtBaseline_QCD.SetMarkerSize(1)
-    hmmtBaseline_QCD.SetMarkerStyle(21)
-    hmmtBaseline_QCD.Draw("same")
-
+ 
             
     tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
     tex4.SetNDC()
@@ -1334,16 +1048,7 @@ def controlPlots(datasets):
     marker2.SetMarkerSize(0.9*met.GetMarkerSize())
     marker2.Draw()
     
-    tex9 = ROOT.TLatex(0.55,0.78,"Baseline: Data-EWK") 
-    tex9.SetNDC()
-    tex9.SetTextSize(20)
-    tex9.Draw()
-    marker9 = ROOT.TMarker(0.5,0.795,hmmtBaseline_QCD.GetMarkerStyle())
-    marker9.SetNDC()
-    marker9.SetMarkerColor(hmmtBaseline_QCD.GetMarkerColor())
-    marker9.SetMarkerSize(0.9*hmmtBaseline_QCD.GetMarkerSize())
-    marker9.Draw()
-        
+         
     met.GetXaxis().SetTitle("MET (GeV)")
     met.GetYaxis().SetTitle("Events / 20 GeV")
     canvas34.Print("MET.png")
@@ -1360,13 +1065,7 @@ def controlPlots(datasets):
     DeltaPhi.SetFillColor(4)    
     DeltaPhi.Draw("EP")
     
-    DeltaPhi_QCD = hfmtBaseline.Clone("QCD")
-    DeltaPhi_QCD.Add(hfmtEWK,-1)
-    DeltaPhi_QCD.SetMarkerColor(2)
-    DeltaPhi_QCD.SetMarkerSize(1)
-    DeltaPhi_QCD.SetMarkerStyle(21)
-    DeltaPhi_QCD.Draw("same")
-    
+     
     tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
     tex4.SetNDC()
     tex4.SetTextSize(20)
@@ -1380,17 +1079,6 @@ def controlPlots(datasets):
     marker2.SetMarkerColor(DeltaPhi.GetMarkerColor())
     marker2.SetMarkerSize(0.9*DeltaPhi.GetMarkerSize())
     marker2.Draw()
-    
-    tex9 = ROOT.TLatex(0.55,0.78,"Baseline: Data-EWK") 
-    tex9.SetNDC()
-    tex9.SetTextSize(20)
-    tex9.Draw()
-    marker9 = ROOT.TMarker(0.5,0.795,DeltaPhi_QCD.GetMarkerStyle())
-    marker9.SetNDC()
-    marker9.SetMarkerColor(DeltaPhi_QCD.GetMarkerColor())
-    marker9.SetMarkerSize(0.9*DeltaPhi_QCD.GetMarkerSize())
-    marker9.Draw()
-            
     
     DeltaPhi.GetXaxis().SetTitle("#Delta#phi(#tau jet, MET) (^{o})")
     DeltaPhi.GetYaxis().SetTitle("Events / 10^{o}")
@@ -1419,188 +1107,7 @@ def controlPlots(datasets):
     canvas31.Print("FullMass.png")
     canvas31.Print("FullMass.C")
 
-################ deltaphi jet-Met
-    if False:
-        canvas51 = ROOT.TCanvas("canvas51","",500,500)
-        
-        jetmetphi.SetMarkerColor(4)
-        jetmetphi.SetMarkerSize(1)
-        jetmetphi.SetFillColor(4)   
-        jetmetphi.Draw("EP")
-        
-        tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
-        tex4.SetNDC()
-        tex4.SetTextSize(20)
-        tex4.Draw()
-        
-        
-        jetmetphi.GetXaxis().SetTitle("#Delta#Phi(jet,MET) (deg)")
-        jetmetphi.GetYaxis().SetTitle("Events ")
-        canvas51.Print("DeltaPhiJetMet.png")
-        canvas51.Print("DeltaPhiJetMet.C")
-
-######## deltaPhi(jet,Met) vs deltaPhi(tau,Met)       
-        canvas52 = ROOT.TCanvas("canvas52","",500,500)
-
-        DeltaPhiJetMet.RebinX(5)
-        DeltaPhiJetMet.RebinY(5)
-        DeltaPhiJetMet.SetMarkerColor(4)
-        DeltaPhiJetMet.SetMarkerSize(1)
-        DeltaPhiJetMet.SetMarkerStyle(20)
-        DeltaPhiJetMet.SetFillColor(4)    
-        DeltaPhiJetMet.Draw("colz")
-        
-        tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12 fb^{-1}       CMS Preliminary ")
-        tex4.SetNDC()
-        tex4.SetTextSize(20)
-        tex4.Draw()
-        tex1 = ROOT.TLatex(0.55,0.88,"QCD with inverted #tau isolation") 
-        tex1.SetNDC()
-        tex1.SetTextSize(15)
-        tex1.Draw()
-        
-        DeltaPhiJetMet.GetXaxis().SetTitle("#Delta#phi(#tau jet,MET) (deg)")
-        DeltaPhiJetMet.GetYaxis().SetTitle("#Delta#phi(jet,MET) (deg) ")
-        canvas52.Print("DeltaPhiJetMetVSTauMet.png")
-        canvas52.Print("DeltaPhiJetMetVSTauMet.C")
-        
-    if False:
-######## hMHTJet1phi deltaPhi(jet,Met) vs hMHTJet1phi deltaPhi(tau,Met)       
-        canvas82 = ROOT.TCanvas("canvas82","",500,500)
-        
-#        MHTJet1phi.RebinX(5)
-#        MHTJet1phi.RebinY(5)
-        MHTJet1phi.SetMarkerColor(4)
-        MHTJet1phi.SetMarkerSize(1)
-        MHTJet1phi.SetMarkerStyle(20)
-        MHTJet1phi.SetFillColor(4)    
-        MHTJet1phi.Draw("colz")
-        
-        tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12 fb^{-1}       CMS Preliminary ")
-        tex4.SetNDC()
-        tex4.SetTextSize(20)
-        tex4.Draw()
-        tex1 = ROOT.TLatex(0.55,0.88,"QCD with inverted #tau isolation") 
-        tex1.SetNDC()
-        tex1.SetTextSize(15)
-        tex1.Draw()
-        
-        MHTJet1phi.GetXaxis().SetTitle("#Delta#phi(jet1,MHT) (deg)")
-        MHTJet1phi.GetYaxis().SetTitle("Events ")
-        canvas82.Print("DeltaPhiMETjet1.png")
-        canvas82.Print("DeltaPhiMETjet1.C")
-
-    
-######## deltaPhi(jet,Met) vs deltaPhi(tau,Met) after 2dim cut
-    if False:    
-        phi2AfterCut = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/DeltaPhiVsDeltaPhiMETJet2AfterCut")])
-        phi2AfterCut._setLegendStyles()
-        phi2AfterCut._setLegendLabels()
-        phi2AfterCut.histoMgr.setHistoDrawStyleAll("P") 
-        phi2AfterCut.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
-        hphi2AfterCut = phi2AfterCut.histoMgr.getHisto("Data").getRootHisto().Clone()
-        
-        
-        canvas55 = ROOT.TCanvas("canvas55","",500,500)
-        
-        hphi2AfterCut.RebinX(5)
-        hphi2AfterCut.RebinY(5)
-        hphi2AfterCut.SetMarkerColor(4)
-        hphi2AfterCut.SetMarkerSize(1)
-        hphi2AfterCut.SetMarkerStyle(20)
-        hphi2AfterCut.SetFillColor(4)    
-        hphi2AfterCut.Draw("colz")
-        
-        tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12 fb^{-1}       CMS Preliminary ")
-        tex4.SetNDC()
-        tex4.SetTextSize(20)
-        tex4.Draw()
-        tex1 = ROOT.TLatex(0.55,0.88,"QCD with inverted #tau isolation") 
-        tex1.SetNDC()
-        tex1.SetTextSize(15)
-        tex1.Draw()
-        
-        hphi2AfterCut.GetXaxis().SetTitle("#Delta#phi(#tau jet,MET) (deg)")
-        hphi2AfterCut.GetYaxis().SetTitle("#Delta#phi(jet,MET) (deg) ")
-        canvas55.Print("DeltaPhiAfterJet1Cut.png")
-        canvas55.Print("DeltaPhiAfterJet1Cut.C")
-
-
-        
-
-
-        
-######## deltaPhi(jet,Met) vs deltaPhi(tau,Met) after 2dim cut
-    if False:        
-        phi2AfterCut2 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/DeltaPhiVsDeltaPhiMETJet1")])
-        phi2AfterCut2._setLegendStyles()
-        phi2AfterCut2._setLegendLabels()
-        phi2AfterCut2.histoMgr.setHistoDrawStyleAll("P")
-        phi2AfterCut2.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
-        hphi2AfterCut2 = phi2AfterCut2.histoMgr.getHisto("Data").getRootHisto().Clone()
-        
-        
-        canvas56 = ROOT.TCanvas("canvas56","",500,500)
-        
-        hphi2AfterCut2.RebinX(5)
-        hphi2AfterCut2.RebinY(5)
-        hphi2AfterCut2.SetMarkerColor(4)
-        hphi2AfterCut2.SetMarkerSize(1)
-        hphi2AfterCut2.SetMarkerStyle(20)
-        hphi2AfterCut2.SetFillColor(4)
-        hphi2AfterCut2.Draw("colz")
-        
-        tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12 fb^{-1}       CMS Preliminary ")
-        tex4.SetNDC()
-        tex4.SetTextSize(20)
-        tex4.Draw()
-        tex1 = ROOT.TLatex(0.55,0.88,"QCD with inverted #tau isolation")
-        tex1.SetNDC()
-        tex1.SetTextSize(15)
-        tex1.Draw()
-        
-        hphi2AfterCut2.GetXaxis().SetTitle("#Delta#phi(#tau jet,MET) (deg)")
-        hphi2AfterCut2.GetYaxis().SetTitle("#Delta#phi(jet1,MET) (deg) ")
-        canvas56.Print("DeltaPhiVSdeltaPhiMETjet1.png")
-        canvas56.Print("DeltaPhiVSdeltaPhiMETjet1.C")
-    
-
-
-  
-######## deltaPhi(jet4,Met) vs deltaPhi(tau,MET) after 2dim cut
-    if False:
-        phiTauMHT = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/DeltaPhiVsDeltaPhiMETJet4")])
-        phiTauMHT._setLegendStyles()
-        phiTauMHT._setLegendLabels()
-        phiTauMHT.histoMgr.setHistoDrawStyleAll("P")
-        phiTauMHT.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
-        hphiTauMHT = phiTauMHT.histoMgr.getHisto("Data").getRootHisto().Clone()
-        
-        
-        canvas59 = ROOT.TCanvas("canvas59","",500,500)
-        
-        hphiTauMHT.RebinX(5)
-        hphiTauMHT.RebinY(5)
-        hphiTauMHT.SetMarkerColor(4)
-        hphiTauMHT.SetMarkerSize(1)
-        hphiTauMHT.SetMarkerStyle(20)
-        hphiTauMHT.SetFillColor(4)
-        hphiTauMHT.Draw("colz")
-        tex4.SetNDC()
-        tex4.SetTextSize(20)
-        tex4.Draw()
-        tex1 = ROOT.TLatex(0.55,0.88,"QCD with inverted #tau isolation")
-        tex1.SetNDC()
-        tex1.SetTextSize(15)
-        tex1.Draw()
-        
-        hphiTauMHT.GetXaxis().SetTitle("#Delta#phi(#tau jet,MET) (deg)")
-        hphiTauMHT.GetYaxis().SetTitle("#Delta#phi(jet4,MET) (deg) ")
-        canvas59.Print("DeltaPhiVSdeltaPhiMETjet4.png")
-        canvas59.Print("DeltaPhiVSdeltaPhiMETjet4.C")                                                                                                    
-
-    
-
+ 
     canvas33 = ROOT.TCanvas("canvas33","",500,500)
     canvas33.SetLogy()
     frame33 = histograms._drawFrame(canvas33, xmin=0, xmax=6, ymin=0.01, ymax=1e4)
@@ -1612,13 +1119,6 @@ def controlPlots(datasets):
     NBjets.SetFillColor(4)
     NBjets.Draw("EP same")
 
-    NBjets_QCD = hbhmtBaseline.Clone("QCD")
-    NBjets_QCD.Add(hbhmtEWK,-1)
-    NBjets_QCD.SetMarkerColor(2)
-    NBjets_QCD.SetMarkerSize(1)
-    NBjets_QCD.SetMarkerStyle(21)
-    NBjets_QCD.Draw("same")
-    
     tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
     tex4.SetNDC()
     tex4.SetTextSize(20)
@@ -1633,17 +1133,6 @@ def controlPlots(datasets):
     marker2.SetMarkerSize(0.9*NBjets.GetMarkerSize())
     marker2.Draw()
     
-    tex9 = ROOT.TLatex(0.55,0.78,"Baseline: Data-EWK") 
-    tex9.SetNDC()
-    tex9.SetTextSize(20)
-    tex9.Draw()
-    marker9 = ROOT.TMarker(0.5,0.795,NBjets_QCD.GetMarkerStyle())
-    marker9.SetNDC()
-    marker9.SetMarkerColor(NBjets_QCD.GetMarkerColor())
-    marker9.SetMarkerSize(0.9*NBjets_QCD.GetMarkerSize())
-    marker9.Draw()
-            
-             
     tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
     tex4.SetNDC()
     tex4.SetTextSize(20)
@@ -1662,11 +1151,6 @@ def controlPlots(datasets):
 
           
 # Njets
-    njet_inverted = Njets.Clone("jet")
-    njet_baseline = Njets_QCD.Clone("Baseline_QCD")
-    invertedQCD.setLabel("NjetInvertedVsBaseline")
-    invertedQCD.mtComparison(njet_inverted, njet_baseline,"NjetInvertedVsBaseline")
-    
        
     canvas34 = ROOT.TCanvas("canvas34","",500,500)
     canvas34.SetLogy()
@@ -1679,12 +1163,6 @@ def controlPlots(datasets):
     Njets.SetFillColor(4)
     Njets.Draw("EP same")
 
-
-    Njets_QCD.SetMarkerColor(2)
-    Njets_QCD.SetMarkerSize(1)
-    Njets_QCD.SetMarkerStyle(21)
-    Njets_QCD.Draw("same")
-    
     tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
     tex4.SetNDC()
     tex4.SetTextSize(20)
@@ -1699,18 +1177,6 @@ def controlPlots(datasets):
     marker2.SetMarkerSize(0.9*Njets.GetMarkerSize())
     marker2.Draw()
     
-    tex9 = ROOT.TLatex(0.55,0.78,"Baseline: Data-EWK") 
-    tex9.SetNDC()
-    tex9.SetTextSize(20)
-    tex9.Draw()
-    marker9 = ROOT.TMarker(0.5,0.795,Njets_QCD.GetMarkerStyle())
-    marker9.SetNDC()
-    marker9.SetMarkerColor(Njets_QCD.GetMarkerColor())
-    marker9.SetMarkerSize(0.9*Njets_QCD.GetMarkerSize())
-    
-    marker9.Draw()
-            
-             
     tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
     tex4.SetNDC()
     tex4.SetTextSize(20)
@@ -1724,27 +1190,6 @@ def controlPlots(datasets):
 
 ################## N jets after MET
     
-
-    jm = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/NJetInvertedTauIdMet")])
-    jmBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/NJetBaselineTauIdJetMet")])
-    jmEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/NJetBaselineTauIdJetMet")])
- 
- 
-    jmBaseline._setLegendStyles()
-    jmBaseline._setLegendLabels()
-    jmBaseline.histoMgr.setHistoDrawStyleAll("P")
-    jmBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hjmBaseline = jmBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/NBBaselineTauIdJet")
-    
-    jmEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    jmEWK._setLegendStyles()
-    jmEWK._setLegendLabels()
-    jmEWK.histoMgr.setHistoDrawStyleAll("P")
-    jmEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hjmEWK =  jmEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("NBBaselineTauIdJet")
-    
-
-       
     canvas35 = ROOT.TCanvas("canvas35","",500,500)
     canvas35.SetLogy()
     frame35 = histograms._drawFrame(canvas33, xmin=0, xmax=10, ymin=1, ymax=1e4)
@@ -1756,38 +1201,6 @@ def controlPlots(datasets):
     NjetsAfterMET.SetFillColor(4)
     NjetsAfterMET.Draw("EP same")
 
-    NjetsAfterMET_QCD = hjmBaseline.Clone("QCD")
-    NjetsAfterMET_QCD.Add(hjmEWK,-1)
-    NjetsAfterMET_QCD.SetMarkerColor(2)
-    NjetsAfterMET_QCD.SetMarkerSize(1)
-    NjetsAfterMET_QCD.SetMarkerStyle(21)
-    NjetsAfterMET_QCD.Draw("same")
-    
-    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
-    tex4.SetNDC()
-    tex4.SetTextSize(20)
-    tex4.Draw()
-    tex2 = ROOT.TLatex(0.55,0.85,"Inverted #tau isolation")
-    tex2.SetNDC()
-    tex2.SetTextSize(20)
-    tex2.Draw()    
-    marker2 = ROOT.TMarker(0.5,0.865,NjetsAfterMET.GetMarkerStyle())
-    marker2.SetNDC()
-    marker2.SetMarkerColor(NjetsAfterMET.GetMarkerColor())
-    marker2.SetMarkerSize(0.9*NjetsAfterMET.GetMarkerSize())
-    marker2.Draw()
-    
-    tex9 = ROOT.TLatex(0.55,0.78,"Baseline: Data-EWK") 
-    tex9.SetNDC()
-    tex9.SetTextSize(20)
-    tex9.Draw()
-    marker9 = ROOT.TMarker(0.5,0.795,NjetsAfterMET_QCD.GetMarkerStyle())
-    marker9.SetNDC()
-    marker9.SetMarkerColor(NjetsAfterMET_QCD.GetMarkerColor())
-    marker9.SetMarkerSize(0.9*NjetsAfterMET_QCD.GetMarkerSize())
-    
-    marker9.Draw()
-            
              
     tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
     tex4.SetNDC()
