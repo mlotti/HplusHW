@@ -107,7 +107,6 @@ namespace HPlus {
     fBjetVetoCounter(eventCounter.addCounter("Veto on second b jet")),
     fMetCut80Counter(eventCounter.addCounter("MET>80")),
     fMetCut100Counter(eventCounter.addCounter("MET>100")),
-   
     fHiggsMassCutCounter(eventCounter.addCounter("HiggsMassCut")),
     fTransverseMass80CutCounter(eventCounter.addCounter("TransverseMass80Cut")),
     fTransverseMass100CutCounter(eventCounter.addCounter("TransverseMass100Cut")),
@@ -407,6 +406,14 @@ namespace HPlus {
     hCtrlNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 7, 3., 10.);
     hCtrlMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "MET", "MET;MET, GeV;N_{events} / 10 GeV", 100, 0., 500.);
     hCtrlNbjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NBjets", "NBjets;Number of identified b-jets;N_{events}", 10, 0., 10.);
+    hCtrlQCDTailKillerJet1BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet1BackToBack", "QCDTailKillerJet1BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlQCDTailKillerJet2BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet2BackToBack", "QCDTailKillerJet2BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlQCDTailKillerJet3BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet3BackToBack", "QCDTailKillerJet3BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlQCDTailKillerJet4BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet4BackToBack", "QCDTailKillerJet4BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlQCDTailKillerJet1Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet1Collinear", "QCDTailKillerJet1Collinear;#sqrt{#Delta#phi(#tau,MET))^{2}+#Delta#phi((180^{o}-jet_{1},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlQCDTailKillerJet2Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet2Collinear", "QCDTailKillerJet2Collinear;#sqrt{#Delta#phi(#tau,MET))^{2}+#Delta#phi((180^{o}-jet_{2},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlQCDTailKillerJet3Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet3Collinear", "QCDTailKillerJet3Collinear;#sqrt{#Delta#phi(#tau,MET))^{2}+#Delta#phi((180^{o}-jet_{3},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlQCDTailKillerJet4Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet4Collinear", "QCDTailKillerJet4Collinear;#sqrt{#Delta#phi(#tau,MET))^{2}+#Delta#phi((180^{o}-jet_{4},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
     // Control histograms for EWKFakeTaus
     TFileDirectory myCtrlEWKFakeTausDir = fs->mkdir("ControlPlotsEWKFakeTaus");
     hCtrlEWKFakeTausIdentifiedElectronPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
@@ -426,6 +433,14 @@ namespace HPlus {
     hCtrlEWKFakeTausNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 7, 3., 10.);
     hCtrlEWKFakeTausMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "MET", "MET;MET, GeV;N_{events} / 10 GeV", 100, 0., 500.);
     hCtrlEWKFakeTausNbjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "NBjets", "NBjets;Number of identified b-jets;N_{events}", 10, 0., 10.);
+    hCtrlEWKFakeTausQCDTailKillerJet1BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet1BackToBack", "QCDTailKillerJet1BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlEWKFakeTausQCDTailKillerJet2BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet2BackToBack", "QCDTailKillerJet2BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlEWKFakeTausQCDTailKillerJet3BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet3BackToBack", "QCDTailKillerJet3BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlEWKFakeTausQCDTailKillerJet4BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet4BackToBack", "QCDTailKillerJet4BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlEWKFakeTausQCDTailKillerJet1Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet1Collinear", "QCDTailKillerJet1Collinear;#sqrt{#Delta#phi(#tau,MET))^{2}+#Delta#phi((180^{o}-jet_{1},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlEWKFakeTausQCDTailKillerJet2Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet2Collinear", "QCDTailKillerJet2Collinear;#sqrt{#Delta#phi(#tau,MET))^{2}+#Delta#phi((180^{o}-jet_{2},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlEWKFakeTausQCDTailKillerJet3Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet3Collinear", "QCDTailKillerJet3Collinear;#sqrt{#Delta#phi(#tau,MET))^{2}+#Delta#phi((180^{o}-jet_{3},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
+    hCtrlEWKFakeTausQCDTailKillerJet4Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "QCDTailKillerJet4Collinear", "QCDTailKillerJet4Collinear;#sqrt{#Delta#phi(#tau,MET))^{2}+#Delta#phi((180^{o}-jet_{4},MET))^{2}}, ^{o};N_{events}", 52, 0., 260.);
 
     hCtrlJetMatrixAfterJetSelection = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myCtrlDir, "JetMatrixAfterJetSelection", "JetMatrixAfterJetSelection;Number of selected jets;Number of selected b jets", 7, 3., 10.,7, 0., 7.);
     hCtrlJetMatrixAfterMET = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myCtrlDir, "JetMatrixAfterMET", "JetMatrixAfterMET;Number of selected jets;Number of selected b jets", 7, 3., 10.,7, 0., 7.);
@@ -937,6 +952,9 @@ namespace HPlus {
 
 //------ Improved delta phi cut, a.k.a. QCD tail killer // FIXME: place of cut still to be determined
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    // FIXME: add here control plots
+    // FIXME: do we want to apply collinear cuts after jet selection?
+
     if (!qcdTailKillerData.passedEvent()) return false;
     increment(fQCDTailKillerCounter);
 
@@ -1130,6 +1148,7 @@ namespace HPlus {
 
     FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData,
 										       metData, &genData);
+    if (!FullHiggsMassData.passedEvent()) return false;
     double HiggsMass = FullHiggsMassData.getHiggsMass();
     if (HiggsMass > 100 && HiggsMass < 200 ) increment(fHiggsMassCutCounter);
     hFullMass->Fill(HiggsMass);
@@ -1158,70 +1177,6 @@ namespace HPlus {
       hTransverseMassTauVeto->Fill(transverseMass);
       //      hHiggsMassTauVeto->Fill(HiggsMass); 
     }
-
-
-
-
-    /*
-<<<<<<< HEAD
-
-    // Calculate alphaT
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau());
-
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
-
-
-
-    if (TopChiSelectionData.passedEvent() ) {
-      double topmass = TopChiSelectionData.getTopMass();
-      //      increment(fTopChiSelectionCounter);
-      if (topmass < 250 ) increment(fTopChiSelection250Counter);
-      if (topmass < 220 ) increment(fTopChiSelection220Counter);
-      //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-      if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
-        hTransverseMassTopChiSelection->Fill(transverseMass, fEventWeight.getWeight());
-      }
-    } 
-
-
-
-
-    if (BjetSelectionData.passedEvent() ) {
-        
-      TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
-      TopWithWSelection::Data TopWithWSelectionData = fTopWithWSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());    
-      if (TopWithBSelectionData.passedEvent() ) {
-	//        increment(fTopWithBSelectionCounter);
-	double topmass = TopWithBSelectionData.getTopMass();
-	if (topmass < 250 ) increment(fTopWithBSelection250Counter);
-	if (topmass < 220 ) increment(fTopWithBSelection220Counter);
-        //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-        if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
-	  //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-	  hTransverseMassTopBjetSelection->Fill(transverseMass, fEventWeight.getWeight()); 
-	  if(transverseMass > 70 ) increment(ftransverseMass70TopWithBSelCounter); 
-	  if(transverseMass > 80 ) increment(ftransverseMass80TopWithBSelCounter);   
-	}    
-      }
-      
-      if (TopWithWSelectionData.passedEvent() ) {
-	//        increment(fTopWithWSelectionCounter);
-	double topmass = TopWithBSelectionData.getTopMass();
-	if (topmass < 250 ) increment(fTopWithWSelection250Counter);
-	if (topmass < 220 ) increment(fTopWithWSelection220Counter);
-        //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-        if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
-	  //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-	  hTransverseMassTopWithWSelection->Fill(transverseMass, fEventWeight.getWeight()); 
-	  if(transverseMass > 70 ) increment(ftransverseMass70TopWithWSelCounter); 
-	  if(transverseMass > 80 ) increment(ftransverseMass80TopWithWSelCounter);   
-	}    
-      }
-     
-    }
-
-    
-*/
 
     // Fake MET veto a.k.a. further QCD suppression
     //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup,  tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());

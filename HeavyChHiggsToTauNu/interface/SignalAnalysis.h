@@ -93,6 +93,7 @@ namespace HPlus {
       Count fTopWithBSelectionCounter;
       Count fTopWithWSelectionCounter;
       Count fSelectedEventsCounter;
+      Count fSelectedEventsFullMassCounter;
     };
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
@@ -340,7 +341,6 @@ namespace HPlus {
     WrappedTH1 *hFullMass;
     WrappedTH1 *hEWKFakeTausFullMass;
 
-
     WrappedTH1 *hDeltaPhiNoBtagging;
     WrappedTH1 *hDeltaPhi;
     WrappedTH1 *hEWKFakeTausDeltaPhi;
@@ -390,6 +390,14 @@ namespace HPlus {
     WrappedTH1* hCtrlNjetsAfterStandardSelections;
     WrappedTH1* hCtrlMET;
     WrappedTH1* hCtrlNbjets;
+    WrappedTH1* hCtrlQCDTailKillerJet1BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet2BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet3BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet4BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet1Collinear;
+    WrappedTH1* hCtrlQCDTailKillerJet2Collinear;
+    WrappedTH1* hCtrlQCDTailKillerJet3Collinear;
+    WrappedTH1* hCtrlQCDTailKillerJet4Collinear;
     // Control plots for fakes
     WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPt;
     WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPt;
@@ -408,6 +416,14 @@ namespace HPlus {
     WrappedTH1* hCtrlEWKFakeTausNjetsAfterStandardSelections;
     WrappedTH1* hCtrlEWKFakeTausMET;
     WrappedTH1* hCtrlEWKFakeTausNbjets;
+    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet1BackToBack;
+    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet2BackToBack;
+    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet3BackToBack;
+    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet4BackToBack;
+    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet1Collinear;
+    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet2Collinear;
+    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet3Collinear;
+    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet4Collinear;
 
     WrappedTH2* hCtrlJetMatrixAfterJetSelection;
     WrappedTH2* hCtrlJetMatrixAfterMET;
