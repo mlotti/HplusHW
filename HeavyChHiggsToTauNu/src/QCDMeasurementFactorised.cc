@@ -768,9 +768,9 @@ namespace HPlus {
     fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerJet4, "CtrlQCDTailKillerJet4", "sqrt((180^{o} - #Delta#phi(#tau,E_{T}^{miss}))^2+(#Delta#phi(jet_{4},E_{T}^{miss}))^2), ^{o}", 52, 0, 260.);
 
     // Closure test oF MET
-    fHistoHandler->createShapeHistogram(myDir, hCtrlMETAfterLeg1, "CtrlMETAfterLeg1", "E_{T}^{miss}, GeV", 100, 3, 500.);
-    fHistoHandler->createShapeHistogram(myDir, hCtrlMETAfterLeg2, "CtrlMETAfterLeg2", "E_{T}^{miss}, GeV", 100, 3, 500.);
-    fHistoHandler->createShapeHistogram(myDir, hCtrlMETAfterBJets, "CtrlMETAfterBJets", "E_{T}^{miss}, GeV", 100, 3, 500.);
+    fHistoHandler->createShapeHistogram(myDir, hCtrlMETAfterLeg1, "CtrlMETAfterLeg1", "E_{T}^{miss}, GeV", 100, 0, 500.);
+    fHistoHandler->createShapeHistogram(myDir, hCtrlMETAfterLeg2, "CtrlMETAfterLeg2", "E_{T}^{miss}, GeV", 100, 0, 500.);
+    fHistoHandler->createShapeHistogram(myDir, hCtrlMETAfterBJets, "CtrlMETAfterBJets", "E_{T}^{miss}, GeV", 100, 0, 500.);
   }
 
   QCDMeasurementFactorised::QCDFactorisedVariation::~QCDFactorisedVariation() { }
