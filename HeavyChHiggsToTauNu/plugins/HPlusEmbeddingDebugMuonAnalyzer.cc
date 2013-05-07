@@ -90,7 +90,7 @@ HPlusEmbeddingDebugMuonAnalyzer::HPlusEmbeddingDebugMuonAnalyzer(const edm::Para
   fEventWeight(iConfig),
   fHistoWrapper(fEventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   eventCounter(iConfig, fEventWeight, fHistoWrapper),
-  fEmbeddingMuonEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonEfficiency"), fHistoWrapper),
+  fEmbeddingMuonEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonEfficiency")),
   muonSrc_(iConfig.getUntrackedParameter<edm::InputTag>("muonSrc")),
   jetSrc_(iConfig.getUntrackedParameter<edm::InputTag>("jetSrc")),
   genSrc_(iConfig.getUntrackedParameter<edm::InputTag>("genSrc")),

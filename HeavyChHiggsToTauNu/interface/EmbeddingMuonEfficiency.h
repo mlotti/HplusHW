@@ -8,6 +8,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EfficiencyScaleFactorBase.h"
 
 #include<vector>
+#include "boost/shared_ptr.hpp"
 
 namespace edm {
   class ParameterSet;
@@ -32,6 +33,8 @@ namespace HPlus {
       explicit Data(const T& data) {
         fWeight = data.getEventWeight();
         fWeightAbsUnc = data.getEventWeightAbsoluteUncertainty();
+        fEfficiency = fWeight;
+        fEfficiencyAbsUnc = fWeightAbsUnc;
       }
       ~Data();
 
@@ -41,10 +44,17 @@ namespace HPlus {
       const double getEventWeightAbsoluteUncertainty() const { check(); return Base::getEventWeightAbsoluteUncertainty(); }
       const double getEventWeightRelativeUncertainty() const { check(); return Base::getEventWeightRelativeUncertainty(); }
 
+      const double getEfficiency() const { check(); return fEfficiency; }
+      const double getEfficiencyAbsoluteUncertainty() const { check(); return fEfficiencyAbsUnc; }
+      const double getEfficiencyRelativeUncertainty() const { check(); return fEfficiencyAbsUnc/fEfficiency; }
+
       friend class EmbeddingMuonEfficiency;
+    private:
+      double fEfficiency;
+      double fEfficiencyAbsUnc;
     };
 
-    EmbeddingMuonEfficiency(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper);
+    explicit EmbeddingMuonEfficiency(const edm::ParameterSet& iConfig);
     ~EmbeddingMuonEfficiency();
 
     void setRun(unsigned run) { fEfficiencyScaleFactor->setRun(run); }
@@ -54,7 +64,7 @@ namespace HPlus {
 
   private:
     edm::InputTag fMuonSrc;
-    EfficiencyScaleFactorBase *fEfficiencyScaleFactor;
+    boost::shared_ptr<EfficiencyScaleFactorBase> fEfficiencyScaleFactor;
   };
 }
 
