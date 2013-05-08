@@ -93,7 +93,6 @@ namespace HPlus {
       Count fTopWithBSelectionCounter;
       Count fTopWithWSelectionCounter;
       Count fSelectedEventsCounter;
-      Count fSelectedEventsFullMassCounter;
     };
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
@@ -158,11 +157,12 @@ namespace HPlus {
     Count fMuonVetoCounter;
     Count fMetCutBeforeJetCutCounter;
     Count fNJetsCounter;
+    Count fQCDTailKillerCollinearCounter;
     Count fMETTriggerScaleFactorCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
-    Count fQCDTailKillerCounter;
+    Count fQCDTailKillerBackToBackCounter;
     Count fDeltaPhiTauMETCounter;
     Count fDeltaPtJetTauCounter;
     Count fDeltaPhiLow30Counter;
@@ -390,6 +390,9 @@ namespace HPlus {
     WrappedTH1* hCtrlNjetsAfterStandardSelections;
     WrappedTH1* hCtrlMET;
     WrappedTH1* hCtrlNbjets;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBack;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinear;
+
     WrappedTH1* hCtrlQCDTailKillerJet1BackToBack;
     WrappedTH1* hCtrlQCDTailKillerJet2BackToBack;
     WrappedTH1* hCtrlQCDTailKillerJet3BackToBack;
@@ -416,14 +419,8 @@ namespace HPlus {
     WrappedTH1* hCtrlEWKFakeTausNjetsAfterStandardSelections;
     WrappedTH1* hCtrlEWKFakeTausMET;
     WrappedTH1* hCtrlEWKFakeTausNbjets;
-    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet1BackToBack;
-    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet2BackToBack;
-    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet3BackToBack;
-    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet4BackToBack;
-    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet1Collinear;
-    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet2Collinear;
-    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet3Collinear;
-    WrappedTH1* hCtrlEWKFakeTausQCDTailKillerJet4Collinear;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBack;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinear;
 
     WrappedTH2* hCtrlJetMatrixAfterJetSelection;
     WrappedTH2* hCtrlJetMatrixAfterMET;
