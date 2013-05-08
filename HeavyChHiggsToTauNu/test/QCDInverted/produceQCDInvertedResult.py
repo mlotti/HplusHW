@@ -48,6 +48,9 @@ rebin = 10
 massPlots.append("Inverted/MTInvertedAllCutsTailKiller")
 massPlotNames.append("transverseMass")
 
+massPlots.append("Inverted/HiggsMass")
+massPlotNames.append("fullMass")
+
 def usage():
     print
     print "### Usage:   ",sys.argv[0]," <QCDInverted multicrab dir>"
@@ -153,7 +156,7 @@ def main():
     	anadir.cd("counters")
     	counter = ROOT.TH1D("counter","counter",len(integrals),0,len(integrals))
     	for i,integral in enumerate(integrals):
-	    binLabel = "integral"
+	    binLabel = "integral_"+massPlotNames[i]
 	    counter.SetBinContent(i+1,integral)
             counter.GetXaxis().SetBinLabel(i+1,binLabel)
         counter.Write()
