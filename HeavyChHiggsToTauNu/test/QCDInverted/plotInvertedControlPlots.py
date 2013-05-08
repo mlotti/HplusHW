@@ -256,7 +256,7 @@ def normalisationInclusive():
     return norm_inc,normEWK_inc 
 
 def sumHistoBins(datasets,histoname,newname="",newtitle="",rebin = 1):
-    normData,normEWK,normFactorisedData,normFactorisedEWK,normBtagToBveto,normBtagToBvetoEWK=normalisation()
+    normData,normEWK = normalisation()
 
     histos = []
     for ptbin in ptbins:
