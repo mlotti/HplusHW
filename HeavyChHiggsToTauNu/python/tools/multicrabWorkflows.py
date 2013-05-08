@@ -49,11 +49,11 @@ class MCDatasetHelper:
     # \param aod           String for the DBS-dataset path of AOD
     def __call__(self, name, aod):
         if "TTToHplusBWB" in name or "TTToHplusBHminusB" in name:
+            # For BR limit LandS expectes WH and HH samples to have ttbar cross section
             crossSection = xsect.backgroundCrossSections.crossSection("TTJets", self.energy)
         elif "HplusTB" in name:
-            # FIXME: ttbar cross section is clearly incorrect, but what to do?
-            # Is there actually a need to store it?
-            crossSection = xsect.backgroundCrossSections.crossSection("TTJets", self.energy)
+            # For sigma*BR limit LandS expects heavy H+ samples to have cross section of 1 pb
+            crossSection = 1
         else:
 
             # W+Njets, with the assumption that they are weighted (see
