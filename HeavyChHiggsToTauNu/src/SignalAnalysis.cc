@@ -744,7 +744,7 @@ namespace HPlus {
     const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metDataForCollinearCut.getSelectedMET());
     for (int i = 0; i < qcdTailKillerDataCollinear.getNConsideredJets(); ++i) {
       if (i < 4) { // protection
-        hCtrlQCDTailKillerBackToBack[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
+        hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromCollinearCorner(i)); // Make control plot before cut
         if (myFakeTauStatus)
           hCtrlEWKFakeTausQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromCollinearCorner(i)); // Make control plot before cut
         if (!qcdTailKillerDataCollinear.passCollinearCutForJet(i)) return false;
