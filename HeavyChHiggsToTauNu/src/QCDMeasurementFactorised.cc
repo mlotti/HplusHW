@@ -303,28 +303,28 @@ namespace HPlus {
 
     // Measurement variations
     if (fDoAnalysisVariationWithTraditionalMethod) {
-      fVariationTraditionalReference = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
+/*      fVariationTraditionalReference = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
                                                                   kQCDFactorisedTraditional, "TradReference");
       fVariationTraditionalPlusMET30 = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
                                                                   kQCDFactorisedTraditional, "TradPlusMET30");
       fVariationTraditionalPlusTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
                                                                   kQCDFactorisedTraditional, "TradPlusTailKiller");
       fVariationTraditionalPlusMET30AndTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedTraditional, "TradPlusMET30TailKiller");
+                                                                  kQCDFactorisedTraditional, "TradPlusMET30TailKiller");*/
       fVariationTraditionalPlusCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
                                                                   kQCDFactorisedTraditional, "TradPlusCollinearTailKiller");
       fVariationTraditionalPlusMET30AndCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
                                                                   kQCDFactorisedTraditional, "TradPlusMET30CollinearTailKiller");
     }
     if (fDoAnalysisVariationWithABCDMethod) {
-      fVariationABCDReference = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
+/*      fVariationABCDReference = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
                                                                   kQCDFactorisedABCD, "ABCDReference");
       fVariationABCDPlusMET30 = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
                                                                   kQCDFactorisedABCD, "ABCDPlusMET30");
       fVariationABCDPlusTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
                                                                   kQCDFactorisedABCD, "ABCDPlusTailKiller");
       fVariationABCDPlusMET30AndTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedABCD, "ABCDPlusMET30TailKiller");
+                                                                  kQCDFactorisedABCD, "ABCDPlusMET30TailKiller");*/
       fVariationABCDPlusCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
                                                                   kQCDFactorisedABCD, "ABCDPlusCollinearTailKiller");
       fVariationABCDPlusMET30AndCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
@@ -552,7 +552,7 @@ namespace HPlus {
 
     // Good old times (HIG-11-019) variation
     if (fDoAnalysisVariationWithTraditionalMethod) {
-      fVariationTraditionalReference->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
+/*      fVariationTraditionalReference->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
       if (metData.getSelectedMET()->et() > 30.0) {
         fVariationTraditionalPlusMET30->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
       }
@@ -561,17 +561,15 @@ namespace HPlus {
       }
       if (metData.getSelectedMET()->et() > 30.0 && qcdTailKillerData.passedEvent()) {
         fVariationTraditionalPlusMET30AndTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }
-      if (qcdTailKillerData.passedCollinearCuts()) {
-        fVariationTraditionalPlusCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }
-      if (metData.getSelectedMET()->et() > 30.0 && qcdTailKillerData.passedCollinearCuts()) {
+      }*/
+      fVariationTraditionalPlusCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
+      if (metData.getSelectedMET()->et()) {
         fVariationTraditionalPlusMET30AndCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
       }
     }
     // ABCD method (experimental)
     if (fDoAnalysisVariationWithABCDMethod) {
-      fVariationABCDReference->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
+      /*fVariationABCDReference->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
       // MET>30 cut applied
       if (metData.getSelectedMET()->et() > 30.0) {
         fVariationABCDPlusMET30->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
@@ -583,11 +581,9 @@ namespace HPlus {
       // Both MET>30 cut and QCD tail killer applied
       if (metData.getSelectedMET()->et() > 30.0 && qcdTailKillerData.passedEvent()) {
         fVariationABCDPlusMET30AndTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }
-      if (qcdTailKillerData.passedCollinearCuts()) {
-        fVariationABCDPlusCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }
-      if (metData.getSelectedMET()->et() > 30.0 && qcdTailKillerData.passedCollinearCuts()) {
+      }*/
+      fVariationABCDPlusCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
+      if (metData.getSelectedMET()->et() > 30.0) {
         fVariationABCDPlusMET30AndCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
       }
     }
@@ -763,12 +759,24 @@ namespace HPlus {
     // Data-driven control histograms
     fHistoHandler->createShapeHistogram(myDir, hCtrlRtau, "CtrlRtau", "Rtau", 60, 0, 1.2);
     fHistoHandler->createShapeHistogram(myDir, hCtrlNjets, "CtrlNjets", "N_{jets}", 20, 0, 20.);
+    for (int i = 0; i < 4; ++i) {
+      hCtrlQCDTailKillerCollinear.push_back(0);
+      std::stringstream sName;
+      std::stringstream sTitle;
+      sName << "QCDTailKillerJet" << i << "Collinear";
+      sTitle << "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{" << i << "},MET))^{2}}, ^{o};N_{events}";
+      fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerCollinear[i], sName.str(), sTitle.str(), 52, 0., 260.);
+    }
     fHistoHandler->createShapeHistogram(myDir, hCtrlMET, "CtrlMET", "E_{T}^{miss}, GeV", 100, 3, 500.);
     fHistoHandler->createShapeHistogram(myDir, hCtrlNbjets, "CtrlNbjets", "N_{b jets}", 20, 0, 20.);
-    fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerJet1, "CtrlQCDTailKillerJet1", "sqrt((180^{o} - #Delta#phi(#tau,E_{T}^{miss}))^2+(#Delta#phi(jet_{1},E_{T}^{miss}))^2), ^{o}", 52, 0, 260.);
-    fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerJet2, "CtrlQCDTailKillerJet2", "sqrt((180^{o} - #Delta#phi(#tau,E_{T}^{miss}))^2+(#Delta#phi(jet_{2},E_{T}^{miss}))^2), ^{o}", 52, 0, 260.);
-    fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerJet3, "CtrlQCDTailKillerJet3", "sqrt((180^{o} - #Delta#phi(#tau,E_{T}^{miss}))^2+(#Delta#phi(jet_{3},E_{T}^{miss}))^2), ^{o}", 52, 0, 260.);
-    fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerJet4, "CtrlQCDTailKillerJet4", "sqrt((180^{o} - #Delta#phi(#tau,E_{T}^{miss}))^2+(#Delta#phi(jet_{4},E_{T}^{miss}))^2), ^{o}", 52, 0, 260.);
+    for (int i = 0; i < 4; ++i) {
+      hCtrlQCDTailKillerBackToBack.push_back(0);
+      std::stringstream sName;
+      std::stringstream sTitle;
+      sName << "QCDTailKillerJet" << i << "BackToBack";
+      sTitle << "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{" << i << "},MET)^{2}}, ^{o};N_{events}";
+      fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerBackToBack[i], sName.str(), sTitle.str(), 52, 0., 260.);
+    }
 
     // Closure test oF MET
     fHistoHandler->createShapeHistogram(myDir, hCtrlMETAfterLeg1, "CtrlMETAfterLeg1", "E_{T}^{miss}, GeV", 100, 0, 500.);
@@ -791,6 +799,14 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doTraditionalSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // Traditional method
+
+    // Apply collinear cut
+    for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
+      if (i < 4) {
+        fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerCollinear[i], tailKillerData.getRadiusFromCollinearCorner(i));
+        if (!tailKillerData.passCollinearCutForJet(i)) return;
+      }
+    }
 
     // Standard selections have been done, fill histograms
     fCommonPlotsAfterStandardSelections->fill();
@@ -827,12 +843,13 @@ namespace HPlus {
     fCommonPlotsAfterMETAndBtag->fill();
     fHistoHandler->fillShapeHistogram(hCtrlMETAfterBJets, myMetValue);
 
-    // Leg 1 / QCD tail killer
-    fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerJet1, tailKillerData.getRadiusFromBackToBackCorner(0));
-    fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerJet2, tailKillerData.getRadiusFromBackToBackCorner(1));
-    fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerJet3, tailKillerData.getRadiusFromBackToBackCorner(2));
-    fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerJet4, tailKillerData.getRadiusFromBackToBackCorner(3));
-    if (!tailKillerData.passedEvent()) return;
+    // Leg 1 / QCD tail killer back-to-back
+    for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
+      if (i < 4) {
+        fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerBackToBack[i],tailKillerData.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
+        if (!tailKillerData.passBackToBackCutForJet(i)) return;
+      }
+    }
 
     // Leg 1 passed
     increment(fAfterLeg1Counter);
@@ -853,6 +870,14 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // ABCD method with MET and tau isolation as variables
+
+    // Apply collinear cut
+    for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
+      if (i < 4) {
+        fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerCollinear[i], tailKillerData.getRadiusFromCollinearCorner(i));
+        if (!tailKillerData.passCollinearCutForJet(i)) return;
+      }
+    }
 
     // Obtain booleans
     bool myLeg1PassedStatus = metData.passedEvent() && btagData.passedEvent() && tailKillerData.passedEvent();
@@ -896,12 +921,14 @@ namespace HPlus {
       fCommonPlotsAfterMETAndBtag->fill();
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterBJets, myMetValue);
 
-      // Leg 1 / QCD tail killer
-      fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerJet1, tailKillerData.getRadiusFromBackToBackCorner(0));
-      fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerJet2, tailKillerData.getRadiusFromBackToBackCorner(1));
-      fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerJet3, tailKillerData.getRadiusFromBackToBackCorner(2));
-      fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerJet4, tailKillerData.getRadiusFromBackToBackCorner(3));
-      if (!tailKillerData.passedEvent()) return;
+      // Leg 1 / QCD tail killer back-to-back
+      for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
+        if (i < 4) {
+          fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerBackToBack[i],tailKillerData.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
+          if (!tailKillerData.passBackToBackCutForJet(i)) return;
+        }
+      }
+
       // Leg 1 passed
       increment(fAfterLeg1Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
@@ -922,6 +949,12 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doDoubleABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // ABCD method inside MET leg (for double ABCD)
+
+    // Apply collinear cut
+    for (int i = 0; i < 4; ++i) {
+      fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerCollinear[i], tailKillerData.getRadiusFromCollinearCorner(i));
+      if (!tailKillerData.passCollinearCutForJet(i)) return;
+    }
 
     // Obtain booleans
     bool myLeg1PassedStatus = metData.passedEvent() && btagData.passedEvent() && tailKillerData.passedEvent();
