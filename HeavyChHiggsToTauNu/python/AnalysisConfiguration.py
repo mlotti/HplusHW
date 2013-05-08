@@ -657,6 +657,7 @@ class ConfigBuilder:
                 QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
+            mod.QCDTailKiller.maxJetsToConsider = 4
             createQCDTailKillerModule(process, "QCDTailKillerZeroPlus", mod, names, modules)
             # Loose plus scenario
             mod = module.clone()
@@ -672,6 +673,7 @@ class ConfigBuilder:
                 QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
+            mod.QCDTailKiller.maxJetsToConsider = 4
             createQCDTailKillerModule(process, "QCDTailKillerLoosePlus", mod, names, modules)
             # Medium plus scenario
             mod = module.clone()
@@ -687,6 +689,7 @@ class ConfigBuilder:
                 QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
+            mod.QCDTailKiller.maxJetsToConsider = 4
             createQCDTailKillerModule(process, "QCDTailKillerMediumPlus", mod, names, modules)
             # Tight plus scenario
             mod = module.clone()
@@ -702,6 +705,7 @@ class ConfigBuilder:
                 QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
+            mod.QCDTailKiller.maxJetsToConsider = 4
             createQCDTailKillerModule(process, "QCDTailKillerTightPlus", mod, names, modules)
         self._accumulateAnalyzers("Modules for QCDTailKiller scenarios", names)
         analysisModules.extend(modules)
