@@ -824,7 +824,7 @@ class InvertedTauID:
         if "BvetoTailKillerClosure" in name:
             histograms.addText(0.6, 0.70, "After MET cut", 22)
             histograms.addText(0.6, 0.64, "B-jet veto", 22)
-            histograms.addText(0.6, 0.58, "TailKiller: Loose", 22)
+            histograms.addText(0.6, 0.58, "TailKiller: Tight", 22)
                                                 
         plot.draw() 
         plot.save()

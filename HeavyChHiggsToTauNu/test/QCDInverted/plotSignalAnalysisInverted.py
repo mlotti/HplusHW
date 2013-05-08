@@ -57,8 +57,8 @@ mcOnlyLumi = 5000 # pb
 searchMode = "Light"
 #searchMode = "Heavy"
 
-#optMode = "OptQCDTailKillerLoose"
-optMode = ""
+optMode = "OptQCDTailKillerTight"
+#optMode = ""
 
 
 #dataEra = "Run2011A"
