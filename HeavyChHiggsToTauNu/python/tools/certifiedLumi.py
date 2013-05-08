@@ -23,7 +23,7 @@ files = {
     "24Aug2012ReReco": "Cert_198022-198523_8TeV_24Aug2012ReReco_Collisions12_JSON.txt",
     "11Dec2012ReReco": "Cert_201191-201191_8TeV_11Dec2012ReReco-recover_Collisions12_JSON.txt",
     # 53X Winter13 ReReco
-    "22Jan2013ReReco": "Cert_190456-203742_8TeV_22Jan2013ReReco_Collisions12_JSON.txt", # D is still missing
+    "22Jan2013ReReco": "Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt",
 }
 
 ## Get a JSON file name
