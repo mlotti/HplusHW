@@ -6,9 +6,9 @@ dataVersion="44XmcS6"     # Fall11 MC
 #dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
 dataEras = [
-    "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
+   # "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
     "Run2011A",
-    "Run2011B",
+   # "Run2011B",
 ]
 
 # Note: Keep number of variations below 200 to keep file sizes reasonable
@@ -33,12 +33,14 @@ myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 
 def customize(signalAnalysis):
     print "Customisation applied"
-
+    signalAnalysis.MET.METCut = 50.
+    
+    
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
-                        maxEvents=1000, # default is -1
+                        maxEvents=-1, # default is -1
                         customizeLightAnalysis=customize,
-                        doQCDTailKillerScenarios=False,
+                        doQCDTailKillerScenarios=True,
                         #doAgainstElectronScan=True,
                         doSystematics=True,
                         #histogramAmbientLevel = "Vital",

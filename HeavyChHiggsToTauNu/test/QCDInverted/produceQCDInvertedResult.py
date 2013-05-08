@@ -2,16 +2,12 @@
 
 ######################################################################
 #
-# Produce a ROOT file with the histograms/counters from tau embedding
-# as correctly normalized etc.
+# Produce a ROOT file with the histograms/counters from QCDInverted
+# with mt constructed in tau pt bins
 #
-# The input is a set of multicrab directories produced with
-# * signalAnalysis_cfg.py with "doPat=1 tauEmbeddingInput=1" command line arguments
-# and one multicrab directory with
-# * signalAnalysis_cfg.py with "doTauEmbeddingLikePreselection=True" in the config file
-#
-# Author: Matti Kortelainen
+# Based on produceTauEmbeddingResult.py by M. Kortelainen
 # Modified for QCD inverted tau method 22.11.2012/S.Lehti
+# Updated 7.5.2013/S.Lehti
 ######################################################################
 
 import os
@@ -35,20 +31,25 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 #import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute,addConfigInfo
 
-analysis = "signalAnalysisInvertedTau"
-massPlot = "transverseMass"
+searchMode = "Light"             
+#searchMode = "Heavy"            
 
+#dataEra = "Run2011A"
+#dataEra = "Run2011B"
+dataEra = "Run2011AB"
 
-############################################################
-#
-# !!!!  IMPORTANT NOTE  !!!!
-#
-# Following subtle bug remains
-#
-# 1. The precision of TH1F is not enough (ok, this is very small
-#    effect, 1e-7). We should consider TH1D for all counters.
-#
-############################################################
+analysis      = "signalAnalysisInvertedTau"
+massPlots     = []
+massPlotNames = []
+controlPlots  = []
+
+rebin = 10
+
+massPlots.append("Inverted/MTInvertedAllCutsTailKiller")
+massPlotNames.append("transverseMass")
+
+massPlots.append("Inverted/HiggsMass")
+massPlotNames.append("fullMass")
 
 def usage():
     print
@@ -87,19 +88,14 @@ def main():
         usage()
 
     dirQCDInv = sys.argv[1]
+    dirs = []
+    dirs.append(dirQCDInv)
 
     print "QCDInverted multicrab directory",dirQCDInv
     print 
 
-    fINname = os.path.join(dirQCDInv,"histogramsForLands.root")
-    if not os.path.exists(fINname):
-        print "File histogramsForLands.root not found under",dirQCDInv
-        print "Did you run plotSignalAnalysisInverted.py?"
-        print "Exiting.."
-        sys.exit()
                                         
     taskDir = multicrab.createTaskDir("QCDInverted")
-    print "Created",taskDir
 
     f = open(os.path.join(taskDir, "codeVersion.txt"), "w")
     f.write(git.getCommitId()+"\n")
@@ -120,51 +116,73 @@ def main():
     f.close()
 
         
-   
-    datasetsQCDInv = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirQCDInv+"/multicrab.cfg", counters=analysis+"/counters", includeOnlyTasks="Tau_")
-    datasetsQCDInv.loadLuminosities()
-    datasetsQCDInv.mergeData()
-        
-    # Save luminosity
-    data = {"Data": datasetsQCDInv.getDataset("Data").getLuminosity()}
-    f = open(os.path.join(taskDir, "lumi.json"), "w")
-    json.dump(data, f, indent=2)
-    f.close()            
+    creator = dataset.readFromMulticrabCfg(directory=dirQCDInv)
+    optModes = creator.getOptimizationModes()
 
     directory = os.path.join(taskDir, "Data", "res")
     os.makedirs(directory)
-    
+
     fOUT = ROOT.TFile.Open(os.path.join(directory, "histograms-Data.root"), "RECREATE")
-    anadir = fOUT.mkdir(analysis)
-    fIN = ROOT.TFile.Open(fINname,"R")
-    histograms = fIN.GetListOfKeys()
-    anadir.cd()
-    controlPlotDir = anadir.mkdir("ControlPlots")
+    
+    for i,optMode in enumerate(optModes):
 
-    integral = 0
-    for h in histograms:
-        histo = fIN.Get(h.GetName())
-        integral = histo.Integral(0, histo.GetNbinsX()+1)
-        if h.GetName() == massPlot:
-            histo.Write()
-        else:
-            anadir.cd("ControlPlots")
-            histo.Write()
-            anadir.cd()
-    fIN.Close()
+	datasetsQCDInv = creator.createDatasetManager(dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode)
+	datasetsQCDInv.loadLuminosities()
+	datasetsQCDInv.updateNAllEventsToPUWeighted()
 
-    counterdir = anadir.mkdir("counters")
-    anadir.cd("counters")
-    counter = ROOT.TH1D("counter","counter",1,0,1)
-    counter.SetBinContent(1,integral)
-    counter.GetXaxis().SetBinLabel(1,"integral")
-    counter.Write()
-    weighteddir = counterdir.mkdir("weighted")
-    weighteddir.cd()
-    counter.Write()
+	plots.mergeRenameReorderForDataMC(datasetsQCDInv)
+
+        datasetsQCDInv.mergeData()
+        datasetsQCDInv.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
+
+	if i == 0:
+	    # Save luminosity
+	    data = {"Data": datasetsQCDInv.getDataset("Data").getLuminosity()}
+	    f = open(os.path.join(taskDir, "lumi.json"), "w")
+	    json.dump(data, f, indent=2)
+	    f.close()
+    
+    	anadir = fOUT.mkdir(analysis+searchMode+optMode)
+
+    	anadir.cd()
+    	integrals = write(fOUT,datasetsQCDInv,massPlots,massPlotNames)
+
+    	controlPlotDir = anadir.mkdir("ControlPlots")
+    	anadir.cd("ControlPlots")
+    	write(fOUT,datasetsQCDInv,controlPlots)
+    	anadir.cd()
+
+    	counterdir = anadir.mkdir("counters")
+    	anadir.cd("counters")
+    	counter = ROOT.TH1D("counter","counter",len(integrals),0,len(integrals))
+    	for i,integral in enumerate(integrals):
+	    binLabel = "integral_"+massPlotNames[i]
+	    counter.SetBinContent(i+1,integral)
+            counter.GetXaxis().SetBinLabel(i+1,binLabel)
+        counter.Write()
+        weighteddir = counterdir.mkdir("weighted")
+        weighteddir.cd()
+        counter.Write()
+
     addConfigInfo(fOUT, datasetsQCDInv.getDataset("Data"))
     
     fOUT.Close()
+
+    print "Created multicrab-like dir for LandS:",taskDir
+
+
+from plotInvertedControlPlots import sumHistoBins
+def write(fOUT,datasets,histonames,newnames = []):
+    integrals = []
+    for i,histoname in enumerate(histonames):
+	name = histoname
+	if len(newnames) == len(histonames):
+	    name = massPlotNames[i]#+"_"+histoname.replace("/","_")
+	histo = sumHistoBins(datasets,histoname,name,"Inverted tau ID",rebin=rebin)
+	histo.Write()
+	integrals.append(histo.Integral(0, histo.GetNbinsX()+1))
+
+    return integrals
                           
 if __name__ == "__main__":
     main()
