@@ -17,15 +17,15 @@ searchMode = "Light"
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
 
-optMode = "OptQCDTailKillerLoose"
+optMode = "OptQCDTailKillerTightPlus"
 #optMode = ""
 binning = [41,50,60,70,80,100,120,150,200]
 
 HISTONAMES = []
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
 HISTONAMES.append("Inverted/SelectedTau_pT_TailKiller")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts")
@@ -84,7 +84,7 @@ def main():
 #        if "AfterMetCut"  in name:    
 #            legends["Purity%s"%i] = "MET > 60 GeV"
         if "AfterMetCut"  in name:    
-            legends["Purity%s"%i] = "MET > 60 GeV"
+            legends["Purity%s"%i] = "MET > 50 GeV"
         if "AfterBtagging"  in name:    
             legends["Purity%s"%i] = "B tagging"
         if "AfterBveto"  in name:    
@@ -100,10 +100,10 @@ def main():
 
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
-    plot.setLegend(histograms.createLegend(0.53, 0.2, 0.98, 0.4))
+    plot.setLegend(histograms.createLegend(0.6, 0.2, 0.98, 0.4))
     
  
-    histograms.addText(0.2, 0.3, "TailKiller: Medium", 18)
+    histograms.addText(0.2, 0.3, "TailKiller: TightPlus", 20)
 
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText(s="%s TeV"%(datasets.getEnergies()[0]))
