@@ -213,29 +213,7 @@ except ImportError:
     print "    Run script InvertedTauID_Normalization.py to generate QCDInvertedNormalizationFactors.py"
     print
 
-
-try:  
-    from QCDInvertedBtaggingFactors import *
-except ImportError:   
-    print
-    print "    WARNING, QCDInvertedBtaggingFactors.py not found!"
-    print
-
-
-try:   
-    from QCDInvertedBtaggingToBvetoAfterMetFactors  import *
-except ImportError:   
-    print
-    print "    WARNING, QCDInvertedBtaggingToBvetoAfterMetFactors.py not found!"
-    print
-
-    
-try:  
-    from QCDInvertedBtaggingtoBvetoFactors import *
-except ImportError:   
-    print
-    print "    WARNING, QCDInvertedBtaggingtoBvetoFactors.py not found!"
-    print 
+ 
     
 ptbins = [
     "4050",
@@ -263,35 +241,18 @@ def normalisation():
     print "-------------------"
     norm_inc = QCDInvertedNormalization["inclusive"]
     normEWK_inc = QCDInvertedNormalization["inclusiveEWK"]    
-    normFactorised_inc = norm_inc  * btaggingFactors["inclusive"]
-    normFactorisedEWK_inc = normEWK_inc * btaggingFactors["inclusive"]
+ 
 
-    normBtagToBveto_inc = norm_inc  * btaggingFactors["inclusive"]
-    normBtagToBvetoEWK_inc = normEWK_inc * btaggingFactors["inclusive"]
-    
     for bin in ptbins: 
         normData[bin] = QCDInvertedNormalization[bin]
         normEWK[bin] = QCDInvertedNormalization[bin+"EWK"]
-        normFactorisedData[bin] = QCDInvertedNormalization[bin] *  btaggingFactors[bin]
-        normFactorisedEWK[bin] = QCDInvertedNormalization[bin+"EWK"] * btaggingFactors[bin]
-        #normBtagToBveto[bin] = QCDInvertedNormalization[bin] *  btaggingToBvetoFactors[bin]
-        #normBtagToBvetoEWK[bin] = QCDInvertedNormalization[bin+"EWK"] * btaggingToBvetoFactors[bin]
-        normBtagToBveto[bin] = QCDInvertedNormalization[bin] *  btaggingToBvetoAfterMetFactors[bin]
-        normBtagToBvetoEWK[bin] = QCDInvertedNormalization[bin+"EWK"] * btaggingToBvetoAfterMetFactors[bin]
     print "inclusive norm", norm_inc,normEWK_inc
     print "norm factors", normData
     print "norm factors EWK", normEWK
     
-    print "inclusive factorised norm", normFactorised_inc,normFactorisedEWK_inc
-    print "norm factors factorised", normFactorisedData
-    print "norm factors EWK factorised", normFactorisedEWK
-    
-    print "inclusive BtagToBveto  norm", normBtagToBveto_inc,normBtagToBvetoEWK_inc
-    print "norm factors BtagToBveto ", normBtagToBveto
-    print "norm factors EWK BtagToBveto ", normBtagToBvetoEWK
-    
+ 
              
-    return normData,normEWK,normFactorisedData,normFactorisedEWK,normBtagToBveto,normBtagToBvetoEWK
+    return normData,normEWK
 
 
 def normalisationInclusive():
@@ -303,7 +264,7 @@ def normalisationInclusive():
     return norm_inc,normEWK_inc 
 
 def sumHistoBins(datasets,histoname,newname="",newtitle="",rebin = 1):
-    normData,normEWK,normFactorisedData,normFactorisedEWK,normBtagToBveto,normBtagToBvetoEWK=normalisation()
+    normData,normEWK = normalisation()
 
     histos = []
     for ptbin in ptbins:
@@ -334,7 +295,7 @@ def sumHistoBins(datasets,histoname,newname="",newtitle="",rebin = 1):
 
 def controlPlots(datasets):
     
-    normData,normEWK,normFactorisedData,normFactorisedEWK,normBtagToBveto,normBtagToBvetoEWK=normalisation()
+    normData,normEWK=normalisation()
     norm_inc,normEWK_inc = normalisationInclusive()
 
 
@@ -371,19 +332,22 @@ def controlPlots(datasets):
 
         ## -------------   mt with tailkiller -----------
         mt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedAllCutsTailKiller"+ptbin)])
-
         #mt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTInvertedTauIdPhi"+ptbin)])
+
         mt_tmp._setLegendStyles()
         mt_tmp._setLegendLabels()
         mt_tmp.histoMgr.setHistoDrawStyleAll("P") 
         mt_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
         mt = mt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mt.Scale(normData[ptbin])
+
 #        hmt.append(mt)        
 
         mtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedAllCutsTailKiller"+ptbin)])
 
         #mtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTInvertedTauIdPhi"+ptbin)])
+        mtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedAllCutsTailKiller"+ptbin)])
+
         mtEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         mtEWK_tmp._setLegendStyles()
         mtEWK_tmp._setLegendLabels()
@@ -403,7 +367,6 @@ def controlPlots(datasets):
         mmt_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))
         mmt = mmt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mmt.Scale(normData[ptbin])
-#        hmt.append(mt)
 
 
         mmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MET_InvertedTauIdJets"+ptbin)])
@@ -449,6 +412,7 @@ def controlPlots(datasets):
         hmt_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
         mass = hmt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mass.Scale(normData[ptbin])
+
 #        hmt.append(mt)
 
 #        hmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/HiggsMass4050")])
@@ -511,7 +475,7 @@ def controlPlots(datasets):
         jmmt_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
         jmmt = jmmt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         jmmt.Scale(normData[ptbin])
-#        hmt.append(mt)        
+        
         jmmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/NJetInvertedTauIdMet"+ptbin)])
         jmmtEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         jmmtEWK_tmp._setLegendStyles()
@@ -530,21 +494,16 @@ def controlPlots(datasets):
     hmtSum.SetName("transverseMass")
     hmtSum.SetTitle("Inverted tau ID")
     hmtSum.Reset()
-    print "check hmtsum",hmtSum.GetEntries()
     for histo in mtTailKiller:
         hmtSum.Add(histo)  
 
-    print "Integral: TailKiller cut- EWK = ",hmtSum.Integral()
-
-
-
+    print "Integral: mT (TailKiller cut)- EWK = ",hmtSum.Integral()
 
 
     met = hmet[0].Clone("met")
     met.SetName("MET")
     met.SetTitle("Inverted tau Met")
     met.Reset()
-    print "check met",met.GetEntries()
     for histo in hmet:
         met.Add(histo)
   
@@ -552,7 +511,6 @@ def controlPlots(datasets):
     DeltaPhi.SetName("deltaPhi")
     DeltaPhi.SetTitle("Inverted tau hdeltaPhi")
     DeltaPhi.Reset()
-    print "check hdeltaPhi",DeltaPhi.GetEntries()
     for histo in hdeltaPhi:
         DeltaPhi.Add(histo)
         
@@ -560,7 +518,6 @@ def controlPlots(datasets):
     higgsMass.SetName("FullMass")
     higgsMass.SetTitle("Inverted tau higgsMass")
     higgsMass.Reset()
-    print "check higgsMass",higgsMass.GetEntries()
     for histo in hmass:
         higgsMass.Add(histo)
 
@@ -569,7 +526,6 @@ def controlPlots(datasets):
     bjet.SetName("NBjets")
     bjet.SetTitle("Inverted tau bjet")
     bjet.Reset()
-    print "check bjet",bjet.GetEntries()
     for histo in hbjet:
         bjet.Add(histo)  
 
@@ -577,7 +533,6 @@ def controlPlots(datasets):
     jet.SetName("Njets")
     jet.SetTitle("Inverted tau jet")
     jet.Reset()
-    print "check jet",jet.GetEntries()
     for histo in hjet:
         jet.Add(histo)
         
@@ -587,7 +542,6 @@ def controlPlots(datasets):
     jetmet.SetName("NjetsAfterMET")
     jetmet.SetTitle("Inverted tau jet after Met")
     jetmet.Reset()
-    print "check jetmet",jetmet.GetEntries()
     for histo in hjetmet:
         jetmet.Add(histo)
 
@@ -595,9 +549,8 @@ def controlPlots(datasets):
 
  ## mt baseline, plots and EWK substraction
             
-
     mtTailKillerInclusive = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedAllCutsTailKiller")])
-    
+
     mtEWKinverted = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedAllCutsTailKiller")])
 
     mtEWKinverted.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())

@@ -46,8 +46,9 @@ def main(argv):
 
 #    HISTONAME = "TauIdJets"
 #    HISTONAME = "TauIdBtag"
+   # HISTONAME = "TauIdBvetoCollinear"
     HISTONAME = "TauIdBveto"
-    
+   
     dirs = []
     if len(sys.argv) < 2:
 	usage()
