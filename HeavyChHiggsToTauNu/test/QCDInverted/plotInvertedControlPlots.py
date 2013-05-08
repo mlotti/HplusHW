@@ -65,7 +65,9 @@ optMode = "OptQCDTailKillerLoose"
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
 
-print "dataEra"
+print "dataEra",dataEra
+
+landsInput = "histogramsForLands.root"
 
 def usage():
     print "\n"
@@ -142,7 +144,7 @@ def main():
     doPlots(datasets)
 
     # Write mt histograms to ROOT file
-#    writeTransverseMass(datasets_lands)
+    writeTransverseMass(datasets_lands)
 
     # Print counters
     doCounters(datasets)
@@ -151,13 +153,13 @@ def main():
 def writeTransverseMass(datasets_lands):
     mt = plots.DataMCPlot(datasets_lands, "transverseMass")
     mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    f = ROOT.TFile.Open(output, "RECREATE")
+    f = ROOT.TFile.Open(landsInput, "RECREATE")
     mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_data")
     mt_data.SetDirectory(f)
     mt_hw = mt.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("mt_hw")
     mt_hw.SetDirectory(f)
-    mt_hh = mt.histoMgr.getHisto("TTToHplusBHminusB_M120").getRootHisto().Clone("mt_hh")
-    mt_hh.SetDirectory(f)
+#    mt_hh = mt.histoMgr.getHisto("TTToHplusBHminusB_M120").getRootHisto().Clone("mt_hh")
+#    mt_hh.SetDirectory(f)
     f.Write()
     f.Close()
 
@@ -253,6 +255,35 @@ def normalisationInclusive():
     print "inclusive norm", norm_inc,normEWK_inc       
     return norm_inc,normEWK_inc 
 
+def sumHistoBins(datasets,histoname,newname="",newtitle="",rebin = 1):
+    normData,normEWK,normFactorisedData,normFactorisedEWK,normBtagToBveto,normBtagToBvetoEWK=normalisation()
+
+    histos = []
+    for ptbin in ptbins:
+        histo_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(histoname+ptbin)])
+        histo_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+        histo = histo_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+        histo.Scale(normData[ptbin])
+
+        histoEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(histoname+ptbin)])
+        histoEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+	histoEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+        histoEWK = histoEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+        histoEWK.Scale(normEWK[ptbin])
+
+        histo.Add(histoEWK, -1)
+        histos.append(histo)
+
+    sum = histos[0].Clone("sum")
+    if len(newname)>0:
+        sum.SetName(newname)
+    if len(newtitle)>0:
+        sum.SetTitle(newtitle)
+    sum.Reset()
+
+    for histo in histos:
+        sum.Add(histo)
+    return sum
 
 def controlPlots(datasets):
     
@@ -274,8 +305,17 @@ def controlPlots(datasets):
     hjet = []
     hphi2 = []
 
+    testHisto = sumHistoBins(datasets,"Inverted/MTInvertedAllCutsTailKiller","transverseMass2","Inverted tau ID")
+    canvasTest = ROOT.TCanvas("testMt","",500,500)
+    canvasTest.cd()
+#    testHisto.Rebin(10)
+    testHisto.SetMarkerColor(4)
+    testHisto.SetMarkerSize(1)
+    testHisto.SetMarkerStyle(20)
+    testHisto.SetFillColor(4)
+    testHisto.Draw("EP")
+    canvasTest.Print("testMt.eps")    
 
-    
 ## histograms in bins, normalisation and substraction of EWK contribution
     ## mt with 2dim deltaPhi cut
     for ptbin in ptbins:
