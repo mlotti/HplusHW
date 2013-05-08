@@ -623,6 +623,7 @@ class ConfigBuilder:
             print "MET filters", module.metFilters
         print "VertexWeight data distribution:",module.vertexWeight.dataPUdistribution.value()
         print "VertexWeight mc distribution:",module.vertexWeight.mcPUdistribution.value()
+        print "Cut on L1 MET", module.trigger.l1MetCut.value()
         print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", module.trigger.hltMetCut.value()
         #print "TauSelection algorithm:", module.tauSelection.selection.value()
         print "TauSelection algorithm:", module.tauSelection.selection.value()

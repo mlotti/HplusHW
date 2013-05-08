@@ -75,6 +75,7 @@ namespace HPlus {
       ~Data();
 
       const bool passedEvent() const { return fPassedEvent; }
+      const pat::TriggerObjectRef getL1MetObject() const { return fL1Met; }
       const pat::TriggerObjectRef getHltMetObject() const { return fHltMet; }
       const bool hasTriggerPath() const { return fHasTriggerPath; }
       const size_t getTriggerTauSize() const { return fHltTaus.size(); }
@@ -84,6 +85,7 @@ namespace HPlus {
 
     private:
       // Analysis results
+      pat::TriggerObjectRef fL1Met;
       pat::TriggerObjectRef fHltMet;
       pat::TriggerObjectRefVector fHltTaus;
 
@@ -106,6 +108,8 @@ namespace HPlus {
     std::vector<TriggerPath* > triggerPaths;
     const edm::InputTag fTriggerSrc;
     const edm::InputTag fPatSrc;
+    std::string fL1MetCollection;
+    const double fL1MetCut;
     const double fMetCut;
 
     TriggerMETEmulation fTriggerCaloMet;
@@ -117,6 +121,8 @@ namespace HPlus {
     Count fTriggerCaloMetCount;
     Count fTriggerCount;
 
+    Count fTriggerDebugAllCount;
+    Count fTriggerL1MetPassedCount;
     Count fTriggerHltMetExistsCount;
     Count fTriggerHltMetPassedCount;
 

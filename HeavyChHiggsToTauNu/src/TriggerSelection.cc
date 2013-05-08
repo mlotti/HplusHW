@@ -23,6 +23,8 @@ namespace HPlus {
     BaseSelection(eventCounter, histoWrapper),
     fTriggerSrc(iConfig.getUntrackedParameter<edm::InputTag>("triggerSrc")),
     fPatSrc(iConfig.getUntrackedParameter<edm::InputTag>("patSrc")),
+    fL1MetCollection(iConfig.getUntrackedParameter<std::string>("l1MetCollection")),
+    fL1MetCut(iConfig.getUntrackedParameter<double>("l1MetCut")),
     fMetCut(iConfig.getUntrackedParameter<double>("hltMetCut")),
     fTriggerCaloMet(iConfig.getUntrackedParameter<edm::ParameterSet>("caloMetSelection"), eventCounter, histoWrapper),
     fTriggerAllCount(eventCounter.addSubCounter("Trigger", "All events")),
@@ -30,6 +32,8 @@ namespace HPlus {
     fTriggerBitCount(eventCounter.addSubCounter("Trigger","Bit passed")), 
     fTriggerCaloMetCount(eventCounter.addSubCounter("Trigger","CaloMET cut passed")), 
     fTriggerCount(eventCounter.addSubCounter("Trigger","Passed")),
+    fTriggerDebugAllCount(eventCounter.addSubCounter("Trigger debug", "All events")),
+    fTriggerL1MetPassedCount(eventCounter.addSubCounter("Trigger debug", "L1 MET passed")),
     fTriggerHltMetExistsCount(eventCounter.addSubCounter("Trigger debug", "HLT MET object exists")),
     fTriggerHltMetPassedCount(eventCounter.addSubCounter("Trigger debug", "HLT MET passed")),
     fThrowIfNoMet(iConfig.getUntrackedParameter<bool>("throwIfNoMet", true))
@@ -151,7 +155,7 @@ namespace HPlus {
     if(passEvent)
       increment(fTriggerPathCount);
 
-    // Get HLT MET object
+    // Get L1/HLT MET object
     // but only if the trigger has been passed (otherwise it makes no sense to emulate MET)
     if(passEvent) {
       // Print all trigger object types of all triggers
@@ -169,6 +173,35 @@ namespace HPlus {
       }
       */
 
+      increment(fTriggerDebugAllCount);
+      // L1 MET
+      if(fL1MetCut >= 0) {
+        pat::TriggerObjectRefVector l1Mets = trigger->objects(trigger::TriggerL1ETM);
+        bool found = false;
+        for(size_t i=0 ;i<l1Mets.size(); ++i) {
+          if(l1Mets[i]->collection() == fL1MetCollection) {
+            found = true;
+            output.fL1Met = l1Mets[i];
+            break;
+          }
+        }
+        if(!found) {
+          std::stringstream ss;
+          for(size_t i=0; i<l1Mets.size(); ++i) {
+            if(i != 0)
+              ss << ", ";
+            ss << l1Mets[i]->collection();
+          }
+          throw cms::Exception("LogicError") << "TriggerSelection: did not find L1_ETM object with collection name " << fL1MetCollection << ". Available objects " << ss.str();
+        }
+        if(output.fL1Met->et() < fL1MetCut)
+          passEvent = false;
+      }
+      if(!passEvent) return passEvent;
+      increment(fTriggerL1MetPassedCount);
+
+
+      // HLT MET
       if(fMetCut < 0) return passEvent;
 
       pat::TriggerObjectRefVector hltMets = trigger->objects(trigger::TriggerMET);

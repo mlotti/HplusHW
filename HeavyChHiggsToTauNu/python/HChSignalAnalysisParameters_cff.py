@@ -41,6 +41,8 @@ trigger = cms.untracked.PSet(
     triggerSrc = cms.untracked.InputTag("TriggerResults", "", "INSERT_HLT_PROCESS_HERE"),
     patSrc = cms.untracked.InputTag("patTriggerEvent"),
     triggers = cms.untracked.vstring(singleTauMetTriggerPaths),
+    l1MetCut = cms.untracked.double(40), # in 2012 L1 seed of Tau+MET trigger is L1_ETM36 OR L1_ETM40, but 36 is prescaled in some runs
+    l1MetCollection = cms.untracked.string("l1extraParticles:MET"),
 #    hltMetCut = cms.untracked.double(60.0),
     hltMetCut = cms.untracked.double(-1), # not needed in 2012
     throwIfNoMet = cms.untracked.bool(False), # to prevent jobs from failing, FIXME: must be investigated later
@@ -569,6 +571,11 @@ def overrideTriggerFromOptions(options):
         trigger.triggers = [options.trigger]
     elif len(options.trigger) > 0:
         trigger.triggers = options.trigger
+
+    for trg in trigger.triggers:
+        if not "IsoPFTau" in trg:
+            print "Disabling l1Met cut because of having trigger", trg
+            trigger.l1MetCut = -1
 
 def _getTriggerVertexArgs(kwargs):
     effargs = {}
