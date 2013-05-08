@@ -71,7 +71,11 @@ private:
   HPlus::TreeVertexBranches fSelectedVertexBranches;
   HPlus::TreeVertexBranches fGoodVertexBranches;
   HPlus::TreeTriggerBranches fTriggerBranches;
+
+  const bool fTauEnabled;
   HPlus::TreeTauBranches fTauBranches;
+
+  const bool fJetEnabled;
   HPlus::TreeJetBranches fJetBranches;
 
   const bool fMuonEnabled;
@@ -97,7 +101,9 @@ HPlusTauNtupleAnalyzer::HPlusTauNtupleAnalyzer(const edm::ParameterSet& iConfig)
   fSelectedVertexBranches(iConfig, "selectedPrimaryVertex", "selectedPrimaryVertexSrc"),
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fTriggerBranches(iConfig),
+  fTauEnabled(iConfig.getParameter<bool>("tauEnabled")),
   fTauBranches(iConfig),
+  fJetEnabled(iConfig.getParameter<bool>("jetEnabled")),
   fJetBranches(iConfig, false),
   fMuonEnabled(iConfig.getParameter<bool>("muonEnabled")),
   fMuonBranches(iConfig),
@@ -127,8 +133,12 @@ HPlusTauNtupleAnalyzer::HPlusTauNtupleAnalyzer(const edm::ParameterSet& iConfig)
   fSelectedVertexBranches.book(fTree);
   fGoodVertexBranches.book(fTree);
   fTriggerBranches.book(fTree);
-  fTauBranches.book(fTree);
-  fJetBranches.book(fTree);
+
+  if(fTauEnabled)
+    fTauBranches.book(fTree);
+
+  if(fJetEnabled)
+    fJetBranches.book(fTree);
 
   if(fMuonEnabled)
     fMuonBranches.book(fTree);
@@ -197,11 +207,13 @@ void HPlusTauNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventS
 
   // Taus
   if(iEvent.isRealData()) {
-    fTauBranches.setValues(iEvent);
+    if(fTauEnabled)
+      fTauBranches.setValues(iEvent);
   }
   else {
     fGenBranches.setValues(iEvent);
-    fTauBranches.setValues(iEvent, *hgenparticlestau);
+    if(fTauEnabled)
+      fTauBranches.setValues(iEvent, *hgenparticlestau);
 
     for(edm::View<reco::GenParticle>::const_iterator iGen = hgenparticlestau->begin(); iGen != hgenparticlestau->end(); ++iGen) {
       if(std::abs(iGen->pdgId()) == 15) {
@@ -218,7 +230,8 @@ void HPlusTauNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventS
     }
   }
 
-  fJetBranches.setValues(iEvent);
+  if(fJetEnabled)
+    fJetBranches.setValues(iEvent);
 
   if(fMuonEnabled) {
     if(iEvent.isRealData()) {

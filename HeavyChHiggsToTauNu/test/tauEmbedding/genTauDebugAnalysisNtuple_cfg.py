@@ -81,9 +81,11 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     patTriggerSrc = cms.InputTag("patTriggerEvent"),
     triggerPaths = cms.PSet(),
 
-    tauSrc = cms.InputTag("selectedPatTausHpsPFTau"),
-    tauFunctions = analysisConfig.tauFunctions.clone(),
+    tauEnabled = cms.bool(False),
+    tauSrc = cms.InputTag("NOT_SET"),
+    tauFunctions = cms.PSet(),
 
+    jetEnabled = cms.bool(False),
     jetSrc = cms.InputTag("goodJets"),
     jetFunctions = cms.PSet(),
     jetPileupIDs = cms.PSet(),
