@@ -1,11 +1,12 @@
-DataCardName    = 'myDummyTestName'
+DataCardName    = 'Default'
 Path            = '/home/wendland/data/v445/met50'
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
-#MassPoints      = [80,90,100,120,140,150,155,160]
+LightMassPoints      = [80,90,100,120,140,150,155,160]
+HeavyMassPoints      = [180,190,200,220,250,300]
 #MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [80,120,160]
-MassPoints      = [120]
+MassPoints      = [120] # The mass points to run
 
 BlindAnalysis   = True
 
@@ -169,7 +170,7 @@ signalTemplate = DataGroup(datasetType="Signal",
                            #dirPrefix=SignalAnalysis,
                            rateCounter=SignalRateCounter)
 
-for mass in MassPoints:
+for mass in LightMassPoints:
     myMassList = [mass]
     hhx = signalTemplate.clone()
     hhx.setLabel("HH"+str(mass)+"_a")
@@ -187,6 +188,15 @@ for mass in MassPoints:
     hwx.setDatasetDefinitions(["TTToHplusBWB_M"+str(mass)]),
     DataGroups.append(hwx)
 
+for mass in HeavyMassPoints:
+    myMassList = [mass]
+    hx = signalTemplate.clone()
+    hx.setLabel("Hp"+str(mass)+"_a")
+    hx.setLandSProcess(0)
+    hx.setValidMassPoints(myMassList)
+    hx.setNuisances(["01","02","03","45","46","47","09","10","50","33","34"])
+    hx.setDatasetDefinitions(["HplusTB_M"+str(mass)]),
+    DataGroups.append(hx)
 
 if OptionMassShape == "TransverseMass":
     DataGroups.append(DataGroup(
@@ -699,6 +709,14 @@ Nuisances.append(Nuisance(
 Nuisances.append(Nuisance(
     id            = "18",
     label         = "MC signal stat., HW",
+    distr         = "lnN",
+    function      = "Counter",
+    counter       = SignalRateCounter,
+))
+
+Nuisances.append(Nuisance(
+    id            = "50",
+    label         = "MC signal stat., H+",
     distr         = "lnN",
     function      = "Counter",
     counter       = SignalRateCounter,
