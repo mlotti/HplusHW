@@ -219,7 +219,7 @@ namespace HPlus {
     hTransverseMassTopChiSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopChiSelection", "transverseMassTopChiSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
     hTransverseMassTopBjetSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopBjetSelection", "transverseMassTopBjetSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
    
-    hDeltaPhiAfterJets= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted , "deltaPhiAfterJets", "deltaPhiAfterJets", 180, 0., 180.);
+    //    hDeltaPhiAfterJets= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted , "deltaPhiAfterJets", "deltaPhiAfterJets", 180, 0., 180.);
     
     hTransverseMassVsDphi = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "transverseMassVsDphi", "transverseMassVsDphi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.,180,0.,180.);
     hSelectedTauEt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_pT_AfterTauID", "SelectedTau_pT_AfterTauID;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 200, 0.0, 400.0);    
@@ -234,18 +234,21 @@ namespace HPlus {
 
     hMETBaselineTauId =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauId", 250, 0.0 , 500.0 );
     hMETBaselineTauIdJets =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdJets", 250, 0.0 , 500.0 );
+    hMETBaselineTauIdJetsCollinear =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdJetsCollinear", 250, 0.0 , 500.0 );
     hMETBaselineTauIdBtag =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdBtag", 250, 0.0 , 500.0 );
     hMETBaselineTauIdBveto =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdBveto", 250, 0.0 , 500.0 );
+    hMETBaselineTauIdBvetoCollinear = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdBvetoCollinear", 250, 0.0 , 500.0 );
 
     hMTBaselineTauIdJet =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdJet", 200, 0.0, 400.0 );
     hMTBaselineTauIdBveto =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdBveto", 200, 0.0, 400.0 );
 
     hMTBaselineTauIdBvetoTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdBvetoTailKiller", 200, 0.0, 400.0 );
-    hMTBaselineTauIdNoBtagging = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTaudNoBtagging", 200, 0.0, 400.0 );
-    hMTBaselineTauIdNoBtaggingTailKiller= new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTaudNoBtaggingTailKiller", 200, 0.0, 400.0 );
+    hMTBaselineTauIdNoBtagging = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdNoBtagging", 200, 0.0, 400.0 );
+    hMTBaselineTauIdNoBtaggingTailKiller= new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdNoBtaggingTailKiller", 200, 0.0, 400.0 );
     //    hMTBaselineTauIdJetTailKiller = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdJetTailKiller", 200, 0.0, 400.0 );
     hMTBaselineTauIdBtag =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdBtag", 200, 0.0, 400.0 );
 
+/*
     hMTBaselineTauIdBvetoDphi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdBvetoDphi", 200, 0.0, 400.0 );
     //    hMTBaselineTauIdPhi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdPhi", 200, 0.0, 400.0 );
     hMTBaselineTauIdAllCutsTailKiller =  new HistogramsInBins(HistoWrapper::kSystematics, eventCounter, fHistoWrapper, "BaseLine","MTBaselineTauIdAllCutsTailKiller", 200, 0.0, 400.0 ); 
@@ -258,6 +261,16 @@ namespace HPlus {
     hMTBaselineTauIdNoMetNoBtagging=  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaselineTauIdNoMetBtagging", 200, 0.0, 400.0 );
     hMTBaselineTauIdNoMetNoBtaggingTailKiller=  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaselineTauIdNoMetBtaggingTailKiller", 200, 0.0, 400.0 );
 
+*/
+    hMTBaselineTauIdAllCutsTailKiller =  new HistogramsInBins(HistoWrapper::kSystematics, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdAllCutsTailKiller", 200, 0.0, 400.0 ); 
+
+    hMTBaselineTauIdNoMetBveto =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdNoMetBveto", 200, 0.0, 400.0 );
+    hMTBaselineTauIdNoMetBvetoTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdNoMetBvetoTailKiller", 200, 0.0, 400.0 );
+    hMTBaselineTauIdNoMetBtag =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdNoMetBtag", 200, 0.0, 400.0 );
+    hMTBaselineTauIdNoMetBtagTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdNoMetBtagTailKiller", 200, 0.0, 400.0 );
+    hMTBaselineTauIdNoMetNoBtagging=  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdNoMetBtagging", 200, 0.0, 400.0 );
+    hMTBaselineTauIdNoMetNoBtaggingTailKiller=  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdNoMetBtaggingTailKiller", 200, 0.0, 400.0 );
+
     hMTInvertedTauIdJet =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdJet", 200, 0.0, 400.0 );
     hMTInvertedTauIdJetTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdJetTailKiller", 200, 0.0, 400.0 );
     hMTInvertedTauIdJetDphi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdJetDphi", 200, 0.0, 400.0 ); 
@@ -266,6 +279,7 @@ namespace HPlus {
     hMTInvertedTauIdBveto =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBveto", 200, 0.0, 400.0 ); 
 
     hMTInvertedTauIdBvetoDphi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBvetoDphi", 200, 0.0, 400.0 ); 
+    hMTInvertedTauIdBvetoDphi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBvetoTailKiller", 200, 0.0, 400.0 );
 
     hMTInvertedAllCutsTailKiller =  new HistogramsInBins(HistoWrapper::kSystematics, eventCounter, fHistoWrapper, "Inverted","MTInvertedAllCutsTailKiller", 200, 0.0, 400.0 );
     //    hMTInvertedSecondDeltaPhiCut =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedSecondDeltaPhiCut", 200, 0.0, 400.0 );
@@ -274,18 +288,19 @@ namespace HPlus {
 
 //FIXME, either define, or remove. 23042013/S.Lehti    hMTInvertedNoBtaggingDphiCuts = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedNoBtaggingDphiCuts", 200, 0.0, 400.0 );
 
-    hMTInvertedNoBtagging = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedNoBtagging", 200, 0.0, 400.0 );    
+    //    hMTInvertedNoBtagging = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedNoBtagging", 200, 0.0, 400.0 );    
     hMTInvertedNoBtaggingTailKiller = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedNoBtaggingTailKiller", 200, 0.0, 400.0 );
 
     hTopMass =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","TopMass", 200, 0.0, 400.0 );
     hHiggsMass =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","HiggsMass", 250, 0.0 , 500.0 );
-    hHiggsMassPhi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","HiggsMassPhi", 250, 0.0 , 500.0 );
+    //    hHiggsMassTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","HiggsMassTailKiller", 250, 0.0 , 500.0 );
 
 
     hMTInvertedTauIdBtagNoMetCut =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBtagNoMetCut", 200, 0.0, 400.0 );
     hMTInvertedTauIdBvetoNoMetCut =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBvetoNoMetCut", 200, 0.0, 400.0 );
     hMTInvertedTauIdBvetoNoMetCutTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBvetoNoMetCutTailKiller", 200, 0.0, 400.0 );
-    hMTInvertedTauIdBtagNoMetCutTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBtagNoMetCutTailKiller", 200,0.0, 400.0 );
+
+    //    hMTInvertedTauIdBtagNoMetCutTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBtagNoMetCutTailKiller", 200,0.0, 400.0 );
 
     hNBInvertedTauIdJet =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","NBInvertedTauIdJet", 10, 0.0 , 10.0 );
     hNBInvertedTauIdJetDphi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","NBInvertedTauIdJetDphi", 10, 0.0 , 10.0 );
@@ -296,9 +311,51 @@ namespace HPlus {
   
     hMETInvertedTauId = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MET_InvertedTauId", 250, 0.0 , 500.0 );
     hMETInvertedTauIdJets = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MET_InvertedTauIdJets", 250, 0.0 , 500.0 );
+    hMETInvertedTauIdJetsCollinear = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MET_InvertedTauIdJetsCollinear", 250, 0.0 , 500.0 );
     hMETInvertedTauIdBtag = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MET_InvertedTauIdBtag", 250, 0.0 , 500.0 );
+    hMETInvertedTauIdBvetoCollinear = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MET_InvertedTauIdBvetoCollinear", 250, 0.0 , 500.0 );
     hMETInvertedTauIdBveto = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MET_InvertedTauIdBveto", 250, 0.0 , 500.0 );
+    hMETInvertedAllCutsTailKiller = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MET_InvertedAllCutsTailKiller", 250, 0.0 , 500.0 );
+    /*
+    hDeltaPhiVsDeltaPhiJet1TauSel = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiJet1TauSel","DeltaPhiVsDeltaPhiJet1TauSel",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiVsDeltaPhiJet1LeptonVeto = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiJet1LeptonVeto","DeltaPhiVsDeltaPhiJet1LeptonVeto",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiVsDeltaPhiJet1MetCut = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiJet1MetCut","DeltaPhiVsDeltaPhiJet1MetCut",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiVsDeltaPhiJet1Btagging = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiJet1Btagging","DeltaPhiVsDeltaPhiJet1Btagging",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiVsDeltaPhiJet2TauSel = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiJet2TauSel","DeltaPhiVsDeltaPhiJet2TauSel",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiVsDeltaPhiJet2LeptonVeto = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiJet2LeptonVeto","DeltaPhiVsDeltaPhiJet2LeptonVeto",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiVsDeltaPhiJet2MetCut = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiJet2MetCut","DeltaPhiVsDeltaPhiJet2MetCut",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiVsDeltaPhiJet2Btagging = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiJet2Btagging","DeltaPhiVsDeltaPhiJet2Btagging",  180, 0., 180., 180,0.,180.);
 
+       
+    //    TFileDirectory myInverted = fs->mkdir("Inverted");
+    hDeltaPhiJet1TauSel = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet1TauSel","DeltaPhiVsDeltaPhiJet1TauSel",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet2TauSel = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet2TauSel","DeltaPhiVsDeltaPhiJet2TauSel",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet3TauSel = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet3TauSel","DeltaPhiVsDeltaPhiJet3TauSel",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet4TauSel = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet4TauSel","DeltaPhiVsDeltaPhiJet4TauSel",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet1LeptonVeto = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet1LeptonVeto","DeltaPhiVsDeltaPhiJet1LeptonVeto",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet2LeptonVeto = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet2LeptonVeto","DeltaPhiVsDeltaPhiJet2LeptonVeto",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet3LeptonVeto = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet3LeptonVeto","DeltaPhiVsDeltaPhiJet3LeptonVeto",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet4LeptonVeto = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet4LeptonVeto","DeltaPhiVsDeltaPhiJet4LeptonVeto",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet1MetCut = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet1MetCut","DeltaPhiVsDeltaPhiJet1MetCut",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet2MetCut = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet2MetCut","DeltaPhiVsDeltaPhiJet2MetCut",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet3MetCut = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet3MetCut","DeltaPhiVsDeltaPhiJet3MetCut",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet4MetCut = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet4MetCut","DeltaPhiVsDeltaPhiJet4MetCut",  180, 0., 180., 180,0.,180.);
+
+    hDeltaPhiJet1Btagging = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet1Btagging","DeltaPhiVsDeltaPhiJet1Btagging",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet2Btagging = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet2Btagging","DeltaPhiVsDeltaPhiJet2Btagging",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet3Btagging = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet3Btagging","DeltaPhiVsDeltaPhiJet3Btagging",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet4Btagging = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myInverted,"DeltaPhiVsDeltaPhiJet4Btagging","DeltaPhiVsDeltaPhiJet4Btagging",  180, 0., 180., 180,0.,180.);
+
+
+    hDeltaPhiJet1TauSelBaseline = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myBaseline,"DeltaPhiVsDeltaPhiJet1TauSelBaseline","DeltaPhiVsDeltaPhiJet1TauSelBaseline",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet2TauSelBaseline = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myBaseline,"DeltaPhiVsDeltaPhiJet2TauSelBaseline","DeltaPhiVsDeltaPhiJet2TauSelBaseline",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet3TauSelBaseline = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myBaseline,"DeltaPhiVsDeltaPhiJet1TauSelBaseline","DeltaPhiVsDeltaPhiJet3TauSelBaseline",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet4TauSelBaseline = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myBaseline,"DeltaPhiVsDeltaPhiJet2TauSelBaseline","DeltaPhiVsDeltaPhiJet4TauSelBaseline",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet1BtaggingBaseline = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myBaseline,"DeltaPhiVsDeltaPhiJet1BtaggingBaseline","DeltaPhiVsDeltaPhiJet1BtaggingBaseline",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet2BtaggingBaseline = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myBaseline,"DeltaPhiVsDeltaPhiJet2BtaggingBaseline","DeltaPhiVsDeltaPhiJet2BtaggingBaseline",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet3BtaggingBaseline = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myBaseline,"DeltaPhiVsDeltaPhiJet1BtaggingBaseline","DeltaPhiVsDeltaPhiJet3BtaggingBaseline",  180, 0., 180., 180,0.,180.);
+    hDeltaPhiJet4BtaggingBaseline = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myBaseline,"DeltaPhiVsDeltaPhiJet2BtaggingBaseline","DeltaPhiVsDeltaPhiJet4BtaggingBaseline",  180, 0., 180., 180,0.,180.);
+    */
 
     hNBBaselineTauIdJet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myBaseline, "NBBaselineTauIdJet", "NBBaselineTauIdJet", 10, 0., 10.);
     hNJetBaselineTauIdMet= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myBaseline, "NJetBaselineTauIdJetMet", "NJetBaselineTauIdJetMet", 10, 0., 10.);
@@ -306,17 +363,6 @@ namespace HPlus {
     hDeltaPhiBaseline = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myBaseline , "deltaPhiBaseline", "deltaPhi;#Delta#phi", 180, 0., 180.);
 
 
-    //   hDeltaPhiVsDeltaPhiMETJet2InvertedAfterCut = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiMETJet2AfterCut", "DeltaPhiVsDeltaPhiMETJet2AfterCut", 180, 0., 180., 180,0.,180.);
- 
-    //    hDeltaPhiVsDeltaPhiMHTJet1InvertedAfterCut= fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "DeltaPhiVsDeltaPhiMHTJet1InvertedAfterCut", 180, 0., 180., 180,0,180. );
-
-
-    //    hDeltaPhiVsDeltaPhiMETJet1Inverted = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiMETJet1","DeltaPhiVsDeltaPhiMETJet1",  180, 0., 180., 180,0.,180.);
-    //    hDeltaPhiVsDeltaPhiMETJet2Inverted = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiMETJet2","DeltaPhiVsDeltaPhiMETJet2",  180, 0., 180., 180,0.,180.); 
-    //    hDeltaPhiVsDeltaPhiMETJet3Inverted = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiMETJet3","DeltaPhiVsDeltaPhiMETJet3",  180, 0., 180., 180,0.,180.);  
-    //    hDeltaPhiVsDeltaPhiMETJet4Inverted = new HistogramsInBins2Dim(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","DeltaPhiVsDeltaPhiMETJet4","DeltaPhiVsDeltaPhiMETJet4",  180, 0., 180., 180,0.,180.);  
-
-  
     hSelectedTauEt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterRtauCut", "SelectedTau_pT_AfterRtauCut", 200, 0.0, 400.0);
     hSelectedTauEtTauVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterTauVeto", "SelectedTau_pT_AfterTauVeto", 200, 0.0, 400.0);     
 
@@ -328,8 +374,8 @@ namespace HPlus {
     hSelectedTauEtBjetVetoPhiCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterBvetoPhiCuts", "SelectedTau_pT_AfterBvetoPhiCuts", 200, 0.,400.0);
     hSelectedTauEtTailKiller = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_TailKiller", "SelectedTau_pT_TailKiller", 200, 0.0, 400.0);
     
-    hSelectedTauEtDeltaPhiJet123Cut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterDeltaPhiJet123Cut", "SelectedTau_pT_AfterDeltaPhiJet123Cut", 200,0, 400.0);
-    hSelectedTauEtDeltaPhiJetsAgainstTTCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterDeltaPhiJetsAgainstTTCut", "SelectedTau_pT_AfterDeltaPhiJetsAgainstTTCut", 200, 0.0, 400.0);
+    //    hSelectedTauEtDeltaPhiJet123Cut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterDeltaPhiJet123Cut", "SelectedTau_pT_AfterDeltaPhiJet123Cut", 200,0, 400.0);
+    //   hSelectedTauEtDeltaPhiJetsAgainstTTCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterDeltaPhiJetsAgainstTTCut", "SelectedTau_pT_AfterDeltaPhiJetsAgainstTTCut", 200, 0.0, 400.0);
 				  
           
     //    hSelectedTauEtMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 200, 0.0, 400.0);
@@ -461,8 +507,11 @@ namespace HPlus {
     //hSelectionFlow->Fill(kSignalOrderVertexSelection);
 
 
-   
   
+
+
+
+
     // Tau-candidate selection
    
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
@@ -618,7 +667,7 @@ namespace HPlus {
       
       increment(fTauTriggerScaleFactorCounter);
       
-      return doInvertedAnalysis(iEvent, iSetup, selectedInvertedTau, pvData);
+      return doInvertedAnalysis(iEvent, iSetup, selectedInvertedTau, pvData, genData);
     }
      
 
@@ -631,7 +680,52 @@ namespace HPlus {
 
   bool SignalAnalysisInvertedTau::doBaselineAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData) {
     
- 
+
+  
+	 
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  selectedTau,   pvData.getNumberOfAllVertices()); 
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetData.getAllJets());
+
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    //const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
+
+
+    double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metData.getSelectedMET()) );
+    double deltaPhi = DeltaPhi::reconstruct(*(selectedTau), *(metData.getSelectedMET())) * 57.3; // converted to degrees    
+
+    /*    
+    int ijet = 0;
+    double deltaPhiMetJet1 = -999;
+    double deltaPhiMetJet2 = -999;
+    double deltaPhiMetJet3 = -999;
+    double deltaPhiMetJet4 = -999;
+    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getAllIdentifiedJets().begin(); iJet != jetData.getAllIdentifiedJets().end(); ++iJet) {
+      if (!((**iJet).pt() > 30. && std::abs((**iJet).eta()) < 2.5) )  continue;
+
+      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
+      ijet++;
+      if (ijet == 1) deltaPhiMetJet1 = jetDeltaPhi;
+      if (ijet == 2) deltaPhiMetJet2 = jetDeltaPhi;
+      if (ijet == 3) deltaPhiMetJet3 = jetDeltaPhi;
+      if (ijet == 4) deltaPhiMetJet4 = jetDeltaPhi;
+    }
+      
+    if(jetData.passedEvent()) {
+     
+
+      hDeltaPhiJet1TauSelBaseline->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+      hDeltaPhiJet2TauSelBaseline->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));
+      hDeltaPhiJet3TauSelBaseline->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(2));    
+      hDeltaPhiJet4TauSelBaseline->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(3));
+            
+      
+      hDeltaPhiJet1TauSelBaseline->Fill(deltaPhi,deltaPhiMetJet1);    
+      hDeltaPhiJet2TauSelBaseline->Fill(deltaPhi,deltaPhiMetJet2);
+      hDeltaPhiJet3TauSelBaseline->Fill(deltaPhi,deltaPhiMetJet3);    
+      hDeltaPhiJet4TauSelBaseline->Fill(deltaPhi,deltaPhiMetJet4);  
+        
+    }
+*/
     // Global electron veto
     ElectronSelection::Data electronVetoData = fElectronSelection.analyze(iEvent, iSetup);   
     if (!electronVetoData.passedEvent()) return false; 
@@ -643,8 +737,8 @@ namespace HPlus {
     increment(fBaselineMuvetoCounter);
   
 	 
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  selectedTau,   pvData.getNumberOfAllVertices()); 
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetData.getAllJets());
+    //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  selectedTau,   pvData.getNumberOfAllVertices()); 
+    //    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetData.getAllJets());
 
       
 
@@ -668,17 +762,20 @@ namespace HPlus {
     increment(fBTaggingScaleFactorCounter);
     
         
+
+
+                                
     // Met with after jets in bins
     hMETBaselineTauIdJets->Fill(selectedTau->pt() ,metData.getSelectedMET()->et());  
-    hNBBaselineTauIdJet->Fill(btagData.getSelectedJets().size());
-
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
-    double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metData.getSelectedMET()) );
-    double deltaPhiBaseline = DeltaPhi::reconstruct(*(selectedTau), *(metData.getSelectedMET())) * 57.3; // converted to degrees                                                      
+    hNBBaselineTauIdJet->Fill(btagData.getSelectedJets().size());              
     hMTBaselineTauIdNoMetNoBtagging->Fill(selectedTau->pt() ,transverseMass );
     if (qcdTailKillerData.passedEvent()) {
       hMTBaselineTauIdNoMetNoBtaggingTailKiller->Fill(selectedTau->pt() ,transverseMass );
     }
+    if (qcdTailKillerData.passCollinearCutForJet(3)) {
+      hMETBaselineTauIdJetsCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
+    }
+
 
     if(btagData.passedEvent()) {
       // Met with b tagging in bins
@@ -695,8 +792,12 @@ namespace HPlus {
       // mT with b veto  in bins 
       hMTBaselineTauIdNoMetBveto->Fill(selectedTau->pt() ,transverseMass );
       if (qcdTailKillerData.passedEvent()) {
-	hMTBaselineTauIdNoMetBvetoTailKiller->Fill(selectedTau->pt() ,transverseMass );
+	hMTBaselineTauIdNoMetBvetoTailKiller->Fill(selectedTau->pt() ,transverseMass );   
       }
+      if (qcdTailKillerData.passCollinearCutForJet(3)) {
+	hMETBaselineTauIdBvetoCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
+      }  
+      
     }
     
       
@@ -736,12 +837,27 @@ namespace HPlus {
     // mT with b tagging in bins
     hMTBaselineTauIdBtag->Fill(selectedTau->pt() ,transverseMass );  
       
-    hDeltaPhiBaseline->Fill(deltaPhiBaseline);
-		
+    hDeltaPhiBaseline->Fill(deltaPhi);
+
+    /*
+    if(jetData.passedEvent()) {
+        
+      hDeltaPhiJet1BtaggingBaseline->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+      hDeltaPhiJet2BtaggingBaseline->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1)); 
+      hDeltaPhiJet3BtaggingBaseline->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(2));    
+      hDeltaPhiJet4BtaggingBaseline->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(3));
+            
+      hDeltaPhiJet1BtaggingBaseline->Fill(deltaPhi,deltaPhiMetJet1);    
+      hDeltaPhiJet2BtaggingBaseline->Fill(deltaPhi,deltaPhiMetJet2);
+      hDeltaPhiJet3BtaggingBaseline->Fill(deltaPhi,deltaPhiMetJet3);    
+      hDeltaPhiJet4BtaggingBaseline->Fill(deltaPhi,deltaPhiMetJet4);
+            
+    }
+    */		
 	
     // delta phi cuts
 
-    if (deltaPhiBaseline < fDeltaPhiCutValue ) increment(fBaselineDeltaPhiTauMETCounter);
+    if (deltaPhi < fDeltaPhiCutValue ) increment(fBaselineDeltaPhiTauMETCounter);
 
 
     if (!qcdTailKillerData.passedEvent()) return false;			
@@ -762,8 +878,10 @@ namespace HPlus {
 
   
   
+  //  bool SignalAnalysisInvertedTau::doInvertedAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData) {
 
-  bool SignalAnalysisInvertedTau::doInvertedAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData) {
+  bool SignalAnalysisInvertedTau::doInvertedAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData, const GenParticleAnalysis::Data genData) {
+
 
 
     JetSelection::Data     jetData = fJetSelection.analyze(iEvent, iSetup,  selectedTau,   pvData.getNumberOfAllVertices());   
@@ -773,7 +891,49 @@ namespace HPlus {
     double deltaPhi = DeltaPhi::reconstruct(*(selectedTau), *(metData.getSelectedMET())) * 57.3; // converted to degrees   
     double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metData.getSelectedMET()) );
 
- 
+    //    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());	
+    //const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
+     
+    /*
+    int ijet = 0;
+    double deltaPhiMetJet1 = -999;
+    double deltaPhiMetJet2 = -999;
+    double deltaPhiMetJet3 = -999;
+    double deltaPhiMetJet4 = -999;
+    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getAllIdentifiedJets().begin(); iJet != jetData.getAllIdentifiedJets().end(); ++iJet) {
+      if (!((**iJet).pt() > 30. && std::abs((**iJet).eta()) < 2.5) )  continue;
+
+      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
+      ijet++;
+      if (ijet == 1) deltaPhiMetJet1 = jetDeltaPhi;
+      if (ijet == 2) deltaPhiMetJet2 = jetDeltaPhi;
+      if (ijet == 3) deltaPhiMetJet3 = jetDeltaPhi;
+      if (ijet == 4) deltaPhiMetJet4 = jetDeltaPhi;
+    }
+    
+
+
+    if(jetData.passedEvent()) {
+      
+      hDeltaPhiVsDeltaPhiJet1TauSel->Fill(selectedTau->pt(), qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+      hDeltaPhiVsDeltaPhiJet2TauSel->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));  
+      hDeltaPhiJet1TauSel->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+      hDeltaPhiJet2TauSel->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));
+      hDeltaPhiJet3TauSel->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(2));    
+      hDeltaPhiJet4TauSel->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(3));
+      
+            
+      hDeltaPhiVsDeltaPhiJet1TauSel->Fill(selectedTau->pt(), deltaPhi,deltaPhiMetJet1);    
+      hDeltaPhiVsDeltaPhiJet2TauSel->Fill( selectedTau->pt(),deltaPhi,deltaPhiMetJet2);  
+      hDeltaPhiJet1TauSel->Fill(deltaPhi,deltaPhiMetJet1);    
+      hDeltaPhiJet2TauSel->Fill(deltaPhi,deltaPhiMetJet2);
+      hDeltaPhiJet3TauSel->Fill(deltaPhi,deltaPhiMetJet3);    
+      hDeltaPhiJet4TauSel->Fill(deltaPhi,deltaPhiMetJet4); 
+        
+    }
+    */
+
+
     //hSelectionFlow->Fill(kSignalOrderTauID);
 
   /*
@@ -785,8 +945,6 @@ namespace HPlus {
   */  
 
     hSelectedTauEtTauVeto->Fill(selectedTau->pt());
- 
-    //    hSelectedTauEt->Fill(selectedTau->pt());
     hSelectedTauEta->Fill(selectedTau->eta());
     hSelectedTauPhi->Fill(selectedTau->phi());
 
@@ -803,8 +961,7 @@ namespace HPlus {
     increment(fElectronVetoCounter);
     //hSelectionFlow->Fill(kQCDOrderElectronVeto);  
 
-  
-        
+     
    
     /*
     if(fProduce) {
@@ -819,9 +976,17 @@ namespace HPlus {
     if (!muonVetoData.passedEvent()) return false;
     increment(fMuonVetoCounter);
     //hSelectionFlow->Fill(kQCDOrderMuonVeto);
-    
-
-  
+    /*  
+    if(jetData.passedEvent()) {
+      
+      hDeltaPhiVsDeltaPhiJet1LeptonVeto->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+      hDeltaPhiVsDeltaPhiJet2LeptonVeto->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));    
+      hDeltaPhiJet1LeptonVeto->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+      hDeltaPhiJet2LeptonVeto->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));
+      hDeltaPhiJet3LeptonVeto->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(2));    
+      hDeltaPhiJet4LeptonVeto->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(3));
+    }
+    */
     /*
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Muon> > saveMuons(new std::vector<pat::Muon>());
@@ -835,11 +1000,13 @@ namespace HPlus {
 
    
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());	
+    //const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
+
 
     hMETInvertedTauId->Fill(selectedTau->pt() ,metData.getSelectedMET()->et());         
 
     hNJetInvertedTauId->Fill(selectedTau->pt(), jetData.getSelectedJets().size());  
-    
+
 
     if(metData.passedEvent()) {
       hNJetInvertedTauIdMet->Fill(selectedTau->pt(), jetData.getSelectedJets().size());  
@@ -867,13 +1034,17 @@ namespace HPlus {
     }   
     increment(fBTaggingScaleFactorInvertedCounter);
 
+
     // inverted MET before b tagging and MT before b tagging and Met
     hMETInvertedTauIdJets->Fill(selectedTau->pt(), metData.getSelectedMET()->et());
     hMTInvertedTauIdJet->Fill(selectedTau->pt(), transverseMass); 
     if (qcdTailKillerData.passedEvent()) {       
-      hMTInvertedTauIdJetTailKiller->Fill(selectedTau->pt(), transverseMass);  
+      hMTInvertedTauIdJetTailKiller->Fill(selectedTau->pt(), transverseMass); 
     }
-
+   
+    if (qcdTailKillerData.passCollinearCutForJet(3)) {
+      hMETInvertedTauIdJetsCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
+    }
 
 															      
     // MET with b tagging
@@ -881,9 +1052,6 @@ namespace HPlus {
       hMETInvertedTauIdBtag->Fill(selectedTau->pt(), metData.getSelectedMET()->et());
       hMTInvertedTauIdBtagNoMetCut->Fill(selectedTau->pt(), transverseMass); 
       increment(fBTaggingBeforeMETCounter);
-      if (qcdTailKillerData.passedEvent()) {
-        hMTInvertedTauIdBtagNoMetCutTailKiller->Fill(selectedTau->pt(), transverseMass);
-      }
 
 
     }
@@ -895,12 +1063,15 @@ namespace HPlus {
       hMTInvertedTauIdBvetoNoMetCut->Fill(selectedTau->pt(), transverseMass);
       if (qcdTailKillerData.passedEvent()) {   	
 	hMTInvertedTauIdBvetoNoMetCutTailKiller->Fill(selectedTau->pt(), transverseMass);
-      }															
 
+      }	
+      if (qcdTailKillerData.passCollinearCutForJet(3)) {
+	hMETInvertedTauIdBvetoCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
+      }														
     }
   
  
-    if(metData.passedEvent()) hDeltaPhiAfterJets->Fill(deltaPhi);   
+    //    if(metData.passedEvent()) hDeltaPhiAfterJets->Fill(deltaPhi);   
      
 
 
@@ -916,9 +1087,20 @@ namespace HPlus {
     hSelectedTauEtMetCut->Fill(selectedTau->pt());
     hSelectedTauEtaMetCut->Fill(selectedTau->eta());
     hSelectedTauPhiMetCut->Fill(selectedTau->phi());  
- 
-
-
+   
+    /*    
+    if(jetData.passedEvent()) {
+      
+      hDeltaPhiVsDeltaPhiJet1MetCut->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+      hDeltaPhiVsDeltaPhiJet2MetCut->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));    
+      hDeltaPhiJet1MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+      hDeltaPhiJet2MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));
+      hDeltaPhiJet3MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(2));    
+      hDeltaPhiJet4MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(3));    
+         
+    }
+    */
+  
   // Nbjets for inverted tau before b tagging
 
     hNBInvertedTauIdJet->Fill(selectedTau->pt(), btagData.getSelectedJets().size()); 
@@ -959,7 +1141,7 @@ namespace HPlus {
 
       }
     }
-  
+     
     // b tagging cut
     //    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderBTagSelection, tauData, btagData.passedEvent(),btagData.getMaxDiscriminatorValue());
     if(!btagData.passedEvent()) return false;
@@ -969,7 +1151,19 @@ namespace HPlus {
     //hSelectionFlow->Fill(kQCDOrderBTag);
 
     hSelectedTauEtBtagging->Fill(selectedTau->pt());
-   
+
+    /*
+    if(jetData.passedEvent()) {
+      
+      hDeltaPhiVsDeltaPhiJet1Btagging->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+      hDeltaPhiVsDeltaPhiJet2Btagging->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));    
+      hDeltaPhiJet1Btagging->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+      hDeltaPhiJet2Btagging->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));
+      hDeltaPhiJet3Btagging->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(2));    
+      hDeltaPhiJet4Btagging->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(3));  
+           
+    }
+    */
 
     /*
     if(fProduce) {
@@ -980,7 +1174,7 @@ namespace HPlus {
     */
 
 
-    
+   
     hMTInvertedTauIdBtag->Fill(selectedTau->pt(), transverseMass);
    // deltaPhi with b tagging
     hDeltaPhiInverted->Fill(selectedTau->pt(),deltaPhi);  
@@ -990,26 +1184,29 @@ namespace HPlus {
     // mT with deltaPhi(tau,met)
     if (deltaPhi < fDeltaPhiCutValue) {
       hMTInvertedTauIdJetDphi->Fill(selectedTau->pt(),transverseMass);        
-      increment(fDeltaPhiTauMETCounter);
 
+      increment(fDeltaPhiTauMETCounter);
       //hSelectionFlow->Fill(kQCDOrderDeltaPhiTauMET);   
     }
 
     // tail killer cuts
     if (!qcdTailKillerData.passedEvent()) return false;
     increment(fQCDTailKillerCounter); 
+
+  
+
     
-    //   hSelectedTauEtDeltaPhiJet1Cut->Fill(selectedTau->pt());
- 
-    increment(fDeltaPhiVSDeltaPhiMETJet1CutCounter);
+    //    increment(fDeltaPhiVSDeltaPhiMETJet1CutCounter);
     hMTInvertedAllCutsTailKiller->Fill(selectedTau->pt(), transverseMass);     
-       
-    increment(fDeltaPhiVSDeltaPhiMETJet2CutCounter);
+    hMETInvertedAllCutsTailKiller->Fill(selectedTau->pt(), metData.getSelectedMET()->et());
+ 	       
+    //    increment(fDeltaPhiVSDeltaPhiMETJet2CutCounter);
     hSelectedTauEtTailKiller->Fill(selectedTau->pt());
       
-    increment(fDeltaPhiVSDeltaPhiMETJet3CutCounter);
-    increment(fDeltaPhiVSDeltaPhiMETJet4CutCounter);
+    //    increment(fDeltaPhiVSDeltaPhiMETJet3CutCounter);
+    //    increment(fDeltaPhiVSDeltaPhiMETJet4CutCounter);
     hTransverseMass->Fill(transverseMass); 
+
     increment(fDeltaPhiAgainstTTCutCounter);   
     // hSelectedTauEtDeltaPhiJetsAgainstTTCut->Fill(selectedTau->pt());
 
@@ -1048,59 +1245,28 @@ namespace HPlus {
     if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hClosestDeltaPhiInverted4050->Fill(fakeMETDataInverted.closestDeltaPhi());
 */
 
+
+    //    increment(fDeltaPhiAgainstTTCutCounter);   
+   
+    
+    FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, selectedTau, btagData,
+										       metData, &genData);
+    double HiggsMass = FullHiggsMassData.getHiggsMass();
+    if (HiggsMass > 100 && HiggsMass < 200 ) increment(fHiggsMassCutCounter);
+    hHiggsMass->Fill(selectedTau->pt(), HiggsMass); 
+   
+  
+       
+    //    TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    //    BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
  
     // top mass with binning    
     double topMass = TopChiSelectionData.getTopMass();    
     hTopMass->Fill(selectedTau->pt(), topMass);
  
-    /*  
-    // Inv mass mass with binning  
-    hHiggsMass->Fill(HiggsMass);   
-    if ( selectedTau->pt() > 150  ) hHiggsMass150->Fill(HiggsMass); 
-    if ( selectedTau->pt() > 120  ) hHiggsMass120->Fill(HiggsMass); 
-    if ( selectedTau->pt() > 120 && selectedTau->pt() < 150 ) hHiggsMass120150->Fill(HiggsMass); 
-    if ( selectedTau->pt() > 100 && selectedTau->pt() < 120 ) hHiggsMass100120->Fill(HiggsMass); 
-    if ( selectedTau->pt() > 80 && selectedTau->pt() < 100 ) hHiggsMass80100->Fill(HiggsMass); 
-    if ( selectedTau->pt() > 70 && selectedTau->pt() < 80 ) hHiggsMass7080->Fill(HiggsMass); 
-    if ( selectedTau->pt() > 60 && selectedTau->pt() < 70 ) hHiggsMass6070->Fill(HiggsMass); 
-    if ( selectedTau->pt() > 50 && selectedTau->pt() < 60 ) hHiggsMass5060->Fill(HiggsMass); 
-    if ( selectedTau->pt() > 40 && selectedTau->pt() < 50 ) hHiggsMass4050->Fill(HiggsMass); 
-
-
-    if (deltaPhi <  130 ) {
-      
-      hHiggsMassPhi->Fill(HiggsMass);   
-      if ( selectedTau->pt() > 150  ) hHiggsMassPhi150->Fill(HiggsMass);
-      if ( selectedTau->pt() > 120  ) hHiggsMassPhi120->Fill(HiggsMass);  
-      if ( selectedTau->pt() > 120 && selectedTau->pt() < 150 ) hHiggsMassPhi120150->Fill(HiggsMass); 
-      if ( selectedTau->pt() > 100 && selectedTau->pt() < 120 ) hHiggsMassPhi100120->Fill(HiggsMass); 
-      if ( selectedTau->pt() > 80 && selectedTau->pt() < 100 ) hHiggsMassPhi80100->Fill(HiggsMass); 
-      if ( selectedTau->pt() > 70 && selectedTau->pt() < 80 ) hHiggsMassPhi7080->Fill(HiggsMass); 
-      if ( selectedTau->pt() > 60 && selectedTau->pt() < 70 ) hHiggsMassPhi6070->Fill(HiggsMass); 
-      if ( selectedTau->pt() > 50 && selectedTau->pt() < 60 ) hHiggsMassPhi5060->Fill(HiggsMass); 
-      if ( selectedTau->pt() > 40 && selectedTau->pt() < 50 ) hHiggsMassPhi4050->Fill(HiggsMass); 
-    }
-    */
-  
-
  
-    if (TopChiSelectionData.passedEvent() ) {
-      /*
-      hMTInvertedTauIdTopMass->Fill(transverseMass);
-      increment(fdeltaPhiTauMET130Counter); 
-      if ( selectedTau->pt() > 150  ) hMTInvertedTauIdTopMass150->Fill(transverseMass);
-      if ( selectedTau->pt() > 120  ) hMTInvertedTauIdTopMass120->Fill(transverseMass);  
-      if ( selectedTau->pt() > 120 && selectedTau->pt() < 150 ) hMTInvertedTauIdTopMass120150->Fill(transverseMass); 
-      if ( selectedTau->pt() > 100 && selectedTau->pt() < 120 ) hMTInvertedTauIdTopMass100120->Fill(transverseMass); 
-      if ( selectedTau->pt() > 80 && selectedTau->pt() < 100 ) hMTInvertedTauIdTopMass80100->Fill(transverseMass); 
-      if ( selectedTau->pt() > 70 && selectedTau->pt() < 80 ) hMTInvertedTauIdTopMass7080->Fill(transverseMass); 
-      if ( selectedTau->pt() > 60 && selectedTau->pt() < 70 ) hMTInvertedTauIdTopMass6070->Fill(transverseMass); 
-      if ( selectedTau->pt() > 50 && selectedTau->pt() < 60 ) hMTInvertedTauIdTopMass5060->Fill(transverseMass); 
-      if ( selectedTau->pt() > 40 && selectedTau->pt() < 50 ) hMTInvertedTauIdTopMass4050->Fill(transverseMass); 
-      */
-    }
-        
 
     hSelectedTauEtAfterCuts->Fill(selectedTau->pt());
     hSelectedTauEtaAfterCuts->Fill(selectedTau->eta());
