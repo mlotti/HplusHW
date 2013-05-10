@@ -27,6 +27,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from InvertedTauID import *
 
 ReBinning = False
+
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
@@ -46,7 +47,8 @@ def main():
 
 
 #    HISTONAME = "MET_InvertedTauIdJets"
-    HISTONAME = "MET_InvertedTauIdBveto"
+#    HISTONAME = "MET_InvertedTauIdBveto"
+    HISTONAME = "MET_InvertedTauIdBvetoCollinear"
 #    HISTONAME = "MET_InvertedTauIdBtag"
 #    HISTONAME = "MTInvertedTauIdJet"
 #    HISTONAME = "MTInvertedTauIdPhi"
@@ -150,6 +152,7 @@ def main():
     invertedQCD.comparison(metInverted_data,metBase_QCD)
     invertedQCD.setLabel("McVsInverted")
     invertedQCD.comparison(metInverted_data,metInverted_MC)
+    invertedQCD.setLabel("EfficiencyBaseMinusEWKVsInverted")
     invertedQCD.cutefficiency(metInverted_data,metBase_QCD )
 
 

@@ -153,13 +153,11 @@ namespace HPlus {
       WrappedUnfoldedFactorisationHisto* hInvariantMassShapesAfterLeg1AndLeg2;
       // Data-driven control histograms
       WrappedUnfoldedFactorisationHisto* hCtrlRtau;
+      std::vector<WrappedUnfoldedFactorisationHisto*> hCtrlQCDTailKillerCollinear;
       WrappedUnfoldedFactorisationHisto* hCtrlNjets;
       WrappedUnfoldedFactorisationHisto* hCtrlMET;
       WrappedUnfoldedFactorisationHisto* hCtrlNbjets;
-      WrappedUnfoldedFactorisationHisto* hCtrlQCDTailKillerJet1;
-      WrappedUnfoldedFactorisationHisto* hCtrlQCDTailKillerJet2;
-      WrappedUnfoldedFactorisationHisto* hCtrlQCDTailKillerJet3;
-      WrappedUnfoldedFactorisationHisto* hCtrlQCDTailKillerJet4;
+      std::vector<WrappedUnfoldedFactorisationHisto*> hCtrlQCDTailKillerBackToBack;
       // Closure test oF MET
       WrappedUnfoldedFactorisationHisto* hCtrlMETAfterLeg1;
       WrappedUnfoldedFactorisationHisto* hCtrlMETAfterLeg2;
