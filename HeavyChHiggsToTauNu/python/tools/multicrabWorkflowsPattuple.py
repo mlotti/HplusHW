@@ -997,7 +997,7 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
                 "dataVersionAppend": wf.dataVersionAppend,
                 }
 
-            dataset.addWorkflow("analysis_"+version, **commonArgs)
+            dataset.addWorkflow(Workflow("analysis_"+version, **commonArgs))
 #            if dataset.isData():
 #                # For data, construct one analysis workflow per trigger type
 #                found = False
