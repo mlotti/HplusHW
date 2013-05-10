@@ -915,6 +915,10 @@ namespace HPlus {
   void FullHiggsMassCalculator::doEventClassification(const edm::Event& iEvent, TVector3& bJetVector, TVector3& tauVector,
 						      TVector3& METVector, FullHiggsMassCalculator::Data& output,
 						      const GenParticleAnalysis::Data* genDataPtr) {
+    reco::Candidate* closestGenTau = getClosestGenTau(iEvent, tauVector);
+    reco::Candidate* closestGenBquark = getClosestGenBquark(iEvent, tauVector);
+    std::cout << ">>> " << tauAndBJetFromSameTopQuark(iEvent, *closestGenTau, *closestGenBquark) << " <<<" << std::endl;
+
     // Declare variables used to classify events
     double bDeltaR     = 9999;
     double tauDeltaR   = 9999;
