@@ -696,7 +696,12 @@ class InvertedTauID:
         if "MtInvertedVsBaselineSystematic" in name:      
             plot.createFrame("systematics"+self.label, opts={"ymin":0.,"ymax":15, "xmax": 300},
                              createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+
             
+        if "MtWithAllCutsTailKiller" in name:      
+            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":9, "xmax": 300},
+                             createRatio=False,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+                        
         # Set Y axis of the upper pad to logarithmic
         if "Purity"  in name:        
             plot.getPad().SetLogy(False)       
@@ -825,7 +830,12 @@ class InvertedTauID:
             histograms.addText(0.6, 0.70, "After MET cut", 22)
             histograms.addText(0.6, 0.64, "B-jet veto", 22)
             histograms.addText(0.6, 0.58, "TailKiller: Tight", 22)
-                                                
+
+        if "MtWithAllCutsTailKiller" in name: 
+            histograms.addText(0.6, 0.8, "All selection cuts", 22)
+            histograms.addText(0.6, 0.72, "MET > 50 GeV", 22)
+            histograms.addText(0.55, 0.64, "TailKiller: MediumPlus", 22)
+            
         plot.draw() 
         plot.save()
 

@@ -6,9 +6,9 @@ dataVersion="44XmcS6"     # Fall11 MC
 #dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
 dataEras = [
-   # "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
+    "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
     "Run2011A",
-   # "Run2011B",
+    "Run2011B",
 ]
 
 # Note: Keep number of variations below 200 to keep file sizes reasonable
@@ -42,7 +42,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         customizeLightAnalysis=customize,
                         doQCDTailKillerScenarios=True,
                         #doAgainstElectronScan=True,
-                        doSystematics=True,
+                        doSystematics=False,
                         #histogramAmbientLevel = "Vital",
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )

@@ -57,7 +57,7 @@ mcOnlyLumi = 5000 # pb
 searchMode = "Light"
 #searchMode = "Heavy"
 
-optMode = "OptQCDTailKillerTight"
+optMode = "OptQCDTailKillerMediumPlus"
 #optMode = ""
 
 
@@ -1366,6 +1366,10 @@ def controlPlots(datasets):
     invertedQCD.setLabel("MtBtaggingNoBtaggingInverted")
     invertedQCD.mtComparison(afterMet_inverted, allCuts_inverted,"MtBtaggingNoBtaggingInverted")
 
+# mt plot with TailKiller 
+    allCuts_inverted = hmtSum.Clone("mtSum")
+    invertedQCD.setLabel("MtWithAllCutsTailKiller")
+    invertedQCD.mtComparison(allCuts_inverted, allCuts_inverted,"MtWithAllCutsTailKiller")
     
 ## mt inverted comparison bveto normalised and  btagging,  with deltaPhi cuts
     btagTailKiller_inverted = hmtSum.Clone("mtSumb")

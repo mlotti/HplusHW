@@ -652,8 +652,8 @@ namespace HPlus {
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  selectedTau,   pvData.getNumberOfAllVertices()); 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetData.getAllJets());
 
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
-    //const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
+    //const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
 
 
     double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metData.getSelectedMET()) );
@@ -732,7 +732,7 @@ namespace HPlus {
     if (qcdTailKillerData.passedEvent()) {
       hMTBaselineTauIdNoMetNoBtaggingTailKiller->Fill(selectedTau->pt() ,transverseMass );
     }
-    if (qcdTailKillerData.passCollinearCutForJet(3)) {
+    if (qcdTailKillerData.passCollinearCutForJet(2)) {
       hMETBaselineTauIdJetsCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
     }
 
@@ -754,7 +754,7 @@ namespace HPlus {
       if (qcdTailKillerData.passedEvent()) {
 	hMTBaselineTauIdNoMetBvetoTailKiller->Fill(selectedTau->pt() ,transverseMass );   
       }
-      if (qcdTailKillerData.passCollinearCutForJet(3)) {
+      if (qcdTailKillerData.passCollinearCutForJet(2)) {
 	hMETBaselineTauIdBvetoCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
       }  
       
@@ -943,8 +943,8 @@ namespace HPlus {
     */
 
    
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());	
-    //const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
+    //const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());	
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
 
 
     hMETInvertedTauId->Fill(selectedTau->pt() ,metData.getSelectedMET()->et());         
@@ -983,7 +983,7 @@ namespace HPlus {
       hMTInvertedTauIdJetTailKiller->Fill(selectedTau->pt(), transverseMass); 
     }
    
-    if (qcdTailKillerData.passCollinearCutForJet(3)) {
+    if (qcdTailKillerData.passCollinearCutForJet(2)) {
       hMETInvertedTauIdJetsCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
     }
 															      
@@ -1002,7 +1002,7 @@ namespace HPlus {
       if (qcdTailKillerData.passedEvent()) {   	
 	hMTInvertedTauIdBvetoNoMetCutTailKiller->Fill(selectedTau->pt(), transverseMass);
       }	
-      if (qcdTailKillerData.passCollinearCutForJet(3)) {
+      if (qcdTailKillerData.passCollinearCutForJet(2)) {
 	hMETInvertedTauIdBvetoCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
       }														
     }
