@@ -14,7 +14,7 @@ namespace HPlus {
     fPassedEvent(false) {}
   METSelection::Data::~Data() {}
 
-  METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label):
+  METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, const std::string& label, const std::string& tauIsolationDiscriminator):
     BaseSelection(eventCounter, histoWrapper),
     fRawSrc(iConfig.getUntrackedParameter<edm::InputTag>("rawSrc")),
     fType1Src(iConfig.getUntrackedParameter<edm::InputTag>("type1Src")),
@@ -26,8 +26,10 @@ namespace HPlus {
     fJetType1Threshold(iConfig.getUntrackedParameter<double>("jetType1Threshold")),
     fJetOffsetCorrLabel(iConfig.getUntrackedParameter<std::string>("jetOffsetCorrLabel")),
     //fType2ScaleFactor(iConfig.getUntrackedParameter<double>("type2ScaleFactor")),
+    fTauIsolationDiscriminator(tauIsolationDiscriminator),
     fTypeIAllEvents(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction all events")),
     fTypeITauRefJetFound(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction tau reference jet found")),
+    fTypeITauIsolated(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction tau treated as isolated")),
     fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut"))
   {
     edm::Service<TFileService> fs;
@@ -44,6 +46,18 @@ namespace HPlus {
     }
     else
       throw cms::Exception("Configuration") << "Invalid value for select '" << select << "', valid values are raw, type1, type2" << std::endl;
+
+    std::string possiblyMode = iConfig.getUntrackedParameter<std::string>("doTypeICorrectionForPossiblyIsolatedTaus");
+    if(possiblyMode == "disabled")
+      fDoTypeICorrectionForPossiblyIsolatedTaus = kDisabled;
+    else if(possiblyMode == "never")
+      fDoTypeICorrectionForPossiblyIsolatedTaus = kNever;
+    else if(possiblyMode == "always")
+      fDoTypeICorrectionForPossiblyIsolatedTaus = kAlways;
+    else if(possiblyMode == "forIsolatedOnly")
+      fDoTypeICorrectionForPossiblyIsolatedTaus = kForIsolatedOnly;
+    else
+      throw cms::Exception("Configuration") << "METSelection: invalid value '" << possiblyMode << "' for parameter doTypeICorrectionForPossiblyIsolatedTaus, valid values are disabled, never, always, forIsolatedOnly";
 
     hMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "met", "met", 80, 0., 400.);
     hMetPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metPhi", "met #phi", 72, -3.14159265, 3.14159265);
@@ -63,15 +77,32 @@ namespace HPlus {
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 
-    return privateAnalyze(iEvent, iSetup, selectedTau, allJets);
+    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, false);
   }
 
   METSelection::Data METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, selectedTau, allJets);
+    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, false);
   }
 
-  METSelection::Data METSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+
+  METSelection::Data METSelection::silentAnalyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, true);
+  }
+
+  METSelection::Data METSelection::analyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, true);
+  }
+
+  METSelection::Data METSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, bool possiblyIsolatedTaus) {
     Data output;
 
     edm::Handle<edm::View<reco::MET> > hrawmet;
@@ -98,7 +129,7 @@ namespace HPlus {
     if(htype1met.isValid() && fType1Src.label() != "") {
       output.fType1METCorrected.clear();
       output.fType1MET = htype1met->ptrAt(0);
-      output.fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(output.fType1MET, selectedTau, allJets, kType1));
+      output.fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(output.fType1MET, selectedTau, allJets, kType1, possiblyIsolatedTaus));
       output.fType1MET = edm::Ptr<reco::MET>(&output.fType1METCorrected, 0);
     }
     /*
@@ -147,7 +178,7 @@ namespace HPlus {
     return output;
   }
 
-  reco::MET METSelection::undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, Select type) {
+  reco::MET METSelection::undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, Select type, bool possiblyIsolatedTaus) {
     /**
      * When the type I/II corrections are done, it is assumed (for
      * simplicity at that point) that the type I correction should be
@@ -165,6 +196,18 @@ namespace HPlus {
 
     const pat::Tau *tau = dynamic_cast<const pat::Tau *>(selectedTau.get());
 
+    if(possiblyIsolatedTaus) {
+      if(fDoTypeICorrectionForPossiblyIsolatedTaus == kNever)
+        return *met;
+      if(fDoTypeICorrectionForPossiblyIsolatedTaus == kForIsolatedOnly) {
+        if(!tau)
+          throw cms::Exception("Assert") << "METSelection::undoJetCorrectionForSelectedTau(): nonIsolatedTausAsJets=true, but selectedTau is not of type pat::Tau!";
+
+        if(tau->tauID(fTauIsolationDiscriminator) < 0.5)
+          return *met;
+      }
+    }
+    increment(fTypeITauIsolated);
 
     // Find the hadronic jet corresponding to the selected tau
     double minDR = fTauJetMatchingCone;

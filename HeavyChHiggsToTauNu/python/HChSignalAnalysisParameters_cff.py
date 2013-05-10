@@ -280,6 +280,7 @@ MET = cms.untracked.PSet(
 #    METCut = cms.untracked.double(80.0), # MET cut for heavy charged Higgs
     
     # For type I/II correction
+    doTypeICorrectionForPossiblyIsolatedTaus = cms.untracked.string("disabled"), # This flag affects only to METSelection::(silent)analyzeWithPossiblyIsolatedTaus(), valid values are: disabled, never, always, forIsolatedOnly
     tauJetMatchingCone = cms.untracked.double(0.5),
     jetType1Threshold = cms.untracked.double(10),
     jetOffsetCorrLabel = cms.untracked.string("L1FastJet"),
