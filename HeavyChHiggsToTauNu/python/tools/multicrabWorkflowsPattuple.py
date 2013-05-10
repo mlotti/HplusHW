@@ -2400,7 +2400,10 @@ def addPattuple_v53_3_test5(datasets):
 def addPattuple_v53_3_test6_quadjet(datasets):
     # To develop the skim
     definitions = {
-        "MultiJet1Parked_198022-198523_2012C_Nov05": TaskDef(""),
+        # 7279753 events, 625 jobs
+        # User mean 19117.5, min 1794.5, max 77645.8
+        # Mean 336.7 MB, min 105.4 MB, max 1.9 GB
+        "MultiJet1Parked_198022-198523_2012C_Nov05": TaskDef("/MultiJet1Parked/local-Run2012C_part1_05Nov2012_v2_AOD_198022_198523_pattuple_quadjet_v53_3_test6-6ab01797f9909fcaec9537ea46721ef9/USER"),
     }
 
     addPattuple_53X_v2("quadjet_v53_3_test6", datasets, definitions)
