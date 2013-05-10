@@ -2,27 +2,82 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTools import Task
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff import addTauLegSkim_53X,addMetLegSkim_53X,addQuadJetSkim_53X
 
 #skimVersion = "V00_12_03_CMSSW537_v1"
-skimVersion = "V00_12_05_CMSSW537p6_v1"
+#skimVersion = "V00_12_05_CMSSW537p6_v1"
+skimVersion = "V53_3_CMSSW539p3_v1"
 
 def addTauLegSkim(datasets):
     definitions = {
-	"TauPlusX_190456-190738_2012A_Jul13": 				TaskDef("/TauPlusX/local-Run2012A_13Jul2012_v1_AOD_190456_190738_triggerTauLeg_skim_v53_v2-3ca67b5668ffc41c3fc637191cd01817/USER"),
-        "TauPlusX_190782-190949_2012A_Aug06": 				TaskDef("/TauPlusX/local-Run2012A_recover_06Aug2012_v1_AOD_190782_190949_triggerTauLeg_skim_v53_v2-4a0e265274a3a3c62fcbddf6d3f521be/USER"),
-        "TauPlusX_191043-193621_2012A_Jul13": 				TaskDef("/TauPlusX/local-Run2012A_13Jul2012_v1_AOD_191043_193621_triggerTauLeg_skim_v53_v2-4a0e265274a3a3c62fcbddf6d3f521be/USER"),
-        "TauPlusX_193834-196531_2012B_Jul13": 				TaskDef("/TauPlusX/local-Run2012B_13Jul2012_v1_AOD_193834_196531_triggerTauLeg_skim_v53_v2-663eba0a1a1c787b38ec317ab3b7fbc4/USER"),
-        "TauPlusX_198022-198523_2012C_Aug24": 				TaskDef("/TauPlusX/local-Run2012C_24Aug2012_v1_AOD_198022_198523_triggerTauLeg_skim_v53_v2-744e53f03db2187c746febe32d910383/USER"),
-        "TauPlusX_198941-199608_2012C_Prompt": 				TaskDef("/TauPlusX/local-Run2012C_PromptReco_v2_AOD_198941_199608_triggerTauLeg_skim_v53_v2-0201062118f04784a4143f7133fbc494/USER"),
-        "TauPlusX_199698-203742_2012C_Prompt": 				TaskDef("/TauPlusX/local-Run2012C_PromptReco_v2_AOD_199698_203742_triggerTauLeg_skim_v53_v2-9d3ec449a3910d6ec6611ff095d9eeb8/USER"),
-        "TauPlusX_203777-208686_2012D_Prompt": 				TaskDef("/TauPlusX/local-Run2012D_PromptReco_v1_AOD_203777_208686_triggerTauLeg_skim_v53_v2-9d3ec449a3910d6ec6611ff095d9eeb8/USER"),
+        "TauPlusX_190456-193621_2012A_Jan22":       			TaskDef("/TauPlusX/local-Run2012A_22Jan2013_v1_AOD_190456_193621_triggerTauLeg_skim_v53_v3-ab0edd69780ab754cbf6aaa760343e0e/USER"),
+        "TauPlusX_193834-196531_2012B_Jan22":       			TaskDef("/TauPlusX/local-Run2012B_22Jan2013_v1_AOD_193834_196531_triggerTauLeg_skim_v53_v3-90dde5f694db916cf2ea3dc4c540f69c/USER"),
+        "TauPlusX_198022-203742_2012C_Jan22":       			TaskDef("/TauPlusX/local-Run2012C_22Jan2013_v1_AOD_198022_203742_triggerTauLeg_skim_v53_v3-9deb66986c607f9bebda7c7c1c86e94c/USER"),
+        "TauPlusX_203777-208686_2012D_Jan22":                           TaskDef("/TauPlusX/local-Run2012D_22Jan2013_v1_AOD_203777_208686_triggerTauLeg_skim_v53_v3-f62bc98791684c36f1551d5d5c8e780d/USER"),
 
-        "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12": 	TaskDef("/DYToTauTau_M-20_CT10_TuneZ2star_8TeV-powheg-tauola-pythia6/local-Summer12_DR53X_PU_S8_START53_V7A_v1_AODSIM_triggerTauLeg_skim_v53_v2-8728052812930676480ae2a242229ec9/USER"),
-        "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12": 	TaskDef("/DYToTauTau_M-20_CT10_TuneZ2star_v2_8TeV-powheg-tauola-pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_triggerTauLeg_skim_v53_v2-8728052812930676480ae2a242229ec9/USER"),
+        "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":       TaskDef("/DYToTauTau_M-20_CT10_TuneZ2star_8TeV-powheg-tauola-pythia6/local-Summer12_DR53X_PU_S8_START53_V7A_v1_AODSIM_triggerTauLeg_skim_v53_v3-bec3178d66007202ae729a1677c5df02/USER"),
+        "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12":    TaskDef("/DYToTauTau_M-20_CT10_TuneZ2star_v2_8TeV-powheg-tauola-pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_triggerTauLeg_skim_v53_v3-bec3178d66007202ae729a1677c5df02/USER"),
+    }
+
+    addTauLegSkim_53X(skimVersion, datasets, definitions)
+
+def addTauLegSkim_V00_12_05_CMSSW537p6_v1(datasets):
+    definitions = {
+        "TauPlusX_190456-190738_2012A_Jul13":                           TaskDef("/TauPlusX/local-Run2012A_13Jul2012_v1_AOD_190456_190738_triggerTauLeg_skim_v53_v2-3ca67b5668ffc41c3fc637191cd01817/USER"),
+        "TauPlusX_190782-190949_2012A_Aug06":                           TaskDef("/TauPlusX/local-Run2012A_recover_06Aug2012_v1_AOD_190782_190949_triggerTauLeg_skim_v53_v2-4a0e265274a3a3c62fcbddf6d3f521be/USER"),
+        "TauPlusX_191043-193621_2012A_Jul13":                           TaskDef("/TauPlusX/local-Run2012A_13Jul2012_v1_AOD_191043_193621_triggerTauLeg_skim_v53_v2-4a0e265274a3a3c62fcbddf6d3f521be/USER"),
+        "TauPlusX_193834-196531_2012B_Jul13":                           TaskDef("/TauPlusX/local-Run2012B_13Jul2012_v1_AOD_193834_196531_triggerTauLeg_skim_v53_v2-663eba0a1a1c787b38ec317ab3b7fbc4/USER"),
+        "TauPlusX_198022-198523_2012C_Aug24":                           TaskDef("/TauPlusX/local-Run2012C_24Aug2012_v1_AOD_198022_198523_triggerTauLeg_skim_v53_v2-744e53f03db2187c746febe32d910383/USER"),
+        "TauPlusX_198941-199608_2012C_Prompt":                          TaskDef("/TauPlusX/local-Run2012C_PromptReco_v2_AOD_198941_199608_triggerTauLeg_skim_v53_v2-0201062118f04784a4143f7133fbc494/USER"),
+        "TauPlusX_199698-203742_2012C_Prompt":                          TaskDef("/TauPlusX/local-Run2012C_PromptReco_v2_AOD_199698_203742_triggerTauLeg_skim_v53_v2-9d3ec449a3910d6ec6611ff095d9eeb8/USER"),
+        "TauPlusX_203777-208686_2012D_Prompt":                          TaskDef("/TauPlusX/local-Run2012D_PromptReco_v1_AOD_203777_208686_triggerTauLeg_skim_v53_v2-9d3ec449a3910d6ec6611ff095d9eeb8/USER"),
+
+        "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":       TaskDef("/DYToTauTau_M-20_CT10_TuneZ2star_8TeV-powheg-tauola-pythia6/local-Summer12_DR53X_PU_S8_START53_V7A_v1_AODSIM_triggerTauLeg_skim_v53_v2-8728052812930676480ae2a242229ec9/USER"),
+        "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12":    TaskDef("/DYToTauTau_M-20_CT10_TuneZ2star_v2_8TeV-powheg-tauola-pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_triggerTauLeg_skim_v53_v2-8728052812930676480ae2a242229ec9/USER"),
     }
 
     addTauLegSkim_53X(skimVersion, datasets, definitions)
 
 
 def addMetLegSkim(datasets):
+    definitions = {
+	"Tau_190456-193621_2012A_Jan22": 		TaskDef("/Tau/local-Run2012A_22Jan2013_v1_AOD_190456_193621_triggerMetLeg_skim_v53_v3-56beb3a2e79a8b14c82b89183fef0535/USER"),
+	"TauParked_193834-196531_2012B_Jan22":		TaskDef("/TauParked/local-Run2012B_22Jan2013_v1_AOD_193834_196531_triggerMetLeg_skim_v53_v3-91526bc7daeb9a1da9e649cb639be3ec/USER"),
+	"TauParked_198022-202504_2012C_Jan22": 		TaskDef("/TauParked/local-Run2012C_22Jan2013_v1_AOD_198022_202504_triggerMetLeg_skim_v53_v3-9f113b1ddfbc3e3d4f22dcd2477c6dfc/USER"),
+	"TauParked_202972-203742_2012C_Jan22":		TaskDef("/TauParked/local-Run2012C_22Jan2013_v1_AOD_202972_203742_triggerMetLeg_skim_v53_v3-21138ca7d5b6f45d688be5148bf48f97/USER"),
+	"TauParked_203777-208686_2012D_Jan22":		TaskDef("/TauParked/local-Run2012D_22Jan2013_v1_AOD_203777_208686_triggerMetLeg_skim_v53_v3-21138ca7d5b6f45d688be5148bf48f97/USER"),
+
+        "QCD_Pt30to50_TuneZ2star_Summer12":             TaskDef(""),
+        "QCD_Pt50to80_TuneZ2star_Summer12":             TaskDef(""),
+        "QCD_Pt80to120_TuneZ2star_Summer12":            TaskDef(""),
+        "QCD_Pt120to170_TuneZ2star_Summer12":           TaskDef(""),
+        "QCD_Pt170to300_TuneZ2star_Summer12":           TaskDef(""),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":        TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_Summer12":           TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":        TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":        TaskDef(""),
+                                                                                                                                                                                                                                                                    
+        "WW_TuneZ2star_Summer12":                       TaskDef(""),
+        "WZ_TuneZ2star_Summer12":                       TaskDef(""),
+        "ZZ_TuneZ2star_Summer12":                       TaskDef(""),
+        "TTJets_TuneZ2star_Summer12":                   TaskDef(""),
+        "WJets_TuneZ2star_v1_Summer12":                 TaskDef(""),
+        "WJets_TuneZ2star_v2_Summer12":                 TaskDef(""),
+        "W1Jets_TuneZ2star_Summer12":                   TaskDef(""),
+        "W2Jets_TuneZ2star_Summer12":                   TaskDef(""),
+        "W3Jets_TuneZ2star_Summer12":                   TaskDef(""),
+        "W4Jets_TuneZ2star_Summer12":                   TaskDef(""),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":           TaskDef(""),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12":       TaskDef(""),
+
+        "T_t-channel_TuneZ2star_Summer12":              TaskDef(""),
+        "Tbar_t-channel_TuneZ2star_Summer12":           TaskDef(""),
+        "T_tW-channel_TuneZ2star_Summer12":             TaskDef(""),
+        "Tbar_tW-channel_TuneZ2star_Summer12":          TaskDef(""),
+        "T_s-channel_TuneZ2star_Summer12":              TaskDef(""),                                    
+        "Tbar_s-channel_TuneZ2star_Summer12":           TaskDef(""),
+    }
+
+    addMetLegSkim_53X(skimVersion, datasets, definitions)
+
+def addMetLegSkim_V00_12_05_CMSSW537p6_v1(datasets):
     definitions = {
         "Tau_190456-190738_2012A_Jul13":                TaskDef("/Tau/local-Run2012A_13Jul2012_v1_AOD_190456_190738_triggerMetLeg_skim_v53_v2-213f3f77afa722905dc0ce5ce7597bca/USER"),
         "Tau_190782-190949_2012A_Aug06":                TaskDef("/Tau/local-Run2012A_recover_06Aug2012_v1_AOD_190782_190949_triggerMetLeg_skim_v53_v2-0e21f8367f184cd38d906ca6ced7b830/USER"),
