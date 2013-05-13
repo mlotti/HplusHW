@@ -42,6 +42,8 @@ def main(opts, args):
             tar.add("%s/codeStatus.txt"%d)
         if os.path.exists(d+"codeVersion.txt"):
             tar.add("%s/codeVersion.txt"%d)
+        if os.path.exists(d+"job"):
+            tar.add("%s/job"%d)
 
         if opts.fullStatus:
             for f in ["%s/*py"%d, "%s/*cfg"%d, "%s/*/res/histograms_*root"%d]:
