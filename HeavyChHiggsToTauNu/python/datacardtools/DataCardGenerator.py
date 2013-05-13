@@ -284,14 +284,15 @@ class DataCardGenerator:
         self.doDataMining()
 
         # Make datacards
-        # Store era / searchMode / optimizationMode combination as a string # FIXME
-        TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
-                      luminosity=self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),
-                      observation=self._observation, datasetGroups=self._columns, extractors=self._extractors,
-                      mcrabInfoOutput=mcrabInfoOutput)
-
+        myProducer = TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
+                                   luminosity=self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),
+                                   observation=self._observation, datasetGroups=self._columns, extractors=self._extractors,
+                                   mcrabInfoOutput=mcrabInfoOutput)
         # Close files
         #self.closeFiles() # Do not close, will crash if done so, because configInfo histogram will not be found anymore !!!
+
+        # Return name of output directory
+        return myProducer.getDirectory()
 
     def _checkCfgFile(self):
         mymsg = ""

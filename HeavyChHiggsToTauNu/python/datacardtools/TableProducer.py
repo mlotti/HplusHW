@@ -132,6 +132,10 @@ class TableProducer:
         f.write(git.getDiff()+"\n")
         f.close()
 
+    ## Returns name of results directory
+    def getDirectory(self):
+        return self._dirname
+
     ## Generates datacards
     def makeDataCards(self):
         # Loop over mass points
