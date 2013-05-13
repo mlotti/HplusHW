@@ -790,19 +790,6 @@ namespace HPlus {
       }
     }
 
-//------ Improved delta phi cut, a.k.a. QCD tail killer - collinear part
-    METSelection::Data metDataForCollinearCut = fMETSelection.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
-    const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metDataForCollinearCut.getSelectedMET());
-    for (int i = 0; i < qcdTailKillerDataCollinear.getNConsideredJets(); ++i) {
-      if (i < 4) { // protection
-        hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromCollinearCorner(i)); // Make control plot before cut
-        if (myFakeTauStatus)
-          hCtrlEWKFakeTausQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromCollinearCorner(i)); // Make control plot before cut
-        if (!qcdTailKillerDataCollinear.passCollinearCutForJet(i)) return false;
-      }
-    }
-    increment(fQCDTailKillerCollinearCounter);
-
     /* temporary place
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     hMet_beforeJetCut->Fill(metData.getSelectedMET()->et());  
@@ -845,6 +832,19 @@ namespace HPlus {
     if (bTauEmbeddingStatus)
       fTauEmbeddingMuonIsolationQuantifier.analyzeAfterJets(iEvent, iSetup);
 
+
+//------ Improved delta phi cut, a.k.a. QCD tail killer - collinear part
+    METSelection::Data metDataForCollinearCut = fMETSelection.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metDataForCollinearCut.getSelectedMET());
+    for (int i = 0; i < qcdTailKillerDataCollinear.getNConsideredJets(); ++i) {
+      if (i < 4) { // protection
+        hCtrlQCDTailKillerBackToBack[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
+        if (myFakeTauStatus)
+          hCtrlEWKFakeTausQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromCollinearCorner(i)); // Make control plot before cut
+        if (!qcdTailKillerDataCollinear.passCollinearCutForJet(i)) return false;
+      }
+    }
+    increment(fQCDTailKillerCollinearCounter);
 
 //------ Obtain rest of data objects      
     if (fTree.isActive()) {
