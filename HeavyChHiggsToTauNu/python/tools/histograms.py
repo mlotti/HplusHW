@@ -803,6 +803,7 @@ class CanvasFrame:
     #                  options of any input histogram, a default value
     #                  of 0.13 is used (this can be disabled with
     #                  explicit value None).
+    # \li\a addHeight  Add this to the height of the canvas
     def __init__(self, histoManager, name, canvasOpts={}, **kwargs):
         histos = []
         if isinstance(histoManager, list):
@@ -819,6 +820,7 @@ class CanvasFrame:
                 canvasAddWidth = 0.13
 
         canvasAddWidth = canvasOpts.get("addWidth", canvasAddWidth)
+        canvasAddHeight = canvasOpts.get("addHeight", None)
 
         if canvasAddWidth is not None:
             cw = ROOT.gStyle.GetCanvasDefW()
@@ -826,6 +828,9 @@ class CanvasFrame:
 
             ROOT.gStyle.SetCanvasDefW(int((1+canvasAddWidth)*cw))
             ROOT.gStyle.SetPadRightMargin(canvasAddWidth+prm)
+        if canvasAddHeight is not None:
+            ch = ROOT.gStyle.GetCanvasDefH()
+            ROOT.gStyle.SetCanvasDefH(int((1+canvasAddHeight)*ch))
 
         self.canvas = ROOT.TCanvas(name)
         self.pad = self.canvas.GetPad(0)
@@ -833,6 +838,8 @@ class CanvasFrame:
         if canvasAddWidth is not None:
             ROOT.gStyle.SetCanvasDefW(cw)
             ROOT.gStyle.SetPadRightMargin(prm)
+        if canvasAddHeight is not None:
+            ROOT.gStyle.SetCanvasDefH(ch)
 
         opts = kwargs
         if "opts" in kwargs:
