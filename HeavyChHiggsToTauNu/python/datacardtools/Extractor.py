@@ -605,7 +605,7 @@ class ControlPlotExtractor(ExtractorBase):
         myShapeModifier = ShapeHistoModifier(self._histoSpecs)
         h = myShapeModifier.createEmptyShapeHistogram(myLabel)
         for i in range (0, len(self._histoDirs)):
-            print "Extractor ",self._histoDirs[i],self._histoNames[i]
+            #print "Extractor ",self._histoDirs[i],self._histoNames[i]
             # Obtain histogram from dataset
             myHistoname = self._histoDirs[i]+"/"+self._histoNames[i]
             if self._histoDirs[i] == "":

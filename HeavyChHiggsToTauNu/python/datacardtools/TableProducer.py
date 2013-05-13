@@ -7,6 +7,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorB
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker import ControlPlotMaker
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
 from math import pow,sqrt
 import os
@@ -73,7 +74,7 @@ class EventYieldSummary:
 ## TableProducer class
 class TableProducer:
     ## Constructor
-    def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors):
+    def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput):
         self._opts = opts
         self._config = config
         self._outputPrefix = outputPrefix
@@ -85,10 +86,6 @@ class TableProducer:
         self._outputFileStem = "lands_datacard_hplushadronic_m"
         self._outputRootFileStem = "lands_histograms_hplushadronic_m"
         # Calculate number of nuisance parameters
-        self._nNuisances = 0
-        for n in self._extractors:
-            if n.isPrintable():
-                self._nNuisances += 1
         # Make directory for output
         self._dirname = "datacards_%s_%s_%s"%(self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
         os.mkdir(self._dirname)
@@ -118,6 +115,23 @@ class TableProducer:
         # Print systematics summary table
         self.makeSystematicsSummary()
 
+        # Debugging info
+        # Make copy of input datacard
+        os.system("cp %s %s/input_datacard.py"%(self._opts.datacard,self._infoDirname))
+        # Write input multicrab directory names
+        f = open(os.path.join(self._infoDirname, "inputDirectories.txt"), "w")
+        f.write("\n".join(map(str, mcrabInfoOutput))+"\n")
+        f.close()
+        f = open(os.path.join(self._infoDirname, "codeVersion.txt"), "w")
+        f.write(git.getCommitId()+"\n")
+        f.close()
+        f = open(os.path.join(self._infoDirname, "codeStatus.txt"), "w")
+        f.write(git.getStatus()+"\n")
+        f.close()
+        f = open(os.path.join(self._infoDirname, "codeDiff.txt"), "w")
+        f.write(git.getDiff()+"\n")
+        f.close()
+
     ## Generates datacards
     def makeDataCards(self):
         # Loop over mass points
@@ -145,7 +159,7 @@ class TableProducer:
             myCard = ""
             myCard += self._generateHeader(m)
             myCard += mySeparatorLine
-            myCard += self._generateParameterLines()
+            myCard += self._generateParameterLines(len(myNuisanceTable))
             myCard += mySeparatorLine
             myCard += self._generateShapeHeader(m)
             myCard += mySeparatorLine
@@ -206,18 +220,18 @@ class TableProducer:
     def _generateHeader(self, mass=None):
         myString = ""
         if mass == None:
-            myString += "Description: LandS datacard (auto generated) luminosity=%f 1/fb, %s/%s\n"%(self._luminosity,self._config.DataCardName,self._outputPrefix)
+            myString += "Description: LandS datacard (auto generated) luminosity=%f 1/pb, %s/%s\n"%(self._luminosity,self._config.DataCardName,self._outputPrefix)
         else:
-            myString += "Description: LandS datacard (auto generated) mass=%d, luminosity=%f 1/fb, %s/%s\n"%(mass,self._luminosity,self._config.DataCardName,self._outputPrefix)
+            myString += "Description: LandS datacard (auto generated) mass=%d, luminosity=%f 1/pb, %s/%s\n"%(mass,self._luminosity,self._config.DataCardName,self._outputPrefix)
         myString += "Date: %s\n"%time.ctime()
         return myString
 
     ## Generates parameter lines
-    def _generateParameterLines(self):
+    def _generateParameterLines(self, kmax):
         # Produce result
         myResult =  "imax     1     number of channels\n"
         myResult += "jmax     *     number of backgrounds\n"
-        myResult += "kmax    %2d     number of parameters\n"%self._nNuisances
+        myResult += "kmax    %2d     number of parameters\n"%kmax
         return myResult
 
     ## Generates shape header
@@ -517,20 +531,20 @@ class TableProducer:
             myOutput += self._generateHeader(m)
             myOutput += "\n"
             myOutput += "Number of events\n"
-            myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f:  %5.0f +- %4.0f (stat.) "%(m,myBr,mySignalRate,mySignalStat)
+            myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f:  %5.1f +- %4.1f (stat.) "%(m,myBr,mySignalRate,mySignalStat)
             if round(mySignalSystDown) == round(mySignalSystUp):
                 myOutput += "+- %4.0f (syst.)\n"%mySignalSystDown
             else:
                 myOutput += "+%4.0f -%4.0f (syst.)\n"%(mySignalSystUp, mySignalSystDown)
             myOutput += "Backgrounds:\n"
-            myOutput += "                           Multijets: %5.0f +- %4.0f (stat.) +- %4.0f (syst.)\n"%(QCD.getRate(),QCD.getAbsoluteStat(),QCD.getAbsoluteSystDown())
-            myOutput += "                    EWK+tt with taus: %5.0f +- %4.0f (stat.) +- %4.0f (syst.)\n"%(Embedding.getRate(),Embedding.getAbsoluteStat(),Embedding.getAbsoluteSystDown())
-            myOutput += "               EWK+tt with fake taus: %5.0f +- %4.0f (stat.) "%(EWKFakes.getRate(),EWKFakes.getAbsoluteStat())
+            myOutput += "                           Multijets: %5.1f +- %4.1f (stat.) +- %4.1f (syst.)\n"%(QCD.getRate(),QCD.getAbsoluteStat(),QCD.getAbsoluteSystDown())
+            myOutput += "                    EWK+tt with taus: %5.1f +- %4.1f (stat.) +- %4.1f (syst.)\n"%(Embedding.getRate(),Embedding.getAbsoluteStat(),Embedding.getAbsoluteSystDown())
+            myOutput += "               EWK+tt with fake taus: %5.1f +- %4.1f (stat.) "%(EWKFakes.getRate(),EWKFakes.getAbsoluteStat())
             if round(EWKFakes.getAbsoluteSystDown()) == round(EWKFakes.getAbsoluteSystUp()):
                 myOutput += "+- %4.0f (syst.)\n"%EWKFakes.getAbsoluteSystDown()
             else:
                 myOutput += "+%4.0f -%4.0f (syst.)\n"%(EWKFakes.getAbsoluteSystUp(), EWKFakes.getAbsoluteSystDown())
-            myOutput += "                      Total expected: %5.0f +- %4.0f (stat.) "%(TotalExpected.getRate(),TotalExpected.getAbsoluteStat())
+            myOutput += "                      Total expected: %5.1f +- %4.1f (stat.) "%(TotalExpected.getRate(),TotalExpected.getAbsoluteStat())
             if round(TotalExpected.getAbsoluteSystDown()) == round(TotalExpected.getAbsoluteSystUp()):
                 myOutput += "+- %4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp())
             else:

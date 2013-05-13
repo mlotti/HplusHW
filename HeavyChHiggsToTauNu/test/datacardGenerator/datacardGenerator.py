@@ -19,14 +19,17 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-def getDsetCreator(label, mcrabPath, enabledStatus=True):
+def getDsetCreator(label, mcrabPath, mcrabInfoOutput, enabledStatus=True):
     if enabledStatus:
         if mcrabPath == "":
+            mcrabInfoOutput.append("- %s: not present"%(label))
             print "- %s: not present"%(label)
         else:
+            mcrabInfoOutput.append("- %s: multicrab dir found (%s)"%(label,mcrabPath))
             print "- %s%s: multicrab dir found%s (%s)"%(HighlightStyle(),label,NormalStyle(),mcrabPath)
             return dataset.readFromMulticrabCfg(directory=mcrabPath)
     else:
+        mcrabInfoOutput.append("- %s: not considered"%(label))
         print "- %s: not considered"%(label)
     return None
 
@@ -51,16 +54,19 @@ def main(opts, moduleSelector):
     # Obtain dataset creators (also check multicrab directory existence)
     print "\nChecking input multicrab directory presence:"
     multicrabPaths = PathFinder.MulticrabPathFinder(config.Path)
-    signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath())
+    mcrabInfoOutput = []
+    mcrabInfoOutput.append("Input directories:")
+    signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
     embeddingDsetCreator = None
     if config.OptionReplaceEmbeddingByMC:
+        mcrabInfoOutput.append("- Embedding: estimated from signal analysis MC")
         print "- %sWarning:%s Embedding: estimated from signal analysis MC"%(WarningStyle(),NormalStyle())
     else:
-        getDsetCreator("Embedding", multicrabPaths.getEWKPath(), not config.OptionReplaceEmbeddingByMC)
-    qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
+        getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput, not config.OptionReplaceEmbeddingByMC)
+    qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
     if qcdFactorisedDsetCreator == None:
         myQCDMethods.remove(DataCard.DatacardQCDMethod.FACTORISED)
-    qcdInvertedDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
+    qcdInvertedDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
     if qcdInvertedDsetCreator == None:
         myQCDMethods.remove(DataCard.DatacardQCDMethod.INVERTED)
 
@@ -109,7 +115,7 @@ def main(opts, moduleSelector):
                         print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sinverted%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
                     dcgen.setDsetMgrCreators(signalDsetCreator,embeddingDsetCreator,myQCDDsetCreator)
                     # Do the heavy stuff
-                    dcgen.doDatacard(era,searchMode,optimizationMode)
+                    dcgen.doDatacard(era,searchMode,optimizationMode,mcrabInfoOutput)
     print "\nDatacard generator is done."
     if myDatacardCount > 10:
         print "\n(collecting some garbage before handing the shell back to you)"

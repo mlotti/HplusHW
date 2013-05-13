@@ -260,7 +260,7 @@ class DataCardGenerator:
         self._dsetMgrManager = DatasetMgrCreatorManager(self._opts, self._config, signalDsetCreator, embeddingDsetCreator, qcdDsetCreator, self._QCDMethod)
         print "DatasetManagerCreator objects passed"
 
-    def doDatacard(self, era, searchMode, optimizationMode):
+    def doDatacard(self, era, searchMode, optimizationMode, mcrabInfoOutput):
         # Prepend era, searchMode, and optimizationMode to prefix
         s = "%s_%s_"%(era, searchMode)
         if optimizationMode == "":
@@ -285,9 +285,10 @@ class DataCardGenerator:
 
         # Make datacards
         # Store era / searchMode / optimizationMode combination as a string # FIXME
-        TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix, 
+        TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
                       luminosity=self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),
-                      observation=self._observation, datasetGroups=self._columns, extractors=self._extractors)
+                      observation=self._observation, datasetGroups=self._columns, extractors=self._extractors,
+                      mcrabInfoOutput=mcrabInfoOutput)
 
         # Close files
         #self.closeFiles() # Do not close, will crash if done so, because configInfo histogram will not be found anymore !!!
