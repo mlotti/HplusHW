@@ -798,6 +798,10 @@ class PlotBase:
     def binWidth(self):
         return self.histoMgr.getHistos()[0].getBinWidth(1)
 
+    ## Get the bin widths (assuming they're the same in all histograms)
+    def binWidths(self):
+        return self.histoMgr.getHistos()[0].getBinWidths()
+
     ## Add a format for which to save the plot
     #
     # \param format  Suffix recognised by ROOT
@@ -2164,8 +2168,16 @@ class PlotDrawer:
         if ylabel is None:
             ylabel = p.histoMgr.getHistos()[0].getRootHisto().GetYaxis().GetTitle()
         else:
-            if "%" in ylabel:
+            nformats = ylabel.count("%")
+            if nformats == 0:
+                pass
+            elif nformats == 1:
                 ylabel = ylabel % p.binWidth()
+            elif nformats == 2:
+                binWidths = p.binWidths()
+                ylabel = ylabel % (min(binWidths), max(binWidths))
+            else:
+                raise Exception("Got %d '%%' formats in y label ('%s'), only 0-2 are supported" % (nformats, ylabel))
         p.frame.GetYaxis().SetTitle(ylabel)
 
         customize = self._getValue("customizeBeforeDraw", p, kwargs)

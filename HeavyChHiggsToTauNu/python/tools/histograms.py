@@ -1246,6 +1246,12 @@ class Histo:
             return None
         return self.rootHisto.GetBinWidth(bin)
 
+    ## Get list of bin widths
+    def getBinWidths(self):
+        if self.rootHisto is None:
+            return None
+        return [self.rootHisto.GetBinWidth(i) for i in xrange(1, self.rootHisto.GetNbinsX()+1)]
+
     ## \var rootHisto
     # ROOT histogram object (TH1)
     ## \var name
