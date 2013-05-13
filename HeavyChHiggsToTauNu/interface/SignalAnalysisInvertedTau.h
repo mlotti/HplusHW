@@ -164,10 +164,14 @@ namespace HPlus {
     Count fBaselineEvetoCounter;
     Count fBaselineMuvetoCounter;
     Count fBaselineJetsCounter;
+
+    Count fBaselineQCDTailKillerCollinearCounter;
     Count fBaselineMetCounter;
     Count fBaselineBtagCounter;
     Count fBTaggingScaleFactorCounter;
     Count fBaselineDeltaPhiTauMETCounter;
+    Count fBaselineQCDTailKillerBackToBackCounter;
+
     //    Count fBaselineDeltaPhiMHTJet1CutCounter;
     Count fBaselineDeltaPhiVSDeltaPhiMHTJet1CutCounter;
 
@@ -179,6 +183,7 @@ namespace HPlus {
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
+    Count fQCDTailKillerCollinearCounter;
     Count fBTaggingBeforeMETCounter;
     Count fMETCounter;
     Count fBjetVetoCounter;
@@ -188,6 +193,7 @@ namespace HPlus {
     Count fBTaggingScaleFactorInvertedCounter;
     Count fQCDTailKillerCounter;
     Count fDeltaPhiTauMETCounter;
+    Count fQCDTailKillerBackToBackCounter;
     Count fDeltaPhiVSDeltaPhiMETJet1CutCounter;
     Count fDeltaPhiVSDeltaPhiMETJet2CutCounter;
     Count fDeltaPhiVSDeltaPhiMETJet3CutCounter;
@@ -267,6 +273,19 @@ namespace HPlus {
     WrappedTH1 *hMet_AfterEvtTopology;
     WrappedTH1 *hMETBeforeMETCut;
     WrappedTH1 *hMETBeforeTauId;
+
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBack;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinear;
+
+    WrappedTH1* hCtrlQCDTailKillerJet1BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet2BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet3BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet4BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet1Collinear;
+    WrappedTH1* hCtrlQCDTailKillerJet2Collinear;
+    WrappedTH1* hCtrlQCDTailKillerJet3Collinear;
+    WrappedTH1* hCtrlQCDTailKillerJet4Collinear;
+
 
     // baseline MET histos
     HistogramsInBins *hMETBaselineTauId;

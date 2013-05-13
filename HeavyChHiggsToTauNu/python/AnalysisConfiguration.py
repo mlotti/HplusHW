@@ -643,7 +643,23 @@ class ConfigBuilder:
         names = []
         modules = []
         for module, name in zip(analysisModules, analysisNames):
-            # Loose scenario
+            # Zero plus scenario
+            mod = module.clone()
+            mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
+                QCDTailKillerBin("noCut", 0.0, 0.0), # jet 1
+                QCDTailKillerBin("noCut", 0.0, 0.0), # jet 2
+                QCDTailKillerBin("noCut", 0.0, 0.0), # jet 3
+                QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
+            )
+            mod.QCDTailKiller.collinear = cms.untracked.VPSet(
+                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
+                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
+                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+                QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
+            )
+            mod.QCDTailKiller.maxJetsToConsider = 4
+            createQCDTailKillerModule(process, "QCDTailKillerZeroPlus", mod, names, modules)
+            # Loose plus scenario
             mod = module.clone()
             mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
                 QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
@@ -651,18 +667,16 @@ class ConfigBuilder:
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
-            mod.QCDTailKiller.collinear = cms.untracked.VPSet()
-            createQCDTailKillerModule(process, "QCDTailKillerLoose", mod, names, modules)
-            # Medium scenario
-            mod = module.clone()
-            mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
-                QCDTailKillerBin("circular", 60.0, 60.0), # jet 1
-                QCDTailKillerBin("circular", 60.0, 60.0), # jet 2
-                QCDTailKillerBin("noCut", 60.0, 60.0), # jet 3
-                QCDTailKillerBin("noCut", 60.0, 60.0), # jet 4
+
+            mod.QCDTailKiller.collinear = cms.untracked.VPSet(
+                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
+                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
+                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+                QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
+
             )
-            mod.QCDTailKiller.collinear = cms.untracked.VPSet()
-            createQCDTailKillerModule(process, "QCDTailKillerMedium", mod, names, modules)
+            mod.QCDTailKiller.maxJetsToConsider = 4
+            createQCDTailKillerModule(process, "QCDTailKillerLoosePlus", mod, names, modules)
             # Medium plus scenario
             mod = module.clone()
             mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
@@ -677,17 +691,9 @@ class ConfigBuilder:
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
+            mod.QCDTailKiller.maxJetsToConsider = 4
             createQCDTailKillerModule(process, "QCDTailKillerMediumPlus", mod, names, modules)
-            # Tight scenario
-            mod = module.clone()
-            mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
-                QCDTailKillerBin("circular", 80.0, 80.0), # jet 1
-                QCDTailKillerBin("circular", 80.0, 80.0), # jet 2
-                QCDTailKillerBin("noCut", 80.0, 80.0), # jet 3
-                QCDTailKillerBin("noCut", 80.0, 80.0), # jet 4
-            )
-            mod.QCDTailKiller.collinear = cms.untracked.VPSet()
-            createQCDTailKillerModule(process, "QCDTailKillerTight", mod, names, modules)
+
             # Tight plus scenario
             mod = module.clone()
             mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
@@ -702,6 +708,7 @@ class ConfigBuilder:
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
+            mod.QCDTailKiller.maxJetsToConsider = 4
             createQCDTailKillerModule(process, "QCDTailKillerTightPlus", mod, names, modules)
         self._accumulateAnalyzers("Modules for QCDTailKiller scenarios", names)
         analysisModules.extend(modules)

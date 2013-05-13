@@ -62,21 +62,35 @@ namespace HPlus {
 
     };
 
-    METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label);
+    METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, const std::string& label, const std::string& tauIsolationDiscriminator);
     ~METSelection();
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
+    // Here tau is always assumed isolated for type 1 correction
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
+
+    // Here non-isolated taus are taken as jets, if
+    // fNonIsolatedTausAsJetsEnabled is true (from python
+    // configuration)
+    Data silentAnalyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
+    Data analyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
 
     const double getCutValue() const { return fMetCut; }
 
   private:
-    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, bool possiblyIsolatedTaus);
 
     enum Select {kRaw, kType1, kType2};
 
-    reco::MET undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, Select type);
+    enum PossiblyIsolatedTauMode { // Do TypeI (residual) correction for possibly isolated taus?
+      kDisabled,       // equivalent to always
+      kNever,          // Taus in (silent)analyzeWithPossiblyIsolatedTaus are always considered as jets
+      kAlways,         // Taus in (silent)analyzeWithPossiblyIsolatedTaus are always considered as isolated taus
+      kForIsolatedOnly // Taus in (silent)analyzeWithPossiblyIsolatedTaus are treated according to their isolation status (non-isolated as jets, isolated as taus)
+    };
+
+    reco::MET undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, Select type, bool possibltyIsolatedTaus);
 
     // Input parameters
     edm::InputTag fRawSrc;
@@ -92,9 +106,13 @@ namespace HPlus {
     const double fJetType1Threshold;
     std::string fJetOffsetCorrLabel;
     //double fType2ScaleFactor;
+    std::string fTauIsolationDiscriminator;
+    PossiblyIsolatedTauMode fDoTypeICorrectionForPossiblyIsolatedTaus;
 
 
     // Counters
+    Count fTypeIAllEvents;
+    Count fTypeITauIsolated;
     Count fMetCutCount;
 
     // Histograms
