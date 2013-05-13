@@ -9,6 +9,7 @@
 
 interactiveMode = False
 
+import sys
 from ROOT import *
 ROOT.gROOT.SetBatch(not interactiveMode)
 
@@ -40,16 +41,16 @@ cutInfoSuffixes = ["noTopMassCut", "topMassCut140-200", "topMassCut100-240"]
 analysis = "signalAnalysis"
 # Data era affects on the set of selected data datasets, and the PU
 # weights (via TDirectory name in histograms.root)
-#dataEra = "Run2011A"
+dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2011AB"
+#dataEra = "Run2011AB"
 
 #plotSignalOnly = True
 plotSignalOnly = False
 #plotAllMassPointsTogether = True
 plotAllMassPointsTogether = False
-mcOnly = True
-#mcOnly = False
+#mcOnly = True
+mcOnly = False
 mcOnlyLumi = 5000 # 1/pb
 #lightHplusMassPoint = 120
 lightHplusMassPoints = [80, 90, 100, 120, 140, 150, 155, 160]
@@ -163,7 +164,8 @@ def doEverything(multicrabDir, cutInfoSuffix, lightHplusMassPoint):
     doCounters(datasets)
 
     # Do plots with a fit
-    doFit(datasets, "HiggsMass", cutInfoSuffix, lightHplusMassPoint)
+    doFit(datasets, "HiggsMass", cutInfoSuffix, lightHplusMassPoint, "Gauss")
+    doFit(datasets, "HiggsMass", cutInfoSuffix, lightHplusMassPoint, "BW")
 
     if interactiveMode:
         raw_input("*** Press \"Enter\" to exit pyROOT: ")
@@ -459,7 +461,9 @@ def Gaussian(x,par):
 def BW(x,par):
     return par[0]*TMath.BreitWigner(x[0],par[1],par[2])
 
-def doFit(datasets, histoName, cutInfoSuffix, lightHplusMassPoint):
+def doFit(datasets, histoName, cutInfoSuffix, lightHplusMassPoint, fitFunction):
+    print "Doing invariant mass fits. (Fit function =", fitFunction + ")"
+    
     ## After standard cuts
     invmass = plots.PlotBase(
         [datasets.getDataset("TTToHplus_M%d"%lightHplusMassPoint).getDatasetRootHisto("FullHiggsMass/"+histoName)])
@@ -489,10 +493,17 @@ def doFit(datasets, histoName, cutInfoSuffix, lightHplusMassPoint):
     
     #    print "Fit range ",rangeMin, " - ",rangeMax
     
-    class FitFunction:
-        def __call__( self, x, par ):
-            #return BW(x, par)
-            return Gaussian(x, par)
+    if fitFunction == "Gauss":
+        class FitFunction:
+            def __call__( self, x, par ):
+                return Gaussian(x, par)
+    elif fitFunction == "BW":
+        class FitFunction:
+            def __call__( self, x, par ):
+                return BW(x, par)
+    else:
+        print "ERROR: invalid fit function option given ("+fitFunction+"). Valid options are \"Gauss\", \"BW\"."
+        sys.exit(1)
         
     theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
     theFit.SetParLimits(0,1,10000)
@@ -522,7 +533,15 @@ def doFit(datasets, histoName, cutInfoSuffix, lightHplusMassPoint):
     #tex5.SetTextSize(20)
     #tex5.Draw()
     print "Fit range ",rangeMin, " - ",rangeMax
-    canvas.Print("Fit_"+histoName+cutInfoSuffix+"_M%d.png"%lightHplusMassPoint)
+    canvas.Print("Fit_"+fitFunction+"_"+histoName+cutInfoSuffix+"_M%d.png"%lightHplusMassPoint)
+    canvas.Print("Fit_"+fitFunction+"_"+histoName+cutInfoSuffix+"_M%d.eps"%lightHplusMassPoint)
+
+    print "******************************", fitFunction ,"***********************************"
+    if fitFunction == "Gauss":
+        print  "$", round(theFit.GetParameter(1), 0), "\\pm", round(theFit.GetParError(1), 0), "$ & $", round(theFit.GetParameter(2), 0), "\\pm", round(theFit.GetParError(2), 0), "$ & $", round(theFit.GetChisquare(), 0), "/", theFit.GetNDF(), "$ &"
+    elif fitFunction == "BW":
+        print  "$", round(theFit.GetParameter(1), 0), "\\pm", round(theFit.GetParError(1), 0), "$ & $", round(theFit.GetParameter(2), 0), "\\pm", round(theFit.GetParError(2), 0), "$ & $", round(theFit.GetChisquare(), 0), "/", theFit.GetNDF(), "$ \\\\"
+
         
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
