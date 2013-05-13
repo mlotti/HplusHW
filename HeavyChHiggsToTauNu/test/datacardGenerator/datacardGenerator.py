@@ -7,6 +7,8 @@ from optparse import OptionParser
 import gc
 import cPickle
 import ROOT
+ROOT.gROOT.SetBatch(True) # no flashing canvases
+ROOT.PyConfig.IngoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.AnalysisModuleSelector import *
@@ -195,5 +197,4 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit()
     # Run main program
-    ROOT.gROOT.SetBatch() # no flashing canvases
     main(opts, myModuleSelector)
