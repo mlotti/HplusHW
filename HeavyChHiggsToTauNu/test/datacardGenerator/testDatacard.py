@@ -1,9 +1,10 @@
 DataCardName    = 'Default'
-Path            = '/home/wendland/data/v445/met50'
+Path            = '/home/wendland/data/v445/met50_2013-05-08'
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 HeavyMassPoints      = [180,190,200,220,250,300]
+HeavyMassPoints      = []
 #MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [80,120,160]
 MassPoints      = [120] # The mass points to run
@@ -88,18 +89,18 @@ QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusCollinearTailKiller"
 #QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30PlusTailKiller"
 
 QCDFactorisedValidationMETShapeHistogramsDimensions = {  "bins": 100,
-                                                         "rangeMin": 3.0,
+                                                         "rangeMin": 0.0,
                                                          "rangeMax": 500.0,
                                                          #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
                                                          #"variableBinSizeLowEdges": [0,10,20,30,40,50,60], # if an empty list is given, then uniform bin width is used
                                                          "variableBinSizeLowEdges": [],
                                                          "xtitle": "E_{T}^{miss}, GeV/c^{2}",
                                                          "ytitle": "Events"}
-QCDFactorisedValidationMtShapeHistogramsDimensions = { "bins": 9,
+QCDFactorisedValidationMtShapeHistogramsDimensions = { "bins": 10,
                                                         "rangeMin": 0.0,
                                                         "rangeMax": 400.0,
                                                         #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                                        "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160], # if an empty list is given, then uniform bin width is used
+                                                        "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
                                                         "xtitle": "Transverse mass / GeV",
                                                         "ytitle": "Events" }
 QCDFactorisationMETShapeCorrections = {
@@ -215,12 +216,13 @@ if OptionMassShape == "TransverseMass":
                               "afterMETandTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1AndLeg2", # for checking only
                               "closureMETShapeSource": [QCDFactorisedStdSelVersion+"/CtrlMET",
                                                         QCDFactorisedStdSelVersion+"/CtrlMETAfterLeg1",
-                                                        QCDFactorisedStdSelVersion+"/CtrlAfterLeg2"],
+                                                        QCDFactorisedStdSelVersion+"/CtrlMETAfterLeg2"],
                               "closureMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions,
                               "finalShapeHisto": QCDFactorisedStdSelVersion+"/MtAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
                               "closureShapeSource": [QCDFactorisedStdSelVersion+"/MtAfterStandardSelections",
                                                      QCDFactorisedStdSelVersion+"/MtAfterLeg1",
-                                                     QCDFactorisedStdSelVersion+"/MtAfterLeg2"]
+                                                     QCDFactorisedStdSelVersion+"/MtAfterLeg2"],
+                              "closureShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions,
                               #"assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ... # not needed
                               #"factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"], # not needed
                               #"METShapeCorrections": QCDFactorisationMETShapeCorrections,
@@ -245,12 +247,13 @@ elif OptionMassShape == "FullMass":
                               "afterMETandTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1AndLeg2", # for checking only
                               "closureMETShapeSource": [QCDFactorisedStdSelVersion+"/CtrlMET",
                                                         QCDFactorisedStdSelVersion+"/CtrlMETAfterLeg1",
-                                                        QCDFactorisedStdSelVersion+"/CtrlAfterLeg2"],
+                                                        QCDFactorisedStdSelVersion+"/CtrlMETAfterLeg2"],
                               "closureMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions,
                               "finalShapeHisto": QCDFactorisedStdSelVersion+"/MassAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
                               "closureShapeSource": [QCDFactorisedStdSelVersion+"/MassAfterStandardSelections",
                                                      QCDFactorisedStdSelVersion+"/MassAfterLeg1",
-                                                     QCDFactorisedStdSelVersion+"/MassAfterLeg2"]
+                                                     QCDFactorisedStdSelVersion+"/MassAfterLeg2"],
+                              "closureShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions,
                               #"assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ... # not needed
                               #"factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"], # not needed
                               #"METShapeCorrections": QCDFactorisationMETShapeCorrections,

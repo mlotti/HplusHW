@@ -156,7 +156,7 @@ class DatasetMgrCreatorManager:
                         myMatchedDatasetNames.append(dset)
                     myFoundStatus = True
             if not myFoundStatus and len(myAllDatasetNames) > 0:
-                print ErrorLabel()+" Dataset group '%s': cannot find datasetDefinition '%s'!"%(label,dset)
+                print ErrorLabel()+" Dataset group '%s': cannot find datasetDefinition '%s'!"%(mergeGroupLabel,searchName)
                 print "Options are: %s"%(', '.join(map(str, myAllDatasetNames)))
                 raise Exception()
         #if self._optionDebugConfig:

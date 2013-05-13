@@ -8,7 +8,7 @@ import gc
 import cPickle
 import ROOT
 ROOT.gROOT.SetBatch(True) # no flashing canvases
-ROOT.PyConfig.IngoreCommandLineOptions = True
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.AnalysisModuleSelector import *
