@@ -54,7 +54,7 @@ def GetPurityHistoNames():
     hNameList.append("Purity_*QcdScheme*_*ErrorType*_QCDfactorised_TradPlusCollinearTailKiller_NevtAfterLeg2")
 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "#tau_{h} p_{T} (GeV/c)", -1, -1, False, "Purity", 0.0, 1.0, False, None))
+        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", -1, -1, False, "Purity", 0.0, 1.0, False, None))
 
     return hTemplateList
 
@@ -67,7 +67,7 @@ def GetEfficiencyHistoNames():
     hNameList.append("Efficiency_leg2_*QcdScheme*_*ErrorType*_QCDfactorised_TradPlusCollinearTailKiller_NevtAfterStandardSelections")
 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "p_{T}^{#tau_{h}} (GeV/c)", -1, -1, False, "Efficiency", 1E-03, 1E-01, True, None))
+        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", -1, -1, False, "Efficiency", 1E-03, 1E-01, True, None))
 
     return hTemplateList
 
@@ -83,12 +83,25 @@ def GetNEventsHistoNames():
     hNameList.append("Nevents_*QcdScheme*_*ErrorType*_QCDfactorised_TradPlusCollinearTailKiller_NevtAfterLeg2")
 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "p_{T}^{#tau_{h}} (GeV/c)", -1, -1, False, "dN_{QCD} / dp_{T}^{#tau_{h}}", 0.0, 10.0, False, None))
+        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", -1, -1, False, "dN_{QCD} / dp_{T, #tau_{h}}", 0.0, 10.0, False, None))
 
     return hTemplateList
 
 #######################################################################################################
 def GetMtShapeHistoNames():
+    hTemplateList = []
+    hNameList = []
+
+    folder = "Shape_*QcdScheme*_QCDfactorised_TradPlusCollinearTailKiller_MtAfterLeg1"
+    hNameList.append( folder + "/" + folder + "_*ErrorType*")
+
+    for h in hNameList:
+        hTemplateList.append(HistoTemplate(h, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / %0.f GeV/c^{2}", 0.0, 10.0, False, None))
+    
+    return hTemplateList
+
+#######################################################################################################
+def GetMtShapeBinHistoNames():
     hTemplateList = []
     hNameList = []
 
@@ -104,11 +117,12 @@ def GetMtShapeHistoNames():
     hNameList.append( folder + "/" + folder + "_binInfo8_*ErrorType*")
     hNameList.append( folder + "/" + folder + "_binInfo9_*ErrorType*")
     hNameList.append( folder + "/" + folder + "_binInfo10_*ErrorType*")
-    hNameList.append( folder + "/" + folder + "_*ErrorType*")
-
-    for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / %0.f GeV/c^{2}", 0.0, 10.0, False, None))
     
+    counter = 0
+    for h in hNameList:
+        hTemplateList.append(HistoTemplate(h, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / %0.f GeV/c^{2}", 0.0, 10.0, False, "bin " + str(counter)))
+        counter = counter +1 
+
     return hTemplateList
 
 #######################################################################################################
@@ -159,19 +173,19 @@ def GetNQcdHistoNames():
     hNameList.append("NQCD_*QcdScheme*_*ErrorType*")
 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "p_{T}^{#tau_{h}} (GeV/c)", -1, -1, False, "dN_{QCD} / dp_{T}^{#tau_{h}}", 1E-03, 1E+02, True, None))
+        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", -1, -1, False, "dN_{QCD} / dp_{T, #tau_{h}}", 1E-03, 1E+02, True, None))
 
     return hTemplateList
 
 #######################################################################################################
-def GetHistoList():
+def GetEntireHistoList():
     
     # Create lists of histograms to be created
     EfficiencyList  = GetEfficiencyHistoNames()
     PurityList      = GetPurityHistoNames()
     NQcdHistoList   = GetNQcdHistoNames()
     NEvtsList       = GetNEventsHistoNames()
-    MtShapeList     = GetMtShapeHistoNames()
+    MtShapeList     = GetMtShapeHistoNames() + GetMtShapeBinHistoNames()
     MassShapeList   = GetMassShapeHistoNames()
     CtrlNjetsList   = GetCtrlNjetsHistoNames()
     CtrlNbjetsList  = GetCtrlNbjetsHistoNames()
