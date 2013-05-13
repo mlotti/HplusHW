@@ -22,7 +22,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 # Script-specific modules
-import QCDHistoHelper
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.QCDHistoHelper as HistoHelper
 
 ######################################################################
 # User options
