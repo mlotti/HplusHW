@@ -40,7 +40,7 @@ class MulticrabPathFinder:
 
     def getQCDInvertedPath(self):
         return self.getQCDinvPath()
-    
+
     def getSignalPath(self):
         return self._signal_path
 
@@ -98,7 +98,7 @@ class MulticrabPathFinder:
         return self.selectLatest(ret_dirs)
 
     def qcdfactfind(self,dirs):
-        return self.selectLatest(self.grep(dirs,"QCDMeasurement"))
+        return self.selectLatest(self.grep(dirs,"QCDMeasurementFactorised_cfg.py"))
 
     def qcdinvfind(self,dirs):
         return self.selectLatest(self.grep(dirs,"signalAnalysisInverted"))

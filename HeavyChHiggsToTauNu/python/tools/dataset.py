@@ -304,12 +304,13 @@ def addOptions(parser, analysisName=None, searchMode=None, dataEra=None, optimiz
 ## Represents counter count value with uncertainty.
 class Count:
     ## Constructor
-    def __init__(self, value, uncertainty=0.0):
+    def __init__(self, value, uncertainty=0.0, systUncertainty=0.0):
         self._value = value
         self._uncertainty = uncertainty
+        self._systUncertainty = systUncertainty
 
     def copy(self):
-        return Count(self._value, self._uncertainty)
+        return Count(self._value, self._uncertainty, self._systUncertainty)
 
     def clone(self):
         return self.copy()
@@ -326,23 +327,31 @@ class Count:
     def uncertaintyHigh(self):
         return self.uncertainty()
 
+    def systUncertainty(self):
+        return self._systUncertainty
+
     ## self = self + count
     def add(self, count):
         self._value += count._value
         self._uncertainty = math.sqrt(self._uncertainty**2 + count._uncertainty**2)
+        self._systUncertainty = math.sqrt(self._systUncertainty**2 + count._systUncertainty**2)
 
     ## self = self - count
     def subtract(self, count):
-        self.add(Count(-count._value, count._uncertainty))
+        self.add(Count(-count._value, count._uncertainty, count._systUncertainty))
 
     ## self = self * count
     def multiply(self, count):
+        self._systUncertainty = math.sqrt( (count._value * self._systUncertainty)**2 +
+                                       (self._value  * count._systUncertainty)**2 )
         self._uncertainty = math.sqrt( (count._value * self._uncertainty)**2 +
                                        (self._value  * count._uncertainty)**2 )
         self._value = self._value * count._value
 
     ## self = self / count
     def divide(self, count):
+        self._systUncertainty = math.sqrt( (self._systUncertainty / count._value)**2 +
+                                       (self._value*count._systUncertainty / (count._value**2) )**2 )
         self._uncertainty = math.sqrt( (self._uncertainty / count._value)**2 +
                                        (self._value*count._uncertainty / (count._value**2) )**2 )
         self._value = self._value / count._value
@@ -350,7 +359,9 @@ class Count:
     ## \var _value
     # Value of the count
     ## \var _uncertainty
-    # Uncertainty of the count
+    # Statistical uncertainty of the count
+    ## \var _systUncertainty
+    # Systematic uncertainty of the count
 
 ## Represents counter count value with asymmetric uncertainties.
 class CountAsymmetric:
@@ -2484,13 +2495,15 @@ class DatasetManager:
     # If nameList translates to only one dataset.Dataset, the
     # dataset.Daataset object is renamed (i.e. dataset.DatasetMerged
     # object is not created)
-    def merge(self, newName, nameList, keepSources=False, addition=False):
+    def merge(self, newName, nameList, keepSources=False, addition=False, silent=False):
         (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge")
         if len(selected) == 0:
-            print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
+            if not silent:
+                print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
             return
         elif len(selected) == 1:
-            print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
+            if not silent:
+                print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
             self.rename(selected[0].getName(), newName)
             return
 

@@ -41,6 +41,8 @@ trigger = cms.untracked.PSet(
     triggerSrc = cms.untracked.InputTag("TriggerResults", "", "INSERT_HLT_PROCESS_HERE"),
     patSrc = cms.untracked.InputTag("patTriggerEvent"),
     triggers = cms.untracked.vstring(singleTauMetTriggerPaths),
+    l1MetCut = cms.untracked.double(40), # in 2012 L1 seed of Tau+MET trigger is L1_ETM36 OR L1_ETM40, but 36 is prescaled in some runs
+    l1MetCollection = cms.untracked.string("l1extraParticles:MET"),
 #    hltMetCut = cms.untracked.double(60.0),
     hltMetCut = cms.untracked.double(-1), # not needed in 2012
     throwIfNoMet = cms.untracked.bool(False), # to prevent jobs from failing, FIXME: must be investigated later
@@ -278,6 +280,7 @@ MET = cms.untracked.PSet(
 #    METCut = cms.untracked.double(80.0), # MET cut for heavy charged Higgs
     
     # For type I/II correction
+    doTypeICorrectionForPossiblyIsolatedTaus = cms.untracked.string("disabled"), # This flag affects only to METSelection::(silent)analyzeWithPossiblyIsolatedTaus(), valid values are: disabled, never, always, forIsolatedOnly
     tauJetMatchingCone = cms.untracked.double(0.5),
     jetType1Threshold = cms.untracked.double(10),
     jetOffsetCorrLabel = cms.untracked.string("L1FastJet"),
@@ -326,10 +329,10 @@ QCDTailKiller = cms.untracked.PSet(
     maxJetsToConsider = cms.untracked.uint32(4),
     # Back to back (bottom right corner of 2D plane tau,MET vs. jet,MET)
     backToBack = cms.untracked.VPSet(
-        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
-        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
-        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
-        QCDTailKillerBin("circular", 40.0, 40.0), # jet 4
+        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
     ),
     # Collinear topology (top left corner of 2D plane tau,MET vs. jet,MET)
     collinear = cms.untracked.VPSet(
@@ -569,6 +572,11 @@ def overrideTriggerFromOptions(options):
         trigger.triggers = [options.trigger]
     elif len(options.trigger) > 0:
         trigger.triggers = options.trigger
+
+    for trg in trigger.triggers:
+        if not "IsoPFTau" in trg:
+            print "Disabling l1Met cut because of having trigger", trg
+            trigger.l1MetCut = -1
 
 def _getTriggerVertexArgs(kwargs):
     effargs = {}

@@ -2,9 +2,23 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTools import Task
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff import addTauLegSkim_53X,addMetLegSkim_53X,addQuadJetSkim_53X
 
 #skimVersion = "V00_12_03_CMSSW537_v1"
-skimVersion = "V00_12_05_CMSSW537p6_v1"
+#skimVersion = "V00_12_05_CMSSW537p6_v1"
+skimVersion = "V53_3_CMSSW539p3_v1"
 
 def addTauLegSkim(datasets):
+    definitions = {
+	"TauPlusX_190456-193621_2012A_Jan22":				TaskDef("/TauPlusX/local-Run2012A_22Jan2013_v1_AOD_190456_193621_triggerTauLeg_skim_v53_v3-ab0edd69780ab754cbf6aaa760343e0e/USER"),
+	"TauPlusX_193834-196531_2012B_Jan22":     			TaskDef("/TauPlusX/local-Run2012B_22Jan2013_v1_AOD_193834_196531_triggerTauLeg_skim_v53_v3-90dde5f694db916cf2ea3dc4c540f69c/USER"),
+	"TauPlusX_198022-203742_2012C_Jan22":     			TaskDef("/TauPlusX/local-Run2012C_22Jan2013_v1_AOD_198022_203742_triggerTauLeg_skim_v53_v3-9deb66986c607f9bebda7c7c1c86e94c/USER"),
+	"TauPlusX_203777-208686_2012D_Jan22":     			TaskDef("/TauPlusX/local-Run2012D_22Jan2013_v1_AOD_203777_208686_triggerTauLeg_skim_v53_v3-f62bc98791684c36f1551d5d5c8e780d/USER"),
+
+        "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":       TaskDef("/DYToTauTau_M-20_CT10_TuneZ2star_8TeV-powheg-tauola-pythia6/local-Summer12_DR53X_PU_S8_START53_V7A_v1_AODSIM_triggerTauLeg_skim_v53_v3-bec3178d66007202ae729a1677c5df02/USER"),
+	"DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12":    TaskDef("/DYToTauTau_M-20_CT10_TuneZ2star_v2_8TeV-powheg-tauola-pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_triggerTauLeg_skim_v53_v3-bec3178d66007202ae729a1677c5df02/USER"),
+    }                                                                                                                             
+                                                                                                                                  
+    addTauLegSkim_53X(skimVersion, datasets, definitions)
+
+def addTauLegSkim_V00_12_05_CMSSW537p6_v1(datasets):
     definitions = {
 	"TauPlusX_190456-190738_2012A_Jul13": 				TaskDef("/TauPlusX/local-Run2012A_13Jul2012_v1_AOD_190456_190738_triggerTauLeg_skim_v53_v2-3ca67b5668ffc41c3fc637191cd01817/USER"),
         "TauPlusX_190782-190949_2012A_Aug06": 				TaskDef("/TauPlusX/local-Run2012A_recover_06Aug2012_v1_AOD_190782_190949_triggerTauLeg_skim_v53_v2-4a0e265274a3a3c62fcbddf6d3f521be/USER"),

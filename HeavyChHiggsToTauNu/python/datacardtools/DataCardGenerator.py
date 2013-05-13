@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 
 import os
 import sys
@@ -33,38 +33,203 @@ class DatacardQCDMethod:
     FACTORISED = 1
     INVERTED = 2
 
+class DatacardDatasetMgrSourceType:
+    SIGNALANALYSIS = 0
+    EMBEDDING = 1
+    QCDMEASUREMENT =2
+
+class DatasetMgrCreatorManager:
+    def __init__(self, opts, config, signalDsetCreator, embeddingDsetCreator, qcdDsetCreator, qcdMethodType):
+        self._dsetMgrCreators = [signalDsetCreator, embeddingDsetCreator, qcdDsetCreator]
+        self._dsetMgrs = []
+        self._luminosities = []
+        self._mainCounterTables = []
+        self._qcdMethodType = qcdMethodType
+        if config.ToleranceForLuminosityDifference == None:
+            raise Exception(ErrorLabel()+"Input datacard should contain entry for ToleranceForLuminosityDifference (for example: ToleranceForLuminosityDifference=0.01)!"+NormalStyle())
+        self._toleranceForLuminosityDifference = config.ToleranceForLuminosityDifference
+        self._optionDebugConfig = opts.debugConfig
+
+    def closeManagers(self):
+        for dMgr in self._dsetMgrs:
+            if dMgr != None:
+                dMgr.close()
+
+    def obtainDatasetMgrs(self, era, searchMode, optimizationMode):
+        if len(self._dsetMgrs) > 0:
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) was already called (dsetMgrs exist)!"+NormalStyle())
+        for dCreator in self._dsetMgrCreators:
+            if dCreator != None:
+                # Create DatasetManager object and set pointer to the selected era, searchMode, and optimizationMode
+                myDsetMgr = dCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+                # Normalize
+                myDsetMgr.updateNAllEventsToPUWeighted()
+                # Obtain luminosity
+                myDsetMgr.loadLuminosities()
+                myLuminosity = 0.0
+                myDataDatasets = myDsetMgr.getDataDatasets()
+                for d in myDataDatasets:
+                    myLuminosity += d.getLuminosity()
+                self._luminosities.append(myLuminosity)
+                # Merge divided datasets
+                myDsetMgr.mergeMany(plots._physicalMcAdd, addition=True)
+                # Store DatasetManager
+                self._dsetMgrs.append(myDsetMgr)
+            else:
+                # No dsetMgrCreator, append zero pointers to retain list dimension
+                self._dsetMgrs.append(None)
+                self._luminosities.append(None)
+        self._checkLuminosityMatching()
+
+    def cacheMainCounterTables(self):
+        # Note: needs to be called after all merging operations have been done
+        for i in range(0,len(self._dsetMgrs)):
+            if self.getDatasetMgr(i) == None:
+                self._mainCounterTables.append(None)
+            else:
+                # Obtain main counter tables
+                myEventCounter = counter.EventCounter(self.getDatasetMgr(i), countNameFunction=None, counters=None, mainCounterOnly=True)
+                myEventCounter.normalizeMCToLuminosity(self.getLuminosity(i))
+                self._mainCounterTables.append(myEventCounter.getMainCounterTable())
+
+    def getNmax(self):
+        return len(self._dsetMgrs)
+
+    # Returns datasetMgr object, index must conform to DatacardDatasetMgrSourceType. Note: can return also a None object
+    def getDatasetMgr(self, i):
+        if len(self._dsetMgrs) == 0:
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!")
+        if i < 0 or i >= len(self._dsetMgrs):
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::getDatasetMgr(...) index = %d is out of range!"%i)
+        return self._dsetMgrs[i]
+
+    def getDatasetMgrLabel(self, i):
+        if i == DatacardDatasetMgrSourceType.SIGNALANALYSIS:
+            return "Signal analysis"
+        elif i == DatacardDatasetMgrSourceType.EMBEDDING:
+            return "Embedding"
+        elif i == DatacardDatasetMgrSourceType.QCDMEASUREMENT:
+            if self._qcdMethodType == DatacardQCDMethod.FACTORISED:
+                return "QCDfactorised"
+            if self._qcdMethodType == DatacardQCDMethod.INVERTED:
+                return "QCDinverted"
+        else:
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::getDatasetMgrLabel(...) index = %d is out of range!!"%i)
+
+    def getLuminosity(self, i):
+        if len(self._luminosities) == 0:
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!")
+        if i < 0 or i >= len(self._dsetMgrs):
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::getLuminosity(...) index = %d is out of range!"%i)
+        return self._luminosities[DatacardDatasetMgrSourceType.SIGNALANALYSIS]
+
+    def getMainCounterTable(self, i):
+        if len(self._mainCounterTables) == 0:
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::cacheMainCounterTables(...) needs to be called first!")
+        if i < 0 or i >= len(self._dsetMgrs):
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::getMainCounterTable(...) index = %d is out of range!"%i)
+        return self._mainCounterTables[i]
+
+    # Merges the list of datasets (if they exist) into one object. The merged group is then used to access counters and histograms
+    def mergeDatasets(self, i, mergeGroupLabel, searchNames):
+        if self.getDatasetMgr(i) == None:
+            return
+        # Obtain all dataset names
+        myAllDatasetNames = self.getDatasetMgr(i).getAllDatasetNames()
+        # Find datasets matching to search conditions
+        myMatchedDatasetNames = []
+        for searchName in searchNames:
+            myFoundStatus = False
+            for dset in myAllDatasetNames:
+                if searchName in dset:
+                    # Replace files existing in _physicalMcAdd
+                    myReplacedStatus = False
+                    for key in plots._physicalMcAdd:
+                        if dset == key:
+                            myReplacedStatus = True
+                            if plots._physicalMcAdd[key] in myResult:
+                                print "    Replaced dataset '%s'->'%s', exists already"%(key,plots._physicalMcAdd[key])
+                            else:
+                                print "    Replaced dataset '%s'->'%s'"%(key,plots._physicalMcAdd[key])
+                                myMatchedDatasetNames.append(dset)
+                    if not myReplacedStatus:
+                        myMatchedDatasetNames.append(dset)
+                    myFoundStatus = True
+            if not myFoundStatus and len(myAllDatasetNames) > 0:
+                print ErrorLabel()+" Dataset group '%s': cannot find datasetDefinition '%s'!"%(label,dset)
+                print "Options are: %s"%(', '.join(map(str, myAllDatasetNames)))
+                raise Exception()
+        #if self._optionDebugConfig:
+            #print "Added to data group '%s' the following datasets:"%(mergeGroupLabel)
+            #for n in myMatchedDatasetNames:
+                #print "  "+n
+        # Now do the merge
+        self.getDatasetMgr(i).merge(mergeGroupLabel, myMatchedDatasetNames, silent=True)
+
+    def printDatasetMgrContents(self):
+        for i in range(0,len(self._dsetMgrs)):
+            if self.getDatasetMgr(i) != None:
+                print "DatasetMgr contains following datasets for '%s'"%self.getDatasetMgrLabel(i)
+                self.getDatasetMgr(i).printInfo()
+
+    def _checkLuminosityMatching(self):
+        # Print info of luminosity
+        print "\nLuminosity is set to:"
+        for i in range(0,len(self._luminosities)):
+            if self._luminosities[i] != None:
+                print "  %s: %s%f 1/pb%s"%(self.getDatasetMgrLabel(i),HighlightStyle(),self._luminosities[i],NormalStyle())
+        # Compare luminosities to signal analysis
+        if len(self._luminosities) == 0:
+            raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!")
+        mySignalLuminosity = self._luminosities[DatacardDatasetMgrSourceType.SIGNALANALYSIS]
+        for i in range(1,len(self._luminosities)):
+            if self._luminosities[i] != None:
+                myDiff = abs(self._luminosities[i] / mySignalLuminosity - 1.0)
+                if myDiff > self._toleranceForLuminosityDifference:
+                    raise Exception(ErrorLabel()+"signal and embedding luminosities differ more than 1 %!")
+                elif myDiff > 0.0001:
+                    print WarningLabel()+"%s and %s luminosities differ slightly (%.2f %%)!"%(self.getDatasetMgrLabel(DatacardDatasetMgrSourceType.SIGNALANALYSIS),self.getDatasetMgrLabel(i),myDiff*100.0)
+        print ""
+
 class DataCardGenerator:
-    def __init__(self, config, opts, QCDMethod, era, optimisationVariation):
-	self._dsetMgrs = None
-	self._config = config
-	self._opts = opts
+    def __init__(self, opts, config, qcdMethod):
+        self._opts = opts
+        self._config = config
+        self._QCDMethod = qcdMethod
+        # Check config file
+        #self._checkCfgFile() #FIXME
+        print "Input datacard read and passed the tests"
+        # Manager for datasetMgrCreators (DatasetMgrCreatorManager object)
+        self._dsetMgrManager = None
+        # Datacard columns
         self._observation = None
-        self._luminosity = -1
         self._columns = []
+        # Extractor objects
         self._extractors = []
+        # Control plot extractors
         self._controlPlotExtractors = []
         self._controlPlotExtractorsEWKfake = []
-        self._QCDMethod = QCDMethod
-        self._replaceEmbeddingWithMC = False
-        self._doSignalAnalysis = True
-        self._doEmbeddingAnalysis = True
-        self._doQCDFactorised = False
-        self._variationPostfix = optimisationVariation
-        self._dataEra = era
-        if self._QCDMethod == DatacardQCDMethod.FACTORISED:
-            self._doQCDFactorised = True
-        self._doQCDInverted = False
-        if self._QCDMethod == DatacardQCDMethod.INVERTED:
-            self._doQCDInverted = True
+        # 
+        #self._replaceEmbeddingWithMC = False
+        #self._doSignalAnalysis = True
+        #self._doEmbeddingAnalysis = True
+        #self._doQCDFactorised = False
+        #self._variationPostfix = optimisationVariation
+        #self._dataEra = era
+        #if self._QCDMethod == DatacardQCDMethod.FACTORISED:
+            #self._doQCDFactorised = True
+        #self._doQCDInverted = False
+        #if self._QCDMethod == DatacardQCDMethod.INVERTED:
+            #self._doQCDInverted = True
         # Override options from command line (not used at the moment)
         #self.overrideConfigOptionsFromCommandLine()
-        if self._QCDMethod != DatacardQCDMethod.FACTORISED and self._QCDMethod != DatacardQCDMethod.INVERTED:
-            raise Exception(ErrorStyle()+"Error: QCD method was not properly specified when creating DataCardGenerator!"+NormalStyle())
-        if self._config.OptionReplaceEmbeddingByMC != None:
-            self._replaceEmbeddingByMC = self._config.OptionReplaceEmbeddingByMC
+        #if self._QCDMethod != DatacardQCDMethod.FACTORISED and self._QCDMethod != DatacardQCDMethod.INVERTED:
+            #raise Exception(ErrorLabel()+"QCD method was not properly specified when creating DataCardGenerator!")
+        #if self._config.OptionReplaceEmbeddingByMC != None:
+            #self._replaceEmbeddingByMC = self._config.OptionReplaceEmbeddingByMC
 
         # Check that all necessary parameters have been specified in config file
-        myStatus = self.checkCfgFile()
+        myStatus = self._checkCfgFile()
         if not myStatus:
             myMsg = "Datacards will not be created for "
             if self._QCDMethod != DatacardQCDMethod.FACTORISED:
@@ -73,35 +238,42 @@ class DataCardGenerator:
                 myMsg += " QCD inverted"
             print myMsg+" (if this is not intented, check your config!)\n"
             return
-
         # Construct prefix for output name
         myOutputPrefix = ""
         if self._QCDMethod == DatacardQCDMethod.FACTORISED:
             myOutputPrefix += "QCDfact"
         elif self._QCDMethod == DatacardQCDMethod.INVERTED:
             myOutputPrefix += "QCDinv"
-        if self._replaceEmbeddingByMC:
+        if self._config.OptionReplaceEmbeddingByMC:
             myOutputPrefix += "_MCEWK"
+        self._outputPrefix = myOutputPrefix
 
         myMassRange = str(self._config.MassPoints[0])
         if len(self._config.MassPoints) > 0:
             myMassRange += "-"+str(self._config.MassPoints[len(self._config.MassPoints)-1])
         print "Cards will be generated for "+HighlightStyle()+myOutputPrefix+NormalStyle()+" in mass range "+HighlightStyle()+myMassRange+" GeV"+NormalStyle()
 
-        myMsg = ""
-        if era == None:
-            myMsg += "era = (default)"
+    #def overrideConfigOptionsFromCommandLine(self):
+        # Obtain QCD measurement method
+
+    def setDsetMgrCreators(self, signalDsetCreator, embeddingDsetCreator, qcdDsetCreator):
+        self._dsetMgrManager = DatasetMgrCreatorManager(self._opts, self._config, signalDsetCreator, embeddingDsetCreator, qcdDsetCreator, self._QCDMethod)
+        print "DatasetManagerCreator objects passed"
+
+    def doDatacard(self, era, searchMode, optimizationMode):
+        # Prepend era, searchMode, and optimizationMode to prefix
+        s = "%s_%s_"%(era, searchMode)
+        if optimizationMode == "":
+            s += "nominal"
         else:
-            myMsg += "era = "+era
-        if optimisationVariation == None:
-            print " variation = (default)"
-        else:
-            print " variation = "+optimisationVariation
-        print "Evaluating case %s\n"%(myMsg)
-        myOutputPrefix += "_"+era+"_"+optimisationVariation
+            s += "%s"%optimizationMode
+        self._outputPrefix = s+"_"+self._outputPrefix
+
+        # Get dataset managers for the era / searchMode / optimizationMode combination
+        self._dsetMgrManager.obtainDatasetMgrs(era, searchMode, optimizationMode)
 
         # Create columns (dataset groups)
-        myLuminosities = self.createDatacardColumns()
+        self.createDatacardColumns()
         self.checkDatacardColumns()
 
         # create extractors and control plot extractors
@@ -109,18 +281,18 @@ class DataCardGenerator:
         self.createControlPlots()
 
         # do data mining to cache results into datacard column objects
-        self.doDataMining(myLuminosities)
+        self.doDataMining()
 
         # Make datacards
-        TableProducer(opts, config, myOutputPrefix, self._luminosity, self._observation, self._columns, self._extractors)
+        # Store era / searchMode / optimizationMode combination as a string # FIXME
+        TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix, 
+                      luminosity=self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),
+                      observation=self._observation, datasetGroups=self._columns, extractors=self._extractors)
 
         # Close files
-        self.closeFiles()
+        #self.closeFiles() # Do not close, will crash if done so, because configInfo histogram will not be found anymore !!!
 
-    #def overrideConfigOptionsFromCommandLine(self):
-        # Obtain QCD measurement method
-
-    def checkCfgFile(self):
+    def _checkCfgFile(self):
         mymsg = ""
         if self._config.DataCardName == None:
             mymsg += "- missing field 'DataCardName' (string, describes the name of the datacard)\n"
@@ -134,23 +306,23 @@ class DataCardGenerator:
             mymsg += "- field 'MassPoints' needs to have at least one entry! (list of integers, mass points for which datacard is generated)\n"
         if self._config.BlindAnalysis == None:
             mymsg += "- field 'BlindAnalysis' needs to be set as True or False!\n"
-        if self._config.SignalAnalysis == None:
-            print WarningStyle()+"Warning: The field 'SignalAnalysis' is not specified or empty in the config file, signal analysis will be ignored"+NormalStyle()
-            self._doSignalAnalysis = False
-        if self._config.EmbeddingAnalysis == None:
-            print WarningStyle()+"Warning: The field 'EmbeddingAnalysis' is not specified or empty in the config file, embedding analysis will be ignored"+NormalStyle()
-            self._doEmbeddingAnalysis = False
+        #if self._config.SignalAnalysis == None:
+            #print WarningStyle()+"Warning: The field 'SignalAnalysis' is not specified or empty in the config file, signal analysis will be ignored"+NormalStyle()
+            #self._doSignalAnalysis = False
+        #if self._config.EmbeddingAnalysis == None:
+            #print WarningStyle()+"Warning: The field 'EmbeddingAnalysis' is not specified or empty in the config file, embedding analysis will be ignored"+NormalStyle()
+            #self._doEmbeddingAnalysis = False
             #mymsg += "- missing field 'SignalAnalysis' (string, name of EDFilter/EDAnalyzer process that produced the root files for signal analysis)\n"
-        if self._QCDMethod == DatacardQCDMethod.FACTORISED and self._config.QCDFactorisedAnalysis == None:
-            print WarningStyle()+"Warning: The field 'QCDFactorisedAnalysis' is not specified or empty in the config file, QCD factorised analysis will be ignored"+NormalStyle()
-            self._doQCDFactorised = False
-            return False
-        if self._QCDMethod == DatacardQCDMethod.INVERTED and self._config.QCDInvertedAnalysis == None:
-            print WarningStyle()+"Warning: The field 'QCDInvertedAnalysis' is not specified or empty in the config file, QCD inverted analysis will be ignored"+NormalStyle()
-            self._doQCDInverted = False
-            return False
-        if self._QCDMethod == DatacardQCDMethod.UNKNOWN:
-            mymsg += "- missing field 'QCDMeasurementMethod' (string, name of QCD measurement method, options: 'QCD factorised' or 'QCD inverted')\n"
+        #if self._QCDMethod == DatacardQCDMethod.FACTORISED and self._config.QCDFactorisedAnalysis == None:
+            #print WarningStyle()+"Warning: The field 'QCDFactorisedAnalysis' is not specified or empty in the config file, QCD factorised analysis will be ignored"+NormalStyle()
+            #self._doQCDFactorised = False
+            #return False
+        #if self._QCDMethod == DatacardQCDMethod.INVERTED and self._config.QCDInvertedAnalysis == None:
+            #print WarningStyle()+"Warning: The field 'QCDInvertedAnalysis' is not specified or empty in the config file, QCD inverted analysis will be ignored"+NormalStyle()
+            #self._doQCDInverted = False
+            #return False
+        #if self._QCDMethod == DatacardQCDMethod.UNKNOWN:
+            #mymsg += "- missing field 'QCDMeasurementMethod' (string, name of QCD measurement method, options: 'QCD factorised' or 'QCD inverted')\n"
         if self._config.SignalRateCounter == None:
             mymsg += "- missing field 'SignalRateCounter' (string, label of counter to be used for rate)\n"
         if self._config.FakeRateCounter == None:
@@ -187,149 +359,63 @@ class DataCardGenerator:
         elif len(self._config.Nuisances) == 0:
             mymsg += "- need to specify at least one Nuisance to field 'Nuisances' (list of Nuisance objects)\n"
         if self._config.ControlPlots == None:
-            print WarningStyle()+"Warning:"+NormalStyle()+" You did not specify any ControlPlots in the config (ControlPlots is list of ControlPlotInput objects)!"
+            print WarningLabel()+"You did not specify any ControlPlots in the config (ControlPlots is list of ControlPlotInput objects)!"
             print "  Please check if this was intended."
         # determine if datacard was ok
         if mymsg != "":
-            print ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"+NormalStyle()
+            print ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"
             print mymsg
             raise Exception()
         return True
 
     ## Reads datagroup definitions from columns and initialises datasets
     def createDatacardColumns(self):
-        # Obtain paths to multicrab directories
-        multicrabPaths = PathFinder.MulticrabPathFinder(self._config.Path)
-        mySignalPath = None
-        if self._doSignalAnalysis:
-            mySignalPath = multicrabPaths.getSignalPath()
-            print "- Using signal and EWK+ttbar with fake taus directory:", mySignalPath
-            if not os.path.exists(mySignalPath):
-                raise Exception(ErrorStyle()+"Path for signal analysis ('"+mySignalPath+"') does not exist!"+NormalStyle())
-        myEmbeddingPath = None
-        if self._doEmbeddingAnalysis:
-            myEmbeddingPath = multicrabPaths.getEWKPath()
-            if not self._replaceEmbeddingByMC:
-                print "- Using embedding (EWK+ttbar with genuine taus) directory:", myEmbeddingPath
-                if not os.path.exists(myEmbeddingPath):
-                    raise Exception(ErrorStyle()+"Path for embedding analysis ('"+myEmbeddingPath+"') does not exist!"+NormalStyle())
-            elif self._doSignalAnalysis:
-                # if embedding is replaced by MC EWK, use signal path as path for embedding
-                myEmbeddingPath = mySignalPath
-                print WarningStyle()+"- Replacing embedding with MC EWK samples from signal analysis"+NormalStyle()
-                self._doEmbeddingAnalysis = False
-        myQCDPath = ""
-        myQCDCounters = ""
-        myQCDBaseName = ""
-        if self._QCDMethod == DatacardQCDMethod.FACTORISED:
-            myQCDPath = multicrabPaths.getQCDFactorisedPath()
-            myQCDCounters = self._config.QCDFactorisedAnalysis+self._variationPostfix+"/counters"
-            myQCDBaseName = self._config.QCDFactorisedAnalysis
-            print "- Using multi-jets (factorised) directory:", myQCDPath
-        elif self._QCDMethod == DatacardQCDMethod.INVERTED:
-            myQCDPath = multicrabPaths.getQCDinvPath()
-            myQCDCounters = self._config.QCDInvertedAnalysis+self._variationPostfix+"/counters"
-            myQCDBaseName = self._config.QCDInvertedAnalysis
-            print "- Using multi-jets (inverted) directory:", myQCDPath
-        if not os.path.exists(myQCDPath):
-            raise Exception(ErrorStyle()+"Path for QCD measurement ('"+myQCDPath+"') does not exist!"+NormalStyle())
-        # Make dataset managers
-        self._dsetMgrs = [None] # needed for datasetType==None
-        if self._doSignalAnalysis:
-            self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=mySignalPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+self._variationPostfix+"/counters", dataEra=self._dataEra))
+        # Make datacard column object for observation
+        if self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS) != None:
+            myObservationName = "dset_observation"
+            self._dsetMgrManager.mergeDatasets(DatacardDatasetMgrSourceType.SIGNALANALYSIS, myObservationName, self._config.Observation.datasetDefinitions)
+            #print "Making merged dataset for data group: "+HighlightStyle()+"observation"+NormalStyle()
+            #self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS).merge(myObservationName, myFoundNames, keepSources=True) # note that mergeMany has already been called at this stage
+            self._observation = DatacardColumn(label = "data_obs",
+                                               enabledForMassPoints = self._config.MassPoints,
+                                               datasetType = "Observation",
+                                               rateCounter = self._config.Observation.rateCounter,
+                                               datasetMgrColumn = myObservationName,
+                                               #dirPrefix = self._config.Observation.dirPrefix+self._variationPostfix,
+                                               shapeHisto = self._config.Observation.shapeHisto)
+            if self._opts.debugConfig:
+                self._observation.printDebug()
         else:
-            self._dsetMgrs.append(None)
-        if self._doEmbeddingAnalysis:
-            #self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+self._variationPostfix+"/counters")) #FIXME
-            self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.EmbeddingAnalysis+"/counters", dataEra=self._dataEra))
-        else:
-            self._dsetMgrs.append(None)
-        self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myQCDPath+"/multicrab.cfg", counters=myQCDCounters, dataEra=self._dataEra, analysisBaseName=myQCDBaseName))
-        # Set normalisation and obtain dataset names and luminosities
-        myAllDatasetNames = []
-        myLuminosities = []
-        for i in range(0,len(self._dsetMgrs)):
-            if self._dsetMgrs[i] != None:
-                # update normalisation info
-                self._dsetMgrs[i].updateNAllEventsToPUWeighted()
-                self._dsetMgrs[i].loadLuminosities()
-                # Obtain all dataset names
-                myAllDatasetNames.append(self._dsetMgrs[i].getAllDatasetNames())
-                # Obtain luminosity
-                myLuminosity = 0.0
-                myDataDatasets = self._dsetMgrs[i].getDataDatasets()
-                for d in myDataDatasets:
-                    myLuminosity += d.getLuminosity()
-                myLuminosities.append(myLuminosity)
-                # Print info
-                myMsg = HighlightStyle()+"DatasetManager info before merging for "
-                if i == 1:
-                    myMsg += "signal"
-                elif i == 2:
-                    myMsg += "EWKtau"
-                elif i == 3:
-                    myMsg += "QCD"
-                print myMsg+NormalStyle()
-                self._dsetMgrs[i].printInfo()
-            else:
-                myAllDatasetNames.append([])
-                myLuminosities.append(0.0)
-        print "Luminosity is set to:"
-        print "  signal multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[1] +NormalStyle()
-        print "  EWKtau multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[2] +NormalStyle()
-        print "     QCD multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[3] +NormalStyle()
-        self._luminosity = myLuminosities[1]
-        # Check that luminosities are compatible
-        if myLuminosities[2] != myLuminosities[1] and self._doEmbeddingAnalysis:
-            myDiff = abs(myLuminosities[2] / myLuminosities[1]-1.0)
-            if myDiff < 0.01:
-                print WarningStyle()+"Warning: signal and embedding luminosities differ slightly (%.2f %%)!"%(myDiff*100.0) +NormalStyle()
-            else:
-                raise Exception(ErrorStyle()+"Error: signal and embedding luminosities differ more than 1 %!"+NormalStyle())
-        if myLuminosities[3] != myLuminosities[1] and self._doSignalAnalysis:
-            raise Exception(ErrorStyle()+"Error: signal and QCD luminosities are not the same!"+NormalStyle())
-        # Merge divided datasets into one
-        for i in range(1,len(self._dsetMgrs)):
-            if self._dsetMgrs[i] != None:
-                self._dsetMgrs[i].mergeMany(plots._physicalMcAdd, addition=True)
-        # Make merges for columns (a unique merge for each data group; used to access counters and histograms)
+            # Not sure what happens after this warning :)
+            print WarningLabel()+"No observation will be extracted, because signal analysis is disabled"
+
+        # Loop over data groups to create datacard columns
         for dg in self._config.DataGroups:
-            # Make sure that only one QCD method is included
-            if (dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED) or (dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED):
-                print "Skipping data group: "+HighlightStyle()+""+dg.label+""+NormalStyle() + " (only one QCD measurement allowed in a datacard)"
-            else:
-                print "Making merged dataset for data group: "+HighlightStyle()+""+dg.label+""+NormalStyle()
-                myDsetMgr = 0
-                mMergedName = ""
+            myIngoreOtherQCDMeasurementStatus = (dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED) or (dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED)
+            if not myIngoreOtherQCDMeasurementStatus:
+                print "Constructing datacard column for data group: "+HighlightStyle()+""+dg.label+""+NormalStyle()
+                myDsetMgrIndex = None
+                myMergedName = ""
                 myMergedNameForQCDMCEWK = ""
-                if dg.datasetType != "None":
+                if dg.datasetType != "None" and not myIngoreOtherQCDMeasurementStatus:
                     if dg.datasetType == "Signal":
-                        myDsetMgr = 1
+                        myDsetMgrIndex = DatacardDatasetMgrSourceType.SIGNALANALYSIS
                     elif dg.datasetType == "Embedding":
-                        myDsetMgr = 2
+                        myDsetMgrIndex = DatacardDatasetMgrSourceType.EMBEDDING
                     elif dg.datasetType == "QCD factorised" or dg.datasetType == "QCD inverted":
-                        myDsetMgr = 3
-                    # find dataset names
-                    myFoundNames = self.findDatasetNames(dg.label, myAllDatasetNames[myDsetMgr], dg.datasetDefinitions)
-                    # make merged set
+                        myDsetMgrIndex = DatacardDatasetMgrSourceType.QCDMEASUREMENT
+                    # Make merge of requested datasets
                     if self._opts.debugConfig:
                         print "Adding datasets to data group '"+dg.label+"':"
                         for n in myFoundNames:
                             print "  "+n
                     myMergedName = "dset_"+dg.label.replace(" ","_")
-                    if self._dsetMgrs[myDsetMgr] != None:
-                        self._dsetMgrs[myDsetMgr].merge(myMergedName, myFoundNames)
-                    # find datasets and make merged set for QCD MC EWK
+                    self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedName, dg.datasetDefinitions)
                     if dg.datasetType == "QCD factorised":
-                        myFoundNames = self.findDatasetNames(dg.label, myAllDatasetNames[myDsetMgr], dg.MCEWKDatasetDefinitions)
-                        # make merged set
-                        if self._opts.debugConfig:
-                            print "Adding MC EWK datasets to QCD:"
-                            for n in myFoundNames:
-                                print "  "+n
+                        # Make merged set of EWK MC datasets
                         myMergedNameForQCDMCEWK = "dset_"+dg.label.replace(" ","_")+"_MCEWK"
-                        self._dsetMgrs[myDsetMgr].merge(myMergedNameForQCDMCEWK, myFoundNames)
-                # Construct dataset column object
+                        self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedNameForQCDMCEWK, dg.MCEWKDatasetDefinitions)
+                # Construct datacard column object
                 myColumn = None
                 if dg.datasetType == "QCD factorised":
                     myColumn = QCDfactorisedColumn(landsProcess=dg.landsProcess,
@@ -338,148 +424,73 @@ class DataCardGenerator:
                                                    datasetMgrColumn = myMergedName,
                                                    datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
                                                    additionalNormalisationFactor = dg.additionalNormalisation,
-                                                   dirPrefix = dg.dirPrefix+self._variationPostfix,
                                                    QCDfactorisedInfo = dg.QCDfactorisedInfo,
                                                    debugMode = self._opts.debugQCD)
-                else:
-                    if dg.datasetType == "Embedding":
-                        myColumn = DatacardColumn(label=dg.label,
-                                                  landsProcess=dg.landsProcess,
-                                                  enabledForMassPoints = dg.validMassPoints,
-                                                  datasetType = dg.datasetType,
-                                                  rateCounter = dg.rateCounter,
-                                                  nuisanceIds = dg.nuisances,
-                                                  datasetMgrColumn = myMergedName,
-                                                  datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
-                                                  additionalNormalisationFactor = dg.additionalNormalisation,
-                                                  dirPrefix = dg.dirPrefix, # FIXME
-                                                  shapeHisto = dg.shapeHisto)
-                    else:
-                        myColumn = DatacardColumn(label=dg.label,
-                                                  landsProcess=dg.landsProcess,
-                                                  enabledForMassPoints = dg.validMassPoints,
-                                                  datasetType = dg.datasetType,
-                                                  rateCounter = dg.rateCounter,
-                                                  nuisanceIds = dg.nuisances,
-                                                  datasetMgrColumn = myMergedName,
-                                                  datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
-                                                  additionalNormalisationFactor = dg.additionalNormalisation,
-                                                  dirPrefix = dg.dirPrefix+self._variationPostfix,
-                                                  shapeHisto = dg.shapeHisto)
-                # Disable non-active QCD measurements
-                if dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED:
-                    myColumn.disable()
-                elif dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED:
-                    myColumn.disable()
-                # Add column
+                elif dg.datasetType == "Embedding":
+                    myColumn = DatacardColumn(label=dg.label,
+                                              landsProcess=dg.landsProcess,
+                                              enabledForMassPoints = dg.validMassPoints,
+                                              datasetType = dg.datasetType,
+                                              rateCounter = dg.rateCounter,
+                                              nuisanceIds = dg.nuisances,
+                                              datasetMgrColumn = myMergedName,
+                                              additionalNormalisationFactor = dg.additionalNormalisation,
+                                              shapeHisto = dg.shapeHisto)
+                else: # i.e. signal analysis and QCD inverted
+                    myColumn = DatacardColumn(label=dg.label,
+                                              landsProcess=dg.landsProcess,
+                                              enabledForMassPoints = dg.validMassPoints,
+                                              datasetType = dg.datasetType,
+                                              rateCounter = dg.rateCounter,
+                                              nuisanceIds = dg.nuisances,
+                                              datasetMgrColumn = myMergedName,
+                                              additionalNormalisationFactor = dg.additionalNormalisation,
+                                              shapeHisto = dg.shapeHisto)
+                # Store column
                 self._columns.append(myColumn)
+                # Provide debug print
                 if self._opts.debugConfig:
                     myColumn.printDebug()
-        # Make datacard column object for observation
-        if self._doSignalAnalysis:
-            myFoundNames = self.findDatasetNames("Observation", myAllDatasetNames[1], self._config.Observation.datasetDefinitions)
-            if self._opts.debugConfig:
-                print "Adding datasets to data group 'Observation':"
-                for n in myFoundNames:
-                    print "  "+n
-            myObservationName = "dset_observation"
-            print "Making merged dataset for data group: "+HighlightStyle()+"observation"+NormalStyle()
-            self._dsetMgrs[1].merge(myObservationName, myFoundNames, keepSources=True) # note that mergeMany has already been called at this stage
-            self._observation = DatacardColumn(label = "data_obs",
-                                              enabledForMassPoints = self._config.MassPoints,
-                                              datasetType = "Observation",
-                                              rateCounter = self._config.Observation.rateCounter,
-                                              datasetMgrColumn = myObservationName,
-                                              dirPrefix = self._config.Observation.dirPrefix+self._variationPostfix,
-                                              shapeHisto = self._config.Observation.shapeHisto)
-            if self._opts.debugConfig:
-                self._observation.printDebug()
-        else:
-            print WarningStyle()+"No observation will be extracted, because signal analysis is disabled"+NormalStyle()
 
-        print "Data groups converted to datacard columns"
-        for i in range(0,len(self._dsetMgrs)):
-            if self._dsetMgrs[i] != None:
-                myMsg = HighlightStyle()+"DatasetManager info after merging datasets for "
-                if i == 1:
-                    myMsg += "signal"
-                elif i == 2:
-                    myMsg += "EWKtau"
-                elif i == 3:
-                    myMsg += "QCD"
-                print myMsg+NormalStyle()
-                self._dsetMgrs[i].printInfo()
-        return myLuminosities
+        # Cache main counter tables
+        self._dsetMgrManager.cacheMainCounterTables()
+        print "Data groups converted to datacard columns\n"
 
-    def doDataMining(self, luminosities):
-        # Obtain main counter tables
-        print "Obtaining main counter tables"
-        myEventCounterTables = []
-        for i in range(0,len(self._dsetMgrs)):
-            if self._dsetMgrs[i] != None:
-                # Obtain main event counter table
-                myEventCounter = counter.EventCounter(self._dsetMgrs[i],None,None,True)
-                myEventCounter.normalizeMCToLuminosity(luminosities[i])
-                myEventCounterTables.append(myEventCounter.getMainCounterTable())
-            else:
-                myEventCounterTables.append(None)
+        if self._opts.debugDatasets:
+            self._dsetMgrManager.printDatasetMgrContents()
+
+    def doDataMining(self):
         # Do data mining and cache results
-        print "Starting data mining"
-        if self._doSignalAnalysis:
+        print "\nStarting data mining"
+        if self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS) != None:
             # Handle observation separately
-            self._observation.doDataMining(self._config,self._dsetMgrs[1],luminosities[1],myEventCounterTables[1],self._extractors,self._controlPlotExtractors)
+            myDsetMgr = self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
+            myLuminosity = self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
+            myMainCounterTable = self._dsetMgrManager.getMainCounterTable(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
+            self._observation.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         for c in self._columns:
-            myIndex = 0
+            myDsetMgrIndex = 0
             if c.typeIsObservation() or c.typeIsSignal():
-                myIndex = 1
+                myDsetMgrIndex = 0
             if c.typeIsEWK():
-                myIndex = 2
+                myDsetMgrIndex = 1
             if c.typeIsQCD():
-                myIndex = 3
-            # Do mining for datacard columns
-            # check if the column Id is in the list of EWK fake taus
+                myDsetMgrIndex = 2
+            # Do mining for datacard columns (separately for EWK fake taus)
+            myDsetMgr = self._dsetMgrManager.getDatasetMgr(myDsetMgrIndex)
+            myLuminosity = self._dsetMgrManager.getLuminosity(myDsetMgrIndex)
+            myMainCounterTable = self._dsetMgrManager.getMainCounterTable(myDsetMgrIndex)
             if c.getLandsProcess() in self._config.EWKFakeIdList:
-                c.doDataMining(self._config,self._dsetMgrs[myIndex],luminosities[myIndex],myEventCounterTables[myIndex],self._extractors,self._controlPlotExtractorsEWKfake)
+                c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractorsEWKfake)
             else:
-                c.doDataMining(self._config,self._dsetMgrs[myIndex],luminosities[myIndex],myEventCounterTables[myIndex],self._extractors,self._controlPlotExtractors)
+                c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
 
     ## Closes files in dataset managers
     def closeFiles(self):
         print "Closing open input files"
-        for i in range(0,len(self._dsetMgrs)):
-            if self._dsetMgrs[i] != None:
-                self._dsetMgrs[i].close()
+        self._dsetMgrManager.closeManagers()
         print "DatasetManagers closed"
-
-
-    ## Helper function for finding datasets
-    def findDatasetNames(self, label, allNames, searchNames):
-        myResult = []
-        for dset in searchNames:
-            myFoundStatus = False
-            for dsetfull in allNames:
-                if dset in dsetfull:
-                    # Replace files existing in _physicalMcAdd
-                    myReplacedStatus = False
-                    for key in plots._physicalMcAdd:
-                        if dset == key:
-                            myReplacedStatus = True
-                            if plots._physicalMcAdd[key] in myResult:
-                                print "    Replaced dataset '%s'->'%s', exists already"%(key,plots._physicalMcAdd[key])
-                            else:
-                                print "    Replaced dataset '%s'->'%s'"%(key,plots._physicalMcAdd[key])
-                                myResult.append(dsetfull)
-                    if not myReplacedStatus:
-                        myResult.append(dsetfull)
-                    myFoundStatus = True
-            if not myFoundStatus and len(allNames) > 0:
-                print ErrorStyle()+"Error in dataset group '"+label+"':"+NormalStyle()+" cannot find datasetDefinition '"+dset+"'!"
-                print "Options are:"
-                for dsetfull in allNames:
-                    print "  "+dsetfull
-                raise Exception()
-        return myResult
 
     ## Check landsProcess in datacard columns
     def checkDatacardColumns(self):
@@ -493,7 +504,7 @@ class DataCardGenerator:
                         myFirstValue = c.getLandsProcess()
                     else:
                         if myFirstValue + i != c.getLandsProcess():
-                            print ErrorStyle()+"Error:"+NormalStyle()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
+                            print ErrorLabel()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
                             raise Exception()
                     i += 1
 
@@ -601,7 +612,7 @@ class DataCardGenerator:
             if n.isPrintable():
                 myCounter += 1
                 if int(n.getId()) != myCounter:
-                    print WarningStyle()+"Warning:"+NormalStyle()+" You have not declared a Nuisance or ReservedNuisance with id='%d'! (assuming consecutive numbers)"%myCounter
+                    print WarningLabel()+"You have not declared a Nuisance or ReservedNuisance with id='%d'! (assuming consecutive numbers)"%myCounter
                     myCounter = int(n.getId())
 
     def mergeNuisances(self):

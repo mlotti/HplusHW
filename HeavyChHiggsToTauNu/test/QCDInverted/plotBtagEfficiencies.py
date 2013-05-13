@@ -318,10 +318,10 @@ def controlPlots(datasets):
         mmtbEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mmtbEWK = mmtbEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
         mmtbEWK.Scale(normEWK[ptbin])
-        mmtb.Add(mmtbEWK, -1)
+        mmtb.Add(mmtbEWK, -1)        
+        hmetb.append(mmtb)
 
         
-        hmetb.append(mmtb)
         eff = mmtb.Integral()/mmt.Integral()
 
         ereff = sqrt(eff*(1-eff)/mmt.Integral())
@@ -566,8 +566,9 @@ def controlPlots(datasets):
  # efficiency metb/met
     metbtag = metb.Clone("metb")
     metnobtag = met.Clone("met")
-    invertedQCD.setLabel("BtagEfficiency")
-    invertedQCD.mtComparison(metbtag, metnobtag,"BtagEffInMet")
+    metbtag.Divide(metnobtag)
+    invertedQCD.setLabel("BtagEffVsMet")
+    invertedQCD.mtComparison(metbtag, metbtag,"BtagEffVsMet")
 
   # efficiency metb/metbveto
     metbtag = metb.Clone("metb")

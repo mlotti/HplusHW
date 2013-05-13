@@ -104,16 +104,26 @@ namespace HPlus {
     eventClass_AllBadTau_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All bad ID tau")),
     eventClass_AllBadMET_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All bad ID MET")),
     eventClass_AllBadBjet_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All bad ID b-jet")),
+
+    count_passedEvent(eventCounter.addSubCounter("FullMassEventClassification", "all passed events")),
+    count_pure(eventCounter.addSubCounter("FullMassEventClassification", "pure")),
+    count_tauGenuine(eventCounter.addSubCounter("FullMassEventClassification", "#tau genuine")),
+    count_bGenuine(eventCounter.addSubCounter("FullMassEventClassification", "b genuine")),
+    count_tauMeasurementGood(eventCounter.addSubCounter("FullMassEventClassification", "#tau measurement good")),
+    count_bMeasurementGood(eventCounter.addSubCounter("FullMassEventClassification", "b measurement good")),
+    count_tauAndBjetFromSameTopQuark(eventCounter.addSubCounter("FullMassEventClassification", "#tau and b from same top")),
+    count_neutrinoMETCorrespondenceGood(eventCounter.addSubCounter("FullMassEventClassification", "MET #approx p_{#nu,T}")),
+
     passedEvents_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Passed events")),
-    selectionGreaterCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Greater solution closest")),
-    selectionSmallerCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Smaller solution closest")),
-    selectionTauNuAngleMaxCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator",
+    selectionGreaterCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", "Greater solution closest")),
+    selectionSmallerCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", "Smaller solution closest")),
+    selectionTauNuAngleMaxCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection",
 								       "TauNuAngleMax solution closest")),
-    selectionTauNuAngleMinCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", 
+    selectionTauNuAngleMinCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", 
 								       "TauNuAngleMin solution closest")),
-    selectionTauNuDeltaEtaMaxCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", 
+    selectionTauNuDeltaEtaMaxCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", 
 									  "TauNuDeltaEtaMax solution closest")),
-    selectionTauNuDeltaEtaMinCorrect_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", 
+    selectionTauNuDeltaEtaMinCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", 
 									  "TauNuDeltaEtaMin solution closest"))
   {
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
@@ -915,6 +925,24 @@ namespace HPlus {
   void FullHiggsMassCalculator::doEventClassification(const edm::Event& iEvent, TVector3& bJetVector, TVector3& tauVector,
 						      TVector3& METVector, FullHiggsMassCalculator::Data& output,
 						      const GenParticleAnalysis::Data* genDataPtr) {
+    if (!output.bPassedEvent) return; // Only passing events are classified; remove this if desired!
+    increment(count_passedEvent);
+
+    bool tauGenuine = false;
+    bool bGenuine = false;
+    reco::Candidate* closestGenTau = getClosestGenTau(iEvent, tauVector);
+    reco::Candidate* closestGenBquark = getClosestGenBquark(iEvent, tauVector);
+    if (closestGenTau != NULL) {
+      tauGenuine = true;
+      increment(count_tauGenuine);
+    }
+    if (closestGenBquark != NULL) {
+      bGenuine = true;
+      increment(count_bGenuine);
+    }
+    if (tauGenuine && bGenuine && tauAndBJetFromSameTopQuark(iEvent, *closestGenTau, *closestGenBquark))
+      increment(count_tauAndBjetFromSameTopQuark);
+
     // Declare variables used to classify events
     double bDeltaR     = 9999;
     double tauDeltaR   = 9999;
@@ -923,8 +951,8 @@ namespace HPlus {
     // Specify the cuts used to classify events
     double bDeltaRCut       =   0.6;
     double tauDeltaRCut     =   0.1;
-    double metDeltaPtLoCut  = -20.0; // GeV
-    double metDeltaPtHiCut  =  40.0; // GeV
+    double metDeltaPtLoCut  = -40.0; // GeV
+    double metDeltaPtHiCut  =  60.0; // GeV
     double metDeltaPhiCut   =  15.0 * TMath::DegToRad(); // The first number is the cut angle in deg, which is then converted to rad
 
     // B-jet: compare RECO and GEN information
@@ -961,14 +989,22 @@ namespace HPlus {
       eventClassCode += eOnlyBadBjet;
       increment(eventClass_AllBadBjet_SubCount);
     }
+    else increment(count_bMeasurementGood);
     if (metDeltaPt <= metDeltaPtLoCut || metDeltaPt >= metDeltaPtHiCut || TMath::Abs(metDeltaPhi) >= metDeltaPhiCut) {
       eventClassCode += eOnlyBadMET;
       increment(eventClass_AllBadMET_SubCount);
     }
+    else increment(count_neutrinoMETCorrespondenceGood);
     if (tauDeltaR >= tauDeltaRCut) {
       eventClassCode += eOnlyBadTau;
       increment(eventClass_AllBadTau_SubCount);
     }
+    else increment(count_tauMeasurementGood);
+
+    if (tauGenuine && bGenuine && tauAndBJetFromSameTopQuark(iEvent, *closestGenTau, *closestGenBquark) && bDeltaR < bDeltaRCut && 
+      metDeltaPt > metDeltaPtLoCut && metDeltaPt < metDeltaPtHiCut && TMath::Abs(metDeltaPhi) < metDeltaPhiCut && 
+      tauDeltaR < tauDeltaRCut) increment(count_pure);
+
     if (bPrintDebugOutput) std::cout << "FullHiggsMassCalculator:   eventClassCode = " << eventClassCode << std::endl;
     // Define and set the event classes. Informative histograms are filled and counters incremented for each class
     switch (eventClassCode) {

@@ -184,6 +184,8 @@ namespace HPlus {
     Count selectionTauNuAngleMinCorrect_SubCount;
     Count selectionTauNuDeltaEtaMaxCorrect_SubCount;
     Count selectionTauNuDeltaEtaMinCorrect_SubCount;
+
+    // Old event classification:
     // two main categories of events (pure or impure):
     Count eventClass_Pure_SubCount;
     Count eventClass_Impure_SubCount;
@@ -199,6 +201,16 @@ namespace HPlus {
     Count eventClass_AllBadTau_SubCount;
     Count eventClass_AllBadMET_SubCount;
     Count eventClass_AllBadBjet_SubCount;
+
+    // New event classification:
+    Count count_passedEvent;
+    Count count_pure;
+    Count count_tauGenuine;
+    Count count_bGenuine;
+    Count count_tauMeasurementGood;
+    Count count_bMeasurementGood;
+    Count count_tauAndBjetFromSameTopQuark;
+    Count count_neutrinoMETCorrespondenceGood;
 
     // Histograms 
     // The most important ones at the moment

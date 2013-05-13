@@ -157,11 +157,12 @@ namespace HPlus {
     Count fMuonVetoCounter;
     Count fMetCutBeforeJetCutCounter;
     Count fNJetsCounter;
+    Count fQCDTailKillerCollinearCounter;
     Count fMETTriggerScaleFactorCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
-    Count fQCDTailKillerCounter;
+    Count fQCDTailKillerBackToBackCounter;
     Count fDeltaPhiTauMETCounter;
     Count fDeltaPhiVSDeltaPhiMETJet1CutCounter;
     Count fDeltaPhiVSDeltaPhiMETJet2CutCounter;
@@ -361,7 +362,6 @@ namespace HPlus {
     WrappedTH1 *hFullMass;
     WrappedTH1 *hEWKFakeTausFullMass;
 
-
     WrappedTH1 *hDeltaPhiNoBtagging;
     WrappedTH1 *hDeltaPhi;
     WrappedTH1 *hEWKFakeTausDeltaPhi;
@@ -411,6 +411,17 @@ namespace HPlus {
     WrappedTH1* hCtrlNjetsAfterStandardSelections;
     WrappedTH1* hCtrlMET;
     WrappedTH1* hCtrlNbjets;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBack;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinear;
+
+    WrappedTH1* hCtrlQCDTailKillerJet1BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet2BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet3BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet4BackToBack;
+    WrappedTH1* hCtrlQCDTailKillerJet1Collinear;
+    WrappedTH1* hCtrlQCDTailKillerJet2Collinear;
+    WrappedTH1* hCtrlQCDTailKillerJet3Collinear;
+    WrappedTH1* hCtrlQCDTailKillerJet4Collinear;
     // Control plots for fakes
     WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPt;
     WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPt;
@@ -429,6 +440,8 @@ namespace HPlus {
     WrappedTH1* hCtrlEWKFakeTausNjetsAfterStandardSelections;
     WrappedTH1* hCtrlEWKFakeTausMET;
     WrappedTH1* hCtrlEWKFakeTausNbjets;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBack;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinear;
 
     WrappedTH2* hCtrlJetMatrixAfterJetSelection;
     WrappedTH2* hCtrlJetMatrixAfterMET;
