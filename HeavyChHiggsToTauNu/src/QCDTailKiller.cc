@@ -127,7 +127,7 @@ namespace HPlus {
         if (fCutX == 0)
           throw cms::Exception("LogicError") << "QCDTailKiller::CutItem by name '"+fName+"' cutX is zero in triangular cut!" << std::endl;
         // y(x) = y0/x0 * x + 180 - y0
-        myPassedStatus = y < fCutY/fCutX * x + 180.0 - fCutY;
+	myPassedStatus = y < fCutY/fCutX * x + 180.0 - fCutY;
       } else {
         if (fCutX == 0)
           throw cms::Exception("LogicError") << "QCDTailKiller::CutItem by name '"+fName+"' cutX is zero in triangular cut!" << std::endl;
