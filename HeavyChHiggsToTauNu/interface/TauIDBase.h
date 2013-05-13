@@ -63,6 +63,8 @@ namespace HPlus {
     /// Call at the end of event (after looping over all tau-jet candidates)
     void updatePassedCounters();
 
+    std::string getIsolationDiscriminator() const { return fIsolationDiscriminator; }
+
   protected:
     TFileDirectory fMyDir;
     

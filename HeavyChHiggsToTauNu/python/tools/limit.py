@@ -351,6 +351,100 @@ class BRLimits:
 
     #     return gr
 
+## Class for reading ML fit output from the JSON file produced by landsReadMLFit.py
+class MLFitData:
+    def __init__(self, directory="."):
+        resultfile="mlfit.json"
+
+        f = open(os.path.join(directory, resultfile))
+        self.data = json.load(f)
+        f.close()
+
+    def massPoints(self):
+        masses = self.data.keys()
+        masses.sort()
+        return masses
+
+    def fittedGraph(self, mass, backgroundOnly=False, signalPlusBackground=False):
+        if not backgroundOnly and not signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
+        if backgroundOnly and signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (both were)")
+        if signalPlusBackground:
+            backgroundOnly = False
+
+        labels = []
+        values = []
+        uncertainties = []
+        
+        if backgroundOnly:
+            content = self.data[mass]["background"]
+        else:
+            content = self.data[mass]["signal+background"]
+        labels = content["nuisanceParameters"][:]
+
+        for nuis in labels[:]:
+            if not nuis in content or content[nuis]["type"] == "shapeStat":
+                del labels[labels.index(nuis)]
+                continue
+            values.append(float(content[nuis]["fitted_value"]))
+            uncertainties.append(float(content[nuis]["fitted_uncertainty"]))
+
+        yvalues = range(1, len(values)+1)
+
+        yvalues.reverse()
+
+        gr = ROOT.TGraphErrors(len(values),
+                               array.array("d", values), array.array("d", yvalues),
+                               array.array("d", uncertainties))
+
+        return (gr, labels)
+
+    def fittedGraphShapeStat(self, mass, backgroundOnly=False, signalPlusBackground=False):
+        if not backgroundOnly and not signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
+        if backgroundOnly and signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (both were)")
+        if signalPlusBackground:
+            backgroundOnly = False
+
+        shapeStatNuisance = None
+        labels = []
+        values = []
+        uncertainties = []
+        
+        if backgroundOnly:
+            content = self.data[mass]["background"]
+        else:
+            content = self.data[mass]["signal+background"]
+
+        for nuis in content["nuisanceParameters"]:
+            if not nuis in content or content[nuis]["type"] != "shapeStat":
+                continue
+
+            shapeStatNuisance = nuis
+            labels = filter(lambda x: x != "type", content[nuis].keys())
+            labels.sort(key=lambda x: int(x))
+
+            for l in labels:
+                values.append(float(content[nuis][l]["fitted_value"]))
+                uncertainties.append(float(content[nuis][l]["fitted_uncertainty"]))
+
+            break
+
+        if shapeStatNuisance is None:
+            raise Exception("No shapeStat nuisance parameters found")
+
+
+        yvalues = range(1, len(values)+1)
+        yvalues.reverse()
+
+        gr = ROOT.TGraphErrors(len(values),
+                               array.array("d", values), array.array("d", yvalues),
+                               array.array("d", uncertainties))
+
+        return (gr, labels, shapeStatNuisance)
+
 
 ## Remove mass points lower than 100
 #
