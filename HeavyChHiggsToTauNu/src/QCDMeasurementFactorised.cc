@@ -724,6 +724,7 @@ namespace HPlus {
 
   QCDMeasurementFactorised::QCDFactorisedVariation::QCDFactorisedVariation(edm::Service< TFileService >& fs, QCDFactorisedHistogramHandler* histoHandler, EventCounter& eventCounter, CommonPlots& commonPlots, QCDFactorisedVariationType methodType, std::string prefix)
   : fMethodType(methodType),
+    fAfterNjetsCounter(eventCounter.addSubCounter(prefix,"After Njets")),
     fAfterStandardSelectionsCounter(eventCounter.addSubCounter(prefix,"After std. selections")),
     fAfterLeg1Counter(eventCounter.addSubCounter(prefix,"After leg1 selections")),
     fAfterLeg2Counter(eventCounter.addSubCounter(prefix,"After leg2 selections")),
@@ -799,6 +800,7 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doTraditionalSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // Traditional method
+    increment(fAfterNjetsCounter);
 
     // Apply collinear cut
     for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
@@ -870,6 +872,7 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // ABCD method with MET and tau isolation as variables
+    increment(fAfterNjetsCounter);
 
     // Apply collinear cut
     for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
@@ -949,6 +952,7 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doDoubleABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // ABCD method inside MET leg (for double ABCD)
+    increment(fAfterNjetsCounter);
 
     // Apply collinear cut
     for (int i = 0; i < 4; ++i) {
