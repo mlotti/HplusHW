@@ -767,7 +767,7 @@ namespace HPlus {
       sTitle << "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{" << i << "},MET))^{2}}, ^{o};N_{events}";
       fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerCollinear[i], sName.str(), sTitle.str(), 52, 0., 260.);
     }
-    fHistoHandler->createShapeHistogram(myDir, hCtrlMET, "CtrlMET", "E_{T}^{miss}, GeV", 100, 3, 500.);
+    fHistoHandler->createShapeHistogram(myDir, hCtrlMET, "CtrlMET", "E_{T}^{miss}, GeV", 100, 0, 500.);
     fHistoHandler->createShapeHistogram(myDir, hCtrlNbjets, "CtrlNbjets", "N_{b jets}", 20, 0, 20.);
     for (int i = 0; i < 4; ++i) {
       hCtrlQCDTailKillerBackToBack.push_back(0);
