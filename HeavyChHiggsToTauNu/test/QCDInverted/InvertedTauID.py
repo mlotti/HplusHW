@@ -1347,6 +1347,7 @@ class InvertedTauID:
 
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
+        theFit.SetLineColor(4)
         theFit.Draw("same")
 
 	par = theFit.GetParameters()
@@ -1357,9 +1358,11 @@ class InvertedTauID:
 	qcdOnly.SetLineStyle(2)
 	qcdOnly.Draw("same")
 
-        histograms.addText(0.35,0.8,"Data, Baseline TauID")
-        histograms.addText(0.4,0.3,"QCD",15)
-
+        histograms.addText(0.35,0.8,"Data, Baseline selection")
+        histograms.addText(0.25,0.3,"QCD shape",20)
+        histograms.addText(0.25,0.25,"from Inverted selection",20)
+        histo.GetYaxis().SetTitle("Events / 10 GeV")
+        histo.GetXaxis().SetTitle("MET  (GeV)")
 
         plot.histoMgr.appendHisto(histograms.Histo(qcdOnly,"qcdOnly"))
         

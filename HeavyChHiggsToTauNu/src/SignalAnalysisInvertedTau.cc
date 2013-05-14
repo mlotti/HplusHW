@@ -765,20 +765,6 @@ namespace HPlus {
     }
     increment(fBaselineQCDTailKillerCollinearCounter);
 
-
-
-
-    
-
-    if(btagData.passedEvent()) {
-      //      hMTBaselineTauIdNoMetBtag->Fill(selectedTau->pt() ,transverseMass );
-    }
-    
-    if( btagData.getSelectedJets().size() < 1 ) {
-      hMTBaselineTauIdNoMetBveto->Fill(selectedTau->pt() ,transverseMass );
-    }
-
-
    
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
 
