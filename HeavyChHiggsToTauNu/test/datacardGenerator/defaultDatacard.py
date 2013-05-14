@@ -1,5 +1,6 @@
 DataCardName    = 'Default'
-Path            = '/home/wendland/data/v445/met50_2013-05-08'
+Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeIsolationDependent'
+Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
@@ -23,8 +24,9 @@ OptionMassShape = "TransverseMass"
 OptionReplaceEmbeddingByMC = True
 OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = not False
+OptionDoControlPlots = True
 OptionQCDfactorisedFactorisationSchema = "TauPt" # options: 'full', 'taupt' (recommended), 'taueta, 'nvtx'
+OptionDoQCDClosureTests = not False
 
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
@@ -87,12 +89,12 @@ QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusCollinearTailKiller"
 #QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusTailKiller"
 #QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30PlusTailKiller"
 
-QCDFactorisedValidationMETShapeHistogramsDimensions = {  "bins": 100,
+QCDFactorisedValidationMETShapeHistogramsDimensions = {  "bins": 9,
                                                          "rangeMin": 0.0,
                                                          "rangeMax": 500.0,
                                                          #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                                                         #"variableBinSizeLowEdges": [0,10,20,30,40,50,60], # if an empty list is given, then uniform bin width is used
-                                                         "variableBinSizeLowEdges": [],
+                                                         "variableBinSizeLowEdges": [0,20,40,60,80,100,150,200,300],
+                                                         #"variableBinSizeLowEdges": [],
                                                          "xtitle": "E_{T}^{miss}, GeV/c^{2}",
                                                          "ytitle": "Events"}
 QCDFactorisedValidationMtShapeHistogramsDimensions = { "bins": 10,
@@ -976,37 +978,37 @@ ControlPlots.append(ControlPlotInput(
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
-if False: # FIXME
-    ControlPlots.append(ControlPlotInput(
-        title            = "MET",
-        signalHHid       = [-1],
-        signalHWid       = [0],
-        QCDid            = [3],
-        embeddingId      = EmbeddingIdList,
-        EWKfakeId        = EWKFakeIdList,
-        signalHistoPath  = "ControlPlots",
-        signalHistoName  = "MET",
-        EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
-        EWKfakeHistoName  = "MET",
-        QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlNjets",
-        QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlMET",
-        details          = { "bins": 13,
-                             "rangeMin": 0.0,
-                             "rangeMax": 500.0,
-                             #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                             "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                             "binLabels": [], # leave empty to disable bin labels
-                             "xtitle": "E_{T}^{miss}",
-                             "ytitle": "Events",
-                             "unit": "GeV",
-                             "logy": True,
-                             "DeltaRatio": 0.5,
-                             "ymin": 0.9,
-                             "ymax": -1},
-        blindedRange     = [], # specify range min,max if blinding applies to this control plot
-        evaluationRange  = [], # specify range to be evaluated and saved into a file
-        flowPlotCaption  = "#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
-    ))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "MET",
+    signalHHid       = [-1],
+    signalHWid       = [0],
+    QCDid            = [3],
+    embeddingId      = EmbeddingIdList,
+    EWKfakeId        = EWKFakeIdList,
+    signalHistoPath  = "ControlPlots",
+    signalHistoName  = "MET",
+    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+    EWKfakeHistoName  = "MET",
+    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlNjets",
+    QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlMET",
+    details          = { "bins": 13,
+                         "rangeMin": 0.0,
+                         "rangeMax": 500.0,
+                         #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                         "binLabels": [], # leave empty to disable bin labels
+                         "xtitle": "E_{T}^{miss}",
+                         "ytitle": "Events",
+                         "unit": "GeV",
+                         "logy": True,
+                         "DeltaRatio": 0.5,
+                         "ymin": 0.9,
+                         "ymax": -1},
+    blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [], # specify range to be evaluated and saved into a file
+    flowPlotCaption  = "#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
+))
 
 ControlPlots.append(ControlPlotInput(
     title            = "BJetSelection",

@@ -176,7 +176,7 @@ class QCDEventCount:
                  luminosity):
         self._histoname = histoName
         # Obtain histograms
-        print "QCDfact: Obtaining factorisation histogram: %s"%histoName
+        #print "QCDfact: Obtaining factorisation histogram: %s"%histoName
         try:
             datasetRootHistoData = dsetMgr.getDataset(dsetMgrDataColumn).getDatasetRootHisto(histoName)
         except Exception, e:
@@ -191,7 +191,6 @@ class QCDEventCount:
         self._reader = UnfoldedHistogramReader(debugStatus=False)
         self._reader._initialize(self._hData)
         self._messages = []
-        self._warnedAboutSystematics = False
         # Find tau pT bin index (needed for systematics)
         self._tauPtAxisIndex = None
         for i in range(0, len(self._reader.getBinLabelList())):
@@ -235,9 +234,6 @@ class QCDEventCount:
         return self._reader
 
     def getEWKMCRelativeSystematicUncertainty(self,tauPtBinIndex):
-        if not self._warnedAboutSystematics:
-            print WarningLabel()+"QCD factorised: check/update hard coded values in QCDEventCount::getEWKMCRelativeSystematicUncertainty()"
-            self._warnedAboutSystematics = True
         myTauTrgUncertainty = 0.0
         if tauPtBinIndex == 0:
             myTauTrgUncertainty = 0.061 / 0.92
@@ -1250,6 +1246,7 @@ class QCDfactorisedColumn(DatacardColumn):
         if dsetMgr == None:
             raise Exception(ErrorLabel()+"You called data mining for QCD factorised, but it's multicrab directory is not there. Such undertaking is currently not supported.")
         print "... Calculating NQCD value ..."
+        print WarningLabel()+"QCD factorised: check/update hard coded values in QCDEventCount::getEWKMCRelativeSystematicUncertainty()"
         # Calculate correction for MET shape
         #self._calculateMETCorrectionFactors(dsetMgr, luminosity)
         # Make event count objects
@@ -1323,17 +1320,21 @@ class QCDfactorisedColumn(DatacardColumn):
         self._messages.extend(myMETLegEventCount.getMessages())
         self._messages.extend(myTauLegEventCount.getMessages())
         # Make closure test histograms for MET
-        print "... Producing closure test histograms"
-        if False: # FIXME
+        if config.OptionDoQCDClosureTests == None:
+            raise Exception(ErrorLabel()+"You are missing from the input config file the field OptionDoQCDClosureTests = True/False!")
+        if config.OptionDoQCDClosureTests:
+            print "... Producing closure test histograms"
             for METshape in self._factorisedConfig["closureMETShapeSource"]:
                 self._createClosureHistogram(dsetMgr,luminosity,myQCDCalculator,histoSpecs=self._factorisedConfig["closureMETShapeDetails"],histoName=METshape)
                 for i in range(0, len(myQCDCalculator.getContractedResultsList())):
                     self._createContractedClosureHistogram(i,dsetMgr,luminosity,myQCDCalculator,histoSpecs=self._factorisedConfig["closureMETShapeDetails"],histoName=METshape)
-        # Make closure test histograms for mT
-        for mTshape in self._factorisedConfig["closureShapeSource"]:
-            self._createClosureHistogram(dsetMgr,luminosity,myQCDCalculator,histoSpecs=self._factorisedConfig["closureShapeDetails"],histoName=mTshape)
-            for i in range(0, len(myQCDCalculator.getContractedResultsList())):
-                self._createContractedClosureHistogram(i,dsetMgr,luminosity,myQCDCalculator,histoSpecs=self._factorisedConfig["closureShapeDetails"],histoName=mTshape)
+            # Make closure test histograms for mT
+            for mTshape in self._factorisedConfig["closureShapeSource"]:
+                self._createClosureHistogram(dsetMgr,luminosity,myQCDCalculator,histoSpecs=self._factorisedConfig["closureShapeDetails"],histoName=mTshape)
+                for i in range(0, len(myQCDCalculator.getContractedResultsList())):
+                    self._createContractedClosureHistogram(i,dsetMgr,luminosity,myQCDCalculator,histoSpecs=self._factorisedConfig["closureShapeDetails"],histoName=mTshape)
+        else:
+            print "... Skipping production of closure test histograms to save time. To enable, set OptionDoQCDClosureTests=True in the config."
         # Construct results for nuisances
         print "... Constructing result ..."
         for nid in self._nuisanceIds:
