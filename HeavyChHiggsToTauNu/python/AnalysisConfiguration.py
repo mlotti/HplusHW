@@ -664,16 +664,14 @@ class ConfigBuilder:
             mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
                 QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
                 QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
-                QCDTailKillerBin("noCut", 40.0, 40.0), # jet 3
+                QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
-
             mod.QCDTailKiller.collinear = cms.untracked.VPSet(
                 QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
                 QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
                 QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
-
             )
             mod.QCDTailKiller.maxJetsToConsider = 4
             createQCDTailKillerModule(process, "QCDTailKillerLoosePlus", mod, names, modules)
@@ -682,30 +680,29 @@ class ConfigBuilder:
             mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
                 QCDTailKillerBin("circular", 60.0, 60.0), # jet 1
                 QCDTailKillerBin("circular", 60.0, 60.0), # jet 2
-                QCDTailKillerBin("noCut", 60.0, 60.0), # jet 3
+                QCDTailKillerBin("circular", 60.0, 60.0), # jet 3
                 QCDTailKillerBin("noCut", 60.0, 60.0), # jet 4
             )
             mod.QCDTailKiller.collinear = cms.untracked.VPSet(
                 QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
                 QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-                QCDTailKillerBin("noCut", 40.0, 40.0), # jet 3
+                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
             mod.QCDTailKiller.maxJetsToConsider = 4
             createQCDTailKillerModule(process, "QCDTailKillerMediumPlus", mod, names, modules)
-
             # Tight plus scenario
             mod = module.clone()
             mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
                 QCDTailKillerBin("circular", 80.0, 80.0), # jet 1
                 QCDTailKillerBin("circular", 80.0, 80.0), # jet 2
-                QCDTailKillerBin("noCut", 80.0, 80.0), # jet 3
+                QCDTailKillerBin("circular", 80.0, 80.0), # jet 3
                 QCDTailKillerBin("noCut", 80.0, 80.0), # jet 4
             )
             mod.QCDTailKiller.collinear = cms.untracked.VPSet(
                 QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
                 QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-                QCDTailKillerBin("noCut", 40.0, 40.0), # jet 3
+                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
                 QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
             )
             mod.QCDTailKiller.maxJetsToConsider = 4

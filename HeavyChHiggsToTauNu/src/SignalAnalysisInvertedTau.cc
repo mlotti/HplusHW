@@ -755,18 +755,21 @@ namespace HPlus {
 
     //------ Improved delta phi cut, a.k.a. QCD tail killer - collinear part                                                                                                          
     // METSelection::Data metDataForCollinearCut = fMETSelection.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getAllJets());
-    const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
-    for (int i = 0; i < qcdTailKillerDataCollinear.getNConsideredJets(); ++i) {
+    //    const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+
+    for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
       if (i < 4) { // protection                                                                                                                                                  
-        hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromCollinearCorner(i)); // Make control plot before cut                                         
+        hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(i)); // Make control plot before cut                                         
         
-        if (!qcdTailKillerDataCollinear.passCollinearCutForJet(i)) return false;
+        if (!qcdTailKillerData.passCollinearCutForJet(i)) return false;
       }
     }
     increment(fBaselineQCDTailKillerCollinearCounter);
 
    
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    //    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
 
 
                                 
@@ -795,9 +798,9 @@ namespace HPlus {
       if (qcdTailKillerData.passedEvent()) {
 	hMTBaselineTauIdNoMetBvetoTailKiller->Fill(selectedTau->pt() ,transverseMass );   
       }
-      if (qcdTailKillerDataCollinear.passedEvent()) {
-	hMETBaselineTauIdBvetoCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
-      }  
+      //      if (qcdTailKillerDataCollinear.passedEvent()) {
+      hMETBaselineTauIdBvetoCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
+	//      }  
       
     }
     
@@ -884,7 +887,7 @@ namespace HPlus {
     //    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());	
     //const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
      
-    /*
+    
     int ijet = 0;
     double deltaPhiMetJet1 = -999;
     double deltaPhiMetJet2 = -999;
@@ -901,7 +904,7 @@ namespace HPlus {
       if (ijet == 4) deltaPhiMetJet4 = jetDeltaPhi;
     }
     
-
+    /*
 
     if(jetData.passedEvent()) {
       
@@ -1015,143 +1018,145 @@ namespace HPlus {
     }
     //------ Improved delta phi cut, a.k.a. QCD tail killer - collinear part                                                                                                                                                                                                                                                                                         
     // METSelection::Data metDataForCollinearCut = fMETSelection.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getAllJets());
-    const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
-    for (int i = 0; i < qcdTailKillerDataCollinear.getNConsideredJets(); ++i) {
+    //    const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
       if (i < 4) { // protection                                                                                                                                                      
-	hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromCollinearCorner(i)); // Make control plot before cut                                             
+	hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(i)); // Make control plot before cut                                             
 	
-	if (!qcdTailKillerDataCollinear.passCollinearCutForJet(i)) return false;
+	if (!qcdTailKillerData.passCollinearCutForJet(i)) return false;
       }
     }
     increment(fQCDTailKillerCollinearCounter);
-
-
-
-
-      //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part                                                                                                          
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
-     
-
-
- /*
-    if(fProduce) {
+    
+    
+    
+    
+    //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part                                                                                                          
+    //    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    
+    
+    
+    /*
+      if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveJets(new std::vector<pat::Jet>());
       copyPtrToVector(jetData.getSelectedJets(), *saveJets);
       iEvent.put(saveJets, "selectedJets");
-    }
+      }
     */   
     if (!iEvent.isRealData()) {
       fBTagging.fillScaleFactorHistograms(btagData); //    Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
       fEventWeight.multiplyWeight(btagData.getScaleFactor());
     }   
     increment(fBTaggingScaleFactorInvertedCounter);
-
-
+    
+    
     // inverted MET before b tagging and MT before b tagging and Met
     //hMETInvertedTauIdJets->Fill(selectedTau->pt(), metData.getSelectedMET()->et());
     hMTInvertedTauIdJet->Fill(selectedTau->pt(), transverseMass); 
     if (qcdTailKillerData.passedEvent()) {       
       hMTInvertedTauIdJetTailKiller->Fill(selectedTau->pt(), transverseMass); 
     }
-   
+    
     
     hMETInvertedTauIdJetsCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
     
-															      
+    
     // MT with b tagging
     if(btagData.passedEvent()) {
-    
+      
       hMTInvertedTauIdBtagNoMetCut->Fill(selectedTau->pt(), transverseMass); 
       increment(fBTaggingBeforeMETCounter);
-
+      
     }
     // MT with b veto 
     if( btagData.getSelectedJets().size() < 1) {
       increment(fBjetVetoCounter);
-    
+      
       hMTInvertedTauIdBvetoNoMetCut->Fill(selectedTau->pt(), transverseMass);
       if (qcdTailKillerData.passedEvent()) {   	
 	hMTInvertedTauIdBvetoNoMetCutTailKiller->Fill(selectedTau->pt(), transverseMass);
       }	
-    
+      
       hMETInvertedTauIdBvetoCollinear->Fill(selectedTau->pt(), metData.getSelectedMET()->et()); 
       
     }
-  
- 
+    
+    
     //    if(metData.passedEvent()) hDeltaPhiAfterJets->Fill(deltaPhi);   
-     
-
+    
+    
     // MET cut
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     size_t nVertices = pvData.getNumberOfAllVertices();
     fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);
-
+    
     //hSelectionFlow->Fill(kQCDOrderMET);
     hSelectedTauEtMetCut->Fill(selectedTau->pt());
     hSelectedTauEtaMetCut->Fill(selectedTau->eta());
     hSelectedTauPhiMetCut->Fill(selectedTau->phi());  
-   
+    
     /*    
-    if(jetData.passedEvent()) {
-      
-      hDeltaPhiVsDeltaPhiJet1MetCut->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
-      hDeltaPhiVsDeltaPhiJet2MetCut->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));    
-      hDeltaPhiJet1MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
-      hDeltaPhiJet2MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));
-      hDeltaPhiJet3MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(2));    
-      hDeltaPhiJet4MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(3));    
-         
-    }
+	  if(jetData.passedEvent()) {
+	  
+	  hDeltaPhiVsDeltaPhiJet1MetCut->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+	  hDeltaPhiVsDeltaPhiJet2MetCut->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));    
+	  hDeltaPhiJet1MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
+	  hDeltaPhiJet2MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));
+	  hDeltaPhiJet3MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(2));    
+	  hDeltaPhiJet4MetCut->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(3));    
+	  
+	  }
     */
-  
-  // Nbjets for inverted tau before b tagging
-
+    
+    // Nbjets for inverted tau before b tagging
+    
     hNBInvertedTauIdJet->Fill(selectedTau->pt(), btagData.getSelectedJets().size()); 
- 
-
-   // mt for inverted tau before b tagging
+    
+    
+    // mt for inverted tau before b tagging
     hMTInvertedTauIdNoBtagging->Fill(selectedTau->pt(), transverseMass); 
-
-   // deltaPhi before b tagging  
+    
+    // deltaPhi before b tagging  
     hDeltaPhiInvertedNoB->Fill(selectedTau->pt(),deltaPhi);  
-
+    
     if (qcdTailKillerData.passedEvent()) {       
       // mt  before b tagging with deltaPhi for factorising b tagging 
       hMTInvertedNoBtaggingTailKiller->Fill(selectedTau->pt(), transverseMass);       
       hNBInvertedTauIdJetDphi->Fill(selectedTau->pt(), btagData.getSelectedJets().size()); 
     }
-
-
-  // mt  with b veto
+    
+    
+    // mt  with b veto
     if( btagData.getSelectedJets().size() < 1) { 
       increment(fBvetoCounter); 
-  
+      
       hMTInvertedTauIdBveto->Fill(selectedTau->pt(), transverseMass);
       hSelectedTauEtBjetVeto->Fill(selectedTau->pt());
-
-  // mt  with b veto and deltaPhi
+      
+      // mt  with b veto and deltaPhi
       if (qcdTailKillerData.passedEvent()) {         
-      //    if ( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut  ) {
+	//    if ( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut  ) {
 	increment(fBvetoDeltaPhiCounter); 
 	hMTInvertedTauIdBvetoDphi->Fill(selectedTau->pt(),transverseMass);
         hSelectedTauEtBjetVetoPhiCuts->Fill(selectedTau->pt());
 	
       }
     }
-     
+    
     // b tagging cut
     //    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderBTagSelection, tauData, btagData.passedEvent(),btagData.getMaxDiscriminatorValue());
     if(!btagData.passedEvent()) return false;
     // Apply scale factor as weight to event 
     increment(fBTaggingCounter);		
     //hSelectionFlow->Fill(kQCDOrderBTag);
-
+    
     hSelectedTauEtBtagging->Fill(selectedTau->pt());
-
+    
     /*
-    if(jetData.passedEvent()) {
+      if(jetData.passedEvent()) {
       
       hDeltaPhiVsDeltaPhiJet1Btagging->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(0));    
       hDeltaPhiVsDeltaPhiJet2Btagging->Fill( selectedTau->pt(),qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));    
@@ -1159,50 +1164,66 @@ namespace HPlus {
       hDeltaPhiJet2Btagging->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(1));
       hDeltaPhiJet3Btagging->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(2));    
       hDeltaPhiJet4Btagging->Fill(qcdTailKillerData.getDeltaPhiTauMET(),qcdTailKillerData.getDeltaPhiJetMET(3));  
-           
-    }
+      
+      }
     */
-
+    
     /*
-    if(fProduce) {
+      if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveBJets(new std::vector<pat::Jet>());
       copyPtrToVector(btagData.getSelectedJets(), *saveBJets);
       iEvent.put(saveBJets, "selectedBJets");
-    }
+      }
     */
-
-   // mt for inverted tau with b tagging
-
-
-
-   
+    
+    // mt for inverted tau with b tagging
+    
+    
+    
+    
     hMTInvertedTauIdBtag->Fill(selectedTau->pt(), transverseMass);
-   // deltaPhi with b tagging
+    // deltaPhi with b tagging
     hDeltaPhiInverted->Fill(selectedTau->pt(),deltaPhi);  
     hTransverseMassVsDphi->Fill(transverseMass,deltaPhi);
-
+    
     // mT with deltaPhi(tau,met)
     if (deltaPhi < fDeltaPhiCutValue) {
       hMTInvertedTauIdJetDphi->Fill(selectedTau->pt(),transverseMass);        
       increment(fDeltaPhiTauMETCounter);  
     }
-
+    
     // tail killer cuts
     //if (!qcdTailKillerData.passedEvent()) return false;
     
     //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part                                                                                                        
-    // const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET(	\
-));
-    for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
+    // const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET( ));
+    /*
+      for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
       if (i < 4) { // protection                                                                                                                                                  
-        hCtrlQCDTailKillerBackToBack[i]->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(i)); // Make control plot before cut                                                
-   
-        if (!qcdTailKillerData.passBackToBackCutForJet(i)) return false;
+      hCtrlQCDTailKillerBackToBack[i]->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(i)); // Make control plot before cut                                                
+      
+      if (!qcdTailKillerData.passBackToBackCutForJet(i)) return false;
       }
-    }
+      }
+    */
+    
+    if (!qcdTailKillerData.passedEvent()) return false;	
+    
     increment(fQCDTailKillerBackToBackCounter);
-
-    increment(fQCDTailKillerCounter);
+    
+    
+    // cut values for circular deltaPhi cuts
+    double radius = 80;
+    double Rcut = 0;
+    if ( deltaPhi > (180-radius)) Rcut = sqrt(radius*radius - (180-deltaPhi)*(180-deltaPhi));
+    //    std::cout << " Rcut " <<  Rcut  << " deltaPhi " <<  deltaPhi  << std::endl;
+    
+    
+    if (deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut ) increment(fQCDTailKillerCounter);	
+    
+    
+    
+    //    increment(fQCDTailKillerCounter);
 
 
     
