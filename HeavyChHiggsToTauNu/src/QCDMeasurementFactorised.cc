@@ -801,6 +801,7 @@ namespace HPlus {
   void QCDMeasurementFactorised::QCDFactorisedVariation::doTraditionalSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // Traditional method
     increment(fAfterNjetsCounter);
+    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
 
     // Apply collinear cut
     for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
@@ -818,7 +819,6 @@ namespace HPlus {
     fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
     fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
     fHistoHandler->fillShapeHistogram(hCtrlRtau, tauSelection.getRtauOfTauObject(selectedTau));
-    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
 
     // Leg 2 (tau ID)
     bool myLeg2PassedStatus = tauSelection.getPassesIsolationStatusOfTauObject(selectedTau) &&
@@ -873,6 +873,7 @@ namespace HPlus {
   void QCDMeasurementFactorised::QCDFactorisedVariation::doABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // ABCD method with MET and tau isolation as variables
     increment(fAfterNjetsCounter);
+    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
 
     // Apply collinear cut
     for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
@@ -890,7 +891,7 @@ namespace HPlus {
     double myMetValue = metData.getSelectedMET()->et();
 
     fHistoHandler->fillShapeHistogram(hCtrlRtau, tauSelection.getRtauOfTauObject(selectedTau));
-    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
+
     // For cell A, negate the selections
     if (!myLeg1PassedStatus && !myLeg2PassedStatus) {
       increment(fAfterStandardSelectionsCounter);
