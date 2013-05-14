@@ -1699,6 +1699,7 @@ class PlotDrawer:
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
     # \param rebin               Default rebin value (passed to Th1::Rebin; if list, passed as double array)
     # \param rebinToWidthX       Default width of X bins to rebin to
+    # \param divideByBinWidth    Divide bin contents by bin width? (done after rebinning)
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \param customizeBeforeDraw Function to customize the plot before drawing it
     # \param customizeBeforeSave Function to customize the plot before saving it
@@ -1718,6 +1719,7 @@ class PlotDrawer:
                  opts2={},
                  rebin=None,
                  rebinToWidthX=None,
+                 divideByBinWidth=False,
                  customizeBeforeFrame=None,
                  customizeBeforeDraw=None,
                  customizeBeforeSave=None,
@@ -1740,6 +1742,7 @@ class PlotDrawer:
         self.opts2Default.update(opts2)
         self.rebinDefault = rebin
         self.rebinToWidthXDefault = rebinToWidthX
+        self.divideByBinWidthDefault = divideByBinWidth
         self.customizeBeforeFrameDefault = customizeBeforeFrame
         self.customizeBeforeDrawDefault = customizeBeforeDraw
         self.customizeBeforeSaveDefault = customizeBeforeSave
@@ -1787,6 +1790,7 @@ class PlotDrawer:
     #                      the plot. If list, pass it as a double array to
     #                      TH1::Rebin()
     # \li\a rebinToWidthX  If given, rebin all histograms to this width of X bins.
+    # \li\a divideByBinWidth Divide bin contents by bin width? (done after rebinning)
     #
     # \b Note: Only one of the arguments above can be given.
     #
@@ -1848,6 +1852,10 @@ class PlotDrawer:
 
         if rebinFunction is not None:
             p.histoMgr.forEachHisto(rebinFunction)
+
+        if kwargs.get("divideByBinWidth", self.divideByBinWidthDefault):
+            # TH1::Scale() with "width" option divides the histogram by bin width
+            p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Scale(1, "width"))
 
     ## Stack MC histograms
     #
