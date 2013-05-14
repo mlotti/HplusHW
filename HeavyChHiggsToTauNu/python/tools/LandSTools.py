@@ -440,6 +440,8 @@ class MultiCrabLandS:
         print "############################################################"
         print
 
+        self.jobsCreated = True
+
     def printInstruction(self):
         if self.jobsCreated:
             print "Multicrab cfg and jobs created. Type"
