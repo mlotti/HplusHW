@@ -440,6 +440,8 @@ class MultiCrabLandS:
         print "############################################################"
         print
 
+        self.jobsCreated = True
+
     def printInstruction(self):
         if self.jobsCreated:
             print "Multicrab cfg and jobs created. Type"
@@ -1292,13 +1294,15 @@ class ResultContainer:
     #
     # \param filename  Name of the datacard file inside the multicrab directory
     def _readLuminosityTaujets(self, filename):
-        lumi_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
+        lumi_re = re.compile("luminosity=\s*(?P<lumi>\d+\.\d+)")
         fname = os.path.join(self.path, filename)
         f = open(fname)
         for line in f:
             match = lumi_re.search(line)
             if match:
-                self.lumi = str(1000*float(match.group("lumi"))) # 1/fb -> 1/pb
+                #self.lumi = str(1000*float(match.group("lumi"))) # 1/fb -> 1/pb
+                # Nowadays the luminosity is in 1/pb
+                self.lumi = match.group("lumi")
                 f.close()
                 return
         raise Exception("Did not find luminosity information from '%s'" % fname)
