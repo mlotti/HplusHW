@@ -123,6 +123,7 @@ namespace HPlus {
 
     private:
       QCDFactorisedVariationType fMethodType;
+      Count fAfterNjetsCounter;
       Count fAfterStandardSelectionsCounter;
       Count fAfterLeg1Counter;
       Count fAfterLeg2Counter;
