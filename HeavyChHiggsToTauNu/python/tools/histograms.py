@@ -2022,3 +2022,15 @@ class HistoManager:
     # histograms.HistoManagerImpl object for the implementation
     ## \var luminosity
     # Total integrated luminosity ofthe managed collision data (None if not set)
+
+
+def addSysError(histogram,syserror):
+    # error in decimals
+    for i in range(1,histogram.GetNbinsX()+1):
+        error  = histogram.GetBinError(i)
+        value  = histogram.GetBinContent(i)
+        syserr = value*syserror    
+
+        newError = math.sqrt(error*error + syserr*syserr)
+        histogram.SetBinError(i,newError)
+    return histogram
