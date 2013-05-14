@@ -522,7 +522,7 @@ namespace HPlus {
 //------ Standard selections are done, fill tree and quit if user asked for it
     if (fTree.isActive()) {
       doTreeFilling(iEvent, iSetup, pvData, mySelectedTau, electronData, muonData, jetData, metData);
-      return true;
+      //return true;
     }
 
 
@@ -601,12 +601,12 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronData, const MuonSelection::Data& muonData, const JetSelection::Data& jetData, const METSelection::Data& metData) {
     // Obtain btagging data
-    const BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    const BTagging::Data btagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     // Obtain QCD tail killer
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
     // const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET()); //testing
     // Obtain alphaT
-    const EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(selectedTau), jetData.getSelectedJetsIncludingTau());
+    const EvtTopology::Data evtTopologyData = fEvtTopology.silentAnalyze(iEvent, iSetup, *(selectedTau), jetData.getSelectedJetsIncludingTau());
 
     // FIXME: Add filling of tree for QCD tail killer
     // FIXME: Add filling of weights (wjets ...)
@@ -630,10 +630,10 @@ namespace HPlus {
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
     // Top reconstruction in different versions
     if (selectedTau.isNonnull() && btagData.passedEvent()) {
-      //const TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-      //const BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
-      const TopChiSelection::Data topChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-      //const TopWithBSelection::Data topWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), bjetSelectionData.getBjetTopSide());
+      //const TopSelection::Data topSelectionData = fTopSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+      //const BjetSelection::Data bjetSelectionData = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+      const TopChiSelection::Data topChiSelectionData = fTopChiSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+      //const TopWithBSelection::Data topWithBSelectionData = fTopWithBSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), bjetSelectionData.getBjetTopSide());
       fTree.setTop(topChiSelectionData.getTopP4());
     }
     // Sphericity, Aplanarity, Planarity, alphaT
@@ -658,7 +658,7 @@ namespace HPlus {
     fTree.setNonIsoLeptons(muonData.getNonIsolatedMuons(), electronData.getNonIsolatedElectrons());
     if (selectedTau.isNonnull() && btagData.passedEvent()) {
       // FullH+ mass
-      FullHiggsMassCalculator::Data FullHiggsMassDataTmp = fFullHiggsMassCalculator.analyze(iEvent, iSetup, selectedTau, btagData, metData);
+      FullHiggsMassCalculator::Data FullHiggsMassDataTmp = fFullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, selectedTau, btagData, metData);
       fTree.setHplusMassDiscriminant(FullHiggsMassDataTmp.getDiscriminant());
       fTree.setHplusMassHiggsMass(FullHiggsMassDataTmp.getHiggsMass());
       fTree.setHplusMassTopMass(FullHiggsMassDataTmp.getTopMass());
