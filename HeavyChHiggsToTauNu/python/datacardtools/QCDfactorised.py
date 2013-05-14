@@ -1353,10 +1353,10 @@ class QCDfactorisedColumn(DatacardColumn):
                     myHistograms = []
                     if e.getQCDmode() == "shapestat":
                         # Clone rate histogram as up and down histograms
-                        myHistograms.append(myRateHistograms[0].Clone(self._label+"_%dDown"%int(e.getMasterId())))
-                        myHistograms[0].SetTitle(self._label+"_%dDown"%int(e.getMasterId()))
-                        myHistograms.append(myRateHistograms[0].Clone(self._label+"_%dUp"%int(e.getMasterId())))
-                        myHistograms[1].SetTitle(self._label+"_%dUp"%int(e.getMasterId()))
+                        myHistograms.append(myRateHistograms[0].Clone(self._label+"_%sDown"%(e.getMasterId())))
+                        myHistograms[0].SetTitle(self._label+"_%sDown"%(e.getMasterId()))
+                        myHistograms.append(myRateHistograms[0].Clone(self._label+"_%sUp"%(e.getMasterId())))
+                        myHistograms[1].SetTitle(self._label+"_%sUp"%(e.getMasterId()))
                         # Substract/Add one sigma to get Down/Up variation
                         for k in range(1, myHistograms[0].GetNbinsX()+1):
                             myHistograms[0].SetBinContent(k, myHistograms[0].GetBinContent(k) - myHistograms[0].GetBinError(k))
