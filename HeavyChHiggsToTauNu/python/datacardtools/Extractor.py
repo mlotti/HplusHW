@@ -457,7 +457,7 @@ class ShapeExtractor(ExtractorBase):
                 # Shape variation nuisance needs to have exactly two entries (down, up)
                 if len(self._histoDirs) != 2:
                     raise Exception(ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"' (shapeQ):"+NormalStyle()+" need to specify exactly two entries (down and up) in both histoDirs and histograms!")
-            elif self._distribution == "shapeStat":
+            elif self._distribution == "shapeStat": # bin-by-bin
                 # Shape variation nuisance needs to have exactly one entry
                 if len(self._histoDirs) != 1:
                     raise Exception(ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"' (shapeStat):"+NormalStyle()+" need to specify exactly one entry in both histoDirs and histograms!")
@@ -605,7 +605,7 @@ class ControlPlotExtractor(ExtractorBase):
         myShapeModifier = ShapeHistoModifier(self._histoSpecs)
         h = myShapeModifier.createEmptyShapeHistogram(myLabel)
         for i in range (0, len(self._histoDirs)):
-            print "Extractor ",self._histoDirs[i],self._histoNames[i]
+            #print "Extractor ",self._histoDirs[i],self._histoNames[i]
             # Obtain histogram from dataset
             myHistoname = self._histoDirs[i]+"/"+self._histoNames[i]
             if self._histoDirs[i] == "":

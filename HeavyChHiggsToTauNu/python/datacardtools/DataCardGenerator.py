@@ -156,7 +156,7 @@ class DatasetMgrCreatorManager:
                         myMatchedDatasetNames.append(dset)
                     myFoundStatus = True
             if not myFoundStatus and len(myAllDatasetNames) > 0:
-                print ErrorLabel()+" Dataset group '%s': cannot find datasetDefinition '%s'!"%(label,dset)
+                print ErrorLabel()+" Dataset group '%s': cannot find datasetDefinition '%s'!"%(mergeGroupLabel,searchName)
                 print "Options are: %s"%(', '.join(map(str, myAllDatasetNames)))
                 raise Exception()
         #if self._optionDebugConfig:
@@ -260,7 +260,7 @@ class DataCardGenerator:
         self._dsetMgrManager = DatasetMgrCreatorManager(self._opts, self._config, signalDsetCreator, embeddingDsetCreator, qcdDsetCreator, self._QCDMethod)
         print "DatasetManagerCreator objects passed"
 
-    def doDatacard(self, era, searchMode, optimizationMode):
+    def doDatacard(self, era, searchMode, optimizationMode, mcrabInfoOutput):
         # Prepend era, searchMode, and optimizationMode to prefix
         s = "%s_%s_"%(era, searchMode)
         if optimizationMode == "":
@@ -284,13 +284,15 @@ class DataCardGenerator:
         self.doDataMining()
 
         # Make datacards
-        # Store era / searchMode / optimizationMode combination as a string # FIXME
-        TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix, 
-                      luminosity=self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),
-                      observation=self._observation, datasetGroups=self._columns, extractors=self._extractors)
-
+        myProducer = TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
+                                   luminosity=self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),
+                                   observation=self._observation, datasetGroups=self._columns, extractors=self._extractors,
+                                   mcrabInfoOutput=mcrabInfoOutput)
         # Close files
         #self.closeFiles() # Do not close, will crash if done so, because configInfo histogram will not be found anymore !!!
+
+        # Return name of output directory
+        return myProducer.getDirectory()
 
     def _checkCfgFile(self):
         mymsg = ""
