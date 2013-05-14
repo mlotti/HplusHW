@@ -28,9 +28,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.QCDHistoHelper as HistoHelper
 # User options
 ######################################################################
 bBatchMode      = True
-bLogY           = True
+bLogY           = False
 bNormalizeToOne = True
 bCustomRange    = False
+sDataEra        = "Run2011AB"
 sLegStyle       = "EP" 
 sDrawStyle      = "EP" #"AP" "EP" "HIST9"
 myRootFilePath  = "info/QCDMeasurementFactorisedInfo.root" 
@@ -41,13 +42,10 @@ myRootFilePath  = "info/QCDMeasurementFactorisedInfo.root"
 myQCDschemes    = ["TauPt", "TauEta", "Nvtx", "Full"]
 myErrorTypes    = ["StatAndSyst", "StatOnly"]
 myValidDataEras = ["Run2011A", "Run2011B", "Run2011AB"]
+#myTailKillers   = ["ZeroPlus", "LoosePlus", "MediumPlus", "TightPlus"]
+myTailKillers   = ["LoosePlus", "MediumPlus", "TightPlus"]
 
 ROOT.gROOT.SetBatch(bBatchMode)
-
-#To do:
-# - plot comparison from different paths
-# - mT Closure test
-# - MET clouser test
 
 ######################################################################
 # Function declarations
@@ -55,16 +53,12 @@ ROOT.gROOT.SetBatch(bBatchMode)
 def main():
     
     # Get all histos to be plotted from QCDHistoHelper module
-    #HistoList = QCDHistoHelper.GetEntireHistoList()
-    
-    # Create a specific histogram list to be plotted
-    HistoList = HistoHelper.GetMtShapeHistoNames()
-    
-    # Plot all histos appended to the HistoList, using a user-defined QCD factorisation scheme and ErrorType
-    #doHistos(HistoList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", saveNameExtension = "")
+    MtShapesList = HistoHelper.GetMtShapeHistoNames()
+    NqcdList     = HistoHelper.GetNQcdHistoNames()
 
     # Superimpos plots in the HistoList on one canvas
-    doHistosCompare(HistoList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", saveNameExtension = "")
+    doHistosCompare(MtShapesList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", saveNameExtension = "")
+    doHistosCompare(NqcdList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", saveNameExtension = "")
 
     return
 
@@ -120,7 +114,7 @@ def checkUserOptions(QCDscheme, ErrorType):
 def getRootFile(myPath):
 
     if os.path.exists(myPath):
-        print "\n*** Opening ROOT file:\n    \"%s\"" % (myPath)
+        print "*** Opening ROOT file:\n    \"%s\"" % (myPath)
         f = ROOT.TFile.Open(myPath)
         return f
     else:
@@ -138,62 +132,10 @@ def getHisto(rootFile, pathName):
         return histo
 
 ######################################################################
-def doHistos(HistoList, myPath, QCDscheme, ErrorType, saveNameExtension):
-                
-    # Check the current working directory name for a valid data-era
-    myDataEra = getDataEra()
-
-    # Get the integrated luminosity of the data-era (only used for addind lumi text)
-    myLumi = getLumi(myDataEra)
-
-    # Check that the user-defined options are valid
-    checkUserOptions(QCDscheme, ErrorType)
-
-    # Get the ROOT file
-    rootFile = getRootFile(myPath)
-
-    # Plot all histograms defined in the HistoList    
-    print "*** There are \"%s\" histograms in the plotting queue (QCDscheme = \"%s\"):" % (len(HistoList), QCDscheme)
-    for h in HistoList:
-        folderName = "Contraction_" + QCDscheme
-        histoName  = h.name.replace("*QcdScheme*", QCDscheme).replace("*ErrorType*", ErrorType)
-        # Temporary quick-fix to naming difference
-        if "Shape_" in histoName:
-            histoName = histoName.replace("StatAndSyst", "fullUncert").replace("StatOnly", "statUncert") 
-        pathName   = folderName + "/" + histoName
-        histo      = getHisto(rootFile, pathName)
-
-        saveName = myDataEra + "_" + histoName + saveNameExtension
-        saveName = saveName.replace("/", "__")
-        xLabel   = h.xLabel
-        yLabel   = h.yLabel
-        xMin     = h.xMin
-        xMax     = h.xMax
-        logX    = h.bLogX
-        yMin     = h.yMin
-        yMax     = h.yMax
-        logY    = h.bLogY
-        legendLabel = h.legendLabel
-        
-        # Create and draw the plots
-        p = createPlot(histo, myLumi, legendLabel)
-        if bCustomRange == True:
-            drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, opts={"ymin": yMin, "ymax": yMax}, optsLog={"ymin": yMin, "ymax": yMax})
-        else:
-            drawPlot = plots.PlotDrawer(log=bLogY, addLuminosityText=True, opts={"ymaxfactor": 1.5}, optsLog={"ymaxfactor": 10})
-            
-        # Save the plots
-        saveName = saveName.replace("Leg1", "MetLeg").replace("Leg2", "TauLeg").replace("leg1", "MetLeg").replace("leg2", "TauLeg")
-        drawPlot(p, saveName, xlabel=xLabel, ylabel=yLabel, customizeBeforeDraw=setLabelOption)
-        print "*** Saved \"%s\"" % (saveName)
-
-    return
-
-######################################################################
 def doHistosCompare(HistoList, myPath, QCDscheme, ErrorType, saveNameExtension):
                 
     # Check the current working directory name for a valid data-era
-    myDataEra = getDataEra()
+    myDataEra = sDataEra
 
     # Get the integrated luminosity of the data-era (only used for addind lumi text)
     myLumi = getLumi(myDataEra)
@@ -201,52 +143,68 @@ def doHistosCompare(HistoList, myPath, QCDscheme, ErrorType, saveNameExtension):
     # Check that the user-defined options are valid
     checkUserOptions(QCDscheme, ErrorType)
 
-    # Get the ROOT file
-    rootFile = getRootFile(myPath)
-
-    # Plot all histograms defined in the HistoList    
-    print "*** There are \"%s\" histograms in the plotting queue (QCDscheme = \"%s\"):" % (len(HistoList), QCDscheme)
-    counter = 1
-    for h in HistoList:
-        folderName = "Contraction_" + QCDscheme
-        histoName  = h.name.replace("*QcdScheme*", QCDscheme).replace("*ErrorType*", ErrorType)
-        # Temporary quick-fix to naming difference
-        if "Shape_" in histoName:
-            histoName = histoName.replace("StatAndSyst", "fullUncert").replace("StatOnly", "statUncert") 
-        pathName   = folderName + "/" + histoName
-        histo      = getHisto(rootFile, pathName)
-
-        saveName = myDataEra + "_" + histoName + saveNameExtension
-        saveName = saveName.replace("/", "__")
-        xLabel   = h.xLabel
-        yLabel   = h.yLabel
-        xMin     = h.xMin
-        xMax     = h.xMax
-        logX    = h.bLogX
-        yMin     = h.yMin
-        yMax     = h.yMax
-        logY    = h.bLogY
-        legendLabel = h.legendLabel
-        
-        # Create and draw the plots
-        if counter == 1:
-            p = createPlot(histo, myLumi, legendLabel)
+    # Get the directories under current working directory. These are my tailKillerPaths
+    myDirsDict = {}
+    for dirName in os.walk('.').next()[1]: 
+        if ("_" + sDataEra  + "_") not in dirName:
+            continue
         else:
-            h = histograms.Histo(setHistoStyle(histo, counter), legendLabel, sDrawStyle, sDrawStyle)
-            histograms.Histo(h, histoName, sDrawStyle, sDrawStyle)
-            p.histoMgr.appendHisto(h)
+            for tailKiller in myTailKillers:
+                if tailKiller not in dirName:
+                    continue
+                else:
+                    myDirsDict[tailKiller] = dirName
 
+    counter = 1
+    for tailKiller in myDirsDict.keys():
+        dirName = myDirsDict[tailKiller]
+        
+        print "\n*** Processing Tail-Killer scenario \"%s\"" % (tailKiller)
+        rootFile = getRootFile(dirName + "/" + myPath)
+
+        # Plot all histograms defined in the HistoList    
+        print "*** There are \"%s\" histogram(s) in the plotting queue (QCDscheme = \"%s\"):" % (len(HistoList), QCDscheme)
+        for h in HistoList:
+            folderName = "Contraction_" + QCDscheme
+            histoName  = h.name.replace("*QcdScheme*", QCDscheme).replace("*ErrorType*", ErrorType)
+            # Temporary quick-fix to naming difference
+            if "Shape_" in histoName:
+                histoName = histoName.replace("StatAndSyst", "fullUncert").replace("StatOnly", "statUncert") 
+            pathName   = folderName + "/" + histoName
+            histo      = getHisto(rootFile, pathName)
+            
+            saveName = myDataEra + "_" + histoName + saveNameExtension
+            saveName = saveName.replace("/", "__")
+            xLabel   = h.xLabel
+            yLabel   = h.yLabel
+            xMin     = h.xMin
+            xMax     = h.xMax
+            logX     = h.bLogX
+            yMin     = h.yMin
+            yMax     = h.yMax
+            logY     = h.bLogY
+            legendLabel = tailKiller # = h.legendLabel
+
+            # Create and draw the plots
+            if counter == 1:
+                p = createPlot(histo, myLumi, legendLabel)
+            else:
+                h = histograms.Histo(setHistoStyle(histo, counter), legendLabel, sDrawStyle, sDrawStyle)
+                histograms.Histo(h, histoName, sDrawStyle, sDrawStyle)
+                p.histoMgr.appendHisto(h)
+                                    
+            # Increment counter
+            counter = counter + 1
+
+    if bNormalizeToOne == True:
+        p.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
+        drawPlot = plots.PlotDrawer(log=bLogY, addLuminosityText=True, opts={"ymaxfactor": 1.5}, optsLog={"ymax": 1.0})
+    else:
         if bCustomRange == True:
             drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, opts={"ymin": yMin, "ymax": yMax}, optsLog={"ymin": yMin, "ymax": yMax})
         else:
             drawPlot = plots.PlotDrawer(log=bLogY, addLuminosityText=True, opts={"ymaxfactor": 1.5}, optsLog={"ymaxfactor": 10})
-
-        # Increment counter
-        counter = counter + 1
-
-    if bNormalizeToOne == True:
-        p.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
-
+                
     # Save the plots
     saveName = saveName.replace("Leg1", "MetLeg").replace("Leg2", "TauLeg").replace("leg1", "MetLeg").replace("leg2", "TauLeg")
     drawPlot(p, saveName, xlabel=xLabel, ylabel=yLabel, customizeBeforeDraw=setLabelOption)
@@ -275,8 +233,8 @@ def setHistoStyle(histo, counter):
     myColours = [ROOT.kRed+1, ROOT.kOrange+1, ROOT.kGreen+3, ROOT.kAzure+1, ROOT.kViolet+1, ROOT.kMagenta+1, 
                  ROOT.kRed-7, ROOT.kOrange-7, ROOT.kGreen-5, ROOT.kAzure-7,  ROOT.kViolet-7, ROOT.kMagenta-7]
 
-    myMarkerStyles = [ROOT.kDot, ROOT.kPlus, ROOT.kStar, ROOT.kCircle, ROOT.kFullCircle, ROOT.kFullSquare, ROOT.kFullTriangleUp, ROOT.kFullTriangleDown, 
-                ROOT.kOpenCircle, ROOT.kOpenSquare, ROOT.kOpenTriangleUp, ROOT.kOpenCross]
+    myMarkerStyles = [ROOT.kStar, ROOT.kFullCircle, ROOT.kFullSquare, ROOT.kFullTriangleUp, ROOT.kFullTriangleDown, 
+                ROOT.kOpenCircle, ROOT.kOpenSquare, ROOT.kOpenTriangleUp, ROOT.kCircle, ROOT.kOpenCross, ROOT.kDot, ROOT.kPlus]
 
     myLineStyles = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] #[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2]
 

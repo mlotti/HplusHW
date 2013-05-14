@@ -96,7 +96,8 @@ def GetMtShapeHistoNames():
     hNameList.append( folder + "/" + folder + "_*ErrorType*")
 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / %0.f GeV/c^{2}", 0.0, 10.0, False, None))
+        #hTemplateList.append(HistoTemplate(h, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / %0.f GeV/c^{2}", 0.0, 10.0, False, None))
+        hTemplateList.append(HistoTemplate(h, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / 20-200 GeV/c^{2}", 0.0, 10.0, False, None))
     
     return hTemplateList
 
@@ -120,7 +121,8 @@ def GetMtShapeBinHistoNames():
     
     counter = 0
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / %0.f GeV/c^{2}", 0.0, 10.0, False, "bin " + str(counter)))
+        #hTemplateList.append(HistoTemplate(h, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / %0.f GeV/c^{2}", 0.0, 10.0, False, "bin " + str(counter)))
+        hTemplateList.append(HistoTemplate(h, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / 20-200 GeV/c^{2}", 0.0, 10.0, False, "bin " + str(counter)))
         counter = counter +1 
 
     return hTemplateList
