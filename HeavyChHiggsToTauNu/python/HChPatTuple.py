@@ -602,10 +602,14 @@ class StandardPATBuilder(PATBuilderBase):
         # Add the continuous isolation discriminators
         addTauRawDiscriminators(patTaus)
 
-        # Remove iso deposits to save disk space
+        # Remove iso deposits to save disk space and time
         if not self.doPatTauIsoDeposits:
+            for isoDepName in patTaus.isoDeposits.parameterNames_():
+                inputLabel = getattr(patTaus.isoDeposits, isoDepName).getModuleLabel()
+                HChTools.removeEverywhere(self.process, inputLabel)
             patTaus.isoDeposits = cms.PSet()
-    
+            patTaus.userIsolation = cms.PSet()
+
         # Trigger matching
         if self.doTauHLTMatching:
             print "Tau HLT matching in PATTuple production is disabled. It should be done in the analysis jobs from now on."
@@ -809,7 +813,6 @@ class StandardPATBuilder(PATBuilderBase):
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#ECAL_dead_cell_filter
             # https://twiki.cern.ch/twiki/bin/view/CMS/SusyEcalMaskedCellSummary
             self.process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
-            self.process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA")
             self.process.EcalDeadCellTriggerPrimitiveFilter.taggingMode = True
 
             self.process.load('RecoMET.METFilters.EcalDeadCellBoundaryEnergyFilter_cfi')
@@ -860,94 +863,17 @@ class StandardPATBuilder(PATBuilderBase):
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_odd_events_filters
             # https://twiki.cern.ch/twiki/bin/view/CMS/TrackingPOGFilters#Filters
-            self.process.logErrorTooManyClusters = cms.EDFilter("LogErrorEventFilter",
-                src = cms.InputTag("logErrorHarvester"),
-                maxErrorFractionInLumi = cms.double(1.0), 
-                maxErrorFractionInRun  = cms.double(1.0),
-                maxSavedEventsPerLumiAndError = cms.uint32(100000), 
-                categoriesToWatch = cms.vstring("TooManyClusters"),
-                modulesToIgnore = cms.vstring("SeedGeneratorFromRegionHitsEDProducer:regionalCosmicTrackerSeeds",
-                                              "PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg")
-            )
-            self.logErrorTooManyClustersPath = cms.Path(self.process.logErrorTooManyClusters)
-
-            self.process.logErrorTooManyTripletsPairs = cms.EDFilter("LogErrorEventFilter",
-                src = cms.InputTag("logErrorHarvester"),
-                maxErrorFractionInLumi = cms.double(1.0), 
-                maxErrorFractionInRun  = cms.double(1.0), 
-                maxSavedEventsPerLumiAndError = cms.uint32(100000), 
-                categoriesToWatch = cms.vstring("TooManyTriplets","TooManyPairs","PixelTripletHLTGenerator"),
-                modulesToIgnore = cms.vstring("SeedGeneratorFromRegionHitsEDProducer:regionalCosmicTrackerSeeds",
-                                              "PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg")
-            )
-            self.process.logErrorTooManyTripletsPairsPath = cms.Path(self.process.logErrorTooManyTripletsPairs)
-
-            self.process.logErrorTooManyTripletsPairsMainIterations = cms.EDFilter("LogErrorEventFilter",
-                src = cms.InputTag("logErrorHarvester"),
-                maxErrorFractionInLumi = cms.double(1.0), 
-                maxErrorFractionInRun  = cms.double(1.0), 
-                maxSavedEventsPerLumiAndError = cms.uint32(100000), 
-                categoriesToWatch = cms.vstring("TooManyTriplets","TooManyPairs","PixelTripletHLTGenerator"),
-                modulesToWatch = cms.vstring("SeedGeneratorFromRegionHitsEDProducer:initialStepSeeds",
-                                             "SeedGeneratorFromRegionHitsEDProducer:pixelPairStepSeeds"
-                                             )
-                )
-            self.process.logErrorTooManyTripletsPairsMainIterationsPath = cms.Path(self.process.logErrorTooManyTripletsPairsMainIterations)
-
-            self.process.logErrorTooManySeeds = cms.EDFilter("LogErrorEventFilter",
-                src = cms.InputTag("logErrorHarvester"),
-                maxErrorFractionInLumi = cms.double(1.0),
-                maxErrorFractionInRun  = cms.double(1.0),
-                maxSavedEventsPerLumiAndError = cms.uint32(100000), 
-                categoriesToWatch = cms.vstring("TooManySeeds"),
-            )
-            self.process.logErrorTooManySeedsPath = cms.Path(self.process.logErrorTooManySeeds)
-
-            self.process.logErrorTooManySeedsMainIterations = cms.EDFilter("LogErrorEventFilter",
-                src = cms.InputTag("logErrorHarvester"),
-                maxErrorFractionInLumi = cms.double(1.0),
-                maxErrorFractionInRun  = cms.double(1.0),
-                maxSavedEventsPerLumiAndError = cms.uint32(100000), 
-                categoriesToWatch = cms.vstring("TooManySeeds"),
-                modulesToWatch = cms.vstring("CkfTrackCandidateMaker:initialStepTrackCandidate",
-                                             "CkfTrackCandidateMaker:pixelPairTrackCandidate"
-                                             )
-            )
-            self.process.logErrorTooManySeedsMainIterationsPath = cms.Path(self.process.logErrorTooManySeedsMainIterations)
-
-            self.process.manystripclus53X = cms.EDFilter('ByClusterSummaryMultiplicityPairEventFilter',
-                                                      multiplicityConfig = cms.PSet(
-                                                                           firstMultiplicityConfig = cms.PSet(
-                                                                                                     clusterSummaryCollection = cms.InputTag("clusterSummaryProducer"),
-                                                                                                     subDetEnum = cms.int32(5),
-                                                                                                     subDetVariable = cms.string("pHits")
-                                                                                                     ),
-                                                                           secondMultiplicityConfig = cms.PSet(
-                                                                                                      clusterSummaryCollection = cms.InputTag("clusterSummaryProducer"),
-                                                                                                      subDetEnum = cms.int32(0),
-                                                                                                      subDetVariable = cms.string("cHits")
-                                                                                                      ),
-                                                                           ),
-                                                      cut = cms.string("( mult2 > 20000+7*mult1)")
-                                                      )
-            self.process.manystripclus53XPath = cms.Path(self.process.manystripclus53X)
-
-            self.process.toomanystripclus53X = cms.EDFilter('ByClusterSummaryMultiplicityPairEventFilter',
-                                                      multiplicityConfig = cms.PSet(
-                                                                           firstMultiplicityConfig = cms.PSet(
-                                                                                                     clusterSummaryCollection = cms.InputTag("clusterSummaryProducer"),
-                                                                                                     subDetEnum = cms.int32(5),
-                                                                                                     subDetVariable = cms.string("pHits")
-                                                                                                     ),
-                                                                           secondMultiplicityConfig = cms.PSet(
-                                                                                                      clusterSummaryCollection = cms.InputTag("clusterSummaryProducer"),
-                                                                                                      subDetEnum = cms.int32(0),
-                                                                                                      subDetVariable = cms.string("cHits")
-                                                                                                      ),
-                                                                           ),
-                                                      cut = cms.string("(mult2>50000) && ( mult2 > 20000+7*mult1)")
-                                                      )
-            self.process.toomanystripclus53XPath = cms.Path(self.process.toomanystripclus53X)
+            # http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/RecoMET/METFilters/test/exampleICHEPrecommendation_cfg.py?revision=1.3&view=markup&pathrev=V00-00-13
+            self.process.load("RecoMET.METFilters.trackingPOGFilters_cff")
+            for name in ["manystripclus53X", "toomanystripclus53X", "logErrorTooManyClusters", # in process.trkPOGFilters sequence
+                         # others available in trackingPOGFilters_cfi
+                         "logErrorTooManyTripletsPairs", "logErrorTooManySeeds", "logErrorTooManySeedsDefault",
+                         "logErrorTooManyTripletsPairsMainIterations", "logErrorTooManySeedsMainIterations",
+                         ]:
+                mod = getattr(self.process, name)
+                mod.taggedMode = cms.untracked.bool(True)
+                self.endSequence += mod
+                self.outputCommands.append("keep *_%s_*_*" % name)
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Muons_with_wrong_momenta_PF_only
             self.process.load('RecoMET.METFilters.inconsistentMuonPFCandidateFilter_cfi')
@@ -1054,8 +980,23 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, doChsJets=True, patA
         # Disable isolated muon/electron top projections before jet clustering
         process.pfNoMuonChs.enable = False
         process.pfNoElectronChs.enable = False
+
         # Disable jet-tau disambiguation (we do it ourselves in the analysis)
         process.pfNoTauChs.enable = False
+        # Remove all tau-related from the CHS sequence, we don't use
+        # CHS-tau and they just waste some precious time
+        process.PFBRECOChs.remove(process.pfTauSequenceChs)
+        remove = ["patHPSPFTauDiscriminationUpdateChs", "patPFTauIsolationChs", "patTausChs", "selectedPatTausChs", "countPatTausChs"]
+        if dataVersion.isMC():
+            remove.extend(["tauMatchChs", "tauGenJetsChs", "tauGenJetsSelectorAllHadronsChs", "tauGenJetMatchChs"])
+        for name in remove:
+            process.patDefaultSequenceChs.remove(getattr(process, name))
+
+        # Remove MET from CHS sequence, we don't use it and it just
+        # wastes some precious time
+        process.PFBRECOChs.remove(process.pfMETChs)
+        process.patDefaultSequenceChs.remove(process.patMETsChs)
+
 
         jetPostfixes.append("Chs")
         process.patDefaultSequence *= process.patPF2PATSequenceChs
