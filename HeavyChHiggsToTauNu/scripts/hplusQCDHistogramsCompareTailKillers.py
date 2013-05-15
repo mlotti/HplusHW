@@ -41,6 +41,13 @@ myErrorTypes    = ["StatAndSyst", "StatOnly"]
 myValidDataEras = ["Run2011A", "Run2011B", "Run2011AB"]
 myTailKillers   = ["ZeroPlus", "LoosePlus", "MediumPlus", "TightPlus"]
 
+yMinRatio     = 0.0
+yMaxRatio     = 2.0
+yMaxFactor    = 1.5
+yMinLog       = 1E-01
+yMinLogNorm   = 1E-04
+yMaxFactorLog = 5
+
 ROOT.gROOT.SetBatch(bBatchMode)
 
 ######################################################################
@@ -52,54 +59,72 @@ def main():
     # Purity plots 
     ##################
     PurityStdSelList = HistoHelper.GetPurityHistoNames(sMyLeg="StandardSelections")
-    #doHistosCompare(PurityStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Purity_StdSel", bNormalizeToOne = False)
-
+    doHistosCompare(PurityStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Purity_StdSel", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    
     PurityLeg1List = HistoHelper.GetPurityHistoNames(sMyLeg="Leg1")
-    #doHistosCompare(PurityLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Purity_Leg1", bNormalizeToOne = False)
+    doHistosCompare(PurityLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Purity_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
     PurityLeg2List = HistoHelper.GetPurityHistoNames(sMyLeg="Leg2")
-    #doHistosCompare(PurityLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Purity_Leg2", bNormalizeToOne = False)
+    doHistosCompare(PurityLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Purity_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
 
     ##################    
     # Efficiency plots 
     ##################
     EfficiencyLeg1List = HistoHelper.GetEfficiencyHistoNames(sMyLeg="leg1")
-    #doHistosCompare(EfficiencyLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Efficiency_Leg1", bNormalizeToOne = False)
+    doHistosCompare(EfficiencyLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Efficiency_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
     EfficiencyLeg2List = HistoHelper.GetEfficiencyHistoNames(sMyLeg="leg2")
-    #doHistosCompare(EfficiencyLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Efficiency_Leg2", bNormalizeToOne = False)
+    doHistosCompare(EfficiencyLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Efficiency_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
 
     ##################
     # mT shapes 
     ##################
     MtShapesStdSelList = HistoHelper.GetMtShapeHistoNames(sMyLeg="StandardSelections")
-    doHistosCompare(MtShapesStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_StdSel", bNormalizeToOne = False)
+    doHistosCompare(MtShapesStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_StdSel", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
     
     MtShapesLeg1List = HistoHelper.GetMtShapeHistoNames(sMyLeg="Leg1")
-    doHistosCompare(MtShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_Leg1", bNormalizeToOne = False)
+    doHistosCompare(MtShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
     MtShapesLeg2List = HistoHelper.GetMtShapeHistoNames(sMyLeg="Leg2")
-    doHistosCompare(MtShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_Leg2", bNormalizeToOne = False)
+    doHistosCompare(MtShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
-    binList = [1] #[1, 2, 3, 4, 5, 6, 7, 8, 9] 
-    for index in binList:
-        MtBinShapesLeg1List   = HistoHelper.GetMtBinShapeHistoNames(lBinList = [index], sMyLeg="Leg1")
-        #doHistosCompare(MtBinShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Mt_Bin" + str(index), bNormalizeToOne = True)
+    #binList = [1] #[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] #bin 0 = underflow, bin 10 = overflow
+    #for index in binList:
+        #MtBinShapesLeg1List   = HistoHelper.GetMtBinShapeHistoNames(lBinList = [index], sMyLeg="Leg1")
+        #doHistosCompare(MtBinShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Mt_Bin" + str(index), bNormalizeToOne = True, bRatio=False, bInvertRatio=False)
+
+
+    ##################
+    # MET shapes 
+    ##################
+    MetShapesStdSelList = HistoHelper.GetMetShapeHistoNames(sMyLeg="")
+    doHistosCompare(MetShapesStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShapes_StdSel", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    
+    #MetShapesLeg1List = HistoHelper.GetMetShapeHistoNames(sMyLeg="AfterLeg1")
+    #doHistosCompare(MetShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShapes_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+
+    MetShapesLeg2List = HistoHelper.GetMetShapeHistoNames(sMyLeg="AfterLeg2")
+    doHistosCompare(MetShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShapes_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+
+    #binList = [1] #[1, 2, 3, 4, 5, 6, 7, 8, 9, 10] #bin 0 = underflow, bin 10 = overflow
+    #for index in binList:
+        #MetBinShapesLeg1List   = HistoHelper.GetMetBinShapeHistoNames(lBinList = [index], sMyLeg="Leg1")
+        #doHistosCompare(MetBinShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Met_Bin" + str(index), bNormalizeToOne = True, bRatio=False, bInvertRatio=False)
 
     ##################
     # Full mass shapes 
     ##################
     MassShapeLeg1List = HistoHelper.GetMassShapeHistoNames(sMyLeg="Leg1")
-    #doHistosCompare(MassShapeLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MassShapes_Leg1", bNormalizeToOne = False)
+    doHistosCompare(MassShapeLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MassShapes_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
 
     ##################
     # QCD Event Yields
     ##################
     NqcdList = HistoHelper.GetNQcdHistoNames()
-    #doHistosCompare(NqcdList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NQcd", bNormalizeToOne = False)
+    doHistosCompare(NqcdList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NQcd", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
     #getNqcdNumbers()
 
     
@@ -107,27 +132,28 @@ def main():
     # Number of events
     ##################
     NEvtsStdSelList = HistoHelper.GetNEventsHistoNames(sMyLeg="StandardSelections")
-    #doHistosCompare(NEvtsStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NEvts_StdSel", bNormalizeToOne = False)
+    doHistosCompare(NEvtsStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NEvts_StdSel", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
     NEvtsLeg1List = HistoHelper.GetNEventsHistoNames(sMyLeg="Leg1")
-    #doHistosCompare(NEvtsLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NEvts_Leg1", bNormalizeToOne = False)
+    doHistosCompare(NEvtsLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NEvts_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
     NEvtsLeg2List = HistoHelper.GetNEventsHistoNames(sMyLeg="Leg2")
-    #doHistosCompare(NEvtsLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NEvts_Leg2", bNormalizeToOne = False)
+    doHistosCompare(NEvtsLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NEvts_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
 
     ##################
     # Number jets 
     ##################
     NjetsList  = HistoHelper.GetCtrlNjetsHistoNames()
-    #doHistosCompare(NjetsList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Njets", bNormalizeToOne = False)
+    doHistosCompare(NjetsList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Njets", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
         
     ##################
     # Number b-jets
     ##################
     NbjetsList  = HistoHelper.GetCtrlNbjetsHistoNames()
-    #doHistosCompare(NbjetsList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Nbjets", bNormalizeToOne = False)
+    doHistosCompare(NbjetsList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Nbjets", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+
 
     return
 
@@ -253,7 +279,7 @@ def getTailKillerDirs():
         return myDirsDict
 
 ######################################################################
-def doHistosCompare(HistoList, myPath, QCDscheme, ErrorType, mySaveName, bNormalizeToOne):
+def doHistosCompare(HistoList, myPath, QCDscheme, ErrorType, mySaveName, bNormalizeToOne, bRatio, bInvertRatio):
                 
     # Check the current working directory name for a valid data-era
     myDataEra = sDataEra
@@ -319,10 +345,15 @@ def doHistosCompare(HistoList, myPath, QCDscheme, ErrorType, mySaveName, bNormal
 
     if bNormalizeToOne == True:
         p.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
-        drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, opts={"ymaxfactor": 1.5}, optsLog={"ymax": 1.0})
+        yMinLog == yMinLogNorm
+        saveName = saveName + "_normalizedToOne"
+                    
+    # Customise the plot
+    if yMin == None or yMax == None:
+        drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, ratio=bRatio, ratioInvert=bInvertRatio, ratioYlabel="Ratio", opts={"ymaxfactor": yMaxFactor}, opts2={"ymin": yMinRatio, "ymax": yMaxRatio}, optsLog={"ymin": yMinLog, "ymaxfactor": yMaxFactorLog})
     else:
-        drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, opts={"ymin": yMin, "ymax": yMax}, optsLog={"ymin": yMin, "ymax": yMax})
-    
+        drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, ratio=bRatio, ratioInvert=bInvertRatio, ratioYlabel="Ratio", opts={"ymin": yMin, "ymax": yMax}, opts2={"ymin": yMinRatio, "ymax": yMaxRatio}, optsLog={"ymin": yMin, "ymax": yMax})
+
     # Save the plots
     drawPlot(p, saveName, xlabel=xLabel, ylabel=yLabel, customizeBeforeDraw=setLabelOption)
     print "*** Saved \"%s\"" % (saveName)
@@ -379,7 +410,8 @@ def createPlot(histo, myLumi, legendLabel, **kwargs):
         args = {"legendStyle": sLegStyle, "drawStyle": sDrawStyle}
         args.update(kwargs)
         histo.GetZaxis().SetTitle("")
-        p = plots.PlotBase([histograms.Histo(histo, legendLabel, **args)])
+        #p = plots.PlotBase([histograms.Histo(histo, legendLabel, **args)])
+        p = plots.ComparisonManyPlot(histograms.Histo(histo, legendLabel, **args), [])
         p.setLuminosity(myLumi)
         return p
     else:

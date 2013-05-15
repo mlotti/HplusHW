@@ -46,8 +46,8 @@ def GetPurityHistoNames(sMyLeg):
 
     # Fill the histogram template list 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", -1, -1, False, "Purity / 20-200 GeV/c^{2}", 0.0, 1.02, False, None))
-        #hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", -1, -1, False, "Purity / %0.0f-%0.0f GeV/c^{2}", 0.0, 1.0, False, None))
+        #hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", None, None, False, "Purity / 20-200 GeV/c", 0.0, 1.02, False, None))
+        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", None, None, False,  "Purity / 20-200 GeV/c", 0.0, 1.02, False, None))
 
     return hTemplateList
 
@@ -68,7 +68,7 @@ def GetEfficiencyHistoNames(sMyLeg):
 
     # Fill the histogram template list 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", -1, -1, False, "Efficiency / 20-200 GeV/c^{2}", 0.5E-03, 1E+00, True, None))
+        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", None, None, False, "Efficiency / 20-200 GeV/c", 0.5E-03, 1E+00, True, None))
 
     return hTemplateList
 
@@ -90,7 +90,7 @@ def GetNEventsHistoNames(sMyLeg):
 
     # Fill the histogram template list 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", -1, -1, False, "Events / 20-200 GeV/c^{2}" , 1E-01, 1E+05, True, None))
+        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", None, None, False, "Events / 20-200 GeV/c" , None, None, True, None))
 
     return hTemplateList
 
@@ -109,11 +109,11 @@ def GetMtShapeHistoNames(sMyLeg):
     # Fill the histogram path list 
     folder = "Closure_Shape_QCDfactorised_TradPlusCollinearTailKiller_MtAfter" + sMyLeg
     hNameList.append( folder + "/" + folder + "_*ErrorType*")
-    legendLabel = sMyLeg.replace("Leg1", "E_{T}^{miss}").replace("Leg2", "#tau_{h}").replace("leg1", "E_{T}^{miss}").replace("leg2", "#tau_{h}").replace("StandardSelections", "Jets")
+    legendLabel = sMyLeg.replace("Leg1", "E_{T}^{miss}").replace("Leg2", "#tau_{h}").replace("leg1", "E_{T}^{miss}").replace("leg2", "#tau_{h}").replace("StandardSelections", "Std.")
     
     # Fill the histogram template list 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / 20-200 GeV/c^{2}", 0.0, 20.0, False, legendLabel))
+        hTemplateList.append(HistoTemplate(h, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", None, None, False, "Events / 20-200 GeV/c^{2}", None, None, False, legendLabel))
         
     return hTemplateList
 
@@ -131,12 +131,68 @@ def GetMtBinShapeHistoNames(lBinList, sMyLeg):
 
     # Fill the histogram-path and histogram-template lists for the list of bins defined by the user
     folder = "Closure_Shape_QCDfactorised_TradPlusCollinearTailKiller_MtAfter" + sMyLeg
-    legendLabel = sMyLeg.replace("Leg1", "E_{T}^{miss}").replace("Leg2", "#tau_{h}").replace("leg1", "E_{T}^{miss}").replace("leg2", "#tau_{h}").replace("StandardSelections", "Jets")
+    legendLabel = sMyLeg.replace("Leg1", "E_{T}^{miss}").replace("Leg2", "#tau_{h}").replace("leg1", "E_{T}^{miss}").replace("leg2", "#tau_{h}").replace("StandardSelections", "Std.")
 
     for index, myBin in enumerate(lBinList):
         legendLabel = legendLabel + " (bin " + str(myBin) + ")"
         hPath = folder + "/" + folder + "_binInfo%s_*ErrorType*" % (str(myBin)) 
-        hTemplateList.append(HistoTemplate(hPath, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / 20-200 GeV/c^{2}", 0.0, 10.0, False, legendLabel))
+        hTemplateList.append(HistoTemplate(hPath, "m_{T}(#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", None, None, False, "Events / 20-200 GeV/c^{2}", None, None, False, legendLabel))
+
+    return hTemplateList
+
+
+#######################################################################################################
+def GetMetShapeHistoNames(sMyLeg):
+    '''
+    def GetMetShapeHistoNames(sMyLeg):
+    Return a list of histogram templates for all mT-shape related histograms.
+    '''
+
+    # Create empty list for paths to histograms within ROOT file 
+    hNameList = []
+    # Create empty list for 
+    hTemplateList = []
+
+    # Fill the histogram path list 
+    folder = "Closure_Shape_QCDfactorised_TradPlusCollinearTailKiller_CtrlMET" + sMyLeg
+    hNameList.append( folder + "/" + folder + "_*ErrorType*")
+
+    if sMyLeg == "":
+        legendLabel = "Std."
+    else:
+        legendLabel = sMyLeg.replace("Leg1", "E_{T}^{miss}").replace("Leg2", "#tau_{h}").replace("leg1", "E_{T}^{miss}").replace("leg2", "#tau_{h}").replace("StandardSelections", "Std.").replace("After", "")
+
+    # Fill the histogram template list 
+    for h in hNameList:
+        hTemplateList.append(HistoTemplate(h, "E_{T}^{miss} (GeV)", None, None, False, "Events / %0.f-%0.f GeV", None, None, False, legendLabel))
+        
+    return hTemplateList
+
+#######################################################################################################
+def GetMetBinShapeHistoNames(lBinList, sMyLeg):
+    '''
+    def GetMetBinShapeHistoNames(sMyLeg):
+    Return a list of histogram templates for all mT bin shape related histograms.
+    '''
+
+    # Create empty list for paths to histograms within ROOT file 
+    hNameList = []
+    # Create empty list for 
+    hTemplateList = []
+
+    # Fill the histogram-path and histogram-template lists for the list of bins defined by the user
+    folder = "Closure_Shape_QCDfactorised_TradPlusCollinearTailKiller_CtrlMET" + sMyLeg
+
+    if sMyLeg == "":
+        legendLabel = "Std."
+    else:
+        legendLabel = sMyLeg.replace("Leg1", "E_{T}^{miss}").replace("Leg2", "#tau_{h}").replace("leg1", "E_{T}^{miss}").replace("leg2", "#tau_{h}").replace("StandardSelections", "Std.").replace("After", "")
+
+        
+    for index, myBin in enumerate(lBinList):
+        legendLabel = legendLabel + " (bin " + str(myBin) + ")"
+        hPath = folder + "/" + folder + "_binInfo%s_*ErrorType*" % (str(myBin)) 
+        hTemplateList.append(HistoTemplate(hPath, "E_{T}^{miss} (GeV)", None, None, False, "Events / %0.f-%0.f GeV", None, None, True, legendLabel))
 
     return hTemplateList
 
@@ -158,7 +214,7 @@ def GetMassShapeHistoNames(sMyLeg):
 
     # Fill the histogram template list 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "m (#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", -1, -1, False, "Events / %0.f GeV/c^{2}", 0.0, 10.0, False, None))
+        hTemplateList.append(HistoTemplate(h, "m (#tau_{h}, E_{T}^{miss}) (GeV/c^{2})", None, None, False, "Events / %0.f GeV/c^{2}", None, None, False, None))
     
     return hTemplateList
 
@@ -180,7 +236,7 @@ def GetCtrlNjetsHistoNames():
 
     # Fill the histogram template list 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "N^{sel}_{jets}", -1, -1, False, "Events / %0.f", 1E-01, 1E+04, True, None))
+        hTemplateList.append(HistoTemplate(h, "N^{sel}_{jets}", None, None, False, "Events / %0.f", None, None, True, None))
     
     return hTemplateList
 
@@ -202,7 +258,7 @@ def GetCtrlNbjetsHistoNames():
 
     # Fill the histogram template list 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "N^{sel}_{b-jets}", -1, -1, False, "Events / %0.f", 1E-02, 1E+04, True, None))
+        hTemplateList.append(HistoTemplate(h, "N^{sel}_{b-jets}", None, None, False, "Events / %0.f", None, None, True, None))
     
     return hTemplateList
 
@@ -223,7 +279,7 @@ def GetNQcdHistoNames():
 
     # Fill the histogram template list 
     for h in hNameList:
-        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", -1, -1, False, "dN_{QCD} / dp_{T, #tau_{h}}", 1E-03, 1E+02, True, None))
+        hTemplateList.append(HistoTemplate(h, "p_{T, #tau_{h}} (GeV/c)", None, None, False, "dN_{QCD} / dp_{T, #tau_{h}}", 1E-04, 1E+02, True, None))
 
     return hTemplateList
 
