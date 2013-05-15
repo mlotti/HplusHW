@@ -57,7 +57,11 @@ mcOnlyLumi = 5000 # pb
 searchMode = "Light"
 #searchMode = "Heavy"
 
-optMode = "OptQCDTailKillerMediumPlus"
+optMode = "OptQCDTailKillerZeroPlus"
+#optMode = "OptQCDTailKillerLoosePlus"
+#optMode = "OptQCDTailKillerMediumPlus"
+#optMode = "OptQCDTailKillerTightPlus"
+
 #optMode = ""
 
 
@@ -67,7 +71,10 @@ dataEra = "Run2011AB"
 
 print "dataEra"
 
-sysError = 0.2
+sysError = 0.1
+
+includeEWKscale = False
+EWKscale = 0.6
 
 def usage():
     print "\n"
@@ -172,8 +179,10 @@ def doPlots(datasets):
             return plots.DataMCPlot(datasets, name, **kwargs)
  
     controlPlots(datasets)
+    drawPlot(createPlot("Inverted/MET_InvertedTauIdBvetoCollinear"), "MET_InvertedTauIdBvetoCollinear", xlabel="MET (GeV)",  rebin=5, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 
-
+    drawPlot(createPlot("Inverted/MET_InvertedTauIdBveto"), "MET_InvertedTauIdBveto", xlabel="MET (GeV)",  rebin=5, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("Inverted/MET_InvertedTauIdJets"), "MET_InvertedTauIdJets", xlabel="MET (GeV)",  rebin=5, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 
 def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
@@ -196,6 +205,13 @@ def doCounters(datasets):
     print eventCounter.getSubCounterTable("b-tagging").format(cellFormat)
     print eventCounter.getSubCounterTable("Jet selection").format(cellFormat)
     print eventCounter.getSubCounterTable("Jet main").format(cellFormat)    
+
+
+
+
+
+
+
 
 try:
     from QCDInvertedNormalizationFactors import *
@@ -360,6 +376,8 @@ def controlPlots(datasets):
         mtEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
         mtEWK = mtEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
         mtEWK.Scale(normEWK[ptbin])
+        if includeEWKscale:
+            mtEWK.Scale(EWKscale)
         mt.Add(mtEWK, -1)
         mtTailKiller.append(mt)
 
@@ -1327,8 +1345,8 @@ def controlPlots(datasets):
     bvetoDphi_inverted = hClosureBvetoNoMetCutTailKiller.Clone("hmtPhivSum")
     bvetoDphi_baseline = hClosureBaselineNoMetBvetoTailKiller_QCD.Clone("hmtPhivBaseline_QCD")
     invertedQCD.setLabel("MtNoMetBvetoInvertedVsBaselineTailKillerClosure")
-    invertedQCD.mtComparison(bvetoDphi_inverted, bvetoDphi_baseline,"MtNoMetBvetoInvertedVsBaselineTailKillerClosure")
-
+    invertedQCD.mtComparison(bvetoDphi_inverted, bvetoDphi_baseline,"MtNoMetBvetoInvertedVsBaselineTailKillerClosure",sysError=sysError)
+    #invertedQCD.mtComparison(bvetoDphi_inverted, bvetoDphi_baseline,"MtNoMetBvetoInvertedVsBaselineTailKillerClosure")
     
     
 ################################

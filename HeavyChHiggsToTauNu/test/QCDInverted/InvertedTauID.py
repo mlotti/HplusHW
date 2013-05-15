@@ -641,10 +641,14 @@ class InvertedTauID:
             plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 400, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
+
+            
         if "MtNoMetBvetoInvertedVsBaselineTailKillerClosure" in name:
-            plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 600, "xmax": 200},
+            plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 500, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
+
+            
         if "MtNormalisedBvetoTailKiller" in name:         
             plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymax": 8, "xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
@@ -704,7 +708,7 @@ class InvertedTauID:
 
             
         if "MtWithAllCutsTailKiller" in name:      
-            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":9, "xmax": 300},
+            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":6, "xmax": 300},
                              createRatio=False,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
                         
         # Set Y axis of the upper pad to logarithmic
@@ -827,18 +831,19 @@ class InvertedTauID:
         if "MtInvertedVsBaselineSystematic" in name:   
             histograms.addText(0.6, 0.67, "All selection cuts", 22)
             histograms.addText(0.6, 0.6, "TailKiller: Loose", 22)
+            
         if "MtNoMetBvetoInvertedVsBaselineTailKillerClosure" in name:
             histograms.addText(0.6, 0.70, "Before MET cut", 22)
             histograms.addText(0.6, 0.64, "B-jet veto", 22)
-            histograms.addText(0.55, 0.58, "TailKiller: MediumPlus", 22)
+            histograms.addText(0.6, 0.58, "TailKiller: MediumPlus", 22)
         if "BvetoTailKillerClosure" in name:
             histograms.addText(0.6, 0.70, "After MET cut", 22)
             histograms.addText(0.6, 0.64, "B-jet veto", 22)
-            histograms.addText(0.6, 0.58, "TailKiller: Tight", 22)
+            histograms.addText(0.6, 0.58, "TailKiller: MediumPlus", 22)
 
         if "MtWithAllCutsTailKiller" in name: 
             histograms.addText(0.6, 0.8, "All selection cuts", 22)
-            histograms.addText(0.6, 0.72, "MET > 50 GeV", 22)
+            histograms.addText(0.6, 0.72, "MET > 60 GeV", 22)
             histograms.addText(0.55, 0.64, "TailKiller: MediumPlus", 22)
             
         plot.draw() 
@@ -1054,7 +1059,7 @@ class InvertedTauID:
 
 	rangeMin = hError.GetXaxis().GetXmin()
         rangeMax = hError.GetXaxis().GetXmax()
-	rangeMax = 90
+	rangeMax = 110
 #	rangeMax = 120
 #	rangeMax = 380
         

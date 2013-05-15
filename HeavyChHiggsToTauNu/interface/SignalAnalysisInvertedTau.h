@@ -403,14 +403,13 @@ namespace HPlus {
 
     WrappedTH1 *hSelectedTauEtTauVeto;
     WrappedTH1 *hSelectedTauEtJetCut;
+    WrappedTH1 *hSelectedTauEtCollinearTailKiller;
     WrappedTH1 *hSelectedTauEtMetCut;
     WrappedTH1 *hSelectedTauEtBtagging;
     WrappedTH1 *hSelectedTauEtBjetVeto;
     WrappedTH1 *hSelectedTauEtBjetVetoPhiCuts;
-    WrappedTH1 *hSelectedTauEtTailKiller;
-    //   WrappedTH1 *hSelectedTauEtDeltaPhiJet12Cut;
-    WrappedTH1 *hSelectedTauEtDeltaPhiJet123Cut;
-    WrappedTH1 *hSelectedTauEtDeltaPhiJetsAgainstTTCut;
+    WrappedTH1 *hSelectedTauEtBackToBackTailKiller;
+
 
    
     WrappedTH1 *hMTInvertedTauIdJets; 

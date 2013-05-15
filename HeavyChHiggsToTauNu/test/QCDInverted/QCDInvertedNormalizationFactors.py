@@ -1,9 +1,9 @@
-# Generated on Tue May 14 11:03:02 2013
+ # Generated on Tue May 14 11:03:02 2013
 # by InvertedTauID_Normalization.py
 
 QCDInvertedNormalization = {
-    "inclusive": 0.0226404008528,
-    "inclusiveEWK": 0.00335615800094,   
+    "inclusive": 0.0226406952603,
+    "inclusiveEWK": 0.00335605153168, 
     "4050": 0.0347970568323,
     "5060": 0.0287281041491,
     "6070": 0.0210499583554,
@@ -19,3 +19,6 @@ QCDInvertedNormalization = {
     "100120EWK": 0.00135219337701,
     "120EWK": 0.00127480484997
 }
+
+                                                    
+    
