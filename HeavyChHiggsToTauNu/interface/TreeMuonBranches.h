@@ -48,14 +48,20 @@ namespace HPlus {
     std::string fPrefix;
 
     typedef math::XYZTLorentzVector XYZTLorentzVector;
+    typedef math::XYZVector XYZVector;
     typedef HPlus::TreeFunctionVectorBranch<pat::Muon> MuonFunctionBranch;
 
     std::vector<XYZTLorentzVector> fMuons;
     std::vector<XYZTLorentzVector> fMuonsCorrected;
+    std::vector<XYZVector> fMuonsTuneP;
+    std::vector<double> fMuonsTunePPtError;
+    std::vector<int> fMuonsCharge;
+    std::vector<double> fMuonsNormChi2;
     std::vector<MuonFunctionBranch> fMuonsFunctions;
     TreeGenParticleBranches fMuonsGenMatch;
 
-    bool fMuonCorrectedEnabled;
+    const bool fMuonCorrectedEnabled;
+    const bool fTunePEnabled;
   };
 }
 

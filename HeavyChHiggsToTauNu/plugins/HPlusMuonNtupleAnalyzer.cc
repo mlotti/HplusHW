@@ -125,7 +125,7 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   std::vector<std::string> names = pset.getParameterNames();
   for(size_t i=0; i<names.size(); ++i) {
     //fMuonEffs.push_back(MuonEff(new HPlus::EmbeddingMuonEfficiency(pset.getUntrackedParameter<edm::ParameterSet>(names[i])), "muon_efficiency_"+names[i]));
-    fMuonEffs.push_back(MuonEff(pset.getUntrackedParameter<edm::ParameterSet>(names[i]), "muon_efficiency_"+names[i]));
+    fMuonEffs.push_back(MuonEff(pset.getUntrackedParameter<edm::ParameterSet>(names[i]), "muons_efficiency_"+names[i]));
   }
 
   pset = iConfig.getParameter<edm::ParameterSet>("mets");
