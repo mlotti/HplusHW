@@ -424,8 +424,9 @@ namespace HPlus {
     TFileDirectory myCtrlEWKFakeTausDir = fs->mkdir("ControlPlotsEWKFakeTaus");
     hCtrlEWKFakeTausIdentifiedElectronPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
     hCtrlEWKFakeTausIdentifiedMuonPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "IdentifiedMuonPt", "IdentifiedMuonPt;Identified muon p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
-    hCtrlEWKFakeTausNjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "Njets", "Njets;Number of selected jets;N_{events}", 10, 0., 10.);
-    hCtrlEWKFakeTausNjetsAfterMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "NjetsAfterMET", "NjetsAfterMET;Number of selected jets;N_{events}", 10, 0., 10.);
+    hCtrlEWKFakeTausNjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "Njets", "Njets;Number of selected jets;N_{events}", 20, 0., 20.);
+    hCtrlEWKFakeTausNjetsBeforeCollinearCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "NjetsBeforeCollinearCut", "NjetsBeforeCollinearCut;Number of selected jets;N_{events}", 20, 0., 20.);
+    hCtrlEWKFakeTausNjetsAfterMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "NjetsAfterMET", "NjetsAfterMET;Number of selected jets;N_{events}", 20, 0., 20.);
     hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
     hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", 60, -3.0, 3.0);
     hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", 72, -3.1415926, 3.1415926);
