@@ -997,7 +997,14 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
                 "dataVersionAppend": wf.dataVersionAppend,
                 }
 
-            dataset.addWorkflow(Workflow("analysis_"+version, **commonArgs))
+            triggers = mcTriggers
+            if dataset.isData():
+                if "taumet" in version:
+                    triggers = tauTriggers[datasetName]
+                elif "quadjet" in version:
+                    triggers = quadJetTriggers[datasetName]
+
+            dataset.addWorkflow(Workflow("analysis_"+version, triggerOR=triggers, **commonArgs))
 #            if dataset.isData():
 #                # For data, construct one analysis workflow per trigger type
 #                found = False
