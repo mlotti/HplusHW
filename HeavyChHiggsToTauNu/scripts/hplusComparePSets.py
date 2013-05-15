@@ -31,6 +31,7 @@ import sys
 import os
 import re
 from optparse import OptionParser
+import difflib
 ### HPlus modules
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
@@ -184,53 +185,44 @@ def ComparePSets(options, RootFilePsetsPath, MulticrabPsetsPath):
 
     ### Read contents of txt file containing the PSets
     RootFilePsets   = readFile(RootFilePsetsPath)
-    MulticrabPsets = readFile(MulticrabPsetsPath)
-
-    ### Sort the lists for coherence
-    RootFilePsets.sort()
-    MulticrabPsets.sort()
-
-    ### Create lists to place the differences in the two PSets
-    RootFileDiffList   = []
-    MulticrabDiffList = []
-    diffList          = []
-
-    ### Create a user-friendly format for the differences found
-    title = " "* 10 + "RootFile <-> Multicrab" + " "* 10 
-    hLine = "-" * len(title)
-    diffList.append(hLine)
-    diffList.append(title)
-    diffList.append(hLine)
-
-    if options.verbose:
-        print hLine + "\n" + title + "\n" + hLine
-
-    ### Loop over the two lists simultaneously and look for differences
-    for i,j in zip(RootFilePsets, MulticrabPsets):
-        if i not in j:
-            i.strip()
-            RootFileDiffList.append(i)
-        if i not in j:
-            j.strip()
-            MulticrabDiffList.append(j)
-
-    ### Print differences between the two PSets and save to a txt file
-    if options.verbose:
-        print "+++ VERBOSE: Printing differences between the two PSets ..."
-    for i,j in zip(RootFileDiffList, MulticrabDiffList):
-        diff = i + " <-> " + j
-        diffList.append(diff)
-        if options.verbose:
-            print diff
+    MulticrabPsets  = readFile(MulticrabPsetsPath)
 
     ### Save results to a txt file
     saveFileName = options.saveFileName
     saveFilePath = os.getcwd() + "/" + saveFileName
     fileExists(saveFilePath, False)
     saveFile = open(saveFilePath, "w")
+
+    ### Testing 
+    diffList1  = []
+    diffList2  = []
+
+    # Check for strings in RootFilePsets not found in MulticrabPsets
+    for line in RootFilePsets:
+        if line not in MulticrabPsets:
+            diffList1.append(line)
+        else:
+            continue
+
+    # Check for strings in MulticrabPsets not found in RootFilePsets
+    for line in MulticrabPsets:
+        if line not in RootFilePsets:
+            diffList2.append(line)
+        else:
+            continue
+
+    # Get the differences between the two files
+    diff=difflib.ndiff(diffList1, diffList2)
+
     print "+++ Saving differences in PSets to:\n    \"%s\"" % (saveFilePath)
-    for item in diffList:
-        saveFile.write(item+"\n")
+    try:
+        while 1:
+            saveFile.write(diff.next(),)
+            if options.verbose:
+                print diff.next(),
+    except:
+        pass
+
     saveFile.close()
 
     return
