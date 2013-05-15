@@ -126,6 +126,7 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
     muonFunctions = cms.PSet(),
     muonCorrectedEnabled = cms.bool(True),
     muonCorrectedSrc = cms.InputTag("tightenedMuonsMuscle"),
+    muonTunePEnabled = cms.bool(True),
     muonEfficiencies = cms.PSet(
         Run2011A = param.embeddingMuonEfficiency.clone(
             mode = "mcEfficiency",
