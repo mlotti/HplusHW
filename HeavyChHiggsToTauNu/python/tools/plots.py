@@ -1119,7 +1119,10 @@ class PlotRatioBase:
             if invertRatio:
                 (num, denom) = (denom, num)
             ratio = _createRatio(num, denom, "Ratio", isBinomial=ratioIsBinomial)
-            copyStyle(num, ratio)
+            if invertRatio:
+                copyStyle(denom, ratio)
+            else:
+                copyStyle(num, ratio)
             self.appendRatio(ratio)
 
         self._createFrame(filename, **kwargs)
