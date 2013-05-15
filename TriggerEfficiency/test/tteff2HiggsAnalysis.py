@@ -34,11 +34,13 @@ def getFiles(path):
     files = []
     taskdirs = execute("ls "+path)
     for taskdir in taskdirs:
-        subdir = os.path.join(path,taskdir)
+        subdir = os.path.join(path,taskdir,"res")
         if os.path.isdir(subdir):
-            filename = os.path.join(subdir,"res","histograms-"+taskdir+".root")
-            if os.path.exists(filename):
-                files.append(filename)
+            histogramfiles = execute("ls "+os.path.join(subdir,"histograms-*.root"))
+            for filename in histogramfiles:
+                #filename = os.path.join(subdir,"res","histograms-"+taskdir+".root")
+                if os.path.exists(filename):
+                    files.append(filename)
     return files
 
 def getDataVersion(filename):
