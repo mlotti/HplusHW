@@ -156,6 +156,7 @@ namespace HPlus {
       WrappedUnfoldedFactorisationHisto* hCtrlRtau;
       std::vector<WrappedUnfoldedFactorisationHisto*> hCtrlQCDTailKillerCollinear;
       WrappedUnfoldedFactorisationHisto* hCtrlNjets;
+      WrappedUnfoldedFactorisationHisto* hCtrlNjetsAfterCollinearCuts;
       WrappedUnfoldedFactorisationHisto* hCtrlMET;
       WrappedUnfoldedFactorisationHisto* hCtrlNbjets;
       std::vector<WrappedUnfoldedFactorisationHisto*> hCtrlQCDTailKillerBackToBack;

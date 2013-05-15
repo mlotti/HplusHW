@@ -392,8 +392,9 @@ namespace HPlus {
     TFileDirectory myCtrlDir = fs->mkdir("ControlPlots");
     hCtrlIdentifiedElectronPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
     hCtrlIdentifiedMuonPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "IdentifiedMuonPt", "IdentifiedMuonPt;Identified muon p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
-    hCtrlNjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "Njets", "Njets;Number of selected jets;N_{events}", 10, 0., 10.);
-    hCtrlNjetsAfterMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NjetsAfterMET", "Njets after MET;Number of selected jets;N_{events}", 10, 0., 10.);
+    hCtrlNjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "Njets", "Njets;Number of selected jets;N_{events}", 20, 0., 20.);
+    hCtrlNjetsBeforeCollinearCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NjetsBeforeCollinearCuts", "NjetsBeforeCollinearCuts;Number of selected jets;N_{events}", 20, 0., 20.);
+    hCtrlNjetsAfterMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NjetsAfterMET", "Njets after MET;Number of selected jets;N_{events}", 20, 0., 20.);
     hCtrlSelectedTauPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
     hCtrlSelectedTauEtaAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", 60, -3.0, 3.0);
     hCtrlSelectedTauPhiAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", 72, -3.1415926, 3.1415926);
@@ -423,8 +424,9 @@ namespace HPlus {
     TFileDirectory myCtrlEWKFakeTausDir = fs->mkdir("ControlPlotsEWKFakeTaus");
     hCtrlEWKFakeTausIdentifiedElectronPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
     hCtrlEWKFakeTausIdentifiedMuonPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "IdentifiedMuonPt", "IdentifiedMuonPt;Identified muon p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
-    hCtrlEWKFakeTausNjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "Njets", "Njets;Number of selected jets;N_{events}", 10, 0., 10.);
-    hCtrlEWKFakeTausNjetsAfterMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "NjetsAfterMET", "NjetsAfterMET;Number of selected jets;N_{events}", 10, 0., 10.);
+    hCtrlEWKFakeTausNjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "Njets", "Njets;Number of selected jets;N_{events}", 20, 0., 20.);
+    hCtrlEWKFakeTausNjetsBeforeCollinearCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "NjetsBeforeCollinearCut", "NjetsBeforeCollinearCut;Number of selected jets;N_{events}", 20, 0., 20.);
+    hCtrlEWKFakeTausNjetsAfterMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "NjetsAfterMET", "NjetsAfterMET;Number of selected jets;N_{events}", 20, 0., 20.);
     hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
     hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", 60, -3.0, 3.0);
     hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", 72, -3.1415926, 3.1415926);
@@ -750,9 +752,8 @@ namespace HPlus {
     //    increment(fMETCounter);
 
     //std::cout << "tau match is " << tauMatchData.getTauMatchType() << " e=" << fFakeTauIdentifier.isElectronToTau(tauMatchData.getTauMatchType()) << " mu=" << fFakeTauIdentifier.isMuonToTau(tauMatchData.getTauMatchType()) << " jet=" << fFakeTauIdentifier.isJetToTau(tauMatchData.getTauMatchType()) << std::endl;
-    hCtrlNjets->Fill(jetData.getHadronicJetCount());
-
-    if (myFakeTauStatus) hCtrlEWKFakeTausNjets->Fill(jetData.getHadronicJetCount());
+    hCtrlNjetsBeforeCollinearCuts->Fill(jetData.getHadronicJetCount());
+    if (myFakeTauStatus) hCtrlEWKFakeTausNjetsBeforeCollinearCuts->Fill(jetData.getHadronicJetCount());
     if(!jetData.passedEvent()) return false;
     // For data, set the current run number (needed for tau embedding
     // input, doesn't harm for normal data except by wasting small
@@ -787,13 +788,15 @@ namespace HPlus {
     const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metDataForCollinearCut.getSelectedMET());
     for (int i = 0; i < qcdTailKillerDataCollinear.getNConsideredJets(); ++i) {
       if (i < 4) { // protection
-        hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
+        hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromCollinearCorner(i)); // Make control plot before cut
         if (myFakeTauStatus)
           hCtrlEWKFakeTausQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromCollinearCorner(i)); // Make control plot before cut
         if (!qcdTailKillerDataCollinear.passCollinearCutForJet(i)) return false;
       }
     }
     increment(fQCDTailKillerCollinearCounter);
+    hCtrlNjets->Fill(jetData.getHadronicJetCount());
+    if (myFakeTauStatus) hCtrlEWKFakeTausNjets->Fill(jetData.getHadronicJetCount());
 
 //------ Obtain rest of data objects      
     if (fTree.isActive()) {
