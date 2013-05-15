@@ -28,7 +28,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.QCDHistoHelper as HistoHelper
 # User options
 ######################################################################
 bBatchMode      = True
-bLogY           = False
 sLegStyle       = "P" 
 sDrawStyle      = "EP" # "AP" "EP" "HIST9"
 myRootFilePath  = "info/QCDMeasurementFactorisedInfo.root" 
@@ -41,27 +40,65 @@ myErrorTypes    = ["StatAndSyst", "StatOnly"]
 myValidDataEras = ["Run2011A", "Run2011B", "Run2011AB"]
 myTailKillers   = ["ZeroPlus", "LoosePlus", "MediumPlus", "TightPlus"]
 
+yMinRatio     = 0.0
+yMaxRatio     = 2.0
+yMaxFactor    = 1.5
+yMinLog       = 1E-01
+yMinLogNorm   = 1E-04
+yMaxFactorLog = 5
+
 ROOT.gROOT.SetBatch(bBatchMode)
 
 ######################################################################
 # Function declarations
 ######################################################################
 def main():
-    
-    # Mt shapes
-    MtShapesLeg1List    = HistoHelper.GetMtShapeHistoNames(sMyLeg="Leg1")
-    MtShapesLeg2List    = HistoHelper.GetMtShapeHistoNames(sMyLeg="Leg2")
-    #doHistos(MtShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShape_Leg1", bNormalizeToOne = False)
-    #doHistos(MtShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShape_Leg2", bNormalizeToOne = False)    
-    #doHistosCompare(MtShapesLeg1List + MtShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_Leg1_And_Leg2", bNormalizeToOne = True)
 
-    # Closure tests
-    binList = [1, 2, 3, 4, 5, 6, 7, 8, 9] 
+    ##################
+    # Mt shapes
+    ##################
+    MtShapesStdSelList = HistoHelper.GetMtShapeHistoNames(sMyLeg="StandardSelections")
+    doHistos(MtShapesStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShape_StdSel", bNormalizeToOne = False)    
+
+    MtShapesLeg1List   = HistoHelper.GetMtShapeHistoNames(sMyLeg="Leg1")
+    doHistos(MtShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShape_Leg1", bNormalizeToOne = False)
+
+    MtShapesLeg2List   = HistoHelper.GetMtShapeHistoNames(sMyLeg="Leg2")
+    doHistos(MtShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShape_Leg2", bNormalizeToOne = False)    
+
+    # Closure test
+    doHistosCompare(MtShapesStdSelList + MtShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Mt", bNormalizeToOne=True, bRatio=True, bInvertRatio=False)
+
+    # Closure tests (bin)
+    binList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] #bin 0 = underflow, bin 10 = overflow
     for index in binList:
         MtBinShapesStdSelList = HistoHelper.GetMtBinShapeHistoNames(lBinList = [index], sMyLeg="StandardSelections")
-        MtBinShapesLeg1List   = HistoHelper.GetMtBinShapeHistoNames(lBinList = [index], sMyLeg="Leg1")
         MtBinShapesLeg2List   = HistoHelper.GetMtBinShapeHistoNames(lBinList = [index], sMyLeg="Leg2")
-        doHistosCompare(MtBinShapesStdSelList + MtBinShapesLeg2List  + MtBinShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Mt_Bin" + str(index), bNormalizeToOne = True)
+        doHistosCompare(MtBinShapesStdSelList + MtBinShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Mt_Bin" + str(index), bNormalizeToOne = True, bRatio=True, bInvertRatio=False)
+
+
+    ##################
+    # MET shapes
+    ##################
+    MetShapesStdSelList  = HistoHelper.GetMetShapeHistoNames(sMyLeg="")
+    doHistos(MetShapesStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShape_StdSel", bNormalizeToOne = False)
+
+    #MetShapesLeg1List    = HistoHelper.GetMetShapeHistoNames(sMyLeg="AfterLeg1")
+    #doHistos(MetShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShape_Leg1", bNormalizeToOne = False)    
+
+    MetShapesLeg2List    = HistoHelper.GetMetShapeHistoNames(sMyLeg="AfterLeg2")
+    doHistos(MetShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShape_Leg2", bNormalizeToOne = False)
+
+    # Closure test
+    doHistosCompare(MetShapesStdSelList + MetShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Met", bNormalizeToOne = True, bRatio=True, bInvertRatio=False)
+
+    # Closure tests (bin)
+    binList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  #bin 0 = underflow, bin 10 = overflow
+    for index in binList:
+        MetBinShapesStdSelList = HistoHelper.GetMetBinShapeHistoNames(lBinList = [index], sMyLeg="")
+        MetBinShapesLeg2List   = HistoHelper.GetMetBinShapeHistoNames(lBinList = [index], sMyLeg="AfterLeg2")
+        doHistosCompare(MetBinShapesStdSelList + MetBinShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Met_Bin" + str(index), bNormalizeToOne = True, bRatio=True, bInvertRatio=False)
+        
 
     return
 
@@ -181,19 +218,25 @@ def doHistos(HistoList, myPath, QCDscheme, ErrorType, mySaveName, bNormalizeToOn
 
         if bNormalizeToOne == True:
             p.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
-            drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, opts={"ymaxfactor": 1.5}, optsLog={"ymax": 1.0})
+            yMinLog = yMinLogNorm
+            saveName = saveName + "_normalizedToOne"
+
+        # Customise the plot
+        if yMin == None or yMax == None:
+            drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, opts={"ymaxfactor": yMaxFactor}, opts2={"ymin": yMinRatio, "ymax": yMaxRatio}, optsLog={"ymin": yMinLog, "ymaxfactor": yMaxFactorLog})
         else:
-            drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, opts={"ymin": yMin, "ymax": yMax}, optsLog={"ymin": yMin, "ymax": yMax})
-            
+            drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, opts={"ymin": yMin, "ymax": yMax}, opts2={"ymin": yMinRatio, "ymax": yMaxRatio}, optsLog={"ymin": yMin, "ymax": yMax})
+        #drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, opts={"ymaxfactor": yMaxFactor}, optsLog={"ymin": yMinLog, "ymaxfactor": yMaxFactorLog})
+
         # Save the plots
-        saveName = saveName.replace("Leg1", "MetLeg").replace("Leg2", "TauLeg").replace("leg1", "MetLeg").replace("leg2", "TauLeg")
+        saveName = saveName.replace("Leg1", "MetLeg").replace("Leg2", "TauLeg").replace("leg1", "MetLeg").replace("leg2", "TauLeg").replace("After","")
         drawPlot(p, saveName, xlabel=xLabel, ylabel=yLabel, customizeBeforeDraw=setLabelOption)
         print "*** Saved \"%s\"" % (saveName)
 
     return
 
 ######################################################################
-def doHistosCompare(HistoList, myPath, QCDscheme, ErrorType, mySaveName, bNormalizeToOne):
+def doHistosCompare(HistoList, myPath, QCDscheme, ErrorType, mySaveName, bNormalizeToOne, bRatio, bInvertRatio):
                 
     # Check the current working directory name for a valid data-era
     myDataEra = getDataEra()
@@ -224,6 +267,7 @@ def doHistosCompare(HistoList, myPath, QCDscheme, ErrorType, mySaveName, bNormal
             saveName = saveName.replace("/", "__")
         else:
             saveName = myDataEra + "_" + mySaveName
+
         saveName = saveName.replace("Leg1", "MetLeg").replace("Leg2", "TauLeg").replace("leg1", "MetLeg").replace("leg2", "TauLeg")
         xLabel   = h.xLabel
         yLabel   = h.yLabel
@@ -247,9 +291,16 @@ def doHistosCompare(HistoList, myPath, QCDscheme, ErrorType, mySaveName, bNormal
 
         if bNormalizeToOne == True:
             p.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
-            drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, opts={"ymaxfactor": 1.5}, optsLog={"ymax": 1.0})
+            yMinLog = yMinLogNorm
+            saveName = saveName + "_normalizedToOne"
+
+        # Customise the plot
+        if yMin == None or yMax == None:
+            drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, ratio=bRatio, ratioInvert=bInvertRatio, ratioYlabel="Ratio", opts={"ymaxfactor": yMaxFactor}, opts2={"ymin": yMinRatio, "ymax": yMaxRatio}, optsLog={"ymin": yMinLog, "ymaxfactor": yMaxFactorLog})
         else:
-            drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, opts={"ymin": yMin, "ymax": yMax}, optsLog={"ymin": yMin, "ymax": yMax})
+            drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, ratio=bRatio, ratioInvert=bInvertRatio, ratioYlabel="Ratio", opts={"ymin": yMin, "ymax": yMax}, opts2={"ymin": yMinRatio, "ymax": yMaxRatio}, optsLog={"ymin": yMinLog, "ymax": yMax})
+
+        #drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, ratio=bRatio, ratioInvert=bInvertRatio, ratioYlabel="Ratio", opts={"ymaxfactor": yMaxFactor}, opts2={"ymin": yMinRatio, "ymax": yMaxRatio}, optsLog={"ymin": yMinLog, "ymaxfactor": yMaxFactorLog})
 
         # Increment counter
         counter = counter + 1
@@ -310,7 +361,8 @@ def createPlot(histo, myLumi, legendLabel, **kwargs):
         args = {"legendStyle": sLegStyle, "drawStyle": sDrawStyle}
         args.update(kwargs)
         histo.GetZaxis().SetTitle("")
-        p = plots.PlotBase([histograms.Histo(histo, legendLabel, **args)])
+        #p = plots.PlotBase([histograms.Histo(histo, legendLabel, **args)])
+        p = plots.ComparisonManyPlot(histograms.Histo(histo, legendLabel, **args), [])
         p.setLuminosity(myLumi)
         return p
     else:
