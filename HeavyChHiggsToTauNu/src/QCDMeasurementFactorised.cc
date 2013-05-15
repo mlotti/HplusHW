@@ -760,6 +760,7 @@ namespace HPlus {
     // Data-driven control histograms
     fHistoHandler->createShapeHistogram(myDir, hCtrlRtau, "CtrlRtau", "Rtau", 60, 0, 1.2);
     fHistoHandler->createShapeHistogram(myDir, hCtrlNjets, "CtrlNjets", "N_{jets}", 20, 0, 20.);
+    fHistoHandler->createShapeHistogram(myDir, hCtrlNjetsAfterCollinearCuts, "CtrlNjetsAfterCollinearCuts", "N_{jets}", 20, 0, 20.);
     for (int i = 0; i < 4; ++i) {
       hCtrlQCDTailKillerCollinear.push_back(0);
       std::stringstream sName;
@@ -812,6 +813,7 @@ namespace HPlus {
     }
 
     // Standard selections have been done, fill histograms
+    fHistoHandler->fillNeventHistogram(hCtrlNjetsAfterCollinearCuts, jetData.getHadronicJetCount());
     fCommonPlotsAfterStandardSelections->fill();
     double myMetValue = metData.getSelectedMET()->et();
     increment(fAfterStandardSelectionsCounter);
@@ -891,6 +893,7 @@ namespace HPlus {
     double myMetValue = metData.getSelectedMET()->et();
 
     fHistoHandler->fillShapeHistogram(hCtrlRtau, tauSelection.getRtauOfTauObject(selectedTau));
+    fHistoHandler->fillNeventHistogram(hCtrlNjetsAfterCollinearCuts, jetData.getHadronicJetCount());
 
     // For cell A, negate the selections
     if (!myLeg1PassedStatus && !myLeg2PassedStatus) {
