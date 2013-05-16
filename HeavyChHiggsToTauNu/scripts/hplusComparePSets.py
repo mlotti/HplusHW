@@ -3,9 +3,12 @@
 '''
 +++ DOC STRINGS
 Usage:
-/hplusComparePSets.py -q -m ../FullHplusMass_130328_170951 -c ../signalAnalysis_cfg.py -r ../histograms.root -s PsetDiffs.txt -d Run2011AB
+hplusComparePSets.py -q -m ../FullHplusMass_130328_170951 -c signalAnalysis_cfg.py -r histograms.root -s PsetDiffs.txt -d Run2011AB
 or, with verbose
-/hplusComparePSets.py -v -m ../FullHplusMass_130328_170951 -c ../signalAnalysis_cfg.py -r ../histograms.root -s PsetDiffs.txt -d Run2011AB
+hplusComparePSets.py -v -m ../FullHplusMass_130328_170951 -c signalAnalysis_cfg.py -r histograms.root -s PsetDiffs.txt -d Run2011AB
+
+another example:
+hplusComparePSets.py -v -m /mnt/flustre/attikis/multicrab_analysis_v44_4_oldreplica_hltmet_trgSF_muonVeto_130130_145112/ -r histograms.root --dataEra Run2011A
 
 Help:
 ./hplusComparePSets.py -h
@@ -16,7 +19,7 @@ Description:
 This is a simple script that compares the PSets between a ROOT file and a multicrab directory.
 The differences are saved to the cwd in the form of a txt file, which by default is named "PSet_Differences.txt".
 Additionally, an edmConfigDump is performed for a user-defined python configuration file  ("signalAnalysis_cfg.py" by default)
-for the user's reference.
+for the users reference.
 '''
 
 ######################################################################
@@ -28,6 +31,7 @@ import sys
 import os
 import re
 from optparse import OptionParser
+import difflib
 ### HPlus modules
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
@@ -44,12 +48,12 @@ def main():
     #print "+++ ARGUMENTS: %s" % (args)
 
     ### Save user-defined (or default) options (if the user fails to provide his own)
-    cfgFileName = options.cfgFileName
+    cfgFileName  = options.cfgFileName
     rootFileName = options.rootFileName
     multicrabDir = options.multicrabDir
 
     ### Get PSets from user-defined python configuration file (using "edmConfigDump" command)
-    EdmCfgDumpPsetsPath = getEdmConfigDumpPsets(options, cfgFileName)
+    #EdmCfgDumpPsetsPath = getEdmConfigDumpPsets(options, cfgFileName)
 
     ### Get PSets from user-defined ROOT file
     RootFilePsetsPath = getRootFilePsets(options, rootFileName )
@@ -181,53 +185,44 @@ def ComparePSets(options, RootFilePsetsPath, MulticrabPsetsPath):
 
     ### Read contents of txt file containing the PSets
     RootFilePsets   = readFile(RootFilePsetsPath)
-    MulticrabPsets = readFile(MulticrabPsetsPath)
-
-    ### Sort the lists for coherence
-    RootFilePsets.sort()
-    MulticrabPsets.sort()
-
-    ### Create lists to place the differences in the two PSets
-    RootFileDiffList   = []
-    MulticrabDiffList = []
-    diffList          = []
-
-    ### Create a user-friendly format for the differences found
-    title = " "* 10 + "RootFile <-> Multicrab" + " "* 10 
-    hLine = "-" * len(title)
-    diffList.append(hLine)
-    diffList.append(title)
-    diffList.append(hLine)
-
-    if options.verbose:
-        print hLine + "\n" + title + "\n" + hLine
-
-    ### Loop over the two lists simultaneously and look for differences
-    for i,j in zip(RootFilePsets, MulticrabPsets):
-        if i not in j:
-            i.strip()
-            RootFileDiffList.append(i)
-        if i not in j:
-            j.strip()
-            MulticrabDiffList.append(j)
-
-    ### Print differences between the two PSets and save to a txt file
-    if options.verbose:
-        print "+++ VERBOSE: Printing differences between the two PSets ..."
-    for i,j in zip(RootFileDiffList, MulticrabDiffList):
-        diff = i + " <-> " + j
-        diffList.append(diff)
-        if options.verbose:
-            print diff
+    MulticrabPsets  = readFile(MulticrabPsetsPath)
 
     ### Save results to a txt file
     saveFileName = options.saveFileName
     saveFilePath = os.getcwd() + "/" + saveFileName
     fileExists(saveFilePath, False)
     saveFile = open(saveFilePath, "w")
+
+    ### Testing 
+    diffList1  = []
+    diffList2  = []
+
+    # Check for strings in RootFilePsets not found in MulticrabPsets
+    for line in RootFilePsets:
+        if line not in MulticrabPsets:
+            diffList1.append(line)
+        else:
+            continue
+
+    # Check for strings in MulticrabPsets not found in RootFilePsets
+    for line in MulticrabPsets:
+        if line not in RootFilePsets:
+            diffList2.append(line)
+        else:
+            continue
+
+    # Get the differences between the two files
+    diff=difflib.ndiff(diffList1, diffList2)
+
     print "+++ Saving differences in PSets to:\n    \"%s\"" % (saveFilePath)
-    for item in diffList:
-        saveFile.write(item+"\n")
+    try:
+        while 1:
+            saveFile.write(diff.next(),)
+            if options.verbose:
+                print diff.next(),
+    except:
+        pass
+
     saveFile.close()
 
     return
@@ -277,8 +272,8 @@ def getUserOptions():
     
     ### Parse the user-defined arguments, and put them into an appropriate format to pass to the readFile(cfgFileName, nLines) function
     parser = OptionParser()
-    parser.add_option("-c", "--cfgFileName" , dest = "cfgFileName" , default = "../signalAnalysis_cfg.py", help = "PATH of python config file to read", metavar = "CFGFILENAME")
-    parser.add_option("-r", "--rootFileName", dest = "rootFileName", default = "../histograms.root"      , help = "PATH of Root file to read", metavar = "ROOTFILENAME")
+    parser.add_option("-c", "--cfgFileName" , dest = "cfgFileName" , default = "signalAnalysis_cfg.py", help = "PATH of python config file to read", metavar = "CFGFILENAME")
+    parser.add_option("-r", "--rootFileName", dest = "rootFileName", default = "histograms.root"      , help = "PATH of Root file to read", metavar = "ROOTFILENAME")
     parser.add_option("-s", "--saveFileName", dest = "saveFileName", default = "PSet_Differences.txt"    , help = "NAME of file for saving the PSet differences", metavar = "SAVEFILENAME")
     parser.add_option("-m", "--multicrabDir", dest = "multicrabDir", default = "../multicrab_XXXXXX_YYYYYY/", help = "PATH to Multicrab dir to read the PSets from", metavar = "MULTICRABDIR")
     parser.add_option("-q", "--quiet", action="store_false", dest = "verbose", default = False, help = "DISABLE verbose (quiet)", metavar = "VERBOSE")
