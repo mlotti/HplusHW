@@ -100,9 +100,10 @@ namespace HPlus {
 
       // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#New_Version_recommended
       if(fTunePEnabled) {
-        reco::TrackRef cktTrack = (muon::tevOptimized(*(muons[i]), 200, 30., 0., 0.25));
-        fMuonsTuneP.push_back(cktTrack->momentum());
-        fMuonsTunePPtError.push_back(cktTrack->ptError());
+        throw cms::Exception("NotYetImplemented") << "TuneP parameters have not yet been updated to 2012 in " << __FILE__ << ":" << __LINE__;
+        reco::Muon::MuonTrackTypePair cktTrackType= (muon::tevOptimized(*(muons[i]), 200, 30., 0., 0.25));
+        fMuonsTuneP.push_back(cktTrackType.first->momentum());
+        fMuonsTunePPtError.push_back(cktTrackType.first->ptError());
       }
     }
 
