@@ -59,6 +59,7 @@ private:
   JetCollection fJets;
   TauCollection fTaus;
   GenParticleCollection fGenTaus; // from original event in embedded, for all in normal
+  GenParticleCollection fGenTausEmbedded;
 
   std::string fPuWeightName;
   Branch<double> fPuWeight;
@@ -132,7 +133,8 @@ TauAnalysisSelector::TauAnalysisSelector(const std::string& puWeight, bool isEmb
                                          const std::string& mcTauMode):
   BaseSelector(),
   //fMuons("Emb"),
-  fGenTaus(isEmbedded ? "gentausOriginal" : "gentaus"),
+  fGenTaus(isEmbedded ? "gentausOriginal" : "gentaus", true),
+  fGenTausEmbedded("gentausEmbedded", true),
   fPuWeightName(puWeight),
   fIsEmbedded(isEmbedded),
   fEmbeddingWTauMuWeights(0),
@@ -217,6 +219,7 @@ void TauAnalysisSelector::setupBranches(TTree *tree) {
     fMuons.setupBranches(tree, isMC());
     //fElectrons.setupBranches(tree, isMC());
     fJets.setupBranches(tree);
+    fGenTausEmbedded.setupBranches(tree);
   }
   fTaus.setupBranches(tree, isMC() && !fIsEmbedded);
   if(isMC())
@@ -241,6 +244,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   fJets.setEntry(entry);
   fTaus.setEntry(entry);
   fGenTaus.setEntry(entry);
+  fGenTausEmbedded.setEntry(entry);
   fPuWeight.setEntry(entry);
   fSelectedVertexCount.setEntry(entry);
   fVertexCount.setEntry(entry);
@@ -288,11 +292,33 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   */
 
   // MC status
+  if(isMC() && fIsEmbedded) {
+    size_t ntaus = 0;
+    for(size_t i=0; i<fGenTausEmbedded.size(); ++i) {
+      GenParticleCollection::GenParticle gen = fGenTausEmbedded.get(i);
+      int daughter = std::abs(gen.daughterPdgId());
+      //if(daughter == 11 || daughter == 13)
+      //  continue;
+      if(std::abs(gen.motherPdgId()) == 24 && std::abs(gen.grandMotherPdgId()) == 2212) { // p->W->tau (unphysical)
+        if(daughter == 11 || daughter == 13)
+          return true;
+        ++ntaus;
+      }
+    }
+    if(ntaus == 0)
+      return true;
+  }
   if(isMC() && fMCTauMode != kMCTauNone) {
     size_t ntaus = 0;
     for(size_t i=0; i<fGenTaus.size(); ++i) {
       GenParticleCollection::GenParticle gen = fGenTaus.get(i);
+      int daughter = std::abs(gen.daughterPdgId());
+      //if(daughter == 11 || daughter == 13)
+      //  continue;
+
       if(std::abs(gen.motherPdgId()) == 24 && std::abs(gen.grandMotherPdgId()) == 6) {
+        if(daughter == 11 || daughter == 13)
+          return true;
         ++ntaus;
       }
     }
@@ -395,6 +421,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   for(size_t i=0; i<selectedTaus.size(); ++i) {
     TauCollection::Tau& tau = selectedTaus[i];
     if(!TauID::decayModeFinding(tau)) continue;
+    if(!TauID::isolation(tau)) continue; // TEMPORARY ISOLATION HERE
 
     if(TauID::isolation(tau)) {
       atLeastOneIsolated = true;
