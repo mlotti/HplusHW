@@ -5,49 +5,37 @@
 ######################################################################
 # System modules
 import sys
-import math
-import array
-import re
-import os
 # ROOT modules
 import ROOT
 from ROOT import gStyle
 # HPlus modules
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 # Script-specific modules
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.QCDHistoHelper as HistoHelper
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.QCDHistoHelper as Helper
 
 ######################################################################
-# User options
+# User options and global definitions
 ######################################################################
-bBatchMode      = True
-sDataEra        = "Run2011A" #"Run2011A" #"Run2011B" #"Run2011AB"
-sLegStyle       = "P"
-sDrawStyle      = "P" # "AP" "EP" "HIST9"
-
-######################################################################
-# Global definitions
-######################################################################
-myRootFilePath  = "info/QCDMeasurementFactorisedInfo.root" 
-myQCDschemes    = ["TauPt", "TauEta", "Nvtx", "Full"]
-myErrorTypes    = ["StatAndSyst", "StatOnly"]
 myValidDataEras = ["Run2011A", "Run2011B", "Run2011AB"]
 myTailKillers   = ["ZeroPlus", "LoosePlus", "MediumPlus", "TightPlus"]
+bBatchMode      = True
+bAddLumiText    = True
+myDataEra       = "Run2011AB"
+sLegStyle       = "P"
+sDrawStyle      = "EP"
+yMinRatio       = 0.0
+yMaxRatio       = 2.0
+yMaxFactor      = 1.5
+yMinLog         = 1E-01
+yMinLogNorm     = 1E-04
+yMaxFactorLog   = 5
 
-yMinRatio     = 0.0
-yMaxRatio     = 2.0
-yMaxFactor    = 1.5
-yMinLog       = 1E-01
-yMinLogNorm   = 1E-04
-yMaxFactorLog = 5
-
+myRootFilePath  = "info/QCDMeasurementFactorisedInfo.root" 
 ROOT.gROOT.SetBatch(bBatchMode)
 
 ######################################################################
@@ -58,373 +46,223 @@ def main():
     ##################
     # Purity plots 
     ##################
-    PurityStdSelList = HistoHelper.GetPurityHistoNames(sMyLeg="StandardSelections")
+    PurityStdSelList = Helper.GetPurityHistoNames(sMyLeg="StandardSelections")
     doHistosCompare(PurityStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Purity_StdSel", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
     
-    PurityLeg1List = HistoHelper.GetPurityHistoNames(sMyLeg="Leg1")
+    PurityLeg1List = Helper.GetPurityHistoNames(sMyLeg="Leg1")
     doHistosCompare(PurityLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Purity_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
-
-    PurityLeg2List = HistoHelper.GetPurityHistoNames(sMyLeg="Leg2")
+    
+    PurityLeg2List = Helper.GetPurityHistoNames(sMyLeg="Leg2") #should be the same for all Tail-Killers
     doHistosCompare(PurityLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Purity_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
 
     ##################    
     # Efficiency plots 
     ##################
-    EfficiencyLeg1List = HistoHelper.GetEfficiencyHistoNames(sMyLeg="leg1")
+    EfficiencyLeg1List = Helper.GetEfficiencyHistoNames(sMyLeg="leg1") 
     doHistosCompare(EfficiencyLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Efficiency_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
-    EfficiencyLeg2List = HistoHelper.GetEfficiencyHistoNames(sMyLeg="leg2")
-    doHistosCompare(EfficiencyLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Efficiency_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    #EfficiencyLeg2List = Helper.GetEfficiencyHistoNames(sMyLeg="leg2") #should be the same for all Tail-Killers
+    #doHistosCompare(EfficiencyLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Efficiency_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
 
     ##################
     # mT shapes 
     ##################
-    MtShapesStdSelList = HistoHelper.GetMtShapeHistoNames(sMyLeg="StandardSelections")
-    doHistosCompare(MtShapesStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_StdSel", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    #MtShapesStdSelList = Helper.GetMtShapeHistoNames(sMyLeg="StandardSelections") #should be the same for all Tail-Killers
+    #doHistosCompare(MtShapesStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_StdSel", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
     
-    MtShapesLeg1List = HistoHelper.GetMtShapeHistoNames(sMyLeg="Leg1")
+    MtShapesLeg1List = Helper.GetMtShapeHistoNames(sMyLeg="Leg1")
     doHistosCompare(MtShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
-    MtShapesLeg2List = HistoHelper.GetMtShapeHistoNames(sMyLeg="Leg2")
-    doHistosCompare(MtShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    #MtShapesLeg2List = Helper.GetMtShapeHistoNames(sMyLeg="Leg2") #should be the same for all Tail-Killers
+    #doHistosCompare(MtShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShapes_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
     #binList = [1] #[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] #bin 0 = underflow, bin 10 = overflow
     #for index in binList:
-        #MtBinShapesLeg1List   = HistoHelper.GetMtBinShapeHistoNames(lBinList = [index], sMyLeg="Leg1")
+        #MtBinShapesLeg1List   = Helper.GetMtBinShapeHistoNames(lBinList = [index], sMyLeg="Leg1")
         #doHistosCompare(MtBinShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Mt_Bin" + str(index), bNormalizeToOne = True, bRatio=False, bInvertRatio=False)
 
 
     ##################
     # MET shapes 
     ##################
-    MetShapesStdSelList = HistoHelper.GetMetShapeHistoNames(sMyLeg="")
-    doHistosCompare(MetShapesStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShapes_StdSel", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    #MetShapesStdSelList = Helper.GetMetShapeHistoNames(sMyLeg="") #should be the same for all Tail-Killers
+    #doHistosCompare(MetShapesStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShapes_StdSel", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
     
-    #MetShapesLeg1List = HistoHelper.GetMetShapeHistoNames(sMyLeg="AfterLeg1")
-    #doHistosCompare(MetShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShapes_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    MetShapesLeg1List = Helper.GetMetShapeHistoNames(sMyLeg="AfterLeg1")
+    doHistosCompare(MetShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShapes_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
-    MetShapesLeg2List = HistoHelper.GetMetShapeHistoNames(sMyLeg="AfterLeg2")
-    doHistosCompare(MetShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShapes_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    #MetShapesLeg2List = Helper.GetMetShapeHistoNames(sMyLeg="AfterLeg2") #should be the same for all Tail-Killers
+    #doHistosCompare(MetShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShapes_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
     #binList = [1] #[1, 2, 3, 4, 5, 6, 7, 8, 9, 10] #bin 0 = underflow, bin 10 = overflow
     #for index in binList:
-        #MetBinShapesLeg1List   = HistoHelper.GetMetBinShapeHistoNames(lBinList = [index], sMyLeg="Leg1")
+        #MetBinShapesLeg1List   = Helper.GetMetBinShapeHistoNames(lBinList = [index], sMyLeg="Leg1")
         #doHistosCompare(MetBinShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Met_Bin" + str(index), bNormalizeToOne = True, bRatio=False, bInvertRatio=False)
 
     ##################
     # Full mass shapes 
     ##################
-    MassShapeLeg1List = HistoHelper.GetMassShapeHistoNames(sMyLeg="Leg1")
+    MassShapeLeg1List = Helper.GetMassShapeHistoNames(sMyLeg="Leg1")
     doHistosCompare(MassShapeLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MassShapes_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
 
     ##################
     # QCD Event Yields
     ##################
-    NqcdList = HistoHelper.GetNQcdHistoNames()
+    NqcdList = Helper.GetNQcdHistoNames()
     doHistosCompare(NqcdList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NQcd", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
-    #getNqcdNumbers()
 
     
     ##################
     # Number of events
     ##################
-    NEvtsStdSelList = HistoHelper.GetNEventsHistoNames(sMyLeg="StandardSelections")
-    doHistosCompare(NEvtsStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NEvts_StdSel", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    #NEvtsStdSelList = Helper.GetNEventsHistoNames(sMyLeg="StandardSelections") #should be the same for all Tail-Killers
+    #doHistosCompare(NEvtsStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NEvts_StdSel", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
-    NEvtsLeg1List = HistoHelper.GetNEventsHistoNames(sMyLeg="Leg1")
+    NEvtsLeg1List = Helper.GetNEventsHistoNames(sMyLeg="Leg1")
     doHistosCompare(NEvtsLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NEvts_Leg1", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
-    NEvtsLeg2List = HistoHelper.GetNEventsHistoNames(sMyLeg="Leg2")
-    doHistosCompare(NEvtsLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NEvts_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    #NEvtsLeg2List = Helper.GetNEventsHistoNames(sMyLeg="Leg2") 
+    #doHistosCompare(NEvtsLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "NEvts_Leg2", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
 
     ##################
     # Number jets 
     ##################
-    NjetsList  = HistoHelper.GetCtrlNjetsHistoNames()
-    doHistosCompare(NjetsList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Njets", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    #NjetsList  = Helper.GetCtrlNjetsHistoNames() #should be the same for all Tail-Killers
+    #doHistosCompare(NjetsList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Njets", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
         
     ##################
     # Number b-jets
     ##################
-    NbjetsList  = HistoHelper.GetCtrlNbjetsHistoNames()
-    doHistosCompare(NbjetsList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Nbjets", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
+    #NbjetsList  = Helper.GetCtrlNbjetsHistoNames() #should be the same for all Tail-Killers
+    #doHistosCompare(NbjetsList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "Nbjets", bNormalizeToOne = False, bRatio=False, bInvertRatio=False)
 
+
+    ##################
+    # LaTeX Tables
+    ##################
+    getNqcdTable(fileName = "NQcd_Event_Yields.tex")
 
     return
 
 ######################################################################
-def getNqcdNumbers():
-    myDirsDict = getTailKillerDirs()
+def getNqcdTable(fileName):
 
-    print "*** sDataEra = ", sDataEra
+    myDirsDict = Helper.getTailKillerDir(myTailKillers, myDataEra)
+    outFile = open(fileName, "w")
+    
+    # Create the LaTeX table
+    outFile.write(r"\renewcommand{\arraystretch}{1.2}" + "\n")
+    outFile.write(r"\begin{table}[ht]" + "\n")
+    outFile.write(r"\centering" + "\n")
+    outFile.write(r"\label{tab:Purities:%s}" % (myDataEra) + "\n")
+    outFile.write(r"\begin{tabular}{l c  c c c c}" + "\n")
+    outFile.write(r"\\" + "\n")
+    outFile.write(r"\hline" + "\n")
+    outFile.write(r"Tail-Killer & Events &  & Stat. &  & Syst. \\" + "\n")
+    outFile.write(r"\hline" + "\n")
+
     for tailKiller in myTailKillers:
         dirName  = myDirsDict[tailKiller]
         filePath =  dirName + "/info/EventYieldSummary_m120.txt"
         myFile = open(filePath, "r")
-
-        if tailKiller == "ZeroPlus":
-            tailKiller = r"\DeltaPhi_{\text{Zero+}}"
-        elif tailKiller == "LoosePlus":
-            tailKiller = r"\DeltaPhi_{\text{Loose+}}"
-        elif tailKiller == "MediumPlus":
-            tailKiller = r"\DeltaPhi_{\text{Medium+}}"
-        elif tailKiller == "TightPlus":
-            tailKiller = r"\DeltaPhi_{\text{Tight+}}"
-        else:
-            print "*** ERROR! Unexpected Tail-Killer scenario name."
-            sys.exit()
-            
+        
         for line in myFile.readlines():
             if "Multijets" not in line:
                 continue
             else:
-                #print tailKiller + " : " + line.strip().replace("+-", "$\pm$").replace("(stat.)", "").replace("(syst.)", "").replace("Multijets:", "\NQcd = ") + "\\"
-                print line.strip().replace("+-", "$\pm$").replace("(stat.)", "").replace("(syst.)", "").replace("Multijets:", r"N$^{\text{QCD}}_{%s}$ = " % (tailKiller)) + r"\\"
-                print r"\vspace{0.2cm}"
+                line = line.strip().replace("+-", "$\pm$").replace("(stat.)", "").replace("(syst.)", "").replace("Multijets:", (tailKiller))
+                for entry in line.split()[:-1]:
+                    outFile.write(entry + r" & ")
+                    
+                outFile.write(line.split()[len(line.split())-1] + r" \\ " + "\n")
+
+    # Close-up the table
+    outFile.write(r"\hline" + "\n")
+    outFile.write(r"\end{tabular}" + "\n")
+    outFile.write(r"\end{table}" + "\n")
+    outFile.write(r"\renewcommand{\arraystretch}{1.0}" + "\n")
+    outFile.close()
+    print "\n*** Saved LaTeX table in \"%s\"\n" % (fileName)
+
     return
-
-######################################################################
-def getDataEra():
-
-    cwd = os.getcwd()
-    myDataEra = None
-    
-    # Check all valid data-eras
-    for era in myValidDataEras:
-        if "_" + era + "_" in cwd:
-            myDataEra = era
-        else:
-            continue
-
-    if myDataEra == None:
-        print "*** ERROR: Invalid data-era selected. Please select one of the following:\n    %s" %(myValidDataEras)
-        sys.exit()
-    else:
-        return myDataEra
-
-######################################################################
-def getLumi(myDataEra):
-
-    # Check if user-defined data-era is allowed
-    if myDataEra == "Run2011A":
-        myLumi            = 2311.191 #(pb)
-    elif myDataEra == "Run2011B":
-        myLumi            = 2739 #(pb)
-    elif myDataEra == "Run2011AB":
-        myLumi            = 5050.191 #(pb)
-    else:
-        print "*** ERROR: Invalid data-era selected. Please select one of the following:\n    %s" %(myValidDataEras)
-        sys.exit()
-
-    return myLumi
-
-######################################################################
-def checkUserOptions(QCDscheme, ErrorType):
-    
-    if QCDscheme not in myQCDschemes:
-        print "*** ERROR: Invalid QCD factorisation scheme selected. Please select one of the following:\n    %s" %(myQCDschemes)
-        sys.exit()
-        
-    if ErrorType not in myErrorTypes:
-        print "*** ERROR: Invalid Error-Type selected. Please select one of the following:\n    %s" %(myFactorisationSchemes)
-        sys.exit()
-    
-    return
-
-######################################################################
-def getRootFile(myPath):
-
-    if os.path.exists(myPath):
-        print "*** Opening ROOT file:\n    \"%s\"" % (myPath)
-        f = ROOT.TFile.Open(myPath)
-        return f
-    else:
-        print "*** ERROR: The path \"%s\" defined for the ROOT file is invalid. Please check the path name." % (myPath)
-        sys.exit()
-
-######################################################################
-def getHisto(rootFile, pathName):
-    
-    histo = rootFile.Get(pathName)
-    if not isinstance(histo, ROOT.TH1):
-        print "*** ERROR: Histogram \"%s\" is not a ROOT.TH1 instance. Check that its path is correct." %(pathName)
-        sys.exit()
-    else:
-        return histo
-
-######################################################################
-def getTailKillerDirs():
-    
-    myDirsDict = {}
-    for tailKiller in myTailKillers:
-        for dirName in os.walk('.').next()[1]: 
-            if ("_" + sDataEra  + "_") not in dirName:
-                continue
-            else:
-                if tailKiller in dirName:
-                    myDirsDict[tailKiller] = dirName
-                    #print "*** tailKiller = %s , dirName = %s" % (tailKiller, dirName)
-                else:
-                    continue
-
-    if len(myDirsDict) < 1:
-        print "*** ERROR: No valid Tail-Killer directory was found in the current working directory. Check that the Tail-Killer scenarios are valid. %s" % (myTailKillers)
-        sys.exit()
-    else:
-        return myDirsDict
 
 ######################################################################
 def doHistosCompare(HistoList, myPath, QCDscheme, ErrorType, mySaveName, bNormalizeToOne, bRatio, bInvertRatio):
                 
-    # Check the current working directory name for a valid data-era
-    myDataEra = sDataEra
-
     # Get the integrated luminosity of the data-era (only used for addind lumi text)
-    myLumi = getLumi(myDataEra)
+    myLumi = Helper.getLumi(myDataEra)
 
     # Check that the user-defined options are valid
-    checkUserOptions(QCDscheme, ErrorType)
+    Helper.checkUserOptions(QCDscheme, ErrorType)
 
     # Get the relevant Tail-Killer directories to be read
-    myDirsDict = getTailKillerDirs()
+    myDirsDict = Helper.getTailKillerDir(myTailKillers, myDataEra)
 
     counter = 0
     #for tailKiller in myDirsDict.keys(): #this is not used as it screws-up the ordering (dictionaries have no order)
     for tailKiller in myTailKillers:
+
         dirName = myDirsDict[tailKiller]
-        
-        print "\n*** Processing Tail-Killer scenario \"%s\"" % (tailKiller)
-        rootFile = getRootFile(dirName + "/" + myPath)
+        rootFile = Helper.getRootFile(dirName + "/" + myPath)
 
         # Plot all histograms defined in the HistoList    
-        print "*** There are \"%s\" histogram(s) in the plotting queue (QCDscheme = \"%s\"):" % (len(HistoList), QCDscheme)
+        print "*** There are \"%s\" histogram(s) in the plotting queue (QCDscheme = \"%s\" , Tail-Killer = \"%s\"):" % (len(HistoList), QCDscheme, tailKiller)
         for h in HistoList:
-            folderName = "Contraction_" + QCDscheme
-            histoName  = h.name.replace("*QcdScheme*", QCDscheme).replace("*ErrorType*", ErrorType)
-            # Temporary quick-fix to naming difference
-            if "Shape_" in histoName:
-                histoName = histoName.replace("StatAndSyst", "fullUncert").replace("StatOnly", "statUncert") 
-            pathName   = folderName + "/" + histoName
-            histo      = getHisto(rootFile, pathName)
-            
-            if mySaveName == None:
-                saveName = myDataEra + "_" + histoName
-                saveName = saveName.replace("/", "__")
-            else:
-                saveName = myDataEra + "_" + mySaveName
-            saveName = saveName.replace("Leg1", "MetLeg").replace("Leg2", "TauLeg").replace("leg1", "MetLeg").replace("leg2", "TauLeg")
-            xLabel   = h.xLabel
-            yLabel   = h.yLabel
-            xMin     = h.xMin
-            xMax     = h.xMax
-            logX     = h.bLogX
-            yMin     = h.yMin
-            yMax     = h.yMax
-            logY     = h.bLogY
-            legendLabel = tailKiller # = h.legendLabel
 
+            pathName, histoName  = Helper.getHistoNameAndPath(QCDscheme, ErrorType, h)
+            histo                = Helper.getHisto(rootFile, pathName)
+            saveName             = Helper.getFullSaveName(myDataEra, None, bNormalizeToOne, mySaveName)
+
+            # Get histogram attributes as defined in QCDHistoHelper.py
+            xLabel       = h.xLabel
+            yLabel       = h.yLabel
+            xMin         = h.xMin
+            xMax         = h.xMax
+            logX         = h.bLogX
+            yMin         = h.yMin
+            yMax         = h.yMax
+            logY         = h.bLogY
+            legendLabel  = tailKiller
+            legendHeader = h.legendHeader
+            
             # Create and draw the plots
             if counter == 0:
-                p = createPlot(histo, myLumi, legendLabel)
-                h = histograms.Histo(setHistoStyle(histo, counter), legendLabel, sLegStyle, sDrawStyle)
+                print "    Creating  \"%s\" (%s)" % (histoName, tailKiller)
+                p = Helper.createPlot(histo, myLumi, legendLabel, sLegStyle, sDrawStyle)
+                h = histograms.Histo(Helper.setHistoStyle(histo, counter), legendLabel, sLegStyle, sDrawStyle)
             else:
-                h = histograms.Histo(setHistoStyle(histo, counter), legendLabel, sLegStyle, sDrawStyle)
+                h = histograms.Histo(Helper.setHistoStyle(histo, counter), legendLabel, sLegStyle, sDrawStyle)
                 histograms.Histo(h, histoName, sLegStyle, sDrawStyle)
+                print "    Appending  \"%s\" (%s)" % (histoName, tailKiller)
                 p.histoMgr.appendHisto(h)
                                     
             # Increment counter
             counter = counter + 1
             binValue = h.getRootHisto().GetBinContent(2)
-            saveFile = open("efficiencies.txt", "a")
-            saveFile.write( "%s: , %s: , %s: , {%s}\n" % (sDataEra, tailKiller, mySaveName, binValue) )
 
     if bNormalizeToOne == True:
         p.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
         yMinLog == yMinLogNorm
-        saveName = saveName + "_normalizedToOne"
-                    
-    # Customise the plot
-    if yMin == None or yMax == None:
-        drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, ratio=bRatio, ratioInvert=bInvertRatio, ratioYlabel="Ratio", opts={"ymaxfactor": yMaxFactor}, opts2={"ymin": yMinRatio, "ymax": yMaxRatio}, optsLog={"ymin": yMinLog, "ymaxfactor": yMaxFactorLog})
-    else:
-        drawPlot = plots.PlotDrawer(log=logY, addLuminosityText=True, ratio=bRatio, ratioInvert=bInvertRatio, ratioYlabel="Ratio", opts={"ymin": yMin, "ymax": yMax}, opts2={"ymin": yMinRatio, "ymax": yMaxRatio}, optsLog={"ymin": yMin, "ymax": yMax})
+
+    # Customize the plots
+    drawPlot = Helper.customizePlot(logY, bAddLumiText, bRatio, bInvertRatio, "Ratio", yMin, yMax, yMaxFactor, yMinRatio, yMaxRatio, yMinLog, yMaxFactorLog)
 
     # Save the plots
-    drawPlot(p, saveName, xlabel=xLabel, ylabel=yLabel, customizeBeforeDraw=setLabelOption)
-    print "*** Saved \"%s\"" % (saveName)
+    drawPlot(p, saveName, xlabel=xLabel, ylabel=yLabel, customizeBeforeDraw=Helper.setLabelOption)
+    print "*** Saved canvas as \"%s\"\n" % (saveName)
 
     return 
 
 ######################################################################
-def setLabelOption(p):
-   
-    # See: http://root.cern.ch/root/htmldoc/TAxis.html#TAxis:LabelsOption
-    if p.getFrame().GetXaxis().GetLabels() == None:
-        return
-    else:
-        p.getFrame().GetXaxis().LabelsOption("u") #"h", "v" "d" "u"
-        p.getFrame().GetXaxis().SetLabelSize(14.5) #"h", "v" "d" "u"
-        
-    return
-
-######################################################################    
-def setHistoStyle(histo, counter):
-
-    # Since the list of supported styles/colours contains 12 entries, if counter goes out of scope it
-    if counter > 11:
-        counter = 0
-        
-    myColours = [ROOT.kRed+1, ROOT.kAzure+1, ROOT.kOrange+1, ROOT.kViolet+1, ROOT.kMagenta+1, ROOT.kGreen+3, 
-                 ROOT.kRed-7, ROOT.kOrange-7, ROOT.kGreen-5, ROOT.kAzure-7,  ROOT.kViolet-7, ROOT.kMagenta-7]
-    
-    myMarkerStyles = [ROOT.kFullCircle, ROOT.kFullSquare, ROOT.kFullTriangleUp, ROOT.kFullTriangleDown, ROOT.kStar, ROOT.kPlus, ROOT.kCircle, 
-                      ROOT.kOpenCircle, ROOT.kOpenSquare, ROOT.kOpenTriangleUp, ROOT.kOpenCross, ROOT.kDot]
-
-    myLineStyles = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] #[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2]
-
-    histo.SetMarkerColor(myColours[counter])
-    histo.SetMarkerColor(myColours[counter])
-    histo.SetMarkerStyle(myMarkerStyles[counter])
-    histo.SetMarkerSize(1.2)
-
-    histo.SetLineColor(myColours[counter])
-    histo.SetLineStyle(myLineStyles[counter]);
-    histo.SetLineWidth(2);
-
-    histo.SetFillStyle(3001)
-    histo.SetFillColor(myColours[counter])
-    
-    return histo
-
-######################################################################
-def createPlot(histo, myLumi, legendLabel, **kwargs):
-
-    style = tdrstyle.TDRStyle()
-
-    if isinstance(histo, ROOT.TH1):
-        args = {"legendStyle": sLegStyle, "drawStyle": sDrawStyle}
-        args.update(kwargs)
-        histo.GetZaxis().SetTitle("")
-        #p = plots.PlotBase([histograms.Histo(histo, legendLabel, **args)])
-        p = plots.ComparisonManyPlot(histograms.Histo(histo, legendLabel, **args), [])
-        p.setLuminosity(myLumi)
-        return p
-    else:
-        print "*** ERROR: Histogram \"%s\" is not a valid instance of a ROOT.TH1" % (histo)
-        sys.exit()
-
-######################################################################
 if __name__ == "__main__":
 
-    # Call the main function
     main()
 
-    # Keep session alive (otherwise canvases close automatically)
     if not bBatchMode:
         raw_input("*** DONE! Press \"ENTER\" key exit session: ")
 
