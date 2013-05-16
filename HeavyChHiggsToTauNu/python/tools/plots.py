@@ -821,6 +821,12 @@ class PlotBase:
     def removeLegend(self):
         delattr(self, "legend")
 
+    ## Set the legend header
+    #
+    # \param legendHeader String for legend header
+    def setLegendHeader(self, legendHeader):
+        self.legendHeader = legendHeader        
+
     ## Add an additional object to be drawn before the plot histograms/graphs
     #
     # \param obj      Object
@@ -893,6 +899,8 @@ class PlotBase:
             obj.Draw(option+"same")
 
         if hasattr(self, "legend"):
+            if hasattr(self, "legendHeader"):
+                self.legend.SetHeader(self.legendHeader)
             self.legend.Draw()
 
         # Redraw the axes in order to get the tick marks on top of the
