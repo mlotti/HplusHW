@@ -2668,10 +2668,11 @@ class NtupleCache:
     # \param cacheFileName  Path to the cache file
     # \param maxEvents      Maximum number of events to process (-1 for all events)
     # \param printStatus    Print processing status information
+    # \param macros         Additional macro files to compile and load
     #
     # I would like to make \a process redundant, but so far I haven't
     # figured out a bullet-proof method for that.
-    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root", maxEvents=-1, printStatus=True):
+    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root", maxEvents=-1, printStatus=True, macros=[]):
         self.treeName = treeName
         self.cacheFileName = cacheFileName
         self.selectorName = selector
@@ -2689,8 +2690,9 @@ class NtupleCache:
         self.macros = [
             os.path.join(base, "BaseSelector.C"),
             os.path.join(base, "Branches.C"),
+            ] + [os.path.join(base, x) for x in macros] + [
             os.path.join(base, self.selectorName+".C")
-            ]
+            ] 
 
         self.cacheFile = None
 
