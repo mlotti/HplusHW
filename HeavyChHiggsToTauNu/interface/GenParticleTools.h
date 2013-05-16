@@ -4,8 +4,10 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/Common/interface/Ptr.h"
 
-#include<iostream>
+#include<vector>
+//#include<iostream>
 
 namespace HPlus {
   namespace GenParticleTools {
@@ -58,6 +60,10 @@ namespace HPlus {
     const reco::GenParticle *findTauDaughter(const reco::GenParticle *tau);
 
     const math::XYZTLorentzVector calculateVisibleTau(const reco::GenParticle *tau);
+
+    std::vector<const reco::GenParticle *> findTTBarWdecays(const edm::PtrVector<reco::GenParticle>& particles);
+
+
   }
 }
 

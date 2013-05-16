@@ -149,5 +149,43 @@ namespace HPlus {
       visibleTauHelper(tau, result);
       return result;
     }
+
+    std::vector<const reco::GenParticle *> findTTBarWdecays(const edm::PtrVector<reco::GenParticle>& particles) {
+      const reco::GenParticle *W1 = 0;
+      const reco::GenParticle *W2 = 0;
+
+      for(edm::PtrVector<reco::GenParticle>::const_iterator iGen = particles.begin(); iGen != particles.end(); ++iGen) {
+        const reco::GenParticle *gen = &(**iGen);
+        if(std::abs(gen->pdgId()) != 24)
+          continue;
+
+        if(gen->mother() && std::abs(gen->mother()->pdgId()) != 6)
+          continue;
+
+        if(!W1)
+          W1 = gen;
+        else if(!W2)
+          W2 = gen;
+        else
+          throw cms::Exception("Assert") << "Third W from top? at " << __FILE__ << ":" << __LINE__ << std::endl;
+      }
+      if(!W1)
+        throw cms::Exception("Assert") << "W1 not found at " << __FILE__ << ":" << __LINE__  << std::endl;
+      if(!W2)
+        throw cms::Exception("Assert") << "W2 not found at " << __FILE__ << ":" << __LINE__  << std::endl;
+
+      const reco::GenParticle *W1daughter = findMaxNonNeutrinoDaughter(W1);
+      const reco::GenParticle *W2daughter = findMaxNonNeutrinoDaughter(W2);
+      if(!W1daughter)
+        throw cms::Exception("Assert") << "W1daughter not found at " << __FILE__ << ":" << __LINE__ << std::endl;
+      if(!W2daughter)
+        throw cms::Exception("Assert") << "W2daughter not found at " << __FILE__ << ":" << __LINE__ << std::endl;
+
+      std::vector<const reco::GenParticle *> ret;
+      ret.push_back(W1daughter);
+      ret.push_back(W2daughter);
+
+      return ret;
+    }
   }
 }
