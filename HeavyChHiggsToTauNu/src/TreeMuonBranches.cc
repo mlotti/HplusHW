@@ -100,9 +100,12 @@ namespace HPlus {
 
       // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#New_Version_recommended
       if(fTunePEnabled) {
+        throw cms::Exception("NotYetImplemented") << "TuneP needs update of DataFormats/MuonReco, which is not yet integrated to the common checkoutTags.sh in " << __FILE__ << ":" << __LINE__;
+        /*
         reco::TrackRef cktTrack = (muon::tevOptimized(*(muons[i]), 200, 30., 0., 0.25));
         fMuonsTuneP.push_back(cktTrack->momentum());
         fMuonsTunePPtError.push_back(cktTrack->ptError());
+        */
       }
     }
 
