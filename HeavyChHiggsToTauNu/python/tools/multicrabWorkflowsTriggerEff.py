@@ -184,7 +184,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
             if dataset.isData():                                                                                                                                       
                 # For data, construct one analysis workflow per trigger type                                                                                           
                 pd = datasetName.split("_")[0]                                                                                                                         
-                if pd == "Tau":                                                                                                                                        
+                if pd == "Tau" or pd == "TauParked":
                     dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=wf.triggerOR, **commonArgs))                                                    
                 elif pd == "MultiJet":                                                                                                                                 
                     if datasetName in quadJetTriggers:                                                                                                                 
