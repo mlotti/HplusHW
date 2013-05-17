@@ -2419,12 +2419,18 @@ def addPattuple_v53_3_taumet(datasets):
         # User mean 2803.4, min 875.0, max 7831.1
         # Mean 85.1 MB, min 34.7 MB, max 189.6 MB
         "Tau_198022-198523_2012C_Aug24":          TaskDef("/Tau/local-Run2012C_24Aug2012_v1_AOD_198022_198523_pattuple_taumet_v53_3-450df8079da161796ef812c3271c9793/USER"),
-        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
+        # 3498600 events, 1703 jobs
+        # User mean 2173.1, min 115.7, max 12412.6
+        # Mean 65.8 MB, min 4.6 MB, max 275.6 MB
+        "Tau_198941-202504_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_198941_202504_pattuple_taumet_v53_3-71928e872913442feb2116b8eeda1951/USER"),
         # 78436 events, 17 jobs
         # User mean 5151.1, min 1659.8, max 11922.5
         # Mean 138.2 MB, min 62.5 MB, max 270.4 MB
         "Tau_201191-201191_2012C_Dec11":          TaskDef("/Tau/local-Run2012C_EcalRecover_11Dec2012_v1_AOD_201191_201191_pattuple_taumet_v53_3-44499bd8f201cef0239f3c1d1b9cedf4/USER"),
-        "Tau_202972-203742_2012C_Prompt":         TaskDef(""),
+        # 166145 events, 33 jobs
+        # User mean 4980.1, min 575.2, max 15776.4
+        # Mean 146.1 MB, min 20.1 MB, max 377.4 MB
+        "Tau_202972-203742_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_202972_203742_pattuple_taumet_v53_3-6f655fd49a479f9532abee7850e734b5/USER"),
 
         #### Winter13 Reprocessing
         # 474834 events, 187 jobs
