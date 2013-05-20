@@ -232,7 +232,13 @@ namespace HPlus {
       output.fWeight = mcEfficiency(value);
       output.fWeightAbsUnc = mcEfficiencyAbsoluteUncertainty(value);
     }
+
+
+    if(fVariationEnabled) {
+      output.fWeight += fVariationShiftBy*output.fWeightAbsUnc;
+      output.fWeightAbsUnc = 0; // Absolute uncertainty does not make much sense after variation
+    }
+
     return output;
   }
-  
 }

@@ -11,7 +11,10 @@ namespace HPlus {
   {}
   EfficiencyScaleFactorBase::Data::~Data() {}
 
-  EfficiencyScaleFactorBase::EfficiencyScaleFactorBase(const edm::ParameterSet& iConfig) {
+  EfficiencyScaleFactorBase::EfficiencyScaleFactorBase(const edm::ParameterSet& iConfig):
+    fVariationEnabled(iConfig.getParameter<bool>("variationEnabled")),
+    fVariationShiftBy(iConfig.getParameter<double>("variationShiftBy"))
+  {
     std::string mode = iConfig.getUntrackedParameter<std::string>("mode");
     if(mode == "dataEfficiency")
       fMode = kDataEfficiency;
