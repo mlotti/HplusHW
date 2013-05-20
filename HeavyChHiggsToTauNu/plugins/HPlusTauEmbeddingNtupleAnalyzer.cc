@@ -18,6 +18,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
@@ -46,6 +47,9 @@ public:
 
 private:
   void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+  void endLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
+  void endJob();
+
   void reset();
 
   typedef math::XYZTLorentzVector XYZTLorentzVector;
@@ -63,7 +67,7 @@ private:
 
   HPlus::EventWeight fEventWeight;
   HPlus::HistoWrapper fHistoWrapper;
-  HPlus::EmbeddingMuonEfficiency fEmbeddingMuonEfficiency;
+  HPlus::EventCounter eventCounter;
 
   HPlus::TreeEventBranches fEventBranches;
   HPlus::TreeVertexBranches fSelectedVertexBranches;
@@ -77,11 +81,21 @@ private:
   HPlus::TreeGenTauBranches fGenTausOriginal;
   HPlus::TreeGenTauBranches fGenTausEmbedded;
 
+  struct MuonEff {
+    MuonEff(const edm::ParameterSet& pset, const std::string& n): efficiency(pset), name(n) {}
+
+    void book(TTree *tree) { tree->Branch(name.c_str(), &values); }
+    void reset() { values.clear(); }
+
+    HPlus::EmbeddingMuonEfficiency efficiency;
+    std::string name;
+    std::vector<double> values;
+  };
+  std::vector<MuonEff> fMuonEffs;
+
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
   std::vector<BoolItem> fBools;
-
-  double fEmbeddingMuonEfficiencyWeight;
 };
 
 HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::ParameterSet& iConfig):
@@ -91,7 +105,7 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fGenTauEmbeddedSrc(iConfig.getParameter<edm::InputTag>("genTauEmbeddedSrc")),
   fEventWeight(iConfig),
   fHistoWrapper(fEventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
-  fEmbeddingMuonEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonEfficiency")),
+  eventCounter(iConfig, fEventWeight, fHistoWrapper),
   fSelectedVertexBranches(iConfig, "selectedPrimaryVertex", "selectedPrimaryVertexSrc"),
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fTriggerBranches(iConfig),
@@ -103,8 +117,14 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fGenTausEmbedded("gentausEmbedded")
 {
 
-  edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("mets");
+  edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("muonEfficiencies");
   std::vector<std::string> names = pset.getParameterNames();
+  for(size_t i=0; i<names.size(); ++i) {
+    fMuonEffs.push_back(MuonEff(pset.getUntrackedParameter<edm::ParameterSet>(names[i]), fMuonBranches.getPrefix()+"_efficiency_"+names[i]));
+  }
+
+  pset = iConfig.getParameter<edm::ParameterSet>("mets");
+  names = pset.getParameterNames();
   for(size_t i=0; i<names.size(); ++i) {
     fMets.push_back(MetItem(names[i], pset.getParameter<edm::InputTag>(names[i])));
   }
@@ -129,6 +149,11 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fGoodVertexBranches.book(fTree);
   fTriggerBranches.book(fTree);
   fMuonBranches.book(fTree);
+
+  for(size_t i=0; i<fMuonEffs.size(); ++i) {
+    fMuonEffs[i].book(fTree);
+  }
+
   //fElectronBranches.book(fTree);
   fTauBranches.book(fTree);
   fJetBranches.book(fTree);
@@ -145,11 +170,16 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   for(size_t i=0; i<fBools.size(); ++i) {
     fTree->Branch(fBools[i].name.c_str(), &(fBools[i].value));
   }
-
-  fTree->Branch("weight_embeddingMuonEfficiency", &fEmbeddingMuonEfficiencyWeight);
 }
 
 HPlusTauEmbeddingNtupleAnalyzer::~HPlusTauEmbeddingNtupleAnalyzer() {}
+
+void HPlusTauEmbeddingNtupleAnalyzer::endLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+  eventCounter.endLuminosityBlock(iBlock, iSetup);
+}
+void HPlusTauEmbeddingNtupleAnalyzer::endJob() {
+  eventCounter.endJob();
+}
 
 void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   double nan = std::numeric_limits<double>::quiet_NaN();
@@ -166,6 +196,10 @@ void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   fGenTausOriginal.reset();
   fGenTausEmbedded.reset();
 
+  for(size_t i=0; i<fMuonEffs.size(); ++i) {
+    fMuonEffs[i].reset();
+  }
+
   for(size_t i=0; i<fMets.size(); ++i) {
     fMets[i].value.SetXYZT(nan, nan, nan, nan);
   }
@@ -175,7 +209,6 @@ void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   for(size_t i=0; i<fBools.size(); ++i) {
     fBools[i].value = false;
   }
-  fEmbeddingMuonEfficiencyWeight = 1.0;
 }
 
 void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -183,10 +216,6 @@ void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const ed
   fSelectedVertexBranches.setValues(iEvent);
   fGoodVertexBranches.setValues(iEvent);
   fTriggerBranches.setValues(iEvent);
-
-  HPlus::EmbeddingMuonEfficiency::Data embeddingMuonData = fEmbeddingMuonEfficiency.getEventWeight(iEvent);
-  fEmbeddingMuonEfficiencyWeight = embeddingMuonData.getEventWeight();
-  fEventWeight.multiplyWeight(fEmbeddingMuonEfficiencyWeight);
 
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesOriginal;
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesEmbedded;

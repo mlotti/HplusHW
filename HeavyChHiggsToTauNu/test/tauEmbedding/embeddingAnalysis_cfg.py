@@ -328,9 +328,9 @@ if lookOriginalGenTaus:
     del additionalCounters[additionalCounters.index("muonFinalSelectionJetSelection")]
     additionalCounters.append("muonFinalSelectionJetSelection")
 
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
-    histogramAmbientLevel = cms.untracked.string("Vital"),
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
 
@@ -349,9 +349,19 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     ),
 
     muonSrc = cms.InputTag(muons.value()),
+    muonCorrectedSrc = cms.InputTag("NONEXISTENT"),
+    muonCorrectedEnabled = cms.bool(False),
+    muonTunePEnabled = cms.bool(False),
     muonFunctions = analysisConfig.muonFunctions.clone(),
-    embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(
-        mode = "efficiency"
+    muonEfficiencies = cms.PSet(
+        Run2011A = param.embeddingMuonEfficiency.clone(
+            mode = "mcEfficiency",
+            mcSelect = "Run2011A",
+        ),
+        Run2011B = param.embeddingMuonEfficiency.clone(
+            mode = "mcEfficiency",
+            mcSelect = "Run2011B",
+        ),
     ),
 
 #    electronSrc = cms.InputTag("selectedPatElectrons"),
@@ -378,7 +388,10 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
 #        pfMetOriginalNoMuon_p4 = cms.InputTag("pfMETOriginalNoMuon"), # FIXME: broken ATM
     ),
     doubles = cms.PSet(),
-    bools = cms.PSet()
+    bools = cms.PSet(),
+
+    eventCounter = param.eventCounter.clone(),
+    histogramAmbientLevel = cms.untracked.string("Informative"),
 )
 for name in ntuple.jetPileupIDs.parameterNames_():
     pset = ntuple.jetPileupIDs.getParameter(name)
@@ -401,8 +414,8 @@ for era, src in zip(puWeights, puWeightNames):
 addAnalysis(process, "tauNtuple", ntuple,
             preSequence=process.commonSequence,
             additionalCounters=additionalCounters,
-            signalAnalysisCounters=False)
-process.tauNtupleCounters.printMainCounter = True
+            signalAnalysisCounters=True)
+process.tauNtuple.eventCounter.printMainCounter = True
 
 # Replace all event counters with the weighted one
 eventCounters = []

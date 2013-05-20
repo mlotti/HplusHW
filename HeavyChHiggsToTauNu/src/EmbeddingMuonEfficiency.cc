@@ -59,7 +59,8 @@ namespace HPlus {
       if(hmuon->size() != 1)
         throw cms::Exception("Assert") << "Read " << hmuon->size() << " muons for the original muon, expected exactly 1. Muon src was " << fMuonSrc.encode() << std::endl;
 
-      setRun(iEvent.id().run());
+      if(iEvent.isRealData())
+         setRun(iEvent.id().run());
       return getEventWeight(hmuon->ptrAt(0), iEvent.isRealData());
     }
   }

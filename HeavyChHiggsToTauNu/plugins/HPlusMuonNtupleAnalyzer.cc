@@ -83,14 +83,11 @@ private:
   HPlus::TreeGenParticleBranches fGenTTBarBranches;
 
   struct MuonEff {
-    //MuonEff(const HPlus::EmbeddingMuonEfficiency *eff, const std::string& n): efficiency(eff), name(n) {}
-    //~MuonEff() {delete efficiency;}
     MuonEff(const edm::ParameterSet& pset, const std::string& n): efficiency(pset), name(n) {}
 
     void book(TTree *tree) { tree->Branch(name.c_str(), &values); }
     void reset() { values.clear(); }
 
-    //const HPlus::EmbeddingMuonEfficiency *efficiency;
     HPlus::EmbeddingMuonEfficiency efficiency;
     std::string name;
     std::vector<double> values;
@@ -124,8 +121,7 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("muonEfficiencies");
   std::vector<std::string> names = pset.getParameterNames();
   for(size_t i=0; i<names.size(); ++i) {
-    //fMuonEffs.push_back(MuonEff(new HPlus::EmbeddingMuonEfficiency(pset.getUntrackedParameter<edm::ParameterSet>(names[i])), "muon_efficiency_"+names[i]));
-    fMuonEffs.push_back(MuonEff(pset.getUntrackedParameter<edm::ParameterSet>(names[i]), "muons_efficiency_"+names[i]));
+    fMuonEffs.push_back(MuonEff(pset.getUntrackedParameter<edm::ParameterSet>(names[i]), fMuonBranches.getPrefix()+"_efficiency_"+names[i]));
   }
 
   pset = iConfig.getParameter<edm::ParameterSet>("mets");
@@ -158,7 +154,7 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
 
   if(fJetEnabled) {
     fJetBranches.book(fTree);
-    fTree->Branch("muons_jetMinDR", &fMuonJetMinDR);
+    fTree->Branch((fMuonBranches.getPrefix()+"_jetMinDR").c_str(), &fMuonJetMinDR);
   }
 
   if(fGenTTBarEnabled)

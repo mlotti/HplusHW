@@ -41,6 +41,7 @@ namespace HPlus {
     void reset();
 
     const edm::InputTag& getInputTag() const { return fMuonSrc; }
+    const std::string getPrefix() const { return fPrefix; }
 
   private:
     edm::InputTag fMuonSrc;
