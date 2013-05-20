@@ -14,14 +14,14 @@
 
 namespace HPlus {
   TreeMuonBranches::TreeMuonBranches(const edm::ParameterSet& iConfig, const std::string& prefix):
-    fMuonSrc(iConfig.getParameter<edm::InputTag>("muonSrc")),
-    fMuonCorrectedSrc(iConfig.getParameter<edm::InputTag>("muonCorrectedSrc")),
+    fMuonSrc(iConfig.getParameter<edm::InputTag>("src")),
+    fMuonCorrectedSrc(iConfig.getParameter<edm::InputTag>("correctedSrc")),
     fPrefix(prefix+"_"),
     fMuonsGenMatch(fPrefix+"genmatch"),
-    fMuonCorrectedEnabled(iConfig.getParameter<bool>("muonCorrectedEnabled")),
-    fTunePEnabled(iConfig.getParameter<bool>("muonTunePEnabled"))
+    fMuonCorrectedEnabled(iConfig.getParameter<bool>("correctedEnabled")),
+    fTunePEnabled(iConfig.getParameter<bool>("tunePEnabled"))
   {
-    edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("muonFunctions");
+    edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("functions");
     std::vector<std::string> names = pset.getParameterNames();
     fMuonsFunctions.reserve(names.size());
     for(size_t i=0; i<names.size(); ++i) {

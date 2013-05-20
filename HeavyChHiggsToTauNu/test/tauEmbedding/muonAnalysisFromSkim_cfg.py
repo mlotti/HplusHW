@@ -187,13 +187,17 @@ additionalCounters.append("preselectedJetsCount")
 
 # Configuration
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
+import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
 ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
     patTriggerEvent = cms.InputTag("patTriggerEvent"),
     genParticleSrc = cms.InputTag("genParticles"),
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
-    muonSrc = cms.InputTag("preselectedMuons"),
-    muonFunctions = analysisConfig.muonFunctions.clone(),
+
+    muons = Ntuple.muons.clone(
+        src = "preselectedMuons",
+        functions = analysisConfig.muonFunctions.clone()
+    )
 
 #    electronSrc = cms.InputTag("selectedPatElectrons"),
 #    electronConversionSrc = cms.InputTag("allConversions"),

@@ -109,7 +109,7 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fSelectedVertexBranches(iConfig, "selectedPrimaryVertex", "selectedPrimaryVertexSrc"),
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fTriggerBranches(iConfig),
-  fMuonBranches(iConfig),
+  fMuonBranches(iConfig.getParameter<edm::ParameterSet>("muons")),
   //fElectronBranches(iConfig, fSelectedVertexBranches.getInputTag()),
   fTauBranches(iConfig),
   fJetBranches(iConfig, false),
@@ -120,7 +120,7 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("muonEfficiencies");
   std::vector<std::string> names = pset.getParameterNames();
   for(size_t i=0; i<names.size(); ++i) {
-    fMuonEffs.push_back(MuonEff(pset.getUntrackedParameter<edm::ParameterSet>(names[i]), fMuonBranches.getPrefix()+"_efficiency_"+names[i]));
+    fMuonEffs.push_back(MuonEff(pset.getUntrackedParameter<edm::ParameterSet>(names[i]), fMuonBranches.getPrefix()+"efficiency_"+names[i]));
   }
 
   pset = iConfig.getParameter<edm::ParameterSet>("mets");
@@ -246,6 +246,16 @@ void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const ed
   for(edm::View<reco::GenParticle>::const_iterator iGen = hgentausEmbedded->begin(); iGen != hgentausEmbedded->end(); ++iGen) {
     if(std::abs(iGen->pdgId()) == 15) {
       fGenTausEmbedded.addValue(&(*iGen));
+    }
+  }
+
+  edm::Handle<edm::View<pat::Muon> > hmuons;
+  iEvent.getByLabel(fMuonBranches.getInputTag(), hmuons);
+
+  for(size_t i=0; i<fMuonEffs.size(); ++i) {
+    for(size_t j=0; j<hmuons->size(); ++j) {
+      HPlus::EmbeddingMuonEfficiency::Data data = fMuonEffs[i].efficiency.getEventWeight(hmuons->ptrAt(j), iEvent.isRealData());
+      fMuonEffs[i].values.push_back(data.getEfficiency());
     }
   }
 

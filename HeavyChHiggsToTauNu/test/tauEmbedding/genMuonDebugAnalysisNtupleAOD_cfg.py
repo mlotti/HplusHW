@@ -114,6 +114,7 @@ puWeights = AnalysisConfiguration.addPuWeightProducers(dataVersion, process, pro
 # Configuration
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
+import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
 ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
     patTriggerEvent = cms.InputTag("patTriggerEvent"),
 
@@ -122,11 +123,14 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
 
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
-    muonSrc = cms.InputTag("tightenedMuons"),
-    muonFunctions = cms.PSet(),
-    muonCorrectedEnabled = cms.bool(True),
-    muonCorrectedSrc = cms.InputTag("tightenedMuonsMuscle"),
-    muonTunePEnabled = cms.bool(True),
+
+    muons = Ntuple.muons.clone(
+        src = "tightenedMuons",
+        functions = cms.PSet(),
+        correctedEnabled = True
+        correctedSrc = "tightenedMuonsMuscle",
+        tunePEnabled = True,
+    )
     muonEfficiencies = cms.PSet(
         Run2011A = param.embeddingMuonEfficiency.clone(
             mode = "mcEfficiency",

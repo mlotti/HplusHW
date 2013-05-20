@@ -424,7 +424,7 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fResultAfterMET(eventCounter, "AfterMET"),
   fResultAfterBTag(eventCounter, "AfterBTag"),
   fResultAfterAllSelections(eventCounter, "AfterAllSelections"),
-  fMuon2Branches(iConfig, "muon2")
+  fMuon2Branches(iConfig.getUntrackedParameter<edm::ParameterSet>("muon2"), "muon2")
 {
   edm::Service<TFileService> fs;
   // Save the module configuration to the output ROOT file as a TNamed object

@@ -330,6 +330,7 @@ if lookOriginalGenTaus:
 
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
+import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
@@ -348,11 +349,10 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
         Mu40_eta2p1 = cms.vstring("HLT_Mu40_eta2p1_v1", "HLT_Mu40_eta2p1_v4", "HLT_Mu40_eta2p1_v5"),
     ),
 
-    muonSrc = cms.InputTag(muons.value()),
-    muonCorrectedSrc = cms.InputTag("NONEXISTENT"),
-    muonCorrectedEnabled = cms.bool(False),
-    muonTunePEnabled = cms.bool(False),
-    muonFunctions = analysisConfig.muonFunctions.clone(),
+    muons = Ntuple.muons.clone(
+        src = muons.value(),
+        functions = analysisConfig.muonFunctions.clone(),
+    ),
     muonEfficiencies = cms.PSet(
         Run2011A = param.embeddingMuonEfficiency.clone(
             mode = "mcEfficiency",
