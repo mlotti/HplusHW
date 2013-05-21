@@ -1470,14 +1470,14 @@ class QCDfactorisedColumn(DatacardColumn):
     def _createClosureHistogram(self, dsetMgr, luminosity, myQCDCalculator, histoSpecs, histoName):
         return self._createShapeHistogram(dsetMgr,luminosity,myQCDCalculator,histoSpecs=histoSpecs,
                                           histoName=histoName,title=None,label="Closure",
-                                          saveDetailedInfo=False,makeCorrectionToShape=True,applyFullSystematics=False)
+                                          saveDetailedInfo=False,makeCorrectionToShape=True,applyFullSystematics=False,applyNQCDWeighting=False)
 
     def _createContractedClosureHistogram(self, axisToKeep, dsetMgr, luminosity, myQCDCalculator, histoSpecs, histoName):
         return self._createContractedShapeHistogram(axisToKeep,dsetMgr,luminosity,myQCDCalculator,histoSpecs=histoSpecs,
                                           histoName=histoName,title=None,label="Closure",
-                                          saveDetailedInfo=True,makeCorrectionToShape=True,applyFullSystematics=False)
+                                          saveDetailedInfo=True,makeCorrectionToShape=True,applyFullSystematics=False,applyNQCDWeighting=False)
 
-    def _createShapeHistogram(self, dsetMgr, luminosity, myQCDCalculator, histoSpecs, title, histoName, label=None, saveDetailedInfo=False, makeCorrectionToShape=False, applyFullSystematics=False):
+    def _createShapeHistogram(self, dsetMgr, luminosity, myQCDCalculator, histoSpecs, title, histoName, label=None, saveDetailedInfo=False, makeCorrectionToShape=False, applyFullSystematics=False, applyNQCDWeighting=True):
         # Open histograms and create QCD event object
         myEventCountObject = self._getQCDEventCount(dsetMgr, histoName, luminosity)
         # Create empty shape histogram
@@ -1501,15 +1501,16 @@ class QCDfactorisedColumn(DatacardColumn):
                 sys.stdout.write("\r... Obtaining shape: %s %3d/%d"%(histoName, i+1,myNUnfoldedFactorisationBins))
                 sys.stdout.flush()
             # Weight shape by efficiency of tau leg
-            myEfficiency = myQCDCalculator.getLeg2EfficiencyByUnfoldedBin(i, onlyNominatorUncert=True)
-            for k in range(0,hShapeData.GetNbinsX()+2):
-                # f=a*b; Delta f^2 = (b Delta a)^2 + (a Delta b)^2
-                hShapeData.SetBinError(k,          sqrt((myEfficiency[0].value()*hShapeData.GetBinError(k))**2 +          (myEfficiency[0].uncertainty()    *hShapeData.GetBinContent(k))**2))
-                hShapeMCEWK.SetBinError(k,         sqrt((myEfficiency[0].value()*hShapeMCEWK.GetBinError(k))**2 +         (myEfficiency[0].uncertainty()    *hShapeMCEWK.GetBinContent(k))**2))
-                hShapeMCEWKFullSyst.SetBinError(k, sqrt((myEfficiency[0].value()*hShapeMCEWKFullSyst.GetBinError(k))**2 + (myEfficiency[0].totalUncertainty()*hShapeMCEWKFullSyst.GetBinContent(k))**2))
-                hShapeData.SetBinContent(k,hShapeData.GetBinContent(k)*myEfficiency[0].value())
-                hShapeMCEWK.SetBinContent(k,hShapeMCEWK.GetBinContent(k)*myEfficiency[0].value())
-                hShapeMCEWKFullSyst.SetBinContent(k,hShapeMCEWKFullSyst.GetBinContent(k)*myEfficiency[0].value())
+            if applyNQCDWeighting:
+                myEfficiency = myQCDCalculator.getLeg2EfficiencyByUnfoldedBin(i, onlyNominatorUncert=True)
+                for k in range(0,hShapeData.GetNbinsX()+2):
+                    # f=a*b; Delta f^2 = (b Delta a)^2 + (a Delta b)^2
+                    hShapeData.SetBinError(k,          sqrt((myEfficiency[0].value()*hShapeData.GetBinError(k))**2 +          (myEfficiency[0].uncertainty()    *hShapeData.GetBinContent(k))**2))
+                    hShapeMCEWK.SetBinError(k,         sqrt((myEfficiency[0].value()*hShapeMCEWK.GetBinError(k))**2 +         (myEfficiency[0].uncertainty()    *hShapeMCEWK.GetBinContent(k))**2))
+                    hShapeMCEWKFullSyst.SetBinError(k, sqrt((myEfficiency[0].value()*hShapeMCEWKFullSyst.GetBinError(k))**2 + (myEfficiency[0].totalUncertainty()*hShapeMCEWKFullSyst.GetBinContent(k))**2))
+                    hShapeData.SetBinContent(k,hShapeData.GetBinContent(k)*myEfficiency[0].value())
+                    hShapeMCEWK.SetBinContent(k,hShapeMCEWK.GetBinContent(k)*myEfficiency[0].value())
+                    hShapeMCEWKFullSyst.SetBinContent(k,hShapeMCEWKFullSyst.GetBinContent(k)*myEfficiency[0].value())
             # Add data
             myShapeModifier.addShape(source=hShapeData,dest=hStat)
             myShapeModifier.addShape(source=hShapeData,dest=hFull)
@@ -1549,9 +1550,10 @@ class QCDfactorisedColumn(DatacardColumn):
             myShapeModifier.correctNegativeBins(dest=hStat)
             myShapeModifier.correctNegativeBins(dest=hFull)
         # Normalise to NQCD
-        myValue = myQCDCalculator.getResult().getNQCDResult().value()
-        hStat.Scale(myValue / hStat.Integral(0,hStat.GetNbinsX()+2))
-        hFull.Scale(myValue / hFull.Integral(0,hStat.GetNbinsX()+2))
+        if applyNQCDWeighting:
+            myValue = myQCDCalculator.getResult().getNQCDResult().value()
+            hStat.Scale(myValue / hStat.Integral(0,hStat.GetNbinsX()+2))
+            hFull.Scale(myValue / hFull.Integral(0,hStat.GetNbinsX()+2))
         # Save histograms
         self._infoHistograms.append(hStat)
         self._infoHistograms.append(hFull)
@@ -1568,7 +1570,7 @@ class QCDfactorisedColumn(DatacardColumn):
         h.SetTitle(title)
         return h
 
-    def _createContractedShapeHistogram(self, axisToKeep, dsetMgr, luminosity, myQCDCalculator, histoSpecs, title, histoName, label=None, saveDetailedInfo=False, makeCorrectionToShape=False, applyFullSystematics=False):
+    def _createContractedShapeHistogram(self, axisToKeep, dsetMgr, luminosity, myQCDCalculator, histoSpecs, title, histoName, label=None, saveDetailedInfo=False, makeCorrectionToShape=False, applyFullSystematics=False, applyNQCDWeighting=True):
         # Open histograms and create QCD event object
         myEventCountObject = QCDEventCount(histoName, dsetMgr, self._datasetMgrColumn, self._datasetMgrColumnForQCDMCEWK, luminosity)
         # Create empty shape histogram
@@ -1595,15 +1597,16 @@ class QCDfactorisedColumn(DatacardColumn):
                 sys.stdout.write("\r... Obtaining contracted (%s) shape %s:  %3d/%d"%(myContractionLabel, histoName, i+1,myMaxBins))
                 sys.stdout.flush()
             # Weight shape by efficiency of tau leg
-            myEfficiency = myQCDCalculator.getLeg2EfficiencyByUnfoldedBin(i, onlyNominatorUncert=True)
-            for k in range(0,hShapeData.GetNbinsX()+2):
-                # f=a*b; Delta f^2 = (b Delta a)^2 + (a Delta b)^2
-                hShapeData.SetBinError(k,          sqrt((myEfficiency[0].value()*hShapeData.GetBinError(k))**2 +          (myEfficiency[0].uncertainty()    *hShapeData.GetBinContent(k))**2))
-                hShapeMCEWK.SetBinError(k,         sqrt((myEfficiency[0].value()*hShapeMCEWK.GetBinError(k))**2 +         (myEfficiency[0].uncertainty()    *hShapeMCEWK.GetBinContent(k))**2))
-                hShapeMCEWKFullSyst.SetBinError(k, sqrt((myEfficiency[0].value()*hShapeMCEWKFullSyst.GetBinError(k))**2 + (myEfficiency[0].totalUncertainty()*hShapeMCEWKFullSyst.GetBinContent(k))**2))
-                hShapeData.SetBinContent(k,hShapeData.GetBinContent(k)*myEfficiency[0].value())
-                hShapeMCEWK.SetBinContent(k,hShapeMCEWK.GetBinContent(k)*myEfficiency[0].value())
-                hShapeMCEWKFullSyst.SetBinContent(k,hShapeMCEWKFullSyst.GetBinContent(k)*myEfficiency[0].value())
+            if applyNQCDWeighting:
+                myEfficiency = myQCDCalculator.getLeg2EfficiencyByUnfoldedBin(i, onlyNominatorUncert=True)
+                for k in range(0,hShapeData.GetNbinsX()+2):
+                    # f=a*b; Delta f^2 = (b Delta a)^2 + (a Delta b)^2
+                    hShapeData.SetBinError(k,          sqrt((myEfficiency[0].value()*hShapeData.GetBinError(k))**2 +          (myEfficiency[0].uncertainty()    *hShapeData.GetBinContent(k))**2))
+                    hShapeMCEWK.SetBinError(k,         sqrt((myEfficiency[0].value()*hShapeMCEWK.GetBinError(k))**2 +         (myEfficiency[0].uncertainty()    *hShapeMCEWK.GetBinContent(k))**2))
+                    hShapeMCEWKFullSyst.SetBinError(k, sqrt((myEfficiency[0].value()*hShapeMCEWKFullSyst.GetBinError(k))**2 + (myEfficiency[0].totalUncertainty()*hShapeMCEWKFullSyst.GetBinContent(k))**2))
+                    hShapeData.SetBinContent(k,hShapeData.GetBinContent(k)*myEfficiency[0].value())
+                    hShapeMCEWK.SetBinContent(k,hShapeMCEWK.GetBinContent(k)*myEfficiency[0].value())
+                    hShapeMCEWKFullSyst.SetBinContent(k,hShapeMCEWKFullSyst.GetBinContent(k)*myEfficiency[0].value())
             # Add data
             myShapeModifier.addShape(source=hShapeData,dest=hStat)
             myShapeModifier.addShape(source=hShapeData,dest=hFull)
@@ -1646,9 +1649,10 @@ class QCDfactorisedColumn(DatacardColumn):
         self._infoHistograms.append(hStat)
         self._infoHistograms.append(hFull)
         # Normalise to NQCD
-        myValue = myQCDCalculator.getContractedResultsList()[axisToKeep].getNQCDResult().value()
-        hStat.Scale(myValue / hStat.Integral(0,hStat.GetNbinsX()+2))
-        hFull.Scale(myValue / hFull.Integral(0,hStat.GetNbinsX()+2))
+        if applyNQCDWeighting:
+            myValue = myQCDCalculator.getContractedResultsList()[axisToKeep].getNQCDResult().value()
+            hStat.Scale(myValue / hStat.Integral(0,hStat.GetNbinsX()+2))
+            hFull.Scale(myValue / hFull.Integral(0,hStat.GetNbinsX()+2))
         # Return the one asked for
         myEventCountObject.clean()
         sys.stdout.write("\n")
