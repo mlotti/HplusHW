@@ -1,6 +1,8 @@
 DataCardName    = 'Default'
-Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeIsolationDependent'
-Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
+#Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeIsolationDependent'
+#Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
+#Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_vitalonly_correctCtrlPlots'
+Path            = '/home/wendland/data/v445/met50_2013-05-13/testInverted'
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
@@ -26,7 +28,7 @@ OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties w
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = True
 OptionQCDfactorisedFactorisationSchema = "TauPt" # options: 'full', 'taupt' (recommended), 'taueta, 'nvtx'
-OptionDoQCDClosureTests = not False
+OptionDoQCDClosureTests = False
 
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
@@ -978,6 +980,40 @@ ControlPlots.append(ControlPlotInput(
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
+for i in range(0,4):
+    ControlPlots.append(ControlPlotInput(
+        title            = "CollinearTailKillerJet%d"%(i+1),
+        signalHHid       = [-1],
+        signalHWid       = [0],
+        QCDid            = [3],
+        embeddingId      = EmbeddingIdList,
+        EWKfakeId        = EWKFakeIdList,
+        signalHistoPath  = "ControlPlots",
+        signalHistoName  = "QCDTailKillerJet%dCollinear"%i,
+        EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "QCDTailKillerJet%dCollinear"%i,
+        QCDFactNormalisation = QCDFactorisedStdSelVersion+"/QCDTailKillerJet%dCollinear"%i,
+        QCDFactHistoName = QCDFactorisedStdSelVersion+"/QCDTailKillerJet%dCollinear"%i,
+        details          = { "bins": 26,
+                             "rangeMin": 0.0,
+                             "rangeMax": 260.0,
+                             "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                             "binLabels": [], # leave empty to disable bin labels
+                             "xtitle": "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%(i+1),
+                             "ytitle": "Events",
+                             "unit": "^{o}",
+                             "logy": True,
+                             "DeltaRatio": 0.5,
+                             "ymin": 0.9,
+                             "ymax": -1},
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
+    if i == 0:
+        ControlPlots[len(ControlPlots)-1].flowPlotCaption = "#tau_{h}+#geq3j"
+    else:
+        ControlPlots[len(ControlPlots)-1].flowPlotCaption = "#Delta#phi_{#uparrow#uparrow,%d}"%(i)
 
 ControlPlots.append(ControlPlotInput(
     title            = "MET",
@@ -990,7 +1026,7 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "MET",
     EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "MET",
-    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlNjets",
+    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlMET",
     QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlMET",
     details          = { "bins": 13,
                          "rangeMin": 0.0,
@@ -1007,7 +1043,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymax": -1},
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "#Delta#phi_{#uparrow#uparrow,4}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -1021,7 +1057,7 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "NBjets",
     EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "NBjets",
-    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlMET",
+    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlNbjets",
     QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlNbjets",
     details          = { "bins": 5,
                          "rangeMin": 0.0,
@@ -1035,7 +1071,8 @@ ControlPlots.append(ControlPlotInput(
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
                          "ymax": -1},
-    blindedRange     = [1.5,10], # specify range min,max if blinding applies to this control plot
+    blindedRange=[],
+    #blindedRange     = [1.5,10], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
@@ -1157,6 +1194,40 @@ ControlPlots.append(ControlPlotInput(
     #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 #))
 
+for i in range(0,4):
+    ControlPlots.append(ControlPlotInput(
+        title            = "BackToBackTailKillerJet%d"%(i+1),
+        signalHHid       = [-1],
+        signalHWid       = [0],
+        QCDid            = [3],
+        embeddingId      = EmbeddingIdList,
+        EWKfakeId        = EWKFakeIdList,
+        signalHistoPath  = "ControlPlots",
+        signalHistoName  = "QCDTailKillerJet%dBackToBack"%i,
+        EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "QCDTailKillerJet%dBackToBack"%i,
+        QCDFactNormalisation = QCDFactorisedStdSelVersion+"/QCDTailKillerJet%dBackToBack"%i,
+        QCDFactHistoName = QCDFactorisedStdSelVersion+"/QCDTailKillerJet%dBackToBack"%i,
+        details          = { "bins": 13,
+                             "rangeMin": 0.0,
+                             "rangeMax": 260.0,
+                             "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                             "binLabels": [], # leave empty to disable bin labels
+                             "xtitle": "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%(i+1),
+                             "ytitle": "Events",
+                             "unit": "^{o}",
+                             "logy": True,
+                             "DeltaRatio": 0.5,
+                             "ymin": 0.9,
+                             "ymax": -1},
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
+    if i == 0:
+        ControlPlots[len(ControlPlots)-1].flowPlotCaption = "#geq1 b tag"
+    else:
+        ControlPlots[len(ControlPlots)-1].flowPlotCaption = "#Delta#phi_{#uparrow#downarrow,%d}"%(i)
 ControlPlots.append(ControlPlotInput(
     title            = "TransverseMass",
     signalHHid       = [-1],
@@ -1184,7 +1255,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymax": -1},
     blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "#Delta#phi(#tau_{h},E_{T}^{miss})", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "#Delta#phi_{#uparrow#downarrow,4}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
