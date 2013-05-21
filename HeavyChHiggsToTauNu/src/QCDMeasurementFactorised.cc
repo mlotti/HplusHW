@@ -159,28 +159,40 @@ namespace HPlus {
         for (int i = 0; i < myTauPtBins; ++i) {
           std::stringstream s;
           // tau pT
-          if (i == 0)
-            s << "#tau pT<" << static_cast<int>(fTauPtBinLowEdges[0]);
-          else if (i == myTauPtBins - 1)
-            s << "#tau pT>" << static_cast<int>(fTauPtBinLowEdges[fTauPtBinLowEdges.size()-1]);
-          else
-            s << "#tau pT=" << static_cast<int>(fTauPtBinLowEdges[i-1]) << ".." << static_cast<int>(fTauPtBinLowEdges[i]);
+          if (!fTauPtBinLowEdges.size()) {
+            s << "#tau pT=all";
+          } else {
+            if (i == 0)
+              s << "#tau pT<" << static_cast<int>(fTauPtBinLowEdges[0]);
+            else if (i == myTauPtBins - 1)
+              s << "#tau pT>" << static_cast<int>(fTauPtBinLowEdges[fTauPtBinLowEdges.size()-1]);
+            else
+              s << "#tau pT=" << static_cast<int>(fTauPtBinLowEdges[i-1]) << ".." << static_cast<int>(fTauPtBinLowEdges[i]);
+          }
           s << "/";
           // tau eta
-          if (j == 0)
-            s << "#tau eta<" << setprecision(2) << fTauEtaBinLowEdges[0];
-          else if (j == myTauEtaBins - 1)
-            s << "#tau eta>" << setprecision(2) << fTauEtaBinLowEdges[fTauEtaBinLowEdges.size()-1];
-          else
-            s << "#tau eta=" << setprecision(2) << fTauEtaBinLowEdges[j-1] << ".." << setprecision(2) << fTauEtaBinLowEdges[j];
+          if (!fTauEtaBinLowEdges.size()) {
+            s << "#tau eta=all";
+          } else {
+            if (j == 0)
+              s << "#tau eta<" << setprecision(2) << fTauEtaBinLowEdges[0];
+            else if (j == myTauEtaBins - 1)
+              s << "#tau eta>" << setprecision(2) << fTauEtaBinLowEdges[fTauEtaBinLowEdges.size()-1];
+            else
+              s << "#tau eta=" << setprecision(2) << fTauEtaBinLowEdges[j-1] << ".." << setprecision(2) << fTauEtaBinLowEdges[j];
+          }
           s << "/";
           // Nvertices
-          if (k == 0)
-            s << "N_{vtx}<" << static_cast<int>(fNVerticesBinLowEdges[0]);
-          else if (k == myNVerticesBins - 1)
-            s << "N_{vtx}>" << static_cast<int>(fNVerticesBinLowEdges[fNVerticesBinLowEdges.size()-1]);
-          else
-            s << "N_{vtx}=" << static_cast<int>(fNVerticesBinLowEdges[k-1]) << ".." << static_cast<int>(fNVerticesBinLowEdges[k]);
+          if (!fNVerticesBinLowEdges.size()) {
+            s << "N_{vtx}=all";
+          } else {
+            if (k == 0)
+              s << "N_{vtx}<" << static_cast<int>(fNVerticesBinLowEdges[0]);
+            else if (k == myNVerticesBins - 1)
+              s << "N_{vtx}>" << static_cast<int>(fNVerticesBinLowEdges[fNVerticesBinLowEdges.size()-1]);
+            else
+              s << "N_{vtx}=" << static_cast<int>(fNVerticesBinLowEdges[k-1]) << ".." << static_cast<int>(fNVerticesBinLowEdges[k]);
+          }
           h->getHisto()->GetYaxis()->SetBinLabel(getShapeBinIndex(i,j,k)+1,s.str().c_str());
         }
       }
