@@ -1079,6 +1079,25 @@ class Histo:
     def setRootHisto(self, rootHisto):
         self.rootHisto = rootHisto
 
+    ## Add shape systematics variations
+    #
+    # \param up   TH1 for up variation
+    # \param down TH1 for down variation
+    def addShapeSystematics(self, up, down):
+        self.systShapeVariationsa.append( (up, down) )
+
+    ## Add shape systematics as bin-wise relative uncertainties
+    #
+    # \param th1  TH1 containing the bin-wise relative uncertainties
+    def addShapeSystematicsRelative(self, th1):
+        self.systShapeRelatives.append(th1)
+
+    ## Add normalization systematic uncertainty
+    #
+    # \param unc  Uncertainty (e.g. 0.2 for 20 %)
+    def addNormalizationSystematics(self, unc):
+        self.systNormalizationSquared += unc*unc
+
     ## Get the histogram name
     def getName(self):
         return self.name
@@ -1254,14 +1273,35 @@ class Histo:
 class HistoWithDataset(Histo):
     ## Constructor
     #
-    # \param dataset    dataset.Dataset object
-    # \param rootHisto  TH1 object
-    # \param name       Name of the Histo
+    # \param args    Position arguments (see below)
+    # \param kwargs  Keyword arguments (see below)
     #
-    #    The default legend label is the dataset name
-    def __init__(self, dataset, rootHisto, name):
-        Histo.__init__(self, rootHisto, name)
-        self.dataset = dataset
+    # Either positional or keyword arguments are allowed
+    #
+    # <b>Positional arguments</b>
+    # \li\a dataset    dataset.Dataset object
+    # \li\a rootHisto  TH1 object
+    # \li\a name       Name of the Histo
+    #
+    # <b>Keyword arguments</b>
+    # \li\a datasetRootHisto  dataset.DatasetRootHisto object
+    #
+    # The default legend label is the dataset name
+    def __init__(self, *args, **kwargs):
+        if len(kwargs) == 0 and len(args) != 3:
+            raise Exception("In absence of keyword arguments, I expect 3 positional arguments (dataset, rootHisto, name). Now I got %d." % len(args))
+        if len(args) == 0 and len(kwargs) != 1 and not "datasetRootHisto" in kwargs:
+            raise Exception("In absence of positional arguments, I expect 1 keyword argument 'datasetRootHisto. Now I got %s" % ",".join(kwargs.keys()))
+
+
+        if len(args) > 0:
+            Histo.__init__(self, args[1], args[2])
+            self.dataset = args[0]
+        else:
+            drh = kwargs["datasetRootHisto"]
+            Histo.__init__(self, drh.getHistogram(), drh.getName())
+            self.dataset = drh.getDataset()
+
         self.setIsDataMC(self.dataset.isData(), self.dataset.isMC())
 
     ## Get the dataset.Dataset object
@@ -1991,7 +2031,7 @@ class HistoManager:
 
     ## Create the HistoManagerImpl object.
     def _createImplementation(self):
-        self.impl = HistoManagerImpl([HistoWithDataset(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
+        self.impl = HistoManagerImpl([HistoWithDataset(datasetRootHisto=drh) for drh in self.datasetRootHistos])
 
     ## Stack all MC histograms to one named <i>StackedMC</i>.
     def stackMCHistograms(self):
