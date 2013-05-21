@@ -1064,7 +1064,7 @@ class ConfigBuilder:
             addWJetsWeight(module, "up")
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="up")
-        names.append(self._addVariationModule(process, module, name+self.systPrefix+"PUWeightUp"))
+        names.append(self._addVariationModule(process, module, name+self.systPrefix+"PUWeightPlus"))
 
         # Down variation
         module = self._cloneForVariation(getattr(process, name))
@@ -1073,7 +1073,7 @@ class ConfigBuilder:
             addWJetsWeight(module, "down")
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="down")
-        names.append(self._addVariationModule(process, module, name+self.systPrefix+"PUWeightDown"))
+        names.append(self._addVariationModule(process, module, name+self.systPrefix+"PUWeightMinus"))
 
         self._accumulateAnalyzers("PU weight variation", names)
 
@@ -1115,12 +1115,12 @@ class ConfigBuilder:
 
         # Tau trigger SF
         if self.applyTauTriggerScaleFactor:
-            names.append(addTauTrgSF( 1.0, "Up"))
-            names.append(addTauTrgSF(-1.0, "Down"))
+            names.append(addTauTrgSF( 1.0, "Plus"))
+            names.append(addTauTrgSF(-1.0, "Minus"))
 
         # BTag SF
-        names.append(addBTagSF( 1.0, "Up"))
-        names.append(addBTagSF(-1.0, "Down"))
+        names.append(addBTagSF( 1.0, "Plus"))
+        names.append(addBTagSF(-1.0, "Minus"))
 
         self._accumulateAnalyzers("SF variation", names)
 
