@@ -80,6 +80,7 @@ class ConfigBuilder:
                  doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
+                 doScaleFactorVariation = False, # Perform the signal analysis with the scale factor variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
                  printAnalyzerNames = False,
@@ -124,6 +125,7 @@ class ConfigBuilder:
         self.doSystematics = doSystematics
         self.doJESVariation = doJESVariation
         self.doPUWeightVariation = doPUWeightVariation
+        self.doScaleFactorVariation = doScaleFactorVariation
         self.doOptimisation = doOptimisation
         self.optimisationScheme = optimisationScheme
         self.allowTooManyAnalyzers = allowTooManyAnalyzers
@@ -421,6 +423,7 @@ class ConfigBuilder:
         if "QCDMeasurement" not in analysisNames_:
             self._buildJESVariation(process, analysisNamesForSystematics)
             self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
+            self._buildScaleFactorVariation(process, analysisNamesForSystematics)
 
         # Optional output
         if self.edmOutput:
@@ -953,6 +956,14 @@ class ConfigBuilder:
         self._accumulateAnalyzers("Tau embedding analyses", allNames)
         return retNames
 
+    def _cloneForVariation(self, module):
+        mod = module.clone()
+        mod.Tree.fill = False
+        mod.GenParticleAnalysis.enabled = False
+        mod.eventCounter.printMainCounter = cms.untracked.bool(False)
+        mod.histogramAmbientLevel = self.histogramAmbientLevelSystematics
+        return mod
+
     ## Build JES variation
     #
     # \param process                      cms.Process object
@@ -979,12 +990,8 @@ class ConfigBuilder:
     # \param name                       Name of the module to be used as a prototype
     # \param doJetUnclusteredVariation  Flag if JES+JER+UES variations should be done
     def _addJESVariation(self, process, name, doJetUnclusteredVariation):
-        module = getattr(process, name)
-
-        module = module.clone()
-        module.Tree.fill = False
+        module = self._cloneForVariation(getattr(process, name))
         module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
-        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         postfix = ""
         if module.jetSelection.src.value()[-3:] == "Chs":
@@ -1007,10 +1014,24 @@ class ConfigBuilder:
 
         self._accumulateAnalyzers("JES variation", names)
 
+    ## Add variation module to process, create a path for it
+    #
+    # \param process    cms.Process object
+    # \param module     EDModule to insert
+    # \param postfix    Name of the module
+    #
+    # \return name
+    def _addVariationModule(self, process, module, name):
+        path = cms.Path(process.commonSequence * module)
+        setattr(process, name, module)
+        setattr(process, name+"Path", path)
+        return name
+
     ## Build PU weight variation
     #
     # \param process                      cms.Process object
     # \param analysisNamesForSystematics  Names of the analysis modules for which the PU weight variation should be done
+    # \param param     HChSignalAnalysisParameters_cff module object
     def _buildPUWeightVariation(self, process, analysisNamesForSystematics, param):
         if not self.applyPUReweight:
             return
@@ -1043,38 +1064,71 @@ class ConfigBuilder:
         names = []
 
         # Up variation
-        module = getattr(process, name).clone()
-        module.Tree.fill = False
-        module.eventCounter.printMainCounter = cms.untracked.bool(False)
-        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
+        module = self._cloneForVariation(getattr(process, name))
 
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "up")
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="up")
-        path = cms.Path(process.commonSequence * module)
-        modName = name+self.systPrefix+"PUWeightPlus"
-        setattr(process, modName, module)
-        setattr(process, modName+"Path", path)
-        names.append(modName)
+        names.append(self._addVariationModule(process, module, name+self.systPrefix+"PUWeightUp"))
 
         # Down variation
-        module = getattr(process, name).clone()
-        module.Tree.fill = False
-        module.eventCounter.printMainCounter = cms.untracked.bool(False)
-        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
+        module = self._cloneForVariation(getattr(process, name))
 
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "down")
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="down")
-        path = cms.Path(process.commonSequence * module)
-        modName = name+self.systPrefix+"PUWeightMinus"
-        setattr(process, modName, module)
-        setattr(process, modName+"Path", path)
-        names.append(modName)
+        names.append(self._addVariationModule(process, module, name+self.systPrefix+"PUWeightDown"))
 
         self._accumulateAnalyzers("PU weight variation", names)
+
+    ## Add scale factor variation
+    #
+    # \param process                      cms.Process object
+    # \param analysisNamesForSystematics  Names of the analysis modules for which the PU weight variation should be done
+    def _buildScaleFactorVariation(self, process, analysisNamesForSystematics):
+        if not (self.doScaleFactorVariation or self.doSystematics):
+            return
+
+        if self.dataVersion.isMC():
+            for name in analysisNamesForSystematics:
+                self._addScaleFactorVariation(process, name)
+        else:
+            print "SF variation disabled for data (not meaningful for data"
+
+    # Add scale factor variation for one module
+    #
+    # \param process   cms.Process object
+    # \param name      Name of the module to be used as a prototype
+    def _addScaleFactorVariation(self, process, name):
+        def addTauTrgSF(shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = module.tauTriggerEfficiencyScaleFactor
+            effSF.variationEnabled = True
+            effSF.variationShiftBy = shiftBy
+            if hasattr(effSF, "printScaleFactors"):
+                effSF.printScaleFactors = False
+            return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgSF"+postfix)
+        def addBTagSF(shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            module.bTagging.variationEnabled = True
+            module.bTagging.variationShiftBy = shiftBy
+            return self._addVariationModule(process, module, name+self.systPrefix+"BTagSF"+postfix)
+
+
+        names = []
+
+        # Tau trigger SF
+        if self.applyTauTriggerScaleFactor:
+            names.append(addTauTrgSF( 1.0, "Up"))
+            names.append(addTauTrgSF(-1.0, "Down"))
+
+        # BTag SF
+        names.append(addBTagSF( 1.0, "Up"))
+        names.append(addBTagSF(-1.0, "Down"))
+
+        self._accumulateAnalyzers("SF variation", names)
 
 
 def addPuWeightProducers(dataVersion, process, commonSequence, dataEras, firstInSequence=False):
