@@ -48,7 +48,8 @@ def main(opts):
     pngs = [os.path.basename(x) for x in glob.glob(os.path.join(opts.dir[0], "*.png"))]
     pngs.sort()
     for p in pngs:
-        output.append(' <tr><td align="center" colspan="%d"><b>%s</b></td></tr>' % (len(opts.dir), p))
+        anchor = os.path.splitext(p)[0] # strip off extension
+        output.append(' <tr><td align="center" colspan="%d"><a name="%s"><b>%s</b></a> <a href="#%s">link</a></td></tr>' % (len(opts.dir), anchor, p, anchor))
 
         output.append(" <tr>")
         for i, d in enumerate(opts.dir):

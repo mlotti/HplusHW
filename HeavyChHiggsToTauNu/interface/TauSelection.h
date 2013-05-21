@@ -132,6 +132,8 @@ namespace HPlus {
     const double getRtauOfTauObject(const edm::Ptr<pat::Tau>& tau) const;
     // End of horror getters
 
+    std::string getIsolationDiscriminator() const { return fTauID->getIsolationDiscriminator(); }
+
   private:
     /// Default tauID called from analyze or silentAnalyze
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, double vertexZ);

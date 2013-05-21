@@ -409,10 +409,15 @@ class InvertedTauID:
             histograms.addText(0.25, 0.3, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1/2/3,MET) cuts", 20)
         
         
-    def mtComparison(self,histo1,histo2,name,norm=1):
+    def mtComparison(self,histo1,histo2,name,norm=1,sysError=0):
 
 	h1 = histo1.Clone("h1")
 	h2 = histo2.Clone("h2")
+
+	if sysError > 0:
+	    h1 = histograms.addSysError(h1,sysError)
+	    #h2 = histograms.addSysError(h2,sysError)
+
 #	if norm == 1:
 #        h1.Scale(1/h1.GetMaximum())
 #        h2.Scale(1/h2.GetMaximum())

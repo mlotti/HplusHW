@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions as HChOptions
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
@@ -83,7 +84,7 @@ class ConfigBuilder:
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
                  printAnalyzerNames = False,
-                 inputWorkflow = "pattuple_v53_2", # Name of the workflow, whose output is used as an input, needed for WJets weighting
+                 inputWorkflow = "pattuple_v53_3", # Name of the workflow, whose output is used as an input, needed for WJets weighting
                  ):
         self.options, self.dataVersion = HChOptions.getOptionsDataVersion(dataVersion)
         self.dataEras = dataEras
@@ -358,9 +359,17 @@ class ConfigBuilder:
         if len(analysisLightModules) > 0:
             analysisLightModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
             #analysisLightModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+            if hasattr(analysisLightModules[0], "tauTriggerEfficiencyScaleFactor"):
+                analysisLightModules[0].tauTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
+            if hasattr(analysisLightModules[0], "metTriggerEfficiencyScaleFactor"):
+                analysisLightModules[0].metTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
         if len(analysisHeavyModules) > 0:
             analysisHeavyModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
             #analysisHeavyModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+            if hasattr(analysisHeavyModules[0], "tauTriggerEfficiencyScaleFactor"):
+                analysisHeavyModules[0].tauTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
+            if hasattr(analysisHeavyModules[0], "metTriggerEfficiencyScaleFactor"):
+                analysisHeavyModules[0].metTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
 
         # Prescale fetching done automatically for data
         if self.dataVersion.isData() and self.options.tauEmbeddingInput == 0 and self.doPrescalesForData:
@@ -623,6 +632,7 @@ class ConfigBuilder:
             print "MET filters", module.metFilters
         print "VertexWeight data distribution:",module.vertexWeight.dataPUdistribution.value()
         print "VertexWeight mc distribution:",module.vertexWeight.mcPUdistribution.value()
+        print "Cut on L1 MET", module.trigger.l1MetCut.value()
         print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", module.trigger.hltMetCut.value()
         #print "TauSelection algorithm:", module.tauSelection.selection.value()
         print "TauSelection algorithm:", module.tauSelection.selection.value()
@@ -1087,3 +1097,18 @@ class ConfigBuilder:
         names.append(modName)
 
         self._accumulateAnalyzers("PU weight variation", names)
+
+
+def addPuWeightProducers(dataVersion, process, commonSequence, dataEras, firstInSequence=False):
+    names = []
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+    for era in dataEras:
+        names.append(param.setPileupWeight(dataVersion, process, commonSequence, era=era))
+
+    if firstInSequence:
+        for name in names:
+            mod = getattr(process, name)
+            commonSequence.remove(mod)
+            commonSequence.insert(0, mod)
+
+    return names

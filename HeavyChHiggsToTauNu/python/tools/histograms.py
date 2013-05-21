@@ -803,6 +803,7 @@ class CanvasFrame:
     #                  options of any input histogram, a default value
     #                  of 0.13 is used (this can be disabled with
     #                  explicit value None).
+    # \li\a addHeight  Add this to the height of the canvas
     def __init__(self, histoManager, name, canvasOpts={}, **kwargs):
         histos = []
         if isinstance(histoManager, list):
@@ -819,6 +820,7 @@ class CanvasFrame:
                 canvasAddWidth = 0.13
 
         canvasAddWidth = canvasOpts.get("addWidth", canvasAddWidth)
+        canvasAddHeight = canvasOpts.get("addHeight", None)
 
         if canvasAddWidth is not None:
             cw = ROOT.gStyle.GetCanvasDefW()
@@ -826,6 +828,9 @@ class CanvasFrame:
 
             ROOT.gStyle.SetCanvasDefW(int((1+canvasAddWidth)*cw))
             ROOT.gStyle.SetPadRightMargin(canvasAddWidth+prm)
+        if canvasAddHeight is not None:
+            ch = ROOT.gStyle.GetCanvasDefH()
+            ROOT.gStyle.SetCanvasDefH(int((1+canvasAddHeight)*ch))
 
         self.canvas = ROOT.TCanvas(name)
         self.pad = self.canvas.GetPad(0)
@@ -833,6 +838,8 @@ class CanvasFrame:
         if canvasAddWidth is not None:
             ROOT.gStyle.SetCanvasDefW(cw)
             ROOT.gStyle.SetPadRightMargin(prm)
+        if canvasAddHeight is not None:
+            ROOT.gStyle.SetCanvasDefH(ch)
 
         opts = kwargs
         if "opts" in kwargs:
@@ -1238,6 +1245,12 @@ class Histo:
         if self.rootHisto is None:
             return None
         return self.rootHisto.GetBinWidth(bin)
+
+    ## Get list of bin widths
+    def getBinWidths(self):
+        if self.rootHisto is None:
+            return None
+        return [self.rootHisto.GetBinWidth(i) for i in xrange(1, self.rootHisto.GetNbinsX()+1)]
 
     ## \var rootHisto
     # ROOT histogram object (TH1)
@@ -2009,3 +2022,15 @@ class HistoManager:
     # histograms.HistoManagerImpl object for the implementation
     ## \var luminosity
     # Total integrated luminosity ofthe managed collision data (None if not set)
+
+
+def addSysError(histogram,syserror):
+    # error in decimals
+    for i in range(1,histogram.GetNbinsX()+1):
+        error  = histogram.GetBinError(i)
+        value  = histogram.GetBinContent(i)
+        syserr = value*syserror    
+
+        newError = math.sqrt(error*error + syserr*syserr)
+        histogram.SetBinError(i,newError)
+    return histogram

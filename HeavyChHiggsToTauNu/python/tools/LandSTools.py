@@ -440,6 +440,8 @@ class MultiCrabLandS:
         print "############################################################"
         print
 
+        self.jobsCreated = True
+
     def printInstruction(self):
         if self.jobsCreated:
             print "Multicrab cfg and jobs created. Type"
@@ -913,9 +915,21 @@ class LHCType:
             "./lands.exe %s -n mlfit_b_m%s --scanRs 1 -vR 0 -d %s > %s 2>&1" % (opts, mass, " ".join(datacardFiles), b_file),
             "tail -n 200 %s | fgrep par > %s" % (b_file, b_file2),
             "fgrep par %s > %s" % (sb_file, sb_file2),
-            'echo "ML fit results are in %s and %s"' % (sb_file2, b_file2)
+            "landsReadMLFit.py -b %s -s %s -o mlfit.json -m %s" % (b_file, sb_file, mass),
+            'echo "ML fit results are in %s and %s, and also in mlfit.json"' % (sb_file2, b_file2)
             ]
         _writeScript(os.path.join(self.dirname, "runLandS_m%s_mlfit" % mass), "\n".join(command)+"\n")
+
+        command = [
+        ]
+        allMlFitPath = os.path.join(self.dirname, "runLandS_mlfits")
+        if not os.path.exists(allMlFitPath):
+            command.extend([
+                    "#!/bin/sh",
+                    "",
+                    ])
+        command.append("./runLandS_m%s_mlfit" % mass)
+        _writeScript(allMlFitPath, "\n".join(command)+"\n", truncate=False)                
         
 
     ## Write the multicrab configuration snippet of a single mass point
@@ -1280,13 +1294,15 @@ class ResultContainer:
     #
     # \param filename  Name of the datacard file inside the multicrab directory
     def _readLuminosityTaujets(self, filename):
-        lumi_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
+        lumi_re = re.compile("luminosity=\s*(?P<lumi>\d+\.\d+)")
         fname = os.path.join(self.path, filename)
         f = open(fname)
         for line in f:
             match = lumi_re.search(line)
             if match:
-                self.lumi = str(1000*float(match.group("lumi"))) # 1/fb -> 1/pb
+                #self.lumi = str(1000*float(match.group("lumi"))) # 1/fb -> 1/pb
+                # Nowadays the luminosity is in 1/pb
+                self.lumi = match.group("lumi")
                 f.close()
                 return
         raise Exception("Did not find luminosity information from '%s'" % fname)
@@ -1455,6 +1471,99 @@ class ParseLandsOutput:
         print "Wrote results to %s" % fname
 
 
+## Parse the nuisance fit values from LandS ML output
+#
+# \return dictionary
+def parseLandsMLOutput(outputFileName):
+    f = open(outputFileName)
+
+    # Skip first lines
+    for line in f:
+        if "fReadFile: Reading --> rate" in line:
+            break
+
+    # Infer nuisance parameter names
+    nuisanceNames = []
+    nuisanceTypes = []
+    nuis_re = re.compile("--> (?P<nuisance>\S+)\s+(?P<type>\S+)\s+\S+")
+    for line in f:
+        if not "fReadFile" in line:
+            break
+
+        m = nuis_re.search(line)
+        if m:
+            nuisanceNames.append(m.group("nuisance"))
+            nuisanceTypes.append(m.group("type"))
+
+
+    # Read the last set of "par" lines
+    parLines = []
+    while True:
+        # Skip until "par" lines are found
+        for line in f:
+            if "par" in line and "name" in line and "fitted_value" in line and "input_value"in line:
+                break
+
+        # Read "par" lines
+        parLinesTmp = []
+        for line in f:
+            if not "par" in line:
+                break
+            parLinesTmp.append(line.rstrip())
+        if len(parLinesTmp) > 0:
+            parLines = parLinesTmp
+        else:
+            break
+
+    f.close()
+
+    # Parse "par" lines
+    num = "-?\d+.\d+"
+    par_re = re.compile("par\s+(?P<nuisance>\S+)\s+(?P<fittedvalue>%s) \+/- (?P<fittedunc>%s)\s+(?P<inputvalue>%s) \+/- (?P<inputunc>%s)\s+(?P<startvalue>%s)\s+(?P<dxsin>%s),\s+(?P<soutsin>%s)" % (num, num, num, num, num, num, num))
+    values = {
+        "nuisanceParameters": nuisanceNames,
+    }
+    for par in parLines:
+        m = par_re.search(par)
+        if not m:
+            raise Exception("Unable to parse line '%s'" % par)
+
+        type = None
+        key = m.group("nuisance")
+        subkey = None
+        if key == "signal_strength":
+            type = key
+        else:
+            if key not in nuisanceNames:
+                for nuis in nuisanceNames:
+                    if key[0:len(nuis)] == nuis:
+                        subkey = key[len(nuis):]
+                        key = nuis
+            type = nuisanceTypes[nuisanceNames.index(key)]
+
+        d = {
+            "fitted_value": m.group("fittedvalue"),
+            "fitted_uncertainty": m.group("fittedunc"),
+            "input_value": m.group("inputvalue"),
+            "input_uncertainty": m.group("inputunc"),
+            "start_value": m.group("startvalue"),
+            "dx/s_in": m.group("dxsin"),
+            "s_out/s_in": m.group("soutsin"),
+            }
+
+        if subkey is None:
+            values[key] = d
+        else:
+            if key in values:
+                values[key][subkey] = d
+            else:
+                values[key] = {subkey: d}
+
+        values[key]["type"] = type
+
+    return values
+
+
 ## Class to contain LandS installation information
 #
 # Looks for LandS in
@@ -1547,8 +1656,12 @@ def _updateArgs(kwargs, obj, names):
 #
 # \param filename   Path to file
 # \param content    String to write to the file
-def _writeScript(filename, content):
-    fOUT = open(filename, 'w')
+# \param truncate   Truncate (True) or append (False)
+def _writeScript(filename, content, truncate=True):
+    mode = "w"
+    if not truncate:
+        mode = "a"
+    fOUT = open(filename, mode)
     fOUT.write(content)
     fOUT.close()
 
