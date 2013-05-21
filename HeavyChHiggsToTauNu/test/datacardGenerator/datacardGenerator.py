@@ -13,7 +13,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 import tarfile
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.AnalysisModuleSelector import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
