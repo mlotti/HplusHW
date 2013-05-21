@@ -351,6 +351,9 @@ namespace HPlus {
     fCollinearSystemJetsFakingTauGenuineTaus = new JetDetailHistograms(fHistoWrapper, myDir, "CollinearSystemJetsFakingTauGenuineTaus", true);
     fCollinearSystemJetsFakingTauFakeTaus = new JetDetailHistograms(fHistoWrapper, myDir, "CollinearSystemJetsFakingTauFakeTaus", true);
     fCollinearSystemJetsOppositeToTau = new JetDetailHistograms(fHistoWrapper, myDir, "CollinearSystemJetsOppositeToTau", true);
+    fBackToBackSystemJetsFakingTauGenuineTaus = new JetDetailHistograms(fHistoWrapper, myDir, "BackToBackSystemJetsFakingTauGenuineTaus", true);
+    fBackToBackSystemJetsFakingTauFakeTaus = new JetDetailHistograms(fHistoWrapper, myDir, "BackToBackSystemJetsFakingTauFakeTaus", true);
+    fBackToBackSystemJetsOppositeToTau = new JetDetailHistograms(fHistoWrapper, myDir, "BackToBackSystemJetsOppositeToTau", true);
   }
 
   QCDMeasurementFactorised::~QCDMeasurementFactorised() {}
@@ -691,36 +694,58 @@ namespace HPlus {
   }
 
   void QCDMeasurementFactorised::testInvestigateCollinearEvents(const edm::Event& iEvent, const QCDTailKiller::Data& qcdTailKillerData, const JetSelection::Data& jetData, const ElectronSelection::Data& eData, const MuonSelection::Data& muData, const bool isRealData, const bool isFakeTau) {
-    //std::cout << "QCD tail killer status: " << qcdTailKillerData.passedBackToBackCuts() << " " << qcdTailKillerData.passedCollinearCuts() << std::endl;
-    if (!qcdTailKillerData.passedBackToBackCuts()) return;
-    if (qcdTailKillerData.passedCollinearCuts()) return;
-
-    // Situation is that the jet faking tau is collinear with MET and the recoiling jet is back-to-back with MET
-    // Why does rejecting these events make the mT closure test agree?
-    // I.e. why is there a correlation between the collinear system and tau isolation?
-
     // Obtain jet that is faking the tau
     edm::Ptr<pat::Jet> myJetFakingTheTau = jetData.getReferenceJetToTau();
     if (myJetFakingTheTau.isNull()) return;
-    // Obtain jet that is back to back to the jet faking the tau
-    edm::Ptr<pat::Jet> myJetOppositeToTau;
-    for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
-      if (myJetOppositeToTau.isNull() && !qcdTailKillerData.passCollinearCutForJet(i)) {
-        myJetOppositeToTau = jetData.getSelectedJetsIncludingTau()[i]; // sorted by Et
-      }
-    }
-    if (myJetOppositeToTau.isNull()) return;
 
-    // Fill jet detail histograms
-    if (isFakeTau) {
-      fCollinearSystemJetsFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
-      fCollinearSystemJetsFakingTauFakeTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
-    } else {
-      fCollinearSystemJetsFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
-      fCollinearSystemJetsFakingTauGenuineTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+    //std::cout << "QCD tail killer status: " << qcdTailKillerData.passedBackToBackCuts() << " " << qcdTailKillerData.passedCollinearCuts() << std::endl;
+    if (qcdTailKillerData.passedBackToBackCuts() && !qcdTailKillerData.passedCollinearCuts()) {
+      // Situation is that the jet faking tau is collinear with MET and the recoiling jet is back-to-back with MET
+      // Why does rejecting these events make the mT closure test agree?
+      // I.e. why is there a correlation between the collinear system and tau isolation?
+
+      // Obtain jet that is back to back to the jet faking the tau
+      edm::Ptr<pat::Jet> myJetOppositeToTau;
+      for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
+        if (myJetOppositeToTau.isNull() && !qcdTailKillerData.passCollinearCutForJet(i)) {
+          myJetOppositeToTau = jetData.getSelectedJetsIncludingTau()[i]; // sorted by Et
+        }
+      }
+      if (myJetOppositeToTau.isNull()) return;
+
+      // Fill jet detail histograms
+      if (isFakeTau) {
+        fCollinearSystemJetsFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
+        fCollinearSystemJetsFakingTauFakeTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      } else {
+        fCollinearSystemJetsFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
+        fCollinearSystemJetsFakingTauGenuineTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      }
+      fCollinearSystemJetsOppositeToTau->fill(myJetOppositeToTau, isRealData);
+      fCollinearSystemJetsOppositeToTau->fillLeptonDetails(iEvent, myJetOppositeToTau, eData, muData, isRealData);
+    } else if (!qcdTailKillerData.passedBackToBackCuts() && qcdTailKillerData.passedCollinearCuts()) {
+      // Situation is that the jet faking tau is back to back with MET and the recoiling jet is collinear with MET
+
+      // Obtain jet that is back to back to the jet faking the tau
+      edm::Ptr<pat::Jet> myJetOppositeToTau;
+      for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
+        if (myJetOppositeToTau.isNull() && !qcdTailKillerData.passBackToBackCutForJet(i)) {
+          myJetOppositeToTau = jetData.getSelectedJetsIncludingTau()[i]; // sorted by Et
+        }
+      }
+      if (myJetOppositeToTau.isNull()) return;
+
+      // Fill jet detail histograms
+      if (isFakeTau) {
+        fBackToBackSystemJetsFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
+        fBackToBackSystemJetsFakingTauFakeTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      } else {
+        fBackToBackSystemJetsFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
+        fBackToBackSystemJetsFakingTauGenuineTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      }
+      fBackToBackSystemJetsOppositeToTau->fill(myJetOppositeToTau, isRealData);
+      fBackToBackSystemJetsOppositeToTau->fillLeptonDetails(iEvent, myJetOppositeToTau, eData, muData, isRealData);
     }
-    fCollinearSystemJetsOppositeToTau->fill(myJetOppositeToTau, isRealData);
-    fCollinearSystemJetsOppositeToTau->fillLeptonDetails(iEvent, myJetOppositeToTau, eData, muData, isRealData);
     // Answered by the detail histograms:
     // Multiplicity of PF charged particles in jet faking the tau
     // Multiplicity of PF charged particles for recoiling jet

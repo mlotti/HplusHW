@@ -287,6 +287,9 @@ namespace HPlus {
     JetDetailHistograms* fCollinearSystemJetsFakingTauGenuineTaus;
     JetDetailHistograms* fCollinearSystemJetsFakingTauFakeTaus;
     JetDetailHistograms* fCollinearSystemJetsOppositeToTau;
+    JetDetailHistograms* fBackToBackSystemJetsFakingTauGenuineTaus;
+    JetDetailHistograms* fBackToBackSystemJetsFakingTauFakeTaus;
+    JetDetailHistograms* fBackToBackSystemJetsOppositeToTau;
 
   };
 }
