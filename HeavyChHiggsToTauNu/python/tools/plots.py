@@ -1860,20 +1860,27 @@ class PlotDrawer:
     #
     # \param p       plots.PlotBase (or deriving) object
     # \param name    Plot file name
-    # \param xlabel  X axis title
     # \param kwargs  Keyword arguments (see below)
     #
     # Keyword arguments are forwarded to the methods doing the actual
     # work. These methods pick the arguments they are interested of.
     # For further documentation, please look the individual methods
-    def __call__(self, p, name, xlabel, **kwargs):
+    def __call__(self, p, name, *args, **kwargs):
         self.rebin(p, name, **kwargs)
         self.stackMCHistograms(p, **kwargs)
         self.createFrame(p, name, **kwargs)
         self.setLegend(p, **kwargs)
         self.addCutLineBox(p, **kwargs)
         self.customise(p, **kwargs)
-        self.finish(p, xlabel=xlabel, **kwargs)
+        if len(args) > 1:
+            raise Exception("At most 1 positional argument allowed (for xlabel), got %d" % len(args))
+        elif len(args) == 1:
+            if "xlabel" in kwargs:
+                raise Exception("May not give positional arguments if xlabel is in kwargs")
+            else:
+                self.finish(p, xlabel=args[0], **kwargs)
+        else:
+            self.finish(p, **kwargs)
 
     ## Rebin all histograms in the plot
     #
