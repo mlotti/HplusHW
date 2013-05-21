@@ -35,23 +35,6 @@ cmsText = {
 ## Default energy text
 energyText = "7 TeV"
 
-## Generic settings class
-class Settings:
-    def __init__(self, **defaults):
-        self.data = copy.deepcopy(defaults)
-
-    def set(self, **kwargs):
-        for key, value in kwargs.iteritems():
-            if not key in self.data:
-                raise Exception("Not allowed to insert '%s', available settings: %s" % (key, ", ".join(self.data.keys())))
-            self.data[key] = value
-
-    def get(self, key, args=None):
-        if args is None:
-            return self.data[key]
-        else:
-            return args.get(key, self.data[key])
-
 ## Class to provide default positions of the various texts.
 #
 # The attributes which can be set are the x and y coordinates and the
@@ -314,7 +297,7 @@ class SignalTextCreator:
     # \param width      Width of the box
     # \param kwargs     Keyword arguments, forwarded to histograms.PlotTextBox.__init__()
     def __init__(self, xmin=0.6, ymax=0.9, size=20, lineheight=0.04, width=0.3, **kwargs):
-        self.settings = Settings(xmin=xmin, ymax=ymax, size=size, lineheight=lineheight, width=width,
+        self.settings = dataset.Settings(xmin=xmin, ymax=ymax, size=size, lineheight=lineheight, width=width,
                                  mass=None, tanbeta=None, mu=None,
                                  br_tH=None,
                                  sigma_H=None, br_Htaunu=None)

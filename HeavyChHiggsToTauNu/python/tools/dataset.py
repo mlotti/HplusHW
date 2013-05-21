@@ -286,6 +286,37 @@ def addOptions(parser, analysisName=None, searchMode=None, dataEra=None, optimiz
     parser.add_option("--counterDir", "-c", dest="counterDir", type="string", default=None,
                       help="TDirectory name containing the counters, relative to the analysis directory (default: analysisDirectory+'/counters')")
 
+## Generic settings class
+class Settings:
+    def __init__(self, **defaults):
+        self.data = copy.deepcopy(defaults)
+
+    def set(self, **kwargs):
+        for key, value in kwargs.iteritems():
+            if not key in self.data:
+                raise Exception("Not allowed to insert '%s', available settings: %s" % (key, ", ".join(self.data.keys())))
+            self.data[key] = value
+
+    def append(self, **kwargs):
+        for key, value in kwargs.iteritems():
+            if not key in self.data:
+                raise Exception("Not allowed to insert '%s', available settings: %s" % (key, ", ".join(self.data.keys())))
+            try:
+                self.data[key].append(value)
+            except AttributeError:
+                try:
+                    self.data[key].update(value)
+                except AttributeError:
+                    raise Exception("Trying to append to '%s', but it does not have 'append' method (assuming list) nor 'update' method (assuming dictionary). Its type is %s." % (key, type(self.data[key]).__name__))
+
+    def get(self, key, args=None):
+        if args is None:
+            return self.data[key]
+        else:
+            return args.get(key, self.data[key])
+
+    def clone(self, **kwargs):
+        return copy.deepcopy(self)
 
 ## Represents counter count value with uncertainty.
 class Count:
