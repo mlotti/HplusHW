@@ -1022,6 +1022,8 @@ class RootHistoWithUncertainties:
         for n in self._normalizationUncertaintyRelativeNames:
             print "  %s" % n
 
+    #### Below are methods for "better" implementation for some ROOT TH1 methods
+
     ## Calculate integral including under/overflow bins
     def integral(self):
         if isinstance(self._rootHisto, ROOT.TH3):
@@ -1030,6 +1032,52 @@ class RootHistoWithUncertainties:
             return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+1, 0, self._rootHisto.GetNbinsY()+1)
         else:
             return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+1)
+
+    def getXmin(self):
+        return aux.th1Xmin(self._rootHisto)
+
+    def getXmax(self):
+        return aux.th1Xmax(self._rootHisto)
+
+    def getYmin(self):
+        if self._rootHisto is None:
+            return None
+        if isinstance(self._rootHisto, ROOT.TH2):
+            return aux.th2Ymin(self._rootHisto)
+        else:
+            return self._rootHisto.GetMinimum()
+
+    def getYmax(self):
+        if self._rootHisto is None:
+            return None
+        if isinstance(self._rootHisto, ROOT.TH2):
+            return aux.th2Ymax(self._rootHisto)
+        else:
+            return self._rootHisto.GetMaximum()
+
+    def getXtitle(self):
+        if self._rootHisto is None:
+            return None
+        return self._rootHisto.GetXaxis().GetTitle()
+
+    def getYtitle(self):
+        if self._rootHisto is None:
+            return None
+        return self._rootHisto.GetYaxis().GetTitle()
+
+    ## Get the width of a bin
+    #
+    # \param bin  Bin number
+    def getBinWidth(self, bin):
+        if self._rootHisto is None:
+            return None
+        return self._rootHisto.GetBinWidth(bin)
+
+    ## Get list of bin widths
+    def getBinWidths(self):
+        if self._rootHisto is None:
+            return None
+        return [self._rootHisto.GetBinWidth(i) for i in xrange(1, self._rootHisto.GetNbinsX()+1)]
 
     #### Below are methods for ROOT TH1 compatibility (only selected methods are implemented)
 
