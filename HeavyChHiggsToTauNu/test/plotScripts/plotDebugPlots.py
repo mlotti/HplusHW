@@ -44,7 +44,7 @@ mcOnlyLumi = 5000 # pb
 # main function
 def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     # Make directory for output
-    mySuffix = "%s%s%s"%(era,searchMode,optimizationMode)
+    mySuffix = "debugPlots_%s_%s_%s"%(era,searchMode,optimizationMode)
     if os.path.exists(mySuffix):
         os.rename(mySuffix, "%s_old"%mySuffix)
     os.mkdir(mySuffix)
@@ -104,7 +104,8 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
 
     # Print counters
     #doCounters(myDsetMgr)
-    
+    print "Results saved in directory: %s"%mySuffix
+
 def doPlots(myDsetMgr, opts, mySuffix):
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
