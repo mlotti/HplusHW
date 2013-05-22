@@ -896,7 +896,7 @@ class SystematicsHelper:
         # Read the shape variations from the Dataset
         shapes = []
         if self._settings.get("allShapes"):
-            shapes = dset.getAvailableSystematicVariationSources
+            shapes = dset.getAvailableSystematicVariationSources()
             if verbose:
                 print "  Using all available shape variations (%s)" % ",".join(shapes)
         else:
