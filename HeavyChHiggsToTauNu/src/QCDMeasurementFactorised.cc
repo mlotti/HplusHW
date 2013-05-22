@@ -1014,12 +1014,12 @@ namespace HPlus {
       s2.str("");
       s1 << "TailTestDiffByDeltaEtaCollinearJet" << i+1;
       s2 << "TailTestDiffByDeltaEtaCollinear;#eta_{tau}+#eta_{jet" << i+1 << "};N_{jets}";
-      hTailTestDiffByDeltaEtaCollinear.push_back(histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 50,0,5.0));
+      hTailTestDiffByDeltaEtaCollinear.push_back(histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 100,-5.0,5.0));
       s1.str("");
       s2.str("");
       s1 << "TailTestDiffByDeltaEtaBackToBackJet" << i+1;
       s2 << "TailTestDiffByDeltaEtaBackToBack;#eta_{tau}+#eta_{jet" << i+1 << "};N_{jets}";
-      hTailTestDiffByDeltaEtaBackToBack.push_back(histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 50,0,5.0));
+      hTailTestDiffByDeltaEtaBackToBack.push_back(histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 100,-5.0,5.0));
     }
     hTailTestMinDeltaR = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TailTestMinDeltaR","TailTestMinDeltaR;min #DeltaR;N_{events}", 50,0,5.0);
     hTailTestByDeltaPhiForMinDeltaR = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR", "TailTestByDeltaPhiForMinDeltaR;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
