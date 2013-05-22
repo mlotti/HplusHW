@@ -2027,6 +2027,7 @@ class Dataset:
     # 
     # \param name   Path of the histogram in the ROOT file
     # \param modify Function to modify the histogram (use case is e.g. obtaining a slice of TH2 as TH1)
+    # \param kwargs Keyword arguments, forwarded to getRootHisto()
     #
     # \return dataset.DatasetRootHisto object containing the (unnormalized) TH1 and this Dataset
     # 
@@ -2039,13 +2040,15 @@ class Dataset:
     # anything with addUncertainties() method), the addUncertainties()
     # method of it is called with the Dataset and
     # RootHistoWithUncertainties objects, and the modify function.
-    def getDatasetRootHisto(self, name, modify=None):
+    def getDatasetRootHisto(self, name, modify=None, **kwargs):
         h = None
         if hasattr(name, "draw"):
+            if len(kwargs) > 0:
+                print >>sys.stderr, "WARNING: You gave keyword arguments to getDatasetRootHisto() together with object with draw() method. The keyword arguments are not passed to the draw() call. This may or may not be what you want."
             h = name.draw(self)
         else:
             pname = name
-            (h, realName) = self.getRootHisto(pname)
+            (h, realName) = self.getRootHisto(pname, **kwargs)
             name = h.GetName()+"_"+self.name
             h.SetName(name.translate(None, "-+.:;"))
 
