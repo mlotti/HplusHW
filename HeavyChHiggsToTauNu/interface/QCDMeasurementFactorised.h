@@ -166,6 +166,36 @@ namespace HPlus {
       WrappedUnfoldedFactorisationHisto* hCtrlMETAfterBJets;
     };
 
+    class TailTest {
+    public:
+      TailTest(std::string prefix, edm::Service<TFileService>& fs, HistoWrapper& histoWrapper);
+      ~TailTest();
+
+      void Fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const QCDTailKiller::Data& qcdTailKillerData, const JetSelection::Data& jetData, const ElectronSelection::Data& eData, const MuonSelection::Data& muData, const METSelection::Data& metData, const bool isRealData, const bool isFakeTau);
+
+    private:
+      // Tests
+      JetDetailHistograms* fJetFakingTauGenuineTaus;
+      JetDetailHistograms* fJetFakingTauFakeTaus;
+      JetDetailHistograms* fCollinearSystemJetsFakingTauGenuineTaus;
+      JetDetailHistograms* fCollinearSystemJetsFakingTauFakeTaus;
+      JetDetailHistograms* fCollinearSystemJetsOppositeToTau;
+      JetDetailHistograms* fBackToBackSystemJetsFakingTauGenuineTaus;
+      JetDetailHistograms* fBackToBackSystemJetsFakingTauFakeTaus;
+      JetDetailHistograms* fBackToBackSystemJetsOppositeToTau;
+
+      std::vector<WrappedTH2*> hTailTestByDeltaPhi;
+      std::vector<WrappedTH2*> hTailTestByDeltaR;
+      std::vector<WrappedTH1*> hTailTestDiffByDeltaEtaBackToBack; // Difference in eta
+      std::vector<WrappedTH1*> hTailTestDiffByDeltaEtaCollinear; // Difference in eta
+      WrappedTH1* hTailTestMinDeltaR;
+      WrappedTH2* hTailTestByDeltaPhiForMinDeltaR;
+      WrappedTH2* hTailTestByDeltaPhiForMinDeltaR10;
+      WrappedTH2* hTailTestByDeltaPhiForMinDeltaR05;
+      WrappedTH2* hCollinearEtaPhi;
+      WrappedTH2* hBackToBackEtaPhi;
+    };
+
     enum QCDSelectionOrder {
       kQCDOrderTrigger,
       kQCDOrderTauCandidateSelection,
@@ -183,7 +213,6 @@ namespace HPlus {
 
   private:
     void doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronData, const MuonSelection::Data& muonData, const JetSelection::Data& jetData, const METSelection::Data& metData);
-    void testInvestigateCollinearEvents(const edm::Event& iEvent, const QCDTailKiller::Data& qcdTailKillerData, const JetSelection::Data& jetData, const ElectronSelection::Data& eData, const MuonSelection::Data& muData, const bool isRealData, const bool isFakeTau);
 
   private:
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
@@ -283,12 +312,11 @@ namespace HPlus {
     QCDFactorisedVariation* fVariationABCDPlusMET30AndCollinearTailKiller;
     QCDFactorisedVariation* fVariationDoubleABCD;
 
-    // Tests
-    JetDetailHistograms* fCollinearSystemJetsFakingTauGenuineTaus;
-    JetDetailHistograms* fCollinearSystemJetsFakingTauFakeTaus;
-    JetDetailHistograms* fCollinearSystemJetsOppositeToTau;
-
+    // Tail tests
+    TailTest* fTailTestAfterStdSel;
+    TailTest* fTailTestAfterTauLeg;
   };
+
 }
 
 #endif

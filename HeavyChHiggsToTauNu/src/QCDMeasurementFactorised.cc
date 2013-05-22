@@ -159,28 +159,40 @@ namespace HPlus {
         for (int i = 0; i < myTauPtBins; ++i) {
           std::stringstream s;
           // tau pT
-          if (i == 0)
-            s << "#tau pT<" << static_cast<int>(fTauPtBinLowEdges[0]);
-          else if (i == myTauPtBins - 1)
-            s << "#tau pT>" << static_cast<int>(fTauPtBinLowEdges[fTauPtBinLowEdges.size()-1]);
-          else
-            s << "#tau pT=" << static_cast<int>(fTauPtBinLowEdges[i-1]) << ".." << static_cast<int>(fTauPtBinLowEdges[i]);
+          if (!fTauPtBinLowEdges.size()) {
+            s << "#tau pT=all";
+          } else {
+            if (i == 0)
+              s << "#tau pT<" << static_cast<int>(fTauPtBinLowEdges[0]);
+            else if (i == myTauPtBins - 1)
+              s << "#tau pT>" << static_cast<int>(fTauPtBinLowEdges[fTauPtBinLowEdges.size()-1]);
+            else
+              s << "#tau pT=" << static_cast<int>(fTauPtBinLowEdges[i-1]) << ".." << static_cast<int>(fTauPtBinLowEdges[i]);
+          }
           s << "/";
           // tau eta
-          if (j == 0)
-            s << "#tau eta<" << setprecision(2) << fTauEtaBinLowEdges[0];
-          else if (j == myTauEtaBins - 1)
-            s << "#tau eta>" << setprecision(2) << fTauEtaBinLowEdges[fTauEtaBinLowEdges.size()-1];
-          else
-            s << "#tau eta=" << setprecision(2) << fTauEtaBinLowEdges[j-1] << ".." << setprecision(2) << fTauEtaBinLowEdges[j];
+          if (!fTauEtaBinLowEdges.size()) {
+            s << "#tau eta=all";
+          } else {
+            if (j == 0)
+              s << "#tau eta<" << setprecision(2) << fTauEtaBinLowEdges[0];
+            else if (j == myTauEtaBins - 1)
+              s << "#tau eta>" << setprecision(2) << fTauEtaBinLowEdges[fTauEtaBinLowEdges.size()-1];
+            else
+              s << "#tau eta=" << setprecision(2) << fTauEtaBinLowEdges[j-1] << ".." << setprecision(2) << fTauEtaBinLowEdges[j];
+          }
           s << "/";
           // Nvertices
-          if (k == 0)
-            s << "N_{vtx}<" << static_cast<int>(fNVerticesBinLowEdges[0]);
-          else if (k == myNVerticesBins - 1)
-            s << "N_{vtx}>" << static_cast<int>(fNVerticesBinLowEdges[fNVerticesBinLowEdges.size()-1]);
-          else
-            s << "N_{vtx}=" << static_cast<int>(fNVerticesBinLowEdges[k-1]) << ".." << static_cast<int>(fNVerticesBinLowEdges[k]);
+          if (!fNVerticesBinLowEdges.size()) {
+            s << "N_{vtx}=all";
+          } else {
+            if (k == 0)
+              s << "N_{vtx}<" << static_cast<int>(fNVerticesBinLowEdges[0]);
+            else if (k == myNVerticesBins - 1)
+              s << "N_{vtx}>" << static_cast<int>(fNVerticesBinLowEdges[fNVerticesBinLowEdges.size()-1]);
+            else
+              s << "N_{vtx}=" << static_cast<int>(fNVerticesBinLowEdges[k-1]) << ".." << static_cast<int>(fNVerticesBinLowEdges[k]);
+          }
           h->getHisto()->GetYaxis()->SetBinLabel(getShapeBinIndex(i,j,k)+1,s.str().c_str());
         }
       }
@@ -335,10 +347,8 @@ namespace HPlus {
                                                         kQCDFactorisedDoubleABCD, "DoubleABCD");
     }
 
-    TFileDirectory myDir = fs->mkdir("tests");
-    fCollinearSystemJetsFakingTauGenuineTaus = new JetDetailHistograms(fHistoWrapper, myDir, "CollinearSystemJetsFakingTauGenuineTaus", true);
-    fCollinearSystemJetsFakingTauFakeTaus = new JetDetailHistograms(fHistoWrapper, myDir, "CollinearSystemJetsFakingTauFakeTaus", true);
-    fCollinearSystemJetsOppositeToTau = new JetDetailHistograms(fHistoWrapper, myDir, "CollinearSystemJetsOppositeToTau", true);
+    fTailTestAfterStdSel = new TailTest("AfterStdSel", fs, fHistoWrapper);
+    fTailTestAfterTauLeg = new TailTest("AfterTauLeg", fs, fHistoWrapper);
   }
 
   QCDMeasurementFactorised::~QCDMeasurementFactorised() {}
@@ -592,7 +602,13 @@ namespace HPlus {
     }
 
     // Additional tests
-    testInvestigateCollinearEvents(iEvent, qcdTailKillerData, jetData, electronData, muonData, iEvent.isRealData(), tauMatchData.isFakeTau());
+    fTailTestAfterStdSel->Fill(iEvent, mySelectedTau, fTauSelection, qcdTailKillerData, jetData, electronData, muonData, metData, iEvent.isRealData(), tauMatchData.isFakeTau());
+    bool myLeg2PassedStatus = fTauSelection.getPassesIsolationStatusOfTauObject(mySelectedTau) &&
+      fTauSelection.getPassesNProngsStatusOfTauObject(mySelectedTau) &&
+      fTauSelection.getPassesRtauStatusOfTauObject(mySelectedTau);
+    if (myLeg2PassedStatus) {
+      fTailTestAfterTauLeg->Fill(iEvent, mySelectedTau, fTauSelection, qcdTailKillerData, jetData, electronData, muonData, metData, iEvent.isRealData(), tauMatchData.isFakeTau());
+    }
 
     //------ End of QCD measurement
     return true;
@@ -675,50 +691,6 @@ namespace HPlus {
     }
 
     fTree.fill(iEvent, selectedTau, jetData.getSelectedJets());
-  }
-
-  void QCDMeasurementFactorised::testInvestigateCollinearEvents(const edm::Event& iEvent, const QCDTailKiller::Data& qcdTailKillerData, const JetSelection::Data& jetData, const ElectronSelection::Data& eData, const MuonSelection::Data& muData, const bool isRealData, const bool isFakeTau) {
-    //std::cout << "QCD tail killer status: " << qcdTailKillerData.passedBackToBackCuts() << " " << qcdTailKillerData.passedCollinearCuts() << std::endl;
-    if (!qcdTailKillerData.passedBackToBackCuts()) return;
-    if (qcdTailKillerData.passedCollinearCuts()) return;
-
-    // Situation is that the jet faking tau is collinear with MET and the recoiling jet is back-to-back with MET
-    // Why does rejecting these events make the mT closure test agree?
-    // I.e. why is there a correlation between the collinear system and tau isolation?
-
-    // Obtain jet that is faking the tau
-    edm::Ptr<pat::Jet> myJetFakingTheTau = jetData.getReferenceJetToTau();
-    if (myJetFakingTheTau.isNull()) return;
-    // Obtain jet that is back to back to the jet faking the tau
-    edm::Ptr<pat::Jet> myJetOppositeToTau;
-    for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
-      if (myJetOppositeToTau.isNull() && !qcdTailKillerData.passCollinearCutForJet(i)) {
-        myJetOppositeToTau = jetData.getSelectedJetsIncludingTau()[i]; // sorted by Et
-      }
-    }
-    if (myJetOppositeToTau.isNull()) return;
-
-    // Fill jet detail histograms
-    if (isFakeTau) {
-      fCollinearSystemJetsFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
-      fCollinearSystemJetsFakingTauFakeTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
-    } else {
-      fCollinearSystemJetsFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
-      fCollinearSystemJetsFakingTauGenuineTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
-    }
-    fCollinearSystemJetsOppositeToTau->fill(myJetOppositeToTau, isRealData);
-    fCollinearSystemJetsOppositeToTau->fillLeptonDetails(iEvent, myJetOppositeToTau, eData, muData, isRealData);
-    // Answered by the detail histograms:
-    // Multiplicity of PF charged particles in jet faking the tau
-    // Multiplicity of PF charged particles for recoiling jet
-    // Multiplicity of PF gammas in jet faking the tau
-    // Multiplicity of PF gammas for recoiling jet
-    // ET(RECO) / ET(GEN) for jet faking tau
-    // ET(RECO) / ET(GEN) for recoiling jet
-    // Flavor of the jet faking the tau (is it a b jet?)
-
-    // Jet faking tau overlapping with electron or muon?
-    // Jet faking tau overlapping with electron or muon from a b jet?
   }
 
   QCDMeasurementFactorised::QCDFactorisedVariation::QCDFactorisedVariation(edm::Service< TFileService >& fs, QCDFactorisedHistogramHandler* histoHandler, EventCounter& eventCounter, CommonPlots& commonPlots, QCDFactorisedVariationType methodType, std::string prefix)
@@ -1014,7 +986,167 @@ namespace HPlus {
     }
   }
 
+  QCDMeasurementFactorised::TailTest::TailTest(std::string prefix, edm::Service<TFileService>& fs, HistoWrapper& histoWrapper) {
+    std::string s = "TailTest_"+prefix;
+    TFileDirectory myDir = fs->mkdir(s.c_str());
+    fJetFakingTauGenuineTaus = new JetDetailHistograms(histoWrapper, myDir, "JetFakingTauGenuineTaus", true);
+    fJetFakingTauFakeTaus = new JetDetailHistograms(histoWrapper, myDir, "JetFakingTauFakeTaus", true);
+    fCollinearSystemJetsFakingTauGenuineTaus = new JetDetailHistograms(histoWrapper, myDir, "CollinearSystemJetsFakingTauGenuineTaus", true);
+    fCollinearSystemJetsFakingTauFakeTaus = new JetDetailHistograms(histoWrapper, myDir, "CollinearSystemJetsFakingTauFakeTaus", true);
+    fCollinearSystemJetsOppositeToTau = new JetDetailHistograms(histoWrapper, myDir, "CollinearSystemJetsOppositeToTau", true);
+    fBackToBackSystemJetsFakingTauGenuineTaus = new JetDetailHistograms(histoWrapper, myDir, "BackToBackSystemJetsFakingTauGenuineTaus", true);
+    fBackToBackSystemJetsFakingTauFakeTaus = new JetDetailHistograms(histoWrapper, myDir, "BackToBackSystemJetsFakingTauFakeTaus", true);
+    fBackToBackSystemJetsOppositeToTau = new JetDetailHistograms(histoWrapper, myDir, "BackToBackSystemJetsOppositeToTau", true);
+    // Delta phi experimental
+    for (int i = 0; i < 4; ++i) {
+      std::stringstream s1;
+      std::stringstream s2;
+      s1 << "TailTestByDeltaPhiJet" << i+1;
+      s2 << "TailTestCollinearByDeltaPhi;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{" << i+1 << "},MET),^{o}";
+      hTailTestByDeltaPhi.push_back(histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 36,0,180, 36,0,180));
+      s1.str("");
+      s2.str("");
+      s1 << "TailTestByDeltaRJet" << i+1;
+      s2 << "TailTestByDeltaR;#Delta#phi(#tau,MET),^{o};#sqrt((#eta_{jet_" << i+1 << "} + #phi_{#tau})^2 + (#phi_{jet_" << i+1 << "} + #eta_{#tau}))^2";
+      hTailTestByDeltaR.push_back(histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 36,0,180, 50,0,5.0));
+      s1.str("");
+      s2.str("");
+      s1 << "TailTestDiffByDeltaEtaCollinearJet" << i+1;
+      s2 << "TailTestDiffByDeltaEtaCollinear;#eta_{tau}+#eta_{jet" << i+1 << "};N_{jets}";
+      hTailTestDiffByDeltaEtaCollinear.push_back(histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 100,-5.0,5.0));
+      s1.str("");
+      s2.str("");
+      s1 << "TailTestDiffByDeltaEtaBackToBackJet" << i+1;
+      s2 << "TailTestDiffByDeltaEtaBackToBack;#eta_{tau}+#eta_{jet" << i+1 << "};N_{jets}";
+      hTailTestDiffByDeltaEtaBackToBack.push_back(histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 100,-5.0,5.0));
+    }
+    hTailTestMinDeltaR = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TailTestMinDeltaR","TailTestMinDeltaR;min #DeltaR;N_{events}", 50,0,5.0);
+    hTailTestByDeltaPhiForMinDeltaR = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR", "TailTestByDeltaPhiForMinDeltaR;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
+    hTailTestByDeltaPhiForMinDeltaR10 = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR10", "TailTestByDeltaPhiForMinDeltaR10;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
+    hTailTestByDeltaPhiForMinDeltaR05 = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR05", "TailTestByDeltaPhiForMinDeltaR05;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
+    hCollinearEtaPhi = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "CollinearEtaPhi", "CollinearEtaPhi;jet #eta; jet #phi, ^{o}", 290,-2.53073,2.53073, 360,-3.14159,3.14159);
+    hBackToBackEtaPhi= histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "BackToBackEtaPhi", "BackToBackEtaPhi;jet #eta; jet #phi, ^{o}", 290,-2.53073,2.53073, 360,-3.14159,3.14159);
+
+  }
+
+  QCDMeasurementFactorised::TailTest::~TailTest() { }
+
+  void QCDMeasurementFactorised::TailTest::Fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const QCDTailKiller::Data& qcdTailKillerData, const JetSelection::Data& jetData, const ElectronSelection::Data& eData, const MuonSelection::Data& muData, const METSelection::Data& metData, const bool isRealData, const bool isFakeTau) {
+    // Obtain jet that is faking the tau
+    edm::Ptr<pat::Jet> myJetFakingTheTau = jetData.getReferenceJetToTau();
+    if (myJetFakingTheTau.isNull()) return;
+
+    // Test effect of replacing deltaphi(jet_n,MET) with deltaR(jet_n,tau)
+    size_t i = 0;
+    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*selectedTau, *(metData.getSelectedMET())) * 57.3;
+    double myMinDeltaR = 999.;
+    edm::Ptr<pat::Jet> myOppositeJet;
+    while (i < jetData.getSelectedJetsIncludingTau().size() && i < 4) {
+      //std::cout << i << std::endl;
+      if (jetData.getSelectedJetsIncludingTau()[i] != myJetFakingTheTau) {
+        double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jetData.getSelectedJetsIncludingTau()[i]), *(metData.getSelectedMET())) * 57.3;
+        double myJetEta = jetData.getSelectedJetsIncludingTau()[i]->eta();
+        double myJetPhi = jetData.getSelectedJetsIncludingTau()[i]->phi();
+        hTailTestByDeltaPhi[i]->Fill(myDeltaPhiTauMET, myDeltaPhiJetMET);
+        double myDeltaR = std::sqrt(std::pow(selectedTau->eta()+myJetEta,2) + std::pow(selectedTau->phi()+myJetPhi,2));
+        //std::cout << "myJetPhi = " << myJetPhi << " myJetEta = " << myJetEta << std::endl;
+        hTailTestByDeltaR[i]->Fill(myDeltaPhiTauMET, myDeltaR);
+        if (myDeltaR < myMinDeltaR) {
+          myMinDeltaR = myDeltaR;
+          myOppositeJet = jetData.getSelectedJetsIncludingTau()[i];
+        }
+        if (!qcdTailKillerData.passBackToBackCutForJet(i)) {
+          hTailTestDiffByDeltaEtaBackToBack[i]->Fill(selectedTau->eta()-myJetEta);
+          hBackToBackEtaPhi->Fill(myJetEta, myJetPhi);
+        } else if (!qcdTailKillerData.passCollinearCutForJet(i)) {
+          hTailTestDiffByDeltaEtaCollinear[i]->Fill(selectedTau->eta()+myJetEta);
+          hCollinearEtaPhi->Fill(myJetEta, myJetPhi);
+        }
+//       } else {
+//         std::cout << "skipping genuine tau, phi = " << myJetFakingTheTau->phi() << " eta = " << myJetFakingTheTau->eta() << std::endl;
+      }
+      ++i;
+    }
+    if (!myOppositeJet.isNull()) {
+      hTailTestMinDeltaR->Fill(myMinDeltaR);
+      //std::cout << "min DeltaR=" << myMinDeltaR << std::endl;
+      double myJetPhi = DeltaPhi::reconstruct(*(myOppositeJet), *(metData.getSelectedMET())) * 57.3;
+      hTailTestByDeltaPhiForMinDeltaR->Fill(myDeltaPhiTauMET, myJetPhi);
+      if (myMinDeltaR < 1.0)
+        hTailTestByDeltaPhiForMinDeltaR10->Fill(myDeltaPhiTauMET, myJetPhi);
+      if (myMinDeltaR < 0.5)
+        hTailTestByDeltaPhiForMinDeltaR05->Fill(myDeltaPhiTauMET, myJetPhi);
+    }
+    //std::cout << "done" << std::endl;
+    //std::cout << "QCD tail killer status: " << qcdTailKillerData.passedBackToBackCuts() << " " << qcdTailKillerData.passedCollinearCuts() << std::endl;
+    if (qcdTailKillerData.passedBackToBackCuts() && !qcdTailKillerData.passedCollinearCuts()) {
+      // Situation is that the jet faking tau is collinear with MET and the recoiling jet is back-to-back with MET
+      // Why does rejecting these events make the mT closure test agree?
+      // I.e. why is there a correlation between the collinear system and tau isolation?
+
+      // Obtain jet that is back to back to the jet faking the tau
+      edm::Ptr<pat::Jet> myJetOppositeToTau;
+      for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
+        if (myJetOppositeToTau.isNull() && !qcdTailKillerData.passCollinearCutForJet(i)) {
+          myJetOppositeToTau = jetData.getSelectedJetsIncludingTau()[i]; // sorted by Et
+        }
+      }
+      if (myJetOppositeToTau.isNull()) return;
+
+      // Fill jet detail histograms
+      if (isFakeTau) {
+        fCollinearSystemJetsFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
+        fCollinearSystemJetsFakingTauFakeTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      } else {
+        fCollinearSystemJetsFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
+        fCollinearSystemJetsFakingTauGenuineTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      }
+      fCollinearSystemJetsOppositeToTau->fill(myJetOppositeToTau, isRealData);
+      fCollinearSystemJetsOppositeToTau->fillLeptonDetails(iEvent, myJetOppositeToTau, eData, muData, isRealData);
+    } else if (!qcdTailKillerData.passedBackToBackCuts() && qcdTailKillerData.passedCollinearCuts()) {
+      // Situation is that the jet faking tau is back to back with MET and the recoiling jet is collinear with MET
+
+      // Obtain jet that is back to back to the jet faking the tau
+      edm::Ptr<pat::Jet> myJetOppositeToTau;
+      for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
+        if (myJetOppositeToTau.isNull() && !qcdTailKillerData.passBackToBackCutForJet(i)) {
+          myJetOppositeToTau = jetData.getSelectedJetsIncludingTau()[i]; // sorted by Et
+        }
+      }
+      if (myJetOppositeToTau.isNull()) return;
+
+      // Fill jet detail histograms
+      if (isFakeTau) {
+        fBackToBackSystemJetsFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
+        fBackToBackSystemJetsFakingTauFakeTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      } else {
+        fBackToBackSystemJetsFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
+        fBackToBackSystemJetsFakingTauGenuineTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      }
+      fBackToBackSystemJetsOppositeToTau->fill(myJetOppositeToTau, isRealData);
+      fBackToBackSystemJetsOppositeToTau->fillLeptonDetails(iEvent, myJetOppositeToTau, eData, muData, isRealData);
+    }
+
+    // For control, fill in all cases the jet faking tau details
+    if (isFakeTau) {
+      fJetFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
+    } else {
+      fJetFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
+    }
+
+    // Answered by the detail histograms:
+    // Multiplicity of PF charged particles in jet faking the tau
+    // Multiplicity of PF charged particles for recoiling jet
+    // Multiplicity of PF gammas in jet faking the tau
+    // Multiplicity of PF gammas for recoiling jet
+    // ET(RECO) / ET(GEN) for jet faking tau
+    // ET(RECO) / ET(GEN) for recoiling jet
+    // Flavor of the jet faking the tau (is it a b jet?)
+
+    // Jet faking tau overlapping with electron or muon?
+    // Jet faking tau overlapping with electron or muon from a b jet?
+
+  }
+
 }
 
-// TODO:
-// test plots for closure tests (b jet, leptons in b jets, gen jet ET / reco jet ET)
