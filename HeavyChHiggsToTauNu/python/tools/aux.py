@@ -115,3 +115,23 @@ def listDirectoryContent(tdirectory, predicate=None):
             ret.append(key.GetName())
         key = diriter.Next()
     return ret
+
+def th1Xmin(th1):
+    if th1 is None:
+        return None
+    return th1.GetXaxis().GetBinLowEdge(th1.GetXaxis().GetFirst())
+
+def th1Xmax(th1):
+    if th1 is None:
+        return None
+    return th1.GetXaxis().GetBinUpEdge(th1.GetXaxis().GetLast())
+
+def th2Ymin(th2):
+    if th2 is None:
+        return None
+    return th2.GetYaxis().GetBinLowEdge(th2.GetYaxis().GetFirst())
+
+def th2Ymax(th2):
+    if th2 is None:
+        return None
+    return th2.GetYaxis().GetBinUpEdge(th2.GetYaxis().GetLast())

@@ -14,6 +14,7 @@ from optparse import OptionParser
 import ROOT
 
 import dataset
+import aux
 
 ## Enumeration class for CMS text mode
 class CMSMode:
@@ -530,26 +531,6 @@ def sumRootHistos(rootHistos, postfix="_sum"):
         h.Add(a)
     return h
 
-def th1Xmin(th1):
-    if th1 is None:
-        return None
-    return th1.GetXaxis().GetBinLowEdge(th1.GetXaxis().GetFirst())
-
-def th1Xmax(th1):
-    if th1 is None:
-        return None
-    return th1.GetXaxis().GetBinUpEdge(th1.GetXaxis().GetLast())
-
-def th2Ymin(th2):
-    if th2 is None:
-        return None
-    return th2.GetYaxis().GetBinLowEdge(th2.GetYaxis().GetFirst())
-
-def th2Ymax(th2):
-    if th2 is None:
-        return None
-    return th2.GetYaxis().GetBinUpEdge(th2.GetYaxis().GetLast())
-
 ## Helper function for lessThan/greaterThan argument handling
 #
 # \param kwargs  Keyword arguments
@@ -900,10 +881,10 @@ class CanvasFrameTwo:
                 return self.frame1.GetYaxis()
 
             def getXmin(self):
-                return th1Xmin(self.frame2)
+                return aux.th1Xmin(self.frame2)
 
             def getXmax(self):
-                return th1Xmax(self.frame2)
+                return aux.th1Xmax(self.frame2)
 
             def Draw(self, *args):
                 self.pad1.cd()
@@ -921,10 +902,10 @@ class CanvasFrameTwo:
                 return self.histo
 
             def getXmin(self):
-                return th1Xmin(self.histo)
+                return aux.th1Xmin(self.histo)
 
             def getXmax(self):
-                return th1Xmax(self.histo)
+                return aux.th1Xmax(self.histo)
 
             def getYmin(self):
                 return self.histo.GetMinimum()
@@ -1206,16 +1187,16 @@ class Histo:
 
     ## Get the minimum value of the X axis
     def getXmin(self):
-        return th1Xmin(self.rootHisto)
+        return aux.th1Xmin(self.rootHisto)
 
     ## Get the maximum value of the X axis
     def getXmax(self):
-        return th1Xmax(self.rootHisto)
+        return aux.th1Xmax(self.rootHisto)
 
     ## Get the minimum value of the Y axis
     def getYmin(self):
         if isinstance(self.rootHisto, ROOT.TH2):
-            return th2Ymin(self.rootHisto)
+            return aux.th2Ymin(h)
         else:
             return self.rootHisto.GetMinimum()
 
@@ -1224,7 +1205,7 @@ class Histo:
         if self.rootHisto is None:
             return None
         if isinstance(self.rootHisto, ROOT.TH2):
-            return th2Ymax(self.rootHisto)
+            return aux.th2Ymax(self.rootHisto)
         else:
             return self.rootHisto.GetMaximum()
 
@@ -1516,10 +1497,10 @@ class HistoEfficiency(Histo):
         return self.rootHisto.GetPassedHistogram()
 
     def getXmin(self):
-        return th1Xmin(self.getRootPassedHisto())
+        return aux.th1Xmin(self.getRootPassedHisto())
 
     def getXmax(self):
-        return th1Xmax(self.getRootPassedHisto())
+        return aux.th1Xmax(self.getRootPassedHisto())
 
     def getYmin(self):
         return min(self._values(lambda eff, bin: eff.GetEfficiency(bin)-eff.GetEfficiencyErrorLow(bin)))

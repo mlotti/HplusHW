@@ -43,6 +43,7 @@ import ROOT
 import dataset
 import histograms
 import styles
+import aux
 
 ## Map the physical dataset names to logical names
 #
@@ -1962,8 +1963,8 @@ class PlotDrawer:
             # the only way which works
             def rebinToWidthTH1(h):
                 th1 = h.getRootHisto()
-                xmin = histograms.th1Xmin(th1)
-                xmax = histograms.th1Xmax(th1)
+                xmin = aux.th1Xmin(th1)
+                xmax = aux.th1Xmax(th1)
                 nbins = (xmax-xmin)/rebinToWidthX
                 intbins = int(nbins+0.5)
                 # Check that the number of bins is integer
@@ -1994,8 +1995,8 @@ class PlotDrawer:
                 if rebinY is not None:
                     rey = rebinY
                 if rebinToWidthX is not None:
-                    xmin = histograms.th1Xmin(th)
-                    xmax = histograms.th1Xmax(th)
+                    xmin = aux.th1Xmin(th)
+                    xmax = aux.th1Xmax(th)
 
                     nbinsx = (xmax-xmin)/rebinToWidthX
                     intbinsx = int(nbinsx+0.5)
@@ -2007,8 +2008,8 @@ class PlotDrawer:
                         return
                     rex = th.GetNbinsX()/intbinsx
                 if rebinToWidthY is not None:
-                    ymin = histograms.th2Ymin(th)
-                    ymax = histograms.th2Ymax(th)
+                    ymin = aux.th2Ymin(th)
+                    ymax = aux.th2Ymax(th)
                     nbinsy = (ymax-ymin)/rebinToWidthY
                     intbinsy = int(nbinsy+0.5)
 
