@@ -175,6 +175,8 @@ namespace HPlus {
 
     private:
       // Tests
+      JetDetailHistograms* fJetFakingTauGenuineTaus;
+      JetDetailHistograms* fJetFakingTauFakeTaus;
       JetDetailHistograms* fCollinearSystemJetsFakingTauGenuineTaus;
       JetDetailHistograms* fCollinearSystemJetsFakingTauFakeTaus;
       JetDetailHistograms* fCollinearSystemJetsOppositeToTau;
@@ -188,6 +190,8 @@ namespace HPlus {
       std::vector<WrappedTH1*> hTailTestDiffByDeltaEtaCollinear; // Difference in eta
       WrappedTH1* hTailTestMinDeltaR;
       WrappedTH2* hTailTestByDeltaPhiForMinDeltaR;
+      WrappedTH2* hTailTestByDeltaPhiForMinDeltaR10;
+      WrappedTH2* hTailTestByDeltaPhiForMinDeltaR05;
       WrappedTH2* hCollinearEtaPhi;
       WrappedTH2* hBackToBackEtaPhi;
     };

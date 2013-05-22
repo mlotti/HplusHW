@@ -990,6 +990,8 @@ namespace HPlus {
   QCDMeasurementFactorised::TailTest::TailTest(std::string prefix, edm::Service<TFileService>& fs, HistoWrapper& histoWrapper) {
     std::string s = "TailTest_"+prefix;
     TFileDirectory myDir = fs->mkdir(s.c_str());
+    fJetFakingTauGenuineTaus = new JetDetailHistograms(histoWrapper, myDir, "JetFakingTauGenuineTaus", true);
+    fJetFakingTauFakeTaus = new JetDetailHistograms(histoWrapper, myDir, "JetFakingTauFakeTaus", true);
     fCollinearSystemJetsFakingTauGenuineTaus = new JetDetailHistograms(histoWrapper, myDir, "CollinearSystemJetsFakingTauGenuineTaus", true);
     fCollinearSystemJetsFakingTauFakeTaus = new JetDetailHistograms(histoWrapper, myDir, "CollinearSystemJetsFakingTauFakeTaus", true);
     fCollinearSystemJetsOppositeToTau = new JetDetailHistograms(histoWrapper, myDir, "CollinearSystemJetsOppositeToTau", true);
@@ -1021,48 +1023,62 @@ namespace HPlus {
     }
     hTailTestMinDeltaR = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TailTestMinDeltaR","TailTestMinDeltaR;min #DeltaR;N_{events}", 50,0,5.0);
     hTailTestByDeltaPhiForMinDeltaR = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR", "TailTestByDeltaPhiForMinDeltaR;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
-    hCollinearEtaPhi = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "CollinearEtaPhi", "CollinearEtaPhi;jet #eta; jet #phi, ^{o}", 290,-2.53073,2.53073, 360,-180,180);
-    hBackToBackEtaPhi= histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "BackToBackEtaPhi", "BackToBackEtaPhi;jet #eta; jet #phi, ^{o}", 290,-2.53073,2.53073, 360,-180,180);
+    hTailTestByDeltaPhiForMinDeltaR10 = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR10", "TailTestByDeltaPhiForMinDeltaR10;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
+    hTailTestByDeltaPhiForMinDeltaR05 = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR05", "TailTestByDeltaPhiForMinDeltaR05;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
+    hCollinearEtaPhi = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "CollinearEtaPhi", "CollinearEtaPhi;jet #eta; jet #phi, ^{o}", 290,-2.53073,2.53073, 360,-3.14159,3.14159);
+    hBackToBackEtaPhi= histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "BackToBackEtaPhi", "BackToBackEtaPhi;jet #eta; jet #phi, ^{o}", 290,-2.53073,2.53073, 360,-3.14159,3.14159);
 
   }
 
   QCDMeasurementFactorised::TailTest::~TailTest() { }
 
   void QCDMeasurementFactorised::TailTest::Fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const QCDTailKiller::Data& qcdTailKillerData, const JetSelection::Data& jetData, const ElectronSelection::Data& eData, const MuonSelection::Data& muData, const METSelection::Data& metData, const bool isRealData, const bool isFakeTau) {
+    // Obtain jet that is faking the tau
+    edm::Ptr<pat::Jet> myJetFakingTheTau = jetData.getReferenceJetToTau();
+    if (myJetFakingTheTau.isNull()) return;
+
     // Test effect of replacing deltaphi(jet_n,MET) with deltaR(jet_n,tau)
     size_t i = 0;
     double myDeltaPhiTauMET = DeltaPhi::reconstruct(*selectedTau, *(metData.getSelectedMET())) * 57.3;
     double myMinDeltaR = 999.;
     edm::Ptr<pat::Jet> myOppositeJet;
     while (i < jetData.getSelectedJetsIncludingTau().size() && i < 4) {
-      double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jetData.getSelectedJetsIncludingTau()[i]), *(metData.getSelectedMET())) * 57.3;
-      double myJetEta = jetData.getSelectedJetsIncludingTau()[i]->eta();
-      double myJetPhi = jetData.getSelectedJetsIncludingTau()[i]->phi();
-      hTailTestByDeltaPhi[i]->Fill(myDeltaPhiTauMET, myDeltaPhiJetMET);
-      double myDeltaR = std::sqrt(std::pow(selectedTau->eta()+myJetEta,2) + std::pow(selectedTau->phi()+myJetPhi,2));
-      hTailTestByDeltaR[i]->Fill(myDeltaPhiTauMET, myDeltaR);
-      if (myDeltaR < myMinDeltaR) {
-        myMinDeltaR = myDeltaR;
-        myOppositeJet = jetData.getSelectedJetsIncludingTau()[i];
-      }
-      if (!qcdTailKillerData.passBackToBackCutForJet(i)) {
-        hTailTestDiffByDeltaEtaBackToBack[i]->Fill(selectedTau->eta()-myJetEta);
-        hBackToBackEtaPhi->Fill(myJetEta, myJetPhi);
-      } else if (!qcdTailKillerData.passCollinearCutForJet(i)) {
-        hTailTestDiffByDeltaEtaCollinear[i]->Fill(selectedTau->eta()+myJetEta);
-        hCollinearEtaPhi->Fill(myJetEta, myJetPhi);
+      //std::cout << i << std::endl;
+      if (jetData.getSelectedJetsIncludingTau()[i] != myJetFakingTheTau) {
+        double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jetData.getSelectedJetsIncludingTau()[i]), *(metData.getSelectedMET())) * 57.3;
+        double myJetEta = jetData.getSelectedJetsIncludingTau()[i]->eta();
+        double myJetPhi = jetData.getSelectedJetsIncludingTau()[i]->phi();
+        hTailTestByDeltaPhi[i]->Fill(myDeltaPhiTauMET, myDeltaPhiJetMET);
+        double myDeltaR = std::sqrt(std::pow(selectedTau->eta()+myJetEta,2) + std::pow(selectedTau->phi()+myJetPhi,2));
+        //std::cout << "myJetPhi = " << myJetPhi << " myJetEta = " << myJetEta << std::endl;
+        hTailTestByDeltaR[i]->Fill(myDeltaPhiTauMET, myDeltaR);
+        if (myDeltaR < myMinDeltaR) {
+          myMinDeltaR = myDeltaR;
+          myOppositeJet = jetData.getSelectedJetsIncludingTau()[i];
+        }
+        if (!qcdTailKillerData.passBackToBackCutForJet(i)) {
+          hTailTestDiffByDeltaEtaBackToBack[i]->Fill(selectedTau->eta()-myJetEta);
+          hBackToBackEtaPhi->Fill(myJetEta, myJetPhi);
+        } else if (!qcdTailKillerData.passCollinearCutForJet(i)) {
+          hTailTestDiffByDeltaEtaCollinear[i]->Fill(selectedTau->eta()+myJetEta);
+          hCollinearEtaPhi->Fill(myJetEta, myJetPhi);
+        }
+//       } else {
+//         std::cout << "skipping genuine tau, phi = " << myJetFakingTheTau->phi() << " eta = " << myJetFakingTheTau->eta() << std::endl;
       }
       ++i;
     }
     if (!myOppositeJet.isNull()) {
       hTailTestMinDeltaR->Fill(myMinDeltaR);
-      hTailTestByDeltaPhiForMinDeltaR->Fill(myDeltaPhiTauMET, DeltaPhi::reconstruct(*(myOppositeJet), *(metData.getSelectedMET())) * 57.3);
+      //std::cout << "min DeltaR=" << myMinDeltaR << std::endl;
+      double myJetPhi = DeltaPhi::reconstruct(*(myOppositeJet), *(metData.getSelectedMET())) * 57.3;
+      hTailTestByDeltaPhiForMinDeltaR->Fill(myDeltaPhiTauMET, myJetPhi);
+      if (myMinDeltaR < 1.0)
+        hTailTestByDeltaPhiForMinDeltaR10->Fill(myDeltaPhiTauMET, myJetPhi);
+      if (myMinDeltaR < 0.5)
+        hTailTestByDeltaPhiForMinDeltaR05->Fill(myDeltaPhiTauMET, myJetPhi);
     }
-
-    // Obtain jet that is faking the tau
-    edm::Ptr<pat::Jet> myJetFakingTheTau = jetData.getReferenceJetToTau();
-    if (myJetFakingTheTau.isNull()) return;
-
+    //std::cout << "done" << std::endl;
     //std::cout << "QCD tail killer status: " << qcdTailKillerData.passedBackToBackCuts() << " " << qcdTailKillerData.passedCollinearCuts() << std::endl;
     if (qcdTailKillerData.passedBackToBackCuts() && !qcdTailKillerData.passedCollinearCuts()) {
       // Situation is that the jet faking tau is collinear with MET and the recoiling jet is back-to-back with MET
@@ -1111,6 +1127,14 @@ namespace HPlus {
       fBackToBackSystemJetsOppositeToTau->fill(myJetOppositeToTau, isRealData);
       fBackToBackSystemJetsOppositeToTau->fillLeptonDetails(iEvent, myJetOppositeToTau, eData, muData, isRealData);
     }
+
+    // For control, fill in all cases the jet faking tau details
+    if (isFakeTau) {
+      fJetFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
+    } else {
+      fJetFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
+    }
+
     // Answered by the detail histograms:
     // Multiplicity of PF charged particles in jet faking the tau
     // Multiplicity of PF charged particles for recoiling jet
