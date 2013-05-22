@@ -136,37 +136,6 @@ def doPlots(datasets, opts):
         # Draw the plot
         drawPlot(p, filename, **kwargs)
 
-    def partiallyBlind(plot, maxShownValue=None, minShownValue=None, moveBlindedText={}):
-        if not plot.histoMgr.hasHisto("Data"):
-            return
-
-        dataHisto = plot.histoMgr.getHisto("Data")
-        th1 = dataHisto.getRootHisto()
-
-        if minShownValue is None:
-            firstShownBin = 1
-        else:
-            firstShownBin = th1.FindFixBin(minShownValue)
-
-        if maxShownValue is None:
-            lastShownBin = th1.GetNbinsX()
-        else:
-            lastShownBin = th1.FindFixBin(maxShownValue)-1
-        
-        for i in xrange(1, th1.GetNbinsX()+1):
-            if i >= firstShownBin and i <= lastShownBin:
-                continue
-
-            th1.SetBinContent(i, 0)
-            th1.SetBinError(i, 0)
-
-        tb = histograms.PlotTextBox(xmin=0.4, ymin=None, xmax=0.6, ymax=0.84, size=17, lineheight=0.035)
-        tb.addText("Data blinded in")
-        tb.addText("signal region")
-        tb.move(**moveBlindedText)
-        plot.appendPlotObject(tb)
-
-            
     # common arguments for plots which make sense only for MC
     mcArgs = {"fullyBlinded": True, "addBlindedText": False}
 
@@ -178,7 +147,7 @@ def doPlots(datasets, opts):
             args.update(kwargs)
             if "transverseMass" in path:
                 if "BTagging" in plotDir or "Selected" in plotDir:
-                    args["customizeBeforeFrame"] = lambda p: partiallyBlind(p, maxShownValue=60)
+                    args["customizeBeforeFrame"] = lambda p: plots.partiallyBlind(p, maxShownValue=60)
             elif "Selected" in plotDir:
                 args["fullyBlinded"] = True
             if "FakeTaus" in plotDir:
@@ -347,11 +316,11 @@ def doPlots(datasets, opts):
     createDrawPlot(myDir+"/etotau_taupT_decayMode2", xlabel="#tau p_{T} / GeV/c")
     # main directory
     createDrawPlot("deltaPhi", xlabel="#Delta#phi(#tau jet, MET), ^{o}", ylabel="N_{events}", rebin=20)
-    createDrawPlot("transverseMass", xlabel="Transverse mass, GeV/c^{2}", ylabel="N_{events}", rebinToWidthX=20, customizeBeforeFrame=lambda p: partiallyBlind(p, maxShownValue=60))
+    createDrawPlot("transverseMass", xlabel="Transverse mass, GeV/c^{2}", ylabel="N_{events}", rebinToWidthX=20, customizeBeforeFrame=lambda p: plots.partiallyBlind(p, maxShownValue=60))
     createDrawPlot("EWKFakeTausTransverseMass", xlabel="Transverse mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=10, **mcArgs)
     createDrawPlot("fullMass", xlabel="Invariant mass, GeV/c^{2}", ylabel="N_{events}", rebin=4, fullyBlinded=True)
     createDrawPlot("EWKFakeTausFullMass", xlabel="Invariant mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=4, **mcArgs)
-    createDrawPlot("alphaT", xlabel="#alpha_{T}", opts={"xmax": 2}, customizeBeforeFrame=lambda p: partiallyBlind(p, maxShownValue=0.5))
+    createDrawPlot("alphaT", xlabel="#alpha_{T}", opts={"xmax": 2}, customizeBeforeFrame=lambda p: plots.partiallyBlind(p, maxShownValue=0.5))
     createDrawPlot("deltaPhiJetMet", xlabel="min #Delta#phi(jet, MET), ^{o}", fullyBlinded=True)
     createDrawPlot("maxDeltaPhiJetMet", xlabel="max #Delta#phi(#tau jet, MET), ^{o}", fullyBlinded=True)
     createDrawPlot("SignalSelectionFlow", xlabel="Step", opts={"xmax": 7})

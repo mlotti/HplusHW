@@ -705,6 +705,43 @@ def _createHisto(rootObject, **kwargs):
 
     return rootObject
 
+## Helper function for partially blinding a plot
+#
+# \param plot              PlotBase (or derived) object
+# \param maxShownValue     If not None, the maximum value to be shown
+# \param minShownValue     If not None, the minimum value to be shown
+# \param moveBlinededText  Dictionary for movinge the blinding text (forwarded to histograms.PlotTextBox.move())
+def partiallyBlind(plot, maxShownValue=None, minShownValue=None, moveBlindedText={}):
+    if not plot.histoMgr.hasHisto("Data"):
+        return
+
+    dataHisto = plot.histoMgr.getHisto("Data")
+    th1 = dataHisto.getRootHisto()
+
+    if minShownValue is None:
+        firstShownBin = 1
+    else:
+        firstShownBin = th1.FindFixBin(minShownValue)
+
+    if maxShownValue is None:
+        lastShownBin = th1.GetNbinsX()
+    else:
+        lastShownBin = th1.FindFixBin(maxShownValue)-1
+    
+    for i in xrange(1, th1.GetNbinsX()+1):
+        if i >= firstShownBin and i <= lastShownBin:
+            continue
+
+        th1.SetBinContent(i, 0)
+        th1.SetBinError(i, 0)
+
+    tb = histograms.PlotTextBox(xmin=0.4, ymin=None, xmax=0.6, ymax=0.84, size=17, lineheight=0.035)
+    tb.addText("Data blinded in")
+    tb.addText("signal region")
+    tb.move(**moveBlindedText)
+    plot.appendPlotObject(tb)
+
+
 ## Base class for plots
 #
 # This class can also be used as for plots which don't need the
