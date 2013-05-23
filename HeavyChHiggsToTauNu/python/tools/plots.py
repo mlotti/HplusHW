@@ -821,6 +821,12 @@ class PlotBase:
     def removeLegend(self):
         delattr(self, "legend")
 
+    ## Set the legend header
+    #
+    # \param legendHeader String for legend header
+    def setLegendHeader(self, legendHeader):
+        self.legendHeader = legendHeader        
+
     ## Add an additional object to be drawn before the plot histograms/graphs
     #
     # \param obj      Object
@@ -893,6 +899,8 @@ class PlotBase:
             obj.Draw(option+"same")
 
         if hasattr(self, "legend"):
+            if hasattr(self, "legendHeader"):
+                self.legend.SetHeader(self.legendHeader)
             self.legend.Draw()
 
         # Redraw the axes in order to get the tick marks on top of the
@@ -1739,6 +1747,7 @@ class PlotDrawer:
     # \param rebinY              Default rebin Y value (passed to TH2::Rebin2D)
     # \param rebinToWidthX       Default width of X bins to rebin to
     # \param rebinToWidthY       Default width of Y bins to rebin to (only applicable for TH2)
+    # \param divideByBinWidth    Divide bin contents by bin width? (done after rebinning)
     # \param createLegend        Default legend creation parameters (None to not to create legend)
     # \param moveLegend          Default legend moving parameters (after creation)
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
@@ -1767,6 +1776,7 @@ class PlotDrawer:
                  rebinY=None,
                  rebinToWidthX=None,
                  rebinToWidthY=None,
+                 divideByBinWidth=False,
                  createLegend={},
                  moveLegend={},
                  customizeBeforeFrame=None,
@@ -1798,6 +1808,7 @@ class PlotDrawer:
         self.rebinYDefault = rebinY
         self.rebinToWidthXDefault = rebinToWidthX
         self.rebinToWidthYDefault = rebinToWidthY
+        self.divideByBinWidthDefault = divideByBinWidth
         self.createLegendDefault = createLegend
         self.moveLegendDefault = moveLegend
         self.customizeBeforeFrameDefault = customizeBeforeFrame
@@ -1880,6 +1891,7 @@ class PlotDrawer:
     #                      TH2)
     # \li\a rebinToWidthX  If given, rebin all histograms to this width of X bins.
     # \li\a rebinToWidthY  If given, rebin all histograms to this width of Y bins.
+    # \li\a divideByBinWidth Divide bin contents by bin width? (done after rebinning)
     #
     # \b Note: Only one argument above per axis can be given.
     #
@@ -2006,6 +2018,10 @@ class PlotDrawer:
 
         if rebinFunction is not None:
             p.histoMgr.forEachHisto(rebinFunction)
+
+        if kwargs.get("divideByBinWidth", self.divideByBinWidthDefault):
+            # TH1::Scale() with "width" option divides the histogram by bin width
+            p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Scale(1, "width"))
 
     ## Stack MC histograms
     #

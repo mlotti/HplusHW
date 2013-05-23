@@ -10,6 +10,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PtrVectorCast.h"
 
 class HPlusBTaggingPtrSelectorFilter: public edm::EDFilter {
  public:
@@ -63,11 +64,7 @@ bool HPlusBTaggingPtrSelectorFilter::filter(edm::Event& iEvent, const edm::Event
   bool passed = false;
   edm::Handle<edm::View<reco::Candidate> > hjets;
   if(iEvent.getByLabel(fJetSrc, hjets) || fThrow) {
-    edm::PtrVector<pat::Jet> casted(hjets->id());
-    for(size_t i=0; i<hjets->size(); ++i) {
-      edm::Ptr<reco::Candidate> ptr = hjets->ptrAt(i);
-      casted.push_back(edm::Ptr<pat::Jet>(ptr.id(), dynamic_cast<const pat::Jet *>(ptr.get()), ptr.key()));
-    }
+    edm::PtrVector<pat::Jet> casted = HPlus::PtrVectorCast<pat::Jet>(hjets->ptrVector());
 
     HPlus::BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, casted);
     if(btagData.passedEvent()) {

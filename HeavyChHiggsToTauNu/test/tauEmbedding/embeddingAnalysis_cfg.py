@@ -263,8 +263,6 @@ process.commonSequence *= process.genTausOriginal
 # FIXME
 lookOriginalGenTaus = True
 if lookOriginalGenTaus:
-    process.muonFinalSelectionJetSelectionFilter.removeTau = False
-
     # Temporary, for ttbar only
     process.genTaus = cms.EDFilter("GenParticleSelector",
         src = cms.InputTag("genParticles", "", "HLT"),
@@ -300,6 +298,35 @@ if lookOriginalGenTaus:
     )
     process.commonSequence *= (process.genTaus * process.genTausVisible * process.patTausNotYetSelected * process.patTausGenMatched * process.mergedPatTaus)
     taus = cms.InputTag("mergedPatTaus")
+
+
+    process.selectedPrimaryVertexAllEvents = cms.EDProducer("EventCountProducer")
+    process.selectedPrimaryVertexCountFilter = cms.EDFilter("VertexCountFilter",
+        src = cms.InputTag("selectedPrimaryVertex"),
+        minNumber = cms.uint32(1),
+        maxNumber = cms.uint32(999)
+    )
+    process.selectedPrimaryVertexSelected = cms.EDProducer("EventCountProducer")
+    process.commonSequence *= (process.selectedPrimaryVertexAllEvents * process.selectedPrimaryVertexCountFilter * process.selectedPrimaryVertexSelected)
+    additionalCounters.extend([
+            "selectedPrimaryVertexAllEvents",
+            "selectedPrimaryVertexSelected",
+            ])
+
+    process.mostLikelyMergedTau = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
+        eventCounter = param.eventCounter.clone(),
+        tauSelection = param.tauSelection.clone(),
+#        vertexSrc = cms.InputTag(param.primaryVertexSelection.selectedSrc.value()),
+        vertexSrc = cms.InputTag("selectedPrimaryVertex"),
+        histogramAmbientLevel = cms.untracked.string("Systematics"),
+    )
+    process.commonSequence.remove(process.muonFinalSelectionJetSelectionFilter)
+    process.commonSequence.remove(process.muonFinalSelectionJetSelection)
+    process.muonFinalSelectionJetSelectionFilter.tauSrc = "mostLikelyMergedTau"
+    process.muonFinalSelectionJetSelectionFilter.allowEmptyTau = True
+    process.commonSequence *= (process.mostLikelyMergedTau * process.muonFinalSelectionJetSelectionFilter * process.muonFinalSelectionJetSelection)
+    del additionalCounters[additionalCounters.index("muonFinalSelectionJetSelection")]
+    additionalCounters.append("muonFinalSelectionJetSelection")
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",

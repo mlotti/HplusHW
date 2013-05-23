@@ -26,11 +26,8 @@ def main(opts):
     if opts.mergeData:
         datasets.mergeData()
 
-#    counters = opts.counterDir
-    if opts.weighted:
-#        counters += "/weighted"
+    if opts.weighted and opts.PUreweight:
         datasets.updateNAllEventsToPUWeighted(era=opts.dataEra)
-#    eventCounter = counter.EventCounter(datasets, counters=counters)
     eventCounter = counter.EventCounter(datasets)
     
 
@@ -44,6 +41,9 @@ def main(opts):
     if opts.mode == "events":
         pass
     elif opts.mode in ["xsect", "xsection", "crosssection", "crossSection", "eff"]:
+        if not opts.PUreweight:
+            print "Mode '%s' works only with PU reweighting, which you disabled with --noPUreweight" % opts.mode
+            return 1
         eventCounter.normalizeMCByCrossSection()
         quantity = "MC by cross section, data by events"
     else:
@@ -95,6 +95,8 @@ if __name__ == "__main__":
     dataset.addOptions(parser)
     parser.add_option("--weighted", dest="weighted", default=False, action="store_true",
                       help="Use weighted counters (i.e. adds '/weighted' to the counter directory path)")
+    parser.add_option("--noPUreweight", dest="PUreweight", default=True, action="store_false",
+                      help="Don't use PU weighted number of all events. Works only with 'events' mode.")
     parser.add_option("--mode", "-m", dest="mode", type="string", default="events",
                       help="Output mode; available: 'events', 'xsect', 'eff' (default: 'events')")
     parser.add_option("--csv", dest="csv", action="store_true", default=False,

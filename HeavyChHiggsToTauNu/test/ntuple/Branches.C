@@ -24,7 +24,7 @@ MuonCollection::Muon::Muon(MuonCollection *mc, size_t i):
 {}
 MuonCollection::Muon::~Muon() {}
 void MuonCollection::Muon::ensureValidity() const {
-  if(!fCollection)
+  if(!isValid())
     throw std::logic_error("Muon is not valid (fCollection is NULL)");
 }
 
@@ -35,6 +35,7 @@ MuonCollection::~MuonCollection() {}
 
 void MuonCollection::setupBranches(TTree *tree, bool isMC) {
   fP4.setupBranch(tree, (fPrefix+"_p4").c_str());
+  fCorrectedP4.setupBranch(tree, (fPrefix+"_correctedP4").c_str());
   fDB.setupBranch(tree, (fPrefix+"_f_dB").c_str());
 
   fTrackIso.setupBranch(tree, (fPrefix+"_f_trackIso").c_str());
@@ -155,29 +156,35 @@ void TauCollection::setupBranches(TTree *tree, bool isMC) {
 
   fDecayModeFinding.setupBranch(tree, (fPrefix+"_f_decayModeFinding").c_str());
   fAgainstMuonTight.setupBranch(tree, (fPrefix+"_f_againstMuonTight").c_str());
+  fAgainstMuonTight2.setupBranch(tree, (fPrefix+"_f_againstMuonTight2").c_str());
   fAgainstElectronLoose.setupBranch(tree, (fPrefix+"_f_againstElectronLoose").c_str());
   fAgainstElectronMedium.setupBranch(tree, (fPrefix+"_f_againstElectronMedium").c_str());
   fAgainstElectronTight.setupBranch(tree, (fPrefix+"_f_againstElectronTight").c_str());
   fAgainstElectronMVA.setupBranch(tree, (fPrefix+"_f_againstElectronMVA").c_str());
+  fAgainstElectronTightMVA3.setupBranch(tree, (fPrefix+"_f_againstElectronTightMVA3").c_str());
   fMediumCombinedIsolationDeltaBetaCorr.setupBranch(tree, (fPrefix+"_f_byMediumCombinedIsolationDeltaBetaCorr").c_str());
+  fMediumCombinedIsolationDeltaBetaCorr3Hits.setupBranch(tree, (fPrefix+"_f_byMediumCombinedIsolationDeltaBetaCorr3Hits").c_str());
 
   if(isMC) {
     fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatch_p4").c_str());
-    fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatchvisible_p4").c_str());
+    fGenMatchVisibleP4.setupBranch(tree, (fPrefix+"_genmatch_visible_p4").c_str());
     fPdgId.setupBranch(tree, (fPrefix+"_genmatch_pdgid").c_str());
     fMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_mother_pdgid").c_str());
     fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_grandmother_pdgid").c_str());
+    fDaughterPdgId.setupBranch(tree, (fPrefix+"_genmatch_daughter_pdgid").c_str());
   }
 }
 
 //////////////////// GenParticleCollection ////////////////////
+GenParticleCollection::GenParticle::GenParticle():  fCollection(0), fIndex(std::numeric_limits<size_t>::max())
+{}
 GenParticleCollection::GenParticle::GenParticle(GenParticleCollection *gpc, size_t i):
   fCollection(gpc), fIndex(i)
 {}
 GenParticleCollection::GenParticle::~GenParticle() {}
 
-GenParticleCollection::GenParticleCollection(const std::string& prefix):
-  fPrefix(prefix)
+GenParticleCollection::GenParticleCollection(const std::string& prefix, bool isTau):
+  fPrefix(prefix), fIsTau(isTau)
 {}
 GenParticleCollection::~GenParticleCollection() {}
 
@@ -186,4 +193,9 @@ void GenParticleCollection::setupBranches(TTree *tree) {
   fPdgId.setupBranch(tree, (fPrefix+"_pdgid").c_str());
   fMotherPdgId.setupBranch(tree, (fPrefix+"_mother_pdgid").c_str());
   fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
+
+  if(fIsTau) {
+    fDaughterPdgId.setupBranch(tree, (fPrefix+"_daughter_pdgid").c_str());
+    fVisibleP4.setupBranch(tree, (fPrefix+"_visible_p4").c_str());
+  }
 }

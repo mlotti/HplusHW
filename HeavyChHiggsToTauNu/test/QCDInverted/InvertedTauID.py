@@ -50,6 +50,9 @@ def DoubleGaussian(x,par):
 def SumFunction(x,par):
     return par[0]*TMath.Gaus(x[0],par[1],par[2],1) + par[3]*TMath.Exp(-x[0]*par[4])
 
+def RayLeigh(x,par):
+    return x[0]*TMath.Exp(-x[0]/( 2*(par[0]+par[1]*x[0])*(par[0]+par[1]*x[0]) ) )
+
 def EWKFunction(x,par,norm = 1,rejectPoints = 0):
     if not rejectPoints == 0:
 #        if (x[0] > 280 and x[0] < 300):

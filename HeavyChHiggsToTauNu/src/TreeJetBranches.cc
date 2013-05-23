@@ -1,4 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PtrVectorCast.h"
+
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -104,18 +106,21 @@ namespace HPlus {
   void TreeJetBranches::setValues(const edm::Event& iEvent) {
     edm::PtrVector<pat::Jet> jets;
     edm::Handle<edm::View<pat::Jet> > hjets;
+    edm::Handle<edm::View<reco::Candidate> > hcands;
     iEvent.getByLabel(fJetSrc, hjets);
     if(hjets.isValid()) {
       jets = hjets->ptrVector();
     }
     else {
-      edm::Handle<edm::View<reco::Candidate> > hcands;
       iEvent.getByLabel(fJetSrc, hcands);
+      jets = PtrVectorCast<pat::Jet>(hcands->ptrVector());
+      /*
       jets = edm::PtrVector<pat::Jet>(hcands->id());
       for(size_t i=0; i<hcands->size(); ++i) {
         edm::Ptr<reco::Candidate> ptr = hcands->ptrAt(i);
         jets.push_back(edm::Ptr<pat::Jet>(ptr.id(), dynamic_cast<const pat::Jet *>(ptr.get()), ptr.key()));
       }
+      */
     }
     
     for(size_t i=0; i<jets.size(); ++i) {
