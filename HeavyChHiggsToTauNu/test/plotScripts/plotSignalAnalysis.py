@@ -44,6 +44,14 @@ mcOnlyLumi = 5000 # pb
 searchMode = "Light"
 #searchMode = "Heavy"
 
+#optMode = "OptQCDTailKillerZeroPlus"
+#optMode = "OptQCDTailKillerLoosePlus"
+optMode = "OptQCDTailKillerMediumPlus"
+#optMode = "OptQCDTailKillerTightPlus"
+
+#optMode = ""
+
+
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
@@ -51,7 +59,7 @@ dataEra = "Run2011AB"
 # main function
 def main():
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabCfg(analysisName=analysis, searchMode=searchMode, dataEra=dataEra)
+    datasets = dataset.getDatasetsFromMulticrabCfg(analysisName=analysis, searchMode=searchMode, dataEra=dataEra, optimizationMode=optMode)
 
     if mcOnly:
         datasets.remove(datasets.getDataDatasetNames())
@@ -102,7 +110,7 @@ def main():
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     
     # Remove QCD
-    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
+#    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
     histograms.createLegend.moveDefaults(dx=-0.02)
     histograms.createLegend.moveDefaults(dh=-0.03)
     
@@ -217,7 +225,7 @@ def doPlots(datasets):
     
 #    leadingTrack(createPlot("TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
     
-    selectionFlow(createPlot("SignalSelectionFlow"), "SignalSelectionFlow", rebin=1, ratio=False)
+#    selectionFlow(createPlot("SignalSelectionFlow"), "SignalSelectionFlow", rebin=1, ratio=False)
 #    selectionFlowTauCand(createPlot("SignalSelectionFlow"), "SignalSelectionFlow", rebin=1, ratio=False)
 #    selectionFlow(createPlot("SignalSelectionFlow"), "SignalSelectionFlow", rebin=1, opts={"ymin": 1, "ymaxfactor": 5} ) 
     
@@ -262,8 +270,8 @@ def doPlots(datasets):
 #    drawPlot(createPlot("JetSelection/jet_phi"), "jetPhi", rebin=1, xlabel="#phi^{jet}", ylabel="Jets / %.2f", opts={"ymin": 20},textFunction=lambda: addMassBRText(x=0.3, y=0.87))
     drawPlot(createPlot("ControlPlots/Njets"), "NumberOfJets", xlabel="Number of selected jets", ylabel="Events", ratio=False, opts={"xmax": 11,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=3)
     
-    drawPlot(createPlot("JetSelection/betaGenuine"), "betaGenuine", rebin=5,xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c",  opts={"ymaxfactor": 2},  moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06},textFunction=lambda: addMassBRText(x=0.6, y=0.3), cutLine=30)
-    drawPlot(createPlot("JetSelection/betaPU"), "betaPU", rebin=5,  xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c", opts={"ymaxfactor": 5},moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.6, y=0.25), cutLine=30)
+#    drawPlot(createPlot("JetSelection/betaGenuine"), "betaGenuine", rebin=5,xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c",  opts={"ymaxfactor": 2},  moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06},textFunction=lambda: addMassBRText(x=0.6, y=0.3), cutLine=30)
+#    drawPlot(createPlot("JetSelection/betaPU"), "betaPU", rebin=5,  xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c", opts={"ymaxfactor": 5},moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.6, y=0.25), cutLine=30)
 
         
     # MET
@@ -279,7 +287,7 @@ def doPlots(datasets):
     drawPlot(createPlot("ControlPlots/NBjets"), "NumberOfBJets", xlabel="Number of selected b jets", ylabel="Events", opts={"xmax": 7}, ratio=False, textFunction=lambda: addMassBRText(x=0.45, y=0.87), cutLine=1)
 #   
 
-    if True:
+    if False:
         # top mass 
         drawPlot(createPlot("TopChiSelection/TopMass"), "TopMassWithChi", rebin=2, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=300)
         drawPlot(createPlot("FullHiggsMass/TopMass"), "TopMassWithHiggsMass", rebin=2, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=300)
@@ -292,13 +300,13 @@ def doPlots(datasets):
         
 #        drawPlot(createPlot("TopWithMHSelection/TopMass"), "TopMassWithMHSel", rebin=2, log=False,xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 
-    drawPlot(createPlot("genWmass"), "genWmass", rebin=1, log=False, xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+#   drawPlot(createPlot("genWmass"), "genWmass", rebin=1, log=False, xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
 
     drawPlot(createPlot("FullHiggsMass/HiggsMass"), "HiggsMass", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=True, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
-    drawPlot(createPlot("FullHiggsMass/HiggsMassReal"), "HiggsMassReal", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))  
-    drawPlot(createPlot("FullHiggsMass/HiggsMassImaginary"), "HiggsMassImaginary", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
-    drawPlot(createPlot("FullHiggsMass/SolutionMinPzDifference"), "SolutionMinPzDifference", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
-    drawPlot(createPlot("FullHiggsMass/SolutionMaxPzDifference"), "SolutionMaxPzDifference", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+#    drawPlot(createPlot("FullHiggsMass/HiggsMassReal"), "HiggsMassReal", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))  
+#    drawPlot(createPlot("FullHiggsMass/HiggsMassImaginary"), "HiggsMassImaginary", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+#    drawPlot(createPlot("FullHiggsMass/SolutionMinPzDifference"), "SolutionMinPzDifference", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+#    drawPlot(createPlot("FullHiggsMass/SolutionMaxPzDifference"), "SolutionMaxPzDifference", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
       
 #    drawPlot(createPlot("FullHiggsMass/HiggsMassTauBmatch"), "HiggsMassTauBmatch", rebin=2, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 #    drawPlot(createPlot("FullHiggsMass/HiggsMassTauBMETmatch"), "HiggsMassTauBMETmatch", rebin=2, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))    
@@ -391,9 +399,9 @@ def doPlots(datasets):
 #    genComparison(datasets)
 #    zMassComparison(datasets)
 #    genQuarkComparison(datasets)
-    topMassComparison(datasets)
+#    topMassComparison(datasets)
     
-    topMassPurity(datasets) 
+#    topMassPurity(datasets) 
 #    vertexComparison(datasets)
 #    mtComparison(datasets)
 #    MetComparison(datasets)

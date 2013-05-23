@@ -17,16 +17,17 @@ searchMode = "Light"
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
 
-optMode = "OptQCDTailKillerTightPlus"
+optMode = "OptQCDTailKillerLoosePlus"
 #optMode = ""
 binning = [41,50,60,70,80,100,120,150,200]
 
 HISTONAMES = []
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
+#HISTONAMES.append("Inverted/SelectedTau_pT_CollinearTailKiller")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
-#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
-HISTONAMES.append("Inverted/SelectedTau_pT_TailKiller")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
+HISTONAMES.append("Inverted/SelectedTau_pT_BackToBackTailKiller")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts")
 
@@ -91,8 +92,8 @@ def main():
             legends["Purity%s"%i] = "B-jet veto"
         if "AfterBvetoPhiCuts"  in name:    
             legends["Purity%s"%i] = "B-jet veto, TailKiller"
-        if "AfterDeltaPhiJetsAgainstTTCut"  in name:    
-            legends["Purity%s"%i] = "TailKiller" 
+        if "BackToBackTailKiller"  in name:    
+            legends["Purity%s"%i] = "Back-to-Back cuts" 
     plot.createFrame("purity", opts={"xmin": 40, "xmax": 200, "ymin": 0., "ymax": 1.05})
     plot.frame.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
     plot.frame.GetYaxis().SetTitle("Purity")
@@ -100,10 +101,10 @@ def main():
 
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
-    plot.setLegend(histograms.createLegend(0.6, 0.2, 0.98, 0.4))
+    plot.setLegend(histograms.createLegend(0.55, 0.3, 0.98, 0.5))
     
  
-    histograms.addText(0.2, 0.3, "TailKiller: TightPlus", 20)
+    histograms.addText(0.4, 0.22, "Back-to-Back cuts: Loose", 20)
 
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText(s="%s TeV"%(datasets.getEnergies()[0]))

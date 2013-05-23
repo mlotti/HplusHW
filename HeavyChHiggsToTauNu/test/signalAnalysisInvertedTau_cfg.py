@@ -33,7 +33,7 @@ myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 
 def customize(signalAnalysis):
     print "Customisation applied"
-    #signalAnalysis.MET.METCut = 50.
+    signalAnalysis.MET.METCut = 50.
     
     
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder

@@ -134,7 +134,7 @@ namespace HPlus {
     void fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData, bool passedStatus = true, double value = 0);
 
     bool doInvertedAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data genData);
-    bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData);
+    bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, bool myFakeTauStatus);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisInvertedTauProducer
@@ -274,17 +274,29 @@ namespace HPlus {
     WrappedTH1 *hMETBeforeMETCut;
     WrappedTH1 *hMETBeforeTauId;
 
-    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBack;
-    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinear;
+    // std::vector<WrappedTH1*> hQCDTailKillerBackToBackInverted;
+    // std::vector<WrappedTH1*> hQCDTailKillerCollinearInverted;
+    //std::vector<WrappedTH1*> hQCDTailKillerBackToBackBaseline;
+    //std::vector<WrappedTH1*> hQCDTailKillerCollinearBaseline;
+    std::vector<WrappedTH1*> hEWKFakeTausQCDTailKillerBackToBack_Baseline;
+    std::vector<WrappedTH1*> hEWKFakeTausQCDTailKillerCollinear_Baseline;
 
-    WrappedTH1* hCtrlQCDTailKillerJet1BackToBack;
-    WrappedTH1* hCtrlQCDTailKillerJet2BackToBack;
-    WrappedTH1* hCtrlQCDTailKillerJet3BackToBack;
-    WrappedTH1* hCtrlQCDTailKillerJet4BackToBack;
-    WrappedTH1* hCtrlQCDTailKillerJet1Collinear;
-    WrappedTH1* hCtrlQCDTailKillerJet2Collinear;
-    WrappedTH1* hCtrlQCDTailKillerJet3Collinear;
-    WrappedTH1* hCtrlQCDTailKillerJet4Collinear;
+    WrappedTH1* hQCDTailKillerJet0BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet1BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet2BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet3BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet0CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet1CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet2CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet3CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet0BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet1BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet2BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet3BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet0CollinearBaseline;
+    WrappedTH1* hQCDTailKillerJet1CollinearBaseline;
+    WrappedTH1* hQCDTailKillerJet2CollinearBaseline;
+    WrappedTH1* hQCDTailKillerJet3CollinearBaseline;
 
 
     // baseline MET histos
@@ -296,6 +308,8 @@ namespace HPlus {
     HistogramsInBins *hMETBaselineTauIdBvetoCollinear;
     HistogramsInBins *hMETBaselineTauIdBvetoTailKiller;
     // baseline MT histos
+    HistogramsInBins *hMTInvertedTauIdSoftBtaggingTK;
+    HistogramsInBins *hMTBaselineTauIdSoftBtaggingTK;
     HistogramsInBins *hMTBaselineTauIdJet;
     HistogramsInBins *hMTBaselineTauIdBtag;
     HistogramsInBins *hMTBaselineTauIdBveto;

@@ -309,6 +309,7 @@ namespace HPlus {
     
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;
+    WrappedTH1 *hTransverseMassRealTaus;
     WrappedTH1 *hTransverseMassDeltaPtCut;
     WrappedTH1 *hTransverseMassSecondBveto;
     WrappedTH1 *hTransverseMassPhi30;

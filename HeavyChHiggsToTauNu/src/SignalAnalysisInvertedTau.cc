@@ -247,6 +247,7 @@ namespace HPlus {
     hMTBaselineTauIdBvetoTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdBvetoTailKiller", 200, 0.0, 400.0 );
     hMTBaselineTauIdNoBtagging = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdNoBtagging", 200, 0.0, 400.0 );
     hMTBaselineTauIdNoBtaggingTailKiller= new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdNoBtaggingTailKiller", 200, 0.0, 400.0 );
+    hMTBaselineTauIdSoftBtaggingTK= new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdSoftBtaggingTK", 200, 0.0, 400.0 );
     //    hMTBaselineTauIdJetTailKiller = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdJetTailKiller", 200, 0.0, 400.0 );
     hMTBaselineTauIdBtag =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdBtag", 200, 0.0, 400.0 );
     //    hMTBaselineTauIdBvetoDphi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdBvetoDphi", 200, 0.0, 400.0 );
@@ -264,7 +265,8 @@ namespace HPlus {
     hMTInvertedTauIdJetTailKiller =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdJetTailKiller", 200, 0.0, 400.0 );
     hMTInvertedTauIdJetDphi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdJetDphi", 200, 0.0, 400.0 ); 
     hMTInvertedTauIdBtag =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBtag", 200, 0.0, 400.0 ); 
-    hMTInvertedTauIdNoBtagging=  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdNoBtagging", 200, 0.0, 400.0 ); 
+    hMTInvertedTauIdNoBtagging=  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdNoBtagging", 200, 0.0, 400.0 );
+    hMTInvertedTauIdSoftBtaggingTK=  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdSoftBtaggingTK", 200, 0.0, 400.0 );  
     hMTInvertedTauIdBveto =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBveto", 200, 0.0, 400.0 ); 
     hMTInvertedTauIdBvetoDphi =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","MTInvertedTauIdBvetoTailKiller", 200, 0.0, 400.0 );
  
@@ -361,24 +363,57 @@ namespace HPlus {
    hDeltaR_TauMETJet1MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "DeltaR_TauMETJet1MET", "DeltaR_TauMETJet1MET ", 65, 0., 260.);
    hDeltaR_TauMETJet2MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "DeltaR_TauMETJet2MET", "DeltaR_TauMETJet2MET ", 65, 0., 260.);
    hDeltaR_TauMETJet3MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "DeltaR_TauMETJet3MET", "DeltaR_TauMETJet3MET ", 65, 0., 260.);
+
+
+   hQCDTailKillerJet0BackToBackInverted = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myInverted ,"QCDTailKillerJet0BackToBackInverted","QCDTailKillerJet0BackToBackInverted", 52, 0., 260.);
+   hQCDTailKillerJet0BackToBackBaseline = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myBaseline ,"QCDTailKillerJet0BackToBackBaseline","QCDTailKillerJet0BackToBackBaseline", 52, 0., 260.);  
+   hQCDTailKillerJet0CollinearInverted = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myInverted ,"QCDTailKillerJet0CollinearInverted","QCDTailKillerJet0CollinearInverted", 52, 0., 260.);
+   hQCDTailKillerJet0CollinearBaseline = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myBaseline ,"QCDTailKillerJet0CollinearBaseline","QCDTailKillerJet0CollinearBaseline", 52, 0., 260.); 
+   hQCDTailKillerJet1BackToBackInverted = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myInverted ,"QCDTailKillerJet1BackToBackInverted","QCDTailKillerJet1BackToBackInverted", 52, 0., 260.);
+   hQCDTailKillerJet1BackToBackBaseline = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myBaseline ,"QCDTailKillerJet1BackToBackBaseline","QCDTailKillerJet1BackToBackBaseline", 52, 0., 260.);  
+   hQCDTailKillerJet1CollinearInverted = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myInverted ,"QCDTailKillerJet1CollinearInverted","QCDTailKillerJet1CollinearInverted", 52, 0., 260.);
+   hQCDTailKillerJet1CollinearBaseline = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myBaseline ,"QCDTailKillerJet1CollinearBaseline","QCDTailKillerJet1CollinearBaseline", 52, 0., 260.); 
+   hQCDTailKillerJet2BackToBackInverted = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myInverted ,"QCDTailKillerJet2BackToBackInverted","QCDTailKillerJet2BackToBackInverted", 52, 0., 260.);
+   hQCDTailKillerJet2BackToBackBaseline = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myBaseline ,"QCDTailKillerJet2BackToBackBaseline","QCDTailKillerJet2BackToBackBaseline", 52, 0., 260.);  
+   hQCDTailKillerJet2CollinearInverted = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myInverted ,"QCDTailKillerJet2CollinearInverted","QCDTailKillerJet2CollinearInverted", 52, 0., 260.);
+   hQCDTailKillerJet2CollinearBaseline = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myBaseline ,"QCDTailKillerJet2CollinearBaseline","QCDTailKillerJet2CollinearBaseline", 52, 0., 260.); 
+   hQCDTailKillerJet3BackToBackInverted = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myInverted ,"QCDTailKillerJet3BackToBackInverted","QCDTailKillerJet3BackToBackInverted", 52, 0., 260.);
+   hQCDTailKillerJet3BackToBackBaseline = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myBaseline ,"QCDTailKillerJet3BackToBackBaseline","QCDTailKillerJet3BackToBackBaseline", 52, 0., 260.);  
+   hQCDTailKillerJet3CollinearInverted = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myInverted ,"QCDTailKillerJet3CollinearInverted","QCDTailKillerJet3CollinearInverted", 52, 0., 260.);
+   hQCDTailKillerJet3CollinearBaseline = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myBaseline ,"QCDTailKillerJet3CollinearBaseline","QCDTailKillerJet3CollinearBaseline", 52, 0., 260.); 
+
    hDeltaR_TauMETJet4MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "DeltaR_TauMETJet4MET", "DeltaR_TauMETJet4MET ", 65, 0., 260.);
 
    // Control histograms                                                                                                                                                               
-   TFileDirectory myCtrlDir = fs->mkdir("ControlPlots");
-
+   //   TFileDirectory myCtrlDir = fs->mkdir("ControlPlots");
+/*
    for (int i = 0; i < 4; ++i) {
      std::stringstream sName;
      std::stringstream sTitle;
      sName << "QCDTailKillerJet" << i << "BackToBack";
      sTitle << "QCDTailKillerJet" << i << "BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{" << i << "},MET)^{2}}, ^{o};N_{events}";
-     hCtrlQCDTailKillerBackToBack.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, sName.str().c_str(), sTitle.str().c_str(), 52, 0., 260.));
+     hQCDTailKillerBackToBackInverted.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myInverted , , sTitle.str().c_str(), 52, 0., 260.));
+     hQCDTailKillerBackToBackBaseline.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital,myBaseline , sName.str().c_str(), sTitle.str().c_str(), 52, 0., 260.));
      sName.str("");
      sTitle.str("");
      sName << "QCDTailKillerJet" << i << "Collinear";
      sTitle << "QCDTailKillerJet" << i << "Collinear;#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{" << i << "},MET))^{2}}, ^{o};N_{events}";
-     hCtrlQCDTailKillerCollinear.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, sName.str().c_str(), sTitle.str().c_str(), 52, 0., 260.));
+     hQCDTailKillerCollinearInverted.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, sName.str().c_str(), sTitle.str().c_str(), 52, 0., 260.));
+     hQCDTailKillerCollinearBaseline.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myBaseline, sName.str().c_str(), sTitle.str().c_str(), 52, 0., 260.));
    }
-
+*/
+    for (int i = 0; i < 4; ++i) {
+      std::stringstream sName;
+      std::stringstream sTitle;
+      sName << "QCDTailKillerJet" << i << "BackToBack";
+      sTitle << "QCDTailKillerJet" << i << "BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{" << i << "},MET)^{2}}, ^{o};N_{events}";
+      hEWKFakeTausQCDTailKillerBackToBack_Baseline.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myBaseline, sName.str().c_str(), sTitle.str().c_str(), 52, 0., 260.));
+      sName.str("");
+      sTitle.str("");
+      sName << "QCDTailKillerJet" << i << "Collinear";
+      sTitle << "QCDTailKillerJet" << i << "Collinear;#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{" << i << "},MET))^{2}}, ^{o};N_{events}";
+      hEWKFakeTausQCDTailKillerCollinear_Baseline.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myBaseline, sName.str().c_str(), sTitle.str().c_str(), 52, 0., 260.));
+    }
 
    /*
    // Selection flow histogram
@@ -557,13 +592,12 @@ namespace HPlus {
       
       // tau isolation
       if ( (*iTau)->tauID(myTauIsolation) < 0.5 ) continue;
-      //<<<<<<< HEAD
-      //=======
+    
 	//	std::cout <<"PASSES TAU DISCR" << std::endl;
       hTauDiscriminator->Fill((*iTau)->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits"));
       increment(fTausExistCounter);
   
-	
+      /*	
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
       //	FakeTauIdentifier::MCSelectedTauMatchType tauMatchData.getTauMatchType() = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
       //      bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
@@ -575,11 +609,12 @@ namespace HPlus {
 	fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), (*iTau)->eta()));
       // plot leading track without pt cut
       increment(fTauFakeScaleFactorCounter);
+ 
+      */
 
-      //>>>>>>> sami2011/2011
-      
-      hTauDiscriminator->Fill((*iTau)->tauID("byRawCombinedIsolationDeltaBetaCorr"));
-      increment(fTausExistCounter);  
+     
+      //      hTauDiscriminator->Fill((*iTau)->tauID("byRawCombinedIsolationDeltaBetaCorr"));
+      //      increment(fTausExistCounter);  
       
       if(fProduce) {
 	std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
@@ -598,11 +633,15 @@ namespace HPlus {
 
       increment(fBaselineTauIDCounter);
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, (*selectedTau));
+      bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
+
       if (!iEvent.isRealData())
 	fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), selectedTau->eta()));
       increment(fTauFakeScaleFactorBaselineCounter);
 
       fVertexAssignmentAnalysis.analyze(iEvent, iSetup, iEvent.isRealData(), pvData.getSelectedVertex(), tauData.getSelectedTau(), tauMatchData.getTauMatchType());
+
+
       
       if(iEvent.isRealData())
 	fTauTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
@@ -614,7 +653,7 @@ namespace HPlus {
       if (myOneProngRtauPassedIsolatedTaus.size() == 1) increment(fOneTauCounter);
 
       // Baseline analysis
-      return doBaselineAnalysis(iEvent, iSetup, selectedTau, pvData);
+      return doBaselineAnalysis(iEvent, iSetup, selectedTau, pvData, myFakeTauStatus );
     }
     
     // end baseline tauid and selection
@@ -662,7 +701,7 @@ namespace HPlus {
 
   //////////////////////////////////////////////////////////////////////////////////
 
-  bool SignalAnalysisInvertedTau::doBaselineAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData) {
+  bool SignalAnalysisInvertedTau::doBaselineAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData, bool myFakeTauStatus) {
     
 
   
@@ -757,11 +796,14 @@ namespace HPlus {
     //    const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
 
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    hQCDTailKillerJet0CollinearBaseline->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(0)); // Make control plot before cut    
+    hQCDTailKillerJet1CollinearBaseline->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(1)); // Make control plot before cut    
+    hQCDTailKillerJet2CollinearBaseline->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(2)); // Make control plot before cut    
+    hQCDTailKillerJet3CollinearBaseline->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(3)); // Make control plot before cut    
 
     for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
-      if (i < 4) { // protection                                                                                                                                                  
-        hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(i)); // Make control plot before cut                                         
-        
+      if (i < 4) { // protection 
+        if (myFakeTauStatus) hEWKFakeTausQCDTailKillerBackToBack_Baseline[i]->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(i)); // Make control plot before cut      
         if (!qcdTailKillerData.passCollinearCutForJet(i)) return false;
       }
     }
@@ -815,6 +857,7 @@ namespace HPlus {
     if (qcdTailKillerData.passedEvent()) {   
 	hMTBaselineTauIdNoBtaggingTailKiller->Fill(selectedTau->pt() ,transverseMass );	
       }
+
       	      
     // mT with b veto  in bins
     if( btagData.getSelectedJets().size() < 1) { 
@@ -825,7 +868,15 @@ namespace HPlus {
 	hMTBaselineTauIdBvetoTailKiller->Fill(selectedTau->pt() ,transverseMass );	
       }
     }
-    
+
+
+    // MT for closer test with soft b tagging  
+    if( btagData.getSelectedSubLeadingJets().size() > 0) {  
+      if (qcdTailKillerData.passedEvent()) {   
+	hMTBaselineTauIdSoftBtaggingTK->Fill(selectedTau->pt() ,transverseMass );	
+      }
+    }
+
 
     
     if(!btagData.passedEvent()) return false;
@@ -852,6 +903,20 @@ namespace HPlus {
             
     }
     */		
+
+
+    hQCDTailKillerJet0BackToBackBaseline->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(0)); // Make control plot before cut
+    hQCDTailKillerJet1BackToBackBaseline->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(1)); // Make control plot before cut
+    hQCDTailKillerJet2BackToBackBaseline->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(2)); // Make control plot before cut
+    hQCDTailKillerJet3BackToBackBaseline->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(3)); // Make control plot before cut
+
+    for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
+      if (i < 4) { // protection
+        if (myFakeTauStatus)
+          hEWKFakeTausQCDTailKillerBackToBack_Baseline[i]->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
+
+      }
+    }
 	
     // delta phi cuts
 
@@ -1020,10 +1085,14 @@ namespace HPlus {
     //    const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
 
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+
+    hQCDTailKillerJet0CollinearInverted->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(0)); // Make control plot before cut 
+    hQCDTailKillerJet1CollinearInverted->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(1)); // Make control plot before cut 
+    hQCDTailKillerJet2CollinearInverted->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(2)); // Make control plot before cut 
+    hQCDTailKillerJet3CollinearInverted->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(3)); // Make control plot before cut 
+    
     for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
-      if (i < 4) { // protection                                                                                                                                                      
-	hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(i)); // Make control plot before cut                                             
-	
+      if (i < 4) { // protection                                                                                                                                                                                         	
 	if (!qcdTailKillerData.passCollinearCutForJet(i)) return false;
       }
     }
@@ -1144,6 +1213,16 @@ namespace HPlus {
 	
       }
     }
+
+
+    // MT for closer test with soft b tagging  
+    if( btagData.getSelectedSubLeadingJets().size() > 0) {  
+      if (qcdTailKillerData.passedEvent()) {   
+	hMTInvertedTauIdSoftBtaggingTK->Fill(selectedTau->pt() ,transverseMass );	
+      }
+    }
+
+
     
     // b tagging cut
     //    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderBTagSelection, tauData, btagData.passedEvent(),btagData.getMaxDiscriminatorValue());
@@ -1191,22 +1270,23 @@ namespace HPlus {
       increment(fDeltaPhiTauMETCounter);  
     }
     
-    // tail killer cuts
-    //if (!qcdTailKillerData.passedEvent()) return false;
-    
+     
     //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part                                                                                                        
     // const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET( ));
-    /*
-      for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
+    hQCDTailKillerJet0BackToBackInverted->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(0)); // Make control plot before cut 
+    hQCDTailKillerJet1BackToBackInverted->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(2)); // Make control plot before cut 
+    hQCDTailKillerJet2BackToBackInverted->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(2)); // Make control plot before cut 
+    hQCDTailKillerJet3BackToBackInverted->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(3)); // Make control plot before cut 
+
+   
+    for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
       if (i < 4) { // protection                                                                                                                                                  
-      hCtrlQCDTailKillerBackToBack[i]->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(i)); // Make control plot before cut                                                
-      
-      if (!qcdTailKillerData.passBackToBackCutForJet(i)) return false;
-      }
-      }
-    */
-    
-    if (!qcdTailKillerData.passedEvent()) return false;	
+	
+	if (!qcdTailKillerData.passBackToBackCutForJet(i)) return false;
+      }      
+    }
+
+    //    if (!qcdTailKillerData.passedEvent()) return false;	
     
     increment(fQCDTailKillerBackToBackCounter);
 
@@ -1218,11 +1298,11 @@ namespace HPlus {
     //    std::cout << " Rcut " <<  Rcut  << " deltaPhi " <<  deltaPhi  << std::endl;
     
     
-    //    if (deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut ) increment(fQCDTailKillerCounter);	
+    if (deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut ) increment(fQCDTailKillerCounter);	
     
      
-    if (deltaPhiMetJet1 < Rcut || deltaPhiMetJet2 < Rcut || deltaPhiMetJet3 < Rcut ) return false;
-    increment(fQCDTailKillerCounter);	  
+    //    if (deltaPhiMetJet1 < Rcut || deltaPhiMetJet2 < Rcut || deltaPhiMetJet3 < Rcut ) return false;
+    //    increment(fQCDTailKillerCounter);	  
 
 
     
