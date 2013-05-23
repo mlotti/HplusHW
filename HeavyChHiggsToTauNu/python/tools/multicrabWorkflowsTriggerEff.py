@@ -112,11 +112,11 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
 
     defaultDefinitions = {                                                                                                                                             
         # njobsOut is just a guess                  
-        "Tau_190456-193621_2012A_Jan22":       TaskDef(njobsIn= 300, njobsOut= 6, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v2","HLT_LooseIsoPFTau35_Trk20_Prong1_v3","HLT_LooseIsoPFTau35_Trk20_Prong1_v4"]),
-        "TauParked_193834-196531_2012B_Jan22": TaskDef(njobsIn=2500, njobsOut=25, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v6"]),
-        "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=3000, njobsOut=40, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v7","HLT_LooseIsoPFTau35_Trk20_Prong1_v9"]),
-        "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn= 150, njobsOut= 1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"]),
-        "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=7000, njobsOut=500, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"]),
+        "Tau_190456-193621_2012A_Jan22":       TaskDef(njobsIn= 300, njobsOut= 6, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v2","HLT_LooseIsoPFTau35_Trk20_Prong1_v3","HLT_LooseIsoPFTau35_Trk20_Prong1_v4"], triggerThrow=False),
+        "TauParked_193834-196531_2012B_Jan22": TaskDef(njobsIn=2500, njobsOut=25, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v6"], triggerThrow=False),
+        "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=3000, njobsOut=40, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v7","HLT_LooseIsoPFTau35_Trk20_Prong1_v9"], triggerThrow=False),
+        "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn= 150, njobsOut= 1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"], triggerThrow=False),
+        "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=7000, njobsOut=500, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"], triggerThrow=False),
                                                                                                                                                                        
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                  
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                  
@@ -135,12 +135,12 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(njobsIn=100, njobsOut= 4, args={"wjetsWeighting": 1, "wjetBin": -1}),                                      
         "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(njobsIn=250, njobsOut=16, args={"wjetsWeighting": 1, "wjetBin": -1}),                                      
         "W1Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=150, njobsOut= 8, args={"wjetsWeighting": 1, "wjetBin": 1}),                                       
-        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=400, njobsOut=40, args={"wjetsWeighting": 1, "wjetBin": 2}),                                       
+        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=800, njobsOut=40, args={"wjetsWeighting": 1, "wjetBin": 2}),                                       
         "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=490, njobsOut=50, args={"wjetsWeighting": 1, "wjetBin": 3}),                                       
         "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=550, njobsOut=30, args={"wjetsWeighting": 1, "wjetBin": 4}),                                       
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=350, njobsOut=60),                                                                                 
         "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(njobsIn= 40, njobsOut= 1),                                                                                 
-        "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 50, njobsOut= 5),                                                                                 
+        "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn=100, njobsOut= 5),
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 50, njobsOut= 5),
         "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut= 2),                                                                                 
         "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDefMC(njobsIn= 20, njobsOut= 2),                                                                                 
