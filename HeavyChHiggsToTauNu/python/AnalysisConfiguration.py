@@ -77,6 +77,7 @@ class ConfigBuilder:
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
+                 doInvariantMassReconstructionScenarios = False, # Run different configurations of the invariant mass reconstruction
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
@@ -93,6 +94,7 @@ class ConfigBuilder:
         self.edmOutput = edmOutput
 
         self.doQCDTailKillerScenarios = doQCDTailKillerScenarios
+        self.doInvariantMassReconstructionScenarios = doInvariantMassReconstructionScenarios
         self.doAgainstElectronScan = doAgainstElectronScan
         self.doTauIsolationAndJetPUScan = doTauIsolationAndJetPUScan
         self.doBTagScan = doBTagScan
@@ -393,6 +395,9 @@ class ConfigBuilder:
         # QCD tail killer scenarios
         analysisNamesForSystematics.extend(self._buildQCDTailKillerScenarios(process, analysisModules, analysisNames))
 
+        # Invariant mass reconstruction scenarios
+        analysisNamesForSystematics.extend(self._buildInvariantMassReconstructionScenarios(process, analysisModules, analysisNames))
+
         # Against electron scan
         self._buildAgainstElectronScan(process, analysisModules, analysisNames)
 
@@ -619,6 +624,7 @@ class ConfigBuilder:
         if hasattr(module, "jetSelection"):
             print "jets: ", module.jetSelection
         print "QCD Tail-Killer: ", module.QCDTailKiller
+        print "Invariant mass reconstruction: ", module.invMassReco
 
     ## Build array of analyzers to scan various QCD tail killer scenarios
     #
@@ -713,6 +719,60 @@ class ConfigBuilder:
 
         return names
 
+    ## Build array of analyzers to scan various scenarios for invariant mass reconstruction
+    def _buildInvariantMassReconstructionScenarios(self, process, analysisModules, analysisNames):
+        if not self.doInvariantMassReconstructionScenarios:
+            return []
+        names = []
+        modules = []
+        print "analysisModules is", repr(analysisModules)
+        for module, name in zip(analysisModules, analysisNames):
+            ## Top invariant mass cut scenarios for invariant mass reconstruction
+            # "None" scenario
+            mod = module.clone()
+            mod.invMassReco.topInvMassLowerCut = -1 # negative value means no cut
+            mod.invMassReco.topInvMassUpperCut = -1 # negative value means no cut
+            modName = name+"Opt"+"InvMassRecoTopInvMassCutNone"
+            setattr(process, modName, mod)
+            names.append(modName)
+            modules.append(mod)
+            path = cms.Path(process.commonSequence * mod)
+            setattr(process, modName+"Path", path)
+            # "Loose" scenario
+            mod = module.clone()
+            mod.invMassReco.topInvMassLowerCut = 100 # negative value means no cut
+            mod.invMassReco.topInvMassUpperCut = 240 # negative value means no cut
+            modName = name+"Opt"+"InvMassRecoTopInvMassCutLoose"
+            setattr(process, modName, mod)
+            names.append(modName)
+            modules.append(mod)
+            path = cms.Path(process.commonSequence * mod)
+            setattr(process, modName+"Path", path)
+            # "Medium" scenario
+            mod = module.clone()
+            mod.invMassReco.topInvMassLowerCut = 140 # negative value means no cut
+            mod.invMassReco.topInvMassUpperCut = 200 # negative value means no cut
+            modName = name+"Opt"+"InvMassRecoTopInvMassCutMedium"
+            setattr(process, modName, mod)
+            names.append(modName)
+            modules.append(mod)
+            path = cms.Path(process.commonSequence * mod)
+            setattr(process, modName+"Path", path)
+            # "Tight" scenario
+            mod = module.clone()
+            mod.invMassReco.topInvMassLowerCut = 157 # negative value means no cut
+            mod.invMassReco.topInvMassUpperCut = 187 # negative value means no cut
+            modName = name+"Opt"+"InvMassRecoTopInvMassCutTight"
+            setattr(process, modName, mod)
+            names.append(modName)
+            modules.append(mod)
+            path = cms.Path(process.commonSequence * mod)
+            setattr(process, modName+"Path", path)
+        self._accumulateAnalyzers("Modules for invariant mass reconstruction scenarios", names)
+        analysisModules.extend(modules)
+        analysisNames.extend(names)
+        return names
+    
     ## Build array of analyzers to scan various tau againstElectron discriminators
     #
     # \param process          cms.Process object

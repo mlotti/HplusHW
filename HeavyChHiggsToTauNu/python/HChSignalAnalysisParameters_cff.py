@@ -316,6 +316,12 @@ QCDTailKiller = cms.untracked.PSet(
     ),
 )
 
+invMassReco = cms.untracked.PSet(
+    #topInvMassCutName = cms.untracked.string("None")
+    topInvMassLowerCut = cms.untracked.double(-1.0), # Negative value means no cut. This is currently the default.
+    topInvMassUpperCut = cms.untracked.double(-1.0),  # Negative value means no cut. This is currently the default.
+    )
+
 topReconstruction = cms.untracked.string("None") # Options: None
 
 transverseMassCut = cms.untracked.double(100) # Not used
