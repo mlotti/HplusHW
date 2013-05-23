@@ -527,66 +527,93 @@ def replaceQCDFromData(datasetMgr, datasetQCDdata):
 # done via TGraphAsymmErrors and Clopper-Pearson method (one of the
 # methods recommended by statistics committee).
 def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
-    if isinstance(rootHisto1, ROOT.TH1) and isinstance(rootHisto2, ROOT.TH1):
-        if isBinomial:
-            eff = ROOT.TGraphAsymmErrors(rootHisto1, rootHisto2)
-            styles.getDataStyle().apply(eff)
-            return eff
-        else:
-            ratio = rootHisto1.Clone()
-            ratio.SetDirectory(0)
-            ratio.Divide(rootHisto2)
-            styles.getDataStyle().apply(ratio)
-            ratio.GetYaxis().SetTitle(ytitle)
-            return ratio
-    elif isinstance(rootHisto1, ROOT.TGraph) and isinstance(rootHisto2, ROOT.TGraph):
-        if isBinomial:
-            raise Exception("isBinomial is not supported for TGraph input")
+    if isBinomial:
+        function = _createRatioBinomial
+    else:
+        function = _createRatioErrorPropagation
+    return function(rootHisto1, rootHisto2, ytitle)
 
-        if not rootHisto1.GetN() == rootHisto2.GetN():
+## Creates a ratio histogram by propagating the uncertainties to the ratio
+#
+# \param histo1  TH1/TGraph/RootHistoWithUncertainties dividend
+# \param histo2  TH1/TGraph/RootHistoWithUncertainties divisor
+# \param ytitle  Y axis title of the final ratio histogram/graph
+#
+# \return TH1 or TGraphAsymmErrors of histo1/histo2
+def _createRatioErrorPropagation(histo1, histo2, ytitle):
+    if isinstance(histo1, ROOT.TH1) and isinstance(histo2, ROOT.TH1):
+        ratio = histo1.Clone()
+        ratio.SetDirectory(0)
+        ratio.Divide(histo2)
+        styles.getDataStyle().apply(ratio)
+        ratio.GetYaxis().SetTitle(ytitle)
+        return ratio
+    elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
+        if not histo1.GetN() == histo2.GetN():
 	    xfound = []
-	    for i in range(rootHisto1.GetN()):
-		for j in range(rootHisto2.GetN()):
-		    if rootHisto1.GetX()[i] == rootHisto2.GetX()[j]:
-			xfound.append(rootHisto1.GetX()[i])
-	    for i in range(rootHisto1.GetN()):
+	    for i in range(histo1.GetN()):
+		for j in range(histo2.GetN()):
+		    if histo1.GetX()[i] == histo2.GetX()[j]:
+			xfound.append(histo1.GetX()[i])
+	    for i in range(histo1.GetN()):
 		found = False
 		for x in xfound:
-		    if rootHisto1.GetX()[i] == x:
+		    if histo1.GetX()[i] == x:
 			found = True
 		if not found:
-		    rootHisto1.RemovePoint(i)
-            for j in range(rootHisto2.GetN()):
+		    histo1.RemovePoint(i)
+            for j in range(histo2.GetN()):
                 found = False
                 for x in xfound:
-                    if rootHisto2.GetX()[j] == x:
+                    if histo2.GetX()[j] == x:
                         found = True
                 if not found:
-                    rootHisto1.RemovePoint(j)
+                    histo1.RemovePoint(j)
 
         xvalues = []
         yvalues = []
         yerrs = []
-        for i in xrange(0, rootHisto1.GetN()):
-            yval = rootHisto2.GetY()[i]
+        for i in xrange(0, histo1.GetN()):
+            yval = histo2.GetY()[i]
             if yval == 0:
                 continue
-            xvalues.append(rootHisto1.GetX()[i])
-            yvalue = rootHisto1.GetY()[i] / yval
+            xvalues.append(histo1.GetX()[i])
+            yvalue = histo1.GetY()[i] / yval
             yvalues.append(yvalue)
-            err1 = max(rootHisto1.GetErrorYhigh(i), rootHisto1.GetErrorYlow(i))
-            err2 = max(rootHisto2.GetErrorYhigh(i), rootHisto2.GetErrorYlow(i))
-            yerrs.append( yvalue * math.sqrt( _divideOrZero(err1, rootHisto1.GetY()[i])**2 +
-                                              _divideOrZero(err2, rootHisto2.GetY()[i])**2 ) )
+            err1 = max(histo1.GetErrorYhigh(i), histo1.GetErrorYlow(i))
+            err2 = max(histo2.GetErrorYhigh(i), histo2.GetErrorYlow(i))
+            yerrs.append( yvalue * math.sqrt( _divideOrZero(err1, histo1.GetY()[i])**2 +
+                                              _divideOrZero(err2, histo2.GetY()[i])**2 ) )
 
-        gr = ROOT.TGraphAsymmErrors()
         if len(xvalues) > 0:
             gr = ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues), array.array("d", yvalues),
-                                        rootHisto1.GetEXlow(), rootHisto1.GetEXhigh(),
+                                        histo1.GetEXlow(), histo1.GetEXhigh(),
                                         array.array("d", yerrs), array.array("d", yerrs))
+        else:
+            gr = ROOT.TGraphAsymmErrors()
         return gr
     else:
-        raise Exception("Arguments are of unsupported type, rootHisto1 is %s and rootHisto2 is %s" % (type(rootHisto1).__name__, type(rootHisto2).__name__))
+        raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (type(histo1).__name__, type(histo2).__name__))
+
+## Creates a ratio histogram by binomial assumption
+#
+# \param histo1  TH1 dividend
+# \param histo2  TH1 divisor
+#
+# \return TGraphAsymmErrors of histo1/histo2
+#
+# The uncertainty estimation is done via TGraphAsymmErrors and
+# Clopper-Pearson method (one of the methods recommended by statistics
+# committee).
+def _createRatioBinomial(histo1, histo2):
+    if isinstance(histo1, ROOT.TH1) and isinstance(histo2, ROOT.TH1):
+        eff = ROOT.TGraphAsymmErrors(rootHisto1, rootHisto2)
+        styles.getDataStyle().apply(eff)
+        return eff
+    elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
+        raise Exception("isBinomial is not supported for TGraph input")
+    else:
+        raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (type(histo1).__name__, type(histo2).__name__))
 
 def _divideOrZero(numerator, denominator):
     if denominator == 0:
