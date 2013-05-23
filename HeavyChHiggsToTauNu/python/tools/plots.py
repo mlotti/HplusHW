@@ -593,11 +593,41 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle):
                                         array.array("d", yerrs), array.array("d", yerrs))
         else:
             gr = ROOT.TGraphAsymmErrors()
+        styles.getDataStyle().apply(gr)
         gr.GetYaxis().SetTitle(ytitle)
         gr.SetName("Ratio")
         return gr
+    elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
+        if not (histo1.hasSystematicUncertainties() or histo2.hasSystematicUncertainties()):
+            return _createRatioErrorPropagation(histo1.getRootHisto(), histo2.getRootHisto(), ytitle)
+
+        unc1 = histo1.getSystematicUncertaintyGraph(addStatistical=True)
+        unc2 = histo2.getSystematicUncertaintyGraph(addStatistical=True)
+
+        for i in xrange(0, unc1.GetN()):
+            yval1 = unc1.GetY()[i]
+            yval2 = unc2.GetY()[i]
+            if yval2 == 0.0:
+                unc1.SetPoint(i, unc1.GetX()[i], 0)
+                unc1.SetPointEYhigh(i, 0)
+                unc1.SetPointEYlow(i, 0)
+                continue
+            if yval1 == 0.0:
+                unc1.SetPoint(i, unc1.GetX()[i], 0)
+                unc1.SetPointEYhigh(i, unc1.GetErrorYhigh(i)/yval2)
+                unc1.SetPointEYlow(i, unc1.GetErrorYlow(i)/yval2)
+                continue
+
+            unc1.SetPoint(i, unc1.GetX()[i], yval1/yval2)
+            unc1.SetPointEYhigh(i, math.sqrt( (unc1.GetErrorYhigh(i)/yval1)**2 + (unc2.GetErrorYhigh(i)/yval2)**2 ))
+            unc1.SetPointEYlow( i, math.sqrt( (unc1.GetErrorYlow(i)/yval1)**2  + (unc2.GetErrorYlow(i)/yval2)**2 ))
+        ratio = unc1
+        styles.getDataStyle().apply(ratio)
+        ratio.GetYaxis().SetTitle(ytitle)
+        ratio.SetName("Ratio")
+        return ratio
     else:
-        raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (type(histo1).__name__, type(histo2).__name__))
+        raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
 
 def _graphRemoveNoncommonPoints(graph1, graph2):
     ret1 = graph1.Clone()
@@ -654,7 +684,7 @@ def _createRatioBinomial(histo1, histo2, ytitle):
     elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
         raise Exception("isBinomial is not supported for TGraph input")
     else:
-        raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (type(histo1).__name__, type(histo2).__name__))
+        raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
 
 
 def _createRatioHistosErrorScale(histo1, histo2, ytitle):
@@ -794,7 +824,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
                 _createHisto(ratioSyst, drawStyle="2"),
                 ])
     else:
-        raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (type(histo1).__name__, type(histo2).__name__))
+        raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
 
     return ret
 
@@ -911,7 +941,7 @@ def _createHisto(rootObject, **kwargs):
     elif isinstance(rootObject, ROOT.TEfficiency):
         return histograms.HistoEfficiency(rootObject, rootObject.GetName(), **kwargs)
     elif not isinstance(rootObject, histograms.Histo):
-        raise Exception("rootObject is not TH1, TGraph, histograms.Histo, nor dataset.RootHistoWithUncertainties, it is %s" % type(rootObject).__name__)
+        raise Exception("rootObject is not TH1, TGraph, histograms.Histo, nor dataset.RootHistoWithUncertainties, it is %s" % rootObject.__class__.__name__)
 
     return rootObject
 
@@ -973,7 +1003,7 @@ class PlotBase:
             if isinstance(datasetRootHistos[0], dataset.DatasetRootHistoBase):
                 for i, drh in enumerate(datasetRootHistos[1:]):
                     if not isinstance(drh, dataset.DatasetRootHistoBase):
-                        raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHistos[%d] is %s" % (i, type(drh).__name__))
+                        raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHistos[%d] is %s" % (i, drh.__class__.__name__))
 
                 self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
             else:

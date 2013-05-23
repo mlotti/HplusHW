@@ -1016,6 +1016,9 @@ class RootHistoWithUncertainties:
     def getShapeUncertainties(self):
         return self._shapeUncertainties
 
+    def hasSystematicUncertainties(self):
+        return len(self._shapeUncertainties) > 0 or len(self._shapeUncertaintyRelativeNames) > 0 or len(self._normalizationUncertaintyRelativeNames) > 0
+
     def getSystematicUncertaintyGraph(self, addStatistical=False):
         xvalues = []
         xerrhigh = []
