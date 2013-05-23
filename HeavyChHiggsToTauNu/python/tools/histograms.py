@@ -1194,6 +1194,9 @@ class Histo:
             return
         h.Draw(self.drawStyle+" "+opt)
 
+    def Draw(self, *args):
+        self.draw(*args)
+
     ## Get the minimum value of the X axis
     def getXmin(self):
         return self._histo.getXmin()
@@ -1273,7 +1276,7 @@ class HistoWithDataset(Histo):
             self.dataset = args[0]
         else:
             drh = kwargs["datasetRootHisto"]
-            Histo.__init__(self, drh.getHistogram(), drh.getName())
+            Histo.__init__(self, drh.getHistogramWithUncertainties(), drh.getName())
             self.dataset = drh.getDataset()
 
         self.setIsDataMC(self.dataset.isData(), self.dataset.isMC())
@@ -1337,8 +1340,10 @@ class HistoStacked(Histo):
         if len(histos) == 0:
             raise Exception("Got 0 histograms, or all input histograms are None")
         histos.reverse()
+        thStack = self.getRootHisto()
         for h in histos:
-            self._histo.Add(h)
+            # Addition of uncertainties is done on the fly in getSumRootHistoWithUncertainties()
+            thStack.Add(h.getRootHisto())
 
         self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
 

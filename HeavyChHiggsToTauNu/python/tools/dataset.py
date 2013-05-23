@@ -10,6 +10,7 @@ import math
 import copy
 import StringIO
 import hashlib
+import array
 
 import ROOT
 
@@ -894,13 +895,19 @@ class SystematicsHelper:
             print "Adding uncertainties to histogram '%s' of dataset '%s'" % (self._histoName, dset.getName())
 
         # Read the shape variations from the Dataset
+        # FIXME: is there a better way to deal with the fact that in
+        # data we usually don't have systematics, except with
+        # background measurements we do?
         shapes = []
+        allShapes = dset.getAvailableSystematicVariationSources()
         if self._settings.get("allShapes"):
-            shapes = dset.getAvailableSystematicVariationSources()
+            shapes = allShapes
             if verbose:
                 print "  Using all available shape variations (%s)" % ",".join(shapes)
         else:
-            shapes = self._settings.get("shapes")
+            for s in self._settings.get("shapes"):
+                if s in allShapes:
+                    shapes.append(s)
             if verbose:
                 print "  Using explicitly specified shape variations (%s)" % ",".join(shapes)
 
@@ -1009,6 +1016,65 @@ class RootHistoWithUncertainties:
     def getShapeUncertainties(self):
         return self._shapeUncertainties
 
+    def getSystematicUncertaintyGraph(self, addStatistical=False):
+        xvalues = []
+        xerrhigh = []
+        xerrlow = []
+        yvalues = []
+        yerrhigh = []
+        yerrlow = []
+
+        for i in xrange(1, self._rootHisto.GetNbinsX()+1):
+            xval = self._rootHisto.GetBinCenter(i)
+            xlow = xval-self._rootHisto.GetXaxis().GetBinLowEdge(i)
+            xhigh = self._rootHisto.GetXaxis().GetBinUpEdge(i)-xval
+
+            yval = self._rootHisto.GetBinContent(i)
+            yhighSquareSum = 0.0
+            ylowSquareSum = 0.0
+
+            if addStatistical:
+                stat = self._rootHisto.GetBinError(i)
+                yhighSquareSum += stat**2
+                ylowSquareSum += stat**2
+
+            for shapePlus, shapeMinus in self._shapeUncertainties.itervalues():
+                diffPlus = shapePlus.GetBinContent(i)-yval
+                diffMinus = shapeMinus.GetBinContent(i)-yval
+
+                if diffPlus > 0 and diffMinus > 0:
+                    yhighSquareSum += max(diffPlus, diffMinus)**2
+                elif diffPlus < 0 and diffMinus < 0:
+                    ylowSquareSum += max(-diffPlus, -diffMinus)**2
+                elif diffPlus > 0:
+                    yhighSquareSum += diffPlus**2
+                    ylowSquareSum += diffMinus**2
+                elif diffPlus < 0:
+                    yhighSquareSum += diffMinus**2
+                    ylowSquareSum += diffPlus**2
+
+            if self._shapeUncertaintyRelativeSquared is not None:
+                relUnc = math.sqrt(self._shapeUncertaintyRelativeSquared.GetBinContent(i))
+                absUnc = relUnc * yval
+                yhighSquareSum += absUnc**2
+                ylowSquareSum += absUnc**2
+
+            relUnc = math.sqrt(self._normalizationUncertaintyRelativeSquared)
+            absUnc = relUnc * yval
+            yhighSquareSum += absUnc**2
+            ylowSquareSum += absUnc**2
+
+            xvalues.append(xval)
+            xerrhigh.append(xhigh)
+            xerrlow.append(xlow)
+            yvalues.append(yval)
+            yerrhigh.append(math.sqrt(yhighSquareSum))
+            yerrlow.append(math.sqrt(ylowSquareSum))
+
+        return ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues), array.array("d", yvalues),
+                                      array.array("d", xerrlow), array.array("d", xerrhigh),
+                                      array.array("d", yerrlow), array.array("d", yerrhigh))
+
     def printUncertainties(self):
         print "Shape uncertainties (%d):" % len(self._shapeUncertainties)
         keys = self._shapeUncertainties.keys()
@@ -1110,6 +1176,20 @@ class RootHistoWithUncertainties:
             self._shapeUncertainties[key] = (plus, minus)
         if self._shapeUncertaintyRelativeSquared is not None:
             self._shapeUncertaintyRelativeSquared.Rebin(*args)
+
+    ## Rebin histogram
+    #
+    # \param args  Positional arguments, forwarded to TH1.Rebin()
+    def Rebin2D(self, *args):
+        self._rootHisto = self._rootHisto.Rebin2D(*args)
+        keys = self._shapeUncertainties.keys()
+        for key in keys:
+            (plus, minus) = self._shapeUncertainties[key]
+            plus = plus.Rebin2D(*args)
+            minus = minus.Rebin2D(*args)
+            self._shapeUncertainties[key] = (plus, minus)
+        if self._shapeUncertaintyRelativeSquared is not None:
+            self._shapeUncertaintyRelativeSquared.Rebin2D(*args)
 
     ## Add another RootHistoWithUncertainties object
     #
