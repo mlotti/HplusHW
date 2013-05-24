@@ -49,6 +49,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 
+from QCDInvertedNormalizationFactors import *
+
 import sys
 import array
 import re
@@ -134,7 +136,9 @@ def purityGraph(i,datasets,histo):
     inverted.histoMgr.forEachHisto(lambda h: h.setRootHisto(h.getRootHisto().Rebin(len(binning)-1,h.getRootHisto().GetName(),array.array('d',binning))))
     
     invertedData = inverted.histoMgr.getHisto("Data").getRootHisto().Clone(histo)
+    invertedData.Scale(QCDInvertedNormalization["inclusive"])
     invertedEWK  = inverted.histoMgr.getHisto("EWK").getRootHisto().Clone(histo)
+    invertedEWK.Scale(QCDInvertedNormalization["inclusiveEWK"])
 
     numerator = invertedData.Clone()
     numerator.SetName("numerator")

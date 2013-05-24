@@ -171,7 +171,7 @@ datasets_SingleTop = [
 workflow = "triggerTauLeg_skim_v53_v3"
 
 tasks = [
-     ("TauLeg", datasets_TauPlusX+datasets_DY),
+     ("TauLeg", datasets_TauPlusX+datasets_DY+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
 #    ("MetLeg", datasets_Tau+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
 #    ("Tau", datasets_Tau),
 #    ("MultiJet", datasets_MultiJet),
