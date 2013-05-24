@@ -54,17 +54,17 @@ def RayLeigh(x,par):
     return x[0]*TMath.Exp(-x[0]/( 2*(par[0]+par[1]*x[0])*(par[0]+par[1]*x[0]) ) )
 
 def EWKFunction(x,par,norm = 1,rejectPoints = 0):
-    if not rejectPoints == 0:
+#    if not rejectPoints == 0:
 #        if (x[0] > 280 and x[0] < 300):
-	if (x[0] > 400):
+#	if (x[0] > 400):
 #	if x[0] > 40 and x[0] < 60 :gx
 #	if x[0] > 240 and x[0] < 260:
 #	if  (x[0] > 180 and x[0] < 200) or (x[0] > 260 and x[0] < 320):
 #	if  (x[0] > 100 and x[0] < 120) or (x[0] > 180 and x[0] < 200):
 #	if  (x[0] > 60 and x[0] < 80) or (x[0] > 140 and x[0] < 160) or (x[0] > 180 and x[0] < 220) or (x[0] > 240 and x[0] < 360):
 #	if  (x[0] > 40 and x[0] < 60) or (x[0] > 80 and x[0] < 100) or (x[0] > 120 and x[0] < 140) or (x[0] > 160 and x[0] < 180):
-            TF1.RejectPoint()
-            return 0
+#            TF1.RejectPoint()
+#            return 0
     value = 150
     if x[0] < value:
 	return norm*par[0]*TMath.Gaus(x[0],par[1],par[2],1)

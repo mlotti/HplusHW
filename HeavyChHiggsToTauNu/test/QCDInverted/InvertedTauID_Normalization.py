@@ -10,7 +10,7 @@
 ###########################################################################
 
 import ROOT
-#ROOT.gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(True)
 from ROOT import *
 import math
 import sys
