@@ -17,7 +17,7 @@ searchMode = "Light"
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
 
-optMode = "OptQCDTailKillerLoosePlus"
+optMode = "OptQCDTailKillerTightPlus"
 #optMode = ""
 binning = [41,50,60,70,80,100,120,150,200]
 
