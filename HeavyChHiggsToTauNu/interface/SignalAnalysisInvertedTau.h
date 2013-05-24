@@ -16,7 +16,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistogramsInBins.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistogramsInBins2Dim.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexAssignmentAnalysis.h"
-
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetTauInvMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
@@ -135,17 +134,19 @@ namespace HPlus {
     void fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData, bool passedStatus = true, double value = 0);
 
     bool doInvertedAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data genData);
-    bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData);
+    bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, bool myFakeTauStatus);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisInvertedTauProducer
     EventWeight& fEventWeight;
     HistoWrapper& fHistoWrapper;
 
+    edm::InputTag fOneProngTauSrc;
+    edm::InputTag fOneAndThreeProngTauSrc;
 
     //    const double ftransverseMassCut;
-    const double fDeltaPhiCutValue;
     const bool bBlindAnalysisStatus;
+    const double fDeltaPhiCutValue;
     Count fAllCounter;
     Count fWJetsWeightCounter;
     Count fVertexFilterCounter;
@@ -165,12 +166,16 @@ namespace HPlus {
     Count fBaselineEvetoCounter;
     Count fBaselineMuvetoCounter;
     Count fBaselineJetsCounter;
+
+    Count fBaselineQCDTailKillerCollinearCounter;
     Count fBaselineMetCounter;
     Count fBaselineBtagCounter;
     Count fBTaggingScaleFactorCounter;
     Count fBaselineDeltaPhiTauMETCounter;
-    Count fBaselineDeltaPhiVSDeltaPhiMHTJet1CutCounter;
+    Count fBaselineQCDTailKillerBackToBackCounter;
+
     //    Count fBaselineDeltaPhiMHTJet1CutCounter;
+    Count fBaselineDeltaPhiVSDeltaPhiMHTJet1CutCounter;
 
   
     Count fTauVetoAfterTauIDCounter;
@@ -180,6 +185,7 @@ namespace HPlus {
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
+    Count fQCDTailKillerCollinearCounter;
     Count fBTaggingBeforeMETCounter;
     Count fMETCounter;
     Count fBjetVetoCounter;
@@ -189,6 +195,7 @@ namespace HPlus {
     Count fBTaggingScaleFactorInvertedCounter;
     Count fQCDTailKillerCounter;
     Count fDeltaPhiTauMETCounter;
+    Count fQCDTailKillerBackToBackCounter;
     Count fDeltaPhiVSDeltaPhiMETJet1CutCounter;
     Count fDeltaPhiVSDeltaPhiMETJet2CutCounter;
     Count fDeltaPhiVSDeltaPhiMETJet3CutCounter;
@@ -261,25 +268,50 @@ namespace HPlus {
     WrappedTH1 *hDeltaPhiAfterJets;
     WrappedTH1 *hDeltaPhiBeforeVeto;
     WrappedTH1 *hDeltaPhiJetMet;
-
-
+    WrappedTH1 *hEtResolutionTau_baseline; 
+    WrappedTH1 *hDeltaRTauSelectedTau_baseline;
     // Histograms for validation at every Selection Cut step
     WrappedTH1 *hMet_AfterTauSelection;
     WrappedTH1 *hMet_AfterEvtTopology;
     WrappedTH1 *hMETBeforeMETCut;
     WrappedTH1 *hMETBeforeTauId;
 
+    // std::vector<WrappedTH1*> hQCDTailKillerBackToBackInverted;
+    // std::vector<WrappedTH1*> hQCDTailKillerCollinearInverted;
+    //std::vector<WrappedTH1*> hQCDTailKillerBackToBackBaseline;
+    //std::vector<WrappedTH1*> hQCDTailKillerCollinearBaseline;
+    std::vector<WrappedTH1*> hEWKFakeTausQCDTailKillerBackToBack_Baseline;
+    std::vector<WrappedTH1*> hEWKFakeTausQCDTailKillerCollinear_Baseline;
+
+    WrappedTH1* hQCDTailKillerJet0BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet1BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet2BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet3BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet0CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet1CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet2CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet3CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet0BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet1BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet2BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet3BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet0CollinearBaseline;
+    WrappedTH1* hQCDTailKillerJet1CollinearBaseline;
+    WrappedTH1* hQCDTailKillerJet2CollinearBaseline;
+    WrappedTH1* hQCDTailKillerJet3CollinearBaseline;
+
+
     // baseline MET histos
     HistogramsInBins *hMETBaselineTauId;
     HistogramsInBins *hMETBaselineTauIdJets;
     HistogramsInBins *hMETBaselineTauIdBtag;
     HistogramsInBins *hMETBaselineTauIdBveto;
-
     HistogramsInBins *hMETBaselineTauIdJetsCollinear;
     HistogramsInBins *hMETBaselineTauIdBvetoCollinear;
-
     HistogramsInBins *hMETBaselineTauIdBvetoTailKiller;
     // baseline MT histos
+    HistogramsInBins *hMTInvertedTauIdSoftBtaggingTK;
+    HistogramsInBins *hMTBaselineTauIdSoftBtaggingTK;
     HistogramsInBins *hMTBaselineTauIdJet;
     HistogramsInBins *hMTBaselineTauIdBtag;
     HistogramsInBins *hMTBaselineTauIdBveto;
@@ -295,7 +327,6 @@ namespace HPlus {
     HistogramsInBins *hMTBaselineTauIdNoBtaggingTailKiller;
     HistogramsInBins *hMTBaselineTauIdPhi;
     HistogramsInBins *hMTBaselineTauIdAllCutsTailKiller;
-
 
 
     WrappedTH1 *hDeltaR_TauMETJet1MET;
@@ -327,12 +358,10 @@ namespace HPlus {
 
     //    HistogramsInBins *hDeltaPhiMHTJet1Inverted;
 
-
     HistogramsInBins *hMTInvertedTauIdBtagNoMetCut;
     HistogramsInBins *hMTInvertedTauIdBvetoNoMetCut; 
     HistogramsInBins *hMTInvertedTauIdBtagNoMetCutTailKiller;
     HistogramsInBins *hMTInvertedTauIdBvetoNoMetCutTailKiller; 
-
     HistogramsInBins *hMTInvertedTauIdJet;
     HistogramsInBins *hMTInvertedTauIdJetTailKiller;
     HistogramsInBins *hMTInvertedTauIdPhi; 
@@ -342,11 +371,8 @@ namespace HPlus {
     HistogramsInBins *hMTInvertedTauIdBtag;
     HistogramsInBins *hMTInvertedTauIdBvetoDphi;
     HistogramsInBins *hMTInvertedTauIdJetDphi;
-
     HistogramsInBins *hMTInvertedNoBtagging;
-
     HistogramsInBins *hMTInvertedAllCutsTailKiller;
-
     HistogramsInBins *hTopMass;
     HistogramsInBins *hHiggsMass;
 
@@ -390,20 +416,20 @@ namespace HPlus {
    
 
 
-   
-    WrappedTH1 *hMTInvertedTauIdJets; 
-    WrappedTH1 *hSelectedTauEt;
+
     WrappedTH1 *hSelectedTauEtTauVeto;
     WrappedTH1 *hSelectedTauEtJetCut;
+    WrappedTH1 *hSelectedTauEtCollinearTailKiller;
     WrappedTH1 *hSelectedTauEtMetCut;
     WrappedTH1 *hSelectedTauEtBtagging;
     WrappedTH1 *hSelectedTauEtBjetVeto;
     WrappedTH1 *hSelectedTauEtBjetVetoPhiCuts;
-    WrappedTH1 *hSelectedTauEtTailKiller;
-    WrappedTH1 *hSelectedTauEtDeltaPhiJet1Cut;
-    WrappedTH1 *hSelectedTauEtDeltaPhiJet12Cut;
-    WrappedTH1 *hSelectedTauEtDeltaPhiJet123Cut;
-    WrappedTH1 *hSelectedTauEtDeltaPhiJetsAgainstTTCut;
+    WrappedTH1 *hSelectedTauEtBackToBackTailKiller;
+
+
+   
+    WrappedTH1 *hMTInvertedTauIdJets; 
+    WrappedTH1 *hSelectedTauEt;
     WrappedTH1 *hSelectedTauEta;
     WrappedTH1 *hSelectedTauPhi;
     WrappedTH1 *hSelectedTauRtau;
@@ -411,14 +437,13 @@ namespace HPlus {
 
     WrappedTH1 *hSelectedTauEtaMetCut;
     WrappedTH1 *hSelectedTauPhiMetCut;
-    WrappedTH1 *hSelectedTauRtauMetCut;
     WrappedTH1 *hSelectedTauEtAfterCuts;
     WrappedTH1 *hSelectedTauEtaAfterCuts;
     WrappedTH1 *hMetAfterCuts;
     WrappedTH1 *hNonQCDTypeIISelectedTauEtAfterCuts;
     WrappedTH1 *hNonQCDTypeIISelectedTauEtaAfterCuts;
     WrappedTH1 *hTransverseMassDeltaPhiUpperCutFakeMet; 
-
+    WrappedTH1 *hSelectedTauRtauMetCut;
 
     WrappedTH1 *hSelectionFlow;
 

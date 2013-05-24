@@ -8,11 +8,11 @@ dataVersion="53XmcS10"
 dataEras = [
     "Run2012ABCD", # This is the one for pickEvents, and for counter printout in CMSSW job
 #    "Run2012ABC",
-#    "Run2012AB",
+    "Run2012AB",
 #    "Run2012A",
 #    "Run2012B",
-#    "Run2012C",
-#    "Run2012D",
+    "Run2012C",
+    "Run2012D",
 ]
 
 
@@ -46,9 +46,9 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilde
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1
                         customizeLightAnalysis=customize,
-                        doQCDTailKillerScenarios=False,
+                        doQCDTailKillerScenarios=True,
                         #doAgainstElectronScan=True,
-                        doSystematics=True,
+                        doSystematics=False,
 
                         #histogramAmbientLevel = "Vital",
                         #doOptimisation=True, optimisationScheme=myOptimisation
