@@ -566,7 +566,6 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle):
         ratio.Divide(histo2)
         styles.getDataStyle().apply(ratio)
         ratio.GetYaxis().SetTitle(ytitle)
-        ratio.SetName("Ratio")
         return ratio
     elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
         if histo1.GetN() != histo2.GetN():
@@ -595,7 +594,6 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle):
             gr = ROOT.TGraphAsymmErrors()
         styles.getDataStyle().apply(gr)
         gr.GetYaxis().SetTitle(ytitle)
-        gr.SetName("Ratio")
         return gr
     elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
         if not (histo1.hasSystematicUncertainties() or histo2.hasSystematicUncertainties()):
@@ -624,7 +622,6 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle):
         ratio = unc1
         styles.getDataStyle().apply(ratio)
         ratio.GetYaxis().SetTitle(ytitle)
-        ratio.SetName("Ratio")
         return ratio
     else:
         raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
@@ -679,7 +676,6 @@ def _createRatioBinomial(histo1, histo2, ytitle):
         eff = ROOT.TGraphAsymmErrors(rootHisto1, rootHisto2)
         styles.getDataStyle().apply(eff)
         eff.GetYaxis().SetTitle(ytitle)
-        eff.SetName("Ratio")
         return eff
     elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
         raise Exception("isBinomial is not supported for TGraph input")
@@ -707,8 +703,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         ratioErr.GetYaxis().SetTitle(ytitle)
         styles.errorRatioStatStyle.apply(ratioErr)
         styles.getDataStyle().apply(ratio)
-        ratio.SetName("Ratio")
-        ratioErr.SetName("StatError")
+        ratioErr.SetName("BackgroundStatError")
 
         ret.extend([
                 _createHisto(ratio, drawStyle="EP"),
@@ -781,8 +776,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         ratioErr.GetYaxis().SetTitle(ytitle)
         styles.getDataStyle().apply(ratio)
         styles.errorRatioStatStyle.apply(ratioErr)
-        ratio.SetName("Ratio")
-        ratioErr.SetName("StatError")
+        ratioErr.SetName("BackgroundStatError")
 
         ret.extend([
                 _createHisto(ratio, drawStyle="EP"),
@@ -815,7 +809,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
             ratioSyst.RemovePoint(i)        
 
         ratioSyst.GetYaxis().SetTitle(ytitle)
-        ratioSyst.SetName("StatSystError")
+        ratioSyst.SetName("BackgroundStatSystError")
         styles.errorRatioSystStyle.apply(ratioSyst)
 
         ret.extend([
@@ -1282,7 +1276,7 @@ class PlotRatioBase:
     def __init__(self):
         self.ratioPlotObjectsBefore = []
         self.ratioPlotObjectsAfter = []
-        self.ratios = []
+        self.ratioHistoMgr = histograms.HistoManager()
 
     ## Add an additional object to be drawn before the ratio histogram(s)
     #
@@ -1303,7 +1297,7 @@ class PlotRatioBase:
     # \param args    Positional arguments (forwarded to plots._createCutBoxAndLine())
     # \param kwargs  Keyword arguments (forwarded to plots._createCutBoxAndLine())
     def addCutBoxAndLineToRatio(self, *args, **kwargs):
-        if len(self.ratios) == 0:
+        if len(self.ratioHistoMgr) == 0:
             return
 
         objs = _createCutBoxAndLine(self.getFrame2(), *args, **kwargs)
@@ -1336,7 +1330,7 @@ class PlotRatioBase:
     #
     # \param ratios  List of TH1/TGraph objects
     def setRatios(self, ratios):
-        self.ratios = []
+        self.ratioHistoMgr.removeAllHistos()
         self.extendRatios(ratios)
 
     ## Create Histo object from ROOT object
@@ -1357,13 +1351,13 @@ class PlotRatioBase:
     #
     # \param ratio  TH1/TGraph object
     def appendRatio(self, ratio):
-        self.ratios.append(self._createRatioObject(ratio))
+        self.ratioHistoMgr.appendHisto(self._createRatioObject(ratio))
 
     ## Addend TH1/TGraph objects to ratio pad
     #
     # \param ratios  List of TH1/TGraph objects
     def extendRatios(self, ratios):
-        self.ratios.extend([self._createRatioObject(r) for r in ratios])
+        self.ratioHistoMgr.extendHistos([self._createRatioObject(r) for r in ratios])
 
     ## Create TCanvas and frame with ratio pad for single ratio
     #
@@ -1389,15 +1383,16 @@ class PlotRatioBase:
             ratioType = "binomial"
 
         ratioHistos = _createRatioHistos(num, denom, ytitle, ratioType=ratioType)
-        if len(ratioHistos) == 1:
-            self.setRatios(ratioHistos)
-        else:
-            tmp = dict((h.getName(), h) for h in ratioHistos)
-            self.setRatios([tmp["Ratio"]])
-            if "StatSystError" in tmp:
-                self.prependPlotObjectToRatio(tmp["StatSystError"])
-            if "StatError" in tmp:
-                self.prependPlotObjectToRatio(tmp["StatError"])
+        self.setRatios(ratioHistos)
+        reorder = []
+        for n in ["BackgroundStatSystError", "BackgroundStatError"]:
+            if self.ratioHistoMgr.hasHisto(n):
+                reorder.append(n)
+        if len(reorder) > 0:
+            self.ratioHistoMgr.reverse()
+            self.ratioHistoMgr.reorder(reorder)
+            self.ratioHistoMgr.reverse()
+
         self._createFrame(filename, **kwargs)
 
     ## Create TCanvas and frame with ratio pad for many ratios
@@ -1423,7 +1418,7 @@ class PlotRatioBase:
             print "WARNING: ratioIsBinomial is deprepcated, please yse ratioType='binomial' instead"
             ratioType = "binomial"
 
-        self.ratios = []
+        self.ratioHistoMgr.removeAllHistos()
         statSysError = None
         statError = None
         for numer in numerators:
@@ -1431,21 +1426,24 @@ class PlotRatioBase:
             if invertRatio:
                 (num, denom) = (denom, num)
             ratioHistos = _createRatioHistos(num, denom, "Ratio", ratioType=ratioType)
-            if len(ratioHistos) == 1:
-                copyStyle(numer, ratioHistos[0])
-                self.setRatios(ratioHistos)
-            else:
-                tmp = dict((h.getName(), h) for h in ratioHistos)
-                self.setRatios([tmp["Ratio"]])
-                if "StatSystError" in tmp and statSysError is None:
-                    statSysError = tmp["StatSystError"]
-                if "StatError" in tmp and statError is None:
-                    statError = tmp["StatError"]
+            tmp = []
+            for h in ratioHistos:
+                if h.getName() == "BackgroundStatSystError":
+                    statSysError = h
+                elif h.getName() == "BackgroundStatError":
+                    statError = h
+                else:
+                    copyStyle(numer, h)
+                    h.setName(numer.getName())
+                    tmp.append(h)
+            if len(tmp) > 1:
+                raise Exception("This shouldn't happen")
+            self.extendRatios(tmp)
 
-        if statSysError is not None:
-            self.prependPlotObjectToRatio(statSysError)
         if statError is not None:
-            self.prependPlotObjectToRatio(statError)
+            self.ratioHistoMgr.appendHisto(statError)
+        if statSysError is not None:
+            self.ratioHistoMgr.appendHisto(statSysError)
 
         self._createFrame(filename, **kwargs)
 
@@ -1455,14 +1453,14 @@ class PlotRatioBase:
     # \param coverPadOpts   Options for overriding cover pad placement (see plots._createCoverPad)
     # \param kwargs         Keyword arguments (forwarded to histograms.CanvasFrameTwo.__init__())
     def _createFrame(self, filename, coverPadOpts={}, **kwargs):
-        self.cf = histograms.CanvasFrameTwo(self.histoMgr, self.ratios, filename, **kwargs)
+        self.cf = histograms.CanvasFrameTwo(self.histoMgr, self.ratioHistoMgr, filename, **kwargs)
         self.frame = self.cf.frame
         self.cf.frame2.GetYaxis().SetNdivisions(505)
         self.coverPadOpts = coverPadOpts
 
     ## Draw the ratio histograms to the ratio pad
     def _draw(self):
-        if len(self.ratios) == 0:
+        if len(self.ratioHistoMgr) == 0:
             return
 
         self.cf.canvas.cd(2)
@@ -1470,13 +1468,18 @@ class PlotRatioBase:
         for obj, option in self.ratioPlotObjectsBefore:
             obj.Draw(option+"same")
 
+        until = None
+        for n in ["BackgroundStatSystError", "BackgroundStatError"]:
+            if self.ratioHistoMgr.hasHisto(n):
+                until = n
+
+        index = self.ratioHistoMgr.draw(untilName=until)
+
         self.ratioLine = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
         self.ratioLine.Draw("L")
-       
-        ratios = self.ratios[:]
-        ratios.reverse()
-        for r in ratios:
-            r.draw("same")
+
+        if index is not None
+            self.ratioHistoMgr.draw(fromIndex=index+1)
 
         for obj, option in self.ratioPlotObjectsAfter:
             obj.Draw(option+"same")
@@ -1498,8 +1501,8 @@ class PlotRatioBase:
         self.cf.canvas.cd(1)
         self.cf.pad1.Pop() # Move the first pad on top
 
-    ## \var ratios
-    # Holds the TH1 for data/MC ratio, if exists
+    ## \var ratioHistoManager
+    # HistoManager for ratio histograms
     ## \var ratioLine
     # Holds the TGraph for ratio line, if ratio exists
     ## \var ratioCoverPad

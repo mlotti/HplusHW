@@ -854,7 +854,7 @@ class CanvasFrameTwo:
     ## Create TCanvas and TH1 for the frame.
     #
     # \param histoManager1 HistoManager object to take the histograms for automatic axis ranges for upper pad
-    # \param histos2       List of Histo objects to take the histograms for automatic axis ranges for lower pad
+    # \param histoManager2 HistoManager object to take the histograms for automatic axis ranges for lower pad
     # \param name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
     # \param kwargs        Keyword arguments (see below)
     #
@@ -862,7 +862,7 @@ class CanvasFrameTwo:
     # \li\a opts   Dictionary for frame bounds (forwarded to histograms._boundsArgs())
     # \li\a opts1  Same as \a opts (can not coexist with \a opts, only either one can be given)
     # \li\a opts2  Dictionary for ratio pad bounds (forwarded to histograms._boundsArgs()) Only Y axis values are allowed, for X axis values are taken from \a opts/\a opts1
-    def __init__(self, histoManager1, histos2, name, **kwargs):
+    def __init__(self, histoManager1, histoManager2, name, **kwargs):
         ## Wrapper to provide the CanvasFrameTwo.frame member.
         #
         # The GetXaxis() is forwarded to the frame of the lower pad,
@@ -920,6 +920,11 @@ class CanvasFrameTwo:
             histos1 = histoManager1.getHistos()
         if len(histos1) == 0:
             raise Exception("Empty set of histograms for first pad!")
+        histos2 = []
+        if isinstance(histoManager2, list):
+            histos2 = histoManager2[:]
+        else:
+            histos2 = histoManager2.getHistos()
         if len(histos2) == 0:
             raise Exception("Empty set of histograms for second pad!")
 
@@ -1616,6 +1621,11 @@ class HistoManagerImpl:
                 del self.legendList[i]
                 break
 
+    def removeAllHistos(self):
+        self.drawList = []
+        self.legendList = []
+        self._populateMap()
+
     ## Replace histograms.Histo object
     #
     # \param name   Name of the histograms.Histo object to be replaced
@@ -1632,6 +1642,18 @@ class HistoManagerImpl:
             if h.getName() == name:
                 self.legendList[i] = histo
                 break
+
+    ## Reverse draw and legend lists
+    def reverse(self):
+        self.drawList.reverse()
+        self.legendList.reverse()
+
+    ## Reorder both draw and legend lists
+    #
+    # \param histogNames   List of histogram names
+    def reorder(self, histoNames):
+        self.reorderDraw(histoNames)
+        self.reorderLegend(histoNames)
 
     ## Reorder the legend
     #
@@ -1779,14 +1801,29 @@ class HistoManagerImpl:
             d.addToLegend(legend)
 
     ## Draw histograms.
-    def draw(self):
+    #
+    # \param untilName  If not None, untilName is the last histogram to
+    #                   be drawn. In this case, the current index is
+    #                   returned.
+    # \param fromIndex  If not None, fromIndex is the index of the
+    #                   first histogram to be drawn.
+    #
+    # Use case for the two above ones is to draw stat and syst+stat
+    # ratios on the "background" of the ratio pad, then draw the ratio
+    # line, and finally continue with the rest of the ratio histograms.
+    def draw(self, untilName=None, fromIndex=None):
         # Reverse the order of histograms so that the last histogram
         # is drawn first, i.e. on the bottom
         histos = self.drawList[:]
         histos.reverse()
 
-        for h in histos:
+        for i, h in enumerate(histos):
+            if fromIndex is not None and i < fromIndex:
+                continue
             h.draw("same")
+            if untilName is not None and h.getName() == untilName:
+                return i
+        return None
 
     ## Stack histograms.
     #
