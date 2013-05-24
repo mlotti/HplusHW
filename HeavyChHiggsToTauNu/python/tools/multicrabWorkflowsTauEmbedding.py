@@ -74,6 +74,22 @@ def getDefaultDefinitions_44X():
         "WZ_TuneZ2_Fall11":                  TaskDefMC(),
         "ZZ_TuneZ2_Fall11":                  TaskDefMC(),
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11": TaskDefMC(),
+        "TTToHplusBWB_M80_Fall11":           TaskDefMC(),
+        "TTToHplusBWB_M90_Fall11":           TaskDefMC(),
+        "TTToHplusBWB_M100_Fall11":          TaskDefMC(),
+        "TTToHplusBWB_M120_Fall11":          TaskDefMC(),
+        "TTToHplusBWB_M140_Fall11":          TaskDefMC(),
+        "TTToHplusBWB_M150_Fall11":          TaskDefMC(),
+        "TTToHplusBWB_M155_Fall11":          TaskDefMC(),
+        "TTToHplusBWB_M160_Fall11":          TaskDefMC(),
+        "TTToHplusBHminusB_M80_Fall11":      TaskDefMC(),
+        "TTToHplusBHminusB_M90_Fall11":      TaskDefMC(),
+        "TTToHplusBHminusB_M100_Fall11":     TaskDefMC(),
+        "TTToHplusBHminusB_M120_Fall11":     TaskDefMC(),
+        "TTToHplusBHminusB_M140_Fall11":     TaskDefMC(),
+        "TTToHplusBHminusB_M150_Fall11":     TaskDefMC(),
+        "TTToHplusBHminusB_M155_Fall11":     TaskDefMC(),
+        "TTToHplusBHminusB_M160_Fall11":     TaskDefMC(),
         }
 
 def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
@@ -124,6 +140,22 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         "WZ_TuneZ2_Fall11":                  TaskDef(njobsIn= 200, njobsOut= 4),
         "ZZ_TuneZ2_Fall11":                  TaskDef(njobsIn= 200, njobsOut= 4),
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11": TaskDef(njobsIn= 200, njobsOut= 3),
+        "TTToHplusBWB_M80_Fall11":           TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBWB_M90_Fall11":           TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBWB_M100_Fall11":          TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBWB_M120_Fall11":          TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBWB_M140_Fall11":          TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBWB_M150_Fall11":          TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBWB_M155_Fall11":          TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBWB_M160_Fall11":          TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBHminusB_M80_Fall11":      TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBHminusB_M90_Fall11":      TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBHminusB_M100_Fall11":     TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBHminusB_M120_Fall11":     TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBHminusB_M140_Fall11":     TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBHminusB_M150_Fall11":     TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBHminusB_M155_Fall11":     TaskDef(njobsIn=  20, njobsOut= 1),
+        "TTToHplusBHminusB_M160_Fall11":     TaskDef(njobsIn=  20, njobsOut= 1),
         }
 
     workflowName = "tauembedding_skim_"+version
@@ -380,16 +412,24 @@ def addEmbeddingSkim_v44_5(datasets):
     # Expecting 33 % file size increase w.r.t. v44_2 (237.7/186.5=27%
     # for event size, 107/102=5% for number of events)
     definitions = {
+        # 8055624 events, 4989 jobs
+        # User mean 3192.2, min 16.7, max 6071.3
+        # Mean 339.4 MB, min 4.1 MB, max 376.1 MB
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_5-a9adb1d2c9d25e1e9802345c8c130cf6/USER", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
+        }
+    addEmbeddingSkim_44X("v44_5", datasets, definitions)
+
+def addEmbeddingSkim_v44_5_1(datasets):
+    # Not doing chi2<10 ID cut in the skim job (for possibility of TuneP)
+    definitions = {
         "SingleMu_160431-163261_2011A_Nov08": TaskDef(""),
         "SingleMu_163270-163869_2011A_Nov08": TaskDef(""),
         "SingleMu_165088-166150_2011A_Nov08": TaskDef(""),
         "SingleMu_166161-173198_2011A_Nov08": TaskDef(""),
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(""),
         "SingleMu_175832-180252_2011B_Nov19": TaskDef(""),
-        # 8055624 events, 4989 jobs
-        # User mean 3192.2, min 16.7, max 6071.3
-        # Mean 339.4 MB, min 4.1 MB, max 376.1 MB
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_5-a9adb1d2c9d25e1e9802345c8c130cf6/USER", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
+
+        "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
         "WJets_TuneZ2_Fall11":                TaskDef(""),
         "W1Jets_TuneZ2_Fall11":               TaskDef(""),
         "W2Jets_TuneZ2_Fall11":               TaskDef(""),
@@ -406,8 +446,26 @@ def addEmbeddingSkim_v44_5(datasets):
         "WZ_TuneZ2_Fall11":                   TaskDef(""),
         "ZZ_TuneZ2_Fall11":                   TaskDef(""),
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef(""),
+
+        "TTToHplusBWB_M80_Fall11":          TaskDef(""),
+        "TTToHplusBWB_M90_Fall11":          TaskDef(""),
+        "TTToHplusBWB_M100_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M120_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M140_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M150_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M155_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M160_Fall11":         TaskDef(""),
+
+        "TTToHplusBHminusB_M80_Fall11":     TaskDef(""),
+        "TTToHplusBHminusB_M90_Fall11":     TaskDef(""),
+        "TTToHplusBHminusB_M100_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M120_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M140_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M150_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M155_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M160_Fall11":    TaskDef(""),
         }
-    addEmbeddingSkim_44X("v44_5", datasets, definitions)
+    addEmbeddingSkim_44X("v44_5_1", datasets, definitions)
 
 def addEmbedding_SKELETON(datasets):
     definitions = {
@@ -417,6 +475,7 @@ def addEmbedding_SKELETON(datasets):
         "SingleMu_166161-173198_2011A_Nov08": TaskDef(""),
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(""),
         "SingleMu_175832-180252_2011B_Nov19": TaskDef(""),
+
         "TTJets_TuneZ2_Fall11":               TaskDef(""),
         "WJets_TuneZ2_Fall11":                TaskDef(""),
         "W1Jets_TuneZ2_Fall11":               TaskDef(""),
@@ -434,6 +493,24 @@ def addEmbedding_SKELETON(datasets):
         "WZ_TuneZ2_Fall11":                   TaskDef(""),
         "ZZ_TuneZ2_Fall11":                   TaskDef(""),
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef(""),
+
+        "TTToHplusBWB_M80_Fall11":          TaskDef(""),
+        "TTToHplusBWB_M90_Fall11":          TaskDef(""),
+        "TTToHplusBWB_M100_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M120_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M140_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M150_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M155_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M160_Fall11":         TaskDef(""),
+
+        "TTToHplusBHminusB_M80_Fall11":     TaskDef(""),
+        "TTToHplusBHminusB_M90_Fall11":     TaskDef(""),
+        "TTToHplusBHminusB_M100_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M120_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M140_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M150_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M155_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M160_Fall11":    TaskDef(""),
         }
 
 ############################# below are old definitions, which still exist in DBS and disk (waiting for Matti's thesis defence)
