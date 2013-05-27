@@ -185,7 +185,9 @@ namespace HPlus {
       JetDetailHistograms* fBackToBackSystemJetsOppositeToTau;
 
       std::vector<WrappedTH2*> hTailTestByDeltaPhi;
-      std::vector<WrappedTH2*> hTailTestByDeltaR;
+      std::vector<WrappedTH2*> hTailTestByDeltaRJets;
+      std::vector<WrappedTH2*> hTailTestByDeltaEtaJets;
+      std::vector<WrappedTH2*> hTailTestByDeltaPhiJets;
       std::vector<WrappedTH1*> hTailTestDiffByDeltaEtaBackToBack; // Difference in eta
       std::vector<WrappedTH1*> hTailTestDiffByDeltaEtaCollinear; // Difference in eta
       WrappedTH1* hTailTestMinDeltaR;
@@ -194,6 +196,8 @@ namespace HPlus {
       WrappedTH2* hTailTestByDeltaPhiForMinDeltaR05;
       WrappedTH2* hCollinearEtaPhi;
       WrappedTH2* hBackToBackEtaPhi;
+      WrappedTH2* hCollinearEtaPhiForSelectedTau;
+      WrappedTH2* hBackToBackEtaPhiForSelectedTau;
     };
 
     enum QCDSelectionOrder {
