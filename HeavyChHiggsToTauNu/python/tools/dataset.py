@@ -1908,16 +1908,27 @@ class Dataset:
     #
     # If dataset consists of multiple files, the histograms are added
     # with the ROOT.TH1.Add() method.
+    # 
+    # If dataset.TreeDraw object is given (or actually anything with
+    # draw() method), the draw() method is called by giving the
+    # Dataset object as parameters. The draw() method is expected to
+    # return a TH1 which is then returned.
     def getRootHisto(self, name, **kwargs):
-        (histos, realName) = self.getRootObjects(name, **kwargs)
-        if len(histos) == 1:
-            h = histos[0]
+        if hasattr(name, "draw"):
+            if len(kwargs) > 0:
+                print >>sys.stderr, "WARNING: You gave keyword arguments to getDatasetRootHisto() together with object with draw() method. The keyword arguments are not passed to the draw() call. This may or may not be what you want."
+            h = name.draw(self)
+            realName = None
         else:
-            h = histos[0]
-            h = h.Clone(h.GetName()+"_cloned")
-            for h2 in histos[1:]:
-                h.Add(h2)
-
+            (histos, realName) = self.getRootObjects(name, **kwargs)
+            if len(histos) == 1:
+                h = histos[0]
+            else:
+                h = histos[0]
+                h = h.Clone(h.GetName()+"_cloned")
+                for h2 in histos[1:]:
+                    h.Add(h2)
+    
         return (h, realName)
 
     ## Create ROOT TChain
@@ -2172,16 +2183,15 @@ class Dataset:
     # method of it is called with the Dataset and
     # RootHistoWithUncertainties objects, and the modify function.
     def getDatasetRootHisto(self, name, modify=None, **kwargs):
-        h = None
-        if hasattr(name, "draw"):
-            if len(kwargs) > 0:
-                print >>sys.stderr, "WARNING: You gave keyword arguments to getDatasetRootHisto() together with object with draw() method. The keyword arguments are not passed to the draw() call. This may or may not be what you want."
-            h = name.draw(self)
-        else:
-            pname = name
-            (h, realName) = self.getRootHisto(pname, **kwargs)
-            name = h.GetName()+"_"+self.name
-            h.SetName(name.translate(None, "-+.:;"))
+        #h = None
+        # if hasattr(name, "draw"):
+        #     if len(kwargs) > 0:
+        #         print >>sys.stderr, "WARNING: You gave keyword arguments to getDatasetRootHisto() together with object with draw() method. The keyword arguments are not passed to the draw() call. This may or may not be what you want."
+        #     h = name.draw(self)
+        # else:
+        (h, realName) = self.getRootHisto(name, **kwargs)
+        name2 = h.GetName()+"_"+self.name
+        h.SetName(name2.translate(None, "-+.:;"))
 
         if modify is not None:
             h = modify(h)
