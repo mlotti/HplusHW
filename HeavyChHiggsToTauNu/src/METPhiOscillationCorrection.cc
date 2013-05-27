@@ -17,8 +17,8 @@ namespace HPlus {
     std::string myDirStr = "METPhiOscillationCorrection"+prefix;
     TFileDirectory myDir = fs->mkdir(myDirStr.c_str());
     // Histograms for determining corrections
-    hNVerticesVsMetX = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETX", "NverticesVsMETX;N_{vertices};MET_{x}, GeV", 60, 0., 60., 500, 0, 500);
-    hNVerticesVsMetY = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETY", "NverticesVsMETY;N_{vertices};MET_{y}, GeV", 60, 0., 60., 500, 0, 500);
+    hNVerticesVsMetX = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETX", "NverticesVsMETX;N_{vertices};MET_{x}, GeV", 60, 0., 60., 500, -250, 250);
+    hNVerticesVsMetY = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETY", "NverticesVsMETY;N_{vertices};MET_{y}, GeV", 60, 0., 60., 500, -250, 250);
   }
 
   METPhiOscillationCorrection::METPhiOscillationCorrection(EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string prefix):
@@ -27,8 +27,8 @@ namespace HPlus {
     std::string myDirStr = "METPhiOscillationCorrection"+prefix;
     TFileDirectory myDir = fs->mkdir(myDirStr.c_str());
     // Histograms for determining corrections
-    hNVerticesVsMetX = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETX", "NverticesVsMETX;N_{vertices};MET_{x}, GeV", 60, 0., 60., 500, 0, 500);
-    hNVerticesVsMetY = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETY", "NverticesVsMETY;N_{vertices};MET_{y}, GeV", 60, 0., 60., 500, 0, 500);
+    hNVerticesVsMetX = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETX", "NverticesVsMETX;N_{vertices};MET_{x}, GeV", 60, 0., 60., 500, -250, 250);
+    hNVerticesVsMetY = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETY", "NverticesVsMETY;N_{vertices};MET_{y}, GeV", 60, 0., 60., 500, -250, 250);
   }
 
   METPhiOscillationCorrection::~METPhiOscillationCorrection() {}

@@ -331,7 +331,7 @@ namespace HPlus {
     fTauData = tauData;
     fFakeTauData = fakeTauData;
     fSelectedTau = selectedTau;
-    fMETData = metSelection.analyze(iEvent, iSetup, fSelectedTau, fJetData.getAllJets());
+    fMETData = metSelection.silentAnalyze(iEvent, iSetup, fSelectedTau, fJetData.getAllJets());
     //----- MET phi oscillation
     fMETPhiOscillationCorrectionAfterTaus.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
 
