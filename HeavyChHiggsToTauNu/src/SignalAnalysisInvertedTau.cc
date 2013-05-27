@@ -175,7 +175,7 @@ namespace HPlus {
     fTauTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("tauTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
-    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper),
+    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper, ""),
     //    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
@@ -805,7 +805,7 @@ namespace HPlus {
     if(!metData.passedEvent()) return false;
     increment(fBaselineMetCounter);
     size_t nVertices = pvData.getNumberOfAllVertices();
-    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);	      
+    fMETPhiOscillationCorrection.analyze(iEvent, nVertices, metData);	      
    
        //------ mT after jets and met in bins
 
@@ -1080,7 +1080,7 @@ namespace HPlus {
     increment(fMETCounter);
 
     size_t nVertices = pvData.getNumberOfAllVertices();
-    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);
+    fMETPhiOscillationCorrection.analyze(iEvent, nVertices, metData);
 
     //hSelectionFlow->Fill(kQCDOrderMET);
 

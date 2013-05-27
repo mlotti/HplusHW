@@ -217,7 +217,6 @@ namespace HPlus {
     //STEFAN    fEventClassification()
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
-    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper),
     fTauEmbeddingMuonIsolationQuantifier(eventCounter, fHistoWrapper),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     // Scale factor uncertainties
@@ -601,18 +600,10 @@ namespace HPlus {
     fCommonPlotsAfterVertexSelection->fill();
     //hSelectionFlow->Fill(kSignalOrderVertexSelection);
     fCommonPlots.fillControlPlots(iEvent, pvData);
+
 //------ TauID
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
-//     if(!tauData.passedEvent()) return false; // Require at least one tau
-//     std::cout << "Tau found!" << std::endl;
-//     checkIfGenuineTau(iEvent, tauData.getSelectedTau());
-//     //checkIfGenuineTau(iEvent, *(tauData.getSelectedTau()));
-
-    // TauID
-    //TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
-
     fTauSelection.analyseFakeTauComposition(fFakeTauIdentifier,iEvent);
-
     if(!tauData.passedEvent()) return false; // Require at least one tau
     //    std::cout << "taus  " << tauData.getSelectedTaus().size() << std::endl;
 
@@ -630,7 +621,7 @@ namespace HPlus {
       fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()));
     fCommonPlotsAfterTauWeight->fill();
     if (myFakeTauStatus) fCommonPlotsAfterTauWeightFakeTaus->fill();
-    fCommonPlots.fillControlPlots(tauData, tauMatchData);
+    fCommonPlots.fillControlPlots(iEvent, iSetup, tauData, tauMatchData, tauData.getSelectedTau(), fMETSelection);
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     increment(fTauFakeScaleFactorCounter);
@@ -722,6 +713,7 @@ namespace HPlus {
 
     if (!electronVetoData.passedEvent()) return false;
     fCommonPlotsAfterElectronVeto->fill();
+    fCommonPlots.fillControlPlots(iEvent, electronVetoData);
     if (myFakeTauStatus) fCommonPlotsAfterElectronVetoFakeTaus->fill();
     increment(fElectronVetoCounter);
     hSelectionFlow->Fill(kSignalOrderElectronVeto);
@@ -753,6 +745,7 @@ namespace HPlus {
     if (myFakeTauStatus) hCtrlEWKFakeTausIdentifiedMuonPt->Fill(muonVetoData.getSelectedMuonPtBeforePtCut());
     if (!muonVetoData.passedEvent()) return false;
     fCommonPlotsAfterMuonVeto->fill();
+    fCommonPlots.fillControlPlots(iEvent, muonVetoData);
     if (myFakeTauStatus) fCommonPlotsAfterMuonVetoFakeTaus->fill();
     increment(fMuonVetoCounter);
     hSelectionFlow->Fill(kSignalOrderMuonVeto);
@@ -810,6 +803,7 @@ namespace HPlus {
     increment(fMETTriggerScaleFactorCounter);
 
     fCommonPlotsAfterJetSelection->fill();
+    fCommonPlots.fillControlPlots(iEvent, jetData);
     if (myFakeTauStatus) fCommonPlotsAfterJetSelectionFakeTaus->fill();
 
     hSelectionFlow->Fill(kSignalOrderJetSelection);
@@ -942,7 +936,7 @@ namespace HPlus {
 //------ MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     hMet->Fill(metData.getSelectedMET()->et());
-    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);
+
 
     //BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());

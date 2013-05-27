@@ -273,7 +273,6 @@ namespace HPlus {
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;
     QCDTailKiller fQCDTailKiller;
-    METPhiOscillationCorrection fMETPhiOscillationCorrection;
     TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
 
     SignalAnalysisTree fTree;
