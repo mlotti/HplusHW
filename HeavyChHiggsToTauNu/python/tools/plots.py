@@ -271,6 +271,10 @@ _legendLabels = {
     "Tbar_tW-channel":       "Single #bar{t} (tW channel)",
     "T_s-channel":           "Single t (s channel)",
     "Tbar_s-channel":        "Single #bar{t} (s channel)",
+
+    # Ratio uncertainties
+    "BackgroundStatError":   "Stat. unc.",
+    "BackgroundStatSystError": "Stat.#oplussyst. unc.",
 }
 
 ## Map the logical dataset names to plot styles
@@ -325,6 +329,11 @@ _plotStyles = {
     "QCD_Pt20_MuEnriched":   styles.qcdStyle,
     "SingleTop":             styles.stStyle,
     "Diboson":               styles.dibStyle,
+
+    # Ratio stuff
+    "Ratio":                 styles.dataStyle,
+    "BackgroundStatError":   styles.errorRatioStatStyle,
+    "BackgroundStatSystError": styles.errorRatioSystStyle,
 }
 
 ## Return True if name is from a signal dataset
@@ -541,10 +550,12 @@ def _createRatioHistos(histo1, histo2, ytitle, ratioType=None):
     if ratioType == "errorPropagation":
         h = _createHisto(_createRatioErrorPropagation(histo1, histo2, ytitle))
         h.setDrawStyle("EP")
+        h.setLegendLabel(None)
         ret.append(h)
     elif ratioType == "binomial":
         h = _createHisto(_createRatioBinomial(histo1, histo2, ytitle))
         h.setDrawStyle("EP")
+        h.setLegendLabel(None)
         ret.append(h)
     elif ratioType == "errorScale":
         ret.extend(_createRatioHistosErrorScale(histo1, histo2, ytitle))
@@ -701,13 +712,13 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
 
         ratio.GetYaxis().SetTitle(ytitle)
         ratioErr.GetYaxis().SetTitle(ytitle)
-        styles.errorRatioStatStyle.apply(ratioErr)
-        styles.getDataStyle().apply(ratio)
         ratioErr.SetName("BackgroundStatError")
+        _plotStyles["Ratio"].apply(ratio)
+        _plotStyles[ratioErr.GetName()].apply(ratioErr)
 
         ret.extend([
-                _createHisto(ratio, drawStyle="EP"),
-                _createHisto(ratioErr, drawStyle="E2"),
+                _createHisto(ratio, drawStyle="EP", legendLabel=None),
+                _createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"),
                 ])
     elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
         xvalues1 = []
@@ -774,13 +785,13 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
 
         ratio.GetYaxis().SetTitle(ytitle)
         ratioErr.GetYaxis().SetTitle(ytitle)
-        styles.getDataStyle().apply(ratio)
-        styles.errorRatioStatStyle.apply(ratioErr)
         ratioErr.SetName("BackgroundStatError")
+        _plotStyles["Ratio"].apply(ratio)
+        _plotStyles[ratioErr.GetName()].apply(ratioErr)
 
         ret.extend([
-                _createHisto(ratio, drawStyle="EP"),
-                _createHisto(ratioErr, drawStyle="E2"),
+                _createHisto(ratio, drawStyle="EP", legendLabel=None),
+                _createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"),
                 ])
 
         return gr
@@ -810,12 +821,12 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
 
         ratioSyst.GetYaxis().SetTitle(ytitle)
         ratioSyst.SetName("BackgroundStatSystError")
-        styles.errorRatioSystStyle.apply(ratioSyst)
+        _plotStyles[ratioSyst.GetName()].apply(ratioSyst)
 
         ret.extend([
                 ratio,
                 ratioStat,
-                _createHisto(ratioSyst, drawStyle="2"),
+                _createHisto(ratioSyst, drawStyle="2", legendLabel=_legendLabels[ratioSyst.GetName()], legendStyle="F"),
                 ])
     else:
         raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
@@ -1359,6 +1370,17 @@ class PlotRatioBase:
     def extendRatios(self, ratios):
         self.ratioHistoMgr.extendHistos([self._createRatioObject(r) for r in ratios])
 
+    def setRatioLegend(self, legend):
+        self.ratioLegend = legend
+        self.ratioHistoMgr.addToLegend(legend)
+
+    def removeRatioLegend(self):
+        delattr(self, "legend")
+        del self.ratioLegend
+
+    def setRatioLegendHEader(self, legendHeader):
+        self.ratioLegendHEader = legendHeader
+
     ## Create TCanvas and frame with ratio pad for single ratio
     #
     # \param filename         Name of the frame
@@ -1390,7 +1412,9 @@ class PlotRatioBase:
                 reorder.append(n)
         if len(reorder) > 0:
             self.ratioHistoMgr.reverse()
-            self.ratioHistoMgr.reorder(reorder)
+            self.ratioHistoMgr.reorderDraw(reorder)
+            reorder.reverse()
+            self.ratioHistoMgr.reorderLegend(reorder)
             self.ratioHistoMgr.reverse()
 
         self._createFrame(filename, **kwargs)
@@ -1478,11 +1502,16 @@ class PlotRatioBase:
         self.ratioLine = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
         self.ratioLine.Draw("L")
 
-        if index is not None
+        if index is not None:
             self.ratioHistoMgr.draw(fromIndex=index+1)
 
         for obj, option in self.ratioPlotObjectsAfter:
             obj.Draw(option+"same")
+
+        if hasattr(self, "ratioLegend"):
+            if hasattr(self, "ratioLegendHeader"):
+                self.ratioLegend.SetHeader(self.ratioLegendHeader)
+            self.ratioLegend.Draw()
 
         # Redraw the axes in order to get the tick marks on top of the
         # histogram
@@ -2055,6 +2084,8 @@ class PlotDrawer:
     # \param ratioInvert         Should the ratio be inverted?
     # \param ratioIsBinomial     Is the ratio binomal (i.e. use Clopper-Pearson?) (deprecated)
     # \param ratioType           Ratio type (None for default)
+    # \param ratioCreateLegend   Default legend creation parameters for ratio (None to not to create legend, True to create with default parameters)
+    # \param ratioMoveLegend     Default ratio legend movement parameters (after creation)
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
@@ -2067,7 +2098,7 @@ class PlotDrawer:
     # \param rebinToWidthY       Default width of Y bins to rebin to (only applicable for TH2)
     # \param divideByBinWidth    Divide bin contents by bin width? (done after rebinning)
     # \param createLegend        Default legend creation parameters (None to not to create legend)
-    # \param moveLegend          Default legend moving parameters (after creation)
+    # \param moveLegend          Default legend movement parameters (after creation)
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \param customizeBeforeDraw Function to customize the plot before drawing it
     # \param customizeBeforeSave Function to customize the plot before saving it
@@ -2085,6 +2116,8 @@ class PlotDrawer:
                  ratioInvert=False,
                  ratioIsBinomial=False,
                  ratioType=None,
+                 ratioCreateLegend=None,
+                 ratioMoveLegend={},
                  opts={},
                  optsLog={},
                  opts2={},
@@ -2115,6 +2148,8 @@ class PlotDrawer:
         self.ratioInvertDefault = ratioInvert
         self.ratioIsBinomialDefault = ratioIsBinomial
         self.ratioTypeDefault = ratioType
+        self.ratioCreateLegendDefault = ratioCreateLegend
+        self.ratioMoveLegendDefault = ratioMoveLegend
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
@@ -2441,6 +2476,9 @@ class PlotDrawer:
     # <b>Keyword arguments</b>
     # \li\a createLegend  Dictionary forwarded to histograms.creteLegend() (if None, don't create legend)
     # \li\a moveLegend    Dictionary forwarded to histograms.moveLegend() after creating the legend
+    # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
+    # \li\a ratioCreateLegend  Dictionary forwarded to histograms.creteLegend() (if None, don't create legend, if True, create with default parameters)
+    # \li\a ratioMoveLegend    Dictionary forwarded to histograms.moveLegend() after creating the legend
     #
     # The default legend position should be set by modifying histograms.createLegend (see histograms.LegendCreator())
     def setLegend(self, p, **kwargs):
@@ -2448,6 +2486,14 @@ class PlotDrawer:
         moveLegend = self._getValue("moveLegend", p, kwargs)
         if createLegend is not None:
             p.setLegend(histograms.moveLegend(histograms.createLegend(**createLegend), **moveLegend))
+
+        if self._getValue("ratio", p, kwargs):
+            create = self._getValue("ratioCreateLegend", p, kwargs)
+            move = self._getValue("ratioMoveLegend", p, kwargs)
+            if create is not None:
+                if create == True:
+                    create = {}
+                p.setRatioLegend(histograms.moveLegend(histograms.createLegendRatio(**create), **move))
 
     ## Add cut box and/or line to the plot
     #

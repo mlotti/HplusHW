@@ -469,6 +469,9 @@ class LegendCreator:
 ## Default legend creator object
 createLegend = LegendCreator()
 
+## Default legend creator object for ratio plots
+createLegendRatio = LegendCreator(x1=0.7, y1=0.7, x2=0.93, y2=0.95, textSize=0.07)
+
 ## Move TLegend
 # 
 # \param legend   TLegend object to modify
@@ -1050,13 +1053,19 @@ class Histo:
     # \param name         Name of the histogram
     # \param legendStyle  Style string for TLegend (third parameter for TLegend.AddEntry())
     # \param drawStyle    Style string for Draw (string parameter for TH1.Draw())
-    def __init__(self, rootHisto, name, legendStyle="l", drawStyle="HIST"):
+    # \param kwargs       Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li\a legendLabel  Legend label (if None, histo is ignored for legend; if doesn't exist, use name)
+    def __init__(self, rootHisto, name, legendStyle="l", drawStyle="HIST", **kwargs):
         if isinstance(rootHisto, dataset.RootHistoWithUncertainties):
             self._histo = rootHisto
         else:
             self._histo = dataset.RootHistoWithUncertainties(rootHisto)
         self.name = name
         self.legendLabel = name
+        if "legendLabel" in kwargs:
+            self.legendLabel = kwargs["legendLabel"]
         self.legendStyle = legendStyle
         self.drawStyle = drawStyle
 
@@ -1294,8 +1303,8 @@ class HistoWithDataset(Histo):
     # The histogram is from this dataset.Dataset object
 
 class HistoWithDatasetFakeMC(HistoWithDataset):
-    def __init__(self, dataset, rootHisto, name):
-        HistoWithDataset.__init__(self, dataset, rootHisto, name)
+    def __init__(self, dataset, rootHisto, name, **kwargs):
+        HistoWithDataset.__init__(self, dataset, rootHisto, name, **kwargs)
         self.setIsDataMC(False, True)
 
 ## Represents combined (statistical) uncertainties of multiple histograms.
@@ -1337,8 +1346,9 @@ class HistoStacked(Histo):
     #
     # \param histos  List of Histo objects to stack
     # \param name    Name of the stacked histogram
-    def __init__(self, histos, name):
-        Histo.__init__(self, ROOT.THStack(name+"stackHist", name+"stackHist"), name, None, "HIST")
+    # \param kwargs  Keyword arguments (forwarded to Histo.__init__())
+    def __init__(self, histos, name, **kwargs):
+        Histo.__init__(self, ROOT.THStack(name+"stackHist", name+"stackHist"), name, None, "HIST", **kwargs)
         self.histos = histos
 
         histos = filter(lambda h: h.getRootHisto() is not None, [d.getRootHistoWithUncertainties() for d in self.histos])
@@ -1417,8 +1427,9 @@ class HistoGraph(Histo):
     # \param name         Name of the histogram
     # \param legendStyle  Style string for TLegend (third parameter for TLegend.AddEntry())
     # \param drawStyle    Style string for Draw (string parameter for TH1.Draw())
-    def __init__(self, rootGraph, name, legendStyle="l", drawStyle="L"):
-        Histo.__init__(self, rootGraph, name, legendStyle, drawStyle)
+    # \param kwargs       Keyword arguments (forwarded for Histo.__init__())
+    def __init__(self, rootGraph, name, legendStyle="l", drawStyle="L", **kwargs):
+        Histo.__init__(self, rootGraph, name, legendStyle, drawStyle, **kwargs)
 
     def getRootGraph(self):
         return self.getRootHisto()
@@ -1487,8 +1498,9 @@ class HistoEfficiency(Histo):
     # \param name         Name of the histogram
     # \param legendStyle  Style string for TLegend (third parameter for TLegend.AddEntry())
     # \param drawStyle    Style string for Draw (string parameter for TH1.Draw())
-    def __init__(self, rootEfficiency, name, legendStyle="l", drawStyle="L"):
-        Histo.__init__(self, rootEfficiency, name, legendStyle, drawStyle)
+    # \param kwargs       Keyword arguments (forwarded to Histo.__init__())
+    def __init__(self, rootEfficiency, name, legendStyle="l", drawStyle="L", **kwargs):
+        Histo.__init__(self, rootEfficiency, name, legendStyle, drawStyle, **kwargs)
 
     def _values(self, function):
         ret = []
