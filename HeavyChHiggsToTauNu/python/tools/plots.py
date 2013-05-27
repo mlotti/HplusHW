@@ -548,10 +548,7 @@ def _createRatioHistos(histo1, histo2, ytitle, ratioType=None):
 
     ret = []
     if ratioType == "errorPropagation":
-        h = _createHisto(_createRatioErrorPropagation(histo1, histo2, ytitle))
-        h.setDrawStyle("EP")
-        h.setLegendLabel(None)
-        ret.append(h)
+        ret.extend(_createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=True))
     elif ratioType == "binomial":
         h = _createHisto(_createRatioBinomial(histo1, histo2, ytitle))
         h.setDrawStyle("EP")
@@ -570,14 +567,18 @@ def _createRatioHistos(histo1, histo2, ytitle, ratioType=None):
 # \param ytitle  Y axis title of the final ratio histogram/graph
 #
 # \return TH1 or TGraphAsymmErrors of histo1/histo2
-def _createRatioErrorPropagation(histo1, histo2, ytitle):
+def _createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=False):
     if isinstance(histo1, ROOT.TH1) and isinstance(histo2, ROOT.TH1):
         ratio = histo1.Clone()
         ratio.SetDirectory(0)
         ratio.Divide(histo2)
-        styles.getDataStyle().apply(ratio)
+        _plotStyles["Ratio"].apply(ratio)
         ratio.GetYaxis().SetTitle(ytitle)
-        return ratio
+
+        if returnHisto:
+            return [_createHisto(ratio, drawStyle="EP", legendLabel=None)]
+        else:
+            return ratio
     elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
         if histo1.GetN() != histo2.GetN():
             (histo1, histo2) = _graphRemoveNoncommonPoints(histo1, histo2)
@@ -603,12 +604,18 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle):
                                         array.array("d", yerrs), array.array("d", yerrs))
         else:
             gr = ROOT.TGraphAsymmErrors()
-        styles.getDataStyle().apply(gr)
+        _plotStyles["Ratio"].apply(ratio)
         gr.GetYaxis().SetTitle(ytitle)
-        return gr
+
+        if returnHisto:
+            return [_createHisto(ratio, drawStyle="EP", legendLabel=None)]
+        else:
+            return gr
     elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
         if not (histo1.hasSystematicUncertainties() or histo2.hasSystematicUncertainties()):
-            return _createRatioErrorPropagation(histo1.getRootHisto(), histo2.getRootHisto(), ytitle)
+            return _createRatioErrorPropagation(histo1.getRootHisto(), histo2.getRootHisto(), ytitle, returnHisto)
+
+        ratio = _createRatioErrorPropagation(histo1.getRootHisto(), histo2.getRootHisto(), ytitle)
 
         unc1 = histo1.getSystematicUncertaintyGraph(addStatistical=True)
         unc2 = histo2.getSystematicUncertaintyGraph(addStatistical=True)
@@ -630,10 +637,17 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle):
             unc1.SetPoint(i, unc1.GetX()[i], yval1/yval2)
             unc1.SetPointEYhigh(i, math.sqrt( (unc1.GetErrorYhigh(i)/yval1)**2 + (unc2.GetErrorYhigh(i)/yval2)**2 ))
             unc1.SetPointEYlow( i, math.sqrt( (unc1.GetErrorYlow(i)/yval1)**2  + (unc2.GetErrorYlow(i)/yval2)**2 ))
-        ratio = unc1
-        styles.getDataStyle().apply(ratio)
-        ratio.GetYaxis().SetTitle(ytitle)
-        return ratio
+        ratioSyst = unc1
+        _plotStyles["Ratio"].apply(ratioSyst)
+        ratioSyst.GetYaxis().SetTitle(ytitle)
+
+        if returnHisto:
+            return [
+                _createHisto(ratio, drawStyle="EP", legendLabel=None),
+                _createHisto(ratioSyst, drawStyle="[]", legendLabel=None),
+                ]
+        else:
+            return [ratio, ratioSyst]
     else:
         raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
 
