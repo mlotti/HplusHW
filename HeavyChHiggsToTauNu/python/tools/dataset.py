@@ -860,6 +860,7 @@ class Systematics:
                                  additionalNormalizations={},
                                  additionalShapes={},
                                  additionalShapesRelative={},
+                                 onlyForMC=True,
                                  verbose=False,
                                  )
         self.settings.set(**kwargs)
@@ -880,6 +881,7 @@ class Systematics:
             settings = settings.clone(**kwargs)
         return SystematicsHelper(name, settings)
 
+## Helper class to do the work for obtaining uncertainties from their sources for a requested histogram
 class SystematicsHelper:
     def __init__(self, histoName, settings):
         self._histoName = histoName
@@ -894,6 +896,11 @@ class SystematicsHelper:
         if verbose:
             print "Adding uncertainties to histogram '%s' of dataset '%s'" % (self._histoName, dset.getName())
 
+        if self._settings.get("onlyForMC") and not dset.isMC():
+            if verbose:
+                print "  Dataset is not MC, no systematics considered (Systematics(..., onlyForMC=True))"
+            return
+
         # Read the shape variations from the Dataset
         # FIXME: is there a better way to deal with the fact that in
         # data we usually don't have systematics, except with
@@ -905,15 +912,19 @@ class SystematicsHelper:
             if verbose:
                 print "  Using all available shape variations (%s)" % ",".join(shapes)
         else:
-            for s in self._settings.get("shapes"):
-                if s in allShapes:
-                    shapes.append(s)
+            shapes = self._settings.get("shapes")
+            #for s in self._settings.get("shapes"):
+            #    if s in allShapes:
+            #        shapes.append(s)
             if verbose:
                 print "  Using explicitly specified shape variations (%s)" % ",".join(shapes)
 
         for source in shapes:
             (plus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Plus")
             (minus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Minus")
+            if modify is not None:
+                modify(plus)
+                modify(minus)
             rootHistoWithUncertainties.addShapeUncertainty(source, plus, minus)
 
         # Add any additional shape variation histograms supplied by the user
@@ -921,8 +932,18 @@ class SystematicsHelper:
         if len(additShapes) > 0:
             if verbose:
                 print "  Adding additional shape variations %s" % ",".join(additShapes.keys())
-            for source, tpl in additShapes.iteritems:
-                rootHistoWithUncertainties.addShapeUncertainty(source, tpl[0], tpl[1])
+            for source, (th1plus, th1minus) in additShapes.iteritems():
+                hp = th1plus
+                hm = th1minus
+                if not isinstance(th1plus, ROOT.TH1):
+                    (hp, realName) = dset.getRootHisto(th1plus)
+                    if modify is not None:
+                        modify(hp)
+                if not isinstance(th1minus, ROOT.TH1):
+                    (hm, realName) = dset.getRootHisto(th1minus)
+                    if modify is not None:
+                        modify(hm)
+                rootHistoWithUncertainties.addShapeUncertainty(source, hp, hm)
 
         # Add any bin-wise relative uncertainties supplied by the user
         relShapes = self._settings.get("additionalShapesRelative")
