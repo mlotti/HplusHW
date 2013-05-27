@@ -3213,7 +3213,7 @@ class DatasetManagerCreator:
                           ("optimizationMode", "getOptimizationModes"),
                           ("systematicVariation", "getSystematicVariations")]:
             lst = getattr(self, attr)()
-            if arg not in _args and len(lst) == 1:
+            if (arg not in _args or _args[arg] is None) and len(lst) == 1:
                 _args[arg] = lst[0]
 
         # Then override from command line options
@@ -3230,7 +3230,8 @@ class DatasetManagerCreator:
         for name in ["analysisName", "searchMode", "dataEra", "optimizationMode", "systematicVariation"]:
             if name in _args:
                 value = _args[name]
-                parameters.append("%s='%s'" % (name, value))
+                if value is not None:
+                    parameters.append("%s='%s'" % (name, value))
         print "Creating DatasetManager with", ", ".join(parameters)
 
         # Create manager and datasets
@@ -3265,10 +3266,10 @@ class DatasetManagerCreator:
                                   ("optimizationMode", "getOptimizationModes"),
                                   ("systematicVariation", "getSystematicVariations")]:
                     lst = getattr(self, attr)()
-                    if arg not in _args and len(lst) > 1:
+                    if (arg not in _args or _args[arg] is None) and len(lst) > 1:
                         msg += "You did not specify %s, while ROOT file contains %s\n" % (arg, ", ".join(lst))
                         helpFound = True
-                    if arg in _args and len(lst) == 0:
+                    if arg in _args and _args[arg] is not None and len(lst) == 0:
                         msg += "You specified %s, while ROOT file apparently has none of them\n" % arg
                         helpFound = True
                 if not helpFound:
