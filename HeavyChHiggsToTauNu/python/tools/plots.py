@@ -651,6 +651,10 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=False):
     else:
         raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
 
+
+## Removes non-common points of two graph
+#
+# Non-commonality is defined with the X value.
 def _graphRemoveNoncommonPoints(graph1, graph2):
     ret1 = graph1.Clone()
     ret2 = graph2.Clone()
@@ -707,7 +711,17 @@ def _createRatioBinomial(histo1, histo2, ytitle):
     else:
         raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
 
-
+## Creates ratio histograms by scaling everything to the divisor value
+#
+# \param histo1  TH1 dividend
+# \param histo2  TH1 divisor
+# \param ytitl   Y axis title
+#
+# \return list of histograms.Histo objects for histo1/histo2
+#
+# Scales the histo1 values+uncertainties, and histo2 uncertainties by
+# histo2 values. Creates separate entries for histo2 statistical and
+# stat+syst uncertainties, if systematic uncertainties exist.
 def _createRatioHistosErrorScale(histo1, histo2, ytitle):
     ret = []
     if isinstance(histo1, ROOT.TH1) and isinstance(histo2, ROOT.TH1):

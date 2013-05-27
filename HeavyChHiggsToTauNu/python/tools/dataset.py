@@ -853,6 +853,38 @@ def treeDrawToNumEntries(treeDraw):
 
 ## Class to encapsulate shape/normalization systematics for plot creation
 class Systematics:
+    ## Constructor
+    #
+    # \param kwargs   Keyword arguments, see below
+    #
+    # <b>Keyword arguments</b>
+    # \li\a allShapes                 If True, use all available shape variation uncertainties
+    # \li\a shapes                    List of strings for explicit list of shape
+    #                                 variations (e.g. ['SystVarJES',
+    #                                 'SystVarJER'])
+    # \li\a normalizationSelections   List of strings for the selections
+    #                                 used up to this point for
+    #                                 normalization uncertainties (not
+    #                                 used yet)
+    # \li\a additionalNormalizations  Dictionary (name (string) ->
+    #                                 value (float)) for addititional
+    #                                 normalization uncertainties. The
+    #                                 uncertainties are supposed to be
+    #                                 relative.
+    # \li\a additionalShapes          Dictionary (name (string) -> (th1up,
+    #                                 th1down)) for additional shape
+    #                                 variation uncertainties.
+    #                                 th1up/th1down can be either
+    #                                 TH1s, or strings for paths of
+    #                                 histograms in the analysis
+    #                                 directory (or ROOT file)
+    # \li\a additionalShapesRelative  Dictionary (name (string) -> th1)
+    #                                 for additional bin-wise relative
+    #                                 uncertainties. Each bin of TH1
+    #                                 should have the relative
+    #                                 uncertainty of that bin.
+    # \li\a onlyForMC                 If True, systematic uncertainties are applied only for MC.
+    # \li\a verbose                   If True, print the applied uncertainties
     def __init__(self, **kwargs):
         self.settings = Settings(allShapes=False,
                                  shapes=[],
@@ -865,16 +897,32 @@ class Systematics:
                                  )
         self.settings.set(**kwargs)
 
+    ## Set systematics parameters
+    #
+    # \param kwargs  Keyword arguments, see __init__()
     def set(self, **kwargs):
         self.settings.set(**kwargs)
 
+    ## Append to systematic parameters
+    #
+    # \param kwargs   Keyword arguments, see __init__()
+    #
+    # Appending works only for those parameters, whose type is list or
+    # dictionary.
     def append(self, **kwargs):
         self.settings.append(**kwargs)
 
+    ## Clone Systematics recipe
+    #
+    # \param kwargs  Keyword arguments for overriding parameters, see __init__()
     def clone(self, **kwargs):
         cl = copy.deepcopy(self)
         cl.set(**kwargs)
 
+    ## Create SystematicsHelper for Dataset.getDatasetRootHisto()
+    #
+    # \param name    Path to the histogram in the analysis TDirectory
+    # \param kwargs  Keyword arguments for overriding parameters, see __init__()
     def histogram(self, name, **kwargs):
         settings = self.settings
         if len(kwargs) > 0:
@@ -882,15 +930,30 @@ class Systematics:
         return SystematicsHelper(name, settings)
 
 ## Helper class to do the work for obtaining uncertainties from their sources for a requested histogram
+#
+# The object should be created with Systematics.histogram(), i.e. not
+# directly.
 class SystematicsHelper:
+    ## Constructor
+    #
+    # \param histoName   Name of the histogram to read
+    # \param settings    Settings object for systematic recipe
     def __init__(self, histoName, settings):
         self._histoName = histoName
         self._settings = settings
 
+    ## Read the histogram for a dataset
+    #
+    # \param dset  Dataset object
     def draw(self, dset):
         (th1, realName) = dset.getRootHisto(self._histoName)
         return th1
 
+    ## Add uncertainties to RootHistoWithUncertainties object
+    #
+    # \param dset                         Dataset object
+    # \param rootHistoWithUncertainties   RootHistoWithUncertainties object
+    # \param modify                       Optional modification function, see Dataset.getDatasetRootHisto()
     def addUncertainties(self, dset, rootHistoWithUncertainties, modify=None):
         verbose = self._settings.get("verbose")
         if verbose:
@@ -902,9 +965,6 @@ class SystematicsHelper:
             return
 
         # Read the shape variations from the Dataset
-        # FIXME: is there a better way to deal with the fact that in
-        # data we usually don't have systematics, except with
-        # background measurements we do?
         shapes = []
         allShapes = dset.getAvailableSystematicVariationSources()
         if self._settings.get("allShapes"):
@@ -975,6 +1035,8 @@ class SystematicsHelper:
         
 
 ## Class to encapsulate a ROOT histogram with a bunch of uncertainties
+#
+# Looks almost as TH1, except holds bunch of uncertainties
 class RootHistoWithUncertainties:
     def __init__(self, rootHisto):
         self._rootHisto = rootHisto
@@ -999,19 +1061,36 @@ class RootHistoWithUncertainties:
         if self._rootHisto.GetNbinsX() != th1.GetNbinsX():
             raise Exception("Adding uncertainty %s, histograms have different number of X bins (%d != %d)" % (self._rootHisto.GetNbinsX(), th1.GetNbinsX()))
 
+    ## Set the ROOT histogram object
+    #
+    # \param newRootHisto   ROOT histogram object
+    #
+    # This method can be called only in absence of shape variation uncertainties
     def setRootHisto(self, newRootHisto):
         if len(self._shapeUncertainties) != 0:
             raise Exception("There are shape uncertanties, you should not set the original histogram!")
         self._rootHisto = newRootHisto
 
+    ## Get the ROOT histogram object
     def getRootHisto(self):
         return self._rootHisto
 
+    ## Add shape variation uncertainty
+    #
+    # \param name     Name of the uncertainty
+    # \param th1Plus  TH1 for the 'plus' variation
+    # \param th1Minus TH1 for the 'minus' variation
     def addShapeUncertainty(self, name, th1Plus, th1Minus):
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
         self._shapeUncertainties[name] = (th1Plus, th1Minus)
 
+    ## Add bin-wise relative uncertainty
+    #
+    # \param name     Name of the uncertainty
+    # \param th1      TH1 holding the relative uncertainties (e.g. 0.2 for 20 %)
+    #
+    # The bin-wise uncertainties are summed quadratically
     def addShapeUncertaintyRelative(self, name, th1):
         if isinstance(th1, ROOT.TH2):
             raise Exception("So far only TH1's are supported (and not TH2/TH3).")
@@ -1030,16 +1109,42 @@ class RootHistoWithUncertainties:
                 squareSum.SetBinContent(bin, squareSum.GetBinContent(bin) +
                                              th1.GetBinContent(bin)**2)
 
+    ## Add normalization relative uncertainty
+    #
+    # \param name         Name of the uncertainty
+    # \param uncertainty  Float for the value (e.g. 0.2 for 20 %)
+    #
+    # The normalization relative uncertainties are summed quadratically
     def addNormalizationUncertaintyRelative(self, name, uncertainty):
         self._normalizationUncertaintyRelativeNames.append(name)
         self._normalizationUncertaintyRelativeSquared += uncertainty*uncertainty
 
+    ## Get the dictionary of shape variation uncertainties
     def getShapeUncertainties(self):
         return self._shapeUncertainties
 
+    ## Return True if this histogram has any systematic uncertainties associated to it
     def hasSystematicUncertainties(self):
         return len(self._shapeUncertainties) > 0 or len(self._shapeUncertaintyRelativeNames) > 0 or len(self._normalizationUncertaintyRelativeNames) > 0
 
+    ## Create TGraphAsymmErrors for the sum of uncertainties
+    #
+    # \param addStatistical   If true, also statistical uncertainties are added
+    #
+    # Statistical uncertainties are taken via _rootHisto.GetBinError().
+    #
+    # All uncertainties are summed in quadrature for each bin.
+    #
+    # For asymmetric uncertainties the sum is done separately for both
+    # sides (this is a rather crude approximation, since in these
+    # cases the uncertainties are probably not Gaussian).
+    #
+    # With shape variation uncertainties it can happen that both
+    # variations yield value larger or smaller than the nominal. If
+    # this happens, only the variation with larger absolute difference
+    # from the nominal value is considered, and only in the difference
+    # direction (i.e. asymmetrically). Again, a rather crude
+    # approximation.
     def getSystematicUncertaintyGraph(self, addStatistical=False):
         xvalues = []
         xerrhigh = []
@@ -1099,6 +1204,7 @@ class RootHistoWithUncertainties:
                                       array.array("d", xerrlow), array.array("d", xerrhigh),
                                       array.array("d", yerrlow), array.array("d", yerrhigh))
 
+    ## Print associated systematic uncertainties
     def printUncertainties(self):
         print "Shape uncertainties (%d):" % len(self._shapeUncertainties)
         keys = self._shapeUncertainties.keys()
@@ -1123,12 +1229,15 @@ class RootHistoWithUncertainties:
         else:
             return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+1)
 
+    ## Get minimum of X axis
     def getXmin(self):
         return aux.th1Xmin(self._rootHisto)
 
+    ## Get maximum of X axis
     def getXmax(self):
         return aux.th1Xmax(self._rootHisto)
 
+    ## Get minimum if Y axis
     def getYmin(self):
         if self._rootHisto is None:
             return None
@@ -1137,6 +1246,7 @@ class RootHistoWithUncertainties:
         else:
             return self._rootHisto.GetMinimum()
 
+    ## Get maximum of Y axis
     def getYmax(self):
         if self._rootHisto is None:
             return None
@@ -1145,11 +1255,13 @@ class RootHistoWithUncertainties:
         else:
             return self._rootHisto.GetMaximum()
 
+    ## Get X axis title
     def getXtitle(self):
         if self._rootHisto is None:
             return None
         return self._rootHisto.GetXaxis().GetTitle()
 
+    ## Get Y axis title
     def getYtitle(self):
         if self._rootHisto is None:
             return None
@@ -1171,12 +1283,17 @@ class RootHistoWithUncertainties:
 
     #### Below are methods for ROOT TH1 compatibility (only selected methods are implemented)
 
+    ## Get the number of X axis bins
     def GetNbinsX(self):
         return self._rootHisto.GetNbinsX()
 
+    ## Get the name
     def GetName(self):
         return self._rootHisto.GetName()
 
+    ## Set the name
+    #
+    # \param args   Positional arguments, forwarded to TH1.SetName()
     def SetName(self, *args):
         self._rootHisto.SetName(*args)
 
@@ -1250,6 +1367,10 @@ class RootHistoWithUncertainties:
             plus.Scale(*args)
             minus.Scale(*args)
 
+    ## Clone the histogram
+    #
+    # All contained histograms are also cloned. For all cloned
+    # histograms, th1.SetDirectory(0) is called.
     def Clone(self):
         clone = RootHistoWithUncertainties(self._rootHisto.Clone())
         clone._rootHisto.SetDirectory(0)
@@ -1266,6 +1387,7 @@ class RootHistoWithUncertainties:
         clone._normalizationUncertaintyRelativeNames = self._normalizationUncertaintyRelativeNames
         return clone
 
+    ## Delete all contained histograms
     def Delete(self):
         self._rootHisto.Delete()
         for (plus, minus) in self._shapeUncertainties.itervalues():
@@ -1279,6 +1401,7 @@ class RootHistoWithUncertainties:
         self._shapeUncertaintyRelativeSquared = None
         self._normalizationUncertaintyRelativeSquared = None
 
+    ## "Eats" SetDirectory() call for interface compatibility, i.e. do nothing
     def SetDirectory(self, *args):
         pass
 
