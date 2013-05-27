@@ -16,6 +16,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NormalisationAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -141,10 +142,10 @@ namespace HPlus {
     /// unique filling methods (to be called before return statement)
     void fillControlPlots(const TriggerSelection::Data& data);
     void fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data);
-    void fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData);
-    void fillControlPlots(const ElectronSelection::Data& data);
-    void fillControlPlots(const MuonSelection::Data& data);
-    void fillControlPlots(const JetSelection::Data& data);
+    void fillControlPlots(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, const edm::Ptr<pat::Tau>& selectedTau, METSelection& metSelection);
+    void fillControlPlots(const edm::Event& iEvent, const ElectronSelection::Data& data);
+    void fillControlPlots(const edm::Event& iEvent, const MuonSelection::Data& data);
+    void fillControlPlots(const edm::Event& iEvent, const JetSelection::Data& data);
     void fillControlPlots(const METSelection::Data& data);
     void fillControlPlots(const BTagging::Data& data);
     void fillControlPlots(const TopChiSelection::Data& data);
@@ -175,6 +176,7 @@ namespace HPlus {
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;
     FakeTauIdentifier::Data fFakeTauData;
+    edm::Ptr<pat::Tau> fSelectedTau;
     ElectronSelection::Data fElectronData;
     MuonSelection::Data fMuonData;
     JetSelection::Data fJetData;
@@ -182,6 +184,12 @@ namespace HPlus {
     BTagging::Data fBJetData;
     TopChiSelection::Data fTopData;
     EvtTopology::Data fEvtTopology;
+
+    /// MET phi oscillation
+    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterVertices;
+    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterTaus;
+    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterLeptonVeto;
+    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterNjets;
 
     // Input parameters
 
