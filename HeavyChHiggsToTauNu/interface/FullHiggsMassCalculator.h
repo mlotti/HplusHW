@@ -172,6 +172,7 @@ namespace HPlus {
 
     double fTopInvMassLowerCut;
     double fTopInvMassUpperCut;
+    std::string fPzSelectionMethod;
 
     Count dummy1;
     Count dummy2;

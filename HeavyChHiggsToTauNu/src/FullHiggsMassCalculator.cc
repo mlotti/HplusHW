@@ -87,6 +87,7 @@ namespace HPlus {
     // Get the parameters from the configuration
     fTopInvMassLowerCut(iConfig.getUntrackedParameter<double>("topInvMassLowerCut")),
     fTopInvMassUpperCut(iConfig.getUntrackedParameter<double>("topInvMassUpperCut")),
+    fPzSelectionMethod(iConfig.getUntrackedParameter<std::string>("pzSelectionMethod")),
     // Define counters to be incremented during this analysis
     allEvents_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All events")),
     positiveDiscriminant_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator",
@@ -498,16 +499,6 @@ namespace HPlus {
 	if (myInputDataType == eGEN_NeutrinosReplacedWithMET) 
 	  hHiggsMass_GEN_NuToMET_tauNuAngleMin->Fill(output.fHiggsMassSolutionSelected);
       }
-      // Selection method: TauNuDeltaEtaMin
-      selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMin);
-      output.fNeutrinoPzSolutionTauNuDeltaEtaMin = output.fNeutrinoPzSolutionSelected;
-      if (output.bPassedEvent) {
-	if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
-	if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
-	if (myInputDataType == eGEN_NeutrinosReplacedWithMET) 
-	  hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
-      }
-      // NOTE: THE LAST CALCULATION DETERMINES WHICH SELECTION METHOD IS USED FOR THE MAIN OUTPUT:
       // Selection method: TauNuDeltaEtaMax
       selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax);
       output.fNeutrinoPzSolutionTauNuDeltaEtaMax = output.fNeutrinoPzSolutionSelected;
@@ -516,6 +507,15 @@ namespace HPlus {
 	if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolutionSelected);
 	if (myInputDataType == eGEN_NeutrinosReplacedWithMET) 
 	  hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolutionSelected);
+      }
+      // Selection method: TauNuDeltaEtaMin
+      selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMin);
+      output.fNeutrinoPzSolutionTauNuDeltaEtaMin = output.fNeutrinoPzSolutionSelected;
+      if (output.bPassedEvent) {
+	if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
+	if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
+	if (myInputDataType == eGEN_NeutrinosReplacedWithMET) 
+	  hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
       }
     }
     // More common actions:
@@ -851,6 +851,9 @@ namespace HPlus {
   }
   
   void FullHiggsMassCalculator::applyCuts(FullHiggsMassCalculator::Data& output) {
+    //if (output.fDiscriminant > 0) std::cout << output.fTopMassSolutionSelected << std::endl;
+    if (output.fDiscriminant > 0 && (output.fTopMassSolutionSelected > 173.0 || output.fTopMassSolutionSelected < 172.0))
+      output.bPassedEvent = false;
     if (fTopInvMassLowerCut >= 0 && output.fTopMassSolutionSelected < fTopInvMassLowerCut) output.bPassedEvent = false;
     if (fTopInvMassUpperCut >= 0 && output.fTopMassSolutionSelected > fTopInvMassUpperCut) output.bPassedEvent = false;
     //std::cout << "fTopInvMassLowerCut: " << fTopInvMassLowerCut << std::endl;
@@ -863,6 +866,12 @@ namespace HPlus {
   
   void FullHiggsMassCalculator::doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, 
 							   InputDataType myInputDataType) {
+    // Choose the neutrino p_z selection method (can be set in python configuration scripts)
+    if (fPzSelectionMethod == "DeltaEtaMax") selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax);
+    else if (fPzSelectionMethod == "Smaller") selectNeutrinoPzAndHiggsMassSolution(output, eSmaller);
+
+    selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax);
+    // Increment counters and fill Histograms
     switch (myInputDataType) {
     case eRECO:
       increment(allEvents_SubCount);

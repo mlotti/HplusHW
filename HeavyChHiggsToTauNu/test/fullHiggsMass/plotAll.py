@@ -22,21 +22,23 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configurations
-
-multicrabDirs   = ["multicrab_130511_130909", "multicrab_130511_212904"]
-cutInfoSuffixes = ["noTopMassCut", "topMassCut100-240"]
-
-# multicrab_130429_163849 topMassCut140-200
+multicrabDirs = ["multicrab_130522_194442"]
+scenarios = [
+    "", # default
+    "OptInvMassRecoTopInvMassCutNone",
+    "OptInvMassRecoTopInvMassCutLoose",
+    "OptInvMassRecoTopInvMassCutMedium",
+    "OptInvMassRecoTopInvMassCutTight",
+    ]
 
 analysis = "signalAnalysis"
-# Data era affects on the set of selected data datasets, and the PU
-# weights (via TDirectory name in histograms.root)
-dataEra = "Run2011A"
+# Data era affects on the set of selected data datasets, and the PU weights (via TDirectory name in histograms.root)
+#dataEra = "Run2011A"
 #dataEra = "Run2011B"
-#dataEra = "Run2011AB"
+dataEra = "Run2011AB"
 
-plotSignalOnly = True
-#plotSignalOnly = False
+#plotSignalOnly = True
+plotSignalOnly = False
 #plotAllMassPointsTogether = True
 plotAllMassPointsTogether = False
 mcOnly = True
@@ -44,12 +46,12 @@ mcOnly = True
 mcOnlyLumi = 5000 # 1/pb
 #lightHplusMassPoint = 120
 lightHplusMassPoints = [80, 90, 100, 120, 140, 150, 155, 160]
-#lightHplusMassPoints = [80, 100, 120, 140, 160]
+#lightHplusMassPoints = [80, 100, 120, 140, 150, 160] # (many plots in Stefan's MSc thesis are shown for these mass points)
 lightHplusTopBR = 0.02
 removeQCD = True
 #removeQCD = False
 massPlotBinWidth = 20 # GeV
-discriminantPlotBinWidth = 5000 # GeV^2
+discriminantPlotBinWidth = 2000 # GeV^2
 #massPlotNormToOne = True
 massPlotNormToOne = False
 
@@ -78,12 +80,21 @@ histograms.createLegend.moveDefaults(dx=-0.05)
 
 # main function
 def main():
-    for i in range(0, len(multicrabDirs)):
-        for lightHplusMassPoint in lightHplusMassPoints:
-            doEverything("../"+multicrabDirs[i], "_"+cutInfoSuffixes[i], lightHplusMassPoint)
+    for multicrabDir in multicrabDirs:
+        for scenario in scenarios:
+            for lightHplusMassPoint in lightHplusMassPoints:
+                doEverything("../"+multicrabDir, scenario, lightHplusMassPoint)
 
-def doEverything(multicrabDir, cutInfoSuffix, lightHplusMassPoint):
+def doEverything(multicrabDir, scenario, lightHplusMassPoint):
     print "MultiCRAB directory is", multicrabDir
+    module = analysis+dataEra+scenario
+    print "Module is", module
+    print "Mass point is", lightHplusMassPoint
+    #return
+
+    # Customizations for specific MultiCRAB directories
+    if multicrabDir == "../multicrab_130522_194442" and lightHplusMassPoint == 100:
+        return # the M100 sample was accidentally not processed in this MultiCRAB directory
     
     # Read the datasets, see twiki page for more examples
     # https://twiki.cern.ch/twiki/bin/view/CMS/HiggsChToTauNuFullyHadronicSoftware#Construct_datasets
@@ -91,9 +102,10 @@ def doEverything(multicrabDir, cutInfoSuffix, lightHplusMassPoint):
     # If you have optimization enabled, you have to specify optimizationMode explicitly (optimizationMode="Opt...") 
     if plotSignalOnly:
         datasets = dataset.getDatasetsFromMulticrabCfg(directory=multicrabDir, analysisName=analysis, dataEra=dataEra,
-                                                       includeOnlyTasks="TTToHplus")
+                                                       optimizationMode=scenario, includeOnlyTasks="TTToHplus")
     else:
-        datasets = dataset.getDatasetsFromMulticrabCfg(directory=multicrabDir, analysisName=analysis, dataEra=dataEra)
+        datasets = dataset.getDatasetsFromMulticrabCfg(directory=multicrabDir, analysisName=analysis, dataEra=dataEra,
+                                                       optimizationMode=scenario)
 
     if mcOnly:
         datasets.remove(datasets.getDataDatasetNames())
@@ -114,7 +126,11 @@ def doEverything(multicrabDir, cutInfoSuffix, lightHplusMassPoint):
     # Remove signal datasets except for the desired mass (if specified)
     if not plotAllMassPointsTogether:
         datasets.remove(filter(lambda name: "TTToHplus" in name and not "M%d"%lightHplusMassPoint in name,
-                               datasets.getAllDatasetNames()))
+                        datasets.getAllDatasetNames()))
+    ### TO PLOT SEVERAL MASS POINTS TOGETHER, ACTIVATE THIS:
+#     if not plotAllMassPointsTogether:
+#         datasets.remove(filter(lambda name: "TTToHplus" in name and not ("M%d"%lightHplusMassPoint in name or "M80" in name),
+#                                datasets.getAllDatasetNames()))
     # Remove heavy charged Higgs signal datasets
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
 
@@ -134,11 +150,14 @@ def doEverything(multicrabDir, cutInfoSuffix, lightHplusMassPoint):
 
     # Merge signals into one dataset (per mass point)
     plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
-    
+
     # Replace signal dataset with a signal+background dataset, where
     # the BR(t->H+) is taken into account for SM ttbar
     if not plotSignalOnly:
         plots.replaceLightHplusWithSignalPlusBackground(datasets)
+
+    plots._plotStyles["TTToHplus_M80"].append(styles.StyleLine(lineColor=ROOT.kBlue))
+    plots._legendLabels["TTToHplus_M80"] += "M=80"
     
     # You can print a tree of all the merged datasets with this
     #datasets.printDatasetTree()
@@ -159,14 +178,17 @@ def doEverything(multicrabDir, cutInfoSuffix, lightHplusMassPoint):
     #print d_ttjets.getNAllEvents()
 
     # Create plots
-    doPlots(datasets, cutInfoSuffix, lightHplusMassPoint)
+    doPlots(datasets, scenario, lightHplusMassPoint)
 
     # Print a counter table for use in LaTeX documents
     doCounters(datasets)
 
     # Do plots with a fit
-    doFit(datasets, "HiggsMass", cutInfoSuffix, lightHplusMassPoint, "Gauss")
-    doFit(datasets, "HiggsMass", cutInfoSuffix, lightHplusMassPoint, "BW")
+#     if plotSignalOnly:
+#         doFit(datasets, "HiggsMass", scenarioSuffix, lightHplusMassPoint, "Gauss")
+#         doFit(datasets, "HiggsMass", scenarioSuffix, lightHplusMassPoint, "BW")
+#         doFit(datasets, "HiggsMass_smaller", scenarioSuffix, lightHplusMassPoint, "Gauss")
+#         doFit(datasets, "HiggsMass_smaller", scenarioSuffix, lightHplusMassPoint, "BW")
 
     if interactiveMode:
         raw_input("*** Press \"Enter\" to exit pyROOT: ")
@@ -181,13 +203,12 @@ if plotSignalOnly:
     
 
 # Define plots to draw
-def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
+def doPlots(datasets, scenario, lightHplusMassPoint):
     def createPlot(name, massbr_x=0.67, massbr_y=0.58, normone_x=0.67, normone_y=0.58, **kwargs):
         args = {}
         args.update(kwargs)
         if mcOnly:
             args["normalizeToLumi"] = mcOnlyLumi
-
         p = plots.DataMCPlot(datasets, name, **args)
         addMassBRText(p, massbr_x, massbr_y, lightHplusMassPoint)
         #p.addCutBoxAndLine(cutValue=0)
@@ -203,12 +224,10 @@ def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
     def createTH2Plot(name, datasetName):
         # Obtain the Dataset object for the given dataset
         dset = datasets.getDataset(datasetName)
-        
         # Pick the luminosity of data if not in MC-only mode
         lumi = mcOnlyLumi
         if datasets.hasDataset("Data") and not mcOnly:
-            lumi = datasets.getDataset("Data").getLuminosity()
-            
+            lumi = datasets.getDataset("Data").getLuminosity()    
         # Obtain a DatasetRootHisto wrapper object for the TH2
         # histogram, create a plot object, and if the Dataset is MC,
         # normalize it to the luminosity
@@ -216,10 +235,8 @@ def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
         p = plots.PlotBase([drh])
         if dset.isMC():
             p.histoMgr.normalizeMCToLuminosity(lumi)
-                
         p.histoMgr.setHistoDrawStyleAll("COLZ")
         #p.histoMgr.setHistoDrawStyleAll("SCAT")
-        
         # Example how to set drawing options on the plot object
         # itself. These override the default, and the options given in
         # drawPlot() override these
@@ -228,8 +245,7 @@ def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
                          # example of how do disable automatic canvas size modification in the presence of COLZ
                          )
         return p
-        
-        
+
     # drawPlot defaults can be modified also here
     if not mcOnly:
         drawPlot.setDefaults(ratio=True)
@@ -238,20 +254,20 @@ def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
 
 
     # specify common parts of the plots' names
+    scenarioSuffix = ""
+    if not scenario == "":
+        scenarioSuffix = "_"+scenario
     nameSuffix = ""
-    if not plotAllMassPointsTogether:
-        nameSuffix = "_M%d"%lightHplusMassPoint
     if plotSignalOnly:
         nameSuffix = nameSuffix + "_signalOnly"
+    if not plotAllMassPointsTogether:
+        nameSuffix = "_M%d"%lightHplusMassPoint
 #     if removeQCD:
 #         nameSuffix = nameSuffix + "_noQCD"
 #     if massPlotNormToOne:
 #         nameSuffix = nameSuffix + "_normToOne"
 
-
-
-
-    # PLOT: top invariant mass
+    # Plot: top invariant mass
     drawPlot(createPlot("FullHiggsMass/TopMassSolution", normalizeToOne=massPlotNormToOne), "TopMass"+nameSuffix,
              xlabel="m_{t}", ylabel="Events / %d GeV"%massPlotBinWidth, log=True, rebinToWidthX=massPlotBinWidth)
         
@@ -260,7 +276,10 @@ def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
 #              log=False, rebinToWidthX=massPlotBinWidth)
 
     # PLOT: Higgs invariant mass using the chosen selection method (RECO, GEN, GEN_NuToMET)
-    drawPlot(createPlot("FullHiggsMass/HiggsMass", normalizeToOne=massPlotNormToOne), "HiggsMass"+cutInfoSuffix+nameSuffix,
+    drawPlot(createPlot("FullHiggsMass/HiggsMass", normalizeToOne=massPlotNormToOne), "HiggsMass"+scenario+nameSuffix,
+             xlabel="m_{#tau, #nu_{#tau}}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+             cutLine=lightHplusMassPoint)
+    drawPlot(createPlot("FullHiggsMass/HiggsMass_smaller", normalizeToOne=massPlotNormToOne), "HiggsMass_SMALLER"+scenarioSuffix+nameSuffix,
              xlabel="m_{#tau, #nu_{#tau}}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
              cutLine=lightHplusMassPoint)
 #     if plotSignalOnly:
@@ -274,11 +293,11 @@ def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
 #                  ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
     # PLOT: Higgs invariant mass using the better and the worse solution, respectively
     drawPlot(createPlot("FullHiggsMass/HiggsMass_betterSolution", normalizeToOne=massPlotNormToOne),
-             "HiggsMass_betterSolution"+cutInfoSuffix+nameSuffix,
+             "HiggsMass_betterSolution"+scenarioSuffix+nameSuffix,
              xlabel="m_{#tau, #nu_{#tau}}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
              cutLine=lightHplusMassPoint)
     drawPlot(createPlot("FullHiggsMass/HiggsMass_worseSolution", normalizeToOne=massPlotNormToOne),
-             "HiggsMass_worseSolution"+cutInfoSuffix+nameSuffix,
+             "HiggsMass_worseSolution"+scenarioSuffix+nameSuffix,
              xlabel="m_{#tau, #nu_{#tau}}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
              cutLine=lightHplusMassPoint)
 
@@ -292,7 +311,7 @@ def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
 
 #     # PLOT: Higgs invariant mass using the chosen selection method, negative discriminant only
 #     drawPlot(createPlot("FullHiggsMass/HiggsMassNegativeDiscriminant", normalizeToOne=massPlotNormToOne),
-#              "HiggsMassNegDisc"+cutInfoSuffix+nameSuffix,
+#              "HiggsMassNegDisc"+scenarioSuffix+nameSuffix,
 #              xlabel="m_{#tau, #nu_{#tau}}", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
 #              cutLine=lightHplusMassPoint)
 
@@ -337,37 +356,37 @@ def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
 
     # PLOT: Transverse mass versus invariant mass
     drawPlot(createTH2Plot("FullHiggsMass/TransMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
-             "TransMassVsInvMass"+cutInfoSuffix+nameSuffix,
+             "TransMassVsInvMass"+scenarioSuffix+nameSuffix,
              xlabel="(M_{H^{+}} = %d GeV)          m_{T}"%lightHplusMassPoint, ylabel="m_{#tau, #nu_{#tau}}",
              zlabel="Events", log=False, createLegend=None,
              opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
     if not plotSignalOnly:
         drawPlot(createTH2Plot("FullHiggsMass/TransMassVsInvMass", "TTJets"),
-                 "TransMassVsInvMass_ttbarOnly"+cutInfoSuffix,
+                 "TransMassVsInvMass_ttbarOnly"+scenarioSuffix,
                  xlabel="(t#bar{t} only)          m_{T}", ylabel="m_{#tau, #nu_{#tau}}", zlabel="Events",
                  log=False, createLegend=None,
                  opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
     # PLOT: Top mass versus invariant mass
     drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
-             "TopMassVsInvMass"+cutInfoSuffix+nameSuffix,
+             "TopMassVsInvMass"+scenarioSuffix+nameSuffix,
              xlabel="(M_{H^{+}} = %d GeV)          m_{top}"%lightHplusMassPoint, ylabel="m_{#tau, #nu_{#tau}}",
              zlabel="Events", log=False, createLegend=None,
              opts={"xmax": 500, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
     if not plotSignalOnly:
         drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTJets"),
-                 "TopMassVsInvMass_ttbarOnly"+cutInfoSuffix,
+                 "TopMassVsInvMass_ttbarOnly"+scenarioSuffix,
                  xlabel="(t#bar{t} only)          m_{top}", ylabel="m_{#tau, #nu_{#tau}}",
                  zlabel="Events", log=False, createLegend=None,
                  opts={"xmax": 500, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
     # PLOT: Top mass versus neutrino number
     drawPlot(createTH2Plot("FullHiggsMass/TopMassVsNeutrinoNumber", "TTToHplus_M%d"%lightHplusMassPoint),
-             "TopMassVsNeutrinoNumber"+cutInfoSuffix+nameSuffix,
+             "TopMassVsNeutrinoNumber"+scenarioSuffix+nameSuffix,
              xlabel="(M_{H^{+}} = %d GeV)          m_{top}"%lightHplusMassPoint, ylabel="Number of neutrinos",
              zlabel="Events", log=False, createLegend=None,
              opts={"xmax": 500, "ymax": 8}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=1.0)
     if not plotSignalOnly:
         drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTJets"),
-                 "TopMassVsInvMass_ttbarOnly"+cutInfoSuffix,
+                 "TopMassVsInvMass_ttbarOnly"+scenarioSuffix,
                  xlabel="(t#bar{t} only)          m_{top}", ylabel="Number of neutrinos",
                  zlabel="Events", log=False, createLegend=None,
                  opts={"xmax": 500, "ymax": 8}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
@@ -394,19 +413,24 @@ def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
 #     drawExample("twocolorhue")
 
 
-#     # PLOT: Discriminant (RECO, GEN, GEN_NuToMET)
-#     drawPlot(createPlot("FullHiggsMass/Discriminant", normalizeToOne=massPlotNormToOne), "Discriminant"+nameSuffix,
-#              xlabel = "Discriminant", ylabel = "Events / %d GeV^{2}"%discriminantPlotBinWidth, log=False,
-#              rebinToWidthX=discriminantPlotBinWidth, cutLine=0)
-#     drawPlot(createPlot("FullHiggsMass/Discriminant_GEN", normalizeToOne=massPlotNormToOne), "Discriminant_GEN"+nameSuffix,
-#              xlabel = "Discriminant (MC truth)", ylabel = "Events / %d GeV^{2}"%discriminantPlotBinWidth, log=False,
-#              rebinToWidthX=discriminantPlotBinWidth, cutLine=0)
-#     drawPlot(createPlot("FullHiggsMass/Discriminant_GEN_NeutrinosReplacedWithMET", normalizeToOne=massPlotNormToOne),
-#              "Discriminant_GEN_NuToMET"+nameSuffix,
-#              xlabel = "Discriminant (MC truth, #nu_{#tau} #leftrightarrow  #slash{E}_{T})",
-#              ylabel = "Events / %d GeV^{2}"%discriminantPlotBinWidth, log=False,
-#              rebinToWidthX=discriminantPlotBinWidth, cutLine=0)
-#     # PLOT: Discriminant (RECO_pure, RECO_with_misidentification)
+    # PLOT: Discriminant (RECO, GEN, GEN_NuToMET)
+    def formatDiscriminantPlotLabels(p):
+        axis = p.getFrame().GetXaxis()
+        #axis.LabelsOption("d")
+        axis.SetLabelSize(14)
+
+    drawPlot(createPlot("FullHiggsMass/Discriminant", normalizeToOne=massPlotNormToOne), "Discriminant"+nameSuffix,
+             xlabel = "Discriminant", ylabel = "Events / %d GeV^{2}"%discriminantPlotBinWidth, log=False,
+             rebinToWidthX=discriminantPlotBinWidth, cutLine=0, customizeBeforeDraw=formatDiscriminantPlotLabels)
+    drawPlot(createPlot("FullHiggsMass/Discriminant_GEN", normalizeToOne=massPlotNormToOne), "Discriminant_GEN"+nameSuffix,
+             xlabel = "Discriminant (MC truth)", ylabel = "Events / %d GeV^{2}"%discriminantPlotBinWidth, log=False,
+             rebinToWidthX=discriminantPlotBinWidth, cutLine=0)
+    drawPlot(createPlot("FullHiggsMass/Discriminant_GEN_NeutrinosReplacedWithMET", normalizeToOne=massPlotNormToOne),
+             "Discriminant_GEN_NuToMET"+nameSuffix,
+             xlabel = "Discriminant (MC truth, #nu_{#tau} #leftrightarrow  #slash{E}_{T})",
+             ylabel = "Events / %d GeV^{2}"%discriminantPlotBinWidth, log=False,
+             rebinToWidthX=discriminantPlotBinWidth, cutLine=0)
+    # PLOT: Discriminant (RECO_pure, RECO_with_misidentification)
 #     drawPlot(createPlot("FullHiggsMass/DiscriminantPure", normalizeToOne=massPlotNormToOne), "Discriminant_pure"+nameSuffix,
 #              xlabel = "Discriminant", ylabel = "Events / %d GeV^{2}"%discriminantPlotBinWidth, log=False,
 #              rebinToWidthX=discriminantPlotBinWidth, cutLine=0)
@@ -422,8 +446,9 @@ def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
         for i in range(1, 7):
             axis.SetBinLabel(i, counterLabels[str(axis.GetBinLabel(i))])
 #            axis.SetBinLabel(i, counterLabels[i])
+    #drawPlot(createPlot("counters/weighted/FullHiggsMassCalculator", normalizeToOne=massPlotNormToOne),
     drawPlot(createPlot("counters/weighted/FullHiggsMassCalculator", normalizeToOne=massPlotNormToOne),
-             "Counters"+cutInfoSuffix+nameSuffix,
+             "Counters"+scenarioSuffix+nameSuffix,
              xlabel = "", ylabel = "Event count", log=False, opts={"xmin": 0, "xmax": 4})
              #customizeBeforeDraw=renameLabels)
              
@@ -434,17 +459,17 @@ def doPlots(datasets, cutInfoSuffix, lightHplusMassPoint):
         for i in range(1, 7):
             axis.SetBinLabel(i, solutionSelectionLabels[str(axis.GetBinLabel(i))])
     drawPlot(createPlot("counters/weighted/SolutionSelection", normalizeToOne=massPlotNormToOne),
-             "SolutionSelectionCounters"+cutInfoSuffix+nameSuffix,
+             "SolutionSelectionCounters"+scenarioSuffix+nameSuffix,
              xlabel = "", ylabel = "Event count", log=False, customizeBeforeDraw=renameLabelsSolutionSelection)
 
     def renameLabelsEventClassification(p):
         axis = p.getFrame().GetXaxis()
-        axis.LabelsOption("d")
+        axis.LabelsOption("u")
         axis.CenterLabels(True)
         for i in range(1, 9):
             axis.SetBinLabel(i, eventClassificationLabels[str(axis.GetBinLabel(i))])
     drawPlot(createPlot("counters/weighted/FullMassEventClassification", normalizeToOne=massPlotNormToOne),
-             "EventClassificationCounters"+cutInfoSuffix+nameSuffix,
+             "EventClassificationCounters"+scenarioSuffix+nameSuffix,
              xlabel = "", ylabel = "Event count", log=False, customizeBeforeDraw=renameLabelsEventClassification)
 
 
@@ -472,17 +497,19 @@ def doCounters(datasets):
 
     # Create LaTeX format, automatically adjust value precision by uncertainty
     latexFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.4f", withPrecision=2))
+    plainFormat = counter.TableFormatText(counter.CellFormatText(valueOnly=True))
 
-    table = eventCounter.getMainCounterTable()
-    print table.format()
+    #table = eventCounter.getMainCounterTable()
+    #print table.format()
     
  #    table  = eventCounter.getSubCounterTable("FullHiggsMassCalculator")
 #     #table.renameRows(counterLabels)
 #     print table.format(latexFormat)
     
-#     table2 = eventCounter.getSubCounterTable("SolutionSelection")
-#     table2.renameRows(solutionSelectionLabels)
-#     print table2.format(latexFormat)
+    table2 = eventCounter.getSubCounterTable("SolutionSelection")
+    table2.renameRows(solutionSelectionLabels)
+    table2.transpose()
+    print table2.format(plainFormat)
     
     
 
@@ -492,7 +519,7 @@ def Gaussian(x,par):
 def BW(x,par):
     return par[0]*TMath.BreitWigner(x[0],par[1],par[2])
 
-def doFit(datasets, histoName, cutInfoSuffix, lightHplusMassPoint, fitFunction):
+def doFit(datasets, histoName, scenarioSuffix, lightHplusMassPoint, fitFunction):
     print "Doing invariant mass fits. (Fit function =", fitFunction + ")"
     
     ## After standard cuts
@@ -515,8 +542,8 @@ def doFit(datasets, histoName, cutInfoSuffix, lightHplusMassPoint, fitFunction):
     #    rangeMin = hinvmass.GetXaxis().GetXmin()
     #    rangeMax = hinvmass.GetXaxis().GetXmax()
     rangeMin = 80
-    rangeMax = 170
-    if cutInfoSuffix == "_noTopMassCut":
+    rangeMax = 160
+    if scenarioSuffix == "_noTopMassCut":
         rangeMax = 190
     #rangeMax = lightHplusMassPoint + 50
     
@@ -564,8 +591,8 @@ def doFit(datasets, histoName, cutInfoSuffix, lightHplusMassPoint, fitFunction):
     #tex5.SetTextSize(20)
     #tex5.Draw()
     print "Fit range ",rangeMin, " - ",rangeMax
-    canvas.Print("Fit_"+fitFunction+"_"+histoName+cutInfoSuffix+"_M%d.png"%lightHplusMassPoint)
-    canvas.Print("Fit_"+fitFunction+"_"+histoName+cutInfoSuffix+"_M%d.eps"%lightHplusMassPoint)
+    canvas.Print("Fit_"+fitFunction+"_"+histoName+scenarioSuffix+"_M%d.png"%lightHplusMassPoint)
+    canvas.Print("Fit_"+fitFunction+"_"+histoName+scenarioSuffix+"_M%d.eps"%lightHplusMassPoint)
 
     print "******************************", fitFunction ,"***********************************"
     if fitFunction == "Gauss":

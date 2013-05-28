@@ -721,53 +721,54 @@ class ConfigBuilder:
 
     ## Build array of analyzers to scan various scenarios for invariant mass reconstruction
     def _buildInvariantMassReconstructionScenarios(self, process, analysisModules, analysisNames):
+        def createInvariantMassReconstructionModule(process, modulePrefix, mod, names, modules):
+            modName = name+"Opt"+modulePrefix
+            if "Opt" in name:
+                modName = name+modulePrefix
+            setattr(process, modName, mod)
+            names.append(modName)
+            modules.append(mod)
+            path = cms.Path(process.commonSequence * mod)
+            setattr(process, modName+"Path", path)
+            
         if not self.doInvariantMassReconstructionScenarios:
             return []
+        
+        neutrinoPzSolutionSelectionMethods = ["DeltaEtaMax", "Smaller"]
         names = []
         modules = []
-        print "analysisModules is", repr(analysisModules)
         for module, name in zip(analysisModules, analysisNames):
-            ## Top invariant mass cut scenarios for invariant mass reconstruction
-            # "None" scenario
-            mod = module.clone()
-            mod.invMassReco.topInvMassLowerCut = -1 # negative value means no cut
-            mod.invMassReco.topInvMassUpperCut = -1 # negative value means no cut
-            modName = name+"Opt"+"InvMassRecoTopInvMassCutNone"
-            setattr(process, modName, mod)
-            names.append(modName)
-            modules.append(mod)
-            path = cms.Path(process.commonSequence * mod)
-            setattr(process, modName+"Path", path)
-            # "Loose" scenario
-            mod = module.clone()
-            mod.invMassReco.topInvMassLowerCut = 100 # negative value means no cut
-            mod.invMassReco.topInvMassUpperCut = 240 # negative value means no cut
-            modName = name+"Opt"+"InvMassRecoTopInvMassCutLoose"
-            setattr(process, modName, mod)
-            names.append(modName)
-            modules.append(mod)
-            path = cms.Path(process.commonSequence * mod)
-            setattr(process, modName+"Path", path)
-            # "Medium" scenario
-            mod = module.clone()
-            mod.invMassReco.topInvMassLowerCut = 140 # negative value means no cut
-            mod.invMassReco.topInvMassUpperCut = 200 # negative value means no cut
-            modName = name+"Opt"+"InvMassRecoTopInvMassCutMedium"
-            setattr(process, modName, mod)
-            names.append(modName)
-            modules.append(mod)
-            path = cms.Path(process.commonSequence * mod)
-            setattr(process, modName+"Path", path)
-            # "Tight" scenario
-            mod = module.clone()
-            mod.invMassReco.topInvMassLowerCut = 157 # negative value means no cut
-            mod.invMassReco.topInvMassUpperCut = 187 # negative value means no cut
-            modName = name+"Opt"+"InvMassRecoTopInvMassCutTight"
-            setattr(process, modName, mod)
-            names.append(modName)
-            modules.append(mod)
-            path = cms.Path(process.commonSequence * mod)
-            setattr(process, modName+"Path", path)
+            for currentPzSelectionMethod in neutrinoPzSolutionSelectionMethods:
+                ## Top invariant mass cut scenarios for invariant mass reconstruction
+                # "None" scenario
+                mod = module.clone()
+                mod.invMassReco.topInvMassLowerCut = -1 # negative value means no cut
+                mod.invMassReco.topInvMassUpperCut = -1 # negative value means no cut
+                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
+                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                        "TopInvMassCutNone", mod, names, modules)
+                # "Loose" scenario
+                mod = module.clone()
+                mod.invMassReco.topInvMassLowerCut = 100 # negative value means no cut
+                mod.invMassReco.topInvMassUpperCut = 240 # negative value means no cut
+                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
+                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                        "TopInvMassCutLoose", mod, names, modules)
+                # "Medium" scenario
+                mod = module.clone()
+                mod.invMassReco.topInvMassLowerCut = 140 # negative value means no cut
+                mod.invMassReco.topInvMassUpperCut = 200 # negative value means no cut
+                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
+                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                        "TopInvMassCutMedium", mod, names, modules)
+                # "Tight" scenario
+                mod = module.clone()
+                mod.invMassReco.topInvMassLowerCut = 157 # negative value means no cut
+                mod.invMassReco.topInvMassUpperCut = 187 # negative value means no cut
+                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
+                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                        "TopInvMassCutTight", mod, names, modules)
+
         self._accumulateAnalyzers("Modules for invariant mass reconstruction scenarios", names)
         analysisModules.extend(modules)
         analysisNames.extend(names)
