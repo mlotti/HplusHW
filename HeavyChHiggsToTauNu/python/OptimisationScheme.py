@@ -15,7 +15,6 @@ class HPlusOptimisationScheme():
         self._rtauVariation = []
         self._jetNumberVariation = []
         self._jetEtVariation = []
-        self._jetBetaVariation = []
         self._METSelectionVariation = []
         self._bjetLeadingDiscriminatorVariation = []
         self._bjetSubLeadingDiscriminatorVariation = []
@@ -63,12 +62,6 @@ class HPlusOptimisationScheme():
             self._jetEtVariation.extend(value)
         else:
             self._jetEtVariation.append(value)
-
-    def addJetBetaVariation(self, value):
-        if isinstance(value, list):
-            self._jetBetaVariation.extend(value)
-        else:
-            self._jetBetaVariation.append(value)
 
     def addMETSelectionVariation(self, value):
         if isinstance(value, list):
@@ -125,8 +118,6 @@ class HPlusOptimisationScheme():
             self._jetEtVariation.append(nominalAnalysis.jetSelection.ptCut.value())
         if len(self._jetNumberVariation) == 0:
             self._jetNumberVariation.append("%s%d"%(nominalAnalysis.jetSelection.jetNumberCutDirection.value(),nominalAnalysis.jetSelection.jetNumber.value()))
-        if len(self._jetBetaVariation) == 0:
-            self._jetBetaVariation.append("%s%.1f"%(nominalAnalysis.jetSelection.betaCutDirection.value(),nominalAnalysis.jetSelection.betaCut.value()))
         if len(self._METSelectionVariation) == 0:
             self._METSelectionVariation.append(nominalAnalysis.MET.METCut.value())
         if len(self._bjetLeadingDiscriminatorVariation) == 0:
@@ -150,7 +141,6 @@ class HPlusOptimisationScheme():
         print "  rtau",self._rtauVariation
         print "  jet ET",self._jetEtVariation
         print "  jet number",self._jetNumberVariation
-        print "  jet beta cut",self._jetBetaVariation
         print "  MET",self._METSelectionVariation
         print "  btag leading disriminator values",self._bjetLeadingDiscriminatorVariation
         print "  btag subleading disriminator values",self._bjetSubLeadingDiscriminatorVariation
@@ -176,7 +166,7 @@ class HPlusOptimisationScheme():
         myNumber = float(variation[myRange:])
         return myNumber
 
-    def getVariationName(self, analysisName,taupt,tauIsol,tauIsolCont,rtau,jetNumber,jetEt,jetBeta,met,bjetNumber,bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr,dphi,topreco):
+    def getVariationName(self, analysisName,taupt,tauIsol,tauIsolCont,rtau,jetNumber,jetEt,met,bjetNumber,bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr,dphi,topreco):
         myVariationName = "%s_Opt"%analysisName
         myVariationName += "_Taupt%.0f"%taupt
         myVariationName += "_%s"%tauIsol
@@ -185,7 +175,6 @@ class HPlusOptimisationScheme():
         myVariationName += "_Rtau%.1f"%rtau
         myVariationName += "_Jet%s"%jetNumber
         myVariationName += "_Et%.0f"%jetEt
-        myVariationName += "_Beta%s"%jetBeta
         myVariationName += "_Met%.0f"%met
         myVariationName += "_Bjet%s"%bjetNumber
         myVariationName += "_Et%.0f_discr%.1fand%.1f"%(bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr)
@@ -209,7 +198,6 @@ class HPlusOptimisationScheme():
                     for rtau in self._rtauVariation:
                         for jetEt in self._jetEtVariation:
                             for jetNumber in self._jetNumberVariation:
-                                for jetBeta in self._jetBetaVariation:
                                     for met in self._METSelectionVariation:
                                         for bjetLeadingDiscr in self._bjetLeadingDiscriminatorVariation:
                                             for bjetSubLeadingDiscr in self._bjetSubLeadingDiscriminatorVariation:
@@ -219,7 +207,7 @@ class HPlusOptimisationScheme():
                                                             for topreco in self._topRecoVatiation:
                                                                 nVariations += 1
                                                                 # Construct name for variation
-                                                                myVariationName = self.getVariationName(analysisName,taupt,tauIsol,tauIsolCont,rtau,jetNumber,jetEt,jetBeta,met,bjetNumber,bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr,dphi,topreco)
+                                                                myVariationName = self.getVariationName(analysisName,taupt,tauIsol,tauIsolCont,rtau,jetNumber,jetEt,met,bjetNumber,bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr,dphi,topreco)
                                                                 #print "Generating variation",myVariationName
                                                                 # Clone module and make changes
                                                                 myModule = nominalAnalysis.clone()
@@ -228,8 +216,6 @@ class HPlusOptimisationScheme():
                                                                 myModule.tauSelection.isolationDiscriminatorContinuousCutPoint = tauIsolCont
                                                                 myModule.tauSelection.rtauCut = rtau
                                                                 myModule.jetSelection.ptCut = jetEt
-                                                                myModule.jetSelection.betaCut = self.getNumberFromCutWithDirection(jetBeta)
-                                                                myModule.jetSelection.betaCutDirection = self.getOperatorFromCutWithDirection(jetBeta)
                                                                 myModule.jetSelection.jetNumberCutDirection = self.getOperatorFromCutWithDirection(jetNumber)
                                                                 myModule.jetSelection.jetNumber = (int)(self.getNumberFromCutWithDirection(jetNumber))
                                                                 myModule.MET.METCut = met
