@@ -388,6 +388,7 @@ namespace HPlus {
     WrappedTH1* hCtrlIdentifiedElectronPtAfterStandardSelections;
     WrappedTH1* hCtrlIdentifiedMuonPtAfterStandardSelections;
     WrappedTH1* hCtrlNjetsAfterStandardSelections;
+    WrappedTH1* hCtrlNjetsBeforeCollinearCuts;
     WrappedTH1* hCtrlMET;
     WrappedTH1* hCtrlNbjets;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBack;
@@ -417,6 +418,7 @@ namespace HPlus {
     WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPtAfterStandardSelections;
     WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPtAfterStandardSelections;
     WrappedTH1* hCtrlEWKFakeTausNjetsAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausNjetsBeforeCollinearCuts;
     WrappedTH1* hCtrlEWKFakeTausMET;
     WrappedTH1* hCtrlEWKFakeTausNbjets;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBack;

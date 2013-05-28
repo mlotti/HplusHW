@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions as HChOptions
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
 import HiggsAnalysis.HeavyChHiggsToTauNu.WJetsWeight as wjetsWeight
@@ -343,9 +344,17 @@ class ConfigBuilder:
         if len(analysisLightModules) > 0:
             analysisLightModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
             #analysisLightModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+            if hasattr(analysisLightModules[0], "tauTriggerEfficiencyScaleFactor"):
+                analysisLightModules[0].tauTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
+            if hasattr(analysisLightModules[0], "metTriggerEfficiencyScaleFactor"):
+                analysisLightModules[0].metTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
         if len(analysisHeavyModules) > 0:
             analysisHeavyModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
             #analysisHeavyModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+            if hasattr(analysisHeavyModules[0], "tauTriggerEfficiencyScaleFactor"):
+                analysisHeavyModules[0].tauTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
+            if hasattr(analysisHeavyModules[0], "metTriggerEfficiencyScaleFactor"):
+                analysisHeavyModules[0].metTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
 
         # Prescale fetching done automatically for data
         if self.dataVersion.isData() and self.options.tauEmbeddingInput == 0 and self.doPrescalesForData:
@@ -1127,3 +1136,18 @@ class ConfigBuilder:
         names.append(modName)
 
         self._accumulateAnalyzers("PU weight variation", names)
+
+
+def addPuWeightProducers(dataVersion, process, commonSequence, dataEras, firstInSequence=False):
+    names = []
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+    for era in dataEras:
+        names.append(param.setPileupWeight(dataVersion, process, commonSequence, era=era))
+
+    if firstInSequence:
+        for name in names:
+            mod = getattr(process, name)
+            commonSequence.remove(mod)
+            commonSequence.insert(0, mod)
+
+    return names

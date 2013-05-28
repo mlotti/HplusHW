@@ -9,7 +9,7 @@ from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-re_histo = None
+re_histos = []
 re_se = re.compile("newPfn =\s*(?P<url>\S+)")
 replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://madhatter.csc.fi:1094")
 
@@ -18,10 +18,13 @@ def getHistogramFile(stdoutFile):
     histoFile = None
     f = open(stdoutFile)
     for line in f:
-        m = re_histo.search(line)
-        if m:
-            histoFile = m.group("file")
-            continue
+        for r in re_histos:
+            m = r.search(line)
+            if m:
+                histoFile = m.group("file")
+                break
+        if histoFile is not None:
+            break
     f.close()
     return histoFile
 
@@ -44,8 +47,9 @@ def getHistogramFileSE(stdoutFile):
 def main(opts, args):
     crabdirs = multicrab.getTaskDirectories(opts)
 
-    global re_histo
-    re_histo = re.compile("^output files:.*?(?P<file>%s)" % opts.input)
+    global re_histos
+    re_histos.append(re.compile("^output files:.*?(?P<file>%s)" % opts.input))
+    re_histos.append(re.compile("^\s+file\s+=\s+(?P<file>%s)" % opts.input))
 
     mergedFiles = []
     for d in crabdirs:
@@ -60,13 +64,17 @@ def main(opts, args):
                     if histoFile != None:
                         files.append(histoFile)
                     else:
-                        print "Task %s, skipping job %s: input root file not found" % (d, f)
+                        print "Task %s, skipping job %s: input root file not found from stdout" % (d, f)
                 else:
                     histoFile = getHistogramFile(f)
                     if histoFile != None:
-                        files.append(os.path.join(os.path.dirname(f), histoFile))
+                        path = os.path.join(os.path.dirname(f), histoFile)
+                        if os.path.exists(path):
+                            files.append(path)
+                        else:
+                            print "Task %s, skipping job %s: input root file found from stdout, but does not exist" % (d, f)
                     else:
-                        print "Task %s, skipping job %s: input root file not found" % (d, f)
+                        print "Task %s, skipping job %s: input root file not found from stdout" % (d, f)
             except multicrab.ExitCodeException, e:
                 print "Task %s, skipping job %s: %s" % (d, f, str(e))
 

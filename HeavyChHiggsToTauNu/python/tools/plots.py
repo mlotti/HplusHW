@@ -801,6 +801,10 @@ class PlotBase:
     def binWidth(self):
         return self.histoMgr.getHistos()[0].getBinWidth(1)
 
+    ## Get the bin widths (assuming they're the same in all histograms)
+    def binWidths(self):
+        return self.histoMgr.getHistos()[0].getBinWidths()
+
     ## Add a format for which to save the plot
     #
     # \param format  Suffix recognised by ROOT
@@ -819,6 +823,12 @@ class PlotBase:
     ## Remove the legend object
     def removeLegend(self):
         delattr(self, "legend")
+
+    ## Set the legend header
+    #
+    # \param legendHeader String for legend header
+    def setLegendHeader(self, legendHeader):
+        self.legendHeader = legendHeader        
 
     ## Add an additional object to be drawn before the plot histograms/graphs
     #
@@ -892,6 +902,8 @@ class PlotBase:
             obj.Draw(option+"same")
 
         if hasattr(self, "legend"):
+            if hasattr(self, "legendHeader"):
+                self.legend.SetHeader(self.legendHeader)
             self.legend.Draw()
 
         # Redraw the axes in order to get the tick marks on top of the
@@ -1118,7 +1130,10 @@ class PlotRatioBase:
             if invertRatio:
                 (num, denom) = (denom, num)
             ratio = _createRatio(num, denom, "Ratio", isBinomial=ratioIsBinomial)
-            copyStyle(num, ratio)
+            if invertRatio:
+                copyStyle(denom, ratio)
+            else:
+                copyStyle(num, ratio)
             self.appendRatio(ratio)
 
         self._createFrame(filename, **kwargs)
@@ -1717,7 +1732,8 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
 class PlotDrawer:
     ## Constructor, set the defaults here
     #
-    # \param ylabel              Default Y axis title
+    # \param xlabel              Default X axis title (None for pick from first TH1)
+    # \param ylabel              Default Y axis title (None for pick from first TH1)
     # \param zlabel              Default Z axis title (None for not to show)
     # \param log                 Should Y axis be in log scale by default?
     # \param ratio               Should the ratio pad be drawn?
@@ -1734,6 +1750,7 @@ class PlotDrawer:
     # \param rebinY              Default rebin Y value (passed to TH2::Rebin2D)
     # \param rebinToWidthX       Default width of X bins to rebin to
     # \param rebinToWidthY       Default width of Y bins to rebin to (only applicable for TH2)
+    # \param divideByBinWidth    Divide bin contents by bin width? (done after rebinning)
     # \param createLegend        Default legend creation parameters (None to not to create legend)
     # \param moveLegend          Default legend moving parameters (after creation)
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
@@ -1744,6 +1761,7 @@ class PlotDrawer:
     # \param addMCUncertainty    Should MC total (stat) uncertainty be drawn()
     # \param cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis
     def __init__(self,
+                 xlabel=None,
                  ylabel="Occurrances / %.0f",
                  zlabel=None,
                  log=False,
@@ -1761,6 +1779,7 @@ class PlotDrawer:
                  rebinY=None,
                  rebinToWidthX=None,
                  rebinToWidthY=None,
+                 divideByBinWidth=False,
                  createLegend={},
                  moveLegend={},
                  customizeBeforeFrame=None,
@@ -1771,6 +1790,7 @@ class PlotDrawer:
                  addMCUncertainty=False,
                  cmsText=None,
                  ):
+        self.xlabelDefault = xlabel
         self.ylabelDefault = ylabel
         self.zlabelDefault = zlabel
         self.logDefault = log
@@ -1791,6 +1811,7 @@ class PlotDrawer:
         self.rebinYDefault = rebinY
         self.rebinToWidthXDefault = rebinToWidthX
         self.rebinToWidthYDefault = rebinToWidthY
+        self.divideByBinWidthDefault = divideByBinWidth
         self.createLegendDefault = createLegend
         self.moveLegendDefault = moveLegend
         self.customizeBeforeFrameDefault = customizeBeforeFrame
@@ -1855,7 +1876,7 @@ class PlotDrawer:
         self.setLegend(p, **kwargs)
         self.addCutLineBox(p, **kwargs)
         self.customise(p, **kwargs)
-        self.finish(p, xlabel, **kwargs)
+        self.finish(p, xlabel=xlabel, **kwargs)
 
     ## Rebin all histograms in the plot
     #
@@ -1873,6 +1894,7 @@ class PlotDrawer:
     #                      TH2)
     # \li\a rebinToWidthX  If given, rebin all histograms to this width of X bins.
     # \li\a rebinToWidthY  If given, rebin all histograms to this width of Y bins.
+    # \li\a divideByBinWidth Divide bin contents by bin width? (done after rebinning)
     #
     # \b Note: Only one argument above per axis can be given.
     #
@@ -1999,6 +2021,10 @@ class PlotDrawer:
 
         if rebinFunction is not None:
             p.histoMgr.forEachHisto(rebinFunction)
+
+        if kwargs.get("divideByBinWidth", self.divideByBinWidthDefault):
+            # TH1::Scale() with "width" option divides the histogram by bin width
+            p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Scale(1, "width"))
 
     ## Stack MC histograms
     #
@@ -2140,10 +2166,10 @@ class PlotDrawer:
     ## Draw and save the plot
     #
     # \param p       plots.PlotBase (or deriving) object
-    # \param xlabel  X axis title
     # \param kwargs  Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
+    # \li\a xlabel  X axis title (None for pick from first histogram)
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
@@ -2154,13 +2180,27 @@ class PlotDrawer:
     # In addition of drawing and saving the plot, handles the X and Y
     # axis titles, and "CMS Preliminary", "sqrt(s)" and luminosity
     # texts.
-    def finish(self, p, xlabel, **kwargs):
-        ylab = self._getValue("ylabel", p, kwargs)
-        if "%" in ylab:
-            ylab = ylab % p.binWidth()
+    def finish(self, p, **kwargs):
+        xlab = self._getValue("xlabel", p, kwargs)
+        if xlab is None:
+            xlab = p.histoMgr.getHistos()[0].getRootHisto().GetXaxis().GetTitle()
+        p.frame.GetXaxis().SetTitle(xlab)
 
-        p.frame.GetXaxis().SetTitle(xlabel)
-        p.frame.GetYaxis().SetTitle(ylab)
+        ylabel = self._getValue("ylabel", p, kwargs)
+        if ylabel is None:
+            ylabel = p.histoMgr.getHistos()[0].getRootHisto().GetYaxis().GetTitle()
+        else:
+            nformats = ylabel.count("%")
+            if nformats == 0:
+                pass
+            elif nformats == 1:
+                ylabel = ylabel % p.binWidth()
+            elif nformats == 2:
+                binWidths = p.binWidths()
+                ylabel = ylabel % (min(binWidths), max(binWidths))
+            else:
+                raise Exception("Got %d '%%' formats in y label ('%s'), only 0-2 are supported" % (nformats, ylabel))
+        p.frame.GetYaxis().SetTitle(ylabel)
 
         customize = self._getValue("customizeBeforeDraw", p, kwargs)
         if customize != None:

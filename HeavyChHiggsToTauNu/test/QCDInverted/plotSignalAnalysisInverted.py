@@ -67,6 +67,8 @@ dataEra = "Run2011AB"
 
 print "dataEra"
 
+sysError = 0.2
+
 def usage():
     print "\n"
     print "### Usage:   plotSignalAnalysisInverted.py <multicrab dir>\n"
@@ -1303,7 +1305,7 @@ def controlPlots(datasets):
     print "bveto_inverted",bveto_inverted.GetEntries()
     print "bveto_baseline ",bveto_baseline.GetEntries()
     invertedQCD.setLabel("BvetoTailKillerClosure")
-    invertedQCD.mtComparison(bveto_inverted, bveto_baseline,"BvetoTailKillerClosure")
+    invertedQCD.mtComparison(bveto_inverted, bveto_baseline,"BvetoTailKillerClosure",sysError=sysError)
     
 # mt inverted-baseline comparison with bveto, closure
     bveto_inverted = hClosureBveto.Clone("hmtvSum")

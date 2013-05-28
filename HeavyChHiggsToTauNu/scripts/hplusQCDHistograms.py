@@ -5,186 +5,224 @@
 ######################################################################
 # System modules
 import sys
-import math
-import array
-import re
-import os
 # ROOT modules
 import ROOT
 from ROOT import gStyle
 # HPlus modules
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 # Script-specific modules
-import QCDHistoHelper
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.QCDHistoHelper as Helper
 
 ######################################################################
-# Define options and declarations
+# User options and global definitions
 ######################################################################
-bBatchMode      = True
-bCustomRange    = False
-myRootFilePath  = "info/QCDMeasurementFactorisedInfo.root" 
 myValidDataEras = ["Run2011A", "Run2011B", "Run2011AB"]
+myTailKillers   = ["ZeroPlus", "LoosePlus", "MediumPlus", "TightPlus"]
+bBatchMode      = True
+bAddLumiText    = True
+sLegStyle       = "P"
+sDrawStyle      = "EP"
+yMinRatio       = 0.0
+yMaxRatio       = 2.0
+yMaxFactor      = 1.5
+yMinLog         = 1E-01
+yMinLogNorm     = 1E-04
+yMaxFactorLog   = 5
+
+myRootFilePath  = "info/QCDMeasurementFactorisedInfo.root" 
 ROOT.gROOT.SetBatch(bBatchMode)
 
 ######################################################################
 # Function declarations
 ######################################################################
 def main():
-    
-    # Get all histos to be plotted from QCDHistoHelper module
-    HistoList = QCDHistoHelper.GetHistoList()
-    
-    # Plot all histos appended to the HistoList in QCDHistoHelper using a user-defined QCD factorisation scheme
-    doHistos(HistoList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", saveNameExtension = "")
-    # doHistos(HistoList, myRootFilePath, QCDscheme = "TauEta", ErrorType = "StatAndSyst", saveNameExtension = "")
-    # doHistos(HistoList, myRootFilePath, QCDscheme = "Nvtx", ErrorType = "StatAndSyst", saveNameExtension = "") 
-    # doHistos(HistoList, myRootFilePath, QCDscheme = "Full", ErrorType = "StatAndSyst", saveNameExtension = "")
+
+    ##################
+    # Mt shapes
+    ##################
+    MtShapesStdSelList = Helper.GetMtShapeHistoNames(sMyLeg="StandardSelections")
+    doHistos(MtShapesStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShape_StdSel", bNormalizeToOne = False)    
+
+    MtShapesLeg1List   = Helper.GetMtShapeHistoNames(sMyLeg="Leg1")
+    doHistos(MtShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShape_Leg1", bNormalizeToOne = False)
+
+    MtShapesLeg2List   = Helper.GetMtShapeHistoNames(sMyLeg="Leg2")
+    doHistos(MtShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MtShape_Leg2", bNormalizeToOne = False)    
+
+    # Closure test
+    doHistosCompare(MtShapesStdSelList + MtShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Mt", bNormalizeToOne=True, bRatio=True, bInvertRatio=False)
+
+    # Closure tests (bin)
+    binList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] #bin 0 = underflow, bin 10 = overflow
+    for index in binList:
+        MtBinShapesStdSelList = Helper.GetMtBinShapeHistoNames(lBinList = [index], sMyLeg="StandardSelections")
+        MtBinShapesLeg2List   = Helper.GetMtBinShapeHistoNames(lBinList = [index], sMyLeg="Leg2")
+        doHistosCompare(MtBinShapesStdSelList + MtBinShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Mt_Bin" + str(index), bNormalizeToOne = True, bRatio=True, bInvertRatio=False)
+
+
+    ##################
+    # MET shapes
+    ##################
+    MetShapesStdSelList  = Helper.GetMetShapeHistoNames(sMyLeg="")
+    doHistos(MetShapesStdSelList, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShape_StdSel", bNormalizeToOne = False)
+
+    #MetShapesLeg1List    = Helper.GetMetShapeHistoNames(sMyLeg="AfterLeg1")
+    #doHistos(MetShapesLeg1List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShape_Leg1", bNormalizeToOne = False)    
+
+    MetShapesLeg2List    = Helper.GetMetShapeHistoNames(sMyLeg="AfterLeg2")
+    doHistos(MetShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "MetShape_Leg2", bNormalizeToOne = False)
+
+    # Closure test
+    doHistosCompare(MetShapesStdSelList + MetShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Met", bNormalizeToOne = True, bRatio=True, bInvertRatio=False)
+
+    # Closure tests (bin)
+    binList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  #bin 0 = underflow, bin 10 = overflow
+    for index in binList:
+        MetBinShapesStdSelList = Helper.GetMetBinShapeHistoNames(lBinList = [index], sMyLeg="")
+        MetBinShapesLeg2List   = Helper.GetMetBinShapeHistoNames(lBinList = [index], sMyLeg="AfterLeg2")
+        doHistosCompare(MetBinShapesStdSelList + MetBinShapesLeg2List, myRootFilePath, QCDscheme = "TauPt", ErrorType = "StatAndSyst", mySaveName = "ClosureTest_Met_Bin" + str(index), bNormalizeToOne = True, bRatio=True, bInvertRatio=False)
+        
 
     return
 
 ######################################################################
-def getDataEra():
-
-    cwd = os.getcwd()
-    myDataEra = None
-    
-    # Check all valid data-eras
-    for era in myValidDataEras:
-        if "_" + era + "_" in cwd:
-            myDataEra = era
-        else:
-            continue
-
-    if myDataEra == None:
-        print "*** ERROR: Invalid data-era selected. Please select one of the following:\n    %s" %(myValidDataEras)
-        sys.exit()
-    else:
-        return myDataEra
-
-######################################################################
-def getLumi(myDataEra):
-
-    # Check if user-defined data-era is allowed
-    if myDataEra == "Run2011A":
-        myLumi            = 2311.191 #(pb)
-    elif myDataEra == "Run2011B":
-        myLumi            = 2739 #(pb)
-    elif myDataEra == "Run2011AB":
-        myLumi            = 5050.191 #(pb)
-    else:
-        print "*** ERROR: Invalid data-era selected. Please select one of the following:\n    %s" %(myValidDataEras)
-        sys.exit()
-
-    return myLumi
-
-######################################################################
-def doHistos(HistoList, myPath, QCDscheme, ErrorType, saveNameExtension):
+def doHistos(HistoList, myPath, QCDscheme, ErrorType, mySaveName, bNormalizeToOne):
                 
-    # Firsly, check that custom-defined data-era is valid and get corresponding integrated luminosity (only used for addind lumi text)
-    myDataEra = getDataEra()
-    myLumi    = getLumi(myDataEra)
+    # Determine the Tail-Killer scenario 
+    myTailKiller = Helper.getTailKillerFromDir(myTailKillers)
 
-    # Define a list of all available factorisation options. 
-    myFactorisationSchemes  = ["Full", "TauPt", "TauEta", "Nvtx"]
-    if QCDscheme not in myFactorisationSchemes:
-        print "*** ERROR: Invalid QCD factorisation scheme selected. Please select one of the following:\n    %s" %(myFactorisationSchemes)
-        sys.exit()
-        
-    myErrorTypes = [ "StatAndSyst", "StatOnly"]
-    if ErrorType not in myErrorTypes:
-        print "*** ERROR: Invalid Error-Type selected. Please select one of the following:\n    %s" %(myFactorisationSchemes)
-        sys.exit()
+    # Check the current working directory name for a valid data-era
+    myDataEra = Helper.getDataEra(myValidDataEras)
 
+    # Get the integrated luminosity of the data-era (only used for addind lumi text)
+    myLumi = Helper.getLumi(myDataEra)
 
-    # Plot all histograms defined in the HistoList
-    print "\n*** Opening ROOT file:\n    \"%s\"" % (myPath)
-    f = ROOT.TFile.Open(myPath)
+    # Check that the user-defined options are valid
+    Helper.checkUserOptions(QCDscheme, ErrorType)
 
-    print "*** There are \"%s\" histograms in the plotting queue (QCDscheme = \"%s\"):" % (len(HistoList), QCDscheme)
+    # Get the ROOT file
+    rootFile = Helper.getRootFile(myPath)
+
+    # Plot all histograms defined in the HistoList    
+    print "*** There are \"%s\" histogram(s) in the plotting queue (QCDscheme = \"%s\" , Tail-Killer = \"%s\"):" % (len(HistoList), QCDscheme, myTailKiller)
     for h in HistoList:
-        folderName = "Contraction_" + QCDscheme
-        histoName  = h.name.replace("*QcdScheme*", QCDscheme).replace("*ErrorType*", ErrorType)
-        # Temporary quick-fix to naming difference
-        if "Shape_" in histoName:
-            histoName = histoName.replace("StatAndSyst", "fullUncert").replace("StatOnly", "statUncert") 
 
-        pathName   = folderName + "/" + histoName
-        histo      = f.Get(pathName)
-        if not isinstance(histo, ROOT.TH1):
-            print "*** ERROR: Histogram \"%s\" is not a ROOT.TH1 instance. Check that its path is correct." %(pathName)
-            sys.exit()
+        pathName, histoName  = Helper.getHistoNameAndPath(QCDscheme, ErrorType, h)
+        histo                = Helper.getHisto(rootFile, pathName)
+        saveName             = Helper.getFullSaveName(myDataEra, myTailKiller, bNormalizeToOne, mySaveName)
 
-        saveName = myDataEra + "_" + histoName + saveNameExtension
-        saveName = saveName.replace("/", "__")
+        # Get histogram attributes as defined in QCDHistoHelper.py
         xLabel   = h.xLabel
         yLabel   = h.yLabel
         xMin     = h.xMin
         xMax     = h.xMax
-        bLogX    = h.bLogX
+        logX     = h.bLogX
         yMin     = h.yMin
         yMax     = h.yMax
-        bLogY    = h.bLogY
+        logY     = h.bLogY
         legendLabel = h.legendLabel
         
-        #print "    Processing histogram with name \"%s\"" % (hName)
-        # Create the plots
-        p = createPlot(histo, myLumi, legendLabel)
-        
-        # Draw the plots
-        if bCustomRange == True:
-            drawPlot = plots.PlotDrawer(log=bLogY, addLuminosityText=True, opts={"ymin": yMin, "ymax": yMax}, optsLog={"ymin": yMin, "ymax": yMax})
-        else:
-            drawPlot = plots.PlotDrawer(addLuminosityText=True)
+        # Create and draw the plots
+        print "    Creating  \"%s\"" % (histoName)
+        p = Helper.createPlot(histo, myLumi, legendLabel, sLegStyle, sDrawStyle)
+
+        if bNormalizeToOne == True:
+            p.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
+            yMinLog == yMinLogNorm
+            saveName = saveName + "_normalizedToOne"
+
+        # Customize the plots
+        drawPlot = Helper.customizePlot(logY, bAddLumiText, False, False, "Ratio", yMin, yMax, yMaxFactor, yMinRatio, yMaxRatio, yMinLog, yMaxFactorLog)
 
         # Save the plots
-        saveName = saveName.replace("Leg1", "MetLeg").replace("Leg2", "TauLeg").replace("leg1", "MetLeg").replace("leg2", "TauLeg")
-        drawPlot(p, saveName, xlabel=xLabel, ylabel=yLabel, customizeBeforeDraw=setLabelOption)
-        print "    \"%s\"" % (saveName)
+        saveName = saveName.replace("Leg1", "MetLeg").replace("Leg2", "TauLeg").replace("leg1", "MetLeg").replace("leg2", "TauLeg").replace("After","")
+        drawPlot(p, saveName, xlabel=xLabel, ylabel=yLabel, customizeBeforeDraw=Helper.setLabelOption)
+        print "*** Saved \"%s\"\n" % (saveName)
 
     return
+
 ######################################################################
-def setLabelOption(p):
-   
-    # See: http://root.cern.ch/root/htmldoc/TAxis.html#TAxis:LabelsOption
-    if p.getFrame().GetXaxis().GetLabels() == None:
-        return
-    else:
-        p.getFrame().GetXaxis().LabelsOption("u") #"h", "v" "d" "u"
-        p.getFrame().GetXaxis().SetLabelSize(15.0) #"h", "v" "d" "u"
+def doHistosCompare(HistoList, myPath, QCDscheme, ErrorType, mySaveName, bNormalizeToOne, bRatio, bInvertRatio):
+                
+    # Determine the Tail-Killer scenario 
+    myTailKiller = Helper.getTailKillerFromDir(myTailKillers)
+
+    # Check the current working directory name for a valid data-era
+    myDataEra = Helper.getDataEra(myValidDataEras)
+
+    # Get the integrated luminosity of the data-era (only used for addind lumi text)
+    myLumi = Helper.getLumi(myDataEra)
+
+    # Check that the user-defined options are valid
+    Helper.checkUserOptions(QCDscheme, ErrorType)
+
+    # Get the ROOT file
+    rootFile = Helper.getRootFile(myPath)
+
+    # Plot all histograms defined in the HistoList    
+    print "*** There are \"%s\" histogram(s) in the plotting queue (QCDscheme = \"%s\" , Tail-Killer = \"%s\"):" % (len(HistoList), QCDscheme, myTailKiller)
+    counter = 0
+    for h in HistoList:
+
+        pathName, histoName  = Helper.getHistoNameAndPath(QCDscheme, ErrorType, h)
+        histo                = Helper.getHisto(rootFile, pathName)
+        saveName             = Helper.getFullSaveName(myDataEra, myTailKiller, bNormalizeToOne, mySaveName)
+
+        # Get histogram attributes as defined in QCDHistoHelper.py
+        xLabel   = h.xLabel
+        yLabel   = h.yLabel
+        xMin     = h.xMin
+        xMax     = h.xMax
+        logX     = h.bLogX
+        yMin     = h.yMin
+        yMax     = h.yMax
+        logY     = h.bLogY
+        legendLabel = h.legendLabel
+        legendHeader = h.legendHeader
         
-    return
+        # Create and draw the plots
+        if counter == 0:
+            print "    Creating  \"%s\"" % (histoName)
+            p = Helper.createPlot(histo, myLumi, legendLabel, sLegStyle, sDrawStyle)
+            h = histograms.Histo(Helper.setHistoStyle(histo, counter), legendLabel, sLegStyle, sDrawStyle)
+        else:
+            if len(HistoList) <= 2:
+                h = histograms.Histo(Helper.setHistoStyle(histo, counter), legendLabel, "f", "HIST")
+            else:
+                h = histograms.Histo(Helper.setHistoStyle(histo, counter), legendLabel, sLegStyle, sDrawStyle)
+            histograms.Histo(h, histoName, sLegStyle, sDrawStyle)
+            print "    Appending \"%s\"" % (histoName)
+            p.histoMgr.appendHisto(h)
 
-######################################################################
-def createPlot(histo, myLumi, legendLabel, **kwargs):
+        if bNormalizeToOne == True:
+            p.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
+            yMinLog = yMinLogNorm
 
-    # Set the TDR style
-    style = tdrstyle.TDRStyle()
+        # Customize the plots
+        drawPlot = Helper.customizePlot(logY, bAddLumiText, bRatio, bInvertRatio, "Ratio", yMin, yMax, yMaxFactor, yMinRatio, yMaxRatio, yMinLog, yMaxFactorLog)            
 
-    if isinstance(histo, ROOT.TH1):
-        defaults = {"legendStyle": "P", "drawStyle": "EP"}
-        defaults.update(kwargs)
-        histo.GetZaxis().SetTitle("")
-        p = plots.PlotBase([histograms.Histo(histo, legendLabel, **defaults)])
-        p.setLuminosity(myLumi)
-        return p
+        # Increment counter
+        counter = counter + 1
+
+    # Save the plots
+    if legendHeader is not None:
+        drawPlot(p, saveName, xlabel=xLabel, ylabel=yLabel, customizeBeforeDraw=lambda plot: plot.legend.SetHeader(legendHeader))
     else:
-        print "*** ERROR: Histogram \"%s\" is not a valid instance of a ROOT.TH1" % (histo)
-        sys.exit()
+        drawPlot(p, saveName, xlabel=xLabel, ylabel=yLabel, customizeBeforeDraw=Helper.setLabelOption)
+    print "*** Saved canvas as \"%s\"\n" % (saveName)
+
+    return 
 
 ######################################################################
 if __name__ == "__main__":
 
-    # Call the main function
     main()
 
-    # Keep session alive (otherwise canvases close automatically)
     if not bBatchMode:
         raw_input("*** DONE! Press \"ENTER\" key exit session: ")
 

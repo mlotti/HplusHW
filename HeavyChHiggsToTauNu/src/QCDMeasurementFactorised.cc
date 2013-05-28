@@ -512,7 +512,7 @@ namespace HPlus {
 
 
 //------ Scale factor for MET trigger
-    const METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, mySelectedTau, jetData.getAllJets());
+    const METSelection::Data metData = fMETSelection.analyzeWithPossiblyIsolatedTaus(iEvent, iSetup, mySelectedTau, jetData.getAllJets());
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metData.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     fTree.setMETTriggerWeight(metTriggerWeight.getEventWeight(), metTriggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fMETTriggerScaleFactorCounter);
@@ -522,7 +522,7 @@ namespace HPlus {
 //------ Standard selections are done, fill tree and quit if user asked for it
     if (fTree.isActive()) {
       doTreeFilling(iEvent, iSetup, pvData, mySelectedTau, electronData, muonData, jetData, metData);
-      return true;
+      //return true;
     }
 
 
@@ -601,12 +601,12 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronData, const MuonSelection::Data& muonData, const JetSelection::Data& jetData, const METSelection::Data& metData) {
     // Obtain btagging data
-    const BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    const BTagging::Data btagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     // Obtain QCD tail killer
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
     // const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET()); //testing
     // Obtain alphaT
-    const EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(selectedTau), jetData.getSelectedJetsIncludingTau());
+    const EvtTopology::Data evtTopologyData = fEvtTopology.silentAnalyze(iEvent, iSetup, *(selectedTau), jetData.getSelectedJetsIncludingTau());
 
     // FIXME: Add filling of tree for QCD tail killer
     // FIXME: Add filling of weights (wjets ...)
@@ -630,10 +630,10 @@ namespace HPlus {
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
     // Top reconstruction in different versions
     if (selectedTau.isNonnull() && btagData.passedEvent()) {
-      //const TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-      //const BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
-      const TopChiSelection::Data topChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-      //const TopWithBSelection::Data topWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), bjetSelectionData.getBjetTopSide());
+      //const TopSelection::Data topSelectionData = fTopSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+      //const BjetSelection::Data bjetSelectionData = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+      const TopChiSelection::Data topChiSelectionData = fTopChiSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+      //const TopWithBSelection::Data topWithBSelectionData = fTopWithBSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), bjetSelectionData.getBjetTopSide());
       fTree.setTop(topChiSelectionData.getTopP4());
     }
     // Sphericity, Aplanarity, Planarity, alphaT
@@ -658,7 +658,7 @@ namespace HPlus {
     fTree.setNonIsoLeptons(muonData.getNonIsolatedMuons(), electronData.getNonIsolatedElectrons());
     if (selectedTau.isNonnull() && btagData.passedEvent()) {
       // FullH+ mass
-      FullHiggsMassCalculator::Data FullHiggsMassDataTmp = fFullHiggsMassCalculator.analyze(iEvent, iSetup, selectedTau, btagData, metData);
+      FullHiggsMassCalculator::Data FullHiggsMassDataTmp = fFullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, selectedTau, btagData, metData);
       fTree.setHplusMassDiscriminant(FullHiggsMassDataTmp.getDiscriminant());
       fTree.setHplusMassHiggsMass(FullHiggsMassDataTmp.getHiggsMass());
       fTree.setHplusMassTopMass(FullHiggsMassDataTmp.getTopMass());
@@ -724,6 +724,7 @@ namespace HPlus {
 
   QCDMeasurementFactorised::QCDFactorisedVariation::QCDFactorisedVariation(edm::Service< TFileService >& fs, QCDFactorisedHistogramHandler* histoHandler, EventCounter& eventCounter, CommonPlots& commonPlots, QCDFactorisedVariationType methodType, std::string prefix)
   : fMethodType(methodType),
+    fAfterNjetsCounter(eventCounter.addSubCounter(prefix,"After Njets")),
     fAfterStandardSelectionsCounter(eventCounter.addSubCounter(prefix,"After std. selections")),
     fAfterLeg1Counter(eventCounter.addSubCounter(prefix,"After leg1 selections")),
     fAfterLeg2Counter(eventCounter.addSubCounter(prefix,"After leg2 selections")),
@@ -759,6 +760,7 @@ namespace HPlus {
     // Data-driven control histograms
     fHistoHandler->createShapeHistogram(myDir, hCtrlRtau, "CtrlRtau", "Rtau", 60, 0, 1.2);
     fHistoHandler->createShapeHistogram(myDir, hCtrlNjets, "CtrlNjets", "N_{jets}", 20, 0, 20.);
+    fHistoHandler->createShapeHistogram(myDir, hCtrlNjetsAfterCollinearCuts, "CtrlNjetsAfterCollinearCuts", "N_{jets}", 20, 0, 20.);
     for (int i = 0; i < 4; ++i) {
       hCtrlQCDTailKillerCollinear.push_back(0);
       std::stringstream sName;
@@ -767,7 +769,7 @@ namespace HPlus {
       sTitle << "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{" << i << "},MET))^{2}}, ^{o};N_{events}";
       fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerCollinear[i], sName.str(), sTitle.str(), 52, 0., 260.);
     }
-    fHistoHandler->createShapeHistogram(myDir, hCtrlMET, "CtrlMET", "E_{T}^{miss}, GeV", 100, 3, 500.);
+    fHistoHandler->createShapeHistogram(myDir, hCtrlMET, "CtrlMET", "E_{T}^{miss}, GeV", 100, 0, 500.);
     fHistoHandler->createShapeHistogram(myDir, hCtrlNbjets, "CtrlNbjets", "N_{b jets}", 20, 0, 20.);
     for (int i = 0; i < 4; ++i) {
       hCtrlQCDTailKillerBackToBack.push_back(0);
@@ -799,6 +801,8 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doTraditionalSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // Traditional method
+    increment(fAfterNjetsCounter);
+    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
 
     // Apply collinear cut
     for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
@@ -809,6 +813,7 @@ namespace HPlus {
     }
 
     // Standard selections have been done, fill histograms
+    fHistoHandler->fillNeventHistogram(hCtrlNjetsAfterCollinearCuts, jetData.getHadronicJetCount());
     fCommonPlotsAfterStandardSelections->fill();
     double myMetValue = metData.getSelectedMET()->et();
     increment(fAfterStandardSelectionsCounter);
@@ -816,7 +821,6 @@ namespace HPlus {
     fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
     fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
     fHistoHandler->fillShapeHistogram(hCtrlRtau, tauSelection.getRtauOfTauObject(selectedTau));
-    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
 
     // Leg 2 (tau ID)
     bool myLeg2PassedStatus = tauSelection.getPassesIsolationStatusOfTauObject(selectedTau) &&
@@ -870,6 +874,8 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // ABCD method with MET and tau isolation as variables
+    increment(fAfterNjetsCounter);
+    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
 
     // Apply collinear cut
     for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
@@ -887,7 +893,8 @@ namespace HPlus {
     double myMetValue = metData.getSelectedMET()->et();
 
     fHistoHandler->fillShapeHistogram(hCtrlRtau, tauSelection.getRtauOfTauObject(selectedTau));
-    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
+    fHistoHandler->fillNeventHistogram(hCtrlNjetsAfterCollinearCuts, jetData.getHadronicJetCount());
+
     // For cell A, negate the selections
     if (!myLeg1PassedStatus && !myLeg2PassedStatus) {
       increment(fAfterStandardSelectionsCounter);
@@ -949,6 +956,7 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doDoubleABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // ABCD method inside MET leg (for double ABCD)
+    increment(fAfterNjetsCounter);
 
     // Apply collinear cut
     for (int i = 0; i < 4; ++i) {

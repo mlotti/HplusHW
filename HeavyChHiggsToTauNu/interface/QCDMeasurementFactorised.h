@@ -123,6 +123,7 @@ namespace HPlus {
 
     private:
       QCDFactorisedVariationType fMethodType;
+      Count fAfterNjetsCounter;
       Count fAfterStandardSelectionsCounter;
       Count fAfterLeg1Counter;
       Count fAfterLeg2Counter;
@@ -155,6 +156,7 @@ namespace HPlus {
       WrappedUnfoldedFactorisationHisto* hCtrlRtau;
       std::vector<WrappedUnfoldedFactorisationHisto*> hCtrlQCDTailKillerCollinear;
       WrappedUnfoldedFactorisationHisto* hCtrlNjets;
+      WrappedUnfoldedFactorisationHisto* hCtrlNjetsAfterCollinearCuts;
       WrappedUnfoldedFactorisationHisto* hCtrlMET;
       WrappedUnfoldedFactorisationHisto* hCtrlNbjets;
       std::vector<WrappedUnfoldedFactorisationHisto*> hCtrlQCDTailKillerBackToBack;
