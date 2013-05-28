@@ -135,3 +135,19 @@ def th2Ymax(th2):
     if th2 is None:
         return None
     return th2.GetYaxis().GetBinUpEdge(th2.GetYaxis().GetLast())
+
+## Copy (some) style attributes from one ROOT object to another
+#
+# \param src  Source object (copy attributes from)
+# \param dst  Destination object (copy attributes to)
+def copyStyle(src, dst):
+    properties = []
+    if hasattr(src, "GetLineColor") and hasattr(dst, "SetLineColor"):
+        properties.extend(["LineColor", "LineStyle", "LineWidth"])
+    if hasattr(src, "GetFillColor") and hasattr(dst, "SetFillColor"):
+        properties.extend(["FillColor", "FillStyle"])
+    if hasattr(src, "GetMarkerColor") and hasattr(dst, "SetMarkerColor"):
+        properties.extend(["MarkerColor", "MarkerSize", "MarkerStyle"])
+
+    for prop in properties:
+        getattr(dst, "Set"+prop)(getattr(src, "Get"+prop)())
