@@ -20,7 +20,7 @@ namespace HPlus {
     hPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_phi", "jet_phi", 72, -3.14159, 3.41459);
     hNeutralEmEnergyFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_NeutralEmEnergyFraction", "jet_NeutralEmEnergyFraction", 100, 0., 1.);
     hNeutralMultiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_EmEnergyFraction", "jet_EmEnergyFraction", 100, 0., 1.);
-    hNeutralHadronEnergyFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_NeutralHadronFraction", "jet_NeutralHadronEnergyFraction", 100, 0., 1.);
+    hNeutralHadronEnergyFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_NeutralHadronEnergyFraction", "jet_NeutralHadronEnergyFraction", 100, 0., 1.);
     hNeutralHadronMultiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
     hPhotonEnergyFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_PhotonEnergyFraction", "jet_PhotonEnergyFraction", 100, 0., 1.);
     hPhotonMultiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_PhotonMultiplicity", "jet_PhotonMultiplicity", 100, 0., 100.);
@@ -30,11 +30,11 @@ namespace HPlus {
     hChargedEmEnergyFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_ChargedEmEnergyFraction", "jet_ChargedEmEnergyFraction", 100, 0., 1.);
     hChargedMultiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_ChargedMultiplicity", "jet_ChargedMultiplicity", 100, 0., 100.);
     hPartonFlavour = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_PartonFlavour", "jet_PartonFlavour", 30, 0., 30.);
-    hJECFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_JECFactor", "jet_JECFactor", 100, 0., 10.);
+    hJECFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_JECFactor", "jet_JECFactor", 200, 0., 2.);
     hN60 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_N60", "jet_MultiplicityCarrying60PercentOfEnergy", 100, 0., 100.);
     hTowersArea = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_TowersArea", "jet_TowersArea", 100, 0., 10.);
-    hJetCharge = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_JECFactor", "jet_JECFactor", 10, -5., 5.);
-    hPtDiffToGenJet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
+    hJetCharge = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_charge", "jet_charge", 10, -5., 5.);
+    hPtDiffToGenJet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 150, 0., 3.);
     if (bEnableExtraHistograms) {
       hDataDrivenLeptonOverlaps = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "Extra_DataDrivenLeptonOverlaps", "Extra_DataDrivenLeptonOverlaps", 5, 0., 5.);
       if (hDataDrivenLeptonOverlaps->isActive()) {
