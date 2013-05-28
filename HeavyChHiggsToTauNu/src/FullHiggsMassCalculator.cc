@@ -128,14 +128,7 @@ namespace HPlus {
     selectionTauNuDeltaEtaMaxCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", 
 									 "TauNuDeltaEtaMax solution closest")),
     selectionTauNuDeltaEtaMinCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", 
-									 "TauNuDeltaEtaMin solution closest")),
-    dummy1(eventCounter.addSubCounter("DUMMIES", "dummy1")),
-    dummy2(eventCounter.addSubCounter("DUMMIES", "dummy2")),
-    dummy3(eventCounter.addSubCounter("DUMMIES", "dummy3")),
-    dummy4(eventCounter.addSubCounter("DUMMIES", "dummy4")),
-    dummy5(eventCounter.addSubCounter("DUMMIES", "dummy5")),
-    dummy6(eventCounter.addSubCounter("DUMMIES", "dummy6")),
-    dummy7(eventCounter.addSubCounter("DUMMIES", "dummy7"))
+									 "TauNuDeltaEtaMin solution closest"))
   {
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
@@ -884,7 +877,6 @@ namespace HPlus {
 	if (output.bPassedEvent) hHiggsMassNegativeDiscriminant->Fill(output.fHiggsMassSolutionSelected);
       }
       // THESE HISTOGRAMS ARE FILLED EVEN IF THE EVENT DOES NOT PASS --->
-      increment(dummy1);
       hTopMassSolution->Fill(output.fTopMassSolutionSelected);
       h2TopMassVsInvariantMass->Fill(output.fTopMassSolutionSelected, output.fHiggsMassSolutionSelected);
       if (!iEvent.isRealData()) {
@@ -893,7 +885,6 @@ namespace HPlus {
 	if (!output.bPassedEvent) hNeutrinoNumberInRejectedEvents->Fill(getNumberOfNeutrinosInEvent(iEvent));
       }
       if (!output.bPassedEvent) break;
-      increment(dummy2);
       // THESE HISTOGRAMS ARE FILLED ONLY IF THE EVENT HAS PASSED --->
       hHiggsMass->Fill(output.fHiggsMassSolutionSelected);
       if (bPrintDebugOutput) std::cout << "Solution put in histogram HiggsMass: " << output.fHiggsMassSolutionSelected << std::endl;
@@ -915,7 +906,6 @@ namespace HPlus {
 	hHiggsMass_worseSolution->Fill(output.fHiggsMassSolution1);
       }
       if (output.fDiscriminant > 0) {
-	increment(dummy3);
 	if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionGreater, output)) // This works for both signal and bkg events!
 	  increment(selectionGreaterCorrect_SubCount);
 	if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionSmaller, output))
