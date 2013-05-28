@@ -547,7 +547,9 @@ namespace HPlus {
     double myFullMass = -1.0;
     if (btagData.passedEvent()) {
       const FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, mySelectedTau, btagData, metData);
-      myFullMass = FullHiggsMassData.getHiggsMass();
+      if (FullHiggsMassData.passedEvent()) {
+        myFullMass = FullHiggsMassData.getHiggsMass();
+      }
     }
     // Increment counters
     increment(fStandardSelectionsCounter);
@@ -794,7 +796,7 @@ namespace HPlus {
     increment(fAfterStandardSelectionsCounter);
     fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
     fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-    fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
+    if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
     fHistoHandler->fillShapeHistogram(hCtrlRtau, tauSelection.getRtauOfTauObject(selectedTau));
 
     // Leg 2 (tau ID)
@@ -806,7 +808,7 @@ namespace HPlus {
       fCommonPlotsAfterLeg2->fill();
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
     }
 
@@ -834,7 +836,7 @@ namespace HPlus {
     increment(fAfterLeg1Counter);
     fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
     fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-    fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
+    if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
     fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
     fCommonPlotsAfterLeg1->fill();
 
@@ -843,7 +845,7 @@ namespace HPlus {
       increment(fAfterLeg1AndLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
     }
   }
 
@@ -875,7 +877,7 @@ namespace HPlus {
       increment(fAfterStandardSelectionsCounter);
       fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
       fCommonPlotsAfterStandardSelections->fill();
     }
 
@@ -884,7 +886,7 @@ namespace HPlus {
       increment(fAfterLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
       fCommonPlotsAfterLeg2->fill();
     }
@@ -915,7 +917,7 @@ namespace HPlus {
       increment(fAfterLeg1Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
       fCommonPlotsAfterLeg1->fill();
     }
@@ -925,7 +927,7 @@ namespace HPlus {
       increment(fAfterLeg1AndLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
     }
   }
 
@@ -957,7 +959,7 @@ namespace HPlus {
       increment(fAfterStandardSelectionsCounter);
       fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
       fCommonPlotsAfterStandardSelections->fill();
     }
 
@@ -966,7 +968,7 @@ namespace HPlus {
       increment(fAfterLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
       fCommonPlotsAfterLeg2->fill();
     }
@@ -976,7 +978,7 @@ namespace HPlus {
       increment(fAfterLeg1Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
       fCommonPlotsAfterLeg1->fill();
     }
@@ -986,7 +988,7 @@ namespace HPlus {
       increment(fAfterLeg1AndLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
     }
   }
 
