@@ -151,3 +151,18 @@ def copyStyle(src, dst):
 
     for prop in properties:
         getattr(dst, "Set"+prop)(getattr(src, "Get"+prop)())
+
+## Helper for adding a list to a dictionary
+#
+# \param d     Dictionary
+# \param name  Key to dictionary
+# \param item  Item to add to the list
+#
+# For dictionaries which have lists as items, this function creates
+# the list with the \a item if \a name doesn't exist yet, or appends
+# if already exists.
+def addToDictList(d, name, item):
+    if name in d:
+        d[name].append(item)
+    else:
+        d[name] = [item]

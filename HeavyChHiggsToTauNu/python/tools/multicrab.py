@@ -157,9 +157,9 @@ import ConfigParser
 import OrderedDict
 
 import multicrabWorkflows
-import multicrabWorkflowsTools
 import certifiedLumi
 import git
+import aux
 
 ## Default Storage Element (SE) black list for non-stageout jobs
 defaultSeBlacklist_noStageout = [
@@ -537,7 +537,7 @@ def crabOutputToJobs(task, output):
         m = status_re.search(line)
         if m:
             job = CrabJob(task, m)
-            multicrabWorkflowsTools._addToDictList(jobs, job.status, job)
+            aux.addToDictList(jobs, job.status, job)
             njobs += 1
             continue
         m = total_re.search(line)
