@@ -273,8 +273,12 @@ _legendLabels = {
     "Tbar_s-channel":        "Single #bar{t} (s channel)",
 
     # Ratio uncertainties
-    "BackgroundStatError":   "Stat. unc.",
+    "BackgroundStatError":     "Stat. unc.",
+    "BackgroundSystError":     "Syst. unc.",
     "BackgroundStatSystError": "Stat.#oplussyst. unc.",
+    "MCStatError": "Sim. stat. unc.",
+    "MCSystError": "Sim. syst. unc.",
+    "MCStatSystError": "Sim. stat.#oplussyst. unc.",
 }
 
 ## Map the logical dataset names to plot styles
@@ -331,8 +335,9 @@ _plotStyles = {
     "Diboson":               styles.dibStyle,
 
     # Ratio stuff
-    "Ratio":                 styles.dataStyle,
-    "BackgroundStatError":   styles.errorRatioStatStyle,
+    "Ratio":                   styles.dataStyle,
+    "BackgroundStatError":     styles.errorRatioStatStyle,
+    "BackgroundSystError":     styles.errorRatioSystStyle,
     "BackgroundStatSystError": styles.errorRatioSystStyle,
 }
 
@@ -567,11 +572,18 @@ def _createRatioHistos(histo1, histo2, ytitle, ratioType=None):
 # \param ytitle  Y axis title of the final ratio histogram/graph
 #
 # \return TH1 or TGraphAsymmErrors of histo1/histo2
+#
+# In case of asymmetric uncertainties, the uncertainties are added in
+# quadrature for both sides separately (a rather crude approximation).
 def _createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=False):
     if isinstance(histo1, ROOT.TH1) and isinstance(histo2, ROOT.TH1):
         ratio = histo1.Clone()
         ratio.SetDirectory(0)
         ratio.Divide(histo2)
+        if histograms.uncertaintyMode.equal(histograms.Uncertainty.SystOnly):
+            for i in xrange(0, ratio.GetNbinsX()+2):
+                ratio.SetBinError(i, 0)
+
         _plotStyles["Ratio"].apply(ratio)
         ratio.GetYaxis().SetTitle(ytitle)
 
@@ -593,10 +605,13 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=False):
             xvalues.append(histo1.GetX()[i])
             yvalue = histo1.GetY()[i] / yval
             yvalues.append(yvalue)
-            err1 = max(histo1.GetErrorYhigh(i), histo1.GetErrorYlow(i))
-            err2 = max(histo2.GetErrorYhigh(i), histo2.GetErrorYlow(i))
-            yerrs.append( yvalue * math.sqrt( _divideOrZero(err1, histo1.GetY()[i])**2 +
-                                              _divideOrZero(err2, histo2.GetY()[i])**2 ) )
+            if histograms.uncertaintyMode.equal(histograms.Uncertainty.SystOnly):
+                yerrs.append(0)
+            else:
+                err1 = max(histo1.GetErrorYhigh(i), histo1.GetErrorYlow(i))
+                err2 = max(histo2.GetErrorYhigh(i), histo2.GetErrorYlow(i))
+                yerrs.append( yvalue * math.sqrt( _divideOrZero(err1, histo1.GetY()[i])**2 +
+                                                  _divideOrZero(err2, histo2.GetY()[i])**2 ) )
 
         if len(xvalues) > 0:
             gr = ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues), array.array("d", yvalues),
@@ -608,17 +623,19 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=False):
         gr.GetYaxis().SetTitle(ytitle)
 
         if returnHisto:
-            return [_createHisto(ratio, drawStyle="EP", legendLabel=None)]
+            return [_createHisto(ratio, drawStyle="EPZ", legendLabel=None)]
         else:
             return gr
     elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
-        if not (histo1.hasSystematicUncertainties() or histo2.hasSystematicUncertainties()):
+        if histograms.uncertaintyMode.equal(histograms.Uncertainty.StatOnly) or \
+                (not (histo1.hasSystematicUncertainties() or histo2.hasSystematicUncertainties())):
             return _createRatioErrorPropagation(histo1.getRootHisto(), histo2.getRootHisto(), ytitle, returnHisto)
 
         ratio = _createRatioErrorPropagation(histo1.getRootHisto(), histo2.getRootHisto(), ytitle)
 
-        unc1 = histo1.getSystematicUncertaintyGraph(addStatistical=True)
-        unc2 = histo2.getSystematicUncertaintyGraph(addStatistical=True)
+        addStat = histograms.uncertaintyMode.addStatToSyst()
+        unc1 = histo1.getSystematicUncertaintyGraph(addStatistical=addStat)
+        unc2 = histo2.getSystematicUncertaintyGraph(addStatistical=addStat)
 
         for i in xrange(0, unc1.GetN()):
             yval1 = unc1.GetY()[i]
@@ -642,12 +659,18 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=False):
         ratioSyst.GetYaxis().SetTitle(ytitle)
 
         if returnHisto:
-            return [
-                _createHisto(ratio, drawStyle="EP", legendLabel=None),
-                _createHisto(ratioSyst, drawStyle="[]", legendLabel=None),
-                ]
+            ret = []
+            systStyle = "EPZ"
+            if histograms.uncertaintyMode.showStatOnly():
+                ret.append(_createHisto(ratio, drawStyle="EPZ", legendLabel=None))
+                systStyle = "[]"
+            ret.append(_createHisto(ratioSyst, drawStyle=systStyle, legendLabel=None))
+            return ret
         else:
-            return [ratio, ratioSyst]
+            if addRatioStat:
+                return [ratio, ratioSyst]
+            else:
+                return ratioSyst
     else:
         raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
 
@@ -702,6 +725,9 @@ def _graphRemoveNoncommonPoints(graph1, graph2):
 # committee).
 def _createRatioBinomial(histo1, histo2, ytitle):
     if isinstance(histo1, ROOT.TH1) and isinstance(histo2, ROOT.TH1):
+        if histograms.uncertaintyNode != histograms.Uncertainty.StatOnly:
+            print >>sys.stderr, "Warning: uncertainty mode is not 'StatOnly' (but %s). Nevertheless, the binomial uncertainty is calculated incorporating the uncertainty from the number of events in the input histograms" % (histograms.uncertaintyMode.getName())
+
         eff = ROOT.TGraphAsymmErrors(rootHisto1, rootHisto2)
         styles.getDataStyle().apply(eff)
         eff.GetYaxis().SetTitle(ytitle)
@@ -744,10 +770,11 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         _plotStyles["Ratio"].apply(ratio)
         _plotStyles[ratioErr.GetName()].apply(ratioErr)
 
-        ret.extend([
-                _createHisto(ratio, drawStyle="EP", legendLabel=None),
-                _createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"),
-                ])
+
+        ret.append(_createHisto(ratio, drawStyle="EP", legendLabel=None))
+        if histograms.uncertaintyMode.showStatOnly():
+            ret.append(_createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"))
+        return ret
     elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
         xvalues1 = []
         yvalues1 = []
@@ -817,22 +844,20 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         _plotStyles["Ratio"].apply(ratio)
         _plotStyles[ratioErr.GetName()].apply(ratioErr)
 
-        ret.extend([
-                _createHisto(ratio, drawStyle="EP", legendLabel=None),
-                _createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"),
-                ])
-
-        return gr
+        ret.append(_createHisto(ratio, drawStyle="EP", legendLabel=None))
+        if histograms.uncertaintyMode.showStatOnly():
+            ret.append(_createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"))
+        return ret
     elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
         h1 = histo1.getRootHisto()
         h2 = histo2.getRootHisto()
 
-        tmp = _createRatioHistosErrorScale(h1, h2, ytitle)
-        ratio = tmp[0]
-        ratioStat = tmp[1]
+        ret.extend(_createRatioHistosErrorScale(h1, h2, ytitle))
+        if histograms.uncertaintyMode.equal(histograms.Uncertainty.StatOnly):
+            return ret
 
         # Get new TGraphAsymmErrors for stat+syst, then scale it
-        ratioSyst = histo2.getSystematicUncertaintyGraph(addStatistical=True)
+        ratioSyst = histo2.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
         removes = []
         for i in xrange(0, ratioSyst.GetN()):
             yval = ratioSyst.GetY()[i]
@@ -848,18 +873,16 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
             ratioSyst.RemovePoint(i)        
 
         ratioSyst.GetYaxis().SetTitle(ytitle)
-        ratioSyst.SetName("BackgroundStatSystError")
-        _plotStyles[ratioSyst.GetName()].apply(ratioSyst)
+        name = "BackgroundStatSystError"
+        ratioSyst.SetName(name)
+        if not histograms.uncertaintyMode.addStatToSyst():
+            name = "BackgroundSystError"
+        _plotStyles[name].apply(ratioSyst)
 
-        ret.extend([
-                ratio,
-                ratioStat,
-                _createHisto(ratioSyst, drawStyle="2", legendLabel=_legendLabels[ratioSyst.GetName()], legendStyle="F"),
-                ])
+        ret.append(_createHisto(ratioSyst, drawStyle="2", legendLabel=_legendLabels[name], legendStyle="F"))
+        return ret
     else:
         raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
-
-    return ret
 
 def _divideOrZero(numerator, denominator):
     if denominator == 0:

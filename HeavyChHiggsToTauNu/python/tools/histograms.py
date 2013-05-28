@@ -33,6 +33,47 @@ cmsText = {
     CMSMode.SIMULATION : "CMS Simulation"
     }
 
+## Global uncertainty mode
+#
+# Python treats classes as singletons, slitghly more safe than
+# hand-made enumeration
+class Uncertainty:
+    ## Statistical uncertainties only
+    class StatOnly:
+        pass
+    ## Systematic uncertainties only
+    class SystOnly:
+        pass
+    ## Stat+syst uncertainty only
+    class StatPlusSyst:
+        pass
+    # Stat and stat+syst uncertainties
+    class StatAndSyst:
+        pass
+
+    def __init__(self, mode=StatAndSyst):
+        self._mode = mode
+
+    def set(self, mode):
+        self._mode = mode
+
+    def get(self):
+        return self._mode
+
+    def getName(self):
+        return self._mode.__name__
+
+    def equal(self, mode):
+        return self._mode == mode
+
+    def showStatOnly(self):
+        return not (self.equal(self.SystOnly) or self.equal(self.StatPlusSyst))
+
+    def addStatToSyst(self):
+        return not self.equal(self.SystOnly)
+## Global uncertainty mode
+uncertaintyMode = Uncertainty()
+
 ## Default energy text
 energyText = "7 TeV"
 
