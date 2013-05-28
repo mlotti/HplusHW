@@ -183,7 +183,7 @@ namespace HPlus {
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
-    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper),
+    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper, ""),
     // Non-QCD Type II related
     fNonQCDTypeIIGroup(eventCounter),
     fAllTausCounterGroup(eventCounter, "All"),
@@ -765,7 +765,7 @@ namespace HPlus {
     if(!metData.passedEvent()) return false;
     increment(fBaselineMetCounter);
     size_t nVertices = pvData.getNumberOfAllVertices();
-    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);	      
+    fMETPhiOscillationCorrection.analyze(iEvent, nVertices, metData);	      
    
        //------ mT after jets and met in bins
     hMTBaselineTauIdNoBtagging->Fill(selectedTau->pt() ,transverseMass );	
@@ -1015,7 +1015,7 @@ namespace HPlus {
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     size_t nVertices = pvData.getNumberOfAllVertices();
-    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);
+    fMETPhiOscillationCorrection.analyze(iEvent, nVertices, metData);
 
     //hSelectionFlow->Fill(kQCDOrderMET);
     hSelectedTauEtMetCut->Fill(selectedTau->pt());

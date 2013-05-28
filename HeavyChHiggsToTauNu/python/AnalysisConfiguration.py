@@ -378,6 +378,7 @@ class ConfigBuilder:
         self._printModule(analysisModules[0])
 
         # Construct normal path
+        analysisNamesForTailKillerScenarios = analysisNames
         if not self.doOptimisation:
             for module, name in zip(analysisModules, analysisNames):
                 setattr(process, name, module)
@@ -399,10 +400,11 @@ class ConfigBuilder:
             for module, name in zip(analysisModules, analysisNames):
                 names = self.optimisationScheme.generateVariations(process, additionalCounters, process.commonSequence, module, name)
                 self._accumulateAnalyzers("Optimisation", names)
+                analysisNamesForTailKillerScenarios = names
                 analysisNamesForSystematics.extend(names)
 
-        # QCD tail killer scenarios
-        analysisNamesForSystematics.extend(self._buildQCDTailKillerScenarios(process, analysisModules, analysisNames))
+        # QCD tail killer scenarios (do them also for optimisation variations)
+        analysisNamesForSystematics.extend(self._buildQCDTailKillerScenarios(process, analysisNamesForTailKillerScenarios))
 
         # Invariant mass reconstruction scenarios
         analysisNamesForSystematics.extend(self._buildInvariantMassReconstructionScenarios(process, analysisModules, analysisNames))
@@ -638,9 +640,8 @@ class ConfigBuilder:
     ## Build array of analyzers to scan various QCD tail killer scenarios
     #
     # \param process          cms.Process object
-    # \param analysisModules  List of analysis modules to be used as prototypes
     # \param analysisNames    List of analysis module names
-    def _buildQCDTailKillerScenarios(self, process, analysisModules, analysisNames):
+    def _buildQCDTailKillerScenarios(self, process, analysisNames):
         def createQCDTailKillerModule(process, modulePrefix, mod, names, modules):
             modName = name+"Opt"+modulePrefix
             if "Opt" in name:
@@ -657,7 +658,8 @@ class ConfigBuilder:
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import QCDTailKillerBin
         names = []
         modules = []
-        for module, name in zip(analysisModules, analysisNames):
+        for name in analysisNames:
+            module = getattr(process, name)
             # Zero plus scenario
             mod = module.clone()
             mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
@@ -723,8 +725,6 @@ class ConfigBuilder:
             mod.QCDTailKiller.maxJetsToConsider = 4
             createQCDTailKillerModule(process, "QCDTailKillerTightPlus", mod, names, modules)
         self._accumulateAnalyzers("Modules for QCDTailKiller scenarios", names)
-        analysisModules.extend(modules)
-        analysisNames.extend(names)
 
         return names
 
@@ -827,8 +827,6 @@ class ConfigBuilder:
                         path = cms.Path(process.commonSequence * mod)
                         setattr(process, modName+"Path", path)
         self._accumulateAnalyzers("AgainstElectron/AgainstMuon scan", names)
-        analysisModules.extend(modules)
-        analysisNames.extend(names)
 
     ## Build array of analyzers to scan various tau isolation and jet PU ID discriminators
     #
@@ -874,8 +872,6 @@ class ConfigBuilder:
                         path = cms.Path(process.commonSequence * mod)
                         setattr(process, modName+"Path", path)
         self._accumulateAnalyzers("TauIsolation/JetPUID scan", names)
-        analysisModules.extend(modules)
-        analysisNames.extend(names)
 
     ## Build array of analyzers to scan various tau isolation and jet PU ID discriminators
     #
@@ -914,8 +910,6 @@ class ConfigBuilder:
                 path = cms.Path(process.commonSequence * mod)
                 setattr(process, modName+"Path", path)
         self._accumulateAnalyzers("btag efficiency scan", names)
-        analysisModules.extend(modules)
-        analysisNames.extend(names)
 
     ## Build "tau embedding"-like preselection for normal MC
     #
