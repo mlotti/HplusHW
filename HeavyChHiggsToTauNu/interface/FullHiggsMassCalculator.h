@@ -174,14 +174,6 @@ namespace HPlus {
     double fTopInvMassUpperCut;
     std::string fPzSelectionMethod;
 
-    Count dummy1;
-    Count dummy2;
-    Count dummy3;
-    Count dummy4;
-    Count dummy5;
-    Count dummy6;
-    Count dummy7;
-
     // Counters
     // Discriminant and neutrino p_z calculation
     Count allEvents_SubCount; // all calculations
