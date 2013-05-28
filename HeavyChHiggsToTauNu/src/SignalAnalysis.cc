@@ -1175,7 +1175,7 @@ namespace HPlus {
 										       metData, &genData);
     if (!FullHiggsMassData.passedEvent()) return false;
     double HiggsMass = FullHiggsMassData.getHiggsMass();
-    if (HiggsMass > 100 && HiggsMass < 200 ) increment(fHiggsMassCutCounter);
+    increment(fHiggsMassCutCounter);
     hFullMass->Fill(HiggsMass);
     if (myFakeTauStatus)
       hEWKFakeTausFullMass->Fill(HiggsMass);

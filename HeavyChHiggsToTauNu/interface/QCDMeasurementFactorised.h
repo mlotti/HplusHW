@@ -137,7 +137,7 @@ namespace HPlus {
       CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg1;
       CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg2;
 
-      // NQCD Histograms
+      // NQCD Histograms - obsolete
       WrappedUnfoldedFactorisationHisto* hNevtAfterStandardSelections;
       WrappedUnfoldedFactorisationHisto* hNevtAfterLeg1;
       WrappedUnfoldedFactorisationHisto* hNevtAfterLeg2;
