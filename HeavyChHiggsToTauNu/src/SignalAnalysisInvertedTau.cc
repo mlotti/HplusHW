@@ -345,13 +345,19 @@ namespace HPlus {
 
     hSelectedTauEt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterRtauCut", "SelectedTau_pT_AfterRtauCut", 200, 0.0, 400.0);
     hSelectedTauEtTauVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterTauVeto", "SelectedTau_pT_AfterTauVeto", 200, 0.0, 400.0);     
-    hSelectedTauEtJetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterJetCut", "SelectedTau_pT_AfterJetCut", 200, 0.0, 400.0);
-    hSelectedTauEtCollinearTailKiller = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_CollinearTailKiller", "SelectedTau_pT_CollinearTailKiller", 200, 0.0, 400.0);
-    hSelectedTauEtMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut", 200, 0.0, 400.0);
-    hSelectedTauEtBtagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterBtagging", "SelectedTau_pT_AfterBtagging", 200, 0.0, 400.0);
+    hSelectedTauEtJetCut = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_AfterJetCut", 200, 0.0 , 400.0 );
+    // hSelectedTauEtJetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterJetCut", "SelectedTau_pT_AfterJetCut", 200, 0.0, 400.0);
+    //hSelectedTauEtCollinearTailKiller = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_CollinearTailKiller", "SelectedTau_pT_CollinearTailKiller", 200, 0.0, 400.0);
+    hSelectedTauEtCollinearTailKiller  = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_CollinearTailKiller", 200, 0.0 , 400.0 );
+    hSelectedTauEtMetCut  = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_AfterMetCut", 200, 0.0 , 400.0);
+    //hSelectedTauEtMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut", 200, 0.0, 400.0);
+    hSelectedTauEtBtagging  = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_AfterBtagging", 200, 0.0 , 400.0);
+ 
+    //hSelectedTauEtBtagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterBtagging", "SelectedTau_pT_AfterBtagging", 200, 0.0, 400.0);
     hSelectedTauEtBjetVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterBveto", "SelectedTau_pT_AfterBveto", 200, 0.0, 400.0);
     hSelectedTauEtBjetVetoPhiCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_AfterBvetoPhiCuts", "SelectedTau_pT_AfterBvetoPhiCuts", 200, 0.,400.0);
-    hSelectedTauEtBackToBackTailKiller = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_BackToBackTailKiller", "SelectedTau_pT_BackToBackTailKiller", 200, 0.0, 400.0);
+    // hSelectedTauEtBackToBackTailKiller = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myInverted, "SelectedTau_pT_BackToBackTailKiller", "SelectedTau_pT_BackToBackTailKiller", 200, 0.0, 400.0);
+    hSelectedTauEtBackToBackTailKiller   = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_BackToBackTailKiller", 200, 0.0 , 400.0);
     
  
           
@@ -1063,7 +1069,7 @@ namespace HPlus {
     if(!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
     //hSelectionFlow->Fill(kQCDOrderJetSelection);
-    hSelectedTauEtJetCut->Fill(selectedTau->pt());
+    hSelectedTauEtJetCut->Fill(selectedTau->pt() ,selectedTau->pt());
 
 
     hMETInvertedTauIdJets->Fill(selectedTau->pt(), metData.getSelectedMET()->et());
@@ -1099,7 +1105,7 @@ namespace HPlus {
     increment(fQCDTailKillerCollinearCounter);
     
     
-    hSelectedTauEtCollinearTailKiller->Fill(selectedTau->pt());     
+    hSelectedTauEtCollinearTailKiller->Fill(selectedTau->pt() ,selectedTau->pt());     
     
     //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part                                                                                                          
     //    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
@@ -1162,7 +1168,7 @@ namespace HPlus {
     fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);
     
     //hSelectionFlow->Fill(kQCDOrderMET);
-    hSelectedTauEtMetCut->Fill(selectedTau->pt());
+    hSelectedTauEtMetCut->Fill(selectedTau->pt() ,selectedTau->pt());
     hSelectedTauEtaMetCut->Fill(selectedTau->eta());
     hSelectedTauPhiMetCut->Fill(selectedTau->phi());  
     
@@ -1231,7 +1237,7 @@ namespace HPlus {
     increment(fBTaggingCounter);		
     //hSelectionFlow->Fill(kQCDOrderBTag);
     
-    hSelectedTauEtBtagging->Fill(selectedTau->pt());
+    hSelectedTauEtBtagging->Fill(selectedTau->pt() ,selectedTau->pt());
     
     /*
       if(jetData.passedEvent()) {
@@ -1311,7 +1317,7 @@ namespace HPlus {
     hMETInvertedAllCutsTailKiller->Fill(selectedTau->pt(), metData.getSelectedMET()->et());
  	       
     //    increment(fDeltaPhiVSDeltaPhiMETJet2CutCounter);
-    hSelectedTauEtBackToBackTailKiller->Fill(selectedTau->pt());
+    hSelectedTauEtBackToBackTailKiller->Fill(selectedTau->pt() ,selectedTau->pt());
       
     hTransverseMass->Fill(transverseMass); 
     
