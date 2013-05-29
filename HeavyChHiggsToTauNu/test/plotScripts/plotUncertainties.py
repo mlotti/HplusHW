@@ -59,6 +59,8 @@ def main():
         #additionalNormalizations={"Foo": 0.2, "Bar": 0.05},
                                       )
 
+    histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
+
     def dop(datasetName):
         doPlots(datasets, datasetName, systematics)
         doCounters(datasets, datasetName, creator.getSystematicVariationSources())

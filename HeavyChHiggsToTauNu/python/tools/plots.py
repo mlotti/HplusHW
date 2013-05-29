@@ -1494,8 +1494,13 @@ class PlotRatioBase:
                 elif h.getName() == "BackgroundStatError":
                     statError = h
                 else:
-                    aux.copyStyle(numer, h)
-                    h.setName(numer.getName())
+                    if isinstance(numer, histograms.Histo):
+                        aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
+                        h.setName(numer.getName())
+                    else:
+                        aux.copyStyle(numer, h.getRootHisto())
+                        h.setName(numer.GetName())
+                        h = _createHisto(h)
                     tmp.append(h)
             if len(tmp) > 1:
                 raise Exception("This shouldn't happen")
