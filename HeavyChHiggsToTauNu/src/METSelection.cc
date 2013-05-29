@@ -125,11 +125,15 @@ namespace HPlus {
     // Set the handles, if object available
     if(hrawmet.isValid())
       output.fRawMET = hrawmet->ptrAt(0);
+    std::cout << "type1MET valid = " << htype1met.isValid() << std::endl;
     if(htype1met.isValid() && fType1Src.label() != "") {
       output.fType1METCorrected.clear();
       output.fType1MET = htype1met->ptrAt(0);
       output.fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(output.fType1MET, selectedTau, allJets, kType1, possiblyIsolatedTaus));
       output.fType1MET = edm::Ptr<reco::MET>(&output.fType1METCorrected, 0);
+      std::cout << "type1MET = " << htype1met->ptrAt(0)->et() << std::endl;
+      std::cout << "type1METcorrection size = " << output.fType1METCorrected.size() << std::endl;
+      std::cout << "type1MET residual corr. = " << output.fType1MET->et() << std::endl;
     }
     /*
     if(htype2met.isValid()) {
@@ -155,6 +159,12 @@ namespace HPlus {
       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
     else
       throw cms::Exception("LogicError") << "This should never happen at " << __FILE__ << ":" << __LINE__ << std::endl;
+    output.fSelectedMET = met;
+    std::cout << "type1MET pointer is zero = " << met.isNull() << std::endl;
+    if (met.isNull()) {
+      output.fPassedEvent = false;
+      return output;
+    }
 
     hMet->Fill(met->et());
     hMetPhi->Fill(met->phi());
@@ -172,7 +182,57 @@ namespace HPlus {
     } else {
       output.fPassedEvent = false;
     }
+
+    std::cout << "type1MET selected met = " << output.fSelectedMET->et() << std::endl;
+    return output;
+  }
+
+  METSelection::Data METSelection::silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& allJets) {
+    Data output;
+
+    edm::Handle<edm::View<reco::MET> > hrawmet;
+    iEvent.getByLabel(fRawSrc, hrawmet);
+
+    edm::Handle<edm::View<reco::MET> > htype1met;
+    if (fType1Src.label() != "")
+      iEvent.getByLabel(fType1Src, htype1met);
+
+    /*
+    edm::Handle<edm::View<reco::MET> > htype2met;
+    iEvent.getByLabel(fType2Src, htype2met);
+    */
+
+    edm::Handle<edm::View<reco::MET> > hcalomet;
+    iEvent.getByLabel(fCaloSrc, hcalomet);
+
+    edm::Handle<edm::View<reco::MET> > htcmet;
+    iEvent.getByLabel(fTcSrc, htcmet);
+
+    if(hrawmet.isValid())
+      output.fRawMET = hrawmet->ptrAt(0);
+    if(htype1met.isValid()) {
+      output.fType1METCorrected.clear();
+      output.fType1MET = htype1met->ptrAt(0);
+    }
+    if(hcalomet.isValid())
+      output.fCaloMET = hcalomet->ptrAt(0);
+    if(htcmet.isValid())
+      output.fTcMET = htcmet->ptrAt(0);
+
+    // Do the selection
+    edm::Ptr<reco::MET> met;
+    if(fSelect == kRaw)
+      met = output.fRawMET;
+    else if(fSelect == kType1)
+      met = output.fType1MET;
+    if(met->et() > fMetCut) {
+      output.fPassedEvent = true;
+    } else {
+      output.fPassedEvent = false;
+    }
     output.fSelectedMET = met;
+    std::cout << "type1MET valid = " << htype1met.isValid() << std::endl;
+    std::cout << "type1MET = " << htype1met->ptrAt(0)->et() << std::endl;
 
     return output;
   }
@@ -189,7 +249,7 @@ namespace HPlus {
      */
 
     increment(fTypeIAllEvents);
-
+    return *met;
     if(type == kRaw)
       throw cms::Exception("Assert") << "METSelection::undoJetCorrectionForSelectedTau should not be called for raw MET" << std::endl;
 
@@ -270,7 +330,7 @@ namespace HPlus {
     }
     */
     reco::Candidate::LorentzVector correctedP4(correctedEx, correctedEy, 0,
-                                               std::sqrt(correctedEx*correctedEx + correctedEy+correctedEy));
+                                               std::sqrt(correctedEx*correctedEx + correctedEy*correctedEy));
     // sumet is not set for pat::MET in the corrections anyway
     //double correctedSumEt = met->sumEt() + sumet;
 

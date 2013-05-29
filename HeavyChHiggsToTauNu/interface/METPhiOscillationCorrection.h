@@ -20,41 +20,24 @@ namespace HPlus {
   /**
    * Class to contain plots to be repeated at different steps of analysis
    */
-  class METPhiOscillationCorrection: public BaseSelection {
+  class METPhiOscillationCorrection {
   public:
-    /**
-     * Class to encapsulate the access to the data members of
-     * TauSelection. If you want to add a new accessor, add it here
-     * and keep all the data private.
-     */
-    class Data {
-    public:
-      // The reason for pointer instead of reference is that const
-      // reference allows temporaries, while const pointer does not.
-      // Here the object pointed-to must live longer than this object.
-      Data();
-      ~Data();
-
-      const double getCorrectionFactor() const { return fCorrectionFactor; }
-
-      friend class METPhiOscillationCorrection;
-
-    private:
-      double fCorrectionFactor;
-    };
-
     METPhiOscillationCorrection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string prefix);
     METPhiOscillationCorrection(EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string prefix);
     ~METPhiOscillationCorrection();
 
-    // Use silentAnalyze if you do not want to fill histograms or increment counters
-    METPhiOscillationCorrection::Data analyze(const edm::Event& iEvent, int nVertices, const METSelection::Data& metData);
-    METPhiOscillationCorrection::Data analyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met);
-    METPhiOscillationCorrection::Data silentAnalyze(const edm::Event& iEvent, int nVertices, const METSelection::Data& metData);
-    METPhiOscillationCorrection::Data silentAnalyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met);
+    /// Getters for corrected quantities
+    double getCorrectedMET(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met);
+    double getCorrectedMETphi(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met);
+
+    /// Plot information for determining parametrisation
+    void analyze(const edm::Event& iEvent, int nVertices, const METSelection::Data& metData);
+    void analyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met);
 
   private:
-    METPhiOscillationCorrection::Data privateAnalyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met);
+    double getCorrectedMETX(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met);
+    double getCorrectedMETY(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met);
+    void privateAnalyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met);
     // Input parameters
 
     // Counters
