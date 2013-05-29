@@ -1799,7 +1799,12 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
             createRatio = False
 
         if not createRatio:
-            PlotSameBase.createFrame(self, filename, **kwargs)
+            args = {}
+            args.update(kwargs)
+            for key in kwargs.keys():
+                if "ratio" in key:
+                    del args[key]
+            PlotSameBase.createFrame(self, filename, **args)
         else:
             if not self.histoMgr.hasHisto("StackedMC"):
                 raise Exception("Must call stackMCHistograms() before createFrame() with ratio")
