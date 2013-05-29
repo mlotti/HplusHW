@@ -3,6 +3,8 @@
 ### Adapted from fhadd to H+ needs
 #
 # Original author: Sebastian Schmitt, sebastian.schmitt@cern.ch
+# http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=14881
+# /afs/cern.ch/user/s/schmitts/public/fhadd/fhadd.py
 #
 # Modified by: Matti Kortelainen, matti.kortelainen@cern.ch
 
