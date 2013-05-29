@@ -48,4 +48,5 @@ def createEDFilter(param):
         tauEmbeddingStatus = cms.untracked.bool(False),
         metFilters = param.metFilters.clone(),
         QCDTailKiller = param.QCDTailKiller.clone(),
+        invMassReco = param.invMassReco.clone(),
     )

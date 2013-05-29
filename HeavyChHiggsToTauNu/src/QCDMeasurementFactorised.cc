@@ -265,7 +265,7 @@ namespace HPlus {
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
     fTopWithWSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithWSelection"), eventCounter, fHistoWrapper),
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
-    fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
+    fFullHiggsMassCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("invMassReco"), eventCounter, fHistoWrapper),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
     //fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
@@ -417,7 +417,7 @@ namespace HPlus {
     if (!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
     //fCommonPlotsAfterVertexSelection->fill();
-    //fCommonPlots.fillControlPlots(iEvent, pvData);
+    fCommonPlots.fillControlPlots(iEvent, pvData);
 
 
 //------ Tau candidate selection
@@ -462,6 +462,7 @@ namespace HPlus {
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(mySelectedTau));
     // note: do not require here that only one tau has been found (mySelectedTau is the selected tau in the event)
     fCommonPlotsAfterTauSelection->fill();
+    fCommonPlots.fillControlPlots(iEvent, iSetup, tauCandidateData, tauMatchData, mySelectedTau, fMETSelection);
     // Set factorisation bin
     fQCDFactorisedHistogramHandler.setFactorisationBinForEvent(mySelectedTau->pt(), mySelectedTau->eta(), nVertices);
 
@@ -493,6 +494,7 @@ namespace HPlus {
     if (!electronData.passedEvent()) return false;
     increment(fElectronVetoCounter);
     fCommonPlotsAfterElectronVeto->fill();
+    fCommonPlots.fillControlPlots(iEvent, electronData);
     hSelectionFlow->Fill(kQCDOrderElectronVeto);
     /*NonIsolatedElectronVeto::Data nonIsolatedElectronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
     if (!nonIsolatedElectronVetoData.passedEvent())  return false;
@@ -505,6 +507,7 @@ namespace HPlus {
     if (!muonData.passedEvent()) return false;
     increment(fMuonVetoCounter);
     fCommonPlotsAfterMuonVeto->fill();
+    fCommonPlots.fillControlPlots(iEvent, muonData);
     hSelectionFlow->Fill(kQCDOrderMuonVeto);
     /*NonIsolatedMuonVeto::Data nonIsolatedMuonVetoData = fNonIsolatedMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!nonIsolatedMuonVetoData.passedEvent()) return; 
@@ -517,6 +520,7 @@ namespace HPlus {
     if (!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
     fCommonPlotsAfterJetSelection->fill();
+    fCommonPlots.fillControlPlots(iEvent, jetData);
     hSelectionFlow->Fill(kQCDOrderJetSelection);
 
 
@@ -543,7 +547,9 @@ namespace HPlus {
     double myFullMass = -1.0;
     if (btagData.passedEvent()) {
       const FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, mySelectedTau, btagData, metData);
-      myFullMass = FullHiggsMassData.getHiggsMass();
+      if (FullHiggsMassData.passedEvent()) {
+        myFullMass = FullHiggsMassData.getHiggsMass();
+      }
     }
     // Increment counters
     increment(fStandardSelectionsCounter);
@@ -790,7 +796,7 @@ namespace HPlus {
     increment(fAfterStandardSelectionsCounter);
     fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
     fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-    fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
+    if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
     fHistoHandler->fillShapeHistogram(hCtrlRtau, tauSelection.getRtauOfTauObject(selectedTau));
 
     // Leg 2 (tau ID)
@@ -802,7 +808,7 @@ namespace HPlus {
       fCommonPlotsAfterLeg2->fill();
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
     }
 
@@ -830,7 +836,7 @@ namespace HPlus {
     increment(fAfterLeg1Counter);
     fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
     fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-    fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
+    if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
     fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
     fCommonPlotsAfterLeg1->fill();
 
@@ -839,7 +845,7 @@ namespace HPlus {
       increment(fAfterLeg1AndLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
     }
   }
 
@@ -871,7 +877,7 @@ namespace HPlus {
       increment(fAfterStandardSelectionsCounter);
       fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
       fCommonPlotsAfterStandardSelections->fill();
     }
 
@@ -880,7 +886,7 @@ namespace HPlus {
       increment(fAfterLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
       fCommonPlotsAfterLeg2->fill();
     }
@@ -911,7 +917,7 @@ namespace HPlus {
       increment(fAfterLeg1Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
       fCommonPlotsAfterLeg1->fill();
     }
@@ -921,7 +927,7 @@ namespace HPlus {
       increment(fAfterLeg1AndLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
     }
   }
 
@@ -953,7 +959,7 @@ namespace HPlus {
       increment(fAfterStandardSelectionsCounter);
       fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
       fCommonPlotsAfterStandardSelections->fill();
     }
 
@@ -962,7 +968,7 @@ namespace HPlus {
       increment(fAfterLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
       fCommonPlotsAfterLeg2->fill();
     }
@@ -972,7 +978,7 @@ namespace HPlus {
       increment(fAfterLeg1Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
       fCommonPlotsAfterLeg1->fill();
     }
@@ -982,7 +988,7 @@ namespace HPlus {
       increment(fAfterLeg1AndLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
     }
   }
 
@@ -1006,9 +1012,19 @@ namespace HPlus {
       hTailTestByDeltaPhi.push_back(histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 36,0,180, 36,0,180));
       s1.str("");
       s2.str("");
-      s1 << "TailTestByDeltaRJet" << i+1;
-      s2 << "TailTestByDeltaR;#Delta#phi(#tau,MET),^{o};#sqrt((#eta_{jet_" << i+1 << "} + #phi_{#tau})^2 + (#phi_{jet_" << i+1 << "} + #eta_{#tau}))^2";
-      hTailTestByDeltaR.push_back(histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 36,0,180, 50,0,5.0));
+      s1 << "TailTestByDeltaRJets" << i+1;
+      s2 << "TailTestByDeltaRJets;#Delta#phi(#tau,MET),^{o};Sqrt((#eta_{jet_" << i+1 << "} + #eta_{#tau})^2 + (#phi_{jet_" << i+1 << "} + #phi_{#tau}))^2";
+      hTailTestByDeltaRJets.push_back(histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 36,0,180, 50,0,5.0));
+      s1.str("");
+      s2.str("");
+      s1 << "TailTestByDeltaEtaJets" << i+1;
+      s2 << "TailTestByDeltaEtaJets;#Delta#phi(#tau,MET),^{o};#eta_{jet_" << i+1 << "} + #eta_{#tau}";
+      hTailTestByDeltaEtaJets.push_back(histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 36,0,180, 50,0,5.0));
+      s1.str("");
+      s2.str("");
+      s1 << "TailTestByDeltaPhiJets" << i+1;
+      s2 << "TailTestByDeltaPhiJets;#Delta#phi(#tau,MET),^{o};#phi_{jet_" << i+1 << "} + #phi_{#tau}";
+      hTailTestByDeltaPhiJets.push_back(histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 36,0,180, 65,0,6.5));
       s1.str("");
       s2.str("");
       s1 << "TailTestDiffByDeltaEtaCollinearJet" << i+1;
@@ -1024,9 +1040,10 @@ namespace HPlus {
     hTailTestByDeltaPhiForMinDeltaR = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR", "TailTestByDeltaPhiForMinDeltaR;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
     hTailTestByDeltaPhiForMinDeltaR10 = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR10", "TailTestByDeltaPhiForMinDeltaR10;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
     hTailTestByDeltaPhiForMinDeltaR05 = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR05", "TailTestByDeltaPhiForMinDeltaR05;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
-    hCollinearEtaPhi = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "CollinearEtaPhi", "CollinearEtaPhi;jet #eta; jet #phi, ^{o}", 290,-2.53073,2.53073, 360,-3.14159,3.14159);
-    hBackToBackEtaPhi= histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "BackToBackEtaPhi", "BackToBackEtaPhi;jet #eta; jet #phi, ^{o}", 290,-2.53073,2.53073, 360,-3.14159,3.14159);
-
+    hCollinearEtaPhi = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "CollinearEtaPhi", "CollinearEtaPhi;jet #eta; jet #phi, ^{o}", 58,-2.53073,2.53073, 72,-3.14159,3.14159);
+    hBackToBackEtaPhi = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "BackToBackEtaPhi", "BackToBackEtaPhi;jet #eta; jet #phi, ^{o}", 58,-2.53073,2.53073, 72,-3.14159,3.14159);
+    hCollinearEtaPhiForSelectedTau = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "CollinearEtaPhiForSelectedTau", "CollinearEtaPhiForSelectedTau;jet #eta; jet #phi, ^{o}", 58,-2.53073,2.53073, 72,-3.14159,3.14159);
+    hBackToBackEtaPhiForSelectedTau = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "BackToBackEtaPhiForSelectedTau", "BackToBackEtaPhiForSelectedTau;jet #eta; jet #phi, ^{o}", 58,-2.53073,2.53073, 72,-3.14159,3.14159);
   }
 
   QCDMeasurementFactorised::TailTest::~TailTest() { }
@@ -1050,7 +1067,9 @@ namespace HPlus {
         hTailTestByDeltaPhi[i]->Fill(myDeltaPhiTauMET, myDeltaPhiJetMET);
         double myDeltaR = std::sqrt(std::pow(selectedTau->eta()+myJetEta,2) + std::pow(selectedTau->phi()+myJetPhi,2));
         //std::cout << "myJetPhi = " << myJetPhi << " myJetEta = " << myJetEta << std::endl;
-        hTailTestByDeltaR[i]->Fill(myDeltaPhiTauMET, myDeltaR);
+        hTailTestByDeltaRJets[i]->Fill(myDeltaPhiTauMET, myDeltaR);
+        hTailTestByDeltaEtaJets[i]->Fill(myDeltaPhiTauMET, selectedTau->eta()+myJetEta);
+        hTailTestByDeltaPhiJets[i]->Fill(myDeltaPhiTauMET, selectedTau->phi()+myJetPhi);
         if (myDeltaR < myMinDeltaR) {
           myMinDeltaR = myDeltaR;
           myOppositeJet = jetData.getSelectedJetsIncludingTau()[i];
@@ -1058,9 +1077,11 @@ namespace HPlus {
         if (!qcdTailKillerData.passBackToBackCutForJet(i)) {
           hTailTestDiffByDeltaEtaBackToBack[i]->Fill(selectedTau->eta()-myJetEta);
           hBackToBackEtaPhi->Fill(myJetEta, myJetPhi);
+          hBackToBackEtaPhiForSelectedTau->Fill(selectedTau->eta(),selectedTau->phi());
         } else if (!qcdTailKillerData.passCollinearCutForJet(i)) {
           hTailTestDiffByDeltaEtaCollinear[i]->Fill(selectedTau->eta()+myJetEta);
           hCollinearEtaPhi->Fill(myJetEta, myJetPhi);
+          hCollinearEtaPhiForSelectedTau->Fill(selectedTau->eta(),selectedTau->phi());
         }
 //       } else {
 //         std::cout << "skipping genuine tau, phi = " << myJetFakingTheTau->phi() << " eta = " << myJetFakingTheTau->eta() << std::endl;

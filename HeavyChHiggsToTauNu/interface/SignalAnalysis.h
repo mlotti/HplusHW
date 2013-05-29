@@ -173,7 +173,7 @@ namespace HPlus {
     Count fBjetVetoCounter;
     Count fMetCut80Counter;
     Count fMetCut100Counter;
-    Count fHiggsMassCutCounter;
+    Count fHiggsMassSelectionCounter;
     Count fTransverseMass100CutCounter;
     Count fTransverseMass120CutCounter;
     Count fTransverseMass150CutCounter;
@@ -273,7 +273,6 @@ namespace HPlus {
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;
     QCDTailKiller fQCDTailKiller;
-    METPhiOscillationCorrection fMETPhiOscillationCorrection;
     TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
 
     SignalAnalysisTree fTree;

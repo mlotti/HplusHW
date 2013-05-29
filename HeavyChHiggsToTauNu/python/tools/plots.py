@@ -465,7 +465,10 @@ def replaceLightHplusWithSignalPlusBackground(datasetMgr, backgroundsWithoutTT=N
     datasetMgr.merge("BkgNoTT", backgroundsWithoutTT, keepSources=True)
     for name in signalDatasetNames:
         isLast = (name == signalDatasetNames[-1])
-        datasetMgr.merge(name, [name, "BkgNoTT","TTJetsScaledByBR"], keepSources=not isLast)
+        datasetMgr.merge(name+"Tmp", [name, "BkgNoTT","TTJetsScaledByBR"], keepSources=not isLast)
+        if not isLast:
+            datasetMgr.remove(name, close=False)
+        datasetMgr.rename(name+"Tmp", name)
         _legendLabels[name] = "with H^{+}#rightarrow#tau^{+}#nu"
 
 

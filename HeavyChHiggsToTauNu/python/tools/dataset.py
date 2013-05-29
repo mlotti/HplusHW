@@ -2410,7 +2410,7 @@ class DatasetManager:
         for d in self.datasets:
             if not d.getName() in nameList:
                 selected.append(d)
-            else:
+            elif close:
                 d.close()
         self.datasets = selected
         self._populateMap()

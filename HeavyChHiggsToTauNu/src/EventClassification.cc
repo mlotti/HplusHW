@@ -1,14 +1,10 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
-
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
-
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-
-
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -19,10 +15,8 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 #include "TMath.h"
-
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-
 
 /*
 About this code
@@ -347,7 +341,6 @@ namespace HPlus {
     return myTauNeutrinoMomentum;
   }
 
-
   bool hasGenVisibleTauWithinDeltaR(const edm::Event& iEvent, TVector3 recoTauVector, double deltaRCut) {
     TVector3 genVisibleTauVector(0.0, 0.0, 0.0);
     edm::Handle <reco::GenParticleCollection> genParticles;
@@ -449,9 +442,110 @@ namespace HPlus {
     return numberOfNeutrinos;
   }
 
-  bool tauAndBJetFromSameTopQuark() {
-    // TODO!
-    return true;
+  reco::Candidate* getClosestGenTau(const edm::Event& iEvent, TVector3 recoTauVector) {
+    reco::Candidate* myClosestTau = NULL;
+    TVector3 genVisibleTauVector(0.0, 0.0, 0.0);
+    double currentDeltaR = 999999.9;
+    double smallestDeltaR = 9999.9;
+    int pId = 9999999;
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      pId = p.pdgId();
+      // Ignore daughters of taus
+      if (hasImmediateMother(p,15) || hasImmediateMother(p,-15)) continue;
+      if (abs(pId) == 15) {
+	genVisibleTauVector = getVisibleMomentum(p);
+	currentDeltaR = recoTauVector.DeltaR(genVisibleTauVector);
+	if (currentDeltaR < smallestDeltaR) {
+	  smallestDeltaR = currentDeltaR;
+	  myClosestTau = const_cast<reco::Candidate*>(&p);
+	}
+      }
+    }
+    if (!myClosestTau) return NULL; // I think this line doesn't do anything. NULL will be returned anyway if there's no tau.
+    return myClosestTau;
+  }
+
+  reco::Candidate* getClosestGenBquark(const edm::Event& iEvent, TVector3 bjetVector) {
+    reco::Candidate* myClosestBquark = NULL;
+    TVector3 genBquarkVector(0.0, 0.0, 0.0);
+    double currentDeltaR = 999999.9;
+    double smallestDeltaR = 9999.9;
+    int pId = 9999999;
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      pId = p.pdgId();
+      // Ignore daughters of b quarks
+      if (hasImmediateMother(p,5) || hasImmediateMother(p,-5)) continue;
+      if (abs(pId) == 5) {
+	genBquarkVector.SetXYZ(p.px(), p.py(), p.pz());
+	currentDeltaR = bjetVector.DeltaR(genBquarkVector);
+	if (currentDeltaR < smallestDeltaR) {
+	  smallestDeltaR = currentDeltaR;
+	  myClosestBquark = const_cast<reco::Candidate*>(&p);
+	}
+      }
+    }
+    if (!myClosestBquark) return NULL; // I think this line doesn't do anything. NULL will be returned anyway if there's no b quark.
+    return myClosestBquark;
+  }
+
+  bool tauAndBJetFromSameTopQuark(const edm::Event& iEvent, const reco::Candidate& closestGenTau, 
+				  const reco::Candidate& closestGenB) {
+    //std::cout << "*******************************************************************" << std::endl;
+    bool tauIsFromCurrentTop = false;
+    bool bIsFromCurrentTop   = false;
+    double tauDeltaR = 999999.9;
+    double bDeltaR   = 999999.9;
+    // Loop over the particles in the event
+    int pId = 9999999;
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      pId = p.pdgId();
+      // Get top quarks
+      if (abs(pId) == 6) {
+	//std::cout << pId << std::endl;
+	// Get (all, not just immediate) daughters of top quark
+	std::vector<const reco::GenParticle*> daughters = getDaughters(p);
+	int dId = 9999999;
+	for(size_t k=0; k<daughters.size(); ++k) {
+	  const reco::Candidate& d = *daughters[k];
+	  dId = d.pdgId();
+	  // Find tau among the daughters
+	  if (abs(dId) == 15 && !hasImmediateMother(d,15) && !hasImmediateMother(d,-15)) {
+	    //std::cout << "   " << dId << std::endl;
+	    // Check if it's the one that's closest to the reconstructed tau
+	    tauDeltaR = ROOT::Math::VectorUtil::DeltaR(d.p4(), closestGenTau.p4());
+	    //std::cout << "      " << tauDeltaR << std::endl;
+	    if (tauDeltaR < 0.01) tauIsFromCurrentTop = true;
+	  }
+	  // Find b among the daughters
+	  if (abs(dId) == 5 && !hasImmediateMother(d,5) && !hasImmediateMother(d,-5)) {
+	    //std::cout << "   " << dId << std::endl;
+	    // Check if it's the one that's closest to the reconstructed b jet
+	    bDeltaR = ROOT::Math::VectorUtil::DeltaR(d.p4(), closestGenB.p4());
+	    //std::cout << "      " << bDeltaR << std::endl;
+	    if (bDeltaR < 0.01) bIsFromCurrentTop = true;
+	  }
+	}
+	if (tauIsFromCurrentTop && bIsFromCurrentTop) {
+	  //std::cout << "TRUE" << std::endl;
+	  return true;
+	}
+      }
+      // Reinitialize and move on (perhaps to finding the next top quark)
+      tauIsFromCurrentTop = false;
+      bIsFromCurrentTop   = false;
+    }
+    // If the closest gen particles were not both daughters of (any) one and the same top quark, return false.
+    //std::cout << "FALSE" << std::endl;
+    return false;
   }
   
 //   bool tauIsFromChargedHiggs() {
