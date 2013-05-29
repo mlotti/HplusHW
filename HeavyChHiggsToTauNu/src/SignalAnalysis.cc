@@ -56,7 +56,7 @@ namespace HPlus {
     fMETCounter(eventCounter.addSubCounter(prefix,":MET")),
     fBTaggingCounter(eventCounter.addSubCounter(prefix,":btagging")),
     fDeltaPhiCounter(eventCounter.addSubCounter(prefix,":deltaphi")),
-    //    fHiggsMassCutCounter(eventCounter.addSubCounter(prefix,"HiggsMassCut")),
+    //    fHiggsMassSelectionCounter(eventCounter.addSubCounter(prefix,"HiggsMassSelection")),
     fFakeMETVetoCounter(eventCounter.addSubCounter(prefix,":fake MET veto")),
     fTopSelectionCounter(eventCounter.addSubCounter(prefix,":Top Selection cut")),
     //fTopSelectionNarrowCounter(eventCounter.addSubCounter(prefix,":Top Selection small window")),
@@ -108,7 +108,7 @@ namespace HPlus {
     fBjetVetoCounter(eventCounter.addCounter("Veto on second b jet")),
     fMetCut80Counter(eventCounter.addCounter("MET>80")),
     fMetCut100Counter(eventCounter.addCounter("MET>100")),
-    fHiggsMassCutCounter(eventCounter.addCounter("HiggsMassCut")),
+    fHiggsMassSelectionCounter(eventCounter.addCounter("HiggsMassSelection")),
     fTransverseMass80CutCounter(eventCounter.addCounter("TransverseMass80Cut")),
     fTransverseMass100CutCounter(eventCounter.addCounter("TransverseMass100Cut")),
     fTransverseMass120CutCounter(eventCounter.addCounter("TransverseMass120Cut")),
@@ -199,7 +199,7 @@ namespace HPlus {
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
 
     //   ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
-    fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
+    fFullHiggsMassCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("invMassReco"), eventCounter, fHistoWrapper),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
     fCorrelationAnalysis(eventCounter, fHistoWrapper, "HistoName"),
@@ -1170,12 +1170,11 @@ namespace HPlus {
                                                                                     metTriggerWeight.getEventWeightAbsoluteUncertainty());
     }
 
-
     FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData,
 										       metData, &genData);
     if (!FullHiggsMassData.passedEvent()) return false;
     double HiggsMass = FullHiggsMassData.getHiggsMass();
-    increment(fHiggsMassCutCounter);
+    increment(fHiggsMassSelectionCounter);
     hFullMass->Fill(HiggsMass);
     if (myFakeTauStatus)
       hEWKFakeTausFullMass->Fill(HiggsMass);
