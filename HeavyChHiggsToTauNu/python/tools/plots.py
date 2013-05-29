@@ -1179,7 +1179,10 @@ class PlotBase:
 
     ## Add MC uncertainty histogram
     def addMCUncertainty(self):
-        self.histoMgr.addMCUncertainty(styles.getErrorStyle())
+        systKey = "MCSystError"
+        if histograms.uncertaintyMode.addStatToSyst():
+            systKey = "MCStatSystError"
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
@@ -1619,7 +1622,10 @@ class PlotSameBase(PlotBase):
     def addMCUncertainty(self):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
-        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"])
+        systKey = "MCSystError"
+        if histograms.uncertaintyMode.addStatToSyst():
+            systKey = "MCStatSystError"
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
 
     ## Create TCanvas and frame
     #

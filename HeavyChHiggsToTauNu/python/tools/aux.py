@@ -166,3 +166,38 @@ def addToDictList(d, name, item):
         d[name].append(item)
     else:
         d[name] = [item]
+
+## Add ROOT object to TLegend
+#
+# \param legend      TLegend object
+# \param rootObject  ROOT object (TH1, TGraph, etc) to add to the legend
+# \param legendLabel Legend label for this entry
+# \param legendStyle Legend style for this entry
+# \param canModify   True, if this function may modify \a rootObject
+#
+# \return Clone of rootObject, if the line color is changed for legend
+# (see below). This object must be kept in memory until the legend is
+# drawn. Otherwise, None.
+#
+# If legend style is "F", and the line and fill colors are the same,
+# the line color is changed to black only for the legend
+def addToLegend(legend, rootObject, legendLabel, legendStyle, canModify=False):
+    # Hack to get the black border to the legend, only if the legend style is fill
+    h = rootObject
+    ret = None
+    if "f" == legendStyle.lower():
+        if not canModify:
+            h = rootObject.Clone(h.GetName()+"_forLegend")
+            if hasattr(h, "SetDirectory"):
+                h.SetDirectory(0)
+        h.SetLineWidth(1)
+        if h.GetLineColor() == h.GetFillColor():
+            h.SetLineColor(ROOT.kBlack)
+        ret = h
+
+    labels = legendLabel.split("\n")
+    legend.AddEntry(h, labels[0], legendStyle)
+    for lab in labels[1:]:
+        legend.AddEntry(None, lab, "")
+
+    return ret
