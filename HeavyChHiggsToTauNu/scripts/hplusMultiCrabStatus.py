@@ -9,7 +9,7 @@ import os
 import re
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTools as multicrabWorkflowsTools
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 order_done = ["Retrieved", "Done"]
 order_run = ["Running", "Scheduled", "Ready", "Submitted", "Created"]
@@ -63,7 +63,7 @@ def main(opts):
             hosts = {}
             for job in item:
                 if job.host != None:
-                    multicrabWorkflowsTools._addToDictList(hosts, job.host, job)
+                    aux.addToDictList(hosts, job.host, job)
             if opts.byHost:
                 for host, joblist in hosts.iteritems():
                     jobSummaries[key+" "+host] = JobSummary(joblist, [host])
@@ -116,7 +116,7 @@ def main(opts):
             pretty = multicrab.prettyJobnums([x[0] for x in failed])
             resubmitJobs[task] = pretty
             for jobId, jobCode in failed:
-                multicrabWorkflowsTools._addToDictList(failedJobs, jobCode, "%s/res/CMSSW_%d.stdout" % (task, jobId))
+                aux.addToDictList(failedJobs, jobCode, "%s/res/CMSSW_%d.stdout" % (task, jobId))
 
     summary = StringIO.StringIO()
     

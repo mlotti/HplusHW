@@ -11,7 +11,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as certifiedLumi
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTools as multicrabWorkflowsTools
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 
 minBiasXsec = 69300
@@ -91,7 +91,7 @@ def main():
         if ret != 0:
             raise Exception("Command '%s' failed with exit code %d" % (" ".join(cmd), ret))
         for era in eras:
-            multicrabWorkflowsTools._addToDictList(eraJsons, era, filteredJson)
+            aux.addToDictList(eraJsons, era, filteredJson)
 
     print "Merging run/lumi JSON files according to era"
     eraFinalJsons = {}

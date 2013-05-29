@@ -23,6 +23,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 analysis = "muonNtuple"
 counters = analysis+"Counters"
@@ -306,7 +307,7 @@ def doPlotsWTauMu(datasets, name, datasetName, ntupleCache):
                       #"1/(1+[0]*exp(-[1]*x))",
                       "1-[0]*exp(-[1]*x)",
                       #"1-([0]/(x^[1]))",
-                      histograms.th1Xmin(ratio.GetPassedHistogram()), histograms.th1Xmax(ratio.GetPassedHistogram()))
+                      aux.th1Xmin(ratio.GetPassedHistogram()), aux.th1Xmax(ratio.GetPassedHistogram()))
     expFit.SetParameter(0, 0.05)
     #ratio.Fit(expFit)
     expFit.SetLineColor(ROOT.kRed)

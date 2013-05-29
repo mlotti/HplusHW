@@ -3,21 +3,7 @@ import copy
 import StringIO
 
 import certifiedLumi
-
-## Helper for adding a list to a dictionary
-#
-# \param d     Dictionary
-# \param name  Key to dictionary
-# \param item  Item to add to the list
-#
-# For dictionaries which have lists as items, this function creates
-# the list with the \a item if \a name doesn't exist yet, or appends
-# if already exists.
-def _addToDictList(d, name, item):
-    if name in d:
-        d[name].append(item)
-    else:
-        d[name] = [item]
+import aux
 
 ## Helper class to get an object for Disable "constant"
 class _Constant:
@@ -188,7 +174,7 @@ class Dataset:
             if workflow.source == None:
                 keys.append(key)
             else:
-                _addToDictList(sourceNameMap, workflow.source.name, key)
+                aux.addToDictList(sourceNameMap, workflow.source.name, key)
         keys.sort()
 
         # Return the list of keys (in order), which use key as a

@@ -44,6 +44,85 @@ def getHistogramFileSE(stdoutFile):
         histoFile = histoFile.replace(replace_madhatter[0], replace_madhatter[1])
     return histoFile
 
+def splitFiles(files, filesPerEntry):
+    if filesPerEntry < 0:
+        return [(0, files)]
+    i = 0
+    ret = []
+    def beg(ind):
+        return ind*filesPerEntry
+    def end(ind):
+        return (ind+1)*filesPerEntry
+    while beg(i) < len(files):
+        ret.append( (i, files[beg(i):end(i)]) )
+        i += 1
+    return ret
+
+def hadd(opts, mergeName, inputFiles):
+    cmd = ["hadd"]
+    if opts.filesInSE:
+        cmd.append("-T") # don't merge TTrees via xrootd
+    cmd.append(mergeName)
+    cmd.extend(inputFiles)
+    if opts.test:
+        print " ".join(cmd)
+        return 0
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    output = p.communicate()[0]
+    ret = p.returncode
+    if ret != 0:
+        print output
+        print "Merging failed with exit code %d" % ret
+        return 1
+    return 0
+
+def hplusHadd(opts, mergeName, inputFiles):
+    intermediateFiles = []
+    resultFiles = inputFiles[:]
+    mergeRound = 0
+    while len(resultFiles) > 1:
+        splitted = splitFiles(resultFiles, opts.fastFilesPerMerge)
+        resultFiles = []
+        for index, files in splitted:
+            if len(splitted) > 1:
+                print "     merge round %d, split round %d" % (mergeRound, index)
+            target = mergeName+"-m%d-s%d" % (mergeRound, index)
+            if os.path.exists(target):
+                shutil.move(target, target+".backup")
+            cmd = ["hplusHadd.py", target]+files
+            if opts.test:
+                print " ".join(cmd)
+            else:
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                output = p.communicate()[0]
+                ret = p.returncode
+                if ret != 0:
+                    print output
+                    print "Merging failed with exit code %d" % ret
+                    return 1
+                if "Error in" in output:
+                    print output
+            resultFiles.append(target)
+            intermediateFiles.append(target)
+        mergeRound += 1
+
+    if intermediateFiles[-1] != resultFiles[0]:
+        raise Exception("Assertion, intermediateFiles[-1] = %s != resultFiles[0] = %s" % (intermediateFiles[-1], resultFiles[0]))
+    intermediateFiles.pop()
+
+    for tmp in intermediateFiles:
+        if opts.test:
+            print "rm %s" % tmp
+        else:
+            os.remove(tmp)
+
+    if opts.test:
+        print "mv %s %s" % (resultFiles[0], mergeName)
+    else:
+        shutil.move(resultFiles[0], mergeName)
+    
+    return 0
+
 def main(opts, args):
     crabdirs = multicrab.getTaskDirectories(opts)
 
@@ -85,79 +164,66 @@ def main(opts, args):
             if not os.path.isfile(f):
                 raise Exception("File %s is marked as output file in the  CMSSW_N.stdout, but does not exist" % f)
 
-        filesSplit = []
-        if opts.filesPerMerge < 0:
-            filesSplit = [(0, files)]
-        else:
-            i = 0
-            def beg(ind):
-                return ind*opts.filesPerMerge
-            def end(ind):
-                return (ind+1)*opts.filesPerMerge
-            while beg(i) < len(files):
-                filesSplit.append((i, files[beg(i):end(i)]))
-                i += 1
-
+        filesSplit = splitFiles(files, opts.filesPerMerge)
         if len(filesSplit) == 1:
             print "Task %s, merging %d file(s)" % (d, len(files))
         else:
             print "Task %s, merging %d file(s) to %d files" % (d, len(files), len(filesSplit))
-
-        # If testing, end this iteration here
-        if opts.test:
-            continue
 
         for index, inputFiles in filesSplit:
             tmp = d
             if len(filesSplit) > 1:
                 tmp += "-%d" % index
             mergeName = os.path.join(d, "res", opts.output % tmp)
-            #cmd = "mergeTFileServiceHistograms -o %s -i %s" % ("histograms-"+d+".root", " ".join(files))
-            #print files
-            #ret = subprocess.call(["mergeTFileServiceHistograms",
-            #                       "-o", mergeName,
-            #                       "-i"]+files)
-               
-            if os.path.exists(mergeName):
+            if os.path.exists(mergeName) and not opts.test:
                 shutil.move(mergeName, mergeName+".backup")
-
-            cmd = ["hadd"]
-            if opts.filesInSE:
-                cmd.append("-T") # don't merge TTrees via xrootd
-            cmd.append(mergeName)
-            cmd.extend(files)
-
-            p = subprocess.Popen(["hadd", mergeName]+inputFiles, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            output = p.communicate()[0]
-            ret = p.returncode
-            if ret != 0:
-                print output
-                print "Merging failed with exit code %d" % ret
-                return 1
 
             # FIXME: add here reading of first xrootd file, finding all TTrees, and writing the TList to mergeName file
             if opts.filesInSE:
                 raise Exception("--filesInSE feature is not fully implemented")
 
+            if len(inputFiles) == 1:
+                if opts.test:
+                    print "cp %s %s" % (inputFiles[0], mergeName)
+                else:
+                    shutil.copy(inputFiles[0], mergeName)
+                
+            else:
+                if opts.fast:
+                    ret = hplusHadd(opts, mergeName, inputFiles)
+                    if ret != 0:
+                        return ret
+                else:
+                    ret = hadd(opts, mergeName, inputFiles)
+                    if ret != 0:
+                        return ret
+    
             if len(filesSplit) > 1:
                 print "  done %d" % index
             mergedFiles.append((mergeName, inputFiles))
+            if opts.deleteImmediately:
+                for srcFile in inputFiles:
+                    if opts.test:
+                        print "rm %s" % srcFile
+                    else:
+                        ps.remove(srcFile)
     
-    # If testing, finish here
-    if opts.test:
-        return 0
-
     deleteMessage = ""
     if opts.delete:
         deleteMessage = " (source files deleted)"
+    if opts.deleteImmediately:
+        deleteMessage = " (source files deleted immediately)"
 
     print
     print "Merged histogram files%s:" % deleteMessage
     for f, sourceFiles in mergedFiles:
         print "  %s (from %d file(s))" % (f, len(sourceFiles))
-        if opts.delete:
+        if opts.delete and not opts.deleteImmediately:
             for srcFile in sourceFiles:
-                os.remove(srcFile)
+                if opts.test:
+                    print "rm %s" % srcFile
+                else:
+                    os.remove(srcFile)
 
     return 0
 
@@ -172,6 +238,12 @@ if __name__ == "__main__":
                       help="Just test, do not do any merging or deleting (might be useful for checking what would happen)")
     parser.add_option("--delete", dest="delete", default=False, action="store_true",
                       help="Delete the source files to save disk space (default is to keep the files)")
+    parser.add_option("--deleteImmediately", dest="deleteImmediately", default=False, action="store_true",
+                      help="Delete the source files immediately after merging to save disk space (--delete deletes them after all crab tasks have been merged)")
+    parser.add_option("--fast", dest="fast", default=False, action="store_true",
+                      help="Use hplusHadd.py instead of hadd, it is faster but works only for TH1's. It also consumes (much) more memory, and is run for a couple of files at a time (see --fastFilesPerMerge).")
+    parser.add_option("--fastFilesPerMerge", dest="fastFilesPerMerge", default=4, type="int",
+                      help="With --fast, merge this many files at a time (default: 4)")
     parser.add_option("--filesPerMerge", dest="filesPerMerge", default=-1, type="int",
                       help="Merge at most this many files together, possibly resulting to multiple merged files. Use case: large ntuples. (default: -1 to merge all files to one)")
     parser.add_option("--filesInSE", dest="filesInSE", default=False, action="store_true",
