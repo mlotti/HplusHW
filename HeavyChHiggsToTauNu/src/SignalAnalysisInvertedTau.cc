@@ -164,7 +164,6 @@ namespace HPlus {
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
     fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
-
     fFullHiggsMassCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("invMassReco"), eventCounter, fHistoWrapper),
     //    ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
@@ -568,6 +567,10 @@ namespace HPlus {
       
       // tau isolation
       if ( (*iTau)->tauID(myTauIsolation) < 0.5 ) continue;
+
+
+/*
+// FIXME: 29.5.2013 / Lauri : got this conflict in merge, please check what to do
       //<<<<<<< HEAD
       //=======
 	//	std::cout <<"PASSES TAU DISCR" << std::endl;
@@ -588,7 +591,7 @@ namespace HPlus {
       increment(fTauFakeScaleFactorCounter);
 
       //>>>>>>> sami2011/2011
-
+*/
       
       hTauDiscriminator->Fill((*iTau)->tauID("byRawCombinedIsolationDeltaBetaCorr"));
       increment(fTausExistCounter);  

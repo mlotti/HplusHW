@@ -65,10 +65,10 @@ class AnalysisModuleSelector:
         return self._selectedOptimizationModes
 
     def addParserOptions(self, parser):
-        parser.add_option("-e", "--era", dest="era", type="string", action="append", help="Evaluate specified data eras")
+        parser.add_option("-e", "--dataEra", dest="era", type="string", action="append", help="Evaluate specified data eras")
         parser.add_option("-m", "--searchMode", dest="searchMode", type="string", action="append", help="name of search mode")
         parser.add_option("-o", "--optimizationMode", dest="optimizationMode", type="string", action="append", help="Evaluate specified optimization mode")
-        parser.add_option("-l", "--listVariations", dest="listVariations", action="store_true", default=False, help="Print a list of available variations")
+        parser.add_option("-l", "--list", dest="listVariations", action="store_true", default=False, help="Print a list of available variations")
 
     def setPrimarySource(self, label, dsetMgrCreator):
         self._primarySource = AnalysisModuleSelectorSource(dsetMgrCreator, label)
