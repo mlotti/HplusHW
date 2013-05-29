@@ -249,7 +249,6 @@ namespace HPlus {
      */
 
     increment(fTypeIAllEvents);
-    return *met;
     if(type == kRaw)
       throw cms::Exception("Assert") << "METSelection::undoJetCorrectionForSelectedTau should not be called for raw MET" << std::endl;
 
