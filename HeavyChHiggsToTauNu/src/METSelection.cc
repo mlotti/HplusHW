@@ -147,9 +147,9 @@ namespace HPlus {
     // Do the selection
     edm::Ptr<reco::MET> met;
     if(fSelect == kRaw)
-      met = hrawmet->ptrAt(0);
+      met = output.fRawMET;
     else if(fSelect == kType1)
-      met = htype1met->ptrAt(0);
+      met = output.fType1MET;
     else if(fSelect == kType2)
       //met = htype2met->ptrAt(0);
       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
