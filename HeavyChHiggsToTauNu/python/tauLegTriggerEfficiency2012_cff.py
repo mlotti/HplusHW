@@ -1,4 +1,4 @@
-# Generated on Mon May 27 19:54:42 2013
+# Generated on Wed May 29 14:04:50 2013
 # by HiggsAnalysis/TriggerEfficiency/test/PythonWriter.py
 
 import FWCore.ParameterSet.Config as cms
@@ -29,6 +29,27 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronMediumMVA3 > 0.5&& PFTau_againstMuonMedium2 > 0.5&& PFTau_byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.020913305748, 0.000714417823078),
+                triggerBin(25.0, 0.0346064635844, 0.00101646954577),
+                triggerBin(29.0, 0.0885797710049, 0.00162746629446),
+                triggerBin(33.0, 0.462946328318, 0.0030505081827),
+                triggerBin(37.0, 0.763745957071, 0.00297361778495),
+                triggerBin(41.0, 0.808964942833, 0.00342073395184),
+                triggerBin(45.0, 0.814235902369, 0.00426454463545),
+                triggerBin(50.0, 0.819913211186, 0.00596630560983),
+                triggerBin(55.0, 0.806977797916, 0.0084010440045),
+                triggerBin(60.0, 0.816747040772, 0.0081004032721),
+                triggerBin(70.0, 0.833883388339, 0.0123446065236),
+                triggerBin(80.0, 0.839469808542, 0.0140878920579),
+                triggerBin(100.0, 0.775773195876, 0.021173628343),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -157,6 +178,23 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0240146301554, 0.00106205567409),
+                triggerBin(25.0, 0.0332921334875, 0.0011327811561),
+                triggerBin(29.0, 0.0765011168046, 0.00152335533647),
+                triggerBin(33.0, 0.533925847317, 0.00287273467731),
+                triggerBin(37.0, 0.856587105402, 0.00223117526402),
+                triggerBin(41.0, 0.875388617474, 0.00263079749899),
+                triggerBin(45.0, 0.884551667012, 0.00325171021473),
+                triggerBin(50.0, 0.88736068295, 0.00486847893093),
+                triggerBin(55.0, 0.87757909216, 0.00701848052294),
+                triggerBin(60.0, 0.90664189503, 0.00627006279942),
+                triggerBin(70.0, 0.850215517241, 0.011714504874),
+                triggerBin(80.0, 0.87399463807, 0.0121500896793),
+                triggerBin(100.0, 0.854700854701, 0.0162897970056),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0240146301554, 0.00106205567409),
@@ -278,7 +316,7 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -300,6 +338,27 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronMediumMVA3 > 0.5&& PFTau_againstMuonMedium2 > 0.5&& PFTau_byMediumCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0238984316654, 0.000957558061689),
+                triggerBin(25.0, 0.0361744074091, 0.00126433497197),
+                triggerBin(29.0, 0.0833140369564, 0.00188067125862),
+                triggerBin(33.0, 0.462019842279, 0.00355612418405),
+                triggerBin(37.0, 0.792290662847, 0.00327342916257),
+                triggerBin(41.0, 0.832920178483, 0.0037147170728),
+                triggerBin(45.0, 0.837940896092, 0.00464493927573),
+                triggerBin(50.0, 0.849710982659, 0.00640383206084),
+                triggerBin(55.0, 0.826441467676, 0.00913995141191),
+                triggerBin(60.0, 0.853828306265, 0.00850840752772),
+                triggerBin(70.0, 0.864705882353, 0.0131165375731),
+                triggerBin(80.0, 0.852670349908, 0.0152102287174),
+                triggerBin(100.0, 0.774509803922, 0.0238900235933),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -428,6 +487,23 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0239330346616, 0.00117347694146),
+                triggerBin(25.0, 0.0314591373162, 0.00122000848049),
+                triggerBin(29.0, 0.0730149916713, 0.00163840589178),
+                triggerBin(33.0, 0.531764520077, 0.00313545060086),
+                triggerBin(37.0, 0.86043255769, 0.00240778936299),
+                triggerBin(41.0, 0.888720551473, 0.00273707487751),
+                triggerBin(45.0, 0.894620486367, 0.00340276506511),
+                triggerBin(50.0, 0.902923644621, 0.00498799400472),
+                triggerBin(55.0, 0.881149806523, 0.00760861375744),
+                triggerBin(60.0, 0.923931149361, 0.00624692620032),
+                triggerBin(70.0, 0.862023653088, 0.0125017147105),
+                triggerBin(80.0, 0.885167464115, 0.0127324338502),
+                triggerBin(100.0, 0.858942065491, 0.0174696998298),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0239330346616, 0.00117347694146),
@@ -549,7 +625,7 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -571,6 +647,27 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronMediumMVA3 > 0.5&& PFTau_againstMuonMedium2 > 0.5&& PFTau_byTightCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.025162554556, 0.00104519327585),
+                triggerBin(25.0, 0.0368776889982, 0.00134877084908),
+                triggerBin(29.0, 0.0821987920975, 0.00196502001212),
+                triggerBin(33.0, 0.46112275284, 0.00370174410687),
+                triggerBin(37.0, 0.795583641011, 0.00339811238644),
+                triggerBin(41.0, 0.833047025982, 0.0038642367123),
+                triggerBin(45.0, 0.839294971488, 0.00482775589106),
+                triggerBin(50.0, 0.858284126433, 0.00649985931785),
+                triggerBin(55.0, 0.834705509816, 0.00934769995378),
+                triggerBin(60.0, 0.86858974359, 0.00855381160055),
+                triggerBin(70.0, 0.867088607595, 0.0135037473804),
+                triggerBin(80.0, 0.858606557377, 0.0157725467687),
+                triggerBin(100.0, 0.775438596491, 0.0247183133731),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -699,6 +796,23 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0237582361885, 0.00121220829938),
+                triggerBin(25.0, 0.0313207348529, 0.00126375667345),
+                triggerBin(29.0, 0.0734725115864, 0.00170130497215),
+                triggerBin(33.0, 0.531410742896, 0.00324020357154),
+                triggerBin(37.0, 0.860643106637, 0.00248207617917),
+                triggerBin(41.0, 0.889085783327, 0.0028183315289),
+                triggerBin(45.0, 0.894990868771, 0.0035013733951),
+                triggerBin(50.0, 0.901659125189, 0.00517185640642),
+                triggerBin(55.0, 0.880994671403, 0.0078787082715),
+                triggerBin(60.0, 0.92054958184, 0.00660988584837),
+                triggerBin(70.0, 0.855337078652, 0.0131827880066),
+                triggerBin(80.0, 0.88, 0.0135518328618),
+                triggerBin(100.0, 0.851458885942, 0.0183161631953),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0237582361885, 0.00121220829938),
@@ -820,7 +934,7 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -842,6 +956,27 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronMediumMVA3 > 0.5&& PFTau_againstMuonTight2 > 0.5&& PFTau_byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.020667168297, 0.000712496158805),
+                triggerBin(25.0, 0.0343928482741, 0.00101530961841),
+                triggerBin(29.0, 0.0886937647987, 0.00163036478976),
+                triggerBin(33.0, 0.462757587111, 0.00305202180826),
+                triggerBin(37.0, 0.764327772326, 0.00297297963144),
+                triggerBin(41.0, 0.809281868507, 0.00342115612473),
+                triggerBin(45.0, 0.814895155459, 0.00426356654067),
+                triggerBin(50.0, 0.820091765274, 0.0059690350822),
+                triggerBin(55.0, 0.807185084129, 0.00841287164512),
+                triggerBin(60.0, 0.816981962165, 0.00811060896937),
+                triggerBin(70.0, 0.832594235033, 0.012430787312),
+                triggerBin(80.0, 0.838278931751, 0.0141823313581),
+                triggerBin(100.0, 0.775773195876, 0.021173628343),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -970,6 +1105,23 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0240853364224, 0.00106514409941),
+                triggerBin(25.0, 0.0333399880216, 0.00113438135163),
+                triggerBin(29.0, 0.0764071541294, 0.00152319758491),
+                triggerBin(33.0, 0.53407658106, 0.0028734379497),
+                triggerBin(37.0, 0.857166037889, 0.00222859395679),
+                triggerBin(41.0, 0.875476009139, 0.00263042336864),
+                triggerBin(45.0, 0.884826514759, 0.00324884640385),
+                triggerBin(50.0, 0.887280493593, 0.00487172472289),
+                triggerBin(55.0, 0.87757909216, 0.00701848052294),
+                triggerBin(60.0, 0.907484890748, 0.00624749373502),
+                triggerBin(70.0, 0.852972972973, 0.0116438166099),
+                triggerBin(80.0, 0.87399463807, 0.0121500896793),
+                triggerBin(100.0, 0.854700854701, 0.0162897970056),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0240853364224, 0.00106514409941),
@@ -1091,7 +1243,7 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -1113,6 +1265,27 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronMediumMVA3 > 0.5&& PFTau_againstMuonTight2 > 0.5&& PFTau_byMediumCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0237124421044, 0.000957308135343),
+                triggerBin(25.0, 0.0359066427289, 0.00126237110267),
+                triggerBin(29.0, 0.0834184858337, 0.00188449367159),
+                triggerBin(33.0, 0.462047885889, 0.00355840317632),
+                triggerBin(37.0, 0.793049488166, 0.00327124587658),
+                triggerBin(41.0, 0.833267130089, 0.00371439428786),
+                triggerBin(45.0, 0.838350055741, 0.00464574359528),
+                triggerBin(50.0, 0.850257069409, 0.00639629515319),
+                triggerBin(55.0, 0.826799297835, 0.00915385107095),
+                triggerBin(60.0, 0.854312354312, 0.00851649830305),
+                triggerBin(70.0, 0.863298662704, 0.0132421768476),
+                triggerBin(80.0, 0.851301115242, 0.0153392568287),
+                triggerBin(100.0, 0.774509803922, 0.0238900235933),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -1241,6 +1414,23 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0240037838477, 0.00117690323743),
+                triggerBin(25.0, 0.0315099324787, 0.00122194631048),
+                triggerBin(29.0, 0.0728889594664, 0.00163791472957),
+                triggerBin(33.0, 0.53187959232, 0.00313620947826),
+                triggerBin(37.0, 0.861147358755, 0.00240394800034),
+                triggerBin(41.0, 0.888829948469, 0.00273641580245),
+                triggerBin(45.0, 0.894950239587, 0.00339868921362),
+                triggerBin(50.0, 0.902840909091, 0.00499201640926),
+                triggerBin(55.0, 0.881149806523, 0.00760861375744),
+                triggerBin(60.0, 0.924958310172, 0.00621150444305),
+                triggerBin(70.0, 0.865435356201, 0.0123950475491),
+                triggerBin(80.0, 0.885167464115, 0.0127324338502),
+                triggerBin(100.0, 0.858942065491, 0.0174696998298),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0240037838477, 0.00117690323743),
@@ -1362,7 +1552,7 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -1384,6 +1574,27 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronMediumMVA3 > 0.5&& PFTau_againstMuonTight2 > 0.5&& PFTau_byTightCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0249472786826, 0.0010447198153),
+                triggerBin(25.0, 0.0365665500926, 0.00134604645415),
+                triggerBin(29.0, 0.0824392998306, 0.00197051128408),
+                triggerBin(33.0, 0.461092395206, 0.00370448537896),
+                triggerBin(37.0, 0.796246267596, 0.00339618378993),
+                triggerBin(41.0, 0.833154160396, 0.00386573613543),
+                triggerBin(45.0, 0.839743589744, 0.00482856289353),
+                triggerBin(50.0, 0.858880778589, 0.0064906710081),
+                triggerBin(55.0, 0.834075015893, 0.00937981099293),
+                triggerBin(60.0, 0.869369369369, 0.00854868218869),
+                triggerBin(70.0, 0.8656, 0.0136432629528),
+                triggerBin(80.0, 0.857142857143, 0.015922234645),
+                triggerBin(100.0, 0.775438596491, 0.0247183133731),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -1512,6 +1723,23 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0238337358587, 0.00121601346885),
+                triggerBin(25.0, 0.0313603541875, 0.00126532939234),
+                triggerBin(29.0, 0.0733316309159, 0.00170063406758),
+                triggerBin(33.0, 0.531398928767, 0.00324068665383),
+                triggerBin(37.0, 0.861403959887, 0.00247784918406),
+                triggerBin(41.0, 0.889202256245, 0.00281760328904),
+                triggerBin(45.0, 0.895341250163, 0.00349689551024),
+                triggerBin(50.0, 0.901570048309, 0.00517628535173),
+                triggerBin(55.0, 0.880994671403, 0.0078787082715),
+                triggerBin(60.0, 0.921650717703, 0.00657177305699),
+                triggerBin(70.0, 0.858956276446, 0.013071917358),
+                triggerBin(80.0, 0.88, 0.0135518328618),
+                triggerBin(100.0, 0.851458885942, 0.0183161631953),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0238337358587, 0.00121601346885),
@@ -1633,7 +1861,7 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -1655,6 +1883,27 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronTightMVA3 > 0.5&& PFTau_againstMuonMedium2 > 0.5&& PFTau_byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0204891626504, 0.000719192696498),
+                triggerBin(25.0, 0.0329495186053, 0.00101804956799),
+                triggerBin(29.0, 0.0861636971047, 0.00165532475002),
+                triggerBin(33.0, 0.46914515936, 0.00315190417566),
+                triggerBin(37.0, 0.774455225068, 0.00304321183911),
+                triggerBin(41.0, 0.816506279563, 0.00349550326271),
+                triggerBin(45.0, 0.822960805085, 0.0043923131764),
+                triggerBin(50.0, 0.83125, 0.00617395998767),
+                triggerBin(55.0, 0.81935483871, 0.00857060841086),
+                triggerBin(60.0, 0.828780487805, 0.00831992585681),
+                triggerBin(70.0, 0.856617647059, 0.0122686359749),
+                triggerBin(80.0, 0.872268907563, 0.0136840617872),
+                triggerBin(100.0, 0.799410029499, 0.0217490130814),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -1783,6 +2032,23 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0228789323165, 0.00105907696154),
+                triggerBin(25.0, 0.0288509994961, 0.00108473943369),
+                triggerBin(29.0, 0.0733016939758, 0.00153400001563),
+                triggerBin(33.0, 0.534952040491, 0.00296738577912),
+                triggerBin(37.0, 0.862856646545, 0.00226692956371),
+                triggerBin(41.0, 0.880746534925, 0.0026845505893),
+                triggerBin(45.0, 0.890311614731, 0.00332654945313),
+                triggerBin(50.0, 0.895909805978, 0.00494477699081),
+                triggerBin(55.0, 0.889003613836, 0.00713742195505),
+                triggerBin(60.0, 0.910597689603, 0.00639443258645),
+                triggerBin(70.0, 0.877171215881, 0.0115617810707),
+                triggerBin(80.0, 0.879284649776, 0.0125772222406),
+                triggerBin(100.0, 0.903465346535, 0.0146928717601),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0228789323165, 0.00105907696154),
@@ -1904,7 +2170,7 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -1926,6 +2192,27 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronTightMVA3 > 0.5&& PFTau_againstMuonMedium2 > 0.5&& PFTau_byMediumCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0234562380585, 0.000964975549048),
+                triggerBin(25.0, 0.0342284144049, 0.00126239370097),
+                triggerBin(29.0, 0.0811010076186, 0.00191389525434),
+                triggerBin(33.0, 0.467277557881, 0.00367385638292),
+                triggerBin(37.0, 0.803764573676, 0.00332834734325),
+                triggerBin(41.0, 0.84074941452, 0.00377527443961),
+                triggerBin(45.0, 0.845643443339, 0.00477411187998),
+                triggerBin(50.0, 0.863471314452, 0.00654265384835),
+                triggerBin(55.0, 0.834920634921, 0.00935467520172),
+                triggerBin(60.0, 0.862091084028, 0.00873272313833),
+                triggerBin(70.0, 0.89603960396, 0.0123982746654),
+                triggerBin(80.0, 0.885892116183, 0.0144818726773),
+                triggerBin(100.0, 0.807407407407, 0.023998509666),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -2054,6 +2341,23 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0226895406752, 0.00116769331641),
+                triggerBin(25.0, 0.026651574398, 0.00115529303437),
+                triggerBin(29.0, 0.0693462712786, 0.00164295213825),
+                triggerBin(33.0, 0.53159866953, 0.00323787480822),
+                triggerBin(37.0, 0.866828713281, 0.00244336654772),
+                triggerBin(41.0, 0.894465367611, 0.00278003528414),
+                triggerBin(45.0, 0.900295619457, 0.00347300057698),
+                triggerBin(50.0, 0.911313068004, 0.00503269037895),
+                triggerBin(55.0, 0.894900497512, 0.00764794370733),
+                triggerBin(60.0, 0.929129129129, 0.00628875685509),
+                triggerBin(70.0, 0.890243902439, 0.0122044134741),
+                triggerBin(80.0, 0.881415929204, 0.0136012680922),
+                triggerBin(100.0, 0.903225806452, 0.0160103475531),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0226895406752, 0.00116769331641),
@@ -2175,7 +2479,7 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -2197,6 +2501,27 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronTightMVA3 > 0.5&& PFTau_againstMuonMedium2 > 0.5&& PFTau_byTightCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0245890316342, 0.00105090779794),
+                triggerBin(25.0, 0.0348079099089, 0.00134545310197),
+                triggerBin(29.0, 0.080156402737, 0.00200102278938),
+                triggerBin(33.0, 0.466635365925, 0.00382189614533),
+                triggerBin(37.0, 0.807368903837, 0.00344795933206),
+                triggerBin(41.0, 0.839935513588, 0.00393469032518),
+                triggerBin(45.0, 0.847892138245, 0.00494886614679),
+                triggerBin(50.0, 0.86925795053, 0.00667986226375),
+                triggerBin(55.0, 0.844398340249, 0.00953227694508),
+                triggerBin(60.0, 0.876508161817, 0.00876479198184),
+                triggerBin(70.0, 0.901433691756, 0.012618683247),
+                triggerBin(80.0, 0.887096774194, 0.0151912604793),
+                triggerBin(100.0, 0.81124497992, 0.0247985103253),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -2325,6 +2650,23 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0223559759243, 0.0012023354664),
+                triggerBin(25.0, 0.0269222246842, 0.00120466581527),
+                triggerBin(29.0, 0.0695816124978, 0.00170477780355),
+                triggerBin(33.0, 0.53166037057, 0.00334633384661),
+                triggerBin(37.0, 0.86640655053, 0.00252204916167),
+                triggerBin(41.0, 0.894401813743, 0.00286979399775),
+                triggerBin(45.0, 0.901201029454, 0.00356799498507),
+                triggerBin(50.0, 0.911044973545, 0.00517683426466),
+                triggerBin(55.0, 0.894736842105, 0.00792128267246),
+                triggerBin(60.0, 0.926022063595, 0.00666746054094),
+                triggerBin(70.0, 0.882736156352, 0.012984144341),
+                triggerBin(80.0, 0.878095238095, 0.0142791216837),
+                triggerBin(100.0, 0.897196261682, 0.0169510133227),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0223559759243, 0.0012023354664),
@@ -2446,7 +2788,7 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -2468,6 +2810,27 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronTightMVA3 > 0.5&& PFTau_againstMuonTight2 > 0.5&& PFTau_byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.020269745528, 0.000717002508629),
+                triggerBin(25.0, 0.0327777958971, 0.00101685691111),
+                triggerBin(29.0, 0.086328928559, 0.00165834913259),
+                triggerBin(33.0, 0.469061876248, 0.00315306670413),
+                triggerBin(37.0, 0.775123427297, 0.00304194718551),
+                triggerBin(41.0, 0.816949706074, 0.00349422033546),
+                triggerBin(45.0, 0.823194168323, 0.00439207566378),
+                triggerBin(50.0, 0.831112319826, 0.00617848547793),
+                triggerBin(55.0, 0.819631290483, 0.00858254674858),
+                triggerBin(60.0, 0.829256360078, 0.00832292972289),
+                triggerBin(70.0, 0.855733662145, 0.012337903945),
+                triggerBin(80.0, 0.871186440678, 0.0137914629856),
+                triggerBin(100.0, 0.799410029499, 0.0217490130814),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -2596,6 +2959,23 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0229157244083, 0.00106076011419),
+                triggerBin(25.0, 0.0288837502628, 0.00108595248487),
+                triggerBin(29.0, 0.0732958879412, 0.00153460872848),
+                triggerBin(33.0, 0.535146428698, 0.00296803996838),
+                triggerBin(37.0, 0.863276836158, 0.00226484134436),
+                triggerBin(41.0, 0.880867416964, 0.00268355790486),
+                triggerBin(45.0, 0.890614373158, 0.00332308502293),
+                triggerBin(50.0, 0.895909805978, 0.00494477699081),
+                triggerBin(55.0, 0.889003613836, 0.00713742195505),
+                triggerBin(60.0, 0.911513323278, 0.00636800009587),
+                triggerBin(70.0, 0.880448318804, 0.0114491173162),
+                triggerBin(80.0, 0.879284649776, 0.0125772222406),
+                triggerBin(100.0, 0.903465346535, 0.0146928717601),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0229157244083, 0.00106076011419),
@@ -2717,7 +3097,7 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -2739,6 +3119,27 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronTightMVA3 > 0.5&& PFTau_againstMuonTight2 > 0.5&& PFTau_byMediumCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0233299284985, 0.000964871088781),
+                triggerBin(25.0, 0.0340425531915, 0.00126099914646),
+                triggerBin(29.0, 0.0812887969258, 0.0019181308491),
+                triggerBin(33.0, 0.467408412483, 0.0036757136002),
+                triggerBin(37.0, 0.804627610943, 0.00332502206905),
+                triggerBin(41.0, 0.841236014917, 0.00377240043223),
+                triggerBin(45.0, 0.845979020979, 0.00477278336208),
+                triggerBin(50.0, 0.863471314452, 0.00654265384835),
+                triggerBin(55.0, 0.835354179962, 0.0093686320294),
+                triggerBin(60.0, 0.862846104314, 0.00872941252337),
+                triggerBin(70.0, 0.895174708819, 0.0124953868033),
+                triggerBin(80.0, 0.884696016771, 0.0146237920127),
+                triggerBin(100.0, 0.807407407407, 0.023998509666),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -2867,6 +3268,23 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.022730072687, 0.00116975499632),
+                triggerBin(25.0, 0.0266845250361, 0.00115670180002),
+                triggerBin(29.0, 0.0693264118558, 0.00164349070129),
+                triggerBin(33.0, 0.531760741365, 0.00323855808001),
+                triggerBin(37.0, 0.867353276058, 0.00244017086194),
+                triggerBin(41.0, 0.89461185719, 0.00277856015029),
+                triggerBin(45.0, 0.900658690684, 0.00346806942291),
+                triggerBin(50.0, 0.911313068004, 0.00503269037895),
+                triggerBin(55.0, 0.894900497512, 0.00764794370733),
+                triggerBin(60.0, 0.930246542393, 0.0062464860962),
+                triggerBin(70.0, 0.894333843798, 0.0120298772801),
+                triggerBin(80.0, 0.881415929204, 0.0136012680922),
+                triggerBin(100.0, 0.903225806452, 0.0160103475531),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.022730072687, 0.00116975499632),
@@ -2988,7 +3406,7 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -3010,6 +3428,27 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronTightMVA3 > 0.5&& PFTau_againstMuonTight2 > 0.5&& PFTau_byTightCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0244421812795, 0.00105062929577),
+                triggerBin(25.0, 0.0345908550427, 0.00134346703523),
+                triggerBin(29.0, 0.0803483941208, 0.00200560631871),
+                triggerBin(33.0, 0.466650996063, 0.00382437387979),
+                triggerBin(37.0, 0.808127965713, 0.00344488383104),
+                triggerBin(41.0, 0.840170546209, 0.0039337097387),
+                triggerBin(45.0, 0.848260125499, 0.00494723796949),
+                triggerBin(50.0, 0.86925795053, 0.00667986226375),
+                triggerBin(55.0, 0.84375, 0.00956831930775),
+                triggerBin(60.0, 0.877580071174, 0.00874442536612),
+                triggerBin(70.0, 0.900542495479, 0.0127264805812),
+                triggerBin(80.0, 0.885780885781, 0.0153569121561),
+                triggerBin(100.0, 0.81124497992, 0.0247985103253),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -3138,6 +3577,23 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0223989396952, 0.00120461964761),
+                triggerBin(25.0, 0.0269490961517, 0.0012058515598),
+                triggerBin(29.0, 0.0695542774982, 0.00170523362332),
+                triggerBin(33.0, 0.531689982457, 0.00334669753245),
+                triggerBin(37.0, 0.866963647363, 0.0025185631177),
+                triggerBin(41.0, 0.894557823129, 0.00286817352069),
+                triggerBin(45.0, 0.901587755686, 0.00356253319319),
+                triggerBin(50.0, 0.911044973545, 0.00517683426466),
+                triggerBin(55.0, 0.894736842105, 0.00792128267246),
+                triggerBin(60.0, 0.927225471085, 0.0066216019204),
+                triggerBin(70.0, 0.887070376432, 0.0128044925939),
+                triggerBin(80.0, 0.878095238095, 0.0142791216837),
+                triggerBin(100.0, 0.897196261682, 0.0169510133227),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0223989396952, 0.00120461964761),
@@ -3259,7 +3715,7 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -3281,6 +3737,27 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronVTightMVA3 > 0.5&& PFTau_againstMuonMedium2 > 0.5&& PFTau_byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0199620273192, 0.000718254172335),
+                triggerBin(25.0, 0.0327509444145, 0.00103367347055),
+                triggerBin(29.0, 0.0859055545504, 0.00168568500419),
+                triggerBin(33.0, 0.471294949075, 0.00321847723625),
+                triggerBin(37.0, 0.778343307791, 0.0031063787714),
+                triggerBin(41.0, 0.81992734821, 0.00357351067425),
+                triggerBin(45.0, 0.826931194597, 0.00448746348723),
+                triggerBin(50.0, 0.835763165724, 0.00639061478397),
+                triggerBin(55.0, 0.824317086235, 0.00880723845238),
+                triggerBin(60.0, 0.841798941799, 0.00839417420127),
+                triggerBin(70.0, 0.85868102288, 0.0127797326415),
+                triggerBin(80.0, 0.878731343284, 0.0141000270995),
+                triggerBin(100.0, 0.851973684211, 0.0203678769938),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -3409,6 +3886,23 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0223750384892, 0.00105951396984),
+                triggerBin(25.0, 0.0284536976795, 0.00109501115835),
+                triggerBin(29.0, 0.0723504947655, 0.00155121816965),
+                triggerBin(33.0, 0.536734393404, 0.00302528230938),
+                triggerBin(37.0, 0.866198467713, 0.00229900405769),
+                triggerBin(41.0, 0.883746276248, 0.00273218863124),
+                triggerBin(45.0, 0.889758093633, 0.00343585598129),
+                triggerBin(50.0, 0.903327596099, 0.00500507058512),
+                triggerBin(55.0, 0.898295766905, 0.00708700667331),
+                triggerBin(60.0, 0.915008068854, 0.0064678749644),
+                triggerBin(70.0, 0.89701897019, 0.0111879688398),
+                triggerBin(80.0, 0.888704318937, 0.0128179789923),
+                triggerBin(100.0, 0.902173913043, 0.0154863319529),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0223750384892, 0.00105951396984),
@@ -3530,7 +4024,7 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -3552,6 +4046,27 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronVTightMVA3 > 0.5&& PFTau_againstMuonMedium2 > 0.5&& PFTau_byMediumCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0230186480186, 0.000967520963134),
+                triggerBin(25.0, 0.0340982950852, 0.00128323720839),
+                triggerBin(29.0, 0.0810188737149, 0.00195147013349),
+                triggerBin(33.0, 0.469586374696, 0.00375413547332),
+                triggerBin(37.0, 0.808311688312, 0.00339096149751),
+                triggerBin(41.0, 0.845285149633, 0.00384302613215),
+                triggerBin(45.0, 0.849472319941, 0.00486570429063),
+                triggerBin(50.0, 0.867091126144, 0.00677194021946),
+                triggerBin(55.0, 0.837559972584, 0.00965665771994),
+                triggerBin(60.0, 0.876302988186, 0.00867913319865),
+                triggerBin(70.0, 0.90310786106, 0.0126479581455),
+                triggerBin(80.0, 0.887614678899, 0.0151259892922),
+                triggerBin(100.0, 0.858870967742, 0.0221078394824),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -3680,6 +4195,23 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0221522970422, 0.00116757031443),
+                triggerBin(25.0, 0.026529421128, 0.00117058832096),
+                triggerBin(29.0, 0.0681229494042, 0.00165546213394),
+                triggerBin(33.0, 0.533981858814, 0.00330215403267),
+                triggerBin(37.0, 0.870185526744, 0.00247547015084),
+                triggerBin(41.0, 0.897609147609, 0.00282160395315),
+                triggerBin(45.0, 0.900540694365, 0.00356992018545),
+                triggerBin(50.0, 0.918172519605, 0.00506122568191),
+                triggerBin(55.0, 0.905835543767, 0.00752086008928),
+                triggerBin(60.0, 0.933204881182, 0.00632727277817),
+                triggerBin(70.0, 0.910447761194, 0.0116280551777),
+                triggerBin(80.0, 0.894422310757, 0.0137153068862),
+                triggerBin(100.0, 0.902280130293, 0.0169470046522),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0221522970422, 0.00116757031443),
@@ -3801,7 +4333,7 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -3823,6 +4355,27 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronVTightMVA3 > 0.5&& PFTau_againstMuonMedium2 > 0.5&& PFTau_byTightCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0241520826454, 0.00105441281468),
+                triggerBin(25.0, 0.0349564440474, 0.00137250374596),
+                triggerBin(29.0, 0.0797449065974, 0.00203510109379),
+                triggerBin(33.0, 0.469081326224, 0.00390677064517),
+                triggerBin(37.0, 0.812479793081, 0.00350921813792),
+                triggerBin(41.0, 0.8447728383, 0.00400188783569),
+                triggerBin(45.0, 0.851115129596, 0.00504586490265),
+                triggerBin(50.0, 0.873652436395, 0.00689925834788),
+                triggerBin(55.0, 0.847988077496, 0.00980070779404),
+                triggerBin(60.0, 0.887452471483, 0.0087152059912),
+                triggerBin(70.0, 0.910179640719, 0.0127741522907),
+                triggerBin(80.0, 0.89058524173, 0.0157463327402),
+                triggerBin(100.0, 0.849137931034, 0.0234982304096),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -3951,6 +4504,23 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0217376582921, 0.00120001841096),
+                triggerBin(25.0, 0.0269065981148, 0.0012229975932),
+                triggerBin(29.0, 0.06840617324, 0.00171856284493),
+                triggerBin(33.0, 0.533782204143, 0.00341115562995),
+                triggerBin(37.0, 0.869640387275, 0.00255603391304),
+                triggerBin(41.0, 0.896981445583, 0.00292062019552),
+                triggerBin(45.0, 0.901758641601, 0.00366481462932),
+                triggerBin(50.0, 0.91768511862, 0.00521083666235),
+                triggerBin(55.0, 0.906628652887, 0.0077677045217),
+                triggerBin(60.0, 0.928818244644, 0.00675951366008),
+                triggerBin(70.0, 0.904255319149, 0.0123897719299),
+                triggerBin(80.0, 0.893162393162, 0.0142792160091),
+                triggerBin(100.0, 0.896551724138, 0.0178834088091),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0217376582921, 0.00120001841096),
@@ -4072,7 +4642,7 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -4094,6 +4664,27 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronVTightMVA3 > 0.5&& PFTau_againstMuonTight2 > 0.5&& PFTau_byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0197110805376, 0.000715005434781),
+                triggerBin(25.0, 0.0326395458846, 0.00103287962215),
+                triggerBin(29.0, 0.0860238431714, 0.00168789690518),
+                triggerBin(33.0, 0.471131447587, 0.00321942036697),
+                triggerBin(37.0, 0.778785334453, 0.00310537698313),
+                triggerBin(41.0, 0.820401801178, 0.00357199550261),
+                triggerBin(45.0, 0.827256088976, 0.00448539250391),
+                triggerBin(50.0, 0.835616438356, 0.00639576259143),
+                triggerBin(55.0, 0.823750671682, 0.00883259748833),
+                triggerBin(60.0, 0.842690677966, 0.00837934997185),
+                triggerBin(70.0, 0.858108108108, 0.0128272610307),
+                triggerBin(80.0, 0.877589453861, 0.0142235451288),
+                triggerBin(100.0, 0.851973684211, 0.0203678769938),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -4222,6 +4813,23 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0224014797308, 0.00106075168364),
+                triggerBin(25.0, 0.0284722222222, 0.00109571361006),
+                triggerBin(29.0, 0.0723280594123, 0.00155152493415),
+                triggerBin(33.0, 0.536852956336, 0.00302556334621),
+                triggerBin(37.0, 0.866554131119, 0.00229688920719),
+                triggerBin(41.0, 0.883874718407, 0.002731075766),
+                triggerBin(45.0, 0.890079460631, 0.00343208355013),
+                triggerBin(50.0, 0.903327596099, 0.00500507058512),
+                triggerBin(55.0, 0.898295766905, 0.00708700667331),
+                triggerBin(60.0, 0.915993537964, 0.00643719403795),
+                triggerBin(70.0, 0.900680272109, 0.0110321311516),
+                triggerBin(80.0, 0.888704318937, 0.0128179789923),
+                triggerBin(100.0, 0.902173913043, 0.0154863319529),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0224014797308, 0.00106075168364),
@@ -4343,7 +4951,7 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -4365,6 +4973,27 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronVTightMVA3 > 0.5&& PFTau_againstMuonTight2 > 0.5&& PFTau_byMediumCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0228526069519, 0.000965877670103),
+                triggerBin(25.0, 0.0340061100816, 0.00128265322936),
+                triggerBin(29.0, 0.0811433840479, 0.00195433675808),
+                triggerBin(33.0, 0.469618891217, 0.00375563821552),
+                triggerBin(37.0, 0.808809329273, 0.00338910872472),
+                triggerBin(41.0, 0.845806014018, 0.00383968533025),
+                triggerBin(45.0, 0.849916620345, 0.00486158913116),
+                triggerBin(50.0, 0.867091126144, 0.00677194021946),
+                triggerBin(55.0, 0.836889194769, 0.00969265018543),
+                triggerBin(60.0, 0.877522616562, 0.00864825974682),
+                triggerBin(70.0, 0.902573529412, 0.0127139450865),
+                triggerBin(80.0, 0.886310904872, 0.0152902228877),
+                triggerBin(100.0, 0.858870967742, 0.0221078394824),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -4493,6 +5122,23 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0221802142407, 0.00116902504462),
+                triggerBin(25.0, 0.0265463233342, 0.00117132394766),
+                triggerBin(29.0, 0.0680924605746, 0.00165579792542),
+                triggerBin(33.0, 0.53405206416, 0.00330233940807),
+                triggerBin(37.0, 0.870610583446, 0.0024726212662),
+                triggerBin(41.0, 0.897764685496, 0.00281994860186),
+                triggerBin(45.0, 0.900925266904, 0.0035645332878),
+                triggerBin(50.0, 0.918172519605, 0.00506122568191),
+                triggerBin(55.0, 0.905835543767, 0.00752086008928),
+                triggerBin(60.0, 0.934405144695, 0.00627823117321),
+                triggerBin(70.0, 0.915, 0.0113852975367),
+                triggerBin(80.0, 0.894422310757, 0.0137153068862),
+                triggerBin(100.0, 0.902280130293, 0.0169470046522),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0221802142407, 0.00116902504462),
@@ -4614,7 +5260,7 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -4636,6 +5282,27 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     # Offline selection: Sum$(PFTauPt > 20 && abs(PFTauEta) < 2.1&& PFTauLeadChargedHadrCandPt > 20&& PFTauProng == 1&& PFTau_againstElectronVTightMVA3 > 0.5&& PFTau_againstMuonTight2 > 0.5&& PFTau_byTightCombinedIsolationDeltaBetaCorr3Hits > 0.5) == 1 && Sum$(MuonPt > 15&& MuonIsGlobalMuon) == 1&& sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80&& sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40
 
     dataParameters = cms.PSet(
+        # 2012ABCD
+        runs_190456_208686 = cms.PSet(
+            firstRun = cms.uint32(190456),
+            lastRun = cms.uint32(208686),
+            luminosity = cms.double(19296), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.023962871756, 0.00105243861481),
+                triggerBin(25.0, 0.0348550967886, 0.00137188759947),
+                triggerBin(29.0, 0.0798666063758, 0.00203807211253),
+                triggerBin(33.0, 0.469116113599, 0.00390846460113),
+                triggerBin(37.0, 0.812828601472, 0.00350798151767),
+                triggerBin(41.0, 0.845025666096, 0.0040006918513),
+                triggerBin(45.0, 0.851598632616, 0.00504112190118),
+                triggerBin(50.0, 0.873652436395, 0.00689925834788),
+                triggerBin(55.0, 0.847305389222, 0.00984075931397),
+                triggerBin(60.0, 0.888804265042, 0.00867590457806),
+                triggerBin(70.0, 0.909638554217, 0.0128472845645),
+                triggerBin(80.0, 0.889175257732, 0.0159366188876),
+                triggerBin(100.0, 0.849137931034, 0.0234982304096),
+            ),
+        ),
         # 2012ABC
         runs_190456_202585 = cms.PSet(
             firstRun = cms.uint32(190456),
@@ -4764,6 +5431,23 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     mcParameters = cms.PSet(
+        Summer12_PU_2012ABCD = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0217671390791, 0.00120162777912),
+                triggerBin(25.0, 0.0269204389575, 0.001223618005),
+                triggerBin(29.0, 0.0683673469388, 0.00171878809199),
+                triggerBin(33.0, 0.533857089413, 0.00341136018278),
+                triggerBin(37.0, 0.87009167964, 0.00255292983991),
+                triggerBin(41.0, 0.897147077832, 0.00291881025225),
+                triggerBin(45.0, 0.902168967086, 0.00365881729775),
+                triggerBin(50.0, 0.91768511862, 0.00521083666235),
+                triggerBin(55.0, 0.906628652887, 0.0077677045217),
+                triggerBin(60.0, 0.930103806228, 0.00670746709179),
+                triggerBin(70.0, 0.909090909091, 0.0121374061326),
+                triggerBin(80.0, 0.893162393162, 0.0142792160091),
+                triggerBin(100.0, 0.896551724138, 0.0178834088091),
+            ),
+        ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0217671390791, 0.00120162777912),
@@ -4885,6 +5569,6 @@ tauLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
     ),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABC"),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
