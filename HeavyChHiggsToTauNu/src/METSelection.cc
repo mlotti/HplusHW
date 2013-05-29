@@ -14,6 +14,24 @@ namespace HPlus {
     fPassedEvent(false) {}
   METSelection::Data::~Data() {}
 
+   const edm::Ptr<reco::MET> METSelection::Data::getSelectedMET() const {
+     if (fMETMode == METSelection::kType1)
+       return getType1MET();
+     else if (fMETMode == METSelection::kType2)
+       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
+     // Fallback
+     return fSelectedMET;
+   }
+
+   const edm::Ptr<reco::MET> METSelection::Data::getType1MET() const { 
+     if (fType1METCorrected.size() > 0) {
+       // Need to construct edm::Ptr here or otherwise copy operation will destroy the pointer and cause seg fault
+       return edm::Ptr<reco::MET>(&fType1METCorrected, 0);
+     }
+     edm::Ptr<reco::MET> myNullPointer;
+     return myNullPointer;
+   }
+
   METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, const std::string& label, const std::string& tauIsolationDiscriminator):
     BaseSelection(eventCounter, histoWrapper),
     fRawSrc(iConfig.getUntrackedParameter<edm::InputTag>("rawSrc")),
@@ -103,6 +121,7 @@ namespace HPlus {
 
   METSelection::Data METSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, bool possiblyIsolatedTaus) {
     Data output;
+    output.fMETMode = fSelect;
 
     edm::Handle<edm::View<reco::MET> > hrawmet;
     iEvent.getByLabel(fRawSrc, hrawmet);
@@ -125,15 +144,11 @@ namespace HPlus {
     // Set the handles, if object available
     if(hrawmet.isValid())
       output.fRawMET = hrawmet->ptrAt(0);
-    std::cout << "type1MET valid = " << htype1met.isValid() << std::endl;
     if(htype1met.isValid() && fType1Src.label() != "") {
       output.fType1METCorrected.clear();
       output.fType1MET = htype1met->ptrAt(0);
       output.fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(output.fType1MET, selectedTau, allJets, kType1, possiblyIsolatedTaus));
       output.fType1MET = edm::Ptr<reco::MET>(&output.fType1METCorrected, 0);
-      std::cout << "type1MET = " << htype1met->ptrAt(0)->et() << std::endl;
-      std::cout << "type1METcorrection size = " << output.fType1METCorrected.size() << std::endl;
-      std::cout << "type1MET residual corr. = " << output.fType1MET->et() << std::endl;
     }
     /*
     if(htype2met.isValid()) {
@@ -160,7 +175,6 @@ namespace HPlus {
     else
       throw cms::Exception("LogicError") << "This should never happen at " << __FILE__ << ":" << __LINE__ << std::endl;
     output.fSelectedMET = met;
-    std::cout << "type1MET pointer is zero = " << met.isNull() << std::endl;
     if (met.isNull()) {
       output.fPassedEvent = false;
       return output;
@@ -183,12 +197,12 @@ namespace HPlus {
       output.fPassedEvent = false;
     }
 
-    std::cout << "type1MET selected met = " << output.fSelectedMET->et() << std::endl;
     return output;
   }
 
   METSelection::Data METSelection::silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& allJets) {
     Data output;
+    output.fMETMode = fSelect;
 
     edm::Handle<edm::View<reco::MET> > hrawmet;
     iEvent.getByLabel(fRawSrc, hrawmet);
@@ -213,6 +227,7 @@ namespace HPlus {
     if(htype1met.isValid()) {
       output.fType1METCorrected.clear();
       output.fType1MET = htype1met->ptrAt(0);
+      output.fType1METCorrected.push_back(*output.fType1MET);
     }
     if(hcalomet.isValid())
       output.fCaloMET = hcalomet->ptrAt(0);

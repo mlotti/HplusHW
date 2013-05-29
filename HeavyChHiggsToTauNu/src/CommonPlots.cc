@@ -325,13 +325,7 @@ namespace HPlus {
       return;
     }
     // A tau exists beyond this point, now obtain MET with residual type I MET
-    std::cout << "common: tau exists" << std::endl;
-    METSelection::Data a = metSelection.silentAnalyze(iEvent, iSetup, fSelectedTau, fJetData.getAllJets());
-    std::cout << "common: met x = " << a.getSelectedMET()->px() << " y = " << a.getSelectedMET()->py() << " z = " << a.getSelectedMET()->pz() << std::endl;
-    std::cout << "common: met " << a.getSelectedMET()->et() << std::endl;
     fMETData = metSelection.silentAnalyze(iEvent, iSetup, fSelectedTau, fJetData.getAllJets());
-    std::cout << "common: met pointer " << fMETData.getSelectedMET().isNull() << std::endl;
-    std::cout << "common: met = " << fMETData.getSelectedMET()->et() << std::endl;
     //FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, fBJetData,
     //                                                                                   metData, &genData); / FIXME: need entry for edm::Ptr<pat::Tau> instead of tauData
 
