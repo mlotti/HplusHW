@@ -425,7 +425,10 @@ class ConfigBuilder:
         if "QCDMeasurement" not in analysisNames_:
             self._buildJESVariation(process, analysisNamesForSystematics)
             self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
-            self._buildScaleFactorVariation(process, analysisNamesForSystematics)
+            # Disabled for now, seems like it would be better to
+            #handle SF uncertainties by error propagation after all
+            #self._buildScaleFactorVariation(process,
+            #analysisNamesForSystematics)
 
         # Optional output
         if self.edmOutput:
