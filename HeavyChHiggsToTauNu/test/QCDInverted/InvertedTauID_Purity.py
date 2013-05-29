@@ -20,7 +20,7 @@ dataEra = "Run2012ABCD"
 #optMode = "OptQCDTailKillerZeroPlus"
 #optMode = "OptQCDTailKillerLoosePlus"
 #optMode = "OptQCDTailKillerMediumPlus"
-optMode = "OptQCDTailKillerTightPlus"
+optMode = "OptQCDTailKillerMediumPlus"
 #optMode = ""
 
 #optMode = ""
@@ -35,7 +35,7 @@ HISTONAMES = []
 
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
-HISTONAMES.append("Inverted/SelectedTau_pT_CollinearTailKiller")
+#HISTONAMES.append("Inverted/SelectedTau_pT_CollinearTailKiller")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
 HISTONAMES.append("Inverted/SelectedTau_pT_BackToBackTailKiller")
@@ -99,7 +99,7 @@ def main():
 #        if "AfterMetCut"  in name:    
 #            legends["Purity%s"%i] = "MET > 60 GeV"
         if "AfterMetCut"  in name:    
-            legends["Purity%s"%i] = "MET > 50 GeV"
+            legends["Purity%s"%i] = "MET > 60 GeV"
         if "AfterBtagging"  in name:    
             legends["Purity%s"%i] = "B tagging"
         if "AfterBveto"  in name:    
@@ -120,7 +120,7 @@ def main():
     plot.setLegend(histograms.createLegend(0.53, 0.2, 0.98, 0.4))
     
  
-    histograms.addText(0.2, 0.3, "TailKiller: TightPlus", 18)
+    histograms.addText(0.2, 0.3, "TailKiller: MediumPlus", 18)
 
 
     histograms.addCmsPreliminaryText()

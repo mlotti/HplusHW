@@ -806,14 +806,14 @@ namespace HPlus {
 
 
     // test for tau resolution
-   
-    for( LorentzVectorCollection::const_iterator tau = oneProngTaus->begin();tau!=oneProngTaus->end();++tau) {      
-      double deltaR = ROOT::Math::VectorUtil::DeltaR(selectedTau->p4() ,*tau );
-      hDeltaRTauSelectedTau_baseline->Fill(deltaR);  
-      if ( deltaR > 0.2) continue;      
-      hEtResolutionTau_baseline->Fill((selectedTau->pt() - (*tau).pt())/ (*tau).pt());      
+    if (!iEvent.isRealData()) {  
+      for( LorentzVectorCollection::const_iterator tau = oneProngTaus->begin();tau!=oneProngTaus->end();++tau) {      
+	double deltaR = ROOT::Math::VectorUtil::DeltaR(selectedTau->p4() ,*tau );
+	hDeltaRTauSelectedTau_baseline->Fill(deltaR);  
+	if ( deltaR > 0.2) continue;      
+	hEtResolutionTau_baseline->Fill((selectedTau->pt() - (*tau).pt())/ (*tau).pt());      
+      }
     }
-   
 
 
   
