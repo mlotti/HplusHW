@@ -307,7 +307,9 @@ bTagging = cms.untracked.PSet(
    # LabelTag       = cms.untracked.string("TTBARWPBTAGCSVM"),######### for TTBAr btag SF
     
     BTagDBAlgo     = cms.untracked.string("CSVM"), #FIXME TCHEL
-    BTagUserDBAlgo = cms.untracked.string("BTAGCSVM_hplusBtagDB_TTJets") #FIXME
+    BTagUserDBAlgo = cms.untracked.string("BTAGCSVM_hplusBtagDB_TTJets"), #FIXME
+    variationEnabled = cms.untracked.bool(False),
+    variationShiftBy = cms.untracked.double(0),
 )
 
 oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
@@ -342,6 +344,13 @@ QCDTailKiller = cms.untracked.PSet(
         QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
     ),
 )
+
+invMassReco = cms.untracked.PSet(
+    #topInvMassCutName = cms.untracked.string("None")
+    topInvMassLowerCut = cms.untracked.double(-1.0), # Negative value means no cut. This is currently the default.
+    topInvMassUpperCut = cms.untracked.double(-1.0),  # Negative value means no cut. This is currently the default.
+    pzSelectionMethod = cms.untracked.string("deltaEtaMax"),
+    )
 
 topReconstruction = cms.untracked.string("None") # Options: None
 
@@ -553,13 +562,19 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
+tauTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
+tauTriggerEfficiencyScaleFactor.variationShiftBy = cms.double(0)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2012_cff as metTriggerEfficiency
 metTriggerEfficiencyScaleFactor = metTriggerEfficiency.metLegEfficiency
+metTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
+metTriggerEfficiencyScaleFactor.variationShiftBy = cms.double(0)
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
 embeddingMuonEfficiency = muonTriggerIDEfficiency.efficiency
+embeddingMuonEfficiency.variationEnabled = cms.bool(False)
+embeddingMuonEfficiency.variationShiftBy = cms.double(0)
 
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff

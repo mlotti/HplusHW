@@ -20,6 +20,13 @@ class StyleBase:
     def __call__(self, h):
         self.apply(h.getRootHisto())
 
+        gr = h.getSystematicUncertaintyGraph()
+        if gr is not None:
+            self.applyUncertainty(gr)
+
+    def applyUncertainty(self, gr):
+        pass
+
 ## Basic style (marker style, marker and line color)
 class Style(StyleBase):
     ## Constructor
@@ -64,6 +71,10 @@ class StyleCompound(StyleBase):
     def apply(self, h):
         for s in self.styles:
             s.apply(h)
+
+    def applyUncertainty(self, gr):
+        for s in self.styles:
+            s.applyUncertainty(gr)
 
     # Clone the compound style
     def clone(self):
@@ -155,10 +166,11 @@ class StyleError(StyleBase):
     # \param color      Fill color
     # \param style      Fill style
     # \param linecolor  Line color
-    def __init__(self, color, style=3004, linecolor=None):
+    def __init__(self, color, style=3004, linecolor=None, styleSyst=3005):
         self.color = color
         self.style = style
         self.linecolor = linecolor
+        self.styleSyst = styleSyst
 
     ## Apply the style
     #
@@ -174,11 +186,18 @@ class StyleError(StyleBase):
             h.SetLineWidth(0)
             h.SetLineColor(ROOT.kWhite)
 
+    def applyUncertainty(self, gr):
+        self.apply(gr)
+        gr.SetFillStyle(self.styleSyst)
+        
+
 dataStyle = StyleCompound([Style(ROOT.kFullCircle, ROOT.kBlack)])
 dataMcStyle = dataStyle.clone()
-errorStyle = StyleCompound([StyleError(ROOT.kBlack, 3354)])
+errorStyle = StyleCompound([StyleError(ROOT.kBlack, 3345, styleSyst=3354)])
 errorStyle2 = StyleCompound([StyleError(ROOT.kGray+2, 3354)])
 errorStyle3 = StyleCompound([StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)])
+errorRatioStatStyle = StyleCompound([StyleError(ROOT.kGray, 1001, linecolor=ROOT.kGray)])
+errorRatioSystStyle = StyleCompound([StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)])
 
 #mcStyle = Style(ROOT.kFullSquare, ROOT.kGreen-2)
 mcStyle = StyleCompound([Style(ROOT.kFullSquare, ROOT.kRed+1)])
@@ -273,9 +292,6 @@ def getQCDStyle():
 
 def getSignalStyle():
     return signalStyle
-
-def getErrorStyle():
-    return errorStyle
 
 def getErrorStyle():
     return errorStyle

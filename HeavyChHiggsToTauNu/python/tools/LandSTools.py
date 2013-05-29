@@ -27,9 +27,8 @@ from optparse import OptionParser
 
 import multicrab
 import multicrabWorkflows
-import multicrabWorkflowsTools
 import git
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import aux
 
 ## The LandS CVS tag to be used
 LandS_tag = "t3-06-05" # Given by Mingshui 15.8.2012 at 11:56 EEST
@@ -322,14 +321,14 @@ class MultiCrabLandS:
                 if not os.path.isfile(fname):
                     raise Exception("Datacard file '%s' does not exist!" % fname)
 
-                multicrabWorkflowsTools._addToDictList(self.datacards, mass, fname)
+                aux.addToDictList(self.datacards, mass, fname)
 
             for rf in rootfilePatterns:
                 fname = os.path.join(self.datacardDirectory, rf % mass)
                 if not os.path.isfile(fname):
                     raise Exception("ROOT file (for shapes) '%s' does not exist!" % fname)
 
-                multicrabWorkflowsTools._addToDictList(self.rootfiles, mass, fname)
+                aux.addToDictList(self.rootfiles, mass, fname)
 
     ## Create the multicrab task directory
     #

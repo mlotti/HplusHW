@@ -135,6 +135,8 @@ namespace HPlus {
     const double fSubLeadingDiscrCut;
     DirectionalCut fNumberOfBJets;
 
+    const bool fVariationEnabled;
+    const double fVariationShiftBy;
     BTaggingScaleFactorFromDB *btagDB;
     bool FactorsFromDB;
 
