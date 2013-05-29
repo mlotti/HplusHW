@@ -120,7 +120,7 @@ namespace HPlus {
       EventClassCode eEventClassCode;
     };
 
-    FullHiggsMassCalculator(EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    FullHiggsMassCalculator(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~FullHiggsMassCalculator();
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
@@ -170,7 +170,10 @@ namespace HPlus {
     void doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
     void analyzeMETComposition(TVector3& recoMETVector, TVector3& genBothNeutrinosVector, TVector3& genMETVector);
 
-  private:
+    double fTopInvMassLowerCut;
+    double fTopInvMassUpperCut;
+    std::string fPzSelectionMethod;
+
     // Counters
     // Discriminant and neutrino p_z calculation
     Count allEvents_SubCount; // all calculations
@@ -184,6 +187,8 @@ namespace HPlus {
     Count selectionTauNuAngleMinCorrect_SubCount;
     Count selectionTauNuDeltaEtaMaxCorrect_SubCount;
     Count selectionTauNuDeltaEtaMinCorrect_SubCount;
+
+    // Old event classification:
     // two main categories of events (pure or impure):
     Count eventClass_Pure_SubCount;
     Count eventClass_Impure_SubCount;
@@ -199,6 +204,16 @@ namespace HPlus {
     Count eventClass_AllBadTau_SubCount;
     Count eventClass_AllBadMET_SubCount;
     Count eventClass_AllBadBjet_SubCount;
+
+    // New event classification:
+    Count count_passedEvent;
+    Count count_pure;
+    Count count_tauGenuine;
+    Count count_bGenuine;
+    Count count_tauMeasurementGood;
+    Count count_bMeasurementGood;
+    Count count_tauAndBjetFromSameTopQuark;
+    Count count_neutrinoMETCorrespondenceGood;
 
     // Histograms 
     // The most important ones at the moment
