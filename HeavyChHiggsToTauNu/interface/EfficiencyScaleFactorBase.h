@@ -48,6 +48,11 @@ namespace HPlus {
     Mode getMode() const { return fMode; }
 
     virtual void setRun(unsigned run) = 0;
+
+  protected:
+    const bool fVariationEnabled;
+    const double fVariationShiftBy;
+
   private:
     Mode fMode;
   };

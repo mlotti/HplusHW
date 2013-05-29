@@ -43,15 +43,18 @@ namespace HPlus {
       double fCorrectionFactor;
     };
 
-    METPhiOscillationCorrection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    METPhiOscillationCorrection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string prefix);
+    METPhiOscillationCorrection(EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string prefix);
     ~METPhiOscillationCorrection();
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
-    METPhiOscillationCorrection::Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const METSelection::Data& metData);
-    METPhiOscillationCorrection::Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const METSelection::Data& metData);
+    METPhiOscillationCorrection::Data analyze(const edm::Event& iEvent, int nVertices, const METSelection::Data& metData);
+    METPhiOscillationCorrection::Data analyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met);
+    METPhiOscillationCorrection::Data silentAnalyze(const edm::Event& iEvent, int nVertices, const METSelection::Data& metData);
+    METPhiOscillationCorrection::Data silentAnalyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met);
 
   private:
-    METPhiOscillationCorrection::Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const METSelection::Data& metData);
+    METPhiOscillationCorrection::Data privateAnalyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met);
     // Input parameters
 
     // Counters

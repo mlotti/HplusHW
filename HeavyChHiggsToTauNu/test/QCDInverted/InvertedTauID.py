@@ -50,26 +50,43 @@ def DoubleGaussian(x,par):
 def SumFunction(x,par):
     return par[0]*TMath.Gaus(x[0],par[1],par[2],1) + par[3]*TMath.Exp(-x[0]*par[4])
 
+def QCDFunction(x,par,norm):
+    return Rayleigh(x,par,norm)
+#    return norm*(par[1]*x[0]/((par[0])*(par[0]))*TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0])))+par[2]*TMath.Gaus(x[0],par[3],par[4],1)+par[5]*TMath.Exp(-par[6]*x[0]))
+
+def Rayleigh(x,par,norm):
+    if par[0]+par[1]*x[0] == 0.0:
+	return 0
+#    return norm*(x[0]/((par[0]+par[1]*x[0])*(par[0]+par[1]*x[0]))*TMath.Exp(-x[0]*x[0]/( 2*(par[0]+par[1]*x[0])*(par[0]+par[1]*x[0]) )))
+#    return norm*(x[0]/((par[0])*(par[0]))*TMath.Exp(-x[0]*x[0]/( 2*(par[0]+par[1]*x[0])*(par[0]+par[1]*x[0]))))
+    return norm*(par[1]*x[0]/((par[0])*(par[0]))*TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0]))))
+#    return norm*(par[1]*x[0]/((par[0])*(par[0]))*TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0])))+par[2]*TMath.Gaus(x[0],par[3],par[4],1)+par[5]*TMath.Exp(-par[6]*x[0]))
+                                                                                        
 def EWKFunction(x,par,norm = 1,rejectPoints = 0):
-    if not rejectPoints == 0:
+#    if not rejectPoints == 0:
 #        if (x[0] > 280 and x[0] < 300):
-	if (x[0] > 400):
+#	if (x[0] > 400):
 #	if x[0] > 40 and x[0] < 60 :gx
 #	if x[0] > 240 and x[0] < 260:
 #	if  (x[0] > 180 and x[0] < 200) or (x[0] > 260 and x[0] < 320):
 #	if  (x[0] > 100 and x[0] < 120) or (x[0] > 180 and x[0] < 200):
 #	if  (x[0] > 60 and x[0] < 80) or (x[0] > 140 and x[0] < 160) or (x[0] > 180 and x[0] < 220) or (x[0] > 240 and x[0] < 360):
 #	if  (x[0] > 40 and x[0] < 60) or (x[0] > 80 and x[0] < 100) or (x[0] > 120 and x[0] < 140) or (x[0] > 160 and x[0] < 180):
-            TF1.RejectPoint()
-            return 0
+#            TF1.RejectPoint()
+#            return 0
     value = 150
     if x[0] < value:
 	return norm*par[0]*TMath.Gaus(x[0],par[1],par[2],1)
     C = norm*par[0]*TMath.Gaus(value,par[1],par[2],1)*TMath.Exp(value*par[3])
     return C*TMath.Exp(-x[0]*par[3])
 
-def QCDFunction(x,par,norm):
-    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1)+par[3]*TMath.Gaus(x[0],par[4],par[5],1)+par[6]*TMath.Exp(-par[7]*x[0]))
+def QCDEWKFunction(x,par,norm):
+    if par[0]+par[1]*x[0] == 0.0:
+        return 0
+    return norm*(par[1]*x[0]/((par[0])*(par[0]))*TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0])))+par[2]*TMath.Gaus(x[0],par[3],par[4],1)+par[5]*TMath.Exp(-par[6]*x[0]))
+
+#def QCDFunction(x,par,norm):
+#    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1)+par[3]*TMath.Gaus(x[0],par[4],par[5],1)+par[6]*TMath.Exp(-par[7]*x[0]))
 #    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1))
 #    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1)+par[3]*TMath.Gaus(x[0],par[4],par[5],1))
 #    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1)+par[3]*TMath.Exp(-par[4]*x[0]))
@@ -1137,24 +1154,104 @@ class InvertedTauID:
             self.nInvQCD = integralValue
             
         self.plotIntegral(plot, histo.GetName())
-        
-    def fitQCD(self,origHisto): 
 
+    
+    def fitQCD(self,histo):
+        
+        parMCEWK   = self.parMCEWK
+        nMCEWK     = self.nMCEWK
+
+        class FitFunction:
+            def __call__( self, x, par ):
+                return QCDEWKFunction(x,par,1)
+
+        class QCDOnly:
+            def __call__( self, x, par ):
+                return QCDFunction(x,par,1)
+
+        rangeMin = histo.GetXaxis().GetXmin()
+        rangeMax = histo.GetXaxis().GetXmax()
+        numberOfParameters = 7
+
+        print "Fit range ",rangeMin, " - ",rangeMax
+
+        theFit = TF1("theFit",FitFunction(),rangeMin,rangeMax,numberOfParameters)
+
+        theFit.SetParLimits(0,0.0001,200)
+        theFit.SetParLimits(1,0.001,10)
+
+        theFit.SetParLimits(2,1,10)
+        theFit.SetParLimits(3,0,150)
+        theFit.SetParLimits(4,10,100)
+
+        theFit.SetParLimits(5,0.0001,1)
+        theFit.SetParLimits(6,0.001,0.05)
+
+        gStyle.SetOptFit(0)
+
+        plot = plots.PlotBase()
+        plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
+        plot.createFrame("qcdfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
+
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+
+        self.normInvQCD = histo.Integral(0,histo.GetNbinsX())
+
+        histo.Scale(1/self.normInvQCD)
+        histo.Fit(theFit,"LR")
+
+        theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
+        theFit.SetLineStyle(2)
+        theFit.Draw("same")
+
+        par = theFit.GetParameters()
+
+        numberOfQCDParameters = 2
+        qcdOnly = TF1("qcdOnly",QCDOnly(),rangeMin,rangeMax,numberOfQCDParameters)
+        qcdOnly.FixParameter(0,par[0])
+        qcdOnly.FixParameter(1,par[1])
+        qcdOnly.SetLineStyle(2)
+        qcdOnly.Draw("same")
+        
+        histograms.addText(0.4,0.8,"Inverted TauID")
+        histograms.addText(0.4,0.25,"QCD",15)
+                
+        plot.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))
+        plot.getPad().SetLogy(True)
+        plot.draw()
+        plot.save()
+
+        self.parInvQCD = theFit.GetParameters()
+
+        fitPars = "fit parameters "
+        i = 0
+        while i < numberOfParameters:
+            fitPars = fitPars + " " + str(self.parInvQCD[i])
+            i = i + 1
+        print "QCD fit parameters",fitPars
+        self.nFitInvQCD = theFit.Integral(0,1000,self.parInvQCD)
+        print "Integral ",self.normInvQCD*self.nFitInvQCD
+
+
+    def fitQCD_old(self,origHisto):
+        
 	histo = origHisto.Clone("histo")
 
         rangeMin = histo.GetXaxis().GetXmin()
         rangeMax = histo.GetXaxis().GetXmax()
 
-        numberOfParameters = 8
+        numberOfParameters = 7
 
         print "Fit range ",rangeMin, " - ",rangeMax
 
 	class FitFunction:
 	    def __call__( self, x, par ):
-		return QCDFunction(x,par,1)
-
+                return QCDFunction(x,par,1)
+            
         theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
-
+        """
         theFit.SetParLimits(0,1,20)
         theFit.SetParLimits(1,20,40)
         theFit.SetParLimits(2,10,25)
@@ -1165,7 +1262,18 @@ class InvertedTauID:
 
         theFit.SetParLimits(6,0.0001,1)
         theFit.SetParLimits(7,0.001,0.05)
+        """
 
+        theFit.SetParLimits(0,0.0001,200)
+        theFit.SetParLimits(1,0.001,10)
+
+        theFit.SetParLimits(2,1,10)
+        theFit.SetParLimits(3,0,150)
+        theFit.SetParLimits(4,10,100)
+
+        theFit.SetParLimits(5,0.0001,1)
+        theFit.SetParLimits(6,0.001,0.05)
+                                        
 	if self.label == "Baseline":
 	    rangeMax = 240
 
@@ -1243,14 +1351,14 @@ class InvertedTauID:
 	    def __call__( self, x, par ):
 		return EWKFunction(x,par,0)
 
+
         theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
 	thePlot = TF1('thePlot',PlotFunction(),rangeMin,rangeMax,numberOfParameters)
 
         theFit.SetParLimits(0,5,30)
-        theFit.SetParLimits(1,90,120)
-        theFit.SetParLimits(2,30,50) 
+        theFit.SetParLimits(1,90,200)
+        theFit.SetParLimits(2,30,100) 
         theFit.SetParLimits(3,0.001,1)
-
 
         if self.label == "4050":
             theFit.SetParLimits(0,5,20) 
@@ -1359,7 +1467,7 @@ class InvertedTauID:
 
 	class QCDOnly:
 	    def __call__( self, x, par ):
-		return par[0]*par[1] * QCDFunction(x,parInvQCD,1/nFitInvQCD)
+                return par[0]*par[1] * QCDFunction(x,parInvQCD,1/nFitInvQCD)
 
         rangeMin = histo.GetXaxis().GetXmin()
         rangeMax = histo.GetXaxis().GetXmax()
@@ -1394,7 +1502,7 @@ class InvertedTauID:
 	qcdOnly.Draw("same")
 
         histograms.addText(0.35,0.8,"Data, Baseline TauID")
-        histograms.addText(0.4,0.3,"QCD",15)
+        histograms.addText(0.4,0.25,"QCD",15)
 
 
         plot.histoMgr.appendHisto(histograms.Histo(qcdOnly,"qcdOnly"))

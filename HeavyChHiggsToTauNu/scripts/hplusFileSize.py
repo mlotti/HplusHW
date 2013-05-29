@@ -7,10 +7,7 @@ import os
 import re
 
 from optparse import OptionParser
-
-def addToDict(d, key, num):
-    old = d.get(key, 0)
-    d[key] = old + num
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 def pretty(num):
     divisions = 0
@@ -36,18 +33,23 @@ def main(opts, files):
     for line in output.split("\n"):
         m = size_re.search(line)
         if m and m.group("class") != "END":
-            addToDict(sizes, m.group("class"), int(m.group("size")))
+            aux.addToDictList(sizes, m.group("class"), int(m.group("size")))
 
     macro.close()
 
-    items = sizes.items()
+    items = []
+    for key, valueList in sizes.iteritems():
+        items.append( (key, sum(valueList), len(valueList)) )
     items.sort(key=lambda x: x[1])
 
-    width = max([len(s) for s in sizes.iterkeys()])
-    format = "%-"+str(width)+"s: %s"
+    if len(sizes) == 0:
+        width = 10
+    else:
+        width = max([len(s) for s in sizes.iterkeys()])
+    format = "%-"+str(width)+"s: %s (%d items)"
     
-    for key, value in items:
-        print format % (key, pretty(value))
+    for name, size, count in items:
+        print format % (name, pretty(size), count)
 
     if opts.tree:
         macro = tempfile.NamedTemporaryFile(suffix=".C")
