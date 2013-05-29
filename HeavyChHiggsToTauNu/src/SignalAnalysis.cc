@@ -492,6 +492,23 @@ namespace HPlus {
     fEventWeight.multiplyWeight(prescaleWeight);
     fTree.setPrescaleWeight(prescaleWeight);
 
+//------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
+    if(!iEvent.isRealData()) {
+      const double wjetsWeight = fWJetsWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(wjetsWeight);
+      fTree.setWjetsWeight(wjetsWeight);
+    }
+    increment(fWJetsWeightCounter);
+
+//------ Apply filter (if chosen) to select tail events
+    //if (!selectTailEvents(iEvent, iSetup)) return false;
+
+//------ MET (noise) filters for data (reject events with instrumental fake MET)
+    if(iEvent.isRealData()) {
+      if(!fMETFilters.passedEvent(iEvent, iSetup)) return false;
+    }
+    increment(fMETFiltersCounter);
+
 //------ Pileup weight
     double myWeightBeforePileupReweighting = fEventWeight.getWeight();
     if(!iEvent.isRealData()) {
@@ -509,23 +526,6 @@ namespace HPlus {
     increment(fAllCounter);
     fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
 
-//------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
-    if(!iEvent.isRealData()) {
-      const double wjetsWeight = fWJetsWeightReader.getWeight(iEvent, iSetup);
-      fEventWeight.multiplyWeight(wjetsWeight);
-      fTree.setWjetsWeight(wjetsWeight);
-    }
-    increment(fWJetsWeightCounter);
-
-//------ Apply filter (if chosen) to select tail events
-    //if (!selectTailEvents(iEvent, iSetup)) return false;
-
-
-//------ MET (noise) filters for data (reject events with instrumental fake MET)
-    if(iEvent.isRealData()) {
-      if(!fMETFilters.passedEvent(iEvent, iSetup)) return false;
-    }
-    increment(fMETFiltersCounter);
 
 //------ For embedding, apply the muon ID efficiency at this stage
     EmbeddingMuonEfficiency::Data embeddingMuonData;
