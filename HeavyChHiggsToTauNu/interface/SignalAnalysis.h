@@ -68,31 +68,34 @@ namespace HPlus {
       void incrementOneTauCounter() { increment(fOneTauCounter); }
       void incrementElectronVetoCounter() { increment(fElectronVetoCounter); }
       void incrementMuonVetoCounter() { increment(fMuonVetoCounter); }
-      void incrementMETCounter() { increment(fMETCounter); }
       void incrementNJetsCounter() { increment(fNJetsCounter); }
+      void incrementDeltaPhiCollinearCounter() { increment(fDeltaPhiCollinearCounter); }
+      void incrementMETCounter() { increment(fMETCounter); }
       void incrementBTaggingCounter() { increment(fBTaggingCounter); }
-      void incrementDeltaPhiCounter() { increment(fDeltaPhiCounter); }
+      void incrementDeltaPhiBackToBackCounter() { increment(fDeltaPhiBackToBackCounter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
       void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
       void incrementTopChiSelectionCounter() { increment(fTopChiSelectionCounter); }
       void incrementSelectedEventsCounter() { increment(fSelectedEventsCounter); }
       void incrementSelectedEventsFullMassCounter() { increment(fSelectedEventsFullMassCounter); }
+
     private:
       Count fOneTauCounter;
       Count fElectronVetoCounter;
       Count fMuonVetoCounter;
       Count fNJetsCounter;
+      Count fDeltaPhiCollinearCounter;
       Count fMETCounter;
       //      Count fRtauAfterMetCounter;
       Count fBTaggingCounter;
-      Count fDeltaPhiCounter;
+      Count fDeltaPhiBackToBackCounter;
       Count fFakeMETVetoCounter;
       Count fTopSelectionCounter;
       Count fTopChiSelectionCounter;
       //      Count fTopChiSelectionNarrowCounter;
-      Count fTopWithMHSelectionCounter;
-      Count fTopWithBSelectionCounter;
-      Count fTopWithWSelectionCounter;
+      //Count fTopWithMHSelectionCounter;
+      //Count fTopWithBSelectionCounter;
+      //Count fTopWithWSelectionCounter;
       Count fSelectedEventsCounter;
       Count fSelectedEventsFullMassCounter;
     };
@@ -103,10 +106,11 @@ namespace HPlus {
     kSignalOrderElectronVeto,
     kSignalOrderMuonVeto,
     kSignalOrderJetSelection,
+    kSignalOrderDeltaPhiCollinearSelection,
     kSignalOrderMETSelection,
     kSignalOrderBTagSelection,
     //kSignalOrderDeltaPhiSelection,
-    kSignalOrderDeltaPhiSelection,
+    kSignalOrderDeltaPhiBackToBackSelection,
     kSignalOrderFakeMETVeto,
     kSignalOrderBjetSelection,
     kSignalOrderTopSelection,
@@ -123,6 +127,8 @@ namespace HPlus {
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
+    /// Fill TTree (after delta phi collinear cuts)
+    void doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronVetoData, const MuonSelection::Data& muonVetoData, const JetSelection::Data& jetData);
     CounterGroup* getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
     void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
     void doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData, const METSelection::Data& metData, const GenParticleAnalysis::Data& genData);
