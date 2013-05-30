@@ -194,7 +194,7 @@ namespace HPlus {
     BTagging::Data fBJetData;
     TopChiSelection::Data fTopData;
     EvtTopology::Data fEvtTopology;
-    FullHiggsMassCalculator::Data* fFullHiggsMassData;
+    FullHiggsMassCalculator::Data fFullHiggsMassData;
 
     /// MET phi oscillation
     METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterVertices;

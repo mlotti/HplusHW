@@ -144,9 +144,9 @@ namespace HPlus {
     double myMT = TransverseMass::reconstruct(*(fSelectedTau), *(fMETData->getSelectedMET()) );
     hTransverseMass->Fill(myMT);
     // full mass
-    if (!fSelectedTau.isNull() && fBJetData.passedEvent()) { // Make sure FullHiggsMassData is available
-      if (fFullHiggsMassData.passedEvent()) {
-        hFullMass->Fill(fFullHiggsMassData.getHiggsMass());
+    if (!fSelectedTau.isNull() && fBJetData->passedEvent()) { // Make sure FullHiggsMassData is available
+      if (fFullHiggsMassData->passedEvent()) {
+        hFullMass->Fill(fFullHiggsMassData->getHiggsMass());
       }
     }
   }
@@ -290,7 +290,7 @@ namespace HPlus {
                                METSelection& metSelection,
                                BTagging& bJetSelection,
                                TopChiSelection& topChiSelection,
-                               EvtTopology& evtTopology),
+                               EvtTopology& evtTopology,
                                FullHiggsMassCalculator& fullHiggsMassCalculator) {
     //fTauSelection = &tauSelection;
     fFakeTauIdentifier = &fakeTauIdentifier;
