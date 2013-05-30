@@ -392,7 +392,7 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
     increment(fAllCounter);
     edm::Ptr<pat::Tau> myZeroTauPointer; // to force common plots to use tau from TauSelection::Data::getSelectedTau()
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
 
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     const TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);

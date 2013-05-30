@@ -526,7 +526,7 @@ namespace HPlus {
 
     increment(fAllCounter);
     edm::Ptr<pat::Tau> myZeroTauPointer; // to force common plots to use tau from TauSelection::Data::getSelectedTau()
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
 
 
 //------ For embedding, apply the muon ID efficiency at this stage

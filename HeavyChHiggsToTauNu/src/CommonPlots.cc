@@ -49,7 +49,7 @@ namespace HPlus {
     hDeltaR_TauMETJet3MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet3MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
     hDeltaR_TauMETJet4MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet4MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
     hTransverseMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events}", 80, 0., 400.);
-    //hFullMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "fullMass", "fullMass;m, GeV/c^{2};N_{events}", 100, 0., 500.);
+    hFullMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "fullMass", "fullMass;m, GeV/c^{2};N_{events}", 100, 0., 500.);
   }
 
   CommonPlotsFilledAtEveryStep::~CommonPlotsFilledAtEveryStep() {}
@@ -143,10 +143,12 @@ namespace HPlus {
     // transverse mass
     double myMT = TransverseMass::reconstruct(*(fSelectedTau), *(fMETData->getSelectedMET()) );
     hTransverseMass->Fill(myMT);
-    // full mass // FIXME
-    //if (fFullHiggsMassData.passedEvent()) {
-    //  hFullMass->Fill(fFullHiggsMassData.getHiggsMass());
-    // }
+    // full mass
+    if (!fSelectedTau.isNull() && fBJetData.passedEvent()) { // Make sure FullHiggsMassData is available
+      if (fFullHiggsMassData.passedEvent()) {
+        hFullMass->Fill(fFullHiggsMassData.getHiggsMass());
+      }
+    }
   }
 
   void CommonPlotsFilledAtEveryStep::cacheDataObjects(const VertexSelection::Data* vertexData,
@@ -248,7 +250,8 @@ namespace HPlus {
                                METSelection& metSelection,
                                BTagging& bJetSelection,
                                TopChiSelection& topChiSelection,
-                               EvtTopology& evtTopology) {
+                               EvtTopology& evtTopology,
+                               FullHiggsMassCalculator& fullHiggsMassCalculator) {
     if (!vertexData.passedEvent()) return; // Require valid vertex
     fTauSelection = &tauSelection;
     fTauData = tauSelection.silentAnalyze(iEvent, iSetup, vertexData.getSelectedVertex()->z());
@@ -271,7 +274,8 @@ namespace HPlus {
                metSelection,
                bJetSelection,
                topChiSelection,
-               evtTopology);
+               evtTopology,
+               fullHiggsMassCalculator);
   }
 
   void CommonPlots::initialize(const edm::Event& iEvent,
@@ -286,7 +290,8 @@ namespace HPlus {
                                METSelection& metSelection,
                                BTagging& bJetSelection,
                                TopChiSelection& topChiSelection,
-                               EvtTopology& evtTopology) {
+                               EvtTopology& evtTopology),
+                               FullHiggsMassCalculator& fullHiggsMassCalculator) {
     //fTauSelection = &tauSelection;
     fFakeTauIdentifier = &fakeTauIdentifier;
     // Obtain data objects only, if they have not yet been cached
@@ -326,14 +331,16 @@ namespace HPlus {
     }
     // A tau exists beyond this point, now obtain MET with residual type I MET
     fMETData = metSelection.silentAnalyze(iEvent, iSetup, fSelectedTau, fJetData.getAllJets());
-    //FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, fBJetData,
-    //                                                                                   metData, &genData); / FIXME: need entry for edm::Ptr<pat::Tau> instead of tauData
+    // Do full higgs mass only if tau and b jet was found
+    if (fBJetData.passedEvent()) {
+      fFullHiggsMassData = fullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, fSelectedTau, fBJetData, fMETData);
+    }
 
     // Pass pointer to cached data objects to CommonPlotsFilledAtEveryStep
     if (!hEveryStepHistograms.size())
       throw cms::Exception("Assert") << "CommonPlots::initialize() was called before creating CommonPlots::createCommonPlotsFilledAtEveryStep()!" << endl<<  "  make first all CommonPlots::createCommonPlotsFilledAtEveryStep() and then call CommonPlots::initialize()";
     for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-      (*it)->cacheDataObjects(&fVertexData, &fTauData, fSelectedTau, &fFakeTauData, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, &fTopData, 0);
+      (*it)->cacheDataObjects(&fVertexData, &fTauData, fSelectedTau, &fFakeTauData, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, &fTopData, &fFullHiggsMassData);
     }
   }
 
