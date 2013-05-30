@@ -247,8 +247,8 @@ namespace HPlus {
       output.fPassedEvent = false;
     }
     output.fSelectedMET = met;
-    std::cout << "type1MET valid = " << htype1met.isValid() << std::endl;
-    std::cout << "type1MET = " << htype1met->ptrAt(0)->et() << std::endl;
+    //std::cout << "type1MET valid = " << htype1met.isValid() << std::endl;
+    //std::cout << "type1MET = " << htype1met->ptrAt(0)->et() << std::endl;
 
     return output;
   }
