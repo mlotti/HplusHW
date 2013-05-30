@@ -219,7 +219,8 @@ fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
 fakeTauSFandSystematics = None
 # FIXME: add scale factors for MVA3 against electron discriminators
 print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
-fakeTauSFandSystematics = fakeTauSFandSystematicsBase
+print "As a temporary solution, the AgainstElectronMVA scale factors and uncertainties are used (as per tau POG instructions)"
+fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
 #if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
     #fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
 #elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
@@ -545,20 +546,16 @@ def cloneForHeavyAnalysis(lightModule):
 # Set trigger efficiency / scale factor depending on tau selection params
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2012_cff as tauTriggerEfficiency
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
-    print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    return tauTriggerEfficiency.tauLegEfficiency_noscalefactors
-    # FIXME
-    if tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr3Hits":
-        if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
-        elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
-            return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA
-    elif tausele.isolationDiscriminator.value() == "byMediumCombinedIsolationDeltaBetaCorr3Hits":
-        if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium
-        elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
-            return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA
-    raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byLooseCombinedIsolationDeltaBetaCorr3Hits', 'byMediumCombinedIsolationDeltaBetaCorr3Hits'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
+    myString = "tauLegEfficiency_%s_%s_%s"%(tausele.isolationDiscriminator.value(),tausele.againstMuonDiscriminator.value(),tausele.againstElectronDiscriminator.value())
+    myScaleFactors = getattr(tauTriggerEfficiency, myString, None)
+    if myScaleFactors == None:
+        print "Supported trigger tau leg scale factor options are:"
+        for item in dir(tauTriggerEfficiency):
+            if "tauLegEfficiency" in item:
+                print "  ",item
+        raise Exception("Error: no scale factors are supported for '%s'!"%myString)
+    print "Trigger tau leg scale factors set to %s"%myString
+    return myScaleFactors
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
