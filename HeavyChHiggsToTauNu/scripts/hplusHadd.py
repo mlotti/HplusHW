@@ -37,7 +37,7 @@ def processDir(outdir, directory, otherdirs, className=None, verbose=False):
         if verbose:
             print "Target object: %s/%s" % (outdir.GetPath(), obj.GetName())
         if obj.GetName() in alreadyProcessed:
-            print >>sys.stderr, "Error: more than 1 entry of %s/%s" % (directory.GetPath(), obj.GetName())
+            print >>sys.stderr, "Error in merging %s/%s, more than 1 object exists" % (directory.GetPath(), obj.GetName())
             continue
         alreadyProcessed[obj.GetName()] = True
 
