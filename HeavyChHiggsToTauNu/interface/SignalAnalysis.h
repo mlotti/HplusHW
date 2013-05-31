@@ -86,18 +86,13 @@ namespace HPlus {
       Count fNJetsCounter;
       Count fDeltaPhiCollinearCounter;
       Count fMETCounter;
-      //      Count fRtauAfterMetCounter;
       Count fBTaggingCounter;
       Count fDeltaPhiBackToBackCounter;
-      Count fFakeMETVetoCounter;
       Count fTopSelectionCounter;
       Count fTopChiSelectionCounter;
-      //      Count fTopChiSelectionNarrowCounter;
-      //Count fTopWithMHSelectionCounter;
-      //Count fTopWithBSelectionCounter;
-      //Count fTopWithWSelectionCounter;
       Count fSelectedEventsCounter;
       Count fSelectedEventsFullMassCounter;
+      Count fFakeMETVetoCounter;
     };
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
@@ -109,13 +104,12 @@ namespace HPlus {
     kSignalOrderDeltaPhiCollinearSelection,
     kSignalOrderMETSelection,
     kSignalOrderBTagSelection,
-    //kSignalOrderDeltaPhiSelection,
     kSignalOrderDeltaPhiBackToBackSelection,
-    kSignalOrderFakeMETVeto,
-    kSignalOrderBjetSelection,
     kSignalOrderTopSelection,
     kSignalOrderSelectedEvents,
-    kSignalOrderSelectedEventsFullMass
+    kSignalOrderSelectedEventsFullMass,
+    kSignalOrderFakeMETVeto,
+    kSignalOrderBjetSelection
   };
   public:
   explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper);
@@ -138,17 +132,16 @@ namespace HPlus {
     // copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
     HistoWrapper fHistoWrapper;
-    const bool bBlindAnalysisStatus;
+    const bool bBlindAnalysisStatus; // FIXME: obsolete
     const bool bTauEmbeddingStatus;
     const double fDeltaPhiCutValue;
     const std::string fTopRecoName; // Name of selected top reconstruction algorithm
-    //    const double ftransverseMassCut;
 
     edm::InputTag fOneProngTauSrc;
     edm::InputTag fOneAndThreeProngTauSrc;
     edm::InputTag fThreeProngTauSrc;
 
-
+    // Main counters
     Count fAllCounter;
     Count fWJetsWeightCounter;
     Count fMETFiltersCounter;
@@ -164,18 +157,17 @@ namespace HPlus {
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
-    Count fQCDTailKillerCollinearCounter;
     Count fMETTriggerScaleFactorCounter;
+    Count fQCDTailKillerCollinearCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
     Count fQCDTailKillerBackToBackCounter;
-    Count fDeltaPhiTauMETCounter;
-    Count fDeltaPtJetTauCounter;
-    Count fBjetVetoCounter;
-    Count fMetCut80Counter;
-    Count fMetCut100Counter;
+    Count fTopReconstructionCounter;
+    Count fSelectedEventsCounter;
     Count fHiggsMassSelectionCounter;
+    Count fFakeMETVetoCounter;
+
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
@@ -221,20 +213,15 @@ namespace HPlus {
     Count fTauIsMuonFromJetCounter;
     Count fTauIsHadronFromJetCounter;
 
+    // Counters for different top algorithms
     Count fTopSelectionCounter;
-    Count fTopWithMHSelectionCounter;
     Count fTopChiSelectionCounter;
-    Count fTopChiSelection250Counter;
-    Count fTopChiSelection220Counter;
+    Count fTopWithMHSelectionCounter;
     Count fTopWithBSelectionCounter;
-    Count fTopWithBSelection250Counter;
-    Count fTopWithBSelection220Counter;
     Count fTopWithWSelectionCounter;
-    Count fTopWithWSelection250Counter;
-    Count fTopWithWSelection220Counter;
-    Count fTopChiSelectionNarrowCounter;
-    Count fFakeMETVetoCounter;
-    Count fSelectedEventsCounter;
+
+    
+    
     Count fSelectedEventsCounterWithGenuineBjets;
 
     TriggerSelection fTriggerSelection;
@@ -303,20 +290,17 @@ namespace HPlus {
     WrappedTH1 *htransverseMassLeptonFakeSignalTau;
     WrappedTH1 *htransverseMassNoObservableLeptons;
     WrappedTH1 *htransverseMassObservableLeptons;
-    
-    // Transverse mass histograms
+
+    // Transverse mass histogram
     WrappedTH1 *hTransverseMass;
-    WrappedTH1 *hTransverseMassDeltaPtCut;
-    WrappedTH1 *hTransverseMassSecondBveto;
-    WrappedTH1 *hTransverseMassMet80;
-    WrappedTH1 *hTransverseMassMet100;
-    WrappedTH1 *hTransverseMassNoBtagging;
-    WrappedTH1 *hTransverseMassNoBtaggingWithRtau;
+
+    // Transverse mass for top algorithms
     WrappedTH1 *hTransverseMassTopSelection;
     WrappedTH1 *hTransverseMassTopChiSelection;
     WrappedTH1 *hTransverseMassWmassCut;
     WrappedTH1 *hTransverseMassTopBjetSelection;
     WrappedTH1 *hTransverseMassTopWithWSelection;
+
     WrappedTH1 *hTransverseMassMET70;
     WrappedTH1 *hTransverseMassTauVeto;
     WrappedTH1 *hTransverseMassAfterDeltaPhi;
@@ -328,27 +312,19 @@ namespace HPlus {
     WrappedTH2 *hDeltaPhiVsTransverseMass;
     WrappedTH2 *hTransverseMassVsNjets;
     WrappedTH2 *hEWKFakeTausTransverseMassVsNjets;
-    WrappedTH1 *hDeltaPtJetTau;
-    WrappedTH1 *hDeltaRJetTau;
 
 
     // Full mass histograms
     WrappedTH1 *hFullMass;
     WrappedTH1 *hEWKFakeTausFullMass;
 
-    WrappedTH1 *hDeltaPhiNoBtagging;
     WrappedTH1 *hDeltaPhi;
     WrappedTH1 *hEWKFakeTausDeltaPhi;
-    WrappedTH1 *hDeltaPhiJetMet;
-    WrappedTH1 *hMaxDeltaPhiJetMet;
     WrappedTH1 *hAlphaT;
     WrappedTH1 *hAlphaTInvMass;
     WrappedTH2 *hAlphaTVsRtau;
     // Histograms for validation at every Selection Cut step
     WrappedTH1 *hSelectedTauEt;
-    WrappedTH1 *hMet;
-    WrappedTH1 *hMet_beforeJetCut;
-    WrappedTH1 *hMetWithBtagging;
     WrappedTH1 *hSelectedTauEta;
     WrappedTH1 *hSelectedTauPhi;
     WrappedTH1 *hSelectedTauRtau;
@@ -356,7 +332,6 @@ namespace HPlus {
     WrappedTH1 *hSelectedTauRtauAfterCuts;
     WrappedTH1 *hSelectedTauEtAfterCuts;
     WrappedTH1 *hSelectedTauEtaAfterCuts;
-    WrappedTH1 *hMetAfterCuts;
     WrappedTH1 *hEWKFakeTausSelectedTauEtAfterCuts;
     WrappedTH1 *hEWKFakeTausSelectedTauEtaAfterCuts;
     WrappedTH1 *hTransverseMassDeltaPhiUpperCutFakeMet;
