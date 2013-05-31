@@ -503,8 +503,8 @@ class ShapeExtractor(ExtractorBase):
         if self.isRate() or self.isObservation():
             myLabels = [myPrefix]
         else:
-            myLabels = [myPrefix+"_"+str(int(self._masterExID))+"Down",
-                        myPrefix+"_"+str(int(self._masterExID))+"Up"]
+            myLabels = [myPrefix+"_"+self._masterExID+"Down",
+                        myPrefix+"_"+self._masterExID+"Up"]
         myHistograms = []
         myShapeModifier = ShapeHistoModifier(self._histoSpecs)
         for i in range (0, len(self._histoDirs)):

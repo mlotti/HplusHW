@@ -609,13 +609,13 @@ class DataCardGenerator:
         # Merge nuisances
         self.mergeNuisances()
         # Check consecutive id's
-        myCounter = 0
-        for n in sorted(self._extractors, key=lambda x: x.getId()):
-            if n.isPrintable():
-                myCounter += 1
-                if int(n.getId()) != myCounter:
-                    print WarningLabel()+"You have not declared a Nuisance or ReservedNuisance with id='%d'! (assuming consecutive numbers)"%myCounter
-                    myCounter = int(n.getId())
+        #myCounter = 0
+        #for n in sorted(self._extractors, key=lambda x: x.getId()):
+            #if n.isPrintable():
+                #myCounter += 1
+                #if int(n.getId()) != myCounter:
+                    #print WarningLabel()+"You have not declared a Nuisance or ReservedNuisance with id='%d'! (assuming consecutive numbers)"%myCounter
+                    #myCounter = int(n.getId())
 
     def mergeNuisances(self):
         for mset in self._config.MergeNuisances:

@@ -178,6 +178,11 @@ namespace HPlus {
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTauTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("tauTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
+    //<<<<<<< HEAD
+    //=======
+    fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
+    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper, ""),
+    //>>>>>>> sami/2012
     //    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
@@ -873,7 +878,7 @@ namespace HPlus {
     if(!metData.passedEvent()) return false;
     increment(fBaselineMetCounter);
     size_t nVertices = pvData.getNumberOfAllVertices();
-    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);	      
+    fMETPhiOscillationCorrection.analyze(iEvent, nVertices, metData);	      
    
        //------ mT after jets and met in bins
     hMTBaselineTauIdNoBtagging->Fill(selectedTau->pt() ,transverseMass );	
@@ -1182,8 +1187,13 @@ namespace HPlus {
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     size_t nVertices = pvData.getNumberOfAllVertices();
-    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);
+    //<<<<<<< HEAD
+    //fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);
     
+    //=======
+    fMETPhiOscillationCorrection.analyze(iEvent, nVertices, metData);
+
+    //>>>>>>> sami/2012
     //hSelectionFlow->Fill(kQCDOrderMET);
     hSelectedTauEtMetCut->Fill(selectedTau->pt());
     hSelectedTauEtaMetCut->Fill(selectedTau->eta());

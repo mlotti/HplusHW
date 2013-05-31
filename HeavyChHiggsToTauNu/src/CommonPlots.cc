@@ -5,6 +5,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+#include "FWCore/Framework/interface/Event.h"
 
 namespace HPlus {
   CommonPlotsFilledAtEveryStep::CommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, TFileDirectory& dir, std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel) :
@@ -171,7 +172,11 @@ namespace HPlus {
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
     fNormalisationAnalysis(eventCounter, histoWrapper),
-    fTauSelection(0), fFakeTauIdentifier(0) {
+    fTauSelection(0), fFakeTauIdentifier(0),
+    fMETPhiOscillationCorrectionAfterVertices(eventCounter, fHistoWrapper, "AfterVertices"),
+    fMETPhiOscillationCorrectionAfterTaus(eventCounter, fHistoWrapper, "AfterTaus"),
+    fMETPhiOscillationCorrectionAfterLeptonVeto(eventCounter, fHistoWrapper, "AfterLeptonVeto"),
+    fMETPhiOscillationCorrectionAfterNjets(eventCounter, fHistoWrapper, "AfterNjets") {
       createHistograms();
   }
 
@@ -182,7 +187,11 @@ namespace HPlus {
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
     fNormalisationAnalysis(eventCounter, histoWrapper),
-    fTauSelection(0), fFakeTauIdentifier(0) {
+    fTauSelection(0), fFakeTauIdentifier(0),
+    fMETPhiOscillationCorrectionAfterVertices(eventCounter, fHistoWrapper, "AfterVertices"),
+    fMETPhiOscillationCorrectionAfterTaus(eventCounter, fHistoWrapper, "AfterTaus"),
+    fMETPhiOscillationCorrectionAfterLeptonVeto(eventCounter, fHistoWrapper, "AfterLeptonVeto"),
+    fMETPhiOscillationCorrectionAfterNjets(eventCounter, fHistoWrapper, "AfterNjets") {
       createHistograms();
   }
 
@@ -231,6 +240,8 @@ namespace HPlus {
     if (!vertexData.passedEvent()) return; // Require valid vertex
     fTauSelection = &tauSelection;
     TauSelection::Data tauData = tauSelection.silentAnalyze(iEvent, iSetup, vertexData.getSelectedVertex()->z());
+    edm::Ptr<pat::Tau> myNullPointer;
+    fSelectedTau = myNullPointer;
     initialize(iEvent,iSetup,
                vertexData,
                tauData,
@@ -305,34 +316,44 @@ namespace HPlus {
   }
 
   void CommonPlots::fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data) {
+    //----- MET phi oscillation
+    edm::Handle<edm::View<reco::MET> > htype1met; // Ugly temp hack
+    iEvent.getByLabel("patType1CorrectedPFMet", htype1met);
+    fMETPhiOscillationCorrectionAfterVertices.analyze(iEvent, fVertexData.getNumberOfAllVertices(), htype1met->ptrAt(0));
+
     //fVertexData = data;
     if(fTauSelection && fFakeTauIdentifier) {
       fNormalisationAnalysis.analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
     }
   }
 
-  void CommonPlots::fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData) {
-    //fTauData = data;
+  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, const edm::Ptr<pat::Tau>& selectedTau, METSelection& metSelection) {
+    fTauData = tauData;
+    fFakeTauData = fakeTauData;
+    fSelectedTau = selectedTau;
+    fMETData = metSelection.silentAnalyze(iEvent, iSetup, fSelectedTau, fJetData.getAllJets());
+    //----- MET phi oscillation
+    fMETPhiOscillationCorrectionAfterTaus.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+
     hTauPhiOscillationX->Fill(fVertexData.getNumberOfAllVertices(), tauData.getSelectedTau()->px());
     hTauPhiOscillationY->Fill(fVertexData.getNumberOfAllVertices(), tauData.getSelectedTau()->py());
-    
+
     // e->tau normalisation
     fNormalisationAnalysis.analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData, fMuonData, fJetData, fMETData);
   }
 
-  void CommonPlots::fillControlPlots(const ElectronSelection::Data& data) {
+  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const ElectronSelection::Data& data) {
     //fElectronData = data;
-    
   }
 
-  void CommonPlots::fillControlPlots(const MuonSelection::Data& data) {
+  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const MuonSelection::Data& data) {
     //fMuonData = data;
-    
+    fMETPhiOscillationCorrectionAfterLeptonVeto.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
-  void CommonPlots::fillControlPlots(const JetSelection::Data& data) {
+  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const JetSelection::Data& data) {
     //fJetData = data;
-    
+    fMETPhiOscillationCorrectionAfterNjets.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
   void CommonPlots::fillControlPlots(const METSelection::Data& data) {

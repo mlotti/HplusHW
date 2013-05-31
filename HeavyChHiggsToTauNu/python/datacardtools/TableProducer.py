@@ -28,7 +28,7 @@ class EventYieldSummary:
         self._rate = datasetColumn.getRateResult()
         myAbsoluteSystUpSquared = 0.0
         myAbsoluteSystDownSquared = 0.0
-        for n in sorted(extractors, key=lambda x: x.getId()):
+        for n in extractors:
             if n.isPrintable():
                 if datasetColumn.hasNuisanceByMasterId(n.getId()):
                     myValue = datasetColumn.getNuisanceResultByMasterId(n.getId())
@@ -298,7 +298,7 @@ class TableProducer:
         myVetoList = [] # List of nuisance id's to veto
         mySingleList = [] # List of nuisance id's that apply only to single column
         # Suppress nuisance rows that are not affecting anything
-        for n in sorted(self._extractors, key=lambda x: x.getId()):
+        for n in self._extractors:
             myCount = 0
             for c in self._datasetGroups:
                 if c.isActiveForMass(mass) and n.isPrintable() and c.hasNuisanceByMasterId(n.getId()):
@@ -323,7 +323,7 @@ class TableProducer:
                     # Do virtual merge
                     myDescription = ""
                     myValue = 0.0
-                    for n in sorted(self._extractors, key=lambda x: x.getId()):
+                    for n in self._extractors:
                         if n.getId() in myFoundSingles:
                             if myDescription == "":
                                 myDescription = n.getDescription()
@@ -336,10 +336,10 @@ class TableProducer:
                     myVirtualMergeInformation["%sdescription"%myFoundSingles[0]] = myDescription
                     print WarningLabel()+"Combined nuisances '%s' for column %s!"%(myDescription, c.getLabel())
         # Loop over rows
-        for n in sorted(self._extractors, key=lambda x: x.getId()):
+        for n in self._extractors:
             if n.isPrintable() and n.getId() not in myVetoList:
                 # Suppress rows that are not affecting anything
-                myRow = ["%d"%int(n.getId()), n.getDistribution()]
+                myRow = ["%s"%(n.getId()), n.getDistribution()]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
                     if c.isActiveForMass(mass):
@@ -383,10 +383,10 @@ class TableProducer:
     def _generateShapeNuisanceVariationTable(self,mass):
         myResult = []
         # Loop over rows
-        for n in sorted(self._extractors, key=lambda x: x.getId()):
+        for n in self._extractors:
             if n.isPrintable() and n.getDistribution() == "shapeQ":
-                myDownRow = ["%d"%int(n.getId())+"_Down", ""]
-                myUpRow = ["%d"%int(n.getId())+"_Up", ""]
+                myDownRow = ["%s_Down"%(n.getId()), ""]
+                myUpRow = ["%s_Up"%(n.getId()), ""]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
                     if c.isActiveForMass(mass):
