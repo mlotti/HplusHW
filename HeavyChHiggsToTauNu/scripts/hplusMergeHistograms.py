@@ -64,19 +64,28 @@ def hadd(opts, mergeName, inputFiles):
         cmd.append("-T") # don't merge TTrees via xrootd
     cmd.append(mergeName)
     cmd.extend(inputFiles)
-    if opts.test:
+    if opts.verbose:
         print " ".join(cmd)
+    if opts.test:
         return 0
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    args = {}
+    if not opts.verbose:
+        args = {"stdout": subprocess.PIPE, "stderr": subprocess.STDOUT}
+    p = subprocess.Popen(cmd, **args)
     output = p.communicate()[0]
     ret = p.returncode
     if ret != 0:
-        print output
+        if not opts.verbose:
+            print output
         print "Merging failed with exit code %d" % ret
         return 1
     return 0
 
 def hplusHadd(opts, mergeName, inputFiles):
+    args = {}
+    if not opts.verbose:
+        args = {"stdout": subprocess.PIPE, "stderr": subprocess.STDOUT}
+
     intermediateFiles = []
     resultFiles = inputFiles[:]
     mergeRound = 0
@@ -90,17 +99,19 @@ def hplusHadd(opts, mergeName, inputFiles):
             if os.path.exists(target):
                 shutil.move(target, target+".backup")
             cmd = ["hplusHadd.py", target]+files
-            if opts.test:
+            if opts.verbose:
+                cmd.append("--verbose")
                 print " ".join(cmd)
-            else:
-                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            if not opts.test:
+                p = subprocess.Popen(cmd, **args)
                 output = p.communicate()[0]
                 ret = p.returncode
                 if ret != 0:
-                    print output
+                    if not opts.verbose:
+                        print output
                     print "Merging failed with exit code %d" % ret
                     return 1
-                if "Error in" in output:
+                if not opts.verbose and "Error in" in output:
                     print output
             resultFiles.append(target)
             intermediateFiles.append(target)
@@ -111,14 +122,14 @@ def hplusHadd(opts, mergeName, inputFiles):
     intermediateFiles.pop()
 
     for tmp in intermediateFiles:
-        if opts.test:
+        if opts.verbose:
             print "rm %s" % tmp
-        else:
+        if not opts.test:
             os.remove(tmp)
 
-    if opts.test:
+    if opts.verbose:
         print "mv %s %s" % (resultFiles[0], mergeName)
-    else:
+    if not opts.test:
         shutil.move(resultFiles[0], mergeName)
     
     return 0
@@ -176,6 +187,8 @@ def main(opts, args):
                 tmp += "-%d" % index
             mergeName = os.path.join(d, "res", opts.output % tmp)
             if os.path.exists(mergeName) and not opts.test:
+                if opts.verbose:
+                    print "mv %s %s" % (mergeName, mergeName+".backup")
                 shutil.move(mergeName, mergeName+".backup")
 
             # FIXME: add here reading of first xrootd file, finding all TTrees, and writing the TList to mergeName file
@@ -183,9 +196,9 @@ def main(opts, args):
                 raise Exception("--filesInSE feature is not fully implemented")
 
             if len(inputFiles) == 1:
-                if opts.test:
+                if opts.verbose:
                     print "cp %s %s" % (inputFiles[0], mergeName)
-                else:
+                if not opts.test:
                     shutil.copy(inputFiles[0], mergeName)
                 
             else:
@@ -203,9 +216,9 @@ def main(opts, args):
             mergedFiles.append((mergeName, inputFiles))
             if opts.deleteImmediately:
                 for srcFile in inputFiles:
-                    if opts.test:
+                    if opts.verbose:
                         print "rm %s" % srcFile
-                    else:
+                    if not opts.test:
                         ps.remove(srcFile)
     
     deleteMessage = ""
@@ -220,9 +233,9 @@ def main(opts, args):
         print "  %s (from %d file(s))" % (f, len(sourceFiles))
         if opts.delete and not opts.deleteImmediately:
             for srcFile in sourceFiles:
-                if opts.test:
+                if opts.verbose:
                     print "rm %s" % srcFile
-                else:
+                if not opts.test:
                     os.remove(srcFile)
 
     return 0
@@ -235,7 +248,7 @@ if __name__ == "__main__":
     parser.add_option("-o", dest="output", type="string", default="histograms-%s.root",
                       help="Pattern for merged output root files (use '%s' for crab directory name) (default: 'histograms-%s.root')")
     parser.add_option("--test", dest="test", default=False, action="store_true",
-                      help="Just test, do not do any merging or deleting (might be useful for checking what would happen)")
+                      help="Just test, do not do any merging or deleting (might be useful for checking what would happen). Implies --verbose.")
     parser.add_option("--delete", dest="delete", default=False, action="store_true",
                       help="Delete the source files to save disk space (default is to keep the files)")
     parser.add_option("--deleteImmediately", dest="deleteImmediately", default=False, action="store_true",
@@ -248,10 +261,15 @@ if __name__ == "__main__":
                       help="Merge at most this many files together, possibly resulting to multiple merged files. Use case: large ntuples. (default: -1 to merge all files to one)")
     parser.add_option("--filesInSE", dest="filesInSE", default=False, action="store_true",
                       help="The ROOT files to be merged are in an SE, merge the files from there. File locations are read from CMSSW_*.stdout files. NOTE: TTrees are not merged (it is assumed that due to TTrees the files are so big that they have to be stored in SE), but are replaced with TList of strings of the PFN's of the files via xrootd protocol.")
+    parser.add_option("--verbose", dest="verbose", default=False, action="store_true",
+                      help="Verbose mode")
     
     (opts, args) = parser.parse_args()
 
     if opts.filesPerMerge == 0:
         parser.error("--filesPerMerge must be non-zero")
+
+    if opts.test:
+        opts.verbose = True
 
     sys.exit(main(opts, args))
