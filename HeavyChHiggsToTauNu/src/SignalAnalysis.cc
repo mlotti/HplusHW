@@ -134,7 +134,7 @@ namespace HPlus {
     fTauNotInTauFromBottomCounter(eventCounter.addSubCounter("MCinfo for selected events", "Bottom->Tau not in tau")),
     fTauNotInTauFromHplusCounter(eventCounter.addSubCounter("MCinfo for selected events", "Hplus->tau not in tau")),
 
-    fOservableMuonsCounter(eventCounter.addSubCounter("MCinfo for selected events", "Observable associated muons")),
+    fObservableMuonsCounter(eventCounter.addSubCounter("MCinfo for selected events", "Observable associated muons")),
     fObservableElectronsCounter(eventCounter.addSubCounter("MCinfo for selected events", "Observable associated electrons")),
     fObservableTausCounter(eventCounter.addSubCounter("MCinfo for selected events", "Observable associated taus")),
 
