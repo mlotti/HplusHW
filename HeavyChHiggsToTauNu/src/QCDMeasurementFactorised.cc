@@ -363,22 +363,6 @@ namespace HPlus {
     fTree.setPrescaleWeight(prescaleWeight);
 
 
-//------ Vertex weight
-    double myWeightBeforePileupReweighting = fEventWeight.getWeight();
-    if(!iEvent.isRealData()) {
-      const double myPileupWeight = fPileupWeightReader.getWeight(iEvent, iSetup);
-      fEventWeight.multiplyWeight(myPileupWeight);
-      fTree.setPileupWeight(myPileupWeight);
-    }
-
-    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
-    size_t nVertices = pvData.getNumberOfAllVertices();
-    hVerticesBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
-    hVerticesAfterWeight->Fill(nVertices);
-    fTree.setNvertices(nVertices);
-    increment(fAllCounter);
-
-
 //------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
     if(!iEvent.isRealData()) {
       const double wjetsWeight = fWJetsWeightReader.getWeight(iEvent, iSetup);
@@ -393,6 +377,22 @@ namespace HPlus {
     }
     increment(fMETFiltersCounter);
 
+//------ Vertex weight
+    double myWeightBeforePileupReweighting = fEventWeight.getWeight();
+    if(!iEvent.isRealData()) {
+      const double myPileupWeight = fPileupWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(myPileupWeight);
+      fTree.setPileupWeight(myPileupWeight);
+    }
+
+    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
+    size_t nVertices = pvData.getNumberOfAllVertices();
+    hVerticesBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
+    hVerticesAfterWeight->Fill(nVertices);
+    fTree.setNvertices(nVertices);
+    increment(fAllCounter);
+    edm::Ptr<pat::Tau> myZeroTauPointer; // to force common plots to use tau from TauSelection::Data::getSelectedTau()
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
 
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     const TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
@@ -413,13 +413,11 @@ namespace HPlus {
       fTree.setGenMET(genData.getGenMET());
     }
 
-
 //------ Primary vertex selection
     if (!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
     //fCommonPlotsAfterVertexSelection->fill();
     fCommonPlots.fillControlPlots(iEvent, pvData);
-
 
 //------ Tau candidate selection
     // Do tau candidate selection
@@ -458,10 +456,11 @@ namespace HPlus {
     // Important NOTE: Beyond this line, use only 'mySelectedTau' as the tau object
     edm::Ptr<pat::Tau> mySelectedTau = fTauSelection.selectMostLikelyTau(mySelectedTauList, pvData.getSelectedVertex()->z());
     TauSelection::Data tauCandidateData = fTauSelection.setSelectedTau(mySelectedTau, true);
-    fCommonPlots.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(mySelectedTau));
     // note: do not require here that only one tau has been found (mySelectedTau is the selected tau in the event)
+    // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, mySelectedTau, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
     fCommonPlotsAfterTauSelection->fill();
     fCommonPlots.fillControlPlots(iEvent, iSetup, tauCandidateData, tauMatchData, mySelectedTau, fMETSelection);
     // Set factorisation bin

@@ -14,6 +14,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NormalisationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
@@ -51,13 +52,15 @@ namespace HPlus {
     /// Cache data objects, to be called from CommonPlots::initialize()
     void cacheDataObjects(const VertexSelection::Data* vertexData,
                           const TauSelection::Data* tauData,
+                          edm::Ptr<pat::Tau>& selectedTau,
                           const FakeTauIdentifier::Data* fakeTauData,
                           const ElectronSelection::Data* electronData,
                           const MuonSelection::Data* muonData,
                           const JetSelection::Data* jetData,
                           const METSelection::Data* metData,
                           const BTagging::Data* bJetData,
-                          const TopChiSelection::Data* topData);
+                          const TopChiSelection::Data* topData,
+                          const FullHiggsMassCalculator::Data* fullHiggsMassData);
 
   private:
     /// Status indicating wheather the data objects have been cached
@@ -69,6 +72,7 @@ namespace HPlus {
     /// Cached data objects from silent analyze
     const VertexSelection::Data* fVertexData;
     const TauSelection::Data* fTauData;
+    edm::Ptr<pat::Tau> fSelectedTau;
     const FakeTauIdentifier::Data* fFakeTauData;
     const ElectronSelection::Data* fElectronData;
     const MuonSelection::Data* fMuonData;
@@ -76,6 +80,7 @@ namespace HPlus {
     const METSelection::Data* fMETData;
     const BTagging::Data* fBJetData;
     const TopChiSelection::Data* fTopData;
+    const FullHiggsMassCalculator::Data* fFullHiggsMassData;
 
     /// Histograms to be plotted after every step
     WrappedTH1* hNVertices;
@@ -98,6 +103,7 @@ namespace HPlus {
     WrappedTH1* hDeltaR_TauMETJet3MET;
     WrappedTH1* hDeltaR_TauMETJet4MET;
     WrappedTH1* hTransverseMass;
+    WrappedTH1* hFullMass;
   };
 
   /**
@@ -114,6 +120,7 @@ namespace HPlus {
                     const edm::EventSetup& iSetup,
                     VertexSelection::Data& vertexData,
                     TauSelection& tauSelection,
+                    edm::Ptr<pat::Tau>& selectedTau,
                     FakeTauIdentifier& fakeTauIdentifier,
                     ElectronSelection& eVeto,
                     MuonSelection& muonVeto,
@@ -127,6 +134,7 @@ namespace HPlus {
                     const edm::EventSetup& iSetup,
                     VertexSelection::Data& vertexData,
                     TauSelection::Data& tauData,
+                    edm::Ptr<pat::Tau>& selectedTau,
                     FakeTauIdentifier& fakeTauIdentifier,
                     ElectronSelection& eVeto,
                     MuonSelection& muonVeto,
