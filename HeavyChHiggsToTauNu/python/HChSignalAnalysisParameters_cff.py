@@ -544,26 +544,26 @@ def cloneForHeavyAnalysis(lightModule):
     return heavyModule
 
 # Set trigger efficiency / scale factor depending on tau selection params
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2012_cff as tauTriggerEfficiency
-def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
-    myString = "tauLegEfficiency_%s_%s_%s"%(tausele.isolationDiscriminator.value(),tausele.againstMuonDiscriminator.value(),tausele.againstElectronDiscriminator.value())
-    myScaleFactors = getattr(tauTriggerEfficiency, myString, None)
+def setTriggerEfficiencyScaleFactorBasedOnTau(tausele, triggerEfficiency, leg):
+    myString = "%sLegEfficiency_%s_%s_%s" % (leg, tausele.isolationDiscriminator.value(),tausele.againstMuonDiscriminator.value(),tausele.againstElectronDiscriminator.value())
+    myScaleFactors = getattr(triggerEfficiency, myString, None)
     if myScaleFactors == None:
         print "Supported trigger tau leg scale factor options are:"
-        for item in dir(tauTriggerEfficiency):
-            if "tauLegEfficiency" in item:
+        for item in dir(triggerEfficiency):
+            if leg+"LegEfficiency" in item:
                 print "  ",item
         raise Exception("Error: no scale factors are supported for '%s'!"%myString)
-    print "Trigger tau leg scale factors set to %s"%myString
+    print "Trigger %s leg scale factors set to %s" % (leg, myString)
     return myScaleFactors
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
-tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2012_cff as tauTriggerEfficiency
+tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection, tauTriggerEfficiency, "tau")
 tauTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
 tauTriggerEfficiencyScaleFactor.variationShiftBy = cms.double(0)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2012_cff as metTriggerEfficiency
-metTriggerEfficiencyScaleFactor = metTriggerEfficiency.metLegEfficiency
+metTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection, metTriggerEfficiency, "met")
 metTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
 metTriggerEfficiencyScaleFactor.variationShiftBy = cms.double(0)
 
