@@ -10,6 +10,9 @@ def triggerBin(pt, efficiency, uncertainty):
         uncertainty = cms.double(uncertainty)
     )
 
+# FIXME, temporary fix for changed met leg naming 3105103/SL
+metLegEfficiency = metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronMediumMVA3
+
 
 metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronMediumMVA3 = cms.untracked.PSet(
     # The selected triggers for the efficiency. If one trigger is
