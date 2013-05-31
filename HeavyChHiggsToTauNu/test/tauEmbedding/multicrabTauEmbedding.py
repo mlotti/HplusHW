@@ -55,7 +55,7 @@ defaultVersions = [
 
     "v44_5_notrg2"
 ]
-skimVersion = "v44_5"
+skimVersion = "v44_5_1"
 genTauSkimVersion = "v44_5"
 
 # Define the processing steps: input dataset, configuration file, output file
@@ -104,31 +104,25 @@ if defaultStep in ["signalAnalysis", "signalAnalysisGenTau"]:
 #]
 datasetsData2011 = [
     # Run2011A
-    "SingleMu_160431-163261_2011A_Nov08",  # HLT_Mu20_v1
-    "SingleMu_163270-163869_2011A_Nov08",  # HLT_Mu24_v2
+    "SingleMu_160431-163261_2011A_Nov08", # HLT_Mu20_v1
+    "SingleMu_163270-163869_2011A_Nov08", # HLT_Mu24_v2
     "SingleMu_165088-166150_2011A_Nov08", # HLT_Mu30_v3
-    "SingleMu_166161-166164_2011A_Nov08", # HLT_Mu40_v1
-    "SingleMu_166346-166346_2011A_Nov08", # HLT_Mu40_v2
-    "SingleMu_166374-167043_2011A_Nov08", # HLT_Mu40_v1
-    "SingleMu_167078-167913_2011A_Nov08", # HLT_Mu40_v3
-    "SingleMu_170722-172619_2011A_Nov08",  # HLT_Mu40_v5
-    "SingleMu_172620-173198_2011A_Nov08", # HLT_Mu40_v5
+    "SingleMu_166161-173198_2011A_Nov08", # HLT_Mu40_v1, v2, v3, v5
     "SingleMu_173236-173692_2011A_Nov08", # HLT_Mu40_eta2p1_v1
     # Run2011B
-    "SingleMu_173693-177452_2011B_Nov19", # HLT_Mu40_eta2p1_v1
-    "SingleMu_177453-178380_2011B_Nov19", # HLT_Mu40_eta2p1_v1
-    "SingleMu_178411-179889_2011B_Nov19", # HLT_Mu40_eta2p1_v4
-    "SingleMu_179942-180371_2011B_Nov19", # HLT_Mu40_eta2p1_v5
+    "SingleMu_175832-180252_2011B_Nov19", # HLT_Mu40_eta2p1_v1, v4, v5
 ]
-datasetsMCTTWJets = [
+datasetsMCTT = [
     "TTJets_TuneZ2_Fall11",
 ]
-datasetsMCnoQCD = datasetsMCTTWJets + [
+datasetsMCWDY = [
     "WJets_TuneZ2_Fall11",
+    "W2Jets_TuneZ2_Fall11",
+    "W3Jets_TuneZ2_Fall11",
+    "W4Jets_TuneZ2_Fall11",
     "DYJetsToLL_M50_TuneZ2_Fall11",
-    #"W2Jets_TuneZ2_Fall11",
-    #"W3Jets_TuneZ2_Fall11",
-    #"W4Jets_TuneZ2_Fall11",
+]
+datasetsMCSTVV = [
     "T_t-channel_TuneZ2_Fall11",
     "Tbar_t-channel_TuneZ2_Fall11",
     "T_tW-channel_TuneZ2_Fall11",
@@ -142,7 +136,7 @@ datasetsMCnoQCD = datasetsMCTTWJets + [
 datasetsMCQCD = [
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
 ]
-datasetsSignal = [
+datasetsMCSignal = [
     "TTToHplusBWB_M80_Fall11",
     "TTToHplusBWB_M90_Fall11",
     "TTToHplusBWB_M100_Fall11",
@@ -162,12 +156,16 @@ datasetsSignal = [
 ]
 
 #datasetsData2011 = []
+#datasetsMCTT = []
+#datasetsMCWDY = []
+#datasetsSTVV = []
 #datasetsMCnoQCD = []
 #datasetsMCQCD = []
-datasetsSignal = []
+#datasetsSignal = []
 #datasetsData2011 = datasetsData2011B
 
-#datasetsMCnoQCD = ["TTJets_TuneZ2_Fall11"]
+datasetsMCnoQCD = datasetsMCTT + datasetsMCWDY + datasetsMCSTVV
+datasetsMCnoQCD = ["TTJets_TuneZ2_Fall11"]
 #datasetsMCnoQCD = ["WJets_TuneZ2_Fall11"]
 #datasetsMCnoQCD = ["DYJetsToLL_M50_TuneZ2_Fall11"]
 
@@ -219,6 +217,8 @@ def createTasks(opts, step, version=None):
     crabcfg = "crab.cfg"
     crabcfgtemplate = None
     scheduler = "arc"
+    if step in ["genTauSkim"]:
+        crabcfg = "../pattuple/crab_pat.cfg"
     if step in ["analysis", "analysisTau", "analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
         crabcfg = None
         if "HOST" in os.environ and "lxplus" in os.environ["HOST"]:
@@ -242,46 +242,61 @@ def createTasks(opts, step, version=None):
         dirName += "_"+genTauSkimVersion
     dirName += opts.midfix
 
-    # Create multicrab
-    multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..", crabConfigTemplate=crabcfgtemplate)
-
-
     # Select the datasets based on the processing step and data era
-    datasets = []
-    if step in ["analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysisGenTau", "genTauSkim", "analysisTau"]:
-        datasets.extend(datasetsMCnoQCD)
-    elif step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
-        datasets.extend(datasetsMCTTWJets)
+    tasks = []
+    if step == "skim":
+        def app(name, lst):
+            if len(lst) > 0:
+                tasks.append( (name, lst) )
+        app("Data", datasetsData2011)
+        app("TT", datasetsMCTT)
+        app("W_DY", datasetsMCWDY)
+        app("ST_VV_QCD", datasetsMCSTVV+datasetsMCQCD)
+        app("Signal", datasetsMCSignal)        
     else:
-    #    datasets.extend(datasetsData2010)
-        datasets.extend(datasetsData2011)
-        datasets.extend(datasetsMCnoQCD)
-        datasets.extend(datasetsMCQCD)
-    if step in ["skim", "embedding", "signalAnalysis","EWKMatching"]:
-        datasets.extend(datasetsSignal)
+        datasest = []
+        if step in ["analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysisGenTau", "genTauSkim", "analysisTau"]:
+                datasets.extend(datasetsMCnoQCD)
+        elif step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
+            datasets.extend(datasetsMCTTWJets)
+        else:
+            datasets.extend(datasetsData2011)
+            datasets.extend(datasetsMCnoQCD)
+            datasets.extend(datasetsMCQCD)
+        if step in ["embedding", "signalAnalysis","EWKMatching"]:
+            datasets.extend(datasetsMCSignal)
+        tasks.append( ("", datasets) )
 
     # Setup the version number for tauembedding_{embedding,analysis} workflows
     workflow = config[step]["workflow"]
     if step in ["embedding", "analysis", "signalAnalysis", "EWKMatching"]:
         workflow = workflow % version
 
-    multicrab.extendDatasets(workflow, datasets)
+    taskDirs = []
+    for midfix, datasets in tasks:
+        # Create multicrab
+        multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..", crabConfigTemplate=crabcfgtemplate)
 
-    if scheduler == "arc":
-        multicrab.appendLineAll("GRID.maxtarballsize = 50")
+        if step in ["skim", "embedding", "genTauSkim"]:
+            multicrab.addCommonLine("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/embedding/CMSSW_4_4_X")
+
+        multicrab.extendDatasets(workflow, datasets)
+
+        if scheduler == "arc":
+            multicrab.addCommonLine("GRID.maxtarballsize = 50")
 #    if not step in ["skim", "genTauSkim", "analysisTauAod"]:
 #        multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
     if step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
         multicrab.addCommonLine("CMSSW.output_file = histograms.root")
 
-    # Let's do the naming like this until we get some answer from crab people
-    #if step in ["skim", "embedding"]:
-    #    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
-
-    # For this workflow we need one additional command line argument
-    if step == "signalAnalysisGenTau":
-        multicrab.appendArgAll("doTauEmbeddingLikePreselection=1")
-
+        # Let's do the naming like this until we get some answer from crab people
+        #if step in ["skim", "embedding"]:
+        #    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
+    
+        # For this workflow we need one additional command line argument
+        if step == "signalAnalysisGenTau":
+            multicrab.appendArgAll("doTauEmbeddingLikePreselection=1")
+    
     if step in ["skim"]:
         multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
     else:
@@ -305,22 +320,30 @@ def createTasks(opts, step, version=None):
                 continue
             md.setNumberOfJobs(njobs)
 
-
-    # Create multicrab task(s)
-    prefix = "multicrab_"+step+dirName
-    taskDirs = multicrab.createTasks(configOnly = opts.configOnly, prefix=prefix)
-        
-    # patch CMSSW.sh
-    if not opts.configOnly and step in ["skim", "embedding", "genTauSkim"]:
-        import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
-        for td, dsets in taskDirs:
-            os.chdir(td)
-            patch.main(Wrapper(dirs=dsets, input={"skim": "skim",
-                                                  "embedding": "embedded",
-                                                  "genTauSkim": "pattuple",
-                                                  }[step]))
-            os.chdir("..")
-
+    
+        if step in ["skim", "embedding", "genTauSkim"]:
+            def addCopyConfig(dataset):
+                dataset.appendLine("USER.additional_input_files = copy_cfg.py")
+                dataset.appendCopyFile("../copy_cfg.py")
+            multicrab.forEachDataset(addCopyConfig)
+    
+        # Create multicrab task(s)
+        prefix = "multicrab_"+step+dirName
+        if midfix != "":
+            prefix += "_"+midfix
+        taskDirs.extend(multicrab.createTasks(configOnly = opts.configOnly, prefix=prefix))
+            
+        # patch CMSSW.sh
+        if not opts.configOnly and step in ["skim", "embedding", "genTauSkim"]:
+            import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
+            for td, dsets in taskDirs:
+                os.chdir(td)
+                patch.main(Wrapper(dirs=dsets, input={"skim": "skim",
+                                                      "embedding": "embedded",
+                                                      "genTauSkim": "pattuple",
+                                                      }[step]))
+                os.chdir("..")
+    
     if len(taskDirs) > 1:
         print 
         print "Created multicrab directories"
@@ -330,8 +353,6 @@ def createTasks(opts, step, version=None):
 class Wrapper:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
-
-
 
 if __name__ == "__main__":
     main()
