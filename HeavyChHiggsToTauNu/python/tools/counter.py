@@ -2103,9 +2103,11 @@ class EventCounter:
     # \param datasets            dataset.DatasetManager, or (single or list) dataset.Dataset (or similar) object
     # \param countNameFunction   Function for mapping the X axis bin labels to count names (optional)
     # \param counters            Counter directory within the dataset.Dataset TFiles (if not given, use the counter from dataset.DatasetManager object)
+    # \param mainCounterOnly     If True, read only the main counter (default: False)
+    # \param kwargs              Keyword arguments, passed to Dataset.getDatasetRootHisto() when reading the counter histograms
     #
     # Creates counter.Counter for the main counter and each subcounter
-    def __init__(self, datasets, countNameFunction=None, counters=None, mainCounterOnly=False):
+    def __init__(self, datasets, countNameFunction=None, counters=None, mainCounterOnly=False, **kwargs):
         counterNames = {}
 
         allDatasets = []
@@ -2139,7 +2141,7 @@ class EventCounter:
             raise Exception("Error: no 'counter' histogram in the '%s' directories" % counterDir)
 
         def getDatasetRootHistos(path):
-            return [d.getDatasetRootHisto(path) for d in allDatasets]
+            return [d.getDatasetRootHisto(path, **kwargs) for d in allDatasets]
 
         self.mainCounter = Counter(getDatasetRootHistos(counterDir+"/counter"), countNameFunction)
         self.subCounters = {}

@@ -167,9 +167,12 @@ namespace HPlus {
     fJetTauInvMass(iConfig.getUntrackedParameter<edm::ParameterSet>("jetTauInvMass"), eventCounter, fHistoWrapper),
     fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper),
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
-    fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
+    //fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
     fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
+
+    fFullHiggsMassCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("invMassReco"), eventCounter, fHistoWrapper),
+
     //    ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
@@ -178,11 +181,10 @@ namespace HPlus {
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTauTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("tauTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
-    //<<<<<<< HEAD
-    //=======
-    fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
+
+    //    fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper, ""),
-    //>>>>>>> sami/2012
+
     //    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
@@ -192,7 +194,7 @@ namespace HPlus {
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
-    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper),
+    //    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper),
     fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
 
     // Non-QCD Type II related
@@ -600,12 +602,19 @@ namespace HPlus {
       
       // tau isolation
       if ( (*iTau)->tauID(myTauIsolation) < 0.5 ) continue;
-    
+
+
+
+
+// FIXME: 29.5.2013 / Lauri : got this conflict in merge, please check what to do
+      //<<<<<<< HEAD
+      //=======
+      //>>>>>>> sami/2012
 	//	std::cout <<"PASSES TAU DISCR" << std::endl;
       hTauDiscriminator->Fill((*iTau)->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits"));
       increment(fTausExistCounter);
   
-      /*	
+      	
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
       //	FakeTauIdentifier::MCSelectedTauMatchType tauMatchData.getTauMatchType() = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
       //      bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
@@ -618,11 +627,13 @@ namespace HPlus {
       // plot leading track without pt cut
       increment(fTauFakeScaleFactorCounter);
  
-      */
+      
 
-     
-      //      hTauDiscriminator->Fill((*iTau)->tauID("byRawCombinedIsolationDeltaBetaCorr"));
-      //      increment(fTausExistCounter);  
+
+      
+      // hTauDiscriminator->Fill((*iTau)->tauID("byRawCombinedIsolationDeltaBetaCorr"));
+      //increment(fTausExistCounter);  
+
       
       if(fProduce) {
 	std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
@@ -878,7 +889,7 @@ namespace HPlus {
     if(!metData.passedEvent()) return false;
     increment(fBaselineMetCounter);
     size_t nVertices = pvData.getNumberOfAllVertices();
-    fMETPhiOscillationCorrection.analyze(iEvent, nVertices, metData);	      
+    //fMETPhiOscillationCorrection.analyze(iEvent, nVertices, metData);	      
    
        //------ mT after jets and met in bins
     hMTBaselineTauIdNoBtagging->Fill(selectedTau->pt() ,transverseMass );	

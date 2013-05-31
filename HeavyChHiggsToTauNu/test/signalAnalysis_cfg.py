@@ -28,7 +28,7 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
 #myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
-myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
+#myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 #myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
 #myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
@@ -54,6 +54,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #doTriggerMatching=False,
                         #useCHSJets=True,
                         #doQCDTailKillerScenarios=True,
+                        #doInvariantMassReconstructionScenarios=True,
                         #doAgainstElectronScan=True,
                         #doTauIsolationAndJetPUScan=True,
                         #doBTagScan=True,

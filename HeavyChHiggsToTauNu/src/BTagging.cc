@@ -233,6 +233,8 @@ namespace HPlus {
     fLeadingDiscrCut(iConfig.getUntrackedParameter<double>("leadingDiscriminatorCut")),
     fSubLeadingDiscrCut(iConfig.getUntrackedParameter<double>("subleadingDiscriminatorCut")),
     fNumberOfBJets(iConfig.getUntrackedParameter<uint32_t>("jetNumber"),iConfig.getUntrackedParameter<std::string>("jetNumberCutDirection")),
+    fVariationEnabled(iConfig.getUntrackedParameter<bool>("variationEnabled")),
+    fVariationShiftBy(iConfig.getUntrackedParameter<double>("variationShiftBy")),
     FactorsFromDB(iConfig.getUntrackedParameter<bool>("UseBTagDB",true)),
     payloadName(iConfig.getUntrackedParameter<std::string>("LabelTag")),
     fTaggedCount(eventCounter.addSubCounter("b-tagging main","b-tagging")),
@@ -698,6 +700,15 @@ namespace HPlus {
     btagData.fScaleFactorAbsoluteUncertainty = TMath::Sqrt(mySFuncert);
     btagData.fScaleFactorRelativeUncertainty = btagData.fScaleFactorAbsoluteUncertainty / mySF;
     // FIXME end of dirty hack
+
+    // Do the variation, if asked
+    if(fVariationEnabled) {
+      btagData.fScaleFactor += fVariationShiftBy*btagData.fScaleFactorAbsoluteUncertainty;
+      // these are meaningless after the variation
+      btagData.fScaleFactorAbsoluteUncertainty = 0;
+      btagData.fScaleFactorRelativeUncertainty = 0;
+    }
+
 
     /* this is the old code
     fScaleFactor = fBTaggingScaleFactor.getWeight(fBJetsPassedPt, fLightJetsPassedPt, fBJetsFailedPt, fLightJetsFailedPt);
