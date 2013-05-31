@@ -84,7 +84,7 @@ def hplusHadd(opts, mergeName, inputFiles):
         splitted = splitFiles(resultFiles, opts.fastFilesPerMerge)
         resultFiles = []
         for index, files in splitted:
-            if len(splitted) > 1:
+            if len(splitted) > 1 or mergeRound > 0:
                 print "     merge round %d, split round %d" % (mergeRound, index)
             target = mergeName+"-m%d-s%d" % (mergeRound, index)
             if os.path.exists(target):
