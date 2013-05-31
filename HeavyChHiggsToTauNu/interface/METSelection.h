@@ -23,6 +23,8 @@ namespace HPlus {
 
   class METSelection: public BaseSelection {
   public:
+    enum Select {kRaw, kType1, kType2};
+
     /**
      * Class to encapsulate the access to the data members of
      * TauSelection. If you want to add a new accessor, add it here
@@ -37,18 +39,20 @@ namespace HPlus {
       ~Data();
 
       const bool passedEvent() const { return fPassedEvent; }
-      const edm::Ptr<reco::MET> getSelectedMET() const { return fSelectedMET; }
+      //const edm::Ptr<reco::MET> getSelectedMET() const { return fSelectedMET; }
+      const edm::Ptr<reco::MET> getSelectedMET() const;
       const edm::Ptr<reco::MET> getRawMET() const { return fRawMET; }
-      const edm::Ptr<reco::MET> getType1MET() const { return fType1MET; }
+      const edm::Ptr<reco::MET> getType1MET() const;
       const edm::Ptr<reco::MET> getType2MET() const { return fType2MET; }
       const edm::Ptr<reco::MET> getCaloMET() const { return fCaloMET; }
       const edm::Ptr<reco::MET> getTcMET() const { return fTcMET; }
-      const  std::vector<reco::MET> getType1METCorrected() const { return fType1METCorrected; }
+      const std::vector<reco::MET> getType1METCorrected() const { return fType1METCorrected; }
 
       friend class METSelection;
 
     private:
       bool fPassedEvent;
+      Select fMETMode;
       // MET objects
       edm::Ptr<reco::MET> fSelectedMET;
       edm::Ptr<reco::MET> fRawMET;
@@ -76,12 +80,15 @@ namespace HPlus {
     Data silentAnalyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
     Data analyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
 
+    // Returns type I MET object for assumption "no isolated taus" (use case: common plots or met phi oscillation before tau selection)
+    Data silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& allJets);
+
     const double getCutValue() const { return fMetCut; }
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, bool possiblyIsolatedTaus);
 
-    enum Select {kRaw, kType1, kType2};
+    
 
     enum PossiblyIsolatedTauMode { // Do TypeI (residual) correction for possibly isolated taus?
       kDisabled,       // equivalent to always
