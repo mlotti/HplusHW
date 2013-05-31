@@ -280,8 +280,7 @@ namespace HPlus {
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fCommonPlots(eventCounter, fHistoWrapper),
     fQCDFactorisedHistogramHandler(iConfig, fHistoWrapper),
-    //fCommonPlotsAfterTrigger(fCommonPlots.createCommonPlotsFilledAtEveryStep("Trigger",true,"Trigger")),
-    //fCommonPlotsAfterVertexSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("VertexSelection",false,"Vtx")),
+    fCommonPlotsAfterVertexSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("VertexSelection",false,"Vtx")),
     fCommonPlotsAfterTauSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauSelection",false,"TauID")),
     fCommonPlotsAfterTauWeight(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauWeight",true,"Tau")),
     fCommonPlotsAfterElectronVeto(fCommonPlots.createCommonPlotsFilledAtEveryStep("ElectronVeto",true,"e veto")),
@@ -296,8 +295,6 @@ namespace HPlus {
     // Book histograms
     hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesBeforeWeight", "Number of vertices without weighting;Vertices;N_{events} / 1 Vertex", 50, 0, 50);
     hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesAfterWeight", "Number of vertices with weighting; Vertices;N_{events} / 1 Vertex", 50, 0, 50);
-    hVerticesTriggeredBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "verticesTriggeredBeforeWeight", "Number of vertices triggered without weighting;Vertices;N_{events} / 1 Vertex", 50, 0, 50);
-    hVerticesTriggeredAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "verticesTriggeredAfterWeight", "Number of vertices triggered with weighting; Vertices;N_{events} / 1 Vertex", 50, 0, 50);
 
     // Selection flow histogram
     hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
@@ -363,20 +360,6 @@ namespace HPlus {
     fTree.setPrescaleWeight(prescaleWeight);
 
 
-//------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
-    if(!iEvent.isRealData()) {
-      const double wjetsWeight = fWJetsWeightReader.getWeight(iEvent, iSetup);
-      fEventWeight.multiplyWeight(wjetsWeight);
-    }
-    increment(fWJetsWeightCounter);
-
-
-//------ MET (noise) filters for data (reject events with instrumental fake MET)
-    if(iEvent.isRealData()) {
-      if(!fMETFilters.passedEvent(iEvent, iSetup)) return false;
-    }
-    increment(fMETFiltersCounter);
-
 //------ Vertex weight
     double myWeightBeforePileupReweighting = fEventWeight.getWeight();
     if(!iEvent.isRealData()) {
@@ -384,15 +367,21 @@ namespace HPlus {
       fEventWeight.multiplyWeight(myPileupWeight);
       fTree.setPileupWeight(myPileupWeight);
     }
-
-    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
-    size_t nVertices = pvData.getNumberOfAllVertices();
-    hVerticesBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
-    hVerticesAfterWeight->Fill(nVertices);
-    fTree.setNvertices(nVertices);
     increment(fAllCounter);
-    edm::Ptr<pat::Tau> myZeroTauPointer; // to force common plots to use tau from TauSelection::Data::getSelectedTau()
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+
+
+//------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
+    if(!iEvent.isRealData()) {
+      const double wjetsWeight = fWJetsWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(wjetsWeight);
+    }
+    increment(fWJetsWeightCounter);
+
+//------ MET (noise) filters for data (reject events with instrumental fake MET)
+    if(iEvent.isRealData()) {
+      if(!fMETFilters.passedEvent(iEvent, iSetup)) return false;
+    }
+    increment(fMETFiltersCounter);
 
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     const TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
@@ -403,10 +392,6 @@ namespace HPlus {
     if(triggerData.hasTriggerPath()) // protection if TriggerSelection is disabled
       fTree.setHltTaus(triggerData.getTriggerTaus());
 
-    hVerticesTriggeredBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
-    hVerticesTriggeredAfterWeight->Fill(nVertices);
-
-
 //------ GenParticle analysis (must be done here when we effectively trigger all MC)
     if (!iEvent.isRealData()) {
       GenParticleAnalysis::Data genData = fGenparticleAnalysis.analyze(iEvent, iSetup);
@@ -414,9 +399,17 @@ namespace HPlus {
     }
 
 //------ Primary vertex selection
+    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if (!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
-    //fCommonPlotsAfterVertexSelection->fill();
+    size_t nVertices = pvData.getNumberOfAllVertices();
+    hVerticesBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
+    hVerticesAfterWeight->Fill(nVertices);
+    fTree.setNvertices(nVertices);
+    // Setup common plots
+    edm::Ptr<pat::Tau> myZeroTauPointer; // to force common plots to use tau from TauSelection::Data::getSelectedTau()
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlotsAfterVertexSelection->fill();
     fCommonPlots.fillControlPlots(iEvent, pvData);
 
 //------ Tau candidate selection
@@ -942,7 +935,7 @@ namespace HPlus {
     }
 
     // Obtain booleans
-    bool myLeg1PassedStatus = metData.passedEvent() && btagData.passedEvent() && tailKillerData.passedEvent();
+    //bool myLeg1PassedStatus = metData.passedEvent() && btagData.passedEvent() && tailKillerData.passedEvent();
     bool myLeg2PassedStatus = tauSelection.getPassesIsolationStatusOfTauObject(selectedTau) &&
       tauSelection.getPassesNProngsStatusOfTauObject(selectedTau) &&
       tauSelection.getPassesRtauStatusOfTauObject(selectedTau);

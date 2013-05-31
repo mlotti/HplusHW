@@ -101,7 +101,7 @@ namespace HPlus {
     };
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
-    //kSignalOrderVertexSelection,
+    kSignalOrderVertexSelection,
     kSignalOrderTauID,
     kSignalOrderElectronVeto,
     kSignalOrderMuonVeto,
@@ -132,7 +132,7 @@ namespace HPlus {
     CounterGroup* getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
     void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
     void doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData, const METSelection::Data& metData, const GenParticleAnalysis::Data& genData);
-    bool selectTailEvents(edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool selectTailEvents(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisProducer
@@ -162,9 +162,7 @@ namespace HPlus {
     Count fGenuineTauCounter;
     Count fVetoTauCounter;
     Count fElectronVetoCounter;
-    //Count fElectronMatchingTauCounter;
     Count fMuonVetoCounter;
-    Count fMetCutBeforeJetCutCounter;
     Count fNJetsCounter;
     Count fQCDTailKillerCollinearCounter;
     Count fMETTriggerScaleFactorCounter;
@@ -287,8 +285,6 @@ namespace HPlus {
     // Vertex histograms
     WrappedTH1 *hVerticesBeforeWeight;
     WrappedTH1 *hVerticesAfterWeight;
-    WrappedTH1 *hVerticesTriggeredBeforeWeight;
-    WrappedTH1 *hVerticesTriggeredAfterWeight;
 
     // MCAnalysis histograms
     WrappedTH1 *hgenWmass;

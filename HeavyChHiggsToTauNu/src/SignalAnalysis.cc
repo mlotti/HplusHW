@@ -94,14 +94,11 @@ namespace HPlus {
     fGenuineTauCounter(eventCounter.addCounter("Tau is genuine")),
     fVetoTauCounter(eventCounter.addCounter("tau veto")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
-    //fElectronMatchingTauCounter(eventCounter.addCounter("Loose electron matching tau")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
-    fMetCutBeforeJetCutCounter(eventCounter.addCounter("MET cut Before Jets")),
     fNJetsCounter(eventCounter.addCounter("njets")),
     fQCDTailKillerCollinearCounter(eventCounter.addCounter("QCD tail killer collinear")),
     fMETTriggerScaleFactorCounter(eventCounter.addCounter("MET trigger scale factor")),
     fMETCounter(eventCounter.addCounter("MET")),
-    //    fRtauAfterMetCounter(eventCounter.Counter("Rtau after MET")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fBTaggingScaleFactorCounter(eventCounter.addCounter("btagging scale factor")),
     fQCDTailKillerBackToBackCounter(eventCounter.addCounter("QCD tail killer back-to-back")),
@@ -277,9 +274,6 @@ namespace HPlus {
     TFileDirectory myVertexDir = fs->mkdir("Vertices");
     hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesBeforeWeight", "Number of vertices without weighting", 40, 0, 40);
     hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesAfterWeight", "Number of vertices with weighting", 40, 0, 40);
-    hVerticesTriggeredBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesTriggeredBeforeWeight", "Number of vertices without weighting", 40, 0, 40);
-    hVerticesTriggeredAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesTriggeredAfterWeight", "Number of vertices with weighting", 40, 0, 40);
-    //    hmetAfterTrigger = fHistoWrapper.makeTH<TH1F>(*fs, "metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
 
     // MET histograms
     hGenMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "genMET", "genMET", 200, 0., 400.);
@@ -357,12 +351,12 @@ namespace HPlus {
     hMet_beforeJetCut  = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "Met_beforeJetCut", "Met_beforeJetCut", 200, 0.0, 500.0);  
     hMetAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "Met_AfterCuts", "Met_AfterCuts", 200, 0.0, 500.0);
 
-    hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 14, 0, 14);
-    hSelectionFlowVsVertices = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "SignalSelectionFlowVsVertices", "SignalSelectionFlowVsVertices;N_{vertices};Step", 50, 0, 50, 14, 0, 14);
-    hSelectionFlowVsVerticesFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "SignalSelectionFlowVsVerticesFakeTaus", "SignalSelectionFlowVsVerticesFakeTaus;N_{vertices};Step", 50, 0, 50, 14, 0, 14);
+    hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 15, 0, 15);
+    hSelectionFlowVsVertices = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "SignalSelectionFlowVsVertices", "SignalSelectionFlowVsVertices;N_{vertices};Step", 50, 0, 50, 15, 0, 15);
+    hSelectionFlowVsVerticesFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "SignalSelectionFlowVsVerticesFakeTaus", "SignalSelectionFlowVsVerticesFakeTaus;N_{vertices};Step", 50, 0, 50, 15, 0, 15);
     if(hSelectionFlow->getHisto()) {
       hSelectionFlow->getHisto()->GetXaxis()->SetBinLabel(1+kSignalOrderTrigger,"Trigger");
-      //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderVertexSelection,"Vertex");
+      hSelectionFlow->getHisto()->GetXaxis()->SetBinLabel(1+kSignalOrderVertexSelection,"PV selection");
       hSelectionFlow->getHisto()->GetXaxis()->SetBinLabel(1+kSignalOrderTauID,"#tau ID");
       hSelectionFlow->getHisto()->GetXaxis()->SetBinLabel(1+kSignalOrderElectronVeto,"Isol. e veto");
       hSelectionFlow->getHisto()->GetXaxis()->SetBinLabel(1+kSignalOrderMuonVeto,"Isol. #mu veto");
@@ -488,10 +482,19 @@ namespace HPlus {
     if (bTauEmbeddingStatus)
       fTauEmbeddingMuonIsolationQuantifier.analyzeAfterTrigger(iEvent, iSetup);
 
-    // set prescale
+//------ Set prescale
     const double prescaleWeight = fPrescaleWeightReader.getWeight(iEvent, iSetup);
     fEventWeight.multiplyWeight(prescaleWeight);
     fTree.setPrescaleWeight(prescaleWeight);
+
+//------ Pileup weight
+    double myWeightBeforePileupReweighting = fEventWeight.getWeight();
+    if(!iEvent.isRealData()) {
+      const double myPileupWeight = fPileupWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(myPileupWeight);
+      fTree.setPileupWeight(myPileupWeight);
+    }
+    increment(fAllCounter);
 
 //------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
     if(!iEvent.isRealData()) {
@@ -501,33 +504,11 @@ namespace HPlus {
     }
     increment(fWJetsWeightCounter);
 
-//------ Apply filter (if chosen) to select tail events
-    //if (!selectTailEvents(iEvent, iSetup)) return false;
-
 //------ MET (noise) filters for data (reject events with instrumental fake MET)
     if(iEvent.isRealData()) {
       if(!fMETFilters.passedEvent(iEvent, iSetup)) return false;
     }
     increment(fMETFiltersCounter);
-
-//------ Pileup weight
-    double myWeightBeforePileupReweighting = fEventWeight.getWeight();
-    if(!iEvent.isRealData()) {
-      const double myPileupWeight = fPileupWeightReader.getWeight(iEvent, iSetup);
-      fEventWeight.multiplyWeight(myPileupWeight);
-      fTree.setPileupWeight(myPileupWeight);
-    }
-
-    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
-    size_t nVertices = pvData.getNumberOfAllVertices();
-    hVerticesBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
-    hVerticesAfterWeight->Fill(nVertices);
-    fTree.setNvertices(nVertices);
-
-    increment(fAllCounter);
-    edm::Ptr<pat::Tau> myZeroTauPointer; // to force common plots to use tau from TauSelection::Data::getSelectedTau()
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
-
 
 //------ For embedding, apply the muon ID efficiency at this stage
     EmbeddingMuonEfficiency::Data embeddingMuonData;
@@ -542,13 +523,8 @@ namespace HPlus {
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
     hSelectionFlow->Fill(kSignalOrderTrigger);
-    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderTrigger);
-    hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderTrigger);
     if(triggerData.hasTriggerPath()) // protection if TriggerSelection is disabled
       fTree.setHltTaus(triggerData.getTriggerTaus());
-
-    hVerticesTriggeredBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
-    hVerticesTriggeredAfterWeight->Fill(nVertices);
 
 //------ GenParticle analysis (must be done here when we effectively trigger all MC)
     GenParticleAnalysis::Data genData;
@@ -558,11 +534,24 @@ namespace HPlus {
     }
 
 //------ Primary vertex
+    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
+    size_t nVertices = pvData.getNumberOfAllVertices();
+    hSelectionFlow->Fill(kSignalOrderVertexSelection);
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderVertexSelection);
+    hVerticesBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
+    hVerticesAfterWeight->Fill(nVertices);
+    fTree.setNvertices(nVertices);
+    // Setup common plots
+    edm::Ptr<pat::Tau> myZeroTauPointer; // to force common plots to use tau from TauSelection::Data::getSelectedTau()
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
     fCommonPlotsAfterVertexSelection->fill();
-    //hSelectionFlow->Fill(kSignalOrderVertexSelection);
     fCommonPlots.fillControlPlots(iEvent, pvData);
+
+//------ Apply filter (if chosen) to select tail events
+    //if (!selectTailEvents(iEvent, iSetup, pvData)) return false;
+
 
 //------ TauID
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
@@ -686,19 +675,7 @@ namespace HPlus {
       copyPtrToVector(electronVetoData.getSelectedElectronsBeforePtAndEtaCuts(), *saveElectrons);
       iEvent.put(saveElectrons, "selectedVetoElectronsBeforePtAndEtaCuts");
     }
-    /*    
-    bool electronTauMatch = false;
-    for(edm::PtrVector<pat::Electron>::const_iterator iEle = electronVetoData.getSelectedLooseElectrons().begin(); iEle != electronVetoData.getSelectedLooseElectrons().end(); ++iEle) {
 
-      double deltaRElectronTau = ROOT::Math::VectorUtil::DeltaR((*iEle)->p4()  , tauData.getSelectedTau()->p4()); 
-      if( deltaRElectronTau < 0.5) electronTauMatch = true;  
-      //      hDeltaPhiJetMet->Fill(deltaPhiJetMet*57.3);
-    }
-    if (electronTauMatch ) return false;
-    */
-    //if (electronVetoData.getSelectedLooseElectrons().size() > 0 ) increment(fElectronMatchingTauCounter);
-    
- 
 
 //------ Global muon veto
     MuonSelection::Data muonVetoData = fMuonSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex());
@@ -737,20 +714,10 @@ namespace HPlus {
       }
     }
 
-    /* temporary place
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
-    hMet_beforeJetCut->Fill(metData.getSelectedMET()->et());  
-    if(metData.passedEvent()) increment(fMetCutBeforeJetCutCounter);
-    */
-
-    // temporary met cut !!!!!!!!!!!!!!!!!
-    //    if(!metData.passedEvent()) return false;
-    //    increment(fMETCounter);
-
-    //std::cout << "tau match is " << tauMatchData.getTauMatchType() << " e=" << fFakeTauIdentifier.isElectronToTau(tauMatchData.getTauMatchType()) << " mu=" << fFakeTauIdentifier.isMuonToTau(tauMatchData.getTauMatchType()) << " jet=" << fFakeTauIdentifier.isJetToTau(tauMatchData.getTauMatchType()) << std::endl;
     hCtrlNjetsBeforeCollinearCuts->Fill(jetData.getHadronicJetCount());
     if (myFakeTauStatus) hCtrlEWKFakeTausNjetsBeforeCollinearCuts->Fill(jetData.getHadronicJetCount());
     if(!jetData.passedEvent()) return false;
+    increment(fNJetsCounter);
     // For data, set the current run number (needed for tau embedding
     // input, doesn't harm for normal data except by wasting small
     // amount of time)
@@ -766,7 +733,6 @@ namespace HPlus {
     fCommonPlots.fillControlPlots(iEvent, jetData);
     if (myFakeTauStatus) fCommonPlotsAfterJetSelectionFakeTaus->fill();
 
-    increment(fNJetsCounter);
     hSelectionFlow->Fill(kSignalOrderJetSelection);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderJetSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderJetSelection);
@@ -837,12 +803,6 @@ namespace HPlus {
 //------ MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     hMet->Fill(metData.getSelectedMET()->et());
-
-
-    //BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
-    //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
-    //if(btagData.passedEvent()) hMetWithBtagging->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
-
     hCtrlMET->Fill(metData.getSelectedMET()->et());
     if (myFakeTauStatus) hCtrlEWKFakeTausMET->Fill(metData.getSelectedMET()->et());
     // Obtain delta phi and transverse mass here, but do not yet cut on them
@@ -1609,9 +1569,7 @@ namespace HPlus {
     }
   }
 
-  bool SignalAnalysis::selectTailEvents(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    VertexSelection::Data pvData = fPrimaryVertexSelection.silentAnalyze(iEvent, iSetup);
-    if (!pvData.passedEvent()) return false;
+  bool SignalAnalysis::selectTailEvents(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData) {
     TauSelection::Data tauData = fTauSelection.silentAnalyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
     if (!tauData.passedEvent()) return false; // Require at least one tau
     JetSelection::Data jetData = fJetSelection.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), 0);
