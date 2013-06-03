@@ -341,7 +341,7 @@ namespace HPlus {
     WrappedTH2 *hSelectionFlowVsVertices;
     WrappedTH2 *hSelectionFlowVsVerticesFakeTaus;
 
-    // Control plots
+    // Control plots FIXME: move to control plots
     //    WrappedTH1* hDeltaPtJetTau;
     //    WrappedTH1* hDeltaRJetTau;
     WrappedTH1* hCtrlIdentifiedElectronPt;
@@ -395,6 +395,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBack;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinear;
 
+    // FIXME move these to common plots
     WrappedTH2* hCtrlJetMatrixAfterJetSelection;
     WrappedTH2* hCtrlJetMatrixAfterMET;
     WrappedTH2* hCtrlJetMatrixAfterMET100;
@@ -426,7 +427,7 @@ namespace HPlus {
     bool fProduce;
     bool fOnlyGenuineTaus; 
     
-    
+    // FIXME move these to common plots
     WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode0;
     WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode1;
     WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode2;

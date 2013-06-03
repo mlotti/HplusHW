@@ -26,18 +26,12 @@ namespace HPlus {
     METPhiOscillationCorrection(EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string prefix);
     ~METPhiOscillationCorrection();
 
-    /// Getters for corrected quantities
-    double getCorrectedMET(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met);
-    double getCorrectedMETphi(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met);
-
     /// Plot information for determining parametrisation
     void analyze(const edm::Event& iEvent, int nVertices, const METSelection::Data& metData);
-    void analyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met);
 
   private:
-    double getCorrectedMETX(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met);
-    double getCorrectedMETY(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met);
-    void privateAnalyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met);
+    void privateAnalyze(const edm::Event& iEvent, int nVertices, const METSelection::Data& metData);
+    void initializeHistograms(HistoWrapper& histoWrapper, std::string prefix);
     // Input parameters
 
     // Counters
@@ -45,6 +39,10 @@ namespace HPlus {
     // Histograms
     WrappedTH2 *hNVerticesVsMetX;
     WrappedTH2 *hNVerticesVsMetY;
+    WrappedTH1 *hMETPhiUncorrected;
+    WrappedTH1 *hMETPhiCorrected;
+    WrappedTH1 *hMETUncorrected;
+    WrappedTH1 *hMETCorrected;
     // FIXME: Add uncertainty histograms, etc.
   };
 }

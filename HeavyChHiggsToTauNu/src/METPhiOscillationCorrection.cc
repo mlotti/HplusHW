@@ -9,69 +9,44 @@
 
 namespace HPlus {
   METPhiOscillationCorrection::METPhiOscillationCorrection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string prefix) {
-    edm::Service<TFileService> fs;
-    std::string myDirStr = "METPhiOscillationCorrection"+prefix;
-    TFileDirectory myDir = fs->mkdir(myDirStr.c_str());
-    // Histograms for determining corrections
-    hNVerticesVsMetX = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETX", "NverticesVsMETX;N_{vertices};MET_{x}, GeV", 60, 0., 60., 1000, -500, 500);
-    hNVerticesVsMetY = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETY", "NverticesVsMETY;N_{vertices};MET_{y}, GeV", 60, 0., 60., 1000, -500, 500);
+    initializeHistograms(histoWrapper, prefix);
   }
 
   METPhiOscillationCorrection::METPhiOscillationCorrection(EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string prefix) {
-    edm::Service<TFileService> fs;
-    std::string myDirStr = "METPhiOscillationCorrection"+prefix;
-    TFileDirectory myDir = fs->mkdir(myDirStr.c_str());
-    // Histograms for determining corrections
-    hNVerticesVsMetX = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETX", "NverticesVsMETX;N_{vertices};MET_{x}, GeV", 60, 0., 60., 1000, -500, 500);
-    hNVerticesVsMetY = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETY", "NverticesVsMETY;N_{vertices};MET_{y}, GeV", 60, 0., 60., 1000, -500, 500);
+    initializeHistograms(histoWrapper, prefix);
   }
 
   METPhiOscillationCorrection::~METPhiOscillationCorrection() {}
 
-  double METPhiOscillationCorrection::getCorrectedMET(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met) {
-    double metX = getCorrectedMETX(isRealData, nVertices, met);
-    double metY = getCorrectedMETY(isRealData, nVertices, met);
-    return std::sqrt(metX*metX + metY*metY);
-  }
-
-  double METPhiOscillationCorrection::getCorrectedMETphi(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met) {
-    double metX = getCorrectedMETX(isRealData, nVertices, met);
-    double metY = getCorrectedMETY(isRealData, nVertices, met);
-    math::XYZVector v(metX, metY, 0.0);
-    return v.phi();
-  }
-
-  double METPhiOscillationCorrection::getCorrectedMETX(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met) {
-    if (isRealData) {
-      // 2012ABCD, tau+MET
-      return met->px() - (0.594 * static_cast<double>(nVertices) - 1.361);
-    } else {
-      // 2012ABCD, from Christian
-      return met->px() - (-0.02004 * static_cast<double>(nVertices) + 0.1143);
-    }
-  }
-
-  double METPhiOscillationCorrection::getCorrectedMETY(const bool isRealData, int nVertices, const edm::Ptr<reco::MET>& met) {
-    if (isRealData) {
-      // 2012ABCD, tau+MET
-      return met->py() - (-0.1554 * static_cast<double>(nVertices) - 4.028);
-    } else {
-      // 2012ABCD, from Christian
-      return met->py() - (-0.1979 * static_cast<double>(nVertices) - 0.2135);
-    }
-  }
-
   void METPhiOscillationCorrection::analyze(const edm::Event& iEvent, int nVertices, const METSelection::Data& metData) {
-    privateAnalyze(iEvent, nVertices, metData.getSelectedMET());
+    privateAnalyze(iEvent, nVertices, metData);
   }
 
-  void METPhiOscillationCorrection::analyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met) {
-    privateAnalyze(iEvent, nVertices, met);
-  }
-
-  void METPhiOscillationCorrection::privateAnalyze(const edm::Event& iEvent, int nVertices, const edm::Ptr<reco::MET>& met) {
+  void METPhiOscillationCorrection::privateAnalyze(const edm::Event& iEvent, int nVertices, const METSelection::Data& metData) {
+    const edm::Ptr<reco::MET> myUncorrectedMET = metData.getPhiUncorrectedSelectedMET();
+    // Fill uncorrected histograms
+    hMETPhiUncorrected->Fill(myUncorrectedMET->phi());
+    hMETUncorrected->Fill(myUncorrectedMET->pt());
     // Fill histograms for determining correction factors
-    hNVerticesVsMetX->Fill(nVertices, met->px());
-    hNVerticesVsMetY->Fill(nVertices, met->py());
+    hNVerticesVsMetX->Fill(nVertices, myUncorrectedMET->px());
+    hNVerticesVsMetY->Fill(nVertices, myUncorrectedMET->py());
+    // Fill corrected histograms
+    const edm::Ptr<reco::MET> myCorrectedMET = metData.getPhiCorrectedSelectedMET();
+    hMETPhiCorrected->Fill(myCorrectedMET->phi());
+    hMETCorrected->Fill(myCorrectedMET->pt());
+}
+
+  void METPhiOscillationCorrection::initializeHistograms(HistoWrapper& histoWrapper, std::string prefix) {
+    edm::Service<TFileService> fs;
+    std::string myDirStr = "METPhiOscillationCorrection"+prefix;
+    TFileDirectory myDir = fs->mkdir(myDirStr.c_str());
+    // Histograms for determining corrections
+    hNVerticesVsMetX = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETX", "NverticesVsMETX;N_{vertices};MET_{x}, GeV", 60, 0., 60., 2000, -500, 500);
+    hNVerticesVsMetY = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETY", "NverticesVsMETY;N_{vertices};MET_{y}, GeV", 60, 0., 60., 2000, -500, 500);
+    // Diagnostic histograms
+    hMETPhiUncorrected = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METPhiUncorrected", "METPhiUncorrected;Type I MET #phi;N_{events}", 72, -3.1415927, 3.1415927);
+    hMETPhiCorrected = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METPhiCorrected", "METPhiCorrected;Type I MET #phi;N_{events}", 72, -3.1415927, 3.1415927);    
+    hMETUncorrected = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METUncorrected", "METUncorrected;Type I MET, GeV;N_{events}", 100., 0., 500.);
+    hMETCorrected = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METCorrected", "METCorrected;Type I MET, GeV;N_{events}", 100., 0., 500.);
   }
 }

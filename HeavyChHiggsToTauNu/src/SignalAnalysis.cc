@@ -656,7 +656,7 @@ namespace HPlus {
     // amount of time)
     if(iEvent.isRealData())
       fMETTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
-    METSelection::Data metDataTmp = fMETSelection.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    METSelection::Data metDataTmp = fMETSelection.silentAnalyze(iEvent, iSetup, nVertices, tauData.getSelectedTau(), jetData.getAllJets());
     // Apply trigger scale factor here for now, SF calculated for tau+3 jets events
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metDataTmp.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     fTree.setMETTriggerWeight(metTriggerWeight.getEventWeight(), metTriggerWeight.getEventWeightAbsoluteUncertainty());
@@ -664,8 +664,7 @@ namespace HPlus {
 
 
 //------ Improved delta phi cut, a.k.a. QCD tail killer - collinear part
-    METSelection::Data metDataForCollinearCut = fMETSelection.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
-    const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metDataForCollinearCut.getSelectedMET());
+    const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metDataTmp.getSelectedMET());
     for (int i = 0; i < qcdTailKillerDataCollinear.getNConsideredJets(); ++i) {
       if (i < 4) { // protection
         hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromCollinearCorner(i)); // Make control plot before cut
@@ -715,7 +714,7 @@ namespace HPlus {
 
 
 //------ MET cut
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, nVertices, tauData.getSelectedTau(), jetData.getAllJets());
     hCtrlMET->Fill(metData.getSelectedMET()->et());
     if (myFakeTauStatus) hCtrlEWKFakeTausMET->Fill(metData.getSelectedMET()->et());
     // Obtain delta phi and transverse mass here, but do not yet cut on them
@@ -750,6 +749,7 @@ namespace HPlus {
     hCtrlNbjets->Fill(btagData.getBJetCount());
     if (myFakeTauStatus) hCtrlEWKFakeTausNbjets->Fill(btagData.getBJetCount());
     if(!btagData.passedEvent()) return false;
+    fCommonPlots.fillControlPlots(iEvent, btagData);
     fCommonPlotsAfterBTagging->fill();
     if (myFakeTauStatus) fCommonPlotsAfterBTaggingFakeTaus->fill();
     increment(fBTaggingCounter);
@@ -847,8 +847,8 @@ namespace HPlus {
       fCommonPlotsSelectedMtTail->fill();
       if (myFakeTauStatus) fCommonPlotsSelectedMtTailFakeTaus->fill();
     }
-    fCommonPlots.fillFinalPlots();
-    if (myFakeTauStatus) fCommonPlots.fillFinalPlotsForFakeTaus();
+    fCommonPlots.fillFinalPlots(iEvent);
+    if (myFakeTauStatus) fCommonPlots.fillFinalPlotsForFakeTaus(iEvent);
 
     hSelectedTauRtauAfterCuts->Fill(tauData.getSelectedTauRtauValue());
     hSelectedTauEtAfterCuts->Fill(tauData.getSelectedTau()->pt());
@@ -949,7 +949,7 @@ namespace HPlus {
   void SignalAnalysis::doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronVetoData, const MuonSelection::Data& muonVetoData, const JetSelection::Data& jetData) {
     // MET
    
-    METSelection::Data metData = fMETSelection.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getAllJets());
+    METSelection::Data metData = fMETSelection.silentAnalyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), selectedTau, jetData.getAllJets());
     // transverse mass
     //double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metData.getSelectedMET()) );
     // b tagging, no event cut
@@ -1398,7 +1398,7 @@ namespace HPlus {
     if (!tauData.passedEvent()) return false; // Require at least one tau
     JetSelection::Data jetData = fJetSelection.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), 0);
     if (jetData.getHadronicJetCount() == 0) return false;
-    METSelection::Data metData = fMETSelection.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    METSelection::Data metData = fMETSelection.silentAnalyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), tauData.getSelectedTau(), jetData.getAllJets());
     if (!(metData.getSelectedMET()->et() > 30)) return false;
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
