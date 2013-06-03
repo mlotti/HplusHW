@@ -278,7 +278,7 @@ namespace HPlus {
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
-    fCommonPlots(eventCounter, fHistoWrapper),
+    fCommonPlots(eventCounter, fHistoWrapper, false),
     fQCDFactorisedHistogramHandler(iConfig, fHistoWrapper),
     fCommonPlotsAfterVertexSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("VertexSelection",false,"Vtx")),
     fCommonPlotsAfterTauSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauSelection",false,"TauID")),
@@ -387,7 +387,6 @@ namespace HPlus {
     const TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
-    //fCommonPlotsAfterTrigger->fill();
     hSelectionFlow->Fill(kQCDOrderTrigger);
     if(triggerData.hasTriggerPath()) // protection if TriggerSelection is disabled
       fTree.setHltTaus(triggerData.getTriggerTaus());
@@ -408,9 +407,9 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
     // Setup common plots
     edm::Ptr<pat::Tau> myZeroTauPointer; // to force common plots to use tau from TauSelection::Data::getSelectedTau()
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
     fCommonPlotsAfterVertexSelection->fill();
-    fCommonPlots.fillControlPlots(iEvent, pvData);
+    fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
 
 //------ Tau candidate selection
     // Do tau candidate selection
@@ -453,9 +452,9 @@ namespace HPlus {
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(mySelectedTau));
     // note: do not require here that only one tau has been found (mySelectedTau is the selected tau in the event)
     // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, mySelectedTau, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, mySelectedTau, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
     fCommonPlotsAfterTauSelection->fill();
-    fCommonPlots.fillControlPlots(iEvent, iSetup, tauCandidateData, tauMatchData, mySelectedTau, fMETSelection);
+    fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauCandidateData, tauMatchData, mySelectedTau, fMETSelection);
     // Set factorisation bin
     fQCDFactorisedHistogramHandler.setFactorisationBinForEvent(mySelectedTau->pt(), mySelectedTau->eta(), nVertices);
 
@@ -473,10 +472,12 @@ namespace HPlus {
     increment(fTausAfterScaleFactorsCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
     fCommonPlotsAfterTauWeight->fill();
+    fCommonPlots.fillControlPlotsAfterTauTriggerScaleFactor(iEvent);
 
 
 //------ Veto against second tau in event
     const VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, mySelectedTau, pvData.getSelectedVertex()->z());
+    fCommonPlots.fillControlPlotsAtTauVetoSelection(iEvent, iSetup, vetoTauData);
     //    if (vetoTauData.passedEvent()) return false;
     if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
     // Note: no return statement should be added here
@@ -484,10 +485,10 @@ namespace HPlus {
 
 //------ Global electron veto
     const ElectronSelection::Data electronData = fElectronSelection.analyze(iEvent, iSetup);
+    fCommonPlots.fillControlPlotsAtElectronSelection(iEvent, electronData);
     if (!electronData.passedEvent()) return false;
     increment(fElectronVetoCounter);
     fCommonPlotsAfterElectronVeto->fill();
-    fCommonPlots.fillControlPlots(iEvent, electronData);
     hSelectionFlow->Fill(kQCDOrderElectronVeto);
     /*NonIsolatedElectronVeto::Data nonIsolatedElectronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
     if (!nonIsolatedElectronVetoData.passedEvent())  return false;
@@ -497,10 +498,10 @@ namespace HPlus {
 
 //------ Global muon veto
     const MuonSelection::Data muonData = fMuonSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex());
+    fCommonPlots.fillControlPlotsAtMuonSelection(iEvent, muonData);
     if (!muonData.passedEvent()) return false;
     increment(fMuonVetoCounter);
     fCommonPlotsAfterMuonVeto->fill();
-    fCommonPlots.fillControlPlots(iEvent, muonData);
     hSelectionFlow->Fill(kQCDOrderMuonVeto);
     /*NonIsolatedMuonVeto::Data nonIsolatedMuonVetoData = fNonIsolatedMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!nonIsolatedMuonVetoData.passedEvent()) return; 
@@ -510,10 +511,10 @@ namespace HPlus {
 
 //------ Jet selection
     const JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedTau, nVertices);
+    fCommonPlots.fillControlPlotsAtJetSelection(iEvent, jetData);
     if (!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
     fCommonPlotsAfterJetSelection->fill();
-    fCommonPlots.fillControlPlots(iEvent, jetData);
     hSelectionFlow->Fill(kQCDOrderJetSelection);
 
 
