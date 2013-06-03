@@ -27,9 +27,8 @@ from optparse import OptionParser
 
 import multicrab
 import multicrabWorkflows
-import multicrabWorkflowsTools
 import git
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import aux
 
 ## The LandS CVS tag to be used
 LandS_tag = "t3-06-05" # Given by Mingshui 15.8.2012 at 11:56 EEST
@@ -322,14 +321,14 @@ class MultiCrabLandS:
                 if not os.path.isfile(fname):
                     raise Exception("Datacard file '%s' does not exist!" % fname)
 
-                multicrabWorkflowsTools._addToDictList(self.datacards, mass, fname)
+                aux.addToDictList(self.datacards, mass, fname)
 
             for rf in rootfilePatterns:
                 fname = os.path.join(self.datacardDirectory, rf % mass)
                 if not os.path.isfile(fname):
                     raise Exception("ROOT file (for shapes) '%s' does not exist!" % fname)
 
-                multicrabWorkflowsTools._addToDictList(self.rootfiles, mass, fname)
+                aux.addToDictList(self.rootfiles, mass, fname)
 
     ## Create the multicrab task directory
     #
@@ -439,6 +438,8 @@ class MultiCrabLandS:
         print
         print "############################################################"
         print
+
+        self.jobsCreated = True
 
     def printInstruction(self):
         if self.jobsCreated:
@@ -1292,13 +1293,15 @@ class ResultContainer:
     #
     # \param filename  Name of the datacard file inside the multicrab directory
     def _readLuminosityTaujets(self, filename):
-        lumi_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
+        lumi_re = re.compile("luminosity=\s*(?P<lumi>\d+\.\d+)")
         fname = os.path.join(self.path, filename)
         f = open(fname)
         for line in f:
             match = lumi_re.search(line)
             if match:
-                self.lumi = str(1000*float(match.group("lumi"))) # 1/fb -> 1/pb
+                #self.lumi = str(1000*float(match.group("lumi"))) # 1/fb -> 1/pb
+                # Nowadays the luminosity is in 1/pb
+                self.lumi = match.group("lumi")
                 f.close()
                 return
         raise Exception("Did not find luminosity information from '%s'" % fname)

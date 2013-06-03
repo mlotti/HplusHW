@@ -70,29 +70,38 @@ datasetsMC2011 = [
         "ZZ_TuneZ2_Fall11",   
         ]
 datasetsData2012TauLeg = [
-        "TauPlusX_190456-190738_2012A_Jul13",
-        "TauPlusX_190782-190949_2012A_Aug06",
-        "TauPlusX_191043-193621_2012A_Jul13",
-        "TauPlusX_193834-196531_2012B_Jul13",
-        "TauPlusX_198022-198523_2012C_Aug24",
-        "TauPlusX_198941-199608_2012C_Prompt",
-        "TauPlusX_199698-203742_2012C_Prompt",
-        "TauPlusX_203777-208686_2012D_Prompt"
+        "TauPlusX_190456-193621_2012A_Jan22",
+        "TauPlusX_193834-196531_2012B_Jan22",
+        "TauPlusX_198022-203742_2012C_Jan22",
+        "TauPlusX_203777-208686_2012D_Jan22",
+#        "TauPlusX_190456-190738_2012A_Jul13",
+#        "TauPlusX_190782-190949_2012A_Aug06",
+#        "TauPlusX_191043-193621_2012A_Jul13",
+#        "TauPlusX_193834-196531_2012B_Jul13",
+#        "TauPlusX_198022-198523_2012C_Aug24",
+#        "TauPlusX_198941-199608_2012C_Prompt",
+#        "TauPlusX_199698-203742_2012C_Prompt",
+#        "TauPlusX_203777-208686_2012D_Prompt"
 ]
 datasetsMC2012TauLeg = [
         "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12",
         "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12"
 ]
 datasetsData2012MetLeg = [
-	"Tau_190456-190738_2012A_Jul13",	# 2012A HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2
-        "Tau_190782-190949_2012A_Aug06",
-        "Tau_191043-193621_2012A_Jul13",
-        "Tau_193834-196531_2012B_Jul13",
-        "Tau_198022-198523_2012C_Aug24",
-        "Tau_198941-200601_2012C_Prompt",
-        "Tau_200961-202504_2012C_Prompt",
-        "Tau_202792-203742_2012C_Prompt",
-        "Tau_203777-208686_2012D_Prompt"
+        "Tau_190456-193621_2012A_Jan22",
+        "TauParked_193834-196531_2012B_Jan22",
+        "TauParked_198022-202504_2012C_Jan22",
+        "TauParked_202972-203742_2012C_Jan22",
+        "TauParked_203777-208686_2012D_Jan22",
+#	"Tau_190456-190738_2012A_Jul13",	# 2012A HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2
+#        "Tau_190782-190949_2012A_Aug06",
+#        "Tau_191043-193621_2012A_Jul13",
+#        "Tau_193834-196531_2012B_Jul13",
+#        "Tau_198022-198523_2012C_Aug24",
+#        "Tau_198941-200601_2012C_Prompt",
+#        "Tau_200961-202504_2012C_Prompt",
+#        "Tau_202792-203742_2012C_Prompt",
+#        "Tau_203777-208686_2012D_Prompt"
 ]
 datasetsMC2012MetLeg = [
         "QCD_Pt30to50_TuneZ2star_Summer12",
@@ -143,7 +152,7 @@ print
 outputfiles = ""
 if analysis == "TauLeg2012":
     datasets.extend(datasetsData2012TauLeg)
-    datasets.extend(datasetsMC2012TauLeg)
+####    datasets.extend(datasetsMC2012TauLeg)
 #    outputfiles = "tteffAnalysis-hltpftau-hpspftau.root, tteffAnalysis-hltpftaumedium-hpspftau.root, tteffAnalysis-hltpftau-hpspftau-highpurity.root"                                                                                  
     outputfiles = "tteffAnalysis-hltpftau-hpspftau.root, tteffAnalysis-hltpftau-hpspftau-highpurity.root"
 

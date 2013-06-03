@@ -7,14 +7,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflows as multicrabWo
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff as multicrabWorkflowsTriggerEff
 
 datasets_TauPlusX = [
-    "TauPlusX_190456-190738_2012A_Jul13",
-    "TauPlusX_190782-190949_2012A_Aug06",
-    "TauPlusX_191043-193621_2012A_Jul13",
-    "TauPlusX_193834-196531_2012B_Jul13",
-    "TauPlusX_198022-198523_2012C_Aug24",
-    "TauPlusX_198941-199608_2012C_Prompt",
-    "TauPlusX_199698-203742_2012C_Prompt",
-    "TauPlusX_203777-208686_2012D_Prompt",
+    "TauPlusX_190456-193621_2012A_Jan22",
+    "TauPlusX_193834-196531_2012B_Jan22",
+    "TauPlusX_198022-203742_2012C_Jan22",
+    "TauPlusX_203777-208686_2012D_Jan22",
 ]
 
 datasets_Tau = [
@@ -156,10 +152,10 @@ datasets_TT_EWK = [
 datasets_DY = [
     "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12",
     "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12",
-    "DYToTauTau_M_100to200_TuneZ2Star_pythia6_tauola_Summer12",
-    "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12",
-    "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12",
-    "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12",
+#    "DYToTauTau_M_100to200_TuneZ2Star_pythia6_tauola_Summer12",
+#    "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12",
+#    "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12",
+#    "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12",
 ]
 
 datasets_SingleTop = [
@@ -172,10 +168,10 @@ datasets_SingleTop = [
 ]
 
 #workflow = "analysis_tauleg_v53_v1"
-workflow = "triggerTauLeg_skim_v53_v2"
+workflow = "triggerTauLeg_skim_v53_v3"
 
 tasks = [
-     ("TauLeg", datasets_TauPlusX+datasets_DY),
+     ("TauLeg", datasets_TauPlusX+datasets_DY+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
 #    ("MetLeg", datasets_Tau+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
 #    ("Tau", datasets_Tau),
 #    ("MultiJet", datasets_MultiJet),

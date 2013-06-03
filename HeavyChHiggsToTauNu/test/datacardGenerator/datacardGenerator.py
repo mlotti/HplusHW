@@ -6,10 +6,14 @@ import imp
 from optparse import OptionParser
 import gc
 import cPickle
+import time
 import ROOT
+ROOT.gROOT.SetBatch(True) # no flashing canvases
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+import tarfile
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.AnalysisModuleSelector import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
@@ -17,14 +21,17 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-def getDsetCreator(label, mcrabPath, enabledStatus=True):
+def getDsetCreator(label, mcrabPath, mcrabInfoOutput, enabledStatus=True):
     if enabledStatus:
         if mcrabPath == "":
+            mcrabInfoOutput.append("- %s: not present"%(label))
             print "- %s: not present"%(label)
         else:
+            mcrabInfoOutput.append("- %s: multicrab dir found (%s)"%(label,mcrabPath))
             print "- %s%s: multicrab dir found%s (%s)"%(HighlightStyle(),label,NormalStyle(),mcrabPath)
             return dataset.readFromMulticrabCfg(directory=mcrabPath)
     else:
+        mcrabInfoOutput.append("- %s: not considered"%(label))
         print "- %s: not considered"%(label)
     return None
 
@@ -49,16 +56,19 @@ def main(opts, moduleSelector):
     # Obtain dataset creators (also check multicrab directory existence)
     print "\nChecking input multicrab directory presence:"
     multicrabPaths = PathFinder.MulticrabPathFinder(config.Path)
-    signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath())
+    mcrabInfoOutput = []
+    mcrabInfoOutput.append("Input directories:")
+    signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
     embeddingDsetCreator = None
     if config.OptionReplaceEmbeddingByMC:
+        mcrabInfoOutput.append("- Embedding: estimated from signal analysis MC")
         print "- %sWarning:%s Embedding: estimated from signal analysis MC"%(WarningStyle(),NormalStyle())
     else:
-        getDsetCreator("Embedding", multicrabPaths.getEWKPath(), not config.OptionReplaceEmbeddingByMC)
-    qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
+        getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput, not config.OptionReplaceEmbeddingByMC)
+    qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
     if qcdFactorisedDsetCreator == None:
         myQCDMethods.remove(DataCard.DatacardQCDMethod.FACTORISED)
-    qcdInvertedDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
+    qcdInvertedDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
     if qcdInvertedDsetCreator == None:
         myQCDMethods.remove(DataCard.DatacardQCDMethod.INVERTED)
 
@@ -89,6 +99,8 @@ def main(opts, moduleSelector):
     print "\nProducing %s%d sets of datacards%s (%d era(s) x %d search mode(s) x %d optimization mode(s) x %d QCD measurement(s))\n"%(HighlightStyle(),myDatacardCount,NormalStyle(),len(moduleSelector.getSelectedEras()),len(moduleSelector.getSelectedSearchModes()),len(moduleSelector.getSelectedOptimizationModes()),len(myQCDMethods))
     # Produce datacards
     myCounter = 0
+    myStartTime = time.time()
+    myOutputDirectories = []
     for qcdMethod in myQCDMethods:
         for era in moduleSelector.getSelectedEras():
             for searchMode in moduleSelector.getSelectedSearchModes():
@@ -107,15 +119,21 @@ def main(opts, moduleSelector):
                         print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sinverted%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
                     dcgen.setDsetMgrCreators(signalDsetCreator,embeddingDsetCreator,myQCDDsetCreator)
                     # Do the heavy stuff
-                    dcgen.doDatacard(era,searchMode,optimizationMode)
+                    myOutputDirectories.append(dcgen.doDatacard(era,searchMode,optimizationMode,mcrabInfoOutput))
     print "\nDatacard generator is done."
-    if myDatacardCount > 10:
-        print "\n(collecting some garbage before handing the shell back to you)"
-
+    myEndTime = time.time()
+    print "Running took on average %.1f s / datacard (total elapsed time: %.1f s)"%((myEndTime-myStartTime)/float(myDatacardCount), (myEndTime-myStartTime))
+    # Make tar file
+    myTimestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
+    myFilename = "datacards_archive_%s.tgz"%myTimestamp
+    fTar = tarfile.open(myFilename, mode="w:gz")
+    for d in myOutputDirectories:
+        fTar.add(d)
+    fTar.close()
+    print "Created archive of results directories to: %s%s%s"%(HighlightStyle(),myFilename,NormalStyle())
     #gc.collect()
     #ROOT.SetMemoryPolicy( ROOT.kMemoryHeuristics)
     #memoryDump()
-
 
 def memoryDump():
     dump = open("memory_pickle.txt", 'w')
@@ -195,5 +213,4 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit()
     # Run main program
-    ROOT.gROOT.SetBatch() # no flashing canvases
     main(opts, myModuleSelector)

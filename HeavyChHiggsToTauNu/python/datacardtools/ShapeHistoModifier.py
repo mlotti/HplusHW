@@ -63,9 +63,9 @@ class ShapeHistoModifier():
             minExists = False
             maxExists = False
             for iSrc in range(1,source.GetNbinsX()+1):
-                if dest.GetXaxis().GetBinLowEdge(iDest) == source.GetXaxis().GetBinLowEdge(iSrc):
+                if abs(dest.GetXaxis().GetBinLowEdge(iDest) - source.GetXaxis().GetBinLowEdge(iSrc)) < 0.0001:
                     minExists = True
-                if dest.GetXaxis().GetBinLowEdge(iDest) == source.GetXaxis().GetBinUpEdge(iSrc):
+                if abs(dest.GetXaxis().GetBinLowEdge(iDest) - source.GetXaxis().GetBinUpEdge(iSrc)) < 0.0001:
                     maxExists = True
             if not minExists and not maxExists:
                 # Bin edges do not match

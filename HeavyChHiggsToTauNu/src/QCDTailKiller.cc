@@ -40,19 +40,19 @@ namespace HPlus {
   }
 
   const double QCDTailKiller::Data::getDeltaPhiJetMET(int njet) const {
-    if (njet >= fMaxEntries)
+    if (njet > fMaxEntries)
       throw cms::Exception("LogicError") << "QCDTailKiller::Data::getDeltaPhiJetMET() Called for jet " << njet << " but only values 0-" << fMaxEntries << " are allowed!" << std::endl;
     return fDeltaPhiJetMET[njet];
   }
 
   const bool QCDTailKiller::Data::passBackToBackCutForJet(int njet) const {
-    if (njet >= fMaxEntries)
+    if (njet > fMaxEntries)
       throw cms::Exception("LogicError") << "QCDTailKiller::Data::passBackToBackCutForJet() Called for jet " << njet << " but only values 0-" << fMaxEntries << " are allowed!" << std::endl;
     return fPassedBackToBackJet[njet];
   }
 
   const bool QCDTailKiller::Data::passCollinearCutForJet(int njet) const {
-    if (njet >= fMaxEntries)
+    if (njet > fMaxEntries)
       throw cms::Exception("LogicError") << "QCDTailKiller::Data::passCollinearCutForJet() Called for jet " << njet << " but only values 0-" << fMaxEntries << " are allowed!" << std::endl;
     return fPassedCollinearJet[njet];
   }
@@ -227,7 +227,7 @@ namespace HPlus {
     // Loop over the jet list (it might contain also the jet corresponding to tau depending on which list is supplied to the analyse method)
     output.fPassedEvent = true;
     size_t i = 0;
-    while (i < jets.size() && i < fMaxEntries && output.fPassedEvent) {
+    while (i < jets.size() && i < fMaxEntries) {
       // Obtain delta phi between jet and MET
       double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met) * 57.3;
       if (fBackToBackJetCut[i].passedCut(myDeltaPhiTauMET, myDeltaPhiJetMET)) {
@@ -241,7 +241,7 @@ namespace HPlus {
       ++i;
     }
     i = 0;
-    while (i < jets.size() && i < fMaxEntries && output.fPassedEvent) {
+    while (i < jets.size() && i < fMaxEntries) {
       // Obtain delta phi between jet and MET
       double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met) * 57.3;
       if (fCollinearJetCut[i].passedCut(myDeltaPhiTauMET, myDeltaPhiJetMET)) {

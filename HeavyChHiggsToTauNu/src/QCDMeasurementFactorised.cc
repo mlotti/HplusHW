@@ -159,28 +159,40 @@ namespace HPlus {
         for (int i = 0; i < myTauPtBins; ++i) {
           std::stringstream s;
           // tau pT
-          if (i == 0)
-            s << "#tau pT<" << static_cast<int>(fTauPtBinLowEdges[0]);
-          else if (i == myTauPtBins - 1)
-            s << "#tau pT>" << static_cast<int>(fTauPtBinLowEdges[fTauPtBinLowEdges.size()-1]);
-          else
-            s << "#tau pT=" << static_cast<int>(fTauPtBinLowEdges[i-1]) << ".." << static_cast<int>(fTauPtBinLowEdges[i]);
+          if (!fTauPtBinLowEdges.size()) {
+            s << "#tau pT=all";
+          } else {
+            if (i == 0)
+              s << "#tau pT<" << static_cast<int>(fTauPtBinLowEdges[0]);
+            else if (i == myTauPtBins - 1)
+              s << "#tau pT>" << static_cast<int>(fTauPtBinLowEdges[fTauPtBinLowEdges.size()-1]);
+            else
+              s << "#tau pT=" << static_cast<int>(fTauPtBinLowEdges[i-1]) << ".." << static_cast<int>(fTauPtBinLowEdges[i]);
+          }
           s << "/";
           // tau eta
-          if (j == 0)
-            s << "#tau eta<" << setprecision(2) << fTauEtaBinLowEdges[0];
-          else if (j == myTauEtaBins - 1)
-            s << "#tau eta>" << setprecision(2) << fTauEtaBinLowEdges[fTauEtaBinLowEdges.size()-1];
-          else
-            s << "#tau eta=" << setprecision(2) << fTauEtaBinLowEdges[j-1] << ".." << setprecision(2) << fTauEtaBinLowEdges[j];
+          if (!fTauEtaBinLowEdges.size()) {
+            s << "#tau eta=all";
+          } else {
+            if (j == 0)
+              s << "#tau eta<" << setprecision(2) << fTauEtaBinLowEdges[0];
+            else if (j == myTauEtaBins - 1)
+              s << "#tau eta>" << setprecision(2) << fTauEtaBinLowEdges[fTauEtaBinLowEdges.size()-1];
+            else
+              s << "#tau eta=" << setprecision(2) << fTauEtaBinLowEdges[j-1] << ".." << setprecision(2) << fTauEtaBinLowEdges[j];
+          }
           s << "/";
           // Nvertices
-          if (k == 0)
-            s << "N_{vtx}<" << static_cast<int>(fNVerticesBinLowEdges[0]);
-          else if (k == myNVerticesBins - 1)
-            s << "N_{vtx}>" << static_cast<int>(fNVerticesBinLowEdges[fNVerticesBinLowEdges.size()-1]);
-          else
-            s << "N_{vtx}=" << static_cast<int>(fNVerticesBinLowEdges[k-1]) << ".." << static_cast<int>(fNVerticesBinLowEdges[k]);
+          if (!fNVerticesBinLowEdges.size()) {
+            s << "N_{vtx}=all";
+          } else {
+            if (k == 0)
+              s << "N_{vtx}<" << static_cast<int>(fNVerticesBinLowEdges[0]);
+            else if (k == myNVerticesBins - 1)
+              s << "N_{vtx}>" << static_cast<int>(fNVerticesBinLowEdges[fNVerticesBinLowEdges.size()-1]);
+            else
+              s << "N_{vtx}=" << static_cast<int>(fNVerticesBinLowEdges[k-1]) << ".." << static_cast<int>(fNVerticesBinLowEdges[k]);
+          }
           h->getHisto()->GetYaxis()->SetBinLabel(getShapeBinIndex(i,j,k)+1,s.str().c_str());
         }
       }
@@ -253,7 +265,7 @@ namespace HPlus {
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
     fTopWithWSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithWSelection"), eventCounter, fHistoWrapper),
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
-    fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
+    fFullHiggsMassCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("invMassReco"), eventCounter, fHistoWrapper),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
     //fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
@@ -335,10 +347,8 @@ namespace HPlus {
                                                         kQCDFactorisedDoubleABCD, "DoubleABCD");
     }
 
-    TFileDirectory myDir = fs->mkdir("tests");
-    fCollinearSystemJetsFakingTauGenuineTaus = new JetDetailHistograms(fHistoWrapper, myDir, "CollinearSystemJetsFakingTauGenuineTaus", true);
-    fCollinearSystemJetsFakingTauFakeTaus = new JetDetailHistograms(fHistoWrapper, myDir, "CollinearSystemJetsFakingTauFakeTaus", true);
-    fCollinearSystemJetsOppositeToTau = new JetDetailHistograms(fHistoWrapper, myDir, "CollinearSystemJetsOppositeToTau", true);
+    fTailTestAfterStdSel = new TailTest("AfterStdSel", fs, fHistoWrapper);
+    fTailTestAfterTauLeg = new TailTest("AfterTauLeg", fs, fHistoWrapper);
   }
 
   QCDMeasurementFactorised::~QCDMeasurementFactorised() {}
@@ -351,21 +361,6 @@ namespace HPlus {
     const double prescaleWeight = fPrescaleWeightReader.getWeight(iEvent, iSetup);
     fEventWeight.multiplyWeight(prescaleWeight);
     fTree.setPrescaleWeight(prescaleWeight);
-
-//------ Vertex weight
-    double myWeightBeforePileupReweighting = fEventWeight.getWeight();
-    if(!iEvent.isRealData()) {
-      const double myPileupWeight = fPileupWeightReader.getWeight(iEvent, iSetup);
-      fEventWeight.multiplyWeight(myPileupWeight);
-      fTree.setPileupWeight(myPileupWeight);
-    }
-
-    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
-    size_t nVertices = pvData.getNumberOfAllVertices();
-    hVerticesBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
-    hVerticesAfterWeight->Fill(nVertices);
-    fTree.setNvertices(nVertices);
-    increment(fAllCounter);
 
 
 //------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
@@ -382,6 +377,22 @@ namespace HPlus {
     }
     increment(fMETFiltersCounter);
 
+//------ Vertex weight
+    double myWeightBeforePileupReweighting = fEventWeight.getWeight();
+    if(!iEvent.isRealData()) {
+      const double myPileupWeight = fPileupWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(myPileupWeight);
+      fTree.setPileupWeight(myPileupWeight);
+    }
+
+    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
+    size_t nVertices = pvData.getNumberOfAllVertices();
+    hVerticesBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
+    hVerticesAfterWeight->Fill(nVertices);
+    fTree.setNvertices(nVertices);
+    increment(fAllCounter);
+    edm::Ptr<pat::Tau> myZeroTauPointer; // to force common plots to use tau from TauSelection::Data::getSelectedTau()
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
 
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     const TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
@@ -402,13 +413,11 @@ namespace HPlus {
       fTree.setGenMET(genData.getGenMET());
     }
 
-
 //------ Primary vertex selection
     if (!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
     //fCommonPlotsAfterVertexSelection->fill();
-    //fCommonPlots.fillControlPlots(iEvent, pvData);
-
+    fCommonPlots.fillControlPlots(iEvent, pvData);
 
 //------ Tau candidate selection
     // Do tau candidate selection
@@ -447,11 +456,13 @@ namespace HPlus {
     // Important NOTE: Beyond this line, use only 'mySelectedTau' as the tau object
     edm::Ptr<pat::Tau> mySelectedTau = fTauSelection.selectMostLikelyTau(mySelectedTauList, pvData.getSelectedVertex()->z());
     TauSelection::Data tauCandidateData = fTauSelection.setSelectedTau(mySelectedTau, true);
-    fCommonPlots.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(mySelectedTau));
     // note: do not require here that only one tau has been found (mySelectedTau is the selected tau in the event)
+    // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, mySelectedTau, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
     fCommonPlotsAfterTauSelection->fill();
+    fCommonPlots.fillControlPlots(iEvent, iSetup, tauCandidateData, tauMatchData, mySelectedTau, fMETSelection);
     // Set factorisation bin
     fQCDFactorisedHistogramHandler.setFactorisationBinForEvent(mySelectedTau->pt(), mySelectedTau->eta(), nVertices);
 
@@ -483,6 +494,7 @@ namespace HPlus {
     if (!electronData.passedEvent()) return false;
     increment(fElectronVetoCounter);
     fCommonPlotsAfterElectronVeto->fill();
+    fCommonPlots.fillControlPlots(iEvent, electronData);
     hSelectionFlow->Fill(kQCDOrderElectronVeto);
     /*NonIsolatedElectronVeto::Data nonIsolatedElectronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
     if (!nonIsolatedElectronVetoData.passedEvent())  return false;
@@ -495,6 +507,7 @@ namespace HPlus {
     if (!muonData.passedEvent()) return false;
     increment(fMuonVetoCounter);
     fCommonPlotsAfterMuonVeto->fill();
+    fCommonPlots.fillControlPlots(iEvent, muonData);
     hSelectionFlow->Fill(kQCDOrderMuonVeto);
     /*NonIsolatedMuonVeto::Data nonIsolatedMuonVetoData = fNonIsolatedMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!nonIsolatedMuonVetoData.passedEvent()) return; 
@@ -507,11 +520,12 @@ namespace HPlus {
     if (!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
     fCommonPlotsAfterJetSelection->fill();
+    fCommonPlots.fillControlPlots(iEvent, jetData);
     hSelectionFlow->Fill(kQCDOrderJetSelection);
 
 
 //------ Scale factor for MET trigger
-    const METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, mySelectedTau, jetData.getAllJets());
+    const METSelection::Data metData = fMETSelection.analyzeWithPossiblyIsolatedTaus(iEvent, iSetup, mySelectedTau, jetData.getAllJets());
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metData.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     fTree.setMETTriggerWeight(metTriggerWeight.getEventWeight(), metTriggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fMETTriggerScaleFactorCounter);
@@ -521,7 +535,7 @@ namespace HPlus {
 //------ Standard selections are done, fill tree and quit if user asked for it
     if (fTree.isActive()) {
       doTreeFilling(iEvent, iSetup, pvData, mySelectedTau, electronData, muonData, jetData, metData);
-      return true;
+      //return true;
     }
 
 
@@ -533,7 +547,9 @@ namespace HPlus {
     double myFullMass = -1.0;
     if (btagData.passedEvent()) {
       const FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, mySelectedTau, btagData, metData);
-      myFullMass = FullHiggsMassData.getHiggsMass();
+      if (FullHiggsMassData.passedEvent()) {
+        myFullMass = FullHiggsMassData.getHiggsMass();
+      }
     }
     // Increment counters
     increment(fStandardSelectionsCounter);
@@ -592,7 +608,13 @@ namespace HPlus {
     }
 
     // Additional tests
-    testInvestigateCollinearEvents(iEvent, qcdTailKillerData, jetData, electronData, muonData, iEvent.isRealData(), tauMatchData.isFakeTau());
+    fTailTestAfterStdSel->Fill(iEvent, mySelectedTau, fTauSelection, qcdTailKillerData, jetData, electronData, muonData, metData, iEvent.isRealData(), tauMatchData.isFakeTau());
+    bool myLeg2PassedStatus = fTauSelection.getPassesIsolationStatusOfTauObject(mySelectedTau) &&
+      fTauSelection.getPassesNProngsStatusOfTauObject(mySelectedTau) &&
+      fTauSelection.getPassesRtauStatusOfTauObject(mySelectedTau);
+    if (myLeg2PassedStatus) {
+      fTailTestAfterTauLeg->Fill(iEvent, mySelectedTau, fTauSelection, qcdTailKillerData, jetData, electronData, muonData, metData, iEvent.isRealData(), tauMatchData.isFakeTau());
+    }
 
     //------ End of QCD measurement
     return true;
@@ -600,12 +622,12 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronData, const MuonSelection::Data& muonData, const JetSelection::Data& jetData, const METSelection::Data& metData) {
     // Obtain btagging data
-    const BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    const BTagging::Data btagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     // Obtain QCD tail killer
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
     // const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET()); //testing
     // Obtain alphaT
-    const EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(selectedTau), jetData.getSelectedJetsIncludingTau());
+    const EvtTopology::Data evtTopologyData = fEvtTopology.silentAnalyze(iEvent, iSetup, *(selectedTau), jetData.getSelectedJetsIncludingTau());
 
     // FIXME: Add filling of tree for QCD tail killer
     // FIXME: Add filling of weights (wjets ...)
@@ -629,10 +651,10 @@ namespace HPlus {
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
     // Top reconstruction in different versions
     if (selectedTau.isNonnull() && btagData.passedEvent()) {
-      //const TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-      //const BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
-      const TopChiSelection::Data topChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-      //const TopWithBSelection::Data topWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), bjetSelectionData.getBjetTopSide());
+      //const TopSelection::Data topSelectionData = fTopSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+      //const BjetSelection::Data bjetSelectionData = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+      const TopChiSelection::Data topChiSelectionData = fTopChiSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+      //const TopWithBSelection::Data topWithBSelectionData = fTopWithBSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), bjetSelectionData.getBjetTopSide());
       fTree.setTop(topChiSelectionData.getTopP4());
     }
     // Sphericity, Aplanarity, Planarity, alphaT
@@ -657,7 +679,7 @@ namespace HPlus {
     fTree.setNonIsoLeptons(muonData.getNonIsolatedMuons(), electronData.getNonIsolatedElectrons());
     if (selectedTau.isNonnull() && btagData.passedEvent()) {
       // FullH+ mass
-      FullHiggsMassCalculator::Data FullHiggsMassDataTmp = fFullHiggsMassCalculator.analyze(iEvent, iSetup, selectedTau, btagData, metData);
+      FullHiggsMassCalculator::Data FullHiggsMassDataTmp = fFullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, selectedTau, btagData, metData);
       fTree.setHplusMassDiscriminant(FullHiggsMassDataTmp.getDiscriminant());
       fTree.setHplusMassHiggsMass(FullHiggsMassDataTmp.getHiggsMass());
       fTree.setHplusMassTopMass(FullHiggsMassDataTmp.getTopMass());
@@ -677,52 +699,9 @@ namespace HPlus {
     fTree.fill(iEvent, selectedTau, jetData.getSelectedJets());
   }
 
-  void QCDMeasurementFactorised::testInvestigateCollinearEvents(const edm::Event& iEvent, const QCDTailKiller::Data& qcdTailKillerData, const JetSelection::Data& jetData, const ElectronSelection::Data& eData, const MuonSelection::Data& muData, const bool isRealData, const bool isFakeTau) {
-    //std::cout << "QCD tail killer status: " << qcdTailKillerData.passedBackToBackCuts() << " " << qcdTailKillerData.passedCollinearCuts() << std::endl;
-    if (!qcdTailKillerData.passedBackToBackCuts()) return;
-    if (qcdTailKillerData.passedCollinearCuts()) return;
-
-    // Situation is that the jet faking tau is collinear with MET and the recoiling jet is back-to-back with MET
-    // Why does rejecting these events make the mT closure test agree?
-    // I.e. why is there a correlation between the collinear system and tau isolation?
-
-    // Obtain jet that is faking the tau
-    edm::Ptr<pat::Jet> myJetFakingTheTau = jetData.getReferenceJetToTau();
-    if (myJetFakingTheTau.isNull()) return;
-    // Obtain jet that is back to back to the jet faking the tau
-    edm::Ptr<pat::Jet> myJetOppositeToTau;
-    for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
-      if (myJetOppositeToTau.isNull() && !qcdTailKillerData.passCollinearCutForJet(i)) {
-        myJetOppositeToTau = jetData.getSelectedJetsIncludingTau()[i]; // sorted by Et
-      }
-    }
-    if (myJetOppositeToTau.isNull()) return;
-
-    // Fill jet detail histograms
-    if (isFakeTau) {
-      fCollinearSystemJetsFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
-      fCollinearSystemJetsFakingTauFakeTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
-    } else {
-      fCollinearSystemJetsFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
-      fCollinearSystemJetsFakingTauGenuineTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
-    }
-    fCollinearSystemJetsOppositeToTau->fill(myJetOppositeToTau, isRealData);
-    fCollinearSystemJetsOppositeToTau->fillLeptonDetails(iEvent, myJetOppositeToTau, eData, muData, isRealData);
-    // Answered by the detail histograms:
-    // Multiplicity of PF charged particles in jet faking the tau
-    // Multiplicity of PF charged particles for recoiling jet
-    // Multiplicity of PF gammas in jet faking the tau
-    // Multiplicity of PF gammas for recoiling jet
-    // ET(RECO) / ET(GEN) for jet faking tau
-    // ET(RECO) / ET(GEN) for recoiling jet
-    // Flavor of the jet faking the tau (is it a b jet?)
-
-    // Jet faking tau overlapping with electron or muon?
-    // Jet faking tau overlapping with electron or muon from a b jet?
-  }
-
   QCDMeasurementFactorised::QCDFactorisedVariation::QCDFactorisedVariation(edm::Service< TFileService >& fs, QCDFactorisedHistogramHandler* histoHandler, EventCounter& eventCounter, CommonPlots& commonPlots, QCDFactorisedVariationType methodType, std::string prefix)
   : fMethodType(methodType),
+    fAfterNjetsCounter(eventCounter.addSubCounter(prefix,"After Njets")),
     fAfterStandardSelectionsCounter(eventCounter.addSubCounter(prefix,"After std. selections")),
     fAfterLeg1Counter(eventCounter.addSubCounter(prefix,"After leg1 selections")),
     fAfterLeg2Counter(eventCounter.addSubCounter(prefix,"After leg2 selections")),
@@ -758,6 +737,7 @@ namespace HPlus {
     // Data-driven control histograms
     fHistoHandler->createShapeHistogram(myDir, hCtrlRtau, "CtrlRtau", "Rtau", 60, 0, 1.2);
     fHistoHandler->createShapeHistogram(myDir, hCtrlNjets, "CtrlNjets", "N_{jets}", 20, 0, 20.);
+    fHistoHandler->createShapeHistogram(myDir, hCtrlNjetsAfterCollinearCuts, "CtrlNjetsAfterCollinearCuts", "N_{jets}", 20, 0, 20.);
     for (int i = 0; i < 4; ++i) {
       hCtrlQCDTailKillerCollinear.push_back(0);
       std::stringstream sName;
@@ -766,7 +746,7 @@ namespace HPlus {
       sTitle << "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{" << i << "},MET))^{2}}, ^{o};N_{events}";
       fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerCollinear[i], sName.str(), sTitle.str(), 52, 0., 260.);
     }
-    fHistoHandler->createShapeHistogram(myDir, hCtrlMET, "CtrlMET", "E_{T}^{miss}, GeV", 100, 3, 500.);
+    fHistoHandler->createShapeHistogram(myDir, hCtrlMET, "CtrlMET", "E_{T}^{miss}, GeV", 100, 0, 500.);
     fHistoHandler->createShapeHistogram(myDir, hCtrlNbjets, "CtrlNbjets", "N_{b jets}", 20, 0, 20.);
     for (int i = 0; i < 4; ++i) {
       hCtrlQCDTailKillerBackToBack.push_back(0);
@@ -798,6 +778,8 @@ namespace HPlus {
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doTraditionalSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // Traditional method
+    increment(fAfterNjetsCounter);
+    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
 
     // Apply collinear cut
     for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
@@ -808,14 +790,14 @@ namespace HPlus {
     }
 
     // Standard selections have been done, fill histograms
+    fHistoHandler->fillNeventHistogram(hCtrlNjetsAfterCollinearCuts, jetData.getHadronicJetCount());
     fCommonPlotsAfterStandardSelections->fill();
     double myMetValue = metData.getSelectedMET()->et();
     increment(fAfterStandardSelectionsCounter);
     fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
     fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-    fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
+    if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
     fHistoHandler->fillShapeHistogram(hCtrlRtau, tauSelection.getRtauOfTauObject(selectedTau));
-    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
 
     // Leg 2 (tau ID)
     bool myLeg2PassedStatus = tauSelection.getPassesIsolationStatusOfTauObject(selectedTau) &&
@@ -826,7 +808,7 @@ namespace HPlus {
       fCommonPlotsAfterLeg2->fill();
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
     }
 
@@ -854,7 +836,7 @@ namespace HPlus {
     increment(fAfterLeg1Counter);
     fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
     fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-    fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
+    if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
     fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
     fCommonPlotsAfterLeg1->fill();
 
@@ -863,12 +845,14 @@ namespace HPlus {
       increment(fAfterLeg1AndLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
     }
   }
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // ABCD method with MET and tau isolation as variables
+    increment(fAfterNjetsCounter);
+    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
 
     // Apply collinear cut
     for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
@@ -886,13 +870,14 @@ namespace HPlus {
     double myMetValue = metData.getSelectedMET()->et();
 
     fHistoHandler->fillShapeHistogram(hCtrlRtau, tauSelection.getRtauOfTauObject(selectedTau));
-    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
+    fHistoHandler->fillNeventHistogram(hCtrlNjetsAfterCollinearCuts, jetData.getHadronicJetCount());
+
     // For cell A, negate the selections
     if (!myLeg1PassedStatus && !myLeg2PassedStatus) {
       increment(fAfterStandardSelectionsCounter);
       fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
       fCommonPlotsAfterStandardSelections->fill();
     }
 
@@ -901,7 +886,7 @@ namespace HPlus {
       increment(fAfterLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
       fCommonPlotsAfterLeg2->fill();
     }
@@ -932,7 +917,7 @@ namespace HPlus {
       increment(fAfterLeg1Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
       fCommonPlotsAfterLeg1->fill();
     }
@@ -942,12 +927,13 @@ namespace HPlus {
       increment(fAfterLeg1AndLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
     }
   }
 
   void QCDMeasurementFactorised::QCDFactorisedVariation::doDoubleABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // ABCD method inside MET leg (for double ABCD)
+    increment(fAfterNjetsCounter);
 
     // Apply collinear cut
     for (int i = 0; i < 4; ++i) {
@@ -973,7 +959,7 @@ namespace HPlus {
       increment(fAfterStandardSelectionsCounter);
       fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
       fCommonPlotsAfterStandardSelections->fill();
     }
 
@@ -982,7 +968,7 @@ namespace HPlus {
       increment(fAfterLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
       fCommonPlotsAfterLeg2->fill();
     }
@@ -992,7 +978,7 @@ namespace HPlus {
       increment(fAfterLeg1Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
       fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
       fCommonPlotsAfterLeg1->fill();
     }
@@ -1002,11 +988,186 @@ namespace HPlus {
       increment(fAfterLeg1AndLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
+      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
     }
+  }
+
+  QCDMeasurementFactorised::TailTest::TailTest(std::string prefix, edm::Service<TFileService>& fs, HistoWrapper& histoWrapper) {
+    std::string s = "TailTest_"+prefix;
+    TFileDirectory myDir = fs->mkdir(s.c_str());
+    fJetFakingTauGenuineTaus = new JetDetailHistograms(histoWrapper, myDir, "JetFakingTauGenuineTaus", true);
+    fJetFakingTauFakeTaus = new JetDetailHistograms(histoWrapper, myDir, "JetFakingTauFakeTaus", true);
+    fCollinearSystemJetsFakingTauGenuineTaus = new JetDetailHistograms(histoWrapper, myDir, "CollinearSystemJetsFakingTauGenuineTaus", true);
+    fCollinearSystemJetsFakingTauFakeTaus = new JetDetailHistograms(histoWrapper, myDir, "CollinearSystemJetsFakingTauFakeTaus", true);
+    fCollinearSystemJetsOppositeToTau = new JetDetailHistograms(histoWrapper, myDir, "CollinearSystemJetsOppositeToTau", true);
+    fBackToBackSystemJetsFakingTauGenuineTaus = new JetDetailHistograms(histoWrapper, myDir, "BackToBackSystemJetsFakingTauGenuineTaus", true);
+    fBackToBackSystemJetsFakingTauFakeTaus = new JetDetailHistograms(histoWrapper, myDir, "BackToBackSystemJetsFakingTauFakeTaus", true);
+    fBackToBackSystemJetsOppositeToTau = new JetDetailHistograms(histoWrapper, myDir, "BackToBackSystemJetsOppositeToTau", true);
+    // Delta phi experimental
+    for (int i = 0; i < 4; ++i) {
+      std::stringstream s1;
+      std::stringstream s2;
+      s1 << "TailTestByDeltaPhiJet" << i+1;
+      s2 << "TailTestCollinearByDeltaPhi;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{" << i+1 << "},MET),^{o}";
+      hTailTestByDeltaPhi.push_back(histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 36,0,180, 36,0,180));
+      s1.str("");
+      s2.str("");
+      s1 << "TailTestByDeltaRJets" << i+1;
+      s2 << "TailTestByDeltaRJets;#Delta#phi(#tau,MET),^{o};Sqrt((#eta_{jet_" << i+1 << "} + #eta_{#tau})^2 + (#phi_{jet_" << i+1 << "} + #phi_{#tau}))^2";
+      hTailTestByDeltaRJets.push_back(histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 36,0,180, 50,0,5.0));
+      s1.str("");
+      s2.str("");
+      s1 << "TailTestByDeltaEtaJets" << i+1;
+      s2 << "TailTestByDeltaEtaJets;#Delta#phi(#tau,MET),^{o};#eta_{jet_" << i+1 << "} + #eta_{#tau}";
+      hTailTestByDeltaEtaJets.push_back(histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 36,0,180, 50,0,5.0));
+      s1.str("");
+      s2.str("");
+      s1 << "TailTestByDeltaPhiJets" << i+1;
+      s2 << "TailTestByDeltaPhiJets;#Delta#phi(#tau,MET),^{o};#phi_{jet_" << i+1 << "} + #phi_{#tau}";
+      hTailTestByDeltaPhiJets.push_back(histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 36,0,180, 65,0,6.5));
+      s1.str("");
+      s2.str("");
+      s1 << "TailTestDiffByDeltaEtaCollinearJet" << i+1;
+      s2 << "TailTestDiffByDeltaEtaCollinear;#eta_{tau}+#eta_{jet" << i+1 << "};N_{jets}";
+      hTailTestDiffByDeltaEtaCollinear.push_back(histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 100,-5.0,5.0));
+      s1.str("");
+      s2.str("");
+      s1 << "TailTestDiffByDeltaEtaBackToBackJet" << i+1;
+      s2 << "TailTestDiffByDeltaEtaBackToBack;#eta_{tau}+#eta_{jet" << i+1 << "};N_{jets}";
+      hTailTestDiffByDeltaEtaBackToBack.push_back(histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, s1.str().c_str(), s2.str().c_str(), 100,-5.0,5.0));
+    }
+    hTailTestMinDeltaR = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TailTestMinDeltaR","TailTestMinDeltaR;min #DeltaR;N_{events}", 50,0,5.0);
+    hTailTestByDeltaPhiForMinDeltaR = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR", "TailTestByDeltaPhiForMinDeltaR;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
+    hTailTestByDeltaPhiForMinDeltaR10 = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR10", "TailTestByDeltaPhiForMinDeltaR10;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
+    hTailTestByDeltaPhiForMinDeltaR05 = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TailTestByDeltaPhiForMinDeltaR05", "TailTestByDeltaPhiForMinDeltaR05;#Delta#phi(#tau,MET),^{o};#Delta#phi(jet_{min#DeltaR},MET),^{o}", 36,0,180, 36,0,180);
+    hCollinearEtaPhi = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "CollinearEtaPhi", "CollinearEtaPhi;jet #eta; jet #phi, ^{o}", 58,-2.53073,2.53073, 72,-3.14159,3.14159);
+    hBackToBackEtaPhi = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "BackToBackEtaPhi", "BackToBackEtaPhi;jet #eta; jet #phi, ^{o}", 58,-2.53073,2.53073, 72,-3.14159,3.14159);
+    hCollinearEtaPhiForSelectedTau = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "CollinearEtaPhiForSelectedTau", "CollinearEtaPhiForSelectedTau;jet #eta; jet #phi, ^{o}", 58,-2.53073,2.53073, 72,-3.14159,3.14159);
+    hBackToBackEtaPhiForSelectedTau = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "BackToBackEtaPhiForSelectedTau", "BackToBackEtaPhiForSelectedTau;jet #eta; jet #phi, ^{o}", 58,-2.53073,2.53073, 72,-3.14159,3.14159);
+  }
+
+  QCDMeasurementFactorised::TailTest::~TailTest() { }
+
+  void QCDMeasurementFactorised::TailTest::Fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const QCDTailKiller::Data& qcdTailKillerData, const JetSelection::Data& jetData, const ElectronSelection::Data& eData, const MuonSelection::Data& muData, const METSelection::Data& metData, const bool isRealData, const bool isFakeTau) {
+    // Obtain jet that is faking the tau
+    edm::Ptr<pat::Jet> myJetFakingTheTau = jetData.getReferenceJetToTau();
+    if (myJetFakingTheTau.isNull()) return;
+
+    // Test effect of replacing deltaphi(jet_n,MET) with deltaR(jet_n,tau)
+    size_t i = 0;
+    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*selectedTau, *(metData.getSelectedMET())) * 57.3;
+    double myMinDeltaR = 999.;
+    edm::Ptr<pat::Jet> myOppositeJet;
+    while (i < jetData.getSelectedJetsIncludingTau().size() && i < 4) {
+      //std::cout << i << std::endl;
+      if (jetData.getSelectedJetsIncludingTau()[i] != myJetFakingTheTau) {
+        double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jetData.getSelectedJetsIncludingTau()[i]), *(metData.getSelectedMET())) * 57.3;
+        double myJetEta = jetData.getSelectedJetsIncludingTau()[i]->eta();
+        double myJetPhi = jetData.getSelectedJetsIncludingTau()[i]->phi();
+        hTailTestByDeltaPhi[i]->Fill(myDeltaPhiTauMET, myDeltaPhiJetMET);
+        double myDeltaR = std::sqrt(std::pow(selectedTau->eta()+myJetEta,2) + std::pow(selectedTau->phi()+myJetPhi,2));
+        //std::cout << "myJetPhi = " << myJetPhi << " myJetEta = " << myJetEta << std::endl;
+        hTailTestByDeltaRJets[i]->Fill(myDeltaPhiTauMET, myDeltaR);
+        hTailTestByDeltaEtaJets[i]->Fill(myDeltaPhiTauMET, selectedTau->eta()+myJetEta);
+        hTailTestByDeltaPhiJets[i]->Fill(myDeltaPhiTauMET, selectedTau->phi()+myJetPhi);
+        if (myDeltaR < myMinDeltaR) {
+          myMinDeltaR = myDeltaR;
+          myOppositeJet = jetData.getSelectedJetsIncludingTau()[i];
+        }
+        if (!qcdTailKillerData.passBackToBackCutForJet(i)) {
+          hTailTestDiffByDeltaEtaBackToBack[i]->Fill(selectedTau->eta()-myJetEta);
+          hBackToBackEtaPhi->Fill(myJetEta, myJetPhi);
+          hBackToBackEtaPhiForSelectedTau->Fill(selectedTau->eta(),selectedTau->phi());
+        } else if (!qcdTailKillerData.passCollinearCutForJet(i)) {
+          hTailTestDiffByDeltaEtaCollinear[i]->Fill(selectedTau->eta()+myJetEta);
+          hCollinearEtaPhi->Fill(myJetEta, myJetPhi);
+          hCollinearEtaPhiForSelectedTau->Fill(selectedTau->eta(),selectedTau->phi());
+        }
+//       } else {
+//         std::cout << "skipping genuine tau, phi = " << myJetFakingTheTau->phi() << " eta = " << myJetFakingTheTau->eta() << std::endl;
+      }
+      ++i;
+    }
+    if (!myOppositeJet.isNull()) {
+      hTailTestMinDeltaR->Fill(myMinDeltaR);
+      //std::cout << "min DeltaR=" << myMinDeltaR << std::endl;
+      double myJetPhi = DeltaPhi::reconstruct(*(myOppositeJet), *(metData.getSelectedMET())) * 57.3;
+      hTailTestByDeltaPhiForMinDeltaR->Fill(myDeltaPhiTauMET, myJetPhi);
+      if (myMinDeltaR < 1.0)
+        hTailTestByDeltaPhiForMinDeltaR10->Fill(myDeltaPhiTauMET, myJetPhi);
+      if (myMinDeltaR < 0.5)
+        hTailTestByDeltaPhiForMinDeltaR05->Fill(myDeltaPhiTauMET, myJetPhi);
+    }
+    //std::cout << "done" << std::endl;
+    //std::cout << "QCD tail killer status: " << qcdTailKillerData.passedBackToBackCuts() << " " << qcdTailKillerData.passedCollinearCuts() << std::endl;
+    if (qcdTailKillerData.passedBackToBackCuts() && !qcdTailKillerData.passedCollinearCuts()) {
+      // Situation is that the jet faking tau is collinear with MET and the recoiling jet is back-to-back with MET
+      // Why does rejecting these events make the mT closure test agree?
+      // I.e. why is there a correlation between the collinear system and tau isolation?
+
+      // Obtain jet that is back to back to the jet faking the tau
+      edm::Ptr<pat::Jet> myJetOppositeToTau;
+      for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
+        if (myJetOppositeToTau.isNull() && !qcdTailKillerData.passCollinearCutForJet(i)) {
+          myJetOppositeToTau = jetData.getSelectedJetsIncludingTau()[i]; // sorted by Et
+        }
+      }
+      if (myJetOppositeToTau.isNull()) return;
+
+      // Fill jet detail histograms
+      if (isFakeTau) {
+        fCollinearSystemJetsFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
+        fCollinearSystemJetsFakingTauFakeTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      } else {
+        fCollinearSystemJetsFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
+        fCollinearSystemJetsFakingTauGenuineTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      }
+      fCollinearSystemJetsOppositeToTau->fill(myJetOppositeToTau, isRealData);
+      fCollinearSystemJetsOppositeToTau->fillLeptonDetails(iEvent, myJetOppositeToTau, eData, muData, isRealData);
+    } else if (!qcdTailKillerData.passedBackToBackCuts() && qcdTailKillerData.passedCollinearCuts()) {
+      // Situation is that the jet faking tau is back to back with MET and the recoiling jet is collinear with MET
+
+      // Obtain jet that is back to back to the jet faking the tau
+      edm::Ptr<pat::Jet> myJetOppositeToTau;
+      for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
+        if (myJetOppositeToTau.isNull() && !qcdTailKillerData.passBackToBackCutForJet(i)) {
+          myJetOppositeToTau = jetData.getSelectedJetsIncludingTau()[i]; // sorted by Et
+        }
+      }
+      if (myJetOppositeToTau.isNull()) return;
+
+      // Fill jet detail histograms
+      if (isFakeTau) {
+        fBackToBackSystemJetsFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
+        fBackToBackSystemJetsFakingTauFakeTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      } else {
+        fBackToBackSystemJetsFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
+        fBackToBackSystemJetsFakingTauGenuineTaus->fillLeptonDetails(iEvent, myJetFakingTheTau, eData, muData, isRealData);
+      }
+      fBackToBackSystemJetsOppositeToTau->fill(myJetOppositeToTau, isRealData);
+      fBackToBackSystemJetsOppositeToTau->fillLeptonDetails(iEvent, myJetOppositeToTau, eData, muData, isRealData);
+    }
+
+    // For control, fill in all cases the jet faking tau details
+    if (isFakeTau) {
+      fJetFakingTauFakeTaus->fill(myJetFakingTheTau, isRealData);
+    } else {
+      fJetFakingTauGenuineTaus->fill(myJetFakingTheTau, isRealData);
+    }
+
+    // Answered by the detail histograms:
+    // Multiplicity of PF charged particles in jet faking the tau
+    // Multiplicity of PF charged particles for recoiling jet
+    // Multiplicity of PF gammas in jet faking the tau
+    // Multiplicity of PF gammas for recoiling jet
+    // ET(RECO) / ET(GEN) for jet faking tau
+    // ET(RECO) / ET(GEN) for recoiling jet
+    // Flavor of the jet faking the tau (is it a b jet?)
+
+    // Jet faking tau overlapping with electron or muon?
+    // Jet faking tau overlapping with electron or muon from a b jet?
+
   }
 
 }
 
-// TODO:
-// test plots for closure tests (b jet, leptons in b jets, gen jet ET / reco jet ET)

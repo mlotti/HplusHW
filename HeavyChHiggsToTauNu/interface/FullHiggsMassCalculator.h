@@ -120,7 +120,7 @@ namespace HPlus {
       EventClassCode eEventClassCode;
     };
 
-    FullHiggsMassCalculator(EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    FullHiggsMassCalculator(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~FullHiggsMassCalculator();
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
@@ -170,7 +170,10 @@ namespace HPlus {
     void doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
     void analyzeMETComposition(TVector3& recoMETVector, TVector3& genBothNeutrinosVector, TVector3& genMETVector);
 
-  private:
+    double fTopInvMassLowerCut;
+    double fTopInvMassUpperCut;
+    std::string fPzSelectionMethod;
+
     // Counters
     // Discriminant and neutrino p_z calculation
     Count allEvents_SubCount; // all calculations
