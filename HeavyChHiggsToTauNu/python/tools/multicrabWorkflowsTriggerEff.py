@@ -14,14 +14,10 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         return TaskDef(triggerOR=mcTriggers, **kwargs)
 
     defaultDefinitions = {
-        "TauPlusX_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  10, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v3"]),                
-        "TauPlusX_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  10, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v4"]),                
-        "TauPlusX_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  50, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v4"]),                
-        "TauPlusX_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 400, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v5"]),                
-        "TauPlusX_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut= 50, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),                
-        "TauPlusX_198941-199608_2012C_Prompt": TaskDef(njobsIn= 500, njobsOut= 250, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),
-        "TauPlusX_199698-203742_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 150, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
-        "TauPlusX_203777-208686_2012D_Prompt": TaskDef(njobsIn=3600, njobsOut= 500, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
+	"TauPlusX_190456-193621_2012A_Jan22": TaskDef(njobsIn= 200, njobsOut=  70,triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v3","HLT_IsoMu15_eta2p1_L1ETM20_v4"], triggerThrow=False),
+        "TauPlusX_193834-196531_2012B_Jan22": TaskDef(njobsIn=2000, njobsOut= 400, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v5"]),
+        "TauPlusX_198022-203742_2012C_Jan22": TaskDef(njobsIn=2000, njobsOut= 400, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6","HLT_IsoMu15_eta2p1_L1ETM20_v7"], triggerThrow=False),
+        "TauPlusX_203777-208686_2012D_Jan22": TaskDef(njobsIn=3600, njobsOut= 500, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
 
         "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":    TaskDefMC(njobsIn= 40, njobsOut= 10),                                                   
         "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12": TaskDefMC(njobsIn= 2000, njobsOut= 200),                                                
@@ -29,6 +25,35 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12":  TaskDefMC(njobsIn= 5, njobsOut= 1),                                             
         "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12":  TaskDefMC(njobsIn= 5, njobsOut= 1),                                             
         "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12":       TaskDefMC(njobsIn= 5, njobsOut= 1),
+
+        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                                                                         
+        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                                                                         
+        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                                                                         
+        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 40, njobsOut=4),                                                                                                                                         
+        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 80, njobsOut=2),                                                                                                                                         
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=300, njobsOut=6),                                                                                                                                         
+        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(njobsIn=250, njobsOut=4),                                                                                                                                         
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=150, njobsOut=3),                                                                                                                                         
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(njobsIn=850, njobsOut=14),                                                                                                                                        
+                                                                                                                                                                                                                              
+        "WW_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 8),                                                                                                                                        
+        "WZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 8),                                                                                                                                        
+        "ZZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 8),                                                                                                                                        
+        "TTJets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=700, njobsOut=30),                                                                                                                                        
+        "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(njobsIn=100, njobsOut= 4, args={"wjetsWeighting": 1, "wjetBin": -1}),                                                                                             
+        "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(njobsIn=250, njobsOut=16, args={"wjetsWeighting": 1, "wjetBin": -1}),                                                                                             
+        "W1Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=150, njobsOut= 8, args={"wjetsWeighting": 1, "wjetBin": 1}),                                                                                              
+        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=800, njobsOut=40, args={"wjetsWeighting": 1, "wjetBin": 2}),                                                                                              
+        "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=490, njobsOut=50, args={"wjetsWeighting": 1, "wjetBin": 3}),                                                                                              
+        "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=550, njobsOut=30, args={"wjetsWeighting": 1, "wjetBin": 4}),                                                                                              
+        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=350, njobsOut=60),                                                                                                                                        
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(njobsIn= 40, njobsOut= 1),                                                                                                                                        
+        "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn=100, njobsOut= 5),                                                                                                                                        
+        "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 50, njobsOut= 5),                                                                                                                                        
+        "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut= 2),                                                                                                                                        
+        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDefMC(njobsIn= 20, njobsOut= 2),                                                                                                                                        
+        "T_s-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 10, njobsOut= 1),                                                                                                                                        
+        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 10, njobsOut= 1),
     }
 
     workflowName = "triggerTauLeg_skim_"+version
@@ -45,7 +70,7 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
 
         # Set tau-leg specific customizations on job configuration
         wf.addArg("customizeConfig", "TauLegZMuTauFilter")
-                                                                                                                                                                 
+
         # Setup the publish name
 #        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "analysis_tauleg_"+version)
 	name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
@@ -87,16 +112,12 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 dataset.addWorkflow(Workflow("triggerTauLeg_analysis_"+version, triggerOR=[mcTriggerTauLeg], **commonArgs))
 
 
-def addTauLegSkim_53X_v2(datasets):
+def addTauLegSkim_53X_v3(datasets):
     definitions = {
-        "TauPlusX_190456-190738_2012A_Jul13":  TaskDef(""),
-        "TauPlusX_190782-190949_2012A_Aug06":  TaskDef(""),
-        "TauPlusX_191043-193621_2012A_Jul13":  TaskDef(""),
-        "TauPlusX_193834-196531_2012B_Jul13":  TaskDef(""),
-        "TauPlusX_198022-198523_2012C_Aug24":  TaskDef(""),
-        "TauPlusX_198941-199608_2012C_Prompt": TaskDef(""),
-        "TauPlusX_199698-203742_2012C_Prompt": TaskDef(""),
-        "TauPlusX_203777-208686_2012D_Prompt": TaskDef(""),
+        "TauPlusX_190456-193621_2012A_Jan22": TaskDef(""),
+        "TauPlusX_193834-196531_2012B_Jan22": TaskDef(""),
+        "TauPlusX_198022-203742_2012C_Jan22": TaskDef(""),
+        "TauPlusX_203777-208686_2012D_Jan22": TaskDef(""),
         
         "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":    TaskDef(""),
         "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12": TaskDef(""),
@@ -104,9 +125,38 @@ def addTauLegSkim_53X_v2(datasets):
         "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12":  TaskDef(""),
         "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12":  TaskDef(""),
         "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12":       TaskDef(""),
+
+        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef(""),                                                                                                                                                                
+        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDef(""),                                                                                                                                                                
+        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDef(""),                                                                                                                                                                
+        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDef(""),                                                                                                                                                                
+        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDef(""),                                                                                                                                                                
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDef(""),                                                                                                                                                                
+        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDef(""),                                                                                                                                                                
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDef(""),                                                                                                                                                                
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDef(""),                                                                                                                                                                
+                                                                                                                                                                                                                              
+        "WW_TuneZ2star_Summer12":                 TaskDef(""),                                                                                                                                                                
+        "WZ_TuneZ2star_Summer12":                 TaskDef(""),                                                                                                                                                                
+        "ZZ_TuneZ2star_Summer12":                 TaskDef(""),                                                                                                                                                                
+        "TTJets_TuneZ2star_Summer12":             TaskDef(""),                                                                                                                                                                
+        "WJets_TuneZ2star_v1_Summer12":           TaskDef(""),                                                                                                                                                                
+        "WJets_TuneZ2star_v2_Summer12":           TaskDef(""),                                                                                                                                                                
+        "W1Jets_TuneZ2star_Summer12":             TaskDef(""),                                                                                                                                                                
+        "W2Jets_TuneZ2star_Summer12":             TaskDef(""),                                                                                                                                                                
+        "W3Jets_TuneZ2star_Summer12":             TaskDef(""),                                                                                                                                                                
+        "W4Jets_TuneZ2star_Summer12":             TaskDef(""),                                                                                                                                                                
+        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef(""),                                                                                                                                                                
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDef(""),                                                                                                                                                                
+        "T_t-channel_TuneZ2star_Summer12":        TaskDef(""),                                                                                                                                                                
+        "Tbar_t-channel_TuneZ2star_Summer12":     TaskDef(""),                                                                                                                                                                
+        "T_tW-channel_TuneZ2star_Summer12":       TaskDef(""),                                                                                                                                                                
+        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDef(""),                                                                                                                                                                
+        "T_s-channel_TuneZ2star_Summer12":        TaskDef(""),                                                                                                                                                                
+        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),
         }
         
-    addTauLegSkim_53X("v53_v2", datasets, definitions)
+    addTauLegSkim_53X("v53_v3", datasets, definitions)
 
 
 
@@ -119,24 +169,12 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         return TaskDef(triggerOR=mcTriggers, **kwargs)
 
     defaultDefinitions = {                                                                                                                                             
-        # njobsOut is just a guess                                                                                                                                     
-        "Tau_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v2"]),
-        "Tau_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v3"]),
-        "Tau_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  3, triggerOR=[                                                                              
-                                                      "HLT_LooseIsoPFTau35_Trk20_Prong1_v3", # 191043-191411                                                     
-                                                      "HLT_LooseIsoPFTau35_Trk20_Prong1_v4", # 191691-191491 (193621)                                            
-                                                  ], triggerThrow=False),                                                                                              
-                                                                                                                                                                       
-        "Tau_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 20, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v6"]),                                
-        "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  2, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v7"]),                                
-        # FIXME: the following three could be combined in the subsequent pattuple processings                                                                          
-        "Tau_198941-200601_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 10, triggerOR=[                                                                              
-                                                     "HLT_LooseIsoPFTau35_Trk20_Prong1_v7",  # 198941-199608                                                     
-                                                     "HLT_LooseIsoPFTau35_Trk20_Prong1_v9",  # 199698-200161                                                     
-                                                 ], triggerThrow=False),                                                                                               
-        "Tau_200961-202504_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 12, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v9"]),
-        "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"]),
-	"Tau_203777-208686_2012D_Prompt": TaskDef(njobsIn=3600, njobsOut= 360, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"]),
+        # njobsOut is just a guess                  
+        "Tau_190456-193621_2012A_Jan22":       TaskDef(njobsIn= 300, njobsOut= 6, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v2","HLT_LooseIsoPFTau35_Trk20_Prong1_v3","HLT_LooseIsoPFTau35_Trk20_Prong1_v4"], triggerThrow=False),
+        "TauParked_193834-196531_2012B_Jan22": TaskDef(njobsIn=2500, njobsOut=25, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v6"], triggerThrow=False),
+        "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=3000, njobsOut=40, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v7","HLT_LooseIsoPFTau35_Trk20_Prong1_v9"], triggerThrow=False),
+        "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn= 150, njobsOut= 1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"], triggerThrow=False),
+        "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=7000, njobsOut=500, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"], triggerThrow=False),
                                                                                                                                                                        
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                  
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                  
@@ -155,12 +193,12 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(njobsIn=100, njobsOut= 4, args={"wjetsWeighting": 1, "wjetBin": -1}),                                      
         "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(njobsIn=250, njobsOut=16, args={"wjetsWeighting": 1, "wjetBin": -1}),                                      
         "W1Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=150, njobsOut= 8, args={"wjetsWeighting": 1, "wjetBin": 1}),                                       
-        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=400, njobsOut=40, args={"wjetsWeighting": 1, "wjetBin": 2}),                                       
+        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=800, njobsOut=40, args={"wjetsWeighting": 1, "wjetBin": 2}),                                       
         "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=490, njobsOut=50, args={"wjetsWeighting": 1, "wjetBin": 3}),                                       
         "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=550, njobsOut=30, args={"wjetsWeighting": 1, "wjetBin": 4}),                                       
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=350, njobsOut=60),                                                                                 
         "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(njobsIn= 40, njobsOut= 1),                                                                                 
-        "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 50, njobsOut= 5),                                                                                 
+        "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn=100, njobsOut= 5),
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 50, njobsOut= 5),
         "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut= 2),                                                                                 
         "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDefMC(njobsIn= 20, njobsOut= 2),                                                                                 
@@ -204,7 +242,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
             if dataset.isData():                                                                                                                                       
                 # For data, construct one analysis workflow per trigger type                                                                                           
                 pd = datasetName.split("_")[0]                                                                                                                         
-                if pd == "Tau":                                                                                                                                        
+                if pd == "Tau" or pd == "TauParked":
                     dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=wf.triggerOR, **commonArgs))                                                    
                 elif pd == "MultiJet":                                                                                                                                 
                     if datasetName in quadJetTriggers:                                                                                                                 
@@ -219,17 +257,13 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 # For MC, also construct one analysis workflow per trigger type                                                                                        
                 dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=[mcTriggerMETLeg], **commonArgs))
 
-def addMetLegSkim_53X_v2(datasets):
-    definitions = {                                                                          
-        "Tau_190456-190738_2012A_Jul13":          TaskDef(""),                               
-        "Tau_190782-190949_2012A_Aug06":          TaskDef(""),                               
-        "Tau_191043-193621_2012A_Jul13":          TaskDef(""),                               
-        "Tau_193834-196531_2012B_Jul13":          TaskDef(""),                               
-        "Tau_198022-198523_2012C_Aug24":          TaskDef(""),                               
-        "Tau_198941-200601_2012C_Prompt":         TaskDef(""),                               
-        "Tau_200961-202504_2012C_Prompt":         TaskDef(""),                               
-        "Tau_202792-203742_2012C_Prompt":         TaskDef(""),
-	"Tau_203777-208686_2012D_Prompt":	  TaskDef(""),
+def addMetLegSkim_53X_v3(datasets):
+    definitions = {
+        "Tau_190456-193621_2012A_Jan22":          TaskDef(""),
+        "TauParked_193834-196531_2012B_Jan22":    TaskDef(""),
+        "TauParked_198022-202504_2012C_Jan22":    TaskDef(""),
+        "TauParked_202972-203742_2012C_Jan22":    TaskDef(""),
+        "TauParked_203777-208686_2012D_Jan22":    TaskDef(""),
 
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef(""),                               
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDef(""),                               
@@ -261,7 +295,7 @@ def addMetLegSkim_53X_v2(datasets):
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),                               
         }
                                                                                              
-    addMetLegSkim_53X("v53_v2", datasets, definitions)                                        
+    addMetLegSkim_53X("v53_v3", datasets, definitions)                                        
 
 def addMetLegSkim_44X(version, datasets, updateDefinitions):
     mcTrigger = "HLT_MediumIsoPFTau35_Trk20_v1"
@@ -553,8 +587,8 @@ def addQuadJetSkim_53X(version, datasets, updateDefinitions, skim=None):
                 # For MC, also construct one analysis workflow per trigger type                                                                            
                 dataset.addWorkflow(Workflow("triggerQuadJet_analysis_"+version, triggerOR=[mcTriggerSingleMu], **commonArgs))
                     
-def addQuadJetSkim_53X_v2(datasets):
-    definitions = {
+def addQuadJetSkim_53X_v3(datasets):
+    dataDefinitions = {
 #        "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
 #        "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
 #        "MultiJet_190782-190949_2012A_Aug06":     TaskDef(""),
@@ -576,7 +610,8 @@ def addQuadJetSkim_53X_v2(datasets):
 	"SingleMu_199698-202504_2012C_Prompt":    TaskDef(""),
 	"SingleMu_202970-203742_2012C_Prompt":    TaskDef(""),
 	"SingleMu_203777-208686_2012D_Prompt":    TaskDef(""),
-
+    }
+    mcDefinitions = {
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef(""),                               
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDef(""),                               
         "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDef(""),                               
@@ -606,6 +641,12 @@ def addQuadJetSkim_53X_v2(datasets):
         "T_s-channel_TuneZ2star_Summer12":        TaskDef(""),                               
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),                               
         }
+
+    # Switch GlobalTag for MC to match to prompt reco
+    tmp = TaskDef(dataVersionAppend="prompt")
+    for n, td in mcDefinitions.iteritems():
+        td.update(tmp)
+    dataDefinitions.update(mcDefinitions)
     
-    addQuadJetSkim_53X("v53_v2", datasets, definitions) 
+    addQuadJetSkim_53X("v53_v3", datasets, dataDefinitions) 
     

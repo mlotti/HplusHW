@@ -14,6 +14,7 @@ import plots
 import counter
 import styles
 import cutstring
+import aux
 
 ## Apply embedding normalization (muon efficiency, W->tau->mu factor
 normalize = True
@@ -207,7 +208,7 @@ def scaleNormalization(obj):
 
     #scaleMCfromWmunu(obj) # data/MC trigger correction
     scaleMuTriggerIdEff(obj)
-    scaleWmuFraction(obj)
+#    scaleWmuFraction(obj)
 
 ## Apply muon trigger and ID efficiency normalization
 #
@@ -266,6 +267,9 @@ def scaleMuTriggerIdEff(obj):
     scaleMap = scaleMap41
 #    scaleMap = scaleMap40
 #    scaleMap = scaleMapOld
+
+    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffs
+    scaleMap = {"MC": (0.955+0.9519)/2}
 
     # Transform to inverse
     for key in scaleMap.keys():
@@ -1144,11 +1148,11 @@ class PlotCreatorMany:
         if self.addVariation:
             if self.addData:
                 if embDataVar != None:
-                    plots.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
+                    aux.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
                     embDataVar.SetMarkerStyle(2)
                     p.embeddingDataVariation = embDataVar
             if embVar != None:
-                plots.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
+                aux.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
                 embVar.SetMarkerStyle(2)
                 p.embeddingVariation = embVar
     

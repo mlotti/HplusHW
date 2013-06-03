@@ -30,6 +30,7 @@ def addDataSelection(process, dataVersion, options, calculateEventCleaning=False
 
     # Filter out Beam Scraping events, see
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/Collisions2010Recipes#Removal_of_Beam_Scraping_Events
+    # http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/RecoMET/METFilters/test/exampleICHEPrecommendation_cfg.py?revision=1.3&view=markup&pathrev=V00-00-13
     process.scrapingVeto = cms.EDFilter("FilterOutScraping",
         applyfilter = cms.untracked.bool(True),
         debugOn = cms.untracked.bool(False),

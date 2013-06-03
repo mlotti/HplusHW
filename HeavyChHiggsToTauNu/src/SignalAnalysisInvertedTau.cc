@@ -164,8 +164,7 @@ namespace HPlus {
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
     fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
-
-    fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
+    fFullHiggsMassCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("invMassReco"), eventCounter, fHistoWrapper),
     //    ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
@@ -175,7 +174,7 @@ namespace HPlus {
     fTauTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("tauTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
-    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper),
+    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper, ""),
     //    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
@@ -568,6 +567,10 @@ namespace HPlus {
       
       // tau isolation
       if ( (*iTau)->tauID(myTauIsolation) < 0.5 ) continue;
+
+
+/*
+// FIXME: 29.5.2013 / Lauri : got this conflict in merge, please check what to do
       //<<<<<<< HEAD
       //=======
 	//	std::cout <<"PASSES TAU DISCR" << std::endl;
@@ -588,7 +591,7 @@ namespace HPlus {
       increment(fTauFakeScaleFactorCounter);
 
       //>>>>>>> sami2011/2011
-
+*/
       
       hTauDiscriminator->Fill((*iTau)->tauID("byRawCombinedIsolationDeltaBetaCorr"));
       increment(fTausExistCounter);  
@@ -805,7 +808,7 @@ namespace HPlus {
     if(!metData.passedEvent()) return false;
     increment(fBaselineMetCounter);
     size_t nVertices = pvData.getNumberOfAllVertices();
-    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);	      
+    fMETPhiOscillationCorrection.analyze(iEvent, nVertices, metData);	      
    
        //------ mT after jets and met in bins
 
@@ -1080,7 +1083,7 @@ namespace HPlus {
     increment(fMETCounter);
 
     size_t nVertices = pvData.getNumberOfAllVertices();
-    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);
+    fMETPhiOscillationCorrection.analyze(iEvent, nVertices, metData);
 
     //hSelectionFlow->Fill(kQCDOrderMET);
 

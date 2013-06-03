@@ -161,7 +161,7 @@ datasets_SingleTop = [
 ]
 
 #workflow = "analysis_quadjetleg_v53_v1"
-workflow = "triggerQuadJet_skim_v53_v2"
+workflow = "triggerQuadJet_skim_v53_v3"
 
 
 tasks = [

@@ -72,9 +72,9 @@ namespace HPlus {
     hElectronEta_matchingMCelectronFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_matchingMCelectronFromW", "ElectronEta_matchingMCelectronFromW", 60, -3.0, 3.0);
     
     hElectronPt_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_AfterSelection", "ElectronPt_AfterSelection", 80, 0.0, 400.0);
-    hElectronEta_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_AfterSelection", "ElectronEta_AfterSelection", 60, -3.0, 3.0);
+    hElectronEta_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_AfterSelection", "ElectronEta_AfterSelection", 60, -3.0, 3.0);
     hElectronPt_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_gsfTrack_AfterSelection", "ElectronPt_gsfTrack_AfterSelection", 80, 0.0, 400.0);
-    hElectronEta_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_gsfTrack_AfterSelection", "ElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
+    hElectronEta_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_gsfTrack_AfterSelection", "ElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
 
     hElectronEtaPhiForSelectedElectrons = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir,
         "ElectronEtaPhiForSelectedElectrons", "ElectronEtaPhiForSelectedElectrons;electron #eta; electron #phi",

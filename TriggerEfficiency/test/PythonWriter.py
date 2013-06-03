@@ -13,7 +13,7 @@ class PythonWriter:
             self.lumi     = lumi
             self.eff      = eff
         def Print(self):
-            print "check Parameters",self.name,self.label,self.runrange,self.lumi
+            print "Parameters",self.name,self.label,self.runrange,self.lumi
 
     def __init__(self,title):
         self.title  = title
@@ -28,7 +28,7 @@ class PythonWriter:
         for r in self.ranges:
             if r.name == name and r.label == label and r.runrange == runrange:
                 labelFound = True
-        if not labelFound:
+        if not labelFound and not label == "Unweighted":
             self.ranges.append(self.Parameters(name,label,runrange,lumi,eff))
             self.dumpParameters(path,label,runrange,lumi,eff)
         #print "check self.ranges size",len(self.ranges)

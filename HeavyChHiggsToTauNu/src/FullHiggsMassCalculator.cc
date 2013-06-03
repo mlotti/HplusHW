@@ -81,10 +81,14 @@ namespace HPlus {
 
   FullHiggsMassCalculator::Data::~Data() { }
 
-  // hepp!
-  FullHiggsMassCalculator::FullHiggsMassCalculator(HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
-    // Define counters to be incremented during this analysis
+  FullHiggsMassCalculator::FullHiggsMassCalculator(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, 
+						   HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
+    // Get the parameters from the configuration
+    fTopInvMassLowerCut(iConfig.getUntrackedParameter<double>("topInvMassLowerCut")),
+    fTopInvMassUpperCut(iConfig.getUntrackedParameter<double>("topInvMassUpperCut")),
+    fPzSelectionMethod(iConfig.getUntrackedParameter<std::string>("pzSelectionMethod")),
+    // Define counters to be incremented during this analysis
     allEvents_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All events")),
     positiveDiscriminant_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator",
 								"Positive discriminant")),
@@ -118,20 +122,20 @@ namespace HPlus {
     selectionGreaterCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", "Greater solution closest")),
     selectionSmallerCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", "Smaller solution closest")),
     selectionTauNuAngleMaxCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection",
-								       "TauNuAngleMax solution closest")),
+								      "TauNuAngleMax solution closest")),
     selectionTauNuAngleMinCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", 
-								       "TauNuAngleMin solution closest")),
+								      "TauNuAngleMin solution closest")),
     selectionTauNuDeltaEtaMaxCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", 
-									  "TauNuDeltaEtaMax solution closest")),
+									 "TauNuDeltaEtaMax solution closest")),
     selectionTauNuDeltaEtaMinCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", 
-									  "TauNuDeltaEtaMin solution closest"))
+									 "TauNuDeltaEtaMin solution closest"))
   {
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
     // Book histograms to be filled by this code
     // Vital histograms
-    hHiggsMass                = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass", 
+    hHiggsMass                = histoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, myDir, "HiggsMass", 
 							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMassPositiveDiscriminant = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassPositiveDiscriminant", 
 							       "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
@@ -149,7 +153,7 @@ namespace HPlus {
     hDiscriminant_GEN_NeutrinosReplacedWithMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
 									   "Discriminant_GEN_NeutrinosReplacedWithMET",
 									   "Discriminant", 100, -50000, 50000);
-    h2TransverseMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, "TransMassVsInvMass", 
+    h2TransverseMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kSystematics, myDir, "TransMassVsInvMass", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
 				      100, 0, 500, 100, 0, 500);
     h2TransverseMassVsInvariantMassPositiveDiscriminant = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, 
@@ -488,16 +492,6 @@ namespace HPlus {
 	if (myInputDataType == eGEN_NeutrinosReplacedWithMET) 
 	  hHiggsMass_GEN_NuToMET_tauNuAngleMin->Fill(output.fHiggsMassSolutionSelected);
       }
-      // Selection method: TauNuDeltaEtaMin
-      selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMin);
-      output.fNeutrinoPzSolutionTauNuDeltaEtaMin = output.fNeutrinoPzSolutionSelected;
-      if (output.bPassedEvent) {
-	if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
-	if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
-	if (myInputDataType == eGEN_NeutrinosReplacedWithMET) 
-	  hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
-      }
-      // NOTE: THE LAST CALCULATION DETERMINES WHICH SELECTION METHOD IS USED FOR THE MAIN OUTPUT:
       // Selection method: TauNuDeltaEtaMax
       selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax);
       output.fNeutrinoPzSolutionTauNuDeltaEtaMax = output.fNeutrinoPzSolutionSelected;
@@ -506,6 +500,15 @@ namespace HPlus {
 	if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolutionSelected);
 	if (myInputDataType == eGEN_NeutrinosReplacedWithMET) 
 	  hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMax->Fill(output.fHiggsMassSolutionSelected);
+      }
+      // Selection method: TauNuDeltaEtaMin
+      selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMin);
+      output.fNeutrinoPzSolutionTauNuDeltaEtaMin = output.fNeutrinoPzSolutionSelected;
+      if (output.bPassedEvent) {
+	if (myInputDataType == eRECO) hHiggsMass_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
+	if (myInputDataType == eGEN) hHiggsMass_GEN_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
+	if (myInputDataType == eGEN_NeutrinosReplacedWithMET) 
+	  hHiggsMass_GEN_NuToMET_tauNuDeltaEtaMin->Fill(output.fHiggsMassSolutionSelected);
       }
     }
     // More common actions:
@@ -841,14 +844,27 @@ namespace HPlus {
   }
   
   void FullHiggsMassCalculator::applyCuts(FullHiggsMassCalculator::Data& output) {
+    //if (output.fDiscriminant > 0) std::cout << output.fTopMassSolutionSelected << std::endl;
+    if (output.fDiscriminant > 0 && (output.fTopMassSolutionSelected > 173.0 || output.fTopMassSolutionSelected < 172.0))
+      output.bPassedEvent = false;
+    if (fTopInvMassLowerCut >= 0 && output.fTopMassSolutionSelected < fTopInvMassLowerCut) output.bPassedEvent = false;
+    if (fTopInvMassUpperCut >= 0 && output.fTopMassSolutionSelected > fTopInvMassUpperCut) output.bPassedEvent = false;
+    //std::cout << "fTopInvMassLowerCut: " << fTopInvMassLowerCut << std::endl;
+    //std::cout << "fTopInvMassUpperCut: " << fTopInvMassUpperCut << std::endl;
     //if (output.fTopMassSolutionSelected < 140.0 || output.fTopMassSolutionSelected > 200.0) output.bPassedEvent = false;
-    if (output.fTopMassSolutionSelected < 100.0 || output.fTopMassSolutionSelected > 240.0) output.bPassedEvent = false;
+    //if (output.fTopMassSolutionSelected < 100.0 || output.fTopMassSolutionSelected > 240.0) output.bPassedEvent = false;
     //if (output.fDiscriminant < -20000) output.bPassedEvent = false; // At -20000, the cut does not make much difference
     //TMath::Abs(output.fModifiedMET - <original MET>)
   }
   
   void FullHiggsMassCalculator::doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, 
 							   InputDataType myInputDataType) {
+    // Choose the neutrino p_z selection method (can be set in python configuration scripts)
+    if (fPzSelectionMethod == "DeltaEtaMax") selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax);
+    else if (fPzSelectionMethod == "Smaller") selectNeutrinoPzAndHiggsMassSolution(output, eSmaller);
+
+    selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax);
+    // Increment counters and fill Histograms
     switch (myInputDataType) {
     case eRECO:
       increment(allEvents_SubCount);
@@ -889,20 +905,20 @@ namespace HPlus {
 	hHiggsMass_betterSolution->Fill(output.fHiggsMassSolution1);
 	hHiggsMass_worseSolution->Fill(output.fHiggsMassSolution1);
       }
-      // The line below has the effect that the following counters are only incremented if the solutions were actually different!
-      if (TMath::Abs(output.fNeutrinoPzSolution1 - output.fNeutrinoPzSolution2) < 0.001) break;
-      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionGreater, output)) // This method works for both signal and bkg events!
- 	increment(selectionGreaterCorrect_SubCount);
-      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionSmaller, output))
- 	increment(selectionSmallerCorrect_SubCount);
-      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuAngleMax, output))
- 	increment(selectionTauNuAngleMaxCorrect_SubCount);
-      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuAngleMin, output))
- 	increment(selectionTauNuAngleMinCorrect_SubCount);
-      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output))
- 	increment(selectionTauNuDeltaEtaMaxCorrect_SubCount);
-      if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output))
- 	increment(selectionTauNuDeltaEtaMinCorrect_SubCount);
+      if (output.fDiscriminant > 0) {
+	if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionGreater, output)) // This works for both signal and bkg events!
+	  increment(selectionGreaterCorrect_SubCount);
+	if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionSmaller, output))
+	  increment(selectionSmallerCorrect_SubCount);
+	if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuAngleMax, output))
+	  increment(selectionTauNuAngleMaxCorrect_SubCount);
+	if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuAngleMin, output))
+	  increment(selectionTauNuAngleMinCorrect_SubCount);
+	if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMax, output))
+	  increment(selectionTauNuDeltaEtaMaxCorrect_SubCount);
+	if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionTauNuDeltaEtaMin, output))
+	  increment(selectionTauNuDeltaEtaMinCorrect_SubCount);
+      }
       break;
     case eGEN:
       hDiscriminant_GEN->Fill(output.fDiscriminant);

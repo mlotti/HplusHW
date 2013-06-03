@@ -27,6 +27,20 @@ def insertPSetContentsTo(src, dst):
     for n in names:
         setattr(dst, n, getattr(src, n))
 
+def removeEverywhere(process, moduleName):
+    try:
+        module = getattr(process, moduleName)
+    except KeyError:
+        print "Trying to remove nonexistent module '%s'" % moduleName
+        return
+
+    for seqName, seq in process.sequences_().iteritems():
+        seq.remove(module)
+    for pthName, pth in process.paths_().iteritems():
+        pth.remove(module)
+
+    delattr(process, moduleName)
+
 # Add an array of analysis+counter modules by varying one
 # configuration parameter of the analysis module. This is done by
 # cloning a given example module configuration and then calling a

@@ -13,18 +13,24 @@
 
 namespace {
   enum MCTauMode {
+    kMCTauZeroTaus,
     kMCTauOneTau,
     kMCTauTwoTaus,
+    kMCTauMoreThanTwoTaus,
     kMCTauNone
   };
 
   MCTauMode parseMCTauMode(const std::string& mode) {
     if(mode == "" || mode == "none")
       return kMCTauNone;
+    if(mode == "zeroTaus")
+      return kMCTauZeroTaus;
     if(mode == "oneTau")
       return kMCTauOneTau;
     if(mode == "twoTaus")
       return kMCTauTwoTaus;
+    if(mode == "moreThanTwoTaus")
+      return kMCTauMoreThanTwoTaus;
 
     std::stringstream ss;
     ss << "Gor mcTauMode " << mode << " which is not valid. Valid options are '', 'none', 'oneTau', 'twoTaus'";
@@ -53,12 +59,14 @@ private:
   JetCollection fJets;
   TauCollection fTaus;
   GenParticleCollection fGenTaus; // from original event in embedded, for all in normal
+  GenParticleCollection fGenTausEmbedded;
 
   std::string fPuWeightName;
   Branch<double> fPuWeight;
   Branch<unsigned> fSelectedVertexCount;
   Branch<unsigned> fVertexCount;
   //Branch<bool> fElectronVetoPassed;
+  Branch<bool> fMuTriggerPassed;
 
   const bool fIsEmbedded;
   TH1 *fEmbeddingWTauMuWeights;
@@ -91,6 +99,7 @@ private:
   EventCounter::Count cIsolation;
   EventCounter::Count cOneProng;
   EventCounter::Count cRtau;
+  EventCounter::Count cMuTrigger;
 
   // Histograms
   TH1 *hTauEta_AfterDecayModeFindingIsolation;
@@ -124,7 +133,8 @@ TauAnalysisSelector::TauAnalysisSelector(const std::string& puWeight, bool isEmb
                                          const std::string& mcTauMode):
   BaseSelector(),
   //fMuons("Emb"),
-  fGenTaus(isEmbedded ? "gentausOriginal" : "gentaus"),
+  fGenTaus(isEmbedded ? "gentausOriginal" : "gentaus", true),
+  fGenTausEmbedded("gentausEmbedded", true),
   fPuWeightName(puWeight),
   fIsEmbedded(isEmbedded),
   fEmbeddingWTauMuWeights(0),
@@ -148,7 +158,8 @@ TauAnalysisSelector::TauAnalysisSelector(const std::string& puWeight, bool isEmb
   cAgainstMuon(fEventCounter.addCounter("Against muon")),
   cIsolation(fEventCounter.addCounter("Isolation")),
   cOneProng(fEventCounter.addCounter("One prong")),
-  cRtau(fEventCounter.addCounter("Rtau"))
+  cRtau(fEventCounter.addCounter("Rtau")),
+  cMuTrigger(fEventCounter.addCounter("Mu trigger"))
 {
   if(isEmbedded && !embeddingWTauMuFile.empty()) {
     TFile *file = TFile::Open(embeddingWTauMuFile.c_str());
@@ -208,6 +219,7 @@ void TauAnalysisSelector::setupBranches(TTree *tree) {
     fMuons.setupBranches(tree, isMC());
     //fElectrons.setupBranches(tree, isMC());
     fJets.setupBranches(tree);
+    fGenTausEmbedded.setupBranches(tree);
   }
   fTaus.setupBranches(tree, isMC() && !fIsEmbedded);
   if(isMC())
@@ -217,6 +229,9 @@ void TauAnalysisSelector::setupBranches(TTree *tree) {
     fPuWeight.setupBranch(tree, fPuWeightName.c_str());
   fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertex_count");
   fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
+  if(fIsEmbedded) {
+    fMuTriggerPassed.setupBranch(tree, "trigger_Mu40_eta2p1");
+  }
 
   //fElectronVetoPassed.setupBranch(tree, "ElectronVetoPassed");
 
@@ -229,9 +244,11 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   fJets.setEntry(entry);
   fTaus.setEntry(entry);
   fGenTaus.setEntry(entry);
+  fGenTausEmbedded.setEntry(entry);
   fPuWeight.setEntry(entry);
   fSelectedVertexCount.setEntry(entry);
   fVertexCount.setEntry(entry);
+  fMuTriggerPassed.setEntry(entry);
 
   //fElectronVetoPassed.setEntry(entry);
 
@@ -275,23 +292,49 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   */
 
   // MC status
+  if(isMC() && fIsEmbedded) {
+    size_t ntaus = 0;
+    for(size_t i=0; i<fGenTausEmbedded.size(); ++i) {
+      GenParticleCollection::GenParticle gen = fGenTausEmbedded.get(i);
+      int daughter = std::abs(gen.daughterPdgId());
+      //if(daughter == 11 || daughter == 13)
+      //  continue;
+      if(std::abs(gen.motherPdgId()) == 24 && std::abs(gen.grandMotherPdgId()) == 2212) { // p->W->tau (unphysical)
+        if(daughter == 11 || daughter == 13)
+          return true;
+        ++ntaus;
+      }
+    }
+    if(ntaus == 0)
+      return true;
+  }
   if(isMC() && fMCTauMode != kMCTauNone) {
     size_t ntaus = 0;
     for(size_t i=0; i<fGenTaus.size(); ++i) {
       GenParticleCollection::GenParticle gen = fGenTaus.get(i);
+      int daughter = std::abs(gen.daughterPdgId());
+      //if(daughter == 11 || daughter == 13)
+      //  continue;
+
       if(std::abs(gen.motherPdgId()) == 24 && std::abs(gen.grandMotherPdgId()) == 6) {
+        if(daughter == 11 || daughter == 13)
+          return true;
         ++ntaus;
       }
     }
 
     if(fIsEmbedded) {
       // For embedded the embedded tau is counted as one
+      if(fMCTauMode == kMCTauZeroTaus) return true;
       if(fMCTauMode == kMCTauOneTau && ntaus != 0) return true;
       if(fMCTauMode == kMCTauTwoTaus && ntaus != 1) return true;
+      if(fMCTauMode == kMCTauMoreThanTwoTaus && ntaus < 2) return true;
     }
     else {
+      if(fMCTauMode == kMCTauZeroTaus && ntaus != 0) return true;
       if(fMCTauMode == kMCTauOneTau && ntaus != 1) return true;
       if(fMCTauMode == kMCTauTwoTaus && ntaus != 2) return true;
+      if(fMCTauMode == kMCTauMoreThanTwoTaus && ntaus < 3) return true;
     }
   }
   cTauMCSelection.increment();
@@ -305,7 +348,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
     if(embeddingMuon.p4().Pt() < 41) return true;
     //std::cout << "Muon pt " << muon.p4().Pt() << std::endl;
 
-    originalMuonIsWMu = std::abs(embeddingMuon.pdgId()) == 13 && std::abs(embeddingMuon.motherPdgId()) == 24;
+    originalMuonIsWMu = std::abs(embeddingMuon.pdgId()) == 13 && std::abs(embeddingMuon.motherPdgId()) == 24 && std::abs(embeddingMuon.grandMotherPdgId()) == 6;
     if(!originalMuonIsWMu) return true;
   }
   else {
@@ -378,6 +421,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   for(size_t i=0; i<selectedTaus.size(); ++i) {
     TauCollection::Tau& tau = selectedTaus[i];
     if(!TauID::decayModeFinding(tau)) continue;
+    if(!TauID::isolation(tau)) continue; // TEMPORARY ISOLATION HERE
 
     if(TauID::isolation(tau)) {
       atLeastOneIsolated = true;
@@ -522,8 +566,6 @@ bool TauAnalysisSelector::process(Long64_t entry) {
     hTauLeadingTrackPt_AfterOneProng->Fill(tau.leadPFChargedHadrCandP4().Pt(), weight);
     hTauLeadingTrackP_AfterOneProng->Fill(tau.leadPFChargedHadrCandP4().P(), weight);
     hTauRtau_AfterOneProng->Fill(tau.rtau(), weight);
-
-    tmp.push_back(tau);
   }
   selectedTaus.swap(tmp);
   tmp.clear();
@@ -547,6 +589,40 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   hVertexCount_AfterRtau->Fill(fVertexCount.value(), weight);
 
   // Tau ID finished
+
+  // Trigger
+  /*
+  if(fIsEmbedded) {
+    if(!fMuTriggerPassed.value()) return true;
+  }
+  */
+  cMuTrigger.increment();
+
+
+  if(false) {
+    std::cout << "Event " << fEventInfo.event() << ":" << fEventInfo.lumi() << ":" << fEventInfo.run() << std::endl;
+    for(size_t i=0; i< selectedTaus.size(); ++i) {
+      TauCollection::Tau& tau = selectedTaus[i];
+      std::cout << "  selected tau pt " << tau.p4().Pt() << " eta " << tau.p4().Eta() << " phi " << tau.p4().Phi() << std::endl;
+      if(fIsEmbedded) {
+        embeddingMuon.ensureValidity();
+        double DR = ROOT::Math::VectorUtil::DeltaR(tau.p4(), embeddingMuon.p4());
+        if(DR < 0.5) {
+          std::cout << "    matched to embedding muon, DR " << DR << std::endl;
+        }
+      }
+      for(size_t j=0; j<fGenTaus.size(); ++j) {
+        GenParticleCollection::GenParticle gen = fGenTaus.get(j);
+        double DR = ROOT::Math::VectorUtil::DeltaR(tau.p4(), gen.p4());
+        if(DR < 0.5) {
+          std::cout << "    matched to generator tau, DR " << DR
+                    << " mother " << gen.motherPdgId()
+                    << " grandmother " << gen.grandMotherPdgId()
+                    << std::endl;
+        }
+      }
+    }
+  }
 
   return true;
 }

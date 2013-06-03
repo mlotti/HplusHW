@@ -36,6 +36,15 @@ def main(opts, args):
             print " adding timeReport.txt"
             tar.add("%s/timeReport.txt"%d)
 
+        if os.path.exists(d+"/codeDiff.txt"):
+            tar.add("%s/codeDiff.txt"%d)
+        if os.path.exists(d+"/codeStatus.txt"):
+            tar.add("%s/codeStatus.txt"%d)
+        if os.path.exists(d+"/codeVersion.txt"):
+            tar.add("%s/codeVersion.txt"%d)
+        for jobdir in glob.glob(d+"/*/job"):
+            tar.add(jobdir) 
+
         if opts.fullStatus:
             for f in ["%s/*py"%d, "%s/*cfg"%d, "%s/*/res/histograms_*root"%d]:
                 list = glob.glob(f)

@@ -66,7 +66,10 @@ class SizeAnalysis:
         return False
 
     def size(self):
-        s_mean = float(sum(self.sizes))/len(self.sizes)
+        if len(self.sizes) == 0:
+            s_mean = 0
+        else:
+            s_mean = float(sum(self.sizes))/len(self.sizes)
         s_min = float(min(self.sizes))
         s_max = float(max(self.sizes))
         return "Mean %s, min %s, max %s" % (fileSize.pretty(s_mean), fileSize.pretty(s_min), fileSize.pretty(s_max))

@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions as HChOptions
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
@@ -78,12 +79,14 @@ class ConfigBuilder:
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
+                 doInvariantMassReconstructionScenarios = False, # Run different configurations of the invariant mass reconstruction
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
+                 doScaleFactorVariation = False, # Perform the signal analysis with the scale factor variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
                  printAnalyzerNames = False,
-                 inputWorkflow = "pattuple_v53_2", # Name of the workflow, whose output is used as an input, needed for WJets weighting
+                 inputWorkflow = "pattuple_v53_3", # Name of the workflow, whose output is used as an input, needed for WJets weighting
                  ):
         self.options, self.dataVersion = HChOptions.getOptionsDataVersion(dataVersion)
         self.dataEras = dataEras
@@ -94,6 +97,7 @@ class ConfigBuilder:
         self.edmOutput = edmOutput
 
         self.doQCDTailKillerScenarios = doQCDTailKillerScenarios
+        self.doInvariantMassReconstructionScenarios = doInvariantMassReconstructionScenarios
         self.doAgainstElectronScan = doAgainstElectronScan
         self.doTauIsolationAndJetPUScan = doTauIsolationAndJetPUScan
         self.doBTagScan = doBTagScan
@@ -124,6 +128,7 @@ class ConfigBuilder:
         self.doSystematics = doSystematics
         self.doJESVariation = doJESVariation
         self.doPUWeightVariation = doPUWeightVariation
+        self.doScaleFactorVariation = doScaleFactorVariation
         self.doOptimisation = doOptimisation
         self.optimisationScheme = optimisationScheme
         self.allowTooManyAnalyzers = allowTooManyAnalyzers
@@ -358,9 +363,17 @@ class ConfigBuilder:
         if len(analysisLightModules) > 0:
             analysisLightModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
             #analysisLightModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+            if hasattr(analysisLightModules[0], "tauTriggerEfficiencyScaleFactor"):
+                analysisLightModules[0].tauTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
+            if hasattr(analysisLightModules[0], "metTriggerEfficiencyScaleFactor"):
+                analysisLightModules[0].metTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
         if len(analysisHeavyModules) > 0:
             analysisHeavyModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
             #analysisHeavyModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+            if hasattr(analysisHeavyModules[0], "tauTriggerEfficiencyScaleFactor"):
+                analysisHeavyModules[0].tauTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
+            if hasattr(analysisHeavyModules[0], "metTriggerEfficiencyScaleFactor"):
+                analysisHeavyModules[0].metTriggerEfficiencyScaleFactor.printScaleFactors = cms.untracked.bool(True)
 
         # Prescale fetching done automatically for data
         if self.dataVersion.isData() and self.options.tauEmbeddingInput == 0 and self.doPrescalesForData:
@@ -384,6 +397,7 @@ class ConfigBuilder:
         self._printModule(analysisModules[0])
 
         # Construct normal path
+        analysisNamesForTailKillerScenarios = analysisNames
         if not self.doOptimisation:
             for module, name in zip(analysisModules, analysisNames):
                 setattr(process, name, module)
@@ -405,10 +419,14 @@ class ConfigBuilder:
             for module, name in zip(analysisModules, analysisNames):
                 names = self.optimisationScheme.generateVariations(process, additionalCounters, process.commonSequence, module, name)
                 self._accumulateAnalyzers("Optimisation", names)
+                analysisNamesForTailKillerScenarios = names
                 analysisNamesForSystematics.extend(names)
 
-        # QCD tail killer scenarios
-        analysisNamesForSystematics.extend(self._buildQCDTailKillerScenarios(process, analysisModules, analysisNames))
+        # QCD tail killer scenarios (do them also for optimisation variations)
+        analysisNamesForSystematics.extend(self._buildQCDTailKillerScenarios(process, analysisNamesForTailKillerScenarios))
+
+        # Invariant mass reconstruction scenarios
+        analysisNamesForSystematics.extend(self._buildInvariantMassReconstructionScenarios(process, analysisModules, analysisNames))
 
         # Against electron scan
         self._buildAgainstElectronScan(process, analysisModules, analysisNames)
@@ -429,6 +447,10 @@ class ConfigBuilder:
         if "QCDMeasurement" not in analysisNames_:
             self._buildJESVariation(process, analysisNamesForSystematics)
             self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
+            # Disabled for now, seems like it would be better to
+            #handle SF uncertainties by error propagation after all
+            #self._buildScaleFactorVariation(process,
+            #analysisNamesForSystematics)
 
         # Optional output
         if self.edmOutput:
@@ -641,13 +663,13 @@ class ConfigBuilder:
         if hasattr(module, "jetSelection"):
             print "jets: ", module.jetSelection
         print "QCD Tail-Killer: ", module.QCDTailKiller
+        print "Invariant mass reconstruction: ", module.invMassReco
 
     ## Build array of analyzers to scan various QCD tail killer scenarios
     #
     # \param process          cms.Process object
-    # \param analysisModules  List of analysis modules to be used as prototypes
     # \param analysisNames    List of analysis module names
-    def _buildQCDTailKillerScenarios(self, process, analysisModules, analysisNames):
+    def _buildQCDTailKillerScenarios(self, process, analysisNames):
         def createQCDTailKillerModule(process, modulePrefix, mod, names, modules):
             modName = name+"Opt"+modulePrefix
             if "Opt" in name:
@@ -664,7 +686,8 @@ class ConfigBuilder:
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import QCDTailKillerBin
         names = []
         modules = []
-        for module, name in zip(analysisModules, analysisNames):
+        for name in analysisNames:
+            module = getattr(process, name)
             # Zero plus scenario
             mod = module.clone()
             mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
@@ -730,11 +753,62 @@ class ConfigBuilder:
             mod.QCDTailKiller.maxJetsToConsider = 4
             createQCDTailKillerModule(process, "QCDTailKillerTightPlus", mod, names, modules)
         self._accumulateAnalyzers("Modules for QCDTailKiller scenarios", names)
-        analysisModules.extend(modules)
-        analysisNames.extend(names)
 
         return names
 
+    ## Build array of analyzers to scan various scenarios for invariant mass reconstruction
+    def _buildInvariantMassReconstructionScenarios(self, process, analysisModules, analysisNames):
+        def createInvariantMassReconstructionModule(process, modulePrefix, mod, names, modules):
+            modName = name+"Opt"+modulePrefix
+            if "Opt" in name:
+                modName = name+modulePrefix
+            setattr(process, modName, mod)
+            names.append(modName)
+            modules.append(mod)
+            path = cms.Path(process.commonSequence * mod)
+            setattr(process, modName+"Path", path)
+            
+        if not self.doInvariantMassReconstructionScenarios:
+            return []
+        
+        neutrinoPzSolutionSelectionMethods = ["DeltaEtaMax", "Smaller"]
+        names = []
+        modules = []
+        for module, name in zip(analysisModules, analysisNames):
+            for currentPzSelectionMethod in neutrinoPzSolutionSelectionMethods:
+                ## Top invariant mass cut scenarios for invariant mass reconstruction
+                # "None" scenario
+                mod = module.clone()
+                mod.invMassReco.topInvMassLowerCut = -1 # negative value means no cut
+                mod.invMassReco.topInvMassUpperCut = -1 # negative value means no cut
+                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
+                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                        "TopInvMassCutNone", mod, names, modules)
+                # "Loose" scenario
+                mod = module.clone()
+                mod.invMassReco.topInvMassLowerCut = 100 # negative value means no cut
+                mod.invMassReco.topInvMassUpperCut = 240 # negative value means no cut
+                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
+                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                        "TopInvMassCutLoose", mod, names, modules)
+                # "Medium" scenario
+                mod = module.clone()
+                mod.invMassReco.topInvMassLowerCut = 140 # negative value means no cut
+                mod.invMassReco.topInvMassUpperCut = 200 # negative value means no cut
+                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
+                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                        "TopInvMassCutMedium", mod, names, modules)
+                # "Tight" scenario
+                mod = module.clone()
+                mod.invMassReco.topInvMassLowerCut = 157 # negative value means no cut
+                mod.invMassReco.topInvMassUpperCut = 187 # negative value means no cut
+                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
+                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                        "TopInvMassCutTight", mod, names, modules)
+
+        self._accumulateAnalyzers("Modules for invariant mass reconstruction scenarios", names)
+        return names
+    
     ## Build array of analyzers to scan various tau againstElectron discriminators
     #
     # \param process          cms.Process object
@@ -779,8 +853,6 @@ class ConfigBuilder:
                         path = cms.Path(process.commonSequence * mod)
                         setattr(process, modName+"Path", path)
         self._accumulateAnalyzers("AgainstElectron/AgainstMuon scan", names)
-        analysisModules.extend(modules)
-        analysisNames.extend(names)
 
     ## Build array of analyzers to scan various tau isolation and jet PU ID discriminators
     #
@@ -826,8 +898,6 @@ class ConfigBuilder:
                         path = cms.Path(process.commonSequence * mod)
                         setattr(process, modName+"Path", path)
         self._accumulateAnalyzers("TauIsolation/JetPUID scan", names)
-        analysisModules.extend(modules)
-        analysisNames.extend(names)
 
     ## Build array of analyzers to scan various tau isolation and jet PU ID discriminators
     #
@@ -866,8 +936,6 @@ class ConfigBuilder:
                 path = cms.Path(process.commonSequence * mod)
                 setattr(process, modName+"Path", path)
         self._accumulateAnalyzers("btag efficiency scan", names)
-        analysisModules.extend(modules)
-        analysisNames.extend(names)
 
     ## Build "tau embedding"-like preselection for normal MC
     #
@@ -966,6 +1034,14 @@ class ConfigBuilder:
         self._accumulateAnalyzers("Tau embedding analyses", allNames)
         return retNames
 
+    def _cloneForVariation(self, module):
+        mod = module.clone()
+        mod.Tree.fill = False
+        mod.GenParticleAnalysis.enabled = False
+        mod.eventCounter.printMainCounter = cms.untracked.bool(False)
+        mod.histogramAmbientLevel = self.histogramAmbientLevelSystematics
+        return mod
+
     ## Build JES variation
     #
     # \param process                      cms.Process object
@@ -992,12 +1068,8 @@ class ConfigBuilder:
     # \param name                       Name of the module to be used as a prototype
     # \param doJetUnclusteredVariation  Flag if JES+JER+UES variations should be done
     def _addJESVariation(self, process, name, doJetUnclusteredVariation):
-        module = getattr(process, name)
-
-        module = module.clone()
-        module.Tree.fill = False
+        module = self._cloneForVariation(getattr(process, name))
         module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
-        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         postfix = ""
         if module.jetSelection.src.value()[-3:] == "Chs":
@@ -1020,10 +1092,24 @@ class ConfigBuilder:
 
         self._accumulateAnalyzers("JES variation", names)
 
+    ## Add variation module to process, create a path for it
+    #
+    # \param process    cms.Process object
+    # \param module     EDModule to insert
+    # \param postfix    Name of the module
+    #
+    # \return name
+    def _addVariationModule(self, process, module, name):
+        path = cms.Path(process.commonSequence * module)
+        setattr(process, name, module)
+        setattr(process, name+"Path", path)
+        return name
+
     ## Build PU weight variation
     #
     # \param process                      cms.Process object
     # \param analysisNamesForSystematics  Names of the analysis modules for which the PU weight variation should be done
+    # \param param     HChSignalAnalysisParameters_cff module object
     def _buildPUWeightVariation(self, process, analysisNamesForSystematics, param):
         if not self.applyPUReweight:
             return
@@ -1056,35 +1142,83 @@ class ConfigBuilder:
         names = []
 
         # Up variation
-        module = getattr(process, name).clone()
-        module.Tree.fill = False
-        module.eventCounter.printMainCounter = cms.untracked.bool(False)
-        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
+        module = self._cloneForVariation(getattr(process, name))
 
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "up")
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="up")
-        path = cms.Path(process.commonSequence * module)
-        modName = name+self.systPrefix+"PUWeightPlus"
-        setattr(process, modName, module)
-        setattr(process, modName+"Path", path)
-        names.append(modName)
+        names.append(self._addVariationModule(process, module, name+self.systPrefix+"PUWeightPlus"))
 
         # Down variation
-        module = getattr(process, name).clone()
-        module.Tree.fill = False
-        module.eventCounter.printMainCounter = cms.untracked.bool(False)
-        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
+        module = self._cloneForVariation(getattr(process, name))
 
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "down")
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="down")
-        path = cms.Path(process.commonSequence * module)
-        modName = name+self.systPrefix+"PUWeightMinus"
-        setattr(process, modName, module)
-        setattr(process, modName+"Path", path)
-        names.append(modName)
+        names.append(self._addVariationModule(process, module, name+self.systPrefix+"PUWeightMinus"))
 
         self._accumulateAnalyzers("PU weight variation", names)
+
+    ## Add scale factor variation
+    #
+    # \param process                      cms.Process object
+    # \param analysisNamesForSystematics  Names of the analysis modules for which the PU weight variation should be done
+    def _buildScaleFactorVariation(self, process, analysisNamesForSystematics):
+        if not (self.doScaleFactorVariation or self.doSystematics):
+            return
+
+        if self.dataVersion.isMC():
+            for name in analysisNamesForSystematics:
+                self._addScaleFactorVariation(process, name)
+        else:
+            print "SF variation disabled for data (not meaningful for data"
+
+    # Add scale factor variation for one module
+    #
+    # \param process   cms.Process object
+    # \param name      Name of the module to be used as a prototype
+    def _addScaleFactorVariation(self, process, name):
+        def addTauTrgSF(shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = module.tauTriggerEfficiencyScaleFactor
+            effSF.variationEnabled = True
+            effSF.variationShiftBy = shiftBy
+            if hasattr(effSF, "printScaleFactors"):
+                effSF.printScaleFactors = False
+            return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgSF"+postfix)
+        def addBTagSF(shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            module.bTagging.variationEnabled = True
+            module.bTagging.variationShiftBy = shiftBy
+            return self._addVariationModule(process, module, name+self.systPrefix+"BTagSF"+postfix)
+
+
+        names = []
+
+        # Tau trigger SF
+        if self.applyTauTriggerScaleFactor:
+            names.append(addTauTrgSF( 1.0, "Plus"))
+            names.append(addTauTrgSF(-1.0, "Minus"))
+
+        # BTag SF
+        names.append(addBTagSF( 1.0, "Plus"))
+        names.append(addBTagSF(-1.0, "Minus"))
+
+        self._accumulateAnalyzers("SF variation", names)
+
+
+def addPuWeightProducers(dataVersion, process, commonSequence, dataEras, firstInSequence=False):
+    names = []
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+    for era in dataEras:
+        names.append(param.setPileupWeight(dataVersion, process, commonSequence, era=era))
+
+    if firstInSequence:
+        for name in names:
+            mod = getattr(process, name)
+            commonSequence.remove(mod)
+            commonSequence.insert(0, mod)
+
+    return names
