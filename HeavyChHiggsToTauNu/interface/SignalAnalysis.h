@@ -293,7 +293,7 @@ namespace HPlus {
     WrappedTH1 *htransverseMassObservableLeptons;
 
     // Transverse mass histogram
-    WrappedTH1 *hTransverseMass;
+    
 
     // Transverse mass for top algorithms
     WrappedTH1 *hTransverseMassTopSelection;
@@ -305,7 +305,7 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassMET70;
     WrappedTH1 *hTransverseMassTauVeto;
     WrappedTH1 *hTransverseMassAfterDeltaPhi;
-    WrappedTH1 *hEWKFakeTausTransverseMass;
+    
     WrappedTH1 *hTransverseMassFakeMetVeto;
     WrappedTH1 *hTransverseMassAfterDeltaPhi160;
     WrappedTH1 *hTransverseMassAfterDeltaPhi130;
@@ -316,8 +316,6 @@ namespace HPlus {
 
 
     // Full mass histograms
-    WrappedTH1 *hFullMass;
-    WrappedTH1 *hEWKFakeTausFullMass;
 
     WrappedTH1 *hDeltaPhi;
     WrappedTH1 *hEWKFakeTausDeltaPhi;
@@ -341,59 +339,8 @@ namespace HPlus {
     WrappedTH2 *hSelectionFlowVsVertices;
     WrappedTH2 *hSelectionFlowVsVerticesFakeTaus;
 
-    // Control plots FIXME: move to control plots
-    //    WrappedTH1* hDeltaPtJetTau;
-    //    WrappedTH1* hDeltaRJetTau;
-    WrappedTH1* hCtrlIdentifiedElectronPt;
-    WrappedTH1* hCtrlIdentifiedMuonPt;
-    WrappedTH1* hCtrlNjets;
-    WrappedTH1* hCtrlNjetsAfterMET;
-    WrappedTH1* hCtrlSelectedTauPtAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauEtaAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauPhiAfterStandardSelections;
-    WrappedTH2* hCtrlSelectedTauEtaVsPhiAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauRtauAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauPAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
-    WrappedTH1* hCtrlIdentifiedElectronPtAfterStandardSelections;
-    WrappedTH1* hCtrlIdentifiedMuonPtAfterStandardSelections;
-    WrappedTH1* hCtrlNjetsAfterStandardSelections;
-    WrappedTH1* hCtrlNjetsBeforeCollinearCuts;
-    WrappedTH1* hCtrlMET;
-    WrappedTH1* hCtrlNbjets;
-    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBack;
-    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinear;
-
-    WrappedTH1* hCtrlQCDTailKillerJet1BackToBack;
-    WrappedTH1* hCtrlQCDTailKillerJet2BackToBack;
-    WrappedTH1* hCtrlQCDTailKillerJet3BackToBack;
-    WrappedTH1* hCtrlQCDTailKillerJet4BackToBack;
-    WrappedTH1* hCtrlQCDTailKillerJet1Collinear;
-    WrappedTH1* hCtrlQCDTailKillerJet2Collinear;
-    WrappedTH1* hCtrlQCDTailKillerJet3Collinear;
-    WrappedTH1* hCtrlQCDTailKillerJet4Collinear;
     // Control plots for fakes
-    WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPt;
-    WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPt;
-    WrappedTH1* hCtrlEWKFakeTausNjets;
-    WrappedTH1* hCtrlEWKFakeTausNjetsAfterMET;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections;
-    WrappedTH2* hCtrlEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauPAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPtAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPtAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausNjetsAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausNjetsBeforeCollinearCuts;
-    WrappedTH1* hCtrlEWKFakeTausMET;
-    WrappedTH1* hCtrlEWKFakeTausNbjets;
-    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBack;
-    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinear;
+
 
     // FIXME move these to common plots
     WrappedTH2* hCtrlJetMatrixAfterJetSelection;

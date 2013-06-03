@@ -278,7 +278,7 @@ namespace HPlus {
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
-    fCommonPlots(eventCounter, fHistoWrapper),
+    fCommonPlots(eventCounter, fHistoWrapper, false),
     fQCDFactorisedHistogramHandler(iConfig, fHistoWrapper),
     fCommonPlotsAfterVertexSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("VertexSelection",false,"Vtx")),
     fCommonPlotsAfterTauSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauSelection",false,"TauID")),
@@ -472,7 +472,7 @@ namespace HPlus {
     increment(fTausAfterScaleFactorsCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
     fCommonPlotsAfterTauWeight->fill();
-    fCommonPlots.fillControlPlotsAfterTauTriggerScaleFactor(iEvent, iSetup, tauCandidateData, tauMatchData, mySelectedTau, fMETSelection);
+    fCommonPlots.fillControlPlotsAfterTauTriggerScaleFactor(iEvent);
 
 
 //------ Veto against second tau in event
