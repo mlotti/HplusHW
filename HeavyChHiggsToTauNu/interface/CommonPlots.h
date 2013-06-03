@@ -13,6 +13,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 
@@ -59,6 +60,7 @@ namespace HPlus {
                           const JetSelection::Data* jetData,
                           const METSelection::Data* metData,
                           const BTagging::Data* bJetData,
+                          const QCDTailKiller::Data* qcdTailKillerData,
                           const TopChiSelection::Data* topData,
                           const FullHiggsMassCalculator::Data* fullHiggsMassData);
 
@@ -79,6 +81,7 @@ namespace HPlus {
     const JetSelection::Data* fJetData;
     const METSelection::Data* fMETData;
     const BTagging::Data* fBJetData;
+    const QCDTailKiller::Data* fQCDTailKillerData;
     const TopChiSelection::Data* fTopData;
     const FullHiggsMassCalculator::Data* fFullHiggsMassData;
 
@@ -127,6 +130,7 @@ namespace HPlus {
                     JetSelection& jetSelection,
                     METSelection& metSelection,
                     BTagging& bJetSelection,
+                    QCDTailKiller& qcdTailKiller,
                     TopChiSelection& topChiSelection,
                     EvtTopology& evtTopology,
                     FullHiggsMassCalculator& fullHiggsMassCalculator);
@@ -142,6 +146,7 @@ namespace HPlus {
                     JetSelection& jetSelection,
                     METSelection& metSelection,
                     BTagging& bJetSelection,
+                    QCDTailKiller& qcdTailKiller,
                     TopChiSelection& topChiSelection,
                     EvtTopology& evtTopology,
                     FullHiggsMassCalculator& fullHiggsMassCalculator);
@@ -149,18 +154,26 @@ namespace HPlus {
     /// create object containing histograms to be filled after all (or almost all) selection steps
     CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
 
-    /// unique filling methods (to be called before return statement)
-    void fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data);
-    void fillControlPlots(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, const edm::Ptr<pat::Tau>& selectedTau, METSelection& metSelection);
-    void fillControlPlots(const edm::Event& iEvent, const ElectronSelection::Data& data);
-    void fillControlPlots(const edm::Event& iEvent, const MuonSelection::Data& data);
-    void fillControlPlots(const edm::Event& iEvent, const JetSelection::Data& data);
-    void fillControlPlots(const edm::Event& iEvent, const METSelection::Data& data);
-    void fillControlPlots(const edm::Event& iEvent, const BTagging::Data& data);
-    void fillControlPlots(const edm::Event& iEvent, const TopChiSelection::Data& data);
-    void fillControlPlots(const edm::Event& iEvent, const EvtTopology::Data& data);
-    void fillFinalPlots(const edm::Event& iEvent);
-    void fillFinalPlotsForFakeTaus(const edm::Event& iEvent);
+    /// unique filling methods (to be called AFTER return statement)
+    void fillControlPlotsAfterVertexSelection(const edm::Event& iEvent, const VertexSelection::Data& data);
+    void fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, const edm::Ptr<pat::Tau>& selectedTau, METSelection& metSelection);
+    void fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, const edm::Ptr<pat::Tau>& selectedTau, METSelection& metSelection);
+    void fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent);
+    void fillControlPlotsAfterAllSelections(const edm::Event& iEvent, bool isFakeTau);
+    void fillControlPlotsAfterAllSelectionsWithFullMass(const edm::Event& iEvent, bool isFakeTau);
+    /// unique filling methods (to be called BEFORE return statement)
+    void fillControlPlotsAtTauVetoSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const VetoTauSelection::Data& tauVetoData);
+    void fillControlPlotsAtElectronSelection(const edm::Event& iEvent, const ElectronSelection::Data& data);
+    void fillControlPlotsAtMuonSelection(const edm::Event& iEvent, const MuonSelection::Data& data);
+    void fillControlPlotsAtJetSelection(const edm::Event& iEvent, const JetSelection::Data& data);
+    void fillControlPlotsAtCollinearDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data);
+    void fillControlPlotsAtMETSelection(const edm::Event& iEvent, const METSelection::Data& data);
+    void fillControlPlotsAtBtagging(const edm::Event& iEvent, const BTagging::Data& data);
+    void fillControlPlotsAtBackToBackDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data);
+    void fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopChiSelection::Data& data);
+    void fillControlPlotsAtEvtTopology(const edm::Event& iEvent, const EvtTopology::Data& data);
+    //void fillFinalPlots(const edm::Event& iEvent);
+    //void fillFinalPlotsForFakeTaus(const edm::Event& iEvent);
 
   protected:
     
@@ -191,6 +204,7 @@ namespace HPlus {
     JetSelection::Data fJetData;
     METSelection::Data fMETData;
     BTagging::Data fBJetData;
+    QCDTailKiller::Data fQCDTailKillerData;
     TopChiSelection::Data fTopData;
     EvtTopology::Data fEvtTopology;
     FullHiggsMassCalculator::Data fFullHiggsMassData;
@@ -219,17 +233,6 @@ namespace HPlus {
     // muon veto
     
     // final
-    WrappedTH2* hDphiTauMetVsDphiJet1MHT;
-    WrappedTH2* hDphiTauMetVsDphiJet2MHT;
-    WrappedTH2* hDphiTauMetVsDphiJet3MHT;
-    WrappedTH2* hDphiTauMetVsDphiJet4MHT;
-    WrappedTH2* hDphiTauMetVsDphiTauMHT;
-
-    WrappedTH2* hDphiTauMetVsDphiJet1MHTFakeTaus;
-    WrappedTH2* hDphiTauMetVsDphiJet2MHTFakeTaus;
-    WrappedTH2* hDphiTauMetVsDphiJet3MHTFakeTaus;
-    WrappedTH2* hDphiTauMetVsDphiJet4MHTFakeTaus;
-    WrappedTH2* hDphiTauMetVsDphiTauMHTFakeTaus;
 
     // histograms to be filled at every step
     std::vector<CommonPlotsFilledAtEveryStep*> hEveryStepHistograms; // Owner of objects

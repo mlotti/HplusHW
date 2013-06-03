@@ -504,9 +504,9 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
     // Setup common plots
     edm::Ptr<pat::Tau> myZeroTauPointer; // to force common plots to use tau from TauSelection::Data::getSelectedTau()
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, myZeroTauPointer, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
     fCommonPlotsAfterVertexSelection->fill();
-    fCommonPlots.fillControlPlots(iEvent, pvData);
+    fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
 
 //------ Apply filter (if chosen) to select tail events
     //if (!selectTailEvents(iEvent, iSetup, pvData)) return false;
@@ -520,6 +520,7 @@ namespace HPlus {
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
     bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
     fCommonPlotsAfterTauSelection->fill();
+    fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauData, tauMatchData, tauData.getSelectedTau(), fMETSelection);
     fTree.setTauIsFake(myFakeTauStatus);
     if (myFakeTauStatus) fCommonPlotsAfterTauSelectionFakeTaus->fill();
     // Below "genuine tau" is in the context of embedding (i.e. irrespective of the tau decay)
@@ -528,9 +529,6 @@ namespace HPlus {
     // Apply scale factor for fake tau
     if (!iEvent.isRealData())
       fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()));
-    fCommonPlotsAfterTauWeight->fill();
-    if (myFakeTauStatus) fCommonPlotsAfterTauWeightFakeTaus->fill();
-    fCommonPlots.fillControlPlots(iEvent, iSetup, tauData, tauMatchData, tauData.getSelectedTau(), fMETSelection);
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     increment(fTauFakeScaleFactorCounter);
@@ -552,6 +550,9 @@ namespace HPlus {
       copyPtrToVector(tauData.getSelectedTaus(), *saveTaus);
       iEvent.put(saveTaus, "selectedTaus");
     }
+    fCommonPlotsAfterTauWeight->fill();
+    if (myFakeTauStatus) fCommonPlotsAfterTauWeightFakeTaus->fill();
+    fCommonPlots.fillControlPlotsAfterTauTriggerScaleFactor(iEvent, iSetup, tauData, tauMatchData, tauData.getSelectedTau(), fMETSelection);
     //    hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau());  
     if (!myFakeTauStatus)
       increment(fGenuineTauCounter);
@@ -572,6 +573,7 @@ namespace HPlus {
 
 //------ Veto against second tau in event
     VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), pvData.getSelectedVertex()->z());
+    fCommonPlots.fillControlPlotsAtTauVetoSelection(iEvent, iSetup, vetoTauData);
     //    if (vetoTauData.passedEvent()) return false; // tau veto
     //    if (!vetoTauData.passedEvent()) return false; // select events with add. taus
     //    if (vetoTauData.getSelectedVetoTaus().size() > 0 ) return false;
@@ -581,6 +583,7 @@ namespace HPlus {
 
 //------ Global electron veto
     ElectronSelection::Data electronVetoData = fElectronSelection.analyze(iEvent, iSetup);
+    fCommonPlots.fillControlPlotsAtElectronSelection(iEvent, electronVetoData);
     //    NonIsolatedElectronVeto::Data electronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
     hCtrlIdentifiedElectronPt->Fill(electronVetoData.getSelectedElectronPtBeforePtCut());
 
@@ -588,7 +591,6 @@ namespace HPlus {
 
     if (!electronVetoData.passedEvent()) return false;
     fCommonPlotsAfterElectronVeto->fill();
-    fCommonPlots.fillControlPlots(iEvent, electronVetoData);
     if (myFakeTauStatus) fCommonPlotsAfterElectronVetoFakeTaus->fill();
     increment(fElectronVetoCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderElectronVeto, tauData);
@@ -601,11 +603,11 @@ namespace HPlus {
 
 //------ Global muon veto
     MuonSelection::Data muonVetoData = fMuonSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex());
+    fCommonPlots.fillControlPlotsAtMuonSelection(iEvent, muonVetoData);
     hCtrlIdentifiedMuonPt->Fill(muonVetoData.getSelectedMuonPtBeforePtCut());
     if (myFakeTauStatus) hCtrlEWKFakeTausIdentifiedMuonPt->Fill(muonVetoData.getSelectedMuonPtBeforePtCut());
     if (!muonVetoData.passedEvent()) return false;
     fCommonPlotsAfterMuonVeto->fill();
-    fCommonPlots.fillControlPlots(iEvent, muonVetoData);
     if (myFakeTauStatus) fCommonPlotsAfterMuonVetoFakeTaus->fill();
     increment(fMuonVetoCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderMuonVeto, tauData);
@@ -618,6 +620,7 @@ namespace HPlus {
 
 //------ Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
+    fCommonPlots.fillControlPlotsAtJetSelection(iEvent, jetData);
 
     if (jetData.getReferenceJetToTau().isNonnull() && tauMatchData.isJetToTau()) {
       double myDeltaPtWithoutNeutralHadrons = tauData.getSelectedTau()->pt() - jetData.getReferenceJetToTau()->pt() * (1.0-jetData.getReferenceJetToTau()->neutralHadronEnergyFraction());
@@ -639,7 +642,6 @@ namespace HPlus {
     increment(fNJetsCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderJetSelection, tauData);
     fCommonPlotsAfterJetSelection->fill();
-    fCommonPlots.fillControlPlots(iEvent, jetData);
     if (myFakeTauStatus) fCommonPlotsAfterJetSelectionFakeTaus->fill();
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveJets(new std::vector<pat::Jet>());
@@ -661,10 +663,11 @@ namespace HPlus {
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metDataTmp.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     fTree.setMETTriggerWeight(metTriggerWeight.getEventWeight(), metTriggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fMETTriggerScaleFactorCounter);
-
+    fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(iEvent);
 
 //------ Improved delta phi cut, a.k.a. QCD tail killer - collinear part
     const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metDataTmp.getSelectedMET());
+    fCommonPlots.fillControlPlotsAtCollinearDeltaPhiCuts(iEvent, qcdTailKillerDataCollinear);
     for (int i = 0; i < qcdTailKillerDataCollinear.getNConsideredJets(); ++i) {
       if (i < 4) { // protection
         hCtrlQCDTailKillerCollinear[i]->Fill(qcdTailKillerDataCollinear.getRadiusFromCollinearCorner(i)); // Make control plot before cut
@@ -715,6 +718,7 @@ namespace HPlus {
 
 //------ MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, nVertices, tauData.getSelectedTau(), jetData.getAllJets());
+    fCommonPlots.fillControlPlotsAtMETSelection(iEvent, metData);
     hCtrlMET->Fill(metData.getSelectedMET()->et());
     if (myFakeTauStatus) hCtrlEWKFakeTausMET->Fill(metData.getSelectedMET()->et());
     // Obtain delta phi and transverse mass here, but do not yet cut on them
@@ -746,10 +750,10 @@ namespace HPlus {
 
 //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    fCommonPlots.fillControlPlotsAtBtagging(iEvent, btagData);
     hCtrlNbjets->Fill(btagData.getBJetCount());
     if (myFakeTauStatus) hCtrlEWKFakeTausNbjets->Fill(btagData.getBJetCount());
     if(!btagData.passedEvent()) return false;
-    fCommonPlots.fillControlPlots(iEvent, btagData);
     fCommonPlotsAfterBTagging->fill();
     if (myFakeTauStatus) fCommonPlotsAfterBTaggingFakeTaus->fill();
     increment(fBTaggingCounter);
@@ -771,6 +775,7 @@ namespace HPlus {
 
 //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    fCommonPlots.fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, qcdTailKillerData);
     for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
       if (i < 4) { // protection
         hCtrlQCDTailKillerBackToBack[i]->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
@@ -786,7 +791,6 @@ namespace HPlus {
 //------ Delta phi(tau,MET) after delta phi cuts
     hDeltaPhi->Fill(deltaPhi);
     if (myFakeTauStatus) hEWKFakeTausDeltaPhi->Fill(deltaPhi);
-
 
 //------ Top reconstruction
 
@@ -830,12 +834,20 @@ namespace HPlus {
       myPassedTopRecoStatus = TopChiSelectionData.passedEvent();
     else if (fTopRecoName == "Wselection")
       myPassedTopRecoStatus = myTopRecoWithWSelectionStatus;
+    fCommonPlots.fillControlPlotsAtTopSelection(iEvent, TopChiSelectionData);
     if (!myPassedTopRecoStatus)
       return false;
     increment(fTopReconstructionCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderTopSelection, tauData);
 
+
+//------ Calculate alphaT
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau());
+    fCommonPlots.fillControlPlotsAtEvtTopology(iEvent, evtTopologyData);
+
+
 //------ Transverse mass and control plots
+    fCommonPlots.fillControlPlotsAfterAllSelections(iEvent, myFakeTauStatus);
     increment(fSelectedEventsCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderSelectedEvents, tauData);
     if (btagData.hasGenuineBJets()) increment(fSelectedEventsCounterWithGenuineBjets);
@@ -847,8 +859,6 @@ namespace HPlus {
       fCommonPlotsSelectedMtTail->fill();
       if (myFakeTauStatus) fCommonPlotsSelectedMtTailFakeTaus->fill();
     }
-    fCommonPlots.fillFinalPlots(iEvent);
-    if (myFakeTauStatus) fCommonPlots.fillFinalPlotsForFakeTaus(iEvent);
 
     hSelectedTauRtauAfterCuts->Fill(tauData.getSelectedTauRtauValue());
     hSelectedTauEtAfterCuts->Fill(tauData.getSelectedTau()->pt());
@@ -894,6 +904,7 @@ namespace HPlus {
     FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData,
 										       metData, &genData);
     if (!FullHiggsMassData.passedEvent()) return false;
+    fCommonPlots.fillControlPlotsAfterAllSelectionsWithFullMass(iEvent, myFakeTauStatus);
     double HiggsMass = FullHiggsMassData.getHiggsMass();
     increment(fHiggsMassSelectionCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderSelectedEventsFullMass, tauData);
@@ -928,8 +939,6 @@ namespace HPlus {
 
     hDeltaPhiVsTransverseMass->Fill(fakeMETData.closestDeltaPhi(),transverseMass); 
 
-    // Calculate alphaT
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau());
     // Correlation analysis
     fCorrelationAnalysis.analyze(iEvent, iSetup, tauData.getSelectedTaus(), btagData.getSelectedJets(),"BCorrelationAnalysis");
     // Alpha T
