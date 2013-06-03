@@ -40,14 +40,15 @@ namespace HPlus {
 
       const bool passedEvent() const { return fPassedEvent; }
       //const edm::Ptr<reco::MET> getSelectedMET() const { return fSelectedMET; }
-      const edm::Ptr<reco::MET> getSelectedMET() const;
+      const edm::Ptr<reco::MET> getSelectedMET() const { return getPhiUncorrectedSelectedMET(); }
+      const edm::Ptr<reco::MET> getPhiUncorrectedSelectedMET() const;
+      const edm::Ptr<reco::MET> getPhiCorrectedSelectedMET() const;
       const edm::Ptr<reco::MET> getRawMET() const { return fRawMET; }
       const edm::Ptr<reco::MET> getType1MET() const;
       const edm::Ptr<reco::MET> getType2MET() const { return fType2MET; }
       const edm::Ptr<reco::MET> getCaloMET() const { return fCaloMET; }
       const edm::Ptr<reco::MET> getTcMET() const { return fTcMET; }
       const std::vector<reco::MET> getType1METCorrected() const { return fType1METCorrected; }
-
       friend class METSelection;
 
     private:
@@ -63,7 +64,8 @@ namespace HPlus {
       // For type I/II correction
       std::vector<reco::MET> fType1METCorrected;
       //std::vector<reco::MET> fType2METCorrected;
-
+      // For MET phi oscillation
+      std::vector<reco::MET> fPhiOscillationCorrectedType1MET;
     };
 
     METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, const std::string& label, const std::string& tauIsolationDiscriminator);
@@ -71,22 +73,22 @@ namespace HPlus {
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
     // Here tau is always assumed isolated for type 1 correction
-    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
 
     // Here non-isolated taus are taken as jets, if
     // fNonIsolatedTausAsJetsEnabled is true (from python
     // configuration)
-    Data silentAnalyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
-    Data analyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
+    Data silentAnalyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
+    Data analyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
 
     // Returns type I MET object for assumption "no isolated taus" (use case: common plots or met phi oscillation before tau selection)
-    Data silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& allJets);
+    Data silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     const double getCutValue() const { return fMetCut; }
 
   private:
-    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, bool possiblyIsolatedTaus);
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, bool possiblyIsolatedTaus);
 
     
 
@@ -98,6 +100,7 @@ namespace HPlus {
     };
 
     reco::MET undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, Select type, bool possibltyIsolatedTaus);
+    reco::MET getPhiOscillationCorrectedMET(const edm::Ptr<reco::MET>& met, const bool isRealData, const int nVertices);
 
     // Input parameters
     edm::InputTag fRawSrc;
@@ -107,15 +110,24 @@ namespace HPlus {
     edm::InputTag fTcSrc;
     Select fSelect;
 
-    // For type I/II correction
     const double fMetCut;
+    // For type I/II correction
     const double fTauJetMatchingCone;
     const double fJetType1Threshold;
     std::string fJetOffsetCorrLabel;
     //double fType2ScaleFactor;
     std::string fTauIsolationDiscriminator;
     PossiblyIsolatedTauMode fDoTypeICorrectionForPossiblyIsolatedTaus;
-
+    // For phi oscillation correction
+    const double fPhiCorrectionSlopeXForData;
+    const double fPhiCorrectionOffsetXForData;
+    const double fPhiCorrectionSlopeYForData;
+    const double fPhiCorrectionOffsetYForData;
+    const double fPhiCorrectionSlopeXForMC;
+    const double fPhiCorrectionOffsetXForMC;
+    const double fPhiCorrectionSlopeYForMC;
+    const double fPhiCorrectionOffsetYForMC;
+    bool bDisablingOfPhiCorrectionNotifiedStatus;
 
     // Counters
     Count fTypeIAllEvents;

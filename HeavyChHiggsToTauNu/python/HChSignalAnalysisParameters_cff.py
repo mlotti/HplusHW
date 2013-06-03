@@ -286,6 +286,16 @@ MET = cms.untracked.PSet(
     jetType1Threshold = cms.untracked.double(10),
     jetOffsetCorrLabel = cms.untracked.string("L1FastJet"),
     #type2ScaleFactor = cms.untracked.double(1.4),
+
+    # For phi oscillation correction - very preliminary parameters
+    phiCorrectionSlopeXForData = cms.untracked.double(0.6224), # +- 0.0286
+    phiCorrectionOffsetXForData = cms.untracked.double(-0.3173), # +- 0.597
+    phiCorrectionSlopeYForData = cms.untracked.double(-0.4129), # +- 0.0285
+    phiCorrectionOffsetYForData = cms.untracked.double(1.14), # +- 0.59
+    phiCorrectionSlopeXForMC = cms.untracked.double(-0.02390), # taken from Christian
+    phiCorrectionOffsetXForMC = cms.untracked.double(0.11438), # taken from Christian
+    phiCorrectionSlopeYForMC = cms.untracked.double(-0.27637), # taken from Christian
+    phiCorrectionOffsetYForMC = cms.untracked.double(2.1351), # taken from Christian
 )
 
 bTagging = cms.untracked.PSet(

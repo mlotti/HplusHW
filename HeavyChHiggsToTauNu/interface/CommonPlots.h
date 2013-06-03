@@ -150,18 +150,17 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
 
     /// unique filling methods (to be called before return statement)
-    void fillControlPlots(const TriggerSelection::Data& data);
     void fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data);
     void fillControlPlots(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, const edm::Ptr<pat::Tau>& selectedTau, METSelection& metSelection);
     void fillControlPlots(const edm::Event& iEvent, const ElectronSelection::Data& data);
     void fillControlPlots(const edm::Event& iEvent, const MuonSelection::Data& data);
     void fillControlPlots(const edm::Event& iEvent, const JetSelection::Data& data);
-    void fillControlPlots(const METSelection::Data& data);
-    void fillControlPlots(const BTagging::Data& data);
-    void fillControlPlots(const TopChiSelection::Data& data);
-    void fillControlPlots(const EvtTopology::Data& data);
-    void fillFinalPlots();
-    void fillFinalPlotsForFakeTaus();
+    void fillControlPlots(const edm::Event& iEvent, const METSelection::Data& data);
+    void fillControlPlots(const edm::Event& iEvent, const BTagging::Data& data);
+    void fillControlPlots(const edm::Event& iEvent, const TopChiSelection::Data& data);
+    void fillControlPlots(const edm::Event& iEvent, const EvtTopology::Data& data);
+    void fillFinalPlots(const edm::Event& iEvent);
+    void fillFinalPlotsForFakeTaus(const edm::Event& iEvent);
 
   protected:
     
@@ -197,10 +196,12 @@ namespace HPlus {
     FullHiggsMassCalculator::Data fFullHiggsMassData;
 
     /// MET phi oscillation
-    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterVertices;
+    //METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterVertices;
     METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterTaus;
     METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterLeptonVeto;
     METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterNjets;
+    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterBjets;
+    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterAllSelections;
 
     // Input parameters
 

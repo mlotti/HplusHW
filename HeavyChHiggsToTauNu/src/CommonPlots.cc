@@ -186,10 +186,11 @@ namespace HPlus {
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
     fNormalisationAnalysis(eventCounter, histoWrapper),
     fTauSelection(0), fFakeTauIdentifier(0),
-    fMETPhiOscillationCorrectionAfterVertices(eventCounter, fHistoWrapper, "AfterVertices"),
     fMETPhiOscillationCorrectionAfterTaus(eventCounter, fHistoWrapper, "AfterTaus"),
     fMETPhiOscillationCorrectionAfterLeptonVeto(eventCounter, fHistoWrapper, "AfterLeptonVeto"),
-    fMETPhiOscillationCorrectionAfterNjets(eventCounter, fHistoWrapper, "AfterNjets") {
+    fMETPhiOscillationCorrectionAfterNjets(eventCounter, fHistoWrapper, "AfterNjets"),
+    fMETPhiOscillationCorrectionAfterBjets(eventCounter, fHistoWrapper, "AfterBjets"),
+    fMETPhiOscillationCorrectionAfterAllSelections(eventCounter, fHistoWrapper, "AfterAllSelections") {
       createHistograms();
   }
 
@@ -201,10 +202,11 @@ namespace HPlus {
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
     fNormalisationAnalysis(eventCounter, histoWrapper),
     fTauSelection(0), fFakeTauIdentifier(0),
-    fMETPhiOscillationCorrectionAfterVertices(eventCounter, fHistoWrapper, "AfterVertices"),
     fMETPhiOscillationCorrectionAfterTaus(eventCounter, fHistoWrapper, "AfterTaus"),
     fMETPhiOscillationCorrectionAfterLeptonVeto(eventCounter, fHistoWrapper, "AfterLeptonVeto"),
-    fMETPhiOscillationCorrectionAfterNjets(eventCounter, fHistoWrapper, "AfterNjets") {
+    fMETPhiOscillationCorrectionAfterNjets(eventCounter, fHistoWrapper, "AfterNjets"),
+    fMETPhiOscillationCorrectionAfterBjets(eventCounter, fHistoWrapper, "AfterBjets"),
+    fMETPhiOscillationCorrectionAfterAllSelections(eventCounter, fHistoWrapper, "AfterAllSelections") {
       createHistograms();
   }
 
@@ -321,7 +323,7 @@ namespace HPlus {
     fTopData = topChiSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets());
     // Need to require one tau in the event
     if (fSelectedTau.isNull()) {
-      fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup, fJetData.getAllJets());
+      fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup);
       // Plots do not make sense if no tau has been found
       edm::Ptr<pat::Tau> myZeroTauPointer;
       for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
@@ -330,7 +332,7 @@ namespace HPlus {
       return;
     }
     // A tau exists beyond this point, now obtain MET with residual type I MET
-    fMETData = metSelection.silentAnalyze(iEvent, iSetup, fSelectedTau, fJetData.getAllJets());
+    fMETData = metSelection.silentAnalyze(iEvent, iSetup, vertexData.getNumberOfAllVertices(), fSelectedTau, fJetData.getAllJets());
     // Do full higgs mass only if tau and b jet was found
     if (fBJetData.passedEvent()) {
       fFullHiggsMassData = fullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, fSelectedTau, fBJetData, fMETData);
@@ -351,17 +353,9 @@ namespace HPlus {
     return myObject;
   }
 
-  void CommonPlots::fillControlPlots(const TriggerSelection::Data& data) {
-    
-  }
-
   void CommonPlots::fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data) {
     //----- MET phi oscillation
-    edm::Handle<edm::View<reco::MET> > htype1met; // Ugly temp hack
-    iEvent.getByLabel("patType1CorrectedPFMet", htype1met);
-    fMETPhiOscillationCorrectionAfterVertices.analyze(iEvent, fVertexData.getNumberOfAllVertices(), htype1met->ptrAt(0));
-
-    //fVertexData = data;
+    //fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup, fJetData.getAllJets());
     if(fTauSelection && fFakeTauIdentifier) {
       fNormalisationAnalysis.analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
     }
@@ -371,7 +365,7 @@ namespace HPlus {
     fTauData = tauData;
     fFakeTauData = fakeTauData;
     fSelectedTau = selectedTau;
-    fMETData = metSelection.silentAnalyze(iEvent, iSetup, fSelectedTau, fJetData.getAllJets());
+    fMETData = metSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices(), fSelectedTau, fJetData.getAllJets());
     //----- MET phi oscillation
     fMETPhiOscillationCorrectionAfterTaus.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
 
@@ -396,23 +390,25 @@ namespace HPlus {
     fMETPhiOscillationCorrectionAfterNjets.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
-  void CommonPlots::fillControlPlots(const METSelection::Data& data) {
+  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const METSelection::Data& data) {
     
   }
 
-  void CommonPlots::fillControlPlots(const BTagging::Data& data) {
+  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const BTagging::Data& data) {
+    fMETPhiOscillationCorrectionAfterBjets.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+  }
+
+  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const TopChiSelection::Data& data) {
     
   }
 
-  void CommonPlots::fillControlPlots(const TopChiSelection::Data& data) {
+   void CommonPlots::fillControlPlots(const edm::Event& iEvent, const EvtTopology::Data& data) {
     
   }
 
-   void CommonPlots::fillControlPlots(const EvtTopology::Data& data) {
-    
-  }
+  void CommonPlots::fillFinalPlots(const edm::Event& iEvent) {
+    fMETPhiOscillationCorrectionAfterAllSelections.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
 
-  void CommonPlots::fillFinalPlots() {
     double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fSelectedTau), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
 
     hDphiTauMetVsDphiJet1MHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet1());
@@ -422,7 +418,7 @@ namespace HPlus {
     hDphiTauMetVsDphiTauMHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTTau());
   }
 
-  void CommonPlots::fillFinalPlotsForFakeTaus() {
+  void CommonPlots::fillFinalPlotsForFakeTaus(const edm::Event& iEvent) {
     double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fSelectedTau), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
 
     hDphiTauMetVsDphiJet1MHTFakeTaus->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet1());
