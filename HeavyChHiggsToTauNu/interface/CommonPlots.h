@@ -128,7 +128,8 @@ namespace HPlus {
                     METSelection& metSelection,
                     BTagging& bJetSelection,
                     TopChiSelection& topChiSelection,
-                    EvtTopology& evtTopology);
+                    EvtTopology& evtTopology,
+                    FullHiggsMassCalculator& fullHiggsMassCalculator);
     /// Initialization where TauSelection::Data is used instead of TauSelection object (use for QCD measurements)
     void initialize(const edm::Event& iEvent,
                     const edm::EventSetup& iSetup,
@@ -142,7 +143,8 @@ namespace HPlus {
                     METSelection& metSelection,
                     BTagging& bJetSelection,
                     TopChiSelection& topChiSelection,
-                    EvtTopology& evtTopology);
+                    EvtTopology& evtTopology,
+                    FullHiggsMassCalculator& fullHiggsMassCalculator);
 
     /// create object containing histograms to be filled after all (or almost all) selection steps
     CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
@@ -192,6 +194,7 @@ namespace HPlus {
     BTagging::Data fBJetData;
     TopChiSelection::Data fTopData;
     EvtTopology::Data fEvtTopology;
+    FullHiggsMassCalculator::Data fFullHiggsMassData;
 
     /// MET phi oscillation
     METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterVertices;
