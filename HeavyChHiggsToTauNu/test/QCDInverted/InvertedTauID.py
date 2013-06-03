@@ -568,7 +568,9 @@ class InvertedTauID:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
         if "MtSoftBtaggingTKClosure" in name: 
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
-                      
+        if "MtAllCutsClosure" in name: 
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+            
        # Set the legend styles
         plot.histoMgr.setHistoLegendStyleAll("P")
     
@@ -666,6 +668,10 @@ class InvertedTauID:
             plot.createFrame("Comparison"+self.label, opts={"ymin":-5, "ymax": 150, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
+        if "MtAllCutsClosure" in name:
+            plot.createFrame("Comparison"+self.label, opts={"ymin":-5, "ymax": 50, "xmax": 200},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                             )
  ############################                            
             
         if "MtNoMetBvetoInvertedVsBaselineTailKillerClosure" in name:
@@ -733,7 +739,7 @@ class InvertedTauID:
 
             
         if "MtWithAllCutsTailKiller" in name:      
-            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":50, "xmax": 300},
+            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":80, "xmax": 300},
                              createRatio=False,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
                         
         # Set Y axis of the upper pad to logarithmic
@@ -803,8 +809,8 @@ class InvertedTauID:
 #            histograms.addText(0.5, 0.6, "b-jet veto and #Delta#phi cuts", 25)
 #        if "MtBvetoInvertedVsBaseline"  name:
 #            histograms.addText(0.5, 0.6, "b-jet veto ", 25)
-        if "MtBvetoInvertedVsBaselineClosure"  in name:
-            histograms.addText(0.6, 0.6, "Before MET cut ", 24)
+#        if "MtBvetoInvertedVsBaselineClosure"  in name:
+#            histograms.addText(0.6, 0.6, "Before MET cut ", 24)
         if "MtBvetoInvertedVsBaselineClosure"  in name:
             histograms.addText(0.6, 0.52, "With b-jet veto ", 24)
         if "MtBvetoInvertedVsBaselineTailKillerClosure"  in name:
@@ -869,6 +875,10 @@ class InvertedTauID:
         if "MtSoftBtaggingTKClosure" in name:
             histograms.addText(0.2, 0.85, "With loose b tagging", 20)
             histograms.addText(0.2, 0.78, "MET > 50 GeV", 20)
+            histograms.addText(0.2, 0.71, "TailKiller: MediumPlus", 20)
+        if "MtAllCutsClosure" in name:
+            #histograms.addText(0.2, 0.85, "With loose b tagging", 20)
+            histograms.addText(0.2, 0.78, "MET > 60 GeV", 20)
             histograms.addText(0.2, 0.71, "TailKiller: MediumPlus", 20)
             
         plot.draw() 
