@@ -214,7 +214,7 @@ namespace HPlus {
     fProduce(iConfig.getUntrackedParameter<bool>("produceCollections", false)),
     fOnlyGenuineTaus(iConfig.getUntrackedParameter<bool>("onlyGenuineTaus", false)),
     // Common plots
-    fCommonPlots(eventCounter, fHistoWrapper, true),
+    fCommonPlots(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, true),
     fCommonPlotsAfterVertexSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("VertexSelection",false,"Vtx")),
     fCommonPlotsAfterTauSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauSelection",false,"TauID")),
     fCommonPlotsAfterTauWeight(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauWeight",true,"Tau")),

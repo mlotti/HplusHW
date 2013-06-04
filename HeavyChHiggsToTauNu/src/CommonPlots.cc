@@ -181,35 +181,35 @@ namespace HPlus {
   // ====================================================================================================
 
   CommonPlots::CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, bool plotSeparatelyFakeTaus) :
+    bOptionEnableNormalisationAnalysis(iConfig.getUntrackedParameter<bool>("enableNormalisationAnalysis")),
+    bOptionEnableMETOscillationAnalysis(iConfig.getUntrackedParameter<bool>("enableMETOscillationAnalysis")),
     fPlotSeparatelyFakeTaus(plotSeparatelyFakeTaus),
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper),
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
-    fNormalisationAnalysis(eventCounter, histoWrapper),
+    fNormalisationAnalysis(0),
     fTauSelection(0), fFakeTauIdentifier(0),
-    fMETPhiOscillationCorrectionAfterTaus(eventCounter, fHistoWrapper, "AfterTaus"),
-    fMETPhiOscillationCorrectionAfterLeptonVeto(eventCounter, fHistoWrapper, "AfterLeptonVeto"),
-    fMETPhiOscillationCorrectionAfterNjets(eventCounter, fHistoWrapper, "AfterNjets"),
-    fMETPhiOscillationCorrectionAfterBjets(eventCounter, fHistoWrapper, "AfterBjets"),
-    fMETPhiOscillationCorrectionAfterAllSelections(eventCounter, fHistoWrapper, "AfterAllSelections") {
-      createHistograms();
-  }
-
-  CommonPlots::CommonPlots(EventCounter& eventCounter, HistoWrapper& histoWrapper, bool plotSeparatelyFakeTaus) :
-    fPlotSeparatelyFakeTaus(plotSeparatelyFakeTaus),
-    fEventCounter(eventCounter),
-    fHistoWrapper(histoWrapper),
-    fCommonBaseDirectory(fs->mkdir("CommonPlots")),
-    fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
-    fNormalisationAnalysis(eventCounter, histoWrapper),
-    fTauSelection(0), fFakeTauIdentifier(0),
-    fMETPhiOscillationCorrectionAfterTaus(eventCounter, fHistoWrapper, "AfterTaus"),
-    fMETPhiOscillationCorrectionAfterLeptonVeto(eventCounter, fHistoWrapper, "AfterLeptonVeto"),
-    fMETPhiOscillationCorrectionAfterNjets(eventCounter, fHistoWrapper, "AfterNjets"),
-    fMETPhiOscillationCorrectionAfterBjets(eventCounter, fHistoWrapper, "AfterBjets"),
-    fMETPhiOscillationCorrectionAfterAllSelections(eventCounter, fHistoWrapper, "AfterAllSelections") {
-      createHistograms();
+    fMETPhiOscillationCorrectionAfterTaus(0),
+    fMETPhiOscillationCorrectionAfterLeptonVeto(0),
+    fMETPhiOscillationCorrectionAfterNjets(0),
+    fMETPhiOscillationCorrectionAfterBjets(0),
+    fMETPhiOscillationCorrectionAfterAllSelections(0),
+    fMETPhiOscillationCorrectionEWKControlRegion(0) {
+    createHistograms();
+    // Create objects for normalisation analysis
+    if (bOptionEnableNormalisationAnalysis) {
+      fNormalisationAnalysis = new NormalisationAnalysis(eventCounter, histoWrapper);
+    }
+    // Create objects for MET phi oscillation analysis
+    if (bOptionEnableMETOscillationAnalysis) {
+      fMETPhiOscillationCorrectionAfterTaus = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterTaus");
+      fMETPhiOscillationCorrectionAfterLeptonVeto = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterLeptonVeto");
+      fMETPhiOscillationCorrectionAfterNjets = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterNjets");
+      fMETPhiOscillationCorrectionAfterBjets = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterBjets");
+      fMETPhiOscillationCorrectionAfterAllSelections = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterAllSelections");
+      fMETPhiOscillationCorrectionEWKControlRegion = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterAllSelections_EKWControlRegion");
+    }
   }
 
   void CommonPlots::createHistograms() {
@@ -442,8 +442,8 @@ namespace HPlus {
   void CommonPlots::fillControlPlotsAfterVertexSelection(const edm::Event& iEvent, const VertexSelection::Data& data) {
     //----- MET phi oscillation
     //fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup, fJetData.getAllJets());
-    if(fTauSelection && fFakeTauIdentifier) {
-      fNormalisationAnalysis.analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
+    if(bOptionEnableNormalisationAnalysis && fTauSelection && fFakeTauIdentifier) {
+      fNormalisationAnalysis->analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
     }
   }
 
@@ -452,12 +452,14 @@ namespace HPlus {
     fFakeTauData = fakeTauData;
     fSelectedTau = selectedTau;
     fMETData = metSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices(), fSelectedTau, fJetData.getAllJets());
-    // e->tau normalisation // FIXME tau trg scale factor needs to be applied!
-    fNormalisationAnalysis.analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData, fMuonData, fJetData, fMETData);
+    if (bOptionEnableNormalisationAnalysis) {
+      // e->tau normalisation // FIXME tau trg scale factor needs to be applied!
+      fNormalisationAnalysis->analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData, fMuonData, fJetData, fMETData);
+    }
   }
 
   void CommonPlots::fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent) {
-    fMETPhiOscillationCorrectionAfterTaus.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterTaus->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
     hTauPhiOscillationX->Fill(fVertexData.getNumberOfAllVertices(), fSelectedTau->px());
     hTauPhiOscillationY->Fill(fVertexData.getNumberOfAllVertices(), fSelectedTau->py());
   }
@@ -476,14 +478,14 @@ namespace HPlus {
     fMuonData = data;
     hCtrlIdentifiedMuonPt->Fill(data.getSelectedMuonPtBeforePtCut());
     if (fFakeTauData.isFakeTau()) hCtrlEWKFakeTausIdentifiedMuonPt->Fill(data.getSelectedMuonPtBeforePtCut());
-    fMETPhiOscillationCorrectionAfterLeptonVeto.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterLeptonVeto->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
   void CommonPlots::fillControlPlotsAtJetSelection(const edm::Event& iEvent, const JetSelection::Data& data) {
     fJetData = data;
     hCtrlNjets->Fill(data.getHadronicJetCount());
     if (fFakeTauData.isFakeTau()) hCtrlEWKFakeTausNjets->Fill(data.getHadronicJetCount());
-    fMETPhiOscillationCorrectionAfterNjets.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterNjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
   void CommonPlots::fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent) {
@@ -537,7 +539,7 @@ namespace HPlus {
     fBJetData = data;
     hCtrlNbjets->Fill(data.getBJetCount());
     if (fFakeTauData.isFakeTau()) hCtrlEWKFakeTausNbjets->Fill(data.getBJetCount());
-    fMETPhiOscillationCorrectionAfterBjets.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
   void CommonPlots::fillControlPlotsAtBackToBackDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data) {
@@ -563,7 +565,12 @@ namespace HPlus {
   }
 
   void CommonPlots::fillControlPlotsAfterAllSelections(const edm::Event& iEvent, double transverseMass) {
-    fMETPhiOscillationCorrectionAfterAllSelections.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+    if (bOptionEnableMETOscillationAnalysis) {
+      fMETPhiOscillationCorrectionAfterAllSelections->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+      if (transverseMass < 80.0) {
+        fMETPhiOscillationCorrectionEWKControlRegion->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+      }
+    }
     //double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fSelectedTau), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
     hShapeTransverseMass->Fill(transverseMass);
     if (fFakeTauData.isFakeTau()) hShapeEWKFakeTausTransverseMass->Fill(transverseMass);
