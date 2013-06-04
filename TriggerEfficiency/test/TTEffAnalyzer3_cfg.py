@@ -419,7 +419,7 @@ process.TTEffAnalysisMETLeg = process.TTEffAnalysisHLTPFTauHPS.clone(
 )
 
 process.TTEffAnalysisQuadJet = process.TTEffAnalysisHLTPFTauHPS.clone(
-    LoopingOver = cms.InputTag("selectedPatTausHpsPFTau"), # FIXME: 53_v1 pattuples, remove this line for 53_v2 pattuples
+#    LoopingOver = cms.InputTag("selectedPatTausHpsPFTau"), # FIXME: 53_v1 pattuples, remove this line for 53_v2 pattuples
     outputFileName  = "tteffAnalysis-quadjet.root",
     triggerBitsOnly = cms.bool(True)
 )
