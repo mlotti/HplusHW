@@ -280,7 +280,9 @@ bTagging = cms.untracked.PSet(
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
     UseBTagDB      = cms.untracked.bool(False),
     BTagDBAlgo     = cms.untracked.string("TCHEL"), #FIXME TCHEL
-    BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets") #FIXME
+    BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets"), #FIXME
+    variationEnabled = cms.untracked.bool(False),
+    variationShiftBy = cms.untracked.double(0),
 )
 
 oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
@@ -533,18 +535,24 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
+tauTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
+tauTriggerEfficiencyScaleFactor.variationShiftBy = cms.double(0)
 
 metTriggerEfficiencyScaleFactor = cms.untracked.PSet(
     dataParameters = cms.PSet(),
     mcParameters = cms.PSet(),
     dataSelect = cms.vstring(),
     mcSelect = cms.string(""),
-    mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
+    mode = cms.untracked.string("disabled"), # dataEfficiency, scaleFactor, disabled
+    variationEnabled = cms.bool(False),
+    variationShiftBy = cms.double(0),
 )
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
 embeddingMuonEfficiency = muonTriggerIDEfficiency.efficiency
+embeddingMuonEfficiency.variationEnabled = cms.bool(False)
+embeddingMuonEfficiency.variationShiftBy = cms.double(0)
 
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
