@@ -34,6 +34,9 @@ namespace HPlus {
     const edm::Ptr<reco::MET> myCorrectedMET = metData.getPhiCorrectedSelectedMET();
     hMETPhiCorrected->Fill(myCorrectedMET->phi());
     hMETCorrected->Fill(myCorrectedMET->pt());
+    // Fill histograms for validating correction factors
+    hNVerticesVsMetXCorrected->Fill(nVertices, myCorrectedMET->px());
+    hNVerticesVsMetYCorrected->Fill(nVertices, myCorrectedMET->py());
 }
 
   void METPhiOscillationCorrection::initializeHistograms(HistoWrapper& histoWrapper, std::string prefix) {
@@ -48,5 +51,8 @@ namespace HPlus {
     hMETPhiCorrected = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METPhiCorrected", "METPhiCorrected;Type I MET #phi;N_{events}", 72, -3.1415927, 3.1415927);    
     hMETUncorrected = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METUncorrected", "METUncorrected;Type I MET, GeV;N_{events}", 100., 0., 500.);
     hMETCorrected = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METCorrected", "METCorrected;Type I MET, GeV;N_{events}", 100., 0., 500.);
+    // Histograms for validating corrections
+    hNVerticesVsMetXCorrected = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETXCorrected", "NverticesVsMETXCorrected;N_{vertices};MET_{x}, GeV", 60, 0., 60., 2000, -500, 500);
+    hNVerticesVsMetYCorrected = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "NverticesVsMETYCorrected", "NverticesVsMETYCorrected;N_{vertices};MET_{y}, GeV", 60, 0., 60., 2000, -500, 500);
   }
 }

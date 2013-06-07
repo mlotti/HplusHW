@@ -114,7 +114,6 @@ namespace HPlus {
    */
   class CommonPlots {
   public:
-    CommonPlots(EventCounter& eventCounter, HistoWrapper& histoWrapper, bool plotSeparatelyFakeTaus);
     CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, bool plotSeparatelyFakeTaus);
     ~CommonPlots();
 
@@ -174,6 +173,9 @@ namespace HPlus {
     void fillControlPlotsAtEvtTopology(const edm::Event& iEvent, const EvtTopology::Data& data);
 
   protected:
+    /// Options
+    const bool bOptionEnableNormalisationAnalysis;
+    const bool bOptionEnableMETOscillationAnalysis;
     /// Indicator wheather fake taus should be handled separately
     bool fPlotSeparatelyFakeTaus;
     /// Creates histograms
@@ -187,7 +189,7 @@ namespace HPlus {
     TFileDirectory fCommonBaseDirectory;
     TFileDirectory fEveryStepDirectory;
     /// Normalisation analysis object
-    NormalisationAnalysis fNormalisationAnalysis;
+    NormalisationAnalysis* fNormalisationAnalysis;
     /// Selection objects
     TauSelection* fTauSelection;
     FakeTauIdentifier* fFakeTauIdentifier;
@@ -221,7 +223,7 @@ namespace HPlus {
     // tau trigger SF
     WrappedTH2* hTauPhiOscillationX;
     WrappedTH2* hTauPhiOscillationY;
-    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterTaus;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterTaus;
 
     // veto tau selection
     
@@ -232,12 +234,12 @@ namespace HPlus {
     // muon veto
     WrappedTH1* hCtrlIdentifiedMuonPt;
     WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPt;
-    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterLeptonVeto;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterLeptonVeto;
 
     // jet selection
     WrappedTH1* hCtrlNjets;
     WrappedTH1* hCtrlEWKFakeTausNjets;
-    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterNjets;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterNjets;
 
     // MET trigger SF
     WrappedTH1* hCtrlNjetsAfterJetSelectionAndMETSF;
@@ -275,7 +277,7 @@ namespace HPlus {
     WrappedTH1* hCtrlNbjets;
     WrappedTH1* hCtrlEWKFakeTausNbjets;
     
-    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterBjets;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterBjets;
 
     // improved delta phi back to back cuts
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBack;
@@ -286,7 +288,8 @@ namespace HPlus {
     // evt topology
     
     // all selections
-    METPhiOscillationCorrection fMETPhiOscillationCorrectionAfterAllSelections;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterAllSelections;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKControlRegion;
     WrappedTH1 *hShapeTransverseMass;
     WrappedTH1 *hShapeEWKFakeTausTransverseMass;
     // NOTE: do we want to try out something like mT vs. rTau?

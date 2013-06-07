@@ -215,7 +215,7 @@ namespace HPlus {
     fProduce(iConfig.getUntrackedParameter<bool>("produceCollections", false)),
     fOnlyGenuineTaus(iConfig.getUntrackedParameter<bool>("onlyGenuineTaus", false)),
     // Common plots
-    fCommonPlots(eventCounter, fHistoWrapper, true),
+    fCommonPlots(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, true),
     fCommonPlotsAfterVertexSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("VertexSelection",false,"Vtx")),
     fCommonPlotsAfterTauSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauSelection",false,"TauID")),
     fCommonPlotsAfterTauWeight(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauWeight",true,"Tau")),
@@ -223,6 +223,7 @@ namespace HPlus {
     fCommonPlotsAfterMuonVeto(fCommonPlots.createCommonPlotsFilledAtEveryStep("MuonVeto",true,"#mu veto")),
     fCommonPlotsAfterJetSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("JetSelection",true,"#geq3j")),
     fCommonPlotsAfterMET(fCommonPlots.createCommonPlotsFilledAtEveryStep("MET",true,"E_{T}^{miss}")),
+    fCommonPlotsAfterMETWithPhiOscillationCorrection(fCommonPlots.createCommonPlotsFilledAtEveryStep("METPhiCorrected",false,"E_{T}^{miss} #phi corected")),
     fCommonPlotsAfterBTagging(fCommonPlots.createCommonPlotsFilledAtEveryStep("BTagging",true,"#geq1b tag")),
     fCommonPlotsSelected(fCommonPlots.createCommonPlotsFilledAtEveryStep("Selected",true,"Selected")),
     fCommonPlotsSelectedMtTail(fCommonPlots.createCommonPlotsFilledAtEveryStep("SelectedMtTail",false,"SelectedMtTail")),
@@ -631,6 +632,7 @@ namespace HPlus {
     if (transverseMass > 40 && transverseMass < 100)
       hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), btagData.getBJetCount());
     // Now cut on MET
+    if (metData.getPhiCorrectedSelectedMET()->et() > 50.0) fCommonPlotsAfterMETWithPhiOscillationCorrection->fill(); // FIXME: temp
     if(!metData.passedEvent()) return false;
     fCommonPlotsAfterMET->fill();
     if (myFakeTauStatus) fCommonPlotsAfterMETFakeTaus->fill();

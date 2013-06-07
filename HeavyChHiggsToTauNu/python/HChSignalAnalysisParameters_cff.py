@@ -489,6 +489,11 @@ topWithMHSelection = cms.untracked.PSet(
         enabled = cms.untracked.bool(False)
 )
 
+commonPlotsSettings = cms.untracked.PSet(
+    enableNormalisationAnalysis = cms.untracked.bool(True),
+    enableMETOscillationAnalysis = cms.untracked.bool(True),
+)
+
 tree = cms.untracked.PSet(
     fill = cms.untracked.bool(True),
     fillJetEnergyFractions = cms.untracked.bool(False), # Disabled by LAW on 25.4.2013 (not very useful anymore because jets are smeared)
