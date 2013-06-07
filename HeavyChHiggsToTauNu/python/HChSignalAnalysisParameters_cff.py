@@ -197,7 +197,7 @@ fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
 fakeTauSFandSystematics = None
 # FIXME: add scale factors for MVA3 against electron discriminators
 print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
-fakeTauSFandSystematics = fakeTauSFandSystematicsBase
+fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium # FIXME: default to the current recommendation of tau POG
 #if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
     #fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
 #elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
@@ -534,7 +534,7 @@ def cloneForHeavyAnalysis(lightModule):
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    return tauTriggerEfficiency.tauLegEfficiency_noscalefactors
+    return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium # FIXME changed default to best so far
     # FIXME
     if tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr3Hits":
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
