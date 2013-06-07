@@ -30,10 +30,16 @@ def processDir(outdir, directory, otherdirs, className=None, verbose=False):
 #    l = ROOT.TList()
 #    ROOT.SetOwnership(l, True)
 
+    alreadyProcessed = {}
+
     for key in keys:
         obj = key.ReadObj()
         if verbose:
             print "Target object: %s/%s" % (outdir.GetPath(), obj.GetName())
+        if obj.GetName() in alreadyProcessed:
+            print >>sys.stderr, "Error in merging %s/%s, more than 1 object exists" % (directory.GetPath(), obj.GetName())
+            continue
+        alreadyProcessed[obj.GetName()] = True
 
         if obj.InheritsFrom("TDirectory"):
             d = outdir.mkdir(obj.GetName())

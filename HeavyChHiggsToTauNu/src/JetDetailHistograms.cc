@@ -25,7 +25,7 @@ namespace HPlus {
     hPhotonEnergyFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_PhotonEnergyFraction", "jet_PhotonEnergyFraction", 100, 0., 1.);
     hPhotonMultiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_PhotonMultiplicity", "jet_PhotonMultiplicity", 100, 0., 100.);
     hMuonEnergyFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_MuonEnergyFraction", "jet_MuonEnergyFraction", 100, 0., 1.);
-    hMuonMultiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
+    hMuonMultiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_MuonMultiplicity", "jet_MuonMultiplicity", 100, 0., 100.);
     hChargedHadronEnergyFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_ChargedHadronEnergyFraction", "jet_ChargedHadronEnergyFraction", 100, 0., 1.);
     hChargedEmEnergyFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_ChargedEmEnergyFraction", "jet_ChargedEmEnergyFraction", 100, 0., 1.);
     hChargedMultiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_ChargedMultiplicity", "jet_ChargedMultiplicity", 100, 0., 100.);
