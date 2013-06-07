@@ -618,7 +618,7 @@ namespace HPlus {
     if (transverseMass > 40 && transverseMass < 100)
       hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), btagData.getBJetCount());
     // Now cut on MET
-    if (metData.getPhiCorrectedSelectedMET() > 50.0) fCommonPlotsAfterMETWithPhiOscillationCorrection->fill(); // FIXME: temp
+    if (metData.getPhiCorrectedSelectedMET()->et() > 50.0) fCommonPlotsAfterMETWithPhiOscillationCorrection->fill(); // FIXME: temp
     if(!metData.passedEvent()) return false;
     fCommonPlotsAfterMET->fill();
     if (myFakeTauStatus) fCommonPlotsAfterMETFakeTaus->fill();
