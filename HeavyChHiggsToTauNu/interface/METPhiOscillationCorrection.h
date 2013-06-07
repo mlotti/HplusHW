@@ -43,6 +43,8 @@ namespace HPlus {
     WrappedTH1 *hMETPhiCorrected;
     WrappedTH1 *hMETUncorrected;
     WrappedTH1 *hMETCorrected;
+    WrappedTH2 *hNVerticesVsMetXCorrected;
+    WrappedTH2 *hNVerticesVsMetYCorrected;
     // FIXME: Add uncertainty histograms, etc.
   };
 }
