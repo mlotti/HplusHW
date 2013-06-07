@@ -412,6 +412,15 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBack;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinear;
 
+    WrappedTH1* hQCDTailKillerJet0BackToBack;
+    WrappedTH1* hQCDTailKillerJet1BackToBack;
+    WrappedTH1* hQCDTailKillerJet2BackToBack;
+    WrappedTH1* hQCDTailKillerJet3BackToBack;
+    WrappedTH1* hQCDTailKillerJet0Collinear;
+    WrappedTH1* hQCDTailKillerJet1Collinear;
+    WrappedTH1* hQCDTailKillerJet2Collinear;
+    WrappedTH1* hQCDTailKillerJet3Collinear;
+
     WrappedTH1* hCtrlQCDTailKillerJet1BackToBack;
     WrappedTH1* hCtrlQCDTailKillerJet2BackToBack;
     WrappedTH1* hCtrlQCDTailKillerJet3BackToBack;

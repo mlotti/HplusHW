@@ -130,7 +130,7 @@ def main():
     datasets.remove(filter(lambda name: "W4Jets" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "Hplus_taunu_s-channel" in name, datasets.getAllDatasetNames()))
     # Remove QCD
-    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
+    #datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
 
     
     datasets_lands = datasets.deepCopy()
@@ -194,7 +194,14 @@ def doPlots(datasets):
     drawPlot(createPlot("BaseLine/MET_BaseLineTauIdBveto"), "MET_BaseLineTauIdBveto", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("Inverted/MET_InvertedTauIdBveto"), "MET_InvertedTauIdBveto", xlabel="MET (GeV)",  rebin=5, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("Inverted/MET_InvertedTauIdJets"), "MET_InvertedTauIdJets", xlabel="MET (GeV)",  rebin=5, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
-
+    
+    drawPlot(createPlot("BaseLine/QCDTailKillerJet0BackToBackBaseline"), "QCDTailKillerJet0BackToBackBaseline",  rebin=5,log=False,  xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.2, y=0.5), moveLegend={"dx": -0.5,"dy": 0.02})
+    drawPlot(createPlot("BaseLine/QCDTailKillerJet1BackToBackBaseline"), "QCDTailKillerJet1BackToBackBaseline",  rebin=5,log=False,  xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET)^{2}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("BaseLine/QCDTailKillerJet2BackToBackBaseline"), "QCDTailKillerJet2BackToBackBaseline",  rebin=5, log=False,  xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}} (^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("BaseLine/QCDTailKillerJet0CollinearBaseline"), "CDTailKillerJet0CollinearBaseline",  rebin=5,log=False,  xlabel="#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1},MET))^{1}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("BaseLine/QCDTailKillerJet1CollinearBaseline"), "CDTailKillerJet1CollinearBaseline",  rebin=5,log=False,  xlabel="#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{2},MET))^{2}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("BaseLine/QCDTailKillerJet2CollinearBaseline"), "CDTailKillerJet2CollinearBaseline",  rebin=5,log=False,  xlabel="#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{2},MET))^{3}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), moveLegend={"dx": -0.5,"dy": 0.02})
+    
 def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
     
@@ -2942,6 +2949,7 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, a
 # Common formatting
 def common(h, xlabel, ylabel, addLuminosityText=True, textFunction=None):
     h.frame.GetXaxis().SetTitle(xlabel)
+    #h.frame.GetXaxis().SetTitleSize()
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
     histograms.addCmsPreliminaryText()

@@ -494,6 +494,18 @@ namespace HPlus {
     hCtrlJetMatrixAfterMET = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myCtrlDir, "JetMatrixAfterMET", "JetMatrixAfterMET;Number of selected jets;Number of selected b jets", 7, 3., 10.,7, 0., 7.);
     hCtrlJetMatrixAfterMET100 = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myCtrlDir, "JetMatrixAfterMET100", "JetMatrixAfterMET100;Number of selected jets;Number of selected b jets", 7, 3., 10.,7, 0., 7.);
 
+
+    hQCDTailKillerJet0BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs,"QCDTailKillerJet0BackToBack","QCDTailKillerJet0BackToBack", 52, 0., 260.);
+    hQCDTailKillerJet1BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs,"QCDTailKillerJet1BackToBack","QCDTailKillerJet1BackToBack", 52, 0., 260.);
+    hQCDTailKillerJet2BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs,"QCDTailKillerJet2BackToBack","QCDTailKillerJet2BackToBack", 52, 0., 260.);
+    hQCDTailKillerJet3BackToBack = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs,"QCDTailKillerJet3BackToBack","QCDTailKillerJet3BackToBack", 52, 0., 260.);
+    hQCDTailKillerJet0Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs,"QCDTailKillerJet0Collinear","QCDTailKillerJet0Collinear", 52, 0., 260.);
+    hQCDTailKillerJet1Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs,"QCDTailKillerJet1Collinear","QCDTailKillerJet1Collinear", 52, 0., 260.);
+    hQCDTailKillerJet2Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs,"QCDTailKillerJet2Collinear","QCDTailKillerJet3Collinear", 52, 0., 260.);
+    hQCDTailKillerJet3Collinear = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs,"QCDTailKillerJet3Collinear","QCDTailKillerJet3Collinear", 52, 0., 260.);
+
+
+
     fTree.init(*fs);
 
     hReferenceJetToTauDeltaPtDecayMode0 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode0", "ReferenceJetToTauDeltaPtDecayMode0;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
@@ -980,6 +992,29 @@ namespace HPlus {
 
 
 
+
+
+
+
+
+
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+
+    hQCDTailKillerJet0BackToBack->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(0)); // Make control plot before cut
+    hQCDTailKillerJet1BackToBack->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(1)); // Make control plot before cut
+    hQCDTailKillerJet2BackToBack->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(2)); // Make control plot before cut
+    hQCDTailKillerJet3BackToBack->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(3)); // Make control plot before cut
+
+    hQCDTailKillerJet0Collinear->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(0)); // Make control plot before cut    
+    hQCDTailKillerJet1Collinear->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(1)); // Make control plot before cut    
+    hQCDTailKillerJet2Collinear->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(2)); // Make control plot before cut    
+    hQCDTailKillerJet3Collinear->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(3)); // Make control plot before cut   
+
+
+
+
+
+
                                           
     //    if (electronTauMatch ) return false;      
 //------ b tagging cut
@@ -1014,7 +1049,7 @@ namespace HPlus {
 
 //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part
 //------ Improved delta phi cut, a.k.a. QCD tail killer // FIXME: place of cut still to be determined
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+//    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
     for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
       if (i < 4) { // protection
         hCtrlQCDTailKillerBackToBack[i]->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(i)); // Make control plot before cut

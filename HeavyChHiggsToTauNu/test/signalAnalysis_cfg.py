@@ -7,7 +7,7 @@ dataVersion="53XmcS10"
 
 dataEras = [
     "Run2012ABCD", # This is the one for pickEvents, and for counter printout in CMSSW job
-    "Run2012ABC", 
+#    "Run2012ABC", 
     "Run2012AB",
 #    "Run2012A",
 #    "Run2012B",
@@ -40,7 +40,8 @@ myOptimisation = HPlusOptimisationScheme()
 def customize(signalAnalysis):
 #    signalAnalysis.jetSelection.jetPileUpWorkingPoint = "tight" # 
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
-#    signalAnalysis.MET.METCut = 100.0 
+#    signalAnalysis.MET.METCut = 100.0
+    signalAnalysis.bTagging.subleadingDiscriminatorCut = 0.244   # used for other bjet candidates
     print "Customisations done"
         
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
@@ -53,7 +54,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #applyMETTriggerScaleFactor=True,
                         #doTriggerMatching=False,
                         #useCHSJets=True,
-                        #doQCDTailKillerScenarios=True,
+                        doQCDTailKillerScenarios=True,
                         #doInvariantMassReconstructionScenarios=True,
                         #doAgainstElectronScan=True,
                         #doTauIsolationAndJetPUScan=True,

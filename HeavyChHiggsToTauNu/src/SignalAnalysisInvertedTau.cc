@@ -1148,15 +1148,7 @@ namespace HPlus {
     // MET cut
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
-    size_t nVertices = pvData.getNumberOfAllVertices();
-    //<<<<<<< HEAD
-    //fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);
-    
-    //=======
-    fMETPhiOscillationCorrection.analyze(iEvent, nVertices, metData);
 
-    //>>>>>>> sami/2012
-    //hSelectionFlow->Fill(kQCDOrderMET);
     hSelectedTauEtMetCut->Fill(selectedTau->pt());
     hSelectedTauEtaMetCut->Fill(selectedTau->eta());
     hSelectedTauPhiMetCut->Fill(selectedTau->phi());  

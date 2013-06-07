@@ -106,14 +106,14 @@ def main():
 #    datasets.getDataset("HplusTB_M200").setCrossSection(0.2889) # pb  
 #    datasets.getDataset("HplusTB_M250").setCrossSection(0.0784) # pb
 #    datasets.getDataset("HplusTB_M300").setCrossSection(0.0334) # pb
-
-    # sigma x BR for tanbeta=40 at 8 TeV (using tanbeta^2 dep)
-    datasets.getDataset("HplusTB_M180").setCrossSection(0.9637) # pb
-    datasets.getDataset("HplusTB_M190").setCrossSection(0.9637) # pb
-    datasets.getDataset("HplusTB_M200").setCrossSection(0.5136) # pb
-    datasets.getDataset("HplusTB_M220").setCrossSection(0.5136) # pb  
-    datasets.getDataset("HplusTB_M250").setCrossSection(0.1394) # pb
-    datasets.getDataset("HplusTB_M300").setCrossSection(0.0594) # pb
+    if False:
+        # sigma x BR for tanbeta=40 at 8 TeV (using tanbeta^2 dep)
+        datasets.getDataset("HplusTB_M180").setCrossSection(0.9637) # pb
+        datasets.getDataset("HplusTB_M190").setCrossSection(0.9637) # pb
+        datasets.getDataset("HplusTB_M200").setCrossSection(0.5136) # pb
+        datasets.getDataset("HplusTB_M220").setCrossSection(0.5136) # pb  
+        datasets.getDataset("HplusTB_M250").setCrossSection(0.1394) # pb
+        datasets.getDataset("HplusTB_M300").setCrossSection(0.0594) # pb
 
     
     # Remove signals other than M120
@@ -296,8 +296,8 @@ def doPlots(datasets):
 #    drawPlot(createPlot("JetSelection/jet_phi"), "jetPhi", rebin=1, xlabel="#phi^{jet}", ylabel="Jets / %.2f", opts={"ymin": 20},textFunction=lambda: addMassBRText(x=0.3, y=0.87))
     drawPlot(createPlot("ControlPlots/Njets"), "NumberOfJets", xlabel="Number of selected jets", ylabel="Events", ratio=False, opts={"xmax": 11,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=3)
     
-    drawPlot(createPlot("JetSelection/betaGenuine"), "betaGenuine", rebin=5,xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c",  opts={"ymaxfactor": 2},  moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06},textFunction=lambda: addMassBRText(x=0.6, y=0.3), cutLine=30)
-    drawPlot(createPlot("JetSelection/betaPU"), "betaPU", rebin=5,  xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c", opts={"ymaxfactor": 5},moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.6, y=0.25), cutLine=30)
+#    drawPlot(createPlot("JetSelection/betaGenuine"), "betaGenuine", rebin=5,xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c",  opts={"ymaxfactor": 2},  moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06},textFunction=lambda: addMassBRText(x=0.6, y=0.3), cutLine=30)
+#    drawPlot(createPlot("JetSelection/betaPU"), "betaPU", rebin=5,  xlabel="Beta", log=True, ylabel="Jets / %.0f GeV/c", opts={"ymaxfactor": 5},moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.6, y=0.25), cutLine=30)
 
         
     # MET
@@ -317,7 +317,7 @@ def doPlots(datasets):
     if True:
         # top mass 
         drawPlot(createPlot("TopChiSelection/TopMass"), "TopMassWithChi", rebin=2, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=300)
-        drawPlot(createPlot("FullHiggsMass/TopMass"), "TopMassWithHiggsMass", rebin=2, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=300)
+#        drawPlot(createPlot("FullHiggsMass/TopMass"), "TopMassWithHiggsMass", rebin=2, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=300)
         
         
         drawPlot(createPlot("TopChiSelection/WMass"), "WMassWithChi", rebin=2, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
@@ -368,8 +368,25 @@ def doPlots(datasets):
     if QCDfromData:
         plot = replaceQCDfromData(createPlot("transverseMass"), datasetsQCD, analysis+"/MTInvertedTauIdBtag")
         transverseMass2(plot, "transverseMass", rebin=20)
+        
+    drawPlot(createPlot("QCDTailKillerJet0BackToBack"), "QCDTailKillerJet0BackToBack",  rebin=2,log=False,  xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.2, y=0.5), moveLegend={"dx": -0.5,"dy": 0.02})
+    drawPlot(createPlot("QCDTailKillerJet1BackToBack"), "QCDTailKillerJet1BackToBack",  rebin=2,log=False,  xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET)^{2}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("QCDTailKillerJet2BackToBack"), "QCDTailKillerJet2BackToBack",  rebin=2, log=False,  xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}} (^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("QCDTailKillerJet0Collinear"), "CDTailKillerJet0Collinear",  rebin=2,log=False,  xlabel="#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1},MET))^{1}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("QCDTailKillerJet1Collinear"), "CDTailKillerJet1Collinear",  rebin=2,log=False,  xlabel="#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{2},MET))^{2}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("QCDTailKillerJet2Collinear"), "CDTailKillerJet2Collinear",  rebin=2,log=False,  xlabel="#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{2},MET))^{3}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), moveLegend={"dx": -0.5,"dy": 0.02})
+    
+    drawPlot(createPlot("QCDTailKiller/BackToBackSystem/CircleCut_BackToBackJet1"), "CircleCut_BackToBackJet1",  rebin=2,log=False,  xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.2, y=0.5), moveLegend={"dx": -0.5,"dy": 0.02})
+    drawPlot(createPlot("QCDTailKiller/BackToBackSystem/CircleCut_BackToBackJet2"), "CircleCut_BackToBackJet2",  rebin=2,log=False,  xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.2, y=0.5), moveLegend={"dx": -0.5,"dy": 0.02})
+    drawPlot(createPlot("QCDTailKiller/BackToBackSystem/CircleCut_BackToBackJet3"), "CircleCut_BackToBackJet3",  rebin=2,log=False,  xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.2, y=0.5), moveLegend={"dx": -0.5,"dy": 0.02})
+    drawPlot(createPlot("QCDTailKiller/CollinearSystem/CircleCut_CollinearJet1"), "CircleCut_CollinearJet1",  rebin=2,log=False,  xlabel="#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1},MET))^{1}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("QCDTailKiller/CollinearSystem/CircleCut_CollinearJet2"), "CircleCut_CollinearJet2",  rebin=2,log=False,  xlabel="#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1},MET))^{1}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("QCDTailKiller/CollinearSystem/CircleCut_CollinearJet3"), "CircleCut_CollinearJet3",  rebin=2,log=False,  xlabel="#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1},MET))^{1}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 
 
+
+
+    
     # Delta phi
 #    deltaPhi(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
     deltaPhi2(createPlot("deltaPhi"), "DeltaPhiTauMet", rebin=10, ratio=False, opts={"ymaxfactor": 50}, moveLegend={"dx":-0.21}, textFunction=lambda: addMassBRText(x=0.2, y=0.87), cutLine=[160])
