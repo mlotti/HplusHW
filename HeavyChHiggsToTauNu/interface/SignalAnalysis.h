@@ -76,6 +76,7 @@ namespace HPlus {
       void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
       void incrementTopChiSelectionCounter() { increment(fTopChiSelectionCounter); }
       void incrementSelectedEventsCounter() { increment(fSelectedEventsCounter); }
+      void incrementSelectedEventsFullMassCounter() { increment(fSelectedEventsFullMassCounter); }
     private:
       Count fOneTauCounter;
       Count fElectronVetoCounter;
@@ -93,6 +94,7 @@ namespace HPlus {
       Count fTopWithBSelectionCounter;
       Count fTopWithWSelectionCounter;
       Count fSelectedEventsCounter;
+      Count fSelectedEventsFullMassCounter;
     };
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
@@ -108,7 +110,8 @@ namespace HPlus {
     kSignalOrderFakeMETVeto,
     kSignalOrderBjetSelection,
     kSignalOrderTopSelection,
-    kSignalOrderSelectedEvents
+    kSignalOrderSelectedEvents,
+    kSignalOrderSelectedEventsFullMass
   };
   public:
   explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper);
@@ -165,17 +168,10 @@ namespace HPlus {
     Count fQCDTailKillerBackToBackCounter;
     Count fDeltaPhiTauMETCounter;
     Count fDeltaPtJetTauCounter;
-    Count fDeltaPhiLow30Counter;
-    Count fDeltaPhiLow60Counter;
     Count fBjetVetoCounter;
     Count fMetCut80Counter;
     Count fMetCut100Counter;
-    Count fHiggsMassCutCounter;
-    Count fTransverseMass80CutCounter;
-    Count fTransverseMass100CutCounter;
-    Count fTransverseMass120CutCounter;
-    Count fTransverseMass100CutPhiLow30Counter;
-    Count fTransverseMass100CutPhiLow60Counter;
+    Count fHiggsMassSelectionCounter;
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
@@ -270,7 +266,6 @@ namespace HPlus {
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;
     QCDTailKiller fQCDTailKiller;
-    METPhiOscillationCorrection fMETPhiOscillationCorrection;
     TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
 
     SignalAnalysisTree fTree;
@@ -312,8 +307,6 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassRealTaus;
     WrappedTH1 *hTransverseMassDeltaPtCut;
     WrappedTH1 *hTransverseMassSecondBveto;
-    WrappedTH1 *hTransverseMassPhi30;
-    WrappedTH1 *hTransverseMassPhi60;
     WrappedTH1 *hTransverseMassMet80;
     WrappedTH1 *hTransverseMassMet100;
     WrappedTH1 *hTransverseMassNoBtagging;
@@ -466,7 +459,6 @@ namespace HPlus {
 
     // Common plots
     CommonPlots fCommonPlots;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTrigger;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelection;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeight;
@@ -477,6 +469,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTagging;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelected;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTail;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMass;
 
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelectionFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeightFakeTaus;
@@ -487,6 +480,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMassFakeTaus;
 
   };
 }

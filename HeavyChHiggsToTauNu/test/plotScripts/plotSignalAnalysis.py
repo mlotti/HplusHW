@@ -21,6 +21,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 # Configuration
 analysis = "signalAnalysis"
@@ -46,10 +47,10 @@ searchMode = "Light"
 
 #optMode = "OptQCDTailKillerZeroPlus"
 #optMode = "OptQCDTailKillerLoosePlus"
-optMode = "OptQCDTailKillerMediumPlus"
+#optMode = "OptQCDTailKillerMediumPlus"
 #optMode = "OptQCDTailKillerTightPlus"
 
-#optMode = ""
+optMode = ""
 
 
 #dataEra = "Run2011A"
@@ -165,7 +166,7 @@ def doPlots(datasets):
             return plots.DataMCPlot(datasets, name, **kwargs)
 
     def pickSliceX(th2, ybinName):
-        th1 = ROOT.TH1D(th2.GetName(), th2.GetTitle(), th2.GetNbinsX(), histograms.th1Xmin(th2), histograms.th1Xmax(th2))
+        th1 = ROOT.TH1D(th2.GetName(), th2.GetTitle(), th2.GetNbinsX(), aux.th1Xmin(th2), aux.th1Xmax(th2))
         th1.Sumw2()
         ybin = None
         for bin in xrange(1, th2.GetNbinsY()+1):
@@ -193,7 +194,11 @@ def doPlots(datasets):
 #    vertexCount(createPlot("verticesTriggeredAfterWeight", normalizeToOne=False), postfix="AfterWeightTriggeredNorm")
 
 #    met2(createPlot("MET"), "met1", rebin=50)
-  
+
+## tailKiller plots
+    drawPlot(createPlot("QCDTailKiller/BackToBackSystem/CircleCut_BackToBackJet1"), "CircleCut_BackToBackJet1",log=False,  xlabel="Radius", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("QCDTailKiller/CollinearSystem/CircleCut_CollinearJet1"), "CircleCut_CollinearJet1",log=False,  xlabel="Radius", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 250}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    
     # Tau
     tauPt(createPlot("SelectedTau/SelectedTau_pT_AfterTauID"), "SelectedTau_pT_AfterTauID", rebin=5, ratio=False, opts={"xmax": 300, "ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     tauEta(createPlot("SelectedTau/SelectedTau_eta_AfterTauID"),"SelectedTau_eta_AfterTauID", rebin=5, ratio=False, opts={"ymin": 1, "ymaxfactor": 50, "xmin": -2.5, "xmax": 2.5}, moveLegend={"dy":0.01, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.3, y=0.85))

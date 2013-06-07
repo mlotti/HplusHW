@@ -9,7 +9,7 @@ import re
 from optparse import OptionParser
 import ConfigParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTools as multicrabWorkflowsTools
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 def isInRange(opts, j):
     if opts.firstJob >= 0 and j.id < opts.firstJob:
@@ -95,7 +95,7 @@ def main(opts):
         jobsToSubmit = {}
         for n in xrange(0, njobsToSubmit):
             job = allJobs.pop(0)
-            multicrabWorkflowsTools._addToDictList(jobsToSubmit, job.task, job.id)
+            aux.addToDictList(jobsToSubmit, job.task, job.id)
 
         # If explicit list of sites to submit was given, get the site to submit this time
         crabOptions = []
