@@ -86,12 +86,15 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         customizeLightAnalysis=customize,
                         #doHeavyAnalysis=True,
                         #customizeHeavyAnalysis=customize,
+                        #useCHSJets=True,
+                        applyTauTriggerScaleFactor=True,
+                        #applyTauTriggerLowPurityScaleFactor=True,
+                        #applyMETTriggerScaleFactor=True,
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
-                        #doAgainstElectronScan=True,
                         #doSystematics=True,
-                        #doQCDTailKillerScenarios=True,#False, #True,
-                        doFillTree=True, #False,
-                        histogramAmbientLevel = "Vital", # Informative
+                        #doQCDTailKillerScenarios=True,
+                        doFillTree=False,
+                        #histogramAmbientLevel = "Vital", # Informative by default
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )
 
