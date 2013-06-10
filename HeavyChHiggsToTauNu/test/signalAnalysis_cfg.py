@@ -37,8 +37,12 @@ def customize(signalAnalysis):
 #    signalAnalysis.jetSelection.jetPileUpWorkingPoint = "tight" # 
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
 #    signalAnalysis.MET.METCut = 100.0 
+    # Example for setting a certain tail killer scenario for the nominal module
+    #import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+    #signalAnalysis.QCDTailKiller = param.QCDTailKillerMediumPlus.clone()
+
     print "Customisations done"
-        
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1
