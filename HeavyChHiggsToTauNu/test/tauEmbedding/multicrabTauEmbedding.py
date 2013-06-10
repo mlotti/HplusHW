@@ -53,7 +53,8 @@ defaultVersions = [
 #    "v44_4_2_seed0",
 #    "v44_4_2_seed1"
 
-    "v44_5_notrg2"
+#    "v44_5_notrg2"
+    "v44_5_1_notrg"
 ]
 skimVersion = "v44_5_1"
 genTauSkimVersion = "v44_5"
@@ -155,16 +156,17 @@ datasetsMCSignal = [
     "TTToHplusBHminusB_M160_Fall11",
 ]
 
-#datasetsData2011 = []
-#datasetsMCTT = []
-#datasetsMCWDY = []
-#datasetsSTVV = []
+datasetsData2011 = []
+datasetsMCTT = []
+datasetsMCWDY = []
+datasetsMCSTVV = []
 #datasetsMCnoQCD = []
-#datasetsMCQCD = []
-#datasetsSignal = []
+datasetsMCQCD = []
+datasetsMCSignal = []
 #datasetsData2011 = datasetsData2011B
 
 datasetsMCnoQCD = datasetsMCTT + datasetsMCWDY + datasetsMCSTVV
+
 datasetsMCnoQCD = ["TTJets_TuneZ2_Fall11"]
 #datasetsMCnoQCD = ["WJets_TuneZ2_Fall11"]
 #datasetsMCnoQCD = ["DYJetsToLL_M50_TuneZ2_Fall11"]
@@ -254,7 +256,7 @@ def createTasks(opts, step, version=None):
         app("ST_VV_QCD", datasetsMCSTVV+datasetsMCQCD)
         app("Signal", datasetsMCSignal)        
     else:
-        datasest = []
+        datasets = []
         if step in ["analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysisGenTau", "genTauSkim", "analysisTau"]:
                 datasets.extend(datasetsMCnoQCD)
         elif step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
@@ -284,42 +286,35 @@ def createTasks(opts, step, version=None):
 
         if scheduler == "arc":
             multicrab.addCommonLine("GRID.maxtarballsize = 50")
-#    if not step in ["skim", "genTauSkim", "analysisTauAod"]:
-#        multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
-    if step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
-        multicrab.addCommonLine("CMSSW.output_file = histograms.root")
+#        if not step in ["skim", "genTauSkim", "analysisTauAod"]:
+#            multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
+        if step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
+            multicrab.addCommonLine("CMSSW.output_file = histograms.root")
 
-        # Let's do the naming like this until we get some answer from crab people
-        #if step in ["skim", "embedding"]:
-        #    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
+            # Let's do the naming like this until we get some answer from crab people
+            #if step in ["skim", "embedding"]:
+            #    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
+        
+            # For this workflow we need one additional command line argument
+            if step == "signalAnalysisGenTau":
+                multicrab.appendArgAll("doTauEmbeddingLikePreselection=1")
+        
+        if step in ["skim"]:
+            multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
+        else:
+            multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist_noStageout)
     
-        # For this workflow we need one additional command line argument
-        if step == "signalAnalysisGenTau":
-            multicrab.appendArgAll("doTauEmbeddingLikePreselection=1")
+        if step == "embedding":
+            multicrab.addCommonLine("GRID.max_rss = 3000")
     
-    if step in ["skim"]:
-        multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
-    else:
-        multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist_noStageout)
-
-    if step in ["skim", "embedding"]:
-        def addCopyConfig(dataset):
-            dataset.appendLine("USER.additional_input_files = copy_cfg.py")
-            dataset.appendCopyFile("../copy_cfg.py")
-        multicrab.forEachDataset(addCopyConfig)
-
-    if step == "embedding":
-        multicrab.addCommonLine("GRID.max_rss = 3000")
-
-    # Override number of jobs if asked
-    if updateNjobs.has_key(step):
-        for dname, njobs in updateNjobs[step].iteritems():
-            try:
-                md = multicrab.getDataset(dname)
-            except KeyError:
-                continue
-            md.setNumberOfJobs(njobs)
-
+        # Override number of jobs if asked
+        if updateNjobs.has_key(step):
+            for dname, njobs in updateNjobs[step].iteritems():
+                try:
+                    md = multicrab.getDataset(dname)
+                except KeyError:
+                    continue
+                md.setNumberOfJobs(njobs)
     
         if step in ["skim", "embedding", "genTauSkim"]:
             def addCopyConfig(dataset):
