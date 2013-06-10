@@ -224,7 +224,7 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         # If have skim output, define the workflows which depend on it
         if wf.output != None:
             dataset.addWorkflow(Workflow("tauembedding_skimAnalysis_"+version, source=Source("tauembedding_skim_"+version),
-                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="histograms.root"))
+                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="histograms.root", crabLines=["CMSSW.total_number_of_lumis = -1"]))
 
 
 def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitions):
@@ -394,6 +394,7 @@ def addEmbeddingGenTauSkim_v44_5(datasets):
         # 6662721 events, 4002 jobs
         # User mean 2775.2, min 916.6, max 4447.0
         # Mean 130.1 MB, min 44.1 MB, max 141.2 MB
+        # The files in this dataset are actually inside pattuple directory
         "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_gentauskim_v44_5-9ecb3a23e436fc2ffd8a803eac2a3a15/USER"),
         }
     addEmbeddingGenTauSkim_44X("v44_5", datasets, definitions)
@@ -539,6 +540,17 @@ def addEmbeddingSkim_v44_5_1(datasets):
         "TTToHplusBHminusB_M160_Fall11":    TaskDef(""),
         }
     addEmbeddingSkim_44X("v44_5_1", datasets, definitions)
+
+def addEmbeddingEmbedding_v44_5_1(datasets):
+    skimVersion = "tauembedding_skim_v44_5_1"
+
+    def addEmbedding(version, definitions):
+        addEmbeddingEmbedding_44X(skimVersion, version, datasets, definitions)
+
+    addEmbedding("v44_5_1_notrg", {
+        "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 0}),
+        })
+
 
 def addEmbedding_SKELETON(datasets):
     definitions = {
