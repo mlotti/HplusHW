@@ -13,9 +13,9 @@ analysis = "signalAnalysisInvertedTau"
 searchMode = "Light"
 #searchMode = "Heavy"
 
-#dataEra = "Run2012AB"
+dataEra = "Run2011AB"
 #dataEra = "Run2012C"
-dataEra = "Run2011B"
+#dataEra = "Run2011A"
 
 #optMode = "OptQCDTailKillerZeroPlus"
 #optMode = "OptQCDTailKillerLoosePlus"
@@ -36,8 +36,8 @@ HISTONAMES = []
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_CollinearTailKiller")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
 HISTONAMES.append("Inverted/SelectedTau_pT_BackToBackTailKiller")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts")

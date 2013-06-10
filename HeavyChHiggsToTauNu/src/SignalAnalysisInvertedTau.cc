@@ -474,6 +474,19 @@ namespace HPlus {
     fEventWeight.multiplyWeight(prescaleWeight);
     fTree.setPrescaleWeight(prescaleWeight);
 
+//------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
+    if(!iEvent.isRealData()) {
+      const double wjetsWeight = fWJetsWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(wjetsWeight);
+    }
+    increment(fWJetsWeightCounter);
+
+//------ MET (noise) filters for data (reject events with instrumental fake MET)
+    if(iEvent.isRealData()) {
+      if(!fMETFilters.passedEvent(iEvent, iSetup)) return false;
+    }
+    increment(fMETFiltersCounter);
+
 
 
     // Pileup weight
@@ -500,21 +513,8 @@ namespace HPlus {
     increment(fVertexFilterCounter);
 
       
-//------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
-    if(!iEvent.isRealData()) {
-      const double wjetsWeight = fWJetsWeightReader.getWeight(iEvent, iSetup);
-      fEventWeight.multiplyWeight(wjetsWeight);
-    }
-    increment(fWJetsWeightCounter);
-       
-    
-//------ MET (noise) filters for data (reject events with instrumental fake MET)
-    if(iEvent.isRealData()) {
-      if(!fMETFilters.passedEvent(iEvent, iSetup)) return false;
 
-    }
-    increment(fMETFiltersCounter);
-        
+
     
     // Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
@@ -554,9 +554,6 @@ namespace HPlus {
 
     increment(fTauCandidateCounter);
 
-    // tauID cuts applied to inverted and baseline taus    
-    // nprongs
-    //hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
 
   
 
@@ -606,7 +603,7 @@ namespace HPlus {
       hTauDiscriminator->Fill((*iTau)->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits"));
       increment(fTausExistCounter);
   
-      /*	
+      	
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
       //	FakeTauIdentifier::MCSelectedTauMatchType tauMatchData.getTauMatchType() = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
       //      bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
@@ -619,7 +616,7 @@ namespace HPlus {
       // plot leading track without pt cut
       increment(fTauFakeScaleFactorCounter);
  
-      */
+     
 
      
       //      hTauDiscriminator->Fill((*iTau)->tauID("byRawCombinedIsolationDeltaBetaCorr"));
@@ -789,6 +786,7 @@ namespace HPlus {
     if(!jetData.passedEvent()) return false;	  
     increment(fBaselineJetsCounter);
 
+    hMTBaselineTauIdJet->Fill(selectedTau->pt() ,transverseMass );
 
     hMETBaselineTauIdJets->Fill(selectedTau->pt(), metData.getSelectedMET()->et());
     if(btagData.passedEvent()) {

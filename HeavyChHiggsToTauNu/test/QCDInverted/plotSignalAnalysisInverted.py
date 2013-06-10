@@ -66,8 +66,8 @@ optMode = "OptQCDTailKillerTightPlus"
 
 
 #dataEra = "Run2011A"
-#dataEra = "Run2011B"
-dataEra = "Run2011AB"
+dataEra = "Run2011B"
+#dataEra = "Run2011AB"
 
 print "dataEra"
 

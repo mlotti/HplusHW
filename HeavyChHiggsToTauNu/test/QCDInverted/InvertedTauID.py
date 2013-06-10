@@ -739,7 +739,7 @@ class InvertedTauID:
 
             
         if "MtWithAllCutsTailKiller" in name:      
-            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":25, "xmax": 300},
+            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":12, "xmax": 300},
                              createRatio=False,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
             
         if "RadiusJet0BackToBack"  in name:      
@@ -898,9 +898,9 @@ class InvertedTauID:
 
         if "MtWithAllCutsTailKiller" in name: 
             histograms.addText(0.6, 0.8, "All selection cuts", 22)
-            histograms.addText(0.6, 0.72, "MET > 50 GeV", 22)
-            #histograms.addText(0.55, 0.64, "TailKiller: MediumPlus", 22)
-            histograms.addText(0.6, 0.64, "no TailKiller cuts", 22)
+            histograms.addText(0.6, 0.72, "MET > 60 GeV", 22)
+            histograms.addText(0.55, 0.64, "TailKiller: ZeroPlus", 22)
+            #histograms.addText(0.6, 0.64, "no TailKiller cuts", 22)
 
         if "RadiusJet0BackToBack" in name:      
             histograms.addText(0.25, 0.85, "All selection cuts", 22)
@@ -1117,12 +1117,14 @@ class InvertedTauID:
         hError.GetYaxis().SetTitle("abs( (#varepsilon^{Inverted} - #varepsilon^{Baseline})/#varepsilon^{Baseline} )")
         hError.GetXaxis().SetTitle("PF MET cut (GeV)")
 
+
+
         plot2 = plots.PlotBase()
         plot2.histoMgr.appendHisto(histograms.Histo(hError,"ShapeUncertainty"))
         plot2.histoMgr.forHisto("ShapeUncertainty", st1)
         plot2.histoMgr.setHistoDrawStyleAll("EP")
 #        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymax": 1})
-        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1, "xmax": 120})
+        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1, "xmax": 80})
 
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
@@ -1131,7 +1133,7 @@ class InvertedTauID:
 
 	rangeMin = hError.GetXaxis().GetXmin()
         rangeMax = hError.GetXaxis().GetXmax()
-	rangeMax = 110
+	rangeMax = 75
 #	rangeMax = 120
 #	rangeMax = 380
         
