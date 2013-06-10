@@ -20,7 +20,7 @@ dataEras = [
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
-
+#myOptimisation.printOptions() # Uncomment to find out the implemented methods
 #myOptimisation.addTauPtVariation([40.0, 50.0, 60.0, 70., 80.])
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
@@ -35,7 +35,6 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,170.0,160.0,150.0])
 #myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
-#myOptimisation.disableMaxVariations()
 
 def customize(signalAnalysis):
 #    signalAnalysis.jetSelection.jetPileUpWorkingPoint = "tight" # 
