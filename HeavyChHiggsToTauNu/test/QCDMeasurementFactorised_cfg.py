@@ -16,7 +16,8 @@ dataEras = [
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
-#myOptimisation.addTauPtVariation([40.0, 50.0])
+#myOptimisation.printOptions() # Uncomment to find out the implemented methods
+#myOptimisation.addTauPtVariation([41.0, 50.0])
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
 #myOptimisation.addRtauVariation([0.0, 0.7])
@@ -30,11 +31,10 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
 #myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
-#myOptimisation.disableMaxVariations()
 
 ### Boolean flags
-bCustomizeTailKiller = True
-    
+bCustomizeTailKiller = False
+
 def customize(signalAnalysis):
     # Choice of tau selection for tau candidate selection
     signalAnalysis.applyNprongsCutForTauCandidate = False
@@ -89,7 +89,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
                         #doAgainstElectronScan=True,
                         #doSystematics=True,
-                        doQCDTailKillerScenarios=False, #True,
+                        #doQCDTailKillerScenarios=True,#False, #True,
                         doFillTree=True, #False,
                         histogramAmbientLevel = "Vital", # Informative
                         #doOptimisation=True, optimisationScheme=myOptimisation
