@@ -391,7 +391,7 @@ class ConfigBuilder:
                 # PickEvens only for the first analysis path
                 p = getattr(process, analysisNames[0]+"Path")
                 p *= process.PickEvents
-    
+
             self._accumulateAnalyzers("Data eras", analysisNames)
 
             if self.doMETResolution:
@@ -399,10 +399,12 @@ class ConfigBuilder:
                 p *= process.metResolutionAnalysis
         # Construct paths for optimisation
         else:
+            analysisNamesForTailKillerScenarios = []
             for module, name in zip(analysisModules, analysisNames):
                 names = self.optimisationScheme.generateVariations(process, additionalCounters, process.commonSequence, module, name)
                 self._accumulateAnalyzers("Optimisation", names)
-                analysisNamesForTailKillerScenarios = names
+                #analysisNamesForTailKillerScenarios = names
+                analysisNamesForTailKillerScenarios.extend(names)
                 analysisNamesForSystematics.extend(names)
 
         # QCD tail killer scenarios (do them also for optimisation variations)
@@ -649,9 +651,9 @@ class ConfigBuilder:
     # \param analysisNames    List of analysis module names
     def _buildQCDTailKillerScenarios(self, process, analysisNames):
         def createQCDTailKillerModule(process, modulePrefix, mod, names, modules):
-            modName = name+"Opt"+modulePrefix
+            modName = name+"_Opt_"+modulePrefix
             if "Opt" in name:
-                modName = name+modulePrefix
+                modName = name+"_"+modulePrefix
             setattr(process, modName, mod)
             names.append(modName)
             modules.append(mod)
