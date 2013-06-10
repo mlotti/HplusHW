@@ -197,7 +197,8 @@ fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
 fakeTauSFandSystematics = None
 # FIXME: add scale factors for MVA3 against electron discriminators
 print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
-fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium # FIXME: default to the current recommendation of tau POG
+print "As a temporary solution, the AgainstElectronMVA scale factors and uncertainties are used (as per tau POG instructions)"
+fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
 #if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
     #fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
 #elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
