@@ -61,6 +61,7 @@ class ConfigBuilder:
                  histogramAmbientLevelOptimization = "Vital",
                  histogramAmbientLevelSystematics = "Systematics",
                  applyTauTriggerScaleFactor = True, # Apply tau trigger scale factor or not
+                 applyTauTriggerLowPurityScaleFactor = False, # Apply tau trigger scale factor or not
                  applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
@@ -108,6 +109,7 @@ class ConfigBuilder:
         self.histogramAmbientLevel = histogramAmbientLevel
         self.histogramAmbientLevelSystematics = histogramAmbientLevelSystematics
         self.applyTauTriggerScaleFactor = applyTauTriggerScaleFactor
+        self.applyTauTriggerLowPurityScaleFactor = applyTauTriggerLowPurityScaleFactor
         self.applyMETTriggerScaleFactor = applyMETTriggerScaleFactor
         self.applyPUReweight = applyPUReweight
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
@@ -551,8 +553,16 @@ class ConfigBuilder:
         # Trigger with scale factors (at the moment hard coded)
         if self.dataVersion.isMC():
             if self.applyTauTriggerScaleFactor:
+                print "Applying high purity trigger tau leg scale factor"
+                param.tauTriggerEfficiencyScaleFactor.mode = "scaleFactor"
+                if self.applyTauTriggerLowPurityScaleFactor:
+                    raise Exception("Config error: You set both applyTauTriggerScaleFactor=True and applyTauTriggerLowPurityScaleFactor=True! Please set only either one of them as true.")
+            elif self.applyTauTriggerLowPurityScaleFactor:
+                print "Applying low purity trigger tau leg scale factor"
+                param.tauTriggerEfficiencyScaleFactor = param.setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(param.tauSelection)
                 param.tauTriggerEfficiencyScaleFactor.mode = "scaleFactor"
             if self.applyMETTriggerScaleFactor:
+                print "Applying trigger MET leg scale factor"
                 param.metTriggerEfficiencyScaleFactor.mode = "scaleFactor"
 
         if self.doBTagTree:
@@ -1017,7 +1027,7 @@ class ConfigBuilder:
     def _cloneForVariation(self, module):
         mod = module.clone()
         mod.Tree.fill = False
-        mod.GenParticleAnalysis.enabled = cms.untracked.bool(False)
+        mod.GenParticleAnalysis.enabled = False
         mod.eventCounter.printMainCounter = cms.untracked.bool(False)
         mod.histogramAmbientLevel = self.histogramAmbientLevelSystematics
         return mod
