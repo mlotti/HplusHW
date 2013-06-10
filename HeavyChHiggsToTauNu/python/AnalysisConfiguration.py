@@ -674,7 +674,7 @@ class ConfigBuilder:
         print "muons: ", module.MuonSelection
         if hasattr(module, "jetSelection"):
             print "jets: ", module.jetSelection
-        print "QCD Tail-Killer: ", module.QCDTailKiller
+        print "QCD Tail-Killer: ", module.QCDTailKiller.scenarioLabel.value()
         print "Invariant mass reconstruction: ", module.invMassReco
 
     ## Build array of analyzers to scan various QCD tail killer scenarios
@@ -695,75 +695,19 @@ class ConfigBuilder:
         if not self.doQCDTailKillerScenarios:
             return []
 
-        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import QCDTailKillerBin
+        import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
         names = []
         modules = []
         for name in analysisNames:
             module = getattr(process, name)
-            # Zero plus scenario
-            mod = module.clone()
-            mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
-                QCDTailKillerBin("noCut", 0.0, 0.0), # jet 1
-                QCDTailKillerBin("noCut", 0.0, 0.0), # jet 2
-                QCDTailKillerBin("noCut", 0.0, 0.0), # jet 3
-                QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
-            )
-            mod.QCDTailKiller.collinear = cms.untracked.VPSet(
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
-                QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
-            )
-            mod.QCDTailKiller.maxJetsToConsider = 4
-            createQCDTailKillerModule(process, "QCDTailKillerZeroPlus", mod, names, modules)
-            # Loose plus scenario
-            mod = module.clone()
-            mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
-                QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
-                QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
-                QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
-                QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
-            )
-            mod.QCDTailKiller.collinear = cms.untracked.VPSet(
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
-                QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
-            )
-            mod.QCDTailKiller.maxJetsToConsider = 4
-            createQCDTailKillerModule(process, "QCDTailKillerLoosePlus", mod, names, modules)
-            # Medium plus scenario
-            mod = module.clone()
-            mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
-                QCDTailKillerBin("circular", 60.0, 60.0), # jet 1
-                QCDTailKillerBin("circular", 60.0, 60.0), # jet 2
-                QCDTailKillerBin("circular", 60.0, 60.0), # jet 3
-                QCDTailKillerBin("noCut", 60.0, 60.0), # jet 4
-            )
-            mod.QCDTailKiller.collinear = cms.untracked.VPSet(
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
-                QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
-            )
-            mod.QCDTailKiller.maxJetsToConsider = 4
-            createQCDTailKillerModule(process, "QCDTailKillerMediumPlus", mod, names, modules)
-            # Tight plus scenario
-            mod = module.clone()
-            mod.QCDTailKiller.backToBack = cms.untracked.VPSet(
-                QCDTailKillerBin("circular", 80.0, 80.0), # jet 1
-                QCDTailKillerBin("circular", 80.0, 80.0), # jet 2
-                QCDTailKillerBin("circular", 80.0, 80.0), # jet 3
-                QCDTailKillerBin("noCut", 80.0, 80.0), # jet 4
-            )
-            mod.QCDTailKiller.collinear = cms.untracked.VPSet(
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-                QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
-                QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
-            )
-            mod.QCDTailKiller.maxJetsToConsider = 4
-            createQCDTailKillerModule(process, "QCDTailKillerTightPlus", mod, names, modules)
+            for scenName in param.QCDTailKillerScenarios:
+                mod = module.clone()
+                obj = getattr(param, scenName, None)
+                if obj == None:
+                    raise Exception("Config error: tried to access tail killer scenario '%s', but its PSet is not present in HChSignalAnalysisParameters_cff.py!"%scenName)
+                mod.QCDTailKiller = obj.clone()
+                param.QCDTailKillerZeroPlus.clone()
+                createQCDTailKillerModule(process, "QCDTailKiller%s"%mod.QCDTailKiller.scenarioLabel.value(), mod, names, modules)
         self._accumulateAnalyzers("Modules for QCDTailKiller scenarios", names)
 
         return names
