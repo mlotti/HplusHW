@@ -141,8 +141,6 @@ namespace HPlus {
     EventWeight& fEventWeight;
     HistoWrapper& fHistoWrapper;
 
-    edm::InputTag fOneProngTauSrc;
-    edm::InputTag fOneAndThreeProngTauSrc;
 
     //    const double ftransverseMassCut;
     const bool bBlindAnalysisStatus;
@@ -268,8 +266,8 @@ namespace HPlus {
     WrappedTH1 *hDeltaPhiAfterJets;
     WrappedTH1 *hDeltaPhiBeforeVeto;
     WrappedTH1 *hDeltaPhiJetMet;
-    WrappedTH1 *hEtResolutionTau_baseline; 
-    WrappedTH1 *hDeltaRTauSelectedTau_baseline;
+
+
     // Histograms for validation at every Selection Cut step
     WrappedTH1 *hMet_AfterTauSelection;
     WrappedTH1 *hMet_AfterEvtTopology;
@@ -418,13 +416,13 @@ namespace HPlus {
 
 
     WrappedTH1 *hSelectedTauEtTauVeto;
-    WrappedTH1 *hSelectedTauEtJetCut;
-    WrappedTH1 *hSelectedTauEtCollinearTailKiller;
-    WrappedTH1 *hSelectedTauEtMetCut;
-    WrappedTH1 *hSelectedTauEtBtagging;
+    HistogramsInBins *hSelectedTauEtJetCut;
+    HistogramsInBins *hSelectedTauEtCollinearTailKiller;
+    HistogramsInBins *hSelectedTauEtMetCut;
+    HistogramsInBins *hSelectedTauEtBtagging;
     WrappedTH1 *hSelectedTauEtBjetVeto;
     WrappedTH1 *hSelectedTauEtBjetVetoPhiCuts;
-    WrappedTH1 *hSelectedTauEtBackToBackTailKiller;
+    HistogramsInBins *hSelectedTauEtBackToBackTailKiller;
 
 
    

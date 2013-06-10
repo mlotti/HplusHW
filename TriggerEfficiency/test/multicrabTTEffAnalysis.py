@@ -85,7 +85,36 @@ datasetsData2012TauLeg = [
 ]
 datasetsMC2012TauLeg = [
         "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12",
-        "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12"
+        "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12",
+
+        "QCD_Pt30to50_TuneZ2star_Summer12",
+        "QCD_Pt50to80_TuneZ2star_Summer12",
+        "QCD_Pt80to120_TuneZ2star_Summer12",
+        "QCD_Pt120to170_TuneZ2star_Summer12",
+        "QCD_Pt170to300_TuneZ2star_Summer12",
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12",
+        "QCD_Pt300to470_TuneZ2star_Summer12",
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12",
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12",
+
+        "WW_TuneZ2star_Summer12",
+        "WZ_TuneZ2star_Summer12",
+        "ZZ_TuneZ2star_Summer12",
+        "TTJets_TuneZ2star_Summer12",
+        "WJets_TuneZ2star_v1_Summer12",
+        "WJets_TuneZ2star_v2_Summer12",
+        "W1Jets_TuneZ2star_Summer12",
+        "W2Jets_TuneZ2star_Summer12",
+        "W3Jets_TuneZ2star_Summer12",
+        "W4Jets_TuneZ2star_Summer12",
+        "DYJetsToLL_M50_TuneZ2star_Summer12",
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12",
+        "T_t-channel_TuneZ2star_Summer12",
+        "Tbar_t-channel_TuneZ2star_Summer12",
+        "T_tW-channel_TuneZ2star_Summer12",
+        "Tbar_tW-channel_TuneZ2star_Summer12",
+        "T_s-channel_TuneZ2star_Summer12",
+        "Tbar_s-channel_TuneZ2star_Summer12"
 ]
 datasetsData2012MetLeg = [
         "Tau_190456-193621_2012A_Jan22",
@@ -152,7 +181,7 @@ print
 outputfiles = ""
 if analysis == "TauLeg2012":
     datasets.extend(datasetsData2012TauLeg)
-####    datasets.extend(datasetsMC2012TauLeg)
+    datasets.extend(datasetsMC2012TauLeg)
 #    outputfiles = "tteffAnalysis-hltpftau-hpspftau.root, tteffAnalysis-hltpftaumedium-hpspftau.root, tteffAnalysis-hltpftau-hpspftau-highpurity.root"                                                                                  
     outputfiles = "tteffAnalysis-hltpftau-hpspftau.root, tteffAnalysis-hltpftau-hpspftau-highpurity.root"
 
