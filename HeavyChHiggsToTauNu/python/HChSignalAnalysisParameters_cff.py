@@ -534,9 +534,26 @@ topWithMHSelection = cms.untracked.PSet(
         enabled = cms.untracked.bool(False)
 )
 
+def SetHistogramBinSettings(nbins, axismin, axismax):
+    return cms.untracked.PSet(
+        nBins = cms.untracked.uint32(nbins), # Number of bins for axis
+        axisMin = cms.untracked.double(axismin), # Minimum value in axis
+        axisMax = cms.untracked.double(axismax) # Maximum value in axis
+        )
+
 commonPlotsSettings = cms.untracked.PSet(
     enableNormalisationAnalysis = cms.untracked.bool(True),
     enableMETOscillationAnalysis = cms.untracked.bool(True),
+    # Histogram dimension definitions for control plots and shapes (input for datacard generator)
+    ptBins = SetHistogramBinSettings(100, 0., 500.),
+    etaBins = SetHistogramBinSettings(60, -3., 3.),
+    phiBins = SetHistogramBinSettings(72, -3.1415926, 3.1415926),
+    rtauBins = SetHistogramBinSettings(55, 0., 1.1),
+    njetsBins = SetHistogramBinSettings(20, 0., 20.),
+    metBins = SetHistogramBinSettings(100, 0., 500.),
+    tailKiller1DBins = SetHistogramBinSettings(52, 0., 260.),
+    mtBins = SetHistogramBinSettings(100, 0., 500.),
+    invmassBins = SetHistogramBinSettings(100, 0., 500.),
 )
 
 tree = cms.untracked.PSet(
