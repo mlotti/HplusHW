@@ -661,9 +661,9 @@ class ConfigBuilder:
     # \param analysisNames    List of analysis module names
     def _buildQCDTailKillerScenarios(self, process, analysisNames):
         def createQCDTailKillerModule(process, modulePrefix, mod, names, modules):
-            modName = name+"_Opt_"+modulePrefix
+            modName = name+"Opt"+modulePrefix
             if "Opt" in name:
-                modName = name+"_"+modulePrefix
+                modName = name+modulePrefix
             setattr(process, modName, mod)
             names.append(modName)
             modules.append(mod)
