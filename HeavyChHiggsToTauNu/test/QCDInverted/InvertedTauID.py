@@ -446,30 +446,27 @@ class InvertedTauID:
 	    value1 = h1.GetBinContent(iBin)
 	    value2 = h2.GetBinContent(iBin)
 
-	    if value1 < 0:
-		h1.SetBinContent(iBin,0)
+	    #if value1 < 0:
+		#h1.SetBinContent(iBin,0)
 
-            if value2 < 0:
-                h2.SetBinContent(iBin,0)
+            #if value2 < 0:
+             #   h2.SetBinContent(iBin,0)
 
             iBin = iBin + 1
 
 
         h1.GetYaxis().SetTitle("Events / 20 GeV")
         h1.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV)")
-        if "BtaEffInMet" in name: 
-            h1.GetYaxis().SetTitle("Events / 20 GeV")
-            h1.GetXaxis().SetTitle("MET (GeV)")
-            
-        if "Purity" in name: 
-            h1.GetYaxis().SetTitle("QCD purity")
-            h1.GetXaxis().SetTitle("MET (GeV)")
+
             
         if "MetBtagging"  in name:
             h1.GetYaxis().SetTitle("Events")
             h1.GetXaxis().SetTitle("MET (GeV)")
             
-
+        if "MtSoftBtaggingTKClosure" in name:           
+            h1.GetYaxis().SetTitle("Events / 20 CeV")
+            h1.GetXaxis().SetTitle("m_{T}(#tau jet,MET) (GeV)")
+            
             
         if "BvetoInvertedVsBaseline"  or "NormalisedBveto" in name:
             h1.GetYaxis().SetTitle("Events / 20 CeV")
@@ -502,7 +499,24 @@ class InvertedTauID:
         if "MtNoBtaggingInvertedVsBaselineTailKillerClosure" in name:
             h1.GetYaxis().SetTitle("Events / 20 CeV")
             h1.GetXaxis().SetTitle("m_{T}(#tau jet,MET) (GeV)")
-
+        if "RadiusJet0BackToBack" in name:
+            h1.GetYaxis().SetTitle("Events ")
+            h1.GetXaxis().SetTitle("#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{0},MET)^{2}}")
+        if "RadiusJet0Collinear"  in name:
+            h1.GetYaxis().SetTitle("Events ")
+            h1.GetXaxis().SetTitle("#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{0},MET))^{2}}")
+        if "RadiusJet1BackToBack"  in name:
+            h1.GetYaxis().SetTitle("Events ")
+            h1.GetXaxis().SetTitle("#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}")
+        if "RadiusJet1Collinear" in name:
+            h1.GetYaxis().SetTitle("Events ")
+            h1.GetXaxis().SetTitle("#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1},MET))^{2}}")
+        if "RadiusJet2BackToBack" in name:
+            h1.GetYaxis().SetTitle("Events ")
+            h1.GetXaxis().SetTitle("#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET)^{2}}")
+        if "RadiusJet2Collinear" in name:
+            h1.GetYaxis().SetTitle("Events ")
+            h1.GetXaxis().SetTitle("#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{2},MET))^{2}}")           
             
         plot = plots.ComparisonPlot(
             histograms.Histo(h1, "Inv"),histograms.Histo(h2, "Base"),
@@ -524,11 +538,7 @@ class InvertedTauID:
 #        plot.histoMgr.setHistoLegendLabelMany({"Inv": "with b tagging","Base": "with b-jet veto"})
         if "InvertedVsBaseline"  in name:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
-        if "Factorised"  in name:
-            plot.histoMgr.setHistoLegendLabelMany({"Inv": "b tagging","Base": "b-tagging factorization"})
-
-        if "BtagEffInMet"  in name:    
-            plot.histoMgr.setHistoLegendLabelMany({"Inv": "with b tagging","Base": "without b tagging "})
+ 
     
         if "NormalisedBveto"  in name:    
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "b tagging","Base": "b veto normalized "})
@@ -566,6 +576,20 @@ class InvertedTauID:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
         if "BvetoTailKillerClosure" in name:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "RadiusJet0BackToBack" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "RadiusJet0Collinear" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "RadiusJet1BackToBack" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "RadiusJet1Collinear" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "RadiusJet2BackToBack" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "RadiusJet2Collinear" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "MtSoftBtaggingTKClosure" in name: 
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
             
        # Set the legend styles
         plot.histoMgr.setHistoLegendStyleAll("P")
@@ -577,25 +601,11 @@ class InvertedTauID:
                 
 
         # Create frame with a ratio pad
-        
-#        if "Factorised"  in name:
-#            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "xmax": 300},
-#                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
-#                             )
-
-
-#        plot.createFrame("purity"+self.label, opts={"ymin":0.6,"ymax":300, "xmax": 300},
-#                         createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
 
        # if "test1"  in name:
         plot.createFrame("Comparison"+self.label, opts={"ymin":0.0, "xmax": 300},
                          createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
-        
-        if "test2"  in name:
-            plot.createFrame("Comparison"+self.label, opts={"ymin":0.0, "xmax": 300},
-                             createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
 
-            
             
         if "MetBtaggingEfficiency"  in name:
             plot.createFrame("Efficiency"+self.label, opts={"ymin":0.0, "xmax": 300},
@@ -658,10 +668,18 @@ class InvertedTauID:
             plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 400, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
-        if "MtNoMetBvetoInvertedVsBaselineTailKillerClosure" in name:
-            plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 600, "xmax": 200},
+
+        if "MtSoftBtaggingTKClosure" in name:
+            plot.createFrame("Comparison"+self.label, opts={"ymin":-5, "ymax": 50, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
+            
+        if "MtNoMetBvetoInvertedVsBaselineTailKillerClosure" in name:
+            plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 500, "xmax": 200},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                             )
+
+            
         if "MtNormalisedBvetoTailKiller" in name:         
             plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymax": 8, "xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
@@ -718,7 +736,32 @@ class InvertedTauID:
         if "MtInvertedVsBaselineSystematic" in name:      
             plot.createFrame("systematics"+self.label, opts={"ymin":0.,"ymax":15, "xmax": 300},
                              createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+
             
+        if "MtWithAllCutsTailKiller" in name:      
+            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":12, "xmax": 300},
+                             createRatio=False,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+            
+        if "RadiusJet0BackToBack"  in name:      
+            plot.createFrame("Radius"+self.label, opts={"ymin":0.,"ymax":50, "xmax": 260},
+                             createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+        if "RadiusJet1BackToBack"  in name:      
+            plot.createFrame("Radius"+self.label, opts={"ymin":0.,"ymax":50, "xmax": 260},
+                             createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+        if "RadiusJet2BackToBack"  in name:      
+            plot.createFrame("Radius"+self.label, opts={"ymin":0.,"ymax":50, "xmax": 260},
+                             createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+            
+        if "RadiusJet0Collinear" in name:      
+            plot.createFrame("Radius"+self.label, opts={"ymin":0.,"ymax":800, "xmax": 260},
+                             createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+        if "RadiusJet1Collinear" in name:      
+            plot.createFrame("Radius"+self.label, opts={"ymin":0.,"ymax":800, "xmax": 260},
+                             createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+        if "RadiusJet2Collinear" in name:      
+            plot.createFrame("Radius"+self.label, opts={"ymin":0.,"ymax":800, "xmax": 260},
+                             createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+                       
         # Set Y axis of the upper pad to logarithmic
         if "Purity"  in name:        
             plot.getPad().SetLogy(False)       
@@ -760,7 +803,21 @@ class InvertedTauID:
             plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
         if "BvetoTailKillerClosure" in name:
             plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
-                           
+        if "RadiusJet0BackToBack" in name:
+            plot.setLegend(histograms.createLegend(0.25,0.65,0.6,0.8))                           
+        if "RadiusJet0Collinear"  in name:
+            plot.setLegend(histograms.createLegend(0.25,0.65,0.6,0.8))
+        if "RadiusJet1BackToBack" in name:
+            plot.setLegend(histograms.createLegend(0.25,0.65,0.6,0.8))                           
+        if "RadiusJet1Collinear"  in name:
+            plot.setLegend(histograms.createLegend(0.25,0.65,0.6,0.8))
+        if "RadiusJet2BackToBack"in name:
+            plot.setLegend(histograms.createLegend(0.25,0.65,0.6,0.8))                           
+        if "RadiusJet2Collinear" in name:
+            plot.setLegend(histograms.createLegend(0.25,0.65,0.6,0.8))
+
+        if "MtSoftBtaggingTKClosure" in name:
+            plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
 
             
         histograms.addCmsPreliminaryText()
@@ -804,18 +861,8 @@ class InvertedTauID:
             histograms.addText(0.55, 0.6, "Before MET cut", 24)
         if "MtBvetoBtagInvertedTailKillerClosure" in name:
             histograms.addText(0.55, 0.54, "Inverted #tau isolation", 24)
-        if "MtBvetoBtagInvertedTailKillerClosure"  in name:
-            histograms.addText(0.55, 0.48, "TailKiller: Tight", 24)
-  
-            
-        if "Factorised"  in name:
-            histograms.addText(0.5, 0.6, "#Delta#phi cuts", 25)
-        if "Purity" in name:
-            histograms.addText(0.2, 0.3, "Purity after jet selection", 25)
-        if "NoDeltaPhi"  in name:
-            histograms.addText(0.5, 0.3, "No #Delta#phi cuts", 28)
-        if "DeltaPhi160"  in name:
-            histograms.addText(0.5, 0.3, "#Delta#phi(#tau jet,MET) < 160^{o}", 28)
+        #if "MtBvetoBtagInvertedTailKillerClosure"  in name:
+
         if "MtbvetoAllDeltaPhiCuts"  in name:
             histograms.addText(0.25, 0.4, "B-tagging factorisation", 23)
             histograms.addText(0.25, 0.3, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1/2/3,MET) cuts", 20)
@@ -839,15 +886,38 @@ class InvertedTauID:
         if "MtInvertedVsBaselineSystematic" in name:   
             histograms.addText(0.6, 0.67, "All selection cuts", 22)
             histograms.addText(0.6, 0.6, "TailKiller: Loose", 22)
+            
         if "MtNoMetBvetoInvertedVsBaselineTailKillerClosure" in name:
             histograms.addText(0.6, 0.70, "Before MET cut", 22)
             histograms.addText(0.6, 0.64, "B-jet veto", 22)
-            histograms.addText(0.55, 0.58, "TailKiller: MediumPlus", 22)
+            histograms.addText(0.6, 0.58, "TailKiller: MediumPlus", 22)
         if "BvetoTailKillerClosure" in name:
             histograms.addText(0.6, 0.70, "After MET cut", 22)
             histograms.addText(0.6, 0.64, "B-jet veto", 22)
-            histograms.addText(0.6, 0.58, "TailKiller: Tight", 22)
-                                                
+            histograms.addText(0.6, 0.58, "TailKiller: MediumPlus", 22)
+
+        if "MtWithAllCutsTailKiller" in name: 
+            histograms.addText(0.6, 0.8, "All selection cuts", 22)
+            histograms.addText(0.6, 0.72, "MET > 60 GeV", 22)
+            histograms.addText(0.55, 0.64, "TailKiller: ZeroPlus", 22)
+            #histograms.addText(0.6, 0.64, "no TailKiller cuts", 22)
+
+        if "RadiusJet0BackToBack" in name:      
+            histograms.addText(0.25, 0.85, "All selection cuts", 22)
+        if "RadiusJet1BackToBack"  in name:      
+            histograms.addText(0.25, 0.85, "All selection cuts", 22)
+        if "RadiusJet2BackToBack" in name:      
+            histograms.addText(0.25, 0.85, "All selection cuts", 22)
+            
+        if "RadiusJet0Collinear"  in name:      
+            histograms.addText(0.25, 0.85, "After jet selection", 22)
+        if "RadiusJet1Collinear" in name:      
+            histograms.addText(0.25, 0.85, "After jet selection", 22)
+        if "RadiusJet2Collinear" in name:      
+            histograms.addText(0.25, 0.85, "After jet selection", 22)
+        if "MtSoftBtaggingTKClosure" in name:
+            histograms.addText(0.2, 0.85, "With loose b tagging", 20)
+            
         plot.draw() 
         plot.save()
 
@@ -1047,12 +1117,14 @@ class InvertedTauID:
         hError.GetYaxis().SetTitle("abs( (#varepsilon^{Inverted} - #varepsilon^{Baseline})/#varepsilon^{Baseline} )")
         hError.GetXaxis().SetTitle("PF MET cut (GeV)")
 
+
+
         plot2 = plots.PlotBase()
         plot2.histoMgr.appendHisto(histograms.Histo(hError,"ShapeUncertainty"))
         plot2.histoMgr.forHisto("ShapeUncertainty", st1)
         plot2.histoMgr.setHistoDrawStyleAll("EP")
 #        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymax": 1})
-        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1, "xmax": 120})
+        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1, "xmax": 80})
 
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
@@ -1061,7 +1133,7 @@ class InvertedTauID:
 
 	rangeMin = hError.GetXaxis().GetXmin()
         rangeMax = hError.GetXaxis().GetXmax()
-	rangeMax = 90
+	rangeMax = 75
 #	rangeMax = 120
 #	rangeMax = 380
         
@@ -1450,6 +1522,7 @@ class InvertedTauID:
 
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
+        theFit.SetLineColor(4)
         theFit.Draw("same")
 
 	par = theFit.GetParameters()
@@ -1460,9 +1533,17 @@ class InvertedTauID:
 	qcdOnly.SetLineStyle(2)
 	qcdOnly.Draw("same")
 
+#<<<<<<< HEAD
+ #       histograms.addText(0.35,0.8,"Data, Baseline selection")
+ #       histograms.addText(0.25,0.3,"QCD shape",20)
+ #       histograms.addText(0.25,0.25,"from Inverted selection",20)
+ #       histo.GetYaxis().SetTitle("Events / 10 GeV")
+ #       histo.GetXaxis().SetTitle("MET  (GeV)")
+#=======
         histograms.addText(0.35,0.8,"Data, Baseline TauID")
         histograms.addText(0.4,0.25,"QCD",15)
 
+#>>>>>>> sami2/2011
 
         plot.histoMgr.appendHisto(histograms.Histo(qcdOnly,"qcdOnly"))
         
