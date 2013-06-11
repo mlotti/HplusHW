@@ -196,7 +196,7 @@ def createTauTriggerMatchingInAnalysis(trigger, taus, pathFilterMap=tauPathLastF
             raise Exception("No filter found for path %s" % path)
 
     module = cms.EDProducer("HPlusTauTriggerMatchSelector",
-        tauSrc = cms.InputTag(taus),
+        src = cms.InputTag(taus),
         patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
         deltaR = cms.double(0.4),
         filterNames = cms.vstring(matched)
