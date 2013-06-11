@@ -189,15 +189,15 @@ namespace HPlus {
     void fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopChiSelection::Data& data);
     void fillControlPlotsAtEvtTopology(const edm::Event& iEvent, const EvtTopology::Data& data);
     /// Getters for histogram bin definitions
-    HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
-    HistogramSettings& getEtaBinSettings() const { return fEtaBinSettings; }
-    HistogramSettings& getPhiBinSettings() const { return fPhiBinSettings; }
-    HistogramSettings& getRtauBinSettings() const { return fRtauBinSettings; }
-    HistogramSettings& getNjetsBinSettings() const { return fNjetsBinSettings; }
-    HistogramSettings& getMetBinSettings() const { return fMetBinSettings; }
-    HistogramSettings& getTailKiller1DSettings() const { return 1DSettings; }
-    HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
-    HistogramSettings& getInvmassBinSettings() const { return fInvmassBinSettings; }
+    const HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
+    const HistogramSettings& getEtaBinSettings() const { return fEtaBinSettings; }
+    const HistogramSettings& getPhiBinSettings() const { return fPhiBinSettings; }
+    const HistogramSettings& getRtauBinSettings() const { return fRtauBinSettings; }
+    const HistogramSettings& getNjetsBinSettings() const { return fNjetsBinSettings; }
+    const HistogramSettings& getMetBinSettings() const { return fMetBinSettings; }
+    const HistogramSettings& getTailKiller1DSettings() const { return fTailKiller1DSettings; }
+    const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
+    const HistogramSettings& getInvmassBinSettings() const { return fInvmassBinSettings; }
 
   protected:
     /// Options
