@@ -64,10 +64,19 @@ optMode = "OptQCDTailKillerTightPlus"
 
 #optMode = ""
 
+
+#optMode = ""
+
+
 #dataEra = "Run2012D"
 #dataEra = "Run2012C"
 #dataEra = "Run2012AB"
 dataEra = "Run2012ABCD"
+
+#dataEra = "Run2011A"
+#dataEra = "Run2011B"
+#dataEra = "Run2011AB"
+
 
 print "dataEra"
 
@@ -188,8 +197,10 @@ def doPlots(datasets):
     transverseMass2(createPlot("BaseLine/MTBaseLineTauIdAllCutsTailKiller"), "transverseMass", rebin=10, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
    # transverseMass2(createPlot("Inverted/MTInvertedTauIdSoftBtaggingTK"), "transverseMassSoftBtag_Inv", rebin=10, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
     transverseMass2(createPlot("BaseLine/MTBaseLineTauIdSoftBtaggingTK"), "transverseMassSoftBtag_Baseline", rebin=10, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))  
+
     drawPlot(createPlot("Inverted/MET_InvertedTauIdBvetoCollinear"), "MET_InvertedTauIdBvetoCollinear", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("BaseLine/MET_BaseLineTauIdBvetoCollinear"), "MET_BaseLineTauIdBvetoCollinear", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+     
     drawPlot(createPlot("BaseLine/MET_BaseLineTauIdJets"), "MET_BaseLineTauIdJets", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("BaseLine/MET_BaseLineTauIdBveto"), "MET_BaseLineTauIdBveto", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("Inverted/MET_InvertedTauIdBveto"), "MET_InvertedTauIdBveto", xlabel="MET (GeV)",  rebin=5, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
@@ -202,6 +213,7 @@ def doPlots(datasets):
     drawPlot(createPlot("BaseLine/QCDTailKillerJet1CollinearBaseline"), "CDTailKillerJet1CollinearBaseline",  rebin=5,log=False,  xlabel="#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{2},MET))^{2}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("BaseLine/QCDTailKillerJet2CollinearBaseline"), "CDTailKillerJet2CollinearBaseline",  rebin=5,log=False,  xlabel="#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{2},MET))^{3}}(^{o})", ylabel="Events", ratio=False, opts={"ymin": 0, "xmax": 260}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), moveLegend={"dx": -0.5,"dy": 0.02})
     
+
 def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
     
@@ -1172,8 +1184,6 @@ def controlPlots(datasets):
 
  ## mt baseline, plots and EWK substraction
             
-    mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedAllCutsTailKiller")])
- 
  
     closureBaselineNoMetBveto = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTauIdNoMetBveto")])
     closureBaselineNoMetBvetoTailKiller = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTauIdNoMetBvetoTailKiller")])
@@ -1200,14 +1210,18 @@ def controlPlots(datasets):
     closureBaselineNoMetNoBtaggingTailKiller = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTauIdNoMetBtaggingTailKiller")])
     closureBaselineNoMetNoBtaggingEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdNoMetBtagging")])
     closureBaselineNoMetNoBtaggingTailKillerEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdNoMetBtaggingTailKiller")])
+
  
     mtvEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdBveto")])
     
+#    mtEWKBaseline = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdAllCutsTailKiller")])
+#    mtvEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdBveto")])            
+#    mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedAllCutsTailKiller")]) 
+#    mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTauIdAllCutsTailKiller")])   
+
     mtPhivEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdBvetoTailKiller")])
-#    jmmtpEWKbaseline = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("ClosestDeltaPhiBaseline")])
 
-
-     
+    
     mtEWKinverted = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedAllCutsTailKiller")])
     mtEWKinverted.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mtEWKinverted._setLegendStyles()
@@ -1508,6 +1522,10 @@ def controlPlots(datasets):
     invertedQCD.setLabel("MtBtaggingNoBtaggingInverted")
     invertedQCD.mtComparison(afterMet_inverted, allCuts_inverted,"MtBtaggingNoBtaggingInverted")
 
+# mt plot with TailKiller 
+    allCuts_inverted = hmtSum.Clone("mtSum")
+    invertedQCD.setLabel("MtWithAllCutsTailKiller")
+    invertedQCD.mtComparison(allCuts_inverted, allCuts_inverted,"MtWithAllCutsTailKiller")
     
 ## mt inverted comparison bveto normalised and  btagging,  with deltaPhi cuts
     btagTailKiller_inverted = hmtSum.Clone("mtSumb")
@@ -1575,7 +1593,219 @@ def controlPlots(datasets):
     invertedQCD.setLabel("MtBtagVsNoBtagNoMetInvertedTailKillerClosure")
     invertedQCD.mtComparison(hClosureAfterJetsTailKiller_nor,hClosureBtagTailKiller_nor,"MtBtagVsNoBtagNoMetInvertedTailKillerClosure")
     
+#################  Inclusive plots ###################
+    # back-to-back, jet0
+    #inverted part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/QCDTailKillerJet0BackToBackInverted")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    RadiusrJet0BackToBack  = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/QCDTailKillerJet0BackToBackInverted")
+    RadiusrJet0BackToBack.Scale(norm_inc)
 
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/QCDTailKillerJet0BackToBackInverted")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/QCDTailKillerJet0BackToBackInverted")
+    hrJet0BackToBack_EWK.Scale(normEWK_inc)
+    RadiusrJet0BackToBack.Add(hrJet0BackToBack_EWK, -1)
+
+    
+   #baseline part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/QCDTailKillerJet0BackToBackBaseline")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/QCDTailKillerJet0BackToBackBaseline")
+
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/QCDTailKillerJet0BackToBackBaseline")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/QCDTailKillerJet0BackToBackBaseline")
+    
+    RadiusrJet0BackToBack_QCD = hrJet0BackToBack_baseline.Clone("QCD")
+    RadiusrJet0BackToBack_QCD.Add(hrJet0BackToBack_baseline_EWK,-1)
+    
+# TK radius
+    radius_inverted = RadiusrJet0BackToBack.Clone("r")
+    radius_baseline = RadiusrJet0BackToBack_QCD.Clone("r_QCD")
+    invertedQCD.setLabel("RadiusJet0BackToBack")
+    invertedQCD.mtComparison(radius_inverted , radius_baseline,"RadiusJet0BackToBack")
+    
+    # collinear, jet0
+    #inverted part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/QCDTailKillerJet0CollinearInverted")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    RadiusrJet0Collinear  = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/QCDTailKillerJet0CollinearInverted")
+    RadiusrJet0Collinear.Scale(norm_inc)
+
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/QCDTailKillerJet0CollinearInverted")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/QCDTailKillerJet0CollinearInverted")
+    hrJet0BackToBack_EWK.Scale(normEWK_inc)
+    RadiusrJet0Collinear.Add(hrJet0BackToBack_EWK, -1)
+
+    
+   #baseline part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/QCDTailKillerJet0CollinearBaseline")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/QCDTailKillerJet0CollinearBaseline")
+
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/QCDTailKillerJet0CollinearBaseline")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/QCDTailKillerJet0CollinearBaseline")
+    
+    RadiusrJet0Collinear_QCD = hrJet0BackToBack_baseline.Clone("QCD")
+    RadiusrJet0Collinear_QCD.Add(hrJet0BackToBack_baseline_EWK,-1)
+    
+# TK radius
+    radius_inverted = RadiusrJet0Collinear.Clone("r")
+    radius_baseline = RadiusrJet0Collinear_QCD.Clone("r_QCD")
+    invertedQCD.setLabel("RadiusJet0Collinear")
+    invertedQCD.mtComparison(radius_inverted , radius_baseline,"RadiusJet0Collinear")
+
+
+
+#################  Inclusive plots ###################
+    # back-to-back, jet1
+    #inverted part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/QCDTailKillerJet1BackToBackInverted")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    RadiusrJet1BackToBack  = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/QCDTailKillerJet1BackToBackInverted")
+    RadiusrJet1BackToBack.Scale(norm_inc)
+
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/QCDTailKillerJet1BackToBackInverted")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/QCDTailKillerJet1BackToBackInverted")
+    hrJet0BackToBack_EWK.Scale(normEWK_inc)
+    RadiusrJet1BackToBack.Add(hrJet0BackToBack_EWK, -1)
+
+    
+   #baseline part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/QCDTailKillerJet1BackToBackBaseline")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/QCDTailKillerJet1BackToBackBaseline")
+
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/QCDTailKillerJet1BackToBackBaseline")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/QCDTailKillerJet1BackToBackBaseline")
+    
+    RadiusrJet1BackToBack_QCD = hrJet0BackToBack_baseline.Clone("QCD")
+    RadiusrJet1BackToBack_QCD.Add(hrJet0BackToBack_baseline_EWK,-1)
+    
+# TK radius
+    radius_inverted = RadiusrJet1BackToBack.Clone("r")
+    radius_baseline = RadiusrJet1BackToBack_QCD.Clone("r_QCD")
+    invertedQCD.setLabel("RadiusJet1BackToBack")
+    invertedQCD.mtComparison(radius_inverted , radius_baseline,"RadiusJet1BackToBack")
+
+
+    
+    # collinear, jet1
+    #inverted part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/QCDTailKillerJet1CollinearInverted")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    RadiusrJet1Collinear  = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/QCDTailKillerJet1CollinearInverted")
+    RadiusrJet1Collinear.Scale(norm_inc)
+
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/QCDTailKillerJet1CollinearInverted")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/QCDTailKillerJet1CollinearInverted")
+    hrJet0BackToBack_EWK.Scale(normEWK_inc)
+    RadiusrJet1Collinear.Add(hrJet0BackToBack_EWK, -1)
+
+    
+   #baseline part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/QCDTailKillerJet1CollinearBaseline")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/QCDTailKillerJet1CollinearBaseline")
+
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/QCDTailKillerJet1CollinearBaseline")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/QCDTailKillerJet1CollinearBaseline")
+    
+    RadiusrJet1Collinear_QCD = hrJet0BackToBack_baseline.Clone("QCD")
+    RadiusrJet1Collinear_QCD.Add(hrJet0BackToBack_baseline_EWK,-1)
+    
+# TK radius
+    radius_inverted = RadiusrJet1Collinear.Clone("r")
+    radius_baseline = RadiusrJet1Collinear_QCD.Clone("r_QCD")
+    invertedQCD.setLabel("RadiusJet1Collinear")
+    invertedQCD.mtComparison(radius_inverted , radius_baseline,"RadiusJet1Collinear")
+
+#################  Inclusive plots ###################
+    # back-to-back, jet2
+    #inverted part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/QCDTailKillerJet2BackToBackInverted")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    RadiusrJet2BackToBack  = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/QCDTailKillerJet2BackToBackInverted")
+    RadiusrJet2BackToBack.Scale(norm_inc)
+
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/QCDTailKillerJet2BackToBackInverted")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/QCDTailKillerJet2BackToBackInverted")
+    hrJet0BackToBack_EWK.Scale(normEWK_inc)
+    RadiusrJet2BackToBack.Add(hrJet0BackToBack_EWK, -1)
+
+    
+   #baseline part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/QCDTailKillerJet2BackToBackBaseline")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/QCDTailKillerJet2BackToBackBaseline")
+
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/QCDTailKillerJet2BackToBackBaseline")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/QCDTailKillerJet2BackToBackBaseline")
+    
+    RadiusrJet2BackToBack_QCD = hrJet0BackToBack_baseline.Clone("QCD")
+    RadiusrJet2BackToBack_QCD.Add(hrJet0BackToBack_baseline_EWK,-1)
+    
+# TK radius
+    radius_inverted = RadiusrJet2BackToBack.Clone("r")
+    radius_baseline = RadiusrJet2BackToBack_QCD.Clone("r_QCD")
+    invertedQCD.setLabel("RadiusJet2BackToBack")
+    invertedQCD.mtComparison(radius_inverted , radius_baseline,"RadiusJet2BackToBack")
+    
+    # collinear, jet2
+    #inverted part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/QCDTailKillerJet2CollinearInverted")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    RadiusrJet2Collinear  = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/QCDTailKillerJet2CollinearInverted")
+    RadiusrJet2Collinear.Scale(norm_inc)
+
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/QCDTailKillerJet2CollinearInverted")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/QCDTailKillerJet2CollinearInverted")
+    hrJet0BackToBack_EWK.Scale(normEWK_inc)
+    RadiusrJet2Collinear.Add(hrJet0BackToBack_EWK, -1)
+
+    
+   #baseline part
+    rJet0BackToBack = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/QCDTailKillerJet2CollinearBaseline")])
+    rJet0BackToBack.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline = rJet0BackToBack.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/QCDTailKillerJet2CollinearBaseline")
+
+    rJet0BackToBack_EWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/QCDTailKillerJet2CollinearBaseline")])
+    rJet0BackToBack_EWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rJet0BackToBack_EWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))  
+    hrJet0BackToBack_baseline_EWK = rJet0BackToBack_EWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/QCDTailKillerJet2CollinearBaseline")
+    
+    RadiusrJet2Collinear_QCD = hrJet0BackToBack_baseline.Clone("QCD")
+    RadiusrJet2Collinear_QCD.Add(hrJet0BackToBack_baseline_EWK,-1)
+    
+# TK radius
+    radius_inverted = RadiusrJet2Collinear.Clone("r")
+    radius_baseline = RadiusrJet2Collinear_QCD.Clone("r_QCD")
+    invertedQCD.setLabel("RadiusJet2Collinear")
+    invertedQCD.mtComparison(radius_inverted , radius_baseline,"RadiusJet2Collinear")
+
+
+########################
     
     mt._setLegendStyles()
     mt._setLegendLabels()
@@ -1583,7 +1813,6 @@ def controlPlots(datasets):
     mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
     hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MTInvertedAllCutsTailKiller")
     hmt.Scale(norm_inc)
-
 
 
     canvas39 = ROOT.TCanvas("canvas39","",500,500)            

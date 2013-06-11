@@ -13,6 +13,9 @@ dataEras = [
 #    "Run2012B",
     "Run2012C",
     "Run2012D",
+#    "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
+#    "Run2011A",
+#    "Run2011B",
 ]
 
 
@@ -41,6 +44,7 @@ def customize(signalAnalysis):
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
     #signalAnalysis.MET.METCut = 50.0 
     print "Customisation applied"
+   # signalAnalysis.MET.METCut = 50.
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
@@ -48,6 +52,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         customizeLightAnalysis=customize,
                         doQCDTailKillerScenarios=True,
                         #doAgainstElectronScan=True,
+
                         doSystematics=False,
 
                         #histogramAmbientLevel = "Vital",

@@ -16,11 +16,18 @@ searchMode = "Light"
 #dataEra = "Run2012AB"
 #dataEra = "Run2012C"
 dataEra = "Run2012ABCD"
+#dataEra = "Run2011AB"
+#dataEra = "Run2012C"
+#dataEra = "Run2011A"
+
 
 #optMode = "OptQCDTailKillerZeroPlus"
 #optMode = "OptQCDTailKillerLoosePlus"
 #optMode = "OptQCDTailKillerMediumPlus"
+
 optMode = "OptQCDTailKillerMediumPlus"
+#optMode = "OptQCDTailKillerTightPlus"
+
 #optMode = ""
 
 #optMode = ""
@@ -38,6 +45,8 @@ HISTONAMES = []
 #HISTONAMES.append("Inverted/SelectedTau_pT_CollinearTailKiller")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
 HISTONAMES.append("Inverted/SelectedTau_pT_BackToBackTailKiller")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts")
@@ -120,7 +129,10 @@ def main():
     plot.setLegend(histograms.createLegend(0.53, 0.2, 0.98, 0.4))
     
  
+
     histograms.addText(0.2, 0.3, "TailKiller: MediumPlus", 18)
+#    histograms.addText(0.2, 0.3, "TailKiller: TightPlus", 18)
+
 
 
     histograms.addCmsPreliminaryText()
