@@ -30,7 +30,7 @@ ReBinning = False
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2012ABCD"
+dataEra = "Run2012C"
 
 searchMode = "Light"
 #searchMode = "Heavy"
