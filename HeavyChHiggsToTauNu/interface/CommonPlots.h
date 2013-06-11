@@ -70,7 +70,6 @@ namespace HPlus {
     /// Cache data objects, to be called from CommonPlots::initialize()
     void cacheDataObjects(const VertexSelection::Data* vertexData,
                           const TauSelection::Data* tauData,
-                          edm::Ptr<pat::Tau>& selectedTau,
                           const FakeTauIdentifier::Data* fakeTauData,
                           const ElectronSelection::Data* electronData,
                           const MuonSelection::Data* muonData,
@@ -91,7 +90,6 @@ namespace HPlus {
     /// Cached data objects from silent analyze
     const VertexSelection::Data* fVertexData;
     const TauSelection::Data* fTauData;
-    edm::Ptr<pat::Tau> fSelectedTau;
     const FakeTauIdentifier::Data* fFakeTauData;
     const ElectronSelection::Data* fElectronData;
     const MuonSelection::Data* fMuonData;
@@ -139,7 +137,6 @@ namespace HPlus {
                     const edm::EventSetup& iSetup,
                     VertexSelection::Data& vertexData,
                     TauSelection& tauSelection,
-                    edm::Ptr<pat::Tau>& selectedTau,
                     FakeTauIdentifier& fakeTauIdentifier,
                     ElectronSelection& eVeto,
                     MuonSelection& muonVeto,
@@ -155,7 +152,6 @@ namespace HPlus {
                     const edm::EventSetup& iSetup,
                     VertexSelection::Data& vertexData,
                     TauSelection::Data& tauData,
-                    edm::Ptr<pat::Tau>& selectedTau,
                     FakeTauIdentifier& fakeTauIdentifier,
                     ElectronSelection& eVeto,
                     MuonSelection& muonVeto,
@@ -172,7 +168,7 @@ namespace HPlus {
 
     /// unique filling methods (to be called AFTER return statement)
     void fillControlPlotsAfterVertexSelection(const edm::Event& iEvent, const VertexSelection::Data& data);
-    void fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, const edm::Ptr<pat::Tau>& selectedTau, METSelection& metSelection);
+    void fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, METSelection& metSelection);
     void fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterAllSelections(const edm::Event& iEvent, double transverseMass);
@@ -224,7 +220,6 @@ namespace HPlus {
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;
     FakeTauIdentifier::Data fFakeTauData;
-    edm::Ptr<pat::Tau> fSelectedTau;
     ElectronSelection::Data fElectronData;
     MuonSelection::Data fMuonData;
     JetSelection::Data fJetData;
