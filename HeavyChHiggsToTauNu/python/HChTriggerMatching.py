@@ -39,6 +39,19 @@ tauPathLastFilter = {
     "HLT_MediumIsoPFTau35_Trk20_MET70_v6": "hltFilterSingleIsoPFTau35Trk20MET70LeadTrack20IsolationL1HLTMatched",
     }
 
+muPathLastFilter = {
+    "HLT_Mu20_v1": "hltSingleMu20L3Filtered20",
+    "HLT_Mu24_v2": "hltSingleMu24L3Filtered24",
+    "HLT_Mu30_v3": "hltSingleMu30L3Filtered30",
+    "HLT_Mu40_v1": "hltSingleMu40L3Filtered40",
+    "HLT_Mu40_v2": "hltSingleMu40L3Filtered40",
+    "HLT_Mu40_v3": "hltSingleMu40L3Filtered40",
+    "HLT_Mu40_v5": "hltSingleMu40L2QualL3Filtered40",
+    "HLT_Mu40_eta2p1_v1": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40",
+    "HLT_Mu40_eta2p1_v4": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40",
+    "HLT_Mu40_eta2p1_v5": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40",
+}
+
 def addTauTriggerMatching(process, trigger, collections, postfix="", outputCommands=None, pathFilterMap=tauPathLastFilter, throw=True):
     seq = cms.Sequence()
 
@@ -200,5 +213,25 @@ def createTauTriggerMatchingInAnalysis(trigger, taus, pathFilterMap=tauPathLastF
         patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
         deltaR = cms.double(0.4),
         filterNames = cms.vstring(matched)
+    )
+    return module
+
+def createMuonTriggerMatchingInAnalysis(trigger, muons, throw=True):
+    if isinstance(trigger, basestring):
+        trigger = [trigger]
+
+    matched = []
+    for path in trigger:
+        if path in muPathLastFilter:
+            filt = muPathLastFilter[path]
+            matched.append(filt)
+        elif throw:
+            raise Exception("No filter found for path %s" % path)
+
+    module = cms.EDProducer("HPlusMuonTriggerMatchSelector",
+        src = cms.InputTag(muons),
+        patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
+        deltaR = cms.double(0.1),
+        filterNames = cms.vstring(matched),
     )
     return module
