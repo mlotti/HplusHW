@@ -679,15 +679,12 @@ namespace HPlus {
 	 
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  selectedTau,   pvData.getNumberOfAllVertices()); 
 
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), selectedTau, jetData.getAllJets());
-
     //const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
     //    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
     //    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
 
 
     size_t nVertices = pvData.getNumberOfAllVertices();
-  
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, nVertices, selectedTau, jetData.getAllJets());
     //    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetData.getAllJets());
 
