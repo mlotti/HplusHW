@@ -38,6 +38,23 @@ namespace HPlus {
   class WrappedTH2;
 
   /**
+   * Helper class for histogram settings
+   */
+  class HistogramSettings {
+  public:
+    HistogramSettings(const edm::ParameterSet& iConfig);
+    ~HistogramSettings();
+    int bins() const { return fBins; }
+    double min() const { return fAxisMin; }
+    double max() const { return fAxisMax; }
+
+  private:
+    int fBins;
+    double fAxisMin;
+    double fAxisMax;
+  };
+
+  /**
    * Helper class to contain the plots to be plotted after each selection
    */
   class CommonPlotsFilledAtEveryStep {
@@ -171,6 +188,16 @@ namespace HPlus {
     void fillControlPlotsAtBackToBackDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data);
     void fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopChiSelection::Data& data);
     void fillControlPlotsAtEvtTopology(const edm::Event& iEvent, const EvtTopology::Data& data);
+    /// Getters for histogram bin definitions
+    const HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
+    const HistogramSettings& getEtaBinSettings() const { return fEtaBinSettings; }
+    const HistogramSettings& getPhiBinSettings() const { return fPhiBinSettings; }
+    const HistogramSettings& getRtauBinSettings() const { return fRtauBinSettings; }
+    const HistogramSettings& getNjetsBinSettings() const { return fNjetsBinSettings; }
+    const HistogramSettings& getMetBinSettings() const { return fMetBinSettings; }
+    const HistogramSettings& getTailKiller1DSettings() const { return fTailKiller1DSettings; }
+    const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
+    const HistogramSettings& getInvmassBinSettings() const { return fInvmassBinSettings; }
 
   protected:
     /// Options
@@ -209,6 +236,15 @@ namespace HPlus {
     FullHiggsMassCalculator::Data fFullHiggsMassData;
 
     // Input parameters
+    HistogramSettings fPtBinSettings;
+    HistogramSettings fEtaBinSettings;
+    HistogramSettings fPhiBinSettings;
+    HistogramSettings fRtauBinSettings;
+    HistogramSettings fNjetsBinSettings;
+    HistogramSettings fMetBinSettings;
+    HistogramSettings fTailKiller1DSettings;
+    HistogramSettings fMtBinSettings;
+    HistogramSettings fInvmassBinSettings;
 
     // Counters - needed or not?
 

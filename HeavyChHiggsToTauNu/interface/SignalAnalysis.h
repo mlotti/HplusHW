@@ -295,6 +295,7 @@ namespace HPlus {
     // Transverse mass histogram
     
 
+    // Transverse mass for top algorithms
     WrappedTH1 *hTransverseMassTopSelection;
     WrappedTH1 *hTransverseMassTopChiSelection;
     WrappedTH1 *hTransverseMassWmassCut;

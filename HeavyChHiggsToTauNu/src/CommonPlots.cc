@@ -8,6 +8,12 @@
 #include "FWCore/Framework/interface/Event.h"
 
 namespace HPlus {
+  HistogramSettings::HistogramSettings(const edm::ParameterSet& iConfig)
+  : fBins(iConfig.getUntrackedParameter<uint32_t>("nBins")),
+    fAxisMin(iConfig.getUntrackedParameter<double>("axisMin")),
+    fAxisMax(iConfig.getUntrackedParameter<double>("axisMax")) { }
+  HistogramSettings::~HistogramSettings() { }
+
   CommonPlotsFilledAtEveryStep::CommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, TFileDirectory& dir, std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel) :
     fDataObjectsCached(false),
     fEnterSelectionFlowPlot(enterSelectionFlowPlot),
@@ -190,6 +196,15 @@ namespace HPlus {
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
     fNormalisationAnalysis(0),
     fTauSelection(0), fFakeTauIdentifier(0),
+    fPtBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("ptBins")),
+    fEtaBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("etaBins")),
+    fPhiBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("phiBins")),
+    fRtauBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("rtauBins")),
+    fNjetsBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("njetsBins")),
+    fMetBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("metBins")),
+    fTailKiller1DSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("tailKiller1DBins")),
+    fMtBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("mtBins")),
+    fInvmassBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("invmassBins")),
     fMETPhiOscillationCorrectionAfterTaus(0),
     fMETPhiOscillationCorrectionAfterLeptonVeto(0),
     fMETPhiOscillationCorrectionAfterNjets(0),
@@ -217,8 +232,13 @@ namespace HPlus {
     TFileDirectory myCtrlDir = fs->mkdir("ForDataDrivenCtrlPlots");
     TFileDirectory myCtrlEWKFakeTausDir = fs->mkdir("ForDataDrivenCtrlPlotsFakeTaus");
     HistoWrapper::HistoLevel myEWKFakeTauCtrlPlotLevel = HistoWrapper::kInformative;
-    if (!fPlotSeparatelyFakeTaus)
+    HistoWrapper::HistoLevel myEWKFakeTauCtrlPlotVitalLevel = HistoWrapper::kVital;
+    HistoWrapper::HistoLevel myEWKFakeTauCtrlPlotSystematicsLevel = HistoWrapper::kVital;
+    if (!fPlotSeparatelyFakeTaus) {
       myEWKFakeTauCtrlPlotLevel = HistoWrapper::kNumberOfLevels; // Prohibit creating histograms for EWK fakes to save disc space
+      myEWKFakeTauCtrlPlotVitalLevel = HistoWrapper::kNumberOfLevels;
+      myEWKFakeTauCtrlPlotSystematicsLevel = HistoWrapper::kNumberOfLevels;
+    }
 
     // Create histograms
 
@@ -234,20 +254,20 @@ namespace HPlus {
     // veto tau selection
 
     // electron veto
-    hCtrlIdentifiedElectronPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
-    hCtrlEWKFakeTausIdentifiedElectronPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
+    hCtrlIdentifiedElectronPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausIdentifiedElectronPt = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
 
     // muon veto
-    hCtrlIdentifiedMuonPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "IdentifiedMuonPt", "IdentifiedMuonPt;Identified muon p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
-    hCtrlEWKFakeTausIdentifiedMuonPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, "IdentifiedMuonPt", "IdentifiedMuonPt;Identified muon p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
+    hCtrlIdentifiedMuonPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "IdentifiedMuonPt", "IdentifiedMuonPt;Identified muon p_{T}, GeV/c;N_{events} / 5 GeV", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausIdentifiedMuonPt = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "IdentifiedMuonPt", "IdentifiedMuonPt;Identified muon p_{T}, GeV/c;N_{events} / 5 GeV", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
 
     // jet selection
-    hCtrlNjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "Njets", "Njets;Number of selected jets;N_{events}", 20, 0., 20.);
-    hCtrlEWKFakeTausNjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "Njets", "Njets;Number of selected jets;N_{events}", 20, 0., 20.);
+    hCtrlNjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "Njets", "Njets;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+    hCtrlEWKFakeTausNjets = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, "Njets", "Njets;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
 
     // MET trigger SF
-    hCtrlNjetsAfterJetSelectionAndMETSF = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NjetsAfterJetSelectionAndMETSF", "NjetsAfterJetSelectionAndMETSF;Number of selected jets;N_{events}", 20, 0., 20.);
-    hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "NjetsAfterJetSelectionAndMETSF", "NjetsAfterJetSelectionAndMETSF;Number of selected jets;N_{events}", 20, 0., 20.);
+    hCtrlNjetsAfterJetSelectionAndMETSF = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NjetsAfterJetSelectionAndMETSF", "NjetsAfterJetSelectionAndMETSF;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+    hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, "NjetsAfterJetSelectionAndMETSF", "NjetsAfterJetSelectionAndMETSF;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
 
     // improved delta phi collinear cuts (currently the point of the std. selections)
     for (int i = 0; i < 4; ++i) {
@@ -255,39 +275,39 @@ namespace HPlus {
       std::stringstream sTitle;
       sName << "ImprovedDeltaPhiCutsJet" << i << "Collinear";
       sTitle << "ImprovedDeltaPhiCutsJet" << i << "Collinear;#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{" << i << "},MET))^{2}}, ^{o};N_{events}";
-      hCtrlQCDTailKillerCollinear.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, sName.str().c_str(), sTitle.str().c_str(), 52, 0., 260.));
+      hCtrlQCDTailKillerCollinear.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, sName.str().c_str(), sTitle.str().c_str(), fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max()));
       sName.str("");
       sTitle.str("");
       sName << "ImprovedDeltaPhiCutsJet" << i << "CollinearFakeTaus";
       sTitle << "ImprovedDeltaPhiCutsJet" << i << "CollinearFakeTaus;#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{" << i << "},MET))^{2}}, ^{o};N_{events}";
-      hCtrlEWKFakeTausQCDTailKillerCollinear.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, sName.str().c_str(), sTitle.str().c_str(), 52, 0., 260.));
+      hCtrlEWKFakeTausQCDTailKillerCollinear.push_back(fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, sName.str().c_str(), sTitle.str().c_str(), fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max()));
     }
-    hCtrlSelectedTauPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
-    hCtrlSelectedTauEtaAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", 60, -3.0, 3.0);
-    hCtrlSelectedTauPhiAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", 72, -3.1415926, 3.1415926);
-    hCtrlSelectedTauEtaVsPhiAfterStandardSelections = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_etavsphi_AfterStandardSelections", "SelectedTau_etavsphi_AfterStandardSelections;#tau #eta;#tau #phi", 60, -3.0, 3.0, 36, -3.1415926, 3.1415926);
-    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_LeadingTrackPt_AfterStandardSelections", "SelectedTau_LeadingTrackPt_AfterStandardSelections;#tau ldg.ch.particle p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
-    hCtrlSelectedTauRtauAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterStandardSelections;R_{#tau};N_{events} / 0.1", 120, 0., 1.2);
-    hCtrlSelectedTauPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_p_AfterStandardSelections", "SelectedTau_p_AfterStandardSelections;#tau p, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
-    hCtrlSelectedTauLeadingTrkPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_LeadingTrackP_AfterStandardSelections", "SelectedTau_LeadingTrackP_AfterStandardSelections;#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
-    hCtrlNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 20, 0., 20.);
-    hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
-    hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", 60, -3.0, 3.0);
-    hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", 72, -3.1415926, 3.1415926);
-    hCtrlEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, "SelectedTau_etavsphi_AfterStandardSelections", "SelectedTau_etavsphi_AfterStandardSelections;#tau #eta;#tau #phi", 60, -3.0, 3.0, 36, -3.1415926, 3.1415926);
-    hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, "SelectedTau_LeadingTrackPt_AfterStandardSelections", "SelectedTau_LeadingTrackPt_AfterStandardSelections;#tau ldg.ch.particle p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
-    hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, "SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterStandardSelections;R_{#tau};N_{events} / 0.1", 120, 0., 1.2);
-    hCtrlEWKFakeTausSelectedTauPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, "SelectedTau_p_AfterStandardSelections", "SelectedTau_p_AfterStandardSelections;#tau p, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
-    hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, "SelectedTau_LeadingTrackP_AfterStandardSelections", "SelectedTau_LeadingTrackP_AfterStandardSelections;#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
-    hCtrlEWKFakeTausNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 20, 0., 20.);
+    hCtrlSelectedTauPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlSelectedTauEtaAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
+    hCtrlSelectedTauPhiAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    hCtrlSelectedTauEtaVsPhiAfterStandardSelections = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_etavsphi_AfterStandardSelections", "SelectedTau_etavsphi_AfterStandardSelections;#tau #eta;#tau #phi", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max(), fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_LeadingTrackPt_AfterStandardSelections", "SelectedTau_LeadingTrackPt_AfterStandardSelections;#tau ldg.ch.particle p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlSelectedTauRtauAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterStandardSelections;R_{#tau};N_{events} / 0.1", fRtauBinSettings.bins(), fRtauBinSettings.min(), fRtauBinSettings.max());
+    hCtrlSelectedTauPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_p_AfterStandardSelections", "SelectedTau_p_AfterStandardSelections;#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlSelectedTauLeadingTrkPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_LeadingTrackP_AfterStandardSelections", "SelectedTau_LeadingTrackP_AfterStandardSelections;#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections = fHistoWrapper.makeTH<TH2F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_etavsphi_AfterStandardSelections", "SelectedTau_etavsphi_AfterStandardSelections;#tau #eta;#tau #phi", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max(), fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_LeadingTrackPt_AfterStandardSelections", "SelectedTau_LeadingTrackPt_AfterStandardSelections;#tau ldg.ch.particle p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterStandardSelections;R_{#tau};N_{events} / 0.1", fRtauBinSettings.bins(), fRtauBinSettings.min(), fRtauBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_p_AfterStandardSelections", "SelectedTau_p_AfterStandardSelections;#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_LeadingTrackP_AfterStandardSelections", "SelectedTau_LeadingTrackP_AfterStandardSelections;#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
 
     // MET selection
-    hCtrlMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "MET", "MET;MET, GeV;N_{events}", 100, 0., 500.);
-    hCtrlEWKFakeTausMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "MET", "MET;MET, GeV;N_{events}", 100, 0., 500.);
+    hCtrlMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "MET", "MET;MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
+    hCtrlEWKFakeTausMET = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, "MET", "MET;MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
 
     // b tagging
-    hCtrlNbjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NBjets", "NBjets;Number of identified b jets;N_{events}", 20, 0., 20.);
-    hCtrlEWKFakeTausNbjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "NBjets", "NBjets;Number of identified b jets;N_{events}", 20, 0., 20.);
+    hCtrlNbjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NBjets", "NBjets;Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+    hCtrlEWKFakeTausNbjets = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, "NBjets", "NBjets;Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
 
     // improved delta phi back to back cuts
     for (int i = 0; i < 4; ++i) {
@@ -295,12 +315,12 @@ namespace HPlus {
       std::stringstream sTitle;
       sName << "ImprovedDeltaPhiCutsJet" << i << "BackToBack";
       sTitle << "ImprovedDeltaPhiCutsJet" << i << "BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{" << i << "},MET)^{2}}, ^{o};N_{events}";
-      hCtrlQCDTailKillerBackToBack.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, sName.str().c_str(), sTitle.str().c_str(), 52, 0., 260.));
+      hCtrlQCDTailKillerBackToBack.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, sName.str().c_str(), sTitle.str().c_str(), fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max()));
       sName.str("");
       sTitle.str("");
       sName << "ImprovedDeltaPhiCutsJet" << i << "BackToBackFakeTaus";
       sTitle << "ImprovedDeltaPhiCutsJet" << i << "BackToBackFakeTaus;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{" << i << "},MET)^{2}}, ^{o};N_{events}";
-      hCtrlEWKFakeTausQCDTailKillerBackToBack.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, sName.str().c_str(), sTitle.str().c_str(), 52, 0., 260.));
+      hCtrlEWKFakeTausQCDTailKillerBackToBack.push_back(fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, sName.str().c_str(), sTitle.str().c_str(), fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max()));
     }
 
     // top selection
@@ -308,12 +328,12 @@ namespace HPlus {
     // evt topology
 
     // all selections
-    hShapeTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "shapeTransverseMass", "shapeTransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", 80, 0., 400.);
-    hShapeEWKFakeTausTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "shapeEWKFakeTausTransverseMass", "shapeEWKFakeTausTransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", 80, 0., 400.);
+    hShapeTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "shapeTransverseMass", "shapeTransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+    hShapeEWKFakeTausTransverseMass = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotSystematicsLevel, *fs, "shapeEWKFakeTausTransverseMass", "shapeEWKFakeTausTransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
 
     // all selections with full mass
-    hShapeFullMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "shapeInvariantMass", "shapeInvariantMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", 100, 0., 500.);
-    hShapeEWKFakeTausFullMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "shapeEWKFakeTausInvariantMass", "shapeEWKFakeTausInvariantMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", 100, 0., 500.);
+    hShapeFullMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "shapeInvariantMass", "shapeInvariantMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
+    hShapeEWKFakeTausFullMass = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotSystematicsLevel, *fs, "shapeEWKFakeTausInvariantMass", "shapeEWKFakeTausInvariantMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
 
   }
 

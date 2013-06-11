@@ -119,24 +119,6 @@ class HPlusOptimisationScheme:
                 print "  ",item
         sys.exit()
 
-    #def getVariationName(self, analysisName,taupt,tauIsol,tauIsolCont,rtau,jetNumber,jetEt,met,bjetNumber,bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr,dphi,topreco):
-        #myVariationName = "%s_Opt"%analysisName
-        #myVariationName += "_Taupt%.0f"%taupt
-        #myVariationName += "_%s"%tauIsol
-        #if tauIsolCont > 0:
-            #myVariationName += "%.1f"%tauIsolCont
-        #myVariationName += "_Rtau%.1f"%rtau
-        #myVariationName += "_Jet%s"%jetNumber
-        #myVariationName += "_Et%.0f"%jetEt
-        #myVariationName += "_Met%.0f"%met
-        #myVariationName += "_Bjet%s"%bjetNumber
-        #myVariationName += "_Et%.0f_discr%.1fand%.1f"%(bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr)
-        #myVariationName += "_Dphi%.0f"%dphi
-        #myVariationName += "_Topreco"+topreco
-        #myVariationName = myVariationName.replace(".","") # remove dots from name since they are forbidden
-        #myVariationName = myVariationName.replace("_","") # remove underscores from name since they are forbidden
-        #return myVariationName
-
     def createVariationModule(self, idxlist, nominalAnalysis):
         myModule = nominalAnalysis.clone()
         for i in range(0, len(self._variationItems)):
@@ -144,9 +126,9 @@ class HPlusOptimisationScheme:
         return myModule
 
     def getVariationName(self, analysisName, idxlist):
-        myName = "%s_Opt"%analysisName
+        myName = "%sOpt"%analysisName
         for i in range(0, len(self._variationItems)):
-            myName += "_%s"%self._variationItems[i].getSuffixForName(idxlist[i])
+            myName += "%s"%self._variationItems[i].getSuffixForName(idxlist[i])
         return myName.replace(".","")
 
     def doVariation(self, depth, idxlist, process, additionalCounters, commonSequence, nominalAnalysis, analysisName):

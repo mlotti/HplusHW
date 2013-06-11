@@ -50,14 +50,11 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #doHeavyAnalysis=True,
                         #customizeHeavyAnalysis=customize,
                         #useCHSJets=True,
-
                         applyTauTriggerScaleFactor=True,
                         #applyTauTriggerLowPurityScaleFactor=True,
                         #applyMETTriggerScaleFactor=True,
-
                         #doQCDTailKillerScenarios=True,
                         #doInvariantMassReconstructionScenarios=True,
-
                         #doAgainstElectronScan=True,
                         #doTauIsolationAndJetPUScan=True,
                         #doBTagScan=True,
