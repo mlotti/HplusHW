@@ -70,7 +70,6 @@ namespace HPlus {
     /// Cache data objects, to be called from CommonPlots::initialize()
     void cacheDataObjects(const VertexSelection::Data* vertexData,
                           const TauSelection::Data* tauData,
-                          edm::Ptr<pat::Tau>& selectedTau,
                           const FakeTauIdentifier::Data* fakeTauData,
                           const ElectronSelection::Data* electronData,
                           const MuonSelection::Data* muonData,
@@ -91,7 +90,6 @@ namespace HPlus {
     /// Cached data objects from silent analyze
     const VertexSelection::Data* fVertexData;
     const TauSelection::Data* fTauData;
-    edm::Ptr<pat::Tau> fSelectedTau;
     const FakeTauIdentifier::Data* fFakeTauData;
     const ElectronSelection::Data* fElectronData;
     const MuonSelection::Data* fMuonData;
@@ -139,7 +137,6 @@ namespace HPlus {
                     const edm::EventSetup& iSetup,
                     VertexSelection::Data& vertexData,
                     TauSelection& tauSelection,
-                    edm::Ptr<pat::Tau>& selectedTau,
                     FakeTauIdentifier& fakeTauIdentifier,
                     ElectronSelection& eVeto,
                     MuonSelection& muonVeto,
@@ -155,7 +152,6 @@ namespace HPlus {
                     const edm::EventSetup& iSetup,
                     VertexSelection::Data& vertexData,
                     TauSelection::Data& tauData,
-                    edm::Ptr<pat::Tau>& selectedTau,
                     FakeTauIdentifier& fakeTauIdentifier,
                     ElectronSelection& eVeto,
                     MuonSelection& muonVeto,
@@ -172,7 +168,7 @@ namespace HPlus {
 
     /// unique filling methods (to be called AFTER return statement)
     void fillControlPlotsAfterVertexSelection(const edm::Event& iEvent, const VertexSelection::Data& data);
-    void fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, const edm::Ptr<pat::Tau>& selectedTau, METSelection& metSelection);
+    void fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, METSelection& metSelection);
     void fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterAllSelections(const edm::Event& iEvent, double transverseMass);
@@ -189,15 +185,15 @@ namespace HPlus {
     void fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopChiSelection::Data& data);
     void fillControlPlotsAtEvtTopology(const edm::Event& iEvent, const EvtTopology::Data& data);
     /// Getters for histogram bin definitions
-    HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
-    HistogramSettings& getEtaBinSettings() const { return fEtaBinSettings; }
-    HistogramSettings& getPhiBinSettings() const { return fPhiBinSettings; }
-    HistogramSettings& getRtauBinSettings() const { return fRtauBinSettings; }
-    HistogramSettings& getNjetsBinSettings() const { return fNjetsBinSettings; }
-    HistogramSettings& getMetBinSettings() const { return fMetBinSettings; }
-    HistogramSettings& getTailKiller1DSettings() const { return 1DSettings; }
-    HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
-    HistogramSettings& getInvmassBinSettings() const { return fInvmassBinSettings; }
+    const HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
+    const HistogramSettings& getEtaBinSettings() const { return fEtaBinSettings; }
+    const HistogramSettings& getPhiBinSettings() const { return fPhiBinSettings; }
+    const HistogramSettings& getRtauBinSettings() const { return fRtauBinSettings; }
+    const HistogramSettings& getNjetsBinSettings() const { return fNjetsBinSettings; }
+    const HistogramSettings& getMetBinSettings() const { return fMetBinSettings; }
+    const HistogramSettings& getTailKiller1DSettings() const { return fTailKiller1DSettings; }
+    const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
+    const HistogramSettings& getInvmassBinSettings() const { return fInvmassBinSettings; }
 
   protected:
     /// Options
@@ -224,7 +220,6 @@ namespace HPlus {
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;
     FakeTauIdentifier::Data fFakeTauData;
-    edm::Ptr<pat::Tau> fSelectedTau;
     ElectronSelection::Data fElectronData;
     MuonSelection::Data fMuonData;
     JetSelection::Data fJetData;

@@ -71,38 +71,42 @@ namespace HPlus {
     size_t nVertices = fVertexData->getNumberOfAllVertices();
     hNVertices->Fill(nVertices);
 
-    if (fFakeTauData) {
-      // Fill fake tau breakdown
-      hFakeTauStatus->Fill(0); // control for Nevents
-      if (fFakeTauData->isGenuineOneProngTau())
-        hFakeTauStatus->Fill(1);
-      else if (!fFakeTauData->isGenuineOneProngTau() && fFakeTauData->isGenuineTau())
-        hFakeTauStatus->Fill(2);
-      else if (fFakeTauData->isElectronToTau()) {
-        hFakeTauStatus->Fill(3);
-        if (fFakeTauData->isEmbeddingGenuineTau())
-          hFakeTauStatus->Fill(9);
-      } else if (fFakeTauData->isMuonToTau()) {
-        hFakeTauStatus->Fill(4);
-        if (fFakeTauData->isEmbeddingGenuineTau())
-          hFakeTauStatus->Fill(10);
-      } else if (fFakeTauData->isJetToTau()) {
-        hFakeTauStatus->Fill(5);
-        if (fJetData->getReferenceJetToTau().isNonnull()) {
-          if (fJetData->getReferenceJetToTauPartonFlavour() >= 1 && fJetData->getReferenceJetToTauPartonFlavour() <= 3)
-            hFakeTauStatus->Fill(6);
-          else if (fJetData->getReferenceJetToTauPartonFlavour() >= 4 && fJetData->getReferenceJetToTauPartonFlavour() <= 5)
-            hFakeTauStatus->Fill(7);
-          if (fJetData->getReferenceJetToTauPartonFlavour() == 21)
-            hFakeTauStatus->Fill(8);
+    if (fFakeTauData && fTauData) {
+      if (fTauData->getSelectedTau().isNonnull()) {
+        // Fill fake tau breakdown
+        hFakeTauStatus->Fill(0); // control for Nevents
+        if (fFakeTauData->isGenuineOneProngTau())
+          hFakeTauStatus->Fill(1);
+        else if (!fFakeTauData->isGenuineOneProngTau() && fFakeTauData->isGenuineTau())
+          hFakeTauStatus->Fill(2);
+        else if (fFakeTauData->isElectronToTau()) {
+          hFakeTauStatus->Fill(3);
+          if (fFakeTauData->isEmbeddingGenuineTau())
+            hFakeTauStatus->Fill(9);
+        } else if (fFakeTauData->isMuonToTau()) {
+          hFakeTauStatus->Fill(4);
+          if (fFakeTauData->isEmbeddingGenuineTau())
+            hFakeTauStatus->Fill(10);
+        } else if (fFakeTauData->isJetToTau()) {
+          hFakeTauStatus->Fill(5);
+          if (fJetData->getReferenceJetToTau().isNonnull()) {
+            if (fJetData->getReferenceJetToTauPartonFlavour() >= 1 && fJetData->getReferenceJetToTauPartonFlavour() <= 3)
+              hFakeTauStatus->Fill(6);
+            else if (fJetData->getReferenceJetToTauPartonFlavour() >= 4 && fJetData->getReferenceJetToTauPartonFlavour() <= 5)
+              hFakeTauStatus->Fill(7);
+            if (fJetData->getReferenceJetToTauPartonFlavour() == 21)
+              hFakeTauStatus->Fill(8);
+          }
         }
       }
     }
-    if (fTauData && !fSelectedTau.isNull()) {
-      hTauPt->Fill(fSelectedTau->pt());
-      hTauEta->Fill(fSelectedTau->eta());
-      hTauPhi->Fill(fSelectedTau->phi());
-      //hRtau->Fill(fSelectedTauRtauValue()); // Note: will be bogus for QCD measurements
+    if (fTauData) {
+      if (fTauData->getSelectedTau().isNonnull()) {
+        hTauPt->Fill(fTauData->getSelectedTau()->pt());
+        hTauEta->Fill(fTauData->getSelectedTau()->eta());
+        hTauPhi->Fill(fTauData->getSelectedTau()->phi());
+        hRtau->Fill(fTauData->getSelectedTauRtauValue());
+      }
     }
     if (fElectronData->eventContainsElectronFromCorBJet()) {
       hSelectedElectrons->Fill(fElectronData->getSelectedElectrons().size()+10);
@@ -125,8 +129,9 @@ namespace HPlus {
     hMET->Fill(fMETData->getSelectedMET()->et());
     hMETphi->Fill(fMETData->getSelectedMET()->phi());
     hNbjets->Fill(fBJetData->getBJetCount());
-    if (fSelectedTau.isNull()) return; // Require tau beyond this point to make sense
-    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fSelectedTau), *(fMETData->getSelectedMET())) * 57.3; // converted to degrees
+    if (!fTauData) return; // Require tau beyond this point to make sense
+    if (fTauData->getSelectedTau().isNull()) return; // Require tau beyond this point to make sense
+    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData->getSelectedTau()), *(fMETData->getSelectedMET())) * 57.3; // converted to degrees
     hDeltaPhiTauMET->Fill(myDeltaPhiTauMET);
     // DeltaR_TauMETJetnMET
     int njets = 0;
@@ -147,10 +152,10 @@ namespace HPlus {
     }
 
     // transverse mass
-    double myMT = TransverseMass::reconstruct(*(fSelectedTau), *(fMETData->getSelectedMET()) );
+    double myMT = TransverseMass::reconstruct(*(fTauData->getSelectedTau()), *(fMETData->getSelectedMET()) );
     hTransverseMass->Fill(myMT);
     // full mass
-    if (!fSelectedTau.isNull() && fBJetData->passedEvent()) { // Make sure FullHiggsMassData is available
+    if (!fTauData->getSelectedTau().isNull() && fBJetData->passedEvent()) { // Make sure FullHiggsMassData is available
       if (fFullHiggsMassData->passedEvent()) {
         hFullMass->Fill(fFullHiggsMassData->getHiggsMass());
       }
@@ -159,7 +164,6 @@ namespace HPlus {
 
   void CommonPlotsFilledAtEveryStep::cacheDataObjects(const VertexSelection::Data* vertexData,
                                                       const TauSelection::Data* tauData,
-                                                      edm::Ptr<pat::Tau>& selectedTau,
                                                       const FakeTauIdentifier::Data* fakeTauData,
                                                       const ElectronSelection::Data* electronData,
                                                       const MuonSelection::Data* muonData,
@@ -171,7 +175,6 @@ namespace HPlus {
                                                       const FullHiggsMassCalculator::Data* fullHiggsMassData) {
     fVertexData = vertexData;
     fTauData = tauData;
-    fSelectedTau = selectedTau;
     fFakeTauData = fakeTauData;
     fElectronData = electronData;
     fMuonData = muonData;
@@ -347,7 +350,6 @@ namespace HPlus {
                                const edm::EventSetup& iSetup,
                                VertexSelection::Data& vertexData,
                                TauSelection& tauSelection,
-                               edm::Ptr<pat::Tau>& selectedTau,
                                FakeTauIdentifier& fakeTauIdentifier,
                                ElectronSelection& eVeto,
                                MuonSelection& muonVeto,
@@ -361,18 +363,9 @@ namespace HPlus {
     if (!vertexData.passedEvent()) return; // Require valid vertex
     fTauSelection = &tauSelection;
     fTauData = tauSelection.silentAnalyze(iEvent, iSetup, vertexData.getSelectedVertex()->z());
-    edm::Ptr<pat::Tau> mySelectedTau;
-    if (selectedTau.isNull()) {
-      if (fTauData.passedEvent())
-        mySelectedTau = fTauData.getSelectedTau();
-    } else {
-      mySelectedTau = selectedTau;
-    }
-    fSelectedTau = mySelectedTau;
     initialize(iEvent,iSetup,
                vertexData,
                fTauData,
-               fSelectedTau,
                fakeTauIdentifier,
                eVeto,
                muonVeto,
@@ -389,7 +382,6 @@ namespace HPlus {
                                const edm::EventSetup& iSetup,
                                VertexSelection::Data& vertexData,
                                TauSelection::Data& tauData,
-                               edm::Ptr<pat::Tau>& selectedTau,
                                FakeTauIdentifier& fakeTauIdentifier,
                                ElectronSelection& eVeto,
                                MuonSelection& muonVeto,
@@ -406,48 +398,40 @@ namespace HPlus {
     fVertexData = vertexData;
     if (!vertexData.passedEvent()) return; // Require valid vertex
     fTauData = tauData;
-    edm::Ptr<pat::Tau> mySelectedTau;
-    if (selectedTau.isNull()) {
-      if (fTauData.passedEvent())
-        mySelectedTau = fTauData.getSelectedTau();
-    } else {
-      mySelectedTau = selectedTau;
-    }
-    fSelectedTau = mySelectedTau;
     if (fTauData.passedEvent())
-      fFakeTauData = fakeTauIdentifier.silentMatchTauToMC(iEvent, *(fSelectedTau));
+      fFakeTauData = fakeTauIdentifier.silentMatchTauToMC(iEvent, *(fTauData.getSelectedTau()));
     fElectronData = eVeto.silentAnalyze(iEvent, iSetup);
     fMuonData = muonVeto.silentAnalyze(iEvent, iSetup, fVertexData.getSelectedVertex());
     if (fTauData.passedEvent())
-      fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fSelectedTau, fVertexData.getNumberOfAllVertices());
+      fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fVertexData.getNumberOfAllVertices());
     else
       fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices());
     fBJetData = bJetSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets());
     fTopData = topChiSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets());
     // Need to require one tau in the event
-    if (fSelectedTau.isNull()) {
+    if (fTauData.getSelectedTau().isNull()) {
       fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup);
       // Plots do not make sense if no tau has been found
       edm::Ptr<pat::Tau> myZeroTauPointer;
       for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-        (*it)->cacheDataObjects(&fVertexData, 0, fSelectedTau, 0, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, 0, &fTopData, 0);
+        (*it)->cacheDataObjects(&fVertexData, 0, 0, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, 0, &fTopData, 0);
       }
       return;
     }
     // A tau exists beyond this point, now obtain MET with residual type I MET
-    fMETData = metSelection.silentAnalyze(iEvent, iSetup, vertexData.getNumberOfAllVertices(), fSelectedTau, fJetData.getAllJets());
+    fMETData = metSelection.silentAnalyze(iEvent, iSetup, vertexData.getNumberOfAllVertices(), fTauData.getSelectedTau(), fJetData.getAllJets());
     // Obtain improved delta phi cut data object
-    fQCDTailKillerData = qcdTailKiller.silentAnalyze(iEvent, iSetup, fSelectedTau, fJetData.getSelectedJetsIncludingTau(), fMETData.getSelectedMET());
+    fQCDTailKillerData = qcdTailKiller.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fJetData.getSelectedJetsIncludingTau(), fMETData.getSelectedMET());
     // Do full higgs mass only if tau and b jet was found
     if (fBJetData.passedEvent()) {
-      fFullHiggsMassData = fullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, fSelectedTau, fBJetData, fMETData);
+      fFullHiggsMassData = fullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fBJetData, fMETData);
     }
 
     // Pass pointer to cached data objects to CommonPlotsFilledAtEveryStep
     if (!hEveryStepHistograms.size())
       throw cms::Exception("Assert") << "CommonPlots::initialize() was called before creating CommonPlots::createCommonPlotsFilledAtEveryStep()!" << endl<<  "  make first all CommonPlots::createCommonPlotsFilledAtEveryStep() and then call CommonPlots::initialize()";
     for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-      (*it)->cacheDataObjects(&fVertexData, &fTauData, fSelectedTau, &fFakeTauData, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, &fQCDTailKillerData, &fTopData, &fFullHiggsMassData);
+      (*it)->cacheDataObjects(&fVertexData, &fTauData, &fFakeTauData, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, &fQCDTailKillerData, &fTopData, &fFullHiggsMassData);
     }
   }
 
@@ -467,11 +451,10 @@ namespace HPlus {
     }
   }
 
-  void CommonPlots::fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, const edm::Ptr<pat::Tau>& selectedTau, METSelection& metSelection) {
+  void CommonPlots::fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, METSelection& metSelection) {
     fTauData = tauData;
     fFakeTauData = fakeTauData;
-    fSelectedTau = selectedTau;
-    fMETData = metSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices(), fSelectedTau, fJetData.getAllJets());
+    fMETData = metSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau(), fJetData.getAllJets());
     if (bOptionEnableNormalisationAnalysis) {
       // e->tau normalisation // FIXME tau trg scale factor needs to be applied!
       fNormalisationAnalysis->analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData, fMuonData, fJetData, fMETData);
@@ -480,8 +463,8 @@ namespace HPlus {
 
   void CommonPlots::fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent) {
     if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterTaus->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
-    hTauPhiOscillationX->Fill(fVertexData.getNumberOfAllVertices(), fSelectedTau->px());
-    hTauPhiOscillationY->Fill(fVertexData.getNumberOfAllVertices(), fSelectedTau->py());
+    hTauPhiOscillationX->Fill(fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau()->px());
+    hTauPhiOscillationY->Fill(fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau()->py());
   }
 
   void CommonPlots::fillControlPlotsAtTauVetoSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const VetoTauSelection::Data& tauVetoData) {
@@ -527,22 +510,22 @@ namespace HPlus {
     }
     // Fill control plots for selected taus after standard selections
     hCtrlSelectedTauRtauAfterStandardSelections->Fill(fTauData.getSelectedTauRtauValue());
-    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections->Fill(fSelectedTau->leadPFChargedHadrCand()->pt());
-    hCtrlSelectedTauPtAfterStandardSelections->Fill(fSelectedTau->pt());
-    hCtrlSelectedTauEtaAfterStandardSelections->Fill(fSelectedTau->eta());
-    hCtrlSelectedTauPhiAfterStandardSelections->Fill(fSelectedTau->phi());
-    hCtrlSelectedTauEtaVsPhiAfterStandardSelections->Fill(fSelectedTau->eta(), fSelectedTau->phi());
-    hCtrlSelectedTauPAfterStandardSelections->Fill(fSelectedTau->p());
-    hCtrlSelectedTauLeadingTrkPAfterStandardSelections->Fill(fSelectedTau->leadPFChargedHadrCand()->p());
+    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections->Fill(fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
+    hCtrlSelectedTauPtAfterStandardSelections->Fill(fTauData.getSelectedTau()->pt());
+    hCtrlSelectedTauEtaAfterStandardSelections->Fill(fTauData.getSelectedTau()->eta());
+    hCtrlSelectedTauPhiAfterStandardSelections->Fill(fTauData.getSelectedTau()->phi());
+    hCtrlSelectedTauEtaVsPhiAfterStandardSelections->Fill(fTauData.getSelectedTau()->eta(), fTauData.getSelectedTau()->phi());
+    hCtrlSelectedTauPAfterStandardSelections->Fill(fTauData.getSelectedTau()->p());
+    hCtrlSelectedTauLeadingTrkPAfterStandardSelections->Fill(fTauData.getSelectedTau()->leadPFChargedHadrCand()->p());
     if (fFakeTauData.isFakeTau()) {
       hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections->Fill(fTauData.getSelectedTauRtauValue());
-      hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections->Fill(fSelectedTau->leadPFChargedHadrCand()->pt());
-      hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections->Fill(fSelectedTau->pt());
-      hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections->Fill(fSelectedTau->eta());
-      hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections->Fill(fSelectedTau->phi());
-      hCtrlEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections->Fill(fSelectedTau->eta(), fSelectedTau->phi());
-      hCtrlEWKFakeTausSelectedTauPAfterStandardSelections->Fill(fSelectedTau->p());
-      hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections->Fill(fSelectedTau->leadPFChargedHadrCand()->p());
+      hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections->Fill(fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
+      hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections->Fill(fTauData.getSelectedTau()->pt());
+      hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections->Fill(fTauData.getSelectedTau()->eta());
+      hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections->Fill(fTauData.getSelectedTau()->phi());
+      hCtrlEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections->Fill(fTauData.getSelectedTau()->eta(), fTauData.getSelectedTau()->phi());
+      hCtrlEWKFakeTausSelectedTauPAfterStandardSelections->Fill(fTauData.getSelectedTau()->p());
+      hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections->Fill(fTauData.getSelectedTau()->leadPFChargedHadrCand()->p());
     }
     // Fill other control plots
     hCtrlNjetsAfterStandardSelections->Fill(fJetData.getHadronicJetCount());
@@ -591,7 +574,7 @@ namespace HPlus {
         fMETPhiOscillationCorrectionEWKControlRegion->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
       }
     }
-    //double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fSelectedTau), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
+    //double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
     hShapeTransverseMass->Fill(transverseMass);
     if (fFakeTauData.isFakeTau()) hShapeEWKFakeTausTransverseMass->Fill(transverseMass);
   }
