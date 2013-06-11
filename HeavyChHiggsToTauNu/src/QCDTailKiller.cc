@@ -13,17 +13,20 @@
 #include <sstream>
 
 namespace HPlus {
-  QCDTailKiller::Data::Data(int maxEntries):
-    fMaxEntries(maxEntries),
+  QCDTailKiller::Data::Data():
+    fMaxEntries(-1),
     fPassedEvent(false),
-    fDeltaPhiTauMET(-1.0) {
-      for (int i = 0; i < fMaxEntries; ++i) {
-        fPassedBackToBackJet.push_back(false);
-        fPassedCollinearJet.push_back(false);
-        fDeltaPhiJetMET.push_back(-1.0);
-      }
-    }
+    fDeltaPhiTauMET(-1.0) { }
   QCDTailKiller::Data::~Data() {}
+
+  void QCDTailKiller::Data::initialize(int maxEntries) {
+    fMaxEntries = maxEntries;
+    for (int i = 0; i < fMaxEntries; ++i) {
+      fPassedBackToBackJet.push_back(false);
+      fPassedCollinearJet.push_back(false);
+      fDeltaPhiJetMET.push_back(-1.0);
+    }
+  }
 
   const bool QCDTailKiller::Data::passedBackToBackCuts() const {
     for (std::vector<bool>::const_iterator it = fPassedBackToBackJet.begin(); it != fPassedBackToBackJet.end(); ++it) {
@@ -217,7 +220,8 @@ namespace HPlus {
   }
 
   QCDTailKiller::Data QCDTailKiller::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau>& tau, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met) {
-    Data output(fMaxEntries);
+    Data output;
+    output.initialize(fMaxEntries);
     increment(fSubCountAllEvents);
     // Obtain delta phi between tau and MET
     double myDeltaPhiTauMET = DeltaPhi::reconstruct(*tau, *met) * 57.3;

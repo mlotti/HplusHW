@@ -14,13 +14,22 @@ namespace HPlus {
     fPassedEvent(false) {}
   METSelection::Data::~Data() {}
 
-   const edm::Ptr<reco::MET> METSelection::Data::getSelectedMET() const {
+   const edm::Ptr<reco::MET> METSelection::Data::getPhiUncorrectedSelectedMET() const {
      if (fMETMode == METSelection::kType1)
        return getType1MET();
      else if (fMETMode == METSelection::kType2)
        throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
      // Fallback
      return fSelectedMET;
+   }
+
+   const edm::Ptr<reco::MET> METSelection::Data::getPhiCorrectedSelectedMET() const {
+     if (fMETMode == METSelection::kType1)
+       return edm::Ptr<reco::MET>(&fPhiOscillationCorrectedType1MET, 0);
+     else if (fMETMode == METSelection::kType2)
+       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
+     else
+       throw cms::Exception("Configuration") << "METSelection::Data::getPhiCorrectedSelectedMET is supported only for type I MET! " << __FILE__ << ":" << __LINE__ << std::endl;
    }
 
    const edm::Ptr<reco::MET> METSelection::Data::getType1MET() const { 
@@ -40,11 +49,23 @@ namespace HPlus {
     fCaloSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloSrc")),
     fTcSrc(iConfig.getUntrackedParameter<edm::InputTag>("tcSrc")),
     fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
+    // For type I/II correction
     fTauJetMatchingCone(iConfig.getUntrackedParameter<double>("tauJetMatchingCone")),
     fJetType1Threshold(iConfig.getUntrackedParameter<double>("jetType1Threshold")),
     fJetOffsetCorrLabel(iConfig.getUntrackedParameter<std::string>("jetOffsetCorrLabel")),
     //fType2ScaleFactor(iConfig.getUntrackedParameter<double>("type2ScaleFactor")),
     fTauIsolationDiscriminator(tauIsolationDiscriminator),
+    // For phi oscillation correction
+    fPhiCorrectionSlopeXForData(iConfig.getUntrackedParameter<double>("phiCorrectionSlopeXForData")),
+    fPhiCorrectionOffsetXForData(iConfig.getUntrackedParameter<double>("phiCorrectionOffsetXForData")),
+    fPhiCorrectionSlopeYForData(iConfig.getUntrackedParameter<double>("phiCorrectionSlopeYForData")),
+    fPhiCorrectionOffsetYForData(iConfig.getUntrackedParameter<double>("phiCorrectionOffsetYForData")),
+    fPhiCorrectionSlopeXForMC(iConfig.getUntrackedParameter<double>("phiCorrectionSlopeXForMC")),
+    fPhiCorrectionOffsetXForMC(iConfig.getUntrackedParameter<double>("phiCorrectionOffsetXForMC")),
+    fPhiCorrectionSlopeYForMC(iConfig.getUntrackedParameter<double>("phiCorrectionSlopeYForMC")),
+    fPhiCorrectionOffsetYForMC(iConfig.getUntrackedParameter<double>("phiCorrectionOffsetYForMC")),
+    bDisablingOfPhiCorrectionNotifiedStatus(true),
+    // Counters
     fTypeIAllEvents(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction all events")),
     fTypeITauRefJetFound(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction tau reference jet found")),
     fTypeITauIsolated(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction tau treated as isolated")),
@@ -87,7 +108,7 @@ namespace HPlus {
 
   METSelection::~METSelection() {}
 
-  METSelection::Data METSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+  METSelection::Data METSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -95,16 +116,16 @@ namespace HPlus {
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 
-    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, false);
+    return privateAnalyze(iEvent, iSetup, nVertices, selectedTau, allJets, false);
   }
 
-  METSelection::Data METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+  METSelection::Data METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, false);
+    return privateAnalyze(iEvent, iSetup, nVertices, selectedTau, allJets, false);
   }
 
 
-  METSelection::Data METSelection::silentAnalyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+  METSelection::Data METSelection::silentAnalyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -112,15 +133,15 @@ namespace HPlus {
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 
-    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, true);
+    return privateAnalyze(iEvent, iSetup, nVertices, selectedTau, allJets, true);
   }
 
-  METSelection::Data METSelection::analyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+  METSelection::Data METSelection::analyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, true);
+    return privateAnalyze(iEvent, iSetup, nVertices, selectedTau, allJets, true);
   }
 
-  METSelection::Data METSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, bool possiblyIsolatedTaus) {
+  METSelection::Data METSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, bool possiblyIsolatedTaus) {
     Data output;
     output.fMETMode = fSelect;
 
@@ -150,6 +171,8 @@ namespace HPlus {
       output.fType1MET = htype1met->ptrAt(0);
       output.fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(output.fType1MET, selectedTau, allJets, kType1, possiblyIsolatedTaus));
       output.fType1MET = edm::Ptr<reco::MET>(&output.fType1METCorrected, 0);
+      // MET phi correction
+      output.fPhiOscillationCorrectedType1MET.push_back(getPhiOscillationCorrectedMET(output.fType1MET, iEvent.isRealData(), nVertices));
     }
     /*
     if(htype2met.isValid()) {
@@ -201,7 +224,7 @@ namespace HPlus {
     return output;
   }
 
-  METSelection::Data METSelection::silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& allJets) {
+  METSelection::Data METSelection::silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     Data output;
     output.fMETMode = fSelect;
 
@@ -369,4 +392,28 @@ namespace HPlus {
     correctedMet.setP4(correctedP4);
     return correctedMet;
   }
+
+  reco::MET METSelection::getPhiOscillationCorrectedMET(const edm::Ptr<reco::MET>& met, const bool isRealData, const int nVertices) {
+    if (nVertices < 0) {
+      if (!bDisablingOfPhiCorrectionNotifiedStatus) {
+        bDisablingOfPhiCorrectionNotifiedStatus = true;
+        std::cout << "Warning: MET phi oscillation correction disabled!" << std::endl;
+      }
+      return *met;
+    }
+    double myCorrectionX = 0.0;
+    double myCorrectionY = 0.0;
+    if (isRealData) {
+      myCorrectionX = met->px() - (static_cast<double>(nVertices)*fPhiCorrectionSlopeXForData + fPhiCorrectionOffsetXForData);
+      myCorrectionY = met->py() - (static_cast<double>(nVertices)*fPhiCorrectionSlopeYForData + fPhiCorrectionOffsetYForData);
+    } else {
+      myCorrectionX = met->px() - (static_cast<double>(nVertices)*fPhiCorrectionSlopeXForMC + fPhiCorrectionOffsetXForMC);
+      myCorrectionY = met->py() - (static_cast<double>(nVertices)*fPhiCorrectionSlopeYForMC + fPhiCorrectionOffsetYForMC);
+    }
+    reco::Candidate::LorentzVector myCorrectedP4(myCorrectionX, myCorrectionY, 0., std::sqrt(myCorrectionX*myCorrectionX + myCorrectionY*myCorrectionY));
+    reco::MET correctedMet = *met;
+    correctedMet.setP4(myCorrectedP4);
+    return correctedMet;
+  }
+
 }

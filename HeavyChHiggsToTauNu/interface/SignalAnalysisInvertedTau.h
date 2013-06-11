@@ -35,6 +35,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CommonPlots.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
@@ -242,6 +243,35 @@ namespace HPlus {
   
 
     // Histograms
+
+   // Common plots                                                                                                                                                                                      
+    CommonPlots fCommonPlots;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeight;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETWithPhiOscillationCorrection; // temporary                                                                                                         
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTagging;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelected;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTail;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMass;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelectionFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeightFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVetoFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVetoFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelectionFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMassFakeTaus;
+
+
+
+
     WrappedTH1 *hTauDiscriminator;
     WrappedTH1 *hOneProngRtauPassedInvertedTaus;
     WrappedTH1 *hVerticesBeforeWeight;
@@ -298,8 +328,9 @@ namespace HPlus {
     WrappedTH1* hQCDTailKillerJet2CollinearBaseline;
     WrappedTH1* hQCDTailKillerJet3CollinearBaseline;
 
+    //    WrappedTH1* hCtrlNjets;
+    HistogramsInBins *hCtrlNjets;
 
-    // baseline MET histos
     HistogramsInBins *hMETBaselineTauId;
     HistogramsInBins *hMETBaselineTauIdJets;
     HistogramsInBins *hMETBaselineTauIdBtag;
