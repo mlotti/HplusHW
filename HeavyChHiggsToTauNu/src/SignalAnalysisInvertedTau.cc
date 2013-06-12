@@ -532,7 +532,8 @@ namespace HPlus {
     GenParticleAnalysis::Data genData;
     if (!iEvent.isRealData()) {
       genData = fGenparticleAnalysis.analyze(iEvent, iSetup);
-      fTree.setGenMET(genData.getGenMET());
+      if(genData.isValid())
+        fTree.setGenMET(genData.getGenMET());
     }
    
 
@@ -946,7 +947,7 @@ namespace HPlus {
 
   
   
-  bool SignalAnalysisInvertedTau::doInvertedAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData, const GenParticleAnalysis::Data genData) {
+  bool SignalAnalysisInvertedTau::doInvertedAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData) {
 
 
     JetSelection::Data     jetData = fJetSelection.analyze(iEvent, iSetup,  selectedTau,   pvData.getNumberOfAllVertices());   

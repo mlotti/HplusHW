@@ -476,6 +476,7 @@ GenParticleAnalysis = cms.untracked.PSet(
   oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
   oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
   threeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauThreeProng"),
+  enabled = cms.untracked.bool(True),
 )
 
 

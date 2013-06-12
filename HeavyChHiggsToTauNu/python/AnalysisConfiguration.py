@@ -971,7 +971,8 @@ class ConfigBuilder:
     def _cloneForVariation(self, module):
         mod = module.clone()
         mod.Tree.fill = False
-        mod.GenParticleAnalysis.enabled = False
+        if hasattr(mod, "GenParticleAnalysis"):
+            mod.GenParticleAnalysis.enabled = False
         mod.eventCounter.printMainCounter = cms.untracked.bool(False)
         mod.histogramAmbientLevel = self.histogramAmbientLevelSystematics
         return mod

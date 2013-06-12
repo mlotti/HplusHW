@@ -394,7 +394,8 @@ namespace HPlus {
 //------ GenParticle analysis (must be done here when we effectively trigger all MC)
     if (!iEvent.isRealData()) {
       GenParticleAnalysis::Data genData = fGenparticleAnalysis.analyze(iEvent, iSetup);
-      fTree.setGenMET(genData.getGenMET());
+      if(genData.isValid())
+        fTree.setGenMET(genData.getGenMET());
     }
 
 //------ Primary vertex selection
