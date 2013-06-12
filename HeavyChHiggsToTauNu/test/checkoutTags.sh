@@ -72,6 +72,7 @@ set -e
 # 5.2.2013/M.Kortelainen CMSSW_4_4_5 Backported runMEtUncertainties, technical fix to pat::Jet
 # 19.3.2013/LAW CMSSW_4_4_5 Added jet PU ID
 # 27.3.2013/M.Kortelainen CMSSW_4_4_5 Fixed re-running of the script
+# 12.6.2013/M.Kortelainen CMSSW_4_4_5 Performance improvement in pat::Trigger
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -130,6 +131,18 @@ cvs up -j 1.19 -j 1.20 PhysicsTools/PatAlgos/python/tools/helpers.py
 
 # Backport technical change in pat::Jet to reduce space
 cvs up -j 1.83 -j 1.84 DataFormats/PatCandidates/src/classes_def.xml
+
+# Take only the performance improvements on pat::Trigger from
+# V06-04-40 for now, there are data format changes which I don't want
+# to mess within v44_5
+cvs up -r V06-04-40 DataFormats/PatCandidates/interface/TriggerAlgorithm.h
+cvs up -r V06-04-40 DataFormats/PatCandidates/interface/TriggerCondition.h
+cvs up -r V06-04-40 DataFormats/PatCandidates/interface/TriggerEvent.h
+cvs up -r V06-04-40 DataFormats/PatCandidates/interface/TriggerFilter.h
+cvs up -r V06-04-40 DataFormats/PatCandidates/interface/TriggerObject.h
+cvs up -r V06-04-40 DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h
+cvs up -r V06-04-40 DataFormats/PatCandidates/interface/TriggerPath.h
+cvs up -r V06-04-40 DataFormats/PatCandidates/src/TriggerEvent.cc
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
