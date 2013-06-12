@@ -8,3 +8,9 @@ hPlusMETPtrSelectorFilter = cms.EDFilter("HPlusMETPtrSelectorFilter",
         histogramAmbientLevel = cms.untracked.string("Debug"),
         eventCounter = param.eventCounter.clone()
 )
+
+hPlusMETNoiseFilters = cms.EDFilter("HPlusMETFilters",
+	histogramAmbientLevel = cms.untracked.string("Debug"),
+	eventCounter = param.eventCounter.clone(),
+	metFilters = param.metFilters.clone()
+)

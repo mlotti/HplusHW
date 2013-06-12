@@ -177,6 +177,9 @@ process.goodPrimaryVertices = cms.EDFilter("VertexSelector",
 )
 process.commonSequence *= process.goodPrimaryVertices
 
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMETFilter_cfi")
+process.commonSequence *= process.hPlusMETNoiseFilters
+
 # Analyzer definition
 process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
         LoopingOver	        = cms.InputTag("selectedPatTausHpsPFTau"),
