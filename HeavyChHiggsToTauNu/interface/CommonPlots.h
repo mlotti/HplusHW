@@ -16,6 +16,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SplittedHistogramHandler.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NormalisationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
@@ -129,7 +130,14 @@ namespace HPlus {
    */
   class CommonPlots {
   public:
-    CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, bool plotSeparatelyFakeTaus);
+    enum AnalysisType {
+      kSignalAnalysis = 0,
+      kEmbedding,
+      kQCDFactorised,
+      kQCDInverted
+    };
+
+    CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, AnalysisType analysisType, bool isEmbeddedData = false);
     ~CommonPlots();
 
     /// Initialize data objects; call for every event
@@ -199,14 +207,16 @@ namespace HPlus {
     /// Options
     const bool bOptionEnableNormalisationAnalysis;
     const bool bOptionEnableMETOscillationAnalysis;
-    /// Indicator wheather fake taus should be handled separately
-    bool fPlotSeparatelyFakeTaus;
+    /// Analysis type 
+    AnalysisType fAnalysisType;
     /// Creates histograms
     void createHistograms();
     /// Event counter object
     EventCounter& fEventCounter;
     /// HistoWrapper object
     HistoWrapper& fHistoWrapper;
+    /// Splitted histogram handler
+    SplittedHistogramHandler fSplittedHistogramHandler;
     /// Base directory in root file for every step histograms
     edm::Service<TFileService> fs;
     TFileDirectory fCommonBaseDirectory;
@@ -259,60 +269,68 @@ namespace HPlus {
     // veto tau selection
     
     // electron veto
-    WrappedTH1* hCtrlIdentifiedElectronPt;
-    WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPt;
 
     // muon veto
-    WrappedTH1* hCtrlIdentifiedMuonPt;
-    WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPt;
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterLeptonVeto;
 
     // jet selection
-    WrappedTH1* hCtrlNjets;
-    WrappedTH1* hCtrlEWKFakeTausNjets;
+    std::vector<WrappedTH1*> hCtrlNjets;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausNjets;
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterNjets;
 
     // MET trigger SF
-    WrappedTH1* hCtrlNjetsAfterJetSelectionAndMETSF;
-    WrappedTH1* hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF;
+    std::vector<WrappedTH1*> hCtrlNjetsAfterJetSelectionAndMETSF;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF;
 
     // improved delta phi collinear cuts (currently the point of the std. selections)
-    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinear;
-    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinear;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet1;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet2;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet3;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet4;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet1;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet2;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet3;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet4;
 
-    WrappedTH1* hCtrlSelectedTauPtAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauEtaAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauPhiAfterStandardSelections;
-    WrappedTH2* hCtrlSelectedTauEtaVsPhiAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauRtauAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauPAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections;
-    WrappedTH2* hCtrlEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauPAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauEtaAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauPhiAfterStandardSelections;
+    WrappedTH2* hSelectedTauEtaVsPhiAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauRtauAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauPAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections;
+    WrappedTH2* hEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections;
 
-    WrappedTH1* hCtrlNjetsAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausNjetsAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlNjetsAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausNjetsAfterStandardSelections;
 
     // MET selection
-    WrappedTH1* hCtrlMET;
-    WrappedTH1* hCtrlEWKFakeTausMET;
+    std::vector<WrappedTH1*> hCtrlMET;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausMET;
     
     // b tagging
-    WrappedTH1* hCtrlNbjets;
-    WrappedTH1* hCtrlEWKFakeTausNbjets;
+    std::vector<WrappedTH1*> hCtrlNbjets;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausNbjets;
     
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterBjets;
 
     // improved delta phi back to back cuts
-    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBack;
-    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBack;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet1;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet2;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet3;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet4;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet1;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet2;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet3;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet4;
     
     // top selection
     
@@ -321,13 +339,13 @@ namespace HPlus {
     // all selections
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterAllSelections;
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKControlRegion;
-    WrappedTH1 *hShapeTransverseMass;
-    WrappedTH1 *hShapeEWKFakeTausTransverseMass;
+    std::vector<WrappedTH1*> hShapeTransverseMass;
+    std::vector<WrappedTH1*> hShapeEWKFakeTausTransverseMass;
     // NOTE: do we want to try out something like mT vs. rTau?
 
     // all selections with full mass
-    WrappedTH1 *hShapeFullMass;
-    WrappedTH1 *hShapeEWKFakeTausFullMass;
+    std::vector<WrappedTH1*> hShapeFullMass;
+    std::vector<WrappedTH1*> hShapeEWKFakeTausFullMass;
     // FIXME: Add unfolded histogram for mT vs. full mass
 
     // histograms to be filled at every step
