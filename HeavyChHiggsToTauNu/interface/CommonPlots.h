@@ -17,6 +17,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SplittedHistogramHandler.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CommonPlotsFilledAtEveryStep.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NormalisationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
@@ -53,76 +54,6 @@ namespace HPlus {
     int fBins;
     double fAxisMin;
     double fAxisMax;
-  };
-
-  /**
-   * Helper class to contain the plots to be plotted after each selection
-   */
-  class CommonPlotsFilledAtEveryStep {
-  public:
-    CommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, TFileDirectory& dir, std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel);
-    ~CommonPlotsFilledAtEveryStep();
-    /// Fills histograms; supply pointer to data object from analyse() call, if it exists
-    void fill();
-    /// Returns status of wheather the item will be used for creating the selection flow plot
-    const bool enterSelectionFlowPlotStatus() const { return fEnterSelectionFlowPlot; }
-    /// 
-    const std::string getSelectionFlowPlotLabel() const { return fSelectionFlowPlotLabel; }
-    /// Cache data objects, to be called from CommonPlots::initialize()
-    void cacheDataObjects(const VertexSelection::Data* vertexData,
-                          const TauSelection::Data* tauData,
-                          const FakeTauIdentifier::Data* fakeTauData,
-                          const ElectronSelection::Data* electronData,
-                          const MuonSelection::Data* muonData,
-                          const JetSelection::Data* jetData,
-                          const METSelection::Data* metData,
-                          const BTagging::Data* bJetData,
-                          const QCDTailKiller::Data* qcdTailKillerData,
-                          const TopChiSelection::Data* topData,
-                          const FullHiggsMassCalculator::Data* fullHiggsMassData);
-
-  private:
-    /// Status indicating wheather the data objects have been cached
-    bool fDataObjectsCached;
-    /// Status indicating if the step is included in the selection flow plot
-    bool fEnterSelectionFlowPlot;
-    std::string fSelectionFlowPlotLabel;
-
-    /// Cached data objects from silent analyze
-    const VertexSelection::Data* fVertexData;
-    const TauSelection::Data* fTauData;
-    const FakeTauIdentifier::Data* fFakeTauData;
-    const ElectronSelection::Data* fElectronData;
-    const MuonSelection::Data* fMuonData;
-    const JetSelection::Data* fJetData;
-    const METSelection::Data* fMETData;
-    const BTagging::Data* fBJetData;
-    const QCDTailKiller::Data* fQCDTailKillerData;
-    const TopChiSelection::Data* fTopData;
-    const FullHiggsMassCalculator::Data* fFullHiggsMassData;
-
-    /// Histograms to be plotted after every step
-    WrappedTH1* hNVertices;
-    WrappedTH1* hFakeTauStatus;
-    WrappedTH1* hTauPt;
-    WrappedTH1* hTauEta;
-    WrappedTH1* hTauPhi;
-    WrappedTH1* hRtau;
-    WrappedTH1* hSelectedElectrons;
-    WrappedTH1* hSelectedMuons;
-    WrappedTH1* hNjets;
-    WrappedTH1* hNjetsAllIdentified;
-    WrappedTH1* hMETRaw;
-    WrappedTH1* hMET;
-    WrappedTH1* hMETphi;
-    WrappedTH1* hNbjets;
-    WrappedTH1* hDeltaPhiTauMET;
-    WrappedTH1* hDeltaR_TauMETJet1MET;
-    WrappedTH1* hDeltaR_TauMETJet2MET;
-    WrappedTH1* hDeltaR_TauMETJet3MET;
-    WrappedTH1* hDeltaR_TauMETJet4MET;
-    WrappedTH1* hTransverseMass;
-    WrappedTH1* hFullMass;
   };
 
   /**
@@ -172,7 +103,7 @@ namespace HPlus {
                     FullHiggsMassCalculator& fullHiggsMassCalculator);
 
     /// create object containing histograms to be filled after all (or almost all) selection steps
-    CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
+   CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
 
     /// unique filling methods (to be called AFTER return statement)
     void fillControlPlotsAfterVertexSelection(const edm::Event& iEvent, const VertexSelection::Data& data);
