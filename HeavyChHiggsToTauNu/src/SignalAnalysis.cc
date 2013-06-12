@@ -433,7 +433,8 @@ namespace HPlus {
     GenParticleAnalysis::Data genData;
     if(!iEvent.isRealData()) {
       genData = fGenparticleAnalysis.analyze(iEvent, iSetup);
-      fTree.setGenMET(genData.getGenMET());
+      if(genData.isValid())
+        fTree.setGenMET(genData.getGenMET());
     }
 
 //------ Primary vertex
@@ -980,7 +981,7 @@ namespace HPlus {
 
   // FIXME: Move as its own class
   void SignalAnalysis::doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData, const METSelection::Data& metData, const GenParticleAnalysis::Data& genData) {
-    if (iEvent.isRealData()) return;
+    if (iEvent.isRealData() || !genData.isValid()) return;
 
     // Origin and type of selected tau
     edm::Handle <reco::GenParticleCollection> genParticles;

@@ -29,6 +29,7 @@ namespace HPlus {
       Data();
       ~Data();
 
+      bool isValid() const { return fGenMet.isNonnull(); }
       void check() const;
 
       const edm::Ptr<reco::GenMET>& getGenMET() const {
@@ -77,6 +78,7 @@ namespace HPlus {
     edm::InputTag fOneProngTauSrc;
     edm::InputTag fOneAndThreeProngTauSrc;
     edm::InputTag fThreeProngTauSrc;
+    const bool fEnabled;
 
     // Histograms
     WrappedTH1 *hHpMass;
