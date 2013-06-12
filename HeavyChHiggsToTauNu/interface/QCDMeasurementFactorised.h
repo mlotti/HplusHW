@@ -284,8 +284,7 @@ namespace HPlus {
     QCDFactorisedHistogramHandler fQCDFactorisedHistogramHandler;
 
     // Common plots
-    //CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTrigger;
-    //CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelection;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeight;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVeto;
@@ -296,8 +295,6 @@ namespace HPlus {
     // Histograms
     WrappedTH1* hVerticesBeforeWeight;
     WrappedTH1* hVerticesAfterWeight;
-    WrappedTH1* hVerticesTriggeredBeforeWeight;
-    WrappedTH1* hVerticesTriggeredAfterWeight;
 
     WrappedTH1* hSelectionFlow;
 

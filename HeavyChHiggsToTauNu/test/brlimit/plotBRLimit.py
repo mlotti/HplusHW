@@ -57,7 +57,10 @@ def doBRlimit(limits,unblindedStatus):
         legend = histograms.moveLegend(legend, dy=-0.1)
     plot.setLegend(legend)
 
-    plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": limits.getFinalstateYmaxBR()})
+    if len(limits.mass) == 1:
+        plot.createFrame("limitsBr", opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": 0, "ymax": limits.getFinalstateYmaxBR()})
+    else:
+        plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": limits.getFinalstateYmaxBR()})
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
     plot.frame.GetYaxis().SetTitle(limit.BRlimit)
 
@@ -125,7 +128,10 @@ def doLimitError(limits,unblindedStatus):
 
     plot.setLegend(histograms.moveLegend(histograms.createLegend(0.48, 0.75, 0.85, 0.92), dx=0.1, dy=-0.1))
 
-    plot.createFrame("limitsBrRelativeUncertainty", opts={"ymin": 0, "ymaxfactor": 1.5})
+    if len(limits.mass) == 1:
+        plot.createFrame("limitsBrRelativeUncertainty", opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": 0, "ymaxfactor": 1.5})
+    else:
+        plot.createFrame("limitsBrRelativeUncertainty", opts={"ymin": 0, "ymaxfactor": 1.5})
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
     plot.frame.GetYaxis().SetTitle("Uncertainty/limit")
 

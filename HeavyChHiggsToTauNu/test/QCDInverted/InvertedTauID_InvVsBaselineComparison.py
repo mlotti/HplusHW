@@ -30,7 +30,7 @@ ReBinning = False
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2012ABCD"
+dataEra = "Run2012C"
 
 searchMode = "Light"
 #searchMode = "Heavy"
@@ -109,6 +109,11 @@ def main():
 
     invertedQCD = InvertedTauID()
     invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
+
+
+    ptbin = ["4050"]
+
+
 
     metBase = plots.DataMCPlot(datasets, "BaseLine/"+baselinehisto)
     metInver = plots.DataMCPlot(datasets, "Inverted/"+invertedhisto)

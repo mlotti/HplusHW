@@ -18,7 +18,7 @@ tanbMax = 65
 #GeVUnit = "GeV/c^{2}"
 GeVUnit = "GeV"
 
-ROOT.gROOT.LoadMacro("LHCHiggsUtils.cc")
+ROOT.gROOT.LoadMacro("LHCHiggsUtils.C")
 
 def usage():
     print
@@ -105,9 +105,8 @@ def main():
 #        graphs[key] = db.graphToSharpTanbExclusion(graphs[key],xVariable,selection)
 
     graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
-#    graphs["Allowed"] = db.mhLimit("mHp",selection,"125.9+-0.6+-0.2")
     graphs["Allowed"] = db.mhLimit("mh","mHp",selection,"125.9+-3.0")
-#    graphs["Allowed"] = db.mhLimit("mHA","mHp",selection,"125.9+-3.0")
+####    graphs["Allowed"] = db.mhLimit("mH","mHp",selection,"125.9+-3.0")
 
     graphs["excluded"] = db.excluded(graphs["obs"],"ExcludedArea")
     
@@ -122,6 +121,27 @@ def main():
 
 
 def doPlot(name, graphs, limits, xlabel, scenario):
+    obs = graphs["obs"]
+#    excluded = ROOT.TGraph(obs)
+#    excluded.SetName("ExcludedArea")
+#    excluded.SetFillColor(ROOT.kGray)
+##    excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], tanbMax)
+##    excluded.SetPoint(excluded.GetN(), obs.GetX()[0], tanbMax)
+#    excluded.SetPoint(excluded.GetN(), -1, 1)
+#    excluded.SetPoint(excluded.GetN(), -1, 100)
+#    excluded.SetPoint(excluded.GetN(), obs.GetX()[0], 100)
+#    if not obs.GetY()[0] == 100: 
+#        excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
+    """            
+    excluded.SetPoint(excluded.GetN(), obs.GetX()[0], tanbMax)
+    excluded.SetPoint(excluded.GetN(), 0, tanbMax)
+    excluded.SetPoint(excluded.GetN(), 0, 1)
+    excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], 1)
+    """
+#    excluded.SetFillColor(ROOT.kGray)
+#    excluded.SetFillStyle(3354)
+#    excluded.SetLineWidth(0)
+#    excluded.SetLineColor(ROOT.kWhite)
 
     expected = graphs["exp"]
     expected.SetLineStyle(2)

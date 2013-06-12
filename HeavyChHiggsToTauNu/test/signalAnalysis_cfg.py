@@ -20,7 +20,7 @@ dataEras = [
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
-
+#myOptimisation.printOptions() # Uncomment to find out the implemented methods
 #myOptimisation.addTauPtVariation([40.0, 50.0, 60.0, 70., 80.])
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
@@ -35,14 +35,17 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,170.0,160.0,150.0])
 #myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
-#myOptimisation.disableMaxVariations()
 
 def customize(signalAnalysis):
 #    signalAnalysis.jetSelection.jetPileUpWorkingPoint = "tight" # 
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
 #    signalAnalysis.MET.METCut = 100.0 
+    # Example for setting a certain tail killer scenario for the nominal module
+    #import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+    #signalAnalysis.QCDTailKiller = param.QCDTailKillerMediumPlus.clone()
+
     print "Customisations done"
-        
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1
@@ -50,6 +53,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #doHeavyAnalysis=True,
                         #customizeHeavyAnalysis=customize,
                         #applyTauTriggerScaleFactor=False,
+                        #applyTauTriggerLowPurityScaleFactor=True,
                         #applyMETTriggerScaleFactor=True,
                         #doTriggerMatching=False,
                         #useCHSJets=True,

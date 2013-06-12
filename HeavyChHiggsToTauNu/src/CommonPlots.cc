@@ -8,6 +8,12 @@
 #include "FWCore/Framework/interface/Event.h"
 
 namespace HPlus {
+  HistogramSettings::HistogramSettings(const edm::ParameterSet& iConfig)
+  : fBins(iConfig.getUntrackedParameter<uint32_t>("nBins")),
+    fAxisMin(iConfig.getUntrackedParameter<double>("axisMin")),
+    fAxisMax(iConfig.getUntrackedParameter<double>("axisMax")) { }
+  HistogramSettings::~HistogramSettings() { }
+
   CommonPlotsFilledAtEveryStep::CommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, TFileDirectory& dir, std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel) :
     fDataObjectsCached(false),
     fEnterSelectionFlowPlot(enterSelectionFlowPlot),
@@ -49,6 +55,7 @@ namespace HPlus {
     hDeltaR_TauMETJet3MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet3MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
     hDeltaR_TauMETJet4MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet4MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
     hTransverseMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events}", 80, 0., 400.);
+    hFullMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "fullMass", "fullMass;m, GeV/c^{2};N_{events}", 100, 0., 500.);
   }
 
   CommonPlotsFilledAtEveryStep::~CommonPlotsFilledAtEveryStep() {}
@@ -57,43 +64,49 @@ namespace HPlus {
      // Safety check
      //if (!fDataObjectsCached)
      //  throw cms::Exception("Assert") << "CommonPlotsFilledAtEveryStep: data objects have not been cached! (did you forget to call CommonPlotsFilledAtEveryStep::cacheDataObjects from CommonPlots::initialize?)";
-    size_t nVertices = fVertexData->getNumberOfAllVertices();
-    hNVertices->Fill(nVertices);
     if (!fVertexData) return;
     if (!fVertexData->passedEvent()) return; // Plots do not make sense if no PV has been found
+    if (fMETData->getSelectedMET().isNull()) return; // If MET is not valid, do not plot events
 
-    if (fFakeTauData) {
-      // Fill fake tau breakdown
-      hFakeTauStatus->Fill(0); // control for Nevents
-      if (fFakeTauData->isGenuineOneProngTau())
-        hFakeTauStatus->Fill(1);
-      else if (!fFakeTauData->isGenuineOneProngTau() && fFakeTauData->isGenuineTau())
-        hFakeTauStatus->Fill(2);
-      else if (fFakeTauData->isElectronToTau()) {
-        hFakeTauStatus->Fill(3);
-        if (fFakeTauData->isEmbeddingGenuineTau())
-          hFakeTauStatus->Fill(9);
-      } else if (fFakeTauData->isMuonToTau()) {
-        hFakeTauStatus->Fill(4);
-        if (fFakeTauData->isEmbeddingGenuineTau())
-          hFakeTauStatus->Fill(10);
-      } else if (fFakeTauData->isJetToTau()) {
-        hFakeTauStatus->Fill(5);
-        if (fJetData->getReferenceJetToTau().isNonnull()) {
-          if (fJetData->getReferenceJetToTauPartonFlavour() >= 1 && fJetData->getReferenceJetToTauPartonFlavour() <= 3)
-            hFakeTauStatus->Fill(6);
-          else if (fJetData->getReferenceJetToTauPartonFlavour() >= 4 && fJetData->getReferenceJetToTauPartonFlavour() <= 5)
-            hFakeTauStatus->Fill(7);
-          if (fJetData->getReferenceJetToTauPartonFlavour() == 21)
-            hFakeTauStatus->Fill(8);
+    size_t nVertices = fVertexData->getNumberOfAllVertices();
+    hNVertices->Fill(nVertices);
+
+    if (fFakeTauData && fTauData) {
+      if (fTauData->getSelectedTau().isNonnull()) {
+        // Fill fake tau breakdown
+        hFakeTauStatus->Fill(0); // control for Nevents
+        if (fFakeTauData->isGenuineOneProngTau())
+          hFakeTauStatus->Fill(1);
+        else if (!fFakeTauData->isGenuineOneProngTau() && fFakeTauData->isGenuineTau())
+          hFakeTauStatus->Fill(2);
+        else if (fFakeTauData->isElectronToTau()) {
+          hFakeTauStatus->Fill(3);
+          if (fFakeTauData->isEmbeddingGenuineTau())
+            hFakeTauStatus->Fill(9);
+        } else if (fFakeTauData->isMuonToTau()) {
+          hFakeTauStatus->Fill(4);
+          if (fFakeTauData->isEmbeddingGenuineTau())
+            hFakeTauStatus->Fill(10);
+        } else if (fFakeTauData->isJetToTau()) {
+          hFakeTauStatus->Fill(5);
+          if (fJetData->getReferenceJetToTau().isNonnull()) {
+            if (fJetData->getReferenceJetToTauPartonFlavour() >= 1 && fJetData->getReferenceJetToTauPartonFlavour() <= 3)
+              hFakeTauStatus->Fill(6);
+            else if (fJetData->getReferenceJetToTauPartonFlavour() >= 4 && fJetData->getReferenceJetToTauPartonFlavour() <= 5)
+              hFakeTauStatus->Fill(7);
+            if (fJetData->getReferenceJetToTauPartonFlavour() == 21)
+              hFakeTauStatus->Fill(8);
+          }
         }
       }
     }
     if (fTauData) {
-      hTauPt->Fill(fTauData->getSelectedTau()->pt());
-      hTauEta->Fill(fTauData->getSelectedTau()->eta());
-      hTauPhi->Fill(fTauData->getSelectedTau()->phi());
-      hRtau->Fill(fTauData->getSelectedTauRtauValue());
+      if (fTauData->getSelectedTau().isNonnull()) {
+        hTauPt->Fill(fTauData->getSelectedTau()->pt());
+        hTauEta->Fill(fTauData->getSelectedTau()->eta());
+        hTauPhi->Fill(fTauData->getSelectedTau()->phi());
+        hRtau->Fill(fTauData->getSelectedTauRtauValue());
+      }
     }
     if (fElectronData->eventContainsElectronFromCorBJet()) {
       hSelectedElectrons->Fill(fElectronData->getSelectedElectrons().size()+10);
@@ -111,12 +124,13 @@ namespace HPlus {
     }
     hNjets->Fill(fJetData->getHadronicJetCount());
     hNjetsAllIdentified->Fill(fJetData->getAllIdentifiedJets().size());
-    if (!fTauData) return; // Need a tau for MET::Data
     if (fJetData->getAllJets().size() == 0) return; // Safety for MET selection data to exist
     hMETRaw->Fill(fMETData->getRawMET()->et());
     hMET->Fill(fMETData->getSelectedMET()->et());
     hMETphi->Fill(fMETData->getSelectedMET()->phi());
     hNbjets->Fill(fBJetData->getBJetCount());
+    if (!fTauData) return; // Require tau beyond this point to make sense
+    if (fTauData->getSelectedTau().isNull()) return; // Require tau beyond this point to make sense
     double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData->getSelectedTau()), *(fMETData->getSelectedMET())) * 57.3; // converted to degrees
     hDeltaPhiTauMET->Fill(myDeltaPhiTauMET);
     // DeltaR_TauMETJetnMET
@@ -140,6 +154,12 @@ namespace HPlus {
     // transverse mass
     double myMT = TransverseMass::reconstruct(*(fTauData->getSelectedTau()), *(fMETData->getSelectedMET()) );
     hTransverseMass->Fill(myMT);
+    // full mass
+    if (!fTauData->getSelectedTau().isNull() && fBJetData->passedEvent()) { // Make sure FullHiggsMassData is available
+      if (fFullHiggsMassData->passedEvent()) {
+        hFullMass->Fill(fFullHiggsMassData->getHiggsMass());
+      }
+    }
   }
 
   void CommonPlotsFilledAtEveryStep::cacheDataObjects(const VertexSelection::Data* vertexData,
@@ -150,7 +170,9 @@ namespace HPlus {
                                                       const JetSelection::Data* jetData,
                                                       const METSelection::Data* metData,
                                                       const BTagging::Data* bJetData,
-                                                      const TopChiSelection::Data* topData) {
+                                                      const QCDTailKiller::Data* qcdTailKillerData,
+                                                      const TopChiSelection::Data* topData,
+                                                      const FullHiggsMassCalculator::Data* fullHiggsMassData) {
     fVertexData = vertexData;
     fTauData = tauData;
     fFakeTauData = fakeTauData;
@@ -159,63 +181,162 @@ namespace HPlus {
     fJetData = jetData;
     fMETData = metData;
     fBJetData = bJetData;
+    fQCDTailKillerData = qcdTailKillerData;
     fTopData = topData;
+    fFullHiggsMassData = fullHiggsMassData;
     //fEvtTopology = evtTopology;
   }
 
   // ====================================================================================================
 
-  CommonPlots::CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper) :
-    bDataObjectsCached(false),
+  CommonPlots::CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, bool plotSeparatelyFakeTaus) :
+    bOptionEnableNormalisationAnalysis(iConfig.getUntrackedParameter<bool>("enableNormalisationAnalysis")),
+    bOptionEnableMETOscillationAnalysis(iConfig.getUntrackedParameter<bool>("enableMETOscillationAnalysis")),
+    fPlotSeparatelyFakeTaus(plotSeparatelyFakeTaus),
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper),
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
-    fNormalisationAnalysis(eventCounter, histoWrapper),
+    fNormalisationAnalysis(0),
     fTauSelection(0), fFakeTauIdentifier(0),
-    fMETPhiOscillationCorrectionAfterVertices(eventCounter, fHistoWrapper, "AfterVertices"),
-    fMETPhiOscillationCorrectionAfterTaus(eventCounter, fHistoWrapper, "AfterTaus"),
-    fMETPhiOscillationCorrectionAfterLeptonVeto(eventCounter, fHistoWrapper, "AfterLeptonVeto"),
-    fMETPhiOscillationCorrectionAfterNjets(eventCounter, fHistoWrapper, "AfterNjets") {
-      createHistograms();
-  }
-
-  CommonPlots::CommonPlots(EventCounter& eventCounter, HistoWrapper& histoWrapper) :
-    bDataObjectsCached(false),
-    fEventCounter(eventCounter),
-    fHistoWrapper(histoWrapper),
-    fCommonBaseDirectory(fs->mkdir("CommonPlots")),
-    fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
-    fNormalisationAnalysis(eventCounter, histoWrapper),
-    fTauSelection(0), fFakeTauIdentifier(0),
-    fMETPhiOscillationCorrectionAfterVertices(eventCounter, fHistoWrapper, "AfterVertices"),
-    fMETPhiOscillationCorrectionAfterTaus(eventCounter, fHistoWrapper, "AfterTaus"),
-    fMETPhiOscillationCorrectionAfterLeptonVeto(eventCounter, fHistoWrapper, "AfterLeptonVeto"),
-    fMETPhiOscillationCorrectionAfterNjets(eventCounter, fHistoWrapper, "AfterNjets") {
-      createHistograms();
+    fPtBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("ptBins")),
+    fEtaBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("etaBins")),
+    fPhiBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("phiBins")),
+    fRtauBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("rtauBins")),
+    fNjetsBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("njetsBins")),
+    fMetBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("metBins")),
+    fTailKiller1DSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("tailKiller1DBins")),
+    fMtBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("mtBins")),
+    fInvmassBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("invmassBins")),
+    fMETPhiOscillationCorrectionAfterTaus(0),
+    fMETPhiOscillationCorrectionAfterLeptonVeto(0),
+    fMETPhiOscillationCorrectionAfterNjets(0),
+    fMETPhiOscillationCorrectionAfterBjets(0),
+    fMETPhiOscillationCorrectionAfterAllSelections(0),
+    fMETPhiOscillationCorrectionEWKControlRegion(0) {
+    createHistograms();
+    // Create objects for normalisation analysis
+    if (bOptionEnableNormalisationAnalysis) {
+      fNormalisationAnalysis = new NormalisationAnalysis(eventCounter, histoWrapper);
+    }
+    // Create objects for MET phi oscillation analysis
+    if (bOptionEnableMETOscillationAnalysis) {
+      fMETPhiOscillationCorrectionAfterTaus = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterTaus");
+      fMETPhiOscillationCorrectionAfterLeptonVeto = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterLeptonVeto");
+      fMETPhiOscillationCorrectionAfterNjets = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterNjets");
+      fMETPhiOscillationCorrectionAfterBjets = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterBjets");
+      fMETPhiOscillationCorrectionAfterAllSelections = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterAllSelections");
+      fMETPhiOscillationCorrectionEWKControlRegion = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterAllSelections_EKWControlRegion");
+    }
   }
 
   void CommonPlots::createHistograms() {
+    // Create directories for data driven control plots
+    TFileDirectory myCtrlDir = fs->mkdir("ForDataDrivenCtrlPlots");
+    TFileDirectory myCtrlEWKFakeTausDir = fs->mkdir("ForDataDrivenCtrlPlotsFakeTaus");
+    HistoWrapper::HistoLevel myEWKFakeTauCtrlPlotLevel = HistoWrapper::kInformative;
+    HistoWrapper::HistoLevel myEWKFakeTauCtrlPlotVitalLevel = HistoWrapper::kVital;
+    HistoWrapper::HistoLevel myEWKFakeTauCtrlPlotSystematicsLevel = HistoWrapper::kVital;
+    if (!fPlotSeparatelyFakeTaus) {
+      myEWKFakeTauCtrlPlotLevel = HistoWrapper::kNumberOfLevels; // Prohibit creating histograms for EWK fakes to save disc space
+      myEWKFakeTauCtrlPlotVitalLevel = HistoWrapper::kNumberOfLevels;
+      myEWKFakeTauCtrlPlotSystematicsLevel = HistoWrapper::kNumberOfLevels;
+    }
+
     // Create histograms
-    TFileDirectory myTauDir = fCommonBaseDirectory.mkdir("Taus");
-    hTauPhiOscillationX = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myTauDir, "TauPhiOscillationX", "TauPhiOscillationX;N_{vertices};#tau p_{x}, GeV/c", 60, 0., 60., 500, 0, 500);
-    hTauPhiOscillationY = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myTauDir, "TauPhiOscillationY", "TauPhiOscillationY;N_{vertices};#tau p_{y}, GeV/c", 60, 0., 60., 500, 0, 500);
 
+    // vertex
 
-    // final
-    TFileDirectory myFinalDir = fCommonBaseDirectory.mkdir("Final");
-    hDphiTauMetVsDphiJet1MHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiJet1MHT", "hDphiTauMetVsDphiJet1MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{1},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
-    hDphiTauMetVsDphiJet2MHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiJet2MHT", "hDphiTauMetVsDphiJet2MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{2},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
-    hDphiTauMetVsDphiJet3MHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiJet3MHT", "hDphiTauMetVsDphiJet3MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{3},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
-    hDphiTauMetVsDphiJet4MHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiJet4MHT", "hDphiTauMetVsDphiJet4MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{4},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
-    hDphiTauMetVsDphiTauMHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiTauMHT", "hDphiTauMetVsDphiTauMHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(#tau,MHT), ^{o}", 36, 0, 180, 36, 0, 180);
-    // final for fake taus
-    TFileDirectory myFinalFakeDir = fCommonBaseDirectory.mkdir("FakeTaus_Final");
-    hDphiTauMetVsDphiJet1MHTFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalFakeDir, "hDphiTauMetVsDphiJet1MHT", "hDphiTauMetVsDphiJet1MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{1},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
-    hDphiTauMetVsDphiJet2MHTFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalFakeDir, "hDphiTauMetVsDphiJet2MHT", "hDphiTauMetVsDphiJet2MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{2},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
-    hDphiTauMetVsDphiJet3MHTFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalFakeDir, "hDphiTauMetVsDphiJet3MHT", "hDphiTauMetVsDphiJet3MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{3},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
-    hDphiTauMetVsDphiJet4MHTFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalFakeDir, "hDphiTauMetVsDphiJet4MHT", "hDphiTauMetVsDphiJet4MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{4},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
-    hDphiTauMetVsDphiTauMHTFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalFakeDir, "hDphiTauMetVsDphiTauMHT", "hDphiTauMetVsDphiTauMHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(#tau,MHT), ^{o}", 36, 0, 180, 36, 0, 180);
+    // tau selection
+
+    // tau trigger SF
+    TFileDirectory myTauDir = fCommonBaseDirectory.mkdir("TausWithSF");
+    hTauPhiOscillationX = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myTauDir, "TauPhiOscillationX", "TauPhiOscillationX;N_{vertices};#tau p_{x}, GeV/c", 60, 0., 60., 1200, -300, 300);
+    hTauPhiOscillationY = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myTauDir, "TauPhiOscillationY", "TauPhiOscillationY;N_{vertices};#tau p_{y}, GeV/c", 60, 0., 60., 1200, -300, 300);
+
+    // veto tau selection
+
+    // electron veto
+    hCtrlIdentifiedElectronPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausIdentifiedElectronPt = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+
+    // muon veto
+    hCtrlIdentifiedMuonPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "IdentifiedMuonPt", "IdentifiedMuonPt;Identified muon p_{T}, GeV/c;N_{events} / 5 GeV", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausIdentifiedMuonPt = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "IdentifiedMuonPt", "IdentifiedMuonPt;Identified muon p_{T}, GeV/c;N_{events} / 5 GeV", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+
+    // jet selection
+    hCtrlNjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "Njets", "Njets;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+    hCtrlEWKFakeTausNjets = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, "Njets", "Njets;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+
+    // MET trigger SF
+    hCtrlNjetsAfterJetSelectionAndMETSF = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NjetsAfterJetSelectionAndMETSF", "NjetsAfterJetSelectionAndMETSF;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+    hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, "NjetsAfterJetSelectionAndMETSF", "NjetsAfterJetSelectionAndMETSF;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+
+    // improved delta phi collinear cuts (currently the point of the std. selections)
+    for (int i = 0; i < 4; ++i) {
+      std::stringstream sName;
+      std::stringstream sTitle;
+      sName << "ImprovedDeltaPhiCutsJet" << i << "Collinear";
+      sTitle << "ImprovedDeltaPhiCutsJet" << i << "Collinear;#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{" << i << "},MET))^{2}}, ^{o};N_{events}";
+      hCtrlQCDTailKillerCollinear.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, sName.str().c_str(), sTitle.str().c_str(), fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max()));
+      sName.str("");
+      sTitle.str("");
+      sName << "ImprovedDeltaPhiCutsJet" << i << "CollinearFakeTaus";
+      sTitle << "ImprovedDeltaPhiCutsJet" << i << "CollinearFakeTaus;#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{" << i << "},MET))^{2}}, ^{o};N_{events}";
+      hCtrlEWKFakeTausQCDTailKillerCollinear.push_back(fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, sName.str().c_str(), sTitle.str().c_str(), fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max()));
+    }
+    hCtrlSelectedTauPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlSelectedTauEtaAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
+    hCtrlSelectedTauPhiAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    hCtrlSelectedTauEtaVsPhiAfterStandardSelections = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_etavsphi_AfterStandardSelections", "SelectedTau_etavsphi_AfterStandardSelections;#tau #eta;#tau #phi", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max(), fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_LeadingTrackPt_AfterStandardSelections", "SelectedTau_LeadingTrackPt_AfterStandardSelections;#tau ldg.ch.particle p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlSelectedTauRtauAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterStandardSelections;R_{#tau};N_{events} / 0.1", fRtauBinSettings.bins(), fRtauBinSettings.min(), fRtauBinSettings.max());
+    hCtrlSelectedTauPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_p_AfterStandardSelections", "SelectedTau_p_AfterStandardSelections;#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlSelectedTauLeadingTrkPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "SelectedTau_LeadingTrackP_AfterStandardSelections", "SelectedTau_LeadingTrackP_AfterStandardSelections;#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myCtrlDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections = fHistoWrapper.makeTH<TH2F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_etavsphi_AfterStandardSelections", "SelectedTau_etavsphi_AfterStandardSelections;#tau #eta;#tau #phi", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max(), fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_LeadingTrackPt_AfterStandardSelections", "SelectedTau_LeadingTrackPt_AfterStandardSelections;#tau ldg.ch.particle p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterStandardSelections;R_{#tau};N_{events} / 0.1", fRtauBinSettings.bins(), fRtauBinSettings.min(), fRtauBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_p_AfterStandardSelections", "SelectedTau_p_AfterStandardSelections;#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "SelectedTau_LeadingTrackP_AfterStandardSelections", "SelectedTau_LeadingTrackP_AfterStandardSelections;#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    hCtrlEWKFakeTausNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotLevel, myCtrlEWKFakeTausDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+
+    // MET selection
+    hCtrlMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "MET", "MET;MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
+    hCtrlEWKFakeTausMET = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, "MET", "MET;MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
+
+    // b tagging
+    hCtrlNbjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NBjets", "NBjets;Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+    hCtrlEWKFakeTausNbjets = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, "NBjets", "NBjets;Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+
+    // improved delta phi back to back cuts
+    for (int i = 0; i < 4; ++i) {
+      std::stringstream sName;
+      std::stringstream sTitle;
+      sName << "ImprovedDeltaPhiCutsJet" << i << "BackToBack";
+      sTitle << "ImprovedDeltaPhiCutsJet" << i << "BackToBack;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{" << i << "},MET)^{2}}, ^{o};N_{events}";
+      hCtrlQCDTailKillerBackToBack.push_back(fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, sName.str().c_str(), sTitle.str().c_str(), fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max()));
+      sName.str("");
+      sTitle.str("");
+      sName << "ImprovedDeltaPhiCutsJet" << i << "BackToBackFakeTaus";
+      sTitle << "ImprovedDeltaPhiCutsJet" << i << "BackToBackFakeTaus;#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{" << i << "},MET)^{2}}, ^{o};N_{events}";
+      hCtrlEWKFakeTausQCDTailKillerBackToBack.push_back(fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotVitalLevel, myCtrlEWKFakeTausDir, sName.str().c_str(), sTitle.str().c_str(), fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max()));
+    }
+
+    // top selection
+
+    // evt topology
+
+    // all selections
+    hShapeTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "shapeTransverseMass", "shapeTransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+    hShapeEWKFakeTausTransverseMass = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotSystematicsLevel, *fs, "shapeEWKFakeTausTransverseMass", "shapeEWKFakeTausTransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+
+    // all selections with full mass
+    hShapeFullMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "shapeInvariantMass", "shapeInvariantMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
+    hShapeEWKFakeTausFullMass = fHistoWrapper.makeTH<TH1F>(myEWKFakeTauCtrlPlotSystematicsLevel, *fs, "shapeEWKFakeTausInvariantMass", "shapeEWKFakeTausInvariantMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
 
   }
 
@@ -235,24 +356,26 @@ namespace HPlus {
                                JetSelection& jetSelection,
                                METSelection& metSelection,
                                BTagging& bJetSelection,
+                               QCDTailKiller& qcdTailKiller,
                                TopChiSelection& topChiSelection,
-                               EvtTopology& evtTopology) {
+                               EvtTopology& evtTopology,
+                               FullHiggsMassCalculator& fullHiggsMassCalculator) {
     if (!vertexData.passedEvent()) return; // Require valid vertex
     fTauSelection = &tauSelection;
-    TauSelection::Data tauData = tauSelection.silentAnalyze(iEvent, iSetup, vertexData.getSelectedVertex()->z());
-    edm::Ptr<pat::Tau> myNullPointer;
-    fSelectedTau = myNullPointer;
+    fTauData = tauSelection.silentAnalyze(iEvent, iSetup, vertexData.getSelectedVertex()->z());
     initialize(iEvent,iSetup,
                vertexData,
-               tauData,
+               fTauData,
                fakeTauIdentifier,
                eVeto,
                muonVeto,
                jetSelection,
                metSelection,
                bJetSelection,
+               qcdTailKiller,
                topChiSelection,
-               evtTopology);
+               evtTopology,
+               fullHiggsMassCalculator);
   }
 
   void CommonPlots::initialize(const edm::Event& iEvent,
@@ -265,13 +388,12 @@ namespace HPlus {
                                JetSelection& jetSelection,
                                METSelection& metSelection,
                                BTagging& bJetSelection,
+                               QCDTailKiller& qcdTailKiller,
                                TopChiSelection& topChiSelection,
-                               EvtTopology& evtTopology) {
+                               EvtTopology& evtTopology,
+                               FullHiggsMassCalculator& fullHiggsMassCalculator) {
     //fTauSelection = &tauSelection;
     fFakeTauIdentifier = &fakeTauIdentifier;
-    // Obtain data objects only, if they have not yet been cached
-    //if (bDataObjectsCached) return;
-    //bDataObjectsCached = true;
     // Obtain data objects
     fVertexData = vertexData;
     if (!vertexData.passedEvent()) return; // Require valid vertex
@@ -284,23 +406,32 @@ namespace HPlus {
       fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fVertexData.getNumberOfAllVertices());
     else
       fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices());
+    fBJetData = bJetSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets());
+    fTopData = topChiSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets());
     // Need to require one tau in the event
-    if (!fTauData.passedEvent()) {
+    if (fTauData.getSelectedTau().isNull()) {
+      fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup);
       // Plots do not make sense if no tau has been found
+      edm::Ptr<pat::Tau> myZeroTauPointer;
       for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-        (*it)->cacheDataObjects(&fVertexData, 0, 0, &fElectronData, &fMuonData, &fJetData, 0, 0, 0);
+        (*it)->cacheDataObjects(&fVertexData, 0, 0, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, 0, &fTopData, 0);
       }
       return;
     }
-    fMETData = metSelection.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fJetData.getAllJets());
-    fBJetData = bJetSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets());
-    fTopData = topChiSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets());
+    // A tau exists beyond this point, now obtain MET with residual type I MET
+    fMETData = metSelection.silentAnalyze(iEvent, iSetup, vertexData.getNumberOfAllVertices(), fTauData.getSelectedTau(), fJetData.getAllJets());
+    // Obtain improved delta phi cut data object
+    fQCDTailKillerData = qcdTailKiller.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fJetData.getSelectedJetsIncludingTau(), fMETData.getSelectedMET());
+    // Do full higgs mass only if tau and b jet was found
+    if (fBJetData.passedEvent()) {
+      fFullHiggsMassData = fullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fBJetData, fMETData);
+    }
 
     // Pass pointer to cached data objects to CommonPlotsFilledAtEveryStep
     if (!hEveryStepHistograms.size())
       throw cms::Exception("Assert") << "CommonPlots::initialize() was called before creating CommonPlots::createCommonPlotsFilledAtEveryStep()!" << endl<<  "  make first all CommonPlots::createCommonPlotsFilledAtEveryStep() and then call CommonPlots::initialize()";
     for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-      (*it)->cacheDataObjects(&fVertexData, &fTauData, &fFakeTauData, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, &fTopData);
+      (*it)->cacheDataObjects(&fVertexData, &fTauData, &fFakeTauData, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, &fQCDTailKillerData, &fTopData, &fFullHiggsMassData);
     }
   }
 
@@ -311,84 +442,146 @@ namespace HPlus {
     return myObject;
   }
 
-  void CommonPlots::fillControlPlots(const TriggerSelection::Data& data) {
-    
-  }
-
-  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data) {
+//------ Control plot filling
+  void CommonPlots::fillControlPlotsAfterVertexSelection(const edm::Event& iEvent, const VertexSelection::Data& data) {
     //----- MET phi oscillation
-    edm::Handle<edm::View<reco::MET> > htype1met; // Ugly temp hack
-    iEvent.getByLabel("patType1CorrectedPFMet", htype1met);
-    fMETPhiOscillationCorrectionAfterVertices.analyze(iEvent, fVertexData.getNumberOfAllVertices(), htype1met->ptrAt(0));
-
-    //fVertexData = data;
-    if(fTauSelection && fFakeTauIdentifier) {
-      fNormalisationAnalysis.analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
+    //fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup, fJetData.getAllJets());
+    if(bOptionEnableNormalisationAnalysis && fTauSelection && fFakeTauIdentifier) {
+      fNormalisationAnalysis->analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
     }
   }
 
-  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, const edm::Ptr<pat::Tau>& selectedTau, METSelection& metSelection) {
+  void CommonPlots::fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, METSelection& metSelection) {
     fTauData = tauData;
     fFakeTauData = fakeTauData;
-    fSelectedTau = selectedTau;
-    fMETData = metSelection.silentAnalyze(iEvent, iSetup, fSelectedTau, fJetData.getAllJets());
-    //----- MET phi oscillation
-    fMETPhiOscillationCorrectionAfterTaus.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
-
-    hTauPhiOscillationX->Fill(fVertexData.getNumberOfAllVertices(), tauData.getSelectedTau()->px());
-    hTauPhiOscillationY->Fill(fVertexData.getNumberOfAllVertices(), tauData.getSelectedTau()->py());
-
-    // e->tau normalisation
-    fNormalisationAnalysis.analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData, fMuonData, fJetData, fMETData);
+    fMETData = metSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau(), fJetData.getAllJets());
+    if (bOptionEnableNormalisationAnalysis) {
+      // e->tau normalisation // FIXME tau trg scale factor needs to be applied!
+      fNormalisationAnalysis->analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData, fMuonData, fJetData, fMETData);
+    }
   }
 
-  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const ElectronSelection::Data& data) {
-    //fElectronData = data;
+  void CommonPlots::fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent) {
+    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterTaus->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+    hTauPhiOscillationX->Fill(fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau()->px());
+    hTauPhiOscillationY->Fill(fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau()->py());
   }
 
-  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const MuonSelection::Data& data) {
-    //fMuonData = data;
-    fMETPhiOscillationCorrectionAfterLeptonVeto.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
-  }
-
-  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const JetSelection::Data& data) {
-    //fJetData = data;
-    fMETPhiOscillationCorrectionAfterNjets.analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
-  }
-
-  void CommonPlots::fillControlPlots(const METSelection::Data& data) {
+  void CommonPlots::fillControlPlotsAtTauVetoSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const VetoTauSelection::Data& tauVetoData) {
     
   }
 
-  void CommonPlots::fillControlPlots(const BTagging::Data& data) {
+  void CommonPlots::fillControlPlotsAtElectronSelection(const edm::Event& iEvent, const ElectronSelection::Data& data) {
+    fElectronData = data;
+    hCtrlIdentifiedElectronPt->Fill(data.getSelectedElectronPtBeforePtCut());
+    if (fFakeTauData.isFakeTau()) hCtrlEWKFakeTausIdentifiedElectronPt->Fill(data.getSelectedElectronPtBeforePtCut());
+  }
+
+  void CommonPlots::fillControlPlotsAtMuonSelection(const edm::Event& iEvent, const MuonSelection::Data& data) {
+    fMuonData = data;
+    hCtrlIdentifiedMuonPt->Fill(data.getSelectedMuonPtBeforePtCut());
+    if (fFakeTauData.isFakeTau()) hCtrlEWKFakeTausIdentifiedMuonPt->Fill(data.getSelectedMuonPtBeforePtCut());
+    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterLeptonVeto->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+  }
+
+  void CommonPlots::fillControlPlotsAtJetSelection(const edm::Event& iEvent, const JetSelection::Data& data) {
+    fJetData = data;
+    hCtrlNjets->Fill(data.getHadronicJetCount());
+    if (fFakeTauData.isFakeTau()) hCtrlEWKFakeTausNjets->Fill(data.getHadronicJetCount());
+    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterNjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+  }
+
+  void CommonPlots::fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent) {
+    hCtrlNjetsAfterJetSelectionAndMETSF->Fill(fJetData.getHadronicJetCount());
+    if (fFakeTauData.isFakeTau()) hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF->Fill(fJetData.getHadronicJetCount());
+  }
+
+  void CommonPlots::fillControlPlotsAtCollinearDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data) {
+    fQCDTailKillerData = data;
+    bool myPassStatus = true;
+    for (int i = 0; i < data.getNConsideredJets(); ++i) {
+      if (i < 4 && myPassStatus) { // protection
+        hCtrlQCDTailKillerCollinear[i]->Fill(data.getRadiusFromCollinearCorner(i)); // Make control plot before cut
+        if (fFakeTauData.isFakeTau())
+          hCtrlEWKFakeTausQCDTailKillerCollinear[i]->Fill(data.getRadiusFromCollinearCorner(i)); // Make control plot before cut
+        if (!data.passCollinearCutForJet(i))
+          myPassStatus = false;
+      }
+    }
+    // Fill control plots for selected taus after standard selections
+    hCtrlSelectedTauRtauAfterStandardSelections->Fill(fTauData.getSelectedTauRtauValue());
+    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections->Fill(fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
+    hCtrlSelectedTauPtAfterStandardSelections->Fill(fTauData.getSelectedTau()->pt());
+    hCtrlSelectedTauEtaAfterStandardSelections->Fill(fTauData.getSelectedTau()->eta());
+    hCtrlSelectedTauPhiAfterStandardSelections->Fill(fTauData.getSelectedTau()->phi());
+    hCtrlSelectedTauEtaVsPhiAfterStandardSelections->Fill(fTauData.getSelectedTau()->eta(), fTauData.getSelectedTau()->phi());
+    hCtrlSelectedTauPAfterStandardSelections->Fill(fTauData.getSelectedTau()->p());
+    hCtrlSelectedTauLeadingTrkPAfterStandardSelections->Fill(fTauData.getSelectedTau()->leadPFChargedHadrCand()->p());
+    if (fFakeTauData.isFakeTau()) {
+      hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections->Fill(fTauData.getSelectedTauRtauValue());
+      hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections->Fill(fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
+      hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections->Fill(fTauData.getSelectedTau()->pt());
+      hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections->Fill(fTauData.getSelectedTau()->eta());
+      hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections->Fill(fTauData.getSelectedTau()->phi());
+      hCtrlEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections->Fill(fTauData.getSelectedTau()->eta(), fTauData.getSelectedTau()->phi());
+      hCtrlEWKFakeTausSelectedTauPAfterStandardSelections->Fill(fTauData.getSelectedTau()->p());
+      hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections->Fill(fTauData.getSelectedTau()->leadPFChargedHadrCand()->p());
+    }
+    // Fill other control plots
+    hCtrlNjetsAfterStandardSelections->Fill(fJetData.getHadronicJetCount());
+    if (fFakeTauData.isFakeTau()) hCtrlEWKFakeTausNjetsAfterStandardSelections->Fill(fJetData.getHadronicJetCount());
+  }
+
+  void CommonPlots::fillControlPlotsAtMETSelection(const edm::Event& iEvent, const METSelection::Data& data) {
+    fMETData = data;
+    hCtrlMET->Fill(data.getSelectedMET()->et());
+    if (fFakeTauData.isFakeTau()) hCtrlEWKFakeTausMET->Fill(data.getSelectedMET()->et());
+  }
+
+  void CommonPlots::fillControlPlotsAtBtagging(const edm::Event& iEvent, const BTagging::Data& data) {
+    fBJetData = data;
+    hCtrlNbjets->Fill(data.getBJetCount());
+    if (fFakeTauData.isFakeTau()) hCtrlEWKFakeTausNbjets->Fill(data.getBJetCount());
+    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+  }
+
+  void CommonPlots::fillControlPlotsAtBackToBackDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data) {
+    fQCDTailKillerData = data;
+    bool myPassStatus = true;
+    for (int i = 0; i < data.getNConsideredJets(); ++i) {
+      if (i < 4 && myPassStatus) { // protection
+        hCtrlQCDTailKillerBackToBack[i]->Fill(data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
+        if (fFakeTauData.isFakeTau())
+          hCtrlEWKFakeTausQCDTailKillerBackToBack[i]->Fill(data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
+        if (!data.passBackToBackCutForJet(i))
+          myPassStatus = false;
+      }
+    }
+  }
+
+  void CommonPlots::fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopChiSelection::Data& data) {
     
   }
 
-  void CommonPlots::fillControlPlots(const TopChiSelection::Data& data) {
+  void CommonPlots::fillControlPlotsAtEvtTopology(const edm::Event& iEvent, const EvtTopology::Data& data) {
     
   }
 
-   void CommonPlots::fillControlPlots(const EvtTopology::Data& data) {
-    
+  void CommonPlots::fillControlPlotsAfterAllSelections(const edm::Event& iEvent, double transverseMass) {
+    if (bOptionEnableMETOscillationAnalysis) {
+      fMETPhiOscillationCorrectionAfterAllSelections->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+      if (transverseMass < 80.0) {
+        fMETPhiOscillationCorrectionEWKControlRegion->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+      }
+    }
+    //double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
+    hShapeTransverseMass->Fill(transverseMass);
+    if (fFakeTauData.isFakeTau()) hShapeEWKFakeTausTransverseMass->Fill(transverseMass);
   }
 
-  void CommonPlots::fillFinalPlots() {
-    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
-
-    hDphiTauMetVsDphiJet1MHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet1());
-    hDphiTauMetVsDphiJet2MHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet2());
-    hDphiTauMetVsDphiJet3MHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet3());
-    hDphiTauMetVsDphiJet4MHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet4());
-    hDphiTauMetVsDphiTauMHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTTau());
-  }
-
-  void CommonPlots::fillFinalPlotsForFakeTaus() {
-    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
-
-    hDphiTauMetVsDphiJet1MHTFakeTaus->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet1());
-    hDphiTauMetVsDphiJet2MHTFakeTaus->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet2());
-    hDphiTauMetVsDphiJet3MHTFakeTaus->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet3());
-    hDphiTauMetVsDphiJet4MHTFakeTaus->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet4());
-    hDphiTauMetVsDphiTauMHTFakeTaus->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTTau());
+  void CommonPlots::fillControlPlotsAfterAllSelectionsWithFullMass(const edm::Event& iEvent, FullHiggsMassCalculator::Data& data) {
+    fFullHiggsMassData = data;
+    hShapeFullMass->Fill(data.getHiggsMass());
+    if (fFakeTauData.isFakeTau()) hShapeEWKFakeTausFullMass->Fill(data.getHiggsMass());
   }
 }
