@@ -129,6 +129,9 @@ cvs up -C PhysicsTools/PatUtils/python/tools/metUncertaintyTools.py
 patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PatUtils_metUncertaintyTools_b4_2_X_cvMEtCorr_13Feb2012_JEC11V12.patch
 cvs up -j 1.19 -j 1.20 PhysicsTools/PatAlgos/python/tools/helpers.py
 
+# jets
+cvs co -r V05-01-06       JetMETCorrections/Modules
+
 # Backport technical change in pat::Jet to reduce space
 cvs up -j 1.83 -j 1.84 DataFormats/PatCandidates/src/classes_def.xml
 
