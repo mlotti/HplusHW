@@ -54,7 +54,7 @@ defaultVersions = [
 #    "v44_4_2_seed1"
 
 #    "v44_5_notrg2"
-    "v44_5_1_notrg"
+    "v44_5_1_notrg2"
 ]
 skimVersion = "v44_5_1"
 genTauSkimVersion = "v44_5"
@@ -280,7 +280,7 @@ def createTasks(opts, step, version=None):
         multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..", crabConfigTemplate=crabcfgtemplate)
 
         if step in ["skim", "embedding", "genTauSkim"]:
-            multicrab.addCommonLine("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/embedding/CMSSW_4_4_X")
+            multicrab.addCommonLine("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X")
 
         multicrab.extendDatasets(workflow, datasets)
 

@@ -547,7 +547,7 @@ def addEmbeddingEmbedding_v44_5_1(datasets):
     def addEmbedding(version, definitions):
         addEmbeddingEmbedding_44X(skimVersion, version, datasets, definitions)
 
-    addEmbedding("v44_5_1_notrg", {
+    addEmbedding("v44_5_1_notrg2", {
         "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 0}),
         })
 
