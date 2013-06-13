@@ -592,11 +592,7 @@ namespace HPlus {
 //------ Improved delta phi cut, a.k.a. QCD tail killer - collinear part
     const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metDataTmp.getSelectedMET());
     fCommonPlots.fillControlPlotsAtCollinearDeltaPhiCuts(iEvent, qcdTailKillerDataCollinear);
-    for (int i = 0; i < qcdTailKillerDataCollinear.getNConsideredJets(); ++i) {
-      if (i < 4) { // protection
-        if (!qcdTailKillerDataCollinear.passCollinearCutForJet(i)) return false;
-      }
-    }
+    if (!qcdTailKillerDataCollinear.passedCollinearCuts()) return false;
     increment(fQCDTailKillerCollinearCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderDeltaPhiCollinearSelection, tauData);
 
@@ -639,17 +635,17 @@ namespace HPlus {
 
 //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    // Apply scale factor as weight to event
+    if (!iEvent.isRealData()) {
+      fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fEventWeight.multiplyWeight(btagData.getScaleFactor());
+    }
     fCommonPlots.fillControlPlotsAtBtagging(iEvent, btagData);
     if(!btagData.passedEvent()) return false;
     fCommonPlotsAfterBTagging->fill();
     if (myFakeTauStatus) fCommonPlotsAfterBTaggingFakeTaus->fill();
     increment(fBTaggingCounter);
 
-    // Apply scale factor as weight to event
-    if (!iEvent.isRealData()) {
-      fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
-      fEventWeight.multiplyWeight(btagData.getScaleFactor());
-    }
    
     increment(fBTaggingScaleFactorCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderBTagSelection, tauData);
@@ -663,11 +659,7 @@ namespace HPlus {
 //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
     fCommonPlots.fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, qcdTailKillerData);
-    for (int i = 0; i < qcdTailKillerData.getNConsideredJets(); ++i) {
-      if (i < 4) { // protection
-        if (!qcdTailKillerData.passBackToBackCutForJet(i)) return false;
-      }
-    }
+    if (!qcdTailKillerData.passedBackToBackCuts()) return false;
     increment(fQCDTailKillerBackToBackCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderDeltaPhiBackToBackSelection, tauData);
 
