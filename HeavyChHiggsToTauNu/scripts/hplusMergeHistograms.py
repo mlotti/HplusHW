@@ -13,8 +13,8 @@ re_histos = []
 re_se = re.compile("newPfn =\s*(?P<url>\S+)")
 replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://madhatter.csc.fi:1094")
 
-def getHistogramFile(stdoutFile):
-    multicrab.assertJobSucceeded(stdoutFile)
+def getHistogramFile(stdoutFile, opts):
+    multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
     histoFile = None
     f = open(stdoutFile)
     for line in f:
@@ -28,8 +28,8 @@ def getHistogramFile(stdoutFile):
     f.close()
     return histoFile
 
-def getHistogramFileSE(stdoutFile):
-    multicrab.assertJobSucceeded(stdoutFile)
+def getHistogramFileSE(stdoutFile, opts):
+    multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
     histoFile = None
     f = open(stdoutFile)
     for line in f:
@@ -150,13 +150,13 @@ def main(opts, args):
         for f in stdoutFiles:
             try:
                 if opts.filesInSE:
-                    histoFile = getHistogramFileSE(f)
+                    histoFile = getHistogramFileSE(f, opts)
                     if histoFile != None:
                         files.append(histoFile)
                     else:
                         print "Task %s, skipping job %s: input root file not found from stdout" % (d, f)
                 else:
-                    histoFile = getHistogramFile(f)
+                    histoFile = getHistogramFile(f, opts)
                     if histoFile != None:
                         path = os.path.join(os.path.dirname(f), histoFile)
                         if os.path.exists(path):
@@ -261,6 +261,8 @@ if __name__ == "__main__":
                       help="Merge at most this many files together, possibly resulting to multiple merged files. Use case: large ntuples. (default: -1 to merge all files to one)")
     parser.add_option("--filesInSE", dest="filesInSE", default=False, action="store_true",
                       help="The ROOT files to be merged are in an SE, merge the files from there. File locations are read from CMSSW_*.stdout files. NOTE: TTrees are not merged (it is assumed that due to TTrees the files are so big that they have to be stored in SE), but are replaced with TList of strings of the PFN's of the files via xrootd protocol.")
+    parser.add_option("--allowJobExitCode", dest="allowJobExitCodes", default=[], action="append", type="int",
+                      help="Allow merging files from this non-zero job exit code (zero exe exit code is still required). Can be given multiple times.")
     parser.add_option("--verbose", dest="verbose", default=False, action="store_true",
                       help="Verbose mode")
     
