@@ -71,6 +71,7 @@ namespace HPlus {
     CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, AnalysisType analysisType, bool isEmbeddedData = false);
     ~CommonPlots();
 
+    void disableCommonPlotsFilledAtEveryStep() { bDisableCommonPlotsFilledAtEveryStep = true; }
     /// Initialize data objects; call for every event
     void initialize(const edm::Event& iEvent,
                     const edm::EventSetup& iSetup,
@@ -138,7 +139,8 @@ namespace HPlus {
     /// Options
     const bool bOptionEnableNormalisationAnalysis;
     const bool bOptionEnableMETOscillationAnalysis;
-    /// Analysis type 
+    /// Analysis type
+    bool bDisableCommonPlotsFilledAtEveryStep;
     AnalysisType fAnalysisType;
     /// Creates histograms
     void createHistograms();

@@ -17,6 +17,7 @@ namespace HPlus {
   CommonPlots::CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, AnalysisType analysisType, bool isEmbeddedData) :
     bOptionEnableNormalisationAnalysis(iConfig.getUntrackedParameter<bool>("enableNormalisationAnalysis")),
     bOptionEnableMETOscillationAnalysis(iConfig.getUntrackedParameter<bool>("enableMETOscillationAnalysis")),
+    bDisableCommonPlotsFilledAtEveryStep(false),
     fAnalysisType(analysisType),
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper),
@@ -251,7 +252,7 @@ namespace HPlus {
     }
 
     // Pass pointer to cached data objects to CommonPlotsFilledAtEveryStep
-    if (!hEveryStepHistograms.size())
+    if (!hEveryStepHistograms.size() && !bDisableCommonPlotsFilledAtEveryStep)
       throw cms::Exception("Assert") << "CommonPlots::initialize() was called before creating CommonPlots::createCommonPlotsFilledAtEveryStep()!" << endl<<  "  make first all CommonPlots::createCommonPlotsFilledAtEveryStep() and then call CommonPlots::initialize()";
     for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
       (*it)->cacheDataObjects(&fVertexData, &fTauData, &fFakeTauData, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, &fQCDTailKillerData, &fTopData, &fFullHiggsMassData);
