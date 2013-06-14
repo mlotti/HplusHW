@@ -635,6 +635,8 @@ namespace HPlus {
 
 //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    if(btagData.passedEvent())
+      increment(fBTaggingCounter);
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
       fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
@@ -642,12 +644,11 @@ namespace HPlus {
     }
     fCommonPlots.fillControlPlotsAtBtagging(iEvent, btagData);
     if(!btagData.passedEvent()) return false;
+    increment(fBTaggingScaleFactorCounter);
     fCommonPlotsAfterBTagging->fill();
     if (myFakeTauStatus) fCommonPlotsAfterBTaggingFakeTaus->fill();
-    increment(fBTaggingCounter);
 
    
-    increment(fBTaggingScaleFactorCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderBTagSelection, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveBJets(new std::vector<pat::Jet>());
