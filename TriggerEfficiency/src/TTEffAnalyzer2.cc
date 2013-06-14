@@ -154,7 +154,7 @@ private:
       edm::Handle<edm::View<reco::MET> > hmet;
 //      edm::Handle<edm::View<pat::MET> > hmet;
       if(iEvent.getByLabel(src, hmet)){
-        et = hmet->front().et();
+        et = hmet->front().pt();
         phi = hmet->front().phi();
       }
     }
