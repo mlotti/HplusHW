@@ -130,7 +130,7 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
         correctedEnabled = True
         correctedSrc = "tightenedMuonsMuscle",
         tunePEnabled = True,
-    )
+    ),
     muonEfficiencies = cms.PSet(
         Run2011A = param.embeddingMuonEfficiency.clone(
             mode = "mcEfficiency",
@@ -142,10 +142,9 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
         ),
     ),
 
-    jetEnabled = cms.bool(False),
-    jetSrc = cms.InputTag("NOT_SET"),
-    jetFunctions = cms.PSet(),
-    jetPileupIDs = cms.PSet(),                        
+    jets = Ntuple.jets.clone(
+        enabled = False,
+    ),
 
     mets = cms.PSet(),
     doubles = cms.PSet(),

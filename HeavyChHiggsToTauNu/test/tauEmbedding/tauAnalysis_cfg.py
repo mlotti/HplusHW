@@ -144,11 +144,12 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     tauSrc = cms.InputTag(param.tauSelection.src.value()), # this is set in addEmbeddingLikePreselection()
     tauFunctions = analysisConfig.tauFunctions.clone(),
 
-    jetEnabled = cms.bool(True),
-#    jetSrc = cms.InputTag(param.jetSelection.src.value()),
-    jetSrc = cms.InputTag("embeddingLikePreselectionCleanedJets"),
-    jetFunctions = analysisConfig.jetFunctions.clone(),
-    jetPileupIDs = analysisConfig.jetPileupIDs.clone(),
+    jets = Ntuple.clone(
+#        src = param.jetSelection.src.value(),
+        src = "embeddingLikePreselectionCleanedJets",
+        functions = analysisConfig.jetFunctions.clone(),
+        pileupIDs = analysisConfig.jetPileupIDs.clone(),
+    ),
 
     muonsEnabled = cms.bool(False),
     muons = Ntuple.muons.clone(src = "NOT_SET"),

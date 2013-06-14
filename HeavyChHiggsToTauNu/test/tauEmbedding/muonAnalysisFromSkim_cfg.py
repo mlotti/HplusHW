@@ -205,8 +205,9 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
 #    electronRhoSrc =  cms.InputTag("kt6PFJetsForEleIso", "rho"),
 #    electronFunctions = analysisConfig.electronFunctions.clone(),
 
-    jetSrc = cms.InputTag("preselectedJets"),
-    jetFunctions = analysisConfig.jetFunctions.clone(),
+    jets = Ntuple.jets.clone(
+        src = cms.InputTag("selectedJets", "selectedJetsPt20"),
+    ),
 
     mets = analysisConfig.mets.clone(),
     doubles = cms.PSet(),

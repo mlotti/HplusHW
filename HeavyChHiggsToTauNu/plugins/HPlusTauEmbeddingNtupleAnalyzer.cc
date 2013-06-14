@@ -112,7 +112,7 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fMuonBranches(iConfig.getParameter<edm::ParameterSet>("muons")),
   //fElectronBranches(iConfig, fSelectedVertexBranches.getInputTag()),
   fTauBranches(iConfig),
-  fJetBranches(iConfig, false),
+  fJetBranches(iConfig.getParameter<edm::ParameterSet>("jets"), false),
   fGenTausOriginal("gentausOriginal"),
   fGenTausEmbedded("gentausEmbedded")
 {

@@ -86,13 +86,12 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     tauSrc = cms.InputTag("NOT_SET"),
     tauFunctions = cms.PSet(),
 
-    jetEnabled = cms.bool(False),
-    jetSrc = cms.InputTag("goodJets"),
-    jetFunctions = cms.PSet(),
-    jetPileupIDs = cms.PSet(),
+    jets = Ntuple.jets.clone(
+        enabled = False,
+    ),
 
     muonsEnabled = cms.bool(True),
-    muons = Ntuple.clone(
+    muons = Ntuple.muons.clone(
         src = "tightenedMuons",
         functions = cms.PSet(),
     )

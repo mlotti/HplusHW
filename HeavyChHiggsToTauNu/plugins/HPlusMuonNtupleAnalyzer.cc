@@ -76,7 +76,6 @@ private:
   //HPlus::TreeElectronBranches fElectronBranches;
   std::vector<double> fMuonJetMinDR;
 
-  bool fJetEnabled;
   HPlus::TreeJetBranches fJetBranches;
 
   bool fGenTTBarEnabled;
@@ -111,8 +110,7 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fMuonBranches(iConfig.getParameter<edm::ParameterSet>("muons")),
   //fElectronBranches(iConfig, fSelectedVertexBranches.getInputTag()),
-  fJetEnabled(iConfig.getParameter<bool>("jetEnabled")),
-  fJetBranches(iConfig, false),
+  fJetBranches(iConfig.getParameter<edm::ParameterSet>("jets"), false),
   fGenTTBarEnabled(iConfig.getParameter<bool>("genTTBarEnabled")),
   fGenTTBarBranches("genttbarwdecays"),
   cAllEvents(eventCounter.addCounter("All events"))
@@ -152,8 +150,8 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   fMuonBranches.book(fTree);
   //fElectronBranches.book(fTree);
 
-  if(fJetEnabled) {
-    fJetBranches.book(fTree);
+  fJetBranches.book(fTree);
+  if(fJetBranches.enabled()) {
     fTree->Branch((fMuonBranches.getPrefix()+"_jetMinDR").c_str(), &fMuonJetMinDR);
   }
 
@@ -255,10 +253,9 @@ void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
     }
   }
 
-  if(fJetEnabled) {
-    fJetBranches.setValues(iEvent);
-
-    edm::Handle<edm::View<pat::Jet> > hjets;
+  fJetBranches.setValues(iEvent);
+  if(fJetBranches.enabled()) {
+    edm::Handle<edm::View<reco::Candidate> > hjets;
     iEvent.getByLabel(fJetBranches.getInputTag(), hjets);
     for(size_t i=0; i<hmuons->size(); ++i) {
       double minDR = 9999;

@@ -29,10 +29,13 @@ namespace HPlus {
     void setValues(const edm::Event& iEvent);
     void reset();
 
+    bool enabled() const { return fEnabled; }
+
     const edm::InputTag& getInputTag() const { return fJetSrc; }
 
   private:
     edm::InputTag fJetSrc;
+    bool fEnabled;
     bool fJetComposition;
 
     typedef math::XYZTLorentzVector XYZTLorentzVector;

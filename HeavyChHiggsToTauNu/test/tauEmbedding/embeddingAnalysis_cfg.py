@@ -373,10 +373,12 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = analysisConfig.tauFunctions.clone(),
 
-    jetSrc = cms.InputTag("muonFinalSelectionJetSelectionFilter"),
-#    jetSrc = cms.InputTag("selectedPatJets"),
-    jetFunctions = analysisConfig.jetFunctions.clone(),
-    jetPileupIDs = analysisConfig.jetPileupIDs.clone(),
+    jets = Ntuple.clone(
+        src = "muonFinalSelectionJetSelectionFilter",
+#        src = cms.InputTag("selectedPatJets", "", "MUONSKIM"),
+        functions = analysisConfig.jetFunctions.clone(),
+        pileupIDs = analysisConfig.jetPileupIDs.clone(),
+    ),
 
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),

@@ -52,17 +52,21 @@ namespace HPlus {
 
 
   TreeJetBranches::TreeJetBranches(const edm::ParameterSet& iConfig, bool jetComposition):
-    fJetSrc(iConfig.getParameter<edm::InputTag>("jetSrc")),
+    fJetSrc(iConfig.getParameter<edm::InputTag>("src")),
+    fEnabled(iConfig.getParameter<bool>("enabled")),
     fJetComposition(jetComposition)
   {
-    edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("jetFunctions");
+    if(!enabled())
+      return;
+
+    edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("functions");
     std::vector<std::string> names = pset.getParameterNames();
     fJetsFunctions.reserve(names.size());
     for(size_t i=0; i<names.size(); ++i) {
       fJetsFunctions.push_back(JetFunctionBranch("jets_f_"+names[i], pset.getParameter<std::string>(names[i])));
     }
 
-    edm::ParameterSet pset2 = iConfig.getParameter<edm::ParameterSet>("jetPileupIDs");
+    edm::ParameterSet pset2 = iConfig.getParameter<edm::ParameterSet>("pileupIDs");
     std::vector<std::string> names2 = pset2.getParameterNames();
     fJetsPileupIDs.reserve(names2.size());
     for(size_t i=0; i<names2.size(); ++i) {
@@ -74,6 +78,9 @@ namespace HPlus {
 
 
   void TreeJetBranches::book(TTree *tree) {
+    if(!enabled())
+      return;
+
     tree->Branch("jets_p4", &fJets);
     for(size_t i=0; i<fJetsFunctions.size(); ++i) {
       fJetsFunctions[i].book(tree);
@@ -104,6 +111,9 @@ namespace HPlus {
   }
 
   void TreeJetBranches::setValues(const edm::Event& iEvent) {
+    if(!enabled())
+      return;
+
     edm::PtrVector<pat::Jet> jets;
     edm::Handle<edm::View<pat::Jet> > hjets;
     edm::Handle<edm::View<reco::Candidate> > hcands;
