@@ -14,6 +14,33 @@ namespace HPlus {
     fPassedEvent(false) {}
   METSelection::Data::~Data() {}
 
+   const edm::Ptr<reco::MET> METSelection::Data::getPhiUncorrectedSelectedMET() const {
+     if (fMETMode == METSelection::kType1)
+       return getType1MET();
+     else if (fMETMode == METSelection::kType2)
+       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
+     // Fallback
+     return fSelectedMET;
+   }
+
+   const edm::Ptr<reco::MET> METSelection::Data::getPhiCorrectedSelectedMET() const {
+     if (fMETMode == METSelection::kType1)
+       return edm::Ptr<reco::MET>(&fPhiOscillationCorrectedType1MET, 0);
+     else if (fMETMode == METSelection::kType2)
+       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
+     else
+       throw cms::Exception("Configuration") << "METSelection::Data::getPhiCorrectedSelectedMET is supported only for type I MET! " << __FILE__ << ":" << __LINE__ << std::endl;
+   }
+
+   const edm::Ptr<reco::MET> METSelection::Data::getType1MET() const { 
+     if (fType1METCorrected.size() > 0) {
+       // Need to construct edm::Ptr here or otherwise copy operation will destroy the pointer and cause seg fault
+       return edm::Ptr<reco::MET>(&fType1METCorrected, 0);
+     }
+     edm::Ptr<reco::MET> myNullPointer;
+     return myNullPointer;
+   }
+
   METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, const std::string& label, const std::string& tauIsolationDiscriminator):
     BaseSelection(eventCounter, histoWrapper),
     fRawSrc(iConfig.getUntrackedParameter<edm::InputTag>("rawSrc")),
@@ -22,12 +49,25 @@ namespace HPlus {
     fCaloSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloSrc")),
     fTcSrc(iConfig.getUntrackedParameter<edm::InputTag>("tcSrc")),
     fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
+    // For type I/II correction
     fTauJetMatchingCone(iConfig.getUntrackedParameter<double>("tauJetMatchingCone")),
     fJetType1Threshold(iConfig.getUntrackedParameter<double>("jetType1Threshold")),
     fJetOffsetCorrLabel(iConfig.getUntrackedParameter<std::string>("jetOffsetCorrLabel")),
     //fType2ScaleFactor(iConfig.getUntrackedParameter<double>("type2ScaleFactor")),
     fTauIsolationDiscriminator(tauIsolationDiscriminator),
+    // For phi oscillation correction
+    fPhiCorrectionSlopeXForData(iConfig.getUntrackedParameter<double>("phiCorrectionSlopeXForData")),
+    fPhiCorrectionOffsetXForData(iConfig.getUntrackedParameter<double>("phiCorrectionOffsetXForData")),
+    fPhiCorrectionSlopeYForData(iConfig.getUntrackedParameter<double>("phiCorrectionSlopeYForData")),
+    fPhiCorrectionOffsetYForData(iConfig.getUntrackedParameter<double>("phiCorrectionOffsetYForData")),
+    fPhiCorrectionSlopeXForMC(iConfig.getUntrackedParameter<double>("phiCorrectionSlopeXForMC")),
+    fPhiCorrectionOffsetXForMC(iConfig.getUntrackedParameter<double>("phiCorrectionOffsetXForMC")),
+    fPhiCorrectionSlopeYForMC(iConfig.getUntrackedParameter<double>("phiCorrectionSlopeYForMC")),
+    fPhiCorrectionOffsetYForMC(iConfig.getUntrackedParameter<double>("phiCorrectionOffsetYForMC")),
+    bDisablingOfPhiCorrectionNotifiedStatus(true),
+    // Counters
     fTypeIAllEvents(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction all events")),
+    fTypeITauRefJetFound(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction tau reference jet found")),
     fTypeITauIsolated(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction tau treated as isolated")),
     fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut"))
   {
@@ -68,7 +108,7 @@ namespace HPlus {
 
   METSelection::~METSelection() {}
 
-  METSelection::Data METSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+  METSelection::Data METSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -76,16 +116,16 @@ namespace HPlus {
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 
-    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, false);
+    return privateAnalyze(iEvent, iSetup, nVertices, selectedTau, allJets, false);
   }
 
-  METSelection::Data METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+  METSelection::Data METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, false);
+    return privateAnalyze(iEvent, iSetup, nVertices, selectedTau, allJets, false);
   }
 
 
-  METSelection::Data METSelection::silentAnalyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+  METSelection::Data METSelection::silentAnalyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -93,16 +133,17 @@ namespace HPlus {
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 
-    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, true);
+    return privateAnalyze(iEvent, iSetup, nVertices, selectedTau, allJets, true);
   }
 
-  METSelection::Data METSelection::analyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+  METSelection::Data METSelection::analyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, selectedTau, allJets, true);
+    return privateAnalyze(iEvent, iSetup, nVertices, selectedTau, allJets, true);
   }
 
-  METSelection::Data METSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, bool possiblyIsolatedTaus) {
+  METSelection::Data METSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, bool possiblyIsolatedTaus) {
     Data output;
+    output.fMETMode = fSelect;
 
     edm::Handle<edm::View<reco::MET> > hrawmet;
     iEvent.getByLabel(fRawSrc, hrawmet);
@@ -130,6 +171,8 @@ namespace HPlus {
       output.fType1MET = htype1met->ptrAt(0);
       output.fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(output.fType1MET, selectedTau, allJets, kType1, possiblyIsolatedTaus));
       output.fType1MET = edm::Ptr<reco::MET>(&output.fType1METCorrected, 0);
+      // MET phi correction
+      output.fPhiOscillationCorrectedType1MET.push_back(getPhiOscillationCorrectedMET(output.fType1MET, iEvent.isRealData(), nVertices));
     }
     /*
     if(htype2met.isValid()) {
@@ -147,14 +190,19 @@ namespace HPlus {
     // Do the selection
     edm::Ptr<reco::MET> met;
     if(fSelect == kRaw)
-      met = hrawmet->ptrAt(0);
+      met = output.fRawMET;
     else if(fSelect == kType1)
-      met = htype1met->ptrAt(0);
+      met = output.fType1MET;
     else if(fSelect == kType2)
       //met = htype2met->ptrAt(0);
       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
     else
       throw cms::Exception("LogicError") << "This should never happen at " << __FILE__ << ":" << __LINE__ << std::endl;
+    output.fSelectedMET = met;
+    if (met.isNull()) {
+      output.fPassedEvent = false;
+      return output;
+    }
 
     hMet->Fill(met->et());
     hMetPhi->Fill(met->phi());
@@ -172,7 +220,58 @@ namespace HPlus {
     } else {
       output.fPassedEvent = false;
     }
+
+    return output;
+  }
+
+  METSelection::Data METSelection::silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    Data output;
+    output.fMETMode = fSelect;
+
+    edm::Handle<edm::View<reco::MET> > hrawmet;
+    iEvent.getByLabel(fRawSrc, hrawmet);
+
+    edm::Handle<edm::View<reco::MET> > htype1met;
+    if (fType1Src.label() != "")
+      iEvent.getByLabel(fType1Src, htype1met);
+
+    /*
+    edm::Handle<edm::View<reco::MET> > htype2met;
+    iEvent.getByLabel(fType2Src, htype2met);
+    */
+
+    edm::Handle<edm::View<reco::MET> > hcalomet;
+    iEvent.getByLabel(fCaloSrc, hcalomet);
+
+    edm::Handle<edm::View<reco::MET> > htcmet;
+    iEvent.getByLabel(fTcSrc, htcmet);
+
+    if(hrawmet.isValid())
+      output.fRawMET = hrawmet->ptrAt(0);
+    if(htype1met.isValid()) {
+      output.fType1METCorrected.clear();
+      output.fType1MET = htype1met->ptrAt(0);
+      output.fType1METCorrected.push_back(*output.fType1MET);
+    }
+    if(hcalomet.isValid())
+      output.fCaloMET = hcalomet->ptrAt(0);
+    if(htcmet.isValid())
+      output.fTcMET = htcmet->ptrAt(0);
+
+    // Do the selection
+    edm::Ptr<reco::MET> met;
+    if(fSelect == kRaw)
+      met = output.fRawMET;
+    else if(fSelect == kType1)
+      met = output.fType1MET;
+    if(met->et() > fMetCut) {
+      output.fPassedEvent = true;
+    } else {
+      output.fPassedEvent = false;
+    }
     output.fSelectedMET = met;
+    //std::cout << "type1MET valid = " << htype1met.isValid() << std::endl;
+    //std::cout << "type1MET = " << htype1met->ptrAt(0)->et() << std::endl;
 
     return output;
   }
@@ -189,7 +288,6 @@ namespace HPlus {
      */
 
     increment(fTypeIAllEvents);
-
     if(type == kRaw)
       throw cms::Exception("Assert") << "METSelection::undoJetCorrectionForSelectedTau should not be called for raw MET" << std::endl;
 
@@ -213,13 +311,29 @@ namespace HPlus {
     edm::Ptr<pat::Jet> selectedJet;
     for(size_t i=0; i<allJets.size(); ++i) {
       double dr = reco::deltaR(*selectedTau, *(allJets[i]));
+
+      /*
+      std::cout << "Jet         pt " << allJets[i]->pt()  << " eta " << allJets[i]->eta()  << " phi " << allJets[i]->phi() << std::endl
+                << "   tau      pt " << selectedTau->pt() << " eta " << selectedTau->eta() << " phi " << selectedTau->phi() << " DR " << dr << std::endl
+                << "   tau rjet pt " << tau->p4Jet().pt() << " eta " << tau->p4Jet().eta() << " phi " << tau->p4Jet().phi() << " DR " << reco::deltaR(tau->p4Jet(), *(allJets[i])) << std::endl;
+      */
+
       if(dr < minDR) {
         minDR = dr;
         selectedJet = allJets[i];
       }
     }
-    if(selectedJet.isNull())
-      throw cms::Exception("Assert") << "METSelection: Did not find the hadronic jet corresponding to the selected tau jet" << std::endl;
+    // It can happen that the JER smearing causes the tau reference
+    // jet to have pt < 10, which is not stored in our pattuples. Here
+    // it is assumed that this is what happens if the reference jet is
+    // not found. The frequency of this must be monitored with the
+    // counters.
+    if(selectedJet.isNull()) {
+      //throw cms::Exception("Assert") << "METSelection: Did not find the hadronic jet corresponding to the selected tau jet" << std::endl;
+      return *met;
+    }
+
+    increment(fTypeITauRefJetFound);
 
     // The code doing the correction is at
     // JetMETCorrections/Type1MET/interface/PFJetMETcorrInputProducerT.h
@@ -270,7 +384,7 @@ namespace HPlus {
     }
     */
     reco::Candidate::LorentzVector correctedP4(correctedEx, correctedEy, 0,
-                                               std::sqrt(correctedEx*correctedEx + correctedEy+correctedEy));
+                                               std::sqrt(correctedEx*correctedEx + correctedEy*correctedEy));
     // sumet is not set for pat::MET in the corrections anyway
     //double correctedSumEt = met->sumEt() + sumet;
 
@@ -278,4 +392,28 @@ namespace HPlus {
     correctedMet.setP4(correctedP4);
     return correctedMet;
   }
+
+  reco::MET METSelection::getPhiOscillationCorrectedMET(const edm::Ptr<reco::MET>& met, const bool isRealData, const int nVertices) {
+    if (nVertices < 0) {
+      if (!bDisablingOfPhiCorrectionNotifiedStatus) {
+        bDisablingOfPhiCorrectionNotifiedStatus = true;
+        std::cout << "Warning: MET phi oscillation correction disabled!" << std::endl;
+      }
+      return *met;
+    }
+    double myCorrectionX = 0.0;
+    double myCorrectionY = 0.0;
+    if (isRealData) {
+      myCorrectionX = met->px() - (static_cast<double>(nVertices)*fPhiCorrectionSlopeXForData + fPhiCorrectionOffsetXForData);
+      myCorrectionY = met->py() - (static_cast<double>(nVertices)*fPhiCorrectionSlopeYForData + fPhiCorrectionOffsetYForData);
+    } else {
+      myCorrectionX = met->px() - (static_cast<double>(nVertices)*fPhiCorrectionSlopeXForMC + fPhiCorrectionOffsetXForMC);
+      myCorrectionY = met->py() - (static_cast<double>(nVertices)*fPhiCorrectionSlopeYForMC + fPhiCorrectionOffsetYForMC);
+    }
+    reco::Candidate::LorentzVector myCorrectedP4(myCorrectionX, myCorrectionY, 0., std::sqrt(myCorrectionX*myCorrectionX + myCorrectionY*myCorrectionY));
+    reco::MET correctedMet = *met;
+    correctedMet.setP4(myCorrectedP4);
+    return correctedMet;
+  }
+
 }

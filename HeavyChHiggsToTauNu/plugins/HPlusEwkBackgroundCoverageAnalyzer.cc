@@ -744,9 +744,8 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
   bPassTauID = true;
 
   // Get MET here, reconstruct transverse mass
-  int nVertices = 0; // dummy value
-  HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
-  HPlus::METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+  HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), pvData.getNumberOfAllVertices());
+  HPlus::METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), tauData.getSelectedTau(), jetData.getAllJets());
   bTauMETTransverseMass = HPlus::TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
 
   // Hadronic jet selection

@@ -16,7 +16,7 @@ dataEras = [
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
-
+#myOptimisation.printOptions() # Uncomment to find out the implemented methods
 #myOptimisation.addTauPtVariation([40.0, 50.0, 60.0, 70., 80.])
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
@@ -24,22 +24,25 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
 #myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
-myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
+#myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 #myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
 #myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,170.0,160.0,150.0])
 #myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
-#myOptimisation.disableMaxVariations()
 
 def customize(signalAnalysis):
     # Apply beta cut for jets to reject PU jets
 #    signalAnalysis.jetSelection.jetPileUpWorkingPoint = "tight" # 
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
 #    signalAnalysis.MET.METCut = 100.0 
+    # Example for setting a certain tail killer scenario for the nominal module
+    #import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+    #signalAnalysis.QCDTailKiller = param.QCDTailKillerMediumPlus.clone()
+
     print "Customisations done"
-        
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1
@@ -47,7 +50,11 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #doHeavyAnalysis=True,
                         #customizeHeavyAnalysis=customize,
                         #useCHSJets=True,
+                        applyTauTriggerScaleFactor=True,
+                        #applyTauTriggerLowPurityScaleFactor=True,
+                        #applyMETTriggerScaleFactor=True,
                         #doQCDTailKillerScenarios=True,
+                        #doInvariantMassReconstructionScenarios=True,
                         #doAgainstElectronScan=True,
                         #doTauIsolationAndJetPUScan=True,
                         #doBTagScan=True,

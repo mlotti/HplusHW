@@ -112,6 +112,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "W+Jets jet bin (-1=inclusive, 1=1, jne), only relevant if wjetsWeighting != 0")
+    options.register("trgAnalysis",
+                     "",
+                     options.multiplicity.singleton,
+                     options.varType.string,
+                     "Giving TTEffAnalyzer info about whether it is TauLeg, MetLeg or QuadJet in question")
     
 
     # Protection in case sys.argv is missing due to various edm tools

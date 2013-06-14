@@ -47,6 +47,8 @@ def createEDFilter(param):
         tauEmbeddingStatus = cms.untracked.bool(False),
         metFilters = param.metFilters.clone(),
         QCDTailKiller = param.QCDTailKiller.clone(),
+        commonPlotsSettings = param.commonPlotsSettings.clone(),
+        invMassReco = param.invMassReco.clone(),
         # Factorisation bin settings
         factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150., 200., 300.),
         factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+

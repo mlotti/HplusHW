@@ -236,8 +236,8 @@ namespace HPlus {
     hAlphaT = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "alphaT", "alphaT", 50, 0.0, 5.0);
     hSphericity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "sphericity", "sphericity", 20, 0.0, 1.0);
     hAplanarity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "aplanarity", "aplanarity", 10, 0.0, 0.5);
-    hPlanarity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "aplanarity", "aplanarity", 10, 0.0, 0.5);
-    hCircularity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "aplanarity", "aplanarity", 20, 0.0, 1.0);
+    hPlanarity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "planarity", "planarity", 10, 0.0, 0.5);
+    hCircularity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "circularity", "circularity", 20, 0.0, 1.0);
     hCparameter = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Cparameter", "Cparameter", 20, 0.0, 1.0);
     hDparameter = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Dparameter", "Dparameter", 20, 0.0, 1.0);
   }

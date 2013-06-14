@@ -13,28 +13,43 @@ analysis = "signalAnalysisInvertedTau"
 searchMode = "Light"
 #searchMode = "Heavy"
 
-#dataEra = "Run2011A"
-#dataEra = "Run2011B"
 dataEra = "Run2011AB"
+#dataEra = "Run2012C"
+#dataEra = "Run2011A"
 
-optMode = "OptQCDTailKillerLoose"
+#optMode = "OptQCDTailKillerZeroPlus"
+#optMode = "OptQCDTailKillerLoosePlus"
+#optMode = "OptQCDTailKillerMediumPlus"
+optMode = "OptQCDTailKillerTightPlus"
 #optMode = ""
-binning = [41,50,60,70,80,100,120,150,200]
+
+#optMode = ""
+
+#binning = [41,50,60,70,80,100,120,150,200]
+
+binning = [41,50,60,70,80,100,120,150,300]
 
 HISTONAMES = []
+
+
+
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
-HISTONAMES.append("Inverted/SelectedTau_pT_TailKiller")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts")
+#HISTONAMES.append("Inverted/SelectedTau_pT_CollinearTailKiller")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
+HISTONAMES.append("Inverted/SelectedTau_pT_BackToBackTailKiller")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts")
+
 
 import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+
+from QCDInvertedNormalizationFactors import *
 
 import sys
 import array
@@ -93,17 +108,20 @@ def main():
             legends["Purity%s"%i] = "B-jet veto, TailKiller"
         if "AfterDeltaPhiJetsAgainstTTCut"  in name:    
             legends["Purity%s"%i] = "TailKiller" 
-    plot.createFrame("purityLoose", opts={"xmin": 40, "xmax": 200, "ymin": 0., "ymax": 1.05})
+
+    plot.createFrame("purityLoose", opts={"xmin": 40, "xmax": 160, "ymin": 0., "ymax": 1.05})
     plot.frame.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
     plot.frame.GetYaxis().SetTitle("Purity")
 #    plot.setEnergy(datasets.getEnergies())
 
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
+
     plot.setLegend(histograms.createLegend(0.53, 0.2, 0.98, 0.4))
     
  
-    histograms.addText(0.2, 0.3, "TailKiller: Medium", 18)
+    histograms.addText(0.2, 0.3, "TailKiller: TightPlus", 18)
+
 
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText(s="%s TeV"%(datasets.getEnergies()[0]))
@@ -118,7 +136,9 @@ def purityGraph(i,datasets,histo):
     inverted.histoMgr.forEachHisto(lambda h: h.setRootHisto(h.getRootHisto().Rebin(len(binning)-1,h.getRootHisto().GetName(),array.array('d',binning))))
     
     invertedData = inverted.histoMgr.getHisto("Data").getRootHisto().Clone(histo)
+    invertedData.Scale(QCDInvertedNormalization["inclusive"])
     invertedEWK  = inverted.histoMgr.getHisto("EWK").getRootHisto().Clone(histo)
+    invertedEWK.Scale(QCDInvertedNormalization["inclusiveEWK"])
 
     numerator = invertedData.Clone()
     numerator.SetName("numerator")
@@ -143,7 +163,9 @@ def purityGraph(i,datasets,histo):
     """
     purityGraph.SetMarkerStyle(20+i)
     purityGraph.SetMarkerColor(2+i)
-
+    if i==3:
+        purityGraph.SetMarkerColor(6)
+        
     defaults = {"drawStyle": "EP","legendStyle": "p"}
     
     return histograms.Histo(purityGraph, "Purity%s"%i, **defaults)

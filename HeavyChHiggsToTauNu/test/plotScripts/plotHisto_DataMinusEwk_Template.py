@@ -13,6 +13,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HistoHelperNew import *
@@ -314,7 +315,7 @@ def doDataMinusEwk(p, drawPlot, datasets, hPath, hName, xLabel, yLabel, binWidth
                     hDataMinusEwk.Add(htmp, -1)
 
     ### Customise QCD=Data-EwkMc histo
-    plots.copyStyle(qcd, hDataMinusEwk)
+    aux.copyStyle(qcd, hDataMinusEwk)
 
     if "TH1" in hType:
         if getBool("bStackHistos"):
