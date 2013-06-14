@@ -59,9 +59,24 @@ namespace HPlus {
       std::vector<bool> fIDFlagTight;
     };
 
+    template<typename T>
+    struct Branch {
+      Branch(const std::string& name, const edm::InputTag& src): fName(name), fSrc(src) {}
+      ~Branch() {}
+      void book(TTree *tree);
+      void setValues(const edm::Event& iEvent, const edm::PtrVector<pat::Jet>& jets);
+      void reset() { fValues.clear(); }
+
+      std::string fName;
+      edm::InputTag fSrc;
+      std::vector<T> fValues;
+    };
+
     std::vector<XYZTLorentzVector> fJets;
     std::vector<JetFunctionBranch> fJetsFunctions;
     std::vector<PileupID> fJetsPileupIDs;
+    std::vector<Branch<float> > fJetsFloats;
+    std::vector<Branch<bool> > fJetsBools;
 
     std::vector<double> fJetsChf;
     std::vector<double> fJetsNhf;

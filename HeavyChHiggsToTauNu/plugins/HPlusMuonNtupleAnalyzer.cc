@@ -152,7 +152,7 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
 
   fJetBranches.book(fTree);
   if(fJetBranches.enabled()) {
-    fTree->Branch((fMuonBranches.getPrefix()+"_jetMinDR").c_str(), &fMuonJetMinDR);
+    fTree->Branch((fMuonBranches.getPrefix()+"jetMinDR").c_str(), &fMuonJetMinDR);
   }
 
   if(fGenTTBarEnabled)

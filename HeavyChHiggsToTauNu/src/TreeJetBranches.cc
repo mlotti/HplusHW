@@ -50,6 +50,36 @@ namespace HPlus {
     fIDFlagTight.clear();
   }
 
+  ////////////////////////////////////////
+
+  template <typename T>
+  void TreeJetBranches::Branch<T>::book(TTree *tree) {
+    tree->Branch(fName.c_str(), &fValues);
+  }
+
+  template <typename T>
+  void TreeJetBranches::Branch<T>::setValues(const edm::Event& iEvent, const edm::PtrVector<pat::Jet>& jets) {
+    //edm::Handle<edm::ValueMap<T> > hmap;
+    edm::Handle<std::vector<T> > hmap;
+    iEvent.getByLabel(fSrc, hmap);
+    if(hmap->size() != jets.size())
+      throw cms::Exception("Assert") << "Jets size " << jets.size() << " vector size " << hmap->size() << " src " << fSrc.encode() << std::endl;
+
+    /*
+    std::cout << "ValueMap productIds";
+    for(size_t i=0; i<hmap->idSize(); ++i) {
+      std::cout << " " << hmap->ids()[i].first;
+    }
+    std::cout << std::endl;
+    */
+
+    for(size_t i=0; i<jets.size(); ++i) {
+      fValues.push_back( (*hmap)[i] );
+    }
+  }
+
+
+  ////////////////////////////////////////
 
   TreeJetBranches::TreeJetBranches(const edm::ParameterSet& iConfig, bool jetComposition):
     fJetSrc(iConfig.getParameter<edm::InputTag>("src")),
@@ -73,6 +103,20 @@ namespace HPlus {
       edm::ParameterSet pset3 = pset2.getParameter<edm::ParameterSet>(names2[i]);
       fJetsPileupIDs.push_back(PileupID("jets_puid_"+names2[i], pset3.getParameter<edm::InputTag>("mvaSrc"), pset3.getParameter<edm::InputTag>("flagSrc")));
     }
+
+    edm::ParameterSet pset3 = iConfig.getParameter<edm::ParameterSet>("floats");
+    std::vector<std::string> names3 = pset3.getParameterNames();
+    fJetsFloats.reserve(names3.size());
+    for(size_t i=0; i<names3.size(); ++i) {
+      fJetsFloats.push_back(Branch<float>("jets_"+names3[i], pset3.getParameter<edm::InputTag>(names3[i])));
+    }
+
+    edm::ParameterSet pset4 = iConfig.getParameter<edm::ParameterSet>("bools");
+    std::vector<std::string> names4 = pset4.getParameterNames();
+    fJetsBools.reserve(names4.size());
+    for(size_t i=0; i<names4.size(); ++i) {
+      fJetsBools.push_back(Branch<bool>("jets_"+names4[i], pset4.getParameter<edm::InputTag>(names4[i])));
+    }
   }
   TreeJetBranches::~TreeJetBranches() {}
 
@@ -87,6 +131,12 @@ namespace HPlus {
     }
     for(size_t i=0; i<fJetsPileupIDs.size(); ++i) {
       fJetsPileupIDs[i].book(tree);
+    }
+    for(size_t i=0; i<fJetsFloats.size(); ++i) {
+      fJetsFloats[i].book(tree);
+    }
+    for(size_t i=0; i<fJetsBools.size(); ++i) {
+      fJetsBools[i].book(tree);
     }
 
     if(fJetComposition) {
@@ -124,6 +174,13 @@ namespace HPlus {
     else {
       iEvent.getByLabel(fJetSrc, hcands);
       jets = PtrVectorCast<pat::Jet>(hcands->ptrVector());
+      /*
+      std::cout << "Jet handle id " << hcands.id() << " ptrvector id " << hcands->ptrVector().id() << " jets id " 
+                << jets.id() << " first jet id " << jets[0].id() 
+                << " src " << fJetSrc
+                << std::endl;
+      */
+
       /*
       jets = edm::PtrVector<pat::Jet>(hcands->id());
       for(size_t i=0; i<hcands->size(); ++i) {
@@ -199,6 +256,12 @@ namespace HPlus {
     for(size_t i=0; i<fJetsPileupIDs.size(); ++i) {
       fJetsPileupIDs[i].setValues(iEvent, jets);
     }
+    for(size_t i=0; i<fJetsFloats.size(); ++i) {
+      fJetsFloats[i].setValues(iEvent, jets);
+    }
+    for(size_t i=0; i<fJetsBools.size(); ++i) {
+      fJetsBools[i].setValues(iEvent, jets);
+    }
   }
 
   void TreeJetBranches::reset() {
@@ -207,6 +270,12 @@ namespace HPlus {
       fJetsFunctions[i].reset();
     for(size_t i=0; i<fJetsPileupIDs.size(); ++i) {
       fJetsPileupIDs[i].reset();
+    }
+    for(size_t i=0; i<fJetsFloats.size(); ++i) {
+      fJetsFloats[i].reset();
+    }
+    for(size_t i=0; i<fJetsBools.size(); ++i) {
+      fJetsBools[i].reset();
     }
 
     if(fJetComposition) {
