@@ -9,6 +9,7 @@ hPlusJetPtrSelectorFilter = cms.EDFilter("HPlusJetPtrSelectorFilter",
         histogramAmbientLevel = cms.untracked.string("Debug"),
         filter = cms.bool(True),
         throw = cms.bool(True),
+        producePt20 = cms.bool(False),
         eventCounter = param.eventCounter.clone()
 )
 # Set Jet PU ID source
