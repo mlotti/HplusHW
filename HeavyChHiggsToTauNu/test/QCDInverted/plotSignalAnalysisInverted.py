@@ -66,8 +66,8 @@ optMode = "OptQCDTailKillerTightPlus"
 
 
 #dataEra = "Run2011A"
-dataEra = "Run2011B"
-#dataEra = "Run2011AB"
+#dataEra = "Run2011B"
+dataEra = "Run2011AB"
 
 print "dataEra"
 
@@ -117,7 +117,7 @@ def main():
 
     plots.mergeRenameReorderForDataMC(datasets)
 
-    print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
+#    print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
 
     # Remove signals other than M120
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))

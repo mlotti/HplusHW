@@ -36,6 +36,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CommonPlots.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
+
+
 
 namespace edm {
   class ParameterSet;
@@ -194,15 +197,98 @@ namespace HPlus {
     QCDTailKiller fQCDTailKiller;
     WeightReader fWJetsWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;
-    CommonPlots fCommonPlots;
+    //    CommonPlots fCommonPlots;
 
     // Histograms
+   
+    //<<<<<<< HEAD
+
+   // Common plots                                                                                                                                                                                      
+    CommonPlots fCommonPlots;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeight;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETWithPhiOscillationCorrection; // temporary                                                                                                         
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTagging;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelected;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTail;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMass;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelectionFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeightFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVetoFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVetoFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelectionFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMassFakeTaus;
+
+
+
+
+    WrappedTH1 *hTauDiscriminator;
+    //=======
+    //>>>>>>> sami/2011
+    
     WrappedTH1 *hOneProngRtauPassedInvertedTaus;
     WrappedTH1 *hVerticesBeforeWeight;
     WrappedTH1 *hVerticesAfterWeight;
     WrappedTH1 *hTransverseMassWithTopCut;
     WrappedTH1 *hTransverseMassTopChiSelection;
     WrappedTH1 *hTransverseMassTopBjetSelection;
+    /*
+<<<<<<< HEAD
+    //    WrappedTH1 *hDeltaPhi;
+    WrappedTH1 *hDeltaPhiAfterVeto;
+    WrappedTH1 *hDeltaPhiAfterJets;
+    WrappedTH1 *hDeltaPhiBeforeVeto;
+    WrappedTH1 *hDeltaPhiJetMet;
+
+
+    // Histograms for validation at every Selection Cut step
+    WrappedTH1 *hMet_AfterTauSelection;
+    WrappedTH1 *hMet_AfterEvtTopology;
+    WrappedTH1 *hMETBeforeMETCut;
+    WrappedTH1 *hMETBeforeTauId;
+
+    // std::vector<WrappedTH1*> hQCDTailKillerBackToBackInverted;
+    // std::vector<WrappedTH1*> hQCDTailKillerCollinearInverted;
+    //std::vector<WrappedTH1*> hQCDTailKillerBackToBackBaseline;
+    //std::vector<WrappedTH1*> hQCDTailKillerCollinearBaseline;
+    std::vector<WrappedTH1*> hEWKFakeTausQCDTailKillerBackToBack_Baseline;
+    std::vector<WrappedTH1*> hEWKFakeTausQCDTailKillerCollinear_Baseline;
+
+    WrappedTH1* hQCDTailKillerJet0BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet1BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet2BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet3BackToBackInverted;
+    WrappedTH1* hQCDTailKillerJet0CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet1CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet2CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet3CollinearInverted;
+    WrappedTH1* hQCDTailKillerJet0BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet1BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet2BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet3BackToBackBaseline;
+    WrappedTH1* hQCDTailKillerJet0CollinearBaseline;
+    WrappedTH1* hQCDTailKillerJet1CollinearBaseline;
+    WrappedTH1* hQCDTailKillerJet2CollinearBaseline;
+    WrappedTH1* hQCDTailKillerJet3CollinearBaseline;
+
+    //    WrappedTH1* hCtrlNjets;
+    HistogramsInBins *hCtrlNjets;
+
+    HistogramsInBins *hMETBaselineTauId;
+    HistogramsInBins *hMETBaselineTauIdJets;
+    HistogramsInBins *hMETBaselineTauIdBtag;
+    HistogramsInBins *hMETBaselineTauIdBveto;
+=======
+    */
     WrappedTH2 *hTransverseMassVsDphi;
     
     WrappedTH1 *hSelectedTauEt;
@@ -214,8 +300,12 @@ namespace HPlus {
     WrappedTH1 *hSelectedTauLeadingTrackPt;
 
     // baseline MET histos
+    HistogramsInBins *hMETBaselineTauIdJets;
+    HistogramsInBins *hMETBaselineTauIdBtag;
+    HistogramsInBins *hMETBaselineTauIdBveto;
     HistogramsInBins *hMETBaselineTauIdJetsCollinear;
     HistogramsInBins *hMETBaselineTauIdBvetoCollinear;
+    HistogramsInBins *hMETBaselineTauIdBtagCollinear;
     //HistogramsInBins *hMETBaselineTauIdBvetoTailKiller;
     // baseline MT histos
     HistogramsInBins *hMTBaselineTauIdSoftBtaggingTK;
@@ -233,6 +323,7 @@ namespace HPlus {
     HistogramsInBins *hMTBaselineTauIdAllCutsTailKiller;
 
     // inverted MET histos
+    HistogramsInBins *hMETInvertedTauIdJets;
     HistogramsInBins *hMETInvertedTauIdJetsCollinear;
     HistogramsInBins *hMETInvertedTauIdBtag;
     HistogramsInBins *hMETInvertedTauIdBvetoCollinear;

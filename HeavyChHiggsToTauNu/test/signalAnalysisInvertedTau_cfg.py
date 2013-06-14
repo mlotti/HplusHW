@@ -39,6 +39,7 @@ def customize(signalAnalysis):
     print "Phase space is splitted in analysis as follows:"
     print signalAnalysis.commonPlotsSettings.histogramSplitting
 
+    signalAnalysis.bTagging.subleadingDiscriminatorCut = 0.244
     # signalAnalysis.MET.METCut = 50.
     print "Customisation applied"
     
