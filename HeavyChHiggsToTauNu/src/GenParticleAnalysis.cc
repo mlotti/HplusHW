@@ -33,8 +33,8 @@ namespace HPlus {
 
   GenParticleAnalysis::Data::~Data() {}
   void GenParticleAnalysis::Data::check() const {
-    if(fGenMet.isNull())
-      throw cms::Exception("Assert") << "GenParticleAnalysis::Data: This Data object was constructed with the default constructor, not with EmbeddingMuonEfficiency::applyEventWeight(). There is something wrong in your code." << std::endl;
+    if(!isValid())
+      throw cms::Exception("Assert") << "GenParticleAnalysis::Data: This Data object was constructed with the default constructor, not with GenParticleAnalysis::(silent)analyze(). There is something wrong in your code." << std::endl;
   }
 
   GenParticleAnalysis::GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
@@ -43,7 +43,8 @@ namespace HPlus {
     fMetSrc(iConfig.getUntrackedParameter<edm::InputTag>("metSrc")),
     fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
     fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc")),
-    fThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("threeProngTauSrc"))
+    fThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("threeProngTauSrc")),
+    fEnabled(iConfig.getUntrackedParameter<bool>("enabled"))
   {
     init(histoWrapper);
   }
@@ -51,6 +52,9 @@ namespace HPlus {
   GenParticleAnalysis::~GenParticleAnalysis() {}
 
   void GenParticleAnalysis::init(HPlus::HistoWrapper& histoWrapper){
+    if(!fEnabled)
+      return;
+
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("GenParticleAnalysis");
 
@@ -128,7 +132,7 @@ namespace HPlus {
   GenParticleAnalysis::Data GenParticleAnalysis::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
     Data output;
     
-    if (iEvent.isRealData()) return output;
+    if (iEvent.isRealData() || !fEnabled) return output;
 
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel(fSrc, genParticles);

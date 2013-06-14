@@ -476,6 +476,7 @@ GenParticleAnalysis = cms.untracked.PSet(
   oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
   oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
   threeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauThreeProng"),
+  enabled = cms.untracked.bool(True),
 )
 
 
@@ -544,6 +545,12 @@ def SetHistogramBinSettings(nbins, axismin, axismax):
 commonPlotsSettings = cms.untracked.PSet(
     enableNormalisationAnalysis = cms.untracked.bool(True),
     enableMETOscillationAnalysis = cms.untracked.bool(True),
+    # Histogram splitting (useful for QCD measurements and detailed studies)
+    histogramSplitting = cms.untracked.PSet(
+        #splitHistogramByTauPtBinLowEdges = cms.untracked.vdouble(41., 50., 60., 70., 80., 100., 120., 150., 200., 300.)
+        #splitHistogramByTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5) # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
+        #splitHistogramByNVerticesBinLowEdges = cms.untracked.vint32(10)
+    ),
     # Histogram dimension definitions for control plots and shapes (input for datacard generator)
     ptBins = SetHistogramBinSettings(100, 0., 500.),
     etaBins = SetHistogramBinSettings(60, -3., 3.),
