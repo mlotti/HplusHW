@@ -4,6 +4,7 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -38,6 +39,7 @@ namespace {
     fFilterNames(iConfig.getParameter<std::vector<std::string> >("filterNames"))
   {
     produces<std::vector<T> >();
+    produces<edm::ValueMap<bool> >();
   }
 
   template <typename T>
@@ -58,6 +60,7 @@ namespace {
     }
 
     std::auto_ptr<std::vector<T> > result(new std::vector<T>());
+    std::vector<bool> matched;
     for(size_t iCand = 0; iCand < hcands->size(); ++iCand) {
       bool match = false;
       for(size_t iTrigger =0; iTrigger < filterObjects.size(); ++iTrigger) {
@@ -69,10 +72,19 @@ namespace {
       if(match) {
         T copy = hcands->at(iCand);
         result->push_back(copy);
+        matched.push_back(true);
       }
+      else
+        matched.push_back(false);
     }
 
     iEvent.put(result);
+
+    std::auto_ptr<edm::ValueMap<bool> > matched2(new edm::ValueMap<bool>());
+    edm::ValueMap<bool>::Filler filler(*matched2);
+    filler.insert(hcands, matched.begin(), matched.end());
+    filler.fill();
+    iEvent.put(matched2);
   }
 }
 
