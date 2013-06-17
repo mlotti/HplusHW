@@ -82,14 +82,22 @@ private:
   HPlus::TreeGenParticleBranches fGenTTBarBranches;
 
   struct MuonEff {
-    MuonEff(const edm::ParameterSet& pset, const std::string& n): efficiency(pset), name(n) {}
+    MuonEff(const edm::ParameterSet& pset, const std::string& n):
+      efficiency(pset), name(n) {}
 
-    void book(TTree *tree) { tree->Branch(name.c_str(), &values); }
-    void reset() { values.clear(); }
+    void book(TTree *tree) {
+      tree->Branch(name.c_str(), &values);
+      tree->Branch((name+"_unc").c_str(), &uncertainties);
+    }
+    void reset() {
+      values.clear();
+      uncertainties.clear();
+    }
 
     HPlus::EmbeddingMuonEfficiency efficiency;
     std::string name;
     std::vector<double> values;
+    std::vector<double> uncertainties;
   };
   std::vector<MuonEff> fMuonEffs;
 
@@ -249,7 +257,8 @@ void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
   for(size_t i=0; i<fMuonEffs.size(); ++i) {
     for(size_t j=0; j<hmuons->size(); ++j) {
       HPlus::EmbeddingMuonEfficiency::Data data = fMuonEffs[i].efficiency.getEventWeight(hmuons->ptrAt(j), iEvent.isRealData());
-      fMuonEffs[i].values.push_back(data.getEfficiency());
+      fMuonEffs[i].values.push_back(data.getEventWeight());
+      fMuonEffs[i].uncertainties.push_back(data.getEventWeightAbsoluteUncertainty());
     }
   }
 
