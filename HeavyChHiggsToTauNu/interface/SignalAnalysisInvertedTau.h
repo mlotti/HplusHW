@@ -391,7 +391,7 @@ namespace HPlus {
     HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2LeptonVeto;
     HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2MetCut; 
     HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2Btagging;   
-
+    /*
     WrappedTH1 *hSelectedTauEtTauVeto;
     HistogramsInBins *hSelectedTauEtJetCut;
     HistogramsInBins *hSelectedTauEtCollinearTailKiller;
@@ -400,7 +400,16 @@ namespace HPlus {
     WrappedTH1 *hSelectedTauEtBjetVeto;
     WrappedTH1 *hSelectedTauEtBjetVetoPhiCuts;
     HistogramsInBins *hSelectedTauEtBackToBackTailKiller;
-   
+    */
+    WrappedTH1 *hSelectedTauEtTauVeto;
+    WrappedTH1 *hSelectedTauEtJetCut;
+    WrappedTH1 *hSelectedTauEtCollinearTailKiller;
+    WrappedTH1 *hSelectedTauEtMetCut;
+    WrappedTH1 *hSelectedTauEtBtagging;
+    WrappedTH1 *hSelectedTauEtBjetVeto;
+    WrappedTH1 *hSelectedTauEtBjetVetoPhiCuts;
+    WrappedTH1 *hSelectedTauEtBackToBackTailKiller;
+      
     WrappedTH1 *hMTInvertedTauIdJets; 
 
     WrappedTH1 *hSelectedTauEtaMetCut;

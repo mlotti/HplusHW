@@ -25,8 +25,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 from InvertedTauID import *
 #dataEra = "Run2011A"
-#dataEra = "Run2011B"
-dataEra = "Run2011AB"
+dataEra = "Run2011B"
+#dataEra = "Run2011AB"
 
 
 searchMode = "Light"
@@ -41,6 +41,7 @@ def usage():
 def main(argv):
 
 #    HISTONAME = "TauIdJets"
+#    HISTONAME = "TauIdJetsCollinear"
 #    HISTONAME = "TauIdBtag"
     HISTONAME = "TauIdBvetoCollinear"
 #    HISTONAME = "TauIdBveto"
@@ -103,9 +104,9 @@ def main(argv):
 
 
 
-#    bins = ["inclusive"]
+    bins = ["inclusive"]
 #    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
-    bins = ["4050","5060","6070","7080","80100","100120","120"]
+#    bins = ["4050","5060","6070","7080","80100","100120","120"]
 #    bins = ["4050"]
             
 

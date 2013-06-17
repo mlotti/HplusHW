@@ -590,6 +590,8 @@ class InvertedTauID:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
         if "MtSoftBtaggingTKClosure" in name: 
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "NoBtaggingTailKillerClosure" in name: 
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
             
        # Set the legend styles
         plot.histoMgr.setHistoLegendStyleAll("P")
@@ -670,9 +672,14 @@ class InvertedTauID:
                              )
 
         if "MtSoftBtaggingTKClosure" in name:
+            plot.createFrame("Comparison"+self.label, opts={"ymin":-5, "ymax": 40, "xmax": 200},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                             )
+        if "NoBtaggingTailKillerClosure" in name:
             plot.createFrame("Comparison"+self.label, opts={"ymin":-5, "ymax": 50, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
+
             
         if "MtNoMetBvetoInvertedVsBaselineTailKillerClosure" in name:
             plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 500, "xmax": 200},
@@ -701,10 +708,7 @@ class InvertedTauID:
             plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymin":0, "ymax":1.2, "xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
-        if "MtBtaggingNoBtaggingInverted" in name:
-            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymin":0, "ymax":0.4, "xmax": 300},
-                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
-                             )
+ 
 
             
         if "MtBvetoBtagInvertedTailKillerClosure" in name:
@@ -739,7 +743,7 @@ class InvertedTauID:
 
             
         if "MtWithAllCutsTailKiller" in name:      
-            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":12, "xmax": 300},
+            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":10, "xmax": 300},
                              createRatio=False,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
             
         if "RadiusJet0BackToBack"  in name:      
@@ -818,7 +822,8 @@ class InvertedTauID:
 
         if "MtSoftBtaggingTKClosure" in name:
             plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
-
+        if "NoBtaggingTailKillerClosure" in name:
+            plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
             
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
@@ -859,13 +864,9 @@ class InvertedTauID:
 
         if "MtBvetoBtagInvertedTailKillerClosure" in name:
             histograms.addText(0.55, 0.6, "Before MET cut", 24)
-        if "MtBvetoBtagInvertedTailKillerClosure" in name:
-            histograms.addText(0.55, 0.54, "Inverted #tau isolation", 24)
-        #if "MtBvetoBtagInvertedTailKillerClosure"  in name:
 
-        if "MtbvetoAllDeltaPhiCuts"  in name:
-            histograms.addText(0.25, 0.4, "B-tagging factorisation", 23)
-            histograms.addText(0.25, 0.3, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1/2/3,MET) cuts", 20)
+
+
         if "MtAfterJetsInvertedVsBaselineTailKillerClosure" in name:
             histograms.addText(0.6, 0.65, "Before MET cut", 24)
             histograms.addText(0.6, 0.60, "No b tagging ", 24)
@@ -894,14 +895,16 @@ class InvertedTauID:
         if "BvetoTailKillerClosure" in name:
             histograms.addText(0.6, 0.70, "After MET cut", 22)
             histograms.addText(0.6, 0.64, "B-jet veto", 22)
-            histograms.addText(0.6, 0.58, "TailKiller: MediumPlus", 22)
+            histograms.addText(0.5, 0.58, "TailKiller: TightPlus", 22)
 
         if "MtWithAllCutsTailKiller" in name: 
             histograms.addText(0.6, 0.8, "All selection cuts", 22)
             histograms.addText(0.6, 0.72, "MET > 60 GeV", 22)
-            histograms.addText(0.55, 0.64, "TailKiller: ZeroPlus", 22)
+            histograms.addText(0.55, 0.64, "TailKiller: MediumPlus", 22)
             #histograms.addText(0.6, 0.64, "no TailKiller cuts", 22)
 
+
+         
         if "RadiusJet0BackToBack" in name:      
             histograms.addText(0.25, 0.85, "All selection cuts", 22)
         if "RadiusJet1BackToBack"  in name:      
@@ -917,7 +920,10 @@ class InvertedTauID:
             histograms.addText(0.25, 0.85, "After jet selection", 22)
         if "MtSoftBtaggingTKClosure" in name:
             histograms.addText(0.2, 0.85, "With loose b tagging", 20)
-            
+            histograms.addText(0.2, 0.75, "TailKiller: TightPlus", 20)
+        if "NoBtaggingTailKillerClosure" in name:
+            histograms.addText(0.2, 0.85, "No b tagging", 20)
+            histograms.addText(0.2, 0.75, "TailKiller: ZeroPlus", 20)
         plot.draw() 
         plot.save()
 

@@ -213,9 +213,9 @@ namespace HPlus {
     hMETBaselineTauIdJetsCollinear =  new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdJetsCollinear", 250, 0.0 , 500.0 );
     hMETBaselineTauIdBvetoCollinear = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdBvetoCollinear", 250, 0.0 , 500.0 );
     hMETBaselineTauIdBtagCollinear = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdBtagCollinear", 250, 0.0 , 500.0 );
-    hMETBaselineTauIdJets = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaselineTauIdJets", 250, 0.0 , 500.0 );
-    hMETBaselineTauIdBveto = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaselineTauIdBveto", 250, 0.0 , 500.0 );
-    hMETBaselineTauIdBtag = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaselineTauIdBtag", 250, 0.0 , 500.0 );
+    hMETBaselineTauIdJets = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdJets", 250, 0.0 , 500.0 );
+    hMETBaselineTauIdBveto = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdBveto", 250, 0.0 , 500.0 );
+    hMETBaselineTauIdBtag = new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MET_BaseLineTauIdBtag", 250, 0.0 , 500.0 );
 
     // baseline MT histos
     hMTBaselineTauIdSoftBtaggingTK= new HistogramsInBins(HistoWrapper::kVital, eventCounter, fHistoWrapper, "BaseLine","MTBaseLineTauIdSoftBtaggingTK", 200, 0.0, 400.0 );
@@ -287,19 +287,19 @@ namespace HPlus {
 
 
     hSelectedTauEtTauVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_AfterTauVeto", "SelectedTau_pT_AfterTauVeto", 200, 0.0, 400.0);     
-    hSelectedTauEtJetCut = new HistogramsInBins(HistoWrapper::kInformative, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_AfterJetCut", 200, 0.0 , 400.0 );
-    // hSelectedTauEtJetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_AfterJetCut", "SelectedTau_pT_AfterJetCut", 200, 0.0, 400.0);
-    //hSelectedTauEtCollinearTailKiller = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_CollinearTailKiller", "SelectedTau_pT_CollinearTailKiller", 200, 0.0, 400.0);
-    hSelectedTauEtCollinearTailKiller  = new HistogramsInBins(HistoWrapper::kInformative, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_CollinearTailKiller", 200, 0.0 , 400.0 );
-    hSelectedTauEtMetCut  = new HistogramsInBins(HistoWrapper::kInformative, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_AfterMetCut", 200, 0.0 , 400.0);
-    //hSelectedTauEtMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut", 200, 0.0, 400.0);
-    hSelectedTauEtBtagging  = new HistogramsInBins(HistoWrapper::kInformative, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_AfterBtagging", 200, 0.0 , 400.0);
+    //    hSelectedTauEtJetCut = new HistogramsInBins(HistoWrapper::kInformative, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_AfterJetCut", 200, 0.0 , 400.0 );
+    hSelectedTauEtJetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_AfterJetCut", "SelectedTau_pT_AfterJetCut", 200, 0.0, 400.0);
+    hSelectedTauEtCollinearTailKiller = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_CollinearTailKiller", "SelectedTau_pT_CollinearTailKiller", 200, 0.0, 400.0);
+    // hSelectedTauEtCollinearTailKiller  = new HistogramsInBins(HistoWrapper::kInformative, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_CollinearTailKiller", 200, 0.0 , 400.0 );
+    //hSelectedTauEtMetCut  = new HistogramsInBins(HistoWrapper::kInformative, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_AfterMetCut", 200, 0.0 , 400.0);
+    hSelectedTauEtMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut", 200, 0.0, 400.0);
+    //hSelectedTauEtBtagging  = new HistogramsInBins(HistoWrapper::kInformative, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_AfterBtagging", 200, 0.0 , 400.0);
  
-    //hSelectedTauEtBtagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_AfterBtagging", "SelectedTau_pT_AfterBtagging", 200, 0.0, 400.0);
+    hSelectedTauEtBtagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_AfterBtagging", "SelectedTau_pT_AfterBtagging", 200, 0.0, 400.0);
     hSelectedTauEtBjetVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_AfterBveto", "SelectedTau_pT_AfterBveto", 200, 0.0, 400.0);
     hSelectedTauEtBjetVetoPhiCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_AfterBvetoPhiCuts", "SelectedTau_pT_AfterBvetoPhiCuts", 200, 0.,400.0);
-    // hSelectedTauEtBackToBackTailKiller = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_BackToBackTailKiller", "SelectedTau_pT_BackToBackTailKiller", 200, 0.0, 400.0);
-    hSelectedTauEtBackToBackTailKiller   = new HistogramsInBins(HistoWrapper::kInformative, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_BackToBackTailKiller", 200, 0.0 , 400.0);
+    hSelectedTauEtBackToBackTailKiller = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInverted, "SelectedTau_pT_BackToBackTailKiller", "SelectedTau_pT_BackToBackTailKiller", 200, 0.0, 400.0);
+    //hSelectedTauEtBackToBackTailKiller   = new HistogramsInBins(HistoWrapper::kInformative, eventCounter, fHistoWrapper, "Inverted","SelectedTau_pT_BackToBackTailKiller", 200, 0.0 , 400.0);
           
     //    hSelectedTauEtMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 200, 0.0, 400.0);
     hSelectedTauEtaMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "SelectedTau_eta_AfterMetCut", "SelectedTau_eta_AfterMetCut;#tau #eta;N_{events} / 0.1", 150, -3.0, 3.0);
@@ -780,42 +780,8 @@ namespace HPlus {
   }
 
   ////////////////////////////////////////////////////////////////////////////////////
-  /*
-<<<<<<< HEAD
-  
-  
-  bool SignalAnalysisInvertedTau::doInvertedAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData, const GenParticleAnalysis::Data genData) {
 
-
-    JetSelection::Data     jetData = fJetSelection.analyze(iEvent, iSetup,  selectedTau,   pvData.getNumberOfAllVertices());   
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), selectedTau, jetData.getAllJets());
-    BTagging::Data btagData  = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
-    
-    double deltaPhi = DeltaPhi::reconstruct(*(selectedTau), *(metData.getSelectedMET())) * 57.3; // converted to degrees   
-    double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metData.getSelectedMET()) );
-    //    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());	
-    //const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
-     
-    
-    int ijet = 0;
-    double deltaPhiMetJet1 = -999;
-    double deltaPhiMetJet2 = -999;
-    double deltaPhiMetJet3 = -999;
-    double deltaPhiMetJet4 = -999;
-    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getAllIdentifiedJets().begin(); iJet != jetData.getAllIdentifiedJets().end(); ++iJet) {
-      if (!((**iJet).pt() > 30. && std::abs((**iJet).eta()) < 2.5) )  continue;
-
-      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
-      ijet++;
-      if (ijet == 1) deltaPhiMetJet1 = jetDeltaPhi;
-      if (ijet == 2) deltaPhiMetJet2 = jetDeltaPhi;
-      if (ijet == 3) deltaPhiMetJet3 = jetDeltaPhi;
-      if (ijet == 4) deltaPhiMetJet4 = jetDeltaPhi;
-    }
-    
-   
-=======
-  */
+ 
   bool SignalAnalysisInvertedTau::doInvertedAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData) {
 
     //------ Veto against second tau in event
@@ -852,7 +818,7 @@ namespace HPlus {
     // Apply trigger scale factor here for now, SF calculated for tau+3 jets events
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metDataTmp.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     increment(fInvertedMetTriggerScaleFactorCounter);
-    hSelectedTauEtJetCut->Fill(selectedTau->pt() ,selectedTau->pt());
+    hSelectedTauEtJetCut->Fill(selectedTau->pt());
     fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(iEvent);
 
     hMETInvertedTauIdJets->Fill(selectedTau->pt(), metDataTmp.getSelectedMET()->et());
@@ -884,7 +850,7 @@ namespace HPlus {
     increment(fInvertedQCDTailKillerCollinearCounter);
 
     // At this point, let's fill histograms for closure test and for normalisation
-    hSelectedTauEtCollinearTailKiller->Fill(selectedTau->pt() ,selectedTau->pt());
+    hSelectedTauEtCollinearTailKiller->Fill(selectedTau->pt());
     /*
 <<<<<<< HEAD
     hQCDTailKillerJet0CollinearInverted->Fill(qcdTailKillerData.getRadiusFromCollinearCorner(0)); // Make control plot before cut 
@@ -902,14 +868,7 @@ namespace HPlus {
     
     hSelectedTauEtCollinearTailKiller->Fill(selectedTau->pt() ,selectedTau->pt());     
     
-      
-    if (!iEvent.isRealData()) {
-      fBTagging.fillScaleFactorHistograms(btagData); //    Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
-      fEventWeight.multiplyWeight(btagData.getScaleFactor());
-    }   
-    increment(fBTaggingScaleFactorInvertedCounter);
-    
-    
+ 
 =======
 >>>>>>> sami/2011
     */
@@ -945,7 +904,7 @@ namespace HPlus {
     increment(fInvertedMetCounter);
 
     //hSelectionFlow->Fill(kQCDOrderMET);
-    hSelectedTauEtMetCut->Fill(selectedTau->pt() ,selectedTau->pt());
+    hSelectedTauEtMetCut->Fill(selectedTau->pt());
     hSelectedTauEtaMetCut->Fill(selectedTau->eta());
     hSelectedTauPhiMetCut->Fill(selectedTau->phi());  
 
@@ -997,7 +956,7 @@ namespace HPlus {
     if(!btagData.passedEvent()) return false;
     increment(fInvertedBTaggingCounter);
     //hSelectionFlow->Fill(kQCDOrderBTag);
-    hSelectedTauEtBtagging->Fill(selectedTau->pt() ,selectedTau->pt());
+    hSelectedTauEtBtagging->Fill(selectedTau->pt());
 
     // mt for inverted tau with b tagging
     hMTInvertedTauIdBtag->Fill(selectedTau->pt(), transverseMass);
@@ -1035,7 +994,7 @@ namespace HPlus {
     hMTInvertedAllCutsTailKiller->Fill(selectedTau->pt(), transverseMass);     
     hMETInvertedAllCutsTailKiller->Fill(selectedTau->pt(), metData.getSelectedMET()->et());
     //    increment(fDeltaPhiVSDeltaPhiMETJet2CutCounter);
-    hSelectedTauEtBackToBackTailKiller->Fill(selectedTau->pt() ,selectedTau->pt());
+    hSelectedTauEtBackToBackTailKiller->Fill(selectedTau->pt());
 
     // Top reconstruction
     TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());

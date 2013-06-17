@@ -13,9 +13,9 @@ analysis = "signalAnalysisInvertedTau"
 searchMode = "Light"
 #searchMode = "Heavy"
 
-dataEra = "Run2011AB"
-#dataEra = "Run2012C"
-#dataEra = "Run2011A"
+#dataEra = "Run2011AB"
+#dataEra = "Run2011B"
+dataEra = "Run2011A"
 
 #optMode = "OptQCDTailKillerZeroPlus"
 #optMode = "OptQCDTailKillerLoosePlus"
@@ -111,16 +111,16 @@ def main():
 
     plot.createFrame("purityLoose", opts={"xmin": 40, "xmax": 160, "ymin": 0., "ymax": 1.05})
     plot.frame.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
-    plot.frame.GetYaxis().SetTitle("Purity")
+    plot.frame.GetYaxis().SetTitle("QCD purity")
 #    plot.setEnergy(datasets.getEnergies())
 
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
 
-    plot.setLegend(histograms.createLegend(0.53, 0.2, 0.98, 0.4))
+    #plot.setLegend(histograms.createLegend(0.53, 0.2, 0.98, 0.4))
     
  
-    histograms.addText(0.2, 0.3, "TailKiller: TightPlus", 18)
+    histograms.addText(0.3, 0.3, "TailKiller: TightPlus", 25)
 
 
     histograms.addCmsPreliminaryText()
