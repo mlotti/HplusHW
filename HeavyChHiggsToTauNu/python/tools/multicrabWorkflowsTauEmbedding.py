@@ -103,7 +103,7 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
     # Goal for skim jobs is ~5 hour jobs
     # Goal for skimAnalysis jobs is 30k events/job
     njobs = {
-        "SingleMu_160431-163261_2011A_Nov08": TaskDef(njobsIn=120, njobsOut= 2),
+        "SingleMu_160431-163261_2011A_Nov08": TaskDef(njobsIn=100, njobsOut= 2),
         "SingleMu_163270-163869_2011A_Nov08": TaskDef(njobsIn=250, njobsOut= 3),
         "SingleMu_165088-166150_2011A_Nov08": TaskDef(njobsIn=490, njobsOut= 4),
 
@@ -113,7 +113,7 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         "SingleMu_167078-167913_2011A_Nov08": TaskDef(njobsIn=230, njobsOut= 3),
         "SingleMu_170722-172619_2011A_Nov08": TaskDef(njobsIn=200, njobsOut= 6),
         "SingleMu_172620-173198_2011A_Nov08": TaskDef(njobsIn=230, njobsOut= 6),
-        "SingleMu_166161-173198_2011A_Nov08": TaskDef(njobsIn=1200, njobsOut= 25),
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef(njobsIn=1700, njobsOut= 25),
 
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(njobsIn=200, njobsOut= 4),
 
@@ -121,7 +121,7 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         "SingleMu_177453-178380_2011B_Nov19": TaskDef(njobsIn=300, njobsOut=11),
         "SingleMu_178411-179889_2011B_Nov19": TaskDef(njobsIn=300, njobsOut=11),
         "SingleMu_179942-180371_2011B_Nov19": TaskDef(njobsIn= 60, njobsOut= 2),
-        "SingleMu_175832-180252_2011B_Nov19": TaskDef(njobsIn=3000, njobsOut=40),
+        "SingleMu_175832-180252_2011B_Nov19": TaskDef(njobsIn=4000, njobsOut=40),
 
         # MC, triggered with mcTrigger
         "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=4990, njobsOut=50),
@@ -537,6 +537,19 @@ def addEmbeddingSkim_v44_5_1(datasets):
         "TTToHplusBHminusB_M160_Fall11":    TaskDef(""),
         }
     addEmbeddingSkim_44X("v44_5_1", datasets, definitions)
+
+def addEmbeddingSkim_v44_5_2(datasets):
+    # Bugfix for calculating the "standard" MET filters for data
+    definitions = {
+        "SingleMu_160431-163261_2011A_Nov08": TaskDef(""),
+        "SingleMu_163270-163869_2011A_Nov08": TaskDef(""),
+        "SingleMu_165088-166150_2011A_Nov08": TaskDef(""),
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef(""),
+        "SingleMu_173236-173692_2011A_Nov08": TaskDef(""),
+        "SingleMu_175832-180252_2011B_Nov19": TaskDef(""),
+        }
+    addEmbeddingSkim_44X("v44_5_2", datasets, definitions)
+
 
 def addEmbedding_SKELETON(datasets):
     definitions = {
