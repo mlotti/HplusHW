@@ -18,60 +18,73 @@ class TBranch;
 namespace math {
   typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > XYZTLorentzVectorD;
   typedef XYZTLorentzVectorD XYZTLorentzVector;
+
+  typedef ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double> > XYZVectorD;
+  typedef XYZVectorD XYZVector;
 }
 
 // Generic branch
 template <typename T>
+struct BranchTraits {
+  typedef T *DataType;
+  typedef const T& ReturnType;
+  static ReturnType get(const T* data) { return *data; }
+};
+template <>
+struct BranchTraits<bool> {
+  typedef bool DataType;
+  typedef bool ReturnType;
+  static ReturnType get(bool data) { return data; }
+};
+template <>
+struct BranchTraits<int> {
+  typedef int DataType;
+  typedef int ReturnType;
+  static ReturnType get(int data) { return data; }
+};
+template <>
+struct BranchTraits<unsigned int> {
+  typedef unsigned int DataType;
+  typedef unsigned int ReturnType;
+  static ReturnType get(unsigned int data) { return data; }
+};
+template <>
+struct BranchTraits<float> {
+  typedef float DataType;
+  typedef float ReturnType;
+  static ReturnType get(float data) { return data; }
+};
+template <>
+struct BranchTraits<double> {
+  typedef double DataType;
+  typedef double ReturnType;
+  static ReturnType get(double data) { return data; }
+};
+
+template <typename T>
 class Branch {
 public:
-  Branch() {}
+  Branch(): entry(0), data(0), branch(0), cached(false) {}
   ~Branch() {}
 
   void setupBranch(TTree *tree, const char *name) {
     tree->SetBranchAddress(name, &data, &branch);    
   }
   void setEntry(Long64_t e) { entry = e; cached = false; }
-  const T& value() {
+  typename BranchTraits<T>::ReturnType value() {
     if(!cached) {
       branch->GetEntry(entry);
       cached = true;
     }
-    return data;
+    return BranchTraits<T>::get(data);
   }
 
 private:
   Long64_t entry;
-  T data;
+  typename BranchTraits<T>::DataType data;
   TBranch *branch;
   bool cached;
 };
-
-// Generic branch of a vector
-template <typename T>
-class BranchObj {
-public:
-  BranchObj(): data(0) {}
-  ~BranchObj() {}
-
-  void setupBranch(TTree *tree, const char *name) {
-    tree->SetBranchAddress(name, &data, &branch);    
-  }
-  void setEntry(Long64_t e) { entry = e; cached = false; }
-  const T& value() {
-    if(!cached) {
-      branch->GetEntry(entry);
-      cached = true;
-    }
-    return *data;
-  }
-
-private:
-  Long64_t entry;
-  T *data;
-  TBranch *branch;
-  bool cached;
-};
-
 
 // Event information
 class EventInfo {
@@ -187,30 +200,30 @@ protected:
 private:
   std::string fIdEfficiencyName;
 
-  BranchObj<std::vector<math::XYZTLorentzVector> > fP4;
-  BranchObj<std::vector<math::XYZTLorentzVector> > fCorrectedP4;
+  Branch<std::vector<math::XYZTLorentzVector> > fP4;
+  Branch<std::vector<math::XYZTLorentzVector> > fCorrectedP4;
 
-  BranchObj<std::vector<math::XYZVector> > fTunePP3;
-  BranchObj<std::vector<double> > fTunePPtError;
+  Branch<std::vector<math::XYZVector> > fTunePP3;
+  Branch<std::vector<double> > fTunePPtError;
 
-  BranchObj<std::vector<int> > fCharge;
-  BranchObj<std::vector<double> > fDB;
-  BranchObj<std::vector<double> > fNormalizedChi2;
+  Branch<std::vector<int> > fCharge;
+  Branch<std::vector<double> > fDB;
+  Branch<std::vector<double> > fNormalizedChi2;
 
-  BranchObj<std::vector<double> > fTrackIso;
-  BranchObj<std::vector<double> > fCaloIso;
+  Branch<std::vector<double> > fTrackIso;
+  Branch<std::vector<double> > fCaloIso;
 
-  BranchObj<std::vector<double> > fChargedHadronIso;
-  BranchObj<std::vector<double> > fPuChargedHadronIso;
-  BranchObj<std::vector<double> > fNeutralHadronIso;
-  BranchObj<std::vector<double> > fPhotonIso;
+  Branch<std::vector<double> > fChargedHadronIso;
+  Branch<std::vector<double> > fPuChargedHadronIso;
+  Branch<std::vector<double> > fNeutralHadronIso;
+  Branch<std::vector<double> > fPhotonIso;
 
-  BranchObj<std::vector<double> > fIdEfficiency;
+  Branch<std::vector<double> > fIdEfficiency;
 
-  BranchObj<std::vector<math::XYZTLorentzVector> > fGenMatchP4;
-  BranchObj<std::vector<int> > fPdgId;
-  BranchObj<std::vector<int> > fMotherPdgId;
-  BranchObj<std::vector<int> > fGrandMotherPdgId;
+  Branch<std::vector<math::XYZTLorentzVector> > fGenMatchP4;
+  Branch<std::vector<int> > fPdgId;
+  Branch<std::vector<int> > fMotherPdgId;
+  Branch<std::vector<int> > fGrandMotherPdgId;
 };
 
 // Embedding muons
@@ -254,10 +267,10 @@ public:
 private:
   std::string fPostfix;
 
-  BranchObj<std::vector<double> > fChargedHadronIsoEmb;
-  BranchObj<std::vector<double> > fPuChargedHadronIsoEmb;
-  BranchObj<std::vector<double> > fNeutralHadronIsoEmb;
-  BranchObj<std::vector<double> > fPhotonIsoEmb;
+  Branch<std::vector<double> > fChargedHadronIsoEmb;
+  Branch<std::vector<double> > fPuChargedHadronIsoEmb;
+  Branch<std::vector<double> > fNeutralHadronIsoEmb;
+  Branch<std::vector<double> > fPhotonIsoEmb;
 };
 
 
@@ -326,20 +339,20 @@ protected:
   std::string fPrefix;
 
 private:
-  BranchObj<std::vector<math::XYZTLorentzVector> > fP4;
-  BranchObj<std::vector<bool> > fHasGsfTrack;
-  BranchObj<std::vector<bool> > fHasSuperCluster;
-  BranchObj<std::vector<bool> > fCutBasedIdVeto;
-  BranchObj<std::vector<bool> > fCutBasedIdLoose;
-  BranchObj<std::vector<bool> > fCutBasedIdMedium;
-  BranchObj<std::vector<bool> > fCutBasedIdTight;
+  Branch<std::vector<math::XYZTLorentzVector> > fP4;
+  Branch<std::vector<bool> > fHasGsfTrack;
+  Branch<std::vector<bool> > fHasSuperCluster;
+  Branch<std::vector<bool> > fCutBasedIdVeto;
+  Branch<std::vector<bool> > fCutBasedIdLoose;
+  Branch<std::vector<bool> > fCutBasedIdMedium;
+  Branch<std::vector<bool> > fCutBasedIdTight;
 
-  BranchObj<std::vector<double> > fSuperClusterEta;
+  Branch<std::vector<double> > fSuperClusterEta;
 
-  BranchObj<std::vector<math::XYZTLorentzVector> > fGenMatchP4;
-  BranchObj<std::vector<int> > fPdgId;
-  BranchObj<std::vector<int> > fMotherPdgId;
-  BranchObj<std::vector<int> > fGrandMotherPdgId;
+  Branch<std::vector<math::XYZTLorentzVector> > fGenMatchP4;
+  Branch<std::vector<int> > fPdgId;
+  Branch<std::vector<int> > fMotherPdgId;
+  Branch<std::vector<int> > fGrandMotherPdgId;
 };
 
 
@@ -387,10 +400,10 @@ protected:
   std::string fPrefix;
 
 private:
-  BranchObj<std::vector<math::XYZTLorentzVector> > fP4;
-  BranchObj<std::vector<unsigned> > fNumberOfDaughters;
-  BranchObj<std::vector<bool> > fLooseId;
-  BranchObj<std::vector<bool> > fTightId;
+  Branch<std::vector<math::XYZTLorentzVector> > fP4;
+  Branch<std::vector<unsigned> > fNumberOfDaughters;
+  Branch<std::vector<bool> > fLooseId;
+  Branch<std::vector<bool> > fTightId;
 };
 
 class JetDetailsCollection: public JetCollection {
@@ -436,16 +449,16 @@ public:
   }
 
 private:
-  BranchObj<std::vector<int> > fChm;
-  BranchObj<std::vector<int> > fNhm;
-  BranchObj<std::vector<int> > fElm;
-  BranchObj<std::vector<int> > fPhm;
-  BranchObj<std::vector<int> > fMum;
-  BranchObj<std::vector<double> > fChf;
-  BranchObj<std::vector<double> > fNhf;
-  BranchObj<std::vector<double> > fElf;
-  BranchObj<std::vector<double> > fPhf;
-  BranchObj<std::vector<double> > fMuf;
+  Branch<std::vector<int> > fChm;
+  Branch<std::vector<int> > fNhm;
+  Branch<std::vector<int> > fElm;
+  Branch<std::vector<int> > fPhm;
+  Branch<std::vector<int> > fMum;
+  Branch<std::vector<double> > fChf;
+  Branch<std::vector<double> > fNhf;
+  Branch<std::vector<double> > fElf;
+  Branch<std::vector<double> > fPhf;
+  Branch<std::vector<double> > fMuf;
 };
 
 
@@ -532,31 +545,31 @@ protected:
   std::string fPrefix;
 
 private:
-  BranchObj<std::vector<math::XYZTLorentzVector> > fP4;
-  BranchObj<std::vector<math::XYZTLorentzVector> > fLeadPFChargedHadrCandP4;
-  BranchObj<std::vector<unsigned> > fSignalPFChargedHadrCandsCount;
-  BranchObj<std::vector<int> > fDecayMode;
+  Branch<std::vector<math::XYZTLorentzVector> > fP4;
+  Branch<std::vector<math::XYZTLorentzVector> > fLeadPFChargedHadrCandP4;
+  Branch<std::vector<unsigned> > fSignalPFChargedHadrCandsCount;
+  Branch<std::vector<int> > fDecayMode;
 
-  BranchObj<std::vector<double> > fDecayModeFinding;
+  Branch<std::vector<double> > fDecayModeFinding;
 
-  BranchObj<std::vector<double> > fAgainstMuonTight;
-  BranchObj<std::vector<double> > fAgainstMuonTight2;
+  Branch<std::vector<double> > fAgainstMuonTight;
+  Branch<std::vector<double> > fAgainstMuonTight2;
 
-  BranchObj<std::vector<double> > fAgainstElectronLoose;
-  BranchObj<std::vector<double> > fAgainstElectronMedium;
-  BranchObj<std::vector<double> > fAgainstElectronTight;
-  BranchObj<std::vector<double> > fAgainstElectronMVA;
-  BranchObj<std::vector<double> > fAgainstElectronTightMVA3;
+  Branch<std::vector<double> > fAgainstElectronLoose;
+  Branch<std::vector<double> > fAgainstElectronMedium;
+  Branch<std::vector<double> > fAgainstElectronTight;
+  Branch<std::vector<double> > fAgainstElectronMVA;
+  Branch<std::vector<double> > fAgainstElectronTightMVA3;
 
-  BranchObj<std::vector<double> > fMediumCombinedIsolationDeltaBetaCorr;
-  BranchObj<std::vector<double> > fMediumCombinedIsolationDeltaBetaCorr3Hits;
+  Branch<std::vector<double> > fMediumCombinedIsolationDeltaBetaCorr;
+  Branch<std::vector<double> > fMediumCombinedIsolationDeltaBetaCorr3Hits;
 
-  BranchObj<std::vector<math::XYZTLorentzVector> > fGenMatchP4;
-  BranchObj<std::vector<math::XYZTLorentzVector> > fGenMatchVisibleP4;
-  BranchObj<std::vector<int> > fPdgId;
-  BranchObj<std::vector<int> > fMotherPdgId;
-  BranchObj<std::vector<int> > fGrandMotherPdgId;
-  BranchObj<std::vector<int> > fDaughterPdgId;
+  Branch<std::vector<math::XYZTLorentzVector> > fGenMatchP4;
+  Branch<std::vector<math::XYZTLorentzVector> > fGenMatchVisibleP4;
+  Branch<std::vector<int> > fPdgId;
+  Branch<std::vector<int> > fMotherPdgId;
+  Branch<std::vector<int> > fGrandMotherPdgId;
+  Branch<std::vector<int> > fDaughterPdgId;
 };
 
 
@@ -612,13 +625,13 @@ protected:
   bool fIsTau;
 
 private:
-  BranchObj<std::vector<math::XYZTLorentzVector> > fP4;
-  BranchObj<std::vector<int> > fPdgId;
-  BranchObj<std::vector<int> > fMotherPdgId;
-  BranchObj<std::vector<int> > fGrandMotherPdgId;
+  Branch<std::vector<math::XYZTLorentzVector> > fP4;
+  Branch<std::vector<int> > fPdgId;
+  Branch<std::vector<int> > fMotherPdgId;
+  Branch<std::vector<int> > fGrandMotherPdgId;
 
-  BranchObj<std::vector<int> > fDaughterPdgId;
-  BranchObj<std::vector<math::XYZTLorentzVector> > fVisibleP4;
+  Branch<std::vector<int> > fDaughterPdgId;
+  Branch<std::vector<math::XYZTLorentzVector> > fVisibleP4;
 };
 
 #endif

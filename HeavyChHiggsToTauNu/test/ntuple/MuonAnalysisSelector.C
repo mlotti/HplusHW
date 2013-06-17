@@ -43,7 +43,7 @@ private:
   EmbeddingMuonCollection fMuons;
   //ElectronCollection fElectrons;
   JetCollection fJets;
-  BranchObj<math::XYZTLorentzVector> fRawMet;
+  Branch<math::XYZTLorentzVector> fRawMet;
 
   std::string fPuWeightName;
   Branch<double> fPuWeight;
