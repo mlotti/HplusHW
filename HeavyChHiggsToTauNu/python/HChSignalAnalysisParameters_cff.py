@@ -671,6 +671,14 @@ embeddingMuonEfficiency = muonTriggerIDEfficiency.efficiency
 embeddingMuonEfficiency.variationEnabled = cms.bool(False)
 embeddingMuonEfficiency.variationShiftBy = cms.double(0)
 
+embeddingMuonEfficiencyID = muonTriggerIDEfficiency.efficiency_ID
+embeddingMuonEfficiencyID.variationEnabled = cms.bool(False)
+embeddingMuonEfficiencyID.variationShiftBy = cms.double(0)
+
+embeddingMuonEfficiencyTrigger = muonTriggerIDEfficiency.efficiency_trigger
+embeddingMuonEfficiencyTrigger.variationEnabled = cms.bool(False)
+embeddingMuonEfficiencyTrigger.variationShiftBy = cms.double(0)
+
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
 #for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff)):

@@ -76,7 +76,7 @@ def triggerBin(eta, eff, unc):
 
 # Taken from https://twiki.cern.ch/twiki/bin/view/CMS/MuonReferenceEffs
 # file MuonEfficiencies2011_44X.pkl
-efficiency_pickle = cms.untracked.PSet(
+efficiency_ID_pickle = cms.untracked.PSet(
     dataParameters = cms.PSet(
         Run2011A = cms.PSet(
             firstRun = cms.uint32(160431),
@@ -173,5 +173,182 @@ efficiency_pickle = cms.untracked.PSet(
     muonSrc = cms.InputTag("NOT_SET"),
 )
 
+
+## Reference trigger efficiencyes for HLT_Mu40
+# From https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonHLT#Reference_Efficiencies_for_2011
+# Run ranges from https://indico.cern.ch/getFile.py/access?contribId=1&resId=0&materialId=slides&confId=156713
+efficiency_trigger_reference = cms.untracked.PSet(
+    dataParameters = cms.PSet(
+        Run2011AB = cms.PSet(
+            firstRun = cms.uint32(160431),
+            lastRun = cms.uint32(180252),
+            luminosity = cms.double(5050.2),
+            bins = cms.VPSet(
+               triggerBin(-2.4, 0.597, 0.004),
+               triggerBin(-2.1, 0.857, 0.002),
+               triggerBin(-1.6, 0.884, 0.002),
+               triggerBin(-1.2, 0.887, 0.002),
+               triggerBin(-0.9, 0.946, 0.001),
+               triggerBin(-0.6, 0.970, 0.001),
+               triggerBin(-0.3, 0.918, 0.003),
+               triggerBin(-0.2, 0.965, 0.001),
+               triggerBin(0.2, 0.927, 0.003),
+               triggerBin(0.3, 0.966, 0.001),
+               triggerBin(0.6, 0.944, 0.001),
+               triggerBin(0.9, 0.882, 0.002),
+               triggerBin(1.2, 0.867, 0.002),
+               triggerBin(1.6, 0.859, 0.002),
+               triggerBin(2.1, 0.597, 0.004),
+            ),
+        ),
+        lumi1e33 = cms.PSet(
+            firstRun = cms.uint32(160431),
+            lastRun = cms.uint32(167913),
+            luminosity = cms.double(1176.0),
+            bins = cms.VPSet(
+               triggerBin(-2.4, 0.747, 0.007),
+               triggerBin(-2.1, 0.868, 0.004),
+               triggerBin(-1.6, 0.867, 0.004),
+               triggerBin(-1.2, 0.923, 0.003),
+               triggerBin(-0.9, 0.941, 0.003),
+               triggerBin(-0.6, 0.972, 0.002),
+               triggerBin(-0.3, 0.917, 0.006),
+               triggerBin(-0.2, 0.962, 0.002),
+               triggerBin(0.2, 0.919, 0.006),
+               triggerBin(0.3, 0.964, 0.002),
+               triggerBin(0.6, 0.937, 0.003),
+               triggerBin(0.9, 0.921, 0.003),
+               triggerBin(1.2, 0.856, 0.004),
+               triggerBin(1.6, 0.876, 0.004),
+               triggerBin(2.1, 0.769, 0.007),
+            ),
+        ),
+        lumi2e33 = cms.PSet(
+            firstRun = cms.uint32(170249),
+            lastRun = cms.uint32(173198),
+            luminosity = cms.double(869.878),
+            bins = cms.VPSet(
+               triggerBin(-2.4, 0.559, 0.010),
+               triggerBin(-2.1, 0.857, 0.004),
+               triggerBin(-1.6, 0.853, 0.004),
+               triggerBin(-1.2, 0.869, 0.004),
+               triggerBin(-0.9, 0.938, 0.003),
+               triggerBin(-0.6, 0.970, 0.002),
+               triggerBin(-0.3, 0.910, 0.007),
+               triggerBin(-0.2, 0.959, 0.002),
+               triggerBin(0.2, 0.922, 0.006),
+               triggerBin(0.3, 0.965, 0.002),
+               triggerBin(0.6, 0.931, 0.003),
+               triggerBin(0.9, 0.855, 0.005),
+               triggerBin(1.2, 0.837, 0.004),
+               triggerBin(1.6, 0.850, 0.004),
+               triggerBin(2.1, 0.542, 0.010),
+            ),
+        ),
+        lumi3e33lowPU = cms.PSet(
+            firstRun = cms.uint32(173236),
+            lastRun = cms.uint32(173692),
+            luminosity = cms.double(265.313),
+            bins = cms.VPSet(
+               triggerBin(-2.4, 0.548, 0.017),
+               triggerBin(-2.1, 0.851, 0.008),
+               triggerBin(-1.6, 0.859, 0.007),
+               triggerBin(-1.2, 0.871, 0.008),
+               triggerBin(-0.9, 0.934, 0.006),
+               triggerBin(-0.6, 0.958, 0.005),
+               triggerBin(-0.3, 0.930, 0.011),
+               triggerBin(-0.2, 0.959, 0.004),
+               triggerBin(0.2, 0.916, 0.011),
+               triggerBin(0.3, 0.966, 0.004),
+               triggerBin(0.6, 0.939, 0.006),
+               triggerBin(0.9, 0.859, 0.008),
+               triggerBin(1.2, 0.841, 0.008),
+               triggerBin(1.6, 0.863, 0.007),
+               triggerBin(2.1, 0.544, 0.017),
+            ),
+        ),
+        lumi3e33highPU = cms.PSet(
+            firstRun = cms.uint32(173693),
+            lastRun = cms.uint32(178380),
+            luminosity = cms.double(1767.0),
+            bins = cms.VPSet(
+               triggerBin(-2.4, 0.550, 0.011),
+               triggerBin(-2.1, 0.852, 0.005),
+               triggerBin(-1.6, 0.911, 0.004),
+               triggerBin(-1.2, 0.885, 0.004),
+               triggerBin(-0.9, 0.952, 0.003),
+               triggerBin(-0.6, 0.972, 0.002),
+               triggerBin(-0.3, 0.917, 0.007),
+               triggerBin(-0.2, 0.972, 0.002),
+               triggerBin(0.2, 0.925, 0.007),
+               triggerBin(0.3, 0.968, 0.002),
+               triggerBin(0.6, 0.954, 0.003),
+               triggerBin(0.9, 0.871, 0.005),
+               triggerBin(1.2, 0.890, 0.004),
+               triggerBin(1.6, 0.859, 0.005),
+               triggerBin(2.1, 0.538, 0.011),
+            ),
+        ),
+        lumi5e33 = cms.PSet(
+            firstRun = cms.uint32(178381),
+            lastRun = cms.uint32(180252),
+            luminosity = cms.double(885.492),
+            bins = cms.VPSet(
+               triggerBin(-2.4, 0.539, 0.011),
+               triggerBin(-2.1, 0.847, 0.005),
+               triggerBin(-1.6, 0.891, 0.004),
+               triggerBin(-1.2, 0.883, 0.005),
+               triggerBin(-0.9, 0.952, 0.003),
+               triggerBin(-0.6, 0.969, 0.002),
+               triggerBin(-0.3, 0.921, 0.007),
+               triggerBin(-0.2, 0.968, 0.002),
+               triggerBin(0.2, 0.941, 0.006),
+               triggerBin(0.3, 0.969, 0.002),
+               triggerBin(0.6, 0.949, 0.003),
+               triggerBin(0.9, 0.883, 0.005),
+               triggerBin(1.2, 0.870, 0.004),
+               triggerBin(1.6, 0.845, 0.005),
+               triggerBin(2.1, 0.538, 0.011),
+            ),
+        ),
+    ),
+    mcParameters = cms.PSet(
+        Fall11 = cms.PSet(
+            bins = cms.VPSet(
+               triggerBin(-2.4, 0.495, 0.003),
+               triggerBin(-2.1, 0.842, 0.001),
+               triggerBin(-1.6, 0.869, 0.001),
+               triggerBin(-1.2, 0.911, 0.001),
+               triggerBin(-0.9, 0.957, 0.001),
+               triggerBin(-0.6, 0.982, 0.000),
+               triggerBin(-0.3, 0.956, 0.001),
+               triggerBin(-0.2, 0.980, 0.000),
+               triggerBin(0.2, 0.959, 0.001),
+               triggerBin(0.3, 0.980, 0.000),
+               triggerBin(0.6, 0.953, 0.001),
+               triggerBin(0.9, 0.911, 0.001),
+               triggerBin(1.2, 0.864, 0.001),
+               triggerBin(1.6, 0.830, 0.001),
+               triggerBin(2.1, 0.474, 0.003),
+            ),
+        ),
+    ),
+    dataSelect = cms.vstring(
+        "lumi1e33",
+        "lumi2e33",
+        "lumi3e33lowPU",
+        "lumi3e33highPU",
+        "lumi5e33",
+    ),
+    mcSelect = cms.string("Fall11"),
+    mode = cms.untracked.string("disabled"),
+    type = cms.untracked.string("binned"),
+    muonSrc = cms.InputTag("NOT_SET"),
+)
+
 #efficiency = efficiency_pt41
-efficiency = efficiency_pickle
+efficiency = efficiency_ID_pickle
+
+efficiency_ID = efficiency_ID_pickle
+
+efficiency_trigger = efficiency_trigger_reference
