@@ -27,6 +27,13 @@ namespace HPlus {
     for(size_t i=0; i<names.size(); ++i) {
       fMuonsFunctions.push_back(MuonFunctionBranch(fPrefix+"f_"+names[i], pset.getParameter<std::string>(names[i])));
     }
+
+    edm::ParameterSet pset2 = iConfig.getParameter<edm::ParameterSet>("bools");
+    std::vector<std::string> names2 = pset2.getParameterNames();
+    fMuonsBools.reserve(names2.size());
+    for(size_t i=0; i<names2.size(); ++i) {
+      fMuonsBools.push_back(TreeValueMapBranch<bool>(fPrefix+names2[i], pset2.getParameter<edm::InputTag>(names2[i])));
+    }
   }
   TreeMuonBranches::~TreeMuonBranches() {}
 
@@ -45,13 +52,16 @@ namespace HPlus {
     for(size_t i=0; i<fMuonsFunctions.size(); ++i) {
       fMuonsFunctions[i].book(tree);
     }
+    for(size_t i=0; i<fMuonsBools.size(); ++i) {
+      fMuonsBools[i].book(tree);
+    }
     fMuonsGenMatch.book(tree);
   }
 
   size_t TreeMuonBranches::setValues(const edm::Event& iEvent) {
     edm::Handle<edm::View<pat::Muon> > hmuons;
     iEvent.getByLabel(fMuonSrc, hmuons);
-    setValues(hmuons->ptrVector());
+    setValues(hmuons->ptrVector(), iEvent);
 
     if(fMuonCorrectedEnabled) {
       edm::Handle<edm::View<pat::Muon> > hmuonscorr;
@@ -71,7 +81,7 @@ namespace HPlus {
   size_t TreeMuonBranches::setValues(const edm::Event& iEvent, const edm::View<reco::GenParticle>& genParticles) {
     edm::Handle<edm::View<pat::Muon> > hmuons;
     iEvent.getByLabel(fMuonSrc, hmuons);
-    setValues(hmuons->ptrVector());
+    setValues(hmuons->ptrVector(), iEvent);
 
     for(size_t i=0; i<hmuons->size(); ++i) {
       const pat::Muon& muon = hmuons->at(i);
@@ -92,7 +102,7 @@ namespace HPlus {
     return hmuons->size();
   }
 
-  void TreeMuonBranches::setValues(const edm::PtrVector<pat::Muon>& muons) {
+  void TreeMuonBranches::setValues(const edm::PtrVector<pat::Muon>& muons, const edm::Event& iEvent) {
     for(size_t i=0; i<muons.size(); ++i) {
       fMuons.push_back(muons[i]->p4());
       fMuonsCharge.push_back(muons[i]->charge());
@@ -112,6 +122,9 @@ namespace HPlus {
     for(size_t i=0; i<fMuonsFunctions.size(); ++i) {
       fMuonsFunctions[i].setValues(muons);
     }
+    for(size_t i=0; i<fMuonsBools.size(); ++i) {
+      fMuonsBools[i].setValues(iEvent, muons);
+    }
   }
 
   void TreeMuonBranches::setValuesCorrected(const edm::PtrVector<pat::Muon>& muons) {
@@ -129,6 +142,9 @@ namespace HPlus {
     fMuonsNormChi2.clear();
     for(size_t i=0; i<fMuonsFunctions.size(); ++i)
       fMuonsFunctions[i].reset();
+    for(size_t i=0; i<fMuonsBools.size(); ++i) {
+      fMuonsBools[i].reset();
+    }
     fMuonsGenMatch.reset();
   }
 }

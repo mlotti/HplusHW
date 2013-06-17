@@ -13,6 +13,7 @@ muons = cms.PSet(
         photonIso = cms.string("photonIso()"),
         puChargedHadronIso = cms.string("puChargedHadronIso()"),
     ),
+    bools = cms.PSet(),
 )
 
 
