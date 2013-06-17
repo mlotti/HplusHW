@@ -77,10 +77,14 @@ namespace HPlus {
       output = Data(beff->getEventWeight(muon->eta(), isData));
     }
 
-    // Weight is actually the inverse of the efficiency
-    if(output.fWeight != 0.0) {
-      output.fWeightAbsUnc = output.fWeightAbsUnc / (output.fWeight*output.fWeight);
-      output.fWeight = 1.0/output.fWeight;
+    // Weight is actually the inverse of the efficiency, but do this
+    // only if the mode is one of the efficiencies
+    EfficiencyScaleFactorBase::Mode mode = fEfficiencyScaleFactor->getMode();
+    if(mode == EfficiencyScaleFactorBase::kDataEfficiency || mode == EfficiencyScaleFactorBase::kMCEfficiency) {
+      if(output.fWeight != 0.0) {
+        output.fWeightAbsUnc = output.fWeightAbsUnc / (output.fWeight*output.fWeight);
+        output.fWeight = 1.0/output.fWeight;
+      }
     }
     return output;
   }
