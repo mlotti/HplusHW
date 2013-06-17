@@ -36,7 +36,13 @@ MuonCollection::~MuonCollection() {}
 void MuonCollection::setupBranches(TTree *tree, bool isMC) {
   fP4.setupBranch(tree, (fPrefix+"_p4").c_str());
   fCorrectedP4.setupBranch(tree, (fPrefix+"_correctedP4").c_str());
+
+  fTunePP3.setupBranch(tree, (fPrefix+"_tunePP3").c_str());
+  fTunePPtError.setupBranch(tree, (fPrefix+"_tunePPtError").c_str());
+
+  fCharge.setupBranch(tree, (fPrefix+"_charge").c_str());
   fDB.setupBranch(tree, (fPrefix+"_f_dB").c_str());
+  fNormalizedChi2.setupBranch(tree, (fPrefix+"_globalTrack_normalizedChi2").c_str());
 
   fTrackIso.setupBranch(tree, (fPrefix+"_f_trackIso").c_str());
   fCaloIso.setupBranch(tree, (fPrefix+"_f_caloIso").c_str());
@@ -45,6 +51,10 @@ void MuonCollection::setupBranches(TTree *tree, bool isMC) {
   fPuChargedHadronIso.setupBranch(tree, (fPrefix+"_f_puChargedHadronIso").c_str());
   fNeutralHadronIso.setupBranch(tree, (fPrefix+"_f_neutralHadronIso").c_str());
   fPhotonIso.setupBranch(tree, (fPrefix+"_f_photonIso").c_str());
+
+  if(fIdEfficiencyName != "") {
+    fIdEfficiency.setupBranch(tree, (fPrefix+"_"+fIdEfficiencyName).c_str());
+  }
 
   if(isMC) {
     fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatch_p4").c_str());

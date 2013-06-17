@@ -6,6 +6,7 @@
 #include "TBranch.h"
 #include "Rtypes.h"
 #include "Math/LorentzVector.h"
+#include "Math/DisplacementVector3D.h"
 
 #include<string>
 #include<vector>
@@ -111,6 +112,12 @@ public:
 
     const math::XYZTLorentzVector& p4() { return fCollection->fP4.value()[fIndex]; }
     const math::XYZTLorentzVector& correctedP4() { return fCollection->fCorrectedP4.value()[fIndex]; }
+
+    const math::XYZVector& tunePP3() { return fCollection->fTunePP3.value()[fIndex]; }
+    double tunePPtError() { return fCollection->fTunePPtError.value()[fIndex]; }
+
+    int charge() { return fCollection->fCharge.value()[fIndex]; }
+    double normalizedChi2() { return fCollection->fNormalizedChi2.value()[fIndex]; }
     double dB() { return fCollection->fDB.value()[fIndex]; }
 
     double trackIso() { return fCollection->fTrackIso.value()[fIndex]; }
@@ -120,6 +127,8 @@ public:
     double puChargedHadronIso() { return fCollection->fPuChargedHadronIso.value()[fIndex]; }
     double neutralHadronIso() { return fCollection->fNeutralHadronIso.value()[fIndex]; }
     double photonIso() { return fCollection->fPhotonIso.value()[fIndex]; }
+
+    double idEfficiency() { return fCollection->fIdEfficiency.value()[fIndex]; }
 
     const math::XYZTLorentzVector& genMatchP4() { return fCollection->fGenMatchP4.value()[fIndex]; }
     int pdgId() { return fCollection->fPdgId.value()[fIndex]; }
@@ -135,11 +144,19 @@ public:
   MuonCollection(const std::string prefix = "muons");
   ~MuonCollection();
 
+  void setIdEfficiencyName(const std::string& idEff) { fIdEfficiencyName = idEff; }
+
   void setupBranches(TTree *tree, bool isMC);
   void setEntry(Long64_t entry) {
     fP4.setEntry(entry);
     fCorrectedP4.setEntry(entry);
+
+    fTunePP3.setEntry(entry);
+    fTunePPtError.setEntry(entry);
+
+    fCharge.setEntry(entry);
     fDB.setEntry(entry);
+    fNormalizedChi2.setEntry(entry);
 
     fTrackIso.setEntry(entry);
     fCaloIso.setEntry(entry);
@@ -148,6 +165,8 @@ public:
     fPuChargedHadronIso.setEntry(entry);
     fNeutralHadronIso.setEntry(entry);
     fPhotonIso.setEntry(entry);
+
+    fIdEfficiency.setEntry(entry);
 
     fPdgId.setEntry(entry);
     fMotherPdgId.setEntry(entry);
@@ -166,9 +185,17 @@ protected:
   std::string fPrefix;
 
 private:
+  std::string fIdEfficiencyName;
+
   BranchObj<std::vector<math::XYZTLorentzVector> > fP4;
   BranchObj<std::vector<math::XYZTLorentzVector> > fCorrectedP4;
+
+  BranchObj<std::vector<math::XYZVector> > fTunePP3;
+  BranchObj<std::vector<double> > fTunePPtError;
+
+  BranchObj<std::vector<int> > fCharge;
   BranchObj<std::vector<double> > fDB;
+  BranchObj<std::vector<double> > fNormalizedChi2;
 
   BranchObj<std::vector<double> > fTrackIso;
   BranchObj<std::vector<double> > fCaloIso;
@@ -177,6 +204,8 @@ private:
   BranchObj<std::vector<double> > fPuChargedHadronIso;
   BranchObj<std::vector<double> > fNeutralHadronIso;
   BranchObj<std::vector<double> > fPhotonIso;
+
+  BranchObj<std::vector<double> > fIdEfficiency;
 
   BranchObj<std::vector<math::XYZTLorentzVector> > fGenMatchP4;
   BranchObj<std::vector<int> > fPdgId;
