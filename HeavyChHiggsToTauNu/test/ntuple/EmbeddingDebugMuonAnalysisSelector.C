@@ -15,61 +15,25 @@
 #include<stdexcept>
 #include<cstdlib>
 
-class MuonWithEffCollection: public MuonCollection {
-public:
-  class Muon: public MuonCollection::Muon {
-  public:
-    Muon(): MuonCollection::Muon() {}
-    Muon(MuonWithEffCollection *mc, size_t i): MuonCollection::Muon(mc, i) {}
-    ~Muon() {}
-
-    double idEfficiency() { return static_cast<MuonWithEffCollection *>(fCollection)->fIdEfficiency.value()[fIndex]; }
-  };
-
-  explicit MuonWithEffCollection(const std::string& idEffName): fIdEffName(idEffName) {}
-  ~MuonWithEffCollection() {}
-
-  void setupBranches(TTree *tree, bool isMC) {
-    MuonCollection::setupBranches(tree, isMC);
-
-    fIdEfficiency.setupBranch(tree, (fIdEffName).c_str());
-  }
-  void setEntry(Long64_t entry) {
-    MuonCollection::setEntry(entry);
-
-    fIdEfficiency.setEntry(entry);
-  }
-
-  Muon get(size_t i) {
-    return Muon(this, i);
-  }
-
-private:
-  std::string fIdEffName;
-
-  BranchObj<std::vector<double> > fIdEfficiency;
-};
-
-
 class EmbeddingDebugMuonAnalysisSelector: public BaseSelector {
 public:
   EmbeddingDebugMuonAnalysisSelector(const std::string& puWeight = "", const std::string& muonEff = "Run2011A");
   ~EmbeddingDebugMuonAnalysisSelector();
 
   void setOutput(TDirectory *dir);
-  void setupBranches(TTree *tree);
+  void setupBranches(BranchManager& branchManager);
   bool process(Long64_t entry);
 
 private:
   // Input
   EventInfo fEventInfo;
   GenParticleCollection fGenTopWDecays;
-  MuonWithEffCollection fMuons;
+  MuonCollection fMuons;
 
   std::string fPuWeightName;
-  Branch<double> fPuWeight;
-  Branch<unsigned> fSelectedVertexCount;
-  Branch<unsigned> fVertexCount;
+  Branch<double> *fPuWeight;
+  Branch<unsigned> *fSelectedVertexCount;
+  Branch<unsigned> *fVertexCount;
 
   rochcor fRochcorr;
 
@@ -100,6 +64,11 @@ private:
       hEta->Fill(p4.Eta(), weight);
       hPhi->Fill(p4.Phi(), weight);
     }
+    void fill(const math::XYZVector& p3, double weight=1.0) {
+      hPt->Fill(std::sqrt(p3.Perp2()), weight);
+      hEta->Fill(p3.Eta(), weight);
+      hPhi->Fill(p3.Phi(), weight);
+    }
 
     TH1 *hPt;
     TH1 *hEta;
@@ -112,15 +81,18 @@ private:
 
   Kinematics hRecoMuon_AfterRecoFound;
   Kinematics hRecoMuon_AfterEffWeight;
+  Kinematics hRecoMuon_AfterEffWeightScaleUp;
+  Kinematics hRecoMuon_AfterEffWeightScaleDown;
   Kinematics hRecoMuon_AfterEffWeightMuscle;
   Kinematics hRecoMuon_AfterEffWeightRochester;
+  Kinematics hRecoMuon_AfterEffWeightTuneP;
 };
 
 
 EmbeddingDebugMuonAnalysisSelector::EmbeddingDebugMuonAnalysisSelector(const std::string& puWeight, const std::string& muonEff):
   BaseSelector(),
   fGenTopWDecays("genttbarwdecays"),
-  fMuons("muon_efficiency_"+muonEff),
+  fMuons(),
   fPuWeightName(puWeight.empty() ? "" : "weightPileup_"+puWeight),
   cAll(fEventCounter.addCounter("All events")),
   cGenMuons(fEventCounter.addCounter("=> 1 gen muon (no pt,eta cuts)")),
@@ -130,7 +102,9 @@ EmbeddingDebugMuonAnalysisSelector::EmbeddingDebugMuonAnalysisSelector(const std
   cRecoMuon(fEventCounter.addCounter("= 1 reco muon")),
   cRecoMuonMatched(fEventCounter.addCounter("reco muon gen matched")),
   cRecoMuonEff(fEventCounter.addCounter("muon id eff weighting"))
-{}
+{
+  fMuons.setIdEfficiencyName("efficiency_"+muonEff);
+}
 EmbeddingDebugMuonAnalysisSelector::~EmbeddingDebugMuonAnalysisSelector() {}
 
 void EmbeddingDebugMuonAnalysisSelector::setOutput(TDirectory *dir) {
@@ -143,32 +117,30 @@ void EmbeddingDebugMuonAnalysisSelector::setOutput(TDirectory *dir) {
 
   hRecoMuon_AfterRecoFound.book("recomuon_afterRecoFound");
   hRecoMuon_AfterEffWeight.book("recomuon_afterEffWeight");
+  hRecoMuon_AfterEffWeightScaleUp.book("recomuon_afterEffWeightScaleUp");
+  hRecoMuon_AfterEffWeightScaleDown.book("recomuon_afterEffWeightScaleDown");
   hRecoMuon_AfterEffWeightMuscle.book("recomuon_afterEffWeightMuscle");
   hRecoMuon_AfterEffWeightRochester.book("recomuon_afterEffWeightRochester");
+  hRecoMuon_AfterEffWeightTuneP.book("recomuon_afterEffWeightTuneP");
 }
 
-void EmbeddingDebugMuonAnalysisSelector::setupBranches(TTree *tree) {
-  fEventInfo.setupBranches(tree);
+void EmbeddingDebugMuonAnalysisSelector::setupBranches(BranchManager& branchManager) {
+  fEventInfo.setupBranches(branchManager);
   if(isMC()) {
-    fGenTopWDecays.setupBranches(tree);
+    fGenTopWDecays.setupBranches(branchManager);
   }
-  fMuons.setupBranches(tree, isMC());
- 
-  fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertex_count");
-  fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
+  fMuons.setupBranches(branchManager, isMC());
+
+  if(!fPuWeightName.empty())
+    branchManager.book(fPuWeightName, &fPuWeight);
+  branchManager.book("selectedPrimaryVertex_count", &fSelectedVertexCount);
+  branchManager.book("goodPrimaryVertex_count", &fVertexCount);
 }
 
 bool EmbeddingDebugMuonAnalysisSelector::process(Long64_t entry) {
-  fEventInfo.setEntry(entry);
-  fGenTopWDecays.setEntry(entry);
-  fMuons.setEntry(entry);
-  fPuWeight.setEntry(entry);
-  fSelectedVertexCount.setEntry(entry);
-  fVertexCount.setEntry(entry);
-
-  double weight = 1.0;
+  Double weight = 1.0;
   if(!fPuWeightName.empty()) {
-    weight *= fPuWeight.value();
+    weight *= fPuWeight->value();
   }
   fEventCounter.setWeight(weight);
 
@@ -219,18 +191,18 @@ bool EmbeddingDebugMuonAnalysisSelector::process(Long64_t entry) {
     genMuon = GenParticleCollection::GenParticle();
 
     // Find reco+ID muon
-    MuonWithEffCollection::Muon recoMuon;
+    MuonCollection::Muon recoMuon;
     for(size_t i=0; i<fMuons.size(); ++i) {
-      MuonWithEffCollection::Muon muon = fMuons.get(i);
+      MuonCollection::Muon muon = fMuons.get(i);
 
       if(muon.p4().Pt() <= 41) continue;
       if(std::abs(muon.p4().Eta()) >= 2.1) continue;
+      if(muon.normalizedChi2() >= 10) continue;
 
       if(recoMuon.isValid())
         return true;
 
       recoMuon = muon;
-
 
     }
 
@@ -265,10 +237,21 @@ bool EmbeddingDebugMuonAnalysisSelector::process(Long64_t entry) {
     hRecoMuon_AfterEffWeight.fill(recoMuon.p4(), weight);
     hRecoMuon_AfterEffWeightMuscle.fill(recoMuon.correctedP4(), weight);
 
+    double scale = 0.007;
+    math::XYZTLorentzVector muonP4Up = recoMuon.p4()*(1+scale);
+    math::XYZTLorentzVector muonP4Down = recoMuon.p4()*(1-scale);
+    hRecoMuon_AfterEffWeightScaleUp.fill(muonP4Up, weight);
+    hRecoMuon_AfterEffWeightScaleDown.fill(muonP4Down, weight);
+
     TLorentzVector rochP4(recoMuon.p4().Px(), recoMuon.p4().Py(), recoMuon.p4().Pz(), recoMuon.p4().E());
     // in absence of charge, just take -1, the last argument (sysdev) does nothing
-    fRochcorr.momcor_mc(rochP4, -1, 0);
+    fRochcorr.momcor_mc(rochP4, recoMuon.charge(), 0);
     hRecoMuon_AfterEffWeightRochester.fill(rochP4, weight);
+
+    if(recoMuon.p4().Pt() < 200)
+      hRecoMuon_AfterEffWeightTuneP.fill(recoMuon.p4(), weight);
+    else
+      hRecoMuon_AfterEffWeightTuneP.fill(recoMuon.tunePP3(), weight);
     
   }
 

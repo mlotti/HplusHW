@@ -34,7 +34,7 @@ public:
   ~MuonAnalysisSelector();
 
   void setOutput(TDirectory *dir);
-  void setupBranches(TTree *tree);
+  void setupBranches(BranchManager& branchManager);
   bool process(Long64_t entry);
 
 private:
@@ -46,13 +46,13 @@ private:
   Branch<math::XYZTLorentzVector> fRawMet;
 
   std::string fPuWeightName;
-  Branch<double> fPuWeight;
-  Branch<unsigned> fSelectedVertexCount;
-  Branch<unsigned> fVertexCount;
-  Branch<unsigned> fGenNumberBQuarks;
+  Branch<double> *fPuWeight;
+  Branch<unsigned> *fSelectedVertexCount;
+  Branch<unsigned> *fVertexCount;
+  Branch<unsigned> *fGenNumberBQuarks;
 
-  Branch<bool> fElectronVetoPassed;
-  Branch<bool> fHBHENoiseFilterPassed;
+  Branch<bool> *fElectronVetoPassed;
+  Branch<bool> *fHBHENoiseFilterPassed;
 
   EmbeddingMuonIsolation::Mode fIsolationMode;
   BQuark::Mode fBQuarkMode;
@@ -192,50 +192,39 @@ void MuonAnalysisSelector::setOutput(TDirectory *dir) {
   hVertexCount_AfterJetSelection = makeVertexCount("vertexCount_AfterJetSelection");
 }
 
-void MuonAnalysisSelector::setupBranches(TTree *tree) {
-  fEventInfo.setupBranches(tree);
-  fMuons.setupBranches(tree, isMC());
-  //fElectrons.setupBranches(tree, isMC());
-  fJets.setupBranches(tree);
+void MuonAnalysisSelector::setupBranches(BranchManager& branchManager) {
+  fEventInfo.setupBranches(branchManager);
+  fMuons.setupBranches(branchManager, isMC());
+  //fElectrons.setupBranches(branchManager, isMC());
+  fJets.setupBranches(branchManager);
   if(!fPuWeightName.empty())
-    fPuWeight.setupBranch(tree, fPuWeightName.c_str());
-  fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertex_count");
-  fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
-  //fVertexCount.setupBranch(tree, "vertex_count");
+    branchManager.book(fPuWeightName, &fPuWeight);
+  branchManager.book("selectedPrimaryVertex_count", &fSelectedVertexCount);
+  branchManager.book("goodPrimaryVertex_count", &fVertexCount);
+  //branchManager.book("vertex_count", &fVertexCount);
   if(isMC())
-    fGenNumberBQuarks.setupBranch(tree, "gen_number_BQuarks");
+    branchManager.book("gen_number_BQuarks", &fGenNumberBQuarks);
 
-  fElectronVetoPassed.setupBranch(tree, "ElectronVetoPassed");
+  branchManager.book("ElectronVetoPassed", &fElectronVetoPassed);
   if(isData())
-    fHBHENoiseFilterPassed.setupBranch(tree, "HBHENoiseFilter");
-  fRawMet.setupBranch(tree, "pfMet_p4");
+    branchManager.book("HBHENoiseFilter", &fHBHENoiseFilterPassed);
+  branchManager.book("pfMet_p4", &fRawMet);
 }
 
 bool MuonAnalysisSelector::process(Long64_t entry) {
-  fEventInfo.setEntry(entry);
-  fMuons.setEntry(entry);
-  //fElectrons.setEntry(entry);
-  fJets.setEntry(entry);
-  fPuWeight.setEntry(entry);
-  fVertexCount.setEntry(entry);
-  fGenNumberBQuarks.setEntry(entry);
-  fElectronVetoPassed.setEntry(entry);
-  fHBHENoiseFilterPassed.setEntry(entry);
-  fRawMet.setEntry(entry);
-
   double weight = 1.0;
   if(!fPuWeightName.empty()) {
-    weight *= fPuWeight.value();
+    weight *= fPuWeight->value();
   }
   fEventCounter.setWeight(weight);
 
   cAll.increment();
 
   if(isMC() && fBQuarkMode != BQuark::kDisabled) {
-    if(fBQuarkMode == BQuark::kBAccept && fGenNumberBQuarks.value() == 0)
+    if(fBQuarkMode == BQuark::kBAccept && fGenNumberBQuarks->value() == 0)
       return true;
 
-    if(fBQuarkMode == BQuark::kBReject && fGenNumberBQuarks.value() < 0)
+    if(fBQuarkMode == BQuark::kBReject && fGenNumberBQuarks->value() < 0)
       return true;
   }
   cBQuark.increment();
@@ -275,10 +264,10 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
       hMuonStdIso_AfterDB->Fill(stdIsoVar, weight);
       hMuonEmbIso_AfterDB->Fill(embIsoVar, weight);
 
-      hMuonVertexCount_AfterDB->Fill(fVertexCount.value(), weight);
+      hMuonVertexCount_AfterDB->Fill(fVertexCount->value(), weight);
       bool isMuFromW = isMC() && std::abs(muon.pdgId()) == 13 && std::abs(muon.motherPdgId()) == 24;
       if(isMuFromW)
-        hMuonVertexCount_AfterDB_MuFromW->Fill(fVertexCount.value(), weight);
+        hMuonVertexCount_AfterDB_MuFromW->Fill(fVertexCount->value(), weight);
 
       if(fIsolationMode == EmbeddingMuonIsolation::kStandard) {
         hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIso(), weight);
@@ -317,9 +306,9 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
 
         if(!(muon.chargedHadronIso()/muon.p4().Pt() < 0.15)) continue;
       }
-      hMuonVertexCount_AfterIsolation->Fill(fVertexCount.value(), weight);
+      hMuonVertexCount_AfterIsolation->Fill(fVertexCount->value(), weight);
       if(isMuFromW)
-        hMuonVertexCount_AfterIsolation_MuFromW->Fill(fVertexCount.value(), weight);
+        hMuonVertexCount_AfterIsolation_MuFromW->Fill(fVertexCount->value(), weight);
 
       tmp.push_back(muon);
     }
@@ -340,7 +329,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   }
 
   // HBHENoiseFilter
-  if(isData() && !fHBHENoiseFilterPassed.value()) return true;
+  if(isData() && !fHBHENoiseFilterPassed->value()) return true;
   cHBHENoiseFilter.increment();
 
   // Muon veto
@@ -378,7 +367,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
 
   /*
   std::cout << "FOO Event " << fEventInfo.event() << ":" << fEventInfo.lumi() << ":" << fEventInfo.run()
-            << " electronVeto passed? " << fElectronVetoPassed.value()
+            << " electronVeto passed? " << fElectronVetoPassed->value()
             << std::endl;
   if( (fEventInfo.event() == 10069461 && fEventInfo.lumi() == 33572) ||
       (fEventInfo.event() == 10086951 && fEventInfo.lumi() == 33630) ||
@@ -386,7 +375,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
       (fEventInfo.event() == 101450418 && fEventInfo.lumi() == 338236) ||
       (fEventInfo.event() == 101460111 && fEventInfo.lumi() == 338268) ) {
     std::cout << "BAR Event " << fEventInfo.event() << ":" << fEventInfo.lumi() << ":" << fEventInfo.run()
-              << " electronVeto passed? " << fElectronVetoPassed.value()
+              << " electronVeto passed? " << fElectronVetoPassed->value()
               << " Nelectrons " << fElectrons.size()
               << std::endl;
     for(size_t i=0; i<fElectrons.size(); ++i) {
@@ -405,7 +394,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
 
 
   // Electron veto
-  if(!fElectronVetoPassed.value()) return true;
+  if(!fElectronVetoPassed->value()) return true;
   cElectronVeto.increment();
   // Fill
   for(size_t i=0; i<selectedMuons.size(); ++i) {
@@ -476,10 +465,10 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
     }
   }
 
-  hRawMet_AfterJetSelection->Fill(fRawMet.value().Pt(), weight);
+  hRawMet_AfterJetSelection->Fill(fRawMet->value().Pt(), weight);
 
   if(selectedMuons.size() == 1) {
-    double transverseMass = std::sqrt(2 * selectedMuons[0].p4().Pt() * fRawMet.value().Pt() * (1-std::cos(selectedMuons[0].p4().Phi()-fRawMet.value().Phi())));
+    double transverseMass = std::sqrt(2 * selectedMuons[0].p4().Pt() * fRawMet->value().Pt() * (1-std::cos(selectedMuons[0].p4().Phi()-fRawMet->value().Phi())));
     hTransverseMassRawMet_AfterJetSelection->Fill(transverseMass, weight);
   }
 

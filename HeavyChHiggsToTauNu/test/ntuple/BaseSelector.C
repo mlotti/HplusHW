@@ -57,13 +57,21 @@ void EventCounter::serialize() {
   }
 }
 
+// BranchManager
+BranchBase::~BranchBase() {}
+BranchManager::BranchManager(): fTree(0) {}
+BranchManager::~BranchManager() {
+  for(size_t i=0; i<fBranches.size(); ++i)
+    delete fBranches[i];
+}
+
 // BaseSelector
-BaseSelector::BaseSelector() {}
+BaseSelector::BaseSelector(): fIsMC(false) {}
 BaseSelector::~BaseSelector() {}
 
 void BaseSelector::setOutput(TDirectory *dir) {
 }
-void BaseSelector::setupBranches(TTree *tree) {
+void BaseSelector::setupBranches(BranchManager& branchManager) {
 }
 
 bool BaseSelector::process(Long64_t entry) {
@@ -98,6 +106,8 @@ private:
 
   Long64_t                  fEntries;      //! Number of entries in the tree
   Long64_t                  fProcessed;    //! Number of processed entries
+
+  BranchManager fBranchManager;
 
   TTree                    *fChain;   //!pointer to the analyzed TTree or TChain
   BaseSelector *fSelector;
@@ -142,7 +152,8 @@ void SelectorImp::Init(TTree *tree) {
   //fChain->SetMakeClass(1);
 
   // Set up variable and cut branches for the new TTree
-  fSelector->setupBranches(tree);
+  fBranchManager.setTree(tree);
+  fSelector->setupBranches(fBranchManager);
 }
 
 
@@ -193,6 +204,7 @@ Bool_t SelectorImp::Process(Long64_t entry) {
   printStatus();
   ++fProcessed;
 
+  fBranchManager.setEntry(entry);
   bool ret = fSelector->process(entry);
   fStatus = ret;
 
