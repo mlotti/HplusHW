@@ -427,7 +427,7 @@ namespace HPlus {
       }
       increment(fInvertedTauTriggerScaleFactorCounter);
       // Check if multiple taus passed
-      if (!myMultipleTausPassForBaselineStatus) increment(fInvertedOneTauCounter);
+      if (!myMultipleTausPassForInvertedStatus) increment(fInvertedOneTauCounter);
 
       fCommonPlots.fillControlPlotsAfterTauTriggerScaleFactor(iEvent);
       hSelectedTauEt->Fill(tauDataForInverted.getSelectedTau()->pt());
@@ -757,9 +757,9 @@ namespace HPlus {
     }
 
     // cut values for circular deltaPhi cuts
-    double radius = 80;
-    double Rcut = 0;
-    if ( deltaPhi > (180-radius)) Rcut = sqrt(radius*radius - (180-deltaPhi)*(180-deltaPhi));
+    //double radius = 80;
+    //double Rcut = 0;
+    //if ( deltaPhi > (180-radius)) Rcut = sqrt(radius*radius - (180-deltaPhi)*(180-deltaPhi));
     //    std::cout << " Rcut " <<  Rcut  << " deltaPhi " <<  deltaPhi  << std::endl;
     //if (deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut ) increment(fQCDTailKillerCounter);	
     //    if (deltaPhiMetJet1 < Rcut || deltaPhiMetJet2 < Rcut || deltaPhiMetJet3 < Rcut ) return false;
