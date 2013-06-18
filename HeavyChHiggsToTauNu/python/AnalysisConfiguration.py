@@ -1133,7 +1133,7 @@ class ConfigBuilder:
         names = []
 
         # Tau trigger SF
-        if self.applyTauTriggerScaleFactor:
+        if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
             names.append(addTauTrgSF( 1.0, "Plus"))
             names.append(addTauTrgSF(-1.0, "Minus"))
 
