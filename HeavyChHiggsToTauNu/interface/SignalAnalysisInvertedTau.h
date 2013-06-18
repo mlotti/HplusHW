@@ -49,44 +49,6 @@ namespace edm {
 
 namespace HPlus {
   class SignalAnalysisInvertedTau {
-
-    enum SignalSelectionOrder {
-      kSignalOrderTrigger,
-      //kSignalOrderVertexSelection,
-      kSignalOrderTauID,
-      kSignalOrderMETSelection,
-      kSignalOrderElectronVeto,
-      kSignalOrderMuonVeto,
-      kSignalOrderJetSelection,
-      kSignalOrderBTagSelection,
-      kSignalOrderFakeMETVeto,
-      kSignalOrderTopSelection
-    };
-    enum QCDSelectionOrder {
-      kQCDOrderVertexSelection,
-      kQCDOrderTrigger,
-      kQCDOrderTauCandidateSelection,
-      kQCDOrderTauID,
-      kQCDOrderElectronVeto,
-      kQCDOrderMuonVeto,
-      kQCDOrderJetSelection,
-      kQCDOrderMET,
-      kQCDOrderBTag,
-      kQCDOrderDeltaPhiTauMET,
-      kQCDOrderMaxDeltaPhiJetMET,
-      kQCDOrderTopSelection
-    };
-  enum MCSelectedTauMatchType {
-    kkElectronToTau,
-    kkMuonToTau,
-    kkTauToTau,
-    kkJetToTau,
-    kkNoMC,
-    kkElectronToTauAndTauOutsideAcceptance,
-    kkMuonToTauAndTauOutsideAcceptance,
-    kkTauToTauAndTauOutsideAcceptance,
-    kkJetToTauAndTauOutsideAcceptance
-  };
   public:
     explicit SignalAnalysisInvertedTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper);
     ~SignalAnalysisInvertedTau();
@@ -130,8 +92,8 @@ namespace HPlus {
     Count fBaselineMetTriggerScaleFactorCounter;
     Count fBaselineQCDTailKillerCollinearCounter;
     Count fBaselineMetCounter;
-    Count fBaselineBTaggingScaleFactorCounter;
     Count fBaselineBtagCounter;
+    Count fBaselineBTaggingScaleFactorCounter;
     Count fBaselineQCDTailKillerBackToBackCounter;
     Count fBaselineDeltaPhiTauMETCounter;
     Count fBaselineSelectedEventsCounter;
@@ -151,8 +113,8 @@ namespace HPlus {
     Count fInvertedMetCounter;
     Count fInvertedBvetoCounter;
     Count fInvertedBvetoDeltaPhiCounter;
-    Count fInvertedBTaggingScaleFactorCounter;
     Count fInvertedBTaggingCounter;
+    Count fInvertedBTaggingScaleFactorCounter;
     Count fInvertedQCDTailKillerBackToBackCounter;
     Count fInvertedDeltaPhiTauMETCounter;
     Count fInvertedSelectedEventsCounter;
