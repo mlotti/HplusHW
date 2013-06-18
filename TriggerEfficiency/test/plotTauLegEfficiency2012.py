@@ -32,6 +32,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 from PythonWriter import PythonWriter
 from Plotter import Plotter
 
+#highPurity = True 
+highPurity = False
+
+
 pythonWriter = PythonWriter("tauLegEfficiency")
 
 def usage():
@@ -43,16 +47,25 @@ def usage():
 analysis = "analysis"
 counters = analysis+"/counters"
 
+plotDir = "TauLeg2012"
+
+
 def main():
     if len(sys.argv) < 2:
         usage()
 
+#    datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False)
     datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, includeOnlyTasks="TauPlusX_")
-    datasetsMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, excludeTasks="TauPlusX_")
+    datasetsDYMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, includeOnlyTasks="DYToTauTau_")
+    datasetsMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, excludeTasks="TauPlusX_|DYToTauTau_")
 
-    datasets.extend(datasetsMC)
+    if highPurity:
+        datasets.extend(datasetsDYMC)
+    else:
+        datasets.extend(datasetsMC)
 
     for d in datasets.getAllDatasets():
+        #print d.name
         d.info["energy"] = "8"
     xsect.setBackgroundCrossSections(datasets,doWNJetsWeighting=False)
     datasets.loadLuminosities()
@@ -65,26 +78,28 @@ def main():
     histograms.createLegend.moveDefaults(dh=-0.2)
 
     puWeights = []
-    """
-    puWeights.append("pileupWeight_Unweighted.C")
+    puWeights.append("pileupWeight_2012ABCD.C")
     puWeights.append("pileupWeight_2012ABC.C")
     puWeights.append("pileupWeight_2012AB.C")
     puWeights.append("pileupWeight_2012A.C")
     puWeights.append("pileupWeight_2012B.C")
     puWeights.append("pileupWeight_2012C.C")
-    """
     puWeights.append("pileupWeight_2012D.C")
+    puWeights.append("pileupWeight_Unweighted.C")
 
     puWeightPath = "src/HiggsAnalysis/TriggerEfficiency/test"
 
-    highPurity = True
-####    highPurity = False
+#    highPurity = True
+#    highPurity = False
 
+    global plotDir
     if highPurity:
         dataset._optionDefaults["input"] = "histograms-*-highpurity.root"
+        plotDir += "_highPurity"
     else:
         dataset._optionDefaults["input"] = "histograms-*-lowpurity.root"
-
+        plotDir += "_lowPurity"
+    
 
     ### Offline selection definition
     """
@@ -134,16 +149,6 @@ def main():
 
                 offlineSelectionHPlus = "Sum$(%s) == 1 && Sum$(%s) == 1"%(offlineTauSelection,offlineMuonSelection)
 
-#    offlineSelectionHPlusBase = "PFTauPt > 20 && abs(PFTauEta) < 2.1"
-#    offlineSelectionHPlusBase += "&& PFTauLeadChargedHadrCandPt > 20"
-#    offlineSelectionHPlusBase += "&& PFTauProng == 1"
-#    offlineSelectionHPlusBase += "&& PFTau_againstMuonTight > 0.5"
-
-#    offlineTauSelection = "PFTauPt > 41 && abs(PFTauEta) < 2.1"
-#    offlineSelection = "Sum$(%s) >= 1"%offlineTauSelection
-#    offlineSelection = And(offlineSelection,"Sum$(PFJetPt > 0) >= 3+Sum$(%s && PFTauJetMinDR < 0.5)"%offlineTauSelection)
-
-    
                 if highPurity:
                     # (p4+k4).M() = sqrt(2*|p3||k3|-2*p3 dot k3)
                     muTauInvMass = "sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))))"
@@ -180,10 +185,6 @@ def main():
                 """
 
                 offlineSelections.append(namedselection(tauD+"_"+muonD+"_"+eleD,offlineSelection))
-#    offlineSelections.append(namedselection("byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium",offlineSelectionMediumMedium))
-#    offlineSelections.append(namedselection("byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA",offlineSelectionMediumMVA))
-#    offlineSelections.append(namedselection("byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA",offlineSelectionLooseMVA))
-#    offlineSelections.append(namedselection("byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium",offlineSelectionLooseMedium))
 
     pu_re = re.compile("pileupWeight_(?P<scenario>(\S+))\.C")
     for puWeight in puWeights:
@@ -209,10 +210,9 @@ def main():
             for selection in offlineSelections:
 
                 pythonWriter.SaveOfflineSelection(selection)
-                print "check pyScenario",pyScenario
                 doPlots(datasets,selection=selection,pyScenario=pyScenario)
 
-    pythonWriter.write("tauLegTriggerEfficiency2012_cff.py")
+    pythonWriter.write(os.path.join(plotDir,"tauLegTriggerEfficiency2012_cff.py"))
 
 def namedselection(name,selection):
     namedSelection = []
@@ -333,20 +333,23 @@ def doPlots(datasets, selection, pyScenario="Unweighted"):
     print "Offline selection for 1 (data/highPurity)", offlineSelection1
     print "Offline selection for 2 (MC/lowPurity)", offlineSelection2
 
-    plotDir = "TauLeg"
-    plotDir += str(pyScenario[:4])
+#    plotDir = "TauLeg"
+#    plotDir += str(pyScenario[:4])
 
     plotter = Plotter(datasets,plotDir,lumi)
     plotter.setLegends(legend1, legend2)
     plotter.setTriggers(True, l1TriggerName, hltTriggerName, l1TriggerName, hltTriggerName, runsText)
 
-    ptbins = [20, 30, 41, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200, 300, 400, 500]
+#    ptbins = [20, 30, 41, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200, 300, 400, 500]
+    ptbins = [20, 25, 29, 33, 37, 41, 45, 50, 55, 60, 70, 80, 100, 150, 200]
+#    ptbins = [20, 30, 41, 50, 60, 70, 80, 100, 150]
     etabins = [-2.1, -1.05, 0, 1.05, 2.1]
     vtxbins = [0,5,10,15,20,25,30,35]
-    ptbins2 = [0, 10, 20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
+#    ptbins2 = [0, 10, 20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
 
     prefix = "Data"+pyScenario+"_"
     prefix+="DataVsMC_"
+    prefix+=selectionName+"_"
 
     mcWeight = None
     if pyScenario != "Unweighted":
@@ -373,7 +376,7 @@ def doPlots(datasets, selection, pyScenario="Unweighted"):
     hnumvtx = ROOT.TH1F("hnumvtx", "hnumvtx", len(vtxbins)-1, array.array("d", vtxbins))
 
     #hnumpt.Sumw2()
-    optspt = {"xmin": 0}
+    optspt = {"xmin": 20, "xmax": 150}
     xlabel = "#tau-jet p_{T} (GeV/c)"
 
     # Level-1
@@ -383,8 +386,8 @@ def doPlots(datasets, selection, pyScenario="Unweighted"):
     num1 = And(denom1,triggerSelection1)
     num2 = And(denom2,triggerSelection2)
 
-    efficiency = plotter.plotEfficiency(prefix+"Tau3_L1HLT_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-1 + HLT tau efficiency", fit=True, fitMin=20., fitMax=150., drawText=True, printResults=True)
-
+    efficiency = plotter.plotEfficiency(prefix+"Tau3_L1HLT_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="HLT tau efficiency", fit=True, fitMin=20., fitMax=150., drawText=True, printResults=True)
+    """
     denom1pt = And(denom1, offlineTauPt40)
     denom2pt = And(denom2, offlineTauPt40)
     num1pt = And(num1, offlineTauPt40)
@@ -392,12 +395,12 @@ def doPlots(datasets, selection, pyScenario="Unweighted"):
 
 
     effVsNvtx = plotter.plotEfficiency(prefix+"Tau4_L1HLT_NVtx", "numGoodOfflinePV>>hnumvtx", num1pt, denom1pt, num2pt, denom2pt, mcWeight, opts=optspt, xlabel="Number of good vertices", ylabel="Level-1 + HLT tau efficiency", fit=False, drawText=True, printResults=True)    
-
+    """
 
     #dumpParameters(plotDir,label,runsText,lumi,efficiency)
     pythonWriter.addParameters(selectionName,plotDir,label,runsText,lumi,efficiency)
     pythonWriter.addMCParameters(selectionName,"Summer12_PU_"+pyScenario,efficiency)
-
+    
     print "\nPlotDir",plotDir
 
 

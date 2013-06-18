@@ -376,9 +376,10 @@ class ExitCodeException(Exception):
 ## Given crab job stdout file, ensure that the job succeeded
 #
 # \param stdoutFile   Path to crab job stdout file
+# \param allowJobExitCodes  Consider jobs with these non-zero exit codes to be succeeded
 #
 # If any of the checks fail, raises multicrab.ExitCodeException
-def assertJobSucceeded(stdoutFile):
+def assertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
     re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
     re_job = re.compile("JobExitCode=(?P<code>\d+)")
 
@@ -401,7 +402,7 @@ def assertJobSucceeded(stdoutFile):
         raise ExitCodeException("No jobExitCode")
     if exeExitCode != 0:
         raise ExitCodeException("Executable exit code is %d" % exeExitCode)
-    if jobExitCode != 0:
+    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
         raise ExitCodeException("Job exit code is %d" % jobExitCode)
 
 ## Compact job number list

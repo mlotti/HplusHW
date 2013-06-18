@@ -20,6 +20,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 
 from PythonWriter import PythonWriter
 pythonWriter = PythonWriter("metLegEfficiency")
+from Plotter import Plotter
+
+METCorrection = ""
+#METCorrection = "type1"
 
 def usage():
     print "\n"
@@ -30,15 +34,29 @@ def usage():
 analysis = "analysis"
 counters = analysis+"/counters"
 
+plotDir = "METLeg2012"
+
+def L1ETMCorrection(L1ETM,caloMETnoHF,caloMETnoHFresidualCorrected):
+    R = 0.9322
+    H = -0.1172+0.0499*ln(caloMETnoHF)
+    K = 0.6693
+
+    L1etmScaleCorr = L1ETM*caloMETnoHFresidualCorrected/caloMETnoHF*R
+    correctedL1ETM = L1etmScaleCorr + H*(L1etmScaleCorr - K*caloMETnoHF)
+
+    return correctedL1ETM
+
 def main():
     if len(sys.argv) < 2:
         usage()
 
-    datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, includeOnlyTasks="Tau_")
+#    datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False)
+    datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, includeOnlyTasks="Tau_|TauParked_")
 #    datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), counters=counters, doEraReplace=False, weightedCounters=False, includeOnlyTasks="_2012C_")
-    datasetsMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, excludeTasks="Tau_")
-#    datasetsMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), counters=counters, doEraReplace=False, weightedCounters=False, includeOnlyTasks="TTJet")
-#    datasetsMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), counters=counters, doEraReplace=False, weightedCounters=False, excludeTasks=["Tau_","QCD_Pt170to300_TuneZ2star_Summer12","QCD_Pt300to470_TuneZ2star_Summer12","QCD_Pt300to470_TuneZ2star_v2_Summer12"])
+    datasetsMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, excludeTasks="Tau_|TauParked_")
+#    datasetsMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, includeOnlyTasks="TTJet")
+#    datasetsMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, includeOnlyTasks="QCD_")
+#    datasetsMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, excludeTasks=["Tau_","TauParked_","QCD_"])
 #    datasetsMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), counters=counters, doEraReplace=False, weightedCounters=False, includeOnlyTasks="QCD_Pt120|QCD_Pt170")
 
     datasets.extend(datasetsMC)
@@ -66,24 +84,88 @@ def main():
 #    puWeights.append("pileupWeight_2011AB.C")
 #    puWeights.append("pileupWeight_2011A.C")
 #    puWeights.append("pileupWeight_2011B.C")
-#    puWeights.append("pileupWeight_2012A.C")
-#    puWeights.append("pileupWeight_2012B.C")
-#    puWeights.append("pileupWeight_2012C.C")
-#    puWeights.append("pileupWeight_2012D.C")
+
+    puWeights.append("pileupWeight_2012A.C")
+    puWeights.append("pileupWeight_2012B.C")
+    puWeights.append("pileupWeight_2012C.C")
+    puWeights.append("pileupWeight_2012D.C")
+    puWeights.append("pileupWeight_2012AB.C")
+    puWeights.append("pileupWeight_2012ABC.C")
     puWeights.append("pileupWeight_2012ABCD.C")
+    puWeights.append("pileupWeight_Unweighted.C")
 
     puWeightPath = "src/HiggsAnalysis/TriggerEfficiency/test"
 
+    """
     offlineTauSelection = "PFTauPt > 41 && abs(PFTauEta) < 2.1"
+    
+    offlineTauSelection += "&& PFTauLeadChargedHadrCandPt > 20"
+    offlineTauSelection += "&& PFTauProng == 1"
+    offlineTauSelection += "&& PFTau_decayModeFinding > 0.5"
+#    offlineTauSelection += "&& PFTau_byMediumCombinedIsolationDeltaBetaCorr3Hits > 0.5"
+    offlineTauSelection += "&& PFTau_byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5"
+#    offlineTauSelection += "&& PFTau_byVLooseCombinedIsolationDeltaBetaCorr > 0.5"
+#    offlineTauSelection += "&& PFTau_byLooseCombinedIsolationDeltaBetaCorr > 0.5"
+#    offlineTauSelection += "&& PFTau_byMediumCombinedIsolationDeltaBetaCorr > 0.5"
+#    offlineTauSelection += "&& PFTau_byLooseIsolationMVA2 > 0.5"
+#    offlineTauSelection += "&& PFTau_byMediumIsolationMVA2 > 0.5"
+    offlineTauSelection += "&& PFTau_againstElectronMediumMVA3 > 0.5 && PFTau_againstMuonTight2 > 0.5"
+
+    offlineJetSelection = "PFJetPt > 0"
+#    offlineJetSelection+= "&& PFJetPUIDloose"
+#    offlineJetSelection+= "&& PFJetPUIDmedium"
+    offlineJetSelection+= "&& PFJetPUIDtight"
+
     offlineSelection = "Sum$(%s) >= 1"%offlineTauSelection
-    offlineSelection = And(offlineSelection,"Sum$(PFJetPt > 0) >= 3+Sum$(%s && PFTauJetMinDR < 0.5)"%offlineTauSelection)
-#    offlineSelection += "&& PFTau_againstElectronMVA > 0.5 && PFTau_againstMuonTight > 0.5"
-#    offlineSelection += "&& PFTau_decayModeFinding > 0.5"
-#    offlineSelection += "&& PFTau_byMediumCombinedIsolationDeltaBetaCorr > 0.5"
-#    offlineSelection += "&& hPlusGlobalElectronVetoFilter > 0.5 && hPlusGlobalMuonVetoFilter > 0.5"
+    offlineSelection = And(offlineSelection,"Sum$(%s) >= 3+Sum$(%s && PFTauJetMinDR < 0.5)"%(offlineJetSelection,offlineTauSelection))
+    offlineSelection += "&& hPlusGlobalElectronVetoFilter > 0.5 && hPlusGlobalMuonVetoFilter > 0.5"
 
     offlineSelections = []
     offlineSelections.append(namedselection("metLegEfficiency",offlineSelection))
+    """
+
+
+
+    tauIDdiscriminators           = []
+    againstMuonDiscriminators     = []
+    againstElectronDiscriminators = []
+
+    tauIDdiscriminators.append("byLooseCombinedIsolationDeltaBetaCorr3Hits")
+    tauIDdiscriminators.append("byMediumCombinedIsolationDeltaBetaCorr3Hits")
+    tauIDdiscriminators.append("byTightCombinedIsolationDeltaBetaCorr3Hits")
+
+    againstMuonDiscriminators.append("againstMuonMedium2")
+    againstMuonDiscriminators.append("againstMuonTight2")
+
+    againstElectronDiscriminators.append("againstElectronMediumMVA3")
+    againstElectronDiscriminators.append("againstElectronTightMVA3")
+    againstElectronDiscriminators.append("againstElectronVTightMVA3")
+
+    offlineSelections = []
+    for eleD in againstElectronDiscriminators:
+        for muonD in againstMuonDiscriminators:
+            for tauD in tauIDdiscriminators:
+
+                ### Offline selection definition (H+)                                                                         
+                offlineTauSelection = "PFTauPt > 41 && abs(PFTauEta) < 2.1"
+                offlineTauSelection += "&& PFTauLeadChargedHadrCandPt > 20"
+                offlineTauSelection += "&& PFTauProng == 1"
+                offlineTauSelection += "&& PFTau_decayModeFinding > 0.5"
+                offlineTauSelection+= "&& PFTau_%s > 0.5"%eleD
+                offlineTauSelection+= "&& PFTau_%s > 0.5"%muonD
+                offlineTauSelection+= "&& PFTau_%s > 0.5"%tauD
+
+                offlineJetSelection = "PFJetPt > 0"
+                #    offlineJetSelection+= "&& PFJetPUIDloose"
+                #    offlineJetSelection+= "&& PFJetPUIDmedium"
+                offlineJetSelection+= "&& PFJetPUIDtight"
+
+                offlineSelection = "Sum$(%s) >= 1"%offlineTauSelection
+                offlineSelection = And(offlineSelection,"Sum$(%s) >= 3+Sum$(%s && PFTauJetMinDR < 0.5)"%(offlineJetSelection,offlineTauSelection))
+                offlineSelection += "&& hPlusGlobalElectronVetoFilter > 0.5 && hPlusGlobalMuonVetoFilter > 0.5"
+
+                offlineSelections.append(namedselection(tauD+"_"+muonD+"_"+eleD,offlineSelection))
+
 
     pu_re = re.compile("pileupWeight_(?P<scenario>(\S+))\.C")
     for puWeight in puWeights:
@@ -111,9 +193,9 @@ def main():
                 pythonWriter.SaveOfflineSelection(selection)
 
 #                doPlots(datasets,selection=selection,dataVsMc=0,pyScenario=pyScenario)
-#                doPlots(datasets,selection=selection,dataVsMc=1,pyScenario=pyScenario)
-                doPlots(datasets,selection=selection,dataVsMc=2,pyScenario=pyScenario)
-    pythonWriter.write("metLegTriggerEfficiency2012_cff.py")
+                doPlots(datasets,selection=selection,dataVsMc=1,pyScenario=pyScenario)
+#                doPlots(datasets,selection=selection,dataVsMc=2,pyScenario=pyScenario)
+    pythonWriter.write(os.path.join(plotDir,"metLegTriggerEfficiency2012_cff.py"))
 
 def namedselection(name,selection):
     namedSelection = []
@@ -131,7 +213,6 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
 
     if pyScenario== "2011A": # May10+Prompt-v4 (160431-167913)                                                                     
         lumi = 1197
-        label = "L1_SingleTauJet52 OR L1_SingleJet68 + HLT_IsoPFTau35_Trk20_MET45 (Run2011A)"
         runs = "run >= 160404 && run <= 167913"
         runsText = "160404-167913"
         offlineTriggerData = "HLT_IsoPFTau35_Trk20_v2 || HLT_IsoPFTau35_Trk20_v3 || HLT_IsoPFTau35_Trk20_v4 || HLT_IsoPFTau35_Trk20_v6"
@@ -139,7 +220,6 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
 
     elif pyScenario== "2011AB": # Whole 2011 data                                                                                   
         lumi = 5094.834
-        label = "Dummy"
 #        runs = "run >= 160404 && run <= 180252"
 #        runsText = "160404-180252"
         runs = "run >= 170722 && run <= 180252"
@@ -150,67 +230,71 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
 
     elif pyScenario== "2012A":
 
-        lumi = 697.308
-        label = "Dummy"
+        lumi = 887.501000
         runs = "run >= 190456 && run <= 193621"
         runsText = "190456-193621"
         offlineTriggerData = "HLT_LooseIsoPFTau35_Trk20_Prong1_v2 || HLT_LooseIsoPFTau35_Trk20_Prong1_v3 || HLT_LooseIsoPFTau35_Trk20_Prong1_v4"
         offlineTriggerMc = "HLT_LooseIsoPFTau35_Trk20_Prong1_v6"
 
-        l1TriggerName1 = "ETM36 OR ETM40"
-        hltTriggerName1 = "LooseIsoPFTau35_Trk20_Prong1"
-
     elif pyScenario== "2012B":
 
-        lumi = 4430
-        label = "Dummy"
+        lumi = 4440.000000
         runs = "run >= 193833 && run <= 196531"
         runsText = "193833-196531"
         offlineTriggerData = "HLT_LooseIsoPFTau35_Trk20_Prong1_v6"
         offlineTriggerMc = "HLT_LooseIsoPFTau35_Trk20_Prong1_v6"
 
-        l1TriggerName1 = "ETM36 OR ETM40"
-        hltTriggerName1 = "LooseIsoPFTau35_Trk20_Prong1"
-
     elif pyScenario== "2012C":
 
-        lumi = 6892
-        label = "Dummy"
+        lumi = 6843.000000+281.454000
         runs = "run >= 198022 && run <= 203742"
         runsText = "198022-203742"
         offlineTriggerData = "HLT_LooseIsoPFTau35_Trk20_Prong1_v7 || HLT_LooseIsoPFTau35_Trk20_Prong1_v9 || HLT_LooseIsoPFTau35_Trk20_Prong1_v10"
         offlineTriggerMc = "HLT_LooseIsoPFTau35_Trk20_Prong1_v6"
 
-        l1TriggerName1 = "ETM36 OR ETM40"
-        hltTriggerName1 = "LooseIsoPFTau35_Trk20_Prong1"
-
     elif pyScenario== "2012D":
 
-        lumi = 7274
-        label = "Dummy"
+        lumi = 7318.000000
         runs = "run >= 203777 && run <= 208686"
         runsText = "203777-208686"
         offlineTriggerData = "HLT_LooseIsoPFTau35_Trk20_Prong1_v10"
         offlineTriggerMc = "HLT_LooseIsoPFTau35_Trk20_Prong1_v6"
 
-        l1TriggerName1 = "ETM36 OR ETM40"
-        hltTriggerName1 = "LooseIsoPFTau35_Trk20_Prong1"
+    elif pyScenario== "2012AB":
 
+        lumi = 887.501000+4440.000000
+        runs = "run >= 190456 && run <= 196531"
+        runsText = "190456-196531"
+        offlineTriggerData = "HLT_LooseIsoPFTau35_Trk20_Prong1_v2 || HLT_LooseIsoPFTau35_Trk20_Prong1_v3 || HLT_LooseIsoPFTau35_Trk20_Prong1_v4 || HLT_LooseIsoPFTau35_Trk20_Prong1_v6"
+        offlineTriggerMc = "HLT_LooseIsoPFTau35_Trk20_Prong1_v6"
+
+    elif pyScenario== "2012ABC":
+
+        lumi = 887.501000+4440.000000+6843.000000
+        runs = "run >= 190456 && run <= 203742"
+        runsText = "190456-203742"
+        offlineTriggerData = "HLT_LooseIsoPFTau35_Trk20_Prong1_v2 || HLT_LooseIsoPFTau35_Trk20_Prong1_v3 || HLT_LooseIsoPFTau35_Trk20_Prong1_v4 || HLT_LooseIsoPFTau35_Trk20_Prong1_v6 || HLT_LooseIsoPFTau35_Trk20_Prong1_v7 || HLT_LooseIsoPFTau35_Trk20_Prong1_v9 || HLT_LooseIsoPFTau35_Trk20_Prong1_v10"
+        offlineTriggerMc = "HLT_LooseIsoPFTau35_Trk20_Prong1_v6"
 
     elif pyScenario== "2012ABCD":
 
-        lumi = 19296
-        label = "Dummy"
+        lumi = 887.501000+4440.000000+6843.000000+281.454000+7318.000000
         runs = "run >= 190456 && run <= 208686"
         runsText = "190456-208686"
         offlineTriggerData = "HLT_LooseIsoPFTau35_Trk20_Prong1_v2 || HLT_LooseIsoPFTau35_Trk20_Prong1_v3 || HLT_LooseIsoPFTau35_Trk20_Prong1_v4 || HLT_LooseIsoPFTau35_Trk20_Prong1_v6 || HLT_LooseIsoPFTau35_Trk20_Prong1_v7 || HLT_LooseIsoPFTau35_Trk20_Prong1_v9 || HLT_LooseIsoPFTau35_Trk20_Prong1_v10"
         offlineTriggerMc = "HLT_LooseIsoPFTau35_Trk20_Prong1_v6"
 
-        l1TriggerName1 = "ETM36 OR ETM40"
-        hltTriggerName1 = "LooseIsoPFTau35_Trk20_Prong1"
+    elif pyScenario == "Unweighted":
+
+        lumi =  1
+        runs = ""
+        runsText = ""
+        offlineTriggerMc = "HLT_LooseIsoPFTau35_Trk20_Prong1_v6"
+        offlineTriggerData = offlineTriggerMc
 
     else:
         raise Exception("Invalid run range %s" % pyScenario)
+
 
     offlineTriggerData = "(%s) && %s" % (offlineTriggerData, runs)
 #    offlineTriggerMc = "HLT_MediumIsoPFTau35_Trk20_v1"
@@ -218,11 +302,18 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
 #    offlineSelection1 = And(offlineSelection,offlineTriggerMc)
 #    offlineSelection2 = And(offlineSelection,offlineTriggerData)
 
-    L1ETMCut   = 36
+    L1ETMCut   = 40
     CaloMETCut = 60
+
+    offlineSelection = And(offlineSelection,"L1MET>%s"%L1ETMCut)
+
+    label = pyScenario
 
     if pyScenario[:4] == "2012":
         CaloMETCut = 70
+        l1TriggerName1 = "ETM40"
+        hltTriggerName1 = "LooseIsoPFTau35_Trk20_Prong1"
+
     if dataVsMc == 1:
         legend1 = "Data, trigger bit"
         legend2 = "MC, trigger bit"
@@ -240,10 +331,10 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
         denom2 = denom1
 
 
-    plotDir = "METLeg"
+#    plotDir = "METLeg"
 #    plotDir += "McFall11"
 ####    plotDir += "RunRange%s" % pyScenario
-    plotDir += str(pyScenario[:4])
+#    plotDir += str(pyScenario[:4])
 
     ### Trigger selectiondefinitions                                                                                                
     # Default is for 2011B                                                                                                    
@@ -254,6 +345,7 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
 
     plotter = Plotter(datasets,plotDir,lumi) # FIXME
     plotter.setLegends(legend1, legend2)
+    plotter.setTextPos(0.2,0.9,17,0.045)
     plotter.setTriggers(dataVsMc, l1TriggerName1, hltTriggerName1, l1TriggerName2, hltTriggerName2, runsText)
 
     ptbins = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
@@ -266,7 +358,8 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
     if dataVsMc == 1:
         prefix+="DataVsMC_"
     if dataVsMc == 2:
-        prefix+="DataVsMCCaloTau_"
+        prefix+="DataVsMCCaloMET_"
+    prefix+=selectionName+"_"
 
     mcWeight = None
     if dataVsMc > 0 and pyScenario != "Unweighted":
@@ -275,30 +368,34 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
     print "MC weight",pyScenario
     print
 
+    """
     if pyScenario== "2011AB":
 #        num2 = And(denom2,"(HLT_IsoPFTau35_Trk20_MET60_v2 || HLT_IsoPFTau35_Trk20_MET60_v3 || HLT_IsoPFTau35_Trk20_MET60_v4 || HLT_IsoPFTau35_Trk20_MET60_v6 || ((HLT_MediumIsoPFTau35_Trk20_MET60_v1 || HLT_MediumIsoPFTau35_Trk20_MET60_v5 || HLT_MediumIsoPFTau35_Trk20_MET60_v6) && L1MET>30) )")
         num1 = And(denom1,"(HLT_IsoPFTau35_Trk20_MET60_v2 || HLT_IsoPFTau35_Trk20_MET60_v3 || HLT_IsoPFTau35_Trk20_MET60_v4 || HLT_IsoPFTau35_Trk20_MET60_v6 || ((HLT_MediumIsoPFTau35_Trk20_MET60_v1 || HLT_MediumIsoPFTau35_Trk20_MET60_v5 || HLT_MediumIsoPFTau35_Trk20_MET60_v6)) )")
         num2 = And(denom2,"((HLT_IsoPFTau35_Trk20_v2 || HLT_IsoPFTau35_Trk20_v3 || HLT_IsoPFTau35_Trk20_v4 || HLT_IsoPFTau35_Trk20_v6) && CaloMET_ET>60) || ((HLT_MediumIsoPFTau35_Trk20_v1 || HLT_MediumIsoPFTau35_Trk20_v5 || HLT_MediumIsoPFTau35_Trk20_v6) && CaloMET_ET>60 && L1MET>36)")
         if dataVsMc > 0:
             num2 = And(denom1,"HLT_MediumIsoPFTau35_Trk20_MET60_v1")
+    """
 
-    if pyScenario== "2012ABCD" or pyScenario== "2012A" or pyScenario== "2012B" or pyScenario== "2012C" or pyScenario== "2012D":
-        num1 = And(denom1,"(HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v4 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10)")
+#    if pyScenario== "2012ABCD" or pyScenario== "2012ABC" or pyScenario== "2012AB" or pyScenario== "2012A" or pyScenario== "2012B" or pyScenario== "2012C" or pyScenario== "2012D":
+    num1 = And(denom1,"(HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v4 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9 || HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10)")
+    num2 = And(denom2,"CaloMET_ET>%s && L1MET>%s"%(CaloMETCut,L1ETMCut))
+    if dataVsMc == 1:
+        num2 = And(denom2,"HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6 && L1MET>%s"%L1ETMCut)
+    if dataVsMc == 2:
+        num1 = And(denom1,"CaloMET_ET>%s && L1MET>%s"%(CaloMETCut,L1ETMCut))
         num2 = And(denom2,"CaloMET_ET>%s && L1MET>%s"%(CaloMETCut,L1ETMCut))
-        if dataVsMc == 1:
-            num2 = And(denom2,"HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6")
-        if dataVsMc == 2:
-            num1 = And(denom1,"CaloMET_ET>%s && L1MET>%s"%(CaloMETCut,L1ETMCut))
-            num2 = And(denom2,"CaloMET_ET>%s && L1MET>%s"%(CaloMETCut,L1ETMCut))
 
-####            num1 = And(denom2,"HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6 && L1MET > 52.94")#36/0.68
+####        num2 = And(num2,"L1MET > %s"%(L1ETMCut/0.68))
+
+    if pyScenario == "Unweighted":
+        num1 = num2
 
     hnummet = ROOT.TH1F("hnummet", "hnummet", len(ptbins)-1, array.array("d", ptbins))
     hnumvtx = ROOT.TH1F("hnumvtx", "hnumvtx", len(vtxbins)-1, array.array("d", vtxbins))
     hl1etm = ROOT.TH1F("hl1etm", "hl1etm", len(ptbins2)-1, array.array("d", ptbins2))
 
-####    offlineMet50   = "PFMET_ET > 50"
-    offlineMet50   = "PFMETtype1_ET > 50"
+    offlineMet50   = "PFMET"+METCorrection+"_ET > 50"
 
     denom1met = And(denom1, offlineMet50)
     denom2met = And(denom2, offlineMet50)
@@ -310,7 +407,13 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
     print num2
     print denom2
 
-    efficiency = plotter.plotEfficiency(prefix+"MET", "PFMET_ET>>hnummet", num1, denom1, num2, denom2, mcWeight, xlabel="MET (GeV)",ylabel="HLT MET efficiency",drawText=True,printResults=True)
+    xlabel = "MET (GeV)"
+    if not METCorrection == "":
+        xlabel = "Type1 MET (GeV)"
+
+    opts2 = {"ymin": 0.0, "ymax": 1.5}
+
+    efficiency = plotter.plotEfficiency(prefix+"MET", "PFMET"+METCorrection+"_ET>>hnummet", num1, denom1, num2, denom2, mcWeight, xlabel=xlabel,ylabel="Level-1 + HLT MET efficiency",opts2=opts2,moveLegend = {"dx": -0.55,"dy": -0.15,"dh": -0.1},drawText=True,printResults=True)
 #    plotter.plotEfficiency(prefix+"METtype1", "PFMETtype1_ET>>hnummet", num1, denom1, num2, denom2, mcWeight, xlabel="MET (GeV)",ylabel="HLT MET efficiency",drawText=True,printResults=True)
 ####    plotter.plotEfficiency(prefix+"Nvtx", "numGoodOfflinePV>>hnumvtx", num1met, denom1met, num2met, denom2met, mcWeight, xlabel="Number of good vertices",printResults=False)
 
@@ -326,335 +429,6 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
 
     print "\nPlotDir",plotDir
 
-
-class Plotter:
-    def __init__(self, datasets, plotDir, lumi):
-        self.datasets = datasets
-        self.plotDir = plotDir
-        self.lumi = lumi
-
-        if not os.path.exists(plotDir):
-            os.mkdir(plotDir)
-
-    def setLegends(self, legend1, legend2):
-        self.legend1 = legend1
-        self.legend2 = legend2
-
-    def setTriggers(self, dataVsMc, l1TriggerName1, hltTriggerName1, l1TriggerName2, hltTriggerName2, runs):
-        self.dataVsMc = dataVsMc
-        self.l1TriggerName1 = l1TriggerName1
-        self.hltTriggerName1 = hltTriggerName1
-        self.l1TriggerName2 = l1TriggerName2
-        self.hltTriggerName2 = hltTriggerName2
-        self.runs = runs
-
-        if dataVsMc == 0:
-            if l1TriggerName1 != l1TriggerName2:
-                raise Exception("If dataVsMc is False, l1TriggerName1 and 2 should be same ('%s' != '%s')" % (l1TriggerName1, l1TriggerName2))
-            if hltTriggerName1 != hltTriggerName2:
-                raise Exception("If dataVsMc is False, hltTriggerName1 and 2 should be same ('%s' != '%s')" % (hltTriggerName1, hltTriggerName2))
-
-    def getEfficiency_old(self,datasets,varexp,num,denom):
-#        print "check getEfficiency"
-        print "    varexp",varexp
-        print "    num",num
-        print "    denom",denom
-        collection = ROOT.TObjArray()
-        weights = []
-        for dataset in datasets:
-            #print "check dataset",dataset.name
-            tree = dataset.getRootHisto("TTEffTree")[0]
-
-            if tree.GetEntries() == 0:
-                continue
-            tree.Draw(varexp, num, "goff e")
-            n = tree.GetHistogram().Clone()
-
-            tree.Draw(varexp, denom, "goff e")
-            d = tree.GetHistogram().Clone()
-            print dataset.getName(),"n=",n.GetEntries(),"d=",d.GetEntries()
-            for i in range(1,d.GetNbinsX()+1):
-                print "    bin",i,d.GetBinContent(i)
-            eff = ROOT.TEfficiency(n, d)
-            eff.SetStatisticOption(ROOT.TEfficiency.kFNormal)
-            collection.Add(eff)
-
-            weight = 1
-            if dataset.isMC():
-                weight = dataset.getCrossSection()
-            print "MC weight",weight
-            weights.append(ROOT.Double(weight))
-
-        if len(weights) > 1:
-            return ROOT.TEfficiency.Combine(collection,"",len(weights),array.array("d",weights)),n,d
-        return eff
-
-    def getEfficiency(self,datasets,varexp,num,denom):
-#        print "check getEfficiency"                                                                                                        
-        print "    varexp",varexp
-        print "    num",num
-        print "    denom",denom
-        teff = ROOT.TEfficiency()
-        teff.SetStatisticOption(ROOT.TEfficiency.kFNormal)
-        tn = ROOT.TH1F()
-        td = ROOT.TH1F()
-        first = True
-        isData = False
-#        collection = ROOT.TObjArray()
-#        weights = []
-        for dataset in datasets:
-            if first:
-                isData = dataset.isData()
-
-            tree = dataset.getRootHisto("TTEffTree")[0]
-
-            if tree.GetEntries() == 0:
-                continue
-            tree.Draw(varexp, num, "goff e")
-            n = tree.GetHistogram().Clone()
-
-            tree.Draw(varexp, denom, "goff e")
-            d = tree.GetHistogram().Clone()
-            print dataset.getName(),"n=",n.GetEntries(),"d=",d.GetEntries()
-
-            eff = ROOT.TEfficiency(n, d)
-            eff.SetStatisticOption(ROOT.TEfficiency.kFNormal)
-
-            weight = 1
-            if dataset.isMC():
-                weight = dataset.getCrossSection()
-                for i in range(0,d.GetNbinsX()):
-                    print "    bin",i,d.GetBinLowEdge(i),n.GetBinContent(i),d.GetBinContent(i)
-            eff.SetWeight(weight)
-                
-            if first:
-                teff = eff
-                if dataset.isData():
-                    tn = n
-                    td = d
-                first = False
-            else:
-                teff.Add(eff)
-                if dataset.isData():
-                    tn.Add(n)
-                    td.Add(d)
-            #collection.Add(eff)
-
-            #weight = 1
-            #if dataset.isMC():
-            #    weight = dataset.getCrossSection()
-            #print "MC weight",weight
-            #weights.append(ROOT.Double(weight))
-
-#        if len(weights) > 1:
-#            return ROOT.TEfficiency.Combine(collection,"",len(weights),array.array("d",weights)),n,d
-        if isData:
-            teff = ROOT.TEfficiency(tn, td)
-            teff.SetStatisticOption(ROOT.TEfficiency.kFNormal)
-            for i in range(0,td.GetNbinsX()):
-                print "    bin",i,td.GetBinLowEdge(i),tn.GetBinContent(i),td.GetBinContent(i),tn.GetBinContent(i)/td.GetBinContent(i)
-#        teff.Draw("ap")
-#        return teff.GetPaintedGraph().Clone()
-        return self.convert2TGraph(teff)
-
-    def convert2TGraph(self,tefficiency):
-        x     = []
-        y     = []
-        xerrl = []
-        xerrh = []
-        yerrl = []
-        yerrh = []
-        h = tefficiency.GetCopyTotalHisto()
-        n = h.GetNbinsX()
-        for i in range(0,n):
-            x.append(h.GetBinLowEdge(i)+0.5*h.GetBinWidth(i))
-            xerrl.append(0.5*h.GetBinWidth(i))
-            xerrh.append(0.5*h.GetBinWidth(i))
-            y.append(tefficiency.GetEfficiency(i))
-            yerrl.append(tefficiency.GetEfficiencyErrorLow(i))
-            yerrh.append(tefficiency.GetEfficiencyErrorUp(i))
-        return ROOT.TGraphAsymmErrors(n,array.array("d",x),
-                                        array.array("d",y),
-                                        array.array("d",xerrl),
-                                        array.array("d",xerrh),
-                                        array.array("d",yerrl),
-                                        array.array("d",yerrh))
-
-    def getVariable(self,datasets,varexp,selection):
-        retHisto = 0
-        for dataset in datasets:
-            tree = dataset.getRootHisto("TTEffTree")[0]
-
-            if tree.GetEntries() == 0:
-                continue
-
-            tree.Draw(varexp, selection, "goff e")
-            h = tree.GetHistogram().Clone()
-            if dataset.isMC():
-                weight = dataset.getCrossSection()
-                h.Scale(weight)
-
-            if retHisto == 0:
-                retHisto = h
-            else:
-                retHisto.Add(h)
-        retHisto.Scale(1/retHisto.Integral())
-        return retHisto
-
-    def plotVariable(self, name, varexp, selection1, selection2, xlabel=None, ylabel=None):
-        print "plotVariable selection1",selection1
-        print "plotVariable selection2",selection2
-        dataset1 = self.datasets.getDataDatasets()
-        dataset2 = dataset1
-        if self.dataVsMc:
-            dataset2 = self.datasets.getMCDatasets()
-
-        h1 = self.getVariable(dataset1,varexp,selection1)
-        h2 = self.getVariable(dataset2,varexp,selection2)
-        h1.SetName("h1")
-        h2.SetName("h2")
-
-        print "check h1",h1.GetEntries()
-        print "check h2",h2.GetEntries()
-
-        fOUT = ROOT.TFile.Open("test.root","RECREATE")
-        h1.Write()
-        h2.Write()
-        fOUT.Close()
-
-        p = plots.ComparisonPlot(histograms.HistoGraph(h1, "h1", "p", "P"),
-                                 histograms.HistoGraph(h2, "h2", "p", "P"))
-
-        if hasattr(self, "legend1"):
-            p.histoMgr.setHistoLegendLabelMany({"h1": self.legend1, "h2": self.legend2})
-
-        p.getFrame2().GetYaxis().SetTitle("Ratio")
-        p.save()
-        return p
-
-    def plotEfficiency(self, name, varexp, num1, denom1, num2, denom2, weight2=None, xlabel=None, ylabel=None, opts={}, opts2={}, fit=False, fitMin=None, fitMax=None, moveLegend={}, drawText=False, printResults=False):
-
-        dataset1 = self.datasets.getDataDatasets()
-        dataset2 = dataset1
-        if self.dataVsMc > 0:
-            dataset2 = self.datasets.getMCDatasets()
-
-        eff1 = self.getEfficiency(dataset1,varexp, num1, denom1)
-        eff2 = self.getEfficiency(dataset2,varexp, num2, denom2)
-        print "check1",name
-        x = ROOT.Double(0)
-        y = ROOT.Double(0)
-        styles.dataStyle.apply(eff1)
-        styles.mcStyle.apply(eff2)
-        eff1.SetMarkerSize(1)
-        eff2.SetMarkerSize(1.5)
-
-        p = plots.ComparisonPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
-                                 histograms.HistoGraph(eff2, "eff2", "p", "P"))
-
-        if hasattr(self, "legend1"):
-            p.histoMgr.setHistoLegendLabelMany({"eff1": self.legend1, "eff2": self.legend2})
-
-        opts_ = {"ymin": 0, "ymax": 1.1}
-        opts_.update(opts)
-
-        opts2_ = {"ymin": 0.5, "ymax": 1.5}
-        opts2_.update(opts2)
-
-        moveLegend_ = {"dx": -0.55}
-        moveLegend_.update(moveLegend)
-
-        if fit:
-            (fit1, res1) = self._fit("eff1", eff1, fitMin, fitMax)
-            (fit2, res2) = self._fit("eff2", eff2, fitMin, fitMax)
-
-            p.prependPlotObject(fit2)
-            p.prependPlotObject(fit1)
-
-        self._common(name, p, xlabel, ylabel, ratio=True, energy = dataset2[0].info["energy"], opts=opts_, opts2=opts2_, moveLegend=moveLegend_)
-        if drawText and hasattr(self, "l1TriggerName1"):
-            x = 0.45
-            y = 0.35
-            size = 17
-            dy = 0.035
-            mcColor = eff2.GetMarkerColor()
-            if self.dataVsMc:
-                if self.l1TriggerName1 == self.l1TriggerName2 and self.hltTriggerName1 == self.hltTriggerName2:
-                    histograms.addText(x, y, "Data (runs %s) and MC"%self.runs, size); y -= dy
-                    histograms.addText(x, y, "L1:  %s" % self.l1TriggerName1, size); y -= dy
-                    histograms.addText(x, y, "HLT: %s" % self.hltTriggerName1, size); y -= dy
-                else:
-                    histograms.addText(x, y, "Data (runs %s)"%self.runs, size); y -= dy
-                    histograms.addText(x, y, "L1:  %s" % self.l1TriggerName1, size); y -= dy
-                    histograms.addText(x, y, "HLT: %s" % self.hltTriggerName1, size); y -= dy
-                    y -= 0.01
-                    histograms.addText(x, y, "MC", size, color=mcColor); y -= dy
-                    histograms.addText(x, y, "L1:  %s" % self.l1TriggerName2, size, color=mcColor); y -= dy
-                    histograms.addText(x, y, "HLT: %s" % self.hltTriggerName2, size, color=mcColor); y -= dy
-            else:
-                histograms.addText(x, y, "Data (runs %s)"%self.runs, size); y -= dy
-                histograms.addText(x, y, "L1:  %s" % self.l1TriggerName1, size); y -= dy
-                histograms.addText(x, y, "HLT: %s" % self.hltTriggerName1, size); y -= dy
-
-
-        if printResults:
-
-            ratioweighted = 0
-            weight = 0
-            ratio = p.ratios[0]
-            print
-#            for bin in xrange(1, n1.GetNbinsX()+1):
-            for bin in xrange(1, eff1.GetN()+1):
-                i = bin-1
-#                print "Bin low edge %.0f" % n1.GetBinLowEdge(bin)
-                print "Bin low edge %.0f" % (eff1.GetX()[i] - eff1.GetErrorXlow(i))
-                print "   1: efficiency %.7f +- %.7f" % (eff1.GetY()[i], max(eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i))), "Entries num"#,n1.GetBinContent(bin),"denom",d1.GetBinContent(bin)
-                print "   2: efficiency %.7f +- %.7f" % (eff2.GetY()[i], max(eff2.GetErrorYhigh(i), eff2.GetErrorYlow(i))), "Entries num"#,n2.GetBinContent(bin),"denom",d2.GetBinContent(bin)
-                print "   ratio:        %.7f +- %.7f" % (ratio.getRootGraph().GetY()[i], max(ratio.getRootGraph().GetErrorYhigh(i), ratio.getRootGraph().GetErrorYlow(i)))
-                #if n1.GetBinLowEdge(bin) >= 41:
-                #    weight += eff1.GetY()[i]
-                #    ratioweighted += eff1.GetY()[i]*max(eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i))
-            print
-#            print "Weighted uncert PFTau > 41:", ratioweighted/weight
-            print
-
-        p.getFrame2().GetYaxis().SetTitle("Ratio")
-        p.save()
-        return p
-
-    def _fit(self, name, graph, min, max, xpos=0):
-        function = ROOT.TF1("fit"+name, "0.5*[0]*(1+TMath::Erf( (sqrt(x)-sqrt([1]))/(sqrt(2)*[2]) ))", min, max);
-        function.SetParameters(1., 40., 1.);
-        function.SetParLimits(0, 0.0, 1.0);
-        fitResult = graph.Fit(function, "NRSE+EX0");
-        print "Fit status", fitResult.Status()
-        #fitResult.Print("V");                                                                                                      
-        #fitResult.GetCovarianceMatrix().Print();                                                                                   
-        function.SetLineColor(graph.GetMarkerColor());
-        function.SetLineWidth(2);
-        # function.Draw("same")                                                                                                     
-        # ROOT.gPadUpdate();                                                                                                        
-        # stat = graph.FindObject("stats");                                                                                         
-        # stat.SetX1NDC(stat.GetX1NDC()+xpos);                                                                                      
-        # stat.SetX2NDC(stat.GetX2NDC()+xpos);                                                                                      
-        # stat.SetTextColor(graph.GetMarkerColor());                                                                                
-        # stat.SetLineColor(graph.GetMarkerColor());                                                                                
-        return (function, fitResult)
-
-    def _common(self, name, plot, xlabel=None, ylabel=None, ratio=False, energy = 0, opts={}, opts2={}, moveLegend={}):
-        plot.createFrame(os.path.join(self.plotDir, name), createRatio=ratio, opts=opts, opts2=opts2)
-        if hasattr(self, "legend1"):
-            plot.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-
-        if xlabel != None:
-            plot.frame.GetXaxis().SetTitle(xlabel)
-        if ylabel != None:
-            plot.frame.GetYaxis().SetTitle(ylabel)
-
-        plot.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText(s="%s TeV"%energy)
-        histograms.addLuminosityText(None, None, self.lumi)
 
 if __name__ == "__main__":
     main()

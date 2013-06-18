@@ -660,6 +660,8 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele, triggerEfficiency, leg):
                 print "  ",item
         raise Exception("Error: no scale factors are supported for '%s'!"%myString)
     print "Trigger %s leg scale factors set to %s" % (leg, myString)
+    myScaleFactors.variationEnabled = cms.bool(False)
+    myScaleFactors.variationShiftBy = cms.double(0)
     return myScaleFactors
 
 # Set trigger efficiency / scale factor for low purity depending on tau selection params
@@ -674,6 +676,8 @@ def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(tausele):
                 print "  ",item
         raise Exception("Error: no tau trigger low purity scale factors are supported for '%s'!"%myString)
     print "Trigger tau leg low purity scale factors set to %s" % (myString)
+    myScaleFactors.variationEnabled = cms.bool(False)
+    myScaleFactors.variationShiftBy = cms.double(0)
     return myScaleFactors
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency

@@ -138,11 +138,12 @@ class ConfigBuilder:
 
         self.inputWorkflow = inputWorkflow
 
-        if self.applyTauTriggerScaleFactor or self.applyMETTriggerScaleFactor:
+        if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor or self.applyMETTriggerScaleFactor:
             for trg in self.options.trigger:
                 if not "IsoPFTau" in trg:
-                    print "applyTauTriggerScaleFactor=True or applyMETTriggerScaleFactor=True, and got non-tau trigger, setting applyTauTriggerScaleFactor=False and applyMETTriggerScaleFactor=False"
+                    print "applyTauTriggerScaleFactor=True or applyTauTriggerLowPurityScaleFactor=True or applyMETTriggerScaleFactor=True, and got non-tau trigger, setting applyTauTriggerScaleFactor=False and applyMETTriggerScaleFactor=False"
                     self.applyTauTriggerScaleFactor = False
+                    self.applyTauTriggerLowPurityScaleFactor = False
                     self.applyMETTriggerScaleFactor = False
 
         if self.doMETResolution and self.doOptimisation:
@@ -321,7 +322,7 @@ class ConfigBuilder:
 
                 for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
-                    if self.applyTauTriggerScaleFactor:
+                    if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
                         param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
                     if self.applyMETTriggerScaleFactor:
                         print "########################################"
@@ -1155,7 +1156,7 @@ class ConfigBuilder:
         names = []
 
         # Tau trigger SF
-        if self.applyTauTriggerScaleFactor:
+        if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
             names.append(addTauTrgSF( 1.0, "Plus"))
             names.append(addTauTrgSF(-1.0, "Minus"))
 
