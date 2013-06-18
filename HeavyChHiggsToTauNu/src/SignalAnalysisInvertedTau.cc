@@ -273,13 +273,8 @@ namespace HPlus {
     if(!iEvent.isRealData()) {
       const double wjetsWeight = fWJetsWeightReader.getWeight(iEvent, iSetup);
       fEventWeight.multiplyWeight(wjetsWeight);
-      fTree.setWjetsWeight(wjetsWeight);
     }
     increment(fWJetsWeightCounter);
-
-//------ Apply filter (if chosen) to select tail events
-    //if (!selectTailEvents(iEvent, iSetup)) return false;
-
 
 //------ MET (noise) filters for data (reject events with instrumental fake MET)
     if(iEvent.isRealData()) {
@@ -300,8 +295,6 @@ namespace HPlus {
     }
 
 //------ Primary vertex
-       
-
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
@@ -354,7 +347,6 @@ namespace HPlus {
     for (edm::PtrVector<pat::Tau>::iterator iTau = mySelectedTauList.begin(); iTau != mySelectedTauList.end(); ++iTau) {
       if (fTauSelection.getPassesIsolationStatusOfTauObject(*iTau))
         myTmpVector.push_back(*iTau);
-      
     }
     TauSelection::Data tauDataForBaseline;
     bool myMultipleTausPassForBaselineStatus = false;
@@ -459,11 +451,6 @@ namespace HPlus {
 
 //------ Global electron veto
     ElectronSelection::Data electronVetoData = fElectronSelection.silentAnalyze(iEvent, iSetup);
-
-    size_t nVertices = pvData.getNumberOfAllVertices();
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, nVertices, selectedTau, jetData.getAllJets());
-    //    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetData.getAllJets());
-
     if (!electronVetoData.passedEvent()) return false; 
     increment(fBaselineEvetoCounter);
 
@@ -486,7 +473,6 @@ namespace HPlus {
 
     // Obtain transverse mass for plotting
     double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metDataTmp.getSelectedMET()));
-
  
    // Use btag scale factor in histogram filling if btagging or btag veto is applied                                                                                                                                                                                
     BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
@@ -508,7 +494,6 @@ namespace HPlus {
     hMETBaselineTauIdJetsCollinear->Fill(selectedTau->pt(), metDataTmp.getSelectedMET()->et()); // no btag scale factor needed
     hMTBaselineTauIdNoMetNoBtagging->Fill(selectedTau->pt(), transverseMass); // no btag scale factor needed
     if (qcdTailKillerDataCollinear.passedEvent()) {
-
       hMTBaselineTauIdNoMetNoBtaggingTailKiller->Fill(selectedTau->pt() ,transverseMass );
     }
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
@@ -606,13 +591,7 @@ namespace HPlus {
 //------ Veto against second tau in event
     // Implement only, if necessary
     //fCommonPlots.fillControlPlotsAtTauVetoSelection(iEvent, iSetup, vetoTauData);
-    size_t nVertices = pvData.getNumberOfAllVertices();   
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, nVertices, selectedTau, jetData.getAllJets());
-
-
     //hSelectionFlow->Fill(kSignalOrderTauID);
-
-
     hSelectedTauEtTauVeto->Fill(selectedTau->pt());
 
 //------ Global electron veto
@@ -625,14 +604,11 @@ namespace HPlus {
     MuonSelection::Data muonVetoData = fMuonSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     fCommonPlots.fillControlPlotsAtMuonSelection(iEvent, muonVetoData);
     if (!muonVetoData.passedEvent()) return false;
-
-
     increment(fInvertedMuonVetoCounter);
 
 //------ Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, selectedTau, pvData.getNumberOfAllVertices());
     fCommonPlots.fillControlPlotsAtJetSelection(iEvent, jetData);
-
     if(!jetData.passedEvent()) return false;
     increment(fInvertedNJetsCounter);
 
@@ -698,7 +674,6 @@ namespace HPlus {
     fCommonPlots.fillControlPlotsAtMETSelection(iEvent, metData);
     if(!metData.passedEvent()) return false;
     increment(fInvertedMetCounter);
-    //    size_t nVertices = pvData.getNumberOfAllVertices();
 
     //hSelectionFlow->Fill(kQCDOrderMET);
     hSelectedTauEtMetCut->Fill(selectedTau->pt() ,selectedTau->pt());
@@ -757,7 +732,6 @@ namespace HPlus {
     //hSelectionFlow->Fill(kQCDOrderBTag);
     hSelectedTauEtBtagging->Fill(selectedTau->pt() ,selectedTau->pt());
 
-    
     // mt for inverted tau with b tagging
     hMTInvertedTauIdBtag->Fill(selectedTau->pt(), transverseMass);
     // deltaPhi with b tagging
@@ -814,7 +788,6 @@ namespace HPlus {
     } 
 
     if (BjetSelectionData.passedEvent() ) {
-        
       TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
 
       if (TopWithBSelectionData.passedEvent() ) {
