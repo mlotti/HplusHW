@@ -756,7 +756,7 @@ namespace HPlus {
     }
 
     // cut values for circular deltaPhi cuts
-    double radius = 80;
+    //double radius = 80;
     //double Rcut = 0;
     //if ( deltaPhi > (180-radius)) Rcut = sqrt(radius*radius - (180-deltaPhi)*(180-deltaPhi));
     //    std::cout << " Rcut " <<  Rcut  << " deltaPhi " <<  deltaPhi  << std::endl;
