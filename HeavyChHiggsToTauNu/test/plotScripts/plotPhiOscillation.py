@@ -212,11 +212,11 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
 
 def doPlots(dsetName, dset, opts, mySuffix, luminosity):
     maxbins = 60
-    myPlotNames = ["METPhiOscillationCorrectionAfterVertices/NverticesVsMET",
-                   "METPhiOscillationCorrectionAfterTaus/NverticesVsMET",
+    myPlotNames = ["METPhiOscillationCorrectionAfterTaus/NverticesVsMET",
                    "METPhiOscillationCorrectionAfterLeptonVeto/NverticesVsMET",
                    "METPhiOscillationCorrectionAfterNjets/NverticesVsMET",
-                   "CommonPlots/Taus/TauPhiOscillation"]
+                   "METPhiOscillationCorrectionAfterBjets/NverticesVsMET",
+                   "METPhiOscillationCorrectionAfterAllSelections/NverticesVsMET"]
     for n in myPlotNames:
         hDX = dset.getDatasetRootHisto(n+"X")
         hDY = dset.getDatasetRootHisto(n+"Y")
@@ -233,6 +233,9 @@ def doPlots(dsetName, dset, opts, mySuffix, luminosity):
         else:
             producePlot(mySuffix, hX, "Average MET_{x}, GeV", dsetName, "%s_X"%myName, maxbins)
             producePlot(mySuffix, hY, "Average MET_{y}, GeV", dsetName, "%s_Y"%myName, maxbins)
+        # Plots before and after correction
+        hPhiAfter = dset.getDatasetRootHisto(n.replace("NverticesVsMET","METPhiCorrected")
+        hPhiBefore = dset.getDatasetRootHisto(n.replace("NverticesVsMET","METPhiUnorrected")
 
 if __name__ == "__main__":
     myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
