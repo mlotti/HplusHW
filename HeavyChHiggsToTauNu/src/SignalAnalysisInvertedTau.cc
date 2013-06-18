@@ -49,8 +49,8 @@ namespace HPlus {
     fBaselineMetTriggerScaleFactorCounter(eventCounter.addCounter("Baseline: MET SF")),
     fBaselineQCDTailKillerCollinearCounter(eventCounter.addCounter("Baseline: QCD tail killer collinear")),
     fBaselineMetCounter(eventCounter.addCounter("Baseline: MET")),
-    fBaselineBTaggingScaleFactorCounter(eventCounter.addCounter("Baseline: btagging scale factor")),
     fBaselineBtagCounter(eventCounter.addCounter("Baseline: btagging")),
+    fBaselineBTaggingScaleFactorCounter(eventCounter.addCounter("Baseline: btagging scale factor")),
     fBaselineQCDTailKillerBackToBackCounter(eventCounter.addCounter("Baseline: QCD tail killer back-to-back")),
     fBaselineDeltaPhiTauMETCounter(eventCounter.addCounter("Baseline: -> DeltaPhi(Tau,MET) upper limit")),
     fBaselineSelectedEventsCounter(eventCounter.addCounter("Baseline: Selected events")),
@@ -70,8 +70,8 @@ namespace HPlus {
     fInvertedMetCounter(eventCounter.addCounter("Inverted: MET")),
     fInvertedBvetoCounter(eventCounter.addCounter("Inverted: -> Veto on b jets after MET")),
     fInvertedBvetoDeltaPhiCounter(eventCounter.addCounter("Inverted: -> Veto on b jets after MET and Dphi")),
-    fInvertedBTaggingScaleFactorCounter(eventCounter.addCounter("Inverted: btagging scale factor")),
     fInvertedBTaggingCounter(eventCounter.addCounter("Inverted: btagging")),
+    fInvertedBTaggingScaleFactorCounter(eventCounter.addCounter("Inverted: btagging scale factor")),
     fInvertedQCDTailKillerBackToBackCounter(eventCounter.addCounter("Inverted: QCD tail killer back-to-back")),
     fInvertedDeltaPhiTauMETCounter(eventCounter.addCounter("Inverted: -> DeltaPhi(Tau,MET) upper limit")),
     fInvertedSelectedEventsCounter(eventCounter.addCounter("Inverted: Selected events")),
@@ -561,16 +561,15 @@ namespace HPlus {
 
 //------ b tagging cut
     BTagging::Data btagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    if (btagData.passedEvent()) increment(fBaselineBtagCounter);
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
       fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
       fEventWeight.multiplyWeight(btagData.getScaleFactor());
     }
     // Beyond this point, the b tag scale factor has already been applied
-    increment(fBaselineBTaggingScaleFactorCounter);
     if(!btagData.passedEvent()) return false;
-    increment(fBaselineBtagCounter);
-
+    increment(fBaselineBTaggingScaleFactorCounter);
 
     // mT with b tagging in bins
     hMTBaselineTauIdBtag->Fill(selectedTau->pt() ,transverseMass );
@@ -744,15 +743,17 @@ namespace HPlus {
     //------ b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     // Apply scale factor as weight to event
-    increment(fInvertedBTaggingScaleFactorCounter);
+    if (btagData.passedEvent()) increment(fInvertedBTaggingCounter);
+
     if (!iEvent.isRealData()) {
       fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
       fEventWeight.multiplyWeight(btagData.getScaleFactor());
     }
     // Beyond this point, the b tag scale factor has already been applied
     fCommonPlots.fillControlPlotsAtBtagging(iEvent, btagData);
-    if(!btagData.passedEvent()) return false;
-    increment(fInvertedBTaggingCounter);
+    if (!btagData.passedEvent()) return false;
+    increment(fInvertedBTaggingScaleFactorCounter);
+
     //hSelectionFlow->Fill(kQCDOrderBTag);
     hSelectedTauEtBtagging->Fill(selectedTau->pt() ,selectedTau->pt());
 
