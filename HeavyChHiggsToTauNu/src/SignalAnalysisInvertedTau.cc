@@ -427,7 +427,7 @@ namespace HPlus {
       }
       increment(fInvertedTauTriggerScaleFactorCounter);
       // Check if multiple taus passed
-      if (!myMultipleTausPassForBaselineStatus) increment(fInvertedOneTauCounter);
+      if (!myMultipleTausPassForInvertedStatus) increment(fInvertedOneTauCounter);
 
       fCommonPlots.fillControlPlotsAfterTauTriggerScaleFactor(iEvent);
       hSelectedTauEt->Fill(tauDataForInverted.getSelectedTau()->pt());
@@ -451,7 +451,6 @@ namespace HPlus {
 
 //------ Global electron veto
     ElectronSelection::Data electronVetoData = fElectronSelection.silentAnalyze(iEvent, iSetup);
-
     if (!electronVetoData.passedEvent()) return false; 
     increment(fBaselineEvetoCounter);
 
@@ -495,7 +494,6 @@ namespace HPlus {
     hMETBaselineTauIdJetsCollinear->Fill(selectedTau->pt(), metDataTmp.getSelectedMET()->et()); // no btag scale factor needed
     hMTBaselineTauIdNoMetNoBtagging->Fill(selectedTau->pt(), transverseMass); // no btag scale factor needed
     if (qcdTailKillerDataCollinear.passedEvent()) {
-
       hMTBaselineTauIdNoMetNoBtaggingTailKiller->Fill(selectedTau->pt() ,transverseMass );
     }
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
@@ -592,9 +590,7 @@ namespace HPlus {
 //------ Veto against second tau in event
     // Implement only, if necessary
     //fCommonPlots.fillControlPlotsAtTauVetoSelection(iEvent, iSetup, vetoTauData);
-
     //hSelectionFlow->Fill(kSignalOrderTauID);
-
     hSelectedTauEtTauVeto->Fill(selectedTau->pt());
 
 //------ Global electron veto
@@ -607,13 +603,11 @@ namespace HPlus {
     MuonSelection::Data muonVetoData = fMuonSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     fCommonPlots.fillControlPlotsAtMuonSelection(iEvent, muonVetoData);
     if (!muonVetoData.passedEvent()) return false;
-
     increment(fInvertedMuonVetoCounter);
 
 //------ Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, selectedTau, pvData.getNumberOfAllVertices());
     fCommonPlots.fillControlPlotsAtJetSelection(iEvent, jetData);
-
     if(!jetData.passedEvent()) return false;
     increment(fInvertedNJetsCounter);
 
@@ -763,8 +757,8 @@ namespace HPlus {
 
     // cut values for circular deltaPhi cuts
     double radius = 80;
-    double Rcut = 0;
-    if ( deltaPhi > (180-radius)) Rcut = sqrt(radius*radius - (180-deltaPhi)*(180-deltaPhi));
+    //double Rcut = 0;
+    //if ( deltaPhi > (180-radius)) Rcut = sqrt(radius*radius - (180-deltaPhi)*(180-deltaPhi));
     //    std::cout << " Rcut " <<  Rcut  << " deltaPhi " <<  deltaPhi  << std::endl;
     //if (deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut ) increment(fQCDTailKillerCounter);	
     //    if (deltaPhiMetJet1 < Rcut || deltaPhiMetJet2 < Rcut || deltaPhiMetJet3 < Rcut ) return false;
@@ -793,7 +787,6 @@ namespace HPlus {
     } 
 
     if (BjetSelectionData.passedEvent() ) {
-        
       TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
 
       if (TopWithBSelectionData.passedEvent() ) {
