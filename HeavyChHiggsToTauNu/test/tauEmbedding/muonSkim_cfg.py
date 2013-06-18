@@ -69,6 +69,7 @@ patArgs = {"doTauHLTMatching": False,
            }
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs,
                                                             doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter
+                                                            calculateEventCleaning=True, # This requires the tags from test/pattuple/checkoutTags.sh
 )
 # In order to avoid transient references and generalTracks is available anyway
 #if hasattr(process, "patMuons"):
