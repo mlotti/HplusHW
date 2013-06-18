@@ -631,7 +631,10 @@ def cloneForHeavyAnalysis(lightModule):
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium # FIXME changed default to best so far
+    myScaleFactors = tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium  # FIXME changed default to best so far
+    myScaleFactors.variationEnabled = cms.bool(False)
+    myScaleFactors.variationShiftBy = cms.double(0)
+    return myScaleFactors
     # FIXME
     if tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr3Hits":
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
@@ -648,7 +651,10 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
 def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(tausele):
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency # FIXME
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium # FIXME changed default to best so far
+    myScaleFactors = tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium # FIXME changed default to best so far
+    myScaleFactors.variationEnabled = cms.bool(False)
+    myScaleFactors.variationShiftBy = cms.double(0)
+    return myScaleFactors
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
