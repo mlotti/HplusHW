@@ -138,11 +138,12 @@ class ConfigBuilder:
 
         self.inputWorkflow = inputWorkflow
 
-        if self.applyTauTriggerScaleFactor or self.applyMETTriggerScaleFactor:
+        if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor or self.applyMETTriggerScaleFactor:
             for trg in self.options.trigger:
                 if not "IsoPFTau" in trg:
-                    print "applyTauTriggerScaleFactor=True or applyMETTriggerScaleFactor=True, and got non-tau trigger, setting applyTauTriggerScaleFactor=False and applyMETTriggerScaleFactor=False"
+                    print "applyTauTriggerScaleFactor=True or applyTauTriggerLowPurityScaleFactor=True or applyMETTriggerScaleFactor=True, and got non-tau trigger, setting applyTauTriggerScaleFactor=False and applyMETTriggerScaleFactor=False"
                     self.applyTauTriggerScaleFactor = False
+                    self.applyTauTriggerLowPurityScaleFactor = False
                     self.applyMETTriggerScaleFactor = False
 
         if self.doMETResolution and self.doOptimisation:
