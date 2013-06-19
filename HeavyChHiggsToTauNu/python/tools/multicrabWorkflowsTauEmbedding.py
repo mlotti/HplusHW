@@ -5,7 +5,7 @@ import re
 
 from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
 import multicrabDatasetsCommon as common
-from multicrabWorkflowsPattuple import constructProcessingWorkflow_44X
+from multicrabWorkflowsPattuple import constructProcessingWorkflow_44X, constructProcessingWorkflow_53X
 
 def addEmbeddingGenTauSkim_44X(version, datasets, updateDefinitions):
     # Tau+MET trigger has 5 % efficiency, GenTauSkim has 10 %, so 2x jobs
@@ -121,6 +121,58 @@ def getDefaultDefinitions_44X():
         "TTToHplusBHminusB_M160_Fall11":     TaskDefMC(),
         }
 
+def getDefaultDefinitions_53X():
+    mcTrigger = "HLT_Mu40_eta2p1_v9"
+    def TaskDefMC(**kwargs):
+        return TaskDef(triggerOR=[mcTrigger], **kwargs)
+
+    return {
+        "SingleMu_190456-193621_2012A_Jan22": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v9"]),
+        "SingleMu_193834-196531_2012B_Jan22": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v9"]),
+        "SingleMu_198022-200381_2012C_Jan22": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v10", "HLT_Mu40_eta2p1_v11"], triggerThrow=False),
+        "SingleMu_200466-203742_2012C_Jan22": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v11"]),
+        "SingleMu_203777-205834_2012D_Jan22": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v11"]),
+        "SingleMu_205908-207100_2012D_Jan22": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v11"]),
+        "SingleMu_207214-208686_2012D_Jan22": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v11"]),
+
+        # MC, triggered with mcTrigger
+        "WJets_TuneZ2star_v1_Summer12":            TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": -1}),
+        "WJets_TuneZ2star_v2_Summer12":            TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": -1}),
+        "W1Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 1}),
+        "W2Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 2}),
+        "W3Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 3}),
+        "W4Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 4}),
+        "TTJets_TuneZ2star_Summer12":              TaskDefMC(),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDefMC(),
+        "T_t-channel_TuneZ2star_Summer12":         TaskDefMC(),
+        "Tbar_t-channel_TuneZ2star_Summer12":      TaskDefMC(),
+        "T_tW-channel_TuneZ2star_Summer12":        TaskDefMC(),
+        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDefMC(),
+        "T_s-channel_TuneZ2star_Summer12":         TaskDefMC(),
+        "Tbar_s-channel_TuneZ2star_Summer12":      TaskDefMC(),
+        "WW_TuneZ2star_Summer12":                  TaskDefMC(),
+        "WZ_TuneZ2star_Summer12":                  TaskDefMC(),
+        "ZZ_TuneZ2star_Summer12":                  TaskDefMC(),
+        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDefMC(),
+        "TTToHplusBWB_M80_ext_Summer12":           TaskDefMC(),
+        "TTToHplusBWB_M90_ext_Summer12":           TaskDefMC(),
+        "TTToHplusBWB_M100_ext_Summer12":          TaskDefMC(),
+        "TTToHplusBWB_M120_ext_Summer12":          TaskDefMC(),
+        "TTToHplusBWB_M140_ext_Summer12":          TaskDefMC(),
+        "TTToHplusBWB_M150_ext_Summer12":          TaskDefMC(),
+        "TTToHplusBWB_M155_ext_Summer12":          TaskDefMC(),
+        "TTToHplusBWB_M160_ext_Summer12":          TaskDefMC(),
+        "TTToHplusBHminusB_M80_ext_Summer12":      TaskDefMC(),
+        "TTToHplusBHminusB_M90_Summer12":          TaskDefMC(),
+        "TTToHplusBHminusB_M100_ext_Summer12":     TaskDefMC(),
+        "TTToHplusBHminusB_M120_ext_Summer12":     TaskDefMC(),
+        "TTToHplusBHminusB_M140_ext_Summer12":     TaskDefMC(),
+        "TTToHplusBHminusB_M150_ext_Summer12":     TaskDefMC(),
+        "TTToHplusBHminusB_M155_ext_Summer12":     TaskDefMC(),
+        "TTToHplusBHminusB_M160_ext_Summer12":     TaskDefMC(),
+        }
+
+
 def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
     defaultDefinitions = getDefaultDefinitions_44X()
     # Specifies the default
@@ -216,6 +268,91 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
             name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName.replace("tau", ""))
         else:
             name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
+        wf.addCrabLine("USER.publish_data_name = "+name)
+
+        # Add the skim Workflow to Dataset
+        dataset.addWorkflow(wf)
+
+        # If have skim output, define the workflows which depend on it
+        if wf.output != None:
+            dataset.addWorkflow(Workflow("tauembedding_skimAnalysis_"+version, source=Source("tauembedding_skim_"+version),
+                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="histograms.root"))
+
+def addEmbeddingSkim_53X(version, datasets, updateDefinitions):
+    defaultDefinitions = getDefaultDefinitions_53X()
+    njobs = {
+        # Goal for data: 9000 events / job (selection efficiency 11 %)
+        # FIXME: set njobsOut
+        "SingleMu_190456-193621_2012A_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
+        "SingleMu_193834-196531_2012B_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
+        "SingleMu_198022-200381_2012C_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
+        "SingleMu_200466-203742_2012C_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
+        "SingleMu_203777-205834_2012D_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
+        "SingleMu_205908-207100_2012D_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
+        "SingleMu_207214-208686_2012D_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
+
+        # MC, triggered with mcTrigger
+        "WJets_TuneZ2star_v1_Summer12":            TaskDef(njobsIn= 250, njobsOut=1),
+        "WJets_TuneZ2star_v2_Summer12":            TaskDef(njobsIn= 750, njobsOut=1),
+        "W1Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 400, njobsOut=1),
+        "W2Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2500, njobsOut=1),
+        "W3Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2300, njobsOut=1),
+        "W4Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2200, njobsOut=1),
+        "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn=1700, njobsOut=1),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(njobsIn=2700, njobsOut=1),
+        "T_t-channel_TuneZ2star_Summer12":         TaskDef(njobsIn= 200, njobsOut=1),
+        "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(njobsIn= 100, njobsOut=1),
+        "T_tW-channel_TuneZ2star_Summer12":        TaskDef(njobsIn= 250, njobsOut=1),
+        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDef(njobsIn= 250, njobsOut=1),
+        "T_s-channel_TuneZ2star_Summer12":         TaskDef(njobsIn=  15, njobsOut=1),
+        "Tbar_s-channel_TuneZ2star_Summer12":      TaskDef(njobsIn=  10, njobsOut=1),
+        "WW_TuneZ2star_Summer12":                  TaskDef(njobsIn= 120, njobsOut=1),
+        "WZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 120, njobsOut=1),
+        "ZZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 120, njobsOut=1),
+        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef(njobsIn= 300, njobsOut=1),
+        "TTToHplusBWB_M80_ext_Summer12":           TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBWB_M90_ext_Summer12":           TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBWB_M100_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBWB_M120_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBWB_M140_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBWB_M150_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBWB_M155_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBWB_M160_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBHminusB_M80_ext_Summer12":      TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBHminusB_M90_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBHminusB_M100_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBHminusB_M120_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBHminusB_M140_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBHminusB_M150_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBHminusB_M155_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
+        "TTToHplusBHminusB_M160_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
+        }
+
+    workflowName = "tauembedding_skim_"+version
+
+    # Update the default definitions from the argument
+    updateTaskDefinitions(defaultDefinitions, njobs, workflowName)
+    updateTaskDefinitions(defaultDefinitions, updateDefinitions, workflowName)
+
+    # Add skim Workflow for each dataset
+    for datasetName, taskDef in defaultDefinitions.iteritems():
+        dataset = datasets.getDataset(datasetName)
+
+        # Construct processing workflow
+        wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName)
+
+        # CRAB configuration lines
+        if dataset.isData():
+            wf.addCrabLine("CMSSW.total_number_of_lumis = -1")
+        else:
+            # split by events can only be used for MC and in skim step
+            # embedding step is impossible, because the counters are saved
+            # in the lumi sections, and will get doubly counted in split
+            # by events mode
+            wf.addCrabLine("CMSSW.total_number_of_events = -1")
+
+        # Setup the publish name
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
         wf.addCrabLine("USER.publish_data_name = "+name)
 
         # Add the skim Workflow to Dataset
@@ -617,6 +754,54 @@ def addEmbeddingSkim_v44_5_2(datasets):
     addEmbeddingSkim_44X("v44_5_2", datasets, definitions)
 
 
+def addEmbeddingSkim_v53_3(datasets):
+    definitions = {
+        "SingleMu_190456-193621_2012A_Jan22":      TaskDef(""),
+        "SingleMu_193834-196531_2012B_Jan22":      TaskDef(""),
+        "SingleMu_198022-200381_2012C_Jan22":      TaskDef(""),
+        "SingleMu_200466-203742_2012C_Jan22":      TaskDef(""),
+        "SingleMu_203777-205834_2012D_Jan22":      TaskDef(""),
+        "SingleMu_205908-207100_2012D_Jan22":      TaskDef(""),
+        "SingleMu_207214-208686_2012D_Jan22":      TaskDef(""),
+
+        "WJets_TuneZ2star_v1_Summer12":            TaskDef(""),
+        "WJets_TuneZ2star_v2_Summer12":            TaskDef(""),
+        "W1Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "W2Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "W3Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "W4Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "TTJets_TuneZ2star_Summer12":              TaskDef("", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
+        "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(""),
+        "T_t-channel_TuneZ2star_Summer12":         TaskDef(""),
+        "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(""),
+        "T_tW-channel_TuneZ2star_Summer12":        TaskDef(""),
+        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDef(""),
+        "T_s-channel_TuneZ2star_Summer12":         TaskDef(""),
+        "Tbar_s-channel_TuneZ2star_Summer12":      TaskDef(""),
+        "WW_TuneZ2star_Summer12":                  TaskDef(""),
+        "WZ_TuneZ2star_Summer12":                  TaskDef(""),
+        "ZZ_TuneZ2star_Summer12":                  TaskDef(""),
+        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef(""),
+        "TTToHplusBWB_M80_ext_Summer12":           TaskDef(""),
+        "TTToHplusBWB_M90_ext_Summer12":           TaskDef(""),
+        "TTToHplusBWB_M100_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M120_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M140_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M150_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M155_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M160_ext_Summer12":          TaskDef(""),
+        "TTToHplusBHminusB_M80_ext_Summer12":      TaskDef(""),
+        "TTToHplusBHminusB_M90_Summer12":          TaskDef(""),
+        "TTToHplusBHminusB_M100_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M120_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M140_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M150_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M155_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M160_ext_Summer12":     TaskDef(""),
+        }
+    addEmbeddingSkim_53X("v53_3", datasets, definitions)
+
+
 def addEmbedding_SKELETON(datasets):
     definitions = {
         "SingleMu_160431-163261_2011A_Nov08": TaskDef(""),
@@ -661,6 +846,53 @@ def addEmbedding_SKELETON(datasets):
         "TTToHplusBHminusB_M150_Fall11":    TaskDef(""),
         "TTToHplusBHminusB_M155_Fall11":    TaskDef(""),
         "TTToHplusBHminusB_M160_Fall11":    TaskDef(""),
+        }
+
+
+def addEmbedding_SKELETON_53X(datasets):
+    definitions = {
+        "SingleMu_190456-193621_2012A_Jan22":      TaskDef(""),
+        "SingleMu_193834-196531_2012B_Jan22":      TaskDef(""),
+        "SingleMu_198022-200381_2012C_Jan22":      TaskDef(""),
+        "SingleMu_200466-203742_2012C_Jan22":      TaskDef(""),
+        "SingleMu_203777-205834_2012D_Jan22":      TaskDef(""),
+        "SingleMu_205908-207100_2012D_Jan22":      TaskDef(""),
+        "SingleMu_207214-208686_2012D_Jan22":      TaskDef(""),
+
+        "WJets_TuneZ2star_v1_Summer12":            TaskDef(""),
+        "WJets_TuneZ2star_v2_Summer12":            TaskDef(""),
+        "W1Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "W2Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "W3Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "W4Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "TTJets_TuneZ2star_Summer12":              TaskDef(""),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(""),
+        "T_t-channel_TuneZ2star_Summer12":         TaskDef(""),
+        "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(""),
+        "T_tW-channel_TuneZ2star_Summer12":        TaskDef(""),
+        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDef(""),
+        "T_s-channel_TuneZ2star_Summer12":         TaskDef(""),
+        "Tbar_s-channel_TuneZ2star_Summer12":      TaskDef(""),
+        "WW_TuneZ2star_Summer12":                  TaskDef(""),
+        "WZ_TuneZ2star_Summer12":                  TaskDef(""),
+        "ZZ_TuneZ2star_Summer12":                  TaskDef(""),
+        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef(""),
+        "TTToHplusBWB_M80_ext_Summer12":           TaskDef(""),
+        "TTToHplusBWB_M90_ext_Summer12":           TaskDef(""),
+        "TTToHplusBWB_M100_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M120_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M140_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M150_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M155_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M160_ext_Summer12":          TaskDef(""),
+        "TTToHplusBHminusB_M80_ext_Summer12":      TaskDef(""),
+        "TTToHplusBHminusB_M90_Summer12":          TaskDef(""),
+        "TTToHplusBHminusB_M100_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M120_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M140_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M150_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M155_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M160_ext_Summer12":     TaskDef(""),
         }
 
 ############################# below are old definitions, which still exist in DBS and disk (waiting for Matti's thesis defence)

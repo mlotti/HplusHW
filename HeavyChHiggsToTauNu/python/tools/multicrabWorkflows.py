@@ -381,6 +381,17 @@ datasets.extend([
     DataDataset("SingleMu_%s_2012C_Jan22", reco="22Jan2013", runs=(198022, 203742), aod="/SingleMu/Run2012C-22Jan2013-v1/AOD"), # 87683348 events, 6171 files
     DataDataset("SingleMu_%s_2012D_Jan22", reco="22Jan2013", runs=(203777, 208686), aod="/SingleMu/Run2012D-22Jan2013-v1/AOD"), # 95089646 events, 7567 files
 ])
+# Split by HLT menu boundaries to have < 5k jobs for embedding skims
+datasets.splitDataByRuns("SingleMu_198022-203742_2012C_Jan22", [
+        (198022, 200381), # 51586584 events, 3482 files
+        (200466, 203742), # 58207084 events, 4285 files
+])
+datasets.splitDataByRuns("SingleMu_203777-208686_2012D_Jan22", [
+        (203777, 205834), # 45358726 events, 3601 files
+        (205908, 207100), # 44923291 events, 3643 files
+        (207214, 208686), # 47041659 events, 3908 files
+])
+
 
 
 datasets.extend([
@@ -480,9 +491,9 @@ datasets.extend([
     # EWK pythia, 10 Mevt/sample
     # Cross sections from [3], took values for CTEQ PDF since CTEQ6L1 was used in pythia simulation
     # ZZ cross section is slightly questionmark, since the computed value is for m(ll) > 12
-    MCDataset("WW_TuneZ2star_Summer12", aod="/WW_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("WZ_TuneZ2star_Summer12", aod="/WZ_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("ZZ_TuneZ2star_Summer12", aod="/ZZ_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
+    MCDataset("WW_TuneZ2star_Summer12", aod="/WW_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 10 Mevt
+    MCDataset("WZ_TuneZ2star_Summer12", aod="/WZ_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 10 Mevt
+    MCDataset("ZZ_TuneZ2star_Summer12", aod="/ZZ_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 10 Mevt
     # EWK madgraph
     #
     # The original 8 TeV madgraph samples had massless b-quark. This
@@ -553,6 +564,7 @@ multicrabWorkflowsTauEmbedding.addEmbeddingGenTauSkim_v44_5(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5_1(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5_2(datasets)
+multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v53_3(datasets)
 
 # Add muon tag&probe definitions
 multicrabWorkflowsMuonTagProbe.addMuonTagProbe_44X(datasets)
