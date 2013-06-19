@@ -245,7 +245,7 @@ def createTasks(opts, step, version=None):
         multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
 
         if step in ["skim", "embedding", "genTauSkim"]:
-            multicrab.addCommonLine("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/embedding/CMSSW_4_4_X")
+            multicrab.addCommonLine("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X")
 
         multicrab.extendDatasets(workflow, datasets)
 
