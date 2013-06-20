@@ -49,6 +49,7 @@ namespace HPlus {
     fCaloSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloSrc")),
     fTcSrc(iConfig.getUntrackedParameter<edm::InputTag>("tcSrc")),
     fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
+    fPreMetCut(iConfig.getUntrackedParameter<double>("preMETCut")),
     // For type I/II correction
     fTauJetMatchingCone(iConfig.getUntrackedParameter<double>("tauJetMatchingCone")),
     fJetType1Threshold(iConfig.getUntrackedParameter<double>("jetType1Threshold")),
@@ -71,6 +72,10 @@ namespace HPlus {
     fTypeITauIsolated(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction tau treated as isolated")),
     fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut"))
   {
+    if (fPreMetCut > fMetCut) {
+      throw cms::Exception("Configuration") << "Pre-MET cut value " << fPreMetCut << " is larger than MET cut value " << fMetCut << "! Check your counfig!" << std::endl;
+    }
+
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir(label);
 
@@ -214,6 +219,13 @@ namespace HPlus {
         hMetDivSqrSumEt->Fill(met->et()/sumEt);
     }
 
+    // Pre-met cut status
+    if (met->et() > fPreMetCut) {
+      output.fPassedPreMetCut = true;
+    } else {
+      output.fPassedPreMetCut = false;
+    }
+    // Met cut status
     if(met->et() > fMetCut) {
       output.fPassedEvent = true;
       increment(fMetCutCount);

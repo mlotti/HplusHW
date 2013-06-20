@@ -39,6 +39,7 @@ namespace HPlus {
       ~Data();
 
       const bool passedEvent() const { return fPassedEvent; }
+      const bool passedPreMetCut() const { return fPassedPreMetCut; }
       //const edm::Ptr<reco::MET> getSelectedMET() const { return fSelectedMET; }
       const edm::Ptr<reco::MET> getSelectedMET() const { return getPhiUncorrectedSelectedMET(); }
       const edm::Ptr<reco::MET> getPhiUncorrectedSelectedMET() const;
@@ -53,6 +54,7 @@ namespace HPlus {
 
     private:
       bool fPassedEvent;
+      bool fPassedPreMetCut;
       Select fMETMode;
       // MET objects
       edm::Ptr<reco::MET> fSelectedMET;
@@ -111,6 +113,7 @@ namespace HPlus {
     Select fSelect;
 
     const double fMetCut;
+    const double fPreMetCut;
     // For type I/II correction
     const double fTauJetMatchingCone;
     const double fJetType1Threshold;

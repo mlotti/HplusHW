@@ -46,6 +46,7 @@ namespace HPlus {
     fBaselineEvetoCounter(eventCounter.addCounter("Baseline: electron veto")),
     fBaselineMuvetoCounter(eventCounter.addCounter("Baseline: muon veto")),
     fBaselineJetsCounter(eventCounter.addCounter("Baseline: njets")),
+    fBaselinePreMETCutCounter(eventCounter.addCounter("Baseline: pre-MET cut")),
     fBaselineMetTriggerScaleFactorCounter(eventCounter.addCounter("Baseline: MET SF")),
     fBaselineQCDTailKillerCollinearCounter(eventCounter.addCounter("Baseline: QCD tail killer collinear")),
     fBaselineMetCounter(eventCounter.addCounter("Baseline: MET")),
@@ -63,6 +64,7 @@ namespace HPlus {
     fInvertedElectronVetoCounter(eventCounter.addCounter("Inverted: electron veto")),
     fInvertedMuonVetoCounter(eventCounter.addCounter("Inverted: muon veto")),
     fInvertedNJetsCounter(eventCounter.addCounter("Inverted: njets")),
+    fInvertedPreMETCutCounter(eventCounter.addCounter("Inverted: pre-MET cut")),
     fInvertedMetTriggerScaleFactorCounter(eventCounter.addCounter("Inverted: MET SF")),
     fInvertedQCDTailKillerCollinearCounter(eventCounter.addCounter("Inverted: QCD tail killer collinear")),
     fInvertedBTaggingBeforeMETCounter(eventCounter.addCounter("Inverted: btagging before MET")),
@@ -466,6 +468,10 @@ namespace HPlus {
 
 //------ MET trigger scale factor (after this step, the MET and its derivatives, such as transverse mass, are physically meaningful)
     METSelection::Data metDataTmp = fMETSelection.silentAnalyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), selectedTau, jetData.getAllJets());
+    if(!metDataTmp.passedPreMetCut()) return false;
+    increment(fBaselinePreMETCutCounter);
+    if(iEvent.isRealData())
+      fMETTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
     // Apply trigger scale factor here for now, SF calculated for tau+3 jets events
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metDataTmp.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     increment(fBaselineMetTriggerScaleFactorCounter);
@@ -614,6 +620,10 @@ namespace HPlus {
 //------ MET trigger scale factor (after this step, the MET and its derivatives, such as transverse mass, are physically meaningful)
     METSelection::Data metDataTmp = fMETSelection.silentAnalyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), selectedTau, jetData.getAllJets());
     // Apply trigger scale factor here for now, SF calculated for tau+3 jets events
+    if(!metDataTmp.passedPreMetCut()) return false;
+    increment(fInvertedPreMETCutCounter);
+    if(iEvent.isRealData())
+      fMETTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metDataTmp.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     increment(fInvertedMetTriggerScaleFactorCounter);
     hSelectedTauEtJetCut->Fill(selectedTau->pt() ,selectedTau->pt());

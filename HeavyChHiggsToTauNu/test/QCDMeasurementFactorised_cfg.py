@@ -50,6 +50,7 @@ def customize(signalAnalysis):
     # MET cut
     #signalAnalysis.MET.METCut = 60.0
     #signalAnalysis.MET.METCut = 50.0
+    #signalAnalysis.MET.preMETCut = 30.0
     signalAnalysis.MET.doTypeICorrectionForPossiblyIsolatedTaus = "always"
     # Tail-Killer 
     if bCustomizeTailKiller:

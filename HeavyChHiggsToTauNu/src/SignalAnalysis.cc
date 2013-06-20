@@ -88,6 +88,7 @@ namespace HPlus {
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
     fNJetsCounter(eventCounter.addCounter("njets")),
+    fPreMETCutCounter(eventCounter.addCounter("pre-MET cut")),
     fMETTriggerScaleFactorCounter(eventCounter.addCounter("MET trigger scale factor")),
     fQCDTailKillerCollinearCounter(eventCounter.addCounter("QCD tail killer collinear")),
     fMETCounter(eventCounter.addCounter("MET")),
@@ -580,9 +581,11 @@ namespace HPlus {
     // For data, set the current run number (needed for tau embedding
     // input, doesn't harm for normal data except by wasting small
     // amount of time)
+    METSelection::Data metDataTmp = fMETSelection.silentAnalyze(iEvent, iSetup, nVertices, tauData.getSelectedTau(), jetData.getAllJets());
+    if(!metDataTmp.passedPreMetCut()) return false;
+    increment(fPreMETCutCounter);
     if(iEvent.isRealData())
       fMETTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
-    METSelection::Data metDataTmp = fMETSelection.silentAnalyze(iEvent, iSetup, nVertices, tauData.getSelectedTau(), jetData.getAllJets());
     // Apply trigger scale factor here for now, SF calculated for tau+3 jets events
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metDataTmp.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     fTree.setMETTriggerWeight(metTriggerWeight.getEventWeight(), metTriggerWeight.getEventWeightAbsoluteUncertainty());
