@@ -245,6 +245,7 @@ namespace HPlus {
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
+    Count fPreMETCutCounter;
     Count fMETTriggerScaleFactorCounter;
     Count fStandardSelectionsCounter;
     Count fStandardSelectionsWithMET30Counter;

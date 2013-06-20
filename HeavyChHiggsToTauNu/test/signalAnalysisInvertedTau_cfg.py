@@ -49,7 +49,8 @@ def customize(signalAnalysis):
     print signalAnalysis.commonPlotsSettings.histogramSplitting
 
     signalAnalysis.bTagging.subleadingDiscriminatorCut = 0.244
-    # signalAnalysis.MET.METCut = 50.
+    #signalAnalysis.MET.METCut = 50.0
+    #signalAnalysis.MET.preMETCut = 30.0
     print "Customisation applied"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
@@ -57,6 +58,9 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1
                         customizeLightAnalysis=customize,
                         doQCDTailKillerScenarios=True,
+                        applyTauTriggerScaleFactor=True,
+                        #applyTauTriggerLowPurityScaleFactor=True,
+                        #applyMETTriggerScaleFactor=True,
                         #doAgainstElectronScan=True,
 
                         doSystematics=False,

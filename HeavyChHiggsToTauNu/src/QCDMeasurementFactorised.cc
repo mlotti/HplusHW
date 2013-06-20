@@ -232,6 +232,7 @@ namespace HPlus {
     fElectronVetoCounter(eventCounter.addCounter("ElectronSelection")),
     fMuonVetoCounter(eventCounter.addCounter("MuonSelection")),
     fNJetsCounter(eventCounter.addCounter("JetSelection")),
+    fPreMETCutCounter(eventCounter.addCounter("pre-MET cut")),
     fMETTriggerScaleFactorCounter(eventCounter.addCounter("Trg MET scale factor")),
     fStandardSelectionsCounter(eventCounter.addCounter("Selected after std. selections")),
     fStandardSelectionsWithMET30Counter(eventCounter.addCounter("Selected after std. selections and MET30")),
@@ -520,6 +521,10 @@ namespace HPlus {
 
 //------ Scale factor for MET trigger
     const METSelection::Data metData = fMETSelection.analyzeWithPossiblyIsolatedTaus(iEvent, iSetup, nVertices, mySelectedTau, jetData.getAllJets());
+    if(!metData.passedPreMetCut()) return false;
+    increment(fPreMETCutCounter);
+    if(iEvent.isRealData())
+      fMETTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metData.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     fTree.setMETTriggerWeight(metTriggerWeight.getEventWeight(), metTriggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fMETTriggerScaleFactorCounter);

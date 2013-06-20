@@ -89,6 +89,7 @@ namespace HPlus {
     Count fBaselineEvetoCounter;
     Count fBaselineMuvetoCounter;
     Count fBaselineJetsCounter;
+    Count fBaselinePreMETCutCounter;
     Count fBaselineMetTriggerScaleFactorCounter;
     Count fBaselineQCDTailKillerCollinearCounter;
     Count fBaselineMetCounter;
@@ -106,6 +107,7 @@ namespace HPlus {
     Count fInvertedElectronVetoCounter;
     Count fInvertedMuonVetoCounter;
     Count fInvertedNJetsCounter;
+    Count fInvertedPreMETCutCounter;
     Count fInvertedMetTriggerScaleFactorCounter;
     Count fInvertedQCDTailKillerCollinearCounter;
     Count fInvertedBTaggingBeforeMETCounter;
