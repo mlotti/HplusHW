@@ -7,205 +7,6 @@
 #include <sstream>
 
 namespace HPlus {
-  QCDMeasurementFactorised::QCDFactorisedHistogramHandler::QCDFactorisedHistogramHandler(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper) :
-    fHistoWrapper(histoWrapper),
-    fTauPtBinLowEdges(iConfig.getUntrackedParameter<std::vector<double> >("factorisationTauPtBinLowEdges")),
-    fTauEtaBinLowEdges(iConfig.getUntrackedParameter<std::vector<double> >("factorisationTauEtaBinLowEdges")),
-    fNVerticesBinLowEdges(iConfig.getUntrackedParameter<std::vector<int> >("factorisationNVerticesBinLowEdges")),
-    fTransverseMassRange(iConfig.getUntrackedParameter<std::vector<double> >("factorisationTransverseMassRange")),
-    fFullMassRange(iConfig.getUntrackedParameter<std::vector<double> >("factorisationFullMassRange")),
-    fNUnfoldedBins((static_cast<int>(fTauPtBinLowEdges.size()) + 1) *
-                   (static_cast<int>(fTauEtaBinLowEdges.size()) + 1) *
-                   (static_cast<int>(fNVerticesBinLowEdges.size()) + 1)) {
-    // Create transverse mass bins
-    if (fTransverseMassRange.size() != 3)
-      throw cms::Exception("Configuration") << "QCDMeasurementFactorised: need to provide config param. factorisationTransverseMassRange = (nbins, min, max)!";
-    double myDelta = (fTransverseMassRange[2]-fTransverseMassRange[1]) / fTransverseMassRange[0];
-    for (double i = 0; i < fTransverseMassRange[0]; ++i) {
-      fTransverseMassBinLowEdges.push_back(i * myDelta);
-    }
-    // Create full mass bins
-    if (fFullMassRange.size() != 3)
-      throw cms::Exception("Configuration") << "QCDMeasurementFactorised: need to provide config param. factorisationFullMassRange = (nbins, min, max)!";
-    myDelta = (fFullMassRange[2]-fFullMassRange[1]) / fFullMassRange[0];
-    for (double i = 0; i < fFullMassRange[0]; ++i) {
-      fFullMassRange.push_back(i * myDelta);
-    }
-    initialize();
-    // Set string for binning
-    std::stringstream s;
-    s << "TauPt:" << fTauPtBinLowEdges.size()+1 << ":TauEta:" << fTauEtaBinLowEdges.size()+1 << ":Nvtx:" << fNVerticesBinLowEdges.size()+1 << ":";
-    fBinningString = s.str();
-  }
-
-  QCDMeasurementFactorised::QCDFactorisedHistogramHandler::~QCDFactorisedHistogramHandler() { }
-
-  void QCDMeasurementFactorised::QCDFactorisedHistogramHandler::initialize() {
-    fCurrentBinX = 9999;
-    fCurrentBinY = 9999;
-    fCurrentBinZ = 9999;
-    fCurrentUnfoldedBin = 9999;
-  }
-
-  void QCDMeasurementFactorised::QCDFactorisedHistogramHandler::setFactorisationBinForEvent(double pt, double eta, int nvtx) {
-    fCurrentBinX = getTauPtBinIndex(pt);
-    fCurrentBinY = getTauEtaBinIndex(eta);
-    fCurrentBinZ = getNVerticesBinIndex(nvtx);
-    fCurrentUnfoldedBin = getShapeBinIndex(fCurrentBinX, fCurrentBinY, fCurrentBinZ);
-  }
-
-  void QCDMeasurementFactorised::QCDFactorisedHistogramHandler::createCountHistogram(TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, std::string title) {
-    // x-axis contains count (just one bin; underflow and overflow bins do not contain information), y-axis contains unfolded factorisation bins
-    // Create histo
-    std::string s = fBinningString+title;
-    unfoldedHisto = fHistoWrapper.makeTH<TH2F>(fNUnfoldedBins, HistoWrapper::kVital, fdir, title.c_str(), s.c_str(), 1, 0., 1.);
-    // Set labels to y-axis
-    setAxisLabelsForUnfoldedHisto(unfoldedHisto);
-  }
-
-  void QCDMeasurementFactorised::QCDFactorisedHistogramHandler::createShapeHistogram(TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, std::string title, std::string label, int nbins, double min, double max) {
-    // x-axis contains distribution, y-axis contains unfolded factorisation bins (including under- and overflows)
-    // Create histo
-    std::string s = fBinningString+title+";"+label;
-    unfoldedHisto = fHistoWrapper.makeTH<TH2F>(fNUnfoldedBins, HistoWrapper::kVital, fdir, title.c_str(), s.c_str(), nbins, min, max);
-    // Set labels to y-axis
-    setAxisLabelsForUnfoldedHisto(unfoldedHisto);
-  }
-
-  void QCDMeasurementFactorised::QCDFactorisedHistogramHandler::fillNeventHistogram(WrappedUnfoldedFactorisationHisto* h) {
-    checkProperBinning();
-    h->Fill(0., fCurrentUnfoldedBin);
-    //std::cout << "Filling count " << h->getHisto()->GetTitle() << " current bin=" << fCurrentUnfoldedBin << std::endl;
-  }
-
-  void QCDMeasurementFactorised::QCDFactorisedHistogramHandler::fillNeventHistogram(WrappedUnfoldedFactorisationHisto* h, double weight) {
-    checkProperBinning();
-    h->Fill(0., fCurrentUnfoldedBin, weight);
-  }
-
-  void QCDMeasurementFactorised::QCDFactorisedHistogramHandler::fillShapeHistogram(WrappedUnfoldedFactorisationHisto* h, double value) {
-    checkProperBinning();
-    h->Fill(value, fCurrentUnfoldedBin);
-    //std::cout << "Filling shape " << h->getHisto()->GetTitle() << " current bin=" << fCurrentUnfoldedBin << std::endl;
-  }
-
-  void QCDMeasurementFactorised::QCDFactorisedHistogramHandler::fillShapeHistogram(WrappedUnfoldedFactorisationHisto* h, double value, double weight) {
-    checkProperBinning();
-    h->Fill(value, fCurrentUnfoldedBin, weight);
-  }
-
-  // Returns index to tau pT bin; 0 is underflow and size() is highest bin
-  int QCDMeasurementFactorised::QCDFactorisedHistogramHandler::getTauPtBinIndex(double pt) {
-    size_t mySize = fTauPtBinLowEdges.size();
-    for (size_t i = 0; i < mySize; ++i) {
-      if (pt < fTauPtBinLowEdges[i])
-        return static_cast<int>(i);
-    }
-    return static_cast<int>(mySize);
-  }
-
-  int QCDMeasurementFactorised::QCDFactorisedHistogramHandler::getTauEtaBinIndex(double eta) {
-    size_t mySize = fTauEtaBinLowEdges.size();
-    for (size_t i = 0; i < mySize; ++i) {
-      if (eta < fTauEtaBinLowEdges[i])
-        return static_cast<int>(i);
-    }
-    return static_cast<int>(mySize);
-  }
-
-  int QCDMeasurementFactorised::QCDFactorisedHistogramHandler::getNVerticesBinIndex(int nvtx) {
-    size_t mySize = fNVerticesBinLowEdges.size();
-    for (size_t i = 0; i < mySize; ++i) {
-      if (nvtx < fNVerticesBinLowEdges[i])
-        return static_cast<int>(i);
-    }
-    return static_cast<int>(mySize);
-  }
-
-  int QCDMeasurementFactorised::QCDFactorisedHistogramHandler::getMtBinIndex(double mt) {
-    size_t mySize = fTransverseMassRange.size();
-    for (size_t i = 0; i < mySize; ++i) {
-      if (mt < fTransverseMassRange[i])
-        return static_cast<int>(i);
-    }
-    return static_cast<int>(mySize);
-  }
-
-  int QCDMeasurementFactorised::QCDFactorisedHistogramHandler::getFullMassBinIndex(double mass) {
-    size_t mySize = fFullMassRange.size();
-    for (size_t i = 0; i < mySize; ++i) {
-      if (mass < fFullMassRange[i])
-        return static_cast<int>(i);
-    }
-    return static_cast<int>(mySize);
-  }
-
-  int QCDMeasurementFactorised::QCDFactorisedHistogramHandler::getShapeBinIndex(int tauPtBin, int tauEtaBin, int nvtxBin) {
-    int myTauPtBins = static_cast<int>(fTauPtBinLowEdges.size()) + 1;
-    int myTauEtaBins = static_cast<int>(fTauEtaBinLowEdges.size()) + 1;
-    //int myNVerticesBins = static_cast<int>(fNVerticesBinLowEdges.size()) + 1;
-    //std::cout << " bin=" << tauPtBin << " taueta=" << tauEtaBin << " nvtx=" << nvtxBin << std::endl;
-    //std::cout << "total index=" << nvtxBin + tauEtaBin*myNVerticesBins + tauPtBin*myNVerticesBins*myTauEtaBins << endl;
-    return tauPtBin + tauEtaBin*myTauPtBins + nvtxBin*myTauPtBins*myTauEtaBins;
-  }
-
-  void QCDMeasurementFactorised::QCDFactorisedHistogramHandler::setAxisLabelsForUnfoldedHisto(WrappedUnfoldedFactorisationHisto* h) {
-    if (!h->isActive()) return;
-    int myTauPtBins = static_cast<int>(fTauPtBinLowEdges.size()) + 1;
-    int myTauEtaBins = static_cast<int>(fTauEtaBinLowEdges.size()) + 1;
-    int myNVerticesBins = static_cast<int>(fNVerticesBinLowEdges.size()) + 1;
-    for (int k = 0; k < myNVerticesBins; ++k) {
-      for (int j = 0; j < myTauEtaBins; ++j) {
-        for (int i = 0; i < myTauPtBins; ++i) {
-          std::stringstream s;
-          // tau pT
-          if (!fTauPtBinLowEdges.size()) {
-            s << "#tau pT=all";
-          } else {
-            if (i == 0)
-              s << "#tau pT<" << static_cast<int>(fTauPtBinLowEdges[0]);
-            else if (i == myTauPtBins - 1)
-              s << "#tau pT>" << static_cast<int>(fTauPtBinLowEdges[fTauPtBinLowEdges.size()-1]);
-            else
-              s << "#tau pT=" << static_cast<int>(fTauPtBinLowEdges[i-1]) << ".." << static_cast<int>(fTauPtBinLowEdges[i]);
-          }
-          s << "/";
-          // tau eta
-          if (!fTauEtaBinLowEdges.size()) {
-            s << "#tau eta=all";
-          } else {
-            if (j == 0)
-              s << "#tau eta<" << setprecision(2) << fTauEtaBinLowEdges[0];
-            else if (j == myTauEtaBins - 1)
-              s << "#tau eta>" << setprecision(2) << fTauEtaBinLowEdges[fTauEtaBinLowEdges.size()-1];
-            else
-              s << "#tau eta=" << setprecision(2) << fTauEtaBinLowEdges[j-1] << ".." << setprecision(2) << fTauEtaBinLowEdges[j];
-          }
-          s << "/";
-          // Nvertices
-          if (!fNVerticesBinLowEdges.size()) {
-            s << "N_{vtx}=all";
-          } else {
-            if (k == 0)
-              s << "N_{vtx}<" << static_cast<int>(fNVerticesBinLowEdges[0]);
-            else if (k == myNVerticesBins - 1)
-              s << "N_{vtx}>" << static_cast<int>(fNVerticesBinLowEdges[fNVerticesBinLowEdges.size()-1]);
-            else
-              s << "N_{vtx}=" << static_cast<int>(fNVerticesBinLowEdges[k-1]) << ".." << static_cast<int>(fNVerticesBinLowEdges[k]);
-          }
-          h->getHisto()->GetYaxis()->SetBinLabel(getShapeBinIndex(i,j,k)+1,s.str().c_str());
-        }
-      }
-    }
-  }
-
-  void QCDMeasurementFactorised::QCDFactorisedHistogramHandler::checkProperBinning() {
-    if (fCurrentBinX == 9999 || fCurrentBinY == 9999 || fCurrentBinZ == 9999 || fCurrentUnfoldedBin == 9999)
-      throw cms::Exception("Logic") << "QCDMeasurementFactorised: need to call QCDFactorisedHistogramHandler::setFactorisationBinForEvent() for the event! Check your code!";
-  }
-
-  // ----- End of QCDFactorisedHistogramHandler implementation -----
-
   QCDMeasurementFactorised::QCDMeasurementFactorised(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper):
     fEventWeight(eventWeight),
     fHistoWrapper(histoWrapper),
@@ -698,7 +499,7 @@ namespace HPlus {
     fTree.fill(iEvent, selectedTau, jetData.getSelectedJets());
   }
 
-  QCDMeasurementFactorised::QCDFactorisedVariation::QCDFactorisedVariation(edm::Service< TFileService >& fs, QCDFactorisedHistogramHandler* histoHandler, EventCounter& eventCounter, CommonPlots& commonPlots, QCDFactorisedVariationType methodType, std::string prefix)
+  QCDMeasurementFactorised::QCDFactorisedVariation(edm::Service< TFileService >& fs, QCDFactorisedHistogramHandler* histoHandler, EventCounter& eventCounter, CommonPlots& commonPlots, QCDFactorisedVariationType methodType, std::string prefix)
   : fMethodType(methodType),
     fAfterNjetsCounter(eventCounter.addSubCounter(prefix,"After Njets")),
     fAfterStandardSelectionsCounter(eventCounter.addSubCounter(prefix,"After std. selections")),
@@ -716,55 +517,35 @@ namespace HPlus {
     std::string myDirTitle = "QCDfactorised_"+prefix;
     TFileDirectory myDir = fs->mkdir(myDirTitle.c_str());
 
-    // NQCD Histograms
-    fHistoHandler->createCountHistogram(myDir, hNevtAfterStandardSelections, "NevtAfterStandardSelections");
-    fHistoHandler->createCountHistogram(myDir, hNevtAfterLeg1, "NevtAfterLeg1");
-    fHistoHandler->createCountHistogram(myDir, hNevtAfterLeg2, "NevtAfterLeg2");
-    fHistoHandler->createCountHistogram(myDir, hNevtAfterLeg1AndLeg2, "NevtAfterLeg1AndLeg2");; // for closure test
+    SplittedHistogramHandler& myHandler = fCommonPlots.getSplittedHistogramHandler();
 
     // Shape histograms (some needed for closure test)
-    fHistoHandler->createShapeHistogram(myDir, hMtShapesAfterStandardSelections, "MtAfterStandardSelections", "Transverse mass, GeV/c^{2}", 80, 0, 400.);
-    fHistoHandler->createShapeHistogram(myDir, hInvariantMassShapesAfterStandardSelections, "MassAfterStandardSelections", "Invariant mass, GeV/c^{2}", 100, 0, 500.);
-    fHistoHandler->createShapeHistogram(myDir, hMtShapesAfterLeg1, "MtAfterLeg1", "Transverse mass, GeV/c^{2}", 80, 0, 400.);
-    fHistoHandler->createShapeHistogram(myDir, hInvariantMassShapesAfterLeg1, "MassAfterLeg1", "Invariant mass, GeV/c^{2}", 100, 0, 500.);
-    fHistoHandler->createShapeHistogram(myDir, hMtShapesAfterLeg1WithoutBtag, "MtAfterLeg1WithoutBtag", "Transverse mass, GeV/c^{2}", 80, 0, 400.);
-    fHistoHandler->createShapeHistogram(myDir, hMtShapesAfterLeg2, "MtAfterLeg2", "Transverse mass, GeV/c^{2}", 80, 0, 400.);
-    fHistoHandler->createShapeHistogram(myDir, hInvariantMassShapesAfterLeg2, "MassAfterLeg2", "Invariant mass, GeV/c^{2}", 100, 0, 500.);
-    fHistoHandler->createShapeHistogram(myDir, hMtShapesAfterLeg1AndLeg2, "MtAfterLeg1AndLeg2", "Transverse mass, GeV/c^{2}", 80, 0, 400.);
-    fHistoHandler->createShapeHistogram(myDir, hInvariantMassShapesAfterLeg1AndLeg2, "MassAfterLeg1AndLeg2", "Invariant mass, GeV/c^{2}", 100, 0, 500.);
-
-    // Data-driven control histograms
-    fHistoHandler->createShapeHistogram(myDir, hCtrlRtau, "CtrlRtau", "Rtau", 60, 0, 1.2);
-    fHistoHandler->createShapeHistogram(myDir, hCtrlNjets, "CtrlNjets", "N_{jets}", 20, 0, 20.);
-    fHistoHandler->createShapeHistogram(myDir, hCtrlNjetsAfterCollinearCuts, "CtrlNjetsAfterCollinearCuts", "N_{jets}", 20, 0, 20.);
-    for (int i = 0; i < 4; ++i) {
-      hCtrlQCDTailKillerCollinear.push_back(0);
-      std::stringstream sName;
-      std::stringstream sTitle;
-      sName << "QCDTailKillerJet" << i << "Collinear";
-      sTitle << "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{" << i << "},MET))^{2}}, ^{o};N_{events}";
-      fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerCollinear[i], sName.str(), sTitle.str(), 52, 0., 260.);
-    }
-    fHistoHandler->createShapeHistogram(myDir, hCtrlMET, "CtrlMET", "E_{T}^{miss}, GeV", 100, 0, 500.);
-    fHistoHandler->createShapeHistogram(myDir, hCtrlNbjets, "CtrlNbjets", "N_{b jets}", 20, 0, 20.);
-    for (int i = 0; i < 4; ++i) {
-      hCtrlQCDTailKillerBackToBack.push_back(0);
-      std::stringstream sName;
-      std::stringstream sTitle;
-      sName << "QCDTailKillerJet" << i << "BackToBack";
-      sTitle << "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{" << i << "},MET)^{2}}, ^{o};N_{events}";
-      fHistoHandler->createShapeHistogram(myDir, hCtrlQCDTailKillerBackToBack[i], sName.str(), sTitle.str(), 52, 0., 260.);
-    }
-
-    // Closure test oF MET
-    fHistoHandler->createShapeHistogram(myDir, hCtrlMETAfterLeg1, "CtrlMETAfterLeg1", "E_{T}^{miss}, GeV", 100, 0, 500.);
-    fHistoHandler->createShapeHistogram(myDir, hCtrlMETAfterLeg2, "CtrlMETAfterLeg2", "E_{T}^{miss}, GeV", 100, 0, 500.);
-    fHistoHandler->createShapeHistogram(myDir, hCtrlMETAfterBJets, "CtrlMETAfterBJets", "E_{T}^{miss}, GeV", 100, 0, 500.);
+    const int myMtBins = fCommonPlots.getMtBinSettings().bins();
+    const double myMtMin = fCommonPlots.getMtBinSettings().min();
+    const double myMtMax = fCommonPlots.getMtBinSettings().max();
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterStandardSelections, "MtAfterStandardSelections", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterLeg1, "MtAfterLeg1", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMtShapesAfterLeg1WithoutBtag, "MtAfterLeg1WithoutBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterLeg2, "MtAfterLeg2", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMtShapesAfterLeg1AndLeg2, "MtAfterLeg1AndLeg2", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    const int myMassBins = fCommonPlots.getInvmassBinSettings().bins();
+    const double myMassMin = fCommonPlots.getInvmassBinSettings().min();
+    const double myMassMax = fCommonPlots.getInvmassBinSettings().max();
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterStandardSelections, "MassAfterStandardSelections", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterLeg1, "MassAfterLeg1", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hInvariantMassShapesAfterLeg1WithoutBtag, "MassAfterLeg1WithoutBtag", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterLeg2, "MassAfterLeg2", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hInvariantMassShapesAfterLeg1AndLeg2, "MassAfterLeg1AndLeg2", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    // MET shapes (just for controlling, closure test comes from mT shapes)
+    const int myMetBins = fCommonPlots.getMetBinSettings().bins();
+    const double myMetMin = fCommonPlots.getMetBinSettings().min();
+    const double myMetMax = fCommonPlots.getMetBinSettings().max();
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hCtrlMETAfterLeg1, "CtrlMETAfterLeg1", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hCtrlMETAfterLeg2, "CtrlMETAfterLeg2", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hCtrlMETAfterBJets, "CtrlMETAfterBJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
   }
 
-  QCDMeasurementFactorised::QCDFactorisedVariation::~QCDFactorisedVariation() { }
-
-  void QCDMeasurementFactorised::QCDFactorisedVariation::doSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
+  void QCDMeasurementFactorised::doSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     if (fMethodType == kQCDFactorisedTraditional)
       doTraditionalSelection(selectedTau, tauSelection, jetData, metData, btagData, tailKillerData, mT, fullMass);
     else if (fMethodType == kQCDFactorisedABCD)
@@ -772,10 +553,10 @@ namespace HPlus {
     else if (fMethodType == kQCDFactorisedDoubleABCD)
       doDoubleABCDSelection(selectedTau, tauSelection, jetData, metData, btagData, tailKillerData, mT, fullMass);
     else
-      throw cms::Exception("Logic") << "QCDMeasurementFactorised::QCDFactorisedVariation::doSelection(): unknown method type! Fix code!";
+      throw cms::Exception("Logic") << "QCDMeasurementFactorised::doSelection(): unknown method type! Fix code!";
   }
 
-  void QCDMeasurementFactorised::QCDFactorisedVariation::doTraditionalSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
+  void QCDMeasurementFactorised::doTraditionalSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // Traditional method
     increment(fAfterNjetsCounter);
     fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
@@ -848,7 +629,7 @@ namespace HPlus {
     }
   }
 
-  void QCDMeasurementFactorised::QCDFactorisedVariation::doABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
+  void QCDMeasurementFactorised::doABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
     // ABCD method with MET and tau isolation as variables
     increment(fAfterNjetsCounter);
     fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
@@ -923,67 +704,6 @@ namespace HPlus {
 
     // Cell D, i.e. leg 1 and leg 2 passed (for control only)
     if (myLeg1PassedStatus && myLeg2PassedStatus) {
-      increment(fAfterLeg1AndLeg2Counter);
-      fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
-      fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
-    }
-  }
-
-  void QCDMeasurementFactorised::QCDFactorisedVariation::doDoubleABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
-    // ABCD method inside MET leg (for double ABCD)
-    increment(fAfterNjetsCounter);
-
-    // Apply collinear cut
-    for (int i = 0; i < 4; ++i) {
-      fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerCollinear[i], tailKillerData.getRadiusFromCollinearCorner(i));
-      if (!tailKillerData.passCollinearCutForJet(i)) return;
-    }
-
-    // Obtain booleans
-    //bool myLeg1PassedStatus = metData.passedEvent() && btagData.passedEvent() && tailKillerData.passedEvent();
-    bool myLeg2PassedStatus = tauSelection.getPassesIsolationStatusOfTauObject(selectedTau) &&
-      tauSelection.getPassesNProngsStatusOfTauObject(selectedTau) &&
-      tauSelection.getPassesRtauStatusOfTauObject(selectedTau);
-    double myMetValue = metData.getSelectedMET()->et();
-
-    if (myLeg2PassedStatus) return;
-    if (!metData.passedEvent()) return;
-
-    bool myPassBtagStatus = btagData.passedEvent();
-    bool myPassTailKillerStatus = tailKillerData.passedEvent();
-
-    // Cell A
-    if (!myPassBtagStatus && !myPassTailKillerStatus) {
-      increment(fAfterStandardSelectionsCounter);
-      fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
-      fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
-      fCommonPlotsAfterStandardSelections->fill();
-    }
-
-    // Cell C
-    if (myPassBtagStatus && !myPassTailKillerStatus) {
-      increment(fAfterLeg2Counter);
-      fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
-      fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
-      fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
-      fCommonPlotsAfterLeg2->fill();
-    }
-
-    // Cell B
-    if (!myPassBtagStatus && myPassTailKillerStatus) {
-      increment(fAfterLeg1Counter);
-      fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
-      fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
-      fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
-      fCommonPlotsAfterLeg1->fill();
-    }
-
-    // Cell D (for control only)
-    if (myPassBtagStatus && myPassTailKillerStatus) {
       increment(fAfterLeg1AndLeg2Counter);
       fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
       fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
