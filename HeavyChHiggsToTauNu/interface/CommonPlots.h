@@ -217,6 +217,7 @@ namespace HPlus {
     // MET trigger SF
     std::vector<WrappedTH1*> hCtrlNjetsAfterJetSelectionAndMETSF;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterMETSF;
 
     // improved delta phi collinear cuts (currently the point of the std. selections)
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet1;
@@ -227,6 +228,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet2;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet3;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet4;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterCollinearCuts;
 
     std::vector<WrappedTH1*> hCtrlSelectedTauPtAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauEtaAfterStandardSelections;

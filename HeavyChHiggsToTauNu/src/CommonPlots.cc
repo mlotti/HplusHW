@@ -55,6 +55,8 @@ namespace HPlus {
       fMETPhiOscillationCorrectionAfterTaus = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterTaus");
       fMETPhiOscillationCorrectionAfterLeptonVeto = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterLeptonVeto");
       fMETPhiOscillationCorrectionAfterNjets = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterNjets");
+      fMETPhiOscillationCorrectionAfterMETSF = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterMETSF");
+      fMETPhiOscillationCorrectionAfterCollinearCuts = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterCollinearCuts");
       fMETPhiOscillationCorrectionAfterBjets = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterBjets");
       fMETPhiOscillationCorrectionAfterAllSelections = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterAllSelections");
       fMETPhiOscillationCorrectionEWKControlRegion = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterAllSelections_EKWControlRegion");
@@ -317,6 +319,7 @@ namespace HPlus {
   void CommonPlots::fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent) {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNjetsAfterJetSelectionAndMETSF, fJetData.getHadronicJetCount());
     if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF, fJetData.getHadronicJetCount());
+    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterMETSF->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
   void CommonPlots::fillControlPlotsAtCollinearDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data) {
@@ -365,6 +368,7 @@ namespace HPlus {
     // Fill other control plots
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNjetsAfterStandardSelections, fJetData.getHadronicJetCount());
     if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjetsAfterStandardSelections, fJetData.getHadronicJetCount());
+    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterCollinearCuts->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
   void CommonPlots::fillControlPlotsAtMETSelection(const edm::Event& iEvent, const METSelection::Data& data) {
