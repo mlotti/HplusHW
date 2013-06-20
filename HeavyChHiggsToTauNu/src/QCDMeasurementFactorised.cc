@@ -15,9 +15,6 @@ namespace HPlus {
     fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     fApplyNprongsCutForTauCandidate(iConfig.getUntrackedParameter<bool>("applyNprongsCutForTauCandidate")),
     fApplyRtauCutForTauCandidate(iConfig.getUntrackedParameter<bool>("applyRtauCutForTauCandidate")),
-    fDoAnalysisVariationWithTraditionalMethod(iConfig.getUntrackedParameter<bool>("doAnalysisVariationWithTraditionalMethod")),
-    fDoAnalysisVariationWithABCDMethod(iConfig.getUntrackedParameter<bool>("doAnalysisVariationWithABCDMethod")),
-    fDoAnalysisVariationWithDoubleABCDMethod(iConfig.getUntrackedParameter<bool>("doAnalysisVariationWithDoubleABCDMethod")),
     // Counters - do not change order
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
     fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
@@ -29,28 +26,21 @@ namespace HPlus {
     fTausExistAfterRtauCutCounter(eventCounter.addCounter("TauCand+Rtau")),
     fMultipleTausAfterTauSelection(eventCounter.addCounter("Multiple tau candidates exist")),
     fTausAfterScaleFactorsCounter(eventCounter.addCounter("Tau after scale factors")),
-    fVetoTauCounter(eventCounter.addCounter("Killed by VetoTauSelection")),
+    fVetoTauCounter(eventCounter.addCounter("-> Killed by VetoTauSelection")),
     fElectronVetoCounter(eventCounter.addCounter("ElectronSelection")),
     fMuonVetoCounter(eventCounter.addCounter("MuonSelection")),
     fNJetsCounter(eventCounter.addCounter("JetSelection")),
     fPreMETCutCounter(eventCounter.addCounter("pre-MET cut")),
     fMETTriggerScaleFactorCounter(eventCounter.addCounter("Trg MET scale factor")),
-    fStandardSelectionsCounter(eventCounter.addCounter("Selected after std. selections")),
-    fStandardSelectionsWithMET30Counter(eventCounter.addCounter("Selected after std. selections and MET30")),
-    fStandardSelectionsWithTailKillerCounter(eventCounter.addCounter("Selected after std. selections and tail killer")),
-    fStandardSelectionsWithTailKillerAndMET30Counter(eventCounter.addCounter("Selected after std. selections and MET30 and tail killer")),
-    /*fFullTauIDCounter(eventCounter.addCounter("FullTauIDCounter")),
-    fMETCounter(eventCounter.addCounter("MET")),
-    fBTaggingCounter(eventCounter.addCounter("bTagging")),
-    fBTaggingScaleFactorCounter(eventCounter.addCounter("btag scale factor")),
-    fQCDTailKillerCounter(eventCounter.addCounter("QCD tail killer")),
-    fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhiTauMET")),
-    fMaxDeltaPhiJetMETCounter(eventCounter.addCounter("maxDeltaPhiJetMET")),
-    fTopSelectionCounter(eventCounter.addCounter("top selection")),
-    fCoincidenceAfterMETCounter(eventCounter.addCounter("coincidence after MET")),
-    fCoincidenceAfterBjetsCounter(eventCounter.addCounter("coincidence after Btag")),
-    fCoincidenceAfterDeltaPhiCounter(eventCounter.addCounter("coincidence after Delta phi")),
-    fCoincidenceAfterSelectionCounter(eventCounter.addCounter("coincidence after full selection")),*/
+    fQCDTailKillerCollinearCounter(eventCounter.addCounter("After collinear cuts")),
+    fAfterStandardSelectionsCounter(eventCounter.addCounter("After std. selections")),
+    fMetCounter(eventCounter.addCounter("MET cut")),
+    fBTaggingCounter(eventCounter.addCounter("btagging")),
+    fBTaggingScaleFactorCounter(eventCounter.addCounter("btagging with SF")),
+    fQCDTailKillerBackToBackCounter(eventCounter.addCounter("After back-to-back cuts")),
+    fAfterLeg1Counter(eventCounter.addCounter("After leg1 selections")),
+    fAfterLeg2Counter(eventCounter.addCounter("After leg2 selections")),
+    fAfterLeg1AndLeg2Counter(eventCounter.addCounter("After leg1 and leg2 selections")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, fHistoWrapper),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, fHistoWrapper),
@@ -81,70 +71,71 @@ namespace HPlus {
     fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fCommonPlots(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDFactorised),
-    fQCDFactorisedHistogramHandler(iConfig, fHistoWrapper),
     fCommonPlotsAfterVertexSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("VertexSelection",false,"Vtx")),
     fCommonPlotsAfterTauSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauSelection",false,"TauID")),
     fCommonPlotsAfterTauWeight(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauWeight",true,"Tau")),
     fCommonPlotsAfterElectronVeto(fCommonPlots.createCommonPlotsFilledAtEveryStep("ElectronVeto",true,"e veto")),
     fCommonPlotsAfterMuonVeto(fCommonPlots.createCommonPlotsFilledAtEveryStep("MuonVeto",true,"#mu veto")),
     fCommonPlotsAfterJetSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("JetSelection",true,"#geq3j")),
-    fCommonPlotsAfterMETScaleFactor(fCommonPlots.createCommonPlotsFilledAtEveryStep("MET scale factor",true,"E_{T}^{miss} scale factor"))
+    fCommonPlotsAfterMETScaleFactor(fCommonPlots.createCommonPlotsFilledAtEveryStep("MET scale factor",true,"E_{T}^{miss} scale factor")),
+    fCommonPlotsAfterStandardSelections(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections",false,"Std. selections")),
+    fCommonPlotsAfterMET(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections+MET",false,"Std. selections+MET")),
+    fCommonPlotsAfterMETAndBtag(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections+MET+btag",false,"Std. selections+MET+btag")),
+    fCommonPlotsAfterMETAndBtagWithSF(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections+MET+btag with SF",false,"Std. selections+MET+btag with SF")),
+    fCommonPlotsAfterLeg1(fCommonPlots.createCommonPlotsFilledAtEveryStep("Leg1 (MET+btag+...)",false,"Leg1 (MET+btag+...)")),
+    fCommonPlotsAfterLeg2(fCommonPlots.createCommonPlotsFilledAtEveryStep("Leg2 (tau isol.)",false,"Leg2 (tau isol.)"))
   {
+    // Options
+    std::string myAnalysisMode = iConfig.getUntrackedParameter<std::string>("analysisMode");
+    if (myAnalysisMode == "traditional")
+      fMethodType = QCDMeasurementFactorised::kQCDFactorisedTraditional;
+    else if (myAnalysisMode == "ABCD")
+      fMethodType = QCDMeasurementFactorised::kQCDFactorisedABCD;
+    else
+      throw cms::Exception("ConfigError") << "QCDfactorised parameter analysisMode unknown (valid options: 'traditional', 'ABCD')!";
+
+    // Book histograms
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
-    // Book histograms
     hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesBeforeWeight", "Number of vertices without weighting;Vertices;N_{events} / 1 Vertex", 50, 0, 50);
     hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesAfterWeight", "Number of vertices with weighting; Vertices;N_{events} / 1 Vertex", 50, 0, 50);
 
-    // Selection flow histogram
-    hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTrigger,"Trigger");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauCandidateSelection,"#tau cand.");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderElectronVeto,"Isol. e veto");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMuonVeto,"Isol. #mu veto");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderJetSelection,"N_{jets}");
+    std::string myDirTitle = "QCDfactorised";
+    TFileDirectory myDir = fs->mkdir(myDirTitle.c_str());
 
-    // Factorisation histograms are inside the nested variation class
+    SplittedHistogramHandler& myHandler = fCommonPlots.getSplittedHistogramHandler();
+
+    // Shape histograms (some needed for closure test)
+    const int myMtBins = fCommonPlots.getMtBinSettings().bins();
+    const double myMtMin = fCommonPlots.getMtBinSettings().min();
+    const double myMtMax = fCommonPlots.getMtBinSettings().max();
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterStandardSelections, "MtAfterStandardSelections", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterLeg1, "MtAfterLeg1", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMtShapesAfterLeg1WithoutBtag, "MtAfterLeg1WithoutBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterLeg2, "MtAfterLeg2", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMtShapesAfterLeg1AndLeg2, "MtAfterLeg1AndLeg2", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    const int myMassBins = fCommonPlots.getInvmassBinSettings().bins();
+    const double myMassMin = fCommonPlots.getInvmassBinSettings().min();
+    const double myMassMax = fCommonPlots.getInvmassBinSettings().max();
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterStandardSelections, "MassAfterStandardSelections", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterLeg1, "MassAfterLeg1", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hInvariantMassShapesAfterLeg1WithoutBtag, "MassAfterLeg1WithoutBtag", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterLeg2, "MassAfterLeg2", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hInvariantMassShapesAfterLeg1AndLeg2, "MassAfterLeg1AndLeg2", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    // MET shapes (just for controlling, closure test comes from mT shapes)
+    const int myMetBins = fCommonPlots.getMetBinSettings().bins();
+    const double myMetMin = fCommonPlots.getMetBinSettings().min();
+    const double myMetMax = fCommonPlots.getMetBinSettings().max();
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMETAfterStandardSelections, "METAfterStandardSelections", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMETAfterLeg1, "METAfterLeg1", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMETAfterLeg2, "METAfterLeg2", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMETAfterBJets, "METAfterBJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
 
     // Tree
     fTree.enableNonIsoLeptons(true);
     fTree.init(*fs);
-
-    // Measurement variations
-    if (fDoAnalysisVariationWithTraditionalMethod) {
-/*      fVariationTraditionalReference = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedTraditional, "TradReference");
-      fVariationTraditionalPlusMET30 = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedTraditional, "TradPlusMET30");
-      fVariationTraditionalPlusTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedTraditional, "TradPlusTailKiller");
-      fVariationTraditionalPlusMET30AndTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedTraditional, "TradPlusMET30TailKiller");*/
-      fVariationTraditionalPlusCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedTraditional, "TradPlusCollinearTailKiller");
-      fVariationTraditionalPlusMET30AndCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedTraditional, "TradPlusMET30CollinearTailKiller");
-    }
-    if (fDoAnalysisVariationWithABCDMethod) {
-/*      fVariationABCDReference = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedABCD, "ABCDReference");
-      fVariationABCDPlusMET30 = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedABCD, "ABCDPlusMET30");
-      fVariationABCDPlusTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedABCD, "ABCDPlusTailKiller");
-      fVariationABCDPlusMET30AndTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedABCD, "ABCDPlusMET30TailKiller");*/
-      fVariationABCDPlusCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedABCD, "ABCDPlusCollinearTailKiller");
-      fVariationABCDPlusMET30AndCollinearTailKiller = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                                  kQCDFactorisedABCD, "ABCDPlusMET30CollinearTailKiller");
-    }
-    if (fDoAnalysisVariationWithDoubleABCDMethod) {
-      fVariationDoubleABCD = new QCDFactorisedVariation(fs, &fQCDFactorisedHistogramHandler, eventCounter, fCommonPlots,
-                                                        kQCDFactorisedDoubleABCD, "DoubleABCD");
-    }
 
     fTailTestAfterStdSel = new TailTest("AfterStdSel", fs, fHistoWrapper);
     fTailTestAfterTauLeg = new TailTest("AfterTauLeg", fs, fHistoWrapper);
@@ -153,8 +144,6 @@ namespace HPlus {
   QCDMeasurementFactorised::~QCDMeasurementFactorised() {}
 
   bool QCDMeasurementFactorised::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    fQCDFactorisedHistogramHandler.initialize();
-
 //------ Read the prescale for the event and set the event weight as the prescale
     fEventWeight.beginEvent();
     const double prescaleWeight = fPrescaleWeightReader.getWeight(iEvent, iSetup);
@@ -189,7 +178,6 @@ namespace HPlus {
     const TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
-    hSelectionFlow->Fill(kQCDOrderTrigger);
     if(triggerData.hasTriggerPath()) // protection if TriggerSelection is disabled
       fTree.setHltTaus(triggerData.getTriggerTaus());
 
@@ -257,8 +245,6 @@ namespace HPlus {
     fCommonPlots.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
     fCommonPlotsAfterTauSelection->fill();
     fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauCandidateData, tauMatchData, fMETSelection);
-    // Set factorisation bin
-    fQCDFactorisedHistogramHandler.setFactorisationBinForEvent(mySelectedTau->pt(), mySelectedTau->eta(), nVertices);
 
 //------ Scale factors for tau fakes and for tau trigger
     // Apply scale factor for fake tau
@@ -272,7 +258,6 @@ namespace HPlus {
     const TauTriggerEfficiencyScaleFactor::Data tauTriggerWeightData = fTauTriggerEfficiencyScaleFactor.applyEventWeight(*(mySelectedTau), iEvent.isRealData(), fEventWeight);
     fTree.setTauTriggerWeight(tauTriggerWeightData.getEventWeight(), tauTriggerWeightData.getEventWeightAbsoluteUncertainty());
     increment(fTausAfterScaleFactorsCounter);
-    hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
     fCommonPlotsAfterTauWeight->fill();
     fCommonPlots.fillControlPlotsAfterTauTriggerScaleFactor(iEvent);
 
@@ -291,7 +276,6 @@ namespace HPlus {
     if (!electronData.passedEvent()) return false;
     increment(fElectronVetoCounter);
     fCommonPlotsAfterElectronVeto->fill();
-    hSelectionFlow->Fill(kQCDOrderElectronVeto);
     /*NonIsolatedElectronVeto::Data nonIsolatedElectronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
     if (!nonIsolatedElectronVetoData.passedEvent())  return false;
     increment(fNonIsolatedElectronVetoCounter);*/
@@ -304,7 +288,6 @@ namespace HPlus {
     if (!muonData.passedEvent()) return false;
     increment(fMuonVetoCounter);
     fCommonPlotsAfterMuonVeto->fill();
-    hSelectionFlow->Fill(kQCDOrderMuonVeto);
     /*NonIsolatedMuonVeto::Data nonIsolatedMuonVetoData = fNonIsolatedMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!nonIsolatedMuonVetoData.passedEvent()) return; 
     increment(fNonIsolatedMuonVetoCounter);*/
@@ -317,7 +300,6 @@ namespace HPlus {
     if (!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
     fCommonPlotsAfterJetSelection->fill();
-    hSelectionFlow->Fill(kQCDOrderJetSelection);
 
 
 //------ Scale factor for MET trigger
@@ -332,6 +314,13 @@ namespace HPlus {
     fCommonPlotsAfterMETScaleFactor->fill();
 
 
+//------ Improved delta phi cut, a.k.a. QCD tail killer - collinear part
+    const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    fCommonPlots.fillControlPlotsAtCollinearDeltaPhiCuts(iEvent, qcdTailKillerDataCollinear);
+    if (!qcdTailKillerDataCollinear.passedCollinearCuts()) return false;
+    increment(fQCDTailKillerCollinearCounter);
+
+
 //------ Standard selections are done, fill tree and quit if user asked for it
     if (fTree.isActive()) {
       doTreeFilling(iEvent, iSetup, pvData, mySelectedTau, electronData, muonData, jetData, metData);
@@ -340,84 +329,205 @@ namespace HPlus {
 
 
 //----- Standard selections are done, now do analysis variations
-    const BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
-    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
-    //const double myDeltaPhi = DeltaPhi::reconstruct(*(mySelectedTau), *(metData.getSelectedMET())) * 57.3; // converted to degrees
-    const double myTransverseMass = TransverseMass::reconstruct(*(mySelectedTau), *(metData.getSelectedMET()));
-    double myFullMass = -1.0;
-    if (btagData.passedEvent()) {
-      const FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, mySelectedTau, btagData, metData);
-      if (FullHiggsMassData.passedEvent()) {
-        myFullMass = FullHiggsMassData.getHiggsMass();
-      }
-    }
-    // Increment counters
-    increment(fStandardSelectionsCounter);
-    if (metData.getSelectedMET()->et() > 30.0) {
-      increment(fStandardSelectionsWithMET30Counter);
-      if (qcdTailKillerData.passedEvent()) {
-        increment(fStandardSelectionsWithTailKillerAndMET30Counter);
-      }
-    }
-    if (qcdTailKillerData.passedEvent()) {
-      increment(fStandardSelectionsWithTailKillerCounter);
-    }
-
-    // Proceed to analysis variations
-
-    // Good old times (HIG-11-019) variation
-    if (fDoAnalysisVariationWithTraditionalMethod) {
-/*      fVariationTraditionalReference->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      if (metData.getSelectedMET()->et() > 30.0) {
-        fVariationTraditionalPlusMET30->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }
-      if (qcdTailKillerData.passedEvent()) {
-        fVariationTraditionalPlusTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }
-      if (metData.getSelectedMET()->et() > 30.0 && qcdTailKillerData.passedEvent()) {
-        fVariationTraditionalPlusMET30AndTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }*/
-      fVariationTraditionalPlusCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      if (metData.getSelectedMET()->et()) {
-        fVariationTraditionalPlusMET30AndCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }
-    }
-    // ABCD method (experimental)
-    if (fDoAnalysisVariationWithABCDMethod) {
-      /*fVariationABCDReference->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      // MET>30 cut applied
-      if (metData.getSelectedMET()->et() > 30.0) {
-        fVariationABCDPlusMET30->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }
-      // QCD tail killer applied
-      if (qcdTailKillerData.passedEvent()) {
-        fVariationABCDPlusTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }
-      // Both MET>30 cut and QCD tail killer applied
-      if (metData.getSelectedMET()->et() > 30.0 && qcdTailKillerData.passedEvent()) {
-        fVariationABCDPlusMET30AndTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }*/
-      fVariationABCDPlusCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      if (metData.getSelectedMET()->et() > 30.0) {
-        fVariationABCDPlusMET30AndCollinearTailKiller->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
-      }
-    }
-    // Double ABCD method (very experimental)
-    if (fDoAnalysisVariationWithDoubleABCDMethod) {
-      fVariationDoubleABCD->doSelection(mySelectedTau, fTauSelection, jetData, metData, btagData, qcdTailKillerData, myTransverseMass, myFullMass);
+    if (fMethodType == QCDMeasurementFactorised::kQCDFactorisedTraditional) {
+      doTraditionalSelection(iEvent, iSetup, tauCandidateData, jetData, metData);
+    } else if (fMethodType == QCDMeasurementFactorised::kQCDFactorisedABCD) {
+      doABCDSelection(iEvent, iSetup, tauCandidateData, jetData, metData);
     }
 
     // Additional tests
-    fTailTestAfterStdSel->Fill(iEvent, mySelectedTau, fTauSelection, qcdTailKillerData, jetData, electronData, muonData, metData, iEvent.isRealData(), tauMatchData.isFakeTau());
+    fTailTestAfterStdSel->Fill(iEvent, mySelectedTau, fTauSelection, qcdTailKillerDataCollinear, jetData, electronData, muonData, metData, iEvent.isRealData(), tauMatchData.isFakeTau());
     bool myLeg2PassedStatus = fTauSelection.getPassesIsolationStatusOfTauObject(mySelectedTau) &&
       fTauSelection.getPassesNProngsStatusOfTauObject(mySelectedTau) &&
       fTauSelection.getPassesRtauStatusOfTauObject(mySelectedTau);
     if (myLeg2PassedStatus) {
-      fTailTestAfterTauLeg->Fill(iEvent, mySelectedTau, fTauSelection, qcdTailKillerData, jetData, electronData, muonData, metData, iEvent.isRealData(), tauMatchData.isFakeTau());
+      fTailTestAfterTauLeg->Fill(iEvent, mySelectedTau, fTauSelection, qcdTailKillerDataCollinear, jetData, electronData, muonData, metData, iEvent.isRealData(), tauMatchData.isFakeTau());
     }
 
     //------ End of QCD measurement
     return true;
+  }
+
+  void QCDMeasurementFactorised::doTraditionalSelection(edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData) {
+    bool myLeg2PassedStatus = fTauSelection.getPassesIsolationStatusOfTauObject(tauData.getSelectedTau()) &&
+      fTauSelection.getPassesNProngsStatusOfTauObject(tauData.getSelectedTau()) &&
+      fTauSelection.getPassesRtauStatusOfTauObject(tauData.getSelectedTau());
+    double myMetValue = metData.getSelectedMET()->et();
+    const double myTransverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
+    const BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    double myFullMass = -1.0;
+    FullHiggsMassCalculator::Data myFullHiggsMassData;
+    if (btagDataTmp.passedEvent()) {
+      FullHiggsMassCalculator::Data myFullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData.getSelectedTau(), btagDataTmp, metData);
+      if (myFullHiggsMassData.passedEvent()) {
+        myFullMass = myFullHiggsMassData.getHiggsMass();
+      }
+    }
+    SplittedHistogramHandler& myHandler = fCommonPlots.getSplittedHistogramHandler();
+
+    // Standard selections have been done, fill histograms
+    increment(fAfterStandardSelectionsCounter);
+    fCommonPlotsAfterStandardSelections->fill();
+    myHandler.fillShapeHistogram(hMETAfterStandardSelections, myMetValue);
+    myHandler.fillShapeHistogram(hMtShapesAfterStandardSelections, myTransverseMass);
+    if (myFullMass > 0) myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, myFullMass);
+
+    // Leg 2 (tau ID)
+    if (myLeg2PassedStatus) {
+      increment(fAfterLeg2Counter);
+      fCommonPlotsAfterLeg2->fill();
+      myHandler.fillShapeHistogram(hMETAfterLeg2, myMetValue);
+      myHandler.fillShapeHistogram(hMtShapesAfterLeg2, myTransverseMass);
+      if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg2, myFullMass);
+    }
+
+    // Leg 1 / MET cut
+    fCommonPlots.fillControlPlotsAtMETSelection(iEvent, metData);
+    if (!metData.passedEvent()) return;
+    increment(fMetCounter);
+    fCommonPlotsAfterMET->fill();
+
+    double myWeightWithBtagSF = fEventWeight.getWeight() * btagDataTmp.getScaleFactor();
+
+    const QCDTailKiller::Data qcdTailKillerDataTmp = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    if (qcdTailKillerDataTmp.passedBackToBackCuts()) {
+      myHandler.fillShapeHistogram(hMtShapesAfterLeg1WithoutBtag, myTransverseMass, myWeightWithBtagSF);
+      if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg1WithoutBtag, myFullMass, myWeightWithBtagSF);
+    }
+
+    // Leg 1 / b tagging
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    if (btagData.passedEvent()) {
+      increment(fBTaggingCounter);
+      fCommonPlotsAfterMETAndBtag->fill();
+    }
+    if (!iEvent.isRealData()) {
+      fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fEventWeight.multiplyWeight(btagData.getScaleFactor());
+    }
+    // Beyond this point, the b tag scale factor has already been applied
+    fCommonPlots.fillControlPlotsAtBtagging(iEvent, btagData);
+    if (!btagData.passedEvent()) return;
+    increment(fBTaggingScaleFactorCounter);
+    fCommonPlotsAfterMETAndBtagWithSF->fill();
+    myHandler.fillShapeHistogram(hMETAfterBJets, myMetValue);
+
+    //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    fCommonPlots.fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, qcdTailKillerData);
+    if (!qcdTailKillerData.passedBackToBackCuts()) return;
+    // Leg 1 passed
+    increment(fQCDTailKillerBackToBackCounter);
+    increment(fAfterLeg1Counter);
+    myHandler.fillShapeHistogram(hMETAfterLeg1, myMetValue);
+    myHandler.fillShapeHistogram(hMtShapesAfterLeg1, myTransverseMass);
+    if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg1, myFullMass);
+    fCommonPlotsAfterLeg1->fill();
+    fCommonPlots.fillControlPlotsAfterAllSelections(iEvent, myTransverseMass);
+    if (myFullMass > 0.) fCommonPlots.fillControlPlotsAfterAllSelectionsWithFullMass(iEvent, myFullHiggsMassData);
+
+    // Leg 1 and leg 2 passed (for control only)
+    if (myLeg2PassedStatus) {
+      increment(fAfterLeg1AndLeg2Counter);
+      myHandler.fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, myTransverseMass);
+      if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, myFullMass);
+    }
+  }
+
+  void QCDMeasurementFactorised::doABCDSelection(edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData) {
+    // ABCD method with MET and tau isolation as variables
+    // Obtain booleans
+    bool myLeg2PassedStatus = fTauSelection.getPassesIsolationStatusOfTauObject(tauData.getSelectedTau()) &&
+      fTauSelection.getPassesNProngsStatusOfTauObject(tauData.getSelectedTau()) &&
+      fTauSelection.getPassesRtauStatusOfTauObject(tauData.getSelectedTau());
+    double myMetValue = metData.getSelectedMET()->et();
+    const double myTransverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
+    const BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    const QCDTailKiller::Data qcdTailKillerDataTmp = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    double myFullMass = -1.0;
+    FullHiggsMassCalculator::Data myFullHiggsMassData;
+    if (btagDataTmp.passedEvent()) {
+      FullHiggsMassCalculator::Data myFullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData.getSelectedTau(), btagDataTmp, metData);
+      if (myFullHiggsMassData.passedEvent()) {
+        myFullMass = myFullHiggsMassData.getHiggsMass();
+      }
+    }
+    SplittedHistogramHandler& myHandler = fCommonPlots.getSplittedHistogramHandler();
+    bool myLeg1PassedStatus = metData.passedEvent() && btagDataTmp.passedEvent() && qcdTailKillerDataTmp.passedEvent();
+
+    // Standard selections have been done, fill histograms
+    if (!myLeg1PassedStatus && !myLeg2PassedStatus) { // Box A
+      increment(fAfterStandardSelectionsCounter);
+      fCommonPlotsAfterStandardSelections->fill();
+      myHandler.fillShapeHistogram(hMETAfterStandardSelections, myMetValue);
+      myHandler.fillShapeHistogram(hMtShapesAfterStandardSelections, myTransverseMass);
+      if (myFullMass > 0) myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, myFullMass);
+    }
+    
+    // Leg 2 (tau ID)
+    
+    if (!myLeg1PassedStatus && myLeg2PassedStatus) { // Box C
+      increment(fAfterLeg2Counter);
+      fCommonPlotsAfterLeg2->fill();
+      myHandler.fillShapeHistogram(hMETAfterLeg2, myMetValue);
+      myHandler.fillShapeHistogram(hMtShapesAfterLeg2, myTransverseMass);
+      if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg2, myFullMass);
+    }
+
+    if (!myLeg2PassedStatus) { // Box D
+      // Leg 1 / MET cut
+      fCommonPlots.fillControlPlotsAtMETSelection(iEvent, metData);
+      if (!metData.passedEvent()) return;
+      increment(fMetCounter);
+      fCommonPlotsAfterMET->fill();
+
+      double myWeightWithBtagSF = fEventWeight.getWeight() * btagDataTmp.getScaleFactor();
+
+      const QCDTailKiller::Data qcdTailKillerDataTmp = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+      if (qcdTailKillerDataTmp.passedBackToBackCuts()) {
+        myHandler.fillShapeHistogram(hMtShapesAfterLeg1WithoutBtag, myTransverseMass, myWeightWithBtagSF);
+        if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg1WithoutBtag, myFullMass, myWeightWithBtagSF);
+      }
+
+      // Leg 1 / b tagging
+      BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+      if (btagData.passedEvent()) {
+        increment(fBTaggingCounter);
+        fCommonPlotsAfterMETAndBtag->fill();
+      }
+      if (!iEvent.isRealData()) {
+        fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+        fEventWeight.multiplyWeight(btagData.getScaleFactor());
+      }
+      // Beyond this point, the b tag scale factor has already been applied
+      fCommonPlots.fillControlPlotsAtBtagging(iEvent, btagData);
+      if (!btagData.passedEvent()) return;
+      increment(fBTaggingScaleFactorCounter);
+      fCommonPlotsAfterMETAndBtagWithSF->fill();
+      myHandler.fillShapeHistogram(hMETAfterBJets, myMetValue);
+
+      //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part
+      const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+      fCommonPlots.fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, qcdTailKillerData);
+      if (!qcdTailKillerData.passedBackToBackCuts()) return;
+      // Leg 1 passed
+      increment(fQCDTailKillerBackToBackCounter);
+      increment(fAfterLeg1Counter);
+      myHandler.fillShapeHistogram(hMETAfterLeg1, myMetValue);
+      myHandler.fillShapeHistogram(hMtShapesAfterLeg1, myTransverseMass);
+      if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg1, myFullMass);
+      fCommonPlotsAfterLeg1->fill();
+      fCommonPlots.fillControlPlotsAfterAllSelections(iEvent, myTransverseMass);
+      if (myFullMass > 0.) fCommonPlots.fillControlPlotsAfterAllSelectionsWithFullMass(iEvent, myFullHiggsMassData);
+
+    }
+
+    // Leg 1 and leg 2 passed (for control only)
+    if (myLeg1PassedStatus && myLeg2PassedStatus) { // Box D
+      increment(fAfterLeg1AndLeg2Counter);
+      myHandler.fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, myTransverseMass);
+      if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, myFullMass);
+    }
   }
 
   void QCDMeasurementFactorised::doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronData, const MuonSelection::Data& muonData, const JetSelection::Data& jetData, const METSelection::Data& metData) {
@@ -497,218 +607,6 @@ namespace HPlus {
     }
 
     fTree.fill(iEvent, selectedTau, jetData.getSelectedJets());
-  }
-
-  QCDMeasurementFactorised::QCDFactorisedVariation(edm::Service< TFileService >& fs, QCDFactorisedHistogramHandler* histoHandler, EventCounter& eventCounter, CommonPlots& commonPlots, QCDFactorisedVariationType methodType, std::string prefix)
-  : fMethodType(methodType),
-    fAfterNjetsCounter(eventCounter.addSubCounter(prefix,"After Njets")),
-    fAfterStandardSelectionsCounter(eventCounter.addSubCounter(prefix,"After std. selections")),
-    fAfterLeg1Counter(eventCounter.addSubCounter(prefix,"After leg1 selections")),
-    fAfterLeg2Counter(eventCounter.addSubCounter(prefix,"After leg2 selections")),
-    fAfterLeg1AndLeg2Counter(eventCounter.addSubCounter(prefix,"After leg1 and leg2 selections")),
-    fHistoHandler(histoHandler),
-    fCommonPlotsAfterStandardSelections(commonPlots.createCommonPlotsFilledAtEveryStep(prefix+" Std. selections",false,prefix+" Std. selections")),
-    fCommonPlotsAfterMET(commonPlots.createCommonPlotsFilledAtEveryStep(prefix+" Std. selections+MET",false,prefix+" Std. selections+MET")),
-    fCommonPlotsAfterMETAndBtag(commonPlots.createCommonPlotsFilledAtEveryStep(prefix+" Std. selections+MET+btag",false,prefix+" Std. selections+MET+btag")),
-    fCommonPlotsAfterLeg1(commonPlots.createCommonPlotsFilledAtEveryStep(prefix+"Leg1 (MET+btag+...)",false,prefix+" Leg1 (MET+btag+...)")),
-    fCommonPlotsAfterLeg2(commonPlots.createCommonPlotsFilledAtEveryStep(prefix+"Leg2 (tau isol.)",false,prefix+" Leg2 (tau isol.)"))
-  {
-    // Create histograms
-    std::string myDirTitle = "QCDfactorised_"+prefix;
-    TFileDirectory myDir = fs->mkdir(myDirTitle.c_str());
-
-    SplittedHistogramHandler& myHandler = fCommonPlots.getSplittedHistogramHandler();
-
-    // Shape histograms (some needed for closure test)
-    const int myMtBins = fCommonPlots.getMtBinSettings().bins();
-    const double myMtMin = fCommonPlots.getMtBinSettings().min();
-    const double myMtMax = fCommonPlots.getMtBinSettings().max();
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterStandardSelections, "MtAfterStandardSelections", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterLeg1, "MtAfterLeg1", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMtShapesAfterLeg1WithoutBtag, "MtAfterLeg1WithoutBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterLeg2, "MtAfterLeg2", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMtShapesAfterLeg1AndLeg2, "MtAfterLeg1AndLeg2", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    const int myMassBins = fCommonPlots.getInvmassBinSettings().bins();
-    const double myMassMin = fCommonPlots.getInvmassBinSettings().min();
-    const double myMassMax = fCommonPlots.getInvmassBinSettings().max();
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterStandardSelections, "MassAfterStandardSelections", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterLeg1, "MassAfterLeg1", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hInvariantMassShapesAfterLeg1WithoutBtag, "MassAfterLeg1WithoutBtag", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterLeg2, "MassAfterLeg2", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hInvariantMassShapesAfterLeg1AndLeg2, "MassAfterLeg1AndLeg2", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
-    // MET shapes (just for controlling, closure test comes from mT shapes)
-    const int myMetBins = fCommonPlots.getMetBinSettings().bins();
-    const double myMetMin = fCommonPlots.getMetBinSettings().min();
-    const double myMetMax = fCommonPlots.getMetBinSettings().max();
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hCtrlMETAfterLeg1, "CtrlMETAfterLeg1", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hCtrlMETAfterLeg2, "CtrlMETAfterLeg2", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hCtrlMETAfterBJets, "CtrlMETAfterBJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-  }
-
-  void QCDMeasurementFactorised::doSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
-    if (fMethodType == kQCDFactorisedTraditional)
-      doTraditionalSelection(selectedTau, tauSelection, jetData, metData, btagData, tailKillerData, mT, fullMass);
-    else if (fMethodType == kQCDFactorisedABCD)
-      doABCDSelection(selectedTau, tauSelection, jetData, metData, btagData, tailKillerData, mT, fullMass);
-    else if (fMethodType == kQCDFactorisedDoubleABCD)
-      doDoubleABCDSelection(selectedTau, tauSelection, jetData, metData, btagData, tailKillerData, mT, fullMass);
-    else
-      throw cms::Exception("Logic") << "QCDMeasurementFactorised::doSelection(): unknown method type! Fix code!";
-  }
-
-  void QCDMeasurementFactorised::doTraditionalSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
-    // Traditional method
-    increment(fAfterNjetsCounter);
-    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
-
-    // Apply collinear cut
-    for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
-      if (i < 4) {
-        fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerCollinear[i], tailKillerData.getRadiusFromCollinearCorner(i));
-        if (!tailKillerData.passCollinearCutForJet(i)) return;
-      }
-    }
-
-    // Standard selections have been done, fill histograms
-    fHistoHandler->fillNeventHistogram(hCtrlNjetsAfterCollinearCuts, jetData.getHadronicJetCount());
-    fCommonPlotsAfterStandardSelections->fill();
-    double myMetValue = metData.getSelectedMET()->et();
-    increment(fAfterStandardSelectionsCounter);
-    fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
-    fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-    if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
-    fHistoHandler->fillShapeHistogram(hCtrlRtau, tauSelection.getRtauOfTauObject(selectedTau));
-
-    // Leg 2 (tau ID)
-    bool myLeg2PassedStatus = tauSelection.getPassesIsolationStatusOfTauObject(selectedTau) &&
-      tauSelection.getPassesNProngsStatusOfTauObject(selectedTau) &&
-      tauSelection.getPassesRtauStatusOfTauObject(selectedTau);
-    if (myLeg2PassedStatus) {
-      increment(fAfterLeg2Counter);
-      fCommonPlotsAfterLeg2->fill();
-      fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
-      fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
-      fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
-    }
-
-    // Leg 1 / MET cut
-    fHistoHandler->fillShapeHistogram(hCtrlMET, myMetValue);
-    if (!metData.passedEvent()) return;
-    fCommonPlotsAfterMET->fill();
-    fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1WithoutBtag, mT);
-
-    // Leg 1 / b tagging
-    fHistoHandler->fillShapeHistogram(hCtrlNbjets, btagData.getBJetCount());
-    if (!btagData.passedEvent()) return;
-    fCommonPlotsAfterMETAndBtag->fill();
-    fHistoHandler->fillShapeHistogram(hCtrlMETAfterBJets, myMetValue);
-
-    // Leg 1 / QCD tail killer back-to-back
-    for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
-      if (i < 4) {
-        fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerBackToBack[i],tailKillerData.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
-        if (!tailKillerData.passBackToBackCutForJet(i)) return;
-      }
-    }
-
-    // Leg 1 passed
-    increment(fAfterLeg1Counter);
-    fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
-    fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-    if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
-    fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
-    fCommonPlotsAfterLeg1->fill();
-
-    // Leg 1 and leg 2 passed (for control only)
-    if (myLeg2PassedStatus) {
-      increment(fAfterLeg1AndLeg2Counter);
-      fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
-      fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
-    }
-  }
-
-  void QCDMeasurementFactorised::doABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass) {
-    // ABCD method with MET and tau isolation as variables
-    increment(fAfterNjetsCounter);
-    fHistoHandler->fillShapeHistogram(hCtrlNjets, jetData.getHadronicJetCount());
-
-    // Apply collinear cut
-    for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
-      if (i < 4) {
-        fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerCollinear[i], tailKillerData.getRadiusFromCollinearCorner(i));
-        if (!tailKillerData.passCollinearCutForJet(i)) return;
-      }
-    }
-
-    // Obtain booleans
-    bool myLeg1PassedStatus = metData.passedEvent() && btagData.passedEvent() && tailKillerData.passedEvent();
-    bool myLeg2PassedStatus = tauSelection.getPassesIsolationStatusOfTauObject(selectedTau) &&
-      tauSelection.getPassesNProngsStatusOfTauObject(selectedTau) &&
-      tauSelection.getPassesRtauStatusOfTauObject(selectedTau);
-    double myMetValue = metData.getSelectedMET()->et();
-
-    fHistoHandler->fillShapeHistogram(hCtrlRtau, tauSelection.getRtauOfTauObject(selectedTau));
-    fHistoHandler->fillNeventHistogram(hCtrlNjetsAfterCollinearCuts, jetData.getHadronicJetCount());
-
-    // For cell A, negate the selections
-    if (!myLeg1PassedStatus && !myLeg2PassedStatus) {
-      increment(fAfterStandardSelectionsCounter);
-      fHistoHandler->fillNeventHistogram(hNevtAfterStandardSelections);
-      fHistoHandler->fillShapeHistogram(hMtShapesAfterStandardSelections, mT);
-      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, fullMass);
-      fCommonPlotsAfterStandardSelections->fill();
-    }
-
-    // Cell C (i.e. Leg 2 i.e. tau ID, not passed Leg1)
-    if (myLeg2PassedStatus && !myLeg1PassedStatus) {
-      increment(fAfterLeg2Counter);
-      fHistoHandler->fillNeventHistogram(hNevtAfterLeg2);
-      fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg2, mT);
-      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg2, fullMass);
-      fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg2, myMetValue);
-      fCommonPlotsAfterLeg2->fill();
-    }
-
-    // Cell B (i.e. Leg 1, not passed Leg2)
-    if (!myLeg2PassedStatus) {
-      // Leg 1 / MET cut
-      fHistoHandler->fillShapeHistogram(hCtrlMET, myMetValue);
-      if (!metData.passedEvent()) return;
-      fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1WithoutBtag, mT);
-      fCommonPlotsAfterMET->fill();
-
-      // Leg 1 / b tagging
-      fHistoHandler->fillShapeHistogram(hCtrlNbjets, btagData.getBJetCount());
-      if (!btagData.passedEvent()) return;
-      fCommonPlotsAfterMETAndBtag->fill();
-      fHistoHandler->fillShapeHistogram(hCtrlMETAfterBJets, myMetValue);
-
-      // Leg 1 / QCD tail killer back-to-back
-      for (int i = 0; i < tailKillerData.getNConsideredJets(); ++i) {
-        if (i < 4) {
-          fHistoHandler->fillShapeHistogram(hCtrlQCDTailKillerBackToBack[i],tailKillerData.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
-          if (!tailKillerData.passBackToBackCutForJet(i)) return;
-        }
-      }
-
-      // Leg 1 passed
-      increment(fAfterLeg1Counter);
-      fHistoHandler->fillNeventHistogram(hNevtAfterLeg1);
-      fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1, mT);
-      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1, fullMass);
-      fHistoHandler->fillShapeHistogram(hCtrlMETAfterLeg1, myMetValue);
-      fCommonPlotsAfterLeg1->fill();
-    }
-
-    // Cell D, i.e. leg 1 and leg 2 passed (for control only)
-    if (myLeg1PassedStatus && myLeg2PassedStatus) {
-      increment(fAfterLeg1AndLeg2Counter);
-      fHistoHandler->fillNeventHistogram(hNevtAfterLeg1AndLeg2);
-      fHistoHandler->fillShapeHistogram(hMtShapesAfterLeg1AndLeg2, mT);
-      if (fullMass>0) fHistoHandler->fillShapeHistogram(hInvariantMassShapesAfterLeg1AndLeg2, fullMass);
-    }
   }
 
   QCDMeasurementFactorised::TailTest::TailTest(std::string prefix, edm::Service<TFileService>& fs, HistoWrapper& histoWrapper) {
@@ -887,6 +785,5 @@ namespace HPlus {
     // Jet faking tau overlapping with electron or muon from a b jet?
 
   }
-
 }
 

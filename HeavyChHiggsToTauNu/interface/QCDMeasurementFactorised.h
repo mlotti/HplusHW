@@ -54,8 +54,7 @@ namespace HPlus {
   class QCDMeasurementFactorised {
     enum QCDFactorisedVariationType {
       kQCDFactorisedTraditional,
-      kQCDFactorisedABCD,
-      kQCDFactorisedDoubleABCD
+      kQCDFactorisedABCD
     };
 
     class TailTest {
@@ -101,9 +100,9 @@ namespace HPlus {
 
   private:
     /// Same method like in paper
-    void doTraditionalSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass);
+    void doTraditionalSelection(edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
     /// Experimental method - not validated
-    void doABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass);
+    void doABCDSelection(edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
     /// Fill root tree after standard selections
     void doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronData, const MuonSelection::Data& muonData, const JetSelection::Data& jetData, const METSelection::Data& metData);
 
@@ -115,10 +114,7 @@ namespace HPlus {
     const std::string fTopRecoName; // Name of selected top reconstruction algorithm
     const bool fApplyNprongsCutForTauCandidate;
     const bool fApplyRtauCutForTauCandidate;
-    const bool fDoAnalysisVariationWithTraditionalMethod;
-    const bool fDoAnalysisVariationWithABCDMethod;
-    const bool fDoAnalysisVariationWithDoubleABCDMethod;
-    const QCDFactorisedVariationType fMethodType;
+    QCDFactorisedVariationType fMethodType;
 
     // Counters - do not change order
     Count fAllCounter;
@@ -137,11 +133,12 @@ namespace HPlus {
     Count fNJetsCounter;
     Count fPreMETCutCounter;
     Count fMETTriggerScaleFactorCounter;
-    Count fStandardSelectionsCounter;
-    Count fStandardSelectionsWithMET30Counter;
-    Count fStandardSelectionsWithTailKillerCounter;
-    Count fStandardSelectionsWithTailKillerAndMET30Counter;
+    Count fQCDTailKillerCollinearCounter;
     Count fAfterStandardSelectionsCounter;
+    Count fMetCounter;
+    Count fBTaggingCounter;
+    Count fBTaggingScaleFactorCounter;
+    Count fQCDTailKillerBackToBackCounter;
     Count fAfterLeg1Counter;
     Count fAfterLeg2Counter;
     Count fAfterLeg1AndLeg2Counter;
@@ -189,6 +186,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterStandardSelections;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtag;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtagWithSF;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg1;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg2;
 
@@ -208,6 +206,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hInvariantMassShapesAfterLeg2;
     std::vector<WrappedTH1*> hInvariantMassShapesAfterLeg1AndLeg2;
     // MET shapes (just for controlling, closure test comes from mT shapes)
+    std::vector<WrappedTH1*> hMETAfterStandardSelections;
     std::vector<WrappedTH1*> hMETAfterLeg1;
     std::vector<WrappedTH1*> hMETAfterLeg2;
     std::vector<WrappedTH1*> hMETAfterBJets;
