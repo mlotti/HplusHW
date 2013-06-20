@@ -639,7 +639,7 @@ namespace HPlus {
     BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     double myWeightWithBtagSF = fEventWeight.getWeight() * btagDataTmp.getScaleFactor();
     if(btagDataTmp.passedEvent()) {
-      hMETInvertedTauIdBtag->Fill(selectedTau->pt(), metDataTmp.getSelectedMET()->et());
+      hMETInvertedTauIdBtag->Fill(selectedTau->pt(), metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
     }
 
     if( btagDataTmp.getSelectedJets().size() < 1) {
