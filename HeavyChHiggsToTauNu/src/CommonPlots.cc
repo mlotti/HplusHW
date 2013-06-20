@@ -281,7 +281,8 @@ namespace HPlus {
     fTauData = tauData;
     fFakeTauData = fakeTauData;
     // Set splitted bin info
-    fSplittedHistogramHandler.setFactorisationBinForEvent(fTauData.getSelectedTau()->pt(), fTauData.getSelectedTau()->eta(), fVertexData.getNumberOfAllVertices());
+    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees    
+    fSplittedHistogramHandler.setFactorisationBinForEvent(fTauData.getSelectedTau()->pt(), fTauData.getSelectedTau()->eta(), fVertexData.getNumberOfAllVertices(), myDeltaPhiTauMET);
     // Obtain new MET object corresponding to the selected tau
     fMETData = metSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau(), fJetData.getAllJets());
     if (bOptionEnableNormalisationAnalysis) {

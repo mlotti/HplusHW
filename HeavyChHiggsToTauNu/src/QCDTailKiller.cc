@@ -158,6 +158,7 @@ namespace HPlus {
   QCDTailKiller::QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string postfix):
     BaseSelection(eventCounter, histoWrapper),
     fMaxEntries(iConfig.getUntrackedParameter<uint32_t>("maxJetsToConsider")),
+    bDisableCollinearCuts(iConfig.getUntrackedParameter<bool>("disableCollinearCuts")),
     fSubCountAllEvents(eventCounter.addSubCounter("QCDTailKiller"+postfix, "All events")),
     fSubCountPassedEvents(eventCounter.addSubCounter("QCDTailKiller"+postfix, "Passed events"))
   {
@@ -190,11 +191,15 @@ namespace HPlus {
       myStream << "CollinearJet" << i+1;
       fCollinearJetCut.push_back(CutItem(eventCounter, myStream.str(), QCDTailKiller::kCutUpperLeftCorner));
       if (i < myCollinearPSets.size()) {
-        fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir,
-                                        myCollinearPSets[i].getUntrackedParameter<std::string>("CutShape"),
-                                        myCollinearPSets[i].getUntrackedParameter<double>("CutX"),
-                                        myCollinearPSets[i].getUntrackedParameter<double>("CutY"),
-                                        i+1);
+        if (!bDisableCollinearCuts) {
+          fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir,
+                                         myCollinearPSets[i].getUntrackedParameter<std::string>("CutShape"),
+                                         myCollinearPSets[i].getUntrackedParameter<double>("CutX"),
+                                         myCollinearPSets[i].getUntrackedParameter<double>("CutY"),
+                                         i+1);
+        } else {
+          fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir, "noCut", 0., 0., i+1);
+        }
       } else {
         fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir, "noCut", 0.0, 0.0, i+1);
       }

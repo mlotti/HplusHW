@@ -39,10 +39,11 @@ def customize(signalAnalysis):
     # Choice of tau selection for tau candidate selection
     signalAnalysis.applyNprongsCutForTauCandidate = False
     signalAnalysis.applyRtauCutForTauCandidate = False
-    # Binning of factorisation (note that first bin is below the first number and last bin is greater than the last number)
+    # Splitting of analysis phase space (note that first bin is below the first number and last bin is greater than the last number)
     signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauPtBinLowEdges = cms.untracked.vdouble(41., 50., 60., 70., 80., 100., 120., 150., 200., 300.)
     #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5)
     #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByNVerticesBinLowEdges = cms.untracked.vint32(10)
+    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByDeltaPhiTauMet = cms.untracked.vdouble(90.) # If used, one could disable collinear cuts
     # Variation options
     signalAnalysis.analysisMode = cms.untracked.string("traditional") # options: "traditional", "ABCD"
     # MET cut
