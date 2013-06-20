@@ -44,6 +44,9 @@ def customize(signalAnalysis):
     #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5)
     #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByNVerticesBinLowEdges = cms.untracked.vint32(10)
     #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByDeltaPhiTauMet = cms.untracked.vdouble(90.) # If used, one could disable collinear cuts
+    #signalAnalysis.QCDTailKiller.disableCollinearCuts = True # enable, if splitting by delta phi(tau,MET)
+    print "Phase space is splitted in analysis as follows:"
+    print signalAnalysis.commonPlotsSettings.histogramSplitting
     # Variation options
     signalAnalysis.analysisMode = cms.untracked.string("traditional") # options: "traditional", "ABCD"
     # MET cut
