@@ -117,6 +117,8 @@ def addMetLegSkim_CaloMETCorr(datasets):
         "Tbar_s-channel_TuneZ2star_Summer12":           TaskDef("/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_triggerMetLeg_skim_v53_3c-43dc92c0c207b3c8306900dc42897adc/USER")
     }
 
+    addMetLegSkim_53X(skimVersion, datasets, definitions)
+
 def addMetLegSkim(datasets):
     definitions = {
 	"Tau_190456-193621_2012A_Jan22": 		TaskDef("/Tau/local-Run2012A_22Jan2013_v1_AOD_190456_193621_triggerMetLeg_skim_v53_v3-56beb3a2e79a8b14c82b89183fef0535/USER"),
