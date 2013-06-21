@@ -1,4 +1,4 @@
-# Generated on Wed May 29 18:05:46 2013
+# Generated on Fri Jun 21 16:06:14 2013
 # by HiggsAnalysis/TriggerEfficiency/test/PythonWriter.py
 
 import FWCore.ParameterSet.Config as cms
@@ -9,6 +9,7 @@ def triggerBin(pt, efficiency, uncertainty):
         efficiency = cms.double(efficiency),
         uncertainty = cms.double(uncertainty)
     )
+
 
 metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronMediumMVA3 = cms.untracked.PSet(
     # The selected triggers for the efficiency. If one trigger is
@@ -34,6 +35,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.05, 0.048733971724),
                 triggerBin(20.0, 0.0833333333333, 0.079785592313),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.333333333333, 0.272165526976),
@@ -53,6 +55,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.025641025641, 0.0113190475827),
                 triggerBin(20.0, 0.0300751879699, 0.0148097384742),
                 triggerBin(30.0, 0.0752688172043, 0.0273573371576),
                 triggerBin(40.0, 0.162790697674, 0.0562985989385),
@@ -72,6 +75,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.028, 0.0104337912573),
                 triggerBin(20.0, 0.0412371134021, 0.0142757479231),
                 triggerBin(30.0, 0.0833333333333, 0.0252304196175),
                 triggerBin(40.0, 0.0506329113924, 0.0246672076884),
@@ -91,6 +95,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.025641025641, 0.00956634122401),
                 triggerBin(20.0, 0.041095890411, 0.0134141985368),
                 triggerBin(30.0, 0.0700636942675, 0.0203715133022),
                 triggerBin(40.0, 0.10989010989, 0.0327853950395),
@@ -110,6 +115,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0279069767442, 0.0112328789395),
                 triggerBin(20.0, 0.0344827586207, 0.0151529439449),
                 triggerBin(30.0, 0.07, 0.0255147016443),
                 triggerBin(40.0, 0.173913043478, 0.0558856162537),
@@ -129,6 +135,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0279569892473, 0.00764471790369),
                 triggerBin(20.0, 0.0383480825959, 0.0104299188373),
                 triggerBin(30.0, 0.0772727272727, 0.0180027337435),
                 triggerBin(40.0, 0.096, 0.0263490417283),
@@ -148,6 +155,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0271002710027, 0.0059771296637),
                 triggerBin(20.0, 0.0394265232975, 0.00823839169829),
                 triggerBin(30.0, 0.0742705570292, 0.0135045371477),
                 triggerBin(40.0, 0.101851851852, 0.0205793464567),
@@ -165,6 +173,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763643502159, 0.00372105597962),
                 triggerBin(20.0, 0.0976163450624, 0.00447181599647),
                 triggerBin(30.0, 0.132600919775, 0.00542091173789),
                 triggerBin(40.0, 0.180893682589, 0.00675732002082),
@@ -180,6 +189,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763643502159, 0.00372105597962),
                 triggerBin(20.0, 0.0976163450624, 0.00447181599647),
                 triggerBin(30.0, 0.132600919775, 0.00542091173789),
                 triggerBin(40.0, 0.180893682589, 0.00675732002082),
@@ -195,6 +205,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763643502159, 0.00372105597962),
                 triggerBin(20.0, 0.0976163450624, 0.00447181599647),
                 triggerBin(30.0, 0.132600919775, 0.00542091173789),
                 triggerBin(40.0, 0.180893682589, 0.00675732002082),
@@ -210,6 +221,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763643502159, 0.00372105597962),
                 triggerBin(20.0, 0.0976163450624, 0.00447181599647),
                 triggerBin(30.0, 0.132600919775, 0.00542091173789),
                 triggerBin(40.0, 0.180893682589, 0.00675732002082),
@@ -225,6 +237,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763643502159, 0.00372105597962),
                 triggerBin(20.0, 0.0976163450624, 0.00447181599647),
                 triggerBin(30.0, 0.132600919775, 0.00542091173789),
                 triggerBin(40.0, 0.180893682589, 0.00675732002082),
@@ -240,6 +253,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763643502159, 0.00372105597962),
                 triggerBin(20.0, 0.0976163450624, 0.00447181599647),
                 triggerBin(30.0, 0.132600919775, 0.00542091173789),
                 triggerBin(40.0, 0.180893682589, 0.00675732002082),
@@ -255,6 +269,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763643502159, 0.00372105597962),
                 triggerBin(20.0, 0.0976163450624, 0.00447181599647),
                 triggerBin(30.0, 0.132600919775, 0.00542091173789),
                 triggerBin(40.0, 0.180893682589, 0.00675732002082),
@@ -270,6 +285,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763643502159, 0.00372105597962),
                 triggerBin(20.0, 0.0976163450624, 0.00447181599647),
                 triggerBin(30.0, 0.132600919775, 0.00542091173789),
                 triggerBin(40.0, 0.180893682589, 0.00675732002082),
@@ -313,6 +329,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.111111111111, 0.104756560176),
                 triggerBin(20.0, 0.125, 0.116926793337),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.5, 0.353553390593),
@@ -332,6 +349,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0336134453782, 0.0165218423464),
                 triggerBin(20.0, 0.0348837209302, 0.019785726281),
                 triggerBin(30.0, 0.125, 0.0441941738242),
                 triggerBin(40.0, 0.136363636364, 0.0731650049984),
@@ -351,6 +369,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0281690140845, 0.0138847166789),
                 triggerBin(20.0, 0.051724137931, 0.0205629293764),
                 triggerBin(30.0, 0.0757575757576, 0.0325712192794),
                 triggerBin(40.0, 0.0681818181818, 0.0379991201606),
@@ -370,6 +389,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0225988700565, 0.0111710281883),
                 triggerBin(20.0, 0.03125, 0.0153789216289),
                 triggerBin(30.0, 0.0348837209302, 0.019785726281),
                 triggerBin(40.0, 0.127659574468, 0.0486766595111),
@@ -389,6 +409,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0390625, 0.0171246854656),
                 triggerBin(20.0, 0.0425531914894, 0.0208189810549),
                 triggerBin(30.0, 0.116666666667, 0.0414438486701),
                 triggerBin(40.0, 0.166666666667, 0.0760725774313),
@@ -408,6 +429,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0333333333333, 0.0109243564472),
                 triggerBin(20.0, 0.047619047619, 0.0146955571392),
                 triggerBin(30.0, 0.0952380952381, 0.0261509355888),
                 triggerBin(40.0, 0.102941176471, 0.0368511095406),
@@ -427,6 +449,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0290827740492, 0.00794795237694),
                 triggerBin(20.0, 0.0414201183432, 0.0108383076011),
                 triggerBin(30.0, 0.0707547169811, 0.0176106323756),
                 triggerBin(40.0, 0.113043478261, 0.0295273860036),
@@ -444,6 +467,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0721966205837, 0.00453639552401),
                 triggerBin(20.0, 0.0981023988543, 0.00562837417416),
                 triggerBin(30.0, 0.127725856698, 0.00658670786463),
                 triggerBin(40.0, 0.172568354998, 0.00800012656363),
@@ -459,6 +483,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0721966205837, 0.00453639552401),
                 triggerBin(20.0, 0.0981023988543, 0.00562837417416),
                 triggerBin(30.0, 0.127725856698, 0.00658670786463),
                 triggerBin(40.0, 0.172568354998, 0.00800012656363),
@@ -474,6 +499,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0721966205837, 0.00453639552401),
                 triggerBin(20.0, 0.0981023988543, 0.00562837417416),
                 triggerBin(30.0, 0.127725856698, 0.00658670786463),
                 triggerBin(40.0, 0.172568354998, 0.00800012656363),
@@ -489,6 +515,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0721966205837, 0.00453639552401),
                 triggerBin(20.0, 0.0981023988543, 0.00562837417416),
                 triggerBin(30.0, 0.127725856698, 0.00658670786463),
                 triggerBin(40.0, 0.172568354998, 0.00800012656363),
@@ -504,6 +531,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0721966205837, 0.00453639552401),
                 triggerBin(20.0, 0.0981023988543, 0.00562837417416),
                 triggerBin(30.0, 0.127725856698, 0.00658670786463),
                 triggerBin(40.0, 0.172568354998, 0.00800012656363),
@@ -519,6 +547,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0721966205837, 0.00453639552401),
                 triggerBin(20.0, 0.0981023988543, 0.00562837417416),
                 triggerBin(30.0, 0.127725856698, 0.00658670786463),
                 triggerBin(40.0, 0.172568354998, 0.00800012656363),
@@ -534,6 +563,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0721966205837, 0.00453639552401),
                 triggerBin(20.0, 0.0981023988543, 0.00562837417416),
                 triggerBin(30.0, 0.127725856698, 0.00658670786463),
                 triggerBin(40.0, 0.172568354998, 0.00800012656363),
@@ -549,6 +579,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0721966205837, 0.00453639552401),
                 triggerBin(20.0, 0.0981023988543, 0.00562837417416),
                 triggerBin(30.0, 0.127725856698, 0.00658670786463),
                 triggerBin(40.0, 0.172568354998, 0.00800012656363),
@@ -592,6 +623,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.142857142857, 0.132260014253),
                 triggerBin(20.0, 0.142857142857, 0.132260014253),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.5, 0.353553390593),
@@ -611,6 +643,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0392156862745, 0.0192195305651),
                 triggerBin(20.0, 0.038961038961, 0.0220516148963),
                 triggerBin(30.0, 0.117647058824, 0.0451155875792),
                 triggerBin(40.0, 0.166666666667, 0.0878410461158),
@@ -630,6 +663,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0327868852459, 0.016122457965),
                 triggerBin(20.0, 0.0594059405941, 0.0235209775375),
                 triggerBin(30.0, 0.0806451612903, 0.0345807888235),
                 triggerBin(40.0, 0.0789473684211, 0.043744076724),
@@ -649,6 +683,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.025974025974, 0.0128172408109),
                 triggerBin(20.0, 0.0263157894737, 0.0149921817924),
                 triggerBin(30.0, 0.038961038961, 0.0220516148963),
                 triggerBin(40.0, 0.130434782609, 0.0496556731061),
@@ -668,6 +703,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.045871559633, 0.0200383484757),
                 triggerBin(20.0, 0.047619047619, 0.0232357160226),
                 triggerBin(30.0, 0.111111111111, 0.0427666866066),
                 triggerBin(40.0, 0.2, 0.0894427191),
@@ -687,6 +723,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.038961038961, 0.0127315057964),
                 triggerBin(20.0, 0.0540540540541, 0.0166249914927),
                 triggerBin(30.0, 0.0948275862069, 0.0272021986784),
                 triggerBin(40.0, 0.120689655172, 0.0427752067866),
@@ -706,6 +743,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0337662337662, 0.00920559897717),
                 triggerBin(20.0, 0.0434782608696, 0.0117936411784),
                 triggerBin(30.0, 0.0725388601036, 0.0186704407255),
                 triggerBin(40.0, 0.125, 0.0324296576039),
@@ -723,6 +761,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0691582256374, 0.00474186493714),
                 triggerBin(20.0, 0.0944625407166, 0.00590158735886),
                 triggerBin(30.0, 0.129933481153, 0.00708049291219),
                 triggerBin(40.0, 0.16874687968, 0.00836843110628),
@@ -738,6 +777,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0691582256374, 0.00474186493714),
                 triggerBin(20.0, 0.0944625407166, 0.00590158735886),
                 triggerBin(30.0, 0.129933481153, 0.00708049291219),
                 triggerBin(40.0, 0.16874687968, 0.00836843110628),
@@ -753,6 +793,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0691582256374, 0.00474186493714),
                 triggerBin(20.0, 0.0944625407166, 0.00590158735886),
                 triggerBin(30.0, 0.129933481153, 0.00708049291219),
                 triggerBin(40.0, 0.16874687968, 0.00836843110628),
@@ -768,6 +809,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0691582256374, 0.00474186493714),
                 triggerBin(20.0, 0.0944625407166, 0.00590158735886),
                 triggerBin(30.0, 0.129933481153, 0.00708049291219),
                 triggerBin(40.0, 0.16874687968, 0.00836843110628),
@@ -783,6 +825,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0691582256374, 0.00474186493714),
                 triggerBin(20.0, 0.0944625407166, 0.00590158735886),
                 triggerBin(30.0, 0.129933481153, 0.00708049291219),
                 triggerBin(40.0, 0.16874687968, 0.00836843110628),
@@ -798,6 +841,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0691582256374, 0.00474186493714),
                 triggerBin(20.0, 0.0944625407166, 0.00590158735886),
                 triggerBin(30.0, 0.129933481153, 0.00708049291219),
                 triggerBin(40.0, 0.16874687968, 0.00836843110628),
@@ -813,6 +857,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0691582256374, 0.00474186493714),
                 triggerBin(20.0, 0.0944625407166, 0.00590158735886),
                 triggerBin(30.0, 0.129933481153, 0.00708049291219),
                 triggerBin(40.0, 0.16874687968, 0.00836843110628),
@@ -828,6 +873,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0691582256374, 0.00474186493714),
                 triggerBin(20.0, 0.0944625407166, 0.00590158735886),
                 triggerBin(30.0, 0.129933481153, 0.00708049291219),
                 triggerBin(40.0, 0.16874687968, 0.00836843110628),
@@ -871,6 +917,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.05, 0.048733971724),
                 triggerBin(20.0, 0.0833333333333, 0.079785592313),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.333333333333, 0.272165526976),
@@ -890,6 +937,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.025641025641, 0.0113190475827),
                 triggerBin(20.0, 0.0300751879699, 0.0148097384742),
                 triggerBin(30.0, 0.0752688172043, 0.0273573371576),
                 triggerBin(40.0, 0.162790697674, 0.0562985989385),
@@ -909,6 +957,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.028, 0.0104337912573),
                 triggerBin(20.0, 0.0412371134021, 0.0142757479231),
                 triggerBin(30.0, 0.0833333333333, 0.0252304196175),
                 triggerBin(40.0, 0.0506329113924, 0.0246672076884),
@@ -928,6 +977,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.025641025641, 0.00956634122401),
                 triggerBin(20.0, 0.041095890411, 0.0134141985368),
                 triggerBin(30.0, 0.0700636942675, 0.0203715133022),
                 triggerBin(40.0, 0.10989010989, 0.0327853950395),
@@ -947,6 +997,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0279069767442, 0.0112328789395),
                 triggerBin(20.0, 0.0344827586207, 0.0151529439449),
                 triggerBin(30.0, 0.07, 0.0255147016443),
                 triggerBin(40.0, 0.173913043478, 0.0558856162537),
@@ -966,6 +1017,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0279569892473, 0.00764471790369),
                 triggerBin(20.0, 0.0383480825959, 0.0104299188373),
                 triggerBin(30.0, 0.0772727272727, 0.0180027337435),
                 triggerBin(40.0, 0.096, 0.0263490417283),
@@ -985,6 +1037,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0271002710027, 0.0059771296637),
                 triggerBin(20.0, 0.0394265232975, 0.00823839169829),
                 triggerBin(30.0, 0.0742705570292, 0.0135045371477),
                 triggerBin(40.0, 0.101851851852, 0.0205793464567),
@@ -1002,6 +1055,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763629206849, 0.00372578120498),
                 triggerBin(20.0, 0.097177969959, 0.0044684299997),
                 triggerBin(30.0, 0.132205995388, 0.00542168925394),
                 triggerBin(40.0, 0.179702048417, 0.00676393708447),
@@ -1017,6 +1071,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763629206849, 0.00372578120498),
                 triggerBin(20.0, 0.097177969959, 0.0044684299997),
                 triggerBin(30.0, 0.132205995388, 0.00542168925394),
                 triggerBin(40.0, 0.179702048417, 0.00676393708447),
@@ -1032,6 +1087,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763629206849, 0.00372578120498),
                 triggerBin(20.0, 0.097177969959, 0.0044684299997),
                 triggerBin(30.0, 0.132205995388, 0.00542168925394),
                 triggerBin(40.0, 0.179702048417, 0.00676393708447),
@@ -1047,6 +1103,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763629206849, 0.00372578120498),
                 triggerBin(20.0, 0.097177969959, 0.0044684299997),
                 triggerBin(30.0, 0.132205995388, 0.00542168925394),
                 triggerBin(40.0, 0.179702048417, 0.00676393708447),
@@ -1062,6 +1119,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763629206849, 0.00372578120498),
                 triggerBin(20.0, 0.097177969959, 0.0044684299997),
                 triggerBin(30.0, 0.132205995388, 0.00542168925394),
                 triggerBin(40.0, 0.179702048417, 0.00676393708447),
@@ -1077,6 +1135,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763629206849, 0.00372578120498),
                 triggerBin(20.0, 0.097177969959, 0.0044684299997),
                 triggerBin(30.0, 0.132205995388, 0.00542168925394),
                 triggerBin(40.0, 0.179702048417, 0.00676393708447),
@@ -1092,6 +1151,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763629206849, 0.00372578120498),
                 triggerBin(20.0, 0.097177969959, 0.0044684299997),
                 triggerBin(30.0, 0.132205995388, 0.00542168925394),
                 triggerBin(40.0, 0.179702048417, 0.00676393708447),
@@ -1107,6 +1167,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0763629206849, 0.00372578120498),
                 triggerBin(20.0, 0.097177969959, 0.0044684299997),
                 triggerBin(30.0, 0.132205995388, 0.00542168925394),
                 triggerBin(40.0, 0.179702048417, 0.00676393708447),
@@ -1150,6 +1211,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.111111111111, 0.104756560176),
                 triggerBin(20.0, 0.125, 0.116926793337),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.5, 0.353553390593),
@@ -1169,6 +1231,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0336134453782, 0.0165218423464),
                 triggerBin(20.0, 0.0348837209302, 0.019785726281),
                 triggerBin(30.0, 0.125, 0.0441941738242),
                 triggerBin(40.0, 0.136363636364, 0.0731650049984),
@@ -1188,6 +1251,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0281690140845, 0.0138847166789),
                 triggerBin(20.0, 0.051724137931, 0.0205629293764),
                 triggerBin(30.0, 0.0757575757576, 0.0325712192794),
                 triggerBin(40.0, 0.0681818181818, 0.0379991201606),
@@ -1207,6 +1271,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0225988700565, 0.0111710281883),
                 triggerBin(20.0, 0.03125, 0.0153789216289),
                 triggerBin(30.0, 0.0348837209302, 0.019785726281),
                 triggerBin(40.0, 0.127659574468, 0.0486766595111),
@@ -1226,6 +1291,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0390625, 0.0171246854656),
                 triggerBin(20.0, 0.0425531914894, 0.0208189810549),
                 triggerBin(30.0, 0.116666666667, 0.0414438486701),
                 triggerBin(40.0, 0.166666666667, 0.0760725774313),
@@ -1245,6 +1311,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0333333333333, 0.0109243564472),
                 triggerBin(20.0, 0.047619047619, 0.0146955571392),
                 triggerBin(30.0, 0.0952380952381, 0.0261509355888),
                 triggerBin(40.0, 0.102941176471, 0.0368511095406),
@@ -1264,6 +1331,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0290827740492, 0.00794795237694),
                 triggerBin(20.0, 0.0414201183432, 0.0108383076011),
                 triggerBin(30.0, 0.0707547169811, 0.0176106323756),
                 triggerBin(40.0, 0.113043478261, 0.0295273860036),
@@ -1281,6 +1349,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.072374499538, 0.00454713640075),
                 triggerBin(20.0, 0.0979547900969, 0.00563064967065),
                 triggerBin(30.0, 0.127002735444, 0.00658230248408),
                 triggerBin(40.0, 0.171635049684, 0.00801355162631),
@@ -1296,6 +1365,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.072374499538, 0.00454713640075),
                 triggerBin(20.0, 0.0979547900969, 0.00563064967065),
                 triggerBin(30.0, 0.127002735444, 0.00658230248408),
                 triggerBin(40.0, 0.171635049684, 0.00801355162631),
@@ -1311,6 +1381,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.072374499538, 0.00454713640075),
                 triggerBin(20.0, 0.0979547900969, 0.00563064967065),
                 triggerBin(30.0, 0.127002735444, 0.00658230248408),
                 triggerBin(40.0, 0.171635049684, 0.00801355162631),
@@ -1326,6 +1397,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.072374499538, 0.00454713640075),
                 triggerBin(20.0, 0.0979547900969, 0.00563064967065),
                 triggerBin(30.0, 0.127002735444, 0.00658230248408),
                 triggerBin(40.0, 0.171635049684, 0.00801355162631),
@@ -1341,6 +1413,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.072374499538, 0.00454713640075),
                 triggerBin(20.0, 0.0979547900969, 0.00563064967065),
                 triggerBin(30.0, 0.127002735444, 0.00658230248408),
                 triggerBin(40.0, 0.171635049684, 0.00801355162631),
@@ -1356,6 +1429,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.072374499538, 0.00454713640075),
                 triggerBin(20.0, 0.0979547900969, 0.00563064967065),
                 triggerBin(30.0, 0.127002735444, 0.00658230248408),
                 triggerBin(40.0, 0.171635049684, 0.00801355162631),
@@ -1371,6 +1445,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.072374499538, 0.00454713640075),
                 triggerBin(20.0, 0.0979547900969, 0.00563064967065),
                 triggerBin(30.0, 0.127002735444, 0.00658230248408),
                 triggerBin(40.0, 0.171635049684, 0.00801355162631),
@@ -1386,6 +1461,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.072374499538, 0.00454713640075),
                 triggerBin(20.0, 0.0979547900969, 0.00563064967065),
                 triggerBin(30.0, 0.127002735444, 0.00658230248408),
                 triggerBin(40.0, 0.171635049684, 0.00801355162631),
@@ -1429,6 +1505,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.142857142857, 0.132260014253),
                 triggerBin(20.0, 0.142857142857, 0.132260014253),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.5, 0.353553390593),
@@ -1448,6 +1525,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0392156862745, 0.0192195305651),
                 triggerBin(20.0, 0.038961038961, 0.0220516148963),
                 triggerBin(30.0, 0.117647058824, 0.0451155875792),
                 triggerBin(40.0, 0.166666666667, 0.0878410461158),
@@ -1467,6 +1545,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0327868852459, 0.016122457965),
                 triggerBin(20.0, 0.0594059405941, 0.0235209775375),
                 triggerBin(30.0, 0.0806451612903, 0.0345807888235),
                 triggerBin(40.0, 0.0789473684211, 0.043744076724),
@@ -1486,6 +1565,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.025974025974, 0.0128172408109),
                 triggerBin(20.0, 0.0263157894737, 0.0149921817924),
                 triggerBin(30.0, 0.038961038961, 0.0220516148963),
                 triggerBin(40.0, 0.130434782609, 0.0496556731061),
@@ -1505,6 +1585,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.045871559633, 0.0200383484757),
                 triggerBin(20.0, 0.047619047619, 0.0232357160226),
                 triggerBin(30.0, 0.111111111111, 0.0427666866066),
                 triggerBin(40.0, 0.2, 0.0894427191),
@@ -1524,6 +1605,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.038961038961, 0.0127315057964),
                 triggerBin(20.0, 0.0540540540541, 0.0166249914927),
                 triggerBin(30.0, 0.0948275862069, 0.0272021986784),
                 triggerBin(40.0, 0.120689655172, 0.0427752067866),
@@ -1543,6 +1625,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0337662337662, 0.00920559897717),
                 triggerBin(20.0, 0.0434782608696, 0.0117936411784),
                 triggerBin(30.0, 0.0725388601036, 0.0186704407255),
                 triggerBin(40.0, 0.125, 0.0324296576039),
@@ -1560,6 +1643,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0693277310924, 0.00475305433254),
                 triggerBin(20.0, 0.094616639478, 0.00591071175606),
                 triggerBin(30.0, 0.129060970182, 0.00707277435961),
                 triggerBin(40.0, 0.167589330649, 0.00837901694491),
@@ -1575,6 +1659,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0693277310924, 0.00475305433254),
                 triggerBin(20.0, 0.094616639478, 0.00591071175606),
                 triggerBin(30.0, 0.129060970182, 0.00707277435961),
                 triggerBin(40.0, 0.167589330649, 0.00837901694491),
@@ -1590,6 +1675,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0693277310924, 0.00475305433254),
                 triggerBin(20.0, 0.094616639478, 0.00591071175606),
                 triggerBin(30.0, 0.129060970182, 0.00707277435961),
                 triggerBin(40.0, 0.167589330649, 0.00837901694491),
@@ -1605,6 +1691,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0693277310924, 0.00475305433254),
                 triggerBin(20.0, 0.094616639478, 0.00591071175606),
                 triggerBin(30.0, 0.129060970182, 0.00707277435961),
                 triggerBin(40.0, 0.167589330649, 0.00837901694491),
@@ -1620,6 +1707,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0693277310924, 0.00475305433254),
                 triggerBin(20.0, 0.094616639478, 0.00591071175606),
                 triggerBin(30.0, 0.129060970182, 0.00707277435961),
                 triggerBin(40.0, 0.167589330649, 0.00837901694491),
@@ -1635,6 +1723,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0693277310924, 0.00475305433254),
                 triggerBin(20.0, 0.094616639478, 0.00591071175606),
                 triggerBin(30.0, 0.129060970182, 0.00707277435961),
                 triggerBin(40.0, 0.167589330649, 0.00837901694491),
@@ -1650,6 +1739,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0693277310924, 0.00475305433254),
                 triggerBin(20.0, 0.094616639478, 0.00591071175606),
                 triggerBin(30.0, 0.129060970182, 0.00707277435961),
                 triggerBin(40.0, 0.167589330649, 0.00837901694491),
@@ -1665,6 +1755,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0693277310924, 0.00475305433254),
                 triggerBin(20.0, 0.094616639478, 0.00591071175606),
                 triggerBin(30.0, 0.129060970182, 0.00707277435961),
                 triggerBin(40.0, 0.167589330649, 0.00837901694491),
@@ -1708,6 +1799,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0666666666667, 0.0644061188719),
                 triggerBin(20.0, 0.0909090909091, 0.0866784172041),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -1727,6 +1819,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0295857988166, 0.0130339745683),
                 triggerBin(20.0, 0.036036036036, 0.017690390363),
                 triggerBin(30.0, 0.0681818181818, 0.0268694355447),
                 triggerBin(40.0, 0.125, 0.0522912516584),
@@ -1746,6 +1839,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0272727272727, 0.0109811668572),
                 triggerBin(20.0, 0.0280898876404, 0.0123844878174),
                 triggerBin(30.0, 0.0660377358491, 0.0241216948646),
                 triggerBin(40.0, 0.0588235294118, 0.0285336029454),
@@ -1765,6 +1859,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0277777777778, 0.0103521665625),
                 triggerBin(20.0, 0.048128342246, 0.0156519642065),
                 triggerBin(30.0, 0.0575539568345, 0.0197541542643),
                 triggerBin(40.0, 0.120481927711, 0.0357309276458),
@@ -1784,6 +1879,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0326086956522, 0.0130935946463),
                 triggerBin(20.0, 0.0409836065574, 0.0179489144269),
                 triggerBin(30.0, 0.0652173913043, 0.0257420488306),
                 triggerBin(40.0, 0.121951219512, 0.051104655788),
@@ -1803,6 +1899,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.029702970297, 0.00844620482067),
                 triggerBin(20.0, 0.0333333333333, 0.0103637545034),
                 triggerBin(30.0, 0.0656565656566, 0.0176019083336),
                 triggerBin(40.0, 0.0825688073394, 0.0263621913364),
@@ -1822,6 +1919,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0289634146341, 0.006547729923),
                 triggerBin(20.0, 0.0390143737166, 0.00877417486016),
                 triggerBin(30.0, 0.0623145400593, 0.0131676519108),
                 triggerBin(40.0, 0.0989583333333, 0.0215500364459),
@@ -1839,6 +1937,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0713801671561, 0.00386948347881),
                 triggerBin(20.0, 0.0956925457828, 0.00472442772175),
                 triggerBin(30.0, 0.129483814523, 0.00573340241621),
                 triggerBin(40.0, 0.17982300885, 0.00722548817808),
@@ -1854,6 +1953,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0713801671561, 0.00386948347881),
                 triggerBin(20.0, 0.0956925457828, 0.00472442772175),
                 triggerBin(30.0, 0.129483814523, 0.00573340241621),
                 triggerBin(40.0, 0.17982300885, 0.00722548817808),
@@ -1869,6 +1969,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0713801671561, 0.00386948347881),
                 triggerBin(20.0, 0.0956925457828, 0.00472442772175),
                 triggerBin(30.0, 0.129483814523, 0.00573340241621),
                 triggerBin(40.0, 0.17982300885, 0.00722548817808),
@@ -1884,6 +1985,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0713801671561, 0.00386948347881),
                 triggerBin(20.0, 0.0956925457828, 0.00472442772175),
                 triggerBin(30.0, 0.129483814523, 0.00573340241621),
                 triggerBin(40.0, 0.17982300885, 0.00722548817808),
@@ -1899,6 +2001,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0713801671561, 0.00386948347881),
                 triggerBin(20.0, 0.0956925457828, 0.00472442772175),
                 triggerBin(30.0, 0.129483814523, 0.00573340241621),
                 triggerBin(40.0, 0.17982300885, 0.00722548817808),
@@ -1914,6 +2017,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0713801671561, 0.00386948347881),
                 triggerBin(20.0, 0.0956925457828, 0.00472442772175),
                 triggerBin(30.0, 0.129483814523, 0.00573340241621),
                 triggerBin(40.0, 0.17982300885, 0.00722548817808),
@@ -1929,6 +2033,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0713801671561, 0.00386948347881),
                 triggerBin(20.0, 0.0956925457828, 0.00472442772175),
                 triggerBin(30.0, 0.129483814523, 0.00573340241621),
                 triggerBin(40.0, 0.17982300885, 0.00722548817808),
@@ -1944,6 +2049,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0713801671561, 0.00386948347881),
                 triggerBin(20.0, 0.0956925457828, 0.00472442772175),
                 triggerBin(30.0, 0.129483814523, 0.00573340241621),
                 triggerBin(40.0, 0.17982300885, 0.00722548817808),
@@ -1987,6 +2093,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.142857142857, 0.132260014253),
                 triggerBin(20.0, 0.142857142857, 0.132260014253),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -2006,6 +2113,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0388349514563, 0.0190367039454),
                 triggerBin(20.0, 0.041095890411, 0.0232340734086),
                 triggerBin(30.0, 0.111111111111, 0.0427666866066),
                 triggerBin(40.0, 0.142857142857, 0.0763603548321),
@@ -2025,6 +2133,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.024, 0.0136891197672),
                 triggerBin(20.0, 0.0380952380952, 0.0186812844796),
                 triggerBin(30.0, 0.0545454545455, 0.0306209221207),
                 triggerBin(40.0, 0.0789473684211, 0.043744076724),
@@ -2044,6 +2153,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0243902439024, 0.012045482886),
                 triggerBin(20.0, 0.0373831775701, 0.0183388856062),
                 triggerBin(30.0, 0.027397260274, 0.0191055648508),
                 triggerBin(40.0, 0.139534883721, 0.0528413377526),
@@ -2063,6 +2173,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0454545454545, 0.0198605203978),
                 triggerBin(20.0, 0.05, 0.024366985862),
                 triggerBin(30.0, 0.105263157895, 0.0406488655643),
                 triggerBin(40.0, 0.136363636364, 0.0731650049984),
@@ -2082,6 +2193,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0340425531915, 0.0118292205394),
                 triggerBin(20.0, 0.0432432432432, 0.0149545735853),
                 triggerBin(30.0, 0.0803571428571, 0.0256869673127),
                 triggerBin(40.0, 0.1, 0.0387298334621),
@@ -2101,6 +2213,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0300751879699, 0.00855040649468),
                 triggerBin(20.0, 0.041095890411, 0.0116170367043),
                 triggerBin(30.0, 0.0594594594595, 0.0173865484103),
                 triggerBin(40.0, 0.116504854369, 0.0316122554085),
@@ -2118,6 +2231,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.069537592658, 0.00477898815679),
                 triggerBin(20.0, 0.0948905109489, 0.00590154082045),
                 triggerBin(30.0, 0.120407259849, 0.00684713734237),
                 triggerBin(40.0, 0.16975308642, 0.00851460183924),
@@ -2133,6 +2247,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.069537592658, 0.00477898815679),
                 triggerBin(20.0, 0.0948905109489, 0.00590154082045),
                 triggerBin(30.0, 0.120407259849, 0.00684713734237),
                 triggerBin(40.0, 0.16975308642, 0.00851460183924),
@@ -2148,6 +2263,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.069537592658, 0.00477898815679),
                 triggerBin(20.0, 0.0948905109489, 0.00590154082045),
                 triggerBin(30.0, 0.120407259849, 0.00684713734237),
                 triggerBin(40.0, 0.16975308642, 0.00851460183924),
@@ -2163,6 +2279,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.069537592658, 0.00477898815679),
                 triggerBin(20.0, 0.0948905109489, 0.00590154082045),
                 triggerBin(30.0, 0.120407259849, 0.00684713734237),
                 triggerBin(40.0, 0.16975308642, 0.00851460183924),
@@ -2178,6 +2295,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.069537592658, 0.00477898815679),
                 triggerBin(20.0, 0.0948905109489, 0.00590154082045),
                 triggerBin(30.0, 0.120407259849, 0.00684713734237),
                 triggerBin(40.0, 0.16975308642, 0.00851460183924),
@@ -2193,6 +2311,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.069537592658, 0.00477898815679),
                 triggerBin(20.0, 0.0948905109489, 0.00590154082045),
                 triggerBin(30.0, 0.120407259849, 0.00684713734237),
                 triggerBin(40.0, 0.16975308642, 0.00851460183924),
@@ -2208,6 +2327,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.069537592658, 0.00477898815679),
                 triggerBin(20.0, 0.0948905109489, 0.00590154082045),
                 triggerBin(30.0, 0.120407259849, 0.00684713734237),
                 triggerBin(40.0, 0.16975308642, 0.00851460183924),
@@ -2223,6 +2343,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.069537592658, 0.00477898815679),
                 triggerBin(20.0, 0.0948905109489, 0.00590154082045),
                 triggerBin(30.0, 0.120407259849, 0.00684713734237),
                 triggerBin(40.0, 0.16975308642, 0.00851460183924),
@@ -2266,6 +2387,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.2, 0.1788854382),
                 triggerBin(20.0, 0.166666666667, 0.152145154863),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -2285,6 +2407,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0449438202247, 0.0219611181558),
                 triggerBin(20.0, 0.0454545454545, 0.0256398215826),
                 triggerBin(30.0, 0.102040816327, 0.0432431398664),
                 triggerBin(40.0, 0.176470588235, 0.0924594409404),
@@ -2304,6 +2427,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0285714285714, 0.0162583610844),
                 triggerBin(20.0, 0.0430107526882, 0.0210378123074),
                 triggerBin(30.0, 0.0566037735849, 0.0317418200429),
                 triggerBin(40.0, 0.0857142857143, 0.047318781212),
@@ -2323,6 +2447,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0283687943262, 0.013981752504),
                 triggerBin(20.0, 0.0309278350515, 0.0175778985147),
                 triggerBin(30.0, 0.03125, 0.0217490795423),
                 triggerBin(40.0, 0.142857142857, 0.0539949247156),
@@ -2342,6 +2467,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0531914893617, 0.0231466542826),
                 triggerBin(20.0, 0.0555555555556, 0.0269951476613),
                 triggerBin(30.0, 0.0961538461538, 0.0408816970575),
                 triggerBin(40.0, 0.166666666667, 0.0878410461158),
@@ -2361,6 +2487,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0402010050251, 0.013924578649),
                 triggerBin(20.0, 0.0484848484848, 0.0167212562875),
                 triggerBin(30.0, 0.0761904761905, 0.0258908859729),
                 triggerBin(40.0, 0.11320754717, 0.0435221909205),
@@ -2380,6 +2507,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0352941176471, 0.0100071214211),
                 triggerBin(20.0, 0.0419847328244, 0.0123902841514),
                 triggerBin(30.0, 0.0591715976331, 0.0181496604801),
                 triggerBin(40.0, 0.126315789474, 0.0340835059358),
@@ -2397,6 +2525,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0671731307477, 0.00500543092708),
                 triggerBin(20.0, 0.0909930715935, 0.00618100093225),
                 triggerBin(30.0, 0.123799898939, 0.00740353097005),
                 triggerBin(40.0, 0.16628440367, 0.00891582388659),
@@ -2412,6 +2541,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0671731307477, 0.00500543092708),
                 triggerBin(20.0, 0.0909930715935, 0.00618100093225),
                 triggerBin(30.0, 0.123799898939, 0.00740353097005),
                 triggerBin(40.0, 0.16628440367, 0.00891582388659),
@@ -2427,6 +2557,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0671731307477, 0.00500543092708),
                 triggerBin(20.0, 0.0909930715935, 0.00618100093225),
                 triggerBin(30.0, 0.123799898939, 0.00740353097005),
                 triggerBin(40.0, 0.16628440367, 0.00891582388659),
@@ -2442,6 +2573,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0671731307477, 0.00500543092708),
                 triggerBin(20.0, 0.0909930715935, 0.00618100093225),
                 triggerBin(30.0, 0.123799898939, 0.00740353097005),
                 triggerBin(40.0, 0.16628440367, 0.00891582388659),
@@ -2457,6 +2589,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0671731307477, 0.00500543092708),
                 triggerBin(20.0, 0.0909930715935, 0.00618100093225),
                 triggerBin(30.0, 0.123799898939, 0.00740353097005),
                 triggerBin(40.0, 0.16628440367, 0.00891582388659),
@@ -2472,6 +2605,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0671731307477, 0.00500543092708),
                 triggerBin(20.0, 0.0909930715935, 0.00618100093225),
                 triggerBin(30.0, 0.123799898939, 0.00740353097005),
                 triggerBin(40.0, 0.16628440367, 0.00891582388659),
@@ -2487,6 +2621,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0671731307477, 0.00500543092708),
                 triggerBin(20.0, 0.0909930715935, 0.00618100093225),
                 triggerBin(30.0, 0.123799898939, 0.00740353097005),
                 triggerBin(40.0, 0.16628440367, 0.00891582388659),
@@ -2502,6 +2637,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0671731307477, 0.00500543092708),
                 triggerBin(20.0, 0.0909930715935, 0.00618100093225),
                 triggerBin(30.0, 0.123799898939, 0.00740353097005),
                 triggerBin(40.0, 0.16628440367, 0.00891582388659),
@@ -2545,6 +2681,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0666666666667, 0.0644061188719),
                 triggerBin(20.0, 0.0909090909091, 0.0866784172041),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -2564,6 +2701,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0295857988166, 0.0130339745683),
                 triggerBin(20.0, 0.036036036036, 0.017690390363),
                 triggerBin(30.0, 0.0681818181818, 0.0268694355447),
                 triggerBin(40.0, 0.125, 0.0522912516584),
@@ -2583,6 +2721,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0272727272727, 0.0109811668572),
                 triggerBin(20.0, 0.0280898876404, 0.0123844878174),
                 triggerBin(30.0, 0.0660377358491, 0.0241216948646),
                 triggerBin(40.0, 0.0588235294118, 0.0285336029454),
@@ -2602,6 +2741,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0277777777778, 0.0103521665625),
                 triggerBin(20.0, 0.048128342246, 0.0156519642065),
                 triggerBin(30.0, 0.0575539568345, 0.0197541542643),
                 triggerBin(40.0, 0.120481927711, 0.0357309276458),
@@ -2621,6 +2761,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0326086956522, 0.0130935946463),
                 triggerBin(20.0, 0.0409836065574, 0.0179489144269),
                 triggerBin(30.0, 0.0652173913043, 0.0257420488306),
                 triggerBin(40.0, 0.121951219512, 0.051104655788),
@@ -2640,6 +2781,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.029702970297, 0.00844620482067),
                 triggerBin(20.0, 0.0333333333333, 0.0103637545034),
                 triggerBin(30.0, 0.0656565656566, 0.0176019083336),
                 triggerBin(40.0, 0.0825688073394, 0.0263621913364),
@@ -2659,6 +2801,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0289634146341, 0.006547729923),
                 triggerBin(20.0, 0.0390143737166, 0.00877417486016),
                 triggerBin(30.0, 0.0623145400593, 0.0131676519108),
                 triggerBin(40.0, 0.0989583333333, 0.0215500364459),
@@ -2676,6 +2819,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0712669683258, 0.00386971030144),
                 triggerBin(20.0, 0.0953981385729, 0.0047234079498),
                 triggerBin(30.0, 0.128985083358, 0.00573235384099),
                 triggerBin(40.0, 0.178228388474, 0.00721827767243),
@@ -2691,6 +2835,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0712669683258, 0.00386971030144),
                 triggerBin(20.0, 0.0953981385729, 0.0047234079498),
                 triggerBin(30.0, 0.128985083358, 0.00573235384099),
                 triggerBin(40.0, 0.178228388474, 0.00721827767243),
@@ -2706,6 +2851,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0712669683258, 0.00386971030144),
                 triggerBin(20.0, 0.0953981385729, 0.0047234079498),
                 triggerBin(30.0, 0.128985083358, 0.00573235384099),
                 triggerBin(40.0, 0.178228388474, 0.00721827767243),
@@ -2721,6 +2867,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0712669683258, 0.00386971030144),
                 triggerBin(20.0, 0.0953981385729, 0.0047234079498),
                 triggerBin(30.0, 0.128985083358, 0.00573235384099),
                 triggerBin(40.0, 0.178228388474, 0.00721827767243),
@@ -2736,6 +2883,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0712669683258, 0.00386971030144),
                 triggerBin(20.0, 0.0953981385729, 0.0047234079498),
                 triggerBin(30.0, 0.128985083358, 0.00573235384099),
                 triggerBin(40.0, 0.178228388474, 0.00721827767243),
@@ -2751,6 +2899,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0712669683258, 0.00386971030144),
                 triggerBin(20.0, 0.0953981385729, 0.0047234079498),
                 triggerBin(30.0, 0.128985083358, 0.00573235384099),
                 triggerBin(40.0, 0.178228388474, 0.00721827767243),
@@ -2766,6 +2915,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0712669683258, 0.00386971030144),
                 triggerBin(20.0, 0.0953981385729, 0.0047234079498),
                 triggerBin(30.0, 0.128985083358, 0.00573235384099),
                 triggerBin(40.0, 0.178228388474, 0.00721827767243),
@@ -2781,6 +2931,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0712669683258, 0.00386971030144),
                 triggerBin(20.0, 0.0953981385729, 0.0047234079498),
                 triggerBin(30.0, 0.128985083358, 0.00573235384099),
                 triggerBin(40.0, 0.178228388474, 0.00721827767243),
@@ -2824,6 +2975,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.142857142857, 0.132260014253),
                 triggerBin(20.0, 0.142857142857, 0.132260014253),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -2843,6 +2995,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0388349514563, 0.0190367039454),
                 triggerBin(20.0, 0.041095890411, 0.0232340734086),
                 triggerBin(30.0, 0.111111111111, 0.0427666866066),
                 triggerBin(40.0, 0.142857142857, 0.0763603548321),
@@ -2862,6 +3015,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.024, 0.0136891197672),
                 triggerBin(20.0, 0.0380952380952, 0.0186812844796),
                 triggerBin(30.0, 0.0545454545455, 0.0306209221207),
                 triggerBin(40.0, 0.0789473684211, 0.043744076724),
@@ -2881,6 +3035,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0243902439024, 0.012045482886),
                 triggerBin(20.0, 0.0373831775701, 0.0183388856062),
                 triggerBin(30.0, 0.027397260274, 0.0191055648508),
                 triggerBin(40.0, 0.139534883721, 0.0528413377526),
@@ -2900,6 +3055,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0454545454545, 0.0198605203978),
                 triggerBin(20.0, 0.05, 0.024366985862),
                 triggerBin(30.0, 0.105263157895, 0.0406488655643),
                 triggerBin(40.0, 0.136363636364, 0.0731650049984),
@@ -2919,6 +3075,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0340425531915, 0.0118292205394),
                 triggerBin(20.0, 0.0432432432432, 0.0149545735853),
                 triggerBin(30.0, 0.0803571428571, 0.0256869673127),
                 triggerBin(40.0, 0.1, 0.0387298334621),
@@ -2938,6 +3095,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0300751879699, 0.00855040649468),
                 triggerBin(20.0, 0.041095890411, 0.0116170367043),
                 triggerBin(30.0, 0.0594594594595, 0.0173865484103),
                 triggerBin(40.0, 0.116504854369, 0.0316122554085),
@@ -2955,6 +3113,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0696113074205, 0.00478386471276),
                 triggerBin(20.0, 0.0947154471545, 0.00590385127247),
                 triggerBin(30.0, 0.119555555556, 0.00683981886347),
                 triggerBin(40.0, 0.168475452196, 0.00850874225011),
@@ -2970,6 +3129,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0696113074205, 0.00478386471276),
                 triggerBin(20.0, 0.0947154471545, 0.00590385127247),
                 triggerBin(30.0, 0.119555555556, 0.00683981886347),
                 triggerBin(40.0, 0.168475452196, 0.00850874225011),
@@ -2985,6 +3145,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0696113074205, 0.00478386471276),
                 triggerBin(20.0, 0.0947154471545, 0.00590385127247),
                 triggerBin(30.0, 0.119555555556, 0.00683981886347),
                 triggerBin(40.0, 0.168475452196, 0.00850874225011),
@@ -3000,6 +3161,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0696113074205, 0.00478386471276),
                 triggerBin(20.0, 0.0947154471545, 0.00590385127247),
                 triggerBin(30.0, 0.119555555556, 0.00683981886347),
                 triggerBin(40.0, 0.168475452196, 0.00850874225011),
@@ -3015,6 +3177,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0696113074205, 0.00478386471276),
                 triggerBin(20.0, 0.0947154471545, 0.00590385127247),
                 triggerBin(30.0, 0.119555555556, 0.00683981886347),
                 triggerBin(40.0, 0.168475452196, 0.00850874225011),
@@ -3030,6 +3193,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0696113074205, 0.00478386471276),
                 triggerBin(20.0, 0.0947154471545, 0.00590385127247),
                 triggerBin(30.0, 0.119555555556, 0.00683981886347),
                 triggerBin(40.0, 0.168475452196, 0.00850874225011),
@@ -3045,6 +3209,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0696113074205, 0.00478386471276),
                 triggerBin(20.0, 0.0947154471545, 0.00590385127247),
                 triggerBin(30.0, 0.119555555556, 0.00683981886347),
                 triggerBin(40.0, 0.168475452196, 0.00850874225011),
@@ -3060,6 +3225,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0696113074205, 0.00478386471276),
                 triggerBin(20.0, 0.0947154471545, 0.00590385127247),
                 triggerBin(30.0, 0.119555555556, 0.00683981886347),
                 triggerBin(40.0, 0.168475452196, 0.00850874225011),
@@ -3103,6 +3269,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.2, 0.1788854382),
                 triggerBin(20.0, 0.166666666667, 0.152145154863),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -3122,6 +3289,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0449438202247, 0.0219611181558),
                 triggerBin(20.0, 0.0454545454545, 0.0256398215826),
                 triggerBin(30.0, 0.102040816327, 0.0432431398664),
                 triggerBin(40.0, 0.176470588235, 0.0924594409404),
@@ -3141,6 +3309,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0285714285714, 0.0162583610844),
                 triggerBin(20.0, 0.0430107526882, 0.0210378123074),
                 triggerBin(30.0, 0.0566037735849, 0.0317418200429),
                 triggerBin(40.0, 0.0857142857143, 0.047318781212),
@@ -3160,6 +3329,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0283687943262, 0.013981752504),
                 triggerBin(20.0, 0.0309278350515, 0.0175778985147),
                 triggerBin(30.0, 0.03125, 0.0217490795423),
                 triggerBin(40.0, 0.142857142857, 0.0539949247156),
@@ -3179,6 +3349,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0531914893617, 0.0231466542826),
                 triggerBin(20.0, 0.0555555555556, 0.0269951476613),
                 triggerBin(30.0, 0.0961538461538, 0.0408816970575),
                 triggerBin(40.0, 0.166666666667, 0.0878410461158),
@@ -3198,6 +3369,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0402010050251, 0.013924578649),
                 triggerBin(20.0, 0.0484848484848, 0.0167212562875),
                 triggerBin(30.0, 0.0761904761905, 0.0258908859729),
                 triggerBin(40.0, 0.11320754717, 0.0435221909205),
@@ -3217,6 +3389,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0352941176471, 0.0100071214211),
                 triggerBin(20.0, 0.0419847328244, 0.0123902841514),
                 triggerBin(30.0, 0.0591715976331, 0.0181496604801),
                 triggerBin(40.0, 0.126315789474, 0.0340835059358),
@@ -3234,6 +3407,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0672538030424, 0.00501122554997),
                 triggerBin(20.0, 0.0911614993059, 0.00619186821558),
                 triggerBin(30.0, 0.122780314561, 0.00739222612351),
                 triggerBin(40.0, 0.164746543779, 0.00890312429278),
@@ -3249,6 +3423,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0672538030424, 0.00501122554997),
                 triggerBin(20.0, 0.0911614993059, 0.00619186821558),
                 triggerBin(30.0, 0.122780314561, 0.00739222612351),
                 triggerBin(40.0, 0.164746543779, 0.00890312429278),
@@ -3264,6 +3439,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0672538030424, 0.00501122554997),
                 triggerBin(20.0, 0.0911614993059, 0.00619186821558),
                 triggerBin(30.0, 0.122780314561, 0.00739222612351),
                 triggerBin(40.0, 0.164746543779, 0.00890312429278),
@@ -3279,6 +3455,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0672538030424, 0.00501122554997),
                 triggerBin(20.0, 0.0911614993059, 0.00619186821558),
                 triggerBin(30.0, 0.122780314561, 0.00739222612351),
                 triggerBin(40.0, 0.164746543779, 0.00890312429278),
@@ -3294,6 +3471,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0672538030424, 0.00501122554997),
                 triggerBin(20.0, 0.0911614993059, 0.00619186821558),
                 triggerBin(30.0, 0.122780314561, 0.00739222612351),
                 triggerBin(40.0, 0.164746543779, 0.00890312429278),
@@ -3309,6 +3487,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0672538030424, 0.00501122554997),
                 triggerBin(20.0, 0.0911614993059, 0.00619186821558),
                 triggerBin(30.0, 0.122780314561, 0.00739222612351),
                 triggerBin(40.0, 0.164746543779, 0.00890312429278),
@@ -3324,6 +3503,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0672538030424, 0.00501122554997),
                 triggerBin(20.0, 0.0911614993059, 0.00619186821558),
                 triggerBin(30.0, 0.122780314561, 0.00739222612351),
                 triggerBin(40.0, 0.164746543779, 0.00890312429278),
@@ -3339,6 +3519,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0672538030424, 0.00501122554997),
                 triggerBin(20.0, 0.0911614993059, 0.00619186821558),
                 triggerBin(30.0, 0.122780314561, 0.00739222612351),
                 triggerBin(40.0, 0.164746543779, 0.00890312429278),
@@ -3382,6 +3563,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0714285714286, 0.0688302936899),
                 triggerBin(20.0, 0.0909090909091, 0.0866784172041),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -3401,6 +3583,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0335570469799, 0.014753220915),
                 triggerBin(20.0, 0.0388349514563, 0.0190367039454),
                 triggerBin(30.0, 0.0609756097561, 0.0264246708383),
                 triggerBin(40.0, 0.135135135135, 0.0562027291795),
@@ -3420,6 +3603,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0309278350515, 0.0124294512387),
                 triggerBin(20.0, 0.0308641975309, 0.0135882117669),
                 triggerBin(30.0, 0.06, 0.0237486841741),
                 triggerBin(40.0, 0.0634920634921, 0.0307216952878),
@@ -3439,6 +3623,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0215517241379, 0.00953379816409),
                 triggerBin(20.0, 0.0487804878049, 0.0168206014463),
                 triggerBin(30.0, 0.0578512396694, 0.0212238120087),
                 triggerBin(40.0, 0.116883116883, 0.036613363161),
@@ -3458,6 +3643,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0368098159509, 0.014748370691),
                 triggerBin(20.0, 0.0438596491228, 0.0191796630922),
                 triggerBin(30.0, 0.0581395348837, 0.0252336360438),
                 triggerBin(40.0, 0.131578947368, 0.0548361022017),
@@ -3477,6 +3663,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0336134453782, 0.00953889012623),
                 triggerBin(20.0, 0.036231884058, 0.0112480488865),
                 triggerBin(30.0, 0.0591397849462, 0.0172960109116),
                 triggerBin(40.0, 0.0891089108911, 0.0283486973684),
@@ -3496,6 +3683,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0288624787776, 0.00689841842266),
                 triggerBin(20.0, 0.0409090909091, 0.00944307552824),
                 triggerBin(30.0, 0.0586319218241, 0.0134084201713),
                 triggerBin(40.0, 0.101123595506, 0.0225978041513),
@@ -3513,6 +3701,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0688872066616, 0.00402307749313),
                 triggerBin(20.0, 0.0950071326676, 0.00495286707585),
                 triggerBin(30.0, 0.129011345219, 0.00603521320145),
                 triggerBin(40.0, 0.180372381691, 0.00757271923777),
@@ -3528,6 +3717,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0688872066616, 0.00402307749313),
                 triggerBin(20.0, 0.0950071326676, 0.00495286707585),
                 triggerBin(30.0, 0.129011345219, 0.00603521320145),
                 triggerBin(40.0, 0.180372381691, 0.00757271923777),
@@ -3543,6 +3733,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0688872066616, 0.00402307749313),
                 triggerBin(20.0, 0.0950071326676, 0.00495286707585),
                 triggerBin(30.0, 0.129011345219, 0.00603521320145),
                 triggerBin(40.0, 0.180372381691, 0.00757271923777),
@@ -3558,6 +3749,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0688872066616, 0.00402307749313),
                 triggerBin(20.0, 0.0950071326676, 0.00495286707585),
                 triggerBin(30.0, 0.129011345219, 0.00603521320145),
                 triggerBin(40.0, 0.180372381691, 0.00757271923777),
@@ -3573,6 +3765,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0688872066616, 0.00402307749313),
                 triggerBin(20.0, 0.0950071326676, 0.00495286707585),
                 triggerBin(30.0, 0.129011345219, 0.00603521320145),
                 triggerBin(40.0, 0.180372381691, 0.00757271923777),
@@ -3588,6 +3781,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0688872066616, 0.00402307749313),
                 triggerBin(20.0, 0.0950071326676, 0.00495286707585),
                 triggerBin(30.0, 0.129011345219, 0.00603521320145),
                 triggerBin(40.0, 0.180372381691, 0.00757271923777),
@@ -3603,6 +3797,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0688872066616, 0.00402307749313),
                 triggerBin(20.0, 0.0950071326676, 0.00495286707585),
                 triggerBin(30.0, 0.129011345219, 0.00603521320145),
                 triggerBin(40.0, 0.180372381691, 0.00757271923777),
@@ -3618,6 +3813,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0688872066616, 0.00402307749313),
                 triggerBin(20.0, 0.0950071326676, 0.00495286707585),
                 triggerBin(30.0, 0.129011345219, 0.00603521320145),
                 triggerBin(40.0, 0.180372381691, 0.00757271923777),
@@ -3661,6 +3857,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.166666666667, 0.152145154863),
                 triggerBin(20.0, 0.142857142857, 0.132260014253),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -3680,6 +3877,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0434782608696, 0.0212612889966),
                 triggerBin(20.0, 0.0441176470588, 0.0249031300527),
                 triggerBin(30.0, 0.1, 0.0424264068712),
                 triggerBin(40.0, 0.166666666667, 0.0878410461158),
@@ -3699,6 +3897,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0265486725664, 0.0151230470988),
                 triggerBin(20.0, 0.0425531914894, 0.0208189810549),
                 triggerBin(30.0, 0.0377358490566, 0.0261749753573),
                 triggerBin(40.0, 0.0833333333333, 0.0460642331994),
@@ -3718,6 +3917,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0266666666667, 0.0131543542995),
                 triggerBin(20.0, 0.0449438202247, 0.0219611181558),
                 triggerBin(30.0, 0.03125, 0.0217490795423),
                 triggerBin(40.0, 0.128205128205, 0.0535337356629),
@@ -3737,6 +3937,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0510204081633, 0.0222273333556),
                 triggerBin(20.0, 0.0533333333333, 0.0259458124788),
                 triggerBin(30.0, 0.0943396226415, 0.0401505793659),
                 triggerBin(40.0, 0.157894736842, 0.083654675183),
@@ -3756,6 +3957,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0379146919431, 0.0131482916696),
                 triggerBin(20.0, 0.0473372781065, 0.0163353285798),
                 triggerBin(30.0, 0.0660377358491, 0.0241216948646),
                 triggerBin(40.0, 0.109090909091, 0.0420367983048),
@@ -3775,6 +3977,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0332409972299, 0.00943501366809),
                 triggerBin(20.0, 0.046511627907, 0.0131107826469),
                 triggerBin(30.0, 0.0529411764706, 0.0171735789385),
                 triggerBin(40.0, 0.117021276596, 0.0331545859316),
@@ -3792,6 +3995,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675355450237, 0.0049871277901),
                 triggerBin(20.0, 0.0956014362657, 0.00622951946535),
                 triggerBin(30.0, 0.121316306483, 0.00723580719943),
                 triggerBin(40.0, 0.171637591446, 0.00894484219135),
@@ -3807,6 +4011,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675355450237, 0.0049871277901),
                 triggerBin(20.0, 0.0956014362657, 0.00622951946535),
                 triggerBin(30.0, 0.121316306483, 0.00723580719943),
                 triggerBin(40.0, 0.171637591446, 0.00894484219135),
@@ -3822,6 +4027,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675355450237, 0.0049871277901),
                 triggerBin(20.0, 0.0956014362657, 0.00622951946535),
                 triggerBin(30.0, 0.121316306483, 0.00723580719943),
                 triggerBin(40.0, 0.171637591446, 0.00894484219135),
@@ -3837,6 +4043,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675355450237, 0.0049871277901),
                 triggerBin(20.0, 0.0956014362657, 0.00622951946535),
                 triggerBin(30.0, 0.121316306483, 0.00723580719943),
                 triggerBin(40.0, 0.171637591446, 0.00894484219135),
@@ -3852,6 +4059,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675355450237, 0.0049871277901),
                 triggerBin(20.0, 0.0956014362657, 0.00622951946535),
                 triggerBin(30.0, 0.121316306483, 0.00723580719943),
                 triggerBin(40.0, 0.171637591446, 0.00894484219135),
@@ -3867,6 +4075,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675355450237, 0.0049871277901),
                 triggerBin(20.0, 0.0956014362657, 0.00622951946535),
                 triggerBin(30.0, 0.121316306483, 0.00723580719943),
                 triggerBin(40.0, 0.171637591446, 0.00894484219135),
@@ -3882,6 +4091,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675355450237, 0.0049871277901),
                 triggerBin(20.0, 0.0956014362657, 0.00622951946535),
                 triggerBin(30.0, 0.121316306483, 0.00723580719943),
                 triggerBin(40.0, 0.171637591446, 0.00894484219135),
@@ -3897,6 +4107,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675355450237, 0.0049871277901),
                 triggerBin(20.0, 0.0956014362657, 0.00622951946535),
                 triggerBin(30.0, 0.121316306483, 0.00723580719943),
                 triggerBin(40.0, 0.171637591446, 0.00894484219135),
@@ -3940,6 +4151,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.2, 0.1788854382),
                 triggerBin(20.0, 0.166666666667, 0.152145154863),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -3959,6 +4171,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0506329113924, 0.0246672076884),
                 triggerBin(20.0, 0.0491803278689, 0.0276872531539),
                 triggerBin(30.0, 0.0888888888889, 0.0424231735208),
                 triggerBin(40.0, 0.2, 0.103279555899),
@@ -3978,6 +4191,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0315789473684, 0.0179419289732),
                 triggerBin(20.0, 0.047619047619, 0.0232357160226),
                 triggerBin(30.0, 0.0392156862745, 0.0271805207876),
                 triggerBin(40.0, 0.0909090909091, 0.0500438075057),
@@ -3997,6 +4211,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.03125, 0.0153789216289),
                 triggerBin(20.0, 0.0375, 0.021240806835),
                 triggerBin(30.0, 0.0350877192982, 0.0243716009785),
                 triggerBin(40.0, 0.131578947368, 0.0548361022017),
@@ -4016,6 +4231,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0595238095238, 0.0258154451793),
                 triggerBin(20.0, 0.0597014925373, 0.0289459672458),
                 triggerBin(30.0, 0.0833333333333, 0.0398927961565),
                 triggerBin(40.0, 0.1875, 0.097578093725),
@@ -4035,6 +4251,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0446927374302, 0.0154441319064),
                 triggerBin(20.0, 0.0529801324503, 0.0182283597573),
                 triggerBin(30.0, 0.0606060606061, 0.0239808353668),
                 triggerBin(40.0, 0.122448979592, 0.0468290915575),
@@ -4054,6 +4271,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0390879478827, 0.0110609917346),
                 triggerBin(20.0, 0.047619047619, 0.0140116639604),
                 triggerBin(30.0, 0.0512820512821, 0.0176599290185),
                 triggerBin(40.0, 0.126436781609, 0.0356306922237),
@@ -4071,6 +4289,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0663677130045, 0.00527125378313),
                 triggerBin(20.0, 0.0917899031107, 0.00652006344538),
                 triggerBin(30.0, 0.124649073554, 0.00782715016001),
                 triggerBin(40.0, 0.168341708543, 0.0093777099168),
@@ -4086,6 +4305,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0663677130045, 0.00527125378313),
                 triggerBin(20.0, 0.0917899031107, 0.00652006344538),
                 triggerBin(30.0, 0.124649073554, 0.00782715016001),
                 triggerBin(40.0, 0.168341708543, 0.0093777099168),
@@ -4101,6 +4321,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0663677130045, 0.00527125378313),
                 triggerBin(20.0, 0.0917899031107, 0.00652006344538),
                 triggerBin(30.0, 0.124649073554, 0.00782715016001),
                 triggerBin(40.0, 0.168341708543, 0.0093777099168),
@@ -4116,6 +4337,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0663677130045, 0.00527125378313),
                 triggerBin(20.0, 0.0917899031107, 0.00652006344538),
                 triggerBin(30.0, 0.124649073554, 0.00782715016001),
                 triggerBin(40.0, 0.168341708543, 0.0093777099168),
@@ -4131,6 +4353,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0663677130045, 0.00527125378313),
                 triggerBin(20.0, 0.0917899031107, 0.00652006344538),
                 triggerBin(30.0, 0.124649073554, 0.00782715016001),
                 triggerBin(40.0, 0.168341708543, 0.0093777099168),
@@ -4146,6 +4369,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0663677130045, 0.00527125378313),
                 triggerBin(20.0, 0.0917899031107, 0.00652006344538),
                 triggerBin(30.0, 0.124649073554, 0.00782715016001),
                 triggerBin(40.0, 0.168341708543, 0.0093777099168),
@@ -4161,6 +4385,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0663677130045, 0.00527125378313),
                 triggerBin(20.0, 0.0917899031107, 0.00652006344538),
                 triggerBin(30.0, 0.124649073554, 0.00782715016001),
                 triggerBin(40.0, 0.168341708543, 0.0093777099168),
@@ -4176,6 +4401,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_a
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0663677130045, 0.00527125378313),
                 triggerBin(20.0, 0.0917899031107, 0.00652006344538),
                 triggerBin(30.0, 0.124649073554, 0.00782715016001),
                 triggerBin(40.0, 0.168341708543, 0.0093777099168),
@@ -4219,6 +4445,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0714285714286, 0.0688302936899),
                 triggerBin(20.0, 0.0909090909091, 0.0866784172041),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -4238,6 +4465,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0335570469799, 0.014753220915),
                 triggerBin(20.0, 0.0388349514563, 0.0190367039454),
                 triggerBin(30.0, 0.0609756097561, 0.0264246708383),
                 triggerBin(40.0, 0.135135135135, 0.0562027291795),
@@ -4257,6 +4485,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0309278350515, 0.0124294512387),
                 triggerBin(20.0, 0.0308641975309, 0.0135882117669),
                 triggerBin(30.0, 0.06, 0.0237486841741),
                 triggerBin(40.0, 0.0634920634921, 0.0307216952878),
@@ -4276,6 +4505,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0215517241379, 0.00953379816409),
                 triggerBin(20.0, 0.0487804878049, 0.0168206014463),
                 triggerBin(30.0, 0.0578512396694, 0.0212238120087),
                 triggerBin(40.0, 0.116883116883, 0.036613363161),
@@ -4295,6 +4525,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0368098159509, 0.014748370691),
                 triggerBin(20.0, 0.0438596491228, 0.0191796630922),
                 triggerBin(30.0, 0.0581395348837, 0.0252336360438),
                 triggerBin(40.0, 0.131578947368, 0.0548361022017),
@@ -4314,6 +4545,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0336134453782, 0.00953889012623),
                 triggerBin(20.0, 0.036231884058, 0.0112480488865),
                 triggerBin(30.0, 0.0591397849462, 0.0172960109116),
                 triggerBin(40.0, 0.0891089108911, 0.0283486973684),
@@ -4333,6 +4565,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0288624787776, 0.00689841842266),
                 triggerBin(20.0, 0.0409090909091, 0.00944307552824),
                 triggerBin(30.0, 0.0586319218241, 0.0134084201713),
                 triggerBin(40.0, 0.101123595506, 0.0225978041513),
@@ -4350,6 +4583,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0687215765538, 0.00402113295289),
                 triggerBin(20.0, 0.0946255002859, 0.0049488959266),
                 triggerBin(30.0, 0.12833008447, 0.00602845413216),
                 triggerBin(40.0, 0.179447255742, 0.00757076227831),
@@ -4365,6 +4599,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0687215765538, 0.00402113295289),
                 triggerBin(20.0, 0.0946255002859, 0.0049488959266),
                 triggerBin(30.0, 0.12833008447, 0.00602845413216),
                 triggerBin(40.0, 0.179447255742, 0.00757076227831),
@@ -4380,6 +4615,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0687215765538, 0.00402113295289),
                 triggerBin(20.0, 0.0946255002859, 0.0049488959266),
                 triggerBin(30.0, 0.12833008447, 0.00602845413216),
                 triggerBin(40.0, 0.179447255742, 0.00757076227831),
@@ -4395,6 +4631,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0687215765538, 0.00402113295289),
                 triggerBin(20.0, 0.0946255002859, 0.0049488959266),
                 triggerBin(30.0, 0.12833008447, 0.00602845413216),
                 triggerBin(40.0, 0.179447255742, 0.00757076227831),
@@ -4410,6 +4647,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0687215765538, 0.00402113295289),
                 triggerBin(20.0, 0.0946255002859, 0.0049488959266),
                 triggerBin(30.0, 0.12833008447, 0.00602845413216),
                 triggerBin(40.0, 0.179447255742, 0.00757076227831),
@@ -4425,6 +4663,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0687215765538, 0.00402113295289),
                 triggerBin(20.0, 0.0946255002859, 0.0049488959266),
                 triggerBin(30.0, 0.12833008447, 0.00602845413216),
                 triggerBin(40.0, 0.179447255742, 0.00757076227831),
@@ -4440,6 +4679,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0687215765538, 0.00402113295289),
                 triggerBin(20.0, 0.0946255002859, 0.0049488959266),
                 triggerBin(30.0, 0.12833008447, 0.00602845413216),
                 triggerBin(40.0, 0.179447255742, 0.00757076227831),
@@ -4455,6 +4695,7 @@ metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0687215765538, 0.00402113295289),
                 triggerBin(20.0, 0.0946255002859, 0.0049488959266),
                 triggerBin(30.0, 0.12833008447, 0.00602845413216),
                 triggerBin(40.0, 0.179447255742, 0.00757076227831),
@@ -4498,6 +4739,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.166666666667, 0.152145154863),
                 triggerBin(20.0, 0.142857142857, 0.132260014253),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -4517,6 +4759,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0434782608696, 0.0212612889966),
                 triggerBin(20.0, 0.0441176470588, 0.0249031300527),
                 triggerBin(30.0, 0.1, 0.0424264068712),
                 triggerBin(40.0, 0.166666666667, 0.0878410461158),
@@ -4536,6 +4779,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0265486725664, 0.0151230470988),
                 triggerBin(20.0, 0.0425531914894, 0.0208189810549),
                 triggerBin(30.0, 0.0377358490566, 0.0261749753573),
                 triggerBin(40.0, 0.0833333333333, 0.0460642331994),
@@ -4555,6 +4799,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0266666666667, 0.0131543542995),
                 triggerBin(20.0, 0.0449438202247, 0.0219611181558),
                 triggerBin(30.0, 0.03125, 0.0217490795423),
                 triggerBin(40.0, 0.128205128205, 0.0535337356629),
@@ -4574,6 +4819,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0510204081633, 0.0222273333556),
                 triggerBin(20.0, 0.0533333333333, 0.0259458124788),
                 triggerBin(30.0, 0.0943396226415, 0.0401505793659),
                 triggerBin(40.0, 0.157894736842, 0.083654675183),
@@ -4593,6 +4839,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0379146919431, 0.0131482916696),
                 triggerBin(20.0, 0.0473372781065, 0.0163353285798),
                 triggerBin(30.0, 0.0660377358491, 0.0241216948646),
                 triggerBin(40.0, 0.109090909091, 0.0420367983048),
@@ -4612,6 +4859,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0332409972299, 0.00943501366809),
                 triggerBin(20.0, 0.046511627907, 0.0131107826469),
                 triggerBin(30.0, 0.0529411764706, 0.0171735789385),
                 triggerBin(40.0, 0.117021276596, 0.0331545859316),
@@ -4629,6 +4877,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675889328063, 0.00499092730096),
                 triggerBin(20.0, 0.0953237410072, 0.00622701259712),
                 triggerBin(30.0, 0.120256283884, 0.00722089371869),
                 triggerBin(40.0, 0.170993227991, 0.00894409978575),
@@ -4644,6 +4893,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675889328063, 0.00499092730096),
                 triggerBin(20.0, 0.0953237410072, 0.00622701259712),
                 triggerBin(30.0, 0.120256283884, 0.00722089371869),
                 triggerBin(40.0, 0.170993227991, 0.00894409978575),
@@ -4659,6 +4909,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675889328063, 0.00499092730096),
                 triggerBin(20.0, 0.0953237410072, 0.00622701259712),
                 triggerBin(30.0, 0.120256283884, 0.00722089371869),
                 triggerBin(40.0, 0.170993227991, 0.00894409978575),
@@ -4674,6 +4925,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675889328063, 0.00499092730096),
                 triggerBin(20.0, 0.0953237410072, 0.00622701259712),
                 triggerBin(30.0, 0.120256283884, 0.00722089371869),
                 triggerBin(40.0, 0.170993227991, 0.00894409978575),
@@ -4689,6 +4941,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675889328063, 0.00499092730096),
                 triggerBin(20.0, 0.0953237410072, 0.00622701259712),
                 triggerBin(30.0, 0.120256283884, 0.00722089371869),
                 triggerBin(40.0, 0.170993227991, 0.00894409978575),
@@ -4704,6 +4957,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675889328063, 0.00499092730096),
                 triggerBin(20.0, 0.0953237410072, 0.00622701259712),
                 triggerBin(30.0, 0.120256283884, 0.00722089371869),
                 triggerBin(40.0, 0.170993227991, 0.00894409978575),
@@ -4719,6 +4973,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675889328063, 0.00499092730096),
                 triggerBin(20.0, 0.0953237410072, 0.00622701259712),
                 triggerBin(30.0, 0.120256283884, 0.00722089371869),
                 triggerBin(40.0, 0.170993227991, 0.00894409978575),
@@ -4734,6 +4989,7 @@ metLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_a
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0675889328063, 0.00499092730096),
                 triggerBin(20.0, 0.0953237410072, 0.00622701259712),
                 triggerBin(30.0, 0.120256283884, 0.00722089371869),
                 triggerBin(40.0, 0.170993227991, 0.00894409978575),
@@ -4777,6 +5033,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(193621),
             luminosity = cms.double(887.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.2, 0.1788854382),
                 triggerBin(20.0, 0.166666666667, 0.152145154863),
                 triggerBin(30.0, 0.0, 0.0),
                 triggerBin(40.0, 0.0, 0.0),
@@ -4796,6 +5053,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(4440.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0506329113924, 0.0246672076884),
                 triggerBin(20.0, 0.0491803278689, 0.0276872531539),
                 triggerBin(30.0, 0.0888888888889, 0.0424231735208),
                 triggerBin(40.0, 0.2, 0.103279555899),
@@ -4815,6 +5073,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(7124.454), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0315789473684, 0.0179419289732),
                 triggerBin(20.0, 0.047619047619, 0.0232357160226),
                 triggerBin(30.0, 0.0392156862745, 0.0271805207876),
                 triggerBin(40.0, 0.0909090909091, 0.0500438075057),
@@ -4834,6 +5093,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(7318.0), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.03125, 0.0153789216289),
                 triggerBin(20.0, 0.0375, 0.021240806835),
                 triggerBin(30.0, 0.0350877192982, 0.0243716009785),
                 triggerBin(40.0, 0.131578947368, 0.0548361022017),
@@ -4853,6 +5113,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(196531),
             luminosity = cms.double(5327.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0595238095238, 0.0258154451793),
                 triggerBin(20.0, 0.0597014925373, 0.0289459672458),
                 triggerBin(30.0, 0.0833333333333, 0.0398927961565),
                 triggerBin(40.0, 0.1875, 0.097578093725),
@@ -4872,6 +5133,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(203742),
             luminosity = cms.double(12170.501), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0446927374302, 0.0154441319064),
                 triggerBin(20.0, 0.0529801324503, 0.0182283597573),
                 triggerBin(30.0, 0.0606060606061, 0.0239808353668),
                 triggerBin(40.0, 0.122448979592, 0.0468290915575),
@@ -4891,6 +5153,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19769.955), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0390879478827, 0.0110609917346),
                 triggerBin(20.0, 0.047619047619, 0.0140116639604),
                 triggerBin(30.0, 0.0512820512821, 0.0176599290185),
                 triggerBin(40.0, 0.126436781609, 0.0356306922237),
@@ -4908,6 +5171,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     mcParameters = cms.PSet(
         Summer12_PU_2012A = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0664272890485, 0.00527581727305),
                 triggerBin(20.0, 0.0918836140888, 0.00652638323867),
                 triggerBin(30.0, 0.123449830891, 0.0078101042489),
                 triggerBin(40.0, 0.167611846251, 0.00937619944848),
@@ -4923,6 +5187,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012B = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0664272890485, 0.00527581727305),
                 triggerBin(20.0, 0.0918836140888, 0.00652638323867),
                 triggerBin(30.0, 0.123449830891, 0.0078101042489),
                 triggerBin(40.0, 0.167611846251, 0.00937619944848),
@@ -4938,6 +5203,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012C = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0664272890485, 0.00527581727305),
                 triggerBin(20.0, 0.0918836140888, 0.00652638323867),
                 triggerBin(30.0, 0.123449830891, 0.0078101042489),
                 triggerBin(40.0, 0.167611846251, 0.00937619944848),
@@ -4953,6 +5219,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012D = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0664272890485, 0.00527581727305),
                 triggerBin(20.0, 0.0918836140888, 0.00652638323867),
                 triggerBin(30.0, 0.123449830891, 0.0078101042489),
                 triggerBin(40.0, 0.167611846251, 0.00937619944848),
@@ -4968,6 +5235,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012AB = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0664272890485, 0.00527581727305),
                 triggerBin(20.0, 0.0918836140888, 0.00652638323867),
                 triggerBin(30.0, 0.123449830891, 0.0078101042489),
                 triggerBin(40.0, 0.167611846251, 0.00937619944848),
@@ -4983,6 +5251,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABC = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0664272890485, 0.00527581727305),
                 triggerBin(20.0, 0.0918836140888, 0.00652638323867),
                 triggerBin(30.0, 0.123449830891, 0.0078101042489),
                 triggerBin(40.0, 0.167611846251, 0.00937619944848),
@@ -4998,6 +5267,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0664272890485, 0.00527581727305),
                 triggerBin(20.0, 0.0918836140888, 0.00652638323867),
                 triggerBin(30.0, 0.123449830891, 0.0078101042489),
                 triggerBin(40.0, 0.167611846251, 0.00937619944848),
@@ -5013,6 +5283,7 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
         ),
         Summer12_PU_Unweighted = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0664272890485, 0.00527581727305),
                 triggerBin(20.0, 0.0918836140888, 0.00652638323867),
                 triggerBin(30.0, 0.123449830891, 0.0078101042489),
                 triggerBin(40.0, 0.167611846251, 0.00937619944848),
@@ -5031,6 +5302,3 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     mcSelect = cms.string("Summer12_PU_2012A"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
-
-# FIXME, temporary fix for changed met leg naming 3105103/SL
-metLegEfficiency = metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronMediumMVA3
