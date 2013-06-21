@@ -195,59 +195,79 @@ namespace HPlus {
 
     WrappedTH2 *hTransverseMassVsDphi;
 
-    WrappedTH1 *hSelectedTauEt;
-    WrappedTH1 *hSelectedTauEta;
-    WrappedTH1 *hSelectedTauEtAfterCuts;
-    WrappedTH1 *hSelectedTauEtaAfterCuts;
-    WrappedTH1 *hSelectedTauPhi;
-    WrappedTH1 *hSelectedTauRtau;
-    WrappedTH1 *hSelectedTauLeadingTrackPt;
+    // Tau properties for inverted selection after tau ID + tau SF's
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtAfterTauID;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtaAfterTauID;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauPhiAfterTauID;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauRtauAfterTauID;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauLeadingTrackPtAfterTauID;
+    // Tau properties for inverted selection after MET cut
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtAfterMetCut;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtaAfterMetCut;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauPhiAfterMetCut;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauRtauAfterMetCut;
+    // Tau properties for inverted selection after all cuts
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtAfterCuts;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtaAfterCuts;
+    // Tau pt for inverted selection after a selection
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtAfterTauVeto;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtAfterJetCut;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtAfterCollinearTailKiller;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtAfterBtagging;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtAfterBjetVeto;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtAfterBjetVetoPhiCuts;
+    std::vector<WrappedTH1*> hInvertedTauIdSelectedTauEtAfterBackToBackTailKiller;
 
     // baseline MET histos
-    HistogramsInBins *hMETBaselineTauIdJets;
-    HistogramsInBins *hMETBaselineTauIdBtag;
-    HistogramsInBins *hMETBaselineTauIdBveto;
-    HistogramsInBins *hMETBaselineTauIdJetsCollinear;
-    HistogramsInBins *hMETBaselineTauIdBvetoCollinear;
-    HistogramsInBins *hMETBaselineTauIdBtagCollinear;
-    //HistogramsInBins *hMETBaselineTauIdBvetoTailKiller;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterJets;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterMetSF;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterMetSFPlusBtag;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterMetSFPlusBveto;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearTailKiller;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearTailKillerPlusBtag;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearTailKillerPlusBveto;
     // baseline MT histos
-    HistogramsInBins *hMTBaselineTauIdSoftBtaggingTK;
-    HistogramsInBins *hMTBaselineTauIdBtag;
-    HistogramsInBins *hMTBaselineTauIdBveto;
-    HistogramsInBins *hMTBaselineTauIdBvetoTailKiller;
-    HistogramsInBins *hMTBaselineTauIdNoMetBveto;
-    HistogramsInBins *hMTBaselineTauIdNoMetBvetoTailKiller;
-    HistogramsInBins *hMTBaselineTauIdNoMetNoBtagging;
-    HistogramsInBins *hMTBaselineTauIdNoMetNoBtaggingTailKiller;
-    HistogramsInBins *hMTBaselineTauIdNoMetBtag;
-    HistogramsInBins *hMTBaselineTauIdNoMetBtagTailKiller;
-    HistogramsInBins *hMTBaselineTauIdNoBtagging;
-    HistogramsInBins *hMTBaselineTauIdNoBtaggingTailKiller;
-    HistogramsInBins *hMTBaselineTauIdAllCutsTailKiller;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterMetSF;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearTailKiller; // <-- used for closure test
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearTailKillerPlusBtag;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearTailKillerPlusBtagPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearTailKillerPlusBveto;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearTailKillerPlusBvetoPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterMet;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterMetPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterMetPlusBveto;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterMetPlusBvetoPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterBtag;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterBackToBackTailKiller;
 
     // inverted MET histos
-    HistogramsInBins *hMETInvertedTauIdJets;
-    HistogramsInBins *hMETInvertedTauIdJetsCollinear;
-    HistogramsInBins *hMETInvertedTauIdBtag;
-    HistogramsInBins *hMETInvertedTauIdBvetoCollinear;
-    HistogramsInBins *hMETInvertedTauIdBveto;
-    HistogramsInBins *hMETInvertedAllCutsTailKiller;
-   
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterJets;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterMetSF;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterMetSFPlusBtag;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterMetSFPlusBveto;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearTailKiller;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearTailKillerPlusBtag;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearTailKillerPlusBveto;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterBackToBackTailKiller;
     // inverted MT histos
-    HistogramsInBins *hMTInvertedTauIdSoftBtaggingTK;
-    HistogramsInBins *hMTInvertedTauIdBtagNoMetCut;
-    HistogramsInBins *hMTInvertedTauIdBvetoNoMetCut; 
-    HistogramsInBins *hMTInvertedTauIdBvetoNoMetCutTailKiller; 
-    HistogramsInBins *hMTInvertedTauIdJet;
-    HistogramsInBins *hMTInvertedTauIdJetTailKiller;
-    HistogramsInBins *hMTInvertedNoBtaggingTailKiller;
-    HistogramsInBins *hMTInvertedTauIdNoBtagging;
-    HistogramsInBins *hMTInvertedTauIdBveto;
-    HistogramsInBins *hMTInvertedTauIdBtag;
-    HistogramsInBins *hMTInvertedTauIdBvetoDphi;
-    HistogramsInBins *hMTInvertedTauIdJetDphi;
-    HistogramsInBins *hMTInvertedAllCutsTailKiller;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterMetSF;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearTailKiller; // <-- used for closure test
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearTailKillerPlusBtag;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearTailKillerPlusBtagPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearTailKillerPlusBveto;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearTailKillerPlusBvetoPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterMet;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterMetPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterMetPlusBveto;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterMetPlusBvetoPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterBtag;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterBackToBackTailKiller;
 
 //     WrappedTH1* hQCDTailKillerJet0BackToBackInverted;
 //     WrappedTH1* hQCDTailKillerJet1BackToBackInverted;
@@ -266,26 +286,23 @@ namespace HPlus {
 //     WrappedTH1* hQCDTailKillerJet2CollinearBaseline;
 //     WrappedTH1* hQCDTailKillerJet3CollinearBaseline;
 
-
-
-
-    WrappedTH1 *hDeltaR_TauMETJet1MET;
-    WrappedTH1 *hDeltaR_TauMETJet2MET;
-    WrappedTH1 *hDeltaR_TauMETJet3MET;
-    WrappedTH1 *hDeltaR_TauMETJet4MET;
+//     WrappedTH1 *hDeltaR_TauMETJet1MET;
+//     WrappedTH1 *hDeltaR_TauMETJet2MET;
+//     WrappedTH1 *hDeltaR_TauMETJet3MET;
+//     WrappedTH1 *hDeltaR_TauMETJet4MET;
 
     WrappedTH1 *hNBBaselineTauIdJet;
     //WrappedTH1 *hNJetBaselineTauId;
     WrappedTH1 *hDeltaPhiBaseline;
     //WrappedTH1 *hNJetBaselineTauIdMet;
-    HistogramsInBins *hNBInvertedTauIdJet;
-    HistogramsInBins *hNBInvertedTauIdJetDphi;  
-    HistogramsInBins *hDeltaPhiInvertedNoB;
-    HistogramsInBins *hDeltaPhiInverted;  
+    std::vector<WrappedTH1*> hNBInvertedTauIdJet;
+    std::vector<WrappedTH1*> hNBInvertedTauIdJetDphi;  
+    std::vector<WrappedTH1*> hDeltaPhiInvertedNoB;
+    std::vector<WrappedTH1*> hDeltaPhiInverted;  
 
-    HistogramsInBins *hTopMass;
+    std::vector<WrappedTH1*> hTopMass;
 
-    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet1TauSel; 
+    /*HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet1TauSel; 
     HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet1LeptonVeto;
     HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet1MetCut; 
     HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet1Btagging;   
@@ -293,24 +310,12 @@ namespace HPlus {
     HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2TauSel; 
     HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2LeptonVeto;
     HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2MetCut; 
-    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2Btagging;   
+    HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet2Btagging;   */
 
-    WrappedTH1 *hSelectedTauEtTauVeto;
-    HistogramsInBins *hSelectedTauEtJetCut;
-    HistogramsInBins *hSelectedTauEtCollinearTailKiller;
-    HistogramsInBins *hSelectedTauEtMetCut;
-    HistogramsInBins *hSelectedTauEtBtagging;
-    WrappedTH1 *hSelectedTauEtBjetVeto;
-    WrappedTH1 *hSelectedTauEtBjetVetoPhiCuts;
-    HistogramsInBins *hSelectedTauEtBackToBackTailKiller;
-   
     WrappedTH1 *hMTInvertedTauIdJets; 
 
-    WrappedTH1 *hSelectedTauEtaMetCut;
-    WrappedTH1 *hSelectedTauPhiMetCut;
     WrappedTH1 *hMetAfterCuts;
     WrappedTH1 *hTransverseMassDeltaPhiUpperCutFakeMet; 
-    WrappedTH1 *hSelectedTauRtauMetCut;
 
     WrappedTH1 *hSelectionFlow;
 
