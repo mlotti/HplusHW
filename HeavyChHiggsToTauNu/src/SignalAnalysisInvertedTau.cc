@@ -407,6 +407,10 @@ namespace HPlus {
       increment(fBaselineTauIDCounter);
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForBaseline.getSelectedTau()));
+      // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
+      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+      // Do not fill histograms (keep them for the inverted part), but set info for splitting the phase space
+      fCommonPlots.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauDataForBaseline, fMETSelection);
       bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
       // Apply scale factor for fake tau
       if (!iEvent.isRealData()) {
