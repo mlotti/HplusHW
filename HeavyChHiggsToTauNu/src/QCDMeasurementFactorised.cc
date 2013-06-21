@@ -111,18 +111,18 @@ namespace HPlus {
     const int myMtBins = fCommonPlots.getMtBinSettings().bins();
     const double myMtMin = fCommonPlots.getMtBinSettings().min();
     const double myMtMax = fCommonPlots.getMtBinSettings().max();
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterStandardSelections, "MtAfterStandardSelections", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterLeg1, "MtAfterLeg1", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hMtShapesAfterStandardSelections, "MtAfterStandardSelections", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hMtShapesAfterLeg1, "MtAfterLeg1", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMtShapesAfterLeg1WithoutBtag, "MtAfterLeg1WithoutBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hMtShapesAfterLeg2, "MtAfterLeg2", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hMtShapesAfterLeg2, "MtAfterLeg2", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMtShapesAfterLeg1AndLeg2, "MtAfterLeg1AndLeg2", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     const int myMassBins = fCommonPlots.getInvmassBinSettings().bins();
     const double myMassMin = fCommonPlots.getInvmassBinSettings().min();
     const double myMassMax = fCommonPlots.getInvmassBinSettings().max();
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterStandardSelections, "MassAfterStandardSelections", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterLeg1, "MassAfterLeg1", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hInvariantMassShapesAfterStandardSelections, "MassAfterStandardSelections", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hInvariantMassShapesAfterLeg1, "MassAfterLeg1", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hInvariantMassShapesAfterLeg1WithoutBtag, "MassAfterLeg1WithoutBtag", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
-    myHandler.createShapeHistogram(HistoWrapper::kVital, myDir, hInvariantMassShapesAfterLeg2, "MassAfterLeg2", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hInvariantMassShapesAfterLeg2, "MassAfterLeg2", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hInvariantMassShapesAfterLeg1AndLeg2, "MassAfterLeg1AndLeg2", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     // MET shapes (just for controlling, closure test comes from mT shapes)
     const int myMetBins = fCommonPlots.getMetBinSettings().bins();
