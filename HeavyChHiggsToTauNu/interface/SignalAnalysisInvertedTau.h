@@ -60,7 +60,7 @@ namespace HPlus {
 
   private:
     bool doInvertedAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
-    bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, bool myFakeTauStatus);
+    bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisInvertedTauProducer
@@ -242,7 +242,9 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterBtag;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterBackToBackTailKiller;
-
+    // baseline invariant mass histos
+    std::vector<WrappedTH1*> hInvMassBaselineTauIdAfterCollinearTailKiller; // <-- used for closure test
+    std::vector<WrappedTH1*> hInvMassBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller;
     // inverted MET histos
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterJets;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterMetSF;
@@ -268,6 +270,9 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterBtag;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterBackToBackTailKiller;
+    // inverted invariant mass histos
+    std::vector<WrappedTH1*> hInvMassInvertedTauIdAfterCollinearTailKiller; // <-- used for closure test
+    std::vector<WrappedTH1*> hInvMassInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller;
 
 //     WrappedTH1* hQCDTailKillerJet0BackToBackInverted;
 //     WrappedTH1* hQCDTailKillerJet1BackToBackInverted;

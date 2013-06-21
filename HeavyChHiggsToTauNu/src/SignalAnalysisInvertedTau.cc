@@ -197,7 +197,9 @@ namespace HPlus {
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller, "MTBaseLineTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterBtag, "MTBaseLineTauIdBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterBackToBackTailKiller, "MTBaseLineTauIdAllCutsTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    // FIXME: add closure test histo for full mass
+    // baseline invariant mass histos
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hInvMassBaselineTauIdAfterCollinearTailKiller, "InvMassBaseLineTauIdAfterCollinearTailKiller", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hInvMassBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, "InvMassBaseLineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     // inverted MET histos
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterJets, "MET_InvertedTauIdJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterMetSF, "MET_InvertedTauIdMetSF", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
@@ -223,7 +225,9 @@ namespace HPlus {
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller, "MTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterBtag, "MTInvertedTauIdBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterBackToBackTailKiller, "MTInvertedAllCutsTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    // FIXME: add closure test histo for full mass
+    // inverted invariant mass histos
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hInvMassInvertedTauIdAfterCollinearTailKiller, "InvMassInvertedTauIdAfterCollinearTailKiller", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hInvMassInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, "InvMassInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
 
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hTopMass, "TopMass", "m_{top}, GeV/c^2", 200, 0.0, 400.0 );
     //     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hHiggsMassTailKiller, "HiggsMassTailKiller", 250, 0.0 , 500.0 );
@@ -411,7 +415,6 @@ namespace HPlus {
       fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
       // Do not fill histograms (keep them for the inverted part), but set info for splitting the phase space
       fCommonPlots.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauDataForBaseline, fMETSelection);
-      bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
       // Apply scale factor for fake tau
       if (!iEvent.isRealData()) {
         fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauDataForBaseline.getSelectedTau()->eta()));
@@ -425,7 +428,7 @@ namespace HPlus {
       // Check if multiple taus passed
       if (!myMultipleTausPassForBaselineStatus) increment(fBaselineOneTauCounter);
       //hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
-      return doBaselineAnalysis(iEvent, iSetup, tauDataForBaseline.getSelectedTau(), pvData, myFakeTauStatus);
+      return doBaselineAnalysis(iEvent, iSetup, tauDataForBaseline.getSelectedTau(), pvData, genData);
     }
     // end of baseline selection
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -436,7 +439,6 @@ namespace HPlus {
       increment(fInvertedTauIDCounter);
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForInverted.getSelectedTau()));
-      //bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
       fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
       fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauDataForInverted, tauMatchData, fMETSelection);
@@ -469,7 +471,7 @@ namespace HPlus {
     return true;
   }
 
-  bool SignalAnalysisInvertedTau::doBaselineAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData, bool myFakeTauStatus) {
+  bool SignalAnalysisInvertedTau::doBaselineAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData) {
     SplittedHistogramHandler& myHandler = fCommonPlots.getSplittedHistogramHandler();
 //------ Veto against second tau in event
     // Implement only, if necessary
@@ -503,11 +505,17 @@ namespace HPlus {
 
     // Obtain transverse mass for plotting
     double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metDataTmp.getSelectedMET()));
-    // FIXME: add here full mass value
+    double invariantMass = -1.0;
+    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    if (btagDataTmp.passedEvent()) {
+      FullHiggsMassCalculator::Data fullHiggsMassData = fFullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, selectedTau, btagDataTmp, metDataTmp, &genData);
+      if (fullHiggsMassData.passedEvent()) {
+        invariantMass = fullHiggsMassData.getHiggsMass();
+      }
+    }
     myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetSF, transverseMass);
 
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
-    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     double myWeightWithBtagSF = fEventWeight.getWeight() * btagDataTmp.getScaleFactor();
 
     if (btagDataTmp.passedEvent()) {
@@ -525,9 +533,11 @@ namespace HPlus {
     // At this point, let's fill histograms for closure test and for normalisation
     myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearTailKiller, metDataTmp.getSelectedMET()->et()); // no btag scale factor needed
     myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearTailKiller, transverseMass); // no btag scale factor needed
+    if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearTailKiller, invariantMass);
     if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
       myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, metDataTmp.getSelectedMET()->et());
       myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, transverseMass);
+      if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, invariantMass);
     }
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
     //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
@@ -651,14 +661,21 @@ namespace HPlus {
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metDataTmp.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     increment(fInvertedMetTriggerScaleFactorCounter);
     fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(iEvent);
-    // Obtain transverse mass for plotting
+    // Obtain transverse mass and invariant mass for plotting
     double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metDataTmp.getSelectedMET()));
+    double invariantMass = -1.0;
+    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    if (btagDataTmp.passedEvent()) {
+      FullHiggsMassCalculator::Data fullHiggsMassData = fFullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, selectedTau, btagDataTmp, metDataTmp, &genData);
+      if (fullHiggsMassData.passedEvent()) {
+        invariantMass = fullHiggsMassData.getHiggsMass();
+      }
+    }
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterJetCut, selectedTau->pt());
     myHandler.fillShapeHistogram(hMETInvertedTauIdAfterMetSF, metDataTmp.getSelectedMET()->et());
     myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMetSF, transverseMass);
 
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
-    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     double myWeightWithBtagSF = fEventWeight.getWeight() * btagDataTmp.getScaleFactor();
     if(btagDataTmp.passedEvent()) {
       myHandler.fillShapeHistogram(hMETInvertedTauIdAfterMetSFPlusBtag, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
@@ -678,9 +695,11 @@ namespace HPlus {
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterCollinearTailKiller, selectedTau->pt());
     myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearTailKiller, metDataTmp.getSelectedMET()->et());
     myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearTailKiller, transverseMass);
+    if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearTailKiller, invariantMass);
     if (qcdTailKillerDataCollinear.passedBackToBackCuts()) { // Pass also back-to-back cuts
       myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, metDataTmp.getSelectedMET()->et());
       myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, transverseMass);
+      if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, invariantMass);
     }
 
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
@@ -730,7 +749,7 @@ namespace HPlus {
       myHandler.fillShapeHistogram(hNBInvertedTauIdJetDphi, btagDataTmp.getSelectedJets().size());
     }
 
-    // mt  with b veto
+    // mt with b veto
     if( btagDataTmp.getSelectedJets().size() < 1) {
       increment(fInvertedBvetoCounter); // NOTE: incorrect count because no btag scale factor has been applied
       myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBjetVeto, selectedTau->pt(), myWeightWithBtagSF);
@@ -828,14 +847,13 @@ namespace HPlus {
       hTransverseMassWithTopCut->Fill(transverseMass);
       if(transverseMass > 80 ) increment(ftransverseMassCut100TopCounter);   
     } 
-    
+
     // All selections passed
     fCommonPlots.fillControlPlotsAfterAllSelections(iEvent, transverseMass);
     increment(fInvertedSelectedEventsCounter);
 
     //------ Invariant Higgs mass
-    FullHiggsMassCalculator::Data fullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, selectedTau, btagData,
-										       metData, &genData);
+    FullHiggsMassCalculator::Data fullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, selectedTau, btagData, metData, &genData);
     if (!fullHiggsMassData.passedEvent()) return false;
     fCommonPlots.fillControlPlotsAfterAllSelectionsWithFullMass(iEvent, fullHiggsMassData);
     increment(fInvertedSelectedEventsInvariantMassCounter);
