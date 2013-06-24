@@ -592,7 +592,10 @@ class InvertedTauID:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
         if "NoBtaggingTailKillerClosure" in name: 
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
-            
+        if "MtWithAllCutsTailKillerClosure" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+
+                
        # Set the legend styles
         plot.histoMgr.setHistoLegendStyleAll("P")
     
@@ -691,15 +694,8 @@ class InvertedTauID:
             plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymax": 8, "xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
-        if "MtNormalisedBvetoNoDphiCuts" in name:
-            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymax": 16, "xmax": 300},
-                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
-                             )
-            
-        if "MtPhiCutNormalisedBveto" in name:
-            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1,"ymax": 50, "ymaxfactor": 0.2, "xmax": 300},
-                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
-                             )
+
+ 
         if "mtBTagVsBvetoInverted" in name:
             plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymax":100,"xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
@@ -733,9 +729,6 @@ class InvertedTauID:
             plot.createFrame("purity"+self.label, opts={"ymin":0.2,"ymax":1.0, "xmax": 300},
                              createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
 
-        if "BtagEffVsMet"  in name:
-            plot.createFrame("efficiency"+self.label, opts={"ymin":0.,"ymax":0.4, "xmax": 400},
-                             createRatio=False,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
 
         if "MtInvertedVsBaselineSystematic" in name:      
             plot.createFrame("systematics"+self.label, opts={"ymin":0.,"ymax":15, "xmax": 300},
@@ -745,7 +738,10 @@ class InvertedTauID:
         if "MtWithAllCutsTailKiller" in name:      
             plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":10, "xmax": 300},
                              createRatio=False,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
-            
+        if "MtWithAllCutsTailKillerClosure" in name:      
+            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":10, "xmax": 300},
+                             createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+                        
         if "RadiusJet0BackToBack"  in name:      
             plot.createFrame("Radius"+self.label, opts={"ymin":0.,"ymax":50, "xmax": 260},
                              createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
@@ -824,6 +820,10 @@ class InvertedTauID:
             plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
         if "NoBtaggingTailKillerClosure" in name:
             plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
+
+        if "MtWithAllCutsTailKillerClosure" in name:              
+            plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
+
             
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
@@ -924,6 +924,12 @@ class InvertedTauID:
         if "NoBtaggingTailKillerClosure" in name:
             histograms.addText(0.2, 0.85, "No b tagging", 20)
             histograms.addText(0.2, 0.75, "TailKiller: ZeroPlus", 20)
+        if "MtWithAllCutsTailKillerClosure" in name:
+            histograms.addText(0.6, 0.8, "All selection cuts", 22)
+            #histograms.addText(0.6, 0.72, "MET > 60 GeV", 22)
+            histograms.addText(0.55, 0.72, "TailKiller: MediumPlus", 22)
+            #histograms.addText(0.6, 0.72, "no TailKiller cuts", 22)
+            
         plot.draw() 
         plot.save()
 

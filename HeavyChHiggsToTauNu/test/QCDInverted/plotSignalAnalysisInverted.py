@@ -56,12 +56,12 @@ mcOnlyLumi = 5000 # pb
 searchMode = "Light"
 #searchMode = "Heavy"
 
-optMode = "OptQCDTailKillerZeroPlus"
+#optMode = "OptQCDTailKillerZeroPlus"
 #optMode = "OptQCDTailKillerLoosePlus"
 #optMode = "OptQCDTailKillerMediumPlus"
 #optMode = "OptQCDTailKillerTightPlus"
 
-#optMode = ""
+optMode = ""
 
 
 #dataEra = "Run2011A"
@@ -355,8 +355,7 @@ def controlPlots(datasets):
     hmtPhivetoNortt = []
     hmetBtagging = []
     hmetBveto = []
-    closureAfterJets = []
-    closureAfterJetsTailKiller = []
+
     NoBtaggingTailKiller = []
     hmtBvetoTailKiller = []
     hmtbSoft = []
@@ -573,38 +572,33 @@ def controlPlots(datasets):
 
  ## mt baseline, plots and EWK substraction
             
- 
-   
     closureBaselineBvetoTailKiller = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTauIdBvetoTailKiller")])
     closureBaselineBvetoTailKillerEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdBvetoTailKiller")])
     
-
-   
-    
-   
-    mtEWKBaseline = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdAllCutsTailKiller")])
     mtvEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdBveto")])            
     mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("Inverted/MTInvertedAllCutsTailKiller")]) 
     mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTauIdAllCutsTailKiller")])   
     mtPhivEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdBvetoTailKiller")])
 
-    
-    mtEWKinverted = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("Inverted/MTInvertedAllCutsTailKiller")])
-    mtEWKinverted.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    mtEWKinverted._setLegendStyles()
-    mtEWKinverted._setLegendLabels()
-    mtEWKinverted.histoMgr.setHistoDrawStyleAll("P")
-    mtEWKinverted.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
-    hmtEWKinverted = mtEWKinverted.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MTInvertedAllCutsTailKiller")
-    # norm = Norm_overall *(1-QCDfract) (0.034446/0.87 * 0.13 = 0.0051
-    hmtEWKinverted.Scale(normEWK_inc)
-
-     
   
+## closure all selection cuts
+    closureBaselineTailKiller = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTauIdAllCutsTailKiller")])  
+    closureBaselineTailKiller.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    closureBaselineTailKiller._setLegendStyles()
+    closureBaselineTailKiller._setLegendLabels()
+    closureBaselineTailKiller.histoMgr.setHistoDrawStyleAll("P")
+    closureBaselineTailKiller.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hClosureBaselineTailKiller = closureBaselineTailKiller.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine//MTBaseLineTauIdAllCutsTailKiller")
 
-    
-    
-
+    closureBaselineTailKillerEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("BaseLine/MTBaseLineTauIdAllCutsTailKiller")])
+    closureBaselineTailKillerEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    closureBaselineTailKillerEWK._setLegendStyles()
+    closureBaselineTailKillerEWK._setLegendLabels()
+    closureBaselineTailKillerEWK.histoMgr.setHistoDrawStyleAll("P")
+    closureBaselineTailKillerEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hClosureBaselineTailKillerEWK = closureBaselineTailKillerEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/MTBaseLineTauIdAllCutsTailKiller")    
+    hClosureBaselineTailKiller_QCD = hClosureBaselineTailKiller.Clone("QCD")
+    hClosureBaselineTailKiller_QCD.Add(hClosureBaselineTailKillerEWK,-1)
 
 ## closure b veto and MEt cut
     closureBaselineBvetoMetCutTailKiller = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTauIdBvetoTailKiller")])  
@@ -625,7 +619,7 @@ def controlPlots(datasets):
     hClosureBaselineBvetoMetCutTailKiller_QCD = hClosureBaselineBvetoMetCutTailKiller.Clone("QCD")
     hClosureBaselineBvetoMetCutTailKiller_QCD.Add(hClosureBaselineBvetoMetCutTailKillerEWK,-1)
 
-
+    
 ## closure soft b  and MEt cut
     closureBaselineSoftBtaggingTK = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("BaseLine/MTBaseLineTauIdSoftBtaggingTK")])  
 #    closureBaselineSoftBtaggingTK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
@@ -719,7 +713,12 @@ def controlPlots(datasets):
     invertedQCD.mtComparison(allCuts_inverted, allCuts_inverted,"MtWithAllCutsTailKiller")
     
 
-
+# mt plot with TailKiller ans baseline 
+    allCuts_inverted = hmtSum.Clone("mtSum")
+    allCuts_baseline = hClosureBaselineTailKiller_QCD.Clone("allcuts_QCD")
+    invertedQCD.setLabel("MtWithAllCutsTailKillerClosure")
+    invertedQCD.mtComparison(allCuts_inverted, allCuts_baseline,"MtWithAllCutsTailKillerClosure")
+    
 def scaleMC(histo, scale):
     if histo.isMC():
         th1 = histo.getRootHisto()
