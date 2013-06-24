@@ -128,7 +128,7 @@ namespace HPlus {
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
  
     TFileDirectory myInvertedDir = fs->mkdir("Inverted");
-    TFileDirectory myBaselineDir = fs->mkdir("BaseLine");
+    TFileDirectory myBaselineDir = fs->mkdir("baseline");
     // Book histograms filled in the analysis body
 
     // Obtain common plot dimension specifications
@@ -167,67 +167,67 @@ namespace HPlus {
     // Tau pt for inverted selection after a selection
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterTauVeto, "SelectedTau_pT_AfterTauVeto", "#tau p_{T}, GeV/c", 200, 0.0, 400.0);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterJetCut, "SelectedTau_pT_AfterJetCut", "#tau p_{T}, GeV/c", 200, 0.0 , 400.0 );
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterCollinearTailKiller, "SelectedTau_pT_CollinearTailKiller", "#tau p_{T}, GeV/c", 200, 0.0 , 400.0 );
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterCollinearCuts, "SelectedTau_pT_CollinearCuts", "#tau p_{T}, GeV/c", 200, 0.0 , 400.0 );
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterBtagging, "SelectedTau_pT_AfterBtagging", "#tau p_{T}, GeV/c", 200, 0.0 , 400.0);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterBjetVeto, "SelectedTau_pT_AfterBveto", "#tau p_{T}, GeV/c", 200, 0.0, 400.0);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterBjetVetoPhiCuts, "SelectedTau_pT_AfterBvetoPhiCuts", "#tau p_{T}, GeV/c", 200, 0.,400.0);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterBackToBackTailKiller, "SelectedTau_pT_BackToBackTailKiller", "#tau p_{T}, GeV/c", 200, 0.0 , 400.0);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterBackToBackCuts, "SelectedTau_pT_BackToBackCuts", "#tau p_{T}, GeV/c", 200, 0.0 , 400.0);
 
     // baseline MET histos
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterJets, "MET_BaselineTauIdJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSFPlusBtag, "MET_BaselineTauIdBtag", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSFPlusBveto, "MET_BaselineTauIdAfterMETPlusBveto", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSF, "MET_BaselineTauIdMetSF", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearTailKiller, "MET_BaseLineTauIdJetsCollinear", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, "MET_BaseLineTauIdBtagCollinearPlusBackToBack", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearTailKillerPlusBtag, "MET_BaseLineTauIdBtagCollinear", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearTailKillerPlusBveto, "MET_BaseLineTauIdAfterMETPlusBvetoCollinear", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterJets, "METBaselineTauIdAfterJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSF, "METBaselineTauIdaFTERMetSF", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSFPlusBtag, "METBaselineTauIdAfterMetSFPlusBtag", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSFPlusBveto, "METBaselineTauIdAfterMetSFPlusBveto", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearCuts, "METBaselineTauIdAfterCollinearCuts", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, "METBaselineTauIdAfterCollinearCutsPlusBackToBackCuts", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusBtag, "METBaselineTauIdAfterCollinearCutsPlusBtag", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusBveto, "METBaselineTauIdAfterCollinearCutsPlusBveto", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     // baseline MT histos
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetSF, "MTBaselineTauIdAfterMetSF", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMTBaselineTauIdAfterCollinearTailKiller, "MTBaseLineTauIdAfterCollinearTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMTBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, "MTBaseLineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterCollinearTailKillerPlusBtag, "MTBaseLineTauIdAfterCollinearTailKillerPlusBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterCollinearTailKillerPlusBtagPlusBackToBackTailKiller, "MTBaseLineTauIdAfterCollinearTailKillerPlusBtagPlusBackToBackTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterCollinearTailKillerPlusBveto, "MTBaseLineTauIdAfterCollinearTailKillerPlusBveto", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterCollinearTailKillerPlusBvetoPlusBackToBackTailKiller, "MTBaseLineTauIdAfterCollinearTailKillerPlusBvetoPlusBackToBackTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMet, "MTBaseLineTauIdAfterMet", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetPlusBackToBackTailKiller, "MTBaseLineTauIdAfterMetPlusBackToBackTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetPlusBveto, "MTBaseLineTauIdAfterMETPlusBveto", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetPlusBvetoPlusBackToBackTailKiller, "MTBaseLineTauIdAfterMETPlusBvetoTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller, "MTBaseLineTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterBtag, "MTBaseLineTauIdBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterBackToBackTailKiller, "MTBaseLineTauIdAllCutsTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMTBaselineTauIdAfterCollinearCuts, "MTBaselineTauIdAfterCollinearCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMTBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, "MTBaselineTauIdAfterCollinearCutsPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterCollinearCutsPlusBtag, "MTBaselineTauIdAfterCollinearCutsPlusBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts, "MTBaselineTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterCollinearCutsPlusBveto, "MTBaselineTauIdAfterCollinearCutsPlusBveto", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterCollinearCutsPlusBvetoPlusBackToBackCuts, "MTBaselineTauIdAfterCollinearCutsPlusBvetoPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMet, "MTBaselineTauIdAfterMet", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetPlusBackToBackCuts, "MTBaselineTauIdAfterMetPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetPlusBveto, "MTBaselineTauIdAfterMetPlusBveto", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetPlusBvetoPlusBackToBackCuts, "MTBaselineTauIdAfterMetPlusBvetoPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts, "MTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterBtag, "MTBaselineTauIdAfterBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterBackToBackCuts, "MTBaselineTauIdAfterBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     // baseline invariant mass histos
-    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hInvMassBaselineTauIdAfterCollinearTailKiller, "InvMassBaseLineTauIdAfterCollinearTailKiller", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
-    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hInvMassBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, "InvMassBaseLineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hInvMassBaselineTauIdAfterCollinearCuts, "INVMASSBaselineTauIdAfterCollinearCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hInvMassBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, "INVMASSBaselineTauIdAfterCollinearCutsPlusBackToBackCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     // inverted MET histos
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterJets, "MET_InvertedTauIdJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterMetSF, "MET_InvertedTauIdMetSF", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterMetSFPlusBtag, "MET_InvertedTauIdBtag", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterMetSFPlusBveto, "MET_InvertedTauIdAfterMETPlusBveto", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterCollinearTailKiller, "MET_InvertedTauIdJetsCollinear", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, "MET_InvertedTauIdJetsCollinearPlusBackToBack", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterCollinearTailKillerPlusBtag, "MET_InvertedTauIdBtagCollinear", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterCollinearTailKillerPlusBveto, "MET_InvertedTauIdAfterMETPlusBvetoCollinear", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterBackToBackTailKiller, "MET_InvertedTauAllCuts", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterJets, "METInvertedTauIdAfterJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterMetSF, "METInvertedTauIdAfterMetSF", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterMetSFPlusBtag, "METInvertedTauIdAfterMetSFPlusBtag", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterMetSFPlusBveto, "METInvertedTauIdAfterMetSFPlusBveto", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterCollinearCuts, "METInvertedTauIdAfterCollinearCuts", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, "METInvertedTauIdAfterCollinearCutsPlusBackToBackCuts", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBtag, "METInvertedTauIdAfterCollinearCutsPlusBtag", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBveto, "METInvertedTauIdAfterCollinearCutsPlusBveto", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterBackToBackCuts, "METInvertedTauIdAfterBackToBackCuts", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     // inverted MT histos
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetSF, "MTInvertedTauIdAfterMetSF", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdAfterCollinearTailKiller, "MTInvertedTauIdAfterCollinearTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, "MTInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterCollinearTailKillerPlusBtag, "MTInvertedTauIdBtagNoMetCut", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterCollinearTailKillerPlusBtagPlusBackToBackTailKiller, "MTInvertedTauIdBtagNoMetCutTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterCollinearTailKillerPlusBveto, "MTInvertedTauIdAfterMETPlusBvetoNoMetCut", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterCollinearTailKillerPlusBvetoPlusBackToBackTailKiller, "MTInvertedTauIdAfterMETPlusBvetoNoMetCutTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdAfterCollinearCuts, "MTInvertedTauIdAfterCollinearCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, "MTInvertedTauIdAfterCollinearCutsPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterCollinearCutsPlusBtag, "MTInvertedTauIdAfterCollinearCutsPlusBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts, "MTInvertedTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterCollinearCutsPlusBveto, "MTInvertedTauIdAfterCollinearCutsPlusBveto", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterCollinearCutsPlusBvetoPlusBackToBackCuts, "MTInvertedTauIdAfterCollinearCutsPlusBvetoPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMet, "MTInvertedTauIdAfterMet", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetPlusBackToBackTailKiller, "MTInvertedNoBtaggingTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetPlusBveto, "MTInvertedTauIdAfterMETPlusBveto", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetPlusBvetoPlusBackToBackTailKiller, "MTInvertedTauIdAfterMETPlusBvetoTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller, "MTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterBtag, "MTInvertedTauIdBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterBackToBackTailKiller, "MTInvertedAllCutsTailKiller", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetPlusBackToBackCuts, "MTInvertedTauIdAfterMetPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetPlusBveto, "MTInvertedTauIdAfterMetPlusBveto", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetPlusBvetoPlusBackToBackCuts, "MTInvertedTauIdAfterMetPlusBvetoPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts, "MTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterBtag, "MTInvertedTauIdAfterBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterBackToBackCuts, "MTInvertedTauIdAfterBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     // inverted invariant mass histos
-    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hInvMassInvertedTauIdAfterCollinearTailKiller, "InvMassInvertedTauIdAfterCollinearTailKiller", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
-    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hInvMassInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, "InvMassInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hInvMassInvertedTauIdAfterCollinearCuts, "INVMASSInvertedTauIdAfterCollinearCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hInvMassInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, "INVMASSInvertedTauIdAfterCollinearCutsPlusBackToBackCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
 
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hTopMass, "TopMass", "m_{top}, GeV/c^2", 200, 0.0, 400.0 );
     //     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hHiggsMassTailKiller, "HiggsMassTailKiller", 250, 0.0 , 500.0 );
@@ -531,13 +531,13 @@ namespace HPlus {
     increment(fBaselineQCDTailKillerCollinearCounter);
 
     // At this point, let's fill histograms for closure test and for normalisation
-    myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearTailKiller, metDataTmp.getSelectedMET()->et()); // no btag scale factor needed
-    myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearTailKiller, transverseMass); // no btag scale factor needed
-    if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearTailKiller, invariantMass);
+    myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCuts, metDataTmp.getSelectedMET()->et()); // no btag scale factor needed
+    myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCuts, transverseMass); // no btag scale factor needed
+    if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearCuts, invariantMass);
     if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
-      myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, metDataTmp.getSelectedMET()->et());
-      myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, transverseMass);
-      if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, invariantMass);
+      myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, metDataTmp.getSelectedMET()->et());
+      myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, transverseMass);
+      if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
     }
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
     //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
@@ -545,18 +545,18 @@ namespace HPlus {
     hNBBaselineTauIdJet->Fill(btagDataTmp.getSelectedJets().size(), myWeightWithBtagSF);
     if (btagDataTmp.passedEvent()) {
       // mT with b veto in bins
-      myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearTailKillerPlusBtag, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
-      myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearTailKillerPlusBtag, transverseMass, myWeightWithBtagSF);
+      myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBtag, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
+      myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBtag, transverseMass, myWeightWithBtagSF);
       if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
-        myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearTailKillerPlusBtagPlusBackToBackTailKiller, transverseMass, myWeightWithBtagSF);
+        myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
       }
     }
     if (btagDataTmp.getSelectedJets().size() < 1) {
       // mT with b veto in bins
-      myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearTailKillerPlusBveto, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
-      myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearTailKillerPlusBveto, transverseMass, myWeightWithBtagSF);
+      myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBveto, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
+      myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBveto, transverseMass, myWeightWithBtagSF);
       if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
-        myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearTailKillerPlusBvetoPlusBackToBackTailKiller, transverseMass, myWeightWithBtagSF);
+        myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBvetoPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
       }
     }
 
@@ -568,7 +568,7 @@ namespace HPlus {
     // mT after jets and met in bins
     myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMet, transverseMass);
     if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
-      myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetPlusBackToBackTailKiller, transverseMass);
+      myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetPlusBackToBackCuts, transverseMass);
     }
 
     // mT with b veto in bins
@@ -576,14 +576,14 @@ namespace HPlus {
       myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetPlusBveto, transverseMass, myWeightWithBtagSF);
       // mT with b veto and deltaPhi cuts in bins
       if (qcdTailKillerDataCollinear.passedEvent()) {
-        myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetPlusBvetoPlusBackToBackTailKiller, transverseMass, myWeightWithBtagSF);
+        myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetPlusBvetoPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
       }
     }
 
     // MT for closure test with soft b tagging  
     if (btagDataTmp.getSelectedSubLeadingJets().size() > 0) {
       if (qcdTailKillerDataCollinear.passedEvent()) {
-        myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller, transverseMass, myWeightWithBtagSF);
+        myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
       }
     }
 
@@ -617,7 +617,7 @@ namespace HPlus {
 
     // mT with b tagging and deltaPhi cuts 
     //    myHandler.fillShapeHistogram(hMTBaselineTauIdPhi, transverseMass);
-    myHandler.fillShapeHistogram(hMTBaselineTauIdAfterBackToBackTailKiller, transverseMass);
+    myHandler.fillShapeHistogram(hMTBaselineTauIdAfterBackToBackCuts, transverseMass);
     increment(fBaselineSelectedEventsCounter);
 
     return true;
@@ -692,14 +692,14 @@ namespace HPlus {
     increment(fInvertedQCDTailKillerCollinearCounter);
 
     // At this point, let's fill histograms for closure test and for normalisation
-    myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterCollinearTailKiller, selectedTau->pt());
-    myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearTailKiller, metDataTmp.getSelectedMET()->et());
-    myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearTailKiller, transverseMass);
-    if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearTailKiller, invariantMass);
+    myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterCollinearCuts, selectedTau->pt());
+    myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCuts, metDataTmp.getSelectedMET()->et());
+    myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCuts, transverseMass);
+    if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearCuts, invariantMass);
     if (qcdTailKillerDataCollinear.passedBackToBackCuts()) { // Pass also back-to-back cuts
-      myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, metDataTmp.getSelectedMET()->et());
-      myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, transverseMass);
-      if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearTailKillerPlusBackToBackTailKiller, invariantMass);
+      myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, metDataTmp.getSelectedMET()->et());
+      myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, transverseMass);
+      if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
     }
 
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
@@ -708,19 +708,19 @@ namespace HPlus {
     // MT with b tagging
     if(btagDataTmp.passedEvent()) {
       increment(fInvertedBTaggingBeforeMETCounter); // NOTE: Will not give correct value for MC because btag SF is not applied
-      myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearTailKillerPlusBtag, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
-      myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearTailKillerPlusBtag, transverseMass, myWeightWithBtagSF);
+      myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBtag, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
+      myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBtag, transverseMass, myWeightWithBtagSF);
       if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
-        myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearTailKillerPlusBtagPlusBackToBackTailKiller, transverseMass, myWeightWithBtagSF);
+        myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
       }
     }
     // MT with b veto
     if( btagDataTmp.getSelectedJets().size() < 1) {
       increment(fInvertedBjetVetoCounter);// NOTE: Will not give correct value for MC because btag SF is not applied
-      myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearTailKillerPlusBveto, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
-      myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearTailKillerPlusBveto, transverseMass, myWeightWithBtagSF);
+      myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBveto, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
+      myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBveto, transverseMass, myWeightWithBtagSF);
       if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
-        myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearTailKillerPlusBvetoPlusBackToBackTailKiller, transverseMass, myWeightWithBtagSF);
+        myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBvetoPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
       }
     }
 
@@ -745,7 +745,7 @@ namespace HPlus {
     myHandler.fillShapeHistogram(hDeltaPhiInvertedNoB, deltaPhi);
     if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
       // mt  before b tagging with deltaPhi for factorising b tagging 
-      myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMetPlusBackToBackTailKiller, transverseMass);
+      myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMetPlusBackToBackCuts, transverseMass);
       myHandler.fillShapeHistogram(hNBInvertedTauIdJetDphi, btagDataTmp.getSelectedJets().size());
     }
 
@@ -759,14 +759,14 @@ namespace HPlus {
         //    if ( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut  ) {
         increment(fInvertedBvetoDeltaPhiCounter);  // NOTE: incorrect count because no btag scale factor has been applied
         myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBjetVetoPhiCuts, selectedTau->pt(), myWeightWithBtagSF);
-        myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMetPlusBvetoPlusBackToBackTailKiller, transverseMass, myWeightWithBtagSF);
+        myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMetPlusBvetoPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
       }
     }
 
     // MT for closure test with soft b tagging  
     if( btagDataTmp.getSelectedSubLeadingJets().size() > 0) {  
       if (qcdTailKillerDataCollinear.passedEvent()) {
-        myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackTailKiller, transverseMass, myWeightWithBtagSF);
+        myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
       }
     }
 
@@ -810,9 +810,9 @@ namespace HPlus {
       increment(fInvertedDeltaPhiTauMETCounter);
     }
 
-    myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBackToBackTailKiller, selectedTau->pt());
-    myHandler.fillShapeHistogram(hMETInvertedTauIdAfterBackToBackTailKiller, metData.getSelectedMET()->et());
-    myHandler.fillShapeHistogram(hMTInvertedTauIdAfterBackToBackTailKiller, transverseMass);
+    myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBackToBackCuts, selectedTau->pt());
+    myHandler.fillShapeHistogram(hMETInvertedTauIdAfterBackToBackCuts, metData.getSelectedMET()->et());
+    myHandler.fillShapeHistogram(hMTInvertedTauIdAfterBackToBackCuts, transverseMass);
 
     // Top reconstruction
     TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
