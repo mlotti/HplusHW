@@ -7,7 +7,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.UnfoldedHistogramReader import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.UnfoldedHistogramReader import *
 import math
 import os
 import sys
