@@ -77,7 +77,6 @@ private:
 
   HPlus::TreeJetBranches fJetBranches;
 
-  const bool fMuonEnabled;
   HPlus::TreeMuonBranches fMuonBranches;
 
   HPlus::TreeGenTauBranches fGenTaus;
@@ -103,7 +102,6 @@ HPlusTauNtupleAnalyzer::HPlusTauNtupleAnalyzer(const edm::ParameterSet& iConfig)
   fTauEnabled(iConfig.getParameter<bool>("tauEnabled")),
   fTauBranches(iConfig),
   fJetBranches(iConfig.getParameter<edm::ParameterSet>("jets"), false),
-  fMuonEnabled(iConfig.getParameter<bool>("muonsEnabled")),
   fMuonBranches(iConfig.getParameter<edm::ParameterSet>("muons")),
   fGenTaus("gentaus"),
   fGenTTBarEnabled(iConfig.getParameter<bool>("genTTBarEnabled")),
@@ -137,8 +135,7 @@ HPlusTauNtupleAnalyzer::HPlusTauNtupleAnalyzer(const edm::ParameterSet& iConfig)
 
   fJetBranches.book(fTree);
 
-  if(fMuonEnabled)
-    fMuonBranches.book(fTree);
+  fMuonBranches.book(fTree);
 
   fGenTaus.book(fTree);
 
@@ -229,13 +226,11 @@ void HPlusTauNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventS
 
   fJetBranches.setValues(iEvent);
 
-  if(fMuonEnabled) {
-    if(iEvent.isRealData()) {
-      fMuonBranches.setValues(iEvent);
-    }
-    else {
-      fMuonBranches.setValues(iEvent, *hgenparticles);
-    }
+  if(iEvent.isRealData()) {
+    fMuonBranches.setValues(iEvent);
+  }
+  else {
+    fMuonBranches.setValues(iEvent, *hgenparticles);
   }
 
   for(size_t i=0; i<fMets.size(); ++i) {

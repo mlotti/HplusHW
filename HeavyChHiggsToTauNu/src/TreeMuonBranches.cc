@@ -18,9 +18,13 @@ namespace HPlus {
     fMuonCorrectedSrc(iConfig.getParameter<edm::InputTag>("correctedSrc")),
     fPrefix(prefix+"_"),
     fMuonsGenMatch(fPrefix+"genmatch"),
+    fEnabled(iConfig.getParameter<bool>("enabled")),
     fMuonCorrectedEnabled(iConfig.getParameter<bool>("correctedEnabled")),
     fTunePEnabled(iConfig.getParameter<bool>("tunePEnabled"))
   {
+    if(!enabled())
+      return;
+    
     edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("functions");
     std::vector<std::string> names = pset.getParameterNames();
     fMuonsFunctions.reserve(names.size());
@@ -39,6 +43,9 @@ namespace HPlus {
 
 
   void TreeMuonBranches::book(TTree *tree) {
+    if(!enabled())
+      return;
+
     tree->Branch((fPrefix+"p4").c_str(), &fMuons);
     if(fMuonCorrectedEnabled) {
       tree->Branch((fPrefix+"correctedP4").c_str(), &fMuonsCorrected);
@@ -59,6 +66,9 @@ namespace HPlus {
   }
 
   size_t TreeMuonBranches::setValues(const edm::Event& iEvent) {
+    if(!enabled())
+      return 0;
+
     edm::Handle<edm::View<pat::Muon> > hmuons;
     iEvent.getByLabel(fMuonSrc, hmuons);
     setValues(hmuons->ptrVector(), iEvent);
@@ -79,6 +89,9 @@ namespace HPlus {
   
 
   size_t TreeMuonBranches::setValues(const edm::Event& iEvent, const edm::View<reco::GenParticle>& genParticles) {
+    if(!enabled())
+      return 0;
+
     edm::Handle<edm::View<pat::Muon> > hmuons;
     iEvent.getByLabel(fMuonSrc, hmuons);
     setValues(hmuons->ptrVector(), iEvent);
@@ -103,6 +116,9 @@ namespace HPlus {
   }
 
   void TreeMuonBranches::setValues(const edm::PtrVector<pat::Muon>& muons, const edm::Event& iEvent) {
+    if(!enabled())
+      return;
+
     for(size_t i=0; i<muons.size(); ++i) {
       fMuons.push_back(muons[i]->p4());
       fMuonsCharge.push_back(muons[i]->charge());
@@ -128,6 +144,9 @@ namespace HPlus {
   }
 
   void TreeMuonBranches::setValuesCorrected(const edm::PtrVector<pat::Muon>& muons) {
+    if(!enabled())
+      return;
+
     for(size_t i=0; i<muons.size(); ++i) {
       fMuonsCorrected.push_back(muons[i]->p4());
     }

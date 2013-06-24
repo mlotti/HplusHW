@@ -41,6 +41,8 @@ namespace HPlus {
 
     void reset();
 
+    bool enabled() const { return fEnabled; }
+
     const edm::InputTag& getInputTag() const { return fMuonSrc; }
     const std::string getPrefix() const { return fPrefix; }
 
@@ -63,6 +65,7 @@ namespace HPlus {
     std::vector<TreeValueMapBranch<bool> > fMuonsBools;
     TreeGenParticleBranches fMuonsGenMatch;
 
+    const bool fEnabled;
     const bool fMuonCorrectedEnabled;
     const bool fTunePEnabled;
   };

@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 muons = cms.PSet(
+    enabled = cms.bool(True),
     src = cms.InputTag("selectedPatMuons"),
     correctedEnabled = cms.bool(False),
     correctedSrc = cms.InputTag("NOT_SET"),
