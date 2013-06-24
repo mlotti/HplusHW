@@ -131,8 +131,8 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
     # Goal for skim jobs is ~5 hour jobs
     # Goal for skimAnalysis jobs is 30k events/job
     njobs = {
-        "SingleMu_160431-163261_2011A_Nov08": TaskDef(njobsIn=100, njobsOut= 2),
-        "SingleMu_163270-163869_2011A_Nov08": TaskDef(njobsIn=250, njobsOut= 3),
+        "SingleMu_160431-163261_2011A_Nov08": TaskDef(njobsIn=100, njobsOut= 1),
+        "SingleMu_163270-163869_2011A_Nov08": TaskDef(njobsIn=250, njobsOut= 2),
         "SingleMu_165088-166150_2011A_Nov08": TaskDef(njobsIn=490, njobsOut= 4),
 
         "SingleMu_166161-166164_2011A_Nov08": TaskDef(njobsIn=  2, njobsOut= 1),
@@ -152,18 +152,18 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         "SingleMu_175832-180252_2011B_Nov19": TaskDef(njobsIn=4000, njobsOut=40),
 
         # MC, triggered with mcTrigger
-        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=4990, njobsOut=50),
+        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=4990, njobsOut=100),
         "WJets_TuneZ2_Fall11":               TaskDef(njobsIn= 700, njobsOut=12),
         "W1Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 700, njobsOut=20),
         "W2Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 750, njobsOut=20),
         "W3Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 750, njobsOut=20),
         "W3Jets_TuneZ2_v2_Fall11":          TaskDef(njobsIn= 750, njobsOut=20),
-        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 750, njobsOut=12),
-        "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn=1700, njobsOut=10),
+        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 750, njobsOut=20),
+        "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn=1700, njobsOut=40),
         "T_t-channel_TuneZ2_Fall11":         TaskDef(njobsIn= 150, njobsOut= 2),
-        "Tbar_t-channel_TuneZ2_Fall11":      TaskDef(njobsIn=  70, njobsOut= 2),
+        "Tbar_t-channel_TuneZ2_Fall11":      TaskDef(njobsIn=  70, njobsOut= 1),
         "T_tW-channel_TuneZ2_Fall11":        TaskDef(njobsIn= 100, njobsOut= 2),
-        "Tbar_tW-channel_TuneZ2_Fall11":     TaskDef(njobsIn= 100, njobsOut= 1),
+        "Tbar_tW-channel_TuneZ2_Fall11":     TaskDef(njobsIn= 100, njobsOut= 2),
         "T_s-channel_TuneZ2_Fall11":         TaskDef(njobsIn=  15, njobsOut= 1),
         "Tbar_s-channel_TuneZ2_Fall11":      TaskDef(njobsIn=  10, njobsOut= 1),
         "WW_TuneZ2_Fall11":                  TaskDef(njobsIn= 200, njobsOut= 4),
