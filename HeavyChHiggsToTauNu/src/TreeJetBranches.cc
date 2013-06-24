@@ -52,8 +52,9 @@ namespace HPlus {
 
   ////////////////////////////////////////
 
-  TreeJetBranches::TreeJetBranches(const edm::ParameterSet& iConfig, bool jetComposition):
+  TreeJetBranches::TreeJetBranches(const edm::ParameterSet& iConfig, bool jetComposition, const std::string& prefix):
     fJetSrc(iConfig.getParameter<edm::InputTag>("src")),
+    fPrefix(prefix),
     fEnabled(iConfig.getParameter<bool>("enabled")),
     fJetComposition(jetComposition)
   {
@@ -64,7 +65,7 @@ namespace HPlus {
     std::vector<std::string> names = pset.getParameterNames();
     fJetsFunctions.reserve(names.size());
     for(size_t i=0; i<names.size(); ++i) {
-      fJetsFunctions.push_back(JetFunctionBranch("jets_f_"+names[i], pset.getParameter<std::string>(names[i])));
+      fJetsFunctions.push_back(JetFunctionBranch(fPrefix+"f_"+names[i], pset.getParameter<std::string>(names[i])));
     }
 
     edm::ParameterSet pset2 = iConfig.getParameter<edm::ParameterSet>("pileupIDs");
@@ -72,21 +73,21 @@ namespace HPlus {
     fJetsPileupIDs.reserve(names2.size());
     for(size_t i=0; i<names2.size(); ++i) {
       edm::ParameterSet pset3 = pset2.getParameter<edm::ParameterSet>(names2[i]);
-      fJetsPileupIDs.push_back(PileupID("jets_puid_"+names2[i], pset3.getParameter<edm::InputTag>("mvaSrc"), pset3.getParameter<edm::InputTag>("flagSrc")));
+      fJetsPileupIDs.push_back(PileupID(fPrefix+"puid_"+names2[i], pset3.getParameter<edm::InputTag>("mvaSrc"), pset3.getParameter<edm::InputTag>("flagSrc")));
     }
 
     edm::ParameterSet pset3 = iConfig.getParameter<edm::ParameterSet>("floats");
     std::vector<std::string> names3 = pset3.getParameterNames();
     fJetsFloats.reserve(names3.size());
     for(size_t i=0; i<names3.size(); ++i) {
-      fJetsFloats.push_back(TreeValueMapBranch<float>("jets_"+names3[i], pset3.getParameter<edm::InputTag>(names3[i])));
+      fJetsFloats.push_back(TreeValueMapBranch<float>(fPrefix+names3[i], pset3.getParameter<edm::InputTag>(names3[i])));
     }
 
     edm::ParameterSet pset4 = iConfig.getParameter<edm::ParameterSet>("bools");
     std::vector<std::string> names4 = pset4.getParameterNames();
     fJetsBools.reserve(names4.size());
     for(size_t i=0; i<names4.size(); ++i) {
-      fJetsBools.push_back(TreeValueMapBranch<bool>("jets_"+names4[i], pset4.getParameter<edm::InputTag>(names4[i])));
+      fJetsBools.push_back(TreeValueMapBranch<bool>(fPrefix+names4[i], pset4.getParameter<edm::InputTag>(names4[i])));
     }
   }
   TreeJetBranches::~TreeJetBranches() {}
@@ -96,7 +97,7 @@ namespace HPlus {
     if(!enabled())
       return;
 
-    tree->Branch("jets_p4", &fJets);
+    tree->Branch((fPrefix+"p4").c_str(), &fJets);
     for(size_t i=0; i<fJetsFunctions.size(); ++i) {
       fJetsFunctions[i].book(tree);
     }
@@ -111,24 +112,24 @@ namespace HPlus {
     }
 
     if(fJetComposition) {
-      tree->Branch("jets_chf", &fJetsChf); // charged hadron
-      tree->Branch("jets_nhf", &fJetsNhf); // neutral hadron
-      tree->Branch("jets_elf", &fJetsElf);  // electron
-      tree->Branch("jets_phf", &fJetsPhf);  // photon
-      tree->Branch("jets_muf", &fJetsMuf);   // muon
-      tree->Branch("jets_chm", &fJetsChm);
-      tree->Branch("jets_nhm", &fJetsNhm);
-      tree->Branch("jets_elm", &fJetsElm);
-      tree->Branch("jets_phm", &fJetsPhm);
-      tree->Branch("jets_mum", &fJetsMum);
+      tree->Branch((fPrefix+"chf").c_str(), &fJetsChf); // charged hadron
+      tree->Branch((fPrefix+"nhf").c_str(), &fJetsNhf); // neutral hadron
+      tree->Branch((fPrefix+"elf").c_str(), &fJetsElf);  // electron
+      tree->Branch((fPrefix+"phf").c_str(), &fJetsPhf);  // photon
+      tree->Branch((fPrefix+"muf").c_str(), &fJetsMuf);   // muon
+      tree->Branch((fPrefix+"chm").c_str(), &fJetsChm);
+      tree->Branch((fPrefix+"nhm").c_str(), &fJetsNhm);
+      tree->Branch((fPrefix+"elm").c_str(), &fJetsElm);
+      tree->Branch((fPrefix+"phm").c_str(), &fJetsPhm);
+      tree->Branch((fPrefix+"mum").c_str(), &fJetsMum);
     }
-    tree->Branch("jets_numberOfDaughters", &fJetsNumberOfDaughters);
-    tree->Branch("jets_flavour", &fJetsFlavour);
-    tree->Branch("jets_genPartonPdgId", &fJetsGenPartonPdgId);
-    tree->Branch("jets_jecToRaw", &fJetsJec);
-    tree->Branch("jets_area", &fJetsArea);
-    tree->Branch("jets_looseId", &fJetsLooseId);
-    tree->Branch("jets_tightId", &fJetsTightId);
+    tree->Branch((fPrefix+"numberOfDaughters").c_str(), &fJetsNumberOfDaughters);
+    tree->Branch((fPrefix+"flavour").c_str(), &fJetsFlavour);
+    tree->Branch((fPrefix+"genPartonPdgId").c_str(), &fJetsGenPartonPdgId);
+    tree->Branch((fPrefix+"jecToRaw").c_str(), &fJetsJec);
+    tree->Branch((fPrefix+"area").c_str(), &fJetsArea);
+    tree->Branch((fPrefix+"looseId").c_str(), &fJetsLooseId);
+    tree->Branch((fPrefix+"tightId").c_str(), &fJetsTightId);
   }
 
   void TreeJetBranches::setValues(const edm::Event& iEvent) {

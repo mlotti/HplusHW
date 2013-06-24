@@ -23,7 +23,7 @@ class TTree;
 namespace HPlus {
   class TreeJetBranches {
   public:
-    TreeJetBranches(const edm::ParameterSet& iConfig, bool jetComposition);
+    TreeJetBranches(const edm::ParameterSet& iConfig, bool jetComposition, const std::string& prefix = "jets_");
     ~TreeJetBranches();
 
     void book(TTree *tree);
@@ -36,6 +36,7 @@ namespace HPlus {
 
   private:
     edm::InputTag fJetSrc;
+    std::string fPrefix;
     bool fEnabled;
     bool fJetComposition;
 
