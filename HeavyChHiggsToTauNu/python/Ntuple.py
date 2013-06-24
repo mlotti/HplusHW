@@ -20,6 +20,7 @@ muons = cms.PSet(
 
 jets = cms.PSet(
     enabled = cms.bool(True),
+    detailsEnabled = cms.bool(True),
     src = cms.InputTag("selectedPatJets"),
     functions = cms.PSet(
         csv = cms.string("bDiscriminator('combinedSecondaryVertexBJetTags')"),

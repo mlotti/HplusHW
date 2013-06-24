@@ -38,6 +38,7 @@ namespace HPlus {
     edm::InputTag fJetSrc;
     std::string fPrefix;
     bool fEnabled;
+    bool fDetailsEnabled;
     bool fJetComposition;
 
     typedef math::XYZTLorentzVector XYZTLorentzVector;

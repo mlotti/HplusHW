@@ -56,6 +56,7 @@ namespace HPlus {
     fJetSrc(iConfig.getParameter<edm::InputTag>("src")),
     fPrefix(prefix),
     fEnabled(iConfig.getParameter<bool>("enabled")),
+    fDetailsEnabled(iConfig.getParameter<bool>("detailsEnabled")),
     fJetComposition(jetComposition)
   {
     if(!enabled())
@@ -123,13 +124,15 @@ namespace HPlus {
       tree->Branch((fPrefix+"phm").c_str(), &fJetsPhm);
       tree->Branch((fPrefix+"mum").c_str(), &fJetsMum);
     }
-    tree->Branch((fPrefix+"numberOfDaughters").c_str(), &fJetsNumberOfDaughters);
-    tree->Branch((fPrefix+"flavour").c_str(), &fJetsFlavour);
-    tree->Branch((fPrefix+"genPartonPdgId").c_str(), &fJetsGenPartonPdgId);
-    tree->Branch((fPrefix+"jecToRaw").c_str(), &fJetsJec);
-    tree->Branch((fPrefix+"area").c_str(), &fJetsArea);
-    tree->Branch((fPrefix+"looseId").c_str(), &fJetsLooseId);
-    tree->Branch((fPrefix+"tightId").c_str(), &fJetsTightId);
+    if(fDetailsEnabled) {
+      tree->Branch((fPrefix+"numberOfDaughters").c_str(), &fJetsNumberOfDaughters);
+      tree->Branch((fPrefix+"flavour").c_str(), &fJetsFlavour);
+      tree->Branch((fPrefix+"genPartonPdgId").c_str(), &fJetsGenPartonPdgId);
+      tree->Branch((fPrefix+"jecToRaw").c_str(), &fJetsJec);
+      tree->Branch((fPrefix+"area").c_str(), &fJetsArea);
+      tree->Branch((fPrefix+"looseId").c_str(), &fJetsLooseId);
+      tree->Branch((fPrefix+"tightId").c_str(), &fJetsTightId);
+    }
   }
 
   void TreeJetBranches::setValues(const edm::Event& iEvent) {
@@ -209,17 +212,18 @@ namespace HPlus {
         fJetsMum.push_back(jet.muonMultiplicity());
       }
 
-      fJetsNumberOfDaughters.push_back(jet.numberOfDaughters());
+      if(fDetailsEnabled) {
+        fJetsNumberOfDaughters.push_back(jet.numberOfDaughters());
 
-      fJetsJec.push_back(jet.jecFactor(0));
+        fJetsJec.push_back(jet.jecFactor(0));
 
+        fJetsLooseId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && elf < 0.99 && chf > 0 && chm > 0) ||
+                                                                        std::abs(eta) > 2.4) );
+        fJetsTightId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && nhf < 0.9 && phf < 0.9 && elf < 0.99 && chf > 0 && chm > 0) ||
+                                                                        std::abs(eta) > 2.4) );
 
-      fJetsLooseId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && elf < 0.99 && chf > 0 && chm > 0) ||
-                                                                      std::abs(eta) > 2.4) );
-      fJetsTightId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && nhf < 0.9 && phf < 0.9 && elf < 0.99 && chf > 0 && chm > 0) ||
-                                                                      std::abs(eta) > 2.4) );
-
-      fJetsArea.push_back(jet.jetArea());
+        fJetsArea.push_back(jet.jetArea());
+      }
     }
 
     for(size_t i=0; i<fJetsFunctions.size(); ++i) {
