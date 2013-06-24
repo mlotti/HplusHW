@@ -33,7 +33,7 @@ namespace HPlus {
   {
     if(fTauEmbeddingInput) {
       edm::ParameterSet pset = iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding");
-      fTauEmbeddingMuon.reset(new TreeMuonBranches(pset.getParameter<edm::ParameterSet>("muon"), "temuon"));
+      fTauEmbeddingMuon.reset(new TreeMuonBranches(pset.getParameter<edm::ParameterSet>("muons"), "temuon"));
 
       fTauEmbeddingGenParticleOriginalSource = pset.getParameter<edm::InputTag>("genParticleOriginalSrc");
       fTauEmbeddingMetSource = pset.getParameter<edm::InputTag>("metSrc");
