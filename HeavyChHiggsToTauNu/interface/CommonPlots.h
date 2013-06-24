@@ -104,11 +104,15 @@ namespace HPlus {
                     FullHiggsMassCalculator& fullHiggsMassCalculator);
 
     /// create object containing histograms to be filled after all (or almost all) selection steps
-   CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
+    CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
+
+    /// Obtain splitted histogram handler
+    SplittedHistogramHandler& getSplittedHistogramHandler() { return fSplittedHistogramHandler; }
 
     /// unique filling methods (to be called AFTER return statement)
     void fillControlPlotsAfterVertexSelection(const edm::Event& iEvent, const VertexSelection::Data& data);
     void fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, METSelection& metSelection);
+    void setSplittingOfPhaseSpaceInfoAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, METSelection& metSelection);
     void fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterAllSelections(const edm::Event& iEvent, double transverseMass);
@@ -214,6 +218,7 @@ namespace HPlus {
     // MET trigger SF
     std::vector<WrappedTH1*> hCtrlNjetsAfterJetSelectionAndMETSF;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterMETSF;
 
     // improved delta phi collinear cuts (currently the point of the std. selections)
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet1;
@@ -224,6 +229,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet2;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet3;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet4;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterCollinearCuts;
 
     std::vector<WrappedTH1*> hCtrlSelectedTauPtAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauEtaAfterStandardSelections;

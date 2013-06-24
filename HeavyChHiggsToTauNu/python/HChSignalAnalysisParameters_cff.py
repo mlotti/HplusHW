@@ -328,6 +328,7 @@ QCDTailKiller = cms.untracked.PSet(
         QCDTailKillerBin("noCut", 0.0, 0.0), # jet 3
         QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
     ),
+    disableCollinearCuts = cms.untracked.bool(False),
 )
 
 QCDTailKillerNoCuts = QCDTailKiller.clone()
@@ -550,6 +551,7 @@ commonPlotsSettings = cms.untracked.PSet(
         #splitHistogramByTauPtBinLowEdges = cms.untracked.vdouble(41., 50., 60., 70., 80., 100., 120., 150., 200., 300.)
         #splitHistogramByTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5) # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
         #splitHistogramByNVerticesBinLowEdges = cms.untracked.vint32(10)
+        #splitHistogramByDeltaPhiTauMetInDegrees = cms.untracked.vdouble(90.)
     ),
     # Histogram dimension definitions for control plots and shapes (input for datacard generator)
     ptBins = SetHistogramBinSettings(100, 0., 500.),
@@ -557,7 +559,7 @@ commonPlotsSettings = cms.untracked.PSet(
     phiBins = SetHistogramBinSettings(72, -3.1415926, 3.1415926),
     rtauBins = SetHistogramBinSettings(55, 0., 1.1),
     njetsBins = SetHistogramBinSettings(20, 0., 20.),
-    metBins = SetHistogramBinSettings(100, 0., 500.),
+    metBins = SetHistogramBinSettings(250, 0., 500.),
     tailKiller1DBins = SetHistogramBinSettings(52, 0., 260.),
     mtBins = SetHistogramBinSettings(100, 0., 500.),
     invmassBins = SetHistogramBinSettings(100, 0., 500.),

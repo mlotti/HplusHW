@@ -100,6 +100,7 @@ namespace HPlus {
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau>& tau, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met);
     /// Number of jets to consider
     const uint32_t fMaxEntries;
+    bool bDisableCollinearCuts;
     // Cut items for back to back (tau,MET) topology
     std::vector<CutItem> fBackToBackJetCut;
     // Cut items for collinear (tau,MET) topology

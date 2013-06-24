@@ -23,7 +23,7 @@ namespace HPlus {
     /// Reset pointer to current bin
     void initialize();
     /// Set pointer to current bin
-    void setFactorisationBinForEvent(double pt, double eta, int nvtx);
+    void setFactorisationBinForEvent(double pt, double eta, int nvtx, double deltaPhiTauMetInDegrees);
     /// Create a histogram for a shape in factorisation bins
     void createShapeHistogram(HistoWrapper::HistoLevel level, TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, std::string title, std::string label, int nbins, double min, double max);
     /// Create a histogram for a shape in factorisation bins
@@ -44,14 +44,16 @@ namespace HPlus {
     size_t getTauEtaBinIndex(double eta) const;
     /// Returns index to nvtx bin; 0 is underflow and size() is highest bin
     size_t getNVerticesBinIndex(int nvtx) const;
+    /// Returns index to delta phi(tau,MET) bin; 0 is underflow and size() is highest bin
+    size_t getDeltaPhiTauMetBinIndex(double degrees) const;
     /// Returns index to unfolded bin index
-    size_t getShapeBinIndex(size_t tauPtBinIndex, size_t tauEtaBinIndex, size_t nvtxBinIndex) const;
+    size_t getShapeBinIndex(size_t tauPtBinIndex, size_t tauEtaBinIndex, size_t nvtxBinIndex, size_t deltaPhiTauMetBinIndex) const;
     /// Constructs labels for the y axis
     void setAxisLabelsForUnfoldedHisto(WrappedUnfoldedFactorisationHisto* h) const;
     /// Check if the bin was updated for the event after calling initialize()
     void checkProperBinning() const;
     /// Get description string for all splits
-    std::string getFullBinDescriptionStringByBinIndex(size_t tauPtBinIndex, size_t tauEtaBinIndex, size_t nvtxBinIndex) const;
+    std::string getFullBinDescriptionStringByBinIndex(size_t tauPtBinIndex, size_t tauEtaBinIndex, size_t nvtxBinIndex, size_t deltaPhiTauMetBinIndex) const;
     /// Get description string for a given split
     std::string getBinDescriptionString(std::string label, size_t binIndex, const std::vector<int>& container, int precision) const;
     /// Get description string for a given split
@@ -63,6 +65,7 @@ namespace HPlus {
     std::vector<double> fTauPtBinLowEdges;
     std::vector<double> fTauEtaBinLowEdges;
     std::vector<int> fNVerticesBinLowEdges;
+    std::vector<double> fDeltaPhiTauMetBinLowEdges;
     // Internal variables
     int fNUnfoldedBins;
     std::string fBinningString; // string holding the info of the binning
@@ -70,6 +73,7 @@ namespace HPlus {
     size_t fCurrentTauPtBinIndex;
     size_t fCurrentTauEtaBinIndex;
     size_t fCurrentNvtxBinIndex;
+    size_t fCurrentDeltaPhiTauMetBinIndex;
     size_t fCurrentUnfoldedBinIndex;
     // Histogram for binning informatio
     WrappedTH1* hBinInfo;

@@ -52,118 +52,9 @@ namespace edm {
 
 namespace HPlus {
   class QCDMeasurementFactorised {
-    /// Helper class for handling the factorisation higtograms
-    class QCDFactorisedHistogramHandler {
-    public:
-      QCDFactorisedHistogramHandler(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper);
-      ~QCDFactorisedHistogramHandler();
-      /// Reset pointer to current bin
-      void initialize();
-      /// Set pointer to current bin
-      void setFactorisationBinForEvent(double pt, double eta, int nvtx);
-      /// Create a histogram for a Nevent count in factorisation bins
-      void createCountHistogram(TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, std::string title);
-      /// Create a histogram for a shape in factorisation bins
-      void createShapeHistogram(TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, std::string title, std::string label, int nbins, double min, double max);
-      /// Fill method for a factorisation histogram containting Nevents counts
-      void fillNeventHistogram(WrappedUnfoldedFactorisationHisto* h);
-      /// Fill method for a factorisation histogram containting Nevents counts, with unconventional weight
-      void fillNeventHistogram(WrappedUnfoldedFactorisationHisto* h, double weight);
-      /// Fill method for a factorisation histogram containting a shape
-      void fillShapeHistogram(WrappedUnfoldedFactorisationHisto* h, double value);
-      /// Fill method for a factorisation histogram containting a shape, with unconventional weight
-      void fillShapeHistogram(WrappedUnfoldedFactorisationHisto* h, double value, double weight);
-
-    private:
-      int getTauPtBinIndex(double pt);
-      int getTauEtaBinIndex(double eta);
-      int getNVerticesBinIndex(int nvtx);
-      int getMtBinIndex(double mt);
-      int getFullMassBinIndex(double mass);
-      int getShapeBinIndex(int tauPtBin, int tauEtaBin, int nvtxBin);
-      void setAxisLabelsForUnfoldedHisto(WrappedUnfoldedFactorisationHisto* h);
-      void checkProperBinning();
-
-    private:
-      HistoWrapper& fHistoWrapper;
-      std::vector<double> fTauPtBinLowEdges;
-      std::vector<double> fTauEtaBinLowEdges;
-      std::vector<int> fNVerticesBinLowEdges;
-      // Are the following needed?
-      std::vector<double> fTransverseMassRange; // Range from config
-      std::vector<double> fFullMassRange; // Range from config
-      std::vector<double> fTransverseMassBinLowEdges;
-      std::vector<double> fFullMassRangeBinLowEdges;
-      const int fNUnfoldedBins;
-      std::string fBinningString; // string holding the info of the binning
-      // Pointer to current bin
-      int fCurrentBinX;
-      int fCurrentBinY;
-      int fCurrentBinZ;
-      int fCurrentUnfoldedBin;
-    };
-
     enum QCDFactorisedVariationType {
       kQCDFactorisedTraditional,
-      kQCDFactorisedABCD,
-      kQCDFactorisedDoubleABCD
-    };
-
-    class QCDFactorisedVariation {
-    public:
-      QCDFactorisedVariation(edm::Service< TFileService >& fs, QCDFactorisedHistogramHandler* histoHandler, EventCounter& eventCounter, CommonPlots& commonPlots, QCDFactorisedVariationType methodType, std::string prefix);
-      ~QCDFactorisedVariation();
-
-      void doSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass);
-
-    private:
-      void doTraditionalSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass);
-      void doABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass);
-      void doDoubleABCDSelection(const edm::Ptr<pat::Tau>& selectedTau, const TauSelection& tauSelection, const JetSelection::Data jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const QCDTailKiller::Data& tailKillerData, const double mT, const double fullMass);
-
-    private:
-      QCDFactorisedVariationType fMethodType;
-      Count fAfterNjetsCounter;
-      Count fAfterStandardSelectionsCounter;
-      Count fAfterLeg1Counter;
-      Count fAfterLeg2Counter;
-      Count fAfterLeg1AndLeg2Counter;
-      QCDFactorisedHistogramHandler* fHistoHandler;
-
-      // Common plots
-      CommonPlotsFilledAtEveryStep* fCommonPlotsAfterStandardSelections;
-      CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
-      CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtag;
-      CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg1;
-      CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg2;
-
-      // NQCD Histograms - obsolete
-      WrappedUnfoldedFactorisationHisto* hNevtAfterStandardSelections;
-      WrappedUnfoldedFactorisationHisto* hNevtAfterLeg1;
-      WrappedUnfoldedFactorisationHisto* hNevtAfterLeg2;
-      WrappedUnfoldedFactorisationHisto* hNevtAfterLeg1AndLeg2;
-      // Shape histograms (some needed for closure test)
-      WrappedUnfoldedFactorisationHisto* hMtShapesAfterStandardSelections;
-      WrappedUnfoldedFactorisationHisto* hInvariantMassShapesAfterStandardSelections;
-      WrappedUnfoldedFactorisationHisto* hMtShapesAfterLeg1;
-      WrappedUnfoldedFactorisationHisto* hInvariantMassShapesAfterLeg1;
-      WrappedUnfoldedFactorisationHisto* hMtShapesAfterLeg1WithoutBtag;
-      WrappedUnfoldedFactorisationHisto* hMtShapesAfterLeg2;
-      WrappedUnfoldedFactorisationHisto* hInvariantMassShapesAfterLeg2;
-      WrappedUnfoldedFactorisationHisto* hMtShapesAfterLeg1AndLeg2;
-      WrappedUnfoldedFactorisationHisto* hInvariantMassShapesAfterLeg1AndLeg2;
-      // Data-driven control histograms
-      WrappedUnfoldedFactorisationHisto* hCtrlRtau;
-      std::vector<WrappedUnfoldedFactorisationHisto*> hCtrlQCDTailKillerCollinear;
-      WrappedUnfoldedFactorisationHisto* hCtrlNjets;
-      WrappedUnfoldedFactorisationHisto* hCtrlNjetsAfterCollinearCuts;
-      WrappedUnfoldedFactorisationHisto* hCtrlMET;
-      WrappedUnfoldedFactorisationHisto* hCtrlNbjets;
-      std::vector<WrappedUnfoldedFactorisationHisto*> hCtrlQCDTailKillerBackToBack;
-      // Closure test oF MET
-      WrappedUnfoldedFactorisationHisto* hCtrlMETAfterLeg1;
-      WrappedUnfoldedFactorisationHisto* hCtrlMETAfterLeg2;
-      WrappedUnfoldedFactorisationHisto* hCtrlMETAfterBJets;
+      kQCDFactorisedABCD
     };
 
     class TailTest {
@@ -200,22 +91,19 @@ namespace HPlus {
       WrappedTH2* hBackToBackEtaPhiForSelectedTau;
     };
 
-    enum QCDSelectionOrder {
-      kQCDOrderTrigger,
-      kQCDOrderTauCandidateSelection,
-      kQCDOrderElectronVeto,
-      kQCDOrderMuonVeto,
-      kQCDOrderJetSelection
-    };
-
   public:
     explicit QCDMeasurementFactorised(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::EventWeight& eventWeight, HPlus::HistoWrapper& histoWrapper);
     ~QCDMeasurementFactorised();
 
-    // Interface towards the EDProducer
+    /// Interface towards the EDProducer
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
+    /// Same method like in paper
+    void doTraditionalSelection(edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
+    /// Experimental method - not validated
+    void doABCDSelection(edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
+    /// Fill root tree after standard selections
     void doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronData, const MuonSelection::Data& muonData, const JetSelection::Data& jetData, const METSelection::Data& metData);
 
   private:
@@ -226,9 +114,7 @@ namespace HPlus {
     const std::string fTopRecoName; // Name of selected top reconstruction algorithm
     const bool fApplyNprongsCutForTauCandidate;
     const bool fApplyRtauCutForTauCandidate;
-    const bool fDoAnalysisVariationWithTraditionalMethod;
-    const bool fDoAnalysisVariationWithABCDMethod;
-    const bool fDoAnalysisVariationWithDoubleABCDMethod;
+    QCDFactorisedVariationType fMethodType;
 
     // Counters - do not change order
     Count fAllCounter;
@@ -247,10 +133,15 @@ namespace HPlus {
     Count fNJetsCounter;
     Count fPreMETCutCounter;
     Count fMETTriggerScaleFactorCounter;
-    Count fStandardSelectionsCounter;
-    Count fStandardSelectionsWithMET30Counter;
-    Count fStandardSelectionsWithTailKillerCounter;
-    Count fStandardSelectionsWithTailKillerAndMET30Counter;
+    Count fQCDTailKillerCollinearCounter;
+    Count fAfterStandardSelectionsCounter;
+    Count fMetCounter;
+    Count fBTaggingCounter;
+    Count fBTaggingScaleFactorCounter;
+    Count fQCDTailKillerBackToBackCounter;
+    Count fAfterLeg1Counter;
+    Count fAfterLeg2Counter;
+    Count fAfterLeg1AndLeg2Counter;
 
     // Do not change order
     TriggerSelection fTriggerSelection;
@@ -282,7 +173,7 @@ namespace HPlus {
     SignalAnalysisTree fTree;
     CommonPlots fCommonPlots;
     //FakeMETVeto fFakeMETVeto;
-    QCDFactorisedHistogramHandler fQCDFactorisedHistogramHandler;
+    //QCDFactorisedHistogramHandler fQCDFactorisedHistogramHandler;
 
     // Common plots
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
@@ -292,27 +183,33 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVeto;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelection;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETScaleFactor;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterStandardSelections;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtag;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtagWithSF;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg1;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg2;
 
     // Histograms
     WrappedTH1* hVerticesBeforeWeight;
     WrappedTH1* hVerticesAfterWeight;
 
-    WrappedTH1* hSelectionFlow;
-
-    // Measurement variations
-    QCDFactorisedVariation* fVariationTraditionalReference;
-    QCDFactorisedVariation* fVariationTraditionalPlusMET30;
-    QCDFactorisedVariation* fVariationTraditionalPlusTailKiller;
-    QCDFactorisedVariation* fVariationTraditionalPlusMET30AndTailKiller;
-    QCDFactorisedVariation* fVariationTraditionalPlusCollinearTailKiller;
-    QCDFactorisedVariation* fVariationTraditionalPlusMET30AndCollinearTailKiller;
-    QCDFactorisedVariation* fVariationABCDReference;
-    QCDFactorisedVariation* fVariationABCDPlusMET30;
-    QCDFactorisedVariation* fVariationABCDPlusTailKiller;
-    QCDFactorisedVariation* fVariationABCDPlusMET30AndTailKiller;
-    QCDFactorisedVariation* fVariationABCDPlusCollinearTailKiller;
-    QCDFactorisedVariation* fVariationABCDPlusMET30AndCollinearTailKiller;
-    QCDFactorisedVariation* fVariationDoubleABCD;
+    // Shape histograms (some needed for closure test)
+    std::vector<WrappedTH1*> hMtShapesAfterStandardSelections;
+    std::vector<WrappedTH1*> hMtShapesAfterLeg1;
+    std::vector<WrappedTH1*> hMtShapesAfterLeg1WithoutBtag;
+    std::vector<WrappedTH1*> hMtShapesAfterLeg2;
+    std::vector<WrappedTH1*> hMtShapesAfterLeg1AndLeg2;
+    std::vector<WrappedTH1*> hInvariantMassShapesAfterStandardSelections;
+    std::vector<WrappedTH1*> hInvariantMassShapesAfterLeg1;
+    std::vector<WrappedTH1*> hInvariantMassShapesAfterLeg1WithoutBtag;
+    std::vector<WrappedTH1*> hInvariantMassShapesAfterLeg2;
+    std::vector<WrappedTH1*> hInvariantMassShapesAfterLeg1AndLeg2;
+    // MET shapes (just for controlling, closure test comes from mT shapes)
+    std::vector<WrappedTH1*> hMETAfterStandardSelections;
+    std::vector<WrappedTH1*> hMETAfterLeg1;
+    std::vector<WrappedTH1*> hMETAfterLeg2;
+    std::vector<WrappedTH1*> hMETAfterBJets;
 
     // Tail tests
     TailTest* fTailTestAfterStdSel;
