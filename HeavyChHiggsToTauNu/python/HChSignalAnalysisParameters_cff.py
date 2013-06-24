@@ -822,6 +822,7 @@ def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, pset
     setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
     psetReader.weightSrc = name
+    return name
 
 # Tau selection
 def forEachTauSelection(function):

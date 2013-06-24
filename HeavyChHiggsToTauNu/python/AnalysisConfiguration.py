@@ -1157,3 +1157,18 @@ def addPuWeightProducers(dataVersion, process, commonSequence, dataEras, firstIn
             commonSequence.insert(0, mod)
 
     return names
+
+def addPuWeightProducersVariations(dataVersion, process, commonSequence, dataEras):
+    ret = []
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+    for era in dataEras:
+        name = param.setPileupWeight(dataVersion, process, commonSequence, era=era)
+        ret.append( (era, "",  name) )
+        nominalModule = getattr(process, name)
+        for suffix in ["up", "down"]:
+            ret.append( (era, suffix,
+                         param.setPileupWeightForVariation(dataVersion, process, commonSequence, suffix=suffix,
+                                                           pset=nominalModule.clone(), psetReader=param.pileupWeightReader))
+                        )
+
+    return ret
