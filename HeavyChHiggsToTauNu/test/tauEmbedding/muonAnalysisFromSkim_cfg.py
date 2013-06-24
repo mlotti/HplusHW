@@ -205,8 +205,17 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
 #    electronRhoSrc =  cms.InputTag("kt6PFJetsForEleIso", "rho"),
 #    electronFunctions = analysisConfig.electronFunctions.clone(),
 
-    jets = Ntuple.jets.clone(
-        src = cms.InputTag("selectedJets", "selectedJetsPt20"),
+    jets = cms.PSet(
+        jets = Ntuple.jets.clone(
+            src = cms.InputTag("selectedJets", "selectedJetsPt20"),
+            floats = cms.PSet(
+                btagScaleFactor = cms.InputTag("btagging", "scaleFactor"),
+                btagScaleFactorUncertainty = cms.InputTag("btagging", "scaleFactorUncertainty"),
+            ),
+            bools = cms.PSet(
+                btagged = cms.InputTag("btagging", "tagged"),
+            ),
+        ),
     ),
 
     mets = analysisConfig.mets.clone(),
