@@ -146,7 +146,8 @@ namespace HPlus {
     Count fAllCounter;
     Count fWJetsWeightCounter;
     Count fMETFiltersCounter;
-    Count fEmbeddingMuonEfficiencyCounter;
+    Count fEmbeddingMuonTriggerEfficiencyCounter;
+    Count fEmbeddingMuonIdEfficiencyCounter;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
@@ -250,7 +251,8 @@ namespace HPlus {
     EvtTopology fEvtTopology;
     TauTriggerEfficiencyScaleFactor fTauTriggerEfficiencyScaleFactor;
     METTriggerEfficiencyScaleFactor fMETTriggerEfficiencyScaleFactor;
-    EmbeddingMuonEfficiency fEmbeddingMuonEfficiency;
+    EmbeddingMuonEfficiency fEmbeddingMuonTriggerEfficiency;
+    EmbeddingMuonEfficiency fEmbeddingMuonIdEfficiency;
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;
     WeightReader fWJetsWeightReader;

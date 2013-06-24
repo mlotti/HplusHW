@@ -667,17 +667,17 @@ metTriggerEfficiencyScaleFactor = cms.untracked.PSet(
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
-embeddingMuonEfficiency = muonTriggerIDEfficiency.efficiency
-embeddingMuonEfficiency.variationEnabled = cms.bool(False)
-embeddingMuonEfficiency.variationShiftBy = cms.double(0)
+#embeddingMuonEfficiency = muonTriggerIDEfficiency.efficiency
+#embeddingMuonEfficiency.variationEnabled = cms.bool(False)
+#embeddingMuonEfficiency.variationShiftBy = cms.double(0)
 
-embeddingMuonEfficiencyID = muonTriggerIDEfficiency.efficiency_ID
-embeddingMuonEfficiencyID.variationEnabled = cms.bool(False)
-embeddingMuonEfficiencyID.variationShiftBy = cms.double(0)
+embeddingMuonIdEfficiency = muonTriggerIDEfficiency.efficiency_ID
+embeddingMuonIdEfficiency.variationEnabled = cms.bool(False)
+embeddingMuonIdEfficiency.variationShiftBy = cms.double(0)
 
-embeddingMuonEfficiencyTrigger = muonTriggerIDEfficiency.efficiency_trigger
-embeddingMuonEfficiencyTrigger.variationEnabled = cms.bool(False)
-embeddingMuonEfficiencyTrigger.variationShiftBy = cms.double(0)
+embeddingMuonTriggerEfficiency = muonTriggerIDEfficiency.efficiency_trigger
+embeddingMuonTriggerEfficiency.variationEnabled = cms.bool(False)
+embeddingMuonTriggerEfficiency.variationShiftBy = cms.double(0)
 
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff

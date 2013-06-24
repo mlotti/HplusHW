@@ -354,13 +354,21 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
         functions = analysisConfig.muonFunctions.clone(),
     ),
     muonEfficiencies = cms.PSet(
-        Run2011A = param.embeddingMuonEfficiency.clone(
+        Run2011A = param.embeddingMuonIdEfficiency.clone(
             mode = "mcEfficiency",
             mcSelect = "Run2011A",
         ),
-        Run2011B = param.embeddingMuonEfficiency.clone(
+        Run2011B = param.embeddingMuonIdEfficiency.clone(
             mode = "mcEfficiency",
             mcSelect = "Run2011B",
+        ),
+        Run2011AB = param.embeddingMuonIdEfficiency.clone(
+            mode = "mcEfficiency",
+            mcSelect = "Run2011AB",
+        ),
+        trigger = param.embeddingMuonTriggerEfficiency.clone(
+            mode = "mcEfficiency",
+            dataSelect = ["Run2011AB"],
         ),
     ),
 

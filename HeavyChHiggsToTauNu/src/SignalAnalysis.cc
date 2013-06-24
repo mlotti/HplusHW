@@ -76,7 +76,8 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
     fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
     fMETFiltersCounter(eventCounter.addCounter("MET filters")),
-    fEmbeddingMuonEfficiencyCounter(eventCounter.addCounter("Embedding: muon eff weight")),
+    fEmbeddingMuonTriggerEfficiencyCounter(eventCounter.addCounter("Embedding: muon trig eff weight")),
+    fEmbeddingMuonIdEfficiencyCounter(eventCounter.addCounter("Embedding: muon ID eff weight")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
@@ -179,7 +180,8 @@ namespace HPlus {
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTauTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("tauTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
-    fEmbeddingMuonEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonEfficiency")),
+    fEmbeddingMuonTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonTriggerEfficiency")),
+    fEmbeddingMuonIdEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonIdEfficiency")),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
@@ -402,12 +404,18 @@ namespace HPlus {
     increment(fMETFiltersCounter);
 
 //------ For embedding, apply the muon ID efficiency at this stage
-    EmbeddingMuonEfficiency::Data embeddingMuonData;
+    EmbeddingMuonEfficiency::Data embeddingMuonTriggerData;
+    EmbeddingMuonEfficiency::Data embeddingMuonIdData;
     if(bTauEmbeddingStatus) {
-      embeddingMuonData = fEmbeddingMuonEfficiency.getEventWeight(iEvent);
-      fEventWeight.multiplyWeight(embeddingMuonData.getEventWeight());
+      embeddingMuonTriggerData = fEmbeddingMuonTriggerEfficiency.getEventWeight(iEvent);
+      fEventWeight.multiplyWeight(embeddingMuonTriggerData.getEventWeight());
     }
-    increment(fEmbeddingMuonEfficiencyCounter);
+    increment(fEmbeddingMuonTriggerEfficiencyCounter);
+    if(bTauEmbeddingStatus) {
+      embeddingMuonIdData = fEmbeddingMuonIdEfficiency.getEventWeight(iEvent);
+      fEventWeight.multiplyWeight(embeddingMuonIdData.getEventWeight());
+    }
+    increment(fEmbeddingMuonIdEfficiencyCounter);
 
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
@@ -754,10 +762,10 @@ namespace HPlus {
                                                                        metTriggerWeight.getEventWeight(),
                                                                        metTriggerWeight.getEventWeightAbsoluteUncertainty());
 
-    if(bTauEmbeddingStatus)
+    if(bTauEmbeddingStatus) // FIXME: add trigger efficiency too
       fSFUncertaintiesAfterSelection.setEmbeddingMuonEfficiencyUncertainty(fEventWeight.getWeight(),
-                                                                           embeddingMuonData.getEventWeight(),
-                                                                           embeddingMuonData.getEventWeightAbsoluteUncertainty());
+                                                                           embeddingMuonIdData.getEventWeight(),
+                                                                           embeddingMuonIdData.getEventWeightAbsoluteUncertainty());
 
     if (myFakeTauStatus) {
       hEWKFakeTausTransverseMassVsNjets->Fill(transverseMass, jetData.getHadronicJetCount());

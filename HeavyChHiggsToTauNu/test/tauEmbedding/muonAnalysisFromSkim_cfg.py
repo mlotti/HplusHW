@@ -289,19 +289,19 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
         ),
     ),
     muonEfficiencies = cms.PSet(
-        id_Run2011A = param.embeddingMuonEfficiencyID.clone(
+        id_Run2011A = param.embeddingMuonIdEfficiency.clone(
             dataSelect = ["Run2011A"],
             mcSelect = "Run2011A",
         ),
-        id_Run2011B = param.embeddingMuonEfficiencyID.clone(
+        id_Run2011B = param.embeddingMuonIdEfficiency.clone(
             dataSelect = ["Run2011B"],
             mcSelect = "Run2011B",
         ),
-        id_Run2011AB = param.embeddingMuonEfficiencyID.clone(
+        id_Run2011AB = param.embeddingMuonIdEfficiency.clone(
             dataSelect = ["Run2011A", "Run2011B"],
             mcSelect = "Run2011AB",
         ),
-        trigger = param.embeddingMuonEfficiencyTrigger.clone(
+        trigger = param.embeddingMuonTriggerEfficiency.clone(
             dataSelect = ["Run2011AB"],
         ),
     ),
