@@ -280,15 +280,20 @@ namespace HPlus {
   void CommonPlots::fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, METSelection& metSelection) {
     fTauData = tauData;
     fFakeTauData = fakeTauData;
-    // Set splitted bin info
-    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees    
-    fSplittedHistogramHandler.setFactorisationBinForEvent(fTauData.getSelectedTau()->pt(), fTauData.getSelectedTau()->eta(), fVertexData.getNumberOfAllVertices(), myDeltaPhiTauMET);
-    // Obtain new MET object corresponding to the selected tau
     fMETData = metSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau(), fJetData.getAllJets());
+    // Set splitted bin info
+    setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, fTauData, metSelection);
+    // Obtain new MET object corresponding to the selected tau
     if (bOptionEnableNormalisationAnalysis) {
       // e->tau normalisation // FIXME tau trg scale factor needs to be applied!
       fNormalisationAnalysis->analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData, fMuonData, fJetData, fMETData);
     }
+  }
+
+  void CommonPlots::setSplittingOfPhaseSpaceInfoAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, METSelection& metSelection) {
+    METSelection::Data metData = metSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau(), fJetData.getAllJets());
+    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees    
+    fSplittedHistogramHandler.setFactorisationBinForEvent(tauData.getSelectedTau()->pt(), tauData.getSelectedTau()->eta(), fVertexData.getNumberOfAllVertices(), myDeltaPhiTauMET);
   }
 
   void CommonPlots::fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent) {
