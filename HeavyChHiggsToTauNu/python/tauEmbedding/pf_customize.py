@@ -544,6 +544,9 @@ def addPAT(process, options, dataVersion):
             "drop *_generalTracks20eta2p5_*_"+skimProcessName,
             "drop *_goodJets*_*_"+skimProcessName,
             "keep *_selectedPatTaus*_*_"+skimProcessName,
+            "keep *_patPFMet*_*_"+skimProcessName,
+            "keep *_patType1CorrectedPFMet*_*_"+skimProcessName,
+            "keep *_patType1p2CorrectedPFMet*_*_"+skimProcessName,
 
             "drop *_dimuonsGlobal_*_"+processName,
             "drop *_tmfTracks_*_"+processName,
