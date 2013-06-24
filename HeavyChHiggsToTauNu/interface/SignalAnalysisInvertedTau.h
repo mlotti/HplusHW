@@ -49,44 +49,6 @@ namespace edm {
 
 namespace HPlus {
   class SignalAnalysisInvertedTau {
-
-    enum SignalSelectionOrder {
-      kSignalOrderTrigger,
-      //kSignalOrderVertexSelection,
-      kSignalOrderTauID,
-      kSignalOrderMETSelection,
-      kSignalOrderElectronVeto,
-      kSignalOrderMuonVeto,
-      kSignalOrderJetSelection,
-      kSignalOrderBTagSelection,
-      kSignalOrderFakeMETVeto,
-      kSignalOrderTopSelection
-    };
-    enum QCDSelectionOrder {
-      kQCDOrderVertexSelection,
-      kQCDOrderTrigger,
-      kQCDOrderTauCandidateSelection,
-      kQCDOrderTauID,
-      kQCDOrderElectronVeto,
-      kQCDOrderMuonVeto,
-      kQCDOrderJetSelection,
-      kQCDOrderMET,
-      kQCDOrderBTag,
-      kQCDOrderDeltaPhiTauMET,
-      kQCDOrderMaxDeltaPhiJetMET,
-      kQCDOrderTopSelection
-    };
-  enum MCSelectedTauMatchType {
-    kkElectronToTau,
-    kkMuonToTau,
-    kkTauToTau,
-    kkJetToTau,
-    kkNoMC,
-    kkElectronToTauAndTauOutsideAcceptance,
-    kkMuonToTauAndTauOutsideAcceptance,
-    kkTauToTauAndTauOutsideAcceptance,
-    kkJetToTauAndTauOutsideAcceptance
-  };
   public:
     explicit SignalAnalysisInvertedTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper);
     ~SignalAnalysisInvertedTau();
@@ -127,11 +89,12 @@ namespace HPlus {
     Count fBaselineEvetoCounter;
     Count fBaselineMuvetoCounter;
     Count fBaselineJetsCounter;
+    Count fBaselinePreMETCutCounter;
     Count fBaselineMetTriggerScaleFactorCounter;
     Count fBaselineQCDTailKillerCollinearCounter;
     Count fBaselineMetCounter;
-    Count fBaselineBTaggingScaleFactorCounter;
     Count fBaselineBtagCounter;
+    Count fBaselineBTaggingScaleFactorCounter;
     Count fBaselineQCDTailKillerBackToBackCounter;
     Count fBaselineDeltaPhiTauMETCounter;
     Count fBaselineSelectedEventsCounter;
@@ -144,6 +107,7 @@ namespace HPlus {
     Count fInvertedElectronVetoCounter;
     Count fInvertedMuonVetoCounter;
     Count fInvertedNJetsCounter;
+    Count fInvertedPreMETCutCounter;
     Count fInvertedMetTriggerScaleFactorCounter;
     Count fInvertedQCDTailKillerCollinearCounter;
     Count fInvertedBTaggingBeforeMETCounter;
@@ -151,8 +115,8 @@ namespace HPlus {
     Count fInvertedMetCounter;
     Count fInvertedBvetoCounter;
     Count fInvertedBvetoDeltaPhiCounter;
-    Count fInvertedBTaggingScaleFactorCounter;
     Count fInvertedBTaggingCounter;
+    Count fInvertedBTaggingScaleFactorCounter;
     Count fInvertedQCDTailKillerBackToBackCounter;
     Count fInvertedDeltaPhiTauMETCounter;
     Count fInvertedSelectedEventsCounter;
@@ -200,97 +164,37 @@ namespace HPlus {
     //    CommonPlots fCommonPlots;
 
     // Histograms
-   
-    //<<<<<<< HEAD
-
    // Common plots                                                                                                                                                                                      
     CommonPlots fCommonPlots;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelection;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeight;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVeto;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVeto;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelection;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETWithPhiOscillationCorrection; // temporary                                                                                                         
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTagging;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsSelected;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTail;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMass;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelectionFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeightFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVetoFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVetoFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelectionFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMassFakeTaus;
-
-
-
 
     WrappedTH1 *hTauDiscriminator;
-    //=======
-    //>>>>>>> sami/2011
-    
+
     WrappedTH1 *hOneProngRtauPassedInvertedTaus;
     WrappedTH1 *hVerticesBeforeWeight;
     WrappedTH1 *hVerticesAfterWeight;
     WrappedTH1 *hTransverseMassWithTopCut;
     WrappedTH1 *hTransverseMassTopChiSelection;
     WrappedTH1 *hTransverseMassTopBjetSelection;
-    /*
-<<<<<<< HEAD
-    //    WrappedTH1 *hDeltaPhi;
-    WrappedTH1 *hDeltaPhiAfterVeto;
-    WrappedTH1 *hDeltaPhiAfterJets;
-    WrappedTH1 *hDeltaPhiBeforeVeto;
-    WrappedTH1 *hDeltaPhiJetMet;
 
+//     WrappedTH1* hQCDTailKillerJet0BackToBackInverted;
+//     WrappedTH1* hQCDTailKillerJet1BackToBackInverted;
+//     WrappedTH1* hQCDTailKillerJet2BackToBackInverted;
+//     WrappedTH1* hQCDTailKillerJet3BackToBackInverted;
+//     WrappedTH1* hQCDTailKillerJet0CollinearInverted;
+//     WrappedTH1* hQCDTailKillerJet1CollinearInverted;
+//     WrappedTH1* hQCDTailKillerJet2CollinearInverted;
+//     WrappedTH1* hQCDTailKillerJet3CollinearInverted;
+//     WrappedTH1* hQCDTailKillerJet0BackToBackBaseline;
+//     WrappedTH1* hQCDTailKillerJet1BackToBackBaseline;
+//     WrappedTH1* hQCDTailKillerJet2BackToBackBaseline;
+//     WrappedTH1* hQCDTailKillerJet3BackToBackBaseline;
+//     WrappedTH1* hQCDTailKillerJet0CollinearBaseline;
+//     WrappedTH1* hQCDTailKillerJet1CollinearBaseline;
+//     WrappedTH1* hQCDTailKillerJet2CollinearBaseline;
+//     WrappedTH1* hQCDTailKillerJet3CollinearBaseline;
 
-    // Histograms for validation at every Selection Cut step
-    WrappedTH1 *hMet_AfterTauSelection;
-    WrappedTH1 *hMet_AfterEvtTopology;
-    WrappedTH1 *hMETBeforeMETCut;
-    WrappedTH1 *hMETBeforeTauId;
-
-    // std::vector<WrappedTH1*> hQCDTailKillerBackToBackInverted;
-    // std::vector<WrappedTH1*> hQCDTailKillerCollinearInverted;
-    //std::vector<WrappedTH1*> hQCDTailKillerBackToBackBaseline;
-    //std::vector<WrappedTH1*> hQCDTailKillerCollinearBaseline;
-    std::vector<WrappedTH1*> hEWKFakeTausQCDTailKillerBackToBack_Baseline;
-    std::vector<WrappedTH1*> hEWKFakeTausQCDTailKillerCollinear_Baseline;
-
-    WrappedTH1* hQCDTailKillerJet0BackToBackInverted;
-    WrappedTH1* hQCDTailKillerJet1BackToBackInverted;
-    WrappedTH1* hQCDTailKillerJet2BackToBackInverted;
-    WrappedTH1* hQCDTailKillerJet3BackToBackInverted;
-    WrappedTH1* hQCDTailKillerJet0CollinearInverted;
-    WrappedTH1* hQCDTailKillerJet1CollinearInverted;
-    WrappedTH1* hQCDTailKillerJet2CollinearInverted;
-    WrappedTH1* hQCDTailKillerJet3CollinearInverted;
-    WrappedTH1* hQCDTailKillerJet0BackToBackBaseline;
-    WrappedTH1* hQCDTailKillerJet1BackToBackBaseline;
-    WrappedTH1* hQCDTailKillerJet2BackToBackBaseline;
-    WrappedTH1* hQCDTailKillerJet3BackToBackBaseline;
-    WrappedTH1* hQCDTailKillerJet0CollinearBaseline;
-    WrappedTH1* hQCDTailKillerJet1CollinearBaseline;
-    WrappedTH1* hQCDTailKillerJet2CollinearBaseline;
-    WrappedTH1* hQCDTailKillerJet3CollinearBaseline;
-
-    //    WrappedTH1* hCtrlNjets;
-    HistogramsInBins *hCtrlNjets;
-
-    HistogramsInBins *hMETBaselineTauId;
-    HistogramsInBins *hMETBaselineTauIdJets;
-    HistogramsInBins *hMETBaselineTauIdBtag;
-    HistogramsInBins *hMETBaselineTauIdBveto;
-=======
-    */
     WrappedTH2 *hTransverseMassVsDphi;
-    
+
     WrappedTH1 *hSelectedTauEt;
     WrappedTH1 *hSelectedTauEta;
     WrappedTH1 *hSelectedTauEtAfterCuts;
@@ -344,7 +248,6 @@ namespace HPlus {
     HistogramsInBins *hMTInvertedTauIdBvetoDphi;
     HistogramsInBins *hMTInvertedTauIdJetDphi;
     HistogramsInBins *hMTInvertedAllCutsTailKiller;
-    
 
 //     WrappedTH1* hQCDTailKillerJet0BackToBackInverted;
 //     WrappedTH1* hQCDTailKillerJet1BackToBackInverted;
@@ -358,9 +261,9 @@ namespace HPlus {
 //     WrappedTH1* hQCDTailKillerJet1BackToBackBaseline;
 //     WrappedTH1* hQCDTailKillerJet2BackToBackBaseline;
 //     WrappedTH1* hQCDTailKillerJet3BackToBackBaseline;
-    //WrappedTH1* hQCDTailKillerJet0CollinearBaseline;
-    //WrappedTH1* hQCDTailKillerJet1CollinearBaseline;
-    //WrappedTH1* hQCDTailKillerJet2CollinearBaseline;
+//     WrappedTH1* hQCDTailKillerJet0CollinearBaseline;
+//     WrappedTH1* hQCDTailKillerJet1CollinearBaseline;
+//     WrappedTH1* hQCDTailKillerJet2CollinearBaseline;
 //     WrappedTH1* hQCDTailKillerJet3CollinearBaseline;
 
 

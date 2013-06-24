@@ -313,7 +313,7 @@ class ConfigBuilder:
 
                 for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
-                    if self.applyTauTriggerScaleFactor:
+                    if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
                         param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
@@ -1133,7 +1133,7 @@ class ConfigBuilder:
         names = []
 
         # Tau trigger SF
-        if self.applyTauTriggerScaleFactor:
+        if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
             names.append(addTauTrgSF( 1.0, "Plus"))
             names.append(addTauTrgSF(-1.0, "Minus"))
 

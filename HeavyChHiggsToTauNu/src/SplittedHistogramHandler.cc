@@ -7,7 +7,11 @@ namespace HPlus {
     fHistoWrapper(histoWrapper) {
     // Create histogram with binning information
     edm::Service<TFileService> fs;
-    hBinInfo = histoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "SplittedBinInfo", "SplittedBinInfo", 3, 0, 3.);
+    hBinInfo = histoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "SplittedBinInfo", "SplittedBinInfo", 4, 0, 4.);
+    if (hBinInfo->isActive()) {
+      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(1, "Control"); // Needed when merging histograms (divide by this number the other bins)
+      hBinInfo->SetBinContent(1, 1);
+    }
     std::stringstream s;
     // tau pt binning
     if (iConfig.exists("splitHistogramByTauPtBinLowEdges")) {
@@ -15,8 +19,8 @@ namespace HPlus {
       s << "TauPt:" << fTauPtBinLowEdges.size()+1;
     }
     if (hBinInfo->isActive()) {
-      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(1, "TauPt");
-      hBinInfo->SetBinContent(1, fTauPtBinLowEdges.size()+1);
+      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(2, "TauPt");
+      hBinInfo->SetBinContent(2, fTauPtBinLowEdges.size()+1);
     }
     // tau eta binning
     if (iConfig.exists("splitHistogramByTauEtaBinLowEdges")) {
@@ -24,8 +28,8 @@ namespace HPlus {
       s << ":TauEta:" << fTauEtaBinLowEdges.size()+1;
     }
     if (hBinInfo->isActive()) {
-      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(2, "TauEta");
-      hBinInfo->SetBinContent(2, fTauEtaBinLowEdges.size()+1);
+      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(3, "TauEta");
+      hBinInfo->SetBinContent(3, fTauEtaBinLowEdges.size()+1);
     }
     // Nvertices binning
     if (iConfig.exists("splitHistogramByNVerticesBinLowEdges")) {
@@ -33,8 +37,8 @@ namespace HPlus {
       s << ":Nvtx:" << fNVerticesBinLowEdges.size()+1;
     }
     if (hBinInfo->isActive()) {
-      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(3, "Nvtx");
-      hBinInfo->SetBinContent(3, fNVerticesBinLowEdges.size()+1);
+      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(4, "Nvtx");
+      hBinInfo->SetBinContent(4, fNVerticesBinLowEdges.size()+1);
     }
     // Set binning info prefix string
     s << ":";

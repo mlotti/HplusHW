@@ -36,7 +36,8 @@ def customize(signalAnalysis):
     # Apply beta cut for jets to reject PU jets
 #    signalAnalysis.jetSelection.jetPileUpWorkingPoint = "tight" # 
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
-#    signalAnalysis.MET.METCut = 100.0 
+#    signalAnalysis.MET.METCut = 100.0
+#    signalAnalysis.MET.preMETCut = 30.0
     # Example for setting a certain tail killer scenario for the nominal module
     #import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
     #signalAnalysis.QCDTailKiller = param.QCDTailKillerMediumPlus.clone()
