@@ -574,7 +574,39 @@ def addEmbeddingEmbedding_v44_5_1(datasets):
         addEmbeddingEmbedding_44X(skimVersion, version, datasets, definitions)
 
     addEmbedding("v44_5_1_notrg2", {
-        "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 0}),
+        # 5296176 events, 2254 jobs
+        # User mean 11404.4, min 9613.9, max 16618.0
+        # Mean 369.0 MB, min 314.1 MB, max 530.3 MB
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_notrg2-b4444849cbd68cba8058d20690fa09f4/USER", args={"triggerMC": 0}),
+        })
+
+    addEmbedding("v44_5_1", {
+        # 4741432 events, 2254 jobs
+        # User mean 10503.6, min 8873.8, max 15635.7
+        # Mean 341.6 MB, min 290.8 MB, max 498.7 MB
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1-7e75763c5b9284e37debaf454cd27985/USER", args={"triggerMC": 1}),
+        })
+
+    addEmbedding("v44_5_1_tauhad", {
+        # 4883090 events, 2254 jobs
+        # User mean 11790.0, min 9915.0, max 17016.8
+        # Mean 344.0 MB, min 291.0 MB, max 499.5 MB
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad-d57ea742826c3abce18a6ceed0c3bca3/USER", args={"triggerMC": 1, "tauDecayMode": 230}),
+        })
+
+    # addEmbedding("v44_5_1_tauhad_vispt10", {
+    #     "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 1, "tauDecayMode": 230, "tauMinVisPt": 10}),
+    #     })
+
+    # addEmbedding("v44_5_1_tauhad_vispt20", {
+    #     "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 1, "tauDecayMode": 230, "tauMinVisPt": 20}),
+    #     })
+
+    addEmbedding("v44_5_1_tauhad_vispt30", {
+        # 4933858 events, 2254 jobs
+        # User mean 13113.8, min 10899.2, max 19112.7
+        # Mean 345.6 MB, min 291.8 MB, max 500.5 MB
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad_vispt30_b-d57ea742826c3abce18a6ceed0c3bca3/USER", args={"triggerMC": 1, "tauDecayMode": 230, "tauMinVisPt": 30}, publishPostfix="_b"),
         })
 
 
