@@ -173,6 +173,22 @@ efficiency_ID_pickle = cms.untracked.PSet(
     muonSrc = cms.InputTag("NOT_SET"),
 )
 
+# calculate Run2011AB as lumi weighted average
+if True:
+    lumiA = efficiency_ID_pickle.dataParameters.Run2011A.luminosity.value()
+    lumiB = efficiency_ID_pickle.dataParameters.Run2011B.luminosity.value()
+    lumiAB = lumiA+lumiB
+    bins = []
+    for binA, binB in zip(efficiency_ID_pickle.mcParameters.Run2011A.bins, efficiency_ID_pickle.mcParameters.Run2011B.bins):
+        bins.append(cms.PSet(
+                triggerBin(binA.eta.value(),
+                           (binA.efficiency.value()*lumiA + binB.efficiency.value()*lumiB)/lumiAB,
+                           # assume stat uncertainties fully correlated in MC samples
+                           (binA.uncertainty.value()*lumiA + binB.uncertainty.value()*lumiB)/lumiAB
+                           )))
+    efficiency_ID_pickle.mcParameters.Run2011AB = cms.PSet(bins = cms.VPSet(bins))
+    efficiency_ID_pickle.mcSelect = "Run2011AB"
+
 
 ## Reference trigger efficiencyes for HLT_Mu40
 # From https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonHLT#Reference_Efficiencies_for_2011
@@ -345,6 +361,16 @@ efficiency_trigger_reference = cms.untracked.PSet(
     type = cms.untracked.string("binned"),
     muonSrc = cms.InputTag("NOT_SET"),
 )
+
+# Add dummy eta bins in order to avoid exception for ntuples
+def addEtaDummyBins(pset):
+    for ps in [pset.dataParameters, pset.mcParameters]:
+        for name in ps.parameterNames_():
+            bins = getattr(ps, name).bins
+            bins.insert(0, triggerBin(-5.0, 1, 0))
+            bins.append(triggerBin(2.4, 1, 0))
+addEtaDummyBins(efficiency_ID_pickle)
+addEtaDummyBins(efficiency_trigger_reference)
 
 #efficiency = efficiency_pt41
 efficiency = efficiency_ID_pickle
