@@ -426,31 +426,56 @@ def addEmbeddingEmbedding_v44_5(datasets):
 
 def addEmbeddingSkim_v44_5_1(datasets):
     # Not doing chi2<10 ID cut in the skim job (for possibility of TuneP)
+#        # 89420 events, 113 jobs
+#        # User mean 2432.4, min 470.6, max 7155.4
+#        # Mean 67.3 MB, min 9.1 MB, max 151.4 MB
+#        "SingleMu_160431-163261_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_163261_tauembedding_skim_v44_5_1-e6e5b12b8c9c249a4985635b30210544/USER"),
+#        # 258958 events, 206 jobs
+#        # User mean 3153.1, min 839.5, max 10264.4
+#        # Mean 101.6 MB, min 18.1 MB, max 217.9 MB
+#        "SingleMu_163270-163869_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_163869_tauembedding_skim_v44_5_1-b86f83b25a65adafc510540db2b385d1/USER"),
+#        # 386851 events, 373 jobs
+#        # User mean 3321.1, min 60.2, max 8545.0
+#        # Mean 87.6 MB, min 3.7 MB, max 181.6 MB
+#        "SingleMu_165088-166150_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_165088_166150_tauembedding_skim_v44_5_1-856f19da8dd50633d34c9707f7e229d2/USER"),
+#        # 1539955 events, 953 jobs
+#        # User mean 4592.0, min 1223.0, max 11895.6
+#        # Mean 134.1 MB, min 39.8 MB, max 287.3 MB
+#        "SingleMu_166161-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_skim_v44_5_1-8a2a027b46e0bf70954ec35b9e70b0b2/USER"),
+#        # 245801 events, 162 jobs
+#        # User mean 4544.6, min 1874.6, max 10131.6
+#        # Mean 140.6 MB, min 55.2 MB, max 226.0 MB
+#        "SingleMu_173236-173692_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_173236_173692_tauembedding_skim_v44_5_1-27084e7b9fd52190a9502d45e7513543/USER"),
+#        # 2842141 events, 1924 jobs
+#        # User mean 4694.9, min 1334.5, max 9042.2
+#        # Mean 163.3 MB, min 47.4 MB, max 318.7 MB
+#        "SingleMu_175832-180252_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_175832_180252_tauembedding_skim_v44_5_1-39b55c7eb0c557d9c273b43a0be4a2ff/USER"),
+    # Bugfix for calculating the "standard" MET filters for data (v44_5_2)
     definitions = {
-        # 89420 events, 113 jobs
-        # User mean 2432.4, min 470.6, max 7155.4
-        # Mean 67.3 MB, min 9.1 MB, max 151.4 MB
-        "SingleMu_160431-163261_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_163261_tauembedding_skim_v44_5_1-e6e5b12b8c9c249a4985635b30210544/USER"),
+        # 89420 events, 95 jobs
+        # User mean 2858.8, min 633.8, max 6299.9
+        # Mean 78.8 MB, min 23.5 MB, max 180.3 MB
+        "SingleMu_160431-163261_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_163261_tauembedding_skim_v44_5_2-5da894984d43d7affb331f2626592c2b/USER"),
         # 258958 events, 206 jobs
-        # User mean 3153.1, min 839.5, max 10264.4
+        # User mean 3522.0, min 595.6, max 7687.9
         # Mean 101.6 MB, min 18.1 MB, max 217.9 MB
-        "SingleMu_163270-163869_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_163869_tauembedding_skim_v44_5_1-b86f83b25a65adafc510540db2b385d1/USER"),
+        "SingleMu_163270-163869_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_163869_tauembedding_skim_v44_5_2-5dcc6e23548084ce0af9542cb166052d/USER"),
         # 386851 events, 373 jobs
-        # User mean 3321.1, min 60.2, max 8545.0
+        # User mean 2765.5, min 45.5, max 7547.7
         # Mean 87.6 MB, min 3.7 MB, max 181.6 MB
-        "SingleMu_165088-166150_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_165088_166150_tauembedding_skim_v44_5_1-856f19da8dd50633d34c9707f7e229d2/USER"),
-        # 1539955 events, 953 jobs
-        # User mean 4592.0, min 1223.0, max 11895.6
-        # Mean 134.1 MB, min 39.8 MB, max 287.3 MB
-        "SingleMu_166161-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_skim_v44_5_1-8a2a027b46e0bf70954ec35b9e70b0b2/USER"),
+        "SingleMu_165088-166150_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_165088_166150_tauembedding_skim_v44_5_2-62bc199df7c6de3914ddfd4e7a4dedf1/USER"),
+        # 1539955 events, 1295 jobs
+        # User mean 3107.2, min 374.8, max 9280.2
+        # Mean 100.6 MB, min 15.2 MB, max 219.0 MB
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_skim_v44_5_2-9279e439e9124cd35585c1246e432cfd/USER"),
         # 245801 events, 162 jobs
-        # User mean 4544.6, min 1874.6, max 10131.6
+        # User mean 4546.0, min 1653.9, max 10561.0
         # Mean 140.6 MB, min 55.2 MB, max 226.0 MB
-        "SingleMu_173236-173692_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_173236_173692_tauembedding_skim_v44_5_1-27084e7b9fd52190a9502d45e7513543/USER"),
-        # 2842141 events, 1924 jobs
-        # User mean 4694.9, min 1334.5, max 9042.2
-        # Mean 163.3 MB, min 47.4 MB, max 318.7 MB
-        "SingleMu_175832-180252_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_175832_180252_tauembedding_skim_v44_5_1-39b55c7eb0c557d9c273b43a0be4a2ff/USER"),
+        "SingleMu_173236-173692_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_173236_173692_tauembedding_skim_v44_5_2-883c99ed2824db47683a70a86f21fc2e/USER"),
+        # 2842141 events, 2638 jobs
+        # User mean 3423.2, min 1095.3, max 7534.9
+        # Mean 120.9 MB, min 47.4 MB, max 253.1 MB
+        "SingleMu_175832-180252_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_175832_180252_tauembedding_skim_v44_5_2-ff6b0c8176db587721dc02d5ab403d42/USER"),
 
         # 8183108 events, 4994 jobs
         # User mean 3079.8, min 14.8, max 6305.4
@@ -540,36 +565,6 @@ def addEmbeddingSkim_v44_5_1(datasets):
         "TTToHplusBHminusB_M160_Fall11":    TaskDef(""),
         }
     addEmbeddingSkim_44X("v44_5_1", datasets, definitions)
-
-def addEmbeddingSkim_v44_5_2(datasets):
-    # Bugfix for calculating the "standard" MET filters for data
-    definitions = {
-        # 89420 events, 95 jobs
-        # User mean 2858.8, min 633.8, max 6299.9
-        # Mean 78.8 MB, min 23.5 MB, max 180.3 MB
-        "SingleMu_160431-163261_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_163261_tauembedding_skim_v44_5_2-5da894984d43d7affb331f2626592c2b/USER"),
-        # 258958 events, 206 jobs
-        # User mean 3522.0, min 595.6, max 7687.9
-        # Mean 101.6 MB, min 18.1 MB, max 217.9 MB
-        "SingleMu_163270-163869_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_163869_tauembedding_skim_v44_5_2-5dcc6e23548084ce0af9542cb166052d/USER"),
-        # 386851 events, 373 jobs
-        # User mean 2765.5, min 45.5, max 7547.7
-        # Mean 87.6 MB, min 3.7 MB, max 181.6 MB
-        "SingleMu_165088-166150_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_165088_166150_tauembedding_skim_v44_5_2-62bc199df7c6de3914ddfd4e7a4dedf1/USER"),
-        # 1539955 events, 1295 jobs
-        # User mean 3107.2, min 374.8, max 9280.2
-        # Mean 100.6 MB, min 15.2 MB, max 219.0 MB
-        "SingleMu_166161-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_skim_v44_5_2-9279e439e9124cd35585c1246e432cfd/USER"),
-        # 245801 events, 162 jobs
-        # User mean 4546.0, min 1653.9, max 10561.0
-        # Mean 140.6 MB, min 55.2 MB, max 226.0 MB
-        "SingleMu_173236-173692_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_173236_173692_tauembedding_skim_v44_5_2-883c99ed2824db47683a70a86f21fc2e/USER"),
-        # 2842141 events, 2638 jobs
-        # User mean 3423.2, min 1095.3, max 7534.9
-        # Mean 120.9 MB, min 47.4 MB, max 253.1 MB
-        "SingleMu_175832-180252_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_175832_180252_tauembedding_skim_v44_5_2-ff6b0c8176db587721dc02d5ab403d42/USER"),
-        }
-    addEmbeddingSkim_44X("v44_5_2", datasets, definitions)
 
 
 def addEmbeddingEmbedding_v44_5_1(datasets):
