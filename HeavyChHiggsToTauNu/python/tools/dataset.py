@@ -561,6 +561,7 @@ def _normalizeToFactor(h, f):
 # \param datasetList  List of all Dataset objects to consider
 # \param nameList     List of the names of Dataset objects to merge/stack
 # \param task         String to identify merge/stack task (can be 'stack' or 'merge')
+# \param allowMissingDatasets  If True, ignore error from missing dataset (warning is nevertheless printed)
 # 
 # \return a triple of:
 # - list of selected Dataset objects
@@ -572,7 +573,7 @@ def _normalizeToFactor(h, f):
 # Datasets, and it is checked that all of them are either data or MC
 # (i.e. merging/stacking of data and MC datasets is forbidden).
 # """
-def _mergeStackHelper(datasetList, nameList, task):
+def _mergeStackHelper(datasetList, nameList, task, allowMissingDatasets=False):
     if not task in ["stack", "merge"]:
         raise Exception("Task can be either 'stack' or 'merge', was '%s'" % task)
 
@@ -604,7 +605,11 @@ def _mergeStackHelper(datasetList, nameList, task):
         for d in selected:
             ind = dlist.index(d.getName())
             del dlist[ind]
-        print >> sys.stderr, "WARNING: Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
+        message = "Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
+        if allowMissingDatasets:
+            print >> sys.stderr, "WARNING: "+message
+        else:
+            raise Exception(message)
 
     return (selected, notSelected, firstIndex)
 
@@ -3133,17 +3138,22 @@ class DatasetManager:
     #                     they are removed, as they are now contained
     #                     in the dataset.DatasetMerged object
     # \param addition     Creates DatasetAddedMC instead of DatasetMerged
+# \param allowMissingDatasets  If True, ignore error from missing dataset (warning is nevertheless printed)
     #
     # If nameList translates to only one dataset.Dataset, the
     # dataset.Daataset object is renamed (i.e. dataset.DatasetMerged
     # object is not created)
-    def merge(self, newName, nameList, keepSources=False, addition=False, silent=False):
-        (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge")
+    def merge(self, newName, nameList, keepSources=False, addition=False, silent=False, allowMissingDatasets=False):
+        (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge", allowMissingDatasets)
         if len(selected) == 0:
-            if not silent:
-                print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
+            message = "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
+            if allowMissingDatasets:
+                if not silent:
+                    print >> sys.stderr, message
+            else:
+                raise Exception(message)
             return
-        elif len(selected) == 1:
+        elif len(selected) == 1 and not keepSources:
             if not silent:
                 print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
             self.rename(selected[0].getName(), newName)
