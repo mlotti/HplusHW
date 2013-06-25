@@ -76,6 +76,8 @@ public:
   explicit BranchBase(const std::string& n): name(n), branch(0), entry(0), cached(false) {}
   virtual ~BranchBase();
 
+  bool isValid() const { return branch != 0; }
+
   void setEntry(Long64_t e) { entry = e; cached = false; }
 
   const std::string& getName() const { return name; }
