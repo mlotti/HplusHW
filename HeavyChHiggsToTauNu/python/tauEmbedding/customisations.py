@@ -34,6 +34,9 @@ generatorTauPt = 40
 generatorTauSelection = "abs(pdgId()) == 15 && pt() > %d && abs(eta()) < 2.1 && abs(mother().pdgId()) != 15"
 
 def customiseParamForTauEmbedding(param, options, dataVersion):
+    # Enable generator weight
+    param.embeddingGeneratorWeightReader.enabled = True
+
     # Change the triggers to muon
     param.trigger.triggers = [
         "HLT_Mu9",

@@ -601,6 +601,11 @@ wjetsWeightReader = cms.untracked.PSet(
     enabled = cms.bool(False),
 )
 
+embeddingGeneratorWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("generator", "weight"),
+    enabled = cms.bool(False),
+)
+
 vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices"),
 #    vertexSrc = cms.InputTag("goodPrimaryVertices10"),

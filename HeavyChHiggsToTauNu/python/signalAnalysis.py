@@ -39,6 +39,7 @@ def createEDFilter(param):
         vertexWeight = param.vertexWeight.clone(),
         pileupWeightReader = param.pileupWeightReader.clone(),
         wjetsWeightReader = param.wjetsWeightReader.clone(),
+        embeddingGeneratorWeightReader = param.embeddingGeneratorWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
         embeddingMuonTriggerEfficiency = param.embeddingMuonTriggerEfficiency.clone(),
         embeddingMuonIdEfficiency = param.embeddingMuonIdEfficiency.clone(),

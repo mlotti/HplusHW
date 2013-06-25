@@ -75,6 +75,7 @@ namespace HPlus {
     // Main counters
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
     fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
+    fEmbeddingGeneratorWeightCounter(eventCounter.addCounter("Embedding: generator weight weight")),
     fMETFiltersCounter(eventCounter.addCounter("MET filters")),
     fEmbeddingMuonTriggerEfficiencyCounter(eventCounter.addCounter("Embedding: muon trig eff weight")),
     fEmbeddingMuonIdEfficiencyCounter(eventCounter.addCounter("Embedding: muon ID eff weight")),
@@ -185,6 +186,7 @@ namespace HPlus {
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
+    fEmbeddingGeneratorWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingGeneratorWeightReader"), fHistoWrapper, "EmbeddingGeneratorWeight"),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
@@ -396,6 +398,15 @@ namespace HPlus {
       fTree.setWjetsWeight(wjetsWeight);
     }
     increment(fWJetsWeightCounter);
+
+//------ For embedding, incorporate generator weight here (N(vispt > cut)/Nall)
+    if(bTauEmbeddingStatus) {
+      double embeddingWeight = fEmbeddingGeneratorWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(embeddingWeight);
+      fTree.setEmbeddingGeneratorWeight(embeddingWeight);
+    }
+    increment(fEmbeddingGeneratorWeightCounter);
+
 
 //------ MET (noise) filters for data (reject events with instrumental fake MET)
     if(iEvent.isRealData()) {
