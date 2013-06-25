@@ -27,9 +27,9 @@ private:
   MuonCollection fMuons;
 
   std::string fPuWeightName;
-  Branch<double> fPuWeight;
-  Branch<unsigned> fSelectedVertexCount;
-  Branch<unsigned> fVertexCount;
+  Branch<double> *fPuWeight;
+  Branch<unsigned> *fSelectedVertexCount;
+  Branch<unsigned> *fVertexCount;
 
   // Output
   // Counts
@@ -82,30 +82,24 @@ void EmbeddingDebugTauAnalysisSelector::setOutput(TDirectory *dir) {
   hGenTau_AfterMuonVeto.book("gentau_afterMuonVeto");
 }
 
-void EmbeddingDebugTauAnalysisSelector::setupBranches(TTree *tree) {
-  fEventInfo.setupBranches(tree);
+void EmbeddingDebugTauAnalysisSelector::setupBranches(BranchManager& branchManager) {
+  fEventInfo.setupBranches(branchManager);
   if(isMC()) {
-    fGenTopWDecays.setupBranches(tree);
-    fGenTaus.setupBranches(tree);
+    fGenTopWDecays.setupBranches(branchManager);
+    fGenTaus.setupBranches(branchManager);
   }
-  fMuons.setupBranches(tree, isMC());
+  fMuons.setupBranches(branchManager, isMC());
+  if(!fPuWeightName.empty())
+    branchManager.book(fPuWeightName, &fPuWeight);
 
-  fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertex_count");
-  fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
+  branchManager.book("selectedPrimaryVertex_count", &fSelectedVertexCount);
+  branchManager.book("goodPrimaryVertex_count", &fVertexCount);
 }
 
 bool EmbeddingDebugTauAnalysisSelector::process(Long64_t entry) {
-  fEventInfo.setEntry(entry);
-  fGenTopWDecays.setEntry(entry);
-  fGenTaus.setEntry(entry);
-  fMuons.setEntry(entry);
-  fPuWeight.setEntry(entry);
-  fSelectedVertexCount.setEntry(entry);
-  fVertexCount.setEntry(entry);
-
   double weight = 1.0;
   if(!fPuWeightName.empty()) {
-    weight *= fPuWeight.value();
+    weight *= fPuWeight->value();
   }
   fEventCounter.setWeight(weight);
 
