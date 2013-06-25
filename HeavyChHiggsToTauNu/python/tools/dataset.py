@@ -3533,6 +3533,8 @@ class NtupleCache:
 
         selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*selectorArgs), directory)
         selector.setPrintStatus(self.printStatus)
+        directories = [directory]
+
         for name, (selecName, selecArgs) in self.additionalSelectors.iteritems():
             directory = getSelectorDir(name).mkdir(datasetName)
             directory.cd()
@@ -3540,6 +3542,7 @@ class NtupleCache:
             argsNamed.Write()
             selectorArgs = getSelectorArgs(name, selecArgs)
             selector.addSelector(name, getattr(ROOT, selecName)(*selectorArgs), directory)
+            directories.append(directory)
 
         print "Processing dataset", datasetName
         
@@ -3547,7 +3550,8 @@ class NtupleCache:
             tree.Process(selector, "", N)
         else:
             tree.Process(selector)
-        directory.Write()
+        for d in directories:
+            d.Write()
 
     ## Get a histogram from the cache file
     #
