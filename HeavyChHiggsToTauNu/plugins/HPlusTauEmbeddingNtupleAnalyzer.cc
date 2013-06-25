@@ -142,6 +142,9 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   }
 
   edm::Service<TFileService> fs;
+  // Save the module configuration to the output ROOT file as a TNamed object
+  fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
+
   fTree = fs->make<TTree>("tree", "Tree");
 
   fEventBranches.book(fTree);
