@@ -2879,7 +2879,7 @@ class DatasetManager:
             else:
                 raise Exception(message)
             return
-        elif len(selected) == 1:
+        elif len(selected) == 1 and not keepSources:
             print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
             self.rename(selected[0].getName(), newName)
             return
