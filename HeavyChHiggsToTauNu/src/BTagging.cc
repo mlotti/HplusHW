@@ -62,7 +62,7 @@ namespace HPlus {
     fEpsilonMCL.push_back(epsilonMCL);
   }
 
-  size_t BTagging::BTaggingScaleFactor::obtainIndex(std::vector<double>& table, double pt) {
+  size_t BTagging::BTaggingScaleFactor::obtainIndex(const std::vector<double>& table, double pt) {
     size_t myEnd = table.size();
     size_t myPos = 0;
     while (myPos < myEnd) {
@@ -77,108 +77,109 @@ namespace HPlus {
     return myEnd-1; // return last bin
   }
 
-////  double BTagging::BTaggingScaleFactor::getWeight(std::vector<double>& fPassedBpT, std::vector<double>& fPassedLpT, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT) {
-  double BTagging::BTaggingScaleFactor::getWeight(edm::PtrVector<pat::Jet> fPassedBpT,
-                                                  edm::PtrVector<pat::Jet> fPassedLpT,
-                                                  edm::PtrVector<pat::Jet> fFailedBpT,
-                                                  edm::PtrVector<pat::Jet> fFailedLpT) {
-    double myValue = 1.0;
-    // b-flavor jets that have passed b-tagging
-////    myValue *= std::pow(fScaleFactorB[0], nPassedB);
-    for(edm::PtrVector<pat::Jet>::const_iterator it = fPassedBpT.begin(); it != fPassedBpT.end(); ++it) {
-      myValue *= getBtagScaleFactor((*it)->pt(),(*it)->eta());
-    }    
-    // b-flavor jets that have not passed b-tagging
-    for(edm::PtrVector<pat::Jet>::const_iterator it = fFailedBpT.begin(); it != fFailedBpT.end(); ++it) {
-      // obtain index for pT table)
-////      int myIndex = obtainIndex(fPtBinsB, *it);
-////      myValue *= (1.-fScaleFactorB[myIndex]*fEpsilonMCB[myIndex]) / (1.-fEpsilonMCB[myIndex]);
-      myValue *= (1.-getBtagScaleFactor((*it)->pt(),(*it)->eta())*getMCBtagEfficiency((*it)->pt(),(*it)->eta())) / (1.-getMCBtagEfficiency((*it)->pt(),(*it)->eta()));
-    }
-    // non-b-flavor jets that have passed b-tagging
-    for(edm::PtrVector<pat::Jet>::const_iterator it = fPassedLpT.begin(); it != fPassedLpT.end(); ++it) {
-      myValue *= getMistagScaleFactor((*it)->pt(),(*it)->eta());
-    }
-////    myValue *= std::pow(fScaleFactorL[0], nPassedL);
-    // non-b-flavor jets that have not passed b-tagging
-    for(edm::PtrVector<pat::Jet>::const_iterator it = fFailedLpT.begin(); it != fFailedLpT.end(); ++it) {
-      // obtain index for pT table
-////      int myIndex = obtainIndex(fPtBinsL, *it);
-////      myValue *= (1.-fScaleFactorL[myIndex]*fEpsilonMCL[myIndex]) / (1.-fEpsilonMCL[myIndex]);
-      myValue *= (1.-getMistagScaleFactor((*it)->pt(),(*it)->eta())*getMCMistagEfficiency((*it)->pt(),(*it)->eta())) / (1.-getMCMistagEfficiency((*it)->pt(),(*it)->eta()));
-    }
-    // Return calculated value
-    return myValue;
-  }
-  
-//  double BTagging::BTaggingScaleFactor::getRelativeUncertainty(std::vector<double>& fPassedBpT, std::vector<double>& fPassedLpT, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT) {
-  double BTagging::BTaggingScaleFactor::getRelativeUncertainty(edm::PtrVector<pat::Jet> fPassedBpT,
-                                                               edm::PtrVector<pat::Jet> fPassedLpT,
-                                                               edm::PtrVector<pat::Jet> fFailedBpT,
-                                                               edm::PtrVector<pat::Jet> fFailedLpT) {
+  BTagging::Info BTagging::BTaggingScaleFactor::getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const {
+    Info ret;
+    ret.reserve(jets.size());
 
-    // b-flavor jets and non-b-flavor jets are uncorrelated --> error propagation with F=F(scalefactorB, scalefactorL)
-    // Notice the nice anti-correlation between the passed and failed components
-/*
-    // b-flavor jets
-////    double myBTerm = static_cast<double>(nPassedB)/fScaleFactorB[0];
-    double myBTerm = 0;
-    for(std::vector<double>::iterator it = fPassedBpT.begin(); it != fPassedBpT.end(); ++it) {
-      myBTerm += 1/getBtagScaleFactor(*it,0);
-    }
-    for(std::vector<double>::iterator it = nFailedBpT.begin(); it != nFailedBpT.end(); ++it) {
-      // obtain index for pT table
-////      int myIndex = obtainIndex(fPtBinsB, *it);
-////      myBTerm -= fEpsilonMCB[myIndex]/(1.-fScaleFactorB[myIndex]*fEpsilonMCB[myIndex]);
-	myBTerm -= getMCBtagEfficiency(*it,0)/(1.-getBtagScaleFactor(*it,0)*getMCBtagEfficiency(*it,0));
-    }
-    myBTerm *= fScaleFactorUncertaintyB[0];
-    // l-flavor jets
-////    double myLTerm = static_cast<double>(nPassedL)/fScaleFactorL[0];
-    for(std::vector<double>::iterator it = fPassedLpT.begin(); it != fPassedLpT.end(); ++it) {
-      myLTerm += getMistagScaleFactor(*it,0);
-    }
-    for(std::vector<double>::iterator it = nFailedLpT.begin(); it != nFailedLpT.end(); ++it) {
-      // obtain index for pT table
-////      int myIndex = obtainIndex(fPtBinsL, *it);
-////      myLTerm -= fEpsilonMCL[myIndex]/(1.-fScaleFactorL[myIndex]*fEpsilonMCL[myIndex]);
-	myLTerm -= getMCMistagEfficiency(*it,0)/(1.-getMistagScaleFactor(*it,0)*getMCMistagEfficiency(*it,0));
-    }
-    myLTerm *= fScaleFactorUncertaintyL[0];
-    // Return result
-    return std::sqrt(std::pow(myBTerm,2) + std::pow(myLTerm,2));
-*/
-	
-	// b-jets
-	double berror = 0;
-	for(edm::PtrVector<pat::Jet>::const_iterator it = fPassedBpT.begin(); it != fPassedBpT.end(); ++it) {
-		berror += getBtagScaleFactorError((*it)->pt(),(*it)->eta())/getBtagScaleFactor((*it)->pt(),(*it)->eta());
-	}
-        for(edm::PtrVector<pat::Jet>::const_iterator it = fFailedBpT.begin(); it != fFailedBpT.end(); ++it) {
-		berror -= getBtagScaleFactorError((*it)->pt(),(*it)->eta())*getMCBtagEfficiency((*it)->pt(),(*it)->eta())/(1-getBtagScaleFactor((*it)->pt(),(*it)->eta())*getMCBtagEfficiency((*it)->pt(),(*it)->eta()));
-	}
+    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jets.begin(); iJet != jets.end(); ++iJet) {
+      bool tagged = false;
+      for (edm::PtrVector<pat::Jet>::const_iterator iBjet = btagData.fSelectedJets.begin(); iBjet != btagData.fSelectedJets.end(); ++iBjet) {
+	if (*iJet == *iBjet) tagged = true;
+      }
+      bool genuine = std::abs((*iJet)->partonFlavour()) == 5;
 
-	// light q/g jets
-	double lerror = 0;
-        for(edm::PtrVector<pat::Jet>::const_iterator it = fPassedLpT.begin(); it != fPassedLpT.end(); ++it) {
-                berror += getMistagScaleFactorError((*it)->pt(),(*it)->eta())/getMistagScaleFactor((*it)->pt(),(*it)->eta());
-        }                                                                                                                                              
-        for(edm::PtrVector<pat::Jet>::const_iterator it = fFailedLpT.begin(); it != fFailedLpT.end(); ++it) {
-                berror -= getMistagScaleFactorError((*it)->pt(),(*it)->eta())*getMCMistagEfficiency((*it)->pt(),(*it)->eta())/(1-getMistagScaleFactor((*it)->pt(),(*it)->eta())*getMCMistagEfficiency((*it)->pt(),(*it)->eta()));
+      // To see how per-jet scale factor and uncertainty are used, see calculateScaleFactor(), calculateAbsoluteUncertainty(), and  calculateRelativeUncertainty()
+      double scaleFactor = 1.0;
+      double uncertainty = 0.0;
+      if(!isData) {
+        // FIXME this is a dirty hack, numbers are from BTV-11-004 (see accompanying AN's)
+        if(tagged) {
+          // This is independent of pT
+          if(genuine) { scaleFactor = 0.96; uncertainty = 0.04; }
+          else        { scaleFactor = 1.17; uncertainty = 0.21; }
         }
-	return std::sqrt(std::pow(berror,2) + std::pow(lerror,2));
+        // FIXME end of dirty hack
+
+        // Old numbers
+        /*
+        const double pt = (*iJet)->pt();
+        const double eta = (*iJet)->eta();
+        if(tagged) {
+          if(genuine) {
+            scaleFactor = getBtagScaleFactor(pt, eta);
+            uncertainty = getBtagScaleFactorError(pt, eta) / scaleFactor;
+          }
+          else {
+            scaleFactor = getMistagScaleFactor(pt, eta);
+            uncertainty = getMistagScaleFactorError(pt, eta) / scaleFactor;
+          }
+        }
+        else {
+          if(genuine) {
+            scaleFactor = (1.-getBtagScaleFactor(pt, eta)*getMCBtagEfficiency(pt, eta)) / (1.-getMCBtagEfficiency(pt, eta));
+            uncertainty = -1. * getBtagScaleFactorError(pt, eta)*getMCBtagEfficiency(pt, eta) / (1.-getBtagScaleFactor(pt, eta)*getMCBtagEfficiency(pt, eta));
+          }
+          else {
+            scaleFactor = (1.-getMistagScaleFactor(pt, eta)*getMCMistagEfficiency(pt, eta)) / (1.-getMCMistagEfficiency(pt, eta));
+            uncertainty = -1. * getMistagScaleFactorError(pt, eta)*getMCMistagEfficiency(pt, eta) / (1.-getMistagScaleFactor(pt, eta)*getMCMistagEfficiency(pt, eta));
+          }
+        }
+        */
+      }
+      ret.tagged.push_back(tagged);
+      ret.genuine.push_back(genuine);
+      ret.scaleFactor.push_back(scaleFactor);
+      ret.uncertainty.push_back(uncertainty);
+
+    }
+    return ret;
   }
 
-  double BTagging::BTaggingScaleFactor::getAbsoluteUncertainty(edm::PtrVector<pat::Jet> fPassedBpT,
-                                                               edm::PtrVector<pat::Jet> fPassedLpT,
-                                                               edm::PtrVector<pat::Jet> fFailedBpT,
-                                                               edm::PtrVector<pat::Jet> fFailedLpT) {
-
-////  double BTagging::BTaggingScaleFactor::getAbsoluteUncertainty(std::vector<double>& fPassedBpT, std::vector<double>& fPassedLpT, std::vector<double>& fFailedBpT, std::vector<double>& fFailedLpT) {
-    return getWeight(fPassedBpT, fPassedLpT, fFailedBpT, fFailedLpT) * getRelativeUncertainty(fPassedBpT, fPassedLpT, fFailedBpT, fFailedLpT);
+  double BTagging::BTaggingScaleFactor::calculateScaleFactor(const Info& info) {
+    double scaleFactor = 1.0;
+    for(size_t i=0; i<info.size(); ++i) {
+      scaleFactor *= info.scaleFactor[i];
+    }
+    return scaleFactor;
   }
 
-  double BTagging::BTaggingScaleFactor::getBtagScaleFactor(double pt,double eta){
+  double BTagging::BTaggingScaleFactor::calculateAbsoluteUncertainty(const Info& info) {
+    // FIXME this is a dirty hack, numbers are from BTV-11-004 (see accompanying AN's)
+    double uncert = 0.0;
+    for(size_t i=0; i<info.size(); ++i) {
+      double tmp = info.uncertainty[i];
+      uncert += tmp*tmp;
+    }
+    return std::sqrt(uncert);
+    // FIXME end of dirty hack
+    // old numbers
+    /*
+    return calculateScaleFactor(info)*calculateRelativeUncertainty(info);
+    */
+  }
+
+  double BTagging::BTaggingScaleFactor::calculateRelativeUncertainty(const Info& info) {
+    // FIXME this is a dirty hack, numbers are from BTV-11-004 (see accompanying AN's)
+    return calculateAbsoluteUncertainty(info) / calculateScaleFactor(info);
+    // FIXME end of dirty hack
+    // old numbers
+    /*
+    double berror = 0; // b-jets
+    double lerror = 0; // light q/g jets
+
+    for(size_t i=0; i<info.size(); ++i) {
+      if(info.genuine[i])
+        berror += info.uncertainty[i];
+      else
+        lerror += info.uncertainty[i];
+    }
+
+    return std::sqrt(berror*berror + lerror*lerror);
+    */
+  }
+
+
+  double BTagging::BTaggingScaleFactor::getBtagScaleFactor(double pt,double eta) const {
         if(btagdb==0){
                 int myIndex = obtainIndex(fPtBinsB, pt);
                 return fScaleFactorB[myIndex];
@@ -186,14 +187,14 @@ namespace HPlus {
                 return btagdb->getScaleFactors(pt,eta).btagScaleFactor();
         }
   }
-  double BTagging::BTaggingScaleFactor::getBtagScaleFactorError(double pt,double eta){
+  double BTagging::BTaggingScaleFactor::getBtagScaleFactorError(double pt,double eta) const {
         if(btagdb==0){
                 return fScaleFactorUncertaintyB[0];
         }else{
                 return btagdb->getScaleFactors(pt,eta).btagScaleFactorError();
         }
   }
-  double BTagging::BTaggingScaleFactor::getMistagScaleFactor(double pt,double eta){
+  double BTagging::BTaggingScaleFactor::getMistagScaleFactor(double pt,double eta) const {
         if(btagdb==0){
                 int myIndex = obtainIndex(fPtBinsB, pt);
                 return fScaleFactorL[myIndex];
@@ -201,14 +202,14 @@ namespace HPlus {
                 return btagdb->getScaleFactors(pt,eta).mistagScaleFactor();
         }
   }
-  double BTagging::BTaggingScaleFactor::getMistagScaleFactorError(double pt,double eta){
+  double BTagging::BTaggingScaleFactor::getMistagScaleFactorError(double pt,double eta) const {
         if(btagdb==0){   
                 return fScaleFactorUncertaintyL[0];      
         }else{
                 return btagdb->getScaleFactors(pt,eta).mistagScaleFactorError();
         }                                                                                                
   }
-  double BTagging::BTaggingScaleFactor::getMCBtagEfficiency(double pt,double eta){
+  double BTagging::BTaggingScaleFactor::getMCBtagEfficiency(double pt,double eta) const {
         if(btagdb==0){
                 int myIndex = obtainIndex(fPtBinsB, pt);
                 return fEpsilonMCB[myIndex];
@@ -216,7 +217,7 @@ namespace HPlus {
 		return btagdb->getScaleFactors(pt,eta).btagEfficiency();
         }
   }
-  double BTagging::BTaggingScaleFactor::getMCMistagEfficiency(double pt,double eta){
+  double BTagging::BTaggingScaleFactor::getMCMistagEfficiency(double pt,double eta) const {
         if(btagdb==0){
                 int myIndex = obtainIndex(fPtBinsB, pt);
                 return fEpsilonMCL[myIndex];
@@ -224,6 +225,7 @@ namespace HPlus {
                 return btagdb->getScaleFactors(pt,eta).mistagEfficiency();
         }
   }
+
 
   BTagging::BTagging(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
@@ -602,69 +604,16 @@ namespace HPlus {
       }
     }
   }
+
+  BTagging::Info BTagging::getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const {
+    return fBTaggingScaleFactor.getPerJetInfo(jets, btagData, isData);
+  }
   
   void BTagging::calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, BTagging::Data& btagData) {
-    // Count number of b jets and light jets
-////    int nBJetsPassed = 0;
-////    std::vector<double> fBJetsPassedPt;
-////    std::vector<double> fBJetsFailedPt;
-////    int nLightJetsPassed = 0;
-////    std::vector<double> fLightJetsPassedPt;
-////    std::vector<double> fLightJetsFailedPt;
-
-    edm::PtrVector<pat::Jet> fBJetsPassedPt;
-    edm::PtrVector<pat::Jet> fBJetsFailedPt;
-    edm::PtrVector<pat::Jet> fLightJetsPassedPt;
-    edm::PtrVector<pat::Jet> fLightJetsFailedPt;
-
-    // Loop over jets
-    for (edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
-      edm::Ptr<pat::Jet> iJet = *iter;
-      bool myJetTaggedStatus = false;
-      for (edm::PtrVector<pat::Jet>::const_iterator iBjet = btagData.fSelectedJets.begin(); iBjet != btagData.fSelectedJets.end(); ++iBjet) {
-	if (iJet == *iBjet) myJetTaggedStatus = true;
-      }
-      if (myJetTaggedStatus) continue; // no double counting
-      // analyze jet flavor
-      int myFlavor = std::abs(iJet->partonFlavour());
-      if (myFlavor == 5) {
-        fBJetsFailedPt.push_back(iJet);
-      } else {
-        fLightJetsFailedPt.push_back(iJet);
-      }
-    }
-    // Loop over b-tagged jets
-    for (edm::PtrVector<pat::Jet>::const_iterator iter = btagData.fSelectedJets.begin(); iter != btagData.fSelectedJets.end(); ++iter) {
-      edm::Ptr<pat::Jet> iJet = *iter;
-      // analyze jet flavor
-      int myFlavor = std::abs(iJet->partonFlavour());
-      if (myFlavor == 5) {
-        fBJetsPassedPt.push_back(iJet);
-        hMCMatchForPassedJets->Fill(1, 1.0);
-      } else {
-        fLightJetsPassedPt.push_back(iJet);
-        hMCMatchForPassedJets->Fill(2, 1.0);
-      }
-    }
-    // Calculate scalefactor
-    // FIXME this is a dirty hack, numbers are from BTV-11-004 (see accompanying AN's)
-
-    double mySF = 1.0;
-    double mySFuncert = 0.0;
-    for (edm::PtrVector<pat::Jet>::const_iterator iter = fBJetsPassedPt.begin(); iter != fBJetsPassedPt.end(); ++iter) {
-      // This is independent of pT
-      mySF *= 0.96;
-      mySFuncert += 0.04*0.04;
-    }
-    for (edm::PtrVector<pat::Jet>::const_iterator iter = fLightJetsPassedPt.begin(); iter != fLightJetsPassedPt.end(); ++iter) {
-      mySF *= 1.17;
-      mySFuncert += 0.21*0.21;
-    }
-
-    btagData.fScaleFactor = mySF;
-    btagData.fScaleFactorAbsoluteUncertainty = TMath::Sqrt(mySFuncert);
-    btagData.fScaleFactorRelativeUncertainty = btagData.fScaleFactorAbsoluteUncertainty / mySF;
-    // FIXME end of dirty hack
+    Info jetInfos = fBTaggingScaleFactor.getPerJetInfo(jets, btagData, false); // assume this method is called only for MC!
+    btagData.fScaleFactor = fBTaggingScaleFactor.calculateScaleFactor(jetInfos);
+    btagData.fScaleFactorAbsoluteUncertainty = fBTaggingScaleFactor.calculateAbsoluteUncertainty(jetInfos);
+    btagData.fScaleFactorRelativeUncertainty = fBTaggingScaleFactor.calculateRelativeUncertainty(jetInfos);
 
     // Do the variation, if asked
     if(fVariationEnabled) {
@@ -673,13 +622,6 @@ namespace HPlus {
       btagData.fScaleFactorAbsoluteUncertainty = 0;
       btagData.fScaleFactorRelativeUncertainty = 0;
     }
-
-
-    /* this is the old code
-    fScaleFactor = fBTaggingScaleFactor.getWeight(fBJetsPassedPt, fLightJetsPassedPt, fBJetsFailedPt, fLightJetsFailedPt);
-    fScaleFactorRelativeUncertainty = fBTaggingScaleFactor.getRelativeUncertainty(fBJetsPassedPt, fLightJetsPassedPt, fBJetsFailedPt, fLightJetsFailedPt);
-    fScaleFactorAbsoluteUncertainty = fBTaggingScaleFactor.getAbsoluteUncertainty(fBJetsPassedPt, fLightJetsPassedPt, fBJetsFailedPt, fLightJetsFailedPt);
-    */
 
     /*std::cout << "btagSF debug: jets=" << jets.size() << " bjets=" << bjets.size() << " nb=" << nBJetsPassed << ", nbf pT=";
     for (std::vector<double>::iterator it = fBJetsFailedPt.begin(); it != fBJetsFailedPt.end(); ++it) { std::cout << " " << *it; }
