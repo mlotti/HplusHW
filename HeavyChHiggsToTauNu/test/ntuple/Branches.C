@@ -14,14 +14,15 @@ void EventInfo::setupBranches(BranchManager& branchManager) {
   branchManager.book("run", &fRun);
 }
 
+//////////////////// Particle ////////////////////
+
+namespace Impl {
+  ParticleBase::ParticleBase(): fIndex(std::numeric_limits<size_t>::max()) {}
+  ParticleBase::~ParticleBase() {}
+}
 
 //////////////////// MuonCollection ////////////////////
-MuonCollection::Muon::Muon():
-  fCollection(0), fIndex(std::numeric_limits<size_t>::max())
-{}
-MuonCollection::Muon::Muon(MuonCollection *mc, size_t i):
-  fCollection(mc), fIndex(i)
-{}
+MuonCollection::Muon::Muon(): Base() {}
 MuonCollection::Muon::~Muon() {}
 void MuonCollection::Muon::ensureValidity() const {
   if(!isValid())
@@ -52,9 +53,14 @@ void MuonCollection::setupBranches(BranchManager& branchManager, bool isMC) {
   branchManager.book(fPrefix+"_f_neutralHadronIso", &fNeutralHadronIso);
   branchManager.book(fPrefix+"_f_photonIso", &fPhotonIso);
 
-  if(fIdEfficiencyName != "") {
+  if(!fIdEfficiencyName.empty()) {
     branchManager.book(fPrefix+"_"+fIdEfficiencyName, &fIdEfficiency);
   }
+  if(!fTriggerEfficiencyName.empty()) {
+    branchManager.book(fPrefix+"_"+fIdEfficiencyName, &fTriggerEfficiency);
+  }
+
+  branchManager.book(fPrefix+"_triggerMatched", &fTriggerMatched);
 
   if(isMC) {
     branchManager.book(fPrefix+"_genmatch_p4", &fGenMatchP4);
@@ -81,9 +87,6 @@ void EmbeddingMuonCollection::setupBranches(BranchManager& branchManager, bool i
 
 
 //////////////////// ElectronCollection ////////////////////
-ElectronCollection::Electron::Electron(ElectronCollection *mc, size_t i):
-  fCollection(mc), fIndex(i)
-{}
 ElectronCollection::Electron::~Electron() {}
 
 ElectronCollection::ElectronCollection(const std::string prefix):
@@ -112,9 +115,6 @@ void ElectronCollection::setupBranches(BranchManager& branchManager, bool isMC) 
 }
 
 //////////////////// JetCollection ////////////////////
-JetCollection::Jet::Jet(JetCollection *mc, size_t i): 
-  fCollection(mc), fIndex(i)
-{}
 JetCollection::Jet::~Jet() {}
 
 JetCollection::JetCollection(const std::string prefix):
@@ -127,6 +127,9 @@ void JetCollection::setupBranches(BranchManager& branchManager) {
   branchManager.book(fPrefix+"_numberOfDaughters", &fNumberOfDaughters);
   branchManager.book(fPrefix+"_looseId", &fLooseId);
   branchManager.book(fPrefix+"_tightId", &fTightId);
+  branchManager.book(fPrefix+"_btagged", &fBTagged);
+  branchManager.book(fPrefix+"_btagScaleFactor", &fBTagSF);
+  branchManager.book(fPrefix+"_btagScaleFactorUncertainty", &fBTagSFUnc);
 }
 
 //////////////////// JetDetailsCollection ////////////////////
@@ -148,9 +151,6 @@ void JetDetailsCollection::setupBranches(BranchManager& branchManager) {
 }
 
 //////////////////// TauCollection ////////////////////
-TauCollection::Tau::Tau(TauCollection *mc, size_t i):
-  fCollection(mc), fIndex(i)
-{}
 TauCollection::Tau::~Tau() {}
 
 TauCollection::TauCollection(const std::string prefix):
@@ -186,11 +186,7 @@ void TauCollection::setupBranches(BranchManager& branchManager, bool isMC) {
 }
 
 //////////////////// GenParticleCollection ////////////////////
-GenParticleCollection::GenParticle::GenParticle():  fCollection(0), fIndex(std::numeric_limits<size_t>::max())
-{}
-GenParticleCollection::GenParticle::GenParticle(GenParticleCollection *gpc, size_t i):
-  fCollection(gpc), fIndex(i)
-{}
+GenParticleCollection::GenParticle::GenParticle():  Base(0, std::numeric_limits<size_t>::max()) {}
 GenParticleCollection::GenParticle::~GenParticle() {}
 
 GenParticleCollection::GenParticleCollection(const std::string& prefix, bool isTau):

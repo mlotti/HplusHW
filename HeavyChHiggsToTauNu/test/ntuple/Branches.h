@@ -40,48 +40,92 @@ private:
   Branch<unsigned> *fRun;
 };
 
+namespace Impl {
+  class ParticleBase {
+  public:
+    ParticleBase();
+    explicit ParticleBase(size_t i): fIndex(i), fP4Set(false) {}
+    ~ParticleBase();
+
+    size_t index() const { return fIndex; }
+    void setP4(const math::XYZTLorentzVector& p4_) {
+      fP4 = p4_;
+      fP4Set = true;
+    }
+
+  protected:
+    const math::XYZTLorentzVector& getP4() const { return fP4; }
+    bool isP4Set() const { return fP4Set; }
+
+  private:
+    math::XYZTLorentzVector fP4;
+    size_t fIndex;
+    bool fP4Set;
+  };
+
+  template <typename T>
+  class Particle: public ParticleBase {
+  public:
+    Particle(): ParticleBase(), fCollection(0) {}
+    Particle(T *coll, size_t i): ParticleBase(i), fCollection(coll) {}
+    ~Particle() {}
+
+    bool isValid() const { return fCollection != 0; }
+
+    const math::XYZTLorentzVector& p4() {
+      if(isP4Set())
+        return getP4();
+      else
+        return originalP4();
+    }
+
+    const math::XYZTLorentzVector& originalP4() {
+      return fCollection->fP4->value()[index()];
+    }
+
+  protected:
+    T *fCollection;
+  };
+}
+
 // Muons
 class MuonCollection {
 public:
-  class Muon {
+  class Muon: public Impl::Particle<MuonCollection> {
+    typedef Impl::Particle<MuonCollection> Base;
   public:
     Muon();
-    Muon(MuonCollection *mc, size_t i);
+    Muon(MuonCollection *mc, size_t i): Base(mc, i) {}
     ~Muon();
 
-    bool isValid() const { return fCollection != 0; }
     void ensureValidity() const;
 
-    size_t index() const { return fIndex; }
+    const math::XYZTLorentzVector& correctedP4() { return fCollection->fCorrectedP4->value()[index()]; }
 
-    const math::XYZTLorentzVector& p4() { return fCollection->fP4->value()[fIndex]; }
-    const math::XYZTLorentzVector& correctedP4() { return fCollection->fCorrectedP4->value()[fIndex]; }
+    const math::XYZVector& tunePP3() { return fCollection->fTunePP3->value()[index()]; }
+    double tunePPtError() { return fCollection->fTunePPtError->value()[index()]; }
 
-    const math::XYZVector& tunePP3() { return fCollection->fTunePP3->value()[fIndex]; }
-    double tunePPtError() { return fCollection->fTunePPtError->value()[fIndex]; }
+    int charge() { return fCollection->fCharge->value()[index()]; }
+    double normalizedChi2() { return fCollection->fNormalizedChi2->value()[index()]; }
+    double dB() { return fCollection->fDB->value()[index()]; }
 
-    int charge() { return fCollection->fCharge->value()[fIndex]; }
-    double normalizedChi2() { return fCollection->fNormalizedChi2->value()[fIndex]; }
-    double dB() { return fCollection->fDB->value()[fIndex]; }
+    double trackIso() { return fCollection->fTrackIso->value()[index()]; }
+    double caloIso() { return fCollection->fCaloIso->value()[index()]; }
 
-    double trackIso() { return fCollection->fTrackIso->value()[fIndex]; }
-    double caloIso() { return fCollection->fCaloIso->value()[fIndex]; }
+    double chargedHadronIso() { return fCollection->fChargedHadronIso->value()[index()]; }
+    double puChargedHadronIso() { return fCollection->fPuChargedHadronIso->value()[index()]; }
+    double neutralHadronIso() { return fCollection->fNeutralHadronIso->value()[index()]; }
+    double photonIso() { return fCollection->fPhotonIso->value()[index()]; }
 
-    double chargedHadronIso() { return fCollection->fChargedHadronIso->value()[fIndex]; }
-    double puChargedHadronIso() { return fCollection->fPuChargedHadronIso->value()[fIndex]; }
-    double neutralHadronIso() { return fCollection->fNeutralHadronIso->value()[fIndex]; }
-    double photonIso() { return fCollection->fPhotonIso->value()[fIndex]; }
+    double idEfficiency() { return fCollection->fIdEfficiency->value()[index()]; }
+    double triggerEfficiency() { return fCollection->fTriggerEfficiency->value()[index()]; }
 
-    double idEfficiency() { return fCollection->fIdEfficiency->value()[fIndex]; }
+    bool triggerMatched() { return fCollection->fTriggerMatched->value()[index()]; }
 
-    const math::XYZTLorentzVector& genMatchP4() { return fCollection->fGenMatchP4->value()[fIndex]; }
-    int pdgId() { return fCollection->fPdgId->value()[fIndex]; }
-    int motherPdgId() { return fCollection->fMotherPdgId->value()[fIndex]; }
-    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId->value()[fIndex]; }
-
-  protected:
-    MuonCollection *fCollection;
-    size_t fIndex;
+    const math::XYZTLorentzVector& genMatchP4() { return fCollection->fGenMatchP4->value()[index()]; }
+    int pdgId() { return fCollection->fPdgId->value()[index()]; }
+    int motherPdgId() { return fCollection->fMotherPdgId->value()[index()]; }
+    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId->value()[index()]; }
   };
 
 
@@ -89,6 +133,7 @@ public:
   ~MuonCollection();
 
   void setIdEfficiencyName(const std::string& idEff) { fIdEfficiencyName = idEff; }
+  void setTriggerEfficiencyName(const std::string& trigEff) { fTriggerEfficiencyName = trigEff; }
 
   void setupBranches(BranchManager& branchManager, bool isMC);
   size_t size() {
@@ -98,12 +143,12 @@ public:
     return Muon(this, i);
   }
 
-
 protected:
   std::string fPrefix;
 
 private:
   std::string fIdEfficiencyName;
+  std::string fTriggerEfficiencyName;
 
   Branch<std::vector<math::XYZTLorentzVector> > *fP4;
   Branch<std::vector<math::XYZTLorentzVector> > *fCorrectedP4;
@@ -124,6 +169,9 @@ private:
   Branch<std::vector<double> > *fPhotonIso;
 
   Branch<std::vector<double> > *fIdEfficiency;
+  Branch<std::vector<double> > *fTriggerEfficiency;
+
+  Branch<std::vector<bool> > *fTriggerMatched;
 
   Branch<std::vector<math::XYZTLorentzVector> > *fGenMatchP4;
   Branch<std::vector<int> > *fPdgId;
@@ -140,10 +188,10 @@ public:
     Muon(EmbeddingMuonCollection *mc, size_t i);
     ~Muon();
 
-    double chargedHadronIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fChargedHadronIsoEmb->value()[fIndex]; }
-    double puChargedHadronIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fPuChargedHadronIsoEmb->value()[fIndex]; }
-    double neutralHadronIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fNeutralHadronIsoEmb->value()[fIndex]; }
-    double photonIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fPhotonIsoEmb->value()[fIndex]; }
+    double chargedHadronIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fChargedHadronIsoEmb->value()[index()]; }
+    double puChargedHadronIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fPuChargedHadronIsoEmb->value()[index()]; }
+    double neutralHadronIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fNeutralHadronIsoEmb->value()[index()]; }
+    double photonIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fPhotonIsoEmb->value()[index()]; }
 
     double standardRelativeIsolation() {
       return (chargedHadronIso() + std::max(0.0, photonIso() + neutralHadronIso() - 0.5*puChargedHadronIso()))/p4().Pt();
@@ -174,32 +222,25 @@ private:
 // Electrons
 class ElectronCollection {
 public:
-  class Electron {
+  class Electron: public Impl::Particle<ElectronCollection> {
+    typedef Impl::Particle<ElectronCollection> Base;
   public:
-    Electron(ElectronCollection *mc, size_t i);
+    Electron(ElectronCollection *ec, size_t i): Base(ec, i) {}
     ~Electron();
 
-    size_t index() const { return fIndex; }
+    bool hasGsfTrack() { return fCollection->fHasGsfTrack->value()[index()]; }
+    bool hasSuperCluster() { return fCollection->fHasSuperCluster->value()[index()]; }
+    bool cutBasedIdVeto() { return fCollection->fCutBasedIdVeto->value()[index()]; }
+    bool cutBasedIdLoose() { return fCollection->fCutBasedIdLoose->value()[index()]; }
+    bool cutBasedIdMedium() { return fCollection->fCutBasedIdMedium->value()[index()]; }
+    bool cutBasedIdTight() { return fCollection->fCutBasedIdTight->value()[index()]; }
 
-    const math::XYZTLorentzVector& p4() { return fCollection->fP4->value()[fIndex]; }
+    double superClusterEta() { return fCollection->fSuperClusterEta->value()[index()]; }
 
-    bool hasGsfTrack() { return fCollection->fHasGsfTrack->value()[fIndex]; }
-    bool hasSuperCluster() { return fCollection->fHasSuperCluster->value()[fIndex]; }
-    bool cutBasedIdVeto() { return fCollection->fCutBasedIdVeto->value()[fIndex]; }
-    bool cutBasedIdLoose() { return fCollection->fCutBasedIdLoose->value()[fIndex]; }
-    bool cutBasedIdMedium() { return fCollection->fCutBasedIdMedium->value()[fIndex]; }
-    bool cutBasedIdTight() { return fCollection->fCutBasedIdTight->value()[fIndex]; }
-
-    double superClusterEta() { return fCollection->fSuperClusterEta->value()[fIndex]; }
-
-    const math::XYZTLorentzVector& genMatchP4() { return fCollection->fGenMatchP4->value()[fIndex]; }
-    int pdgId() { return fCollection->fPdgId->value()[fIndex]; }
-    int motherPdgId() { return fCollection->fMotherPdgId->value()[fIndex]; }
-    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId->value()[fIndex]; }
-
-  protected:
-    ElectronCollection *fCollection;
-    size_t fIndex;
+    const math::XYZTLorentzVector& genMatchP4() { return fCollection->fGenMatchP4->value()[index()]; }
+    int pdgId() { return fCollection->fPdgId->value()[index()]; }
+    int motherPdgId() { return fCollection->fMotherPdgId->value()[index()]; }
+    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId->value()[index()]; }
   };
 
 
@@ -240,22 +281,20 @@ private:
 // Jets
 class JetCollection {
 public:
-  class Jet {
+  class Jet: public Impl::Particle<JetCollection> {
+    typedef Impl::Particle<JetCollection> Base;
   public:
-    Jet(JetCollection *mc, size_t i);
+    Jet(JetCollection *jc, size_t i): Base(jc, i) {}
     ~Jet();
 
-    size_t index() const { return fIndex; }
-    const math::XYZTLorentzVector& p4() { return fCollection->fP4->value()[fIndex]; }
+    bool looseID() { return fCollection->fLooseId->value()[index()]; }
+    bool tightID() { return fCollection->fTightId->value()[index()]; }
 
-    bool looseID() { return fCollection->fLooseId->value()[fIndex]; }
-    bool tightID() { return fCollection->fTightId->value()[fIndex]; }
+    unsigned numberOfDaughters() { return fCollection->fNumberOfDaughters->value()[index()]; }
 
-    unsigned numberOfDaughters() { return fCollection->fNumberOfDaughters->value()[fIndex]; }
-
-  protected:
-    JetCollection *fCollection;
-    size_t fIndex;
+    bool btagged() { return fCollection->fBTagged->value()[index()]; }
+    float btagScaleFactor() { return fCollection->fBTagSF->value()[index()]; }
+    float btagScaleFactorUncertainty() { return fCollection->fBTagSFUnc->value()[index()]; }
   };
 
   JetCollection(const std::string prefix = "jets");
@@ -279,6 +318,9 @@ private:
   Branch<std::vector<unsigned> > *fNumberOfDaughters;
   Branch<std::vector<bool> > *fLooseId;
   Branch<std::vector<bool> > *fTightId;
+  Branch<std::vector<bool> > *fBTagged;
+  Branch<std::vector<float> > *fBTagSF;
+  Branch<std::vector<float> > *fBTagSFUnc;
 };
 
 class JetDetailsCollection: public JetCollection {
@@ -288,17 +330,17 @@ public:
     Jet(JetDetailsCollection *jdc, size_t i);
     ~Jet();
 
-    int chargedHadronMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fChm->value()[fIndex]; }
-    int neutralHadronMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fNhm->value()[fIndex]; }
-    int electronMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fElm->value()[fIndex]; }
-    int photonMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fPhm->value()[fIndex]; }
-    int muonMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fMum->value()[fIndex]; }
+    int chargedHadronMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fChm->value()[index()]; }
+    int neutralHadronMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fNhm->value()[index()]; }
+    int electronMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fElm->value()[index()]; }
+    int photonMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fPhm->value()[index()]; }
+    int muonMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fMum->value()[index()]; }
 
-    double chargedHadronFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fChf->value()[fIndex]; }
-    double neutralHadronFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fNhf->value()[fIndex]; }
-    double electronFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fElf->value()[fIndex]; }
-    double photonFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fPhf->value()[fIndex]; }
-    double muonFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fMuf->value()[fIndex]; }
+    double chargedHadronFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fChf->value()[index()]; }
+    double neutralHadronFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fNhf->value()[index()]; }
+    double electronFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fElf->value()[index()]; }
+    double photonFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fPhf->value()[index()]; }
+    double muonFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fMuf->value()[index()]; }
   };
 
   JetDetailsCollection(const std::string prefix = "jets");
@@ -326,43 +368,38 @@ private:
 // Taus
 class TauCollection {
 public:
-  class Tau {
+  class Tau: public Impl::Particle<TauCollection> {
+    typedef Impl::Particle<TauCollection> Base;
   public:
-    Tau(TauCollection *mc, size_t i);
+    Tau(TauCollection *tc, size_t i): Base(tc, i) {}
     ~Tau();
 
-    size_t index() const { return fIndex; }
-    const math::XYZTLorentzVector& p4() { return fCollection->fP4->value()[fIndex]; }
-    const math::XYZTLorentzVector& leadPFChargedHadrCandP4() { return fCollection->fLeadPFChargedHadrCandP4->value()[fIndex]; }
-    unsigned signalPFChargedHadrCandsCount() { return fCollection->fSignalPFChargedHadrCandsCount->value()[fIndex]; }
-    int decayMode() { return fCollection->fDecayMode->value()[fIndex]; }
+    const math::XYZTLorentzVector& leadPFChargedHadrCandP4() { return fCollection->fLeadPFChargedHadrCandP4->value()[index()]; }
+    unsigned signalPFChargedHadrCandsCount() { return fCollection->fSignalPFChargedHadrCandsCount->value()[index()]; }
+    int decayMode() { return fCollection->fDecayMode->value()[index()]; }
 
     double rtau() { return leadPFChargedHadrCandP4().P() / p4().P() -1e-10; }
 
-    double decayModeFinding() { return fCollection->fDecayModeFinding->value()[fIndex]; }
+    double decayModeFinding() { return fCollection->fDecayModeFinding->value()[index()]; }
 
-    double againstMuonTight() { return fCollection->fAgainstMuonTight->value()[fIndex]; }
-    double againstMuonTight2() { return fCollection->fAgainstMuonTight2->value()[fIndex]; }
+    double againstMuonTight() { return fCollection->fAgainstMuonTight->value()[index()]; }
+    double againstMuonTight2() { return fCollection->fAgainstMuonTight2->value()[index()]; }
 
-    double againstElectronLoose() { return fCollection->fAgainstElectronLoose->value()[fIndex]; }
-    double againstElectronMedium() { return fCollection->fAgainstElectronMedium->value()[fIndex]; }
-    double againstElectronTight() { return fCollection->fAgainstElectronTight->value()[fIndex]; }
-    double againstElectronMVA() { return fCollection->fAgainstElectronMVA->value()[fIndex]; }
-    double againstElectronTightMVA3() { return fCollection->fAgainstElectronTightMVA3->value()[fIndex]; }
+    double againstElectronLoose() { return fCollection->fAgainstElectronLoose->value()[index()]; }
+    double againstElectronMedium() { return fCollection->fAgainstElectronMedium->value()[index()]; }
+    double againstElectronTight() { return fCollection->fAgainstElectronTight->value()[index()]; }
+    double againstElectronMVA() { return fCollection->fAgainstElectronMVA->value()[index()]; }
+    double againstElectronTightMVA3() { return fCollection->fAgainstElectronTightMVA3->value()[index()]; }
 
-    double mediumCombinedIsolationDeltaBetaCorr() { return fCollection->fMediumCombinedIsolationDeltaBetaCorr->value()[fIndex]; }
-    double mediumCombinedIsolationDeltaBetaCorr3Hits() { return fCollection->fMediumCombinedIsolationDeltaBetaCorr3Hits->value()[fIndex]; }
+    double mediumCombinedIsolationDeltaBetaCorr() { return fCollection->fMediumCombinedIsolationDeltaBetaCorr->value()[index()]; }
+    double mediumCombinedIsolationDeltaBetaCorr3Hits() { return fCollection->fMediumCombinedIsolationDeltaBetaCorr3Hits->value()[index()]; }
 
-    const math::XYZTLorentzVector& genMatchP4() { return fCollection->fGenMatchP4->value()[fIndex]; }
-    const math::XYZTLorentzVector& genMatchVisibleP4() { return fCollection->fGenMatchVisibleP4->value()[fIndex]; }
-    int pdgId() { return fCollection->fPdgId->value()[fIndex]; }
-    int motherPdgId() { return fCollection->fMotherPdgId->value()[fIndex]; }
-    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId->value()[fIndex]; }
-    int daughterPdgId() { return fCollection->fDaughterPdgId->value()[fIndex]; }
-
-  protected:
-    TauCollection *fCollection;
-    size_t fIndex;
+    const math::XYZTLorentzVector& genMatchP4() { return fCollection->fGenMatchP4->value()[index()]; }
+    const math::XYZTLorentzVector& genMatchVisibleP4() { return fCollection->fGenMatchVisibleP4->value()[index()]; }
+    int pdgId() { return fCollection->fPdgId->value()[index()]; }
+    int motherPdgId() { return fCollection->fMotherPdgId->value()[index()]; }
+    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId->value()[index()]; }
+    int daughterPdgId() { return fCollection->fDaughterPdgId->value()[index()]; }
   };
 
   TauCollection(const std::string prefix = "taus");
@@ -413,28 +450,21 @@ private:
 // GenParticles
 class GenParticleCollection {
 public:
-  class GenParticle {
+  class GenParticle: public Impl::Particle<GenParticleCollection> {
+    typedef Impl::Particle<GenParticleCollection> Base;
   public:
     GenParticle();
-    GenParticle(GenParticleCollection *gpc, size_t i);
+    GenParticle(GenParticleCollection *gpc, size_t i): Base(gpc, i) {}
     ~GenParticle();
 
-    bool isValid() const { return fCollection != 0; }
-
-    size_t index() const { return fIndex; }
-    const math::XYZTLorentzVector& p4() { return fCollection->fP4->value()[fIndex]; }
-    int pdgId() { return fCollection->fPdgId->value()[fIndex]; }
-    int motherPdgId() { return fCollection->fMotherPdgId->value()[fIndex]; }
-    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId->value()[fIndex]; }
+    int pdgId() { return fCollection->fPdgId->value()[index()]; }
+    int motherPdgId() { return fCollection->fMotherPdgId->value()[index()]; }
+    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId->value()[index()]; }
 
     // Tau specific
-    int daughterPdgId() { return fCollection->fDaughterPdgId->value()[fIndex]; }
-    const math::XYZTLorentzVector& visibleP4() { return fCollection->fVisibleP4->value()[fIndex]; }
-
-  protected:
-    GenParticleCollection *fCollection;
-    size_t fIndex;
-  };
+    int daughterPdgId() { return fCollection->fDaughterPdgId->value()[index()]; }
+    const math::XYZTLorentzVector& visibleP4() { return fCollection->fVisibleP4->value()[index()]; }
+ };
 
   GenParticleCollection(const std::string& prefix, bool isTau=false);
   ~GenParticleCollection();
