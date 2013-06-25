@@ -74,6 +74,7 @@ process.commonSequence += process.tightenedMuons
 # Configuration
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
+import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
 ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
@@ -85,16 +86,15 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     tauSrc = cms.InputTag("NOT_SET"),
     tauFunctions = cms.PSet(),
 
-    jetEnabled = cms.bool(False),
-    jetSrc = cms.InputTag("goodJets"),
-    jetFunctions = cms.PSet(),
-    jetPileupIDs = cms.PSet(),
+    jets = Ntuple.jets.clone(
+        enabled = False,
+    ),
 
-    muonEnabled = cms.bool(True),
-    muonSrc = cms.InputTag("tightenedMuons"),
-    muonFunctions = cms.PSet(),
-    muonCorrectedEnabled = cms.bool(False),
-    muonCorrectedSrc = cms.InputTag("NOT_SET"),
+    muonsEnabled = cms.bool(True),
+    muons = Ntuple.muons.clone(
+        src = "tightenedMuons",
+        functions = cms.PSet(),
+    )
 
     genParticleSrc = cms.InputTag("genParticles"),
     genParticleTauSrc = cms.InputTag("genTaus"),

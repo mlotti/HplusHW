@@ -27,14 +27,17 @@ class HPlusMETFilters: public edm::EDFilter {
   HPlus::HistoWrapper histoWrapper;
   HPlus::EventCounter eventCounter;
   HPlus::METFilters fMETFilters;
+  bool fFilter;
 };
 
 HPlusMETFilters::HPlusMETFilters(const edm::ParameterSet& iConfig):
   eventWeight(iConfig),
   histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   eventCounter(iConfig, eventWeight, histoWrapper),
-  fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter)
+  fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
+  fFilter(iConfig.getParameter<bool>("filter"))
 {
+  produces<bool>();
 }
 HPlusMETFilters::~HPlusMETFilters() {}
 void HPlusMETFilters::beginJob() {}
@@ -47,10 +50,14 @@ bool HPlusMETFilters::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm
 bool HPlusMETFilters::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
 //------ MET (noise) filters for data (reject events with instrumental fake MET)
-    if(iEvent.isRealData()) {
-      if(!fMETFilters.passedEvent(iEvent, iSetup)) return false;
-    }
-    return true;
+  bool passed = true;
+  if(iEvent.isRealData()) {
+    passed = fMETFilters.passedEvent(iEvent, iSetup);
+  }
+  std::auto_ptr<bool> p(new bool(passed));
+  iEvent.put(p);
+
+  return !fFilter || (fFilter && passed);
 }
 
 void HPlusMETFilters::endJob() {

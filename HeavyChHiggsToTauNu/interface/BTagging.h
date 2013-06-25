@@ -24,6 +24,24 @@ namespace HPlus {
   class WrappedTH2;
 
   class BTagging: public BaseSelection {
+  public:
+    class Data; // Forward declare because it is used in BTaggingScaleFactor interface
+    struct Info {
+      std::vector<double> scaleFactor;
+      std::vector<double> uncertainty;
+      std::vector<bool> tagged;
+      std::vector<bool> genuine;
+
+      void reserve(size_t s) {
+        scaleFactor.reserve(s);
+        uncertainty.reserve(s);
+        tagged.reserve(s);
+        genuine.reserve(s);
+      }
+      size_t size() const { return scaleFactor.size(); }
+    };
+
+  private:
     class BTaggingScaleFactor {
     public:
       BTaggingScaleFactor();
@@ -33,24 +51,21 @@ namespace HPlus {
       
       void addBFlavorData(double pT, double scaleFactorB, double scaleFactorUncertaintyB, double epsilonMCB);
       void addNonBFlavorData(double pT, double scaleFactorL, double scaleFactorUncertaintyL, double epsilonMCL);
-/*      
-      double getWeight(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
-      double getRelativeUncertainty(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
-      double getAbsoluteUncertainty(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
-*/
-      double getWeight(edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>);
-      double getRelativeUncertainty(edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>);
-      double getAbsoluteUncertainty(edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>);
+
+      BTagging::Info getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const;
+      static double calculateScaleFactor(const Info& info);
+      static double calculateAbsoluteUncertainty(const Info& info);
+      static double calculateRelativeUncertainty(const Info& info);
       
     private:
-      size_t obtainIndex(std::vector<double>& table, double pt);
+      static size_t obtainIndex(const std::vector<double>& table, double pt);
 
-      double getBtagScaleFactor(double,double);
-      double getBtagScaleFactorError(double,double);
-      double getMistagScaleFactor(double,double);
-      double getMistagScaleFactorError(double,double);
-      double getMCBtagEfficiency(double,double);
-      double getMCMistagEfficiency(double,double);
+      double getBtagScaleFactor(double,double) const;
+      double getBtagScaleFactorError(double,double) const;
+      double getMistagScaleFactor(double,double) const;
+      double getMistagScaleFactorError(double,double) const;
+      double getMCBtagEfficiency(double,double) const;
+      double getMCMistagEfficiency(double,double) const;
 
       BTaggingScaleFactorFromDB *btagdb;
       
@@ -111,6 +126,8 @@ namespace HPlus {
     void fillScaleFactorHistograms(BTagging::Data& input);
 
     const std::string getDiscriminator() const { return fDiscriminator; }
+
+    Info getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const;
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);

@@ -603,6 +603,11 @@ wjetsWeightReader = cms.untracked.PSet(
     enabled = cms.bool(False),
 )
 
+embeddingGeneratorWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("generator", "weight"),
+    enabled = cms.bool(False),
+)
+
 vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices"),
 #    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
@@ -675,9 +680,17 @@ metTriggerEfficiencyScaleFactor = cms.untracked.PSet(
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
-embeddingMuonEfficiency = muonTriggerIDEfficiency.efficiency
-embeddingMuonEfficiency.variationEnabled = cms.bool(False)
-embeddingMuonEfficiency.variationShiftBy = cms.double(0)
+#embeddingMuonEfficiency = muonTriggerIDEfficiency.efficiency
+#embeddingMuonEfficiency.variationEnabled = cms.bool(False)
+#embeddingMuonEfficiency.variationShiftBy = cms.double(0)
+
+embeddingMuonIdEfficiency = muonTriggerIDEfficiency.efficiency_ID
+embeddingMuonIdEfficiency.variationEnabled = cms.bool(False)
+embeddingMuonIdEfficiency.variationShiftBy = cms.double(0)
+
+embeddingMuonTriggerEfficiency = muonTriggerIDEfficiency.efficiency_trigger
+embeddingMuonTriggerEfficiency.variationEnabled = cms.bool(False)
+embeddingMuonTriggerEfficiency.variationShiftBy = cms.double(0)
 
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
@@ -822,6 +835,7 @@ def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, pset
     setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
     psetReader.weightSrc = name
+    return name
 
 # Tau selection
 def forEachTauSelection(function):
