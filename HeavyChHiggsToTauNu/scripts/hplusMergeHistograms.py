@@ -219,7 +219,7 @@ def main(opts, args):
                     if opts.verbose:
                         print "rm %s" % srcFile
                     if not opts.test:
-                        ps.remove(srcFile)
+                        os.remove(srcFile)
     
     deleteMessage = ""
     if opts.delete:

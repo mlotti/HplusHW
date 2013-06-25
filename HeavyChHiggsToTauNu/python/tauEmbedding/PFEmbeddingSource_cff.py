@@ -14,7 +14,9 @@ TauolaPolar = cms.PSet(
 tightenedMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("tightMuons"),
     cut = cms.string(
-        "pt() > 40 && abs(eta()) < 2.1"
+        "pt() > 41 && abs(eta()) < 2.1"
+        # chi2<10 && globalTrack().hitPattern().numberOfValidMuonHits() > 0
+        "&& muonID('GlobalMuonPromptTight')"
         "&& numberOfMatchedStations() > 1"
         "&& abs(dB()) < 0.2" 
         "&& innerTrack().hitPattern().numberOfValidPixelHits() > 0"
@@ -27,7 +29,6 @@ tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
 )
 tightenedMuonsCount = cms.EDProducer("EventCountProducer")
 
-
 ### Muon isolation step
 
 #tauEmbeddingMuons = cms.EDFilter("HPlusSmallestRelIsoPATMuonViewSelector",
@@ -37,6 +38,21 @@ tightenedMuonsCount = cms.EDProducer("EventCountProducer")
 #)
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 tightenedMuonsWithIso = customisations.constructMuonIsolationOnTheFly("tightenedMuons", embedPrefix="embeddingStep_")
+
+### Trigger matching
+## Matching is added in pf_customize.py
+# tightenedMuonsMatched = cms.EDProducer("HPlusMuonTriggerMatchSelector",
+#    src = cms.InputTag("tightenedMuons"),
+#    patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
+#    deltaR = cms.double(0.1),
+# #   filterNames = cms.vstring("hltSingleMu20L3Filtered20"),
+#    filterNames = cms.vstring("hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40"),
+# )
+# tightenedMuonsMatchedFilter = cms.EDFilter("CandViewCountFilter",
+#     src = cms.InputTag("tightenedMuonsMatched"),
+#     minNumber = cms.uint32(1)
+# )
+tightenedMuonsMatchedCount = cms.EDProducer("EventCountProducer")
 
 tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("tightenedMuonsWithIso"),
@@ -102,7 +118,9 @@ filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
     src = cms.untracked.InputTag("generator")
 )
 
-muonSelectionCounters = [ "tightenedMuonsCount", "tauEmbeddingMuonsCount", "tauEmbeddingMuonsOneCount",
+muonSelectionCounters = [ "tightenedMuonsCount", 
+                          "tightenedMuonsMatchedCount",
+                          "tauEmbeddingMuonsCount", "tauEmbeddingMuonsOneCount",
 #                          "tightenedJetsCount"
                           ]
 
@@ -125,6 +143,9 @@ try:
         tightenedMuonsFilter *
         tightenedMuonsCount *
         tightenedMuonsWithIso *
+#        tightenedMuonsMatched *
+#        tightenedMuonsMatchedFilter *
+        tightenedMuonsMatchedCount *
         tauEmbeddingMuons *
         tauEmbeddingMuonsFilter *
         tauEmbeddingMuonsCount *

@@ -328,9 +328,10 @@ if lookOriginalGenTaus:
     del additionalCounters[additionalCounters.index("muonFinalSelectionJetSelection")]
     additionalCounters.append("muonFinalSelectionJetSelection")
 
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
+import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
-    histogramAmbientLevel = cms.untracked.string("Vital"),
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
 
@@ -348,10 +349,27 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
         Mu40_eta2p1 = cms.vstring("HLT_Mu40_eta2p1_v1", "HLT_Mu40_eta2p1_v4", "HLT_Mu40_eta2p1_v5"),
     ),
 
-    muonSrc = cms.InputTag(muons.value()),
-    muonFunctions = analysisConfig.muonFunctions.clone(),
-    embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(
-        mode = "efficiency"
+    muons = Ntuple.muons.clone(
+        src = muons.value(),
+        functions = analysisConfig.muonFunctions.clone(),
+    ),
+    muonEfficiencies = cms.PSet(
+        Run2011A = param.embeddingMuonIdEfficiency.clone(
+            mode = "mcEfficiency",
+            mcSelect = "Run2011A",
+        ),
+        Run2011B = param.embeddingMuonIdEfficiency.clone(
+            mode = "mcEfficiency",
+            mcSelect = "Run2011B",
+        ),
+        Run2011AB = param.embeddingMuonIdEfficiency.clone(
+            mode = "mcEfficiency",
+            mcSelect = "Run2011AB",
+        ),
+        trigger = param.embeddingMuonTriggerEfficiency.clone(
+            mode = "mcEfficiency",
+            dataSelect = ["Run2011AB"],
+        ),
     ),
 
 #    electronSrc = cms.InputTag("selectedPatElectrons"),
@@ -363,10 +381,12 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = analysisConfig.tauFunctions.clone(),
 
-    jetSrc = cms.InputTag("muonFinalSelectionJetSelectionFilter"),
-#    jetSrc = cms.InputTag("selectedPatJets"),
-    jetFunctions = analysisConfig.jetFunctions.clone(),
-    jetPileupIDs = analysisConfig.jetPileupIDs.clone(),
+    jets = Ntuple.clone(
+        src = "muonFinalSelectionJetSelectionFilter",
+#        src = cms.InputTag("selectedPatJets", "", "MUONSKIM"),
+        functions = analysisConfig.jetFunctions.clone(),
+        pileupIDs = analysisConfig.jetPileupIDs.clone(),
+    ),
 
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),
@@ -378,7 +398,10 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
 #        pfMetOriginalNoMuon_p4 = cms.InputTag("pfMETOriginalNoMuon"), # FIXME: broken ATM
     ),
     doubles = cms.PSet(),
-    bools = cms.PSet()
+    bools = cms.PSet(),
+
+    eventCounter = param.eventCounter.clone(),
+    histogramAmbientLevel = cms.untracked.string("Informative"),
 )
 for name in ntuple.jetPileupIDs.parameterNames_():
     pset = ntuple.jetPileupIDs.getParameter(name)
@@ -401,8 +424,8 @@ for era, src in zip(puWeights, puWeightNames):
 addAnalysis(process, "tauNtuple", ntuple,
             preSequence=process.commonSequence,
             additionalCounters=additionalCounters,
-            signalAnalysisCounters=False)
-process.tauNtupleCounters.printMainCounter = True
+            signalAnalysisCounters=True)
+process.tauNtuple.eventCounter.printMainCounter = True
 
 # Replace all event counters with the weighted one
 eventCounters = []

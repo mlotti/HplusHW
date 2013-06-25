@@ -424,7 +424,7 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fResultAfterMET(eventCounter, "AfterMET"),
   fResultAfterBTag(eventCounter, "AfterBTag"),
   fResultAfterAllSelections(eventCounter, "AfterAllSelections"),
-  fMuon2Branches(iConfig, "muon2")
+  fMuon2Branches(iConfig.getUntrackedParameter<edm::ParameterSet>("muon2"), "muon2")
 {
   edm::Service<TFileService> fs;
   // Save the module configuration to the output ROOT file as a TNamed object
@@ -697,7 +697,7 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
       break;
     }
   }
-  fMuon2Branches.setValues(muon2);
+  fMuon2Branches.setValues(muon2, iEvent);
   /*
   if(obj2Type == kObj2MuonEmb && muon2.empty()) {
     std::cout << "Embedding muons" << std::endl;

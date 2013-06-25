@@ -48,7 +48,7 @@ public:
   ~TauAnalysisSelector();
 
   void setOutput(TDirectory *dir);
-  void setupBranches(TTree *tree);
+  void setupBranches(BranchManager& branchManager);
   bool process(Long64_t entry);
 
 private:
@@ -62,11 +62,11 @@ private:
   GenParticleCollection fGenTausEmbedded;
 
   std::string fPuWeightName;
-  Branch<double> fPuWeight;
-  Branch<unsigned> fSelectedVertexCount;
-  Branch<unsigned> fVertexCount;
+  Branch<double> *fPuWeight;
+  Branch<unsigned> *fSelectedVertexCount;
+  Branch<unsigned> *fVertexCount;
   //Branch<bool> fElectronVetoPassed;
-  Branch<bool> fMuTriggerPassed;
+  Branch<bool> *fMuTriggerPassed;
 
   const bool fIsEmbedded;
   TH1 *fEmbeddingWTauMuWeights;
@@ -174,6 +174,10 @@ TauAnalysisSelector::TauAnalysisSelector(const std::string& puWeight, bool isEmb
     fEmbeddingWTauMuWeights->SetBinContent(xaxis->GetNbins()+1, fEmbeddingWTauMuWeights->GetBinContent(xaxis->GetNbins()));
     file->Close();
   }
+
+  if(isEmbedded) {
+    fMuons.setIdEfficiencyName("efficiency_Run2011A");
+  }
 }
 
 TauAnalysisSelector::~TauAnalysisSelector() {}
@@ -213,48 +217,38 @@ void TauAnalysisSelector::setOutput(TDirectory *dir) {
   hVertexCount_AfterRtau = makeVertexCount("vertexCount_AfterRtau");
 }
 
-void TauAnalysisSelector::setupBranches(TTree *tree) {
-  fEventInfo.setupBranches(tree);
+void TauAnalysisSelector::setupBranches(BranchManager& branchManager) {
+  fEventInfo.setupBranches(branchManager);
   if(fIsEmbedded) {
-    fMuons.setupBranches(tree, isMC());
-    //fElectrons.setupBranches(tree, isMC());
-    fJets.setupBranches(tree);
-    fGenTausEmbedded.setupBranches(tree);
+    fMuons.setupBranches(branchManager, isMC());
+    //fElectrons.setupBranches(branchManager, isMC());
+    fJets.setupBranches(branchManager);
+    fGenTausEmbedded.setupBranches(branchManager);
   }
-  fTaus.setupBranches(tree, isMC() && !fIsEmbedded);
+  fTaus.setupBranches(branchManager, isMC() && !fIsEmbedded);
   if(isMC())
-    fGenTaus.setupBranches(tree);
+    fGenTaus.setupBranches(branchManager);
 
   if(!fPuWeightName.empty())
-    fPuWeight.setupBranch(tree, fPuWeightName.c_str());
-  fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertex_count");
-  fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
+    branchManager.book(fPuWeightName, &fPuWeight);
+
+  branchManager.book("selectedPrimaryVertex_count", &fSelectedVertexCount);
+  branchManager.book("goodPrimaryVertex_count", &fVertexCount);
   if(fIsEmbedded) {
-    fMuTriggerPassed.setupBranch(tree, "trigger_Mu40_eta2p1");
+    branchManager.book("trigger_Mu40_eta2p1", &fMuTriggerPassed);
   }
 
-  //fElectronVetoPassed.setupBranch(tree, "ElectronVetoPassed");
+  //branchManager.book("ElectronVetoPassed", &fElectronVetoPassed);
+}
+
 
 }
 
+
 bool TauAnalysisSelector::process(Long64_t entry) {
-  fEventInfo.setEntry(entry);
-  fMuons.setEntry(entry);
-  //fElectrons.setEntry(entry);
-  fJets.setEntry(entry);
-  fTaus.setEntry(entry);
-  fGenTaus.setEntry(entry);
-  fGenTausEmbedded.setEntry(entry);
-  fPuWeight.setEntry(entry);
-  fSelectedVertexCount.setEntry(entry);
-  fVertexCount.setEntry(entry);
-  fMuTriggerPassed.setEntry(entry);
-
-  //fElectronVetoPassed.setEntry(entry);
-
   double weight = 1.0;
   if(!fPuWeightName.empty()) {
-    weight *= fPuWeight.value();
+    weight *= fPuWeight->value();
   }
   fEventCounter.setWeight(weight);
 
@@ -262,7 +256,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
 
   /*
   std::cout << "FOO Event " << fEventInfo.event() << ":" << fEventInfo.lumi() << ":" << fEventInfo.run()
-            << " electronVeto passed? " << fElectronVetoPassed.value()
+            << " electronVeto passed? " << fElectronVetoPassed->value()
             << std::endl;
 
   if( (fEventInfo.event() == 10069461 && fEventInfo.lumi() == 33572) ||
@@ -271,7 +265,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
       (fEventInfo.event() == 101450418 && fEventInfo.lumi() == 338236) ||
       (fEventInfo.event() == 101460111 && fEventInfo.lumi() == 338268) ) {
     std::cout << "BAR Event " << fEventInfo.event() << ":" << fEventInfo.lumi() << ":" << fEventInfo.run()
-              << " electronVeto passed? " << fElectronVetoPassed.value()
+              << " electronVeto passed? " << fElectronVetoPassed->value()
               << " Nelectrons " << fElectrons.size()
               << std::endl;
     for(size_t i=0; i<fElectrons.size(); ++i) {
@@ -287,7 +281,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
     }
   }
 
-  if(!fElectronVetoPassed.value()) return false;
+  if(!fElectronVetoPassed->value()) return false;
   cElectronVeto.increment();
   */
 
@@ -395,7 +389,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   */
   cJetSelection.increment();
 
-  if(fSelectedVertexCount.value() <= 0) return true;
+  if(fSelectedVertexCount->value() <= 0) return true;
   cPrimaryVertex.increment();
 
   std::vector<TauCollection::Tau> selectedTaus;
@@ -435,7 +429,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   if(selectedTaus.empty()) return true;
   cDecayModeFinding.increment();
   if(atLeastOneIsolated)
-    hVertexCount_AfterDecayModeFindingIsolation->Fill(fVertexCount.value(), weight);
+    hVertexCount_AfterDecayModeFindingIsolation->Fill(fVertexCount->value(), weight);
 
   // Eta cut
   atLeastOneIsolated = false;
@@ -454,7 +448,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   if(selectedTaus.empty()) return true;
   cEtaCut.increment();
   if(atLeastOneIsolated)
-    hVertexCount_AfterEtaCutIsolation->Fill(fVertexCount.value(), weight);
+    hVertexCount_AfterEtaCutIsolation->Fill(fVertexCount->value(), weight);
 
   // Pt cut
   atLeastOneIsolated = false;
@@ -474,7 +468,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   if(selectedTaus.empty()) return true;
   cPtCut.increment();
   if(atLeastOneIsolated)
-    hVertexCount_AfterPtCutIsolation->Fill(fVertexCount.value(), weight);
+    hVertexCount_AfterPtCutIsolation->Fill(fVertexCount->value(), weight);
 
   // Leading track pt
   for(size_t i=0; i<selectedTaus.size(); ++i) {
@@ -553,7 +547,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   tmp.clear();
   if(selectedTaus.empty()) return true;
   cIsolation.increment();
-  hVertexCount_AfterIsolation->Fill(fVertexCount.value(), weight);
+  hVertexCount_AfterIsolation->Fill(fVertexCount->value(), weight);
 
   // One prong
   for(size_t i=0; i<selectedTaus.size(); ++i) {
@@ -571,7 +565,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   tmp.clear();
   if(selectedTaus.empty()) return true;
   cOneProng.increment();
-  hVertexCount_AfterOneProng->Fill(fVertexCount.value(), weight);
+  hVertexCount_AfterOneProng->Fill(fVertexCount->value(), weight);
 
   // Rtau
   for(size_t i=0; i<selectedTaus.size(); ++i) {
@@ -586,14 +580,14 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   tmp.clear();
   if(selectedTaus.empty()) return true;
   cRtau.increment();
-  hVertexCount_AfterRtau->Fill(fVertexCount.value(), weight);
+  hVertexCount_AfterRtau->Fill(fVertexCount->value(), weight);
 
   // Tau ID finished
 
   // Trigger
   /*
   if(fIsEmbedded) {
-    if(!fMuTriggerPassed.value()) return true;
+    if(!fMuTriggerPassed->value()) return true;
   }
   */
   cMuTrigger.increment();
