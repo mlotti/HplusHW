@@ -4,6 +4,7 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
@@ -50,6 +51,9 @@ HPlusBTaggingPtrSelectorFilter::HPlusBTaggingPtrSelectorFilter(const edm::Parame
   fThrow(iConfig.getUntrackedParameter<bool>("throw"))
 {
   produces<Product>();
+  produces<edm::ValueMap<bool> >("tagged");
+  produces<edm::ValueMap<float> >("scaleFactor");
+  produces<edm::ValueMap<float> >("scaleFactorUncertainty");
   produces<bool>();
 }
 HPlusBTaggingPtrSelectorFilter::~HPlusBTaggingPtrSelectorFilter() {}
@@ -67,15 +71,41 @@ bool HPlusBTaggingPtrSelectorFilter::filter(edm::Event& iEvent, const edm::Event
     edm::PtrVector<pat::Jet> casted = HPlus::PtrVectorCast<pat::Jet>(hjets->ptrVector());
 
     HPlus::BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, casted);
+
+    std::auto_ptr<Product> product(new Product(hjets->id()));
     if(btagData.passedEvent()) {
       passed = true;
-      std::auto_ptr<Product> product(new Product(hjets->id()));
       edm::PtrVector<pat::Jet> selected = btagData.getSelectedJets();
       for(size_t i=0; i<selected.size(); ++i) {
         product->push_back(selected[i]);
       }
-      iEvent.put(product);
     }
+    iEvent.put(product);
+
+
+    HPlus::BTagging::Info jetInfos = fBTagging.getPerJetInfo(casted, btagData, iEvent.isRealData());
+    std::auto_ptr<edm::ValueMap<bool> > tagged(new edm::ValueMap<bool>());
+    std::auto_ptr<edm::ValueMap<float> > scaleFactor(new edm::ValueMap<float>());
+    std::auto_ptr<edm::ValueMap<float> > scaleFactorUncertainty(new edm::ValueMap<float>());
+    {
+      edm::ValueMap<bool>::Filler filler(*tagged);
+      filler.insert(hjets, jetInfos.tagged.begin(), jetInfos.tagged.end());
+      filler.fill();
+    }
+    {
+      edm::ValueMap<float>::Filler filler(*scaleFactor);
+      filler.insert(hjets, jetInfos.scaleFactor.begin(), jetInfos.scaleFactor.end());
+      filler.fill();
+    }
+    {
+      edm::ValueMap<float>::Filler filler(*scaleFactorUncertainty);
+      filler.insert(hjets, jetInfos.uncertainty.begin(), jetInfos.uncertainty.end());
+      filler.fill();
+    }
+
+    iEvent.put(tagged, "tagged");
+    iEvent.put(scaleFactor, "scaleFactor");
+    iEvent.put(scaleFactorUncertainty, "scaleFactorUncertainty");
   }
   std::auto_ptr<bool> p(new bool(passed));
   iEvent.put(p);
