@@ -36,4 +36,4 @@ cvs up -r1.7 AnalysisDataFormats/EWK/src/classes_def.xml
 cvs up -r1.3 AnalysisDataFormats/EWK/BuildFile.xml
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/MuScleFitCorrections2012
-cvs co -d MuScleFit/Calibration UserCode/scasasso/MuScleFit/Calibration 
+cvs co -r muscle_v4_2_0 -d MuScleFit/Calibration UserCode/scasasso/MuScleFit/Calibration 

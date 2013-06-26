@@ -74,26 +74,29 @@ private:
   HPlus::TreeVertexBranches fGoodVertexBranches;
   HPlus::TreeMuonBranches fMuonBranches;
   //HPlus::TreeElectronBranches fElectronBranches;
-  std::vector<double> fMuonJetMinDR;
 
-  bool fJetEnabled;
-  HPlus::TreeJetBranches fJetBranches;
+  std::vector<HPlus::TreeJetBranches> fJetBranches;
 
   bool fGenTTBarEnabled;
   HPlus::TreeGenParticleBranches fGenTTBarBranches;
 
   struct MuonEff {
-    //MuonEff(const HPlus::EmbeddingMuonEfficiency *eff, const std::string& n): efficiency(eff), name(n) {}
-    //~MuonEff() {delete efficiency;}
-    MuonEff(const edm::ParameterSet& pset, const std::string& n): efficiency(pset), name(n) {}
+    MuonEff(const edm::ParameterSet& pset, const std::string& n):
+      efficiency(pset), name(n) {}
 
-    void book(TTree *tree) { tree->Branch(name.c_str(), &values); }
-    void reset() { values.clear(); }
+    void book(TTree *tree) {
+      tree->Branch(name.c_str(), &values);
+      tree->Branch((name+"_unc").c_str(), &uncertainties);
+    }
+    void reset() {
+      values.clear();
+      uncertainties.clear();
+    }
 
-    //const HPlus::EmbeddingMuonEfficiency *efficiency;
     HPlus::EmbeddingMuonEfficiency efficiency;
     std::string name;
     std::vector<double> values;
+    std::vector<double> uncertainties;
   };
   std::vector<MuonEff> fMuonEffs;
 
@@ -112,10 +115,8 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   fGenBranches(iConfig),
   fSelectedVertexBranches(iConfig, "selectedPrimaryVertex", "selectedPrimaryVertexSrc"),
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
-  fMuonBranches(iConfig),
+  fMuonBranches(iConfig.getParameter<edm::ParameterSet>("muons")),
   //fElectronBranches(iConfig, fSelectedVertexBranches.getInputTag()),
-  fJetEnabled(iConfig.getParameter<bool>("jetEnabled")),
-  fJetBranches(iConfig, false),
   fGenTTBarEnabled(iConfig.getParameter<bool>("genTTBarEnabled")),
   fGenTTBarBranches("genttbarwdecays"),
   cAllEvents(eventCounter.addCounter("All events"))
@@ -124,8 +125,14 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("muonEfficiencies");
   std::vector<std::string> names = pset.getParameterNames();
   for(size_t i=0; i<names.size(); ++i) {
-    //fMuonEffs.push_back(MuonEff(new HPlus::EmbeddingMuonEfficiency(pset.getUntrackedParameter<edm::ParameterSet>(names[i])), "muon_efficiency_"+names[i]));
-    fMuonEffs.push_back(MuonEff(pset.getUntrackedParameter<edm::ParameterSet>(names[i]), "muons_efficiency_"+names[i]));
+    fMuonEffs.push_back(MuonEff(pset.getUntrackedParameter<edm::ParameterSet>(names[i]), fMuonBranches.getPrefix()+"efficiency_"+names[i]));
+  }
+
+  pset = iConfig.getParameter<edm::ParameterSet>("jets");
+  names = pset.getParameterNames();
+  fJetBranches.reserve(names.size());
+  for(size_t i=0; i<names.size(); ++i) {
+    fJetBranches.push_back(HPlus::TreeJetBranches(pset.getParameter<edm::ParameterSet>(names[i]), false, names[i]+"_"));
   }
 
   pset = iConfig.getParameter<edm::ParameterSet>("mets");
@@ -147,6 +154,9 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   }
 
   edm::Service<TFileService> fs;
+  // Save the module configuration to the output ROOT file as a TNamed object
+  fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
+
   fTree = fs->make<TTree>("tree", "Tree");
 
   fEventBranches.book(fTree);
@@ -156,10 +166,8 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   fMuonBranches.book(fTree);
   //fElectronBranches.book(fTree);
 
-  if(fJetEnabled) {
-    fJetBranches.book(fTree);
-    fTree->Branch("muons_jetMinDR", &fMuonJetMinDR);
-  }
+  for(size_t i=0; i<fJetBranches.size(); ++i)
+    fJetBranches[i].book(fTree);
 
   if(fGenTTBarEnabled)
     fGenTTBarBranches.book(fTree);
@@ -197,8 +205,8 @@ void HPlusMuonNtupleAnalyzer::reset() {
   fGoodVertexBranches.reset();
   fMuonBranches.reset();
   //fElectronBranches.reset();
-  fMuonJetMinDR.clear();
-  fJetBranches.reset();
+  for(size_t i=0; i<fJetBranches.size(); ++i)
+    fJetBranches[i].reset();
   fGenTTBarBranches.reset();
 
   for(size_t i=0; i<fMuonEffs.size(); ++i) {
@@ -254,25 +262,14 @@ void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
 
   for(size_t i=0; i<fMuonEffs.size(); ++i) {
     for(size_t j=0; j<hmuons->size(); ++j) {
-      //HPlus::EmbeddingMuonEfficiency::Data data = fMuonEffs[i].efficiency->getEventWeight(hmuons->ptrAt(j), iEvent.isRealData());
       HPlus::EmbeddingMuonEfficiency::Data data = fMuonEffs[i].efficiency.getEventWeight(hmuons->ptrAt(j), iEvent.isRealData());
-      fMuonEffs[i].values.push_back(data.getEfficiency());
+      fMuonEffs[i].values.push_back(data.getEventWeight());
+      fMuonEffs[i].uncertainties.push_back(data.getEventWeightAbsoluteUncertainty());
     }
   }
 
-  if(fJetEnabled) {
-    fJetBranches.setValues(iEvent);
-
-    edm::Handle<edm::View<pat::Jet> > hjets;
-    iEvent.getByLabel(fJetBranches.getInputTag(), hjets);
-    for(size_t i=0; i<hmuons->size(); ++i) {
-      double minDR = 9999;
-      for(size_t j=0; j<hjets->size(); ++j) {
-        minDR = std::min(minDR, reco::deltaR(hmuons->at(i), hjets->at(j)));
-      }
-      fMuonJetMinDR.push_back(minDR);
-    }
-  }
+  for(size_t i=0; i<fJetBranches.size(); ++i)
+    fJetBranches[i].setValues(iEvent);
 
   for(size_t i=0; i<fMets.size(); ++i) {
     edm::Handle<edm::View<reco::MET> > hmet;
