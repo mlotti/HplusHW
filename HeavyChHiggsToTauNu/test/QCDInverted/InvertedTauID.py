@@ -627,20 +627,8 @@ class InvertedTauID:
                              createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
             
 
-        if "DeltaPhiJet1Cuts" or "DeltaPhiJet2Cuts"  in name:
-            plot.createFrame("purity"+self.label, opts={"ymin":-0.2,"ymax":1.0, "xmax": 300},
-                             createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
-            
-        if "MtAllDeltaPhiCuts" in name:
-            plot.createFrame("Purity"+self.label, opts={"ymin":-0.2,"ymax":1.0, "xmax": 300},
-                           createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
-
         
-        if "AfterMetPlusBveto" in name:
-            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 250, "xmax": 300},
-                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot)
-                           )
-            
+  
 #####################################
             
         if "MtAfterJetsInvertedVsBaselineTailKillerClosure" in name:
@@ -681,18 +669,22 @@ class InvertedTauID:
                              )
 
 ##################################
-            
+        if "AfterMetPlusBveto" in name:
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 35, "xmax": 300},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot)
+                           )
+                      
         if "AfterMetPlusSoftBtagging" in name:
-            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 200, "xmax": 200},
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 25, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
             
         if "AfterMetCut" in name:
-            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 300, "xmax": 200},
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 40, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
         if "AfterCollinearCuts" in name:
-            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 2000, "xmax": 200},
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 800, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )                                      
 
@@ -704,7 +696,7 @@ class InvertedTauID:
 
             
         if "AllCuts" in name:         
-            plot.createFrame("mtClosure"+self.label, opts={"ymin":1e-1, "ymax": 40, "xmax": 200},
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":1e-1, "ymax": 10, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
 
