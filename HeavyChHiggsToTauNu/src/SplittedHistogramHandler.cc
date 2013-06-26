@@ -115,6 +115,9 @@ namespace HPlus {
         }
       }
     }
+    // Create inclusive histogram
+    std::string myTitle = title+"Inclusive";
+    histoContainer.push_back(fHistoWrapper.makeTH<TH1F>(level, myDir, myTitle.c_str(), myTitle.c_str(), nbins, min, max));
   }
 
   void SplittedHistogramHandler::fillShapeHistogram(WrappedUnfoldedFactorisationHisto* h, double value) {
@@ -131,11 +134,17 @@ namespace HPlus {
   void SplittedHistogramHandler::fillShapeHistogram(std::vector<WrappedTH1*>& histoContainer, double value) {
     checkProperBinning();
     histoContainer[fCurrentUnfoldedBinIndex]->Fill(value);
+    // Fill inclusive histogram
+    if (fNUnfoldedBins > 1)
+      histoContainer[histoContainer.size()-1]->Fill(value);
   }
 
   void SplittedHistogramHandler::fillShapeHistogram(std::vector<WrappedTH1*>& histoContainer, double value, double weight) {
     checkProperBinning();
     histoContainer[fCurrentUnfoldedBinIndex]->Fill(value, weight);
+    // Fill inclusive histogram
+    if (fNUnfoldedBins > 1)
+      histoContainer[histoContainer.size()-1]->Fill(value, weight);
   }
 
   size_t SplittedHistogramHandler::getTauPtBinIndex(double pt) const {
