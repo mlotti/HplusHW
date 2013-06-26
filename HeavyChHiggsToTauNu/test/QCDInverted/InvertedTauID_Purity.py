@@ -13,14 +13,23 @@ analysis = "signalAnalysisInvertedTau"
 searchMode = "Light"
 #searchMode = "Heavy"
 
+
+#dataEra = "Run2012AB"
+#dataEra = "Run2012C"
+dataEra = "Run2012D"
 #dataEra = "Run2011AB"
-#dataEra = "Run2011B"
-dataEra = "Run2011A"
+#dataEra = "Run2012C"
+#dataEra = "Run2011A"
+
+
 
 #optMode = "OptQCDTailKillerZeroPlus"
 #optMode = "OptQCDTailKillerLoosePlus"
 #optMode = "OptQCDTailKillerMediumPlus"
+
+#optMode = "OptQCDTailKillerMediumPlus"
 optMode = "OptQCDTailKillerTightPlus"
+
 #optMode = ""
 
 #optMode = ""
@@ -36,6 +45,8 @@ HISTONAMES = []
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_CollinearTailKiller")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
 HISTONAMES.append("Inverted/SelectedTau_pT_BackToBackTailKiller")
@@ -117,10 +128,13 @@ def main():
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
 
-    #plot.setLegend(histograms.createLegend(0.53, 0.2, 0.98, 0.4))
+    plot.setLegend(histograms.createLegend(0.53, 0.2, 0.98, 0.4))
     
  
-    histograms.addText(0.3, 0.3, "TailKiller: TightPlus", 25)
+#    histograms.addText(0.2, 0.3, "TailKiller: MediumPlus", 18)
+    histograms.addText(0.2, 0.3, "TailKiller: TightPlus", 18)
+
+
 
 
     histograms.addCmsPreliminaryText()
