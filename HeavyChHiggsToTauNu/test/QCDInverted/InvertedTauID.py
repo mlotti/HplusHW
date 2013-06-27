@@ -577,7 +577,7 @@ class InvertedTauID:
         if "BvetoTailKillerClosure" in name:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
         if "MtAllCutsClosure" in name: 
-	    plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"}
+	    plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
         if "RadiusJet0BackToBack" in name:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
         if "RadiusJet0Collinear" in name:
@@ -1420,49 +1420,44 @@ class InvertedTauID:
         theFit.SetParLimits(2,30,100) 
         theFit.SetParLimits(3,0.001,1)
 
-        if self.label == "4050":
+        if "41..50" in self.label:
             theFit.SetParLimits(0,5,20) 
             theFit.SetParLimits(1,90,120)
             theFit.SetParLimits(2,30,50)
             theFit.SetParLimits(3,0.001,1)
-
-	if self.label == "5060":
+	elif "50..60" in self.label:
             theFit.SetParLimits(0,5,20)     
             theFit.SetParLimits(1,90,120)   
             theFit.SetParLimits(2,20,50)
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "6070":
+        elif "60..70" in self.label:
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,90,150)
             theFit.SetParLimits(2,20,50)
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "7080":
+        elif "70..80" in self.label:
             theFit.SetParLimits(0,5,60)
             theFit.SetParLimits(1,90,200)
             theFit.SetParLimits(2,20,100)
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "80100":
+        elif "80..100" in self.label:
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,50,170)
             theFit.SetParLimits(2,20,60)
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "100120":
+        elif "100..120" in self.label:
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,90,170)
             theFit.SetParLimits(2,20,60) 
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "120150":
+        elif "120..150" in self.label:
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,60,170)
             theFit.SetParLimits(2,10,100)
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "150":
+        else:
+            #if self.label == "150":
+            print "Warning: Using fallback fit settings in InvertedTauID::fitEWK() for label %s"%self.label
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,70,170)
             theFit.SetParLimits(2,20,100)
