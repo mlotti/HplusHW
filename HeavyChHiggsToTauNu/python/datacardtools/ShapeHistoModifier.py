@@ -192,5 +192,6 @@ class ShapeHistoModifier():
                 myArray = histo.GetXaxis().GetXbins()
                 myBinEdges = []
                 for i in range(0,myArray.GetSize()-1): # Ignore last bin since it is the right edge of the last bin
-                    myBinEdges.append(myArray.GetAt(i)
-                mySpecs["variableBinSizeLowEdges"] = list(myBinEdges)
+                    myBinEdges.append(myArray.GetAt)(i)
+                specs["variableBinSizeLowEdges"] = list(myBinEdges)
+                specs["bins"] = len(myBinDeges)

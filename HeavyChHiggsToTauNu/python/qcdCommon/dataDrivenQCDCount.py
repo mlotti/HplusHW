@@ -1,20 +1,20 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.SplittedHistoReader import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.splittedHistoReader import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
 #from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import *
 from math import sqrt
-from dataset import Count
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
 
 import ROOT
 ROOT.gROOT.SetBatch(True) # no flashing canvases
 
 ## Container class for information of data and MC EWK at certain point of selection
 class DataDrivenQCDShape:
-    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName):
+    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, luminosity):
         self._uniqueN = 0
         self._splittedHistoReader = SplittedHistoReader(dsetRootHisto.getHistogram())
-        self._dataList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, histoName))
-        self._ewkList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, histoName))
+        self._dataList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, histoName, luminosity))
+        self._ewkList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, histoName, luminosity))
 
     ## Return the sum of data-ewk in a given phase space split bin
     def getDataDrivenQCDHistoForSplittedBin(self, binIndex, histoSpecs=None):
@@ -71,7 +71,7 @@ class DataDrivenQCDShape:
         myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[0])
         h = myModifier.createEmptyShapeHistogram("%s%d"%(self._dataList[0].GetName(), self._uniqueN), self._dataList[0].GetTitle())
         self._uniqueN += 1
-        for i in range(1, len(self._dataList)):
+        for i in range(0, len(self._dataList)):
             myModifier.addShape(source=self._dataList[binIndex], dest=h)
         myModifier.finaliseShape(dest=h) # Convert errors from variances to std.devs.
         return h
@@ -82,28 +82,51 @@ class DataDrivenQCDShape:
         myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._ewkList[0])
         h = myModifier.createEmptyShapeHistogram("%s%d"%(self._ewkList[0].GetName(), self._uniqueN), self._ewkList[0].GetTitle())
         self._uniqueN += 1
-        for i in range(1, len(self._ewkList)):
+        for i in range(0, len(self._ewkList)):
             myModifier.addShape(source=self._ewkList[binIndex], dest=h)
         myModifier.finaliseShape(dest=h) # Convert errors from variances to std.devs.
         return h
 
+    ## Return the QCD purity as a histogram with splitted bins on x-axis
+    def getPurityHisto(self):
+        # Create histogram
+        h = ROOT.TH1F("%spurity%d"%(self._ewkList[0].GetName(), self._uniqueN), "Purity%s"%self._ewkList[0].GetName(), len(self.dataList),0,len(self.dataList))
+        h.Sumw2()
+        h.SetYTitle("Purity, %")
+        self._uniqueN += 1
+        for i in range(0, len(self._dataList)):
+            h.GetXaxis().SetBinLabel(i+1, self._dataList[i].GetTitle())
+            nData = 0.0
+            nEwk = 0.0
+            for j in range(0, self._dataList[i].GetNbinsX()+2):
+                nData += self._dataList[i].GetBinContent(j)
+                nEwk += self._ewkList[i].GetBinContent(j)
+            myPurity = 0.0
+            myUncert = 0.0
+            if (nData > 0.0):
+                myPurity = (nData - nEwk) / nData
+                myUncert = sqrt(myPurity * (1.0-myPurity) * nData) # Assume binomial error
+            h.SetBinContent(i+1, myPurity * 100.0)
+            h.SetBinError(i+1, myUncert * 100.0)
+        return h
+
     ## Return the QCD purity as a Count object
-    def getPurity(self):
+    def getIntegratedPurity(self):
         nData = 0.0
         nEwk = 0.0
         for i in range(0, len(self._dataList)):
-            for j in range(0, self._dataList[i].GetNbinsX()+2)):
+            for j in range(0, self._dataList[i].GetNbinsX()+2):
                 nData += self._dataList[i].GetBinContent(j)
                 nEwk += self._ewkList[i].GetBinContent(j)
         myPurity = 0.0
         myUncert = 0.0
-        if (nData > 0.0)
+        if (nData > 0.0):
             myPurity = (nData - nEwk) / nData
             myUncert = sqrt(myPurity * (1.0-myPurity) * nData) # Assume binomial error
         return Count(myPurity, myUncert)
 
     ## Return the QCD purity in bins of the final shape
-    def getPurityForShapeHisto(self, histoSpecs=None):
+    def getIntegratedPurityForShapeHisto(self, histoSpecs=None):
         hData = self.getIntegratedDataHisto()
         hEwk = self.getIntegratedEwkHisto()
         h = hData.Clone("%spurity%d"%(hData,self._uniqueN))
