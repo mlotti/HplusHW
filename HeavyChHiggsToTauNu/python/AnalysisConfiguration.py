@@ -961,33 +961,55 @@ class ConfigBuilder:
         if self.options.tauEmbeddingInput == 0:
             return []
 
+        def makeName(name, postfix):
+            for n in ["Light", "Heavy"]:
+                if n in name:
+                    return name.replace(n, postfix+n)
+            raise Exception("Analysis name '%s' broke assumptions on naming convention")
+
+
         allNames = []
         retNames = []
         for module, name in zip(analysisModules, analysisNames):
-            postfix = "MEff"
+            postfix = "MIdEff"
             mod = module.clone()
-            mod.embeddingMuonEfficiency.mode = "efficiency"
+            mod.histogramAmbientLevel = "Vital"
+            mod.embeddingMuonIdEfficiency.mode = "dataEfficiency"
+            mod.embeddingMuonIdEfficiency.muonSrc = mod.Tree.tauEmbedding.muons.src.value()
             path = cms.Path(process.commonSequence * mod)
-            setattr(process, name+postfix, mod)
-            setattr(process, name+postfix+"Path", path)
-            allNames.append(name+postfix)
+            modName = makeName(name, postfix)
+            setattr(process, modName, mod)
+            setattr(process, modName+"Path", path)
+            allNames.append(modName)
+
+            postfix += "TrgEff"
+            mod.embeddingMuonTriggerEfficiency.mode = "dataEfficiency"
+            mod.embeddingMuonTriggerEfficiency.muonSrc = mod.embeddingMuonIdEfficiency.muonSrc.value()
+            path = cms.Path(process.commonSequence * mod)
+            modName = makeName(name, postfix)
+            setattr(process, modName, mod)
+            setattr(process, modName+"Path", path)
+            allNames.append(modName)
 
             postfix += "CaloMet60"
             mod = mod.clone()
             mod.trigger.caloMetSelection.metEmulationCut = 60.0
             path = cms.Path(process.commonSequence * mod)
-            setattr(process, name+postfix, mod)
-            setattr(process, name+postfix+"Path", path)
-            allNames.append(name+postfix)
+            modName = makeName(name, postfix)
+            setattr(process, modName, mod)
+            setattr(process, modName+"Path", path)
+            allNames.append(modName)
 
             postfix += "TEff"
             mod = mod.clone()
-            mod.tauTriggerEfficiencyScaleFactor.mode = "efficiency"
+            mod.histogramAmbientLevel = self.histogramAmbientLevel
+            mod.tauTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
             path = cms.Path(process.commonSequence * mod)
-            setattr(process, name+postfix, mod)
-            setattr(process, name+postfix+"Path", path)
-            allNames.append(name+postfix)
-            retNames.append(name+postfix)
+            modName = makeName(name, postfix)
+            setattr(process, modName, mod)
+            setattr(process, modName+"Path", path)
+            allNames.append(modName)
+            retNames.append(modName)
         self._accumulateAnalyzers("Tau embedding analyses", allNames)
         return retNames
 
@@ -1180,3 +1202,18 @@ def addPuWeightProducers(dataVersion, process, commonSequence, dataEras, firstIn
             commonSequence.insert(0, mod)
 
     return names
+
+def addPuWeightProducersVariations(dataVersion, process, commonSequence, dataEras):
+    ret = []
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+    for era in dataEras:
+        name = param.setPileupWeight(dataVersion, process, commonSequence, era=era)
+        ret.append( (era, "",  name) )
+        nominalModule = getattr(process, name)
+        for suffix in ["up", "down"]:
+            ret.append( (era, suffix,
+                         param.setPileupWeightForVariation(dataVersion, process, commonSequence, suffix=suffix,
+                                                           pset=nominalModule.clone(), psetReader=param.pileupWeightReader))
+                        )
+
+    return ret

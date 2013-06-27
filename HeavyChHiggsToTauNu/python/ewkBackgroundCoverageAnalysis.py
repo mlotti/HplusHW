@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
+
 genTauPtCut = 41
 genTauEtaCut = 2.1
 
@@ -25,14 +27,8 @@ def createEDAnalyze(param):
         tauEtaCut = cms.untracked.double(genTauEtaCut),
 
         # for tree
-        muonSrc = cms.InputTag("dummy"),
-        muonFunctions = cms.PSet(
-            dB = cms.string("dB()"),
-
-            chargedHadronIso = cms.string("chargedHadronIso()"),
-            neutralHadronIso = cms.string("neutralHadronIso()"),
-            photonIso = cms.string("photonIso()"),
-            puChargedHadronIso = cms.string("puChargedHadronIso()"),
+        muons = Ntuple.clone(
+            src = "dummy",
         ),
 
         # Options below are not really used, they're just needed to

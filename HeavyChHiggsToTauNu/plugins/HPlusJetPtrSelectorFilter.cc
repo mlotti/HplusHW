@@ -5,6 +5,7 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
+#include "DataFormats/Common/interface/OrphanHandle.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
@@ -36,6 +37,7 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
   bool fAllowEmptyTau;
   bool fFilter;
   bool fThrow;
+  bool fProducePt20;
 
   // Let's use reco::Candidate as the output type, as the required
   // dictionaries for edm::PtrVector<pat:Jet> do not exist, and I
@@ -53,9 +55,16 @@ HPlusJetPtrSelectorFilter::HPlusJetPtrSelectorFilter(const edm::ParameterSet& iC
   fRemoveTau(iConfig.getParameter<bool>("removeTau")),
   fAllowEmptyTau(iConfig.getParameter<bool>("allowEmptyTau")),
   fFilter(iConfig.getParameter<bool>("filter")),
-  fThrow(iConfig.getParameter<bool>("throw"))
+  fThrow(iConfig.getParameter<bool>("throw")),
+  fProducePt20(iConfig.getParameter<bool>("producePt20"))
 {
-  produces<Product>();
+  if(fProducePt20) {
+    produces<Product>("selectedJets");
+    produces<Product>("selectedJetsPt20");
+  }
+  else {
+    produces<Product>();
+  }
   produces<bool>();
 }
 HPlusJetPtrSelectorFilter::~HPlusJetPtrSelectorFilter() {}
@@ -92,13 +101,24 @@ bool HPlusJetPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
    
   bool passed = false;
   std::auto_ptr<Product> selectedJets(new Product());
+  std::auto_ptr<Product> selectedJetsPt20(new Product());
   if(jetData.passedEvent()) {
     passed = true;
     for(size_t i=0; i<jetData.getSelectedJets().size(); ++i) {
       selectedJets->push_back(jetData.getSelectedJets()[i]);
     }
+    for(size_t i=0; i<jetData.getSelectedJetsPt20().size(); ++i) {
+      selectedJetsPt20->push_back(jetData.getSelectedJetsPt20()[i]);
+    }
   }
-  iEvent.put(selectedJets);
+  if(fProducePt20) {
+    edm::OrphanHandle<Product> h1 = iEvent.put(selectedJetsPt20, "selectedJetsPt20");
+    edm::OrphanHandle<Product> h2 = iEvent.put(selectedJets, "selectedJets");
+    //std::cout << "selectedJetsPt20 id " << h1.id() << " selectedJets id " << h2.id() << std::endl;
+  }
+  else {
+    iEvent.put(selectedJets);
+  }
 
   std::auto_ptr<bool> p(new bool(passed));
   iEvent.put(p);

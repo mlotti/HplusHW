@@ -1189,7 +1189,7 @@ class QCDfactorisedColumn(DatacardColumn):
         else:
             myChosenQCDResult = myQCDCalculator.getContractedResultsList()[myFactorisationContractionIndex].getNQCDResult()
             myRateHistograms.append(hRateShapeContracted[myFactorisationContractionIndex])
-        self._rateResult = ExtractorResult("rate", "rate", myChosenQCDResult.value(), myRateHistograms)
+        self._rateResult = ExtractorResult("rate", "rate", myRateHistograms[0].Integral(), myRateHistograms)
         # Obtain messages
         self._messages.extend(myStdSelEventCount.getMessages())
         self._messages.extend(myMETLegEventCount.getMessages())

@@ -561,6 +561,7 @@ def _normalizeToFactor(h, f):
 # \param datasetList  List of all Dataset objects to consider
 # \param nameList     List of the names of Dataset objects to merge/stack
 # \param task         String to identify merge/stack task (can be 'stack' or 'merge')
+# \param allowMissingDatasets  If True, ignore error from missing dataset (warning is nevertheless printed)
 # 
 # \return a triple of:
 # - list of selected Dataset objects
@@ -572,7 +573,7 @@ def _normalizeToFactor(h, f):
 # Datasets, and it is checked that all of them are either data or MC
 # (i.e. merging/stacking of data and MC datasets is forbidden).
 # """
-def _mergeStackHelper(datasetList, nameList, task):
+def _mergeStackHelper(datasetList, nameList, task, allowMissingDatasets=False):
     if not task in ["stack", "merge"]:
         raise Exception("Task can be either 'stack' or 'merge', was '%s'" % task)
 
@@ -604,7 +605,11 @@ def _mergeStackHelper(datasetList, nameList, task):
         for d in selected:
             ind = dlist.index(d.getName())
             del dlist[ind]
-        print >> sys.stderr, "WARNING: Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
+        message = "Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
+        if allowMissingDatasets:
+            print >> sys.stderr, "WARNING: "+message
+        else:
+            raise Exception(message)
 
     return (selected, notSelected, firstIndex)
 
@@ -3133,17 +3138,22 @@ class DatasetManager:
     #                     they are removed, as they are now contained
     #                     in the dataset.DatasetMerged object
     # \param addition     Creates DatasetAddedMC instead of DatasetMerged
+# \param allowMissingDatasets  If True, ignore error from missing dataset (warning is nevertheless printed)
     #
     # If nameList translates to only one dataset.Dataset, the
     # dataset.Daataset object is renamed (i.e. dataset.DatasetMerged
     # object is not created)
-    def merge(self, newName, nameList, keepSources=False, addition=False, silent=False):
-        (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge")
+    def merge(self, newName, nameList, keepSources=False, addition=False, silent=False, allowMissingDatasets=False):
+        (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge", allowMissingDatasets)
         if len(selected) == 0:
-            if not silent:
-                print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
+            message = "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
+            if allowMissingDatasets:
+                if not silent:
+                    print >> sys.stderr, message
+            else:
+                raise Exception(message)
             return
-        elif len(selected) == 1:
+        elif len(selected) == 1 and not keepSources:
             if not silent:
                 print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
             self.rename(selected[0].getName(), newName)
@@ -3667,9 +3677,11 @@ class NtupleCacheDrawer:
     #
     # \param ntupleCache   NtupleCache object
     # \param histoName     Name of the histogram to obtain
-    def __init__(self, ntupleCache, histoName):
+    # \param selectorName  Name of the selector
+    def __init__(self, ntupleCache, histoName, selectorName):
         self.ntupleCache = ntupleCache
         self.histoName = histoName
+        self.selectorName = selectorName
 
     ## "Draw"
     #
@@ -3678,7 +3690,7 @@ class NtupleCacheDrawer:
     # This method exploits the infrastucture we have for TreeDraw.
     def draw(self, dataset):
         self.ntupleCache.process(dataset)
-        return self.ntupleCache.getRootHisto(dataset, self.histoName)
+        return self.ntupleCache.getRootHisto(dataset, self.histoName, self.selectorName)
 
 ## Ntuple processing with C macro and caching the result histograms
 #
@@ -3709,30 +3721,40 @@ class NtupleCache:
         self.maxEvents = maxEvents
         self.printStatus = printStatus
 
+        self.additionalSelectors = {}
         self.datasetSelectorArgs = {}
 
         self.macrosLoaded = False
         self.processedDatasets = {}
 
-        base = os.path.join(aux.higgsAnalysisPath(), "HeavyChHiggsToTauNu", "test", "ntuple")
         self.macros = [
-            os.path.join(base, "BaseSelector.C"),
-            os.path.join(base, "Branches.C"),
-            ] + [os.path.join(base, x) for x in macros] + [
-            os.path.join(base, self.selectorName+".C")
-            ] 
-
+            "BaseSelector.C",
+            "Branches.C"
+            ] + macros + [
+            self.selectorName+".C"
+            ]
         self.cacheFile = None
 
     ## Compile and load the macros
     def _loadMacros(self):
-        for m in self.macros:
+        base = os.path.join(aux.higgsAnalysisPath(), "HeavyChHiggsToTauNu", "test", "ntuple")
+        macros = [os.path.join(base, x) for x in self.macros]
+
+        for m in macros:
             ret = ROOT.gROOT.LoadMacro(m+"+g")
             if ret != 0:
                 raise Exception("Failed to load "+m)
 
-    def setDatasetSelectorArgs(self, dictionary):
-        self.datasetSelectorArgs.update(dictionary)
+    def addSelector(self, name, selector, selectorArgs):
+        self.additionalSelectors[name] = (selector, selectorArgs)
+        macro = selector+".C"
+        if not macro in self.macros:
+            self.macros.append(macro)
+
+    def setDatasetSelectorArgs(self, dictionary, selectorName=None):
+        if not selectorName in self.datasetSelectorArgs:
+            self.datasetSelectorArgs[selectorName] = {}
+        self.datasetSelectorArgs[selectorName].update(dictionary)
 
     # def _isMacroNewerThanCacheFile(self):
     #     latestMacroTime = max([os.path.getmtime(m) for m in self.macros])
@@ -3766,30 +3788,30 @@ class NtupleCache:
             self.cacheFile = ROOT.TFile.Open(self.cacheFileName, "RECREATE")
             self.cacheFile.cd()
 
-        directory = self.cacheFile.Get(pathDigest)
-        if directory == None:
-            directory = self.cacheFile.mkdir(pathDigest)
-            directory.cd()
+        rootDirectory = self.cacheFile.Get(pathDigest)
+        if rootDirectory == None:
+            rootDirectory = self.cacheFile.mkdir(pathDigest)
+            rootDirectory.cd()
             tmp = ROOT.TNamed("originalPath", dataset.getBaseDirectory())
             tmp.Write()
 
         # Create selector args
-        selectorArgs = []
-        if isinstance(self.selectorArgs, list):
-            selectorArgs = self.selectorArgs[:]
-            if dataset.getName() in self.datasetSelectorArgs:
-                selectorArgs.extend(self.datasetSelectorArgs[dataset.getName()])
-        else:
-            # assume we have an object making a keyword->positional mapping
-            sa = self.selectorArgs.clone()
-            if dataset.getName() in self.datasetSelectorArgs:
-                sa.update(self.datasetSelectorArgs[dataset.getName()])
-            selectorArgs = sa.createArgs()
+        def getSelectorArgs(selectorName, selectorArgsObj):
+            ret = []
+            d = self.datasetSelectorArgs.get(selectorName, None)
+            if isinstance(selectorArgsObj, list):
+                ret = selectorArgsObj[:]
+                if d is not None and dataset.getName() in d:
+                    ret.extend(d[dataset.getName()])
+            else:
+                # assume we have an object making a keyword->positional mapping
+                sa = selectorArgsObj.clone()
+                if d is not None and dataset.getName() in d:
+                    sa.update(d[dataset.getName()])
+                ret = sa.createArgs()
+            return ret
 
-        directory = directory.mkdir(datasetName)
-        argsNamed = ROOT.TNamed("selectorArgs", str(selectorArgs))
-        argsNamed.Write()
-
+        selectorArgs = getSelectorArgs(None, self.selectorArgs)
         (tree, realTreeName) = dataset.createRootChain(self.treeName)
 
         N = tree.GetEntries()
@@ -3797,9 +3819,30 @@ class NtupleCache:
         if self.maxEvents >= 0 and N > self.maxEvents:
             useMaxEvents = True
             N = self.maxEvents
-        selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*selectorArgs))
-        selector.setOutput(directory)
+
+        def getSelectorDir(name_):
+            d = rootDirectory.Get(name_)
+            if d == None:
+                d = rootDirectory.mkdir(name_)
+            return d
+            
+        directory = getSelectorDir("mainSelector").mkdir(datasetName)
+        directory.cd()
+        argsNamed = ROOT.TNamed("selectorArgs", str(selectorArgs))
+        argsNamed.Write()
+
+        selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*selectorArgs), directory)
         selector.setPrintStatus(self.printStatus)
+        directories = [directory]
+
+        for name, (selecName, selecArgs) in self.additionalSelectors.iteritems():
+            directory = getSelectorDir(name).mkdir(datasetName)
+            directory.cd()
+            argsNamed = ROOT.TNamed("selectorArgs", str(selectorArgs))
+            argsNamed.Write()
+            selectorArgs = getSelectorArgs(name, selecArgs)
+            selector.addSelector(name, getattr(ROOT, selecName)(*selectorArgs), directory)
+            directories.append(directory)
 
         print "Processing dataset", datasetName
         
@@ -3807,19 +3850,24 @@ class NtupleCache:
             tree.Process(selector, "", N)
         else:
             tree.Process(selector)
-        directory.Write()
+        for d in directories:
+            d.Write()
 
     ## Get a histogram from the cache file
     #
     # \param Datase        Dataset object for which histogram is to be obtained
-    # \apram histoName     Histogram name
-    def getRootHisto(self, dataset, histoName):
+    # \param histoName     Histogram name
+    # \param selectorName  Selector name
+    def getRootHisto(self, dataset, histoName, selectorName):
         if self.cacheFile == None:
             if not os.path.exists(self.cacheFileName):
                 raise Exception("Assert: for some reason the cache file %s does not exist yet. Did you set 'process=True' in the constructor of NtupleCache?" % self.cacheFileName)
             self.cacheFile = ROOT.TFile.Open(self.cacheFileName)
 
-        path = "%s/%s/%s" % (hashlib.sha1(dataset.getBaseDirectory()).hexdigest(), dataset.getName(), histoName)
+        if selectorName is None:
+            selectorName = "mainSelector"
+
+        path = "%s/%s/%s/%s" % (hashlib.sha1(dataset.getBaseDirectory()).hexdigest(), selectorName, dataset.getName(), histoName)
         h = self.cacheFile.Get(path)
         if not h:
             raise Exception("Histogram '%s' not found from %s" % (path, self.cacheFile.GetName()))
@@ -3828,8 +3876,9 @@ class NtupleCache:
     ## Create NtupleCacheDrawer for Dataset.getDatasetRootHisto()
     #
     # \param histoName   Histogram name to obtain
-    def histogram(self, histoName):
-        return NtupleCacheDrawer(self, histoName)
+    # \param selectorName  Name of selector from which to read the histogram (None for the main selector)
+    def histogram(self, histoName, selectorName=None):
+        return NtupleCacheDrawer(self, histoName, selectorName)
 
 
 class SelectorArgs:

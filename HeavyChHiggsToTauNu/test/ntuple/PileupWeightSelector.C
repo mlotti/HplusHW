@@ -12,11 +12,11 @@ public:
   ~PileupWeightSelector();
 
   void setOutput(TDirectory *dir);
-  void setupBranches(TTree *tree);
+  void setupBranches(BranchManager& branchManager);
   bool process(Long64_t entry);
 
 private:
-  Branch<float> fTrueNumInteractions;
+  Branch<float> *fTrueNumInteractions;
 
   const TH1 *fWeights;
   const TH1 *fWeightsUp;
@@ -44,22 +44,22 @@ void PileupWeightSelector::setOutput(TDirectory *dir) {
   hEventsDown = new TH1D("eventsDown", "eventsUp", 1, 0, 1);
 }
 
-void PileupWeightSelector::setupBranches(TTree *tree) {
-  fTrueNumInteractions.setupBranch(tree, "TrueNumInteractions");
+void PileupWeightSelector::setupBranches(BranchManager& branchManager) {
+  branchManager.book("TrueNumInteractions", fTrueNumInteractions);
 }
 
 bool PileupWeightSelector::process(Long64_t entry) {
   fTrueNumInteractions.setEntry(entry);
 
-  Int_t bin = fWeights->FindFixBin(fTrueNumInteractions.value());
+  Int_t bin = fWeights->FindFixBin(fTrueNumInteractions->value());
   double weight = fWeights->GetBinContent(bin);
   hEvents->SetBinContent(1, hEvents->GetBinContent(1)+weight);
 
-  bin = fWeightsUp->FindFixBin(fTrueNumInteractions.value());
+  bin = fWeightsUp->FindFixBin(fTrueNumInteractions->value());
   weight = fWeightsUp->GetBinContent(bin);
   hEventsUp->SetBinContent(1, hEventsUp->GetBinContent(1)+weight);
 
-  bin = fWeightsDown->FindFixBin(fTrueNumInteractions.value());
+  bin = fWeightsDown->FindFixBin(fTrueNumInteractions->value());
   weight = fWeightsDown->GetBinContent(bin);
   hEventsDown->SetBinContent(1, hEventsDown->GetBinContent(1)+weight);
 
