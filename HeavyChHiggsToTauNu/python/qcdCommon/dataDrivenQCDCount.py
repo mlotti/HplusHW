@@ -12,7 +12,7 @@ ROOT.gROOT.SetBatch(True) # no flashing canvases
 class DataDrivenQCDShape:
     def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, luminosity):
         self._uniqueN = 0
-        self._splittedHistoReader = SplittedHistoReader(dsetRootHisto.getHistogram())
+        self._splittedHistoReader = SplittedHistoReader(dsetMgr, dsetLabelData)
         self._dataList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, histoName, luminosity))
         self._ewkList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, histoName, luminosity))
 
@@ -22,7 +22,7 @@ class DataDrivenQCDShape:
             raise Exception(ErrorLabel()+"DataDrivenQCDShape::getDataDrivenQCDForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
         # Do summing within shape histo modifier
         myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[binIndex])
-        h = myModifier.createEmptyShapeHistogram("%s%d"%(self._dataList[binIndex].GetName(), self._uniqueN), self._dataList[binIndex].GetTitle())
+        h = myModifier.createEmptyShapeHistogram("%s_%d"%(self._dataList[binIndex].GetName(), self._uniqueN), self._dataList[binIndex].GetTitle())
         self._uniqueN += 1
         myModifier.addShape(source=self._dataList[binIndex], dest=h)
         myModifier.subtractShape(source=self._ewkList[binIndex], dest=h)
@@ -35,7 +35,7 @@ class DataDrivenQCDShape:
             raise Exception(ErrorLabel()+"DataDrivenQCDShape::getDataHistoForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
         # Do summing within shape histo modifier
         myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[binIndex])
-        h = myModifier.createEmptyShapeHistogram("%s%d"%(self._dataList[binIndex].GetName(), self._uniqueN), self._dataList[binIndex].GetTitle())
+        h = myModifier.createEmptyShapeHistogram("%s_%d"%(self._dataList[binIndex].GetName(), self._uniqueN), self._dataList[binIndex].GetTitle())
         self._uniqueN += 1
         myModifier.addShape(source=self._dataList[binIndex], dest=h)
         myModifier.finaliseShape(dest=h) # Convert errors from variances to std.devs.
@@ -44,10 +44,10 @@ class DataDrivenQCDShape:
     ## Return the EWK MC in a given phase space split bin
     def getEwkHistoForSplittedBin(self, binIndex, histoSpecs=None):
         if binIndex >= len(self._dataList):
-            raise Exception(ErrorLabel()+"DataDrivenQCDShape::getEwkHistoForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
+            raise Exception(ErrorLabel()+"DataDrivenQCDShape::getEwkHistoForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._ewkList)))
         # Do summing within shape histo modifier
         myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._ewkList[binIndex])
-        h = myModifier.createEmptyShapeHistogram("%s%d"%(self._ewkList[binIndex].GetName(), self._uniqueN), self._ewkList[binIndex].GetTitle())
+        h = myModifier.createEmptyShapeHistogram("%s_%d"%(self._ewkList[binIndex].GetName(), self._uniqueN), self._ewkList[binIndex].GetTitle())
         self._uniqueN += 1
         myModifier.addShape(source=self._ewkList[binIndex], dest=h)
         myModifier.finaliseShape(dest=h) # Convert errors from variances to std.devs.
@@ -57,11 +57,12 @@ class DataDrivenQCDShape:
     def getIntegratedDataDrivenQCDHisto(self, histoSpecs=None):
         # Do summing within shape histo modifier
         myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[0])
-        h = myModifier.createEmptyShapeHistogram("%s%d"%(self._dataList[0].GetName(), self._uniqueN), self._dataList[0].GetTitle())
+        myNameList = self._dataList[0].GetName().split("_")
+        h = myModifier.createEmptyShapeHistogram("%s_%d"%(self._dataList[0].GetName(), self._uniqueN), myNameList[0][:len(myNameList[0])-1])
         self._uniqueN += 1
         for i in range(0, len(self._dataList)):
-            myModifier.addShape(source=self._dataList[binIndex], dest=h)
-            myModifier.subtractShape(source=self._ewkList[binIndex], dest=h)
+            myModifier.addShape(source=self._dataList[i], dest=h)
+            myModifier.subtractShape(source=self._ewkList[i], dest=h)
         myModifier.finaliseShape(dest=h) # Convert errors from variances to std.devs.
         return h
 
@@ -69,10 +70,11 @@ class DataDrivenQCDShape:
     def getIntegratedDataHisto(self, histoSpecs=None):
         # Do summing within shape histo modifier
         myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[0])
-        h = myModifier.createEmptyShapeHistogram("%s%d"%(self._dataList[0].GetName(), self._uniqueN), self._dataList[0].GetTitle())
+        myNameList = self._dataList[0].GetName().split("_")
+        h = myModifier.createEmptyShapeHistogram("%s_%d"%(self._dataList[0].GetName(), self._uniqueN), myNameList[0][:len(myNameList[0])-1])
         self._uniqueN += 1
         for i in range(0, len(self._dataList)):
-            myModifier.addShape(source=self._dataList[binIndex], dest=h)
+            myModifier.addShape(source=self._dataList[i], dest=h)
         myModifier.finaliseShape(dest=h) # Convert errors from variances to std.devs.
         return h
 
@@ -80,17 +82,19 @@ class DataDrivenQCDShape:
     def getIntegratedEwkHisto(self, histoSpecs=None):
         # Do summing within shape histo modifier
         myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._ewkList[0])
-        h = myModifier.createEmptyShapeHistogram("%s%d"%(self._ewkList[0].GetName(), self._uniqueN), self._ewkList[0].GetTitle())
+        myNameList = self._ewkList[0].GetName().split("_")
+        h = myModifier.createEmptyShapeHistogram("%s_%d"%(self._ewkList[0].GetName(), self._uniqueN), myNameList[0][:len(myNameList[0])-1])
         self._uniqueN += 1
         for i in range(0, len(self._ewkList)):
-            myModifier.addShape(source=self._ewkList[binIndex], dest=h)
+            myModifier.addShape(source=self._ewkList[i], dest=h)
         myModifier.finaliseShape(dest=h) # Convert errors from variances to std.devs.
         return h
 
     ## Return the QCD purity as a histogram with splitted bins on x-axis
     def getPurityHisto(self):
         # Create histogram
-        h = ROOT.TH1F("%spurity%d"%(self._ewkList[0].GetName(), self._uniqueN), "Purity%s"%self._ewkList[0].GetName(), len(self.dataList),0,len(self.dataList))
+        myNameList = self._ewkList[0].GetName().split("_")
+        h = ROOT.TH1F("%s_purity_%d"%(self._ewkList[0].GetName(), self._uniqueN), "PurityBySplittedBin_%s"%myNameList[0][:len(myNameList[0])-1], len(self._ewkList),0,len(self._ewkList))
         h.Sumw2()
         h.SetYTitle("Purity, %")
         self._uniqueN += 1
@@ -105,7 +109,7 @@ class DataDrivenQCDShape:
             myUncert = 0.0
             if (nData > 0.0):
                 myPurity = (nData - nEwk) / nData
-                myUncert = sqrt(myPurity * (1.0-myPurity) * nData) # Assume binomial error
+                myUncert = sqrt(myPurity * (1.0-myPurity) / nData) # Assume binomial error
             h.SetBinContent(i+1, myPurity * 100.0)
             h.SetBinError(i+1, myUncert * 100.0)
         return h
@@ -122,21 +126,27 @@ class DataDrivenQCDShape:
         myUncert = 0.0
         if (nData > 0.0):
             myPurity = (nData - nEwk) / nData
-            myUncert = sqrt(myPurity * (1.0-myPurity) * nData) # Assume binomial error
+            myUncert = sqrt(myPurity * (1.0-myPurity) / nData) # Assume binomial error
         return Count(myPurity, myUncert)
 
     ## Return the QCD purity in bins of the final shape
     def getIntegratedPurityForShapeHisto(self, histoSpecs=None):
-        hData = self.getIntegratedDataHisto()
-        hEwk = self.getIntegratedEwkHisto()
-        h = hData.Clone("%spurity%d"%(hData,self._uniqueN))
+        hData = self.getIntegratedDataHisto(histoSpecs=histoSpecs)
+        hEwk = self.getIntegratedEwkHisto(histoSpecs=histoSpecs)
+        h = hData.Clone("%s_purity_%d"%(hData,self._uniqueN))
+        myNameList = self._dataList[0].GetName().split("_")
+        h.SetTitle("PurityByFinalShapeBin_%s"%myNameList[0][:len(myNameList[0])-1])
         self._uniqueN += 1
-        for i in range(1, h.GetNbinxX()+1):
+        for i in range(1, h.GetNbinsX()+1):
             myPurity = 0.0
             myUncert = 0.0
             if (hData.GetBinContent(i) > 0.0):
                 myPurity = (hData.GetBinContent(i) - hEwk.GetBinContent(i)) / hData.GetBinContent(i)
-                myUncert = sqrt(myPurity * (1.0-myPurity) * hData.GetBinContent(i)) # Assume binomial error
+                if myPurity < 0.0:
+                    myPurity = 0.0
+                    myUncert = 0.0
+                else:
+                    myUncert = sqrt(myPurity * (1.0-myPurity) / hData.GetBinContent(i)) # Assume binomial error
             h.SetBinContent(i, myPurity)
             h.SetBinError(i, myUncert)
         return h
@@ -150,4 +160,14 @@ class DataDrivenQCDShape:
         if binIndex >= len(self._dataList):
             raise Exception(ErrorLabel()+"DataDrivenQCDShape::getPhaseSpaceBinTitle: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
         return self._dataList[binIndex].GetTitle()
+
+    ## Returns phase space split title for a bin
+    def getPhaseSpaceBinFileFriendlyTitle(self, binIndex):
+        if binIndex >= len(self._dataList):
+            raise Exception(ErrorLabel()+"DataDrivenQCDShape::getPhaseSpaceBinTitle: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
+        return self._dataList[binIndex].GetTitle().replace(">","").replace("<","").replace("=","").replace("{","").replace("}","").replace(" ","").replace("#","").replace("..","to")
+
+    ## Returns number of phase space bins
+    def getNumberOfPhaseSpaceSplitBins(self):
+        return self._splittedHistoReader.getMaxBinNumber()
 

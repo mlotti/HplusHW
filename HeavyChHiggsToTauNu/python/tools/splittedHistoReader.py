@@ -29,14 +29,14 @@ class SplittedHistoReader:
         for i in range(2, splittedBinInfoHisto.GetNbinsX()+1):
             if splittedBinInfoHisto.GetBinContent(i) > 1:
                 self._binLabels.append(splittedBinInfoHisto.GetXaxis().GetBinLabel(i))
-                self._binCount.append(plittedBinInfoHisto.GetBinContent(i))
+                self._binCount.append(int(splittedBinInfoHisto.GetBinContent(i) / myNormalizer))
 
     ## Returns the maximum bin number
     def getMaxBinNumber(self):
         myProduct = 1
         for x in self._binCount:
             myProduct *= x
-        return myProduct
+        return int(myProduct)
 
     ## Returns the splitted bin labels (returns an empty list if no splitting was done)
     def getBinLabels(self):
@@ -62,7 +62,7 @@ class SplittedHistoReader:
     def _splittingDoneWithMultipleHistograms(self, dsetMgr, dsetlabel, histoName):
         myNameList = histoName.split("/")
         myMultipleFileName = histoName+"/"+myNameList[len(myNameList)-1]+"0"
-        myMultipleFilesStatus = dsetMgr.getDataset(label).hasRootHisto(histoName)
+        myMultipleFilesStatus = dsetMgr.getDataset(dsetlabel).hasRootHisto(histoName)
         return myMultipleFilesStatus
 
     ## Returns a list of histograms (one per split bin, in the same order)

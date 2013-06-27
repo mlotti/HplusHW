@@ -10,20 +10,15 @@ class ShapeHistoModifier():
     def __init__(self, histoSpecs, histoObjectForSpecs=None, debugMode=False):
         if isinstance(histoSpecs,list):
             raise Exception(ErrorLabel()+"ShapeHistoModifier: Requested a %d-dimensional histogram, but code currently supports only 1 dimension!"%len(histoSpecs))
-        self._retrieveHistoSpecsFromHisto(histoObjectForSpecs, histoSpecs)
-        self._nbins = histoSpecs["bins"]
-        self._min = histoSpecs["rangeMin"]
-        self._max = histoSpecs["rangeMax"]
-        self._binLowEdges = []
-        self._binLowEdges.extend(histoSpecs["variableBinSizeLowEdges"])
-        self._xtitle = histoSpecs["xtitle"]
-        self._ytitle = histoSpecs["ytitle"]
+        mySpecs = self._retrieveHistoSpecsFromHisto(histoObjectForSpecs, histoSpecs)
+        self._nbins = mySpecs["bins"]
+        self._min = mySpecs["rangeMin"]
+        self._max = mySpecs["rangeMax"]
+        self._binLowEdges = list(mySpecs["variableBinSizeLowEdges"])
+        self._xtitle = mySpecs["xtitle"]
+        self._ytitle = mySpecs["ytitle"]
         # Variable bin widths support
-        if len(self._binLowEdges) > 0:
-            # Check that all bins are given
-            if len(self._binLowEdges) != self._nbins:
-                raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" shape histo definition for variable bin widths has %d entries, but nbins=%d!"%(len(self._binLowEdges),self._nbins))
-        else:
+        if len(self._binLowEdges) == 0:
             # Create bins with uniform width
             binwidth = (self._max-self._min) / self._nbins
             for i in range(0,self._nbins):
@@ -172,18 +167,22 @@ class ShapeHistoModifier():
 
     ## Retrieve the default specs from the histogram if necessary
     def _retrieveHistoSpecsFromHisto(self, histo, specs):
+        mySpecs = None
         if specs == None:
+            mySpecs = {}
             specs = {}
+        else:
+            mySpecs = dict(specs)
         if not "bins" in specs:
-            specs["bins"] = histo.GetXaxis().GetNbins()
+            mySpecs["bins"] = histo.GetXaxis().GetNbins()
         if not "rangeMin" in specs:
-            specs["rangeMin"] = histo.GetXaxis().GetXmin()
+            mySpecs["rangeMin"] = histo.GetXaxis().GetXmin()
         if not "rangeMax" in specs:
-            specs["rangeMax"] = histo.GetXaxis().GetXmax()
+            mySpecs["rangeMax"] = histo.GetXaxis().GetXmax()
         if not "xtitle" in specs:
-            specs["xtitle"] = histo.GetXaxis().GetTitle()
+            mySpecs["xtitle"] = histo.GetXaxis().GetTitle()
         if not "ytitle" in specs:
-            specs["ytitle"] = histo.GetYaxis().GetTitle()
+            mySpecs["ytitle"] = histo.GetYaxis().GetTitle()
         if not "variableBinSizeLowEdges" in specs:
             # Check if constant interval binning is used
             if histo.GetXaxis().GetXbins().GetSize() == 0:
@@ -193,5 +192,6 @@ class ShapeHistoModifier():
                 myBinEdges = []
                 for i in range(0,myArray.GetSize()-1): # Ignore last bin since it is the right edge of the last bin
                     myBinEdges.append(myArray.GetAt)(i)
-                specs["variableBinSizeLowEdges"] = list(myBinEdges)
-                specs["bins"] = len(myBinDeges)
+                mySpecs["variableBinSizeLowEdges"] = list(myBinEdges)
+                mySpecs["bins"] = len(myBinEdges)
+        return mySpecs
