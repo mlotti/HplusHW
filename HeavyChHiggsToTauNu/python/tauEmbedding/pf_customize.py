@@ -110,7 +110,7 @@ def customise(process):
     processName = process.name_()
 
     # Setup trigger matching
-    if not (dataVersion.isMC() and options.triggerMC == 0):
+    if not (dataVersion.isMC() and options.triggerMC == 0 and options.triggerMCInAnalysis == 0):
         tightenedMuonsName = process.tauEmbeddingMuons.src.value()
         tightenedMuonsMatched = HChTriggerMatching.createMuonTriggerMatchingInAnalysis(options.trigger, tightenedMuonsName)
         setattr(process, tightenedMuonsName+"Matched", tightenedMuonsMatched)
