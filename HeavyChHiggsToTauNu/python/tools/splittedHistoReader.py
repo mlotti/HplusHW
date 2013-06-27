@@ -38,6 +38,14 @@ class SplittedHistoReader:
             myProduct *= x
         return myProduct
 
+    ## Returns the splitted bin labels (returns an empty list if no splitting was done)
+    def getBinLabels(self):
+        return self._binLabels
+
+    ## Returns the splitted bin sizes (returns an empty list if no splitting was done)
+    def getBinSizes(self):
+        return self._binCount
+
     ## Returns a list of histograms
     def getSplittedBinHistograms(self, dsetMgr, dsetlabel, histoName):
         histoList = []
@@ -47,10 +55,9 @@ class SplittedHistoReader:
             histoList = list(self._getSplittedHistogramsFromMultipleSources(dsetMgr, dsetlabel, histoName))
         else:
             # Assume that a single histogram contains the information
-            
-            
+            histoList = list(self._getSplittedHistogramsFromSingleSource(dsetMgr, dsetlabel, histoName))
+        return histoList
 
-        
     ## Returns true if the splitting is done with multiple histograms
     def _splittingDoneWithMultipleHistograms(self, dsetMgr, dsetlabel, histoName):
         myNameList = histoName.split("/")
@@ -59,6 +66,7 @@ class SplittedHistoReader:
         return myMultipleFilesStatus
 
     ## Returns a list of histograms (one per split bin, in the same order)
+    # I.e. vector<WrappedTHn*> -> list of THn's (THn = TH1, TH2, ...)
     def _getSplittedHistogramsFromMultipleSources(self, dsetMgr, dsetlabel, histoName):
         myHistoList = []
         myNameList = histoName.split("/")
@@ -71,7 +79,10 @@ class SplittedHistoReader:
         return myHistoList
 
     ## Deconstructs a 2D histogram into a list of histograms (one per split bin, in the same order)
-    def _getSplittedHistogramsFromMultipleSources(self, dsetMgr, dsetlabel, histoName):
+    # I.e. WrappedUnfoldedFactorisationHisto (= TH2 with factorisation bin on y-axis) -> list of TH1's
+    # Limitation: can only use 1D shapes
+    def _getSplittedHistogramsFromSingleSource(self, dsetMgr, dsetlabel, histoName):
+        myHistoList = []
         myNameList = histoName.split("/")
         myNameStem = myNameList[len(myNameList)-1]
         myDsetRootHisto = dsetMgr.getDataset(dsetlabel).getDatasetRootHisto(histoName)
@@ -82,8 +93,8 @@ class SplittedHistoReader:
             myName = myNameStem+"_"+dsetlabel+"_"+str(i)
             h = ROOT.TH1F(myName, myHisto.GetYaxis().GetBinLabel(i+1), myHisto.GetXaxis().GetNbins(), myHisto.GetXaxis().GetXmin(), myHisto.GetXaxis().GetXmin())
             h.Sumw2()
-#            for j in range(0, myHisto.GetXaxis().GetNbins()+2):
-#                h.SetBin # FIXME
-            
-            
- #       return myHistoList
+            for j in range(0, myHisto.GetXaxis().GetNbins()+2):
+                h.SetBinContent(j, myHisto.GetBinContent(j, i+1))
+                h.SetBinError(j, myHisto.GetBinError(j, i+1))
+            myHistoList.append(h)
+       return myHistoList # do the histograms disappear from memory???
