@@ -269,7 +269,6 @@ def createMuonTriggerMatchingInAnalysis(trigger, muons, throw=True):
     )
     return module
 
-
 def triggerMatchingInAnalysis(process, sequence, triggers, param):
     tauTriggers = []
     quadJetTriggers = []
@@ -300,3 +299,4 @@ def triggerMatchingInAnalysis(process, sequence, triggers, param):
 
         setattr(process, label, module)
         param.setAllTauSelectionSrc(label)
+
