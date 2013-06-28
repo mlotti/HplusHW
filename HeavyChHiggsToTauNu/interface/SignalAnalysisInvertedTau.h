@@ -324,6 +324,38 @@ namespace HPlus {
 
     WrappedTH1 *hSelectionFlow;
 
+    // Common plots at every step for baseline
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterMetSF;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterCollinearCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterCollinearCutsPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterCollinearCutsPlusBtag;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterCollinearCutsPlusBtagPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterCollinearCutsPlusBveto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterCollinearCutsPlusBvetoPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterMet;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterMetPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterMetPlusBveto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterMetPlusBvetoPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterMetPlusSoftBtaggingPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterMETAndBtagWithSF;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsBaselineAfterBackToBackCuts;
+
+    // Common plots at every step for baseline
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterMetSF;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterCollinearCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterCollinearCutsPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterCollinearCutsPlusBtag;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterCollinearCutsPlusBtagPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterCollinearCutsPlusBveto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterCollinearCutsPlusBvetoPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterMet;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterMetPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterMetPlusBveto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterMetPlusBvetoPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterMetPlusSoftBtaggingPlusBackToBackCuts;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterMETAndBtagWithSF;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsInvertedAfterBackToBackCuts;
+
     bool fProduce;
     bool fOnlyGenuineTaus; 
   };

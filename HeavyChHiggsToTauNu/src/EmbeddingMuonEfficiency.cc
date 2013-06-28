@@ -59,7 +59,8 @@ namespace HPlus {
       if(hmuon->size() != 1)
         throw cms::Exception("Assert") << "Read " << hmuon->size() << " muons for the original muon, expected exactly 1. Muon src was " << fMuonSrc.encode() << std::endl;
 
-      setRun(iEvent.id().run());
+      if(iEvent.isRealData())
+         setRun(iEvent.id().run());
       return getEventWeight(hmuon->ptrAt(0), iEvent.isRealData());
     }
   }
@@ -76,10 +77,14 @@ namespace HPlus {
       output = Data(beff->getEventWeight(muon->eta(), isData));
     }
 
-    // Weight is actually the inverse of the efficiency
-    if(output.fWeight != 0.0) {
-      output.fWeightAbsUnc = output.fWeightAbsUnc / (output.fWeight*output.fWeight);
-      output.fWeight = 1.0/output.fWeight;
+    // Weight is actually the inverse of the efficiency, but do this
+    // only if the mode is one of the efficiencies
+    EfficiencyScaleFactorBase::Mode mode = fEfficiencyScaleFactor->getMode();
+    if(mode == EfficiencyScaleFactorBase::kDataEfficiency || mode == EfficiencyScaleFactorBase::kMCEfficiency) {
+      if(output.fWeight != 0.0) {
+        output.fWeightAbsUnc = output.fWeightAbsUnc / (output.fWeight*output.fWeight);
+        output.fWeight = 1.0/output.fWeight;
+      }
     }
     return output;
   }

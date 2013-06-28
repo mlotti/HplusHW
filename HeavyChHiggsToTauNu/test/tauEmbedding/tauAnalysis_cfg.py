@@ -128,7 +128,10 @@ preselectionCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselect
 
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
+import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
 ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
+    eventCounter = param.eventCounter.clone(),
+    histogramAmbientLevel = cms.untracked.string("Vital"),
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
 
@@ -137,17 +140,24 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
         MediumIsoPFTau35_Trk20_MET60 = cms.vstring("HLT_MediumIsoPFTau35_Trk20_MET60_v1"),
     ),
 
+    tauEnabled = cms.bool(True),
     tauSrc = cms.InputTag(param.tauSelection.src.value()), # this is set in addEmbeddingLikePreselection()
     tauFunctions = analysisConfig.tauFunctions.clone(),
 
-#    jetSrc = cms.InputTag(param.jetSelection.src.value()),
-    jetSrc = cms.InputTag("embeddingLikePreselectionCleanedJets"),
-    jetFunctions = analysisConfig.jetFunctions.clone(),
-    jetPileupIDs = analysisConfig.jetPileupIDs.clone(),
+    jets = Ntuple.clone(
+#        src = param.jetSelection.src.value(),
+        src = "embeddingLikePreselectionCleanedJets",
+        functions = analysisConfig.jetFunctions.clone(),
+        pileupIDs = analysisConfig.jetPileupIDs.clone(),
+    ),
+
+    muonsEnabled = cms.bool(False),
+    muons = Ntuple.muons.clone(src = "NOT_SET"),
 
     genParticleSrc = cms.InputTag("genParticles"),
 # For tau MC matching, use the same collection which was used in preselection
     genParticleTauSrc = cms.InputTag("embeddingLikePreselectionGenTau"),
+    genTTBarEnabled = cms.bool(True),
 
     mets = cms.PSet(
 #        pfMet_p4 = cms.InputTag("patMETs"+PF2PATVersion),
@@ -170,10 +180,10 @@ process.preselectionSequence.insert(0, process.commonSequence)
 addAnalysis(process, "tauNtuple", ntuple,
             preSequence=process.preselectionSequence,
             additionalCounters=preselectionCounters,
-            signalAnalysisCounters=False)
-process.tauNtupleCounters.printMainCounter = True
+            signalAnalysisCounters=True)
+process.tauNtuple.eventCounter.printMainCounter = True
 
-addSignalAnalysis = True
+addSignalAnalysis = False
 if addSignalAnalysis:
     # Run signal analysis module on the same go with the embedding preselection without tau+MET trigger
     import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis

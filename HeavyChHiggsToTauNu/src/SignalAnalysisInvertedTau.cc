@@ -120,6 +120,38 @@ namespace HPlus {
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     // Common plots
     fCommonPlots(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDInverted),
+    // Common plots at every step for baseline
+    fCommonPlotsBaselineAfterMetSF(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterMetSF",false,"")),
+    fCommonPlotsBaselineAfterCollinearCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterCollinearCuts",false,"")),
+    fCommonPlotsBaselineAfterCollinearCutsPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterCollinearCutsPlusBackToBackCuts",false,"")),
+    fCommonPlotsBaselineAfterCollinearCutsPlusBtag(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterCollinearCutsPlusBtag",false,"")),
+    fCommonPlotsBaselineAfterCollinearCutsPlusBtagPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterCollinearCutsPlusBtagPlusBackToBackCuts(",false,"")),
+    fCommonPlotsBaselineAfterCollinearCutsPlusBveto(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterCollinearCutsPlusBveto",false,"")),
+    fCommonPlotsBaselineAfterCollinearCutsPlusBvetoPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterCollinearCutsPlusBvetoPlusBackToBackCuts",false,"")),
+    fCommonPlotsBaselineAfterMet(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterMet",false,"")),
+    fCommonPlotsBaselineAfterMetPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterMetPlusBackToBackCuts",false,"")),
+    fCommonPlotsBaselineAfterMetPlusBveto(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterMetPlusBveto",false,"")),
+    fCommonPlotsBaselineAfterMetPlusBvetoPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterMetPlusBvetoPlusBackToBackCuts",false,"")),
+    fCommonPlotsBaselineAfterMetPlusSoftBtaggingPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterMetPlusSoftBtaggingPlusBackToBackCuts",false,"")),
+    fCommonPlotsBaselineAfterMETAndBtagWithSF(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterMETAndBtagWithSF",false,"")),
+    fCommonPlotsBaselineAfterBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterBackToBackCuts",false,"")),
+    // Common plots at every step for baseline
+    fCommonPlotsInvertedAfterMetSF(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterMetSF",false,"")),
+    fCommonPlotsInvertedAfterCollinearCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterCollinearCuts",false,"")),
+    fCommonPlotsInvertedAfterCollinearCutsPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterCollinearCutsPlusBackToBackCuts",false,"")),
+    fCommonPlotsInvertedAfterCollinearCutsPlusBtag(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterCollinearCutsPlusBtag",false,"")),
+    fCommonPlotsInvertedAfterCollinearCutsPlusBtagPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterCollinearCutsPlusBtagPlusBackToBackCuts(",false,"")),
+    fCommonPlotsInvertedAfterCollinearCutsPlusBveto(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterCollinearCutsPlusBveto",false,"")),
+    fCommonPlotsInvertedAfterCollinearCutsPlusBvetoPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterCollinearCutsPlusBvetoPlusBackToBackCuts",false,"")),
+    fCommonPlotsInvertedAfterMet(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterMet",false,"")),
+    fCommonPlotsInvertedAfterMetPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterMetPlusBackToBackCuts",false,"")),
+    fCommonPlotsInvertedAfterMetPlusBveto(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterMetPlusBveto",false,"")),
+    fCommonPlotsInvertedAfterMetPlusBvetoPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterMetPlusBvetoPlusBackToBackCuts",false,"")),
+    fCommonPlotsInvertedAfterMetPlusSoftBtaggingPlusBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterMetPlusSoftBtaggingPlusBackToBackCuts",false,"")),
+    fCommonPlotsInvertedAfterMETAndBtagWithSF(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterMETAndBtagWithSF",false,"")),
+    fCommonPlotsInvertedAfterBackToBackCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("InvertedAfterBackToBackCuts",false,"")),
+
+    // Other
     fProduce(iConfig.getUntrackedParameter<bool>("produceCollections", false)),
     fOnlyGenuineTaus(iConfig.getUntrackedParameter<bool>("onlyGenuineTaus", false))
   {
@@ -265,8 +297,6 @@ namespace HPlus {
 //     hDeltaR_TauMETJet2MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInvertedDir, "DeltaR_TauMETJet2MET", "DeltaR_TauMETJet2MET ", 65, 0., 260.);
 //     hDeltaR_TauMETJet3MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInvertedDir, "DeltaR_TauMETJet3MET", "DeltaR_TauMETJet3MET ", 65, 0., 260.);
 //     hDeltaR_TauMETJet4MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInvertedDir, "DeltaR_TauMETJet4MET", "DeltaR_TauMETJet4MET ", 65, 0., 260.);
-
-    fCommonPlots.disableCommonPlotsFilledAtEveryStep();
   }
 
   SignalAnalysisInvertedTau::~SignalAnalysisInvertedTau() { }
@@ -502,6 +532,7 @@ namespace HPlus {
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metDataTmp.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     increment(fBaselineMetTriggerScaleFactorCounter);
     myHandler.fillShapeHistogram(hMETBaselineTauIdAfterMetSF, metDataTmp.getSelectedMET()->et());
+    fCommonPlotsBaselineAfterMetSF->fill();
 
     // Obtain transverse mass for plotting
     double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metDataTmp.getSelectedMET()));
@@ -534,10 +565,12 @@ namespace HPlus {
     myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCuts, metDataTmp.getSelectedMET()->et()); // no btag scale factor needed
     myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCuts, transverseMass); // no btag scale factor needed
     if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearCuts, invariantMass);
+    fCommonPlotsBaselineAfterCollinearCuts->fill();
     if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
       myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, metDataTmp.getSelectedMET()->et());
       myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, transverseMass);
       if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
+      fCommonPlotsBaselineAfterCollinearCutsPlusBackToBackCuts->fill();
     }
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
     //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
@@ -547,16 +580,20 @@ namespace HPlus {
       // mT with b veto in bins
       myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBtag, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
       myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBtag, transverseMass, myWeightWithBtagSF);
+      fCommonPlotsBaselineAfterCollinearCutsPlusBtag->fill();
       if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
         myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
+        fCommonPlotsBaselineAfterCollinearCutsPlusBtagPlusBackToBackCuts->fill();
       }
     }
     if (btagDataTmp.getSelectedJets().size() < 1) {
       // mT with b veto in bins
       myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBveto, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
       myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBveto, transverseMass, myWeightWithBtagSF);
+      fCommonPlotsBaselineAfterCollinearCutsPlusBveto->fill();
       if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
         myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBvetoPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
+        fCommonPlotsBaselineAfterCollinearCutsPlusBvetoPlusBackToBackCuts->fill();
       }
     }
 
@@ -567,16 +604,20 @@ namespace HPlus {
 
     // mT after jets and met in bins
     myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMet, transverseMass);
+    fCommonPlotsBaselineAfterMet->fill();
     if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
       myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetPlusBackToBackCuts, transverseMass);
+      fCommonPlotsBaselineAfterMetPlusBackToBackCuts->fill();
     }
 
     // mT with b veto in bins
     if (btagDataTmp.getSelectedJets().size() < 1) { 
       myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetPlusBveto, transverseMass, myWeightWithBtagSF);
+      fCommonPlotsBaselineAfterMetPlusBveto->fill();
       // mT with b veto and deltaPhi cuts in bins
       if (qcdTailKillerDataCollinear.passedEvent()) {
         myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetPlusBvetoPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
+        fCommonPlotsBaselineAfterMetPlusBvetoPlusBackToBackCuts->fill();
       }
     }
 
@@ -584,6 +625,7 @@ namespace HPlus {
     if (btagDataTmp.getSelectedSubLeadingJets().size() > 0) {
       if (qcdTailKillerDataCollinear.passedEvent()) {
         myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
+        fCommonPlotsBaselineAfterMetPlusSoftBtaggingPlusBackToBackCuts->fill();
       }
     }
 
@@ -599,6 +641,7 @@ namespace HPlus {
     if(!btagData.passedEvent()) return false;
     increment(fBaselineBTaggingScaleFactorCounter);
     myHandler.fillShapeHistogram(hMTBaselineTauIdAfterBtag, transverseMass);
+    fCommonPlotsBaselineAfterMETAndBtagWithSF->fill();
 
 //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.silentAnalyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
@@ -619,8 +662,9 @@ namespace HPlus {
     // mT with b tagging and deltaPhi cuts 
     //    myHandler.fillShapeHistogram(hMTBaselineTauIdPhi, transverseMass);
     myHandler.fillShapeHistogram(hMTBaselineTauIdAfterBackToBackCuts, transverseMass);
-    increment(fBaselineSelectedEventsCounter);
 
+    increment(fBaselineSelectedEventsCounter);
+    fCommonPlotsBaselineAfterBackToBackCuts->fill();
     return true;
   }
 
@@ -662,6 +706,7 @@ namespace HPlus {
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metDataTmp.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     increment(fInvertedMetTriggerScaleFactorCounter);
     fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(iEvent);
+    fCommonPlotsInvertedAfterMetSF->fill();
     // Obtain transverse mass and invariant mass for plotting
     double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metDataTmp.getSelectedMET()));
     double invariantMass = -1.0;
@@ -691,6 +736,7 @@ namespace HPlus {
     fCommonPlots.fillControlPlotsAtCollinearDeltaPhiCuts(iEvent, qcdTailKillerDataCollinear);
     if (!qcdTailKillerDataCollinear.passedCollinearCuts()) return false;
     increment(fInvertedQCDTailKillerCollinearCounter);
+    fCommonPlotsInvertedAfterCollinearCuts->fill();
 
     // At this point, let's fill histograms for closure test and for normalisation
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterCollinearCuts, selectedTau->pt());
@@ -701,6 +747,7 @@ namespace HPlus {
       myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, metDataTmp.getSelectedMET()->et());
       myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, transverseMass);
       if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
+      fCommonPlotsInvertedAfterCollinearCutsPlusBackToBackCuts->fill();
     }
 
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
@@ -711,8 +758,10 @@ namespace HPlus {
       increment(fInvertedBTaggingBeforeMETCounter); // NOTE: Will not give correct value for MC because btag SF is not applied
       myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBtag, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
       myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBtag, transverseMass, myWeightWithBtagSF);
+      fCommonPlotsInvertedAfterCollinearCutsPlusBtag->fill();
       if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
         myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
+        fCommonPlotsInvertedAfterCollinearCutsPlusBtag->fill();
       }
     }
     // MT with b veto
@@ -720,8 +769,10 @@ namespace HPlus {
       increment(fInvertedBjetVetoCounter);// NOTE: Will not give correct value for MC because btag SF is not applied
       myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBveto, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
       myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBveto, transverseMass, myWeightWithBtagSF);
+      fCommonPlotsInvertedAfterCollinearCutsPlusBtag->fill();
       if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
         myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBvetoPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
+        fCommonPlotsInvertedAfterCollinearCutsPlusBvetoPlusBackToBackCuts->fill();
       }
     }
 
@@ -741,6 +792,7 @@ namespace HPlus {
 
     // mt for inverted tau before b tagging
     myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMet, transverseMass);
+    fCommonPlotsInvertedAfterMet->fill();
     // deltaPhi before b tagging
     double deltaPhi = DeltaPhi::reconstruct(*(selectedTau), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     myHandler.fillShapeHistogram(hDeltaPhiInvertedNoB, deltaPhi);
@@ -748,6 +800,7 @@ namespace HPlus {
       // mt  before b tagging with deltaPhi for factorising b tagging 
       myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMetPlusBackToBackCuts, transverseMass);
       myHandler.fillShapeHistogram(hNBInvertedTauIdJetDphi, btagDataTmp.getSelectedJets().size());
+      fCommonPlotsInvertedAfterMetPlusBackToBackCuts->fill();
     }
 
     // mt with b veto
@@ -755,12 +808,14 @@ namespace HPlus {
       increment(fInvertedBvetoCounter); // NOTE: incorrect count because no btag scale factor has been applied
       myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBjetVeto, selectedTau->pt(), myWeightWithBtagSF);
       myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMetPlusBveto, transverseMass, myWeightWithBtagSF);
+      fCommonPlotsInvertedAfterMetPlusBveto->fill();
       // mt  with b veto and deltaPhi
       if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
         //    if ( deltaPhiMetJet1 > Rcut && deltaPhiMetJet2 > Rcut && deltaPhiMetJet3 > Rcut  ) {
         increment(fInvertedBvetoDeltaPhiCounter);  // NOTE: incorrect count because no btag scale factor has been applied
         myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBjetVetoPhiCuts, selectedTau->pt(), myWeightWithBtagSF);
         myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMetPlusBvetoPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
+        fCommonPlotsInvertedAfterMetPlusBvetoPlusBackToBackCuts->fill();
       }
     }
 
@@ -768,6 +823,7 @@ namespace HPlus {
     if( btagDataTmp.getSelectedSubLeadingJets().size() > 0) {  
       if (qcdTailKillerDataCollinear.passedEvent()) {
         myHandler.fillShapeHistogram(hMTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
+        fCommonPlotsInvertedAfterMetPlusSoftBtaggingPlusBackToBackCuts->fill();
       }
     }
 
@@ -787,6 +843,7 @@ namespace HPlus {
 
     //hSelectionFlow->Fill(kQCDOrderBTag);
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBtagging, selectedTau->pt());
+    fCommonPlotsInvertedAfterMETAndBtagWithSF->fill();
 
     // mt for inverted tau with b tagging
     myHandler.fillShapeHistogram(hMTInvertedTauIdAfterBtag, transverseMass);
@@ -814,6 +871,7 @@ namespace HPlus {
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBackToBackCuts, selectedTau->pt());
     myHandler.fillShapeHistogram(hMETInvertedTauIdAfterBackToBackCuts, metData.getSelectedMET()->et());
     myHandler.fillShapeHistogram(hMTInvertedTauIdAfterBackToBackCuts, transverseMass);
+    fCommonPlotsInvertedAfterBackToBackCuts->fill();
 
     // Top reconstruction
     TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());

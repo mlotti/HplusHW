@@ -27,7 +27,7 @@ process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #dataVersion.getPatDefaultFileCastor()
         #dataVersion.getPatDefaultFileMadhatter()
-        "file:/mnt/flustre/wendland/AODSIM_PU_S6_START44_V9B_7TeV/Fall11_TTJets_TuneZ2_7TeV-madgraph-tauola_AODSIM_PU_S6_START44_V9B-v1_testfile.root"
+        "file:/mnt/flustre/mkortela/data/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/7EE6381E-D036-E111-9BF5-002354EF3BDF.root"
     )
 )
 
@@ -69,6 +69,7 @@ patArgs = {"doTauHLTMatching": False,
            }
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs,
                                                             doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter
+                                                            calculateEventCleaning=True, # This requires the tags from test/pattuple/checkoutTags.sh
 )
 # In order to avoid transient references and generalTracks is available anyway
 #if hasattr(process, "patMuons"):
