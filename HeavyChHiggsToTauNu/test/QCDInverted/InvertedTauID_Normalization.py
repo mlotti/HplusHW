@@ -39,11 +39,11 @@ def calculateNormalisation(opts, dsetMgr, moduleInfoString, myDir, luminosity):
     #myMetHistoSuffix = "AfterCollinearCutsPlusBveto"
 
     # Define MET histogram binning and other specifications
-    myMetHistoSpecs = { "bins": 13,
-                        "rangeMin": 0.0,
+    myMetHistoSpecs = { "rangeMin": 0.0,
                         "rangeMax": 500.0,
+                        "bins": 50, # needed only for uniform bin widths
                         #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                        "variableBinSizeLowEdges": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,160,180,200,250,300,400], # if an empty list is given, then uniform bin width is used
+                        #"variableBinSizeLowEdges": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,160,180,200,250,300,400], # if an empty list is given, then uniform bin width is used
                         "xtitle": "E_{T}^{miss} / GeV",
                         "ytitle": "N_{Events}" }
 
@@ -59,8 +59,8 @@ def calculateNormalisation(opts, dsetMgr, moduleInfoString, myDir, luminosity):
     # Loop over phase space bins
     nSplitBins = myBaselineMetShape.getNumberOfPhaseSpaceSplitBins()
     for i in range(1, nSplitBins):
-        print "Processing phase space bin %s%s%s"%(HighlightStyle(),myBaselineMetShape.getPhaseSpaceBinTitle(i),NormalStyle())
-        invertedQCD.setLabel("%s_%s"%(myBaselineMetShape.getPhaseSpaceBinTitle(i), moduleInfoString))
+        print "Processing phase space bin %s%s%s"%(HighlightStyle(),myBaselineMetShape.getPhaseSpaceBinFileFriendlyTitle(i),NormalStyle())
+        invertedQCD.setLabel("%s_%s"%(myBaselineMetShape.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
         # Obtain QCD template for MET from data in inverted selection (high purity)
         hMetTemplateQCD = myInvertedMetShape.getDataHistoForSplittedBin(i, myMetHistoSpecs)
         # Obtain MC EWK+tt template for MET from simulation in baseline selection
@@ -68,8 +68,8 @@ def calculateNormalisation(opts, dsetMgr, moduleInfoString, myDir, luminosity):
         # Obtain sum of QCD and EWK for fitting from baseline
         hMetForFitting = myBaselineMetShape.getDataHistoForSplittedBin(i, myMetHistoSpecs)
 
-        invertedQCD.plotHisto(hMetTemplateQCD,"Data, inverted")
-        invertedQCD.plotHisto(hMetForFitting,"Data, baseline")
+        invertedQCD.plotHisto(hMetTemplateQCD,"MetShape_Data_inverted")
+        invertedQCD.plotHisto(hMetForFitting,"MetShape_Data_baseline")
         invertedQCD.fitQCD(hMetTemplateQCD)
         invertedQCD.fitEWK(hMetTemplateEWK,"LR")
         invertedQCD.fitData(hMetForFitting)
