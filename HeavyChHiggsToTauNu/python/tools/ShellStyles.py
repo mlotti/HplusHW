@@ -14,9 +14,19 @@ def HighlightStyle():
     return "\033[1;37m"
 
 def CaptionStyle():
-    # White text on blue background, bolc
+    # White text on blue background, bold
     return "\033[0;44m\033[1;37m"
 
 def NormalStyle():
     # Normal text on normal background, bold
     return "\033[0;0m"
+
+def TestPassedStyle():
+    # green text, bold
+    return "\033[1;32m"
+
+def WarningLabel():
+    return "%sWarning:%s "%(WarningStyle(),NormalStyle())
+
+def ErrorLabel():
+    return "%sError:%s "%(ErrorStyle(),NormalStyle())
