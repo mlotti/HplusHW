@@ -1861,16 +1861,16 @@ class InvertedTauID:
         i = 0
         while i < len(self.normFactors):
 	    line = "    \"" + self.labels[i] + "\": " + str(self.normFactors[i])
-	    if i < len(self.normFactors) - 1:
-		line += ","
+	    #if i < len(self.normFactors) - 1:
+            line += ","
 	    line += "\n"
             fOUT.write(line)
             i = i + 1
         i = 0
         while i < len(self.normFactorsEWK):
 	    line = "    \"" + self.labels[i] + "EWK\": " + str(self.normFactorsEWK[i])
-	    if i < len(self.normFactorsEWK) - 1:
-		line += ","
+	    #if i < len(self.normFactorsEWK) - 1:
+            line += ","
 	    line += "\n"
             fOUT.write(line)
             i = i + 1

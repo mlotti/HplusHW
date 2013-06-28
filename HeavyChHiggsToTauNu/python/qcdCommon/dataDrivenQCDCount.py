@@ -171,3 +171,9 @@ class DataDrivenQCDShape:
     def getNumberOfPhaseSpaceSplitBins(self):
         return self._splittedHistoReader.getMaxBinNumber()
 
+    ## Returns name of histogram combined with the split bin title
+    def getOutputHistoName(self, suffix=""):
+        s = "%s"%(self._dataList[0].GetName().replace("/","_"))
+        if len(suffix) > 0:
+            s += "_%s"%suffix
+        return s
