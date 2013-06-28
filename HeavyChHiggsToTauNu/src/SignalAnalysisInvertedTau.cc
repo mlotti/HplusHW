@@ -342,7 +342,6 @@ namespace HPlus {
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
-    //hSelectionFlow->Fill(kQCDOrderTrigger);
 
 //------ GenParticle analysis (must be done here when we effectively trigger all MC)
     GenParticleAnalysis::Data genData;
@@ -355,10 +354,8 @@ namespace HPlus {
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
     size_t nVertices = pvData.getNumberOfAllVertices();
-    //hSelectionFlow->Fill(kSignalOrderVertexSelection);
     hVerticesBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
     hVerticesAfterWeight->Fill(nVertices);
-    //hSelectionFlow->Fill(kQCDOrderVertexSelection);
 
     // test for pile-up dependence
     //    if (nVertices > 12 )  return false;
@@ -461,7 +458,6 @@ namespace HPlus {
       increment(fBaselineTauTriggerScaleFactorCounter);
       // Check if multiple taus passed
       if (!myMultipleTausPassForBaselineStatus) increment(fBaselineOneTauCounter);
-      //hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
       return doBaselineAnalysis(iEvent, iSetup, tauDataForBaseline.getSelectedTau(), pvData, genData);
     }
     // end of baseline selection
@@ -678,7 +674,6 @@ namespace HPlus {
 //------ Veto against second tau in event
     // Implement only, if necessary
     //fCommonPlots.fillControlPlotsAtTauVetoSelection(iEvent, iSetup, vetoTauData);
-    //hSelectionFlow->Fill(kSignalOrderTauID);
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterTauVeto, selectedTau->pt());
 
 //------ Global electron veto
@@ -791,12 +786,6 @@ namespace HPlus {
     increment(fInvertedMetCounter);
 
 
-    //hSelectionFlow->Fill(kQCDOrderMET);
-	  //    hSelectedTauEtMetCut->Fill(selectedTau->pt());
-	  // hSelectedTauEtaMetCut->Fill(selectedTau->eta());
-	  //hSelectedTauPhiMetCut->Fill(selectedTau->phi());  
-
-
     // Tau properties for inverted selection after MET cut
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterMetCut, selectedTau->pt());
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtaAfterMetCut, selectedTau->eta());
@@ -857,13 +846,8 @@ namespace HPlus {
     if (!btagData.passedEvent()) return false;
     increment(fInvertedBTaggingScaleFactorCounter);
 
-    //hSelectionFlow->Fill(kQCDOrderBTag);
-
-	  //    hSelectedTauEtBtagging->Fill(selectedTau->pt());
-
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBtagging, selectedTau->pt());
     fCommonPlotsInvertedAfterMETAndBtagWithSF->fill();
-
 
     // mt for inverted tau with b tagging
     myHandler.fillShapeHistogram(hMTInvertedTauIdAfterBtag, transverseMass);
@@ -916,7 +900,6 @@ namespace HPlus {
 
       if (TopWithBSelectionData.passedEvent() ) {
         increment(fTopWithBSelectionCounter);
-        //      //hSelectionFlow->Fill(kSignalOrderTopSelection);      
         hTransverseMassTopBjetSelection->Fill(transverseMass);     
       }    
     }
