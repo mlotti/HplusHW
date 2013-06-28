@@ -3138,7 +3138,7 @@ class DatasetManager:
     #                     they are removed, as they are now contained
     #                     in the dataset.DatasetMerged object
     # \param addition     Creates DatasetAddedMC instead of DatasetMerged
-# \param allowMissingDatasets  If True, ignore error from missing dataset (warning is nevertheless printed)
+    # \param allowMissingDatasets  If True, ignore error from missing dataset (warning is nevertheless printed)
     #
     # If nameList translates to only one dataset.Dataset, the
     # dataset.Daataset object is renamed (i.e. dataset.DatasetMerged
