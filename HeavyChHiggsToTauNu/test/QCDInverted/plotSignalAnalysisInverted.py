@@ -12,13 +12,11 @@
 ######################################################################
 import ROOT
 from ROOT import *
-ROOT.PyConfig.IgnoreCommandLineOptions = True
 import sys,os
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetPalette(1)
 from array import array
 from math import fabs
-from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
@@ -29,15 +27,19 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.FindFirstBinAbove import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.bayes import * 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.myArrays import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 from InvertedTauID import *
 
 
 
 # Configuration
 analysis = "signalAnalysisInvertedTau"
+#analysis = "signalOptimisation"
+#analysis = "signalAnalysisJESMinus03eta02METMinus10"
+#analysis = "EWKFakeTauAnalysisJESMinus03eta02METMinus10"
+#analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
+#analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
+#analysis = "signalAnalysisBtaggingTest2"
+counters = analysis+"/counters"
 
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale")
 
@@ -51,78 +53,131 @@ mcOnly = False
 #mcOnly = True
 mcOnlyLumi = 5000 # pb
 
+searchMode = "Light"
+#searchMode = "Heavy"
+
+#optMode = "OptQCDTailKillerZeroPlus"
+#optMode = "OptQCDTailKillerLoosePlus"
+#optMode = "OptQCDTailKillerMediumPlus"
+#optMode = "OptQCDTailKillerTightPlus"
+
+optMode = ""
+
+
+#dataEra = "Run2012C"
+#
+#dataEra = "Run2012D"
+#dataEra = "Run2012AB"
+
+dataEra = "Run2011AB"
+
+
+print "dataEra"
+
 sysError = 0.1
 
 includeEWKscale = False
 EWKscale = 0.6
 
+def usage():
+    print "\n"
+    print "### Usage:   plotSignalAnalysisInverted.py <multicrab dir>\n"
+    print "\n"
+    sys.exit()
 
 # main function
-def plotSignalAnalysisInverted(opts, dsetMgr, myModuleInfoString, myDir, luminosity):
+def main():
+
+    if len(sys.argv) < 2:
+        usage()
+
+    dirs = []
+    dirs.append(sys.argv[1])
+
+    # Read the datasets
+#    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode) 
+#    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
+#    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
+#    datasets.updateNAllEventsToPUWeighted()
+    datasets.loadLuminosities()
+    datasets.updateNAllEventsToPUWeighted()
+
+    
     # Take QCD from data
-    #datasetsQCD = None
-    #if QCDfromData:
-        #datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111123_132128/multicrab.cfg", counters=counters)
-        #datasetsQCD.loadLuminosities()
-        #print "QCDfromData", QCDfromData
-        #datasetsQCD.mergeData()
-        #datasetsQCD.remove(datasetsQCD.getMCDatasetNames())
-        #datasetsQCD.rename("Data", "QCD")
+    datasetsQCD = None
+
+    if QCDfromData:
+
+        datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111123_132128/multicrab.cfg", counters=counters)
+        datasetsQCD.loadLuminosities()
+        print "QCDfromData", QCDfromData
+        datasetsQCD.mergeData()
+        datasetsQCD.remove(datasetsQCD.getMCDatasetNames())
+        datasetsQCD.rename("Data", "QCD")
+    
+
+
+    plots.mergeRenameReorderForDataMC(datasets)
+
+#    print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
 
     # Remove signals other than M120
-    #datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
-    #datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
-    #datasets.remove(filter(lambda name: "Hplus_taunu_t-channel" in name, datasets.getAllDatasetNames()))
-    #datasets.remove(filter(lambda name: "Hplus_taunu_tW-channel" in name, datasets.getAllDatasetNames()))
-    #datasets.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
-    #datasets.remove(filter(lambda name: "W2Jets" in name, datasets.getAllDatasetNames()))        
-    #datasets.remove(filter(lambda name: "W3Jets" in name, datasets.getAllDatasetNames()))
-    #datasets.remove(filter(lambda name: "W4Jets" in name, datasets.getAllDatasetNames()))
-    #datasets.remove(filter(lambda name: "Hplus_taunu_s-channel" in name, datasets.getAllDatasetNames()))
-    ## Remove QCD
-    #datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_t-channel" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_tW-channel" in name, datasets.getAllDatasetNames()))
+    datasets.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
+    datasets.remove(filter(lambda name: "W2Jets" in name, datasets.getAllDatasetNames()))        
+    datasets.remove(filter(lambda name: "W3Jets" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "W4Jets" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_s-channel" in name, datasets.getAllDatasetNames()))
+    # Remove QCD
+    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
+
+    
+    datasets_lands = datasets.deepCopy()
 
     # Set the signal cross sections to the ttbar for datasets for lands
 #    xsect.setHplusCrossSectionsToTop(datasets_lands)
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
-    #xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.01, br_Htaunu=1)
+    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.01, br_Htaunu=1)
 
     # Set the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
 
-    #plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
+    plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
+
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
-    # Print counters
-    doCounters(dsetMgr)
-
     # Create plots
-    doPlots(opts, dsetMgr, myModuleInfoString, myDir, luminosity)
+    doPlots(datasets)
 
-    # Write mt histograms to ROOT file  # NOTE: create a new file for this functionality
+    # Write mt histograms to ROOT file
 #    writeTransverseMass(datasets_lands)
 
-
+    # Print counters
+    doCounters(datasets)
 
 # write histograms to file
-#def writeTransverseMass(datasets_lands):
-    #mt = plots.DataMCPlot(datasets_lands, "transverseMass")
-    #mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    #f = ROOT.TFile.Open(output, "RECREATE")
-    #mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_data")
-    #mt_data.SetDirectory(f)
-    #mt_hw = mt.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("mt_hw")
-    #mt_hw.SetDirectory(f)
-    #mt_hh = mt.histoMgr.getHisto("TTToHplusBHminusB_M120").getRootHisto().Clone("mt_hh")
-    #mt_hh.SetDirectory(f)
-    #f.Write()
-    #f.Close()
+def writeTransverseMass(datasets_lands):
+    mt = plots.DataMCPlot(datasets_lands, "transverseMass")
+    mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    f = ROOT.TFile.Open(output, "RECREATE")
+    mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_data")
+    mt_data.SetDirectory(f)
+    mt_hw = mt.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("mt_hw")
+    mt_hw.SetDirectory(f)
+    mt_hh = mt.histoMgr.getHisto("TTToHplusBHminusB_M120").getRootHisto().Clone("mt_hh")
+    mt_hh.SetDirectory(f)
+    f.Write()
+    f.Close()
 
 
-def doPlots(opts, dsetMgr, myModuleInfoString, myDir, luminosity):
+def doPlots(datasets):
     def createPlot(name, **kwargs):
         if mcOnly:
             plot = plots.MCPlot(datasets, name, normalizeToLumi=mcOnlyLumi, **kwargs)
@@ -131,7 +186,7 @@ def doPlots(opts, dsetMgr, myModuleInfoString, myDir, luminosity):
         plot.histoMgr.removeHisto("EWK")
         return plot
  
-    controlPlots(opts, dsetMgr, myModuleInfoString, myDir, luminosity)
+    controlPlots(datasets)
     
     if True:
         transverseMass2(createPlot("baseline/MTBaselineTauIdAfterBackToBackCuts/MTBaselineTauIdAfterBackToBackCutsInclusive"), "transverseMass", rebin=5, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
@@ -154,6 +209,12 @@ def doPlots(opts, dsetMgr, myModuleInfoString, myDir, luminosity):
  
 def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
+    
+    ewkDatasets = [
+        "WJets", "TTJets",
+        "DYJetsToLL", "SingleTop", "Diboson"
+        ]
+
 
     eventCounter.normalizeMCByLuminosity()
 #    eventCounter.normalizeMCToLuminosity(73)
@@ -167,6 +228,13 @@ def doCounters(datasets):
     print eventCounter.getSubCounterTable("b-tagging").format(cellFormat)
     print eventCounter.getSubCounterTable("Jet selection").format(cellFormat)
     print eventCounter.getSubCounterTable("Jet main").format(cellFormat)    
+
+
+
+
+
+
+
 
 try:
     from QCDInvertedNormalizationFactors import *
@@ -186,11 +254,17 @@ except ImportError:
 
 
 
-def normalisation(): 
+ptbins = ["1","2","3","4","5","6","7","8","9","10"]    
+
+
+
+def normalisation():
 
     normData = {}
     normEWK = {}
 
+
+ 
     print "-------------------"
 #    norm_inc = QCDInvertedNormalization["inclusive"]
 #    normEWK_inc = QCDInvertedNormalization["inclusiveEWK"]    
@@ -215,71 +289,12 @@ def normalisationInclusive():
     return norm_inc,normEWK_inc 
 
 
-def controlPlots(opts, dsetMgr, myModuleInfoString, myDir, luminosity):
-    # Define transverse mass histogram binning and other specifications
-    mtHistoSpecs = { #"bins": 10,
-                     "rangeMin": 0.0,
-                     "rangeMax": 500.0,
-                     #"bins": 10, # needed only for uniform bin widths
-                     #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                     "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,300], # if an empty list is given, then uniform bin width is used
-                     "xtitle": "Transverse mass / GeV",
-                     "ytitle": "Events" }
-    # Define MET histogram binning and other specifications
-    metHistoSpecs = { "rangeMin": 0.0,
-                      "rangeMax": 500.0,
-                      "bins": 50, # needed only for uniform bin widths
-                      #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                      #"variableBinSizeLowEdges": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,160,180,200,250,300,400], # if an empty list is given, then uniform bin width is used
-                      "xtitle": "E_{T}^{miss} / GeV",
-                      "ytitle": "N_{Events}" }
-
-    # Obtain QCD count objects (they are containers for the actual histograms for data and for EWK)
-    myMTInvertedTauIdAfterBackToBackCutsShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "Inverted/MTInvertedTauIdAfterBackToBackCuts", luminosity)
+def controlPlots(datasets):
     
-    # FIXME add here more
-    
-    
-    
-    # Obtain normalisation data
-    #normData,normEWK=normalisation()
+    normData,normEWK=normalisation()
     #norm_inc,normEWK_inc = normalisationInclusive()
-    
-    # Create shape modifiers (these do the actual addition/subtraction operations and formatting of bins)
-    myMtModifier = ShapeHistoModifier(mtHistoSpecs)
-    myMetModifier = ShapeHistoModifier(metHistoSpecs)
 
-    # Create empty histograms for summing (obtain histogram name automatically)
-    hMTInvertedTauIdAfterBackToBackCutsShape = myMtModifier.createEmptyShapeHistogram(myMTInvertedTauIdAfterBackToBackCutsShape.getOutputHistoName(myModuleInfoString))
 
-    # Loop over splitted phase space bins
-    nSplitBins = myMTInvertedTauIdAfterBackToBackCutsShape.getNumberOfPhaseSpaceSplitBins()
-    for i in range(1, nSplitBins): # No need to take the first bin without entries
-        # Obtain normalisation factor and provide some info if it is not found
-        myBinTitle = myMTInvertedTauIdAfterBackToBackCutsShape.getPhaseSpaceBinFileFriendlyTitle(i)
-        if not "%s_%s"%(myBinTitle, myModuleInfoString) in QCDInvertedNormalization:
-            print ErrorLabel()+"Cannot find normalization for label '%s' in file QCDInvertedNormalizationFactors.py! \n(Did you create normalization factors with InvertedTauID_Normalization.py for that era/searchMode/optimizationMode combination?"
-            print "Available era/searchMode/optimizationMode combinations in QCDInvertedNormalizationFactors.py for bin %s:"%myBinTitle
-            for item in QCDInvertedNormalization:
-                if myBinTitle in item and "EWK" not in item:
-                    print "   %s"%item
-            raise Exception()
-        myNormFactor = QCDInvertedNormalization["%s_%s"%(myBinTitle, myModuleInfoString)]
-        # Get and add the data-driven QCD histograms (i.e. data - EWK)
-        myMtModifier.addShape(source=myMTInvertedTauIdAfterBackToBackCutsShape.getDataDrivenQCDHistoForSplittedBin(i, mtHistoSpecs), dest=hMTInvertedTauIdAfterBackToBackCutsShape, weight=myNormFactor)
-
-    # Finalise histograms (take square root of uncertainties; if this is not done, the uncertainties are variances)
-    myMtModifier.finaliseShape(dest=hMTInvertedTauIdAfterBackToBackCutsShape)
-
-    
-    # Now do whatever you want with the histogram
-    #hMTInvertedTauIdAfterBackToBackCutsShape
-
-        
-    
-def old_plots():
-    
-    
     mtAllCuts = []
     mtAllCutsBaseline = []
     mtAfterMetCut = []
@@ -775,66 +790,4 @@ addMassBRText = AddMassBRText()
     
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
-    myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
-
-    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=True,conflict_handler="resolve")
-    myModuleSelector.addParserOptions(parser)
-    parser.add_option("--mdir", dest="multicrabDir", action="store", help="Multicrab directory")
-    # Add here parser options, if necessary, following line is an example
-    #parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
-
-    # Parse options
-    (opts, args) = parser.parse_args()
-
-    # Obtain multicrab directory
-    myMulticrabDir = "."
-    if opts.multicrabDir != None:
-        myMulticrabDir = opts.multicrabDir
-    if not os.path.exists(myMulticrabDir+"/multicrab.cfg"):
-        print "\n"+ErrorLabel()+"Cannot find multicrab.cfg! Did you use the --mdir parameter?\n"
-        parser.print_help()
-        sys.exit()
-
-    # Obtain dsetMgrCreator and register it to module selector
-    dsetMgrCreator = dataset.readFromMulticrabCfg(directory=myMulticrabDir)
-    myModuleSelector.setPrimarySource("analysis", dsetMgrCreator)
-    # Select modules
-    myModuleSelector.doSelect(opts)
-
-    myDisplayStatus = True
-    # Loop over era/searchMode/optimizationMode options
-    for era in myModuleSelector.getSelectedEras():
-        for searchMode in myModuleSelector.getSelectedSearchModes():
-            for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
-                # Construct info string of module
-                myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
-                print HighlightStyle()+"Module:",myModuleInfoString,NormalStyle()
-                # Obtain dataset manager
-                dsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
-                # Do the usual normalisation
-                dsetMgr.updateNAllEventsToPUWeighted()
-                dsetMgr.loadLuminosities()
-                plots.mergeRenameReorderForDataMC(dsetMgr)
-                dsetMgr.merge("EWK", [
-                              "TTJets",
-                              "WJets",
-                              "DYJetsToLL",
-                              "SingleTop",
-                              "Diboson"
-                              ])
-                # Remove MC QCD
-                dsetMgr.remove("QCD")
-                # Make a directory for output
-                myDir = ""
-                #myDir = "plots_%s"%myModuleInfoString
-                #createOutputdirectory(myDir)
-                # Obtain luminosity
-                myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
-                # Print info so that user can check that merge went correct
-                if myDisplayStatus:
-                    dsetMgr.printDatasetTree()
-                    print "Luminosity = %f 1/fb"%(myLuminosity / 1000.0)
-                    print
-                    myDisplayStatus = False
-                # Run one module
-                plotSignalAnalysisInverted(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
+    main()
