@@ -49,16 +49,7 @@ def createEDFilter(param):
         QCDTailKiller = param.QCDTailKiller.clone(),
         commonPlotsSettings = param.commonPlotsSettings.clone(),
         invMassReco = param.invMassReco.clone(),
-        # Factorisation bin settings
-        factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
-        factorisationNVerticesBinLowEdges = cms.untracked.vint32(10, 20),
-        factorisationTransverseMassRange = cms.untracked.vdouble(40., 0., 400.),
-        factorisationFullMassRange = cms.untracked.vdouble(50., 0., 500.),
         # Tau candidate selection options
         applyNprongsCutForTauCandidate = cms.untracked.bool(False),
         applyRtauCutForTauCandidate = cms.untracked.bool(False),
-        # Analysis variation options
-        doAnalysisVariationWithTraditionalMethod = cms.untracked.bool(True),
-        doAnalysisVariationWithABCDMethod = cms.untracked.bool(False),
-        doAnalysisVariationWithDoubleABCDMethod = cms.untracked.bool(False),
     )

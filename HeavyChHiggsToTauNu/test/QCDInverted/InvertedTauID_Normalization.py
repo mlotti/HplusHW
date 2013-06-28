@@ -25,6 +25,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 from InvertedTauID import *
 #dataEra = "Run2011A"
+
 #dataEra = "Run2011B"
 dataEra = "Run2012ABCD"
 
@@ -36,6 +37,14 @@ searchMode = "Light"
 searchMode = "Light"
 #searchMode = "Heavy"
 
+
+#optMode = "OptQCDTailKillerZeroPlus"
+#optMode = "OptQCDTailKillerLoosePlus"
+#optMode = "OptQCDTailKillerMediumPlus"
+#optMode = "OptQCDTailKillerTightPlus"
+optMode = ""
+
+
 def usage():
     print "\n"
     print "### Usage:   InvertedTauID_Normalization.py <multicrab dir>\n"
@@ -44,9 +53,10 @@ def usage():
 
 def main(argv):
 
-#    HISTONAME = "TauIdJets"
-#    HISTONAME = "TauIdBtag"
-    HISTONAME = "TauIdBvetoCollinear"
+#    HISTONAME = "METBaselineTauIdAfterJets"
+    HISTONAME = "METBaselineTauIdAfterCollinearCuts"
+#    HISTONAME = " METBaselineTauIdAfterMetSFPlusBtag"
+#    HISTONAME = "METBaselineTauIdAfterMETPlusBveto"
 #    HISTONAME = "TauIdBveto"
    
     dirs = []
@@ -61,8 +71,9 @@ def main(argv):
     # Create all datasets from a multicrab task
     # datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
     #datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
-#    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
+    #datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode) 
+
    
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
@@ -92,8 +103,8 @@ def main(argv):
     plots.mergeWHandHH(datasets)
 
     datasets.merge("EWK", [
-	    "TTJets"
-            "WJets"
+	    "TTJets",
+            "WJets",
             "DYJetsToLL",
             "SingleTop",
             "Diboson"
@@ -107,7 +118,9 @@ def main(argv):
 
 
 
-#    bins = ["inclusive"]
+    bins = ["inclusive"]
+#    bins = ["1","2","3","4","5","6","7","8","9","10"]
+#    bins = ["2","3","4","5","6"]
 #    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
 #    bins = ["4050","5060","6070","7080","80100","100120","120"]
 #    bins = ["4050"]
@@ -119,18 +132,21 @@ def main(argv):
 	invertedQCD.setLabel(bin)
 
 	if bin == "inclusive":
-	    bin = ""
+	    bin = "Inclusive"
 
         metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLine"+HISTONAME+str(i))
         metInver = plots.DataMCPlot(datasets, "Inverted/MET_Inverted"+HISTONAME+str(i))
+
+        metBase = plots.DataMCPlot(datasets, "baseline/"+histoNameBaseline)
+        metInver = plots.DataMCPlot(datasets, "Inverted/"+histoNameInverted)
         # Rebin before subtracting
         metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
         metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
 
-        metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/MET_Inverted"+HISTONAME+bin)
-        metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/MET_Inverted"+HISTONAME+bin)
-        metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline/MET_BaseLine"+HISTONAME+bin)
-        metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("Baseline/MET_BaseLine"+HISTONAME+bin)
+        metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("InvertedData")
+        metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("InvertedEWK")
+        metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLineData")
+        metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("BaselineEWK")
 
         metBase_QCD = metBase_data.Clone("QCD")
         metBase_QCD.Add(metBase_EWK,-1)

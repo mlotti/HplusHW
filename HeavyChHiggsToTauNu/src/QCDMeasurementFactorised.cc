@@ -237,6 +237,25 @@ namespace HPlus {
     const_cast<TauSelection::Data*>(&tauCandidateDataTmp)->invalidate();
     // Important NOTE: Beyond this line, use only 'mySelectedTau' as the tau object
     edm::Ptr<pat::Tau> mySelectedTau = fTauSelection.selectMostLikelyTau(mySelectedTauList, pvData.getSelectedVertex()->z());
+    if (fMethodType == QCDMeasurementFactorised::kQCDFactorisedABCD) {
+      // Check how many passed taus pass or fail isolation - one needs to choose tau depending on the isolation
+      // because it will affect jet selection, MET value, delta phi, ...
+      edm::PtrVector<pat::Tau> myPassedIsolationList;
+      edm::PtrVector<pat::Tau> myFailedIsolationList;
+      for (edm::PtrVector<pat::Tau>::iterator iTau = mySelectedTauList.begin(); iTau != mySelectedTauList.end(); ++iTau) {
+        if (fTauSelection.getPassesIsolationStatusOfTauObject(*iTau)) {
+          myPassedIsolationList.push_back(*iTau);
+        } else {
+          myFailedIsolationList.push_back(*iTau);
+        }
+      }
+      // See if any tau passes isolation
+      if (myPassedIsolationList.size() > 0) {
+        mySelectedTau = fTauSelection.selectMostLikelyTau(myPassedIsolationList, pvData.getSelectedVertex()->z());
+      } else {
+        mySelectedTau = fTauSelection.selectMostLikelyTau(myFailedIsolationList, pvData.getSelectedVertex()->z());
+      }
+    }
     TauSelection::Data tauCandidateData = fTauSelection.setSelectedTau(mySelectedTau, true);
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(mySelectedTau));
