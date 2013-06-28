@@ -17,7 +17,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 
 myHistoSpecs = { "bins": 13,
                  "rangeMin": 0.0,
