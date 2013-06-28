@@ -57,11 +57,11 @@ searchMode = "Light"
 #searchMode = "Heavy"
 
 #optMode = "OptQCDTailKillerZeroPlus"
-optMode = "OptQCDTailKillerLoosePlus"
+#optMode = "OptQCDTailKillerLoosePlus"
 #optMode = "OptQCDTailKillerMediumPlus"
 #optMode = "OptQCDTailKillerTightPlus"
 
-#optMode = ""
+optMode = ""
 
 
 #dataEra = "Run2012C"
@@ -187,18 +187,26 @@ def doPlots(datasets):
         return plot
  
     controlPlots(datasets)
-    if False:
-        transverseMass2(createPlot("BaseLine/MTBaseLineTauIdAllCutsTailKiller"), "transverseMass", rebin=10, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
-        # transverseMass2(createPlot("Inverted/MTInvertedTauIdSoftBtaggingTK"), "transverseMassSoftBtag_Inv", rebin=10, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
-        transverseMass2(createPlot("BaseLine/MTBaseLineTauIdSoftBtaggingTK"), "transverseMassSoftBtag_Baseline", rebin=10, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))  
-        drawPlot(createPlot("Inverted/MET_InvertedTauIdBvetoCollinear"), "MET_InvertedTauIdBvetoCollinear", xlabel="MET (GeV)",  rebin=5, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
-        drawPlot(createPlot("BaseLine/MET_BaseLineTauIdBvetoCollinear"), "MET_BaseLineTauIdBvetoCollinear", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    
+    if True:
+        transverseMass2(createPlot("baseline/MTBaselineTauIdAfterBackToBackCuts/MTBaselineTauIdAfterBackToBackCutsInclusive"), "transverseMass", rebin=5, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
+        transverseMass2(createPlot("baseline/MTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts/MTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackCutsInclusive"), "transverseMassSoftBtagging", rebin=5, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
         
-        drawPlot(createPlot("BaseLine/MET_BaseLineTauIdJets"), "MET_BaseLineTauIdJets", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
-        drawPlot(createPlot("BaseLine/MET_BaseLineTauIdBveto"), "MET_BaseLineTauIdBveto", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
-        drawPlot(createPlot("Inverted/MET_InvertedTauIdBveto"), "MET_InvertedTauIdBveto", xlabel="MET (GeV)",  rebin=5, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
-        drawPlot(createPlot("Inverted/MET_InvertedTauIdJets"), "MET_InvertedTauIdJets", xlabel="MET (GeV)",  rebin=5, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+        drawPlot(createPlot("baseline/INVMASSBaselineTauIdAfterCollinearCutsPlusBackToBackCuts/INVMASSBaselineTauIdAfterCollinearCutsPlusBackToBackCutsInclusive"), "InvariantMass", rebin=2, log=False,  xlabel="m_{H^{/pm}} )GerV)", ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
         
+        drawPlot(createPlot("baseline/METBaselineTauIdAfterJets/METBaselineTauIdAfterJetsInclusive"), "METBaseLineTauIdAfterJets", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+        
+        drawPlot(createPlot("baseline/METBaselineTauIdAfterCollinearCuts/METBaselineTauIdAfterCollinearCutsInclusive"), "METBaseLineTauIdAfterCollinearCuts", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))                 
+        drawPlot(createPlot("baseline/METBaselineTauIdAfterCollinearCutsPlusBveto/METBaselineTauIdAfterCollinearCutsPlusBvetoInclusive"), "METBaseLineTauIdAfterCollinearCutsBveto", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+                 
+        drawPlot(createPlot("Inverted/METInvertedTauIdAfterJets/METInvertedTauIdAfterJetsInclusive"), "METInvertedTauIdAfterJets", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+                 
+        drawPlot(createPlot("Inverted/METInvertedTauIdAfterCollinearCuts/METInvertedTauIdAfterCollinearCutsInclusive"), "METInvertedTauIdAfterCollinearCuts", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={ "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+                 
+        drawPlot(createPlot("Inverted/METInvertedTauIdAfterCollinearCutsPlusBveto/METInvertedTauIdAfterCollinearCutsPlusBvetoInclusive"), "METInvertedTauIdAfterCollinearCutsBveto", xlabel="MET (GeV)",  rebin=10, log=True,  ylabel="Events", ratio=True, opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+                 
+
+ 
 def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
     

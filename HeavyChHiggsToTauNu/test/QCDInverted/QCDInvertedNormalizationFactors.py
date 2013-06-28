@@ -2,6 +2,8 @@
 # by InvertedTauID_Normalization.py
 
 QCDInvertedNormalization = {
+    "inclusive": 0.0230450695411,
+    "inclusiveEWK": 0.00354339070544,
     "1": 0.0357870968473,
     "2": 0.0292184185327,
     "3": 0.0230121509963,

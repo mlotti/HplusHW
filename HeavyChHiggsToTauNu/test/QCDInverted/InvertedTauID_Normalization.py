@@ -114,8 +114,8 @@ def main(argv):
 
 
 
-#    bins = ["inclusive"]
-    bins = ["1","2","3","4","5","6","7","8","9","10"]
+    bins = ["inclusive"]
+#    bins = ["1","2","3","4","5","6","7","8","9","10"]
 #    bins = ["2","3","4","5","6"]
 #    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
 #    bins = ["4050","5060","6070","7080","80100","100120","120"]
@@ -127,7 +127,7 @@ def main(argv):
 	invertedQCD.setLabel(bin)
 
 	if bin == "inclusive":
-	    bin = ""
+	    bin = "Inclusive"
 
         histoNameBaseline = HISTONAME+"/"+HISTONAME+bin
         histoNameInverted = histoNameBaseline.replace("Baseline", "Inverted")

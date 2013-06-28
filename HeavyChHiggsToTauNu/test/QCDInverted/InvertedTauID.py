@@ -670,21 +670,21 @@ class InvertedTauID:
 
 ##################################
         if "AfterMetPlusBveto" in name:
-            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 35, "xmax": 300},
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 40, "xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot)
                            )
                       
         if "AfterMetPlusSoftBtagging" in name:
-            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 25, "xmax": 200},
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 30, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
             
         if "AfterMetCut" in name:
-            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 40, "xmax": 200},
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 50, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
         if "AfterCollinearCuts" in name:
-            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 800, "xmax": 200},
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 1000, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )                                      
 
@@ -1054,6 +1054,7 @@ class InvertedTauID:
             value1 = h1.GetBinContent(iBin)
             value2 = h2.GetBinContent(iBin)
         
+           
             if value1 < 0:
                 h1.SetBinContent(iBin,0)
         
