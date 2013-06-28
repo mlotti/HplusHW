@@ -1,6 +1,6 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.splittedHistoReader import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 #from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import *
 from math import sqrt
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count

@@ -3,7 +3,7 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import TDRStyle
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
 
