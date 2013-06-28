@@ -182,6 +182,7 @@ namespace HPlus {
     hTransverseMassTopChiSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopChiSelection", "transverseMassTopChiSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
     hTransverseMassTopBjetSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopBjetSelection", "transverseMassTopBjetSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
     hTransverseMassVsDphi = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, *fs, "transverseMassVsDphi", "transverseMassVsDphi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.,180,0.,180.);
+
     // Tau properties for inverted selection after tau ID + tau SF's
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterTauID, "SelectedTau_pT_AfterTauID", "SelectedTau_pT_AfterTauID;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 200, 0.0, 400.0);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtaAfterTauID, "SelectedTau_eta_AfterTauID", "SelectedTau_eta_AfterTauID;#tau #eta;N_{events} / 0.1", 150, -3.0, 3.0);   
@@ -204,6 +205,7 @@ namespace HPlus {
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterBjetVeto, "SelectedTau_pT_AfterBveto", "#tau p_{T}, GeV/c", 200, 0.0, 400.0);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterBjetVetoPhiCuts, "SelectedTau_pT_AfterBvetoPhiCuts", "#tau p_{T}, GeV/c", 200, 0.,400.0);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvertedTauIdSelectedTauEtAfterBackToBackCuts, "SelectedTau_pT_BackToBackCuts", "#tau p_{T}, GeV/c", 200, 0.0 , 400.0);
+
 
     // baseline MET histos
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterJets, "METBaselineTauIdAfterJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
@@ -243,6 +245,7 @@ namespace HPlus {
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBveto, "METInvertedTauIdAfterCollinearCutsPlusBveto", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterBackToBackCuts, "METInvertedTauIdAfterBackToBackCuts", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     // inverted MT histos
+
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetSF, "MTInvertedTauIdAfterMetSF", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdAfterCollinearCuts, "MTInvertedTauIdAfterCollinearCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, "MTInvertedTauIdAfterCollinearCutsPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
@@ -297,6 +300,7 @@ namespace HPlus {
 //     hDeltaR_TauMETJet2MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInvertedDir, "DeltaR_TauMETJet2MET", "DeltaR_TauMETJet2MET ", 65, 0., 260.);
 //     hDeltaR_TauMETJet3MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInvertedDir, "DeltaR_TauMETJet3MET", "DeltaR_TauMETJet3MET ", 65, 0., 260.);
 //     hDeltaR_TauMETJet4MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInvertedDir, "DeltaR_TauMETJet4MET", "DeltaR_TauMETJet4MET ", 65, 0., 260.);
+
   }
 
   SignalAnalysisInvertedTau::~SignalAnalysisInvertedTau() { }
@@ -668,6 +672,7 @@ namespace HPlus {
   }
 
   ////////////////////////////////////////////////////////////////////////////////////
+
   bool SignalAnalysisInvertedTau::doInvertedAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData) {
     SplittedHistogramHandler& myHandler = fCommonPlots.getSplittedHistogramHandler();
 //------ Veto against second tau in event
@@ -704,6 +709,9 @@ namespace HPlus {
       fMETTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
     METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metDataTmp.getSelectedMET()), iEvent.isRealData(), fEventWeight);
     increment(fInvertedMetTriggerScaleFactorCounter);
+
+    //    hSelectedTauEtJetCut->Fill(selectedTau->pt());
+
     fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(iEvent);
     fCommonPlotsInvertedAfterMetSF->fill();
     // Obtain transverse mass and invariant mass for plotting
@@ -738,6 +746,7 @@ namespace HPlus {
     fCommonPlotsInvertedAfterCollinearCuts->fill();
 
     // At this point, let's fill histograms for closure test and for normalisation
+
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterCollinearCuts, selectedTau->pt());
     myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCuts, metDataTmp.getSelectedMET()->et());
     myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCuts, transverseMass);
@@ -781,11 +790,19 @@ namespace HPlus {
     if(!metData.passedEvent()) return false;
     increment(fInvertedMetCounter);
 
+
+    //hSelectionFlow->Fill(kQCDOrderMET);
+	  //    hSelectedTauEtMetCut->Fill(selectedTau->pt());
+	  // hSelectedTauEtaMetCut->Fill(selectedTau->eta());
+	  //hSelectedTauPhiMetCut->Fill(selectedTau->phi());  
+
+
     // Tau properties for inverted selection after MET cut
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterMetCut, selectedTau->pt());
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtaAfterMetCut, selectedTau->eta());
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauPhiAfterMetCut, selectedTau->phi());
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauRtauAfterMetCut, fTauSelection.getRtauOfTauObject(selectedTau));
+
 
     myHandler.fillShapeHistogram(hNBInvertedTauIdJet, btagDataTmp.getSelectedJets().size());
 
@@ -841,8 +858,12 @@ namespace HPlus {
     increment(fInvertedBTaggingScaleFactorCounter);
 
     //hSelectionFlow->Fill(kQCDOrderBTag);
+
+	  //    hSelectedTauEtBtagging->Fill(selectedTau->pt());
+
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBtagging, selectedTau->pt());
     fCommonPlotsInvertedAfterMETAndBtagWithSF->fill();
+
 
     // mt for inverted tau with b tagging
     myHandler.fillShapeHistogram(hMTInvertedTauIdAfterBtag, transverseMass);
@@ -866,6 +887,7 @@ namespace HPlus {
     if (deltaPhi < fDeltaPhiCutValue) {
       increment(fInvertedDeltaPhiTauMETCounter);
     }
+
 
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBackToBackCuts, selectedTau->pt());
     myHandler.fillShapeHistogram(hMETInvertedTauIdAfterBackToBackCuts, metData.getSelectedMET()->et());
