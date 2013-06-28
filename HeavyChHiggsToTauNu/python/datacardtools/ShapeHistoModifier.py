@@ -7,22 +7,18 @@ from math import sqrt
 # Allows tuning of shape histogram without having to rerun full analysis
 # Note: After the adding is done, remember to call finalise! (adding treats errors as squares, finalising takes the sqrt of the squares)
 class ShapeHistoModifier():
-    def __init__(self, histoSpecs, debugMode=False):
+    def __init__(self, histoSpecs, histoObjectForSpecs=None, debugMode=False):
         if isinstance(histoSpecs,list):
             raise Exception(ErrorLabel()+"ShapeHistoModifier: Requested a %d-dimensional histogram, but code currently supports only 1 dimension!"%len(histoSpecs))
-        self._nbins = histoSpecs["bins"]
-        self._min = histoSpecs["rangeMin"]
-        self._max = histoSpecs["rangeMax"]
-        self._binLowEdges = []
-        self._binLowEdges.extend(histoSpecs["variableBinSizeLowEdges"])
-        self._xtitle = histoSpecs["xtitle"]
-        self._ytitle = histoSpecs["ytitle"]
+        mySpecs = self._retrieveHistoSpecsFromHisto(histoObjectForSpecs, histoSpecs)
+        self._nbins = mySpecs["bins"]
+        self._min = mySpecs["rangeMin"]
+        self._max = mySpecs["rangeMax"]
+        self._binLowEdges = list(mySpecs["variableBinSizeLowEdges"])
+        self._xtitle = mySpecs["xtitle"]
+        self._ytitle = mySpecs["ytitle"]
         # Variable bin widths support
-        if len(self._binLowEdges) > 0:
-            # Check that all bins are given
-            if len(self._binLowEdges) != self._nbins:
-                raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" shape histo definition for variable bin widths has %d entries, but nbins=%d!"%(len(self._binLowEdges),self._nbins))
-        else:
+        if len(self._binLowEdges) == 0:
             # Create bins with uniform width
             binwidth = (self._max-self._min) / self._nbins
             for i in range(0,self._nbins):
@@ -32,10 +28,14 @@ class ShapeHistoModifier():
             print"  bin low edges:",self._binLowEdges
 
     ## Returns an empty histogram created according to the specifications
-    def createEmptyShapeHistogram(self, name):
+    def createEmptyShapeHistogram(self, name, title=None):
         myEdges = self._binLowEdges
         myEdges.append(self._max) # ROOT needs bins+1 numbers, where the last one is the right edge of last bin
-        h = ROOT.TH1F(name, name, self._nbins,array('f',myEdges))
+        h = None
+        if title == None:
+            h = ROOT.TH1F(name, name, self._nbins,array('f',myEdges))
+        else:
+            h = ROOT.TH1F(name, title, self._nbins,array('f',myEdges))
         h.Sumw2()
         h.SetXTitle(self._xtitle)
         h.SetYTitle(self._ytitle)
@@ -165,3 +165,33 @@ class ShapeHistoModifier():
         myNewIntegral = dest.Integral(0,dest.GetNbinsX()+2)
         dest.Scale(myIntegral / myNewIntegral)
 
+    ## Retrieve the default specs from the histogram if necessary
+    def _retrieveHistoSpecsFromHisto(self, histo, specs):
+        mySpecs = None
+        if specs == None:
+            mySpecs = {}
+            specs = {}
+        else:
+            mySpecs = dict(specs)
+        if not "bins" in specs:
+            mySpecs["bins"] = histo.GetXaxis().GetNbins()
+        if not "rangeMin" in specs:
+            mySpecs["rangeMin"] = histo.GetXaxis().GetXmin()
+        if not "rangeMax" in specs:
+            mySpecs["rangeMax"] = histo.GetXaxis().GetXmax()
+        if not "xtitle" in specs:
+            mySpecs["xtitle"] = histo.GetXaxis().GetTitle()
+        if not "ytitle" in specs:
+            mySpecs["ytitle"] = histo.GetYaxis().GetTitle()
+        if not "variableBinSizeLowEdges" in specs:
+            # Check if constant interval binning is used
+            if histo.GetXaxis().GetXbins().GetSize() == 0:
+                mySpecs["variableBinSizeLowEdges"] = []
+            else:
+                myArray = histo.GetXaxis().GetXbins()
+                myBinEdges = []
+                for i in range(0,myArray.GetSize()-1): # Ignore last bin since it is the right edge of the last bin
+                    myBinEdges.append(myArray.GetAt)(i)
+                mySpecs["variableBinSizeLowEdges"] = list(myBinEdges)
+                mySpecs["bins"] = len(myBinEdges)
+        return mySpecs

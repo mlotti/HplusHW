@@ -3143,18 +3143,19 @@ class DatasetManager:
     # If nameList translates to only one dataset.Dataset, the
     # dataset.Daataset object is renamed (i.e. dataset.DatasetMerged
     # object is not created)
-
-    def merge(self, newName, nameList, keepSources=False, allowMissingDatasets=False):
+    def merge(self, newName, nameList, keepSources=False, addition=False, silent=False, allowMissingDatasets=False):
         (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge", allowMissingDatasets)
         if len(selected) == 0:
             message = "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
             if allowMissingDatasets:
-                print >> sys.stderr, message
+                if not silent:
+                    print >> sys.stderr, message
             else:
                 raise Exception(message)
             return
         elif len(selected) == 1 and not keepSources:
-            print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
+            if not silent:
+                print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
             self.rename(selected[0].getName(), newName)
             return
 

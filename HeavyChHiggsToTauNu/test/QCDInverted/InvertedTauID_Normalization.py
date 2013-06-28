@@ -109,19 +109,20 @@ def main(argv):
 
 #    bins = ["inclusive"]
 #    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
-    bins = ["4050","5060","6070","7080","80100","100120","120"]
+#    bins = ["4050","5060","6070","7080","80100","100120","120"]
 #    bins = ["4050"]
+    bins = ["<41","41..50","50..60","60..70","70..80","80..100","100..120","120..150","150..200","200..300",">300"]
             
 
-    for bin in bins:
+    for i,bin in enumerate(bins):
 
 	invertedQCD.setLabel(bin)
 
 	if bin == "inclusive":
 	    bin = ""
 
-        metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLine"+HISTONAME+bin)
-        metInver = plots.DataMCPlot(datasets, "Inverted/MET_Inverted"+HISTONAME+bin)
+        metBase = plots.DataMCPlot(datasets, "BaseLine/MET_BaseLine"+HISTONAME+str(i))
+        metInver = plots.DataMCPlot(datasets, "Inverted/MET_Inverted"+HISTONAME+str(i))
         # Rebin before subtracting
         metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
         metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
