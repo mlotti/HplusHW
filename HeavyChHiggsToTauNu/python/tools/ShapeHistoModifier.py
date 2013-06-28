@@ -44,17 +44,17 @@ class ShapeHistoModifier():
 
     ## Adds shape from the source to the destination histogram
     # Returns list of possible messages
-    def addShape(self, source, dest):
-        return self._calculateShape(source,dest,"+")
+    def addShape(self, source, dest, weight=1.0):
+        return self._calculateShape(source,dest,weight,"+")
 
     ## Adds shape from the source to the destination histogram
     # Returns list of possible messages
-    def subtractShape(self, source, dest, purityCheck=False):
-        return self._calculateShape(source,dest,"-",purityCheck)
+    def subtractShape(self, source, dest, weight=1.0, purityCheck=False):
+        return self._calculateShape(source,dest,weight,"-",purityCheck)
 
     ## Adds or subtracts the shape from the source to the destination histogram
     # Returns list of possible messages
-    def _calculateShape(self, source, dest, operation, purityCheck=False):
+    def _calculateShape(self, source, dest, weight, operation, purityCheck=False):
         if source == None or dest == None:
             return []
         myMsgList = []
@@ -95,8 +95,8 @@ class ShapeHistoModifier():
                 if abs(source.GetXaxis().GetBinUpEdge(iSrc) - dest.GetXaxis().GetBinLowEdge(iDest+1)) < 0.0001:
                     # This is last source bin for the destination
                     myDestBinWillChangeOnNextInteration = True
-            countSum += source.GetBinContent(iSrc)
-            errorSum += source.GetBinError(iSrc)**2
+            countSum += source.GetBinContent(iSrc) * weight
+            errorSum += (source.GetBinError(iSrc)**2) * weight
             #print "iSrc=%d,iDest=%d, sum=%f +- %f"%(iSrc,iDest,countSum,errorSum)
             if myDestBinWillChangeOnNextInteration:
                 # Store result, Note: it is assumed here that bin error is squared!!!
