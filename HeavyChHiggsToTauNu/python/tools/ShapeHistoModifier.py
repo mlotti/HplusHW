@@ -44,17 +44,17 @@ class ShapeHistoModifier():
 
     ## Adds shape from the source to the destination histogram
     # Returns list of possible messages
-    def addShape(self, source, dest):
-        return self._calculateShape(source,dest,"+")
+    def addShape(self, source, dest, weight=1.0):
+        return self._calculateShape(source,dest,weight,"+")
 
     ## Adds shape from the source to the destination histogram
     # Returns list of possible messages
-    def subtractShape(self, source, dest, purityCheck=False):
-        return self._calculateShape(source,dest,"-",purityCheck)
+    def subtractShape(self, source, dest, weight=1.0, purityCheck=False):
+        return self._calculateShape(source,dest,weight,"-",purityCheck)
 
     ## Adds or subtracts the shape from the source to the destination histogram
     # Returns list of possible messages
-    def _calculateShape(self, source, dest, operation, purityCheck=False):
+    def _calculateShape(self, source, dest, weight, operation, purityCheck=False):
         if source == None or dest == None:
             return []
         myMsgList = []
@@ -95,8 +95,8 @@ class ShapeHistoModifier():
                 if abs(source.GetXaxis().GetBinUpEdge(iSrc) - dest.GetXaxis().GetBinLowEdge(iDest+1)) < 0.0001:
                     # This is last source bin for the destination
                     myDestBinWillChangeOnNextInteration = True
-            countSum += source.GetBinContent(iSrc)
-            errorSum += source.GetBinError(iSrc)**2
+            countSum += source.GetBinContent(iSrc) * weight
+            errorSum += (source.GetBinError(iSrc)**2) * weight
             #print "iSrc=%d,iDest=%d, sum=%f +- %f"%(iSrc,iDest,countSum,errorSum)
             if myDestBinWillChangeOnNextInteration:
                 # Store result, Note: it is assumed here that bin error is squared!!!
@@ -167,34 +167,41 @@ class ShapeHistoModifier():
 
     ## Retrieve the default specs from the histogram if necessary
     def _retrieveHistoSpecsFromHisto(self, histo, specs):
+        if histo == None and specs == None:
+            raise Exception(ErrorLabel()+"Need to supply either a histogram or dictionary with bin specification for the histograms!")
         mySpecs = None
         if specs == None:
             mySpecs = {}
             specs = {}
         else:
+            # Obtain specs from dictionary
             mySpecs = dict(specs)
-        if not "bins" in specs:
-            mySpecs["bins"] = histo.GetXaxis().GetNbins()
-        if not "rangeMin" in specs:
-            mySpecs["rangeMin"] = histo.GetXaxis().GetXmin()
-        if not "rangeMax" in specs:
-            mySpecs["rangeMax"] = histo.GetXaxis().GetXmax()
-        if not "xtitle" in specs:
-            mySpecs["xtitle"] = histo.GetXaxis().GetTitle()
-        if not "ytitle" in specs:
-            mySpecs["ytitle"] = histo.GetYaxis().GetTitle()
-        if not "variableBinSizeLowEdges" in specs:
-            # Check if constant interval binning is used
-            if histo.GetXaxis().GetXbins().GetSize() == 0:
-                mySpecs["variableBinSizeLowEdges"] = []
-            else:
-                myArray = histo.GetXaxis().GetXbins()
-                myBinEdges = []
-                for i in range(0,myArray.GetSize()-1): # Ignore last bin since it is the right edge of the last bin
-                    myBinEdges.append(myArray.GetAt)(i)
-                mySpecs["variableBinSizeLowEdges"] = list(myBinEdges)
-                mySpecs["bins"] = len(myBinEdges)
-        else:
+        if histo != None:
+            # Obtain specs from histogram
+            if not "bins" in specs:
+                mySpecs["bins"] = histo.GetXaxis().GetNbins()
+            if not "rangeMin" in specs:
+                mySpecs["rangeMin"] = histo.GetXaxis().GetXmin()
+            if not "rangeMax" in specs:
+                mySpecs["rangeMax"] = histo.GetXaxis().GetXmax()
+            if not "xtitle" in specs:
+                mySpecs["xtitle"] = histo.GetXaxis().GetTitle()
+            if not "ytitle" in specs:
+                mySpecs["ytitle"] = histo.GetYaxis().GetTitle()
+            if not "variableBinSizeLowEdges" in specs:
+                # Check if constant interval binning is used
+                if histo.GetXaxis().GetXbins().GetSize() == 0:
+                    mySpecs["variableBinSizeLowEdges"] = []
+                else:
+                    myArray = histo.GetXaxis().GetXbins()
+                    myBinEdges = []
+                    for i in range(0,myArray.GetSize()-1): # Ignore last bin since it is the right edge of the last bin
+                        myBinEdges.append(myArray.GetAt)(i)
+                    mySpecs["variableBinSizeLowEdges"] = list(myBinEdges)
+                    mySpecs["bins"] = len(myBinEdges)
+        if "variableBinSizeLowEdges" in mySpecs:
             if len(mySpecs["variableBinSizeLowEdges"]) > 0:
                 mySpecs["bins"] = len(mySpecs["variableBinSizeLowEdges"])
+        else:
+            mySpecs["variableBinSizeLowEdges"] = []
         return mySpecs

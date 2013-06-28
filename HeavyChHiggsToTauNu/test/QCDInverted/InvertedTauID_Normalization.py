@@ -79,7 +79,7 @@ def calculateNormalisation(opts, dsetMgr, moduleInfoString, myDir, luminosity):
         invertedQCD.getNormalization()
 
     invertedQCD.Summary()
-    invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactorsRun.py")
+    invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactors.py")
 
 
 
