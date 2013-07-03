@@ -36,8 +36,10 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(int maxEntries);
+      Data();
       ~Data();
+
+      void initialize(int maxEntries);
 
       const bool passedEvent() const { return fPassedEvent; }
       const bool passedBackToBackCuts() const;
@@ -55,7 +57,7 @@ namespace HPlus {
       friend class QCDTailKiller;
 
     private:
-      const int fMaxEntries;
+      int fMaxEntries;
       bool fPassedEvent;
       std::vector<bool> fPassedBackToBackJet;
       std::vector<bool> fPassedCollinearJet;
@@ -98,6 +100,7 @@ namespace HPlus {
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau>& tau, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met);
     /// Number of jets to consider
     const uint32_t fMaxEntries;
+    bool bDisableCollinearCuts;
     // Cut items for back to back (tau,MET) topology
     std::vector<CutItem> fBackToBackJetCut;
     // Cut items for collinear (tau,MET) topology

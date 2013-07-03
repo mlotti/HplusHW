@@ -6,9 +6,9 @@ dataVersion="44XmcS6"     # Fall11 MC
 #dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
 dataEras = [
-   # "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
+    "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
     "Run2011A",
-   # "Run2011B",
+    "Run2011B",
 ]
 
 # Note: Keep number of variations below 200 to keep file sizes reasonable
@@ -32,8 +32,19 @@ myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 #myOptimisation.disableMaxVariations()
 
 def customize(signalAnalysis):
+    # Set here splitting of phase space (underflow bin will be automatically added; last value is edge for overflow bin)
+    signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauPtBinLowEdges = cms.untracked.vdouble(41., 50., 60., 70., 80., 100., 120., 150., 200., 300.)
+    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5)
+    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByNVerticesBinLowEdges = cms.untracked.vint32(10)
+    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByDeltaPhiTauMet = cms.untracked.vdouble(90.) # If used, one could disable collinear cuts
+    #signalAnalysis.QCDTailKiller.disableCollinearCuts = True # enable, if splitting by delta phi(tau,MET)
+    print "Phase space is splitted in analysis as follows:"
+    print signalAnalysis.commonPlotsSettings.histogramSplitting
+
+    signalAnalysis.bTagging.subleadingDiscriminatorCut = 0.244
+    #signalAnalysis.MET.METCut = 50.0
+    #signalAnalysis.MET.preMETCut = 30.0
     print "Customisation applied"
-    signalAnalysis.MET.METCut = 50.
     
     
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
@@ -41,8 +52,11 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1
                         customizeLightAnalysis=customize,
                         doQCDTailKillerScenarios=True,
+                        applyTauTriggerScaleFactor=True,
+                        #applyTauTriggerLowPurityScaleFactor=True,
+                        #applyMETTriggerScaleFactor=True,
                         #doAgainstElectronScan=True,
-                        doSystematics=True,
+                        #doSystematics=True,
                         #histogramAmbientLevel = "Vital",
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )

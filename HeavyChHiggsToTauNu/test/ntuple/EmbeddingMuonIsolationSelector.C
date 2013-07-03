@@ -13,7 +13,7 @@ public:
   ~EmbeddingMuonIsolationSelector();
 
   void setOutput(TDirectory *dir);
-  void setupBranches(TTree *tree);
+  void setupBranches(BranchManager& branchManager);
   bool process(Long64_t entry);
 
 private:
@@ -23,9 +23,9 @@ private:
   TauCollection fTaus;
 
   std::string fPuWeightName;
-  Branch<double> fPuWeight;
-  Branch<unsigned> fVertexCount;
-  Branch<bool> fIsoMuTrigger;
+  Branch<double> *fPuWeight;
+  Branch<unsigned> *fVertexCount;
+  Branch<bool> *fIsoMuTrigger;
 
   EmbeddingMuonIsolation::Mode fIsolationMode;
 
@@ -116,27 +116,20 @@ void EmbeddingMuonIsolationSelector::setOutput(TDirectory *dir) {
   hAfterIsoMuTrigger.makeHistos();
 }
 
-void EmbeddingMuonIsolationSelector::setupBranches(TTree *tree) {
-  fEventInfo.setupBranches(tree);
-  fMuons.setupBranches(tree, isMC());
-  fTaus.setupBranches(tree);
+void EmbeddingMuonIsolationSelector::setupBranches(BranchManager& branchManager) {
+  fEventInfo.setupBranches(branchManager);
+  fMuons.setupBranches(branchManager, isMC());
+  fTaus.setupBranches(branchManager);
   if(!fPuWeightName.empty())
-    fPuWeight.setupBranch(tree, fPuWeightName.c_str());
-  fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
-  fIsoMuTrigger.setupBranch(tree, "trigger_IsoMu30_eta2p1");
+    branchManager.book(fPuWeightName, &fPuWeight);
+  branchManager.book("goodPrimaryVertex_count", &fVertexCount);
+  branchManager.book("trigger_IsoMu30_eta2p1", &fIsoMuTrigger);
 }
 
 bool EmbeddingMuonIsolationSelector::process(Long64_t entry) {
-  fEventInfo.setEntry(entry);
-  fMuons.setEntry(entry);
-  fTaus.setEntry(entry);
-  fPuWeight.setEntry(entry);
-  fVertexCount.setEntry(entry);
-  fIsoMuTrigger.setEntry(entry);
-
   double weight = 1.0;
   if(!fPuWeightName.empty()) {
-    weight *= fPuWeight.value();
+    weight *= fPuWeight->value();
   }
   fEventCounter.setWeight(weight);
   //std::cout << weight << std::endl;
@@ -163,7 +156,7 @@ bool EmbeddingMuonIsolationSelector::process(Long64_t entry) {
   }
   if(selectedTaus.empty()) return true;
   cTauID.increment();
-  hAfterTauID.fillVertex(fVertexCount.value(), weight);
+  hAfterTauID.fillVertex(fVertexCount->value(), weight);
 
   // Muon isolation
   std::vector<EmbeddingMuonCollection::Muon> selectedMuons;
@@ -179,17 +172,17 @@ bool EmbeddingMuonIsolationSelector::process(Long64_t entry) {
     TauCollection::Tau& tau = selectedTaus[i];
     hAfterMuonIsolation.fillTau(tau, weight);
   }
-  hAfterMuonIsolation.fillVertex(fVertexCount.value(), weight);
+  hAfterMuonIsolation.fillVertex(fVertexCount->value(), weight);
 
   // Mu trigger
-  if(!fIsoMuTrigger.value()) return true;
+  if(!fIsoMuTrigger->value()) return true;
   cIsoMuTrigger.increment();
 
   for(size_t i=0; i<selectedTaus.size(); ++i) {
     TauCollection::Tau& tau = selectedTaus[i];
     hAfterIsoMuTrigger.fillTau(tau, weight);
   }
-  hAfterIsoMuTrigger.fillVertex(fVertexCount.value(), weight);
+  hAfterIsoMuTrigger.fillVertex(fVertexCount->value(), weight);
 
   return true;
 }

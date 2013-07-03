@@ -9,6 +9,7 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 import PhysicsTools.PatAlgos.tools.helpers as helpers
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 
 # Note: This file is adapted from TauAnalysis/MCEmbeddingTools/python/pf_01_customizeAll.py
 # Check that file in CVS for changes
@@ -95,12 +96,32 @@ def customise(process):
                       VarParsing.VarParsing.multiplicity.singleton,
                       VarParsing.VarParsing.varType.int,
                       "should I override beamspot in globaltag?")
+    options.register("tauDecayMode", 0, # Default is all decays
+                     VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int,
+                     "Tau decay mode (0=all, 230=hadronic)")
+    options.register("tauMinVisPt", -1, # Disabled
+                     VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int,
+                     "Minimum visible pt of tau decay (-1 disabled, >= 0 cut value in GeV)")
 
     options, dataVersion = getOptionsDataVersion("44XmcS6", options)
 
     hltProcessName = dataVersion.getTriggerProcess()
     recoProcessName = dataVersion.getRecoProcess()
     processName = process.name_()
+
+    # Setup trigger matching
+    if not (dataVersion.isMC() and options.triggerMC == 0):
+        tightenedMuonsName = process.tauEmbeddingMuons.src.value()
+        tightenedMuonsMatched = HChTriggerMatching.createMuonTriggerMatchingInAnalysis(options.trigger, tightenedMuonsName)
+        setattr(process, tightenedMuonsName+"Matched", tightenedMuonsMatched)
+        tightenedMuonsMatchedFilter = cms.EDFilter("CandViewCountFilter",
+            src = cms.InputTag(tightenedMuonsName+"Matched"),
+            minNumber = cms.uint32(1),
+        )
+        setattr(process, tightenedMuonsName+"MatchedFilter", tightenedMuonsMatchedFilter)
+        process.ProductionFilterSequence.replace(process.tightenedMuonsMatchedCount,
+                                                 (tightenedMuonsMatched + tightenedMuonsMatchedFilter + process.tightenedMuonsMatchedCount))
+        process.tauEmbeddingMuons.src = tightenedMuonsName+"Matched"
 
     # Setup output
     outputModule = None
@@ -164,6 +185,10 @@ def customise(process):
         src = cms.InputTag("generator")
     )
 
+    # Set up tau decay options
+    process.generator.ZTauTau.TauolaOptions.InputCards.mdtau = options.tauDecayMode
+    if options.tauMinVisPt >= 0:
+        process.generator.ZTauTau.minVisibleTransverseMomentum = options.tauMinVisPt
 
     print "TAUOLA mdtau =", process.generator.ZTauTau.TauolaOptions.InputCards.mdtau
 
@@ -519,6 +544,9 @@ def addPAT(process, options, dataVersion):
             "drop *_generalTracks20eta2p5_*_"+skimProcessName,
             "drop *_goodJets*_*_"+skimProcessName,
             "keep *_selectedPatTaus*_*_"+skimProcessName,
+            "keep *_patPFMet*_*_"+skimProcessName,
+            "keep *_patType1CorrectedPFMet*_*_"+skimProcessName,
+            "keep *_patType1p2CorrectedPFMet*_*_"+skimProcessName,
 
             "drop *_dimuonsGlobal_*_"+processName,
             "drop *_tmfTracks_*_"+processName,

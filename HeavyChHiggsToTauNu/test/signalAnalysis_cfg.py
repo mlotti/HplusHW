@@ -16,7 +16,7 @@ dataEras = [
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
-
+#myOptimisation.printOptions() # Uncomment to find out the implemented methods
 #myOptimisation.addTauPtVariation([40.0, 50.0, 60.0, 70., 80.])
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
@@ -31,15 +31,19 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,170.0,160.0,150.0])
 #myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
-#myOptimisation.disableMaxVariations()
 
 def customize(signalAnalysis):
     # Apply beta cut for jets to reject PU jets
 #    signalAnalysis.jetSelection.jetPileUpWorkingPoint = "tight" # 
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
-#    signalAnalysis.MET.METCut = 100.0 
+#    signalAnalysis.MET.METCut = 100.0
+#    signalAnalysis.MET.preMETCut = 30.0
+    # Example for setting a certain tail killer scenario for the nominal module
+    #import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+    #signalAnalysis.QCDTailKiller = param.QCDTailKillerMediumPlus.clone()
+
     print "Customisations done"
-        
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1
@@ -47,6 +51,9 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #doHeavyAnalysis=True,
                         #customizeHeavyAnalysis=customize,
                         #useCHSJets=True,
+                        applyTauTriggerScaleFactor=True,
+                        #applyTauTriggerLowPurityScaleFactor=True,
+                        #applyMETTriggerScaleFactor=True,
                         #doQCDTailKillerScenarios=True,
                         #doInvariantMassReconstructionScenarios=True,
                         #doAgainstElectronScan=True,
@@ -64,13 +71,13 @@ if builder.options.tauEmbeddingInput != 0:
 
     if builder.dataVersion.isMC():
         process.source.fileNames = [
+        "/store/group/local/HiggsChToTauNuFullyHadronic/embedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_notrg2/b4444849cbd68cba8058d20690fa09f4/embedded_1000_1_M8J.root",
+#        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad_vispt30_b/d57ea742826c3abce18a6ceed0c3bca3/embedded_1000_2_vFL.root",
+            
             ]
     else:
         # HLT_Mu40_eta2p1_v1
         process.source.fileNames = [
-            "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/SingleMu_Mu_173693-177452_2011B_Nov19/SingleMu/Run2011B_19Nov2011_v1_AOD_173693_tauembedding_embedding_v44_4_2_seed0/a55cb9805ad247805760f23e605c41e5/embedded_9_1_ccy.root",
-            "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/SingleMu_Mu_173693-177452_2011B_Nov19/SingleMu/Run2011B_19Nov2011_v1_AOD_173693_tauembedding_embedding_v44_4_2_seed0/a55cb9805ad247805760f23e605c41e5/embedded_99_1_Wje.root",
-            "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/SingleMu_Mu_173693-177452_2011B_Nov19/SingleMu/Run2011B_19Nov2011_v1_AOD_173693_tauembedding_embedding_v44_4_2_seed0/a55cb9805ad247805760f23e605c41e5/embedded_98_1_Qmf.root",
             ]
 
     #process.maxEvents.input = 10

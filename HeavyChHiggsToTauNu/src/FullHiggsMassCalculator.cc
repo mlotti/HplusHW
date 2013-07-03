@@ -395,7 +395,7 @@ namespace HPlus {
     // If it is not available, an estimate for the GenMET is calculated by summing the momenta of all GEN neutrinos that were
     // not filtered from the event to save space.
     TVector3 genMETVector(0.0, 0.0, 0.0);
-    if (genDataPtr != NULL) {
+    if (genDataPtr != NULL && genDataPtr->isValid()) {
       edm::Ptr<reco::GenMET> myGenMET = genDataPtr->getGenMET();
       genMETVector.SetXYZ(myGenMET->px(), myGenMET->py(), myGenMET->pz());
     } else {
@@ -979,7 +979,7 @@ namespace HPlus {
   
     // MET: compare RECO and GEN information
     TVector3 genMETVector;
-    if (genDataPtr != NULL) {
+    if (genDataPtr != NULL && genDataPtr->isValid()) {
       // This gives the true GenMET, will work if GenParticleAnalysis::Data is available
       edm::Ptr<reco::GenMET> myGenMET = genDataPtr->getGenMET();
       genMETVector.SetXYZ(myGenMET->px(), myGenMET->py(), myGenMET->pz());

@@ -11,6 +11,8 @@
 #include<iomanip>
 #include<stdexcept>
 #include<cmath>
+#include<utility>
+#include<string>
 
 // EventCounter
 EventCounter::Count::Count(EventCounter& ec, size_t index):
@@ -57,13 +59,21 @@ void EventCounter::serialize() {
   }
 }
 
+// BranchManager
+BranchBase::~BranchBase() {}
+BranchManager::BranchManager(): fTree(0) {}
+BranchManager::~BranchManager() {
+  for(size_t i=0; i<fBranches.size(); ++i)
+    delete fBranches[i];
+}
+
 // BaseSelector
-BaseSelector::BaseSelector() {}
+BaseSelector::BaseSelector(): fIsMC(false) {}
 BaseSelector::~BaseSelector() {}
 
 void BaseSelector::setOutput(TDirectory *dir) {
 }
-void BaseSelector::setupBranches(TTree *tree) {
+void BaseSelector::setupBranches(BranchManager& branchManager) {
 }
 
 bool BaseSelector::process(Long64_t entry) {
@@ -76,7 +86,7 @@ class SelectorImp: public TSelector {
 public:
 
   //SelectorImp(TTree * /*tree*/ =0);
-  SelectorImp(Long64_t entries, bool isMC, BaseSelector *selector);
+  SelectorImp(Long64_t entries, bool isMC, BaseSelector *selector, TDirectory *outputDir);
   virtual ~SelectorImp();
   Int_t   Version() const;
   void    Begin(TTree *tree);
@@ -89,8 +99,9 @@ public:
 
   ClassDef(SelectorImp,0);
 
-  void setOutput(TDirectory *dir);
   void setPrintStatus(bool status);
+
+  void addSelector(const std::string& name, BaseSelector *selector, TDirectory *outputDir);
 
 private:
   void printStatus();
@@ -99,28 +110,36 @@ private:
   Long64_t                  fEntries;      //! Number of entries in the tree
   Long64_t                  fProcessed;    //! Number of processed entries
 
+  BranchManager fBranchManager;
+
   TTree                    *fChain;   //!pointer to the analyzed TTree or TChain
   BaseSelector *fSelector;
+
+  std::vector<std::pair<std::string, BaseSelector *> > fAdditionalSelectors;
 
   TStopwatch                 fStopwatch;
   Long64_t fPrintStep;
   double fPrintLastTime;
   int fPrintAdaptCount;
   bool fPrintStatus;
+  bool fIsMC;
 };
 
 ClassImp(SelectorImp)
 
-SelectorImp::SelectorImp(Long64_t entries, bool isMC, BaseSelector *selector):
+SelectorImp::SelectorImp(Long64_t entries, bool isMC, BaseSelector *selector, TDirectory *outputDir):
   fEntries(entries), fProcessed(0),
   fChain(0), fSelector(selector),
-  fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0), fPrintStatus(true)
+  fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0), fPrintStatus(true), fIsMC(isMC)
 {
-  selector->setMCStatus(isMC);
+  fSelector->setMCStatus(fIsMC);
+  fSelector->setOutputExt(outputDir);
 }
 
 SelectorImp::~SelectorImp() {
   delete fSelector;
+  for(size_t i=0; i<fAdditionalSelectors.size(); ++i)
+    delete fAdditionalSelectors[i].second;
 }
 
 Int_t SelectorImp::Version() const {
@@ -142,7 +161,11 @@ void SelectorImp::Init(TTree *tree) {
   //fChain->SetMakeClass(1);
 
   // Set up variable and cut branches for the new TTree
-  fSelector->setupBranches(tree);
+  fBranchManager.setTree(tree);
+  fSelector->setupBranches(fBranchManager);
+  for(size_t i=0; i<fAdditionalSelectors.size(); ++i) {
+    fAdditionalSelectors[i].second->setupBranches(fBranchManager);
+  }
 }
 
 
@@ -193,8 +216,16 @@ Bool_t SelectorImp::Process(Long64_t entry) {
   printStatus();
   ++fProcessed;
 
-  bool ret = fSelector->process(entry);
-  fStatus = ret;
+  fBranchManager.setEntry(entry);
+  //std::cout << "Main selector" << std::endl;
+  fSelector->process(entry);
+  for(size_t i=0; i<fAdditionalSelectors.size(); ++i) {
+    //std::cout << "Additional selector " << fAdditionalSelectors[i].first << std::endl;
+    fAdditionalSelectors[i].second->process(entry);
+  }
+
+  //bool ret = fSelector->process(entry);
+  //fStatus = ret;
 
   return kTRUE;
 }
@@ -213,14 +244,18 @@ void SelectorImp::Terminate() {
   // the results graphically or save the results to file.
 
   fSelector->terminate();
-}
-
-void SelectorImp::setOutput(TDirectory *dir) {
-  fSelector->setOutputExt(dir);
+  for(size_t i=0; i<fAdditionalSelectors.size(); ++i)
+    fAdditionalSelectors[i].second->terminate();
 }
 
 void SelectorImp::setPrintStatus(bool status) {
   fPrintStatus = status;
+}
+
+void SelectorImp::addSelector(const std::string& name, BaseSelector *selector, TDirectory *outputDir) {
+  selector->setMCStatus(fIsMC);
+  selector->setOutputExt(outputDir);
+  fAdditionalSelectors.push_back(std::make_pair(name, selector));
 }
 
 void SelectorImp::printStatus() {
