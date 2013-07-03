@@ -7,8 +7,8 @@ dataVersion="44XmcS6"     # Fall11 MC
 
 dataEras = [
     "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
-    "Run2011A",
-    "Run2011B",
+    #"Run2011A",
+    #"Run2011B",
 ]
 
 # Note: Keep number of variations below 200 to keep file sizes reasonable
@@ -76,21 +76,22 @@ def customize(signalAnalysis):
     print "- Rtau cut included in tau candidate selections:",signalAnalysis.applyRtauCutForTauCandidate.value()
     print "- Traditional method used:",signalAnalysis.doAnalysisVariationWithTraditionalMethod.value()
     print "- ABCD method (experimental) used:",signalAnalysis.doAnalysisVariationWithABCDMethod.value()
-    print "- Double ABCD method (very experymental) used:",signalAnalysis.doAnalysisVariationWithDoubleABCDMethod.value()
+    print "- Double ABCD method (very experimental) used:",signalAnalysis.doAnalysisVariationWithDoubleABCDMethod.value()
     print "- MET cut:",signalAnalysis.MET.METCut.value()
     print "- Tail-Killer:", signalAnalysis.QCDTailKiller
     
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
-                        maxEvents=1000, # default is -1
+                        maxEvents=-1, # default is -1
                         customizeLightAnalysis=customize,
                         #doHeavyAnalysis=True,
                         #customizeHeavyAnalysis=customize,
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
                         #doAgainstElectronScan=True,
                         #doSystematics=True,
-                        doQCDTailKillerScenarios=False, #True,
-                        doFillTree=True, #False,
+                        doQCDTailKillerScenarios=True, #True,
+                        doInvariantMassReconstructionScenarios=True,
+                        doFillTree=False, #False,
                         histogramAmbientLevel = "Vital", # Informative
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )
@@ -106,6 +107,6 @@ if builder.options.tauEmbeddingInput != 0:
         ]
     process.maxEvents.input = 10
 
-f = open("configDump.py", "w")
-f.write(process.dumpPython())
-f.close()
+#f = open("configDump.py", "w")
+#f.write(process.dumpPython())
+#f.close()

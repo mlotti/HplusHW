@@ -114,7 +114,7 @@ def doEverything(multicrabDir, scenario, lightHplusMassPoint):
         datasets.loadLuminosities()
 
     datasets.updateNAllEventsToPUWeighted()
-    plots.mergeRenameReorderForDataMC(datasets)
+    plots.mergeRenameReorderForDataMC(datasets) # THIS MIGHT LEAD TO AN EXCEPTION, AS NO QCD DATASETS ARE PRESENT. CAN BE TURNED INTO A WARNING WITH A FLAG!
 
     if mcOnly:
         myIntegratedLuminosity = mcOnlyLumi
@@ -424,12 +424,12 @@ def doPlots(datasets, scenario, lightHplusMassPoint):
              rebinToWidthX=discriminantPlotBinWidth, cutLine=0, customizeBeforeDraw=formatDiscriminantPlotLabels)
     drawPlot(createPlot("FullHiggsMass/Discriminant_GEN", normalizeToOne=massPlotNormToOne), "Discriminant_GEN"+nameSuffix,
              xlabel = "Discriminant (MC truth)", ylabel = "Events / %d GeV^{2}"%discriminantPlotBinWidth, log=False,
-             rebinToWidthX=discriminantPlotBinWidth, cutLine=0)
+             rebinToWidthX=discriminantPlotBinWidth, cutLine=0, customizeBeforeDraw=formatDiscriminantPlotLabels)
     drawPlot(createPlot("FullHiggsMass/Discriminant_GEN_NeutrinosReplacedWithMET", normalizeToOne=massPlotNormToOne),
              "Discriminant_GEN_NuToMET"+nameSuffix,
              xlabel = "Discriminant (MC truth, #nu_{#tau} #leftrightarrow  #slash{E}_{T})",
              ylabel = "Events / %d GeV^{2}"%discriminantPlotBinWidth, log=False,
-             rebinToWidthX=discriminantPlotBinWidth, cutLine=0)
+             rebinToWidthX=discriminantPlotBinWidth, cutLine=0, customizeBeforeDraw=formatDiscriminantPlotLabels)
     # PLOT: Discriminant (RECO_pure, RECO_with_misidentification)
 #     drawPlot(createPlot("FullHiggsMass/DiscriminantPure", normalizeToOne=massPlotNormToOne), "Discriminant_pure"+nameSuffix,
 #              xlabel = "Discriminant", ylabel = "Events / %d GeV^{2}"%discriminantPlotBinWidth, log=False,

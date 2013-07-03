@@ -862,8 +862,7 @@ namespace HPlus {
     // Choose the neutrino p_z selection method (can be set in python configuration scripts)
     if (fPzSelectionMethod == "DeltaEtaMax") selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax);
     else if (fPzSelectionMethod == "Smaller") selectNeutrinoPzAndHiggsMassSolution(output, eSmaller);
-
-    selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax);
+    else selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax); // DEFAULT
     // Increment counters and fill Histograms
     switch (myInputDataType) {
     case eRECO:
