@@ -326,10 +326,10 @@ elif "v53" in workflow:
 #        wf_mc = mcWorkflow()
 #        multicrab.extendDatasets(wf_mc, datasetsMC_2012)
 
-output = ["histograms.root"]
-if "signalAnalysis" in cfg:
-    output.append("pickEvents.txt")
-multicrab.addCommonLine("CMSSW.output_file = %s" % ",".join(output))
+#output = ["histograms.root"]
+#if "signalAnalysis" in cfg:
+#    output.append("pickEvents.txt")
+#multicrab.addCommonLine("CMSSW.output_file = %s" % ",".join(output))
 
 #multicrab.addCommonLine("GRID.maxtarballsize = 35")
 
