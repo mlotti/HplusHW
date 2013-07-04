@@ -452,7 +452,7 @@ def UpdatePlotStyleFill(styleMap, namesToFilled):
 # datasets not in the plots._datasetOrder list are left at the end in
 # the same order they were originally.
 def mergeRenameReorderForDataMC(datasetMgr, keepSourcesMC=False):
-    datasetMgr.mergeData()
+    datasetMgr.mergeData(allowMissingDatasets=True)
     datasetMgr.renameMany(_physicalToLogical, silent=True)
 
     datasetMgr.mergeMany(_datasetMerge, keepSources=keepSourcesMC)
