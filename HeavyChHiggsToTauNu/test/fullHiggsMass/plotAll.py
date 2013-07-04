@@ -107,15 +107,14 @@ def doEverything(multicrabDir, scenario, lightHplusMassPoint):
     else:
         datasets = dataset.getDatasetsFromMulticrabCfg(directory=multicrabDir, analysisName=analysis, dataEra=dataEra,
                                                        optimizationMode=scenario)
-
+    datasets.updateNAllEventsToPUWeighted()
+    plots.mergeRenameReorderForDataMC(datasets) # THIS MIGHT LEAD TO AN EXCEPTION, AS NO QCD DATASETS ARE PRESENT. CAN BE TURNED INTO A WARNING WITH A FLAG!
+    
     if mcOnly:
         datasets.remove(datasets.getDataDatasetNames())
         histograms.cmsTextMode = histograms.CMSMode.SIMULATION
     else:
         datasets.loadLuminosities()
-
-    datasets.updateNAllEventsToPUWeighted()
-    plots.mergeRenameReorderForDataMC(datasets) # THIS MIGHT LEAD TO AN EXCEPTION, AS NO QCD DATASETS ARE PRESENT. CAN BE TURNED INTO A WARNING WITH A FLAG!
 
     if mcOnly:
         myIntegratedLuminosity = mcOnlyLumi

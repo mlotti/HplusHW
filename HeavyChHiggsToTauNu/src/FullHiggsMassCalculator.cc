@@ -892,19 +892,19 @@ namespace HPlus {
       // Counters (note: only incremented if the event has passed)
       increment(passedEvents_SubCount);
       if (iEvent.isRealData()) break; // The true solution is not known for real data.
-      // Fill histograms with better and worse solutions:
-      if (isBetterSolution(iEvent, output.fNeutrinoPzSolution1, output)) {
-	hHiggsMass_betterSolution->Fill(output.fHiggsMassSolution1);
-	hHiggsMass_worseSolution->Fill(output.fHiggsMassSolution2);
-      } else if (isBetterSolution(iEvent, output.fNeutrinoPzSolution2, output)) {
-	hHiggsMass_betterSolution->Fill(output.fHiggsMassSolution2);
-	hHiggsMass_worseSolution->Fill(output.fHiggsMassSolution1);
-      }
-      else { // the solutions are the same and both histograms are filled with any of them
-	hHiggsMass_betterSolution->Fill(output.fHiggsMassSolution1);
-	hHiggsMass_worseSolution->Fill(output.fHiggsMassSolution1);
-      }
-      if (output.fDiscriminant > 0) {
+      if (output.fDiscriminant > 0) { // this is done only for positive discriminants / two different possible p_z solutions:
+	// Fill histograms with better and worse solutions:
+	if (isBetterSolution(iEvent, output.fNeutrinoPzSolution1, output)) {
+	  hHiggsMass_betterSolution->Fill(output.fHiggsMassSolution1);
+	  hHiggsMass_worseSolution->Fill(output.fHiggsMassSolution2);
+	} else if (isBetterSolution(iEvent, output.fNeutrinoPzSolution2, output)) {
+	  hHiggsMass_betterSolution->Fill(output.fHiggsMassSolution2);
+	  hHiggsMass_worseSolution->Fill(output.fHiggsMassSolution1);
+	}
+	else { // the solutions are the same and both histograms are filled with any of them
+	  hHiggsMass_betterSolution->Fill(output.fHiggsMassSolution1);
+	  hHiggsMass_worseSolution->Fill(output.fHiggsMassSolution1);
+	}
 	if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionGreater, output)) // This works for both signal and bkg events!
 	  increment(selectionGreaterCorrect_SubCount);
 	if (isBetterSolution(iEvent, output.fNeutrinoPzSolutionSmaller, output))
