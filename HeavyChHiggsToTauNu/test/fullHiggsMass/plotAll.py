@@ -22,8 +22,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configurations
-#multicrabDirs = ["multicrab_130522_194442"]
-multicrabDirs = ["multicrab_130529_154518"]
+multicrabDirs = ["multicrab_130522_194442"]
+#multicrabDirs = ["multicrab_130529_154518"]
 scenarios = [
     "", # default
     "OptInvMassRecoTopInvMassCutNone",
@@ -47,7 +47,7 @@ mcOnly = True
 mcOnlyLumi = 5000 # 1/pb
 #lightHplusMassPoint = 120
 lightHplusMassPoints = [80, 90, 100, 120, 140, 150, 155, 160]
-#lightHplusMassPoints = [80, 100, 120, 140, 150, 160] # (many plots in Stefan's MSc thesis are shown for these mass points)
+#lightHplusMassPoints = [80, 90, 120, 140, 150, 160] # (many plots in Stefan's MSc thesis are shown for these mass points) # TODO change 90 to 100 once there's a working directory
 lightHplusTopBR = 0.02
 removeQCD = True
 #removeQCD = False
@@ -107,14 +107,14 @@ def doEverything(multicrabDir, scenario, lightHplusMassPoint):
     else:
         datasets = dataset.getDatasetsFromMulticrabCfg(directory=multicrabDir, analysisName=analysis, dataEra=dataEra,
                                                        optimizationMode=scenario)
-    datasets.updateNAllEventsToPUWeighted()
-    plots.mergeRenameReorderForDataMC(datasets) # THIS MIGHT LEAD TO AN EXCEPTION, AS NO QCD DATASETS ARE PRESENT. CAN BE TURNED INTO A WARNING WITH A FLAG!
-    
     if mcOnly:
         datasets.remove(datasets.getDataDatasetNames())
         histograms.cmsTextMode = histograms.CMSMode.SIMULATION
     else:
         datasets.loadLuminosities()
+
+    datasets.updateNAllEventsToPUWeighted()
+    plots.mergeRenameReorderForDataMC(datasets)
 
     if mcOnly:
         myIntegratedLuminosity = mcOnlyLumi
@@ -268,24 +268,25 @@ def doPlots(datasets, scenario, lightHplusMassPoint):
     drawPlot(createPlot("FullHiggsMass/HiggsMass", normalizeToOne=massPlotNormToOne), "HiggsMass"+scenario+nameSuffix,
              xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
              cutLine=lightHplusMassPoint)
-    drawPlot(createPlot("FullHiggsMass/HiggsMass_greater", normalizeToOne=massPlotNormToOne), "HiggsMass_GREATER"+scenarioSuffix+nameSuffix,
-             xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
-             cutLine=lightHplusMassPoint)
-    drawPlot(createPlot("FullHiggsMass/HiggsMass_smaller", normalizeToOne=massPlotNormToOne), "HiggsMass_SMALLER"+scenarioSuffix+nameSuffix,
-             xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
-             cutLine=lightHplusMassPoint)
-    drawPlot(createPlot("FullHiggsMass/HiggsMass_tauNuAngleMax", normalizeToOne=massPlotNormToOne), "HiggsMass_ANGLEMAX"+scenarioSuffix+nameSuffix,
-             xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
-             cutLine=lightHplusMassPoint)
-    drawPlot(createPlot("FullHiggsMass/HiggsMass_tauNuAngleMin", normalizeToOne=massPlotNormToOne), "HiggsMass_ANGLEMIN"+scenarioSuffix+nameSuffix,
-             xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
-             cutLine=lightHplusMassPoint)
-    drawPlot(createPlot("FullHiggsMass/HiggsMass_tauNuDeltaEtaMax", normalizeToOne=massPlotNormToOne), "HiggsMass_DELTAETAMAX"+scenarioSuffix+nameSuffix,
-             xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
-             cutLine=lightHplusMassPoint)
-    drawPlot(createPlot("FullHiggsMass/HiggsMass_tauNuDeltaEtaMin", normalizeToOne=massPlotNormToOne), "HiggsMass_DELTAETAMIN"+scenarioSuffix+nameSuffix,
-             xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
-             cutLine=lightHplusMassPoint)
+    if scenario == "":
+        drawPlot(createPlot("FullHiggsMass/HiggsMass_greater", normalizeToOne=massPlotNormToOne), "HiggsMass_GREATER"+scenarioSuffix+nameSuffix,
+                 xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+                 cutLine=lightHplusMassPoint)
+        drawPlot(createPlot("FullHiggsMass/HiggsMass_smaller", normalizeToOne=massPlotNormToOne), "HiggsMass_SMALLER"+scenarioSuffix+nameSuffix,
+                 xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+                 cutLine=lightHplusMassPoint)
+        drawPlot(createPlot("FullHiggsMass/HiggsMass_tauNuAngleMax", normalizeToOne=massPlotNormToOne), "HiggsMass_ANGLEMAX"+scenarioSuffix+nameSuffix,
+                 xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+                 cutLine=lightHplusMassPoint)
+        drawPlot(createPlot("FullHiggsMass/HiggsMass_tauNuAngleMin", normalizeToOne=massPlotNormToOne), "HiggsMass_ANGLEMIN"+scenarioSuffix+nameSuffix,
+                 xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+                 cutLine=lightHplusMassPoint)
+        drawPlot(createPlot("FullHiggsMass/HiggsMass_tauNuDeltaEtaMax", normalizeToOne=massPlotNormToOne), "HiggsMass_DELTAETAMAX"+scenarioSuffix+nameSuffix,
+                 xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+                 cutLine=lightHplusMassPoint)
+        drawPlot(createPlot("FullHiggsMass/HiggsMass_tauNuDeltaEtaMin", normalizeToOne=massPlotNormToOne), "HiggsMass_DELTAETAMIN"+scenarioSuffix+nameSuffix,
+                 xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+                 cutLine=lightHplusMassPoint)
 #     if plotSignalOnly:
 #         drawPlot(createPlot("FullHiggsMass/HiggsMass_GEN", normalizeToOne=massPlotNormToOne),
 #                  "HiggsMass_GEN"+nameSuffix+"_TauNuAngleMax",
@@ -296,14 +297,15 @@ def doPlots(datasets, scenario, lightHplusMassPoint):
 #                  xlabel="m(#tau, #nu_{#tau}) (MC truth, #nu_{#tau} #leftrightarrow  #slash{E}_{T})",
 #                  ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
     # PLOT: Higgs invariant mass using the better and the worse solution, respectively
-    drawPlot(createPlot("FullHiggsMass/HiggsMass_betterSolution", normalizeToOne=massPlotNormToOne),
-             "HiggsMass_betterSolution"+scenarioSuffix+nameSuffix,
-             xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
-             cutLine=lightHplusMassPoint)
-    drawPlot(createPlot("FullHiggsMass/HiggsMass_worseSolution", normalizeToOne=massPlotNormToOne),
-             "HiggsMass_worseSolution"+scenarioSuffix+nameSuffix,
-             xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
-             cutLine=lightHplusMassPoint)
+    if scenario == "":
+        drawPlot(createPlot("FullHiggsMass/HiggsMass_betterSolution", normalizeToOne=massPlotNormToOne),
+                 "HiggsMass_betterSolution"+scenarioSuffix+nameSuffix,
+                 xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+                 cutLine=lightHplusMassPoint)
+        drawPlot(createPlot("FullHiggsMass/HiggsMass_worseSolution", normalizeToOne=massPlotNormToOne),
+                 "HiggsMass_worseSolution"+scenarioSuffix+nameSuffix,
+                 xlabel="m(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth,
+                 cutLine=lightHplusMassPoint)
 
 
 
@@ -351,49 +353,56 @@ def doPlots(datasets, scenario, lightHplusMassPoint):
 #     drawPlot(createPlot("FullHiggsMass/HiggsMassImpure", normalizeToOne=massPlotNormToOne), "HiggsMassImpure"+nameSuffix, xlabel="m(#tau, #nu_{#tau}) of events with mis-ID", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
 
     # PLOT: Transverse mass
-    drawPlot(createPlot("transverseMass", normalizeToOne=massPlotNormToOne),
-             "TransverseMass"+nameSuffix,
-             xlabel="m_{T}(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
+    if scenario == "":
+        drawPlot(createPlot("transverseMass", normalizeToOne=massPlotNormToOne),
+                 "TransverseMass"+nameSuffix,
+                 xlabel="m_{T}(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
 
     # Set colour scheme for 2D plots
     tdrstyle.setDeepSeaPalette()
 
     # PLOT: Transverse mass versus invariant mass
-    drawPlot(createTH2Plot("FullHiggsMass/TransMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
-             "TransMassVsInvMass"+scenarioSuffix+nameSuffix,
-             xlabel="(M_{H^{+}} = %d GeV)          m_{T}(#tau, #nu_{#tau})"%lightHplusMassPoint, ylabel="m(#tau, #nu_{#tau})",
-             zlabel="Events", log=False, createLegend=None,
-             opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
-    if not plotSignalOnly:
+    if plotSignalOnly:
+        drawPlot(createTH2Plot("FullHiggsMass/TransMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
+                 "TransMassVsInvMass"+scenarioSuffix+nameSuffix,
+                 xlabel="(M_{H^{+}}=%d GeV sig. only)          m_{T}(#tau, #nu_{#tau})"%lightHplusMassPoint, ylabel="m(#tau, #nu_{#tau})",
+                 zlabel="Events", log=False, createLegend=None,
+                 opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+    else:
+        drawPlot(createTH2Plot("FullHiggsMass/TransMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
+                 "TransMassVsInvMass"+scenarioSuffix+nameSuffix,
+                 xlabel="(M_{H^{+}}=%d GeV sig. + bkg)          m_{T}(#tau, #nu_{#tau})"%lightHplusMassPoint, ylabel="m(#tau, #nu_{#tau})",
+                 zlabel="Events", log=False, createLegend=None,
+                 opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
         drawPlot(createTH2Plot("FullHiggsMass/TransMassVsInvMass", "TTJets"),
                  "TransMassVsInvMass_ttbarOnly"+scenarioSuffix,
-                 xlabel="(t#bar{t}only)          m_{T}(#tau, #nu_{#tau})", ylabel="m(#tau, #nu_{#tau})", zlabel="Events",
+                 xlabel="(t#bar{t} only)          m_{T}(#tau, #nu_{#tau})", ylabel="m(#tau, #nu_{#tau})", zlabel="Events",
                  log=False, createLegend=None,
                  opts={"xmax": 200, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
     # PLOT: Top mass versus invariant mass
-    drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
-             "TopMassVsInvMass"+scenarioSuffix+nameSuffix,
-             xlabel="(M_{H^{+}} = %d GeV)          m_{top}"%lightHplusMassPoint, ylabel="m(#tau, #nu_{#tau})",
-             zlabel="Events", log=False, createLegend=None,
-             opts={"xmax": 500, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
-    if not plotSignalOnly:
-        drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTJets"),
-                 "TopMassVsInvMass_ttbarOnly"+scenarioSuffix,
-                 xlabel="(t#bar{t} only)          m_{top}", ylabel="m(#tau, #nu_{#tau})",
-                 zlabel="Events", log=False, createLegend=None,
-                 opts={"xmax": 500, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+#     drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTToHplus_M%d"%lightHplusMassPoint),
+#              "TopMassVsInvMass"+scenarioSuffix+nameSuffix,
+#              xlabel="(M_{H^{+}} = %d GeV)          m_{top}"%lightHplusMassPoint, ylabel="m(#tau, #nu_{#tau})",
+#              zlabel="Events", log=False, createLegend=None,
+#              opts={"xmax": 500, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+#     if not plotSignalOnly:
+#         drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTJets"),
+#                  "TopMassVsInvMass_ttbarOnly"+scenarioSuffix,
+#                  xlabel="(t#bar{t} only)          m_{top}", ylabel="m(#tau, #nu_{#tau})",
+#                  zlabel="Events", log=False, createLegend=None,
+#                  opts={"xmax": 500, "ymax": 200}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
     # PLOT: Top mass versus neutrino number
-    drawPlot(createTH2Plot("FullHiggsMass/TopMassVsNeutrinoNumber", "TTToHplus_M%d"%lightHplusMassPoint),
-             "TopMassVsNeutrinoNumber"+scenarioSuffix+nameSuffix,
-             xlabel="(M_{H^{+}} = %d GeV)          m_{top}"%lightHplusMassPoint, ylabel="Number of neutrinos",
-             zlabel="Events", log=False, createLegend=None,
-             opts={"xmax": 500, "ymax": 8}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=1.0)
-    if not plotSignalOnly:
-        drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTJets"),
-                 "TopMassVsInvMass_ttbarOnly"+scenarioSuffix,
-                 xlabel="(t#bar{t} only)          m_{top}", ylabel="Number of neutrinos",
-                 zlabel="Events", log=False, createLegend=None,
-                 opts={"xmax": 500, "ymax": 8}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
+#     drawPlot(createTH2Plot("FullHiggsMass/TopMassVsNeutrinoNumber", "TTToHplus_M%d"%lightHplusMassPoint),
+#              "TopMassVsNeutrinoNumber"+scenarioSuffix+nameSuffix,
+#              xlabel="(M_{H^{+}} = %d GeV)          m_{top}"%lightHplusMassPoint, ylabel="Number of neutrinos",
+#              zlabel="Events", log=False, createLegend=None,
+#              opts={"xmax": 500, "ymax": 8}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=1.0)
+#     if not plotSignalOnly:
+#         drawPlot(createTH2Plot("FullHiggsMass/TopMassVsInvMass", "TTJets"),
+#                  "TopMassVsInvMass_ttbarOnly"+scenarioSuffix,
+#                  xlabel="(t#bar{t} only)          m_{top}", ylabel="Number of neutrinos",
+#                  zlabel="Events", log=False, createLegend=None,
+#                  opts={"xmax": 500, "ymax": 8}, rebinToWidthX=massPlotBinWidth, rebinToWidthY=massPlotBinWidth)
     
         
 
@@ -510,12 +519,15 @@ def doCounters(datasets):
 #     #table.renameRows(counterLabels)
 #     print table.format(latexFormat)
     
-    table2 = eventCounter.getSubCounterTable("SolutionSelection")
-    table2.renameRows(solutionSelectionLabels)
-    table2.transpose()
-    print table2.format(plainFormat)
+#     table2 = eventCounter.getSubCounterTable("SolutionSelection")
+#     table2.renameRows(solutionSelectionLabels)
+#     table2.transpose()
+#     print table2.format(plainFormat)
     
-    
+    table3 = eventCounter.getSubCounterTable("FullMassEventClassification")
+    table3.renameRows(eventClassificationLabels)
+#    table3.transpose()
+    print table3.format(latexFormat)
 
 def Gaussian(x,par):
     return par[0]*TMath.Gaus(x[0],par[1],par[2],1)
