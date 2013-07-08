@@ -10,6 +10,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeFunctionBranch.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenParticleBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeValueMapBranch.h"
 
 #include<vector>
 #include<string>
@@ -35,12 +36,15 @@ namespace HPlus {
     size_t setValues(const edm::Event& iEvent);
     size_t setValues(const edm::Event& iEvent, const edm::View<reco::GenParticle>& genParticles);
 
-    void setValues(const edm::PtrVector<pat::Muon>& muons);
+    void setValues(const edm::PtrVector<pat::Muon>& muons, const edm::Event& iEvent);
     void setValuesCorrected(const edm::PtrVector<pat::Muon>& muons);
 
     void reset();
 
+    bool enabled() const { return fEnabled; }
+
     const edm::InputTag& getInputTag() const { return fMuonSrc; }
+    const std::string getPrefix() const { return fPrefix; }
 
   private:
     edm::InputTag fMuonSrc;
@@ -58,8 +62,10 @@ namespace HPlus {
     std::vector<int> fMuonsCharge;
     std::vector<double> fMuonsNormChi2;
     std::vector<MuonFunctionBranch> fMuonsFunctions;
+    std::vector<TreeValueMapBranch<bool> > fMuonsBools;
     TreeGenParticleBranches fMuonsGenMatch;
 
+    const bool fEnabled;
     const bool fMuonCorrectedEnabled;
     const bool fTunePEnabled;
   };

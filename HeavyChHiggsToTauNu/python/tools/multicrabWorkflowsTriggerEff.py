@@ -175,86 +175,86 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         "TauParked_198022-202504_2012C_Jan22": TaskDef(njobsIn=3000, njobsOut=40, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v7","HLT_LooseIsoPFTau35_Trk20_Prong1_v9"], triggerThrow=False),
         "TauParked_202972-203742_2012C_Jan22": TaskDef(njobsIn= 150, njobsOut= 1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"], triggerThrow=False),
         "TauParked_203777-208686_2012D_Jan22": TaskDef(njobsIn=7000, njobsOut=500, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"], triggerThrow=False),
-                                                                                                                                                                       
-        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                  
-        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                  
-        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                  
-        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 40, njobsOut=4),                                                                                  
-        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 80, njobsOut=2),                                                                                  
-        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=300, njobsOut=6),                                                                                  
-        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(njobsIn=250, njobsOut=4),                                                                                  
-        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=150, njobsOut=3),                                                                                  
-        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(njobsIn=850, njobsOut=14),                                                                                 
-                                                                                                                                                                       
-        "WW_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 8),                                                                                 
-        "WZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 8),                                                                                 
-        "ZZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 8),                                                                                 
-        "TTJets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=700, njobsOut=30),                                                                                 
-        "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(njobsIn=100, njobsOut= 4, args={"wjetsWeighting": 1, "wjetBin": -1}),                                      
-        "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(njobsIn=250, njobsOut=16, args={"wjetsWeighting": 1, "wjetBin": -1}),                                      
-        "W1Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=150, njobsOut= 8, args={"wjetsWeighting": 1, "wjetBin": 1}),                                       
-        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=800, njobsOut=40, args={"wjetsWeighting": 1, "wjetBin": 2}),                                       
-        "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=490, njobsOut=50, args={"wjetsWeighting": 1, "wjetBin": 3}),                                       
-        "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=550, njobsOut=30, args={"wjetsWeighting": 1, "wjetBin": 4}),                                       
-        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=350, njobsOut=60),                                                                                 
-        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(njobsIn= 40, njobsOut= 1),                                                                                 
+                                                                                       
+        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),
+        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=2),
+        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(njobsIn= 20, njobsOut=1),  
+        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 40, njobsOut=4),  
+        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 80, njobsOut=2),  
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=300, njobsOut=6),  
+        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(njobsIn=250, njobsOut=4),  
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=150, njobsOut=3),  
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(njobsIn=850, njobsOut=14), 
+                                                                                       
+        "WW_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 15),
+        "WZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 15),
+        "ZZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 15),
+        "TTJets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=700, njobsOut=30), 
+        "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(njobsIn=100, njobsOut= 10, args={"wjetsWeighting": 1, "wjetBin": -1}),
+        "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(njobsIn=250, njobsOut= 25, args={"wjetsWeighting": 1, "wjetBin": -1}),
+        "W1Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=150, njobsOut= 15, args={"wjetsWeighting": 1, "wjetBin": 1}), 
+        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=800, njobsOut= 80, args={"wjetsWeighting": 1, "wjetBin": 2}), 
+        "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=490, njobsOut= 50, args={"wjetsWeighting": 1, "wjetBin": 3}), 
+        "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=550, njobsOut= 55, args={"wjetsWeighting": 1, "wjetBin": 4}), 
+        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=350, njobsOut= 60),                                           
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(njobsIn= 40, njobsOut= 1),                                            
         "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn=100, njobsOut= 5),
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 50, njobsOut= 5),
-        "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut= 2),                                                                                 
-        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDefMC(njobsIn= 20, njobsOut= 2),                                                                                 
-        "T_s-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 10, njobsOut= 1),                                                                                 
-        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 10, njobsOut= 1),                                                                                 
+        "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut= 2),                                            
+        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDefMC(njobsIn= 20, njobsOut= 2),                                            
+        "T_s-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 10, njobsOut= 1),                                            
+        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 10, njobsOut= 1),                                            
         }
 
     workflowName = "triggerMetLeg_skim_"+version
 
-    # Update the default definitions from the argument                                                                                                                 
-    updateTaskDefinitions(defaultDefinitions, updateDefinitions)                                                                                                       
-                                                                                                                                                                       
-    # Add pattuple Workflow for each dataset                                                                                                                           
-    for datasetName, taskDef in defaultDefinitions.iteritems():                                                                                                        
-        dataset = datasets.getDataset(datasetName)                                                                                                                     
-                                                                                                                                                                       
-        # Construct processing workflow                                                                                                                                
+    # Update the default definitions from the argument             
+    updateTaskDefinitions(defaultDefinitions, updateDefinitions)   
+                                                                   
+    # Add pattuple Workflow for each dataset                       
+    for datasetName, taskDef in defaultDefinitions.iteritems():    
+        dataset = datasets.getDataset(datasetName)                 
+                                                                   
+        # Construct processing workflow                                       
         wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName, skimConfig=skim)
 
-        # Setup the publish name                                                                                                                                       
+        # Setup the publish name                                                 
         name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
-        wf.addCrabLine("USER.publish_data_name = "+name)                                                                                                               
-                                                                                                                                                                       
-        # For MC, split by events, for data, split by lumi                                                                                                             
-        if dataset.isMC():                                                                                                                                             
-            wf.addCrabLine("CMSSW.total_number_of_events = -1")                                                                                                        
-        else:                                                                                                                                                          
-            wf.addCrabLine("CMSSW.total_number_of_lumis = -1")                                                                                                         
-                                                                                                                                                                       
-        # Add the pattuple Workflow to Dataset                                                                                                                         
-        dataset.addWorkflow(wf)                                                                                                                                        
-        # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset                                                                     
-        if wf.output != None:                                                                                                                                          
-            commonArgs = {                                                                                                                                             
-                "source": Source(workflowName),                                                                                                                 
-                "args": wf.args,                                                                                                                                       
-                "skimConfig": skim                                                                                                                                     
+        wf.addCrabLine("USER.publish_data_name = "+name)                         
+                                                                                 
+        # For MC, split by events, for data, split by lumi                       
+        if dataset.isMC():                                                       
+            wf.addCrabLine("CMSSW.total_number_of_events = -1") 
+        else:                                                   
+            wf.addCrabLine("CMSSW.total_number_of_lumis = -1")  
+                                                                
+        # Add the pattuple Workflow to Dataset                  
+        dataset.addWorkflow(wf)                                 
+        # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
+        if wf.output != None:                                                                     
+            commonArgs = {                                                                        
+                "source": Source(workflowName),                                                   
+                "args": wf.args,                                                                  
+                "skimConfig": skim                                                                
                 }
             commonArgs["args"]["trgAnalysis"] = "MetLeg"
 
-            if dataset.isData():                                                                                                                                       
-                # For data, construct one analysis workflow per trigger type                                                                                           
-                pd = datasetName.split("_")[0]                                                                                                                         
+            if dataset.isData():                                                                  
+                # For data, construct one analysis workflow per trigger type                      
+                pd = datasetName.split("_")[0]                                                    
                 if pd == "Tau" or pd == "TauParked":
-                    dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=wf.triggerOR, **commonArgs))                                                    
-                elif pd == "MultiJet":                                                                                                                                 
-                    if datasetName in quadJetTriggers:                                                                                                                 
+                    dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=wf.triggerOR, **commonArgs))
+                elif pd == "MultiJet":                                                                                    
+                    if datasetName in quadJetTriggers:                                                                    
                         dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))                               
-                    if datasetName in quadJetBTagTriggers:                                                                                                             
+                    if datasetName in quadJetBTagTriggers:                                                                
                         dataset.addWorkflow(Workflow("analysis_quadjetbtag_"+version, triggerOR=quadJetBTagTriggers[datasetName], **commonArgs))                       
-                    if datasetName in quadPFJetBTagTriggers:                                                                                                           
+                    if datasetName in quadPFJetBTagTriggers:                                                              
                         dataset.addWorkflow(Workflow("analysis_quadpfjetbtag_"+version, triggerOR=quadPFJetBTagTriggers[datasetName], **commonArgs))                   
-                else:                                                                                                                                                  
-                    raise Exception("Unsupported PD name %s" % pd)                                                                                                     
-            else:                                                                                                                                                      
-                # For MC, also construct one analysis workflow per trigger type                                                                                        
+                else:                                                                                                     
+                    raise Exception("Unsupported PD name %s" % pd)                                                        
+            else:                                                                                                         
+                # For MC, also construct one analysis workflow per trigger type                                           
                 dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=[mcTriggerMETLeg], **commonArgs))
 
 def addMetLegSkim_53X_v3(datasets):

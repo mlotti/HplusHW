@@ -13,17 +13,20 @@
 #include <sstream>
 
 namespace HPlus {
-  QCDTailKiller::Data::Data(int maxEntries):
-    fMaxEntries(maxEntries),
+  QCDTailKiller::Data::Data():
+    fMaxEntries(-1),
     fPassedEvent(false),
-    fDeltaPhiTauMET(-1.0) {
-      for (int i = 0; i < fMaxEntries; ++i) {
-        fPassedBackToBackJet.push_back(false);
-        fPassedCollinearJet.push_back(false);
-        fDeltaPhiJetMET.push_back(-1.0);
-      }
-    }
+    fDeltaPhiTauMET(-1.0) { }
   QCDTailKiller::Data::~Data() {}
+
+  void QCDTailKiller::Data::initialize(int maxEntries) {
+    fMaxEntries = maxEntries;
+    for (int i = 0; i < fMaxEntries; ++i) {
+      fPassedBackToBackJet.push_back(false);
+      fPassedCollinearJet.push_back(false);
+      fDeltaPhiJetMET.push_back(-1.0);
+    }
+  }
 
   const bool QCDTailKiller::Data::passedBackToBackCuts() const {
     for (std::vector<bool>::const_iterator it = fPassedBackToBackJet.begin(); it != fPassedBackToBackJet.end(); ++it) {
@@ -137,7 +140,7 @@ namespace HPlus {
     } else if (fCutShape == QCDTailKiller::kCircle) {
     // Circular cut
       if (fCutDirection == QCDTailKiller::kCutUpperLeftCorner) {
-        myPassedStatus = std::sqrt(std::pow(180.0-y,2)+std::pow(x,2)) > fCutX;
+        myPassedStatus = std::sqrt(std::pow(180.0-y,2)+std::pow(x,2)) < fCutX;
       } else {
         myPassedStatus = std::sqrt(std::pow(180.0-x,2)+std::pow(y,2)) > fCutX;
       }
@@ -155,6 +158,7 @@ namespace HPlus {
   QCDTailKiller::QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string postfix):
     BaseSelection(eventCounter, histoWrapper),
     fMaxEntries(iConfig.getUntrackedParameter<uint32_t>("maxJetsToConsider")),
+    bDisableCollinearCuts(iConfig.getUntrackedParameter<bool>("disableCollinearCuts")),
     fSubCountAllEvents(eventCounter.addSubCounter("QCDTailKiller"+postfix, "All events")),
     fSubCountPassedEvents(eventCounter.addSubCounter("QCDTailKiller"+postfix, "Passed events"))
   {
@@ -187,11 +191,15 @@ namespace HPlus {
       myStream << "CollinearJet" << i+1;
       fCollinearJetCut.push_back(CutItem(eventCounter, myStream.str(), QCDTailKiller::kCutUpperLeftCorner));
       if (i < myCollinearPSets.size()) {
-        fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir,
-                                        myCollinearPSets[i].getUntrackedParameter<std::string>("CutShape"),
-                                        myCollinearPSets[i].getUntrackedParameter<double>("CutX"),
-                                        myCollinearPSets[i].getUntrackedParameter<double>("CutY"),
-                                        i+1);
+        if (!bDisableCollinearCuts) {
+          fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir,
+                                         myCollinearPSets[i].getUntrackedParameter<std::string>("CutShape"),
+                                         myCollinearPSets[i].getUntrackedParameter<double>("CutX"),
+                                         myCollinearPSets[i].getUntrackedParameter<double>("CutY"),
+                                         i+1);
+        } else {
+          fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir, "noCut", 0., 0., i+1);
+        }
       } else {
         fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir, "noCut", 0.0, 0.0, i+1);
       }
@@ -217,7 +225,8 @@ namespace HPlus {
   }
 
   QCDTailKiller::Data QCDTailKiller::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau>& tau, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met) {
-    Data output(fMaxEntries);
+    Data output;
+    output.initialize(fMaxEntries);
     increment(fSubCountAllEvents);
     // Obtain delta phi between tau and MET
     double myDeltaPhiTauMET = DeltaPhi::reconstruct(*tau, *met) * 57.3;

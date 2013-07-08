@@ -251,12 +251,13 @@ class DatacardColumn():
             else:
                 myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.RATE)
                 myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [""], [self._shapeHisto], ExtractorMode.RATE)
-            myRateResult = myExtractor.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+            # OBSOLETE
+            #myRateResult = myExtractor.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         # Cache result
         self._rateResult = ExtractorResult("rate",
                                            "rate",
-                                           myRateResult,
+                                           myRateHistograms[0].Integral(), # Take only visible part
                                            myRateHistograms)
         # Obtain results for nuisances
         for nid in self._nuisanceIds:

@@ -264,7 +264,7 @@ class UnfoldedHistogramReader:
         return mySum
 
 ## Method containing the validation tests for this package
-def validate():
+def validateUnfoldedHistogramReader():
     def check(a,b):
         if abs(a-b) < 0.00001:
             return TestPassedStyle()+"PASSED"+NormalStyle()

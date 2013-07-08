@@ -20,7 +20,8 @@ dataEras = [
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
-#myOptimisation.addTauPtVariation([40.0, 50.0])
+#myOptimisation.printOptions() # Uncomment to find out the implemented methods
+#myOptimisation.addTauPtVariation([41.0, 50.0])
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
 #myOptimisation.addRtauVariation([0.0, 0.7])
@@ -34,26 +35,28 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
 #myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
-#myOptimisation.disableMaxVariations()
 
 ### Boolean flags
-bCustomizeTailKiller = True
-    
+bCustomizeTailKiller = False
+
 def customize(signalAnalysis):
     # Choice of tau selection for tau candidate selection
     signalAnalysis.applyNprongsCutForTauCandidate = False
     signalAnalysis.applyRtauCutForTauCandidate = False
-    # Binning of factorisation (note that first bin is below the first number and last bin is greater than the last number)
-    signalAnalysis.factorisationTauPtBinLowEdges = cms.untracked.vdouble(41., 50., 60., 70., 80., 100., 120., 150., 200., 300.)
-    signalAnalysis.factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5) # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
-    signalAnalysis.factorisationNVerticesBinLowEdges = cms.untracked.vint32(10)
+    # Splitting of analysis phase space (note that first bin is below the first number and last bin is greater than the last number)
+    signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauPtBinLowEdges = cms.untracked.vdouble(41., 50., 60., 70., 80., 100., 120., 150., 200., 300.)
+    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5)
+    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByNVerticesBinLowEdges = cms.untracked.vint32(10)
+    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByDeltaPhiTauMet = cms.untracked.vdouble(90.) # If used, one could disable collinear cuts
+    #signalAnalysis.QCDTailKiller.disableCollinearCuts = True # enable, if splitting by delta phi(tau,MET)
+    print "Phase space is splitted in analysis as follows:"
+    print signalAnalysis.commonPlotsSettings.histogramSplitting
     # Variation options
-    signalAnalysis.doAnalysisVariationWithTraditionalMethod = True
-    signalAnalysis.doAnalysisVariationWithABCDMethod = False
-    signalAnalysis.doAnalysisVariationWithDoubleABCDMethod = False
+    signalAnalysis.analysisMode = cms.untracked.string("traditional") # options: "traditional", "ABCD"
     # MET cut
     #signalAnalysis.MET.METCut = 60.0
-    #signalAnalysis.MET.METCut = 50.0
+    signalAnalysis.MET.METCut = 50.0
+    #signalAnalysis.MET.preMETCut = 30.0
     signalAnalysis.MET.doTypeICorrectionForPossiblyIsolatedTaus = "always"
     # Tail-Killer 
     if bCustomizeTailKiller:
@@ -78,10 +81,9 @@ def customize(signalAnalysis):
     print "\n*** QCD factorised customisations applied ***"
     print "- Nprongs cut included in tau candidate selections:",signalAnalysis.applyNprongsCutForTauCandidate.value()
     print "- Rtau cut included in tau candidate selections:",signalAnalysis.applyRtauCutForTauCandidate.value()
-    print "- Traditional method used:",signalAnalysis.doAnalysisVariationWithTraditionalMethod.value()
-    print "- ABCD method (experimental) used:",signalAnalysis.doAnalysisVariationWithABCDMethod.value()
-    print "- Double ABCD method (very experymental) used:",signalAnalysis.doAnalysisVariationWithDoubleABCDMethod.value()
+    print "- Analysis method used:",signalAnalysis.analysisMode.value()
     print "- MET cut:",signalAnalysis.MET.METCut.value()
+    print "- pre-MET cut:",signalAnalysis.MET.preMETCut.value()
     print "- Tail-Killer:", signalAnalysis.QCDTailKiller
     
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
@@ -90,13 +92,15 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         customizeLightAnalysis=customize,
                         #doHeavyAnalysis=True,
                         #customizeHeavyAnalysis=customize,
+                        #useCHSJets=True,
+                        applyTauTriggerScaleFactor=True,
+                        #applyTauTriggerLowPurityScaleFactor=True,
+                        #applyMETTriggerScaleFactor=True,
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
-                        #customizeAnalysis=customize,
-                        #doAgainstElectronScan=True,
                         #doSystematics=True,
-                        doQCDTailKillerScenarios=False, #True,
-                        doFillTree=True, #False,
-                        histogramAmbientLevel = "Vital", # Informative
+                        #doQCDTailKillerScenarios=True,
+                        doFillTree=False,
+                        #histogramAmbientLevel = "Vital", # Informative by default
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )
 

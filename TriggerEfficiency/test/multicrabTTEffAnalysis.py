@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-analysis = "TauLeg2012"
-#analysis = "MetLeg2012"
+#analysis = "TauLeg2012"
+analysis = "MetLeg2012"
 #analysis = "QuadJet2012"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
@@ -19,7 +19,8 @@ import HiggsAnalysis.TriggerEfficiency.tools.multicrabDatasets2012 as multicrabD
 if analysis[:-4] == "TauLeg":
     multicrabDatasetsTTEff.addTauLegSkim(multicrabWorkflows.datasets)
 if analysis[:-4] == "MetLeg":
-    multicrabDatasetsTTEff.addMetLegSkim(multicrabWorkflows.datasets)
+#    multicrabDatasetsTTEff.addMetLegSkim(multicrabWorkflows.datasets)
+    multicrabDatasetsTTEff.addMetLegSkim_CaloMETCorr(multicrabWorkflows.datasets)
 if analysis[:-4] == "QuadJet":
     multicrabDatasetsTTEff.addQuadJetSkim(multicrabWorkflows.datasets)
 #multicrabWorkflows.printAllDatasets()

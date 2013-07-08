@@ -64,7 +64,7 @@ def main(opts, moduleSelector):
         mcrabInfoOutput.append("- Embedding: estimated from signal analysis MC")
         print "- %sWarning:%s Embedding: estimated from signal analysis MC"%(WarningStyle(),NormalStyle())
     else:
-        getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput, not config.OptionReplaceEmbeddingByMC)
+        embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput, not config.OptionReplaceEmbeddingByMC)
     qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
     if qcdFactorisedDsetCreator == None:
         myQCDMethods.remove(DataCard.DatacardQCDMethod.FACTORISED)
