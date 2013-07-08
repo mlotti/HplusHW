@@ -9,6 +9,10 @@ import re
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
+def addToDict(d, key, num):
+    old = d.get(key, 0)
+    d[key] = old + num
+
 def pretty(num):
     divisions = 0
     value = float(num)

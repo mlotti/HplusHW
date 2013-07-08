@@ -99,6 +99,9 @@ def addConfigInfo(of, dataset):
 
 
 def listDirectoryContent(tdirectory, predicate=None):
+    if not hasattr(tdirectory, "GetListOfKeys"):
+        return None
+
     dirlist = tdirectory.GetListOfKeys()
 
     # Suppress the warning message of missing dictionary for some iterator

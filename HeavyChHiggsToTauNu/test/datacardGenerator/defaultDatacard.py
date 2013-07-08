@@ -2,10 +2,12 @@ DataCardName    = 'Default'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeIsolationDependent'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_vitalonly_correctCtrlPlots'
-Path            = '/home/wendland/data/v445/met50_2013-05-13/testInverted'
+#Path            = '/home/wendland/data/v445/met50_2013-05-13/testInverted'
+Path = "/home/wendland/data/v445/tmp"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
+LightMassPoints      = [120]
 HeavyMassPoints      = [180,190,200,220,250,300]
 HeavyMassPoints      = []
 #MassPoints      = [80,90,100,120,140,150,155,160]
@@ -26,7 +28,7 @@ OptionMassShape = "TransverseMass"
 OptionReplaceEmbeddingByMC = True
 OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = True
+OptionDoControlPlots = not True
 OptionQCDfactorisedFactorisationSchema = "TauPt" # options: 'full', 'taupt' (recommended), 'taueta, 'nvtx'
 OptionDoQCDClosureTests = False
 
@@ -52,8 +54,8 @@ if OptionMassShape == "TransverseMass":
                                   "xtitle": "Transverse mass / GeV",
                                   "ytitle": "Events" }
 elif OptionMassShape == "FullMass":
-    SignalShapeHisto = "fullMass"
-    FakeShapeHisto = "EWKFakeTausFullMass"
+    SignalShapeHisto = "shapeInvariantMass"
+    FakeShapeHisto = "shapeEWKFakeTausInvariantMass"
     ShapeHistogramsDimensions = { "bins": 25,
                                   "rangeMin": 0.0,
                                   "rangeMax": 500.0,

@@ -8,9 +8,11 @@
 # Based on produceTauEmbeddingResult.py by M. Kortelainen
 # Modified for QCD inverted tau method 22.11.2012/S.Lehti
 # Updated 7.5.2013/S.Lehti
+# Updated 19.6.2013/S.Lehti
 ######################################################################
 
 import os
+import re
 import sys
 import math
 import json
@@ -34,22 +36,19 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute,addConfigInfo
 searchMode = "Light"             
 #searchMode = "Heavy"            
 
-#dataEra = "Run2011A"
-#dataEra = "Run2011B"
-dataEra = "Run2011AB"
 
 analysis      = "signalAnalysisInvertedTau"
 massPlots     = []
 massPlotNames = []
 controlPlots  = []
 
-rebin = 10
+rebin = 1
 
-massPlots.append("Inverted/MTInvertedAllCutsTailKiller")
-massPlotNames.append("transverseMass")
 
-massPlots.append("Inverted/HiggsMass")
-massPlotNames.append("fullMass")
+massPlots.append("shapeTransverseMass")
+massPlots.append("shapeInvariantMass")
+
+controlPlots.append("ForDataDrivenCtrlPlots")
 
 def usage():
     print
@@ -117,52 +116,75 @@ def main():
 
         
     creator = dataset.readFromMulticrabCfg(directory=dirQCDInv)
-    optModes = creator.getOptimizationModes()
+    optModes = []#creator.getOptimizationModes()
+    optModes.append("")
+    dataEras = creator.getDataEras()
+    dataEras = []
+#    dataEras.append("Run2011A")
+#    dataEras.append("Run2011AB")
+    dataEras.append("Run2011B")
+    print "optModes",optModes
+    print "dataEras",dataEras
 
     directory = os.path.join(taskDir, "Data", "res")
     os.makedirs(directory)
 
     fOUT = ROOT.TFile.Open(os.path.join(directory, "histograms-Data.root"), "RECREATE")
+
+    lumiSaved = False    
+    for optMode in optModes:
+	for dataEra in dataEras:
+
+            datasetsQCDInv = creator.createDatasetManager(dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode)
+            datasetsQCDInv.loadLuminosities()
+            datasetsQCDInv.updateNAllEventsToPUWeighted()
+
+            plots.mergeRenameReorderForDataMC(datasetsQCDInv)
+            
+            datasetsQCDInv.mergeData()
+            datasetsQCDInv.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
+            
+            if not lumiSaved:
+                # Save luminosity
+                data = {"Data": datasetsQCDInv.getDataset("Data").getLuminosity()}
+                f = open(os.path.join(taskDir, "lumi.json"), "w")
+                json.dump(data, f, indent=2)
+                f.close()
+		lumiSaved = True
     
-    for i,optMode in enumerate(optModes):
+            anadir = fOUT.mkdir(analysis+searchMode+dataEra+optMode)
 
-	datasetsQCDInv = creator.createDatasetManager(dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode)
-	datasetsQCDInv.loadLuminosities()
-	datasetsQCDInv.updateNAllEventsToPUWeighted()
+            anadir.cd()
+            integrals = []
+            for massPlot in massPlots:
+                print "Processing",massPlot
+                massPlotDir = anadir.mkdir(massPlot)
+                anadir.cd(massPlot)
+                integral = write(fOUT,datasetsQCDInv,[massPlot])
+                integrals.append(integral[0])
 
-	plots.mergeRenameReorderForDataMC(datasetsQCDInv)
+  	    for controlPlot in controlPlots:
+                print "Processing",controlPlot
+                controlPlotDir = anadir.mkdir(controlPlot)
+                anadir.cd(controlPlot)
+                controlPlotNames = datasetsQCDInv.getDataset("Data").getDirectoryContent(controlPlot)
+                controlPlotNamesWithPaths = []
+                for controlPlotName in controlPlotNames:
+                    controlPlotNamesWithPaths.append(os.path.join(controlPlot,controlPlotName))
+                write(fOUT,datasetsQCDInv,controlPlotNamesWithPaths)
+                anadir.cd()
 
-        datasetsQCDInv.mergeData()
-        datasetsQCDInv.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
-
-	if i == 0:
-	    # Save luminosity
-	    data = {"Data": datasetsQCDInv.getDataset("Data").getLuminosity()}
-	    f = open(os.path.join(taskDir, "lumi.json"), "w")
-	    json.dump(data, f, indent=2)
-	    f.close()
-    
-    	anadir = fOUT.mkdir(analysis+searchMode+optMode)
-
-    	anadir.cd()
-    	integrals = write(fOUT,datasetsQCDInv,massPlots,massPlotNames)
-
-    	controlPlotDir = anadir.mkdir("ControlPlots")
-    	anadir.cd("ControlPlots")
-    	write(fOUT,datasetsQCDInv,controlPlots)
-    	anadir.cd()
-
-    	counterdir = anadir.mkdir("counters")
-    	anadir.cd("counters")
-    	counter = ROOT.TH1D("counter","counter",len(integrals),0,len(integrals))
-    	for i,integral in enumerate(integrals):
-	    binLabel = "integral_"+massPlotNames[i]
-	    counter.SetBinContent(i+1,integral)
-            counter.GetXaxis().SetBinLabel(i+1,binLabel)
-        counter.Write()
-        weighteddir = counterdir.mkdir("weighted")
-        weighteddir.cd()
-        counter.Write()
+    	    counterdir = anadir.mkdir("counters")
+            anadir.cd("counters")
+            counter = ROOT.TH1D("counter","counter",len(integrals),0,len(integrals))
+            for i,integral in enumerate(integrals):
+                binLabel = "integral_"+massPlots[i]
+                counter.SetBinContent(i+1,integral)
+                counter.GetXaxis().SetBinLabel(i+1,binLabel)
+            counter.Write()
+            weighteddir = counterdir.mkdir("weighted")
+            weighteddir.cd()
+            counter.Write()
 
     addConfigInfo(fOUT, datasetsQCDInv.getDataset("Data"))
     
@@ -171,14 +193,79 @@ def main():
     print "Created multicrab-like dir for LandS:",taskDir
 
 
-from plotInvertedControlPlots import sumHistoBins
-def write(fOUT,datasets,histonames,newnames = []):
+def binFromTitle(title):
+    binlt_re = re.compile("#.*(?P<value><\d+)")
+    match = binlt_re.search(title)
+    if match:
+	return match.group("value")
+    bineq_re = re.compile("#.*=(?P<value>\d+\.\.\d+)")
+    match = bineq_re.search(title)
+    if match:
+	return match.group("value")
+    bingt_re = re.compile("#.*(?P<value>>\d+)")
+    match = bingt_re.search(title)
+    if match:
+	return match.group("value")
+
+    print "Function binFromTitle: Histogram title",title,"did not match re's"
+    sys.exit() 
+    return None
+
+from QCDInvertedNormalizationFactors import *
+def sumHistoBins(datasets,histonames,newname="",newtitle="",rebin = 1):
+
+    if len(histonames) == 0:
+	print "No histograms to sum, exiting.."
+	sys.exit()
+
+    histos = []
+    for histoname in histonames:
+        histo_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(histoname)])
+        histo_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+        histo = histo_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
+	ptbin = binFromTitle(histo.GetTitle())
+	if not ptbin in QCDInvertedNormalization.keys():
+	    print "Key",ptbin,"not found in QCDInvertedNormalization."
+	    print "Available keys:",QCDInvertedNormalization.keys() 
+	    continue
+
+        histo.Scale(QCDInvertedNormalization[ptbin])
+
+        histoEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(histoname)])
+        histoEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+        histoEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+        histoEWK = histoEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+        histoEWK.Scale(QCDInvertedNormalization[ptbin+"EWK"])
+
+        histo.Add(histoEWK, -1)
+        histos.append(histo)
+
+    sum = histos[0].Clone("sum")
+    if len(newname)>0:
+        sum.SetName(newname)
+    if len(newtitle)>0:
+        sum.SetTitle(newtitle)
+    sum.Reset()
+
+    for histo in histos:
+        sum.Add(histo)
+    return sum
+
+def write(fOUT,datasets,dirnames,newnames = []):
     integrals = []
-    for i,histoname in enumerate(histonames):
-	name = histoname
-	if len(newnames) == len(histonames):
-	    name = massPlotNames[i]#+"_"+histoname.replace("/","_")
-	histo = sumHistoBins(datasets,histoname,name,"Inverted tau ID",rebin=rebin)
+    for i,dirname in enumerate(dirnames):
+	name = os.path.basename(dirname)
+	if len(newnames) == len(dirnames):
+	    name = massPlotNames[i]#+"_"+dirname.replace("/","_")
+        print "check write dirname",dirname
+        histonames = datasets.getDataset("Data").getDirectoryContent(dirname)
+        print "check write histonames",histonames
+	if histonames == None:
+	    continue
+	histonamesWithPath = []
+	for histoname in histonames:
+	    histonamesWithPath.append(os.path.join(dirname,histoname))    
+	histo = sumHistoBins(datasets,histonamesWithPath,name,"Inverted tau ID",rebin=rebin)
 	histo.Write()
 	integrals.append(histo.Integral(0, histo.GetNbinsX()+1))
 

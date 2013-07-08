@@ -6,7 +6,8 @@ dataVersion="53XdataPromptCv2"
 #isData = False
 runL1Emulator = False
 runOpenHLT = False
-analysis = "TauLeg"
+#analysis = "TauLeg"
+analysis = "MetLeg"
 hltType = "HLT"
 #hltType = "TEST"
 
@@ -62,7 +63,7 @@ else:
 #        "file:/afs/cern.ch/work/s/slehti/TriggerMETLeg_Tau_173236-173692_2011A_Nov08_pattuple_9_1_LSf.root"
 #        "file:TTEffSkim.root"
 #	"file:/tmp/slehti/TriggerMETLeg_Tau_Run2012C_PromptReco_v2_AOD_202792_203742_analysis_metleg_v53_v1_pattuple_28_1_L19.root"
-       'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerTauLeg/CMSSW_5_3_X/TauPlusX/Run2012A_13Jul2012_v1_AOD_190456_190738_triggerTauLeg_noTauIDTestSkim2noJSON_v53_v2/a3e0eb2b4b011c1375d601a0aac09e7c/pattuple_9_1_Ygp.root'
+       'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X/TauParked/Run2012D_22Jan2013_v1_AOD_203777_208686_triggerMetLeg_skim_v53_3c/65583ace3198f0f55b2cd7d093b9f259/pattuple_3940_3_oJW.root'
         )
     )
 
@@ -173,6 +174,9 @@ process.goodPrimaryVertices = cms.EDFilter("VertexSelector",
 )
 process.commonSequence *= process.goodPrimaryVertices
 
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMETFilter_cfi")
+process.commonSequence *= process.hPlusMETNoiseFilters
+
 # Analyzer definition
 process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
 ####        LoopingOver	        = cms.InputTag("selectedPatTausHpsPFTau"),
@@ -225,7 +229,11 @@ process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
 ##	    PFMETtype1 = cms.InputTag("pfType1CorrectedMet"),
 ##            HLTMET = cms.InputTag("hltMet"),
 ##            HLTMHT = cms.InputTag("hltPFMHTProducer"),
-            CaloMET = cms.InputTag("met")
+##            CaloMET = cms.InputTag("met")
+            CaloMET = cms.InputTag("patCaloMET"),
+#            CaloMETresidualCorrected = cms.InputTag("patResidualCorrectedCaloMET"),
+#            CaloMETnoHF = cms.InputTag("patCaloMETnoHF"),
+#            CaloMETnoHFresidualCorrected = cms.InputTag("patResidualCorrectedCaloMETnoHF"),
         ),
 
 	MuonSource        = cms.InputTag("selectedPatMuons"),

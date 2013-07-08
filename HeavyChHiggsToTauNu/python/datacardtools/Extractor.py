@@ -6,7 +6,7 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import _histoToCounter
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 from math import pow,sqrt
 import sys
 import ROOT

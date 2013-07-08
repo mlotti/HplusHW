@@ -24,6 +24,7 @@ namespace HPlus {
     HistogramsInBins2Dim(HPlus::HistoWrapper::HistoLevel, EventCounter&,HistoWrapper& ,std::string, std::string, std::string, int, double, double,  int, double, double);
      ~HistogramsInBins2Dim();
     void Fill(double ,double, double);
+    void Fill(double ,double, double, double); // for arbitrary weight
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
     // Use silentAnalyze if you do not want to fill histograms or increment counters
  

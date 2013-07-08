@@ -13,9 +13,9 @@ def getTightMuonsDefinition(postfix=""):
 
     tightMuons = cms.EDFilter("PATMuonSelector",
         src = cms.InputTag(src),
-#        cut = cms.string("%s && muonID('GlobalMuonPromptTight')" % muonGlobalPtEta)
-        # Take out chi2<10 cut while testing TuneP cocktail
+        # Take out chi2<10 cut for testing TuneP cocktail
         cut = cms.string("%s && globalTrack().hitPattern().numberOfValidMuonHits() > 0" % muonGlobalPtEta)
+#        cut = cms.string("%s && muonID('GlobalMuonPromptTight')" % muonGlobalPtEta)
 #        "&& innerTrack().numberOfValidHits() > 10"
 #        "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
 #        "&& numberOfMatches() > 1"

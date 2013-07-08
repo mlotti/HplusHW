@@ -13,29 +13,45 @@ analysis = "signalAnalysisInvertedTau"
 searchMode = "Light"
 #searchMode = "Heavy"
 
-#dataEra = "Run2011A"
-#dataEra = "Run2011B"
-dataEra = "Run2011AB"
+
+#dataEra = "Run2012AB"
+dataEra = "Run2012ABCD"
+#dataEra = "Run2011AB"
+#dataEra = "Run2012C"
+#dataEra = "Run2012D"
+#dataEra = "Run2011AB"
+#dataEra = "Run2012C"
+dataEra = "Run2011B"
 
 
-optMode = "OptQCDTailKillerLoose"
+
+
+#optMode = "OptQCDTailKillerZeroPlus"
+#optMode = "OptQCDTailKillerLoosePlus"
+#optMode = "OptQCDTailKillerMediumPlus"
+
+#optMode = "OptQCDTailKillerMediumPlus"
+#optMode = "OptQCDTailKillerTightPlus"
+
+#optMode = ""
+
 #optMode = ""
 
 #binning = [41,50,60,70,80,100,120,150,200]
-
 binning = [41,50,60,70,80,100,120,150,300]
 
 HISTONAMES = []
 
-
-
-#HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto")
-#HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto/SelectedTau_pT_AfterTauVetoInclusive")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut/SelectedTau_pT_AfterJetCutInclusive")
+HISTONAMES.append("Inverted/SelectedTau_pT_CollinearCuts/SelectedTau_pT_CollinearCutsInclusive")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
 HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
-HISTONAMES.append("Inverted/SelectedTau_pT_TailKiller")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
+HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging/SelectedTau_pT_AfterBtaggingInclusive")
+HISTONAMES.append("Inverted/SelectedTau_pT_BackToBackCuts/SelectedTau_pT_BackToBackCutsInclusive")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto/SelectedTau_pT_AfterBvetoInclusive")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts/SelectedTau_pT_AfterBvetoPhiCutsInclusive")
 
 
 import ROOT
@@ -93,29 +109,36 @@ def main():
         legends["Purity%s"%i] = name
 #        if "AfterMetCut"  in name:    
 #            legends["Purity%s"%i] = "MET > 60 GeV"
-        if "AfterMetCut"  in name:    
-            legends["Purity%s"%i] = "MET > 60 GeV"
+        if "SelectedTau_pT_CollinearCuts"  in name:    
+            legends["Purity%s"%i] = "Collinear cuts"
         if "AfterBtagging"  in name:    
             legends["Purity%s"%i] = "B tagging"
         if "AfterBveto"  in name:    
             legends["Purity%s"%i] = "B-jet veto"
         if "AfterBvetoPhiCuts"  in name:    
             legends["Purity%s"%i] = "B-jet veto, TailKiller"
-        if "AfterDeltaPhiJetsAgainstTTCut"  in name:    
-            legends["Purity%s"%i] = "TailKiller" 
+        if "SelectedTau_pT_BackToBackCuts"  in name:    
+            legends["Purity%s"%i] = "BackToBack cuts" 
 
-    plot.createFrame("purityLoose", opts={"xmin": 40, "xmax": 200, "ymin": 0., "ymax": 1.05})
+    plot.createFrame("purityLoose", opts={"xmin": 40, "xmax": 160, "ymin": 0., "ymax": 1.05})
     plot.frame.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
-    plot.frame.GetYaxis().SetTitle("Purity")
+    plot.frame.GetYaxis().SetTitle("QCD purity")
 #    plot.setEnergy(datasets.getEnergies())
 
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
 
-    plot.setLegend(histograms.createLegend(0.53, 0.2, 0.98, 0.4))
+    plot.setLegend(histograms.createLegend(0.3, 0.35, 0.6, 0.5))
     
  
-    histograms.addText(0.2, 0.3, "TailKiller: Medium", 18)
+#    histograms.addText(0.2, 0.3, "TailKiller: MediumPlus", 18)
+    histograms.addText(0.35, 0.28, "BackToBack cuts: TightPlus", 20)
+    histograms.addText(0.35, 0.22, "2011B", 20)
+
+
+    histograms.addText(0.2, 0.3, "TailKiller: MediumPlus", 18)
+#    histograms.addText(0.2, 0.3, "TailKiller: TightPlus", 18)
+
 
 
     histograms.addCmsPreliminaryText()
@@ -158,7 +181,9 @@ def purityGraph(i,datasets,histo):
     """
     purityGraph.SetMarkerStyle(20+i)
     purityGraph.SetMarkerColor(2+i)
-
+    if i==3:
+        purityGraph.SetMarkerColor(6)
+        
     defaults = {"drawStyle": "EP","legendStyle": "p"}
     
     return histograms.Histo(purityGraph, "Purity%s"%i, **defaults)
