@@ -34,6 +34,8 @@ void printImmediateDaughters(const reco::Candidate& p);
 void printDaughters(const reco::Candidate& p);
 
 namespace { 
+  // DUMMY COMMENT TO DEMONSTRATE COMMITTING
+
   // (Containing these variables in an anonymous namespace prevents them from being accessed from code in another file)
   // FLAGS:
   // Set this variable to true if you want debug print statements to be activated
