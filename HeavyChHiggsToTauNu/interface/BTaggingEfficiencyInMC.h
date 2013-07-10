@@ -45,23 +45,26 @@ namespace HPlus {
       friend class BTaggingEfficiencyInMC;
     private:
       // private member variables
-      int fSomeDataMember;
+      edm::PtrVector<pat::Jet> fGenuineBJets;
+      edm::PtrVector<pat::Jet> fGenuineBJetsWithBTag;
+      edm::PtrVector<pat::Jet> fGenuineLJets;
+      edm::PtrVector<pat::Jet> fGenuineLJetsWithBTag;
     };
 
     BTaggingEfficiencyInMC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper); // constructor
     ~BTaggingEfficiencyInMC(); // destructor
 
     // Analyzers
-    Data silentAnalyze(const edm::Event& iEvent);
-    Data analyze(const edm::Event& iEvent);
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const BTagging::Data& bTagData);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const BTagging::Data& bTagData);
 
   private:
-    Data privateAnalyze(const edm::Event& iEvent);
-    // All the private member functions
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const BTagging::Data& bTagData);
+    void classifyJetsForEfficiencyCalculation(const edm::PtrVector<pat::Jet>& jets, const BTagging::Data& bTagData, 
+					      BTaggingEfficiencyInMC::Data& output);
+    bool isBTagged(edm::Ptr<pat::Jet>& jet, const BTagging::Data& bTagData);
 
-    // All the private member variables
-
-    // Possibly counters and histograms
+    // Possibly add counters and histograms
 
   };
 }

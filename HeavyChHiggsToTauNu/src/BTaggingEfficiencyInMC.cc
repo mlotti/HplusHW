@@ -1,6 +1,11 @@
-// New code for calculating the b-tagging efficiency in MC. Responsible persons in Summer 2013: Shih-Yen and Stefan.
+/*
+  PURPOSE
+  Create vectors of different types of jets that can be used to calculate the b-(mis)tagging efficiency in MC. The efficiency measurement can be done at
+  several points in the event selection flow by creating several BTaggingEfficiencyInMC::Data objects in SignalAnalysis.cc (for instance). For this
+  reason, the actual histograms and counters are defined and handled in SignalAnalysis.cc (for instance).
+*/
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingEfficiencyInMC.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
@@ -30,9 +35,7 @@ void  printImmediateDaughters(const reco::Candidate& p);
 void printDaughters(const reco::Candidate& p);
 
 namespace HPlus {
-  BTaggingEfficiencyInMC::Data::Data():
-    fSomeDataMember(0)
-  { }
+  BTaggingEfficiencyInMC::Data::Data() { }
 
   BTaggingEfficiencyInMC::Data::~Data() { }
 
@@ -47,23 +50,69 @@ namespace HPlus {
 
   BTaggingEfficiencyInMC::~BTaggingEfficiencyInMC() { }
 
-  BTaggingEfficiencyInMC::Data BTaggingEfficiencyInMC::silentAnalyze(const edm::Event& iEvent) {
+  BTaggingEfficiencyInMC::Data BTaggingEfficiencyInMC::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup,
+								     const edm::PtrVector<pat::Jet>& jets, const BTagging::Data& bTagData) {
     ensureSilentAnalyzeAllowed(iEvent);
     // Disable histogram filling and counter incrementing until the return call
     // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-    return privateAnalyze(iEvent);
+    return privateAnalyze(iEvent, iSetup, jets, bTagData);
   }
   
-  BTaggingEfficiencyInMC::Data BTaggingEfficiencyInMC::analyze(const edm::Event& iEvent) {
+  BTaggingEfficiencyInMC::Data BTaggingEfficiencyInMC::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup,
+							       const edm::PtrVector<pat::Jet>& jets, const BTagging::Data& bTagData) {
     ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent);
+    return privateAnalyze(iEvent, iSetup, jets, bTagData);
   }
   
-  BTaggingEfficiencyInMC::Data BTaggingEfficiencyInMC::privateAnalyze(const edm::Event& iEvent) {
-    // basically all the actual code goes here
+  BTaggingEfficiencyInMC::Data BTaggingEfficiencyInMC::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup,
+								      const edm::PtrVector<pat::Jet>& jets, const BTagging::Data& bTagData) {
+    // Throw exception if b-tagging data are not available (i.e. if BTagging::privateAnalyze() has not been called
+    // TODO implement
+
+    // Set up
     Data output;
+    output.fGenuineBJets.reserve(jets.size());
+    output.fGenuineBJetsWithBTag.reserve(jets.size());
+    output.fGenuineLJets.reserve(jets.size());
+    output.fGenuineLJetsWithBTag.reserve(jets.size());
+
+    // End run with default output if the event is not MC. Otherwise, continue.
+    if (iEvent.isRealData()) return output;
+
+    // Make vectors of jets for the output. This way, their p_T, eta, ... can be put into histograms, which in turn can be used to
+    // calculate the efficiencies in bins of p_T, eta, ...
+    classifyJetsForEfficiencyCalculation(jets, bTagData, output);
     return output;
   }
+
+
+  
+  void BTaggingEfficiencyInMC::classifyJetsForEfficiencyCalculation(const edm::PtrVector<pat::Jet>& jets, const BTagging::Data& bTagData,
+								    BTaggingEfficiencyInMC::Data& output) {
+    int iFlavour = 0;
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
+      edm::Ptr<pat::Jet> iJet = *iter;
+      iFlavour = std::abs(iJet->partonFlavour());
+      if (iFlavour == 5) {
+	// B-jet found.
+	output.fGenuineBJets.push_back(iJet);
+	if (isBTagged(iJet, bTagData)) output.fGenuineBJetsWithBTag.push_back(iJet); // B-tagged b-jet found.
+      } else {
+	// Light flavour jet found.
+	output.fGenuineLJets.push_back(iJet);
+	if (isBTagged(iJet, bTagData)) output.fGenuineLJetsWithBTag.push_back(iJet); // B-tagged light flavour jet found.
+      }
+    }
+  }
+ 
+
+ 
+  bool BTaggingEfficiencyInMC::isBTagged(edm::Ptr<pat::Jet>& jet, const BTagging::Data& bTagData) {
+      for (edm::PtrVector<pat::Jet>::iterator iBjet = bTagData.getSelectedJets().begin(); iBjet != bTagData.getSelectedJets().end(); ++iBjet) {
+      if (jet == *iBjet) return true;
+    }
+    return false;
+  }  
 }
