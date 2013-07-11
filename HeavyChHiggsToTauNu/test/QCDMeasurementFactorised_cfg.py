@@ -7,8 +7,8 @@ dataVersion="44XmcS6"     # Fall11 MC
 
 dataEras = [
     "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
-    #"Run2011A",
-    #"Run2011B",
+    "Run2011A",
+    "Run2011B",
 ]
 
 # Note: Keep number of variations below 200 to keep file sizes reasonable
@@ -84,7 +84,7 @@ def customize(signalAnalysis):
     
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
-                        maxEvents=-1, # default is -1
+                        maxEvents=1000, # default is -1
                         customizeLightAnalysis=customize,
                         #doHeavyAnalysis=True,
                         #customizeHeavyAnalysis=customize,
@@ -94,10 +94,9 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #applyMETTriggerScaleFactor=True,
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
                         #doSystematics=True,
-                        doQCDTailKillerScenarios=True, #True,
-                        doInvariantMassReconstructionScenarios=True,
-                        doFillTree=False, #False,
-                        histogramAmbientLevel = "Vital", # Informative
+                        #doQCDTailKillerScenarios=True,
+                        doFillTree=False,
+                        #histogramAmbientLevel = "Vital", # Informative by default
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )
 
@@ -112,6 +111,6 @@ if builder.options.tauEmbeddingInput != 0:
         ]
     process.maxEvents.input = 10
 
-#f = open("configDump.py", "w")
-#f.write(process.dumpPython())
-#f.close()
+f = open("configDump.py", "w")
+f.write(process.dumpPython())
+f.close()
