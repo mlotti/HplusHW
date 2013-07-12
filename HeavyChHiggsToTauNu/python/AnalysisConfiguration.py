@@ -428,10 +428,12 @@ class ConfigBuilder:
                 analysisNamesForSystematics.extend(names)
 
         # QCD tail killer scenarios (do them also for optimisation variations)
-        analysisNamesForSystematics.extend(self._buildQCDTailKillerScenarios(process, analysisNamesForTailKillerScenarios))
+        qcdTailKillerNames = self._buildQCDTailKillerScenarios(process, analysisNamesForTailKillerScenarios)
+        analysisNamesForSystematics.extend(qcdTailKillerNames)
 
         # Invariant mass reconstruction scenarios
-        analysisNamesForSystematics.extend(self._buildInvariantMassReconstructionScenarios(process, analysisModules, analysisNames))
+        analysisNamesForSystematics.extend(self._buildInvariantMassReconstructionScenarios(process,
+                                           analysisNamesForTailKillerScenarios+qcdTailKillerNames))
 
         # Against electron scan
         self._buildAgainstElectronScan(process, analysisModules, analysisNames)
@@ -714,24 +716,23 @@ class ConfigBuilder:
         return names
 
     ## Build array of analyzers to scan various scenarios for invariant mass reconstruction
-    def _buildInvariantMassReconstructionScenarios(self, process, analysisModules, analysisNames):
-        def createInvariantMassReconstructionModule(process, modulePrefix, mod, names, modules):
+    def _buildInvariantMassReconstructionScenarios(self, process, analysisNames):
+        def createInvariantMassReconstructionModule(process, modulePrefix, mod):
             modName = name+"Opt"+modulePrefix
             if "Opt" in name:
                 modName = name+modulePrefix
             setattr(process, modName, mod)
-            names.append(modName)
-            modules.append(mod)
             path = cms.Path(process.commonSequence * mod)
             setattr(process, modName+"Path", path)
+            return modName
             
         if not self.doInvariantMassReconstructionScenarios:
             return []
         
         neutrinoPzSolutionSelectionMethods = ["DeltaEtaMax", "Smaller"]
         names = []
-        modules = []
-        for module, name in zip(analysisModules, analysisNames):
+        for name in analysisNames:
+            module = getattr(process, name)
             for currentPzSelectionMethod in neutrinoPzSolutionSelectionMethods:
                 ## Top invariant mass cut scenarios for invariant mass reconstruction
                 # "None" scenario
@@ -739,29 +740,29 @@ class ConfigBuilder:
                 mod.invMassReco.topInvMassLowerCut = -1 # negative value means no cut
                 mod.invMassReco.topInvMassUpperCut = -1 # negative value means no cut
                 mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
-                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
-                                                        "TopInvMassCutNone", mod, names, modules)
+                names.append(createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                        "TopInvMassCutNone", mod))
                 # "Loose" scenario
                 mod = module.clone()
                 mod.invMassReco.topInvMassLowerCut = 100 # negative value means no cut
                 mod.invMassReco.topInvMassUpperCut = 240 # negative value means no cut
                 mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
-                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
-                                                        "TopInvMassCutLoose", mod, names, modules)
+                names.append(createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                        "TopInvMassCutLoose", mod))
                 # "Medium" scenario
                 mod = module.clone()
                 mod.invMassReco.topInvMassLowerCut = 140 # negative value means no cut
                 mod.invMassReco.topInvMassUpperCut = 200 # negative value means no cut
                 mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
-                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
-                                                        "TopInvMassCutMedium", mod, names, modules)
+                names.append(createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                        "TopInvMassCutMedium", mod))
                 # "Tight" scenario
                 mod = module.clone()
                 mod.invMassReco.topInvMassLowerCut = 157 # negative value means no cut
                 mod.invMassReco.topInvMassUpperCut = 187 # negative value means no cut
                 mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
-                createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
-                                                        "TopInvMassCutTight", mod, names, modules)
+                names.append(createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
+                                                                     "TopInvMassCutTight", mod))
 
         self._accumulateAnalyzers("Modules for invariant mass reconstruction scenarios", names)
         return names
