@@ -43,6 +43,10 @@ namespace HPlus {
       
       const edm::PtrVector<pat::Jet>& getGenuineBJets() const { return fGenuineBJets; }
       const edm::PtrVector<pat::Jet>& getGenuineBJetsWithBTag() const { return fGenuineBJetsWithBTag; }
+      const edm::PtrVector<pat::Jet>& getGenuineGJets() const { return fGenuineGJets; }
+      const edm::PtrVector<pat::Jet>& getGenuineGJetsWithBTag() const { return fGenuineGJetsWithBTag; }
+      const edm::PtrVector<pat::Jet>& getGenuineUDSJets() const { return fGenuineUDSJets; }
+      const edm::PtrVector<pat::Jet>& getGenuineUDSJetsWithBTag() const { return fGenuineUDSJetsWithBTag; }
       const edm::PtrVector<pat::Jet>& getGenuineLJets() const { return fGenuineLJets; }
       const edm::PtrVector<pat::Jet>& getGenuineLJetsWithBTag() const { return fGenuineLJetsWithBTag; }
 
@@ -51,6 +55,10 @@ namespace HPlus {
       // private member variables
       edm::PtrVector<pat::Jet> fGenuineBJets;
       edm::PtrVector<pat::Jet> fGenuineBJetsWithBTag;
+      edm::PtrVector<pat::Jet> fGenuineGJets;
+      edm::PtrVector<pat::Jet> fGenuineGJetsWithBTag;
+      edm::PtrVector<pat::Jet> fGenuineUDSJets;
+      edm::PtrVector<pat::Jet> fGenuineUDSJetsWithBTag;
       edm::PtrVector<pat::Jet> fGenuineLJets;
       edm::PtrVector<pat::Jet> fGenuineLJetsWithBTag;
     };

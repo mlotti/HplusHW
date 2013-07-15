@@ -317,7 +317,22 @@ namespace HPlus {
     TFileDirectory myBTagEffDir = fs->mkdir("BTaggingEfficiencyInMC");
     hGenuineBJetEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineBJetEta", "genuineBJetEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
     hGenuineBJetWithBTagEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineBJetWithBTagEta", "genuineBJetWithBTagEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
-
+    hGenuineGJetEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineGJetEta", "genuineGJetEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
+    hGenuineGJetWithBTagEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineGJetWithBTagEta", "genuineGJetWithBTagEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
+    hGenuineUDSJetEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineUDSJetEta", "genuineUDSJetEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
+    hGenuineUDSJetWithBTagEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineUDSJetWithBTagEta", "genuineUDSJetWithBTagEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
+    hGenuineLJetEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineLJetEta", "genuineLJetEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
+    hGenuineLJetWithBTagEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineLJetWithBTagEta", "genuineLJetWithBTagEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
+    
+    hGenuineBJetPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineBJetPt", "genuineBJetPt;b-jet #eta;N_{events} / 0.05", 5000, 0.0, 500.0);
+    hGenuineBJetWithBTagPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineBJetWithBTagPt", "genuineBJetWithBTagPt;b-jet #eta;N_{events} / 0.05", 5000, 0.0, 500.0);
+    hGenuineGJetPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineGJetPt", "genuineGJetPt;b-jet #eta;N_{events} / 0.05", 5000, 0.0, 500.0);
+    hGenuineGJetWithBTagPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineGJetWithBTagPt", "genuineGJetWithBTagPt;b-jet #eta;N_{events} / 0.05", 5000, 0.0, 500.0);
+    hGenuineUDSJetPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineUDSJetPt", "genuineUDSJetPt;b-jet #eta;N_{events} / 0.05", 5000, 0.0, 500.0);
+    hGenuineUDSJetWithBTagPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineUDSJetWithBTagPt", "genuineUDSJetWithBTagPt;b-jet #eta;N_{events} / 0.05", 5000, 0.0, 500.0);
+    hGenuineLJetPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineLJetPt", "genuineLJetPt;b-jet #eta;N_{events} / 0.05", 5000, 0.0, 500.0);
+    hGenuineLJetWithBTagPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineLJetWithBTagPt", "genuineLJetWithBTagPt;b-jet #eta;N_{events} / 0.05", 5000, 0.0, 500.0);
+    
     hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 15, 0, 15);
     hSelectionFlowVsVertices = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "SignalSelectionFlowVsVertices", "SignalSelectionFlowVsVertices;N_{vertices};Step", 50, 0, 50, 15, 0, 15);
     hSelectionFlowVsVerticesFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "SignalSelectionFlowVsVerticesFakeTaus", "SignalSelectionFlowVsVerticesFakeTaus;N_{vertices};Step", 50, 0, 50, 15, 0, 15);
@@ -641,7 +656,50 @@ namespace HPlus {
     for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineBJetsWithBTag().begin(); jet != bTagEffData_afterCollinearCut.getGenuineBJetsWithBTag().end(); ++jet) {
       hGenuineBJetWithBTagEta->Fill((*jet)->eta());
     }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineGJets().begin(); jet != bTagEffData_afterCollinearCut.getGenuineGJets().end(); ++jet) {
+      hGenuineGJetEta->Fill((*jet)->eta());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineGJetsWithBTag().begin(); jet != bTagEffData_afterCollinearCut.getGenuineGJetsWithBTag().end(); ++jet) {
+      hGenuineGJetWithBTagEta->Fill((*jet)->eta());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineUDSJets().begin(); jet != bTagEffData_afterCollinearCut.getGenuineUDSJets().end(); ++jet) {
+      hGenuineUDSJetEta->Fill((*jet)->eta());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineUDSJetsWithBTag().begin(); jet != bTagEffData_afterCollinearCut.getGenuineUDSJetsWithBTag().end(); ++jet) {
+      hGenuineUDSJetWithBTagEta->Fill((*jet)->eta());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineLJets().begin(); jet != bTagEffData_afterCollinearCut.getGenuineLJets().end(); ++jet) {
+      hGenuineLJetEta->Fill((*jet)->eta());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineLJetsWithBTag().begin(); jet != bTagEffData_afterCollinearCut.getGenuineLJetsWithBTag().end(); ++jet) {
+      hGenuineLJetWithBTagEta->Fill((*jet)->eta());
+    }
 
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineBJets().begin(); jet != bTagEffData_afterCollinearCut.getGenuineBJets().end(); ++jet) {
+      hGenuineBJetPt->Fill((*jet)->pt());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineBJetsWithBTag().begin(); jet != bTagEffData_afterCollinearCut.getGenuineBJetsWithBTag().end(); ++jet) {
+      hGenuineBJetWithBTagPt->Fill((*jet)->pt());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineGJets().begin(); jet != bTagEffData_afterCollinearCut.getGenuineGJets().end(); ++jet) {
+      hGenuineGJetPt->Fill((*jet)->pt());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineGJetsWithBTag().begin(); jet != bTagEffData_afterCollinearCut.getGenuineGJetsWithBTag().end(); ++jet) {
+      hGenuineGJetWithBTagPt->Fill((*jet)->pt());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineUDSJets().begin(); jet != bTagEffData_afterCollinearCut.getGenuineUDSJets().end(); ++jet) {
+      hGenuineUDSJetPt->Fill((*jet)->pt());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineUDSJetsWithBTag().begin(); jet != bTagEffData_afterCollinearCut.getGenuineUDSJetsWithBTag().end(); ++jet) {
+      hGenuineUDSJetWithBTagPt->Fill((*jet)->pt());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineLJets().begin(); jet != bTagEffData_afterCollinearCut.getGenuineLJets().end(); ++jet) {
+      hGenuineLJetPt->Fill((*jet)->pt());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineLJetsWithBTag().begin(); jet != bTagEffData_afterCollinearCut.getGenuineLJetsWithBTag().end(); ++jet) {
+      hGenuineLJetWithBTagPt->Fill((*jet)->pt());
+    }
+    
 //------ MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, nVertices, tauData.getSelectedTau(), jetData.getAllJets());
     fCommonPlots.fillControlPlotsAtMETSelection(iEvent, metData);

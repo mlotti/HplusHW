@@ -347,8 +347,23 @@ namespace HPlus {
     WrappedTH2 *hSelectionFlowVsVerticesFakeTaus;
 
     // Histograms for jet flavour tagging efficiency calculation in MC
-    WrappedTH1 *hGenuineBJetEta;
+    WrappedTH1 *hGenuineBJetEta;   
     WrappedTH1 *hGenuineBJetWithBTagEta;
+    WrappedTH1 *hGenuineGJetEta;
+    WrappedTH1 *hGenuineGJetWithBTagEta;
+    WrappedTH1 *hGenuineUDSJetEta;
+    WrappedTH1 *hGenuineUDSJetWithBTagEta;
+    WrappedTH1 *hGenuineLJetEta;
+    WrappedTH1 *hGenuineLJetWithBTagEta;
+
+    WrappedTH1 *hGenuineBJetPt;   
+    WrappedTH1 *hGenuineBJetWithBTagPt;
+    WrappedTH1 *hGenuineGJetPt;
+    WrappedTH1 *hGenuineGJetWithBTagPt;
+    WrappedTH1 *hGenuineUDSJetPt;
+    WrappedTH1 *hGenuineUDSJetWithBTagPt;
+    WrappedTH1 *hGenuineLJetPt;
+    WrappedTH1 *hGenuineLJetWithBTagPt;
 
     // Control plots for fakes
 

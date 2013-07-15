@@ -77,6 +77,10 @@ namespace HPlus {
     output.fGenuineBJetsWithBTag.reserve(jets.size());
     output.fGenuineLJets.reserve(jets.size());
     output.fGenuineLJetsWithBTag.reserve(jets.size());
+    output.fGenuineGJets.reserve(jets.size());
+    output.fGenuineGJetsWithBTag.reserve(jets.size());
+    output.fGenuineUDSJets.reserve(jets.size());
+    output.fGenuineUDSJetsWithBTag.reserve(jets.size());
 
     // End run with default output if the event is not MC. Otherwise, continue.
     if (iEvent.isRealData()) return output;
@@ -99,11 +103,22 @@ namespace HPlus {
 	// B-jet found.
 	output.fGenuineBJets.push_back(iJet);
 	if (isBTagged(iJet, bTagData)) output.fGenuineBJetsWithBTag.push_back(iJet); // B-tagged b-jet found.
-      } else {
+      } else if (iFlavour == 21) {
+        // Gluon flavour jet found.
+        output.fGenuineGJets.push_back(iJet);
+        if (isBTagged(iJet, bTagData)) output.fGenuineGJetsWithBTag.push_back(iJet); // B-tagged gluon flavour jet found.
+      } else if (iFlavour == 1 || 2 || 3) {
+        // UDS flavour jet found.
+        output.fGenuineUDSJets.push_back(iJet);
+        if (isBTagged(iJet, bTagData)) output.fGenuineUDSJetsWithBTag.push_back(iJet); // B-tagged uds flavour jet found.
+      } 
+
+      if (iFlavour != 5) {
 	// Light flavour jet found.
 	output.fGenuineLJets.push_back(iJet);
 	if (isBTagged(iJet, bTagData)) output.fGenuineLJetsWithBTag.push_back(iJet); // B-tagged light flavour jet found.
       }
+    
     }
   }
  
