@@ -1,3 +1,7 @@
+/*
+  PURPOSE
+  Read the b-(mis)tagging scale factors and their uncertainties from a central database (called the "payload").
+*/
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingScaleFactorFromDB.h"
 
 BTaggingScaleFactorFromDB::Data::Data() :

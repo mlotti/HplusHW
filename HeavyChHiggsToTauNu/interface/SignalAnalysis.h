@@ -7,6 +7,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingEfficiencyInMC.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
@@ -237,6 +238,7 @@ namespace HPlus {
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
+    BTaggingEfficiencyInMC fBTaggingEfficiencyInMC;
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
     TopSelection fTopSelection;
@@ -343,6 +345,10 @@ namespace HPlus {
     WrappedTH1 *hSelectionFlow;
     WrappedTH2 *hSelectionFlowVsVertices;
     WrappedTH2 *hSelectionFlowVsVerticesFakeTaus;
+
+    // Histograms for jet flavour tagging efficiency calculation in MC
+    WrappedTH1 *hGenuineBJetEta;
+    WrappedTH1 *hGenuineBJetWithBTagEta;
 
     // Control plots for fakes
 

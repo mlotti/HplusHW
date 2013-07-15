@@ -1,3 +1,8 @@
+/*
+  PURPOSE
+  Loop over jets in event and apply a b-tagging discriminator. If an event contains at least one b-tagged jet, it will be flagged as having passed.
+  If the event is MC, its current weight is multiplied by a b-tagging scale factor (SF). See also BTaggingScaleFactorFromDB.cc.
+*/
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingScaleFactorFromDB.h"
@@ -46,6 +51,7 @@ namespace HPlus {
   BTagging::BTaggingScaleFactor::BTaggingScaleFactor() {
 	btagdb = 0;
   }
+
   BTagging::BTaggingScaleFactor::~BTaggingScaleFactor() {}
 
   void BTagging::BTaggingScaleFactor::UseDB(BTaggingScaleFactorFromDB* db){btagdb = db;}  
@@ -62,7 +68,7 @@ namespace HPlus {
     fEpsilonMCL.push_back(epsilonMCL);
   }
 
-  size_t BTagging::BTaggingScaleFactor::obtainIndex(const std::vector<double>& table, double pt) {
+  size_t BTagging::BTaggingScaleFactor::obtainIndex(const std::vector<double>& table, double pt) {    //STR consider renaming to getIndexOfSFEntryByPt
     size_t myEnd = table.size();
     size_t myPos = 0;
     while (myPos < myEnd) {
@@ -388,7 +394,6 @@ namespace HPlus {
 
   BTagging::Data BTagging::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
     ensureSilentAnalyzeAllowed(iEvent);
-
     // Disable histogram filling and counter incrementinguntil the return call
     // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();

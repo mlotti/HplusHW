@@ -39,7 +39,7 @@ namespace HPlus {
 
   BTaggingEfficiencyInMC::Data::~Data() { }
 
-  BTaggingEfficiencyInMC::BTaggingEfficiencyInMC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+  BTaggingEfficiencyInMC::BTaggingEfficiencyInMC(EventCounter& eventCounter, HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper)
     // (possibly) read configuration and add counters
   {

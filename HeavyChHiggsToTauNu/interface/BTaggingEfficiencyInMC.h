@@ -40,7 +40,11 @@ namespace HPlus {
     public:
       Data();
       ~Data();
-      // in-line getters
+      
+      const edm::PtrVector<pat::Jet>& getGenuineBJets() const { return fGenuineBJets; }
+      const edm::PtrVector<pat::Jet>& getGenuineBJetsWithBTag() const { return fGenuineBJetsWithBTag; }
+      const edm::PtrVector<pat::Jet>& getGenuineLJets() const { return fGenuineLJets; }
+      const edm::PtrVector<pat::Jet>& getGenuineLJetsWithBTag() const { return fGenuineLJetsWithBTag; }
 
       friend class BTaggingEfficiencyInMC;
     private:
@@ -51,7 +55,7 @@ namespace HPlus {
       edm::PtrVector<pat::Jet> fGenuineLJetsWithBTag;
     };
 
-    BTaggingEfficiencyInMC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper); // constructor
+    BTaggingEfficiencyInMC(EventCounter& eventCounter, HistoWrapper& histoWrapper); // constructor
     ~BTaggingEfficiencyInMC(); // destructor
 
     // Analyzers
