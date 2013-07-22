@@ -560,10 +560,10 @@ class BRXSDatabaseInterface:
         excluded.SetLineColor(ROOT.kWhite)
 
         N = excluded.GetN() 
-#        for i in range(N):
-#            j = N - i - 1
-#            if j > 0 and excluded.GetY()[j] == 100 and excluded.GetY()[j-1] == 100:
-#                excluded.RemovePoint(j)
+        for i in range(N):
+            j = N - i - 1
+            if j > 0 and excluded.GetY()[j] == 100 and excluded.GetY()[j-1] == 100 and excluded.GetX()[j-1] > 0:
+                excluded.RemovePoint(j-1)
 
 #	for i in range(N):
 #	    print "check excluded",i,excluded.GetX()[i],excluded.GetY()[i]
