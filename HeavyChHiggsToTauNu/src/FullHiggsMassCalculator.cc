@@ -177,6 +177,7 @@ namespace HPlus {
 							    "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMass_worseSolution = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_worseSolution", 
 							       "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hTopInvariantMassInGenerator = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopInvariantMassInGenerator", "Top invariant mass;m_{t} (GeV)", 100, 0, 500);
     hMETSignificance = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METSignificance",
 							  "METSignificance", 100, 0, 500);
     hNeutrinoNumberInPassedEvents = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NeutrinoNumberInPassedEvents",
@@ -383,6 +384,8 @@ namespace HPlus {
     // Set true value of neutrino p_z
     output.fTrueNeutrinoPz = genBothNeutrinosVector.Pz();
     doCalculations(iEvent, genVisibleTauVector, genBJetVector, genBothNeutrinosVector, output, eGEN);
+    // Histogram of top invariant mass in generator:
+    if (eventHasTopQuark(iEvent)) hTopInvariantMassInGenerator->Fill(getTopQuarkInvariantMass(iEvent));
 
     // NOTE: doEventClassification should only be called once for each event. DO NOT uncomment this line without commenting above!
     // doEventClassification(iEvent, genBJetVector, genVisibleTauVector, genBothNeutrinosVector, output, genDataPtr);
