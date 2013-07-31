@@ -27,9 +27,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from InvertedTauID import *
 
 ReBinning = False
+
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2012ABCD"
+dataEra = "Run2012C"
 
 searchMode = "Light"
 #searchMode = "Heavy"
@@ -49,7 +50,9 @@ def main():
 
 
 #    HISTONAME = "MET_InvertedTauIdJets"
-    HISTONAME = "MET_InvertedTauIdBveto"
+#    HISTONAME = "MET_InvertedTauIdJetsCollinear"
+#    HISTONAME = "MET_InvertedTauIdBveto"
+    HISTONAME = "MET_InvertedTauIdBvetoCollinear"
 #    HISTONAME = "MET_InvertedTauIdBtag"
 #    HISTONAME = "MTInvertedTauIdJet"
 #    HISTONAME = "MTInvertedTauIdPhi"
@@ -108,6 +111,11 @@ def main():
     invertedQCD = InvertedTauID()
     invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
 
+
+    ptbin = ["4050"]
+
+
+
     metBase = plots.DataMCPlot(datasets, "BaseLine/"+baselinehisto)
     metInver = plots.DataMCPlot(datasets, "Inverted/"+invertedhisto)
 
@@ -117,7 +125,7 @@ def main():
     
     metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/"+invertedhisto)
     metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/"+invertedhisto)
-    metInverted_MC = metInver.histoMgr.getHisto("QCD").getRootHisto().Clone("BaseLine/"+invertedhisto)
+#    metInverted_MC = metInver.histoMgr.getHisto("QCD").getRootHisto().Clone("BaseLine/"+invertedhisto)
     
     metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("BaseLine/"+baselinehisto)
     metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("BaseLine/"+baselinehisto)
@@ -152,7 +160,8 @@ def main():
     invertedQCD.setLabel("BaseMinusEWKVsInverted")
     invertedQCD.comparison(metInverted_data,metBase_QCD)
     invertedQCD.setLabel("McVsInverted")
-    invertedQCD.comparison(metInverted_data,metInverted_MC)
+#    invertedQCD.comparison(metInverted_data,metInverted_MC)
+    invertedQCD.setLabel("EfficiencyBaseMinusEWKVsInverted")
     invertedQCD.cutefficiency(metInverted_data,metBase_QCD )
 
 

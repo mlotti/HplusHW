@@ -43,6 +43,7 @@ import ROOT
 import dataset
 import histograms
 import styles
+import aux
 
 _lightHplusMasses = [80, 90, 100, 120, 140, 150, 155, 160]
 _heavyHplusMasses = [180, 190, 200, 220, 250, 300, 400, 500, 600]
@@ -83,6 +84,8 @@ _physicalToLogical = {
     "WToTauNu_TuneZ2_Summer11": "WToTauNu",
 
     "W3Jets_TuneZ2_Summer11": "W3Jets",
+
+    "W3Jets_TuneZ2_v2_Fall11": "W3Jets",
 }
 for mcEra in ["Summer11", "Fall11", "Summer12"]:
     for mass in _lightHplusMasses:
@@ -102,7 +105,6 @@ for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     "W1Jets_%s"%mcEra: "W1Jets",
     "W2Jets_%s"%mcEra: "W2Jets",
     "W3Jets_%s"%mcEra: "W3Jets",
-    "W3Jets_TuneZ2_v2_%s"%mcEra: "W3Jets",
     "W4Jets_%s"%mcEra: "W4Jets",
     "DYJetsToLL_M50_%s"%mcEra:      "DYJetsToLL_M50",
     "DYJetsToLL_M10to50_%s"%mcEra:  "DYJetsToLL_M10to50",
@@ -236,6 +238,14 @@ _legendLabels = {
     "Tbar_tW-channel":       "Single #bar{t} (tW channel)",
     "T_s-channel":           "Single t (s channel)",
     "Tbar_s-channel":        "Single #bar{t} (s channel)",
+
+    # Ratio uncertainties
+    "BackgroundStatError":     "Stat. unc.",
+    "BackgroundSystError":     "Syst. unc.",
+    "BackgroundStatSystError": "Stat.#oplussyst. unc.",
+    "MCStatError": "Sim. stat. unc.",
+    "MCSystError": "Sim. syst. unc.",
+    "MCStatSystError": "Sim. stat.#oplussyst. unc.",
 }
 for mass in _lightHplusMasses:
     _legendLabels["TTToHplusBWB_M%d"%mass] = "H^{+}W^{-} m_{H^{#pm}}=%d"%mass
@@ -270,6 +280,12 @@ _plotStyles = {
     "QCD_Pt20_MuEnriched":   styles.qcdStyle,
     "SingleTop":             styles.stStyle,
     "Diboson":               styles.dibStyle,
+
+    # Ratio stuff
+    "Ratio":                   styles.dataStyle,
+    "BackgroundStatError":     styles.errorRatioStatStyle,
+    "BackgroundSystError":     styles.errorRatioSystStyle,
+    "BackgroundStatSystError": styles.errorRatioSystStyle,
 }
 for mass in _lightHplusMasses:
     _plotStyles["TTToHplusBWB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
@@ -397,7 +413,7 @@ def UpdatePlotStyleFill(styleMap, namesToFilled):
 # datasets not in the plots._datasetOrder list are left at the end in
 # the same order they were originally.
 def mergeRenameReorderForDataMC(datasetMgr, keepSourcesMC=False):
-    datasetMgr.mergeData()
+    datasetMgr.mergeData(allowMissingDatasets=True)
     datasetMgr.mergeMany(_physicalMcAdd, addition=True)
     datasetMgr.renameMany(_physicalToLogical, silent=True)
 
@@ -465,7 +481,10 @@ def replaceLightHplusWithSignalPlusBackground(datasetMgr, backgroundsWithoutTT=N
     datasetMgr.merge("BkgNoTT", backgroundsWithoutTT, keepSources=True)
     for name in signalDatasetNames:
         isLast = (name == signalDatasetNames[-1])
-        datasetMgr.merge(name, [name, "BkgNoTT","TTJetsScaledByBR"], keepSources=not isLast)
+        datasetMgr.merge(name+"Tmp", [name, "BkgNoTT","TTJetsScaledByBR"], keepSources=not isLast)
+        if not isLast:
+            datasetMgr.remove(name, close=False)
+        datasetMgr.rename(name+"Tmp", name)
         _legendLabels[name] = "with H^{+}#rightarrow#tau^{+}#nu"
 
 
@@ -491,88 +510,353 @@ def replaceQCDFromData(datasetMgr, datasetQCDdata):
 # done via TGraphAsymmErrors and Clopper-Pearson method (one of the
 # methods recommended by statistics committee).
 def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
-    if isinstance(rootHisto1, ROOT.TH1) and isinstance(rootHisto2, ROOT.TH1):
-        if isBinomial:
-            eff = ROOT.TGraphAsymmErrors(rootHisto1, rootHisto2)
-            styles.getDataStyle().apply(eff)
-            return eff
-        else:
-            ratio = rootHisto1.Clone()
-            ratio.SetDirectory(0)
-            ratio.Divide(rootHisto2)
-            styles.getDataStyle().apply(ratio)
-            ratio.GetYaxis().SetTitle(ytitle)
-            return ratio
-    elif isinstance(rootHisto1, ROOT.TGraph) and isinstance(rootHisto2, ROOT.TGraph):
-        if isBinomial:
-            raise Exception("isBinomial is not supported for TGraph input")
+    if isBinomial:
+        function = _createRatioBinomial
+    else:
+        function = _createRatioErrorPropagation
+    return function(rootHisto1, rootHisto2, ytitle)
 
-        if not rootHisto1.GetN() == rootHisto2.GetN():
-	    xfound = []
-	    for i in range(rootHisto1.GetN()):
-		for j in range(rootHisto2.GetN()):
-		    if rootHisto1.GetX()[i] == rootHisto2.GetX()[j]:
-			xfound.append(rootHisto1.GetX()[i])
-	    for i in range(rootHisto1.GetN()):
-		found = False
-		for x in xfound:
-		    if rootHisto1.GetX()[i] == x:
-			found = True
-		if not found:
-		    rootHisto1.RemovePoint(i)
-            for j in range(rootHisto2.GetN()):
-                found = False
-                for x in xfound:
-                    if rootHisto2.GetX()[j] == x:
-                        found = True
-                if not found:
-                    rootHisto1.RemovePoint(j)
+def _createRatioHistos(histo1, histo2, ytitle, ratioType=None):
+    if ratioType is None:
+        ratioType = "errorPropagation"
+
+    ret = []
+    if ratioType == "errorPropagation":
+        ret.extend(_createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=True))
+    elif ratioType == "binomial":
+        h = _createHisto(_createRatioBinomial(histo1, histo2, ytitle))
+        h.setDrawStyle("EP")
+        h.setLegendLabel(None)
+        ret.append(h)
+    elif ratioType == "errorScale":
+        ret.extend(_createRatioHistosErrorScale(histo1, histo2, ytitle))
+    else:
+        raise Exception("Invalid value for argument ratioType '%s', valid are 'errorPropagation', 'binomial', 'errorScale'")
+    return ret        
+
+## Creates a ratio histogram by propagating the uncertainties to the ratio
+#
+# \param histo1  TH1/TGraph/RootHistoWithUncertainties dividend
+# \param histo2  TH1/TGraph/RootHistoWithUncertainties divisor
+# \param ytitle  Y axis title of the final ratio histogram/graph
+#
+# \return TH1 or TGraphAsymmErrors of histo1/histo2
+#
+# In case of asymmetric uncertainties, the uncertainties are added in
+# quadrature for both sides separately (a rather crude approximation).
+def _createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=False):
+    if isinstance(histo1, ROOT.TH1) and isinstance(histo2, ROOT.TH1):
+        ratio = histo1.Clone()
+        ratio.SetDirectory(0)
+        ratio.Divide(histo2)
+        if histograms.uncertaintyMode.equal(histograms.Uncertainty.SystOnly):
+            for i in xrange(0, ratio.GetNbinsX()+2):
+                ratio.SetBinError(i, 0)
+
+        _plotStyles["Ratio"].apply(ratio)
+        ratio.GetYaxis().SetTitle(ytitle)
+
+        if returnHisto:
+            return [_createHisto(ratio, drawStyle="EP", legendLabel=None)]
+        else:
+            return ratio
+    elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
+        if histo1.GetN() != histo2.GetN():
+            (histo1, histo2) = _graphRemoveNoncommonPoints(histo1, histo2)
 
         xvalues = []
         yvalues = []
         yerrs = []
-        for i in xrange(0, rootHisto1.GetN()):
-            yval = rootHisto2.GetY()[i]
+        for i in xrange(0, histo1.GetN()):
+            yval = histo2.GetY()[i]
             if yval == 0:
                 continue
-            xvalues.append(rootHisto1.GetX()[i])
-            yvalue = rootHisto1.GetY()[i] / yval
+            xvalues.append(histo1.GetX()[i])
+            yvalue = histo1.GetY()[i] / yval
             yvalues.append(yvalue)
-            err1 = max(rootHisto1.GetErrorYhigh(i), rootHisto1.GetErrorYlow(i))
-            err2 = max(rootHisto2.GetErrorYhigh(i), rootHisto2.GetErrorYlow(i))
-            yerrs.append( yvalue * math.sqrt( _divideOrZero(err1, rootHisto1.GetY()[i])**2 +
-                                              _divideOrZero(err2, rootHisto2.GetY()[i])**2 ) )
+            if histograms.uncertaintyMode.equal(histograms.Uncertainty.SystOnly):
+                yerrs.append(0)
+            else:
+                err1 = max(histo1.GetErrorYhigh(i), histo1.GetErrorYlow(i))
+                err2 = max(histo2.GetErrorYhigh(i), histo2.GetErrorYlow(i))
+                yerrs.append( yvalue * math.sqrt( _divideOrZero(err1, histo1.GetY()[i])**2 +
+                                                  _divideOrZero(err2, histo2.GetY()[i])**2 ) )
 
-        gr = ROOT.TGraphAsymmErrors()
         if len(xvalues) > 0:
             gr = ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues), array.array("d", yvalues),
-                                        rootHisto1.GetEXlow(), rootHisto1.GetEXhigh(),
+                                        histo1.GetEXlow(), histo1.GetEXhigh(),
                                         array.array("d", yerrs), array.array("d", yerrs))
-        return gr
+        else:
+            gr = ROOT.TGraphAsymmErrors()
+        _plotStyles["Ratio"].apply(ratio)
+        gr.GetYaxis().SetTitle(ytitle)
+
+        if returnHisto:
+            return [_createHisto(ratio, drawStyle="EPZ", legendLabel=None)]
+        else:
+            return gr
+    elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
+        if histograms.uncertaintyMode.equal(histograms.Uncertainty.StatOnly) or \
+                (not (histo1.hasSystematicUncertainties() or histo2.hasSystematicUncertainties())):
+            return _createRatioErrorPropagation(histo1.getRootHisto(), histo2.getRootHisto(), ytitle, returnHisto)
+
+        ratio = _createRatioErrorPropagation(histo1.getRootHisto(), histo2.getRootHisto(), ytitle)
+
+        addStat = histograms.uncertaintyMode.addStatToSyst()
+        unc1 = histo1.getSystematicUncertaintyGraph(addStatistical=addStat)
+        unc2 = histo2.getSystematicUncertaintyGraph(addStatistical=addStat)
+
+        for i in xrange(0, unc1.GetN()):
+            yval1 = unc1.GetY()[i]
+            yval2 = unc2.GetY()[i]
+            if yval2 == 0.0:
+                unc1.SetPoint(i, unc1.GetX()[i], 0)
+                unc1.SetPointEYhigh(i, 0)
+                unc1.SetPointEYlow(i, 0)
+                continue
+            if yval1 == 0.0:
+                unc1.SetPoint(i, unc1.GetX()[i], 0)
+                unc1.SetPointEYhigh(i, unc1.GetErrorYhigh(i)/yval2)
+                unc1.SetPointEYlow(i, unc1.GetErrorYlow(i)/yval2)
+                continue
+
+            unc1.SetPoint(i, unc1.GetX()[i], yval1/yval2)
+            unc1.SetPointEYhigh(i, math.sqrt( (unc1.GetErrorYhigh(i)/yval1)**2 + (unc2.GetErrorYhigh(i)/yval2)**2 ))
+            unc1.SetPointEYlow( i, math.sqrt( (unc1.GetErrorYlow(i)/yval1)**2  + (unc2.GetErrorYlow(i)/yval2)**2 ))
+        ratioSyst = unc1
+        _plotStyles["Ratio"].apply(ratioSyst)
+        ratioSyst.GetYaxis().SetTitle(ytitle)
+
+        if returnHisto:
+            ret = []
+            systStyle = "EPZ"
+            if histograms.uncertaintyMode.showStatOnly():
+                ret.append(_createHisto(ratio, drawStyle="EPZ", legendLabel=None))
+                systStyle = "[]"
+            ret.append(_createHisto(ratioSyst, drawStyle=systStyle, legendLabel=None))
+            return ret
+        else:
+            if addRatioStat:
+                return [ratio, ratioSyst]
+            else:
+                return ratioSyst
     else:
-        raise Exception("Arguments are of unsupported type, rootHisto1 is %s and rootHisto2 is %s" % (type(rootHisto1).__name__, type(rootHisto2).__name__))
+        raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
+
+
+## Removes non-common points of two graph
+#
+# Non-commonality is defined with the X value.
+def _graphRemoveNoncommonPoints(graph1, graph2):
+    ret1 = graph1.Clone()
+    ret2 = graph2.Clone()
+    xfound = []
+    for i in range(graph1.GetN()):
+        for j in range(graph2.GetN()):
+            if histo1.GetX()[i] == graph2.GetX()[j]:
+        	xfound.append(histo1.GetX()[i])
+    remove1 = []
+    for i in range(graph1.GetN()):
+        found = False
+        for x in xfound:
+            if graph1.GetX()[i] == x:
+        	found = True
+        if not found:
+            remove1.append(i)
+    remove2 = []
+    for j in range(histo2.GetN()):
+        found = False
+        for x in xfound:
+            if histo2.GetX()[j] == x:
+                found = True
+        if not found:
+            remove2.append(j)
+
+    remove1.reverse()
+    for i in reverse1:
+        ret1.RemovePoint(i)
+    remove2.reverse()
+    for i in reverse2:
+        ret2.RemovePoint(i)
+
+    return (ret1, ret2)
+
+## Creates a ratio histogram by binomial assumption
+#
+# \param histo1  TH1 dividend
+# \param histo2  TH1 divisor
+# \param ytitle  Y axis title
+#
+# \return TGraphAsymmErrors of histo1/histo2
+#
+# The uncertainty estimation is done via TGraphAsymmErrors and
+# Clopper-Pearson method (one of the methods recommended by statistics
+# committee).
+def _createRatioBinomial(histo1, histo2, ytitle):
+    if isinstance(histo1, ROOT.TH1) and isinstance(histo2, ROOT.TH1):
+        if histograms.uncertaintyNode != histograms.Uncertainty.StatOnly:
+            print >>sys.stderr, "Warning: uncertainty mode is not 'StatOnly' (but %s). Nevertheless, the binomial uncertainty is calculated incorporating the uncertainty from the number of events in the input histograms" % (histograms.uncertaintyMode.getName())
+
+        eff = ROOT.TGraphAsymmErrors(rootHisto1, rootHisto2)
+        styles.getDataStyle().apply(eff)
+        eff.GetYaxis().SetTitle(ytitle)
+        return eff
+    elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
+        raise Exception("isBinomial is not supported for TGraph input")
+    else:
+        raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
+
+## Creates ratio histograms by scaling everything to the divisor value
+#
+# \param histo1  TH1 dividend
+# \param histo2  TH1 divisor
+# \param ytitl   Y axis title
+#
+# \return list of histograms.Histo objects for histo1/histo2
+#
+# Scales the histo1 values+uncertainties, and histo2 uncertainties by
+# histo2 values. Creates separate entries for histo2 statistical and
+# stat+syst uncertainties, if systematic uncertainties exist.
+def _createRatioHistosErrorScale(histo1, histo2, ytitle):
+    ret = []
+    if isinstance(histo1, ROOT.TH1) and isinstance(histo2, ROOT.TH1):
+        ratio = histo1.Clone()
+        ratio.SetDirectory(0)
+
+        ratioErr = histo2.Clone()
+        ratioErr.SetDirectory(0)
+        for i in xrange(0, ratio.GetNbinsX()+2):
+            scale = histo2.GetBinContent(i)
+            ratio.SetBinContent(i, _divideOrZero(histo1.GetBinContent(i), scale))
+            ratio.SetBinError(i, _divideOrZero(histo1.GetBinError(i), scale))
+
+            ratioErr.SetBinContent(i, 1)
+            ratioErr.SetBinError(i, _divideOrZero(histo2.GetBinError(i), scale))
+
+        ratio.GetYaxis().SetTitle(ytitle)
+        ratioErr.GetYaxis().SetTitle(ytitle)
+        ratioErr.SetName("BackgroundStatError")
+        _plotStyles["Ratio"].apply(ratio)
+        _plotStyles[ratioErr.GetName()].apply(ratioErr)
+
+
+        ret.append(_createHisto(ratio, drawStyle="EP", legendLabel=None))
+        if histograms.uncertaintyMode.showStatOnly():
+            ret.append(_createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"))
+        return ret
+    elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
+        xvalues1 = []
+        yvalues1 = []
+        xvalues2 = []
+        yerrs1high = []
+        yerrs1low = []
+        yerrs2high = []
+        yerrs2low = []
+
+        i1 = 0
+        i2 = 0
+        while i2 < histo2.GetN():
+            if i1 < histo1.GetN():
+                xval1 = histo1.GetX()[i1]
+            else:
+                xval1 = None
+            xval2 = histo2.GetX()[i2]
+            yval2 = histo2.GetY()[i2]
+            # histo2 is zero
+            if yval2 == 0:
+                i1 += 1
+                i2 += 1
+                continue
+
+            # histo2 is missing an item
+            if xval1 < xval2:
+                i1 += 1
+                continue
+
+            xvalues2.append(xval2)
+            yerrs2high.append(histo2.GetErrorYhigh(i2) / yval2)
+            yerrs2low.append(histo2.GetErrorYlow(i2) / yval2)
+
+            # Usual case
+            if xval1 == xval2:
+                xvalues1.append(xval1)
+                yvalues1.append(histo1.GetY()[i1] / yval2)
+                yerrs1high.append(histo1.GetErrorYhigh(i1) / yval2)
+                yerrs1low.append(histo1.GetErrorYlow(i1) / yval2)
+                i1 += 1
+                i2 += 1
+                continue
+            # No more items in histo1, or histo1 is missing an item
+            if xval1 is None or xval1 > xval2:
+                i2 += 1
+                continue
+
+            raise Exception("This should not happen")
+
+
+        if len(xvalues1) > 0:
+            ratio = ROOT.TGraphAsymmErrors(len(xvalues1), array.array("d", xvalues1), array.array("d", yvalues1),
+                                         histo1.GetEXlow(), histo1.GetEXhigh(),
+                                         array.array("d", yerrs1low), array.array("d", yerrs1high))
+        else:
+            ratio = ROOT.TGraphAsymmErrors()
+        if len(xvalues2) > 0:
+            ratioErr = ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues2), array.array("d", [1]*len(xvalues2)),
+                                         histo1.GetEXlow(), histo1.GetEXhigh(),
+                                         array.array("d", yerrs2low), array.array("d", yerrs2high))
+        else:
+            ratioErr = ROOT.TGraphAsymmErrors()
+
+        ratio.GetYaxis().SetTitle(ytitle)
+        ratioErr.GetYaxis().SetTitle(ytitle)
+        ratioErr.SetName("BackgroundStatError")
+        _plotStyles["Ratio"].apply(ratio)
+        _plotStyles[ratioErr.GetName()].apply(ratioErr)
+
+        ret.append(_createHisto(ratio, drawStyle="EP", legendLabel=None))
+        if histograms.uncertaintyMode.showStatOnly():
+            ret.append(_createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"))
+        return ret
+    elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
+        h1 = histo1.getRootHisto()
+        h2 = histo2.getRootHisto()
+
+        ret.extend(_createRatioHistosErrorScale(h1, h2, ytitle))
+        if histograms.uncertaintyMode.equal(histograms.Uncertainty.StatOnly):
+            return ret
+
+        # Get new TGraphAsymmErrors for stat+syst, then scale it
+        ratioSyst = histo2.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
+        removes = []
+        for i in xrange(0, ratioSyst.GetN()):
+            yval = ratioSyst.GetY()[i]
+            if yval == 0.0:
+                removes.append(i)
+                continue
+            ratioSyst.SetPoint(i, ratioSyst.GetX()[i], 1)
+            ratioSyst.SetPointEYhigh(i, ratioSyst.GetErrorYhigh(i)/yval)
+            ratioSyst.SetPointEYlow(i, ratioSyst.GetErrorYlow(i)/yval)
+#            print i, ratioSyst.GetX()[i], ratioSyst.GetErrorXlow(i), ratioSyst.GetErrorXhigh(i), yval, ratioSyst.GetY()[i], ratioSyst.GetErrorYhigh(i), ratioSyst.GetErrorYlow(i)
+        removes.reverse()
+        for i in removes:
+            ratioSyst.RemovePoint(i)        
+
+        ratioSyst.GetYaxis().SetTitle(ytitle)
+        name = "BackgroundStatSystError"
+        ratioSyst.SetName(name)
+        if not histograms.uncertaintyMode.addStatToSyst():
+            name = "BackgroundSystError"
+        _plotStyles[name].apply(ratioSyst)
+
+        ret.append(_createHisto(ratioSyst, drawStyle="2", legendLabel=_legendLabels[name], legendStyle="F"))
+        return ret
+    else:
+        raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
 
 def _divideOrZero(numerator, denominator):
     if denominator == 0:
         return 0
     return numerator/denominator
-
-## Copy (some) style attributes from one ROOT object to another
-#
-# \param src  Source object (copy attributes from)
-# \param dst  Destination object (copy attributes to)
-def copyStyle(src, dst):
-    properties = []
-    if hasattr(src, "GetLineColor") and hasattr(dst, "SetLineColor"):
-        properties.extend(["LineColor", "LineStyle", "LineWidth"])
-    if hasattr(src, "GetFillColor") and hasattr(dst, "SetFillColor"):
-        properties.extend(["FillColor", "FillStyle"])
-    if hasattr(src, "GetMarkerColor") and hasattr(dst, "SetMarkerColor"):
-        properties.extend(["MarkerColor", "MarkerSize", "MarkerStyle"])
-
-    for prop in properties:
-        getattr(dst, "Set"+prop)(getattr(src, "Get"+prop)())
-
 
 ## Creates a horizontal line
 #
@@ -658,16 +942,53 @@ def _createCutBoxAndLine(frame, cutValue, fillColor=18, box=True, line=True, **k
 # \param rootObject   ROOT object (TH1 or TGraph)
 # \param kwargs       Keyword arguments (forwarded to histograms.Histo.__init__() or histograms.HistoGraph.__init__())
 def _createHisto(rootObject, **kwargs):
-    if isinstance(rootObject, ROOT.TH1):
+    if isinstance(rootObject, ROOT.TH1) or isinstance(rootObject, dataset.RootHistoWithUncertainties):
         return histograms.Histo(rootObject, rootObject.GetName(), **kwargs)
     elif isinstance(rootObject, ROOT.TGraph):
         return histograms.HistoGraph(rootObject, rootObject.GetName(), **kwargs)
     elif isinstance(rootObject, ROOT.TEfficiency):
         return histograms.HistoEfficiency(rootObject, rootObject.GetName(), **kwargs)
     elif not isinstance(rootObject, histograms.Histo):
-        raise Exception("rootObject is not TH1, TGraph, nor histograms.Histo, it is %s" % type(rootObject).__name__)
+        raise Exception("rootObject is not TH1, TGraph, histograms.Histo, nor dataset.RootHistoWithUncertainties, it is %s" % rootObject.__class__.__name__)
 
     return rootObject
+
+## Helper function for partially blinding a plot
+#
+# \param plot              PlotBase (or derived) object
+# \param maxShownValue     If not None, the maximum value to be shown
+# \param minShownValue     If not None, the minimum value to be shown
+# \param moveBlinededText  Dictionary for movinge the blinding text (forwarded to histograms.PlotTextBox.move())
+def partiallyBlind(plot, maxShownValue=None, minShownValue=None, moveBlindedText={}):
+    if not plot.histoMgr.hasHisto("Data"):
+        return
+
+    dataHisto = plot.histoMgr.getHisto("Data")
+    th1 = dataHisto.getRootHisto()
+
+    if minShownValue is None:
+        firstShownBin = 1
+    else:
+        firstShownBin = th1.FindFixBin(minShownValue)
+
+    if maxShownValue is None:
+        lastShownBin = th1.GetNbinsX()
+    else:
+        lastShownBin = th1.FindFixBin(maxShownValue)-1
+    
+    for i in xrange(1, th1.GetNbinsX()+1):
+        if i >= firstShownBin and i <= lastShownBin:
+            continue
+
+        th1.SetBinContent(i, 0)
+        th1.SetBinError(i, 0)
+
+    tb = histograms.PlotTextBox(xmin=0.4, ymin=None, xmax=0.6, ymax=0.84, size=17, lineheight=0.035)
+    tb.addText("Data blinded in")
+    tb.addText("signal region")
+    tb.move(**moveBlindedText)
+    plot.appendPlotObject(tb)
+
 
 ## Base class for plots
 #
@@ -690,7 +1011,7 @@ class PlotBase:
             if isinstance(datasetRootHistos[0], dataset.DatasetRootHistoBase):
                 for i, drh in enumerate(datasetRootHistos[1:]):
                     if not isinstance(drh, dataset.DatasetRootHistoBase):
-                        raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHistos[%d] is %s" % (i, type(drh).__name__))
+                        raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHistos[%d] is %s" % (i, drh.__class__.__name__))
 
                 self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
             else:
@@ -763,6 +1084,10 @@ class PlotBase:
     def binWidth(self):
         return self.histoMgr.getHistos()[0].getBinWidth(1)
 
+    ## Get the bin widths (assuming they're the same in all histograms)
+    def binWidths(self):
+        return self.histoMgr.getHistos()[0].getBinWidths()
+
     ## Add a format for which to save the plot
     #
     # \param format  Suffix recognised by ROOT
@@ -781,6 +1106,12 @@ class PlotBase:
     ## Remove the legend object
     def removeLegend(self):
         delattr(self, "legend")
+
+    ## Set the legend header
+    #
+    # \param legendHeader String for legend header
+    def setLegendHeader(self, legendHeader):
+        self.legendHeader = legendHeader        
 
     ## Add an additional object to be drawn before the plot histograms/graphs
     #
@@ -817,7 +1148,10 @@ class PlotBase:
 
     ## Add MC uncertainty histogram
     def addMCUncertainty(self):
-        self.histoMgr.addMCUncertainty(styles.getErrorStyle())
+        systKey = "MCSystError"
+        if histograms.uncertaintyMode.addStatToSyst():
+            systKey = "MCStatSystError"
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
@@ -854,6 +1188,8 @@ class PlotBase:
             obj.Draw(option+"same")
 
         if hasattr(self, "legend"):
+            if hasattr(self, "legendHeader"):
+                self.legend.SetHeader(self.legendHeader)
             self.legend.Draw()
 
         # Redraw the axes in order to get the tick marks on top of the
@@ -957,7 +1293,7 @@ class PlotRatioBase:
     def __init__(self):
         self.ratioPlotObjectsBefore = []
         self.ratioPlotObjectsAfter = []
-        self.ratios = []
+        self.ratioHistoMgr = histograms.HistoManager()
 
     ## Add an additional object to be drawn before the ratio histogram(s)
     #
@@ -978,7 +1314,7 @@ class PlotRatioBase:
     # \param args    Positional arguments (forwarded to plots._createCutBoxAndLine())
     # \param kwargs  Keyword arguments (forwarded to plots._createCutBoxAndLine())
     def addCutBoxAndLineToRatio(self, *args, **kwargs):
-        if len(self.ratios) == 0:
+        if len(self.ratioHistoMgr) == 0:
             return
 
         objs = _createCutBoxAndLine(self.getFrame2(), *args, **kwargs)
@@ -1011,7 +1347,7 @@ class PlotRatioBase:
     #
     # \param ratios  List of TH1/TGraph objects
     def setRatios(self, ratios):
-        self.ratios = []
+        self.ratioHistoMgr.removeAllHistos()
         self.extendRatios(ratios)
 
     ## Create Histo object from ROOT object
@@ -1024,21 +1360,32 @@ class PlotRatioBase:
     #
     # Intended for internal use only
     def _createRatioObject(self, ratio):
-        r = _createHisto(ratio)
-        r.setDrawStyle("EP")
-        return r
+        if isinstance(ratio, histograms.Histo):
+            return ratio
+        return _createHisto(ratio, drawStyle="EP")
 
     ## Add TH1/TGraph object to ratio pad
     #
     # \param ratio  TH1/TGraph object
     def appendRatio(self, ratio):
-        self.ratios.append(self._createRatioObject(ratio))
+        self.ratioHistoMgr.appendHisto(self._createRatioObject(ratio))
 
     ## Addend TH1/TGraph objects to ratio pad
     #
     # \param ratios  List of TH1/TGraph objects
     def extendRatios(self, ratios):
-        self.ratios.extend([self._createRatioObject(r) for r in ratios])
+        self.ratioHistoMgr.extendHistos([self._createRatioObject(r) for r in ratios])
+
+    def setRatioLegend(self, legend):
+        self.ratioLegend = legend
+        self.ratioHistoMgr.addToLegend(legend)
+
+    def removeRatioLegend(self):
+        delattr(self, "legend")
+        del self.ratioLegend
+
+    def setRatioLegendHEader(self, legendHeader):
+        self.ratioLegendHEader = legendHeader
 
     ## Create TCanvas and frame with ratio pad for single ratio
     #
@@ -1047,16 +1394,35 @@ class PlotRatioBase:
     # \param denominator      Denominator TH1/TGraph
     # \param ytitle           Y axis title for the ratio pad
     # \param invertRatio      Invert the roles of numerator and denominator
-    # \param ratioIsBinomial  True for binomial ratio (e.g. efficiency)
+    # \param ratioIsBinomial  True for binomial ratio (e.g. efficiency) (\b deprecated)
+    # \param ratioType        Type of the ratio, forwarded to _createRatioHistos() (None for default)
     # \param kwargs           Keyword arguments (forwarded to _createFrame())
     #
     # Intended for internal use only
-    def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, ratioIsBinomial=False, **kwargs):
+    def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, ratioIsBinomial=False, ratioType=None, **kwargs):
         (num, denom) = (numerator, denominator)
         if invertRatio:
             (num, denom) = (denom, num)
 
-        self.setRatios([_createRatio(num, denom, ytitle, isBinomial=ratioIsBinomial)])
+        if ratioIsBinomial:
+            if ratioType is not None:
+                raise Exception("You should not set (deprecated) ratioIsBinomial=True, and give ratioType (%s)." % ratioType)
+            print "WARNING: ratioIsBinomial is deprepcated, please yse ratioType='binomial' instead"
+            ratioType = "binomial"
+
+        ratioHistos = _createRatioHistos(num, denom, ytitle, ratioType=ratioType)
+        self.setRatios(ratioHistos)
+        reorder = []
+        for n in ["BackgroundStatSystError", "BackgroundStatError"]:
+            if self.ratioHistoMgr.hasHisto(n):
+                reorder.append(n)
+        if len(reorder) > 0:
+            self.ratioHistoMgr.reverse()
+            self.ratioHistoMgr.reorderDraw(reorder)
+            reorder.reverse()
+            self.ratioHistoMgr.reorderLegend(reorder)
+            self.ratioHistoMgr.reverse()
+
         self._createFrame(filename, **kwargs)
 
     ## Create TCanvas and frame with ratio pad for many ratios
@@ -1065,7 +1431,8 @@ class PlotRatioBase:
     # \param numerators       List of numerator TH1/TGraph objects
     # \param denominator      Denominator TH1/TGraph object
     # \param invertRatio      Invert the roles of numerator and denominator
-    # \param ratioIsBinomial  True for binomial ratio (e.g. efficiency)
+    # \param ratioIsBinomial  True for binomial ratio (e.g. efficiency) (\b deprecated)
+    # \param ratioType        Type of the ratio, forwarded to _createRatioHistos() (None for default)
     # \param kwargs           Keyword arguments (forwarded to _createFrame())
     #
     # Creates one ratio histogram for each numerator, as
@@ -1073,15 +1440,45 @@ class PlotRatioBase:
     # formed as denominator/numerator.
     #
     # Intended for internal use only
-    def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, ratioIsBinomial=False, **kwargs):
-        self.ratios = []
+    def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, ratioIsBinomial=False, ratioType=None, **kwargs):
+        
+        if ratioIsBinomial:
+            if ratioType is not None:
+                raise Exception("You should not set (deprecated) ratioIsBinomial=True, and give ratioType (%s)." % ratioType)
+            print "WARNING: ratioIsBinomial is deprepcated, please yse ratioType='binomial' instead"
+            ratioType = "binomial"
+
+        self.ratioHistoMgr.removeAllHistos()
+        statSysError = None
+        statError = None
         for numer in numerators:
             (num, denom) = (numer, denominator)
             if invertRatio:
                 (num, denom) = (denom, num)
-            ratio = _createRatio(num, denom, "Ratio", isBinomial=ratioIsBinomial)
-            copyStyle(num, ratio)
-            self.appendRatio(ratio)
+            ratioHistos = _createRatioHistos(num, denom, "Ratio", ratioType=ratioType)
+            tmp = []
+            for h in ratioHistos:
+                if h.getName() == "BackgroundStatSystError":
+                    statSysError = h
+                elif h.getName() == "BackgroundStatError":
+                    statError = h
+                else:
+                    if isinstance(numer, histograms.Histo):
+                        aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
+                        h.setName(numer.getName())
+                    else:
+                        aux.copyStyle(numer, h.getRootHisto())
+                        h.setName(numer.GetName())
+                        h = _createHisto(h)
+                    tmp.append(h)
+            if len(tmp) > 1:
+                raise Exception("This shouldn't happen")
+            self.extendRatios(tmp)
+
+        if statError is not None:
+            self.ratioHistoMgr.appendHisto(statError)
+        if statSysError is not None:
+            self.ratioHistoMgr.appendHisto(statSysError)
 
         self._createFrame(filename, **kwargs)
 
@@ -1091,14 +1488,14 @@ class PlotRatioBase:
     # \param coverPadOpts   Options for overriding cover pad placement (see plots._createCoverPad)
     # \param kwargs         Keyword arguments (forwarded to histograms.CanvasFrameTwo.__init__())
     def _createFrame(self, filename, coverPadOpts={}, **kwargs):
-        self.cf = histograms.CanvasFrameTwo(self.histoMgr, self.ratios, filename, **kwargs)
+        self.cf = histograms.CanvasFrameTwo(self.histoMgr, self.ratioHistoMgr, filename, **kwargs)
         self.frame = self.cf.frame
         self.cf.frame2.GetYaxis().SetNdivisions(505)
         self.coverPadOpts = coverPadOpts
 
     ## Draw the ratio histograms to the ratio pad
     def _draw(self):
-        if len(self.ratios) == 0:
+        if len(self.ratioHistoMgr) == 0:
             return
 
         self.cf.canvas.cd(2)
@@ -1106,16 +1503,26 @@ class PlotRatioBase:
         for obj, option in self.ratioPlotObjectsBefore:
             obj.Draw(option+"same")
 
+        until = None
+        for n in ["BackgroundStatSystError", "BackgroundStatError"]:
+            if self.ratioHistoMgr.hasHisto(n):
+                until = n
+
+        index = self.ratioHistoMgr.draw(untilName=until)
+
         self.ratioLine = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
         self.ratioLine.Draw("L")
-       
-        ratios = self.ratios[:]
-        ratios.reverse()
-        for r in ratios:
-            r.draw("same")
+
+        if index is not None:
+            self.ratioHistoMgr.draw(fromIndex=index+1)
 
         for obj, option in self.ratioPlotObjectsAfter:
             obj.Draw(option+"same")
+
+        if hasattr(self, "ratioLegend"):
+            if hasattr(self, "ratioLegendHeader"):
+                self.ratioLegend.SetHeader(self.ratioLegendHeader)
+            self.ratioLegend.Draw()
 
         # Redraw the axes in order to get the tick marks on top of the
         # histogram
@@ -1134,8 +1541,8 @@ class PlotRatioBase:
         self.cf.canvas.cd(1)
         self.cf.pad1.Pop() # Move the first pad on top
 
-    ## \var ratios
-    # Holds the TH1 for data/MC ratio, if exists
+    ## \var ratioHistoManager
+    # HistoManager for ratio histograms
     ## \var ratioLine
     # Holds the TGraph for ratio line, if ratio exists
     ## \var ratioCoverPad
@@ -1189,7 +1596,10 @@ class PlotSameBase(PlotBase):
     def addMCUncertainty(self):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
-        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"])
+        systKey = "MCSystError"
+        if histograms.uncertaintyMode.addStatToSyst():
+            systKey = "MCStatSystError"
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
 
     ## Create TCanvas and frame
     #
@@ -1363,15 +1773,20 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
             createRatio = False
 
         if not createRatio:
-            PlotSameBase.createFrame(self, filename, **kwargs)
+            args = {}
+            args.update(kwargs)
+            for key in kwargs.keys():
+                if "ratio" in key:
+                    del args[key]
+            PlotSameBase.createFrame(self, filename, **args)
         else:
             if not self.histoMgr.hasHisto("StackedMC"):
                 raise Exception("Must call stackMCHistograms() before createFrame() with ratio")
 
             self._normalizeToOne()
             self._createFrameRatio(filename,
-                                   self.histoMgr.getHisto("Data").getRootHisto(),
-                                   self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
+                                   self.histoMgr.getHisto("Data").getRootHistoWithUncertainties(),
+                                   self.histoMgr.getHisto("StackedMC").getSumRootHistoWithUncertainties(),
                                    "Data/MC", **kwargs)
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
@@ -1679,13 +2094,17 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
 class PlotDrawer:
     ## Constructor, set the defaults here
     #
-    # \param ylabel              Default Y axis title
+    # \param xlabel              Default X axis title (None for pick from first TH1)
+    # \param ylabel              Default Y axis title (None for pick from first TH1)
     # \param zlabel              Default Z axis title (None for not to show)
     # \param log                 Should Y axis be in log scale by default?
     # \param ratio               Should the ratio pad be drawn?
     # \param ratioYlabel         The Y axis title for the ratio pad (None for default)
     # \param ratioInvert         Should the ratio be inverted?
-    # \param ratioIsBinomial     Is the ratio binomal (i.e. use Clopper-Pearson?)
+    # \param ratioIsBinomial     Is the ratio binomal (i.e. use Clopper-Pearson?) (deprecated)
+    # \param ratioType           Ratio type (None for default)
+    # \param ratioCreateLegend   Default legend creation parameters for ratio (None to not to create legend, True to create with default parameters)
+    # \param ratioMoveLegend     Default ratio legend movement parameters (after creation)
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
@@ -1696,8 +2115,9 @@ class PlotDrawer:
     # \param rebinY              Default rebin Y value (passed to TH2::Rebin2D)
     # \param rebinToWidthX       Default width of X bins to rebin to
     # \param rebinToWidthY       Default width of Y bins to rebin to (only applicable for TH2)
+    # \param divideByBinWidth    Divide bin contents by bin width? (done after rebinning)
     # \param createLegend        Default legend creation parameters (None to not to create legend)
-    # \param moveLegend          Default legend moving parameters (after creation)
+    # \param moveLegend          Default legend movement parameters (after creation)
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \param customizeBeforeDraw Function to customize the plot before drawing it
     # \param customizeBeforeSave Function to customize the plot before saving it
@@ -1706,6 +2126,7 @@ class PlotDrawer:
     # \param addMCUncertainty    Should MC total (stat) uncertainty be drawn()
     # \param cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis
     def __init__(self,
+                 xlabel=None,
                  ylabel="Occurrances / %.0f",
                  zlabel=None,
                  log=False,
@@ -1713,6 +2134,9 @@ class PlotDrawer:
                  ratioYlabel=None,
                  ratioInvert=False,
                  ratioIsBinomial=False,
+                 ratioType=None,
+                 ratioCreateLegend=None,
+                 ratioMoveLegend={},
                  opts={},
                  optsLog={},
                  opts2={},
@@ -1723,6 +2147,7 @@ class PlotDrawer:
                  rebinY=None,
                  rebinToWidthX=None,
                  rebinToWidthY=None,
+                 divideByBinWidth=False,
                  createLegend={},
                  moveLegend={},
                  customizeBeforeFrame=None,
@@ -1733,6 +2158,7 @@ class PlotDrawer:
                  addMCUncertainty=False,
                  cmsText=None,
                  ):
+        self.xlabelDefault = xlabel
         self.ylabelDefault = ylabel
         self.zlabelDefault = zlabel
         self.logDefault = log
@@ -1740,6 +2166,9 @@ class PlotDrawer:
         self.ratioYlabelDefault = ratioYlabel
         self.ratioInvertDefault = ratioInvert
         self.ratioIsBinomialDefault = ratioIsBinomial
+        self.ratioTypeDefault = ratioType
+        self.ratioCreateLegendDefault = ratioCreateLegend
+        self.ratioMoveLegendDefault = ratioMoveLegend
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
@@ -1753,6 +2182,7 @@ class PlotDrawer:
         self.rebinYDefault = rebinY
         self.rebinToWidthXDefault = rebinToWidthX
         self.rebinToWidthYDefault = rebinToWidthY
+        self.divideByBinWidthDefault = divideByBinWidth
         self.createLegendDefault = createLegend
         self.moveLegendDefault = moveLegend
         self.customizeBeforeFrameDefault = customizeBeforeFrame
@@ -1804,20 +2234,27 @@ class PlotDrawer:
     #
     # \param p       plots.PlotBase (or deriving) object
     # \param name    Plot file name
-    # \param xlabel  X axis title
     # \param kwargs  Keyword arguments (see below)
     #
     # Keyword arguments are forwarded to the methods doing the actual
     # work. These methods pick the arguments they are interested of.
     # For further documentation, please look the individual methods
-    def __call__(self, p, name, xlabel, **kwargs):
+    def __call__(self, p, name, *args, **kwargs):
         self.rebin(p, name, **kwargs)
         self.stackMCHistograms(p, **kwargs)
         self.createFrame(p, name, **kwargs)
         self.setLegend(p, **kwargs)
         self.addCutLineBox(p, **kwargs)
         self.customise(p, **kwargs)
-        self.finish(p, xlabel, **kwargs)
+        if len(args) > 1:
+            raise Exception("At most 1 positional argument allowed (for xlabel), got %d" % len(args))
+        elif len(args) == 1:
+            if "xlabel" in kwargs:
+                raise Exception("May not give positional arguments if xlabel is in kwargs")
+            else:
+                self.finish(p, xlabel=args[0], **kwargs)
+        else:
+            self.finish(p, **kwargs)
 
     ## Rebin all histograms in the plot
     #
@@ -1835,6 +2272,7 @@ class PlotDrawer:
     #                      TH2)
     # \li\a rebinToWidthX  If given, rebin all histograms to this width of X bins.
     # \li\a rebinToWidthY  If given, rebin all histograms to this width of Y bins.
+    # \li\a divideByBinWidth Divide bin contents by bin width? (done after rebinning)
     #
     # \b Note: Only one argument above per axis can be given.
     #
@@ -1848,6 +2286,8 @@ class PlotDrawer:
 
         if rebin is not None and rebinX is not None:
             raise Exception("Give either 'rebin' or 'rebinX', not both")
+        if rebin is not None:
+            rebinX = rebin
 
         # Use the one given as argument if both are non-None
         if rebinX is not None and rebinToWidthX is not None:
@@ -1895,9 +2335,9 @@ class PlotDrawer:
             # bin widths) explicitly specifying the bin low edges is
             # the only way which works
             def rebinToWidthTH1(h):
-                th1 = h.getRootHisto()
-                xmin = histograms.th1Xmin(th1)
-                xmax = histograms.th1Xmax(th1)
+                histo = h.getRootHistoWithUncertainties()
+                xmin = histo.getXmin()
+                xmax = histo.getXmax()
                 nbins = (xmax-xmin)/rebinToWidthX
                 intbins = int(nbins+0.5)
                 # Check that the number of bins is integer
@@ -1908,17 +2348,18 @@ class PlotDrawer:
 
                 nbins = intbins
                 binLowEdgeList = [xmin + (xmax-xmin)/nbins*i for i in range(0, nbins+1)]
-                rebinned = th1.Rebin(nbins, th1.GetName(), array.array("d", binLowEdgeList))
-                h.setRootHisto(rebinned)
+                rebinned = histo.Rebin(nbins, histo.GetName(), array.array("d", binLowEdgeList))
+#                h.setRootHisto(rebinned)
 
             def rebinToWidth(h):
-                th = h.getRootHisto()
-                if not hasattr(th, "Rebin2D"):
+                histo = h.getRootHistoWithUncertainties()
+                if not hasattr(histo.getRootHisto(), "Rebin2D"):
                     if rebinX is not None:
-                        th.Rebin(rebinX)
+                        histo.Rebin(rebinX)
                     if rebinToWidthX is not None:
                         rebinToWidthTH1(h)
                     return
+                th = histo.getRootHisto()
 
                 rex = 1
                 rey = 1
@@ -1928,8 +2369,8 @@ class PlotDrawer:
                 if rebinY is not None:
                     rey = rebinY
                 if rebinToWidthX is not None:
-                    xmin = histograms.th1Xmin(th)
-                    xmax = histograms.th1Xmax(th)
+                    xmin = histo.getXmin()
+                    xmax = histo.getXmax()
 
                     nbinsx = (xmax-xmin)/rebinToWidthX
                     intbinsx = int(nbinsx+0.5)
@@ -1941,8 +2382,8 @@ class PlotDrawer:
                         return
                     rex = th.GetNbinsX()/intbinsx
                 if rebinToWidthY is not None:
-                    ymin = histograms.th2Ymin(th)
-                    ymax = histograms.th2Ymax(th)
+                    ymin = histo.getYmin()
+                    ymax = histo.getYmax()
                     nbinsy = (ymax-ymin)/rebinToWidthY
                     intbinsy = int(nbinsy+0.5)
 
@@ -1953,12 +2394,16 @@ class PlotDrawer:
                         return
                     rey = th.GetNbinsY()/intbinsy
 
-                th.Rebin2D(rex, rey)
+                histo.Rebin2D(rex, rey)
 
             rebinFunction = rebinToWidth
 
         if rebinFunction is not None:
             p.histoMgr.forEachHisto(rebinFunction)
+
+        if kwargs.get("divideByBinWidth", self.divideByBinWidthDefault):
+            # TH1::Scale() with "width" option divides the histogram by bin width
+            p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Scale(1, "width"))
 
     ## Stack MC histograms
     #
@@ -1990,6 +2435,7 @@ class PlotDrawer:
     # \li\a ratioYlabel  The Y axis title for the ratio pad (None for default)
     # \li\a ratioInvert  Should the ratio be inverted?
     # \li\a ratioIsBinomial  Is the ratio a binomial?
+    # \li\a ratioType    Type of the ratio calculation
     # \li\a customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \li\a backgroundColor  Plot background color (None for white)
     def createFrame(self, p, name, **kwargs):
@@ -2013,10 +2459,11 @@ class PlotDrawer:
         ratio = self._getValue("ratio", p, kwargs)
         if ratio:
             args["createRatio"] = True
-        if self._getValue("ratioInvert", p, kwargs):
-            args["invertRatio"] = True
-        if self._getValue("ratioIsBinomial", p, kwargs):
-            args["ratioIsBinomial"] = True
+            args["ratioType"] = self._getValue("ratioType", p, kwargs)
+            if self._getValue("ratioInvert", p, kwargs):
+                args["invertRatio"] = True
+            if self._getValue("ratioIsBinomial", p, kwargs):
+                args["ratioIsBinomial"] = True
         canvasOpts = self._getValue("canvasOpts", p, kwargs)
         if canvasOpts is not None:
             args["canvasOpts"] = canvasOpts
@@ -2048,6 +2495,9 @@ class PlotDrawer:
     # <b>Keyword arguments</b>
     # \li\a createLegend  Dictionary forwarded to histograms.creteLegend() (if None, don't create legend)
     # \li\a moveLegend    Dictionary forwarded to histograms.moveLegend() after creating the legend
+    # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
+    # \li\a ratioCreateLegend  Dictionary forwarded to histograms.creteLegend() (if None, don't create legend, if True, create with default parameters)
+    # \li\a ratioMoveLegend    Dictionary forwarded to histograms.moveLegend() after creating the legend
     #
     # The default legend position should be set by modifying histograms.createLegend (see histograms.LegendCreator())
     def setLegend(self, p, **kwargs):
@@ -2055,6 +2505,14 @@ class PlotDrawer:
         moveLegend = self._getValue("moveLegend", p, kwargs)
         if createLegend is not None:
             p.setLegend(histograms.moveLegend(histograms.createLegend(**createLegend), **moveLegend))
+
+        if self._getValue("ratio", p, kwargs):
+            create = self._getValue("ratioCreateLegend", p, kwargs)
+            move = self._getValue("ratioMoveLegend", p, kwargs)
+            if create is not None:
+                if create == True:
+                    create = {}
+                p.setRatioLegend(histograms.moveLegend(histograms.createLegendRatio(**create), **move))
 
     ## Add cut box and/or line to the plot
     #
@@ -2100,10 +2558,10 @@ class PlotDrawer:
     ## Draw and save the plot
     #
     # \param p       plots.PlotBase (or deriving) object
-    # \param xlabel  X axis title
     # \param kwargs  Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
+    # \li\a xlabel  X axis title (None for pick from first histogram)
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
@@ -2114,13 +2572,27 @@ class PlotDrawer:
     # In addition of drawing and saving the plot, handles the X and Y
     # axis titles, and "CMS Preliminary", "sqrt(s)" and luminosity
     # texts.
-    def finish(self, p, xlabel, **kwargs):
-        ylab = self._getValue("ylabel", p, kwargs)
-        if "%" in ylab:
-            ylab = ylab % p.binWidth()
+    def finish(self, p, **kwargs):
+        xlab = self._getValue("xlabel", p, kwargs)
+        if xlab is None:
+            xlab = p.histoMgr.getHistos()[0].getRootHisto().GetXaxis().GetTitle()
+        p.frame.GetXaxis().SetTitle(xlab)
 
-        p.frame.GetXaxis().SetTitle(xlabel)
-        p.frame.GetYaxis().SetTitle(ylab)
+        ylabel = self._getValue("ylabel", p, kwargs)
+        if ylabel is None:
+            ylabel = p.histoMgr.getHistos()[0].getRootHisto().GetYaxis().GetTitle()
+        else:
+            nformats = ylabel.count("%")
+            if nformats == 0:
+                pass
+            elif nformats == 1:
+                ylabel = ylabel % p.binWidth()
+            elif nformats == 2:
+                binWidths = p.binWidths()
+                ylabel = ylabel % (min(binWidths), max(binWidths))
+            else:
+                raise Exception("Got %d '%%' formats in y label ('%s'), only 0-2 are supported" % (nformats, ylabel))
+        p.frame.GetYaxis().SetTitle(ylabel)
 
         customize = self._getValue("customizeBeforeDraw", p, kwargs)
         if customize != None:

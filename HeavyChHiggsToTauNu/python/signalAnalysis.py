@@ -39,8 +39,10 @@ def createEDFilter(param):
         vertexWeight = param.vertexWeight.clone(),
         pileupWeightReader = param.pileupWeightReader.clone(),
         wjetsWeightReader = param.wjetsWeightReader.clone(),
+        embeddingGeneratorWeightReader = param.embeddingGeneratorWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
-        embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(),
+        embeddingMuonTriggerEfficiency = param.embeddingMuonTriggerEfficiency.clone(),
+        embeddingMuonIdEfficiency = param.embeddingMuonIdEfficiency.clone(),
         Tree = param.tree.clone(),
         eventCounter = param.eventCounter.clone(),
         oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus","HadronicTauOneAndThreeProng"),
@@ -48,4 +50,6 @@ def createEDFilter(param):
         tauEmbeddingStatus = cms.untracked.bool(False),
         metFilters = param.metFilters.clone(),
         QCDTailKiller = param.QCDTailKiller.clone(),
+        commonPlotsSettings = param.commonPlotsSettings.clone(),
+        invMassReco = param.invMassReco.clone(),
     )

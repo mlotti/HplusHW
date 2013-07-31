@@ -37,7 +37,7 @@ process.source = cms.Source('PoolSource',
 #        "file:/mnt/flustre/wendland/AODSIM_PU_S6_START44_V9B_7TeV/Fall11_TTJets_TuneZ2_7TeV-madgraph-tauola_AODSIM_PU_S6_START44_V9B-v1_testfile.root"
         "file:/mnt/flustre/mkortela/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/82A96ABF-C736-E111-8E5D-0030486790C0.root" # has lumi 255000, which induces a bug
     ),
-    lumisToProcess = cms.untracked.VLuminosityBlockRange("1:255000"),
+#    lumisToProcess = cms.untracked.VLuminosityBlockRange("1:255000"),
 #    eventsToProcess = cms.untracked.VEventRange("1:255000:76484768"),
 )
 
@@ -104,7 +104,10 @@ process.commonSequence.insert(0, process.goodPrimaryVertices)
 # Embedding-like preselection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 #tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
-if options.doPat != 0:
+if options.doPat == 0:
+    import HiggsAnalysis.HeavyChHiggsToTauNu.CustomGenTauSkim as tauSkim
+    additionalCounters = tauSkim.getCounters() + additionalCounters
+else:
     # To optimise, perform the generator level preselection before running PAT
     counters = tauEmbeddingCustomisations.addGenuineTauPreselection(process, process.commonSequence, param, pileupWeight=puWeightNames[-1])
     process.commonSequence.remove(process.genuineTauPreselectionSequence)
@@ -125,7 +128,10 @@ preselectionCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselect
 
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
+import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
 ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
+    eventCounter = param.eventCounter.clone(),
+    histogramAmbientLevel = cms.untracked.string("Vital"),
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
 
@@ -134,15 +140,24 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
         MediumIsoPFTau35_Trk20_MET60 = cms.vstring("HLT_MediumIsoPFTau35_Trk20_MET60_v1"),
     ),
 
+    tauEnabled = cms.bool(True),
     tauSrc = cms.InputTag(param.tauSelection.src.value()), # this is set in addEmbeddingLikePreselection()
     tauFunctions = analysisConfig.tauFunctions.clone(),
 
-    jetSrc = cms.InputTag(param.jetSelection.src.value()),
-    jetFunctions = analysisConfig.jetFunctions.clone(),
+    jets = Ntuple.clone(
+#        src = param.jetSelection.src.value(),
+        src = "embeddingLikePreselectionCleanedJets",
+        functions = analysisConfig.jetFunctions.clone(),
+        pileupIDs = analysisConfig.jetPileupIDs.clone(),
+    ),
+
+    muonsEnabled = cms.bool(False),
+    muons = Ntuple.muons.clone(src = "NOT_SET"),
 
     genParticleSrc = cms.InputTag("genParticles"),
 # For tau MC matching, use the same collection which was used in preselection
     genParticleTauSrc = cms.InputTag("embeddingLikePreselectionGenTau"),
+    genTTBarEnabled = cms.bool(True),
 
     mets = cms.PSet(
 #        pfMet_p4 = cms.InputTag("patMETs"+PF2PATVersion),
@@ -165,14 +180,15 @@ process.preselectionSequence.insert(0, process.commonSequence)
 addAnalysis(process, "tauNtuple", ntuple,
             preSequence=process.preselectionSequence,
             additionalCounters=preselectionCounters,
-            signalAnalysisCounters=False)
-process.tauNtupleCounters.printMainCounter = True
+            signalAnalysisCounters=True)
+process.tauNtuple.eventCounter.printMainCounter = True
 
-addSignalAnalysis = True
+addSignalAnalysis = False
 if addSignalAnalysis:
     # Run signal analysis module on the same go with the embedding preselection without tau+MET trigger
     import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
     module = signalAnalysis.createEDFilter(param)
+    param.setJetPUIdSrc(module.jetSelection, "")
     module.Tree.fill = cms.untracked.bool(False)
     module.histogramAmbientLevel = "Systematics"
 

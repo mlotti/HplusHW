@@ -6,22 +6,43 @@ import imp
 from optparse import OptionParser
 import gc
 import cPickle
+import time
 import ROOT
+ROOT.gROOT.SetBatch(True) # no flashing canvases
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+import tarfile
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-def main(opts):
+def getDsetCreator(label, mcrabPath, mcrabInfoOutput, enabledStatus=True):
+    if enabledStatus:
+        if mcrabPath == "":
+            mcrabInfoOutput.append("- %s: not present"%(label))
+            print "- %s: not present"%(label)
+        else:
+            mcrabInfoOutput.append("- %s: multicrab dir found (%s)"%(label,mcrabPath))
+            print "- %s%s: multicrab dir found%s (%s)"%(HighlightStyle(),label,NormalStyle(),mcrabPath)
+            return dataset.readFromMulticrabCfg(directory=mcrabPath)
+    else:
+        mcrabInfoOutput.append("- %s: not considered"%(label))
+        print "- %s: not considered"%(label)
+    return None
+
+def main(opts, moduleSelector):
     print CaptionStyle()+"*** Datacard generator ***"+NormalStyle()+"\n"
     #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
     #gc.set_debug(gc.DEBUG_STATS)
     #ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
     #gc.set_debug(gc.DEBUG_STATS)
     print "Loading datacard:",opts.datacard
+    os.system("python %s"%opts.datacard) # Catch any errors in the input datacard
     config = load_module(opts.datacard)
 
     # If user insisted on certain QCD method on command line, produce datacards only for that QCD method
@@ -32,200 +53,87 @@ def main(opts):
     elif opts.useQCDinverted:
         myQCDMethods = [DataCard.DatacardQCDMethod.INVERTED]
 
-    # Check multicrab directory existence
-    # Find also list of eras and variations for which to produce datacards
+    # Obtain dataset creators (also check multicrab directory existence)
     print "\nChecking input multicrab directory presence:"
     multicrabPaths = PathFinder.MulticrabPathFinder(config.Path)
-    myEras = []
-    myModules = []
-    if config.SignalAnalysis != None:
-        myEras,myModules = obtainErasAndModules(multicrabPaths.getSignalPath())
-        print "- %ssignal analysis: found%s (%s)"%(HighlightStyle(),NormalStyle(),multicrabPaths.getSignalPath())
-    else:
-        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" you have not specified SignalAnalysis in the datacard!")
+    mcrabInfoOutput = []
+    mcrabInfoOutput.append("Input directories:")
+    signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
+    embeddingDsetCreator = None
     if config.OptionReplaceEmbeddingByMC:
-        print "- %sembedding: estimated from signal analysis MC%s"%(WarningStyle(),NormalStyle())
+        mcrabInfoOutput.append("- Embedding: estimated from signal analysis MC")
+        print "- %sWarning:%s Embedding: estimated from signal analysis MC"%(WarningStyle(),NormalStyle())
     else:
-        if config.EmbeddingAnalysis != None:
-            myEmbeddingEras,myEmbeddingModules = obtainErasAndModules(multicrabPaths.getEWKPath())
-            myEmbeddingEras,myEmbeddingModules = checkEraAndVariationMatching(myEras,myModules,myQCDEras,myQCDFactList,"Embedding")
-            print "- %sembedding: found%s (%s)"%(HighlightStyle(),NormalStyle(),multicrabPaths.getEWKPath())
-        else:
-            print "- embedding: not considered or not present"
-    if DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods:
-        if config.QCDFactorisedAnalysis != None:
-            myQCDEras,myQCDFactList = obtainErasAndModules(multicrabPaths.getQCDFactorisedPath())
-            myEras,myModules = checkEraAndVariationMatching(myEras,myModules,myQCDEras,myQCDFactList,"QCD factorised")
-            print "- %sQCD factorised: found%s (%s)"%(HighlightStyle(),NormalStyle(),multicrabPaths.getQCDFactorisedPath())
-        else:
-            print "- QCD factorised: not considered or not present"
-    else:
-        print "- QCD factorised: not considered or not present"
-    if DataCard.DatacardQCDMethod.INVERTED in myQCDMethods:
-        if config.QCDInvertedAnalysis != None:
-            myQCDEras,myQCDInvList = obtainErasAndModules(multicrabPaths.getQCDInvertedPath())
-            myEras,myModules = checkEraAndVariationMatching(myEras,myModules,myQCDEras,myQCDInvList,"QCD inverted")
-            print "- %sQCD inverted: found%s (%s)"%(HighlightStyle(),NormalStyle(),multicrabPaths.getQCDInvertedPath())
-        else:
-            print "- QCD inverted: not considered or not present"
-    else:
-        print "- QCD inverted: not considered or not present"
+        embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput, not config.OptionReplaceEmbeddingByMC)
+    qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
+    if qcdFactorisedDsetCreator == None:
+        myQCDMethods.remove(DataCard.DatacardQCDMethod.FACTORISED)
+    qcdInvertedDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
+    if qcdInvertedDsetCreator == None:
+        myQCDMethods.remove(DataCard.DatacardQCDMethod.INVERTED)
+
+    # Require existence of signal analysis and one QCD measurement
+    if signalDsetCreator == None:
+        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Signal analysis multicrab directory not found!")
+    if len(myQCDMethods) == 0:
+        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" QCD measurement (factorised and/or inverted) not found!")
 
     # Check options that are affecting the validity of the results
     if not config.OptionIncludeSystematics:
-        print WarningStyle()+"\nWarning: skipping of shape systematics has been forced (flag OptionIncludeSystematics in the datacard file)",NormalStyle()
+        print "\n%sWarning%s: skipping of shape systematics has been forced (flag OptionIncludeSystematics in the datacard file)"%(WarningStyle(),NormalStyle())
     if not config.OptionDoControlPlots:
-        print WarningStyle()+"\nWarning: skipping of data driven control plot generation been forced (flag OptionDoControlPlots in the datacard file)"+NormalStyle()
+        print "\n%sWarning%s: skipping of data driven control plot generation been forced (flag OptionDoControlPlots in the datacard file)"%(WarningStyle(),NormalStyle())
 
-    # Print era list and determine which ones are selected
-    mySelectedEras = []
-    print "\nAvailable eras found: (use -e to add, for example: -e Run2011A -e Run2011B)"
-    if opts.eraId == None:
-        print "(you did not ask for specific era(s) so by default all possibilities will be considered...)"
-    for era in myEras:
-        if era == "":
-            print HighlightStyle()+"--> (default unspecified era, will be used automatically)"+NormalStyle()
-            mySelectedEras.append("")
-        else:
-            if opts.eraId != None:
-                if era in opts.eraId:
-                    print HighlightStyle()+"--> %s"%(era)+NormalStyle()
-                    mySelectedEras.append(era)
-                else:
-                    print "    %s"%(era)
-            else:
-                print HighlightStyle()+"--> %s"%(era)+NormalStyle()
-                mySelectedEras.append(era)
-    # Print variation list and determine which ones are selected
-    mySelectedVariations = []
-    print "\nAvailable variations found: (use -v to add by index number, for example -v 0 -v 3)"
-    if opts.variationId == None:
-        print "(you did not ask for specific variation(s) so by default all possibilities will be considered...)"
-    for i in range(0,len(myModules)):
-        if myModules[i] == "":
-            print HighlightStyle()+"--> (default module)"%i+NormalStyle()
-            mySelectedVariations.append("")
-        else:
-            if opts.variationId != None:
-                if i in opts.variationId:
-                    print HighlightStyle()+"--> %d: %s"%(i,myModules[i])+NormalStyle()
-                    mySelectedVariations.append(myModules[i])
-                else:
-                    print "    %d: %s"%(i,myModules[i])
-            else:
-                print HighlightStyle()+"--> %d: %s"%(i,myModules[i])+NormalStyle()
-                mySelectedVariations.append(myModules[i])
-    if opts.listVariations == True:
-        print "Printed list of eras and variations, now exiting. To generate datacards, remove '-l' parameter from command line."
-        sys.exit()
-    # Check that the command line options for eras and variations make sense
-    if opts.eraId != None:
-        for era in opts.eraId:
-            if not era in myEras:
-                raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" you asked for era '%s' which is not available in all of the multicrab directories!"%(era))
-    if opts.variationId != None:
-        for variation in opts.variationId:
-            if variation < 0 or variation >= len(myModules):
-                print variation, myModules
-                raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" you asked for variation '%s' which is not available in all of the multicrab directories!"%(variation))
+    # Find list of available eras, search modes, and optimization modes common for all multicrab directories
+    moduleSelector.setPrimarySource("Signal analysis", signalDsetCreator)
+    if embeddingDsetCreator != None:
+        moduleSelector.addOtherSource("Embedding", embeddingDsetCreator)
+    if qcdFactorisedDsetCreator != None:
+        moduleSelector.addOtherSource("QCD factorised", qcdFactorisedDsetCreator)
+    if qcdInvertedDsetCreator != None:
+        moduleSelector.addOtherSource("QCD inverted", qcdInvertedDsetCreator)
+    moduleSelector.doSelect(opts)
+
     # Summarise the consequences of the user choises
-    myDatacardCount = len(mySelectedEras)*len(mySelectedVariations)*len(myQCDMethods)
-    print "\nProducing %s%d sets of datacards%s (%d era(s) x %d variation(s) x %d QCD measurement(s))\n"%(HighlightStyle(),myDatacardCount,NormalStyle(),len(mySelectedEras),len(mySelectedVariations),len(myQCDMethods))
-
+    myDatacardCount = len(moduleSelector.getSelectedEras())*len(moduleSelector.getSelectedSearchModes())*len(moduleSelector.getSelectedOptimizationModes())*len(myQCDMethods)
+    print "\nProducing %s%d sets of datacards%s (%d era(s) x %d search mode(s) x %d optimization mode(s) x %d QCD measurement(s))\n"%(HighlightStyle(),myDatacardCount,NormalStyle(),len(moduleSelector.getSelectedEras()),len(moduleSelector.getSelectedSearchModes()),len(moduleSelector.getSelectedOptimizationModes()),len(myQCDMethods))
     # Produce datacards
     myCounter = 0
-    for method in myQCDMethods:
-        for module in mySelectedVariations:
-            for era in mySelectedEras:
-                myCounter += 1
-                print CaptionStyle()+"Producing datacard %d/%d ..."%(myCounter,myDatacardCount)+NormalStyle()+"\n"
-                DataCard.DataCardGenerator(config,opts,method,era,module)
+    myStartTime = time.time()
+    myOutputDirectories = []
+    for qcdMethod in myQCDMethods:
+        for era in moduleSelector.getSelectedEras():
+            for searchMode in moduleSelector.getSelectedSearchModes():
+                for optimizationMode in moduleSelector.getSelectedOptimizationModes():
+                    myCounter += 1
+                    print "%sProducing datacard %d/%d ...%s\n"%(CaptionStyle(),myCounter,myDatacardCount,NormalStyle())
+                    # Create the generator, check config file contents
+                    dcgen = DataCard.DataCardGenerator(opts, config, qcdMethod)
+                    # Tweak to provide the correct datasetMgrCreator to the generator
+                    myQCDDsetCreator = None
+                    if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
+                        myQCDDsetCreator = qcdFactorisedDsetCreator
+                        print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sfactorised%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
+                    elif qcdMethod == DataCard.DatacardQCDMethod.INVERTED:
+                        myQCDDsetCreator = qcdInvertedDsetCreator
+                        print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sinverted%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
+                    dcgen.setDsetMgrCreators(signalDsetCreator,embeddingDsetCreator,myQCDDsetCreator)
+                    # Do the heavy stuff
+                    myOutputDirectories.append(dcgen.doDatacard(era,searchMode,optimizationMode,mcrabInfoOutput))
     print "\nDatacard generator is done."
-
+    myEndTime = time.time()
+    print "Running took on average %.1f s / datacard (total elapsed time: %.1f s)"%((myEndTime-myStartTime)/float(myDatacardCount), (myEndTime-myStartTime))
+    # Make tar file
+    myTimestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
+    myFilename = "datacards_archive_%s.tgz"%myTimestamp
+    fTar = tarfile.open(myFilename, mode="w:gz")
+    for d in myOutputDirectories:
+        fTar.add(d)
+    fTar.close()
+    print "Created archive of results directories to: %s%s%s"%(HighlightStyle(),myFilename,NormalStyle())
     #gc.collect()
     #ROOT.SetMemoryPolicy( ROOT.kMemoryHeuristics)
     #memoryDump()
-
-def obtainErasAndModules(taskPath):
-    # Initialise black list of words (if these appear in the directory name, the directory will be skipped)
-    mySkipList = ["Plus","Minus","configInfo","PUWeightProducer"]
-    # Initialise return objects
-    myModules = []
-    myEras = []
-    # Check that path exists
-    if not os.path.exists(taskPath):
-        return myEras,myModules
-    taskDirs = multicrab.getTaskDirectories(None, taskPath+"/multicrab.cfg")
-    # take first non-data task and obtain its result histogram
-    myRootFile = None
-    myTask = ""
-    for task in taskDirs:
-        myBasename = os.path.basename(task)
-        if myBasename.find("2011") < 0 and myBasename.find("2012") < 0: # and len(myTask) == 0:
-            myTask = task
-    if len(myTask) == 0:
-        if len(taskDirs) == 0:
-            return myEras,myModules
-        myTask = taskDirs[0]
-    myFilename = myTask+"/res/histograms-"+os.path.basename(myTask)+".root"
-    if os.path.exists(myFilename):
-        myRootFile = ROOT.TFile.Open(myFilename)
-        # root file is opened, loop over keys to find directories
-        for i in range(0, myRootFile.GetNkeys()):
-            myKey = myRootFile.GetListOfKeys().At(i)
-            if myKey.IsFolder():
-                myTitle = myKey.GetTitle()
-                # Ignore systematics and architecture directories
-                mySkipStatus = False
-                for skipItem in mySkipList:
-                    if skipItem in myTitle:
-                        mySkipStatus = True
-                if mySkipStatus:
-                    continue
-                # Analyse directory name
-                # Extract optimisation postfix
-                myModuleName = myTitle
-                if myTitle.find("Opt") > 0:
-                    # Remove prefix
-                    myModuleName = myModuleName[myModuleName.find("Opt"):len(myModuleName)]
-                else:
-                    # Fall back to default
-                    myModuleName = ""
-                if not myModuleName in myModules:
-                    myModules.append(myModuleName)
-                # Extract era
-                myEraName = myTitle
-                if myEraName.find("Run") > 0:
-                    myEraName = myEraName[myEraName.find("Run"):len(myEraName)]
-                    if myEraName.find("Opt") > 0:
-                        myEraName = myEraName[0:myEraName.find("Opt")]
-                else:
-                    myEraName = ""
-                if not myEraName in myEras:
-                    myEras.append(myEraName)
-        myRootFile.Close()
-        return myEras,myModules
-    # No root file has been found
-    return myEras,myModules
-
-# Remove eras and variations that are not possible
-def checkEraAndVariationMatching(eras,variations,testEras,testVariations,label):
-    myEras = []
-    myVariations = []
-    # Check that eras are possible
-    for era in eras:
-        if era in testEras:
-            myEras.append(era)
-        else:
-            print "Not possible to evaluate era '%s', because it is missing from %s."%(era,label)
-    # Check that variations are possible
-    for variation in variations:
-        if variation in testVariations:
-            myVariations.append(variation)
-        else:
-            print "Not possible to evaluate era '%s', because it is missing from %s."%(era,label)
-    # Return
-    return myEras,myVariations
 
 def memoryDump():
     dump = open("memory_pickle.txt", 'w')
@@ -239,6 +147,7 @@ def memoryDump():
             cPickle.dump({'id': i, 'class': cls, 'size': size, 'referents': referents}, dump)
 
 def testShapeHistogram():
+    # FIXME: Move this code as validate() of the ShapeHistoModifier class
     print "Testing shape histogram modifying algorithm:"
     # Create specification
     ShapeHistogramsDimensions = { "bins": 6,
@@ -272,15 +181,19 @@ def testShapeHistogram():
     sys.exit()
 
 if __name__ == "__main__":
+    myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
+
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
     parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
-    parser.add_option("-l", "--listVariations", dest="listVariations", action="store_true", default=False, help="Print a list of available variations")
-    parser.add_option("-e", "--era", dest="eraId", type="string", action="append", help="Evaluate specified eras")
-    parser.add_option("-v", "--variation", dest="variationId", type="int", action="append", help="Evaluate specified variations")
+    myModuleSelector.addParserOptions(parser)
+    #parser.add_option("-e", "--era", dest="eraId", type="string", action="append", help="Evaluate specified eras")
+    #parser.add_option("-m", "--searchMode", dest="searchModeId", action="append", help="name of search mode")
+    #parser.add_option("-v", "--variation", dest="variationId", type="int", action="append", help="Evaluate specified variations")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
     parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
     parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
+    parser.add_option("--debugDatasets", dest="debugDatasets", action="store_true", default=False, help="Enable debugging print for datasetMgr contents")
     parser.add_option("--debugConfig", dest="debugConfig", action="store_true", default=False, help="Enable debugging print for config parsing")
     parser.add_option("--debugMining", dest="debugMining", action="store_true", default=False, help="Enable debugging print for data mining")
     parser.add_option("--debugQCD", dest="debugQCD", action="store_true", default=False, help="Enable debugging print for QCD measurement")
@@ -300,5 +213,4 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit()
     # Run main program
-    ROOT.gROOT.SetBatch() # no flashing canvases
-    main(opts)
+    main(opts, myModuleSelector)

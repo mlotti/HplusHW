@@ -12,10 +12,10 @@ multicrab = Multicrab("crab_analysis.cfg", cfg)
 #workflow = "analysis_v44_5"
 
 # Tau+MET trigger
-workflow = "analysis_taumet_v53_2"
+workflow = "analysis_taumet_v53_3"
 
 # QuadJet80 tritgger
-#workflow = "analysis_quadjet_v53_2"
+#workflow = "analysis_quadjet_v53_3_test6"
 
 # QuadJet75_55_38_20_BTagIP_VBF trigger
 #workflow = "analysis_quadjetbtag_v53_2"
@@ -23,13 +23,17 @@ workflow = "analysis_taumet_v53_2"
 # QuadPFJet75_55_38_20_BTagCSV_VBF trigger for data
 # QuadPFJetXX_61_44_31_BTagCSV_VBF trigger for MC, XX specified below with mc_pfjettrigger variable
 #workflow = "analysis_quadpfjetbtag_v53_2"
-mc_pfjettrigger = "78"
+#mc_pfjettrigger = "78"
 #mc_pfjettrigger = "82"
 
 
-# Do W+jets weighting?
+# Do W+jets weighting? (recommended: True)
 doWJetsWeighting = False
 doWJetsWeighting = True
+
+# Use the Jan22 data ReReco (recommended: True)
+useJan22ReReco = False
+useJan22ReReco = True
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -42,7 +46,7 @@ if runPatOnTheFly:
 # For minimal set of datasets remove the 200k signal samples, and
 # single top signal samples
 minimalDatasets = True
-minimalDatasets = False
+#minimalDatasets = False
 
 
 # Uncomment below the datasets you want to process
@@ -110,16 +114,24 @@ datasetsMC_2011 = [
         "ZZ_TuneZ2_Fall11",
         ]
 
-datasetsData_Tau_2012 = [
-    "Tau_190456-190738_2012A_Jul13",
-    "Tau_190782-190949_2012A_Aug06",
-    "Tau_191043-193621_2012A_Jul13",
+datasetsData_Tau_2012_Prompt = [
+    # "Tau_190456-190738_2012A_Jul13",
+    # "Tau_190782-190949_2012A_Aug06",
+    # "Tau_191043-193621_2012A_Jul13",
     "Tau_193834-196531_2012B_Jul13",
-    "Tau_198022-198523_2012C_Aug24",
-    "Tau_198941-202504_2012C_Prompt",
-    "Tau_201191-201191_2012C_Dec11",
-    "Tau_202972-203742_2012C_Prompt",
-    "Tau_203777-208686_2012D_Prompt",
+#    "Tau_198022-198523_2012C_Aug24",
+#    "Tau_198941-202504_2012C_Prompt",
+#    "Tau_201191-201191_2012C_Dec11",
+#    "Tau_202972-203742_2012C_Prompt",
+    # "Tau_203777-208686_2012D_Prompt",
+]
+
+datasetsData_Tau_2012 = [
+    "Tau_190456-193621_2012A_Jan22",
+    "TauParked_193834-196531_2012B_Jan22",
+    "TauParked_198022-202504_2012C_Jan22",
+    "TauParked_202972-203742_2012C_Jan22",
+    "TauParked_203777-208686_2012D_Jan22",
 ]
 
 datasetsData_MultiJet_2012 = [
@@ -133,17 +145,24 @@ datasetsData_MultiJet_2012 = [
     "MultiJet_203777-208686_2012D_Prompt",
 ]
 
-datasetsData_BJetPlusX_2012 = [
-    "MultiJet_190456-190738_2012A_Jul13",
-    "MultiJet_190782-190949_2012A_Aug06",
-    "MultiJet_191043-193621_2012A_Jul13",
-    "BJetPlusX_193834-194225_2012B_Jul13",
-    "BJetPlusX_194270-196531_2012B_Jul13",
-    "BJetPlusX_198022-198523_2012C_Aug24",
-    "BJetPlusX_198941-203742_2012C_Prompt",
-    "BJetPlusX_201191-201191_2012C_Dec11",
-    "BJetPlusX_203777-208686_2012D_Prompt",
+datasetsData_MultiJetParked_2012 = [
+#    "MultiJet_190456-190738_2012A_Jul13",
+#    "MultiJet_190782-190949_2012A_Aug06",
+#    "MultiJet_191043-193621_2012A_Jul13",
+    "MultiJet1Parked_198022-198523_2012C_Nov05",
 ]
+
+# datasetsData_BJetPlusX_2012 = [
+#     "MultiJet_190456-190738_2012A_Jul13",
+#     "MultiJet_190782-190949_2012A_Aug06",
+#     "MultiJet_191043-193621_2012A_Jul13",
+#     "BJetPlusX_193834-194225_2012B_Jul13",
+#     "BJetPlusX_194270-196531_2012B_Jul13",
+#     "BJetPlusX_198022-198523_2012C_Aug24",
+#     "BJetPlusX_198941-203742_2012C_Prompt",
+#     "BJetPlusX_201191-201191_2012C_Dec11",
+#     "BJetPlusX_203777-208686_2012D_Prompt",
+# ]
 
 datasetsMC_2012 = []
 if not minimalDatasets:
@@ -260,8 +279,8 @@ datasetsMC_2012.extend([
 ])
 
 def mcWorkflow():
-    if "quadpfjetbtag" in workflow:
-        return workflow.replace("quadpfjetbtag", "quadpfjet%sbtag" % mc_pfjettrigger)
+#    if "quadpfjetbtag" in workflow:
+#        return workflow.replace("quadpfjetbtag", "quadpfjet%sbtag" % mc_pfjettrigger)
     return workflow
 # Disable W+jets weighting if requested
 if not doWJetsWeighting:
@@ -286,28 +305,31 @@ if "v44" in workflow:
 elif "v53" in workflow:
     datasets = []
     if "taumet" in workflow:
-        datasets.extend(datasetsData_Tau_2012)
+        if useJan22ReReco:
+            datasets.extend(datasetsData_Tau_2012)
+        else:
+            datasets.extend(datasetsData_Tau_2012_Prompt)
         datasets.extend(datasetsMC_2012)
     elif "quadjet_" in workflow:
-        datasets.extend(datasetsData_MultiJet_2012)
+        datasets.extend(datasetsData_MultiJetParked_2012)
         datasets.extend(datasetsMC_2012)
-    elif "quadjetbtag" in workflow:
-        datasets.extend(datasetsData_BJetPlusX_2012)
-        datasets.extend(datasetsMC_2012)
-    elif "quadpfjetbtag" in workflow:
-        datasets.extend(datasetsData_BJetPlusX_2012)
+#    elif "quadjetbtag" in workflow:
+#        datasets.extend(datasetsData_BJetPlusX_2012)
+#        datasets.extend(datasetsMC_2012)
+#    elif "quadpfjetbtag" in workflow:
+#        datasets.extend(datasetsData_BJetPlusX_2012)
     else:
         raise Exception("Unsupported workflow %s" % workflow)
 
     multicrab.extendDatasets(workflow, datasets)
-    if "quadpfjetbtag" in workflow:
-        wf_mc = mcWorkflow()
-        multicrab.extendDatasets(wf_mc, datasetsMC_2012)
+#    if "quadpfjetbtag" in workflow:
+#        wf_mc = mcWorkflow()
+#        multicrab.extendDatasets(wf_mc, datasetsMC_2012)
 
-output = ["histograms.root"]
-if "signalAnalysis" in cfg:
-    output.append("pickEvents.txt")
-multicrab.addCommonLine("CMSSW.output_file = %s" % ",".join(output))
+#output = ["histograms.root"]
+#if "signalAnalysis" in cfg:
+#    output.append("pickEvents.txt")
+#multicrab.addCommonLine("CMSSW.output_file = %s" % ",".join(output))
 
 #multicrab.addCommonLine("GRID.maxtarballsize = 35")
 

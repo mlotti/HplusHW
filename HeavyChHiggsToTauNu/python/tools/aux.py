@@ -99,6 +99,9 @@ def addConfigInfo(of, dataset):
 
 
 def listDirectoryContent(tdirectory, predicate=None):
+    if not hasattr(tdirectory, "GetListOfKeys"):
+        return None
+
     dirlist = tdirectory.GetListOfKeys()
 
     # Suppress the warning message of missing dictionary for some iterator
@@ -114,4 +117,90 @@ def listDirectoryContent(tdirectory, predicate=None):
         if predicate is not None and predicate(key):
             ret.append(key.GetName())
         key = diriter.Next()
+    return ret
+
+def th1Xmin(th1):
+    if th1 is None:
+        return None
+    return th1.GetXaxis().GetBinLowEdge(th1.GetXaxis().GetFirst())
+
+def th1Xmax(th1):
+    if th1 is None:
+        return None
+    return th1.GetXaxis().GetBinUpEdge(th1.GetXaxis().GetLast())
+
+def th2Ymin(th2):
+    if th2 is None:
+        return None
+    return th2.GetYaxis().GetBinLowEdge(th2.GetYaxis().GetFirst())
+
+def th2Ymax(th2):
+    if th2 is None:
+        return None
+    return th2.GetYaxis().GetBinUpEdge(th2.GetYaxis().GetLast())
+
+## Copy (some) style attributes from one ROOT object to another
+#
+# \param src  Source object (copy attributes from)
+# \param dst  Destination object (copy attributes to)
+def copyStyle(src, dst):
+    properties = []
+    if hasattr(src, "GetLineColor") and hasattr(dst, "SetLineColor"):
+        properties.extend(["LineColor", "LineStyle", "LineWidth"])
+    if hasattr(src, "GetFillColor") and hasattr(dst, "SetFillColor"):
+        properties.extend(["FillColor", "FillStyle"])
+    if hasattr(src, "GetMarkerColor") and hasattr(dst, "SetMarkerColor"):
+        properties.extend(["MarkerColor", "MarkerSize", "MarkerStyle"])
+
+    for prop in properties:
+        getattr(dst, "Set"+prop)(getattr(src, "Get"+prop)())
+
+## Helper for adding a list to a dictionary
+#
+# \param d     Dictionary
+# \param name  Key to dictionary
+# \param item  Item to add to the list
+#
+# For dictionaries which have lists as items, this function creates
+# the list with the \a item if \a name doesn't exist yet, or appends
+# if already exists.
+def addToDictList(d, name, item):
+    if name in d:
+        d[name].append(item)
+    else:
+        d[name] = [item]
+
+## Add ROOT object to TLegend
+#
+# \param legend      TLegend object
+# \param rootObject  ROOT object (TH1, TGraph, etc) to add to the legend
+# \param legendLabel Legend label for this entry
+# \param legendStyle Legend style for this entry
+# \param canModify   True, if this function may modify \a rootObject
+#
+# \return Clone of rootObject, if the line color is changed for legend
+# (see below). This object must be kept in memory until the legend is
+# drawn. Otherwise, None.
+#
+# If legend style is "F", and the line and fill colors are the same,
+# the line color is changed to black only for the legend
+def addToLegend(legend, rootObject, legendLabel, legendStyle, canModify=False):
+    # Hack to get the black border to the legend, only if the legend style is fill
+    h = rootObject
+    ret = None
+    if "f" == legendStyle.lower():
+        if not canModify:
+            h = rootObject.Clone(h.GetName()+"_forLegend")
+            if hasattr(h, "SetDirectory"):
+                h.SetDirectory(0)
+        h.SetLineWidth(1)
+        if h.GetLineColor() == h.GetFillColor():
+            h.SetLineColor(ROOT.kBlack)
+        ret = h
+
+    labels = legendLabel.split("\n")
+    legend.AddEntry(h, labels[0], legendStyle)
+    for lab in labels[1:]:
+        legend.AddEntry(None, lab, "")
+
     return ret

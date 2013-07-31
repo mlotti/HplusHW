@@ -157,9 +157,9 @@ import ConfigParser
 import OrderedDict
 
 import multicrabWorkflows
-import multicrabWorkflowsTools
 import certifiedLumi
 import git
+import aux
 
 ## Default Storage Element (SE) black list for non-stageout jobs
 defaultSeBlacklist_noStageout = [
@@ -376,9 +376,10 @@ class ExitCodeException(Exception):
 ## Given crab job stdout file, ensure that the job succeeded
 #
 # \param stdoutFile   Path to crab job stdout file
+# \param allowJobExitCodes  Consider jobs with these non-zero exit codes to be succeeded
 #
 # If any of the checks fail, raises multicrab.ExitCodeException
-def assertJobSucceeded(stdoutFile):
+def assertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
     re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
     re_job = re.compile("JobExitCode=(?P<code>\d+)")
 
@@ -401,7 +402,7 @@ def assertJobSucceeded(stdoutFile):
         raise ExitCodeException("No jobExitCode")
     if exeExitCode != 0:
         raise ExitCodeException("Executable exit code is %d" % exeExitCode)
-    if jobExitCode != 0:
+    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
         raise ExitCodeException("Job exit code is %d" % jobExitCode)
 
 ## Compact job number list
@@ -550,7 +551,7 @@ def crabOutputToJobs(task, output):
         m = status_re.search(line)
         if m:
             job = CrabJob(task, m)
-            multicrabWorkflowsTools._addToDictList(jobs, job.status, job)
+            aux.addToDictList(jobs, job.status, job)
             njobs += 1
             continue
         m = total_re.search(line)

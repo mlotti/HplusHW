@@ -522,6 +522,7 @@ class NavigationPanel:
         self._searchMode = None
         self._variation = None
         self._dataset = None
+        self._datasetTest = None
         self._colorPanelHeader = '"#000060"'
         self._colorPanelFontHeader = '"#f0f0f0"'
         self._colorPanelContent = '"#6666cc"' #a0a0a0
@@ -538,8 +539,9 @@ class NavigationPanel:
         self._searchMode = searchMode
         self._variation = variation
 
-    def setDataset(self, dataset):
+    def setDataset(self, dataset, datasetTest=None):
         self._dataset = dataset
+        self._datasetTest = datasetTest
 
     def makehtml(self, groups, groupOutput, mydir, myname):
         # Table
@@ -567,7 +569,10 @@ class NavigationPanel:
         myOutput += self._generatePanelHeaderCell("Time stamp")
         myOutput += self._generatePanelContentCell(self._timestamp)
         myOutput += self._generatePanelHeaderCell("Dataset")
-        myOutput += self._generatePanelContentCell(self._dataset)
+        if self._dataset == self._datasetTest:
+            myOutput += self._generatePanelContentCell(self._dataset)
+        else:
+            myOutput += self._generatePanelContentCell("%s vs. <br/> %s" % (self._dataset, self._datasetTest))
         myOutput += self._generatePanelHeaderCell("Data Era")
         myOutput += self._generatePanelContentCell(self._era)
         myOutput += self._generatePanelHeaderCell("Search Mode")
@@ -746,7 +751,7 @@ def createValidateHistograms():
     myGroup.addHistogram("JetSelection/SelectedJets/jet_eta", 0.2, "log")
     myGroup.addHistogram("JetSelection/SelectedJets/jet_phi", 3.14159265 / 36, "log")
     myGroup.addHistogram("JetSelection/SelectedJets/jet_NeutralEmEnergyFraction", 0.05, "log")
-    myGroup.addHistogram("JetSelection/SelectedJets/jet_NeutralHadronFraction", 0.05, "log")
+    myGroup.addHistogram("JetSelection/SelectedJets/jet_NeutralHadronEnergyFraction", 0.05, "log")
     myGroup.addHistogram("JetSelection/SelectedJets/jet_NeutralHadronMultiplicity", 1, "log")
     myGroup.addHistogram("JetSelection/SelectedJets/jet_PhotonEnergyFraction", 0.05, "log")
     myGroup.addHistogram("JetSelection/SelectedJets/jet_PhotonMultiplicity", 1, "log")
@@ -760,7 +765,7 @@ def createValidateHistograms():
     myGroup.addHistogram("JetSelection/ExcludedJets/jet_eta", 0.2, "log")
     myGroup.addHistogram("JetSelection/ExcludedJets/jet_phi", 3.14159265 / 36, "log")
     myGroup.addHistogram("JetSelection/ExcludedJets/jet_NeutralEmEnergyFraction", 0.05, "log")
-    myGroup.addHistogram("JetSelection/ExcludedJets/jet_NeutralHadronFraction", 0.05, "log")
+    myGroup.addHistogram("JetSelection/ExcludedJets/jet_NeutralHadronEnergyFraction", 0.05, "log")
     myGroup.addHistogram("JetSelection/ExcludedJets/jet_NeutralHadronMultiplicity", 1, "log")
     myGroup.addHistogram("JetSelection/ExcludedJets/jet_PhotonEnergyFraction", 0.05, "log")
     myGroup.addHistogram("JetSelection/ExcludedJets/jet_PhotonMultiplicity", 1, "log")
@@ -895,17 +900,24 @@ def main(opts,timeStamp,refDsetCreator,testDsetCreator,myValidateGroups,era,sear
     refDatasetMgr.updateNAllEventsToPUWeighted()
     testDatasetMgr.updateNAllEventsToPUWeighted()
     # Find common dataset names
-    commonDatasetNames = compareLists(refDatasetMgr.getAllDatasetNames(),testDatasetMgr.getAllDatasetNames(),opts.dirs)
+    if opts.testDir is None:
+        commonDatasetNames = compareLists(refDatasetMgr.getAllDatasetNames(),testDatasetMgr.getAllDatasetNames(),opts.dirs)
+        commonDatasetNames = [(x, x) for x in commonDatasetNames]
+    else:
+        commonDatasetNames = [(opts.dirs[0], opts.testDir)]
     # Loop over common dataset names
     #myOutput += "Following dataset names found in both reference and test multicrab directories<br>\n"
     myOutput = "      <ul>\n"
     myItemCount = 0.0
-    for dsetName in commonDatasetNames:
+    for refDsetName, testDsetName in commonDatasetNames:
         myReadCounterItemsCount = 0
         myReadHistogramsCount = 0
-        print "  Dataset: %s"%dsetName
-        myPanel.setDataset(dsetName)
-        myOutput += '        <li><b><a href="%s.html">%s</a></b>'%(myModuleDir+"/"+dsetName+"/"+myValidateGroups[0].getName().replace(" ","_"),dsetName)
+        print "  Dataset: %s"%refDsetName
+        myPanel.setDataset(refDsetName, testDsetName)
+        name = refDsetName
+        if refDsetName != testDsetName:
+            name = "%s vs. %s" % (refDsetName, testDsetName)
+        myOutput += '        <li><b><a href="%s.html">%s</a></b>'%(myModuleDir+"/"+refDsetName+"/"+myValidateGroups[0].getName().replace(" ","_"),name)
         myGroupCount = 0
         for g in myValidateGroups:
             myGroupCount += 1
@@ -913,12 +925,12 @@ def main(opts,timeStamp,refDsetCreator,testDsetCreator,myValidateGroups,era,sear
             # Create output and histograms and cache difference for panel
             #if not (myItemCount % 20):
                 #print "  ... validating histograms/counters %.2f"%(myItemCount/myTotalCount*100.0)
-            g.doValidate(myBaseDir+"/"+myModuleDir+"/"+dsetName, refDatasetMgr.getDataset(dsetName), testDatasetMgr.getDataset(dsetName))
+            g.doValidate(myBaseDir+"/"+myModuleDir+"/"+refDsetName, refDatasetMgr.getDataset(refDsetName), testDatasetMgr.getDataset(testDsetName))
             myReadCounterItemsCount += g.getReadCounterCount()
             myReadHistogramsCount += g.getReadHistogramCount()
         # Create html subpages with panel
         for g in myValidateGroups:
-            myPanel.makehtml(myValidateGroups,g.getOutput(),myBaseDir+"/"+myModuleDir+"/"+dsetName,g.getName())
+            myPanel.makehtml(myValidateGroups,g.getOutput(),myBaseDir+"/"+myModuleDir+"/"+refDsetName,g.getName())
         myItemCount += 1.0
         myOutput += " (subcounters=%d, histograms=%d)</li>\n"%(myReadCounterItemsCount,myReadHistogramsCount)
     myOutput += "      </ul>\n"
@@ -946,6 +958,7 @@ if __name__ == "__main__":
     parser.add_option("--oldref", dest="oldreference", action="store_true", help="use this flag if the reference is using signalAnalysisCounters")
     parser.add_option("--test", dest="test", action="store", help="multicrab directory to be tested/validated")
     parser.add_option("-d", dest="dirs", action="append", help="name of sample directory inside multicrab dir (multiple directories can be specified with multiple -d arguments)")
+    parser.add_option("--testDir", dest="testDir", default=None, help="Name of the sample directory in test multicrab dir")
     parser.add_option("-v", dest="variation", action="append", help="name of variation")
     parser.add_option("-e", dest="era", action="append", help="name of era")
     parser.add_option("-m", dest="searchMode", action="append", help="name of search mode")
@@ -971,14 +984,22 @@ if __name__ == "__main__":
     if opts.variation== None:
         print "(optional) Missing specification for analysis variation (use -v if desired) - will use all available variations"
         #mystatus = False
+    if opts.testDir is not None and (opts.dirs is None or len(opts.dirs) != 1):
+        print "Error: with --testDir exactly one -d is allowed (got %d)" % (len(opts.dirs))
+        myStatus = False
 
     if not mystatus:
         parser.print_help()
         sys.exit()
 
     # Create dataset creators to see what's inside
-    refDsetCreator = dataset.readFromMulticrabCfg(directory=opts.reference)
-    testDsetCreator = dataset.readFromMulticrabCfg(directory=opts.test)
+    kwargs = {}
+    if opts.dirs is not None:
+        kwargs["includeOnlyTasks"] = opts.dirs[:]
+    refDsetCreator = dataset.readFromMulticrabCfg(directory=opts.reference, **kwargs)
+    if opts.testDir is not None:
+        kwargs["includeOnlyTasks"] = [opts.testDir]
+    testDsetCreator = dataset.readFromMulticrabCfg(directory=opts.test, **kwargs)
     myEraList = compareLists(refDsetCreator.getDataDataEras(), testDsetCreator.getDataDataEras(), opts.era)
     mySearchModeList = compareLists(refDsetCreator.getSearchModes(), testDsetCreator.getSearchModes(), opts.searchMode)
     myVariationList = compareLists(refDsetCreator.getOptimizationModes(), testDsetCreator.getOptimizationModes(), opts.variation)

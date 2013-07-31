@@ -408,7 +408,7 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fElectronSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("ElectronSelection"), fPrimaryVertexSelection.getSelectedSrc(), eventCounter, fHistoWrapper),
   fMuonSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MuonSelection"), eventCounter, fHistoWrapper),
   fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, fHistoWrapper),
-  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, fHistoWrapper, "MET"),
+  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, fHistoWrapper, "MET", fTauSelection.getIsolationDiscriminator()),
   fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, fHistoWrapper),
   fAllCounter(eventCounter.addCounter("Offline selection begins")),
   fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
@@ -424,7 +424,7 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fResultAfterMET(eventCounter, "AfterMET"),
   fResultAfterBTag(eventCounter, "AfterBTag"),
   fResultAfterAllSelections(eventCounter, "AfterAllSelections"),
-  fMuon2Branches(iConfig, "muon2")
+  fMuon2Branches(iConfig.getUntrackedParameter<edm::ParameterSet>("muon2"), "muon2")
 {
   edm::Service<TFileService> fs;
   // Save the module configuration to the output ROOT file as a TNamed object
@@ -697,7 +697,7 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
       break;
     }
   }
-  fMuon2Branches.setValues(muon2);
+  fMuon2Branches.setValues(muon2, iEvent);
   /*
   if(obj2Type == kObj2MuonEmb && muon2.empty()) {
     std::cout << "Embedding muons" << std::endl;
@@ -744,9 +744,8 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
   bPassTauID = true;
 
   // Get MET here, reconstruct transverse mass
-  int nVertices = 0; // dummy value
-  HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
-  HPlus::METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+  HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), pvData.getNumberOfAllVertices());
+  HPlus::METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), tauData.getSelectedTau(), jetData.getAllJets());
   bTauMETTransverseMass = HPlus::TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
 
   // Hadronic jet selection

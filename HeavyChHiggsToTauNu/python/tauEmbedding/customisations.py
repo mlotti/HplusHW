@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChSignalAnalysisParameters
+import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
 
 PF2PATVersion = "" # empty for standard PAT
 #PF2PATVersion = "PFlow"
@@ -33,6 +34,9 @@ generatorTauPt = 40
 generatorTauSelection = "abs(pdgId()) == 15 && pt() > %d && abs(eta()) < 2.1 && abs(mother().pdgId()) != 15"
 
 def customiseParamForTauEmbedding(param, options, dataVersion):
+    # Enable generator weight
+    param.embeddingGeneratorWeightReader.enabled = True
+
     # Change the triggers to muon
     param.trigger.triggers = [
         "HLT_Mu9",
@@ -77,8 +81,9 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     # Set the analyzer
     param.tree.tauEmbeddingInput = cms.untracked.bool(True)
     param.tree.tauEmbedding = cms.untracked.PSet(
-        muonSrc = cms.InputTag(tauEmbeddingMuons),
-        muonFunctions = cms.PSet(),
+        muons = Ntuple.muons.clone(
+            src = tauEmbeddingMuons,
+        ),
         genParticleOriginalSrc = cms.InputTag("genParticles", "", dataVersion.getTriggerProcess()),
         metSrc = cms.InputTag("pfMet", "", dataVersion.getRecoProcess()),
         caloMetNoHFSrc = cms.InputTag("caloMetNoHFSum"),
@@ -87,7 +92,7 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
     muonIsolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGammaIso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]
     for name in muonIsolations:
-        setattr(param.tree.tauEmbedding.muonFunctions, name, cms.string(muonAnalysis.isolations[name]))
+        setattr(param.tree.tauEmbedding.muons.functions, name, cms.string(muonAnalysis.isolations[name]))
     
 
 def setCaloMetSum(process, sequence, options, dataVersion):
@@ -475,7 +480,7 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChJetFilter_cfi as jetFilter_cfi
     m2 = jetFilter_cfi.hPlusJetPtrSelectorFilter.clone(
         tauSrc = tauEmbeddingMuons,
-        histogramAmbientLevel = "Systematics"
+        histogramAmbientLevel = "Systematics",
     )
     m2.jetSelection.src.setProcessName(skimProcessName)
     m2.jetSelection.jetPileUpMVAValues.setProcessName(skimProcessName)
@@ -1096,29 +1101,38 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     )
 
     # 3 jets
-    from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
-    cleanedJets = cleanPatJets.clone(
-        src = cms.InputTag(param.jetSelection.src.value()),
-        preselection = cms.string(jetSelection),
-        checkOverlaps = cms.PSet(
-            genTaus = genTauCleanPSet.clone()
-        )
+    # from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
+    # cleanedJets = cleanPatJets.clone(
+    #     src = cms.InputTag(param.jetSelection.src.value()),
+    #     preselection = cms.string(jetSelection),
+    #     checkOverlaps = cms.PSet(
+    #         genTaus = genTauCleanPSet.clone()
+    #     )
+    # )
+    # cleanedJetsName = prefix+"CleanedJets"
+    # setattr(process, cleanedJetsName, cleanedJets)
+
+    # cleanedJetsFilter = cms.EDFilter("CandViewCountFilter",
+    #     src = cms.InputTag(cleanedJetsName),
+    #     minNumber = cms.uint32(3)
+    # )
+    # setattr(process, cleanedJetsName+"Filter", cleanedJetsFilter)
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChJetFilter_cfi as jetFilter_cfi
+    cleanedJets = jetFilter_cfi.hPlusJetPtrSelectorFilter.clone(
+        tauSrc = param.tauSelection.src.value(),
+        allowEmptyTau = True,
+        histogramAmbientLevel = "Systematics",
     )
     cleanedJetsName = prefix+"CleanedJets"
     setattr(process, cleanedJetsName, cleanedJets)
-
-    cleanedJetsFilter = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag(cleanedJetsName),
-        minNumber = cms.uint32(3)
-    )
-    setattr(process, cleanedJetsName+"Filter", cleanedJetsFilter)
 
     cleanedJetsCount = counterPrototype.clone()
     setattr(process, cleanedJetsName+"Count", cleanedJetsCount)
     counters.append(cleanedJetsName+"Count")
 
     genTauSequence *= (
-        cleanedJets * cleanedJetsFilter * cleanedJetsCount 
+        cleanedJets * #cleanedJetsFilter *
+        cleanedJetsCount 
     )
     setattr(process, prefix+"Sequence", genTauSequence)
     sequence *= genTauSequence

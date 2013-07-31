@@ -13,9 +13,14 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SplittedHistogramHandler.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CommonPlotsFilledAtEveryStep.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NormalisationAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -35,68 +40,20 @@ namespace HPlus {
   class WrappedTH2;
 
   /**
-   * Helper class to contain the plots to be plotted after each selection
+   * Helper class for histogram settings
    */
-  class CommonPlotsFilledAtEveryStep {
+  class HistogramSettings {
   public:
-    CommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, TFileDirectory& dir, std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel);
-    ~CommonPlotsFilledAtEveryStep();
-    /// Fills histograms; supply pointer to data object from analyse() call, if it exists
-    void fill();
-    /// Returns status of wheather the item will be used for creating the selection flow plot
-    const bool enterSelectionFlowPlotStatus() const { return fEnterSelectionFlowPlot; }
-    /// 
-    const std::string getSelectionFlowPlotLabel() const { return fSelectionFlowPlotLabel; }
-    /// Cache data objects, to be called from CommonPlots::initialize()
-    void cacheDataObjects(const VertexSelection::Data* vertexData,
-                          const TauSelection::Data* tauData,
-                          const FakeTauIdentifier::Data* fakeTauData,
-                          const ElectronSelection::Data* electronData,
-                          const MuonSelection::Data* muonData,
-                          const JetSelection::Data* jetData,
-                          const METSelection::Data* metData,
-                          const BTagging::Data* bJetData,
-                          const TopChiSelection::Data* topData);
+    HistogramSettings(const edm::ParameterSet& iConfig);
+    ~HistogramSettings();
+    int bins() const { return fBins; }
+    double min() const { return fAxisMin; }
+    double max() const { return fAxisMax; }
 
   private:
-    /// Status indicating wheather the data objects have been cached
-    bool fDataObjectsCached;
-    /// Status indicating if the step is included in the selection flow plot
-    bool fEnterSelectionFlowPlot;
-    std::string fSelectionFlowPlotLabel;
-
-    /// Cached data objects from silent analyze
-    const VertexSelection::Data* fVertexData;
-    const TauSelection::Data* fTauData;
-    const FakeTauIdentifier::Data* fFakeTauData;
-    const ElectronSelection::Data* fElectronData;
-    const MuonSelection::Data* fMuonData;
-    const JetSelection::Data* fJetData;
-    const METSelection::Data* fMETData;
-    const BTagging::Data* fBJetData;
-    const TopChiSelection::Data* fTopData;
-
-    /// Histograms to be plotted after every step
-    WrappedTH1* hNVertices;
-    WrappedTH1* hFakeTauStatus;
-    WrappedTH1* hTauPt;
-    WrappedTH1* hTauEta;
-    WrappedTH1* hTauPhi;
-    WrappedTH1* hRtau;
-    WrappedTH1* hSelectedElectrons;
-    WrappedTH1* hSelectedMuons;
-    WrappedTH1* hNjets;
-    WrappedTH1* hNjetsAllIdentified;
-    WrappedTH1* hMETRaw;
-    WrappedTH1* hMET;
-    WrappedTH1* hMETphi;
-    WrappedTH1* hNbjets;
-    WrappedTH1* hDeltaPhiTauMET;
-    WrappedTH1* hDeltaR_TauMETJet1MET;
-    WrappedTH1* hDeltaR_TauMETJet2MET;
-    WrappedTH1* hDeltaR_TauMETJet3MET;
-    WrappedTH1* hDeltaR_TauMETJet4MET;
-    WrappedTH1* hTransverseMass;
+    int fBins;
+    double fAxisMin;
+    double fAxisMax;
   };
 
   /**
@@ -104,10 +61,17 @@ namespace HPlus {
    */
   class CommonPlots {
   public:
-    CommonPlots(EventCounter& eventCounter, HistoWrapper& histoWrapper);
-    CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    enum AnalysisType {
+      kSignalAnalysis = 0,
+      kEmbedding,
+      kQCDFactorised,
+      kQCDInverted
+    };
+
+    CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, AnalysisType analysisType, bool isEmbeddedData = false);
     ~CommonPlots();
 
+    void disableCommonPlotsFilledAtEveryStep() { bDisableCommonPlotsFilledAtEveryStep = true; }
     /// Initialize data objects; call for every event
     void initialize(const edm::Event& iEvent,
                     const edm::EventSetup& iSetup,
@@ -119,8 +83,10 @@ namespace HPlus {
                     JetSelection& jetSelection,
                     METSelection& metSelection,
                     BTagging& bJetSelection,
+                    QCDTailKiller& qcdTailKiller,
                     TopChiSelection& topChiSelection,
-                    EvtTopology& evtTopology);
+                    EvtTopology& evtTopology,
+                    FullHiggsMassCalculator& fullHiggsMassCalculator);
     /// Initialization where TauSelection::Data is used instead of TauSelection object (use for QCD measurements)
     void initialize(const edm::Event& iEvent,
                     const edm::EventSetup& iSetup,
@@ -132,42 +98,68 @@ namespace HPlus {
                     JetSelection& jetSelection,
                     METSelection& metSelection,
                     BTagging& bJetSelection,
+                    QCDTailKiller& qcdTailKiller,
                     TopChiSelection& topChiSelection,
-                    EvtTopology& evtTopology);
+                    EvtTopology& evtTopology,
+                    FullHiggsMassCalculator& fullHiggsMassCalculator);
 
     /// create object containing histograms to be filled after all (or almost all) selection steps
     CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
 
-    /// unique filling methods (to be called before return statement)
-    void fillControlPlots(const TriggerSelection::Data& data);
-    void fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data);
-    void fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData);
-    void fillControlPlots(const ElectronSelection::Data& data);
-    void fillControlPlots(const MuonSelection::Data& data);
-    void fillControlPlots(const JetSelection::Data& data);
-    void fillControlPlots(const METSelection::Data& data);
-    void fillControlPlots(const BTagging::Data& data);
-    void fillControlPlots(const TopChiSelection::Data& data);
-    void fillControlPlots(const EvtTopology::Data& data);
-    void fillFinalPlots();
-    void fillFinalPlotsForFakeTaus();
+    /// Obtain splitted histogram handler
+    SplittedHistogramHandler& getSplittedHistogramHandler() { return fSplittedHistogramHandler; }
+
+    /// unique filling methods (to be called AFTER return statement)
+    void fillControlPlotsAfterVertexSelection(const edm::Event& iEvent, const VertexSelection::Data& data);
+    void fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, METSelection& metSelection);
+    void setSplittingOfPhaseSpaceInfoAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, METSelection& metSelection);
+    void fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent);
+    void fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent);
+    void fillControlPlotsAfterAllSelections(const edm::Event& iEvent, double transverseMass);
+    void fillControlPlotsAfterAllSelectionsWithFullMass(const edm::Event& iEvent, FullHiggsMassCalculator::Data& data);
+    /// unique filling methods (to be called BEFORE return statement)
+    void fillControlPlotsAtTauVetoSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const VetoTauSelection::Data& tauVetoData);
+    void fillControlPlotsAtElectronSelection(const edm::Event& iEvent, const ElectronSelection::Data& data);
+    void fillControlPlotsAtMuonSelection(const edm::Event& iEvent, const MuonSelection::Data& data);
+    void fillControlPlotsAtJetSelection(const edm::Event& iEvent, const JetSelection::Data& data);
+    void fillControlPlotsAtCollinearDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data);
+    void fillControlPlotsAtMETSelection(const edm::Event& iEvent, const METSelection::Data& data);
+    void fillControlPlotsAtBtagging(const edm::Event& iEvent, const BTagging::Data& data);
+    void fillControlPlotsAtBackToBackDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data);
+    void fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopChiSelection::Data& data);
+    void fillControlPlotsAtEvtTopology(const edm::Event& iEvent, const EvtTopology::Data& data);
+    /// Getters for histogram bin definitions
+    const HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
+    const HistogramSettings& getEtaBinSettings() const { return fEtaBinSettings; }
+    const HistogramSettings& getPhiBinSettings() const { return fPhiBinSettings; }
+    const HistogramSettings& getRtauBinSettings() const { return fRtauBinSettings; }
+    const HistogramSettings& getNjetsBinSettings() const { return fNjetsBinSettings; }
+    const HistogramSettings& getMetBinSettings() const { return fMetBinSettings; }
+    const HistogramSettings& getTailKiller1DSettings() const { return fTailKiller1DSettings; }
+    const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
+    const HistogramSettings& getInvmassBinSettings() const { return fInvmassBinSettings; }
 
   protected:
-    
+    /// Options
+    const bool bOptionEnableNormalisationAnalysis;
+    const bool bOptionEnableMETOscillationAnalysis;
+    /// Analysis type
+    bool bDisableCommonPlotsFilledAtEveryStep;
+    AnalysisType fAnalysisType;
     /// Creates histograms
     void createHistograms();
-    /// Status indicating wheather the data objects have been cached
-    bool bDataObjectsCached;
     /// Event counter object
     EventCounter& fEventCounter;
     /// HistoWrapper object
     HistoWrapper& fHistoWrapper;
+    /// Splitted histogram handler
+    SplittedHistogramHandler fSplittedHistogramHandler;
     /// Base directory in root file for every step histograms
     edm::Service<TFileService> fs;
     TFileDirectory fCommonBaseDirectory;
     TFileDirectory fEveryStepDirectory;
     /// Normalisation analysis object
-    NormalisationAnalysis fNormalisationAnalysis;
+    NormalisationAnalysis* fNormalisationAnalysis;
     /// Selection objects
     TauSelection* fTauSelection;
     FakeTauIdentifier* fFakeTauIdentifier;
@@ -180,36 +172,120 @@ namespace HPlus {
     JetSelection::Data fJetData;
     METSelection::Data fMETData;
     BTagging::Data fBJetData;
+    QCDTailKiller::Data fQCDTailKillerData;
     TopChiSelection::Data fTopData;
     EvtTopology::Data fEvtTopology;
+    FullHiggsMassCalculator::Data fFullHiggsMassData;
 
     // Input parameters
+    HistogramSettings fPtBinSettings;
+    HistogramSettings fEtaBinSettings;
+    HistogramSettings fPhiBinSettings;
+    HistogramSettings fRtauBinSettings;
+    HistogramSettings fNjetsBinSettings;
+    HistogramSettings fMetBinSettings;
+    HistogramSettings fTailKiller1DSettings;
+    HistogramSettings fMtBinSettings;
+    HistogramSettings fInvmassBinSettings;
 
     // Counters - needed or not?
 
     // Histograms ------------------------------------------
+    // NOTE: the histograms with the prefix hCtrl are used as data driven control plots
+    // NOTE: the histograms with the prefix hShape are used as shape histograms
+
     // vertex
-    
+
     // tau selection
+
+    // tau trigger SF
     WrappedTH2* hTauPhiOscillationX;
     WrappedTH2* hTauPhiOscillationY;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterTaus;
+
+    // veto tau selection
     
     // electron veto
-    
-    // muon veto
-    
-    // final
-    WrappedTH2* hDphiTauMetVsDphiJet1MHT;
-    WrappedTH2* hDphiTauMetVsDphiJet2MHT;
-    WrappedTH2* hDphiTauMetVsDphiJet3MHT;
-    WrappedTH2* hDphiTauMetVsDphiJet4MHT;
-    WrappedTH2* hDphiTauMetVsDphiTauMHT;
 
-    WrappedTH2* hDphiTauMetVsDphiJet1MHTFakeTaus;
-    WrappedTH2* hDphiTauMetVsDphiJet2MHTFakeTaus;
-    WrappedTH2* hDphiTauMetVsDphiJet3MHTFakeTaus;
-    WrappedTH2* hDphiTauMetVsDphiJet4MHTFakeTaus;
-    WrappedTH2* hDphiTauMetVsDphiTauMHTFakeTaus;
+    // muon veto
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterLeptonVeto;
+
+    // jet selection
+    std::vector<WrappedTH1*> hCtrlNjets;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausNjets;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterNjets;
+
+    // MET trigger SF
+    std::vector<WrappedTH1*> hCtrlNjetsAfterJetSelectionAndMETSF;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterMETSF;
+
+    // improved delta phi collinear cuts (currently the point of the std. selections)
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet1;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet2;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet3;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet4;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet1;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet2;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet3;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet4;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterCollinearCuts;
+
+    std::vector<WrappedTH1*> hCtrlSelectedTauPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauEtaAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauPhiAfterStandardSelections;
+    WrappedTH2* hSelectedTauEtaVsPhiAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauRtauAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauPAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections;
+    WrappedTH2* hEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections;
+
+    std::vector<WrappedTH1*> hCtrlNjetsAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausNjetsAfterStandardSelections;
+
+    // MET selection
+    std::vector<WrappedTH1*> hCtrlMET;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausMET;
+    
+    // b tagging
+    std::vector<WrappedTH1*> hCtrlNbjets;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausNbjets;
+    
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterBjets;
+
+    // improved delta phi back to back cuts
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet1;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet2;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet3;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet4;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet1;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet2;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet3;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet4;
+    
+    // top selection
+    
+    // evt topology
+    
+    // all selections
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterAllSelections;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKControlRegion;
+    std::vector<WrappedTH1*> hShapeTransverseMass;
+    std::vector<WrappedTH1*> hShapeEWKFakeTausTransverseMass;
+    // NOTE: do we want to try out something like mT vs. rTau?
+
+    // all selections with full mass
+    std::vector<WrappedTH1*> hShapeFullMass;
+    std::vector<WrappedTH1*> hShapeEWKFakeTausFullMass;
+    // FIXME: Add unfolded histogram for mT vs. full mass
 
     // histograms to be filled at every step
     std::vector<CommonPlotsFilledAtEveryStep*> hEveryStepHistograms; // Owner of objects

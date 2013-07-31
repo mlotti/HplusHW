@@ -8,7 +8,7 @@
 
 namespace HPlus {
   METTriggerEfficiencyScaleFactor::METTriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper):
-    fBinned(iConfig) {
+    fBinned(iConfig, "pt") {
   
     edm::Service<TFileService> fs;
     TFileDirectory dir = fs->mkdir("METTriggerScaleFactor");

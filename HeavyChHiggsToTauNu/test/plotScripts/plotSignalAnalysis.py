@@ -22,6 +22,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 # Configuration
 analysis = "signalAnalysis"
@@ -190,7 +191,7 @@ def doPlots(datasets):
             return plots.DataMCPlot(datasets, name, **kwargs)
 
     def pickSliceX(th2, ybinName):
-        th1 = ROOT.TH1D(th2.GetName(), th2.GetTitle(), th2.GetNbinsX(), histograms.th1Xmin(th2), histograms.th1Xmax(th2))
+        th1 = ROOT.TH1D(th2.GetName(), th2.GetTitle(), th2.GetNbinsX(), aux.th1Xmin(th2), aux.th1Xmax(th2))
         th1.Sumw2()
         ybin = None
         for bin in xrange(1, th2.GetNbinsY()+1):

@@ -9,6 +9,7 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeFunctionBranch.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeValueMapBranch.h"
 
 #include<vector>
 
@@ -22,17 +23,22 @@ class TTree;
 namespace HPlus {
   class TreeJetBranches {
   public:
-    TreeJetBranches(const edm::ParameterSet& iConfig, bool jetComposition);
+    TreeJetBranches(const edm::ParameterSet& iConfig, bool jetComposition, const std::string& prefix = "jets_");
     ~TreeJetBranches();
 
     void book(TTree *tree);
     void setValues(const edm::Event& iEvent);
     void reset();
 
+    bool enabled() const { return fEnabled; }
+
     const edm::InputTag& getInputTag() const { return fJetSrc; }
 
   private:
     edm::InputTag fJetSrc;
+    std::string fPrefix;
+    bool fEnabled;
+    bool fDetailsEnabled;
     bool fJetComposition;
 
     typedef math::XYZTLorentzVector XYZTLorentzVector;
@@ -59,6 +65,8 @@ namespace HPlus {
     std::vector<XYZTLorentzVector> fJets;
     std::vector<JetFunctionBranch> fJetsFunctions;
     std::vector<PileupID> fJetsPileupIDs;
+    std::vector<TreeValueMapBranch<float> > fJetsFloats;
+    std::vector<TreeValueMapBranch<bool> > fJetsBools;
 
     std::vector<double> fJetsChf;
     std::vector<double> fJetsNhf;

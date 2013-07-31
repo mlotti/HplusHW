@@ -13,17 +13,20 @@
 #include <sstream>
 
 namespace HPlus {
-  QCDTailKiller::Data::Data(int maxEntries):
-    fMaxEntries(maxEntries),
+  QCDTailKiller::Data::Data():
+    fMaxEntries(-1),
     fPassedEvent(false),
-    fDeltaPhiTauMET(-1.0) {
-      for (int i = 0; i < fMaxEntries; ++i) {
-        fPassedBackToBackJet.push_back(false);
-        fPassedCollinearJet.push_back(false);
-        fDeltaPhiJetMET.push_back(-1.0);
-      }
-    }
+    fDeltaPhiTauMET(-1.0) { }
   QCDTailKiller::Data::~Data() {}
+
+  void QCDTailKiller::Data::initialize(int maxEntries) {
+    fMaxEntries = maxEntries;
+    for (int i = 0; i < fMaxEntries; ++i) {
+      fPassedBackToBackJet.push_back(false);
+      fPassedCollinearJet.push_back(false);
+      fDeltaPhiJetMET.push_back(-1.0);
+    }
+  }
 
   const bool QCDTailKiller::Data::passedBackToBackCuts() const {
     for (std::vector<bool>::const_iterator it = fPassedBackToBackJet.begin(); it != fPassedBackToBackJet.end(); ++it) {
@@ -40,19 +43,19 @@ namespace HPlus {
   }
 
   const double QCDTailKiller::Data::getDeltaPhiJetMET(int njet) const {
-    if (njet >= fMaxEntries)
+    if (njet > fMaxEntries)
       throw cms::Exception("LogicError") << "QCDTailKiller::Data::getDeltaPhiJetMET() Called for jet " << njet << " but only values 0-" << fMaxEntries << " are allowed!" << std::endl;
     return fDeltaPhiJetMET[njet];
   }
 
   const bool QCDTailKiller::Data::passBackToBackCutForJet(int njet) const {
-    if (njet >= fMaxEntries)
+    if (njet > fMaxEntries)
       throw cms::Exception("LogicError") << "QCDTailKiller::Data::passBackToBackCutForJet() Called for jet " << njet << " but only values 0-" << fMaxEntries << " are allowed!" << std::endl;
     return fPassedBackToBackJet[njet];
   }
 
   const bool QCDTailKiller::Data::passCollinearCutForJet(int njet) const {
-    if (njet >= fMaxEntries)
+    if (njet > fMaxEntries)
       throw cms::Exception("LogicError") << "QCDTailKiller::Data::passCollinearCutForJet() Called for jet " << njet << " but only values 0-" << fMaxEntries << " are allowed!" << std::endl;
     return fPassedCollinearJet[njet];
   }
@@ -127,7 +130,7 @@ namespace HPlus {
         if (fCutX == 0)
           throw cms::Exception("LogicError") << "QCDTailKiller::CutItem by name '"+fName+"' cutX is zero in triangular cut!" << std::endl;
         // y(x) = y0/x0 * x + 180 - y0
-        myPassedStatus = y < fCutY/fCutX * x + 180.0 - fCutY;
+	myPassedStatus = y < fCutY/fCutX * x + 180.0 - fCutY;
       } else {
         if (fCutX == 0)
           throw cms::Exception("LogicError") << "QCDTailKiller::CutItem by name '"+fName+"' cutX is zero in triangular cut!" << std::endl;
@@ -137,7 +140,7 @@ namespace HPlus {
     } else if (fCutShape == QCDTailKiller::kCircle) {
     // Circular cut
       if (fCutDirection == QCDTailKiller::kCutUpperLeftCorner) {
-        myPassedStatus = std::sqrt(std::pow(180.0-y,2)+std::pow(x,2)) > fCutX;
+        myPassedStatus = std::sqrt(std::pow(180.0-y,2)+std::pow(x,2)) < fCutX;
       } else {
         myPassedStatus = std::sqrt(std::pow(180.0-x,2)+std::pow(y,2)) > fCutX;
       }
@@ -155,6 +158,7 @@ namespace HPlus {
   QCDTailKiller::QCDTailKiller(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string postfix):
     BaseSelection(eventCounter, histoWrapper),
     fMaxEntries(iConfig.getUntrackedParameter<uint32_t>("maxJetsToConsider")),
+    bDisableCollinearCuts(iConfig.getUntrackedParameter<bool>("disableCollinearCuts")),
     fSubCountAllEvents(eventCounter.addSubCounter("QCDTailKiller"+postfix, "All events")),
     fSubCountPassedEvents(eventCounter.addSubCounter("QCDTailKiller"+postfix, "Passed events"))
   {
@@ -187,11 +191,15 @@ namespace HPlus {
       myStream << "CollinearJet" << i+1;
       fCollinearJetCut.push_back(CutItem(eventCounter, myStream.str(), QCDTailKiller::kCutUpperLeftCorner));
       if (i < myCollinearPSets.size()) {
-        fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir,
-                                        myCollinearPSets[i].getUntrackedParameter<std::string>("CutShape"),
-                                        myCollinearPSets[i].getUntrackedParameter<double>("CutX"),
-                                        myCollinearPSets[i].getUntrackedParameter<double>("CutY"),
-                                        i+1);
+        if (!bDisableCollinearCuts) {
+          fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir,
+                                         myCollinearPSets[i].getUntrackedParameter<std::string>("CutShape"),
+                                         myCollinearPSets[i].getUntrackedParameter<double>("CutX"),
+                                         myCollinearPSets[i].getUntrackedParameter<double>("CutY"),
+                                         i+1);
+        } else {
+          fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir, "noCut", 0., 0., i+1);
+        }
       } else {
         fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir, "noCut", 0.0, 0.0, i+1);
       }
@@ -217,7 +225,8 @@ namespace HPlus {
   }
 
   QCDTailKiller::Data QCDTailKiller::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau>& tau, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met) {
-    Data output(fMaxEntries);
+    Data output;
+    output.initialize(fMaxEntries);
     increment(fSubCountAllEvents);
     // Obtain delta phi between tau and MET
     double myDeltaPhiTauMET = DeltaPhi::reconstruct(*tau, *met) * 57.3;
@@ -227,7 +236,7 @@ namespace HPlus {
     // Loop over the jet list (it might contain also the jet corresponding to tau depending on which list is supplied to the analyse method)
     output.fPassedEvent = true;
     size_t i = 0;
-    while (i < jets.size() && i < fMaxEntries && output.fPassedEvent) {
+    while (i < jets.size() && i < fMaxEntries) {
       // Obtain delta phi between jet and MET
       double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met) * 57.3;
       if (fBackToBackJetCut[i].passedCut(myDeltaPhiTauMET, myDeltaPhiJetMET)) {
@@ -241,7 +250,7 @@ namespace HPlus {
       ++i;
     }
     i = 0;
-    while (i < jets.size() && i < fMaxEntries && output.fPassedEvent) {
+    while (i < jets.size() && i < fMaxEntries) {
       // Obtain delta phi between jet and MET
       double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met) * 57.3;
       if (fCollinearJetCut[i].passedCut(myDeltaPhiTauMET, myDeltaPhiJetMET)) {

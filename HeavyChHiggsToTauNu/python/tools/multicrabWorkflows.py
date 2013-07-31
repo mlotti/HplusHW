@@ -49,11 +49,11 @@ class MCDatasetHelper:
     # \param aod           String for the DBS-dataset path of AOD
     def __call__(self, name, aod):
         if "TTToHplusBWB" in name or "TTToHplusBHminusB" in name:
+            # For BR limit LandS expectes WH and HH samples to have ttbar cross section
             crossSection = xsect.backgroundCrossSections.crossSection("TTJets", self.energy)
         elif "HplusTB" in name:
-            # FIXME: ttbar cross section is clearly incorrect, but what to do?
-            # Is there actually a need to store it?
-            crossSection = xsect.backgroundCrossSections.crossSection("TTJets", self.energy)
+            # For sigma*BR limit LandS expects heavy H+ samples to have cross section of 1 pb
+            crossSection = 1
         elif "Hplus_taunu" in name:
             if "t-channel" in name:
                 crossSection = sum([xsect.backgroundCrossSections.crossSection(st, self.energy) for st in ["T_t-channel", "Tbar_t-channel"]])
@@ -301,13 +301,37 @@ datasets.extend([
     # SingleMu, Run212C
     DataDataset("SingleMu_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/SingleMu/Run2012C-24Aug2012-v1/AOD"), # 6076746 events, 460 files
     DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"), # 81770645 events, 7450 files
-    DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 199608), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"),
-    DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(199698, 202504), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"),
-    DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(202970, 203742), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"),
     DataDataset("SingleMu_%s_2012C_Dec11",     reco="11Dec2012", runs=(201191, 201191), aod="/SingleMu/Run2012C-EcalRecover_11Dec2012-v1/AOD"), # 1619573 events, 145 files
     # SingleMu, Run2012D
     DataDataset("SingleMu_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/SingleMu/Run2012D-PromptReco-v1/AOD"), # 90255013 events, 8886 files
 ])
+# Split to cope with number of jobs(?)
+datasets.splitDataByRuns("SingleMu_198941-203742_2012C_Prompt", [
+        (198941, 199608),
+        (199698, 202504),
+        (202970, 203742),
+])
+
+########
+# MultiJet1Parked ReReco, QuadJet trigger for signal
+datasets.extend([
+    DataDataset("MultiJet1Parked_%s_2012B_Nov05", reco="05Nov2012B",   runs=(193834, 196531), aod="/MultiJet1Parked/Run2012B-05Nov2012-v2/AOD"), # 78067581 events,  7084 files
+    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012Cv1", runs=(198022, 198523), aod="/MultiJet1Parked/Run2012C-part1_05Nov2012-v2/AOD"), # 9209168 events, 626 files
+    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012Cv2", runs=(198941, 203742), aod="/MultiJet1Parked/Run2012C-part2_05Nov2012-v2/AOD"), # 130268374 events, 10136 files
+    DataDataset("MultiJet1Parked_%s_2012D_Dec10", reco="10Dec2012",    runs=(203777, 207779), aod="/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD"), # 218620252 events, 22176 files
+    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013",    runs=(207875, 208686), aod="/MultiJet1Parked/Run2012D-part2_17Jan2013-v1/AOD"), # 28985011 events, 3051 files
+    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013",    runs=(207883, 208307), aod="/MultiJet1Parked/Run2012D-part2_PixelRecover_17Jan2013-v1/AOD"), # 20015244 events, 1878 files
+])
+datasets.splitDataByRuns("MultiJet1Parked_193834-196531_2012B_Nov05", [
+        (193834, 194225), # HLT_QuadJet50 is prescaled, use HLT_QuadJet80, 78059999 events, 6484 files
+        (194270, 196531), # HLT_QuadJet50 is unprescaled, 76705110 events, 6356 files
+])
+# Split to have separate pieces of this around PixelRecover
+datasets.splitDataByRuns("MultiJet1Parked_207875-208686_2012D_Jan17", [
+        (207875, 207882), # 395625 events, 35 files
+        (208339, 208686), # 28902576 events, 3043 files
+])
+
 
 ########
 # ReRecos (Jan22)
@@ -330,28 +354,32 @@ datasets.splitDataByRuns("TauParked_198022-203742_2012C_Jan22", [
 datasets.extend([
     DataDataset("TauPlusX_%s_2012A_Jan22", reco="22Jan2013", runs=(190456, 193621), aod="/TauPlusX/Run2012A-22Jan2013-v1/AOD"), # 7350406 events, 487 files
     DataDataset("TauPlusX_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/TauPlusX/Run2012B-22Jan2013-v1/AOD"), # 39411579 events, 3006 files
+    DataDataset("TauPlusX_%s_2012C_Jan22", reco="22Jan2013", runs=(198022, 203742), aod="/TauPlusX/Run2012C-22Jan2013-v1/AOD"), # 53083103 events, 7862 files
+    DataDataset("TauPlusX_%s_2012D_Jan22", reco="22Jan2013", runs=(203777, 208686), aod="/TauPlusX/Run2012D-22Jan2013-v1/AOD"), # 63421453 events, 5395 files
 ])
 
-# MultiJet(Parked) PD, QuadJet trigger for signal
-# Commented for now, until the corresponding GlobalTags have been added to HChDataVersion.py
+# MultiJet PD, QuadJet trigger for signal
 datasets.extend([
-    DataDataset("MultiJet_%s_2012A_Jan22",        reco="22Jan2013", runs=(190456, 193621), aod="/MultiJet/Run2012A-22Jan2013-v1/AOD"), # 11068071 events, 879 files
-#    DataDataset("MultiJet1Parked_%s_2012B_Nov05", reco="05Nov2012", runs=(193834, 196531), aod="/MultiJet1Parked/Run2012B-05Nov2012-v1/AOD"),
-#    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012", runs=(198022, 198523), aod="/MultiJet1Parked/Run2012C-part1_05Nov2012-v1/AOD"), # FIXME: run range from DAS
-#    DataDataset("MultiJet1Parked_%s_2012C_Nov05", reco="05Nov2012", runs=(198941, 203742), aod="/MultiJet1Parked/Run2012C-part2_05Nov2012-v1/AOD"), # FIXME: run range from DAS
-#    DataDataset("MultiJet1Parked_%s_2012D_Dec10", reco="10Dec2012", runs=(203777, 207779), aod="/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD"), # FIXME: run range from DAS
-#    DataDataset("MultiJet1Parked_%s_2012D_Jan17", reco="17Jan2013", runs=(207883, 208307), aod="/MultiJet1Parked/Run2012D-part2_PixelRecover_17Jan2013-v1/AOD"), # FIXME: run range from DAS
+    DataDataset("MultiJet_%s_2012A_Jan22",        reco="22Jan2013",    runs=(190456, 193621), aod="/MultiJet/Run2012A-22Jan2013-v1/AOD"), # 11068071 events, 879 files
 ])
 
 # BJetPlusX PD, QuadJet trigger for signal
 datasets.extend([
     DataDataset("BJetPlusX_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/BJetPlusX/Run2012B-22Jan2013-v1/AOD"), # 27868808 events, 2289 files
+    DataDataset("BJetPlusX_%s_2012C_Jan22", reco="22Jan2013", runs=(198022, 203742), aod="/BJetPlusX/Run2012C-22Jan2013-v1/AOD"), # 36498856 events, 3091 files
+    DataDataset("BJetPlusX_%s_2012D_Jan22", reco="22Jan2013", runs=(203777, 208686), aod="/BJetPlusX/Run2012D-22Jan2013-v1/AOD"), # 40926332 events, 3943 files
 ])
+datasets.splitDataByRuns("BJetPlusX_193834-196531_2012B_Jan22", [
+        (193834, 194225), # This has both BTagCSV and BTagIP triggers, 6146763 events, 462 files
+        (194270, 196531), # This has only BTagIP trigger, 25513309 events, 2125 files
+        ])
 
 # SingleMu PD, Mu trigger for embedding, IsoMu trigger for muon efficiency measurement
 datasets.extend([
     DataDataset("SingleMu_%s_2012A_Jan22", reco="22Jan2013", runs=(190456, 193621), aod="/SingleMu/Run2012A-22Jan2013-v1/AOD"), # 19785316 events, 817 files
     DataDataset("SingleMu_%s_2012B_Jan22", reco="22Jan2013", runs=(193834, 196531), aod="/SingleMu/Run2012B-22Jan2013-v1/AOD"), # 59516381 events, 4204 files
+    DataDataset("SingleMu_%s_2012C_Jan22", reco="22Jan2013", runs=(198022, 203742), aod="/SingleMu/Run2012C-22Jan2013-v1/AOD"), # 87683348 events, 6171 files
+    DataDataset("SingleMu_%s_2012D_Jan22", reco="22Jan2013", runs=(203777, 208686), aod="/SingleMu/Run2012D-22Jan2013-v1/AOD"), # 95089646 events, 7567 files
 ])
 
 
@@ -500,21 +528,32 @@ multicrabWorkflowsPileupNtuple.addNtuple_53X(datasets)
 multicrabWorkflowsPattuple.addPattuple_v44_5(datasets)
 
 multicrabWorkflowsPattuple.addPattuple_v53_2(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_3_test1(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_3_test2(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_3_test3(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_3_test4(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_3_test5(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_3_test6_quadjet(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_3_taumet(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_3_quadjet(datasets)
 
 # Add embedding definitions
 multicrabWorkflowsTauEmbedding.addEmbeddingAodAnalysis_44X(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_4_2(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_4_2(datasets)
+multicrabWorkflowsTauEmbedding.addEmbeddingGenTauSkim_v44_5(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_5(datasets)
+multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5_1(datasets)
+multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_5_1(datasets)
 
 # Add muon tag&probe definitions
 multicrabWorkflowsMuonTagProbe.addMuonTagProbe_44X(datasets)
 
 # Add trigger efficiency definitions
-multicrabWorkflowsTriggerEff.addTauLegSkim_53X_v2(datasets)
-multicrabWorkflowsTriggerEff.addMetLegSkim_53X_v2(datasets)
-multicrabWorkflowsTriggerEff.addQuadJetSkim_53X_v2(datasets)
+multicrabWorkflowsTriggerEff.addTauLegSkim_53X_v3(datasets)
+multicrabWorkflowsTriggerEff.addMetLegSkim_53X_v3(datasets)
+multicrabWorkflowsTriggerEff.addQuadJetSkim_53X_v3(datasets)
 
 def printAllDatasets():
     for d in datasets.getDatasetList():

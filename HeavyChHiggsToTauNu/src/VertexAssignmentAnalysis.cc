@@ -33,8 +33,8 @@ namespace HPlus {
     hGenuineTauAllEventsByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GenuineTauAllEventsByPhi", "GenuineTauAllEventsByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
     hGenuineTauPassedEventsByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GenuineTauPassedEventsByPhi", "GenuineTauPassedEventsByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
     hFakeTauAllEventsByTauZ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauAllEventsByTauZ", "FakeTauAllEventsByTauZ;PV z associated to #tau, mm;Events / 1 mm", 100, -50, 50);
-    hFakeTauPassedEventsByTauZ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauAllEventsByTauZ", "FakeTauAllEventsByTauZ;PV z associated to #tau, mm;Events / 1 mm", 100, -50, 50);
-    hFakeTauAllEventsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauPassedEventsByPt", "FakeTauPassedEventsByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hFakeTauPassedEventsByTauZ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauPassedEventsByTauZ", "FakeTauPassedEventsByTauZ;PV z associated to #tau, mm;Events / 1 mm", 100, -50, 50);
+    hFakeTauAllEventsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauAllEventsByPt", "FakeTauAllEventsByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
     hFakeTauPassedEventsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauPassedEventsByPt", "FakeTauPassedEventsByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
     hFakeTauAllEventsByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauAllEventsByEta", "FakeTauAllEventsByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
     hFakeTauPassedEventsByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauPassedEventsByEta", "FakeTauPassedEventsByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);

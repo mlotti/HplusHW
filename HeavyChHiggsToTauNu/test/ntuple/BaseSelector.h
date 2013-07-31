@@ -3,9 +3,12 @@
 #define __BASE_SELECTOR__
 
 #include "Rtypes.h"
+#include "TBranch.h"
+#include "TTree.h"
 
 #include<string>
 #include<vector>
+#include<algorithm>
 
 class TTree;
 class TDirectory;
@@ -30,6 +33,125 @@ T* makeTH(const Arg1& a1, const Arg2& a2, const Arg3& a3, const Arg4& a4, const 
   return histo;
 }
 
+// Generic branch
+template <typename T>
+struct BranchTraits {
+  typedef T *DataType;
+  typedef const T& ReturnType;
+  static ReturnType get(const T* data) { return *data; }
+};
+template <>
+struct BranchTraits<bool> {
+  typedef bool DataType;
+  typedef bool ReturnType;
+  static ReturnType get(bool data) { return data; }
+};
+template <>
+struct BranchTraits<int> {
+  typedef int DataType;
+  typedef int ReturnType;
+  static ReturnType get(int data) { return data; }
+};
+template <>
+struct BranchTraits<unsigned int> {
+  typedef unsigned int DataType;
+  typedef unsigned int ReturnType;
+  static ReturnType get(unsigned int data) { return data; }
+};
+template <>
+struct BranchTraits<float> {
+  typedef float DataType;
+  typedef float ReturnType;
+  static ReturnType get(float data) { return data; }
+};
+template <>
+struct BranchTraits<double> {
+  typedef double DataType;
+  typedef double ReturnType;
+  static ReturnType get(double data) { return data; }
+};
+
+class BranchBase {
+public:
+  explicit BranchBase(const std::string& n): name(n), branch(0), entry(0), cached(false) {}
+  virtual ~BranchBase();
+
+  bool isValid() const { return branch != 0; }
+
+  void setEntry(Long64_t e) { entry = e; cached = false; }
+
+  const std::string& getName() const { return name; }
+
+protected:
+  const std::string name;
+  TBranch *branch;
+  Long64_t entry;
+  bool cached;
+};
+
+template <typename T>
+class Branch: public BranchBase {
+public:
+  explicit Branch(const std::string& n): BranchBase(n), data(0) {}
+  ~Branch() {}
+
+  void setupBranch(TTree *tree) {
+    tree->SetBranchAddress(this->name.c_str(), &data, &this->branch);
+  }
+  typename BranchTraits<T>::ReturnType value() {
+    if(!cached) {
+      branch->GetEntry(this->entry);
+      cached = true;
+    }
+    return BranchTraits<T>::get(data);
+  }
+
+private:
+  typename BranchTraits<T>::DataType data;
+};
+
+// Branch manager, to allow multiple analyzer modules
+class BranchManager {
+public:
+  BranchManager();
+  ~BranchManager();
+
+  void setTree(TTree *tree) { fTree = tree; }
+
+  template <typename T>
+  void book(const std::string& branchName, Branch<T> **returnValue) {
+    std::vector<BranchBase *>::iterator found = std::lower_bound(fBranches.begin(), fBranches.end(), branchName, BranchCompare());
+
+    Branch<T> *ptr = 0;
+    if(found == fBranches.end() || (*found)->getName() != branchName) {
+      ptr = new Branch<T>(branchName);
+      fBranches.insert(found, ptr);
+    }
+    else {
+      ptr = dynamic_cast<Branch<T> *>(*found);
+    }
+    ptr->setupBranch(fTree);
+    *returnValue = ptr;
+  }
+
+  void setEntry(Long64_t entry) {
+    for(size_t i=0; i<fBranches.size(); ++i) {
+      fBranches[i]->setEntry(entry);
+    }
+  }
+
+private:
+  struct BranchCompare {
+    bool operator()(const BranchBase *a, const std::string& b) const {
+      return a->getName() < b;
+    }
+  };
+
+  TTree *fTree;
+  std::vector<BranchBase *> fBranches;
+};
+
+/// Event counter
 class EventCounter {
 public:
   class Count {
@@ -73,6 +195,8 @@ void EventCounter::Count::increment() {
   fEventCounter.incrementCount(fIndex);
 }
 
+
+/// Selector base class
 class BaseSelector {
 public:
   BaseSelector();
@@ -90,7 +214,7 @@ public:
 
   // Implement these
   virtual void setOutput(TDirectory *dir);
-  virtual void setupBranches(TTree *tree);
+  virtual void setupBranches(BranchManager& branchManager);
   virtual bool process(Long64_t entry);
 
 protected:

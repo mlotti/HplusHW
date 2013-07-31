@@ -79,6 +79,8 @@ set -e
 # 20.2.2013/M.Kortelainen CMSSW_5_3_/_patch6 Updated PAT tags
 # 19.3.2013/LAW CMSSW_5_3_7 Added jet PU ID
 # 27.3.2013/M.Kortelainen CMSSW_4_4_5 Fixed re-running of the script
+# 5.4.2013/M.Kortelainen CMSSW_5_3_9_patch2 Updated PAT tags
+# 12.6.2013/M.Kortelainen CMSSW_5_3_9_patch3 Performance improvement in pat::Trigger
 
 
 # addpkg requires cmsenv
@@ -86,20 +88,15 @@ eval $(scram runtime -sh)
 
 # PAT
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes52X
-addpkg DataFormats/PatCandidates V06-05-06-07
-addpkg PhysicsTools/PatAlgos     V08-09-52
-addpkg DataFormats/StdDictionaries V00-02-14
+addpkg DataFormats/PatCandidates V06-05-06-08
+addpkg PhysicsTools/PatAlgos     V08-09-55
+addpkg PhysicsTools/PatUtils V03-09-28
+# Follow is needed instead of V00-02-14 for one dictionary, PAT jobs fail otherwise
+addpkg DataFormats/StdDictionaries V00-02-15
 addpkg FWCore/GuiBrowsers V00-00-70
-# We don't need the code (it's the same as in the release), but a ROOT
-# file for jet smearing needs to be in the developer area at the moment
-# (see )
-addpkg PhysicsTools/PatUtils V03-09-27
+addpkg RecoMET/METProducers      V03-03-12-02
 # Needed for running runMEtUncertainties() multiple times, no tag yet
-cvs up -r 1.25 PhysicsTools/PatUtils/python/tools/metUncertaintyTools.py
 cvs up -r 1.19.8.1 PhysicsTools/PatAlgos/python/tools/helpers.py
-rm PhysicsTools/PatUtils/plugins/MinPatMETProducer.cc
-# Backport technical change in pat::Jet to reduce space
-cvs up -j 1.83 -j 1.84 DataFormats/PatCandidates/src/classes_def.xml
 
 # Latest EGM isolation definition (whatever that is)
 addpkg RecoParticleFlow/PFProducer V15-02-06
@@ -119,7 +116,8 @@ addpkg CondFormats/EgammaObjects  V00-04-00
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
 # https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1417.html
-cvs co -r V00-03-01 -d CMGTools/External UserCode/CMG/CMGTools/External
+# With respect to V00-03-01 in the twiki page, this one contains only bugfixes
+cvs co -r V00-03-03 -d CMGTools/External UserCode/CMG/CMGTools/External
 
 # btagging scale factors
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagPerformanceDBV2
@@ -129,6 +127,18 @@ cvs co -r V00-04-11 RecoBTag/PerformanceDB
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
 # Nothing to add on 535, but let's keep the reference
 
+
+# Take only the performance improvements on pat::Trigger from
+# VV06-05-06-12 for now, there are data format changes which I don't want
+# to mess within v53_3
+cvs up -r V06-05-06-12 DataFormats/PatCandidates/interface/TriggerAlgorithm.h
+cvs up -r V06-05-06-12 DataFormats/PatCandidates/interface/TriggerCondition.h
+cvs up -r V06-05-06-12 DataFormats/PatCandidates/interface/TriggerEvent.h
+cvs up -r V06-05-06-12 DataFormats/PatCandidates/interface/TriggerFilter.h
+cvs up -r V06-05-06-12 DataFormats/PatCandidates/interface/TriggerObject.h
+cvs up -r V06-05-06-12 DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h
+cvs up -r V06-05-06-12 DataFormats/PatCandidates/interface/TriggerPath.h
+cvs up -r V06-05-06-12 DataFormats/PatCandidates/src/TriggerEvent.cc
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc

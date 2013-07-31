@@ -24,6 +24,7 @@ namespace HPlus {
     HistogramsInBins(HPlus::HistoWrapper::HistoLevel, EventCounter&,HistoWrapper& ,std::string, std::string, int, double, double);
     ~HistogramsInBins();
    void Fill(double ,double);
+   void Fill(double ,double, double); // for arbitrary weight
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
     // Use silentAnalyze if you do not want to fill histograms or increment counters
  

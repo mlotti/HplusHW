@@ -35,4 +35,15 @@ namespace HPlus {
     if ( selectedTauPt > 50 && selectedTauPt  < 60 ) h5060->Fill(Variable1,Variable2);
     if ( selectedTauPt > 40 && selectedTauPt  < 50 ) h4050->Fill(Variable1,Variable2);    
   }
+
+  void HistogramsInBins2Dim::Fill(double selectedTauPt, double Variable1, double Variable2, double weight ) {
+    hInclusive->Fill( Variable1,Variable2, weight);
+    if ( selectedTauPt > 120  ) h120->Fill(Variable1,Variable2, weight);
+    if ( selectedTauPt > 100 && selectedTauPt  < 120 ) h100120->Fill(Variable1,Variable2, weight);
+    if ( selectedTauPt > 80 && selectedTauPt  < 100  ) h80100->Fill(Variable1,Variable2, weight);
+    if ( selectedTauPt > 70 && selectedTauPt  < 80 ) h7080->Fill(Variable1,Variable2, weight);
+    if ( selectedTauPt > 60 && selectedTauPt  < 70 ) h6070->Fill(Variable1,Variable2, weight);
+    if ( selectedTauPt > 50 && selectedTauPt  < 60 ) h5060->Fill(Variable1,Variable2, weight);
+    if ( selectedTauPt > 40 && selectedTauPt  < 50 ) h4050->Fill(Variable1,Variable2, weight);
+  }
 }

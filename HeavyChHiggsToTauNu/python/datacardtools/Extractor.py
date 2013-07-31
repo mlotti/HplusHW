@@ -6,7 +6,7 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import _histoToCounter
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 from math import pow,sqrt
 import sys
 import ROOT
@@ -284,7 +284,7 @@ class PileupUncertaintyExtractor(ExtractorBase):
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.UP) #FIXME
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.DOWN) #FIXME
         for d in self._counterDirs:
-            myHistoName = datasetColumn.getDirPrefix()+d+"/counters/weighted/counter"
+            myHistoName = d+"/counters/weighted/counter"
             try:
                 datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             except Exception, e:
@@ -382,7 +382,9 @@ class ScaleFactorExtractor(ExtractorBase):
         for i in range (0, len(self._histoDirs)):
             myTotal = 0.0
             mySum = 0.0
-            myHistoName = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histograms[i]
+            myHistoName = self._histoDirs[i]+"/"+self._histograms[i]
+            if self._histoDirs[i] == "":
+                myHistoName = self._histograms[i]
             try:
                 myValueRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             except Exception, e:
@@ -391,7 +393,7 @@ class ScaleFactorExtractor(ExtractorBase):
             hValues = myValueRootHisto.getHistogram()
             if hValues == None:
                 raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot open histogram '"+myHistoName+"'!")
-            myHistoName = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._normalisation[i]
+            myHistoName = self._histoDirs[i]+"/"+self._normalisation[i]
             try:
                 myNormalisationRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             except Exception, e:
@@ -455,7 +457,7 @@ class ShapeExtractor(ExtractorBase):
                 # Shape variation nuisance needs to have exactly two entries (down, up)
                 if len(self._histoDirs) != 2:
                     raise Exception(ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"' (shapeQ):"+NormalStyle()+" need to specify exactly two entries (down and up) in both histoDirs and histograms!")
-            elif self._distribution == "shapeStat":
+            elif self._distribution == "shapeStat": # bin-by-bin
                 # Shape variation nuisance needs to have exactly one entry
                 if len(self._histoDirs) != 1:
                     raise Exception(ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"' (shapeStat):"+NormalStyle()+" need to specify exactly one entry in both histoDirs and histograms!")
@@ -471,7 +473,7 @@ class ShapeExtractor(ExtractorBase):
         if self._distribution == "shapeQ":
             myNominalRateCount = mainCounterTable.getCount(rowName=self._counterItem, colName=datasetColumn.getDatasetMgrColumn()).value()
             for i in range (0, len(self._histoDirs)):
-                myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/counters/weighted/counter"
+                myHistoName = self._histoDirs[i]+"/counters/weighted/counter" #FIXME !!!! replace by using main counter table
                 try:
                     datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
                 except Exception, e:
@@ -501,16 +503,18 @@ class ShapeExtractor(ExtractorBase):
         if self.isRate() or self.isObservation():
             myLabels = [myPrefix]
         else:
-            myLabels = [myPrefix+"_"+str(int(self._masterExID))+"Down",
-                        myPrefix+"_"+str(int(self._masterExID))+"Up"]
+            myLabels = [myPrefix+"_"+self._masterExID+"Down",
+                        myPrefix+"_"+self._masterExID+"Up"]
         myHistograms = []
         myShapeModifier = ShapeHistoModifier(self._histoSpecs)
         for i in range (0, len(self._histoDirs)):
             # Create empty shape histogram
             h = myShapeModifier.createEmptyShapeHistogram(myLabels[i])
             # Obtain source histogram
-            myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/"+self._histograms[i]
-            print "group",datasetColumn.getLabel(),"id",self._exid,"histo",myHistoName
+            myHistoName = self._histoDirs[i]+"/"+self._histograms[i]
+            if self._histoDirs[i] == "":
+                myHistoName = self._histograms[i]
+            #print "group",datasetColumn.getLabel(),"id",self._exid,"histo",myHistoName
             try:
                 myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             except Exception, e:
@@ -553,7 +557,7 @@ class ShapeExtractor(ExtractorBase):
                     print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeUp histo bin %d is negative (%f), it is forced to zero"%(k,myHistograms[0].GetBinContent(k))
                     myHistograms[1].SetBinContent(k, 0.0)
         # No source for histograms for empty column; create an empty histogram with correct dimensions
-        if (self.isRate() or self.isObservation()) and datasetColumn.typeIsEmptyColum():
+        if (self.isRate() or self.isObservation()) and datasetColumn.typeIsEmptyColumn():
             h = myShapeModifier.createEmptyShapeHistogram(myLabels[0])
             myHistograms.append(h)
         # Return result
@@ -601,9 +605,11 @@ class ControlPlotExtractor(ExtractorBase):
         myShapeModifier = ShapeHistoModifier(self._histoSpecs)
         h = myShapeModifier.createEmptyShapeHistogram(myLabel)
         for i in range (0, len(self._histoDirs)):
-            print "Extractor ",self._histoDirs[i],self._histoNames[i]
+            #print "Extractor ",self._histoDirs[i],self._histoNames[i]
             # Obtain histogram from dataset
-            myHistoname = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histoNames[i]
+            myHistoname = self._histoDirs[i]+"/"+self._histoNames[i]
+            if self._histoDirs[i] == "":
+                myHistoname = self._histoNames[i]
             try:
                 myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoname)
             except Exception, e:
