@@ -17,6 +17,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdFactorised.qcdFactorisedResult import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 
@@ -72,7 +73,7 @@ def doQCDfactorisedResultPlots(opts, dsetMgr, moduleInfoString, myDir, luminosit
 
     # Calculate final shape in signal region (leg1 * leg2 / basic)
     myResult = QCDFactorisedResult(myBasicShape, myLeg1Shape, myLeg2Shape, myHistoSpecs, moduleInfoString)
-    hTotalQCD = myResult.getResultShape()
+    hTotalQCD = myResult.getResultShape().Clone()
 
     # Do plotting - this needs to be edited to use tdr style ...
     c1 = ROOT.TCanvas()
@@ -85,6 +86,32 @@ def doQCDfactorisedResultPlots(opts, dsetMgr, moduleInfoString, myDir, luminosit
         myResult.getNQCDHistograms()[i].Draw()
         myBinTitle = myBasicShape.getPhaseSpaceBinFileFriendlyTitle(i)
         c.Print("%s/QCDShape_%s_%s.png"%(myDir, myBinTitle, moduleInfoString))
+
+    # Do systematics coming from met shape difference
+    # Set here the names of the histograms you want to access
+    myCtrlRegionName = "QCDfactorised/MtAfterStandardSelections"
+    mySignalRegionName = "QCDfactorised/MtAfterLeg2"
+    # Obtain QCD shapes
+    myCtrlRegion = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myCtrlRegionName, luminosity)
+    mySignalRegion = DataDrivenQCDShape(dsetMgr, "Data", "EWK", mySignalRegionName, luminosity)
+    # Calculate
+    mySyst = SystematicsForMetShapeDifference(mySignalRegion, myCtrlRegion, myResult.getResultShape(), myHistoSpecs, moduleInfoString)
+    print "Evaluated MET shape systematics"
+    # Do plotting
+    #mySyst
+    c2 = ROOT.TCanvas()
+    c2.Draw()
+    hNominal = myResult.getResultShape().Clone()
+    hUp = mySyst.getUpHistogram().Clone()
+    hDown = mySyst.getDownHistogram().Clone()
+    hNominal.SetLineColor(ROOT.kBlack)
+    hUp.SetLineColor(ROOT.kBlue)
+    hDown.SetLineColor(ROOT.kRed)
+    hNominal.Draw()
+    hUp.Draw("same")
+    hDown.Draw("same")
+    c2.Print("%s/QCDShapeWithMetSyst_%s_%s.png"%(myDir, myBinTitle, moduleInfoString))
+
     print HighlightStyle()+"doQCDfactorisedResultPlots is ready"+NormalStyle()
 
 def createOutputdirectory(myDir):

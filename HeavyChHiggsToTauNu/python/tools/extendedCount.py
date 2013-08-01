@@ -1,3 +1,8 @@
+# Description: Extension of counter with arbitrary many uncertainties
+# Note: Make sure to include the keyword "stat" or "syst" in label of each uncertainty
+#
+# Authors: LAW
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from math import sqrt
 

@@ -1,3 +1,9 @@
+# Description: Calculates QCD factorised result (works for both ABCD and traditional method)
+# Makes also the shape histograms in phase space bins and the final shape
+# Note: Systematic uncertainties need to be treated separately (since they should be taken from variation modules)
+#
+# Authors: LAW
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import *
