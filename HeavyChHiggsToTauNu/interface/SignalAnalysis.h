@@ -347,6 +347,7 @@ namespace HPlus {
     WrappedTH2 *hSelectionFlowVsVerticesFakeTaus;
 
     // Histograms for jet flavour tagging efficiency calculation in MC
+    // Pseudorapidity (eta)
     WrappedTH1 *hGenuineBJetEta;   
     WrappedTH1 *hGenuineBJetWithBTagEta;
     WrappedTH1 *hGenuineGJetEta;
@@ -355,7 +356,7 @@ namespace HPlus {
     WrappedTH1 *hGenuineUDSJetWithBTagEta;
     WrappedTH1 *hGenuineLJetEta;
     WrappedTH1 *hGenuineLJetWithBTagEta;
-
+    // Transverse momentum (pT)
     WrappedTH1 *hGenuineBJetPt;   
     WrappedTH1 *hGenuineBJetWithBTagPt;
     WrappedTH1 *hGenuineGJetPt;
@@ -364,6 +365,16 @@ namespace HPlus {
     WrappedTH1 *hGenuineUDSJetWithBTagPt;
     WrappedTH1 *hGenuineLJetPt;
     WrappedTH1 *hGenuineLJetWithBTagPt;
+    // Two-dimensional histograms of pT vs. eta to investigate possible correlations
+    WrappedTH2 *hGenuineBJetPtAndEta;
+    WrappedTH2 *hGenuineBJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineGJetPtAndEta;
+    WrappedTH2 *hGenuineGJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineUDSJetPtAndEta;
+    WrappedTH2 *hGenuineUDSJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineLJetPtAndEta;
+    WrappedTH2 *hGenuineLJetWithBTagPtAndEta;
+
 
     // Control plots for fakes
 
