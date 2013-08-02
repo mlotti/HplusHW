@@ -15,6 +15,7 @@ namespace HPlus {
   HistogramSettings::~HistogramSettings() { }
 
   CommonPlots::CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, AnalysisType analysisType, bool isEmbeddedData) :
+    bOptionEnableTauFakeRateAnalysis(iConfig.getUntrackedParameter<bool>("enableTauFakeRateAnalysis")),
     bOptionEnableNormalisationAnalysis(iConfig.getUntrackedParameter<bool>("enableNormalisationAnalysis")),
     bOptionEnableMETOscillationAnalysis(iConfig.getUntrackedParameter<bool>("enableMETOscillationAnalysis")),
     bDisableCommonPlotsFilledAtEveryStep(false),
@@ -24,8 +25,10 @@ namespace HPlus {
     fSplittedHistogramHandler(iConfig.getUntrackedParameter<edm::ParameterSet>("histogramSplitting"), histoWrapper),
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
-    fNormalisationAnalysis(0),
-    fTauSelection(0), fFakeTauIdentifier(0),
+    fTauFakeRateAnalysis(0),
+    fTauSelection(0),
+    fFakeTauIdentifier(0),
+    fMetTrgSF(0),
     fPtBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("ptBins")),
     fEtaBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("etaBins")),
     fPhiBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("phiBins")),
@@ -46,9 +49,18 @@ namespace HPlus {
       fAnalysisType = kEmbedding;
     // Create histograms
     createHistograms();
-    // Create objects for normalisation analysis
+    // Create tau fake rate analysis if asked
+    if (bOptionEnableTauFakeRateAnalysis) {
+      fTauFakeRateAnalysis = new TauFakeRateAnalysis(histoWrapper);
+    }
+    // Create objects for normalisation analysis if asked
     if (bOptionEnableNormalisationAnalysis) {
-      fNormalisationAnalysis = new NormalisationAnalysis(eventCounter, histoWrapper);
+      fNormalisationAnalysisObjects.push_back(new NormalisationDYEnrichedWithGenuineTaus(eventCounter, histoWrapper));
+      fNormalisationAnalysisObjects.push_back(new NormalisationDYEnrichedWithFakeTaus(eventCounter, histoWrapper));
+      fNormalisationAnalysisObjects.push_back(new NormalisationWJetsEnrichedWithGenuineTaus(eventCounter, histoWrapper));
+      fNormalisationAnalysisObjects.push_back(new NormalisationWJetsEnrichedWithFakeTaus(eventCounter, histoWrapper));
+      fNormalisationAnalysisObjects.push_back(new NormalisationTTJetsEnrichedWithGenuineTaus(eventCounter, histoWrapper));
+      fNormalisationAnalysisObjects.push_back(new NormalisationTTJetsEnrichedWithFakeTaus(eventCounter, histoWrapper));
     }
     // Create objects for MET phi oscillation analysis
     if (bOptionEnableMETOscillationAnalysis) {
@@ -179,6 +191,7 @@ namespace HPlus {
                                ElectronSelection& eVeto,
                                MuonSelection& muonVeto,
                                JetSelection& jetSelection,
+                               METTriggerEfficiencyScaleFactor& metTrgSF,
                                METSelection& metSelection,
                                BTagging& bJetSelection,
                                QCDTailKiller& qcdTailKiller,
@@ -195,6 +208,7 @@ namespace HPlus {
                eVeto,
                muonVeto,
                jetSelection,
+               metTrgSF,
                metSelection,
                bJetSelection,
                qcdTailKiller,
@@ -211,6 +225,7 @@ namespace HPlus {
                                ElectronSelection& eVeto,
                                MuonSelection& muonVeto,
                                JetSelection& jetSelection,
+                               METTriggerEfficiencyScaleFactor& metTrgSF,
                                METSelection& metSelection,
                                BTagging& bJetSelection,
                                QCDTailKiller& qcdTailKiller,
@@ -218,8 +233,8 @@ namespace HPlus {
                                EvtTopology& evtTopology,
                                FullHiggsMassCalculator& fullHiggsMassCalculator) {
     fSplittedHistogramHandler.initialize();
-
     fFakeTauIdentifier = &fakeTauIdentifier;
+    fMetTrgSF = &metTrgSF;
     // Obtain data objects
     fVertexData = vertexData;
     if (!vertexData.passedEvent()) return; // Require valid vertex
@@ -252,7 +267,7 @@ namespace HPlus {
     if (fBJetData.passedEvent()) {
       fFullHiggsMassData = fullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fBJetData, fMETData);
     }
-
+//FIXME : add met SF also to every set plots
     // Pass pointer to cached data objects to CommonPlotsFilledAtEveryStep
     if (!hEveryStepHistograms.size() && !bDisableCommonPlotsFilledAtEveryStep)
       throw cms::Exception("Assert") << "CommonPlots::initialize() was called before creating CommonPlots::createCommonPlotsFilledAtEveryStep()!" << endl<<  "  make first all CommonPlots::createCommonPlotsFilledAtEveryStep() and then call CommonPlots::initialize()";
@@ -272,21 +287,25 @@ namespace HPlus {
   void CommonPlots::fillControlPlotsAfterVertexSelection(const edm::Event& iEvent, const VertexSelection::Data& data) {
     //----- MET phi oscillation
     //fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup, fJetData.getAllJets());
-    if(bOptionEnableNormalisationAnalysis && fTauSelection && fFakeTauIdentifier) {
-      fNormalisationAnalysis->analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
+    if (bOptionEnableTauFakeRateAnalysis && fTauSelection && fFakeTauIdentifier) {
+      fTauFakeRateAnalysis->analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
     }
   }
 
-  void CommonPlots::fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, METSelection& metSelection) {
+  void CommonPlots::fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, JetSelection& jetSelection, METSelection& metSelection, BTagging& btagging, QCDTailKiller& qcdTailKiller) {
     fTauData = tauData;
     fFakeTauData = fakeTauData;
+    // Obtain all other objects, whose selection depends on the tau
+    fJetData = jetSelection.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), fVertexData.getNumberOfAllVertices());
     fMETData = metSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau(), fJetData.getAllJets());
+    fBJetData = btagging.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJetsPt20());
+    fQCDTailKillerData = qcdTailKiller.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fJetData.getSelectedJetsIncludingTau(), fMETData.getSelectedMET());
     // Set splitted bin info
     setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, fTauData, metSelection);
     // Obtain new MET object corresponding to the selected tau
-    if (bOptionEnableNormalisationAnalysis) {
-      // e->tau normalisation // FIXME tau trg scale factor needs to be applied!
-      fNormalisationAnalysis->analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData, fMuonData, fJetData, fMETData);
+    if (bOptionEnableTauFakeRateAnalysis) {
+      // e->tau normalisation
+      fTauFakeRateAnalysis->analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData, fMuonData, fJetData, fMETData);
     }
   }
 
@@ -300,6 +319,13 @@ namespace HPlus {
     if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterTaus->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
     hTauPhiOscillationX->Fill(fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau()->px());
     hTauPhiOscillationY->Fill(fVertexData.getNumberOfAllVertices(), fTauData.getSelectedTau()->py());
+
+    // Do normalisation analyses
+    if (bOptionEnableNormalisationAnalysis) {
+      for (std::vector<NormalisationAnalysis*>::iterator it = fNormalisationAnalysisObjects.begin(); it != fNormalisationAnalysisObjects.end(); ++it) {
+        (*it)->analyse(iEvent, fTauData, fFakeTauData, fElectronData, fMuonData, fJetData, *fMetTrgSF, fQCDTailKillerData, fMETData, fBJetData);
+      }
+    }
   }
 
   void CommonPlots::fillControlPlotsAtTauVetoSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const VetoTauSelection::Data& tauVetoData) {

@@ -10,6 +10,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
@@ -19,7 +20,10 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SplittedHistogramHandler.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CommonPlotsFilledAtEveryStep.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NormalisationAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauFakeRateAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NormalisationDYEnriched.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NormalisationWJetsEnriched.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NormalisationTTJetsEnriched.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -81,6 +85,7 @@ namespace HPlus {
                     ElectronSelection& eVeto,
                     MuonSelection& muonVeto,
                     JetSelection& jetSelection,
+                    METTriggerEfficiencyScaleFactor& metTrgSF,
                     METSelection& metSelection,
                     BTagging& bJetSelection,
                     QCDTailKiller& qcdTailKiller,
@@ -96,6 +101,7 @@ namespace HPlus {
                     ElectronSelection& eVeto,
                     MuonSelection& muonVeto,
                     JetSelection& jetSelection,
+                    METTriggerEfficiencyScaleFactor& metTrgSF,
                     METSelection& metSelection,
                     BTagging& bJetSelection,
                     QCDTailKiller& qcdTailKiller,
@@ -111,7 +117,7 @@ namespace HPlus {
 
     /// unique filling methods (to be called AFTER return statement)
     void fillControlPlotsAfterVertexSelection(const edm::Event& iEvent, const VertexSelection::Data& data);
-    void fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, METSelection& metSelection);
+    void fillControlPlotsAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData, JetSelection& jetSelection, METSelection& metSelection, BTagging& btagging, QCDTailKiller& qcdTailKiller);
     void setSplittingOfPhaseSpaceInfoAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, METSelection& metSelection);
     void fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent);
@@ -141,6 +147,7 @@ namespace HPlus {
 
   protected:
     /// Options
+    const bool bOptionEnableTauFakeRateAnalysis;
     const bool bOptionEnableNormalisationAnalysis;
     const bool bOptionEnableMETOscillationAnalysis;
     /// Analysis type
@@ -158,11 +165,14 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory fCommonBaseDirectory;
     TFileDirectory fEveryStepDirectory;
-    /// Normalisation analysis object
-    NormalisationAnalysis* fNormalisationAnalysis;
+    /// Tau fake rate analysis object
+    TauFakeRateAnalysis* fTauFakeRateAnalysis;
+    /// Normalisation analysis objects
+    std::vector<NormalisationAnalysis*> fNormalisationAnalysisObjects;
     /// Selection objects
     TauSelection* fTauSelection;
     FakeTauIdentifier* fFakeTauIdentifier;
+    METTriggerEfficiencyScaleFactor* fMetTrgSF;
     /// Cached data objects from silent analyze
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;
