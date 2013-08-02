@@ -21,8 +21,6 @@ class SystematicsForMetShapeDifference:
         self._ctrlRegionHistograms = []
         self._hCombinedSignalRegion = None
         self._hCombinedCtrlRegion = None
-        self._relSystUpValue = None
-        self._relSystDownValue = None
         self._systUpHistogram = None
         self._systDownHistogram = None
         # Calculate
@@ -39,12 +37,6 @@ class SystematicsForMetShapeDifference:
 
     def getCombinedCtrlRegionHistogram(self):
         return self._hCombinedCtrlRegion
-
-    def getUpRelativeUncertainty(self):
-        return self._relSystUpValue
-
-    def getDownRelativeUncertainty(self):
-        return self._relSystDownValue
 
     def getUpHistogram(self):
         return self._systUpHistogram
