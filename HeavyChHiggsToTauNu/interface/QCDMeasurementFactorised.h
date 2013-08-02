@@ -196,11 +196,15 @@ namespace HPlus {
 
     // Shape histograms (some needed for closure test)
     std::vector<WrappedTH1*> hMtShapesAfterStandardSelections;
+    std::vector<WrappedTH1*> hMtShapesAfterStandardSelectionsAndIsolatedTau;
+    std::vector<WrappedTH1*> hMtShapesAfterStandardSelectionsAndNonIsolatedTau;
     std::vector<WrappedTH1*> hMtShapesAfterLeg1;
     std::vector<WrappedTH1*> hMtShapesAfterLeg1WithoutBtag;
     std::vector<WrappedTH1*> hMtShapesAfterLeg2;
     std::vector<WrappedTH1*> hMtShapesAfterLeg1AndLeg2;
     std::vector<WrappedTH1*> hInvariantMassShapesAfterStandardSelections;
+    std::vector<WrappedTH1*> hInvariantMassShapesAfterStandardSelectionsAndIsolatedTau;
+    std::vector<WrappedTH1*> hInvariantMassShapesAfterStandardSelectionsAndNonIsolatedTau;
     std::vector<WrappedTH1*> hInvariantMassShapesAfterLeg1;
     std::vector<WrappedTH1*> hInvariantMassShapesAfterLeg1WithoutBtag;
     std::vector<WrappedTH1*> hInvariantMassShapesAfterLeg2;
