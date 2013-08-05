@@ -17,6 +17,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.qcdFactorised.qcdFactorisedResult import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 
 myHistoSpecs = { "bins": 13,
@@ -70,55 +72,46 @@ def doQCDfactorisedResultPlots(opts, dsetMgr, moduleInfoString, myDir, luminosit
     myLeg2Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myLeg2Name, luminosity)
 
     # Calculate final shape in signal region (leg1 * leg2 / basic)
-    nSplitBins = myBasicShape.getNumberOfPhaseSpaceSplitBins()
-    myModifier = ShapeHistoModifier(myHistoSpecs)
-    hTotalQCD = myModifier.createEmptyShapeHistogram("NQCD_Total_%s"%moduleInfoString)
-    myBinQCDList = []
-    for i in range(0, nSplitBins):
-        hBin = myModifier.createEmptyShapeHistogram("NQCD_%s_%s"%(myBasicShape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
-        myBinQCDList.append(hBin)
-    for i in range(0, nSplitBins):
-        hBasic = myBasicShape.getDataDrivenQCDHistoForSplittedBin(i, myHistoSpecs)
-        hLeg1 = myLeg1Shape.getDataDrivenQCDHistoForSplittedBin(i, myHistoSpecs)
-        hLeg2 = myLeg2Shape.getDataDrivenQCDHistoForSplittedBin(i, myHistoSpecs)
-        for j in range(1,hBasic.GetNbinsX()+1):
-            myResult = 0.0
-            myStatUncertSquared = 0.0
-            if hBasic.GetBinContent(j) > 0.0:
-                # Calculate result
-                myResult = abs(hLeg1.GetBinContent(j) * hLeg2.GetBinContent(j) / hBasic.GetBinContent(j))
-                # Calculate abs. stat. uncert.
-                myStatUncertSquared = ((hLeg1.GetBinError(j) * hLeg2.GetBinContent(j))**2 + (hLeg2.GetBinError(j) * hLeg1.GetBinContent(j))**2) / hBasic.GetBinContent(j)**2
-                # Treat negative numbers
-                if hLeg1.GetBinContent(j) < 0.0 or hLeg2.GetBinContent(j) < 0.0 or hBasic.GetBinContent(j) < 0.0:
-                    myResult = -myResult;
-            myBinQCDList[i].SetBinContent(j, myResult)
-            myBinQCDList[i].SetBinError(j, sqrt(myStatUncertSquared))
-            hTotalQCD.SetBinContent(j, hTotalQCD.GetBinContent(j) + myResult)
-            hTotalQCD.SetBinError(j, hTotalQCD.GetBinError(j) + myStatUncertSquared) # Sum squared
-    # Take square root of uncertainties
-    myModifier.finaliseShape(dest=hTotalQCD)
-    # Print result
-    nQCD = 0.0
-    nQCDStatUncert = 0.0
-    for i in range(1, hTotalQCD.GetNbinsX()+1):
-        nQCD += hTotalQCD.GetBinContent(i)
-        nQCDStatUncert += hTotalQCD.GetBinError(i)**2
-    nQCDStatUncert = sqrt(nQCDStatUncert)
-    # To obtain syst. uncert. for EWK is quite a bit more difficult. Will develop it later.
-    print "NQCD = %f +- %f (stat.)"%(nQCD, nQCDStatUncert)
+    myResult = QCDFactorisedResult(myBasicShape, myLeg1Shape, myLeg2Shape, myHistoSpecs, moduleInfoString)
+    hTotalQCD = myResult.getResultShape().Clone()
 
     # Do plotting - this needs to be edited to use tdr style ...
     c1 = ROOT.TCanvas()
     c1.Draw()
     hTotalQCD.Draw()
     c1.Print("%s/QCDShape_total_%s.png"%(myDir, moduleInfoString))
-    for i in range(0,len(myBinQCDList)):
+    for i in range(0,len(myResult.getNQCDHistograms())):
         c = ROOT.TCanvas()
         c.Draw()
-        myBinQCDList[i].Draw()
+        myResult.getNQCDHistograms()[i].Draw()
         myBinTitle = myBasicShape.getPhaseSpaceBinFileFriendlyTitle(i)
         c.Print("%s/QCDShape_%s_%s.png"%(myDir, myBinTitle, moduleInfoString))
+
+    # Do systematics coming from met shape difference
+    # Set here the names of the histograms you want to access
+    myCtrlRegionName = "QCDfactorised/MtAfterStandardSelections"
+    mySignalRegionName = "QCDfactorised/MtAfterLeg2"
+    # Obtain QCD shapes
+    myCtrlRegion = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myCtrlRegionName, luminosity)
+    mySignalRegion = DataDrivenQCDShape(dsetMgr, "Data", "EWK", mySignalRegionName, luminosity)
+    # Calculate
+    mySyst = SystematicsForMetShapeDifference(mySignalRegion, myCtrlRegion, myResult.getResultShape(), myHistoSpecs, moduleInfoString)
+    print "Evaluated MET shape systematics"
+    # Do plotting
+    #mySyst
+    c2 = ROOT.TCanvas()
+    c2.Draw()
+    hNominal = myResult.getResultShape().Clone()
+    hUp = mySyst.getUpHistogram().Clone()
+    hDown = mySyst.getDownHistogram().Clone()
+    hNominal.SetLineColor(ROOT.kBlack)
+    hUp.SetLineColor(ROOT.kBlue)
+    hDown.SetLineColor(ROOT.kRed)
+    hNominal.Draw()
+    hUp.Draw("same")
+    hDown.Draw("same")
+    c2.Print("%s/QCDShapeWithMetSyst_%s_%s.png"%(myDir, myBinTitle, moduleInfoString))
+
     print HighlightStyle()+"doQCDfactorisedResultPlots is ready"+NormalStyle()
 
 def createOutputdirectory(myDir):
