@@ -42,7 +42,7 @@ namespace HPlus {
                  const ElectronSelection::Data& electronData,
                  const MuonSelection::Data& muonData,
                  const JetSelection::Data& jetData,
-                 METTriggerEfficiencyScaleFactor& metTrgSF,
+                 METTriggerEfficiencyScaleFactor* metTrgSF,
                  const QCDTailKiller::Data& tailKillerData,
                  const METSelection::Data& metData,
                  const BTagging::Data& btagData);
@@ -66,7 +66,7 @@ namespace HPlus {
                  const ElectronSelection::Data& electronData,
                  const MuonSelection::Data& muonData,
                  const JetSelection::Data& jetData,
-                 METTriggerEfficiencyScaleFactor& metTrgSF,
+                 METTriggerEfficiencyScaleFactor* metTrgSF,
                  const QCDTailKiller::Data& tailKillerData,
                  const METSelection::Data& metData,
                  const BTagging::Data& btagData);
