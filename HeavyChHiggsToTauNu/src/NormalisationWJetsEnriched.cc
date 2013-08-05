@@ -40,7 +40,7 @@ namespace HPlus {
     if (!jetData.passedEvent()) return;
 
     // Obtain MET trg SF
-    if (iEvent.isRealData()) {
+    if (!iEvent.isRealData()) {
       metTrgSF.setRun(iEvent.id().run());
       myEventWeight *= metTrgSF.scaleFactor(*(metData.getSelectedMET()));
     }
@@ -118,7 +118,7 @@ namespace HPlus {
     if (!jetData.passedEvent()) return;
 
     // Obtain MET trg SF
-    if (iEvent.isRealData()) {
+    if (!iEvent.isRealData()) {
       metTrgSF.setRun(iEvent.id().run());
       myEventWeight *= metTrgSF.scaleFactor(*(metData.getSelectedMET()));
     }
