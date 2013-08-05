@@ -234,6 +234,7 @@ namespace HPlus {
                                FullHiggsMassCalculator& fullHiggsMassCalculator) {
     fSplittedHistogramHandler.initialize();
     fFakeTauIdentifier = &fakeTauIdentifier;
+    metTrgSF.setRun(iEvent.id().run());
     fMetTrgSF = &metTrgSF;
     // Obtain data objects
     fVertexData = vertexData;
@@ -323,7 +324,7 @@ namespace HPlus {
     // Do normalisation analyses
     if (bOptionEnableNormalisationAnalysis) {
       for (std::vector<NormalisationAnalysis*>::iterator it = fNormalisationAnalysisObjects.begin(); it != fNormalisationAnalysisObjects.end(); ++it) {
-        (*it)->analyse(iEvent, fTauData, fFakeTauData, fElectronData, fMuonData, fJetData, *fMetTrgSF, fQCDTailKillerData, fMETData, fBJetData);
+        (*it)->analyse(iEvent, fTauData, fFakeTauData, fElectronData, fMuonData, fJetData, fMetTrgSF, fQCDTailKillerData, fMETData, fBJetData);
       }
     }
   }

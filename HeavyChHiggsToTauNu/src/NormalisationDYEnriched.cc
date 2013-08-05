@@ -19,7 +19,7 @@ namespace HPlus {
                                                        const ElectronSelection::Data& electronData,
                                                        const MuonSelection::Data& muonData,
                                                        const JetSelection::Data& jetData,
-                                                       METTriggerEfficiencyScaleFactor& metTrgSF,
+                                                       METTriggerEfficiencyScaleFactor* metTrgSF,
                                                        const QCDTailKiller::Data& tailKillerData,
                                                        const METSelection::Data& metData,
                                                        const BTagging::Data& btagData) {
@@ -42,8 +42,7 @@ namespace HPlus {
 
     // Obtain MET trg SF
     if (!iEvent.isRealData()) {
-      metTrgSF.setRun(iEvent.id().run());
-      myEventWeight *= metTrgSF.scaleFactor(*(metData.getSelectedMET()));
+      myEventWeight *= metTrgSF->getEventWeight(*(metData.getSelectedMET()));
     }
 
     // Do collinear tail killer
@@ -105,7 +104,7 @@ namespace HPlus {
                                                     const ElectronSelection::Data& electronData,
                                                     const MuonSelection::Data& muonData,
                                                     const JetSelection::Data& jetData,
-                                                    METTriggerEfficiencyScaleFactor& metTrgSF,
+                                                    METTriggerEfficiencyScaleFactor* metTrgSF,
                                                     const QCDTailKiller::Data& tailKillerData,
                                                     const METSelection::Data& metData,
                                                     const BTagging::Data& btagData) {
@@ -128,8 +127,7 @@ namespace HPlus {
 
     // Obtain MET trg SF
     if (!iEvent.isRealData()) {
-      metTrgSF.setRun(iEvent.id().run());
-      myEventWeight *= metTrgSF.scaleFactor(*(metData.getSelectedMET()));
+      myEventWeight *= metTrgSF->getEventWeight(*(metData.getSelectedMET()));
     }
 
     // Do collinear tail killer
