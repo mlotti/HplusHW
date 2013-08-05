@@ -84,6 +84,8 @@ class SystematicsForMetShapeDifference:
         normaliseToUnity(self._hCombinedSignalRegion)
         normaliseToUnity(self._hCombinedCtrlRegion)
         # Fill up and down variation histogram (bin-by-bin)
+        mySumUp = 0.0
+        mySumDown = 0.0
         for i in range(1, self._systUpHistogram.GetNbinsX()+1):
             myRatio = 1.0
             myRatioSigma = 0.0 # Absolute uncertainty
@@ -96,5 +98,11 @@ class SystematicsForMetShapeDifference:
             #print i, (myRatio+myRatioSigma)*finalShape.GetBinContent(i), (myRatio-myRatioSigma)*finalShape.GetBinContent(i), finalShape.GetBinContent(i)
             self._systUpHistogram.SetBinContent(i, (myRatio+myRatioSigma)*finalShape.GetBinContent(i))
             self._systDownHistogram.SetBinContent(i, (myRatio-myRatioSigma)*finalShape.GetBinContent(i))
-            # Do not bother to calculate overall uncertainty as it will cancel almost completely out!
-            # I.e. Take the bin-by-bin uncertainty instead
+            # Do not bother to calculate overall uncertainty with the approach above as it will cancel almost completely out!
+            # I.e. Take the bin-by-bin uncertainty instead 
+            # To get a feeling a conservative (overestimated) total uncertainty is calculated here (uncertainty weighted by Nevents of the final shape)
+            mySumUp += (myRatio+myRatioSigma)**2
+            mySumDown += (myRatio-myRatioSigma)**2
+        mySigmaUp = sqrt(mySumUp) / finalShape.Integral()
+        mySigmaDown = sqrt(mySumDown) / finalShape.Integral()
+        print "Conservative estimate for syst. uncertainty from met shape difference: up: %.1f %% down: %.1f %%"%(mySigmaUp*100.0,mySigmaDown*100.0)
