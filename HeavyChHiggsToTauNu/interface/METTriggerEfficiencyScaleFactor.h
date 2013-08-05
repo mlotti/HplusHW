@@ -42,6 +42,7 @@ namespace HPlus {
     double scaleFactorAbsoluteUncertainty(const reco::MET& met) const;
 
     Data applyEventWeight(const reco::MET& met, bool isData, HPlus::EventWeight& eventWeight);
+    double getEventWeight(const reco::MET& met);
 
   private:
     BinnedEfficiencyScaleFactor fBinned;
