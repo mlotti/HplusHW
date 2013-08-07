@@ -24,10 +24,11 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  TopWithWSelection::Data::Data():
+/*  TopWithWSelection::Data::Data():
     fPassedEvent(false) {}
-  TopWithWSelection::Data::~Data() {}
+  TopWithWSelection::Data::~Data() {} */
 
+  //constructor
   TopWithWSelection::TopWithWSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
@@ -58,9 +59,10 @@ namespace HPlus {
     hWMassChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMassChiCut", "WMassChiCut", 100, 0., 200.);
   }
 
+  /destructor
   TopWithWSelection::~TopWithWSelection() {}
 
-  TopWithWSelection::Data TopWithWSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
+/*  TopWithWSelection::Data TopWithWSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -74,7 +76,7 @@ namespace HPlus {
   TopWithWSelection::Data TopWithWSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
     ensureAnalyzeAllowed(iEvent);
     return privateAnalyze(iEvent, iSetup, jets, iJetb);
-  }
+  } */
 
   TopWithWSelection::Data TopWithWSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
     Data output;
