@@ -29,6 +29,13 @@ myHistoSpecs = { "bins": 13,
                  "xtitle": "Transverse mass / GeV",
                  "ytitle": "Events" }
 
+myMETSpecs           = { "bins": 13,
+                         "rangeMin": 0.0,
+                         "rangeMax": 500.0,
+                         #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                         "xtitle": "E_{T}^{miss}",
+                         "ytitle": "Events"}
 
 def doPurityPlots(opts, dsetMgr, moduleInfoString, myDir, luminosity):
     # Set here the names of the histograms you want to access
@@ -114,6 +121,36 @@ def doQCDfactorisedResultPlots(opts, dsetMgr, moduleInfoString, myDir, luminosit
 
     print HighlightStyle()+"doQCDfactorisedResultPlots is ready"+NormalStyle()
 
+def doDataDrivenControlPlot(opts, dsetMgr, moduleInfoString, myDir, luminosity):
+    myBasicName = "QCDfactorised/MtAfterStandardSelections"
+    myLeg1Name = "QCDfactorised/MtAfterLeg1"
+    myLeg2Name = "QCDfactorised/MtAfterLeg2"
+    # Obtain QCD shapes
+    myBasicShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myBasicName, luminosity)
+    myLeg1Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myLeg1Name, luminosity)
+    myLeg2Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myLeg2Name, luminosity)
+    # Obtain control plot (myBasicShape and myLeg2Shape are summed first)
+    myPlotContainer = QCDControlPlot(myBasicShape, myLeg1Shape, myLeg2Shape, myMETSpecs, moduleInfoString)
+
+    myBasicName = "QCDfactorised/MtAfterStandardSelections"
+    myLeg1Name = "QCDfactorised/MtAfterLeg1"
+    myLeg2Name = "QCDfactorised/MtAfterLeg2"
+    # Obtain QCD shapes
+    myBasicShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myBasicName, luminosity)
+    myLeg1Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myLeg1Name, luminosity)
+    myLeg2Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myLeg2Name, luminosity)
+    myPlotContainerVariant = QCDFactorisedResult(myBasicShape, myLeg1Shape, myLeg2Shape, myMETSpecs, moduleInfoString+myLeg1Name.replace("/",""))
+
+    c1 = ROOT.TCanvas()
+    c1.Draw()
+    hMET1 = myPlotContainer.getResultShape()
+    hMET2 = myPlotContainerVariant.getResultShape()
+    hMET2.SetLineColor(ROOT.kRed)
+    hMET1.Draw()
+    hMET2.Draw("same")
+    c1.Print("%s/CtrlPlotMETTest_%s.png"%(myDir, moduleInfoString))
+
+
 def createOutputdirectory(myDir):
     if os.path.exists(myDir):
         # Remove very old files
@@ -183,5 +220,6 @@ if __name__ == "__main__":
                     print
                     myDisplayStatus = False
                 # Run plots
-                doPurityPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
-                doQCDfactorisedResultPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
+                #doPurityPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
+                #doQCDfactorisedResultPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
+                doDataDrivenControlPlot(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
