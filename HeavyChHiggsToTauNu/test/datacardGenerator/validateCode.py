@@ -15,7 +15,11 @@ if __name__ == "__main__":
     # Include here packages to validate
     from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import *
     validateExtendedCount(cv)
-   
- #   from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.UnfoldedHistogramReader import validateUnfoldedHistogramReader
- #   validateUnfoldedHistogramReader(cv)
+
+    #from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.UnfoldedHistogramReader import validateUnfoldedHistogramReader
+    #validateUnfoldedHistogramReader(cv)
+
+    from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import validateErrorPropagation
+    validateErrorPropagation(cv)
+
     cv.finish()
