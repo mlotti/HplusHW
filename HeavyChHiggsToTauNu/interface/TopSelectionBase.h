@@ -32,7 +32,7 @@ namespace HPlus {
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
       Data();
-      ~Data();
+      virtual ~Data();
 
       const bool passedEvent() const { return fPassedEvent; }
       const double getTopMass() const { return top.M(); }
@@ -41,9 +41,9 @@ namespace HPlus {
       const XYZTLorentzVector& getWP4() const { return W; }
       const edm::Ptr<pat::Jet>& getSelectedBjet() const { return bjetInTop; }
 
-      friend class TopSelectionBase;
+      friend class TopSelectionBase; //TODO: what???
 
-    private:
+    //protected: //TODO: why nothing works if these are protected??
       bool fPassedEvent;
       // Variables
       XYZTLorentzVector top;
@@ -53,20 +53,23 @@ namespace HPlus {
 
   public:    
     TopSelectionBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
-    ~TopSelectionBase();
+    virtual ~TopSelectionBase();
     
-    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    // Use silentAnalyze if you do not want to fill histograms or increment counters (overloading for BSelection)
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
 
     // Overloading for BSelection
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
 
-
-  private:
+  protected:
     virtual Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
-    void init();
+    // Overloading for BSelection
+    virtual Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
 
-    //Input parameters, counters and histograms are defined for each algorighm separately!
+    void init();
+    //Input parameters, counters and histograms are defined for each algorighm separately
   };
 }
 

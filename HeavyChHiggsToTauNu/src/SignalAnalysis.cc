@@ -696,6 +696,7 @@ namespace HPlus {
     // Top reco, no event cut
 
    // top mass with possible event cuts
+    
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     if (TopSelectionData.passedEvent() ) {
       increment(fTopSelectionCounter);

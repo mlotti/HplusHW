@@ -30,8 +30,8 @@ namespace HPlus {
   TopSelection::Data::~Data() {} */
 
   //constructor for TopSelection class itself
-  TopSelection::TopSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
-    BaseSelection(eventCounter, histoWrapper),
+  TopSelection::TopSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper) : TopSelectionBase::TopSelectionBase(iConfig, eventCounter, histoWrapper),
+    //BaseSelection(eventCounter, histoWrapper),
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
     fTopMassCount(eventCounter.addSubCounter("Top mass","Top Mass cut")),

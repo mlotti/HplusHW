@@ -20,12 +20,13 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEmulationEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h" //TODO remove
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
+//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h" //TODO
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h" //TODO remove
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h" //TODO remove
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h" //TODO remove
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
@@ -240,6 +241,7 @@ namespace HPlus {
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
     TopSelection fTopSelection;
+    //TopSelectionManager fTopSelectionManager; //TODO
     TopChiSelection fTopChiSelection;
     TopWithBSelection fTopWithBSelection;
     TopWithWSelection fTopWithWSelection;
