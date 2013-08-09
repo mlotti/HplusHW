@@ -81,7 +81,7 @@ set -e
 # 27.3.2013/M.Kortelainen CMSSW_4_4_5 Fixed re-running of the script
 # 5.4.2013/M.Kortelainen CMSSW_5_3_9_patch2 Updated PAT tags
 # 12.6.2013/M.Kortelainen CMSSW_5_3_9_patch3 Performance improvement in pat::Trigger
-
+# 9.8.2013/LAW CMSSW_5_3_9_patch3 Updated tag for btagging
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -120,8 +120,9 @@ addpkg CondFormats/EgammaObjects  V00-04-00
 cvs co -r V00-03-03 -d CMGTools/External UserCode/CMG/CMGTools/External
 
 # btagging scale factors
-# https://twiki.cern.ch/twiki/bin/view/CMS/BtagPerformanceDBV2
-cvs co -r V00-04-11 RecoBTag/PerformanceDB
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_EPS13_prescript
+# and under the heading "Reading the SFs from the database"
+cvs co -r V01-03-21 RecoBTag/PerformanceDB
 
 # Type I/II MET
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
