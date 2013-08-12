@@ -147,11 +147,11 @@ namespace HPlus {
     fTauIsMuonFromJetCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from jet->mu")),
     fTauIsHadronFromJetCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from jet->hadron")),
     // Counters for different top algorithms
-    fTopSelectionCounter(eventCounter.addSubCounter("top", "Top selection")),
+/*    fTopSelectionCounter(eventCounter.addSubCounter("top", "Top selection")),
     fTopChiSelectionCounter(eventCounter.addSubCounter("top", "Top Chi Selection")),
     fTopWithMHSelectionCounter(eventCounter.addCounter("Top after Inv Mass selection")),
     fTopWithBSelectionCounter(eventCounter.addSubCounter("top", "Top with B Selection")),
-    fTopWithWSelectionCounter(eventCounter.addSubCounter("top", "Top with W Selection")),
+    fTopWithWSelectionCounter(eventCounter.addSubCounter("top", "Top with W Selection")), */
 
     fSelectedEventsCounterWithGenuineBjets(eventCounter.addCounter("Selected events with genuine bjets")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
@@ -167,13 +167,13 @@ namespace HPlus {
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, fHistoWrapper),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, fHistoWrapper),
     fJetTauInvMass(iConfig.getUntrackedParameter<edm::ParameterSet>("jetTauInvMass"), eventCounter, fHistoWrapper),
-    fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper),
-    fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
+    fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper), //TODO: to be removed!!!
+/*    fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper),
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
     fTopWithWSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithWSelection"), eventCounter, fHistoWrapper),
-    //    fTopWithMHSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithMHSelection"), eventCounter, fHistoWrapper),
-    fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
-
+    //    fTopWithMHSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithMHSelection"), eventCounter, fHistoWrapper), */
+    fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),    
+    fTopSelectionManager(iConfig, eventCounter, fHistoWrapper, fTopRecoName, fTopChiSelection),
     //   ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
     fFullHiggsMassCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("invMassReco"), eventCounter, fHistoWrapper),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
@@ -242,6 +242,7 @@ namespace HPlus {
     fCommonPlotsSelectedFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_Selected",false,"Selected")),
     fCommonPlotsSelectedMtTailFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedMtTail",false,"SelectedMtTail")),
     fCommonPlotsSelectedFullMassFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedFullMass",false,"FakeTaus_SelectedFullMass"))
+    
   {
     // Check parameter initialisation
     if (fTopRecoName != "None" && fTopRecoName != "chi" && fTopRecoName != "std" && fTopRecoName != "Wselection") {
@@ -455,8 +456,9 @@ namespace HPlus {
     hVerticesBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
     hVerticesAfterWeight->Fill(nVertices);
     fTree.setNvertices(nVertices);
+
     // Setup common plots
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator); //TODO: what to do with fTopChiSelection?
     fCommonPlotsAfterVertexSelection->fill();
     fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
 
@@ -691,11 +693,23 @@ namespace HPlus {
     hDeltaPhi->Fill(deltaPhi);
     if (myFakeTauStatus) hEWKFakeTausDeltaPhi->Fill(deltaPhi);
 
-//------ Top reconstruction
+// Top reconstruction
 
-    // Top reco, no event cut
+    //constructing and initializing fTopSelectionManager
+    BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
 
-   // top mass with possible event cuts
+    // TODO: iSetup appears to be completely futile???
+    
+    //running the analyze
+    fTopSelectionManager.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), BjetSelectionData.getBjetTopSide(), BjetSelectionData.passedEvent());
+    //fCommonPlots.fillControlPlotsAtTopSelection(iEvent, TopChiSelectionData); //TODO
+    if (!(fTopSelectionManager.getPassedTopRecoStatus()))
+      return false;
+    increment(fTopReconstructionCounter);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderTopSelection, tauData);
+
+/** OLD Top reconstruction
+//All of this should happen now in topSelectionManager:
     
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     if (TopSelectionData.passedEvent() ) {
@@ -734,12 +748,14 @@ namespace HPlus {
       myPassedTopRecoStatus = TopChiSelectionData.passedEvent();
     else if (fTopRecoName == "Wselection")
       myPassedTopRecoStatus = myTopRecoWithWSelectionStatus;
+//What is this?!?!:
     fCommonPlots.fillControlPlotsAtTopSelection(iEvent, TopChiSelectionData);
+//These are included in the new implementation too:
     if (!myPassedTopRecoStatus)
       return false;
     increment(fTopReconstructionCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderTopSelection, tauData);
-
+*/
 
 //------ Calculate alphaT
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau());
@@ -858,11 +874,12 @@ namespace HPlus {
     // b tagging, no event cut
     BTagging::Data btagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     // Top reco, no event cut
+    // TODO
    
-    TopSelection::Data TopSelectionData = fTopSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    //TopSelection::Data TopSelectionData = fTopSelectionManager.fTopSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets()); //TODO
     BjetSelection::Data BjetSelectionData = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
 
-    TopChiSelection::Data TopChiSelectionData = fTopChiSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    //TopChiSelection::Data TopChiSelectionData = fTopSelectionManager.fTopChiSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets()); //TODO
   
     // Calculate event topology variables (alphaT, sphericity, aplanarity etc..)
     EvtTopology::Data evtTopologyData = fEvtTopology.silentAnalyze(iEvent, iSetup, *(selectedTau), jetData.getSelectedJetsIncludingTau());
@@ -882,7 +899,7 @@ namespace HPlus {
       fTree.setTcMET(metData.getTcMET());
     fTree.setFillWeight(fEventWeight.getWeight());
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
-    fTree.setTop(TopSelectionData.getTopP4());
+    //fTree.setTop(TopSelectionData.getTopP4()); //TODO
     // Sphericity, Aplanarity, Planarity, alphaT
     fTree.setDiJetMassesNoTau(evtTopologyData.alphaT().vDiJetMassesNoTau);
     fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);

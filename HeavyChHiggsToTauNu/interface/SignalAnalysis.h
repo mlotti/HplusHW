@@ -22,7 +22,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h" //TODO remove
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h" //TODO
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h" //TODO remove
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h" //TODO remove
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
@@ -76,7 +76,7 @@ namespace HPlus {
       void incrementDeltaPhiBackToBackCounter() { increment(fDeltaPhiBackToBackCounter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
       void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
-      void incrementTopChiSelectionCounter() { increment(fTopChiSelectionCounter); }
+      void incrementTopChiSelectionCounter() { increment(fTopChiSelectionCounter); } //TODO: are these needed?!?!
       void incrementSelectedEventsCounter() { increment(fSelectedEventsCounter); }
       void incrementSelectedEventsFullMassCounter() { increment(fSelectedEventsFullMassCounter); }
 
@@ -90,7 +90,7 @@ namespace HPlus {
       Count fBTaggingCounter;
       Count fDeltaPhiBackToBackCounter;
       Count fTopSelectionCounter;
-      Count fTopChiSelectionCounter;
+      Count fTopChiSelectionCounter; //TODO: do these have any function anymore?
       Count fSelectedEventsCounter;
       Count fSelectedEventsFullMassCounter;
       Count fFakeMETVetoCounter;
@@ -219,11 +219,11 @@ namespace HPlus {
     Count fTauIsHadronFromJetCounter;
 
     // Counters for different top algorithms
-    Count fTopSelectionCounter;
+    /*Count fTopSelectionCounter;
     Count fTopChiSelectionCounter;
     Count fTopWithMHSelectionCounter;
-    Count fTopWithBSelectionCounter;
-    Count fTopWithWSelectionCounter;
+    Count fTopWithBSelectionCounter; 
+    Count fTopWithWSelectionCounter; */
 
     
     
@@ -240,14 +240,15 @@ namespace HPlus {
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
-    TopSelection fTopSelection;
-    //TopSelectionManager fTopSelectionManager; //TODO
-    TopChiSelection fTopChiSelection;
+    TopChiSelection fTopChiSelection; //TODO remove
+    //TopSelectionManager fTopSelectionManager;
+    /* TopSelection fTopSelection;
     TopWithBSelection fTopWithBSelection;
-    TopWithWSelection fTopWithWSelection;
+    TopWithWSelection fTopWithWSelection; */
     //    TopWithMHSelection fTopWithMHSelection;
     BjetSelection fBjetSelection;
     //    BjetWithPtSelection fBjetWithPtSelection;
+    TopSelectionManager fTopSelectionManager;
     FullHiggsMassCalculator fFullHiggsMassCalculator;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;

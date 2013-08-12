@@ -41,9 +41,8 @@ namespace HPlus {
       const XYZTLorentzVector& getWP4() const { return W; }
       const edm::Ptr<pat::Jet>& getSelectedBjet() const { return bjetInTop; }
 
-      friend class TopSelectionBase; //TODO: what???
+      friend class TopSelectionBase;
 
-    //protected: //TODO: why nothing works if these are protected??
       bool fPassedEvent;
       // Variables
       XYZTLorentzVector top;

@@ -10,7 +10,7 @@
 
 namespace HPlus {
 
-  //constructor and desturctor TODO: do these work by any means?
+  //constructor and desturctor
   TopSelectionBase::TopSelectionBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper) {}
   TopSelectionBase::~TopSelectionBase() {}
