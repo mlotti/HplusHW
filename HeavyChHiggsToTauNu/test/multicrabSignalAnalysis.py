@@ -108,10 +108,10 @@ if not doWJetsWeighting:
 # Add the datasest to the multicrab system
 multicrab.extendDatasets(workflow, datasets)
 
-output = ["histograms.root"]
-if "signalAnalysis" in cfg:
-    output.append("pickEvents.txt")
-multicrab.addCommonLine("CMSSW.output_file = %s" % ",".join(output))
+#output = ["histograms.root"]
+#if "signalAnalysis" in cfg:
+#    output.append("pickEvents.txt")
+#multicrab.addCommonLine("CMSSW.output_file = %s" % ",".join(output))
 
 # Force all jobs go to jade, in some situations this might speed up
 # the analysis (e.g. when there are O(1000) Alice jobs queueing, all
