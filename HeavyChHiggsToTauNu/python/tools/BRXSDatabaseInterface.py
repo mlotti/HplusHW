@@ -106,7 +106,7 @@ class BRXSDatabaseInterface:
             yval = graph.GetY()[i]
             ylimit = self.getTanbFromLightHpBR(yval,yselection,highTanbRegion)
             graph.SetPoint(i, xval, ylimit)
-            #print "    ",i, xval, yval, ylimit 
+            print "    ",i, xval, yval, ylimit 
         graph.Sort()
 
         if limitBRtoMin:
@@ -564,9 +564,11 @@ class BRXSDatabaseInterface:
         N = excluded.GetN() 
         for i in range(N):
             j = N - i - 1
-            if j > 0 and excluded.GetY()[j] == 100 and excluded.GetY()[j-1] == 100:
-                excluded.RemovePoint(j)
+            if j > 0 and excluded.GetY()[j] == 100 and excluded.GetY()[j-1] == 100 and excluded.GetX()[j-1] > 0:
+                excluded.RemovePoint(j-1)
 
+#	for i in range(N):
+#	    print "check excluded",i,excluded.GetX()[i],excluded.GetY()[i]
         return excluded
 
     def passed(self,selection):
@@ -770,15 +772,15 @@ class BRXSDatabaseInterface:
 #        print "tanbs",len(self.getValues("tanb",selection,roundValues=-1)),self.getValues("tanb",selection,roundValues=-1)
 #        print variable,len(self.getValues(variable,selection,roundValues=-1))
         if min >= max:
+	    tanbs = self.getValues("tanb",selection,roundValues=-1)
             newMin = 999
-            newMax = 0
-            tanbs = self.getValues("tanb",selection,roundValues=-1)
+            newMax = tanbs[len(tanbs)-1]
             values = self.getValues(variable,selection,roundValues=-1)
             for i in range(0,len(tanbs)-1):
 #                if tanb < 10:
 #                    continue
 #                value = self.getOLD(variable,selection+"&&tanb=="+str(tanb))
-                print "tanb,value",tanbs[i],values[i],min,max
+#                print "tanb,value",tanbs[i],values[i],min,max
                 if values[i] < target:
                     newMin = tanbs[i]
                 else:
@@ -786,7 +788,7 @@ class BRXSDatabaseInterface:
                     break
             min = newMin
             max = newMax
-
+#	print "check min,max",min,max
         if target < self.getMinimum(variable,selection):
             print "Warning,",variable,"target",target,"< minimum possible value",self.getMinimum(variable,selection),selection
             return 1
