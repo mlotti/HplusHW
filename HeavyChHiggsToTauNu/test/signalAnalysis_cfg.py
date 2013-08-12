@@ -38,6 +38,7 @@ def customize(signalAnalysis):
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
 #    signalAnalysis.MET.METCut = 100.0
 #    signalAnalysis.MET.preMETCut = 30.0
+#    signalAnalysis.QCDTailKiller.disableCollinearCuts = True
     # Example for setting a certain tail killer scenario for the nominal module
     #import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
     #signalAnalysis.QCDTailKiller = param.QCDTailKillerMediumPlus.clone()
