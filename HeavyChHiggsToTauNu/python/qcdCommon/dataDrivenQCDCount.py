@@ -4,6 +4,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 #from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import *
 from math import sqrt
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import ExtendedCount
 
 import ROOT
 ROOT.gROOT.SetBatch(True) # no flashing canvases
@@ -129,6 +131,24 @@ class DataDrivenQCDShape:
             myUncert = sqrt(myPurity * (1.0-myPurity) / nData) # Assume binomial error
         return Count(myPurity, myUncert)
 
+    ## Return the minimum QCD purity as a Count object
+    def getMinimumPurity(self):
+        myMinPurity = 0.0
+        myMinPurityUncert = 0.0
+        for i in range(0, len(self._dataList)):
+            for j in range(0, self._dataList[i].GetNbinsX()+2):
+                nData += self._dataList[i].GetBinContent(j)
+                nEwk += self._ewkList[i].GetBinContent(j)
+        myPurity = 0.0
+        myUncert = 0.0
+        if (nData > 0.0):
+            myPurity = (nData - nEwk) / nData
+            myUncert = sqrt(myPurity * (1.0-myPurity) / nData) # Assume binomial error
+            if myPurity < myMinPurity:
+                myMinPurity = myPurity
+                myMinPurityUncert = myUncert
+        return Count(myMinPurity, myMinPurityUncert)
+
     ## Return the QCD purity in bins of the final shape
     def getIntegratedPurityForShapeHisto(self, histoSpecs=None):
         hData = self.getIntegratedDataHisto(histoSpecs=histoSpecs)
@@ -177,3 +197,41 @@ class DataDrivenQCDShape:
         if len(suffix) > 0:
             s += "_%s"%suffix
         return s
+
+## Efficiency from two shape objects
+class DataDrivenQCDEfficiency:
+    ## numerator and denominator are DataDrivenQCDShape objects
+    def __init__(self, numerator, denominator, histoSpecs):
+        self._efficiencies = [] # List of ExtendedCount objects, one for each phase space split bin
+
+        self._calculate(numerator, denominator, histoSpecs)
+
+    def getEfficiencyForSplitBin(self, binIndex):
+        return self._efficiencies[binIndex]
+
+    def _calculate(self, numerator, denominator, histoSpecs):
+        self._efficiencies = []
+        myUncertaintyLabels = ["statData", "statEWK"]
+        nSplitBins = numerator.getNumberOfPhaseSpaceSplitBins()
+        for i in range(0, nSplitBins):
+            hNum = numerator.getDataDrivenQCDHistoForSplittedBin(i, histoSpecs)
+            hNumData = numerator.getDataHistoForSplittedBin(i, histoSpecs)
+            hNumEwk = numerator.getEwkHistoForSplittedBin(i, histoSpecs)
+            hDenom = denominator.getDataDrivenQCDHistoForSplittedBin(i, histoSpecs)
+            hDenomData = denominator.getDataHistoForSplittedBin(i, histoSpecs)
+            hDenomEwk = denominator.getEwkHistoForSplittedBin(i, histoSpecs)
+            # Sum over basic shape and leg2 shape to obtain normalisation factor
+            mySumNum = hNum.Integral(1, hNum.GetNbinsX()+2)
+            mySumNumDataUncert = integratedUncertaintyForHistogram(1, hNumData.GetNbinsX()+2, hNumData)
+            mySumNumEwkUncert = integratedUncertaintyForHistogram(1, hNumEwk.GetNbinsX()+2, hNumEwk)
+            mySumDenom = hDenom.Integral(1, hDenom.GetNbinsX()+2)
+            mySumDenomDataUncert = integratedUncertaintyForHistogram(1, hDenomData.GetNbinsX()+2, hDenomData)
+            mySumDenomEwkUncert = integratedUncertaintyForHistogram(1, hDenomEwk.GetNbinsX()+2, hDenomEwk)
+            # Calculate efficiency
+            myEfficiency = 0.0
+            myEfficiencyUncertData = errorPropagationForDivision(mySumNum, mySumNumDataUncert, mySumDenom, mySumDenomDataUncert)
+            myEfficiencyUncertEwk = errorPropagationForDivision(mySumNum, mySumNumEwkUncert, mySumDenom, mySumDenomEwkUncert)
+            if abs(mySumNum) > 0.000001 and abs(mySumDenom) > 0.000001:
+                myEfficiency = mySumNum / mySumDenom
+            self._efficiencies.append(ExtendedCount(myEfficiency, [myEfficiencyUncertData, myEfficiencyUncertEwk], myUncertaintyLabels))
+        #FIXME: add histogram for efficiency

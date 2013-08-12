@@ -48,7 +48,7 @@ class ExtendedCount:
         for i in range(0, len(self._uncertaintyLabelList)):
             if label == self._uncertaintyLabelList[i]:
                 return self._uncertaintyList[i]
-        raise Exception(ErrorLabel()+"ExtendedCount::uncertainty(): Cannot find asked label '%s'! options are %s"%(label, ', '.join(map(str,self._uncertaintyLabelList[i]))))
+        raise Exception(ErrorLabel()+"ExtendedCount::uncertainty(): Cannot find asked label '%s'! options are: %s"%(label, ', '.join(map(str,self._uncertaintyLabelList))))
 
     # Getters for stat. uncertainty
     def statUncertainty(self):
