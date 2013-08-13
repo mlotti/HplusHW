@@ -27,6 +27,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 analysis = "signalAnalysisInvertedTau"
 #analysis = "signalAnalysis"
@@ -115,22 +116,33 @@ class InvertedTauID:
 	self.parMCEWK   = []
 	self.parBaseQCD = []
 
-	self.nInvQCD    = 0
-        self.nFitInvQCD = 0
-	self.nMCEWK     = 0
-	self.nBaseQCD   = 0
+	self.nInvQCD    = 0.0
+        self.nFitInvQCD = 0.0
+	self.nMCEWK     = 0.0
+	self.nBaseQCD   = 0.0
 
-	self.normInvQCD  = 1
-	self.normEWK     = 1
+	self.normInvQCD  = 1.0
+	self.normEWK     = 1.0
 
-	self.QCDfraction = 0
+	self.QCDfraction = 0.0
 
 	self.label = ""
 	self.labels = []
 	self.normFactors = []
 	self.normFactorsEWK = []
-	self.lumi = 0
+	self.lumi = 0.0
 
+	# Limits for warning about a bad fit
+	self._minGoodNormalisedChi2ForFit = 0.1
+	
+	# Parameters for fitting (use 'max' for maximum from histogram range)
+	self._metFitRangeMin = 30.0 # FIXME this should be obtained automatically from the parameterset object in the root files
+	self._metFitRangeMaxForCutEfficiency = 75.0
+	self._metFitRangeMaxForQCDFit = "max"
+	self._metFitRangeMaxForEWKFit = "max"
+	self._metFitRangeMaxForDataFit = "max"
+	self._metFitRangeMaxForBaselineDataFit = "max"
+	
 	self.errorBars = False
 
     def setLabel(self, label):
@@ -142,6 +154,24 @@ class InvertedTauID:
     def useErrorBars(self, useHistoErrors):
 	self.errorBars = useHistoErrors
 
+    ## Returns the maximum range for fitting
+    def _getMaxRangeForFit(self, parameter, histo):
+        if parameter == "max":
+            return histo.GetXaxis().GetXmax()
+        else:
+            return parameter
+	
+    ## Check goodness of fit
+    def _checkGoodnessOfFit(self, fitResultPtr, methodName, binName):
+        # Check fit convergence
+        if fitResultPtr.Status() != 0:
+            print ErrorLabel()+"Fit did not converge in method '%s' for bin '%s'!"%(methodName, binName)
+        else:
+            if fitResultPtr.Ndf() > 0:
+                nchi2 = fitResultPtr.Chi2() / fitResultPtr.Ndf()
+                if nchi2 < self._minGoodNormalisedChi2ForFit or nchi2 > 1.0 / self._minGoodNormalisedChi2ForFit:
+                    print ErrorLabel()+"Fit quality is very bad (chi2 / ndf = %f) for method '%s' and bin '%s'!"%(nchi2, methodName, binName)
+	
     def plotIntegral(self, plot_orig, objectName, canvasName = "Integral"):
 
 #        plot = copy.deepcopy(plot_orig)
@@ -574,8 +604,12 @@ class InvertedTauID:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
         if "MtBvetoInvertedVsBaselineTailKillerClosure" in name:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
-        if "BvetoTailKillerClosure" in name:
+        if "AfterMetPlusBveto" in name:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "MtAllCutsClosure" in name: 
+	    plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "MtAllCutsClosure" in name: 
+	    plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
         if "RadiusJet0BackToBack" in name:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
         if "RadiusJet0Collinear" in name:
@@ -588,9 +622,18 @@ class InvertedTauID:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
         if "RadiusJet2Collinear" in name:
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
-        if "MtSoftBtaggingTKClosure" in name: 
+        if "AfterMetPlusSoftBtagging" in name: 
             plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
-            
+        if "NoBtaggingTailKillerClosure" in name: 
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "AfterCollinearCuts" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "AllCuts" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "AfterMetPlusBveto" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})
+        if "AfterMetCut" in name:
+            plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})   
        # Set the legend styles
         plot.histoMgr.setHistoLegendStyleAll("P")
     
@@ -616,24 +659,12 @@ class InvertedTauID:
                              createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
             
 
-        if "DeltaPhiJet1Cuts" or "DeltaPhiJet2Cuts"  in name:
-            plot.createFrame("purity"+self.label, opts={"ymin":-0.2,"ymax":1.0, "xmax": 300},
-                             createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
-            
-        if "MtAllDeltaPhiCuts" in name:
-            plot.createFrame("Purity"+self.label, opts={"ymin":-0.2,"ymax":1.0, "xmax": 300},
-                           createRatio=False,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
-
         
-        if "BvetoTailKillerClosure" in name:
-            plot.createFrame("Comparison"+self.label, opts={"ymin":-5, "ymax": 80, "xmax": 300},
-                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot)
-                           )
-            
+  
 #####################################
             
         if "MtAfterJetsInvertedVsBaselineTailKillerClosure" in name:
-            plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 400, "xmax": 300},
+            plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 600, "xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                             )
         if "MtBtagVsNoBtagNoMetInvertedTailKillerClosure" in name:
@@ -650,12 +681,12 @@ class InvertedTauID:
                              )
             
         if "MtNoBtaggingInvertedVsBaselineTailKillerClosure" in name:
-            plot.createFrame("Comparison"+self.label, opts={"ymin":-2, "ymax": 50, "xmax": 300},
+            plot.createFrame("Comparison"+self.label, opts={"ymin":-2, "ymax": 200, "xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
             
         if "MtBvetoInvertedVsBaselineMetCutTailKillerClosure" in name:
-            plot.createFrame("Comparison"+self.label, opts={"ymin":-2, "ymax": 10, "xmax": 300},
+            plot.createFrame("Comparison"+self.label, opts={"ymin":-2, "ymax": 50, "xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
             
@@ -665,14 +696,31 @@ class InvertedTauID:
                              )
             
         if "MtBvetoInvertedVsBaselineTailKillerClosure" in name:
-            plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 400, "xmax": 200},
+            plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 600, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
 
-        if "MtSoftBtaggingTKClosure" in name:
-            plot.createFrame("Comparison"+self.label, opts={"ymin":-5, "ymax": 50, "xmax": 200},
+##################################
+        if "AfterMetPlusBveto" in name:
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 40, "xmax": 300},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot)
+                           )
+                      
+        if "AfterMetPlusSoftBtagging" in name:
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 30, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
+ ############################                            
+            
+        if "AfterMetCut" in name:
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 50, "xmax": 200},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                             )
+        if "AfterCollinearCuts" in name:
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":-5, "ymax": 1000, "xmax": 200},
+                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                             )                                      
+
             
         if "MtNoMetBvetoInvertedVsBaselineTailKillerClosure" in name:
             plot.createFrame("Comparison"+self.label, opts={"ymin":1e-1, "ymax": 500, "xmax": 200},
@@ -680,14 +728,11 @@ class InvertedTauID:
                              )
 
             
-        if "MtNormalisedBvetoTailKiller" in name:         
-            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymax": 8, "xmax": 300},
+        if "AllCuts" in name:         
+            plot.createFrame("mtClosure"+self.label, opts={"ymin":1e-1, "ymax": 10, "xmax": 200},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
-        if "MtNormalisedBvetoNoDphiCuts" in name:
-            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymax": 16, "xmax": 300},
-                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
-                             )
+
             
         if "MtPhiCutNormalisedBveto" in name:
             plot.createFrame("comparison"+self.label, opts={"ymin":1e-1,"ymax": 50, "ymaxfactor": 0.2, "xmax": 300},
@@ -697,14 +742,8 @@ class InvertedTauID:
             plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymax":100,"xmax": 300},
                              createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                              )
-        if "MtBvetoBtagInvertedClosure" in name:
-            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymin":0, "ymax":1.2, "xmax": 300},
-                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
-                             )
-        if "MtBtaggingNoBtaggingInverted" in name:
-            plot.createFrame("comparison"+self.label, opts={"ymin":1e-1, "ymin":0, "ymax":0.4, "xmax": 300},
-                             createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
-                             )
+   
+ 
 
             
         if "MtBvetoBtagInvertedTailKillerClosure" in name:
@@ -737,10 +776,9 @@ class InvertedTauID:
             plot.createFrame("systematics"+self.label, opts={"ymin":0.,"ymax":15, "xmax": 300},
                              createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
 
-            
         if "MtWithAllCutsTailKiller" in name:      
-            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":12, "xmax": 300},
-                             createRatio=False,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
+            plot.createFrame("mtPlot"+self.label, opts={"ymin":0.,"ymax":50, "xmax": 300},
+                             createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
             
         if "RadiusJet0BackToBack"  in name:      
             plot.createFrame("Radius"+self.label, opts={"ymin":0.,"ymax":50, "xmax": 260},
@@ -762,6 +800,7 @@ class InvertedTauID:
             plot.createFrame("Radius"+self.label, opts={"ymin":0.,"ymax":800, "xmax": 260},
                              createRatio=True,  opts2={"ymin": 0.1, "ymax": 2})  # bounds of the ratio plot
                        
+
         # Set Y axis of the upper pad to logarithmic
         if "Purity"  in name:        
             plot.getPad().SetLogy(False)       
@@ -816,8 +855,18 @@ class InvertedTauID:
         if "RadiusJet2Collinear" in name:
             plot.setLegend(histograms.createLegend(0.25,0.65,0.6,0.8))
 
-        if "MtSoftBtaggingTKClosure" in name:
+        if "AfterMetPlusSoftBtagging" in name:
             plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
+
+        if "AfterMetCut" in name:
+            plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
+        if "AfterCollinearCuts" in name:
+            plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
+        if "AllCuts" in name:                     
+            plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
+        if "AfterMetPlusBveto" in name:                     
+            plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
+
 
             
         histograms.addCmsPreliminaryText()
@@ -841,8 +890,8 @@ class InvertedTauID:
 #            histograms.addText(0.5, 0.6, "b-jet veto and #Delta#phi cuts", 25)
 #        if "MtBvetoInvertedVsBaseline"  name:
 #            histograms.addText(0.5, 0.6, "b-jet veto ", 25)
-        if "MtBvetoInvertedVsBaselineClosure"  in name:
-            histograms.addText(0.6, 0.6, "Before MET cut ", 24)
+#        if "MtBvetoInvertedVsBaselineClosure"  in name:
+#            histograms.addText(0.6, 0.6, "Before MET cut ", 24)
         if "MtBvetoInvertedVsBaselineClosure"  in name:
             histograms.addText(0.6, 0.52, "With b-jet veto ", 24)
         if "MtBvetoInvertedVsBaselineTailKillerClosure"  in name:
@@ -859,13 +908,14 @@ class InvertedTauID:
 
         if "MtBvetoBtagInvertedTailKillerClosure" in name:
             histograms.addText(0.55, 0.6, "Before MET cut", 24)
-        if "MtBvetoBtagInvertedTailKillerClosure" in name:
-            histograms.addText(0.55, 0.54, "Inverted #tau isolation", 24)
-        #if "MtBvetoBtagInvertedTailKillerClosure"  in name:
 
-        if "MtbvetoAllDeltaPhiCuts"  in name:
-            histograms.addText(0.25, 0.4, "B-tagging factorisation", 23)
-            histograms.addText(0.25, 0.3, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1/2/3,MET) cuts", 20)
+        if "MtBvetoBtagInvertedTailKillerClosure"  in name:
+            histograms.addText(0.55, 0.48, "TailKiller: Tight", 24)
+  
+
+
+
+
         if "MtAfterJetsInvertedVsBaselineTailKillerClosure" in name:
             histograms.addText(0.6, 0.65, "Before MET cut", 24)
             histograms.addText(0.6, 0.60, "No b tagging ", 24)
@@ -891,17 +941,45 @@ class InvertedTauID:
             histograms.addText(0.6, 0.70, "Before MET cut", 22)
             histograms.addText(0.6, 0.64, "B-jet veto", 22)
             histograms.addText(0.6, 0.58, "TailKiller: MediumPlus", 22)
-        if "BvetoTailKillerClosure" in name:
-            histograms.addText(0.6, 0.70, "After MET cut", 22)
-            histograms.addText(0.6, 0.64, "B-jet veto", 22)
-            histograms.addText(0.6, 0.58, "TailKiller: MediumPlus", 22)
+            
+        if "AfterMetPlusBveto" in name:
+            #histograms.addText(0.6, 0.70, "After MET cut", 22)
+            histograms.addText(0.6, 0.70, "with B-jet veto", 22)
+            histograms.addText(0.6, 0.64, "LoosePlus", 22)
 
         if "MtWithAllCutsTailKiller" in name: 
-            histograms.addText(0.6, 0.8, "All selection cuts", 22)
-            histograms.addText(0.6, 0.72, "MET > 60 GeV", 22)
-            histograms.addText(0.55, 0.64, "TailKiller: ZeroPlus", 22)
+            histograms.addText(0.6, 0.80, "All selection cuts", 22)
+            histograms.addText(0.6, 0.70, "MET > 60 GeV", 22)
+            histograms.addText(0.58, 0.69, "TailKiller: TightPlus", 22)
+            #histograms.addText(0.6, 0.64, "no TailKiller cuts", 22)
+            
+        if "AllCuts" in name: 
+            histograms.addText(0.2, 0.85, "All selection cuts", 22)
+            #histograms.addText(0.6, 0.77, "MET > 60 GeV", 22)
+            histograms.addText(0.2, 0.79, "LoosePlus", 22)
             #histograms.addText(0.6, 0.64, "no TailKiller cuts", 22)
 
+        if "AfterMetCut" in name:
+            histograms.addText(0.2, 0.85, "After MET cut", 20)
+            histograms.addText(0.2, 0.75, "LoosePlus", 20)
+            
+        if "AfterMetPlusSoftBtagging" in name:
+            histograms.addText(0.2, 0.85, "With loose b tagging", 20)
+            #histograms.addText(0.2, 0.78, "MET >60 GeV", 20)
+            histograms.addText(0.2, 0.78, "LoosePlus", 20)
+            
+        if "MtAllCutsClosure" in name:
+            #histograms.addText(0.2, 0.85, "With loose b tagging", 20)
+            
+            histograms.addText(0.6, 0.8, "All selection cuts", 22)
+            histograms.addText(0.6, 0.72, "MET > 60 GeV", 22)
+            histograms.addText(0.55, 0.64, "TailKiller: TightPlus", 22)
+            #histograms.addText(0.6, 0.64, "no TailKiller cuts", 22)
+        if "AfterCollinearCuts" in name:
+            histograms.addText(0.6, 0.7, "After jet selection", 20)
+            histograms.addText(0.6, 0.65, "LoosePlus", 20)
+########################################################
+         
         if "RadiusJet0BackToBack" in name:      
             histograms.addText(0.25, 0.85, "All selection cuts", 22)
         if "RadiusJet1BackToBack"  in name:      
@@ -917,7 +995,9 @@ class InvertedTauID:
             histograms.addText(0.25, 0.85, "After jet selection", 22)
         if "MtSoftBtaggingTKClosure" in name:
             histograms.addText(0.2, 0.85, "With loose b tagging", 20)
-            
+ 
+                      
+           
         plot.draw() 
         plot.save()
 
@@ -972,20 +1052,23 @@ class InvertedTauID:
         plot.histoMgr.setHistoDrawStyleAll("EP")
         
         # Create frame with a ratio pad
-        plot.createFrame("comparison"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2, "xmax": 200},
+        plot.createFrame("comparison"+self.label, opts={"ymin":1e-4, "ymaxfactor": 2, "xmax": 200},
                          createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                         )
         
         # Set Y axis of the upper pad to logarithmic
         plot.getPad1().SetLogy(True)
 
-	plot.setLegend(histograms.createLegend(0.4,0.82,0.9,0.93))
+	plot.setLegend(histograms.createLegend(0.55,0.8,0.95,0.93))
 
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
         histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
- 
-           
+        
+        histograms.addText(0.25, 0.38, "After collinear cuts", 22)
+        histograms.addText(0.25, 0.3, "2011AB", 22)
+
+        
         plot.draw()
         plot.save()
 
@@ -1009,6 +1092,7 @@ class InvertedTauID:
             value1 = h1.GetBinContent(iBin)
             value2 = h2.GetBinContent(iBin)
         
+           
             if value1 < 0:
                 h1.SetBinContent(iBin,0)
         
@@ -1124,34 +1208,33 @@ class InvertedTauID:
         plot2.histoMgr.forHisto("ShapeUncertainty", st1)
         plot2.histoMgr.setHistoDrawStyleAll("EP")
 #        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymax": 1})
-        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1, "xmax": 80})
+
+        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1, "xmax": 90})
 
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
         histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        histograms.addText(0.25, 0.8, "After collinear cuts", 22)
+        histograms.addText(0.25, 0.7, "2011AB", 22)
 
+        rangeMax = self._getMaxRangeForFit(self._metFitRangeMaxForCutEfficiency, hError)
+        print "Fit range in 'cutefficiency()': %f - %f"%(self._metFitRangeMin, rangeMax)
 
-	rangeMin = hError.GetXaxis().GetXmin()
-        rangeMax = hError.GetXaxis().GetXmax()
-	rangeMax = 75
-#	rangeMax = 120
-#	rangeMax = 380
-        
         numberOfParameters = 2
-
         class FitFunction:
             def __call__( self, x, par ):
 #                return Linear(x,par)
 		return ErrorFunction(x,par)
 
-        theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = TF1('theFit',FitFunction(),self._metFitRangeMin,rangeMax,numberOfParameters)
         theFit.SetParLimits(0,0.01,0.05)
         theFit.SetParLimits(1,50,150)
 
 #	theFit.FixParameter(0,0.02)
 #	theFit.FixParameter(1,100)
 
-	hError.Fit(theFit,"LRN")
+	myFitResultPtr = hError.Fit(theFit,"LRNS")
+	self._checkGoodnessOfFit(myFitResultPtr, "fitQCD()", histo.GetTitle())
 	print "Error MET > 40",theFit.Eval(40)
 	print "Error MET > 50",theFit.Eval(50)
        	print "Error MET > 60",theFit.Eval(60) 
@@ -1173,22 +1256,25 @@ class InvertedTauID:
 
         plot.getPad().SetLogy(True)
 
+        # FIXME: why calculate integral with 'width' -parameter?
         integralValue = int(0.5 + histo.Integral(0,histo.GetNbinsX(),"width"))
-        print histo.GetName(),"Integral",histo.Integral(0,histo.GetNbinsX(),"width")
-        histograms.addText(0.4,0.7,"Integral = %s ev"% integralValue)
+        #print histo.GetName(),"Integral",histo.Integral(0,histo.GetNbinsX(),"width")
+        print histo.GetName(),"Integral",histo.Integral(0,histo.GetNbinsX())
+        histograms.addText(0.4,0.7,"Integral = %s ev"% integralValue) 
 
-        match = re.search("/\S+baseline",histo.GetName(),re.IGNORECASE)
-        if match:
-            self.nBaseQCD = integralValue
-        match = re.search("/\S+inverted",histo.GetName(),re.IGNORECASE)
-        if match:
-            self.nInvQCD = integralValue
-            
+        # NOTE: assignment of nBaseQCD and nInvQCD is done at fitQCD and fitEWK (because someone could accidentally use this method to do something else ...)
+        #match = re.search("/\S+baseline",histo.GetName(),re.IGNORECASE)
+        #if match:
+        #    self.nBaseQCD = integralValue
+        #match = re.search("/\S+inverted",histo.GetName(),re.IGNORECASE)
+        #if match:
+        #    self.nInvQCD = integralValue
+
         self.plotIntegral(plot, histo.GetName())
 
-    
     def fitQCD(self,histo):
-        
+        self.nInvQCD = histo.Integral(0,histo.GetNbinsX())
+
         parMCEWK   = self.parMCEWK
         nMCEWK     = self.nMCEWK
 
@@ -1200,22 +1286,26 @@ class InvertedTauID:
             def __call__( self, x, par ):
                 return QCDFunction(x,par,1)
 
-        rangeMin = histo.GetXaxis().GetXmin()
-        rangeMax = histo.GetXaxis().GetXmax()
         numberOfParameters = 7
 
-        print "Fit range ",rangeMin, " - ",rangeMax
+        rangeMax = self._getMaxRangeForFit(self._metFitRangeMaxForQCDFit, histo)
+        print "Fit range for 'fitQCD()'",self._metFitRangeMin, " - ",rangeMax
 
-        theFit = TF1("theFit",FitFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = TF1("theFit",FitFunction(),self._metFitRangeMin,rangeMax,numberOfParameters)
 
+        theFit.SetParameter(0,1);
         theFit.SetParLimits(0,0.0001,200)
+        theFit.SetParameter(1,1);
         theFit.SetParLimits(1,0.001,10)
-
+        theFit.SetParameter(2,2);
         theFit.SetParLimits(2,1,10)
+        theFit.SetParameter(3,10);
         theFit.SetParLimits(3,0,150)
+        theFit.SetParameter(4,20);
         theFit.SetParLimits(4,10,100)
-
+        theFit.SetParameter(5,0.1);
         theFit.SetParLimits(5,0.0001,1)
+        theFit.SetParameter(6,0.01);
         theFit.SetParLimits(6,0.001,0.05)
 
         gStyle.SetOptFit(0)
@@ -1230,8 +1320,9 @@ class InvertedTauID:
 
         self.normInvQCD = histo.Integral(0,histo.GetNbinsX())
 
-        histo.Scale(1/self.normInvQCD)
-        histo.Fit(theFit,"LR")
+        histo.Scale(1.0/self.normInvQCD)
+        myFitResultPtr = histo.Fit(theFit,"LRS")
+        self._checkGoodnessOfFit(myFitResultPtr, "fitQCD()", histo.GetTitle())
 
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
@@ -1240,7 +1331,7 @@ class InvertedTauID:
         par = theFit.GetParameters()
 
         numberOfQCDParameters = 2
-        qcdOnly = TF1("qcdOnly",QCDOnly(),rangeMin,rangeMax,numberOfQCDParameters)
+        qcdOnly = TF1("qcdOnly",QCDOnly(),self._metFitRangeMin,rangeMax,numberOfQCDParameters)
         qcdOnly.FixParameter(0,par[0])
         qcdOnly.FixParameter(1,par[1])
         qcdOnly.SetLineStyle(2)
@@ -1270,18 +1361,15 @@ class InvertedTauID:
         
 	histo = origHisto.Clone("histo")
 
-        rangeMin = histo.GetXaxis().GetXmin()
-        rangeMax = histo.GetXaxis().GetXmax()
-
         numberOfParameters = 7
 
-        print "Fit range ",rangeMin, " - ",rangeMax
+        print "Fit range ",self._metFitRangeMin, " - ",rangeMax
 
 	class FitFunction:
 	    def __call__( self, x, par ):
                 return QCDFunction(x,par,1)
             
-        theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = TF1('theFit',FitFunction(),self._metFitRangeMin,rangeMax,numberOfParameters)
         """
         theFit.SetParLimits(0,1,20)
         theFit.SetParLimits(1,20,40)
@@ -1304,7 +1392,7 @@ class InvertedTauID:
 
         theFit.SetParLimits(5,0.0001,1)
         theFit.SetParLimits(6,0.001,0.05)
-                                        
+
 	if self.label == "Baseline":
 	    rangeMax = 240
 
@@ -1363,15 +1451,9 @@ class InvertedTauID:
 
 
     def fitEWK(self,histo,options="R"):
-
-        rangeMin = histo.GetXaxis().GetXmin()
-        rangeMax = histo.GetXaxis().GetXmax()
-#	rangeMin = 120
-#	rangeMax = 120
-
         numberOfParameters = 4
-
-        print "Fit range ",rangeMin, " - ",rangeMax
+        rangeMax = self._getMaxRangeForFit(self._metFitRangeMaxForEWKFit, histo)
+        print "Fit range in 'fitEWK()'",self._metFitRangeMin, " - ",rangeMax
 
         class FitFunction:
             def __call__( self, x, par ):
@@ -1383,57 +1465,51 @@ class InvertedTauID:
 		return EWKFunction(x,par,0)
 
 
-        theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
-	thePlot = TF1('thePlot',PlotFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = TF1('theFit',FitFunction(),self._metFitRangeMin,rangeMax,numberOfParameters)
+	thePlot = TF1('thePlot',PlotFunction(),self._metFitRangeMin,rangeMax,numberOfParameters)
 
         theFit.SetParLimits(0,5,30)
         theFit.SetParLimits(1,90,200)
         theFit.SetParLimits(2,30,100) 
         theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "4050":
+        if "41to50" in self.label:
             theFit.SetParLimits(0,5,20) 
             theFit.SetParLimits(1,90,120)
             theFit.SetParLimits(2,30,50)
             theFit.SetParLimits(3,0.001,1)
-
-	if self.label == "5060":
+	elif "50to60" in self.label:
             theFit.SetParLimits(0,5,20)     
             theFit.SetParLimits(1,90,120)   
             theFit.SetParLimits(2,20,50)
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "6070":
+        elif "60to70" in self.label:
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,90,150)
             theFit.SetParLimits(2,20,50)
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "7080":
+        elif "70to80" in self.label:
             theFit.SetParLimits(0,5,60)
             theFit.SetParLimits(1,90,200)
             theFit.SetParLimits(2,20,100)
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "80100":
+        elif "80to100" in self.label:
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,50,170)
             theFit.SetParLimits(2,20,60)
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "100120":
+        elif "100to120" in self.label:
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,90,170)
             theFit.SetParLimits(2,20,60) 
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "120150":
+        elif "120to150" in self.label:
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,60,170)
             theFit.SetParLimits(2,10,100)
             theFit.SetParLimits(3,0.001,1)
-
-        if self.label == "150":
+        else:
+            #if self.label == "150":
+            print "Warning: Using fallback fit settings in InvertedTauID::fitEWK() for label %s"%self.label
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,70,170)
             theFit.SetParLimits(2,20,100)
@@ -1452,7 +1528,8 @@ class InvertedTauID:
 
 	histo.Scale(1/self.normEWK)
 
-	histo.Fit(theFit,options) 
+	myFitResultPtr = histo.Fit(theFit,options+"S")
+	self._checkGoodnessOfFit(myFitResultPtr, "fitEWK()", histo.GetTitle())
        
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
@@ -1485,6 +1562,7 @@ class InvertedTauID:
         print "Integral ",self.normEWK*self.nMCEWK
 
     def fitData(self,histo):
+        self.nBaseQCD = histo.Integral(0,histo.GetNbinsX())
 
 	parInvQCD  = self.parInvQCD
 	parMCEWK   = self.parMCEWK
@@ -1500,13 +1578,12 @@ class InvertedTauID:
 	    def __call__( self, x, par ):
                 return par[0]*par[1] * QCDFunction(x,parInvQCD,1/nFitInvQCD)
 
-        rangeMin = histo.GetXaxis().GetXmin()
-        rangeMax = histo.GetXaxis().GetXmax()
         numberOfParameters = 2
         
-        print "Fit range ",rangeMin, " - ",rangeMax
+        rangeMax = self._getMaxRangeForFit(self._metFitRangeMaxForDataFit, histo)
+        print "Fit range in 'fitData()'",self._metFitRangeMin, " - ",rangeMax
         
-        theFit = TF1("theFit",FitFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = TF1("theFit",FitFunction(),self._metFitRangeMin,rangeMax,numberOfParameters)
         
         plot = plots.PlotBase()
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
@@ -1518,7 +1595,8 @@ class InvertedTauID:
                                         
 	print "data events ",histo.Integral(0,histo.GetNbinsX())
 
-        histo.Fit(theFit,"R")
+        myFitResultPtr = histo.Fit(theFit,"SR")
+        self._checkGoodnessOfFit(myFitResultPtr, "fitData()", histo.GetTitle())
 
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
@@ -1527,23 +1605,20 @@ class InvertedTauID:
 
 	par = theFit.GetParameters()
 
-	qcdOnly = TF1("qcdOnly",QCDOnly(),rangeMin,rangeMax,numberOfParameters)
+	qcdOnly = TF1("qcdOnly",QCDOnly(),self._metFitRangeMin,rangeMax,numberOfParameters)
 	qcdOnly.FixParameter(0,par[0])
 	qcdOnly.FixParameter(1,par[1])
 	qcdOnly.SetLineStyle(2)
 	qcdOnly.Draw("same")
 
-#<<<<<<< HEAD
- #       histograms.addText(0.35,0.8,"Data, Baseline selection")
- #       histograms.addText(0.25,0.3,"QCD shape",20)
- #       histograms.addText(0.25,0.25,"from Inverted selection",20)
- #       histo.GetYaxis().SetTitle("Events / 10 GeV")
- #       histo.GetXaxis().SetTitle("MET  (GeV)")
-#=======
+        histograms.addText(0.35,0.8,"Data, Baseline selection")
+        histograms.addText(0.25,0.3,"QCD shape",20)
+        histograms.addText(0.25,0.25,"from Inverted selection",20)
+        histo.GetYaxis().SetTitle("Events / 10 GeV")
+        histo.GetXaxis().SetTitle("MET  (GeV)")
         histograms.addText(0.35,0.8,"Data, Baseline TauID")
         histograms.addText(0.4,0.25,"QCD",15)
 
-#>>>>>>> sami2/2011
 
         plot.histoMgr.appendHisto(histograms.Histo(qcdOnly,"qcdOnly"))
         
@@ -1608,15 +1683,12 @@ class InvertedTauID:
 	    def __call__( self, x, par ):
 		return QCDFunction(x,par,norm)
         
-        rangeMin = histoInv.GetXaxis().GetXmin()
-        rangeMax = histoInv.GetXaxis().GetXmax()
-#	rangeMax = 300
-
         numberOfParameters = 8
         
-        print "Fit range ",rangeMin, " - ",rangeMax
+        rangeMax = self._getMaxRangeForFit(self._metFitRangeMaxForBaselineDataFit, histoInv)
+        print "Fit range in 'fitBaselineData()'",self._metFitRangeMin, " - ",rangeMax
                 
-        theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = TF1('theFit',FitFunction(),self._metFitRangeMin,rangeMax,numberOfParameters)
 
         theFit.SetParLimits(0,10,20000)
         theFit.SetParLimits(1,20,40)
@@ -1635,7 +1707,7 @@ class InvertedTauID:
         
         theFit.SetParLimits(6,0.001,100)
         theFit.SetParLimits(7,0.001,0.05)        
-        print "Fit range ",rangeMin, " - ",rangeMax
+        print "Fit range ",self._metFitRangeMin, " - ",rangeMax
     
         
         cshape = TCanvas("cshape","",500,500)
@@ -1650,7 +1722,8 @@ class InvertedTauID:
 #	histoBase.GetYaxis().SetLimits(0.001,300.)
 #	histoBase.SetBinContent(11,0)
 	histoBase.Draw("histo epsame")
-        histoBase.Fit(theFit,"RN")
+        myFitResultPtr = histoBase.Fit(theFit,"RNS")
+        self._checkGoodnessOfFit(myFitResultPtr, "fitBaselineData()", histo.GetTitle())
 	theFit.Draw("same")
 
 #        theFit.SetRange(histoInv.GetXaxis().GetXmin(),histoInv.GetXaxis().GetXmax())
@@ -1659,7 +1732,7 @@ class InvertedTauID:
 
         par = theFit.GetParameters()
 
-	ewkOnly = TF1("ewkOnly",EWKOnly(),rangeMin,rangeMax,4)
+	ewkOnly = TF1("ewkOnly",EWKOnly(),self._metFitRangeMin,rangeMax,4)
 	ewkOnly.SetLineStyle(2)
 	ewkOnly.SetLineColor(3)
 	ewkOnly.Draw("same")
@@ -1670,7 +1743,7 @@ class InvertedTauID:
 
 
 
-        theFit2 = TF1('theFit2',QCDOnly(),rangeMin,rangeMax,numberOfParameters)
+        theFit2 = TF1('theFit2',QCDOnly(),self._metFitRangeMin,rangeMax,numberOfParameters)
             
         theFit2.SetParLimits(0,10,20000)
         theFit2.SetParLimits(1,20,40)
@@ -1698,10 +1771,11 @@ class InvertedTauID:
 	    i = i + 1
 	QCDbase.SetMarkerColor(5)
 	QCDbase.Draw("same")
-	QCDbase.Fit(theFit2,"LRN")
+	myFitResultPtr = QCDbase.Fit(theFit2,"LRNS")
+	self._checkGoodnessOfFit(myFitResultPtr, "fitQCD()", histo.GetTitle())
 	theFit2.Draw("same")
         
-        qcdOnly = TF1("qcdOnly",QCDOnly(),rangeMin,rangeMax,numberOfParameters)
+        qcdOnly = TF1("qcdOnly",QCDOnly(),self._metFitRangeMin,rangeMax,numberOfParameters)
 	i = 0
 	while i < numberOfParameters:
             qcdOnly.FixParameter(i,par[i])
@@ -1714,7 +1788,7 @@ class InvertedTauID:
 #        histoInv.SetMarkerColor(4)
 #        histoInv.Draw("hist epsame");
 
-	inverted = TF1("inverted",InvertedFit(),rangeMin,rangeMax,numberOfParameters)
+	inverted = TF1("inverted",InvertedFit(),self._metFitRangeMin,rangeMax,numberOfParameters)
         i = 0
         while i < numberOfParameters:   
             inverted.FixParameter(i,parInvQCD[i])
@@ -1728,12 +1802,13 @@ class InvertedTauID:
     def getNormalization(self):
 	nQCDbaseline = self.nBaseQCD
 	nQCDinverted = self.nInvQCD
+
 	QCDfractionInBaseLineEvents = self.QCDfraction
         QCDfractionInBaseLineEventsError = self.QCDfractionError
 	self.normalizationForInvertedEvents = nQCDbaseline*QCDfractionInBaseLineEvents/nQCDinverted
         self.normalizationForInvertedEWKEvents = nQCDbaseline*(1-QCDfractionInBaseLineEvents)/nQCDinverted
         ratio = float(nQCDbaseline)/nQCDinverted
-	normalizationForInvertedEventsError = sqrt(ratio*(1-ratio/nQCDinverted))*QCDfractionInBaseLineEvents +QCDfractionInBaseLineEventsError*ratio        
+	normalizationForInvertedEventsError = sqrt(ratio*(1-ratio/nQCDinverted))*QCDfractionInBaseLineEvents +QCDfractionInBaseLineEventsError*ratio # FIXME: is it correct to use a linear sum instead of a squared sum here?
 	self.normFactors.append(self.normalizationForInvertedEvents)
         self.normFactorsEWK.append(self.normalizationForInvertedEWKEvents)
 	self.labels.append(self.label)
@@ -1786,16 +1861,16 @@ class InvertedTauID:
         i = 0
         while i < len(self.normFactors):
 	    line = "    \"" + self.labels[i] + "\": " + str(self.normFactors[i])
-	    if i < len(self.normFactors) - 1:
-		line += ","
+	    #if i < len(self.normFactors) - 1:
+            line += ","
 	    line += "\n"
             fOUT.write(line)
             i = i + 1
         i = 0
         while i < len(self.normFactorsEWK):
 	    line = "    \"" + self.labels[i] + "EWK\": " + str(self.normFactorsEWK[i])
-	    if i < len(self.normFactorsEWK) - 1:
-		line += ","
+	    #if i < len(self.normFactorsEWK) - 1:
+            line += ","
 	    line += "\n"
             fOUT.write(line)
             i = i + 1

@@ -3219,7 +3219,7 @@ class DatasetManagerCreator:
         # exactly one it available, use that.
         for arg, attr in [("analysisName", "getAnalyses"),
                           ("searchMode", "getSearchModes"),
-                          ("dataEra", "getDataEras"),
+                          ("dataEra", "getMCDataEras"),
                           ("optimizationMode", "getOptimizationModes"),
                           ("systematicVariation", "getSystematicVariations")]:
             lst = getattr(self, attr)()
@@ -3272,7 +3272,7 @@ class DatasetManagerCreator:
                 helpFound = False
                 for arg, attr in [("analysisName", "getAnalyses"),
                                   ("searchMode", "getSearchModes"),
-                                  ("dataEra", "getDataEras"),
+                                  ("dataEra", "getMCDataEras"),
                                   ("optimizationMode", "getOptimizationModes"),
                                   ("systematicVariation", "getSystematicVariations")]:
                     lst = getattr(self, attr)()

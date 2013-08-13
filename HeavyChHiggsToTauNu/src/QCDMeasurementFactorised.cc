@@ -112,6 +112,8 @@ namespace HPlus {
     const double myMtMin = fCommonPlots.getMtBinSettings().min();
     const double myMtMax = fCommonPlots.getMtBinSettings().max();
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hMtShapesAfterStandardSelections, "MtAfterStandardSelections", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hMtShapesAfterStandardSelectionsAndIsolatedTau, "MtAfterStandardSelectionsAndIsolatedTau", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hMtShapesAfterStandardSelectionsAndNonIsolatedTau, "MtAfterStandardSelectionsAndNonIsolatedTau", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hMtShapesAfterLeg1, "MtAfterLeg1", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMtShapesAfterLeg1WithoutBtag, "MtAfterLeg1WithoutBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hMtShapesAfterLeg2, "MtAfterLeg2", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
@@ -120,6 +122,8 @@ namespace HPlus {
     const double myMassMin = fCommonPlots.getInvmassBinSettings().min();
     const double myMassMax = fCommonPlots.getInvmassBinSettings().max();
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hInvariantMassShapesAfterStandardSelections, "MassAfterStandardSelections", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hInvariantMassShapesAfterStandardSelectionsAndIsolatedTau, "InvariantMassAfterStandardSelectionsAndIsolatedTau", "Transverse mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hInvariantMassShapesAfterStandardSelectionsAndNonIsolatedTau, "InvariantMassAfterStandardSelectionsAndNonIsolatedTau", "Transverse mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hInvariantMassShapesAfterLeg1, "MassAfterLeg1", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hInvariantMassShapesAfterLeg1WithoutBtag, "MassAfterLeg1WithoutBtag", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myDir, hInvariantMassShapesAfterLeg2, "MassAfterLeg2", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
@@ -197,7 +201,7 @@ namespace HPlus {
     hVerticesAfterWeight->Fill(nVertices);
     fTree.setNvertices(nVertices);
     // Setup common plots
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
     fCommonPlotsAfterVertexSelection->fill();
     fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
 
@@ -237,14 +241,33 @@ namespace HPlus {
     const_cast<TauSelection::Data*>(&tauCandidateDataTmp)->invalidate();
     // Important NOTE: Beyond this line, use only 'mySelectedTau' as the tau object
     edm::Ptr<pat::Tau> mySelectedTau = fTauSelection.selectMostLikelyTau(mySelectedTauList, pvData.getSelectedVertex()->z());
+    if (fMethodType == QCDMeasurementFactorised::kQCDFactorisedABCD) {
+      // Check how many passed taus pass or fail isolation - one needs to choose tau depending on the isolation
+      // because it will affect jet selection, MET value, delta phi, ...
+      edm::PtrVector<pat::Tau> myPassedIsolationList;
+      edm::PtrVector<pat::Tau> myFailedIsolationList;
+      for (edm::PtrVector<pat::Tau>::iterator iTau = mySelectedTauList.begin(); iTau != mySelectedTauList.end(); ++iTau) {
+        if (fTauSelection.getPassesIsolationStatusOfTauObject(*iTau)) {
+          myPassedIsolationList.push_back(*iTau);
+        } else {
+          myFailedIsolationList.push_back(*iTau);
+        }
+      }
+      // See if any tau passes isolation
+      if (myPassedIsolationList.size() > 0) {
+        mySelectedTau = fTauSelection.selectMostLikelyTau(myPassedIsolationList, pvData.getSelectedVertex()->z());
+      } else {
+        mySelectedTau = fTauSelection.selectMostLikelyTau(myFailedIsolationList, pvData.getSelectedVertex()->z());
+      }
+    }
     TauSelection::Data tauCandidateData = fTauSelection.setSelectedTau(mySelectedTau, true);
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(mySelectedTau));
     // note: do not require here that only one tau has been found (mySelectedTau is the selected tau in the event)
     // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
-    fCommonPlots.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
     fCommonPlotsAfterTauSelection->fill();
-    fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauCandidateData, tauMatchData, fMETSelection);
+    fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauCandidateData, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
 
 //------ Scale factors for tau fakes and for tau trigger
     // Apply scale factor for fake tau
@@ -378,7 +401,14 @@ namespace HPlus {
       fCommonPlotsAfterLeg2->fill();
       myHandler.fillShapeHistogram(hMETAfterLeg2, myMetValue);
       myHandler.fillShapeHistogram(hMtShapesAfterLeg2, myTransverseMass);
-      if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg2, myFullMass);
+      myHandler.fillShapeHistogram(hMtShapesAfterStandardSelectionsAndIsolatedTau, myTransverseMass);
+      if (myFullMass > 0.) {
+        myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg2, myFullMass);
+        myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelectionsAndIsolatedTau, myFullMass);
+      }
+    } else {
+      myHandler.fillShapeHistogram(hMtShapesAfterStandardSelectionsAndNonIsolatedTau, myTransverseMass);
+      if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelectionsAndNonIsolatedTau, myFullMass);
     }
 
     // Leg 1 / MET cut
@@ -455,6 +485,15 @@ namespace HPlus {
     SplittedHistogramHandler& myHandler = fCommonPlots.getSplittedHistogramHandler();
     bool myLeg1PassedStatus = metData.passedEvent() && btagDataTmp.passedEvent() && qcdTailKillerDataTmp.passedEvent();
 
+    // Fill inclusive histograms for syst. uncertainty
+    if (myLeg2PassedStatus) {
+      myHandler.fillShapeHistogram(hMtShapesAfterStandardSelectionsAndIsolatedTau, myTransverseMass);
+      if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelectionsAndIsolatedTau, myFullMass);
+    } else {
+      myHandler.fillShapeHistogram(hMtShapesAfterStandardSelectionsAndNonIsolatedTau, myTransverseMass);
+      if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelectionsAndNonIsolatedTau, myFullMass);
+    }
+
     // Standard selections have been done, fill histograms
     if (!myLeg1PassedStatus && !myLeg2PassedStatus) { // Box A
       increment(fAfterStandardSelectionsCounter);
@@ -463,9 +502,8 @@ namespace HPlus {
       myHandler.fillShapeHistogram(hMtShapesAfterStandardSelections, myTransverseMass);
       if (myFullMass > 0) myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, myFullMass);
     }
-    
+
     // Leg 2 (tau ID)
-    
     if (!myLeg1PassedStatus && myLeg2PassedStatus) { // Box C
       increment(fAfterLeg2Counter);
       fCommonPlotsAfterLeg2->fill();
