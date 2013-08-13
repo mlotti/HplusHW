@@ -185,7 +185,7 @@ class DataDrivenQCDShape:
     def getPhaseSpaceBinFileFriendlyTitle(self, binIndex):
         if binIndex >= len(self._dataList):
             raise Exception(ErrorLabel()+"DataDrivenQCDShape::getPhaseSpaceBinTitle: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
-        return self._dataList[binIndex].GetTitle().replace(">","_").replace("<","_").replace("=","_").replace("{","").replace("}","").replace(" ","").replace("#","").replace("..","to")
+        return self._dataList[binIndex].GetTitle().replace(">","gt").replace("<","lt").replace("=","eq").replace("{","").replace("}","").replace(" ","").replace("#","").replace("..","to").replace("(","").replace(")","").replace(",","").replace("/","_")
 
     ## Returns number of phase space bins
     def getNumberOfPhaseSpaceSplitBins(self):

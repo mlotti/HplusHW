@@ -95,13 +95,22 @@ class QCDFactorisedResult:
         # Print result
         print "NQCD = %s "%(self._resultCountObject.getResultStringFull("%.1f"))
         # Print purity as function of final shape bins
+        print "Purity as function of final shape"
+        print "shapeBin purity purityUncert"
         for j in range (1,hLeg1.GetNbinsX()+1):
             myPurity = 0.0
             myPurityUncert = 0.0
             if abs(myShapeDataSum[j-1]) > 0.000001:
                 myPurity = 1.0 - myShapeEwkSum[j-1] / myShapeDataSum[j-1]
                 myPurityUncert = errorPropagationForDivision(myShapeEwkSum[j-1], myShapeEwkSumUncert[j-1], myShapeDataSum[j-1], myShapeDataSumUncert[j-1])
-            print j, myPurity, myPurityUncert
+            # Print purity info of final shape
+            myString = ""
+            if j < hLeg1.GetNbinsX():
+                myString = "%d..%d"%(hLeg1.GetXaxis().GetBinLowEdge(j),hLeg1.GetXaxis().GetBinUpEdge(j))
+            else:
+                myString = ">%d"%(hLeg1.GetXaxis().GetBinLowEdge(j))
+            myString += " %.3f %.3f"%(myPurity, myPurityUncert)
+            print myString
 
 class QCDControlPlot:
     def __init__(self, basicShape, leg1Shape, leg2Shape, histoSpecs, moduleInfoString):

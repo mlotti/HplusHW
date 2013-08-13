@@ -20,6 +20,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdFactorised.qcdFactorisedResult import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import *
 
 myHistoSpecs = { "bins": 13,
                  "rangeMin": 0.0,
@@ -150,6 +152,51 @@ def doDataDrivenControlPlot(opts, dsetMgr, moduleInfoString, myDir, luminosity):
     hMET2.Draw("same")
     c1.Print("%s/CtrlPlotMETTest_%s.png"%(myDir, moduleInfoString))
 
+def doQuarkAndGluonFractionAnalysis(opts, dsetMgr, moduleInfoString, myDir, luminosity):
+    def getHisto(dsetMgr, dsetName, luminosity, histoName):
+        dsetRootHisto = dsetMgr.getDataset(dsetName).getDatasetRootHisto(histoName)
+        #dsetRootHisto.normalizeToLuminosity(luminosity)
+        dsetRootHisto.normalizeToLuminosity(luminosity)
+        return dsetRootHisto.getHistogram()
+
+    def printInfo(h, label):
+        if h.GetXaxis().GetBinLabel(6) != "jet#rightarrow#tau" or h.GetXaxis().GetBinLabel(7) != "uds#rightarrow#tau" or h.GetXaxis().GetBinLabel(8) != "cb#rightarrow#tau" or h.GetXaxis().GetBinLabel(9) != "g#rightarrow#tau":
+            raise Exception(ErrorLabel()+"Check tau fake status histogram binning, because labels do not match!")
+        myJetToTauFraction = None
+        myJetToTauFractionErr = None
+        if h.GetBinContent(1) > 0.0:
+            myJetToTauFraction = h.GetBinContent(6) / h.GetBinContent(1) * 100.0
+            myJetToTauFractionErr = errorPropagationForDivision(h.GetBinContent(6), h.GetBinError(6), h.GetBinContent(1), h.GetBinError(1)) * 100.0
+        myUds = h.GetBinContent(7)
+        myUdsErr = h.GetBinError(7)
+        myCb = h.GetBinContent(8)
+        myCbErr = h.GetBinError(8)
+        myG = h.GetBinContent(9)
+        myGErr = h.GetBinError(9)
+        myTotal = myUds + myCb + myG
+        myTotalErr = sqrt(myUdsErr**2 + myCbErr**2 + myGErr**2)
+        if myTotal > 0.0:
+            myUdsFraction = myUds / myTotal * 100.0
+            myUdsFractionErr = errorPropagationForDivision(myUds, myUdsErr, myTotal, myTotalErr) * 100.0
+            myCbFraction = myCb / myTotal * 100.0
+            myCbFractionErr = errorPropagationForDivision(myCb, myCbErr, myTotal, myTotalErr) * 100.0
+            myGFraction = myG / myTotal * 100.0
+            myGFractionErr = errorPropagationForDivision(myG, myGErr, myTotal, myTotalErr) * 100.0
+            print "%s: jet->tau: %4.1f +- %4.1f %% uds->tau: %4.1f +- %4.1f %% cb->tau: %4.1f +- %4.1f %% g->tau %4.1f +- %4.1f %%"%(label, myJetToTauFraction, myJetToTauFractionErr, myUdsFraction, myUdsFractionErr, myCbFraction, myCbFractionErr, myGFraction, myGFractionErr)
+        else:
+            print "%s: no_events"%(label)
+
+    myBasicName = "CommonPlots/AtEveryStep/Std. selections/tau_fakeStatus"
+    myLeg1Name = "CommonPlots/AtEveryStep/Leg1 (MET+btag+...)/tau_fakeStatus"
+    myLeg2Name = "CommonPlots/AtEveryStep/Leg2 (tau isol.)/tau_fakeStatus"
+
+    print "Quark and gluon fractions of jets misidentified as taus:"
+    printInfo(getHisto(dsetMgr, "QCD", luminosity, myBasicName), "QCD/Std.sel.")
+    printInfo(getHisto(dsetMgr, "QCD", luminosity, myLeg1Name),  "QCD/Leg1____")
+    printInfo(getHisto(dsetMgr, "QCD", luminosity, myLeg2Name),  "QCD/Leg2____")
+    printInfo(getHisto(dsetMgr, "EWK", luminosity, myBasicName), "EWK/Std.sel.")
+    printInfo(getHisto(dsetMgr, "EWK", luminosity, myLeg1Name),  "EWK/Leg1____")
+    printInfo(getHisto(dsetMgr, "EWK", luminosity, myLeg2Name),  "EWK/Leg2____")
 
 def createOutputdirectory(myDir):
     if os.path.exists(myDir):
@@ -194,7 +241,6 @@ if __name__ == "__main__":
             for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
                 # Construct info string of module
                 myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
-                print HighlightStyle()+"Module:",myModuleInfoString,NormalStyle()
                 # Obtain dataset manager
                 dsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
                 # Do the usual normalisation
@@ -220,6 +266,8 @@ if __name__ == "__main__":
                     print
                     myDisplayStatus = False
                 # Run plots
+                print HighlightStyle()+"Module:",myModuleInfoString,NormalStyle()
                 #doPurityPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
-                #doQCDfactorisedResultPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
+                doQuarkAndGluonFractionAnalysis(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
+                doQCDfactorisedResultPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
                 doDataDrivenControlPlot(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
