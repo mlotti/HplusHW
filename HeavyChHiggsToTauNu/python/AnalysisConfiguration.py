@@ -9,9 +9,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisati
 
 tooManyAnalyzersLimit = 100
 
-defaultOptimisation = HPlusOptimisationScheme()
-#defaultOptimisation.addTauPtVariation([40.0, 50.0])
-
 ## Infrastucture to help analysis configuration building
 #
 # This is the "master configuration" for analysis jobs. It is
@@ -83,7 +80,7 @@ class ConfigBuilder:
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doScaleFactorVariation = False, # Perform the signal analysis with the scale factor variations
-                 doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
+                 doOptimisation = False, optimisationScheme=None, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
                  printAnalyzerNames = False,
                  inputWorkflow = "pattuple_v44_5", # Name of the workflow, whose output is used as an input, needed for WJets weighting
@@ -401,9 +398,22 @@ class ConfigBuilder:
                 p *= process.metResolutionAnalysis
         # Construct paths for optimisation
         else:
+            if self.optimisationScheme is None:
+                raise Exception("You specified doOptimisation=True, but did not specify optimisationScheme. It must be a name of a module in HiggsAnalysis.HeavyChHiggsToTauNu.python.optimisation.")
+
+            try:
+                module = __import__("HiggsAnalysis.HeavyChHiggsToTauNu.optimisation."+self.optimisationScheme, fromlist=[self.optimisationScheme])
+            except ImportError:
+                raise Exception("Module HiggsAnalysis.HeavyChHiggsToTauNu.optimisation."+self.optimisationScheme+" does not exist")
+
+            try:
+                optimisationScheme = module.optimisation
+            except AttributeError:
+                raise Exception("Module HiggsAnalysis.HeavyChHiggsToTauNu.optimisation."+self.optimisationScheme+" does not have an object 'optimisation'")
+
             analysisNamesForTailKillerScenarios = []
             for module, name in zip(analysisModules, analysisNames):
-                names = self.optimisationScheme.generateVariations(process, additionalCounters, process.commonSequence, module, name)
+                names = optimisationScheme.generateVariations(process, additionalCounters, process.commonSequence, module, name)
                 self._accumulateAnalyzers("Optimisation", names)
                 #analysisNamesForTailKillerScenarios = names
                 analysisNamesForTailKillerScenarios.extend(names)
