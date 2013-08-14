@@ -108,8 +108,6 @@ def doQCDfactorisedResultPlots(opts, dsetMgr, moduleInfoString, myDir, luminosit
     print "Evaluated MET shape systematics"
     # Do plotting
     #mySyst
-    c2 = ROOT.TCanvas()
-    c2.Draw()
     hNominal = myResult.getResultShape().Clone()
     hUp = mySyst.getUpHistogram().Clone()
     hDown = mySyst.getDownHistogram().Clone()
@@ -117,9 +115,50 @@ def doQCDfactorisedResultPlots(opts, dsetMgr, moduleInfoString, myDir, luminosit
     hUp.SetLineColor(ROOT.kBlue)
     hDown.SetLineColor(ROOT.kRed)
     hNominal.Draw()
-    hUp.Draw("same")
-    hDown.Draw("same")
-    c2.Print("%s/QCDShapeWithMetSyst_%s_%s.png"%(myDir, myBinTitle, moduleInfoString))
+    myYmax = 30
+    if "2012" in moduleInfoString:
+        myYmax = 70
+    plot = plots.ComparisonManyPlot(histograms.Histo(hNominal, "Nominal"),
+        [histograms.Histo(hUp, "Up"), histograms.Histo(hDown, "Down")])
+    plot.createFrame("%s/QCDShapeWithMetSyst_%s_%s"%(myDir, myBinTitle, moduleInfoString), createRatio=True, opts2={"ymin": -2.5, "ymax": 2.5}, opts={"addMCUncertainty": True, "ymin": -5, "ymax": myYmax, "xmin": 0, "xmax": 500})
+    plot.frame.GetXaxis().SetTitle("Transverse mass, GeV/c^{2}")
+    plot.frame.GetYaxis().SetTitle("N_{events}")
+    plot.setLegend(histograms.createLegend(0.59, 0.70, 0.87, 0.90))
+    plot.legend.SetFillColor(0)
+    plot.legend.SetFillStyle(1001)
+    styles.mcStyle(plot.histoMgr.getHisto("Up"))
+    plot.histoMgr.getHisto("Up").getRootHisto().SetMarkerSize(0)
+    styles.mcStyle2(plot.histoMgr.getHisto("Down"))
+    #hRatioDown = hDown.Clone()
+    #hRatioUp = hUp.Clone()
+    #hRatioDown.Divide(hNominal)
+    #hRatioUp.Divide(hNominal)
+    #plot.setRatios([hRatioUp,hRatioDown])
+    plot.setLuminosity(luminosity)
+    plot.addLuminosityText()
+    if "2012" in moduleInfoString:
+        plot.setEnergy("8")
+    else:
+        plot.setEnergy("7")
+    plot.addEnergyText()
+    histograms.addCmsPreliminaryText()
+    #plot.setDrawOptions({addMCUncertainty: True})
+    plot.draw()
+    plot.save()
+
+    if False:
+        c2 = ROOT.TCanvas()
+        c2.Draw()
+        hNominal = myResult.getResultShape().Clone()
+        hUp = mySyst.getUpHistogram().Clone()
+        hDown = mySyst.getDownHistogram().Clone()
+        hNominal.SetLineColor(ROOT.kBlack)
+        hUp.SetLineColor(ROOT.kBlue)
+        hDown.SetLineColor(ROOT.kRed)
+        hNominal.Draw()
+        hUp.Draw("same")
+        hDown.Draw("same")
+        c2.Print("%s/QCDShapeWithMetSyst_%s_%s.png"%(myDir, myBinTitle, moduleInfoString))
 
     print HighlightStyle()+"doQCDfactorisedResultPlots is ready"+NormalStyle()
 
@@ -212,6 +251,8 @@ def createOutputdirectory(myDir):
         os.mkdir(myDir)
 
 if __name__ == "__main__":
+    style = tdrstyle.TDRStyle()
+
     myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
 
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=True,conflict_handler="resolve")
