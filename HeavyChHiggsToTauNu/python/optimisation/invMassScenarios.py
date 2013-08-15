@@ -1,5 +1,4 @@
-import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
+from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme, Scenario
 
 # There must be 'optimisation' object
 optimisation = HPlusOptimisationScheme()
@@ -8,30 +7,27 @@ _neutrinoPzSolutionSelectionMethods = ["DeltaEtaMax", "Smaller"]
 values = []
 for currentPzSelectionMethod in _neutrinoPzSolutionSelectionMethods:
         values.extend([
-                ("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutNone",
-                 cms.PSet(topInvMassLowerCut = cms.untracked.double(-1), # negative value means no cut
-                          topInvMassUpperCut = cms.untracked.double(-1), # negative value means no cut     
-                          pzSelectionMethod = cms.untracked.string(currentPzSelectionMethod)
-                  )
-                ),
-                ("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutLoose",
-                 cms.PSet(topInvMassLowerCut = cms.untracked.double(100), # negative value means no cut
-                          topInvMassUpperCut = cms.untracked.double(240), # negative value means no cut
-                          pzSelectionMethod = cms.untracked.string(currentPzSelectionMethod)
-                  ),
-                ),
-                ("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutMedium",
-                 cms.PSet(topInvMassLowerCut = cms.untracked.double(140), # negative value means no cut
-                          topInvMassUpperCut = cms.untracked.double(200), # negative value means no cut
-                          pzSelectionMethod = cms.untracked.string(currentPzSelectionMethod)
-                  ),
-                ),
-                ("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutTight",
-                 cms.PSet(topInvMassLowerCut = cms.untracked.double(157), # negative value means no cut
-                          topInvMassUpperCut = cms.untracked.double(187), # negative value means no cut
-                          pzSelectionMethod = cms.untracked.string(currentPzSelectionMethod)
-                  ),
-                )
+            Scenario("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutNone",
+                     topInvMassLowerCut = -1, # negative value means no cut
+                     topInvMassUpperCut = -1, # negative value means no cut
+                     pzSelectionMethod = currentPzSelectionMethod
+                 ),
+            Scenario("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutLoose",
+                     topInvMassLowerCut = 100, # negative value means no cut
+                     topInvMassUpperCut = 240, # negative value means no cut
+                     pzSelectionMethod = currentPzSelectionMethod
+                 ),
+            Scenario("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutMedium",
+                     topInvMassLowerCut = 140, # negative value means no cut
+                     topInvMassUpperCut = 200, # negative value means no cut
+                     pzSelectionMethod = currentPzSelectionMethod
+                 ),
+            Scenario("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutTight",
+                     topInvMassLowerCut = 157, # negative value means no cut
+                     topInvMassUpperCut = 187, # negative value means no cut
+                     pzSelectionMethod = currentPzSelectionMethod
+                 ),
         ])
 
 optimisation.addInvariantMassVariation(values)
+
