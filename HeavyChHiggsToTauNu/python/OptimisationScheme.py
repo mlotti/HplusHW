@@ -5,20 +5,6 @@ import copy
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
 
-class Scenario:
-    def __init__(self, *args, **kwargs):
-        if len(args) != 1:
-            raise Exception("You must give exactly one positional argument for the scenario name, got %d" % len(args))
-        self._name = args[0]
-        self._data = copy.deepcopy(kwargs)
-
-    def applyToPSet(self, pset):
-        for key, value in self._data.iteritems():
-            setattr(pset, key, value)
-
-    def __str__(self):
-        return self._name
-
 class OptimisationItem:
     def __init__(self, name, variationList, attributeToChange, formatString):
         # Initialize
@@ -35,7 +21,11 @@ class OptimisationItem:
         return len(self._variationList)
 
     def getSuffixForName(self, idx):
-        return self._formatString%self._variationList[idx]
+        variation = self._variationList[idx]
+        if isinstance(variation, tuple):
+            return self._formatString % variation[0]
+        else:
+            return self._formatString % variation
 
     def setVariation(self, module, idx):
         def deepgetattr(obj, attr):
@@ -47,8 +37,10 @@ class OptimisationItem:
             if len(attr.split(".")) > 1:
                 deepsetattr(getattr(obj, attr.split(".")[0]), attr[attr.find(".")+1:], value)
             else:
-                if hasattr(value, "applyToPSet"):
-                    value.applyToPSet(getattr(obj, attr))
+                if isinstance(value, tuple):
+                    pset = getattr(obj, attr)
+                    for name in value[1].parameterNames_():
+                        setattr(pset, name, value[1].getParameter(name).value())
                 else:
                     setattr(obj, attr, value)
 
@@ -80,7 +72,13 @@ class OptimisationItem:
         return False
 
     def printLabelAndValues(self):
-        print "  %s: [%s]"%(self._name, (', '.join(map(str, self._variationList))))
+        def name(variation):
+            if isinstance(variation, tuple):
+                return variation[0]
+            else:
+                return str(variation)
+
+        print "  %s: [%s]"%(self._name, (', '.join(map(name, self._variationList))))
 
 ## Class for generating variations to the analysis for optimisation
 class HPlusOptimisationScheme:
