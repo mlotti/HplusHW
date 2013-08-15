@@ -5,9 +5,11 @@ import copy
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
 
-class Compound: # FIXME: better name
-    def __init__(self, _name, **kwargs):
-        self._name = _name
+class Scenario:
+    def __init__(self, *args, **kwargs):
+        if len(args) != 1:
+            raise Exception("You must give exactly one positional argument for the scenario name, got %d" % len(args))
+        self._name = args[0]
         self._data = copy.deepcopy(kwargs)
 
     def applyToPSet(self, pset):
@@ -16,14 +18,6 @@ class Compound: # FIXME: better name
 
     def __str__(self):
         return self._name
-
-    # def getName(self):
-    #     return self._name
-
-    # def getDescription(self):
-    #     items = self._data.items()
-    #     items.sort(key=lambda x: x[0])
-    #     return "(%s)" % ", ".join(["%s=%s" % (key, str(value)) for key, value in items])
 
 class OptimisationItem:
     def __init__(self, name, variationList, attributeToChange, formatString):
@@ -42,11 +36,6 @@ class OptimisationItem:
 
     def getSuffixForName(self, idx):
         return self._formatString%self._variationList[idx]
-        # item = self._variationList[idx]
-        # if hasattr(item, "getName"):
-        #     return self._formatString % item.getName()
-        # else:
-        #     return self._formatString % item
 
     def setVariation(self, module, idx):
         def deepgetattr(obj, attr):
@@ -92,22 +81,6 @@ class OptimisationItem:
 
     def printLabelAndValues(self):
         print "  %s: [%s]"%(self._name, (', '.join(map(str, self._variationList))))
-        # pre = "  %s: [" % self._name
-        # post = "]"
-
-        # ret = pre
-        # for ivar, variation in enumerate(self._variationList):
-        #     isLast = (ivar+1 == len(self._variationList))
-        #     if hasattr(variation, "getDescription"):
-        #         ret += variation.getDescription()
-        #         if not isLast:
-        #             ret += ",\n" + " "*len(pre)
-        #     else:
-        #         ret += str(variation)
-        #         if not isLast:
-        #             ret += ", "
-                
-        # print ret+post
 
 ## Class for generating variations to the analysis for optimisation
 class HPlusOptimisationScheme:

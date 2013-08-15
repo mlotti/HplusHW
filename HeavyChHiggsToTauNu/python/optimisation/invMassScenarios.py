@@ -1,4 +1,4 @@
-from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme, Compound
+from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme, Scenario
 
 # There must be 'optimisation' object
 optimisation = HPlusOptimisationScheme()
@@ -7,22 +7,22 @@ _neutrinoPzSolutionSelectionMethods = ["DeltaEtaMax", "Smaller"]
 values = []
 for currentPzSelectionMethod in _neutrinoPzSolutionSelectionMethods:
         values.extend([
-            Compound("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutNone",
+            Scenario("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutNone",
                      topInvMassLowerCut = -1, # negative value means no cut
                      topInvMassUpperCut = -1, # negative value means no cut
                      pzSelectionMethod = currentPzSelectionMethod
                  ),
-            Compound("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutLoose",
+            Scenario("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutLoose",
                      topInvMassLowerCut = 100, # negative value means no cut
                      topInvMassUpperCut = 240, # negative value means no cut
                      pzSelectionMethod = currentPzSelectionMethod
                  ),
-            Compound("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutMedium",
+            Scenario("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutMedium",
                      topInvMassLowerCut = 140, # negative value means no cut
                      topInvMassUpperCut = 200, # negative value means no cut
                      pzSelectionMethod = currentPzSelectionMethod
                  ),
-            Compound("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutTight",
+            Scenario("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutTight",
                      topInvMassLowerCut = 157, # negative value means no cut
                      topInvMassUpperCut = 187, # negative value means no cut
                      pzSelectionMethod = currentPzSelectionMethod
