@@ -4,9 +4,9 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisati
 optimisation = HPlusOptimisationScheme()
 
 _neutrinoPzSolutionSelectionMethods = ["DeltaEtaMax", "Smaller"]
-values = []
+scenarios = []
 for currentPzSelectionMethod in _neutrinoPzSolutionSelectionMethods:
-        values.extend([
+        scenarios.extend([
             Scenario("RecoPZSelection"+currentPzSelectionMethod+"TopInvMassCutNone",
                      topInvMassLowerCut = -1, # negative value means no cut
                      topInvMassUpperCut = -1, # negative value means no cut
@@ -29,5 +29,5 @@ for currentPzSelectionMethod in _neutrinoPzSolutionSelectionMethods:
                  ),
         ])
 
-optimisation.addInvariantMassVariation(values)
+optimisation.addInvariantMassVariation(scenarios)
 

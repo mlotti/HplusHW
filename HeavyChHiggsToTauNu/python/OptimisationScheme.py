@@ -119,11 +119,14 @@ class HPlusOptimisationScheme:
     def addBJetEtVariation(self, values):
         self._variationItems.append(OptimisationItem("btag pT", values, "bTagging.ptCut", "BpT%.0f"))
 
+    def addBTagVariations(self, scenarios):
+        self._variationItems.append(OptimisationItem("btag", scenarios, "bTagging", "Btag%s"))
+
     def addTopRecoVariation(self, values):
         self._variationItems.append(OptimisationItem("top reco algorithm", values, "topReconstruction", "Top%s"))
 
-    def addInvariantMassVariation(self, values):
-        self._variationItems.append(OptimisationItem("invariant mass algorithm", values, "invMassReco", "InvMassReco%s"))
+    def addInvariantMassVariation(self, scenarios):
+        self._variationItems.append(OptimisationItem("invariant mass algorithm", scenarios, "invMassReco", "InvMassReco%s"))
 
     def printOptimisationConfig(self, analysisName):
         print "Optimisation configuration for module %s:"%analysisName
