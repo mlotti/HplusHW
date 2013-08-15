@@ -1258,8 +1258,6 @@ class InvertedTauID:
 
         # FIXME: why calculate integral with 'width' -parameter?
         integralValue = int(0.5 + histo.Integral(0,histo.GetNbinsX(),"width"))
-        #print histo.GetName(),"Integral",histo.Integral(0,histo.GetNbinsX(),"width")
-        print histo.GetName(),"Integral",histo.Integral(0,histo.GetNbinsX())
         histograms.addText(0.4,0.7,"Integral = %s ev"% integralValue) 
 
         # NOTE: assignment of nBaseQCD and nInvQCD is done at fitQCD and fitEWK (because someone could accidentally use this method to do something else ...)
