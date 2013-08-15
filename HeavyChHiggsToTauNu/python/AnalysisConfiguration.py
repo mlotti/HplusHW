@@ -403,9 +403,10 @@ class ConfigBuilder:
 
             try:
                 module = __import__("HiggsAnalysis.HeavyChHiggsToTauNu.optimisation."+self.optimisationScheme, fromlist=[self.optimisationScheme])
-            except ImportError:
-                raise Exception("Module HiggsAnalysis.HeavyChHiggsToTauNu.optimisation."+self.optimisationScheme+" does not exist")
-
+            except ImportError, e:
+                print
+                print "Module HiggsAnalysis.HeavyChHiggsToTauNu.optimisation."+self.optimisationScheme+" does not exist or has an error."
+                raise
             try:
                 optimisationScheme = module.optimisation
             except AttributeError:
