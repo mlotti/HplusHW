@@ -111,7 +111,7 @@ class HPlusOptimisationScheme:
         self._variationItems.append(OptimisationItem("btag discriminator", values, "bTagging.leadingDiscriminatorCut", "Bdiscr%.1f"))
 
     def addBJetSubLeadingDiscriminatorVariation(self, values):
-        self._variationItems.append(OptimisationItem("btag subleading discriminator", values, "bTagging.bjetSubLeadingDiscr", "Bsubdiscr%.1f"))
+        self._variationItems.append(OptimisationItem("btag subleading discriminator", values, "bTagging.subleadingDiscriminatorCut", "Bsubdiscr%.1f"))
 
     def addBJetNumberVariation(self, values):
         self._variationItems.append(OptimisationItem("btag Njets", values, "bTagging.jetNumber", "Bjets%d"))
