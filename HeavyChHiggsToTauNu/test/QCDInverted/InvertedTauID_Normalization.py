@@ -48,8 +48,6 @@ def calculateNormalisation(opts, dsetMgr, moduleInfoString, myDir, luminosity):
                         "xtitle": "E_{T}^{miss} / GeV",
                         "ytitle": "N_{Events}" }
 
-
-
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
@@ -63,7 +61,7 @@ def calculateNormalisation(opts, dsetMgr, moduleInfoString, myDir, luminosity):
     nSplitBins = myBaselineMetShape.getNumberOfPhaseSpaceSplitBins()
     for i in range(1, nSplitBins):
         print "Processing phase space bin %s%s%s"%(HighlightStyle(),myBaselineMetShape.getPhaseSpaceBinFileFriendlyTitle(i),NormalStyle())
-        invertedQCD.setLabel("%s_%s"%(myBaselineMetShape.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
+        invertedQCD.setLabel("%s"%(myBaselineMetShape.getPhaseSpaceBinFileFriendlyTitle(i)))
         # Obtain QCD template for MET from data in inverted selection (high purity)
         hMetTemplateQCD = myInvertedMetShape.getDataHistoForSplittedBin(i, myMetHistoSpecs)
         # Obtain MC EWK+tt template for MET from simulation in baseline selection
@@ -79,9 +77,8 @@ def calculateNormalisation(opts, dsetMgr, moduleInfoString, myDir, luminosity):
         invertedQCD.getNormalization()
 
     invertedQCD.Summary()
-    invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactors.py")
-
-
+    myModuleInfo = moduleInfoString.split("_")
+    invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactors.py", era=myModuleInfo[0], searchMode=myModuleInfo[1], optimizationMode=myModuleInfo[2])
 
 if __name__ == "__main__":
     myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
@@ -110,7 +107,24 @@ if __name__ == "__main__":
     # Select modules
     myModuleSelector.doSelect(opts)
 
+    # Normalization factors do not depend on MET cut or cuts beyond that (btag and delta phi back to back)
+    # Reasonable optimization targets, which require separate normalisation factors are tau pt, jet pt and Njets
+    # Of these tau pt is naturally handled because tau pt binning is applied (unless one chooses a cut that does not match to bin boundaries)
+    # Warn user about special cases
+    if len(myModuleSelector.getSelectedEras()) > 1:
+        raise Exception(ErrorLabel()+"You asked to run eras %s!\nEach era needs it's own normalization factors, please specify with -e parameter only one era!"%(', '.join(map(str, myModuleSelector.getSelectedEras()))))
+    if len(myModuleSelector.getSelectedSearchModes()) > 1:
+        raise Exception(ErrorLabel()+"You asked to run search modes %s!\nEach search mode needs it's own normalization factors, please specify with -m parameter only one search mode!"%(', '.join(map(str, myModuleSelector.getSelectedSearchModes()))))
+    if len(myModuleSelector.getSelectedOptimizationModes()) > 1:
+        nJetVariations = []
+        for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
+            if "Jet" in optimizationMode:
+                nJetVariations.append(optimizationMode)
+        if len(nJetVariations) > 1:
+            raise Exception(ErrorLabel()+"You asked to run optimization modes %s which contain jet variations!\nEach jet selection needs it's own normalization factors, please specify with -o parameter only one jet selection!"%(', '.join(map(str, nJetVariations))))
+
     myDisplayStatus = True
+    myNormalizationDoneStatus = False
     # Loop over era/searchMode/optimizationMode options
     for era in myModuleSelector.getSelectedEras():
         for searchMode in myModuleSelector.getSelectedSearchModes():
@@ -130,7 +144,7 @@ if __name__ == "__main__":
                               "DYJetsToLL",
                               "SingleTop",
                               "Diboson"
-                              ])
+                              ],keepSources=True) # Keep sources needed to keep open TTJets
                 # Make a directory for output
                 myDir = ""
                 #myDir = "plots_%s"%myModuleInfoString
@@ -143,6 +157,9 @@ if __name__ == "__main__":
                     print "Luminosity = %f 1/fb"%(myLuminosity / 1000.0)
                     print
                     myDisplayStatus = False
-                # Run one module
-                calculateNormalisation(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
+                # Do normalization for one module only
+                if not myNormalizationDoneStatus:
+                    calculateNormalisation(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
+                    myNormalizationDoneStatus = True
+                    print "Normalization done"
 
