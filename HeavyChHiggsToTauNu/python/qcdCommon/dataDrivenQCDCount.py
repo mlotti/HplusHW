@@ -15,8 +15,15 @@ class DataDrivenQCDShape:
     def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, luminosity):
         self._uniqueN = 0
         self._splittedHistoReader = SplittedHistoReader(dsetMgr, dsetLabelData)
+        self._histoName = histoName
         self._dataList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, histoName, luminosity))
         self._ewkList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, histoName, luminosity))
+
+    def getFileFriendlyHistoName(self):
+        return self._histoName.replace("/","_")
+
+    def getHistoName(self):
+        return self._histoName
 
     ## Return the sum of data-ewk in a given phase space split bin
     def getDataDrivenQCDHistoForSplittedBin(self, binIndex, histoSpecs=None):
