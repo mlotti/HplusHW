@@ -87,7 +87,6 @@ class DatacardColumn():
                  datasetMgrColumn = "",
                  datasetMgrColumnForQCDMCEWK = "",
                  additionalNormalisationFactor = 1.0,
-                 dirPrefix = "",
                  shapeHisto = ""):
         self._label = label
         self._landsProcess = landsProcess
@@ -114,7 +113,6 @@ class DatacardColumn():
         self._datasetMgrColumn = datasetMgrColumn
         self._datasetMgrColumnForQCDMCEWK  = datasetMgrColumnForQCDMCEWK
         self._additionalNormalisationFactor = additionalNormalisationFactor
-        self._dirPrefix = dirPrefix
         self._shapeHisto = shapeHisto
         self._isPrintable = True
         self.checkInputValidity()
@@ -144,7 +142,7 @@ class DatacardColumn():
         return self._datasetType == MulticrabDirectoryDataType.QCDINVERTED
 
     ## Returns true if the column is empty (uses no datasets)
-    def typeIsEmptyColum(self):
+    def typeIsEmptyColumn(self):
         return self._datasetType == MulticrabDirectoryDataType.DUMMY
 
     ## Checks that required fields have been supplied
@@ -159,20 +157,20 @@ class DatacardColumn():
             myMsg += "Missing or empty field 'validMassPoints'! (list of integers) specifies for which mass points the column is enabled\n"
         if self._datasetType == MulticrabDirectoryDataType.UNKNOWN:
             myMsg += "Wrong 'datasetType' specified! Valid options are 'Signal', 'Embedding', 'QCD factorised', 'QCD inverted', and 'None'\n"
-        if self._datasetMgrColumn == "":
+        if self._datasetMgrColumn == "" and not self.typeIsEmptyColumn():
             myMsg += "No dataset names defined!\n"
         if self.typeIsSignal() or self.typeIsEWK() or self.typeIsObservation():
             if self._rateCounter == "":
                 myMsg += "Missing or empty field 'rateCounter'! (string) Counter for rate to be used for column\n"
             if self._shapeHisto == "":
                 myMsg += "Missing or empty field 'shapeHisto'! (string) Name of histogram for shape \n"
-        elif self._datasetType == MulticrabDirectoryDataType.QCDFACTORISED:
+        elif self.typeIsQCDfactorised():
             # rate handled as spedial case, extra datasetMgrColumn are required for EWK MC
             if len(self._datasetMgrColumnForQCDMCEWK) == 0:
                 myMsg += "No datasets defined for MC EWK in data group for QCD factorised!\n"
 ####        elif self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
 ####            myMsg += "FIXME: QCD inverted not implemented yet\n" # FIXME
-        if not self.typeIsEmptyColum() and not self.typeIsObservation():
+        if not self.typeIsEmptyColumn() and not self.typeIsObservation():
             if len(self._nuisanceIds) == 0:
                 myMsg += "Missing or empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
 
@@ -220,10 +218,6 @@ class DatacardColumn():
     def getDatasetMgrColumnForQCDMCEWK(self):
         return self._datasetMgrColumnForQCDMCEWK
 
-    ## Returns the module name, i.e. directory prefix in the root file
-    def getDirPrefix(self):
-        return self._dirPrefix
-
     ## Get correct control plot
     def getControlPlotByTitle(self, title):
         for h in self._controlPlots:
@@ -242,7 +236,7 @@ class DatacardColumn():
         #sys.stdout.flush()
         myRateResult = None
         myRateHistograms = []
-        if self.typeIsEmptyColum() or dsetMgr == None:
+        if self.typeIsEmptyColumn() or dsetMgr == None:
             myRateResult = 0.0
             myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [], [], ExtractorMode.RATE, description="empty")
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
@@ -257,12 +251,13 @@ class DatacardColumn():
             else:
                 myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.RATE)
                 myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [""], [self._shapeHisto], ExtractorMode.RATE)
-            myRateResult = myExtractor.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+            # OBSOLETE
+            #myRateResult = myExtractor.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         # Cache result
         self._rateResult = ExtractorResult("rate",
                                            "rate",
-                                           myRateResult,
+                                           myRateHistograms[0].Integral(), # Take only visible part
                                            myRateHistograms)
         # Obtain results for nuisances
         for nid in self._nuisanceIds:
@@ -293,7 +288,7 @@ class DatacardColumn():
         if config.OptionDoControlPlots != None:
             if config.OptionDoControlPlots:
                 for c in controlPlotExtractors:
-                    if dsetMgr != None:
+                    if dsetMgr != None and not self.typeIsEmptyColumn():
                         self._controlPlots.append(c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
                         #print "added ctrl plot %s for %s"%(c._histoTitle,self._label)
 
@@ -363,7 +358,6 @@ class DatacardColumn():
         print "  rate counter:", self._rateCounter
         if len(self._nuisanceIds) > 0:
             print "  nuisances:", self._nuisanceIds
-        print "  directory prefix for root file:", self._dirPrefix
         print "  shape histogram:", self._shapeHisto
 
 

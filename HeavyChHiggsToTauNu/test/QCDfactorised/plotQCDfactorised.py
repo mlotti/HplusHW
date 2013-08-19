@@ -17,7 +17,11 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.qcdFactorised.qcdFactorisedResult import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import *
 
 myHistoSpecs = { "bins": 13,
                  "rangeMin": 0.0,
@@ -27,6 +31,13 @@ myHistoSpecs = { "bins": 13,
                  "xtitle": "Transverse mass / GeV",
                  "ytitle": "Events" }
 
+myMETSpecs           = { "bins": 13,
+                         "rangeMin": 0.0,
+                         "rangeMax": 500.0,
+                         #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                         "xtitle": "E_{T}^{miss}",
+                         "ytitle": "Events"}
 
 def doPurityPlots(opts, dsetMgr, moduleInfoString, myDir, luminosity):
     # Set here the names of the histograms you want to access
@@ -70,56 +81,161 @@ def doQCDfactorisedResultPlots(opts, dsetMgr, moduleInfoString, myDir, luminosit
     myLeg2Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myLeg2Name, luminosity)
 
     # Calculate final shape in signal region (leg1 * leg2 / basic)
-    nSplitBins = myBasicShape.getNumberOfPhaseSpaceSplitBins()
-    myModifier = ShapeHistoModifier(myHistoSpecs)
-    hTotalQCD = myModifier.createEmptyShapeHistogram("NQCD_Total_%s"%moduleInfoString)
-    myBinQCDList = []
-    for i in range(0, nSplitBins):
-        hBin = myModifier.createEmptyShapeHistogram("NQCD_%s_%s"%(myBasicShape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
-        myBinQCDList.append(hBin)
-    for i in range(0, nSplitBins):
-        hBasic = myBasicShape.getDataDrivenQCDHistoForSplittedBin(i, myHistoSpecs)
-        hLeg1 = myLeg1Shape.getDataDrivenQCDHistoForSplittedBin(i, myHistoSpecs)
-        hLeg2 = myLeg2Shape.getDataDrivenQCDHistoForSplittedBin(i, myHistoSpecs)
-        for j in range(1,hBasic.GetNbinsX()+1):
-            myResult = 0.0
-            myStatUncertSquared = 0.0
-            if hBasic.GetBinContent(j) > 0.0:
-                # Calculate result
-                myResult = abs(hLeg1.GetBinContent(j) * hLeg2.GetBinContent(j) / hBasic.GetBinContent(j))
-                # Calculate abs. stat. uncert.
-                myStatUncertSquared = ((hLeg1.GetBinError(j) * hLeg2.GetBinContent(j))**2 + (hLeg2.GetBinError(j) * hLeg1.GetBinContent(j))**2) / hBasic.GetBinContent(j)**2
-                # Treat negative numbers
-                if hLeg1.GetBinContent(j) < 0.0 or hLeg2.GetBinContent(j) < 0.0 or hBasic.GetBinContent(j) < 0.0:
-                    myResult = -myResult;
-            myBinQCDList[i].SetBinContent(j, myResult)
-            myBinQCDList[i].SetBinError(j, sqrt(myStatUncertSquared))
-            hTotalQCD.SetBinContent(j, hTotalQCD.GetBinContent(j) + myResult)
-            hTotalQCD.SetBinError(j, hTotalQCD.GetBinError(j) + myStatUncertSquared) # Sum squared
-    # Take square root of uncertainties
-    myModifier.finaliseShape(dest=hTotalQCD)
-    # Print result
-    nQCD = 0.0
-    nQCDStatUncert = 0.0
-    for i in range(1, hTotalQCD.GetNbinsX()+1):
-        nQCD += hTotalQCD.GetBinContent(i)
-        nQCDStatUncert += hTotalQCD.GetBinError(i)**2
-    nQCDStatUncert = sqrt(nQCDStatUncert)
-    # To obtain syst. uncert. for EWK is quite a bit more difficult. Will develop it later.
-    print "NQCD = %f +- %f (stat.)"%(nQCD, nQCDStatUncert)
+    myResult = QCDFactorisedResult(myBasicShape, myLeg1Shape, myLeg2Shape, myHistoSpecs, moduleInfoString)
+    hTotalQCD = myResult.getResultShape().Clone()
 
     # Do plotting - this needs to be edited to use tdr style ...
     c1 = ROOT.TCanvas()
     c1.Draw()
     hTotalQCD.Draw()
     c1.Print("%s/QCDShape_total_%s.png"%(myDir, moduleInfoString))
-    for i in range(0,len(myBinQCDList)):
+    for i in range(0,len(myResult.getNQCDHistograms())):
         c = ROOT.TCanvas()
         c.Draw()
-        myBinQCDList[i].Draw()
+        myResult.getNQCDHistograms()[i].Draw()
         myBinTitle = myBasicShape.getPhaseSpaceBinFileFriendlyTitle(i)
         c.Print("%s/QCDShape_%s_%s.png"%(myDir, myBinTitle, moduleInfoString))
+
+    # Do systematics coming from met shape difference
+    # Set here the names of the histograms you want to access
+    myCtrlRegionName = "QCDfactorised/MtAfterStandardSelections"
+    mySignalRegionName = "QCDfactorised/MtAfterLeg2"
+    # Obtain QCD shapes
+    myCtrlRegion = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myCtrlRegionName, luminosity)
+    mySignalRegion = DataDrivenQCDShape(dsetMgr, "Data", "EWK", mySignalRegionName, luminosity)
+    # Calculate
+    mySyst = SystematicsForMetShapeDifference(mySignalRegion, myCtrlRegion, myResult.getResultShape(), myHistoSpecs, moduleInfoString)
+    print "Evaluated MET shape systematics"
+    # Do plotting
+    #mySyst
+    hNominal = myResult.getResultShape().Clone()
+    hUp = mySyst.getUpHistogram().Clone()
+    hDown = mySyst.getDownHistogram().Clone()
+    hNominal.SetLineColor(ROOT.kBlack)
+    hUp.SetLineColor(ROOT.kBlue)
+    hDown.SetLineColor(ROOT.kRed)
+    hNominal.Draw()
+    myYmax = 30
+    if "2012" in moduleInfoString:
+        myYmax = 70
+    plot = plots.ComparisonManyPlot(histograms.Histo(hNominal, "Nominal"),
+        [histograms.Histo(hUp, "Up"), histograms.Histo(hDown, "Down")])
+    plot.createFrame("%s/QCDShapeWithMetSyst_%s_%s"%(myDir, myBinTitle, moduleInfoString), createRatio=True, opts2={"ymin": -2.5, "ymax": 2.5}, opts={"addMCUncertainty": True, "ymin": -5, "ymax": myYmax, "xmin": 0, "xmax": 500})
+    plot.frame.GetXaxis().SetTitle("Transverse mass, GeV/c^{2}")
+    plot.frame.GetYaxis().SetTitle("N_{events}")
+    plot.setLegend(histograms.createLegend(0.59, 0.70, 0.87, 0.90))
+    plot.legend.SetFillColor(0)
+    plot.legend.SetFillStyle(1001)
+    styles.mcStyle(plot.histoMgr.getHisto("Up"))
+    plot.histoMgr.getHisto("Up").getRootHisto().SetMarkerSize(0)
+    styles.mcStyle2(plot.histoMgr.getHisto("Down"))
+    #hRatioDown = hDown.Clone()
+    #hRatioUp = hUp.Clone()
+    #hRatioDown.Divide(hNominal)
+    #hRatioUp.Divide(hNominal)
+    #plot.setRatios([hRatioUp,hRatioDown])
+    plot.setLuminosity(luminosity)
+    plot.addLuminosityText()
+    if "2012" in moduleInfoString:
+        plot.setEnergy("8")
+    else:
+        plot.setEnergy("7")
+    plot.addEnergyText()
+    histograms.addCmsPreliminaryText()
+    #plot.setDrawOptions({addMCUncertainty: True})
+    plot.draw()
+    plot.save()
+
+    if False:
+        c2 = ROOT.TCanvas()
+        c2.Draw()
+        hNominal = myResult.getResultShape().Clone()
+        hUp = mySyst.getUpHistogram().Clone()
+        hDown = mySyst.getDownHistogram().Clone()
+        hNominal.SetLineColor(ROOT.kBlack)
+        hUp.SetLineColor(ROOT.kBlue)
+        hDown.SetLineColor(ROOT.kRed)
+        hNominal.Draw()
+        hUp.Draw("same")
+        hDown.Draw("same")
+        c2.Print("%s/QCDShapeWithMetSyst_%s_%s.png"%(myDir, myBinTitle, moduleInfoString))
+
     print HighlightStyle()+"doQCDfactorisedResultPlots is ready"+NormalStyle()
+
+def doDataDrivenControlPlot(opts, dsetMgr, moduleInfoString, myDir, luminosity):
+    myBasicName = "QCDfactorised/MtAfterStandardSelections"
+    myLeg1Name = "QCDfactorised/MtAfterLeg1"
+    myLeg2Name = "QCDfactorised/MtAfterLeg2"
+    # Obtain QCD shapes
+    myBasicShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myBasicName, luminosity)
+    myLeg1Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myLeg1Name, luminosity)
+    myLeg2Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myLeg2Name, luminosity)
+    # Obtain control plot (myBasicShape and myLeg2Shape are summed first)
+    myPlotContainer = QCDControlPlot(myBasicShape, myLeg1Shape, myLeg2Shape, myMETSpecs, moduleInfoString)
+
+    myBasicName = "QCDfactorised/MtAfterStandardSelections"
+    myLeg1Name = "QCDfactorised/MtAfterLeg1"
+    myLeg2Name = "QCDfactorised/MtAfterLeg2"
+    # Obtain QCD shapes
+    myBasicShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myBasicName, luminosity)
+    myLeg1Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myLeg1Name, luminosity)
+    myLeg2Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", myLeg2Name, luminosity)
+    myPlotContainerVariant = QCDFactorisedResult(myBasicShape, myLeg1Shape, myLeg2Shape, myMETSpecs, moduleInfoString+myLeg1Name.replace("/",""))
+
+    c1 = ROOT.TCanvas()
+    c1.Draw()
+    hMET1 = myPlotContainer.getResultShape()
+    hMET2 = myPlotContainerVariant.getResultShape()
+    hMET2.SetLineColor(ROOT.kRed)
+    hMET1.Draw()
+    hMET2.Draw("same")
+    c1.Print("%s/CtrlPlotMETTest_%s.png"%(myDir, moduleInfoString))
+
+def doQuarkAndGluonFractionAnalysis(opts, dsetMgr, moduleInfoString, myDir, luminosity):
+    def getHisto(dsetMgr, dsetName, luminosity, histoName):
+        dsetRootHisto = dsetMgr.getDataset(dsetName).getDatasetRootHisto(histoName)
+        #dsetRootHisto.normalizeToLuminosity(luminosity)
+        dsetRootHisto.normalizeToLuminosity(luminosity)
+        return dsetRootHisto.getHistogram()
+
+    def printInfo(h, label):
+        if h.GetXaxis().GetBinLabel(6) != "jet#rightarrow#tau" or h.GetXaxis().GetBinLabel(7) != "uds#rightarrow#tau" or h.GetXaxis().GetBinLabel(8) != "cb#rightarrow#tau" or h.GetXaxis().GetBinLabel(9) != "g#rightarrow#tau":
+            raise Exception(ErrorLabel()+"Check tau fake status histogram binning, because labels do not match!")
+        myJetToTauFraction = None
+        myJetToTauFractionErr = None
+        if h.GetBinContent(1) > 0.0:
+            myJetToTauFraction = h.GetBinContent(6) / h.GetBinContent(1) * 100.0
+            myJetToTauFractionErr = errorPropagationForDivision(h.GetBinContent(6), h.GetBinError(6), h.GetBinContent(1), h.GetBinError(1)) * 100.0
+        myUds = h.GetBinContent(7)
+        myUdsErr = h.GetBinError(7)
+        myCb = h.GetBinContent(8)
+        myCbErr = h.GetBinError(8)
+        myG = h.GetBinContent(9)
+        myGErr = h.GetBinError(9)
+        myTotal = myUds + myCb + myG
+        myTotalErr = sqrt(myUdsErr**2 + myCbErr**2 + myGErr**2)
+        if myTotal > 0.0:
+            myUdsFraction = myUds / myTotal * 100.0
+            myUdsFractionErr = errorPropagationForDivision(myUds, myUdsErr, myTotal, myTotalErr) * 100.0
+            myCbFraction = myCb / myTotal * 100.0
+            myCbFractionErr = errorPropagationForDivision(myCb, myCbErr, myTotal, myTotalErr) * 100.0
+            myGFraction = myG / myTotal * 100.0
+            myGFractionErr = errorPropagationForDivision(myG, myGErr, myTotal, myTotalErr) * 100.0
+            print "%s: jet->tau: %4.1f +- %4.1f %% uds->tau: %4.1f +- %4.1f %% cb->tau: %4.1f +- %4.1f %% g->tau %4.1f +- %4.1f %%"%(label, myJetToTauFraction, myJetToTauFractionErr, myUdsFraction, myUdsFractionErr, myCbFraction, myCbFractionErr, myGFraction, myGFractionErr)
+        else:
+            print "%s: no_events"%(label)
+
+    myBasicName = "CommonPlots/AtEveryStep/Std. selections/tau_fakeStatus"
+    myLeg1Name = "CommonPlots/AtEveryStep/Leg1 (MET+btag+...)/tau_fakeStatus"
+    myLeg2Name = "CommonPlots/AtEveryStep/Leg2 (tau isol.)/tau_fakeStatus"
+
+    print "Quark and gluon fractions of jets misidentified as taus:"
+    printInfo(getHisto(dsetMgr, "QCD", luminosity, myBasicName), "QCD/Std.sel.")
+    printInfo(getHisto(dsetMgr, "QCD", luminosity, myLeg1Name),  "QCD/Leg1____")
+    printInfo(getHisto(dsetMgr, "QCD", luminosity, myLeg2Name),  "QCD/Leg2____")
+    printInfo(getHisto(dsetMgr, "EWK", luminosity, myBasicName), "EWK/Std.sel.")
+    printInfo(getHisto(dsetMgr, "EWK", luminosity, myLeg1Name),  "EWK/Leg1____")
+    printInfo(getHisto(dsetMgr, "EWK", luminosity, myLeg2Name),  "EWK/Leg2____")
 
 def createOutputdirectory(myDir):
     if os.path.exists(myDir):
@@ -135,6 +251,8 @@ def createOutputdirectory(myDir):
         os.mkdir(myDir)
 
 if __name__ == "__main__":
+    style = tdrstyle.TDRStyle()
+
     myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
 
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=True,conflict_handler="resolve")
@@ -164,7 +282,6 @@ if __name__ == "__main__":
             for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
                 # Construct info string of module
                 myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
-                print HighlightStyle()+"Module:",myModuleInfoString,NormalStyle()
                 # Obtain dataset manager
                 dsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
                 # Do the usual normalisation
@@ -190,5 +307,8 @@ if __name__ == "__main__":
                     print
                     myDisplayStatus = False
                 # Run plots
-                doPurityPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
+                print HighlightStyle()+"Module:",myModuleInfoString,NormalStyle()
+                #doPurityPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
+                doQuarkAndGluonFractionAnalysis(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
                 doQCDfactorisedResultPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
+                doDataDrivenControlPlot(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
