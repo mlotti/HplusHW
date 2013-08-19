@@ -305,50 +305,49 @@ def addEmbeddingSkim_53X(version, datasets, updateDefinitions):
     defaultDefinitions = getDefaultDefinitions_53X()
     njobs = {
         # Goal for data: 9000 events / job (selection efficiency 11 %)
-        # FIXME: set njobsOut
-        "SingleMu_190456-193621_2012A_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
-        "SingleMu_193834-196531_2012B_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
-        "SingleMu_198022-200381_2012C_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
-        "SingleMu_200466-203742_2012C_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
-        "SingleMu_203777-205834_2012D_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
-        "SingleMu_205908-207100_2012D_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
-        "SingleMu_207214-208686_2012D_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=1),
+        "SingleMu_190456-193621_2012A_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=45),
+        "SingleMu_193834-196531_2012B_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=220),
+        "SingleMu_198022-200381_2012C_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=150),
+        "SingleMu_200466-203742_2012C_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=180),
+        "SingleMu_203777-205834_2012D_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=125),
+        "SingleMu_205908-207100_2012D_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=115),
+        "SingleMu_207214-208686_2012D_Jan22": TaskDef(nlumisPerJobIn=1, njobsOut=125),
 
         # MC, triggered with mcTrigger
-        "WJets_TuneZ2star_v1_Summer12":            TaskDef(njobsIn= 250, njobsOut=1),
-        "WJets_TuneZ2star_v2_Summer12":            TaskDef(njobsIn= 750, njobsOut=1),
-        "W1Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 400, njobsOut=1),
-        "W2Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2500, njobsOut=1),
-        "W3Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2300, njobsOut=1),
-        "W4Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2200, njobsOut=1),
-        "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn=1700, njobsOut=1),
-        "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(njobsIn=2700, njobsOut=1),
-        "T_t-channel_TuneZ2star_Summer12":         TaskDef(njobsIn= 200, njobsOut=1),
-        "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(njobsIn= 100, njobsOut=1),
-        "T_tW-channel_TuneZ2star_Summer12":        TaskDef(njobsIn= 250, njobsOut=1),
-        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDef(njobsIn= 250, njobsOut=1),
-        "T_s-channel_TuneZ2star_Summer12":         TaskDef(njobsIn=  15, njobsOut=1),
+        "WJets_TuneZ2star_v1_Summer12":            TaskDef(njobsIn= 250, njobsOut=10),
+        "WJets_TuneZ2star_v2_Summer12":            TaskDef(njobsIn= 750, njobsOut=25),
+        "W1Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 400, njobsOut=20),
+        "W2Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2500, njobsOut=65),
+        "W3Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2300, njobsOut=45),
+        "W4Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2200, njobsOut=45),
+        "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn=1700, njobsOut=35),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(njobsIn=2700, njobsOut=60),
+        "T_t-channel_TuneZ2star_Summer12":         TaskDef(njobsIn= 200, njobsOut=4),
+        "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(njobsIn= 100, njobsOut=2),
+        "T_tW-channel_TuneZ2star_Summer12":        TaskDef(njobsIn= 250, njobsOut=2),
+        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDef(njobsIn= 250, njobsOut=2),
+        "T_s-channel_TuneZ2star_Summer12":         TaskDef(njobsIn=  15, njobsOut=2),
         "Tbar_s-channel_TuneZ2star_Summer12":      TaskDef(njobsIn=  10, njobsOut=1),
-        "WW_TuneZ2star_Summer12":                  TaskDef(njobsIn= 120, njobsOut=1),
-        "WZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 120, njobsOut=1),
-        "ZZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 120, njobsOut=1),
-        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef(njobsIn= 300, njobsOut=1),
-        "TTToHplusBWB_M80_ext_Summer12":           TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBWB_M90_ext_Summer12":           TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBWB_M100_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBWB_M120_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBWB_M140_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBWB_M150_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBWB_M155_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBWB_M160_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBHminusB_M80_ext_Summer12":      TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBHminusB_M90_Summer12":          TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBHminusB_M100_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBHminusB_M120_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBHminusB_M140_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBHminusB_M150_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBHminusB_M155_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
-        "TTToHplusBHminusB_M160_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1),
+        "WW_TuneZ2star_Summer12":                  TaskDef(njobsIn= 120, njobsOut=15),
+        "WZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 120, njobsOut=15),
+        "ZZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 120, njobsOut=15),
+        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef(njobsIn= 300, njobsOut=6),
+        "TTToHplusBWB_M80_ext_Summer12":           TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBWB_M90_ext_Summer12":           TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBWB_M100_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBWB_M120_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBWB_M140_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBWB_M150_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBWB_M155_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBWB_M160_ext_Summer12":          TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBHminusB_M80_ext_Summer12":      TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBHminusB_M90_Summer12":          TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBHminusB_M100_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBHminusB_M120_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBHminusB_M140_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBHminusB_M150_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBHminusB_M155_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
+        "TTToHplusBHminusB_M160_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
         }
 
     workflowName = "tauembedding_skim_"+version
