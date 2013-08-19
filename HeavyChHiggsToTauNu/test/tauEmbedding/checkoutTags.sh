@@ -18,21 +18,15 @@ set -e
 # 10.7.2011/M.Kortelainen CMSSW_4_2_5 Included AnalysisDataFormats/EWK back
 # 13.8.2012/M.Kortelainen CMSSW_4_4_4 Fix compilation of SelectReplacementCandidates.cc
 # 6.5.2013/M.Kortelainen CMSSW_4_4_5 Added MuScleFit correction class
-
-cvs co -r V00-00-13 TauAnalysis/MCEmbeddingTools
-cvs up -r 1.7 TauAnalysis/MCEmbeddingTools/plugins/SelectReplacementCandidates.cc
-
-cvs co -r V01-13-00 MuonAnalysis/MuonAssociators
-cvs up -r 1.4 MuonAnalysis/MuonAssociators/python/patMuonsWithTrigger_cff.py
+# 19.8.2013/M.Kortelainen CMSSW_5_3_9_patch3 Removed TauAnalysis/MCEmbeddingTools and MuonAnalysis/MuonAssociators (in release), updated AnalysisDataFormats/EWK
 
 # We have to add protection for multiple runs in OscarProducer
 addpkg SimG4Core/Application
 patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/OscarProducer.patch
 
-
 addpkg AnalysisDataFormats/EWK
 cvs up -r1.7 AnalysisDataFormats/EWK/src/classes.h
-cvs up -r1.7 AnalysisDataFormats/EWK/src/classes_def.xml
+cvs up -r1.9 AnalysisDataFormats/EWK/src/classes_def.xml
 cvs up -r1.3 AnalysisDataFormats/EWK/BuildFile.xml
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/MuScleFitCorrections2012
