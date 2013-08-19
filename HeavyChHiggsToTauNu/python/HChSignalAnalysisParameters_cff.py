@@ -544,6 +544,7 @@ def SetHistogramBinSettings(nbins, axismin, axismax):
         )
 
 commonPlotsSettings = cms.untracked.PSet(
+    enableTauFakeRateAnalysis = cms.untracked.bool(True),
     enableNormalisationAnalysis = cms.untracked.bool(True),
     enableMETOscillationAnalysis = cms.untracked.bool(True),
     # Histogram splitting (useful for QCD measurements and detailed studies)

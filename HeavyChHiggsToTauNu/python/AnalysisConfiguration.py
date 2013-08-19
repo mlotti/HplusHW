@@ -686,7 +686,7 @@ class ConfigBuilder:
                 if obj == None:
                     raise Exception("Config error: tried to access tail killer scenario '%s', but its PSet is not present in HChSignalAnalysisParameters_cff.py!"%scenName)
                 mod.QCDTailKiller = obj.clone()
-                #param.QCDTailKillerZeroPlus.clone()
+                mod.QCDTailKiller.disableCollinearCuts = module.QCDTailKiller.disableCollinearCuts
                 createQCDTailKillerModule(process, "QCDTailKiller%s"%mod.QCDTailKiller.scenarioLabel.value(), mod, names, modules)
         self._accumulateAnalyzers("Modules for QCDTailKiller scenarios", names)
 

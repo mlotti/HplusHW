@@ -7,6 +7,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorB
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker import ControlPlotMaker
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
 from math import pow,sqrt
 import os
@@ -27,7 +28,7 @@ class EventYieldSummary:
         self._rate = datasetColumn.getRateResult()
         myAbsoluteSystUpSquared = 0.0
         myAbsoluteSystDownSquared = 0.0
-        for n in sorted(extractors, key=lambda x: x.getId()):
+        for n in extractors:
             if n.isPrintable():
                 if datasetColumn.hasNuisanceByMasterId(n.getId()):
                     myValue = datasetColumn.getNuisanceResultByMasterId(n.getId())
@@ -73,7 +74,7 @@ class EventYieldSummary:
 ## TableProducer class
 class TableProducer:
     ## Constructor
-    def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors):
+    def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput):
         self._opts = opts
         self._config = config
         self._outputPrefix = outputPrefix
@@ -85,12 +86,8 @@ class TableProducer:
         self._outputFileStem = "lands_datacard_hplushadronic_m"
         self._outputRootFileStem = "lands_histograms_hplushadronic_m"
         # Calculate number of nuisance parameters
-        self._nNuisances = 0
-        for n in self._extractors:
-            if n.isPrintable():
-                self._nNuisances += 1
         # Make directory for output
-        self._dirname = "datacards_"+self._timestamp+self._config.DataCardName.replace(" ","_")+"_"+self._outputPrefix+"_"
+        self._dirname = "datacards_%s_%s_%s"%(self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
         os.mkdir(self._dirname)
         self._infoDirname = self._dirname + "/info"
         os.mkdir(self._infoDirname)
@@ -105,9 +102,9 @@ class TableProducer:
             if self._config.OptionDoControlPlots:
                 ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
             else:
-                print "\n"+HighlightStyle()+"Skipped making of data-driven Control plots."+NormalStyle()+" To enable, set OptionDoControlPlots = True in the input datacard."
+                print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
         else:
-            print "\n"+HighlightStyle()+"Skipped making of data-driven Control plots."+NormalStyle()+" To enable, set OptionDoControlPlots = True in the input datacard."
+            print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
 
         # Make other reports
         print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()
@@ -117,6 +114,27 @@ class TableProducer:
         self.makeEventYieldSummary()
         # Print systematics summary table
         self.makeSystematicsSummary()
+
+        # Debugging info
+        # Make copy of input datacard
+        os.system("cp %s %s/input_datacard.py"%(self._opts.datacard,self._infoDirname))
+        # Write input multicrab directory names
+        f = open(os.path.join(self._infoDirname, "inputDirectories.txt"), "w")
+        f.write("\n".join(map(str, mcrabInfoOutput))+"\n")
+        f.close()
+        f = open(os.path.join(self._infoDirname, "codeVersion.txt"), "w")
+        f.write(git.getCommitId()+"\n")
+        f.close()
+        f = open(os.path.join(self._infoDirname, "codeStatus.txt"), "w")
+        f.write(git.getStatus()+"\n")
+        f.close()
+        f = open(os.path.join(self._infoDirname, "codeDiff.txt"), "w")
+        f.write(git.getDiff()+"\n")
+        f.close()
+
+    ## Returns name of results directory
+    def getDirectory(self):
+        return self._dirname
 
     ## Generates datacards
     def makeDataCards(self):
@@ -145,7 +163,7 @@ class TableProducer:
             myCard = ""
             myCard += self._generateHeader(m)
             myCard += mySeparatorLine
-            myCard += self._generateParameterLines()
+            myCard += self._generateParameterLines(len(myNuisanceTable))
             myCard += mySeparatorLine
             myCard += self._generateShapeHeader(m)
             myCard += mySeparatorLine
@@ -206,18 +224,18 @@ class TableProducer:
     def _generateHeader(self, mass=None):
         myString = ""
         if mass == None:
-            myString += "Description: LandS datacard (auto generated) luminosity=%f 1/fb, %s/%s\n"%(self._luminosity,self._config.DataCardName,self._outputPrefix)
+            myString += "Description: LandS datacard (auto generated) luminosity=%f 1/pb, %s/%s\n"%(self._luminosity,self._config.DataCardName,self._outputPrefix)
         else:
-            myString += "Description: LandS datacard (auto generated) mass=%d, luminosity=%f 1/fb, %s/%s\n"%(mass,self._luminosity,self._config.DataCardName,self._outputPrefix)
+            myString += "Description: LandS datacard (auto generated) mass=%d, luminosity=%f 1/pb, %s/%s\n"%(mass,self._luminosity,self._config.DataCardName,self._outputPrefix)
         myString += "Date: %s\n"%time.ctime()
         return myString
 
     ## Generates parameter lines
-    def _generateParameterLines(self):
+    def _generateParameterLines(self, kmax):
         # Produce result
         myResult =  "imax     1     number of channels\n"
         myResult += "jmax     *     number of backgrounds\n"
-        myResult += "kmax    %2d     number of parameters\n"%self._nNuisances
+        myResult += "kmax    %2d     number of parameters\n"%kmax
         return myResult
 
     ## Generates shape header
@@ -277,16 +295,59 @@ class TableProducer:
     ## Generates nuisance table as list
     def _generateNuisanceTable(self,mass):
         myResult = []
+        myVetoList = [] # List of nuisance id's to veto
+        mySingleList = [] # List of nuisance id's that apply only to single column
+        # Suppress nuisance rows that are not affecting anything
+        for n in self._extractors:
+            myCount = 0
+            for c in self._datasetGroups:
+                if c.isActiveForMass(mass) and n.isPrintable() and c.hasNuisanceByMasterId(n.getId()):
+                    myCount += 1
+            if myCount == 0 and n.isPrintable():
+                print WarningLabel()+"Suppressed nuisance %s: '%s' because it does not affect any data column!"%(n.getId(),n.getDescription())
+                myVetoList.append(n.getId())
+            if myCount == 1:
+                mySingleList.append(n.getId())
+        # Merge nuisances (quadratic sum) together, if they apply to only one column (is mathematically equal treatrment, but makes datacard running faster)
+        # Note that it is not possible to merge physically the nuisances, because it would affect all other parts as well
+        # Only solution is to do a virtual merge affecting only this method
+        myVirtualMergeInformation = {}
+        myVirtuallyInactivatedIds = []
+        for c in self._datasetGroups:
+            if c.isActiveForMass(mass):
+                myFoundSingles = []
+                for n in self._extractors:
+                    if c.hasNuisanceByMasterId(n.getId()) and n.getId() in mySingleList and not n.isShapeNuisance():
+                        myFoundSingles.append(n.getId())
+                if len(myFoundSingles) > 1:
+                    # Do virtual merge
+                    myDescription = ""
+                    myValue = 0.0
+                    for n in self._extractors:
+                        if n.getId() in myFoundSingles:
+                            if myDescription == "":
+                                myDescription = n.getDescription()
+                                myValue = c.getNuisanceResultByMasterId(n.getId())**2
+                            else:
+                                myDescription += " + "+n.getDescription()
+                                myValue += c.getNuisanceResultByMasterId(n.getId())**2
+                                myVetoList.append(n.getId())
+                    myVirtualMergeInformation[myFoundSingles[0]] = sqrt(myValue)
+                    myVirtualMergeInformation["%sdescription"%myFoundSingles[0]] = myDescription
+                    print WarningLabel()+"Combined nuisances '%s' for column %s!"%(myDescription, c.getLabel())
         # Loop over rows
-        for n in sorted(self._extractors, key=lambda x: x.getId()):
-            if n.isPrintable():
-                myRow = ["%d"%int(n.getId()), n.getDistribution()]
+        for n in self._extractors:
+            if n.isPrintable() and n.getId() not in myVetoList:
+                # Suppress rows that are not affecting anything
+                myRow = ["%s"%(n.getId()), n.getDistribution()]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
                     if c.isActiveForMass(mass):
                         # Check that column has current nuisance or has nuisance that is slave to current nuisance
                         if c.hasNuisanceByMasterId(n.getId()):
                             myValue = c.getNuisanceResultByMasterId(n.getId())
+                            if n.getId() in myVirtualMergeInformation.keys():
+                                myValue = myVirtualMergeInformation[n.getId()] # Overwrite virtually merged value
                             myValueString = ""
                             # Check output format
                             if myValue == None or n.isShapeNuisance():
@@ -311,7 +372,10 @@ class TableProducer:
                             else:
                                 myRow.append("1")
                 # Add description to end of the row
-                myRow.append(n.getDescription())
+                if n.getId() in myVirtualMergeInformation.keys():
+                    myRow.append(myVirtualMergeInformation["%sdescription"%n.getId()])
+                else:
+                    myRow.append(n.getDescription())
                 myResult.append(myRow)
         return myResult
 
@@ -319,10 +383,10 @@ class TableProducer:
     def _generateShapeNuisanceVariationTable(self,mass):
         myResult = []
         # Loop over rows
-        for n in sorted(self._extractors, key=lambda x: x.getId()):
+        for n in self._extractors:
             if n.isPrintable() and n.getDistribution() == "shapeQ":
-                myDownRow = ["%d"%int(n.getId())+"_Down", ""]
-                myUpRow = ["%d"%int(n.getId())+"_Up", ""]
+                myDownRow = ["%s_Down"%(n.getId()), ""]
+                myUpRow = ["%s_Up"%(n.getId()), ""]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
                     if c.isActiveForMass(mass):
@@ -471,20 +535,20 @@ class TableProducer:
             myOutput += self._generateHeader(m)
             myOutput += "\n"
             myOutput += "Number of events\n"
-            myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f:  %5.0f +- %4.0f (stat.) "%(m,myBr,mySignalRate,mySignalStat)
+            myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f:  %5.1f +- %4.1f (stat.) "%(m,myBr,mySignalRate,mySignalStat)
             if round(mySignalSystDown) == round(mySignalSystUp):
                 myOutput += "+- %4.0f (syst.)\n"%mySignalSystDown
             else:
                 myOutput += "+%4.0f -%4.0f (syst.)\n"%(mySignalSystUp, mySignalSystDown)
             myOutput += "Backgrounds:\n"
-            myOutput += "                           Multijets: %5.0f +- %4.0f (stat.) +- %4.0f (syst.)\n"%(QCD.getRate(),QCD.getAbsoluteStat(),QCD.getAbsoluteSystDown())
-            myOutput += "                    EWK+tt with taus: %5.0f +- %4.0f (stat.) +- %4.0f (syst.)\n"%(Embedding.getRate(),Embedding.getAbsoluteStat(),Embedding.getAbsoluteSystDown())
-            myOutput += "               EWK+tt with fake taus: %5.0f +- %4.0f (stat.) "%(EWKFakes.getRate(),EWKFakes.getAbsoluteStat())
+            myOutput += "                           Multijets: %5.1f +- %4.1f (stat.) +- %4.1f (syst.)\n"%(QCD.getRate(),QCD.getAbsoluteStat(),QCD.getAbsoluteSystDown())
+            myOutput += "                    EWK+tt with taus: %5.1f +- %4.1f (stat.) +- %4.1f (syst.)\n"%(Embedding.getRate(),Embedding.getAbsoluteStat(),Embedding.getAbsoluteSystDown())
+            myOutput += "               EWK+tt with fake taus: %5.1f +- %4.1f (stat.) "%(EWKFakes.getRate(),EWKFakes.getAbsoluteStat())
             if round(EWKFakes.getAbsoluteSystDown()) == round(EWKFakes.getAbsoluteSystUp()):
                 myOutput += "+- %4.0f (syst.)\n"%EWKFakes.getAbsoluteSystDown()
             else:
                 myOutput += "+%4.0f -%4.0f (syst.)\n"%(EWKFakes.getAbsoluteSystUp(), EWKFakes.getAbsoluteSystDown())
-            myOutput += "                      Total expected: %5.0f +- %4.0f (stat.) "%(TotalExpected.getRate(),TotalExpected.getAbsoluteStat())
+            myOutput += "                      Total expected: %5.1f +- %4.1f (stat.) "%(TotalExpected.getRate(),TotalExpected.getAbsoluteStat())
             if round(TotalExpected.getAbsoluteSystDown()) == round(TotalExpected.getAbsoluteSystUp()):
                 myOutput += "+- %4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp())
             else:

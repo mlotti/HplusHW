@@ -85,4 +85,8 @@ namespace HPlus {
     eventWeight.multiplyWeight(output.getEventWeight());
     return output;
   }
+
+  double METTriggerEfficiencyScaleFactor::getEventWeight(const reco::MET& met) {
+    return fBinned.getEventWeight(met.et(), false).getEventWeight();
+  }
 }
