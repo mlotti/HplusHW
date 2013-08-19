@@ -3,8 +3,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 import FWCore.ParameterSet.VarParsing as VarParsing
 
-dataVersion = "44XmcS6"
+#dataVersion = "44XmcS6"
 #dataVersion = "42Xdata"
+dataVersion = "53XmcS10"
+#dataVersion = "53Xdata22Jan2013"
 
 options = getOptions()
 if options.dataVersion != "":
@@ -27,16 +29,18 @@ process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #dataVersion.getPatDefaultFileCastor()
         #dataVersion.getPatDefaultFileMadhatter()
-        "file:/mnt/flustre/mkortela/data/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/7EE6381E-D036-E111-9BF5-002354EF3BDF.root"
+        "file:/mnt/flustre/mkortela/data/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM/FCE9FDAC-59E1-E111-82BB-0030487E5247.root"
     )
 )
+if dataVersion.isData():
+    process.source.fileNames = ["file:/mnt/flustre/mkortela/data/SingleMu/Run2012D-22Jan2013-v1/AOD/FC0C6A2E-858B-E211-A5C6-485B39800BB9.root"]
 
 ################################################################################
 
 trigger = options.trigger
 # Default trigger (for MC)
 if len(trigger) == 0:
-    trigger = "HLT_Mu40_eta2p1_v1" # Fall11; other HLT_Mu20_v8, HLT_Mu40_v6 or HLT_Mu40_eta2p1_v1
+    trigger = "HLT_Mu40_eta2p1_v9" # Fall11; other HLT_Mu20_v8, HLT_Mu40_v6 or HLT_Mu40_eta2p1_v1
     options.trigger = trigger
 print "trigger:", trigger
 
