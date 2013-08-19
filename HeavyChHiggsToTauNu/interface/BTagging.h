@@ -27,10 +27,10 @@ namespace HPlus {
   public:
     class Data; // Forward declare because it is used in BTaggingScaleFactor interface
     struct Info {
-      std::vector<double> scaleFactor;
-      std::vector<double> uncertainty;
-      std::vector<bool> tagged;
-      std::vector<bool> genuine;
+      std::vector<double> scaleFactor; // perJetWeight
+      std::vector<double> uncertainty; // perJetWeightUncert
+      std::vector<bool> tagged;        // 
+      std::vector<bool> genuine;       // 
 
       void reserve(size_t s) {
         scaleFactor.reserve(s);
@@ -51,7 +51,7 @@ namespace HPlus {
       
       void addBFlavorData(double pT, double scaleFactorB, double scaleFactorUncertaintyB, double epsilonMCB);
       void addNonBFlavorData(double pT, double scaleFactorL, double scaleFactorUncertaintyL, double epsilonMCL);
-
+      
       BTagging::Info getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const;
       static double calculateScaleFactor(const Info& info);
       static double calculateAbsoluteUncertainty(const Info& info);
@@ -166,18 +166,22 @@ namespace HPlus {
     Count fTaggedOneTaggedJet;
     Count fTaggedTwoTaggedJets;
 
+    Count allJetsCount2;
+    Count genuineBJetsCount2;
+    Count genuineBJetsWithBTagCount2;
+
     // Histograms
-    WrappedTH1 *hDiscr;
+    WrappedTH1 *hDiscriminator;
     WrappedTH1 *hPt;
     WrappedTH1 *hEta;
-    WrappedTH1 *hDiscrB;
+    WrappedTH1 *hDiscriminatorB;
     WrappedTH1 *hPtBCSVT;
     WrappedTH1 *hEtaBCSVT;
     WrappedTH1 *hPtBCSVM;
     WrappedTH1 *hEtaBCSVM;
     WrappedTH1 *hPtBnoTag;
     WrappedTH1 *hEtaBnoTag;
-    WrappedTH1 *hDiscrQ;
+    WrappedTH1 *hDiscriminatorQ;
     WrappedTH1 *hPtQCSVT;
     WrappedTH1 *hEtaQCSVT;
     WrappedTH1 *hPtQCSVM;

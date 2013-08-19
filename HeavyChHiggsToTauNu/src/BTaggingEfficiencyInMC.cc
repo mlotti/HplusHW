@@ -40,8 +40,11 @@ namespace HPlus {
   BTaggingEfficiencyInMC::Data::~Data() { }
 
   BTaggingEfficiencyInMC::BTaggingEfficiencyInMC(EventCounter& eventCounter, HistoWrapper& histoWrapper):
-    BaseSelection(eventCounter, histoWrapper)
+    BaseSelection(eventCounter, histoWrapper),
     // (possibly) read configuration and add counters
+    allJetsCount(eventCounter.addSubCounter("allJetsCount","All jets")),
+    genuineBJetsCount(eventCounter.addSubCounter("genuineBJetsCount","Genuine b-jets")),
+    genuineBJetsWithBTagCount(eventCounter.addSubCounter("genuineBJetsWithBTagCount","Genuine b-jets with b-tag"))
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("BTaggingEfficiencyInMC");
@@ -97,12 +100,17 @@ namespace HPlus {
 								    BTaggingEfficiencyInMC::Data& output) {
     int iFlavour = 0;
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
+      increment(allJetsCount);
       edm::Ptr<pat::Jet> iJet = *iter;
       iFlavour = std::abs(iJet->partonFlavour());
       if (iFlavour == 5) {
 	// B-jet found.
 	output.fGenuineBJets.push_back(iJet);
-	if (isBTagged(iJet, bTagData)) output.fGenuineBJetsWithBTag.push_back(iJet); // B-tagged b-jet found.
+	increment(genuineBJetsCount);
+	if (isBTagged(iJet, bTagData)) {
+	  output.fGenuineBJetsWithBTag.push_back(iJet); // B-tagged b-jet found.
+	  increment(genuineBJetsWithBTagCount);
+	}
       } else if (iFlavour == 21) {
         // Gluon flavour jet found.
         output.fGenuineGJets.push_back(iJet);
@@ -111,17 +119,15 @@ namespace HPlus {
         // UDS flavour jet found.
         output.fGenuineUDSJets.push_back(iJet);
         if (isBTagged(iJet, bTagData)) output.fGenuineUDSJetsWithBTag.push_back(iJet); // B-tagged uds flavour jet found.
-      } 
-
+      }
       if (iFlavour != 5) {
 	// Light flavour jet found.
 	output.fGenuineLJets.push_back(iJet);
 	if (isBTagged(iJet, bTagData)) output.fGenuineLJetsWithBTag.push_back(iJet); // B-tagged light flavour jet found.
       }
-    
     }
   }
- 
+
 
  
   bool BTaggingEfficiencyInMC::isBTagged(edm::Ptr<pat::Jet>& jet, const BTagging::Data& bTagData) {

@@ -77,7 +77,9 @@ namespace HPlus {
     bool isBTagged(edm::Ptr<pat::Jet>& jet, const BTagging::Data& bTagData);
 
     // Possibly add counters and histograms
-
+    Count allJetsCount;
+    Count genuineBJetsCount;
+    Count genuineBJetsWithBTagCount;
   };
 }
 

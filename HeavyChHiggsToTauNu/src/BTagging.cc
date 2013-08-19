@@ -49,18 +49,20 @@ namespace HPlus {
   }
 
   BTagging::BTaggingScaleFactor::BTaggingScaleFactor() {
-	btagdb = 0;
+    btagdb = 0;
   }
 
   BTagging::BTaggingScaleFactor::~BTaggingScaleFactor() {}
 
   void BTagging::BTaggingScaleFactor::UseDB(BTaggingScaleFactorFromDB* db){btagdb = db;}  
+  
   void BTagging::BTaggingScaleFactor::addBFlavorData(double pT, double scaleFactorB, double scaleFactorUncertaintyB, double epsilonMCB) {
     fPtBinsB.push_back(pT);
     fScaleFactorB.push_back(scaleFactorB);
     fScaleFactorUncertaintyB.push_back(scaleFactorUncertaintyB);
     fEpsilonMCB.push_back(epsilonMCB);
   }
+  
   void BTagging::BTaggingScaleFactor::addNonBFlavorData(double pT, double scaleFactorL, double scaleFactorUncertaintyL, double epsilonMCL) {
     fPtBinsL.push_back(pT);
     fScaleFactorL.push_back(scaleFactorL);
@@ -84,8 +86,8 @@ namespace HPlus {
   }
 
   BTagging::Info BTagging::BTaggingScaleFactor::getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const {
-    Info ret;
-    ret.reserve(jets.size());
+    Info bTaggingInfo;
+    bTaggingInfo.reserve(jets.size());
 
     for(edm::PtrVector<pat::Jet>::const_iterator iJet = jets.begin(); iJet != jets.end(); ++iJet) {
       bool tagged = false;
@@ -101,8 +103,8 @@ namespace HPlus {
         // FIXME this is a dirty hack, numbers are from BTV-11-004 (see accompanying AN's)
         if(tagged) {
           // This is independent of pT
-          if(genuine) { scaleFactor = 0.96; uncertainty = 0.04; }
-          else        { scaleFactor = 1.17; uncertainty = 0.21; }
+          if(genuine) { scaleFactor = 0.96; uncertainty = 0.04; } // STR: Values found in BTV-11-004
+          else        { scaleFactor = 1.17; uncertainty = 0.21; } // STR: Not in BTV-11-004, but accompanying AN
         }
         // FIXME end of dirty hack
 
@@ -132,13 +134,13 @@ namespace HPlus {
         }
         */
       }
-      ret.tagged.push_back(tagged);
-      ret.genuine.push_back(genuine);
-      ret.scaleFactor.push_back(scaleFactor);
-      ret.uncertainty.push_back(uncertainty);
+      bTaggingInfo.tagged.push_back(tagged);
+      bTaggingInfo.genuine.push_back(genuine);
+      bTaggingInfo.scaleFactor.push_back(scaleFactor);
+      bTaggingInfo.uncertainty.push_back(uncertainty);
 
     }
-    return ret;
+    return bTaggingInfo;
   }
 
   double BTagging::BTaggingScaleFactor::calculateScaleFactor(const Info& info) {
@@ -168,24 +170,10 @@ namespace HPlus {
     // FIXME this is a dirty hack, numbers are from BTV-11-004 (see accompanying AN's)
     return calculateAbsoluteUncertainty(info) / calculateScaleFactor(info);
     // FIXME end of dirty hack
-    // old numbers
-    /*
-    double berror = 0; // b-jets
-    double lerror = 0; // light q/g jets
-
-    for(size_t i=0; i<info.size(); ++i) {
-      if(info.genuine[i])
-        berror += info.uncertainty[i];
-      else
-        lerror += info.uncertainty[i];
-    }
-
-    return std::sqrt(berror*berror + lerror*lerror);
-    */
   }
 
 
-  double BTagging::BTaggingScaleFactor::getBtagScaleFactor(double pt,double eta) const {
+  double BTagging::BTaggingScaleFactor::getBtagScaleFactor(double pt,double eta) const { // STR: currently not being used, replaced by dirty hack
         if(btagdb==0){
                 int myIndex = obtainIndex(fPtBinsB, pt);
                 return fScaleFactorB[myIndex];
@@ -193,14 +181,14 @@ namespace HPlus {
                 return btagdb->getScaleFactors(pt,eta).btagScaleFactor();
         }
   }
-  double BTagging::BTaggingScaleFactor::getBtagScaleFactorError(double pt,double eta) const {
+  double BTagging::BTaggingScaleFactor::getBtagScaleFactorError(double pt,double eta) const { // STR: currently not being used, replaced by dirty hack
         if(btagdb==0){
                 return fScaleFactorUncertaintyB[0];
         }else{
                 return btagdb->getScaleFactors(pt,eta).btagScaleFactorError();
         }
   }
-  double BTagging::BTaggingScaleFactor::getMistagScaleFactor(double pt,double eta) const {
+  double BTagging::BTaggingScaleFactor::getMistagScaleFactor(double pt,double eta) const { // STR: currently not being used, replaced by dirty hack
         if(btagdb==0){
                 int myIndex = obtainIndex(fPtBinsB, pt);
                 return fScaleFactorL[myIndex];
@@ -208,14 +196,14 @@ namespace HPlus {
                 return btagdb->getScaleFactors(pt,eta).mistagScaleFactor();
         }
   }
-  double BTagging::BTaggingScaleFactor::getMistagScaleFactorError(double pt,double eta) const {
+  double BTagging::BTaggingScaleFactor::getMistagScaleFactorError(double pt,double eta) const { // STR: currently not being used, replaced by dirty hack
         if(btagdb==0){   
                 return fScaleFactorUncertaintyL[0];      
         }else{
                 return btagdb->getScaleFactors(pt,eta).mistagScaleFactorError();
         }                                                                                                
   }
-  double BTagging::BTaggingScaleFactor::getMCBtagEfficiency(double pt,double eta) const {
+  double BTagging::BTaggingScaleFactor::getMCBtagEfficiency(double pt,double eta) const { // STR: currently not being used, replaced by dirty hack
         if(btagdb==0){
                 int myIndex = obtainIndex(fPtBinsB, pt);
                 return fEpsilonMCB[myIndex];
@@ -223,7 +211,7 @@ namespace HPlus {
 		return btagdb->getScaleFactors(pt,eta).btagEfficiency();
         }
   }
-  double BTagging::BTaggingScaleFactor::getMCMistagEfficiency(double pt,double eta) const {
+  double BTagging::BTaggingScaleFactor::getMCMistagEfficiency(double pt,double eta) const { // STR: currently not being used, replaced by dirty hack
         if(btagdb==0){
                 int myIndex = obtainIndex(fPtBinsB, pt);
                 return fEpsilonMCL[myIndex];
@@ -253,21 +241,24 @@ namespace HPlus {
     fTaggedTaggedRealBJetsSubCount(eventCounter.addSubCounter("b-tagging", "Btagged real b jets")),
     fTaggedNoTaggedJet(eventCounter.addSubCounter("b-tagging", "no b-tagged jet")),
     fTaggedOneTaggedJet(eventCounter.addSubCounter("b-tagging", "one b-tagged jet")),
-    fTaggedTwoTaggedJets(eventCounter.addSubCounter("b-tagging", "two b-tagged jets"))
+    fTaggedTwoTaggedJets(eventCounter.addSubCounter("b-tagging", "two b-tagged jets")),
+    allJetsCount2(eventCounter.addSubCounter("allJetsCount2", "All jets")),
+    genuineBJetsCount2(eventCounter.addSubCounter("genuineBJetsCount2", "All b-jets")),
+    genuineBJetsWithBTagCount2(eventCounter.addSubCounter("genuineBJetsWithBTagCount2", "All b-jets with b-tag"))
     //    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("Btagging");
-    hDiscr = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
+    hDiscriminator = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
     hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet_pt", "bjet_pt", 100, 0., 500.);
-    hDiscrB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
+    hDiscriminatorB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10); // STR: Currently not used
     hPtBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVM_pt", "realbjetCSVM_pt", 100, 0., 500.);
     hEtaBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVM_eta", "realbjetCSVM_eta", 100, -5., 5.);
     hPtBCSVT = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVT_pt", "realbjetCSVT_pt", 100, 0., 500.);
     hEtaBCSVT = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVT_eta", "realbjetCSVT_eta", 100, -5., 5.);
     hPtBnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_pt", "realbjetNotag_pt", 100, 0., 500.);
     hEtaBnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_eta", "realbjetNotag_eta", 100, -5., 5.);
-    hDiscrQ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealQjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
+    hDiscriminatorQ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealQjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10); // STR: Currently not used
     hPtQCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetCSVM_pt", "realqjetCSVM_pt", 100, 0., 500.);
     hEtaQCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetCSVM_eta", "realqjetCSVM_pt", 100, -5., 5.);
     hPtQCSVT = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetCSVT_pt", "realqjetCSVT_pt", 100, 0., 500.);
@@ -322,71 +313,78 @@ namespace HPlus {
     }
     else
       btagDB = 0;
-
-    // OBSOLETE
-    // BTagging scale factors for b-flavor jets (source: BTV-11-001)
-    double fScaleFactorBFlavor = 0.95;
-    double fScaleFactorBFlavorUncertainty = 0.05;
-    fBTaggingScaleFactor.addBFlavorData(30., fScaleFactorBFlavor, fScaleFactorBFlavorUncertainty, .671);
-    fBTaggingScaleFactor.addBFlavorData(40., fScaleFactorBFlavor, fScaleFactorBFlavorUncertainty, .741);
-    fBTaggingScaleFactor.addBFlavorData(50., fScaleFactorBFlavor, fScaleFactorBFlavorUncertainty, .779);
-    fBTaggingScaleFactor.addBFlavorData(60., fScaleFactorBFlavor, fScaleFactorBFlavorUncertainty, .802);
-    fBTaggingScaleFactor.addBFlavorData(70., fScaleFactorBFlavor, fScaleFactorBFlavorUncertainty, .826);
-    fBTaggingScaleFactor.addBFlavorData(80., fScaleFactorBFlavor, fScaleFactorBFlavorUncertainty, .840);
-    fBTaggingScaleFactor.addBFlavorData(100., fScaleFactorBFlavor, fScaleFactorBFlavorUncertainty, .840);
-    fBTaggingScaleFactor.addBFlavorData(120., fScaleFactorBFlavor, fScaleFactorBFlavorUncertainty, .856);
-    // BTagging scale factors for non-b-flavor jets (source: BTV-11-001)
-    double fScaleFactorLightFlavor = 1.10;
-    double fScaleFactorLightFlavorUncertainty = 0.12;
-    fBTaggingScaleFactor.addNonBFlavorData(30., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.055);
-    fBTaggingScaleFactor.addNonBFlavorData(40., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.076);
-    fBTaggingScaleFactor.addNonBFlavorData(50., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.095);
-    fBTaggingScaleFactor.addNonBFlavorData(60., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.116);
-    fBTaggingScaleFactor.addNonBFlavorData(70., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.128);
-    fBTaggingScaleFactor.addNonBFlavorData(80., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.151);
-    fBTaggingScaleFactor.addNonBFlavorData(90., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.170);
-    fBTaggingScaleFactor.addNonBFlavorData(100., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.186);
-    fBTaggingScaleFactor.addNonBFlavorData(110., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.202);
-    fBTaggingScaleFactor.addNonBFlavorData(120., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.213);
-    fBTaggingScaleFactor.addNonBFlavorData(130., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.226);
-    fBTaggingScaleFactor.addNonBFlavorData(140., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.238);
-    fBTaggingScaleFactor.addNonBFlavorData(150., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.248);
-    fBTaggingScaleFactor.addNonBFlavorData(160., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.260);
-    fBTaggingScaleFactor.addNonBFlavorData(170., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.271);
-    fBTaggingScaleFactor.addNonBFlavorData(180., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.279);
-    fBTaggingScaleFactor.addNonBFlavorData(190., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.286);
-    fBTaggingScaleFactor.addNonBFlavorData(200., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.294);
-    fBTaggingScaleFactor.addNonBFlavorData(210., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.303);
-    fBTaggingScaleFactor.addNonBFlavorData(220., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.311);
-    fBTaggingScaleFactor.addNonBFlavorData(230., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.319);
-    fBTaggingScaleFactor.addNonBFlavorData(240., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.321);
-    fBTaggingScaleFactor.addNonBFlavorData(250., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.329);
-    fBTaggingScaleFactor.addNonBFlavorData(260., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.335);
-    fBTaggingScaleFactor.addNonBFlavorData(270., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.338);
-    fBTaggingScaleFactor.addNonBFlavorData(280., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.347);
-    fBTaggingScaleFactor.addNonBFlavorData(290., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.355);
-    fBTaggingScaleFactor.addNonBFlavorData(300., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.358);
-    fBTaggingScaleFactor.addNonBFlavorData(310., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.361);
-    fBTaggingScaleFactor.addNonBFlavorData(320., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.367);
-    fBTaggingScaleFactor.addNonBFlavorData(330., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.365);
-    fBTaggingScaleFactor.addNonBFlavorData(340., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.371);
-    fBTaggingScaleFactor.addNonBFlavorData(350., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.373);
-    fBTaggingScaleFactor.addNonBFlavorData(360., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.374);
-    fBTaggingScaleFactor.addNonBFlavorData(370., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.377);
-    fBTaggingScaleFactor.addNonBFlavorData(380., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.376);
-    fBTaggingScaleFactor.addNonBFlavorData(390., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.380);
-    fBTaggingScaleFactor.addNonBFlavorData(400., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.385);
-    fBTaggingScaleFactor.addNonBFlavorData(410., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.387);
-    fBTaggingScaleFactor.addNonBFlavorData(420., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.391);
-    fBTaggingScaleFactor.addNonBFlavorData(430., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.392);
-    fBTaggingScaleFactor.addNonBFlavorData(440., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.389);
-    fBTaggingScaleFactor.addNonBFlavorData(450., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.396);
-    fBTaggingScaleFactor.addNonBFlavorData(460., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.396);
-    fBTaggingScaleFactor.addNonBFlavorData(470., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.402);
-    fBTaggingScaleFactor.addNonBFlavorData(480., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.396);
-    fBTaggingScaleFactor.addNonBFlavorData(490., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.402);
-
+    
+    // Scale factors for 2011 analysis (assumed no eta dependence)
+    // Source: BTV-12-001
+    // Remarks: The pT bin 0-30 GeV has the scale factor of the 500+ GeV bin with twice the uncertainty.
+    //          The scale factor is calculated as 0.901615*((1.+(0.552628*pT))/(1.+(0.547195*pT)))
+    fBTaggingScaleFactor.addBFlavorData(0.,   .9105344, .1733126, .671); // TODO: update MC b-tagging efficiencies!
+    fBTaggingScaleFactor.addBFlavorData(30.,  .9100530, .0364717, .671);
+    fBTaggingScaleFactor.addBFlavorData(40.,  .9101758, .0362281, .741);
+    fBTaggingScaleFactor.addBFlavorData(50.,  .9102513, .0232876, .779);
+    fBTaggingScaleFactor.addBFlavorData(60.,  .9103024, .0249618, .802);
+    fBTaggingScaleFactor.addBFlavorData(70.,  .9103392, .0261482, .826);
+    fBTaggingScaleFactor.addBFlavorData(80.,  .9103670, .0290466, .840);
+    fBTaggingScaleFactor.addBFlavorData(100., .9104327, .0300033, .840);
+    fBTaggingScaleFactor.addBFlavorData(120., .9104516, .0453252, .856);
+    fBTaggingScaleFactor.addBFlavorData(160., .9104659, .0685143, .671);
+    fBTaggingScaleFactor.addBFlavorData(210., .9104897, .0653621, .671);
+    fBTaggingScaleFactor.addBFlavorData(260., .9105045, .0712586, .671);
+    fBTaggingScaleFactor.addBFlavorData(320., .9105161, .0945890, .671);
+    fBTaggingScaleFactor.addBFlavorData(400., .9105263, .0777011, .671);
+    fBTaggingScaleFactor.addBFlavorData(500., .9105344, .0866563, .671);
   }
+//     // BTagging scale factors for non-b-flavor jets (source: BTV-11-001)
+//     double fScaleFactorLightFlavor = 1.10;
+//     double fScaleFactorLightFlavorUncertainty = 0.12;
+//     fBTaggingScaleFactor.addNonBFlavorData(30., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.055);
+//     fBTaggingScaleFactor.addNonBFlavorData(40., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.076);
+//     fBTaggingScaleFactor.addNonBFlavorData(50., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.095);
+//     fBTaggingScaleFactor.addNonBFlavorData(60., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.116);
+//     fBTaggingScaleFactor.addNonBFlavorData(70., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.128);
+//     fBTaggingScaleFactor.addNonBFlavorData(80., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.151);
+//     fBTaggingScaleFactor.addNonBFlavorData(90., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.170);
+//     fBTaggingScaleFactor.addNonBFlavorData(100., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.186);
+//     fBTaggingScaleFactor.addNonBFlavorData(110., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.202);
+//     fBTaggingScaleFactor.addNonBFlavorData(120., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.213);
+//     fBTaggingScaleFactor.addNonBFlavorData(130., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.226);
+//     fBTaggingScaleFactor.addNonBFlavorData(140., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.238);
+//     fBTaggingScaleFactor.addNonBFlavorData(150., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.248);
+//     fBTaggingScaleFactor.addNonBFlavorData(160., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.260);
+//     fBTaggingScaleFactor.addNonBFlavorData(170., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.271);
+//     fBTaggingScaleFactor.addNonBFlavorData(180., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.279);
+//     fBTaggingScaleFactor.addNonBFlavorData(190., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.286);
+//     fBTaggingScaleFactor.addNonBFlavorData(200., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.294);
+//     fBTaggingScaleFactor.addNonBFlavorData(210., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.303);
+//     fBTaggingScaleFactor.addNonBFlavorData(220., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.311);
+//     fBTaggingScaleFactor.addNonBFlavorData(230., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.319);
+//     fBTaggingScaleFactor.addNonBFlavorData(240., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.321);
+//     fBTaggingScaleFactor.addNonBFlavorData(250., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.329);
+//     fBTaggingScaleFactor.addNonBFlavorData(260., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.335);
+//     fBTaggingScaleFactor.addNonBFlavorData(270., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.338);
+//     fBTaggingScaleFactor.addNonBFlavorData(280., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.347);
+//     fBTaggingScaleFactor.addNonBFlavorData(290., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.355);
+//     fBTaggingScaleFactor.addNonBFlavorData(300., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.358);
+//     fBTaggingScaleFactor.addNonBFlavorData(310., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.361);
+//     fBTaggingScaleFactor.addNonBFlavorData(320., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.367);
+//     fBTaggingScaleFactor.addNonBFlavorData(330., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.365);
+//     fBTaggingScaleFactor.addNonBFlavorData(340., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.371);
+//     fBTaggingScaleFactor.addNonBFlavorData(350., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.373);
+//     fBTaggingScaleFactor.addNonBFlavorData(360., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.374);
+//     fBTaggingScaleFactor.addNonBFlavorData(370., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.377);
+//     fBTaggingScaleFactor.addNonBFlavorData(380., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.376);
+//     fBTaggingScaleFactor.addNonBFlavorData(390., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.380);
+//     fBTaggingScaleFactor.addNonBFlavorData(400., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.385);
+//     fBTaggingScaleFactor.addNonBFlavorData(410., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.387);
+//     fBTaggingScaleFactor.addNonBFlavorData(420., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.391);
+//     fBTaggingScaleFactor.addNonBFlavorData(430., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.392);
+//     fBTaggingScaleFactor.addNonBFlavorData(440., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.389);
+//     fBTaggingScaleFactor.addNonBFlavorData(450., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.396);
+//     fBTaggingScaleFactor.addNonBFlavorData(460., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.396);
+//     fBTaggingScaleFactor.addNonBFlavorData(470., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.402);
+//     fBTaggingScaleFactor.addNonBFlavorData(480., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.396);
+//     fBTaggingScaleFactor.addNonBFlavorData(490., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.402);
+
 
   BTagging::~BTagging() {
     if(btagDB) delete btagDB;
@@ -413,138 +411,71 @@ namespace HPlus {
     output.fSelectedJets.reserve(jets.size());
     output.fSelectedSubLeadingJets.reserve(jets.size());
     // Initialise internal variables
-    bool bJetIsMCb = false;
-    bool bJetIsMCc = false;
-    bool bJetIsMCLightQuark = false;
+    bool isGenuineB = false;
+    bool isGenuineC = false;
+    bool isGenuineG = false;
+    bool isGenuineUDS = false;
     bool bMatch = false;
     bool qMatch = false;
 
     if(btagDB) btagDB->setup(iSetup);
 
-    // Calculate 
+    // Loop over all jets in event
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
-
       increment(fAllSubCount);
 
-//       if (!iEvent.isRealData()) {
-// 	edm::Handle <reco::GenParticleCollection> genParticles;
-// 	iEvent.getByLabel("genParticles", genParticles);
-// 
-// 	for (size_t i=0; i < genParticles->size(); ++i){
-// 	  const reco::Candidate & p = (*genParticles)[i];
-// 	  int id = p.pdgId();
-// 	  if ( abs(id) != 5 || hasImmediateMother(p,5) || hasImmediateMother(p,-5) )continue;
-// 	  //	  printImmediateMothers(p);
-// 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(iJet->p4(),p.p4() );
-// 	  if ( deltaR < 0.2) bMatch = true;
-// 	  //	  std::cout << "  bmatch   "  <<  p.pdgId()   << std::endl;
-// 	} 
-// 
-// 	for (size_t i=0; i < genParticles->size(); ++i){
-// 	  const reco::Candidate & p = (*genParticles)[i];
-// 	  int id = p.pdgId();
-// 	  if ( abs(id) > 4 &&  p.pdgId() != 21 )continue;
-// 	  if ( hasImmediateMother(p,1) || hasImmediateMother(p,-1) )continue;
-// 	  if ( hasImmediateMother(p,2) || hasImmediateMother(p,-2) )continue;
-// 	  if ( hasImmediateMother(p,3) || hasImmediateMother(p,-3) )continue;
-// 	  if ( hasImmediateMother(p,4) || hasImmediateMother(p,-4) )continue;
-// 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(iJet->p4(),p.p4() );
-// 	  if ( deltaR < 0.2) qMatch = true;
-// 	  //	  std::cout << "  qmatch   "  <<  p.pdgId()   << std::endl;
-// 
-// 	}
-
+      // In MC, check the true flavour of the parton that produced the jet
       if (!iEvent.isRealData()) {
-        int myFlavor = std::abs(iJet->partonFlavour());
-        if (myFlavor == 5) {
-          bJetIsMCb = true;
-        } else if (myFlavor == 4) {
-          bJetIsMCc = true;
-        } else {
-          bJetIsMCLightQuark = true;
-        }
+	int myFlavor = std::abs(iJet->partonFlavour());
+	if      (myFlavor == 5) isGenuineB = true;
+	else if (myFlavor == 4) isGenuineC = true;
+	else if (myFlavor == 21) isGenuineG = true;
+	else    isGenuineUDS = true;
       }
+      if (isGenuineB) increment(fTaggedAllRealBJetsSubCount); // STR: why "Tagged"? No tagging has been done yet!
+      ////      // Analyze MC tag / mistag efficiencies
+      ////      analyzeMCTagEfficiencyByJetFlavour(iJet, isGenuineB, isGenuineC, isGenuineUDS); // STR: MOVE FUNCTIONALITY TO DESIGNATED CLASS
 
-      if (bJetIsMCb)   increment(fTaggedAllRealBJetsSubCount);
+      // Apply transverse momentum cut
+      if(iJet->pt() < fPtCut) continue;
+      increment(fTaggedPtCutSubCount); // STR: why "Tagged"? No tagging has been done yet!
 
+      // Apply pseudorapidity cut
+      if(fabs(iJet->eta()) > fEtaCut) continue;
+      increment(fTaggedEtaCutSubCount); // STR: why "Tagged"? No tagging has been done yet!
+
+      // Do b-tagging using the chosen discriminator and working point
       float discr = iJet->bDiscriminator(fDiscriminator);
-      //      if (bmatchedJet ) {
-//       if (bMatch ) {
-// 	hPtBnoTag->Fill(iJet->pt());
-// 	hEtaBnoTag->Fill(iJet->eta());
-// 	//	std::cout << " discr. b-matched   "  << discr << " discr cut   "  << fDiscrCut  << std::endl;	
-// 	//	if(discr > fDiscrCut ) {
-// 	if(discr > 0.898) {
-// 	  hPtBCSVT->Fill(iJet->pt());
-// 	  hEtaBCSVT->Fill(iJet->eta());
-// 	}
-// 	if(discr > 0.679) {
-// 	  hPtBCSVM->Fill(iJet->pt());
-// 	  hEtaBCSVM->Fill(iJet->eta());
-// 	}
-// 	hDiscrB->Fill(discr);
-//       }
-//       //      if (qmatchedJet ) {
-//       if (qMatch ) {
-// 	hPtQnoTag->Fill(iJet->pt());
-// 	hEtaQnoTag->Fill(iJet->eta());
-// 	//	std::cout << " discr. q-matched  "  << discr <<  discr << " discr cut   "  << fDiscrCut << std::endl;
-// 	//	if(discr > fDiscrCut ) {
-// 	if(discr > 0.898) {
-// 	  hPtQCSVT->Fill(iJet->pt());
-// 	  hEtaQCSVT->Fill(iJet->eta());
-// 	}
-// 	if(discr > 0.679) {
-// 	  hPtQCSVM->Fill(iJet->pt());
-// 	  hEtaQCSVM->Fill(iJet->eta());
-// 	}
-// 	hDiscrQ->Fill(discr);
-//       }
-
-      // pt cut
-      if(iJet->pt() < fPtCut ) continue;
-      increment(fTaggedPtCutSubCount);
-
-      // eta cut
-      if(fabs(iJet->eta()) > fEtaCut ) continue;
-      increment(fTaggedEtaCutSubCount);
-
-      // Analyze MC tag / mistag efficiencies
-      analyzeMCTagEfficiencyByJetFlavour(iJet, bJetIsMCb, bJetIsMCc, bJetIsMCLightQuark);
-
-      // discriminator cut
-      hDiscr->Fill(discr);
+      hDiscriminator->Fill(discr);
       if (discr > fLeadingDiscrCut) {
         output.fSelectedJets.push_back(iJet);
-      } else if (discr > fSubLeadingDiscrCut){
+      } else if (discr > fSubLeadingDiscrCut) {
         output.fSelectedSubLeadingJets.push_back(iJet);
       } else {
         continue;
       }
       increment(fTaggedSubCount);
-
       hPt->Fill(iJet->pt());
       hEta->Fill(iJet->eta());
+      if (discr > output.fMaxDiscriminatorValue) output.fMaxDiscriminatorValue = discr;
+      if (isGenuineB) increment(fTaggedTaggedRealBJetsSubCount); // STR: "TaggedTagged"?!
+    } // End of jet loop
 
-      if (discr > output.fMaxDiscriminatorValue)
-        output.fMaxDiscriminatorValue = discr;
+    
+    // STR: do the weight calculation here! TODO
+    // Calculate event weight (this requires knowledge of the per-jet scale factors and the MC [mis]tagging efficiencies!)
+    double probMC, probDATA;
+    probMC = 1.0;
+    probDATA = 1.0;
+    double scaleFactor = probDATA / probMC;
 
-      //++passed;
-      if (bJetIsMCb) increment(fTaggedTaggedRealBJetsSubCount);
+    if (!iEvent.isRealData())   calculateScaleFactor(jets, output); // Calculate scale factor for MC events
 
-    } // end of jet loop
-
-    // Calculate scale factor for MC events
-    if (!iEvent.isRealData())
-      calculateScaleFactor(jets, output);
-
-    // Fill histograms
+    // Do some histogramming and set output
     hNumberOfBtaggedJets->Fill(output.fSelectedJets.size());
     hNumberOfBtaggedJetsIncludingSubLeading->Fill(output.fSelectedJets.size()+output.fSelectedSubLeadingJets.size());
     output.iNBtags = output.fSelectedJets.size();
-
-    ////////////////////////////////
     if(output.fSelectedJets.size() > 0) {
       hPt1->Fill(output.fSelectedJets[0]->pt());
       hEta1->Fill(output.fSelectedJets[0]->eta());
@@ -553,12 +484,6 @@ namespace HPlus {
       hPt2->Fill(output.fSelectedJets[1]->pt());
       hEta2->Fill(output.fSelectedJets[1]->eta());
     }
-       // plot deltaPhi(bjet,tau jet)
-    //      double deltaPhi = -999;    
-	//      if ( met->et()>  fMetCut) {
-      //	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(met));
-      //	  hDeltaPhiJetMet->Fill(deltaPhi*57.3);
-      //      }
     if(output.fSelectedJets.size() == 0)   increment(fTaggedNoTaggedJet);
     else if(output.fSelectedJets.size() == 1)   increment(fTaggedOneTaggedJet);
     else if(output.fSelectedJets.size() == 2)   increment(fTaggedTwoTaggedJets);
@@ -599,13 +524,13 @@ namespace HPlus {
       // jet did not pass b tag
       if (isBJet) {
         hMCBmistaggedBJetsByPt->Fill(jet->pt());
-        hMCBmistaggedBJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+        hMCBmistaggedBJetsByPtAndEta->Fill(jet->pt(),jet->eta()); // STR: "Bmistagged" IS VERY MISLEADING! What is meant is "not b-tagged"
       } else if (isCJet) {
         hMCBmistaggedCJetsByPt->Fill(jet->pt());
-        hMCBmistaggedCJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+        hMCBmistaggedCJetsByPtAndEta->Fill(jet->pt(),jet->eta()); // STR: "Bmistagged" IS VERY MISLEADING! What is meant is "not b-tagged"
       } else if (isLightJet) {
         hMCBmistaggedLightJetsByPt->Fill(jet->pt());
-        hMCBmistaggedLightJetsByPtAndEta->Fill(jet->pt(),jet->eta());
+        hMCBmistaggedLightJetsByPtAndEta->Fill(jet->pt(),jet->eta()); // STR: "Bmistagged" IS VERY MISLEADING! What is meant is "not b-tagged"
       }
     }
   }
@@ -623,7 +548,7 @@ namespace HPlus {
     // Do the variation, if asked
     if(fVariationEnabled) {
       btagData.fScaleFactor += fVariationShiftBy*btagData.fScaleFactorAbsoluteUncertainty;
-      // these are meaningless after the variation
+      // These are meaningless after the variation:
       btagData.fScaleFactorAbsoluteUncertainty = 0;
       btagData.fScaleFactorRelativeUncertainty = 0;
     }
