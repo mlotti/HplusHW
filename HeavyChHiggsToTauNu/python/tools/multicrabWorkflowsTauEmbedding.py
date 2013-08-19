@@ -383,7 +383,7 @@ def addEmbeddingSkim_53X(version, datasets, updateDefinitions):
         # If have skim output, define the workflows which depend on it
         if wf.output != None:
             dataset.addWorkflow(Workflow("tauembedding_skimAnalysis_"+version, source=Source("tauembedding_skim_"+version),
-                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="histograms.root"))
+                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="histograms.root", crabLines=["CMSSW.total_number_of_lumis = -1"]))
 
 
 def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitions):
