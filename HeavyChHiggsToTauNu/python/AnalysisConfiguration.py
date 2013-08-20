@@ -422,10 +422,6 @@ class ConfigBuilder:
         qcdTailKillerNames = self._buildQCDTailKillerScenarios(process, analysisNamesForTailKillerScenarios)
         analysisNamesForSystematics.extend(qcdTailKillerNames)
 
-        # Invariant mass reconstruction scenarios
-        analysisNamesForSystematics.extend(self._buildInvariantMassReconstructionScenarios(process,
-                                           analysisNamesForTailKillerScenarios+qcdTailKillerNames))
-
         # Against electron scan
         self._buildAgainstElectronScan(process, analysisModules, analysisNames)
 
