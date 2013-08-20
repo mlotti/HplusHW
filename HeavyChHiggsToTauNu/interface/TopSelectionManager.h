@@ -2,19 +2,17 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TopSelectionManager_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_TopSelectionManager_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionBase.h"
+
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionBase.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h" 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h" 
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
-
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
 
 namespace edm {
   class Event;
@@ -25,13 +23,15 @@ namespace edm {
 namespace HPlus {
   class TopSelectionManager {
   public:    
+    typedef math::XYZTLorentzVector XYZTLorentzVector;
+    typedef TopSelectionBase::Data Data;
     //counters
-    Count fTopSelectionCounter;
-    Count fTopChiSelectionCounter;
-    Count fTopWithBSelectionCounter;
-    Count fTopWithWSelectionCounter;
+    //Count fTopSelectionCounter;
+    //Count fTopChiSelectionCounter;
+    //Count fTopWithBSelectionCounter;
+    //Count fTopWithWSelectionCounter;
     //Count fTopWithMHSelectionCounter;
-
+    
     //top selection algorithms
     TopSelection fTopSelection;
     TopChiSelection fTopChiSelection;
@@ -39,30 +39,17 @@ namespace HPlus {
     TopWithWSelection fTopWithWSelection;
     //TopWithMHSelection fTopWithMHSelection;
 
-    TopSelectionManager(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& fHistoWrapper, const std::string topRecoName, TopChiSelection topChiSelection);
+    TopSelectionManager(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& fHistoWrapper, const std::string topRecoName);
     ~TopSelectionManager();
     
     //function declarations
-    void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, edm::Ptr<pat::Jet> bjet, bool bjetPassed);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, edm::Ptr<pat::Jet> bjet, bool bjetPassed);
     bool getPassedTopRecoStatus();
     
   private:
-    std::vector<TopSelectionBase*> fTopAlgorithms; // different top algorithms TODO
-    TopSelectionBase* fSelectedAlgorithm; // Pointer to the selected top reco algorithm (zero pointer if top reco is disabled) TODO
-
-    bool myTopRecoWithWSelectionStatus;
-    
+    bool myTopRecoWithWSelectionStatus; //TODO is this needed?
     const std::string fTopRecoName;
-    //const edm::Event& iEvent;
-    //const edm::EventSetup& iSetup;
-    //const edm::PtrVector<pat::Jet>& jets;
-    //const edm::PtrVector<pat::Jet>& bjets;
-    //edm::Ptr<pat::Jet> bjet;    
-    //bool bjetPassed;
-    
-    //needed for getPassedTopRecoStatus
-    TopSelection::Data TopSelectionData;
-    TopChiSelection::Data TopChiSelectionData;
+    //Data TopSelectionData; //declared in cc
   };
 }
 

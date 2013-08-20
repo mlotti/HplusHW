@@ -37,7 +37,7 @@ namespace HPlus {
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
     fChi2Cut(iConfig.getUntrackedParameter<double>("Chi2Cut")),
-    fTopChiMassCount(eventCounter.addSubCounter("Top Chi mass cut","Top Chi Mass cut")),
+    //fTopChiMassCount(eventCounter.addSubCounter("Top Chi mass cut","Top Chi Mass cut")),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src"))
   {
     edm::Service<TFileService> fs;
@@ -85,7 +85,7 @@ namespace HPlus {
   */
 
   //privateAnalyze
-  TopChiSelection::Data TopChiSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
+  Data TopChiSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
     Data output;
 
     // Reset variables
@@ -221,7 +221,7 @@ namespace HPlus {
       output.fPassedEvent = false;
       } else {
       output.fPassedEvent = true;
-      increment(fTopChiMassCount);
+      //increment(fTopChiMassCount); //TODO
       } 
     return output;
   }

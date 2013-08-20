@@ -15,6 +15,7 @@ namespace edm {
 }
 
 namespace HPlus {
+  typedef TopSelectionBase::Data Data;
   class TopChiSelection: public TopSelectionBase {
   
   public:
@@ -31,7 +32,7 @@ namespace HPlus {
     const double fChi2Cut;
 
     // Counters
-    Count fTopChiMassCount;
+    //Count fTopChiMassCount;
 
     edm::InputTag fSrc;
     

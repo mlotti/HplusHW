@@ -19,6 +19,7 @@
 // TriggerEmulationEfficiency.h
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
@@ -153,6 +154,7 @@ namespace HPlus {
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
+    TopSelectionManager fTopSelectionManager;
     TopSelection fTopSelection;
     TopChiSelection fTopChiSelection;
     TopWithBSelection fTopWithBSelection;

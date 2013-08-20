@@ -24,17 +24,12 @@ void printDaughters(const reco::Candidate& p); //not used
 
 namespace HPlus {
 
-  //constructor and destructor for TopSelection::Data class
-  /*TopSelection::Data::Data():
-    fPassedEvent(false) {}
-  TopSelection::Data::~Data() {} */
-
   //constructor for TopSelection class itself
   TopSelection::TopSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper) : TopSelectionBase::TopSelectionBase(iConfig, eventCounter, histoWrapper),
     //BaseSelection(eventCounter, histoWrapper),
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
-    fTopMassCount(eventCounter.addSubCounter("Top mass","Top Mass cut")),
+    //fTopMassCount(eventCounter.addSubCounter("Top mass","Top Mass cut")),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src"))
     {
       edm::Service<TFileService> fs;
@@ -85,7 +80,7 @@ namespace HPlus {
   */
 
   //privateAnalyze
-  TopSelection::Data TopSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
+  Data TopSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
     Data output;
 
     // Reset variables
@@ -216,7 +211,7 @@ namespace HPlus {
       output.fPassedEvent = false;
       } else {
       output.fPassedEvent = true;
-      increment(fTopMassCount);
+      //increment(fTopMassCount); //TODO
       }
       
     return output;

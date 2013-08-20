@@ -19,8 +19,12 @@ namespace HPlus {
   class WrappedTH1;
 
   class TopSelectionBase: public BaseSelection {
-  public:
+
+  public:    
     typedef math::XYZTLorentzVector XYZTLorentzVector;
+    TopSelectionBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    virtual ~TopSelectionBase();
+
     /**
      * Class to encapsulate the access to the data members of
      * TauSelection. If you want to add a new accessor, add it here
@@ -32,7 +36,7 @@ namespace HPlus {
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
       Data();
-      virtual ~Data();
+      ~Data();
 
       const bool passedEvent() const { return fPassedEvent; }
       const double getTopMass() const { return top.M(); }
@@ -40,8 +44,7 @@ namespace HPlus {
       const XYZTLorentzVector& getTopP4() const { return top; }
       const XYZTLorentzVector& getWP4() const { return W; }
       const edm::Ptr<pat::Jet>& getSelectedBjet() const { return bjetInTop; }
-
-      friend class TopSelectionBase;
+      void makeEventPassed() { fPassedEvent=true; }
 
       bool fPassedEvent;
       // Variables
@@ -49,10 +52,6 @@ namespace HPlus {
       XYZTLorentzVector W;
       edm::Ptr<pat::Jet> bjetInTop;
     };
-
-  public:    
-    TopSelectionBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
-    virtual ~TopSelectionBase();
     
     // Use silentAnalyze if you do not want to fill histograms or increment counters (overloading for BSelection)
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);

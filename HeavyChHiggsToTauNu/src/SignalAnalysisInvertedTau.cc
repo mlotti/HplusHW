@@ -103,6 +103,8 @@ namespace HPlus {
     fJetTauInvMass(iConfig.getUntrackedParameter<edm::ParameterSet>("jetTauInvMass"), eventCounter, fHistoWrapper),
     fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper),
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
+    fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
+    fTopSelectionManager(iConfig, eventCounter, fHistoWrapper, fTopRecoName),
     fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
     fFullHiggsMassCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("invMassReco"), eventCounter, fHistoWrapper),
@@ -364,7 +366,7 @@ namespace HPlus {
     increment(fVertexFilterCounter);
 
     // Setup common plots
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
     fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
 
 //------ Tau candidate selection
@@ -443,7 +445,7 @@ namespace HPlus {
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForBaseline.getSelectedTau()));
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
-      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
       // Do not fill histograms (keep them for the inverted part), but set info for splitting the phase space
       fCommonPlots.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauDataForBaseline, fMETSelection);
       // Apply scale factor for fake tau
@@ -470,7 +472,7 @@ namespace HPlus {
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForInverted.getSelectedTau()));
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
-      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
       fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauDataForInverted, tauMatchData, fMETSelection);
       // Apply scale factor for fake tau
       if (!iEvent.isRealData()) {
@@ -881,7 +883,7 @@ namespace HPlus {
     // Top reconstruction
     TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    TopSelectionManager::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     //fCommonPlots.fillControlPlotsAtTopSelection(iEvent, TopChiSelectionData);
     // top mass with binning
     double topMass = TopChiSelectionData.getTopMass();

@@ -37,7 +37,7 @@ namespace HPlus {
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
     fChi2Cut(iConfig.getUntrackedParameter<double>("Chi2Cut")),
-    fTopWithBMassCount(eventCounter.addSubCounter("Top with B mass cut","Top with B Mass cut")),
+    //fTopWithBMassCount(eventCounter.addSubCounter("Top with B mass cut","Top with B Mass cut")),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src"))
   {
     edm::Service<TFileService> fs;
@@ -81,7 +81,7 @@ namespace HPlus {
     return privateAnalyze(iEvent, iSetup, jets, iJetb);
   } */
 
-  TopWithBSelection::Data TopWithBSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
+  Data TopWithBSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
     Data output;
 
     bool topmassfound = false;
@@ -217,7 +217,7 @@ namespace HPlus {
       output.fPassedEvent = false;
     } else {
       output.fPassedEvent = true;
-      increment(fTopWithBMassCount);
+      //increment(fTopWithBMassCount); //TODO
     }
     return output;
   }

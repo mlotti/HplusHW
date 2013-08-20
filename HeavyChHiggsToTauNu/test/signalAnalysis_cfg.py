@@ -30,7 +30,7 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addBJetEtVariation([])
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,170.0,160.0,150.0])
-#myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
+#myOptimisation.addTopRecoVariation(["None"]) # Valid options: None, chi, std, Wselection
 
 def customize(signalAnalysis):
     # Apply beta cut for jets to reject PU jets
@@ -67,11 +67,17 @@ builder = ConfigBuilder(dataVersion, dataEras,
 
 process = builder.buildSignalAnalysis()
 
+process.source.fileNames = [
+    #"file:skim_TTJetsFall11.root"
+    "file:TTToHplusBWB_M-120_7TeV-pythia6-tauola_pattuple_v44_5_10_1_zI8.root"
+    ]
+
 if builder.options.tauEmbeddingInput != 0:
 
     if builder.dataVersion.isMC():
         process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/embedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_notrg2/b4444849cbd68cba8058d20690fa09f4/embedded_1000_1_M8J.root",
+            "file:skim_TTJetsFall11.root"
+            #        "/store/group/local/HiggsChToTauNuFullyHadronic/embedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_notrg2/b4444849cbd68cba8058d20690fa09f4/embedded_1000_1_M8J.root",
 #        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad_vispt30_b/d57ea742826c3abce18a6ceed0c3bca3/embedded_1000_2_vFL.root",
             
             ]
