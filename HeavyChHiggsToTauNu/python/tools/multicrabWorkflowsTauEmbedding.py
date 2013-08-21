@@ -825,7 +825,7 @@ def addEmbeddingSkim_v53_3(datasets):
         # 1346368 events, 2201 jobs
         # User mean 1311.4, min 448.9, max 1942.2
         # Mean 168.2 MB, min 69.8 MB, max 189.8 MB
-        "W4Jets_TuneZ2star_Summer12":              TaskDef("/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER"),
+        "W4Jets_TuneZ2star_Summer12":              TaskDef("/W4JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER"),
         # 959991 events, 1702 jobs
         # User mean 1246.4, min 257.4, max 2356.3
         # Mean 165.9 MB, min 32.3 MB, max 188.3 MB
