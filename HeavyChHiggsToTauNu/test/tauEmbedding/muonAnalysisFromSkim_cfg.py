@@ -196,14 +196,14 @@ additionalCounters.append("preselectedMuons41Count")
 muscle = cms.EDProducer("MuScleFitPATMuonCorrector", 
     src = cms.InputTag(muons), 
     debug = cms.bool(False), 
-    identifier = cms.string("Data2011_44X"),
+    identifier = cms.string("Data2012_53X_ReReco"),
     applySmearing = cms.bool(False), 
     fakeSmearing = cms.bool(False)
 )
 setattr(process, muons+"Muscle", muscle)
 process.commonSequence += muscle
 if dataVersion.isMC():
-    muscle.identifier = "Fall11_START44"
+    muscle.identifier = "Summer12_DR53X_smearReReco"
     muscle.applySmearing = True
 
 
@@ -293,21 +293,8 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
         ),
     ),
     muonEfficiencies = cms.PSet(
-        id_Run2011A = param.embeddingMuonIdEfficiency.clone(
-            dataSelect = ["Run2011A"],
-            mcSelect = "Run2011A",
-        ),
-        id_Run2011B = param.embeddingMuonIdEfficiency.clone(
-            dataSelect = ["Run2011B"],
-            mcSelect = "Run2011B",
-        ),
-        id_Run2011AB = param.embeddingMuonIdEfficiency.clone(
-            dataSelect = ["Run2011A", "Run2011B"],
-            mcSelect = "Run2011AB",
-        ),
-        trigger = param.embeddingMuonTriggerEfficiency.clone(
-            dataSelect = ["Run2011AB"],
-        ),
+        id_Run2012ABCD = param.embeddingMuonIdEfficiency.clone(),
+        trigger = param.embeddingMuonTriggerEfficiency.clone(),
     ),
 
 #    electronSrc = cms.InputTag("selectedPatElectrons"),
