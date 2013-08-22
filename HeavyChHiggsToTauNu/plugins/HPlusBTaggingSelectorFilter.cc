@@ -83,7 +83,7 @@ bool HPlusBTaggingPtrSelectorFilter::filter(edm::Event& iEvent, const edm::Event
     iEvent.put(product);
 
 
-    HPlus::BTagging::Info jetInfos = fBTagging.getPerJetInfo(casted, btagData, iEvent.isRealData());
+    HPlus::BTagging::PerJetInfo jetInfos = fBTagging.getPerJetInfo(casted, btagData, iEvent.isRealData());
     std::auto_ptr<edm::ValueMap<bool> > tagged(new edm::ValueMap<bool>());
     std::auto_ptr<edm::ValueMap<float> > scaleFactor(new edm::ValueMap<float>());
     std::auto_ptr<edm::ValueMap<float> > scaleFactorUncertainty(new edm::ValueMap<float>());

@@ -26,7 +26,7 @@ namespace HPlus {
   class BTagging: public BaseSelection {
   public:
     class Data; // Forward declare because it is used in BTaggingScaleFactor interface
-    struct Info {
+    struct PerJetInfo {
       std::vector<double> scaleFactor; // perJetWeight
       std::vector<double> uncertainty; // perJetWeightUncert
       std::vector<bool> tagged;        // 
@@ -41,6 +41,11 @@ namespace HPlus {
       size_t size() const { return scaleFactor.size(); }
     };
 
+    struct WeightWithUncertainty {
+      double weight;
+      double uncert;
+    };
+
   private:
     class BTaggingScaleFactor {
     public:
@@ -51,21 +56,24 @@ namespace HPlus {
       
       void addBFlavorData(double pT, double scaleFactorB, double scaleFactorUncertaintyB, double epsilonMCB);
       void addNonBFlavorData(double pT, double scaleFactorL, double scaleFactorUncertaintyL, double epsilonMCL);
+
+      //BTagging::PerJetInfo getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const;
+      //BTagging::WeightWithUncertainty calculateJetWeight(edm::Ptr<pat::Jet>& iJet, bool isBTagged) const;
       
-      BTagging::Info getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const;
-      static double calculateScaleFactor(const Info& info);
-      static double calculateAbsoluteUncertainty(const Info& info);
-      static double calculateRelativeUncertainty(const Info& info);
-      
-    private:
-      static size_t obtainIndex(const std::vector<double>& table, double pt);
+      static double calculateScaleFactor(const PerJetInfo& info); // move to class BTaggign
+      static double calculateAbsoluteUncertainty(const PerJetInfo& info); // move to class BTagging
+      static double calculateRelativeUncertainty(const PerJetInfo& info); // move to class BTagging
 
       double getBtagScaleFactor(double,double) const;
       double getBtagScaleFactorError(double,double) const;
       double getMistagScaleFactor(double,double) const;
+      double calculateMistagScaleFactor(double) const;
       double getMistagScaleFactorError(double,double) const;
       double getMCBtagEfficiency(double,double) const;
       double getMCMistagEfficiency(double,double) const;
+
+    private:
+      static size_t obtainIndex(const std::vector<double>& table, double pt);
 
       BTaggingScaleFactorFromDB *btagdb;
       
@@ -77,6 +85,36 @@ namespace HPlus {
       std::vector<double> fScaleFactorUncertaintyL; // b-mistagging scalefactor uncertainty for non-b-flavor jets
       std::vector<double> fEpsilonMCB; // b-tagging efficiency from MC for b-flavor jets
       std::vector<double> fEpsilonMCL; // b-mistagging efficiency from MC for non-b-flavor jets
+    };
+
+    class EfficiencyTable {
+    public:
+      EfficiencyTable();
+      ~EfficiencyTable();
+
+      void addTagEfficiencyData(double pT, double efficiency, double effUncertainty);
+      void addGMistagEfficiencyData(double pT, double efficiency, double effUncertainty);
+      void addUDSMistagEfficiencyData(double pT, double efficiency, double effUncertainty);
+
+      double getTagEfficiency(double) const;
+      double getGMistagEfficiency(double) const;
+      double getUDSMistagEfficiency(double) const;
+      double getTagEffUncertainty(double) const;
+      double getGMistagEffUncertainty(double) const;
+      double getUDSMistagEffUncertainty(double) const;
+
+    private:
+      static size_t obtainIndex(const std::vector<double>& table, double pt);
+
+      std::vector<double> fPtBinsTag; // lower edges of pT bins for b- and c-jets
+      std::vector<double> fPtBinsGMistag; // lower edges of pT bins for g- and light quark jets
+      std::vector<double> fPtBinsUDSMistag; // lower edges of pT bins for l-flavor jets
+      std::vector<double> fEfficiencyTag; // Efficiency of (mis)tagging a b- or c-jet as a b-jet
+      std::vector<double> fEfficiencyGMistag; // Efficiency of mistagging a gluon jet as a b-jet
+      std::vector<double> fEfficiencyUDSMistag; // Efficiency of mistagging a light quark (u, d, s) jet as a b-jet
+      std::vector<double> fEffUncertaintyTag; // Uncertainty of b- and c-jet (mis)tagging efficiency
+      std::vector<double> fEffUncertaintyGMistag; // Uncertainty of gluon jet mistagging efficiency
+      std::vector<double> fEffUncertaintyUDSMistag; // Uncertainty of light quark jet mistagging efficiency
     };
 
   public:
@@ -127,8 +165,9 @@ namespace HPlus {
 
     const std::string getDiscriminator() const { return fDiscriminator; }
 
-    Info getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const;
-
+    PerJetInfo getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const;
+    WeightWithUncertainty calculateJetWeight(edm::Ptr<pat::Jet>&, bool, BTaggingScaleFactor& sf, EfficiencyTable& eff) const;
+    
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
     void analyzeMCTagEfficiencyByJetFlavour(const edm::Ptr<pat::Jet>& jet, const bool isBJet, const bool isCJet, const bool isLightJet);
@@ -152,6 +191,9 @@ namespace HPlus {
 
     // Lookup tables for scale factors
     BTaggingScaleFactor fBTaggingScaleFactor;
+
+    // Lookup tables for tagging efficiencies in MC
+    EfficiencyTable fEfficiencyTable;
 
     // Counters
     Count fTaggedCount;
