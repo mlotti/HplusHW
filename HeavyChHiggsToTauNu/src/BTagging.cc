@@ -30,11 +30,12 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
+  // ================================== class Data ==================================
   BTagging::Data::Data():
     fPassedEvent(false),
     iNBtags(-1),
     fMaxDiscriminatorValue(-999.0),
-    fScaleFactor(1.0), // STR: new name for this variable: bTagEventWeight?
+    fScaleFactor(1.0),
     fScaleFactorAbsoluteUncertainty(0.0),
     fScaleFactorRelativeUncertainty(0.0)
     { }
@@ -48,6 +49,7 @@ namespace HPlus {
     return false;
   }
 
+  // ================================== class BTaggingScaleFactor ==================================
   BTagging::BTaggingScaleFactor::BTaggingScaleFactor() {
     btagdb = 0;
   }
@@ -86,59 +88,6 @@ namespace HPlus {
     return myEnd-1; // return last bin
   }
 
-  //  BTagging::PerJetInfo BTagging::BTgetPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const {
-  //   PerJetInfo bTaggingInfo;
-//     bTaggingInfo.reserve(jets.size());
-
-//     for(edm::PtrVector<pat::Jet>::const_iterator iJet = jets.begin(); iJet != jets.end(); ++iJet) {
-//       bool tagged = false;
-//       for (edm::PtrVector<pat::Jet>::const_iterator iBjet = btagData.fSelectedJets.begin(); iBjet != btagData.fSelectedJets.end(); ++iBjet) {
-// 	if (*iJet == *iBjet) tagged = true;
-//       }
-//       bool genuine = std::abs((*iJet)->partonFlavour()) == 5;
-
-//       // To see how per-jet scale factor and uncertainty are used, see calculateScaleFactor(), calculateAbsoluteUncertainty(), and  calculateRelativeUncertainty()
-//       double scaleFactor = 1.0;
-//       double uncertainty = 0.0;
-//       if(!isData) {
-//         const double pt = (*iJet)->pt();
-//         const double eta = (*iJet)->eta();
-//         if(tagged) {
-//           if(genuine) {
-//             scaleFactor = getBtagScaleFactor(pt, eta);
-//             uncertainty = getBtagScaleFactorError(pt, eta) / scaleFactor;
-// 	    std::cout << "Tagged genuine: " << pt << ", " << eta << ", " << scaleFactor << ", " << uncertainty << std::endl;
-//           }
-//           else {
-// 	    scaleFactor = calculateMistagScaleFactor(pt); // this function calculates the mistag scale factor based on a parametrized function.
-// 	    uncertainty = 0.0; // DUMMY; FIXME
-// //             scaleFactor = getMistagScaleFactor(pt, eta); // Disabled, because mistag scale factors are provided as parametrized functions!
-// //             uncertainty = getMistagScaleFactorError(pt, eta) / scaleFactor;
-// 	    std::cout << "Tagged fake: " << pt << ", " << eta << ", " << scaleFactor << ", " << uncertainty << std::endl;
-//           }
-//         }
-//         else {
-//           if(genuine) {
-//             scaleFactor = (1.-getBtagScaleFactor(pt, eta)*getMCBtagEfficiency(pt, eta)) / (1.-getMCBtagEfficiency(pt, eta));
-//             uncertainty = -1. * getBtagScaleFactorError(pt, eta)*getMCBtagEfficiency(pt, eta) / (1.-getBtagScaleFactor(pt, eta)*getMCBtagEfficiency(pt, eta));
-// 	    std::cout << "Untagged genuine: " << pt << ", " << eta << ", " << scaleFactor << ", " << uncertainty << std::endl;
-//           }
-//           else {
-// 	    double mistagScaleFactorError = 0.0; // DUMMY; FIXME
-//             scaleFactor = (1.-calculateMistagScaleFactor(pt)*getMCMistagEfficiency(pt, eta)) / (1.-getMCMistagEfficiency(pt, eta));
-//             uncertainty = -1. * calculateMistagScaleFactor(pt)*getMCMistagEfficiency(pt, eta) / (1.-calculateMistagScaleFactor(pt)*getMCMistagEfficiency(pt, eta));
-// 	    std::cout << "Untagged fake: " << pt << ", " << eta << ", " << scaleFactor << ", " << uncertainty << std::endl;
-//           }
-// 	}
-//       }
-//       bTaggingInfo.tagged.push_back(tagged);
-//       bTaggingInfo.genuine.push_back(genuine);
-//       bTaggingInfo.scaleFactor.push_back(scaleFactor);
-//       bTaggingInfo.uncertainty.push_back(uncertainty);
-//     }
-//    return bTaggingInfo;
-  //  }
-
   double BTagging::BTaggingScaleFactor::calculateScaleFactor(const PerJetInfo& info) {
     double scaleFactor = 1.0;
     for(size_t i=0; i<info.size(); ++i) {
@@ -169,20 +118,11 @@ namespace HPlus {
   }
 
   double BTagging::BTaggingScaleFactor::getBtagScaleFactor(double pt,double eta) const {
-    if(btagdb==0){
-      int myIndex = obtainIndex(fPtBinsB, pt);
-      return fScaleFactorB[myIndex];
-    } else {
-      return btagdb->getScaleFactors(pt,eta).btagScaleFactor();
-    }
+    return fScaleFactorB[obtainIndex(fPtBinsB, pt)];
   }
 
   double BTagging::BTaggingScaleFactor::getBtagScaleFactorError(double pt,double eta) const {
-    if(btagdb==0){
-      return fScaleFactorUncertaintyB[0];
-    } else {
-      return btagdb->getScaleFactors(pt,eta).btagScaleFactorError();
-    }
+    return fScaleFactorUncertaintyB[obtainIndex(fPtBinsB, pt)];
   }
 
   double BTagging::BTaggingScaleFactor::calculateMistagScaleFactor(double pt) const {
@@ -192,27 +132,14 @@ namespace HPlus {
   }
 
   double BTagging::BTaggingScaleFactor::getMistagScaleFactor(double pt, double eta) const {
-    if(btagdb==0){
-      int myIndex = obtainIndex(fPtBinsB, pt);
-      return fScaleFactorL[myIndex];
-    } else {
-      return btagdb->getScaleFactors(pt,eta).mistagScaleFactor();
-    }
+    return fScaleFactorL[obtainIndex(fPtBinsB, pt)];
   }
 
   double BTagging::BTaggingScaleFactor::getMistagScaleFactorError(double pt, double eta) const {
-    if(btagdb==0){   
-      return fScaleFactorUncertaintyL[0];      
-    } else {
-      return btagdb->getScaleFactors(pt,eta).mistagScaleFactorError();
-    }                                                                                                
+    return fScaleFactorUncertaintyL[obtainIndex(fPtBinsB, pt)];
   }
 
-  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< STR: Move to BTaggingScaleFactor
-
-  
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> STR: Move to BTaggingEfficiencyInMC
-  
+  // ================================== class EfficiencyTable ==================================
   BTagging::EfficiencyTable::EfficiencyTable() { }
 
   BTagging::EfficiencyTable::~EfficiencyTable() { }
@@ -274,11 +201,8 @@ namespace HPlus {
   double BTagging::EfficiencyTable::getUDSMistagEffUncertainty(double pT) const {
     return fEffUncertaintyUDSMistag[obtainIndex(fPtBinsUDSMistag, pT)];
   }
-  
-  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< STR: Move to BTaggingEfficiencyInMC
 
-
-
+  // ================================== class BTagging ==================================
   BTagging::BTagging(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
@@ -392,15 +316,14 @@ namespace HPlus {
     fBTaggingScaleFactor.addBFlavorData(400., .9105263, .0777011, .671);
     fBTaggingScaleFactor.addBFlavorData(500., .9105344, .0866563, .671);
 
-
     // Tagging and mistagging efficiencies in MC
     // Source: Own measurement
-    fEfficiencyTable.addTagEfficiencyData(0.,   .8, .1);
-    fEfficiencyTable.addTagEfficiencyData(100., .9, .05);
-    fEfficiencyTable.addGMistagEfficiencyData(0.,   .05, .03);
-    fEfficiencyTable.addGMistagEfficiencyData(100., .02, .005);
-    fEfficiencyTable.addUDSMistagEfficiencyData(0.,   .08, .01);
-    fEfficiencyTable.addUDSMistagEfficiencyData(100., .09, .06);
+    fEfficiencyTable.addTagEfficiencyData(0.,   .8, .1); // THESE ARE COMPLETE DUMMY VALUES FOR TESTING PURPOSES!!!
+    fEfficiencyTable.addTagEfficiencyData(100., .9, .05); // THESE ARE COMPLETE DUMMY VALUES FOR TESTING PURPOSES!!!
+    fEfficiencyTable.addGMistagEfficiencyData(0.,   .05, .03); // THESE ARE COMPLETE DUMMY VALUES FOR TESTING PURPOSES!!!
+    fEfficiencyTable.addGMistagEfficiencyData(100., .02, .005); // THESE ARE COMPLETE DUMMY VALUES FOR TESTING PURPOSES!!!
+    fEfficiencyTable.addUDSMistagEfficiencyData(0.,   .08, .01); // THESE ARE COMPLETE DUMMY VALUES FOR TESTING PURPOSES!!!
+    fEfficiencyTable.addUDSMistagEfficiencyData(100., .09, .06); // THESE ARE COMPLETE DUMMY VALUES FOR TESTING PURPOSES!!!
   }
 
   BTagging::~BTagging() {
@@ -413,7 +336,6 @@ namespace HPlus {
     // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-
     return privateAnalyze(iEvent, iSetup, jets);
   }
 
@@ -438,10 +360,9 @@ namespace HPlus {
     // Loop over all jets in event
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
-
+      
       // Initialize structure for collecting information (scale factor & uncertainty, tagging status, etc.) of each jet.
-      PerJetInfo bTaggingInfo;
-      bTaggingInfo.reserve(jets.size());
+      fBTaggingInfo.reserve(jets.size());
 
       // Initialize flags
       bool isBTagged = false;
@@ -457,8 +378,6 @@ namespace HPlus {
 	else    isGenuineUDS = true;
       }
       if (isGenuineB) increment(fTaggedAllRealBJetsSubCount); // STR: why "Tagged"? No tagging has been done yet!
-      ////      // Analyze MC tag / mistag efficiencies
-      ////      analyzeMCTagEfficiencyByJetFlavour(iJet, isGenuineB, isGenuineC, isGenuineUDS); // STR: MOVE FUNCTIONALITY TO DESIGNATED CLASS
 
       // Apply transverse momentum cut
       if(iJet->pt() < fPtCut) continue;
@@ -485,32 +404,20 @@ namespace HPlus {
       if (discr > output.fMaxDiscriminatorValue) output.fMaxDiscriminatorValue = discr;
       if (isGenuineB) increment(fTaggedTaggedRealBJetsSubCount); // STR: "TaggedTagged"?!
 
-      //---------------------------- MC ONLY ----------------------------
-      // Calculate the contribution to the event weight for each jet.
-      BTagging::WeightWithUncertainty jetWeightData;
-      //BTagging::WeightWithUncertainty dummyWeightData = jetWeightData;
-      if (!iEvent.isRealData()) jetWeightData = calculateJetWeight(iJet, isBTagged, fBTaggingScaleFactor, fEfficiencyTable);
-
-      // Store the b-tagging information, including per-jet weights
+      // If MC, calculate and store the contribution to the event weight for each jet.
       if (!iEvent.isRealData()) {
-	bTaggingInfo.tagged.push_back(isBTagged);
-	bTaggingInfo.genuine.push_back(isGenuineB);
-	//bTaggingInfo.scaleFactor.push_back(jetWeightData.weight);
-	//bTaggingInfo.uncertainty.push_back(jetWeightData.uncert);
+	BTagging::WeightWithUncertainty jetWeightData;
+	jetWeightData = calculateJetWeight(iJet, isBTagged, fBTaggingScaleFactor, fEfficiencyTable);
+	fBTaggingInfo.tagged.push_back(isBTagged);
+	fBTaggingInfo.genuine.push_back(isGenuineB);
+	fBTaggingInfo.scaleFactor.push_back(jetWeightData.weight);
+	fBTaggingInfo.uncertainty.push_back(jetWeightData.uncert);
       }
     } // End of jet loop
 
-    
-    // STR: Below code is obsolete (?)
-    //     // Calculate event weight (this requires knowledge of the per-jet scale factors and the MC [mis]tagging efficiencies!)
-    //     double probMC, probDATA;
-    //     probMC = 1.0;
-    //     probDATA = 1.0;
-    //     double scaleFactor = probDATA / probMC;
+    if (!iEvent.isRealData()) calculateScaleFactorInfo(fBTaggingInfo, output); // Calculate scale factor and its uncertainty for MC events
 
-    if (!iEvent.isRealData())   calculateScaleFactor(jets, output); // Calculate scale factor for MC events
-
-    // Do some histogramming and set output
+    // Do histogramming and set output
     hNumberOfBtaggedJets->Fill(output.fSelectedJets.size());
     hNumberOfBtaggedJetsIncludingSubLeading->Fill(output.fSelectedJets.size()+output.fSelectedSubLeadingJets.size());
     output.iNBtags = output.fSelectedJets.size();
@@ -522,9 +429,9 @@ namespace HPlus {
       hPt2->Fill(output.fSelectedJets[1]->pt());
       hEta2->Fill(output.fSelectedJets[1]->eta());
     }
-    if(output.fSelectedJets.size() == 0)   increment(fTaggedNoTaggedJet);
-    else if(output.fSelectedJets.size() == 1)   increment(fTaggedOneTaggedJet);
-    else if(output.fSelectedJets.size() == 2)   increment(fTaggedTwoTaggedJets);
+    if(output.fSelectedJets.size() == 0) increment(fTaggedNoTaggedJet);
+    else if(output.fSelectedJets.size() == 1) increment(fTaggedOneTaggedJet);
+    else if(output.fSelectedJets.size() == 2) increment(fTaggedTwoTaggedJets);
 
     output.fPassedEvent= fNumberOfBJets.passedCut(output.fSelectedJets.size());
     if (output.fPassedEvent)
@@ -583,82 +490,24 @@ namespace HPlus {
     return weightData;
   }
 
-  // Move functionality to designated class, then remove this function. But first find out, why it gives different results from our method.
-  void BTagging::analyzeMCTagEfficiencyByJetFlavour(const edm::Ptr<pat::Jet>& jet, const bool isBJet, const bool isCJet, const bool isLightJet) {
-    // Plot histograms for leading discriminator
-    if (isBJet) {
-      hMCAllBJetsByPt->Fill(jet->pt());
-      hMCAllBJetsByPtAndEta->Fill(jet->pt(),jet->eta());
-    } else if (isCJet) {
-      hMCAllCJetsByPt->Fill(jet->pt());
-      hMCAllCJetsByPtAndEta->Fill(jet->pt(),jet->eta());
-    } else if (isLightJet) {
-      hMCAllLightJetsByPt->Fill(jet->pt());
-      hMCAllLightJetsByPtAndEta->Fill(jet->pt(),jet->eta());
-    }
-    bool myPassedLeadingDiscriminator = jet->bDiscriminator(fDiscriminator) > fLeadingDiscrCut;
-    if (myPassedLeadingDiscriminator) {
-      // jet passed b tag
-      if (isBJet) {
-        hMCBtaggedBJetsByPt->Fill(jet->pt());
-        hMCBtaggedBJetsByPtAndEta->Fill(jet->pt(),jet->eta());
-      } else if (isCJet) {
-        hMCBtaggedCJetsByPt->Fill(jet->pt());
-        hMCBtaggedCJetsByPtAndEta->Fill(jet->pt(),jet->eta());
-      } else if (isLightJet) {
-        hMCBtaggedLightJetsByPt->Fill(jet->pt());
-        hMCBtaggedLightJetsByPtAndEta->Fill(jet->pt(),jet->eta());
-      }
-    } else {
-      // jet did not pass b tag
-      if (isBJet) {
-        hMCBmistaggedBJetsByPt->Fill(jet->pt());
-        hMCBmistaggedBJetsByPtAndEta->Fill(jet->pt(),jet->eta()); // STR: "Bmistagged" IS VERY MISLEADING! What is meant is "not b-tagged"
-      } else if (isCJet) {
-        hMCBmistaggedCJetsByPt->Fill(jet->pt());
-        hMCBmistaggedCJetsByPtAndEta->Fill(jet->pt(),jet->eta()); // STR: "Bmistagged" IS VERY MISLEADING! What is meant is "not b-tagged"
-      } else if (isLightJet) {
-        hMCBmistaggedLightJetsByPt->Fill(jet->pt());
-        hMCBmistaggedLightJetsByPtAndEta->Fill(jet->pt(),jet->eta()); // STR: "Bmistagged" IS VERY MISLEADING! What is meant is "not b-tagged"
-      }
-    }
-  }
-
   BTagging::PerJetInfo BTagging::getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const {
     BTagging::PerJetInfo dummy;
     return dummy;
 //     return fBTaggingScaleFactor.getPerJetInfo(jets, btagData, isData);
   }
 
+  void BTagging::calculateScaleFactorInfo(PerJetInfo& bTaggingInfo, BTagging::Data& output) {
+    output.fScaleFactor = fBTaggingScaleFactor.calculateScaleFactor(bTaggingInfo);
+    output.fScaleFactorAbsoluteUncertainty = fBTaggingScaleFactor.calculateAbsoluteUncertainty(bTaggingInfo);
+    output.fScaleFactorRelativeUncertainty = fBTaggingScaleFactor.calculateRelativeUncertainty(bTaggingInfo);
 
-
-//   BTagging::WeightWithUncertainty BTagging::calculateJetWeight(edm::Ptr<pat::Jet>& iJet, bool isBTagged) const {
-//     return fBTaggingScaleFactor.calculateJetWeight(iJet, isBTagged);
-//   }
-
-
-  
-  void BTagging::calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, BTagging::Data& btagData) {
-//     PerJetInfo jetInfos = fBTaggingScaleFactor.getPerJetInfo(jets, btagData, false); // assume this method is called only for MC!
-//     btagData.fScaleFactor = fBTaggingScaleFactor.calculateScaleFactor(jetInfos);
-//     btagData.fScaleFactorAbsoluteUncertainty = fBTaggingScaleFactor.calculateAbsoluteUncertainty(jetInfos);
-//     btagData.fScaleFactorRelativeUncertainty = fBTaggingScaleFactor.calculateRelativeUncertainty(jetInfos);
-
-//     // Do the variation, if asked
-//     if(fVariationEnabled) {
-//       btagData.fScaleFactor += fVariationShiftBy*btagData.fScaleFactorAbsoluteUncertainty;
-//       // These are meaningless after the variation:
-//       btagData.fScaleFactorAbsoluteUncertainty = 0;
-//       btagData.fScaleFactorRelativeUncertainty = 0;
-//     }
-
-//     /*std::cout << "btagSF debug: jets=" << jets.size() << " bjets=" << bjets.size() << " nb=" << nBJetsPassed << ", nbf pT=";
-//     for (std::vector<double>::iterator it = fBJetsFailedPt.begin(); it != fBJetsFailedPt.end(); ++it) { std::cout << " " << *it; }
-//     std::cout << " nl=" << nLightJetsPassed << ", nlf pT=";
-//     for (std::vector<double>::iterator it = fLightJetsFailedPt.begin(); it != fLightJetsFailedPt.end(); ++it) { std::cout << " " << *it; }
-//     std::cout << " scalefactor= " << fScaleFactor << ", rel.syst.=" << fBTaggingScaleFactor.getRelativeUncertainty(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt) << std::endl;*/
-
-//     //std::cout << "bjets=" << nBJets << ", light jets=" << nLightJets << ", scale factor=" << fScaleFactor << std::endl;
+    // Do the variation, if asked
+    if(fVariationEnabled) {
+      output.fScaleFactor += fVariationShiftBy * output.fScaleFactorAbsoluteUncertainty;
+      // These are meaningless after the variation:
+      output.fScaleFactorAbsoluteUncertainty = 0;
+      output.fScaleFactorRelativeUncertainty = 0;
+    }
   }
 
   void BTagging::fillScaleFactorHistograms(BTagging::Data& input) {
@@ -666,5 +515,4 @@ namespace HPlus {
     hBTagAbsoluteUncertainty->Fill(input.getScaleFactorAbsoluteUncertainty());
     hBTagRelativeUncertainty->Fill(input.getScaleFactorRelativeUncertainty());
   }
-
 }

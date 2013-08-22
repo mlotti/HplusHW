@@ -56,13 +56,10 @@ namespace HPlus {
       
       void addBFlavorData(double pT, double scaleFactorB, double scaleFactorUncertaintyB, double epsilonMCB);
       void addNonBFlavorData(double pT, double scaleFactorL, double scaleFactorUncertaintyL, double epsilonMCL);
-
-      //BTagging::PerJetInfo getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const;
-      //BTagging::WeightWithUncertainty calculateJetWeight(edm::Ptr<pat::Jet>& iJet, bool isBTagged) const;
-      
-      static double calculateScaleFactor(const PerJetInfo& info); // move to class BTaggign
-      static double calculateAbsoluteUncertainty(const PerJetInfo& info); // move to class BTagging
-      static double calculateRelativeUncertainty(const PerJetInfo& info); // move to class BTagging
+   
+      static double calculateScaleFactor(const PerJetInfo& info);
+      static double calculateAbsoluteUncertainty(const PerJetInfo& info);
+      static double calculateRelativeUncertainty(const PerJetInfo& info);
 
       double getBtagScaleFactor(double,double) const;
       double getBtagScaleFactorError(double,double) const;
@@ -171,7 +168,7 @@ namespace HPlus {
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
     void analyzeMCTagEfficiencyByJetFlavour(const edm::Ptr<pat::Jet>& jet, const bool isBJet, const bool isCJet, const bool isLightJet);
-    void calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, BTagging::Data& btagData);
+    void calculateScaleFactorInfo(PerJetInfo& bTaggingInfo, BTagging::Data& output);
 
     // Input parameters
     edm::InputTag fSrc;
@@ -188,6 +185,9 @@ namespace HPlus {
     const double fVariationShiftBy;
     BTaggingScaleFactorFromDB *btagDB;
     bool FactorsFromDB;
+
+    // Object for storing weigth information
+    PerJetInfo fBTaggingInfo;
 
     // Lookup tables for scale factors
     BTaggingScaleFactor fBTaggingScaleFactor;
