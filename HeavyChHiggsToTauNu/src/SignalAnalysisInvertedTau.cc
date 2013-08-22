@@ -209,7 +209,7 @@ namespace HPlus {
 
     // baseline MET histos
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterJets, "METBaselineTauIdAfterJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSF, "METBaselineTauIdaFTERMetSF", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSF, "METBaselineTauIdAfterMetSF", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSFPlusBtag, "METBaselineTauIdAfterMetSFPlusBtag", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSFPlusBveto, "METBaselineTauIdAfterMetSFPlusBveto", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearCuts, "METBaselineTauIdAfterCollinearCuts", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
