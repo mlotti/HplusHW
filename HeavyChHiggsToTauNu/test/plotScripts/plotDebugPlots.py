@@ -148,24 +148,26 @@ def doPlots(myDsetMgr, opts, mySuffix):
     mcArgs = {"fullyBlinded": True, "addBlindedText": False}
 
     # Common plots
-    myCommonPlotDirs = ["VertexSelection","TauSelection","TauWeight","ElectronVeto","MuonVeto","JetSelection","MET","BTagging","Selected","FakeTaus_BTagging","FakeTaus_Selected"]
+    myCommonPlotDirs = ["TauSelection","TauWeight","ElectronVeto","MuonVeto","JetSelection","MET","BTagging","Selected","FakeTaus_BTagging","FakeTaus_Selected"]
     def createDrawCommonPlot(path, **kwargs):
         for plotDir in myCommonPlotDirs:
             args = {}
             args.update(kwargs)
-            if "transverseMass" in path:
-                if "BTagging" in plotDir or "Selected" in plotDir:
-                    args["customizeBeforeFrame"] = lambda p: plots.partiallyBlind(p, maxShownValue=60)
-            elif "Selected" in plotDir:
-                args["fullyBlinded"] = True
-            if "FakeTaus" in plotDir:
-                args.update(mcArgs)
             createDrawPlot(path%plotDir, **args)
+            
+            #if "transverseMass" in path:
+                #if "BTagging" in plotDir or "Selected" in plotDir:
+                    #args["customizeBeforeFrame"] = lambda p: plots.partiallyBlind(p, maxShownValue=60)
+            #elif "Selected" in plotDir:
+                #args["fullyBlinded"] = True
+            #if "FakeTaus" in plotDir:
+                #args.update(mcArgs)
+            #createDrawPlot(path%plotDir, **args)
 
     #phiBinWidth = 2*3.14159/72
     phiBinWidth = 2*3.14159/36
 
-    createDrawPlot("CommonPlots/AtEveryStep/Trigger/nVertices", xlabel="N_{Vertices}")
+    #createDrawPlot("CommonPlots/AtEveryStep/Trigger/nVertices", xlabel="N_{Vertices}")
     createDrawCommonPlot("CommonPlots/AtEveryStep/%s/nVertices", xlabel="N_{Vertices}")
     createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_fakeStatus", xlabel="Fake tau status", **mcArgs)
     createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_pT", xlabel="#tau p_{T}, GeV/c", rebinToWidthX=10)
@@ -192,8 +194,8 @@ def doPlots(myDsetMgr, opts, mySuffix):
     createDrawPlot(myDir+"/verticesBeforeWeight", xlabel="N_{vertices}")
     createDrawPlot(myDir+"/verticesBeforeWeight", xlabel="N_{vertices}")
     createDrawPlot(myDir+"/verticesAfterWeight", xlabel="N_{vertices}")
-    createDrawPlot(myDir+"/verticesTriggeredBeforeWeight", xlabel="N_{vertices}")
-    createDrawPlot(myDir+"/verticesTriggeredAfterWeight", xlabel="N_{vertices}")
+    #createDrawPlot(myDir+"/verticesTriggeredBeforeWeight", xlabel="N_{vertices}")
+    #createDrawPlot(myDir+"/verticesTriggeredAfterWeight", xlabel="N_{vertices}")
     myDir = "TauSelection"
     createDrawPlot(myDir+"/N_TriggerMatchedTaus", xlabel="N_{trg. matched taus}")
     createDrawPlot(myDir+"/N_TriggerMatchedSeparateTaus", xlabel="N_{trg. matched separate taus}")
