@@ -70,8 +70,6 @@ namespace HPlus {
       void incrementBTaggingCounter() { increment(fBTaggingCounter); }
       void incrementDeltaPhiBackToBackCounter() { increment(fDeltaPhiBackToBackCounter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
-      void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
-      void incrementTopChiSelectionCounter() { increment(fTopChiSelectionCounter); } //TODO: are these needed?!?!
       void incrementSelectedEventsCounter() { increment(fSelectedEventsCounter); }
       void incrementSelectedEventsFullMassCounter() { increment(fSelectedEventsFullMassCounter); }
 
@@ -84,8 +82,6 @@ namespace HPlus {
       Count fMETCounter;
       Count fBTaggingCounter;
       Count fDeltaPhiBackToBackCounter;
-      Count fTopSelectionCounter;
-      Count fTopChiSelectionCounter; //TODO: do these have any function anymore?
       Count fSelectedEventsCounter;
       Count fSelectedEventsFullMassCounter;
       Count fFakeMETVetoCounter;
@@ -212,15 +208,6 @@ namespace HPlus {
     Count fTauIsElectronFromJetCounter;
     Count fTauIsMuonFromJetCounter;
     Count fTauIsHadronFromJetCounter;
-
-    // Counters for different top algorithms
-    /*Count fTopSelectionCounter;
-    Count fTopChiSelectionCounter;
-    Count fTopWithMHSelectionCounter;
-    Count fTopWithBSelectionCounter; 
-    Count fTopWithWSelectionCounter; */
-
-    
     
     Count fSelectedEventsCounterWithGenuineBjets;
 
@@ -235,11 +222,6 @@ namespace HPlus {
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
-    //TopChiSelection fTopChiSelection;
-    /* TopSelection fTopSelection;
-    TopWithBSelection fTopWithBSelection;
-    TopWithWSelection fTopWithWSelection; */
-    //    TopWithMHSelection fTopWithMHSelection;
     BjetSelection fBjetSelection;
     //    BjetWithPtSelection fBjetWithPtSelection;
     TopSelectionManager fTopSelectionManager;

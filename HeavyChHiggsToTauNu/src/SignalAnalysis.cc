@@ -41,8 +41,6 @@ namespace HPlus {
     fMETCounter(eventCounter.addCounter("EWKfaketaus:MET")),
     fBTaggingCounter(eventCounter.addCounter("EWKfaketaus:btagging")),
     fDeltaPhiBackToBackCounter(eventCounter.addCounter("EWKfaketaus:deltaphi backtoback")),
-    fTopSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top Selection cut")),
-    fTopChiSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top Chi Selection cut")),
     fSelectedEventsCounter(eventCounter.addCounter("EWKfaketaus:SelectedEvents")),
     fSelectedEventsFullMassCounter(eventCounter.addCounter("EWKfaketaus:SelectedEventsFullMass")),
     fFakeMETVetoCounter(eventCounter.addCounter("EWKfaketaus:fake MET veto")) { }
@@ -55,8 +53,6 @@ namespace HPlus {
     fMETCounter(eventCounter.addSubCounter(prefix,":MET")),
     fBTaggingCounter(eventCounter.addSubCounter(prefix,":btagging")),
     fDeltaPhiBackToBackCounter(eventCounter.addSubCounter(prefix,":deltaphi backtoback")),
-    fTopSelectionCounter(eventCounter.addSubCounter(prefix,":Top Selection cut")),
-    fTopChiSelectionCounter(eventCounter.addSubCounter(prefix,":Top Chi Selection cut")),
     fSelectedEventsCounter(eventCounter.addSubCounter(prefix,"EWKfaketaus:SelectedEvents")),
     fSelectedEventsFullMassCounter(eventCounter.addSubCounter(prefix,"EWKfaketaus:SelectedEventsFullMass")),
     fFakeMETVetoCounter(eventCounter.addSubCounter(prefix,":fake MET veto")) { }
@@ -146,12 +142,6 @@ namespace HPlus {
     fTauIsElectronFromJetCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from jet->e")),
     fTauIsMuonFromJetCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from jet->mu")),
     fTauIsHadronFromJetCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from jet->hadron")),
-    // Counters for different top algorithms
-/*    fTopSelectionCounter(eventCounter.addSubCounter("top", "Top selection")),
-    fTopChiSelectionCounter(eventCounter.addSubCounter("top", "Top Chi Selection")),
-    fTopWithMHSelectionCounter(eventCounter.addCounter("Top after Inv Mass selection")),
-    fTopWithBSelectionCounter(eventCounter.addSubCounter("top", "Top with B Selection")),
-    fTopWithWSelectionCounter(eventCounter.addSubCounter("top", "Top with W Selection")), */
 
     fSelectedEventsCounterWithGenuineBjets(eventCounter.addCounter("Selected events with genuine bjets")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
@@ -244,8 +234,8 @@ namespace HPlus {
     fCommonPlotsSelectedFullMassFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedFullMass",false,"FakeTaus_SelectedFullMass"))    
   {
     // Check parameter initialisation
-    if (fTopRecoName != "None" && fTopRecoName != "chi" && fTopRecoName != "std" && fTopRecoName != "Wselection") {
-      throw cms::Exception("config") << "selected topReconstruction is invalid! Valid options are: None, chi, std, Wselection";
+    if (fTopRecoName != "None" && fTopRecoName != "chi" && fTopRecoName != "std" && fTopRecoName != "Wselection" && fTopRecoName != "Bselection") {
+      throw cms::Exception("config") << "selected topReconstruction is invalid! Valid options are: None, chi, std, Wselection, Bselection";
     }
 
     edm::Service<TFileService> fs;
@@ -692,67 +682,17 @@ namespace HPlus {
     hDeltaPhi->Fill(deltaPhi);
     if (myFakeTauStatus) hEWKFakeTausDeltaPhi->Fill(deltaPhi);
 
-// Top reconstruction
+//------ Top reconstruction
 
-    //constructing and initializing fTopSelectionManager
     BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
     
-    //running the analyze //TODO: do whis work?
     TopSelectionManager::Data TopSelectionData = fTopSelectionManager.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), BjetSelectionData.getBjetTopSide(), BjetSelectionData.passedEvent());
-    //fCommonPlots.fillControlPlotsAtTopSelection(iEvent, TopSelectionData);
+    //fCommonPlots.fillControlPlotsAtTopSelection(iEvent, TopSelectionData); TODO: implement (if needed)
     
     if (!(TopSelectionData.passedEvent()))
       return false;
     increment(fTopReconstructionCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderTopSelection, tauData);
-
-/** OLD Top reconstruction
-    
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    if (TopSelectionData.passedEvent() ) {
-      increment(fTopSelectionCounter);
-      hTransverseMassTopSelection->Fill(transverseMass);
-    }
-
-    TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    if (TopChiSelectionData.passedEvent() ) {
-      increment(fTopChiSelectionCounter);
-      hTransverseMassTopChiSelection->Fill(transverseMass);
-    }
-
-    bool myTopRecoWithWSelectionStatus = false;
-    BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
-    if (BjetSelectionData.passedEvent() ) {
-      TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
-      if (TopWithBSelectionData.passedEvent() ) {
-        increment(fTopWithBSelectionCounter);
-        hTransverseMassTopBjetSelection->Fill(transverseMass);
-      }
-      TopWithWSelection::Data TopWithWSelectionData = fTopWithWSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
-      if (TopWithWSelectionData.passedEvent() ) {
-        myTopRecoWithWSelectionStatus = true;
-        increment(fTopWithWSelectionCounter);
-        hTransverseMassTopWithWSelection->Fill(transverseMass);
-      }
-    }
-    // Select events depending on top resonctruction
-    bool myPassedTopRecoStatus = false;
-    if (fTopRecoName == "None")
-      myPassedTopRecoStatus = true;
-    else if (fTopRecoName == "std")
-      myPassedTopRecoStatus = TopSelectionData.passedEvent();
-    else if (fTopRecoName == "chi")
-      myPassedTopRecoStatus = TopChiSelectionData.passedEvent();
-    else if (fTopRecoName == "Wselection")
-      myPassedTopRecoStatus = myTopRecoWithWSelectionStatus;
-//What is this?!?!:
-    fCommonPlots.fillControlPlotsAtTopSelection(iEvent, TopChiSelectionData);
-//These are included in the new implementation too:
-    if (!myPassedTopRecoStatus)
-      return false;
-    increment(fTopReconstructionCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderTopSelection, tauData);
-*/
 
 //------ Calculate alphaT
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau());
@@ -871,9 +811,10 @@ namespace HPlus {
     // b tagging, no event cut
     BTagging::Data btagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
 
-    // Top reco, no event cut   //TODO: could we use previous one?
-    TopSelectionManager::Data TopSelectionData = fTopSelectionManager.fTopSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    BjetSelection::Data BjetSelectionData = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+    // Top reco, no event cut 
+    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
+    BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
+    TopSelectionManager::Data TopSelectionData = fTopSelectionManager.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), BjetSelectionData.getBjetTopSide(), BjetSelectionData.passedEvent());
   
     // Calculate event topology variables (alphaT, sphericity, aplanarity etc..)
     EvtTopology::Data evtTopologyData = fEvtTopology.silentAnalyze(iEvent, iSetup, *(selectedTau), jetData.getSelectedJetsIncludingTau());
@@ -1261,8 +1202,8 @@ namespace HPlus {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementFakeMETVetoCounter();
       myCounterGroup->incrementFakeMETVetoCounter();
     } else if (selection == kSignalOrderTopSelection) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementTopSelectionCounter();
-      myCounterGroup->incrementTopSelectionCounter();
+      //if (myFakeTauStatus) fEWKFakeTausGroup.incrementTopSelectionCounter();
+      //myCounterGroup->incrementTopSelectionCounter();
     } else if (selection == kSignalOrderDeltaPhiCollinearSelection) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementDeltaPhiCollinearCounter();
       myCounterGroup->incrementDeltaPhiCollinearCounter();
@@ -1298,7 +1239,7 @@ namespace HPlus {
       } else if (selection == kSignalOrderFakeMETVeto) {
         mySpecialGroup->incrementFakeMETVetoCounter();
       } else if (selection == kSignalOrderTopSelection) {
-        mySpecialGroup->incrementTopSelectionCounter();
+        //mySpecialGroup->incrementTopSelectionCounter();
       } else if (selection == kSignalOrderSelectedEvents) {
         mySpecialGroup->incrementSelectedEventsCounter();
       } else if (selection == kSignalOrderSelectedEventsFullMass) {

@@ -30,11 +30,11 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addBJetEtVariation([])
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,170.0,160.0,150.0])
-#myOptimisation.addTopRecoVariation(["None"]) # Valid options: None, chi, std, Wselection
+#myOptimisation.addTopRecoVariation(["None,chi,std,Wselection,Beselection"]) # Valid options: None, chi, std, Wselection, Bselection
 
 def customize(signalAnalysis):
     # Apply beta cut for jets to reject PU jets
-#    signalAnalysis.jetSelection.jetPileUpWorkingPoint = "tight" # 
+#    signalAnalysis.jetSelection.jetPileUpWorkingPoint = "tight"
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
 #    signalAnalysis.MET.METCut = 100.0
 #    signalAnalysis.MET.preMETCut = 30.0
@@ -73,7 +73,6 @@ process.source.fileNames = [
     ]
 
 if builder.options.tauEmbeddingInput != 0:
-
     if builder.dataVersion.isMC():
         process.source.fileNames = [
             "file:skim_TTJetsFall11.root"
