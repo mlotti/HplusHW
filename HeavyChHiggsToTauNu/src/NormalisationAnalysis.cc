@@ -14,19 +14,21 @@ namespace HPlus {
   NormalisationAnalysis::NormalisationAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label) :
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper) {
-      createHistograms(label);
+      createCommonHistograms(label);
   }
 
   NormalisationAnalysis::NormalisationAnalysis(EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label) :
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper) {
-      createHistograms(label);
+      createCommonHistograms(label);
   }
 
-  void NormalisationAnalysis::createHistograms(std::string label) {
+  void NormalisationAnalysis::createCommonHistograms(std::string label) {
     edm::Service<TFileService> fs;
     TFileDirectory myBaseDir = fs->mkdir("NormalisationAnalysis");
     TFileDirectory myDir = myBaseDir.mkdir(label.c_str());
+    fMyDir += "NormalisationAnalysis/";
+    fMyDir += label;
 
     hTauPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tauPt", "tauPt;tau p_{T} / GeV/c;N_{events}", 50, 0, 500);
     hNJets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "nJets", "nJets;N_{jets};N_{events}", 20, 0, 20);
@@ -43,7 +45,6 @@ namespace HPlus {
     hFakeTauNBJets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "fakeTauNBJets", "fakeTauNBJets;N_{b jets};N_{events}", 20, 0, 20);
     hFakeTauTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "fakeTauTransverseMass", "fakeTauTransverseMass;m_{T} / GeV/c^{2};N_{events}", 50, 0, 500);
     hFakeTauZMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "fakeTauZMass", "fakeTauZMass;m_{Z} / GeV/c^{2};N_{events}", 30, 0, 300);
-
   }
 
   NormalisationAnalysis::~NormalisationAnalysis() {}
@@ -58,5 +59,7 @@ namespace HPlus {
                                       const QCDTailKiller::Data& tailKillerData,
                                       const METSelection::Data& metData,
                                       const BTagging::Data& btagData) { }
+
+  void NormalisationAnalysis::createHistogramsAndCounters() { }
 
 }

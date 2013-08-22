@@ -136,7 +136,7 @@ class InvertedTauID:
 	self._minGoodNormalisedChi2ForFit = 0.1
 	
 	# Parameters for fitting (use 'max' for maximum from histogram range)
-	self._metFitRangeMin = 30.0 # FIXME this should be obtained automatically from the parameterset object in the root files
+	self._metFitRangeMin = 0.0 # FIXME this should be obtained automatically from the parameterset object in the root files
 	self._metFitRangeMaxForCutEfficiency = 75.0
 	self._metFitRangeMaxForQCDFit = "max"
 	self._metFitRangeMaxForEWKFit = "max"
@@ -1258,8 +1258,6 @@ class InvertedTauID:
 
         # FIXME: why calculate integral with 'width' -parameter?
         integralValue = int(0.5 + histo.Integral(0,histo.GetNbinsX(),"width"))
-        #print histo.GetName(),"Integral",histo.Integral(0,histo.GetNbinsX(),"width")
-        print histo.GetName(),"Integral",histo.Integral(0,histo.GetNbinsX())
         histograms.addText(0.4,0.7,"Integral = %s ev"% integralValue) 
 
         # NOTE: assignment of nBaseQCD and nInvQCD is done at fitQCD and fitEWK (because someone could accidentally use this method to do something else ...)
@@ -1396,15 +1394,15 @@ class InvertedTauID:
 	if self.label == "Baseline":
 	    rangeMax = 240
 
-	if self.label == "7080":
+	if histo.GetTitle() == "#tau p_{T}=70..80": # FIXME: now use something like '#tau p_{T}=150..200'
 	    theFit.SetParLimits(5,10,100)
 
-#	if self.label == "100120":
+#	if self.label == "#tau p_{T}=100..120":
 #	    theFit.SetParLimits(0,1,20)
 #	    theFit.SetParLimits(2,1,25)
 #	    theFit.SetParLimits(3,0.1,20)
 
-	if self.label == "120150":
+	if histo.GetTitle() == "#tau p_{T}=120..150":
             theFit.SetParLimits(0,1,20)
             theFit.SetParLimits(3,0.1,5)
 
@@ -1472,44 +1470,44 @@ class InvertedTauID:
         theFit.SetParLimits(1,90,200)
         theFit.SetParLimits(2,30,100) 
         theFit.SetParLimits(3,0.001,1)
-        if "41to50" in self.label:
+        if "#tau p_{T}=41..50" in histo.GetTitle():
             theFit.SetParLimits(0,5,20) 
             theFit.SetParLimits(1,90,120)
             theFit.SetParLimits(2,30,50)
             theFit.SetParLimits(3,0.001,1)
-	elif "50to60" in self.label:
+	elif "#tau p_{T}=50..60" in histo.GetTitle():
             theFit.SetParLimits(0,5,20)     
             theFit.SetParLimits(1,90,120)   
             theFit.SetParLimits(2,20,50)
             theFit.SetParLimits(3,0.001,1)
-        elif "60to70" in self.label:
+        elif "#tau p_{T}=60..70" in histo.GetTitle():
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,90,150)
             theFit.SetParLimits(2,20,50)
             theFit.SetParLimits(3,0.001,1)
-        elif "70to80" in self.label:
+        elif "#tau p_{T}=70..80" in histo.GetTitle():
             theFit.SetParLimits(0,5,60)
             theFit.SetParLimits(1,90,200)
             theFit.SetParLimits(2,20,100)
             theFit.SetParLimits(3,0.001,1)
-        elif "80to100" in self.label:
+        elif "#tau p_{T}=80..100" in histo.GetTitle():
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,50,170)
             theFit.SetParLimits(2,20,60)
             theFit.SetParLimits(3,0.001,1)
-        elif "100to120" in self.label:
+        elif "#tau p_{T}=100..120" in histo.GetTitle():
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,90,170)
             theFit.SetParLimits(2,20,60) 
             theFit.SetParLimits(3,0.001,1)
-        elif "120to150" in self.label:
+        elif "#tau p_{T}=120..150" in histo.GetTitle():
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,60,170)
             theFit.SetParLimits(2,10,100)
             theFit.SetParLimits(3,0.001,1)
         else:
-            #if self.label == "150":
-            print "Warning: Using fallback fit settings in InvertedTauID::fitEWK() for label %s"%self.label
+            #if histo.GetTitle() == "150":
+            print WarningLabel()+"Using fallback fit settings in InvertedTauID::fitEWK() for label %s"%self.label
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,70,170)
             theFit.SetParLimits(2,20,100)
@@ -1570,6 +1568,7 @@ class InvertedTauID:
         nFitInvQCD = self.nFitInvQCD
         nMCEWK     = self.nMCEWK
 
+        print nInvQCD,nFitInvQCD,nMCEWK
         class FitFunction:
             def __call__( self, x, par ):
                 return par[0]*(par[1] * QCDFunction(x,parInvQCD,1/nFitInvQCD) + ( 1 - par[1] ) * EWKFunction(x,parMCEWK,1/nMCEWK))
@@ -1849,7 +1848,7 @@ class InvertedTauID:
         print "\nNow run plotSignalAnalysisInverted.py with these normalization factors.\n"
 
 
-    def WriteNormalizationToFile(self,filename):
+    def WriteNormalizationToFile(self,filename,era,searchMode,optimizationMode):
 	fOUT = open(filename,"w")
 
 	now = datetime.datetime.now()
@@ -1858,6 +1857,9 @@ class InvertedTauID:
 	fOUT.write("# by %s\n"%os.path.basename(sys.argv[0]))
         fOUT.write("\n")
 	fOUT.write("QCDInvertedNormalization = {\n")
+	fOUT.write('    "era": "%s",\n'%era)
+	fOUT.write('    "searchMode": "%s",\n'%searchMode)
+	fOUT.write('    "optimizationMode": "%s",\n'%optimizationMode)
         i = 0
         while i < len(self.normFactors):
 	    line = "    \"" + self.labels[i] + "\": " + str(self.normFactors[i])
