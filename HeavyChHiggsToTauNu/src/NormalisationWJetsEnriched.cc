@@ -45,7 +45,7 @@ namespace HPlus {
     }
 
     // Do collinear tail killer
-    if (!tailKillerData.passedCollinearCuts()) return;
+    //if (!tailKillerData.passedCollinearCuts()) return;
 
     // Do MET cut
     if (!metData.passedEvent()) return;
@@ -59,7 +59,7 @@ namespace HPlus {
     }
 
     // Do back-to-back tail killer
-    if (!tailKillerData.passedBackToBackCuts()) return;
+    //if (!tailKillerData.passedBackToBackCuts()) return;
 
     // Fill plots
     fillPlotsAfterSelection(fakeTauData.isFakeTau(), tauData, jetData, metData, btagData, myEventWeight);
@@ -172,7 +172,7 @@ namespace HPlus {
     }
 
     // Do collinear tail killer
-    if (!tailKillerData.passedCollinearCuts()) return;
+    //if (!tailKillerData.passedCollinearCuts()) return;
 
     // Do MET cut
     if (!metData.passedEvent()) return;
@@ -186,7 +186,7 @@ namespace HPlus {
     }
 
     // Do back-to-back tail killer
-    if (!tailKillerData.passedBackToBackCuts()) return;
+    //if (!tailKillerData.passedBackToBackCuts()) return;
 
     // Reconstruct Z mass from muon and tau
     double myZMass = (muonData.getSelectedTightMuons()[0]->p4() + tauData.getSelectedTau()->p4()).mass();
