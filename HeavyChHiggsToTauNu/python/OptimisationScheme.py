@@ -1,8 +1,23 @@
 import FWCore.ParameterSet.Config as cms
 import sys
 import ctypes
+import copy
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+
+class Scenario:
+    def __init__(self, *args, **kwargs):
+        if len(args) != 1:
+            raise Exception("You must give exactly one positional argument for the scenario name, got %d" % len(args))
+        self._name = args[0]
+        self._data = copy.deepcopy(kwargs)
+
+    def applyToPSet(self, pset):
+        for key, value in self._data.iteritems():
+            setattr(pset, key, value)
+
+    def __str__(self):
+        return self._name
 
 class OptimisationItem:
     def __init__(self, name, variationList, attributeToChange, formatString):
@@ -20,7 +35,7 @@ class OptimisationItem:
         return len(self._variationList)
 
     def getSuffixForName(self, idx):
-        return self._formatString%(self._variationList[idx])
+        return self._formatString%self._variationList[idx]
 
     def setVariation(self, module, idx):
         def deepgetattr(obj, attr):
@@ -32,7 +47,10 @@ class OptimisationItem:
             if len(attr.split(".")) > 1:
                 deepsetattr(getattr(obj, attr.split(".")[0]), attr[attr.find(".")+1:], value)
             else:
-                setattr(obj, attr, value)
+                if hasattr(value, "applyToPSet"):
+                    value.applyToPSet(getattr(obj, attr))
+                else:
+                    setattr(obj, attr, value)
 
         if self.isDirectionalParameter():
             # separate direction and digit (operators are "GT","GEQ","NEQ","EQ","LT","LEQ")
@@ -93,7 +111,7 @@ class HPlusOptimisationScheme:
         self._variationItems.append(OptimisationItem("btag discriminator", values, "bTagging.leadingDiscriminatorCut", "Bdiscr%.1f"))
 
     def addBJetSubLeadingDiscriminatorVariation(self, values):
-        self._variationItems.append(OptimisationItem("btag subleading discriminator", values, "bTagging.bjetSubLeadingDiscr", "Bsubdiscr%.1f"))
+        self._variationItems.append(OptimisationItem("btag subleading discriminator", values, "bTagging.subleadingDiscriminatorCut", "Bsubdiscr%.1f"))
 
     def addBJetNumberVariation(self, values):
         self._variationItems.append(OptimisationItem("btag Njets", values, "bTagging.jetNumber", "Bjets%d"))
@@ -101,8 +119,14 @@ class HPlusOptimisationScheme:
     def addBJetEtVariation(self, values):
         self._variationItems.append(OptimisationItem("btag pT", values, "bTagging.ptCut", "BpT%.0f"))
 
+    def addBTagVariations(self, scenarios):
+        self._variationItems.append(OptimisationItem("btag", scenarios, "bTagging", "Btag%s"))
+
     def addTopRecoVariation(self, values):
         self._variationItems.append(OptimisationItem("top reco algorithm", values, "topReconstruction", "Top%s"))
+
+    def addInvariantMassVariation(self, scenarios):
+        self._variationItems.append(OptimisationItem("invariant mass algorithm", scenarios, "invMassReco", "InvMassReco%s"))
 
     def printOptimisationConfig(self, analysisName):
         print "Optimisation configuration for module %s:"%analysisName

@@ -209,7 +209,7 @@ namespace HPlus {
 
     // baseline MET histos
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterJets, "METBaselineTauIdAfterJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSF, "METBaselineTauIdaFTERMetSF", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSF, "METBaselineTauIdAfterMetSF", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSFPlusBtag, "METBaselineTauIdAfterMetSFPlusBtag", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSFPlusBveto, "METBaselineTauIdAfterMetSFPlusBveto", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearCuts, "METBaselineTauIdAfterCollinearCuts", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
@@ -364,7 +364,7 @@ namespace HPlus {
     increment(fVertexFilterCounter);
 
     // Setup common plots
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
     fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
 
 //------ Tau candidate selection
@@ -443,7 +443,7 @@ namespace HPlus {
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForBaseline.getSelectedTau()));
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
-      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
       // Do not fill histograms (keep them for the inverted part), but set info for splitting the phase space
       fCommonPlots.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauDataForBaseline, fMETSelection);
       // Apply scale factor for fake tau
@@ -470,8 +470,8 @@ namespace HPlus {
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForInverted.getSelectedTau()));
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
-      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
-      fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauDataForInverted, tauMatchData, fMETSelection);
+      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+      fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauDataForInverted, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
       // Apply scale factor for fake tau
       if (!iEvent.isRealData()) {
         fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauDataForInverted.getSelectedTau()->eta()));
