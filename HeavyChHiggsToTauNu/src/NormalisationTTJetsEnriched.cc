@@ -46,7 +46,7 @@ namespace HPlus {
     }
 
     // Do collinear tail killer
-    if (!tailKillerData.passedCollinearCuts()) return;
+    //if (!tailKillerData.passedCollinearCuts()) return;
 
     // Do MET cut, require MET>80
     if (!metData.passedEvent()) return;
