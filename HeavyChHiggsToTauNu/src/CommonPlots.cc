@@ -60,7 +60,9 @@ namespace HPlus {
       fNormalisationAnalysisObjects.push_back(new NormalisationWJetsEnrichedWithGenuineTaus(eventCounter, histoWrapper));
       fNormalisationAnalysisObjects.push_back(new NormalisationWJetsEnrichedWithFakeTaus(eventCounter, histoWrapper));
       fNormalisationAnalysisObjects.push_back(new NormalisationTTJetsEnrichedWithGenuineTaus(eventCounter, histoWrapper));
+      fNormalisationAnalysisObjects.push_back(new NormalisationWJetsEnrichedBoostedWH(eventCounter, histoWrapper));
       fNormalisationAnalysisObjects.push_back(new NormalisationTTJetsEnrichedWithFakeTaus(eventCounter, histoWrapper));
+      fNormalisationAnalysisObjects.push_back(new NormalisationTTJetsEnrichedBoostedWH(eventCounter, histoWrapper));
     }
     // Create objects for MET phi oscillation analysis
     if (bOptionEnableMETOscillationAnalysis) {
