@@ -17,6 +17,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
 
+#include "CommonTools/Utils/interface/TFileDirectory.h"
+
 #include <string>
 #include <vector>
 
@@ -51,15 +53,21 @@ namespace HPlus {
                           const METSelection::Data& metData,
                           const BTagging::Data& btagData);
 
+    virtual void createHistogramsAndCounters();
+
+    std::string getHistogramDirectory() { return fMyDir; }
+
   private:
     /// Creates histograms
-    void createHistograms(std::string label);
+    void createCommonHistograms(std::string label);
 
   protected:
     /// Event counter object
     EventCounter& fEventCounter;
     /// HistoWrapper object
     HistoWrapper& fHistoWrapper;
+    /// Directory for histograms
+    std::string fMyDir;
 
     // Input parameters
 
