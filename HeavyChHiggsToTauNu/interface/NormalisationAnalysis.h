@@ -56,6 +56,8 @@ namespace HPlus {
     virtual void createHistogramsAndCounters();
 
     std::string getHistogramDirectory() { return fMyDir; }
+    void fillPlotsAfterSelection(bool isFakeTau, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData, const BTagging::Data& btagData, double eventWeight, double zMass = -1);
+    double getHiggsPt(const TauSelection::Data& tauData, const METSelection::Data& metData);
 
   private:
     /// Creates histograms
@@ -82,6 +84,7 @@ namespace HPlus {
     WrappedTH1* hNBJets;
     WrappedTH1* hTransverseMass;
     WrappedTH1* hZMass;
+    WrappedTH1* hHplusPt; // boost variable = vector sum of tau pt and MET
 
     WrappedTH1* hFakeTauTauPt;
     WrappedTH1* hFakeTauNJets;
@@ -90,6 +93,7 @@ namespace HPlus {
     WrappedTH1* hFakeTauNBJets;
     WrappedTH1* hFakeTauTransverseMass;
     WrappedTH1* hFakeTauZMass;
+    WrappedTH1* hFakeTauHplusPt;
 
   };
 }
