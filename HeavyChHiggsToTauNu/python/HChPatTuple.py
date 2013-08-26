@@ -132,6 +132,19 @@ class PATBuilder:
 #                self.process.patTausHpsPFTauTauTriggerMatched = HChTriggerMatching.createTauTriggerMatchingInAnalysis(options.trigger, "selectedPatTausHpsPFTau")
 #                seq *= process.patTausHpsPFTauTauTriggerMatched
 
+        ## Common for PAT and analysis jobs (again)
+        if options.bquarkNumFilter >= 0:
+            if options.bquarkNumFilter > 3:
+                raise Exception("bquarkNumFilter parameter is too large (%d), values 0,1,2,3 are valid (-1 for disabled)" % options.bquarkNumFilter)
+            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChGenBQuarkFilter_cfi")
+            sequence += getattr(process, "genBJetFilter"+{0: "ZeroBQuarks",
+                                                          1: "OneBQuark",
+                                                          2: "TwoBQuarks",
+                                                          3: "ThreeOrMoreBQuarks"}[options.bquarkNumFilter])
+            process.genBQuarkFiltered = cms.EDProducer("EventCountProducer")
+            sequence += process.genBQuarkFiltered
+            self.counters.append("genBQuarkFiltered")
+
         return (sequence, self.counters)
 
     def addPat(self, dataVersion, patArgs, pvSelectionConfig=""):
