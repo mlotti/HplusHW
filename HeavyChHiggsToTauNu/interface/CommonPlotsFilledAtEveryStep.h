@@ -98,6 +98,7 @@ namespace HPlus {
     WrappedTH1* hTopPt;
     WrappedTH1* hWMass;
     WrappedTH1* hWPt;
+    WrappedTH1* hChargedHiggsPt; // Boost variable
     WrappedTH1* hTransverseMass;
     WrappedTH1* hFullMass;
   };
