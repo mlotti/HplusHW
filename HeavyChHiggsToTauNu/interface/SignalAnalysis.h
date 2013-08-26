@@ -377,6 +377,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETWithPhiOscillationCorrection; // temporary
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTagging;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBackToBackDeltaPhi;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelected;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTail;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMass;
@@ -388,6 +389,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelectionFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBackToBackDeltaPhiFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMassFakeTaus;
