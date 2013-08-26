@@ -5,7 +5,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
@@ -15,6 +14,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SplittedHistogramHandler.h"
@@ -87,8 +88,9 @@ namespace HPlus {
                     JetSelection& jetSelection,
                     METTriggerEfficiencyScaleFactor& metTrgSF,
                     METSelection& metSelection,
-                    BTagging& bJetSelection,
+                    BTagging& bTagging,
                     QCDTailKiller& qcdTailKiller,
+                    BjetSelection& bjetSelection,
                     TopSelectionManager& topSelection,
                     EvtTopology& evtTopology,
                     FullHiggsMassCalculator& fullHiggsMassCalculator);
@@ -103,8 +105,9 @@ namespace HPlus {
                     JetSelection& jetSelection,
                     METTriggerEfficiencyScaleFactor& metTrgSF,
                     METSelection& metSelection,
-                    BTagging& bJetSelection,
+                    BTagging& bTagging,
                     QCDTailKiller& qcdTailKiller,
+                    BjetSelection& bjetSelection,
                     TopSelectionManager& topSelection,
                     EvtTopology& evtTopology,
                     FullHiggsMassCalculator& fullHiggsMassCalculator);
@@ -195,6 +198,8 @@ namespace HPlus {
     HistogramSettings fNjetsBinSettings;
     HistogramSettings fMetBinSettings;
     HistogramSettings fTailKiller1DSettings;
+    HistogramSettings fTopMassBinSettings;
+    HistogramSettings fWMassBinSettings;
     HistogramSettings fMtBinSettings;
     HistogramSettings fInvmassBinSettings;
 
@@ -280,9 +285,17 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet2;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet3;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet4;
-    
+
     // top selection
-    
+    std::vector<WrappedTH1*> hCtrlTopMass;
+    std::vector<WrappedTH1*> hCtrlTopPt;
+    std::vector<WrappedTH1*> hCtrlWMass;
+    std::vector<WrappedTH1*> hCtrlWPt;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausTopMass;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausTopPt;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausWMass;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausWPt;
+
     // evt topology
     
     // all selections

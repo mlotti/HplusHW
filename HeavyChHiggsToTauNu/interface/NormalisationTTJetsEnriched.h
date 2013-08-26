@@ -28,7 +28,7 @@ namespace HPlus {
   class WrappedTH2;
 
   /**
-   * Class to check normalisation of DY enriched sample with genuine taus
+   * Class to check normalisation of ttbar enriched sample with genuine taus
    */
   class NormalisationTTJetsEnrichedWithGenuineTaus : public NormalisationAnalysis {
   public:
@@ -52,7 +52,30 @@ namespace HPlus {
   };
 
   /**
-   * Class to check normalisation of DY enriched sample with fake taus
+   * Class to check normalisation of ttbar enriched sample, in the boosted WH style
+   */
+  class NormalisationTTJetsEnrichedBoostedWH : public NormalisationAnalysis {
+  public:
+    NormalisationTTJetsEnrichedBoostedWH(EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    NormalisationTTJetsEnrichedBoostedWH(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    ~NormalisationTTJetsEnrichedBoostedWH();
+
+    void analyse(const edm::Event& iEvent,
+                 const TauSelection::Data& tauData,
+                 const FakeTauIdentifier::Data& fakeTauData,
+                 const ElectronSelection::Data& electronData,
+                 const MuonSelection::Data& muonData,
+                 const JetSelection::Data& jetData,
+                 METTriggerEfficiencyScaleFactor* metTrgSF,
+                 const QCDTailKiller::Data& tailKillerData,
+                 const METSelection::Data& metData,
+                 const BTagging::Data& btagData);
+
+  private:
+
+  };
+  /**
+   * Class to check normalisation of ttbar enriched sample with fake taus
    */
   class NormalisationTTJetsEnrichedWithFakeTaus : public NormalisationAnalysis {
   public:

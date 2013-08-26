@@ -98,7 +98,8 @@ namespace HPlus {
     Data output;
 
     edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel(fSrc, genParticles);
+    if (!iEvent.isRealData())
+      iEvent.getByLabel(fSrc, genParticles);
 
     typedef math::XYZTLorentzVectorD LorentzVector;
     typedef std::vector<LorentzVector> LorentzVectorCollection;
