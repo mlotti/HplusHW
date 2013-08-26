@@ -113,6 +113,14 @@ for mcEra in ["Summer11", "Fall11"]:
     "WZ_TuneZ2_%s"%mcEra: "WZ",
     "ZZ_TuneZ2_%s"%mcEra: "ZZ",
     })
+    for bquark in [0, 1, 2, 3]:
+        _physicalToLogical.update({
+                "WJets_%dbquark_TuneZ2_%s"%(bquark, mcEra): "WJets_%dbquark"%bquark,
+                "W1Jets_%dbquark_TuneZ2_%s"%(bquark, mcEra): "W1Jets_%dbquark"%bquark,
+                "W2Jets_%dbquark_TuneZ2_%s"%(bquark, mcEra): "W2Jets_%dbquark"%bquark,
+                "W3Jets_%dbquark_TuneZ2_%s"%(bquark, mcEra): "W3Jets_%dbquark"%bquark,
+                "W4Jets_%dbquark_TuneZ2_%s"%(bquark, mcEra): "W4Jets_%dbquark"%bquark,
+        })
 
 ## Map the datasets to be merged to the name of the merged dataset.
 _signalMerge = [
@@ -156,6 +164,13 @@ _datasetMerge = {
     "WZ": "Diboson",
     "ZZ": "Diboson",
 }
+for bquark in [0, 1, 2, 3]:
+    _datasetMerge.update({
+            "WJets_%dbquark": "WJets_%dbquark",
+            "W1Jets_%dbquark": "WJets_%dbquark",
+            "W2Jets_%dbquark": "WJets_%dbquark",
+            "W3Jets_%dbquark": "WJets_%dbquark",
+    })
 
 ## Default ordering of datasets
 _datasetOrder = [
@@ -195,6 +210,11 @@ _datasetOrder = [
     "QCD_Pt20_MuEnriched",
     "WJets",
     "W3Jets",
+    "WJets_0bquark",
+    "WJets_1bquark",
+    "WJets_2bquark",
+    "WJets_3bquark",
+    "WJets",
     "WToTauNu",
     "TTJets",
     "TT",
@@ -247,6 +267,10 @@ _legendLabels = {
     "WJets":                 "W+jets",
     "WToTauNu":              "W#to#tau#nu",
     "W3Jets":                "W+3 jets",
+    "WJets_0bquark":         "W+jets (0 b)",
+    "WJets_1bquark":         "W+jets (1 b)",
+    "WJets_2bquark":         "W+jets (2 b)",
+    "WJets_3bquark":         "W+jets (#geq3 b)",
 
     "QCD_Pt30to50":          "QCD, 30 < #hat{p}_{T} < 50",
     "QCD_Pt50to80":          "QCD, 50 < #hat{p}_{T} < 80",
