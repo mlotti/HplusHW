@@ -79,6 +79,7 @@ namespace HPlus {
     fCommonPlotsAfterMET(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections+MET",false,"Std. selections+MET")),
     fCommonPlotsAfterMETAndBtag(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections+MET+btag",false,"Std. selections+MET+btag")),
     fCommonPlotsAfterMETAndBtagWithSF(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections+MET+btag with SF",false,"Std. selections+MET+btag with SF")),
+    fCommonPlotsAfterMETAndBtagWithSFAndDeltaPhi(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections+MET+btag+deltaphi with SF",false,"Std. selections+MET+btag+deltaphi with SF")),
     fCommonPlotsAfterLeg1(fCommonPlots.createCommonPlotsFilledAtEveryStep("Leg1 (MET+btag+...)",false,"Leg1 (MET+btag+...)")),
     fCommonPlotsAfterLeg2(fCommonPlots.createCommonPlotsFilledAtEveryStep("Leg2 (tau isol.)",false,"Leg2 (tau isol.)"))
   {
@@ -199,7 +200,7 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
     // Setup common plots
 
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
 
     fCommonPlotsAfterVertexSelection->fill();
     fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
@@ -265,7 +266,7 @@ namespace HPlus {
     // note: do not require here that only one tau has been found (mySelectedTau is the selected tau in the event)
     // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
 
-    fCommonPlots.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
 
     fCommonPlotsAfterTauSelection->fill();
     fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauCandidateData, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
@@ -452,7 +453,7 @@ namespace HPlus {
     //------ Top selection
     BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
     TopSelectionManager::Data topSelectionData = fTopSelectionManager.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
-    //fCommonPlots.fillControlPlotsAtTopSelection(iEvent, TopSelectionData); TODO: implement (if needed)
+    fCommonPlots.fillControlPlotsAtTopSelection(iEvent, topSelectionData);
     if (!(topSelectionData.passedEvent())) return;
     increment(fTopSelectionCounter);
 
@@ -564,7 +565,7 @@ namespace HPlus {
       increment(fQCDTailKillerBackToBackCounter);
 
       //------ Top selection
-      //fCommonPlots.fillControlPlotsAtTopSelection(iEvent, TopSelectionData); TODO: implement (if needed)
+      fCommonPlots.fillControlPlotsAtTopSelection(iEvent, topSelectionData);
       if (!(topSelectionData.passedEvent())) return;
       increment(fTopSelectionCounter);
 

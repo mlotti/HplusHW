@@ -180,6 +180,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtag;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtagWithSF;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtagWithSFAndDeltaPhi;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg1;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg2;
 

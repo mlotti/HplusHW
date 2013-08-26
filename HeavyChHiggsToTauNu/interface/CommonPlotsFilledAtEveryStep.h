@@ -12,9 +12,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 
@@ -94,6 +94,10 @@ namespace HPlus {
     WrappedTH1* hDeltaR_TauMETJet2MET;
     WrappedTH1* hDeltaR_TauMETJet3MET;
     WrappedTH1* hDeltaR_TauMETJet4MET;
+    WrappedTH1* hTopMass;
+    WrappedTH1* hTopPt;
+    WrappedTH1* hWMass;
+    WrappedTH1* hWPt;
     WrappedTH1* hTransverseMass;
     WrappedTH1* hFullMass;
   };
