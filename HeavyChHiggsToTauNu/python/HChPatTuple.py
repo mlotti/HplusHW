@@ -73,15 +73,52 @@ class PATBuilder:
 #            self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlowChs"))
             self.counters.extend(PFEmbeddingSource.muonSelectionCounters)
 
+        patOnTheFly = (options.doPat != 0)
+        if patOnTheFly:
+            print "Running PAT on the fly"
 
-        if options.doPat == 0:
+            self.process.eventPreSelection = cms.Sequence()
+
+            if options.tauEmbeddingInput != 0:
+                self.process.patSequence = self.addPatForTauEmbeddingInput(dataVersion, patArgs=patArgs, pvSelectionConfig=options.pvSelectionConfig)
+            else:
+                # normal AOD input
+                if dataVersion.isData():
+                    self.process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options, calculateEventCleaning)
+                elif dataVersion.isMC() and options.triggerMC != 0:
+                    self.process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
+
+                # Do some manipulation of PAT arguments, ensure that the
+                # trigger has been given if Tau-HLT matching is required
+                pargs = patArgs.copy()
+                pargs["calculateEventCleaning"] = calculateEventCleaning
+                if pargs.get("doTauHLTMatching", True):
+                    if not "matchingTauTrigger" in pargs:
+                        if options.trigger == "":
+                            raise Exception("Command line argument 'trigger' is missing")
+                        pargs["matchingTauTrigger"] = options.trigger
+                    print "Trigger used for tau matching:", pargs["matchingTauTrigger"]
+
+                self.process.patSequence = self.addPat(dataVersion, patArgs=pargs, pvSelectionConfig=options.pvSelectionConfig)
+            sequence *= self.process.eventPreSelection
+
+            # Selects the first primary vertex, applies the quality cuts to it
+            # Applies quality cuts to all vertices too
+            # Must be done before PAT sequence
+            self.counters.extend(HChPrimaryVertex.addPrimaryVertexSelection(process, sequence, filter=selectedPrimaryVertexFilter))
+
+            # Add PAT sequence
+            sequence *= self.process.patSequence
+        else:
             # Not running PAT, assuming that the job is taking pattuples as input
             for additionalPattupleCounter in additionalPattupleCounters:
                 self.counters.append(additionalPattupleCounter)
 
-            # Add event filters if requested
-            self.addFilters(dataVersion, sequence, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=False)
+        ## Common for PAT and analysis jobs
+        # Add event filters if requested
+        self.addFilters(dataVersion, sequence, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=(options.doPat != 0))
 
+        if not patOnTheFly:
             # Add primary vertex selection
             # Selects the first primary vertex, applies the quality cuts to it
             # Applies quality cuts to all vertices too
@@ -94,46 +131,6 @@ class PATBuilder:
                 raise Exception("doTauLHTMatchingInAnalysis is not supported at the moment")
 #                self.process.patTausHpsPFTauTauTriggerMatched = HChTriggerMatching.createTauTriggerMatchingInAnalysis(options.trigger, "selectedPatTausHpsPFTau")
 #                seq *= process.patTausHpsPFTauTauTriggerMatched
-            return (sequence, self.counters)
-
-        # After this step we're running the PAT
-        print "Running PAT on the fly"
-        
-        self.process.eventPreSelection = cms.Sequence()
-
-        if options.tauEmbeddingInput != 0:
-            self.process.patSequence = self.addPatForTauEmbeddingInput(dataVersion, patArgs=patArgs, pvSelectionConfig=options.pvSelectionConfig)
-        else:
-            # normal AOD input
-            if dataVersion.isData():
-                self.process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options, calculateEventCleaning)
-            elif dataVersion.isMC() and options.triggerMC != 0:
-                self.process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
-
-            # Do some manipulation of PAT arguments, ensure that the
-            # trigger has been given if Tau-HLT matching is required
-            pargs = patArgs.copy()
-            pargs["calculateEventCleaning"] = calculateEventCleaning
-            if pargs.get("doTauHLTMatching", True):
-                if not "matchingTauTrigger" in pargs:
-                    if options.trigger == "":
-                        raise Exception("Command line argument 'trigger' is missing")
-                    pargs["matchingTauTrigger"] = options.trigger
-                print "Trigger used for tau matching:", pargs["matchingTauTrigger"]
-
-            self.process.patSequence = self.addPat(dataVersion, patArgs=pargs, pvSelectionConfig=options.pvSelectionConfig)
-        sequence *= self.process.eventPreSelection
-
-        # Selects the first primary vertex, applies the quality cuts to it
-        # Applies quality cuts to all vertices too
-        # Must be done before PAT sequence
-        self.counters.extend(HChPrimaryVertex.addPrimaryVertexSelection(process, sequence, filter=selectedPrimaryVertexFilter))
-
-        # Add PAT sequence
-        sequence *= self.process.patSequence
-
-        # Add event filters if requested
-        self.addFilters(dataVersion, self.process.eventPreSelection, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=True)
 
         return (sequence, self.counters)
 
