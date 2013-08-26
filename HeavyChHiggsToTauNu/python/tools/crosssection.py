@@ -100,7 +100,7 @@ backgroundCrossSections = CrossSectionList(
             }),
     CrossSection("WJets", {
             "7": 31314.0, # [2], NNLO
-            "8": 36257.2, # [9], NNLO
+            "8": 37509, # [9], NNLO
             }),
     # PREP (LO) cross sections, for W+NJets weighting
     CrossSection("PREP_WJets", {
