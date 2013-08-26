@@ -23,6 +23,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
@@ -146,6 +147,8 @@ namespace HPlus {
     JetTauInvMass fJetTauInvMass;
     TopSelection fTopSelection;
     BjetSelection fBjetSelection;
+    const std::string fTopRecoName; // Name of selected top reconstruction algorithm
+    TopSelectionManager fTopSelectionManager; 
     TopChiSelection fTopChiSelection;
     TopWithBSelection fTopWithBSelection;
     FullHiggsMassCalculator fFullHiggsMassCalculator;

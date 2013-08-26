@@ -164,7 +164,7 @@ namespace HPlus {
                                                       const METSelection::Data* metData,
                                                       const BTagging::Data* bJetData,
                                                       const QCDTailKiller::Data* qcdTailKillerData,
-                                                      const TopChiSelection::Data* topData,
+                                                      const TopSelectionManager::Data* topData,
                                                       const FullHiggsMassCalculator::Data* fullHiggsMassData) {
     fVertexData = vertexData;
     fTauData = tauData;
