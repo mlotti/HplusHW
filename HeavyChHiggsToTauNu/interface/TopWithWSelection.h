@@ -15,9 +15,9 @@ namespace edm {
 }
 
 namespace HPlus {
-  typedef TopSelectionBase::Data Data;
   class TopWithWSelection: public TopSelectionBase {
-
+  typedef TopSelectionBase::Data Data;
+  
   public:
     TopWithWSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TopWithWSelection();
