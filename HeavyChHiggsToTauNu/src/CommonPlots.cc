@@ -36,6 +36,8 @@ namespace HPlus {
     fNjetsBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("njetsBins")),
     fMetBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("metBins")),
     fTailKiller1DSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("tailKiller1DBins")),
+    fTopMassBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("topMassBins")),
+    fWMassBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("WMassBins")),
     fMtBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("mtBins")),
     fInvmassBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("invmassBins")),
     fMETPhiOscillationCorrectionAfterTaus(0),
@@ -165,6 +167,16 @@ namespace HPlus {
     }
 
     // top selection
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,       myCtrlDir,            hCtrlTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlDir,            hCtrlTopPt,   "TopPt", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,       myCtrlDir,            hCtrlWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlDir,            hCtrlWPt,     "WPt", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    if (fAnalysisType == kSignalAnalysis) {
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,       myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopPt,   "TopPt", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,       myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWPt,     "WPt", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    }
 
     // evt topology
 
@@ -195,8 +207,9 @@ namespace HPlus {
                                JetSelection& jetSelection,
                                METTriggerEfficiencyScaleFactor& metTrgSF,
                                METSelection& metSelection,
-                               BTagging& bJetSelection,
+                               BTagging& bTagging,
                                QCDTailKiller& qcdTailKiller,
+                               BjetSelection& bjetSelection,
                                TopSelectionManager& topSelectionManager,
                                EvtTopology& evtTopology,
                                FullHiggsMassCalculator& fullHiggsMassCalculator) {
@@ -212,8 +225,9 @@ namespace HPlus {
                jetSelection,
                metTrgSF,
                metSelection,
-               bJetSelection,
+               bTagging,
                qcdTailKiller,
+               bjetSelection,
                topSelectionManager,
                evtTopology,
                fullHiggsMassCalculator);
@@ -229,8 +243,9 @@ namespace HPlus {
                                JetSelection& jetSelection,
                                METTriggerEfficiencyScaleFactor& metTrgSF,
                                METSelection& metSelection,
-                               BTagging& bJetSelection,
+                               BTagging& bTagging,
                                QCDTailKiller& qcdTailKiller,
+                               BjetSelection& bjetSelection,
                                TopSelectionManager& topSelectionManager,
                                EvtTopology& evtTopology,
                                FullHiggsMassCalculator& fullHiggsMassCalculator) {
@@ -250,16 +265,15 @@ namespace HPlus {
       fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fVertexData.getNumberOfAllVertices());
     else
       fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices());
-    fBJetData = bJetSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets());
-    //fTopData = topSelectionManager.analyze(...); //TODO
-        
+    fBJetData = bTagging.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets());
+
     // Need to require one tau in the event
     if (fTauData.getSelectedTau().isNull()) {
       fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup);
       // Plots do not make sense if no tau has been found
       edm::Ptr<pat::Tau> myZeroTauPointer;
       for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-        (*it)->cacheDataObjects(&fVertexData, 0, 0, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, 0, &fTopData, 0);
+        (*it)->cacheDataObjects(&fVertexData, 0, 0, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, 0, 0, 0);
       }
       return;
     }
@@ -267,6 +281,9 @@ namespace HPlus {
     fMETData = metSelection.silentAnalyze(iEvent, iSetup, vertexData.getNumberOfAllVertices(), fTauData.getSelectedTau(), fJetData.getAllJets());
     // Obtain improved delta phi cut data object
     fQCDTailKillerData = qcdTailKiller.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fJetData.getSelectedJetsIncludingTau(), fMETData.getSelectedMET());
+    // Obtain top selection object
+    BjetSelection::Data bjetSelectionData = bjetSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets(), fTauData.getSelectedTau(), fMETData.getSelectedMET());
+    fTopData = topSelectionManager.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
     // Do full higgs mass only if tau and b jet was found
     if (fBJetData.passedEvent()) {
       fFullHiggsMassData = fullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fBJetData, fMETData);
@@ -445,7 +462,17 @@ namespace HPlus {
   }
 
   void CommonPlots::fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopSelectionManager::Data& data) {
-    
+    fTopData = data;
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlTopMass, data.getTopMass());
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlTopPt, data.getTopP4().pt());
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlWMass, data.getWMass());
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlWPt, data.getWP4().pt());
+    if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) {
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTopMass, data.getTopMass());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTopPt, data.getTopP4().pt());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausWMass, data.getWMass());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausWPt, data.getWP4().pt());
+    }
   }
 
   void CommonPlots::fillControlPlotsAtEvtTopology(const edm::Event& iEvent, const EvtTopology::Data& data) {

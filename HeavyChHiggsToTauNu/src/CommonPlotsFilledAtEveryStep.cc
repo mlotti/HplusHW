@@ -47,6 +47,11 @@ namespace HPlus {
     hDeltaR_TauMETJet2MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet2MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
     hDeltaR_TauMETJet3MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet3MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
     hDeltaR_TauMETJet4MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet4MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
+    hTopMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "topMass", "topMass;m_{bqq'}, GeV/c^{2};N_{events}", 100, 0., 500.);
+    hTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "topPt", "topPt;p_{T}(bqq'), GeV/c;N_{events}", 100, 0., 500.);
+    hWMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass", "WMass;m_{qq'}, GeV/c^{2};N_{events}", 60, 0., 300.);
+    hWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WPt", "WPt;p_{T}(bqq'), GeV/c;N_{events}", 100, 0., 500.);
+    hChargedHiggsPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsPt", "HiggsPt;p_{T}(#tau,MET), GeV/c;N_{events}", 100, 0., 500.);
     hTransverseMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events}", 80, 0., 400.);
     hFullMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "fullMass", "fullMass;m, GeV/c^{2};N_{events}", 100, 0., 500.);
   }
@@ -143,6 +148,17 @@ namespace HPlus {
       }
       ++njets;
     }
+
+    // top reco
+    if (fTopData) {
+      hTopMass->Fill(fTopData->getTopMass());
+      hTopPt->Fill(fTopData->getTopP4().pt());
+      hWMass->Fill(fTopData->getWMass());
+      hWPt->Fill(fTopData->getWP4().pt());
+    }
+
+    // Boost of the Higgs
+    hChargedHiggsPt->Fill((fMETData->getSelectedMET()->p4(), fTauData->getSelectedTau()->p4()).pt());
 
     // transverse mass
     double myMT = TransverseMass::reconstruct(*(fTauData->getSelectedTau()), *(fMETData->getSelectedMET()) );
