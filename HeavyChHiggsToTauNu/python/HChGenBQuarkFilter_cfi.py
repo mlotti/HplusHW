@@ -7,18 +7,18 @@ genBJetFilterBase = cms.EDFilter("HPlusGenBQuarkFilter",
 )
 
 genBJetFilterZeroBQuarks = genBJetFilterBase.clone(
-    bjetNumber = cms.untracked.uint32(0),
+    bjetNumber = 0,
 )
 
 genBJetFilterOneBQuark = genBJetFilterBase.clone(
-    bjetNumber = cms.untracked.uint32(1),
+    bjetNumber = 1,
 )
 
 genBJetFilterTwoBQuarks = genBJetFilterBase.clone(
-    bjetNumber = cms.untracked.uint32(2),
+    bjetNumber = 2,
 )
 
-genBJetFilterThreeOrMoreBQuarks = cms.EDFilter("HPlusGenBQuarkFilter",
-    bjetNumber = cms.untracked.uint32(3),
-    bjetNumberCutDirection = cms.untracked.string("GEQ"), # Options are EQ, NEQ, GT, LT, GEQ, LEQ
+genBJetFilterThreeOrMoreBQuarks = genBJetFilterBase.clone(
+    bjetNumber = 3,
+    bjetNumberCutDirection = "GEQ", # Options are EQ, NEQ, GT, LT, GEQ, LEQ
 )
