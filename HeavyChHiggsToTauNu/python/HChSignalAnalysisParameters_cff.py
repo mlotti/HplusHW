@@ -436,7 +436,7 @@ invMassReco = cms.untracked.PSet(
     pzSelectionMethod = cms.untracked.string("deltaEtaMax"),
     )
 
-topReconstruction = cms.untracked.string("None") # Options: None
+topReconstruction = cms.untracked.string("None") # Options: None, chi, std, Wselection, Bselection
 
 transverseMassCut = cms.untracked.double(100) # Not used
 
