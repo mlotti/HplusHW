@@ -197,7 +197,7 @@ namespace HPlus {
                                METSelection& metSelection,
                                BTagging& bJetSelection,
                                QCDTailKiller& qcdTailKiller,
-                               TopChiSelection& topChiSelection,
+                               TopSelectionManager& topSelectionManager,
                                EvtTopology& evtTopology,
                                FullHiggsMassCalculator& fullHiggsMassCalculator) {
     if (!vertexData.passedEvent()) return; // Require valid vertex
@@ -214,7 +214,7 @@ namespace HPlus {
                metSelection,
                bJetSelection,
                qcdTailKiller,
-               topChiSelection,
+               topSelectionManager,
                evtTopology,
                fullHiggsMassCalculator);
   }
@@ -231,7 +231,7 @@ namespace HPlus {
                                METSelection& metSelection,
                                BTagging& bJetSelection,
                                QCDTailKiller& qcdTailKiller,
-                               TopChiSelection& topChiSelection,
+                               TopSelectionManager& topSelectionManager,
                                EvtTopology& evtTopology,
                                FullHiggsMassCalculator& fullHiggsMassCalculator) {
     fSplittedHistogramHandler.initialize();
@@ -251,7 +251,8 @@ namespace HPlus {
     else
       fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fVertexData.getNumberOfAllVertices());
     fBJetData = bJetSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets());
-    fTopData = topChiSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets());
+    //fTopData = topSelectionManager.analyze(...); //TODO
+        
     // Need to require one tau in the event
     if (fTauData.getSelectedTau().isNull()) {
       fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup);
@@ -443,7 +444,7 @@ namespace HPlus {
     }
   }
 
-  void CommonPlots::fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopChiSelection::Data& data) {
+  void CommonPlots::fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopSelectionManager::Data& data) {
     
   }
 

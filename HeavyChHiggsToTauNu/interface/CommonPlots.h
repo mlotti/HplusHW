@@ -5,6 +5,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
@@ -13,7 +14,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
@@ -89,7 +89,7 @@ namespace HPlus {
                     METSelection& metSelection,
                     BTagging& bJetSelection,
                     QCDTailKiller& qcdTailKiller,
-                    TopChiSelection& topChiSelection,
+                    TopSelectionManager& topSelection,
                     EvtTopology& evtTopology,
                     FullHiggsMassCalculator& fullHiggsMassCalculator);
     /// Initialization where TauSelection::Data is used instead of TauSelection object (use for QCD measurements)
@@ -105,7 +105,7 @@ namespace HPlus {
                     METSelection& metSelection,
                     BTagging& bJetSelection,
                     QCDTailKiller& qcdTailKiller,
-                    TopChiSelection& topChiSelection,
+                    TopSelectionManager& topSelection,
                     EvtTopology& evtTopology,
                     FullHiggsMassCalculator& fullHiggsMassCalculator);
 
@@ -132,7 +132,7 @@ namespace HPlus {
     void fillControlPlotsAtMETSelection(const edm::Event& iEvent, const METSelection::Data& data);
     void fillControlPlotsAtBtagging(const edm::Event& iEvent, const BTagging::Data& data);
     void fillControlPlotsAtBackToBackDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data);
-    void fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopChiSelection::Data& data);
+    void fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopSelectionManager::Data& data);
     void fillControlPlotsAtEvtTopology(const edm::Event& iEvent, const EvtTopology::Data& data);
     /// Getters for histogram bin definitions
     const HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
@@ -183,7 +183,7 @@ namespace HPlus {
     METSelection::Data fMETData;
     BTagging::Data fBJetData;
     QCDTailKiller::Data fQCDTailKillerData;
-    TopChiSelection::Data fTopData;
+    TopSelectionManager::Data fTopData;
     EvtTopology::Data fEvtTopology;
     FullHiggsMassCalculator::Data fFullHiggsMassData;
 
