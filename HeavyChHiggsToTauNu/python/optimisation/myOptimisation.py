@@ -13,7 +13,7 @@ optimisation = HPlusOptimisationScheme()
 #optimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
 #optimisation.addJetEtVariation([20.0, 30.0])
 #optimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
-optimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
+#optimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 
 #optimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
 #optimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
@@ -23,7 +23,8 @@ optimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 #optimisation.addBTagVariations(btagScenarios.scenarios)
 
 #optimisation.addDeltaPhiVariation([180.0,170.0,160.0,150.0])
-#optimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
+optimisation.addTopRecoVariation(["None","chi","std","Wselection","Bselection"]) # Valid options: None, chi, std, Wselection, Bselection
+
 
 #import invMassScenarios # Pick invariant mass scan points
 #optimisation.addInvariantMassVariation(invMassScenarios.scenarios)

@@ -7,8 +7,10 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "TLorentzVector.h"
 #include "TVector3.h"
+
 #include <limits>
 
+//Declarations
 std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
 std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
 bool  hasImmediateMother(const reco::Candidate& p, int id);
@@ -24,16 +26,18 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  TopWithBSelection::Data::Data():
-    fPassedEvent(false) {}
-  TopWithBSelection::Data::~Data() {}
 
-  TopWithBSelection::TopWithBSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
-    BaseSelection(eventCounter, histoWrapper),
+  /*TopWithBSelection::Data::Data():
+    fPassedEvent(false) {}
+  TopWithBSelection::Data::~Data() {} */
+
+  //constructor
+  TopWithBSelection::TopWithBSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper) : TopSelectionBase::TopSelectionBase(iConfig, eventCounter, histoWrapper),
+    //BaseSelection(eventCounter, histoWrapper),
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
     fChi2Cut(iConfig.getUntrackedParameter<double>("Chi2Cut")),
-    fTopWithBMassCount(eventCounter.addSubCounter("Top with B mass cut","Top with B Mass cut")),
+    //fTopWithBMassCount(eventCounter.addSubCounter("Top with B mass cut","Top with B Mass cut")),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src"))
   {
     edm::Service<TFileService> fs;
@@ -58,9 +62,10 @@ namespace HPlus {
     hWMassChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMassChiCut", "WMassChiCut", 100, 0., 200.);
   }
 
+  //destructor
   TopWithBSelection::~TopWithBSelection() {}
 
-  TopWithBSelection::Data TopWithBSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
+/*  TopWithBSelection::Data TopWithBSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -74,9 +79,9 @@ namespace HPlus {
   TopWithBSelection::Data TopWithBSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
     ensureAnalyzeAllowed(iEvent);
     return privateAnalyze(iEvent, iSetup, jets, iJetb);
-  }
+  } */
 
-  TopWithBSelection::Data TopWithBSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
+  Data TopWithBSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
     Data output;
 
     bool topmassfound = false;
@@ -212,7 +217,7 @@ namespace HPlus {
       output.fPassedEvent = false;
     } else {
       output.fPassedEvent = true;
-      increment(fTopWithBMassCount);
+      //increment(fTopWithBMassCount); //TODO
     }
     return output;
   }
