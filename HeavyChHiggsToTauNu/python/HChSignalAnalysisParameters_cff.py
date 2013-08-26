@@ -409,7 +409,7 @@ invMassReco = cms.untracked.PSet(
     pzSelectionMethod = cms.untracked.string("deltaEtaMax"),
     )
 
-topReconstruction = cms.untracked.string("Bselection") # Options: None, chi, std, Wselection, Bselection
+topReconstruction = cms.untracked.string("None") # Options: None
 
 transverseMassCut = cms.untracked.double(100) # Not used
 
@@ -483,7 +483,7 @@ GenParticleAnalysis = cms.untracked.PSet(
 
 topSelection = cms.untracked.PSet(
   TopMassLow = cms.untracked.double(100.0),
-  TopMassHigh = cms.untracked.double(260.0),
+  TopMassHigh = cms.untracked.double(300.0),
   src = cms.untracked.InputTag("genParticles")
 )
 
@@ -494,9 +494,10 @@ bjetSelection = cms.untracked.PSet(
 )
 
 
+
 topChiSelection = cms.untracked.PSet(
     TopMassLow = cms.untracked.double(120.0),
-    TopMassHigh = cms.untracked.double(260.0),
+    TopMassHigh = cms.untracked.double(300.0),
     Chi2Cut = cms.untracked.double(5.0),
     src = cms.untracked.InputTag("genParticles"),
     enabled = cms.untracked.bool(False)
@@ -504,7 +505,7 @@ topChiSelection = cms.untracked.PSet(
 
 topWithBSelection = cms.untracked.PSet(
     TopMassLow = cms.untracked.double(120.0),
-    TopMassHigh = cms.untracked.double(260.0),
+    TopMassHigh = cms.untracked.double(300.0),
     Chi2Cut = cms.untracked.double(5.0),
     src = cms.untracked.InputTag("genParticles"),
     enabled = cms.untracked.bool(False)
@@ -512,7 +513,7 @@ topWithBSelection = cms.untracked.PSet(
 
 topWithWSelection = cms.untracked.PSet(
     TopMassLow = cms.untracked.double(120.0),
-    TopMassHigh = cms.untracked.double(260.0),
+    TopMassHigh = cms.untracked.double(300.0),
     Chi2Cut = cms.untracked.double(5.0),
     src = cms.untracked.InputTag("genParticles"),
     enabled = cms.untracked.bool(False)
@@ -520,12 +521,20 @@ topWithWSelection = cms.untracked.PSet(
 
 topWithMHSelection = cms.untracked.PSet(
     TopMassLow = cms.untracked.double(120.0),
-    TopMassHigh = cms.untracked.double(260.0),
+    TopMassHigh = cms.untracked.double(300.0),
     Chi2Cut = cms.untracked.double(5.0),
     src = cms.untracked.InputTag("genParticles"),
     enabled = cms.untracked.bool(False)
 )
 
+
+topWithMHSelection = cms.untracked.PSet(
+        TopMassLow = cms.untracked.double(120.0),
+        TopMassHigh = cms.untracked.double(300.0),
+        Chi2Cut = cms.untracked.double(5.0),
+        src = cms.untracked.InputTag("genParticles"),
+        enabled = cms.untracked.bool(False)
+)
 
 def SetHistogramBinSettings(nbins, axismin, axismax):
     return cms.untracked.PSet(
