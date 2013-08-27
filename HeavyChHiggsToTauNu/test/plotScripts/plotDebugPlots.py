@@ -31,6 +31,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 from optparse import OptionParser
 import os
+import shutil
 
 # Configuration
 removeQCD = False
@@ -46,7 +47,7 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     # Make directory for output
     mySuffix = "debugPlots_%s_%s_%s"%(era,searchMode,optimizationMode)
     if os.path.exists(mySuffix):
-        os.rename(mySuffix, "%s_old"%mySuffix)
+        shutil.rmtree(mySuffix)
     os.mkdir(mySuffix)
     # Create dataset manager
     myDsetMgr = signalDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
@@ -145,7 +146,7 @@ def doPlots(myDsetMgr, opts, mySuffix):
         drawPlot(p, filename, **kwargs)
 
     # common arguments for plots which make sense only for MC
-    mcArgs = {"fullyBlinded": True, "addBlindedText": False}
+    mcArgs = {"fullyBlinded": True, "addBlindedText": False, "ratio": False}
 
     # Common plots
     myCommonPlotDirs = ["TauSelection","TauWeight","ElectronVeto","MuonVeto","JetSelection","MET","BTagging","Selected","FakeTaus_BTagging","FakeTaus_Selected"]
@@ -168,30 +169,30 @@ def doPlots(myDsetMgr, opts, mySuffix):
     phiBinWidth = 2*3.14159/36
 
     #createDrawPlot("CommonPlots/AtEveryStep/Trigger/nVertices", xlabel="N_{Vertices}")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/nVertices", xlabel="N_{Vertices}")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_fakeStatus", xlabel="Fake tau status", **mcArgs)
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_pT", xlabel="#tau p_{T}, GeV/c", rebinToWidthX=10)
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_eta", xlabel="#tau #eta")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_phi", xlabel="#tau #phi", rebinToWidthX=phiBinWidth)
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_Rtau", xlabel="R_{#tau}", rebinToWidthX=0.05, opts={"xmin": 0.5, "xmax": 1}, moveLegend={"dx": -0.5})
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/electrons_N", xlabel="N_{electrons}")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/muons_N", xlabel="N_{muons}")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/jets_N", xlabel="N_{jets}")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/jets_N_allIdentified", xlabel="N_{all identified jets}")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/MET_Raw", xlabel="Raw MET, GeV", rebinToWidthX=20)
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/MET_MET", xlabel="MET, GeV", rebinToWidthX=20)
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/MET_phi", xlabel="MET #phi", rebinToWidthX=phiBinWidth)
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/bjets_N", xlabel="N_{b jets}", opts={"xmax": 8})
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/DeltaPhi_TauMET", xlabel="#Delta#phi(#tau,MET)")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet1MET", xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2} + #Delta#phi(MET,jet_{1})^{2}}")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet2MET", xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2} + #Delta#phi(MET,jet_{2})^{2}}")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet3MET", xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2} + #Delta#phi(MET,jet_{3})^{2}}")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet4MET", xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2} + #Delta#phi(MET,jet_{4})^{2}}")
-    createDrawCommonPlot("CommonPlots/AtEveryStep/%s/transverseMass", xlabel="m_{T}(#tau,MET)", rebinToWidthX=20)
-
+    if False:
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/nVertices", xlabel="N_{Vertices}")
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_fakeStatus", xlabel="Fake tau status", **mcArgs)
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_pT", xlabel="#tau p_{T}, GeV/c", rebinToWidthX=10)
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_eta", xlabel="#tau #eta")
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_phi", xlabel="#tau #phi", rebinToWidthX=phiBinWidth)
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_Rtau", xlabel="R_{#tau}", rebinToWidthX=0.05, opts={"xmin": 0.5, "xmax": 1}, moveLegend={"dx": -0.5})
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/electrons_N", xlabel="N_{electrons}")
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/muons_N", xlabel="N_{muons}")
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/jets_N", xlabel="N_{jets}")
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/jets_N_allIdentified", xlabel="N_{all identified jets}")
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/MET_Raw", xlabel="Raw MET, GeV", rebinToWidthX=20)
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/MET_MET", xlabel="MET, GeV", rebinToWidthX=20)
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/MET_phi", xlabel="MET #phi", rebinToWidthX=phiBinWidth)
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/bjets_N", xlabel="N_{b jets}", opts={"xmax": 8})
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/DeltaPhi_TauMET", xlabel="#Delta#phi(#tau,MET)")
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet1MET", xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2} + #Delta#phi(MET,jet_{1})^{2}}")
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet2MET", xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2} + #Delta#phi(MET,jet_{2})^{2}}")
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet3MET", xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2} + #Delta#phi(MET,jet_{3})^{2}}")
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet4MET", xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2} + #Delta#phi(MET,jet_{4})^{2}}")
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/transverseMass", xlabel="m_{T}(#tau,MET)", rebinToWidthX=20)
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/fullMass", xlabel="m_{T}(#tau,MET)", rebinToWidthX=20)
 
     myDir = "Vertices"
-    createDrawPlot(myDir+"/verticesBeforeWeight", xlabel="N_{vertices}")
     createDrawPlot(myDir+"/verticesBeforeWeight", xlabel="N_{vertices}")
     createDrawPlot(myDir+"/verticesAfterWeight", xlabel="N_{vertices}")
     #createDrawPlot(myDir+"/verticesTriggeredBeforeWeight", xlabel="N_{vertices}")
@@ -271,12 +272,13 @@ def doPlots(myDsetMgr, opts, mySuffix):
     createDrawPlot(myDir+"/thirdJet_eta", xlabel="#eta of third jet")
     createDrawPlot(myDir+"/thirdJet_phi", xlabel="#phi of third jet", rebinToWidthX=phiBinWidth)
     createDrawPlot(myDir+"/NumberOfSelectedJets", xlabel="N_{selected jets}")
+    createDrawPlot(myDir+"/jet_PUIDmva", xlabel="Jet PU ID MVA output")
     myDir = "JetSelection/SelectedJets"
     createDrawPlot(myDir+"/jet_pt", xlabel="p_{T} of accepted jets, GeV/c", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_eta", xlabel="#eta of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_phi", xlabel="#phi of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralEmEnergyFraction", xlabel="NeutralEmEnergyFraction of accepted jets", ylabel="N_{jets}")
-    createDrawPlot(myDir+"/jet_NeutralHadronFraction", xlabel="NeutralHadronFraction of accepted jets", ylabel="N_{jets}")
+    createDrawPlot(myDir+"/jet_NeutralHadronEnergyFraction", xlabel="NeutralHadronEnergyFraction of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_PhotonEnergyFraction", xlabel="PhotonEnergyFraction of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_ChargedHadronEnergyFraction", xlabel="ChargedEnergyFraction of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralHadronMultiplicity", xlabel="NeutralHadronMultiplicity of accepted jets", ylabel="N_{jets}", opts={"xmax": 10})
@@ -288,7 +290,7 @@ def doPlots(myDsetMgr, opts, mySuffix):
     createDrawPlot(myDir+"/jet_eta", xlabel="#eta of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_phi", xlabel="#phi of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralEmEnergyFraction", xlabel="NeutralEmEnergyFraction of rejected jets", ylabel="N_{jets}")
-    createDrawPlot(myDir+"/jet_NeutralHadronFraction", xlabel="NeutralHadronFraction of rejected jets", ylabel="N_{jets}")
+    createDrawPlot(myDir+"/jet_NeutralHadronEnergyFraction", xlabel="NeutralHadronEnergyFraction of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_PhotonEnergyFraction", xlabel="PhotonEnergyFraction of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_ChargedHadronEnergyFraction", xlabel="ChargedEnergyFraction of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralHadronMultiplicity", xlabel="NeutralHadronMultiplicity of rejected jets", ylabel="N_{jets}", opts={"xmax": 10})
@@ -315,7 +317,7 @@ def doPlots(myDsetMgr, opts, mySuffix):
     createDrawPlot(myDir+"/bjet2_pt", xlabel="p_{T} of second b jets, GeV/c", ylabel="N_{jets}")
     createDrawPlot(myDir+"/bjet2_eta", xlabel="#eta of second b jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/MCMatchForPassedJets", xlabel="MCMatchForPassedJets", ylabel="N_{jets}")
-    myDir = "NormalisationAnalysis/eToTau"
+    myDir = "TauFakeRate/eToTau"
     createDrawPlot(myDir+"/etotau_mZ_all", xlabel="m_{ee} / GeV/c^{2}")
     createDrawPlot(myDir+"/etotau_mZ_decayMode0", xlabel="m_{ee} / GeV/c^{2}")
     createDrawPlot(myDir+"/etotau_mZ_decayMode1", xlabel="m_{ee} / GeV/c^{2}")
@@ -324,20 +326,56 @@ def doPlots(myDsetMgr, opts, mySuffix):
     createDrawPlot(myDir+"/etotau_taupT_decayMode0", xlabel="#tau p_{T} / GeV/c")
     createDrawPlot(myDir+"/etotau_taupT_decayMode1", xlabel="#tau p_{T}/ GeV/c")
     createDrawPlot(myDir+"/etotau_taupT_decayMode2", xlabel="#tau p_{T} / GeV/c")
+    # Data driven control plots
+    myDir = "ForDataDrivenCtrlPlots"
+    createDrawPlot(myDir+"/Njets", xlabel="N_{jets}")
+    createDrawPlot(myDir+"/NjetsAfterJetSelectionAndMETSF", xlabel="N_{jets}")
+    for i in range (1,4):
+        createDrawPlot(myDir+"/ImprovedDeltaPhiCutsJet%dCollinear"%i, xlabel="#sqrt{(#Delta#phi(#tau,MET))^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%i)
+    createDrawPlot(myDir+"/SelectedTau_pT_AfterStandardSelections", xlabel="#tau p_{T} / GeV/c")
+    createDrawPlot(myDir+"/SelectedTau_eta_AfterStandardSelections", xlabel="#tau #eta")
+    createDrawPlot(myDir+"/SelectedTau_phi_AfterStandardSelections", xlabel="#tau #phi")
+    createDrawPlot(myDir+"/SelectedTau_LeadingTrackPt_AfterStandardSelections", xlabel="#tau ldg. ch. particle p_{T} / GeV/c")
+    createDrawPlot(myDir+"/SelectedTau_Rtau_AfterStandardSelections", xlabel="R_{#tau}")
+    createDrawPlot(myDir+"/SelectedTau_pT_AfterStandardSelections", xlabel="#tau p_{T} / GeV/c")
+    createDrawPlot(myDir+"/SelectedTau_p_AfterStandardSelections", xlabel="#tau p / GeV/c")
+    createDrawPlot(myDir+"/SelectedTau_LeadingTrackP_AfterStandardSelections", xlabel="#tau ldg. ch. particle p / GeV/c")
+    createDrawPlot(myDir+"/Njets_AfterStandardSelections", xlabel="N_{jets}")
+    createDrawPlot(myDir+"/MET", xlabel="MET / GeV")
+    createDrawPlot(myDir+"/NBjets", xlabel="N_{b jets}")
+    for i in range (1,4):
+        createDrawPlot(myDir+"/ImprovedDeltaPhiCutsJet%dBackToBack"%i, xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+(#Delta#phi(jet_{%d},MET))^{2}}"%i)
+    # Final shapes
+    createDrawPlot("shapeTransverseMass", xlabel="Transverse mass, GeV/c^{2}", ylabel="N_{events}", rebinToWidthX=20, customizeBeforeFrame=lambda p: plots.partiallyBlind(p, maxShownValue=60))
+    createDrawPlot("shapeEWKFakeTausTransverseMass", xlabel="Transverse mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=10, **mcArgs)
+    createDrawPlot("shapeInvariantMass", xlabel="Invariant mass, GeV/c^{2}", ylabel="N_{events}", rebin=4, fullyBlinded=True)
+    createDrawPlot("shapeEWKFakeTausInvariantMass", xlabel="Invariant mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=4, **mcArgs)
     # main directory
     createDrawPlot("deltaPhi", xlabel="#Delta#phi(#tau jet, MET), ^{o}", ylabel="N_{events}", rebin=20)
-    createDrawPlot("transverseMass", xlabel="Transverse mass, GeV/c^{2}", ylabel="N_{events}", rebinToWidthX=20, customizeBeforeFrame=lambda p: plots.partiallyBlind(p, maxShownValue=60))
-    createDrawPlot("EWKFakeTausTransverseMass", xlabel="Transverse mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=10, **mcArgs)
-    createDrawPlot("fullMass", xlabel="Invariant mass, GeV/c^{2}", ylabel="N_{events}", rebin=4, fullyBlinded=True)
-    createDrawPlot("EWKFakeTausFullMass", xlabel="Invariant mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=4, **mcArgs)
     createDrawPlot("alphaT", xlabel="#alpha_{T}", opts={"xmax": 2}, customizeBeforeFrame=lambda p: plots.partiallyBlind(p, maxShownValue=0.5))
-    createDrawPlot("deltaPhiJetMet", xlabel="min #Delta#phi(jet, MET), ^{o}", fullyBlinded=True)
-    createDrawPlot("maxDeltaPhiJetMet", xlabel="max #Delta#phi(#tau jet, MET), ^{o}", fullyBlinded=True)
+    #createDrawPlot("deltaPhiJetMet", xlabel="min #Delta#phi(jet, MET), ^{o}", fullyBlinded=True)
+    #createDrawPlot("maxDeltaPhiJetMet", xlabel="max #Delta#phi(#tau jet, MET), ^{o}", fullyBlinded=True)
     createDrawPlot("SignalSelectionFlow", xlabel="Step", opts={"xmax": 7})
-
     #createDrawPlot("SignalSelectionFlowVsVertices"", xlabel="N_{vertices}", ylabel="Step",)
     #createDrawPlot("SignalSelectionFlowVsVerticesFakeTaus", xlabel="N_{vertices}", ylabel="Step")
-    
+
+    # Normalization plots
+    myNormalizationPlotDirs = myDsetMgr.getDataset("Data").getDirectoryContent("NormalisationAnalysis")
+    def createDrawNormalizationPlots(path, **kwargs):
+        for plotDir in myNormalizationPlotDirs:
+            args = {}
+            args.update(kwargs)
+            createDrawPlot(path%plotDir, **args)
+
+    createDrawNormalizationPlots("NormalisationAnalysis/%s/tauPt", xlabel="#tau p_{T} / GeV/c")
+    createDrawNormalizationPlots("NormalisationAnalysis/%s/nJets", xlabel="N_{jets}")
+    createDrawNormalizationPlots("NormalisationAnalysis/%s/met", xlabel="MET / GeV")
+    createDrawNormalizationPlots("NormalisationAnalysis/%s/metPhi", xlabel="MET #phi")
+    createDrawNormalizationPlots("NormalisationAnalysis/%s/nBJets", xlabel="N_{b jets}")
+    createDrawNormalizationPlots("NormalisationAnalysis/%s/transverseMass", xlabel="m_{T}(#tau,MET) / GeV/c^{2}")
+    createDrawNormalizationPlots("NormalisationAnalysis/%s/zMass", xlabel="m_{Z} / GeV/c^{2}")
+    createDrawNormalizationPlots("NormalisationAnalysis/%s/HplusPt", xlabel="p_{T}(H+) / GeV/c")
+
 def doCounters(myDsetMgr, mySuffix):
     eventCounter = counter.EventCounter(myDsetMgr)
 
