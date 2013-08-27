@@ -85,7 +85,7 @@ namespace HPlus {
   */
 
   //privateAnalyze
-  Data TopChiSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
+  TopChiSelection::Data TopChiSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
     Data output;
 
     // Reset variables
