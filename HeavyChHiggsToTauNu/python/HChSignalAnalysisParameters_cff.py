@@ -409,7 +409,7 @@ invMassReco = cms.untracked.PSet(
     pzSelectionMethod = cms.untracked.string("deltaEtaMax"),
     )
 
-topReconstruction = cms.untracked.string("None") # Options: None
+topReconstruction = cms.untracked.string("None") # Options: None, chi, std, Bselection, Wselection
 
 transverseMassCut = cms.untracked.double(100) # Not used
 
@@ -562,6 +562,8 @@ commonPlotsSettings = cms.untracked.PSet(
     njetsBins = SetHistogramBinSettings(20, 0., 20.),
     metBins = SetHistogramBinSettings(250, 0., 500.),
     tailKiller1DBins = SetHistogramBinSettings(52, 0., 260.),
+    topMassBins = SetHistogramBinSettings(100, 0., 500.),
+    WMassBins = SetHistogramBinSettings(60, 0., 300.),
     mtBins = SetHistogramBinSettings(100, 0., 500.),
     invmassBins = SetHistogramBinSettings(100, 0., 500.),
 )

@@ -13,8 +13,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SplittedHistogramHandler.h"
@@ -87,9 +88,10 @@ namespace HPlus {
                     JetSelection& jetSelection,
                     METTriggerEfficiencyScaleFactor& metTrgSF,
                     METSelection& metSelection,
-                    BTagging& bJetSelection,
+                    BTagging& bTagging,
                     QCDTailKiller& qcdTailKiller,
-                    TopChiSelection& topChiSelection,
+                    BjetSelection& bjetSelection,
+                    TopSelectionManager& topSelection,
                     EvtTopology& evtTopology,
                     FullHiggsMassCalculator& fullHiggsMassCalculator);
     /// Initialization where TauSelection::Data is used instead of TauSelection object (use for QCD measurements)
@@ -103,9 +105,10 @@ namespace HPlus {
                     JetSelection& jetSelection,
                     METTriggerEfficiencyScaleFactor& metTrgSF,
                     METSelection& metSelection,
-                    BTagging& bJetSelection,
+                    BTagging& bTagging,
                     QCDTailKiller& qcdTailKiller,
-                    TopChiSelection& topChiSelection,
+                    BjetSelection& bjetSelection,
+                    TopSelectionManager& topSelection,
                     EvtTopology& evtTopology,
                     FullHiggsMassCalculator& fullHiggsMassCalculator);
 
@@ -132,7 +135,7 @@ namespace HPlus {
     void fillControlPlotsAtMETSelection(const edm::Event& iEvent, const METSelection::Data& data);
     void fillControlPlotsAtBtagging(const edm::Event& iEvent, const BTagging::Data& data);
     void fillControlPlotsAtBackToBackDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data);
-    void fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopChiSelection::Data& data);
+    void fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopSelectionManager::Data& data);
     void fillControlPlotsAtEvtTopology(const edm::Event& iEvent, const EvtTopology::Data& data);
     /// Getters for histogram bin definitions
     const HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
@@ -183,7 +186,7 @@ namespace HPlus {
     METSelection::Data fMETData;
     BTagging::Data fBJetData;
     QCDTailKiller::Data fQCDTailKillerData;
-    TopChiSelection::Data fTopData;
+    TopSelectionManager::Data fTopData;
     EvtTopology::Data fEvtTopology;
     FullHiggsMassCalculator::Data fFullHiggsMassData;
 
@@ -195,6 +198,8 @@ namespace HPlus {
     HistogramSettings fNjetsBinSettings;
     HistogramSettings fMetBinSettings;
     HistogramSettings fTailKiller1DSettings;
+    HistogramSettings fTopMassBinSettings;
+    HistogramSettings fWMassBinSettings;
     HistogramSettings fMtBinSettings;
     HistogramSettings fInvmassBinSettings;
 
@@ -280,9 +285,17 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet2;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet3;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet4;
-    
+
     // top selection
-    
+    std::vector<WrappedTH1*> hCtrlTopMass;
+    std::vector<WrappedTH1*> hCtrlTopPt;
+    std::vector<WrappedTH1*> hCtrlWMass;
+    std::vector<WrappedTH1*> hCtrlWPt;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausTopMass;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausTopPt;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausWMass;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausWPt;
+
     // evt topology
     
     // all selections

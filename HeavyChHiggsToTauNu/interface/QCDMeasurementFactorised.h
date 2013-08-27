@@ -19,12 +19,8 @@
 // TriggerEmulationEfficiency.h
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
@@ -111,7 +107,6 @@ namespace HPlus {
     EventWeight& fEventWeight;
     HistoWrapper& fHistoWrapper;
     const double fDeltaPhiCutValue;
-    const std::string fTopRecoName; // Name of selected top reconstruction algorithm
     const bool fApplyNprongsCutForTauCandidate;
     const bool fApplyRtauCutForTauCandidate;
     QCDFactorisedVariationType fMethodType;
@@ -139,6 +134,7 @@ namespace HPlus {
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
     Count fQCDTailKillerBackToBackCounter;
+    Count fTopSelectionCounter;
     Count fAfterLeg1Counter;
     Count fAfterLeg2Counter;
     Count fAfterLeg1AndLeg2Counter;
@@ -153,11 +149,8 @@ namespace HPlus {
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
-    TopSelection fTopSelection;
-    TopChiSelection fTopChiSelection;
-    TopWithBSelection fTopWithBSelection;
-    TopWithWSelection fTopWithWSelection;
     BjetSelection fBjetSelection;
+    TopSelectionManager fTopSelectionManager;
     FullHiggsMassCalculator fFullHiggsMassCalculator;
     GenParticleAnalysis fGenparticleAnalysis;
     //ForwardJetVeto fForwardJetVeto;
@@ -187,6 +180,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtag;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtagWithSF;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtagWithSFAndDeltaPhi;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg1;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg2;
 

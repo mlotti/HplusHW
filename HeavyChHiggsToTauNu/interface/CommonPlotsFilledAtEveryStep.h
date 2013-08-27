@@ -12,8 +12,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 
@@ -50,7 +51,7 @@ namespace HPlus {
                           const METSelection::Data* metData,
                           const BTagging::Data* bJetData,
                           const QCDTailKiller::Data* qcdTailKillerData,
-                          const TopChiSelection::Data* topData,
+                          const TopSelectionManager::Data* topData,
                           const FullHiggsMassCalculator::Data* fullHiggsMassData);
 
   private:
@@ -70,7 +71,7 @@ namespace HPlus {
     const METSelection::Data* fMETData;
     const BTagging::Data* fBJetData;
     const QCDTailKiller::Data* fQCDTailKillerData;
-    const TopChiSelection::Data* fTopData;
+    const TopSelectionManager::Data* fTopData;
     const FullHiggsMassCalculator::Data* fFullHiggsMassData;
 
     /// Histograms to be plotted after every step
@@ -93,6 +94,11 @@ namespace HPlus {
     WrappedTH1* hDeltaR_TauMETJet2MET;
     WrappedTH1* hDeltaR_TauMETJet3MET;
     WrappedTH1* hDeltaR_TauMETJet4MET;
+    WrappedTH1* hTopMass;
+    WrappedTH1* hTopPt;
+    WrappedTH1* hWMass;
+    WrappedTH1* hWPt;
+    WrappedTH1* hChargedHiggsPt; // Boost variable
     WrappedTH1* hTransverseMass;
     WrappedTH1* hFullMass;
   };
