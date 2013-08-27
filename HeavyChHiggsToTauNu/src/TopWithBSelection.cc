@@ -81,7 +81,7 @@ namespace HPlus {
     return privateAnalyze(iEvent, iSetup, jets, iJetb);
   } */
 
-  Data TopWithBSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
+  TopWithBSelection::Data TopWithBSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
     Data output;
 
     bool topmassfound = false;
