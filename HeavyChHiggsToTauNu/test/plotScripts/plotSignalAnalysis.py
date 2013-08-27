@@ -116,6 +116,15 @@ def main():
     #datasets.getDataset("HplusTB_M300").setCrossSection(0.0594) # pb FIXME
 
     
+    # sigma x BR for tanbeta=40 at 8 TeV (using tanbeta^2 dep)
+    datasets.getDataset("HplusTB_M180").setCrossSection(0.9637) # pb
+    datasets.getDataset("HplusTB_M190").setCrossSection(0.9637) # pb
+    datasets.getDataset("HplusTB_M200").setCrossSection(0.5136) # pb
+    datasets.getDataset("HplusTB_M220").setCrossSection(0.5136) # pb  
+    datasets.getDataset("HplusTB_M250").setCrossSection(0.1394) # pb
+    datasets.getDataset("HplusTB_M300").setCrossSection(0.0594) # pb
+
+    
     # Remove signals other than M120
     datasets.remove(filter(lambda name: "W2Jets" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "W3Jets" in name, datasets.getAllDatasetNames()))
