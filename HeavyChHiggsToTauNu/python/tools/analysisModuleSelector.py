@@ -117,7 +117,7 @@ class AnalysisModuleSelector:
         for i in range(0, len(self._otherSources)):
             if self._otherSources[i] != None:
                 myList = self._findCommonAvailableModules("OptimizationMode",self._primarySource.getLabel(),myList,self._otherSources[i].getLabel(),self._otherSources[i].getOptimizationModes())
-        if len(myList) > 0:
+        if len(myList) > 1:
             self._availableOptimizationModes = myList[1:]
         else:
             self._availableOptimizationModes = myList
