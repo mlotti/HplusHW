@@ -92,11 +92,11 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
 #    xsect.setHplusCrossSectionsToMSSM(myDsetMgr, tanbeta=20, mu=200)
 
     plots.mergeWHandHH(myDsetMgr) # merging of WH and HH signals must be done after setting the cross section
-    
     # Replace signal dataset with a signal+background dataset, where
     # the BR(t->H+) is taken into account for SM ttbar
     #plots.replaceLightHplusWithSignalPlusBackground(myDsetMgr)
-        
+    myDsetMgr.printDatasetTree()
+
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
@@ -104,7 +104,7 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     doPlots(myDsetMgr, opts, mySuffix)
 
     # Print counters
-    #doCounters(myDsetMgr)
+    doCounters(myDsetMgr)
     print "Results saved in directory: %s"%mySuffix
 
 def doPlots(myDsetMgr, opts, mySuffix):
@@ -169,7 +169,7 @@ def doPlots(myDsetMgr, opts, mySuffix):
     phiBinWidth = 2*3.14159/36
 
     #createDrawPlot("CommonPlots/AtEveryStep/Trigger/nVertices", xlabel="N_{Vertices}")
-    if False:
+    if True:
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/nVertices", xlabel="N_{Vertices}")
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_fakeStatus", xlabel="Fake tau status", **mcArgs)
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_pT", xlabel="#tau p_{T}, GeV/c", rebinToWidthX=10)
@@ -376,7 +376,7 @@ def doPlots(myDsetMgr, opts, mySuffix):
     createDrawNormalizationPlots("NormalisationAnalysis/%s/zMass", xlabel="m_{Z} / GeV/c^{2}")
     createDrawNormalizationPlots("NormalisationAnalysis/%s/HplusPt", xlabel="p_{T}(H+) / GeV/c")
 
-def doCounters(myDsetMgr, mySuffix):
+def doCounters(myDsetMgr, mySuffix=""):
     eventCounter = counter.EventCounter(myDsetMgr)
 
     # append row from the tree to the main counter
