@@ -45,7 +45,10 @@ mcOnlyLumi = 5000 # pb
 # main function
 def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     # Make directory for output
-    mySuffix = "debugPlots_%s_%s_%s"%(era,searchMode,optimizationMode)
+    if optimizationMode is None:
+        mySuffix = "debugPlots_%s_%s"%(era,searchMode)
+    else:
+        mySuffix = "debugPlots_%s_%s_%s"%(era,searchMode,optimizationMode)
     if os.path.exists(mySuffix):
         shutil.rmtree(mySuffix)
     os.mkdir(mySuffix)
@@ -437,13 +440,23 @@ if __name__ == "__main__":
     myModuleSelector.doSelect(opts)
 
     # Arguments are ok, proceed to run
-    myChosenModuleCount = len(myModuleSelector.getSelectedEras())*len(myModuleSelector.getSelectedSearchModes())*len(myModuleSelector.getSelectedOptimizationModes())
-    print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes)"%(myChosenModuleCount,len(myModuleSelector.getSelectedEras()),len(myModuleSelector.getSelectedSearchModes()),len(myModuleSelector.getSelectedOptimizationModes()))
+    nOptModes = len(myModuleSelector.getSelectedOptimizationModes())
+    if nOptModes == 0:
+        myChosenModuleCount = len(myModuleSelector.getSelectedEras())*len(myModuleSelector.getSelectedSearchModes())
+        print "Will run over %d modules (%d eras x %d searchModes)"%(myChosenModuleCount,len(myModuleSelector.getSelectedEras()),len(myModuleSelector.getSelectedSearchModes()))
+    else:
+        myChosenModuleCount = len(myModuleSelector.getSelectedEras())*len(myModuleSelector.getSelectedSearchModes())*nOptModes
+        print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes)"%(myChosenModuleCount,len(myModuleSelector.getSelectedEras()),len(myModuleSelector.getSelectedSearchModes()), nOptModes)
     myCount = 1
     for era in myModuleSelector.getSelectedEras():
         for searchMode in myModuleSelector.getSelectedSearchModes():
-            for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
-                print "%sProcessing module %d/%d: era=%s searchMode=%s optimizationMode=%s%s"%(HighlightStyle(), myCount, myChosenModuleCount, era, searchMode, optimizationMode, NormalStyle())
-                main(opts,signalDsetCreator,era,searchMode,optimizationMode)
+           if nOptModes == 0:
+                print "%sProcessing module %d/%d: era=%s searchMode=%s%s"%(HighlightStyle(), myCount, myChosenModuleCount, era, searchMode, NormalStyle())
+                main(opts,signalDsetCreator,era,searchMode, None)
                 myCount += 1
+           else:
+               for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
+                   print "%sProcessing module %d/%d: era=%s searchMode=%s optimizationMode=%s%s"%(HighlightStyle(), myCount, myChosenModuleCount, era, searchMode, optimizationMode, NormalStyle())
+                   main(opts,signalDsetCreator,era,searchMode,optimizationMode)
+                   myCount += 1
     print "\n%sPlotting done.%s"%(HighlightStyle(),NormalStyle())
