@@ -386,9 +386,11 @@ def doCounters(myDsetMgr, mySuffix=""):
 #    eventCounter.getMainCounter().appendRow("MET > 70", treeDraw.clone(selection="met_p4.Et() > 70"))
 
     ewkDatasets = [
-        "WJets", "W1Jets", "W2Jets", "W3Jets", "W4Jets", "TTJets",
+        "WJets", "TTJets",
         "DYJetsToLL", "SingleTop", "Diboson"
         ]
+    if myDsetMgr.hasDataset("W1Jets"):
+        ewkDatasets.extend(["W1Jets", "W2Jets", "W3Jets", "W4Jets"])
 
     if mcOnly:
         eventCounter.normalizeMCToLuminosity(mcOnlyLumi)
