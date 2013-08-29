@@ -156,17 +156,16 @@ def doPlots(myDsetMgr, opts, mySuffix):
     def createDrawCommonPlot(path, **kwargs):
         for plotDir in myCommonPlotDirs:
             args = {}
-            args.update(kwargs)
-            createDrawPlot(path%plotDir, **args)
             
-            #if "transverseMass" in path:
-                #if "BTagging" in plotDir or "Selected" in plotDir:
-                    #args["customizeBeforeFrame"] = lambda p: plots.partiallyBlind(p, maxShownValue=60)
-            #elif "Selected" in plotDir:
-                #args["fullyBlinded"] = True
-            #if "FakeTaus" in plotDir:
-                #args.update(mcArgs)
-            #createDrawPlot(path%plotDir, **args)
+            if opts.blind:
+                if "transverseMass" in path:
+                    if "BTagging" in plotDir or "Selected" in plotDir:
+                        args["customizeBeforeFrame"] = lambda p: plots.partiallyBlind(p, maxShownValue=60)
+                elif "Selected" in plotDir:
+                    args["fullyBlinded"] = True
+            if "FakeTaus" in plotDir:
+                args.update(mcArgs)
+            createDrawPlot(path%plotDir, **args)
 
     #phiBinWidth = 2*3.14159/72
     phiBinWidth = 2*3.14159/36
@@ -434,6 +433,7 @@ if __name__ == "__main__":
     myModuleSelector.addParserOptions(parser)
     parser.add_option("--noMCQCD", dest="noMCQCD", action="store_true", default=False, help="remove MC QCD")
     parser.add_option("--noSignal", dest="noSignal", action="store_true", default=False, help="remove MC QCD")
+    parser.add_option("--blind", dest="blind", action="store_true", default=False, help="Blind sensitive plots")
     (opts, args) = parser.parse_args()
 
     # Get dataset manager creator and handle different era/searchMode/optimizationMode combinations
