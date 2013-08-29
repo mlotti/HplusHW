@@ -28,7 +28,7 @@ namespace HPlus {
     class Data; // Forward declare because it is used in BTaggingScaleFactor interface
     struct PerJetInfo {
       std::vector<double> scaleFactor; // perJetWeight
-      std::vector<double> uncertainty; // perJetWeightUncert
+      std::vector<double> uncertainty; // perJetWeightUncert // NOT MEANINGFUL; DELETE
       std::vector<bool> tagged;        // 
       std::vector<bool> genuine;       // 
 
@@ -72,30 +72,50 @@ namespace HPlus {
     };
 
   private:
+    class EfficiencyTable; // Forward declared because BTaggingScaleFactor interface uses it
+
     class BTaggingScaleFactor {
     public:
       BTaggingScaleFactor();
       ~BTaggingScaleFactor();
 
       void addScaleFactorData(double pT, double scaleFactor, double scaleFactorUncertainty);
-   
+
+      void initializeJetTable();
+      void addTaggedJet(double pT);
+      void addUntaggedJet(double pT);
+      void addUncertaintyTagged(double pT);
+      void addUncertaintyTagged(double pT, double uncertaintyFactor);
+      void addUncertaintyUntagged(double pT, EfficiencyTable& efficiencyTable);
+      void addUncertaintyUntagged(double pT, EfficiencyTable& efficiencyTable, double uncertaintyFactor);
+
       static double calculateScaleFactor(const PerJetInfo& info);
       static double calculateAbsoluteUncertainty(const PerJetInfo& info);
       static double calculateRelativeUncertainty(const PerJetInfo& info);
 
-      double getScaleFactor(double, double) const;
-      double getScaleFactorUncertainty(double, double) const;
-      double calculateMistagScaleFactor(double) const;
+      double getScaleFactor(double pt) const;
+      double getScaleFactorUncertainty(double pt) const;
+      double calculateMistagScaleFactor(double pt) const;
+      double getNTagged(double pT) const;
+      double getNUntagged(double pT) const;
 
-      size_t getNumberOfBins() { return fPtBins.size(); }
+      size_t getNumberOfBins() { return fPtBins.size(); } // DELETE
       size_t obtainIndex(double pt) { return obtainIndex(fPtBins, pt); }
+
+      double calculateRelativeUncertaintySquared();
 
     private:
       static size_t obtainIndex(const std::vector<double>& table, double pt);
 
+      // Per-jet scale factor look-up table
       std::vector<double> fPtBins; // lower edges of pT bins
       std::vector<double> fScaleFactor; // b-tagging scale factor
       std::vector<double> fScaleFactorUncertainty; // b-tagging scale factor uncertainty
+      // Vectors for storing jet info for the calculation of the weight uncertainty
+      std::vector<int> fNTagged;
+      std::vector<int> fNNotTagged;
+      std::vector<double> fPerBinUncertaintyTagged;
+      std::vector<double> fPerBinUncertaintyNotTagged;
     };
 
     class EfficiencyTable {
@@ -105,17 +125,33 @@ namespace HPlus {
 
       void addEfficiencyData(double pT, double efficiency, double effUncertainty);
 
-      double getEfficiency(double) const;
-      double getEffUncertainty(double) const;
+      void initializeJetTable();
+      void addTaggedJet(double pT);
+      void addUntaggedJet(double pT);
+      void addUncertaintyUntagged(double pT, BTaggingScaleFactor& scaleFactorTable);
 
-      size_t getNumberOfBins() { return fPtBins.size(); }
+      double getEfficiency(double pT) const;
+      double getEffUncertainty(double pT) const;
+      double getNTagged(double pT) const;
+      double getNUntagged(double pT) const;
+
+      size_t getNumberOfBins() { return fPtBins.size(); } // DELETE
       size_t obtainIndex(double pt) { return obtainIndex(fPtBins, pt); }
+
+      double calculateRelativeUncertaintySquared();
+
     private:
       static size_t obtainIndex(const std::vector<double>& table, double pt);
 
+      // Efficiency look-up table
       std::vector<double> fPtBins; // lower edges of pT bins
       std::vector<double> fEfficiency; // Efficiency of (mis)tagging jet as a b-jet
       std::vector<double> fEffUncertainty; // Uncertainty of (mis)tagging efficiency
+      // Vectors for storing jet info for the calculation of the weight uncertainty
+      std::vector<int> fNTagged; // Number of b-tagged jets in each efficiency bin
+      std::vector<int> fNNotTagged; // Number of not b-tagged jets in each efficiency bin
+      std::vector<double> fPerBinUncertaintyNotTagged;
+
     };
 
   public:
@@ -158,13 +194,15 @@ namespace HPlus {
 
     const std::string getDiscriminator() const { return fDiscriminator; }
 
-    PerJetInfo getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const;
+    //PerJetInfo getPerJetInfo(PerJetInfo& bTaggingInfo) const { return bTaggingInfo; } //// Get rid of this function (still required by some plugin)
     WeightWithUncertainty calculateJetWeight(edm::Ptr<pat::Jet>& iJet, bool isBTagged, BTaggingScaleFactor& sfTag, BTaggingScaleFactor& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) const;
+    double calculateEventWeight(PerJetInfo& fBTaggingInfo);
+    double calculateRelativeEventWeightUncertainty(BTaggingScaleFactor& sfTag, BTaggingScaleFactor& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag);
     
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
     void analyzeMCTagEfficiencyByJetFlavour(const edm::Ptr<pat::Jet>& jet, const bool isBJet, const bool isCJet, const bool isLightJet);
-    void calculateScaleFactorInfo(PerJetInfo& bTaggingInfo, BTagging::Data& output);
+    void calculateScaleFactorInfo(PerJetInfo& bTaggingInfo, BTaggingScaleFactor& sfTag, BTaggingScaleFactor& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag, BTagging::Data& output);
 
     // Input parameters
     edm::InputTag fSrc;
