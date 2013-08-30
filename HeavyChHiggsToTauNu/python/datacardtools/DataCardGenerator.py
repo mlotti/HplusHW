@@ -73,6 +73,8 @@ class DatasetMgrCreatorManager:
                 self._luminosities.append(myLuminosity)
                 # Merge divided datasets
                 myDsetMgr.mergeMany(plots._physicalMcAdd, addition=True)
+                # Show info of available datasets
+                myDsetMgr.printDatasetTree()
                 # Store DatasetManager
                 self._dsetMgrs.append(myDsetMgr)
             else:

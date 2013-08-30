@@ -9,11 +9,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 
 class ObservationInput:
     def __init__(self, datasetDefinitions, shapeHisto):
-	self.setDatasetDefinitions(datasetDefinitions)
-	self.setShapeHisto(shapeHisto)
-
-    def setShapeHisto(self,histo):
-	self.shapeHisto = histo
+        self.datasetDefinitions = datasetDefinitions
+        self.shapeHisto = shapeHisto
 
     def getShapeHisto(self):
         return self.shapeHisto

@@ -28,7 +28,7 @@ OptionMassShape = "TransverseMass"
 OptionReplaceEmbeddingByMC = True
 OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = not True
+OptionDoControlPlots = False
 OptionQCDfactorisedFactorisationSchema = "TauPt" # options: 'full', 'taupt' (recommended), 'taueta, 'nvtx'
 OptionDoQCDClosureTests = False
 
@@ -87,8 +87,7 @@ DataCardName += "_"+OptionMassShape
 # Observation definition (how to retrieve number of observed events)
 #
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ObservationInput
-Observation = ObservationInput(rateCounter=SignalRateCounter,
-                               datasetDefinitions=["Tau_"],
+Observation = ObservationInput(datasetDefinitions=["Tau_"],
                                shapeHisto=SignalShapeHisto)
 #Observation.setPaths(signalPath,signalDataPaths)
 
@@ -139,21 +138,10 @@ if OptionMassShape == "TransverseMass":
         datasetType  = "QCD factorised",
         datasetDefinitions = ["Tau_"],
         MCEWKDatasetDefinitions = ["TTJets","WJets","W1Jets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
-        nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"],
-        QCDfactorisedInfo = { "afterStdSelSource": QCDFactorisedStdSelVersion+"/NevtAfterStandardSelections",
-                              "afterMETLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1",
-                              "afterTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg2",
-                              "afterMETandTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1AndLeg2", # for checking only
-                              "closureMETShapeSource": [QCDFactorisedStdSelVersion+"/CtrlMET",
-                                                        QCDFactorisedStdSelVersion+"/CtrlMETAfterLeg1",
-                                                        QCDFactorisedStdSelVersion+"/CtrlMETAfterLeg2"],
-                              "closureMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions,
-                              "finalShapeHisto": QCDFactorisedStdSelVersion+"/MtAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
-                              "closureShapeSource": [QCDFactorisedStdSelVersion+"/MtAfterStandardSelections",
-                                                     QCDFactorisedStdSelVersion+"/MtAfterLeg1",
-                                                     QCDFactorisedStdSelVersion+"/MtAfterLeg2"],
-                              "closureShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions,
-                              "factorisationSchema" : OptionQCDfactorisedFactorisationSchema,
+        nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"], # FIXME
+        QCDfactorisedInfo = { "afterStdSelSource": "MtAfterStandardSelections",
+                              "afterMETLegSource": "MtAfterLeg1",
+                              "afterTauLegSource": "MtAfterLeg2"
         }
     ))
 elif OptionMassShape == "FullMass":
@@ -165,18 +153,18 @@ elif OptionMassShape == "FullMass":
         datasetDefinitions = ["Tau_"],
         MCEWKDatasetDefinitions = ["TTJets","WJets","W1Jets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"],
-        QCDfactorisedInfo = { "afterStdSelSource": QCDFactorisedStdSelVersion+"/NevtAfterStandardSelections",
-                              "afterMETLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1",
-                              "afterTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg2",
-                              "afterMETandTauLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1AndLeg2", # for checking only
-                              "closureMETShapeSource": [QCDFactorisedStdSelVersion+"/CtrlMET",
-                                                        QCDFactorisedStdSelVersion+"/CtrlMETAfterLeg1",
-                                                        QCDFactorisedStdSelVersion+"/CtrlMETAfterLeg2"],
+        QCDfactorisedInfo = { "afterStdSelSource": "/NevtAfterStandardSelections",
+                              "afterMETLegSource": "/NevtAfterLeg1",
+                              "afterTauLegSource": "/NevtAfterLeg2",
+                              "afterMETandTauLegSource": "/NevtAfterLeg1AndLeg2", # for checking only
+                              "closureMETShapeSource": ["/CtrlMET",
+                                                        "/CtrlMETAfterLeg1",
+                                                        "/CtrlMETAfterLeg2"],
                               "closureMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions,
-                              "finalShapeHisto": QCDFactorisedStdSelVersion+"/MassAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
-                              "closureShapeSource": [QCDFactorisedStdSelVersion+"/MassAfterStandardSelections",
-                                                     QCDFactorisedStdSelVersion+"/MassAfterLeg1",
-                                                     QCDFactorisedStdSelVersion+"/MassAfterLeg2"],
+                              "finalShapeHisto": "/MassAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
+                              "closureShapeSource": ["/MassAfterStandardSelections",
+                                                     "/MassAfterLeg1",
+                                                     "/MassAfterLeg2"],
                               "closureShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions,
                               #"assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ... # not needed
                               #"factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"], # not needed
@@ -193,8 +181,6 @@ DataGroups.append(DataGroup(
     datasetType  = "QCD inverted",
     datasetDefinitions   = "Data",
     shapeHisto   = "mtSum",
-    #dirPrefix   = QCDInvertedAnalysis,
-    rateCounter  = "integral",
 #    additionalNormalisation = 1.0,
     nuisances    = ["stat_QCDinv","42","43","44"] # FIXME: add shape stat, i.e. 40x,
 ))
@@ -209,7 +195,6 @@ if not OptionReplaceEmbeddingByMC:
         datasetType  = "Embedding",
         #datasetDefinitions   = ["SingleMu"],
         datasetDefinitions   = ["Data"],
-        #dirPrefix   = EmbeddingAnalysis,
         validMassPoints = MassPoints,
         additionalNormalisation = 1.0907,
         nuisances    = ["trg_tau_embedding","tau_ID","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb","stat_binByBin","ES_taus_tempForEmbedding"]
@@ -897,6 +882,9 @@ MergeNuisances.append(["stat_binByBin","stat_binByBin_QCDfact","stat_binByBin_fa
 # Control plots
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput
 ControlPlots = []
+
+
+# FIXME: fix how QCD background is taken here
 ControlPlots.append(ControlPlotInput(
     title            = "Njets",
     signalHHid       = [-1],
@@ -908,8 +896,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "Njets_AfterStandardSelections",
     EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "Njets_AfterStandardSelections",
-    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlNjets",
-    QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlNjets",
+    QCDFactNormalisation = "/CtrlNjets",
+    QCDFactHistoName = "/CtrlNjets",
     details          = { "bins": 5,
                          "rangeMin": 3.0,
                          "rangeMax": 8.0,
@@ -939,8 +927,8 @@ for i in range(0,4):
         signalHistoName  = "QCDTailKillerJet%dCollinear"%i,
         EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "QCDTailKillerJet%dCollinear"%i,
-        QCDFactNormalisation = QCDFactorisedStdSelVersion+"/QCDTailKillerJet%dCollinear"%i,
-        QCDFactHistoName = QCDFactorisedStdSelVersion+"/QCDTailKillerJet%dCollinear"%i,
+        QCDFactNormalisation = "/QCDTailKillerJet%dCollinear"%i,
+        QCDFactHistoName = "/QCDTailKillerJet%dCollinear"%i,
         details          = { "bins": 26,
                              "rangeMin": 0.0,
                              "rangeMax": 260.0,
@@ -973,8 +961,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "MET",
     EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "MET",
-    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlMET",
-    QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlMET",
+    QCDFactNormalisation = "/CtrlMET",
+    QCDFactHistoName = "/CtrlMET",
     details          = { "bins": 13,
                          "rangeMin": 0.0,
                          "rangeMax": 500.0,
@@ -1004,8 +992,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "NBjets",
     EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "NBjets",
-    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/CtrlNbjets",
-    QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlNbjets",
+    QCDFactNormalisation = "/CtrlNbjets",
+    QCDFactHistoName = "/CtrlNbjets",
     details          = { "bins": 5,
                          "rangeMin": 0.0,
                          "rangeMax": 5.0,
@@ -1038,8 +1026,8 @@ ControlPlots.append(ControlPlotInput(
     #signalHistoName  = "deltaPhi",
     #EWKfakeHistoPath  = "",
     #EWKfakeHistoName  = "EWKFakeTausDeltaPhi",
-    #QCDFactNormalisation = QCDFactorisedStdSelVersion+"/factorisation/Leg1AfterBTagging",
-    #QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlLeg1AfterDeltaPhiTauMET", #FIXME
+    #QCDFactNormalisation = "/factorisation/Leg1AfterBTagging",
+    #QCDFactHistoName = "/CtrlLeg1AfterDeltaPhiTauMET", #FIXME
     #details          = { "bins": 11,
                          #"rangeMin": 0.0,
                          #"rangeMax": 180.0,
@@ -1066,8 +1054,8 @@ ControlPlots.append(ControlPlotInput(
     #EWKfakeId        = EWKFakeIdList,
     #signalHistoPath  = "",
     #signalHistoName  = "maxDeltaPhiJetMet",
-    #QCDFactNormalisation = QCDFactorisedStdSelVersion+"/factorisation/Leg1AfterDeltaPhiTauMET",
-    #QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlLeg1AfterMaxDeltaPhiJetMET", #FIXME
+    #QCDFactNormalisation = "/factorisation/Leg1AfterDeltaPhiTauMET",
+    #QCDFactHistoName = "/CtrlLeg1AfterMaxDeltaPhiJetMET", #FIXME
     #details          = { "bins": 18,
                          #"rangeMin": 0.0,
                          #"rangeMax": 180.0,
@@ -1094,8 +1082,8 @@ ControlPlots.append(ControlPlotInput(
     #EWKfakeId        = EWKFakeIdList,
     #signalHistoPath  = "TopChiSelection",
     #signalHistoName  = "WMass",
-    #QCDFactNormalisation = QCDFactorisedStdSelVersion+"/factorisation/Leg1AfterDeltaPhiTauMET",
-    #QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlLeg1AfterTopMass", #FIXME
+    #QCDFactNormalisation = "/factorisation/Leg1AfterDeltaPhiTauMET",
+    #QCDFactHistoName = "/CtrlLeg1AfterTopMass", #FIXME
     #details          = { "bins": 20,
                          #"rangeMin": 0.0,
                          #"rangeMax": 200.0,
@@ -1122,8 +1110,8 @@ ControlPlots.append(ControlPlotInput(
     #EWKfakeId        = EWKFakeIdList,
     #signalHistoPath  = "TopChiSelection",
     #signalHistoName  = "TopMass",
-    #QCDFactNormalisation = QCDFactorisedStdSelVersion+"/factorisation/Leg1AfterDeltaPhiTauMET",
-    #QCDFactHistoName = QCDFactorisedStdSelVersion+"/CtrlLeg1AfterTopMass", #FIXME
+    #QCDFactNormalisation = "/factorisation/Leg1AfterDeltaPhiTauMET",
+    #QCDFactHistoName = "/CtrlLeg1AfterTopMass", #FIXME
     #details          = { "bins": 20,
                          #"rangeMin": 0.0,
                          #"rangeMax": 400.0,
@@ -1153,8 +1141,8 @@ for i in range(0,4):
         signalHistoName  = "QCDTailKillerJet%dBackToBack"%i,
         EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "QCDTailKillerJet%dBackToBack"%i,
-        QCDFactNormalisation = QCDFactorisedStdSelVersion+"/QCDTailKillerJet%dBackToBack"%i,
-        QCDFactHistoName = QCDFactorisedStdSelVersion+"/QCDTailKillerJet%dBackToBack"%i,
+        QCDFactNormalisation = "/QCDTailKillerJet%dBackToBack"%i,
+        QCDFactHistoName = "/QCDTailKillerJet%dBackToBack"%i,
         details          = { "bins": 13,
                              "rangeMin": 0.0,
                              "rangeMax": 260.0,
@@ -1186,8 +1174,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "transverseMass",
     EWKfakeHistoPath  = "",
     EWKfakeHistoName  = "EWKFakeTausTransverseMass",
-    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/NevtAfterLeg1",
-    QCDFactHistoName = QCDFactorisedStdSelVersion+"/MtAfterLeg1",
+    QCDFactNormalisation = "/NevtAfterLeg1",
+    QCDFactHistoName = "/MtAfterLeg1",
     details          = { "bins": 13,
                          "rangeMin": 0.0,
                          "rangeMax": 400.0,
@@ -1216,8 +1204,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "HiggsMass",
     EWKfakeHistoPath  = "",
     EWKfakeHistoName  = "EWKFakeTausFullMass",
-    QCDFactNormalisation = QCDFactorisedStdSelVersion+"/NevtAfterLeg1",
-    QCDFactHistoName = QCDFactorisedStdSelVersion+"/MassAfterLeg1",
+    QCDFactNormalisation = "/NevtAfterLeg1",
+    QCDFactHistoName = "/MassAfterLeg1",
     details          = { "bins": 13,
                          "rangeMin": 0.0,
                          "rangeMax": 500.0,
