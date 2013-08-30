@@ -84,7 +84,6 @@ class DatacardColumn():
                  datasetType = 0,
                  nuisanceIds = [],
                  datasetMgrColumn = "",
-                 datasetMgrColumnForQCDMCEWK = "",
                  additionalNormalisationFactor = 1.0,
                  shapeHisto = ""):
         self._label = label
@@ -109,7 +108,6 @@ class DatacardColumn():
         self._nuisanceResults = []
         self._controlPlots = []
         self._datasetMgrColumn = datasetMgrColumn
-        self._datasetMgrColumnForQCDMCEWK  = datasetMgrColumnForQCDMCEWK
         self._additionalNormalisationFactor = additionalNormalisationFactor
         self._shapeHisto = shapeHisto
         self._isPrintable = True
@@ -160,10 +158,8 @@ class DatacardColumn():
         if self.typeIsSignal() or self.typeIsEWK() or self.typeIsObservation():
             if self._shapeHisto == "":
                 myMsg += "Missing or empty field 'shapeHisto'! (string) Name of histogram for shape \n"
-        elif self.typeIsQCDfactorised():
+#        elif self.typeIsQCDfactorised():
             # rate handled as spedial case, extra datasetMgrColumn are required for EWK MC
-            if len(self._datasetMgrColumnForQCDMCEWK) == 0:
-                myMsg += "No datasets defined for MC EWK in data group for QCD factorised!\n"
 ####        elif self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
 ####            myMsg += "FIXME: QCD inverted not implemented yet\n" # FIXME
         if not self.typeIsEmptyColumn() and not self.typeIsObservation():

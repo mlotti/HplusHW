@@ -54,10 +54,10 @@ class DatasetMgrCreatorManager:
     def obtainDatasetMgrs(self, era, searchMode, optimizationMode):
         if len(self._dsetMgrs) > 0:
             raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) was already called (dsetMgrs exist)!"+NormalStyle())
-        for dCreator in self._dsetMgrCreators:
-            if dCreator != None:
+        for i in range(0, len(self._dsetMgrCreators)):
+            if self._dsetMgrCreators[i] != None:
                 # Create DatasetManager object and set pointer to the selected era, searchMode, and optimizationMode
-                myDsetMgr = dCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+                myDsetMgr = self._dsetMgrCreators[i].createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
                 # Normalize
                 myDsetMgr.updateNAllEventsToPUWeighted()
                 # Obtain luminosity
@@ -69,8 +69,8 @@ class DatasetMgrCreatorManager:
                 self._luminosities.append(myLuminosity)
                 # Merge divided datasets
                 plots.mergeRenameReorderForDataMC(myDsetMgr)
-                #myDsetMgr.mergeMany(plots._physicalMcAdd, addition=True)
                 # Show info of available datasets
+                print HighlightStyle()+"Dataset merging structure for %s:%s"%(self.getDatasetMgrLabel(i),NormalStyle())
                 myDsetMgr.printDatasetTree()
                 # Store DatasetManager
                 self._dsetMgrs.append(myDsetMgr)
@@ -373,15 +373,13 @@ class DataCardGenerator:
     def createDatacardColumns(self):
         # Make datacard column object for observation
         if self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS) != None:
-            myObservationName = "dset_observation"
-            self._dsetMgrManager.mergeDatasets(DatacardDatasetMgrSourceType.SIGNALANALYSIS, myObservationName, self._config.Observation.datasetDefinitions)
+            #self._dsetMgrManager.mergeDatasets(DatacardDatasetMgrSourceType.SIGNALANALYSIS, myObservationName, self._config.Observation.datasetDefinition)
             #print "Making merged dataset for data group: "+HighlightStyle()+"observation"+NormalStyle()
             #self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS).merge(myObservationName, myFoundNames, keepSources=True) # note that mergeMany has already been called at this stage
             self._observation = DatacardColumn(label = "data_obs",
                                                enabledForMassPoints = self._config.MassPoints,
                                                datasetType = "Observation",
-                                               datasetMgrColumn = myObservationName,
-                                               #dirPrefix = self._config.Observation.dirPrefix+self._variationPostfix,
+                                               datasetMgrColumn = self._config.Observation.datasetDefinition,
                                                shapeHisto = self._config.Observation.shapeHisto)
             if self._opts.debugConfig:
                 self._observation.printDebug()
@@ -397,32 +395,31 @@ class DataCardGenerator:
                 myDsetMgrIndex = None
                 myMergedName = ""
                 myMergedNameForQCDMCEWK = ""
-                if dg.datasetType != "None" and not myIngoreOtherQCDMeasurementStatus:
-                    if dg.datasetType == "Signal":
-                        myDsetMgrIndex = DatacardDatasetMgrSourceType.SIGNALANALYSIS
-                    elif dg.datasetType == "Embedding":
-                        myDsetMgrIndex = DatacardDatasetMgrSourceType.EMBEDDING
-                    elif dg.datasetType == "QCD factorised" or dg.datasetType == "QCD inverted":
-                        myDsetMgrIndex = DatacardDatasetMgrSourceType.QCDMEASUREMENT
+                #if dg.datasetType != "None" and not myIngoreOtherQCDMeasurementStatus:
+                    #if dg.datasetType == "Signal":
+                        #myDsetMgrIndex = DatacardDatasetMgrSourceType.SIGNALANALYSIS
+                    #elif dg.datasetType == "Embedding":
+                        #myDsetMgrIndex = DatacardDatasetMgrSourceType.EMBEDDING
+                    #elif dg.datasetType == "QCD factorised" or dg.datasetType == "QCD inverted":
+                        #myDsetMgrIndex = DatacardDatasetMgrSourceType.QCDMEASUREMENT
                     # Make merge of requested datasets
-                    if self._opts.debugConfig:
-                        print "Adding datasets to data group '"+dg.label+"':"
-                        for n in myFoundNames:
-                            print "  "+n
-                    myMergedName = "dset_"+dg.label.replace(" ","_")
-                    self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedName, dg.datasetDefinitions)
-                    if dg.datasetType == "QCD factorised":
-                        # Make merged set of EWK MC datasets
-                        myMergedNameForQCDMCEWK = "dset_"+dg.label.replace(" ","_")+"_MCEWK"
-                        self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedNameForQCDMCEWK, dg.MCEWKDatasetDefinitions)
+                    #if self._opts.debugConfig:
+                        #print "Adding datasets to data group '"+dg.label+"':"
+                        #for n in myFoundNames:
+                            #print "  "+n
+                    #myMergedName = "dset_"+dg.label.replace(" ","_")
+                    #self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedName, dg.datasetDefinitions)
+                    #if dg.datasetType == "QCD factorised":
+                        ## Make merged set of EWK MC datasets
+                        #myMergedNameForQCDMCEWK = "dset_"+dg.label.replace(" ","_")+"_MCEWK"
+                        #self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedNameForQCDMCEWK, dg.MCEWKDatasetDefinitions)
                 # Construct datacard column object
                 myColumn = None
                 if dg.datasetType == "QCD factorised":
                     myColumn = QCDfactorisedColumn(landsProcess=dg.landsProcess,
                                                    enabledForMassPoints = dg.validMassPoints,
                                                    nuisanceIds = dg.nuisances,
-                                                   datasetMgrColumn = myMergedName,
-                                                   datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
+                                                   datasetMgrColumn = dg.datasetDefinition,
                                                    additionalNormalisationFactor = dg.additionalNormalisation,
                                                    QCDfactorisedInfo = dg.QCDfactorisedInfo,
                                                    debugMode = self._opts.debugQCD)
@@ -432,7 +429,7 @@ class DataCardGenerator:
                                               enabledForMassPoints = dg.validMassPoints,
                                               datasetType = dg.datasetType,
                                               nuisanceIds = dg.nuisances,
-                                              datasetMgrColumn = myMergedName,
+                                              datasetMgrColumn = dg.datasetDefinition,
                                               additionalNormalisationFactor = dg.additionalNormalisation,
                                               shapeHisto = dg.shapeHisto)
                 else: # i.e. signal analysis and QCD inverted
@@ -441,7 +438,7 @@ class DataCardGenerator:
                                               enabledForMassPoints = dg.validMassPoints,
                                               datasetType = dg.datasetType,
                                               nuisanceIds = dg.nuisances,
-                                              datasetMgrColumn = myMergedName,
+                                              datasetMgrColumn = dg.datasetDefinition,
                                               additionalNormalisationFactor = dg.additionalNormalisation,
                                               shapeHisto = dg.shapeHisto)
                 # Store column

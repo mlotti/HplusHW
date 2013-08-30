@@ -87,7 +87,7 @@ DataCardName += "_"+OptionMassShape
 # Observation definition (how to retrieve number of observed events)
 #
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ObservationInput
-Observation = ObservationInput(datasetDefinitions=["Tau_"],
+Observation = ObservationInput(datasetDefinition="Data",
                                shapeHisto=SignalShapeHisto)
 #Observation.setPaths(signalPath,signalDataPaths)
 
@@ -109,7 +109,7 @@ for mass in LightMassPoints:
     hhx.setLandSProcess(-1)
     hhx.setValidMassPoints(myMassList)
     hhx.setNuisances(["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","stat_binByBin","xsect_tt_7TeV","lumi","pileup"])
-    hhx.setDatasetDefinitions(["TTToHplusBHminusB_M"+str(mass)]),
+    hhx.setDatasetDefinition("TTToHplusBHminusB_M"+str(mass)),
     DataGroups.append(hhx)
 
     hwx = signalTemplate.clone()
@@ -117,7 +117,7 @@ for mass in LightMassPoints:
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
     hwx.setNuisances(["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","stat_binByBin","xsect_tt_7TeV","lumi","pileup"])
-    hwx.setDatasetDefinitions(["TTToHplusBWB_M"+str(mass)]),
+    hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass)),
     DataGroups.append(hwx)
 
 for mass in HeavyMassPoints:
@@ -127,7 +127,7 @@ for mass in HeavyMassPoints:
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
     hx.setNuisances(["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","stat_binByBin","lumi","pileup"])
-    hx.setDatasetDefinitions(["HplusTB_M"+str(mass)]),
+    hx.setDatasetDefinitions("HplusTB_M"+str(mass)),
     DataGroups.append(hx)
 
 if OptionMassShape == "TransverseMass":
@@ -136,8 +136,7 @@ if OptionMassShape == "TransverseMass":
         landsProcess = 3,
         validMassPoints = MassPoints,
         datasetType  = "QCD factorised",
-        datasetDefinitions = ["Data"],
-        MCEWKDatasetDefinitions = ["TTJets","WJets","DYJetsToLL","Diboson","SingleTop"],
+        datasetDefinition = "Data",
         nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"], # FIXME
         QCDfactorisedInfo = { "afterStdSelSource": "MtAfterStandardSelections",
                               "afterMETLegSource": "MtAfterLeg1",
@@ -150,7 +149,7 @@ elif OptionMassShape == "FullMass":
         landsProcess = 3,
         validMassPoints = MassPoints,
         datasetType  = "QCD factorised",
-        datasetDefinitions = ["Data"],
+        datasetDefinition = "Data",
         MCEWKDatasetDefinitions = ["TTJets","WJets","DYJetsToLL","Diboson","SingleTop"],
         nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"], # FIXME
         QCDfactorisedInfo = { "afterStdSelSource": "MassMtAfterStandardSelections",
@@ -164,7 +163,7 @@ DataGroups.append(DataGroup(
     landsProcess = 3,
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
-    datasetDefinitions   = "Data",
+    datasetDefinition   = "Data",
     shapeHisto   = "mtSum",
 #    additionalNormalisation = 1.0,
     nuisances    = ["stat_QCDinv","42","43","44"] # FIXME: add shape stat, i.e. 40x,
@@ -178,8 +177,8 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 4,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
-        #datasetDefinitions   = ["SingleMu"],
-        datasetDefinitions   = ["Data"],
+        #datasetDefinition   = ["SingleMu"],
+        datasetDefinition   = "Data",
         validMassPoints = MassPoints,
         additionalNormalisation = 1.0907,
         nuisances    = ["trg_tau_embedding","tau_ID","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb","stat_binByBin","ES_taus_tempForEmbedding"]
@@ -193,7 +192,7 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 1,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["TTJets"],
+        datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","tau_misID","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_tag_fakes","xsect_tt_7TeV","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -202,7 +201,7 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 5,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["WJets"],
+        datasetDefinition = "WJets",
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -211,7 +210,7 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 6,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["SingleTop"],
+        datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -220,7 +219,7 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 7,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions   = ["DYJetsToLL"],
+        datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","tau_misID","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_mistag","xsect_DYtoll","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -229,7 +228,7 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 8,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions   = ["Diboson"],
+        datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","tau_misID","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_mistag","xsect_VV","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -241,7 +240,7 @@ else:
         landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["TTJets"],
+        datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_embedding","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","xsect_tt_7TeV","lumi","pileup","stat_binByBin"]
     ))
@@ -250,7 +249,7 @@ else:
         landsProcess = 4,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["WJets"],
+        datasetDefinition = "WJets",
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_embedding","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_mistag","xsect_Wjets","lumi","pileup","stat_binByBin"]
     ))
@@ -259,7 +258,7 @@ else:
         landsProcess = 5,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["SingleTop"],
+        datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_embedding","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","xsect_singleTop","lumi","pileup","stat_binByBin"]
     ))
@@ -268,7 +267,7 @@ else:
         landsProcess = 6,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions   = ["DYJetsToLL"],
+        datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_mistag","xsect_DYtoll","lumi","pileup","stat_binByBin"]
     ))
@@ -277,7 +276,7 @@ else:
         landsProcess = 7,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions   = ["Diboson"],
+        datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_mistag","xsect_VV","lumi","pileup","stat_binByBin"]
     ))
