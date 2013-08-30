@@ -8,29 +8,18 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 # data structures for the config file information
 
 class ObservationInput:
-    def __init__(self, rateCounter, datasetDefinitions, shapeHisto):
-	self.setRateCounter(rateCounter)
+    def __init__(self, datasetDefinitions, shapeHisto):
 	self.setDatasetDefinitions(datasetDefinitions)
 	self.setShapeHisto(shapeHisto)
 
-    def setRateCounter(self,rateCounter):
-	self.rateCounter = rateCounter
-
-    def setDatasetDefinitions(self,datasetDefinitions):
-        self.datasetDefinitions = datasetDefinitions
-
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
-
-    def getRateCounter(self):
-        return self.rateCounter
 
     def getShapeHisto(self):
         return self.shapeHisto
 
     def Print(self):
 	print "ObservationInput :"
-	print "    rate counter",self.rateCounter
 	print "    shapeHisto  ",self.shapeHisto
 
 class DataGroup:
@@ -40,7 +29,6 @@ class DataGroup:
                  label = "", 
                  nuisances = [], 
                  shapeHisto = "", 
-                 rateCounter = "",
                  datasetType = "",
                  datasetDefinitions = [],
                  MCEWKDatasetDefinitions = [],
@@ -51,7 +39,6 @@ class DataGroup:
 	self.label         = label
 	self.nuisances     = nuisances
 	self.shapeHisto    = shapeHisto
-	self.rateCounter   = rateCounter
         self.datasetType   = datasetType
         self.datasetDefinitions = datasetDefinitions
         self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
@@ -67,7 +54,6 @@ class DataGroup:
                          label        = self.label,
                          nuisances    = self.nuisances,
                          shapeHisto   = self.shapeHisto,
-                         rateCounter  = self.rateCounter,
                          datasetType  = self.datasetType,
                          datasetDefinitions = self.datasetDefinitions,
                          MCEWKDatasetDefinitions = self.MCEWKDatasetDefinitions,
@@ -88,9 +74,6 @@ class DataGroup:
 
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
-
-    def setRateCounter(self, rateCounter):
-        self.rateCounter = rateCounter
 
     def setDatasetType(self,datasetType):
         self.datasetType = datasetType

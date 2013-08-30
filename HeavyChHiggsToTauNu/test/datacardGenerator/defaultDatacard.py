@@ -3,7 +3,7 @@ DataCardName    = 'Default'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_vitalonly_correctCtrlPlots'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/testInverted'
-Path = "/home/wendland/data/v445/tmp"
+Path = "/home/wendland/data/v445/2013-08-29"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
@@ -44,13 +44,13 @@ FakeShapeHisto = None
 ShapeHistogramsDimensions = None
 
 if OptionMassShape == "TransverseMass":
-    SignalShapeHisto = "transverseMass"
-    FakeShapeHisto = "EWKFakeTausTransverseMass"
+    SignalShapeHisto = "shapeTransverseMass"
+    FakeShapeHisto = "shapeEWKFakeTausTransverseMass"
     ShapeHistogramsDimensions = { "bins": 10,
                                   "rangeMin": 0.0,
                                   "rangeMax": 400.0,
                                   #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                  "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
+                                  "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250], # if an empty list is given, then uniform bin width is used
                                   "xtitle": "Transverse mass / GeV",
                                   "ytitle": "Events" }
 elif OptionMassShape == "FullMass":
@@ -64,8 +64,8 @@ elif OptionMassShape == "FullMass":
                                   "xtitle": "Full mass / GeV",
                                   "ytitle": "Events" }
 elif OptionMassShape == "TransverseAndFullMass2D": # FIXME: preparing to add support, not yet working
-    SignalShapeHisto = "transverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
-    FakeShapeHisto = "EWKFakeTausTransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
+    SignalShapeHisto = "shapetransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
+    FakeShapeHisto = "shapeEWKFakeTausTransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
     ShapeHistogramsDimensions = [{ "bins": 10,
                                   "rangeMin": 0.0,
                                   "rangeMax": 400.0,
@@ -84,37 +84,10 @@ elif OptionMassShape == "TransverseAndFullMass2D": # FIXME: preparing to add sup
 DataCardName += "_"+OptionMassShape
 
 ##############################################################################
-# Specifications for QCD factorised
-
-#QCDFactorisedStdSelVersion = "QCDfactorised_TradReference"
-#QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30"
-QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusCollinearTailKiller"
-#QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30PlusCollinearTailKiller"
-#QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusTailKiller"
-#QCDFactorisedStdSelVersion = "QCDfactorised_TradPlusMET30PlusTailKiller"
-
-QCDFactorisedValidationMETShapeHistogramsDimensions = {  "bins": 9,
-                                                         "rangeMin": 0.0,
-                                                         "rangeMax": 500.0,
-                                                         #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                                                         "variableBinSizeLowEdges": [0,20,40,60,80,100,150,200,300],
-                                                         #"variableBinSizeLowEdges": [],
-                                                         "xtitle": "E_{T}^{miss}, GeV/c^{2}",
-                                                         "ytitle": "Events"}
-QCDFactorisedValidationMtShapeHistogramsDimensions = { "bins": 10,
-                                                        "rangeMin": 0.0,
-                                                        "rangeMax": 400.0,
-                                                        #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                                        "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
-                                                        "xtitle": "Transverse mass / GeV",
-                                                        "ytitle": "Events" }
-
-##############################################################################
 # Observation definition (how to retrieve number of observed events)
 #
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ObservationInput
-Observation = ObservationInput(#dirPrefix=SignalAnalysis,
-                               rateCounter=SignalRateCounter,
+Observation = ObservationInput(rateCounter=SignalRateCounter,
                                datasetDefinitions=["Tau_"],
                                shapeHisto=SignalShapeHisto)
 #Observation.setPaths(signalPath,signalDataPaths)
@@ -128,9 +101,7 @@ EmbeddingIdList = []
 EWKFakeIdList = []
 
 signalTemplate = DataGroup(datasetType="Signal",
-                           shapeHisto=SignalShapeHisto,
-                           #dirPrefix=SignalAnalysis,
-                           rateCounter=SignalRateCounter)
+                           shapeHisto=SignalShapeHisto)
 
 for mass in LightMassPoints:
     myMassList = [mass]
@@ -165,11 +136,9 @@ if OptionMassShape == "TransverseMass":
         label        = "QCDfact",
         landsProcess = 3,
         validMassPoints = MassPoints,
-        #dirPrefix   = QCDFactorisedAnalysis,
         datasetType  = "QCD factorised",
         datasetDefinitions = ["Tau_"],
         MCEWKDatasetDefinitions = ["TTJets","WJets","W1Jets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
-        #MCEWKDatasetDefinitions = ["TTJets","W2Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"],
         QCDfactorisedInfo = { "afterStdSelSource": QCDFactorisedStdSelVersion+"/NevtAfterStandardSelections",
                               "afterMETLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1",
@@ -185,11 +154,6 @@ if OptionMassShape == "TransverseMass":
                                                      QCDFactorisedStdSelVersion+"/MtAfterLeg2"],
                               "closureShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions,
                               "factorisationSchema" : OptionQCDfactorisedFactorisationSchema,
-                              #"assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ... # not needed
-                              #"factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"], # not needed
-                              #"METShapeCorrections": QCDFactorisationMETShapeCorrections,
-                              #"MTShapeCorrections": QCDFactorisationMtShapeCorrections,
-                              #FIXME: add systematics definition (tau trg uncer as function of tau bins, trg MET leg, tauID, energy scales, btagging, xsection)
         }
     ))
 elif OptionMassShape == "FullMass":
@@ -197,11 +161,9 @@ elif OptionMassShape == "FullMass":
         label        = "QCDfact",
         landsProcess = 3,
         validMassPoints = MassPoints,
-        #dirPrefix   = QCDFactorisedAnalysis,
         datasetType  = "QCD factorised",
         datasetDefinitions = ["Tau_"],
         MCEWKDatasetDefinitions = ["TTJets","WJets","W1Jets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
-        #MCEWKDatasetDefinitions = ["TTJets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"],
         QCDfactorisedInfo = { "afterStdSelSource": QCDFactorisedStdSelVersion+"/NevtAfterStandardSelections",
                               "afterMETLegSource": QCDFactorisedStdSelVersion+"/NevtAfterLeg1",
@@ -248,7 +210,6 @@ if not OptionReplaceEmbeddingByMC:
         #datasetDefinitions   = ["SingleMu"],
         datasetDefinitions   = ["Data"],
         #dirPrefix   = EmbeddingAnalysis,
-        rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         additionalNormalisation = 1.0907,
         nuisances    = ["trg_tau_embedding","tau_ID","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb","stat_binByBin","ES_taus_tempForEmbedding"]
@@ -263,7 +224,6 @@ if not OptionReplaceEmbeddingByMC:
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions = ["TTJets_"],
-        rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","tau_misID","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_tag_fakes","xsect_tt_7TeV","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -273,7 +233,6 @@ if not OptionReplaceEmbeddingByMC:
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions = ["WJets","W1Jets","W2Jets","W3Jets","W4Jets"],
-        rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -283,7 +242,6 @@ if not OptionReplaceEmbeddingByMC:
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions = ["T_", "Tbar_"],
-        rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -293,7 +251,6 @@ if not OptionReplaceEmbeddingByMC:
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions   = ["DYJetsToLL"],
-        rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","tau_misID","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_mistag","xsect_DYtoll","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -303,7 +260,6 @@ if not OptionReplaceEmbeddingByMC:
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions   = ["WW","WZ","ZZ"],
-        rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","tau_misID","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_mistag","xsect_VV","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -316,7 +272,6 @@ else:
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions = ["TTJets"],
-        rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_embedding","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","xsect_tt_7TeV","lumi","pileup","stat_binByBin"]
     ))
@@ -326,7 +281,6 @@ else:
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions = ["WJets", "W1Jets", "W2Jets", "W3Jets", "W4Jets"],
-        rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_embedding","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_mistag","xsect_Wjets","lumi","pileup","stat_binByBin"]
     ))
@@ -336,7 +290,6 @@ else:
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions = ["Tbar_", "T_"],
-        rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_embedding","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","xsect_singleTop","lumi","pileup","stat_binByBin"]
     ))
@@ -346,7 +299,6 @@ else:
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions   = ["DYJetsToLL"],
-        rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_mistag","xsect_DYtoll","lumi","pileup","stat_binByBin"]
     ))
@@ -356,7 +308,6 @@ else:
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions   = ["WW","WZ","ZZ"],
-        rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_mistag","xsect_VV","lumi","pileup","stat_binByBin"]
     ))

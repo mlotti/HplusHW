@@ -325,16 +325,16 @@ class DataCardGenerator:
             #return False
         #if self._QCDMethod == DatacardQCDMethod.UNKNOWN:
             #mymsg += "- missing field 'QCDMeasurementMethod' (string, name of QCD measurement method, options: 'QCD factorised' or 'QCD inverted')\n"
-        if self._config.SignalRateCounter == None:
-            mymsg += "- missing field 'SignalRateCounter' (string, label of counter to be used for rate)\n"
-        if self._config.FakeRateCounter == None:
-            mymsg += "- missing field 'FakeRateCounter' (string, label of counter to be used for rate)\n"
-        if self._config.SignalShapeHisto == None:
-            mymsg += "- missing field 'SignalShapeHisto' (string, name of histogram for the shape)\n"
-        if self._config.FakeShapeHisto == None:
-            mymsg += "- missing field 'FakeShapeHisto' (string, name of histogram for the shape)\n"
+        #if self._config.SignalRateCounter == None:
+            #mymsg += "- missing field 'SignalRateCounter' (string, label of counter to be used for rate)\n"
+        #if self._config.FakeRateCounter == None:
+            #mymsg += "- missing field 'FakeRateCounter' (string, label of counter to be used for rate)\n"
+        #if self._config.SignalShapeHisto == None:
+            #mymsg += "- missing field 'SignalShapeHisto' (string, name of histogram for the shape)\n"
+        #if self._config.FakeShapeHisto == None:
+            #mymsg += "- missing field 'FakeShapeHisto' (string, name of histogram for the shape)\n"
         if self._config.ShapeHistogramsDimensions == None:
-            mymsg += "- missing field 'ShapeHistogramsDimensions' (list of number of bins, minimum, and maximum)\n"
+            mymsg += "- missing field 'ShapeHistogramsDimensions' (list of number of bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
         elif not isinstance(self._config.ShapeHistogramsDimensions, dict):
             mymsg += "- field 'ShapeHistogramsDimensions' has to be of type dictionary with keys: bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
         else:
@@ -381,7 +381,6 @@ class DataCardGenerator:
             self._observation = DatacardColumn(label = "data_obs",
                                                enabledForMassPoints = self._config.MassPoints,
                                                datasetType = "Observation",
-                                               rateCounter = self._config.Observation.rateCounter,
                                                datasetMgrColumn = myObservationName,
                                                #dirPrefix = self._config.Observation.dirPrefix+self._variationPostfix,
                                                shapeHisto = self._config.Observation.shapeHisto)
@@ -433,7 +432,6 @@ class DataCardGenerator:
                                               landsProcess=dg.landsProcess,
                                               enabledForMassPoints = dg.validMassPoints,
                                               datasetType = dg.datasetType,
-                                              rateCounter = dg.rateCounter,
                                               nuisanceIds = dg.nuisances,
                                               datasetMgrColumn = myMergedName,
                                               additionalNormalisationFactor = dg.additionalNormalisation,
@@ -443,7 +441,6 @@ class DataCardGenerator:
                                               landsProcess=dg.landsProcess,
                                               enabledForMassPoints = dg.validMassPoints,
                                               datasetType = dg.datasetType,
-                                              rateCounter = dg.rateCounter,
                                               nuisanceIds = dg.nuisances,
                                               datasetMgrColumn = myMergedName,
                                               additionalNormalisationFactor = dg.additionalNormalisation,
@@ -550,7 +547,6 @@ class DataCardGenerator:
                                                                    mode = myMode))
             elif n.function == "Shape":
                 self._extractors.append(ShapeExtractor(histoSpecs = self._config.ShapeHistogramsDimensions,
-                                                       counterItem = n.counter,
                                                        histoDirs = n.histoDir,
                                                        histograms = n.histo,
                                                        exid = n.id,
