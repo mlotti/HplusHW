@@ -72,6 +72,9 @@ for mass in _lightHplusMasses:
 for mass in [180, 190, 200, 220, 250, 300]:
     _physicalMcAdd["HplusTB_M%d_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
     _physicalMcAdd["HplusTB_M%d_ext_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
+for bquark in [0, 1, 2, 3, 4]:
+    _physicalMcAdd["WJets_%dbquark_TuneZ2star_v1_Summer12"%bquark =  "WJets_%dbquark_TuneZ2star_Summer12"%bquark
+    _physicalMcAdd["WJets_%dbquark_TuneZ2star_v2_Summer12"%bquark =  "WJets_%dbquark_TuneZ2star_Summer12"%bquark
 
 ## Map the physical dataset names to logical names
 #
@@ -131,11 +134,11 @@ for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     })
     for bquark in [0, 1, 2, 3]:
         _physicalToLogical.update({
-                "WJets_%dbquark_TuneZ2_%s"%(bquark, mcEra): "WJets_%dbquark"%bquark,
-                "W1Jets_%dbquark_TuneZ2_%s"%(bquark, mcEra): "W1Jets_%dbquark"%bquark,
-                "W2Jets_%dbquark_TuneZ2_%s"%(bquark, mcEra): "W2Jets_%dbquark"%bquark,
-                "W3Jets_%dbquark_TuneZ2_%s"%(bquark, mcEra): "W3Jets_%dbquark"%bquark,
-                "W4Jets_%dbquark_TuneZ2_%s"%(bquark, mcEra): "W4Jets_%dbquark"%bquark,
+                "WJets_%dbquark_%s"%(bquark, mcEra): "WJets_%dbquark"%bquark,
+                "W1Jets_%dbquark_%s"%(bquark, mcEra): "W1Jets_%dbquark"%bquark,
+                "W2Jets_%dbquark_%s"%(bquark, mcEra): "W2Jets_%dbquark"%bquark,
+                "W3Jets_%dbquark_%s"%(bquark, mcEra): "W3Jets_%dbquark"%bquark,
+                "W4Jets_%dbquark_%s"%(bquark, mcEra): "W4Jets_%dbquark"%bquark,
         })
 
 ## Map the datasets to be merged to the name of the merged dataset.
