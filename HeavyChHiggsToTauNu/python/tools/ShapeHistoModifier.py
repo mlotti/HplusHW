@@ -199,6 +199,12 @@ class ShapeHistoModifier():
                         myBinEdges.append(myArray.GetAt)(i)
                     mySpecs["variableBinSizeLowEdges"] = list(myBinEdges)
                     mySpecs["bins"] = len(myBinEdges)
+        else:
+            # No histogram provided
+            if not "xtitle" in specs:
+                mySpecs["xtitle"] = ""
+            if not "ytitle" in specs:
+                mySpecs["ytitle"] = ""
         if "variableBinSizeLowEdges" in mySpecs:
             if len(mySpecs["variableBinSizeLowEdges"]) > 0:
                 mySpecs["bins"] = len(mySpecs["variableBinSizeLowEdges"])
