@@ -136,8 +136,8 @@ if OptionMassShape == "TransverseMass":
         landsProcess = 3,
         validMassPoints = MassPoints,
         datasetType  = "QCD factorised",
-        datasetDefinitions = ["Tau_"],
-        MCEWKDatasetDefinitions = ["TTJets","WJets","W1Jets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
+        datasetDefinitions = ["Data"],
+        MCEWKDatasetDefinitions = ["TTJets","WJets","DYJetsToLL","Diboson","SingleTop"],
         nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"], # FIXME
         QCDfactorisedInfo = { "afterStdSelSource": "MtAfterStandardSelections",
                               "afterMETLegSource": "MtAfterLeg1",
@@ -150,27 +150,12 @@ elif OptionMassShape == "FullMass":
         landsProcess = 3,
         validMassPoints = MassPoints,
         datasetType  = "QCD factorised",
-        datasetDefinitions = ["Tau_"],
-        MCEWKDatasetDefinitions = ["TTJets","WJets","W1Jets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
-        nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"],
-        QCDfactorisedInfo = { "afterStdSelSource": "/NevtAfterStandardSelections",
-                              "afterMETLegSource": "/NevtAfterLeg1",
-                              "afterTauLegSource": "/NevtAfterLeg2",
-                              "afterMETandTauLegSource": "/NevtAfterLeg1AndLeg2", # for checking only
-                              "closureMETShapeSource": ["/CtrlMET",
-                                                        "/CtrlMETAfterLeg1",
-                                                        "/CtrlMETAfterLeg2"],
-                              "closureMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions,
-                              "finalShapeHisto": "/MassAfterLeg1", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
-                              "closureShapeSource": ["/MassAfterStandardSelections",
-                                                     "/MassAfterLeg1",
-                                                     "/MassAfterLeg2"],
-                              "closureShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions,
-                              #"assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ... # not needed
-                              #"factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"], # not needed
-                              #"METShapeCorrections": QCDFactorisationMETShapeCorrections,
-                              #"MTShapeCorrections": QCDFactorisationMtShapeCorrections,
-                              #FIXME: add systematics definition (tau trg uncer as function of tau bins, trg MET leg, tauID, energy scales, btagging, xsection)
+        datasetDefinitions = ["Data"],
+        MCEWKDatasetDefinitions = ["TTJets","WJets","DYJetsToLL","Diboson","SingleTop"],
+        nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"], # FIXME
+        QCDfactorisedInfo = { "afterStdSelSource": "MassMtAfterStandardSelections",
+                              "afterMETLegSource": "MassAfterLeg1",
+                              "afterTauLegSource": "MassAfterLeg2"
         }
     ))
 
@@ -208,7 +193,7 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 1,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["TTJets_"],
+        datasetDefinitions = ["TTJets"],
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","tau_misID","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_tag_fakes","xsect_tt_7TeV","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -217,7 +202,7 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 5,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["WJets","W1Jets","W2Jets","W3Jets","W4Jets"],
+        datasetDefinitions = ["WJets"],
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -226,7 +211,7 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 6,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["T_", "Tbar_"],
+        datasetDefinitions = ["SingleTop"],
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -244,7 +229,7 @@ if not OptionReplaceEmbeddingByMC:
         landsProcess = 8,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions   = ["WW","WZ","ZZ"],
+        datasetDefinitions   = ["Diboson"],
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_fakes","trg_MET","tau_misID","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_mistag","xsect_VV","lumi","pileup_fakes","stat_binByBin_fakes"]
     ))
@@ -265,7 +250,7 @@ else:
         landsProcess = 4,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["WJets", "W1Jets", "W2Jets", "W3Jets", "W4Jets"],
+        datasetDefinitions = ["WJets"],
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_embedding","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_mistag","xsect_Wjets","lumi","pileup","stat_binByBin"]
     ))
@@ -274,7 +259,7 @@ else:
         landsProcess = 5,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["Tbar_", "T_"],
+        datasetDefinitions = ["SingleTop"],
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau_embedding","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","xsect_singleTop","lumi","pileup","stat_binByBin"]
     ))
@@ -292,7 +277,7 @@ else:
         landsProcess = 7,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions   = ["WW","WZ","ZZ"],
+        datasetDefinitions   = ["Diboson"],
         validMassPoints = MassPoints,
         nuisances    = ["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_mistag","xsect_VV","lumi","pileup","stat_binByBin"]
     ))
