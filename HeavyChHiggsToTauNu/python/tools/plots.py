@@ -166,10 +166,10 @@ _datasetMerge = {
 }
 for bquark in [0, 1, 2, 3]:
     _datasetMerge.update({
-            "WJets_%dbquark": "WJets_%dbquark",
-            "W1Jets_%dbquark": "WJets_%dbquark",
-            "W2Jets_%dbquark": "WJets_%dbquark",
-            "W3Jets_%dbquark": "WJets_%dbquark",
+            "WJets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
+            "W1Jets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
+            "W2Jets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
+            "W3Jets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
     })
 
 ## Default ordering of datasets
@@ -349,6 +349,10 @@ _plotStyles = {
     "WJets":                 styles.wStyle,
     "WToTauNu":              styles.wStyle,
     "W3Jets":                styles.wStyle,
+    "WJets_0bquark":         styles.Style(ROOT.kFullTriangleDown, ROOT.kRed+1),
+    "WJets_1bquark":         styles.Style(ROOT.kFullTriangleDown, ROOT.kRed+4),
+    "WJets_2bquark":         styles.Style(ROOT.kFullTriangleDown, ROOT.kRed+3),
+    "WJets_3bquark":         styles.Style(ROOT.kFullTriangleDown, ROOT.kRed-7),
 
     "QCD":                   styles.qcdStyle,
     "QCDdata":               styles.qcdStyle,
