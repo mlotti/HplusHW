@@ -88,6 +88,10 @@ namespace HPlus {
     WrappedTH1* hMETRaw;
     WrappedTH1* hMET;
     WrappedTH1* hMETphi;
+    WrappedTH1* hMETSignificance;
+    WrappedTH1* hMETOverTrackPtSum;
+    WrappedTH1* hMETOverMHT;
+    WrappedTH1* hMETOverTauPt;
     WrappedTH1* hNbjets;
     WrappedTH1* hDeltaPhiTauMET;
     WrappedTH1* hDeltaR_TauMETJet1MET;
