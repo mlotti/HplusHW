@@ -73,8 +73,8 @@ for mass in [180, 190, 200, 220, 250, 300]:
     _physicalMcAdd["HplusTB_M%d_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
     _physicalMcAdd["HplusTB_M%d_ext_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
 for bquark in [0, 1, 2, 3, 4]:
-    _physicalMcAdd["WJets_%dbquark_TuneZ2star_v1_Summer12"%bquark =  "WJets_%dbquark_TuneZ2star_Summer12"%bquark
-    _physicalMcAdd["WJets_%dbquark_TuneZ2star_v2_Summer12"%bquark =  "WJets_%dbquark_TuneZ2star_Summer12"%bquark
+    _physicalMcAdd["WJets_%dbquark_TuneZ2star_v1_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
+    _physicalMcAdd["WJets_%dbquark_TuneZ2star_v2_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
 
 ## Map the physical dataset names to logical names
 #
