@@ -33,10 +33,10 @@ class PseudoMultiCrabCreator:
         if os.path.exists(myDir):
             shutil.rmtree(myDir)
         os.mkdir(myDir)
-        os.mkdir("%s/data"%myDir)
-        os.mkdir("%s/data/res"%myDir)
+        os.mkdir("%s/%s"%(myDir,self._title))
+        os.mkdir("%s/%s/res"%(myDir,self._title))
         # Open root file
-        myRootFile = ROOT.TFile("%s/data/res/histograms-data.root"%myDir,"CREATE")
+        myRootFile = ROOT.TFile("%s/%s/res/histograms-%s.root"%(myDir,self._title,self._title),"CREATE")
         # Write modules
         for m in self._modulesList:
             m.writeModuleToRootFile(myRootFile)
@@ -44,15 +44,13 @@ class PseudoMultiCrabCreator:
         myRootFile.cd("/")
         myRootFile.mkdir("configInfo")
         myRootFile.cd("configInfo")
-        hConfigInfo = ROOT.TH1F("configinfo","configinfo",4,0,4)
+        hConfigInfo = ROOT.TH1F("configinfo","configinfo",3,0,3)
         hConfigInfo.GetXaxis().SetBinLabel(1,"control")
         hConfigInfo.SetBinContent(1, 1)
-        hConfigInfo.GetXaxis().SetBinLabel(2,"energy")
-        hConfigInfo.SetBinContent(2, 0)
-        hConfigInfo.GetXaxis().SetBinLabel(3,"crossSection")
+        hConfigInfo.GetXaxis().SetBinLabel(2,"crossSection")
+        hConfigInfo.SetBinContent(2, 1)
+        hConfigInfo.GetXaxis().SetBinLabel(3,"isData")
         hConfigInfo.SetBinContent(3, 1)
-        hConfigInfo.GetXaxis().SetBinLabel(4,"isData")
-        hConfigInfo.SetBinContent(4, 1)
         # Note that data version and code version are stored to the modules
         # Write and close the root file
         myRootFile.Write()
@@ -75,7 +73,7 @@ class PseudoMultiCrabModule:
         if optimizationMode != "" and optimizationMode != None:
             self._moduleName += "%s"%optimizationMode
         if systematicsVariation != None:
-            self._moduleName += "SystVar%s"%systematicsVariation
+            self._moduleName += "%s"%systematicsVariation
         # Initialize containers
         self._shapes = [] # Shape histograms
         self._dataDrivenControlPlots = [] # Data driven control plot histograms
@@ -114,9 +112,9 @@ class PseudoMultiCrabModule:
     def addDataDrivenControlPlot(self, histo, name):
         self._dataDrivenControlPlots.append(histo.Clone("%s%s"%(name,h.GetTitle())))
 
-    def addDataDrivenControlPlots(self, histoList, name):
+    def addDataDrivenControlPlots(self, histoList):
         for h in histoList:
-            self._dataDrivenControlPlots.append(h.Clone("%s%s"%(name,h.GetTitle())))
+            self._dataDrivenControlPlots.append(h.Clone())
 
     def writeModuleToRootFile(self, rootfile):
         # Create module directory

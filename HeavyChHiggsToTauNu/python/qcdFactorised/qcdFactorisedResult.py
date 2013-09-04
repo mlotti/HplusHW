@@ -13,7 +13,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import *
 
 ## Class for calculating the QCD factorised results
 class QCDFactorisedResult:
-    def __init__(self, basicShape, leg1Shape, leg2Shape, histoSpecs, moduleInfoString, createBinHistos=False, displayPurityBreakdown=True):
+    def __init__(self, basicShape, leg1Shape, leg2Shape, histoSpecs, moduleInfoString, createBinHistos=False, displayPurityBreakdown=False):
         self._resultCountObject = None # ExtendedCount object which contains the result
         self._resultShape = None # TH1F which contains the final shape histogram
         self._nQCDHistogramsList = [] # List of TH1F histograms
@@ -171,14 +171,14 @@ class QCDControlPlot:
         print "Control plots integral = %.1f"%(self._resultShape.Integral())
 
 class QCDFactorisedResultManager:
-    def __init__(self, specs, dsetMgr, luminosity, moduleInfoString, shapeOnly=True):
+    def __init__(self, specs, dsetMgr, luminosity, moduleInfoString, shapeOnly=False, displayPurityBreakdown=False):
         print HighlightStyle()+"Obtaining final shape ..."+NormalStyle()
         # Obtain QCD shapes
         myCtrlRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", specs["basicName"], luminosity)
         myLeg1Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", specs["leg1Name"], luminosity)
         mySignalRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", specs["leg2Name"], luminosity)
         # Calculate final shape in signal region (leg1 * leg2 / basic)
-        myResult = QCDFactorisedResult(myCtrlRegionShape, myLeg1Shape, mySignalRegionShape, specs["histoSpecs"], moduleInfoString, displayPurityBreakdown=not shapeOnly)
+        myResult = QCDFactorisedResult(myCtrlRegionShape, myLeg1Shape, mySignalRegionShape, specs["histoSpecs"], moduleInfoString, displayPurityBreakdown=displayPurityBreakdown)
         self._hShape = myResult.getResultShape()
         if not shapeOnly:
             print HighlightStyle()+"Obtaining region transition systematics"+NormalStyle()
