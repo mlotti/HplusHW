@@ -5,6 +5,7 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
@@ -20,6 +21,7 @@ namespace HPlus {
     BaseSelection(eventCounter, histoWrapper),
     fSelectedSrc(iConfig.getUntrackedParameter<edm::InputTag>("selectedSrc")),
     fAllSrc(iConfig.getUntrackedParameter<edm::InputTag>("allSrc")),
+    fSumPtSrc(iConfig.getUntrackedParameter<edm::InputTag>("sumPtSrc")),
     fEnabled(iConfig.getUntrackedParameter<bool>("enabled"))
   {}
 
@@ -63,6 +65,11 @@ namespace HPlus {
 
     output.fSelectedVertex = hvertex->ptrAt(0);
     output.fPassedEvent = true;
+
+    edm::Handle<edm::ValueMap<float> > hSumPt;
+    iEvent.getByLabel(fSumPtSrc, hSumPt);
+    output.fSumPt = (*hSumPt)[hvertexall->ptrAt(0)];
+
     return output;
   }
 }

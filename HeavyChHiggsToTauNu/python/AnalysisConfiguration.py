@@ -438,13 +438,13 @@ class ConfigBuilder:
         analysisNamesForSystematics.extend(self._additionalTauEmbeddingAnalyses(process, analysisModules, analysisNames))
 
         ## Systematics
-        if "QCDMeasurement" not in analysisNames_:
-            self._buildJESVariation(process, analysisNamesForSystematics)
-            self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
-            # Disabled for now, seems like it would be better to
-            #handle SF uncertainties by error propagation after all
-            #self._buildScaleFactorVariation(process,
-            #analysisNamesForSystematics)
+        #if "QCDMeasurement" not in analysisNames_: # Need also for QCD measurements, since they contain MC EWK
+        self._buildJESVariation(process, analysisNamesForSystematics)
+        self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
+        # Disabled for now, seems like it would be better to
+        #handle SF uncertainties by error propagation after all
+        # Re-enabled for test
+        self._buildScaleFactorVariation(process, analysisNamesForSystematics)
 
         # Optional output
         if self.edmOutput:
@@ -1099,6 +1099,14 @@ class ConfigBuilder:
             if hasattr(effSF, "printScaleFactors"):
                 effSF.printScaleFactors = False
             return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgSF"+postfix)
+        def addMETTrgSF(shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = module.metTriggerEfficiencyScaleFactor
+            effSF.variationEnabled = True
+            effSF.variationShiftBy = shiftBy
+            if hasattr(effSF, "printScaleFactors"):
+                effSF.printScaleFactors = False
+            return self._addVariationModule(process, module, name+self.systPrefix+"MetTrgSF"+postfix)
         def addBTagSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
             module.bTagging.variationEnabled = True
@@ -1110,6 +1118,11 @@ class ConfigBuilder:
 
         # Tau trigger SF
         if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
+            names.append(addTauTrgSF( 1.0, "Plus"))
+            names.append(addTauTrgSF(-1.0, "Minus"))
+
+        # MET trigger SF
+        if self.applyMETTriggerScaleFactor:
             names.append(addTauTrgSF( 1.0, "Plus"))
             names.append(addTauTrgSF(-1.0, "Minus"))
 
