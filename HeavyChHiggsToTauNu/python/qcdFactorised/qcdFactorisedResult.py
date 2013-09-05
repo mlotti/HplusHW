@@ -172,7 +172,7 @@ class QCDControlPlot:
 
 class QCDFactorisedResultManager:
     def __init__(self, specs, dsetMgr, luminosity, moduleInfoString, shapeOnly=False, displayPurityBreakdown=False):
-        print HighlightStyle()+"Obtaining final shape ..."+NormalStyle()
+        print HighlightStyle()+"...Obtaining final shape"+NormalStyle()
         # Obtain QCD shapes
         myCtrlRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", specs["basicName"], luminosity)
         myLeg1Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", specs["leg1Name"], luminosity)
@@ -181,7 +181,7 @@ class QCDFactorisedResultManager:
         myResult = QCDFactorisedResult(myCtrlRegionShape, myLeg1Shape, mySignalRegionShape, specs["histoSpecs"], moduleInfoString, displayPurityBreakdown=displayPurityBreakdown)
         self._hShape = myResult.getResultShape()
         if not shapeOnly:
-            print HighlightStyle()+"Obtaining region transition systematics"+NormalStyle()
+            print HighlightStyle()+"...Obtaining region transition systematics"+NormalStyle()
             # Do systematics coming from met shape difference
             myRegionTransitionSyst = SystematicsForMetShapeDifference(mySignalRegionShape, myCtrlRegionShape, myResult.getResultShape(), specs["histoSpecs"], moduleInfoString)
             self._hRegionSystUp = myRegionTransitionSyst.getUpHistogram()
@@ -192,7 +192,7 @@ class QCDFactorisedResultManager:
             i = 0
             for item in myObjects:
                 i += 1
-                print HighlightStyle()+"Obtaining ctrl plot %d/%d: %s%s"%(i,len(myObjects),item,NormalStyle())
+                print HighlightStyle()+"...Obtaining ctrl plot %d/%d: %s%s"%(i,len(myObjects),item,NormalStyle())
                 myCtrlShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity)
                 myCtrlPlot = QCDControlPlot(myCtrlRegionShape, myCtrlShape, mySignalRegionShape, moduleInfoString, histoSpecsForEfficiency=specs["histoSpecs"], histoSpecsForPlot=None, title=item)
                 self._hCtrlPlots.append(myCtrlPlot.getResultShape().Clone())

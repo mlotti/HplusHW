@@ -21,22 +21,42 @@ class PseudoMultiCrabCreator:
     # title is a string that goes to the multicrab directory name
     def __init__(self, title, inputMulticrabDir):
         self._title = title
+        self._mySubTitles = []
         self._modulesList = [] # List of PseudoMultiCrabModule objects
         self._inputMulticrabDir = inputMulticrabDir
+        self._myBaseDir = None
 
     def addModule(self, module):
         self._modulesList.append(module)
 
-    def writeToDisk(self):
+    def _createBaseDirectory(self):
+        if self._myBaseDir != None:
+            return
         # Create directory structure
-        myDir = "pseudoMulticrab_%s"%self._title
-        if os.path.exists(myDir):
-            shutil.rmtree(myDir)
-        os.mkdir(myDir)
-        os.mkdir("%s/%s"%(myDir,self._title))
-        os.mkdir("%s/%s/res"%(myDir,self._title))
+        self._myBaseDir = "pseudoMulticrab_%s"%self._title
+        if os.path.exists(self._myBaseDir):
+            shutil.rmtree(self._myBaseDir)
+        os.mkdir(self._myBaseDir)
+
+    def finalize(self):
+        # Copy lumi.json file from input multicrab directory
+        os.system("cp %s/lumi.json %s"%(self._inputMulticrabDir, self._myBaseDir))
+        # Create multicrab.cfg
+        f = open(os.path.join(self._myBaseDir, "multicrab.cfg"), "w")
+        f.write("# Ultimate pseudo-multicrab for fooling dataset.py, created by PseudoMultiCrabCreator\n")
+        for item in self._mySubTitles:
+            f.write("[%s]\n"%(self._title+item))
+        f.close()
+        # Done
+        print HighlightStyle()+"Created pseudo-multicrab directory %s%s"%(self._myBaseDir,NormalStyle())
+
+    def writeRootFileToDisk(self, subTitle):
+        self._createBaseDirectory()
+        self._mySubTitles.append(subTitle)
+        os.mkdir("%s/%s"%(self._myBaseDir,self._title+subTitle))
+        os.mkdir("%s/%s/res"%(self._myBaseDir,self._title+subTitle))
         # Open root file
-        myRootFile = ROOT.TFile("%s/%s/res/histograms-%s.root"%(myDir,self._title,self._title),"CREATE")
+        myRootFile = ROOT.TFile("%s/%s/res/histograms-%s.root"%(self._myBaseDir,self._title+subTitle,self._title+subTitle),"CREATE")
         # Write modules
         for m in self._modulesList:
             m.writeModuleToRootFile(myRootFile)
@@ -55,15 +75,8 @@ class PseudoMultiCrabCreator:
         # Write and close the root file
         myRootFile.Write()
         myRootFile.Close()
-        # Copy lumi.json file from input multicrab directory
-        os.system("cp %s/lumi.json %s"%(self._inputMulticrabDir, myDir))
-        # Create multicrab.cfg
-        f = open(os.path.join(myDir, "multicrab.cfg"), "w")
-        f.write("# Ultimate pseudo-multicrab for fooling dataset.py, created by PseudoMultiCrabCreator\n")
-        f.write("[data]\n")
-        f.close()
-        # Done
-        print HighlightStyle()+"Created pseudo-multicrab directory %s%s"%(myDir,NormalStyle())
+        # Clear the module list
+        self._modulesList = []
 
 class PseudoMultiCrabModule:
     ## Constructor
