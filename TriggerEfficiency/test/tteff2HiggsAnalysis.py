@@ -71,17 +71,6 @@ def modify(filename):
     anadir = fOUT.mkdir("analysis")
     anadir.cd()
 
-    tree = fIN.Get("TTEffTree").CloneTree()
-    print "modifying",filename," entries",tree.GetEntries()
-    if not tree:
-        print "Error: cannot find the tree!"
-        sys.exit()
-#    fOUT = ROOT.TFile.Open(newName,"RECREATE")
-#    fOUT.cd()
-#    anadir = fOUT.mkdir("analysis")
-#    anadir.cd()
-    tree.Write("",ROOT.TObject.kWriteDelete)
-#    fOUT.WriteTObject(tree)
     counterdir = anadir.mkdir("counters")
     counterdir.cd()
     counter = ROOT.TH1D("counter","counter",1,0,1)
@@ -104,6 +93,21 @@ def modify(filename):
 
     dataversion = ROOT.TNamed("dataVersion",vname)
     dataversion.Write()
+
+    anadir.cd()
+    tree = fIN.Get("TTEffTree").CloneTree()
+    print "modifying",filename," entries",tree.GetEntries()
+    if not tree:
+        print "Error: cannot find the tree!"
+        sys.exit()
+
+#    fOUT = ROOT.TFile.Open(newName,"RECREATE")
+#    fOUT.cd()
+#    anadir = fOUT.mkdir("analysis")
+#    anadir.cd()
+    tree.Write("",ROOT.TObject.kWriteDelete)
+#    fOUT.WriteTObject(tree)
+
 
     fOUT.Close()
     fIN.Close()

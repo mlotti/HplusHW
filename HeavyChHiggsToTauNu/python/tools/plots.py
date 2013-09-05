@@ -72,6 +72,9 @@ for mass in _lightHplusMasses:
 for mass in [180, 190, 200, 220, 250, 300]:
     _physicalMcAdd["HplusTB_M%d_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
     _physicalMcAdd["HplusTB_M%d_ext_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
+for bquark in [0, 1, 2, 3, 4]:
+    _physicalMcAdd["WJets_%dbquark_TuneZ2star_v1_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
+    _physicalMcAdd["WJets_%dbquark_TuneZ2star_v2_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
 
 ## Map the physical dataset names to logical names
 #
@@ -129,6 +132,14 @@ for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     "WZ_%s"%mcEra: "WZ",
     "ZZ_%s"%mcEra: "ZZ",
     })
+    for bquark in [0, 1, 2, 3]:
+        _physicalToLogical.update({
+                "WJets_%dbquark_%s"%(bquark, mcEra): "WJets_%dbquark"%bquark,
+                "W1Jets_%dbquark_%s"%(bquark, mcEra): "W1Jets_%dbquark"%bquark,
+                "W2Jets_%dbquark_%s"%(bquark, mcEra): "W2Jets_%dbquark"%bquark,
+                "W3Jets_%dbquark_%s"%(bquark, mcEra): "W3Jets_%dbquark"%bquark,
+                "W4Jets_%dbquark_%s"%(bquark, mcEra): "W4Jets_%dbquark"%bquark,
+        })
 
 ## Map the datasets to be merged to the name of the merged dataset.
 _ttSignalMerge = {}
@@ -176,6 +187,13 @@ _datasetMerge = {
     "WZ": "Diboson",
     "ZZ": "Diboson",
 }
+for bquark in [0, 1, 2, 3]:
+    _datasetMerge.update({
+            "WJets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
+            "W1Jets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
+            "W2Jets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
+            "W3Jets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
+    })
 
 ## Default ordering of datasets
 _datasetOrder = ["Data"]
@@ -193,6 +211,11 @@ _datasetOrder.extend([
     "W2Jets",
     "W3Jets",
     "W4Jets",
+    "WJets_0bquark",
+    "WJets_1bquark",
+    "WJets_2bquark",
+    "WJets_3bquark",
+    "WJets",
     "WToTauNu",
     "TTJets",
     "TT",
@@ -214,6 +237,10 @@ _legendLabels = {
     "W2Jets":                "W+2 jets",
     "W3Jets":                "W+3 jets",
     "W4Jets":                "W+4 jets",
+    "WJets_0bquark":         "W+jets (0 b)",
+    "WJets_1bquark":         "W+jets (1 b)",
+    "WJets_2bquark":         "W+jets (2 b)",
+    "WJets_3bquark":         "W+jets (#geq3 b)",
 
     "QCD_Pt30to50":          "QCD, 30 < #hat{p}_{T} < 50",
     "QCD_Pt50to80":          "QCD, 50 < #hat{p}_{T} < 80",
@@ -272,6 +299,10 @@ _plotStyles = {
     "WJets":                 styles.wStyle,
     "WToTauNu":              styles.wStyle,
     "W3Jets":                styles.wStyle,
+    "WJets_0bquark":         styles.Style(ROOT.kFullTriangleDown, ROOT.kRed+1),
+    "WJets_1bquark":         styles.Style(ROOT.kFullTriangleDown, ROOT.kRed+4),
+    "WJets_2bquark":         styles.Style(ROOT.kFullTriangleDown, ROOT.kRed+3),
+    "WJets_3bquark":         styles.Style(ROOT.kFullTriangleDown, ROOT.kRed-7),
 
     "QCD":                   styles.qcdStyle,
     "QCDdata":               styles.qcdStyle,
