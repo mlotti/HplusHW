@@ -70,7 +70,9 @@ namespace HPlus {
       kSignalAnalysis = 0,
       kEmbedding,
       kQCDFactorised,
-      kQCDInverted
+      kQCDInverted,
+      kQCDNormalizationSystematicsSignalRegion, // Needed for obtaining normalization systematics to data-driven control plots
+      kQCDNormalizationSystematicsControlRegion // Needed for obtaining normalization systematics to data-driven control plots
     };
 
     CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, AnalysisType analysisType, bool isEmbeddedData = false);
@@ -137,6 +139,8 @@ namespace HPlus {
     void fillControlPlotsAtBackToBackDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data);
     void fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopSelectionManager::Data& data);
     void fillControlPlotsAtEvtTopology(const edm::Event& iEvent, const EvtTopology::Data& data);
+    /// Fill all plots at once (needed for QCD normalization systematics)
+    void fillAllControlPlots(const edm::Event& iEvent, double transverseMass);
     /// Getters for histogram bin definitions
     const HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
     const HistogramSettings& getEtaBinSettings() const { return fEtaBinSettings; }

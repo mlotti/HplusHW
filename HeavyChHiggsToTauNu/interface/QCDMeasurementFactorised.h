@@ -165,8 +165,8 @@ namespace HPlus {
     QCDTailKiller fQCDTailKiller;
     SignalAnalysisTree fTree;
     CommonPlots fCommonPlots;
-    //FakeMETVeto fFakeMETVeto;
-    //QCDFactorisedHistogramHandler fQCDFactorisedHistogramHandler;
+    CommonPlots fNormalizationSystematicsSignalRegion; // For normalization systematics plotting
+    CommonPlots fNormalizationSystematicsControlRegion; // For normalization systematics plotting
 
     // Common plots
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;

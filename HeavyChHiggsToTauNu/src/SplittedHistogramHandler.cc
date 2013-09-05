@@ -3,14 +3,16 @@
 #include <iomanip>
 
 namespace HPlus {
-  SplittedHistogramHandler::SplittedHistogramHandler(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper) :
+  SplittedHistogramHandler::SplittedHistogramHandler(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper, bool doInfoHistogram) :
     fHistoWrapper(histoWrapper) {
     // Create histogram with binning information
     edm::Service<TFileService> fs;
-    hBinInfo = histoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "SplittedBinInfo", "SplittedBinInfo", 5, 0, 5.);
-    if (hBinInfo->isActive()) {
-      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(1, "Control"); // Needed when merging histograms (divide by this number the other bins)
-      hBinInfo->SetBinContent(1, 1);
+    if (doInfoHistogram) {
+      hBinInfo = histoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, *fs, "SplittedBinInfo", "SplittedBinInfo", 5, 0, 5.);
+      if (hBinInfo->isActive()) {
+        hBinInfo->getHisto()->GetXaxis()->SetBinLabel(1, "Control"); // Needed when merging histograms (divide by this number the other bins)
+        hBinInfo->SetBinContent(1, 1);
+      }
     }
     std::stringstream s;
     // tau pt binning
@@ -18,36 +20,44 @@ namespace HPlus {
       fTauPtBinLowEdges = iConfig.getUntrackedParameter<std::vector<double> >("splitHistogramByTauPtBinLowEdges");
       s << "TauPt:" << fTauPtBinLowEdges.size()+1;
     }
-    if (hBinInfo->isActive()) {
-      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(2, "TauPt");
-      hBinInfo->SetBinContent(2, fTauPtBinLowEdges.size()+1);
+    if (doInfoHistogram) {
+      if (hBinInfo->isActive()) {
+        hBinInfo->getHisto()->GetXaxis()->SetBinLabel(2, "TauPt");
+        hBinInfo->SetBinContent(2, fTauPtBinLowEdges.size()+1);
+      }
     }
     // tau eta binning
     if (iConfig.exists("splitHistogramByTauEtaBinLowEdges")) {
       fTauEtaBinLowEdges = iConfig.getUntrackedParameter<std::vector<double> >("splitHistogramByTauEtaBinLowEdges");
       s << ":TauEta:" << fTauEtaBinLowEdges.size()+1;
     }
-    if (hBinInfo->isActive()) {
-      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(3, "TauEta");
-      hBinInfo->SetBinContent(3, fTauEtaBinLowEdges.size()+1);
+    if (doInfoHistogram) {
+      if (hBinInfo->isActive()) {
+        hBinInfo->getHisto()->GetXaxis()->SetBinLabel(3, "TauEta");
+        hBinInfo->SetBinContent(3, fTauEtaBinLowEdges.size()+1);
+      }
     }
     // Nvertices binning
     if (iConfig.exists("splitHistogramByNVerticesBinLowEdges")) {
       fNVerticesBinLowEdges = iConfig.getUntrackedParameter<std::vector<int> >("splitHistogramByNVerticesBinLowEdges");
       s << ":Nvtx:" << fNVerticesBinLowEdges.size()+1;
     }
-    if (hBinInfo->isActive()) {
-      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(4, "Nvtx");
-      hBinInfo->SetBinContent(4, fNVerticesBinLowEdges.size()+1);
+    if (doInfoHistogram) {
+      if (hBinInfo->isActive()) {
+        hBinInfo->getHisto()->GetXaxis()->SetBinLabel(4, "Nvtx");
+        hBinInfo->SetBinContent(4, fNVerticesBinLowEdges.size()+1);
+      }
     }
     // Delta phi (tau, MET), binning
     if (iConfig.exists("splitHistogramByDeltaPhiTauMetInDegrees")) {
       fDeltaPhiTauMetBinLowEdges = iConfig.getUntrackedParameter<std::vector<double> >("splitHistogramByDeltaPhiTauMetInDegrees");
       s << ":dphiTauMet:" << fDeltaPhiTauMetBinLowEdges.size()+1;
     }
-    if (hBinInfo->isActive()) {
-      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(5, "dphiTauMet");
-      hBinInfo->SetBinContent(5, fDeltaPhiTauMetBinLowEdges.size()+1);
+    if (doInfoHistogram) {
+      if (hBinInfo->isActive()) {
+        hBinInfo->getHisto()->GetXaxis()->SetBinLabel(5, "dphiTauMet");
+        hBinInfo->SetBinContent(5, fDeltaPhiTauMetBinLowEdges.size()+1);
+      }
     }
     // Set binning info prefix string
     s << ":";

@@ -15,14 +15,15 @@ namespace HPlus {
   HistogramSettings::~HistogramSettings() { }
 
   CommonPlots::CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, AnalysisType analysisType, bool isEmbeddedData) :
-    bOptionEnableTauFakeRateAnalysis(iConfig.getUntrackedParameter<bool>("enableTauFakeRateAnalysis")),
-    bOptionEnableNormalisationAnalysis(iConfig.getUntrackedParameter<bool>("enableNormalisationAnalysis")),
-    bOptionEnableMETOscillationAnalysis(iConfig.getUntrackedParameter<bool>("enableMETOscillationAnalysis")),
+    // Switch off all extras for QCD normalization systematics
+    bOptionEnableTauFakeRateAnalysis(iConfig.getUntrackedParameter<bool>("enableTauFakeRateAnalysis") && (analysisType != kQCDNormalizationSystematicsSignalRegion && analysisType != kQCDNormalizationSystematicsControlRegion)),
+    bOptionEnableNormalisationAnalysis(iConfig.getUntrackedParameter<bool>("enableNormalisationAnalysis") && (analysisType != kQCDNormalizationSystematicsSignalRegion && analysisType != kQCDNormalizationSystematicsControlRegion)),
+    bOptionEnableMETOscillationAnalysis(iConfig.getUntrackedParameter<bool>("enableMETOscillationAnalysis") && (analysisType != kQCDNormalizationSystematicsSignalRegion && analysisType != kQCDNormalizationSystematicsControlRegion)),
     bDisableCommonPlotsFilledAtEveryStep(false),
     fAnalysisType(analysisType),
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper),
-    fSplittedHistogramHandler(iConfig.getUntrackedParameter<edm::ParameterSet>("histogramSplitting"), histoWrapper),
+    fSplittedHistogramHandler(iConfig.getUntrackedParameter<edm::ParameterSet>("histogramSplitting"), histoWrapper, (analysisType != kQCDNormalizationSystematicsSignalRegion && analysisType != kQCDNormalizationSystematicsControlRegion)),
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
     fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
     fTauFakeRateAnalysis(0),
@@ -81,8 +82,18 @@ namespace HPlus {
 
   void CommonPlots::createHistograms() {
     // Create directories for data driven control plots
-    TFileDirectory myCtrlDir = fs->mkdir("ForDataDrivenCtrlPlots");
-    TFileDirectory myCtrlEWKFakeTausDir = fs->mkdir("ForDataDrivenCtrlPlotsFakeTaus");
+    std::string myLabel = "ForDataDrivenCtrlPlots";
+    std::string myFakeLabel = "ForDataDrivenCtrlPlots";
+    if (fAnalysisType == kQCDNormalizationSystematicsSignalRegion) {
+      myLabel += "QCDNormalizationSignal";
+      myFakeLabel = "Empty";
+    }
+    if (fAnalysisType == kQCDNormalizationSystematicsControlRegion) {
+      myLabel += "QCDNormalizationControl";
+      myFakeLabel = "Empty";
+    }
+    TFileDirectory myCtrlDir = fs->mkdir(myLabel.c_str());
+    TFileDirectory myCtrlEWKFakeTausDir = fs->mkdir(myFakeLabel.c_str());
 
     // Create histograms
 
@@ -91,9 +102,11 @@ namespace HPlus {
     // tau selection
 
     // tau trigger SF
-    TFileDirectory myTauDir = fCommonBaseDirectory.mkdir("TausWithSF");
-    hTauPhiOscillationX = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myTauDir, "TauPhiOscillationX", "TauPhiOscillationX;N_{vertices};#tau p_{x}, GeV/c", 60, 0., 60., 1200, -300, 300);
-    hTauPhiOscillationY = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myTauDir, "TauPhiOscillationY", "TauPhiOscillationY;N_{vertices};#tau p_{y}, GeV/c", 60, 0., 60., 1200, -300, 300);
+    if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
+      TFileDirectory myTauDir = fCommonBaseDirectory.mkdir("TausWithSF");
+      hTauPhiOscillationX = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myTauDir, "TauPhiOscillationX", "TauPhiOscillationX;N_{vertices};#tau p_{x}, GeV/c", 60, 0., 60., 1200, -300, 300);
+      hTauPhiOscillationY = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myTauDir, "TauPhiOscillationY", "TauPhiOscillationY;N_{vertices};#tau p_{y}, GeV/c", 60, 0., 60., 1200, -300, 300);
+    }
 
     // veto tau selection
 
@@ -496,4 +509,17 @@ namespace HPlus {
     fSplittedHistogramHandler.fillShapeHistogram(hShapeFullMass, data.getHiggsMass());
     if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausFullMass, data.getHiggsMass());
   }
+
+  void CommonPlots::fillAllControlPlots(const edm::Event& iEvent, double transverseMass) {
+    fillControlPlotsAtJetSelection(iEvent, fJetData);
+    fillControlPlotsAtCollinearDeltaPhiCuts(iEvent, fQCDTailKillerData);
+    fillControlPlotsAtMETSelection(iEvent, fMETData);
+    fillControlPlotsAtBtagging(iEvent, fBJetData);
+    fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, fQCDTailKillerData);
+    fillControlPlotsAtTopSelection(iEvent, fTopData);
+    fillControlPlotsAtEvtTopology(iEvent, fEvtTopology);
+    fillControlPlotsAfterAllSelections(iEvent, transverseMass);
+    fillControlPlotsAfterAllSelectionsWithFullMass(iEvent, fFullHiggsMassData);
+  }
+
 }

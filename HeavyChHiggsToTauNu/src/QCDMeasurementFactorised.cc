@@ -68,6 +68,8 @@ namespace HPlus {
     fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fCommonPlots(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDFactorised),
+    fNormalizationSystematicsSignalRegion(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDNormalizationSystematicsSignalRegion),
+    fNormalizationSystematicsControlRegion(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDNormalizationSystematicsControlRegion),
     fCommonPlotsAfterVertexSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("VertexSelection",false,"Vtx")),
     fCommonPlotsAfterTauSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauSelection",false,"TauID")),
     fCommonPlotsAfterTauWeight(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauWeight",true,"Tau")),
@@ -134,6 +136,9 @@ namespace HPlus {
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMETAfterLeg1, "METAfterLeg1", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMETAfterLeg2, "METAfterLeg2", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMETAfterBJets, "METAfterBJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    // Shapes for closure test systematics for data-driven control plots are done via the extra Common plots objects
+    fNormalizationSystematicsSignalRegion.disableCommonPlotsFilledAtEveryStep();
+    fNormalizationSystematicsControlRegion.disableCommonPlotsFilledAtEveryStep();
 
     // Tree
     fTree.enableNonIsoLeptons(true);
@@ -265,11 +270,14 @@ namespace HPlus {
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(mySelectedTau));
     // note: do not require here that only one tau has been found (mySelectedTau is the selected tau in the event)
     // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
-
     fCommonPlots.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
-
     fCommonPlotsAfterTauSelection->fill();
     fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauCandidateData, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
+    // Initialize also normalization systematics plotting
+    fNormalizationSystematicsSignalRegion.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+    fNormalizationSystematicsControlRegion.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+    fNormalizationSystematicsSignalRegion.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauCandidateData, fMETSelection);
+    fNormalizationSystematicsControlRegion.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauCandidateData, fMETSelection);
 
 //------ Scale factors for tau fakes and for tau trigger
     // Apply scale factor for fake tau
@@ -396,6 +404,7 @@ namespace HPlus {
     myHandler.fillShapeHistogram(hMETAfterStandardSelections, myMetValue);
     myHandler.fillShapeHistogram(hMtShapesAfterStandardSelections, myTransverseMass);
     if (myFullMass > 0) myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, myFullMass);
+    fNormalizationSystematicsControlRegion.fillAllControlPlots(iEvent, myTransverseMass);
 
     // Leg 2 (tau ID)
     if (myLeg2PassedStatus) {
@@ -404,6 +413,7 @@ namespace HPlus {
       myHandler.fillShapeHistogram(hMETAfterLeg2, myMetValue);
       myHandler.fillShapeHistogram(hMtShapesAfterLeg2, myTransverseMass);
       myHandler.fillShapeHistogram(hMtShapesAfterStandardSelectionsAndIsolatedTau, myTransverseMass);
+      fNormalizationSystematicsSignalRegion.fillAllControlPlots(iEvent, myTransverseMass);
       if (myFullMass > 0.) {
         myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg2, myFullMass);
         myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelectionsAndIsolatedTau, myFullMass);
@@ -515,6 +525,7 @@ namespace HPlus {
       myHandler.fillShapeHistogram(hMETAfterStandardSelections, myMetValue);
       myHandler.fillShapeHistogram(hMtShapesAfterStandardSelections, myTransverseMass);
       if (myFullMass > 0) myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, myFullMass);
+      fNormalizationSystematicsControlRegion.fillAllControlPlots(iEvent, myTransverseMass);
     }
 
     // Leg 2 (tau ID)
@@ -523,6 +534,7 @@ namespace HPlus {
       fCommonPlotsAfterLeg2->fill();
       myHandler.fillShapeHistogram(hMETAfterLeg2, myMetValue);
       myHandler.fillShapeHistogram(hMtShapesAfterLeg2, myTransverseMass);
+      fNormalizationSystematicsSignalRegion.fillAllControlPlots(iEvent, myTransverseMass);
       if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg2, myFullMass);
     }
 
