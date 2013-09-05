@@ -64,6 +64,9 @@ class AnalysisModuleSelector:
     def getSelectedOptimizationModes(self):
         return self._selectedOptimizationModes
 
+    def getSelectedCombinationCount(self):
+        return len(self.getSelectedEras()) * len(self.getSelectedSearchModes()) * len(self.getSelectedOptimizationModes())
+
     def addParserOptions(self, parser):
         parser.add_option("-e", "--dataEra", dest="era", type="string", action="append", help="Evaluate specified data eras")
         parser.add_option("-m", "--searchMode", dest="searchMode", type="string", action="append", help="name of search mode")

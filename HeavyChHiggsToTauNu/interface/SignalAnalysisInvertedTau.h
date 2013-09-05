@@ -160,6 +160,8 @@ namespace HPlus {
     // Histograms
    // Common plots                                                                                                                                                                                      
     CommonPlots fCommonPlots;
+    CommonPlots fNormalizationSystematicsSignalRegion; // For normalization systematics plotting
+    CommonPlots fNormalizationSystematicsControlRegion; // For normalization systematics plotting
 
     WrappedTH1 *hTauDiscriminator;
 

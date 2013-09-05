@@ -115,6 +115,8 @@ namespace HPlus {
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     // Common plots
     fCommonPlots(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDInverted),
+    fNormalizationSystematicsSignalRegion(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDNormalizationSystematicsSignalRegion),
+    fNormalizationSystematicsControlRegion(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDNormalizationSystematicsControlRegion),
     // Common plots at every step for baseline
     fCommonPlotsBaselineAfterMetSF(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterMetSF",false,"")),
     fCommonPlotsBaselineAfterCollinearCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterCollinearCuts",false,"")),
@@ -294,6 +296,9 @@ namespace HPlus {
 //     hDeltaR_TauMETJet3MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInvertedDir, "DeltaR_TauMETJet3MET", "DeltaR_TauMETJet3MET ", 65, 0., 260.);
 //     hDeltaR_TauMETJet4MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInvertedDir, "DeltaR_TauMETJet4MET", "DeltaR_TauMETJet4MET ", 65, 0., 260.);
 
+    // Shapes for closure test systematics for data-driven control plots are done via the extra Common plots objects
+    fNormalizationSystematicsSignalRegion.disableCommonPlotsFilledAtEveryStep();
+    fNormalizationSystematicsControlRegion.disableCommonPlotsFilledAtEveryStep();
   }
 
   SignalAnalysisInvertedTau::~SignalAnalysisInvertedTau() { }
@@ -439,6 +444,9 @@ namespace HPlus {
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForBaseline.getSelectedTau()));
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
       fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+      // Initialize also normalization systematics plotting
+      fNormalizationSystematicsSignalRegion.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+      fNormalizationSystematicsSignalRegion.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauDataForBaseline, fMETSelection);
 
       // Do not fill histograms (keep them for the inverted part), but set info for splitting the phase space
       fCommonPlots.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauDataForBaseline, fMETSelection);
@@ -469,6 +477,9 @@ namespace HPlus {
 
       fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
       fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauDataForInverted, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
+      // Initialize also normalization systematics plotting
+      fNormalizationSystematicsControlRegion.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+      fNormalizationSystematicsControlRegion.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauDataForInverted, fMETSelection);
 
       // Apply scale factor for fake tau
       if (!iEvent.isRealData()) {
@@ -570,6 +581,8 @@ namespace HPlus {
       if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
       fCommonPlotsBaselineAfterCollinearCutsPlusBackToBackCuts->fill();
     }
+    // Fill normalization systematics plots
+    fNormalizationSystematicsSignalRegion.fillAllControlPlots(iEvent, transverseMass);
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
     //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     // double myWeightWithBtagSF = fEventWeight.getWeight() * btagDataTmp.getScaleFactor();
@@ -760,6 +773,8 @@ namespace HPlus {
       if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
       fCommonPlotsInvertedAfterCollinearCutsPlusBackToBackCuts->fill();
     }
+    // Fill normalization systematics plots
+    fNormalizationSystematicsControlRegion.fillAllControlPlots(iEvent, transverseMass);
 
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
     //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());

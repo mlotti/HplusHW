@@ -94,6 +94,7 @@ metFilters = cms.untracked.PSet(
 primaryVertexSelection = cms.untracked.PSet(
     selectedSrc = cms.untracked.InputTag("selectedPrimaryVertex"),
     allSrc = cms.untracked.InputTag("offlinePrimaryVertices"),
+    sumPtSrc = cms.untracked.InputTag("offlinePrimaryVerticesSumPt", "sumPt"),
     enabled = cms.untracked.bool(True)
 )
 

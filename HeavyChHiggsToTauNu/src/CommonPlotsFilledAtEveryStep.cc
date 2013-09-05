@@ -41,6 +41,10 @@ namespace HPlus {
     hMETRaw = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MET_Raw", "MET_Raw;Raw MET, GeV;N_{events}", 100, 0.0, 500.);
     hMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MET_MET", "MET;MET, GeV;N_{events}", 100, 0.0, 500.);
     hMETphi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MET_phi", "MET_phi;MET #phi;N_{events}", 72, -3.1415926, 3.1415926);
+    hMETSignificance = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MET_significance", "MET_significance;MET significance;N_{events}", 100, 0.0, 100.);
+    hMETOverTrackPtSum = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MET_over_TrackPtSum", "MET_over_TrackPtSum;MET/0.5/#sqrt{#sum p_{T}^{track}} / #sqrt{GeV};N_{events}", 100, 0.0, 100.);
+    hMETOverMHT = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MET_over_MHT", "MET_over_MHT;MET/MHT;N_{events}", 100, 0.0, 50.);
+    hMETOverTauPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MET_over_TauPt", "MET_over_TauPt;MET/#tau pT;N_{events}", 100, 0.0, 50.);
     hNbjets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjets_N", "bjets_N;N_{b jets};N_{events}", 20, 0.0, 20.);
     hDeltaPhiTauMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaPhi_TauMET", "DeltaPhi_TauMET;#Delta#phi(#tau,MET);N_{events}", 36, 0.0, 180.);
     hDeltaR_TauMETJet1MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet1MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
@@ -126,6 +130,12 @@ namespace HPlus {
     hMETRaw->Fill(fMETData->getRawMET()->et());
     hMET->Fill(fMETData->getSelectedMET()->et());
     hMETphi->Fill(fMETData->getSelectedMET()->phi());
+    hMETSignificance->Fill(fMETData->getSelectedMET()->significance());
+    hMETOverTrackPtSum->Fill(fMETData->getSelectedMET()->et() / 0.5 / std::sqrt(fVertexData->getTrackSumPt()));
+    if (fTauData) {
+      hMETOverMHT->Fill(fMETData->getSelectedMET()->et() / fJetData->getMHT());
+      hMETOverTauPt->Fill(fMETData->getSelectedMET()->et() / fTauData->getSelectedTau()->pt());
+    }
     hNbjets->Fill(fBJetData->getBJetCount());
     if (!fTauData) return; // Require tau beyond this point to make sense
     if (fTauData->getSelectedTau().isNull()) return; // Require tau beyond this point to make sense
