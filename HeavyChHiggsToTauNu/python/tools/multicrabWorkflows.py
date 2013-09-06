@@ -43,7 +43,7 @@ class MCDatasetHelper:
         self.energy = "7"
         self.dataVersion = "44XmcS6"
 
-        self.argSamples = ["WJets", "W1Jets", "W2Jets", "W3Jets", "W4Jets"]
+        self.argSamples = ["WJets", "W1Jets", "W2Jets", "W3Jets", "W4Jets", "TTJets"]
 
     ## Function call syntax
     #

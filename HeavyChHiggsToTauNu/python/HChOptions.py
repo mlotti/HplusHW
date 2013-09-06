@@ -8,6 +8,7 @@ validSampleValues = [
     "W2Jets",
     "W3Jets",
     "W4Jets",
+    "TTJets",
 ]
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideAboutPythonConfigFile#Passing_Command_Line_Arguments_T
