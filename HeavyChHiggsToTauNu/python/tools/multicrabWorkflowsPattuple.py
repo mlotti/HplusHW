@@ -33,10 +33,6 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
         args["triggerThrow"] = 0
     if dataset.isMC() and taskDef.triggerOR is not None and len(taskDef.triggerOR) > 0:
         args["triggerMC"] = 1
-    # Propagate 'sample' argument
-    srcWf = dataset.getWorkflow(sourceWorkflow)
-    if srcWf.hasArg("sample"):
-        args["sample"] = srcWf.getArg("sample")
     if taskDef.args != None:
         args.update(taskDef.args)
 

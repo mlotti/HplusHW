@@ -129,6 +129,10 @@ class Dataset:
         self.workflows[workflow.name] = workflow
         if workflow.source != None:
             workflow.source.dataset = self
+            # Propagate 'sample' argument
+            srcWf = self.getWorkflow(workflow.source.name)
+            if srcWf.hasArg("sample") and not workflow.hasArg("sample"):
+                workflow.addArg("sample", srcWf.getArg("sample"))
 
     def addWorkflows(self, workflows):
         for wf in workflows:
