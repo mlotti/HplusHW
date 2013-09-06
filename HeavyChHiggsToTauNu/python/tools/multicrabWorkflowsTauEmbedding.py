@@ -85,12 +85,12 @@ def getDefaultDefinitions_44X():
         "SingleMu_175832-180252_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v1", "HLT_Mu40_eta2p1_v4", "HLT_Mu40_eta2p1_v5"], triggerThrow=False),
 
         # MC, triggered with mcTrigger
-        "WJets_TuneZ2_Fall11":               TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": -1}),
-        "W1Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 1}),
-        "W2Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 2}),
-        "W3Jets_TuneZ2_Fall11":           TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 3}),
-        "W3Jets_TuneZ2_v2_Fall11":           TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 3}),
-        "W4Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 4}),
+        "WJets_TuneZ2_Fall11":               TaskDefMC(args={"wjetsWeighting": 1, "sample": "WJets"}),
+        "W1Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1, "sample": "W1Jets"}),
+        "W2Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1, "sample": "W2Jets"}),
+        "W3Jets_TuneZ2_Fall11":           TaskDefMC(args={"wjetsWeighting": 1, "sample": "W3Jets"}),
+        "W3Jets_TuneZ2_v2_Fall11":           TaskDefMC(args={"wjetsWeighting": 1, "sample": "W3Jets"}),
+        "W4Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1, "sample": "W4Jets"}),
         "TTJets_TuneZ2_Fall11":              TaskDefMC(),
         "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDefMC(),
         "T_t-channel_TuneZ2_Fall11":         TaskDefMC(),
