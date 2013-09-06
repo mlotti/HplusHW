@@ -83,7 +83,7 @@ namespace HPlus {
   void CommonPlots::createHistograms() {
     // Create directories for data driven control plots
     std::string myLabel = "ForDataDrivenCtrlPlots";
-    std::string myFakeLabel = "ForDataDrivenCtrlPlots";
+    std::string myFakeLabel = "ForDataDrivenCtrlPlotsEWKFakeTaus";
     if (fAnalysisType == kQCDNormalizationSystematicsSignalRegion) {
       myLabel += "QCDNormalizationSignal";
       myFakeLabel = "Empty";
@@ -194,14 +194,16 @@ namespace HPlus {
     // evt topology
 
     // all selections
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeTransverseMass,            "shapeTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis)
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEWKFakeTausTransverseMass, "shapeEWKFakeTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+    if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeTransverseMass,            "shapeTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+      if (fAnalysisType == kSignalAnalysis)
+        fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEWKFakeTausTransverseMass, "shapeEWKFakeTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
 
-    // all selections with full mass
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeFullMass,            "shapeInvariantMass", "m_{H+}, GeV/c^{2};N_{events}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis)
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEWKFakeTausFullMass, "shapeEWKFakeTausInvariantMass", "m_{H+}, GeV/c^{2};N_{events}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
+      // all selections with full mass
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeFullMass,            "shapeInvariantMass", "m_{H+}, GeV/c^{2};N_{events}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
+      if (fAnalysisType == kSignalAnalysis)
+        fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEWKFakeTausFullMass, "shapeEWKFakeTausInvariantMass", "m_{H+}, GeV/c^{2};N_{events}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
+    }
   }
 
   CommonPlots::~CommonPlots() {
@@ -500,14 +502,18 @@ namespace HPlus {
       }
     }
     //double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
-    fSplittedHistogramHandler.fillShapeHistogram(hShapeTransverseMass, transverseMass);
-    if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausTransverseMass, transverseMass);
+    if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
+      fSplittedHistogramHandler.fillShapeHistogram(hShapeTransverseMass, transverseMass);
+      if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausTransverseMass, transverseMass);
+    }
   }
 
   void CommonPlots::fillControlPlotsAfterAllSelectionsWithFullMass(const edm::Event& iEvent, FullHiggsMassCalculator::Data& data) {
     fFullHiggsMassData = data;
-    fSplittedHistogramHandler.fillShapeHistogram(hShapeFullMass, data.getHiggsMass());
-    if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausFullMass, data.getHiggsMass());
+    if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
+      fSplittedHistogramHandler.fillShapeHistogram(hShapeFullMass, data.getHiggsMass());
+      if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausFullMass, data.getHiggsMass());
+    }
   }
 
   void CommonPlots::fillAllControlPlots(const edm::Event& iEvent, double transverseMass) {
