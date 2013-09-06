@@ -131,7 +131,7 @@ if runPatOnTheFly:
     #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*2)
     #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*0.5)
 
-prefix = "multicrab"
+prefix = "multicrab_"+workflow
 if "QCD" in cfg:
     prefix += "_QCD"
 
