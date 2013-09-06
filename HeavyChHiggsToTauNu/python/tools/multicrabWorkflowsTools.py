@@ -262,6 +262,12 @@ class Workflow:
     def removeArg(self, argName):
         del self.args[argName]
 
+    def hasArg(self, argName):
+        return argName in self.args
+
+    def getArg(self, argName):
+        return self.args[argName]
+
     def setOutputFile(self, output_file):
         self.output_file = output_file
 

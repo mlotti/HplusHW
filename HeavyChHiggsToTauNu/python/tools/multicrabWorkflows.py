@@ -43,6 +43,8 @@ class MCDatasetHelper:
         self.energy = "7"
         self.dataVersion = "44XmcS6"
 
+        self.argSamples = ["WJets", "W1Jets", "W2Jets", "W3Jets", "W4Jets"]
+
     ## Function call syntax
     #
     # \param name          Name of the dataset
@@ -69,7 +71,13 @@ class MCDatasetHelper:
             if crossSection is None:
                 print "Warning: unable to find cross section for dataset %s with energy %s (check python/tools/crosssection.py)" % (name, self.energy)
 
-        return Dataset(name, dataVersion=self.dataVersion, energy=self.energy, crossSection=crossSection, workflows=[Workflow("AOD", output=Data(datasetpath=aod))])
+        args = {}
+        for sname in self.argSamples:
+            if sname in name:
+                args["sample"] = sname
+                break
+
+        return Dataset(name, dataVersion=self.dataVersion, energy=self.energy, crossSection=crossSection, workflows=[Workflow("AOD", output=Data(datasetpath=aod), args=args)])
 MCDataset = MCDatasetHelper()
 
 ## List of datasets
