@@ -4,6 +4,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # This is an analyzer to produce an ntuple with the number of true
 # interactions per event. This is needed to obtain the PU-reweighted
 # number of all events for each MC dataset.
+#
+# Also needed for TopPt-reweighted numer of all events for TTJets
 
 # Runs in ~10 s / 5k events
 # Output size ~25 kB / 5k events
@@ -22,6 +24,7 @@ process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         # For testing in jade
         dataVersion.getPatDefaultFileMadhatter()
+        #"file:/mnt/flustre/mkortela/data/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/7EE6381E-D036-E111-9BF5-002354EF3BDF.root"
     )
 )
 
@@ -30,9 +33,23 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 process.pileupNtuple = cms.EDAnalyzer("HPlusPileUpNtupleAnalyzer",
-    puSummarySrc = cms.InputTag("addPileupInfo")
+    puSummarySrc = cms.InputTag("addPileupInfo"),
+    ttGenEventSrc = cms.InputTag("genEvt"),
+    topBranchesEnabled = cms.bool(False)
 )
+process.begin = cms.Sequence()
+if options.sample == "TTJets":
+    process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
+    process.begin += process.makeGenEvt
+    process.decaySubset.fillMode = cms.string("kME")
+    process.pileupNtuple.topBranchesEnabled = True;
+
 
 process.path = cms.Path(
+    process.begin +
     process.pileupNtuple
 )
+
+#f = open("configDump.py", "w")
+#f.write(process.dumpPython())
+#f.close()
