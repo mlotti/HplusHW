@@ -321,6 +321,8 @@ namespace HPlus {
     hGenuineGJetWithBTagEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineGJetWithBTagEta", "genuineGJetWithBTagEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
     hGenuineUDSJetEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineUDSJetEta", "genuineUDSJetEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
     hGenuineUDSJetWithBTagEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineUDSJetWithBTagEta", "genuineUDSJetWithBTagEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
+    hGenuineCJetEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineCJetEta", "genuineCJetEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
+    hGenuineCJetWithBTagEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineCJetWithBTagEta", "genuineCJetWithBTagEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
     hGenuineLJetEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineLJetEta", "genuineLJetEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
     hGenuineLJetWithBTagEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineLJetWithBTagEta", "genuineLJetWithBTagEta;b-jet #eta;N_{events} / 0.05", 200, -5.0, 5.0);
     
@@ -330,6 +332,8 @@ namespace HPlus {
     hGenuineGJetWithBTagPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineGJetWithBTagPt", "genuineGJetWithBTagPt;b-jet p_{T};N_{events} / 1 GeV", 500, 0.0, 500.0);
     hGenuineUDSJetPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineUDSJetPt", "genuineUDSJetPt;b-jet p_{T};N_{events} / 1 GeV", 500, 0.0, 500.0);
     hGenuineUDSJetWithBTagPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineUDSJetWithBTagPt", "genuineUDSJetWithBTagPt;b-jet p_{T};N_{events} / 1 GeV", 500, 0.0, 500.0);
+    hGenuineCJetPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineCJetPt", "genuineCJetPt;b-jet p_{T};N_{events} / 1 GeV", 500, 0.0, 500.0);
+    hGenuineCJetWithBTagPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineCJetWithBTagPt", "genuineCJetWithBTagPt;b-jet p_{T};N_{events} / 1 GeV", 500, 0.0, 500.0);
     hGenuineLJetPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineLJetPt", "genuineLJetPt;b-jet p_{T};N_{events} / 1 GeV", 500, 0.0, 500.0);
     hGenuineLJetWithBTagPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myBTagEffDir, "genuineLJetWithBTagPt", "genuineLJetWithBTagPt;b-jet p_{T};N_{events} / 1 GeV", 500, 0.0, 500.0);
 
@@ -339,6 +343,8 @@ namespace HPlus {
     hGenuineGJetWithBTagPtAndEta = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myBTagEffDir, "genuineGJetWithBTagPtAndEta", "genuineGJetWithBTagPtAndEta;b-jet p_{T};b-jet #eta;N_{events}", 500, 0.0, 500.0, 200, -5.0, 5.0);
     hGenuineUDSJetPtAndEta = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myBTagEffDir, "genuineUDSJetPtAndEta", "genuineUDSJetPtAndEta;b-jet p_{T};b-jet #eta;N_{events}", 500, 0.0, 500.0, 200, -5.0, 5.0);
     hGenuineUDSJetWithBTagPtAndEta = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myBTagEffDir, "genuineUDSJetWithBTagPtAndEta", "genuineUDSJetWithBTagPtAndEta;b-jet p_{T};b-jet #eta;N_{events}", 500, 0.0, 500.0, 200, -5.0, 5.0);
+    hGenuineCJetPtAndEta = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myBTagEffDir, "genuineCJetPtAndEta", "genuineCJetPtAndEta;b-jet p_{T};b-jet #eta;N_{events}", 500, 0.0, 500.0, 200, -5.0, 5.0);
+    hGenuineCJetWithBTagPtAndEta = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myBTagEffDir, "genuineCJetWithBTagPtAndEta", "genuineCJetWithBTagPtAndEta;b-jet p_{T};b-jet #eta;N_{events}", 500, 0.0, 500.0, 200, -5.0, 5.0);
     hGenuineLJetPtAndEta = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myBTagEffDir, "genuineLJetPtAndEta", "genuineLJetPtAndEta;b-jet p_{T};b-jet #eta;N_{events}", 500, 0.0, 500.0, 200, -5.0, 5.0);
     hGenuineLJetWithBTagPtAndEta = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myBTagEffDir, "genuineLJetWithBTagPtAndEta", "genuineLJetWithBTagPtAndEta;b-jet p_{T};b-jet #eta;N_{events}", 500, 0.0, 500.0, 200, -5.0, 5.0);
     
@@ -688,6 +694,16 @@ namespace HPlus {
       hGenuineUDSJetWithBTagPt->Fill((*jet)->pt());
       hGenuineUDSJetWithBTagEta->Fill((*jet)->eta());
       hGenuineUDSJetWithBTagPtAndEta->Fill((*jet)->pt(),(*jet)->eta());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineCJets().begin(); jet != bTagEffData_afterCollinearCut.getGenuineCJets().end(); ++jet) {
+      hGenuineCJetPt->Fill((*jet)->pt());
+      hGenuineCJetEta->Fill((*jet)->eta());
+      hGenuineCJetPtAndEta->Fill((*jet)->pt(),(*jet)->eta());
+    }
+    for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineCJetsWithBTag().begin(); jet != bTagEffData_afterCollinearCut.getGenuineCJetsWithBTag().end(); ++jet) {
+      hGenuineCJetWithBTagPt->Fill((*jet)->pt());
+      hGenuineCJetWithBTagEta->Fill((*jet)->eta());
+      hGenuineCJetWithBTagPtAndEta->Fill((*jet)->pt(),(*jet)->eta());
     }
     for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineLJets().begin(); jet != bTagEffData_afterCollinearCut.getGenuineLJets().end(); ++jet) {
       hGenuineLJetPt->Fill((*jet)->pt());
