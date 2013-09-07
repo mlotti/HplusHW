@@ -33,7 +33,7 @@ bool hasDaughter(const reco::Candidate& p, int id);
 void printImmediateDaughters(const reco::Candidate& p);
 void printDaughters(const reco::Candidate& p);
 
-namespace { 
+namespace {
   // (Containing these variables in an anonymous namespace prevents them from being accessed from code in another file)
   // FLAGS:
   // Set this variable to true if you want debug print statements to be activated
@@ -865,7 +865,7 @@ namespace HPlus {
     // Choose the neutrino p_z selection method (can be set in python configuration scripts)
     if (fPzSelectionMethod == "DeltaEtaMax") selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax);
     else if (fPzSelectionMethod == "Smaller") selectNeutrinoPzAndHiggsMassSolution(output, eSmaller);
-    else selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax); // DEFAULT
+    else selectNeutrinoPzAndHiggsMassSolution(output, eSmaller); // Default (smaller solution)
     // Increment counters and fill Histograms
     switch (myInputDataType) {
     case eRECO:
