@@ -333,6 +333,8 @@ namespace HPlus {
     WrappedTH1 *hGenuineGJetWithBTagEta;
     WrappedTH1 *hGenuineUDSJetEta;
     WrappedTH1 *hGenuineUDSJetWithBTagEta;
+    WrappedTH1 *hGenuineCJetEta;
+    WrappedTH1 *hGenuineCJetWithBTagEta;
     WrappedTH1 *hGenuineLJetEta;
     WrappedTH1 *hGenuineLJetWithBTagEta;
     // Transverse momentum (pT)
@@ -342,6 +344,8 @@ namespace HPlus {
     WrappedTH1 *hGenuineGJetWithBTagPt;
     WrappedTH1 *hGenuineUDSJetPt;
     WrappedTH1 *hGenuineUDSJetWithBTagPt;
+    WrappedTH1 *hGenuineCJetPt;
+    WrappedTH1 *hGenuineCJetWithBTagPt;
     WrappedTH1 *hGenuineLJetPt;
     WrappedTH1 *hGenuineLJetWithBTagPt;
     // Two-dimensional histograms of pT vs. eta to investigate possible correlations
@@ -351,6 +355,8 @@ namespace HPlus {
     WrappedTH2 *hGenuineGJetWithBTagPtAndEta;
     WrappedTH2 *hGenuineUDSJetPtAndEta;
     WrappedTH2 *hGenuineUDSJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineCJetPtAndEta;
+    WrappedTH2 *hGenuineCJetWithBTagPtAndEta;
     WrappedTH2 *hGenuineLJetPtAndEta;
     WrappedTH2 *hGenuineLJetWithBTagPtAndEta;
 
