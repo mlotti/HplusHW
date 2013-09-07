@@ -28,12 +28,14 @@ namespace HPlus {
       const bool passedEvent() const { return fPassedEvent; }
       const edm::Ptr<reco::Vertex>& getSelectedVertex() const { return fSelectedVertex; }
       size_t getNumberOfAllVertices() const { return fNumberOfAllVertices; }
+      double getTrackSumPt() const { return fSumPt; }
 
       friend class VertexSelection;
 
     private:
       bool fPassedEvent;
       edm::Ptr<reco::Vertex> fSelectedVertex;
+      double fSumPt;
       size_t fNumberOfAllVertices;
     };
 
@@ -56,6 +58,7 @@ namespace HPlus {
     
     edm::InputTag fSelectedSrc;
     edm::InputTag fAllSrc;
+    edm::InputTag fSumPtSrc;
     bool fEnabled;
   };
 }

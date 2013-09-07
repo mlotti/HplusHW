@@ -64,6 +64,9 @@ class AnalysisModuleSelector:
     def getSelectedOptimizationModes(self):
         return self._selectedOptimizationModes
 
+    def getSelectedCombinationCount(self):
+        return len(self.getSelectedEras()) * len(self.getSelectedSearchModes()) * len(self.getSelectedOptimizationModes())
+
     def addParserOptions(self, parser):
         parser.add_option("-e", "--dataEra", dest="era", type="string", action="append", help="Evaluate specified data eras")
         parser.add_option("-m", "--searchMode", dest="searchMode", type="string", action="append", help="name of search mode")
@@ -117,7 +120,7 @@ class AnalysisModuleSelector:
         for i in range(0, len(self._otherSources)):
             if self._otherSources[i] != None:
                 myList = self._findCommonAvailableModules("OptimizationMode",self._primarySource.getLabel(),myList,self._otherSources[i].getLabel(),self._otherSources[i].getOptimizationModes())
-        if len(myList) > 0:
+        if len(myList) > 1:
             self._availableOptimizationModes = myList[1:]
         else:
             self._availableOptimizationModes = myList

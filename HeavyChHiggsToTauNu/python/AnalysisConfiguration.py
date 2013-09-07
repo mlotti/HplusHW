@@ -9,9 +9,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisati
 
 tooManyAnalyzersLimit = 100
 
-defaultOptimisation = HPlusOptimisationScheme()
-#defaultOptimisation.addTauPtVariation([40.0, 50.0])
-
 ## Infrastucture to help analysis configuration building
 #
 # This is the "master configuration" for analysis jobs. It is
@@ -79,11 +76,10 @@ class ConfigBuilder:
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
-                 doInvariantMassReconstructionScenarios = False, # Run different configurations of the invariant mass reconstruction
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doScaleFactorVariation = False, # Perform the signal analysis with the scale factor variations
-                 doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
+                 doOptimisation = False, optimisationScheme=None, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
                  printAnalyzerNames = False,
                  inputWorkflow = "pattuple_v44_5", # Name of the workflow, whose output is used as an input, needed for WJets weighting
@@ -97,7 +93,6 @@ class ConfigBuilder:
         self.edmOutput = edmOutput
 
         self.doQCDTailKillerScenarios = doQCDTailKillerScenarios
-        self.doInvariantMassReconstructionScenarios = doInvariantMassReconstructionScenarios
         self.doAgainstElectronScan = doAgainstElectronScan
         self.doTauIsolationAndJetPUScan = doTauIsolationAndJetPUScan
         self.doBTagScan = doBTagScan
@@ -401,9 +396,23 @@ class ConfigBuilder:
                 p *= process.metResolutionAnalysis
         # Construct paths for optimisation
         else:
+            if self.optimisationScheme is None:
+                raise Exception("You specified doOptimisation=True, but did not specify optimisationScheme. It must be a name of a module in HiggsAnalysis.HeavyChHiggsToTauNu.python.optimisation.")
+
+            try:
+                module = __import__("HiggsAnalysis.HeavyChHiggsToTauNu.optimisation."+self.optimisationScheme, fromlist=[self.optimisationScheme])
+            except ImportError, e:
+                print
+                print "Module HiggsAnalysis.HeavyChHiggsToTauNu.optimisation."+self.optimisationScheme+" does not exist or has an error."
+                raise
+            try:
+                optimisationScheme = module.optimisation
+            except AttributeError:
+                raise Exception("Module HiggsAnalysis.HeavyChHiggsToTauNu.optimisation."+self.optimisationScheme+" does not have an object 'optimisation'")
+
             analysisNamesForTailKillerScenarios = []
             for module, name in zip(analysisModules, analysisNames):
-                names = self.optimisationScheme.generateVariations(process, additionalCounters, process.commonSequence, module, name)
+                names = optimisationScheme.generateVariations(process, additionalCounters, process.commonSequence, module, name)
                 self._accumulateAnalyzers("Optimisation", names)
                 #analysisNamesForTailKillerScenarios = names
                 analysisNamesForTailKillerScenarios.extend(names)
@@ -412,10 +421,6 @@ class ConfigBuilder:
         # QCD tail killer scenarios (do them also for optimisation variations)
         qcdTailKillerNames = self._buildQCDTailKillerScenarios(process, analysisNamesForTailKillerScenarios)
         analysisNamesForSystematics.extend(qcdTailKillerNames)
-
-        # Invariant mass reconstruction scenarios
-        analysisNamesForSystematics.extend(self._buildInvariantMassReconstructionScenarios(process,
-                                           analysisNamesForTailKillerScenarios+qcdTailKillerNames))
 
         # Against electron scan
         self._buildAgainstElectronScan(process, analysisModules, analysisNames)
@@ -433,13 +438,13 @@ class ConfigBuilder:
         analysisNamesForSystematics.extend(self._additionalTauEmbeddingAnalyses(process, analysisModules, analysisNames))
 
         ## Systematics
-        if "QCDMeasurement" not in analysisNames_:
-            self._buildJESVariation(process, analysisNamesForSystematics)
-            self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
-            # Disabled for now, seems like it would be better to
-            #handle SF uncertainties by error propagation after all
-            #self._buildScaleFactorVariation(process,
-            #analysisNamesForSystematics)
+        #if "QCDMeasurement" not in analysisNames_: # Need also for QCD measurements, since they contain MC EWK
+        self._buildJESVariation(process, analysisNamesForSystematics)
+        self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
+        # Disabled for now, seems like it would be better to
+        #handle SF uncertainties by error propagation after all
+        # Re-enabled for test
+        self._buildScaleFactorVariation(process, analysisNamesForSystematics)
 
         # Optional output
         if self.edmOutput:
@@ -692,58 +697,6 @@ class ConfigBuilder:
 
         return names
 
-    ## Build array of analyzers to scan various scenarios for invariant mass reconstruction
-    def _buildInvariantMassReconstructionScenarios(self, process, analysisNames):
-        def createInvariantMassReconstructionModule(process, modulePrefix, mod):
-            modName = name+"Opt"+modulePrefix
-            if "Opt" in name:
-                modName = name+modulePrefix
-            setattr(process, modName, mod)
-            path = cms.Path(process.commonSequence * mod)
-            setattr(process, modName+"Path", path)
-            return modName
-            
-        if not self.doInvariantMassReconstructionScenarios:
-            return []
-        
-        neutrinoPzSolutionSelectionMethods = ["DeltaEtaMax", "Smaller"]
-        names = []
-        for name in analysisNames:
-            module = getattr(process, name)
-            for currentPzSelectionMethod in neutrinoPzSolutionSelectionMethods:
-                ## Top invariant mass cut scenarios for invariant mass reconstruction
-                # "None" scenario
-                mod = module.clone()
-                mod.invMassReco.topInvMassLowerCut = -1 # negative value means no cut
-                mod.invMassReco.topInvMassUpperCut = -1 # negative value means no cut
-                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
-                names.append(createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
-                                                        "TopInvMassCutNone", mod))
-                # "Loose" scenario
-                mod = module.clone()
-                mod.invMassReco.topInvMassLowerCut = 100 # negative value means no cut
-                mod.invMassReco.topInvMassUpperCut = 240 # negative value means no cut
-                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
-                names.append(createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
-                                                        "TopInvMassCutLoose", mod))
-                # "Medium" scenario
-                mod = module.clone()
-                mod.invMassReco.topInvMassLowerCut = 140 # negative value means no cut
-                mod.invMassReco.topInvMassUpperCut = 200 # negative value means no cut
-                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
-                names.append(createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
-                                                        "TopInvMassCutMedium", mod))
-                # "Tight" scenario
-                mod = module.clone()
-                mod.invMassReco.topInvMassLowerCut = 157 # negative value means no cut
-                mod.invMassReco.topInvMassUpperCut = 187 # negative value means no cut
-                mod.invMassReco.pzSelectionMethod = currentPzSelectionMethod
-                names.append(createInvariantMassReconstructionModule(process,"InvMassRecoPzSelection"+currentPzSelectionMethod+
-                                                                     "TopInvMassCutTight", mod))
-
-        self._accumulateAnalyzers("Modules for invariant mass reconstruction scenarios", names)
-        return names
-    
     ## Build array of analyzers to scan various tau againstElectron discriminators
     #
     # \param process          cms.Process object
@@ -1146,6 +1099,14 @@ class ConfigBuilder:
             if hasattr(effSF, "printScaleFactors"):
                 effSF.printScaleFactors = False
             return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgSF"+postfix)
+        def addMETTrgSF(shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = module.metTriggerEfficiencyScaleFactor
+            effSF.variationEnabled = True
+            effSF.variationShiftBy = shiftBy
+            if hasattr(effSF, "printScaleFactors"):
+                effSF.printScaleFactors = False
+            return self._addVariationModule(process, module, name+self.systPrefix+"MetTrgSF"+postfix)
         def addBTagSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
             module.bTagging.variationEnabled = True
@@ -1157,6 +1118,11 @@ class ConfigBuilder:
 
         # Tau trigger SF
         if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
+            names.append(addTauTrgSF( 1.0, "Plus"))
+            names.append(addTauTrgSF(-1.0, "Minus"))
+
+        # MET trigger SF
+        if self.applyMETTriggerScaleFactor:
             names.append(addTauTrgSF( 1.0, "Plus"))
             names.append(addTauTrgSF(-1.0, "Minus"))
 

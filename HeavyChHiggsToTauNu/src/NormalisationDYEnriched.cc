@@ -46,7 +46,7 @@ namespace HPlus {
     }
 
     // Do collinear tail killer
-    if (!tailKillerData.passedCollinearCuts()) return;
+    //if (!tailKillerData.passedCollinearCuts()) return;
 
     // Do MET cut
     if (!metData.passedEvent()) return;
@@ -60,7 +60,7 @@ namespace HPlus {
     }
 
     // Do back-to-back tail killer
-    if (!tailKillerData.passedBackToBackCuts()) return;
+    //if (!tailKillerData.passedBackToBackCuts()) return;
 
     // Require opposite sign of muon and tau
     if (muonData.getSelectedTightMuons()[0]->charge() == tauData.getSelectedTau()->charge()) return;
@@ -70,25 +70,9 @@ namespace HPlus {
     //InvariantMass::InvariantMass<LorentzVector>(muonData.getSelectedTightMuons()[0]->p4(), tauData.getSelectedTau()->p4());
     // TODO: Add cut here
 
-    double myTransverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
 
-    // Fill histograms
-    hTauPt->Fill(tauData.getSelectedTau()->pt(), myEventWeight);
-    hNJets->Fill(jetData.getHadronicJetCount(), myEventWeight);
-    hMET->Fill(metData.getSelectedMET()->et(), myEventWeight);
-    hMETphi->Fill(metData.getSelectedMET()->phi(), myEventWeight);
-    hNBJets->Fill(btagData.getBJetCount(), myEventWeight);
-    hTransverseMass->Fill(myTransverseMass, myEventWeight);
-    hZMass->Fill(myZMass, myEventWeight);
-    if (fakeTauData.isFakeTau()) {
-      hFakeTauTauPt->Fill(tauData.getSelectedTau()->pt(), myEventWeight);
-      hFakeTauNJets->Fill(jetData.getHadronicJetCount(), myEventWeight);
-      hFakeTauMET->Fill(metData.getSelectedMET()->et(), myEventWeight);
-      hFakeTauMETphi->Fill(metData.getSelectedMET()->phi(), myEventWeight);
-      hFakeTauNBJets->Fill(btagData.getBJetCount(), myEventWeight);
-      hFakeTauTransverseMass->Fill(myTransverseMass, myEventWeight);
-      hFakeTauZMass->Fill(myZMass, myEventWeight);
-    }
+    // Fill plots
+    fillPlotsAfterSelection(fakeTauData.isFakeTau(), tauData, jetData, metData, btagData, myEventWeight, myZMass);
   }
     NormalisationDYEnrichedWithFakeTaus::NormalisationDYEnrichedWithFakeTaus(EventCounter& eventCounter, HistoWrapper& histoWrapper)
   : NormalisationAnalysis(eventCounter, histoWrapper, "DYEnrichedWithFakeTaus") { }
@@ -131,7 +115,7 @@ namespace HPlus {
     }
 
     // Do collinear tail killer
-    if (!tailKillerData.passedCollinearCuts()) return;
+    //if (!tailKillerData.passedCollinearCuts()) return;
 
     // Do MET cut
     if (!metData.passedEvent()) return;
@@ -145,7 +129,7 @@ namespace HPlus {
     }
 
     // Do back-to-back tail killer
-    if (!tailKillerData.passedBackToBackCuts()) return;
+    //if (!tailKillerData.passedBackToBackCuts()) return;
 
     // Require opposite sign of muon and tau
     if (muonData.getSelectedTightMuons()[0]->charge() == muonData.getSelectedTightMuons()[1]->charge()) return;
@@ -154,24 +138,7 @@ namespace HPlus {
     double myZMass = (muonData.getSelectedTightMuons()[0]->p4() + muonData.getSelectedTightMuons()[1]->p4()).mass();
     // TODO: Add cut here (80-100) ?
 
-    double myTransverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
-
-    // Fill histograms
-    hTauPt->Fill(tauData.getSelectedTau()->pt(), myEventWeight);
-    hNJets->Fill(jetData.getHadronicJetCount(), myEventWeight);
-    hMET->Fill(metData.getSelectedMET()->et(), myEventWeight);
-    hMETphi->Fill(metData.getSelectedMET()->phi(), myEventWeight);
-    hNBJets->Fill(btagData.getBJetCount(), myEventWeight);
-    hTransverseMass->Fill(myTransverseMass, myEventWeight);
-    hZMass->Fill(myZMass, myEventWeight);
-    if (fakeTauData.isFakeTau()) {
-      hFakeTauTauPt->Fill(tauData.getSelectedTau()->pt(), myEventWeight);
-      hFakeTauNJets->Fill(jetData.getHadronicJetCount(), myEventWeight);
-      hFakeTauMET->Fill(metData.getSelectedMET()->et(), myEventWeight);
-      hFakeTauMETphi->Fill(metData.getSelectedMET()->phi(), myEventWeight);
-      hFakeTauNBJets->Fill(btagData.getBJetCount(), myEventWeight);
-      hFakeTauTransverseMass->Fill(myTransverseMass, myEventWeight);
-      hFakeTauZMass->Fill(myZMass, myEventWeight);
-    }
+    // Fill plots
+    fillPlotsAfterSelection(fakeTauData.isFakeTau(), tauData, jetData, metData, btagData, myEventWeight, myZMass);
   }
 }

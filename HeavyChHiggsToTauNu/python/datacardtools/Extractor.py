@@ -437,12 +437,11 @@ class ScaleFactorExtractor(ExtractorBase):
 # Extracts histogram shapes
 class ShapeExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, histoSpecs, counterItem, histoDirs, histograms, mode = ExtractorMode.NUISANCE, exid = "", distribution = "lnN", description = ""):
+    def __init__(self, histoSpecs, histoDirs, histograms, mode = ExtractorMode.NUISANCE, exid = "", distribution = "lnN", description = ""):
         ExtractorBase.__init__(self, mode, exid, distribution, description)
         self._histoSpecs = histoSpecs
         self._histoDirs = histoDirs
         self._histograms = histograms
-        self._counterItem = counterItem
         if len(self._histoDirs) != len(self._histograms):
             raise Exception(ErrorStyle()+"Error in Rate/Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" need to specify equal amount of histoDirs and histograms!")
         if len(self._histoDirs) == 0 and self._description != "empty":

@@ -27,7 +27,8 @@ myHistoSpecs = { "bins": 13,
                  "rangeMin": 0.0,
                  "rangeMax": 500.0,
                  #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                 "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250,300,400], # if an empty list is given, then uniform bin width is used
+                 #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250,300,400], # if an empty list is given, then uniform bin width is used
+                 "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250], # if an empty list is given, then uniform bin width is used
                  "xtitle": "Transverse mass / GeV",
                  "ytitle": "Events" }
 
@@ -115,7 +116,7 @@ def doQCDfactorisedResultPlots(opts, dsetMgr, moduleInfoString, myDir, luminosit
     hUp.SetLineColor(ROOT.kBlue)
     hDown.SetLineColor(ROOT.kRed)
     hNominal.Draw()
-    myYmax = 30
+    myYmax = 15
     if "2012" in moduleInfoString:
         myYmax = 70
     plot = plots.ComparisonManyPlot(histograms.Histo(hNominal, "Nominal"),

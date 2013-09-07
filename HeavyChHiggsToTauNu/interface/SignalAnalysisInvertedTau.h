@@ -13,8 +13,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistogramsInBins.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistogramsInBins2Dim.h"
+//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistogramsInBins.h"
+//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistogramsInBins2Dim.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexAssignmentAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetTauInvMass.h"
@@ -22,10 +22,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEmulationEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
@@ -96,6 +94,7 @@ namespace HPlus {
     Count fBaselineBtagCounter;
     Count fBaselineBTaggingScaleFactorCounter;
     Count fBaselineQCDTailKillerBackToBackCounter;
+    Count fBaselineTopSelectionCounter;
     Count fBaselineDeltaPhiTauMETCounter;
     Count fBaselineSelectedEventsCounter;
     Count fBaselineSelectedEventsInvariantMassCounter;
@@ -118,6 +117,7 @@ namespace HPlus {
     Count fInvertedBTaggingCounter;
     Count fInvertedBTaggingScaleFactorCounter;
     Count fInvertedQCDTailKillerBackToBackCounter;
+    Count fInvertedTopSelectionCounter;
     Count fInvertedDeltaPhiTauMETCounter;
     Count fInvertedSelectedEventsCounter;
     Count fInvertedSelectedEventsInvariantMassCounter;
@@ -129,10 +129,6 @@ namespace HPlus {
 //     Count fHiggsMassCutCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
-    Count fTopSelectionCounter;
-    Count fTopChiSelectionCounter;
-    Count fTopWithBSelectionCounter;
-    Count ftransverseMassCut100TopCounter;
 
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
@@ -144,10 +140,8 @@ namespace HPlus {
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
-    TopSelection fTopSelection;
     BjetSelection fBjetSelection;
-    TopChiSelection fTopChiSelection;
-    TopWithBSelection fTopWithBSelection;
+    TopSelectionManager fTopSelectionManager; 
     FullHiggsMassCalculator fFullHiggsMassCalculator;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;
@@ -166,15 +160,14 @@ namespace HPlus {
     // Histograms
    // Common plots                                                                                                                                                                                      
     CommonPlots fCommonPlots;
+    CommonPlots fNormalizationSystematicsSignalRegion; // For normalization systematics plotting
+    CommonPlots fNormalizationSystematicsControlRegion; // For normalization systematics plotting
 
     WrappedTH1 *hTauDiscriminator;
 
     WrappedTH1 *hOneProngRtauPassedInvertedTaus;
     WrappedTH1 *hVerticesBeforeWeight;
     WrappedTH1 *hVerticesAfterWeight;
-    WrappedTH1 *hTransverseMassWithTopCut;
-    WrappedTH1 *hTransverseMassTopChiSelection;
-    WrappedTH1 *hTransverseMassTopBjetSelection;
 
 //     WrappedTH1* hQCDTailKillerJet0BackToBackInverted;
 //     WrappedTH1* hQCDTailKillerJet1BackToBackInverted;
@@ -242,6 +235,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterBtag;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterBackToBackCuts;
+    std::vector<WrappedTH1*> hMTBaselineTauIdAfterTopReco;
     // baseline invariant mass histos
     std::vector<WrappedTH1*> hInvMassBaselineTauIdAfterCollinearCuts; // <-- used for closure test
     std::vector<WrappedTH1*> hInvMassBaselineTauIdAfterCollinearCutsPlusBackToBackCuts;
@@ -270,6 +264,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterBtag;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterBackToBackCuts;
+    std::vector<WrappedTH1*> hMTInvertedTauIdAfterTopReco;
     // inverted invariant mass histos
     std::vector<WrappedTH1*> hInvMassInvertedTauIdAfterCollinearCuts; // <-- used for closure test
     std::vector<WrappedTH1*> hInvMassInvertedTauIdAfterCollinearCutsPlusBackToBackCuts;
@@ -305,7 +300,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hDeltaPhiInvertedNoB;
     std::vector<WrappedTH1*> hDeltaPhiInverted;  
 
-    std::vector<WrappedTH1*> hTopMass;
+    //std::vector<WrappedTH1*> hTopMass;
 
     /*HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet1TauSel; 
     HistogramsInBins2Dim *hDeltaPhiVsDeltaPhiJet1LeptonVeto;

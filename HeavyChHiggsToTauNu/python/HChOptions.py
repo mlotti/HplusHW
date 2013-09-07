@@ -112,6 +112,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "W+Jets jet bin (-1=inclusive, 1=1, jne), only relevant if wjetsWeighting != 0")
+    options.register("bquarkNumFilter",
+                     -1,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "b-quark filtering option (-1=disabled, 0=0b, 1=1b, 2=2b, 3=at least 3b)")
     options.register("trgAnalysis",
                      "",
                      options.multiplicity.singleton,
