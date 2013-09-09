@@ -1395,6 +1395,8 @@ class Histo:
     # Is the histogram from MC?
 
 ## Represents one (TH1/TH2) histogram associated with a dataset.Dataset object
+#
+# Treats pseudo-datasets as MC-datasets.
 class HistoWithDataset(Histo):
     ## Constructor
     #
@@ -1427,7 +1429,7 @@ class HistoWithDataset(Histo):
             Histo.__init__(self, drh.getHistogramWithUncertainties(), drh.getName())
             self.dataset = drh.getDataset()
 
-        self.setIsDataMC(self.dataset.isData(), self.dataset.isMC())
+        self.setIsDataMC(self.dataset.isData(), self.dataset.isMC() or self.dataset.isPseudo())
 
     ## Get the dataset.Dataset object
     def getDataset(self):
