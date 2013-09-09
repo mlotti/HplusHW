@@ -55,7 +55,7 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     # Create dataset manager
     myDsetMgr = signalDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
     if mcOnly:
-        myDsetMgr.remove(myDsetMgr.getDataDatasetNames())
+        myDsetMgr.remove(myDsetMgr.getDataDatasetNames(), close=False)
         histograms.cmsTextMode = histograms.CMSMode.SIMULATION
     else:
         myDsetMgr.loadLuminosities()
@@ -63,12 +63,12 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
 
     # Take QCD from data
     if opts.noMCQCD:
-        myDsetMgr.remove(filter(lambda name: "QCD" in name, myDsetMgr.getAllDatasetNames()))
+        myDsetMgr.remove(filter(lambda name: "QCD" in name, myDsetMgr.getAllDatasetNames()), close=False)
     # Remove signal
     if opts.noSignal:
-        myDsetMgr.remove(filter(lambda name: "TTToHplus" in name, myDsetMgr.getAllDatasetNames()))
-        myDsetMgr.remove(filter(lambda name: "Hplus_taunu" in name, myDsetMgr.getAllDatasetNames()))
-        myDsetMgr.remove(filter(lambda name: "HplusTB" in name, myDsetMgr.getAllDatasetNames()))
+        myDsetMgr.remove(filter(lambda name: "TTToHplus" in name, myDsetMgr.getAllDatasetNames()), close=False)
+        myDsetMgr.remove(filter(lambda name: "Hplus_taunu" in name, myDsetMgr.getAllDatasetNames()), close=False)
+        myDsetMgr.remove(filter(lambda name: "HplusTB" in name, myDsetMgr.getAllDatasetNames()), close=False)
 
     plots.mergeRenameReorderForDataMC(myDsetMgr)
 
@@ -79,11 +79,11 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     if not opts.noSignal:
         print "norm=",myDsetMgr.getDataset("TTToHplusBWB_M120").getNormFactor()
 
-    myDsetMgr.remove(filter(lambda name: "QCD_Pt20_MuEnriched" in name, myDsetMgr.getAllDatasetNames()))
+    myDsetMgr.remove(filter(lambda name: "QCD_Pt20_MuEnriched" in name, myDsetMgr.getAllDatasetNames()), close=False)
     # Remove signals other than M120
-    myDsetMgr.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, myDsetMgr.getAllDatasetNames()))
-    myDsetMgr.remove(filter(lambda name: "Hplus_taunu" in name, myDsetMgr.getAllDatasetNames()))
-    myDsetMgr.remove(filter(lambda name: "HplusTB" in name, myDsetMgr.getAllDatasetNames()))
+    myDsetMgr.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, myDsetMgr.getAllDatasetNames()), close=False)
+    myDsetMgr.remove(filter(lambda name: "Hplus_taunu" in name, myDsetMgr.getAllDatasetNames()), close=False)
+    myDsetMgr.remove(filter(lambda name: "HplusTB" in name, myDsetMgr.getAllDatasetNames()), close=False)
     
     histograms.createLegend.moveDefaults(dx=-0.05)
     histograms.createSignalText.set(xmin=0.4, ymax=0.93, mass=120)
