@@ -12,6 +12,7 @@
 #include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeEventBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
 
 #include "TTree.h"
 
@@ -40,8 +41,7 @@ private:
   float fTrueNumInteractions;
   float fTopPt;
   float fTopBarPt;
-  int fTopEventClassTauIsLepton;
-  int fTopEventClassTauIsNotLepton;
+  int fTopEventClass;
   const bool fTopBranchesEnabled;
 };
 
@@ -58,8 +58,7 @@ HPlusPileUpNtupleAnalyzer::HPlusPileUpNtupleAnalyzer(const edm::ParameterSet& iC
   if(fTopBranchesEnabled) {
     fTree->Branch("TopPt", &fTopPt);
     fTree->Branch("TopBarPt", &fTopBarPt);
-    fTree->Branch("TopEventClassTauIsLepton", &fTopEventClassTauIsLepton);
-    fTree->Branch("TopEventClassTauIsNotLepton", &fTopEventClassTauIsNotLepton);
+    fTree->Branch("TopEventClass", &fTopEventClass);
   }
 
   reset();
@@ -72,8 +71,7 @@ void HPlusPileUpNtupleAnalyzer::reset() {
   fTrueNumInteractions = -1;
   fTopPt = -999;
   fTopBarPt = -999;
-  fTopEventClassTauIsLepton = 0;
-  fTopEventClassTauIsNotLepton = 0;
+  fTopEventClass = -1;
 }
 
 void HPlusPileUpNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -97,18 +95,49 @@ void HPlusPileUpNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
     if(!top) throw cms::Exception("Assert") << "Got null from ttGenEvent.top() in " << __FILE__ << ":" << __LINE__;
     if(!topBar) throw cms::Exception("Assert") << "Got null from ttGenEvent.topBar() in " << __FILE__ << ":" << __LINE__;
 
+
     fTopPt = top->pt();
     fTopBarPt = topBar->pt();
 
-    if(hGenEvent->isFullHadronic(false)) fTopEventClassTauIsLepton = 1;
-    else if(hGenEvent->isSemiLeptonic(false)) fTopEventClassTauIsLepton = 2;
-    else if(hGenEvent->isFullLeptonic(false)) fTopEventClassTauIsLepton = 3;
-    else throw cms::Exception("Assert") << "ttGenEvent is not FullHadronic, SemiLeptonic, nor FullLeptonic (tau is treated as lepton) in " << __FILE__ << ":" << __LINE__;
-
-    if(hGenEvent->isFullHadronic(true)) fTopEventClassTauIsNotLepton = 1;
-    else if(hGenEvent->isSemiLeptonic(true)) fTopEventClassTauIsNotLepton = 2;
-    else if(hGenEvent->isFullLeptonic(true)) fTopEventClassTauIsNotLepton = 3;
+    // First as from TtGenEvent the topology while treating taus as
+    // hadrons
+    if(hGenEvent->isFullHadronic(true)) fTopEventClass = 0;
+    else if(hGenEvent->isSemiLeptonic(true)) fTopEventClass = 1;
+    else if(hGenEvent->isFullLeptonic(true)) fTopEventClass = 2;
     else throw cms::Exception("Assert") << "ttGenEvent is not FullHadronic, SemiLeptonic, nor FullLeptonic (tau is not treated as lepton) in " << __FILE__ << ":" << __LINE__;
+
+    // Then ask for taus, theck their decay, and modify the event class accordingly
+    if(const reco::GenParticle *tauPlus = hGenEvent->tauPlus()) {
+      edm::LogVerbatim("Ntuple") << "Has tau plus";
+      const reco::GenParticle *d = HPlus::GenParticleTools::findTauDaughter(tauPlus);
+      if(d) {
+        edm::LogVerbatim("Ntuple") << "  has daughter " << d->pdgId();
+        int id = std::abs(d->pdgId());
+        if(id == 11 || id == 13) {
+          ++fTopEventClass;
+        }
+      }
+      else {
+        fTopEventClass += 10;
+      }
+    }
+    if(const reco::GenParticle *tauMinus = hGenEvent->tauMinus()) {
+      edm::LogVerbatim("Ntuple") << "Has tau minus";
+      const reco::GenParticle *d = HPlus::GenParticleTools::findTauDaughter(tauMinus);
+      if(d) {
+        edm::LogVerbatim("Ntuple") << "  has daughter " << d->pdgId();
+        int id = std::abs(d->pdgId());
+        if(id == 11 || id == 13) {
+          ++fTopEventClass;
+        }
+      }
+      else {
+        fTopEventClass += 10;
+      }
+    }
+
+    edm::LogVerbatim("Ntuple") << "Top event class (number of leptons) " << fTopEventClass;
+    hGenEvent->print();
   }
 
   fTree->Fill();

@@ -31,6 +31,9 @@ process.source = cms.Source('PoolSource',
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 #process.options.wantSummary = cms.untracked.bool(True)
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+#process.MessageLogger.cerr.FwkReport.reportEvery = 1
+#process.MessageLogger.categories.append("TopGenEvent")
+#process.MessageLogger.categories.append("Ntuple")
 
 process.pileupNtuple = cms.EDAnalyzer("HPlusPileUpNtupleAnalyzer",
     puSummarySrc = cms.InputTag("addPileupInfo"),
