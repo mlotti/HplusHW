@@ -6,6 +6,75 @@ from multicrabWorkflowsPattuple import constructProcessingWorkflow_44X
 
 import multicrabDatasetsCommon as common
 
+def addTauLegSkim_44X(version, datasets, updateDefinitions):
+    mcTrigger = "HLT_IsoMu30_eta2p1_v3"
+    def TaskDefMC(**kwargs):
+        return TaskDef(triggerOR=[mcTrigger], **kwargs)
+
+    # The numbers of jobs are from multicrabDatasetsPattuple, they may have to be adjusted
+    defaultDefinitions = {
+
+        # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
+        "SingleMu_165970-167913_2011A_Nov08_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=[
+                                                    "HLT_IsoMu17_v9",
+                                                    "HLT_IsoMu17_v11",
+                                                    ], triggerThrow=False),
+        # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+        "SingleMu_170722-173198_2011A_Nov08_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=[
+                                                    " HLT_IsoMu20_v8 ",
+                                                    ], triggerThrow=False),
+        # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+        "SingleMu_173236-173692_2011A_Nov08_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=[
+                                                    "HLT_IsoMu30_eta2p1_v3"
+                                                    ], triggerThrow=False),
+        # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
+        "SingleMu_175832-180252_2011B_Nov19_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=[
+                                                    "HLT_IsoMu30_eta2p1_v3","HLT_IsoMu30_eta2p1_v6","HLT_IsoMu30_eta2p1_v7",
+                                                    ], triggerThrow=False),
+        
+        "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW":       TaskDefMC(njobsIn=4000, njobsOut=2000),
+        }
+
+    workflowName = "triggerTauLeg_skim_"+version      
+                                                      
+    # Update the default definitions from the argument
+    updateTaskDefinitions(defaultDefinitions, updateDefinitions, workflowName)
+                                                                              
+    # Add Workflow for each dataset                                           
+    for datasetName, taskDef in defaultDefinitions.iteritems():               
+        dataset = datasets.getDataset(datasetName)
+
+        # Construct processing workflow
+        wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName, inputLumiMaskData="Nov08ReReco", outputLumiMaskData=None)
+
+        # Set tau-leg specific customizations on job configuration
+        wf.addArg("customizeConfig", "TauLegZMuTauFilter")
+
+        # Example of how to set user_remote_dir for this workflow only (but for all datasets)
+        #wf.addCrabLine("USER.user_remote_dir = /whatever")                                  
+                                                                                             
+        dataset.addWorkflow(wf)                                                              
+                                                                                             
+        # If have skim output, define the workflows which depend on it                       
+        if wf.output != None:                                                                
+            wf.output.dbs_url = common.tteff_dbs                                             
+            dataset.addWorkflow(Workflow("triggerTauLeg_analysis_"+version, source=Source(workflowName),
+                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="tteffAnalysis-tauleg.root"))
+
+def addTauLegSkim_v44_v5(datasets):
+#def addTauLegSkim_cmssw44X_v1(datasets):
+    definitions = {
+
+        "SingleMu_165970-167913_2011A_Nov08_RAWRECO":    TaskDef(""),
+        "SingleMu_170722-173198_2011A_Nov08_RAWRECO":    TaskDef(""),
+        "SingleMu_173236-173692_2011A_Nov08_RAWRECO":    TaskDef(""),
+        "SingleMu_175832-180252_2011B_Nov19_RAWRECO":    TaskDef(""),
+
+        "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW":    TaskDef("")
+        }
+
+    addTauLegSkim_44X("v44_v5", datasets, definitions)
+
 def addMetLegSkim_44X(version, datasets, updateDefinitions):
     mcTrigger = "HLT_MediumIsoPFTau35_Trk20_v1"
     def TaskDefMC(**kwargs):
