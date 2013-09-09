@@ -2819,12 +2819,6 @@ class DatasetMerged:
     # DatasetRootHistoMergedData works also for pseudo
     def getDatasetRootHisto(self, name, **kwargs):
         wrappers = [d.getDatasetRootHisto(name, **kwargs) for d in self.datasets]
-        # Catch returned error messages
-        if wrappers != None:
-            for w in wrappers:
-                if isinstance(w,str):
-                    return w
-        # No errors, continue as usual
         if self.isMC():
             return DatasetRootHistoMergedMC(wrappers, self)
         elif self.isData():
