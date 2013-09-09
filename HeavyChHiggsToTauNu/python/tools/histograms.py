@@ -547,6 +547,10 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
 # axis automatically. It is recommended to call this every time
 # something is drawn with an option "Z"
 def updatePaletteStyle(histo):
+    if not hasattr(histo, "GetListOfFunctions"):
+        # Applies at least to THStack, which is not applicable for Z axis
+        return None
+
     ROOT.gPad.Update()
     paletteAxis = histo.GetListOfFunctions().FindObject("palette")
     if paletteAxis == None:
