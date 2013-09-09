@@ -95,49 +95,12 @@ void HPlusPileUpNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
     if(!top) throw cms::Exception("Assert") << "Got null from ttGenEvent.top() in " << __FILE__ << ":" << __LINE__;
     if(!topBar) throw cms::Exception("Assert") << "Got null from ttGenEvent.topBar() in " << __FILE__ << ":" << __LINE__;
 
-
     fTopPt = top->pt();
     fTopBarPt = topBar->pt();
 
-    // First as from TtGenEvent the topology while treating taus as
-    // hadrons
-    if(hGenEvent->isFullHadronic(true)) fTopEventClass = 0;
-    else if(hGenEvent->isSemiLeptonic(true)) fTopEventClass = 1;
-    else if(hGenEvent->isFullLeptonic(true)) fTopEventClass = 2;
-    else throw cms::Exception("Assert") << "ttGenEvent is not FullHadronic, SemiLeptonic, nor FullLeptonic (tau is not treated as lepton) in " << __FILE__ << ":" << __LINE__;
-
-    // Then ask for taus, theck their decay, and modify the event class accordingly
-    if(const reco::GenParticle *tauPlus = hGenEvent->tauPlus()) {
-      edm::LogVerbatim("Ntuple") << "Has tau plus";
-      const reco::GenParticle *d = HPlus::GenParticleTools::findTauDaughter(tauPlus);
-      if(d) {
-        edm::LogVerbatim("Ntuple") << "  has daughter " << d->pdgId();
-        int id = std::abs(d->pdgId());
-        if(id == 11 || id == 13) {
-          ++fTopEventClass;
-        }
-      }
-      else {
-        fTopEventClass += 10;
-      }
-    }
-    if(const reco::GenParticle *tauMinus = hGenEvent->tauMinus()) {
-      edm::LogVerbatim("Ntuple") << "Has tau minus";
-      const reco::GenParticle *d = HPlus::GenParticleTools::findTauDaughter(tauMinus);
-      if(d) {
-        edm::LogVerbatim("Ntuple") << "  has daughter " << d->pdgId();
-        int id = std::abs(d->pdgId());
-        if(id == 11 || id == 13) {
-          ++fTopEventClass;
-        }
-      }
-      else {
-        fTopEventClass += 10;
-      }
-    }
-
-    edm::LogVerbatim("Ntuple") << "Top event class (number of leptons) " << fTopEventClass;
-    hGenEvent->print();
+    fTopEventClass = HPlus::GenParticleTools::calculateTTBarNumberOfLeptons(*hGenEvent);
+    //edm::LogVerbatim("Ntuple") << "Top event class (number of leptons) " << fTopEventClass;
+    //hGenEvent->print();
   }
 
   fTree->Fill();

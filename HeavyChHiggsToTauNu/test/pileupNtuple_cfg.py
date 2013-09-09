@@ -34,6 +34,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 #process.MessageLogger.cerr.FwkReport.reportEvery = 1
 #process.MessageLogger.categories.append("TopGenEvent")
 #process.MessageLogger.categories.append("Ntuple")
+#process.MessageLogger.categories.append("GenParticleTools")
 
 process.pileupNtuple = cms.EDAnalyzer("HPlusPileUpNtupleAnalyzer",
     puSummarySrc = cms.InputTag("addPileupInfo"),
