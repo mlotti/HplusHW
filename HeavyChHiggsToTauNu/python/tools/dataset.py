@@ -1986,6 +1986,8 @@ class Dataset:
                     raise Exception("Mismatched values in %s, label %s, got %f from file %s, and %f from file %s" % (name, key, value, refFile.GetName(), valnew, newFile.GetName()))
 
         for f in self.files:
+            if not f.IsOpen():
+                raise Exception("File %s of dataset %s has been closed! Maybe this Dataset has been removed without 'close=False'?" % (f.GetName(), self.name))
             configInfo = f.Get("configInfo")
             if configInfo == None:
                 raise Exception("configInfo directory is missing from file %s" % f.GetName())
