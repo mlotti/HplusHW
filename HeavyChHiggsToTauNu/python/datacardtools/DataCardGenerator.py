@@ -64,6 +64,8 @@ class DatasetMgrCreatorManager:
                 myDsetMgr.loadLuminosities()
                 myLuminosity = 0.0
                 myDataDatasets = myDsetMgr.getDataDatasets()
+                #print "datasets:",myDsetMgr.getDatasetNames()
+                #print "datasets:",myDsetMgr.getAllDatasetNames()
                 for d in myDataDatasets:
                     myLuminosity += d.getLuminosity()
                 self._luminosities.append(myLuminosity)
