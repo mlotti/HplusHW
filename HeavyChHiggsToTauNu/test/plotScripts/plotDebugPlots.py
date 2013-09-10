@@ -161,6 +161,9 @@ def doPlots(myDsetMgr, opts, mySuffix):
                 if "transverseMass" in path:
                     if "BTagging" in plotDir or "Selected" in plotDir:
                         args["customizeBeforeFrame"] = lambda p: plots.partiallyBlind(p, maxShownValue=60)
+                elif "fullMass" in path:
+                    if "JetSelection" in plotDir or "MET" in plotDir or "BTagging" in plotDir or "Selected" in plotDir:
+                        args["customizeBeforeFrame"] = lambda p: plots.partiallyBlind(p, minShownValue=80, maxShownValue=180, invert=True)
                 elif "Selected" in plotDir:
                     args["fullyBlinded"] = True
             if "FakeTaus" in plotDir:
