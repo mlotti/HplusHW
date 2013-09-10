@@ -89,6 +89,16 @@ def main(opts):
     for o in output:
         f.write(o)
         f.write("\n")
+    f.close()
+
+    f = open(os.path.join(opts.output, "command.txt"), "w")
+    def fmt(s):
+        if " " in s:
+            return '"%s"' % s
+        return s
+    f.write(" ".join([fmt(s) for s in sys.argv]))
+    f.write("\n")
+    f.close()
 
     print "Plots copied and HTML generated to", opts.output
     return 0
