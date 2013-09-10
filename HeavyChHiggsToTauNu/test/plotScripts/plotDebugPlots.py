@@ -45,14 +45,17 @@ mcOnlyLumi = 5000 # pb
 # main function
 def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     # Make directory for output
-    mySuffix = "debugPlots_%s_%s_%s"%(era,searchMode,optimizationMode)
+    if optimizationMode is None:
+        mySuffix = "debugPlots_%s_%s"%(era,searchMode)
+    else:
+        mySuffix = "debugPlots_%s_%s_%s"%(era,searchMode,optimizationMode)
     if os.path.exists(mySuffix):
         shutil.rmtree(mySuffix)
     os.mkdir(mySuffix)
     # Create dataset manager
     myDsetMgr = signalDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
     if mcOnly:
-        myDsetMgr.remove(myDsetMgr.getDataDatasetNames())
+        myDsetMgr.remove(myDsetMgr.getDataDatasetNames(), close=False)
         histograms.cmsTextMode = histograms.CMSMode.SIMULATION
     else:
         myDsetMgr.loadLuminosities()
@@ -60,12 +63,12 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
 
     # Take QCD from data
     if opts.noMCQCD:
-        myDsetMgr.remove(filter(lambda name: "QCD" in name, myDsetMgr.getAllDatasetNames()))
+        myDsetMgr.remove(filter(lambda name: "QCD" in name, myDsetMgr.getAllDatasetNames()), close=False)
     # Remove signal
     if opts.noSignal:
-        myDsetMgr.remove(filter(lambda name: "TTToHplus" in name, myDsetMgr.getAllDatasetNames()))
-        myDsetMgr.remove(filter(lambda name: "Hplus_taunu" in name, myDsetMgr.getAllDatasetNames()))
-        myDsetMgr.remove(filter(lambda name: "HplusTB" in name, myDsetMgr.getAllDatasetNames()))
+        myDsetMgr.remove(filter(lambda name: "TTToHplus" in name, myDsetMgr.getAllDatasetNames()), close=False)
+        myDsetMgr.remove(filter(lambda name: "Hplus_taunu" in name, myDsetMgr.getAllDatasetNames()), close=False)
+        myDsetMgr.remove(filter(lambda name: "HplusTB" in name, myDsetMgr.getAllDatasetNames()), close=False)
 
     plots.mergeRenameReorderForDataMC(myDsetMgr)
 
@@ -76,11 +79,11 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     if not opts.noSignal:
         print "norm=",myDsetMgr.getDataset("TTToHplusBWB_M120").getNormFactor()
 
-    myDsetMgr.remove(filter(lambda name: "QCD_Pt20_MuEnriched" in name, myDsetMgr.getAllDatasetNames()))
+    myDsetMgr.remove(filter(lambda name: "QCD_Pt20_MuEnriched" in name, myDsetMgr.getAllDatasetNames()), close=False)
     # Remove signals other than M120
-    myDsetMgr.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, myDsetMgr.getAllDatasetNames()))
-    myDsetMgr.remove(filter(lambda name: "Hplus_taunu" in name, myDsetMgr.getAllDatasetNames()))
-    myDsetMgr.remove(filter(lambda name: "HplusTB" in name, myDsetMgr.getAllDatasetNames()))
+    myDsetMgr.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, myDsetMgr.getAllDatasetNames()), close=False)
+    myDsetMgr.remove(filter(lambda name: "Hplus_taunu" in name, myDsetMgr.getAllDatasetNames()), close=False)
+    myDsetMgr.remove(filter(lambda name: "HplusTB" in name, myDsetMgr.getAllDatasetNames()), close=False)
     
     histograms.createLegend.moveDefaults(dx=-0.05)
     histograms.createSignalText.set(xmin=0.4, ymax=0.93, mass=120)
@@ -104,7 +107,7 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     doPlots(myDsetMgr, opts, mySuffix)
 
     # Print counters
-    doCounters(myDsetMgr)
+    doCounters(myDsetMgr, mySuffix)
     print "Results saved in directory: %s"%mySuffix
 
 def doPlots(myDsetMgr, opts, mySuffix):
@@ -153,17 +156,19 @@ def doPlots(myDsetMgr, opts, mySuffix):
     def createDrawCommonPlot(path, **kwargs):
         for plotDir in myCommonPlotDirs:
             args = {}
-            args.update(kwargs)
-            createDrawPlot(path%plotDir, **args)
             
-            #if "transverseMass" in path:
-                #if "BTagging" in plotDir or "Selected" in plotDir:
-                    #args["customizeBeforeFrame"] = lambda p: plots.partiallyBlind(p, maxShownValue=60)
-            #elif "Selected" in plotDir:
-                #args["fullyBlinded"] = True
-            #if "FakeTaus" in plotDir:
-                #args.update(mcArgs)
-            #createDrawPlot(path%plotDir, **args)
+            if opts.blind:
+                if "transverseMass" in path:
+                    if "BTagging" in plotDir or "Selected" in plotDir:
+                        args["customizeBeforeFrame"] = lambda p: plots.partiallyBlind(p, maxShownValue=60)
+                elif "fullMass" in path:
+                    if "JetSelection" in plotDir or "MET" in plotDir or "BTagging" in plotDir or "Selected" in plotDir:
+                        args["customizeBeforeFrame"] = lambda p: plots.partiallyBlind(p, minShownValue=80, maxShownValue=180, invert=True)
+                elif "Selected" in plotDir:
+                    args["fullyBlinded"] = True
+            if "FakeTaus" in plotDir:
+                args.update(mcArgs)
+            createDrawPlot(path%plotDir, **args)
 
     #phiBinWidth = 2*3.14159/72
     phiBinWidth = 2*3.14159/36
@@ -383,9 +388,11 @@ def doCounters(myDsetMgr, mySuffix=""):
 #    eventCounter.getMainCounter().appendRow("MET > 70", treeDraw.clone(selection="met_p4.Et() > 70"))
 
     ewkDatasets = [
-        "WJets", "W1Jets", "W2Jets", "W3Jets", "W4Jets", "TTJets",
+        "WJets", "TTJets",
         "DYJetsToLL", "SingleTop", "Diboson"
         ]
+    if myDsetMgr.hasDataset("W1Jets"):
+        ewkDatasets.extend(["W1Jets", "W2Jets", "W3Jets", "W4Jets"])
 
     if mcOnly:
         eventCounter.normalizeMCToLuminosity(mcOnlyLumi)
@@ -394,31 +401,37 @@ def doCounters(myDsetMgr, mySuffix=""):
     print "============================================================"
     print mySuffix
     print "============================================================"
-    print "Main counter (MC normalized by collision data luminosity)"
+    out = open(os.path.join(mySuffix, "counters.txt"), "w")
+    def printAndSave(line):
+        print line
+        out.write(line)
+        out.write("\n")
+
+    printAndSave("Main counter (MC normalized by collision data luminosity)")
     mainTable = eventCounter.getMainCounterTable()
     mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
     # Default
 #    cellFormat = counter.TableFormatText()
     # No uncertainties
     cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=False))
-    print mainTable.format(cellFormat)
+    printAndSave(mainTable.format(cellFormat))
 
 
 
 
-#    print eventCounter.getSubCounterTable("tauIDTauSelection").format()
-    print eventCounter.getSubCounterTable("TauIDPassedEvt::TauSelection_HPS").format(cellFormat)
-    print eventCounter.getSubCounterTable("TauIDPassedJets::TauSelection_HPS").format(cellFormat)
-    print eventCounter.getSubCounterTable("b-tagging").format(cellFormat)
-    print eventCounter.getSubCounterTable("Jet selection").format(cellFormat)
-    print eventCounter.getSubCounterTable("Jet main").format(cellFormat)    
-    print eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat)
-    print eventCounter.getSubCounterTable("MuonSelection").format(cellFormat)
-    print eventCounter.getSubCounterTable("MCinfo for selected events").format(cellFormat) 
-    print eventCounter.getSubCounterTable("ElectronSelection").format(cellFormat)  
-#    print eventCounter.getSubCounterTable("top").format(cellFormat) 
+#    printAndSave(eventCounter.getSubCounterTable("tauIDTauSelection").format())
+    printAndSave(eventCounter.getSubCounterTable("TauIDPassedEvt::TauSelection_HPS").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("TauIDPassedJets::TauSelection_HPS").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("b-tagging").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("Jet selection").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("Jet main").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("MuonSelection").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("MCinfo for selected events").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("ElectronSelection").format(cellFormat))
+#    printAndSave(eventCounter.getSubCounterTable("top").format(cellFormat))
 
-    
+    out.close()
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))
 #    print eventCounter.getMainCounterTable().format(latexFormat)
     
@@ -429,6 +442,7 @@ if __name__ == "__main__":
     myModuleSelector.addParserOptions(parser)
     parser.add_option("--noMCQCD", dest="noMCQCD", action="store_true", default=False, help="remove MC QCD")
     parser.add_option("--noSignal", dest="noSignal", action="store_true", default=False, help="remove MC QCD")
+    parser.add_option("--blind", dest="blind", action="store_true", default=False, help="Blind sensitive plots")
     (opts, args) = parser.parse_args()
 
     # Get dataset manager creator and handle different era/searchMode/optimizationMode combinations
@@ -437,13 +451,23 @@ if __name__ == "__main__":
     myModuleSelector.doSelect(opts)
 
     # Arguments are ok, proceed to run
-    myChosenModuleCount = len(myModuleSelector.getSelectedEras())*len(myModuleSelector.getSelectedSearchModes())*len(myModuleSelector.getSelectedOptimizationModes())
-    print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes)"%(myChosenModuleCount,len(myModuleSelector.getSelectedEras()),len(myModuleSelector.getSelectedSearchModes()),len(myModuleSelector.getSelectedOptimizationModes()))
+    nOptModes = len(myModuleSelector.getSelectedOptimizationModes())
+    if nOptModes == 0:
+        myChosenModuleCount = len(myModuleSelector.getSelectedEras())*len(myModuleSelector.getSelectedSearchModes())
+        print "Will run over %d modules (%d eras x %d searchModes)"%(myChosenModuleCount,len(myModuleSelector.getSelectedEras()),len(myModuleSelector.getSelectedSearchModes()))
+    else:
+        myChosenModuleCount = len(myModuleSelector.getSelectedEras())*len(myModuleSelector.getSelectedSearchModes())*nOptModes
+        print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes)"%(myChosenModuleCount,len(myModuleSelector.getSelectedEras()),len(myModuleSelector.getSelectedSearchModes()), nOptModes)
     myCount = 1
     for era in myModuleSelector.getSelectedEras():
         for searchMode in myModuleSelector.getSelectedSearchModes():
-            for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
-                print "%sProcessing module %d/%d: era=%s searchMode=%s optimizationMode=%s%s"%(HighlightStyle(), myCount, myChosenModuleCount, era, searchMode, optimizationMode, NormalStyle())
-                main(opts,signalDsetCreator,era,searchMode,optimizationMode)
+           if nOptModes == 0:
+                print "%sProcessing module %d/%d: era=%s searchMode=%s%s"%(HighlightStyle(), myCount, myChosenModuleCount, era, searchMode, NormalStyle())
+                main(opts,signalDsetCreator,era,searchMode, None)
                 myCount += 1
+           else:
+               for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
+                   print "%sProcessing module %d/%d: era=%s searchMode=%s optimizationMode=%s%s"%(HighlightStyle(), myCount, myChosenModuleCount, era, searchMode, optimizationMode, NormalStyle())
+                   main(opts,signalDsetCreator,era,searchMode,optimizationMode)
+                   myCount += 1
     print "\n%sPlotting done.%s"%(HighlightStyle(),NormalStyle())

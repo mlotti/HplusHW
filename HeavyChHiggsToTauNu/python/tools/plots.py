@@ -989,8 +989,9 @@ def _createHisto(rootObject, **kwargs):
 # \param plot              PlotBase (or derived) object
 # \param maxShownValue     If not None, the maximum value to be shown
 # \param minShownValue     If not None, the minimum value to be shown
+# \param invert            Invert the selection (from [min, max] to [-inf, min], [max, inf])
 # \param moveBlinededText  Dictionary for movinge the blinding text (forwarded to histograms.PlotTextBox.move())
-def partiallyBlind(plot, maxShownValue=None, minShownValue=None, moveBlindedText={}):
+def partiallyBlind(plot, maxShownValue=None, minShownValue=None, invert=False, moveBlindedText={}):
     if not plot.histoMgr.hasHisto("Data"):
         return
 
@@ -1008,8 +1009,12 @@ def partiallyBlind(plot, maxShownValue=None, minShownValue=None, moveBlindedText
         lastShownBin = th1.FindFixBin(maxShownValue)-1
     
     for i in xrange(1, th1.GetNbinsX()+1):
-        if i >= firstShownBin and i <= lastShownBin:
-            continue
+        if invert:
+            if i<= firstShownBin or i >= lastShownBin:
+                continue
+        else:
+            if i >= firstShownBin and i <= lastShownBin:
+                continue
 
         th1.SetBinContent(i, 0)
         th1.SetBinError(i, 0)
