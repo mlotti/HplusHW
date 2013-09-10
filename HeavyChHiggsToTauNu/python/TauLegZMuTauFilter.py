@@ -18,7 +18,7 @@ muonSelection += "&& globalTrack().normalizedChi2() < 10.0"
 muonSelection += "&& globalTrack().hitPattern().numberOfValidMuonHits() > 0"
 
 muTauPairs = cms.EDProducer("DeltaRMinCandCombiner",
-    decay = cms.string('selectedPatMuons@+ selectedPatTausHpsPFTau@-'),
+    decay = cms.string('selectedPatMuons@+ selectedPatTaus@-'),
     checkCharge = cms.bool(False),
     cut = cms.string(''),
     name = cms.string('muTauCandidates'),
@@ -30,13 +30,13 @@ def customize(process):
     process.path += process.mutauSequence
     
 def addMuTauSelection(process):
-    process.selectedPatTausHpsPFTau.cut = hpsTauSelection
+    process.selectedPatTaus.cut = hpsTauSelection
     process.selectedPatMuons.cut = muonSelection  
 
     process.zmutauAllEvents = cms.EDProducer("EventCountProducer")
 
     process.selectedTauFilter = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag("selectedPatTausHpsPFTau"),
+        src = cms.InputTag("selectedPatTaus"),
         minNumber = cms.uint32(1),
     )
     process.selectedMuonFilter = cms.EDFilter("CandViewCountFilter",
