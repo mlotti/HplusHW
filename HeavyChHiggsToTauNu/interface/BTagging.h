@@ -28,29 +28,6 @@ namespace HPlus {
   public:
     class Data; // Forward declare because it is used in ScaleFactorTable interface
 
-//     struct NumberOfJetsPerBin {
-//       std::vector<int> nTagB; // Number of b-tagged b- and c-flavor jets. C-jets are counted double as this is the simplest way of obtaining the correct uncertainty for them.
-//       std::vector<int> nTagG; // Number of b-tagged gluon jets
-//       std::vector<int> nTagUDS; // Number of b-tagged u/d/s-jets
-//       std::vector<int> nNoTagB; // Number of not b-tagged b- and c-flavor jets. C-jets are counted double (see above)
-//       std::vector<int> nNoTagG; // Number of not b-tagged gluon jets
-//       std::vector<int> nNoTagUDS; // Number of not b-tagged u/d/s-jets
-
-//       void initialize(size_t s) {
-//         size_t i = 0;
-// 	while (i < s) {
-// 	  nTagB.push_back(0);
-// 	  nTagG.push_back(0);
-// 	  nTagUDS.push_back(0);
-// 	  nNoTagB.push_back(0);
-// 	  nNoTagG.push_back(0);
-// 	  nNoTagUDS.push_back(0);
-// 	  i++;
-// 	}
-//       }
-//     };
-
-
   private:
     class EfficiencyTable; // Forward declared because ScaleFactorTable interface uses it
 
@@ -60,10 +37,11 @@ namespace HPlus {
       ~ScaleFactorTable();
 
       void setScaleFactorTable(const std::vector<double>& ptBinTable, const char* SFFunctionExpression, const std::vector<double>& uncertaintyTable);
+      void setScaleFactorTable(TF1* scaleFactorFunction, TF1* sfUncertUpFunction, TF1* sfUncertDownFunction);
       void setScaleFactorFunction(const char* expression);
       void setScaleFactorUncertaintyFunctions(const char* expressionUp, const char* expressionDown);
 
-      void initializeJetTable();
+      void resetJetTable();
       void addUncertaintyTagged(double pT);
       void addUncertaintyTagged(double pT, double uncertaintyFactor);
       void addUncertaintyUntagged(double pT, EfficiencyTable& efficiencyTable);
@@ -77,7 +55,9 @@ namespace HPlus {
 
       size_t obtainIndex(double pt) { return obtainIndex(fPtBins, pt); }
 
-      double calculateRelativeUncertaintySquared();
+      double calculateRelativeUncertaintySquared(bool up);
+
+      void printJetTableForValidation();
 
     private:
       static size_t obtainIndex(const std::vector<double>& table, double pt);
@@ -103,14 +83,14 @@ namespace HPlus {
       ~EfficiencyTable();
 
       void setEfficiencyTable(const std::vector<double>& ptBinTable, const std::vector<double>& efficiencyTable, const std::vector<double>& uncertaintyUpTable, const std::vector<double>& uncertaintyDownTable);
-      void initializeJetTable();
+      void resetJetTable();
       void addJetSFUncertaintyTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable);
 
       double getEfficiency(double pT) const;
 
       size_t obtainIndex(double pt) { return obtainIndex(fPtBins, pt); }
 
-      double calculateRelativeUncertaintySquared();
+      double calculateRelativeUncertaintySquared(bool up);
 
     private:
       static size_t obtainIndex(const std::vector<double>& table, double pt);
@@ -123,7 +103,6 @@ namespace HPlus {
       // Vectors for storing jet info for the calculation of the weight uncertainty
       std::vector<double> fPerBinUncertaintyUp;
       std::vector<double> fPerBinUncertaintyDown;
-
     };
 
     struct PerJetInfo {
@@ -157,8 +136,11 @@ namespace HPlus {
       const int getBJetCount() const { return iNBtags; }
       const double getMaxDiscriminatorValue() const { return fMaxDiscriminatorValue; }
       const double getScaleFactor() const { return fEventScaleFactor; }
-      const double getScaleFactorAbsoluteUncertainty() const { return fEventScaleFactorAbsoluteUncertainty; }
-      const double getScaleFactorRelativeUncertainty() const { return fEventScaleFactorRelativeUncertainty; }
+      const double getScaleFactorAbsoluteUncertainty_up() const { return fEventSFAbsUncert_up; }
+      const double getScaleFactorAbsoluteUncertainty_down() const { return fEventSFAbsUncert_down; }
+      const double getScaleFactorRelativeUncertainty_up() const { return fEventSFRelUncert_up; }
+      const double getScaleFactorRelativeUncertainty_down() const { return fEventSFRelUncert_down; }
+
       const bool hasGenuineBJets() const;
 
       friend class BTagging;
@@ -171,8 +153,10 @@ namespace HPlus {
       int iNBtags;
       double fMaxDiscriminatorValue;
       double fEventScaleFactor;
-      double fEventScaleFactorAbsoluteUncertainty;
-      double fEventScaleFactorRelativeUncertainty;
+      double fEventSFAbsUncert_up;
+      double fEventSFAbsUncert_down;
+      double fEventSFRelUncert_up;
+      double fEventSFRelUncert_down;
     };
 
     BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -188,7 +172,7 @@ namespace HPlus {
     //PerJetInfo getPerJetInfo(PerJetInfo& bTaggingInfo) const { return bTaggingInfo; } //// Get rid of this function (still required by some plugin)
     void calculateJetSFAndUncertaintyTerm(edm::Ptr<pat::Jet>& iJet, bool isBTagged, PerJetInfo& info, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) const;
     double calculateEventScaleFactor(PerJetInfo& bTaggingInfo);
-    double calculateRelativeEventScaleFactorUncertainty(ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag);
+    double calculateRelativeEventScaleFactorUncertainty(bool up, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag);
     
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
@@ -241,14 +225,12 @@ namespace HPlus {
     WrappedTH1 *hDiscriminator;
     WrappedTH1 *hPt;
     WrappedTH1 *hEta;
-    WrappedTH1 *hDiscriminatorB;
     WrappedTH1 *hPtBCSVT;
     WrappedTH1 *hEtaBCSVT;
     WrappedTH1 *hPtBCSVM;
     WrappedTH1 *hEtaBCSVM;
     WrappedTH1 *hPtBnoTag;
     WrappedTH1 *hEtaBnoTag;
-    WrappedTH1 *hDiscriminatorQ;
     WrappedTH1 *hPtQCSVT;
     WrappedTH1 *hEtaQCSVT;
     WrappedTH1 *hPtQCSVM;

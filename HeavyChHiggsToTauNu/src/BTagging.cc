@@ -1,7 +1,9 @@
 /*
   PURPOSE
   Loop over jets in event and apply a b-tagging discriminator. If an event contains at least one b-tagged jet, it will be flagged as having passed.
-  If the event is MC, its current weight is multiplied by a b-tagging scale factor (SF). See also BTaggingScaleFactorFromDB.cc.
+  If the event is MC, an event scale factor is calculated using per-jet scale factors and MC tagging efficiencies. The scale factors come from a
+  database maintained by the B-tagging & Vertexing POG and the efficiencies are measured by us (see BTaggingEfficiencyInMC.cc). Both are hard-coded
+  into this file. The event weight is multiplied with the event scale factor (in the main analysis file, e.g. SignalAnalysis.cc).
 */
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
@@ -49,6 +51,9 @@ namespace HPlus {
   namespace SFBins {
     double ptmin[] = {30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500};
   }
+  namespace EffBins {
+    double ptmin[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
+  }
   namespace CSVL {
     // B-tagging scale factors
     // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt
@@ -77,16 +82,25 @@ namespace HPlus {
     TF1 *SFl_min = new TF1("SFlightMin","((0.956023+(0.000825106*x))+(-3.18828e-06*(x*x)))+(2.81787e-09*(x*(x*x)))", 20.,670.);
     TF1 *SFl_max = new TF1("SFlightMax","((1.11272+(0.00110104*x))+(-4.11956e-06*(x*x)))+(3.65263e-09*(x*(x*x)))", 20.,670.);
     // B->B efficiencies
-    double ptBinLowEdges_BtoB[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
-    double eff_BtoB[] = {0.821023, 0.844312, 0.841045, 0.849044, 0.848066, 0.853467, 0.847721, 0.848242, 0.849008, 0.852407, 0.852413, 0.843951, 0.820661, 0.826063, 0.773984, 0.756426, 0.633727};
-    double effUncertainty_BtoB[] = {0.005739, 0.004294, 0.004514, 0.004737, 0.005098, 0.005450, 0.006033, 0.006512, 0.005161, 0.006037, 0.007169, 0.006949, 0.010137, 0.015885, 0.027706, 0.040550, 0.045388};
+    // From ttbar (TTJets) sample with Rtau cut deactivated
+    double eff_BtoB_byPt[] = {0.000000, 0.843692, 0.841796, 0.847828, 0.848339, 0.851303, 0.848301, 0.847911, 0.849353, 0.853927, 0.849528, 0.844153, 0.819833, 0.827717, 0.776372, 0.758767, 0.631211};
+    double effUncertUp_BtoB_byPt[] = {0.000000, 0.004269, 0.004465, 0.004706, 0.005054, 0.005428, 0.005960, 0.006454, 0.005105, 0.005941, 0.007159, 0.006879, 0.010042, 0.015658, 0.027454, 0.040231, 0.045057};
+    double effUncertDown_BtoB_byPt[] = {0.000000, 0.004269, 0.004465, 0.004706, 0.005054, 0.005428, 0.005960, 0.006454, 0.005105, 0.005941, 0.007159, 0.006879, 0.010042, 0.015658, 0.027454, 0.040231, 0.045057};
     // C->B efficiencies
-
-    // UDS->B efficiencies
-
+    // From ttbar (TTJets) sample with Rtau cut deactivated
+    double eff_CtoB_byPt[] = {0.000000, 0.512153, 0.435582, 0.431783, 0.437036, 0.401122, 0.398187, 0.387372, 0.405418, 0.403269, 0.365568, 0.394243, 0.429448, 0.358584, 0.301526, 0.313177, 0.299944};
+    double effUncertUp_CtoB_byPt[] = {0.000000, 0.012331, 0.013119, 0.013576, 0.014845, 0.015599, 0.016915, 0.018294, 0.014104, 0.016224, 0.019251, 0.017779, 0.024536, 0.034436, 0.048572, 0.059639, 0.055166};
+    double effUncertDown_CtoB_byPt[] = {0.000000, 0.012331, 0.013119, 0.013576, 0.014845, 0.015599, 0.016915, 0.018294, 0.014104, 0.016224, 0.019251, 0.017779, 0.024536, 0.034436, 0.048572, 0.059639, 0.055166};
     // G->B efficiencies
-    double eff_GtoB[] = {0.259164, 0.240507, 0.151367, 0.125611, 0.116589, 0.121143, 0.107907, 0.090414, 0.082867, 0.080655, 0.081918, 0.094026, 0.101960, 0.100259, 0.077350, 0.072080, 0.094000};
-    double effUncertainty_GtoB[] = {0.004679, 0.005317, 0.005481, 0.005952, 0.006675, 0.007612, 0.008025, 0.008179, 0.006400, 0.007538, 0.008682, 0.008497, 0.011539, 0.015783, 0.017536, 0.025889, 0.025597};
+    // From W+jets (WJets) sample with Rtau cut deactivated
+    double eff_GtoB_byPt[] = {0.000000, 0.207036, 0.138837, 0.117500, 0.091949, 0.083768, 0.105878, 0.097636, 0.053914, 0.074936, 0.064921, 0.080986, 0.099322, 0.093154, 0.097792, 0.154462, 0.091716};
+    double effUncertUp_GtoB_byPt[] = {0.000000, 0.008780, 0.009324, 0.010362, 0.010678, 0.013155, 0.015497, 0.015083, 0.008407, 0.012636, 0.011789, 0.011469, 0.016167, 0.018813, 0.023252, 0.040865, 0.026904};
+    double effUncertDown_GtoB_byPt[] = {0.000000, 0.008780, 0.009324, 0.010362, 0.010678, 0.013155, 0.015497, 0.015083, 0.008407, 0.012636, 0.011789, 0.011469, 0.016167, 0.018813, 0.023252, 0.040865, 0.026904};
+    // UDS->B efficiencies
+    // From W+jets (WJets) sample with Rtau cut deactivated
+    double eff_UDStoB_byPt[] = {0.000000, 0.213758, 0.135864, 0.127671, 0.126380, 0.098389, 0.109508, 0.106269, 0.100095, 0.085032, 0.101848, 0.113422, 0.112541, 0.105453, 0.128996, 0.108739, 0.099718};
+    double effUncertUp_UDStoB_byPt[] = {0.000000, 0.013189, 0.012238, 0.013247, 0.014101, 0.013437, 0.017142, 0.016619, 0.012532, 0.013068, 0.014022, 0.011916, 0.012546, 0.015593, 0.021723, 0.027790, 0.021730};
+    double effUncertDown_UDStoB_byPt[] = {0.000000, 0.013189, 0.012238, 0.013247, 0.014101, 0.013437, 0.017142, 0.016619, 0.012532, 0.013068, 0.014022, 0.011916, 0.012546, 0.015593, 0.021723, 0.027790, 0.021730};
   }
   namespace CSVM {
     // B-tagging scale factors
@@ -116,16 +130,25 @@ namespace HPlus {
     TF1 *SFl_min = new TF1("SFlightMin","((0.962627+(0.000448344*x))+(-1.25579e-06*(x*x)))+(4.82283e-10*(x*(x*x)))", 20.,670.);
     TF1 *SFl_max = new TF1("SFlightMax","((1.12368+(0.00124806*x))+(-3.9032e-06*(x*x)))+(2.80083e-09*(x*(x*x)))", 20.,670.);
     // B->B efficiencies
-    double ptBinLowEdges_BtoB[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
-    double eff_BtoB[] = {0.821023, 0.844312, 0.841045, 0.849044, 0.848066, 0.853467, 0.847721, 0.848242, 0.849008, 0.852407, 0.852413, 0.843951, 0.820661, 0.826063, 0.773984, 0.756426, 0.633727};
-    double effUncertainty_BtoB[] = {0.005739, 0.004294, 0.004514, 0.004737, 0.005098, 0.005450, 0.006033, 0.006512, 0.005161, 0.006037, 0.007169, 0.006949, 0.010137, 0.015885, 0.027706, 0.040550, 0.045388};
+    // From ttbar (TTJets) sample with Rtau cut deactivated
+    double eff_BtoB_byPt[] = {0.000000, 0.605497, 0.660818, 0.696156, 0.717718, 0.721635, 0.725644, 0.733542, 0.742611, 0.754529, 0.733295, 0.720926, 0.693444, 0.666824, 0.606797, 0.570024, 0.427823};
+    double effUncertUp_BtoB_byPt[] = {0.000000, 0.005743, 0.005794, 0.006011, 0.006346, 0.006841, 0.007410, 0.007930, 0.006243, 0.007234, 0.008858, 0.008525, 0.012013, 0.019713, 0.032342, 0.046238, 0.046291};
+    double effUncertDown_BtoB_byPt[] = {0.000000, 0.005743, 0.005794, 0.006011, 0.006346, 0.006841, 0.007410, 0.007930, 0.006243, 0.007234, 0.008858, 0.008525, 0.012013, 0.019713, 0.032342, 0.046238, 0.046291};
     // C->B efficiencies
-
-    // UDS->B efficiencies
-
+    // From ttbar (TTJets) sample with Rtau cut deactivated
+    double eff_CtoB_byPt[] = {0.000000, 0.176809, 0.172700, 0.175568, 0.202081, 0.198587, 0.187493, 0.215256, 0.203682, 0.214922, 0.214593, 0.216126, 0.214556, 0.193903, 0.122043, 0.143678, 0.126606};
+    double effUncertUp_CtoB_byPt[] = {0.000000, 0.009417, 0.009991, 0.010394, 0.012058, 0.012682, 0.013441, 0.015478, 0.011531, 0.013545, 0.016377, 0.015065, 0.020521, 0.028282, 0.034813, 0.044718, 0.040161};
+    double effUncertDown_CtoB_byPt[] = {0.000000, 0.009417, 0.009991, 0.010394, 0.012058, 0.012682, 0.013441, 0.015478, 0.011531, 0.013545, 0.016377, 0.015065, 0.020521, 0.028282, 0.034813, 0.044718, 0.040161};
     // G->B efficiencies
-    double eff_GtoB[] = {0.259164, 0.240507, 0.151367, 0.125611, 0.116589, 0.121143, 0.107907, 0.090414, 0.082867, 0.080655, 0.081918, 0.094026, 0.101960, 0.100259, 0.077350, 0.072080, 0.094000};
-    double effUncertainty_GtoB[] = {0.004679, 0.005317, 0.005481, 0.005952, 0.006675, 0.007612, 0.008025, 0.008179, 0.006400, 0.007538, 0.008682, 0.008497, 0.011539, 0.015783, 0.017536, 0.025889, 0.025597};
+    // From W+jets (WJets) sample with Rtau cut deactivated
+    double eff_GtoB_byPt[] = {0.000000, 0.018381, 0.010355, 0.009945, 0.006411, 0.006561, 0.012621, 0.013704, 0.010578, 0.019309, 0.005789, 0.011435, 0.020790, 0.012862, 0.015879, 0.015702, 0.030737};
+    double effUncertUp_GtoB_byPt[] = {0.000000, 0.003093, 0.002276, 0.002976, 0.002281, 0.003279, 0.006167, 0.006239, 0.004320, 0.006817, 0.003077, 0.005404, 0.008512, 0.005531, 0.008956, 0.011048, 0.013869};
+    double effUncertDown_GtoB_byPt[] = {0.000000, 0.003093, 0.002276, 0.002976, 0.002281, 0.003279, 0.006167, 0.006239, 0.004320, 0.006817, 0.003077, 0.005404, 0.008512, 0.005531, 0.008956, 0.011048, 0.013869};
+    // UDS->B efficiencies
+    // From W+jets (WJets) sample with Rtau cut deactivated
+    double eff_UDStoB_byPt[] = {0.000000, 0.009963, 0.015774, 0.010952, 0.018218, 0.003307, 0.019630, 0.009050, 0.011548, 0.012703, 0.015178, 0.013060, 0.009178, 0.012344, 0.014516, 0.031033, 0.019454};
+    double effUncertUp_UDStoB_byPt[] = {0.000000, 0.003213, 0.004446, 0.004312, 0.005569, 0.002208, 0.010258, 0.004356, 0.003632, 0.005311, 0.006261, 0.004993, 0.003160, 0.004715, 0.006905, 0.018827, 0.008264};
+    double effUncertDown_UDStoB_byPt[] = {0.000000, 0.003213, 0.004446, 0.004312, 0.005569, 0.002208, 0.010258, 0.004356, 0.003632, 0.005311, 0.006261, 0.004993, 0.003160, 0.004715, 0.006905, 0.018827, 0.008264};
   }
   namespace CSVT {
     // B-tagging scale factors
@@ -155,16 +178,25 @@ namespace HPlus {
     TF1 *SFl_min = new TF1("SFlightMin","((0.899715+(0.00102278*x))+(-2.46335e-06*(x*x)))+(9.71143e-10*(x*(x*x)))", 20.,670.);
     TF1 *SFl_max = new TF1("SFlightMax","((0.997077+(0.00473953*x))+(-1.34985e-05*(x*x)))+(1.0032e-08*(x*(x*x)))", 20.,670.);
     // B->B efficiencies
-    double ptBinLowEdges_BtoB[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
-    double eff_BtoB[] = {0.821023, 0.844312, 0.841045, 0.849044, 0.848066, 0.853467, 0.847721, 0.848242, 0.849008, 0.852407, 0.852413, 0.843951, 0.820661, 0.826063, 0.773984, 0.756426, 0.633727};
-    double effUncertainty_BtoB[] = {0.005739, 0.004294, 0.004514, 0.004737, 0.005098, 0.005450, 0.006033, 0.006512, 0.005161, 0.006037, 0.007169, 0.006949, 0.010137, 0.015885, 0.027706, 0.040550, 0.045388};
+    // From ttbar (TTJets) sample with Rtau cut deactivated
+    double eff_BtoB_byPt[] = {0.000000, 0.458483, 0.518979, 0.553481, 0.571330, 0.579789, 0.577360, 0.560711, 0.559940, 0.580829, 0.526322, 0.464904, 0.426719, 0.352917, 0.275715, 0.266566, 0.168526};
+    double effUncertUp_BtoB_byPt[] = {0.000000, 0.005856, 0.006119, 0.006500, 0.006984, 0.007535, 0.008196, 0.008910, 0.007097, 0.008298, 0.009980, 0.009487, 0.012849, 0.019915, 0.029559, 0.041264, 0.035311};
+    double effUncertDown_BtoB_byPt[] = {0.000000, 0.005856, 0.006119, 0.006500, 0.006984, 0.007535, 0.008196, 0.008910, 0.007097, 0.008298, 0.009980, 0.009487, 0.012849, 0.019915, 0.029559, 0.041264, 0.035311};
     // C->B efficiencies
-
-    // UDS->B efficiencies
-
+    // From ttbar (TTJets) sample with Rtau cut deactivated
+    double eff_CtoB_byPt[] = {0.000000, 0.059786, 0.053019, 0.068237, 0.058548, 0.059453, 0.063899, 0.048850, 0.047686, 0.056202, 0.047481, 0.040659, 0.042219, 0.027147, 0.000000, 0.031319, 0.028526};
+    double effUncertUp_CtoB_byPt[] = {0.000000, 0.005852, 0.005966, 0.006897, 0.007087, 0.007513, 0.008420, 0.008020, 0.006123, 0.007539, 0.008558, 0.007140, 0.009909, 0.011899, 0.000000, 0.021816, 0.019897};
+    double effUncertDown_CtoB_byPt[] = {0.000000, 0.005852, 0.005966, 0.006897, 0.007087, 0.007513, 0.008420, 0.008020, 0.006123, 0.007539, 0.008558, 0.007140, 0.009909, 0.011899, 0.000000, 0.021816, 0.019897};
     // G->B efficiencies
-    double eff_GtoB[] = {0.259164, 0.240507, 0.151367, 0.125611, 0.116589, 0.121143, 0.107907, 0.090414, 0.082867, 0.080655, 0.081918, 0.094026, 0.101960, 0.100259, 0.077350, 0.072080, 0.094000};
-    double effUncertainty_GtoB[] = {0.004679, 0.005317, 0.005481, 0.005952, 0.006675, 0.007612, 0.008025, 0.008179, 0.006400, 0.007538, 0.008682, 0.008497, 0.011539, 0.015783, 0.017536, 0.025889, 0.025597};
+    // From W+jets (WJets) sample with Rtau cut deactivated
+    double eff_GtoB_byPt[] = {0.000000, 0.002869, 0.001235, 0.000000, 0.000129, 0.005070, 0.004398, 0.004124, 0.000000, 0.001680, 0.001912, 0.000000, 0.000000, 0.000000, 0.005021, 0.000000, 0.000000};
+    double effUncertUp_GtoB_byPt[] = {0.000000, 0.001425, 0.000778, 0.000000, 0.000129, 0.003018, 0.004384, 0.002937, 0.000000, 0.001505, 0.001911, 0.000000, 0.000000, 0.000000, 0.005012, 0.000000, 0.000000};
+    double effUncertDown_GtoB_byPt[] = {0.000000, 0.001425, 0.000778, 0.000000, 0.000129, 0.003018, 0.004384, 0.002937, 0.000000, 0.001505, 0.001911, 0.000000, 0.000000, 0.000000, 0.005012, 0.000000, 0.000000};
+    // UDS->B efficiencies
+    // From W+jets (WJets) sample with Rtau cut deactivated
+    double eff_UDStoB_byPt[] = {0.000000, 0.000966, 0.001111, 0.004857, 0.001493, 0.000000, 0.005789, 0.000000, 0.000000, 0.007048, 0.002036, 0.000939, 0.000000, 0.000000, 0.000000, 0.000000, 0.003175};
+    double effUncertUp_UDStoB_byPt[] = {0.000000, 0.000772, 0.001111, 0.003530, 0.001492, 0.000000, 0.005764, 0.000000, 0.000000, 0.004127, 0.002034, 0.000939, 0.000000, 0.000000, 0.000000, 0.000000, 0.003173};
+    double effUncertDown_UDStoB_byPt[] = {0.000000, 0.000772, 0.001111, 0.003530, 0.001492, 0.000000, 0.005764, 0.000000, 0.000000, 0.004127, 0.002034, 0.000939, 0.000000, 0.000000, 0.000000, 0.000000, 0.003173};
   }
 
 
@@ -174,8 +206,10 @@ namespace HPlus {
     iNBtags(-1),
     fMaxDiscriminatorValue(-999.0),
     fEventScaleFactor(1.0),
-    fEventScaleFactorAbsoluteUncertainty(0.0),
-    fEventScaleFactorRelativeUncertainty(0.0)
+    fEventSFAbsUncert_up(0.0),
+    fEventSFAbsUncert_down(0.0),
+    fEventSFRelUncert_up(0.0),
+    fEventSFRelUncert_down(0.0)
     { }
   BTagging::Data::~Data() {}
 
@@ -188,28 +222,46 @@ namespace HPlus {
   }
 
   // ================================== class ScaleFactorTable ==================================
-  BTagging::ScaleFactorTable::ScaleFactorTable() : fScaleFactorFunction(0) {}
+  BTagging::ScaleFactorTable::ScaleFactorTable() :
+    fScaleFactorFunction(0), fScaleFactorUncertUpFunction(0), fScaleFactorUncertDownFunction(0)
+  {}
 
   BTagging::ScaleFactorTable::~ScaleFactorTable() {
-    //std::cout << "Destructor called!" << std::endl;
-    delete fScaleFactorFunction; fScaleFactorFunction = 0;
+    delete fScaleFactorFunction;
+    delete fScaleFactorUncertUpFunction;
+    delete fScaleFactorUncertDownFunction;
   }
-
+  
   void BTagging::ScaleFactorTable::setScaleFactorTable(const std::vector<double>& ptBinTable, const char* SFFunctionExpression, const std::vector<double>& uncertaintyTable) {
     fPtBins = ptBinTable;
     setScaleFactorFunction(SFFunctionExpression);
     fScaleFactorUncertainty = uncertaintyTable;
-    initializeJetTable();
-  }
-
-  void BTagging::ScaleFactorTable::initializeJetTable() {
-    if (fPtBins.size() == 0) throw cms::Exception("LogicError")  << "Call BTagging::ScaleFactorTable::initializeJetTable() AFTER adding data to the lookup-table!";
+    size_t NBins = fPtBins.size();
+    fPerBinUncertaintyUp.reserve(NBins);
+    fPerBinUncertaintyDown.reserve(NBins);
     size_t i = 0;
-    while (i < fPtBins.size()) {
+    while (i < NBins) {
       fPerBinUncertaintyUp.push_back(0.0);
       fPerBinUncertaintyDown.push_back(0.0);
       i++;
     }
+  }
+
+  void BTagging::ScaleFactorTable::setScaleFactorTable(TF1* scaleFactorFunction, TF1* sfUncertUpFunction, TF1* sfUncertDownFunction) {
+    fScaleFactorFunction = new TF1(*scaleFactorFunction);
+    fScaleFactorUncertUpFunction = new TF1(*sfUncertUpFunction);
+    fScaleFactorUncertDownFunction = new TF1(*sfUncertDownFunction);
+  }
+
+  void BTagging::ScaleFactorTable::resetJetTable() {
+    size_t i = 0;
+    while (i < fPtBins.size()) {
+      fPerBinUncertaintyUp[i] = 0.0;
+      fPerBinUncertaintyDown[i] = 0.0;
+      i++;
+    }
+    fUnbinnedUncertaintyUp.clear();
+    fUnbinnedUncertaintyDown.clear();
   }
 
   void BTagging::ScaleFactorTable::setScaleFactorFunction(const char* expression) {
@@ -227,14 +279,14 @@ namespace HPlus {
     double SF = getScaleFactor(pT);
     // UNBINNED UNCERTAINTIES:
     if (fScaleFactorUncertUpFunction && fScaleFactorUncertDownFunction) { // two functions given (one for lower, one for upper uncertainty)
-      sfUncertUp = fScaleFactorUncertUpFunction->Eval(pT);
-      sfUncertDown = fScaleFactorUncertDownFunction->Eval(pT);
+      sfUncertUp = fScaleFactorUncertUpFunction->Eval(pT); // Careful, this is a relative uncertainty!
+      sfUncertDown = fScaleFactorUncertDownFunction->Eval(pT); // Careful, this is a relative uncertainty!
       if (isBTagged) {
-	fUnbinnedUncertaintyUp.push_back(factor * sfUncertUp / SF);
-	fUnbinnedUncertaintyDown.push_back(factor * sfUncertDown / SF);
+	fUnbinnedUncertaintyUp.push_back(factor * sfUncertUp);
+	fUnbinnedUncertaintyDown.push_back(factor * sfUncertDown);
       } else {
-	fUnbinnedUncertaintyUp.push_back(-factor * (eff * sfUncertUp) / (1.0 - eff * SF));
-	fUnbinnedUncertaintyDown.push_back(-factor * (eff * sfUncertDown) / (1.0 - eff * SF));
+	fUnbinnedUncertaintyUp.push_back(-(factor * eff * SF * sfUncertUp) / (1.0 - eff * SF));
+	fUnbinnedUncertaintyDown.push_back(-factor * (eff * SF * sfUncertDown) / (1.0 - eff * SF));
       }
     }
     // BINNED UNCERTAINTIES:
@@ -243,11 +295,11 @@ namespace HPlus {
       sfUncertDown = getScaleFactorUncertaintyBinned(pT);
       size_t i = obtainIndex(fPtBins, pT);
       if (isBTagged) {
-	fPerBinUncertaintyUp[i] += factor * sfUncertUp / SF;
-	fPerBinUncertaintyDown[i] += factor * sfUncertDown / SF;
+	fPerBinUncertaintyUp[i] += factor * sfUncertUp;
+	fPerBinUncertaintyDown[i] += factor * sfUncertDown;
       } else {
-	fPerBinUncertaintyUp[i] += -factor * (eff * sfUncertUp) / (1.0 - eff * SF);
-	fPerBinUncertaintyDown[i] += -factor * (eff * sfUncertDown) / (1.0 - eff * SF);
+	fPerBinUncertaintyUp[i] += -(factor * eff * SF * sfUncertUp) / (1.0 - eff * SF);
+	fPerBinUncertaintyDown[i] += -(factor * eff * SF * sfUncertDown) / (1.0 - eff * SF);
       }
     }
     else throw cms::Exception("LogicError")  << "Please provide two functions OR one vector of b-tagging SF upper and lower uncertainties! (Or implement using a different combination.)";
@@ -274,7 +326,6 @@ namespace HPlus {
 
   double BTagging::ScaleFactorTable::getScaleFactor(double pt) const {
     if (fScaleFactorFunction) {
-      //std::cout << "In getScaleFactor: fScaleFactorFunction exists! Evaluating..." << fScaleFactorFunction->Eval(pt) << std::endl;
       return fScaleFactorFunction->Eval(pt);
     }
     else if (fScaleFactor.size() > 0) return fScaleFactor[obtainIndex(fPtBins, pt)];
@@ -285,18 +336,55 @@ namespace HPlus {
     return fScaleFactorUncertainty[obtainIndex(fPtBins, pt)];
   }
 
-  double BTagging::ScaleFactorTable::calculateRelativeUncertaintySquared() { // FIXME! Up & Down, take into account also unbinned uncertainties!
-    //std::cout << "Calculating rel uncert ^2 of SF table..." << std::endl;
+  double BTagging::ScaleFactorTable::calculateRelativeUncertaintySquared(bool up) {
     double relUncertSquared = 0.0;
     size_t i = 0;
+    // Sum binned uncertainties:
     while (i < fPtBins.size()) {
-      relUncertSquared += TMath::Power(fPerBinUncertaintyUp[i], 2);
-      //std::cout << "   " << relUncertSquared << std::endl;
+      if (up) relUncertSquared += TMath::Power(fPerBinUncertaintyUp[i], 2);
+      else  relUncertSquared += TMath::Power(fPerBinUncertaintyDown[i], 2);
       i++;
+    }
+    // Sum unbinned uncertainties:
+    if (up) {
+      for(std::vector<double>::const_iterator iterUncert = fUnbinnedUncertaintyUp.begin(); iterUncert != fUnbinnedUncertaintyUp.end(); ++iterUncert) {
+	relUncertSquared += TMath::Power(*iterUncert, 2);
+      }
+    }
+    else {
+      for(std::vector<double>::const_iterator iterUncert = fUnbinnedUncertaintyDown.begin(); iterUncert != fUnbinnedUncertaintyDown.end(); ++iterUncert) {
+	relUncertSquared += TMath::Power(*iterUncert, 2);
+      }
     }
     return relUncertSquared;
   }
 
+  void BTagging::ScaleFactorTable::printJetTableForValidation() {
+    std::cout << "  fPerBinUncertaintyUp: {";
+    size_t i = 0;
+    while (i < fPtBins.size()) {
+      std::cout << fPerBinUncertaintyUp[i] << ", ";
+      i++;
+    }
+    std::cout << "}" << std::endl;
+    std::cout << "  fPerBinUncertaintyDown: {";
+    i = 0;
+    while (i < fPtBins.size()) {
+      std::cout << fPerBinUncertaintyDown[i] << ", ";
+      i++;
+    }
+    std::cout << "}" << std::endl;
+    std::cout << "  fUnbinnedUncertaintyUp: {";
+    for(std::vector<double>::const_iterator iterUncert = fUnbinnedUncertaintyUp.begin(); iterUncert != fUnbinnedUncertaintyUp.end(); ++iterUncert) {
+      std::cout << *iterUncert << ", ";
+    }
+    std::cout << "}" << std::endl;
+    std::cout << "  fUnbinnedUncertaintyDown: {";
+    for(std::vector<double>::const_iterator iterUncert = fUnbinnedUncertaintyDown.begin(); iterUncert != fUnbinnedUncertaintyDown.end(); ++iterUncert) {
+      std::cout << *iterUncert << ", ";
+    }
+    std::cout << "}" << std::endl;
+  }
 
 
   // ================================== class EfficiencyTable ==================================
@@ -309,16 +397,23 @@ namespace HPlus {
     fEfficiency = efficiencyTable;
     fEffUncertUp = uncertaintyUpTable;
     fEffUncertDown = uncertaintyDownTable;
-    initializeJetTable();
+    size_t NBins = fPtBins.size();
+    fPerBinUncertaintyUp.reserve(NBins);
+    fPerBinUncertaintyDown.reserve(NBins);
+    size_t i = 0;
+    while (i < NBins) {
+      fPerBinUncertaintyUp.push_back(0.0);
+      fPerBinUncertaintyDown.push_back(0.0);
+      i++;
+    }
   }
 
 
-  void BTagging::EfficiencyTable::initializeJetTable() {
-    if (fPtBins.size() == 0) throw cms::Exception("LogicError")  << "Call BTagging::EfficiencyTable::initializeJetTable() AFTER adding data to the lookup-table!";
+  void BTagging::EfficiencyTable::resetJetTable() {
     size_t i = 0;
     while (i < fPtBins.size()) {
-      fPerBinUncertaintyUp.push_back(0.0);
-      fPerBinUncertaintyDown.push_back(0.0);
+      fPerBinUncertaintyUp[i] = 0.0;
+      fPerBinUncertaintyDown[i] = 0.0;
       i++;
     }
   }
@@ -327,8 +422,10 @@ namespace HPlus {
     if (isBTagged) return; // The uncertainty term due to the efficiency uncertainty for tagged jets is zero
     size_t i = obtainIndex(fPtBins, pT);
     double SF = sfTable.getScaleFactor(pT);
-    fPerBinUncertaintyUp[i] += ((1.0 - SF) * fEffUncertUp[i]) / ((1.0 - SF * fEfficiency[i]) * (1.0 - fEfficiency[i]));
-    fPerBinUncertaintyDown[i] += ((1.0 - SF) * fEffUncertDown[i]) / ((1.0 - SF * fEfficiency[i]) * (1.0 - fEfficiency[i]));
+    double eff = fEfficiency[i];
+    // Careful, relative uncertainties have to be converted to absolute uncertainties!
+    fPerBinUncertaintyUp[i] += ((1.0 - SF) * eff * fEffUncertUp[i]) / ((1.0 - SF * eff) * (1.0 - eff));
+    fPerBinUncertaintyDown[i] += ((1.0 - SF) * eff * fEffUncertDown[i]) / ((1.0 - SF * eff) * (1.0 - eff));
   }
 
   size_t BTagging::EfficiencyTable::obtainIndex(const std::vector<double>& table, double pt) {
@@ -350,13 +447,12 @@ namespace HPlus {
     return fEfficiency[obtainIndex(fPtBins, pT)];
   }
 
-  double BTagging::EfficiencyTable::calculateRelativeUncertaintySquared() { // FIXME: up and down
-    //std::cout << "Calculating rel uncert ^2 of efficiency table..." << std::endl;
+  double BTagging::EfficiencyTable::calculateRelativeUncertaintySquared(bool up) {
     double relUncertSquared = 0.0;
     size_t i = 0;
     while (i < fPtBins.size()) {
-      relUncertSquared += TMath::Power(fPerBinUncertaintyUp[i], 2);
-      //std::cout << "   " << relUncertSquared << std::endl;
+      if (up) relUncertSquared += TMath::Power(fPerBinUncertaintyUp[i], 2);
+      else  relUncertSquared += TMath::Power(fPerBinUncertaintyDown[i], 2);
       i++;
     }
     return relUncertSquared;
@@ -370,6 +466,7 @@ namespace HPlus {
     } else {
       eventScaleFactor = (1.-sfTable.getScaleFactor(pT)*effTable.getEfficiency(pT)) / (1.-effTable.getEfficiency(pT));
     }
+    if (printValidationOutput) std::cout << "  Event scale factor term: " << eventScaleFactor << std::endl;
     fScaleFactor.push_back(eventScaleFactor);
   }
   
@@ -405,14 +502,12 @@ namespace HPlus {
     TFileDirectory myDir = fs->mkdir("Btagging");
     hDiscriminator = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
     hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet_pt", "bjet_pt", 100, 0., 500.);
-    hDiscriminatorB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10); // STR: Currently not used
     hPtBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVM_pt", "realbjetCSVM_pt", 100, 0., 500.);
     hEtaBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVM_eta", "realbjetCSVM_eta", 100, -5., 5.);
     hPtBCSVT = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVT_pt", "realbjetCSVT_pt", 100, 0., 500.);
     hEtaBCSVT = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVT_eta", "realbjetCSVT_eta", 100, -5., 5.);
     hPtBnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_pt", "realbjetNotag_pt", 100, 0., 500.);
     hEtaBnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_eta", "realbjetNotag_eta", 100, -5., 5.);
-    hDiscriminatorQ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealQjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10); // STR: Currently not used
     hPtQCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetCSVM_pt", "realqjetCSVM_pt", 100, 0., 500.);
     hEtaQCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetCSVM_eta", "realqjetCSVM_pt", 100, -5., 5.);
     hPtQCSVT = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetCSVT_pt", "realqjetCSVT_pt", 100, 0., 500.);
@@ -463,25 +558,25 @@ namespace HPlus {
     // Set scale factor and efficiency look-up tables and functions
     if (fLeadingDiscrCut > 0.243 && fLeadingDiscrCut < 0.245) { // CSVL (Combined Secondary Vertex b-tagging method, Loose working point)
       fTagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVL::SFb, toVector(CSVL::SFb_error));
-      fMistagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVL::SFb, toVector(CSVL::SFb_error));
-      fTagEffTable.setEfficiencyTable(toVector(CSVL::ptBinLowEdges_BtoB), toVector(CSVL::eff_BtoB), toVector(CSVL::effUncertainty_BtoB), toVector(CSVL::effUncertainty_BtoB));
-      fCMistagEffTable.setEfficiencyTable(toVector(CSVL::ptBinLowEdges_BtoB), toVector(CSVL::eff_GtoB), toVector(CSVL::effUncertainty_GtoB), toVector(CSVL::effUncertainty_GtoB));
-      fGMistagEffTable.setEfficiencyTable(toVector(CSVL::ptBinLowEdges_BtoB), toVector(CSVL::eff_GtoB), toVector(CSVL::effUncertainty_GtoB), toVector(CSVL::effUncertainty_GtoB));
-      fUDSMistagEffTable.setEfficiencyTable(toVector(CSVL::ptBinLowEdges_BtoB), toVector(CSVL::eff_GtoB), toVector(CSVL::effUncertainty_GtoB), toVector(CSVL::effUncertainty_GtoB));
+      fMistagSFTable.setScaleFactorTable(CSVL::SFl, CSVL::SFl_max, CSVL::SFl_min);
+      fTagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVL::eff_BtoB_byPt), toVector(CSVL::effUncertUp_BtoB_byPt), toVector(CSVL::effUncertDown_BtoB_byPt));
+      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVL::eff_CtoB_byPt), toVector(CSVL::effUncertUp_CtoB_byPt), toVector(CSVL::effUncertDown_CtoB_byPt));
+      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVL::eff_GtoB_byPt), toVector(CSVL::effUncertUp_GtoB_byPt), toVector(CSVL::effUncertDown_GtoB_byPt));
+      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVL::eff_UDStoB_byPt), toVector(CSVL::effUncertUp_UDStoB_byPt), toVector(CSVL::effUncertDown_UDStoB_byPt));
     } else if (fLeadingDiscrCut > 0.678 && fLeadingDiscrCut < 0.680) { // CSVM (Combined Secondary Vertex b-tagging method, Medium working point)
       fTagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVM::SFb, toVector(CSVM::SFb_error));
-      fMistagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVM::SFb, toVector(CSVM::SFb_error));
-      fTagEffTable.setEfficiencyTable(toVector(CSVM::ptBinLowEdges_BtoB), toVector(CSVM::eff_BtoB), toVector(CSVM::effUncertainty_BtoB), toVector(CSVL::effUncertainty_BtoB));
-      fCMistagEffTable.setEfficiencyTable(toVector(CSVM::ptBinLowEdges_BtoB), toVector(CSVM::eff_GtoB), toVector(CSVM::effUncertainty_GtoB), toVector(CSVL::effUncertainty_GtoB));
-      fGMistagEffTable.setEfficiencyTable(toVector(CSVM::ptBinLowEdges_BtoB), toVector(CSVM::eff_GtoB), toVector(CSVM::effUncertainty_GtoB), toVector(CSVL::effUncertainty_GtoB));
-      fUDSMistagEffTable.setEfficiencyTable(toVector(CSVM::ptBinLowEdges_BtoB), toVector(CSVM::eff_GtoB), toVector(CSVM::effUncertainty_GtoB), toVector(CSVL::effUncertainty_GtoB));
+      fMistagSFTable.setScaleFactorTable(CSVM::SFl, CSVM::SFl_max, CSVM::SFl_min);
+      fTagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVM::eff_BtoB_byPt), toVector(CSVM::effUncertUp_BtoB_byPt), toVector(CSVM::effUncertDown_BtoB_byPt));
+      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVM::eff_CtoB_byPt), toVector(CSVM::effUncertUp_CtoB_byPt), toVector(CSVM::effUncertDown_CtoB_byPt));
+      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVM::eff_GtoB_byPt), toVector(CSVM::effUncertUp_GtoB_byPt), toVector(CSVM::effUncertDown_GtoB_byPt));
+      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVM::eff_UDStoB_byPt), toVector(CSVM::effUncertUp_UDStoB_byPt), toVector(CSVM::effUncertDown_UDStoB_byPt));
     } else if (fLeadingDiscrCut > 0.897 && fLeadingDiscrCut < 0.899) { // CSVT (Combined Secondary Vertex b-tagging method, Tight working point)
       fTagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVT::SFb, toVector(CSVT::SFb_error));
-      fMistagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVT::SFb, toVector(CSVT::SFb_error));
-      fTagEffTable.setEfficiencyTable(toVector(CSVT::ptBinLowEdges_BtoB), toVector(CSVT::eff_BtoB), toVector(CSVT::effUncertainty_BtoB), toVector(CSVL::effUncertainty_BtoB));
-      fCMistagEffTable.setEfficiencyTable(toVector(CSVT::ptBinLowEdges_BtoB), toVector(CSVT::eff_GtoB), toVector(CSVT::effUncertainty_GtoB), toVector(CSVL::effUncertainty_GtoB));
-      fGMistagEffTable.setEfficiencyTable(toVector(CSVT::ptBinLowEdges_BtoB), toVector(CSVT::eff_GtoB), toVector(CSVT::effUncertainty_GtoB), toVector(CSVL::effUncertainty_GtoB));
-      fUDSMistagEffTable.setEfficiencyTable(toVector(CSVT::ptBinLowEdges_BtoB), toVector(CSVT::eff_GtoB), toVector(CSVT::effUncertainty_GtoB), toVector(CSVL::effUncertainty_GtoB));
+      fMistagSFTable.setScaleFactorTable(CSVT::SFl, CSVT::SFl_max, CSVT::SFl_min);
+      fTagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVT::eff_BtoB_byPt), toVector(CSVT::effUncertUp_BtoB_byPt), toVector(CSVT::effUncertDown_BtoB_byPt));
+      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVT::eff_CtoB_byPt), toVector(CSVT::effUncertUp_CtoB_byPt), toVector(CSVT::effUncertDown_CtoB_byPt));
+      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVT::eff_GtoB_byPt), toVector(CSVT::effUncertUp_GtoB_byPt), toVector(CSVT::effUncertDown_GtoB_byPt));
+      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::ptmin), toVector(CSVT::eff_UDStoB_byPt), toVector(CSVT::effUncertUp_UDStoB_byPt), toVector(CSVT::effUncertDown_UDStoB_byPt));
     } else {
       throw cms::Exception("LogicError")  << "The given b-tagging discriminator value does not correspond to any known working point!";
     }
@@ -504,20 +599,28 @@ namespace HPlus {
   }
 
   BTagging::Data BTagging::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
-    //std::cout << "****************" << fTagSFTable.getNumberOfBins() << std::endl;
+    if (printValidationOutput) std::cout << std::endl << "Start processing next event..." << std::endl;
     
     // Initialize output data object
     Data output;
     output.fSelectedJets.reserve(jets.size());
     output.fSelectedSubLeadingJets.reserve(jets.size());
-    // Initialize structure for collecting information (scale factor & uncertainty, tagging status, etc.) of each jet.
+    // Initialize structure for collecting information (scale factor & uncertainty, tagging status, etc.) of each jet
     PerJetInfo bTaggingInfo;
     bTaggingInfo.reserve(jets.size());
+    // Initialize tables of per-jet SF uncertainties in look-up table objects
+    fTagSFTable.resetJetTable();
+    fMistagSFTable.resetJetTable();
+    fTagEffTable.resetJetTable();
+    fCMistagEffTable.resetJetTable();
+    fGMistagEffTable.resetJetTable();
+    fUDSMistagEffTable.resetJetTable();
 
     // Loop over all jets in event
+    if (printValidationOutput) std::cout << "*** Begin looping over jets ***" << std::endl;
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
-      //std::cout << "Current jet flavour and pT: " << std::abs(iJet->partonFlavour()) << ", " << iJet->pt() << std::endl;
+      if (printValidationOutput) std::cout << "Jet number " << iter - jets.begin() + 1 << " found. Flavour = " << std::abs(iJet->partonFlavour()) << ", pT = " << iJet->pt();
 
       // Initialize flags
       bool isGenuineB = false;
@@ -529,17 +632,17 @@ namespace HPlus {
       if (!iEvent.isRealData()) {
 	if (std::abs(iJet->partonFlavour()) == 5) {
 	    isGenuineB = true;
-	    increment(fTaggedAllRealBJetsSubCount); // STR: why "Tagged"? No tagging has been done yet!
+	    increment(fTaggedAllRealBJetsSubCount);
 	}
       }
 
       // Apply transverse momentum cut
       if(iJet->pt() < fPtCut) continue;
-      increment(fTaggedPtCutSubCount); // STR: why "Tagged"? No tagging has been done yet!
+      increment(fTaggedPtCutSubCount);
 
       // Apply pseudorapidity cut
       if(fabs(iJet->eta()) > fEtaCut) continue;
-      increment(fTaggedEtaCutSubCount); // STR: why "Tagged"? No tagging has been done yet!
+      increment(fTaggedEtaCutSubCount);
 
       // Do b-tagging using the chosen discriminator and working point
       float discr = iJet->bDiscriminator(fDiscriminator);
@@ -547,15 +650,17 @@ namespace HPlus {
       if (discr > fLeadingDiscrCut) {
         output.fSelectedJets.push_back(iJet);
 	isBTagged = true;
+	if (printValidationOutput) std::cout << ", b-tagged" << std::endl;
 	increment(fTaggedSubCount);
-	if (isGenuineB) increment(fTaggedTaggedRealBJetsSubCount); // STR: "TaggedTagged"?!
+	if (isGenuineB) increment(fTaggedTaggedRealBJetsSubCount);
 	hPt->Fill(iJet->pt());
 	hEta->Fill(iJet->eta());
-	//std::cout << "Jet is b-tagged" << std::endl;
       } else if (discr > fSubLeadingDiscrCut) {
         output.fSelectedSubLeadingJets.push_back(iJet);
       }
       if (discr > output.fMaxDiscriminatorValue) output.fMaxDiscriminatorValue = discr;
+
+      if (printValidationOutput && !isBTagged) std::cout << ", not b-tagged" << std::endl;
 
       // If MC, calculate the jet's contribution to the event scale factor
       if (!iEvent.isRealData()) {
@@ -564,6 +669,15 @@ namespace HPlus {
 	bTaggingInfo.fGenuine.push_back(isGenuineB);
       }
     } // End of jet loop
+    if (printValidationOutput) std::cout << "*** Jet loop ended ***" << std::endl;
+
+    if (printValidationOutput) {
+      std::cout << "Uncertainty terms stored in the look-up table objects:" << std::endl;
+      std::cout << "Tagging scale factor table" << std::endl;
+      fTagSFTable.printJetTableForValidation();
+      std::cout << "Mistagging scale factor table" << std::endl;
+      fMistagSFTable.printJetTableForValidation();
+    }
 
     // Calculate scale factor and its uncertainty for MC events
     if (!iEvent.isRealData()) setEventScaleFactorInfo(bTaggingInfo, fTagSFTable, fMistagSFTable, fTagEffTable, fCMistagEffTable, fGMistagEffTable, fUDSMistagEffTable, output);
@@ -596,8 +710,6 @@ namespace HPlus {
     int flavour = std::abs(iJet->partonFlavour());
     double pt = iJet->pt();
     
-    //std::cout << "Weight calculation jet flavour and pT: " << flavour << ", " << pt << std::endl;
-
     // Set flags
     bool isGenuineB = false, isGenuineC = false, isGenuineG = false, isGenuineUDS = false;
     if      (flavour == 5) isGenuineB = true;
@@ -629,61 +741,52 @@ namespace HPlus {
   }
 
   double BTagging::calculateEventScaleFactor(PerJetInfo& bTaggingInfo) {
-    //std::cout << "Calculating event SF..." << std::endl;
-    //std::cout << "   Number of entries in bTaggingInfo.fScaleFactor: " << bTaggingInfo.fScaleFactor.size() << std::endl;
     double eventScaleFactor = 1.0;
     size_t i = 0;
     while (i < bTaggingInfo.fScaleFactor.size()) {
       eventScaleFactor *= bTaggingInfo.fScaleFactor[i];
-      //std::cout << "_" << bTaggingInfo.fScaleFactor[i] << std::endl;
-      //std::cout << "   " << eventScaleFactor << std::endl;
       i++;
     }
     return eventScaleFactor;
   }
 
-  double BTagging::calculateRelativeEventScaleFactorUncertainty(ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) {
-    //std::cout << "Calculaing relative uncertainty of event scale factor... " << std::endl;
+  double BTagging::calculateRelativeEventScaleFactorUncertainty(bool up, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) {
     double relUncertSquared = 0.0;
-    relUncertSquared += sfTag.calculateRelativeUncertaintySquared();
-    //std::cout << "sfTag.calculateRelativeUncertaintySquared() " << sfTag.calculateRelativeUncertaintySquared() << std::endl;
-    relUncertSquared += sfMistag.calculateRelativeUncertaintySquared();
-    //std::cout << "sfMistag.calculateRelativeUncertaintySquared() " << sfMistag.calculateRelativeUncertaintySquared() << std::endl;
-    relUncertSquared += effTag.calculateRelativeUncertaintySquared();
-    //std::cout << "effTag.calculateRelativeUncertaintySquared() " << effTag.calculateRelativeUncertaintySquared() << std::endl;
-    relUncertSquared += effCMistag.calculateRelativeUncertaintySquared();
-    //std::cout << "effCMistag.calculateRelativeUncertaintySquared() " << effCMistag.calculateRelativeUncertaintySquared() << std::endl; 
-    relUncertSquared += effGMistag.calculateRelativeUncertaintySquared();
-    //std::cout << "effGMistag.calculateRelativeUncertaintySquared() " << effGMistag.calculateRelativeUncertaintySquared() << std::endl; 
-    relUncertSquared += effUDSMistag.calculateRelativeUncertaintySquared();
-    //std::cout << "effUDSMistag.calculateRelativeUncertaintySquared() " << effUDSMistag.calculateRelativeUncertaintySquared() << std::endl;
-    //std::cout << "Uncertainty squared is: " << relUncertSquared << std::endl;
-    //std::cout << "UNCERTAINTY IS: " << TMath::Sqrt(relUncertSquared) << std::endl;
+    relUncertSquared += sfTag.calculateRelativeUncertaintySquared(up);
+    relUncertSquared += sfMistag.calculateRelativeUncertaintySquared(up);
+    relUncertSquared += effTag.calculateRelativeUncertaintySquared(up);
+    relUncertSquared += effCMistag.calculateRelativeUncertaintySquared(up);
+    relUncertSquared += effGMistag.calculateRelativeUncertaintySquared(up);
+    relUncertSquared += effUDSMistag.calculateRelativeUncertaintySquared(up);
     return TMath::Sqrt(relUncertSquared);
   }
 
   void BTagging::setEventScaleFactorInfo(PerJetInfo& bTaggingInfo, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag, BTagging::Data& output) {
     output.fEventScaleFactor = calculateEventScaleFactor(bTaggingInfo);
-    output.fEventScaleFactorRelativeUncertainty = calculateRelativeEventScaleFactorUncertainty(sfTag, sfMistag, effTag, effCMistag, effGMistag, effUDSMistag);
-    output.fEventScaleFactorAbsoluteUncertainty = output.fEventScaleFactorRelativeUncertainty * output.fEventScaleFactor;
+    output.fEventSFRelUncert_up = calculateRelativeEventScaleFactorUncertainty(true, sfTag, sfMistag, effTag, effCMistag, effGMistag, effUDSMistag);
+    output.fEventSFAbsUncert_up = output.fEventSFRelUncert_up * output.fEventScaleFactor;
+    output.fEventSFRelUncert_down = calculateRelativeEventScaleFactorUncertainty(false, sfTag, sfMistag, effTag, effCMistag, effGMistag, effUDSMistag);
+    output.fEventSFAbsUncert_down = output.fEventSFRelUncert_down * output.fEventScaleFactor;
 
-    //std::cout << "Event weight: " << output.fEventScaleFactor << std::endl;
-    //std::cout << "Event weight rel uncert: " << output.fEventScaleFactorRelativeUncertainty << std::endl;
-    //std::cout << "Event weight abs uncert: " << output.fEventScaleFactorAbsoluteUncertainty << std::endl;
+    std::cout << "Event weight: " << output.fEventScaleFactor << " (+" << output.fEventSFAbsUncert_up << ", -" << output.fEventSFAbsUncert_down << ")" << std::endl;
+    std::cout << "  Corresponding to relative uncertainty (+" << output.fEventSFRelUncert_up << ", -" << output.fEventSFRelUncert_down<< ")" << std::endl;;
 
     // Do the variation, if asked
     if(fVariationEnabled) {
-      output.fEventScaleFactor += fVariationShiftBy * output.fEventScaleFactorAbsoluteUncertainty;
+      if (fVariationShiftBy > 0) output.fEventScaleFactor += fVariationShiftBy * output.fEventSFAbsUncert_up;
+      else output.fEventScaleFactor += fVariationShiftBy * output.fEventSFAbsUncert_down;
       // These are meaningless after the variation:
-      output.fEventScaleFactorAbsoluteUncertainty = 0;
-      output.fEventScaleFactorRelativeUncertainty = 0;
+      output.fEventSFAbsUncert_up = 0;
+      output.fEventSFAbsUncert_down = 0;
+      output.fEventSFRelUncert_up = 0;
+      output.fEventSFRelUncert_down = 0;
     }
   }
 
   // Method called from SignalAnalysis.cc:
-  void BTagging::fillScaleFactorHistograms(BTagging::Data& data) {
+  void BTagging::fillScaleFactorHistograms(BTagging::Data& data) { // FIXME: up and down uncert
     hScaleFactor->Fill(data.getScaleFactor());
-    hBTagAbsoluteUncertainty->Fill(data.getScaleFactorAbsoluteUncertainty());
-    hBTagRelativeUncertainty->Fill(data.getScaleFactorRelativeUncertainty());
+    hBTagAbsoluteUncertainty->Fill(data.getScaleFactorAbsoluteUncertainty_up());
+    hBTagRelativeUncertainty->Fill(data.getScaleFactorRelativeUncertainty_up());
   }
 }
