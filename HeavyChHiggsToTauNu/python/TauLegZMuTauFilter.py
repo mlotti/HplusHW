@@ -28,6 +28,7 @@ muTauPairs = cms.EDProducer("DeltaRMinCandCombiner",
 def customize(process):
     process.mutauSequence = addMuTauSelection(process)
     process.path += process.mutauSequence
+    process.out.outputCommands.extend(["keep FEDRawDataCollection_*_*_*"])
     
 def addMuTauSelection(process):
     process.selectedPatTausHpsPFTau.cut = hpsTauSelection
