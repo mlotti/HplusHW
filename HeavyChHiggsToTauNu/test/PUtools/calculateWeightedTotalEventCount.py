@@ -9,6 +9,7 @@ from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeightSchemes as topPtWeightSchemes
 
 # We don't need (or actaually can not create) full dataset.Dataset object
 class DatasetWrapper:
@@ -75,6 +76,23 @@ def main(opts):
                                       selectorArgs=[hweight, hweightUp, hweightDown],
                                       )
 
+    topPtNames = ROOT.std.vector("string")()
+    topPtFormulasAllHadr = ROOT.std.vector("string")()
+    topPtFormulasSemiLep = ROOT.std.vector("string")()
+    topPtFormulasDiLep = ROOT.std.vector("string")()
+    print topPtNames
+    for name, scheme in topPtWeightSchemes.schemes.iteritems():
+        topPtNames.push_back(name)
+        topPtFormulasAllHadr.push_back(scheme.allhadronic)
+        topPtFormulasSemiLep.push_back(scheme.leptonjets)
+        topPtFormulasDiLep.push_back(scheme.dilepton)
+
+    ntupleCacheTTJets = dataset.NtupleCache("pileupNtuple/tree", "PileupWeightSelector",
+                                            selectorArgs=[hweight, hweightUp, hweightDown, topPtNames, topPtFormulasAllHadr, topPtFormulasSemiLep, topPtFormulasDiLep],
+                                            cacheFileName="histogramCacheTTJets.root"
+                                            )
+
+
     # loop over datasets
     myoutput = ""
     for multicrabDir in opts.multicrabdir:
@@ -94,17 +112,40 @@ def main(opts):
                 raise Exception("Did not find 'pileupNtuple/tree' from %s" % rootFile.GetName())
             nevents = mytree.GetEntries()
 
+            nc = ntupleCache
+            topPtWeighting = opts.doTopPt and "TTJets" in taskName
+            if topPtWeighting:
+                nc = ntupleCacheTTJets
+
             # Process tree
-            ntupleCache.process(dset)
+            nc.process(dset)
 
             # Get results
-            nevt = ntupleCache.getRootHisto(dset, "events", None).GetBinContent(1)
-            nevtup = ntupleCache.getRootHisto(dset, "eventsUp", None).GetBinContent(1)
-            nevtdown = ntupleCache.getRootHisto(dset, "eventsDown", None).GetBinContent(1)
+            def getResult(histo):
+                return nc.getRootHisto(dset, histo, None).GetBinContent(1)
+            nevt = getResult("events")
+            nevtup = getResult("eventsUp")
+            nevtdown = getResult("eventsDown")
 
             rootFile.Close()
             # Write output line
-            myline = "        "+'"'+taskName+'"'+": WeightedAllEvents(unweighted=%d, "%nevents+"weighted=%f, "%nevt+"up=%f, "%nevtup+"down=%f),\n"%nevtdown
+            if topPtWeighting:
+                taskPrefix = "        "+'"'+taskName+'"'+": WeightedAllEventsTopPt("
+                myline = taskPrefix+"unweighted = WeightedAllEvents(unweighted=%d, "%nevents+"weighted=%f, "%nevt+"up=%f, "%nevtup+"down=%f),\n"%nevtdown
+                for name in topPtWeightSchemes.schemes.iterkeys():
+                    def construct(prefix, histoPostfix, postfix):
+                        top_nevt = getResult("events_topPt%s_%s"%(histoPostfix, name))
+                        top_nevtup = getResult("eventsUp_topPt%s_%s"%(histoPostfix, name))
+                        top_nevtdown = getResult("eventsDown_topPt%s_%s"%(histoPostfix, name))
+                        return prefix + "=WeightedAllEvents(unweighted=%d, weighted=%f, up=%f, down=%f)" % (nevents, top_nevt, top_nevtup, top_nevtdown) + postfix + "\n"
+
+                    firstPrefix = " "*len(taskPrefix) + name + " = WeightedAllEventsTopPt.Weighted("
+                    myline += construct(firstPrefix+"weighted", "", ",")
+                    myline += construct(" "*len(firstPrefix)+"up", "Up", ",")
+                    myline += construct(" "*len(firstPrefix)+"down", "Down", "),")
+                myline += " "*len(taskPrefix)+"),\n"
+            else:
+                myline = "        "+'"'+taskName+'"'+": WeightedAllEvents(unweighted=%d, "%nevents+"weighted=%f, "%nevt+"up=%f, "%nevtup+"down=%f),\n"%nevtdown
             #print "\n"+myline
             myoutput += myline
 
@@ -136,6 +177,8 @@ if __name__ == "__main__":
     parser.add_option("--mcPU", dest="mcPU", action="store", type="string", help="root file containing PU spectrum for MC")
     parser.add_option("-o", "--output", dest="outname", action="store", type="string", default="outPU_cfi.py", help="name for output cfi.py fragment")
     parser.add_option("--mdir", dest="multicrabdir", action="append", help="name of multicrab dir (multiple directories can be specified with multiple --mdir arguments)")
+    parser.add_option("--noTopPt", dest="doTopPt", action="store_false", default=True,
+                      help="Do not do top pT reweighting for TTJets")
     (opts, args) = parser.parse_args()
     
     # Check that proper arguments were given

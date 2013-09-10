@@ -7,9 +7,14 @@
 
 ## "Enumeration" of pile-up weight type
 class PileupWeightType:
-    NOMINAL = 0
-    UP = 1
-    DOWN = 2
+    class UNWEIGHTED:
+        pass
+    class NOMINAL:
+        pass
+    class UP:
+        pass
+    class DOWN:
+        pass
 
 ## Utility class for handling the weighted number of all MC events
 #
@@ -38,10 +43,12 @@ class WeightedAllEvents:
     # \param unweighted  Unweighted number of all events (used for a cross check)
     # \param weightType  Type of weight (nominal, up/down varied), one of PileupWeightType members
     def getWeighted(self, unweighted, weightType=PileupWeightType.NOMINAL):
+        if weightType is PileupWeightType.UNWEIGHTED:
+            return unweighted
         try:
             nweighted = self.weighted[weightType]
         except KeyError:
-            raise Exception("Invalid weight type %d, see dataset.PileupWeightType" % weightType)
+            raise Exception("Invalid weight type %s, see pileupReweightedAllEvents.PileupWeightType" % weightType.__name__)
         if int(unweighted) != int(self.unweighted):
             nweighted = unweighted * nweighted/self.unweighted
             print "%s: Unweighted all events from analysis %d, unweighted all events from _weightedAllEvents %d, using their ratio for setting the weighted all events (weight=%f)" % (self.name, int(unweighted), int(self.unweighted), nweighted)
@@ -53,6 +60,37 @@ class WeightedAllEvents:
     ## \var weighted
     # Dictionary holding the weighted number of all MC events for nominal case, and for up/down variations (for systematics)
 
+class WeightedAllEventsTopPt:
+    # helper class
+    class Weighted:
+        def __init__(self, weighted, up, down):
+            self.weighted = {
+                PileupWeightType.NOMINAL: weighted,
+                PileupWeightType.UP: up,
+                PileupWeightType.DOWN: down
+                }
+        def getWeighted(self, topPtWeightType):
+            try:
+                return self.weighted[topPtWeightType]
+            except KeyError:
+                raise Exception("Invalid top pt weight type %s, see pileupReweightedAllEvents.PileupWeightType" % topPtWeightType.__name__)
+
+    def __init__(self, unweighted, **kwargs):
+        self.unweighted = unweighted
+        self.weighted = {}
+        self.weighted.update(kwargs)
+
+    def _setName(self, name):
+        self.name = name
+
+    def getWeighted(self, unweighted, topPtWeight, topPtWeightType=PileupWeightType.UNWEIGHTED, **kwargs):
+        if topPtWeightType is PileupWeightType.UNWEIGHTED:
+            return self.unweighted.getWeighted(unweighted, **kwargs)
+        try:
+            weightedAllEvents = self.weighted[topPtWeight].getWeighted(topPtWeightType)
+        except KeyError:
+            raise Exception("Invalid top pt weight name %s, see TopPtWeightSchemes.schemes" % topPtWeight)
+        return weightedAllEvents.getWeight(unweighted, **kwargs)
 
 ## Get WeightedAllEvents for dataset and era
 #
