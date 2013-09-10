@@ -169,13 +169,13 @@ class PseudoMultiCrabModule:
         myModuleDir.Add(self._psetInfo)
         # Create config info for the module
         myConfigInfoDir = myModuleDir.mkdir("configInfo")
-        self._hConfigInfo = ROOT.TH1F("configinfo","configinfo",3,0,3) # Have to store the histogram to keep it alive for writing
+        self._hConfigInfo = ROOT.TH1F("configinfo","configinfo",2,0,2) # Have to store the histogram to keep it alive for writing        self._hConfigInfo.GetXaxis().SetBinLabel(1,"control")
         self._hConfigInfo.GetXaxis().SetBinLabel(1,"control")
         self._hConfigInfo.SetBinContent(1, 1)
-        self._hConfigInfo.GetXaxis().SetBinLabel(2,"energy")
-        self._hConfigInfo.SetBinContent(2, self._energy)
-        self._hConfigInfo.GetXaxis().SetBinLabel(3,"luminosity")
-        self._hConfigInfo.SetBinContent(3, self._luminosity)
+        #self._hConfigInfo.GetXaxis().SetBinLabel(2,"energy")
+        #self._hConfigInfo.SetBinContent(2, self._energy)
+        self._hConfigInfo.GetXaxis().SetBinLabel(2,"luminosity")
+        self._hConfigInfo.SetBinContent(2, self._luminosity)
         self._hConfigInfo.SetDirectory(myConfigInfoDir)
         myConfigInfoDir.Add(self._dataVersion)
         myConfigInfoDir.Add(self._codeVersion)
