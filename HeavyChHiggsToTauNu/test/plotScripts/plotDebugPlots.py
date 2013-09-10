@@ -107,7 +107,7 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     doPlots(myDsetMgr, opts, mySuffix)
 
     # Print counters
-    doCounters(myDsetMgr)
+    doCounters(myDsetMgr, mySuffix)
     print "Results saved in directory: %s"%mySuffix
 
 def doPlots(myDsetMgr, opts, mySuffix):
@@ -401,31 +401,37 @@ def doCounters(myDsetMgr, mySuffix=""):
     print "============================================================"
     print mySuffix
     print "============================================================"
-    print "Main counter (MC normalized by collision data luminosity)"
+    out = open(os.path.join(mySuffix, "counters.txt"), "w")
+    def printAndSave(line):
+        print line
+        out.write(line)
+        out.write("\n")
+
+    printAndSave("Main counter (MC normalized by collision data luminosity)")
     mainTable = eventCounter.getMainCounterTable()
     mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
     # Default
 #    cellFormat = counter.TableFormatText()
     # No uncertainties
     cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=False))
-    print mainTable.format(cellFormat)
+    printAndSave(mainTable.format(cellFormat))
 
 
 
 
-#    print eventCounter.getSubCounterTable("tauIDTauSelection").format()
-    print eventCounter.getSubCounterTable("TauIDPassedEvt::TauSelection_HPS").format(cellFormat)
-    print eventCounter.getSubCounterTable("TauIDPassedJets::TauSelection_HPS").format(cellFormat)
-    print eventCounter.getSubCounterTable("b-tagging").format(cellFormat)
-    print eventCounter.getSubCounterTable("Jet selection").format(cellFormat)
-    print eventCounter.getSubCounterTable("Jet main").format(cellFormat)    
-    print eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat)
-    print eventCounter.getSubCounterTable("MuonSelection").format(cellFormat)
-    print eventCounter.getSubCounterTable("MCinfo for selected events").format(cellFormat) 
-    print eventCounter.getSubCounterTable("ElectronSelection").format(cellFormat)  
-#    print eventCounter.getSubCounterTable("top").format(cellFormat) 
+#    printAndSave(eventCounter.getSubCounterTable("tauIDTauSelection").format())
+    printAndSave(eventCounter.getSubCounterTable("TauIDPassedEvt::TauSelection_HPS").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("TauIDPassedJets::TauSelection_HPS").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("b-tagging").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("Jet selection").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("Jet main").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("MuonSelection").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("MCinfo for selected events").format(cellFormat))
+    printAndSave(eventCounter.getSubCounterTable("ElectronSelection").format(cellFormat))
+#    printAndSave(eventCounter.getSubCounterTable("top").format(cellFormat))
 
-    
+    out.close()
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))
 #    print eventCounter.getMainCounterTable().format(latexFormat)
     
