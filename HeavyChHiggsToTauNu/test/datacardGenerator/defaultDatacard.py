@@ -3,7 +3,7 @@ DataCardName    = 'Default'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_vitalonly_correctCtrlPlots'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/testInverted'
-Path = "/home/wendland/data/v445/2013-08-29"
+Path = "/home/wendland/data/v445/2013-09-04"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
@@ -29,8 +29,6 @@ OptionReplaceEmbeddingByMC = True
 OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = False
-OptionQCDfactorisedFactorisationSchema = "TauPt" # options: 'full', 'taupt' (recommended), 'taueta, 'nvtx'
-OptionDoQCDClosureTests = False
 
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
@@ -92,6 +90,12 @@ Observation = ObservationInput(datasetDefinition="Data",
 #Observation.setPaths(signalPath,signalDataPaths)
 
 ##############################################################################
+# Systematics lists
+import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.HChSystematics as systematics
+
+
+
+##############################################################################
 # DataGroup (i.e. columns in datacard) definitions
 #
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import DataGroup
@@ -136,7 +140,7 @@ if OptionMassShape == "TransverseMass":
         landsProcess = 3,
         validMassPoints = MassPoints,
         datasetType  = "QCD factorised",
-        datasetDefinition = "Data",
+        datasetDefinition = "QCDfactorisedmt",
         nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"], # FIXME
         QCDfactorisedInfo = { "afterStdSelSource": "MtAfterStandardSelections",
                               "afterMETLegSource": "MtAfterLeg1",
@@ -149,8 +153,7 @@ elif OptionMassShape == "FullMass":
         landsProcess = 3,
         validMassPoints = MassPoints,
         datasetType  = "QCD factorised",
-        datasetDefinition = "Data",
-        MCEWKDatasetDefinitions = ["TTJets","WJets","DYJetsToLL","Diboson","SingleTop"],
+        datasetDefinition = "QCDfactorisedinvmass",
         nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"], # FIXME
         QCDfactorisedInfo = { "afterStdSelSource": "MassMtAfterStandardSelections",
                               "afterMETLegSource": "MassAfterLeg1",
