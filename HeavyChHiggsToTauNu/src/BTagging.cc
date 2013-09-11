@@ -789,9 +789,9 @@ namespace HPlus {
   }
 
   // Method called from SignalAnalysis.cc:
-  void BTagging::fillScaleFactorHistograms(BTagging::Data& data) { // FIXME: up and down uncert
+  void BTagging::fillScaleFactorHistograms(BTagging::Data& data) {
     hScaleFactor->Fill(data.getScaleFactor());
-    hBTagAbsoluteUncertainty->Fill(data.getScaleFactorAbsoluteUncertainty_up());
-    hBTagRelativeUncertainty->Fill(data.getScaleFactorRelativeUncertainty_up());
+    hBTagAbsoluteUncertainty->Fill(data.getScaleFactorMaxAbsUncertainty());
+    hBTagRelativeUncertainty->Fill(data.getScaleFactorMaxAbsUncertainty() / data.fEventScaleFactor);
   }
 }
