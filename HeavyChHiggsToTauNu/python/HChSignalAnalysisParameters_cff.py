@@ -631,6 +631,11 @@ pileupWeightReader = cms.untracked.PSet(
     enabled = cms.bool(False),
 )
 
+topPtWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("topPtWeightNominal"),
+    enabled = cms.bool(False),
+)
+
 # Default parameters for heavy H+ analysis
 def cloneForHeavyAnalysis(lightModule):
     heavyModule = lightModule.clone()

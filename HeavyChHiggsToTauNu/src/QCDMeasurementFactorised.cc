@@ -16,6 +16,7 @@ namespace HPlus {
     fApplyRtauCutForTauCandidate(iConfig.getUntrackedParameter<bool>("applyRtauCutForTauCandidate")),
     // Counters - do not change order
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
+    fTopPtWeightCounter(eventCounter.addCounter("Top pt reweight")),
     fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
     fMETFiltersCounter(eventCounter.addCounter("MET filters")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET")),
@@ -63,6 +64,7 @@ namespace HPlus {
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
+    fTopPtWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("topPtWeightReader"), fHistoWrapper, "TopPtWeight"),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauCandidates"),
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
@@ -167,6 +169,13 @@ namespace HPlus {
     }
     increment(fAllCounter);
 
+//------ Top pT reweighting
+    if(!iEvent.isRealData()) {
+      const double topPtWeight = fTopPtWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(topPtWeight);
+      fTree.setTopPtWeight(topPtWeight);
+    }
+    increment(fTopPtWeightCounter);
 
 //------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
     if(!iEvent.isRealData()) {

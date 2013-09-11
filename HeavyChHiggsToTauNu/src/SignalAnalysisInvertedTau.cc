@@ -30,6 +30,7 @@ namespace HPlus {
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     // Common counters
     fAllCounter(eventCounter.addCounter("All events")),
+    fTopPtWeightCounter(eventCounter.addCounter("Top pt reweight")),
     fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
     fMETFiltersCounter(eventCounter.addCounter("MET filters")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),  
@@ -112,6 +113,7 @@ namespace HPlus {
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WjetsWeight"),
+    fTopPtWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("topPtWeightReader"), fHistoWrapper, "TopPtWeight"),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     // Common plots
     fCommonPlots(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDInverted),
@@ -322,6 +324,13 @@ namespace HPlus {
       fEventWeight.multiplyWeight(myPileupWeight);
     }
     increment(fAllCounter);
+
+//------ Top pT reweighting
+    if(!iEvent.isRealData()) {
+      const double topPtWeight = fTopPtWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(topPtWeight);
+    }
+    increment(fTopPtWeightCounter);
 
 //------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
     if(!iEvent.isRealData()) {

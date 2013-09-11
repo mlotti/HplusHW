@@ -5,6 +5,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
 import HiggsAnalysis.HeavyChHiggsToTauNu.WJetsWeight as wjetsWeight
+import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeight_cfi as topPtWeight
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 
 tooManyAnalyzersLimit = 100
@@ -61,6 +62,8 @@ class ConfigBuilder:
                  applyTauTriggerLowPurityScaleFactor = False, # Apply tau trigger scale factor or not
                  applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
+                 applyTopPtReweight = False, # Apply Top Pt reweighting on TTJets sample
+                 topPtReweightMode = None, # None for default, see TopPtWeight_cfi.py for allowed values
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
                 # tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
                  useTriggerMatchedTaus = True,
@@ -78,6 +81,7 @@ class ConfigBuilder:
                  doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
+                 doTopPtWeightVariation = False, # Perform the signal analysis with the Top pt weight variations
                  doScaleFactorVariation = False, # Perform the signal analysis with the scale factor variations
                  doOptimisation = False, optimisationScheme=None, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
@@ -107,6 +111,8 @@ class ConfigBuilder:
         self.applyTauTriggerLowPurityScaleFactor = applyTauTriggerLowPurityScaleFactor
         self.applyMETTriggerScaleFactor = applyMETTriggerScaleFactor
         self.applyPUReweight = applyPUReweight
+        self.applyTopPtReweight = applyTopPtReweight
+        self.topPtReweightMode = topPtReweightMode
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
         self.useTriggerMatchedTaus = useTriggerMatchedTaus
         self.useCHSJets = useCHSJets
@@ -124,6 +130,7 @@ class ConfigBuilder:
         self.doSystematics = doSystematics
         self.doJESVariation = doJESVariation
         self.doPUWeightVariation = doPUWeightVariation
+        self.doTopPtWeightVariation = doTopPtWeightVariation
         self.doScaleFactorVariation = doScaleFactorVariation
         self.doOptimisation = doOptimisation
         self.optimisationScheme = optimisationScheme
@@ -140,6 +147,9 @@ class ConfigBuilder:
                 raise Exception("Command line option 'wjetsWeighting' works only with MC")
             if self.options.tauEmbeddingInput != 0:
                 raise Exception("There are no WJets weights for embedding yet")
+
+        if self.applyTopPtReweight and not self.applyPUReweight:
+            raise Exception("When applyTopPtReweight=True, also applyPUReweight must be True (you had it False)")
 
         if self.doOptimisation or self.doAgainstElectronScan or self.doTauIsolationAndJetPUScan:
             #self.doSystematics = True            # Make sure that systematics are run
@@ -306,6 +316,13 @@ class ConfigBuilder:
                     setattr(process, "wjetsWeight"+dataEra, weightMod)
                     process.commonSequence *= weightMod
 
+                if self.options.sample == "TTJets" and self.applyTopPtReweight:
+                    weightMod = topPtWeight.topPtWeight.clone(enabled=True)
+                    if self.topPtReweightMode is not None:
+                        weightMod.mode = self.topPtReweightMode
+                    setattr(process, "topPtWeight"+dataEra, weightMod)
+                    process.commonSequence += weightMod
+
                 for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
                     if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
@@ -315,6 +332,9 @@ class ConfigBuilder:
                         if self.options.wjetsWeighting != 0:
                             mod.wjetsWeightReader.weightSrc = "wjetsWeight"+dataEra
                             mod.wjetsWeightReader.enabled = True
+                        if self.options.sample == "TTJets" and self.applyTopPtReweight:
+                            mod.topPtWeightReader.weightSrc = "topPtWeight"+dataEra
+                            mod.topPtWeightReader.enabled = True
 
                     if self.doLightAnalysis:
                         analysisLightModules.append(mod)
@@ -441,6 +461,7 @@ class ConfigBuilder:
         #if "QCDMeasurement" not in analysisNames_: # Need also for QCD measurements, since they contain MC EWK
         self._buildJESVariation(process, analysisNamesForSystematics)
         self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
+        self._buildTopPtWeightVariation(process, analysisNamesForSystematics)
         # Disabled for now, seems like it would be better to
         #handle SF uncertainties by error propagation after all
         # Re-enabled for test
@@ -524,9 +545,20 @@ class ConfigBuilder:
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
         process.commonSequence, additionalCounters = addPatOnTheFly(process, self.options, self.dataVersion, selectedPrimaryVertexFilter=True)
 
+        # For top pt reweighting
+        if self.options.sample == "TTJets" and self.applyTopPtReweight:
+            process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
+            process.commonSequence += process.makeGenEvt
+            process.decaySubset.fillMode = cms.string("kME")
+
         # Add configuration information to histograms.root
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
         process.infoPath = addConfigInfo(process, self.options, self.dataVersion)
+        if self.options.sample == "TTJets" and self.applyTopPtReweight:
+            if self.topPtReweightMode is None:
+                process.configInfo.topPtReweightMode = cms.untracked.string(topPtWeight.topPtWeight.mode.value())
+            else:
+                process.configInfo.topPtReweightMode = cms.untracked.string(self.topPtReweightMode)
 
         return (process, additionalCounters)
 
@@ -1071,6 +1103,48 @@ class ConfigBuilder:
         names.append(self._addVariationModule(process, module, name+self.systPrefix+"PUWeightMinus"))
 
         self._accumulateAnalyzers("PU weight variation", names)
+
+    ## Build Top pt weight variation
+    #
+    # \param process                      cms.Process object
+    # \param analysisNamesForSystematics  Names of the analysis modules for which the PU weight variation should be done
+    def _buildTopPtWeightVariation(self, process, analysisNamesForSystematics):
+        if not self.applyTopPtReweight:
+            return
+        if not (self.doTopPtWeightVariation or self.doSystematics):
+            return
+
+        if self.dataVersion.isMC():
+            for name in analysisNamesForSystematics:
+                self._addTopPtWeightVariation(process, name)
+            print "Added Top pt weight variation for %d modules" % len(analysisNamesForSystematics)
+        else:
+            print "PU weight variation disabled for data (not meaningful for data)"
+
+    ## Add Top pt weight variation
+    #
+    # \param process   cms.Process object
+    # \param name      Name of the module to be used as a prototype
+    def _addTopPtWeightVariation(self, process, name):
+        def addVariation(direction, directionName):
+            module = self._cloneForVariation(getattr(process, name))
+            if self.options.sample == "TTJets":
+                weightName = module.topPtWeightReader.weightSrc.getModuleLabel()
+                varyName = weightName+directionName
+                if not hasattr(process, varyName):
+                    varyMod = getattr(process, weightName).clone(
+                        variationEnabled = True,
+                        variationDirection = direction
+                    )
+                    setattr(process, varyName, varyMod)
+                    process.commonSequence += varyMod
+                module.topPtWeightReader.weightSrc = varyName
+            return self._addVariationModule(process, module, name+self.systPrefix+"TopPtWeight"+directionName)
+
+        names = []
+        names.append(addVariation(+1, "Plus"))
+        names.append(addVariation(-1, "Minus"))
+        self._accumulateAnalyzers("Top pt variation", names)
 
     ## Add scale factor variation
     #

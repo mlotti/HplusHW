@@ -70,6 +70,7 @@ namespace HPlus {
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     // Main counters
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
+    fTopPtWeightCounter(eventCounter.addCounter("Top pt reweight")),
     fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
     fEmbeddingGeneratorWeightCounter(eventCounter.addCounter("Embedding: generator weight weight")),
     fMETFiltersCounter(eventCounter.addCounter("MET filters")),
@@ -177,6 +178,7 @@ namespace HPlus {
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
+    fTopPtWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("topPtWeightReader"), fHistoWrapper, "TopPtWeight"),
     fEmbeddingGeneratorWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingGeneratorWeightReader"), fHistoWrapper, "EmbeddingGeneratorWeight"),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
@@ -383,6 +385,14 @@ namespace HPlus {
       fTree.setPileupWeight(myPileupWeight);
     }
     increment(fAllCounter);
+
+//------ Top pT reweighting
+    if(!iEvent.isRealData()) {
+      const double topPtWeight = fTopPtWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(topPtWeight);
+      fTree.setTopPtWeight(topPtWeight);
+    }
+    increment(fTopPtWeightCounter);
 
 //------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
     if(!iEvent.isRealData()) {

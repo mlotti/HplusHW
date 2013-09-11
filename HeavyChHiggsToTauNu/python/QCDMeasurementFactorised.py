@@ -39,6 +39,7 @@ def createEDFilter(param):
         vertexWeight = param.vertexWeight.clone(),
         pileupWeightReader = param.pileupWeightReader.clone(),
         wjetsWeightReader = param.wjetsWeightReader.clone(),
+        topPtWeightReader = param.topPtWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
         Tree = param.tree.clone(),
         eventCounter = param.eventCounter.clone(),
