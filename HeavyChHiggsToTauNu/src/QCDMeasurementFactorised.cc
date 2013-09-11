@@ -1,6 +1,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementFactorised.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ConfigInfo.h"
 
 #include "TNamed.h"
 #include <iomanip>
@@ -98,8 +99,7 @@ namespace HPlus {
 
     // Book histograms
     edm::Service<TFileService> fs;
-    // Save the module configuration to the output ROOT file as a TNamed object
-    fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
+    ConfigInfo::writeConfigInfo(iConfig, *fs);
 
     hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesBeforeWeight", "Number of vertices without weighting;Vertices;N_{events} / 1 Vertex", 50, 0, 50);
     hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesAfterWeight", "Number of vertices with weighting; Vertices;N_{events} / 1 Vertex", 50, 0, 50);

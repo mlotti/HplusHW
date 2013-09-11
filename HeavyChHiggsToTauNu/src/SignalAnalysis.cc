@@ -2,6 +2,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ConfigInfo.h"
 
 // #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
 
@@ -10,8 +11,6 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-
-#include "TNamed.h"
 
 bool  hasImmediateMother(const reco::Candidate& p, int id);
 bool  hasImmediateDaughter(const reco::Candidate& p, int id);
@@ -243,8 +242,7 @@ namespace HPlus {
     }
 
     edm::Service<TFileService> fs;
-    // Save the module configuration to the output ROOT file as a TNamed object
-    fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
+    ConfigInfo::writeConfigInfo(iConfig, *fs);
 
     // Book histograms filled in the analysis body
     

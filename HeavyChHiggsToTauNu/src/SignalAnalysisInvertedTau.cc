@@ -3,6 +3,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ConfigInfo.h"
 
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -155,8 +156,7 @@ namespace HPlus {
     fOnlyGenuineTaus(iConfig.getUntrackedParameter<bool>("onlyGenuineTaus", false))
   {
     edm::Service<TFileService> fs;
-    // Save the module configuration to the output ROOT file as a TNamed object
-    fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
+    ConfigInfo::writeConfigInfo(iConfig, *fs);
  
     TFileDirectory myInvertedDir = fs->mkdir("Inverted");
     TFileDirectory myBaselineDir = fs->mkdir("baseline");

@@ -7,6 +7,7 @@ import FWCore.ParameterSet.Config as cms
 # creating the EDFilter.
 def createEDFilter(param):
     return cms.EDFilter("HPlusSignalAnalysisInvertedTauFilter",
+        configInfo = param.configInfo.clone(),
         blindAnalysisStatus = param.blindAnalysisStatus,
 	histogramAmbientLevel = param.histogramAmbientLevel,
         trigger = param.trigger.clone(),

@@ -1,5 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
+configInfo = cms.PSet(
+    topPtReweightType = cms.string("UNWEIGHTED")
+)
+
 # Blind analysis - do not fill final counter and histogram for data if true
 blindAnalysisStatus = cms.untracked.bool(False)
 
