@@ -276,7 +276,6 @@ class QCDfactorisedColumn(DatacardColumn):
                  enabledForMassPoints = [],
                  nuisanceIds = [],
                  datasetMgrColumn = "",
-                 datasetMgrColumnForQCDMCEWK = "",
                  additionalNormalisationFactor = 1.0,
                  QCDfactorisedInfo = None,
                  debugMode = False):
@@ -287,7 +286,6 @@ class QCDfactorisedColumn(DatacardColumn):
                                 datasetType = "QCD factorised",
                                 nuisanceIds = nuisanceIds,
                                 datasetMgrColumn = datasetMgrColumn,
-                                datasetMgrColumnForQCDMCEWK = datasetMgrColumnForQCDMCEWK,
                                 additionalNormalisationFactor = additionalNormalisationFactor)
         # Store info dictionary for QCD factorised
         self._factorisedConfig = QCDfactorisedInfo

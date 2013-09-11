@@ -45,12 +45,10 @@ void PileupWeightSelector::setOutput(TDirectory *dir) {
 }
 
 void PileupWeightSelector::setupBranches(BranchManager& branchManager) {
-  branchManager.book("TrueNumInteractions", fTrueNumInteractions);
+  branchManager.book("TrueNumInteractions", &fTrueNumInteractions);
 }
 
 bool PileupWeightSelector::process(Long64_t entry) {
-  fTrueNumInteractions.setEntry(entry);
-
   Int_t bin = fWeights->FindFixBin(fTrueNumInteractions->value());
   double weight = fWeights->GetBinContent(bin);
   hEvents->SetBinContent(1, hEvents->GetBinContent(1)+weight);

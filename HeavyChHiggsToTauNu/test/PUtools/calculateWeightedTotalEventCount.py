@@ -20,6 +20,12 @@ class DatasetWrapper:
     def getRootFile(self):
         return self.rootFile
 
+    def getTree(self, treeName):
+        return self.rootFile.Get(treeName)
+
+    def createRootChain(self, treeName):
+        return (self.getTree(treeName), treeName)
+
     def getName(self):
         return self.name
 
@@ -79,22 +85,22 @@ def main(opts):
             if rootFile.IsZombie():
                 sys.exit()
 
+            # Create Dataset wrapper
+            dset = DatasetWrapper(taskName, rootFile, multicrabDir)
+
             # Get tree for non-weighted number of events
-            mytree = rootFile.Get("pileupNtuple/tree")
+            mytree = dset.getTree("pileupNtuple/tree")
             if mytree == 0:
                 raise Exception("Did not find 'pileupNtuple/tree' from %s" % rootFile.GetName())
             nevents = mytree.GetEntries()
-
-            # Create Dataset wrapper
-            dset = DatasetWrapper(taskName, rootFile, multicrabDir)
 
             # Process tree
             ntupleCache.process(dset)
 
             # Get results
-            nevt = ntupleCache.getRootHisto(dset, "events").GetBinContent(1)
-            nevtup = ntupleCache.getRootHisto(dset, "eventsUp").GetBinContent(1)
-            nevtdown = ntupleCache.getRootHisto(dset, "eventsDown").GetBinContent(1)
+            nevt = ntupleCache.getRootHisto(dset, "events", None).GetBinContent(1)
+            nevtup = ntupleCache.getRootHisto(dset, "eventsUp", None).GetBinContent(1)
+            nevtdown = ntupleCache.getRootHisto(dset, "eventsDown", None).GetBinContent(1)
 
             rootFile.Close()
             # Write output line

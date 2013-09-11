@@ -51,6 +51,30 @@ namespace HPlus {
 
   };
 
+    /**
+   * Class to check normalisation of DY enriched sample with fake taus
+   */
+  class NormalisationWJetsEnrichedBoostedWH : public NormalisationAnalysis {
+  public:
+    NormalisationWJetsEnrichedBoostedWH(EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    NormalisationWJetsEnrichedBoostedWH(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    ~NormalisationWJetsEnrichedBoostedWH();
+
+    void analyse(const edm::Event& iEvent,
+                 const TauSelection::Data& tauData,
+                 const FakeTauIdentifier::Data& fakeTauData,
+                 const ElectronSelection::Data& electronData,
+                 const MuonSelection::Data& muonData,
+                 const JetSelection::Data& jetData,
+                 METTriggerEfficiencyScaleFactor* metTrgSF,
+                 const QCDTailKiller::Data& tailKillerData,
+                 const METSelection::Data& metData,
+                 const BTagging::Data& btagData);
+
+  private:
+
+  };
+
   /**
    * Class to check normalisation of DY enriched sample with fake taus
    */

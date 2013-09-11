@@ -547,6 +547,10 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
 # axis automatically. It is recommended to call this every time
 # something is drawn with an option "Z"
 def updatePaletteStyle(histo):
+    if not hasattr(histo, "GetListOfFunctions"):
+        # Applies at least to THStack, which is not applicable for Z axis
+        return None
+
     ROOT.gPad.Update()
     paletteAxis = histo.GetListOfFunctions().FindObject("palette")
     if paletteAxis == None:
@@ -1391,6 +1395,8 @@ class Histo:
     # Is the histogram from MC?
 
 ## Represents one (TH1/TH2) histogram associated with a dataset.Dataset object
+#
+# Treats pseudo-datasets as MC-datasets.
 class HistoWithDataset(Histo):
     ## Constructor
     #
@@ -1423,7 +1429,7 @@ class HistoWithDataset(Histo):
             Histo.__init__(self, drh.getHistogramWithUncertainties(), drh.getName())
             self.dataset = drh.getDataset()
 
-        self.setIsDataMC(self.dataset.isData(), self.dataset.isMC())
+        self.setIsDataMC(self.dataset.isData(), self.dataset.isMC() or self.dataset.isPseudo())
 
     ## Get the dataset.Dataset object
     def getDataset(self):

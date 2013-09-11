@@ -1,4 +1,4 @@
- #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisInvertedTau.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisInvertedTau.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
@@ -53,6 +53,7 @@ namespace HPlus {
     fBaselineBtagCounter(eventCounter.addCounter("Baseline: btagging")),
     fBaselineBTaggingScaleFactorCounter(eventCounter.addCounter("Baseline: btagging scale factor")),
     fBaselineQCDTailKillerBackToBackCounter(eventCounter.addCounter("Baseline: QCD tail killer back-to-back")),
+    fBaselineTopSelectionCounter(eventCounter.addCounter("Baseline: top reco")),
     fBaselineDeltaPhiTauMETCounter(eventCounter.addCounter("Baseline: -> DeltaPhi(Tau,MET) upper limit")),
     fBaselineSelectedEventsCounter(eventCounter.addCounter("Baseline: Selected events")),
     fBaselineSelectedEventsInvariantMassCounter(eventCounter.addCounter("Baseline: Selected events invariant mass")),
@@ -75,6 +76,7 @@ namespace HPlus {
     fInvertedBTaggingCounter(eventCounter.addCounter("Inverted: btagging")),
     fInvertedBTaggingScaleFactorCounter(eventCounter.addCounter("Inverted: btagging scale factor")),
     fInvertedQCDTailKillerBackToBackCounter(eventCounter.addCounter("Inverted: QCD tail killer back-to-back")),
+    fInvertedTopSelectionCounter(eventCounter.addCounter("Inverted: top reco")),
     fInvertedDeltaPhiTauMETCounter(eventCounter.addCounter("Inverted: -> DeltaPhi(Tau,MET) upper limit")),
     fInvertedSelectedEventsCounter(eventCounter.addCounter("Inverted: Selected events")),
     fInvertedSelectedEventsInvariantMassCounter(eventCounter.addCounter("Inverted: Selected events invariant mass")),
@@ -86,11 +88,6 @@ namespace HPlus {
 //     fHiggsMassCutCounter(eventCounter.addCounter("Inverted: HiggsMassCut")),
     ftransverseMassCut80Counter(eventCounter.addCounter("Inverted: -> transverseMass > 80")),
     ftransverseMassCut100Counter(eventCounter.addCounter("Inverted: -> transverseMass > 100")),
-    fTopSelectionCounter(eventCounter.addCounter("Inverted: -> Top Selection cut")),
-    fTopChiSelectionCounter(eventCounter.addCounter("Inverted: -> Top ChiSelection cut")),
-    fTopWithBSelectionCounter(eventCounter.addCounter("Inverted: -> Top with B Selection cut")),
-    ftransverseMassCut100TopCounter(eventCounter.addCounter("Inverted: -> transverseMass > 100 top cut")),
-
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, fHistoWrapper),
     fElectronSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("ElectronSelection"), fPrimaryVertexSelection.getSelectedSrc(), eventCounter, fHistoWrapper),
@@ -101,10 +98,8 @@ namespace HPlus {
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, fHistoWrapper),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, fHistoWrapper),
     fJetTauInvMass(iConfig.getUntrackedParameter<edm::ParameterSet>("jetTauInvMass"), eventCounter, fHistoWrapper),
-    fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper),
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
-    fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
-    fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
+    fTopSelectionManager(iConfig, eventCounter, fHistoWrapper, iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     fFullHiggsMassCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("invMassReco"), eventCounter, fHistoWrapper),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
@@ -120,6 +115,8 @@ namespace HPlus {
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     // Common plots
     fCommonPlots(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDInverted),
+    fNormalizationSystematicsSignalRegion(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDNormalizationSystematicsSignalRegion),
+    fNormalizationSystematicsControlRegion(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDNormalizationSystematicsControlRegion),
     // Common plots at every step for baseline
     fCommonPlotsBaselineAfterMetSF(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterMetSF",false,"")),
     fCommonPlotsBaselineAfterCollinearCuts(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterCollinearCuts",false,"")),
@@ -178,9 +175,6 @@ namespace HPlus {
     hOneProngRtauPassedInvertedTaus = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "OneProngRtauPassedInvertedTaus", "OneProngRtauPassedInvertedTaus", 10, 0, 10);
     hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "verticesBeforeWeight", "Number of vertices without weighting", 60, 0, 60);
     hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "verticesAfterWeight", "Number of vertices with weighting", 60, 0, 60);
-    hTransverseMassWithTopCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassWithTopCut", "transverseMassWithTopCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassTopChiSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopChiSelection", "transverseMassTopChiSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassTopBjetSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopBjetSelection", "transverseMassTopBjetSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
     hTransverseMassVsDphi = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, *fs, "transverseMassVsDphi", "transverseMassVsDphi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.,180,0.,180.);
 
     // Tau properties for inverted selection after tau ID + tau SF's
@@ -231,6 +225,7 @@ namespace HPlus {
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts, "MTBaselineTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterBtag, "MTBaselineTauIdAfterBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterBackToBackCuts, "MTBaselineTauIdAfterBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterTopReco, "MTBaselineTauIdAfterTopReco", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     // baseline invariant mass histos
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hInvMassBaselineTauIdAfterCollinearCuts, "INVMASSBaselineTauIdAfterCollinearCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hInvMassBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, "INVMASSBaselineTauIdAfterCollinearCutsPlusBackToBackCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
@@ -260,11 +255,11 @@ namespace HPlus {
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts, "MTInvertedTauIdAfterMetPlusSoftBtaggingPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterBtag, "MTInvertedTauIdAfterBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterBackToBackCuts, "MTInvertedTauIdAfterBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterTopReco, "MTInvertedTauIdAfterTopReco", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     // inverted invariant mass histos
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hInvMassInvertedTauIdAfterCollinearCuts, "INVMASSInvertedTauIdAfterCollinearCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hInvMassInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, "INVMASSInvertedTauIdAfterCollinearCutsPlusBackToBackCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
 
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hTopMass, "TopMass", "m_{top}, GeV/c^2", 200, 0.0, 400.0 );
     //     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hHiggsMassTailKiller, "HiggsMassTailKiller", 250, 0.0 , 500.0 );
 
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hNBInvertedTauIdJet, "NBInvertedTauIdJet", "N_{b jets}", 10, 0.0 , 10.0 );
@@ -301,6 +296,9 @@ namespace HPlus {
 //     hDeltaR_TauMETJet3MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInvertedDir, "DeltaR_TauMETJet3MET", "DeltaR_TauMETJet3MET ", 65, 0., 260.);
 //     hDeltaR_TauMETJet4MET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myInvertedDir, "DeltaR_TauMETJet4MET", "DeltaR_TauMETJet4MET ", 65, 0., 260.);
 
+    // Shapes for closure test systematics for data-driven control plots are done via the extra Common plots objects
+    fNormalizationSystematicsSignalRegion.disableCommonPlotsFilledAtEveryStep();
+    fNormalizationSystematicsControlRegion.disableCommonPlotsFilledAtEveryStep();
   }
 
   SignalAnalysisInvertedTau::~SignalAnalysisInvertedTau() { }
@@ -364,7 +362,9 @@ namespace HPlus {
     increment(fVertexFilterCounter);
 
     // Setup common plots
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+
     fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
 
 //------ Tau candidate selection
@@ -443,7 +443,11 @@ namespace HPlus {
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForBaseline.getSelectedTau()));
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
-      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+      // Initialize also normalization systematics plotting
+      fNormalizationSystematicsSignalRegion.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+      fNormalizationSystematicsSignalRegion.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauDataForBaseline, fMETSelection);
+
       // Do not fill histograms (keep them for the inverted part), but set info for splitting the phase space
       fCommonPlots.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauDataForBaseline, fMETSelection);
       // Apply scale factor for fake tau
@@ -470,8 +474,13 @@ namespace HPlus {
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForInverted.getSelectedTau()));
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
-      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+
+      fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
       fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauDataForInverted, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
+      // Initialize also normalization systematics plotting
+      fNormalizationSystematicsControlRegion.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+      fNormalizationSystematicsControlRegion.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauDataForInverted, fMETSelection);
+
       // Apply scale factor for fake tau
       if (!iEvent.isRealData()) {
         fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauDataForInverted.getSelectedTau()->eta()));
@@ -572,6 +581,8 @@ namespace HPlus {
       if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
       fCommonPlotsBaselineAfterCollinearCutsPlusBackToBackCuts->fill();
     }
+    // Fill normalization systematics plots
+    fNormalizationSystematicsSignalRegion.fillAllControlPlots(iEvent, transverseMass);
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
     //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     // double myWeightWithBtagSF = fEventWeight.getWeight() * btagDataTmp.getScaleFactor();
@@ -653,7 +664,16 @@ namespace HPlus {
 //    hQCDTailKillerJet2BackToBackBaseline->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(2)); // Make control plot before cut
 //    hQCDTailKillerJet3BackToBackBaseline->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(3)); // Make control plot before cut
 
-	
+    // Top reconstruction
+    BjetSelection::Data bjetSelectionData = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+    TopSelectionManager::Data topSelectionData = fTopSelectionManager.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
+    if (!(topSelectionData.passedEvent())) return false;
+    increment(fBaselineTopSelectionCounter);
+    myHandler.fillShapeHistogram(hMTBaselineTauIdAfterTopReco, transverseMass);
+
+    // top mass with possible event cuts
+
+
     // delta phi cuts
     double deltaPhi = DeltaPhi::reconstruct(*(selectedTau), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     hDeltaPhiBaseline->Fill(deltaPhi);
@@ -753,6 +773,8 @@ namespace HPlus {
       if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
       fCommonPlotsInvertedAfterCollinearCutsPlusBackToBackCuts->fill();
     }
+    // Fill normalization systematics plots
+    fNormalizationSystematicsControlRegion.fillAllControlPlots(iEvent, transverseMass);
 
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
     //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
@@ -880,37 +902,14 @@ namespace HPlus {
     fCommonPlotsInvertedAfterBackToBackCuts->fill();
 
     // Top reconstruction
-    TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    //fCommonPlots.fillControlPlotsAtTopSelection(iEvent, TopChiSelectionData);
-    // top mass with binning
-    double topMass = TopChiSelectionData.getTopMass();
-    myHandler.fillShapeHistogram(hTopMass, topMass);
-
-    myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterCuts, selectedTau->pt());
-    myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtaAfterCuts, selectedTau->eta());
-
-    if (TopChiSelectionData.passedEvent() ) {
-         increment(fTopChiSelectionCounter);     
-         hTransverseMassTopChiSelection->Fill(transverseMass);     
-    } 
-
-    if (BjetSelectionData.passedEvent() ) {
-      TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
-
-      if (TopWithBSelectionData.passedEvent() ) {
-        increment(fTopWithBSelectionCounter);
-        hTransverseMassTopBjetSelection->Fill(transverseMass);     
-      }    
-    }
+    BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+    TopSelectionManager::Data topSelectionData = fTopSelectionManager.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
+    fCommonPlots.fillControlPlotsAtTopSelection(iEvent, topSelectionData);
+    if (!(topSelectionData.passedEvent())) return false;
+    increment(fInvertedTopSelectionCounter);
+    myHandler.fillShapeHistogram(hMTInvertedTauIdAfterTopReco, transverseMass);
 
     // top mass with possible event cuts
-    if (TopSelectionData.passedEvent() ) {
-      increment(fTopSelectionCounter);      
-      hTransverseMassWithTopCut->Fill(transverseMass);
-      if(transverseMass > 80 ) increment(ftransverseMassCut100TopCounter);   
-    } 
 
     // All selections passed
     fCommonPlots.fillControlPlotsAfterAllSelections(iEvent, transverseMass);

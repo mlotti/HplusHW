@@ -14,16 +14,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 # lumiCalc.py usage taken from
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiCalc
 
-def usePixelLumiCalc(taskName):
-    for era in ["2011A", "2011B", "2012A", "2012B"]:
-        if era in taskName:
-            return True
-    # No pixel lumi available after ICHEP12 yet
-    for era in ["2012C", "2012D"]:
-        if era in taskName:
-            return False
-    raise Exception("No known era in task name %s" % taskName)
-
 dataVersion_re = re.compile("dataVersion=(?P<dataVersion>[^: ]+)")
 def isMCTask(taskdir):
     path = os.path.join(taskdir, "share", "crab.cfg")
@@ -112,12 +102,6 @@ def main(opts, args):
     for task, jsonfile in files:
         lumicalc = opts.lumicalc
 
-        if lumicalc == "defaultLumiCalc":
-            if usePixelLumiCalc(task):
-                lumicalc = "pixelLumiCalc"
-            else:
-                lumicalc = "lumiCalc2"
-
         #print
         #print "================================================================================"
         #print "Dataset %s:" % d
@@ -200,16 +184,12 @@ if __name__ == "__main__":
     parser.add_option("--lumiCalc2", dest="lumicalc", action="store_const", const="lumiCalc2",
                       help="Use lumiCalc2.py (default is to use pixelLumiCalc.py)")
     parser.add_option("--pixelLumiCalc", dest="lumicalc", action="store_const", const="pixelLumiCalc",
-                      help="Use pixelLumiCalc.py instead of lumiCalc2.py")
-    parser.add_option("--defaultLumiCalc", dest="lumicalc", action="store_const", const="defaultLumiCalc",
-                      help="Use default mixture of pixelLumiCalc (Run2011AB, Run2012AB) and lumiCalc2 (Run2012CD) (default)")
+                      help="Use pixelLumiCalc.py instead of lumiCalc2.py (default)")
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
     
     if opts.lumicalc == None:
-        opts.lumicalc = "defaultLumiCalc"
+        opts.lumicalc = "pixelLumiCalc"
     print "Calculating luminosity with %s" % opts.lumicalc
-    if opts.lumicalc == "defaultLumiCalc":
-        print "   mixture of pixelLumiCalc (for Run2011AB, Run2012AB) and lumiCalc2 (Run212CD)"
 
     sys.exit(main(opts, args))

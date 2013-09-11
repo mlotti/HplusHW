@@ -24,7 +24,7 @@ dataEras = [
 
 def customize(signalAnalysis):
     # Set here splitting of phase space (underflow bin will be automatically added; last value is edge for overflow bin)
-    signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauPtBinLowEdges = cms.untracked.vdouble(41., 50., 60., 70., 80., 100., 120., 150., 200., 300.)
+    signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150.)
     #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5)
     #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByNVerticesBinLowEdges = cms.untracked.vint32(10)
     #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByDeltaPhiTauMetInDegrees = cms.untracked.vdouble(90.) # If used, one could disable collinear cuts
