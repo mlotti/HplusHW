@@ -9,6 +9,8 @@
 #include<vector>
 //#include<iostream>
 
+class TtGenEvent;
+
 namespace HPlus {
   namespace GenParticleTools {
     const reco::GenParticle *rewindChainUp(const reco::GenParticle *particle);
@@ -63,7 +65,7 @@ namespace HPlus {
 
     std::vector<const reco::GenParticle *> findTTBarWdecays(const edm::PtrVector<reco::GenParticle>& particles);
 
-
+    int calculateTTBarNumberOfLeptons(const TtGenEvent& ttGenEven);
   }
 }
 
