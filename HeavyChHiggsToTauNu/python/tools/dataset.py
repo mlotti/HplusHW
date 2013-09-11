@@ -2047,25 +2047,26 @@ class Dataset:
 
         # Update info from analysis directory specific histogram, if one exists
         realDirName = self._translateName("configInfo")
-        realName = realDirName+"/configinfo"
-        if self.files[0].Get(realName) != None: # important to use !=
+        if self.files[0].Get(realDirName) != None: # important to use !=
             updateInfo = None
             for f in self.files:
-                h = f.Get(realName)
-                if h is None:
-                    raise Exception("%s directory is missing from file %s, it was in %s" % (realName, f.GetName(), self.files[0].GetName()))
-                info = _rescaleInfo(_histoToDict(f.Get(realName)))
-                addDirContentsToInfo(f.Get(realDirName), info)
+                d = f.Get(realDirName)
+                if d == None:
+                    raise Exception("%s directory is missing from file %s, it was in %s" % (realDirName, f.GetName(), self.files[0].GetName()))
+                info = {}
+                h = d.Get("configinfo")
+                if h != None:
+                    info = _rescaleInfo(_histoToDict(d.Get("configinfo")))
+                addDirContentsToDict(f.Get(realDirName), info)
                 if updateInfo == None:
                     updateInfo = info
                 else:
-                    assertInfo(updateInfo, info, self.files[0], f, realName)
+                    assertInfo(updateInfo, info, self.files[0], f, realDirName+"/configinfo")
             if "energy" in updateInfo:
                 #raise Exception("You may not set 'energy' in analysis directory specific configinfo histogram. Please fix %s." % realName)
-                print "WARNING: 'energy' has been set in analysis directory specific configinfo histogram (%s), it will be ignored. Please fix your pseudomulticrab code." % realName
+                print "WARNING: 'energy' has been set in analysis directory specific configinfo histogram (%s), it will be ignored. Please fix your pseudomulticrab code." % (realName+"/configinfo")
                 del updateInfo["energy"]
             self.info.update(updateInfo)
-        print self.name, self.info
 
         self._unweightedCounterDir = counterDir
         if counterDir is not None:
@@ -2374,12 +2375,13 @@ class Dataset:
             raise Exception("Number of all unweighted events is %d < 0, this is a symptom of missing unweighted counter" % self.nAllEventsUnweighted)
 
         try:
-            if hasattr(self.info, "topPtReweightScheme"):
+            if "topPtReweightScheme" in self.info:
                 args = {}
                 args.update(kwargs)
                 if "topPtWeightType" not in kwargs:
                     args["topPtWeightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["topPtReweightType"]]
                 self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.getName(), era).getWeighted(self.nAllEventsUnweighted, self.info["topPtReweightScheme"], **args)
+                print "Using top-pt reweighted Nallevents for sample %s" % self.name
             else:
                 self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.getName(), era).getWeighted(self.nAllEventsUnweighted, **kwargs)
         except KeyError:
