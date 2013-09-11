@@ -559,6 +559,8 @@ class ConfigBuilder:
                 process.configInfo.topPtReweightScheme = cms.untracked.string(topPtWeight.topPtWeight.scheme.value())
             else:
                 process.configInfo.topPtReweightScheme = cms.untracked.string(self.topPtReweightScheme)
+        if self.dataVersion.isMC() and self.applyPUReweight:
+            process.configInfo.isPileupReweighted = cms.untracked.bool(True)
 
         return (process, additionalCounters)
 
