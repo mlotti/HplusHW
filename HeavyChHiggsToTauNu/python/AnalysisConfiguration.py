@@ -820,7 +820,8 @@ class ConfigBuilder:
             return
         #OP: JPL = 0.275, JPM = 0.545, JPT = 0.790, CSVL = 0.244, CSVM = 0.679, CSVT = 0.898
         myCSVWorkingPoints = [0.244, 0.679, 0.898]
-        myJPTWorkingPoints = [0.275, 0.545, 0.790]
+        myJPTWorkingPoints = [] # Efficiencies and scale factors need to be added to BTagging.cc before this can be used!
+        #myJPTWorkingPoints = [0.275, 0.545, 0.790]
 
         names = []
         modules = []
