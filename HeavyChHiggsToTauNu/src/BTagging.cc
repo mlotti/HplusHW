@@ -49,38 +49,40 @@ namespace HPlus {
   // ===== Look-up tables and parametrized functions for scale factors and tagging efficiencies =====
 
   namespace SFBins {
-    double ptmin[] = {30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500};
+    double ptmin[] = {20, 30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 600};
   }
   namespace EffBins {
     double ptmin[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
   }
   namespace CSVL {
     // B-tagging scale factors
-    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt
-    // Retrieved: 2013-09-04
-    const char* SFb = "1.02658*((1.+(0.0195388*x))/(1.+(0.0209145*x)))";
+    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_payload_Moriond13.txt
+    // Retrieved: 2013-09-11
+    const char* SFb = "0.981149*((1.+(-0.000713295*x))/(1.+(-0.000703264*x)))";
     double SFb_error[] = {
-      0.0188743,
-      0.0161816,
-      0.0139824,
-      0.0152644,
-      0.0161226,
-      0.0157396,
-      0.0161619,
-      0.0168747,
-      0.0257175,
-      0.026424,
-      0.0264928,
-      0.0315127,
-      0.030734,
-      0.0438259 };
+      0.0484285,
+      0.0126178,
+      0.0120027,
+      0.0141137,
+      0.0145441,
+      0.0131145,
+      0.0168479,
+      0.0160836,
+      0.0126209,
+      0.0136017,
+      0.019182,
+      0.0198805,
+      0.0386531,
+      0.0392831,
+      0.0481008,
+      0.0474291 };
     // Mistagging scale factors
-    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C
-    // Row:       Atagger == "CSVL" && sEtamin == "0.0" && sEtamax == "2.4"
-    // Retrieved: 2013-09-04
-    TF1 *SFl     = new TF1("SFlight","((1.0344+(0.000962994*x))+(-3.65392e-06*(x*x)))+(3.23525e-09*(x*(x*x)))", 20.,670.);
-    TF1 *SFl_min = new TF1("SFlightMin","((0.956023+(0.000825106*x))+(-3.18828e-06*(x*x)))+(2.81787e-09*(x*(x*x)))", 20.,670.);
-    TF1 *SFl_max = new TF1("SFlightMax","((1.11272+(0.00110104*x))+(-4.11956e-06*(x*x)))+(3.65263e-09*(x*(x*x)))", 20.,670.);
+    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C
+    // Row:       Atagger == "CSVL" && sEtamin == "0.5" && sEtamax == "1.0"
+    // Retrieved: 2013-09-11
+    TF1 *SFl     = new TF1("SFlight","((0.991915+(0.00172552*x))+(-3.92652e-06*(x*x)))+(2.56816e-09*(x*(x*x)))", 20., 800.);
+    TF1 *SFl_min = new TF1("SFlightMin","((0.921518+(0.00129098*x))+(-2.86488e-06*(x*x)))+(1.86022e-09*(x*(x*x)))", 20., 800.);
+    TF1 *SFl_max = new TF1("SFlightMax","((1.06231+(0.00215815*x))+(-4.9844e-06*(x*x)))+(3.27623e-09*(x*(x*x)))", 20., 800.);
     // B->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
     double eff_BtoB_byPt[] = {0.000000, 0.843692, 0.841796, 0.847828, 0.848339, 0.851303, 0.848301, 0.847911, 0.849353, 0.853927, 0.849528, 0.844153, 0.819833, 0.827717, 0.776372, 0.758767, 0.631211};
@@ -104,31 +106,33 @@ namespace HPlus {
   }
   namespace CSVM {
     // B-tagging scale factors
-    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt
-    // Retrieved: 2013-09-04
-    const char* SFb = "0.6981*((1.+(0.414063*x))/(1.+(0.300155*x)))";
+    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_payload_Moriond13.txt
+    // Retrieved: 2013-09-11
+    const char* SFb = "0.726981*((1.+(0.253238*x))/(1.+(0.188389*x)))";
     double SFb_error[] = {
-      0.0295675,
-      0.0295095,
-      0.0210867,
-      0.0219349,
-      0.0227033,
-      0.0204062,
-      0.0185857,
-      0.0256242,
-      0.0383341,
-      0.0409675,
-      0.0420284,
-      0.0541299,
-      0.0578761,
-      0.0655432 };
+      0.0554504,
+      0.0209663,
+      0.0207019,
+      0.0230073,
+      0.0208719,
+      0.0200453,
+      0.0264232,
+      0.0240102,
+      0.0229375,
+      0.0184615,
+      0.0216242,
+      0.0248119,
+      0.0465748,
+      0.0474666,
+      0.0718173,
+      0.0717567 };
     // Mistagging scale factors
-    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C
-    // Row:       Atagger == "CSVM" && sEtamin == "0.0" && sEtamax == "2.4"
-    // Retrieved: 2013-09-04
-    TF1 *SFl     = new TF1("SFlight","((1.04318+(0.000848162*x))+(-2.5795e-06*(x*x)))+(1.64156e-09*(x*(x*x)))", 20.,670.);
-    TF1 *SFl_min = new TF1("SFlightMin","((0.962627+(0.000448344*x))+(-1.25579e-06*(x*x)))+(4.82283e-10*(x*(x*x)))", 20.,670.);
-    TF1 *SFl_max = new TF1("SFlightMax","((1.12368+(0.00124806*x))+(-3.9032e-06*(x*x)))+(2.80083e-09*(x*(x*x)))", 20.,670.);
+    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C
+    // Row:       Atagger == "CSVM" && sEtamin == "0.0" && sEtamax == "0.8"
+    // Retrieved: 2013-09-11
+    TF1 *SFl     = new TF1("SFlight","((1.06238+(0.00198635*x))+(-4.89082e-06*(x*x)))+(3.29312e-09*(x*(x*x)))", 20., 800.);
+    TF1 *SFl_min = new TF1("SFlightMin","((0.972746+(0.00104424*x))+(-2.36081e-06*(x*x)))+(1.53438e-09*(x*(x*x)))", 20., 800.);
+    TF1 *SFl_max = new TF1("SFlightMax","((1.15201+(0.00292575*x))+(-7.41497e-06*(x*x)))+(5.0512e-09*(x*(x*x)))", 20., 800.);
     // B->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
     double eff_BtoB_byPt[] = {0.000000, 0.605497, 0.660818, 0.696156, 0.717718, 0.721635, 0.725644, 0.733542, 0.742611, 0.754529, 0.733295, 0.720926, 0.693444, 0.666824, 0.606797, 0.570024, 0.427823};
@@ -152,31 +156,33 @@ namespace HPlus {
   }
   namespace CSVT {
     // B-tagging scale factors
-    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt
-    // Retrieved: 2013-09-04
-    const char* SFb = "0.901615*((1.+(0.552628*x))/(1.+(0.547195*x)))";
+    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_payload_Moriond13.txt
+    // Retrieved: 2013-09-11
+    const char* SFb = "0.869965*((1.+(0.0335062*x))/(1.+(0.0304598*x)))";
     double SFb_error[] = {
-      0.0364717,
-      0.0362281,
-      0.0232876,
-      0.0249618,
-      0.0261482,
-      0.0290466,
-      0.0300033,
-      0.0453252,
-      0.0685143,
-      0.0653621,
-      0.0712586,
-      0.094589,
-      0.0777011,
-      0.0866563 };
+      0.0567059,
+      0.0266907,
+      0.0263491,
+      0.0342831,
+      0.0303327,
+      0.024608,
+      0.0333786,
+      0.0317642,
+      0.031102,
+      0.0295603,
+      0.0474663,
+      0.0503182,
+      0.0580424,
+      0.0575776,
+      0.0769779,
+      0.0898199 };
     // Mistagging scale factors
-    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C
+    // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C
     // Row:       Atagger == "CSVT" && sEtamin == "0.0" && sEtamax == "2.4"
-    // Retrieved: 2013-09-04
-    TF1 *SFl     = new TF1("SFlight","((0.948463+(0.00288102*x))+(-7.98091e-06*(x*x)))+(5.50157e-09*(x*(x*x)))", 20.,670.);
-    TF1 *SFl_min = new TF1("SFlightMin","((0.899715+(0.00102278*x))+(-2.46335e-06*(x*x)))+(9.71143e-10*(x*(x*x)))", 20.,670.);
-    TF1 *SFl_max = new TF1("SFlightMax","((0.997077+(0.00473953*x))+(-1.34985e-05*(x*x)))+(1.0032e-08*(x*(x*x)))", 20.,670.);
+    // Retrieved: 2013-09-11
+    TF1 *SFl     = new TF1("SFlight","((1.01739+(0.00283619*x))+(-7.93013e-06*(x*x)))+(5.97491e-09*(x*(x*x)))", 20., 800.);
+    TF1 *SFl_min = new TF1("SFlightMin","((0.953587+(0.00124872*x))+(-3.97277e-06*(x*x)))+(3.23466e-09*(x*(x*x)))", 20., 800.);
+    TF1 *SFl_max = new TF1("SFlightMax","((1.08119+(0.00441909*x))+(-1.18764e-05*(x*x)))+(8.71372e-09*(x*(x*x)))", 20., 800.);
     // B->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
     double eff_BtoB_byPt[] = {0.000000, 0.458483, 0.518979, 0.553481, 0.571330, 0.579789, 0.577360, 0.560711, 0.559940, 0.580829, 0.526322, 0.464904, 0.426719, 0.352917, 0.275715, 0.266566, 0.168526};
@@ -507,7 +513,6 @@ namespace HPlus {
     //hEffBCSVM_eta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "hEffBCSVM_eta", "hEffBCSVM_eta", 100, -5., 5.);
     //hEffBCSVM_eta_pt = histoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, myDir, "hEffBCSVM_eta_pt", "hEffBCSVM_eta_pt", 100, -5., 5.,80, 0., 400. );
     hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_pt", "bjet_pt", 100, 0., 500.);
-    hDiscrB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
     hDiscriminator = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
     hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet_pt", "bjet_pt", 100, 0., 500.);
     hPtBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVM_pt", "realbjetCSVM_pt", 100, 0., 500.);
