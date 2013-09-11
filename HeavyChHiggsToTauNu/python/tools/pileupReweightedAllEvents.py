@@ -16,6 +16,20 @@ class PileupWeightType:
     class DOWN:
         pass
 
+    toString = {
+        UNWEIGHTED: "UNWEIGHTED",
+        NOMINAL: "NOMINAL",
+        UP: "UP",
+        DOWN: "DOWN",
+        }
+
+    fromString = {
+        "UNWEIGHTED": UNWEIGHTED,
+        "NOMINAL": NOMINAL,
+        "UP": UP,
+        "DOWN": DOWN,
+        }
+
 ## Utility class for handling the weighted number of all MC events
 #
 # Represents values for one dataset
@@ -83,9 +97,11 @@ class WeightedAllEventsTopPt:
     def _setName(self, name):
         self.name = name
 
-    def getWeighted(self, unweighted, topPtWeight, topPtWeightType=PileupWeightType.UNWEIGHTED, **kwargs):
+    def getWeighted(self, unweighted, topPtWeight=None, topPtWeightType=PileupWeightType.UNWEIGHTED, **kwargs):
         if topPtWeightType is PileupWeightType.UNWEIGHTED:
             return self.unweighted.getWeighted(unweighted, **kwargs)
+        if topPtWeight is None:
+            raise Exception("topPtWeight must be set when topPtWeightType is not UNWEIGHTED")
         try:
             weightedAllEvents = self.weighted[topPtWeight].getWeighted(topPtWeightType)
         except KeyError:

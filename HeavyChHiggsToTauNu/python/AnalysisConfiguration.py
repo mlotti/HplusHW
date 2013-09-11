@@ -7,6 +7,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
 import HiggsAnalysis.HeavyChHiggsToTauNu.WJetsWeight as wjetsWeight
 import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeight_cfi as topPtWeight
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.pileupReweightedAllEvents import PileupWeightType
 
 tooManyAnalyzersLimit = 100
 
@@ -335,6 +336,7 @@ class ConfigBuilder:
                         if self.options.sample == "TTJets" and self.applyTopPtReweight:
                             mod.topPtWeightReader.weightSrc = "topPtWeight"+dataEra
                             mod.topPtWeightReader.enabled = True
+                            mod.configInfo.topPtReweightType = PileupWeightType.toString[PileupWeightType.NOMINAL]
 
                     if self.doLightAnalysis:
                         analysisLightModules.append(mod)
@@ -1128,7 +1130,7 @@ class ConfigBuilder:
     # \param process   cms.Process object
     # \param name      Name of the module to be used as a prototype
     def _addTopPtWeightVariation(self, process, name):
-        def addVariation(direction, directionName):
+        def addVariation(direction, directionName, directionMode):
             module = self._cloneForVariation(getattr(process, name))
             if self.options.sample == "TTJets":
                 weightName = module.topPtWeightReader.weightSrc.getModuleLabel()
@@ -1141,11 +1143,12 @@ class ConfigBuilder:
                     setattr(process, varyName, varyMod)
                     process.commonSequence += varyMod
                 module.topPtWeightReader.weightSrc = varyName
+                module.configInfo.topPtReweightType = PileupWeightType.toString[directionMode]
             return self._addVariationModule(process, module, name+self.systPrefix+"TopPtWeight"+directionName)
 
         names = []
-        names.append(addVariation(+1, "Plus"))
-        names.append(addVariation(-1, "Minus"))
+        names.append(addVariation(+1, "Plus", PileupWeightType.UP))
+        names.append(addVariation(-1, "Minus", PileupWeightType.DOWN))
         self._accumulateAnalyzers("Top pt variation", names)
 
     ## Add scale factor variation

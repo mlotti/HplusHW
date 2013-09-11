@@ -1984,6 +1984,11 @@ class Dataset:
                     return
                 if abs(value-valnew)/max(value, valnew) > 0.001:
                     raise Exception("Mismatched values in %s, label %s, got %f from file %s, and %f from file %s" % (name, key, value, refFile.GetName(), valnew, newFile.GetName()))
+        def addDirContentsToDict(tdirectory, dictionary):
+            content = aux.listDirectoryContent(tdirectory, lambda key: key.GetClassName() == "TNamed" and key.GetName() not in ["dataVersion", "parameterSet"])
+            for name in content:
+                if name not in dictionary:
+                    dictionary[name] = tdirectory.Get(name).GetTitle()
 
         for f in self.files:
             if not f.IsOpen():
@@ -1995,6 +2000,7 @@ class Dataset:
             info = _rescaleInfo(_histoToDict(configInfo.Get("configinfo")))
             if "energy" in info:
                 info["energy"] = str(int(round(info["energy"])))
+            addDirContentsToDict(configInfo, info)
             if self.info is None:
                 self.info = info
             else:
@@ -2040,7 +2046,8 @@ class Dataset:
         self._analysisDirectoryName += "/"
 
         # Update info from analysis directory specific histogram, if one exists
-        realName = self._translateName("configInfo/configinfo")
+        realDirName = self._translateName("configInfo")
+        realName = realDirName+"/configinfo"
         if self.files[0].Get(realName) != None: # important to use !=
             updateInfo = None
             for f in self.files:
@@ -2048,6 +2055,7 @@ class Dataset:
                 if h is None:
                     raise Exception("%s directory is missing from file %s, it was in %s" % (realName, f.GetName(), self.files[0].GetName()))
                 info = _rescaleInfo(_histoToDict(f.Get(realName)))
+                addDirContentsToInfo(f.Get(realDirName), info)
                 if updateInfo == None:
                     updateInfo = info
                 else:
@@ -2056,9 +2064,8 @@ class Dataset:
                 #raise Exception("You may not set 'energy' in analysis directory specific configinfo histogram. Please fix %s." % realName)
                 print "WARNING: 'energy' has been set in analysis directory specific configinfo histogram (%s), it will be ignored. Please fix your pseudomulticrab code." % realName
                 del updateInfo["energy"]
-            print updateInfo
             self.info.update(updateInfo)
-            print self.info
+        print self.name, self.info
 
         self._unweightedCounterDir = counterDir
         if counterDir is not None:
@@ -2350,6 +2357,9 @@ class Dataset:
     #                event number (optional, if not given a default
     #                value read from the configinfo is used)
     # \param kwargs  Keyword arguments (forwarded to pileupReweightedAllEvents.WeightedAllEvents.getWeighted())
+    #
+    # If \a topPtWeightType is not given in \a kwargs, read the value
+    # from analysis directory -specific configInfo
     def updateNAllEventsToPUWeighted(self, era=None, **kwargs):
         # Ignore if not MC
         if not self.isMC():
@@ -2364,7 +2374,14 @@ class Dataset:
             raise Exception("Number of all unweighted events is %d < 0, this is a symptom of missing unweighted counter" % self.nAllEventsUnweighted)
 
         try:
-            self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.getName(), era).getWeighted(self.nAllEventsUnweighted, **kwargs)
+            if hasattr(self.info, "topPtReweightScheme"):
+                args = {}
+                args.update(kwargs)
+                if "topPtWeightType" not in kwargs:
+                    args["topPtWeightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["topPtReweightType"]]
+                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.getName(), era).getWeighted(self.nAllEventsUnweighted, self.info["topPtReweightScheme"], **args)
+            else:
+                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.getName(), era).getWeighted(self.nAllEventsUnweighted, **kwargs)
         except KeyError:
             # Just ignore if no weights found for this dataset
             pass
