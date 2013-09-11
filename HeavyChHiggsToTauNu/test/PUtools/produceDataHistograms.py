@@ -14,7 +14,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as certifiedLumi
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 
-minBiasXsec = 69300
+minBiasXsec = 69400
 options = [
     "--calcMode",      "true",
     "--maxPileupBin",  "60",
