@@ -136,6 +136,7 @@ namespace HPlus {
       const int getBJetCount() const { return iNBtags; }
       const double getMaxDiscriminatorValue() const { return fMaxDiscriminatorValue; }
       const double getScaleFactor() const { return fEventScaleFactor; }
+      const double getScaleFactorMaxAbsUncertainty() const { return fEventSFAbsUncert_max; }
       const double getScaleFactorAbsoluteUncertainty_up() const { return fEventSFAbsUncert_up; }
       const double getScaleFactorAbsoluteUncertainty_down() const { return fEventSFAbsUncert_down; }
       const double getScaleFactorRelativeUncertainty_up() const { return fEventSFRelUncert_up; }
@@ -157,6 +158,7 @@ namespace HPlus {
       double fEventSFAbsUncert_down;
       double fEventSFRelUncert_up;
       double fEventSFRelUncert_down;
+      double fEventSFAbsUncert_max;
     };
 
     BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);

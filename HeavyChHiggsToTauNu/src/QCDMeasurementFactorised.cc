@@ -628,7 +628,7 @@ namespace HPlus {
     //if (!iEvent.isRealData()) {
     //  fEventWeight.multiplyWeight(btagData.getScaleFactor()); // needed to calculate the scale factor and the uncertainties
     //}
-    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorMaxAbsUncertainty());
     // Top reconstruction in different versions
     if (selectedTau.isNonnull() && btagData.passedEvent()) {
       BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());

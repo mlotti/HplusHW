@@ -814,7 +814,7 @@ namespace HPlus {
                                                             fEventWeight.getWeight(),
                                                             fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
                                                             fFakeTauIdentifier.getFakeTauSystematics(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
-                                                            btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+							       btagData.getScaleFactor(), btagData.getScaleFactorMaxAbsUncertainty());
     fSFUncertaintiesAfterSelection.setTauTriggerScaleFactorUncertainty(fEventWeight.getWeight(),
                                                                        tauTriggerWeight.getEventWeight(),
                                                                        tauTriggerWeight.getEventWeightAbsoluteUncertainty());
@@ -833,7 +833,7 @@ namespace HPlus {
                                                                             fEventWeight.getWeight(),
                                                                             fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
                                                                             fFakeTauIdentifier.getFakeTauSystematics(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
-                                                                            btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+                                                                            btagData.getScaleFactor(), btagData.getScaleFactorMaxAbsUncertainty());
       fEWKFakeTausSFUncertaintiesAfterSelection.setTauTriggerScaleFactorUncertainty(fEventWeight.getWeight(),
                                                                                     tauTriggerWeight.getEventWeight(),
                                                                                     tauTriggerWeight.getEventWeightAbsoluteUncertainty());
@@ -925,7 +925,7 @@ namespace HPlus {
     if(metData.getTcMET().isNonnull())
       fTree.setTcMET(metData.getTcMET());
     fTree.setFillWeight(fEventWeight.getWeight());
-    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorMaxAbsUncertainty());
     fTree.setTop(TopSelectionData.getTopP4());
     // Sphericity, Aplanarity, Planarity, alphaT
     fTree.setDiJetMassesNoTau(evtTopologyData.alphaT().vDiJetMassesNoTau);

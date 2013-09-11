@@ -34,7 +34,7 @@ void printDaughters(const reco::Candidate& p);
 namespace {
   // The below things are contained in an anonymous namespace to prevent them from being accessed from outside this file.
   // Set this to true to enable printing output for debugging/checking calculations:
-  bool printValidationOutput = true;
+  bool printValidationOutput = false;
   // Tool to convert SF and efficiency tables from C-type table to std::vector.
   template <int N>
   std::vector<double> toVector(double (&input)[N]) {
@@ -209,7 +209,8 @@ namespace HPlus {
     fEventSFAbsUncert_up(0.0),
     fEventSFAbsUncert_down(0.0),
     fEventSFRelUncert_up(0.0),
-    fEventSFRelUncert_down(0.0)
+    fEventSFRelUncert_down(0.0),
+    fEventSFAbsUncert_max(0.0)
     { }
   BTagging::Data::~Data() {}
 
@@ -768,8 +769,12 @@ namespace HPlus {
     output.fEventSFRelUncert_down = calculateRelativeEventScaleFactorUncertainty(false, sfTag, sfMistag, effTag, effCMistag, effGMistag, effUDSMistag);
     output.fEventSFAbsUncert_down = output.fEventSFRelUncert_down * output.fEventScaleFactor;
 
-    std::cout << "Event weight: " << output.fEventScaleFactor << " (+" << output.fEventSFAbsUncert_up << ", -" << output.fEventSFAbsUncert_down << ")" << std::endl;
-    std::cout << "  Corresponding to relative uncertainty (+" << output.fEventSFRelUncert_up << ", -" << output.fEventSFRelUncert_down<< ")" << std::endl;;
+    output.fEventSFAbsUncert_max = TMath::Max(output.fEventSFAbsUncert_up, output.fEventSFAbsUncert_down);
+    
+    if (printValidationOutput) {
+      std::cout << "Event weight: " << output.fEventScaleFactor << " (+" << output.fEventSFAbsUncert_up << ", -" << output.fEventSFAbsUncert_down << ")" << std::endl;
+      std::cout << "  Corresponding to relative uncertainty (+" << output.fEventSFRelUncert_up << ", -" << output.fEventSFRelUncert_down<< ")" << std::endl;;
+    }
 
     // Do the variation, if asked
     if(fVariationEnabled) {
