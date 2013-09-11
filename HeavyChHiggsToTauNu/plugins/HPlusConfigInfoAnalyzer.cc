@@ -32,7 +32,7 @@ private:
   std::string dataVersion;
   std::string codeVersion;
   std::string era;
-  std::string topPtReweightMode;
+  std::string topPtReweightScheme;
   unsigned energy;
   double crossSection;
   bool isData;
@@ -44,7 +44,7 @@ HPlusConfigInfoAnalyzer::HPlusConfigInfoAnalyzer(const edm::ParameterSet& pset):
   dataVersion(pset.getUntrackedParameter<std::string>("dataVersion", "")),
   codeVersion(pset.getUntrackedParameter<std::string>("codeVersion", "")),
   era(pset.getUntrackedParameter<std::string>("era", "")),
-  topPtReweightMode(pset.getUntrackedParameter<std::string>("topPtReweightMode", "")),
+  topPtReweightScheme(pset.getUntrackedParameter<std::string>("topPtReweightScheme", "")),
   energy(pset.getUntrackedParameter<unsigned>("energy", 0)),
   crossSection(std::numeric_limits<double>::quiet_NaN()),
   isData(false),
@@ -98,8 +98,8 @@ void HPlusConfigInfoAnalyzer::endJob() {
   TNamed *cv = fs->make<TNamed>("codeVersion", codeVersion.c_str());
   if(era.length() > 0)
     TNamed *e = fs->make<TNamed>("era", era.c_str());
-  if(topPtReweightMode.length() > 0)
-    fs->make<TNamed>("topPtReweightMode", topPtReweightMode.c_str());
+  if(topPtReweightScheme.length() > 0)
+    fs->make<TNamed>("topPtReweightScheme", topPtReweightScheme.c_str());
 }
 
 //define this as a plug-in

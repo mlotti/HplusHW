@@ -63,7 +63,7 @@ class ConfigBuilder:
                  applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  applyTopPtReweight = False, # Apply Top Pt reweighting on TTJets sample
-                 topPtReweightMode = None, # None for default, see TopPtWeight_cfi.py for allowed values
+                 topPtReweightScheme = None, # None for default, see TopPtWeight_cfi.py for allowed values
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
                 # tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
                  useTriggerMatchedTaus = True,
@@ -112,7 +112,7 @@ class ConfigBuilder:
         self.applyMETTriggerScaleFactor = applyMETTriggerScaleFactor
         self.applyPUReweight = applyPUReweight
         self.applyTopPtReweight = applyTopPtReweight
-        self.topPtReweightMode = topPtReweightMode
+        self.topPtReweightScheme = topPtReweightScheme
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
         self.useTriggerMatchedTaus = useTriggerMatchedTaus
         self.useCHSJets = useCHSJets
@@ -318,8 +318,8 @@ class ConfigBuilder:
 
                 if self.options.sample == "TTJets" and self.applyTopPtReweight:
                     weightMod = topPtWeight.topPtWeight.clone(enabled=True)
-                    if self.topPtReweightMode is not None:
-                        weightMod.mode = self.topPtReweightMode
+                    if self.topPtReweightScheme is not None:
+                        weightMod.scheme = self.topPtReweightScheme
                     setattr(process, "topPtWeight"+dataEra, weightMod)
                     process.commonSequence += weightMod
 
@@ -555,10 +555,10 @@ class ConfigBuilder:
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
         process.infoPath = addConfigInfo(process, self.options, self.dataVersion)
         if self.options.sample == "TTJets" and self.applyTopPtReweight:
-            if self.topPtReweightMode is None:
-                process.configInfo.topPtReweightMode = cms.untracked.string(topPtWeight.topPtWeight.mode.value())
+            if self.topPtReweightScheme is None:
+                process.configInfo.topPtReweightScheme = cms.untracked.string(topPtWeight.topPtWeight.scheme.value())
             else:
-                process.configInfo.topPtReweightMode = cms.untracked.string(self.topPtReweightMode)
+                process.configInfo.topPtReweightScheme = cms.untracked.string(self.topPtReweightScheme)
 
         return (process, additionalCounters)
 

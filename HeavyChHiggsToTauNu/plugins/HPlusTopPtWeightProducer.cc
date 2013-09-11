@@ -66,7 +66,7 @@ private:
 HPlusTopPtWeightProducer::HPlusTopPtWeightProducer(const edm::ParameterSet& iConfig):
   fSrc(iConfig.getParameter<edm::InputTag>("ttGenEventSrc")),
   fAlias(iConfig.getParameter<std::string>("alias")),
-  fWeightCalculator(iConfig.getParameter<edm::ParameterSet>(iConfig.getParameter<std::string>("mode"))),
+  fWeightCalculator(iConfig.getParameter<edm::ParameterSet>(iConfig.getParameter<std::string>("scheme"))),
   fVariationDir(iConfig.getParameter<int>("variationDirection")),
   fEnabled(iConfig.getParameter<bool>("enabled")),
   fVariationEnabled(iConfig.getParameter<bool>("variationEnabled"))

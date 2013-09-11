@@ -16,4 +16,4 @@ for name, values in _schemes.schemes.iteritems():
             leptonjets = cms.string(values.leptonjets),
             dilepton = cms.string(values.dilepton),
             ))
-topPtWeight.mode = cms.string(_schemes.defaultScheme)
+topPtWeight.scheme = cms.string(_schemes.defaultScheme)
