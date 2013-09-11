@@ -123,9 +123,9 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         "QCD_Pt170to300_TuneZ2_Fall11":     TaskDefMC(njobsIn=40, njobsOut=1),
         "QCD_Pt300to470_TuneZ2_Fall11":     TaskDefMC(njobsIn=100, njobsOut=3),
                                             
-        "WW_TuneZ2_Fall11":                 TaskDefMC(njobsIn=40, njobsOut=3),
-        "WZ_TuneZ2_Fall11":                 TaskDefMC(njobsIn=40, njobsOut=3),
-        "ZZ_TuneZ2_Fall11":                 TaskDefMC(njobsIn=40, njobsOut=3),   
+        "WW_TuneZ2_Fall11":                 TaskDefMC(njobsIn=40, njobsOut=1),
+        "WZ_TuneZ2_Fall11":                 TaskDefMC(njobsIn=40, njobsOut=1),
+        "ZZ_TuneZ2_Fall11":                 TaskDefMC(njobsIn=40, njobsOut=1),
         "TTJets_TuneZ2_Fall11":             TaskDefMC(njobsIn=2000, njobsOut=50),
         "WJets_TuneZ2_Fall11":              TaskDefMC(njobsIn=400, njobsOut=4, args={"wjetsWeighting": 1}),
         "W1Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=6, args={"wjetsWeighting": 1}),
