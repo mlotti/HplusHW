@@ -33,7 +33,9 @@ namespace HPlus {
 //   public:
 //     EventClassification(EventCounter& eventCounter, HistoWrapper& histoWrapper);
 //     ~EventClassification();
-    
+
+  bool eventHasTopQuark(const edm::Event& iEvent);
+  double getTopQuarkInvariantMass(const edm::Event& iEvent);
   bool eventHasLightChargedHiggs(const edm::Event& iEvent);
   size_t getHiggsLine(const edm::Event& iEvent);
   reco::Candidate* getChargedHiggs(const edm::Event& iEvent);

@@ -7,6 +7,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingEfficiencyInMC.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
@@ -220,6 +221,7 @@ namespace HPlus {
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
+    BTaggingEfficiencyInMC fBTaggingEfficiencyInMC;
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
     BjetSelection fBjetSelection;
@@ -322,6 +324,42 @@ namespace HPlus {
     WrappedTH1 *hSelectionFlow;
     WrappedTH2 *hSelectionFlowVsVertices;
     WrappedTH2 *hSelectionFlowVsVerticesFakeTaus;
+
+    // Histograms for jet flavour tagging efficiency calculation in MC
+    // Pseudorapidity (eta)
+    WrappedTH1 *hGenuineBJetEta;   
+    WrappedTH1 *hGenuineBJetWithBTagEta;
+    WrappedTH1 *hGenuineGJetEta;
+    WrappedTH1 *hGenuineGJetWithBTagEta;
+    WrappedTH1 *hGenuineUDSJetEta;
+    WrappedTH1 *hGenuineUDSJetWithBTagEta;
+    WrappedTH1 *hGenuineCJetEta;
+    WrappedTH1 *hGenuineCJetWithBTagEta;
+    WrappedTH1 *hGenuineLJetEta;
+    WrappedTH1 *hGenuineLJetWithBTagEta;
+    // Transverse momentum (pT)
+    WrappedTH1 *hGenuineBJetPt;   
+    WrappedTH1 *hGenuineBJetWithBTagPt;
+    WrappedTH1 *hGenuineGJetPt;
+    WrappedTH1 *hGenuineGJetWithBTagPt;
+    WrappedTH1 *hGenuineUDSJetPt;
+    WrappedTH1 *hGenuineUDSJetWithBTagPt;
+    WrappedTH1 *hGenuineCJetPt;
+    WrappedTH1 *hGenuineCJetWithBTagPt;
+    WrappedTH1 *hGenuineLJetPt;
+    WrappedTH1 *hGenuineLJetWithBTagPt;
+    // Two-dimensional histograms of pT vs. eta to investigate possible correlations
+    WrappedTH2 *hGenuineBJetPtAndEta;
+    WrappedTH2 *hGenuineBJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineGJetPtAndEta;
+    WrappedTH2 *hGenuineGJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineUDSJetPtAndEta;
+    WrappedTH2 *hGenuineUDSJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineCJetPtAndEta;
+    WrappedTH2 *hGenuineCJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineLJetPtAndEta;
+    WrappedTH2 *hGenuineLJetWithBTagPtAndEta;
+
 
     // Control plots for fakes
 
