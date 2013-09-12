@@ -309,7 +309,7 @@ class Workflow:
                     out.write("%d" % value)
                 else:
                     out.write('"%s"' % str(value))
-                out.write("\n")
+                out.write(",\n")
             out.write(prefix+prefix+"},\n")
         if self.skimConfig != None:
             out.write(prefix+prefix+"skimConfig=[" + ", ".join(['"%s"' % s for s in self.skimConfig]) + "],\n")
