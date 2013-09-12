@@ -137,7 +137,7 @@ namespace HPlus {
 
  
   bool BTaggingEfficiencyInMC::isBTagged(edm::Ptr<pat::Jet>& jet, const BTagging::Data& bTagData) {
-      for (edm::PtrVector<pat::Jet>::iterator iBjet = bTagData.getSelectedJets().begin(); iBjet != bTagData.getSelectedJets().end(); ++iBjet) {
+    for (edm::PtrVector<pat::Jet>::iterator iBjet = bTagData.getSelectedJets().begin(); iBjet != bTagData.getSelectedJets().end(); ++iBjet) {
       if (jet == *iBjet) return true;
     }
     return false;

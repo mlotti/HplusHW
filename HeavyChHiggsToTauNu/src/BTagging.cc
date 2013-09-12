@@ -310,11 +310,11 @@ namespace HPlus {
     addJetSFUncertaintyTerm(pT, isBTagged, effTable, 1.0);
   }
   
-  size_t BTagging::ScaleFactorTable::obtainIndex(const std::vector<double>& table, double pt) {
+  size_t BTagging::ScaleFactorTable::obtainIndex(const std::vector<double>& table, double pT) {
     size_t myEnd = table.size();
     size_t myPos = 0;
     while (myPos < myEnd) {
-      if (pt < table[myPos]) {
+      if (pT < table[myPos]) {
         if (myPos == 0)
           return 0; // should never happen
         else
@@ -325,16 +325,23 @@ namespace HPlus {
     return myEnd-1; // return last bin
   }
 
-  double BTagging::ScaleFactorTable::getScaleFactor(double pt) const {
+  double BTagging::ScaleFactorTable::getScaleFactor(double pT) const {
     if (fScaleFactorFunction) {
-      return fScaleFactorFunction->Eval(pt);
+      return fScaleFactorFunction->Eval(pT);
     }
-    else if (fScaleFactor.size() > 0) return fScaleFactor[obtainIndex(fPtBins, pt)];
+    else if (fScaleFactor.size() > 0) return fScaleFactor[obtainIndex(fPtBins, pT)];
     else throw cms::Exception("LogicError")  << "Neither parametrized function nor look-up table for b-tagging scale factor found! Either one must be given.";
   }
 
-  double BTagging::ScaleFactorTable::getScaleFactorUncertaintyBinned(double pt) const {
-    return fScaleFactorUncertainty[obtainIndex(fPtBins, pt)];
+  double BTagging::ScaleFactorTable::getScaleFactorUncertaintyBinned(double pT) const {
+    return fScaleFactorUncertainty[obtainIndex(fPtBins, pT)];
+  }
+
+  double BTagging::ScaleFactorTable::getMaximumUncertainty(double pT) const {
+    if (fScaleFactorUncertUpFunction && fScaleFactorUncertDownFunction)
+      return TMath::Max(fScaleFactorUncertUpFunction->Eval(pT), fScaleFactorUncertDownFunction->Eval(pT));
+    else 
+      return getScaleFactorUncertaintyBinned(pT);
   }
 
   double BTagging::ScaleFactorTable::calculateRelativeUncertaintySquared(bool up) {
@@ -409,7 +416,6 @@ namespace HPlus {
     }
   }
 
-
   void BTagging::EfficiencyTable::resetJetTable() {
     size_t i = 0;
     while (i < fPtBins.size()) {
@@ -429,11 +435,11 @@ namespace HPlus {
     fPerBinUncertaintyDown[i] += ((1.0 - SF) * eff * fEffUncertDown[i]) / ((1.0 - SF * eff) * (1.0 - eff));
   }
 
-  size_t BTagging::EfficiencyTable::obtainIndex(const std::vector<double>& table, double pt) {
+  size_t BTagging::EfficiencyTable::obtainIndex(const std::vector<double>& table, double pT) {
     size_t myEnd = table.size();
     size_t myPos = 0;
     while (myPos < myEnd) {
-      if (pt < table[myPos]) {
+      if (pT < table[myPos]) {
         if (myPos == 0)
           return 0; // should never happen
         else
@@ -448,6 +454,10 @@ namespace HPlus {
     return fEfficiency[obtainIndex(fPtBins, pT)];
   }
 
+  double BTagging::EfficiencyTable::getMaximumUncertainty(double pT) const {
+    return TMath::Max(fEffUncertUp[obtainIndex(fPtBins, pT)], fEffUncertDown[obtainIndex(fPtBins, pT)]);
+  }
+
   double BTagging::EfficiencyTable::calculateRelativeUncertaintySquared(bool up) {
     double relUncertSquared = 0.0;
     size_t i = 0;
@@ -459,31 +469,27 @@ namespace HPlus {
     return relUncertSquared;
   }
 
-  // ================================== struct PerJetInfo ==================================
-  void BTagging::PerJetInfo::addJetSFTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable) {
-    double eventScaleFactor = 1.0;
+  // ================================== struct EventSFTerms ==================================
+  void BTagging::EventSFTerms::addJetSFTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable) {
+    double term = 1.0;
     if (isBTagged) {
-      eventScaleFactor = sfTable.getScaleFactor(pT);
+      term = sfTable.getScaleFactor(pT);
     } else {
-      eventScaleFactor = (1.-sfTable.getScaleFactor(pT)*effTable.getEfficiency(pT)) / (1.-effTable.getEfficiency(pT));
+      term = (1.-sfTable.getScaleFactor(pT)*effTable.getEfficiency(pT)) / (1.-effTable.getEfficiency(pT));
     }
-    if (printValidationOutput) std::cout << "  Event scale factor term: " << eventScaleFactor << std::endl;
-    fScaleFactor.push_back(eventScaleFactor);
-  }
-  
-  void BTagging::PerJetInfo::resetInfo(size_t s) {
-    // Clear info from previous event:
-    fScaleFactor.clear();
-    fUncertainty.clear();
-    fTagged.clear();
-    fGenuine.clear();
-    // Reserve memory for storing the info:
-    fScaleFactor.reserve(s);
-    fUncertainty.reserve(s);
-    fTagged.reserve(s);
-    fGenuine.reserve(s);
+    if (printValidationOutput) std::cout << "  Event scale factor term: " << term << std::endl;
+    SFTerms.push_back(term);
   }
 
+  double BTagging::EventSFTerms::calculateEventScaleFactor() {
+    double SF = 1.0;
+    size_t i = 0;
+    while (i < SFTerms.size()) {
+      SF *= SFTerms[i];
+      i++;
+    }
+    return SF;
+  }
 
   // ================================== class BTagging ==================================
   BTagging::BTagging(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
@@ -618,8 +624,9 @@ namespace HPlus {
     Data output;
     output.fSelectedJets.reserve(jets.size());
     output.fSelectedSubLeadingJets.reserve(jets.size());
-    // Initialize structure for collecting information (scale factor & uncertainty, tagging status, genuine b?) of each jet
-    fBTaggingInfo.resetInfo(jets.size());
+    // Initialize structure for collecting event SF term of each jet
+    EventSFTerms eventSFTerms;
+    eventSFTerms.reserve(jets.size());
     // Initialize tables of per-jet SF uncertainties in look-up table objects
     fTagSFTable.resetJetTable();
     fMistagSFTable.resetJetTable();
@@ -676,9 +683,9 @@ namespace HPlus {
 
       // If MC, calculate the jet's contribution to the event scale factor
       if (!iEvent.isRealData()) {
-	calculateJetSFAndUncertaintyTerm(iJet, isBTagged, fBTaggingInfo, fTagSFTable, fMistagSFTable, fTagEffTable, fCMistagEffTable, fGMistagEffTable, fUDSMistagEffTable);
-	fBTaggingInfo.fTagged.push_back(isBTagged);
-	fBTaggingInfo.fGenuine.push_back(isGenuineB);
+	calculateJetSFAndUncertaintyTerm(iJet, isBTagged, eventSFTerms, fTagSFTable, fMistagSFTable, fTagEffTable, fCMistagEffTable, fGMistagEffTable, fUDSMistagEffTable);
+// 	fBTaggingInfo.fTagged.push_back(isBTagged);
+// 	fBTaggingInfo.fGenuine.push_back(isGenuineB);
       }
     } // End of jet loop
     if (printValidationOutput) std::cout << "*** Jet loop ended ***" << std::endl;
@@ -692,7 +699,7 @@ namespace HPlus {
     }
 
     // Calculate scale factor and its uncertainty for MC events
-    if (!iEvent.isRealData()) setEventScaleFactorInfo(fBTaggingInfo, fTagSFTable, fMistagSFTable, fTagEffTable, fCMistagEffTable, fGMistagEffTable, fUDSMistagEffTable, output);
+    if (!iEvent.isRealData()) setEventScaleFactorInfo(eventSFTerms, fTagSFTable, fMistagSFTable, fTagEffTable, fCMistagEffTable, fGMistagEffTable, fUDSMistagEffTable, output);
 
     // Do histogramming and set output
     hNumberOfBtaggedJets->Fill(output.fSelectedJets.size());
@@ -717,10 +724,10 @@ namespace HPlus {
     return output;
   }
 
-  void BTagging::calculateJetSFAndUncertaintyTerm(edm::Ptr<pat::Jet>& iJet, bool isBTagged, PerJetInfo& info, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) const {
+  void BTagging::calculateJetSFAndUncertaintyTerm(edm::Ptr<pat::Jet>& iJet, bool isBTagged, EventSFTerms& terms, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) const {
     // Get jet information
     int flavour = std::abs(iJet->partonFlavour());
-    double pt = iJet->pt();
+    double pT = iJet->pt();
     
     // Set flags
     bool isGenuineB = false, isGenuineC = false, isGenuineG = false, isGenuineUDS = false;
@@ -731,35 +738,25 @@ namespace HPlus {
 
     // Calculate the jet weight according to the properties (flavour, momentum, etc.) of the jet and the tagging status
     if (isGenuineB) {
-      info.addJetSFTerm(pt, isBTagged, sfTag, effTag);
-      sfTag.addJetSFUncertaintyTerm(pt, isBTagged, effTag);
-      effTag.addJetSFUncertaintyTerm(pt, isBTagged, sfTag);
+      terms.addJetSFTerm(pT, isBTagged, sfTag, effTag);
+      sfTag.addJetSFUncertaintyTerm(pT, isBTagged, effTag);
+      effTag.addJetSFUncertaintyTerm(pT, isBTagged, sfTag);
     }
     else if (isGenuineC) {
-      info.addJetSFTerm(pt, isBTagged, sfTag, effCMistag);
-      sfTag.addJetSFUncertaintyTerm(pt, isBTagged, effCMistag, 2.0); // c-jets use b-jet scale factors with double uncertainty
-      effCMistag.addJetSFUncertaintyTerm(pt, isBTagged, sfTag);
+      terms.addJetSFTerm(pT, isBTagged, sfTag, effCMistag);
+      sfTag.addJetSFUncertaintyTerm(pT, isBTagged, effCMistag, 2.0); // c-jets use b-jet scale factors with double uncertainty
+      effCMistag.addJetSFUncertaintyTerm(pT, isBTagged, sfTag);
     }
     else if (isGenuineG) {
-      info.addJetSFTerm(pt, isBTagged, sfMistag, effGMistag);
-      sfMistag.addJetSFUncertaintyTerm(pt, isBTagged, effGMistag);
-      effGMistag.addJetSFUncertaintyTerm(pt, isBTagged, sfMistag);
+      terms.addJetSFTerm(pT, isBTagged, sfMistag, effGMistag);
+      sfMistag.addJetSFUncertaintyTerm(pT, isBTagged, effGMistag);
+      effGMistag.addJetSFUncertaintyTerm(pT, isBTagged, sfMistag);
     }
     else if (isGenuineUDS) {
-      info.addJetSFTerm(pt, isBTagged, sfMistag, effUDSMistag);
-      sfMistag.addJetSFUncertaintyTerm(pt, isBTagged, effUDSMistag);
-      effUDSMistag.addJetSFUncertaintyTerm(pt, isBTagged, sfMistag);
+      terms.addJetSFTerm(pT, isBTagged, sfMistag, effUDSMistag);
+      sfMistag.addJetSFUncertaintyTerm(pT, isBTagged, effUDSMistag);
+      effUDSMistag.addJetSFUncertaintyTerm(pT, isBTagged, sfMistag);
     }
-  }
-
-  double BTagging::calculateEventScaleFactor(PerJetInfo& fBTaggingInfo) {
-    double eventScaleFactor = 1.0;
-    size_t i = 0;
-    while (i < fBTaggingInfo.fScaleFactor.size()) {
-      eventScaleFactor *= fBTaggingInfo.fScaleFactor[i];
-      i++;
-    }
-    return eventScaleFactor;
   }
 
   double BTagging::calculateRelativeEventScaleFactorUncertainty(bool up, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) {
@@ -773,8 +770,8 @@ namespace HPlus {
     return TMath::Sqrt(relUncertSquared);
   }
 
-  void BTagging::setEventScaleFactorInfo(PerJetInfo& fBTaggingInfo, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag, BTagging::Data& output) {
-    output.fEventScaleFactor = calculateEventScaleFactor(fBTaggingInfo);
+  void BTagging::setEventScaleFactorInfo(EventSFTerms& terms, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag, BTagging::Data& output) {
+    output.fEventScaleFactor = terms.calculateEventScaleFactor();
     output.fEventSFRelUncert_up = calculateRelativeEventScaleFactorUncertainty(true, sfTag, sfMistag, effTag, effCMistag, effGMistag, effUDSMistag);
     output.fEventSFAbsUncert_up = output.fEventSFRelUncert_up * output.fEventScaleFactor;
     output.fEventSFRelUncert_down = calculateRelativeEventScaleFactorUncertainty(false, sfTag, sfMistag, effTag, effCMistag, effGMistag, effUDSMistag);
@@ -804,5 +801,82 @@ namespace HPlus {
     hScaleFactor->Fill(data.getScaleFactor());
     hBTagAbsoluteUncertainty->Fill(data.getScaleFactorMaxAbsUncertainty());
     hBTagRelativeUncertainty->Fill(data.getScaleFactorMaxAbsUncertainty() / data.fEventScaleFactor);
+  }
+
+  // Method called from HPlusBTaggingSelectorFilter.cc;
+  BTagging::PerJetInfo BTagging::getPerJetInfo(edm::PtrVector<pat::Jet> jetCollection, BTagging::Data& bTagData, bool isRealData) const {
+    bool tagged = false;
+    double scaleFactor = 1.0;
+    double uncertainty = 0.0;
+    bool genuine = false;
+    PerJetInfo info;
+    info.reserve(jetCollection.size());
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = jetCollection.begin(); iter != jetCollection.end(); ++iter) {
+      edm::Ptr<pat::Jet> jet = *iter;
+      // Find out if jet is b-tagged
+      for (edm::PtrVector<pat::Jet>::iterator bjet = bTagData.getSelectedJets().begin(); bjet != bTagData.getSelectedJets().end(); ++bjet) {
+	if (jet == *bjet) {
+	  tagged = true;
+	  break;
+	}
+      }
+      // If MC, calculate the following things:
+      if (! isRealData) {
+	int flavour = std::abs(jet->partonFlavour());
+	BTagging::ScaleFactorTable sfTable;
+	BTagging::EfficiencyTable effTable;
+	double SFUncertaintyFactor = 1.0;
+	// Find out if jet is genuine b-jet and choose the correct look-up tables
+	if (flavour == 5) {
+	  genuine = true;
+	  sfTable = fTagSFTable;
+	  effTable = fTagEffTable;
+	} else if (flavour == 4) {
+	  sfTable = fTagSFTable;
+          effTable = fCMistagEffTable;
+	  SFUncertaintyFactor = 2.0;
+	} else if (flavour == 21) {
+          sfTable = fMistagSFTable;
+          effTable = fGMistagEffTable;
+	} else {
+          sfTable = fMistagSFTable;
+          effTable = fUDSMistagEffTable;
+	}
+	// Get event scale factor term due to current jet
+	scaleFactor = calculateJetSFTerm(jet->pt(), tagged, sfTable, effTable);
+	// Get event scale factor uncertainty term due to current jet
+	uncertainty = calculateJetSFUncertaintyTerm(jet->pt(), tagged, sfTable, effTable, SFUncertaintyFactor);
+      }
+      // Set output
+      info.scaleFactor.push_back(scaleFactor);
+      info.uncertainty.push_back(uncertainty);
+      info.tagged.push_back(tagged);
+      info.genuine.push_back(genuine);
+    }
+    return info;
+  }
+
+  double BTagging::calculateJetSFTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable) const {
+    double sf = 1.0;
+    if (isBTagged) {
+      sf = sfTable.getScaleFactor(pT);
+    } else {
+      sf = (1.-sfTable.getScaleFactor(pT)*effTable.getEfficiency(pT)) / (1.-effTable.getEfficiency(pT));
+    }
+    return sf;
+  }
+
+  double BTagging::calculateJetSFUncertaintyTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable, double SFUncertaintyFactor) const {
+    double uncertainty = 0.0;
+    if (isBTagged)
+      uncertainty = SFUncertaintyFactor * sfTable.getMaximumUncertainty(pT);
+    else {
+      double uncertainty2 = TMath::Power((-(SFUncertaintyFactor * effTable.getEfficiency(pT) * sfTable.getScaleFactor(pT) * sfTable.getMaximumUncertainty(pT))
+					  / (1.0 - effTable.getEfficiency(pT) * sfTable.getScaleFactor(pT))), 2)
+	+ TMath::Power(((1.0 - sfTable.getScaleFactor(pT)) * effTable.getEfficiency(pT) * effTable.getMaximumUncertainty(pT))
+		       / ((1.0 - sfTable.getScaleFactor(pT) * effTable.getEfficiency(pT)) * (1.0 - effTable.getEfficiency(pT))), 2);
+      uncertainty = TMath::Sqrt(uncertainty2);
+    }
+    return uncertainty;
   }
 }
