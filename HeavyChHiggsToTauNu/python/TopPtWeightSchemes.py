@@ -19,9 +19,9 @@ _TTH = "(x<=463.312)*(1.18246+2.10061e-6*x*(x-2*463.312)) + (x>463.312)*0.732"
 
 schemes = {
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting#Eventweight
-    "TopPtCombined": TopPtWeight(all=_TopPtReweighting % ("0.199", "-0.00166")),
-    "TopPtSeparate": TopPtWeight(leptonjets=_TopPtReweighting % ("0.174", "-0.00137"),
-                                 dilepton=_TopPtReweighting % ("0.222", "-0.00197")),
+    "TopPtCombined": TopPtWeight(all=_TopPtReweighting % ("0.156", "-0.00137")),
+    "TopPtSeparate": TopPtWeight(leptonjets=_TopPtReweighting % ("0.159", "-0.00141"),
+                                 dilepton=_TopPtReweighting % ("0.148", "-0.00129")),
     "TTH" : TopPtWeight(all=_TTH),
 }
 
