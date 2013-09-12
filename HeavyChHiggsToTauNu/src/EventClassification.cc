@@ -51,6 +51,28 @@ namespace HPlus {
   
 //   EventClassification::~EventClassification() {}
 
+  bool eventHasTopQuark(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      if (hasImmediateMother(p,6) || hasImmediateMother(p,-6)) continue;
+      if (TMath::Abs(p.pdgId()) == 6) return true;
+    }
+    return false;
+  }
+
+  double getTopQuarkInvariantMass(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      if (hasImmediateMother(p,6) || hasImmediateMother(p,-6)) continue;
+      if (TMath::Abs(p.pdgId()) == 6) return p.p4().M(); // Note: only returns the invariant mass of the first found top quark.
+    }
+    return -1.0;
+  }
+
   bool eventHasLightChargedHiggs(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);

@@ -40,21 +40,36 @@ namespace HPlus {
     public:
       Data();
       ~Data();
-      // in-line getters
+      
+      const edm::PtrVector<pat::Jet>& getGenuineBJets() const { return fGenuineBJets; }
+      const edm::PtrVector<pat::Jet>& getGenuineBJetsWithBTag() const { return fGenuineBJetsWithBTag; }
+      const edm::PtrVector<pat::Jet>& getGenuineGJets() const { return fGenuineGJets; }
+      const edm::PtrVector<pat::Jet>& getGenuineGJetsWithBTag() const { return fGenuineGJetsWithBTag; }
+      const edm::PtrVector<pat::Jet>& getGenuineUDSJets() const { return fGenuineUDSJets; }
+      const edm::PtrVector<pat::Jet>& getGenuineUDSJetsWithBTag() const { return fGenuineUDSJetsWithBTag; }
+      const edm::PtrVector<pat::Jet>& getGenuineCJets() const { return fGenuineCJets; }
+      const edm::PtrVector<pat::Jet>& getGenuineCJetsWithBTag() const { return fGenuineCJetsWithBTag; }
+      const edm::PtrVector<pat::Jet>& getGenuineLJets() const { return fGenuineLJets; }
+      const edm::PtrVector<pat::Jet>& getGenuineLJetsWithBTag() const { return fGenuineLJetsWithBTag; }
 
       friend class BTaggingEfficiencyInMC;
     private:
       // private member variables
       edm::PtrVector<pat::Jet> fGenuineBJets;
       edm::PtrVector<pat::Jet> fGenuineBJetsWithBTag;
+      edm::PtrVector<pat::Jet> fGenuineGJets;
+      edm::PtrVector<pat::Jet> fGenuineGJetsWithBTag;
+      edm::PtrVector<pat::Jet> fGenuineUDSJets;
+      edm::PtrVector<pat::Jet> fGenuineUDSJetsWithBTag;
+      edm::PtrVector<pat::Jet> fGenuineCJets;
+      edm::PtrVector<pat::Jet> fGenuineCJetsWithBTag;
       edm::PtrVector<pat::Jet> fGenuineLJets;
       edm::PtrVector<pat::Jet> fGenuineLJetsWithBTag;
     };
 
-    BTaggingEfficiencyInMC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper); // constructor
+    BTaggingEfficiencyInMC(EventCounter& eventCounter, HistoWrapper& histoWrapper); // constructor
     ~BTaggingEfficiencyInMC(); // destructor
 
-    // Analyzers
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const BTagging::Data& bTagData);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const BTagging::Data& bTagData);
 
@@ -64,8 +79,10 @@ namespace HPlus {
 					      BTaggingEfficiencyInMC::Data& output);
     bool isBTagged(edm::Ptr<pat::Jet>& jet, const BTagging::Data& bTagData);
 
-    // Possibly add counters and histograms
-
+    // counters and histograms
+    Count allJetsCount;
+    Count genuineBJetsCount;
+    Count genuineBJetsWithBTagCount;
   };
 }
 
