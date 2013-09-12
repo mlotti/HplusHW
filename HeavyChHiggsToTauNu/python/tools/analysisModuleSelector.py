@@ -16,7 +16,7 @@ class AnalysisModuleSelectorSource:
     def getDataEras(self):
         if self._dsetMgrCreator == None:
             return None
-        return self._dsetMgrCreator.getDataEras()
+        return self._dsetMgrCreator.getMCDataEras()
 
     def getSearchModes(self):
         if self._dsetMgrCreator == None:

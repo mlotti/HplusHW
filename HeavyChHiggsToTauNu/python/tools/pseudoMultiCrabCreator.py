@@ -40,7 +40,7 @@ class PseudoMultiCrabCreator:
 
     def finalize(self):
         # Copy lumi.json file from input multicrab directory
-        os.system("cp %s/lumi.json %s"%(self._inputMulticrabDir, self._myBaseDir))
+        #os.system("cp %s/lumi.json %s"%(self._inputMulticrabDir, self._myBaseDir))
         # Create multicrab.cfg
         f = open(os.path.join(self._myBaseDir, "multicrab.cfg"), "w")
         f.write("# Ultimate pseudo-multicrab for fooling dataset.py, created by PseudoMultiCrabCreator\n")
@@ -62,16 +62,18 @@ class PseudoMultiCrabCreator:
             m.writeModuleToRootFile(myRootFile)
         # Create config info histogram
         myRootFile.cd("/")
-        myRootFile.mkdir("configInfo")
-        myRootFile.cd("configInfo")
-        hConfigInfo = ROOT.TH1F("configinfo","configinfo",3,0,3)
+        myConfigInfoDir = myRootFile.mkdir("configInfo")
+        hConfigInfo = ROOT.TH1F("configinfo","configinfo",2,0,2)
         hConfigInfo.GetXaxis().SetBinLabel(1,"control")
         hConfigInfo.SetBinContent(1, 1)
-        hConfigInfo.GetXaxis().SetBinLabel(2,"crossSection")
-        hConfigInfo.SetBinContent(2, 1)
-        hConfigInfo.GetXaxis().SetBinLabel(3,"isData")
-        hConfigInfo.SetBinContent(3, 1)
-        # Note that data version and code version are stored to the modules
+        hConfigInfo.GetXaxis().SetBinLabel(2,"energy")
+        hConfigInfo.SetBinContent(2, self._modulesList[0]._energy)
+        #hConfigInfo.GetXaxis().SetBinLabel(3,"luminosity")
+        #hConfigInfo.SetBinContent(3, 1)
+        hConfigInfo.SetDirectory(myConfigInfoDir)
+        # Write a copy of data version and code version
+        myConfigInfoDir.Add(self._modulesList[0]._dataVersion.Clone())
+        myConfigInfoDir.Add(self._modulesList[0]._codeVersion.Clone())
         # Write and close the root file
         myRootFile.Write()
         myRootFile.Close()
@@ -93,21 +95,30 @@ class PseudoMultiCrabModule:
         self._counters = {} # Dictionary for counter values to be stored
         self._counterUncertainties = {} # Dictionary for counter values to be stored
         self._hCounters = None
-        # Obtain luminosity information and store it as a counter
-        myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
+        # Obtain luminosity information
+        myLuminosity = 0.0
+        myDataDatasets = dsetMgr.getDataDatasets()
+        for d in myDataDatasets:
+            myLuminosity += d.getLuminosity()
+        self._luminosity = myLuminosity
+        # Obtain energy information
+        self._energy = float(dsetMgr.getDataset("Data").datasets[0].getEnergy())
+        #myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
         self._counters["luminosity"] = myLuminosity
         self._counterUncertainties["luminosity"] = 0
         # Copy splittedBinInfo (for self-documenting)
         self._hSplittedBinInfo = dsetMgr.getDataset("Data").getDatasetRootHisto("SplittedBinInfo").getHistogram().Clone()
-        for i in range(2,self._hSplittedBinInfo.GetNbinsX()+1):
-            self._hSplittedBinInfo.SetBinContent(i, self._hSplittedBinInfo.GetBinContent(i)/self._hSplittedBinInfo.GetBinContent(1))
+        myControlValue = self._hSplittedBinInfo.GetBinContent(1)
+        for i in range(1,self._hSplittedBinInfo.GetNbinsX()+1):
+            self._hSplittedBinInfo.SetBinContent(i, self._hSplittedBinInfo.GetBinContent(i)/myControlValue)
         self._hSplittedBinInfo.SetName("SplittedBinInfo")
         # Copy parameter set information
         (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("parameterSet")
         self._psetInfo = objs[0].Clone()
-        # Copy data version
+        # Copy data version and set it to pseudo
         (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/dataVersion")
         self._dataVersion = objs[0].Clone()
+        self._dataVersion.SetTitle("pseudo")
         # Copy code version
         (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/codeVersion")
         self._codeVersion = objs[0].Clone()
@@ -156,8 +167,18 @@ class PseudoMultiCrabModule:
         self._hSplittedBinInfo.SetDirectory(myModuleDir)
         # Save parameter set, code version and data version
         myModuleDir.Add(self._psetInfo)
-        myModuleDir.Add(self._dataVersion)
-        myModuleDir.Add(self._codeVersion)
+        # Create config info for the module
+        myConfigInfoDir = myModuleDir.mkdir("configInfo")
+        self._hConfigInfo = ROOT.TH1F("configinfo","configinfo",2,0,2) # Have to store the histogram to keep it alive for writing        self._hConfigInfo.GetXaxis().SetBinLabel(1,"control")
+        self._hConfigInfo.GetXaxis().SetBinLabel(1,"control")
+        self._hConfigInfo.SetBinContent(1, 1)
+        #self._hConfigInfo.GetXaxis().SetBinLabel(2,"energy")
+        #self._hConfigInfo.SetBinContent(2, self._energy)
+        self._hConfigInfo.GetXaxis().SetBinLabel(2,"luminosity")
+        self._hConfigInfo.SetBinContent(2, self._luminosity)
+        self._hConfigInfo.SetDirectory(myConfigInfoDir)
+        myConfigInfoDir.Add(self._dataVersion)
+        myConfigInfoDir.Add(self._codeVersion)
         #self._psetInfo.SetDirectory(rootfile)
         #.SetDirectory(rootfile)
         #self._codeVersion.SetDirectory(rootfile)
