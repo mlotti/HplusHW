@@ -209,14 +209,20 @@ class ValidateGroup:
         myOutput += "<td><b>New eff.</b></td><td><b>Ref. eff.</b></td><td><b>New/Ref.</b></td>"
         myOutput += "</tr>\n"
         oldrow = ""
-        if refCounter == None:
-            rownames = testCounter.getRowNames()
-        else:
-            rownames = refCounter.getRowNames()
-        for row in rownames:
+        # This handles nonexisting rows correctly
+        table = counter.CounterTable()
+        if refCounter is not None:
+            c = refCounter.getColumn(index=0)
+            c.setName("Ref")
+            table.appendColumn(c)
+        c = testCounter.getColumn(index=0)
+        c.setName("Test")
+        table.appendColumn(c)
+
+        for row in table.getRowNames():
             myOutput += self._testCounterValues(oldrow, row, refCounter, testCounter)
             oldrow = row
-        self._readCounterCount += len(rownames)
+        self._readCounterCount += table.getNrows()
         myOutput += "</table>\n"
         return myOutput
 
