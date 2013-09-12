@@ -631,8 +631,6 @@ def createValidateHistograms():
     myGroup = ValidateGroup("Primary vertices")
     myGroup.addHistogram("Vertices/verticesBeforeWeight", 1, "log")
     myGroup.addHistogram("Vertices/verticesAfterWeight", 1, "log")
-    myGroup.addHistogram("Vertices/verticesTriggeredBeforeWeight", 1, "log")
-    myGroup.addHistogram("Vertices/verticesTriggeredAfterWeight", 1, "log")
     myGroups.append(myGroup)
 
     myGroup = ValidateGroup("Trigger matched tau collection")
@@ -805,11 +803,13 @@ def createValidateHistograms():
     myGroup.addHistogram("QCDTailKiller/CollinearSystem/CircleCut_CollinearJet4", 10, "log")
     myGroups.append(myGroup)
 
-    myGroup = ValidateGroup("Transverse mass")
+    myGroup = ValidateGroup("Transverse and invariant mass")
     myGroup.addCounter("FullHiggsMassCalculator")
     myGroup.addHistogram("deltaPhi", 10, "linear")
-    myGroup.addHistogram(["transverseMass","transverseMassAfterDeltaPhi160"], 20, "linear")
-    myGroup.addHistogram(["NonQCDTypeIITransverseMassAfterDeltaPhi160","EWKFakeTausTransverseMass"], 20, "linear")
+    myGroup.addHistogram(["shapeTransverseMass",], 20, "linear")
+    myGroup.addHistogram(["shapeEWKFakeTausTransverseMass"], 20, "linear")
+    myGroup.addHistogram(["shapeInvariantMass",], 10, "linear")
+    myGroup.addHistogram(["shapeEWKFakeTausInvariantMass"], 10, "linear")
     myGroups.append(myGroup)
 
     myGroup = ValidateGroup("TopSelection (TopChi)")
