@@ -106,7 +106,8 @@ class WeightedAllEventsTopPt:
             weightedAllEvents = self.weighted[topPtWeight].getWeighted(topPtWeightType)
         except KeyError:
             raise Exception("Invalid top pt weight name %s, see TopPtWeightSchemes.schemes" % topPtWeight)
-        return weightedAllEvents.getWeight(unweighted, **kwargs)
+        weightedAllEvents._setName(self.name)
+        return weightedAllEvents.getWeighted(unweighted, **kwargs)
 
 ## Get WeightedAllEvents for dataset and era
 #
