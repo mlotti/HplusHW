@@ -1887,10 +1887,13 @@ class InvertedTauID:
 	fOUT.write("# Generated on %s\n"%now.ctime())
 	fOUT.write("# by %s\n"%os.path.basename(sys.argv[0]))
         fOUT.write("\n")
+        fOUT.write("import sys\n")
+        fOUT.write("\n")
         fOUT.write("def QCDInvertedNormalizationSafetyCheck(era):\n")
         fOUT.write("    validForEra = \""+self.info[0]+"\"\n")
         fOUT.write("    if not era == validForEra:\n")
         fOUT.write("        print \"Warning, inconsistent era, normalisation factors valid for\",validForEra,\"but trying to use with\",era\n")
+        fOUT.write("        sys.exit()\n")
         fOUT.write("\n")
 	fOUT.write("QCDInvertedNormalization = {\n")
         for i in self.info:
