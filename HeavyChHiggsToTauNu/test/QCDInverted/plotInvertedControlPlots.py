@@ -13,7 +13,7 @@
 
 import ROOT
 import sys,os,shutil
-from optparse import OptionParser
+#from optparse import OptionParser
 from time import sleep
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -38,6 +38,10 @@ from InvertedTauID import *
 
 # Configuration
 optionBrTopToHplusb = 0.01 # Br(t->bH+), needed only for plotting signal for light H+
+
+era              = "Run2011AB"
+searchMode       = "Light"
+optimizationMode = "OptQCDTailKillerLoosePlus"
 
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale")
 
@@ -357,9 +361,21 @@ def controlPlots(opts, dsetMgr, moduleInfoString, myDir, luminosity, normFactors
         #histograms.addText(x, y-self.separation, br, size=self.size)
 
 #addMassBRText = AddMassBRText()
-    
+
+def usage():
+    print
+    print "### Usage:   ",os.path.basename(sys.argv[0])," <multicrab dir>"
+    print
+    sys.exit()
+                    
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
+
+
+    if len(sys.argv) < 2:
+        usage()
+    myMulticrabDir = sys.argv[1]
+        
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
@@ -367,28 +383,30 @@ if __name__ == "__main__":
 
     myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
 
-    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=True,conflict_handler="resolve")
-    myModuleSelector.addParserOptions(parser)
-    parser.add_option("--mdir", dest="multicrabDir", action="store", help="Multicrab directory")
-    # Add here parser options, if necessary, following line is an example
-    #parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
-
-    # Parse options
-    (opts, args) = parser.parse_args()
-
-    # Obtain multicrab directory
-    myMulticrabDir = "."
-    if opts.multicrabDir != None:
-        myMulticrabDir = opts.multicrabDir
+#    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=True,conflict_handler="resolve")
+#    myModuleSelector.addParserOptions(parser)
+#    parser.add_option("--mdir", dest="multicrabDir", action="store", help="Multicrab directory")
+#    # Add here parser options, if necessary, following line is an example
+#    #parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
+#
+#    # Parse options
+#    (opts, args) = parser.parse_args()
+#
+#    # Obtain multicrab directory
+#    myMulticrabDir = "."
+#    if opts.multicrabDir != None:
+#        myMulticrabDir = opts.multicrabDir
     if not os.path.exists(myMulticrabDir+"/multicrab.cfg"):
-        print "\n"+ErrorLabel()+"Cannot find multicrab.cfg! Did you use the --mdir parameter?\n"
-        parser.print_help()
-        sys.exit()
+        print "\n"+ErrorLabel()+"Cannot find multicrab.cfg!"# Did you use the --mdir parameter?\n"
+        usage()
+#        parser.print_help()
+#        sys.exit()
 
     # Obtain normalisation coefficients
     myNormFactors = None
     if os.path.exists(myNormalizationFactorSource+".py"):
-        from QCDInvertedNormalizationFactors import QCDInvertedNormalization
+        from QCDInvertedNormalizationFactors import *
+        QCDInvertedNormalizationSafetyCheck(era)
         myNormFactors = QCDInvertedNormalization.copy()
     else:
         raise Exception(ErrorLabel()+"Normalisation factors ('%s.py') not found!\nRun script InvertedTauID_Normalization.py to generate the normalization factors."%myNormalizationFactorSource)
@@ -396,74 +414,74 @@ if __name__ == "__main__":
 
     # Obtain dsetMgrCreator and register it to module selector
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=myMulticrabDir)
-    myModuleSelector.setPrimarySource("analysis", dsetMgrCreator)
-    # Select modules
-    myModuleSelector.doSelect(opts)
+#    myModuleSelector.setPrimarySource("analysis", dsetMgrCreator)
+#    # Select modules
+#    myModuleSelector.doSelect(opts)
 
     myDisplayStatus = True
     # Loop over era/searchMode/optimizationMode options
-    for era in myModuleSelector.getSelectedEras():
-        for searchMode in myModuleSelector.getSelectedSearchModes():
-            for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
+#    for era in myModuleSelector.getSelectedEras():
+#        for searchMode in myModuleSelector.getSelectedSearchModes():
+#            for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
                 # Check if normalisation factors are compatible with the requested module
-                if era != myNormFactors["era"]:
-                    raise Exception(ErrorLabel()+"You requested to do analysis with era='%s', but the normalization factors have been calculated for the era '%s'!\nRecalculate norm. factors with InvertedTauID_Normalization.py or change requested era with -e!"%(era,myNormFactors["era"]))
-                if searchMode != myNormFactors["searchMode"]:
-                    raise Exception(ErrorLabel()+"You requested to do analysis with searchMode='%s', but the normalization factors have been calculated for the searchMode '%s'!\nRecalculate norm. factors with InvertedTauID_Normalization.py or change requested searchMode with -m!"%(searchMode,myNormFactors["searchMode"]))
-                if "Jet" in optimizationMode or "Jet" in myNormFactors["optimizationMode"]:
-                    print WarningLabel()+"You ask for the variation '%s', which varies the JetSelection properties."%optimizationMode
-                    print WarningLabel()+"The normalization factors were calculated for the variation '%s'."%myNormFactors["optimizationMode"]
-                    print WarningLabel()+"Please check if they are compatible with each other! (you may need to calculate new normalization factors for the results to make sense)"
+#                if era != myNormFactors["era"]:
+#                    raise Exception(ErrorLabel()+"You requested to do analysis with era='%s', but the normalization factors have been calculated for the era '%s'!\nRecalculate norm. factors with InvertedTauID_Normalization.py or change requested era with -e!"%(era,myNormFactors["era"]))
+#                if searchMode != myNormFactors["searchMode"]:
+#                    raise Exception(ErrorLabel()+"You requested to do analysis with searchMode='%s', but the normalization factors have been calculated for the searchMode '%s'!\nRecalculate norm. factors with InvertedTauID_Normalization.py or change requested searchMode with -m!"%(searchMode,myNormFactors["searchMode"]))
+#                if "Jet" in optimizationMode or "Jet" in myNormFactors["optimizationMode"]:
+#                    print WarningLabel()+"You ask for the variation '%s', which varies the JetSelection properties."%optimizationMode
+#                    print WarningLabel()+"The normalization factors were calculated for the variation '%s'."%myNormFactors["optimizationMode"]
+#                    print WarningLabel()+"Please check if they are compatible with each other! (you may need to calculate new normalization factors for the results to make sense)"
                     # Add a small delay to give a chance for the user to see the warning message
-                    for i in range(0,5):
-                        sys.stdout.write("\rContinuing in %d seconds ..."%(5-i))
-                        sys.stdout.flush()
-                        sleep(1)
-                    print
-                # Construct info string of module
-                myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
-                print HighlightStyle()+"Module:",myModuleInfoString,NormalStyle()
-                # Obtain dataset manager
-                dsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
-                # Do the usual normalisation
-                dsetMgr.updateNAllEventsToPUWeighted()
-                dsetMgr.loadLuminosities()
-                plots.mergeRenameReorderForDataMC(dsetMgr)
-                dsetMgr.merge("EWK", [
-                              "TTJets",
-                              "WJets",
-                              "DYJetsToLL",
-                              "SingleTop",
-                              "Diboson"
-                              ],keepSources=True) # Keep sources needed to keep open TTJets
-                # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
-                xsect.setHplusCrossSectionsToBR(dsetMgr, br_tH=optionBrTopToHplusb, br_Htaunu=1)
-                # Set the signal cross sections to a value from MSSM
-                # xsect.setHplusCrossSectionsToMSSM(dsetMgr, tanbeta=20, mu=200)
-                plots.mergeWHandHH(dsetMgr) # merging of WH and HH signals must be done after setting the cross section
+#                    for i in range(0,5):
+#                        sys.stdout.write("\rContinuing in %d seconds ..."%(5-i))
+#                        sys.stdout.flush()
+#                        sleep(1)
+#                    print
+    # Construct info string of module
+    myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
+    print HighlightStyle()+"Module:",myModuleInfoString,NormalStyle()
+    # Obtain dataset manager
+    dsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+    # Do the usual normalisation
+    dsetMgr.updateNAllEventsToPUWeighted()
+    dsetMgr.loadLuminosities()
+    plots.mergeRenameReorderForDataMC(dsetMgr)
+    dsetMgr.merge("EWK", [
+                  "TTJets",
+                  "WJets",
+                  "DYJetsToLL",
+                  "SingleTop",
+                  "Diboson"
+                  ],keepSources=True) # Keep sources needed to keep open TTJets
+    # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
+    xsect.setHplusCrossSectionsToBR(dsetMgr, br_tH=optionBrTopToHplusb, br_Htaunu=1)
+    # Set the signal cross sections to a value from MSSM
+    # xsect.setHplusCrossSectionsToMSSM(dsetMgr, tanbeta=20, mu=200)
+    plots.mergeWHandHH(dsetMgr) # merging of WH and HH signals must be done after setting the cross section
 
-                # Make a directory for output
-                myDir = "invertedControlPlots_%s"%myModuleInfoString
-                # Remove the directory with its contents if it exists
-                if os.path.exists(myDir):
-                    shutil.rmtree(myDir)
-                os.mkdir(myDir)
-                # Obtain luminosity
-                myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
-                # Print info so that user can check that merge went correct
-                if myDisplayStatus:
-                    dsetMgr.printDatasetTree()
-                    print "Luminosity = %f 1/fb"%(myLuminosity / 1000.0)
-                    print
-                    myDisplayStatus = False
-                # Call methods for module
-                # Create plots
-                if False:
-                    doPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity, myNormFactors)
-                doPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity, myNormFactors)
-                # Print counters
-                #doCounters(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity, myNormFactors)
+    # Make a directory for output
+    myDir = "invertedControlPlots_%s"%myModuleInfoString
+    # Remove the directory with its contents if it exists
+    if os.path.exists(myDir):
+        shutil.rmtree(myDir)
+    os.mkdir(myDir)
+    # Obtain luminosity
+    myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
+    # Print info so that user can check that merge went correct
+    if myDisplayStatus:
+        dsetMgr.printDatasetTree()
+        print "Luminosity = %f 1/fb"%(myLuminosity / 1000.0)
+        print
+        myDisplayStatus = False
+    # Call methods for module
+    # Create plots
+    opts={}
+    doPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity, myNormFactors)
 
-                # Write mt histograms to ROOT file
-                #writeTransverseMass(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity, myNormFactors)
+    # Print counters
+    #doCounters(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity, myNormFactors)
+
+    # Write mt histograms to ROOT file
+    #writeTransverseMass(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity, myNormFactors)
 
