@@ -112,7 +112,7 @@ def main(argv):
         title = datasets.getDataset("Data").getDatasetRootHisto("baseline/METBaseline"+HISTONAME+"/"+histoname).getHistogram().GetTitle()
         title = title.replace("METBaseline"+HISTONAME,"")
         title = title.replace("#tau p_{T}","taup_T")
-        title = title.replace("<","leq")
+        title = title.replace("<","lt")
         title = title.replace(">","gt")
         title = title.replace("=","eq")
         title = title.replace("..","to")
