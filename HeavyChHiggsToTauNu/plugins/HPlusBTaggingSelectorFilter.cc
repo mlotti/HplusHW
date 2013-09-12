@@ -82,30 +82,29 @@ bool HPlusBTaggingPtrSelectorFilter::filter(edm::Event& iEvent, const edm::Event
     }
     iEvent.put(product);
 
-    // COMMENTED OUT BY STEFAN 2013-08-29 BECAUSE METHOD BTagging::getPerJetInfo DOES NOT EXIST ANYMORE. STEFAN WILL FIX IT.
-//     HPlus::BTagging::PerJetInfo jetInfos = fBTagging.getPerJetInfo(casted, btagData, iEvent.isRealData());
-//     std::auto_ptr<edm::ValueMap<bool> > tagged(new edm::ValueMap<bool>());
-//     std::auto_ptr<edm::ValueMap<float> > scaleFactor(new edm::ValueMap<float>());
-//     std::auto_ptr<edm::ValueMap<float> > scaleFactorUncertainty(new edm::ValueMap<float>());
-//     {
-//       edm::ValueMap<bool>::Filler filler(*tagged);
-//       filler.insert(hjets, jetInfos.tagged.begin(), jetInfos.tagged.end());
-//       filler.fill();
-//     }
-//     {
-//       edm::ValueMap<float>::Filler filler(*scaleFactor);
-//       filler.insert(hjets, jetInfos.scaleFactor.begin(), jetInfos.scaleFactor.end());
-//       filler.fill();
-//     }
-//     {
-//       edm::ValueMap<float>::Filler filler(*scaleFactorUncertainty);
-//       filler.insert(hjets, jetInfos.uncertainty.begin(), jetInfos.uncertainty.end());
-//       filler.fill();
-//     }
+    HPlus::BTagging::PerJetInfo jetInfos = fBTagging.getPerJetInfo();
+    std::auto_ptr<edm::ValueMap<bool> > tagged(new edm::ValueMap<bool>());
+    std::auto_ptr<edm::ValueMap<float> > scaleFactor(new edm::ValueMap<float>());
+    std::auto_ptr<edm::ValueMap<float> > scaleFactorUncertainty(new edm::ValueMap<float>());
+    {
+      edm::ValueMap<bool>::Filler filler(*tagged);
+      filler.insert(hjets, jetInfos.fTagged.begin(), jetInfos.fTagged.end());
+      filler.fill();
+    }
+    {
+      edm::ValueMap<float>::Filler filler(*scaleFactor);
+      filler.insert(hjets, jetInfos.fScaleFactor.begin(), jetInfos.fScaleFactor.end());
+      filler.fill();
+    }
+    {
+      edm::ValueMap<float>::Filler filler(*scaleFactorUncertainty);
+      filler.insert(hjets, jetInfos.fUncertainty.begin(), jetInfos.fUncertainty.end());
+      filler.fill();
+    }
 
-//     iEvent.put(tagged, "tagged");
-//     iEvent.put(scaleFactor, "scaleFactor");
-//     iEvent.put(scaleFactorUncertainty, "scaleFactorUncertainty");
+    iEvent.put(tagged, "tagged");
+    iEvent.put(scaleFactor, "scaleFactor");
+    iEvent.put(scaleFactorUncertainty, "scaleFactorUncertainty");
   }
   std::auto_ptr<bool> p(new bool(passed));
   iEvent.put(p);

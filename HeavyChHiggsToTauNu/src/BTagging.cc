@@ -471,6 +471,18 @@ namespace HPlus {
     fScaleFactor.push_back(eventScaleFactor);
   }
   
+  void BTagging::PerJetInfo::resetInfo(size_t s) {
+    // Clear info from previous event:
+    fScaleFactor.clear();
+    fUncertainty.clear();
+    fTagged.clear();
+    fGenuine.clear();
+    // Reserve memory for storing the info:
+    fScaleFactor.reserve(s);
+    fUncertainty.reserve(s);
+    fTagged.reserve(s);
+    fGenuine.reserve(s);
+  }
 
 
   // ================================== class BTagging ==================================
@@ -606,9 +618,8 @@ namespace HPlus {
     Data output;
     output.fSelectedJets.reserve(jets.size());
     output.fSelectedSubLeadingJets.reserve(jets.size());
-    // Initialize structure for collecting information (scale factor & uncertainty, tagging status, etc.) of each jet
-    PerJetInfo bTaggingInfo;
-    bTaggingInfo.reserve(jets.size());
+    // Initialize structure for collecting information (scale factor & uncertainty, tagging status, genuine b?) of each jet
+    fBTaggingInfo.resetInfo(jets.size());
     // Initialize tables of per-jet SF uncertainties in look-up table objects
     fTagSFTable.resetJetTable();
     fMistagSFTable.resetJetTable();
@@ -665,9 +676,9 @@ namespace HPlus {
 
       // If MC, calculate the jet's contribution to the event scale factor
       if (!iEvent.isRealData()) {
-	calculateJetSFAndUncertaintyTerm(iJet, isBTagged, bTaggingInfo, fTagSFTable, fMistagSFTable, fTagEffTable, fCMistagEffTable, fGMistagEffTable, fUDSMistagEffTable);
-	bTaggingInfo.fTagged.push_back(isBTagged);
-	bTaggingInfo.fGenuine.push_back(isGenuineB);
+	calculateJetSFAndUncertaintyTerm(iJet, isBTagged, fBTaggingInfo, fTagSFTable, fMistagSFTable, fTagEffTable, fCMistagEffTable, fGMistagEffTable, fUDSMistagEffTable);
+	fBTaggingInfo.fTagged.push_back(isBTagged);
+	fBTaggingInfo.fGenuine.push_back(isGenuineB);
       }
     } // End of jet loop
     if (printValidationOutput) std::cout << "*** Jet loop ended ***" << std::endl;
@@ -681,7 +692,7 @@ namespace HPlus {
     }
 
     // Calculate scale factor and its uncertainty for MC events
-    if (!iEvent.isRealData()) setEventScaleFactorInfo(bTaggingInfo, fTagSFTable, fMistagSFTable, fTagEffTable, fCMistagEffTable, fGMistagEffTable, fUDSMistagEffTable, output);
+    if (!iEvent.isRealData()) setEventScaleFactorInfo(fBTaggingInfo, fTagSFTable, fMistagSFTable, fTagEffTable, fCMistagEffTable, fGMistagEffTable, fUDSMistagEffTable, output);
 
     // Do histogramming and set output
     hNumberOfBtaggedJets->Fill(output.fSelectedJets.size());
@@ -741,11 +752,11 @@ namespace HPlus {
     }
   }
 
-  double BTagging::calculateEventScaleFactor(PerJetInfo& bTaggingInfo) {
+  double BTagging::calculateEventScaleFactor(PerJetInfo& fBTaggingInfo) {
     double eventScaleFactor = 1.0;
     size_t i = 0;
-    while (i < bTaggingInfo.fScaleFactor.size()) {
-      eventScaleFactor *= bTaggingInfo.fScaleFactor[i];
+    while (i < fBTaggingInfo.fScaleFactor.size()) {
+      eventScaleFactor *= fBTaggingInfo.fScaleFactor[i];
       i++;
     }
     return eventScaleFactor;
@@ -762,8 +773,8 @@ namespace HPlus {
     return TMath::Sqrt(relUncertSquared);
   }
 
-  void BTagging::setEventScaleFactorInfo(PerJetInfo& bTaggingInfo, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag, BTagging::Data& output) {
-    output.fEventScaleFactor = calculateEventScaleFactor(bTaggingInfo);
+  void BTagging::setEventScaleFactorInfo(PerJetInfo& fBTaggingInfo, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag, BTagging::Data& output) {
+    output.fEventScaleFactor = calculateEventScaleFactor(fBTaggingInfo);
     output.fEventSFRelUncert_up = calculateRelativeEventScaleFactorUncertainty(true, sfTag, sfMistag, effTag, effCMistag, effGMistag, effUDSMistag);
     output.fEventSFAbsUncert_up = output.fEventSFRelUncert_up * output.fEventScaleFactor;
     output.fEventSFRelUncert_down = calculateRelativeEventScaleFactorUncertainty(false, sfTag, sfMistag, effTag, effCMistag, effGMistag, effUDSMistag);
