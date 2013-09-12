@@ -1887,13 +1887,26 @@ class InvertedTauID:
 	fOUT.write("# Generated on %s\n"%now.ctime())
 	fOUT.write("# by %s\n"%os.path.basename(sys.argv[0]))
         fOUT.write("\n")
+        fOUT.write("def QCDInvertedNormalizationSafetyCheck(era):\n")
+        fOUT.write("    validForEra = \""+self.info[0]+"\"\n")
+        fOUT.write("    if not era == validForEra:\n")
+        fOUT.write("        print \"Warning, inconsistent era, normalisation factors valid for\",validForEra,\"but trying to use with\",era\n")
+        fOUT.write("\n")
 	fOUT.write("QCDInvertedNormalization = {\n")
         for i in self.info:
             fOUT.write("    # %s\n"%i)
-        
+
+        maxLabelLength = 0
         i = 0
         while i < len(self.normFactors):
-	    line = "    \"" + self.labels[i] + "\": " + str(self.normFactors[i])
+            maxLabelLength = max(maxLabelLength,len(self.labels[i]))
+            i = i + 1
+        i = 0
+        while i < len(self.normFactors):
+	    line = "    \"" + self.labels[i] + "\""
+            while len(line) < maxLabelLength + 11:
+                line += " "
+            line += ": " + str(self.normFactors[i])
 	    if i < len(self.normFactors) - 1 or len(self.normFactorsEWK) > 0:
 		line += ","
 	    line += "\n"
