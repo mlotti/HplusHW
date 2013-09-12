@@ -1000,7 +1000,7 @@ if __name__ == "__main__":
     if opts.testDir is not None:
         kwargs["includeOnlyTasks"] = [opts.testDir]
     testDsetCreator = dataset.readFromMulticrabCfg(directory=opts.test, **kwargs)
-    myEraList = compareLists(refDsetCreator.getDataDataEras(), testDsetCreator.getDataDataEras(), opts.era)
+    myEraList = compareLists(refDsetCreator.getDataEras(), testDsetCreator.getDataEras(), opts.era)
     mySearchModeList = compareLists(refDsetCreator.getSearchModes(), testDsetCreator.getSearchModes(), opts.searchMode)
     myVariationList = compareLists(refDsetCreator.getOptimizationModes(), testDsetCreator.getOptimizationModes(), opts.variation)
     if len(myVariationList) == 0:
