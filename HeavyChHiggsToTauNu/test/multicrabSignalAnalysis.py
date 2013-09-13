@@ -35,6 +35,11 @@ datasetsData = [
     "Tau_175832-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
 ]
 
+# For minimal set of datasets remove the 200k signal samples, and
+# single top signal samples
+minimalDatasets = True
+#minimalDatasets = False
+
 datasetsMC = [
         # MC Signal (WH)
         "TTToHplusBWB_M80_Fall11",
@@ -45,7 +50,9 @@ datasetsMC = [
         "TTToHplusBWB_M150_Fall11",
         "TTToHplusBWB_M155_Fall11",
         "TTToHplusBWB_M160_Fall11",
-
+]
+if not minimalDatasets:
+    datasetsMC.extend([
         # MC Signal (HH)
         "TTToHplusBHminusB_M80_Fall11",
         "TTToHplusBHminusB_M90_Fall11",
@@ -55,7 +62,8 @@ datasetsMC = [
         "TTToHplusBHminusB_M150_Fall11",
         "TTToHplusBHminusB_M155_Fall11",
         "TTToHplusBHminusB_M160_Fall11",
-
+        ])
+datasetsMC.extend([
 	# MC Signal (heavy H+ from process pp->tbH+)
         "HplusTB_M180_Fall11",
         "HplusTB_M190_Fall11",
@@ -87,7 +95,7 @@ datasetsMC = [
         "WW_TuneZ2_Fall11",
         "WZ_TuneZ2_Fall11",
         "ZZ_TuneZ2_Fall11",
-        ]
+        ])
 
 datasets = []
 datasets.extend(datasetsData)
@@ -131,7 +139,7 @@ if runPatOnTheFly:
     #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*2)
     #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*0.5)
 
-prefix = "multicrab"
+prefix = "multicrab_"+workflow
 if "QCD" in cfg:
     prefix += "_QCD"
 

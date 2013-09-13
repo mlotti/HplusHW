@@ -43,17 +43,14 @@ mcOnly = False
 mcOnlyLumi = 5000 # pb
 
 # main function
-def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
+def main(opts, signalDsetCreator, era, searchMode, optimizationMode, systematicVariation):
     # Make directory for output
-    if optimizationMode is None:
-        mySuffix = "debugPlots_%s_%s"%(era,searchMode)
-    else:
-        mySuffix = "debugPlots_%s_%s_%s"%(era,searchMode,optimizationMode)
+    mySuffix = "debugPlots_%s_%s_%s_%s"%(era, searchMode, optimizationMode, systematicVariation)
     if os.path.exists(mySuffix):
         shutil.rmtree(mySuffix)
     os.mkdir(mySuffix)
     # Create dataset manager
-    myDsetMgr = signalDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+    myDsetMgr = signalDsetCreator.createDatasetManager(dataEra=era, searchMode=searchMode, optimizationMode=optimizationMode, systematicVariation=systematicVariation)
     if mcOnly:
         myDsetMgr.remove(myDsetMgr.getDataDatasetNames(), close=False)
         histograms.cmsTextMode = histograms.CMSMode.SIMULATION
@@ -104,20 +101,22 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     style = tdrstyle.TDRStyle()
 
     # Create plots
-    doPlots(myDsetMgr, opts, mySuffix)
+    doPlots(myDsetMgr, opts, mySuffix, systematicVariation != "")
 
     # Print counters
-    doCounters(myDsetMgr, mySuffix)
+    doCounters(myDsetMgr, mySuffix, systematicVariation != "")
     print "Results saved in directory: %s"%mySuffix
 
-def doPlots(myDsetMgr, opts, mySuffix):
+def doPlots(myDsetMgr, opts, mySuffix, isSystematicVariation):
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
     drawPlot = plots.PlotDrawer(ylabel="N_{events}", log=True, ratio=True, ratioYlabel="Data/MC", opts2={"ymin": 0, "ymax": 2}, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True)
 
     global plotIndex
     plotIndex = 1
-    def createDrawPlot(name, moveSignalText={}, fullyBlinded=False, addBlindedText=True, moveBlindedText={}, **kwargs):
+    def createDrawPlot(name, moveSignalText={}, fullyBlinded=False, addBlindedText=True, moveBlindedText={}, forSystVar=False, **kwargs):
+        if isSystematicVariation and not forSystVar:
+            return
         # Create the plot object
         print "Creating plot:",name
         args = {}
@@ -168,6 +167,7 @@ def doPlots(myDsetMgr, opts, mySuffix):
                     args["fullyBlinded"] = True
             if "FakeTaus" in plotDir:
                 args.update(mcArgs)
+            args.update(kwargs)
             createDrawPlot(path%plotDir, **args)
 
     #phiBinWidth = 2*3.14159/72
@@ -177,7 +177,7 @@ def doPlots(myDsetMgr, opts, mySuffix):
     if True:
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/nVertices", xlabel="N_{Vertices}")
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_fakeStatus", xlabel="Fake tau status", **mcArgs)
-        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_pT", xlabel="#tau p_{T}, GeV/c", rebinToWidthX=10)
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_pT", xlabel="#tau p_{T}, GeV/c", rebinToWidthX=20)
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_eta", xlabel="#tau #eta")
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_phi", xlabel="#tau #phi", rebinToWidthX=phiBinWidth)
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_Rtau", xlabel="R_{#tau}", rebinToWidthX=0.05, opts={"xmin": 0.5, "xmax": 1}, moveLegend={"dx": -0.5})
@@ -333,10 +333,10 @@ def doPlots(myDsetMgr, opts, mySuffix):
     createDrawPlot(myDir+"/etotau_taupT_decayMode2", xlabel="#tau p_{T} / GeV/c")
     # Data driven control plots
     myDir = "ForDataDrivenCtrlPlots"
-    createDrawPlot(myDir+"/Njets", xlabel="N_{jets}")
-    createDrawPlot(myDir+"/NjetsAfterJetSelectionAndMETSF", xlabel="N_{jets}")
+    createDrawPlot(myDir+"/Njets", forSystVar=True, xlabel="N_{jets}")
+    createDrawPlot(myDir+"/NjetsAfterJetSelectionAndMETSF", forSystVar=True, xlabel="N_{jets}")
     for i in range (1,4):
-        createDrawPlot(myDir+"/ImprovedDeltaPhiCutsJet%dCollinear"%i, xlabel="#sqrt{(#Delta#phi(#tau,MET))^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%i)
+        createDrawPlot(myDir+"/ImprovedDeltaPhiCutsJet%dCollinear"%i, forSystVar=True, xlabel="#sqrt{(#Delta#phi(#tau,MET))^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%i)
     createDrawPlot(myDir+"/SelectedTau_pT_AfterStandardSelections", xlabel="#tau p_{T} / GeV/c")
     createDrawPlot(myDir+"/SelectedTau_eta_AfterStandardSelections", xlabel="#tau #eta")
     createDrawPlot(myDir+"/SelectedTau_phi_AfterStandardSelections", xlabel="#tau #phi")
@@ -346,15 +346,15 @@ def doPlots(myDsetMgr, opts, mySuffix):
     createDrawPlot(myDir+"/SelectedTau_p_AfterStandardSelections", xlabel="#tau p / GeV/c")
     createDrawPlot(myDir+"/SelectedTau_LeadingTrackP_AfterStandardSelections", xlabel="#tau ldg. ch. particle p / GeV/c")
     createDrawPlot(myDir+"/Njets_AfterStandardSelections", xlabel="N_{jets}")
-    createDrawPlot(myDir+"/MET", xlabel="MET / GeV")
-    createDrawPlot(myDir+"/NBjets", xlabel="N_{b jets}")
+    createDrawPlot(myDir+"/MET", forSystVar=True, xlabel="MET / GeV", rebinToWidthX=20)
+    createDrawPlot(myDir+"/NBjets", forSystVar=True, xlabel="N_{b jets}")
     for i in range (1,4):
-        createDrawPlot(myDir+"/ImprovedDeltaPhiCutsJet%dBackToBack"%i, xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+(#Delta#phi(jet_{%d},MET))^{2}}"%i)
+        createDrawPlot(myDir+"/ImprovedDeltaPhiCutsJet%dBackToBack"%i, forSystVar=True, xlabel="#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+(#Delta#phi(jet_{%d},MET))^{2}}"%i)
     # Final shapes
-    createDrawPlot("shapeTransverseMass", xlabel="Transverse mass, GeV/c^{2}", ylabel="N_{events}", rebinToWidthX=20, customizeBeforeFrame=lambda p: plots.partiallyBlind(p, maxShownValue=60))
-    createDrawPlot("shapeEWKFakeTausTransverseMass", xlabel="Transverse mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=10, **mcArgs)
-    createDrawPlot("shapeInvariantMass", xlabel="Invariant mass, GeV/c^{2}", ylabel="N_{events}", rebin=4, fullyBlinded=True)
-    createDrawPlot("shapeEWKFakeTausInvariantMass", xlabel="Invariant mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=4, **mcArgs)
+    createDrawPlot("shapeTransverseMass", forSystVar=True, xlabel="Transverse mass, GeV/c^{2}", ylabel="N_{events}", rebinToWidthX=20, customizeBeforeFrame=lambda p: plots.partiallyBlind(p, maxShownValue=60))
+    createDrawPlot("shapeEWKFakeTausTransverseMass", forSystVar=True, xlabel="Transverse mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=10, **mcArgs)
+    createDrawPlot("shapeInvariantMass", forSystVar=True, xlabel="Invariant mass, GeV/c^{2}", ylabel="N_{events}", rebin=4, fullyBlinded=True)
+    createDrawPlot("shapeEWKFakeTausInvariantMass", forSystVar=True, xlabel="Invariant mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=4, **mcArgs)
     # main directory
     createDrawPlot("deltaPhi", xlabel="#Delta#phi(#tau jet, MET), ^{o}", ylabel="N_{events}", rebin=20)
     createDrawPlot("alphaT", xlabel="#alpha_{T}", opts={"xmax": 2}, customizeBeforeFrame=lambda p: plots.partiallyBlind(p, maxShownValue=0.5))
@@ -381,7 +381,7 @@ def doPlots(myDsetMgr, opts, mySuffix):
     createDrawNormalizationPlots("NormalisationAnalysis/%s/zMass", xlabel="m_{Z} / GeV/c^{2}")
     createDrawNormalizationPlots("NormalisationAnalysis/%s/HplusPt", xlabel="p_{T}(H+) / GeV/c")
 
-def doCounters(myDsetMgr, mySuffix=""):
+def doCounters(myDsetMgr, mySuffix, isSystematicVariation):
     eventCounter = counter.EventCounter(myDsetMgr)
 
     # append row from the tree to the main counter
@@ -418,18 +418,18 @@ def doCounters(myDsetMgr, mySuffix=""):
 
 
 
-
-#    printAndSave(eventCounter.getSubCounterTable("tauIDTauSelection").format())
-    printAndSave(eventCounter.getSubCounterTable("TauIDPassedEvt::TauSelection_HPS").format(cellFormat))
-    printAndSave(eventCounter.getSubCounterTable("TauIDPassedJets::TauSelection_HPS").format(cellFormat))
-    printAndSave(eventCounter.getSubCounterTable("b-tagging").format(cellFormat))
-    printAndSave(eventCounter.getSubCounterTable("Jet selection").format(cellFormat))
-    printAndSave(eventCounter.getSubCounterTable("Jet main").format(cellFormat))
-    printAndSave(eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat))
-    printAndSave(eventCounter.getSubCounterTable("MuonSelection").format(cellFormat))
-    printAndSave(eventCounter.getSubCounterTable("MCinfo for selected events").format(cellFormat))
-    printAndSave(eventCounter.getSubCounterTable("ElectronSelection").format(cellFormat))
-#    printAndSave(eventCounter.getSubCounterTable("top").format(cellFormat))
+    if not isSystematicVariation:
+#        printAndSave(eventCounter.getSubCounterTable("tauIDTauSelection").format())
+        printAndSave(eventCounter.getSubCounterTable("TauIDPassedEvt::TauSelection_HPS").format(cellFormat))
+        printAndSave(eventCounter.getSubCounterTable("TauIDPassedJets::TauSelection_HPS").format(cellFormat))
+        printAndSave(eventCounter.getSubCounterTable("b-tagging").format(cellFormat))
+        printAndSave(eventCounter.getSubCounterTable("Jet selection").format(cellFormat))
+        printAndSave(eventCounter.getSubCounterTable("Jet main").format(cellFormat))
+        printAndSave(eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat))
+        printAndSave(eventCounter.getSubCounterTable("MuonSelection").format(cellFormat))
+        printAndSave(eventCounter.getSubCounterTable("MCinfo for selected events").format(cellFormat))
+        printAndSave(eventCounter.getSubCounterTable("ElectronSelection").format(cellFormat))
+#        printAndSave(eventCounter.getSubCounterTable("top").format(cellFormat))
 
     out.close()
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))
@@ -451,23 +451,10 @@ if __name__ == "__main__":
     myModuleSelector.doSelect(opts)
 
     # Arguments are ok, proceed to run
-    nOptModes = len(myModuleSelector.getSelectedOptimizationModes())
-    if nOptModes == 0:
-        myChosenModuleCount = len(myModuleSelector.getSelectedEras())*len(myModuleSelector.getSelectedSearchModes())
-        print "Will run over %d modules (%d eras x %d searchModes)"%(myChosenModuleCount,len(myModuleSelector.getSelectedEras()),len(myModuleSelector.getSelectedSearchModes()))
-    else:
-        myChosenModuleCount = len(myModuleSelector.getSelectedEras())*len(myModuleSelector.getSelectedSearchModes())*nOptModes
-        print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes)"%(myChosenModuleCount,len(myModuleSelector.getSelectedEras()),len(myModuleSelector.getSelectedSearchModes()), nOptModes)
+    myChosenModuleCount = myModuleSelector.printSelectedCombinationCount()
     myCount = 1
-    for era in myModuleSelector.getSelectedEras():
-        for searchMode in myModuleSelector.getSelectedSearchModes():
-           if nOptModes == 0:
-                print "%sProcessing module %d/%d: era=%s searchMode=%s%s"%(HighlightStyle(), myCount, myChosenModuleCount, era, searchMode, NormalStyle())
-                main(opts,signalDsetCreator,era,searchMode, None)
-                myCount += 1
-           else:
-               for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
-                   print "%sProcessing module %d/%d: era=%s searchMode=%s optimizationMode=%s%s"%(HighlightStyle(), myCount, myChosenModuleCount, era, searchMode, optimizationMode, NormalStyle())
-                   main(opts,signalDsetCreator,era,searchMode,optimizationMode)
-                   myCount += 1
+    for era, searchMode, optMode, systVar in myModuleSelector.iterSelectedCombinations():
+        print "%sProcessing module %d/%d: era=%s searchMode=%s optimizationMode=%s, systematicVariation=%s%s"%(HighlightStyle(), myCount, myChosenModuleCount, era, searchMode, optMode, systVar, NormalStyle())
+        main(opts, signalDsetCreator, era, searchMode, optMode, systVar)
+        myCount += 1
     print "\n%sPlotting done.%s"%(HighlightStyle(),NormalStyle())

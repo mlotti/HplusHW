@@ -7,6 +7,7 @@ import FWCore.ParameterSet.Config as cms
 # creating the EDFilter.
 def createEDFilter(param):
     return cms.EDFilter("HPlusSignalAnalysisFilter",
+        configInfo = param.configInfo.clone(),
         blindAnalysisStatus = param.blindAnalysisStatus,
         histogramAmbientLevel = param.histogramAmbientLevel,
         trigger = param.trigger.clone(),
@@ -39,6 +40,7 @@ def createEDFilter(param):
         vertexWeight = param.vertexWeight.clone(),
         pileupWeightReader = param.pileupWeightReader.clone(),
         wjetsWeightReader = param.wjetsWeightReader.clone(),
+        topPtWeightReader = param.topPtWeightReader.clone(),
         embeddingGeneratorWeightReader = param.embeddingGeneratorWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
         embeddingMuonTriggerEfficiency = param.embeddingMuonTriggerEfficiency.clone(),
