@@ -550,9 +550,7 @@ class ConfigBuilder:
 
         # For top pt reweighting
         if self.options.sample == "TTJets" and self.applyTopPtReweight:
-            process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
-            process.commonSequence += process.makeGenEvt
-            process.decaySubset.fillMode = cms.string("kME")
+            topPtWeight.addTtGenEvent(process, process.commonSequence)
 
         # Add configuration information to histograms.root
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
