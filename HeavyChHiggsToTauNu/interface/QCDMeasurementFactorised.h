@@ -113,6 +113,7 @@ namespace HPlus {
 
     // Counters - do not change order
     Count fAllCounter;
+    Count fTopPtWeightCounter;
     Count fWJetsWeightCounter;
     Count fMETFiltersCounter;
     Count fTriggerCounter;
@@ -160,6 +161,7 @@ namespace HPlus {
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;
     WeightReader fWJetsWeightReader;
+    WeightReader fTopPtWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;
     QCDTailKiller fQCDTailKiller;

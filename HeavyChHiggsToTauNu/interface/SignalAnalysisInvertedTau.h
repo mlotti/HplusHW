@@ -71,6 +71,7 @@ namespace HPlus {
     const double fDeltaPhiCutValue;
     // Common counters
     Count fAllCounter;
+    Count fTopPtWeightCounter;
     Count fWJetsWeightCounter;
     Count fMETFiltersCounter;
     Count fTriggerCounter;
@@ -154,6 +155,7 @@ namespace HPlus {
     METFilters fMETFilters;
     QCDTailKiller fQCDTailKiller;
     WeightReader fWJetsWeightReader;
+    WeightReader fTopPtWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;
     //    CommonPlots fCommonPlots;
 

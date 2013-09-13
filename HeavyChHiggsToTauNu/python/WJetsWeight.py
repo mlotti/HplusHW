@@ -141,6 +141,10 @@ def getWJetsWeight(dataVersion, options, inputWorkflow, era, suffix=""):
         pset = _wjetsNumberOfEvents[inputWorkflow].construct8TeV(era, weightType)
     else:
         raise Exception("WJets weights are available only for 44X and 53X")
-    pset.sampleJetBin = options.wjetBin
+    pset.sampleJetBin = {"WJets": -1,
+                         "W1Jets": 1, 
+                         "W2Jets": 2,
+                         "W3Jets": 3,
+                         "W4Jets": 4}[options.sample]
     return pset
 
