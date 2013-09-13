@@ -179,6 +179,16 @@ if not minimalDatasets:
     "TTToHplusBWB_M155_Summer12",
     "TTToHplusBWB_M160_Summer12",
 
+    # 1Mevent samples
+    "TTToHplusBHminusB_M80_ext_Summer12",
+    "TTToHplusBHminusB_M90_Summer12",
+    "TTToHplusBHminusB_M100_ext_Summer12",
+    "TTToHplusBHminusB_M120_ext_Summer12",
+    "TTToHplusBHminusB_M140_ext_Summer12",
+    "TTToHplusBHminusB_M150_ext_Summer12",
+    "TTToHplusBHminusB_M155_ext_Summer12",
+    "TTToHplusBHminusB_M160_ext_Summer12",
+
     "TTToHplusBHminusB_M80_Summer12",
     "TTToHplusBHminusB_M100_Summer12",
     "TTToHplusBHminusB_M120_Summer12",
@@ -231,15 +241,6 @@ datasetsMC_2012.extend([
     "TTToHplusBWB_M150_ext_Summer12",
     "TTToHplusBWB_M155_ext_Summer12",
     "TTToHplusBWB_M160_ext_Summer12",
-
-    "TTToHplusBHminusB_M80_ext_Summer12",
-    "TTToHplusBHminusB_M90_Summer12",
-    "TTToHplusBHminusB_M100_ext_Summer12",
-    "TTToHplusBHminusB_M120_ext_Summer12",
-    "TTToHplusBHminusB_M140_ext_Summer12",
-    "TTToHplusBHminusB_M150_ext_Summer12",
-    "TTToHplusBHminusB_M155_ext_Summer12",
-    "TTToHplusBHminusB_M160_ext_Summer12",
 
     "HplusTB_M180_ext_Summer12",
     "HplusTB_M190_ext_Summer12",
