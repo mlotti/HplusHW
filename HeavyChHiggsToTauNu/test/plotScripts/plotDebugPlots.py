@@ -167,6 +167,7 @@ def doPlots(myDsetMgr, opts, mySuffix, isSystematicVariation):
                     args["fullyBlinded"] = True
             if "FakeTaus" in plotDir:
                 args.update(mcArgs)
+            args.update(kwargs)
             createDrawPlot(path%plotDir, **args)
 
     #phiBinWidth = 2*3.14159/72
@@ -176,7 +177,7 @@ def doPlots(myDsetMgr, opts, mySuffix, isSystematicVariation):
     if True:
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/nVertices", xlabel="N_{Vertices}")
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_fakeStatus", xlabel="Fake tau status", **mcArgs)
-        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_pT", xlabel="#tau p_{T}, GeV/c", rebinToWidthX=10)
+        createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_pT", xlabel="#tau p_{T}, GeV/c", rebinToWidthX=20)
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_eta", xlabel="#tau #eta")
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_phi", xlabel="#tau #phi", rebinToWidthX=phiBinWidth)
         createDrawCommonPlot("CommonPlots/AtEveryStep/%s/tau_Rtau", xlabel="R_{#tau}", rebinToWidthX=0.05, opts={"xmin": 0.5, "xmax": 1}, moveLegend={"dx": -0.5})
