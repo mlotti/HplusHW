@@ -63,7 +63,7 @@ class ConfigBuilder:
                  applyTauTriggerLowPurityScaleFactor = False, # Apply tau trigger scale factor or not
                  applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
-                 applyTopPtReweight = False, # Apply Top Pt reweighting on TTJets sample
+                 applyTopPtReweight = True, # Apply Top Pt reweighting on TTJets sample
                  topPtReweightScheme = None, # None for default, see TopPtWeight_cfi.py for allowed values
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
                 # tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
