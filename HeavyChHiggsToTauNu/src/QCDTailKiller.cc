@@ -115,9 +115,9 @@ namespace HPlus {
     // Fill before plots
     hBeforeCut->Fill(x,y);
     if (fCutDirection == kCutUpperLeftCorner)
-      hOptimisationPlot->Fill(std::sqrt(std::pow(180.-x,2)+std::pow(y,2)));
-    else
       hOptimisationPlot->Fill(std::sqrt(std::pow(x,2)+std::pow(180.-y,2)));
+    else
+      hOptimisationPlot->Fill(std::sqrt(std::pow(180.-x,2)+std::pow(y,2)));
     bool myPassedStatus = false;
     // No cut requested
     if (fCutShape == QCDTailKiller::kNoCut) {

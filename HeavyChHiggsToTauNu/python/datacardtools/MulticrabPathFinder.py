@@ -98,10 +98,18 @@ class MulticrabPathFinder:
         return self.selectLatest(ret_dirs)
 
     def qcdfactfind(self,dirs):
-        return self.selectLatest(self.grep(dirs,"QCDMeasurementFactorised_cfg.py"))
+        myList = []
+        for d in dirs:
+            if "pseudoMulticrab_QCDfactorised" in d:
+                myList.append(d)
+        return self.selectLatest(myList)
 
     def qcdinvfind(self,dirs):
-        return self.selectLatest(self.grep(dirs,"signalAnalysisInverted"))
+        myList = []
+        for d in dirs:
+            if "pseudoMulticrab_signalAnalysisInverted" in d:
+                myList.append(d)
+        return self.selectLatest(myList)
 
     def grep(self,dirs,word,file="multicrab.cfg"):
         command = "grep " + word + " "

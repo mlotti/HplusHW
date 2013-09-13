@@ -2133,6 +2133,7 @@ class Dataset:
     def __init__(self, name, tfiles, analysisName,
                  searchMode=None, dataEra=None, optimizationMode=None, systematicVariation=None,
                  weightedCounters=True, counterDir="counters", useAnalysisNameOnly=False, availableSystematicVariationSources=[]):
+        self.rawName = name
         self.name = name
         self.files = tfiles
         if len(self.files) == 0:
@@ -2156,6 +2157,11 @@ class Dataset:
                     return
                 if abs(value-valnew)/max(value, valnew) > 0.001:
                     raise Exception("Mismatched values in %s, label %s, got %f from file %s, and %f from file %s" % (name, key, value, refFile.GetName(), valnew, newFile.GetName()))
+        def addDirContentsToDict(tdirectory, dictionary):
+            content = aux.listDirectoryContent(tdirectory, lambda key: key.GetClassName() == "TNamed" and key.GetName() not in ["dataVersion", "parameterSet"])
+            for name in content:
+                if name not in dictionary:
+                    dictionary[name] = tdirectory.Get(name).GetTitle()
 
         for f in self.files:
             if not f.IsOpen():
@@ -2167,6 +2173,7 @@ class Dataset:
             info = _rescaleInfo(_histoToDict(configInfo.Get("configinfo")))
             if "energy" in info:
                 info["energy"] = str(int(round(info["energy"])))
+            addDirContentsToDict(configInfo, info)
             if self.info is None:
                 self.info = info
             else:
@@ -2204,7 +2211,7 @@ class Dataset:
                 self._analysisDirectoryName += self._optimizationMode
             if (self.isMC() or self.isPseudo()) and self._systematicVariation is not None:
                 self._analysisDirectoryName += self._systematicVariation
-    
+
         # Check that analysis directory exists
         for f in self.files:
             if f.Get(self._analysisDirectoryName) == None:
@@ -2212,30 +2219,38 @@ class Dataset:
         self._analysisDirectoryName += "/"
 
         # Update info from analysis directory specific histogram, if one exists
-        realName = self._translateName("configInfo/configinfo")
-        if self.files[0].Get(realName) != None: # important to use !=
+        realDirName = self._translateName("configInfo")
+        if self.files[0].Get(realDirName) != None: # important to use !=
             updateInfo = None
             for f in self.files:
-                h = f.Get(realName)
-                if h is None:
-                    raise Exception("%s directory is missing from file %s, it was in %s" % (realName, f.GetName(), self.files[0].GetName()))
-                info = _rescaleInfo(_histoToDict(f.Get(realName)))
+                d = f.Get(realDirName)
+                if d == None:
+                    raise Exception("%s directory is missing from file %s, it was in %s" % (realDirName, f.GetName(), self.files[0].GetName()))
+                info = {}
+                h = d.Get("configinfo")
+                if h != None:
+                    info = _rescaleInfo(_histoToDict(d.Get("configinfo")))
+                addDirContentsToDict(f.Get(realDirName), info)
                 if updateInfo == None:
                     updateInfo = info
                 else:
-                    assertInfo(updateInfo, info, self.files[0], f, realName)
+                    assertInfo(updateInfo, info, self.files[0], f, realDirName+"/configinfo")
             if "energy" in updateInfo:
                 #raise Exception("You may not set 'energy' in analysis directory specific configinfo histogram. Please fix %s." % realName)
-                print "WARNING: 'energy' has been set in analysis directory specific configinfo histogram (%s), it will be ignored. Please fix your pseudomulticrab code." % realName
+                print "WARNING: 'energy' has been set in analysis directory specific configinfo histogram (%s), it will be ignored. Please fix your pseudomulticrab code." % (realName+"/configinfo")
                 del updateInfo["energy"]
-            print updateInfo
             self.info.update(updateInfo)
-            print self.info
 
         self._unweightedCounterDir = counterDir
         if counterDir is not None:
             self._weightedCounterDir = counterDir + "/weighted"
             self._readCounters()
+
+        # Update Nallevents to weighted one
+        if "isPileupReweighted" in self.info and self.info["isPileupReweighted"]:
+            #print "%s: is pileup-reweighted, calling updateNAllEventsToPUWeighted()" % self.name
+            self.updateNAllEventsToPUWeighted()
+
 
     ## Close the files
     #
@@ -2258,9 +2273,10 @@ class Dataset:
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._systematicVariation, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly, self._availableSystematicVariationSources)
+        d = Dataset(self.rawName, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._systematicVariation, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly, self._availableSystematicVariationSources)
         d.info.update(self.info)
         d.nAllEvents = self.nAllEvents
+        d.name = self.name
         return d
 
     ## Translate a logical name to a physical name in the file
@@ -2522,6 +2538,9 @@ class Dataset:
     #                event number (optional, if not given a default
     #                value read from the configinfo is used)
     # \param kwargs  Keyword arguments (forwarded to pileupReweightedAllEvents.WeightedAllEvents.getWeighted())
+    #
+    # If \a topPtWeightType is not given in \a kwargs, read the value
+    # from analysis directory -specific configInfo
     def updateNAllEventsToPUWeighted(self, era=None, **kwargs):
         # Ignore if not MC
         if not self.isMC():
@@ -2530,16 +2549,31 @@ class Dataset:
         if era == None:
             era = self._dataEra
         if era == None:
-            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.getName())
+            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.rawName)
 
         if self.nAllEventsUnweighted < 0:
             raise Exception("Number of all unweighted events is %d < 0, this is a symptom of missing unweighted counter" % self.nAllEventsUnweighted)
 
-        try:
-            self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.getName(), era).getWeighted(self.nAllEventsUnweighted, **kwargs)
-        except KeyError:
-            # Just ignore if no weights found for this dataset
-            pass
+        args = {}
+        args.update(kwargs)
+        if "pileupReweightType" not in kwargs and "pileupReweightType" in self.info:
+            args["weightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["pileupReweightType"]]
+
+        if "topPtReweightScheme" in self.info:
+            if "topPtWeightType" not in kwargs:
+                args["topPtWeightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["topPtReweightType"]]
+            try:
+                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, self.info["topPtReweightScheme"], **args)
+            except KeyError:
+                # Just ignore if no weights found for this dataset
+                pass
+            print "Using top-pt reweighted Nallevents for sample %s" % self.name
+        else:
+            try:
+                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, **args)
+            except KeyError:
+                # Just ignore if no weights found for this dataset
+                pass
 
     def getNAllEvents(self):
         if not hasattr(self, "nAllEvents"):

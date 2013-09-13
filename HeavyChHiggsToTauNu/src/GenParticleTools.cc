@@ -1,6 +1,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
 
 #include "FWCore/Utilities/interface/Exception.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+
+#include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
 
 namespace {
   void visibleTauHelper(const reco::Candidate *cand, math::XYZTLorentzVector& result) {
@@ -186,6 +189,48 @@ namespace HPlus {
       ret.push_back(W2daughter);
 
       return ret;
+    }
+
+    int calculateTTBarNumberOfLeptons(const TtGenEvent& ttGenEvent) {
+      int nleptons = -1;
+
+      // First as from TtGenEvent the topology while treating taus as
+      // hadrons
+      if(ttGenEvent.isFullHadronic(true)) nleptons = 0;
+      else if(ttGenEvent.isSemiLeptonic(true)) nleptons = 1;
+      else if(ttGenEvent.isFullLeptonic(true)) nleptons = 2;
+      else throw cms::Exception("Assert") << "ttGenEvent is not FullHadronic, SemiLeptonic, nor FullLeptonic (tau is not treated as lepton) in " << __FILE__ << ":" << __LINE__;
+
+      // Then ask for taus, theck their decay, and modify the event class accordingly
+      if(const reco::GenParticle *tauPlus = ttGenEvent.tauPlus()) {
+        //edm::LogVerbatim("GenParticleTools") << "Has tau plus";
+        const reco::GenParticle *d = findTauDaughter(tauPlus);
+        if(d) {
+          //edm::LogVerbatim("GenParticleTools") << "  has daughter " << d->pdgId();
+          int id = std::abs(d->pdgId());
+          if(id == 11 || id == 13) {
+            ++nleptons;
+          }
+        }
+        else {
+          throw cms::Exception("Assert") << "Tau plus does not have a daughter in " << __FILE__ << ":" << __LINE__;
+        }
+      }
+      if(const reco::GenParticle *tauMinus = ttGenEvent.tauMinus()) {
+        //edm::LogVerbatim("GenParticleTools") << "Has tau minus";
+        const reco::GenParticle *d = findTauDaughter(tauMinus);
+        if(d) {
+          //edm::LogVerbatim("GenParticleTools") << "  has daughter " << d->pdgId();
+          int id = std::abs(d->pdgId());
+          if(id == 11 || id == 13) {
+            ++nleptons;
+          }
+        }
+        else {
+          throw cms::Exception("Assert") << "Tau minus does not have a daughter in " << __FILE__ << ":" << __LINE__;
+        }
+      }
+      return nleptons;
     }
   }
 }

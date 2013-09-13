@@ -7,9 +7,28 @@
 
 ## "Enumeration" of pile-up weight type
 class PileupWeightType:
-    NOMINAL = 0
-    UP = 1
-    DOWN = 2
+    class UNWEIGHTED:
+        pass
+    class NOMINAL:
+        pass
+    class UP:
+        pass
+    class DOWN:
+        pass
+
+    toString = {
+        UNWEIGHTED: "UNWEIGHTED",
+        NOMINAL: "NOMINAL",
+        UP: "UP",
+        DOWN: "DOWN",
+        }
+
+    fromString = {
+        "UNWEIGHTED": UNWEIGHTED,
+        "NOMINAL": NOMINAL,
+        "UP": UP,
+        "DOWN": DOWN,
+        }
 
 ## Utility class for handling the weighted number of all MC events
 #
@@ -38,10 +57,12 @@ class WeightedAllEvents:
     # \param unweighted  Unweighted number of all events (used for a cross check)
     # \param weightType  Type of weight (nominal, up/down varied), one of PileupWeightType members
     def getWeighted(self, unweighted, weightType=PileupWeightType.NOMINAL):
+        if weightType is PileupWeightType.UNWEIGHTED:
+            return unweighted
         try:
             nweighted = self.weighted[weightType]
         except KeyError:
-            raise Exception("Invalid weight type %d, see dataset.PileupWeightType" % weightType)
+            raise Exception("Invalid weight type %s, see pileupReweightedAllEvents.PileupWeightType" % weightType.__name__)
         if int(unweighted) != int(self.unweighted):
             nweighted = unweighted * nweighted/self.unweighted
             print "%s: Unweighted all events from analysis %d, unweighted all events from _weightedAllEvents %d, using their ratio for setting the weighted all events (weight=%f)" % (self.name, int(unweighted), int(self.unweighted), nweighted)
@@ -53,6 +74,40 @@ class WeightedAllEvents:
     ## \var weighted
     # Dictionary holding the weighted number of all MC events for nominal case, and for up/down variations (for systematics)
 
+class WeightedAllEventsTopPt:
+    # helper class
+    class Weighted:
+        def __init__(self, weighted, up, down):
+            self.weighted = {
+                PileupWeightType.NOMINAL: weighted,
+                PileupWeightType.UP: up,
+                PileupWeightType.DOWN: down
+                }
+        def getWeighted(self, topPtWeightType):
+            try:
+                return self.weighted[topPtWeightType]
+            except KeyError:
+                raise Exception("Invalid top pt weight type %s, see pileupReweightedAllEvents.PileupWeightType" % topPtWeightType.__name__)
+
+    def __init__(self, unweighted, **kwargs):
+        self.unweighted = unweighted
+        self.weighted = {}
+        self.weighted.update(kwargs)
+
+    def _setName(self, name):
+        self.name = name
+
+    def getWeighted(self, unweighted, topPtWeight=None, topPtWeightType=PileupWeightType.UNWEIGHTED, **kwargs):
+        if topPtWeightType is PileupWeightType.UNWEIGHTED:
+            return self.unweighted.getWeighted(unweighted, **kwargs)
+        if topPtWeight is None:
+            raise Exception("topPtWeight must be set when topPtWeightType is not UNWEIGHTED")
+        try:
+            weightedAllEvents = self.weighted[topPtWeight].getWeighted(topPtWeightType)
+        except KeyError:
+            raise Exception("Invalid top pt weight name %s, see TopPtWeightSchemes.schemes" % topPtWeight)
+        weightedAllEvents._setName(self.name)
+        return weightedAllEvents.getWeighted(unweighted, **kwargs)
 
 ## Get WeightedAllEvents for dataset and era
 #
@@ -100,7 +155,7 @@ _weightedAllEvents = {
         "HplusTB_M220_Fall11": WeightedAllEvents(unweighted=204040, weighted=207525.122919, up=207385.995097, down=207274.662719),
         "HplusTB_M250_Fall11": WeightedAllEvents(unweighted=202450, weighted=204070.910060, up=204125.717761, down=203593.971870),
         "HplusTB_M300_Fall11": WeightedAllEvents(unweighted=201457, weighted=202116.437670, up=202356.380887, down=201437.047268),
-        "TTJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=59444088, weighted=60325852.933433, up=60322253.558011, down=60231186.347115),
+#        "TTJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=59444088, weighted=60325852.933433, up=60322253.558011, down=60231186.347115),
         "WJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=81345381, weighted=82377568.126906, up=82349060.998291, down=82313862.591121),
         "W2Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=25400546, weighted=25071227.079162, up=25154522.001505, down=24950382.486547),
         "W3Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=7685944, weighted=7317449.306018, up=7341688.317943, down=7278364.468218),
@@ -125,6 +180,18 @@ _weightedAllEvents = {
         "QCD_Pt300to470_TuneZ2_Fall11": WeightedAllEvents(unweighted=6432669, weighted=6508237.455281, up=6506327.251603, down=6497639.996005),
         "W1Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=76051609, weighted=77644362.113436, up=77583557.117218, down=77586056.500796),
         "W3Jets_TuneZ2_v2_Fall11": WeightedAllEvents(unweighted=7541595, weighted=7537540.054457, up=7537738.468034, down=7537552.142497),
+        # multicrab_pileupNtuple_130909_162629
+        "TTJets_TuneZ2_Fall11": WeightedAllEventsTopPt(unweighted = WeightedAllEvents(unweighted=59444088, weighted=60325852.741440, up=60322253.227963, down=60231186.256806),
+                                                       TopPtCombined = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=59444088, weighted=62844239.913834, up=62840342.797988, down=62745699.176327),
+                                                                                                       up=WeightedAllEvents(unweighted=59444088, weighted=67888121.440667, up=67883615.781412, down=67781921.010222),
+                                                                                                       down=WeightedAllEvents(unweighted=59444088, weighted=60325852.741440, up=60322253.227963, down=60231186.256806)),
+                                                       TopPtSeparate = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=59444088, weighted=61633358.519904, up=61629412.690126, down=61536897.856909),
+                                                                                                       up=WeightedAllEvents(unweighted=59444088, weighted=63894925.717996, up=63890526.992493, down=63795219.409307),
+                                                                                                       down=WeightedAllEvents(unweighted=59444088, weighted=60325852.741440, up=60322253.227963, down=60231186.256806)),
+                                                       TTH = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=59444088, weighted=60293195.146847, up=60289444.973253, down=60198684.099778),
+                                                                                             up=WeightedAllEvents(unweighted=59444088, weighted=62015383.416890, up=62011283.979865, down=61918377.302050),
+                                                                                             down=WeightedAllEvents(unweighted=59444088, weighted=60325852.741440, up=60322253.227963, down=60231186.256806)),
+                                                       ),
     },
     "Run2011B": {
         "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=216325.066231, up=217254.616614, down=215493.146064),
@@ -149,7 +216,7 @@ _weightedAllEvents = {
         "HplusTB_M220_Fall11": WeightedAllEvents(unweighted=204040, weighted=202835.223906, up=203486.164125, down=202216.528988),
         "HplusTB_M250_Fall11": WeightedAllEvents(unweighted=202450, weighted=202079.322576, up=202933.498424, down=201279.034487),
         "HplusTB_M300_Fall11": WeightedAllEvents(unweighted=201457, weighted=200195.422594, up=200967.096588, down=199592.613978),
-        "TTJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=59444088, weighted=59233566.400571, up=59337704.411034, down=59147168.792957),
+#        "TTJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=59444088, weighted=59233566.400571, up=59337704.411034, down=59147168.792957),
         "WJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=81345381, weighted=81541165.831106, up=81615917.662211, down=81430140.570515),
         "W2Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=25400546, weighted=25596891.612887, up=25715435.973731, down=25461089.267917),
         "W3Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=7685944, weighted=7543101.017547, up=7667914.058201, down=7428410.947998),
@@ -174,6 +241,17 @@ _weightedAllEvents = {
         "QCD_Pt300to470_TuneZ2_Fall11": WeightedAllEvents(unweighted=6432669, weighted=6360307.883080, up=6380161.481108, down=6344053.485342),
         "W1Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=76051609, weighted=75728733.328432, up=75798599.404381, down=75648203.837487),
         "W3Jets_TuneZ2_v2_Fall11": WeightedAllEvents(unweighted=7541595, weighted=7546266.215300, up=7546438.546617, down=7545655.045459),
+        "TTJets_TuneZ2_Fall11": WeightedAllEventsTopPt(unweighted = WeightedAllEvents(unweighted=59444088, weighted=59233566.566973, up=59337704.690950, down=59147168.805523),
+                                                       TopPtCombined = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=59444088, weighted=61708257.760790, up=61817297.445449, down=61617575.301592),
+                                                                                                       up=WeightedAllEvents(unweighted=59444088, weighted=66662764.612929, up=66781256.877939, down=66563947.479685),
+                                                                                                       down=WeightedAllEvents(unweighted=59444088, weighted=59233566.566973, up=59337704.690950, down=59147168.805523)),
+                                                       TopPtSeparate = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=59444088, weighted=60517440.575763, up=60624127.398478, down=60428860.149392),
+                                                                                                       up=WeightedAllEvents(unweighted=59444088, weighted=62737845.364941, up=62848796.728375, down=62645641.312006),
+                                                                                                       down=WeightedAllEvents(unweighted=59444088, weighted=59233566.566973, up=59337704.690950, down=59147168.805523)),
+                                                       TTH = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=59444088, weighted=59203328.156319, up=59307949.139600, down=59116323.979157),
+                                                                                             up=WeightedAllEvents(unweighted=59444088, weighted=60896014.579425, up=61004234.334096, down=60805784.037903),
+                                                                                             down=WeightedAllEvents(unweighted=59444088, weighted=59233566.566973, up=59337704.690950, down=59147168.805523)),
+                                                       ),
     },
     "Run2011AB": {
         "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=219013.870316, up=219377.625194, down=218493.470983),
@@ -198,7 +276,7 @@ _weightedAllEvents = {
         "HplusTB_M220_Fall11": WeightedAllEvents(unweighted=204040, weighted=204977.279613, up=205267.399981, down=204526.790792),
         "HplusTB_M250_Fall11": WeightedAllEvents(unweighted=202450, weighted=202988.956520, up=203478.040956, down=202336.363474),
         "HplusTB_M300_Fall11": WeightedAllEvents(unweighted=201457, weighted=201072.823428, up=201601.647938, down=200435.044014),
-        "TTJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=59444088, weighted=59732455.311131, up=59787394.224508, down=59642285.070652),
+#        "TTJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=59444088, weighted=59732455.311131, up=59787394.224508, down=59642285.070652),
         "WJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=81345381, weighted=81923182.650655, up=81950778.642015, down=81833773.478359),
         "W2Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=25400546, weighted=25356800.576871, up=25459240.234189, down=25227828.062063),
         "W3Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=7685944, weighted=7440037.276690, up=7518911.450093, down=7359878.427958),
@@ -226,6 +304,17 @@ _weightedAllEvents = {
         "QCD_Pt300to470_TuneZ2_Fall11": WeightedAllEvents(unweighted=6432669, weighted=6427872.959324, up=6437787.310456, down=6414202.885941),
         "W1Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=76051609, weighted=76603674.038794, up=76613873.380221, down=76533302.418103),
         "W3Jets_TuneZ2_v2_Fall11": WeightedAllEvents(unweighted=7541595, weighted=7542280.644894, up=7542464.812360, down=7541954.109907),
+        "TTJets_TuneZ2_Fall11": WeightedAllEventsTopPt(unweighted = WeightedAllEvents(unweighted=59444088, weighted=59732455.313507, up=59787394.226023, down=59642285.036207),
+                                                       TopPtCombined = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=59444088, weighted=62227104.125905, up=62284570.278088, down=62132836.787114),
+                                                                                                       up=WeightedAllEvents(unweighted=59444088, weighted=67222431.799873, up=67284755.932160, down=67120247.071204),
+                                                                                                       down=WeightedAllEvents(unweighted=59444088, weighted=59732455.313507, up=59787394.226023, down=59642285.036207)),
+                                                       TopPtSeparate = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=59444088, weighted=61027122.852141, up=61083288.380528, down=60934947.439112),
+                                                                                                       up=WeightedAllEvents(unweighted=59444088, weighted=63266328.082984, up=63324603.840149, down=63170701.839852),
+                                                                                                       down=WeightedAllEvents(unweighted=59444088, weighted=59732455.313507, up=59787394.226023, down=59642285.036207)),
+                                                       TTH = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=59444088, weighted=59701111.968319, up=59756244.356672, down=59610683.238908),
+                                                                                             up=WeightedAllEvents(unweighted=59444088, weighted=61407273.009811, up=61464201.176636, down=61313952.042213),
+                                                                                             down=WeightedAllEvents(unweighted=59444088, weighted=59732455.313507, up=59787394.226023, down=59642285.036207)),
+                                                       ),
     },
     ########################################
     #
@@ -336,6 +425,18 @@ _weightedAllEvents = {
         "Hplus_taunu_tW-channel_M155_Summer12": WeightedAllEvents(unweighted=131352, weighted=131213.676409, up=131270.633714, down=131130.348123),
         "Hplus_taunu_tW-channel_M160_Summer12": WeightedAllEvents(unweighted=130024, weighted=130319.848067, up=130342.932248, down=130281.306902),
         "HplusTB_M250_ext_Summer12": WeightedAllEvents(unweighted=1000000, weighted=1000530.801149, up=1000412.261806, down=1000603.899518),
+        # multicrab_pileupNtuple_130912_090205
+        "TTJets_TuneZ2star_Summer12": WeightedAllEventsTopPt(unweighted = WeightedAllEvents(unweighted=6923750, weighted=6923452.817161, up=6923611.370120, down=6923131.174768),
+                                                             TopPtCombined = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6991743.126575, up=6992062.663691, down=6991258.155354),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7248744.334157, up=7249203.753566, down=7248109.071057),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6923452.817161, up=6923611.370120, down=6923131.174768)),
+                                                             TopPtSeparate = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6948693.092607, up=6948928.175270, down=6948279.184218),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7062103.558770, up=7062372.807862, down=7061634.550594),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6923452.817161, up=6923611.370120, down=6923131.174768)),
+                                                             TTH = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6883086.442934, up=6883395.766630, down=6882613.399345),
+                                                                                                   up=WeightedAllEvents(unweighted=6923750, weighted=7048144.535754, up=7048590.387485, down=7047527.388485),
+                                                                                                   down=WeightedAllEvents(unweighted=6923750, weighted=6923452.817161, up=6923611.370120, down=6923131.174768)),
+                                                             ),
     },
     "Run2012B": {
         "TTToHplusBWB_M80_Summer12": WeightedAllEvents(unweighted=190276, weighted=190514.175907, up=190351.895106, down=190731.068988),
@@ -436,6 +537,17 @@ _weightedAllEvents = {
         "Hplus_taunu_tW-channel_M155_Summer12": WeightedAllEvents(unweighted=131352, weighted=131263.896110, up=131295.777370, down=131239.789311),
         "Hplus_taunu_tW-channel_M160_Summer12": WeightedAllEvents(unweighted=130024, weighted=130112.045328, up=130133.693685, down=130044.820759),
         "HplusTB_M250_ext_Summer12": WeightedAllEvents(unweighted=1000000, weighted=1000389.778115, up=1000244.934014, down=1000608.965182),
+        "TTJets_TuneZ2star_Summer12": WeightedAllEventsTopPt(unweighted = WeightedAllEvents(unweighted=6923750, weighted=6921262.047129, up=6921513.919966, down=6921083.164497),
+                                                             TopPtCombined = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6989815.493905, up=6990148.833977, down=6989553.747930),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7246901.093628, up=7247306.162851, down=7246554.514881),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6921262.047129, up=6921513.919966, down=6921083.164497)),
+                                                             TopPtSeparate = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6946415.959336, up=6946715.226575, down=6946181.970284),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7059635.761241, up=7059964.936974, down=7059361.673678),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6921262.047129, up=6921513.919966, down=6921083.164497)),
+                                                             TTH = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6881161.309923, up=6881493.492079, down=6880890.024741),
+                                                                                                   up=WeightedAllEvents(unweighted=6923750, weighted=7046318.337866, up=7046723.702087, down=7045951.091443),
+                                                                                                   down=WeightedAllEvents(unweighted=6923750, weighted=6921262.047129, up=6921513.919966, down=6921083.164497)),
+                                                             ),
     },
     "Run2012C": {
         "TTToHplusBWB_M80_Summer12": WeightedAllEvents(unweighted=190276, weighted=190475.503069, up=190328.671396, down=190663.337245),
@@ -536,6 +648,17 @@ _weightedAllEvents = {
         "Hplus_taunu_tW-channel_M155_Summer12": WeightedAllEvents(unweighted=131352, weighted=131215.145602, up=131262.179201, down=131175.632335),
         "Hplus_taunu_tW-channel_M160_Summer12": WeightedAllEvents(unweighted=130024, weighted=130126.898102, up=130143.235913, down=130094.628048),
         "HplusTB_M250_ext_Summer12": WeightedAllEvents(unweighted=1000000, weighted=1000424.224895, up=1000287.515728, down=1000596.845524),
+        "TTJets_TuneZ2star_Summer12": WeightedAllEventsTopPt(unweighted = WeightedAllEvents(unweighted=6923750, weighted=6921747.187912, up=6922194.899717, down=6921284.122653),
+                                                             TopPtCombined = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6990364.829091, up=6990898.475025, down=6989805.815787),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7247527.647979, up=7248138.525000, down=7246873.054534),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6921747.187912, up=6922194.899717, down=6921284.122653)),
+                                                             TopPtSeparate = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6946928.160258, up=6947403.386927, down=6946427.484224),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7060190.901601, up=7060668.512339, down=7059672.711685),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6921747.187912, up=6922194.899717, down=6921284.122653)),
+                                                             TTH = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6881710.027366, up=6882229.898321, down=6881160.938559),
+                                                                                                   up=WeightedAllEvents(unweighted=6923750, weighted=7046939.741290, up=7047530.044027, down=7046298.362970),
+                                                                                                   down=WeightedAllEvents(unweighted=6923750, weighted=6921747.187912, up=6922194.899717, down=6921284.122653)),
+                                                             ),
     },
     "Run2012D": {
         "TTToHplusBWB_M80_Summer12": WeightedAllEvents(unweighted=190276, weighted=190199.586264, up=190114.411523, down=190331.832108),
@@ -636,6 +759,17 @@ _weightedAllEvents = {
         "Hplus_taunu_tW-channel_M155_Summer12": WeightedAllEvents(unweighted=131352, weighted=131367.858401, up=131418.290622, down=131317.149428),
         "Hplus_taunu_tW-channel_M160_Summer12": WeightedAllEvents(unweighted=130024, weighted=130145.358971, up=130134.607891, down=130151.311091),
         "HplusTB_M250_ext_Summer12": WeightedAllEvents(unweighted=1000000, weighted=1000069.880325, up=999968.556018, down=1000225.615617),
+        "TTJets_TuneZ2star_Summer12": WeightedAllEventsTopPt(unweighted = WeightedAllEvents(unweighted=6923750, weighted=6922556.697788, up=6923068.270988, down=6922145.579186),
+                                                             TopPtCombined = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6991350.668949, up=6991906.144473, down=6990868.202792),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7248642.716112, up=7249222.280483, down=7248109.149233),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6922556.697788, up=6923068.270988, down=6922145.579186)),
+                                                             TopPtSeparate = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6947789.000192, up=6948298.677922, down=6947362.653152),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7061044.598562, up=7061528.118291, down=7060629.864607),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6922556.697788, up=6923068.270988, down=6922145.579186)),
+                                                             TTH = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6882666.509025, up=6883195.479913, down=6882204.232792),
+                                                                                                   up=WeightedAllEvents(unweighted=6923750, weighted=7048008.391995, up=7048542.794869, down=7047507.688000),
+                                                                                                   down=WeightedAllEvents(unweighted=6923750, weighted=6922556.697788, up=6923068.270988, down=6922145.579186)),
+                                                             ),
     },
     "Run2012AB": {
         "TTToHplusBWB_M80_Summer12": WeightedAllEvents(unweighted=190276, weighted=190542.445795, up=190373.482052, down=190761.283147),
@@ -736,6 +870,17 @@ _weightedAllEvents = {
         "Hplus_taunu_tW-channel_M155_Summer12": WeightedAllEvents(unweighted=131352, weighted=131255.558868, up=131291.603137, down=131221.620393),
         "Hplus_taunu_tW-channel_M160_Summer12": WeightedAllEvents(unweighted=130024, weighted=130146.543773, up=130168.430499, down=130084.081089),
         "HplusTB_M250_ext_Summer12": WeightedAllEvents(unweighted=1000000, weighted=1000413.190103, up=1000272.712996, down=1000608.124203),
+        "TTJets_TuneZ2star_Summer12": WeightedAllEventsTopPt(unweighted = WeightedAllEvents(unweighted=6923750, weighted=6921625.748593, up=6921862.128872, down=6921423.165655),
+                                                             TopPtCombined = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6990135.510521, up=6990466.559091, down=6989836.705727),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7247207.099852, up=7247621.192041, down=7246812.595072),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6921625.748593, up=6921862.128872, down=6921423.165655)),
+                                                             TopPtSeparate = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6946793.998421, up=6947082.610020, down=6946530.139999),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7060045.453519, up=7060364.680496, down=7059739.006146),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6921625.748593, up=6921862.128872, down=6921423.165655)),
+                                                             TTH = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6881480.911556, up=6881809.298858, down=6881176.131383),
+                                                                                                   up=WeightedAllEvents(unweighted=6923750, weighted=7046621.514751, up=7047033.600522, down=7046212.780950),
+                                                                                                   down=WeightedAllEvents(unweighted=6923750, weighted=6921625.748593, up=6921862.128872, down=6921423.165655)),
+                                                             ),
     },
     "Run2012ABC": {
         "TTToHplusBWB_M80_Summer12": WeightedAllEvents(unweighted=190276, weighted=190504.177783, up=190347.865910, down=190705.292033),
@@ -836,6 +981,17 @@ _weightedAllEvents = {
         "Hplus_taunu_tW-channel_M155_Summer12": WeightedAllEvents(unweighted=131352, weighted=131232.456502, up=131274.782858, down=131195.331161),
         "Hplus_taunu_tW-channel_M160_Summer12": WeightedAllEvents(unweighted=130024, weighted=130135.313266, up=130154.027940, down=130090.110295),
         "HplusTB_M250_ext_Summer12": WeightedAllEvents(unweighted=1000000, weighted=1000419.498176, up=1000281.175022, down=1000601.676706),
+        "TTJets_TuneZ2star_Summer12": WeightedAllEventsTopPt(unweighted = WeightedAllEvents(unweighted=6923750, weighted=6921695.169687, up=6922052.358282, down=6921343.681196),
+                                                             TopPtCombined = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6990266.601174, up=6990713.465097, down=6989819.047386),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7247390.342157, up=7247916.926940, down=7246847.156933),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6921695.169687, up=6922052.358282, down=6921343.681196)),
+                                                             TopPtSeparate = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6946870.692407, up=6947265.983069, down=6946471.456444),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7060128.599320, up=7060538.366849, down=7059701.108662),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6921695.169687, up=6922052.358282, down=6921343.681196)),
+                                                             TTH = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6881611.886302, up=6882049.735772, down=6881167.446353),
+                                                                                                   up=WeightedAllEvents(unweighted=6923750, weighted=7046803.429912, up=7047317.393904, down=7046261.704209),
+                                                                                                   down=WeightedAllEvents(unweighted=6923750, weighted=6921695.169687, up=6922052.358282, down=6921343.681196)),
+                                                             ),
     },
     "Run2012ABCD": {
         "TTToHplusBWB_M80_Summer12": WeightedAllEvents(unweighted=190276, weighted=190504.177783, up=190347.865910, down=190705.292033),
@@ -936,5 +1092,16 @@ _weightedAllEvents = {
         "Hplus_taunu_tW-channel_M155_Summer12": WeightedAllEvents(unweighted=131352, weighted=131232.456502, up=131274.782858, down=131195.331161),
         "Hplus_taunu_tW-channel_M160_Summer12": WeightedAllEvents(unweighted=130024, weighted=130135.313266, up=130154.027940, down=130090.110295),
         "HplusTB_M250_ext_Summer12": WeightedAllEvents(unweighted=1000000, weighted=1000419.498176, up=1000281.175022, down=1000601.676706),
+        "TTJets_TuneZ2star_Summer12": WeightedAllEventsTopPt(unweighted = WeightedAllEvents(unweighted=6923750, weighted=6921695.169687, up=6922052.358282, down=6921343.681196),
+                                                             TopPtCombined = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6990266.601174, up=6990713.465097, down=6989819.047386),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7247390.342157, up=7247916.926940, down=7246847.156933),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6921695.169687, up=6922052.358282, down=6921343.681196)),
+                                                             TopPtSeparate = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6946870.692407, up=6947265.983069, down=6946471.456444),
+                                                                                                             up=WeightedAllEvents(unweighted=6923750, weighted=7060128.599320, up=7060538.366849, down=7059701.108662),
+                                                                                                             down=WeightedAllEvents(unweighted=6923750, weighted=6921695.169687, up=6922052.358282, down=6921343.681196)),
+                                                             TTH = WeightedAllEventsTopPt.Weighted(weighted=WeightedAllEvents(unweighted=6923750, weighted=6881611.886302, up=6882049.735772, down=6881167.446353),
+                                                                                                   up=WeightedAllEvents(unweighted=6923750, weighted=7046803.429912, up=7047317.393904, down=7046261.704209),
+                                                                                                   down=WeightedAllEvents(unweighted=6923750, weighted=6921695.169687, up=6922052.358282, down=6921343.681196)),
+                                                             ),
     },
 }
