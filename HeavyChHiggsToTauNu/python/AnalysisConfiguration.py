@@ -347,6 +347,7 @@ class ConfigBuilder:
                         param.setDataTriggerEfficiency(self.dataVersion, era="Run2012ABCD", pset=mod.metTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
+                        mod.configInfo.pileupReweightType = PileupWeightType.toString[PileupWeightType.NOMINAL]
                         if self.options.wjetsWeighting != 0:
                             mod.wjetsWeightReader.weightSrc = "wjetsWeight"+dataEra
                             mod.wjetsWeightReader.enabled = True
@@ -1118,6 +1119,7 @@ class ConfigBuilder:
             addWJetsWeight(module, "up")
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="up")
+        module.configInfo.pileupReweightType = PileupWeightType.toString[PileupWeightType.UP]
         names.append(self._addVariationModule(process, module, name+self.systPrefix+"PUWeightPlus"))
 
         # Down variation
@@ -1127,6 +1129,7 @@ class ConfigBuilder:
             addWJetsWeight(module, "down")
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="down")
+        module.configInfo.pileupReweightType = PileupWeightType.toString[PileupWeightType.DOWN]
         names.append(self._addVariationModule(process, module, name+self.systPrefix+"PUWeightMinus"))
 
         self._accumulateAnalyzers("PU weight variation", names)

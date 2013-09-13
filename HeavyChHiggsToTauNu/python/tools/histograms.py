@@ -297,6 +297,24 @@ def addEnergyText(x=None, y=None, s=None):
         text = s
     addText(x, y, "#sqrt{s} = "+text, textDefaults.getSize("energy"), bold=False)
 
+## Format luminosity number to fb
+#
+# \param lumi  Luminosity in pb^-1
+def formatLuminosityInFb(lumi):
+    lumiInFb = lumi/1000.
+    log = math.log10(lumiInFb)
+    ndigis = int(log)
+    format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
+    if ndigis == 0: 
+        if log >= 0: # 1 <= lumiInFb < 10
+            format = "%.1f"
+        else: # 0.1 < lumiInFb < 1
+            format = "%.2f"
+    elif ndigis <= -1:
+        format = ".%df" % (abs(ndigis)+1)
+        format = "%"+format
+    return format % lumiInFb
+
 ## Draw the integrated luminosity text to the current TPad
 #
 # \param x     X coordinate of the text (None for default value)
@@ -309,19 +327,7 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     if isinstance(lumi, basestring):
         lumiStr += lumi
     else:
-        lumiInFb = lumi/1000.
-        log = math.log10(lumiInFb)
-        ndigis = int(log)
-        format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
-        if ndigis == 0: 
-            if log >= 0: # 1 <= lumiInFb < 10
-                format = "%.1f"
-            else: # 0.1 < lumiInFb < 1
-                format = "%.2f"
-        elif ndigis <= -1:
-            format = ".%df" % (abs(ndigis)+1)
-            format = "%"+format
-        lumiStr += format % (lumiInFb)
+        lumiStr += formatLuminosityInFb(lumi)
 
     lumiStr += " "+unit
 
