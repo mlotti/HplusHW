@@ -70,7 +70,9 @@ datasetsMC_2011 = [
         "TTToHplusBWB_M150_Fall11",
         "TTToHplusBWB_M155_Fall11",
         "TTToHplusBWB_M160_Fall11",
-
+]
+if not minimalDatasets:
+    datasetsMC_2011.extend([
         # MC Signal (HH)
         "TTToHplusBHminusB_M80_Fall11",
         "TTToHplusBHminusB_M90_Fall11",
@@ -80,7 +82,8 @@ datasetsMC_2011 = [
         "TTToHplusBHminusB_M150_Fall11",
         "TTToHplusBHminusB_M155_Fall11",
         "TTToHplusBHminusB_M160_Fall11",
-
+        ])
+datasetsMC_2011.extend([
 	# MC Signal (heavy H+ from process pp->tbH+)
         "HplusTB_M180_Fall11",
         "HplusTB_M190_Fall11",
@@ -112,7 +115,7 @@ datasetsMC_2011 = [
         "WW_TuneZ2_Fall11",
         "WZ_TuneZ2_Fall11",
         "ZZ_TuneZ2_Fall11",
-        ]
+        ])
 
 datasetsData_Tau_2012_Prompt = [
     # "Tau_190456-190738_2012A_Jul13",

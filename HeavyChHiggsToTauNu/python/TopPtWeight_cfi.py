@@ -17,3 +17,10 @@ for name, values in _schemes.schemes.iteritems():
             dilepton = cms.string(values.dilepton),
             ))
 topPtWeight.scheme = cms.string(_schemes.defaultScheme)
+
+
+def addTtGenEvent(process, sequence):
+    if not hasattr(process, "makeGenEvt"):
+        process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
+        process.decaySubset.fillMode = cms.string("kME")
+        sequence += process.makeGenEvt

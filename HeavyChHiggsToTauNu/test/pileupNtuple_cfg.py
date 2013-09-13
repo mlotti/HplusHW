@@ -49,9 +49,8 @@ process.pileupNtuple = cms.EDAnalyzer("HPlusPileUpNtupleAnalyzer",
 )
 process.begin = cms.Sequence()
 if options.sample == "TTJets":
-    process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
-    process.begin += process.makeGenEvt
-    process.decaySubset.fillMode = cms.string("kME")
+    import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeight_cfi as topPtWeight
+    topPtWeight.addTtGenEvent(process, process.begin)
     process.pileupNtuple.topBranchesEnabled = True;
 
 

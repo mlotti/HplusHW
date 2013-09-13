@@ -2133,6 +2133,7 @@ class Dataset:
     def __init__(self, name, tfiles, analysisName,
                  searchMode=None, dataEra=None, optimizationMode=None, systematicVariation=None,
                  weightedCounters=True, counterDir="counters", useAnalysisNameOnly=False, availableSystematicVariationSources=[]):
+        self.rawName = name
         self.name = name
         self.files = tfiles
         if len(self.files) == 0:
@@ -2210,7 +2211,7 @@ class Dataset:
                 self._analysisDirectoryName += self._optimizationMode
             if (self.isMC() or self.isPseudo()) and self._systematicVariation is not None:
                 self._analysisDirectoryName += self._systematicVariation
-    
+
         # Check that analysis directory exists
         for f in self.files:
             if f.Get(self._analysisDirectoryName) == None:
@@ -2245,6 +2246,12 @@ class Dataset:
             self._weightedCounterDir = counterDir + "/weighted"
             self._readCounters()
 
+        # Update Nallevents to weighted one
+        if "isPileupReweighted" in self.info and self.info["isPileupReweighted"]:
+            #print "%s: is pileup-reweighted, calling updateNAllEventsToPUWeighted()" % self.name
+            self.updateNAllEventsToPUWeighted()
+
+
     ## Close the files
     #
     # Can be useful when opening very many files in order to reduce
@@ -2266,9 +2273,10 @@ class Dataset:
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._systematicVariation, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly, self._availableSystematicVariationSources)
+        d = Dataset(self.rawName, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._systematicVariation, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly, self._availableSystematicVariationSources)
         d.info.update(self.info)
         d.nAllEvents = self.nAllEvents
+        d.name = self.name
         return d
 
     ## Translate a logical name to a physical name in the file
@@ -2541,24 +2549,31 @@ class Dataset:
         if era == None:
             era = self._dataEra
         if era == None:
-            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.getName())
+            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.rawName)
 
         if self.nAllEventsUnweighted < 0:
             raise Exception("Number of all unweighted events is %d < 0, this is a symptom of missing unweighted counter" % self.nAllEventsUnweighted)
 
-        try:
-            if "topPtReweightScheme" in self.info:
-                args = {}
-                args.update(kwargs)
-                if "topPtWeightType" not in kwargs:
-                    args["topPtWeightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["topPtReweightType"]]
-                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.getName(), era).getWeighted(self.nAllEventsUnweighted, self.info["topPtReweightScheme"], **args)
-                print "Using top-pt reweighted Nallevents for sample %s" % self.name
-            else:
-                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.getName(), era).getWeighted(self.nAllEventsUnweighted, **kwargs)
-        except KeyError:
-            # Just ignore if no weights found for this dataset
-            pass
+        args = {}
+        args.update(kwargs)
+        if "pileupReweightType" not in kwargs and "pileupReweightType" in self.info:
+            args["weightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["pileupReweightType"]]
+
+        if "topPtReweightScheme" in self.info:
+            if "topPtWeightType" not in kwargs:
+                args["topPtWeightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["topPtReweightType"]]
+            try:
+                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, self.info["topPtReweightScheme"], **args)
+            except KeyError:
+                # Just ignore if no weights found for this dataset
+                pass
+            print "Using top-pt reweighted Nallevents for sample %s" % self.name
+        else:
+            try:
+                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, **args)
+            except KeyError:
+                # Just ignore if no weights found for this dataset
+                pass
 
     def getNAllEvents(self):
         if not hasattr(self, "nAllEvents"):
