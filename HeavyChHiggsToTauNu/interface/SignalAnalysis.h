@@ -137,6 +137,7 @@ namespace HPlus {
 
     // Main counters
     Count fAllCounter;
+    Count fTopPtWeightCounter;
     Count fWJetsWeightCounter;
     Count fEmbeddingGeneratorWeightCounter;
     Count fMETFiltersCounter;
@@ -239,6 +240,7 @@ namespace HPlus {
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;
     WeightReader fWJetsWeightReader;
+    WeightReader fTopPtWeightReader;
     WeightReader fEmbeddingGeneratorWeightReader;
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
