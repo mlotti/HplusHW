@@ -982,12 +982,12 @@ class SystematicsHelper:
 
         onlyFor = self._settings.get("applyToDatasets")
         if dset.isMC():
-            if onlyFor is not Systematics.OnlyForPseudo:
+            if onlyFor is Systematics.OnlyForPseudo:
                 if verbose:
                     print "  Dataset is MC, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
                 return
         elif dset.isPseudo():
-            if onlyFor is not Systematics.OnlyForMC:
+            if onlyFor is Systematics.OnlyForMC:
                 if verbose:
                     print "  Dataset is pseudo, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
                 return
