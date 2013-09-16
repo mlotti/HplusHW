@@ -159,12 +159,12 @@ def getDefaultDefinitions_53X():
         "SingleMu_207214-208686_2012D_Jan22": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v11"]),
 
         # MC, triggered with mcTrigger
-        "WJets_TuneZ2star_v1_Summer12":            TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": -1}),
-        "WJets_TuneZ2star_v2_Summer12":            TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": -1}),
-        "W1Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 1}),
-        "W2Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 2}),
-        "W3Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 3}),
-        "W4Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 4}),
+        "WJets_TuneZ2star_v1_Summer12":            TaskDefMC(args={"wjetsWeighting": 1}),
+        "WJets_TuneZ2star_v2_Summer12":            TaskDefMC(args={"wjetsWeighting": 1}),
+        "W1Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1}),
+        "W2Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1}),
+        "W3Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1}),
+        "W4Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1}),
         "TTJets_TuneZ2star_Summer12":              TaskDefMC(),
         "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDefMC(),
         "T_t-channel_TuneZ2star_Summer12":         TaskDefMC(),
