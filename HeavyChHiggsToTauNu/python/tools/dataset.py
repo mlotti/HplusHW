@@ -913,7 +913,7 @@ class Systematics:
                                  additionalNormalizations={},
                                  additionalShapes={},
                                  additionalShapesRelative={},
-                                 applyToDatasets=OnlyForPseudoAndMC,
+                                 applyToDatasets=Systematics.OnlyForPseudoAndMC,
                                  verbose=False,
                                  )
         self.settings.set(**kwargs)
