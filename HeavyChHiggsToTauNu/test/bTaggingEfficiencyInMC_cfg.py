@@ -2,13 +2,17 @@ import FWCore.ParameterSet.Config as cms
 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
-dataVersion="44XmcS6"     # Fall11 MC
-#dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
+dataVersion="53XmcS10"
+#dataVersion="53Xdata24Aug2012" # Now we have multiple dataVersions for data too, see HChDataVersion for them
 
 dataEras = [
-    "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
-#    "Run2011A",
-#    "Run2011B",
+    "Run2012ABCD", # This is the one for pickEvents, and for counter printout in CMSSW job
+#    "Run2012ABC", 
+#    "Run2012AB",
+#    "Run2012A",
+#    "Run2012B",
+#    "Run2012C",
+#    "Run2012D",
 ]
 
 
@@ -24,10 +28,11 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         customizeLightAnalysis=customize,
                         #doHeavyAnalysis=True,
                         #customizeHeavyAnalysis=customize,
-                        #useCHSJets=True,
-                        applyTauTriggerScaleFactor=True,
+                        #applyTauTriggerScaleFactor=False,
                         #applyTauTriggerLowPurityScaleFactor=True,
                         #applyMETTriggerScaleFactor=True,
+                        #doTriggerMatching=False,
+                        #useCHSJets=True,
                         #doQCDTailKillerScenarios=True,
                         #doAgainstElectronScan=True,
                         #doTauIsolationAndJetPUScan=True,
@@ -39,6 +44,11 @@ builder = ConfigBuilder(dataVersion, dataEras,
 
 
 process = builder.buildSignalAnalysis()
+
+# An example how to use a non-default file(s)
+#process.source.fileNames = [
+#    "store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/TTJets_TuneZ2star_Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1/cad8d1056ca20d363262a3efa1d97a74/pattuple_570_1_k4M.root"
+#]
 
 if builder.options.tauEmbeddingInput != 0:
 
