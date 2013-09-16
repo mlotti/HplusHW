@@ -14,23 +14,21 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as certifiedLumi
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 
-minBiasXsec = 69300
+minBiasXsec = 69400
 options = [
     "--calcMode",      "true",
     "--maxPileupBin",  "60",
+#    "--maxPileupBin",  "80",
     "--numPileupBins", "1200"
 ]
 outputFileName = "PileupHistogramData"
 
 jsonPath = ".."
 runsJson = [
-    (["2012A"], 190456, 190738, certifiedLumi.files["13Jul2012ReReco"]),
-    (["2012A"], 190782, 190949, certifiedLumi.files["06Aug2012ReReco"]),
-    (["2012A"], 191043, 193621, certifiedLumi.files["13Jul2012ReReco"]),
-    (["2012B"], 193834, 196531, certifiedLumi.files["13Jul2012ReReco"]),
-    (["2012C"], 198022, 198523, certifiedLumi.files["24Aug2012ReReco"]),
-    (["2012C"], 198941, 203742, certifiedLumi.files["PromptReco12"]),
-    (["2012D"], 203777, 208686, certifiedLumi.files["PromptReco12"]),
+    (["2012A"], 190456, 193621, certifiedLumi.files["22Jan2013ReReco"]),
+    (["2012B"], 193834, 196531, certifiedLumi.files["22Jan2013ReReco"]),
+    (["2012C"], 198022, 203742, certifiedLumi.files["22Jan2013ReReco"]),
+    (["2012D"], 203777, 208686, certifiedLumi.files["22Jan2013ReReco"]),
     ]
 for tpl in runsJson:
     if tpl[0][0] in ["2012A", "2012B"]:
@@ -43,14 +41,14 @@ for tpl in runsJson:
     elif tpl[0][0] in ["2012CD"]:
         tpl[0].append("2012ABCD")
 eraPUJson = {
-    "2012A": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
-    "2012B": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
-    "2012C": "pileup_JSON_DCSONLY_190389-208686_corr.txt",
-    "2012D": "pileup_JSON_DCSONLY_190389-208686_corr.txt",
+    "2012A": "pileup_JSON_DCSONLY_190389-208686_All_2012_pixelcorr.txt",
+    "2012B": "pileup_JSON_DCSONLY_190389-208686_All_2012_pixelcorr.txt",
+    "2012C": "pileup_JSON_DCSONLY_190389-208686_All_2012_pixelcorr.txt",
+    "2012D": "pileup_JSON_DCSONLY_190389-208686_All_2012_pixelcorr.txt",
 
-    "2012AB": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
-    "2012ABC": "pileup_JSON_DCSONLY_190389-200041_pixelcorr_upto196531_190389-204506_corr_from198022.txt",
-    "2012ABCD": "pileup_JSON_DCSONLY_190389-200041_pixelcorr_upto196531_190389-204506_corr_from198022.txt",
+    "2012AB": "pileup_JSON_DCSONLY_190389-208686_All_2012_pixelcorr.txt",
+    "2012ABC": "pileup_JSON_DCSONLY_190389-208686_All_2012_pixelcorr.txt",
+    "2012ABCD": "pileup_JSON_DCSONLY_190389-208686_All_2012_pixelcorr.txt",
 }
 
 processEras = [
@@ -64,30 +62,31 @@ processEras = [
 ]
 
 def main():
-    if not os.path.exists(eraPUJson["2012ABC"]):
-        print "Creating PU json", eraPUJson["2012ABC"]
+    # Code to mix HF and pixel JSON files (in case necessary in the future)
+    # if not os.path.exists(eraPUJson["2012ABC"]):
+    #     print "Creating PU json", eraPUJson["2012ABC"]
 
-        f = open(eraPUJson["2012A"])
-        pixelPU = json.load(f)
-        f.close()
+    #     f = open(eraPUJson["2012A"])
+    #     pixelPU = json.load(f)
+    #     f.close()
 
-        f = open(eraPUJson["2012C"])
-        hfPU = json.load(f)
-        f.close()
+    #     f = open(eraPUJson["2012C"])
+    #     hfPU = json.load(f)
+    #     f.close()
 
-        for run in pixelPU.keys():
-            if int(run) > 196531:
-                del pixelPU[run]
+    #     for run in pixelPU.keys():
+    #         if int(run) > 196531:
+    #             del pixelPU[run]
 
-        for run in hfPU.keys():
-            if int(run) < 198022:
-                del hfPU[run]
+    #     for run in hfPU.keys():
+    #         if int(run) < 198022:
+    #             del hfPU[run]
 
-        pixelPU.update(hfPU)
+    #     pixelPU.update(hfPU)
 
-        f = open(eraPUJson["2012ABC"], "w")
-        json.dump(pixelPU, f, sort_keys=True)
-        f.close()
+    #     f = open(eraPUJson["2012ABC"], "w")
+    #     json.dump(pixelPU, f, sort_keys=True)
+    #     f.close()
 
     print "Filtering run/lumi JSON files according to eras and our run ranges"
     eraJsons = {}

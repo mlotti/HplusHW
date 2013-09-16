@@ -1,6 +1,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementFactorised.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ConfigInfo.h"
 
 #include "TNamed.h"
 #include <iomanip>
@@ -12,11 +13,11 @@ namespace HPlus {
     fHistoWrapper(histoWrapper),
     // Input parameters
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
-    fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     fApplyNprongsCutForTauCandidate(iConfig.getUntrackedParameter<bool>("applyNprongsCutForTauCandidate")),
     fApplyRtauCutForTauCandidate(iConfig.getUntrackedParameter<bool>("applyRtauCutForTauCandidate")),
     // Counters - do not change order
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
+    fTopPtWeightCounter(eventCounter.addCounter("Top pt reweight")),
     fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
     fMETFiltersCounter(eventCounter.addCounter("MET filters")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET")),
@@ -38,6 +39,7 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fBTaggingScaleFactorCounter(eventCounter.addCounter("btagging with SF")),
     fQCDTailKillerBackToBackCounter(eventCounter.addCounter("After back-to-back cuts")),
+    fTopSelectionCounter(eventCounter.addCounter("After top selection cuts")),
     fAfterLeg1Counter(eventCounter.addCounter("After leg1 selections")),
     fAfterLeg2Counter(eventCounter.addCounter("After leg2 selections")),
     fAfterLeg1AndLeg2Counter(eventCounter.addCounter("After leg1 and leg2 selections")),
@@ -52,11 +54,8 @@ namespace HPlus {
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, fHistoWrapper),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, fHistoWrapper, "MET", fTauSelection.getIsolationDiscriminator()),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, fHistoWrapper),
-    fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper),
-    fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
-    fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
-    fTopWithWSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithWSelection"), eventCounter, fHistoWrapper),
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
+    fTopSelectionManager(iConfig, eventCounter, fHistoWrapper, iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     fFullHiggsMassCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("invMassReco"), eventCounter, fHistoWrapper),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
     //fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
@@ -66,11 +65,14 @@ namespace HPlus {
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
+    fTopPtWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("topPtWeightReader"), fHistoWrapper, "TopPtWeight"),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauCandidates"),
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fCommonPlots(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDFactorised),
+    fNormalizationSystematicsSignalRegion(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDNormalizationSystematicsSignalRegion),
+    fNormalizationSystematicsControlRegion(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kQCDNormalizationSystematicsControlRegion),
     fCommonPlotsAfterVertexSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("VertexSelection",false,"Vtx")),
     fCommonPlotsAfterTauSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauSelection",false,"TauID")),
     fCommonPlotsAfterTauWeight(fCommonPlots.createCommonPlotsFilledAtEveryStep("TauWeight",true,"Tau")),
@@ -82,6 +84,7 @@ namespace HPlus {
     fCommonPlotsAfterMET(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections+MET",false,"Std. selections+MET")),
     fCommonPlotsAfterMETAndBtag(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections+MET+btag",false,"Std. selections+MET+btag")),
     fCommonPlotsAfterMETAndBtagWithSF(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections+MET+btag with SF",false,"Std. selections+MET+btag with SF")),
+    fCommonPlotsAfterMETAndBtagWithSFAndDeltaPhi(fCommonPlots.createCommonPlotsFilledAtEveryStep("Std. selections+MET+btag+deltaphi with SF",false,"Std. selections+MET+btag+deltaphi with SF")),
     fCommonPlotsAfterLeg1(fCommonPlots.createCommonPlotsFilledAtEveryStep("Leg1 (MET+btag+...)",false,"Leg1 (MET+btag+...)")),
     fCommonPlotsAfterLeg2(fCommonPlots.createCommonPlotsFilledAtEveryStep("Leg2 (tau isol.)",false,"Leg2 (tau isol.)"))
   {
@@ -96,8 +99,7 @@ namespace HPlus {
 
     // Book histograms
     edm::Service<TFileService> fs;
-    // Save the module configuration to the output ROOT file as a TNamed object
-    fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
+    ConfigInfo::writeConfigInfo(iConfig, *fs);
 
     hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesBeforeWeight", "Number of vertices without weighting;Vertices;N_{events} / 1 Vertex", 50, 0, 50);
     hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesAfterWeight", "Number of vertices with weighting; Vertices;N_{events} / 1 Vertex", 50, 0, 50);
@@ -136,6 +138,9 @@ namespace HPlus {
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMETAfterLeg1, "METAfterLeg1", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMETAfterLeg2, "METAfterLeg2", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myDir, hMETAfterBJets, "METAfterBJets", "E_{T}^{miss}, GeV", myMetBins, myMetMin, myMetMax);
+    // Shapes for closure test systematics for data-driven control plots are done via the extra Common plots objects
+    fNormalizationSystematicsSignalRegion.disableCommonPlotsFilledAtEveryStep();
+    fNormalizationSystematicsControlRegion.disableCommonPlotsFilledAtEveryStep();
 
     // Tree
     fTree.enableNonIsoLeptons(true);
@@ -164,6 +169,13 @@ namespace HPlus {
     }
     increment(fAllCounter);
 
+//------ Top pT reweighting
+    if(!iEvent.isRealData()) {
+      const double topPtWeight = fTopPtWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(topPtWeight);
+      fTree.setTopPtWeight(topPtWeight);
+    }
+    increment(fTopPtWeightCounter);
 
 //------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
     if(!iEvent.isRealData()) {
@@ -201,7 +213,9 @@ namespace HPlus {
     hVerticesAfterWeight->Fill(nVertices);
     fTree.setNvertices(nVertices);
     // Setup common plots
-    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+
     fCommonPlotsAfterVertexSelection->fill();
     fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
 
@@ -265,9 +279,14 @@ namespace HPlus {
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(mySelectedTau));
     // note: do not require here that only one tau has been found (mySelectedTau is the selected tau in the event)
     // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
-    fCommonPlots.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fTopChiSelection, fEvtTopology, fFullHiggsMassCalculator);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
     fCommonPlotsAfterTauSelection->fill();
     fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauCandidateData, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
+    // Initialize also normalization systematics plotting
+    fNormalizationSystematicsSignalRegion.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+    fNormalizationSystematicsControlRegion.initialize(iEvent, iSetup, pvData, tauCandidateData, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
+    fNormalizationSystematicsSignalRegion.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauCandidateData, fMETSelection);
+    fNormalizationSystematicsControlRegion.setSplittingOfPhaseSpaceInfoAfterTauSelection(iEvent, iSetup, tauCandidateData, fMETSelection);
 
 //------ Scale factors for tau fakes and for tau trigger
     // Apply scale factor for fake tau
@@ -394,6 +413,7 @@ namespace HPlus {
     myHandler.fillShapeHistogram(hMETAfterStandardSelections, myMetValue);
     myHandler.fillShapeHistogram(hMtShapesAfterStandardSelections, myTransverseMass);
     if (myFullMass > 0) myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, myFullMass);
+    fNormalizationSystematicsControlRegion.fillAllControlPlots(iEvent, myTransverseMass);
 
     // Leg 2 (tau ID)
     if (myLeg2PassedStatus) {
@@ -402,6 +422,7 @@ namespace HPlus {
       myHandler.fillShapeHistogram(hMETAfterLeg2, myMetValue);
       myHandler.fillShapeHistogram(hMtShapesAfterLeg2, myTransverseMass);
       myHandler.fillShapeHistogram(hMtShapesAfterStandardSelectionsAndIsolatedTau, myTransverseMass);
+      fNormalizationSystematicsSignalRegion.fillAllControlPlots(iEvent, myTransverseMass);
       if (myFullMass > 0.) {
         myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg2, myFullMass);
         myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelectionsAndIsolatedTau, myFullMass);
@@ -446,8 +467,16 @@ namespace HPlus {
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
     fCommonPlots.fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, qcdTailKillerData);
     if (!qcdTailKillerData.passedBackToBackCuts()) return;
-    // Leg 1 passed
     increment(fQCDTailKillerBackToBackCounter);
+
+    //------ Top selection
+    BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
+    TopSelectionManager::Data topSelectionData = fTopSelectionManager.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
+    fCommonPlots.fillControlPlotsAtTopSelection(iEvent, topSelectionData);
+    if (!(topSelectionData.passedEvent())) return;
+    increment(fTopSelectionCounter);
+
+    // Leg 1 passed
     increment(fAfterLeg1Counter);
     myHandler.fillShapeHistogram(hMETAfterLeg1, myMetValue);
     myHandler.fillShapeHistogram(hMtShapesAfterLeg1, myTransverseMass);
@@ -474,6 +503,10 @@ namespace HPlus {
     const double myTransverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
     const BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     const QCDTailKiller::Data qcdTailKillerDataTmp = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
+    BjetSelection::Data bjetSelectionData = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagDataTmp.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
+    TopSelectionManager::Data topSelectionData = fTopSelectionManager.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagDataTmp.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
+
+    // Leg 1 passed
     double myFullMass = -1.0;
     FullHiggsMassCalculator::Data myFullHiggsMassData;
     if (btagDataTmp.passedEvent()) {
@@ -483,7 +516,7 @@ namespace HPlus {
       }
     }
     SplittedHistogramHandler& myHandler = fCommonPlots.getSplittedHistogramHandler();
-    bool myLeg1PassedStatus = metData.passedEvent() && btagDataTmp.passedEvent() && qcdTailKillerDataTmp.passedEvent();
+    bool myLeg1PassedStatus = metData.passedEvent() && btagDataTmp.passedEvent() && qcdTailKillerDataTmp.passedEvent() && topSelectionData.passedEvent();
 
     // Fill inclusive histograms for syst. uncertainty
     if (myLeg2PassedStatus) {
@@ -501,6 +534,7 @@ namespace HPlus {
       myHandler.fillShapeHistogram(hMETAfterStandardSelections, myMetValue);
       myHandler.fillShapeHistogram(hMtShapesAfterStandardSelections, myTransverseMass);
       if (myFullMass > 0) myHandler.fillShapeHistogram(hInvariantMassShapesAfterStandardSelections, myFullMass);
+      fNormalizationSystematicsControlRegion.fillAllControlPlots(iEvent, myTransverseMass);
     }
 
     // Leg 2 (tau ID)
@@ -509,6 +543,7 @@ namespace HPlus {
       fCommonPlotsAfterLeg2->fill();
       myHandler.fillShapeHistogram(hMETAfterLeg2, myMetValue);
       myHandler.fillShapeHistogram(hMtShapesAfterLeg2, myTransverseMass);
+      fNormalizationSystematicsSignalRegion.fillAllControlPlots(iEvent, myTransverseMass);
       if (myFullMass > 0.) myHandler.fillShapeHistogram(hInvariantMassShapesAfterLeg2, myFullMass);
     }
 
@@ -548,8 +583,14 @@ namespace HPlus {
       const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
       fCommonPlots.fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, qcdTailKillerData);
       if (!qcdTailKillerData.passedBackToBackCuts()) return;
-      // Leg 1 passed
       increment(fQCDTailKillerBackToBackCounter);
+
+      //------ Top selection
+      fCommonPlots.fillControlPlotsAtTopSelection(iEvent, topSelectionData);
+      if (!(topSelectionData.passedEvent())) return;
+      increment(fTopSelectionCounter);
+
+      // Leg 1 passed
       increment(fAfterLeg1Counter);
       myHandler.fillShapeHistogram(hMETAfterLeg1, myMetValue);
       myHandler.fillShapeHistogram(hMtShapesAfterLeg1, myTransverseMass);
@@ -596,14 +637,12 @@ namespace HPlus {
     //if (!iEvent.isRealData()) {
     //  fEventWeight.multiplyWeight(btagData.getScaleFactor()); // needed to calculate the scale factor and the uncertainties
     //}
-    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorMaxAbsUncertainty());
     // Top reconstruction in different versions
     if (selectedTau.isNonnull() && btagData.passedEvent()) {
-      //const TopSelection::Data topSelectionData = fTopSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-      //const BjetSelection::Data bjetSelectionData = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
-      const TopChiSelection::Data topChiSelectionData = fTopChiSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-      //const TopWithBSelection::Data topWithBSelectionData = fTopWithBSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), bjetSelectionData.getBjetTopSide());
-      fTree.setTop(topChiSelectionData.getTopP4());
+      BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+      TopSelectionManager::Data topSelectionData = fTopSelectionManager.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
+      fTree.setTop(topSelectionData.getTopP4());
     }
     // Sphericity, Aplanarity, Planarity, alphaT
     fTree.setDiJetMassesNoTau(evtTopologyData.alphaT().vDiJetMassesNoTau);

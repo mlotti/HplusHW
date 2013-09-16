@@ -237,6 +237,8 @@ namespace HPlus {
 
     WrappedTH1* hHiggsMass_betterSolution;
     WrappedTH1* hHiggsMass_worseSolution;
+
+    WrappedTH1* hTopInvariantMassInGenerator;
     
     // Histograms that may be used to identify good cut possibilities
     WrappedTH1* hMETSignificance;

@@ -133,6 +133,10 @@ class Dataset:
         self.workflows[workflow.name] = workflow
         if workflow.source != None:
             workflow.source.dataset = self
+            # Propagate 'sample' argument
+            srcWf = self.getWorkflow(workflow.source.name)
+            if srcWf.hasArg("sample") and not workflow.hasArg("sample"):
+                workflow.addArg("sample", srcWf.getArg("sample"))
 
     def addWorkflows(self, workflows):
         for wf in workflows:
@@ -274,6 +278,12 @@ class Workflow:
     def removeArg(self, argName):
         del self.args[argName]
 
+    def hasArg(self, argName):
+        return argName in self.args
+
+    def getArg(self, argName):
+        return self.args[argName]
+
     def setOutputFile(self, output_file):
         self.output_file = output_file
 
@@ -313,7 +323,7 @@ class Workflow:
                     out.write("%d" % value)
                 else:
                     out.write('"%s"' % str(value))
-                out.write("\n")
+                out.write(",\n")
             out.write(prefix+prefix+"},\n")
         if self.skimConfig != None:
             out.write(prefix+prefix+"skimConfig=[" + ", ".join(['"%s"' % s for s in self.skimConfig]) + "],\n")

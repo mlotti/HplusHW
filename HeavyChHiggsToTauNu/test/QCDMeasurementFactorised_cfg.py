@@ -18,24 +18,6 @@ dataEras = [
 # Note: Keep number of variations below 200 to keep file sizes reasonable
 # Note: Currently it is not possible to vary the tau selection -related variables, because only one JES and MET producer is made (tau selection influences type I MET correction and JES)
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
-myOptimisation = HPlusOptimisationScheme()
-#myOptimisation.printOptions() # Uncomment to find out the implemented methods
-#myOptimisation.addTauPtVariation([41.0, 50.0])
-#myOptimisation.addTauIsolationVariation([])
-#myOptimisation.addTauIsolationContinuousVariation([])
-#myOptimisation.addRtauVariation([0.0, 0.7])
-#myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
-#myOptimisation.addJetEtVariation([20.0, 30.0])
-#myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
-#myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
-#myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
-#myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
-#myOptimisation.addBJetEtVariation([])
-#myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
-#myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
-#myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
-
 ### Boolean flags
 bCustomizeTailKiller = False
 
@@ -44,10 +26,10 @@ def customize(signalAnalysis):
     signalAnalysis.applyNprongsCutForTauCandidate = False
     signalAnalysis.applyRtauCutForTauCandidate = False
     # Splitting of analysis phase space (note that first bin is below the first number and last bin is greater than the last number)
-    signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauPtBinLowEdges = cms.untracked.vdouble(41., 50., 60., 70., 80., 100., 120., 150., 200., 300.)
+    signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150.)
     #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5)
     #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByNVerticesBinLowEdges = cms.untracked.vint32(10)
-    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByDeltaPhiTauMet = cms.untracked.vdouble(90.) # If used, one could disable collinear cuts
+    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByDeltaPhiTauMetInDegrees = cms.untracked.vdouble(90.) # If used, one could disable collinear cuts
     #signalAnalysis.QCDTailKiller.disableCollinearCuts = True # enable, if splitting by delta phi(tau,MET)
     print "Phase space is splitted in analysis as follows:"
     print signalAnalysis.commonPlotsSettings.histogramSplitting
@@ -101,7 +83,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #doQCDTailKillerScenarios=True,
                         doFillTree=False,
                         #histogramAmbientLevel = "Vital", # Informative by default
-                        #doOptimisation=True, optimisationScheme=myOptimisation
+                        #doOptimisation=True, optimisationScheme="myOptimisation"
                         )
 
 process = builder.buildQCDMeasurementFactorised()

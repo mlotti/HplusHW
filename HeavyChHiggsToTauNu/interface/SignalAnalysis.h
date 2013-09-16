@@ -7,6 +7,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingEfficiencyInMC.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
@@ -20,12 +21,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEmulationEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
@@ -74,8 +71,6 @@ namespace HPlus {
       void incrementBTaggingCounter() { increment(fBTaggingCounter); }
       void incrementDeltaPhiBackToBackCounter() { increment(fDeltaPhiBackToBackCounter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
-      void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
-      void incrementTopChiSelectionCounter() { increment(fTopChiSelectionCounter); }
       void incrementSelectedEventsCounter() { increment(fSelectedEventsCounter); }
       void incrementSelectedEventsFullMassCounter() { increment(fSelectedEventsFullMassCounter); }
 
@@ -88,8 +83,6 @@ namespace HPlus {
       Count fMETCounter;
       Count fBTaggingCounter;
       Count fDeltaPhiBackToBackCounter;
-      Count fTopSelectionCounter;
-      Count fTopChiSelectionCounter;
       Count fSelectedEventsCounter;
       Count fSelectedEventsFullMassCounter;
       Count fFakeMETVetoCounter;
@@ -144,6 +137,7 @@ namespace HPlus {
 
     // Main counters
     Count fAllCounter;
+    Count fTopPtWeightCounter;
     Count fWJetsWeightCounter;
     Count fEmbeddingGeneratorWeightCounter;
     Count fMETFiltersCounter;
@@ -216,15 +210,6 @@ namespace HPlus {
     Count fTauIsElectronFromJetCounter;
     Count fTauIsMuonFromJetCounter;
     Count fTauIsHadronFromJetCounter;
-
-    // Counters for different top algorithms
-    Count fTopSelectionCounter;
-    Count fTopChiSelectionCounter;
-    Count fTopWithMHSelectionCounter;
-    Count fTopWithBSelectionCounter;
-    Count fTopWithWSelectionCounter;
-
-    
     
     Count fSelectedEventsCounterWithGenuineBjets;
 
@@ -237,15 +222,12 @@ namespace HPlus {
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
+    BTaggingEfficiencyInMC fBTaggingEfficiencyInMC;
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
-    TopSelection fTopSelection;
-    TopChiSelection fTopChiSelection;
-    TopWithBSelection fTopWithBSelection;
-    TopWithWSelection fTopWithWSelection;
-    //    TopWithMHSelection fTopWithMHSelection;
     BjetSelection fBjetSelection;
     //    BjetWithPtSelection fBjetWithPtSelection;
+    TopSelectionManager fTopSelectionManager;
     FullHiggsMassCalculator fFullHiggsMassCalculator;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;
@@ -258,6 +240,7 @@ namespace HPlus {
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;
     WeightReader fWJetsWeightReader;
+    WeightReader fTopPtWeightReader;
     WeightReader fEmbeddingGeneratorWeightReader;
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
@@ -344,6 +327,42 @@ namespace HPlus {
     WrappedTH2 *hSelectionFlowVsVertices;
     WrappedTH2 *hSelectionFlowVsVerticesFakeTaus;
 
+    // Histograms for jet flavour tagging efficiency calculation in MC
+    // Pseudorapidity (eta)
+    WrappedTH1 *hGenuineBJetEta;   
+    WrappedTH1 *hGenuineBJetWithBTagEta;
+    WrappedTH1 *hGenuineGJetEta;
+    WrappedTH1 *hGenuineGJetWithBTagEta;
+    WrappedTH1 *hGenuineUDSJetEta;
+    WrappedTH1 *hGenuineUDSJetWithBTagEta;
+    WrappedTH1 *hGenuineCJetEta;
+    WrappedTH1 *hGenuineCJetWithBTagEta;
+    WrappedTH1 *hGenuineLJetEta;
+    WrappedTH1 *hGenuineLJetWithBTagEta;
+    // Transverse momentum (pT)
+    WrappedTH1 *hGenuineBJetPt;   
+    WrappedTH1 *hGenuineBJetWithBTagPt;
+    WrappedTH1 *hGenuineGJetPt;
+    WrappedTH1 *hGenuineGJetWithBTagPt;
+    WrappedTH1 *hGenuineUDSJetPt;
+    WrappedTH1 *hGenuineUDSJetWithBTagPt;
+    WrappedTH1 *hGenuineCJetPt;
+    WrappedTH1 *hGenuineCJetWithBTagPt;
+    WrappedTH1 *hGenuineLJetPt;
+    WrappedTH1 *hGenuineLJetWithBTagPt;
+    // Two-dimensional histograms of pT vs. eta to investigate possible correlations
+    WrappedTH2 *hGenuineBJetPtAndEta;
+    WrappedTH2 *hGenuineBJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineGJetPtAndEta;
+    WrappedTH2 *hGenuineGJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineUDSJetPtAndEta;
+    WrappedTH2 *hGenuineUDSJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineCJetPtAndEta;
+    WrappedTH2 *hGenuineCJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineLJetPtAndEta;
+    WrappedTH2 *hGenuineLJetWithBTagPtAndEta;
+
+
     // Control plots for fakes
 
 
@@ -398,6 +417,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETWithPhiOscillationCorrection; // temporary
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTagging;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBackToBackDeltaPhi;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelected;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTail;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMass;
@@ -409,6 +429,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelectionFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBackToBackDeltaPhiFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMassFakeTaus;

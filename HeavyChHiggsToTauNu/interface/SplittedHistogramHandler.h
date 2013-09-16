@@ -18,7 +18,7 @@ namespace HPlus {
 
   class SplittedHistogramHandler {
   public:
-    SplittedHistogramHandler(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper);
+    SplittedHistogramHandler(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper, bool doInfoHistogram=true);
     ~SplittedHistogramHandler();
     /// Reset pointer to current bin
     void initialize();

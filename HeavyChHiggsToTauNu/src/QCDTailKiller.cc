@@ -93,7 +93,10 @@ namespace HPlus {
     std::string myNameString;
     std::stringstream myStream;
     myNameString = "CircleCut_"+fName;
-    myStream << "CircleCut_" << fName << ";#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{" << jetN << "},MET))^{2}}, ^{o};N_{events}";
+    if (fCutDirection == kCutUpperLeftCorner)
+      myStream << "CircleCut_" << fName << ";#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{" << jetN << "},MET))^{2}}, ^{o};N_{events}";
+    else
+      myStream << "CircleCut_" << fName << ";#sqrt{(#Delta#phi(#tau,MET))^{2}+(180^{o}-#Delta#phi(jet_{" << jetN << "},MET))^{2}}, ^{o};N_{events}";
     hOptimisationPlot = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, histoDir, myNameString.c_str(), myStream.str().c_str(),52,0.,260.);
     myStream.str("");
     myNameString = "2DplaneBeforeCut_"+fName;
@@ -111,8 +114,10 @@ namespace HPlus {
       throw cms::Exception("LogicError") << "QCDTailKiller::CutItem You forgot to call initialise() before calling passedCut()!" << std::endl;
     // Fill before plots
     hBeforeCut->Fill(x,y);
-    hOptimisationPlot->Fill(std::sqrt(std::pow(180.-x,2)+std::pow(y,2)));
-
+    if (fCutDirection == kCutUpperLeftCorner)
+      hOptimisationPlot->Fill(std::sqrt(std::pow(x,2)+std::pow(180.-y,2)));
+    else
+      hOptimisationPlot->Fill(std::sqrt(std::pow(180.-x,2)+std::pow(y,2)));
     bool myPassedStatus = false;
     // No cut requested
     if (fCutShape == QCDTailKiller::kNoCut) {

@@ -24,16 +24,17 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  TopWithWSelection::Data::Data():
+/*  TopWithWSelection::Data::Data():
     fPassedEvent(false) {}
-  TopWithWSelection::Data::~Data() {}
+  TopWithWSelection::Data::~Data() {} */
 
-  TopWithWSelection::TopWithWSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
-    BaseSelection(eventCounter, histoWrapper),
+  //constructor
+  TopWithWSelection::TopWithWSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper) : TopSelectionBase::TopSelectionBase(iConfig, eventCounter, histoWrapper),
+    //BaseSelection(eventCounter, histoWrapper),
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
     fChi2Cut(iConfig.getUntrackedParameter<double>("Chi2Cut")),
-    fTopWithWMassCount(eventCounter.addSubCounter("Top with W mass cut","Top with W Mass cut")),
+    //fTopWithWMassCount(eventCounter.addSubCounter("Top with W mass cut","Top with W Mass cut")),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src"))
   {
     edm::Service<TFileService> fs;
@@ -58,9 +59,10 @@ namespace HPlus {
     hWMassChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMassChiCut", "WMassChiCut", 100, 0., 200.);
   }
 
+  //destructor
   TopWithWSelection::~TopWithWSelection() {}
 
-  TopWithWSelection::Data TopWithWSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
+/*  TopWithWSelection::Data TopWithWSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -74,9 +76,9 @@ namespace HPlus {
   TopWithWSelection::Data TopWithWSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
     ensureAnalyzeAllowed(iEvent);
     return privateAnalyze(iEvent, iSetup, jets, iJetb);
-  }
+  } */
 
-  TopWithWSelection::Data TopWithWSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
+  TopWithWSelection::Data TopWithWSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) { 
     Data output;
 
     bool wmassfound = false;
@@ -209,7 +211,7 @@ namespace HPlus {
       output.fPassedEvent = false;
     } else {
       output.fPassedEvent = true;
-      increment(fTopWithWMassCount);
+      //increment(fTopWithWMassCount); //TODO
     }
     return output;
   }

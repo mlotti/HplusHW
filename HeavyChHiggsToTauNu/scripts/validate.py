@@ -8,6 +8,7 @@ from optparse import OptionParser
 from datetime import date, time, datetime
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 
 class HistogramInput:
@@ -19,6 +20,11 @@ class HistogramInput:
             self._histoNameList = [histoNameList]
         self._binWidth = binWidth
         self._logStatus = logStatus
+
+        self._mcNormalization={}
+
+    def setMCNormalization(self, **kwargs):
+        self._mcNormalization.update(**kwargs)
 
     def getHistoNameList(self):
         return self._histoNameList
@@ -41,6 +47,9 @@ class HistogramInput:
                 raise Exception("Error: could not open histogram '%s' in test file %s!"%(', '.join(map(str, self._histoNameList)),dataset.getName()))
         roothisto = dataset.getDatasetRootHisto(hname)
         #roothisto.normalizeToOne()
+        if dataset.isMC():
+            if "normalizeToLumi" in self._mcNormalization:
+                roothisto.normalizeToLuminosity(self._mcNormalization["normalizeToLumi"])
         hnew = roothisto.getHistogram()
         # Rebin
         binwidth = hnew.GetXaxis().GetBinWidth(1)
@@ -95,11 +104,18 @@ class ValidateGroup:
         self._yellowWarnings = []
         self._redWarnings = []
 
+        self._mcNormalization = {}
+
     def addCounter(self, counterName):
         self._counters.append(counterName)
 
     def addHistogram(self, histoName, binWidth, logStatus):
         self._histograms.append(HistogramInput(histoName, binWidth, logStatus))
+
+    def setMCNormalization(self, **kwargs):
+        self._mcNormalization.update(kwargs)
+        for h in self._histograms:
+            h.setMCNormalization(**kwargs)
 
     def getName(self):
         return self._groupName
@@ -134,19 +150,25 @@ class ValidateGroup:
         myOutput = "<a name=mytop></a>"
         #print "Generating validation counters"
         self._readCounterCount = 0
+
+        mcNormalization = ""
+        if refDataset.isMC() or testDataset.isMC():
+            if "normalizeToLumi" in self._mcNormalization:
+                mcNormalization = "MC is normalized to %s fb<sup>-1</sup><br>\n" % histograms.formatLuminosityInFb(self._mcNormalization["normalizeToLumi"])
+
         if len(self._counters) > 0:
-            myOutput += "<h1>Counters for validation:</h1><br>\n"
+            myOutput += "<h1>Counters for validation:</h1><br>\n%s" % mcNormalization
             myOutput += self._doValidateCounters(refDataset, testDataset)
-            myOutput += '<a href="#mytop">Back to top"</a><br>\n'
+            myOutput += '<a href="#mytop">Back to top</a><br>\n'
         # validate histograms
         #print "Generating validation histograms"
         if len(self._histograms) > 0:
             myOutput += "<h1>Histograms for validation:</h1><br>\n"
             myOutput += "Note: the underflow (overflow) bin is shown as the first (last) bin in the histogram<br>\n"
             myOutput += "Color legend: blue histogram = reference, red points = dataset to be validated<br>\n"
-            myOutput += "Difference is defined as sum_i (abs(new_i / ref_i - 1.0)), where sum goes over the histogram bins<br><br>\n"
+            myOutput += "Difference is defined as sum_i (abs(new_i / ref_i - 1.0)), where sum goes over the histogram bins<br>%s<br>\n" % mcNormalization
             myOutput += self._doValidateHistograms(mydir, refDataset, testDataset)
-            myOutput += '<a href="#mytop">Back to top"</a><br>\n'
+            myOutput += '<a href="#mytop">Back to top</a><br>\n'
         # make html
         self._output = myOutput
         #makehtml(mydir,"index.html",myOutput+myCounterOutput+myHistoOutput)
@@ -160,6 +182,12 @@ class ValidateGroup:
         # Get event counters
         refEventCounter = counter.EventCounter(refDataset)
         testEventCounter = counter.EventCounter(testDataset)
+        mcNormalization = ""
+        for ds, ec in [(refDataset, refEventCounter), (testDataset, testEventCounter)]:
+            if ds.isMC():
+                if "normalizeToLumi" in self._mcNormalization:
+                    ec.normalizeMCToLuminosity(self._mcNormalization["normalizeToLumi"])
+
         # Get sub counter names
         refSubCounterNames = refEventCounter.getSubCounterNames()
         testSubCounterNames = testEventCounter.getSubCounterNames()
@@ -209,14 +237,20 @@ class ValidateGroup:
         myOutput += "<td><b>New eff.</b></td><td><b>Ref. eff.</b></td><td><b>New/Ref.</b></td>"
         myOutput += "</tr>\n"
         oldrow = ""
-        if refCounter == None:
-            rownames = testCounter.getRowNames()
-        else:
-            rownames = refCounter.getRowNames()
-        for row in rownames:
+        # This handles nonexisting rows correctly
+        table = counter.CounterTable()
+        if refCounter is not None:
+            c = refCounter.getColumn(index=0)
+            c.setName("Ref")
+            table.appendColumn(c)
+        c = testCounter.getColumn(index=0)
+        c.setName("Test")
+        table.appendColumn(c)
+
+        for row in table.getRowNames():
             myOutput += self._testCounterValues(oldrow, row, refCounter, testCounter)
             oldrow = row
-        self._readCounterCount += len(rownames)
+        self._readCounterCount += table.getNrows()
         myOutput += "</table>\n"
         return myOutput
 
@@ -631,8 +665,6 @@ def createValidateHistograms():
     myGroup = ValidateGroup("Primary vertices")
     myGroup.addHistogram("Vertices/verticesBeforeWeight", 1, "log")
     myGroup.addHistogram("Vertices/verticesAfterWeight", 1, "log")
-    myGroup.addHistogram("Vertices/verticesTriggeredBeforeWeight", 1, "log")
-    myGroup.addHistogram("Vertices/verticesTriggeredAfterWeight", 1, "log")
     myGroups.append(myGroup)
 
     myGroup = ValidateGroup("Trigger matched tau collection")
@@ -805,11 +837,13 @@ def createValidateHistograms():
     myGroup.addHistogram("QCDTailKiller/CollinearSystem/CircleCut_CollinearJet4", 10, "log")
     myGroups.append(myGroup)
 
-    myGroup = ValidateGroup("Transverse mass")
+    myGroup = ValidateGroup("Transverse and invariant mass")
     myGroup.addCounter("FullHiggsMassCalculator")
     myGroup.addHistogram("deltaPhi", 10, "linear")
-    myGroup.addHistogram(["transverseMass","transverseMassAfterDeltaPhi160"], 20, "linear")
-    myGroup.addHistogram(["NonQCDTypeIITransverseMassAfterDeltaPhi160","EWKFakeTausTransverseMass"], 20, "linear")
+    myGroup.addHistogram(["shapeTransverseMass",], 20, "linear")
+    myGroup.addHistogram(["shapeEWKFakeTausTransverseMass"], 20, "linear")
+    myGroup.addHistogram(["shapeInvariantMass",], 10, "linear")
+    myGroup.addHistogram(["shapeEWKFakeTausInvariantMass"], 10, "linear")
     myGroups.append(myGroup)
 
     myGroup = ValidateGroup("TopSelection (TopChi)")
@@ -962,6 +996,7 @@ if __name__ == "__main__":
     parser.add_option("-v", dest="variation", action="append", help="name of variation")
     parser.add_option("-e", dest="era", action="append", help="name of era")
     parser.add_option("-m", dest="searchMode", action="append", help="name of search mode")
+    parser.add_option("--normalizeToLumi", dest="normalizeToLumi", type="float", default=None, help="If set, normalize MC to this luminosity (default is to not to normalize)")
     (opts, args) = parser.parse_args()
 
     # Check that proper arguments were given
@@ -1000,13 +1035,17 @@ if __name__ == "__main__":
     if opts.testDir is not None:
         kwargs["includeOnlyTasks"] = [opts.testDir]
     testDsetCreator = dataset.readFromMulticrabCfg(directory=opts.test, **kwargs)
-    myEraList = compareLists(refDsetCreator.getDataDataEras(), testDsetCreator.getDataDataEras(), opts.era)
+    myEraList = compareLists(refDsetCreator.getDataEras(), testDsetCreator.getDataEras(), opts.era)
     mySearchModeList = compareLists(refDsetCreator.getSearchModes(), testDsetCreator.getSearchModes(), opts.searchMode)
     myVariationList = compareLists(refDsetCreator.getOptimizationModes(), testDsetCreator.getOptimizationModes(), opts.variation)
     if len(myVariationList) == 0:
         myVariationList.append(None)
     # Create ValidateGroups
     myValidateGroups = createValidateHistograms()
+    if opts.normalizeToLumi is not None:
+        for vg in myValidateGroups:
+            vg.setMCNormalization(normalizeToLumi=opts.normalizeToLumi)
+
     # Create output directory
     myTimeStamp = datetime.now().strftime("%y%m%d_%H%M%S")
     myDir = "validation_"+myTimeStamp

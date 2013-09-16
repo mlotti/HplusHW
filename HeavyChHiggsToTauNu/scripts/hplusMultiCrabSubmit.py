@@ -113,7 +113,12 @@ def main(opts):
             if len(crabOptions) > 0:
                 command.extend(crabOptions)
             if opts.addSeBlackList != "":
-                command.extend(["-GRID.se_black_list="+seBlackLists[task]+","+opts.addSeBlackList])
+                lst = seBlackLists[task]
+                if lst is None:
+                    lst = opts.addSeBlackList
+                else:
+                    lst += ","+opts.addSeBlackList
+                command.extend(["-GRID.se_black_list="+lst])
 
             print "Submitting %d jobs from task %s" % (len(jobs), task)
             print "Command", " ".join(command)

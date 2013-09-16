@@ -22,6 +22,10 @@ def main(opts):
         d = os.path.join(opts.output, str(i))
         os.mkdir(d)
         outputDirs.append(d)
+    if opts.subdir is None:
+        plotDirs = opts.dir
+    else:
+        plotDirs = [os.path.join(d, opts.subdir) for d in opts.dir]
 
     title = "Validation report"
     if opts.title != "":
@@ -45,14 +49,14 @@ def main(opts):
             output.append("  <th>%s</th>" % n)
         output.append(" </tr>")
 
-    pngs = [os.path.basename(x) for x in glob.glob(os.path.join(opts.dir[0], "*.png"))]
+    pngs = [os.path.basename(x) for x in glob.glob(os.path.join(plotDirs[0], "*.png"))]
     pngs.sort()
     for p in pngs:
         anchor = os.path.splitext(p)[0] # strip off extension
         output.append(' <tr><td align="center" colspan="%d"><a name="%s"><b>%s</b></a> <a href="#%s">link</a></td></tr>' % (len(opts.dir), anchor, p, anchor))
 
         output.append(" <tr>")
-        for i, d in enumerate(opts.dir):
+        for i, d in enumerate(plotDirs):
             shutil.copy(os.path.join(d, p), os.path.join(outputDirs[i], p))
             output.append('  <td><img src="%d/%s"></td>' % (i, p))
         output.append(" </tr>")
@@ -85,6 +89,16 @@ def main(opts):
     for o in output:
         f.write(o)
         f.write("\n")
+    f.close()
+
+    f = open(os.path.join(opts.output, "command.txt"), "w")
+    def fmt(s):
+        if " " in s:
+            return '"%s"' % s
+        return s
+    f.write(" ".join([fmt(s) for s in sys.argv]))
+    f.write("\n")
+    f.close()
 
     print "Plots copied and HTML generated to", opts.output
     return 0
@@ -93,6 +107,8 @@ if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("-d", "--dir", dest="dir", action="append", default=[],
                       help="Directory to look for PNGs (can be given multiple times)")
+    parser.add_option("--subdir", dest="subdir", type="string", default=None,
+                      help="Subdirectory inside DIRs to look the plots.")
     parser.add_option("-n", "--name", dest="name", action="append", default=[],
                       help="Name of a directory (corresponding to a directory)")
     parser.add_option("-o", "--output", dest="output", default="validation",

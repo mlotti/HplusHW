@@ -2,6 +2,15 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 import sys
 
+validSampleValues = [
+    "WJets",
+    "W1Jets",
+    "W2Jets",
+    "W3Jets",
+    "W4Jets",
+    "TTJets",
+]
+
 # https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideAboutPythonConfigFile#Passing_Command_Line_Arguments_T
 def getOptions(options=None):
     if options == None:
@@ -112,11 +121,16 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Set to 1 WJets inclusive+exclusive weighting should be enabled")
-    options.register("wjetBin",
+    options.register("sample",
+                     "",
+                     options.multiplicity.singleton,
+                     options.varType.string,
+                     "Sample name for specific weighting schemes (valid values are: "+", ".join(validSampleValues))
+    options.register("bquarkNumFilter",
                      -1,
                      options.multiplicity.singleton,
                      options.varType.int,
-                     "W+Jets jet bin (-1=inclusive, 1=1, jne), only relevant if wjetsWeighting != 0")
+                     "b-quark filtering option (-1=disabled, 0=0b, 1=1b, 2=2b, 3=at least 3b)")
     options.register("trgAnalysis",
                      "",
                      options.multiplicity.singleton,
@@ -137,6 +151,8 @@ def getOptions(options=None):
 
     if options.doPat != 0 and options.doTauHLTMatchingInAnalysis != 0:
         raise Exception("doTauHLTMatchingInAnalysis may not be used with doPat=1 (use PAT trigger matching instead)")
+    if options.sample != "" and options.sample not in validSampleValues:
+        raise Exception("Invalid value '%s' of 'sample' command line parameter, valid values are %s" % (options.sample, ", ".join(validSampleValues)))
 
     return options
 

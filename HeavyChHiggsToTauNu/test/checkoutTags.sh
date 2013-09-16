@@ -82,6 +82,7 @@ set -e
 # 5.4.2013/M.Kortelainen CMSSW_5_3_9_patch2 Updated PAT tags
 # 12.6.2013/M.Kortelainen CMSSW_5_3_9_patch3 Performance improvement in pat::Trigger
 # 9.8.2013/LAW CMSSW_5_3_9_patch3 Updated tag for btagging
+# 4.9.2013/M.Kortelainen CMSSW_5_3_9_patch3 Updated lumi tag
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -143,7 +144,14 @@ cvs up -r V06-05-06-12 DataFormats/PatCandidates/src/TriggerEvent.cc
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
-addpkg RecoLuminosity/LumiDB V04-01-09
+#addpkg RecoLuminosity/LumiDB V04-01-09
+if [ -e RecoLuminosity/LumiDB ]; then
+    rm -fR RecoLuminosity/LumiDB;
+fi
+git clone https://github.com/cms-sw/RecoLuminosity-LumiDB.git RecoLuminosity/LumiDB
+cd RecoLuminosity/LumiDB
+git checkout -b lumi-V04-02-10 V04-02-10
+cd ../..
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/EgammaCutBasedIdentification

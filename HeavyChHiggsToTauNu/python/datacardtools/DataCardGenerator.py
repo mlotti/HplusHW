@@ -6,12 +6,8 @@ import sys
 from ROOT import *
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import *
@@ -58,21 +54,26 @@ class DatasetMgrCreatorManager:
     def obtainDatasetMgrs(self, era, searchMode, optimizationMode):
         if len(self._dsetMgrs) > 0:
             raise Exception(ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) was already called (dsetMgrs exist)!"+NormalStyle())
-        for dCreator in self._dsetMgrCreators:
-            if dCreator != None:
+        for i in range(0, len(self._dsetMgrCreators)):
+            if self._dsetMgrCreators[i] != None:
                 # Create DatasetManager object and set pointer to the selected era, searchMode, and optimizationMode
-                myDsetMgr = dCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+                myDsetMgr = self._dsetMgrCreators[i].createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
                 # Normalize
                 myDsetMgr.updateNAllEventsToPUWeighted()
                 # Obtain luminosity
                 myDsetMgr.loadLuminosities()
                 myLuminosity = 0.0
                 myDataDatasets = myDsetMgr.getDataDatasets()
+                #print "datasets:",myDsetMgr.getDatasetNames()
+                #print "datasets:",myDsetMgr.getAllDatasetNames()
                 for d in myDataDatasets:
                     myLuminosity += d.getLuminosity()
                 self._luminosities.append(myLuminosity)
                 # Merge divided datasets
-                myDsetMgr.mergeMany(plots._physicalMcAdd, addition=True)
+                plots.mergeRenameReorderForDataMC(myDsetMgr)
+                # Show info of available datasets
+                print HighlightStyle()+"Dataset merging structure for %s:%s"%(self.getDatasetMgrLabel(i),NormalStyle())
+                myDsetMgr.printDatasetTree()
                 # Store DatasetManager
                 self._dsetMgrs.append(myDsetMgr)
             else:
@@ -325,16 +326,16 @@ class DataCardGenerator:
             #return False
         #if self._QCDMethod == DatacardQCDMethod.UNKNOWN:
             #mymsg += "- missing field 'QCDMeasurementMethod' (string, name of QCD measurement method, options: 'QCD factorised' or 'QCD inverted')\n"
-        if self._config.SignalRateCounter == None:
-            mymsg += "- missing field 'SignalRateCounter' (string, label of counter to be used for rate)\n"
-        if self._config.FakeRateCounter == None:
-            mymsg += "- missing field 'FakeRateCounter' (string, label of counter to be used for rate)\n"
-        if self._config.SignalShapeHisto == None:
-            mymsg += "- missing field 'SignalShapeHisto' (string, name of histogram for the shape)\n"
-        if self._config.FakeShapeHisto == None:
-            mymsg += "- missing field 'FakeShapeHisto' (string, name of histogram for the shape)\n"
+        #if self._config.SignalRateCounter == None:
+            #mymsg += "- missing field 'SignalRateCounter' (string, label of counter to be used for rate)\n"
+        #if self._config.FakeRateCounter == None:
+            #mymsg += "- missing field 'FakeRateCounter' (string, label of counter to be used for rate)\n"
+        #if self._config.SignalShapeHisto == None:
+            #mymsg += "- missing field 'SignalShapeHisto' (string, name of histogram for the shape)\n"
+        #if self._config.FakeShapeHisto == None:
+            #mymsg += "- missing field 'FakeShapeHisto' (string, name of histogram for the shape)\n"
         if self._config.ShapeHistogramsDimensions == None:
-            mymsg += "- missing field 'ShapeHistogramsDimensions' (list of number of bins, minimum, and maximum)\n"
+            mymsg += "- missing field 'ShapeHistogramsDimensions' (list of number of bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
         elif not isinstance(self._config.ShapeHistogramsDimensions, dict):
             mymsg += "- field 'ShapeHistogramsDimensions' has to be of type dictionary with keys: bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
         else:
@@ -374,16 +375,13 @@ class DataCardGenerator:
     def createDatacardColumns(self):
         # Make datacard column object for observation
         if self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS) != None:
-            myObservationName = "dset_observation"
-            self._dsetMgrManager.mergeDatasets(DatacardDatasetMgrSourceType.SIGNALANALYSIS, myObservationName, self._config.Observation.datasetDefinitions)
+            #self._dsetMgrManager.mergeDatasets(DatacardDatasetMgrSourceType.SIGNALANALYSIS, myObservationName, self._config.Observation.datasetDefinition)
             #print "Making merged dataset for data group: "+HighlightStyle()+"observation"+NormalStyle()
             #self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS).merge(myObservationName, myFoundNames, keepSources=True) # note that mergeMany has already been called at this stage
             self._observation = DatacardColumn(label = "data_obs",
                                                enabledForMassPoints = self._config.MassPoints,
                                                datasetType = "Observation",
-                                               rateCounter = self._config.Observation.rateCounter,
-                                               datasetMgrColumn = myObservationName,
-                                               #dirPrefix = self._config.Observation.dirPrefix+self._variationPostfix,
+                                               datasetMgrColumn = self._config.Observation.datasetDefinition,
                                                shapeHisto = self._config.Observation.shapeHisto)
             if self._opts.debugConfig:
                 self._observation.printDebug()
@@ -399,32 +397,31 @@ class DataCardGenerator:
                 myDsetMgrIndex = None
                 myMergedName = ""
                 myMergedNameForQCDMCEWK = ""
-                if dg.datasetType != "None" and not myIngoreOtherQCDMeasurementStatus:
-                    if dg.datasetType == "Signal":
-                        myDsetMgrIndex = DatacardDatasetMgrSourceType.SIGNALANALYSIS
-                    elif dg.datasetType == "Embedding":
-                        myDsetMgrIndex = DatacardDatasetMgrSourceType.EMBEDDING
-                    elif dg.datasetType == "QCD factorised" or dg.datasetType == "QCD inverted":
-                        myDsetMgrIndex = DatacardDatasetMgrSourceType.QCDMEASUREMENT
+                #if dg.datasetType != "None" and not myIngoreOtherQCDMeasurementStatus:
+                    #if dg.datasetType == "Signal":
+                        #myDsetMgrIndex = DatacardDatasetMgrSourceType.SIGNALANALYSIS
+                    #elif dg.datasetType == "Embedding":
+                        #myDsetMgrIndex = DatacardDatasetMgrSourceType.EMBEDDING
+                    #elif dg.datasetType == "QCD factorised" or dg.datasetType == "QCD inverted":
+                        #myDsetMgrIndex = DatacardDatasetMgrSourceType.QCDMEASUREMENT
                     # Make merge of requested datasets
-                    if self._opts.debugConfig:
-                        print "Adding datasets to data group '"+dg.label+"':"
-                        for n in myFoundNames:
-                            print "  "+n
-                    myMergedName = "dset_"+dg.label.replace(" ","_")
-                    self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedName, dg.datasetDefinitions)
-                    if dg.datasetType == "QCD factorised":
-                        # Make merged set of EWK MC datasets
-                        myMergedNameForQCDMCEWK = "dset_"+dg.label.replace(" ","_")+"_MCEWK"
-                        self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedNameForQCDMCEWK, dg.MCEWKDatasetDefinitions)
+                    #if self._opts.debugConfig:
+                        #print "Adding datasets to data group '"+dg.label+"':"
+                        #for n in myFoundNames:
+                            #print "  "+n
+                    #myMergedName = "dset_"+dg.label.replace(" ","_")
+                    #self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedName, dg.datasetDefinitions)
+                    #if dg.datasetType == "QCD factorised":
+                        ## Make merged set of EWK MC datasets
+                        #myMergedNameForQCDMCEWK = "dset_"+dg.label.replace(" ","_")+"_MCEWK"
+                        #self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedNameForQCDMCEWK, dg.MCEWKDatasetDefinitions)
                 # Construct datacard column object
                 myColumn = None
                 if dg.datasetType == "QCD factorised":
                     myColumn = QCDfactorisedColumn(landsProcess=dg.landsProcess,
                                                    enabledForMassPoints = dg.validMassPoints,
                                                    nuisanceIds = dg.nuisances,
-                                                   datasetMgrColumn = myMergedName,
-                                                   datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
+                                                   datasetMgrColumn = dg.datasetDefinition,
                                                    additionalNormalisationFactor = dg.additionalNormalisation,
                                                    QCDfactorisedInfo = dg.QCDfactorisedInfo,
                                                    debugMode = self._opts.debugQCD)
@@ -433,9 +430,8 @@ class DataCardGenerator:
                                               landsProcess=dg.landsProcess,
                                               enabledForMassPoints = dg.validMassPoints,
                                               datasetType = dg.datasetType,
-                                              rateCounter = dg.rateCounter,
                                               nuisanceIds = dg.nuisances,
-                                              datasetMgrColumn = myMergedName,
+                                              datasetMgrColumn = dg.datasetDefinition,
                                               additionalNormalisationFactor = dg.additionalNormalisation,
                                               shapeHisto = dg.shapeHisto)
                 else: # i.e. signal analysis and QCD inverted
@@ -443,9 +439,8 @@ class DataCardGenerator:
                                               landsProcess=dg.landsProcess,
                                               enabledForMassPoints = dg.validMassPoints,
                                               datasetType = dg.datasetType,
-                                              rateCounter = dg.rateCounter,
                                               nuisanceIds = dg.nuisances,
-                                              datasetMgrColumn = myMergedName,
+                                              datasetMgrColumn = dg.datasetDefinition,
                                               additionalNormalisationFactor = dg.additionalNormalisation,
                                               shapeHisto = dg.shapeHisto)
                 # Store column
@@ -550,7 +545,6 @@ class DataCardGenerator:
                                                                    mode = myMode))
             elif n.function == "Shape":
                 self._extractors.append(ShapeExtractor(histoSpecs = self._config.ShapeHistogramsDimensions,
-                                                       counterItem = n.counter,
                                                        histoDirs = n.histoDir,
                                                        histograms = n.histo,
                                                        exid = n.id,
