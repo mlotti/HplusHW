@@ -806,13 +806,14 @@ namespace HPlus {
 
   // Method called from HPlusBTaggingSelectorFilter.cc;
   BTagging::PerJetInfo BTagging::getPerJetInfo(edm::PtrVector<pat::Jet> jetCollection, BTagging::Data& bTagData, bool isRealData) const {
-    bool tagged = false;
-    double scaleFactor = 1.0;
-    double uncertainty = 0.0;
-    bool genuine = false;
     PerJetInfo info;
     info.reserve(jetCollection.size());
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jetCollection.begin(); iter != jetCollection.end(); ++iter) {
+      bool tagged = false;
+      double scaleFactor = 1.0;
+      double uncertainty = 0.0;
+      bool genuine = false;
+
       edm::Ptr<pat::Jet> jet = *iter;
       // Find out if jet is b-tagged
       for (edm::PtrVector<pat::Jet>::iterator bjet = bTagData.getSelectedJets().begin(); bjet != bTagData.getSelectedJets().end(); ++bjet) {
