@@ -11,6 +11,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
 #include "TF1.h"
 
+#include <boost/utility.hpp>
+
 namespace edm {
   class Event;
   class EventSetup;
@@ -31,7 +33,7 @@ namespace HPlus {
   private:
     class EfficiencyTable; // Forward declared because ScaleFactorTable interface uses it
 
-    class ScaleFactorTable {
+    class ScaleFactorTable: private boost::noncopyable {
     public:
       ScaleFactorTable();
       ~ScaleFactorTable();
@@ -78,7 +80,7 @@ namespace HPlus {
       std::vector<double> fUnbinnedUncertaintyDown;
     };
 
-    class EfficiencyTable {
+    class EfficiencyTable: private boost::noncopyable {
     public:
       EfficiencyTable();
       ~EfficiencyTable();
