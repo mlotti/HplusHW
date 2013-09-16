@@ -71,6 +71,7 @@ tauPathLastFilter = {
     }
 
 muPathLastFilter = {
+    # 2011
     "HLT_Mu20_v1": "hltSingleMu20L3Filtered20",
     "HLT_Mu24_v2": "hltSingleMu24L3Filtered24",
     "HLT_Mu30_v3": "hltSingleMu30L3Filtered30",
@@ -81,6 +82,11 @@ muPathLastFilter = {
     "HLT_Mu40_eta2p1_v1": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40",
     "HLT_Mu40_eta2p1_v4": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40",
     "HLT_Mu40_eta2p1_v5": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40",
+
+    # 2012
+    "HLT_Mu40_eta2p1_v9":  "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40Q",
+    "HLT_Mu40_eta2p1_v10": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40Q",
+    "HLT_Mu40_eta2p1_v11": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40Q",
 }
 
 def addTauTriggerMatching(process, trigger, collections, postfix="", outputCommands=None, pathFilterMap=tauPathLastFilter, throw=True):
