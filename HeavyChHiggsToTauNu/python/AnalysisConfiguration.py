@@ -70,7 +70,6 @@ class ConfigBuilder:
                  useTriggerMatchedTaus = True,
                  useCHSJets = False,
                  useJERSmearedJets = True,
-                 useBTagDB = False,
                  customizeLightAnalysis = None,
                  customizeHeavyAnalysis = None,
 
@@ -118,7 +117,6 @@ class ConfigBuilder:
         self.useTriggerMatchedTaus = useTriggerMatchedTaus
         self.useCHSJets = useCHSJets
         self.useJERSmearedJets = useJERSmearedJets
-        self.useBTagDB = useBTagDB
         self.customizeLightAnalysis = customizeLightAnalysis
         self.customizeHeavyAnalysis = customizeHeavyAnalysis
 
@@ -280,9 +278,6 @@ class ConfigBuilder:
 
         # Import and customize HChSignalAnalysisParameters
         param = self._buildParam()
-
-        # Btagging DB
-        self._useBTagDB(process, param)
 
         # Tau embedding input handling
         additionalCounters.extend(self._customizeTauEmbeddingInput(process, param))
@@ -614,35 +609,6 @@ class ConfigBuilder:
             param.GlobalMuonVeto.MuonPtCut = 999
 
         return param
-
-    ## Setup b tag DB
-    #
-    # \param process  cms.Process object
-    # \param param    HChSignalAnalysisParameters_cff module object
-    def _useBTagDB(self, process, param):
-        if not self.useBTagDB:
-            return
-
-        process.load("CondCore.DBCommon.CondDBCommon_cfi")
-        #MC measurements 
-        process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
-        process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
-        #Data measurements
-        process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
-        process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
-        #User DB for btag eff
-        if options.runOnCrab != 0:
-            print "BTagDB: Assuming that you are running on CRAB"
-            btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
-        else:
-            print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
-            # This way signalAnalysis can be ran from any directory
-            import os
-            btagDB = "sqlite_file:%s/src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db" % os.environ["CMSSW_BASE"]
-        process.CondDBCommon.connect = btagDB
-        process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
-        process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
-        param.bTagging.UseBTagDB  = False
 
     ## Setup for tau embedding input
     #
