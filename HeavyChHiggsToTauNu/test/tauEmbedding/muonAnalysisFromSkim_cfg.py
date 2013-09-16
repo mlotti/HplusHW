@@ -86,13 +86,13 @@ dataEras = [
 ]
 #puWeights = AnalysisConfiguration.addPuWeightProducers(dataVersion, process, process.commonSequence, dataEras)
 if dataVersion.isMC():
-    puEraSuffixWeights = AnalysisConfiguration.addPuWeightProducersVariations(dataVersion, process, process.commonSequence, dataEras)
+    puEraSuffixWeights = AnalysisConfiguration.addPuWeightProducersVariations(dataVersion, process, process.commonSequence, dataEras, doVariations=False)
 
     # W+jets weights
     import HiggsAnalysis.HeavyChHiggsToTauNu.WJetsWeight as WJetsWeight
     wjetsEraSuffixWeights = []
     for era, suffix, weight in puEraSuffixWeights:
-        weight = WJetsWeight.getWJetsWeight(dataVersion, options, "embedding_skim_v44_5_1", era, suffix)
+        weight = WJetsWeight.getWJetsWeight(dataVersion, options, "embedding_skim_v44_5_1", era, suffix, useInclusiveIfNotFound=True)
         name = "wjetsWeight"+era+suffix
         weight.enabled = False
         weight.alias = name
@@ -101,7 +101,15 @@ if dataVersion.isMC():
         wjetsEraSuffixWeights.append( (era, suffix, name) )
         if options.wjetsWeighting != 0:
             weight.enabled = True
-    
+
+    # Top pt reweihting
+    import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeight_cfi as topPtWeight
+    process.topPtWeight = topPtWeight.topPtWeight.clone()
+    if options.sample == "TTJets":
+        topPtWeight.addTtGenEvent(process, process.commonSequence)
+        process.topPtWeight.enabled = True
+    process.commonSequence += process.topPtWeight
+
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
 additionalCounters.extend(MuonSelection.getMuonPreSelectionCountersForEmbedding())
@@ -345,6 +353,7 @@ if dataVersion.isMC():
         setattr(ntuple.doubles, "weightPileup_"+era+suffix, cms.InputTag(weight))
     for era, suffix, weight in wjetsEraSuffixWeights:
         setattr(ntuple.doubles, "weightWJets_"+era+suffix, cms.InputTag(weight))
+    setattr(ntuple.doubles, "weightTopPt", cms.InputTag("topPtWeight"))
 
     for name in ntuple.muonEfficiencies.parameterNames_():
         pset = getattr(ntuple.muonEfficiencies, name)
