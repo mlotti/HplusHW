@@ -11,6 +11,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
 #include "TF1.h"
 
+#include <boost/utility.hpp>
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingScaleFactorFromDB.h"
 #include "RecoBTag/Records/interface/BTagPerformanceRecord.h"
 #include "CondFormats/PhysicsToolsObjects/interface/BinningPointByMap.h"
@@ -37,7 +39,7 @@ namespace HPlus {
   private:
     class EfficiencyTable; // Forward declared because ScaleFactorTable interface uses it
 
-    class ScaleFactorTable {
+    class ScaleFactorTable: private boost::noncopyable {
     public:
       ScaleFactorTable();
       ~ScaleFactorTable();
@@ -84,7 +86,7 @@ namespace HPlus {
       std::vector<double> fUnbinnedUncertaintyDown;
     };
 
-    class EfficiencyTable {
+    class EfficiencyTable: private boost::noncopyable {
     public:
       EfficiencyTable();
       ~EfficiencyTable();
@@ -182,8 +184,8 @@ namespace HPlus {
     const std::string getDiscriminator() const { return fDiscriminator; }
 
     PerJetInfo getPerJetInfo(edm::PtrVector<pat::Jet> jetCollection, BTagging::Data& bTagData, bool isRealData) const;
-    double calculateJetSFTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable) const;
-    double calculateJetSFUncertaintyTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable, double SFUncertaintyFactor) const;
+    double calculateJetSFTerm(double pT, bool isBTagged, const ScaleFactorTable& sfTable, const EfficiencyTable& effTable) const;
+    double calculateJetSFUncertaintyTerm(double pT, bool isBTagged, const ScaleFactorTable& sfTable, const EfficiencyTable& effTable, double SFUncertaintyFactor) const;
 
     void calculateJetSFAndUncertaintyTerm(edm::Ptr<pat::Jet>& iJet, bool isBTagged, EventSFTerms& terms, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) const;
     double calculateRelativeEventScaleFactorUncertainty(bool up, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag);

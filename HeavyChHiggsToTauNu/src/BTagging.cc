@@ -818,13 +818,14 @@ namespace HPlus {
 
   // Method called from HPlusBTaggingSelectorFilter.cc;
   BTagging::PerJetInfo BTagging::getPerJetInfo(edm::PtrVector<pat::Jet> jetCollection, BTagging::Data& bTagData, bool isRealData) const {
-    bool tagged = false;
-    double scaleFactor = 1.0;
-    double uncertainty = 0.0;
-    bool genuine = false;
     PerJetInfo info;
     info.reserve(jetCollection.size());
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jetCollection.begin(); iter != jetCollection.end(); ++iter) {
+      bool tagged = false;
+      double scaleFactor = 1.0;
+      double uncertainty = 0.0;
+      bool genuine = false;
+
       edm::Ptr<pat::Jet> jet = *iter;
       // Find out if jet is b-tagged
       for (edm::PtrVector<pat::Jet>::iterator bjet = bTagData.getSelectedJets().begin(); bjet != bTagData.getSelectedJets().end(); ++bjet) {
@@ -836,29 +837,29 @@ namespace HPlus {
       // If MC, calculate the following things:
       if (! isRealData) {
 	int flavour = std::abs(jet->partonFlavour());
-	BTagging::ScaleFactorTable sfTable;
-	BTagging::EfficiencyTable effTable;
+	const BTagging::ScaleFactorTable *sfTable;
+	const BTagging::EfficiencyTable *effTable;
 	double SFUncertaintyFactor = 1.0;
 	// Find out if jet is genuine b-jet and choose the correct look-up tables
 	if (flavour == 5) {
 	  genuine = true;
-	  sfTable = fTagSFTable;
-	  effTable = fTagEffTable;
+	  sfTable = &fTagSFTable;
+	  effTable = &fTagEffTable;
 	} else if (flavour == 4) {
-	  sfTable = fTagSFTable;
-          effTable = fCMistagEffTable;
+	  sfTable = &fTagSFTable;
+          effTable = &fCMistagEffTable;
 	  SFUncertaintyFactor = 2.0;
 	} else if (flavour == 21) {
-          sfTable = fMistagSFTable;
-          effTable = fGMistagEffTable;
+          sfTable = &fMistagSFTable;
+          effTable = &fGMistagEffTable;
 	} else {
-          sfTable = fMistagSFTable;
-          effTable = fUDSMistagEffTable;
+          sfTable = &fMistagSFTable;
+          effTable = &fUDSMistagEffTable;
 	}
 	// Get event scale factor term due to current jet
-	scaleFactor = calculateJetSFTerm(jet->pt(), tagged, sfTable, effTable);
+	scaleFactor = calculateJetSFTerm(jet->pt(), tagged, *sfTable, *effTable);
 	// Get event scale factor uncertainty term due to current jet
-	uncertainty = calculateJetSFUncertaintyTerm(jet->pt(), tagged, sfTable, effTable, SFUncertaintyFactor);
+	uncertainty = calculateJetSFUncertaintyTerm(jet->pt(), tagged, *sfTable, *effTable, SFUncertaintyFactor);
       }
       // Set output
       info.scaleFactor.push_back(scaleFactor);
@@ -869,7 +870,7 @@ namespace HPlus {
     return info;
   }
 
-  double BTagging::calculateJetSFTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable) const {
+  double BTagging::calculateJetSFTerm(double pT, bool isBTagged, const ScaleFactorTable& sfTable, const EfficiencyTable& effTable) const {
     double sf = 1.0;
     if (isBTagged) {
       sf = sfTable.getScaleFactor(pT);
@@ -879,7 +880,7 @@ namespace HPlus {
     return sf;
   }
 
-  double BTagging::calculateJetSFUncertaintyTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable, double SFUncertaintyFactor) const {
+  double BTagging::calculateJetSFUncertaintyTerm(double pT, bool isBTagged, const ScaleFactorTable& sfTable, const EfficiencyTable& effTable, double SFUncertaintyFactor) const {
     double uncertainty = 0.0;
     if (isBTagged)
       uncertainty = SFUncertaintyFactor * sfTable.getMaximumUncertainty(pT);
