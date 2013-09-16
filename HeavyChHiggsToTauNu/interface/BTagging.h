@@ -176,8 +176,8 @@ namespace HPlus {
     const std::string getDiscriminator() const { return fDiscriminator; }
 
     PerJetInfo getPerJetInfo(edm::PtrVector<pat::Jet> jetCollection, BTagging::Data& bTagData, bool isRealData) const;
-    double calculateJetSFTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable) const;
-    double calculateJetSFUncertaintyTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable, double SFUncertaintyFactor) const;
+    double calculateJetSFTerm(double pT, bool isBTagged, const ScaleFactorTable& sfTable, const EfficiencyTable& effTable) const;
+    double calculateJetSFUncertaintyTerm(double pT, bool isBTagged, const ScaleFactorTable& sfTable, const EfficiencyTable& effTable, double SFUncertaintyFactor) const;
 
     void calculateJetSFAndUncertaintyTerm(edm::Ptr<pat::Jet>& iJet, bool isBTagged, EventSFTerms& terms, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) const;
     double calculateRelativeEventScaleFactorUncertainty(bool up, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag);
