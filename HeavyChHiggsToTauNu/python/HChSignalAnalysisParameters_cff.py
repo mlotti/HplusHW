@@ -317,14 +317,6 @@ bTagging = cms.untracked.PSet(
     etaCut = cms.untracked.double(2.4),
     jetNumber = cms.untracked.uint32(1),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
-    UseBTagDB      = cms.untracked.bool(False),
-    LabelTag       = cms.untracked.string("MUJETSWPBTAGCSVM"),#### for MU+JETS btag SF
-   # LabelTag       = cms.untracked.string("MISTAGCSVM"),######### for MU+JETS Mistag SF
-   # LabelTag       = cms.untracked.string("TTBARDISCRIMBTAGCSV"),########## for TTBar efficiency
-   # LabelTag       = cms.untracked.string("TTBARWPBTAGCSVM"),######### for TTBAr btag SF
-    
-    BTagDBAlgo     = cms.untracked.string("CSVM"), #FIXME TCHEL
-    BTagUserDBAlgo = cms.untracked.string("BTAGCSVM_hplusBtagDB_TTJets"), #FIXME
     variationEnabled = cms.untracked.bool(False),
     variationShiftBy = cms.untracked.double(0),
 )

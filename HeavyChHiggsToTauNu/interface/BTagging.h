@@ -25,8 +25,6 @@ namespace edm {
   class ParameterSet;
 }
 
-class BTaggingScaleFactorFromDB;
-
 namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;

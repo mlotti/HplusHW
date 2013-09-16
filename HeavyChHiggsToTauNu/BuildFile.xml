@@ -16,7 +16,6 @@
 <use name="CommonTools/UtilAlgos"/>
 <use name="PhysicsTools/Utilities"/>
 <use name="RecoTauTag/TauTagTools"/>
-<use name="RecoBTag/PerformanceDB"/>
 <use name="CondFormats/PhysicsToolsObjects"/>
 <use name="RecoBTag/Records"/>
 <use name="EGamma/EGammaAnalysisTools"/>
