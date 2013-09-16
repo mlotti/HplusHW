@@ -9,6 +9,7 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
+#include "TF1.h"
 
 namespace edm {
   class Event;
@@ -25,71 +26,88 @@ namespace HPlus {
 
   class BTagging: public BaseSelection {
   public:
-    class Data; // Forward declare because it is used in BTaggingScaleFactor interface
-    struct Info {
-      std::vector<double> scaleFactor;
-      std::vector<double> uncertainty;
-      std::vector<bool> tagged;
-      std::vector<bool> genuine;
-
-      void reserve(size_t s) {
-        scaleFactor.reserve(s);
-        uncertainty.reserve(s);
-        tagged.reserve(s);
-        genuine.reserve(s);
-      }
-      size_t size() const { return scaleFactor.size(); }
-    };
+    class Data; // Forward declare because it is used in ScaleFactorTable interface
 
   private:
-    class BTaggingScaleFactor {
+    class EfficiencyTable; // Forward declared because ScaleFactorTable interface uses it
+
+    class ScaleFactorTable {
     public:
-      BTaggingScaleFactor();
-      ~BTaggingScaleFactor();
+      ScaleFactorTable();
+      ~ScaleFactorTable();
 
-      void UseDB(BTaggingScaleFactorFromDB*);
-      
-      void addBFlavorData(double pT, double scaleFactorB, double scaleFactorUncertaintyB, double epsilonMCB);
-      void addNonBFlavorData(double pT, double scaleFactorL, double scaleFactorUncertaintyL, double epsilonMCL);
+      void setScaleFactorTable(const std::vector<double>& ptBinTable, const char* SFFunctionExpression, const std::vector<double>& uncertaintyTable);
+      void setScaleFactorTable(TF1* scaleFactorFunction, TF1* sfUncertUpFunction, TF1* sfUncertDownFunction);
+      void setScaleFactorFunction(const char* expression);
+      void setScaleFactorUncertaintyFunctions(const char* expressionUp, const char* expressionDown);
 
-      BTagging::Info getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const;
-      static double calculateScaleFactor(const Info& info);
-      static double calculateAbsoluteUncertainty(const Info& info);
-      static double calculateRelativeUncertainty(const Info& info);
-      
+      void resetJetTable();
+      void addUncertaintyTagged(double pT);
+      void addUncertaintyTagged(double pT, double uncertaintyFactor);
+      void addUncertaintyUntagged(double pT, EfficiencyTable& efficiencyTable);
+      void addUncertaintyUntagged(double pT, EfficiencyTable& efficiencyTable, double uncertaintyFactor);
+
+      void addJetSFUncertaintyTerm(double pT, bool isBTagged, EfficiencyTable& effTable, double factor);
+      void addJetSFUncertaintyTerm(double pT, bool isBTagged, EfficiencyTable& effTable);
+
+      double getScaleFactor(double pt) const;
+      double getScaleFactorUncertaintyBinned(double pt) const;
+
+      size_t obtainIndex(double pt) { return obtainIndex(fPtBins, pt); }
+
+      double calculateRelativeUncertaintySquared(bool up);
+
+      void printJetTableForValidation();
+
     private:
       static size_t obtainIndex(const std::vector<double>& table, double pt);
 
-      double getBtagScaleFactor(double,double) const;
-      double getBtagScaleFactorError(double,double) const;
-      double getMistagScaleFactor(double,double) const;
-      double getMistagScaleFactorError(double,double) const;
-      double getMCBtagEfficiency(double,double) const;
-      double getMCMistagEfficiency(double,double) const;
-
-      BTaggingScaleFactorFromDB *btagdb;
-      
-      std::vector<double> fPtBinsB; // lower edges of pT bins for b-flavor jets
-      std::vector<double> fPtBinsL; // lower edges of pT bins for l-flavor jets
-      std::vector<double> fScaleFactorB; // b-tagging scalefactor for b-flavor jets
-      std::vector<double> fScaleFactorL; // b-mistagging scalefactor for non-b-flavor jets
-      std::vector<double> fScaleFactorUncertaintyB; // b-tagging scalefactor uncertainty for b-flavor jets
-      std::vector<double> fScaleFactorUncertaintyL; // b-mistagging scalefactor uncertainty for non-b-flavor jets
-      std::vector<double> fEpsilonMCB; // b-tagging efficiency from MC for b-flavor jets
-      std::vector<double> fEpsilonMCL; // b-mistagging efficiency from MC for non-b-flavor jets
+      // Scale factors and/or their uncertainties may be given as parametrized functions
+      TF1 *fScaleFactorFunction;
+      TF1 *fScaleFactorUncertUpFunction;
+      TF1 *fScaleFactorUncertDownFunction;
+      // Per-jet scale factor look-up table
+      std::vector<double> fPtBins; // lower edges of pT bins
+      std::vector<double> fScaleFactor; // b-tagging scale factor
+      std::vector<double> fScaleFactorUncertainty; // b-tagging scale factor uncertainty
+      // Vectors for storing jet info for the calculation of the weight uncertainty
+      std::vector<double> fPerBinUncertaintyUp;
+      std::vector<double> fPerBinUncertaintyDown;
+      std::vector<double> fUnbinnedUncertaintyUp;
+      std::vector<double> fUnbinnedUncertaintyDown;
     };
 
+    class EfficiencyTable {
+    public:
+      EfficiencyTable();
+      ~EfficiencyTable();
+
+      void setEfficiencyTable(const std::vector<double>& ptBinTable, const std::vector<double>& efficiencyTable, const std::vector<double>& uncertaintyUpTable, const std::vector<double>& uncertaintyDownTable);
+      void resetJetTable();
+      void addJetSFUncertaintyTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable);
+
+      double getEfficiency(double pT) const;
+
+      size_t obtainIndex(double pt) { return obtainIndex(fPtBins, pt); }
+
+      double calculateRelativeUncertaintySquared(bool up);
+
+    private:
+      static size_t obtainIndex(const std::vector<double>& table, double pt);
+
+      // Efficiency look-up table
+      std::vector<double> fPtBins; // lower edges of pT bins
+      std::vector<double> fEfficiency; // Efficiency of (mis)tagging jet as a b-jet
+      std::vector<double> fEffUncertUp; // Uncertainty of (mis)tagging efficienc
+      std::vector<double> fEffUncertDown; // Uncertainty of (mis)tagging efficiency
+      // Vectors for storing jet info for the calculation of the weight uncertainty
+      std::vector<double> fPerBinUncertaintyUp;
+      std::vector<double> fPerBinUncertaintyDown;
+    };
+    
   public:
-    /**
-     * Class to encapsulate the access to the data members of
-     * TauSelection. If you want to add a new accessor, add it here
-     * and keep all the data of TauSelection private.
-     */
     class Data {
     public:
-      // The reason for pointer instead of reference is that const
-      // reference allows temporaries, while const pointer does not.
-      // Here the object pointed-to must live longer than this object.
       Data();
       ~Data();
 
@@ -98,9 +116,13 @@ namespace HPlus {
       const edm::PtrVector<pat::Jet>& getSelectedSubLeadingJets() const { return fSelectedSubLeadingJets; }
       const int getBJetCount() const { return iNBtags; }
       const double getMaxDiscriminatorValue() const { return fMaxDiscriminatorValue; }
-      const double getScaleFactor() const { return fScaleFactor; }
-      const double getScaleFactorAbsoluteUncertainty() const { return fScaleFactorAbsoluteUncertainty; }
-      const double getScaleFactorRelativeUncertainty() const { return fScaleFactorRelativeUncertainty; }
+      const double getScaleFactor() const { return fEventScaleFactor; }
+      const double getScaleFactorMaxAbsUncertainty() const { return fEventSFAbsUncert_max; }
+      const double getScaleFactorAbsoluteUncertainty_up() const { return fEventSFAbsUncert_up; }
+      const double getScaleFactorAbsoluteUncertainty_down() const { return fEventSFAbsUncert_down; }
+      const double getScaleFactorRelativeUncertainty_up() const { return fEventSFRelUncert_up; }
+      const double getScaleFactorRelativeUncertainty_down() const { return fEventSFRelUncert_down; }
+
       const bool hasGenuineBJets() const;
 
       friend class BTagging;
@@ -112,9 +134,23 @@ namespace HPlus {
       edm::PtrVector<pat::Jet> fSelectedSubLeadingJets;
       int iNBtags;
       double fMaxDiscriminatorValue;
-      double fScaleFactor;
-      double fScaleFactorAbsoluteUncertainty;
-      double fScaleFactorRelativeUncertainty;
+      double fEventScaleFactor;
+      double fEventSFAbsUncert_up;
+      double fEventSFAbsUncert_down;
+      double fEventSFRelUncert_up;
+      double fEventSFRelUncert_down;
+      double fEventSFAbsUncert_max;
+    };
+
+    struct PerJetInfo {
+      std::vector<double> fScaleFactor; // perJetWeight
+      std::vector<double> fUncertainty; // perJetWeightUncert
+      std::vector<bool> fTagged;        // b-tagging status
+      std::vector<bool> fGenuine;       // genuine b-jet?
+
+      size_t size() const { return fScaleFactor.size(); }      
+      void resetInfo(size_t s);
+      void addJetSFTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable);
     };
 
     BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -126,13 +162,16 @@ namespace HPlus {
     void fillScaleFactorHistograms(BTagging::Data& input);
 
     const std::string getDiscriminator() const { return fDiscriminator; }
+    PerJetInfo getPerJetInfo() const { return fBTaggingInfo; }
 
-    Info getPerJetInfo(const edm::PtrVector<pat::Jet>& jets, const Data& btagData, bool isData) const;
-
+    void calculateJetSFAndUncertaintyTerm(edm::Ptr<pat::Jet>& iJet, bool isBTagged, PerJetInfo& info, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) const;
+    double calculateEventScaleFactor(PerJetInfo& fBTaggingInfo);
+    double calculateRelativeEventScaleFactorUncertainty(bool up, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag);
+    
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
     void analyzeMCTagEfficiencyByJetFlavour(const edm::Ptr<pat::Jet>& jet, const bool isBJet, const bool isCJet, const bool isLightJet);
-    void calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, BTagging::Data& btagData);
+    void setEventScaleFactorInfo(PerJetInfo& fBTaggingInfo, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag, BTagging::Data& output);
 
     // Input parameters
     edm::InputTag fSrc;
@@ -147,11 +186,19 @@ namespace HPlus {
 
     const bool fVariationEnabled;
     const double fVariationShiftBy;
-    BTaggingScaleFactorFromDB *btagDB;
-    bool FactorsFromDB;
+
+    // Structure for storing per-jet information
+    PerJetInfo fBTaggingInfo;
 
     // Lookup tables for scale factors
-    BTaggingScaleFactor fBTaggingScaleFactor;
+    ScaleFactorTable fTagSFTable;
+    ScaleFactorTable fMistagSFTable;
+
+    // Lookup tables for tagging efficiencies in MC
+    EfficiencyTable fTagEffTable;
+    EfficiencyTable fCMistagEffTable;
+    EfficiencyTable fGMistagEffTable;
+    EfficiencyTable fUDSMistagEffTable;
 
     // Counters
     Count fTaggedCount;
@@ -166,18 +213,20 @@ namespace HPlus {
     Count fTaggedOneTaggedJet;
     Count fTaggedTwoTaggedJets;
 
+    Count allJetsCount2;
+    Count genuineBJetsCount2;
+    Count genuineBJetsWithBTagCount2;
+
     // Histograms
-    WrappedTH1 *hDiscr;
+    WrappedTH1 *hDiscriminator;
     WrappedTH1 *hPt;
     WrappedTH1 *hEta;
-    WrappedTH1 *hDiscrB;
     WrappedTH1 *hPtBCSVT;
     WrappedTH1 *hEtaBCSVT;
     WrappedTH1 *hPtBCSVM;
     WrappedTH1 *hEtaBCSVM;
     WrappedTH1 *hPtBnoTag;
     WrappedTH1 *hEtaBnoTag;
-    WrappedTH1 *hDiscrQ;
     WrappedTH1 *hPtQCSVT;
     WrappedTH1 *hEtaQCSVT;
     WrappedTH1 *hPtQCSVM;
@@ -211,7 +260,7 @@ namespace HPlus {
     WrappedTH2 *hMCBmistaggedBJetsByPtAndEta;
     WrappedTH2 *hMCBmistaggedCJetsByPtAndEta;
     WrappedTH2 *hMCBmistaggedLightJetsByPtAndEta;
-    // Scale factor histograms (needed for evaluating syst. uncertainty of btagging in datacard generator)
+    // Scale factor histograms (needed for evaluating syst. uncertainty of b-tagging in datacard generator)
     WrappedTH1 *hScaleFactor;
     WrappedTH1 *hBTagAbsoluteUncertainty;
     WrappedTH1 *hBTagRelativeUncertainty;

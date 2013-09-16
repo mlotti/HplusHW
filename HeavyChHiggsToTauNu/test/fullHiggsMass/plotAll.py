@@ -22,15 +22,32 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configurations
-multicrabDirs = ["multicrab_130522_194442"]
+#multicrabDirs = ["multicrab_130722_135352"]
+#scenarios = [""]
+
+multicrabDirs = ["multicrab_130725_113751"] # has the top invariant mass in generator histogram!
+scenarios = [""]
+
+#multicrabDirs = ["multicrab_130724_113525"]
+#scenarios = [
+    #"", # default
+    #"OptInvMassRecoPzSelectionDeltaEtaMaxTopInvMassCutNone",
+    #"OptInvMassRecoPzSelectionDeltaEtaMaxTopInvMassCutLoose",
+#    "OptInvMassRecoPzSelectionDeltaEtaMaxTopInvMassCutMedium",
+    #"OptInvMassRecoPzSelectionDeltaEtaMaxTopInvMassCutTight",
+#    ]
+
+
 #multicrabDirs = ["multicrab_130529_154518"]
-scenarios = [
-    "", # default
-    "OptInvMassRecoTopInvMassCutNone",
-    "OptInvMassRecoTopInvMassCutLoose",
-    "OptInvMassRecoTopInvMassCutMedium",
-    "OptInvMassRecoTopInvMassCutTight",
-    ]
+
+#multicrabDirs = ["multicrab_130522_194442"] # used for most of the plots and info in my MSc thesis
+#scenarios = [
+#    "", # default
+#    "OptInvMassRecoTopInvMassCutNone",
+#    "OptInvMassRecoTopInvMassCutLoose",
+#    "OptInvMassRecoTopInvMassCutMedium",
+#    "OptInvMassRecoTopInvMassCutTight",
+#    ]
 
 analysis = "signalAnalysis"
 # Data era affects on the set of selected data datasets, and the PU weights (via TDirectory name in histograms.root)
@@ -38,8 +55,8 @@ analysis = "signalAnalysis"
 #dataEra = "Run2011B"
 dataEra = "Run2011AB"
 
-#plotSignalOnly = True
-plotSignalOnly = False
+plotSignalOnly = True
+#plotSignalOnly = False
 #plotAllMassPointsTogether = True
 plotAllMassPointsTogether = False
 mcOnly = True
@@ -173,11 +190,11 @@ def doEverything(multicrabDir, scenario, lightHplusMassPoint):
     doCounters(datasets)
 
     # Do plots with a fit
-#     if plotSignalOnly:
-#         doFit(datasets, "HiggsMass", scenarioSuffix, lightHplusMassPoint, "Gauss")
-#         doFit(datasets, "HiggsMass", scenarioSuffix, lightHplusMassPoint, "BW")
-#         doFit(datasets, "HiggsMass_smaller", scenarioSuffix, lightHplusMassPoint, "Gauss")
-#         doFit(datasets, "HiggsMass_smaller", scenarioSuffix, lightHplusMassPoint, "BW")
+    if plotSignalOnly and (scenario == "OptInvMassRecoTopInvMassCutMedium" or scenario == "OptInvMassRecoPzSelectionDeltaEtaMaxTopInvMassCutMedium"):
+        doFit(datasets, "HiggsMass", scenario, lightHplusMassPoint, "Gauss")
+        doFit(datasets, "HiggsMass", scenario, lightHplusMassPoint, "BW")
+        #doFit(datasets, "HiggsMass_smaller", scenario, lightHplusMassPoint, "Gauss")
+        #doFit(datasets, "HiggsMass_smaller", scenario, lightHplusMassPoint, "BW")
 
     if interactiveMode:
         raw_input("*** Press \"Enter\" to exit pyROOT: ")
@@ -256,13 +273,15 @@ def doPlots(datasets, scenario, lightHplusMassPoint):
 #     if massPlotNormToOne:
 #         nameSuffix = nameSuffix + "_normToOne"
 
-    # Plot: top invariant mass
+    # Plot: top invariant masses
+    drawPlot(createPlot("FullHiggsMass/TopInvariantMassInGenerator", normalizeToOne=massPlotNormToOne), "TopInvariantMassInGenerator"+nameSuffix,
+             xlabel="m_{t}", ylabel="Events / 5 GeV", log=False, opts={"xmin": 100, "xmax": 300})
     drawPlot(createPlot("FullHiggsMass/TopMassSolution", normalizeToOne=massPlotNormToOne), "TopMass"+nameSuffix,
              xlabel="m_{t}", ylabel="Events / %d GeV"%massPlotBinWidth, log=True, rebinToWidthX=massPlotBinWidth)
         
-#     drawPlot(createPlot("FullHiggsMass/TopInvariantMassInGenerator", normalizeToOne=massPlotNormToOne),
-#              "TopInvariantMassInGenerator"+nameSuffix, xlabel="m(b, #tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth,
-#              log=False, rebinToWidthX=massPlotBinWidth)
+    #drawPlot(createPlot("FullHiggsMass/TopInvariantMassInGenerator", normalizeToOne=massPlotNormToOne),
+    #         "TopInvariantMassInGenerator"+nameSuffix, xlabel="m_{t}", ylabel="Events / %d GeV"%massPlotBinWidth,
+    #         log=False, rebinToWidthX=massPlotBinWidth)
 
     # PLOT: Higgs invariant mass using the chosen selection method (RECO, GEN, GEN_NuToMET)
     drawPlot(createPlot("FullHiggsMass/HiggsMass", normalizeToOne=massPlotNormToOne), "HiggsMass"+scenario+nameSuffix,
@@ -354,7 +373,7 @@ def doPlots(datasets, scenario, lightHplusMassPoint):
 
     # PLOT: Transverse mass
     if scenario == "":
-        drawPlot(createPlot("transverseMass", normalizeToOne=massPlotNormToOne),
+        drawPlot(createPlot("CommonPlots/AtEveryStep/Selected/transverseMass", normalizeToOne=massPlotNormToOne),
                  "TransverseMass"+nameSuffix,
                  xlabel="m_{T}(#tau, #nu_{#tau})", ylabel="Events / %d GeV"%massPlotBinWidth, log=False, rebinToWidthX=massPlotBinWidth)
 
@@ -515,19 +534,19 @@ def doCounters(datasets):
     #table = eventCounter.getMainCounterTable()
     #print table.format()
     
- #    table  = eventCounter.getSubCounterTable("FullHiggsMassCalculator")
-#     #table.renameRows(counterLabels)
-#     print table.format(latexFormat)
+    table  = eventCounter.getSubCounterTable("FullHiggsMassCalculator")
+    #table.renameRows(counterLabels)
+    print table.format(latexFormat)
     
 #     table2 = eventCounter.getSubCounterTable("SolutionSelection")
 #     table2.renameRows(solutionSelectionLabels)
 #     table2.transpose()
 #     print table2.format(plainFormat)
     
-    table3 = eventCounter.getSubCounterTable("FullMassEventClassification")
-    table3.renameRows(eventClassificationLabels)
-#    table3.transpose()
-    print table3.format(latexFormat)
+    #table3 = eventCounter.getSubCounterTable("FullMassEventClassification")
+    #table3.renameRows(eventClassificationLabels)
+    #table3.transpose()
+    #print table3.format(latexFormat)
 
 def Gaussian(x,par):
     return par[0]*TMath.Gaus(x[0],par[1],par[2],1)
@@ -538,14 +557,13 @@ def BW(x,par):
 def doFit(datasets, histoName, scenarioSuffix, lightHplusMassPoint, fitFunction):
     print "Doing invariant mass fits. (Fit function =", fitFunction + ")"
     
-    ## After standard cuts
     invmass = plots.PlotBase(
         [datasets.getDataset("TTToHplus_M%d"%lightHplusMassPoint).getDatasetRootHisto("FullHiggsMass/"+histoName)])
     invmass.histoMgr.normalizeMCToLuminosity(mcOnlyLumi) # Could implement possibility to normalize to data lumi (as for plots)
     invmass._setLegendStyles()
     invmass._setLegendLabels()
     invmass.histoMgr.setHistoDrawStyleAll("P")
-    invmass.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1)) # SET REBINNING HERE!
+    #invmass.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1)) # SET REBINNING HERE!
     hinvmass = invmass.histoMgr.getHisto("TTToHplus_M%d"%lightHplusMassPoint).getRootHisto().Clone("FullHiggsMass/"+histoName)
     
     canvas = TCanvas("canvas","",500,500)
@@ -559,6 +577,31 @@ def doFit(datasets, histoName, scenarioSuffix, lightHplusMassPoint, fitFunction)
     #    rangeMax = hinvmass.GetXaxis().GetXmax()
     rangeMin = 80
     rangeMax = 160
+    if lightHplusMassPoint == 80:
+        rangeMin = 80
+        rangeMax = 160
+    if lightHplusMassPoint == 90:
+        rangeMin = 70
+        rangeMax = 160
+    if lightHplusMassPoint == 100:
+        rangeMin = 90
+        rangeMax = 165
+    if lightHplusMassPoint == 120:
+        rangeMin = 80
+        rangeMax = 165
+    if lightHplusMassPoint == 140:
+        rangeMin = 110
+        rangeMax = 165
+    if lightHplusMassPoint == 150:
+        rangeMin = 130
+        rangeMax = 170
+    if lightHplusMassPoint == 155:
+        rangeMin = 140
+        rangeMax = 170
+    if lightHplusMassPoint == 160:
+        rangeMin = 140
+        rangeMax = 175
+ 
     if scenarioSuffix == "_noTopMassCut":
         rangeMax = 190
     #rangeMax = lightHplusMassPoint + 50
@@ -580,6 +623,9 @@ def doFit(datasets, histoName, scenarioSuffix, lightHplusMassPoint, fitFunction)
         sys.exit(1)
         
     theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+    theFit.SetParName(0,"norm.");
+    theFit.SetParName(1,"mean");
+    theFit.SetParName(2,"width");
     theFit.SetParLimits(0,1,10000)
     theFit.SetParLimits(1,0,500)
     theFit.SetParLimits(2,0.1,200)
@@ -590,18 +636,25 @@ def doFit(datasets, histoName, scenarioSuffix, lightHplusMassPoint, fitFunction)
     theFit.SetLineStyle(1)
     theFit.SetLineWidth(2)
     theFit.Draw("same")
-    tex4 = TLatex(0.2,0.97,"CMS Simulation")
+    tex4 = TLatex(0.2,0.96,"CMS Simulation")
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
-    tex2 = TLatex(0.6,0.7,"tt->tbH^{#pm}")
+    if fitFunction == "Gauss":
+        tex2 = TLatex(0.5,0.7,"Gaussian fit")
+    if fitFunction == "BW":
+        tex2 = TLatex(0.5,0.7,"Breit-Wigner fit")
     tex2.SetNDC()
-    tex2.SetTextSize(20)
+    tex2.SetTextSize(18)
     tex2.Draw()
-    tex3 = TLatex(0.6,0.6,"m_{H^{#pm}} = %d GeV"%lightHplusMassPoint)
+    tex3 = TLatex(0.5,0.65,"m_{H^{#pm}} = %d GeV"%lightHplusMassPoint)
     tex3.SetNDC()
-    tex3.SetTextSize(20)
+    tex3.SetTextSize(18)
     tex3.Draw()
+    tex5 = TLatex(0.5,0.6,"#color[2]{Background not shown}")
+    tex5.SetNDC()
+    tex5.SetTextSize(18)
+    tex5.Draw()
     #tex5 = ROOT.TLatex(0.6,0.5,"Matched jets")
     #tex5.SetNDC()
     #tex5.SetTextSize(20)
@@ -612,9 +665,9 @@ def doFit(datasets, histoName, scenarioSuffix, lightHplusMassPoint, fitFunction)
 
     print "******************************", fitFunction ,"***********************************"
     if fitFunction == "Gauss":
-        print  "$", round(theFit.GetParameter(1), 0), "\\pm", round(theFit.GetParError(1), 0), "$ & $", round(theFit.GetParameter(2), 0), "\\pm", round(theFit.GetParError(2), 0), "$ & $", round(theFit.GetChisquare(), 0), "/", theFit.GetNDF(), "$ &"
+        print  "$", round(theFit.GetParameter(1), 0), "\\pm", round(theFit.GetParError(1), 0), "$ & $", round(theFit.GetChisquare(), 0), "/", theFit.GetNDF(), "$ &"
     elif fitFunction == "BW":
-        print  "$", round(theFit.GetParameter(1), 0), "\\pm", round(theFit.GetParError(1), 0), "$ & $", round(theFit.GetParameter(2), 0), "\\pm", round(theFit.GetParError(2), 0), "$ & $", round(theFit.GetChisquare(), 0), "/", theFit.GetNDF(), "$ \\\\"
+        print  "$", round(theFit.GetParameter(1), 0), "\\pm", round(theFit.GetParError(1), 0), "$ & $", round(theFit.GetChisquare(), 0), "/", theFit.GetNDF(), "$ \\\\"
 
         
 # Call the main function if the script is executed (i.e. not imported)

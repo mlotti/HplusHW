@@ -19,12 +19,8 @@
 // TriggerEmulationEfficiency.h
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
@@ -111,13 +107,13 @@ namespace HPlus {
     EventWeight& fEventWeight;
     HistoWrapper& fHistoWrapper;
     const double fDeltaPhiCutValue;
-    const std::string fTopRecoName; // Name of selected top reconstruction algorithm
     const bool fApplyNprongsCutForTauCandidate;
     const bool fApplyRtauCutForTauCandidate;
     QCDFactorisedVariationType fMethodType;
 
     // Counters - do not change order
     Count fAllCounter;
+    Count fTopPtWeightCounter;
     Count fWJetsWeightCounter;
     Count fMETFiltersCounter;
     Count fTriggerCounter;
@@ -139,6 +135,7 @@ namespace HPlus {
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
     Count fQCDTailKillerBackToBackCounter;
+    Count fTopSelectionCounter;
     Count fAfterLeg1Counter;
     Count fAfterLeg2Counter;
     Count fAfterLeg1AndLeg2Counter;
@@ -153,11 +150,8 @@ namespace HPlus {
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
-    TopSelection fTopSelection;
-    TopChiSelection fTopChiSelection;
-    TopWithBSelection fTopWithBSelection;
-    TopWithWSelection fTopWithWSelection;
     BjetSelection fBjetSelection;
+    TopSelectionManager fTopSelectionManager;
     FullHiggsMassCalculator fFullHiggsMassCalculator;
     GenParticleAnalysis fGenparticleAnalysis;
     //ForwardJetVeto fForwardJetVeto;
@@ -167,13 +161,14 @@ namespace HPlus {
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;
     WeightReader fWJetsWeightReader;
+    WeightReader fTopPtWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;
     QCDTailKiller fQCDTailKiller;
     SignalAnalysisTree fTree;
     CommonPlots fCommonPlots;
-    //FakeMETVeto fFakeMETVeto;
-    //QCDFactorisedHistogramHandler fQCDFactorisedHistogramHandler;
+    CommonPlots fNormalizationSystematicsSignalRegion; // For normalization systematics plotting
+    CommonPlots fNormalizationSystematicsControlRegion; // For normalization systematics plotting
 
     // Common plots
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
@@ -187,6 +182,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtag;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtagWithSF;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETAndBtagWithSFAndDeltaPhi;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg1;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterLeg2;
 

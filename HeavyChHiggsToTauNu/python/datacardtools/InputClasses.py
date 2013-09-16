@@ -8,29 +8,15 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 # data structures for the config file information
 
 class ObservationInput:
-    def __init__(self, rateCounter, datasetDefinitions, shapeHisto):
-	self.setRateCounter(rateCounter)
-	self.setDatasetDefinitions(datasetDefinitions)
-	self.setShapeHisto(shapeHisto)
-
-    def setRateCounter(self,rateCounter):
-	self.rateCounter = rateCounter
-
-    def setDatasetDefinitions(self,datasetDefinitions):
-        self.datasetDefinitions = datasetDefinitions
-
-    def setShapeHisto(self,histo):
-	self.shapeHisto = histo
-
-    def getRateCounter(self):
-        return self.rateCounter
+    def __init__(self, datasetDefinition, shapeHisto):
+        self.datasetDefinition = datasetDefinition
+        self.shapeHisto = shapeHisto
 
     def getShapeHisto(self):
         return self.shapeHisto
 
     def Print(self):
 	print "ObservationInput :"
-	print "    rate counter",self.rateCounter
 	print "    shapeHisto  ",self.shapeHisto
 
 class DataGroup:
@@ -40,10 +26,8 @@ class DataGroup:
                  label = "", 
                  nuisances = [], 
                  shapeHisto = "", 
-                 rateCounter = "",
                  datasetType = "",
-                 datasetDefinitions = [],
-                 MCEWKDatasetDefinitions = [],
+                 datasetDefinition = None,
                  QCDfactorisedInfo = None,
                  additionalNormalisation = 1.0):
 	self.landsProcess  = landsProcess
@@ -51,10 +35,8 @@ class DataGroup:
 	self.label         = label
 	self.nuisances     = nuisances
 	self.shapeHisto    = shapeHisto
-	self.rateCounter   = rateCounter
         self.datasetType   = datasetType
-        self.datasetDefinitions = datasetDefinitions
-        self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
+        self.datasetDefinition = datasetDefinition
         self.QCDfactorisedInfo = QCDfactorisedInfo
         self.additionalNormalisation = additionalNormalisation
 
@@ -67,10 +49,8 @@ class DataGroup:
                          label        = self.label,
                          nuisances    = self.nuisances,
                          shapeHisto   = self.shapeHisto,
-                         rateCounter  = self.rateCounter,
                          datasetType  = self.datasetType,
-                         datasetDefinitions = self.datasetDefinitions,
-                         MCEWKDatasetDefinitions = self.MCEWKDatasetDefinitions,
+                         datasetDefinition = self.datasetDefinition,
                          QCDfactorisedInfo = self.QCDfactorisedInfo,
                          additionalNormalisation= self.additionalNormalisation)
 
@@ -89,17 +69,11 @@ class DataGroup:
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
 
-    def setRateCounter(self, rateCounter):
-        self.rateCounter = rateCounter
-
     def setDatasetType(self,datasetType):
         self.datasetType = datasetType
 
-    def setDatasetDefinitions(self,datasetDefinitions):
-        self.datasetDefinitions = datasetDefinitions
-
-    def setMCEWKDatasetDefinitions(self,MCEWKDatasetDefinitions):
-        self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
+    def setDatasetDefinition(self,datasetDefinition):
+        self.datasetDefinition = datasetDefinition
 
     def setQCDfactorisedInfo(self,QCDfactorisedInfo):
         self.QCDfactorisedInfo = QCDfactorisedInfo
@@ -112,8 +86,7 @@ class DataGroup:
 	print "    LandS process",self.landsProcess
 	print "    Valid mass points",self.validMassPoints
 	print "    datasetType  ",self.datasetType
-	print "    datasetDefinitions",self.datasetDefinitions
-	print "    MCEWKDatasetDefinitions",self.MCEWKDatasetDefinitions
+	print "    datasetDefinition",self.datasetDefinition
 	print "    Additional normalisation",self.additionalNormalisation
 	print "    Nuisances    ",self.nuisances
         print

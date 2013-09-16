@@ -82,10 +82,8 @@ class DatacardColumn():
                  landsProcess = -999,
                  enabledForMassPoints = [],
                  datasetType = 0,
-                 rateCounter = "",
                  nuisanceIds = [],
                  datasetMgrColumn = "",
-                 datasetMgrColumnForQCDMCEWK = "",
                  additionalNormalisationFactor = 1.0,
                  shapeHisto = ""):
         self._label = label
@@ -105,13 +103,11 @@ class DatacardColumn():
             self._datasetType = MulticrabDirectoryDataType.DUMMY
         else:
             self._datasetType = MulticrabDirectoryDataType.UNKNOWN
-        self._rateCounter = rateCounter
         self._rateResult = None
         self._nuisanceIds = nuisanceIds
         self._nuisanceResults = []
         self._controlPlots = []
         self._datasetMgrColumn = datasetMgrColumn
-        self._datasetMgrColumnForQCDMCEWK  = datasetMgrColumnForQCDMCEWK
         self._additionalNormalisationFactor = additionalNormalisationFactor
         self._shapeHisto = shapeHisto
         self._isPrintable = True
@@ -160,14 +156,10 @@ class DatacardColumn():
         if self._datasetMgrColumn == "" and not self.typeIsEmptyColumn():
             myMsg += "No dataset names defined!\n"
         if self.typeIsSignal() or self.typeIsEWK() or self.typeIsObservation():
-            if self._rateCounter == "":
-                myMsg += "Missing or empty field 'rateCounter'! (string) Counter for rate to be used for column\n"
             if self._shapeHisto == "":
                 myMsg += "Missing or empty field 'shapeHisto'! (string) Name of histogram for shape \n"
-        elif self.typeIsQCDfactorised():
+#        elif self.typeIsQCDfactorised():
             # rate handled as spedial case, extra datasetMgrColumn are required for EWK MC
-            if len(self._datasetMgrColumnForQCDMCEWK) == 0:
-                myMsg += "No datasets defined for MC EWK in data group for QCD factorised!\n"
 ####        elif self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
 ####            myMsg += "FIXME: QCD inverted not implemented yet\n" # FIXME
         if not self.typeIsEmptyColumn() and not self.typeIsObservation():
@@ -193,10 +185,6 @@ class DatacardColumn():
     ## Returns LandS process
     def getLandsProcess(self):
         return self._landsProcess
-
-    ## Returns the label of the counter from which to look up the rate
-    def getRateCounterItem(self):
-        return self._rateCounter
 
     ## Returns the list of nuisance IDs
     def getNuisanceIds(self):
@@ -238,19 +226,16 @@ class DatacardColumn():
         myRateHistograms = []
         if self.typeIsEmptyColumn() or dsetMgr == None:
             myRateResult = 0.0
-            myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [], [], ExtractorMode.RATE, description="empty")
+            myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [], [], ExtractorMode.RATE, description="empty")
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         #elif self.typeIsQCD():
             # should never be reached for QCD factorised
         else:
-            myExtractor = None
             myShapeExtractor = None
             if self.typeIsObservation():
-                myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.OBSERVATION)
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [""], [self._shapeHisto], ExtractorMode.OBSERVATION)
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [""], [self._shapeHisto], ExtractorMode.OBSERVATION)
             else:
-                myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.RATE)
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [""], [self._shapeHisto], ExtractorMode.RATE)
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [""], [self._shapeHisto], ExtractorMode.RATE)
             # OBSOLETE
             #myRateResult = myExtractor.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
@@ -355,7 +340,6 @@ class DatacardColumn():
         if self._landsProcess > -999:
             print "  process:", self._landsProcess
         print "  enabled for mass points:", self._enabledForMassPoints
-        print "  rate counter:", self._rateCounter
         if len(self._nuisanceIds) > 0:
             print "  nuisances:", self._nuisanceIds
         print "  shape histogram:", self._shapeHisto

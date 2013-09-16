@@ -557,6 +557,7 @@ def _mergeStackHelper(datasetList, nameList, task, allowMissingDatasets=False):
     firstIndex = None
     dataCount = 0
     mcCount = 0
+    pseudoCount = 0
 
     for i, d in enumerate(datasetList):
         if d.getName() in nameList:
@@ -567,6 +568,8 @@ def _mergeStackHelper(datasetList, nameList, task, allowMissingDatasets=False):
                 dataCount += 1
             elif d.isMC():
                 mcCount += 1
+            elif hasattr(d, "isPseudo") and d.isPseudo():
+                pseudoCount += 1
             else:
                 raise Exception("Internal error!")
         else:
@@ -574,6 +577,10 @@ def _mergeStackHelper(datasetList, nameList, task, allowMissingDatasets=False):
 
     if dataCount > 0 and mcCount > 0:
         raise Exception("Can not %s data and MC datasets!" % task)
+    if dataCount > 0 and pseudoCount > 0:
+        raise Exception("Can not %s data and pseudo datasets!" % task)
+    if pseudoCount > 0 and mcCount > 0:
+        raise Exception("Can not %s pseudo and MC datasets!" % task)
 
     if len(selected) != len(nameList):
         dlist = nameList[:]
@@ -858,6 +865,15 @@ def treeDrawToNumEntries(treeDraw):
 
 ## Class to encapsulate shape/normalization systematics for plot creation
 class Systematics:
+    class OnlyForMC:
+        pass
+    class OnlyForPseudo:
+        pass
+    class OnlyForPseudoAndMC:
+        pass
+    class All:
+        pass
+
     ## Constructor
     #
     # \param kwargs   Keyword arguments, see below
@@ -888,7 +904,7 @@ class Systematics:
     #                                 uncertainties. Each bin of TH1
     #                                 should have the relative
     #                                 uncertainty of that bin.
-    # \li\a onlyForMC                 If True, systematic uncertainties are applied only for MC.
+    # \li\a applyToDatasets           Datasets to which the systematic uncertainties are applied (one of the tag classes OnlyForMC, OnlyForPseudo, OnlyForPseudoAndMC, All)
     # \li\a verbose                   If True, print the applied uncertainties
     def __init__(self, **kwargs):
         self.settings = Settings(allShapes=False,
@@ -897,7 +913,7 @@ class Systematics:
                                  additionalNormalizations={},
                                  additionalShapes={},
                                  additionalShapesRelative={},
-                                 onlyForMC=True,
+                                 applyToDatasets=OnlyForPseudoAndMC,
                                  verbose=False,
                                  )
         self.settings.set(**kwargs)
@@ -964,10 +980,24 @@ class SystematicsHelper:
         if verbose:
             print "Adding uncertainties to histogram '%s' of dataset '%s'" % (self._histoName, dset.getName())
 
-        if self._settings.get("onlyForMC") and not dset.isMC():
-            if verbose:
-                print "  Dataset is not MC, no systematics considered (Systematics(..., onlyForMC=True))"
-            return
+        onlyFor = self._settings.get("applyToDatasets")
+        if dset.isMC():
+            if onlyFor is not Systematics.OnlyForPseudo:
+                if verbose:
+                    print "  Dataset is MC, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
+                return
+        elif dset.isPseudo():
+            if onlyFor is not Systematics.OnlyForMC:
+                if verbose:
+                    print "  Dataset is pseudo, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
+                return
+        elif dset.isData():
+            if onlyFor is not Systematics.All:
+                if verbose:
+                    print "  Dataset is data, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
+                return
+        else:
+            raise Exception("Internal error (unknown dataset type)")
 
         # Read the shape variations from the Dataset
         shapes = []
@@ -1450,6 +1480,9 @@ class DatasetRootHistoBase:
     def isMC(self):
         return self.dataset.isMC()
 
+    def isPseudo(self):
+        return self.dataset.isPseudo()
+
     ## Get a clone of the wrapped histogram (TH1) normalized as requested.
     def getHistogram(self):
         h = self.getHistogramWithUncertainties()
@@ -1560,8 +1593,8 @@ class DatasetRootHisto(DatasetRootHistoBase):
     # corresponding dataset. The normalization can be applied only
     # to MC histograms.
     def normalizeByCrossSection(self):
-        if self.dataset.isData():
-            raise Exception("Can't normalize data histogram by cross section")
+        if not self.dataset.isMC():
+            raise Exception("Can't normalize non-MC histogram by cross section")
         self.normalization = "byCrossSection"
 
     ## Set the current normalization scheme to 'to luminosity'.
@@ -1573,8 +1606,8 @@ class DatasetRootHisto(DatasetRootHistoBase):
     # luminosity. The normalization can be applied only to MC
     # histograms.
     def normalizeToLuminosity(self, lumi):
-        if self.dataset.isData():
-            raise Exception("Can't normalize data histogram to luminosity")
+        if not self.dataset.isMC():
+            raise Exception("Can't normalize non-MC histogram to luminosity")
 
         self.normalization = "toLuminosity"
         self.luminosity = lumi
@@ -1653,12 +1686,6 @@ class DatasetRootHistoMergedData(DatasetRootHistoCompoundBase):
             if h.multiplication != None:
                 raise Exception("Histograms to be merged must not be multiplied at this stage")
 
-    def isData(self):
-        return True
-
-    def isMC(self):
-        return False
-
     def forEach(self, function, datasetRootHisto1=None):
         ret = []
         if datasetRootHisto1 != None:
@@ -1714,6 +1741,31 @@ class DatasetRootHistoMergedData(DatasetRootHistoCompoundBase):
         else:
             return hsum
 
+## Wrapper for a merged TH1 histograms from pseudo and the corresponding Datasets.
+#
+# The merged pseudo histogramgs can only be normalized 'to one'.
+#
+# Works as DatasetRootHistoMergedData, except can be constructed only
+# from pseudo datasets.
+#
+# \see dataset.DatasetRootHisto class.
+class DatasetRootHistoMergedPseudo(DatasetRootHistoMergedData):
+    ## Constructor.
+    #
+    # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
+    # \param mergedDataset   The corresponding dataset.DatasetMerged object
+    #
+    # The constructor checks that all histoWrappers are data, and
+    # are not yet normalized.
+    def __init__(self, histoWrappers, mergedDataset):
+        DatasetRootHistoCompoundBase.__init__(self, histoWrappers, mergedDataset)
+        for h in self.histoWrappers:
+            if not h.isPseudo():
+                raise Exception("Histograms to be merged must come from pseudo (%s is not pseudo)" % h.getDataset().getName())
+            if h.normalization != "none":
+                raise Exception("Histograms to be merged must not be normalized at this stage")
+            if h.multiplication != None:
+                raise Exception("Histograms to be merged must not be multiplied at this stage")
 
 ## Wrapper for a merged TH1 histograms from MC and the corresponding Datasets.
 # 
@@ -1735,12 +1787,6 @@ class DatasetRootHistoMergedMC(DatasetRootHistoCompoundBase):
                 raise Exception("Histograms to be merged must not be normalized at this stage")
             if h.multiplication != None:
                 raise Exception("Histograms to be merged must not be multiplied at this stage")
-
-    def isData(self):
-        return False
-
-    def isMC(self):
-        return True
 
     def forEach(self, function, datasetRootHisto1=None):
         ret = []
@@ -1915,6 +1961,7 @@ class Dataset:
     def __init__(self, name, tfiles, analysisName,
                  searchMode=None, dataEra=None, optimizationMode=None, systematicVariation=None,
                  weightedCounters=True, counterDir="counters", useAnalysisNameOnly=False, availableSystematicVariationSources=[]):
+        self.rawName = name
         self.name = name
         self.files = tfiles
         if len(self.files) == 0:
@@ -1927,7 +1974,26 @@ class Dataset:
         # that all files have the same values
         self.info = None
         self.dataVersion = None
+        def assertInfo(refInfo, newInfo, refFile, newFile, name):
+            for key, value in refInfo.iteritems():
+                valnew = info[key]
+                if isinstance(value, basestring):
+                    if value == valnew:
+                        continue
+                    raise Exception("Mismatched values in %s, label %s, got %s from file %s, and %s from file %s" % (name, key, value, refFile.GetName(), valnew, newFile.GetName()))
+                if valnew == 0 and value == 0:
+                    return
+                if abs(value-valnew)/max(value, valnew) > 0.001:
+                    raise Exception("Mismatched values in %s, label %s, got %f from file %s, and %f from file %s" % (name, key, value, refFile.GetName(), valnew, newFile.GetName()))
+        def addDirContentsToDict(tdirectory, dictionary):
+            content = aux.listDirectoryContent(tdirectory, lambda key: key.GetClassName() == "TNamed" and key.GetName() not in ["dataVersion", "parameterSet"])
+            for name in content:
+                if name not in dictionary:
+                    dictionary[name] = tdirectory.Get(name).GetTitle()
+
         for f in self.files:
+            if not f.IsOpen():
+                raise Exception("File %s of dataset %s has been closed! Maybe this Dataset has been removed without 'close=False'?" % (f.GetName(), self.name))
             configInfo = f.Get("configInfo")
             if configInfo == None:
                 raise Exception("configInfo directory is missing from file %s" % f.GetName())
@@ -1935,19 +2001,11 @@ class Dataset:
             info = _rescaleInfo(_histoToDict(configInfo.Get("configinfo")))
             if "energy" in info:
                 info["energy"] = str(int(round(info["energy"])))
+            addDirContentsToDict(configInfo, info)
             if self.info is None:
                 self.info = info
             else:
-                for key, value in self.info.iteritems():
-                    valnew = info[key]
-                    if isinstance(value, basestring):
-                        if value == valnew:
-                            continue
-                        raise Exception("Mismatched values in configInfo/configinfo, label %s, got %s from file %s, and %s from file %s" % (key, value, self.files[0].GetName(), valenew, f.GetName()))
-                    if valnew == 0 and value == 0:
-                        continue
-                    if abs(value-valnew)/max(value, valnew) > 0.001:
-                        raise Exception("Mismatched values in configInfo/configinfo, label %s, got %f from file %s, and %f from file %s" % (key, value, self.files[0].GetName(), valnew, f.GetName()))
+                assertInfo(self.info, info, self.files[0], f, "configInfo/configinfo")
 
             dataVersion = configInfo.Get("dataVersion")
             if dataVersion == None:
@@ -1959,6 +2017,8 @@ class Dataset:
                     raise Exception("Mismatched values in configInfo/dataVersion, got %s from file %s, and %s from file %s" % (self.dataVersion, self.files[0].GetName(), dataVersion.GetTitle(), f.GetName()))
 
         self._isData = "data" in self.dataVersion
+        self._isPseudo = "pseudo" in self.dataVersion
+        self._isMC = not (self._isData or self._isPseudo)
         self._weightedCounters = weightedCounters
 
         self._analysisName = analysisName
@@ -1973,23 +2033,52 @@ class Dataset:
         if not self._useAnalysisNameOnly:
             if self._searchMode is not None:
                 self._analysisDirectoryName += self._searchMode
-            if self.isMC() and self._dataEra is not None:
+            if (self.isMC() or self.isPseudo()) and self._dataEra is not None:
                 self._analysisDirectoryName += self._dataEra
             if self._optimizationMode is not None:
                 self._analysisDirectoryName += self._optimizationMode
-            if self.isMC() and self._systematicVariation is not None:
+            if (self.isMC() or self.isPseudo()) and self._systematicVariation is not None:
                 self._analysisDirectoryName += self._systematicVariation
-    
+
         # Check that analysis directory exists
         for f in self.files:
             if f.Get(self._analysisDirectoryName) == None:
                 raise AnalysisNotFoundException("Analysis directory '%s' does not exist in file '%s'" % (self._analysisDirectoryName, f.GetName()))
         self._analysisDirectoryName += "/"
 
+        # Update info from analysis directory specific histogram, if one exists
+        realDirName = self._translateName("configInfo")
+        if self.files[0].Get(realDirName) != None: # important to use !=
+            updateInfo = None
+            for f in self.files:
+                d = f.Get(realDirName)
+                if d == None:
+                    raise Exception("%s directory is missing from file %s, it was in %s" % (realDirName, f.GetName(), self.files[0].GetName()))
+                info = {}
+                h = d.Get("configinfo")
+                if h != None:
+                    info = _rescaleInfo(_histoToDict(d.Get("configinfo")))
+                addDirContentsToDict(f.Get(realDirName), info)
+                if updateInfo == None:
+                    updateInfo = info
+                else:
+                    assertInfo(updateInfo, info, self.files[0], f, realDirName+"/configinfo")
+            if "energy" in updateInfo:
+                #raise Exception("You may not set 'energy' in analysis directory specific configinfo histogram. Please fix %s." % realName)
+                print "WARNING: 'energy' has been set in analysis directory specific configinfo histogram (%s), it will be ignored. Please fix your pseudomulticrab code." % (realName+"/configinfo")
+                del updateInfo["energy"]
+            self.info.update(updateInfo)
+
         self._unweightedCounterDir = counterDir
         if counterDir is not None:
             self._weightedCounterDir = counterDir + "/weighted"
             self._readCounters()
+
+        # Update Nallevents to weighted one
+        if "isPileupReweighted" in self.info and self.info["isPileupReweighted"]:
+            #print "%s: is pileup-reweighted, calling updateNAllEventsToPUWeighted()" % self.name
+            self.updateNAllEventsToPUWeighted()
+
 
     ## Close the files
     #
@@ -2012,9 +2101,10 @@ class Dataset:
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._systematicVariation, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly, self._availableSystematicVariationSources)
+        d = Dataset(self.rawName, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._systematicVariation, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly, self._availableSystematicVariationSources)
         d.info.update(self.info)
         d.nAllEvents = self.nAllEvents
+        d.name = self.name
         return d
 
     ## Translate a logical name to a physical name in the file
@@ -2201,13 +2291,13 @@ class Dataset:
     ## Set cross section of MC dataset (in pb).
     def setCrossSection(self, value):
         if not self.isMC():
-            raise Exception("Should not set cross section for data dataset %s" % self.name)
+            raise Exception("Should not set cross section for non-MC dataset %s" % self.name)
         self.info["crossSection"] = value
 
     ## Get cross section of MC dataset (in pb).
     def getCrossSection(self):
         if not self.isMC():
-            raise Exception("Dataset %s is data, no cross section available" % self.name)
+            raise Exception("Dataset %s is not MC, no cross section available" % self.name)
         try:
             return self.info["crossSection"]
         except KeyError:
@@ -2221,12 +2311,12 @@ class Dataset:
 
     ## Get the integrated luminosity of data dataset (in pb^-1).
     def getLuminosity(self):
-        if not self.isData():
-            raise Exception("Dataset %s is MC, no luminosity available" % self.name)
+        if not (self.isData() or self.isPseudo()):
+            raise Exception("Dataset %s is not data nor pseudo, no luminosity available" % self.name)
         try:
             return self.info["luminosity"]
         except KeyError:
-            raise Exception("Dataset %s is data, but luminosity has not been set yet. You have to explicitly set the luminosity with setLuminosity() method." % self.name)
+            raise Exception("Dataset %s is %s, but luminosity has not been set yet. You have to explicitly set the luminosity with setLuminosity() method." % (self.name, self.getDataType()))
 
     def setProperty(self, key, value):
         self.info[key] = value
@@ -2237,8 +2327,20 @@ class Dataset:
     def isData(self):
         return self._isData
 
+    def isPseudo(self):
+        return self._isPseudo
+
     def isMC(self):
-        return not self._isData
+        return self._isMC
+
+    def getDataType(self):
+        if self.isData():
+            return "data"
+        if self.isMC():
+            return "MC"
+        if self.isPseudo:
+            return "pseudo"
+        raise Exception("I don't know what I am, sorry.")
 
     def getCounterDirectory(self):
         return self.counterDir
@@ -2264,24 +2366,42 @@ class Dataset:
     #                event number (optional, if not given a default
     #                value read from the configinfo is used)
     # \param kwargs  Keyword arguments (forwarded to pileupReweightedAllEvents.WeightedAllEvents.getWeighted())
+    #
+    # If \a topPtWeightType is not given in \a kwargs, read the value
+    # from analysis directory -specific configInfo
     def updateNAllEventsToPUWeighted(self, era=None, **kwargs):
-        # Ignore if data
-        if self.isData():
+        # Ignore if not MC
+        if not self.isMC():
             return
 
         if era == None:
             era = self._dataEra
         if era == None:
-            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.getName())
+            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.rawName)
 
         if self.nAllEventsUnweighted < 0:
             raise Exception("Number of all unweighted events is %d < 0, this is a symptom of missing unweighted counter" % self.nAllEventsUnweighted)
 
-        try:
-            self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.getName(), era).getWeighted(self.nAllEventsUnweighted, **kwargs)
-        except KeyError:
-            # Just ignore if no weights found for this dataset
-            pass
+        args = {}
+        args.update(kwargs)
+        if "pileupReweightType" not in kwargs and "pileupReweightType" in self.info:
+            args["weightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["pileupReweightType"]]
+
+        if "topPtReweightScheme" in self.info:
+            if "topPtWeightType" not in kwargs:
+                args["topPtWeightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["topPtReweightType"]]
+            try:
+                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, self.info["topPtReweightScheme"], **args)
+            except KeyError:
+                # Just ignore if no weights found for this dataset
+                pass
+            print "Using top-pt reweighted Nallevents for sample %s" % self.name
+        else:
+            try:
+                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, **args)
+            except KeyError:
+                # Just ignore if no weights found for this dataset
+                pass
 
     def getNAllEvents(self):
         return self.nAllEvents
@@ -2415,14 +2535,14 @@ class Dataset:
 
 ## Dataset class for histogram access for a dataset merged from Dataset objects.
 # 
-# The merged datasets are required to be either MC or data.
+# The merged datasets are required to be either MC, data, or pseudo
 class DatasetMerged:
     ## Constructor.
     # 
     # \param name      Name of the merged dataset
     # \param datasets  List of dataset.Dataset objects to merge
     # 
-    # Calculates the total cross section (luminosity) for MC (data)
+    # Calculates the total cross section (luminosity) for MC (data or pseudo)
     # datasets.
     def __init__(self, name, datasets):
         self.name = name
@@ -2441,12 +2561,18 @@ class DatasetMerged:
         if self.datasets[0].isMC():
             crossSum = 0.0
             for d in self.datasets:
+                if not d.isMC():
+                    raise Exception("Can't merge non-MC dataset %s with MC datasets, it is %s" % (d.getName(), d.getDataType()))
                 crossSum += d.getCrossSection()
             self.info["crossSection"] = crossSum
         else:
+            reft = self.datasets[0].getDataType()
             lumiSum = 0.0
             for d in self.datasets:
                 lumiSum += d.getLuminosity()
+                t = d.getDataType()
+                if reft != t:
+                    raise Exception("Can't merge non-%s datasets %s with %s datasets, it is %s" % (reft, d.getName(), t))
             self.info["luminosity"] = lumiSum
 
     ## Close TFiles in the contained dataset.Dataset objects
@@ -2488,14 +2614,14 @@ class DatasetMerged:
         return self.datasets[0].getEnergy()
 
     def setCrossSection(self, value):
-        if self.isData():
-            raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
+        if not self.isMC():
+            raise Exception("Should not set cross section for non-MC dataset %s (has luminosity)" % self.name)
         raise Exception("Setting cross section for merged dataset is meaningless (it has no real effect, and hence is misleading")
 
     ## Get cross section of MC dataset (in pb).
     def getCrossSection(self):
-        if self.isData():
-            raise Exception("Dataset %s is data, no cross section available" % self.name)
+        if not self.isMC():
+            raise Exception("Dataset %s is not MC, no cross section available" % self.name)
         return self.info["crossSection"]
 
     def setLuminosity(self, value):
@@ -2511,6 +2637,9 @@ class DatasetMerged:
 
     def isData(self):
         return self.datasets[0].isData()
+
+    def isPseudo(self):
+        return self.datasets[0].isPseudo()
 
     def isMC(self):
         return self.datasets[0].isMC()
@@ -2543,13 +2672,18 @@ class DatasetMerged:
     # \param kwargs Keyword arguments, forwarder to get
     #               getDatasetRootHisto() of the contained
     #               Dataset objects
+    #
+    # DatasetRootHistoMergedData works also for pseudo
     def getDatasetRootHisto(self, name, **kwargs):
         wrappers = [d.getDatasetRootHisto(name, **kwargs) for d in self.datasets]
         if self.isMC():
             return DatasetRootHistoMergedMC(wrappers, self)
-        else:
+        elif self.isData():
             return DatasetRootHistoMergedData(wrappers, self)
-
+        elif self.isPseudo():
+            return DatasetRootHistoMergedPseudo(wrappers, self)
+        else:
+            raise Exception("Internal error (unknown dataset type)")
         
     ## Get the directory content of a given directory in the ROOT file.
     # 
@@ -2744,6 +2878,10 @@ class DatasetManager:
                 ret.append(d)
         return ret
 
+    ## Get a list of pseudo dataset.Dataset objects.
+    def getPseudoDatasets(self):
+        return filter(lambda d: d.isPseudo(), self.datasets)
+
     ## Get a list of names of all dataset.Dataset objects.
     def getAllDatasetNames(self):
         return [x.getName() for x in self.getAllDatasets()]
@@ -2755,6 +2893,10 @@ class DatasetManager:
     ## Get a list of names of data dataset.Dataset objects.
     def getDataDatasetNames(self):
         return [x.getName() for x in self.getDataDatasets()]
+
+    ## Get a list of names of pseudo dataset.Dataset objects.
+    def getPseudoDatasetNames(self):
+        return [x.getName() for x in self.getPseudoDatasets()]
 
     ## Select and reorder Datasets.
     # 
@@ -3049,6 +3191,8 @@ class DatasetPrecursor:
                     raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
 
         self._isData = "data" in dataVersion
+        self._isPseudo = "pseudo" in dataVersion
+        self._isMC = not (self._isData or self._isPseudo)
 
     def getName(self):
         return self._name
@@ -3059,8 +3203,11 @@ class DatasetPrecursor:
     def isData(self):
         return self._isData
 
+    def isPseudo(self):
+        return self._isPseudo
+
     def isMC(self):
-        return not self.isData()
+        return self._isMC
 
     ## Close the ROOT files
     def close():
@@ -3100,7 +3247,7 @@ class DatasetManagerCreator:
 
         mcRead = False
         for d in self._precursors:
-            if d.isMC():
+            if d.isMC() or d.isPseudo():
                 self._readAnalysisContent(d)
                 mcRead = True
                 break
@@ -3155,7 +3302,7 @@ class DatasetManagerCreator:
                 directoryName = directoryName[:start]
 
             # Look for data era
-            if precursor.isMC():
+            if precursor.isMC() or precursor.isPseudo():
                 start = directoryName.find("Run")
                 if start >= 0:
                     dataEras[directoryName[start:]] = 1

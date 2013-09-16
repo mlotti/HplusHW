@@ -84,6 +84,8 @@ class SystematicsForMetShapeDifference:
         normaliseToUnity(self._hCombinedSignalRegion)
         normaliseToUnity(self._hCombinedCtrlRegion)
         # Fill up and down variation histogram (bin-by-bin)
+        if finalShape == None:
+            return
         mySumUp = 0.0
         mySumDown = 0.0
         for i in range(1, self._systUpHistogram.GetNbinsX()+1):

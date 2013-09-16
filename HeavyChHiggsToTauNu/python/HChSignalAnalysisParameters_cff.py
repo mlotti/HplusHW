@@ -1,5 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
+configInfo = cms.PSet(
+    pileupReweightType = cms.string("UNWEIGHTED"),
+    topPtReweightType = cms.string("UNWEIGHTED"),
+)
+
 # Blind analysis - do not fill final counter and histogram for data if true
 blindAnalysisStatus = cms.untracked.bool(False)
 
@@ -71,6 +76,7 @@ metFilters = cms.untracked.PSet(
 primaryVertexSelection = cms.untracked.PSet(
     selectedSrc = cms.untracked.InputTag("selectedPrimaryVertex"),
     allSrc = cms.untracked.InputTag("offlinePrimaryVertices"),
+    sumPtSrc = cms.untracked.InputTag("offlinePrimaryVerticesSumPt", "sumPt"),
     enabled = cms.untracked.bool(True)
 )
 
@@ -282,9 +288,9 @@ bTagging = cms.untracked.PSet(
 #    discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
     discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
 #    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
-    leadingDiscriminatorCut = cms.untracked.double(0.898), # used for best bjet candidates (best discriminator
+    leadingDiscriminatorCut = cms.untracked.double(0.898), # used for best bjet candidates (best discriminator)
     subleadingDiscriminatorCut = cms.untracked.double(0.898), # used for other bjet candidates
-    ptCut = cms.untracked.double(20.0),
+    ptCut = cms.untracked.double(30.0),
 #    ptCut = cms.untracked.double(30.0), # for heavy charged Higgs
     etaCut = cms.untracked.double(2.4),
     jetNumber = cms.untracked.uint32(1),
@@ -409,7 +415,7 @@ invMassReco = cms.untracked.PSet(
     pzSelectionMethod = cms.untracked.string("deltaEtaMax"),
     )
 
-topReconstruction = cms.untracked.string("None") # Options: None
+topReconstruction = cms.untracked.string("None") # Options: None, chi, std, Bselection, Wselection
 
 transverseMassCut = cms.untracked.double(100) # Not used
 
@@ -562,6 +568,8 @@ commonPlotsSettings = cms.untracked.PSet(
     njetsBins = SetHistogramBinSettings(20, 0., 20.),
     metBins = SetHistogramBinSettings(250, 0., 500.),
     tailKiller1DBins = SetHistogramBinSettings(52, 0., 260.),
+    topMassBins = SetHistogramBinSettings(100, 0., 500.),
+    WMassBins = SetHistogramBinSettings(60, 0., 300.),
     mtBins = SetHistogramBinSettings(100, 0., 500.),
     invmassBins = SetHistogramBinSettings(100, 0., 500.),
 )
@@ -625,6 +633,11 @@ vertexWeight = cms.untracked.PSet(
 
 pileupWeightReader = cms.untracked.PSet(
     weightSrc = cms.InputTag("PUVertexWeightNominal"),
+    enabled = cms.bool(False),
+)
+
+topPtWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("topPtWeightNominal"),
     enabled = cms.bool(False),
 )
 
