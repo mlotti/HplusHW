@@ -135,7 +135,7 @@ if __name__ == "__main__":
                     elif massType == "invmass":
                         myShapeString = "shapeInvariantMass"
                         myResult = QCDFactorisedResultManager(myFullMassSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
-                    myModuleResults.addShape(myResult.getShape(), myShapeString)
+                    myModuleResults.addShape(myResult.getRawShape(), myShapeString)
                     myModuleResults.addDataDrivenControlPlots(myResult.getControlPlots())
                     myOutputCreator.addModule(myModuleResults)
                     # Up variation of QCD normalization (i.e. ctrl->signal region transition)
@@ -165,7 +165,7 @@ if __name__ == "__main__":
                             mySystResult = QCDFactorisedResultManager(myMtSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
                         elif massType == "invmass":
                             mySystResult = QCDFactorisedResultManager(myFullMassSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
-                        mySystModuleResults.addShape(mySystResult.getShape(), myShapeString)
+                        mySystModuleResults.addShape(mySystResult.getRawShape(), myShapeString)
                         mySystModuleResults.addDataDrivenControlPlots(mySystResult.getControlPlots())
                         ## Save module info
                         myOutputCreator.addModule(mySystModuleResults)

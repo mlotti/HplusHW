@@ -38,7 +38,10 @@ class QCDFactorisedResult:
         # Calculate final shape in signal region (leg1 * leg2 / basic)
         # Note that the calculation of the result is exactly the same for both the ABCD method and the traditional method
         nSplitBins = basicShape.getNumberOfPhaseSpaceSplitBins()
-        myModifier = ShapeHistoModifier(histoSpecs)
+        h = None
+        if histoSpecs == None:
+            h = leg1Shape.getDataHistoForSplittedBin(0).Clone()
+        myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=h)
         # Initialize result containers
         self._resultShape = myModifier.createEmptyShapeHistogram("NQCDFinal_Total_%s"%moduleInfoString)
         self._nQCDHistogramsList = []
@@ -98,7 +101,10 @@ class QCDFactorisedResult:
         # Take square root of uncertainties
         myModifier.finaliseShape(dest=self._resultShape)
         # Print result
-        print "NQCD = %s "%(self._resultCountObject.getResultStringFull("%.1f"))
+        if histoSpecs == None:
+            print "Raw NQCD = %s "%(self._resultCountObject.getResultStringFull("%.1f"))
+        else:
+            print "Binned NQCD = %s "%(self._resultCountObject.getResultStringFull("%.1f"))
         # Print purity as function of final shape bins
         if self._displayPurityBreakdown:
             print "Purity as function of final shape"
@@ -178,6 +184,8 @@ class QCDFactorisedResultManager:
         myLeg1Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", specs["leg1Name"], luminosity)
         mySignalRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", specs["leg2Name"], luminosity)
         # Calculate final shape in signal region (leg1 * leg2 / basic)
+        myRawResult = QCDFactorisedResult(myCtrlRegionShape, myLeg1Shape, mySignalRegionShape, None, moduleInfoString, displayPurityBreakdown=displayPurityBreakdown)
+        self._hRawShape = myRawResult.getResultShape()
         myResult = QCDFactorisedResult(myCtrlRegionShape, myLeg1Shape, mySignalRegionShape, specs["histoSpecs"], moduleInfoString, displayPurityBreakdown=displayPurityBreakdown)
         self._hShape = myResult.getResultShape()
         if not shapeOnly:
@@ -196,6 +204,9 @@ class QCDFactorisedResultManager:
                 myCtrlShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity)
                 myCtrlPlot = QCDControlPlot(myCtrlRegionShape, myCtrlShape, mySignalRegionShape, moduleInfoString, histoSpecsForEfficiency=specs["histoSpecs"], histoSpecsForPlot=None, title=item)
                 self._hCtrlPlots.append(myCtrlPlot.getResultShape().Clone())
+
+    def getRawShape(self):
+        return self._hRawShape
 
     def getShape(self):
         return self._hShape
