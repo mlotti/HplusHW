@@ -13,12 +13,6 @@
 
 #include <boost/utility.hpp>
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingScaleFactorFromDB.h"
-#include "RecoBTag/Records/interface/BTagPerformanceRecord.h"
-#include "CondFormats/PhysicsToolsObjects/interface/BinningPointByMap.h"
-#include "CondFormats/PhysicsToolsObjects/interface/PerformancePayloadFromBinnedTFormula.h"
-#include "RecoBTag/PerformanceDB/interface/BtagPerformance.h"
-
 namespace edm {
   class Event;
   class EventSetup;
