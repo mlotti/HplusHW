@@ -147,7 +147,9 @@ process.preselectedMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag(muons),
     cut = cms.string(
         "isGlobalMuon() && isTrackerMuon()"
-        "&& muonID('GlobalMuonPromptTight')"
+        # Take out chi2<10 cut for testing TuneP cocktail
+#        "&& muonID('GlobalMuonPromptTight')"
+        "&& globalTrack().hitPattern().numberOfValidMuonHits() > 0"
         "&& numberOfMatchedStations() > 1"
         "&& abs(dB()) < 0.2" 
         "&& innerTrack().hitPattern().numberOfValidPixelHits() > 0"
@@ -291,6 +293,7 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
         src = muons,
         correctedEnabled = cms.bool(True),
         correctedSrc = muons+"Muscle",
+        tunePEnabled = True,
         functions = analysisConfig.muonFunctions.clone(),
         bools = cms.PSet(
             triggerMatched = cms.InputTag(muons+"Matched")
