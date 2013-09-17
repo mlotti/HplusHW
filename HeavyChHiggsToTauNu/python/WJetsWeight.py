@@ -153,7 +153,7 @@ _wjetsNumberOfEvents = {
 }
 
 
-def getWJetsWeight(dataVersion, options, inputWorkflow, era, suffix=""):
+def getWJetsWeight(dataVersion, options, inputWorkflow, era, suffix="", useInclusiveIfNotFound=False):
     weightType = {"": pileupReweightedAllEvents.PileupWeightType.NOMINAL,
                   "up": pileupReweightedAllEvents.PileupWeightType.UP,
                   "down": pileupReweightedAllEvents.PileupWeightType.DOWN
@@ -165,10 +165,17 @@ def getWJetsWeight(dataVersion, options, inputWorkflow, era, suffix=""):
         pset = _wjetsNumberOfEvents[inputWorkflow].construct8TeV(era, weightType)
     else:
         raise Exception("WJets weights are available only for 44X and 53X")
-    pset.sampleJetBin = {"WJets": -1,
-                         "W1Jets": 1, 
-                         "W2Jets": 2,
-                         "W3Jets": 3,
-                         "W4Jets": 4}[options.sample]
+    try:
+        pset.sampleJetBin = {"WJets": -1,
+                             "W1Jets": 1,
+                             "W2Jets": 2,
+                             "W3Jets": 3,
+                             "W4Jets": 4}[options.sample]
+    except KeyError, e:
+        if useInclusiveIfNotFound:
+            pset.sampleJetBin = -1
+        else:
+            raise e
+
     return pset
 

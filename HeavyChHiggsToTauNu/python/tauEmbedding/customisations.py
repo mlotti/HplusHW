@@ -482,7 +482,7 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
         tauSrc = tauEmbeddingMuons,
         histogramAmbientLevel = "Systematics",
     )
-    m2.jetSelection.src.setProcessName(skimProcessName)
+    m2.jetSelection.src.setProcessName(skimProcessName) # FIXME: use smeared collection for MC
     m2.jetSelection.jetPileUpMVAValues.setProcessName(skimProcessName)
     m2.jetSelection.jetPileUpIdFlag.setProcessName(skimProcessName)
     m3 = cms.EDProducer("EventCountProducer")
@@ -972,16 +972,6 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     setattr(process, genTausName, genTaus)
     genTauSequence *= genTaus
 
-    if selectOnlyFirstGenTau:
-        # Select first generator tau for the jet cleaning and tau selection
-         genTauFirst = cms.EDProducer("HPlusFirstGenParticleSelector",
-             src = cms.InputTag(genTausName)
-         )
-         genTauFirstName = prefix+"GenTauFirst"
-         setattr(process, genTauFirstName, genTauFirst)
-         genTauSequence *= genTauFirst
-         genTausName = genTauFirstName
-
     if maxGenTaus is not None:
         genTausFilter = cms.EDFilter("PATCandViewCountFilter",
             src = cms.InputTag(genTausName),
@@ -1001,6 +991,16 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     genTauSequence *= genTausCount
     counters.append(prefix+"GenTauCount")
 
+    # Select first generator tau for e/mu veto, and if the flag is
+    # true, also for the jet cleaning and tau selection
+    genTauFirst = cms.EDProducer("HPlusFirstGenParticleSelector",
+        src = cms.InputTag(genTausName)
+    )
+    genTauFirstName = prefix+"GenTauFirst"
+    setattr(process, genTauFirstName, genTauFirst)
+    genTauSequence *= genTauFirst
+    if selectOnlyFirstGenTau:
+         genTausName = genTauFirstName
 
     genTausVisible = cms.EDProducer("HPlusGenVisibleTauComputer",
         src = cms.InputTag(genTausName)
@@ -1008,6 +1008,13 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     genTausVisibleName = prefix+"GenTauVisible"
     setattr(process, genTausVisibleName, genTausVisible)
     genTauSequence *= genTausVisible
+
+    genTauFirstVisible = cms.EDProducer("HPlusGenVisibleTauComputer",
+        src = cms.InputTag(genTauFirstName)
+    )
+    genTauFirstVisibleName = prefix+"GenTauFirstVisible"
+    setattr(process, genTauFirstVisibleName, genTauFirstVisible)
+    genTauSequence *= genTauFirstVisible
     
     # Tau selection
     # genTauReco = cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",
@@ -1031,6 +1038,13 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     genTauSequence *= genTauReco
     param.tauSelection.src = genTauRecoName
 
+    genTauFirstReco = genTauReco.clone(
+        refSrc = genTauFirstVisibleName
+    )
+    genTauFirstRecoName = prefix+"FirstTauMCMatched"
+    setattr(process, genTauFirstRecoName, genTauFirstReco)
+    genTauSequence *= genTauFirstReco
+
     if not selectOnlyFirstGenTau:
         # Select the tau candidate which is most likely going to pass the identification
         genTauSelected = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
@@ -1045,7 +1059,8 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
         param.tauSelection.src = genTauSelectedName
     
     genTauCleanPSet = cms.PSet(
-        src                 = cms.InputTag(param.tauSelection.src.value()),
+#        src                 = cms.InputTag(param.tauSelection.src.value()),
+        src                 = cms.InputTag(genTauFirstRecoName),
         algorithm           = cms.string("byDeltaR"),
         preselection        = cms.string(""),
         deltaR              = cms.double(0.5),

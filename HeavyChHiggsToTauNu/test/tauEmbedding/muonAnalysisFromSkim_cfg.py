@@ -89,13 +89,13 @@ dataEras = [
 ]
 #puWeights = AnalysisConfiguration.addPuWeightProducers(dataVersion, process, process.commonSequence, dataEras)
 if dataVersion.isMC():
-    puEraSuffixWeights = AnalysisConfiguration.addPuWeightProducersVariations(dataVersion, process, process.commonSequence, dataEras)
+    puEraSuffixWeights = AnalysisConfiguration.addPuWeightProducersVariations(dataVersion, process, process.commonSequence, dataEras, doVariations=False)
 
     # W+jets weights
     import HiggsAnalysis.HeavyChHiggsToTauNu.WJetsWeight as WJetsWeight
     wjetsEraSuffixWeights = []
     for era, suffix, weight in puEraSuffixWeights:
-        weight = WJetsWeight.getWJetsWeight(dataVersion, options, "embedding_skim_v53_3", era, suffix)
+        weight = WJetsWeight.getWJetsWeight(dataVersion, options, "embedding_skim_v53_3", era, suffix, useInclusiveIfNotFound=True)
         name = "wjetsWeight"+era+suffix
         weight.enabled = False
         weight.alias = name
@@ -104,7 +104,15 @@ if dataVersion.isMC():
         wjetsEraSuffixWeights.append( (era, suffix, name) )
         if options.wjetsWeighting != 0:
             weight.enabled = True
-    
+
+    # Top pt reweihting
+    import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeight_cfi as topPtWeight
+    process.topPtWeight = topPtWeight.topPtWeight.clone()
+    if options.sample == "TTJets":
+        topPtWeight.addTtGenEvent(process, process.commonSequence)
+        process.topPtWeight.enabled = True
+    process.commonSequence += process.topPtWeight
+
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
 additionalCounters.extend(MuonSelection.getMuonPreSelectionCountersForEmbedding())
@@ -142,7 +150,9 @@ process.preselectedMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag(muons),
     cut = cms.string(
         "isGlobalMuon() && isTrackerMuon()"
-        "&& muonID('GlobalMuonPromptTight')"
+        # Take out chi2<10 cut for testing TuneP cocktail
+#        "&& muonID('GlobalMuonPromptTight')"
+        "&& globalTrack().hitPattern().numberOfValidMuonHits() > 0"
         "&& numberOfMatchedStations() > 1"
         "&& abs(dB()) < 0.2" 
         "&& innerTrack().hitPattern().numberOfValidPixelHits() > 0"
@@ -235,6 +245,8 @@ process.btagging = btagFilter_cfi.hPlusBTaggingPtrSelectorFilter.clone(
     histogramAmbientLevel = "Systematics",
     filter = False,
 )
+process.btagging.btagging.ptCut = 0
+process.btagging.btagging.etaCut = 9999
 process.commonSequence += process.btagging
 #process.debug = cms.EDAnalyzer("EventContentAnalyzer")
 #process.commonSequence += process.debug
@@ -287,6 +299,7 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
         src = muons,
         correctedEnabled = cms.bool(True),
         correctedSrc = muons+"Muscle",
+        tunePEnabled = True,
         functions = analysisConfig.muonFunctions.clone(),
         bools = cms.PSet(
             triggerMatched = cms.InputTag(muons+"Matched")
@@ -336,6 +349,7 @@ if dataVersion.isMC():
         setattr(ntuple.doubles, "weightPileup_"+era+suffix, cms.InputTag(weight))
     for era, suffix, weight in wjetsEraSuffixWeights:
         setattr(ntuple.doubles, "weightWJets_"+era+suffix, cms.InputTag(weight))
+    setattr(ntuple.doubles, "weightTopPt", cms.InputTag("topPtWeight"))
 
     for name in ntuple.muonEfficiencies.parameterNames_():
         pset = getattr(ntuple.muonEfficiencies, name)
