@@ -295,9 +295,6 @@ bTagging = cms.untracked.PSet(
     etaCut = cms.untracked.double(2.4),
     jetNumber = cms.untracked.uint32(1),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
-    UseBTagDB      = cms.untracked.bool(False),
-    BTagDBAlgo     = cms.untracked.string("TCHEL"), #FIXME TCHEL
-    BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets"), #FIXME
     variationEnabled = cms.untracked.bool(False),
     variationShiftBy = cms.untracked.double(0),
 )

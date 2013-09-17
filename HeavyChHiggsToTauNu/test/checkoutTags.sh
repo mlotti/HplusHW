@@ -73,6 +73,7 @@ set -e
 # 19.3.2013/LAW CMSSW_4_4_5 Added jet PU ID
 # 27.3.2013/M.Kortelainen CMSSW_4_4_5 Fixed re-running of the script
 # 12.6.2013/M.Kortelainen CMSSW_4_4_5 Performance improvement in pat::Trigger
+# 16.9.2013/M.Kortelainen CMSSW_4_4_5 Removed btag DB as obsolete
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -113,10 +114,6 @@ rm CMGTools/External/src/PileupJetIdAlgoSubStructure.cc
 rm CMGTools/External/interface/PileupJetIdAlgoSubstructure.h
 cvs up -r V00-02-10 CMGTools/External/src/classes.h
 cvs up -r V00-02-10 CMGTools/External/src/classes_def.xml
-
-# btagging scale factors
-# https://twiki.cern.ch/twiki/bin/view/CMS/BtagPerformanceDBV2
-cvs co -r V00-04-11 RecoBTag/PerformanceDB
 
 # Type I/II MET
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
