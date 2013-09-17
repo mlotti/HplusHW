@@ -103,7 +103,7 @@ def customise(process):
                      VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int,
                      "Minimum visible pt of tau decay (-1 disabled, >= 0 cut value in GeV)")
 
-    options, dataVersion = getOptionsDataVersion("44XmcS6", options)
+    options, dataVersion = getOptionsDataVersion("53XmcS10", options)
 
     hltProcessName = dataVersion.getTriggerProcess()
     recoProcessName = dataVersion.getRecoProcess()
@@ -188,7 +188,7 @@ def customise(process):
     # Set up tau decay options
     process.generator.ZTauTau.TauolaOptions.InputCards.mdtau = options.tauDecayMode
     if options.tauMinVisPt >= 0:
-        process.generator.ZTauTau.minVisibleTransverseMomentum = options.tauMinVisPt
+        process.generator.ZTauTau.minVisibleTransverseMomentum = "%d"%options.tauMinVisPt
 
     print "TAUOLA mdtau =", process.generator.ZTauTau.TauolaOptions.InputCards.mdtau
 
@@ -209,7 +209,7 @@ def customise(process):
 
     # Merge tracks
     process.tmfTracks = cms.EDProducer("RecoTracksMixer",
-        trackCol1 = cms.InputTag("dimuonsGlobal"),
+        trackCol1 = cms.InputTag("dimuonsGlobal", "tracks"),
         trackCol2 = cms.InputTag("generalTracks", "", processName)
     )
     process.offlinePrimaryVerticesWithBS.TrackLabel = cms.InputTag("tmfTracks")
@@ -257,7 +257,7 @@ def customise(process):
     # order to get PF-based isolation right.
     if hasattr(process, 'particleFlowTmp'):
         process.particleFlowTmpMixed = cms.EDProducer('PFCandidateMixer',
-            col1 = cms.untracked.InputTag("dimuonsGlobal","forMixing"),
+            col1 = cms.untracked.InputTag("dimuonsGlobal", "pfCands"),
             col2 = cms.untracked.InputTag("particleFlowTmp", ""),
             trackCol = cms.untracked.InputTag("tmfTracks"),
             # Don't produce value maps:
@@ -296,8 +296,7 @@ def customise(process):
         process.pfSelectedPhotons.src   = cms.InputTag("particleFlowORG")
 
     process.particleFlow =  cms.EDProducer('PFCandidateMixer',
-        #col1 = cms.untracked.InputTag("removedInputMuons","pfCands"), # this is ok in 5_2
-        col1 = cms.untracked.InputTag("dimuonsGlobal","forMixing"), # this works for 4_2 and 4_4
+        col1 = cms.untracked.InputTag("dimuonsGlobal", "pfCands"),
         col2 = cms.untracked.InputTag("particleFlowORG", ""),
         trackCol = cms.untracked.InputTag("tmfTracks"),
         muons = cms.untracked.InputTag("muons"),
@@ -397,10 +396,19 @@ def replaceInAllPathsAndSequences(process, old, new, exceptions=[]):
         if seqName not in exceptions:
             seq.replace(old, new)
 
-def replaceInputTagInAllSequences(process, oldName, newName, exceptions=[]):
+def replaceInputTagInAllSequences(process, oldName, newName, exceptions=[], pathExceptions=[], verbose=False):
+    if verbose:
+        print "Replacing %s -> %s" % (oldName, newName)
     for seqName, seq in process.sequences_().iteritems():
         if seqName not in exceptions:
-            helpers.massSearchReplaceAnyInputTag(seq, cms.InputTag(oldName), cms.InputTag(newName))
+            if verbose:
+                print "  in sequence %s" % seqName
+            helpers.massSearchReplaceAnyInputTag(seq, cms.InputTag(oldName), cms.InputTag(newName), verbose=verbose)
+    for pathName, path in process.paths_().iteritems():
+        if pathName not in pathExceptions:
+            if verbose:
+                print "  in path %s" % pathName
+            helpers.massSearchReplaceAnyInputTag(path, cms.InputTag(oldName), cms.InputTag(newName), verbose=verbose)
 
 def addPAT(process, options, dataVersion):
     options.doPat = 1
@@ -419,15 +427,29 @@ def addPAT(process, options, dataVersion):
     origPostfix = "Orig"
     clashingSequences = [
         "muonPFIsolationSequence",
-        "pfPhotonIsolationSequence",
-        "pfElectronIsolationSequence",
+#        "pfPhotonIsolationSequence",
+#        "pfElectronIsolationSequence",
+#        "muonPFIsolationDepositsSequence",
+#        "photonPFIsolationDepositsSequence",
+#        "electronPFIsolationDepositsSequence",
+        "pfElectronTranslatorSequence",
+        "pfPhotonTranslatorSequence",
         ]
     sequencesNoReplaceInputTag = clashingSequences+[
         "photonPFIsolationDepositsSequence",
         "electronPFIsolationDepositsSequence",
+        "pfBasedElectronPhotonIsoSequence",
         ]
 
     modulesInClashingSequences = [
+        "pfElectronTranslator",
+        "pfElectronTranslator:pf",
+        "pfPhotonTranslator",
+        "pfPhotonTranslator:pfphot",
+        "pfElectronInterestingEcalDetIdEB",
+        "pfElectronInterestingEcalDetIdEE",
+        "pfPhotonInterestingEcalDetIdEE",
+        "pfPhotonInterestingEcalDetIdEB",
     ]
     for name in ["Charged", "ChargedAll", "Gamma", "Neutral", "PU"]:
         modulesInClashingSequences.extend([
@@ -441,6 +463,11 @@ def addPAT(process, options, dataVersion):
                 "elPFIsoValue%s03PFId"%name,
                 "elPFIsoValue%s04PFId"%name,
                 ])
+    for name in ["Gamma", "neutral"]:
+        modulesInClashingSequences.extend([
+                "muPFIsoValue%sHighThreshold03"%name,
+                "muPFIsoValue%sHighThreshold04"%name,
+                ])
     for name in ["Charged", "Neutral", "Photons"]:
         modulesInClashingSequences.extend([
                 "isoDepPhotonWith"+name,
@@ -452,15 +479,21 @@ def addPAT(process, options, dataVersion):
 
     clashingModules = ["pfSelectedElectrons", "pfSelectedPhotons"]
 
+    process.pfPhotonTranslatorSequence.remove(process.pfBasedElectronPhotonIsoSequence)
     for name in clashingSequences:
         oldSeq = getattr(process, name)
         helpers.cloneProcessingSnippet(process, getattr(process, name), origPostfix)
         newSeq = getattr(process, name+origPostfix)
 
         replaceInAllPathsAndSequences(process, oldSeq, newSeq)
+    process.pfPhotonTranslatorSequence.insert(0, process.pfBasedElectronPhotonIsoSequenceOrig)
 
     for name in modulesInClashingSequences:
-        replaceInputTagInAllSequences(process, name, name+origPostfix, exceptions=sequencesNoReplaceInputTag)
+        if ":" in name:
+            newName = name.replace(":", origPostfix+":", 1)
+        else:
+            newName = name+origPostfix
+        replaceInputTagInAllSequences(process, name, newName, exceptions=sequencesNoReplaceInputTag)
 
     for name in clashingModules:
         newName = name+origPostfix
@@ -498,16 +531,11 @@ def addPAT(process, options, dataVersion):
     process.commonPatSequence, additionalCounters = patConf.addPatOnTheFly(process, options, dataVersion)
 
     # More hacks to get PAT to work in this process
-    for name in ["tauIsoDepositPF"+x for x in ["Candidates", "ChargedHadrons", "NeutralHadrons", "Gammas"]]+["tauMatch", "tauGenJetMatch", "patTaus", "selectedPatTaus", "cleanPatTaus", "cleanPatJets", "countPatTaus"]:
-        process.patDefaultSequence.remove(getattr(process, name))
-        delattr(process, name)
-    del process.patPFTauIsolation
-    del process.selectedPatCandidates
-    del process.countPatCandidates
-    del process.cleanPatCandidates
-    del process.makePatTaus
-    del process.patCandidates
-    process.patPF2PATSequenceChs.remove(process.pfTauSequenceChs)
+    if dataVersion.isMC():
+        process.patJetPartonMatch.matched.setProcessName("SIM")
+        process.patJetPartonMatchChs.matched.setProcessName("SIM")
+        process.patJetPartons.src.setProcessName("SIM")
+        process.patJetPartonsChs.src.setProcessName("SIM")
 
     # Select the tau matching to the muon already here
     # Also remove the embedding muon from the selected muons

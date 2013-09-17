@@ -110,7 +110,6 @@ adaptedMuonsFromWmunu = cms.EDProducer("HPlusMuonMetAdapter",
 dimuonsGlobal = cms.EDProducer('ZmumuPFEmbedder',
     tracks = cms.InputTag("generalTracks"),
     selectedMuons = cms.InputTag("tauEmbeddingMuons"),
-    keepMuonTrack = cms.bool(False)
 )
 
 filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
@@ -132,7 +131,7 @@ try:
     # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideTauolaInterface for mdtau parameter
     newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(0) # for all decay modes
     #newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(230) # for hadronic modes
-    newSource.ZTauTau.minVisibleTransverseMomentum = cms.untracked.double(0)
+    newSource.ZTauTau.minVisibleTransverseMomentum = cms.untracked.string("")
     newSource.ZTauTau.transformationMode = cms.untracked.int32(3)
 
     generator = newSource.clone()
