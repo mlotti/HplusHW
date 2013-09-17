@@ -242,6 +242,8 @@ process.btagging = btagFilter_cfi.hPlusBTaggingPtrSelectorFilter.clone(
     histogramAmbientLevel = "Systematics",
     filter = False,
 )
+process.btagging.btagging.ptCut = 0
+process.btagging.btagging.etaCut = 9999
 process.commonSequence += process.btagging
 #process.debug = cms.EDAnalyzer("EventContentAnalyzer")
 #process.commonSequence += process.debug
