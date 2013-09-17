@@ -251,29 +251,6 @@ process.signalAnalysis.MET.select = "raw"
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
 
 
-# Btagging DB
-process.load("CondCore.DBCommon.CondDBCommon_cfi")
-#MC measurements 
-process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
-process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
-#Data measurements
-process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
-process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
-#User DB for btag eff
-btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
-if options.runOnCrab != 0:
-    print "BTagDB: Assuming that you are running on CRAB"
-    btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
-else:
-    print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
-process.CondDBCommon.connect = btagDB
-process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
-process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
-    
-param.bTagging.UseBTagDB  = cms.untracked.bool(False)
-
-
-
 # Add type 1 MET
 #import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 #sequence = MetCorrection.addCorrectedMet(process, process.signalAnalysis, postfix=PF2PATVersion)

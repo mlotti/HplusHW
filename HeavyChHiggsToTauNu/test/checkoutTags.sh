@@ -83,6 +83,7 @@ set -e
 # 12.6.2013/M.Kortelainen CMSSW_5_3_9_patch3 Performance improvement in pat::Trigger
 # 9.8.2013/LAW CMSSW_5_3_9_patch3 Updated tag for btagging
 # 4.9.2013/M.Kortelainen CMSSW_5_3_9_patch3 Updated lumi tag
+# 16.9.2013/M.Kortelainen CMSSW_4_4_5 Removed btag DB as obsolete
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -119,11 +120,6 @@ addpkg CondFormats/EgammaObjects  V00-04-00
 # https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1417.html
 # With respect to V00-03-01 in the twiki page, this one contains only bugfixes
 cvs co -r V00-03-03 -d CMGTools/External UserCode/CMG/CMGTools/External
-
-# btagging scale factors
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_EPS13_prescript
-# and under the heading "Reading the SFs from the database"
-cvs co -r V01-03-21 RecoBTag/PerformanceDB
 
 # Type I/II MET
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive

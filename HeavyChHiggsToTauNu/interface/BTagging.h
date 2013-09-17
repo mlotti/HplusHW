@@ -11,19 +11,13 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
 #include "TF1.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingScaleFactorFromDB.h"
-#include "RecoBTag/Records/interface/BTagPerformanceRecord.h"
-#include "CondFormats/PhysicsToolsObjects/interface/BinningPointByMap.h"
-#include "CondFormats/PhysicsToolsObjects/interface/PerformancePayloadFromBinnedTFormula.h"
-#include "RecoBTag/PerformanceDB/interface/BtagPerformance.h"
+#include <boost/utility.hpp>
 
 namespace edm {
   class Event;
   class EventSetup;
   class ParameterSet;
 }
-
-class BTaggingScaleFactorFromDB;
 
 namespace HPlus {
   class HistoWrapper;
@@ -37,7 +31,7 @@ namespace HPlus {
   private:
     class EfficiencyTable; // Forward declared because ScaleFactorTable interface uses it
 
-    class ScaleFactorTable {
+    class ScaleFactorTable: private boost::noncopyable {
     public:
       ScaleFactorTable();
       ~ScaleFactorTable();
@@ -56,17 +50,18 @@ namespace HPlus {
       void addJetSFUncertaintyTerm(double pT, bool isBTagged, EfficiencyTable& effTable, double factor);
       void addJetSFUncertaintyTerm(double pT, bool isBTagged, EfficiencyTable& effTable);
 
-      double getScaleFactor(double pt) const;
-      double getScaleFactorUncertaintyBinned(double pt) const;
+      double getScaleFactor(double pT) const;
+      double getScaleFactorUncertaintyBinned(double pT) const;
+      double getMaximumUncertainty(double pT) const;
 
-      size_t obtainIndex(double pt) { return obtainIndex(fPtBins, pt); }
+      size_t obtainIndex(double pT) { return obtainIndex(fPtBins, pT); }
 
       double calculateRelativeUncertaintySquared(bool up);
 
       void printJetTableForValidation();
 
     private:
-      static size_t obtainIndex(const std::vector<double>& table, double pt);
+      static size_t obtainIndex(const std::vector<double>& table, double pT);
 
       // Scale factors and/or their uncertainties may be given as parametrized functions
       TF1 *fScaleFactorFunction;
@@ -83,7 +78,7 @@ namespace HPlus {
       std::vector<double> fUnbinnedUncertaintyDown;
     };
 
-    class EfficiencyTable {
+    class EfficiencyTable: private boost::noncopyable {
     public:
       EfficiencyTable();
       ~EfficiencyTable();
@@ -93,13 +88,14 @@ namespace HPlus {
       void addJetSFUncertaintyTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable);
 
       double getEfficiency(double pT) const;
+      double getMaximumUncertainty(double pT) const;
 
-      size_t obtainIndex(double pt) { return obtainIndex(fPtBins, pt); }
+      size_t obtainIndex(double pT) { return obtainIndex(fPtBins, pT); }
 
       double calculateRelativeUncertaintySquared(bool up);
 
     private:
-      static size_t obtainIndex(const std::vector<double>& table, double pt);
+      static size_t obtainIndex(const std::vector<double>& table, double pT);
 
       // Efficiency look-up table
       std::vector<double> fPtBins; // lower edges of pT bins
@@ -149,14 +145,24 @@ namespace HPlus {
     };
 
     struct PerJetInfo {
-      std::vector<double> fScaleFactor; // perJetWeight
-      std::vector<double> fUncertainty; // perJetWeightUncert
-      std::vector<bool> fTagged;        // b-tagging status
-      std::vector<bool> fGenuine;       // genuine b-jet?
+      std::vector<double> scaleFactor; // perJetWeight
+      std::vector<double> uncertainty; // perJetWeightUncert
+      std::vector<bool> tagged;        // b-tagging status
+      std::vector<bool> genuine;       // genuine b-jet?
 
-      size_t size() const { return fScaleFactor.size(); }      
-      void resetInfo(size_t s);
+      void reserve(size_t s) {
+	scaleFactor.reserve(s);
+	uncertainty.reserve(s);
+	tagged.reserve(s);
+	genuine.reserve(s);
+      }
+    };
+
+    struct EventSFTerms {
+      std::vector<double> SFTerms;
+      void reserve(size_t s) { SFTerms.reserve(s); }
       void addJetSFTerm(double pT, bool isBTagged, ScaleFactorTable& sfTable, EfficiencyTable& effTable);
+      double calculateEventScaleFactor();
     };
 
     BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -168,16 +174,18 @@ namespace HPlus {
     void fillScaleFactorHistograms(BTagging::Data& input);
 
     const std::string getDiscriminator() const { return fDiscriminator; }
-    PerJetInfo getPerJetInfo() const { return fBTaggingInfo; }
 
-    void calculateJetSFAndUncertaintyTerm(edm::Ptr<pat::Jet>& iJet, bool isBTagged, PerJetInfo& info, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) const;
-    double calculateEventScaleFactor(PerJetInfo& fBTaggingInfo);
+    PerJetInfo getPerJetInfo(edm::PtrVector<pat::Jet> jetCollection, BTagging::Data& bTagData, bool isRealData) const;
+    double calculateJetSFTerm(double pT, bool isBTagged, const ScaleFactorTable& sfTable, const EfficiencyTable& effTable) const;
+    double calculateJetSFUncertaintyTerm(double pT, bool isBTagged, const ScaleFactorTable& sfTable, const EfficiencyTable& effTable, double SFUncertaintyFactor) const;
+
+    void calculateJetSFAndUncertaintyTerm(edm::Ptr<pat::Jet>& iJet, bool isBTagged, EventSFTerms& terms, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag) const;
     double calculateRelativeEventScaleFactorUncertainty(bool up, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag);
     
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
     void analyzeMCTagEfficiencyByJetFlavour(const edm::Ptr<pat::Jet>& jet, const bool isBJet, const bool isCJet, const bool isLightJet);
-    void setEventScaleFactorInfo(PerJetInfo& fBTaggingInfo, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag, BTagging::Data& output);
+    void setEventScaleFactorInfo(EventSFTerms& terms, ScaleFactorTable& sfTag, ScaleFactorTable& sfMistag, EfficiencyTable& effTag, EfficiencyTable& effCMistag, EfficiencyTable& effGMistag, EfficiencyTable& effUDSMistag, BTagging::Data& output);
 
     // Input parameters
     edm::InputTag fSrc;
@@ -194,8 +202,8 @@ namespace HPlus {
     const bool fVariationEnabled;
     const double fVariationShiftBy;
 
-    // Structure for storing per-jet information
-    PerJetInfo fBTaggingInfo;
+//     // Structure for storing per-jet information
+//     PerJetInfo fBTaggingInfo;
 
     // Lookup tables for scale factors
     ScaleFactorTable fTagSFTable;
