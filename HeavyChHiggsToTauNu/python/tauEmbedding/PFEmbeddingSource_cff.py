@@ -54,11 +54,24 @@ tightenedMuonsWithIso = customisations.constructMuonIsolationOnTheFly("tightened
 # )
 tightenedMuonsMatchedCount = cms.EDProducer("EventCountProducer")
 
-tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
+# MuScleFit correction
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/MuScleFitCorrections2012
+muscleCorrectedMuons = cms.EDProducer("MuScleFitPATMuonCorrector", 
     src = cms.InputTag("tightenedMuonsWithIso"),
-    cut = cms.string("chargedHadronIso()/pt() < 0.1"), # <--- This is the current isolation
-#    cut = cms.string("(userFloat('embeddingStep_pfChargedHadrons') + max(userFloat('embeddingStep_pfPhotons')-0.5*userFloat('embeddingStep_pfPUChargedHadrons'), 0)) < 2") 
-#    cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
+    debug = cms.bool(False), 
+    identifier = cms.string("Data2011_44X"),
+    applySmearing = cms.bool(False), 
+    fakeSmearing = cms.bool(False)
+)
+tauEmbeddingMuons = cms.EDProducer("HPlusPATMuonTunePCorrector",
+    src = cms.InputTag("muscleCorrectedMuons"),
+    originalSrc = cms.InputTag("tightenedMuonsWithIso"),
+    finalizeId = cms.bool(True),
+    idMaxChi2 = cms.double(10.0),
+    idMaxPtError = cms.double(0.03),
+    idCut = cms.string("chargedHadronIso()/pt() < 0.1"), # <--- This is the current isolation
+#    idCut = cms.string("(userFloat('embeddingStep_pfChargedHadrons') + max(userFloat('embeddingStep_pfPhotons')-0.5*userFloat('embeddingStep_pfPUChargedHadrons'), 0)) < 2") 
+#    idCut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
 )
 tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("tauEmbeddingMuons"),
@@ -146,6 +159,7 @@ try:
 #        tightenedMuonsMatched *
 #        tightenedMuonsMatchedFilter *
         tightenedMuonsMatchedCount *
+        muscleCorrectedMuons *
         tauEmbeddingMuons *
         tauEmbeddingMuonsFilter *
         tauEmbeddingMuonsCount *
