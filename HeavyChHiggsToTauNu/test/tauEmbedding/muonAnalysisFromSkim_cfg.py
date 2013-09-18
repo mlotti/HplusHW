@@ -77,6 +77,10 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
                                                             doHBHENoiseFilter=False,
                                                             )
 
+# Add configuration information to histograms.root
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+process.infoPath = HChTools.addConfigInfo(process, options, dataVersion)
+
 # PU weights
 import HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration as AnalysisConfiguration
 dataEras = [
@@ -105,20 +109,18 @@ if dataVersion.isMC():
     # Top pt reweihting
     import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeight_cfi as topPtWeight
     process.topPtWeight = topPtWeight.topPtWeight.clone()
+    process.topPtWeightSeparate = process.topPtWeight.clone(scheme="TopPtSeparate")
     if options.sample == "TTJets":
         topPtWeight.addTtGenEvent(process, process.commonSequence)
         process.topPtWeight.enabled = True
-    process.commonSequence += process.topPtWeight
+        process.topPtWeightSeparate.enabled = True
+        process.configInfo.topPtReweightScheme = cms.untracked.string(process.topPtWeight.scheme.value())
+    process.commonSequence += (process.topPtWeight+process.topPtWeightSeparate)
 
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
 additionalCounters.extend(MuonSelection.getMuonPreSelectionCountersForEmbedding())
 additionalCounters.extend(MuonSelection.getMuonSelectionCountersForEmbedding(dataVersion))
-
-# Add configuration information to histograms.root
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
-process.infoPath = HChTools.addConfigInfo(process, options, dataVersion)
-
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 #customisations.PF2PATVersion = PF2PATVersion
@@ -204,7 +206,7 @@ muscle = cms.EDProducer("MuScleFitPATMuonCorrector",
     src = cms.InputTag(muons), 
     debug = cms.bool(False), 
     identifier = cms.string("Data2011_44X"),
-    applySmearing = cms.bool(False), 
+    applySmearing = cms.bool(False),
     fakeSmearing = cms.bool(False)
 )
 setattr(process, muons+"Muscle", muscle)
@@ -359,6 +361,7 @@ if dataVersion.isMC():
     for era, suffix, weight in wjetsEraSuffixWeights:
         setattr(ntuple.doubles, "weightWJets_"+era+suffix, cms.InputTag(weight))
     setattr(ntuple.doubles, "weightTopPt", cms.InputTag("topPtWeight"))
+    setattr(ntuple.doubles, "weightTopPt_TopPtSeparate", cms.InputTag("topPtWeightSeparate"))
 
     for name in ntuple.muonEfficiencies.parameterNames_():
         pset = getattr(ntuple.muonEfficiencies, name)
