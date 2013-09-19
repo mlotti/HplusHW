@@ -5,8 +5,10 @@
 import os
 import sys
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from math import sqrt,pow
 
@@ -78,6 +80,7 @@ class ExtractorResult():
 class DatacardColumn():
     ## Constructor
     def __init__(self,
+                 opts = None,
                  label = "",
                  landsProcess = -999,
                  enabledForMassPoints = [],
@@ -86,6 +89,7 @@ class DatacardColumn():
                  datasetMgrColumn = "",
                  additionalNormalisationFactor = 1.0,
                  shapeHisto = ""):
+        self._opts = opts
         self._label = label
         self._landsProcess = landsProcess
         self._enabledForMassPoints = enabledForMassPoints
@@ -107,6 +111,7 @@ class DatacardColumn():
         self._nuisanceIds = nuisanceIds
         self._nuisanceResults = []
         self._controlPlots = []
+        self._cachedShapeRootHistogramWithUncertainties = None
         self._datasetMgrColumn = datasetMgrColumn
         self._additionalNormalisationFactor = additionalNormalisationFactor
         self._shapeHisto = shapeHisto
@@ -163,7 +168,7 @@ class DatacardColumn():
 ####        elif self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
 ####            myMsg += "FIXME: QCD inverted not implemented yet\n" # FIXME
         if not self.typeIsEmptyColumn() and not self.typeIsObservation():
-            if len(self._nuisanceIds) == 0:
+            if self._nuisanceIds == None or len(self._nuisanceIds) == 0:
                 myMsg += "Missing or empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
 
         if myMsg != "":
@@ -194,6 +199,10 @@ class DatacardColumn():
     def getNuisanceResults(self):
         return self._nuisanceResults
 
+    ## Returns the cached roto histogram with uncertainties object for the shape
+    def getCachedShapeRootHistogramWithUncertainties(self):
+        return self._cachedShapeRootHistogramWithUncertainties
+
     ## Returns dataset manager
     def getDatasetMgr(self):
         return self._datasetMgr
@@ -218,26 +227,50 @@ class DatacardColumn():
 
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
+        def rebinHelper(shapeModifier,h,label):
+            hShape = shapeModifier.createEmptyShapeHistogram("rebin%s"%(label))
+            myShapeModifier.addShape(dest=hShape,source=h)
+            myShapeModifier.finaliseShape(dest=hShape)
+            return hShape
+
         print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
-        # Obtain rate
-        #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Rate...                                                          ")
-        #sys.stdout.flush()
-        myRateResult = None
+        # Obtain root histogram with uncertainties for shape and cache it
+        if not (self.typeIsEmptyColumn() or dsetMgr == None):
+            mySystematics = dataset.Systematics(allShapes=True) #,verbose=True)
+            myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
+            if myDatasetRootHisto.isMC():
+                myDatasetRootHisto.normalizeToLuminosity(luminosity)
+            self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()
+            # Rebin cached histograms with uncertainties
+            myShapeModifier = ShapeHistoModifier(config.ShapeHistogramsDimensions)
+            hShape = self._cachedShapeRootHistogramWithUncertainties.getRootHisto()
+            self._cachedShapeRootHistogramWithUncertainties._rootHisto = rebinHelper(myShapeModifier, hShape, self.getLabel())
+            print "shape dim %d->%d"%(hShape.GetNbinsX(),self._cachedShapeRootHistogramWithUncertainties.getRootHisto().GetNbinsX())
+            myShapeUncertDict = self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties()
+            for key in myShapeUncertDict.keys():
+                (hSystUp, hSystDown) = myShapeUncertDict[key]
+                hRebinnedUp = rebinHelper(myShapeModifier, hSystUp, "%s%s"%(self.getLabel(),key))
+                hRebinnedDown = rebinHelper(myShapeModifier, hSystDown, "%s%s"%(self.getLabel(),key))
+                self._cachedShapeRootHistogramWithUncertainties._shapeUncertainties[key] = (hRebinnedUp, hRebinnedDown)
+                (hSystUp2, hSystDown2) = self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties()[key]
+                print "uncert dim + %d->%d - %d->%d"%(hSystUp.GetNbinsX(),hSystUp2.GetNbinsX(),hSystDown.GetNbinsX(),hSystDown2.GetNbinsX())
+            if self._opts.verbose:
+                print "  - Has syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
+        # Obtain rate histogram
         myRateHistograms = []
         if self.typeIsEmptyColumn() or dsetMgr == None:
-            myRateResult = 0.0
-            myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [], [], ExtractorMode.RATE, description="empty")
-            myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
-        #elif self.typeIsQCD():
-            # should never be reached for QCD factorised
+            if self._opts.verbose:
+                print "  - Creating empty rate shape"
+            myShapeModifier = ShapeHistoModifier(config.ShapeHistogramsDimensions)
+            myRateHistograms.append(myShapeModifier.createEmptyShapeHistogram(self.getLabel()))
         else:
+            if self._opts.verbose:
+                print "  - Extracting rate histogram"
             myShapeExtractor = None
             if self.typeIsObservation():
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [""], [self._shapeHisto], ExtractorMode.OBSERVATION)
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, ExtractorMode.OBSERVATION)
             else:
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [""], [self._shapeHisto], ExtractorMode.RATE)
-            # OBSOLETE
-            #myRateResult = myExtractor.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, ExtractorMode.RATE)
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         # Cache result
         self._rateResult = ExtractorResult("rate",
@@ -246,6 +279,8 @@ class DatacardColumn():
                                            myRateHistograms)
         # Obtain results for nuisances
         for nid in self._nuisanceIds:
+            if self._opts.verbose:
+                print "  - Extracting nuisance by id=%s"%nid
             #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Nuisance="+nid+"...                                              ")
             #sys.stdout.flush()
             myFoundStatus = False
@@ -267,12 +302,13 @@ class DatacardColumn():
                                                                  myHistograms,
                                                                  "Stat." in e.getDescription() or "stat." in e.getDescription() or e.getDistribution()=="shapeStat"))
             if not myFoundStatus:
-                print "\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!"
-                raise Exception()
+                raise Exception("\n"+ErrorLabel()+"(data group ='"+self._label+"'): Cannot find nuisance with id '"+nid+"'!")
         # Obtain results for control plots
         if config.OptionDoControlPlots != None:
             if config.OptionDoControlPlots:
                 for c in controlPlotExtractors:
+                    if self._opts.verbose:
+                        print "  - Extracting data-driven control plot by label=%s"%c.getId()
                     if dsetMgr != None and not self.typeIsEmptyColumn():
                         self._controlPlots.append(c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
                         #print "added ctrl plot %s for %s"%(c._histoTitle,self._label)

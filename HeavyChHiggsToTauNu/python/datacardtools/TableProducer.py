@@ -6,6 +6,7 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorBase
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker import ControlPlotMaker
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
@@ -19,57 +20,98 @@ import ROOT
 class EventYieldSummary:
     ## Constructor
     def __init__(self):
-        self._rate = 0.0
-        self._absoluteStat = 0.0
-        self._absoluteSystUp = 0.0
-        self._absoluteSystDown = 0.0
+        self._hRate = None
+        self._hAbsoluteSystUp = None
+        self._hAbsoluteSystDown = None
 
     def extract(self, opts, config, datasetColumn, extractors):
-        self._rate = datasetColumn.getRateResult()
-        myAbsoluteSystUpSquared = 0.0
-        myAbsoluteSystDownSquared = 0.0
+        if self._hRate == None:
+            hNominal = datasetColumn.getRateHistogram()
+            self._hRate = hNominal.Clone("tmpNominal%s"%datasetColumn.getLabel())
+            self._hAbsoluteSystUp = self._hRate.Clone("tmpUp%s"%datasetColumn.getLabel())
+            self._hAbsoluteSystUp.Reset()
+            self._hAbsoluteSystDown = self._hRate.Clone("tmpDown%s"%datasetColumn.getLabel())
+            self._hAbsoluteSystDown.Reset()
         for n in extractors:
             if n.isPrintable():
                 if datasetColumn.hasNuisanceByMasterId(n.getId()):
                     myValue = datasetColumn.getNuisanceResultByMasterId(n.getId())
                     if "stat" in n.getDescription() and n.isNuisance():
-                        self._absoluteStat = myValue * self._rate
+                        if isinstance(myValue,ScalarUncertaintyItem):
+                            print "stat, scalar",myValue
+                            for i in range(1, self._hRate.GetNbinsX()+1):
+                                self._hRate.SetBinError(i, sqrt(self._hRate.GetBinError(i)**2+self._hRate.GetBinContent(i)*myValue.getUncertaintyUp()))
+                        else:
+                            print "stat, double",myValue
+                            for i in range(1, self._hRate.GetNbinsX()+1):
+                                self._hRate.SetBinError(i, sqrt(self._hRate.GetBinError(i)**2+self._hRate.GetBinContent(i)*myValue))
                     else:
-                        if n.isAsymmetricNuisance():
-                            myAbsoluteSystDownSquared += pow(myValue[0] * self._rate,2)
-                            myAbsoluteSystUpSquared += pow(myValue[1] * self._rate,2)
-                        elif n.isNuisance():
-                            myAbsoluteSystDownSquared += pow(myValue * self._rate,2)
-                            myAbsoluteSystUpSquared += pow(myValue * self._rate,2)
-                        elif n.isShapeNuisance() and n.getDistribution() == "shapeQ":
-                            # Determine maximum of values
-                            myMax = 0.0
-                            for v in myValue:
-                                if v > myMax:
-                                    myMax = v
-                            myAbsoluteSystDownSquared += pow(myMax * self._rate,2)
-                            myAbsoluteSystUpSquared += pow(myMax * self._rate,2)
-        self._absoluteSystDown = sqrt(myAbsoluteSystDownSquared)
-        self._absoluteSystUp = sqrt(myAbsoluteSystUpSquared)
+                        if isinstance(myValue,ScalarUncertaintyItem):
+                            print "syst, scalar",myValue
+                            for i in range(1, self._hRate.GetNbinsX()+1):
+                                self._hAbsoluteSystDown.SetBinContent(i, sqrt(self._hAbsoluteSystDown.GetBinContent(i)**2+(myValue.getUncertaintyDown() * self._hRate.GetBinContent(i))**2))
+                                self._hAbsoluteSystUp.SetBinContent(i, sqrt(self._hAbsoluteSystUp.GetBinContent(i)**2+(myValue.getUncertaintyUp() * self._hRate.GetBinContent(i))**2))
+                        else:
+                            if n.isAsymmetricNuisance():
+                                print "syst, double asymm.",myValue
+                                for i in range(1, self._hRate.GetNbinsX()+1):
+                                    self._hAbsoluteSystDown.SetBinContent(i, sqrt(self._hAbsoluteSystDown.GetBinContent(i)**2+(myValue[0] * self._hRate.GetBinContent(i))**2))
+                                    self._hAbsoluteSystUp.SetBinContent(i, sqrt(self._hAbsoluteSystUp.GetBinContent(i)**2+(myValue[1] * self._hRate.GetBinContent(i))**2))
+                            elif n.isNuisance():
+                                print "syst, scalar symm.",myValue
+                                for i in range(1, self._hRate.GetNbinsX()+1):
+                                    self._hAbsoluteSystDown.SetBinContent(i, sqrt(self._hAbsoluteSystDown.GetBinContent(i)**2+(myValue * self._hRate.GetBinContent(i))**2))
+                                    self._hAbsoluteSystUp.SetBinContent(i, sqrt(self._hAbsoluteSystUp.GetBinContent(i)**2+(myValue * self._hRate.GetBinContent(i))**2))
+                            elif n.isShapeNuisance() and n.getDistribution() == "shapeQ":
+                                print "syst, shapeQ.",myValue
+                                # Determine maximum of values
+                                myHistograms = datasetColumn.getFullNuisanceResultByMasterId(n.getId()).getHistograms()
+                                hUp = myHistograms[0]
+                                hDown = myHistograms[1]
+                                hNominal = self._hRate
+                                # Calculate
+                                for i in range(1, self._hRate.GetNbinsX()+1):
+                                    myDeltaDown = 0.0
+                                    myDeltaUp = 0.0
+                                    if hNominal.GetBinContent(i) > 0.0:
+                                        myDeltaDown = abs(hDown.GetBinContent(i) - hNominal.GetBinContent(i)) / hNominal.GetBinContent(i)
+                                        myDeltaUp = abs(hUp.GetBinContent(i) - hNominal.GetBinContent(i)) / hNominal.GetBinContent(i)
+                                    self._hAbsoluteSystDown.SetBinContent(i, sqrt(self._hAbsoluteSystDown.GetBinContent(i)**2+myDeltaDown**2))
+                                    self._hAbsoluteSystUp.SetBinContent(i, sqrt(self._hAbsoluteSystUp.GetBinContent(i)**2+myDeltaUp**2))
+                    print self._hRate.GetBinContent(2),self._hRate.GetBinError(2),self._hAbsoluteSystDown.GetBinContent(2),self._hAbsoluteSystUp.GetBinContent(2),n.getId()
 
     ## Combines with another event yield summary
     def add(self,summary):
-        self._rate += summary.getRate()
-        self._absoluteStat = sqrt(pow(self._absoluteStat,2)+pow(summary.getAbsoluteStat(),2))
-        self._absoluteSystDown = sqrt(pow(self._absoluteSystDown,2)+pow(summary.getAbsoluteSystDown(),2))
-        self._absoluteSystUp = sqrt(pow(self._absoluteSystUp,2)+pow(summary.getAbsoluteSystUp(),2))
+        if self._hRate == None:
+            self._hRate = summary._hRate.Clone()
+            self._hAbsoluteSystDown = summary._hAbsoluteSystDown.Clone()
+            self._hAbsoluteSystUp = summary._hAbsoluteSystUp.Clone()
+        else:
+            self._hRate.Add(summary._hRate)
+            for i in range(1, self._hRate.GetNbinsX()+1):
+                self._hAbsoluteSystDown.SetBinContent(i, sqrt(self._hAbsoluteSystDown.GetBinContent(i)**2+summary._hAbsoluteSystDown.GetBinContent(i)**2))
+                self._hAbsoluteSystUp.SetBinContent(i, sqrt(self._hAbsoluteSystUp.GetBinContent(i)**2+summary._hAbsoluteSystUp.GetBinContent(i)**2))
 
     def getRate(self):
-        return self._rate
+        return self._hRate.Integral()
 
     def getAbsoluteStat(self):
-        return self._absoluteStat
+        mySum = 0.0
+        for i in range(1, self._hRate.GetNbinsX()+1):
+            mySum += self._hRate.GetBinError(i)**2
+        return sqrt(mySum)
 
     def getAbsoluteSystDown(self):
-        return self._absoluteSystDown
+        mySum = 0.0
+        for i in range(1, self._hRate.GetNbinsX()+1):
+            mySum += self._hAbsoluteSystDown.GetBinContent(i)**2
+        return sqrt(mySum)
 
     def getAbsoluteSystUp(self):
-        return self._absoluteSystUp
+        mySum = 0.0
+        for i in range(1, self._hRate.GetNbinsX()+1):
+            mySum += self._hAbsoluteSystUp.GetBinContent(i)**2
+        return sqrt(mySum)
 
 ## TableProducer class
 class TableProducer:
@@ -149,9 +191,15 @@ class TableProducer:
                 print ErrorStyle()+"Error:"+NormalStyle()+" Cannot open file '"+myRootFilename+"' for output!"
                 sys.exit()
             # Invoke extractors
+            if self._opts.verbose:
+                print "TableProducer/producing observation line"
             myObservationLine = self._generateObservationLine()
+            if self._opts.verbose:
+                print "TableProducer/producing rate line"
             myRateHeaderTable = self._generateRateHeaderTable(m)
             myRateDataTable = self._generateRateDataTable(m)
+            if self._opts.verbose:
+                print "TableProducer/producing nuisance lines"
             myNuisanceTable = self._generateNuisanceTable(m)
             # Calculate dimensions of tables
             myWidths = []
@@ -191,34 +239,6 @@ class TableProducer:
             myRootFile.Write()
             myRootFile.Close()
             print "Written shape root file to:",myRootFilename
-        # Save additional info for QCD factorised
-        for c in self._datasetGroups:
-            if c.typeIsQCDfactorised():
-                c.saveQCDInfoHistograms(self._infoDirname)
-                myFilename = self._infoDirname+"/QCDfactorisedMessages.txt"
-                myFile = open(myFilename, "w")
-                myFile.write(self._generateHeader())
-                myMessages = c.getMessages()
-                for m in myMessages:
-                    myFile.write(m+"\n")
-                myFile.close()
-                print HighlightStyle()+"QCD factorised messages written to: "+NormalStyle()+myFilename
-
-                myFilename = self._infoDirname+"/QCDfactorised_table_NQCD_yield.tex"
-                myFile = open(myFilename, "w")
-                myFile.write("% Auto generated from datacard generator; to produce, run datacard generator and have a look into the produced info directory\n")
-                myFile.write("%% %s \n"%self._generateHeader().replace("Date","% Date"))
-                myFile.write(c.getYieldTable())
-                myFile.close()
-                print HighlightStyle()+"QCD factorised event yield table written to: "+NormalStyle()+myFilename
-
-                myFilename = self._infoDirname+"/QCDfactorised_table_NQCD_yield_contracted.tex"
-                myFile = open(myFilename, "w")
-                myFile.write("% Auto generated from datacard generator; to produce, run datacard generator and have a look into the produced info directory\n")
-                myFile.write("%% %s \n"%self._generateHeader().replace("Date","% Date"))
-                myFile.write(c.getCompactYieldTable())
-                myFile.close()
-                print HighlightStyle()+"QCD factorised compact event yield table written to: "+NormalStyle()+myFilename
 
     ## Generates header of datacard
     def _generateHeader(self, mass=None):
@@ -283,6 +303,8 @@ class TableProducer:
         myRow = ["rate",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass):
+                if self._opts.verbose:
+                    print "- obtaining cached rate for column %s"%c.getLabel()
                 myRateValue = c.getRateResult()
                 if myRateValue == None:
                     myRateValue = 0.0
@@ -345,6 +367,8 @@ class TableProducer:
                     if c.isActiveForMass(mass):
                         # Check that column has current nuisance or has nuisance that is slave to current nuisance
                         if c.hasNuisanceByMasterId(n.getId()):
+                            if self._opts.verbose:
+                                print "- obtaining cached nuisance %s for column %s"%(n.getId(),c.getLabel())
                             myValue = c.getNuisanceResultByMasterId(n.getId())
                             if n.getId() in myVirtualMergeInformation.keys():
                                 myValue = myVirtualMergeInformation[n.getId()] # Overwrite virtually merged value
@@ -353,12 +377,14 @@ class TableProducer:
                             if myValue == None or n.isShapeNuisance():
                                 myValueString = "1"
                             else:
-                                if isinstance(myValue, list):
-                                    for i in range(0,len(myValue)):
-                                        if i == 0:
-                                            myValueString += "%.3f"%(myValue[i]+1.0)
-                                        else:
-                                            myValueString += "/%.3f"%(myValue[i]+1.0)
+                                if isinstance(myValue, ScalarUncertaintyItem):
+                                    # Check if nuisance is asymmetric
+                                    if myValue.isAsymmetric():
+                                        myValueString += "%.3f/%.3f"%(1.0-myValue.getUncertaintyDown(),1.0+myValue.getUncertaintyUp())
+                                    else:
+                                        myValueString += "%.3f"%(myValue.getUncertaintyUp()+1.0)
+                                elif isinstance(myValue, list):
+                                    myValueString += "%.3f/%.3f"%(1.0+myValue[0],1.0+myValue[1])
                                 else:
                                     # Assume that result is a plain number
                                     #print "nid=",n.getId(),"c=",c.getLabel()
@@ -385,28 +411,47 @@ class TableProducer:
         # Loop over rows
         for n in self._extractors:
             if n.isPrintable() and n.getDistribution() == "shapeQ":
-                myDownRow = ["%s_Down"%(n.getId()), ""]
-                myUpRow = ["%s_Up"%(n.getId()), ""]
+                myDownRow = ["%s_ShapeDown"%(n.getId()), ""]
+                myScalarDownRow = ["%s_DownDevFromScalar"%(n.getId()), ""]
+                myUpRow = ["%s_ShapeUp"%(n.getId()), ""]
+                myScalarUpRow = ["%s_UpDevFromScalar"%(n.getId()), ""]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
                     if c.isActiveForMass(mass):
                         # Check that column has current nuisance or has nuisance that is slave to current nuisance
                         if c.hasNuisanceByMasterId(n.getId()):
-                            myValue = c.getNuisanceResultByMasterId(n.getId())
-                            # Check output format
-                            if not isinstance(myValue, list):
-                                print ErrorStyle()+"Error: Nuisance '"+n.getId()+"'did strangely not return a list of results for shapeQ. Check code."+NormalStyle()
-                                sys.exit()
-                            myDownRow.append("%.3f"%(myValue[0]))
-                            myUpRow.append("%.3f"%(myValue[1]))
+                            #print "column=%s extractor id=%s"%(c.getLabel(),n.getId())
+                            # Obtain histograms
+                            myHistograms = c.getFullNuisanceResultByMasterId(n.getId()).getHistograms()
+                            hUp = myHistograms[0]
+                            hDown = myHistograms[1]
+                            hNominal = c.getRateHistogram()
+                            # Calculate
+                            myDownDeltaSquared = 0.0
+                            myUpDeltaSquared = 0.0
+                            myDownAverage = abs(hDown.Integral()-hNominal.Integral())/hNominal.Integral()
+                            myUpAverage = abs(hUp.Integral()-hNominal.Integral())/hNominal.Integral()
+                            for i in range(1,hNominal.GetNbinsX()):
+                                myDownDeltaSquared += (abs(hDown.GetBinContent(i) - hNominal.GetBinContent(i)) - myDownAverage)**2
+                                myUpDeltaSquared += (abs(hUp.GetBinContent(i) - hNominal.GetBinContent(i)) - myUpAverage)**2
+                            myScalarDownRow.append("%.3f"%(sqrt(myDownDeltaSquared)/hNominal.Integral()))
+                            myScalarUpRow.append("%.3f"%(sqrt(myUpDeltaSquared)/hNominal.Integral()))
+                            myDownRow.append("%.3f"%(myDownAverage))
+                            myUpRow.append("%.3f"%(myUpAverage))
                         else:
                             myDownRow.append("-")
                             myUpRow.append("-")
+                            myScalarDownRow.append("-")
+                            myScalarUpRow.append("-")
                 # Add description to end of the row
                 myDownRow.append(n.getDescription())
                 myUpRow.append(n.getDescription())
+                myScalarDownRow.append(n.getDescription())
+                myScalarUpRow.append(n.getDescription())
                 myResult.append(myDownRow)
+                #myResult.append(myScalarDownRow)
                 myResult.append(myUpRow)
+                #myResult.append(myScalarUpRow)
         return myResult
 
     ## Save histograms to root file
@@ -491,72 +536,91 @@ class TableProducer:
 
     ## Prints event yield summary table
     def makeEventYieldSummary(self):
-        Data = EventYieldSummary()
-        if self._observation != None:
-            Data.extract(self._opts,self._config,self._observation,self._extractors)
+        def getFormattedUnc(formatStr,uncUp,uncDown):
+            if abs(uncDown-uncUp) < 0.00001:
+                # symmetric
+                return "+- %s"%(formatStr%uncDown)
+            else:
+                # asymmetric
+                return "+%s -%s"%(formatStr%uncDown,formatStr%uncUp)
+
+        def getLatexFormattedUnc(formatStr,uncUp,uncDown):
+            if abs(uncDown-uncUp) < 0.00001:
+                # symmetric
+                return "\\pm %s"%(formatStr%uncDown)
+            else:
+                # asymmetric
+                return "~^{+%s}){-%s}"%(formatStr%uncDown, formatStr%uncUp)
+
+        # Loop over mass points
         for m in self._config.MassPoints:
-            HH = EventYieldSummary()
-            HW = EventYieldSummary()
-            QCD = EventYieldSummary()
-            Embedding = EventYieldSummary()
-            EWKFakes = EventYieldSummary()
-            # Loop over columns
+            # Initialize
+            HH = None
+            HW = None
+            QCD = None
+            Embedding = None
+            EWKFakes = None
+            # Loop over columns to obtain RootHistoWithUncertainties objects
             for c in self._datasetGroups:
-                if c.isActiveForMass(m):
-                    mySummary = EventYieldSummary()
-                    mySummary.extract(self._opts,self._config,c,self._extractors)
+                if c.isActiveForMass(m) and not c.typeIsEmptyColumn():
                     # Find out what type the column is
                     if c.getLandsProcess() == -1:
-                        HH.add(mySummary)
+                        HH = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.getLandsProcess() == 0:
-                        HW.add(mySummary)
+                        HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.typeIsQCD():
-                        QCD.add(mySummary)
-                    elif c.typeIsEWK():
-                        Embedding.add(mySummary)
+                        if QCD == None:
+                            QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                        else:
+                            QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
+                    elif c.typeIsEWK() or self._config.OptionReplaceEmbeddingByMC:
+                        if Embedding == None:
+                            Embedding = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                        else:
+                            Embedding.Add(c.getCachedShapeRootHistogramWithUncertainties())
                     else:
-                        EWKFakes.add(mySummary)
+                        if EWKFakes == None:
+                            EWKFakes = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                        else:
+                            EWKFakes.Add(c.getCachedShapeRootHistogramWithUncertainties())
             # Calculate signal yield
             myBr = self._config.OptionBr
             if self._config.OptionBr == None:
-                print WarningStyle()+"Warning: Br(t->bH+) has not been specified in config file, using default 0.05! To specify, add OptionBr=0.05 to the config file."+NormalStyle()
-                myBr = self._config.OptionBr
-            mySignalRate = HH.getRate() * pow(myBr,2) + HW.getRate() * 2.0 * myBr * (1.0 - myBr)
-            mySignalStat = sqrt(pow(HH.getAbsoluteStat() * pow(myBr,2),2) + pow(HW.getAbsoluteStat() * 2.0 * myBr * (1.0 - myBr),2))
-            mySignalSystDown = sqrt(pow(HH.getAbsoluteSystDown() * pow(myBr,2),2) + pow(HW.getAbsoluteSystDown() * 2.0 * myBr * (1.0 - myBr),2))
-            mySignalSystUp = sqrt(pow(HH.getAbsoluteSystUp() * pow(myBr,2),2) + pow(HW.getAbsoluteSystUp() * 2.0 * myBr * (1.0 - myBr),2))
+                print WarningStyle()+"Warning: Br(t->bH+) has not been specified in config file, using default 0.01! To specify, add OptionBr=0.05 to the config file."+NormalStyle()
+                myBr = 0.01
+            HW.Scale(2.0 * myBr * (1.0 - myBr))
+            if HH != None:
+                HH.Scale(myBr**2)
+                HW.Add(HH)
+            # From this line on, HW includes all signal
+            mySignalRate = HW.getRate()
+            mySignalStat = HW.getRateStatUncertainty()
             # Calculate expected yield
-            TotalExpected = EventYieldSummary()
-            TotalExpected.add(QCD)
-            TotalExpected.add(Embedding)
-            TotalExpected.add(EWKFakes)
+            TotalExpected = QCD.Clone()
+            TotalExpected.Add(Embedding)
+            if not self._config.OptionReplaceEmbeddingByMC:
+                TotalExpected.Add(EWKFakes)
             # Construct table
             myOutput = "*** Event yield summary ***\n"
             myOutput += self._generateHeader(m)
             myOutput += "\n"
             myOutput += "Number of events\n"
-            myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f:  %5.1f +- %4.1f (stat.) "%(m,myBr,mySignalRate,mySignalStat)
-            if round(mySignalSystDown) == round(mySignalSystUp):
-                myOutput += "+- %4.0f (syst.)\n"%mySignalSystDown
-            else:
-                myOutput += "+%4.0f -%4.0f (syst.)\n"%(mySignalSystUp, mySignalSystDown)
+            myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(m,myBr,mySignalRate,mySignalStat,getFormattedUnc("%4.1f",*HW.getRateSystUncertainty()))
             myOutput += "Backgrounds:\n"
-            myOutput += "                           Multijets: %5.1f +- %4.1f (stat.) +- %4.1f (syst.)\n"%(QCD.getRate(),QCD.getAbsoluteStat(),QCD.getAbsoluteSystDown())
-            myOutput += "                    EWK+tt with taus: %5.1f +- %4.1f (stat.) +- %4.1f (syst.)\n"%(Embedding.getRate(),Embedding.getAbsoluteStat(),Embedding.getAbsoluteSystDown())
-            myOutput += "               EWK+tt with fake taus: %5.1f +- %4.1f (stat.) "%(EWKFakes.getRate(),EWKFakes.getAbsoluteStat())
-            if round(EWKFakes.getAbsoluteSystDown()) == round(EWKFakes.getAbsoluteSystUp()):
-                myOutput += "+- %4.0f (syst.)\n"%EWKFakes.getAbsoluteSystDown()
+            myOutput += "                           Multijets: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(QCD.getRate(),QCD.getRateStatUncertainty(),getFormattedUnc("%4.1f",*QCD.getRateSystUncertainty()))
+            if self._config.OptionReplaceEmbeddingByMC:
+                myOutput += "                           MC EWK+tt: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(Embedding.getRate(),Embedding.getRateStatUncertainty(),getFormattedUnc("%4.1f",*Embedding.getRateSystUncertainty()))
             else:
-                myOutput += "+%4.0f -%4.0f (syst.)\n"%(EWKFakes.getAbsoluteSystUp(), EWKFakes.getAbsoluteSystDown())
-            myOutput += "                      Total expected: %5.1f +- %4.1f (stat.) "%(TotalExpected.getRate(),TotalExpected.getAbsoluteStat())
-            if round(TotalExpected.getAbsoluteSystDown()) == round(TotalExpected.getAbsoluteSystUp()):
-                myOutput += "+- %4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp())
-            else:
-                myOutput += "+%4.0f -%4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp(), TotalExpected.getAbsoluteSystDown())
+                myOutput += "                    EWK+tt with taus: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(Embedding.getRate(),Embedding.getRateStatUncertainty(),getFormattedUnc("%4.1f",*Embedding.getRateSystUncertainty()))
+                myOutput += "               EWK+tt with fake taus: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(EWKFakes.getRate(),EWKFakes.getRateStatUncertainty(),getFormattedUnc("%4.1f",*EWKFakes.getRateSystUncertainty()))
+            myOutput += "                      Total expected: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(TotalExpected.getRate(),TotalExpected.getRateStatUncertainty(),getFormattedUnc("%4.1f",*TotalExpected.getRateSystUncertainty()))
             if self._config.BlindAnalysis:
                 myOutput += "                            Observed: BLINDED\n\n"
             else:
                 myOutput += "                            Observed: %5d\n\n"%Data.getRate()
+            # Print to screen
+            if self._config.OptionDisplayEventYieldSummary:
+                print myOutput
             # Save output to file
             myFilename = self._infoDirname+"/EventYieldSummary_m%d.txt"%m
             myFile = open(myFilename, "w")
@@ -582,15 +646,18 @@ class TableProducer:
             else:
                 myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & $%4.0f \\pm $%4.0f~^{+%4.0f}_{%4.0f} $ \\\\ \n"%(m, mySignalRate, mySignalStat, mySignalSystUp, mySignalSystDown)
             myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  Multijet background (data-driven)       & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(QCD.getRate(),QCD.getAbsoluteStat(),QCD.getAbsoluteSystDown())
-            myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(Embedding.getRate(),Embedding.getAbsoluteStat(),Embedding.getAbsoluteSystDown())
-            myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & $%4.0f \\pm %4.0f"%(EWKFakes.getRate(),EWKFakes.getAbsoluteStat())
-            if round(EWKFakes.getAbsoluteSystDown()) == round(EWKFakes.getAbsoluteSystUp()):
-                myOutputLatex += " \\pm %4.0f $ \\\\ \n"%EWKFakes.getAbsoluteSystDown()
+            myOutputLatex += "  Multijet background (data-driven)       & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(QCD.getRate(),QCD.getRateStatUncertainty(),QCD.getAbsoluteSystDown())
+            if self._config.OptionReplaceEmbeddingByMC:
+                myOutputLatex += "  MC EWK+\\ttbar  & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(Embedding.getRate(),Embedding.getRateStatUncertainty(),Embedding.getAbsoluteSystDown())
             else:
-                myOutputLatex += "~^{+%4.0f}){-%4.0f} $ \\\\ \n"%(EWKFakes.getAbsoluteSystUp(), EWKFakes.getAbsoluteSystDown())
+                myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(Embedding.getRate(),Embedding.getRateStatUncertainty(),Embedding.getAbsoluteSystDown())
+                myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & $%4.0f \\pm %4.0f"%(EWKFakes.getRate(),EWKFakes.getRateStatUncertainty())
+                if round(EWKFakes.getAbsoluteSystDown()) == round(EWKFakes.getAbsoluteSystUp()):
+                    myOutputLatex += " \\pm %4.0f $ \\\\ \n"%EWKFakes.getAbsoluteSystDown()
+                else:
+                    myOutputLatex += "~^{+%4.0f}){-%4.0f} $ \\\\ \n"%(EWKFakes.getAbsoluteSystUp(), EWKFakes.getAbsoluteSystDown())
             myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  Total expected from the SM              & $%4.0f \\pm %4.0f"%(TotalExpected.getRate(),TotalExpected.getAbsoluteStat())
+            myOutputLatex += "  Total expected from the SM              & $%4.0f \\pm %4.0f"%(TotalExpected.getRate(),TotalExpected.getRateStatUncertainty())
             if round(TotalExpected.getAbsoluteSystDown()) == round(TotalExpected.getAbsoluteSystUp()):
                 myOutputLatex += " \\pm %4.0f $ \\\\ \n"%(TotalExpected.getAbsoluteSystUp())
             else:
