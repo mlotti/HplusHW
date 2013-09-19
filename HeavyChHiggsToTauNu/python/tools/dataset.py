@@ -1087,6 +1087,9 @@ class RootHistoWithUncertainties:
         self._normalizationUncertaintyRelativeSquared = 0.0
         self._normalizationUncertaintyRelativeNames = []
 
+        # Boolean to save the status if the under- and overflow bins have been made visible (i.e. summed to the first and last bin)
+        self._flowBinsVisibleStatus = False
+
     def _checkConsistency(self, name, th1):
         # I can't use this since it's private/protected :(
         #if not ROOT.TH1.CheckConsistency(self._rootHisto, th1):
@@ -1110,12 +1113,88 @@ class RootHistoWithUncertainties:
     def getRootHisto(self):
         return self._rootHisto
 
+    ## Get the event rate, i.e. integral of the root histo object (usually at this point the under and overflow bins are already merged to actual bins)
+    def getRate(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        myRate = self._rootHisto.Integral()
+        myRateIncludingOverflow = self.integral()
+        if abs(myRate - myRateIncludingOverflow) > 0.00001:
+            raise Exception("getRate(): Weird, the under/overflow should be empty at this point, but apparantly they are not?!")
+        return myRate
+
+    ## Get the stat. uncertainty of the root histo object
+    def getRateStatUncertainty(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        mySum = 0.0
+        if isinstance(self._rootHisto, ROOT.TH1):
+            for i in range(1, self._rootHisto.GetNbinsX()):
+                mySum += self._rootHisto.GetBinError(i)**2
+        else:
+            raise Exception("getRateStatUncertainty() supported currently only for TH1!")
+        return math.sqrt(mySum)
+
+    ## Get the syst. uncertainty of the root histo object
+    def getRateSystUncertainty(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        if not isinstance(self._rootHisto, ROOT.TH1):
+            raise Exception("getRateSystUncertainty() supported currently only for TH1!")
+        g = self.getSystematicUncertaintyGraph()
+        mySumUp = 0.0
+        mySumDown = 0.0
+        for i in range(0, g.GetN()):
+            mySumUp += g.GetErrorYhigh(i)**2
+            mySumDown += g.GetErrorYhigh(i)**2
+        return (math.sqrt(mySumUp),math.sqrt(mySumDown))
+
+    def _uncertaintyAddHelper(self, diffPlus, diffMinus):
+        yhighSquareSum = 0.0
+        ylowSquareSum = 0.0
+        if diffPlus > 0 and diffMinus > 0:
+            yhighSquareSum += max(diffPlus, diffMinus)**2
+        elif diffPlus < 0 and diffMinus < 0:
+            ylowSquareSum += max(-diffPlus, -diffMinus)**2
+        elif diffPlus > 0:
+            yhighSquareSum += diffPlus**2
+            ylowSquareSum += diffMinus**2
+        elif diffPlus < 0:
+            yhighSquareSum += diffMinus**2
+            ylowSquareSum += diffPlus**2
+        return (yhighSquareSum, ylowSquareSum)
+
+    ## Adds the underflow and overflow bins to the first and last bins, respectively
+    def makeFlowBinsVisible(self):
+        def moveBinContent(sourceBin,targetBin,histo):
+            histo.SetBinContent(targetBin, histo.GetBinContent(targetBin)+histo.GetBinContent(sourceBin))
+            histo.SetBinError(targetBin, sqrt(histo.GetBinError(targetBin)**2+histo.GetBinError(sourceBin)))
+            histo.SetBinContent(targetBin,0.0)
+            histo.SetBinError(targetBin,0.0)
+
+        if self._flowBinsVisibleStatus:
+            return
+        self._flowBinsVisibleStatus = True
+        # Update systematics histograms first
+        keys1 = self._shapeUncertainties.keys()
+        for key in keys1:
+            (hPlus, hMinus) = self._shapeUncertainties[key]
+            moveBinContent(0,1,hPlus)
+            moveBinContent(0,1,hMinus)
+            moveBinContent(hPlus.GetNbinsX()+1,hPlus.GetNbinsX(),hPlus)
+            moveBinContent(hMinus.GetNbinsX()+1,hMinus.GetNbinsX(),hMinus)
+        # Update nominal histogram
+        moveBinContent(0,1,self._rootHisto)
+        moveBinContent(self._rootHisto.GetNbinsX()+1,self._rootHisto.GetNbinsX(),self._rootHisto)
+
     ## Add shape variation uncertainty
     #
     # \param name     Name of the uncertainty
     # \param th1Plus  TH1 for the 'plus' variation
     # \param th1Minus TH1 for the 'minus' variation
     def addShapeUncertainty(self, name, th1Plus, th1Minus):
+        if self._flowBinsVisibleStatus:
+            raise Exception("addShapeUncertainty(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
         self._shapeUncertainties[name] = (th1Plus, th1Minus)
@@ -1377,13 +1456,15 @@ class RootHistoWithUncertainties:
         keys2 = other._shapeUncertainties.keys()
         keys1.sort()
         keys2.sort()
-        if keys1 != keys2:
-            raise Exception("In adding two RootHistoWithUncertainties, the two objects have different sets of shape uncertainties (by variations): self has %s, parameter has %s. The assumption of equal sets of uncertainties is made for simplification only, and can be removed if really necessary" % (",".join(keys1), ",".join(keys2)))
         for key in keys1:
-            (plus, minus) = self._shapeUncertainties[key]
-            (otherPlus, otherMinus) = other._shapeUncertainties[key]
-            plus.Add(otherPlus)
-            minus.Add(otherMinus)
+            if key in keys2:
+                (plus, minus) = self._shapeUncertainties[key]
+                (otherPlus, otherMinus) = other._shapeUncertainties[key]
+                plus.Add(otherPlus)
+                minus.Add(otherMinus)
+        for key in keys2:
+            if not key in keys1:
+                self.addShapeUncertainty(key, other._shapeUncertainties[key]) # Add those histograms, which so far did not exist
 
         if other._shapeUncertaintyRelativeSquared is not None:
             if self._shapeUncertaintyRelativeSquared is None:
