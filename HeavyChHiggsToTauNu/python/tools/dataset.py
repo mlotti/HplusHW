@@ -1150,21 +1150,6 @@ class RootHistoWithUncertainties:
             mySumDown += g.GetErrorYhigh(i)**2
         return (math.sqrt(mySumUp),math.sqrt(mySumDown))
 
-    def _uncertaintyAddHelper(self, diffPlus, diffMinus):
-        yhighSquareSum = 0.0
-        ylowSquareSum = 0.0
-        if diffPlus > 0 and diffMinus > 0:
-            yhighSquareSum += max(diffPlus, diffMinus)**2
-        elif diffPlus < 0 and diffMinus < 0:
-            ylowSquareSum += max(-diffPlus, -diffMinus)**2
-        elif diffPlus > 0:
-            yhighSquareSum += diffPlus**2
-            ylowSquareSum += diffMinus**2
-        elif diffPlus < 0:
-            yhighSquareSum += diffMinus**2
-            ylowSquareSum += diffPlus**2
-        return (yhighSquareSum, ylowSquareSum)
-
     ## Adds the underflow and overflow bins to the first and last bins, respectively
     def makeFlowBinsVisible(self):
         def moveBinContent(sourceBin,targetBin,histo):
@@ -1182,8 +1167,8 @@ class RootHistoWithUncertainties:
             (hPlus, hMinus) = self._shapeUncertainties[key]
             moveBinContent(0,1,hPlus)
             moveBinContent(0,1,hMinus)
-            moveBinContent(hPlus.GetNbinsX()+1,hPlus.GetNbinsX(),hPlus)
-            moveBinContent(hMinus.GetNbinsX()+1,hMinus.GetNbinsX(),hMinus)
+            moveBinContent(hPlus.GetNbinsX()+1,hPlus.GetNbinsX(),hPlus) # FIXME: this is the uncertainty, shouldn't one use quadratic sum?
+            moveBinContent(hMinus.GetNbinsX()+1,hMinus.GetNbinsX(),hMinus) # FIXME: this is the uncertainty, shouldn't one use quadratic sum?
         # Update nominal histogram
         moveBinContent(0,1,self._rootHisto)
         moveBinContent(self._rootHisto.GetNbinsX()+1,self._rootHisto.GetNbinsX(),self._rootHisto)
@@ -1207,6 +1192,8 @@ class RootHistoWithUncertainties:
     #
     # The bin-wise uncertainties are summed quadratically
     def addShapeUncertaintyRelative(self, name, th1):
+        if self._flowBinsVisibleStatus:
+            raise Exception("addShapeUncertainty(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
         if isinstance(th1, ROOT.TH2):
             raise Exception("So far only TH1's are supported (and not TH2/TH3).")
 
@@ -1430,11 +1417,11 @@ class RootHistoWithUncertainties:
         keys = self._shapeUncertainties.keys()
         for key in keys:
             (plus, minus) = self._shapeUncertainties[key]
-            plus = plus.Rebin(*args)
-            minus = minus.Rebin(*args)
+            plus = plus.Rebin(*args) # FIXME: this is the uncertainty, shouldn't one use quadratic sum?
+            minus = minus.Rebin(*args) # FIXME: this is the uncertainty, shouldn't one use quadratic sum?
             self._shapeUncertainties[key] = (plus, minus)
         if self._shapeUncertaintyRelativeSquared is not None:
-            self._shapeUncertaintyRelativeSquared.Rebin(*args)
+            self._shapeUncertaintyRelativeSquared.Rebin(*args) # FIXME: this is the uncertainty, shouldn't one use quadratic sum?
 
     ## Rebin histogram
     #
@@ -1444,11 +1431,11 @@ class RootHistoWithUncertainties:
         keys = self._shapeUncertainties.keys()
         for key in keys:
             (plus, minus) = self._shapeUncertainties[key]
-            plus = plus.Rebin2D(*args)
-            minus = minus.Rebin2D(*args)
+            plus = plus.Rebin2D(*args) # FIXME: this is the uncertainty, shouldn't one use quadratic sum?
+            minus = minus.Rebin2D(*args) # FIXME: this is the uncertainty, shouldn't one use quadratic sum?
             self._shapeUncertainties[key] = (plus, minus)
         if self._shapeUncertaintyRelativeSquared is not None:
-            self._shapeUncertaintyRelativeSquared.Rebin2D(*args)
+            self._shapeUncertaintyRelativeSquared.Rebin2D(*args) # FIXME: this is the uncertainty, shouldn't one use quadratic sum?
 
     ## Add another RootHistoWithUncertainties object
     #
@@ -1533,6 +1520,43 @@ class RootHistoWithUncertainties:
     ## "Eats" SetDirectory() call for interface compatibility, i.e. do nothing
     def SetDirectory(self, *args):
         pass
+
+    ## Print a lot of comma separated info for debugging
+    def Debug(self):
+        def histoContentsHelper(h):
+            s = ""
+            for h in range(0, h.GetNbinsX+2):
+                s += ", %f"%h.GetBinContent(i)
+            return s
+
+        def histoErrorHelper(h):
+            s = ""
+            for h in range(0, h.GetNbinsX+2):
+                s += ", %f"%h.GetBinError(i)
+            return s
+
+        print "*** Debug info for RootHistoWithUncertainties:"
+        print "histogram %s"%(self.getName())
+        print "nominal%s"%histoContentsHelper(self._rootHisto)
+        print "nominal_error%s"%histoContentsHelper(self._rootHisto)
+        print "normalization_error_up, %f"%self._normalizationUncertaintyRelativeSquaredPlus
+        print "normalization_error_down, %f"%self._normalizationUncertaintyRelativeSquaredMinus
+        keys = self._shapeUncertainties.keys()
+        for key in keys:
+            (hPlus, hMinus) = self._shapeUncertainties[key]
+            print "uncert_%s_up%s"%(key,histoContentsHelper(hPlus))
+            print "uncert_%s_down%s"%(key,histoContentsHelper(hMinus))
+        print "rate, %f"%self.getRate()
+        print "rate_stat_uncert, %f"%self.getRateStatUncertainty()
+        print "rate_syst_uncert, +%f -%f"%self.getRateSystUncertainty()
+        g = self.getSystematicUncertaintyGraph()
+        sUp = ""
+        sDown = ""
+        for i in range(0, g.GetN()):
+            sUp += ", %f"%g.GetErrorYhigh(i)
+            sDown += ", %f"%g.GetErrorYhigh(i)
+        print "rate_syst_uncert_up%s"%sUp
+        print "rate_syst_uncert_down%s\n"%sDown
 
 ## Base class for DatasetRootHisto classes (wrapper for TH1 histogram and the originating Dataset)
 # 
