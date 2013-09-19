@@ -56,8 +56,6 @@ class QCDInvertedShape:
             myShapeEwkSum.append(0.0)
             myShapeEwkSumUncert.append(0.0)
         myMinIndex = 0
-        if not shape.getPhaseSpaceBinFileFriendlyTitle(0) in normFactors.keys():
-            myMinIndex = 1
         # Calculate results separately for each phase space bin and then combine
         for i in range(myMinIndex, nSplitBins):
             # Get data-driven QCD, data, and MC EWK shape histogram for the phase space bin
