@@ -1084,7 +1084,8 @@ class RootHistoWithUncertainties:
         self._shapeUncertaintyRelativeNames = []
 
         # Float to hold square sum of relative normalization uncertainty
-        self._normalizationUncertaintyRelativeSquared = 0.0
+        self._normalizationUncertaintyRelativeSquaredPlus = 0.0
+        self._normalizationUncertaintyRelativeSquaredMinus = 0.0
         self._normalizationUncertaintyRelativeNames = []
 
         # Boolean to save the status if the under- and overflow bins have been made visible (i.e. summed to the first and last bin)
@@ -1168,9 +1169,9 @@ class RootHistoWithUncertainties:
     def makeFlowBinsVisible(self):
         def moveBinContent(sourceBin,targetBin,histo):
             histo.SetBinContent(targetBin, histo.GetBinContent(targetBin)+histo.GetBinContent(sourceBin))
-            histo.SetBinError(targetBin, sqrt(histo.GetBinError(targetBin)**2+histo.GetBinError(sourceBin)))
-            histo.SetBinContent(targetBin,0.0)
-            histo.SetBinError(targetBin,0.0)
+            histo.SetBinError(targetBin, math.sqrt(histo.GetBinError(targetBin)**2+histo.GetBinError(sourceBin)**2))
+            histo.SetBinContent(sourceBin,0.0)
+            histo.SetBinError(sourceBin,0.0)
 
         if self._flowBinsVisibleStatus:
             return
@@ -1229,9 +1230,10 @@ class RootHistoWithUncertainties:
     # \param uncertainty  Float for the value (e.g. 0.2 for 20 %)
     #
     # The normalization relative uncertainties are summed quadratically
-    def addNormalizationUncertaintyRelative(self, name, uncertainty):
+    def addNormalizationUncertaintyRelative(self, name, uncertaintyPlus, uncertaintyMinus):
         self._normalizationUncertaintyRelativeNames.append(name)
-        self._normalizationUncertaintyRelativeSquared += uncertainty*uncertainty
+        self._normalizationUncertaintyRelativeSquaredPlus += uncertaintyPlus**2
+        self._normalizationUncertaintyRelativeSquaredMinus += uncertaintyMinus**2
 
     ## Get the dictionary of shape variation uncertainties
     def getShapeUncertainties(self):
@@ -1302,10 +1304,12 @@ class RootHistoWithUncertainties:
                 yhighSquareSum += absUnc**2
                 ylowSquareSum += absUnc**2
 
-            relUnc = math.sqrt(self._normalizationUncertaintyRelativeSquared)
-            absUnc = relUnc * yval
-            yhighSquareSum += absUnc**2
-            ylowSquareSum += absUnc**2
+            relUncPlus = math.sqrt(self._normalizationUncertaintyRelativeSquaredPlus)
+            absUncPlus = relUncPlus * yval
+            yhighSquareSum += absUncPlus**2
+            relUncMinus = math.sqrt(self._normalizationUncertaintyRelativeSquaredMinus)
+            absUncMinus = relUncMinus * yval
+            ylowSquareSum += absUncMinus**2
 
             xvalues.append(xval)
             xerrhigh.append(xhigh)
@@ -1450,6 +1454,12 @@ class RootHistoWithUncertainties:
     #
     # \param other   RootHistoWithUncertainties object
     def Add(self, other):
+        # Make sure the flow bins are handled in the same way before adding
+        if self._flowBinsVisibleStatus and not other._flowBinsVisibleStatus:
+            other.makeFlowBinsVisible()
+        if not self._flowBinsVisibleStatus and other._flowBinsVisibleStatus:
+            self.makeFlowBinsVisible()
+
         self._rootHisto.Add(other._rootHisto)
 
         keys1 = self._shapeUncertainties.keys()
@@ -1499,8 +1509,10 @@ class RootHistoWithUncertainties:
             clone._shapeUncertaintyRelativeSquared = self._shapeUncertaintyRelativeSquared.Clone()
             clone._shapeUncertaintyRelativeSquared.SetDirectory(0)
             clone._shapeUncertaintyRelativeNames = self._shapeUncertaintyRelativeNames[:]
-        clone._normalizationUncertaintyRelativeSquared = self._normalizationUncertaintyRelativeSquared
+        clone._normalizationUncertaintyRelativeSquaredPlus = self._normalizationUncertaintyRelativeSquaredPlus
+        clone._normalizationUncertaintyRelativeSquaredMinus = self._normalizationUncertaintyRelativeSquaredMinus
         clone._normalizationUncertaintyRelativeNames = self._normalizationUncertaintyRelativeNames
+        clone._flowBinsVisibleStatus = self._flowBinsVisibleStatus
         return clone
 
     ## Delete all contained histograms
@@ -1515,7 +1527,8 @@ class RootHistoWithUncertainties:
         self._rootHisto = None
         self._shapeUncertainties = None
         self._shapeUncertaintyRelativeSquared = None
-        self._normalizationUncertaintyRelativeSquared = None
+        self._normalizationUncertaintyRelativeSquaredPlus = None
+        self._normalizationUncertaintyRelativeSquaredMinus = None
 
     ## "Eats" SetDirectory() call for interface compatibility, i.e. do nothing
     def SetDirectory(self, *args):
