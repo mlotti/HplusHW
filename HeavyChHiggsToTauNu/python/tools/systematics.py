@@ -54,6 +54,9 @@ class ScalarUncertaintyItem:
     def getName(self):
         return self._name
 
+    def isAsymmetric(self):
+        return abs(self._uncertDown - self._uncertUp) > 0.0001
+
     def getUncertaintyDown(self):
         return self._uncertDown
 
