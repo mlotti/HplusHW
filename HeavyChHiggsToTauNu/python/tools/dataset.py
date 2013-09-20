@@ -1127,18 +1127,17 @@ class RootHistoWithUncertainties:
         if not self._flowBinsVisibleStatus:
             raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
         mySum = 0.0
-        if isinstance(self._rootHisto, ROOT.TH1):
-            for i in range(1, self._rootHisto.GetNbinsX()):
-                mySum += self._rootHisto.GetBinError(i)**2
-        else:
+        if isinstance(self._rootHisto, ROOT.TH2):
             raise Exception("getRateStatUncertainty() supported currently only for TH1!")
+        for i in range(1, self._rootHisto.GetNbinsX()):
+            mySum += self._rootHisto.GetBinError(i)**2
         return math.sqrt(mySum)
 
     ## Get the syst. uncertainty of the root histo object
     def getRateSystUncertainty(self):
         if not self._flowBinsVisibleStatus:
             raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
-        if not isinstance(self._rootHisto, ROOT.TH1):
+        if isinstance(self._rootHisto, ROOT.TH2):
             raise Exception("getRateSystUncertainty() supported currently only for TH1!")
         # Integrate first over distribution, then sum
         myClone = self.Clone()
@@ -1158,9 +1157,7 @@ class RootHistoWithUncertainties:
             return
         self._flowBinsVisibleStatus = True
         # Update systematics histograms first
-        keys1 = self._shapeUncertainties.keys()
-        for key in keys1:
-            (hPlus, hMinus) = self._shapeUncertainties[key]
+        for key, (hPlus, hMinus) in self._shapeUncertainties.iteritems():
             moveBinContent(0,1,hPlus)
             moveBinContent(0,1,hMinus)
             moveBinContent(hPlus.GetNbinsX()+1,hPlus.GetNbinsX(),hPlus)
@@ -1193,7 +1190,7 @@ class RootHistoWithUncertainties:
     # \param th1Minus TH1 holding the relative uncertainties (e.g. 0.2 for 20 %); if None, then th1Plus values are used
     #
     # The bin-wise uncertainties are summed quadratically
-    def addShapeUncertaintyRelative(self, name, th1Plus, thi1Minus=None):
+    def addShapeUncertaintyRelative(self, name, th1Plus, th1Minus=None):
         if self._flowBinsVisibleStatus:
             raise Exception("addShapeUncertainty(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
         if isinstance(th1Plus, ROOT.TH2) or isinstance(th1Minus, ROOT.TH2):
@@ -1205,8 +1202,8 @@ class RootHistoWithUncertainties:
         sqSumPlus = self._shapeUncertaintyAbsoluteSquaredPlus # just for a shorter name
         sqSumMinus = self._shapeUncertaintyAbsoluteSquaredMinus # just for a shorter name
         th1MinusSource = th1Minus
-        if thi1MinusSource == None:
-            thi1MinusSource = th1Plus
+        if th1MinusSource == None:
+            th1MinusSource = th1Plus
         for bin in xrange(0, th1.GetNbinsX()+2):
             absUncertUp = th1Plus.GetBinContent(bin)*self._rootHisto.GetBinContent(bin)
             sqSumPlus.SetBinContent(bin, sqSumPlus.GetBinContent(bin)+absUncertUp**2)
@@ -1508,6 +1505,8 @@ class RootHistoWithUncertainties:
             clone._shapeUncertainties[key] = (plus, minus)
         clone._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Clone()
         clone._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Clone()
+        clone._shapeUncertaintyAbsoluteSquaredPlus.SetDirectory(0)
+        clone._shapeUncertaintyAbsoluteSquaredMinus.SetDirectory(0)
         clone._shapeUncertaintyAbsoluteNames = self._shapeUncertaintyAbsoluteNames[:]
         clone._flowBinsVisibleStatus = self._flowBinsVisibleStatus
         return clone
