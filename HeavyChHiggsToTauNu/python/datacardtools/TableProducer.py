@@ -536,21 +536,40 @@ class TableProducer:
 
     ## Prints event yield summary table
     def makeEventYieldSummary(self):
-        def getFormattedUnc(formatStr,uncUp,uncDown):
-            if abs(uncDown-uncUp) < 0.00001:
+        formatStr = "%6."
+        myPrecision = None
+        if self._config.OptionNumberOfDecimalsInSummaries == None:
+            print WarningLabel()+"Using default value for number of decimals in summaries. To change, set OptionNumberOfDecimalsInSummaries in your config."+NormalStyle()
+            formatStr += "1"
+            myPrecision = 1
+        else:
+            formatStr += "%d"%self._config.OptionNumberOfDecimalsInSummaries
+            myPrecision = self._config.OptionNumberOfDecimalsInSummaries
+        formatStr += "f"
+
+        def getFormattedUnc(formatStr,myPrecision,uncUp,uncDown):
+            if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
                 # symmetric
                 return "+- %s"%(formatStr%uncDown)
             else:
                 # asymmetric
-                return "+%s -%s"%(formatStr%uncDown,formatStr%uncUp)
+                return "+%s -%s"%(formatStr%uncUp,formatStr%uncDown)
 
-        def getLatexFormattedUnc(formatStr,uncUp,uncDown):
-            if abs(uncDown-uncUp) < 0.00001:
+        def getResultString(hwu,formatStr,myPrecision):
+            return "%s +- %s (stat.) %s (syst.)\n"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
+                getFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
+
+        def getLatexFormattedUnc(formatStr,myPrecision,uncUp,uncDown):
+            if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
                 # symmetric
                 return "\\pm %s"%(formatStr%uncDown)
             else:
                 # asymmetric
-                return "~^{+%s}){-%s}"%(formatStr%uncDown, formatStr%uncUp)
+                return "~^{+%s}){-%s}"%(formatStr%uncUp, formatStr%uncDown)
+
+        def getLatexResultString(hwu,formatStr,myPrecision):
+            return "$%s \\pm %s %s $"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
+                getLatexFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
 
         # Loop over mass points
         for m in self._config.MassPoints:
@@ -593,8 +612,6 @@ class TableProducer:
                 HH.Scale(myBr**2)
                 HW.Add(HH)
             # From this line on, HW includes all signal
-            mySignalRate = HW.getRate()
-            mySignalStat = HW.getRateStatUncertainty()
             # Calculate expected yield
             TotalExpected = QCD.Clone()
             TotalExpected.Add(Embedding)
@@ -605,15 +622,15 @@ class TableProducer:
             myOutput += self._generateHeader(m)
             myOutput += "\n"
             myOutput += "Number of events\n"
-            myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(m,myBr,mySignalRate,mySignalStat,getFormattedUnc("%4.1f",*HW.getRateSystUncertainty()))
+            myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %s"%(m,myBr,getResultString(HW,formatStr,myPrecision))
             myOutput += "Backgrounds:\n"
-            myOutput += "                           Multijets: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(QCD.getRate(),QCD.getRateStatUncertainty(),getFormattedUnc("%4.1f",*QCD.getRateSystUncertainty()))
+            myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
             if self._config.OptionReplaceEmbeddingByMC:
-                myOutput += "                           MC EWK+tt: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(Embedding.getRate(),Embedding.getRateStatUncertainty(),getFormattedUnc("%4.1f",*Embedding.getRateSystUncertainty()))
+                myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
             else:
-                myOutput += "                    EWK+tt with taus: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(Embedding.getRate(),Embedding.getRateStatUncertainty(),getFormattedUnc("%4.1f",*Embedding.getRateSystUncertainty()))
-                myOutput += "               EWK+tt with fake taus: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(EWKFakes.getRate(),EWKFakes.getRateStatUncertainty(),getFormattedUnc("%4.1f",*EWKFakes.getRateSystUncertainty()))
-            myOutput += "                      Total expected: %5.1f +- %4.1f (stat.) %s (syst.)\n"%(TotalExpected.getRate(),TotalExpected.getRateStatUncertainty(),getFormattedUnc("%4.1f",*TotalExpected.getRateSystUncertainty()))
+                myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
+                myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
+            myOutput += "                      Total expected: %s"%getResultString(TotalExpected,formatStr,myPrecision)
             if self._config.BlindAnalysis:
                 myOutput += "                            Observed: BLINDED\n\n"
             else:
@@ -641,31 +658,20 @@ class TableProducer:
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  \\multicolumn{1}{ c }{Source}  & $N_{\\text{events}} \\pm \\text{stat.} \\pm \\text{syst.}$  \\\\ \n"
             myOutputLatex += "  \\hline\n"
-            if round(mySignalSystDown) == round(mySignalSystUp): 
-                myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(m, mySignalRate, mySignalStat, mySignalSystDown)
-            else:
-                myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & $%4.0f \\pm $%4.0f~^{+%4.0f}_{%4.0f} $ \\\\ \n"%(m, mySignalRate, mySignalStat, mySignalSystUp, mySignalSystDown)
+            myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n"%(m,getLatexResultString(HW,formatStr,myPrecision))
             myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  Multijet background (data-driven)       & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(QCD.getRate(),QCD.getRateStatUncertainty(),QCD.getAbsoluteSystDown())
+            myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n"%getLatexResultString(QCD,formatStr,myPrecision)
             if self._config.OptionReplaceEmbeddingByMC:
-                myOutputLatex += "  MC EWK+\\ttbar  & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(Embedding.getRate(),Embedding.getRateStatUncertainty(),Embedding.getAbsoluteSystDown())
+                myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
             else:
-                myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(Embedding.getRate(),Embedding.getRateStatUncertainty(),Embedding.getAbsoluteSystDown())
-                myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & $%4.0f \\pm %4.0f"%(EWKFakes.getRate(),EWKFakes.getRateStatUncertainty())
-                if round(EWKFakes.getAbsoluteSystDown()) == round(EWKFakes.getAbsoluteSystUp()):
-                    myOutputLatex += " \\pm %4.0f $ \\\\ \n"%EWKFakes.getAbsoluteSystDown()
-                else:
-                    myOutputLatex += "~^{+%4.0f}){-%4.0f} $ \\\\ \n"%(EWKFakes.getAbsoluteSystUp(), EWKFakes.getAbsoluteSystDown())
+                myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
+                myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
             myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  Total expected from the SM              & $%4.0f \\pm %4.0f"%(TotalExpected.getRate(),TotalExpected.getRateStatUncertainty())
-            if round(TotalExpected.getAbsoluteSystDown()) == round(TotalExpected.getAbsoluteSystUp()):
-                myOutputLatex += " \\pm %4.0f $ \\\\ \n"%(TotalExpected.getAbsoluteSystUp())
-            else:
-                myOutputLatex += "~^{+%4.0f}){-%4.0f} $ \\\\ \n"%(TotalExpected.getAbsoluteSystUp(), TotalExpected.getAbsoluteSystDown())
+            myOutputLatex += "  Total expected from the SM              & %s \\\\ \n"%getLatexResultString(TotalExpected,formatStr,myPrecision)
             if self._config.BlindAnalysis:
                 myOutputLatex += "  Observed: & BLINDED \\\\ \n"
             else:
-                myOutputLatex += "  Observed: & %4d \\\\ \n"%Data.getRate()
+                myOutputLatex += "  Observed: & %5d \\\\ \n"%Data.getRate()
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  \\end{tabular}\n"
             myOutputLatex += "\\end{table}\n"

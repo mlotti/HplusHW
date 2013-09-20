@@ -6,7 +6,6 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import _histoToCounter
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 from math import pow,sqrt
 import sys
 import ROOT
@@ -457,13 +456,7 @@ class ShapeExtractor(ExtractorBase):
         if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
             raise Exception(ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+NormalStyle())
         # Get histogram from cache
-        hSource = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
-        # Apply formatting
-        myShapeModifier = ShapeHistoModifier(self._histoSpecs)
-        h = myShapeModifier.createEmptyShapeHistogram(datasetColumn.getLabel())
-        myShapeModifier.addShape(dest=h,source=hSource)
-        myShapeModifier.finaliseShape(dest=h)
-        #hSource.IsA().Destructor(hSource) # Delete temporary histogram
+        h = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
         h.Scale(additionalNormalisation) # Scale by additional normalisation
         if self.isRate() or self.isObservation():
             # Shape histogram is the result
@@ -471,8 +464,8 @@ class ShapeExtractor(ExtractorBase):
         else:
             # Ok, it's a nuisance
             # Create up and down histograms for shape stat
-            hUp = myShapeModifier.createEmptyShapeHistogram(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
-            hDown = myShapeModifier.createEmptyShapeHistogram(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
+            hUp = h.Clone(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
+            hDown = h.Clone(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
             for k in range(1, h.GetNbinsX()+1):
                 hUp.SetBinContent(k, h.GetBinContent(k) + h.GetBinError(k))
                 hDown.SetBinContent(k, h.GetBinContent(k) - h.GetBinError(k))
@@ -522,24 +515,16 @@ class ShapeVariationExtractor(ExtractorBase):
         if not self._systVariation in myShapeUncertDict.keys():
             print WarningLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, ignoring it! Available: %s"%(datasetColumn.getLabel(), self._systVariation, ', '.join(map(str, myShapeUncertDict.keys())))
             return myHistograms
-        # Create up and down histograms
-        myShapeModifier = ShapeHistoModifier(self._histoSpecs)
-        hUp = myShapeModifier.createEmptyShapeHistogram(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
-        hDown = myShapeModifier.createEmptyShapeHistogram(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
         # Get histogram from cache
         (hSystUp, hSystDown) = myShapeUncertDict[self._systVariation]
+        hUp = hSystUp.Clone(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
+        hDown = hSystDown.Clone(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
         # Apply formatting
-        myShapeModifier.addShape(dest=hUp,source=hSystUp)
-        myShapeModifier.addShape(dest=hDown,source=hSystDown)
-        myShapeModifier.finaliseShape(dest=hUp)
-        myShapeModifier.finaliseShape(dest=hDown)
-        #hSource.IsA().Destructor(hSource) # Delete temporary histogram
         hUp.Scale(additionalNormalisation) # Scale by additional normalisation
         hDown.Scale(additionalNormalisation) # Scale by additional normalisation
         # Append histograms to output list
         myHistograms.append(hUp)
         myHistograms.append(hDown)
-        #h.IsA().Destructor(h) # Delete the nominal histo
         # Return result
         return myHistograms
 
@@ -579,34 +564,36 @@ class ControlPlotExtractor(ExtractorBase):
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         # Create an empty histogram
         myLabel = datasetColumn.getLabel()+"_"+self._histoTitle
-        myShapeModifier = ShapeHistoModifier(self._histoSpecs)
-        h = myShapeModifier.createEmptyShapeHistogram(myLabel)
-        for i in range (0, len(self._histoDirs)):
-            #print "Extractor ",self._histoDirs[i],self._histoNames[i]
-            # Obtain histogram from dataset
-            myHistoname = self._histoDirs[i]+"/"+self._histoNames[i]
-            if self._histoDirs[i] == "":
-                myHistoname = self._histoNames[i]
-            try:
-                myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoname)
-            except Exception, e:
-                raise Exception (ErrorStyle()+"Error in extracting ControlPlots:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  Histogram title = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._histoTitle, str(e)))
-            if myDatasetRootHisto.isMC():
-                myDatasetRootHisto.normalizeToLuminosity(luminosity)
-            hSource = myDatasetRootHisto.getHistogram()
-            if i == 0:
-                myShapeModifier.addShape(dest=h,source=hSource)
-            else:
-                myShapeModifier.subtractShape(dest=h,source=hSource)
-            hSource.IsA().Destructor(hSource)
-        # Finalise histogram
-        myShapeModifier.finaliseShape(dest=h)
-        # Apply additional normalisation
-        h.Scale(additionalNormalisation)
-        # Add here substraction of negative bins, if necessary
-        # ... no use case currently, therefore no code added
-        # Return result
-        return h
+        #FIXME
+        
+        #myShapeModifier = ShapeHistoModifier(self._histoSpecs)
+        #h = myShapeModifier.createEmptyShapeHistogram(myLabel)
+        #for i in range (0, len(self._histoDirs)):
+            ##print "Extractor ",self._histoDirs[i],self._histoNames[i]
+            ## Obtain histogram from dataset
+            #myHistoname = self._histoDirs[i]+"/"+self._histoNames[i]
+            #if self._histoDirs[i] == "":
+                #myHistoname = self._histoNames[i]
+            #try:
+                #myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoname)
+            #except Exception, e:
+                #raise Exception (ErrorStyle()+"Error in extracting ControlPlots:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  Histogram title = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._histoTitle, str(e)))
+            #if myDatasetRootHisto.isMC():
+                #myDatasetRootHisto.normalizeToLuminosity(luminosity)
+            #hSource = myDatasetRootHisto.getHistogram()
+            #if i == 0:
+                #myShapeModifier.addShape(dest=h,source=hSource)
+            #else:
+                #myShapeModifier.subtractShape(dest=h,source=hSource)
+            #hSource.IsA().Destructor(hSource)
+        ## Finalise histogram
+        #myShapeModifier.finaliseShape(dest=h)
+        ## Apply additional normalisation
+        #h.Scale(additionalNormalisation)
+        ## Add here substraction of negative bins, if necessary
+        ## ... no use case currently, therefore no code added
+        ## Return result
+        #return h
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):

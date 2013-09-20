@@ -4,13 +4,15 @@
 
 import os
 import sys
-
+from ROOT import TH1F
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from math import sqrt,pow
+from array import array
+
 
 ## ExtractorResult
 # Helper class to cache the result for each extractor in each datacard column
@@ -241,28 +243,18 @@ class DatacardColumn():
             if myDatasetRootHisto.isMC():
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()
-            # Rebin cached histograms with uncertainties
-            myShapeModifier = ShapeHistoModifier(config.ShapeHistogramsDimensions)
-            hShape = self._cachedShapeRootHistogramWithUncertainties.getRootHisto()
-            self._cachedShapeRootHistogramWithUncertainties._rootHisto = rebinHelper(myShapeModifier, hShape, self.getLabel())
-            print "shape dim %d->%d"%(hShape.GetNbinsX(),self._cachedShapeRootHistogramWithUncertainties.getRootHisto().GetNbinsX())
-            myShapeUncertDict = self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties()
-            for key in myShapeUncertDict.keys():
-                (hSystUp, hSystDown) = myShapeUncertDict[key]
-                hRebinnedUp = rebinHelper(myShapeModifier, hSystUp, "%s%s"%(self.getLabel(),key))
-                hRebinnedDown = rebinHelper(myShapeModifier, hSystDown, "%s%s"%(self.getLabel(),key))
-                self._cachedShapeRootHistogramWithUncertainties._shapeUncertainties[key] = (hRebinnedUp, hRebinnedDown)
-                (hSystUp2, hSystDown2) = self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties()[key]
-                print "uncert dim + %d->%d - %d->%d"%(hSystUp.GetNbinsX(),hSystUp2.GetNbinsX(),hSystDown.GetNbinsX(),hSystDown2.GetNbinsX())
-            if self._opts.verbose:
-                print "  - Has syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
+            # Rebin and move under/overflow bins to visible bins
+            myArray = array("d",config.ShapeHistogramsDimensions["variableBinSizeLowEdges"]+[config.ShapeHistogramsDimensions["rangeMax"]])
+            self._cachedShapeRootHistogramWithUncertainties.Rebin(len(config.ShapeHistogramsDimensions["variableBinSizeLowEdges"]),"",myArray)
+            self._cachedShapeRootHistogramWithUncertainties.makeFlowBinsVisible()
         # Obtain rate histogram
         myRateHistograms = []
         if self.typeIsEmptyColumn() or dsetMgr == None:
             if self._opts.verbose:
                 print "  - Creating empty rate shape"
-            myShapeModifier = ShapeHistoModifier(config.ShapeHistogramsDimensions)
-            myRateHistograms.append(myShapeModifier.createEmptyShapeHistogram(self.getLabel()))
+            myArray = array("d",config.ShapeHistogramsDimensions["variableBinSizeLowEdges"]+[config.ShapeHistogramsDimensions["rangeMax"]])
+            h = TH1F(self.getLabel(),self.getLabel(),len(myArray)-1,myArray)
+            myRateHistograms.append(h)
         else:
             if self._opts.verbose:
                 print "  - Extracting rate histogram"
@@ -281,8 +273,6 @@ class DatacardColumn():
         for nid in self._nuisanceIds:
             if self._opts.verbose:
                 print "  - Extracting nuisance by id=%s"%nid
-            #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Nuisance="+nid+"...                                              ")
-            #sys.stdout.flush()
             myFoundStatus = False
             for e in extractors:
                 if e.getId() == nid:
@@ -295,6 +285,14 @@ class DatacardColumn():
                     myHistograms = []
                     if e.isShapeNuisance() and dsetMgr != None:
                         myHistograms.extend(e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+                    else:
+                        # Add scalar uncertainties
+                        if isinstance(myResult, ScalarUncertaintyItem):
+                            self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                        elif isinstance(myResult, list):
+                            self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myResult[1], myResult[0])
+                        else:
+                            self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myResult, myResult)
                     # Cache result
                     self._nuisanceResults.append(ExtractorResult(e.getId(),
                                                                  e.getMasterId(),
@@ -303,6 +301,10 @@ class DatacardColumn():
                                                                  "Stat." in e.getDescription() or "stat." in e.getDescription() or e.getDistribution()=="shapeStat"))
             if not myFoundStatus:
                 raise Exception("\n"+ErrorLabel()+"(data group ='"+self._label+"'): Cannot find nuisance with id '"+nid+"'!")
+        # Print list of uncertainties
+        if self._opts.verbose and dsetMgr != None and not self.typeIsEmptyColumn():
+            print "  - Has shape variation syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
+            print "  - Has shape squared syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties._shapeUncertaintyAbsoluteNames)))
         # Obtain results for control plots
         if config.OptionDoControlPlots != None:
             if config.OptionDoControlPlots:

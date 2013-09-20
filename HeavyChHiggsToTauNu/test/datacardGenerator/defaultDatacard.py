@@ -30,6 +30,7 @@ OptionIncludeSystematics = True # Set to true if the JES and PU uncertainties we
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = False
 OptionDisplayEventYieldSummary = True
+OptionNumberOfDecimalsInSummaries = 1
 
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
