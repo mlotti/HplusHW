@@ -436,7 +436,7 @@ class ScaleFactorExtractor(ExtractorBase):
 # Extracts histogram shapes
 class ShapeExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, histoSpecs, mode = ExtractorMode.NUISANCE, exid = "", distribution = "", description = "", opts=None):
+    def __init__(self, histoSpecs, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "", description = "", opts=None):
         self._histoSpecs = histoSpecs
         ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
         if not (self.isRate() or self.isObservation()):
@@ -486,7 +486,7 @@ class ShapeExtractor(ExtractorBase):
 # Extracts histogram shapes from up and down variation
 class ShapeVariationExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, histoSpecs, systVariation, mode = ExtractorMode.NUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None):
+    def __init__(self, histoSpecs, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None):
         ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
         self._histoSpecs = histoSpecs
         self._systVariation = systVariation

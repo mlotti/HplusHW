@@ -470,7 +470,7 @@ class DataCardGenerator:
             i = 0
             myFirstValue = 0
             for c in sorted(self._columns, key=lambda x: x.getLandsProcess()):
-                if (c.isActiveForMass(m)):
+                if (c.isActiveForMass(m,self._config)):
                     #sprint c.getLabel(), c.getLandsProcess()
                     if i == 0:
                         myFirstValue = c.getLandsProcess()
@@ -479,6 +479,9 @@ class DataCardGenerator:
                             print ErrorLabel()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
                             raise Exception()
                     i += 1
+                else:
+                    if c.getLabel() == "res.":
+                        i += 1 # Take into account that the empty column is no longer needed for sigma x Br limits
 
     ## Creates extractors for nuisances
     def createExtractors(self):

@@ -1,4 +1,4 @@
-DataCardName    = 'Default'
+DataCardName    = 'Default_7TeV'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeIsolationDependent'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_vitalonly_correctCtrlPlots'
@@ -9,10 +9,8 @@ Path = "/home/wendland/data/v445/2013-09-09"
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 LightMassPoints      = [120]
 HeavyMassPoints      = [180,190,200,220,250,300]
-HeavyMassPoints      = []
-#MassPoints      = [80,90,100,120,140,150,155,160]
-#MassPoints      = [80,120,160]
-MassPoints      = [120] # The mass points to run
+HeavyMassPoints      = [180]
+MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
 BlindAnalysis   = True
 
@@ -31,6 +29,8 @@ OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine
 OptionDoControlPlots = False
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
+OptionRemoveHHDataGroup = False
+OptionLimitOnSigmaBr = False # Is automatically set to true for heavy H+
 
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
@@ -137,8 +137,8 @@ for mass in HeavyMassPoints:
     hx.setLabel("Hp"+str(mass)+"_a")
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
-    hx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_tt_7TeV","lumi"])
-    hx.setDatasetDefinitions("HplusTB_M"+str(mass))
+    hx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_heavyHplus_7TeV","lumi"])
+    hx.setDatasetDefinition("HplusTB_M"+str(mass))
     DataGroups.append(hx)
 
 myQCDFact = DataGroup(
@@ -190,7 +190,7 @@ if not OptionReplaceEmbeddingByMC:
     # EWK + ttbar with fake taus
     EWKFakeIdList = [1,5,6]
     DataGroups.append(DataGroup(
-        label        = "EWK_tt_faketau",
+        label        = "tt_EWK_faketau",
         landsProcess = 1,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
@@ -199,7 +199,7 @@ if not OptionReplaceEmbeddingByMC:
         nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","xsect_tt_7TeV","lumi","stat_binByBin_fakes"],
     ))
     DataGroups.append(DataGroup(
-        label        = "EWK_W_faketau",
+        label        = "W_EWK_faketau",
         landsProcess = 5,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
@@ -208,7 +208,7 @@ if not OptionReplaceEmbeddingByMC:
         nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin_fakes"],
     ))
     DataGroups.append(DataGroup(
-        label        = "EWK_t_faketau",
+        label        = "t_EWK_faketau",
         landsProcess = 6,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
@@ -217,7 +217,7 @@ if not OptionReplaceEmbeddingByMC:
         nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin_fakes"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_DY_faketau",
+        label        = "DY_EWK_faketau",
         landsProcess = 7,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
@@ -226,7 +226,7 @@ if not OptionReplaceEmbeddingByMC:
         nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin_fakes"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_VV_faketau",
+        label        = "VV_EWK_faketau",
         landsProcess = 8,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
@@ -238,7 +238,7 @@ else:
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
     EmbeddingIdList = [1,4,5,6,7]
     DataGroups.append(DataGroup(
-        label        = "MC_ttbar",
+        label        = "ttbar_MC",
         landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
@@ -247,7 +247,7 @@ else:
         nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","xsect_tt_7TeV","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_Wjets",
+        label        = "Wjets_MC",
         landsProcess = 4,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
@@ -256,7 +256,7 @@ else:
         nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_mistag","xsect_Wjets","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_1top",
+        label        = "t_MC",
         landsProcess = 5,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
@@ -265,7 +265,7 @@ else:
         nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","xsect_singleTop","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_DY",
+        label        = "DY_MC",
         landsProcess = 6,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
@@ -274,7 +274,7 @@ else:
         nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_mistag","xsect_DYtoll","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_VV",
+        label        = "VV_MC",
         landsProcess = 7,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
@@ -792,6 +792,15 @@ Nuisances.append(Nuisance(
     distr         = "lnN",
     function      = "Counter",
     counter       = FakeRateCounter
+))
+
+Nuisances.append(Nuisance(
+    id            = "xsect_heavyHplus_7TeV",
+    label         = "ttbar cross section",
+    distr         = "lnN",
+    function      = "Constant",
+    value         = systematics.getCrossSectionUncertainty("HplusTB").getUncertaintyDown(),
+    upperValue    = systematics.getCrossSectionUncertainty("HplusTB").getUncertaintyUp(),
 ))
 
 Nuisances.append(Nuisance(

@@ -178,8 +178,14 @@ class DatacardColumn():
             raise Exception()
 
     ## Returns true if column is enabled for given mass point
-    def isActiveForMass(self, mass):
-        return (mass in self._enabledForMassPoints) and self._isPrintable
+    def isActiveForMass(self, mass, config):
+        myResult = (mass in self._enabledForMassPoints) and self._isPrintable
+        # Ignore empty column for heavy H+
+        myMassStatus = not (self.typeIsEmptyColumn() and (mass > 179 or config.OptionLimitOnSigmaBr))
+        # Ignore HH if chosen in options
+        myHHStatus = not (self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr))
+        #print self._label,myResult,myMassStatus,myHHStatus
+        return myResult and myMassStatus and myHHStatus
 
     ## Disables the datacard column
     def disable(self):
@@ -241,7 +247,10 @@ class DatacardColumn():
             mySystematics = dataset.Systematics(allShapes=True) #,verbose=True)
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
             if myDatasetRootHisto.isMC():
-                myDatasetRootHisto.normalizeToLuminosity(luminosity)
+                if (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
+                    myDatasetRootHisto.normalizeToLuminosity(1) # Normalize signal to 1 pb in order to obtain limit on sigma x Br
+                else:
+                    myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()
             # Rebin and move under/overflow bins to visible bins
             myArray = array("d",config.ShapeHistogramsDimensions["variableBinSizeLowEdges"]+[config.ShapeHistogramsDimensions["rangeMax"]])

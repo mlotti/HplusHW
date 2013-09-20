@@ -16,103 +16,6 @@ import sys
 import time
 import ROOT
 
-## EventYieldSummary class
-class EventYieldSummary:
-    ## Constructor
-    def __init__(self):
-        self._hRate = None
-        self._hAbsoluteSystUp = None
-        self._hAbsoluteSystDown = None
-
-    def extract(self, opts, config, datasetColumn, extractors):
-        if self._hRate == None:
-            hNominal = datasetColumn.getRateHistogram()
-            self._hRate = hNominal.Clone("tmpNominal%s"%datasetColumn.getLabel())
-            self._hAbsoluteSystUp = self._hRate.Clone("tmpUp%s"%datasetColumn.getLabel())
-            self._hAbsoluteSystUp.Reset()
-            self._hAbsoluteSystDown = self._hRate.Clone("tmpDown%s"%datasetColumn.getLabel())
-            self._hAbsoluteSystDown.Reset()
-        for n in extractors:
-            if n.isPrintable():
-                if datasetColumn.hasNuisanceByMasterId(n.getId()):
-                    myValue = datasetColumn.getNuisanceResultByMasterId(n.getId())
-                    if "stat" in n.getDescription() and n.isNuisance():
-                        if isinstance(myValue,ScalarUncertaintyItem):
-                            print "stat, scalar",myValue
-                            for i in range(1, self._hRate.GetNbinsX()+1):
-                                self._hRate.SetBinError(i, sqrt(self._hRate.GetBinError(i)**2+self._hRate.GetBinContent(i)*myValue.getUncertaintyUp()))
-                        else:
-                            print "stat, double",myValue
-                            for i in range(1, self._hRate.GetNbinsX()+1):
-                                self._hRate.SetBinError(i, sqrt(self._hRate.GetBinError(i)**2+self._hRate.GetBinContent(i)*myValue))
-                    else:
-                        if isinstance(myValue,ScalarUncertaintyItem):
-                            print "syst, scalar",myValue
-                            for i in range(1, self._hRate.GetNbinsX()+1):
-                                self._hAbsoluteSystDown.SetBinContent(i, sqrt(self._hAbsoluteSystDown.GetBinContent(i)**2+(myValue.getUncertaintyDown() * self._hRate.GetBinContent(i))**2))
-                                self._hAbsoluteSystUp.SetBinContent(i, sqrt(self._hAbsoluteSystUp.GetBinContent(i)**2+(myValue.getUncertaintyUp() * self._hRate.GetBinContent(i))**2))
-                        else:
-                            if n.isAsymmetricNuisance():
-                                print "syst, double asymm.",myValue
-                                for i in range(1, self._hRate.GetNbinsX()+1):
-                                    self._hAbsoluteSystDown.SetBinContent(i, sqrt(self._hAbsoluteSystDown.GetBinContent(i)**2+(myValue[0] * self._hRate.GetBinContent(i))**2))
-                                    self._hAbsoluteSystUp.SetBinContent(i, sqrt(self._hAbsoluteSystUp.GetBinContent(i)**2+(myValue[1] * self._hRate.GetBinContent(i))**2))
-                            elif n.isNuisance():
-                                print "syst, scalar symm.",myValue
-                                for i in range(1, self._hRate.GetNbinsX()+1):
-                                    self._hAbsoluteSystDown.SetBinContent(i, sqrt(self._hAbsoluteSystDown.GetBinContent(i)**2+(myValue * self._hRate.GetBinContent(i))**2))
-                                    self._hAbsoluteSystUp.SetBinContent(i, sqrt(self._hAbsoluteSystUp.GetBinContent(i)**2+(myValue * self._hRate.GetBinContent(i))**2))
-                            elif n.isShapeNuisance() and n.getDistribution() == "shapeQ":
-                                print "syst, shapeQ.",myValue
-                                # Determine maximum of values
-                                myHistograms = datasetColumn.getFullNuisanceResultByMasterId(n.getId()).getHistograms()
-                                hUp = myHistograms[0]
-                                hDown = myHistograms[1]
-                                hNominal = self._hRate
-                                # Calculate
-                                for i in range(1, self._hRate.GetNbinsX()+1):
-                                    myDeltaDown = 0.0
-                                    myDeltaUp = 0.0
-                                    if hNominal.GetBinContent(i) > 0.0:
-                                        myDeltaDown = abs(hDown.GetBinContent(i) - hNominal.GetBinContent(i)) / hNominal.GetBinContent(i)
-                                        myDeltaUp = abs(hUp.GetBinContent(i) - hNominal.GetBinContent(i)) / hNominal.GetBinContent(i)
-                                    self._hAbsoluteSystDown.SetBinContent(i, sqrt(self._hAbsoluteSystDown.GetBinContent(i)**2+myDeltaDown**2))
-                                    self._hAbsoluteSystUp.SetBinContent(i, sqrt(self._hAbsoluteSystUp.GetBinContent(i)**2+myDeltaUp**2))
-                    print self._hRate.GetBinContent(2),self._hRate.GetBinError(2),self._hAbsoluteSystDown.GetBinContent(2),self._hAbsoluteSystUp.GetBinContent(2),n.getId()
-
-    ## Combines with another event yield summary
-    def add(self,summary):
-        if self._hRate == None:
-            self._hRate = summary._hRate.Clone()
-            self._hAbsoluteSystDown = summary._hAbsoluteSystDown.Clone()
-            self._hAbsoluteSystUp = summary._hAbsoluteSystUp.Clone()
-        else:
-            self._hRate.Add(summary._hRate)
-            for i in range(1, self._hRate.GetNbinsX()+1):
-                self._hAbsoluteSystDown.SetBinContent(i, sqrt(self._hAbsoluteSystDown.GetBinContent(i)**2+summary._hAbsoluteSystDown.GetBinContent(i)**2))
-                self._hAbsoluteSystUp.SetBinContent(i, sqrt(self._hAbsoluteSystUp.GetBinContent(i)**2+summary._hAbsoluteSystUp.GetBinContent(i)**2))
-
-    def getRate(self):
-        return self._hRate.Integral()
-
-    def getAbsoluteStat(self):
-        mySum = 0.0
-        for i in range(1, self._hRate.GetNbinsX()+1):
-            mySum += self._hRate.GetBinError(i)**2
-        return sqrt(mySum)
-
-    def getAbsoluteSystDown(self):
-        mySum = 0.0
-        for i in range(1, self._hRate.GetNbinsX()+1):
-            mySum += self._hAbsoluteSystDown.GetBinContent(i)**2
-        return sqrt(mySum)
-
-    def getAbsoluteSystUp(self):
-        mySum = 0.0
-        for i in range(1, self._hRate.GetNbinsX()+1):
-            mySum += self._hAbsoluteSystUp.GetBinContent(i)**2
-        return sqrt(mySum)
-
 ## TableProducer class
 class TableProducer:
     ## Constructor
@@ -280,20 +183,24 @@ class TableProducer:
         # obtain bin numbers
         myRow = ["bin",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-            if c.isActiveForMass(mass):
+            if c.isActiveForMass(mass,self._config):
                 myRow.append("1")
         myResult.append(myRow)
         # obtain labels
         myRow = ["process",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-            if c.isActiveForMass(mass):
+            if c.isActiveForMass(mass,self._config):
                 myRow.append(c.getLabel())
         myResult.append(myRow)
         # obtain process numbers
         myRow = ["process",""]
+        myOffset = 0
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-            if c.isActiveForMass(mass):
-                myRow.append(str(c.getLandsProcess()))
+            if c.isActiveForMass(mass,self._config):
+                myRow.append(str(c.getLandsProcess()+myOffset))
+            else:
+                if c.getLabel() == "res.": # Take into account that the empty column is no longer needed for sigma x Br limits
+                    myOffset -= 1
         myResult.append(myRow)
         return myResult
 
@@ -302,7 +209,7 @@ class TableProducer:
         myResult = []
         myRow = ["rate",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-            if c.isActiveForMass(mass):
+            if c.isActiveForMass(mass,self._config):
                 if self._opts.verbose:
                     print "- obtaining cached rate for column %s"%c.getLabel()
                 myRateValue = c.getRateResult()
@@ -323,7 +230,7 @@ class TableProducer:
         for n in self._extractors:
             myCount = 0
             for c in self._datasetGroups:
-                if c.isActiveForMass(mass) and n.isPrintable() and c.hasNuisanceByMasterId(n.getId()):
+                if c.isActiveForMass(mass,self._config) and n.isPrintable() and c.hasNuisanceByMasterId(n.getId()):
                     myCount += 1
             if myCount == 0 and n.isPrintable():
                 print WarningLabel()+"Suppressed nuisance %s: '%s' because it does not affect any data column!"%(n.getId(),n.getDescription())
@@ -336,7 +243,7 @@ class TableProducer:
         myVirtualMergeInformation = {}
         myVirtuallyInactivatedIds = []
         for c in self._datasetGroups:
-            if c.isActiveForMass(mass):
+            if c.isActiveForMass(mass,self._config):
                 myFoundSingles = []
                 for n in self._extractors:
                     if c.hasNuisanceByMasterId(n.getId()) and n.getId() in mySingleList and not n.isShapeNuisance():
@@ -364,7 +271,7 @@ class TableProducer:
                 myRow = ["%s"%(n.getId()), n.getDistribution()]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-                    if c.isActiveForMass(mass):
+                    if c.isActiveForMass(mass,self._config):
                         # Check that column has current nuisance or has nuisance that is slave to current nuisance
                         if c.hasNuisanceByMasterId(n.getId()):
                             if self._opts.verbose:
@@ -406,6 +313,7 @@ class TableProducer:
         return myResult
 
     ## Generates nuisance table as list
+    # Recipe is to integrate first (linear sum for variations), then to evaluate
     def _generateShapeNuisanceVariationTable(self,mass):
         myResult = []
         # Loop over rows
@@ -417,7 +325,7 @@ class TableProducer:
                 myScalarUpRow = ["%s_UpDevFromScalar"%(n.getId()), ""]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-                    if c.isActiveForMass(mass):
+                    if c.isActiveForMass(mass,self._config):
                         # Check that column has current nuisance or has nuisance that is slave to current nuisance
                         if c.hasNuisanceByMasterId(n.getId()):
                             #print "column=%s extractor id=%s"%(c.getLabel(),n.getId())
@@ -461,7 +369,7 @@ class TableProducer:
             self._observation.setResultHistogramsToRootFile(rootFile)
         # Loop over columns
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-            if c.isActiveForMass(mass):
+            if c.isActiveForMass(mass,self._config):
                 c.setResultHistogramsToRootFile(rootFile)
 
     ## Calculates maximum width of each table cell
@@ -527,6 +435,7 @@ class TableProducer:
             myOutput += mySeparatorLine
             myOutput += self._getTableOutput(myWidths,myNuisanceTable)
             myOutput += "\n"
+            myOutput += "Note: Linear sum is used to obtain the values, i.e. cancellations might occur. Bin-by-bin uncertainties could be larger.\n"
         # Save output to file
         myFilename = self._infoDirname+"/shapeVariationResults.txt"
         myFile = open(myFilename, "w")
@@ -581,7 +490,7 @@ class TableProducer:
             EWKFakes = None
             # Loop over columns to obtain RootHistoWithUncertainties objects
             for c in self._datasetGroups:
-                if c.isActiveForMass(m) and not c.typeIsEmptyColumn():
+                if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
                     # Find out what type the column is
                     if c.getLandsProcess() == -1:
                         HH = c.getCachedShapeRootHistogramWithUncertainties().Clone()
@@ -604,10 +513,11 @@ class TableProducer:
                             EWKFakes.Add(c.getCachedShapeRootHistogramWithUncertainties())
             # Calculate signal yield
             myBr = self._config.OptionBr
-            if self._config.OptionBr == None:
-                print WarningStyle()+"Warning: Br(t->bH+) has not been specified in config file, using default 0.01! To specify, add OptionBr=0.05 to the config file."+NormalStyle()
-                myBr = 0.01
-            HW.Scale(2.0 * myBr * (1.0 - myBr))
+            if not (self._config.OptionLimitOnSigmaBr or m > 179):
+                if self._config.OptionBr == None:
+                    print WarningStyle()+"Warning: Br(t->bH+) has not been specified in config file, using default 0.01! To specify, add OptionBr=0.05 to the config file."+NormalStyle()
+                    myBr = 0.01
+                HW.Scale(2.0 * myBr * (1.0 - myBr))
             if HH != None:
                 HH.Scale(myBr**2)
                 HW.Add(HH)
@@ -622,7 +532,10 @@ class TableProducer:
             myOutput += self._generateHeader(m)
             myOutput += "\n"
             myOutput += "Number of events\n"
-            myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %s"%(m,myBr,getResultString(HW,formatStr,myPrecision))
+            if not (self._config.OptionLimitOnSigmaBr or m > 179):
+                myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %s"%(m,myBr,getResultString(HW,formatStr,myPrecision))
+            else:
+                myOutput += "Signal, mH+=%3d GeV,                : %s"%(m,getResultString(HW,formatStr,myPrecision))
             myOutput += "Backgrounds:\n"
             myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
             if self._config.OptionReplaceEmbeddingByMC:
@@ -649,7 +562,10 @@ class TableProducer:
             myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
             myOutputLatex += "\\begin{table}\n"
             myOutputLatex += "  \\centering\n"
-            myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$ with $\\BRtH=%.2f$,\n"%(m,myBr)
+            if not (self._config.OptionLimitOnSigmaBr or m > 179):
+                myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$ with $\\BRtH=%.2f$,\n"%(m,myBr)
+            else:
+                myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$,\n"%(m)
             myOutputLatex += "           from the background measurements, and the observed event yield. Luminosity uncertainty is not included in the numbers.}\n"
             myOutputLatex += "  \\label{tab:summary:yields}\n"
             myOutputLatex += "  \\vskip 0.1 in\n"

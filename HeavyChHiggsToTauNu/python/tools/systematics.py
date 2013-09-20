@@ -66,7 +66,7 @@ class ScalarUncertaintyItem:
 _crossSectionUncertainty = {
     "TTJets": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.053),
     "TTToHplus": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.053),
-    "HplusTB": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.053),
+    "HplusTB": ScalarUncertaintyItem("xsect", 0.30),
     "WJets":  ScalarUncertaintyItem("xsect", 0.05),
     "SingleTop": ScalarUncertaintyItem("xsect", 0.08),
     "DYJetsToLL": ScalarUncertaintyItem("xsect", 0.04),
