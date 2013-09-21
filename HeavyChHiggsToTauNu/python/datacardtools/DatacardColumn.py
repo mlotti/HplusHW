@@ -235,12 +235,6 @@ class DatacardColumn():
 
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
-        def rebinHelper(shapeModifier,h,label):
-            hShape = shapeModifier.createEmptyShapeHistogram("rebin%s"%(label))
-            myShapeModifier.addShape(dest=hShape,source=h)
-            myShapeModifier.finaliseShape(dest=hShape)
-            return hShape
-
         print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
         # Obtain root histogram with uncertainties for shape and cache it
         if not (self.typeIsEmptyColumn() or dsetMgr == None):
@@ -248,7 +242,11 @@ class DatacardColumn():
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
             if myDatasetRootHisto.isMC():
                 if (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
-                    myDatasetRootHisto.normalizeToLuminosity(1) # Normalize signal to 1 pb in order to obtain limit on sigma x Br
+                     # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
+                     dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
+                     myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
+                     # Normalize signal to 1 pb
+                     myDatasetRootHisto.normalizeToLuminosity(1)
                 else:
                     myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()

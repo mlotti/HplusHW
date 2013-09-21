@@ -217,7 +217,11 @@ class TableProducer:
                     myRateValue = 0.0
                 if self._opts.debugMining:
                     print "  Rate for '%s' = %.3f"%(c.getLabel(),myRateValue)
-                myRow.append("%.3f"%myRateValue)
+                # Need better precision for sigma x br limits
+                if (self._config.OptionLimitOnSigmaBr or mass > 179) and c.getLandsProcess() <= 0:
+                    myRow.append("%.6f"%myRateValue)
+                else:
+                    myRow.append("%.3f"%myRateValue)
         myResult.append(myRow)
         return myResult
 
