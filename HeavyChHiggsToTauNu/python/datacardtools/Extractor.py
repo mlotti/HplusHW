@@ -460,12 +460,17 @@ class ShapeExtractor(ExtractorBase):
         h.Scale(additionalNormalisation) # Scale by additional normalisation
         if self.isRate() or self.isObservation():
             # Shape histogram is the result
+            h.SetTitle(datasetColumn.getLabel())
             myHistograms.append(h) # Append histogram to output list
         else:
             # Ok, it's a nuisance
             # Create up and down histograms for shape stat
-            hUp = h.Clone(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
-            hDown = h.Clone(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
+            hUp = h.Clone()
+            hDown = h.Clone()
+            hUp.Reset()
+            hDown.Reset()
+            hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
+            hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
             for k in range(1, h.GetNbinsX()+1):
                 hUp.SetBinContent(k, h.GetBinContent(k) + h.GetBinError(k))
                 hDown.SetBinContent(k, h.GetBinContent(k) - h.GetBinError(k))
@@ -517,8 +522,10 @@ class ShapeVariationExtractor(ExtractorBase):
             return myHistograms
         # Get histogram from cache
         (hSystUp, hSystDown) = myShapeUncertDict[self._systVariation]
-        hUp = hSystUp.Clone(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
-        hDown = hSystDown.Clone(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
+        hUp = hSystUp.Clone()
+        hDown = hSystDown.Clone()
+        hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
+        hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
         # Apply formatting
         hUp.Scale(additionalNormalisation) # Scale by additional normalisation
         hDown.Scale(additionalNormalisation) # Scale by additional normalisation
