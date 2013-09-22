@@ -335,23 +335,23 @@ class DataCardGenerator:
             #mymsg += "- missing field 'SignalShapeHisto' (string, name of histogram for the shape)\n"
         #if self._config.FakeShapeHisto == None:
             #mymsg += "- missing field 'FakeShapeHisto' (string, name of histogram for the shape)\n"
-        if self._config.ShapeHistogramsDimensions == None:
-            mymsg += "- missing field 'ShapeHistogramsDimensions' (list of number of bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
-        elif not isinstance(self._config.ShapeHistogramsDimensions, dict):
-            mymsg += "- field 'ShapeHistogramsDimensions' has to be of type dictionary with keys: bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
-        else:
-            if not "bins" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key bins (int)\n"
-            elif not "rangeMin" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMin (float)\n"
-            elif not "rangeMax" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMax (float)\n"
-            elif not "variableBinSizeLowEdges" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key variableBinSizeLowEdges (list of floats, can be empty list)\n"
-            elif not "xtitle" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key xtitle (string)\n"
-            elif not "ytitle" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key ytitle (string)\n"
+        #if self._config.ShapeHistogramsDimensions == None:
+            #mymsg += "- missing field 'ShapeHistogramsDimensions' (list of number of bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
+        #elif not isinstance(self._config.ShapeHistogramsDimensions, dict):
+            #mymsg += "- field 'ShapeHistogramsDimensions' has to be of type dictionary with keys: bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
+        #else:
+            #if not "bins" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key bins (int)\n"
+            #elif not "rangeMin" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMin (float)\n"
+            #elif not "rangeMax" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMax (float)\n"
+            #elif not "variableBinSizeLowEdges" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key variableBinSizeLowEdges (list of floats, can be empty list)\n"
+            #elif not "xtitle" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key xtitle (string)\n"
+            #elif not "ytitle" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key ytitle (string)\n"
         if self._config.Observation == None:
             mymsg += "- missing field 'Observation' (ObservationInput object)\n"
         if self._config.DataGroups == None:
@@ -442,11 +442,11 @@ class DataCardGenerator:
             self._observation.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         for c in self._columns:
             myDsetMgrIndex = 0
-            if c.typeIsObservation() or c.typeIsSignal():
+            if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or (c.typeIsEWK() and self._config.OptionReplaceEmbeddingByMC):
                 myDsetMgrIndex = 0
-            if c.typeIsEWK():
+            elif c.typeIsEWK():
                 myDsetMgrIndex = 1
-            if c.typeIsQCD():
+            elif c.typeIsQCD():
                 myDsetMgrIndex = 2
             # Do mining for datacard columns (separately for EWK fake taus)
             myDsetMgr = self._dsetMgrManager.getDatasetMgr(myDsetMgrIndex)
@@ -528,15 +528,13 @@ class DataCardGenerator:
                                                                    mode = myMode,
                                                                    opts = self._opts))
             elif n.function == "Shape":
-                self._extractors.append(ShapeExtractor(histoSpecs = self._config.ShapeHistogramsDimensions,
-                                                       exid = n.id,
+                self._extractors.append(ShapeExtractor(exid = n.id,
                                                        distribution = n.distr,
                                                        description = n.label,
                                                        mode = ExtractorMode.SHAPENUISANCE,
                                                        opts = self._opts))
             elif n.function == "ShapeVariation":
-                self._extractors.append(ShapeVariationExtractor(histoSpecs = self._config.ShapeHistogramsDimensions,
-                                                                exid = n.id,
+                self._extractors.append(ShapeVariationExtractor(exid = n.id,
                                                                 distribution = n.distr,
                                                                 description = n.label,
                                                                 systVariation = n.getArg("systVariation"),

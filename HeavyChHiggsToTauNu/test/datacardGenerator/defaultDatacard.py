@@ -1,3 +1,5 @@
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
+
 DataCardName    = 'Default_7TeV'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeIsolationDependent'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
@@ -26,7 +28,7 @@ OptionMassShape = "TransverseMass"
 OptionReplaceEmbeddingByMC = True
 OptionIncludeSystematics = True # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = False
+OptionDoControlPlots = True
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
 OptionRemoveHHDataGroup = False
@@ -46,40 +48,13 @@ ShapeHistogramsDimensions = None
 if OptionMassShape == "TransverseMass":
     SignalShapeHisto = "shapeTransverseMass"
     FakeShapeHisto = "shapeEWKFakeTausTransverseMass"
-    ShapeHistogramsDimensions = { "bins": 10,
-                                  "rangeMin": 0.0,
-                                  "rangeMax": 400.0,
-                                  #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                  "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250], # if an empty list is given, then uniform bin width is used
-                                  "xtitle": "Transverse mass / GeV",
-                                  "ytitle": "Events" }
 elif OptionMassShape == "FullMass":
     SignalShapeHisto = "shapeInvariantMass"
     FakeShapeHisto = "shapeEWKFakeTausInvariantMass"
-    ShapeHistogramsDimensions = { "bins": 25,
-                                  "rangeMin": 0.0,
-                                  "rangeMax": 500.0,
-                                  "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                  #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
-                                  "xtitle": "Full mass / GeV",
-                                  "ytitle": "Events" }
 elif OptionMassShape == "TransverseAndFullMass2D": # FIXME: preparing to add support, not yet working
     SignalShapeHisto = "shapetransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
     FakeShapeHisto = "shapeEWKFakeTausTransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
-    ShapeHistogramsDimensions = [{ "bins": 10,
-                                  "rangeMin": 0.0,
-                                  "rangeMax": 400.0,
-                                  #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                  "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
-                                  "xtitle": "Transverse mass / GeV",
-                                  "ytitle": "Events" },
-                                 { "bins": 25,
-                                   "rangeMin": 0.0,
-                                   "rangeMax": 500.0,
-                                   "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                   #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
-                                   "xtitle": "Full mass / GeV",
-                                   "ytitle": "Events" }]
+ShapeHistogramsDimensions = systematics.getBinningForPlot(SignalShapeHisto)
 
 DataCardName += "_"+OptionMassShape
 
@@ -93,8 +68,6 @@ Observation = ObservationInput(datasetDefinition="Data",
 
 ##############################################################################
 # Systematics lists
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
-
 
 myShapeSystematics = ["trg_tau","trg_MET","ES_taus","ES_jets","JER","ES_METunclustered","pileup"] # btag is not added, because it has the tag and mistag categories
 myFakeShapeSystematics = []
@@ -193,7 +166,7 @@ if not OptionReplaceEmbeddingByMC:
         label        = "tt_EWK_faketau",
         landsProcess = 1,
         shapeHisto   = FakeShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","xsect_tt_7TeV","lumi","stat_binByBin_fakes"],
@@ -202,7 +175,7 @@ if not OptionReplaceEmbeddingByMC:
         label        = "W_EWK_faketau",
         landsProcess = 5,
         shapeHisto   = FakeShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin_fakes"],
@@ -211,7 +184,7 @@ if not OptionReplaceEmbeddingByMC:
         label        = "t_EWK_faketau",
         landsProcess = 6,
         shapeHisto   = FakeShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "EWKfake",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin_fakes"],
@@ -220,7 +193,7 @@ if not OptionReplaceEmbeddingByMC:
         label        = "DY_EWK_faketau",
         landsProcess = 7,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin_fakes"],
@@ -229,7 +202,7 @@ if not OptionReplaceEmbeddingByMC:
         label        = "VV_EWK_faketau",
         landsProcess = 8,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin_fakes"],
@@ -241,7 +214,7 @@ else:
         label        = "ttbar_MC",
         landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "Embedding",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","xsect_tt_7TeV","lumi","stat_binByBin"],
@@ -250,7 +223,7 @@ else:
         label        = "Wjets_MC",
         landsProcess = 4,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "Embedding",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_mistag","xsect_Wjets","lumi","stat_binByBin"],
@@ -259,7 +232,7 @@ else:
         label        = "t_MC",
         landsProcess = 5,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "Embedding",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","xsect_singleTop","lumi","stat_binByBin"],
@@ -268,7 +241,7 @@ else:
         label        = "DY_MC",
         landsProcess = 6,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "Embedding",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_mistag","xsect_DYtoll","lumi","stat_binByBin"],
@@ -277,7 +250,7 @@ else:
         label        = "VV_MC",
         landsProcess = 7,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "Embedding",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_mistag","xsect_VV","lumi","stat_binByBin"],
@@ -718,7 +691,7 @@ Nuisances.append(Nuisance(
     id            = "stat_tt_jjtau",
     label         = "tt->jjtau MC stat.",
     distr         = "lnN",
-    function      = "Constant",
+    function      = "Counter",
     value         = SignalRateCounter,
 ))
 
@@ -750,7 +723,7 @@ Nuisances.append(Nuisance(
     id            = "stat_Wjets",
     label         = "W+jets MC stat.",
     distr         = "lnN",
-    function      = "Constant",
+    function      = "Counter",
     value         = SignalRateCounter
 ))
 
@@ -766,7 +739,7 @@ Nuisances.append(Nuisance(
     id            = "stat_singleTop",
     label         = "Single top MC stat.",
     distr         = "lnN",
-    function      = "Constant",
+    function      = "Counter",
     value         = SignalRateCounter
 ))
 
@@ -934,10 +907,10 @@ ControlPlots.append(ControlPlotInput(
     QCDid            = [3],
     embeddingId      = EmbeddingIdList,
     EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "ControlPlots",
-    signalHistoName  = "Njets_AfterStandardSelections",
-    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
-    EWKfakeHistoName  = "Njets_AfterStandardSelections",
+    signalHistoPath  = "ForDataDrivenCtrlPlots",
+    signalHistoName  = "NjetsAfterJetSelectionAndMETSF",
+    EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+    EWKfakeHistoName  = "NjetsAfterJetSelectionAndMETSF",
     QCDFactNormalisation = "/CtrlNjets",
     QCDFactHistoName = "/CtrlNjets",
     details          = { "bins": 5,
@@ -965,10 +938,10 @@ for i in range(0,4):
         QCDid            = [3],
         embeddingId      = EmbeddingIdList,
         EWKfakeId        = EWKFakeIdList,
-        signalHistoPath  = "ControlPlots",
-        signalHistoName  = "QCDTailKillerJet%dCollinear"%i,
-        EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
-        EWKfakeHistoName  = "QCDTailKillerJet%dCollinear"%i,
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "ImprovedDeltaPhiCutsJet%dCollinear"%(i+1),
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "ImprovedDeltaPhiCutsJet%dCollinear"%(i+1),
         QCDFactNormalisation = "/QCDTailKillerJet%dCollinear"%i,
         QCDFactHistoName = "/QCDTailKillerJet%dCollinear"%i,
         details          = { "bins": 26,
@@ -999,9 +972,9 @@ ControlPlots.append(ControlPlotInput(
     QCDid            = [3],
     embeddingId      = EmbeddingIdList,
     EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "ControlPlots",
+    signalHistoPath  = "ForDataDrivenCtrlPlots",
     signalHistoName  = "MET",
-    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+    EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "MET",
     QCDFactNormalisation = "/CtrlMET",
     QCDFactHistoName = "/CtrlMET",
@@ -1030,9 +1003,9 @@ ControlPlots.append(ControlPlotInput(
     QCDid            = [3],
     embeddingId      = EmbeddingIdList,
     EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "ControlPlots",
+    signalHistoPath  = "ForDataDrivenCtrlPlots",
     signalHistoName  = "NBjets",
-    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+    EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "NBjets",
     QCDFactNormalisation = "/CtrlNbjets",
     QCDFactHistoName = "/CtrlNbjets",
@@ -1179,10 +1152,10 @@ for i in range(0,4):
         QCDid            = [3],
         embeddingId      = EmbeddingIdList,
         EWKfakeId        = EWKFakeIdList,
-        signalHistoPath  = "ControlPlots",
-        signalHistoName  = "QCDTailKillerJet%dBackToBack"%i,
-        EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
-        EWKfakeHistoName  = "QCDTailKillerJet%dBackToBack"%i,
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "ImprovedDeltaPhiCutsJet%dBackToBack"%(i+1),
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "ImprovedDeltaPhiCutsJet%dBackToBack"%(i+1),
         QCDFactNormalisation = "/QCDTailKillerJet%dBackToBack"%i,
         QCDFactHistoName = "/QCDTailKillerJet%dBackToBack"%i,
         details          = { "bins": 13,
@@ -1213,9 +1186,9 @@ ControlPlots.append(ControlPlotInput(
     embeddingId      = EmbeddingIdList,
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "",
-    signalHistoName  = "transverseMass",
+    signalHistoName  = "shapeTransverseMass",
     EWKfakeHistoPath  = "",
-    EWKfakeHistoName  = "EWKFakeTausTransverseMass",
+    EWKfakeHistoName  = "shapeEWKFakeTausTransverseMass",
     QCDFactNormalisation = "/NevtAfterLeg1",
     QCDFactHistoName = "/MtAfterLeg1",
     details          = { "bins": 13,
@@ -1235,35 +1208,36 @@ ControlPlots.append(ControlPlotInput(
     flowPlotCaption  = "#Delta#phi_{#uparrow#downarrow,4}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
-ControlPlots.append(ControlPlotInput(
-    title            = "FullMass",
-    signalHHid       = [-1],
-    signalHWid       = [0],
-    QCDid            = [3],
-    embeddingId      = EmbeddingIdList,
-    EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "FullHiggsMass",
-    signalHistoName  = "HiggsMass",
-    EWKfakeHistoPath  = "",
-    EWKfakeHistoName  = "EWKFakeTausFullMass",
-    QCDFactNormalisation = "/NevtAfterLeg1",
-    QCDFactHistoName = "/MassAfterLeg1",
-    details          = { "bins": 13,
-                         "rangeMin": 0.0,
-                         "rangeMax": 500.0,
-                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                         "binLabels": [], # leave empty to disable bin labels
-                         "xtitle": "m(#tau_{h},E^{miss})",
-                         "ytitle": "Events",
-                         "unit": "GeV/c^{2}",
-                         "logy": False,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
-    blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
-    evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
-))
+if False:
+    ControlPlots.append(ControlPlotInput(
+        title            = "FullMass",
+        signalHHid       = [-1],
+        signalHWid       = [0],
+        QCDid            = [3],
+        embeddingId      = EmbeddingIdList,
+        EWKfakeId        = EWKFakeIdList,
+        signalHistoPath  = "",
+        signalHistoName  = "shapeInvariantMass",
+        EWKfakeHistoPath  = "",
+        EWKfakeHistoName  = "shapeEWKFakeTausInvariantMass",
+        QCDFactNormalisation = "/NevtAfterLeg1",
+        QCDFactHistoName = "/MassAfterLeg1",
+        details          = { "bins": 13,
+                            "rangeMin": 0.0,
+                            "rangeMax": 500.0,
+                            "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                            "binLabels": [], # leave empty to disable bin labels
+                            "xtitle": "m(#tau_{h},E^{miss})",
+                            "ytitle": "Events",
+                            "unit": "GeV/c^{2}",
+                            "logy": False,
+                            "DeltaRatio": 0.5,
+                            "ymin": 0.9,
+                            "ymax": -1},
+        blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
 
 if False:
     ControlPlots.append(ControlPlotInput(
@@ -1273,9 +1247,9 @@ if False:
         QCDid            = [3],
         embeddingId      = EmbeddingIdList,
         EWKfakeId        = EWKFakeIdList,
-        signalHistoPath  = "ControlPlots",
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
         signalHistoName  = "NjetsAfterMET",
-        EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "NjetsAfterMET",
         QCDFactNormalisation = "Njets",
         QCDFactHistoPath = QCDFactorisedStdSelVersion,

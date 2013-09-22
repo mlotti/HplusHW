@@ -8,7 +8,7 @@ from ROOT import TH1F
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from math import sqrt,pow
 from array import array
@@ -101,6 +101,8 @@ class DatacardColumn():
             self._datasetType = MulticrabDirectoryDataType.SIGNAL
         elif datasetType == "Embedding":
             self._datasetType = MulticrabDirectoryDataType.EWKTAUS
+        elif datasetType == "EWKfake":
+            self._datasetType = MulticrabDirectoryDataType.EWKFAKETAUS
         elif datasetType == "QCD factorised":
             self._datasetType = MulticrabDirectoryDataType.QCDFACTORISED
         elif datasetType == "QCD inverted":
@@ -111,8 +113,8 @@ class DatacardColumn():
             self._datasetType = MulticrabDirectoryDataType.UNKNOWN
         self._rateResult = None
         self._nuisanceIds = nuisanceIds
-        self._nuisanceResults = []
-        self._controlPlots = []
+        self._nuisanceResults = [] # Of type ExtractorResult
+        self._controlPlots = [] # Of type RootHistogramWithUncertainties
         self._cachedShapeRootHistogramWithUncertainties = None
         self._datasetMgrColumn = datasetMgrColumn
         self._additionalNormalisationFactor = additionalNormalisationFactor
@@ -131,6 +133,10 @@ class DatacardColumn():
     ## Returns true if the column is using the embedding data samples
     def typeIsEWK(self):
         return self._datasetType == MulticrabDirectoryDataType.EWKTAUS
+
+    ## Returns true if the column is using the embedding data samples
+    def typeIsEWKfake(self):
+        return self._datasetType == MulticrabDirectoryDataType.EWKFAKETAUS
 
     ## Returns true if the column is QCD
     def typeIsQCD(self):
@@ -223,14 +229,18 @@ class DatacardColumn():
     def getDatasetMgrColumnForQCDMCEWK(self):
         return self._datasetMgrColumnForQCDMCEWK
 
+    ## Get control plots
+    def getControlPlotByIndex(self,index):
+        return self._controlPlots[index]
+
     ## Get correct control plot
     def getControlPlotByTitle(self, title):
         for h in self._controlPlots:
-            if title in h.GetTitle():
+            if title in h.getRootHisto().GetTitle():
                 return h
         print "Available control plot names:"
         for h in self._controlPlots:
-            print "  "+h.GetTitle()
+            print "  "+h.getRootHisto().GetTitle()
         raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Could not find control plot by title '%s' in column %s!"%(title, self._label))
 
     ## Do data mining and cache results
@@ -251,15 +261,15 @@ class DatacardColumn():
                     myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()
             # Rebin and move under/overflow bins to visible bins
-            myArray = array("d",config.ShapeHistogramsDimensions["variableBinSizeLowEdges"]+[config.ShapeHistogramsDimensions["rangeMax"]])
-            self._cachedShapeRootHistogramWithUncertainties.Rebin(len(config.ShapeHistogramsDimensions["variableBinSizeLowEdges"]),"",myArray)
+            myArray = array("d",config.ShapeHistogramsDimensions)
+            self._cachedShapeRootHistogramWithUncertainties.Rebin(len(config.ShapeHistogramsDimensions)-1,"",myArray)
             self._cachedShapeRootHistogramWithUncertainties.makeFlowBinsVisible()
         # Obtain rate histogram
         myRateHistograms = []
         if self.typeIsEmptyColumn() or dsetMgr == None:
             if self._opts.verbose:
                 print "  - Creating empty rate shape"
-            myArray = array("d",config.ShapeHistogramsDimensions["variableBinSizeLowEdges"]+[config.ShapeHistogramsDimensions["rangeMax"]])
+            myArray = array("d",config.ShapeHistogramsDimensions)
             h = TH1F(self.getLabel(),self.getLabel(),len(myArray)-1,myArray)
             myRateHistograms.append(h)
         else:
@@ -267,15 +277,17 @@ class DatacardColumn():
                 print "  - Extracting rate histogram"
             myShapeExtractor = None
             if self.typeIsObservation():
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, ExtractorMode.OBSERVATION)
+                myShapeExtractor = ShapeExtractor(ExtractorMode.OBSERVATION)
             else:
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, ExtractorMode.RATE)
+                myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         # Cache result
         self._rateResult = ExtractorResult("rate",
                                            "rate",
                                            myRateHistograms[0].Integral(), # Take only visible part
                                            myRateHistograms)
+        if self.typeIsEmptyColumn() or dsetMgr == None:
+            return
         # Obtain results for nuisances
         for nid in self._nuisanceIds:
             if self._opts.verbose:
@@ -290,7 +302,7 @@ class DatacardColumn():
                         myResult = e.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                     # Obtain histograms
                     myHistograms = []
-                    if e.isShapeNuisance() and dsetMgr != None:
+                    if e.isShapeNuisance():
                         myHistograms.extend(e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
                     else:
                         # Add scalar uncertainties
@@ -313,14 +325,40 @@ class DatacardColumn():
             print "  - Has shape variation syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
             print "  - Has shape squared syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties._shapeUncertaintyAbsoluteNames)))
         # Obtain results for control plots
-        if config.OptionDoControlPlots != None:
-            if config.OptionDoControlPlots:
-                for c in controlPlotExtractors:
+        if config.OptionDoControlPlots:
+            for c in controlPlotExtractors:
+                if dsetMgr != None and not self.typeIsEmptyColumn():
                     if self._opts.verbose:
-                        print "  - Extracting data-driven control plot by label=%s"%c.getId()
-                    if dsetMgr != None and not self.typeIsEmptyColumn():
-                        self._controlPlots.append(c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
-                        #print "added ctrl plot %s for %s"%(c._histoTitle,self._label)
+                        print "  - Extracting data-driven control plot %s"%c._histoTitle
+                    myCtrlDsetRootHisto = c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                    # Now normalize
+                    if myDatasetRootHisto.isMC():
+                        if (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
+                            myCtrlDsetRootHisto.normalizeToLuminosity(1) # Normalize signal yield to 1 pb
+                        else:
+                            myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
+                    h = myCtrlDsetRootHisto.getHistogramWithUncertainties()
+                    # Rebin and move under/overflow bins to visible bins
+                    myArray = array("d",getBinningForPlot(c._histoName))
+                    h.Rebin(len(myArray)-1,"",myArray)
+                    h.makeFlowBinsVisible()
+                    # Add to RootHistogramWithUncertainties non-shape uncertainties
+                    for n in self._nuisanceResults:
+                        if not n.resultIsStatUncertainty() and len(n.getHistograms()) == 0: # systematic uncert., but not shapeQ
+                            if self._opts.verbose:
+                                print "    - Adding norm. uncertainty: %s"%n.getMasterId()
+                            myResult = n.getResult()
+                            if isinstance(myResult, ScalarUncertaintyItem):
+                                h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                            elif isinstance(myResult, list):
+                                h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult[1], myResult[0])
+                            else:
+                                h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult, myResult)
+                    # Scale if asked
+                    if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
+                        h.Scale(self._additionalNormalisationFactor)
+                    # Store RootHistogramWithUncertainties
+                    self._controlPlots.append(h)
 
     ## Returns rate for column
     def getRateResult(self):

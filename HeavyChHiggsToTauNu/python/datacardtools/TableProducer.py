@@ -43,11 +43,8 @@ class TableProducer:
         self.makeDataCards()
 
         # Make control plots
-        if self._config.OptionDoControlPlots != None:
-            if self._config.OptionDoControlPlots:
-                ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
-            else:
-                print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
+        if self._config.OptionDoControlPlots:
+            ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
         else:
             print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
 
@@ -255,17 +252,17 @@ class TableProducer:
                 if len(myFoundSingles) > 1:
                     # Do virtual merge
                     myDescription = ""
-                    myValue = 0.0
+                    myValue = ScalarUncertaintyItem("sum",0.0)
                     for n in self._extractors:
                         if n.getId() in myFoundSingles:
                             if myDescription == "":
                                 myDescription = n.getDescription()
-                                myValue = c.getNuisanceResultByMasterId(n.getId())**2
+                                myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
                             else:
                                 myDescription += " + "+n.getDescription()
-                                myValue += c.getNuisanceResultByMasterId(n.getId())**2
+                                myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
                                 myVetoList.append(n.getId())
-                    myVirtualMergeInformation[myFoundSingles[0]] = sqrt(myValue)
+                    myVirtualMergeInformation[myFoundSingles[0]] = myValue
                     myVirtualMergeInformation["%sdescription"%myFoundSingles[0]] = myDescription
                     print WarningLabel()+"Combined nuisances '%s' for column %s!"%(myDescription, c.getLabel())
         # Loop over rows
@@ -505,16 +502,19 @@ class TableProducer:
                             QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
                             QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
-                    elif c.typeIsEWK() or self._config.OptionReplaceEmbeddingByMC:
+                    elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionReplaceEmbeddingByMC):
                         if Embedding == None:
+                            print c.getLabel()
                             Embedding = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
                             Embedding.Add(c.getCachedShapeRootHistogramWithUncertainties())
-                    else:
+                    elif c.typeIsEWKfake():
                         if EWKFakes == None:
                             EWKFakes = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
                             EWKFakes.Add(c.getCachedShapeRootHistogramWithUncertainties())
+                    else:
+                        raise Exception(ErrorLabel()+"Unknown dataset type for dataset %s!%s"%(c.getLabel(),NormalStyle()))
             # Calculate signal yield
             myBr = self._config.OptionBr
             if not (self._config.OptionLimitOnSigmaBr or m > 179):

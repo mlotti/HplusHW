@@ -4,7 +4,8 @@
 #
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import _histoToCounter
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from math import pow,sqrt
 import sys
@@ -148,31 +149,27 @@ class ConstantExtractor(ExtractorBase):
     ## Constructor
     def __init__(self, constantValue, mode, exid = "", distribution = "lnN", description = "", constantUpperValue = 0.0, opts=None):
         ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
-        self._constantValue = constantValue
-        self._constantUpperValue = constantUpperValue
+        self._constantValue = None
+        if isinstance(constantValue, ScalarUncertaintyItem):
+            self._constantValue = constantValue
+        else:
+            if self.isAsymmetricNuisance():
+                self._constantValue = ScalarUncertaintyItem(exid,plus=constantUpperValue,minus=constantValue)
+            else:
+                self._constantValue = ScalarUncertaintyItem(exid,constantValue)
 
     ## Method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
-        myResult = None
-        if self.isAsymmetricNuisance():
-            myResult = [-(self._constantValue), self._constantUpperValue]
-        else:
-            myResult = self._constantValue
-        return myResult
+        return self._constantValue
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
         print "ConstantExtractor"
-        if self.isAsymmetricNuisance():
-            print "- value = ", self._constantValue, "/", self._constantUpperValue
-        else:
-            print "- value = ", self._constantValue
+        print "- value = + %f - %f"%(self._constantValue.getUncertaintyUp,self._constantValue.getUncertaintyDown)
         ExtractorBase.printDebugInfo(self)
 
     ## \var _constantValue
-    # Constant value (either rate or nuisance in percent)
-    ## \var _constantUpperValue
-    # Constant value for upper bound (either rate or nuisance in percent)
+    # ScalarUncertaintyItem containting the uncertainty
 
 ## CounterExtractor class
 # Extracts a value from a given counter in the list of main counters
@@ -195,9 +192,9 @@ class CounterExtractor(ExtractorBase):
             # protection against zero
             if myCount.value() == 0:
                 print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' counter ('"+self._counterItem+"') value is zero!"
-                myResult = 0.0
+                myResult = ScalarUncertaintyItem(self._exid,0.0)
             else:
-                myResult = myCount.uncertainty() / myCount.value()
+                myResult = ScalarUncertaintyItem(self._exid,myCount.uncertainty() / myCount.value())
         return myResult
 
     ## Virtual method for printing debug information
@@ -232,7 +229,7 @@ class MaxCounterExtractor(ExtractorBase):
                 raise Exception (ErrorStyle()+"Error in extracting max counter value:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
             datasetRootHisto.normalizeToLuminosity(luminosity)
             myHisto = datasetRootHisto.getHistogram()
-            counterList = _histoToCounter(myHisto)
+            counterList = dataset._histoToCounter(myHisto)
             myHisto.IsA().Destructor(myHisto)
             myFoundStatus = False # to ensure that the first counter of given name is taken
             for name, count in counterList:
@@ -251,7 +248,7 @@ class MaxCounterExtractor(ExtractorBase):
                 myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
                 if (myValue > myMaxValue):
                     myMaxValue = myValue
-        return myMaxValue
+        return ScalarUncertaintyItem(self._exid,myMaxValue)
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -290,7 +287,7 @@ class MaxCounterExtractor(ExtractorBase):
                 #raise Exception (ErrorStyle()+"Error in extracting PU uncertainty:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
             #datasetRootHisto.normalizeToLuminosity(luminosity)
             #myHisto = datasetRootHisto.getHistogram()
-            #counterList = _histoToCounter(myHisto)
+            #counterList = dataset._histoToCounter(myHisto)
             #myHisto.IsA().Destructor(myHisto)
             #myFoundStatus = False # to ensure that the first counter of given name is taken
             #for name, count in counterList:
@@ -346,7 +343,7 @@ class RatioExtractor(ExtractorBase):
         else:
             myResult = (myDenominatorCount.value() / myNumeratorCount.value() - 1.0) * self._scale
         # Return result
-        return myResult
+        return ScalarUncertaintyItem(self._exid,myResult)
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -418,7 +415,7 @@ class ScaleFactorExtractor(ExtractorBase):
             myCombinedResult += pow(myResult[i], 2)
         myCombinedResult += pow(self._addSystInQuadrature, 2)
         # Return result
-        return sqrt(myCombinedResult)
+        return ScalarUncertaintyItem(self._exid,sqrt(myCombinedResult))
 
 
     ## Virtual method for printing debug information
@@ -436,8 +433,7 @@ class ScaleFactorExtractor(ExtractorBase):
 # Extracts histogram shapes
 class ShapeExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, histoSpecs, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "", description = "", opts=None):
-        self._histoSpecs = histoSpecs
+    def __init__(self, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "", description = "", opts=None):
         ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
         if not (self.isRate() or self.isObservation()):
             if self._distribution != "shapeStat":
@@ -484,16 +480,14 @@ class ShapeExtractor(ExtractorBase):
     ## Virtual method for printing debug information
     def printDebugInfo(self):
         print "ShapeExtractor"
-        print "- specs:",self._histoSpecs
         ExtractorBase.printDebugInfo(self)
 
 ## ShapeVariationExtractor class
 # Extracts histogram shapes from up and down variation
 class ShapeVariationExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, histoSpecs, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None):
+    def __init__(self, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None):
         ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
-        self._histoSpecs = histoSpecs
         self._systVariation = systVariation
         if not "SystVar" in self._systVariation:
             self._systVariation = "SystVar%s"%self._systVariation
@@ -538,7 +532,6 @@ class ShapeVariationExtractor(ExtractorBase):
     ## Virtual method for printing debug information
     def printDebugInfo(self):
         print "ShapeExtractor"
-        print "- specs:",self._histoSpecs
         ExtractorBase.printDebugInfo(self)
 
 ## ControlPlotExtractor class
@@ -549,28 +542,28 @@ class ControlPlotExtractor(ExtractorBase):
         ExtractorBase.__init__(self, mode=ExtractorMode.CONTROLPLOT, exid="-1", distribution="-", description="-", opts=opts)
         self._histoSpecs = histoSpecs
         self._histoTitle = histoTitle
-        self._histoDirs = []
-        if isinstance(histoDirs, list):
-            self._histoDirs.extend(histoDirs)
-        else:
-            self._histoDirs.append(histoDirs)
-        self._histoNames = []
-        if isinstance(histoNames, list):
-            self._histoNames.extend(histoNames)
-        else:
-            self._histoNames.append(histoNames)
-        if len(self._histoDirs) != len(self._histoNames):
-            raise Exception (ErrorStyle()+"Error in ControlPlot "+histoTitle+":"+NormalStyle()+" need to specify equal amount of histoDirs and histoNames!")
+        self._histoName = histoNames
+        self._histoNameWithPath = ""
+        if histoDirs != None and histoDirs != "" and histoDirs != ".":
+            self._histoNameWithPath = "%s/"%histoDirs
+        self._histoNameWithPath += histoNames
 
     ## Method for extracking result
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
-        print WarningStyle()+"Did you actually call extractResult for a ControlPlot by name "+self._histoTitle+"? (you shouldn't)"+NormalStyle()
-        return 0.0 # Dummy number, this method
+        raise Exception(ErrorStyle()+"Did you actually call extractResult for a ControlPlot by name "+self._histoTitle+"? (you shouldn't)"+NormalStyle())
 
     ## Virtual method for extracting histograms
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
-        # Create an empty histogram
         myLabel = datasetColumn.getLabel()+"_"+self._histoTitle
+        mySystematics = dataset.Systematics(allShapes=True)
+        myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._histoNameWithPath))
+        # Normalisation
+        #h = 
+        
+        
+        
+        return myDatasetRootHisto
+        
         #FIXME
         
         #myShapeModifier = ShapeHistoModifier(self._histoSpecs)

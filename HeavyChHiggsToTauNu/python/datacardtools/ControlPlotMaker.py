@@ -3,9 +3,14 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import TDRStyle
+#from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 from math import pow,sqrt,log10
 import os
@@ -18,6 +23,9 @@ class ControlPlotMaker:
     def __init__(self, opts, config, dirname, luminosity, observation, datasetGroups):
         if config.ControlPlots == None:
             return
+        myStyle = tdrstyle.TDRStyle()
+        myStyle.setOptStat(False)
+
         self._opts = opts
         self._config = config
         self._dirname = dirname
@@ -25,7 +33,7 @@ class ControlPlotMaker:
         self._observation = observation
         self._datasetGroups = datasetGroups
 
-        myEvaluator = SignalAreaEvaluator()
+        #myEvaluator = SignalAreaEvaluator()
 
         # Make control plots
         print "\n"+HighlightStyle()+"Generating control plots"+NormalStyle()
@@ -33,56 +41,104 @@ class ControlPlotMaker:
         for m in self._config.MassPoints:
             selectionFlow = SelectionFlowPlotMaker(config, m)
             myBlindingCount = 0
-            for c in self._config.ControlPlots:
+            for i in range(0,len(self._config.ControlPlots)):
+                myCtrlPlot = self._config.ControlPlots[i]
                 myMassSuffix = "_M%d"%m
-                # Obtain frame
-                hFrame = self._makeFrame(c.title+myMassSuffix+"Frame", c.details)
-                # Obtain histograms
-                hSignalHH = self._getControlPlot(m, c.details, c.signalHHid, c.title,"HH"+myMassSuffix)
-                hSignalHW = self._getControlPlot(m, c.details, c.signalHWid, c.title,"HW"+myMassSuffix)
-                hQCD = self._getControlPlot(m, c.details, c.QCDid, c.title,"QCD"+myMassSuffix)
-                hEmbedded = self._getControlPlot(m, c.details, c.embeddingId, c.title,"EWKtau"+myMassSuffix)
-                hEWKfake = self._getControlPlot(m, c.details, c.EWKfakeId, c.title,"EWKfake"+myMassSuffix)
-                hData = self._getControlPlot(m, c.details, None, c.title,"Data"+myMassSuffix, c.blindedRange)
-                # Obtain total expected and total signal
-                hExpected = self._getExpectedPlot(c.details, c.title+myMassSuffix, [hQCD, hEmbedded, hEWKfake])
-                hSignal = self._getSignalPlot(c.details, c.title+myMassSuffix, hSignalHH, hSignalHW)
-                # Add data to selection flow plot
-                if c.flowPlotCaption != "":
-                    if myBlindingCount > 0:
-                        selectionFlow.addColumn(label=c.flowPlotCaption,signal=hSignal,qcd=hQCD,EWKtau=hEmbedded,EWKfake=hEWKfake,data=None,expected=hExpected)
-                    else:
-                        selectionFlow.addColumn(label=c.flowPlotCaption,signal=hSignal,qcd=hQCD,EWKtau=hEmbedded,EWKfake=hEWKfake,data=hData,expected=hExpected)
-                    if len(c.blindedRange) > 0:
-                        myBlindingCount += 1
+                # Initialize histograms
+                hSignal = None
+                hQCD = None
+                hEmbedded = None
+                hEWKfake = None
+                hData = None
+                hTotalExpected = None
+                # Loop over dataset columns to find histograms
+                for c in self._datasetGroups:
+                    if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
+                        h = c.getControlPlotByIndex(i).Clone()
+                        if c.typeIsSignal():
+                            # Scale light H+ signal
+                            if m < 179:
+                                if c.getLabel()[:2] == "HH":
+                                    h.Scale(self._config.OptionBr**2)
+                                elif c.getLabel()[:2] == "HW":
+                                    h.Scale(2.0*self._config.OptionBr*(1.0-self._config.OptionBr))
+                            if hSignal == None:
+                                hSignal = h.Clone()
+                            else:
+                                hSignal.Add(h)
+                        elif c.typeIsQCD():
+                            if hQCD == None:
+                                hQCD = h.Clone()
+                            else:
+                                hQCD.Add(h)
+                        elif c.typeIsEWK():
+                            if hEmbedded == None:
+                                hEmbedded = h.Clone()
+                            else:
+                                hEmbedded.Add(h)
+                        elif c.typeIsEWKfake():
+                            if hEWKfake == None:
+                                hEWKfake = h.Clone()
+                            else:
+                                hEWKfake.Add(h)
+                hTotalExpected = hQCD.Clone()
+                myStackList = [hQCD]
+                if hEmbedded != None:
+                    hTotalExpected.Add(hEmbedded)
+                    myStackList = [hEmbedded]+myStackList
+                if hEWKfake != None:
+                    hTotalExpected.Add(hEWKfake)
+                    myStackList = [hEWKfake]+myStackList
+                hData = observation.getControlPlotByIndex(i).Clone()
+                myStackList.extend([hSignal,hData])
                 # Apply blinding 
-                if len(c.blindedRange) > 0:
-                    self._applyBlinding(hData,c.blindedRange)
+                if len(myCtrlPlot.blindedRange) > 0:
+                    self._applyBlinding(hData,myCtrlPlot.blindedRange)
+                # Make plot
+                #myRatioPlot = plots.ComparisonPlot(hTotalExpected,hData)
+                #myRatioPlot.createFrame("test_%s"%(myCtrlPlot.title), createRatio=True,opts={"addMCUncertainty": True})
+                myStackPlot = plots.DataMCPlot2(myStackList)
+                myStackPlot.stackMCHistograms()
+                myStackPlot.createFrame("test_%s"%(myCtrlPlot.title), createRatio=True,opts={"addMCUncertainty": True})
+                #plot.frame.GetXaxis().SetTitle(self._histoSpecs["xtitle"])
+                #plot.frame.GetYaxis().SetTitle("Arb. units. (Normalised to 1)")
+                #styles.mcStyle(plot.histoMgr.getHisto("Ctrl. region"))
+                #styles.dataStyle(plot.histoMgr.getHisto("Signal region"))
+                #plot.setLegend(histograms.createLegend(0.59, 0.77, 0.87, 0.90))
+                #plot.legend.SetFillColor(0)
+                #plot.legend.SetFillStyle(1001)
+                #plot.histoMgr.getHisto("Up").getRootHisto().SetMarkerSize(0)
+                histograms.addCmsPreliminaryText()
+                #myRatioPlot.draw()
+                myStackPlot.draw()
+                myRatioPlot.save()
+                return
+                
+                
+                # Add data to selection flow plot
+                #if c.flowPlotCaption != "":
+                    #if myBlindingCount > 0:
+                        #selectionFlow.addColumn(label=c.flowPlotCaption,signal=hSignal,qcd=hQCD,EWKtau=hEmbedded,EWKfake=hEWKfake,data=None,expected=hExpected)
+                    #else:
+                        #selectionFlow.addColumn(label=c.flowPlotCaption,signal=hSignal,qcd=hQCD,EWKtau=hEmbedded,EWKfake=hEWKfake,data=hData,expected=hExpected)
+                    #if len(c.blindedRange) > 0:
+                        #myBlindingCount += 1
                 # Obtain ratio plot
-                hRatio = self._getRatioPlot(c.title+myMassSuffix, hData, hExpected)
+                #hRatio = self._getRatioPlot(c.title+myMassSuffix, hData, hExpected)
                 # Evaluate signal region
-                if len(c.evaluationRange) > 0:
-                    myEvaluator.addEntry(m,c.title,c.evaluationRange,hSignal,hQCD,hEmbedded,hEWKfake)
+                #if len(c.evaluationRange) > 0:
+                    #myEvaluator.addEntry(m,c.title,c.evaluationRange,hSignal,hQCD,hEmbedded,hEWKfake)
                 # Construct plot and save
-                self._construct(m,c.details,"M%d_ControlPlot_"%m+c.title,hFrame,hData,hSignal,hQCD,hEmbedded,hEWKfake,hExpected,hRatio,luminosity)
-                # Delete histograms from memory
-                hSignalHH.IsA().Destructor(hSignalHH)
-                hSignalHW.IsA().Destructor(hSignalHW)
-                hData.IsA().Destructor(hData)
-                hQCD.IsA().Destructor(hQCD)
-                hEmbedded.IsA().Destructor(hEmbedded)
-                hEWKfake.IsA().Destructor(hEWKfake)
-                hExpected.IsA().Destructor(hExpected)
-                hSignal.IsA().Destructor(hSignal)
-                hRatio.IsA().Destructor(hRatio)
-            # Make selection flow plot
-            hSelectionFlowRatio = self._getRatioPlot("SelectionFlow"+myMassSuffix,selectionFlow.data,selectionFlow.expected)
-            self._construct(mass=m,details=selectionFlow.plotDetails,title="M%d_SelectionFlow_"%m,
-                            hFrame=selectionFlow.hFrame,hData=selectionFlow.data,hSignal=selectionFlow.signal,
-                            hQCD=selectionFlow.qcd,hEmbedded=selectionFlow.EWKtau,hEWKfake=selectionFlow.EWKfake,
-                            hExpected=selectionFlow.expected,hRatio=hSelectionFlowRatio,luminosity=luminosity)
-            hSelectionFlowRatio.IsA().Destructor(hSelectionFlowRatio)
-        myEvaluator.save(dirname)
+                #self._construct(m,c.details,"M%d_ControlPlot_"%m+c.title,hFrame,hData,hSignal,hQCD,hEmbedded,hEWKfake,hExpected,hRatio,luminosity)
+
+            ## Make selection flow plot
+            #hSelectionFlowRatio = self._getRatioPlot("SelectionFlow"+myMassSuffix,selectionFlow.data,selectionFlow.expected)
+            #self._construct(mass=m,details=selectionFlow.plotDetails,title="M%d_SelectionFlow_"%m,
+                            #hFrame=selectionFlow.hFrame,hData=selectionFlow.data,hSignal=selectionFlow.signal,
+                            #hQCD=selectionFlow.qcd,hEmbedded=selectionFlow.EWKtau,hEWKfake=selectionFlow.EWKfake,
+                            #hExpected=selectionFlow.expected,hRatio=hSelectionFlowRatio,luminosity=luminosity)
+            #hSelectionFlowRatio.IsA().Destructor(hSelectionFlowRatio)
+        #myEvaluator.save(dirname)
         print "Control plots done"
 
     def _getControlPlot(self, mass, details, columnIdList, title, titleSuffix, blindedRange = []):
@@ -242,8 +298,6 @@ class ControlPlotMaker:
 
     ## Constructs canvas object and saves it
     def _construct(self,mass,details,title,hFrame,hData,hSignal,hQCD,hEmbedded,hEWKfake,hExpected,hRatio,luminosity):
-        myStyle = TDRStyle()
-        myStyle.setOptStat(False)
         # Make canvas
         c = ROOT.TCanvas(title+"Canvas",title+"Canvas",600,600)
         c.Range(0,0,1,1)

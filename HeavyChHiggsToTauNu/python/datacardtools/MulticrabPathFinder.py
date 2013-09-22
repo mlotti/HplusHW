@@ -14,9 +14,10 @@ class MulticrabDirectoryDataType:
     OBSERVATION = 1
     SIGNAL = 2
     EWKTAUS = 3
-    QCDFACTORISED = 4
-    QCDINVERTED = 5
-    DUMMY = 6
+    EWKFAKETAUS = 4
+    QCDFACTORISED = 5
+    QCDINVERTED = 6
+    DUMMY = 7
 
 class MulticrabPathFinder:
     def __init__(self, path):
