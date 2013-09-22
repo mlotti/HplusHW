@@ -32,36 +32,52 @@
 # - cross section uncertainties
 # - luminosity
 
+from math import sqrt
+
 ## Helper class for a scalar uncertainty
 class ScalarUncertaintyItem:
     def __init__(self, uncertaintyName, *args, **kwargs):
         self._name = uncertaintyName
-        self._uncertUp = 0.0
-        self._uncertDown = 0.0
+        self._uncertUp = 0.0 # relative uncertainty squared
+        self._uncertDown = 0.0 # relative uncertainty squared
         # Handle inputs
         if len(args) == 1:
             # Symmetric uncertainty
-            self._uncertUp = args[0]
-            self._uncertDown = args[0]
+            self._uncertUp = args[0]**2
+            self._uncertDown = args[0]**2
         elif len(args) == 0 and len(kwargs) == 2:
             if not "plus" in kwargs or not "minus" in kwargs:
                 raise Exception("Error: You forgot to give plus= and minus= arguments to ScalarUncertaintyItem()!")
-            self._uncertUp = kwargs["plus"]
-            self._uncertDown = kwargs["minus"]
+            self._uncertUp = kwargs["plus"]**2
+            self._uncertDown = kwargs["minus"]**2
         else:
             raise Exception("Error: You forgot to give the uncertainty value(s) to ScalarUncertaintyItem()!")
+
+    def add(self,other):
+        self._name += "+%s"%other._name
+        self._uncertUp += other._uncertUp
+        self._uncertDown += other._uncertDown
+
+    def Clone(self):
+        return ScalarUncertaintyItem(self.name, self._uncertUp, self._uncertDown)
 
     def getName(self):
         return self._name
 
     def isAsymmetric(self):
-        return abs(self._uncertDown - self._uncertUp) > 0.0001
+        return abs(self._uncertDown - self._uncertUp) > 0.0000001
 
-    def getUncertaintyDown(self):
+    def getUncertaintySquaredDown(self):
         return self._uncertDown
 
-    def getUncertaintyUp(self):
+    def getUncertaintyDown(self):
+        return sqrt(self._uncertDown)
+
+    def getUncertaintySquaredUp(self):
         return self._uncertUp
+
+    def getUncertaintyUp(self):
+        return sqrt(self._uncertUp)
 
 _crossSectionUncertainty = {
     "TTJets": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.053),
@@ -108,3 +124,22 @@ def getScalarUncertainties(datasetName, isGenuineTau):
     myList.append(getLuminosityUncertainty())
     return myList
 
+# Binning for data-driven control plots and final shapes
+# Needed to get systematics right for QCD anti-isol. -> isol. systematics
+# Format: list of left bin edges; last entry is maximum value
+_dataDrivenCtrlPlotBinning = {
+    "Njets": [3,4,5,6,7,8,9,10],
+    "ImprovedDeltaPhiCuts": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
+    "MET": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,150,170,190,220,250,300,400,500],
+    "NBjets": [0,1,2,3,4,5,6,7,8],
+    "TopMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500],
+    "WMass": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
+    "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,200,250,400],
+    "shapeInvariantMass": [0,20,40,60,80,100,120,140,160,200,400],
+}
+
+def getBinningForPlot(plotName):
+    for plot in _dataDrivenCtrlPlotBinning:
+        if plot == plotName[:len(plot)]:
+            return _dataDrivenCtrlPlotBinning[plot]
+    raise Exception("Cannot find bin specifications for plotname %s! (implemented are: %s)"%(plotName,', '.join(map(str, _dataDrivenCtrlPlotBinning.keys()))))
