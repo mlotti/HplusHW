@@ -134,11 +134,14 @@ class PseudoMultiCrabModule:
         self._counterUncertainties[plotName] = sqrt(myUncert)
 
     def addDataDrivenControlPlot(self, histo, name):
-        self._dataDrivenControlPlots.append(histo.Clone("%s%s"%(name,h.GetTitle())))
+        self._dataDrivenControlPlots.append(histo.Clone(name))
 
-    def addDataDrivenControlPlots(self, histoList):
-        for h in histoList:
-            self._dataDrivenControlPlots.append(h.Clone())
+    def addDataDrivenControlPlots(self, histoList, labelList):
+        for i in range(0,len(histoList)):
+            h = histoList[i].Clone()
+            h.SetTitle(labelList[i])
+            h.SetName(labelList[i])
+            self._dataDrivenControlPlots.append(h)
 
     def writeModuleToRootFile(self, rootfile):
         # Create module directory

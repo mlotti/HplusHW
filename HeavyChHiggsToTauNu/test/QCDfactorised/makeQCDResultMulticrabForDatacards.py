@@ -10,6 +10,7 @@ from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdFactorised.qcdFactorisedResult import *
@@ -20,32 +21,14 @@ myMtSpecs = {
     "basicName": "QCDfactorised/MtAfterStandardSelections",
     "leg1Name": "QCDfactorised/MtAfterLeg1",
     "leg2Name": "QCDfactorised/MtAfterLeg2",
-    "histoSpecs": {
-        "bins": 13,
-        "rangeMin": 0.0,
-        "rangeMax": 500.0,
-        #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-        #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250,300,400], # if an empty list is given, then uniform bin width is used
-        "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250], # if an empty list is given, then uniform bin width is used
-        "xtitle": "Transverse mass / GeV",
-        "ytitle": "Events",
-    },
+    "binList": systematics.getBinningForPlot("shapeTransverseMass"),
 }
 
 myFullMassSpecs = {
     "basicName": "QCDfactorised/MassAfterStandardSelections",
     "leg1Name": "QCDfactorised/MassAfterLeg1",
     "leg2Name": "QCDfactorised/MassAfterLeg2",
-    "histoSpecs": {
-        "bins": 14,
-        "rangeMin": 0.0,
-        "rangeMax": 500.0,
-        #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-        #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250,300,400], # if an empty list is given, then uniform bin width is used
-        "variableBinSizeLowEdges": [0,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-        "xtitle": "Invariant mass / GeV",
-        "ytitle": "Events",
-    },
+    "binList": systematics.getBinningForPlot("shapeInvariantMass"),
 }
 
 if __name__ == "__main__":
@@ -131,20 +114,20 @@ if __name__ == "__main__":
                     myShapeString = ""
                     if massType == "mt":
                         myShapeString = "shapeTransverseMass"
-                        myResult = QCDFactorisedResultManager(myMtSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
+                        myResult = QCDFactorisedResultManager(myMtSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False,displayPurityBreakdown=True)
                     elif massType == "invmass":
                         myShapeString = "shapeInvariantMass"
                         myResult = QCDFactorisedResultManager(myFullMassSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
-                    myModuleResults.addShape(myResult.getRawShape(), myShapeString)
-                    myModuleResults.addDataDrivenControlPlots(myResult.getControlPlots())
+                    myModuleResults.addShape(myResult.getShape(), myShapeString)
+                    myModuleResults.addDataDrivenControlPlots(myResult.getControlPlots(),myResult.getControlPlotLabels())
                     myOutputCreator.addModule(myModuleResults)
                     # Up variation of QCD normalization (i.e. ctrl->signal region transition)
                     myQCDNormalizationSystUpResults.addShape(myResult.getRegionSystUp(), myShapeString)
-                    myQCDNormalizationSystUpResults.addDataDrivenControlPlots(myResult.getRegionSystUpCtrlPlots())
+                    myQCDNormalizationSystUpResults.addDataDrivenControlPlots(myResult.getRegionSystUpCtrlPlots(),myResult.getControlPlotLabels())
                     myOutputCreator.addModule(myQCDNormalizationSystUpResults)
                     # Down variation of QCD normalization (i.e. ctrl->signal region transition)
                     myQCDNormalizationSystDownResults.addShape(myResult.getRegionSystDown(), myShapeString)
-                    myQCDNormalizationSystDownResults.addDataDrivenControlPlots(myResult.getRegionSystDownCtrlPlots())
+                    myQCDNormalizationSystDownResults.addDataDrivenControlPlots(myResult.getRegionSystDownCtrlPlots(),myResult.getControlPlotLabels())
                     myOutputCreator.addModule(myQCDNormalizationSystDownResults)
                     # Now do the rest of systematics variations
                     for syst in mySystematicsNames:
@@ -165,8 +148,8 @@ if __name__ == "__main__":
                             mySystResult = QCDFactorisedResultManager(myMtSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
                         elif massType == "invmass":
                             mySystResult = QCDFactorisedResultManager(myFullMassSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
-                        mySystModuleResults.addShape(mySystResult.getRawShape(), myShapeString)
-                        mySystModuleResults.addDataDrivenControlPlots(mySystResult.getControlPlots())
+                        mySystModuleResults.addShape(mySystResult.getShape(), myShapeString)
+                        mySystModuleResults.addDataDrivenControlPlots(mySystResult.getControlPlots(),myResult.getControlPlotLabels())
                         ## Save module info
                         myOutputCreator.addModule(mySystModuleResults)
         # Now write output to disk
