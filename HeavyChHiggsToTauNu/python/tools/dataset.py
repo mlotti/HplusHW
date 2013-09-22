@@ -15,6 +15,7 @@ import array
 import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pileupReweightedAllEvents as pileupReweightedAllEvents
 
@@ -1094,9 +1095,9 @@ class RootHistoWithUncertainties:
         #if not ROOT.TH1.CheckConsistency(self._rootHisto, th1):
         #    raise Exception("Adding uncertainty %s, histogram consistency check fails (ROOT.TH1.CheckConsistency())" % name)
         if self._rootHisto.GetDimension() != th1.GetDimension():
-            raise Exception("Adding uncertainty %s, histograms have different dimension (%d != %d)" % (self._rootHisto.GetDimension(), th1.GetDimension()))
+            raise Exception("Adding uncertainty %s, histograms have different dimension (%d != %d)" % (name, self._rootHisto.GetDimension(), th1.GetDimension()))
         if self._rootHisto.GetNbinsX() != th1.GetNbinsX():
-            raise Exception("Adding uncertainty %s, histograms have different number of X bins (%d != %d)" % (self._rootHisto.GetNbinsX(), th1.GetNbinsX()))
+            raise Exception("Adding uncertainty %s, histograms have different number of X bins (%d != %d)" % (name, self._rootHisto.GetNbinsX(), th1.GetNbinsX()))
 
     ## Set the ROOT histogram object
     #
@@ -1147,29 +1148,18 @@ class RootHistoWithUncertainties:
 
     ## Adds the underflow and overflow bins to the first and last bins, respectively
     def makeFlowBinsVisible(self):
-        def moveBinContent(sourceBin,targetBin,histo):
-            histo.SetBinContent(targetBin, histo.GetBinContent(targetBin)+histo.GetBinContent(sourceBin))
-            histo.SetBinError(targetBin, math.sqrt(histo.GetBinError(targetBin)**2+histo.GetBinError(sourceBin)**2))
-            histo.SetBinContent(sourceBin,0.0)
-            histo.SetBinError(sourceBin,0.0)
-
         if self._flowBinsVisibleStatus:
             return
         self._flowBinsVisibleStatus = True
         # Update systematics histograms first
         for key, (hPlus, hMinus) in self._shapeUncertainties.iteritems():
-            moveBinContent(0,1,hPlus)
-            moveBinContent(0,1,hMinus)
-            moveBinContent(hPlus.GetNbinsX()+1,hPlus.GetNbinsX(),hPlus)
-            moveBinContent(hMinus.GetNbinsX()+1,hMinus.GetNbinsX(),hMinus)
+            histogramsExtras.makeFlowBinsVisible(hPlus)
+            histogramsExtras.makeFlowBinsVisible(hMinus)
         # Update nominal histogram
-        moveBinContent(0,1,self._rootHisto)
-        moveBinContent(self._rootHisto.GetNbinsX()+1,self._rootHisto.GetNbinsX(),self._rootHisto)
+        histogramsExtras.makeFlowBinsVisible(self._rootHisto)
         # Update shape uncertainty squared histograms
-        moveBinContent(0,1,self._shapeUncertaintyAbsoluteSquaredPlus)
-        moveBinContent(self._shapeUncertaintyAbsoluteSquaredPlus.GetNbinsX()+1,self._shapeUncertaintyAbsoluteSquaredPlus.GetNbinsX(),self._shapeUncertaintyAbsoluteSquaredPlus)
-        moveBinContent(0,1,self._shapeUncertaintyAbsoluteSquaredMinus)
-        moveBinContent(self._shapeUncertaintyAbsoluteSquaredMinus.GetNbinsX()+1,self._shapeUncertaintyAbsoluteSquaredMinus.GetNbinsX(),self._shapeUncertaintyAbsoluteSquaredMinus)
+        histogramsExtras.makeFlowBinsVisible(self._shapeUncertaintyAbsoluteSquaredPlus)
+        histogramsExtras.makeFlowBinsVisible(self._shapeUncertaintyAbsoluteSquaredMinus)
 
     ## Add shape variation uncertainty
     #
