@@ -140,13 +140,13 @@ if __name__ == "__main__":
                     myOutputCreator.addModule(myModuleResults)
                     # Up variation of QCD normalization (i.e. ctrl->signal region transition)
                     myQCDNormalizationSystUpResults.addShape(myResult.getRegionSystUp(), myShapeString)
-                    # FIXME: add here data-driven control plots for the syst var
+                    myQCDNormalizationSystUpResults.addDataDrivenControlPlots(myResult.getRegionSystUpCtrlPlots())
                     myOutputCreator.addModule(myQCDNormalizationSystUpResults)
                     # Down variation of QCD normalization (i.e. ctrl->signal region transition)
                     myQCDNormalizationSystDownResults.addShape(myResult.getRegionSystDown(), myShapeString)
-                    # FIXME: add here data-driven control plots for the syst var
+                    myQCDNormalizationSystDownResults.addDataDrivenControlPlots(myResult.getRegionSystDownCtrlPlots())
                     myOutputCreator.addModule(myQCDNormalizationSystDownResults)
-                    # Now do the systematics
+                    # Now do the rest of systematics variations
                     for syst in mySystematicsNames:
                         mySystModuleResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, syst)
                         n += 1

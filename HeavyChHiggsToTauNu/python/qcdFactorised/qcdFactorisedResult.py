@@ -192,10 +192,12 @@ class QCDFactorisedResultManager:
             print HighlightStyle()+"...Obtaining region transition systematics"+NormalStyle()
             # Do systematics coming from met shape difference
             myRegionTransitionSyst = SystematicsForMetShapeDifference(mySignalRegionShape, myCtrlRegionShape, myResult.getResultShape(), specs["histoSpecs"], moduleInfoString)
-            self._hRegionSystUp = myRegionTransitionSyst.getUpHistogram()
-            self._hRegionSystDown = myRegionTransitionSyst.getDownHistogram()
+            self._hRegionSystUp = myRegionTransitionSyst.getUpHistogram().Clone()
+            self._hRegionSystDown = myRegionTransitionSyst.getDownHistogram().Clone()
             # Obtain data-driven control plots
             self._hCtrlPlots = []
+            self._hRegionSystUpCtrlPlots = []
+            self._hRegionSystDownCtrlPlots = []
             myObjects = dsetMgr.getDataset("Data").getDirectoryContent("ForDataDrivenCtrlPlots")
             i = 0
             for item in myObjects:
@@ -204,6 +206,19 @@ class QCDFactorisedResultManager:
                 myCtrlShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity)
                 myCtrlPlot = QCDControlPlot(myCtrlRegionShape, myCtrlShape, mySignalRegionShape, moduleInfoString, histoSpecsForEfficiency=specs["histoSpecs"], histoSpecsForPlot=None, title=item)
                 self._hCtrlPlots.append(myCtrlPlot.getResultShape().Clone())
+                # Do systematics coming from met shape difference for control plots
+                # FIXME Need already final binning to get the systematic right!!! Include binning to systematics.py?
+                #myCtrlPlotSignalRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationSignal",item), luminosity)
+                #myCtrlPlotControlRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationControl",item), luminosity)
+                #myCtrlPlotRegionTransitionSyst = SystematicsForMetShapeDifference(myCtrlPlotSignalRegionShape, myCtrlPlotControlRegionShape, myCtrlPlot.getResultShape(), None, moduleInfoString)
+                #self._hRegionSystUpCtrlPlots.append(myCtrlPlotRegionTransitionSyst.getUpHistogram().Clone())
+                #self._hRegionSystDownCtrlPlots.append(myCtrlPlotRegionTransitionSyst.getDownHistogram().Clone())
+                h = myCtrlPlot.getResultShape().Clone()
+                h.SetTitle(item)
+                self._hRegionSystUpCtrlPlots.append(h)
+                h = myCtrlPlot.getResultShape().Clone()
+                h.SetTitle(item)
+                self._hRegionSystDownCtrlPlots.append(h)
 
     def getRawShape(self):
         return self._hRawShape
@@ -219,3 +234,9 @@ class QCDFactorisedResultManager:
 
     def getControlPlots(self):
         return self._hCtrlPlots
+
+    def getRegionSystUpCtrlPlots(self):
+        return self._hRegionSystUpCtrlPlots
+
+    def getRegionSystDownCtrlPlots(self):
+        return self._hRegionSystDownCtrlPlots

@@ -52,7 +52,11 @@ class SystematicsForMetShapeDifference:
                 h.Scale(1.0 / myIntegral)
 
         nSplitBins = signalRegion.getNumberOfPhaseSpaceSplitBins()
-        myModifier = ShapeHistoModifier(histoSpecs)
+        myModifier = None
+        if histoSpecs == None:
+            myModifier = ShapeHistoModifier(histoSpecs,finalShape)
+        else:
+            myModifier = ShapeHistoModifier(histoSpecs)
         # Initialize histograms
         self._hCombinedSignalRegion = myModifier.createEmptyShapeHistogram("QCDSystSignalRegion_Total_%s"%(moduleInfoString))
         self._hCombinedCtrlRegion = myModifier.createEmptyShapeHistogram("QCDSystCtrlRegion_Total_%s"%(moduleInfoString))
