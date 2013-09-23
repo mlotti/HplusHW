@@ -1081,10 +1081,13 @@ class RootHistoWithUncertainties:
         self._shapeUncertainties = {}
 
         # TH1 to hold square sum of bin-wise relative uncertainties
-        self._shapeUncertaintyAbsoluteSquaredPlus = rootHisto.Clone()
-        self._shapeUncertaintyAbsoluteSquaredMinus = rootHisto.Clone()
-        self._shapeUncertaintyAbsoluteSquaredPlus.Reset()
-        self._shapeUncertaintyAbsoluteSquaredMinus.Reset()
+        self._shapeUncertaintyAbsoluteSquaredPlus = None
+        self._shapeUncertaintyAbsoluteSquaredMinus = None
+        if isinstance(rootHisto, ROOT.TH1):
+            self._shapeUncertaintyAbsoluteSquaredPlus = rootHisto.Clone()
+            self._shapeUncertaintyAbsoluteSquaredMinus = rootHisto.Clone()
+            self._shapeUncertaintyAbsoluteSquaredPlus.Reset()
+            self._shapeUncertaintyAbsoluteSquaredMinus.Reset()
         self._shapeUncertaintyAbsoluteNames = []
 
         # Boolean to save the status if the under- and overflow bins have been made visible (i.e. summed to the first and last bin)
@@ -1168,7 +1171,13 @@ class RootHistoWithUncertainties:
     # \param th1Minus TH1 for the 'minus' variation
     def addShapeUncertainty(self, name, th1Plus, th1Minus):
         if self._flowBinsVisibleStatus:
-            raise Exception("addShapeUncertainty(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
+            # Check if flow bins have entries
+            myStatus = abs(th1Plus.GetBinContent(th1Plus.GetNbinsX()+1)) < 0.00001
+            myStatus &= abs(th1Minus.GetBinContent(th1Minus.GetNbinsX()+1)) < 0.00001
+            myStatus &= abs(th1Plus.GetBinContent(0)) < 0.00001
+            myStatus &= abs(th1Minus.GetBinContent(0)) < 0.00001
+            if not myStatus:
+                raise Exception("addShapeUncertainty(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
         self._shapeUncertainties[name] = (th1Plus, th1Minus)
@@ -1283,8 +1292,9 @@ class RootHistoWithUncertainties:
                     yhighSquareSum += diffMinus**2
                     ylowSquareSum += diffPlus**2
 
-            yhighSquareSum += self._shapeUncertaintyAbsoluteSquaredPlus.GetBinContent(i)
-            ylowSquareSum += self._shapeUncertaintyAbsoluteSquaredMinus.GetBinContent(i)
+            if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+                yhighSquareSum += self._shapeUncertaintyAbsoluteSquaredPlus.GetBinContent(i)
+                ylowSquareSum += self._shapeUncertaintyAbsoluteSquaredMinus.GetBinContent(i)
 
             xvalues.append(xval)
             xerrhigh.append(xhigh)
@@ -1405,8 +1415,9 @@ class RootHistoWithUncertainties:
             plus = plus.Rebin(*args)
             minus = minus.Rebin(*args)
             self._shapeUncertainties[key] = (plus, minus)
-        self._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Rebin(*args)
-        self._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Rebin(*args)
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Rebin(*args)
+            self._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Rebin(*args)
 
     ## Rebin histogram
     #
@@ -1419,8 +1430,9 @@ class RootHistoWithUncertainties:
             plus = plus.Rebin2D(*args)
             minus = minus.Rebin2D(*args)
             self._shapeUncertainties[key] = (plus, minus)
-        self._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Rebin2D(*args)
-        self._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Rebin2D(*args)
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Rebin2D(*args)
+            self._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Rebin2D(*args)
 
     ## Add another RootHistoWithUncertainties object
     #
@@ -1433,8 +1445,9 @@ class RootHistoWithUncertainties:
             self.makeFlowBinsVisible()
 
         # Absolute shape uncertainty (values are squares, can add directly)
-        self._shapeUncertaintyAbsoluteSquaredPlus.Add(other._shapeUncertaintyAbsoluteSquaredPlus)
-        self._shapeUncertaintyAbsoluteSquaredMinus.Add(other._shapeUncertaintyAbsoluteSquaredMinus)
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus.Add(other._shapeUncertaintyAbsoluteSquaredPlus)
+            self._shapeUncertaintyAbsoluteSquaredMinus.Add(other._shapeUncertaintyAbsoluteSquaredMinus)
         for item in other._shapeUncertaintyAbsoluteNames:
             if not item in self._shapeUncertaintyAbsoluteNames:
                 self._shapeUncertaintyAbsoluteNames.append(item)
@@ -1476,10 +1489,11 @@ class RootHistoWithUncertainties:
             plus.Scale(*args)
             minus.Scale(*args)
         # The absolute uncertainty squared needs to be scaled twice because of the squaring
-        self._shapeUncertaintyAbsoluteSquaredPlus.Scale(*args)
-        self._shapeUncertaintyAbsoluteSquaredPlus.Scale(*args)
-        self._shapeUncertaintyAbsoluteSquaredMinus.Scale(*args)
-        self._shapeUncertaintyAbsoluteSquaredMinus.Scale(*args)
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus.Scale(*args)
+            self._shapeUncertaintyAbsoluteSquaredPlus.Scale(*args)
+            self._shapeUncertaintyAbsoluteSquaredMinus.Scale(*args)
+            self._shapeUncertaintyAbsoluteSquaredMinus.Scale(*args)
 
     ## Clone the histogram
     #
@@ -1493,10 +1507,14 @@ class RootHistoWithUncertainties:
             plus.SetDirectory(0)
             minus.SetDirectory(0)
             clone._shapeUncertainties[key] = (plus, minus)
-        clone._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Clone()
-        clone._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Clone()
-        clone._shapeUncertaintyAbsoluteSquaredPlus.SetDirectory(0)
-        clone._shapeUncertaintyAbsoluteSquaredMinus.SetDirectory(0)
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            clone._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Clone()
+            clone._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Clone()
+            clone._shapeUncertaintyAbsoluteSquaredPlus.SetDirectory(0)
+            clone._shapeUncertaintyAbsoluteSquaredMinus.SetDirectory(0)
+        else:
+            clone._shapeUncertaintyAbsoluteSquaredPlus = None
+            clone._shapeUncertaintyAbsoluteSquaredMinus = None
         clone._shapeUncertaintyAbsoluteNames = self._shapeUncertaintyAbsoluteNames[:]
         clone._flowBinsVisibleStatus = self._flowBinsVisibleStatus
         return clone
@@ -1507,8 +1525,9 @@ class RootHistoWithUncertainties:
         for (plus, minus) in self._shapeUncertainties.itervalues():
             plus.Delete()
             minus.Delete()
-        self._shapeUncertaintyAbsoluteSquaredPlus.Delete()
-        self._shapeUncertaintyAbsoluteSquaredMinus.Delete()
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus.Delete()
+            self._shapeUncertaintyAbsoluteSquaredMinus.Delete()
 
         self._rootHisto = None
         self._shapeUncertainties = None
@@ -1544,9 +1563,10 @@ class RootHistoWithUncertainties:
         print "nominal_error%s"%histoErrorHelper(self._rootHisto)
         sUp = ""
         sDown = ""
-        for i in range(0, self._rootHisto.GetNbinsX()+2):
-            sUp += ", %f"%math.sqrt(self._shapeUncertaintyAbsoluteSquaredPlus.GetBinContent(i))
-            sDown += ", %f"%math.sqrt(self._shapeUncertaintyAbsoluteSquaredMinus.GetBinContent(i))
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            for i in range(0, self._rootHisto.GetNbinsX()+2):
+                sUp += ", %f"%math.sqrt(self._shapeUncertaintyAbsoluteSquaredPlus.GetBinContent(i))
+                sDown += ", %f"%math.sqrt(self._shapeUncertaintyAbsoluteSquaredMinus.GetBinContent(i))
         print "shape_error_up%s"%sUp
         print "shape_error_down%s"%sDown
         keys = self._shapeUncertainties.keys()
