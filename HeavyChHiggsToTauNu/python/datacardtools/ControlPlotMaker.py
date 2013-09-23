@@ -52,6 +52,7 @@ class ControlPlotMaker:
                 hData = None
                 hTotalExpected = None
                 # Loop over dataset columns to find histograms
+                myStackList = []
                 for c in self._datasetGroups:
                     if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
                         h = c.getControlPlotByIndex(i).Clone()
@@ -72,48 +73,80 @@ class ControlPlotMaker:
                             else:
                                 hQCD.Add(h)
                         elif c.typeIsEWK():
-                            if hEmbedded == None:
-                                hEmbedded = h.Clone()
+                            if self._config.OptionReplaceEmbeddingByMC:# or False: # FIXME
+                                myHisto = histograms.Histo(h,c._datasetMgrColumn)
+                                myHisto.setIsDataMC(isData=False, isMC=True)
+                                myStackList.append(myHisto)
+                                if hTotalExpected == None:
+                                    hTotalExpected = h.Clone()
+                                else:
+                                    hTotalExpected.Add(h)
                             else:
-                                hEmbedded.Add(h)
+                                if hEmbedded == None:
+                                    hEmbedded = h.Clone()
+                                else:
+                                    hEmbedded.Add(h)
                         elif c.typeIsEWKfake():
                             if hEWKfake == None:
                                 hEWKfake = h.Clone()
                             else:
                                 hEWKfake.Add(h)
-                hTotalExpected = hQCD.Clone()
-                myStackList = [hQCD]
+                if hQCD != None:
+                    if hTotalExpected == None:
+                        hTotalExpected = hQCD.Clone()
+                    else:
+                        hTotalExpected.Add(hQCD)
+                    myHisto = histograms.Histo(hQCD,"QCD")
+                    myHisto.setIsDataMC(isData=False, isMC=True)
+                    myStackList = [myHisto]+myStackList
                 if hEmbedded != None:
                     hTotalExpected.Add(hEmbedded)
-                    myStackList = [hEmbedded]+myStackList
+                    myHisto = histograms.Histo(hEmbedded,"Embedding")
+                    myHisto.setIsDataMC(isData=False, isMC=True)
+                    myStackList.append(myHisto)
                 if hEWKfake != None:
                     hTotalExpected.Add(hEWKfake)
-                    myStackList = [hEWKfake]+myStackList
+                    myHisto = histograms.Histo(hEWKfake,"EWKfakes")
+                    myHisto.setIsDataMC(isData=False, isMC=True)
+                    myStackList.append(myHisto)
                 hData = observation.getControlPlotByIndex(i).Clone()
-                myStackList.extend([hSignal,hData])
                 # Apply blinding 
                 if len(myCtrlPlot.blindedRange) > 0:
                     self._applyBlinding(hData,myCtrlPlot.blindedRange)
+                myHisto = histograms.Histo(hData,"Data")
+                myHisto.setIsDataMC(isData=True, isMC=False)
+                myStackList.append(myHisto)
+                # Add signal
+                mySignalLabel = "TTToHplus_M%d"%m
+                if m > 179:
+                    mySignalLabel = "HplusTB_M%d"%m
+                myHisto = histograms.Histo(hSignal,mySignalLabel)
+                myHisto.setIsDataMC(isData=False, isMC=True)
+                myStackList.append(myHisto)
                 # Make plot
-                #myRatioPlot = plots.ComparisonPlot(hTotalExpected,hData)
-                #myRatioPlot.createFrame("test_%s"%(myCtrlPlot.title), createRatio=True,opts={"addMCUncertainty": True})
                 myStackPlot = plots.DataMCPlot2(myStackList)
-                myStackPlot.stackMCHistograms()
-                myStackPlot.createFrame("test_%s"%(myCtrlPlot.title), createRatio=True,opts={"addMCUncertainty": True})
-                #plot.frame.GetXaxis().SetTitle(self._histoSpecs["xtitle"])
-                #plot.frame.GetYaxis().SetTitle("Arb. units. (Normalised to 1)")
-                #styles.mcStyle(plot.histoMgr.getHisto("Ctrl. region"))
-                #styles.dataStyle(plot.histoMgr.getHisto("Signal region"))
-                #plot.setLegend(histograms.createLegend(0.59, 0.77, 0.87, 0.90))
-                #plot.legend.SetFillColor(0)
-                #plot.legend.SetFillStyle(1001)
-                #plot.histoMgr.getHisto("Up").getRootHisto().SetMarkerSize(0)
-                histograms.addCmsPreliminaryText()
-                #myRatioPlot.draw()
-                myStackPlot.draw()
-                myRatioPlot.save()
-                return
-                
+                myStackPlot.setLuminosity(self._luminosity)
+                myStackPlot.setDefaultStyles()
+                myParams = myCtrlPlot.details.copy()
+                myParams["xtitle"] = "%s, %s"%(myParams["xtitle"],myParams["unit"])
+                myMinWidth = 10000.0
+                myMaxWidth = 0.0
+                for i in range(hData.getRootHisto.GetNbinsX()):
+                    w = hData.getRootHisto.GetBinWidth(i)
+                    if w < myMinWidth:
+                        myMinWidth = w
+                    if w > myMaxWidth
+                        myMaxWidth = w
+                myWidthSuffix = "%d-%d"%(myMinWidth,myMaxWidth)
+                if abs(myMinWidth-myMaxWidth) < 0.0001:
+                myWidthSuffix = "%d"%(myMinWidth)
+                myParams["ytitle"] = "%s / %s %s"%(myParams["ytitle"],myWidthSuffix,myParams["unit"])
+                myDrawer = plots.PlotDrawer(xlabel=myCtrlPlot.details["xtitle"], ylabel=myCtrlPlot.details["ytitle"], log=myLogStatus,
+                                            divideByBinWidth=True, ratio=True, ratioYlabel="Data/#Sigma Exp.",
+                                            stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True)
+                myDrawer(myStackPlot, "%s/DataDrivenCtrlPlot_%02d_%s"%(self._dirname,i,myCtrlPlot.title))
+
+                # FIXME: Add here piece of code to fill the selection flow plot
                 
                 # Add data to selection flow plot
                 #if c.flowPlotCaption != "":
@@ -141,49 +174,10 @@ class ControlPlotMaker:
         #myEvaluator.save(dirname)
         print "Control plots done"
 
-    def _getControlPlot(self, mass, details, columnIdList, title, titleSuffix, blindedRange = []):
-        myShapeModifier = ShapeHistoModifier(details)
-        myHisto = myShapeModifier.createEmptyShapeHistogram(title+titleSuffix)
-        #mySystHisto = myShapeModifier.createEmptyShapeHistogram(title+"Syst"+titleSuffix)
-        if columnIdList == None:
-            # Data
-            h = self._observation.getControlPlotByTitle(title)
-            myShapeModifier.addShape(source=h,dest=myHisto)
-        else:
-            for g in self._datasetGroups:
-                if g.isActiveForMass(mass):
-                    # Find column with correct id
-                    for c in columnIdList:
-                        if g.getLandsProcess() == c:
-                            h = g.getControlPlotByTitle(title)
-                            # Add systematic uncertainty (yes, we have here access to full systematics!)
-                            mySystError = 0.0
-                            for result in g.getNuisanceResults():
-                                if not result.resultIsStatUncertainty(): # ignore stat. uncert.
-                                    # take average error from plus and minus if nuisance is shape stat or asymmetric
-                                    if not ("QCD" in g.getLabel()):
-                                        mySystError += pow(result.getResultAverage(),2)
-                                    #print "group",g.getLabel(),"id",result.getId(),"syst",result.getResultAverage()
-                            # Apply systematic uncertainty to shape histogram
-                            #print "group",g.getLabel(),"syst=",sqrt(mySystError)
-                            for i in range(1,h.GetNbinsX()+1):
-                                h.SetBinError(i,sqrt(pow(h.GetBinError(i),2)+pow(mySystError,2)))
-                            # Downscale MC ttbar according to branching ratio
-                            if c == 1 or c == 2:
-                                h.Scale(pow(1.0-self._config.OptionBr,2))
-                            # Add to total histogram
-                            myShapeModifier.addShape(source=h,dest=myHisto)
-        myShapeModifier.finaliseShape(dest=myHisto)
-        # Set bin labels, if specified
-        if len(details["binLabels"]) > 0:
-            if len(details["binLabels"]) != myHisto.GetNbinsX():
-                raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" control plot has %d bins, but %d bin labels were provided! (provide same number of labels as bins)"%(myHisto.GetNbinsX(),len(details["binLabels"])))
-            for i in range(1,myHisto.GetNbinsX()+1):
-                myHisto.GetXaxis().SetBinLabel(i,details["binLabels"][i-1])
-        #mySystHisto.IsA().Destructor(mySystHisto)
-        return myHisto
 
-    def _applyBlinding(self,myHisto,blindedRange = []):
+
+    def _applyBlinding(self,myObject,blindedRange = []):
+        myHisto = myObject.getRootHisto()
         for i in range (1, myHisto.GetNbinsX()+1):
             # Blind if any edge of the current bin is inside the blinded range or if bin spans over the blinded range
             if ((myHisto.GetXaxis().GetBinLowEdge(i) >= blindedRange[0] and myHisto.GetXaxis().GetBinLowEdge(i) <= blindedRange[1]) or

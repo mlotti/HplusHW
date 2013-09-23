@@ -11,7 +11,7 @@ Path = "/home/wendland/data/v445/2013-09-09"
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 LightMassPoints      = [120]
 HeavyMassPoints      = [180,190,200,220,250,300]
-HeavyMassPoints      = [180]
+HeavyMassPoints      = []
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
 BlindAnalysis   = True
@@ -898,37 +898,53 @@ MergeNuisances.append(["pileup","pileup_fakes"])
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput
 ControlPlots = []
 
-
-# FIXME: fix how QCD background is taken here
-ControlPlots.append(ControlPlotInput(
-    title            = "Njets",
-    signalHHid       = [-1],
-    signalHWid       = [0],
-    QCDid            = [3],
-    embeddingId      = EmbeddingIdList,
-    EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "ForDataDrivenCtrlPlots",
-    signalHistoName  = "NjetsAfterJetSelectionAndMETSF",
-    EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
-    EWKfakeHistoName  = "NjetsAfterJetSelectionAndMETSF",
-    QCDFactNormalisation = "/CtrlNjets",
-    QCDFactHistoName = "/CtrlNjets",
-    details          = { "bins": 5,
-                         "rangeMin": 3.0,
-                         "rangeMax": 8.0,
-                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                         "binLabels": ["3","4","5","6","7"], # leave empty to disable bin labels
-                         "xtitle": "Number of selected jets",
-                         "ytitle": "Events",
-                         "unit": "",
-                         "logy": True,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
-    blindedRange     = [], # specify range min,max if blinding applies to this control plot
-    evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
-))
+if False: # FIXME: bug fixed in place of Njets cut in QCD measurements, need to rerun mcrab
+    ControlPlots.append(ControlPlotInput(
+        title            = "Njets",
+        signalHHid       = [-1],
+        signalHWid       = [0],
+        QCDid            = [3],
+        embeddingId      = EmbeddingIdList,
+        EWKfakeId        = EWKFakeIdList,
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "Njets",
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "Njets",
+        QCDFactNormalisation = "/CtrlNjets",
+        QCDFactHistoName = "/CtrlNjets",
+        details          = { "xlabel": "Number of selected jets",
+                             "ylabel": "Events",
+                             "divideByBinWidth": False,
+                             "unit": "",
+                             "log": True,
+                             "optsLog": {"ymin": 0.9} },
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
+    ControlPlots.append(ControlPlotInput(
+        title            = "Njets",
+        signalHHid       = [-1],
+        signalHWid       = [0],
+        QCDid            = [3],
+        embeddingId      = EmbeddingIdList,
+        EWKfakeId        = EWKFakeIdList,
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "NjetsAfterJetSelectionAndMETSF",
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "NjetsAfterJetSelectionAndMETSF",
+        QCDFactNormalisation = "/CtrlNjets",
+        QCDFactHistoName = "/CtrlNjets",
+        details          = { "xlabel": "Number of selected jets",
+                             "ylabel": "Events",
+                             "divideByBinWidth": False,
+                             "unit": "",
+                             "log": True,
+                             "optsLog": {"ymin": 0.9} },
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
 
 for i in range(0,4):
     ControlPlots.append(ControlPlotInput(
@@ -944,18 +960,12 @@ for i in range(0,4):
         EWKfakeHistoName  = "ImprovedDeltaPhiCutsJet%dCollinear"%(i+1),
         QCDFactNormalisation = "/QCDTailKillerJet%dCollinear"%i,
         QCDFactHistoName = "/QCDTailKillerJet%dCollinear"%i,
-        details          = { "bins": 26,
-                             "rangeMin": 0.0,
-                             "rangeMax": 260.0,
-                             "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                             "binLabels": [], # leave empty to disable bin labels
-                             "xtitle": "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%(i+1),
-                             "ytitle": "Events",
+        details          = { "xlabel": "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%(i+1),
+                             "ylabel": "Events",
+                             "divideByBinWidth": False,
                              "unit": "^{o}",
-                             "logy": True,
-                             "DeltaRatio": 0.5,
-                             "ymin": 0.9,
-                             "ymax": -1},
+                             "log": True,
+                             "optsLog": {"ymin": 0.9} },
         blindedRange     = [], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
@@ -978,19 +988,12 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeHistoName  = "MET",
     QCDFactNormalisation = "/CtrlMET",
     QCDFactHistoName = "/CtrlMET",
-    details          = { "bins": 13,
-                         "rangeMin": 0.0,
-                         "rangeMax": 500.0,
-                         #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                         "binLabels": [], # leave empty to disable bin labels
-                         "xtitle": "E_{T}^{miss}",
-                         "ytitle": "Events",
+    details          = { "xlabel": "E_{T}^{miss}",
+                         "ylabel": "dN_{Events}/dE_{T}^{miss}",
+                         "divideByBinWidth": True,
                          "unit": "GeV",
-                         "logy": True,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
+                         "log": True,
+                         "optsLog": {"ymin": 0.9} },
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "#Delta#phi_{#uparrow#uparrow,4}", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1009,18 +1012,12 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeHistoName  = "NBjets",
     QCDFactNormalisation = "/CtrlNbjets",
     QCDFactHistoName = "/CtrlNbjets",
-    details          = { "bins": 5,
-                         "rangeMin": 0.0,
-                         "rangeMax": 5.0,
-                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                         "binLabels": ["0","1","2","3","4"], # leave empty to disable bin labels
-                         "xtitle": "Number of selected b jets",
-                         "ytitle": "Events",
+    details          = { "xlabel": "Number of selected b jets",
+                         "ylabel": "Events",
+                         "divideByBinWidth": False,
                          "unit": "",
-                         "logy": True,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
+                         "log": True,
+                         "optsLog": {"ymin": 0.9} },
     blindedRange=[],
     #blindedRange     = [1.5,10], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
@@ -1048,10 +1045,10 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMax": 180.0,
                          #"variableBinSizeLowEdges": [0., 10., 20., 30., 40., 60., 80., 100., 120., 140., 160.], # if an empty list is given, then uniform bin width is used
                          #"binLabels": [], # leave empty to disable bin labels
-                         #"xtitle": "#Delta#phi(#tau_{h},E_{T}^{miss})",
-                         #"ytitle": "Events",
+                         #"xlabel": "#Delta#phi(#tau_{h},E_{T}^{miss})",
+                         #"ylabel": "Events",
                          #"unit": "^{o}",
-                         #"logy": True,
+                         #"log": True,
                          #"DeltaRatio": 0.5,
                          #"ymin": 0.9,
                          #"ymax": -1},
@@ -1076,10 +1073,10 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMax": 180.0,
                          #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
                          #"binLabels": [], # leave empty to disable bin labels
-                         #"xtitle": "max(#Delta#phi(jet,E_{T}^{miss})",
-                         #"ytitle": "Events",
+                         #"xlabel": "max(#Delta#phi(jet,E_{T}^{miss})",
+                         #"ylabel": "Events",
                          #"unit": "^{o}",
-                         #"logy": True,
+                         #"log": True,
                          #"DeltaRatio": 0.5,
                          #"ymin": 0.9,
                          #"ymax": -1},
@@ -1104,10 +1101,10 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMax": 200.0,
                          #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
                          #"binLabels": [], # leave empty to disable bin labels
-                         #"xtitle": "m_{jj}",
-                         #"ytitle": "Events",
+                         #"xlabel": "m_{jj}",
+                         #"ylabel": "Events",
                          #"unit": "GeV/c^{2}",
-                         #"logy": True,
+                         #"log": True,
                          #"DeltaRatio": 0.5,
                          #"ymin": 0.9,
                          #"ymax": -1},
@@ -1132,10 +1129,10 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMax": 400.0,
                          #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
                          #"binLabels": [], # leave empty to disable bin labels
-                         #"xtitle": "m_{bjj}",
-                         #"ytitle": "Events",
+                         #"xlabel": "m_{bjj}",
+                         #"ylabel": "Events",
                          #"unit": "GeV/c^{2}",
-                         #"logy": True,
+                         #"log": True,
                          #"DeltaRatio": 0.5,
                          #"ymin": 0.9,
                          #"ymax": -1},
@@ -1158,18 +1155,12 @@ for i in range(0,4):
         EWKfakeHistoName  = "ImprovedDeltaPhiCutsJet%dBackToBack"%(i+1),
         QCDFactNormalisation = "/QCDTailKillerJet%dBackToBack"%i,
         QCDFactHistoName = "/QCDTailKillerJet%dBackToBack"%i,
-        details          = { "bins": 13,
-                             "rangeMin": 0.0,
-                             "rangeMax": 260.0,
-                             "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                             "binLabels": [], # leave empty to disable bin labels
-                             "xtitle": "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%(i+1),
-                             "ytitle": "Events",
+        details          = { "xlabel": "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{%d},MET)^{2}}"%(i+1),
+                             "ylabel": "Events",
+                             "divideByBinWidth": False,
                              "unit": "^{o}",
-                             "logy": True,
-                             "DeltaRatio": 0.5,
-                             "ymin": 0.9,
-                             "ymax": -1},
+                             "log": True,
+                             "optsLog": {"ymin": 0.9} },
         blindedRange     = [], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1191,18 +1182,12 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeHistoName  = "shapeEWKFakeTausTransverseMass",
     QCDFactNormalisation = "/NevtAfterLeg1",
     QCDFactHistoName = "/MtAfterLeg1",
-    details          = { "bins": 13,
-                         "rangeMin": 0.0,
-                         "rangeMax": 400.0,
-                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                         "binLabels": [], # leave empty to disable bin labels
-                         "xtitle": "mT(#tau_{h},E_{T}^{miss})",
-                         "ytitle": "Events",
-                         "unit": "GeV/c^{2}",
-                         "logy": False,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
+    details          = { "xlabel": "m_{T}(#tau_{h},E_{T}^{miss})",
+                     "ylabel": "dN_{Events}/dm_{T}",
+                     "divideByBinWidth": True,
+                     "unit": "GeV",
+                     "log": False,
+                     "opts": {"ymin": 0.0} },
     blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "#Delta#phi_{#uparrow#downarrow,4}", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1222,52 +1207,14 @@ if False:
         EWKfakeHistoName  = "shapeEWKFakeTausInvariantMass",
         QCDFactNormalisation = "/NevtAfterLeg1",
         QCDFactHistoName = "/MassAfterLeg1",
-        details          = { "bins": 13,
-                            "rangeMin": 0.0,
-                            "rangeMax": 500.0,
-                            "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                            "binLabels": [], # leave empty to disable bin labels
-                            "xtitle": "m(#tau_{h},E^{miss})",
-                            "ytitle": "Events",
-                            "unit": "GeV/c^{2}",
-                            "logy": False,
-                            "DeltaRatio": 0.5,
-                            "ymin": 0.9,
-                            "ymax": -1},
+        details          = { "xlabel": "m(#tau_{h},E_{T}^{miss})",
+                             "ylabel": "dN_{Events}/dm",
+                             "divideByBinWidth": True,
+                             "unit": "GeV",
+                             "log": False,
+                             "opts": {"ymin": 0.0} },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
-        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
-    ))
-
-if False:
-    ControlPlots.append(ControlPlotInput(
-        title            = "NjetsAfterMET",
-        signalHHid       = [-1],
-        signalHWid       = [0],
-        QCDid            = [3],
-        embeddingId      = EmbeddingIdList,
-        EWKfakeId        = EWKFakeIdList,
-        signalHistoPath  = "ForDataDrivenCtrlPlots",
-        signalHistoName  = "NjetsAfterMET",
-        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
-        EWKfakeHistoName  = "NjetsAfterMET",
-        QCDFactNormalisation = "Njets",
-        QCDFactHistoPath = QCDFactorisedStdSelVersion,
-        QCDFactHistoName = "", # FIXME
-        details          = { "bins": 5,
-                             "rangeMin": 3.0,
-                             "rangeMax": 8.0,
-                             "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                             "binLabels": ["3","4","5","6","7"], # leave empty to disable bin labels
-                             "xtitle": "Number of selected jets",
-                             "ytitle": "Events",
-                             "unit": "",
-                             "logy": True,
-                             "DeltaRatio": 0.5,
-                             "ymin": 0.9,
-                             "ymax": -1},
-        blindedRange     = [], # specify range min,max if blinding applies to this control plot
-        evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
     ))
 

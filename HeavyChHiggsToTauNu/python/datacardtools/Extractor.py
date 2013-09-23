@@ -557,43 +557,7 @@ class ControlPlotExtractor(ExtractorBase):
         myLabel = datasetColumn.getLabel()+"_"+self._histoTitle
         mySystematics = dataset.Systematics(allShapes=True)
         myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._histoNameWithPath))
-        # Normalisation
-        #h = 
-        
-        
-        
         return myDatasetRootHisto
-        
-        #FIXME
-        
-        #myShapeModifier = ShapeHistoModifier(self._histoSpecs)
-        #h = myShapeModifier.createEmptyShapeHistogram(myLabel)
-        #for i in range (0, len(self._histoDirs)):
-            ##print "Extractor ",self._histoDirs[i],self._histoNames[i]
-            ## Obtain histogram from dataset
-            #myHistoname = self._histoDirs[i]+"/"+self._histoNames[i]
-            #if self._histoDirs[i] == "":
-                #myHistoname = self._histoNames[i]
-            #try:
-                #myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoname)
-            #except Exception, e:
-                #raise Exception (ErrorStyle()+"Error in extracting ControlPlots:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  Histogram title = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._histoTitle, str(e)))
-            #if myDatasetRootHisto.isMC():
-                #myDatasetRootHisto.normalizeToLuminosity(luminosity)
-            #hSource = myDatasetRootHisto.getHistogram()
-            #if i == 0:
-                #myShapeModifier.addShape(dest=h,source=hSource)
-            #else:
-                #myShapeModifier.subtractShape(dest=h,source=hSource)
-            #hSource.IsA().Destructor(hSource)
-        ## Finalise histogram
-        #myShapeModifier.finaliseShape(dest=h)
-        ## Apply additional normalisation
-        #h.Scale(additionalNormalisation)
-        ## Add here substraction of negative bins, if necessary
-        ## ... no use case currently, therefore no code added
-        ## Return result
-        #return h
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
