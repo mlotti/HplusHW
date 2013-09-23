@@ -24,12 +24,14 @@ class SplittedHistoReader:
         except Exception, e:
             raise Exception (ErrorLabel()+"Cannot find histogram '%s'!\n  Message = %s!"%(mySplittedBinInfoHistoName, str(e)))
         splittedBinInfoHisto = dsetRootHisto.getHistogram()
+        ROOT.SetOwnership(splittedBinInfoHisto, True)
         # Copy splitting information with proper normalisation (to account for a merge)
         myNormalizer = splittedBinInfoHisto.GetBinContent(1)
         for i in range(2, splittedBinInfoHisto.GetNbinsX()+1):
             if splittedBinInfoHisto.GetBinContent(i) > 1:
                 self._binLabels.append(splittedBinInfoHisto.GetXaxis().GetBinLabel(i))
                 self._binCount.append(int(splittedBinInfoHisto.GetBinContent(i) / myNormalizer))
+        ROOT.gDirectory.Delete(splittedBinInfoHisto.GetName())
 
     ## Returns the maximum bin number
     def getMaxBinNumber(self):
@@ -48,15 +50,13 @@ class SplittedHistoReader:
 
     ## Returns a list of histograms
     def getSplittedBinHistograms(self, dsetMgr, dsetlabel, histoName, luminosity):
-        histoList = []
         # Check the format
         if self._splittingDoneWithMultipleHistograms(dsetMgr, dsetlabel, histoName):
             # Found multiple bins, get histograms
-            histoList = list(self._getSplittedHistogramsFromMultipleSources(dsetMgr, dsetlabel, histoName, luminosity))
+            return self._getSplittedHistogramsFromMultipleSources(dsetMgr, dsetlabel, histoName, luminosity)
         else:
             # Assume that a single histogram contains the information
-            histoList = list(self._getSplittedHistogramsFromSingleSource(dsetMgr, dsetlabel, histoName, luminosity))
-        return histoList
+            return self._getSplittedHistogramsFromSingleSource(dsetMgr, dsetlabel, histoName, luminosity)
 
     ## Returns true if the splitting is done with multiple histograms
     def _splittingDoneWithMultipleHistograms(self, dsetMgr, dsetlabel, histoName):
@@ -75,7 +75,9 @@ class SplittedHistoReader:
             myDsetRootHisto = dsetMgr.getDataset(dsetlabel).getDatasetRootHisto(myMultipleFileNameStem+str(i))
             if dsetMgr.getDataset(dsetlabel).isMC():
                 myDsetRootHisto.normalizeToLuminosity(luminosity)
-            myHistoList.append(myDsetRootHisto.getHistogram())
+            h = myDsetRootHisto.getHistogram()
+            ROOT.SetOwnership(h, True)
+            myHistoList.append(h)
         return myHistoList
 
     ## Deconstructs a 2D histogram into a list of histograms (one per split bin, in the same order)
@@ -96,5 +98,6 @@ class SplittedHistoReader:
             for j in range(0, myHisto.GetXaxis().GetNbins()+2):
                 h.SetBinContent(j, myHisto.GetBinContent(j, i+1))
                 h.SetBinError(j, myHisto.GetBinError(j, i+1))
+            ROOT.SetOwnership(h, True)
             myHistoList.append(h)
         return myHistoList # do the histograms disappear from memory???

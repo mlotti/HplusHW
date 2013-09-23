@@ -117,7 +117,7 @@ if __name__ == "__main__":
                         myResult = QCDFactorisedResultManager(myMtSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False,displayPurityBreakdown=True)
                     elif massType == "invmass":
                         myShapeString = "shapeInvariantMass"
-                        myResult = QCDFactorisedResultManager(myFullMassSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
+                        myResult = QCDFactorisedResultManager(myFullMassSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False,displayPurityBreakdown=True)
                     myModuleResults.addShape(myResult.getShape(), myShapeString)
                     myModuleResults.addDataDrivenControlPlots(myResult.getControlPlots(),myResult.getControlPlotLabels())
                     myOutputCreator.addModule(myModuleResults)
@@ -128,10 +128,10 @@ if __name__ == "__main__":
                     # Down variation of QCD normalization (i.e. ctrl->signal region transition)
                     myQCDNormalizationSystDownResults.addShape(myResult.getRegionSystDown(), myShapeString)
                     myQCDNormalizationSystDownResults.addDataDrivenControlPlots(myResult.getRegionSystDownCtrlPlots(),myResult.getControlPlotLabels())
+                    myResult.delete()
                     myOutputCreator.addModule(myQCDNormalizationSystDownResults)
                     # Now do the rest of systematics variations
                     for syst in mySystematicsNames:
-                        mySystModuleResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, syst)
                         n += 1
                         print CaptionStyle()+"Analyzing systematics variations %d/%d: %s/%s%s"%(n,myTotalModules,myModuleInfoString,syst,NormalStyle())
                         myModuleInfoString = "%s_%s_%s_%s"%(era, searchMode, optimizationMode,syst)
@@ -143,13 +143,15 @@ if __name__ == "__main__":
                         systDsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
                         myLuminosity = systDsetMgr.getDataset("Data").getLuminosity()
                         # Obtain results
+                        mySystModuleResults = PseudoMultiCrabModule(systDsetMgr, era, searchMode, optimizationMode, syst)
                         mySystResult = None
                         if massType == "mt":
                             mySystResult = QCDFactorisedResultManager(myMtSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
                         elif massType == "invmass":
                             mySystResult = QCDFactorisedResultManager(myFullMassSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
                         mySystModuleResults.addShape(mySystResult.getShape(), myShapeString)
-                        mySystModuleResults.addDataDrivenControlPlots(mySystResult.getControlPlots(),myResult.getControlPlotLabels())
+                        mySystModuleResults.addDataDrivenControlPlots(mySystResult.getControlPlots(),mySystResult.getControlPlotLabels())
+                        mySystResult.delete()
                         ## Save module info
                         myOutputCreator.addModule(mySystModuleResults)
         # Now write output to disk
@@ -157,3 +159,6 @@ if __name__ == "__main__":
         myOutputCreator.writeRootFileToDisk(massType)
     # Create rest of pseudo multicrab directory
     myOutputCreator.finalize()
+
+    
+    
