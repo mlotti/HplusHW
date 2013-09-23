@@ -318,6 +318,8 @@ _plotStyles = {
     "BackgroundSystError":     styles.errorRatioSystStyle,
     "BackgroundStatSystError": styles.errorRatioSystStyle,
 }
+# Other
+_plotStyles["Embedding"] = _plotStyles["TTJets"].clone()
 for mass in _lightHplusMasses:
     _plotStyles["TTToHplusBWB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
     _plotStyles["TTToHplusBHminusB_M%d"%mass] = getattr(styles, "signalHH%dStyle"%mass)

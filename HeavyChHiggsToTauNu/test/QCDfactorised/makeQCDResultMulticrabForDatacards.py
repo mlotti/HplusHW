@@ -7,9 +7,11 @@ import math
 import sys
 import os
 from optparse import OptionParser
+import cProfile
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdFactorised.qcdFactorisedResult import *
@@ -20,33 +22,92 @@ myMtSpecs = {
     "basicName": "QCDfactorised/MtAfterStandardSelections",
     "leg1Name": "QCDfactorised/MtAfterLeg1",
     "leg2Name": "QCDfactorised/MtAfterLeg2",
-    "histoSpecs": {
-        "bins": 13,
-        "rangeMin": 0.0,
-        "rangeMax": 500.0,
-        #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-        #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250,300,400], # if an empty list is given, then uniform bin width is used
-        "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250], # if an empty list is given, then uniform bin width is used
-        "xtitle": "Transverse mass / GeV",
-        "ytitle": "Events",
-    },
+    "binList": systematics.getBinningForPlot("shapeTransverseMass"),
 }
 
 myFullMassSpecs = {
     "basicName": "QCDfactorised/MassAfterStandardSelections",
     "leg1Name": "QCDfactorised/MassAfterLeg1",
     "leg2Name": "QCDfactorised/MassAfterLeg2",
-    "histoSpecs": {
-        "bins": 14,
-        "rangeMin": 0.0,
-        "rangeMax": 500.0,
-        #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-        #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250,300,400], # if an empty list is given, then uniform bin width is used
-        "variableBinSizeLowEdges": [0,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-        "xtitle": "Invariant mass / GeV",
-        "ytitle": "Events",
-    },
+    "binList": systematics.getBinningForPlot("shapeInvariantMass"),
 }
+
+def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myDisplayStatus):
+    # Construct info string of module
+    myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
+    # Obtain dataset manager
+    dsetMgrCreator = dataset.readFromMulticrabCfg(directory=myMulticrabDir)
+    dsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+    # Do the usual normalisation
+    dsetMgr.updateNAllEventsToPUWeighted()
+    dsetMgr.loadLuminosities()
+    plots.mergeRenameReorderForDataMC(dsetMgr)
+    dsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
+    # Obtain luminosity
+    myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
+    # Print info so that user can check that merge went correct
+    if myDisplayStatus:
+        dsetMgr.printDatasetTree()
+        print "Luminosity = %f 1/fb"%(myLuminosity / 1000.0)
+        print
+        myDisplayStatus = False
+    # Gather results
+    # Create containers for results
+    myModuleResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode)
+    myQCDNormalizationSystUpResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDNormPlus")
+    myQCDNormalizationSystDownResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDNormMinus")
+    # Obtain results
+    myResult = None
+    if massType == "mt":
+        myResult = QCDFactorisedResultManager(myMtSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False,displayPurityBreakdown=True)
+    elif massType == "invmass":
+        myResult = QCDFactorisedResultManager(myFullMassSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False,displayPurityBreakdown=True)
+    myModuleResults.addShape(myResult.getShape(), myShapeString)
+    myModuleResults.addDataDrivenControlPlots(myResult.getControlPlots(),myResult.getControlPlotLabels())
+    myOutputCreator.addModule(myModuleResults)
+    # Up variation of QCD normalization (i.e. ctrl->signal region transition)
+    myQCDNormalizationSystUpResults.addShape(myResult.getRegionSystUp(), myShapeString)
+    myQCDNormalizationSystUpResults.addDataDrivenControlPlots(myResult.getRegionSystUpCtrlPlots(),myResult.getControlPlotLabels())
+    myOutputCreator.addModule(myQCDNormalizationSystUpResults)
+    # Down variation of QCD normalization (i.e. ctrl->signal region transition)
+    myQCDNormalizationSystDownResults.addShape(myResult.getRegionSystDown(), myShapeString)
+    myQCDNormalizationSystDownResults.addDataDrivenControlPlots(myResult.getRegionSystDownCtrlPlots(),myResult.getControlPlotLabels())
+    myOutputCreator.addModule(myQCDNormalizationSystDownResults)
+    myResult.delete()
+    #dsetMgr.close()
+
+def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString):
+    myModuleInfoString = "%s_%s_%s_%s"%(era, searchMode, optimizationMode,syst)
+    dsetMgrCreator = dataset.readFromMulticrabCfg(directory=myMulticrabDir)
+    systDsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode,systematicVariation=syst)
+    # Do the usual normalisation
+    systDsetMgr.updateNAllEventsToPUWeighted()
+    systDsetMgr.loadLuminosities()
+    plots.mergeRenameReorderForDataMC(systDsetMgr)
+    systDsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
+    myLuminosity = systDsetMgr.getDataset("Data").getLuminosity()
+    # Obtain results
+    mySystModuleResults = PseudoMultiCrabModule(systDsetMgr, era, searchMode, optimizationMode, syst)
+    mySystResult = None
+    if massType == "mt":
+        mySystResult = QCDFactorisedResultManager(myMtSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
+    elif massType == "invmass":
+        mySystResult = QCDFactorisedResultManager(myFullMassSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
+    mySystModuleResults.addShape(mySystResult.getShape(), myShapeString)
+    mySystModuleResults.addDataDrivenControlPlots(mySystResult.getControlPlots(),mySystResult.getControlPlotLabels())
+    mySystResult.delete()
+    ## Save module info
+    myOutputCreator.addModule(mySystModuleResults)
+    systDsetMgr.close()
+
+def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
+    myLocalDelta = time.time() - localStart
+    myGlobalDelta = time.time() - globalStart
+    myEstimate = myGlobalDelta / float(nCurrent) * float(nAll-nCurrent)
+    s = "%02d:"%(myEstimate/60)
+    myEstimate -= int(myEstimate/60)*60
+    s += "%02d"%(myEstimate)
+    print "Module finished in %.1f s, estimated time to complete: %s"%(myLocalDelta, s)
 
 if __name__ == "__main__":
     myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
@@ -88,89 +149,43 @@ if __name__ == "__main__":
     myModuleSelector.setPrimarySource("analysis", dsetMgrCreator)
     # Select modules
     myModuleSelector.doSelect(opts)
-
+    #dsetMgrCreator.close()
     # Loop over era/searchMode/optimizationMode combos
     myDisplayStatus = True
-    myTotalModules = myModuleSelector.getSelectedCombinationCount() * (len(mySystematicsNames)+1)
+    myTotalModules = myModuleSelector.getSelectedCombinationCount() * (len(mySystematicsNames)+1) * len(myShapes)
     # Loop over era/searchMode/optimizationMode options
 
     # Create pseudo-multicrab creator
     myOutputCreator = PseudoMultiCrabCreator("QCDfactorised", myMulticrabDir)
+    n = 0
+    myGlobalStartTime = time.time()
     for massType in myShapes:
-        n = 0
+        myShapeString = ""
+        if massType == "mt":
+            myShapeString = "shapeTransverseMass"
+        elif massType == "invmass":
+            myShapeString = "shapeInvariantMass"
+        myOutputCreator.initialize(massType)
         print HighlightStyle()+"Creating dataset for shape: %s%s"%(massType,NormalStyle())
         for era in myModuleSelector.getSelectedEras():
             for searchMode in myModuleSelector.getSelectedSearchModes():
                 for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
-                    # Construct info string of module
                     myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
-                    # Obtain dataset manager
-                    dsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
-                    # Do the usual normalisation
-                    dsetMgr.updateNAllEventsToPUWeighted()
-                    dsetMgr.loadLuminosities()
-                    plots.mergeRenameReorderForDataMC(dsetMgr)
-                    dsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
-                    # Obtain luminosity
-                    myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
-                    # Print info so that user can check that merge went correct
-                    if myDisplayStatus:
-                        dsetMgr.printDatasetTree()
-                        print "Luminosity = %f 1/fb"%(myLuminosity / 1000.0)
-                        print
-                        myDisplayStatus = False
-                    # Gather results
                     n += 1
-                    print CaptionStyle()+"Module %d/%d: %s%s"%(n,myTotalModules,myModuleInfoString,NormalStyle())
-                    # Create containers for results
-                    myModuleResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode)
-                    myQCDNormalizationSystUpResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDNormPlus")
-                    myQCDNormalizationSystDownResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDNormMinus")
-                    # Obtain results
-                    myResult = None
-                    myShapeString = ""
-                    if massType == "mt":
-                        myShapeString = "shapeTransverseMass"
-                        myResult = QCDFactorisedResultManager(myMtSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
-                    elif massType == "invmass":
-                        myShapeString = "shapeInvariantMass"
-                        myResult = QCDFactorisedResultManager(myFullMassSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
-                    myModuleResults.addShape(myResult.getShape(), myShapeString)
-                    myModuleResults.addDataDrivenControlPlots(myResult.getControlPlots())
-                    myOutputCreator.addModule(myModuleResults)
-                    # Up variation of QCD normalization (i.e. ctrl->signal region transition)
-                    myQCDNormalizationSystUpResults.addShape(myResult.getRegionSystUp(), myShapeString)
-                    # FIXME: add here data-driven control plots for the syst var
-                    myOutputCreator.addModule(myQCDNormalizationSystUpResults)
-                    # Down variation of QCD normalization (i.e. ctrl->signal region transition)
-                    myQCDNormalizationSystDownResults.addShape(myResult.getRegionSystDown(), myShapeString)
-                    # FIXME: add here data-driven control plots for the syst var
-                    myOutputCreator.addModule(myQCDNormalizationSystDownResults)
-                    # Now do the systematics
+                    print CaptionStyle()+"Module %d/%d: %s/%s%s"%(n,myTotalModules,myModuleInfoString,massType,NormalStyle())
+                    myStartTime = time.time()
+                    doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myDisplayStatus)
+                    printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
+                    # Now do the rest of systematics variations
                     for syst in mySystematicsNames:
-                        mySystModuleResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, syst)
                         n += 1
-                        print CaptionStyle()+"Analyzing systematics variations %d/%d: %s/%s%s"%(n,myTotalModules,myModuleInfoString,syst,NormalStyle())
-                        myModuleInfoString = "%s_%s_%s_%s"%(era, searchMode, optimizationMode,syst)
-                        systDsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode,systematicVariation=syst)
-                        # Do the usual normalisation
-                        systDsetMgr.updateNAllEventsToPUWeighted()
-                        systDsetMgr.loadLuminosities()
-                        plots.mergeRenameReorderForDataMC(systDsetMgr)
-                        systDsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
-                        myLuminosity = systDsetMgr.getDataset("Data").getLuminosity()
-                        # Obtain results
-                        mySystResult = None
-                        if massType == "mt":
-                            mySystResult = QCDFactorisedResultManager(myMtSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
-                        elif massType == "invmass":
-                            mySystResult = QCDFactorisedResultManager(myFullMassSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
-                        mySystModuleResults.addShape(mySystResult.getShape(), myShapeString)
-                        mySystModuleResults.addDataDrivenControlPlots(mySystResult.getControlPlots())
-                        ## Save module info
-                        myOutputCreator.addModule(mySystModuleResults)
+                        print CaptionStyle()+"Analyzing systematics variations %d/%d: %s/%s/%s%s"%(n,myTotalModules,myModuleInfoString,syst,massType,NormalStyle())
+                        myStartTime = time.time()
+                        doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString)
+                        printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
         # Now write output to disk
-        print "\nWriting output to disk ..."
+        print "\nWriting output to disk shape %s..."%massType
         myOutputCreator.writeRootFileToDisk(massType)
     # Create rest of pseudo multicrab directory
     myOutputCreator.finalize()
+    print "Average processing time of one module: %.1f s"%((time.time()-myGlobalStartTime)/float(myTotalModules))

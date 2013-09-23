@@ -18,7 +18,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as Data
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 def getDsetCreator(label, mcrabPath, mcrabInfoOutput, enabledStatus=True):
@@ -187,9 +187,6 @@ if __name__ == "__main__":
     parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
     myModuleSelector.addParserOptions(parser)
-    #parser.add_option("-e", "--era", dest="eraId", type="string", action="append", help="Evaluate specified eras")
-    #parser.add_option("-m", "--searchMode", dest="searchModeId", action="append", help="name of search mode")
-    #parser.add_option("-v", "--variation", dest="variationId", type="int", action="append", help="Evaluate specified variations")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
     parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
     parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
@@ -198,6 +195,7 @@ if __name__ == "__main__":
     parser.add_option("--debugMining", dest="debugMining", action="store_true", default=False, help="Enable debugging print for data mining")
     parser.add_option("--debugQCD", dest="debugQCD", action="store_true", default=False, help="Enable debugging print for QCD measurement")
     parser.add_option("--debugShapeHistogram", dest="debugShapeHistogram", action="store_true", default=False, help="Debug shape histogram modifying algorithm")
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
     (opts, args) = parser.parse_args()
 
     myStatus = True

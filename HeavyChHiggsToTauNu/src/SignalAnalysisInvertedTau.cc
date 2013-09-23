@@ -720,8 +720,8 @@ namespace HPlus {
 
 //------ Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, selectedTau, pvData.getNumberOfAllVertices());
-    fCommonPlots.fillControlPlotsAtJetSelection(iEvent, jetData);
     if(!jetData.passedEvent()) return false;
+    fCommonPlots.fillControlPlotsAtJetSelection(iEvent, jetData);
     increment(fInvertedNJetsCounter);
     METSelection::Data metDataTmp = fMETSelection.silentAnalyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), selectedTau, jetData.getAllJets());
     myHandler.fillShapeHistogram(hMETInvertedTauIdAfterJets, metDataTmp.getSelectedMET()->et());

@@ -59,7 +59,7 @@ class ShapeHistoModifier():
             return []
         myMsgList = []
         # Check that binning is meaningful
-        for iDest in range(1,dest.GetNbinsX()+2):
+        for iDest in range(1,dest.GetNbinsX()+1):
             minExists = False
             maxExists = False
             for iSrc in range(1,source.GetNbinsX()+1):
@@ -69,6 +69,7 @@ class ShapeHistoModifier():
                     maxExists = True
             if not minExists and not maxExists:
                 # Bin edges do not match
+                print iDest, dest.GetNbinsX()+1, source.GetXaxis().GetBinLowEdge(1), dest.GetXaxis().GetBinLowEdge(iDest), source.GetXaxis().GetBinUpEdge(source.GetNbinsX()+1),dest.GetXaxis().GetBinLowEdge(iDest)
                 if source.GetXaxis().GetBinLowEdge(1) <= dest.GetXaxis().GetBinLowEdge(iDest) and source.GetXaxis().GetBinUpEdge(source.GetNbinsX()+1) >= dest.GetXaxis().GetBinLowEdge(iDest):
                     # Bin edge mismatch is not caused by underflow or overflow
                     myMsg = "Source bin low edges:"

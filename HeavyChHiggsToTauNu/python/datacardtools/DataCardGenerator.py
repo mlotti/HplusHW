@@ -13,7 +13,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import Datac
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.QCDfactorised import QCDfactorisedColumn,QCDfactorisedExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
@@ -61,13 +60,15 @@ class DatasetMgrCreatorManager:
                 # Normalize
                 myDsetMgr.updateNAllEventsToPUWeighted()
                 # Obtain luminosity
-                myDsetMgr.loadLuminosities()
                 myLuminosity = 0.0
-                myDataDatasets = myDsetMgr.getDataDatasets()
-                #print "datasets:",myDsetMgr.getDatasetNames()
-                #print "datasets:",myDsetMgr.getAllDatasetNames()
-                for d in myDataDatasets:
-                    myLuminosity += d.getLuminosity()
+                if i != DatacardDatasetMgrSourceType.QCDMEASUREMENT:
+                    myDsetMgr.loadLuminosities()
+                    myDataDatasets = myDsetMgr.getDataDatasets()
+                    for d in myDataDatasets:
+                        myLuminosity += d.getLuminosity()
+                else:
+                    # Speciality for the QCD measurement
+                    myLuminosity = myDsetMgr.getAllDatasets()[0].getLuminosity()
                 self._luminosities.append(myLuminosity)
                 # Merge divided datasets
                 plots.mergeRenameReorderForDataMC(myDsetMgr)
@@ -334,23 +335,23 @@ class DataCardGenerator:
             #mymsg += "- missing field 'SignalShapeHisto' (string, name of histogram for the shape)\n"
         #if self._config.FakeShapeHisto == None:
             #mymsg += "- missing field 'FakeShapeHisto' (string, name of histogram for the shape)\n"
-        if self._config.ShapeHistogramsDimensions == None:
-            mymsg += "- missing field 'ShapeHistogramsDimensions' (list of number of bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
-        elif not isinstance(self._config.ShapeHistogramsDimensions, dict):
-            mymsg += "- field 'ShapeHistogramsDimensions' has to be of type dictionary with keys: bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
-        else:
-            if not "bins" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key bins (int)\n"
-            elif not "rangeMin" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMin (float)\n"
-            elif not "rangeMax" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMax (float)\n"
-            elif not "variableBinSizeLowEdges" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key variableBinSizeLowEdges (list of floats, can be empty list)\n"
-            elif not "xtitle" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key xtitle (string)\n"
-            elif not "ytitle" in self._config.ShapeHistogramsDimensions.keys():
-                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key ytitle (string)\n"
+        #if self._config.ShapeHistogramsDimensions == None:
+            #mymsg += "- missing field 'ShapeHistogramsDimensions' (list of number of bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
+        #elif not isinstance(self._config.ShapeHistogramsDimensions, dict):
+            #mymsg += "- field 'ShapeHistogramsDimensions' has to be of type dictionary with keys: bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
+        #else:
+            #if not "bins" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key bins (int)\n"
+            #elif not "rangeMin" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMin (float)\n"
+            #elif not "rangeMax" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMax (float)\n"
+            #elif not "variableBinSizeLowEdges" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key variableBinSizeLowEdges (list of floats, can be empty list)\n"
+            #elif not "xtitle" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key xtitle (string)\n"
+            #elif not "ytitle" in self._config.ShapeHistogramsDimensions.keys():
+                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key ytitle (string)\n"
         if self._config.Observation == None:
             mymsg += "- missing field 'Observation' (ObservationInput object)\n"
         if self._config.DataGroups == None:
@@ -378,7 +379,8 @@ class DataCardGenerator:
             #self._dsetMgrManager.mergeDatasets(DatacardDatasetMgrSourceType.SIGNALANALYSIS, myObservationName, self._config.Observation.datasetDefinition)
             #print "Making merged dataset for data group: "+HighlightStyle()+"observation"+NormalStyle()
             #self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS).merge(myObservationName, myFoundNames, keepSources=True) # note that mergeMany has already been called at this stage
-            self._observation = DatacardColumn(label = "data_obs",
+            self._observation = DatacardColumn(opts=self._opts,
+                                               label = "data_obs",
                                                enabledForMassPoints = self._config.MassPoints,
                                                datasetType = "Observation",
                                                datasetMgrColumn = self._config.Observation.datasetDefinition,
@@ -394,39 +396,11 @@ class DataCardGenerator:
             myIngoreOtherQCDMeasurementStatus = (dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED) or (dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED)
             if not myIngoreOtherQCDMeasurementStatus:
                 print "Constructing datacard column for data group: "+HighlightStyle()+""+dg.label+""+NormalStyle()
-                myDsetMgrIndex = None
-                myMergedName = ""
-                myMergedNameForQCDMCEWK = ""
-                #if dg.datasetType != "None" and not myIngoreOtherQCDMeasurementStatus:
-                    #if dg.datasetType == "Signal":
-                        #myDsetMgrIndex = DatacardDatasetMgrSourceType.SIGNALANALYSIS
-                    #elif dg.datasetType == "Embedding":
-                        #myDsetMgrIndex = DatacardDatasetMgrSourceType.EMBEDDING
-                    #elif dg.datasetType == "QCD factorised" or dg.datasetType == "QCD inverted":
-                        #myDsetMgrIndex = DatacardDatasetMgrSourceType.QCDMEASUREMENT
-                    # Make merge of requested datasets
-                    #if self._opts.debugConfig:
-                        #print "Adding datasets to data group '"+dg.label+"':"
-                        #for n in myFoundNames:
-                            #print "  "+n
-                    #myMergedName = "dset_"+dg.label.replace(" ","_")
-                    #self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedName, dg.datasetDefinitions)
-                    #if dg.datasetType == "QCD factorised":
-                        ## Make merged set of EWK MC datasets
-                        #myMergedNameForQCDMCEWK = "dset_"+dg.label.replace(" ","_")+"_MCEWK"
-                        #self._dsetMgrManager.mergeDatasets(myDsetMgrIndex, myMergedNameForQCDMCEWK, dg.MCEWKDatasetDefinitions)
                 # Construct datacard column object
                 myColumn = None
-                if dg.datasetType == "QCD factorised":
-                    myColumn = QCDfactorisedColumn(landsProcess=dg.landsProcess,
-                                                   enabledForMassPoints = dg.validMassPoints,
-                                                   nuisanceIds = dg.nuisances,
-                                                   datasetMgrColumn = dg.datasetDefinition,
-                                                   additionalNormalisationFactor = dg.additionalNormalisation,
-                                                   QCDfactorisedInfo = dg.QCDfactorisedInfo,
-                                                   debugMode = self._opts.debugQCD)
-                elif dg.datasetType == "Embedding":
-                    myColumn = DatacardColumn(label=dg.label,
+                if dg.datasetType == "Embedding":
+                    myColumn = DatacardColumn(opts=self._opts,
+                                              label=dg.label,
                                               landsProcess=dg.landsProcess,
                                               enabledForMassPoints = dg.validMassPoints,
                                               datasetType = dg.datasetType,
@@ -434,8 +408,9 @@ class DataCardGenerator:
                                               datasetMgrColumn = dg.datasetDefinition,
                                               additionalNormalisationFactor = dg.additionalNormalisation,
                                               shapeHisto = dg.shapeHisto)
-                else: # i.e. signal analysis and QCD inverted
-                    myColumn = DatacardColumn(label=dg.label,
+                else: # i.e. signal analysis and QCD factorised / inverted
+                    myColumn = DatacardColumn(opts=self._opts,
+                                              label=dg.label,
                                               landsProcess=dg.landsProcess,
                                               enabledForMassPoints = dg.validMassPoints,
                                               datasetType = dg.datasetType,
@@ -467,11 +442,11 @@ class DataCardGenerator:
             self._observation.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         for c in self._columns:
             myDsetMgrIndex = 0
-            if c.typeIsObservation() or c.typeIsSignal():
+            if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or (c.typeIsEWK() and self._config.OptionReplaceEmbeddingByMC):
                 myDsetMgrIndex = 0
-            if c.typeIsEWK():
+            elif c.typeIsEWK():
                 myDsetMgrIndex = 1
-            if c.typeIsQCD():
+            elif c.typeIsQCD():
                 myDsetMgrIndex = 2
             # Do mining for datacard columns (separately for EWK fake taus)
             myDsetMgr = self._dsetMgrManager.getDatasetMgr(myDsetMgrIndex)
@@ -495,8 +470,8 @@ class DataCardGenerator:
             i = 0
             myFirstValue = 0
             for c in sorted(self._columns, key=lambda x: x.getLandsProcess()):
-                if (c.isActiveForMass(m)):
-                    #print c.getLabel(), c.getLandsProcess()
+                if (c.isActiveForMass(m,self._config)):
+                    #sprint c.getLabel(), c.getLandsProcess()
                     if i == 0:
                         myFirstValue = c.getLandsProcess()
                     else:
@@ -504,6 +479,9 @@ class DataCardGenerator:
                             print ErrorLabel()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
                             raise Exception()
                     i += 1
+                else:
+                    if c.getLabel() == "res.":
+                        i += 1 # Take into account that the empty column is no longer needed for sigma x Br limits
 
     ## Creates extractors for nuisances
     def createExtractors(self):
@@ -513,84 +491,83 @@ class DataCardGenerator:
 
         myMode = ExtractorMode.NUISANCE
         for n in self._config.Nuisances:
+            if self._opts.verbose:
+                print "Creating extractor for nuisance by ID:",n.id
             if n.function == "Constant":
                 myMode = ExtractorMode.NUISANCE
-                if n.upperValue > 0:
+                if n.getArg("upperValue") != None and n.getArg("upperValue") > 0:
                     myMode = ExtractorMode.ASYMMETRICNUISANCE
                 self._extractors.append(ConstantExtractor(exid = n.id,
-                                                         constantValue = n.value,
-                                                         constantUpperValue = n.upperValue,
+                                                         constantValue = n.getArg("value"),
+                                                         constantUpperValue = n.getArg("upperValue"),
                                                          distribution = n.distr,
                                                          description = n.label,
-                                                         mode = myMode))
+                                                         mode = myMode,
+                                                         opts = self._opts))
             elif n.function == "Counter":
                 self._extractors.append(CounterExtractor(exid = n.id,
-                                                        counterItem = n.counter,
+                                                        counterItem = n.getArg("counter"),
                                                         distribution = n.distr,
                                                         description = n.label,
-                                                        mode = myMode))
+                                                        mode = myMode,
+                                                        opts = self._opts))
             elif n.function == "maxCounter":
                 self._extractors.append(MaxCounterExtractor(exid = n.id,
-                                                           counterItem = n.counter,
-                                                           counterDirs = n.histoDir,
+                                                           counterItem = n.getArg("counter"),
+                                                           counterDirs = n.getArg("histoDir"),
                                                            distribution = n.distr,
                                                            description = n.label,
-                                                           mode = myMode))
+                                                           mode = myMode,
+                                                          opts = self._opts))
             elif n.function == "pileupUncertainty":
                 self._extractors.append(PileupUncertaintyExtractor(exid = n.id,
-                                                                   counterItem = n.counter,
-                                                                   counterDirs = n.histoDir,
+                                                                   counterItem = n.getArg("counter"),
+                                                                   counterDirs = n.getArg("histoDir"),
                                                                    distribution = n.distr,
                                                                    description = n.label,
-                                                                   mode = myMode))
+                                                                   mode = myMode,
+                                                                   opts = self._opts))
             elif n.function == "Shape":
-                self._extractors.append(ShapeExtractor(histoSpecs = self._config.ShapeHistogramsDimensions,
-                                                       histoDirs = n.histoDir,
-                                                       histograms = n.histo,
-                                                       exid = n.id,
+                self._extractors.append(ShapeExtractor(exid = n.id,
                                                        distribution = n.distr,
                                                        description = n.label,
-                                                       mode = ExtractorMode.SHAPENUISANCE))
+                                                       mode = ExtractorMode.SHAPENUISANCE,
+                                                       opts = self._opts))
+            elif n.function == "ShapeVariation":
+                self._extractors.append(ShapeVariationExtractor(exid = n.id,
+                                                                distribution = n.distr,
+                                                                description = n.label,
+                                                                systVariation = n.getArg("systVariation"),
+                                                                mode = ExtractorMode.SHAPENUISANCE,
+                                                                opts = self._opts))
             elif n.function == "ScaleFactor":
                 self._extractors.append(ScaleFactorExtractor(exid = n.id,
-                                                            histoDirs = n.histoDir,
-                                                            histograms = n.histo,
-                                                            normalisation = n.norm,
-                                                            addSystInQuadrature = n.addUncertaintyInQuadrature,
+                                                            histoDirs = n.getArg("histoDir"),
+                                                            histograms = n.getArg("histograms"),
+                                                            normalisation = n.getArg("normalisation"),
+                                                            addSystInQuadrature = n.getArg("addUncertaintyInQuadrature"),
                                                             distribution = n.distr,
                                                             description = n.label,
-                                                            mode = myMode))
+                                                            mode = myMode,
+                                                            opts = self._opts))
             elif n.function == "Ratio":
                 self._extractors.append(RatioExtractor(exid = n.id,
-                                                      numeratorCounterItem = n.numerator,
-                                                      denominatorCounterItem = n.denominator,
+                                                      numeratorCounterItem = n.getArg("numerator"),
+                                                      denominatorCounterItem = n.getArg("denominator"),
                                                       distribution = n.distr,
                                                       description = n.label,
-                                                      scale = n.scaling,
-                                                      mode = myMode))
-            elif n.function == "QCDFactorised":
-                if self._QCDMethod == DatacardQCDMethod.FACTORISED:
-                    self._extractors.append(QCDfactorisedExtractor(QCDmode = n.QCDmode, exid = n.id, distribution = n.distr, description = n.label, mode = myMode))
-                else:
-                    # Protection; generate nuisance line even, but leave it empty
-                    self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
-            elif n.function == "QCDInverted":
-                if self._QCDMethod == DatacardQCDMethod.INVERTED:
-                    ####print "fixme: add QCD inverted"
-                    # FIXME temp code
-                    self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
-                else:
-                    # Protection; generate nuisance line even, but leave it empty
-                    self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
+                                                      scale = n.getArg("scaling"),
+                                                      mode = myMode,
+                                                      opts = self._opts))
             else:
                 print ErrorStyle()+"Error in nuisance with id='"+n.id+"':"+NormalStyle()+" unknown or missing field function '"+n.function+"' (string)!"
-                print "Options are: 'Constant', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio', 'QCDFactorised'"
+                print "Options are: 'Constant', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio'"
                 raise Exception()
         # Create reserved nuisances
         for n in self._config.ReservedNuisances:
             self._extractors.append(ConstantExtractor(exid = n[0], constantValue = 0.0, distribution = "lnN", description = n[1], mode = myMode))
         # Done
-        print "Created Nuisances"
+        print "Created extractors for all nuisances"
         self.checkNuisances()
 
     def checkNuisances(self):
@@ -613,6 +590,8 @@ class DataCardGenerator:
 
     def mergeNuisances(self):
         for mset in self._config.MergeNuisances:
+            if self._opts.verbose:
+                print "Merging nuisances:",mset,"->",mset[0]
             # check if nuisance with master id can be found
             myFoundStatus = False
             for n in self._extractors:
@@ -642,6 +621,8 @@ class DataCardGenerator:
 
         # Loop over control plot inputs, create extractors for all other columns except QCD factorised
         for c in self._config.ControlPlots:
+            if self._opts.verbose:
+                print "Creating control plot extractor for",c.title
             self._controlPlotExtractors.append(ControlPlotExtractor(histoSpecs = c.details,
                                                histoTitle = c.title,
                                                histoDirs = c.signalHistoPath,
