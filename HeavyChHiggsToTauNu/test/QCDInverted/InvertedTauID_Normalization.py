@@ -106,19 +106,37 @@ def main(argv):
 
     histonames = datasets.getDataset("Data").getDirectoryContent("baseline/METBaseline"+HISTONAME)
     bins = []
+    binLabels = []
     for histoname in histonames:
         bins.append(histoname.replace("METBaseline"+HISTONAME,""))
+        title = datasets.getDataset("Data").getDatasetRootHisto("baseline/METBaseline"+HISTONAME+"/"+histoname).getHistogram().GetTitle()
+        title = title.replace("METBaseline"+HISTONAME,"")
+        title = title.replace("#tau p_{T}","taup_T")
+        title = title.replace("<","lt")
+        title = title.replace(">","gt")
+        title = title.replace("=","eq")
+        title = title.replace("..","to")
+        binLabels.append(title)
+        
     print
     print "Histogram bins available",bins
 
 #    bins = ["Inclusive"]
-#    bins = ["1","2"]
+#    bins = ["taup_Tleq50","taup_Teq50to60"]
     print "Using bins              ",bins
     print
+    print "Bin labels"
+    for i in range(len(binLabels)):
+        line = bins[i]
+        while len(line) < 10:
+            line += " "
+        line += ": "+binLabels[i]
+        print line
+    print
 
-    for bin in bins:
+    for i,bin in enumerate(bins):
 
-	invertedQCD.setLabel(bin)
+	invertedQCD.setLabel(binLabels[i])
 
         metBase = plots.DataMCPlot(datasets, "baseline/METBaseline"+HISTONAME+"/METBaseline"+HISTONAME+bin)
         metInver = plots.DataMCPlot(datasets, "Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)

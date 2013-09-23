@@ -82,11 +82,12 @@ bool HPlusBTaggingPtrSelectorFilter::filter(edm::Event& iEvent, const edm::Event
     }
     iEvent.put(product);
 
-
-    HPlus::BTagging::Info jetInfos = fBTagging.getPerJetInfo(casted, btagData, iEvent.isRealData());
+    HPlus::BTagging::PerJetInfo jetInfos = fBTagging.getPerJetInfo(casted, btagData, iEvent.isRealData());
     std::auto_ptr<edm::ValueMap<bool> > tagged(new edm::ValueMap<bool>());
     std::auto_ptr<edm::ValueMap<float> > scaleFactor(new edm::ValueMap<float>());
+    // Remark: The event scale factor is the product of the jet scale factor terms
     std::auto_ptr<edm::ValueMap<float> > scaleFactorUncertainty(new edm::ValueMap<float>());
+    // Remark: The event SF uncertainty can be roughly estimated as the jet SF uncertainty terms added in quadrature
     {
       edm::ValueMap<bool>::Filler filler(*tagged);
       filler.insert(hjets, jetInfos.tagged.begin(), jetInfos.tagged.end());

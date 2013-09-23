@@ -39,9 +39,12 @@ namespace HPlus {
 
   BTaggingEfficiencyInMC::Data::~Data() { }
 
-  BTaggingEfficiencyInMC::BTaggingEfficiencyInMC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
-    BaseSelection(eventCounter, histoWrapper)
+  BTaggingEfficiencyInMC::BTaggingEfficiencyInMC(EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     // (possibly) read configuration and add counters
+    allJetsCount(eventCounter.addSubCounter("allJetsCount","All jets")),
+    genuineBJetsCount(eventCounter.addSubCounter("genuineBJetsCount","Genuine b-jets")),
+    genuineBJetsWithBTagCount(eventCounter.addSubCounter("genuineBJetsWithBTagCount","Genuine b-jets with b-tag"))
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("BTaggingEfficiencyInMC");
@@ -75,6 +78,12 @@ namespace HPlus {
     Data output;
     output.fGenuineBJets.reserve(jets.size());
     output.fGenuineBJetsWithBTag.reserve(jets.size());
+    output.fGenuineGJets.reserve(jets.size());
+    output.fGenuineGJetsWithBTag.reserve(jets.size());
+    output.fGenuineUDSJets.reserve(jets.size());
+    output.fGenuineUDSJetsWithBTag.reserve(jets.size());
+    output.fGenuineCJets.reserve(jets.size());
+    output.fGenuineCJetsWithBTag.reserve(jets.size());
     output.fGenuineLJets.reserve(jets.size());
     output.fGenuineLJetsWithBTag.reserve(jets.size());
 
@@ -93,24 +102,42 @@ namespace HPlus {
 								    BTaggingEfficiencyInMC::Data& output) {
     int iFlavour = 0;
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
+      increment(allJetsCount);
       edm::Ptr<pat::Jet> iJet = *iter;
       iFlavour = std::abs(iJet->partonFlavour());
       if (iFlavour == 5) {
 	// B-jet found.
 	output.fGenuineBJets.push_back(iJet);
-	if (isBTagged(iJet, bTagData)) output.fGenuineBJetsWithBTag.push_back(iJet); // B-tagged b-jet found.
-      } else {
+	increment(genuineBJetsCount);
+	if (isBTagged(iJet, bTagData)) {
+	  output.fGenuineBJetsWithBTag.push_back(iJet); // B-tagged b-jet found.
+	  increment(genuineBJetsWithBTagCount);
+	}
+      } else if (iFlavour == 21) {
+        // Gluon flavour jet found.
+        output.fGenuineGJets.push_back(iJet);
+        if (isBTagged(iJet, bTagData)) output.fGenuineGJetsWithBTag.push_back(iJet); // B-tagged gluon flavour jet found.
+      } else if (iFlavour == 1 || iFlavour == 2 || iFlavour == 3) {
+        // UDS flavour jet found.
+        output.fGenuineUDSJets.push_back(iJet);
+        if (isBTagged(iJet, bTagData)) output.fGenuineUDSJetsWithBTag.push_back(iJet); // B-tagged uds flavour jet found.
+      } else if (iFlavour == 4) {
+	// C flavour jet found
+	output.fGenuineCJets.push_back(iJet);
+	if (isBTagged(iJet, bTagData)) output.fGenuineCJetsWithBTag.push_back(iJet); // B-tagged c-jet found
+      }
+      if (iFlavour != 5 && iFlavour != 4) {
 	// Light flavour jet found.
 	output.fGenuineLJets.push_back(iJet);
 	if (isBTagged(iJet, bTagData)) output.fGenuineLJetsWithBTag.push_back(iJet); // B-tagged light flavour jet found.
       }
     }
   }
- 
+
 
  
   bool BTaggingEfficiencyInMC::isBTagged(edm::Ptr<pat::Jet>& jet, const BTagging::Data& bTagData) {
-      for (edm::PtrVector<pat::Jet>::iterator iBjet = bTagData.getSelectedJets().begin(); iBjet != bTagData.getSelectedJets().end(); ++iBjet) {
+    for (edm::PtrVector<pat::Jet>::iterator iBjet = bTagData.getSelectedJets().begin(); iBjet != bTagData.getSelectedJets().end(); ++iBjet) {
       if (jet == *iBjet) return true;
     }
     return false;

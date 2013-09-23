@@ -239,11 +239,15 @@ def getTaskDirectories(opts, filename="multicrab.cfg", directory=""):
             if opts.filter in dir:
                 return True
             return False
-        fi = lambda x: True
-        if opts != None and opts.filter != "":
-            fi = filt
+        taskNames = [os.path.join(dirname, sec) for sec in sections]
+        if opts != None:
+            if opts.filter != "":
+                taskNames = filter(filt, taskNames)
+            if len(opts.skip) > 0:
+                for skip in opts.skip:
+                    taskNames = filter(lambda n: skip not in n, taskNames)
 
-        return filter(fi, [os.path.join(dirname, sec) for sec in sections])
+        return taskNames
 
 ## Add common MultiCRAB options to OptionParser object.
 #
@@ -253,6 +257,8 @@ def addOptions(parser):
                       help="CRAB task directory to have the files to merge (default: read multicrab.cfg and use the sections in it)")
     parser.add_option("--filter", dest="filter", type="string", default="",
                       help="When reading CRAB tasks from multicrab.cfg, take only tasks whose names contain this string")
+    parser.add_option("--skip", dest="skip", type="string", action="append", default=[],
+                      help="When reading CRAB tasks from multicrab.cfg, skip tasks containing this string (can be given multiple times)")
 
 ## Raise OSError if 'crab' command is not found in $PATH.
 def checkCrabInPath():
