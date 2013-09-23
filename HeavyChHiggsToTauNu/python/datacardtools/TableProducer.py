@@ -6,6 +6,7 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorBase
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker import ControlPlotMaker
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
@@ -14,62 +15,6 @@ import os
 import sys
 import time
 import ROOT
-
-## EventYieldSummary class
-class EventYieldSummary:
-    ## Constructor
-    def __init__(self):
-        self._rate = 0.0
-        self._absoluteStat = 0.0
-        self._absoluteSystUp = 0.0
-        self._absoluteSystDown = 0.0
-
-    def extract(self, opts, config, datasetColumn, extractors):
-        self._rate = datasetColumn.getRateResult()
-        myAbsoluteSystUpSquared = 0.0
-        myAbsoluteSystDownSquared = 0.0
-        for n in extractors:
-            if n.isPrintable():
-                if datasetColumn.hasNuisanceByMasterId(n.getId()):
-                    myValue = datasetColumn.getNuisanceResultByMasterId(n.getId())
-                    if "stat" in n.getDescription() and n.isNuisance():
-                        self._absoluteStat = myValue * self._rate
-                    else:
-                        if n.isAsymmetricNuisance():
-                            myAbsoluteSystDownSquared += pow(myValue[0] * self._rate,2)
-                            myAbsoluteSystUpSquared += pow(myValue[1] * self._rate,2)
-                        elif n.isNuisance():
-                            myAbsoluteSystDownSquared += pow(myValue * self._rate,2)
-                            myAbsoluteSystUpSquared += pow(myValue * self._rate,2)
-                        elif n.isShapeNuisance() and n.getDistribution() == "shapeQ":
-                            # Determine maximum of values
-                            myMax = 0.0
-                            for v in myValue:
-                                if v > myMax:
-                                    myMax = v
-                            myAbsoluteSystDownSquared += pow(myMax * self._rate,2)
-                            myAbsoluteSystUpSquared += pow(myMax * self._rate,2)
-        self._absoluteSystDown = sqrt(myAbsoluteSystDownSquared)
-        self._absoluteSystUp = sqrt(myAbsoluteSystUpSquared)
-
-    ## Combines with another event yield summary
-    def add(self,summary):
-        self._rate += summary.getRate()
-        self._absoluteStat = sqrt(pow(self._absoluteStat,2)+pow(summary.getAbsoluteStat(),2))
-        self._absoluteSystDown = sqrt(pow(self._absoluteSystDown,2)+pow(summary.getAbsoluteSystDown(),2))
-        self._absoluteSystUp = sqrt(pow(self._absoluteSystUp,2)+pow(summary.getAbsoluteSystUp(),2))
-
-    def getRate(self):
-        return self._rate
-
-    def getAbsoluteStat(self):
-        return self._absoluteStat
-
-    def getAbsoluteSystDown(self):
-        return self._absoluteSystDown
-
-    def getAbsoluteSystUp(self):
-        return self._absoluteSystUp
 
 ## TableProducer class
 class TableProducer:
@@ -98,11 +43,8 @@ class TableProducer:
         self.makeDataCards()
 
         # Make control plots
-        if self._config.OptionDoControlPlots != None:
-            if self._config.OptionDoControlPlots:
-                ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
-            else:
-                print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
+        if self._config.OptionDoControlPlots:
+            ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
         else:
             print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
 
@@ -149,9 +91,15 @@ class TableProducer:
                 print ErrorStyle()+"Error:"+NormalStyle()+" Cannot open file '"+myRootFilename+"' for output!"
                 sys.exit()
             # Invoke extractors
+            if self._opts.verbose:
+                print "TableProducer/producing observation line"
             myObservationLine = self._generateObservationLine()
+            if self._opts.verbose:
+                print "TableProducer/producing rate line"
             myRateHeaderTable = self._generateRateHeaderTable(m)
             myRateDataTable = self._generateRateDataTable(m)
+            if self._opts.verbose:
+                print "TableProducer/producing nuisance lines"
             myNuisanceTable = self._generateNuisanceTable(m)
             # Calculate dimensions of tables
             myWidths = []
@@ -191,34 +139,6 @@ class TableProducer:
             myRootFile.Write()
             myRootFile.Close()
             print "Written shape root file to:",myRootFilename
-        # Save additional info for QCD factorised
-        for c in self._datasetGroups:
-            if c.typeIsQCDfactorised():
-                c.saveQCDInfoHistograms(self._infoDirname)
-                myFilename = self._infoDirname+"/QCDfactorisedMessages.txt"
-                myFile = open(myFilename, "w")
-                myFile.write(self._generateHeader())
-                myMessages = c.getMessages()
-                for m in myMessages:
-                    myFile.write(m+"\n")
-                myFile.close()
-                print HighlightStyle()+"QCD factorised messages written to: "+NormalStyle()+myFilename
-
-                myFilename = self._infoDirname+"/QCDfactorised_table_NQCD_yield.tex"
-                myFile = open(myFilename, "w")
-                myFile.write("% Auto generated from datacard generator; to produce, run datacard generator and have a look into the produced info directory\n")
-                myFile.write("%% %s \n"%self._generateHeader().replace("Date","% Date"))
-                myFile.write(c.getYieldTable())
-                myFile.close()
-                print HighlightStyle()+"QCD factorised event yield table written to: "+NormalStyle()+myFilename
-
-                myFilename = self._infoDirname+"/QCDfactorised_table_NQCD_yield_contracted.tex"
-                myFile = open(myFilename, "w")
-                myFile.write("% Auto generated from datacard generator; to produce, run datacard generator and have a look into the produced info directory\n")
-                myFile.write("%% %s \n"%self._generateHeader().replace("Date","% Date"))
-                myFile.write(c.getCompactYieldTable())
-                myFile.close()
-                print HighlightStyle()+"QCD factorised compact event yield table written to: "+NormalStyle()+myFilename
 
     ## Generates header of datacard
     def _generateHeader(self, mass=None):
@@ -260,20 +180,24 @@ class TableProducer:
         # obtain bin numbers
         myRow = ["bin",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-            if c.isActiveForMass(mass):
+            if c.isActiveForMass(mass,self._config):
                 myRow.append("1")
         myResult.append(myRow)
         # obtain labels
         myRow = ["process",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-            if c.isActiveForMass(mass):
+            if c.isActiveForMass(mass,self._config):
                 myRow.append(c.getLabel())
         myResult.append(myRow)
         # obtain process numbers
         myRow = ["process",""]
+        myOffset = 0
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-            if c.isActiveForMass(mass):
-                myRow.append(str(c.getLandsProcess()))
+            if c.isActiveForMass(mass,self._config):
+                myRow.append(str(c.getLandsProcess()+myOffset))
+            else:
+                if c.getLabel() == "res.": # Take into account that the empty column is no longer needed for sigma x Br limits
+                    myOffset -= 1
         myResult.append(myRow)
         return myResult
 
@@ -282,13 +206,19 @@ class TableProducer:
         myResult = []
         myRow = ["rate",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-            if c.isActiveForMass(mass):
+            if c.isActiveForMass(mass,self._config):
+                if self._opts.verbose:
+                    print "- obtaining cached rate for column %s"%c.getLabel()
                 myRateValue = c.getRateResult()
                 if myRateValue == None:
                     myRateValue = 0.0
                 if self._opts.debugMining:
                     print "  Rate for '%s' = %.3f"%(c.getLabel(),myRateValue)
-                myRow.append("%.3f"%myRateValue)
+                # Need better precision for sigma x br limits
+                if (self._config.OptionLimitOnSigmaBr or mass > 179) and c.getLandsProcess() <= 0:
+                    myRow.append("%.6f"%myRateValue)
+                else:
+                    myRow.append("%.3f"%myRateValue)
         myResult.append(myRow)
         return myResult
 
@@ -301,7 +231,7 @@ class TableProducer:
         for n in self._extractors:
             myCount = 0
             for c in self._datasetGroups:
-                if c.isActiveForMass(mass) and n.isPrintable() and c.hasNuisanceByMasterId(n.getId()):
+                if c.isActiveForMass(mass,self._config) and n.isPrintable() and c.hasNuisanceByMasterId(n.getId()):
                     myCount += 1
             if myCount == 0 and n.isPrintable():
                 print WarningLabel()+"Suppressed nuisance %s: '%s' because it does not affect any data column!"%(n.getId(),n.getDescription())
@@ -314,7 +244,7 @@ class TableProducer:
         myVirtualMergeInformation = {}
         myVirtuallyInactivatedIds = []
         for c in self._datasetGroups:
-            if c.isActiveForMass(mass):
+            if c.isActiveForMass(mass,self._config):
                 myFoundSingles = []
                 for n in self._extractors:
                     if c.hasNuisanceByMasterId(n.getId()) and n.getId() in mySingleList and not n.isShapeNuisance():
@@ -322,17 +252,17 @@ class TableProducer:
                 if len(myFoundSingles) > 1:
                     # Do virtual merge
                     myDescription = ""
-                    myValue = 0.0
+                    myValue = ScalarUncertaintyItem("sum",0.0)
                     for n in self._extractors:
                         if n.getId() in myFoundSingles:
                             if myDescription == "":
                                 myDescription = n.getDescription()
-                                myValue = c.getNuisanceResultByMasterId(n.getId())**2
+                                myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
                             else:
                                 myDescription += " + "+n.getDescription()
-                                myValue += c.getNuisanceResultByMasterId(n.getId())**2
+                                myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
                                 myVetoList.append(n.getId())
-                    myVirtualMergeInformation[myFoundSingles[0]] = sqrt(myValue)
+                    myVirtualMergeInformation[myFoundSingles[0]] = myValue
                     myVirtualMergeInformation["%sdescription"%myFoundSingles[0]] = myDescription
                     print WarningLabel()+"Combined nuisances '%s' for column %s!"%(myDescription, c.getLabel())
         # Loop over rows
@@ -342,9 +272,11 @@ class TableProducer:
                 myRow = ["%s"%(n.getId()), n.getDistribution()]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-                    if c.isActiveForMass(mass):
+                    if c.isActiveForMass(mass,self._config):
                         # Check that column has current nuisance or has nuisance that is slave to current nuisance
                         if c.hasNuisanceByMasterId(n.getId()):
+                            if self._opts.verbose:
+                                print "- obtaining cached nuisance %s for column %s"%(n.getId(),c.getLabel())
                             myValue = c.getNuisanceResultByMasterId(n.getId())
                             if n.getId() in myVirtualMergeInformation.keys():
                                 myValue = myVirtualMergeInformation[n.getId()] # Overwrite virtually merged value
@@ -353,12 +285,14 @@ class TableProducer:
                             if myValue == None or n.isShapeNuisance():
                                 myValueString = "1"
                             else:
-                                if isinstance(myValue, list):
-                                    for i in range(0,len(myValue)):
-                                        if i == 0:
-                                            myValueString += "%.3f"%(myValue[i]+1.0)
-                                        else:
-                                            myValueString += "/%.3f"%(myValue[i]+1.0)
+                                if isinstance(myValue, ScalarUncertaintyItem):
+                                    # Check if nuisance is asymmetric
+                                    if myValue.isAsymmetric():
+                                        myValueString += "%.3f/%.3f"%(1.0-myValue.getUncertaintyDown(),1.0+myValue.getUncertaintyUp())
+                                    else:
+                                        myValueString += "%.3f"%(myValue.getUncertaintyUp()+1.0)
+                                elif isinstance(myValue, list):
+                                    myValueString += "%.3f/%.3f"%(1.0+myValue[0],1.0+myValue[1])
                                 else:
                                     # Assume that result is a plain number
                                     #print "nid=",n.getId(),"c=",c.getLabel()
@@ -380,33 +314,53 @@ class TableProducer:
         return myResult
 
     ## Generates nuisance table as list
+    # Recipe is to integrate first (linear sum for variations), then to evaluate
     def _generateShapeNuisanceVariationTable(self,mass):
         myResult = []
         # Loop over rows
         for n in self._extractors:
             if n.isPrintable() and n.getDistribution() == "shapeQ":
-                myDownRow = ["%s_Down"%(n.getId()), ""]
-                myUpRow = ["%s_Up"%(n.getId()), ""]
+                myDownRow = ["%s_ShapeDown"%(n.getId()), ""]
+                myScalarDownRow = ["%s_DownDevFromScalar"%(n.getId()), ""]
+                myUpRow = ["%s_ShapeUp"%(n.getId()), ""]
+                myScalarUpRow = ["%s_UpDevFromScalar"%(n.getId()), ""]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-                    if c.isActiveForMass(mass):
+                    if c.isActiveForMass(mass,self._config):
                         # Check that column has current nuisance or has nuisance that is slave to current nuisance
                         if c.hasNuisanceByMasterId(n.getId()):
-                            myValue = c.getNuisanceResultByMasterId(n.getId())
-                            # Check output format
-                            if not isinstance(myValue, list):
-                                print ErrorStyle()+"Error: Nuisance '"+n.getId()+"'did strangely not return a list of results for shapeQ. Check code."+NormalStyle()
-                                sys.exit()
-                            myDownRow.append("%.3f"%(myValue[0]))
-                            myUpRow.append("%.3f"%(myValue[1]))
+                            #print "column=%s extractor id=%s"%(c.getLabel(),n.getId())
+                            # Obtain histograms
+                            myHistograms = c.getFullNuisanceResultByMasterId(n.getId()).getHistograms()
+                            hUp = myHistograms[0]
+                            hDown = myHistograms[1]
+                            hNominal = c.getRateHistogram()
+                            # Calculate
+                            myDownDeltaSquared = 0.0
+                            myUpDeltaSquared = 0.0
+                            myDownAverage = abs(hDown.Integral()-hNominal.Integral())/hNominal.Integral()
+                            myUpAverage = abs(hUp.Integral()-hNominal.Integral())/hNominal.Integral()
+                            for i in range(1,hNominal.GetNbinsX()):
+                                myDownDeltaSquared += (abs(hDown.GetBinContent(i) - hNominal.GetBinContent(i)) - myDownAverage)**2
+                                myUpDeltaSquared += (abs(hUp.GetBinContent(i) - hNominal.GetBinContent(i)) - myUpAverage)**2
+                            myScalarDownRow.append("%.3f"%(sqrt(myDownDeltaSquared)/hNominal.Integral()))
+                            myScalarUpRow.append("%.3f"%(sqrt(myUpDeltaSquared)/hNominal.Integral()))
+                            myDownRow.append("%.3f"%(myDownAverage))
+                            myUpRow.append("%.3f"%(myUpAverage))
                         else:
                             myDownRow.append("-")
                             myUpRow.append("-")
+                            myScalarDownRow.append("-")
+                            myScalarUpRow.append("-")
                 # Add description to end of the row
                 myDownRow.append(n.getDescription())
                 myUpRow.append(n.getDescription())
+                myScalarDownRow.append(n.getDescription())
+                myScalarUpRow.append(n.getDescription())
                 myResult.append(myDownRow)
+                #myResult.append(myScalarDownRow)
                 myResult.append(myUpRow)
+                #myResult.append(myScalarUpRow)
         return myResult
 
     ## Save histograms to root file
@@ -416,7 +370,7 @@ class TableProducer:
             self._observation.setResultHistogramsToRootFile(rootFile)
         # Loop over columns
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
-            if c.isActiveForMass(mass):
+            if c.isActiveForMass(mass,self._config):
                 c.setResultHistogramsToRootFile(rootFile)
 
     ## Calculates maximum width of each table cell
@@ -482,6 +436,7 @@ class TableProducer:
             myOutput += mySeparatorLine
             myOutput += self._getTableOutput(myWidths,myNuisanceTable)
             myOutput += "\n"
+            myOutput += "Note: Linear sum is used to obtain the values, i.e. cancellations might occur. Bin-by-bin uncertainties could be larger.\n"
         # Save output to file
         myFilename = self._infoDirname+"/shapeVariationResults.txt"
         myFile = open(myFilename, "w")
@@ -491,72 +446,115 @@ class TableProducer:
 
     ## Prints event yield summary table
     def makeEventYieldSummary(self):
-        Data = EventYieldSummary()
-        if self._observation != None:
-            Data.extract(self._opts,self._config,self._observation,self._extractors)
+        formatStr = "%6."
+        myPrecision = None
+        if self._config.OptionNumberOfDecimalsInSummaries == None:
+            print WarningLabel()+"Using default value for number of decimals in summaries. To change, set OptionNumberOfDecimalsInSummaries in your config."+NormalStyle()
+            formatStr += "1"
+            myPrecision = 1
+        else:
+            formatStr += "%d"%self._config.OptionNumberOfDecimalsInSummaries
+            myPrecision = self._config.OptionNumberOfDecimalsInSummaries
+        formatStr += "f"
+
+        def getFormattedUnc(formatStr,myPrecision,uncUp,uncDown):
+            if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
+                # symmetric
+                return "+- %s"%(formatStr%uncDown)
+            else:
+                # asymmetric
+                return "+%s -%s"%(formatStr%uncUp,formatStr%uncDown)
+
+        def getResultString(hwu,formatStr,myPrecision):
+            return "%s +- %s (stat.) %s (syst.)\n"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
+                getFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
+
+        def getLatexFormattedUnc(formatStr,myPrecision,uncUp,uncDown):
+            if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
+                # symmetric
+                return "\\pm %s"%(formatStr%uncDown)
+            else:
+                # asymmetric
+                return "~^{+%s}){-%s}"%(formatStr%uncUp, formatStr%uncDown)
+
+        def getLatexResultString(hwu,formatStr,myPrecision):
+            return "$%s \\pm %s %s $"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
+                getLatexFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
+
+        # Loop over mass points
         for m in self._config.MassPoints:
-            HH = EventYieldSummary()
-            HW = EventYieldSummary()
-            QCD = EventYieldSummary()
-            Embedding = EventYieldSummary()
-            EWKFakes = EventYieldSummary()
-            # Loop over columns
+            # Initialize
+            HH = None
+            HW = None
+            QCD = None
+            Embedding = None
+            EWKFakes = None
+            # Loop over columns to obtain RootHistoWithUncertainties objects
             for c in self._datasetGroups:
-                if c.isActiveForMass(m):
-                    mySummary = EventYieldSummary()
-                    mySummary.extract(self._opts,self._config,c,self._extractors)
+                if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
                     # Find out what type the column is
                     if c.getLandsProcess() == -1:
-                        HH.add(mySummary)
+                        HH = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.getLandsProcess() == 0:
-                        HW.add(mySummary)
+                        HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.typeIsQCD():
-                        QCD.add(mySummary)
-                    elif c.typeIsEWK():
-                        Embedding.add(mySummary)
+                        if QCD == None:
+                            QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                        else:
+                            QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
+                    elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionReplaceEmbeddingByMC):
+                        if Embedding == None:
+                            print c.getLabel()
+                            Embedding = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                        else:
+                            Embedding.Add(c.getCachedShapeRootHistogramWithUncertainties())
+                    elif c.typeIsEWKfake():
+                        if EWKFakes == None:
+                            EWKFakes = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                        else:
+                            EWKFakes.Add(c.getCachedShapeRootHistogramWithUncertainties())
                     else:
-                        EWKFakes.add(mySummary)
+                        raise Exception(ErrorLabel()+"Unknown dataset type for dataset %s!%s"%(c.getLabel(),NormalStyle()))
             # Calculate signal yield
             myBr = self._config.OptionBr
-            if self._config.OptionBr == None:
-                print WarningStyle()+"Warning: Br(t->bH+) has not been specified in config file, using default 0.05! To specify, add OptionBr=0.05 to the config file."+NormalStyle()
-                myBr = self._config.OptionBr
-            mySignalRate = HH.getRate() * pow(myBr,2) + HW.getRate() * 2.0 * myBr * (1.0 - myBr)
-            mySignalStat = sqrt(pow(HH.getAbsoluteStat() * pow(myBr,2),2) + pow(HW.getAbsoluteStat() * 2.0 * myBr * (1.0 - myBr),2))
-            mySignalSystDown = sqrt(pow(HH.getAbsoluteSystDown() * pow(myBr,2),2) + pow(HW.getAbsoluteSystDown() * 2.0 * myBr * (1.0 - myBr),2))
-            mySignalSystUp = sqrt(pow(HH.getAbsoluteSystUp() * pow(myBr,2),2) + pow(HW.getAbsoluteSystUp() * 2.0 * myBr * (1.0 - myBr),2))
+            if not (self._config.OptionLimitOnSigmaBr or m > 179):
+                if self._config.OptionBr == None:
+                    print WarningStyle()+"Warning: Br(t->bH+) has not been specified in config file, using default 0.01! To specify, add OptionBr=0.05 to the config file."+NormalStyle()
+                    myBr = 0.01
+                HW.Scale(2.0 * myBr * (1.0 - myBr))
+            if HH != None:
+                HH.Scale(myBr**2)
+                HW.Add(HH)
+            # From this line on, HW includes all signal
             # Calculate expected yield
-            TotalExpected = EventYieldSummary()
-            TotalExpected.add(QCD)
-            TotalExpected.add(Embedding)
-            TotalExpected.add(EWKFakes)
+            TotalExpected = QCD.Clone()
+            TotalExpected.Add(Embedding)
+            if not self._config.OptionReplaceEmbeddingByMC:
+                TotalExpected.Add(EWKFakes)
             # Construct table
             myOutput = "*** Event yield summary ***\n"
             myOutput += self._generateHeader(m)
             myOutput += "\n"
             myOutput += "Number of events\n"
-            myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f:  %5.1f +- %4.1f (stat.) "%(m,myBr,mySignalRate,mySignalStat)
-            if round(mySignalSystDown) == round(mySignalSystUp):
-                myOutput += "+- %4.0f (syst.)\n"%mySignalSystDown
+            if not (self._config.OptionLimitOnSigmaBr or m > 179):
+                myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %s"%(m,myBr,getResultString(HW,formatStr,myPrecision))
             else:
-                myOutput += "+%4.0f -%4.0f (syst.)\n"%(mySignalSystUp, mySignalSystDown)
+                myOutput += "Signal, mH+=%3d GeV,                : %s"%(m,getResultString(HW,formatStr,myPrecision))
             myOutput += "Backgrounds:\n"
-            myOutput += "                           Multijets: %5.1f +- %4.1f (stat.) +- %4.1f (syst.)\n"%(QCD.getRate(),QCD.getAbsoluteStat(),QCD.getAbsoluteSystDown())
-            myOutput += "                    EWK+tt with taus: %5.1f +- %4.1f (stat.) +- %4.1f (syst.)\n"%(Embedding.getRate(),Embedding.getAbsoluteStat(),Embedding.getAbsoluteSystDown())
-            myOutput += "               EWK+tt with fake taus: %5.1f +- %4.1f (stat.) "%(EWKFakes.getRate(),EWKFakes.getAbsoluteStat())
-            if round(EWKFakes.getAbsoluteSystDown()) == round(EWKFakes.getAbsoluteSystUp()):
-                myOutput += "+- %4.0f (syst.)\n"%EWKFakes.getAbsoluteSystDown()
+            myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
+            if self._config.OptionReplaceEmbeddingByMC:
+                myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
             else:
-                myOutput += "+%4.0f -%4.0f (syst.)\n"%(EWKFakes.getAbsoluteSystUp(), EWKFakes.getAbsoluteSystDown())
-            myOutput += "                      Total expected: %5.1f +- %4.1f (stat.) "%(TotalExpected.getRate(),TotalExpected.getAbsoluteStat())
-            if round(TotalExpected.getAbsoluteSystDown()) == round(TotalExpected.getAbsoluteSystUp()):
-                myOutput += "+- %4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp())
-            else:
-                myOutput += "+%4.0f -%4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp(), TotalExpected.getAbsoluteSystDown())
+                myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
+                myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
+            myOutput += "                      Total expected: %s"%getResultString(TotalExpected,formatStr,myPrecision)
             if self._config.BlindAnalysis:
                 myOutput += "                            Observed: BLINDED\n\n"
             else:
                 myOutput += "                            Observed: %5d\n\n"%Data.getRate()
+            # Print to screen
+            if self._config.OptionDisplayEventYieldSummary:
+                print myOutput
             # Save output to file
             myFilename = self._infoDirname+"/EventYieldSummary_m%d.txt"%m
             myFile = open(myFilename, "w")
@@ -568,7 +566,10 @@ class TableProducer:
             myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
             myOutputLatex += "\\begin{table}\n"
             myOutputLatex += "  \\centering\n"
-            myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$ with $\\BRtH=%.2f$,\n"%(m,myBr)
+            if not (self._config.OptionLimitOnSigmaBr or m > 179):
+                myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$ with $\\BRtH=%.2f$,\n"%(m,myBr)
+            else:
+                myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$,\n"%(m)
             myOutputLatex += "           from the background measurements, and the observed event yield. Luminosity uncertainty is not included in the numbers.}\n"
             myOutputLatex += "  \\label{tab:summary:yields}\n"
             myOutputLatex += "  \\vskip 0.1 in\n"
@@ -577,28 +578,20 @@ class TableProducer:
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  \\multicolumn{1}{ c }{Source}  & $N_{\\text{events}} \\pm \\text{stat.} \\pm \\text{syst.}$  \\\\ \n"
             myOutputLatex += "  \\hline\n"
-            if round(mySignalSystDown) == round(mySignalSystUp): 
-                myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(m, mySignalRate, mySignalStat, mySignalSystDown)
-            else:
-                myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & $%4.0f \\pm $%4.0f~^{+%4.0f}_{%4.0f} $ \\\\ \n"%(m, mySignalRate, mySignalStat, mySignalSystUp, mySignalSystDown)
+            myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n"%(m,getLatexResultString(HW,formatStr,myPrecision))
             myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  Multijet background (data-driven)       & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(QCD.getRate(),QCD.getAbsoluteStat(),QCD.getAbsoluteSystDown())
-            myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & $%4.0f \\pm %4.0f \\pm %4.0f $ \\\\ \n"%(Embedding.getRate(),Embedding.getAbsoluteStat(),Embedding.getAbsoluteSystDown())
-            myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & $%4.0f \\pm %4.0f"%(EWKFakes.getRate(),EWKFakes.getAbsoluteStat())
-            if round(EWKFakes.getAbsoluteSystDown()) == round(EWKFakes.getAbsoluteSystUp()):
-                myOutputLatex += " \\pm %4.0f $ \\\\ \n"%EWKFakes.getAbsoluteSystDown()
+            myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n"%getLatexResultString(QCD,formatStr,myPrecision)
+            if self._config.OptionReplaceEmbeddingByMC:
+                myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
             else:
-                myOutputLatex += "~^{+%4.0f}){-%4.0f} $ \\\\ \n"%(EWKFakes.getAbsoluteSystUp(), EWKFakes.getAbsoluteSystDown())
+                myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
+                myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
             myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  Total expected from the SM              & $%4.0f \\pm %4.0f"%(TotalExpected.getRate(),TotalExpected.getAbsoluteStat())
-            if round(TotalExpected.getAbsoluteSystDown()) == round(TotalExpected.getAbsoluteSystUp()):
-                myOutputLatex += " \\pm %4.0f $ \\\\ \n"%(TotalExpected.getAbsoluteSystUp())
-            else:
-                myOutputLatex += "~^{+%4.0f}){-%4.0f} $ \\\\ \n"%(TotalExpected.getAbsoluteSystUp(), TotalExpected.getAbsoluteSystDown())
+            myOutputLatex += "  Total expected from the SM              & %s \\\\ \n"%getLatexResultString(TotalExpected,formatStr,myPrecision)
             if self._config.BlindAnalysis:
                 myOutputLatex += "  Observed: & BLINDED \\\\ \n"
             else:
-                myOutputLatex += "  Observed: & %4d \\\\ \n"%Data.getRate()
+                myOutputLatex += "  Observed: & %5d \\\\ \n"%Data.getRate()
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  \\end{tabular}\n"
             myOutputLatex += "\\end{table}\n"

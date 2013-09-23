@@ -15,6 +15,7 @@ import array
 import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pileupReweightedAllEvents as pileupReweightedAllEvents
 
@@ -557,6 +558,7 @@ def _mergeStackHelper(datasetList, nameList, task, allowMissingDatasets=False):
     firstIndex = None
     dataCount = 0
     mcCount = 0
+    pseudoCount = 0
 
     for i, d in enumerate(datasetList):
         if d.getName() in nameList:
@@ -567,6 +569,8 @@ def _mergeStackHelper(datasetList, nameList, task, allowMissingDatasets=False):
                 dataCount += 1
             elif d.isMC():
                 mcCount += 1
+            elif hasattr(d, "isPseudo") and d.isPseudo():
+                pseudoCount += 1
             else:
                 raise Exception("Internal error!")
         else:
@@ -574,6 +578,10 @@ def _mergeStackHelper(datasetList, nameList, task, allowMissingDatasets=False):
 
     if dataCount > 0 and mcCount > 0:
         raise Exception("Can not %s data and MC datasets!" % task)
+    if dataCount > 0 and pseudoCount > 0:
+        raise Exception("Can not %s data and pseudo datasets!" % task)
+    if pseudoCount > 0 and mcCount > 0:
+        raise Exception("Can not %s pseudo and MC datasets!" % task)
 
     if len(selected) != len(nameList):
         dlist = nameList[:]
@@ -858,6 +866,15 @@ def treeDrawToNumEntries(treeDraw):
 
 ## Class to encapsulate shape/normalization systematics for plot creation
 class Systematics:
+    class OnlyForMC:
+        pass
+    class OnlyForPseudo:
+        pass
+    class OnlyForPseudoAndMC:
+        pass
+    class All:
+        pass
+
     ## Constructor
     #
     # \param kwargs   Keyword arguments, see below
@@ -888,7 +905,7 @@ class Systematics:
     #                                 uncertainties. Each bin of TH1
     #                                 should have the relative
     #                                 uncertainty of that bin.
-    # \li\a onlyForMC                 If True, systematic uncertainties are applied only for MC.
+    # \li\a applyToDatasets           Datasets to which the systematic uncertainties are applied (one of the tag classes OnlyForMC, OnlyForPseudo, OnlyForPseudoAndMC, All)
     # \li\a verbose                   If True, print the applied uncertainties
     def __init__(self, **kwargs):
         self.settings = Settings(allShapes=False,
@@ -897,7 +914,7 @@ class Systematics:
                                  additionalNormalizations={},
                                  additionalShapes={},
                                  additionalShapesRelative={},
-                                 onlyForMC=True,
+                                 applyToDatasets=Systematics.OnlyForPseudoAndMC,
                                  verbose=False,
                                  )
         self.settings.set(**kwargs)
@@ -964,10 +981,24 @@ class SystematicsHelper:
         if verbose:
             print "Adding uncertainties to histogram '%s' of dataset '%s'" % (self._histoName, dset.getName())
 
-        if self._settings.get("onlyForMC") and not dset.isMC():
-            if verbose:
-                print "  Dataset is not MC, no systematics considered (Systematics(..., onlyForMC=True))"
-            return
+        onlyFor = self._settings.get("applyToDatasets")
+        if dset.isMC():
+            if onlyFor is Systematics.OnlyForPseudo:
+                if verbose:
+                    print "  Dataset is MC, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
+                return
+        elif dset.isPseudo():
+            if onlyFor is Systematics.OnlyForMC:
+                if verbose:
+                    print "  Dataset is pseudo, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
+                return
+        elif dset.isData():
+            if onlyFor is not Systematics.All:
+                if verbose:
+                    print "  Dataset is data, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
+                return
+        else:
+            raise Exception("Internal error (unknown dataset type)")
 
         # Read the shape variations from the Dataset
         shapes = []
@@ -1050,21 +1081,26 @@ class RootHistoWithUncertainties:
         self._shapeUncertainties = {}
 
         # TH1 to hold square sum of bin-wise relative uncertainties
-        self._shapeUncertaintyRelativeSquared = None
-        self._shapeUncertaintyRelativeNames = []
+        self._shapeUncertaintyAbsoluteSquaredPlus = None
+        self._shapeUncertaintyAbsoluteSquaredMinus = None
+        if isinstance(rootHisto, ROOT.TH1):
+            self._shapeUncertaintyAbsoluteSquaredPlus = rootHisto.Clone()
+            self._shapeUncertaintyAbsoluteSquaredMinus = rootHisto.Clone()
+            self._shapeUncertaintyAbsoluteSquaredPlus.Reset()
+            self._shapeUncertaintyAbsoluteSquaredMinus.Reset()
+        self._shapeUncertaintyAbsoluteNames = []
 
-        # Float to hold square sum of relative normalization uncertainty
-        self._normalizationUncertaintyRelativeSquared = 0.0
-        self._normalizationUncertaintyRelativeNames = []
+        # Boolean to save the status if the under- and overflow bins have been made visible (i.e. summed to the first and last bin)
+        self._flowBinsVisibleStatus = False
 
     def _checkConsistency(self, name, th1):
         # I can't use this since it's private/protected :(
         #if not ROOT.TH1.CheckConsistency(self._rootHisto, th1):
         #    raise Exception("Adding uncertainty %s, histogram consistency check fails (ROOT.TH1.CheckConsistency())" % name)
         if self._rootHisto.GetDimension() != th1.GetDimension():
-            raise Exception("Adding uncertainty %s, histograms have different dimension (%d != %d)" % (self._rootHisto.GetDimension(), th1.GetDimension()))
+            raise Exception("Adding uncertainty %s, histograms have different dimension (%d != %d)" % (name, self._rootHisto.GetDimension(), th1.GetDimension()))
         if self._rootHisto.GetNbinsX() != th1.GetNbinsX():
-            raise Exception("Adding uncertainty %s, histograms have different number of X bins (%d != %d)" % (self._rootHisto.GetNbinsX(), th1.GetNbinsX()))
+            raise Exception("Adding uncertainty %s, histograms have different number of X bins (%d != %d)" % (name, self._rootHisto.GetNbinsX(), th1.GetNbinsX()))
 
     ## Set the ROOT histogram object
     #
@@ -1080,12 +1116,68 @@ class RootHistoWithUncertainties:
     def getRootHisto(self):
         return self._rootHisto
 
+    ## Get the event rate, i.e. integral of the root histo object (usually at this point the under and overflow bins are already merged to actual bins)
+    def getRate(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        myRate = self._rootHisto.Integral()
+        myRateIncludingOverflow = self.integral()
+        if abs(myRate - myRateIncludingOverflow) > 0.00001:
+            raise Exception("getRate(): Weird, the under/overflow should be empty at this point, but apparantly they are not?!")
+        return myRate
+
+    ## Get the stat. uncertainty of the root histo object
+    def getRateStatUncertainty(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        mySum = 0.0
+        if isinstance(self._rootHisto, ROOT.TH2):
+            raise Exception("getRateStatUncertainty() supported currently only for TH1!")
+        for i in range(1, self._rootHisto.GetNbinsX()):
+            mySum += self._rootHisto.GetBinError(i)**2
+        return math.sqrt(mySum)
+
+    ## Get the syst. uncertainty of the root histo object
+    def getRateSystUncertainty(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        if isinstance(self._rootHisto, ROOT.TH2):
+            raise Exception("getRateSystUncertainty() supported currently only for TH1!")
+        # Integrate first over distribution, then sum
+        myClone = self.Clone()
+        myClone.Rebin(self._rootHisto.GetNbinsX())
+        g = myClone.getSystematicUncertaintyGraph()
+        return (g.GetErrorYhigh(0),g.GetErrorYlow(0))
+
+    ## Adds the underflow and overflow bins to the first and last bins, respectively
+    def makeFlowBinsVisible(self):
+        if self._flowBinsVisibleStatus:
+            return
+        self._flowBinsVisibleStatus = True
+        # Update systematics histograms first
+        for key, (hPlus, hMinus) in self._shapeUncertainties.iteritems():
+            histogramsExtras.makeFlowBinsVisible(hPlus)
+            histogramsExtras.makeFlowBinsVisible(hMinus)
+        # Update nominal histogram
+        histogramsExtras.makeFlowBinsVisible(self._rootHisto)
+        # Update shape uncertainty squared histograms
+        histogramsExtras.makeFlowBinsVisible(self._shapeUncertaintyAbsoluteSquaredPlus)
+        histogramsExtras.makeFlowBinsVisible(self._shapeUncertaintyAbsoluteSquaredMinus)
+
     ## Add shape variation uncertainty
     #
     # \param name     Name of the uncertainty
     # \param th1Plus  TH1 for the 'plus' variation
     # \param th1Minus TH1 for the 'minus' variation
     def addShapeUncertainty(self, name, th1Plus, th1Minus):
+        if self._flowBinsVisibleStatus:
+            # Check if flow bins have entries
+            myStatus = abs(th1Plus.GetBinContent(th1Plus.GetNbinsX()+1)) < 0.00001
+            myStatus &= abs(th1Minus.GetBinContent(th1Minus.GetNbinsX()+1)) < 0.00001
+            myStatus &= abs(th1Plus.GetBinContent(0)) < 0.00001
+            myStatus &= abs(th1Minus.GetBinContent(0)) < 0.00001
+            if not myStatus:
+                raise Exception("addShapeUncertainty(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
         self._shapeUncertainties[name] = (th1Plus, th1Minus)
@@ -1093,36 +1185,49 @@ class RootHistoWithUncertainties:
     ## Add bin-wise relative uncertainty
     #
     # \param name     Name of the uncertainty
-    # \param th1      TH1 holding the relative uncertainties (e.g. 0.2 for 20 %)
+    # \param th1Plus  TH1 holding the relative uncertainties (e.g. 0.2 for 20 %)
+    # \param th1Minus TH1 holding the relative uncertainties (e.g. 0.2 for 20 %); if None, then th1Plus values are used
     #
     # The bin-wise uncertainties are summed quadratically
-    def addShapeUncertaintyRelative(self, name, th1):
-        if isinstance(th1, ROOT.TH2):
+    def addShapeUncertaintyRelative(self, name, th1Plus, th1Minus=None):
+        if self._flowBinsVisibleStatus:
+            raise Exception("addShapeUncertainty(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
+        if isinstance(th1Plus, ROOT.TH2) or isinstance(th1Minus, ROOT.TH2):
             raise Exception("So far only TH1's are supported (and not TH2/TH3).")
 
-        self._checkConsistency(name, th1)
-        self._shapeUncertaintyRelativeNames.append(name)
-        if self._shapeUncertaintyRelativeSquared is None:
-            # Loop over all bins of TH1/TH2/TH3, including
-            # under/overflow bins in a general manner
-            for bin in xrange(0, th1.GetNbinsX()):
-                th1.SetBinContent(bin, th1.GetBinContent(bin)**2)
-            self._shapeUncertaintyRelativeSquared = th1
-        else:
-            squareSum = self._shapeUncertaintyRelativeSquared # just for a shorter name
-            for bin in xrange(0, th1.GetNbinsX()+2):
-                squareSum.SetBinContent(bin, squareSum.GetBinContent(bin) +
-                                             th1.GetBinContent(bin)**2)
+        self._checkConsistency(name, th1Plus)
+        self._checkConsistency(name, th1Minus)
+        self._shapeUncertaintyAbsoluteNames.append(name)
+        sqSumPlus = self._shapeUncertaintyAbsoluteSquaredPlus # just for a shorter name
+        sqSumMinus = self._shapeUncertaintyAbsoluteSquaredMinus # just for a shorter name
+        th1MinusSource = th1Minus
+        if th1MinusSource == None:
+            th1MinusSource = th1Plus
+        for bin in xrange(0, th1.GetNbinsX()+2):
+            absUncertUp = th1Plus.GetBinContent(bin)*self._rootHisto.GetBinContent(bin)
+            sqSumPlus.SetBinContent(bin, sqSumPlus.GetBinContent(bin)+absUncertUp**2)
+            absUncertDown = th1MinusSource.GetBinContent(bin)*self._rootHisto.GetBinContent(bin)
+            sqSumMinus.SetBinContent(bin, sqSumMinus.GetBinContent(bin)+absUncertDown**2)
 
     ## Add normalization relative uncertainty
     #
-    # \param name         Name of the uncertainty
-    # \param uncertainty  Float for the value (e.g. 0.2 for 20 %)
+    # \param name             Name of the uncertainty
+    # \param uncertaintyPlus  Float for the value (e.g. 0.2 for 20 %)
+    # \param uncertaintyMinus  Float for the value (e.g. 0.2 for 20 %); if None, then uncertaintyPlus value is used
     #
     # The normalization relative uncertainties are summed quadratically
-    def addNormalizationUncertaintyRelative(self, name, uncertainty):
-        self._normalizationUncertaintyRelativeNames.append(name)
-        self._normalizationUncertaintyRelativeSquared += uncertainty*uncertainty
+    def addNormalizationUncertaintyRelative(self, name, uncertaintyPlus, uncertaintyMinus=None):
+        self._shapeUncertaintyAbsoluteNames.append(name)
+        sqSumPlus = self._shapeUncertaintyAbsoluteSquaredPlus # just for a shorter name
+        sqSumMinus = self._shapeUncertaintyAbsoluteSquaredMinus # just for a shorter name
+        uncertMinusSource = uncertaintyMinus
+        if uncertMinusSource == None:
+            uncertMinusSource = uncertaintyPlus
+        for bin in xrange(0, self._rootHisto.GetNbinsX()+2):
+            absUncertUp = uncertaintyPlus*self._rootHisto.GetBinContent(bin)
+            sqSumPlus.SetBinContent(bin, sqSumPlus.GetBinContent(bin)+absUncertUp**2)
+            absUncertDown = uncertMinusSource*self._rootHisto.GetBinContent(bin)
+            sqSumMinus.SetBinContent(bin, sqSumMinus.GetBinContent(bin)+absUncertDown**2)
 
     ## Get the dictionary of shape variation uncertainties
     def getShapeUncertainties(self):
@@ -1130,7 +1235,7 @@ class RootHistoWithUncertainties:
 
     ## Return True if this histogram has any systematic uncertainties associated to it
     def hasSystematicUncertainties(self):
-        return len(self._shapeUncertainties) > 0 or len(self._shapeUncertaintyRelativeNames) > 0 or len(self._normalizationUncertaintyRelativeNames) > 0
+        return len(self._shapeUncertainties) > 0 or len(self._shapeUncertaintyAbsoluteNames) > 0
 
     ## Create TGraphAsymmErrors for the sum of uncertainties
     #
@@ -1187,16 +1292,9 @@ class RootHistoWithUncertainties:
                     yhighSquareSum += diffMinus**2
                     ylowSquareSum += diffPlus**2
 
-            if self._shapeUncertaintyRelativeSquared is not None:
-                relUnc = math.sqrt(self._shapeUncertaintyRelativeSquared.GetBinContent(i))
-                absUnc = relUnc * yval
-                yhighSquareSum += absUnc**2
-                ylowSquareSum += absUnc**2
-
-            relUnc = math.sqrt(self._normalizationUncertaintyRelativeSquared)
-            absUnc = relUnc * yval
-            yhighSquareSum += absUnc**2
-            ylowSquareSum += absUnc**2
+            if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+                yhighSquareSum += self._shapeUncertaintyAbsoluteSquaredPlus.GetBinContent(i)
+                ylowSquareSum += self._shapeUncertaintyAbsoluteSquaredMinus.GetBinContent(i)
 
             xvalues.append(xval)
             xerrhigh.append(xhigh)
@@ -1216,11 +1314,8 @@ class RootHistoWithUncertainties:
         keys.sort()
         for key in keys:
             print "  %s" % key
-        print "Bin-wise relative uncertainties (%d):" % len(self._shapeUncertaintyRelativeNames)
-        for n in self._shapeUncertaintyRelativeNames:
-            print "  %s" % n
-        print "Normalization uncertainties (%d):" % len(self._normalizationUncertaintyRelativeNames)
-        for n in self._normalizationUncertaintyRelativeNames:
+        print "Bin-wise relative uncertainties (%d):" % len(self._shapeUncertaintyAbsoluteNames)
+        for n in self._shapeUncertaintyAbsoluteNames:
             print "  %s" % n
 
     #### Below are methods for "better" implementation for some ROOT TH1 methods
@@ -1320,8 +1415,9 @@ class RootHistoWithUncertainties:
             plus = plus.Rebin(*args)
             minus = minus.Rebin(*args)
             self._shapeUncertainties[key] = (plus, minus)
-        if self._shapeUncertaintyRelativeSquared is not None:
-            self._shapeUncertaintyRelativeSquared.Rebin(*args)
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Rebin(*args)
+            self._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Rebin(*args)
 
     ## Rebin histogram
     #
@@ -1334,32 +1430,53 @@ class RootHistoWithUncertainties:
             plus = plus.Rebin2D(*args)
             minus = minus.Rebin2D(*args)
             self._shapeUncertainties[key] = (plus, minus)
-        if self._shapeUncertaintyRelativeSquared is not None:
-            self._shapeUncertaintyRelativeSquared.Rebin2D(*args)
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Rebin2D(*args)
+            self._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Rebin2D(*args)
 
     ## Add another RootHistoWithUncertainties object
     #
     # \param other   RootHistoWithUncertainties object
     def Add(self, other):
+        # Make sure the flow bins are handled in the same way before adding
+        if self._flowBinsVisibleStatus and not other._flowBinsVisibleStatus:
+            other.makeFlowBinsVisible()
+        if not self._flowBinsVisibleStatus and other._flowBinsVisibleStatus:
+            self.makeFlowBinsVisible()
+
+        # Absolute shape uncertainty (values are squares, can add directly)
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus.Add(other._shapeUncertaintyAbsoluteSquaredPlus)
+            self._shapeUncertaintyAbsoluteSquaredMinus.Add(other._shapeUncertaintyAbsoluteSquaredMinus)
+        for item in other._shapeUncertaintyAbsoluteNames:
+            if not item in self._shapeUncertaintyAbsoluteNames:
+                self._shapeUncertaintyAbsoluteNames.append(item)
+
+        # Add histo
         self._rootHisto.Add(other._rootHisto)
 
         keys1 = self._shapeUncertainties.keys()
         keys2 = other._shapeUncertainties.keys()
-        keys1.sort()
-        keys2.sort()
-        if keys1 != keys2:
-            raise Exception("In adding two RootHistoWithUncertainties, the two objects have different sets of shape uncertainties (by variations): self has %s, parameter has %s. The assumption of equal sets of uncertainties is made for simplification only, and can be removed if really necessary" % (",".join(keys1), ",".join(keys2)))
+        #keys1.sort()
+        #keys2.sort()
         for key in keys1:
-            (plus, minus) = self._shapeUncertainties[key]
-            (otherPlus, otherMinus) = other._shapeUncertainties[key]
-            plus.Add(otherPlus)
-            minus.Add(otherMinus)
-
-        if other._shapeUncertaintyRelativeSquared is not None:
-            if self._shapeUncertaintyRelativeSquared is None:
-                self._shapeUncertaintyRelativeSquared = other._shapeUncertaintyRelativeSquared.Clone()
+            if key in keys2:
+                (plus, minus) = self._shapeUncertainties[key]
+                (otherPlus, otherMinus) = other._shapeUncertainties[key]
+                plus.Add(otherPlus)
+                minus.Add(otherMinus)
             else:
-                self._shapeUncertaintyRelativeSquared.Add(other._shapeUncertaintyRelativeSquared)
+                # key is not in other, i.e. need to add nominal count from other (since the uncertainty is calculated as variation over nominal)
+                (plus, minus) = self._shapeUncertainties[key]
+                plus.Add(other._rootHisto)
+                minus.Add(other._rootHisto)
+        for key in keys2:
+            if not key in keys1:
+                self.addShapeUncertainty(key, *other._shapeUncertainties[key]) # Add those histograms, which so far did not exist
+                # Add nominal count from self (since the uncertainty is calculated as variation over nominal)
+                (plus, minus) = self._shapeUncertainties[key]
+                plus.Add(self._rootHisto)
+                minus.Add(self._rootHisto)
 
     ## Scale the histogram
     #
@@ -1371,6 +1488,12 @@ class RootHistoWithUncertainties:
         for (plus, minus) in self._shapeUncertainties.itervalues():
             plus.Scale(*args)
             minus.Scale(*args)
+        # The absolute uncertainty squared needs to be scaled twice because of the squaring
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus.Scale(*args)
+            self._shapeUncertaintyAbsoluteSquaredPlus.Scale(*args)
+            self._shapeUncertaintyAbsoluteSquaredMinus.Scale(*args)
+            self._shapeUncertaintyAbsoluteSquaredMinus.Scale(*args)
 
     ## Clone the histogram
     #
@@ -1384,12 +1507,16 @@ class RootHistoWithUncertainties:
             plus.SetDirectory(0)
             minus.SetDirectory(0)
             clone._shapeUncertainties[key] = (plus, minus)
-        if self._shapeUncertaintyRelativeSquared is not None:
-            clone._shapeUncertaintyRelativeSquared = self._shapeUncertaintyRelativeSquared.Clone()
-            clone._shapeUncertaintyRelativeSquared.SetDirectory(0)
-            clone._shapeUncertaintyRelativeNames = self._shapeUncertaintyRelativeNames[:]
-        clone._normalizationUncertaintyRelativeSquared = self._normalizationUncertaintyRelativeSquared
-        clone._normalizationUncertaintyRelativeNames = self._normalizationUncertaintyRelativeNames
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            clone._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Clone()
+            clone._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Clone()
+            clone._shapeUncertaintyAbsoluteSquaredPlus.SetDirectory(0)
+            clone._shapeUncertaintyAbsoluteSquaredMinus.SetDirectory(0)
+        else:
+            clone._shapeUncertaintyAbsoluteSquaredPlus = None
+            clone._shapeUncertaintyAbsoluteSquaredMinus = None
+        clone._shapeUncertaintyAbsoluteNames = self._shapeUncertaintyAbsoluteNames[:]
+        clone._flowBinsVisibleStatus = self._flowBinsVisibleStatus
         return clone
 
     ## Delete all contained histograms
@@ -1398,17 +1525,66 @@ class RootHistoWithUncertainties:
         for (plus, minus) in self._shapeUncertainties.itervalues():
             plus.Delete()
             minus.Delete()
-        if self._shapeUncertaintyRelativeSquared is not None:
-            self._shapeUncertaintyRelativeSquared.Delete()
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus.Delete()
+            self._shapeUncertaintyAbsoluteSquaredMinus.Delete()
 
         self._rootHisto = None
         self._shapeUncertainties = None
-        self._shapeUncertaintyRelativeSquared = None
-        self._normalizationUncertaintyRelativeSquared = None
+        self._shapeUncertaintyAbsoluteSquaredPlus = None
+        self._shapeUncertaintyAbsoluteSquaredMinus = None
+        self._shapeUncertaintyAbsoluteNames = None
 
     ## "Eats" SetDirectory() call for interface compatibility, i.e. do nothing
     def SetDirectory(self, *args):
         pass
+
+    ## Print a lot of comma separated info for debugging
+    def Debug(self):
+        def histoContentsHelper(h):
+            s = ""
+            for i in range(0, h.GetNbinsX()+2):
+                s += ", %f"%h.GetBinContent(i)
+            return s
+        def histoContentsHelperWithSubtraction(h):
+            s = ""
+            for i in range(0, h.GetNbinsX()+2):
+                s += ", %f"%(h.GetBinContent(i)-self._rootHisto.GetBinContent(i))
+            return s
+        def histoErrorHelper(h):
+            s = ""
+            for i in range(0, h.GetNbinsX()+2):
+                s += ", %f"%h.GetBinError(i)
+            return s
+
+        print "*** Debug info for RootHistoWithUncertainties:"
+        print "histogram %s"%(self.GetName())
+        print "nominal%s"%histoContentsHelper(self._rootHisto)
+        print "nominal_error%s"%histoErrorHelper(self._rootHisto)
+        sUp = ""
+        sDown = ""
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            for i in range(0, self._rootHisto.GetNbinsX()+2):
+                sUp += ", %f"%math.sqrt(self._shapeUncertaintyAbsoluteSquaredPlus.GetBinContent(i))
+                sDown += ", %f"%math.sqrt(self._shapeUncertaintyAbsoluteSquaredMinus.GetBinContent(i))
+        print "shape_error_up%s"%sUp
+        print "shape_error_down%s"%sDown
+        keys = self._shapeUncertainties.keys()
+        for key in keys:
+            (hPlus, hMinus) = self._shapeUncertainties[key]
+            print "uncert_%s_up%s"%(key,histoContentsHelperWithSubtraction(hPlus))
+            print "uncert_%s_down%s"%(key,histoContentsHelperWithSubtraction(hMinus))
+        print "rate, %f"%self.getRate()
+        print "rate_stat_uncert, %f"%self.getRateStatUncertainty()
+        print "rate_syst_uncert, +%f, -%f"%self.getRateSystUncertainty()
+        g = self.getSystematicUncertaintyGraph()
+        sUp = ""
+        sDown = ""
+        for i in range(0, g.GetN()):
+            sUp += ", %f"%g.GetErrorYhigh(i)
+            sDown += ", %f"%g.GetErrorYlow(i)
+        print "rate_syst_uncert_up,%s"%sUp
+        print "rate_syst_uncert_down,%s\n"%sDown
 
 ## Base class for DatasetRootHisto classes (wrapper for TH1 histogram and the originating Dataset)
 # 
@@ -1449,6 +1625,9 @@ class DatasetRootHistoBase:
 
     def isMC(self):
         return self.dataset.isMC()
+
+    def isPseudo(self):
+        return self.dataset.isPseudo()
 
     ## Get a clone of the wrapped histogram (TH1) normalized as requested.
     def getHistogram(self):
@@ -1560,8 +1739,8 @@ class DatasetRootHisto(DatasetRootHistoBase):
     # corresponding dataset. The normalization can be applied only
     # to MC histograms.
     def normalizeByCrossSection(self):
-        if self.dataset.isData():
-            raise Exception("Can't normalize data histogram by cross section")
+        if not self.dataset.isMC():
+            raise Exception("Can't normalize non-MC histogram by cross section")
         self.normalization = "byCrossSection"
 
     ## Set the current normalization scheme to 'to luminosity'.
@@ -1573,8 +1752,8 @@ class DatasetRootHisto(DatasetRootHistoBase):
     # luminosity. The normalization can be applied only to MC
     # histograms.
     def normalizeToLuminosity(self, lumi):
-        if self.dataset.isData():
-            raise Exception("Can't normalize data histogram to luminosity")
+        if not self.dataset.isMC():
+            raise Exception("Can't normalize non-MC histogram to luminosity")
 
         self.normalization = "toLuminosity"
         self.luminosity = lumi
@@ -1653,12 +1832,6 @@ class DatasetRootHistoMergedData(DatasetRootHistoCompoundBase):
             if h.multiplication != None:
                 raise Exception("Histograms to be merged must not be multiplied at this stage")
 
-    def isData(self):
-        return True
-
-    def isMC(self):
-        return False
-
     def forEach(self, function, datasetRootHisto1=None):
         ret = []
         if datasetRootHisto1 != None:
@@ -1714,6 +1887,31 @@ class DatasetRootHistoMergedData(DatasetRootHistoCompoundBase):
         else:
             return hsum
 
+## Wrapper for a merged TH1 histograms from pseudo and the corresponding Datasets.
+#
+# The merged pseudo histogramgs can only be normalized 'to one'.
+#
+# Works as DatasetRootHistoMergedData, except can be constructed only
+# from pseudo datasets.
+#
+# \see dataset.DatasetRootHisto class.
+class DatasetRootHistoMergedPseudo(DatasetRootHistoMergedData):
+    ## Constructor.
+    #
+    # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
+    # \param mergedDataset   The corresponding dataset.DatasetMerged object
+    #
+    # The constructor checks that all histoWrappers are data, and
+    # are not yet normalized.
+    def __init__(self, histoWrappers, mergedDataset):
+        DatasetRootHistoCompoundBase.__init__(self, histoWrappers, mergedDataset)
+        for h in self.histoWrappers:
+            if not h.isPseudo():
+                raise Exception("Histograms to be merged must come from pseudo (%s is not pseudo)" % h.getDataset().getName())
+            if h.normalization != "none":
+                raise Exception("Histograms to be merged must not be normalized at this stage")
+            if h.multiplication != None:
+                raise Exception("Histograms to be merged must not be multiplied at this stage")
 
 ## Wrapper for a merged TH1 histograms from MC and the corresponding Datasets.
 # 
@@ -1735,12 +1933,6 @@ class DatasetRootHistoMergedMC(DatasetRootHistoCompoundBase):
                 raise Exception("Histograms to be merged must not be normalized at this stage")
             if h.multiplication != None:
                 raise Exception("Histograms to be merged must not be multiplied at this stage")
-
-    def isData(self):
-        return False
-
-    def isMC(self):
-        return True
 
     def forEach(self, function, datasetRootHisto1=None):
         ret = []
@@ -1927,6 +2119,18 @@ class Dataset:
         # that all files have the same values
         self.info = None
         self.dataVersion = None
+        def assertInfo(refInfo, newInfo, refFile, newFile, name):
+            for key, value in refInfo.iteritems():
+                valnew = info[key]
+                if isinstance(value, basestring):
+                    if value == valnew:
+                        continue
+                    raise Exception("Mismatched values in %s, label %s, got %s from file %s, and %s from file %s" % (name, key, value, refFile.GetName(), valnew, newFile.GetName()))
+                if valnew == 0 and value == 0:
+                    return
+                if abs(value-valnew)/max(value, valnew) > 0.001:
+                    raise Exception("Mismatched values in %s, label %s, got %f from file %s, and %f from file %s" % (name, key, value, refFile.GetName(), valnew, newFile.GetName()))
+
         for f in self.files:
             configInfo = f.Get("configInfo")
             if configInfo == None:
@@ -1938,16 +2142,7 @@ class Dataset:
             if self.info is None:
                 self.info = info
             else:
-                for key, value in self.info.iteritems():
-                    valnew = info[key]
-                    if isinstance(value, basestring):
-                        if value == valnew:
-                            continue
-                        raise Exception("Mismatched values in configInfo/configinfo, label %s, got %s from file %s, and %s from file %s" % (key, value, self.files[0].GetName(), valenew, f.GetName()))
-                    if valnew == 0 and value == 0:
-                        continue
-                    if abs(value-valnew)/max(value, valnew) > 0.001:
-                        raise Exception("Mismatched values in configInfo/configinfo, label %s, got %f from file %s, and %f from file %s" % (key, value, self.files[0].GetName(), valnew, f.GetName()))
+                assertInfo(self.info, info, self.files[0], f, "configInfo/configinfo")
 
             dataVersion = configInfo.Get("dataVersion")
             if dataVersion == None:
@@ -1959,6 +2154,8 @@ class Dataset:
                     raise Exception("Mismatched values in configInfo/dataVersion, got %s from file %s, and %s from file %s" % (self.dataVersion, self.files[0].GetName(), dataVersion.GetTitle(), f.GetName()))
 
         self._isData = "data" in self.dataVersion
+        self._isPseudo = "pseudo" in self.dataVersion
+        self._isMC = not (self._isData or self._isPseudo)
         self._weightedCounters = weightedCounters
 
         self._analysisName = analysisName
@@ -1973,11 +2170,11 @@ class Dataset:
         if not self._useAnalysisNameOnly:
             if self._searchMode is not None:
                 self._analysisDirectoryName += self._searchMode
-            if self.isMC() and self._dataEra is not None:
+            if (self.isMC() or self.isPseudo()) and self._dataEra is not None:
                 self._analysisDirectoryName += self._dataEra
             if self._optimizationMode is not None:
                 self._analysisDirectoryName += self._optimizationMode
-            if self.isMC() and self._systematicVariation is not None:
+            if (self.isMC() or self.isPseudo()) and self._systematicVariation is not None:
                 self._analysisDirectoryName += self._systematicVariation
     
         # Check that analysis directory exists
@@ -1985,6 +2182,27 @@ class Dataset:
             if f.Get(self._analysisDirectoryName) == None:
                 raise AnalysisNotFoundException("Analysis directory '%s' does not exist in file '%s'" % (self._analysisDirectoryName, f.GetName()))
         self._analysisDirectoryName += "/"
+
+        # Update info from analysis directory specific histogram, if one exists
+        realName = self._translateName("configInfo/configinfo")
+        if self.files[0].Get(realName) != None: # important to use !=
+            updateInfo = None
+            for f in self.files:
+                h = f.Get(realName)
+                if h is None:
+                    raise Exception("%s directory is missing from file %s, it was in %s" % (realName, f.GetName(), self.files[0].GetName()))
+                info = _rescaleInfo(_histoToDict(f.Get(realName)))
+                if updateInfo == None:
+                    updateInfo = info
+                else:
+                    assertInfo(updateInfo, info, self.files[0], f, realName)
+            if "energy" in updateInfo:
+                #raise Exception("You may not set 'energy' in analysis directory specific configinfo histogram. Please fix %s." % realName)
+                print "WARNING: 'energy' has been set in analysis directory specific configinfo histogram (%s), it will be ignored. Please fix your pseudomulticrab code." % realName
+                del updateInfo["energy"]
+            print updateInfo
+            self.info.update(updateInfo)
+            print self.info
 
         self._unweightedCounterDir = counterDir
         if counterDir is not None:
@@ -2201,13 +2419,13 @@ class Dataset:
     ## Set cross section of MC dataset (in pb).
     def setCrossSection(self, value):
         if not self.isMC():
-            raise Exception("Should not set cross section for data dataset %s" % self.name)
+            raise Exception("Should not set cross section for non-MC dataset %s" % self.name)
         self.info["crossSection"] = value
 
     ## Get cross section of MC dataset (in pb).
     def getCrossSection(self):
         if not self.isMC():
-            raise Exception("Dataset %s is data, no cross section available" % self.name)
+            raise Exception("Dataset %s is not MC, no cross section available" % self.name)
         try:
             return self.info["crossSection"]
         except KeyError:
@@ -2221,12 +2439,12 @@ class Dataset:
 
     ## Get the integrated luminosity of data dataset (in pb^-1).
     def getLuminosity(self):
-        if not self.isData():
-            raise Exception("Dataset %s is MC, no luminosity available" % self.name)
+        if not (self.isData() or self.isPseudo()):
+            raise Exception("Dataset %s is not data nor pseudo, no luminosity available" % self.name)
         try:
             return self.info["luminosity"]
         except KeyError:
-            raise Exception("Dataset %s is data, but luminosity has not been set yet. You have to explicitly set the luminosity with setLuminosity() method." % self.name)
+            raise Exception("Dataset %s is %s, but luminosity has not been set yet. You have to explicitly set the luminosity with setLuminosity() method." % (self.name, self.getDataType()))
 
     def setProperty(self, key, value):
         self.info[key] = value
@@ -2237,8 +2455,20 @@ class Dataset:
     def isData(self):
         return self._isData
 
+    def isPseudo(self):
+        return self._isPseudo
+
     def isMC(self):
-        return not self._isData
+        return self._isMC
+
+    def getDataType(self):
+        if self.isData():
+            return "data"
+        if self.isMC():
+            return "MC"
+        if self.isPseudo:
+            return "pseudo"
+        raise Exception("I don't know what I am, sorry.")
 
     def getCounterDirectory(self):
         return self.counterDir
@@ -2265,8 +2495,8 @@ class Dataset:
     #                value read from the configinfo is used)
     # \param kwargs  Keyword arguments (forwarded to pileupReweightedAllEvents.WeightedAllEvents.getWeighted())
     def updateNAllEventsToPUWeighted(self, era=None, **kwargs):
-        # Ignore if data
-        if self.isData():
+        # Ignore if not MC
+        if not self.isMC():
             return
 
         if era == None:
@@ -2415,14 +2645,14 @@ class Dataset:
 
 ## Dataset class for histogram access for a dataset merged from Dataset objects.
 # 
-# The merged datasets are required to be either MC or data.
+# The merged datasets are required to be either MC, data, or pseudo
 class DatasetMerged:
     ## Constructor.
     # 
     # \param name      Name of the merged dataset
     # \param datasets  List of dataset.Dataset objects to merge
     # 
-    # Calculates the total cross section (luminosity) for MC (data)
+    # Calculates the total cross section (luminosity) for MC (data or pseudo)
     # datasets.
     def __init__(self, name, datasets):
         self.name = name
@@ -2441,12 +2671,18 @@ class DatasetMerged:
         if self.datasets[0].isMC():
             crossSum = 0.0
             for d in self.datasets:
+                if not d.isMC():
+                    raise Exception("Can't merge non-MC dataset %s with MC datasets, it is %s" % (d.getName(), d.getDataType()))
                 crossSum += d.getCrossSection()
             self.info["crossSection"] = crossSum
         else:
+            reft = self.datasets[0].getDataType()
             lumiSum = 0.0
             for d in self.datasets:
                 lumiSum += d.getLuminosity()
+                t = d.getDataType()
+                if reft != t:
+                    raise Exception("Can't merge non-%s datasets %s with %s datasets, it is %s" % (reft, d.getName(), t))
             self.info["luminosity"] = lumiSum
 
     ## Close TFiles in the contained dataset.Dataset objects
@@ -2488,14 +2724,14 @@ class DatasetMerged:
         return self.datasets[0].getEnergy()
 
     def setCrossSection(self, value):
-        if self.isData():
-            raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
+        if not self.isMC():
+            raise Exception("Should not set cross section for non-MC dataset %s (has luminosity)" % self.name)
         raise Exception("Setting cross section for merged dataset is meaningless (it has no real effect, and hence is misleading")
 
     ## Get cross section of MC dataset (in pb).
     def getCrossSection(self):
-        if self.isData():
-            raise Exception("Dataset %s is data, no cross section available" % self.name)
+        if not self.isMC():
+            raise Exception("Dataset %s is not MC, no cross section available" % self.name)
         return self.info["crossSection"]
 
     def setLuminosity(self, value):
@@ -2511,6 +2747,9 @@ class DatasetMerged:
 
     def isData(self):
         return self.datasets[0].isData()
+
+    def isPseudo(self):
+        return self.datasets[0].isPseudo()
 
     def isMC(self):
         return self.datasets[0].isMC()
@@ -2543,13 +2782,18 @@ class DatasetMerged:
     # \param kwargs Keyword arguments, forwarder to get
     #               getDatasetRootHisto() of the contained
     #               Dataset objects
+    #
+    # DatasetRootHistoMergedData works also for pseudo
     def getDatasetRootHisto(self, name, **kwargs):
         wrappers = [d.getDatasetRootHisto(name, **kwargs) for d in self.datasets]
         if self.isMC():
             return DatasetRootHistoMergedMC(wrappers, self)
-        else:
+        elif self.isData():
             return DatasetRootHistoMergedData(wrappers, self)
-
+        elif self.isPseudo():
+            return DatasetRootHistoMergedPseudo(wrappers, self)
+        else:
+            raise Exception("Internal error (unknown dataset type)")
         
     ## Get the directory content of a given directory in the ROOT file.
     # 
@@ -2744,6 +2988,10 @@ class DatasetManager:
                 ret.append(d)
         return ret
 
+    ## Get a list of pseudo dataset.Dataset objects.
+    def getPseudoDatasets(self):
+        return filter(lambda d: d.isPseudo(), self.datasets)
+
     ## Get a list of names of all dataset.Dataset objects.
     def getAllDatasetNames(self):
         return [x.getName() for x in self.getAllDatasets()]
@@ -2755,6 +3003,10 @@ class DatasetManager:
     ## Get a list of names of data dataset.Dataset objects.
     def getDataDatasetNames(self):
         return [x.getName() for x in self.getDataDatasets()]
+
+    ## Get a list of names of pseudo dataset.Dataset objects.
+    def getPseudoDatasetNames(self):
+        return [x.getName() for x in self.getPseudoDatasets()]
 
     ## Select and reorder Datasets.
     # 
@@ -3049,6 +3301,8 @@ class DatasetPrecursor:
                     raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
 
         self._isData = "data" in dataVersion
+        self._isPseudo = "pseudo" in dataVersion
+        self._isMC = not (self._isData or self._isPseudo)
 
     def getName(self):
         return self._name
@@ -3059,8 +3313,11 @@ class DatasetPrecursor:
     def isData(self):
         return self._isData
 
+    def isPseudo(self):
+        return self._isPseudo
+
     def isMC(self):
-        return not self.isData()
+        return self._isMC
 
     ## Close the ROOT files
     def close():
@@ -3100,7 +3357,7 @@ class DatasetManagerCreator:
 
         mcRead = False
         for d in self._precursors:
-            if d.isMC():
+            if d.isMC() or d.isPseudo():
                 self._readAnalysisContent(d)
                 mcRead = True
                 break
@@ -3155,7 +3412,7 @@ class DatasetManagerCreator:
                 directoryName = directoryName[:start]
 
             # Look for data era
-            if precursor.isMC():
+            if precursor.isMC() or precursor.isPseudo():
                 start = directoryName.find("Run")
                 if start >= 0:
                     dataEras[directoryName[start:]] = 1

@@ -58,13 +58,13 @@ class DataGroup:
 	self.landsProcess = landsProcess
 
     def setValidMassPoints(self,validMassPoints):
-	self.validMassPoints = validMassPoints
+	self.validMassPoints = list(validMassPoints)
 
     def setLabel(self, label):
 	self.label = label
 
     def setNuisances(self,nuisances):
-	self.nuisances = nuisances
+	self.nuisances = nuisances[:]
 
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
@@ -116,32 +116,12 @@ class Nuisance:
 		label="",
 		distr="",
 		function = "",
-		QCDmode = "",
-		value = -1,
-		upperValue = -1,
-		counter = "",
-		numerator = -1, 
-		denominator = -1, 
-		histoDir = [],
-		histograms = [],
-		normalisation = [],
-		scaling = 1.0,
-		addUncertaintyInQuadrature = 0.0):
+		**kwargs):
 	self.setId(id)
 	self.setLabel(label)
 	self.setDistribution(distr)
 	self.setFunction(function)
-	self.setQCDmode(QCDmode)
-	self.setValue(value)
-	self.setUpperValue(upperValue)
-	self.setCounter(counter)
-	self.setNumerator(numerator)
-	self.setDenominator(denominator)
-        self.setHistoDir(histoDir)
-	self.setHistograms(histograms)
-        self.setNormalisation(normalisation)
-        self.setScaling(scaling)
-        self.setAddUncertaintyInQuadrature(addUncertaintyInQuadrature)
+	self.kwargs = kwargs
 
     def setId(self,id):
 	self.id = id
@@ -155,39 +135,11 @@ class Nuisance:
     def setFunction(self, function):
 	self.function = function
 
-    def setQCDmode(self, QCDmode):
-        self.QCDmode = QCDmode
-
-    def setValue(self,value):
-	self.value = value
-
-    def setUpperValue(self,upperValue):
-        self.upperValue = upperValue
-
-    def setCounter(self, value):
-	self.counter = value
-
-    def setNumerator(self,value):
-	self.numerator = value
-
-    def setDenominator(self,value):
-	self.denominator = value
-
-    def setHistoDir(self, histoDir):
-	self.histoDir = histoDir
-
-    def setHistograms(self, histo):
-	self.histo = histo
-
-    def setNormalisation(self, norm):
-	self.norm = norm
-
-    def setScaling(self, scaling):
-        self.scaling = scaling
-
-    def setAddUncertaintyInQuadrature(self, addUncertaintyInQuadrature):
-        self.addUncertaintyInQuadrature = addUncertaintyInQuadrature
-
+    def getArg(self, keyword):
+        if keyword in self.kwargs.keys():
+            return self.kwargs[keyword]
+        return None
+	
     def getId(self):
 	return self.id
 
@@ -196,16 +148,16 @@ class Nuisance:
 	print "    Label         =",self.label
         print "    Distribution  =",self.distr
         print "    Function      =",self.function
-        if self.value > 0:
-            print "    Value         =",self.value
-        if len(self.counter) > 0:
-            print "    Counter       =",self.counter
-        if len(self.paths) > 0:
-            print "    Paths         =",self.paths
-        if len(self.histo) > 0:
-            print "    Histograms    =",self.histo
-        if len(self.norm) > 0:
-            print "    Normalisation =",self.norm
+        #if self.value > 0:
+            #print "    Value         =",self.value
+        #if len(self.counter) > 0:
+            #print "    Counter       =",self.counter
+        #if len(self.paths) > 0:
+            #print "    Paths         =",self.paths
+        #if len(self.histo) > 0:
+            #print "    Histograms    =",self.histo
+        #if len(self.norm) > 0:
+            #print "    Normalisation =",self.norm
 	print
 
 #class NuisanceTable:

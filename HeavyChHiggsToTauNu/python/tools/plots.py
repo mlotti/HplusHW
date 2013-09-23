@@ -368,6 +368,8 @@ _plotStyles = {
     "BackgroundSystError":     styles.errorRatioSystStyle,
     "BackgroundStatSystError": styles.errorRatioSystStyle,
 }
+# Other
+_plotStyles["Embedding"] = _plotStyles["TTJets"].clone()
 
 ## Return True if name is from a signal dataset
 def isSignal(name):

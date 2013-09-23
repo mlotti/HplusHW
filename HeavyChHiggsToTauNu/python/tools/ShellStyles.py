@@ -10,8 +10,8 @@ def ErrorStyle():
     return "\033[0;41m\033[1;37m"
 
 def HighlightStyle():
-    # White text on normal background, bold
-    return "\033[1;37m"
+    # White text on black background, bold
+    return "\033[0;30m\033[1;37m"
 
 def CaptionStyle():
     # White text on blue background, bold

@@ -1,18 +1,18 @@
-DataCardName    = 'Default'
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
+
+DataCardName    = 'Default_7TeV'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeIsolationDependent'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_vitalonly_correctCtrlPlots'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/testInverted'
-Path = "/home/wendland/data/v445/2013-09-04"
+Path = "/home/wendland/data/v445/2013-09-09"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 LightMassPoints      = [120]
 HeavyMassPoints      = [180,190,200,220,250,300]
 HeavyMassPoints      = []
-#MassPoints      = [80,90,100,120,140,150,155,160]
-#MassPoints      = [80,120,160]
-MassPoints      = [120] # The mass points to run
+MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
 BlindAnalysis   = True
 
@@ -26,9 +26,13 @@ OptionMassShape = "TransverseMass"
 #OptionMassShape = "TransverseAndFullMass2D" #FIXME not yet supported!!!
 
 OptionReplaceEmbeddingByMC = True
-OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
+OptionIncludeSystematics = True # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = False
+OptionDoControlPlots = True
+OptionDisplayEventYieldSummary = True
+OptionNumberOfDecimalsInSummaries = 1
+OptionRemoveHHDataGroup = False
+OptionLimitOnSigmaBr = False # Is automatically set to true for heavy H+
 
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
@@ -44,40 +48,13 @@ ShapeHistogramsDimensions = None
 if OptionMassShape == "TransverseMass":
     SignalShapeHisto = "shapeTransverseMass"
     FakeShapeHisto = "shapeEWKFakeTausTransverseMass"
-    ShapeHistogramsDimensions = { "bins": 10,
-                                  "rangeMin": 0.0,
-                                  "rangeMax": 400.0,
-                                  #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                  "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250], # if an empty list is given, then uniform bin width is used
-                                  "xtitle": "Transverse mass / GeV",
-                                  "ytitle": "Events" }
 elif OptionMassShape == "FullMass":
     SignalShapeHisto = "shapeInvariantMass"
     FakeShapeHisto = "shapeEWKFakeTausInvariantMass"
-    ShapeHistogramsDimensions = { "bins": 25,
-                                  "rangeMin": 0.0,
-                                  "rangeMax": 500.0,
-                                  "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                  #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
-                                  "xtitle": "Full mass / GeV",
-                                  "ytitle": "Events" }
 elif OptionMassShape == "TransverseAndFullMass2D": # FIXME: preparing to add support, not yet working
     SignalShapeHisto = "shapetransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
     FakeShapeHisto = "shapeEWKFakeTausTransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
-    ShapeHistogramsDimensions = [{ "bins": 10,
-                                  "rangeMin": 0.0,
-                                  "rangeMax": 400.0,
-                                  #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                  "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
-                                  "xtitle": "Transverse mass / GeV",
-                                  "ytitle": "Events" },
-                                 { "bins": 25,
-                                   "rangeMin": 0.0,
-                                   "rangeMax": 500.0,
-                                   "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                   #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
-                                   "xtitle": "Full mass / GeV",
-                                   "ytitle": "Events" }]
+ShapeHistogramsDimensions = systematics.getBinningForPlot(SignalShapeHisto)
 
 DataCardName += "_"+OptionMassShape
 
@@ -91,8 +68,11 @@ Observation = ObservationInput(datasetDefinition="Data",
 
 ##############################################################################
 # Systematics lists
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.HChSystematics as systematics
 
+myShapeSystematics = ["trg_tau","trg_MET","ES_taus","ES_jets","JER","ES_METunclustered","pileup"] # btag is not added, because it has the tag and mistag categories
+myFakeShapeSystematics = []
+for item in myShapeSystematics:
+    myFakeShapeSystematics.append("%s_fakes"%item)
 
 
 ##############################################################################
@@ -112,16 +92,16 @@ for mass in LightMassPoints:
     hhx.setLabel("HH"+str(mass)+"_a")
     hhx.setLandSProcess(-1)
     hhx.setValidMassPoints(myMassList)
-    hhx.setNuisances(["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","stat_binByBin","xsect_tt_7TeV","lumi","pileup"])
-    hhx.setDatasetDefinition("TTToHplusBHminusB_M"+str(mass)),
+    hhx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_tt_7TeV","lumi"])
+    hhx.setDatasetDefinition("TTToHplusBHminusB_M"+str(mass))
     DataGroups.append(hhx)
 
     hwx = signalTemplate.clone()
     hwx.setLabel("HW"+str(mass)+"_a")
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
-    hwx.setNuisances(["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","stat_binByBin","xsect_tt_7TeV","lumi","pileup"])
-    hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass)),
+    hwx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_tt_7TeV","lumi"])
+    hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass))
     DataGroups.append(hwx)
 
 for mass in HeavyMassPoints:
@@ -130,47 +110,39 @@ for mass in HeavyMassPoints:
     hx.setLabel("Hp"+str(mass)+"_a")
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
-    hx.setNuisances(["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","stat_binByBin","lumi","pileup"])
-    hx.setDatasetDefinitions("HplusTB_M"+str(mass)),
+    hx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_heavyHplus_7TeV","lumi"])
+    hx.setDatasetDefinition("HplusTB_M"+str(mass))
     DataGroups.append(hx)
 
-if OptionMassShape == "TransverseMass":
-    DataGroups.append(DataGroup(
-        label        = "QCDfact",
-        landsProcess = 3,
-        validMassPoints = MassPoints,
-        datasetType  = "QCD factorised",
-        datasetDefinition = "QCDfactorisedmt",
-        nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"], # FIXME
-        QCDfactorisedInfo = { "afterStdSelSource": "MtAfterStandardSelections",
-                              "afterMETLegSource": "MtAfterLeg1",
-                              "afterTauLegSource": "MtAfterLeg2"
-        }
-    ))
-elif OptionMassShape == "FullMass":
-    DataGroups.append(DataGroup(
-        label        = "QCDfact",
-        landsProcess = 3,
-        validMassPoints = MassPoints,
-        datasetType  = "QCD factorised",
-        datasetDefinition = "QCDfactorisedinvmass",
-        nuisances    = ["QCDfact_syst","stat_binByBin_QCDfact"], # FIXME
-        QCDfactorisedInfo = { "afterStdSelSource": "MassMtAfterStandardSelections",
-                              "afterMETLegSource": "MassAfterLeg1",
-                              "afterTauLegSource": "MassAfterLeg2"
-        }
-    ))
+myQCDFact = DataGroup(
+    label        = "QCDfact",
+    landsProcess = 3,
+    validMassPoints = MassPoints,
+    datasetType  = "QCD factorised",
+    datasetDefinition = "QCDfactorisedmt",
+    nuisances    = myShapeSystematics[:]+["QCD_metshape","stat_binByBin"],
+    shapeHisto   = SignalShapeHisto,
+)
 
-DataGroups.append(DataGroup(
+myQCDInv = DataGroup(
     label        = "QCDinv",
     landsProcess = 3,
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
-    datasetDefinition   = "Data",
-    shapeHisto   = "mtSum",
-#    additionalNormalisation = 1.0,
-    nuisances    = ["stat_QCDinv","42","43","44"] # FIXME: add shape stat, i.e. 40x,
-))
+    datasetDefinition = "QCDfactorisedmt",
+    nuisances    = myShapeSystematics[:]+["QCD_metshape","stat_binByBin","QCDinvTemplateFit"],
+    shapeHisto   = SignalShapeHisto,
+)
+
+if OptionMassShape == "TransverseMass":
+    myQCDFact.setDatasetDefinition("QCDfactorisedmt")
+    myQCDInv.setDatasetDefinition("QCDfactorisedmt")
+elif OptionMassShape == "FullMass":
+    myQCDFact.setDatasetDefinition("QCDfactorisedinvmass")
+    myQCDInv.setDatasetDefinition("QCDfactorisedinvmass")
+
+DataGroups.append(myQCDFact)
+DataGroups.append(myQCDInv)
 
 if not OptionReplaceEmbeddingByMC:
     # EWK + ttbar with genuine taus
@@ -183,105 +155,105 @@ if not OptionReplaceEmbeddingByMC:
         #datasetDefinition   = ["SingleMu"],
         datasetDefinition   = "Data",
         validMassPoints = MassPoints,
-        additionalNormalisation = 1.0907,
-        nuisances    = ["trg_tau_embedding","tau_ID","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb","stat_binByBin","ES_taus_tempForEmbedding"]
+        additionalNormalisation = 1.0907, #FIXME
+        nuisances    = ["trg_tau_embedding","tau_ID","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb","stat_binByBin","ES_taus_tempForEmbedding"]#FIXME
         #nuisances    = ["trg_tau_embedding","tau_ID","ES_taus","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb","stat_binByBin"]
     ))
 
     # EWK + ttbar with fake taus
     EWKFakeIdList = [1,5,6]
     DataGroups.append(DataGroup(
-        label        = "EWK_tt_faketau",
+        label        = "tt_EWK_faketau",
         landsProcess = 1,
         shapeHisto   = FakeShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = ["trg_tau_fakes","trg_MET","tau_misID","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_tag_fakes","xsect_tt_7TeV","lumi","pileup_fakes","stat_binByBin_fakes"]
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","xsect_tt_7TeV","lumi","stat_binByBin_fakes"],
     ))
     DataGroups.append(DataGroup(
-        label        = "EWK_W_faketau",
+        label        = "W_EWK_faketau",
         landsProcess = 5,
         shapeHisto   = FakeShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = ["trg_tau_fakes","trg_MET","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","pileup_fakes","stat_binByBin_fakes"]
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin_fakes"],
     ))
     DataGroups.append(DataGroup(
-        label        = "EWK_t_faketau",
+        label        = "t_EWK_faketau",
         landsProcess = 6,
         shapeHisto   = FakeShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "EWKfake",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = ["trg_tau_fakes","trg_MET","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","pileup_fakes","stat_binByBin_fakes"]
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin_fakes"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_DY_faketau",
+        label        = "DY_EWK_faketau",
         landsProcess = 7,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = ["trg_tau_fakes","trg_MET","tau_misID","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_mistag","xsect_DYtoll","lumi","pileup_fakes","stat_binByBin_fakes"]
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin_fakes"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_VV_faketau",
+        label        = "VV_EWK_faketau",
         landsProcess = 8,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = ["trg_tau_fakes","trg_MET","tau_misID","ES_taus_fakes","ES_jets_fakes","ES_METunclustered_fakes","e_mu_veto_fakes","b_mistag","xsect_VV","lumi","pileup_fakes","stat_binByBin_fakes"]
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin_fakes"],
     ))
 else:
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
     EmbeddingIdList = [1,4,5,6,7]
     DataGroups.append(DataGroup(
-        label        = "MC_ttbar",
+        label        = "ttbar_MC",
         landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "Embedding",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = ["trg_tau_embedding","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","xsect_tt_7TeV","lumi","pileup","stat_binByBin"]
+        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","xsect_tt_7TeV","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_Wjets",
+        label        = "Wjets_MC",
         landsProcess = 4,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "Embedding",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = ["trg_tau_embedding","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_mistag","xsect_Wjets","lumi","pileup","stat_binByBin"]
+        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_mistag","xsect_Wjets","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_1top",
+        label        = "t_MC",
         landsProcess = 5,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "Embedding",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = ["trg_tau_embedding","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_tag","xsect_singleTop","lumi","pileup","stat_binByBin"]
+        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","xsect_singleTop","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_DY",
+        label        = "DY_MC",
         landsProcess = 6,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "Embedding",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = ["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_mistag","xsect_DYtoll","lumi","pileup","stat_binByBin"]
+        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_mistag","xsect_DYtoll","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
-        label        = "MC_VV",
+        label        = "VV_MC",
         landsProcess = 7,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Signal",
+        datasetType  = "Embedding",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = ["trg_tau","trg_MET","tau_ID","ES_taus","ES_jets","ES_METunclustered","e_mu_veto","b_mistag","xsect_VV","lumi","pileup","stat_binByBin"]
+        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_mistag","xsect_VV","lumi","stat_binByBin"],
     ))
     #DataGroups.append(DataGroup(
         #label        = "empty",
@@ -318,14 +290,22 @@ if OptionPurgeReservedLines:
 
 Nuisances = []
 
+#Nuisances.append(Nuisance(
+    #id            = "trg_tau",
+    #label         = "tau+MET trg tau part",
+    #distr         = "lnN",
+    #function      = "ScaleFactor",
+    #histoDir      = ["ScaleFactorUncertainties"],
+    #histograms    = ["TauTriggerScaleFactorAbsUncert_AfterSelection"],
+    #normalisation = ["TauTriggerScaleFactorAbsUncertCounts_AfterSelection"],
+#))
+
 Nuisances.append(Nuisance(
     id            = "trg_tau",
     label         = "tau+MET trg tau part",
-    distr         = "lnN",
-    function      = "ScaleFactor",
-    histoDir      = ["ScaleFactorUncertainties"],
-    histograms    = ["TauTriggerScaleFactorAbsUncert_AfterSelection"],
-    normalisation = ["TauTriggerScaleFactorAbsUncertCounts_AfterSelection"],
+    distr         = "shapeQ",
+    function      = "ShapeVariation",
+    systVariation = "TauTrgSF",
 ))
 
 Nuisances.append(Nuisance(
@@ -333,21 +313,53 @@ Nuisances.append(Nuisance(
     label         = "tau+MET trg tau part for EWKtau (temp)",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.066
+    value         = 0.066 #FIXME
 ))
 
 Nuisances.append(Nuisance(
     id            = "trg_tau_fakes",
     label         = "tau+MET trg tau part for EWK fake taus",
-    distr         = "lnN",
-    function      = "ScaleFactor",
-    histoDir      = ["ScaleFactorUncertainties"],
-    histograms    = ["TriggerScaleFactorAbsUncert_EWKFakeTausAfterSelection"],
-    normalisation = ["TriggerScaleFactorAbsUncertCounts_EWKFakeTausAfterSelection"],
+    distr         = "shapeQ",
+    function      = "ShapeVariation",
+    systVariation = "TauTrgSF",
 ))
+
+#Nuisances.append(Nuisance(
+    #id            = "trg_tau_fakes",
+    #label         = "tau+MET trg tau part for EWK fake taus",
+    #distr         = "lnN",
+    #function      = "ScaleFactor",
+    #histoDir      = ["ScaleFactorUncertainties"],
+    #histograms    = ["TriggerScaleFactorAbsUncert_EWKFakeTausAfterSelection"],
+    #normalisation = ["TriggerScaleFactorAbsUncertCounts_EWKFakeTausAfterSelection"],
+#))
+
+#Nuisances.append(Nuisance(
+    #id            = "trg_MET",
+    #label         = "tau+MET trg MET part",
+    #distr         = "shapeQ",
+    #function      = "ShapeVariation",
+    #systVariation = "METTrgSF",
+#))
+
+#Nuisances.append(Nuisance(
+    #id            = "trg_MET_fakes",
+    #label         = "tau+MET trg MET part",
+    #distr         = "shapeQ",
+    #function      = "ShapeVariation",
+    #systVariation = "METTrgSF"
+#))
 
 Nuisances.append(Nuisance(
     id            = "trg_MET",
+    label         = "tau+MET trg MET part",
+    distr         = "lnN",
+    function      = "Constant",
+    value         = 0.10
+))
+
+Nuisances.append(Nuisance(
+    id            = "trg_MET_fakes",
     label         = "tau+MET trg MET part",
     distr         = "lnN",
     function      = "Constant",
@@ -359,12 +371,12 @@ Nuisances.append(Nuisance(
     label         = "tau-jet ID (no Rtau)",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.06
+    value         = systematics.getTauIDUncertainty(isGenuineTau=True)
 ))
 
 Nuisances.append(Nuisance(
     id            = "tau_misID", 
-    label         = "tau-jet mis ID (no Rtau)",  
+    label         = "tau-jet mis ID (no Rtau)",
     distr         = "lnN",
     function      = "ScaleFactor",
     histoDir      = ["ScaleFactorUncertainties"],
@@ -377,61 +389,85 @@ if OptionIncludeSystematics:
         id            = "ES_taus",
         label         = "TES bin-by-bin uncertainty",
         distr         = "shapeQ",
-        function      = "Shape",
-        histoDir      = ["TESPlus",
-                        "TESMinus"],
-        histograms    = [SignalShapeHisto,
-                        SignalShapeHisto]
+        function      = "ShapeVariation",
+        systVariation = "TES",
     ))
     Nuisances.append(Nuisance(
         id            = "ES_taus_fakes",
         label         = "TES bin-by-bin uncertainty",
         distr         = "shapeQ",
-        function      = "Shape",
-        histoDir      = ["TESPlus",
-                        "TESMinus"],
-        histograms    = [FakeShapeHisto,
-                        FakeShapeHisto]
+        function      = "ShapeVariation",
+        systVariation = "TES",
     ))
     Nuisances.append(Nuisance(
         id            = "ES_jets",
         label         = "JES bin-by-bin uncertainty",
         distr         = "shapeQ",
-        function      = "Shape",
-        histoDir      = ["JESPlus",
-                        "JESMinus"],
-        histograms    = [SignalShapeHisto,
-                        SignalShapeHisto]
+        function      = "ShapeVariation",
+        systVariation = "JES",
     ))
     Nuisances.append(Nuisance(
         id            = "ES_jets_fakes",
         label         = "JES bin-by-bin uncertainty",
         distr         = "shapeQ",
-        function      = "Shape",
-        histoDir      = ["JESPlus",
-                        "JESMinus"],
-        histograms    = [FakeShapeHisto,
-                        FakeShapeHisto]
+        function      = "ShapeVariation",
+        systVariation = "JES",
+    ))
+    Nuisances.append(Nuisance(
+        id            = "JER",
+        label         = "Jet energy resolution",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "JER",
+    ))
+    Nuisances.append(Nuisance(
+        id            = "JER_fakes",
+        label         = "Jet energy resolution",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "JES",
     ))
     Nuisances.append(Nuisance(
         id            = "ES_METunclustered",
         label         = "MET unclustered scale bin-by-bin uncertainty",
         distr         = "shapeQ",
-        function      = "Shape",
-        histoDir      = ["METPlus",
-                        "METMinus"],
-        histograms    = [SignalShapeHisto,
-                        SignalShapeHisto]
+        function      = "ShapeVariation",
+        systVariation = "MET",
     ))
     Nuisances.append(Nuisance(
         id            = "ES_METunclustered_fakes",
         label         = "MET unclustered scale bin-by-bin uncertainty",
         distr         = "shapeQ",
-        function      = "Shape",
-        histoDir      = ["METPlus",
-                        "METMinus"],
-        histograms    = [FakeShapeHisto,
-                        FakeShapeHisto]
+        function      = "ShapeVariation",
+        systVariation = "MET",
+    ))
+    Nuisances.append(Nuisance(
+        id            = "b_tag",
+        label         = "btagging",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "BTagSF",
+    ))
+    Nuisances.append(Nuisance(
+        id            = "b_tag_fakes",
+        label         = "btagging for EWK fake taus",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "BTagSF",
+    ))
+    Nuisances.append(Nuisance(
+        id            = "b_mistag",
+        label         = "mistagging",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "BTagSF",
+    ))
+    Nuisances.append(Nuisance(
+        id            = "b_mistag_fakes",
+        label         = "mistagging EWK fake taus",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "BTagSF",
     ))
 else:
     Nuisances.append(Nuisance(
@@ -476,13 +512,55 @@ else:
         function      = "Constant",
         value         = 0.01,
     ))
+    Nuisances.append(Nuisance(
+        id            = "JER",
+        label         = "NON-EXACT VALUE for Jet energy resolution",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.02,
+    ))
+    Nuisances.append(Nuisance(
+        id            = "JER_fakes",
+        label         = "NON-EXACT VALUE for Jet energy resolution",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.02,
+    ))
+    Nuisances.append(Nuisance(
+        id            = "b_tag",
+        label         = "NON-EXACT VALUE for btagging",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.05,
+    ))
+    Nuisances.append(Nuisance(
+        id            = "b_tag_fakes",
+        label         = "NON-EXACT VALUE for btagging for EWK fake taus",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.05,
+    ))
+    Nuisances.append(Nuisance(
+        id            = "b_mistag",
+        label         = "NON-EXACT VALUE for mistagging",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.05,
+    ))
+    Nuisances.append(Nuisance(
+        id            = "b_mistag_fakes",
+        label         = "NON-EXACT VALUE for mistagging EWK fake taus",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.05,
+    ))
 
 Nuisances.append(Nuisance(
     id            = "ES_taus_tempForEmbedding",
     label         = "Temporary TES for EWKtau",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.020,
+    value         = 0.020, #FIXME
 ))
 
 Nuisances.append(Nuisance(
@@ -505,60 +583,52 @@ Nuisances.append(Nuisance(
     scaling       = 0.02
 ))
 
-Nuisances.append(Nuisance(
-    id            = "b_tag",
-    label         = "btagging",
-    distr         = "lnN",
-    function      = "ScaleFactor",
-    histoDir      = ["ScaleFactorUncertainties"],
-    histograms    = ["BtagScaleFactorAbsUncert_AfterSelection"],
-    normalisation = ["BtagScaleFactorAbsUncertCounts_AfterSelection"]
-))
+#Nuisances.append(Nuisance(
+    #id            = "b_tag",
+    #label         = "btagging",
+    #distr         = "lnN",
+    #function      = "ScaleFactor",
+    #histoDir      = ["ScaleFactorUncertainties"],
+    #histograms    = ["BtagScaleFactorAbsUncert_AfterSelection"],
+    #normalisation = ["BtagScaleFactorAbsUncertCounts_AfterSelection"]
+#))
+
+#Nuisances.append(Nuisance(
+    #id            = "b_tag_fakes",
+    #label         = "btagging for EWK fake taus",
+    #distr         = "lnN",
+    #function      = "ScaleFactor",
+    #histoDir      = ["ScaleFactorUncertainties"],
+    #histograms    = ["BtagScaleFactorAbsUncert_EWKFakeTausAfterSelection"],
+    #normalisation = ["BtagScaleFactorAbsUncertCounts_EWKFakeTausAfterSelection"]
+#))
+
+#Nuisances.append(Nuisance(
+    #id            = "b_mistag",
+    #label         = "mistagging",
+    #distr         = "lnN",
+    #function      = "ScaleFactor",
+    #histoDir      = ["ScaleFactorUncertainties"],
+    #histograms    = ["BtagScaleFactorAbsUncert_AfterSelection"],
+    #normalisation = ["BtagScaleFactorAbsUncertCounts_AfterSelection"]
+#))
+
+#Nuisances.append(Nuisance(
+    #id            = "b_mistag_fakes",
+    #label         = "mistagging EWK fake taus",
+    #distr         = "lnN",
+    #function      = "ScaleFactor",
+    #histoDir      = ["ScaleFactorUncertainties"],
+    #histograms    = ["BtagScaleFactorAbsUncert_EWKFakeTausAfterSelection"],
+    #normalisation = ["BtagScaleFactorAbsUncertCounts_EWKFakeTausAfterSelection"]
+#))
 
 Nuisances.append(Nuisance(
-    id            = "b_tag_fakes",
-    label         = "btagging for EWK fake taus",
-    distr         = "lnN",
-    function      = "ScaleFactor",
-    histoDir      = ["ScaleFactorUncertainties"],
-    histograms    = ["BtagScaleFactorAbsUncert_EWKFakeTausAfterSelection"],
-    normalisation = ["BtagScaleFactorAbsUncertCounts_EWKFakeTausAfterSelection"]
-))
-
-Nuisances.append(Nuisance(
-    id            = "b_mistag",
-    label         = "mistagging",
-    distr         = "lnN",
-    function      = "ScaleFactor",
-    histoDir      = ["ScaleFactorUncertainties"],
-    histograms    = ["BtagScaleFactorAbsUncert_AfterSelection"],
-    normalisation = ["BtagScaleFactorAbsUncertCounts_AfterSelection"]
-))
-
-Nuisances.append(Nuisance(
-    id            = "b_mistag_fakes",
-    label         = "mistagging EWK fake taus",
-    distr         = "lnN",
-    function      = "ScaleFactor",
-    histoDir      = ["ScaleFactorUncertainties"],
-    histograms    = ["BtagScaleFactorAbsUncert_EWKFakeTausAfterSelection"],
-    normalisation = ["BtagScaleFactorAbsUncertCounts_EWKFakeTausAfterSelection"]
-))
-
-Nuisances.append(Nuisance(
-    id            = "QCDfact_stat",
-    label         = "QCD stat.",
-    distr         = "lnN",
-    function      = "QCDFactorised",
-    QCDmode       = "statistics",
-))
-
-Nuisances.append(Nuisance(
-    id            = "QCDfact_syst",
-    label         = "QCD syst.",
-    distr         = "lnN",
-    function      = "QCDFactorised",
-    QCDmode       = "systematics",
+    id            = "QCD_metshape",
+    label         = "QCD met shape syst.",
+    distr         = "shapeQ",
+    function      = "ShapeVariation",
+    systVariation = "QCDNorm",
 ))
 
 Nuisances.append(Nuisance(
@@ -566,7 +636,7 @@ Nuisances.append(Nuisance(
     label         = "EWK with taus QCD contamination",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.012
+    value         = 0.012 #FIXME
 ))
 
 Nuisances.append(Nuisance(
@@ -582,7 +652,7 @@ Nuisances.append(Nuisance(
     label         = "EWK with taus muon selection+ditau+mu trg",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.031
+    value         = 0.031 #FIXME
 ))
 
 Nuisances.append(Nuisance(
@@ -621,7 +691,7 @@ Nuisances.append(Nuisance(
     id            = "stat_tt_jjtau",
     label         = "tt->jjtau MC stat.",
     distr         = "lnN",
-    function      = "Constant",
+    function      = "Counter",
     value         = SignalRateCounter,
 ))
 
@@ -653,7 +723,7 @@ Nuisances.append(Nuisance(
     id            = "stat_Wjets",
     label         = "W+jets MC stat.",
     distr         = "lnN",
-    function      = "Constant",
+    function      = "Counter",
     value         = SignalRateCounter
 ))
 
@@ -669,7 +739,7 @@ Nuisances.append(Nuisance(
     id            = "stat_singleTop",
     label         = "Single top MC stat.",
     distr         = "lnN",
-    function      = "Constant",
+    function      = "Counter",
     value         = SignalRateCounter
 ))
 
@@ -698,21 +768,21 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
+    id            = "xsect_heavyHplus_7TeV",
+    label         = "ttbar cross section",
+    distr         = "lnN",
+    function      = "Constant",
+    value         = systematics.getCrossSectionUncertainty("HplusTB").getUncertaintyDown(),
+    upperValue    = systematics.getCrossSectionUncertainty("HplusTB").getUncertaintyUp(),
+))
+
+Nuisances.append(Nuisance(
     id            = "xsect_tt_7TeV",
     label         = "ttbar cross section",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.062,
-    upperValue    = 0.053,
-))
-
-Nuisances.append(Nuisance(
-    id            = "xsect_tt_8TeV",
-    label         = "ttbar cross section",
-    distr         = "lnN",
-    function      = "Constant",
-    value         = 0.060,
-    upperValue    = 0.053,
+    value         = systematics.getCrossSectionUncertainty("TTJets").getUncertaintyDown(),
+    upperValue    = systematics.getCrossSectionUncertainty("TTJets").getUncertaintyUp(),
 ))
 
 Nuisances.append(Nuisance(
@@ -720,7 +790,7 @@ Nuisances.append(Nuisance(
     label         = "W+jets cross section",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.05
+    value         = systematics.getCrossSectionUncertainty("WJets").getUncertaintyDown()
 ))
 
 Nuisances.append(Nuisance(
@@ -728,7 +798,7 @@ Nuisances.append(Nuisance(
     label         = "single top cross section",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.08
+    value         = systematics.getCrossSectionUncertainty("SingleTop").getUncertaintyDown()
 ))
 
 Nuisances.append(Nuisance(
@@ -736,7 +806,7 @@ Nuisances.append(Nuisance(
     label         = "Z->ll cross section",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.04
+    value         = systematics.getCrossSectionUncertainty("DYJetsToLL").getUncertaintyDown()
 ))
 
 Nuisances.append(Nuisance(
@@ -744,7 +814,7 @@ Nuisances.append(Nuisance(
     label         = "diboson cross section",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.04
+    value         = systematics.getCrossSectionUncertainty("Diboson").getUncertaintyDown()
 ))
 
 Nuisances.append(Nuisance(
@@ -752,30 +822,24 @@ Nuisances.append(Nuisance(
     label         = "luminosity",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.022
+    value         = systematics.getLuminosityUncertainty()
 ))
 
 if OptionIncludeSystematics:
     Nuisances.append(Nuisance(
         id            = "pileup",
         label         = "pileup",
-        distr         = "lnN",
-        function      = "pileupUncertainty",
-        histoDir      = ["", # nominal
-                        "PUWeightMinus", # minus
-                        "PUWeightPlus"], # up
-        counter       = SignalRateCounter
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "PUWeight",
     ))
 
     Nuisances.append(Nuisance(
         id            = "pileup_fakes",
         label         = "pileup",
-        distr         = "lnN",
-        function      = "pileupUncertainty",
-        histoDir      = ["", # nominal
-                        "PUWeightMinus", # minus
-                        "PUWeightPlus"], # up
-        counter       = FakeRateCounter
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "PUWeight",
     ))
 else:
     Nuisances.append(Nuisance(
@@ -785,7 +849,6 @@ else:
         function      = "Constant",
         value         = 0.05
     ))
-
     Nuisances.append(Nuisance(
         id            = "pileup_fakes",
         label         = "FAKE pileup",
@@ -800,17 +863,7 @@ Nuisances.append(Nuisance(
     label         = "Bin-by-bin stat. uncertainty on the shape",
     distr         = "shapeStat",
     function      = "Shape",
-    counter       = SignalRateCounter,
-    histoDir      = [""],
-    histograms    = [SignalShapeHisto],
-))
-
-Nuisances.append(Nuisance(
-    id            = "stat_binByBin_QCDfact",
-    label         = "Bin-by-bin stat. uncertainty on the shape",
-    distr         = "shapeStat",
-    function      = "QCDFactorised",
-    QCDmode       = "shapestat"
+    histograms    = SignalShapeHisto,
 ))
 
 Nuisances.append(Nuisance(
@@ -818,37 +871,11 @@ Nuisances.append(Nuisance(
     label         = "Bin-by-bin stat. uncertainty on the shape",
     distr         = "shapeStat",
     function      = "Shape",
-    counter       = FakeRateCounter,
-    histoDir      = [""],
-    histograms    = [FakeShapeHisto],
+    histograms    = FakeShapeHisto,
 ))
 
 Nuisances.append(Nuisance(
-    id            = "stat_QCDinv",
-    label         = "QCDInv: stat.",
-    distr         = "lnN",
-    function      = "QCDInverted",
-    counter       = "deltaPhiTauMET160 limit"
-))
-
-Nuisances.append(Nuisance(
-    id            = "42",
-    label         = "QCDInv: JES/JER/MET/Rtau effect on normalisation",
-    distr         = "lnN",
-    function      = "Constant",
-    value         = 0.057
-))
-
-Nuisances.append(Nuisance(
-    id            = "43",
-    label         = "QCDInv: MET shape", 
-    distr         = "lnN",
-    function      = "Constant",
-    value         = 0.055
-))
-
-Nuisances.append(Nuisance(
-    id            = "44",
+    id            = "QCDinvTemplateFit",
     label         = "QCDInv: fit", 
     distr         = "lnN",
     function      = "Constant", 
@@ -859,48 +886,65 @@ MergeNuisances = []
 MergeNuisances.append(["trg_tau","trg_tau_embedding","trg_tau_fakes"])
 MergeNuisances.append(["ES_taus","ES_taus_fakes","ES_taus_tempForEmbedding"])
 MergeNuisances.append(["ES_jets","ES_jets_fakes"])
+MergeNuisances.append(["JER","JER_fakes"])
 MergeNuisances.append(["ES_METunclustered","ES_METunclustered_fakes"])
 MergeNuisances.append(["e_mu_veto","e_mu_veto_fakes"])
 MergeNuisances.append(["b_tag","b_tag_fakes"])
 MergeNuisances.append(["b_mistag","b_mistag_fakes"])
 MergeNuisances.append(["pileup","pileup_fakes"])
-MergeNuisances.append(["stat_binByBin","stat_binByBin_QCDfact","stat_binByBin_fakes"])
+#MergeNuisances.append(["stat_binByBin","stat_binByBin_QCDfact","stat_binByBin_fakes"])
 
 # Control plots
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput
 ControlPlots = []
 
-
-# FIXME: fix how QCD background is taken here
-ControlPlots.append(ControlPlotInput(
-    title            = "Njets",
-    signalHHid       = [-1],
-    signalHWid       = [0],
-    QCDid            = [3],
-    embeddingId      = EmbeddingIdList,
-    EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "ControlPlots",
-    signalHistoName  = "Njets_AfterStandardSelections",
-    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
-    EWKfakeHistoName  = "Njets_AfterStandardSelections",
-    QCDFactNormalisation = "/CtrlNjets",
-    QCDFactHistoName = "/CtrlNjets",
-    details          = { "bins": 5,
-                         "rangeMin": 3.0,
-                         "rangeMax": 8.0,
-                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                         "binLabels": ["3","4","5","6","7"], # leave empty to disable bin labels
-                         "xtitle": "Number of selected jets",
-                         "ytitle": "Events",
-                         "unit": "",
-                         "logy": True,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
-    blindedRange     = [], # specify range min,max if blinding applies to this control plot
-    evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
-))
+if False: # FIXME: bug fixed in place of Njets cut in QCD measurements, need to rerun mcrab
+    ControlPlots.append(ControlPlotInput(
+        title            = "Njets",
+        signalHHid       = [-1],
+        signalHWid       = [0],
+        QCDid            = [3],
+        embeddingId      = EmbeddingIdList,
+        EWKfakeId        = EWKFakeIdList,
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "Njets",
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "Njets",
+        QCDFactNormalisation = "/CtrlNjets",
+        QCDFactHistoName = "/CtrlNjets",
+        details          = { "xlabel": "Number of selected jets",
+                             "ylabel": "Events",
+                             "divideByBinWidth": False,
+                             "unit": "",
+                             "log": True,
+                             "optsLog": {"ymin": 0.9} },
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
+    ControlPlots.append(ControlPlotInput(
+        title            = "Njets",
+        signalHHid       = [-1],
+        signalHWid       = [0],
+        QCDid            = [3],
+        embeddingId      = EmbeddingIdList,
+        EWKfakeId        = EWKFakeIdList,
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "NjetsAfterJetSelectionAndMETSF",
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "NjetsAfterJetSelectionAndMETSF",
+        QCDFactNormalisation = "/CtrlNjets",
+        QCDFactHistoName = "/CtrlNjets",
+        details          = { "xlabel": "Number of selected jets",
+                             "ylabel": "Events",
+                             "divideByBinWidth": False,
+                             "unit": "",
+                             "log": True,
+                             "optsLog": {"ymin": 0.9} },
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
 
 for i in range(0,4):
     ControlPlots.append(ControlPlotInput(
@@ -910,24 +954,18 @@ for i in range(0,4):
         QCDid            = [3],
         embeddingId      = EmbeddingIdList,
         EWKfakeId        = EWKFakeIdList,
-        signalHistoPath  = "ControlPlots",
-        signalHistoName  = "QCDTailKillerJet%dCollinear"%i,
-        EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
-        EWKfakeHistoName  = "QCDTailKillerJet%dCollinear"%i,
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "ImprovedDeltaPhiCutsJet%dCollinear"%(i+1),
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "ImprovedDeltaPhiCutsJet%dCollinear"%(i+1),
         QCDFactNormalisation = "/QCDTailKillerJet%dCollinear"%i,
         QCDFactHistoName = "/QCDTailKillerJet%dCollinear"%i,
-        details          = { "bins": 26,
-                             "rangeMin": 0.0,
-                             "rangeMax": 260.0,
-                             "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                             "binLabels": [], # leave empty to disable bin labels
-                             "xtitle": "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%(i+1),
-                             "ytitle": "Events",
+        details          = { "xlabel": "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%(i+1),
+                             "ylabel": "Events",
+                             "divideByBinWidth": False,
                              "unit": "^{o}",
-                             "logy": True,
-                             "DeltaRatio": 0.5,
-                             "ymin": 0.9,
-                             "ymax": -1},
+                             "log": True,
+                             "optsLog": {"ymin": 0.9} },
         blindedRange     = [], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
@@ -944,25 +982,18 @@ ControlPlots.append(ControlPlotInput(
     QCDid            = [3],
     embeddingId      = EmbeddingIdList,
     EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "ControlPlots",
+    signalHistoPath  = "ForDataDrivenCtrlPlots",
     signalHistoName  = "MET",
-    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+    EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "MET",
     QCDFactNormalisation = "/CtrlMET",
     QCDFactHistoName = "/CtrlMET",
-    details          = { "bins": 13,
-                         "rangeMin": 0.0,
-                         "rangeMax": 500.0,
-                         #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                         "binLabels": [], # leave empty to disable bin labels
-                         "xtitle": "E_{T}^{miss}",
-                         "ytitle": "Events",
+    details          = { "xlabel": "E_{T}^{miss}",
+                         "ylabel": "dN_{Events}/dE_{T}^{miss}",
+                         "divideByBinWidth": True,
                          "unit": "GeV",
-                         "logy": True,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
+                         "log": True,
+                         "optsLog": {"ymin": 0.9} },
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "#Delta#phi_{#uparrow#uparrow,4}", # Leave blank if you don't want to include the item to the selection flow plot
@@ -975,24 +1006,18 @@ ControlPlots.append(ControlPlotInput(
     QCDid            = [3],
     embeddingId      = EmbeddingIdList,
     EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "ControlPlots",
+    signalHistoPath  = "ForDataDrivenCtrlPlots",
     signalHistoName  = "NBjets",
-    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+    EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "NBjets",
     QCDFactNormalisation = "/CtrlNbjets",
     QCDFactHistoName = "/CtrlNbjets",
-    details          = { "bins": 5,
-                         "rangeMin": 0.0,
-                         "rangeMax": 5.0,
-                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                         "binLabels": ["0","1","2","3","4"], # leave empty to disable bin labels
-                         "xtitle": "Number of selected b jets",
-                         "ytitle": "Events",
+    details          = { "xlabel": "Number of selected b jets",
+                         "ylabel": "Events",
+                         "divideByBinWidth": False,
                          "unit": "",
-                         "logy": True,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
+                         "log": True,
+                         "optsLog": {"ymin": 0.9} },
     blindedRange=[],
     #blindedRange     = [1.5,10], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
@@ -1020,10 +1045,10 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMax": 180.0,
                          #"variableBinSizeLowEdges": [0., 10., 20., 30., 40., 60., 80., 100., 120., 140., 160.], # if an empty list is given, then uniform bin width is used
                          #"binLabels": [], # leave empty to disable bin labels
-                         #"xtitle": "#Delta#phi(#tau_{h},E_{T}^{miss})",
-                         #"ytitle": "Events",
+                         #"xlabel": "#Delta#phi(#tau_{h},E_{T}^{miss})",
+                         #"ylabel": "Events",
                          #"unit": "^{o}",
-                         #"logy": True,
+                         #"log": True,
                          #"DeltaRatio": 0.5,
                          #"ymin": 0.9,
                          #"ymax": -1},
@@ -1048,10 +1073,10 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMax": 180.0,
                          #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
                          #"binLabels": [], # leave empty to disable bin labels
-                         #"xtitle": "max(#Delta#phi(jet,E_{T}^{miss})",
-                         #"ytitle": "Events",
+                         #"xlabel": "max(#Delta#phi(jet,E_{T}^{miss})",
+                         #"ylabel": "Events",
                          #"unit": "^{o}",
-                         #"logy": True,
+                         #"log": True,
                          #"DeltaRatio": 0.5,
                          #"ymin": 0.9,
                          #"ymax": -1},
@@ -1076,10 +1101,10 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMax": 200.0,
                          #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
                          #"binLabels": [], # leave empty to disable bin labels
-                         #"xtitle": "m_{jj}",
-                         #"ytitle": "Events",
+                         #"xlabel": "m_{jj}",
+                         #"ylabel": "Events",
                          #"unit": "GeV/c^{2}",
-                         #"logy": True,
+                         #"log": True,
                          #"DeltaRatio": 0.5,
                          #"ymin": 0.9,
                          #"ymax": -1},
@@ -1104,10 +1129,10 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMax": 400.0,
                          #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
                          #"binLabels": [], # leave empty to disable bin labels
-                         #"xtitle": "m_{bjj}",
-                         #"ytitle": "Events",
+                         #"xlabel": "m_{bjj}",
+                         #"ylabel": "Events",
                          #"unit": "GeV/c^{2}",
-                         #"logy": True,
+                         #"log": True,
                          #"DeltaRatio": 0.5,
                          #"ymin": 0.9,
                          #"ymax": -1},
@@ -1124,24 +1149,18 @@ for i in range(0,4):
         QCDid            = [3],
         embeddingId      = EmbeddingIdList,
         EWKfakeId        = EWKFakeIdList,
-        signalHistoPath  = "ControlPlots",
-        signalHistoName  = "QCDTailKillerJet%dBackToBack"%i,
-        EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
-        EWKfakeHistoName  = "QCDTailKillerJet%dBackToBack"%i,
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "ImprovedDeltaPhiCutsJet%dBackToBack"%(i+1),
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "ImprovedDeltaPhiCutsJet%dBackToBack"%(i+1),
         QCDFactNormalisation = "/QCDTailKillerJet%dBackToBack"%i,
         QCDFactHistoName = "/QCDTailKillerJet%dBackToBack"%i,
-        details          = { "bins": 13,
-                             "rangeMin": 0.0,
-                             "rangeMax": 260.0,
-                             "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                             "binLabels": [], # leave empty to disable bin labels
-                             "xtitle": "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%(i+1),
-                             "ytitle": "Events",
+        details          = { "xlabel": "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{%d},MET)^{2}}"%(i+1),
+                             "ylabel": "Events",
+                             "divideByBinWidth": False,
                              "unit": "^{o}",
-                             "logy": True,
-                             "DeltaRatio": 0.5,
-                             "ymin": 0.9,
-                             "ymax": -1},
+                             "log": True,
+                             "optsLog": {"ymin": 0.9} },
         blindedRange     = [], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1158,87 +1177,44 @@ ControlPlots.append(ControlPlotInput(
     embeddingId      = EmbeddingIdList,
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "",
-    signalHistoName  = "transverseMass",
+    signalHistoName  = "shapeTransverseMass",
     EWKfakeHistoPath  = "",
-    EWKfakeHistoName  = "EWKFakeTausTransverseMass",
+    EWKfakeHistoName  = "shapeEWKFakeTausTransverseMass",
     QCDFactNormalisation = "/NevtAfterLeg1",
     QCDFactHistoName = "/MtAfterLeg1",
-    details          = { "bins": 13,
-                         "rangeMin": 0.0,
-                         "rangeMax": 400.0,
-                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                         "binLabels": [], # leave empty to disable bin labels
-                         "xtitle": "mT(#tau_{h},E_{T}^{miss})",
-                         "ytitle": "Events",
-                         "unit": "GeV/c^{2}",
-                         "logy": False,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
+    details          = { "xlabel": "m_{T}(#tau_{h},E_{T}^{miss})",
+                     "ylabel": "dN_{Events}/dm_{T}",
+                     "divideByBinWidth": True,
+                     "unit": "GeV",
+                     "log": False,
+                     "opts": {"ymin": 0.0} },
     blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "#Delta#phi_{#uparrow#downarrow,4}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
-ControlPlots.append(ControlPlotInput(
-    title            = "FullMass",
-    signalHHid       = [-1],
-    signalHWid       = [0],
-    QCDid            = [3],
-    embeddingId      = EmbeddingIdList,
-    EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "FullHiggsMass",
-    signalHistoName  = "HiggsMass",
-    EWKfakeHistoPath  = "",
-    EWKfakeHistoName  = "EWKFakeTausFullMass",
-    QCDFactNormalisation = "/NevtAfterLeg1",
-    QCDFactHistoName = "/MassAfterLeg1",
-    details          = { "bins": 13,
-                         "rangeMin": 0.0,
-                         "rangeMax": 500.0,
-                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                         "binLabels": [], # leave empty to disable bin labels
-                         "xtitle": "m(#tau_{h},E^{miss})",
-                         "ytitle": "Events",
-                         "unit": "GeV/c^{2}",
-                         "logy": False,
-                         "DeltaRatio": 0.5,
-                         "ymin": 0.9,
-                         "ymax": -1},
-    blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
-    evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
-))
-
 if False:
     ControlPlots.append(ControlPlotInput(
-        title            = "NjetsAfterMET",
+        title            = "FullMass",
         signalHHid       = [-1],
         signalHWid       = [0],
         QCDid            = [3],
         embeddingId      = EmbeddingIdList,
         EWKfakeId        = EWKFakeIdList,
-        signalHistoPath  = "ControlPlots",
-        signalHistoName  = "NjetsAfterMET",
-        EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
-        EWKfakeHistoName  = "NjetsAfterMET",
-        QCDFactNormalisation = "Njets",
-        QCDFactHistoPath = QCDFactorisedStdSelVersion,
-        QCDFactHistoName = "", # FIXME
-        details          = { "bins": 5,
-                             "rangeMin": 3.0,
-                             "rangeMax": 8.0,
-                             "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                             "binLabels": ["3","4","5","6","7"], # leave empty to disable bin labels
-                             "xtitle": "Number of selected jets",
-                             "ytitle": "Events",
-                             "unit": "",
-                             "logy": True,
-                             "DeltaRatio": 0.5,
-                             "ymin": 0.9,
-                             "ymax": -1},
-        blindedRange     = [], # specify range min,max if blinding applies to this control plot
-        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        signalHistoPath  = "",
+        signalHistoName  = "shapeInvariantMass",
+        EWKfakeHistoPath  = "",
+        EWKfakeHistoName  = "shapeEWKFakeTausInvariantMass",
+        QCDFactNormalisation = "/NevtAfterLeg1",
+        QCDFactHistoName = "/MassAfterLeg1",
+        details          = { "xlabel": "m(#tau_{h},E_{T}^{miss})",
+                             "ylabel": "dN_{Events}/dm",
+                             "divideByBinWidth": True,
+                             "unit": "GeV",
+                             "log": False,
+                             "opts": {"ymin": 0.0} },
+        blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
     ))
 
