@@ -12,9 +12,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifferenc
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import *
 import math
 import time
-import sys
-import cProfile
-import re
 
 ## Class for calculating the QCD factorised results
 class QCDFactorisedResult:
@@ -157,7 +154,6 @@ class QCDControlPlot:
     def _doCalculate(self, basicShape, leg1Shape, leg2Shape, moduleInfoString):
         # Calculate final shape in signal region (leg1 * leg2 / basic)
         # Note that the calculation of the result is exactly the same for both the ABCD method and the traditional method
-        myStartTime = time.time()
         nSplitBins = basicShape.getNumberOfPhaseSpaceSplitBins()
         # Initialize result containers
         self._resultShape = leg1Shape.getDataHistoForSplittedBin(0).Clone()
@@ -196,8 +192,7 @@ class QCDControlPlot:
         for i in range(0,self._resultShape.GetNbinsX()+2):
             self._resultShape.SetBinError(i,math.sqrt(self._resultShape.GetBinError(i)))
         myEfficiency.delete()
-        myStopTime = time.time()
-        print "Control plots integral = %.1f, exec time=%.1f ms, list size=%d"%(self._resultShape.Integral(),(myStopTime-myStartTime)*1000.0,ROOT.gDirectory.GetList().GetSize())
+        print "Control plots integral = %.1f"%self._resultShape.Integral()
 
 class QCDFactorisedResultManager:
     def __init__(self, specs, dsetMgr, luminosity, moduleInfoString, shapeOnly=False, displayPurityBreakdown=False):
@@ -263,19 +258,13 @@ class QCDFactorisedResultManager:
         ROOT.gDirectory.Delete(self._hShape.GetName())
         ROOT.gDirectory.Delete(self._hRegionSystDown.GetName())
         ROOT.gDirectory.Delete(self._hRegionSystUp.GetName())
-        #self._hShape.IsA().Destructor(self._hShape)
-        #self._hRegionSystDown.IsA().Destructor(self._hRegionSystDown)
-        #self._hRegionSystUp.IsA().Destructor(self._hRegionSystUp)
         self._hCtrlPlotLabels = None
         for h in self._hCtrlPlots:
             ROOT.gDirectory.Delete(h.GetName())
-            #h.IsA().Destructor(h)
         for h in self._hRegionSystUpCtrlPlots:
             ROOT.gDirectory.Delete(h.GetName())
-            #h.IsA().Destructor(h)
         for h in self._hRegionSystDownCtrlPlots:
             ROOT.gDirectory.Delete(h.GetName())
-            #h.IsA().Destructor(h)
         self._hCtrlPlots = None
         self._hRegionSystUpCtrlPlots = None
         self._hRegionSystDownCtrlPlots = None
