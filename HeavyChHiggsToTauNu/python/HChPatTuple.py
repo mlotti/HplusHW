@@ -556,6 +556,7 @@ class StandardPATBuilder(PATBuilderBase):
         tauTools.addTauCollection(self.process, cms.InputTag('hpsPFTauProducer'),
                                   algoLabel = "hps",
                                   typeLabel = "PFTau")
+	tauTools.switchToPFTauHPS(self.process)
         patTaus = self.process.patTausHpsPFTau
         selectedPatTaus = self.process.selectedPatTausHpsPFTau
 
