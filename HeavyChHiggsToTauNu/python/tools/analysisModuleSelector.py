@@ -252,7 +252,7 @@ class AnalysisModuleSelector:
                 if not opts.optimizationMode[i].isdigit():
                     if not "Opt" in opts.optimizationMode[i]:
                         opts.optimizationMode[i] = "Opt%s"%opts.optimizationMode[i]
-        if self._disableSystematicsList:
+        if not self._disableSystematicsList:
             if opts.systematicVariation is not None:
                 opts.systematicVariation = self._disentangleDigitsInOptionString(opts.systematicVariation)
                 for i, systVar in enumerate(opts.systematicVariation):
