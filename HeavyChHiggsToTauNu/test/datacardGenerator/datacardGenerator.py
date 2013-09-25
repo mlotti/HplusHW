@@ -58,6 +58,7 @@ def main(opts, moduleSelector):
     multicrabPaths = PathFinder.MulticrabPathFinder(config.Path)
     mcrabInfoOutput = []
     mcrabInfoOutput.append("Input directories:")
+
     signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
     embeddingDsetCreator = None
     if config.OptionReplaceEmbeddingByMC:
@@ -105,17 +106,32 @@ def main(opts, moduleSelector):
         for era in moduleSelector.getSelectedEras():
             for searchMode in moduleSelector.getSelectedSearchModes():
                 for optimizationMode in moduleSelector.getSelectedOptimizationModes():
+                    # Create the dataset creator managers separately for each module
+                    signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
+                    embeddingDsetCreator = None
+                    if config.OptionReplaceEmbeddingByMC:
+                        mcrabInfoOutput.append("- Embedding: estimated from signal analysis MC")
+                        print "- %sWarning:%s Embedding: estimated from signal analysis MC"%(WarningStyle(),NormalStyle())
+                    else:
+                        embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput, not config.OptionReplaceEmbeddingByMC)
+                    myQCDDsetCreator = None
+                    if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
+                        myQCDDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
+                        if myQCDDsetCreator == None:
+                            raise Exception(ErrorLabel()+"Could not find factorised QCD pseudomulticrab!"+NormalStyle())
+                    elif qcdMethod == DataCard.DatacardQCDMethod.INVERTED:
+                        myQCDDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
+                        if myQCDDsetCreator == None:
+                            raise Exception(ErrorLabel()+"Could not find inverted QCD pseudomulticrab!"+NormalStyle())
+                    # Print progress info
                     myCounter += 1
                     print "%sProducing datacard %d/%d ...%s\n"%(CaptionStyle(),myCounter,myDatacardCount,NormalStyle())
                     # Create the generator, check config file contents
                     dcgen = DataCard.DataCardGenerator(opts, config, qcdMethod)
                     # Tweak to provide the correct datasetMgrCreator to the generator
-                    myQCDDsetCreator = None
                     if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
-                        myQCDDsetCreator = qcdFactorisedDsetCreator
                         print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sfactorised%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
                     elif qcdMethod == DataCard.DatacardQCDMethod.INVERTED:
-                        myQCDDsetCreator = qcdInvertedDsetCreator
                         print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sinverted%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
                     dcgen.setDsetMgrCreators(signalDsetCreator,embeddingDsetCreator,myQCDDsetCreator)
                     # Do the heavy stuff

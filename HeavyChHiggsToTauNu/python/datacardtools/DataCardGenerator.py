@@ -291,7 +291,7 @@ class DataCardGenerator:
                                    observation=self._observation, datasetGroups=self._columns, extractors=self._extractors,
                                    mcrabInfoOutput=mcrabInfoOutput)
         # Close files
-        #self.closeFiles() # Do not close, will crash if done so, because configInfo histogram will not be found anymore !!!
+        self.closeFiles()
 
         # Return name of output directory
         return myProducer.getDirectory()
