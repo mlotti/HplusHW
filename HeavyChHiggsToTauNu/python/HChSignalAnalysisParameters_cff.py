@@ -1,5 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
+configInfo = cms.PSet(
+    pileupReweightType = cms.string("UNWEIGHTED"),
+    topPtReweightType = cms.string("UNWEIGHTED"),
+)
+
 # Blind analysis - do not fill final counter and histogram for data if true
 blindAnalysisStatus = cms.untracked.bool(False)
 
@@ -290,9 +295,6 @@ bTagging = cms.untracked.PSet(
     etaCut = cms.untracked.double(2.4),
     jetNumber = cms.untracked.uint32(1),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
-    UseBTagDB      = cms.untracked.bool(False),
-    BTagDBAlgo     = cms.untracked.string("TCHEL"), #FIXME TCHEL
-    BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets"), #FIXME
     variationEnabled = cms.untracked.bool(False),
     variationShiftBy = cms.untracked.double(0),
 )
@@ -628,6 +630,11 @@ vertexWeight = cms.untracked.PSet(
 
 pileupWeightReader = cms.untracked.PSet(
     weightSrc = cms.InputTag("PUVertexWeightNominal"),
+    enabled = cms.bool(False),
+)
+
+topPtWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("topPtWeightNominal"),
     enabled = cms.bool(False),
 )
 
