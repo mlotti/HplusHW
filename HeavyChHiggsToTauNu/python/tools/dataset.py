@@ -1083,11 +1083,6 @@ class RootHistoWithUncertainties:
         # TH1 to hold square sum of bin-wise relative uncertainties
         self._shapeUncertaintyAbsoluteSquaredPlus = None
         self._shapeUncertaintyAbsoluteSquaredMinus = None
-        if isinstance(rootHisto, ROOT.TH1):
-            self._shapeUncertaintyAbsoluteSquaredPlus = rootHisto.Clone()
-            self._shapeUncertaintyAbsoluteSquaredMinus = rootHisto.Clone()
-            self._shapeUncertaintyAbsoluteSquaredPlus.Reset()
-            self._shapeUncertaintyAbsoluteSquaredMinus.Reset()
         self._shapeUncertaintyAbsoluteNames = []
 
         # Boolean to save the status if the under- and overflow bins have been made visible (i.e. summed to the first and last bin)
@@ -1101,6 +1096,12 @@ class RootHistoWithUncertainties:
             raise Exception("Adding uncertainty %s, histograms have different dimension (%d != %d)" % (name, self._rootHisto.GetDimension(), th1.GetDimension()))
         if self._rootHisto.GetNbinsX() != th1.GetNbinsX():
             raise Exception("Adding uncertainty %s, histograms have different number of X bins (%d != %d)" % (name, self._rootHisto.GetNbinsX(), th1.GetNbinsX()))
+
+    def _createShapeUncertaintyAbsoluteSquared(self):
+        self._shapeUncertaintyAbsoluteSquaredPlus = aux.Clone(self._rootHisto)
+        self._shapeUncertaintyAbsoluteSquaredMinus = aux.Clone(self._rootHisto)
+        self._shapeUncertaintyAbsoluteSquaredPlus.Reset()
+        self._shapeUncertaintyAbsoluteSquaredMinus.Reset()
 
     ## Set the ROOT histogram object
     #
@@ -1161,8 +1162,9 @@ class RootHistoWithUncertainties:
         # Update nominal histogram
         histogramsExtras.makeFlowBinsVisible(self._rootHisto)
         # Update shape uncertainty squared histograms
-        histogramsExtras.makeFlowBinsVisible(self._shapeUncertaintyAbsoluteSquaredPlus)
-        histogramsExtras.makeFlowBinsVisible(self._shapeUncertaintyAbsoluteSquaredMinus)
+        if self._shapeUncertaintyAbsoluteSquaredPlus is not None:
+            histogramsExtras.makeFlowBinsVisible(self._shapeUncertaintyAbsoluteSquaredPlus)
+            histogramsExtras.makeFlowBinsVisible(self._shapeUncertaintyAbsoluteSquaredMinus)
 
     ## Add shape variation uncertainty
     #
@@ -1197,6 +1199,9 @@ class RootHistoWithUncertainties:
 
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
+        if self._shapeUncertaintyAbsoluteSquaredPlus is None:
+            self._createShapeUncertaintyAbsoluteSquared
+
         self._shapeUncertaintyAbsoluteNames.append(name)
         sqSumPlus = self._shapeUncertaintyAbsoluteSquaredPlus # just for a shorter name
         sqSumMinus = self._shapeUncertaintyAbsoluteSquaredMinus # just for a shorter name
@@ -1217,6 +1222,9 @@ class RootHistoWithUncertainties:
     #
     # The normalization relative uncertainties are summed quadratically
     def addNormalizationUncertaintyRelative(self, name, uncertaintyPlus, uncertaintyMinus=None):
+        if self._shapeUncertaintyAbsoluteSquaredPlus is None:
+            self._createShapeUncertaintyAbsoluteSquared
+
         self._shapeUncertaintyAbsoluteNames.append(name)
         sqSumPlus = self._shapeUncertaintyAbsoluteSquaredPlus # just for a shorter name
         sqSumMinus = self._shapeUncertaintyAbsoluteSquaredMinus # just for a shorter name
@@ -1500,18 +1508,13 @@ class RootHistoWithUncertainties:
     # All contained histograms are also cloned. For all cloned
     # histograms, th1.SetDirectory(0) is called.
     def Clone(self):
-        clone = RootHistoWithUncertainties(self._rootHisto.Clone())
-        clone._rootHisto.SetDirectory(0)
+        clone = RootHistoWithUncertainties(aux.Clone(self._rootHisto))
         for key, value in self._shapeUncertainties.iteritems():
-            (plus, minus) = (value[0].Clone(), value[1].Clone())
-            plus.SetDirectory(0)
-            minus.SetDirectory(0)
+            (plus, minus) = (aux.Clone(value[0]), aux.Clone(value[1]))
             clone._shapeUncertainties[key] = (plus, minus)
         if self._shapeUncertaintyAbsoluteSquaredPlus != None:
-            clone._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Clone()
-            clone._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Clone()
-            clone._shapeUncertaintyAbsoluteSquaredPlus.SetDirectory(0)
-            clone._shapeUncertaintyAbsoluteSquaredMinus.SetDirectory(0)
+            clone._shapeUncertaintyAbsoluteSquaredPlus = aux.Clone(self._shapeUncertaintyAbsoluteSquaredPlus)
+            clone._shapeUncertaintyAbsoluteSquaredMinus = aux.Clone(self._shapeUncertaintyAbsoluteSquaredMinus)
         else:
             clone._shapeUncertaintyAbsoluteSquaredPlus = None
             clone._shapeUncertaintyAbsoluteSquaredMinus = None
@@ -2135,16 +2138,16 @@ class Dataset:
             content = aux.listDirectoryContent(tdirectory, lambda key: key.GetClassName() == "TNamed" and key.GetName() not in ["dataVersion", "parameterSet"])
             for name in content:
                 if name not in dictionary:
-                    dictionary[name] = tdirectory.Get(name).GetTitle()
+                    dictionary[name] = aux.Get(tdirectory, name).GetTitle()
 
         for f in self.files:
             if not f.IsOpen():
                 raise Exception("File %s of dataset %s has been closed! Maybe this Dataset has been removed without 'close=False'?" % (f.GetName(), self.name))
-            configInfo = f.Get("configInfo")
+            configInfo = aux.Get(f, "configInfo")
             if configInfo == None:
                 raise Exception("configInfo directory is missing from file %s" % f.GetName())
 
-            info = _rescaleInfo(_histoToDict(configInfo.Get("configinfo")))
+            info = _rescaleInfo(_histoToDict(aux.Get(configInfo, "configinfo")))
             if "energy" in info:
                 info["energy"] = str(int(round(info["energy"])))
             addDirContentsToDict(configInfo, info)
@@ -2153,7 +2156,7 @@ class Dataset:
             else:
                 assertInfo(self.info, info, self.files[0], f, "configInfo/configinfo")
 
-            dataVersion = configInfo.Get("dataVersion")
+            dataVersion = aux.Get(configInfo, "dataVersion")
             if dataVersion == None:
                 raise Exception("Unable to determine dataVersion for dataset %s from file %s" % (name, f.GetName()))
             if self.dataVersion is None:
@@ -2188,23 +2191,23 @@ class Dataset:
 
         # Check that analysis directory exists
         for f in self.files:
-            if f.Get(self._analysisDirectoryName) == None:
+            if aux.Get(f, self._analysisDirectoryName) == None:
                 raise AnalysisNotFoundException("Analysis directory '%s' does not exist in file '%s'" % (self._analysisDirectoryName, f.GetName()))
         self._analysisDirectoryName += "/"
 
         # Update info from analysis directory specific histogram, if one exists
         realDirName = self._translateName("configInfo")
-        if self.files[0].Get(realDirName) != None: # important to use !=
+        if aux.Get(self.files[0], realDirName) != None: # important to use !=
             updateInfo = None
             for f in self.files:
-                d = f.Get(realDirName)
+                d = aux.Get(f, realDirName)
                 if d == None:
                     raise Exception("%s directory is missing from file %s, it was in %s" % (realDirName, f.GetName(), self.files[0].GetName()))
                 info = {}
-                h = d.Get("configinfo")
+                h = aux.Get(d, "configinfo")
                 if h != None:
-                    info = _rescaleInfo(_histoToDict(d.Get("configinfo")))
-                addDirContentsToDict(f.Get(realDirName), info)
+                    info = _rescaleInfo(_histoToDict(aux.Get(d, "configinfo")))
+                addDirContentsToDict(aux.Get(f, realDirName), info)
                 if updateInfo == None:
                     updateInfo = info
                 else:
@@ -2225,6 +2228,12 @@ class Dataset:
             #print "%s: is pileup-reweighted, calling updateNAllEventsToPUWeighted()" % self.name
             self.updateNAllEventsToPUWeighted()
 
+        # For some reason clearing the in-memory representations of
+        # the files increases the reading (object lookup?) performance
+        # when reading from many analysis directories in a single
+        # script.
+        for f in self.files:
+            f.Clear()
 
     ## Close the files
     #
@@ -2310,7 +2319,7 @@ class Dataset:
                 h = histos[0]
             else:
                 h = histos[0]
-                h = h.Clone(h.GetName()+"_cloned")
+                h = aux.Clone(h. h.GetName()+"_cloned")
                 for h2 in histos[1:]:
                     h.Add(h2)
     
@@ -2371,16 +2380,11 @@ class Dataset:
             raise Exception("Trying to read object %s from dataset %s, but the file is already closed!" % (name, self.name))
 
         for f in self.files:
-            o = f.Get(realName)
+            o = aux.Get(f, realName)
             # below it is important to use '==' instead of 'is',
             # because null TObject == None, but is not None
             if o == None:
                 raise HistogramNotFoundException("Unable to find object '%s' (requested '%s') from file '%s'" % (realName, name, self.files[0].GetName()))
-
-            # http://root.cern.ch/phpBB3/viewtopic.php?f=14&t=15496
-            # This one seems to save quite a lot of "garbage
-            # collection" time
-            ROOT.SetOwnership(o, True)
 
             ret.append(o)
         return (ret, realName)
@@ -3326,7 +3330,7 @@ class DatasetPrecursor:
                 raise Exception("Unable to open ROOT file '%s' for dataset '%s'" % (name, self._name))
             self._rootFiles.append(rf)
 
-            dv = rf.Get("configInfo/dataVersion")
+            dv = aux.Get(rf, "configInfo/dataVersion")
             if dv == None:
                 raise Exception("Unable to find 'configInfo/dataVersion' from ROOT file '%s'" % name)
                 
