@@ -2235,6 +2235,12 @@ class Dataset:
             #print "%s: is pileup-reweighted, calling updateNAllEventsToPUWeighted()" % self.name
             self.updateNAllEventsToPUWeighted()
 
+        # For some reason clearing the in-memory representations of
+        # the files increases the reading (object lookup?) performance
+        # when reading from many analysis directories in a single
+        # script.
+        for f in self.files:
+            f.Clear()
 
     ## Close the files
     #
