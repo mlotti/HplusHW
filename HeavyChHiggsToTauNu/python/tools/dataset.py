@@ -1200,7 +1200,7 @@ class RootHistoWithUncertainties:
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
         if self._shapeUncertaintyAbsoluteSquaredPlus is None:
-            self._createShapeUncertaintyAbsoluteSquared
+            self._createShapeUncertaintyAbsoluteSquared()
 
         self._shapeUncertaintyAbsoluteNames.append(name)
         sqSumPlus = self._shapeUncertaintyAbsoluteSquaredPlus # just for a shorter name
@@ -1223,7 +1223,7 @@ class RootHistoWithUncertainties:
     # The normalization relative uncertainties are summed quadratically
     def addNormalizationUncertaintyRelative(self, name, uncertaintyPlus, uncertaintyMinus=None):
         if self._shapeUncertaintyAbsoluteSquaredPlus is None:
-            self._createShapeUncertaintyAbsoluteSquared
+            self._createShapeUncertaintyAbsoluteSquared()
 
         self._shapeUncertaintyAbsoluteNames.append(name)
         sqSumPlus = self._shapeUncertaintyAbsoluteSquaredPlus # just for a shorter name
