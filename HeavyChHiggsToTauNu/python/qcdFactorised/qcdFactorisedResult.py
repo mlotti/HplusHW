@@ -10,6 +10,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import math
 import time
 
@@ -48,7 +49,7 @@ class QCDFactorisedResult:
         # Note that the calculation of the result is exactly the same for both the ABCD method and the traditional method
         nSplitBins = basicShape.getNumberOfPhaseSpaceSplitBins()
         # Initialize result containers
-        self._resultShape = leg1Shape.getDataDrivenQCDHistoForSplittedBin(0).Clone()
+        self._resultShape = aux.Clone(leg1Shape.getDataDrivenQCDHistoForSplittedBin(0))
         self._resultShape.Reset()
         self._resultShape.SetTitle("NQCDFinal_Total_%s"%moduleInfoString)
         self._resultShape.SetName("NQCDFinal_Total_%s"%moduleInfoString)
@@ -57,7 +58,7 @@ class QCDFactorisedResult:
         self._resultCountObject = ExtendedCount(0.0, [0.0, 0.0], myUncertaintyLabels)
         if self._createBinHistos:
             for i in range(0, nSplitBins):
-                hBin = self._resultShape.Clone()
+                hBin = aux.Clone(self._resultShape)
                 hBin.SetTitle("NQCDFinal_%s_%s"%(basicShape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
                 hBin.SetName("NQCDFinal_%s_%s"%(basicShape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
                 self._nQCDHistogramsList.append(hBin)
@@ -156,7 +157,7 @@ class QCDControlPlot:
         # Note that the calculation of the result is exactly the same for both the ABCD method and the traditional method
         nSplitBins = basicShape.getNumberOfPhaseSpaceSplitBins()
         # Initialize result containers
-        self._resultShape = leg1Shape.getDataHistoForSplittedBin(0).Clone()
+        self._resultShape = aux.Clone(leg1Shape.getDataHistoForSplittedBin(0))
         self._resultShape.Reset()
         self._resultShape.SetTitle(self._title+"tmp")
         self._resultShape.SetName(self._title+"tmp")
@@ -204,15 +205,15 @@ class QCDFactorisedResultManager:
         # Calculate final shape in signal region (leg1 * leg2 / basic)
         myResult = QCDFactorisedResult(myCtrlRegionShape, myLeg1Shape, mySignalRegionShape, moduleInfoString, displayPurityBreakdown=displayPurityBreakdown)
         myLeg1Shape.delete()
-        self._hShape = myResult.getResultShape().Clone()
+        self._hShape = aux.Clone(myResult.getResultShape())
         self._hShape.SetName(self._hShape.GetName()+"finalShapeInManager")
         myResult.delete()
         if not shapeOnly:
             print HighlightStyle()+"...Obtaining region transition systematics"+NormalStyle()
             # Do systematics coming from met shape difference
             myRegionTransitionSyst = SystematicsForMetShapeDifference(mySignalRegionShape, myCtrlRegionShape, self._hShape, histoSpecs=None, moduleInfoString=moduleInfoString)
-            self._hRegionSystUp = myRegionTransitionSyst.getUpHistogram().Clone("QCDfactMgrQCDSystUp")
-            self._hRegionSystDown = myRegionTransitionSyst.getDownHistogram().Clone("QCDfactMgrQCDSystDown")
+            self._hRegionSystUp = aux.Clone(myRegionTransitionSyst.getUpHistogram(), "QCDfactMgrQCDSystUp")
+            self._hRegionSystDown = aux.Clone(myRegionTransitionSyst.getDownHistogram(), "QCDfactMgrQCDSystDown")
             myRegionTransitionSyst.delete()
             # Obtain data-driven control plots
             self._hCtrlPlotLabels = []
@@ -229,7 +230,7 @@ class QCDFactorisedResultManager:
                 myCtrlShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity, rebinList=myRebinList)
                 myCtrlPlot = QCDControlPlot(myCtrlRegionShape, myCtrlShape, mySignalRegionShape, moduleInfoString, title=item)
                 myCtrlShape.delete()
-                myCtrlPlotHisto = myCtrlPlot.getResultShape().Clone("ctrlPlotShapeInManager")
+                myCtrlPlotHisto = aux.Clone(myCtrlPlot.getResultShape(), "ctrlPlotShapeInManager")
                 myCtrlPlot.delete()
                 myCtrlPlotHisto.SetName(item+"%d"%i)
                 myCtrlPlotHisto.SetTitle(item)
@@ -240,10 +241,10 @@ class QCDFactorisedResultManager:
                 myCtrlPlotRegionTransitionSyst = SystematicsForMetShapeDifference(myCtrlPlotSignalRegionShape, myCtrlPlotControlRegionShape, myCtrlPlotHisto, histoSpecs=None, moduleInfoString=moduleInfoString, quietMode=True)
                 myCtrlPlotSignalRegionShape.delete()
                 myCtrlPlotControlRegionShape.delete()
-                hUp = myCtrlPlotRegionTransitionSyst.getUpHistogram().Clone("QCDfactMgrSystQCDSystUp%d"%i)
+                hUp = aux.Clone(myCtrlPlotRegionTransitionSyst.getUpHistogram(), "QCDfactMgrSystQCDSystUp%d"%i)
                 hUp.SetTitle(item)
                 self._hRegionSystUpCtrlPlots.append(hUp)
-                hDown = myCtrlPlotRegionTransitionSyst.getDownHistogram().Clone("QCDfactMgrSystQCDSystDown%d"%i)
+                hDown = aux.Clone(myCtrlPlotRegionTransitionSyst.getDownHistogram(), "QCDfactMgrSystQCDSystDown%d"%i)
                 hDown.SetTitle(item)
                 self._hRegionSystDownCtrlPlots.append(hDown)
                 myCtrlPlotRegionTransitionSyst.delete()

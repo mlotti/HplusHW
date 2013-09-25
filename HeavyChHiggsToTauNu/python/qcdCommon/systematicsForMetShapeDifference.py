@@ -7,6 +7,7 @@ from math import sqrt
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import errorPropagationForDivision
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 #from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import *
 import ROOT
 
@@ -65,27 +66,27 @@ class SystematicsForMetShapeDifference:
 
         nSplitBins = signalRegion.getNumberOfPhaseSpaceSplitBins()
         # Initialize histograms
-        self._hCombinedSignalRegion = finalShape.Clone()
+        self._hCombinedSignalRegion = aux.Clone(finalShape)
         self._hCombinedSignalRegion.Reset()
         self._hCombinedSignalRegion.SetTitle("QCDSystSignalRegion_Total_%s"%(moduleInfoString))
         self._hCombinedSignalRegion.SetName("QCDSystSignalRegion_Total_%s"%(moduleInfoString))
-        self._hCombinedCtrlRegion = finalShape.Clone()
+        self._hCombinedCtrlRegion = aux.Clone(finalShape)
         self._hCombinedCtrlRegion.Reset()
         self._hCombinedCtrlRegion.SetTitle("QCDSystCtrlRegion_Total_%s"%(moduleInfoString))
         self._hCombinedCtrlRegion.SetName("QCDSystCtrlRegion_Total_%s"%(moduleInfoString))
         for i in range(0, nSplitBins):
-            h = self._hCombinedSignalRegion.Clone()
+            h = aux.Clone(self._hCombinedSignalRegion)
             h.SetTitle("QCDSystSignalRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
             h.SetName("QCDSystSignalRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
             self._signalRegionHistograms.append(h)
-            h = self._hCombinedSignalRegion.Clone()
+            h = aux.Clone(self._hCombinedSignalRegion)
             h.SetTitle("QCDSystCtrlRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
             h.SetName("QCDSystCtrlRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
             self._ctrlRegionHistograms.append(h)
-        self._systUpHistogram = self._hCombinedSignalRegion.Clone()
+        self._systUpHistogram = aux.Clone(self._hCombinedSignalRegion)
         self._systUpHistogram.SetTitle("QCDSystUp_%s"%(moduleInfoString))
         self._systUpHistogram.SetName("QCDSystUp_%s"%(moduleInfoString))
-        self._systDownHistogram = self._hCombinedSignalRegion.Clone()
+        self._systDownHistogram = aux.Clone(self._hCombinedSignalRegion)
         self._systDownHistogram.SetTitle("QCDSystDown_%s"%(moduleInfoString))
         self._systDownHistogram.SetName("QCDSystDown_%s"%(moduleInfoString))
         # Loop over phase space bins to sum histograms
