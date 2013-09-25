@@ -64,26 +64,6 @@ namespace HPlus {
   //destructor
   TopChiSelection::~TopChiSelection() {}
 
-  /*
-  //silentAnalyze
-  TopChiSelection::Data TopChiSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
-    ensureSilentAnalyzeAllowed(iEvent);
-
-    // Disable histogram filling and counter incrementinguntil the return call
-    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
-    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
-    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-
-    return privateAnalyze(iEvent, iSetup, jets, bjets);
-  }
-
-  //analyze
-  TopChiSelection::Data TopChiSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
-    ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, jets, bjets);
-  }
-  */
-
   //privateAnalyze
   TopChiSelection::Data TopChiSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
     Data output;
@@ -100,6 +80,7 @@ namespace HPlus {
     edm::Ptr<pat::Jet> Jet2;
     edm::Ptr<pat::Jet> Jetb;
 
+    //for all combos of 3 jets close enough to each other...
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet1 = *iter;
 
@@ -113,6 +94,7 @@ namespace HPlus {
         if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJetb->p4()) < 0.4) continue;
         if (ROOT::Math::VectorUtil::DeltaR(iJet2->p4(), iJetb->p4()) < 0.4) continue;      
 
+        //...find top and W candidates with minimum chi2
         XYZTLorentzVector candTop = iJet1->p4() + iJet2->p4() + iJetb->p4();
         XYZTLorentzVector candW = iJet1->p4() + iJet2->p4();
 
