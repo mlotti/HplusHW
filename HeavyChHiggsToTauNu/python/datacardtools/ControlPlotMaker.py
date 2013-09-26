@@ -150,8 +150,7 @@ class ControlPlotMaker:
                 # Remove non-dientified keywords
                 del myParams["unit"]
                 # Do plotting
-                myDrawer = plots.PlotDrawer(**myParams)
-                myDrawer(myStackPlot, "%s/DataDrivenCtrlPlot_%02d_%s"%(self._dirname,i,myCtrlPlot.title))
+                plots.drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_%02d_%s"%(self._dirname,i,myCtrlPlot.title), **myParams)
 
                 # FIXME: Add here piece of code to fill the selection flow plot
                 
