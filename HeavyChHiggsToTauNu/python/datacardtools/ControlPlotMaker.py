@@ -132,7 +132,7 @@ class ControlPlotMaker:
                 myParams["xlabel"] = "%s, %s"%(myParams["xlabel"],myParams["unit"])
                 myMinWidth = 10000.0
                 myMaxWidth = 0.0
-                for j in range(hData.getRootHisto().GetNbinsX()):
+                for j in range(1,hData.getRootHisto().GetNbinsX()+1):
                     w = hData.getRootHisto().GetBinWidth(j)
                     if w < myMinWidth:
                         myMinWidth = w
@@ -142,7 +142,6 @@ class ControlPlotMaker:
                 if abs(myMinWidth-myMaxWidth) < 0.0001:
                     myWidthSuffix = "%d"%(myMinWidth)
                 myParams["ylabel"] = "%s / %s %s"%(myParams["ylabel"],myWidthSuffix,myParams["unit"])
-                
                 myParams["ratio"] = True
                 myParams["ratioYlabel"] = "Data/#Sigma Exp."
                 myParams["stackMCHistograms"] = True
