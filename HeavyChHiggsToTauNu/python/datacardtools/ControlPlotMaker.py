@@ -115,14 +115,14 @@ class ControlPlotMaker:
                     self._applyBlinding(hData,myCtrlPlot.blindedRange)
                 myHisto = histograms.Histo(hData,"Data")
                 myHisto.setIsDataMC(isData=True, isMC=False)
-                myStackList.append(myHisto)
+                myStackList.insert(0, myHisto)
                 # Add signal
                 mySignalLabel = "TTToHplus_M%d"%m
                 if m > 179:
                     mySignalLabel = "HplusTB_M%d"%m
                 myHisto = histograms.Histo(hSignal,mySignalLabel)
                 myHisto.setIsDataMC(isData=False, isMC=True)
-                myStackList.append(myHisto)
+                myStackList.insert(1, myHisto)
                 # Make plot
                 myStackPlot = plots.DataMCPlot2(myStackList)
                 myStackPlot.setLuminosity(self._luminosity)
