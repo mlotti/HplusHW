@@ -2472,7 +2472,7 @@ class PlotDrawer:
 
         if kwargs.get("divideByBinWidth", self.divideByBinWidthDefault):
             # TH1::Scale() with "width" option divides the histogram by bin width
-            p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Scale(1, "width"))
+            p.histoMgr.forEachHisto(lambda h: h.getRootHistoWithUncertainties().Scale(1, "width"))
 
     ## Stack MC histograms
     #
