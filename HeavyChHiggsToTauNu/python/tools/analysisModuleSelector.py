@@ -82,11 +82,17 @@ class AnalysisModuleSelector:
         return self._selectedSystematicVariations
 
     def getSelectedCombinationCount(self):
-        return len(self.getSelectedEras()) * len(self.getSelectedSearchModes()) * len(self.getSelectedOptimizationModes()) * len(self.getSelectedSystematicVariations())
+        if not self._disableSystematicsList:
+            return len(self.getSelectedEras()) * len(self.getSelectedSearchModes()) * len(self.getSelectedOptimizationModes()) * len(self.getSelectedSystematicVariations())
+        else:
+            return len(self.getSelectedEras()) * len(self.getSelectedSearchModes()) * len(self.getSelectedOptimizationModes())
 
     def printSelectedCombinationCount(self):
         count = self.getSelectedCombinationCount()
-        print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes x %d systematic variations)" % (count, len(self.getSelectedEras()), len(self.getSelectedSearchModes()), len(self.getSelectedOptimizationModes()), len(self.getSelectedSystematicVariations()))
+        if not self._disableSystematicsList:
+            print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes x %d systematic variations)" % (count, len(self.getSelectedEras()), len(self.getSelectedSearchModes()), len(self.getSelectedOptimizationModes()), len(self.getSelectedSystematicVariations()))
+        else:
+            print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes)" % (count, len(self.getSelectedEras()), len(self.getSelectedSearchModes()), len(self.getSelectedOptimizationModes()))
         return count
 
     def iterSelectedCombinations(self):
