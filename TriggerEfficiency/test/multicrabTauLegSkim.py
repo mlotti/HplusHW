@@ -12,13 +12,13 @@ multicrab = Multicrab("../../HeavyChHiggsToTauNu/test/pattuple/crab_pat.cfg", ".
 
 datasets_SingleMu = [
     "SingleMu_165970-167913_2011A_Nov08_RAWRECO",
-#    "SingleMu_170722-173198_2011A_Nov08_RAWRECO",
-#    "SingleMu_173236-173692_2011A_Nov08_RAWRECO",
-#    "SingleMu_175832-180252_2011B_Nov019_RAWRECO",
+    "SingleMu_170722-173198_2011A_Nov08_RAWRECO",
+    "SingleMu_173236-173692_2011A_Nov08_RAWRECO",
+    "SingleMu_175832-180252_2011B_Nov19_RAWRECO",
 ]
 
 datasets_DY = [
-#    "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW",
+     "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW",
 ]
            
 workflow = "triggerTauLeg_skim_v44_v5"

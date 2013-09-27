@@ -11,26 +11,31 @@ def addTauLegSkim_44X(version, datasets, updateDefinitions):
     def TaskDefMC(**kwargs):
         return TaskDef(triggerOR=[mcTrigger], **kwargs)
 
+    allMuonTriggers = [
+	"HLT_IsoMu12_v1","HLT_IsoMu12_v2","HLT_IsoMu12_v4","HLT_IsoMu12_v5","HLT_IsoMu12_v6","HLT_IsoMu12_v7","HLT_IsoMu12_v9",
+	"HLT_IsoMu15_eta2p1_v1","HLT_IsoMu15_eta2p1_v4","HLT_IsoMu15_eta2p1_v5",
+	"HLT_IsoMu15_v9","HLT_IsoMu15_v10","HLT_IsoMu15_v11","HLT_IsoMu15_v12","HLT_IsoMu15_v13","HLT_IsoMu15_v14","HLT_IsoMu15_v17","HLT_IsoMu15_v18",
+	"HLT_IsoMu17_v9","HLT_IsoMu17_v10","HLT_IsoMu17_v11","HLT_IsoMu17_v13","HLT_IsoMu17_v14",
+	"HLT_IsoMu17_eta2p1_v1",
+	"HLT_IsoMu20_eta2p1_v1",
+	"HLT_IsoMu20_v8","HLT_IsoMu20_v9","HLT_IsoMu20_v12","HLT_IsoMu20_v13",
+	"HLT_IsoMu24_eta2p1_v3","HLT_IsoMu24_eta2p1_v6","HLT_IsoMu24_eta2p1_v7",
+	"HLT_IsoMu24_v5","HLT_IsoMu24_v6","HLT_IsoMu24_v7","HLT_IsoMu24_v8","HLT_IsoMu24_v9","HLT_IsoMu24_v12","HLT_IsoMu24_v13",
+	"HLT_IsoMu30_eta2p1_v3","HLT_IsoMu30_eta2p1_v6","HLT_IsoMu30_eta2p1_v7",
+	"HLT_IsoMu34_eta2p1_v1","HLT_IsoMu34_eta2p1_v4","HLT_IsoMu34_eta2p1_v5"
+    ]
+
     # The numbers of jobs are from multicrabDatasetsPattuple, they may have to be adjusted
     defaultDefinitions = {
 
         # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
-        "SingleMu_165970-167913_2011A_Nov08_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=[
-                                                    "HLT_IsoMu17_v9",
-                                                    "HLT_IsoMu17_v11",
-                                                    ], triggerThrow=False),
+        "SingleMu_165970-167913_2011A_Nov08_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=allMuonTriggers, triggerThrow=False),
         # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-        "SingleMu_170722-173198_2011A_Nov08_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=[
-                                                    " HLT_IsoMu20_v8 ",
-                                                    ], triggerThrow=False),
+        "SingleMu_170722-173198_2011A_Nov08_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=allMuonTriggers, triggerThrow=False),
         # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
-        "SingleMu_173236-173692_2011A_Nov08_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=[
-                                                    "HLT_IsoMu30_eta2p1_v3"
-                                                    ], triggerThrow=False),
+        "SingleMu_173236-173692_2011A_Nov08_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=allMuonTriggers, triggerThrow=False),
         # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
-        "SingleMu_175832-180252_2011B_Nov19_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=[
-                                                    "HLT_IsoMu30_eta2p1_v3","HLT_IsoMu30_eta2p1_v6","HLT_IsoMu30_eta2p1_v7",
-                                                    ], triggerThrow=False),
+        "SingleMu_175832-180252_2011B_Nov19_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=allMuonTriggers, triggerThrow=False),
         
         "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW":       TaskDefMC(njobsIn=4000, njobsOut=2000),
         }

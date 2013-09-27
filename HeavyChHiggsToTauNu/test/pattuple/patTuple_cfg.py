@@ -73,7 +73,7 @@ if len(options.customizeConfig) > 0:
     for config in options.customizeConfig:
         module = __import__("HiggsAnalysis.HeavyChHiggsToTauNu."+config, fromlist=[config])
         if hasattr(module, "customizeBeforePat"):
-            module.customizeBeforePat(process)
+            module.customizeBeforePat(process,dataVersion)
 
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,

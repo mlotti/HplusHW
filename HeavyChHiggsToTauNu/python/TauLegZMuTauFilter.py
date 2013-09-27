@@ -38,10 +38,6 @@ def customize(process):
 
     process.patPF2PATSequenceChs.remove(process.pfTauSequenceChs)
     
-    process.load('Configuration.StandardSequences.RawToDigi_cff')
-    process.load('Configuration.StandardSequences.L1Reco_cff')
-    process.load('Configuration.StandardSequences.EndOfProcess_cff')
-
     process.pfPileUpIso.PFCandidates = "particleFlowTmp"
     process.pfNoPileUpIso.bottomCollection = "particleFlowTmp"
 
@@ -94,8 +90,8 @@ def addMuTauSelection(process):
         process.zmutauSelectedEvents
     )
 
-def customizeBeforePat(process):
-    doRECO(process)
+def customizeBeforePat(process,dataVersion):
+    doRECO(process,dataVersion)
 
 def replaceInAllPathsAndSequences(process, old, new, exceptions=[]):
     for pthName, pth in process.paths_().iteritems():
@@ -110,9 +106,12 @@ def replaceInputTagInAllSequences(process, oldName, newName, exceptions=[]):
         if seqName not in exceptions:
             helpers.massSearchReplaceAnyInputTag(seq, cms.InputTag(oldName), cms.InputTag(newName))
 
-def doRECO(process):
+def doRECO(process,dataVersion):
     # copy-pasted from embedding..
+    process.load('Configuration.StandardSequences.RawToDigi_cff')
+    process.load('Configuration.StandardSequences.L1Reco_cff')
     process.load('Configuration.StandardSequences.Reconstruction_cff')
+    process.load('Configuration.StandardSequences.EndOfProcess_cff')
 
 #    f = open("configDumpRECODebug.py", "w") 
 #    f.write(process.dumpPython())
@@ -176,11 +175,19 @@ def doRECO(process):
         replaceInAllPathsAndSequences(process, mod, newMod, exceptions=sequencesNoReplaceInputTag)
         replaceInputTagInAllSequences(process, name, newName, exceptions=sequencesNoReplaceInputTag)
 
+    if dataVersion.isData():
+    #if isData:  # replace all instances of "rawDataCollector" with "source"
+        from FWCore.ParameterSet import Mixins
+        for module in process.__dict__.itervalues():
+            if isinstance(module, Mixins._Parameterizable):
+                for parameter in module.__dict__.itervalues():
+                    if isinstance(parameter, cms.InputTag):
+                        if parameter.moduleLabel == 'rawDataCollector':
+                            parameter.moduleLabel = 'source'
 
 #    f = open("configDumpRECODebug2.py", "w")
 #    f.write(process.dumpPython())
 #    f.close()
-    
 
 def getSelectionCounters():
     return ["zmutauAllEvents",
