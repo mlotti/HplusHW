@@ -1933,7 +1933,10 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
     def addMCUncertainty(self):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
-        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"])
+        systKey = "MCSystError"
+        if histograms.uncertaintyMode.addStatToSyst():
+            systKey = "MCStatSystError"
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
@@ -2472,7 +2475,7 @@ class PlotDrawer:
 
         if kwargs.get("divideByBinWidth", self.divideByBinWidthDefault):
             # TH1::Scale() with "width" option divides the histogram by bin width
-            p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Scale(1, "width"))
+            p.histoMgr.forEachHisto(lambda h: h.getRootHistoWithUncertainties().Scale(1, "width"))
 
     ## Stack MC histograms
     #
