@@ -7,6 +7,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import ExtendedCount
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import array
 
 import ROOT
@@ -59,11 +60,9 @@ class DataDrivenQCDShape:
         if binIndex >= len(self._dataList):
             raise Exception(ErrorLabel()+"DataDrivenQCDShape::getDataDrivenQCDForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
         if self._rebinDoneStatus:
-            h = self._dataList[binIndex].Clone()
+            h = aux.Clone(self._dataList[binIndex])
             h.SetName(h.GetName()+"dataDriven")
             h.Add(self._ewkList[binIndex], -1.0)
-            ROOT.SetOwnership(h, True)
-            h.SetDirectory(0)
             return h
 
         # Do summing within shape histo modifier
@@ -80,10 +79,8 @@ class DataDrivenQCDShape:
         if binIndex >= len(self._dataList):
             raise Exception(ErrorLabel()+"DataDrivenQCDShape::getDataHistoForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
         if self._rebinDoneStatus:
-            h = self._dataList[binIndex].Clone()
+            h = aux.Clone(self._dataList[binIndex])
             h.SetName(h.GetName()+"_")
-            ROOT.SetOwnership(h, True)
-            h.SetDirectory(0)
             return h
 
         # Do summing within shape histo modifier
@@ -99,9 +96,8 @@ class DataDrivenQCDShape:
         if binIndex >= len(self._dataList):
             raise Exception(ErrorLabel()+"DataDrivenQCDShape::getEwkHistoForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._ewkList)))
         if self._rebinDoneStatus:
-            h = self._ewkList[binIndex].Clone()
+            h = aux.Clone(self._ewkList[binIndex])
             h.SetName(h.GetName()+"_")
-            ROOT.SetOwnership(h, True)
             return h
 
         # Do summing within shape histo modifier
@@ -115,13 +111,12 @@ class DataDrivenQCDShape:
     ## Return the sum of data-ewk integrated over the phase space splitted bins
     def getIntegratedDataDrivenQCDHisto(self, histoSpecs=None):
         if self._rebinDoneStatus:
-            h = self._dataList[0].Clone()
+            h = aux.Clone(self._dataList[0])
             h.SetName(h.GetName()+"Integrated")
             h.Add(self._ewkList[0],-1.0)
             for i in range(1, len(self._dataList)):
                 h.Add(self._dataList[i])
                 h.Add(self._ewkList[i],-1.0)
-            ROOT.SetOwnership(h, True)
             return h
 
         # Do summing within shape histo modifier
@@ -138,11 +133,10 @@ class DataDrivenQCDShape:
     ## Return the sum of data integrated over the phase space splitted bins
     def getIntegratedDataHisto(self, histoSpecs=None):
         if self._rebinDoneStatus:
-            h = self._dataList[0].Clone()
+            h = aux.Clone(self._dataList[0])
             h.SetName(h.GetName()+"Integrated")
             for i in range(1, len(self._dataList)):
                 h.Add(self._dataList[i])
-            ROOT.SetOwnership(h, True)
             return h
 
         # Do summing within shape histo modifier
@@ -158,11 +152,10 @@ class DataDrivenQCDShape:
     ## Return the sum of ewk integrated over the phase space splitted bins
     def getIntegratedEwkHisto(self, histoSpecs=None):
         if self._rebinDoneStatus:
-            h = self._ewkList[0].Clone()
+            h = aux.Clone(self._ewkList[0])
             h.SetName(h.GetName()+"Integrated")
             for i in range(1, len(self._dataList)):
                 h.Add(self._ewkList[i])
-            ROOT.SetOwnership(h, True)
             return h
 
         # Do summing within shape histo modifier
@@ -237,7 +230,7 @@ class DataDrivenQCDShape:
     def getIntegratedPurityForShapeHisto(self, histoSpecs=None):
         hData = self.getIntegratedDataHisto(histoSpecs=histoSpecs)
         hEwk = self.getIntegratedEwkHisto(histoSpecs=histoSpecs)
-        h = hData.Clone("%s_purity_%d"%(hData,self._uniqueN))
+        h = aux.Clone(hData, "%s_purity_%d"%(hData,self._uniqueN))
         myNameList = self._dataList[0].GetName().split("_")
         h.SetTitle("PurityByFinalShapeBin_%s"%myNameList[0][:len(myNameList[0])-1])
         self._uniqueN += 1

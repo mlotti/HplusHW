@@ -74,7 +74,7 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     myQCDNormalizationSystDownResults.addDataDrivenControlPlots(myResult.getRegionSystDownCtrlPlots(),myResult.getControlPlotLabels())
     myOutputCreator.addModule(myQCDNormalizationSystDownResults)
     myResult.delete()
-    #dsetMgr.close()
+    dsetMgr.close()
 
 def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString):
     myModuleInfoString = "%s_%s_%s_%s"%(era, searchMode, optimizationMode,syst)

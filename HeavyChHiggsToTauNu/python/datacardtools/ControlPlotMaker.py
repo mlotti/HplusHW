@@ -128,22 +128,29 @@ class ControlPlotMaker:
                 myStackPlot.setLuminosity(self._luminosity)
                 myStackPlot.setDefaultStyles()
                 myParams = myCtrlPlot.details.copy()
-                myParams["xtitle"] = "%s, %s"%(myParams["xtitle"],myParams["unit"])
+                # Tweak paramaters
+                myParams["xlabel"] = "%s, %s"%(myParams["xlabel"],myParams["unit"])
                 myMinWidth = 10000.0
                 myMaxWidth = 0.0
-                for i in range(hData.getRootHisto.GetNbinsX()):
-                    w = hData.getRootHisto.GetBinWidth(i)
+                for j in range(1,hData.getRootHisto().GetNbinsX()+1):
+                    w = hData.getRootHisto().GetBinWidth(j)
                     if w < myMinWidth:
                         myMinWidth = w
-                    if w > myMaxWidth
+                    if w > myMaxWidth:
                         myMaxWidth = w
                 myWidthSuffix = "%d-%d"%(myMinWidth,myMaxWidth)
                 if abs(myMinWidth-myMaxWidth) < 0.0001:
-                myWidthSuffix = "%d"%(myMinWidth)
-                myParams["ytitle"] = "%s / %s %s"%(myParams["ytitle"],myWidthSuffix,myParams["unit"])
-                myDrawer = plots.PlotDrawer(xlabel=myCtrlPlot.details["xtitle"], ylabel=myCtrlPlot.details["ytitle"], log=myLogStatus,
-                                            divideByBinWidth=True, ratio=True, ratioYlabel="Data/#Sigma Exp.",
-                                            stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True)
+                    myWidthSuffix = "%d"%(myMinWidth)
+                myParams["ylabel"] = "%s / %s %s"%(myParams["ylabel"],myWidthSuffix,myParams["unit"])
+                myParams["ratio"] = True
+                myParams["ratioYlabel"] = "Data/#Sigma Exp."
+                myParams["stackMCHistograms"] = True
+                myParams["addMCUncertainty"] = True
+                myParams["addLuminosityText"] = True
+                # Remove non-dientified keywords
+                del myParams["unit"]
+                # Do plotting
+                myDrawer = plots.PlotDrawer(**myParams)
                 myDrawer(myStackPlot, "%s/DataDrivenCtrlPlot_%02d_%s"%(self._dirname,i,myCtrlPlot.title))
 
                 # FIXME: Add here piece of code to fill the selection flow plot
@@ -332,9 +339,9 @@ class ControlPlotMaker:
                     myRange = "%.1f"%myWidth
                 else:
                     myRange = "%d"%myWidth
-            hFrame.SetYTitle(details["ytitle"]+" / %s %s"%(myRange,details["unit"]))
+            hFrame.SetYTitle(details["ylabel"]+" / %s %s"%(myRange,details["unit"]))
         else:
-            hFrame.SetYTitle(details["ytitle"])
+            hFrame.SetYTitle(details["ylabel"])
         self._setHistoStyle(hFrame)
         hFrame.GetXaxis().SetTitleSize(0)
         hFrame.GetXaxis().SetLabelSize(0)
@@ -349,9 +356,9 @@ class ControlPlotMaker:
         hRatio.SetMinimum(1.0-details["DeltaRatio"])
         hRatio.SetMaximum(1.0+details["DeltaRatio"])
         if len(details["unit"]) > 0:
-            hRatio.SetXTitle(details["xtitle"]+", "+details["unit"])
+            hRatio.SetXTitle(details["xlabel"]+", "+details["unit"])
         else:
-            hRatio.SetXTitle(details["xtitle"])
+            hRatio.SetXTitle(details["xlabel"])
         hRatio.SetYTitle("Data/Exp.")
         hRatio.GetYaxis().SetNdivisions(505)
         ci = ROOT.TColor.GetColor("#ff3399")
@@ -514,8 +521,8 @@ class SelectionFlowPlotMaker:
                             "rangeMin": 0.0,
                             "rangeMax": myBinCount,
                             "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                            "xtitle": "Step",
-                            "ytitle": "Events",
+                            "xlabel": "Step",
+                            "ylabel": "Events",
                             "unit": "",
                             "logy": True,
                             "DeltaRatio": 0.5,
