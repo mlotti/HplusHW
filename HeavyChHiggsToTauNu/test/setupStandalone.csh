@@ -23,7 +23,7 @@ if( ! -e .python/HiggsAnalysis/HeavyChHiggsToTauNu) then
 endif
 
 if( ${?PYTHONPATH} ) then
-    setenv PYTHONPATH ${PYTHONPATH}:${PWD}/.python
+    setenv PYTHONPATH ${PWD}/.python:${PYTHONPATH}
 else
     setenv PYTHONPATH ${PWD}/.python
 endif
