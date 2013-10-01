@@ -5,7 +5,7 @@ DataCardName    = 'Default_7TeV'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_vitalonly_correctCtrlPlots'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/testInverted'
-Path = "/home/wendland/data/v445/2013-09-09"
+Path = "/home/wendland/data/v445/2013-09-24"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
@@ -898,7 +898,7 @@ MergeNuisances.append(["pileup","pileup_fakes"])
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput
 ControlPlots = []
 
-if False: # FIXME: bug fixed in place of Njets cut in QCD measurements, need to rerun mcrab
+if False: # there's a bug in data for this plot (the underflow was not empty, under investigation)
     ControlPlots.append(ControlPlotInput(
         title            = "Njets",
         signalHHid       = [-1],
@@ -922,29 +922,29 @@ if False: # FIXME: bug fixed in place of Njets cut in QCD measurements, need to 
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
     ))
-    ControlPlots.append(ControlPlotInput(
-        title            = "Njets",
-        signalHHid       = [-1],
-        signalHWid       = [0],
-        QCDid            = [3],
-        embeddingId      = EmbeddingIdList,
-        EWKfakeId        = EWKFakeIdList,
-        signalHistoPath  = "ForDataDrivenCtrlPlots",
-        signalHistoName  = "NjetsAfterJetSelectionAndMETSF",
-        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
-        EWKfakeHistoName  = "NjetsAfterJetSelectionAndMETSF",
-        QCDFactNormalisation = "/CtrlNjets",
-        QCDFactHistoName = "/CtrlNjets",
-        details          = { "xlabel": "Number of selected jets",
-                             "ylabel": "Events",
-                             "divideByBinWidth": False,
-                             "unit": "",
-                             "log": True,
-                             "optsLog": {"ymin": 0.9} },
-        blindedRange     = [], # specify range min,max if blinding applies to this control plot
-        evaluationRange  = [], # specify range to be evaluated and saved into a file
-        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
-    ))
+ControlPlots.append(ControlPlotInput(
+    title            = "NjetsAfterMETSF",
+    signalHHid       = [-1],
+    signalHWid       = [0],
+    QCDid            = [3],
+    embeddingId      = EmbeddingIdList,
+    EWKfakeId        = EWKFakeIdList,
+    signalHistoPath  = "ForDataDrivenCtrlPlots",
+    signalHistoName  = "NjetsAfterJetSelectionAndMETSF",
+    EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+    EWKfakeHistoName  = "NjetsAfterJetSelectionAndMETSF",
+    QCDFactNormalisation = "/CtrlNjets",
+    QCDFactHistoName = "/CtrlNjets",
+    details          = { "xlabel": "Number of selected jets",
+                         "ylabel": "Events",
+                         "divideByBinWidth": False,
+                         "unit": "",
+                         "log": True,
+                         "optsLog": {"ymin": 0.9} },
+    blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [], # specify range to be evaluated and saved into a file
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+))
 
 for i in range(0,4):
     ControlPlots.append(ControlPlotInput(

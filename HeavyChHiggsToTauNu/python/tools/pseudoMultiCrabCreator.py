@@ -134,8 +134,8 @@ class PseudoMultiCrabModule:
             self._hSplittedBinInfo.SetBinContent(i, self._hSplittedBinInfo.GetBinContent(i)/myControlValue)
         self._hSplittedBinInfo.SetName("SplittedBinInfo")
         # Copy parameter set information
-        (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("parameterSet")
-        self._psetInfo = objs[0].Clone()
+        #(objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("parameterSet")
+        #self._psetInfo = objs[0].Clone()
         # Copy data version and set it to pseudo
         (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/dataVersion")
         self._dataVersion = objs[0].Clone()
@@ -203,7 +203,7 @@ class PseudoMultiCrabModule:
         # Save splittedBinInfo
         self._hSplittedBinInfo.SetDirectory(myModuleDir)
         # Save parameter set, code version and data version
-        myModuleDir.Add(self._psetInfo)
+        #myModuleDir.Add(self._psetInfo)
         # Create config info for the module
         myConfigInfoDir = myModuleDir.mkdir("configInfo")
         self._hConfigInfo = ROOT.TH1F("configinfo","configinfo",2,0,2) # Have to store the histogram to keep it alive for writing        self._hConfigInfo.GetXaxis().SetBinLabel(1,"control")
@@ -216,7 +216,6 @@ class PseudoMultiCrabModule:
         self._hConfigInfo.SetDirectory(myConfigInfoDir)
         myConfigInfoDir.Add(self._dataVersion)
         myConfigInfoDir.Add(self._codeVersion)
-        #self._psetInfo.SetDirectory(rootfile)
         #.SetDirectory(rootfile)
         #self._codeVersion.SetDirectory(rootfile)
 
