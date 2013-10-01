@@ -5,6 +5,7 @@
 <use   name="DataFormats/MuonReco"/>
 <use   name="DataFormats/HLTReco"/>
 <use   name="DataFormats/PatCandidates"/>
+<use   name="RecoTauTag/TauTagTools"/>
 <use   name="SimDataFormats/GeneratorProducts"/>
 <use   name="SimGeneral/HepPDTRecord"/>
 <library   file="*.cc" name="HiggsAnalysisValidationPlugins">
