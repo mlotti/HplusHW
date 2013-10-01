@@ -1219,7 +1219,7 @@ class RootHistoWithUncertainties:
         th1MinusSource = th1Minus
         if th1MinusSource == None:
             th1MinusSource = th1Plus
-        for bin in xrange(0, th1.GetNbinsX()+2):
+        for bin in xrange(0, th1Plus.GetNbinsX()+2):
             absUncertUp = th1Plus.GetBinContent(bin)*self._rootHisto.GetBinContent(bin)
             sqSumPlus.SetBinError(bin, math.sqrt(sqSumPlus.GetBinError(bin)**2+absUncertUp**2))
             absUncertDown = th1MinusSource.GetBinContent(bin)*self._rootHisto.GetBinContent(bin)
