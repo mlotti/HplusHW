@@ -739,7 +739,7 @@ namespace HPlus {
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
     if (transverseMass > 40 && transverseMass < 100)
-      hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), btagData.getBJetCount());
+      hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), btagDataTmp.getBJetCount());
     // Now cut on MET
     if (metData.getPhiCorrectedSelectedMET()->et() > 50.0) fCommonPlotsAfterMETWithPhiOscillationCorrection->fill(); // FIXME: temp
     if(!metData.passedEvent()) return false;
@@ -750,9 +750,9 @@ namespace HPlus {
 
     // Plot jet matrix
     if (transverseMass > 40 && transverseMass < 100) {
-      hCtrlJetMatrixAfterMET->Fill(jetData.getHadronicJetCount(), btagData.getBJetCount());
+      hCtrlJetMatrixAfterMET->Fill(jetData.getHadronicJetCount(), btagDataTmp.getBJetCount());
       if (metData.getSelectedMET()->et() > 100.0)
-        hCtrlJetMatrixAfterMET100->Fill(jetData.getHadronicJetCount(), btagData.getBJetCount());
+        hCtrlJetMatrixAfterMET100->Fill(jetData.getHadronicJetCount(), btagDataTmp.getBJetCount());
 
     }
 
