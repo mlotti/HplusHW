@@ -473,6 +473,8 @@ namespace HPlus {
         if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis)
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet4, data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
       }
+      if (!data.passBackToBackCutForJet(i))
+        myPassStatus = false;
     }
   }
 

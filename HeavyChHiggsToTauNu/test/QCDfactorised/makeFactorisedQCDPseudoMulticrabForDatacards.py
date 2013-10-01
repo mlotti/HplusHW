@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# Description: Calculates the QCD factorised method result and creates a pseudo-multicrab directory as output
+# Works for the QCD factorised method
+# Author: Lauri Wendland
+
 import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -153,6 +157,7 @@ if __name__ == "__main__":
     # Loop over era/searchMode/optimizationMode combos
     myDisplayStatus = True
     myTotalModules = myModuleSelector.getSelectedCombinationCount() * (len(mySystematicsNames)+1) * len(myShapes)
+    myModuleSelector.printSelectedCombinationCount()
     # Loop over era/searchMode/optimizationMode options
 
     # Create pseudo-multicrab creator
@@ -183,9 +188,9 @@ if __name__ == "__main__":
                         myStartTime = time.time()
                         doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString)
                         printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
-        # Now write output to disk
-        print "\nWriting output to disk shape %s..."%massType
-        myOutputCreator.writeRootFileToDisk(massType)
+    # Now write output to disk
+    print "\nWriting output to disk shape %s..."%massType
+    myOutputCreator.writeRootFileToDisk(massType)
     # Create rest of pseudo multicrab directory
     myOutputCreator.finalize()
     print "Average processing time of one module: %.1f s"%((time.time()-myGlobalStartTime)/float(myTotalModules))

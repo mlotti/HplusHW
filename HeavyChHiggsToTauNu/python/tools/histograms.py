@@ -2014,7 +2014,7 @@ class HistoManagerImpl:
         self.drawList = notSelected
 
         self.legendList = filter(lambda x: x in notSelected, self.legendList)
-        self.legendList.insert(firstIndex+1, stacked)
+        self.legendList.insert(firstIndex, stacked)
 
         self._populateMap()
 
