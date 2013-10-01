@@ -664,9 +664,9 @@ namespace HPlus {
     }
 
     // BTagging::silentAnalyze() needs to be called before the first call to BTaggingEfficiencyInMC::silentAnalyze()
-    BTagging::Data btagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
 
-    BTaggingEfficiencyInMC::Data bTagEffData_afterCollinearCut = fBTaggingEfficiencyInMC.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20(), btagData);
+    BTaggingEfficiencyInMC::Data bTagEffData_afterCollinearCut = fBTaggingEfficiencyInMC.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagDataTmp);
     for (edm::PtrVector<pat::Jet>::iterator jet = bTagEffData_afterCollinearCut.getGenuineBJets().begin(); jet != bTagEffData_afterCollinearCut.getGenuineBJets().end(); ++jet) {
       hGenuineBJetPt->Fill((*jet)->pt());
       hGenuineBJetEta->Fill((*jet)->eta());
@@ -745,9 +745,7 @@ namespace HPlus {
 
 
 //------ b tagging cut
-
-//    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
-    btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     if(btagData.passedEvent())
       increment(fBTaggingCounter);
     // Apply scale factor as weight to event
