@@ -41,6 +41,7 @@ class ControlPlotMaker:
         print "\n"+HighlightStyle()+"Generating control plots"+NormalStyle()
         # Loop over mass points
         for m in self._config.MassPoints:
+            print "... mass = %d GeV"%m
             # Initialize flow plot
             selectionFlow = SelectionFlowPlotMaker(self._config, m)
             myBlindingCount = 0
