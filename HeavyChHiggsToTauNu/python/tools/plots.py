@@ -1122,7 +1122,7 @@ class PlotBase:
         for h in self.histoMgr.getHistos():
             if h.isData():
                 h.setLegendStyle("P")
-            elif "TTTo" in h.getName():
+            elif isSignal(h.getName()):
                 h.setLegendStyle("L")
 
     ## Set the default legend labels
