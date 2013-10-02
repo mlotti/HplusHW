@@ -21,6 +21,8 @@ import ROOT
 class ControlPlotMaker:
     ## Constructor
     def __init__(self, opts, config, dirname, luminosity, observation, datasetGroups):
+        plots._legendLabels["MCStatError"] = "Bkg. stat."
+        plots._legendLabels["MCStatSystError"] = "Bkg. stat.#oplussyst."
         if config.ControlPlots == None:
             return
         myStyle = tdrstyle.TDRStyle()

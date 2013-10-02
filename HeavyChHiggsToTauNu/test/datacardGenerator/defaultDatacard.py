@@ -120,7 +120,7 @@ myQCDFact = DataGroup(
     validMassPoints = MassPoints,
     datasetType  = "QCD factorised",
     datasetDefinition = "QCDfactorisedmt",
-    nuisances    = myShapeSystematics[:]+["QCD_metshape","stat_binByBin"],
+    nuisances    = myShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","stat_binByBin"],
     shapeHisto   = SignalShapeHisto,
 )
 
@@ -130,7 +130,7 @@ myQCDInv = DataGroup(
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
     datasetDefinition = "QCDfactorisedmt",
-    nuisances    = myShapeSystematics[:]+["QCD_metshape","stat_binByBin","QCDinvTemplateFit"],
+    nuisances    = myShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","stat_binByBin","QCDinvTemplateFit"],
     shapeHisto   = SignalShapeHisto,
 )
 
@@ -169,7 +169,7 @@ if not OptionReplaceEmbeddingByMC:
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","xsect_tt_7TeV","lumi","stat_binByBin_fakes"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","top_pt","xsect_tt_7TeV","lumi","stat_binByBin_fakes"],
     ))
     DataGroups.append(DataGroup(
         label        = "W_EWK_faketau",
@@ -217,7 +217,7 @@ else:
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","xsect_tt_7TeV","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","top_pt","xsect_tt_7TeV","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "Wjets_MC",
@@ -469,6 +469,13 @@ if OptionIncludeSystematics:
         function      = "ShapeVariation",
         systVariation = "BTagSF",
     ))
+    Nuisances.append(Nuisance(
+        id            = "top_pt",
+        label         = "top pT reweighting",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "TopPtWeight",
+    ))
 else:
     Nuisances.append(Nuisance(
         id            = "ES_taus",
@@ -554,6 +561,14 @@ else:
         function      = "Constant",
         value         = 0.05,
     ))
+    Nuisances.append(Nuisance(
+        id            = "top_pt",
+        label         = "NON-EXACT VALUE for top pT reweighting",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.15,
+    ))
+
 
 Nuisances.append(Nuisance(
     id            = "ES_taus_tempForEmbedding",
