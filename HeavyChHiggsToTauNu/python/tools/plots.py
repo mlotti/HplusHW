@@ -2296,7 +2296,7 @@ class PlotDrawer:
         except KeyError:
             pass
         try:
-            ret = _update(ret, args[attr])
+            ret = _update(ret, args[attr+attrPostfix])
         except KeyError:
             pass
 
