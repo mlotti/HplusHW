@@ -885,9 +885,12 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         h1 = histo1.getRootHisto()
         h2 = histo2.getRootHisto()
 
+        # Add scaled stat uncertainty
         ret.extend(_createRatioHistosErrorScale(h1, h2, ytitle))
         if histograms.uncertaintyMode.equal(histograms.Uncertainty.StatOnly):
             return ret
+
+        # Then add scaled stat+syst uncertainty
 
         # Get new TGraphAsymmErrors for stat+syst, then scale it
         ratioSyst = histo2.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
@@ -1953,8 +1956,8 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
 
             self._normalizeToOne()
             self._createFrameRatio(filename,
-                                   self.histoMgr.getHisto("Data").getRootHisto(),
-                                   self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
+                                   self.histoMgr.getHisto("Data").getRootHistoWithUncertainties(),
+                                   self.histoMgr.getHisto("StackedMC").getSumRootHistoWithUncertainties(),
                                    "Data/MC", **kwargs)
 
     ## Add cut box and/or line
