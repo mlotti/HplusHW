@@ -35,47 +35,6 @@ namespace HPlus {
   }
   TauTriggerEfficiencyScaleFactor::~TauTriggerEfficiencyScaleFactor() {}
 
-  double TauTriggerEfficiencyScaleFactor::dataEfficiency(const pat::Tau& tau) const {
-    return fBinned.dataEfficiency(tau.pt());
-  }
-  double TauTriggerEfficiencyScaleFactor::dataEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
-    return fBinned.dataEfficiencyRelativeUncertainty(tau.pt());
-  }
-  double TauTriggerEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const {
-    return fBinned.dataEfficiencyAbsoluteUncertainty(tau.pt());
-  }
-
-  double TauTriggerEfficiencyScaleFactor::dataAverageEfficiency(const pat::Tau& tau) const {
-    return fBinned.dataAverageEfficiency(tau.pt());
-  }
-  double TauTriggerEfficiencyScaleFactor::dataAverageEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
-    return fBinned.dataAverageEfficiencyRelativeUncertainty(tau.pt());
-  }
-  double TauTriggerEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const {
-    return fBinned.dataAverageEfficiencyAbsoluteUncertainty(tau.pt());
-  }
-
-
-  double TauTriggerEfficiencyScaleFactor::mcEfficiency(const pat::Tau& tau) const {
-    return fBinned.mcEfficiency(tau.pt());
-  }
-  double TauTriggerEfficiencyScaleFactor::mcEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
-    return fBinned.mcEfficiencyRelativeUncertainty(tau.pt());
-  }
-  double TauTriggerEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const {
-    return fBinned.mcEfficiencyAbsoluteUncertainty(tau.pt());
-  }
-
-  double TauTriggerEfficiencyScaleFactor::scaleFactor(const pat::Tau& tau) const {
-    return fBinned.scaleFactor(tau.pt());
-  }
-  double TauTriggerEfficiencyScaleFactor::scaleFactorRelativeUncertainty(const pat::Tau& tau) const {
-    return fBinned.scaleFactorRelativeUncertainty(tau.pt());
-  }
-  double TauTriggerEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty(const pat::Tau& tau) const {
-    return fBinned.scaleFactorAbsoluteUncertainty(tau.pt());
-  }
-
   TauTriggerEfficiencyScaleFactor::Data TauTriggerEfficiencyScaleFactor::applyEventWeight(const pat::Tau& tau, bool isData, EventWeight& eventWeight) {
     Data output = fBinned.getEventWeight(tau.pt(), isData);
 

@@ -105,10 +105,6 @@ namespace HPlus {
     if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "ConstantEfficiencyScaleFactor: Must call ConstantEfficiencyScaleFactor::setRun() before dataEfficiency()" << std::endl;
     return fData.fCurrentRunData->values;
   }
-  double ConstantEfficiencyScaleFactor::dataEfficiencyRelativeUncertainty() const {
-    if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "ConstantEfficiencyScaleFactor: Must call ConstantEfficiencyScaleFactor::setRun() before dataEfficiencyRelativeUncertainty()" << std::endl;
-    return fData.fCurrentRunData->uncertainties / fData.fCurrentRunData->values;
-  }
   double ConstantEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty() const {
     if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "ConstantEfficiencyScaleFactor: Must call ConstantEfficiencyScaleFactor::setRun() before dataEfficiencyAbsoluteUncertainty()" << std::endl;
     return fData.fCurrentRunData->uncertainties;
@@ -117,18 +113,12 @@ namespace HPlus {
   double ConstantEfficiencyScaleFactor::dataAverageEfficiency() const {
     return fData.fEffDataAverageValues;
   }
-  double ConstantEfficiencyScaleFactor::dataAverageEfficiencyRelativeUncertainty() const {
-    return fData.fEffDataAverageUncertainties / fData.fEffDataAverageValues;
-  }
   double ConstantEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty() const {
     return fData.fEffDataAverageUncertainties;
   }
 
   double ConstantEfficiencyScaleFactor::mcEfficiency() const {
     return fData.fEffMCValues;
-  }
-  double ConstantEfficiencyScaleFactor::mcEfficiencyRelativeUncertainty() const {
-    return fData.fEffMCUncertainties / fData.fEffMCValues;
   }
   double ConstantEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertainty() const {
     return fData.fEffMCUncertainties;
@@ -137,9 +127,6 @@ namespace HPlus {
 
   double ConstantEfficiencyScaleFactor::scaleFactor() const {
     return fData.fScaleValues;
-  }
-  double ConstantEfficiencyScaleFactor::scaleFactorRelativeUncertainty() const {
-    return fData.fScaleUncertainties / fData.fScaleValues;
   }
   double ConstantEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty() const {
     return fData.fScaleUncertainties;

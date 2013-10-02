@@ -23,25 +23,21 @@ namespace HPlus {
 
     void setRun(unsigned run);
 
-    double dataEfficiency() const;
-    double dataEfficiencyRelativeUncertainty() const;
-    double dataEfficiencyAbsoluteUncertainty() const;
-
-    double dataAverageEfficiency() const;
-    double dataAverageEfficiencyRelativeUncertainty() const;
-    double dataAverageEfficiencyAbsoluteUncertainty() const;
-
-    double mcEfficiency() const;
-    double mcEfficiencyRelativeUncertainty() const;
-    double mcEfficiencyAbsoluteUncertainty() const;
-
-    double scaleFactor() const;
-    double scaleFactorRelativeUncertainty() const;
-    double scaleFactorAbsoluteUncertainty() const;
-
     Data getEventWeight(bool isData) const;
 
   private:
+    double dataEfficiency() const;
+    double dataEfficiencyAbsoluteUncertainty() const;
+
+    double dataAverageEfficiency() const;
+    double dataAverageEfficiencyAbsoluteUncertainty() const;
+
+    double mcEfficiency() const;
+    double mcEfficiencyAbsoluteUncertainty() const;
+
+    double scaleFactor() const;
+    double scaleFactorAbsoluteUncertainty() const;
+
     EfficiencyScaleFactorData<double> fData;
   };
 }

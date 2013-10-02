@@ -154,11 +154,6 @@ namespace HPlus {
     if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "BinnedEfficiencyScaleFactor: Must call BinnedEfficiencyScaleFactor::setRun() before dataEfficiency()" << std::endl;
     return fData.fCurrentRunData->values[index(value)];
   }
-  double BinnedEfficiencyScaleFactor::dataEfficiencyRelativeUncertainty(double value) const {
-    if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "BinnedEfficiencyScaleFactor: Must call BinnedEfficiencyScaleFactor::setRun() before dataEfficiencyRelativeUncertainty()" << std::endl;
-    size_t i = index(value);
-    return fData.fCurrentRunData->uncertainties[i] / fData.fCurrentRunData->values[i];
-  }
   double BinnedEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty(double value) const {
     if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "BinnedEfficiencyScaleFactor: Must call BinnedEfficiencyScaleFactor::setRun() before dataEfficiencyAbsoluteUncertainty()" << std::endl;
     return fData.fCurrentRunData->uncertainties[index(value)];
@@ -167,20 +162,12 @@ namespace HPlus {
   double BinnedEfficiencyScaleFactor::dataAverageEfficiency(double value) const {
     return fData.fEffDataAverageValues[index(value)];
   }
-  double BinnedEfficiencyScaleFactor::dataAverageEfficiencyRelativeUncertainty(double value) const {
-    size_t i = index(value);
-    return fData.fEffDataAverageUncertainties[i] / fData.fEffDataAverageValues[i];
-  }
   double BinnedEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty(double value) const {
     return fData.fEffDataAverageUncertainties[index(value)];
   }
 
   double BinnedEfficiencyScaleFactor::mcEfficiency(double value) const {
     return fData.fEffMCValues[index(value)];
-  }
-  double BinnedEfficiencyScaleFactor::mcEfficiencyRelativeUncertainty(double value) const {
-    size_t i = index(value);
-    return fData.fEffMCUncertainties[i] / fData.fEffMCValues[i];
   }
   double BinnedEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertainty(double value) const {
     return fData.fEffMCUncertainties[index(value)];
@@ -189,10 +176,6 @@ namespace HPlus {
 
   double BinnedEfficiencyScaleFactor::scaleFactor(double value) const {
     return fData.fScaleValues[index(value)];
-  }
-  double BinnedEfficiencyScaleFactor::scaleFactorRelativeUncertainty(double value) const {
-    size_t i = index(value);
-    return fData.fScaleUncertainties[i] / fData.fScaleValues[i];
   }
   double BinnedEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty(double value) const {
     return fData.fScaleUncertainties[index(value)];
