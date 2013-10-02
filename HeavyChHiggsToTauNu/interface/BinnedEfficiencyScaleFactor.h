@@ -32,13 +32,16 @@ namespace HPlus {
 
   private:
     double dataEfficiency(double value) const;
-    double dataEfficiencyAbsoluteUncertainty(double value) const;
+    double dataEfficiencyAbsoluteUncertaintyPlus(double value) const;
+    double dataEfficiencyAbsoluteUncertaintyMinus(double value) const;
 
     double dataAverageEfficiency(double value) const;
-    double dataAverageEfficiencyAbsoluteUncertainty(double value) const;
+    double dataAverageEfficiencyAbsoluteUncertaintyPlus(double value) const;
+    double dataAverageEfficiencyAbsoluteUncertaintyMinus(double value) const;
 
     double mcEfficiency(double value) const;
-    double mcEfficiencyAbsoluteUncertainty(double value) const;
+    double mcEfficiencyAbsoluteUncertaintyPlus(double value) const;
+    double mcEfficiencyAbsoluteUncertaintyMinus(double value) const;
 
     double scaleFactor(double value) const;
     double scaleFactorAbsoluteUncertainty(double value) const;

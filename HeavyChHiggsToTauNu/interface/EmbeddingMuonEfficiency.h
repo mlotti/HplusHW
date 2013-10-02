@@ -25,33 +25,40 @@ namespace HPlus {
 
   class EmbeddingMuonEfficiency {
   public:
-    class Data: public EfficiencyScaleFactorBase::Data {
+    class Data: private EfficiencyScaleFactorBase::Data {
       typedef EfficiencyScaleFactorBase::Data Base;
     public:
       Data();
       template <typename T>
       explicit Data(const T& data) {
         fWeight = data.getEventWeight();
-        fWeightAbsUnc = data.getEventWeightAbsoluteUncertainty();
+        fWeightAbsUncPlus = data.getEventWeightAbsoluteUncertaintyPlus();
+        fWeightAbsUncMinus  = data.getEventWeightAbsoluteUncertaintyMinus();
         fEfficiency = fWeight;
-        fEfficiencyAbsUnc = fWeightAbsUnc;
+        fEfficiencyAbsUncPlus = fWeightAbsUncPlus;
+        fEfficiencyAbsUncMinus = fWeightAbsUncMinus;
       }
       ~Data();
 
       void check() const;
 
       const double getEventWeight() const { check(); return Base::getEventWeight(); }
+      const double getEventWeightAbsoluteUncertaintyPlus() const { check(); return Base::getEventWeightAbsoluteUncertaintyPlus(); }
+      const double getEventWeightAbsoluteUncertaintyMinus() const { check(); return Base::getEventWeightAbsoluteUncertaintyMinus(); }
       const double getEventWeightAbsoluteUncertainty() const { check(); return Base::getEventWeightAbsoluteUncertainty(); }
       const double getEventWeightRelativeUncertainty() const { check(); return Base::getEventWeightRelativeUncertainty(); }
 
       const double getEfficiency() const { check(); return fEfficiency; }
-      const double getEfficiencyAbsoluteUncertainty() const { check(); return fEfficiencyAbsUnc; }
-      const double getEfficiencyRelativeUncertainty() const { check(); return fEfficiencyAbsUnc/fEfficiency; }
+      const double getEfficiencyAbsoluteUncertaintyPlus() const { check(); return fEfficiencyAbsUncPlus; }
+      const double getEfficiencyAbsoluteUncertaintyMinus() const { check(); return fEfficiencyAbsUncMinus; }
+      const double getEfficiencyAbsoluteUncertainty() const { check(); return std::max(fEfficiencyAbsUncPlus, fEfficiencyAbsUncMinus); }
+      const double getEfficiencyRelativeUncertainty() const { return getEfficiencyAbsoluteUncertainty()/fEfficiency; }
 
       friend class EmbeddingMuonEfficiency;
     private:
       double fEfficiency;
-      double fEfficiencyAbsUnc;
+      double fEfficiencyAbsUncPlus;
+      double fEfficiencyAbsUncMinus;
     };
 
     explicit EmbeddingMuonEfficiency(const edm::ParameterSet& iConfig);
