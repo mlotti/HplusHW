@@ -621,11 +621,11 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=False):
                                         array.array("d", yerrs), array.array("d", yerrs))
         else:
             gr = ROOT.TGraphAsymmErrors()
-        _plotStyles["Ratio"].apply(ratio)
+        _plotStyles["Ratio"].apply(gr)
         gr.GetYaxis().SetTitle(ytitle)
 
         if returnHisto:
-            return [_createHisto(ratio, drawStyle="EPZ", legendLabel=None)]
+            return [_createHisto(gr, drawStyle="EPZ", legendLabel=None)]
         else:
             return gr
     elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
