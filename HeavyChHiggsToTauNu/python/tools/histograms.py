@@ -586,6 +586,45 @@ def sumRootHistos(rootHistos, postfix="_sum"):
         h.Add(a)
     return h
 
+def drawNonVisibleErrorsTH1(th1):
+    if isinstance(th1, ROOT.TH2):
+        raise Exception("This function supports only 1D TH1, got %s" % th1.__class__.__name__)
+
+    # Get the Y-axis min/max from pad
+    pad_ymin = ROOT.gPad.GetUymin()
+    pad_ymax = ROOT.gPad.GetUymax()
+
+    ret = []
+    for i in xrange(1, th1.GetNbinsX()+1):
+        x = th1.GetBinCenter(i)
+        y = th1.GetBinContent(i)
+        ymin = y - th1.GetBinError(i)
+        ymax = y + th1.GetBinError(i)
+
+        line = None
+        if y < pad_ymin and ymax > pad_ymin:
+            line = ROOT.TLine(x, pad_ymin, x, ymax)
+            aux.copyStyle(th1, line)
+            line.Draw("same")
+            ret.append(line)
+        elif y > pad_ymax and ymin < pad_ymax:
+            line = ROOT.TLine(x, ymin, x, pad_ymax)
+            aux.copyStyle(th1, line)
+            line.Draw("same")
+            ret.append(line)
+    return ret
+
+def drawNonVisibleErrorsTGraph(tgraph):
+    # Get the Y-axis min/max from pad
+    pad_ymin = ROOT.gPad.GetYmin()
+    pad_ymax = ROOT.gPad.GetYmax()
+#    print "FOO", ROOT.gPad.GetUxmin(), ROOT.gPad.GetUxmax(),ROOT.gPad.GetUymin(), ROOT.gPad.GetUymax()
+    for i in xrange(0, tgraph.GetN()):
+        ymin = tgraph.GetY()[i]-tgraph.GetErrorYhigh(i)
+        ymax = tgraph.GetErrorYhigh(i)+tgraph.GetY()[i]
+        print ymin, tgraph.GetY()[i], ymax
+    raise Exception("This function is not finished because of lack of need")
+
 ## Helper function for lessThan/greaterThan argument handling
 #
 # \param kwargs  Keyword arguments
@@ -1336,7 +1375,14 @@ class Histo:
             if unc is not None:
                 unc.Draw(self._uncertaintyDrawStyle+" "+opt)
         if self.drawStyle is not None:
-            h.Draw(self.drawStyle+" "+opt)
+            drawStyle = self.drawStyle+" "+opt
+            h.Draw(drawStyle)
+            tmp = drawStyle.lower()
+            if "e" in tmp and "p" in tmp:
+                if isinstance(h, ROOT.TH1):
+                    self._nonVisibleErrorLinesTH1 = drawNonVisibleErrorsTH1(h)
+#                elif isinstance(h, ROOT.TGraphErrors):
+#                    drawNonVisibleErrorsTGraph(h)
 
     def Draw(self, *args):
         self.draw(*args)
