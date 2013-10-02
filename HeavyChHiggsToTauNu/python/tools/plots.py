@@ -1456,8 +1456,8 @@ class PlotRatioBase:
         delattr(self, "legend")
         del self.ratioLegend
 
-    def setRatioLegendHEader(self, legendHeader):
-        self.ratioLegendHEader = legendHeader
+    def setRatioLegendHeader(self, legendHeader):
+        self.ratioLegendHeader = legendHeader
 
     ## Create TCanvas and frame with ratio pad for single ratio
     #
