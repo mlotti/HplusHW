@@ -603,12 +603,12 @@ def drawNonVisibleErrorsTH1(th1):
 
         line = None
         if y < pad_ymin and ymax > pad_ymin:
-            line = ROOT.TLine(x, pad_ymin, x, ymax)
+            line = ROOT.TLine(x, pad_ymin, x, min(pad_ymax, ymax))
             aux.copyStyle(th1, line)
             line.Draw("same")
             ret.append(line)
         elif y > pad_ymax and ymin < pad_ymax:
-            line = ROOT.TLine(x, ymin, x, pad_ymax)
+            line = ROOT.TLine(x, max(pad_ymin, ymin), x, pad_ymax)
             aux.copyStyle(th1, line)
             line.Draw("same")
             ret.append(line)
