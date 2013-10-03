@@ -206,8 +206,6 @@ class ControlPlotInput:
                  signalHistoName,
                  EWKfakeHistoPath,
                  EWKfakeHistoName,
-                 QCDFactNormalisation,
-                 QCDFactHistoName,
                  details,
                  blindedRange,
                  evaluationRange,
@@ -222,8 +220,6 @@ class ControlPlotInput:
         self.signalHistoName = signalHistoName
         self.EWKfakeHistoPath = EWKfakeHistoPath
         self.EWKfakeHistoName = EWKfakeHistoName
-        self.QCDFactNormalisation = QCDFactNormalisation
-        self.QCDFactHistoName = QCDFactHistoName
         self.details = details
         self.blindedRange = blindedRange
         self.evaluationRange = evaluationRange
