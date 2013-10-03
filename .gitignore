@@ -17,6 +17,7 @@ Skimming
 *.html
 fjr*.xml
 *.tar.gz
+*.tgz
 CVS
 HeavyChHiggsToTauNu/CVS
 HeavyChHiggsToTauNu/data
@@ -26,3 +27,5 @@ configDump*.py
 typescript
 *_backup
 stefan*
+datacards_??????_??????_*
+*.bak
