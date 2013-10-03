@@ -54,7 +54,7 @@ namespace HPlus {
     double bins_B[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
     double bins_C[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
     double bins_G[] = {20, 30, 60, 100, 150, 250};
-    double bins_GUDS[] = {20, 30, 60, 100, 150, 250};
+    double bins_UDS[] = {20, 30, 60, 100, 150, 250};
   }
   namespace CSVL {
     // B-tagging scale factors
