@@ -22,6 +22,9 @@ class PythonWriter:
         self.namedSelection = []
         self.bins   = []
 
+    def setInput(self,inString):
+        self.inString = os.path.basename(inString)
+
     def addParameters(self,name,path,label,runrange,lumi,eff):
         #print "check addParameters",name,path,label,runrange,lumi 
         labelFound = False
@@ -72,7 +75,8 @@ class PythonWriter:
         fOUT.write("    return cms.PSet(\n")
         fOUT.write("        pt = cms.double(pt),\n")
         fOUT.write("        efficiency = cms.double(efficiency),\n")
-        fOUT.write("        uncertainty = cms.double(uncertainty)\n")
+        fOUT.write("        uncertaintyPlus = cms.double(uncertaintyPlus),\n")
+        fOUT.write("        uncertaintyMinus = cms.double(uncertaintyMinus)\n")
         fOUT.write("    )\n\n")
 
         #print "check self.namedSelection",self.namedSelection
@@ -99,6 +103,8 @@ class PythonWriter:
             fOUT.write("    # looked dynamically from TriggerEfficiency_cff.py\n\n")
 
             fOUT.write("    # Offline selection: "+selection+"\n\n")
+
+            fOUT.write("    # Used input: "+self.inString+"\n\n")
 
             fOUT.write("    dataParameters = cms.PSet(\n")
             for r in self.ranges:
@@ -145,15 +151,17 @@ class PythonWriter:
             binLowEdge = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetX()[i]
             binLowEdge-= eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorX(i)
             efficiency = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetY()[i]
-            error      = max(eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYhigh(i),eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYlow(i))
+#            error      = max(eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYhigh(i),eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYlow(i))
+            errorPlus = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYhigh(i)
+            errorMinus = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYlow(i)
 #            efficiency = eff.ratios[0].getRootGraph().GetY()[i]
 #            error = max(eff.ratios[0].getRootGraph().GetErrorYhigh(i),eff.ratios[0].getRootGraph().GetErrorYlow(i))
-            fOUT.write("                triggerBin("+str(binLowEdge)+", "+str(efficiency)+", "+str(error)+"),\n")
+            fOUT.write("                triggerBin("+str(binLowEdge)+", "+str(efficiency)+", "+str(errorPlus)+", "+str(errorMinus)+"),\n")
         #print "check writeBins",nbins,len(self.bins)
         if nbins < len(self.bins):
             for i in range(nbins,len(self.bins)):
                 #print self.bins[i],efficiency,error
-                fOUT.write("                triggerBin("+str(self.bins[i])+", "+str(efficiency)+", "+str(error)+"), # duplicated bin\n")
+                fOUT.write("                triggerBin("+str(self.bins[i])+", "+str(efficiency)+", "+str(errorPlus)+", "+str(errorMinus)+"), # duplicated bin\n")
         fOUT.write("            ),\n")
 
     def findBins(self,eff):

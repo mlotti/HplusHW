@@ -94,12 +94,15 @@ class Plotter:
         return eff
 
     def getEfficiency(self,datasets,varexp,num,denom):
+
+#        statOption = ROOT.TEfficiency.kBUniform
+        statOption = ROOT.TEfficiency.kFNormal
 #        print "check getEfficiency"                                                                                                        
         print "    varexp",varexp
         print "    num",num
         print "    denom",denom
         teff = ROOT.TEfficiency()
-        teff.SetStatisticOption(ROOT.TEfficiency.kFNormal)
+#        teff.SetStatisticOption(statOption)
         tn = ROOT.TH1F()
         td = ROOT.TH1F()
         first = True
@@ -129,7 +132,7 @@ class Plotter:
                 continue
 
             eff = ROOT.TEfficiency(n, d)
-            eff.SetStatisticOption(ROOT.TEfficiency.kFNormal)
+#            eff.SetStatisticOption(statOption)
 
             weight = 1
             if dataset.isMC():
@@ -161,7 +164,7 @@ class Plotter:
 #            return ROOT.TEfficiency.Combine(collection,"",len(weights),array.array("d",weights)),n,d
         if isData:
             teff = ROOT.TEfficiency(tn, td)
-            teff.SetStatisticOption(ROOT.TEfficiency.kFNormal)
+#            teff.SetStatisticOption(statOption)
             for i in range(1,td.GetNbinsX()+1):
                 if td.GetBinContent(i) > 0:
                     print "    bin",i,td.GetBinLowEdge(i),tn.GetBinContent(i),td.GetBinContent(i),tn.GetBinContent(i)/td.GetBinContent(i)
@@ -254,7 +257,10 @@ class Plotter:
             dataset2 = self.datasets.getMCDatasets()
             if weight2 == None:
                 dataset1 = dataset2
-        
+            else:
+                num2   = "%s*(%s)" % (weight2, num2)
+                denom2 = "%s*(%s)" % (weight2, denom2)
+
         eff1 = self.getEfficiency(dataset1,varexp, num1, denom1)
         eff2 = self.getEfficiency(dataset2,varexp, num2, denom2)
 
@@ -317,16 +323,16 @@ class Plotter:
 
             ratioweighted = 0
             weight = 0
-            ratio = p.ratios[0]
+            ratio = p.ratioHistoMgr.getHistos()[0]
             print
 #            for bin in xrange(1, n1.GetNbinsX()+1):
             for i in xrange(1, eff1.GetN()):
 #                i = bin-1
 #                print "Bin low edge %.0f" % n1.GetBinLowEdge(bin)
                 print "Bin low edge %.0f" % (eff1.GetX()[i] - eff1.GetErrorXlow(i))
-                print "   1: efficiency %.7f +- %.7f" % (eff1.GetY()[i], max(eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i))), "Entries num"#,n1.GetBinContent(bin),"denom",d1.GetBinContent(bin)
-                print "   2: efficiency %.7f +- %.7f" % (eff2.GetY()[i], max(eff2.GetErrorYhigh(i), eff2.GetErrorYlow(i))), "Entries num"#,n2.GetBinContent(bin),"denom",d2.GetBinContent(bin)
-                print "   ratio:        %.7f +- %.7f" % (ratio.getRootGraph().GetY()[i], max(ratio.getRootGraph().GetErrorYhigh(i), ratio.getRootGraph().GetErrorYlow(i)))
+                print "   1: efficiency %.7f + %.7f - %.7f" % (eff1.GetY()[i], eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i)), "Entries num"#,n1.GetBinContent(bin),"denom",d1.GetBinContent(bin)
+                print "   2: efficiency %.7f + %.7f - %.7f" % (eff2.GetY()[i], eff2.GetErrorYhigh(i), eff2.GetErrorYlow(i)), "Entries num"#,n2.GetBinContent(bin),"denom",d2.GetBinContent(bin)
+                print "   ratio:        %.7f + %.7f - %.7f" % (ratio.getRootGraph().GetY()[i], ratio.getRootGraph().GetErrorYhigh(i), ratio.getRootGraph().GetErrorYlow(i))
                 #if n1.GetBinLowEdge(bin) >= 41:
                 #    weight += eff1.GetY()[i]
                 #    ratioweighted += eff1.GetY()[i]*max(eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i))
