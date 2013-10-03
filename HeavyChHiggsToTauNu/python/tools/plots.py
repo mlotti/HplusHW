@@ -686,8 +686,8 @@ def _graphRemoveNoncommonPoints(graph1, graph2):
     xfound = []
     for i in range(graph1.GetN()):
         for j in range(graph2.GetN()):
-            if histo1.GetX()[i] == graph2.GetX()[j]:
-        	xfound.append(histo1.GetX()[i])
+            if graph1.GetX()[i] == graph2.GetX()[j]:
+        	xfound.append(graph1.GetX()[i])
     remove1 = []
     for i in range(graph1.GetN()):
         found = False
@@ -697,19 +697,19 @@ def _graphRemoveNoncommonPoints(graph1, graph2):
         if not found:
             remove1.append(i)
     remove2 = []
-    for j in range(histo2.GetN()):
+    for j in range(graph2.GetN()):
         found = False
         for x in xfound:
-            if histo2.GetX()[j] == x:
+            if graph2.GetX()[j] == x:
                 found = True
         if not found:
             remove2.append(j)
 
     remove1.reverse()
-    for i in reverse1:
+    for i in remove1:
         ret1.RemovePoint(i)
     remove2.reverse()
-    for i in reverse2:
+    for i in remove2:
         ret2.RemovePoint(i)
 
     return (ret1, ret2)
