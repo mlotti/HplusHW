@@ -51,8 +51,10 @@ namespace HPlus {
     double ptmin[] = {30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500};
   }
   namespace EffBins {
-    double bins_BC[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
-    double bins_GUDS[] = {20, 30, 60, 100, 150, 250};
+    double bins_B[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
+    double bins_C[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
+    double bins_G[] = {20, 30, 60, 100, 150, 250};
+    double bins_UDS[] = {20, 30, 60, 100, 150, 250};
   }
   namespace CSVL {
     // B-tagging scale factors
@@ -578,24 +580,24 @@ namespace HPlus {
     if (fLeadingDiscrCut > 0.243 && fLeadingDiscrCut < 0.245) { // CSVL (Combined Secondary Vertex b-tagging method, Loose working point)
       fTagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVL::SFb, toVector(CSVL::SFb_error));
       fMistagSFTable.setScaleFactorTable(CSVL::SFl, CSVL::SFl_max, CSVL::SFl_min);
-      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVL::eff_BtoB_byPt), toVector(CSVL::effUncertUp_BtoB_byPt), toVector(CSVL::effUncertDown_BtoB_byPt));
-      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVL::eff_CtoB_byPt), toVector(CSVL::effUncertUp_CtoB_byPt), toVector(CSVL::effUncertDown_CtoB_byPt));
-      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVL::eff_GtoB_byPt), toVector(CSVL::effUncertUp_GtoB_byPt), toVector(CSVL::effUncertDown_GtoB_byPt));
-      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVL::eff_UDStoB_byPt), toVector(CSVL::effUncertUp_UDStoB_byPt), toVector(CSVL::effUncertDown_UDStoB_byPt));
+      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_B), toVector(CSVL::eff_BtoB_byPt), toVector(CSVL::effUncertUp_BtoB_byPt), toVector(CSVL::effUncertDown_BtoB_byPt));
+      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_C), toVector(CSVL::eff_CtoB_byPt), toVector(CSVL::effUncertUp_CtoB_byPt), toVector(CSVL::effUncertDown_CtoB_byPt));
+      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_G), toVector(CSVL::eff_GtoB_byPt), toVector(CSVL::effUncertUp_GtoB_byPt), toVector(CSVL::effUncertDown_GtoB_byPt));
+      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_UDS), toVector(CSVL::eff_UDStoB_byPt), toVector(CSVL::effUncertUp_UDStoB_byPt), toVector(CSVL::effUncertDown_UDStoB_byPt));
     } else if (fLeadingDiscrCut > 0.678 && fLeadingDiscrCut < 0.680) { // CSVM (Combined Secondary Vertex b-tagging method, Medium working point)
       fTagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVM::SFb, toVector(CSVM::SFb_error));
       fMistagSFTable.setScaleFactorTable(CSVM::SFl, CSVM::SFl_max, CSVM::SFl_min);
-      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVM::eff_BtoB_byPt), toVector(CSVM::effUncertUp_BtoB_byPt), toVector(CSVM::effUncertDown_BtoB_byPt));
-      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVM::eff_CtoB_byPt), toVector(CSVM::effUncertUp_CtoB_byPt), toVector(CSVM::effUncertDown_CtoB_byPt));
-      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVM::eff_GtoB_byPt), toVector(CSVM::effUncertUp_GtoB_byPt), toVector(CSVM::effUncertDown_GtoB_byPt));
-      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVM::eff_UDStoB_byPt), toVector(CSVM::effUncertUp_UDStoB_byPt), toVector(CSVM::effUncertDown_UDStoB_byPt));
+      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_B), toVector(CSVM::eff_BtoB_byPt), toVector(CSVM::effUncertUp_BtoB_byPt), toVector(CSVM::effUncertDown_BtoB_byPt));
+      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_C), toVector(CSVM::eff_CtoB_byPt), toVector(CSVM::effUncertUp_CtoB_byPt), toVector(CSVM::effUncertDown_CtoB_byPt));
+      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_G), toVector(CSVM::eff_GtoB_byPt), toVector(CSVM::effUncertUp_GtoB_byPt), toVector(CSVM::effUncertDown_GtoB_byPt));
+      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_UDS), toVector(CSVM::eff_UDStoB_byPt), toVector(CSVM::effUncertUp_UDStoB_byPt), toVector(CSVM::effUncertDown_UDStoB_byPt));
     } else if (fLeadingDiscrCut > 0.897 && fLeadingDiscrCut < 0.899) { // CSVT (Combined Secondary Vertex b-tagging method, Tight working point)
       fTagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVT::SFb, toVector(CSVT::SFb_error));
       fMistagSFTable.setScaleFactorTable(CSVT::SFl, CSVT::SFl_max, CSVT::SFl_min);
-      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVT::eff_BtoB_byPt), toVector(CSVT::effUncertUp_BtoB_byPt), toVector(CSVT::effUncertDown_BtoB_byPt));
-      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVT::eff_CtoB_byPt), toVector(CSVT::effUncertUp_CtoB_byPt), toVector(CSVT::effUncertDown_CtoB_byPt));
-      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVT::eff_GtoB_byPt), toVector(CSVT::effUncertUp_GtoB_byPt), toVector(CSVT::effUncertDown_GtoB_byPt));
-      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVT::eff_UDStoB_byPt), toVector(CSVT::effUncertUp_UDStoB_byPt), toVector(CSVT::effUncertDown_UDStoB_byPt));
+      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_B), toVector(CSVT::eff_BtoB_byPt), toVector(CSVT::effUncertUp_BtoB_byPt), toVector(CSVT::effUncertDown_BtoB_byPt));
+      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_C), toVector(CSVT::eff_CtoB_byPt), toVector(CSVT::effUncertUp_CtoB_byPt), toVector(CSVT::effUncertDown_CtoB_byPt));
+      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_G), toVector(CSVT::eff_GtoB_byPt), toVector(CSVT::effUncertUp_GtoB_byPt), toVector(CSVT::effUncertDown_GtoB_byPt));
+      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_UDS), toVector(CSVT::eff_UDStoB_byPt), toVector(CSVT::effUncertUp_UDStoB_byPt), toVector(CSVT::effUncertDown_UDStoB_byPt));
     } else {
       throw cms::Exception("LogicError")  << "The given b-tagging discriminator value does not correspond to any known working point!";
     }
