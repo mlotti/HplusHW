@@ -16,9 +16,8 @@ class SystematicsForMetShapeDifference:
     ## Constructor
     # signalRegion and ctrlRegion are of type dataDrivenQCDCount, they are the shape histograms at the tested stage
     # finalShape is the final shape histogram (needs to be already properly normalised)
-    # histoSpecs is a dictionary (see python/tools/ShapeHistoModifier.py for it's defition)
     # moduleInfoString is a string that is unique to the analysis module
-    def __init__(self, signalRegion, ctrlRegion, finalShape, histoSpecs, moduleInfoString, quietMode=False):
+    def __init__(self, signalRegion, ctrlRegion, finalShape, moduleInfoString, quietMode=False):
         self._signalRegionHistograms = []
         self._ctrlRegionHistograms = []
         self._hCombinedSignalRegion = None
@@ -26,7 +25,7 @@ class SystematicsForMetShapeDifference:
         self._systUpHistogram = None
         self._systDownHistogram = None
         # Calculate
-        self._calculate(signalRegion, ctrlRegion, finalShape, histoSpecs, moduleInfoString, quietMode)
+        self._calculate(signalRegion, ctrlRegion, finalShape, moduleInfoString, quietMode)
 
     ## Delete the histograms
     def delete(self):
@@ -57,7 +56,7 @@ class SystematicsForMetShapeDifference:
     def getDownHistogram(self):
         return self._systDownHistogram
 
-    def _calculate(self, signalRegion, ctrlRegion, finalShape, histoSpecs, moduleInfoString, quietMode):
+    def _calculate(self, signalRegion, ctrlRegion, finalShape, moduleInfoString, quietMode):
         def normaliseToUnity(h):
             # Normalise area to unity since we only care about the shape
             myIntegral = abs(h.Integral(1, h.GetNbinsX()+2))
@@ -92,8 +91,8 @@ class SystematicsForMetShapeDifference:
         # Loop over phase space bins to sum histograms
         for i in range(0, nSplitBins):
             # Get data-driven QCD shapes for MET
-            hSignalRegion = signalRegion.getDataDrivenQCDHistoForSplittedBin(i, histoSpecs)
-            hCtrlRegion = ctrlRegion.getDataDrivenQCDHistoForSplittedBin(i, histoSpecs)
+            hSignalRegion = signalRegion.getDataDrivenQCDHistoForSplittedBin(i)
+            hCtrlRegion = ctrlRegion.getDataDrivenQCDHistoForSplittedBin(i)
             # Add to output histograms
             self._signalRegionHistograms[i].Add(hSignalRegion)
             self._ctrlRegionHistograms[i].Add(hCtrlRegion)
