@@ -47,8 +47,8 @@ public:
       pat::Muon copy = (*hmuons)[iMuon];
 
       //throw cms::Exception("NotYetImplemented") << "TuneP needs update of DataFormats/MuonReco, which is not yet integrated to the common checkoutTags.sh in " << __FILE__ << ":" << __LINE__;
-      reco::TrackRef cktTrack = (muon::tevOptimized(copy, 200, 30., 0., 0.25));
-      if(copy.pt() < 200.0 && cktTrack->pt() < 200.0) {
+      reco::Muon::MuonTrackTypePair cktTrackType = (muon::tevOptimized(copy, 200, 30., 0., 0.25));
+      if(copy.pt() < 200.0 && cktTrackType.first->pt() < 200.0) {
         if(fDoId) {
           if(copy.normChi2() >= fIdMaxChi2) {
             continue;
@@ -60,7 +60,7 @@ public:
       }
       else { // TuneP correction
         if(fDoId) {
-          if(cktTrack->ptError()/cktTrack->pt() >= fIdMaxPtError) {
+          if(cktTrackType.first->ptError()/cktTrackType.first->pt() >= fIdMaxPtError) {
             continue;
           }
           if(!fIdFunction(copy)) {
@@ -68,9 +68,9 @@ public:
           }
         }
         math::XYZTLorentzVector p4 = copy.p4();
-        p4.SetPx(cktTrack->px());
-        p4.SetPy(cktTrack->py());
-        p4.SetPz(cktTrack->pz());
+        p4.SetPx(cktTrackType.first->px());
+        p4.SetPy(cktTrackType.first->py());
+        p4.SetPz(cktTrackType.first->pz());
         copy.setP4(p4);
       }
 
