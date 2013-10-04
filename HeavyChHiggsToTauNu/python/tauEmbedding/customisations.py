@@ -19,7 +19,7 @@ tauEmbeddingMuons = "tauEmbeddingMuons"
 
 def getAllPatTaus():
     if PF2PATVersion == "":
-        return "patTausHpsPFTau"
+        return "patTaus"
     else:
         return "patTaus"+PF2PATVersion
 
