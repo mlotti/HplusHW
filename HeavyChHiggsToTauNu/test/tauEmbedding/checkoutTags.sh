@@ -19,6 +19,7 @@ set -e
 # 13.8.2012/M.Kortelainen CMSSW_4_4_4 Fix compilation of SelectReplacementCandidates.cc
 # 6.5.2013/M.Kortelainen CMSSW_4_4_5 Added MuScleFit correction class
 # 19.8.2013/M.Kortelainen CMSSW_5_3_9_patch3 Removed TauAnalysis/MCEmbeddingTools and MuonAnalysis/MuonAssociators (in release), updated AnalysisDataFormats/EWK
+# 4.10.2013/M.Kortelainen CMSSW_5_3_9_patch3 Hack to circumvent W->taunu embedding-related bug
 
 # We have to add protection for multiple runs in OscarProducer
 addpkg SimG4Core/Application
@@ -31,3 +32,10 @@ cvs up -r1.3 AnalysisDataFormats/EWK/BuildFile.xml
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/MuScleFitCorrections2012
 cvs co -r muscle_v4_2_0 -d MuScleFit/Calibration UserCode/scasasso/MuScleFit/Calibration 
+
+# Circumvetn W->taunu related bug when employing visible tau pt cut,
+# probably not worth of the effort to propagate to 53X release. For >=
+# 62X, it might be worth to make a class of its own for W->taunu
+# embedding instead of it being in ParticleReplacerClass/ParticleReplacerZtautau.
+addpkg TauAnalysis/MCEmbeddingTools
+patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/ParticleReplacerClass.patch

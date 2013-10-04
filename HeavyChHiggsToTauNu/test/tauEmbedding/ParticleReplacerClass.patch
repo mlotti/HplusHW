@@ -1,0 +1,16 @@
+Index: TauAnalysis/MCEmbeddingTools/src/ParticleReplacerClass.cc
+===================================================================
+RCS file: /local/reps/CMSSW/CMSSW/TauAnalysis/MCEmbeddingTools/src/Attic/ParticleReplacerClass.cc,v
+retrieving revision 1.14
+diff -u -p -r1.14 ParticleReplacerClass.cc
+--- TauAnalysis/MCEmbeddingTools/src/ParticleReplacerClass.cc	21 Mar 2012 13:15:43 -0000	1.14
++++ TauAnalysis/MCEmbeddingTools/src/ParticleReplacerClass.cc	4 Oct 2013 13:50:59 -0000
+@@ -531,7 +531,7 @@ bool ParticleReplacerClass::testEvent(He
+       }
+ 
+       // subcut fail
+-      if(iter2->index_ >= collection->size() || (*collection)[iter2->index_] < iter2->pt_)
++      if(iter2->index_ < collection->size() && (*collection)[iter2->index_] < iter2->pt_)
+         break;
+     }
+ 
