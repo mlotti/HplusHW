@@ -120,7 +120,7 @@ myQCDFact = DataGroup(
     validMassPoints = MassPoints,
     datasetType  = "QCD factorised",
     datasetDefinition = "QCDfactorisedmt",
-    nuisances    = myShapeSystematics[:]+["QCD_metshape","stat_binByBin"],
+    nuisances    = myShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","stat_binByBin"],
     shapeHisto   = SignalShapeHisto,
 )
 
@@ -130,7 +130,7 @@ myQCDInv = DataGroup(
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
     datasetDefinition = "QCDfactorisedmt",
-    nuisances    = myShapeSystematics[:]+["QCD_metshape","stat_binByBin","QCDinvTemplateFit"],
+    nuisances    = myShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","stat_binByBin","QCDinvTemplateFit"],
     shapeHisto   = SignalShapeHisto,
 )
 
@@ -169,7 +169,7 @@ if not OptionReplaceEmbeddingByMC:
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","xsect_tt_7TeV","lumi","stat_binByBin_fakes"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","top_pt","xsect_tt_7TeV","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "W_EWK_faketau",
@@ -178,7 +178,7 @@ if not OptionReplaceEmbeddingByMC:
         datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin_fakes"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
@@ -187,7 +187,7 @@ if not OptionReplaceEmbeddingByMC:
         datasetType  = "EWKfake",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin_fakes"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "DY_EWK_faketau",
@@ -196,7 +196,7 @@ if not OptionReplaceEmbeddingByMC:
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin_fakes"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
@@ -205,7 +205,7 @@ if not OptionReplaceEmbeddingByMC:
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin_fakes"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin"],
     ))
 else:
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
@@ -217,7 +217,7 @@ else:
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","xsect_tt_7TeV","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","top_pt","xsect_tt_7TeV","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "Wjets_MC",
@@ -469,6 +469,13 @@ if OptionIncludeSystematics:
         function      = "ShapeVariation",
         systVariation = "BTagSF",
     ))
+    Nuisances.append(Nuisance(
+        id            = "top_pt",
+        label         = "top pT reweighting",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "TopPtWeight",
+    ))
 else:
     Nuisances.append(Nuisance(
         id            = "ES_taus",
@@ -554,6 +561,14 @@ else:
         function      = "Constant",
         value         = 0.05,
     ))
+    Nuisances.append(Nuisance(
+        id            = "top_pt",
+        label         = "NON-EXACT VALUE for top pT reweighting",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.15,
+    ))
+
 
 Nuisances.append(Nuisance(
     id            = "ES_taus_tempForEmbedding",
@@ -866,13 +881,13 @@ Nuisances.append(Nuisance(
     histograms    = SignalShapeHisto,
 ))
 
-Nuisances.append(Nuisance(
-    id            = "stat_binByBin_fakes",
-    label         = "Bin-by-bin stat. uncertainty on the shape",
-    distr         = "shapeStat",
-    function      = "Shape",
-    histograms    = FakeShapeHisto,
-))
+#Nuisances.append(Nuisance(
+    #id            = "stat_binByBin_fakes",
+    #label         = "Bin-by-bin stat. uncertainty on the shape",
+    #distr         = "shapeStat",
+    #function      = "Shape",
+    #histograms    = FakeShapeHisto,
+#))
 
 Nuisances.append(Nuisance(
     id            = "QCDinvTemplateFit",
@@ -910,8 +925,6 @@ if False: # there's a bug in data for this plot (the underflow was not empty, un
         signalHistoName  = "Njets",
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "Njets",
-        QCDFactNormalisation = "/CtrlNjets",
-        QCDFactHistoName = "/CtrlNjets",
         details          = { "xlabel": "Number of selected jets",
                              "ylabel": "Events",
                              "divideByBinWidth": False,
@@ -933,8 +946,6 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "NjetsAfterJetSelectionAndMETSF",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "NjetsAfterJetSelectionAndMETSF",
-    QCDFactNormalisation = "/CtrlNjets",
-    QCDFactHistoName = "/CtrlNjets",
     details          = { "xlabel": "Number of selected jets",
                          "ylabel": "Events",
                          "divideByBinWidth": False,
@@ -943,10 +954,10 @@ ControlPlots.append(ControlPlotInput(
                          "optsLog": {"ymin": 0.9} },
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
-for i in range(0,4):
+for i in range(0,3):
     ControlPlots.append(ControlPlotInput(
         title            = "CollinearTailKillerJet%d"%(i+1),
         signalHHid       = [-1],
@@ -958,8 +969,6 @@ for i in range(0,4):
         signalHistoName  = "ImprovedDeltaPhiCutsJet%dCollinear"%(i+1),
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "ImprovedDeltaPhiCutsJet%dCollinear"%(i+1),
-        QCDFactNormalisation = "/QCDTailKillerJet%dCollinear"%i,
-        QCDFactHistoName = "/QCDTailKillerJet%dCollinear"%i,
         details          = { "xlabel": "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{%d},MET))^{2}}"%(i+1),
                              "ylabel": "Events",
                              "divideByBinWidth": False,
@@ -970,10 +979,9 @@ for i in range(0,4):
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
     ))
-    if i == 0:
-        ControlPlots[len(ControlPlots)-1].flowPlotCaption = "#tau_{h}+#geq3j"
-    else:
-        ControlPlots[len(ControlPlots)-1].flowPlotCaption = "#Delta#phi_{#uparrow#uparrow,%d}"%(i)
+    if i == 2:
+        ControlPlots[len(ControlPlots)-1].flowPlotCaption = "#Delta#phi_{#uparrow#uparrow}"
+
 
 ControlPlots.append(ControlPlotInput(
     title            = "MET",
@@ -986,17 +994,15 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "MET",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "MET",
-    QCDFactNormalisation = "/CtrlMET",
-    QCDFactHistoName = "/CtrlMET",
     details          = { "xlabel": "E_{T}^{miss}",
-                         "ylabel": "dN_{Events}/dE_{T}^{miss}",
+                         "ylabel": "Events/#DeltaE_{T}^{miss}",
                          "divideByBinWidth": True,
                          "unit": "GeV",
                          "log": True,
-                         "optsLog": {"ymin": 0.9} },
+                         "optsLog": {"ymin": 0.0008} },
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "#Delta#phi_{#uparrow#uparrow,4}", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -1010,18 +1016,16 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "NBjets",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "NBjets",
-    QCDFactNormalisation = "/CtrlNbjets",
-    QCDFactHistoName = "/CtrlNbjets",
     details          = { "xlabel": "Number of selected b jets",
                          "ylabel": "Events",
                          "divideByBinWidth": False,
                          "unit": "",
                          "log": True,
-                         "optsLog": {"ymin": 0.9} },
+                         "optsLog": {"ymin": 0.09} },
     blindedRange=[],
     #blindedRange     = [1.5,10], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "#geq1 b tag", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 #TODO: add as preselection for all ctrl plots in signal analysis MET30 and/or collinear tail killer and/or full tail killer
@@ -1141,7 +1145,7 @@ ControlPlots.append(ControlPlotInput(
     #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 #))
 
-for i in range(0,4):
+for i in range(0,3):
     ControlPlots.append(ControlPlotInput(
         title            = "BackToBackTailKillerJet%d"%(i+1),
         signalHHid       = [-1],
@@ -1153,8 +1157,6 @@ for i in range(0,4):
         signalHistoName  = "ImprovedDeltaPhiCutsJet%dBackToBack"%(i+1),
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "ImprovedDeltaPhiCutsJet%dBackToBack"%(i+1),
-        QCDFactNormalisation = "/QCDTailKillerJet%dBackToBack"%i,
-        QCDFactHistoName = "/QCDTailKillerJet%dBackToBack"%i,
         details          = { "xlabel": "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{%d},MET)^{2}}"%(i+1),
                              "ylabel": "Events",
                              "divideByBinWidth": False,
@@ -1165,10 +1167,9 @@ for i in range(0,4):
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
     ))
-    if i == 0:
-        ControlPlots[len(ControlPlots)-1].flowPlotCaption = "#geq1 b tag"
-    else:
-        ControlPlots[len(ControlPlots)-1].flowPlotCaption = "#Delta#phi_{#uparrow#downarrow,%d}"%(i)
+    if i == 2:
+        ControlPlots[len(ControlPlots)-1].flowPlotCaption = "#Delta#phi_{#uparrow#downarrow}"
+
 ControlPlots.append(ControlPlotInput(
     title            = "TransverseMass",
     signalHHid       = [-1],
@@ -1180,17 +1181,15 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "shapeTransverseMass",
     EWKfakeHistoPath  = "",
     EWKfakeHistoName  = "shapeEWKFakeTausTransverseMass",
-    QCDFactNormalisation = "/NevtAfterLeg1",
-    QCDFactHistoName = "/MtAfterLeg1",
     details          = { "xlabel": "m_{T}(#tau_{h},E_{T}^{miss})",
-                     "ylabel": "dN_{Events}/dm_{T}",
+                     "ylabel": "Events/#Deltam_{T}",
                      "divideByBinWidth": True,
                      "unit": "GeV",
                      "log": False,
                      "opts": {"ymin": 0.0} },
     blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "#Delta#phi_{#uparrow#downarrow,4}", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 if False:
@@ -1205,16 +1204,14 @@ if False:
         signalHistoName  = "shapeInvariantMass",
         EWKfakeHistoPath  = "",
         EWKfakeHistoName  = "shapeEWKFakeTausInvariantMass",
-        QCDFactNormalisation = "/NevtAfterLeg1",
-        QCDFactHistoName = "/MassAfterLeg1",
         details          = { "xlabel": "m(#tau_{h},E_{T}^{miss})",
-                             "ylabel": "dN_{Events}/dm",
+                             "ylabel": "Events/#Deltam",
                              "divideByBinWidth": True,
                              "unit": "GeV",
                              "log": False,
                              "opts": {"ymin": 0.0} },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
-        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+        flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
     ))
 
