@@ -132,6 +132,8 @@ if __name__ == "__main__":
     myMulticrabDir = "."
     if opts.multicrabDir != None:
         myMulticrabDir = opts.multicrabDir
+    if not os.path.exists("%s/multicrab.cfg"%myMulticrabDir):
+        raise Exception(ErrorLabel()+"No multicrab directory found at path '%s'! Please check path or specify it with --mdir!"%(myMulticrabDir)+NormalStyle())
 
     myShapes = ["mt","invmass"]
     if opts.transverseMassOnly != None and opts.transverseMassOnly:
@@ -193,4 +195,4 @@ if __name__ == "__main__":
     myOutputCreator.writeRootFileToDisk(massType)
     # Create rest of pseudo multicrab directory
     myOutputCreator.finalize()
-    print "Average processing time of one module: %.1f s"%((time.time()-myGlobalStartTime)/float(myTotalModules))
+    print "Average processing time of one module: %.1f s, total elapsed time: %.1f s"%((time.time()-myGlobalStartTime)/float(myTotalModules), (time.time()-myGlobalStartTime))
