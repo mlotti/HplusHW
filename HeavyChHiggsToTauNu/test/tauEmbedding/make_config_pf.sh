@@ -6,7 +6,8 @@ SEQUENCE=GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO
 #NEVENTS=-1
 NEVENTS=20
 #SKIMFILE=file:skim.root
-SKIMFILE=/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_5/a9adb1d2c9d25e1e9802345c8c130cf6/skim_1000_1_heh.root
+SKIMFILE=/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_5_3_X/TTJets_TuneZ2star_Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_tauembedding_skim_v53_3/9a24e6fe0421ec76a55ad5183bef176f/skim_172_1_F0R.root
+
 
 cmsDriver.py HiggsAnalysis/HeavyChHiggsToTauNu/python/tauEmbedding/PFEmbeddingSource_cff.py \
     -s $SEQUENCE \
