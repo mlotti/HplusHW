@@ -54,6 +54,8 @@ def main():
     if len(sys.argv) < 2:
         usage()
 
+    pythonWriter.setInput(sys.argv[1])
+
 #    datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False)
     datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, includeOnlyTasks="TauPlusX_")
     datasetsDYMC = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, includeOnlyTasks="DYToTauTau_")
@@ -89,8 +91,6 @@ def main():
 
     puWeightPath = "src/HiggsAnalysis/TriggerEfficiency/test"
 
-#    highPurity = True
-#    highPurity = False
 
     global plotDir
     if highPurity:
