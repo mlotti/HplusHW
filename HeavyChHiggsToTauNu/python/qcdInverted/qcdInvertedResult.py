@@ -127,12 +127,12 @@ class QCDInvertedShape:
 
 class QCDInvertedControlPlot:
     def __init__(self, shape, moduleInfoString, normFactors, title=""):
-    self._resultShape = None # TH1F which contains the final shape histogram
-    self._normFactors = normFactors
-    self._title = title
-    if title == "":
-        title = "NQCDCtrl_Total_%s"%moduleInfoString
-    self._doCalculate(shape, moduleInfoString)
+        self._resultShape = None # TH1F which contains the final shape histogram
+        self._normFactors = normFactors
+        self._title = title
+        if title == "":
+            title = "NQCDCtrl_Total_%s"%moduleInfoString
+        self._doCalculate(shape, moduleInfoString)
 
     def delete(self):
         ROOT.gDirectory.Delete(self._resultShape.GetName())
