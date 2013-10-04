@@ -158,8 +158,6 @@ class ControlPlotMaker:
         #myEvaluator.save(dirname)
         print "Control plots done"
 
-
-
     def _applyBlinding(self,myObject,blindedRange = []):
         myHisto = myObject.getRootHisto()
         for i in range (1, myHisto.GetNbinsX()+1):
@@ -236,10 +234,14 @@ class SelectionFlowPlotMaker:
         self._expectedListSystDown = []
         self._data = None
         # Initialise column pointer
-        self._myCurrentColumn = 0
+        self._myCurrentColumn = 1
+        self._pickStatus = False
+        self._pickLabel = ""
 
     def addColumn(self,label,data,expectedList):
-        if label == "":
+        # System to pick the correct input for correct label
+        if self._pickLabel == "":
+            self._pickLabel = label
             return
         # Create histograms if necessary
         if self._data == None:
@@ -262,6 +264,8 @@ class SelectionFlowPlotMaker:
         else:
             self._data.SetBinContent(self._myCurrentColumn, -1)
         self._myCurrentColumn += 1
+        # Refresh pick status
+        self._pickLabel = label
 
     def _createHistograms(self,data,expectedList):
         for e in expectedList:
