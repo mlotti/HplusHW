@@ -34,6 +34,9 @@ class PseudoMultiCrabCreator:
             self._energy = module._energy
             self._dataVersion = module._dataVersion.Clone()
             self._codeVersion = module._codeVersion.Clone()
+            self._writeRootFileToDisk(self._currentSubTitle)
+            self._dataVersion = None # No need to delete from gDirectory, since they were saved to disk already
+            self._codeVersion = None
 
         # Open root file
         myFilename = "%s/%s/res/histograms-%s.root"%(self._myBaseDir,self._title+self._mySubTitles[-1],self._title+self._mySubTitles[-1])
@@ -58,8 +61,12 @@ class PseudoMultiCrabCreator:
         os.mkdir(self._myBaseDir)
 
     def initialize(self, subTitle):
+        self._energy = None
+        self._dataVersion = None
+        self._codeVersion = None
         self._createBaseDirectory()
         self._mySubTitles.append(subTitle)
+        self._currentSubTitle = subTitle
         os.mkdir("%s/%s"%(self._myBaseDir,self._title+subTitle))
         os.mkdir("%s/%s/res"%(self._myBaseDir,self._title+subTitle))
 
@@ -75,7 +82,7 @@ class PseudoMultiCrabCreator:
         # Done
         print HighlightStyle()+"Created pseudo-multicrab directory %s%s"%(self._myBaseDir,NormalStyle())
 
-    def writeRootFileToDisk(self, subTitle):
+    def _writeRootFileToDisk(self, subTitle):
         # Open root file
         myRootFile = ROOT.TFile("%s/%s/res/histograms-%s.root"%(self._myBaseDir,self._title+self._mySubTitles[-1],self._title+self._mySubTitles[-1]),"UPDATE")
         # Write modules
@@ -98,8 +105,6 @@ class PseudoMultiCrabCreator:
         # Write and close the root file
         myRootFile.Write()
         myRootFile.Close()
-        # Clear the module list
-        self._modulesList = []
 
 class PseudoMultiCrabModule:
     ## Constructor
