@@ -478,6 +478,90 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
                                    triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root")
             wf_analysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
             dataset.addWorkflow(wf_analysis)
+
+def addEmbeddingEmbedding_53X(sourceWorkflow, version, datasets, updateDefinitions):
+    defaultDefinitions = getDefaultDefinitions_53X()
+    # njobsIn default value is for embedding
+    njobs = {
+        # FIXME: njobsOut
+        "SingleMu_190456-193621_2012A_Jan22": TaskDef(njobsIn= 420, njobsOut=20),
+        "SingleMu_193834-196531_2012B_Jan22": TaskDef(njobsIn=2200, njobsOut=100),
+        "SingleMu_198022-200381_2012C_Jan22": TaskDef(njobsIn=1600, njobsOut=70),
+        "SingleMu_200466-203742_2012C_Jan22": TaskDef(njobsIn=2200, njobsOut=90),
+        "SingleMu_203777-205834_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=60),
+        "SingleMu_205908-207100_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=60),
+        "SingleMu_207214-208686_2012D_Jan22": TaskDef(njobsIn=1300, njobsOut=60),
+
+
+        # MC, triggered with mcTrigger
+        # FIXME: njobsOut
+        "WJets_TuneZ2star_v1_Summer12":            TaskDef(njobsIn= 130, njobsOut=5),
+        "WJets_TuneZ2star_v2_Summer12":            TaskDef(njobsIn= 380, njobsOut=15),
+        "W1Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 200, njobsOut=10),
+        "W2Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=1300, njobsOut=40),
+        "W3Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 800, njobsOut=35),
+        "W4Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=1100, njobsOut=40),
+        "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn= 600, njobsOut=25),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(njobsIn= 900, njobsOut=40),
+        "T_t-channel_TuneZ2star_Summer12":         TaskDef(njobsIn=  50, njobsOut=3),
+        "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(njobsIn=  30, njobsOut=1),
+        "T_tW-channel_TuneZ2star_Summer12":        TaskDef(njobsIn=  50, njobsOut=2),
+        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDef(njobsIn=  50, njobsOut=2),
+        "T_s-channel_TuneZ2star_Summer12":         TaskDef(njobsIn=   6, njobsOut=1),
+        "Tbar_s-channel_TuneZ2star_Summer12":      TaskDef(njobsIn=   5, njobsOut=1),
+        "WW_TuneZ2star_Summer12":                  TaskDef(njobsIn= 150, njobsOut=7),
+        "WZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 150, njobsOut=7),
+        "ZZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 150, njobsOut=7),
+        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef(njobsIn= 100, njobsOut=4),
+        }
+    # Update the default definitions from the argument
+    updateTaskDefinitions(defaultDefinitions, njobs)
+    updateTaskDefinitions(defaultDefinitions, updateDefinitions)
+
+    path_re = re.compile("_tauembedding_.*")
+
+    # Add embedding Workflow for each dataset
+    for datasetName, taskDef in defaultDefinitions.iteritems():
+        dataset = datasets.getDataset(datasetName)
+
+        wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow=sourceWorkflow, workflowName="tauembedding_embedding_"+version)
+        wf.source.lumiMask = None # be agnostic for lumi mask
+        wf.setOutputFile("embedded.root")
+
+        # CRAB configuration lines
+        wf.addCrabLine("CMSSW.total_number_of_lumis = -1")
+
+        # Override the beamspot only for data
+        if dataset.isData():
+            wf.args["overrideBeamSpot"] = "1"
+
+        # Setup the publish name
+        path = wf.source.getDataForDataset(dataset).getDatasetPath().split("/")
+        postfix = ""
+        if taskDef.publishPostfix is not None:
+            postfix = taskDef.publishPostfix
+        name = path_re.sub("_tauembedding_embedding_"+version+postfix, path[2])
+        name = name.replace("local-", "")
+        wf.addCrabLine("USER.publish_data_name = "+name)
+
+        # Add the skim Workflow to Dataset
+        dataset.addWorkflow(wf)
+
+        # If have embedding output, define the workflows which depend on it
+        if wf.output != None:
+            args = {}
+            args.update(wf.args)
+            args["tauEmbeddingInput"] = "1"
+            # these is needed only for embedding jobs
+            for a in ["overrideBeamSpot", "tauDecayMode", "tauMinVisPt"]:
+                try:
+                    del args[a] 
+                except KeyError:
+                    pass
+            wf_analysis = Workflow("tauembedding_analysis_"+version, source=Source("tauembedding_embedding_"+version),
+                                   triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root")
+            wf_analysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
+            dataset.addWorkflow(wf_analysis)
  
 def addEmbeddingSkim_v44_4_2(datasets):
     definitions = {
@@ -938,6 +1022,45 @@ def addEmbeddingSkim_v53_3(datasets):
         "TTToHplusBHminusB_M160_ext_Summer12":     TaskDef(""),
         }
     addEmbeddingSkim_53X("v53_3", datasets, definitions)
+
+def addEmbeddingEmbedding_v53_3(datasets):
+    skimVersion = "tauembedding_skim_v53_3"
+
+    def addEmbedding(version, definitions):
+        for name, taskDef in definitions.iteritems():
+            taskDef.setArg("tauDecayMode", 230)
+            taskDef.setArg("tauMinVisPt", 30)
+        addEmbeddingEmbedding_53X(skimVersion, version, datasets, definitions)
+
+    addEmbedding("v53_3", {
+        "SingleMu_190456-193621_2012A_Jan22":      TaskDef(""),
+        "SingleMu_193834-196531_2012B_Jan22":      TaskDef(""),
+        "SingleMu_198022-200381_2012C_Jan22":      TaskDef(""),
+        "SingleMu_200466-203742_2012C_Jan22":      TaskDef(""),
+        "SingleMu_203777-205834_2012D_Jan22":      TaskDef(""),
+        "SingleMu_205908-207100_2012D_Jan22":      TaskDef(""),
+        "SingleMu_207214-208686_2012D_Jan22":      TaskDef(""),
+
+        "WJets_TuneZ2star_v1_Summer12":            TaskDef(""),
+        "WJets_TuneZ2star_v2_Summer12":            TaskDef(""),
+        "W1Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "W2Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "W3Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "W4Jets_TuneZ2star_Summer12":              TaskDef(""),
+        "TTJets_TuneZ2star_Summer12":              TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(""),
+        "T_t-channel_TuneZ2star_Summer12":         TaskDef(""),
+        "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(""),
+        "T_tW-channel_TuneZ2star_Summer12":        TaskDef(""),
+        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDef(""),
+        "T_s-channel_TuneZ2star_Summer12":         TaskDef(""),
+        "Tbar_s-channel_TuneZ2star_Summer12":      TaskDef(""),
+        "WW_TuneZ2star_Summer12":                  TaskDef(""),
+        "WZ_TuneZ2star_Summer12":                  TaskDef(""),
+        "ZZ_TuneZ2star_Summer12":                  TaskDef(""),
+        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef(""),
+        })
+
 
 
 def addEmbedding_SKELETON(datasets):
