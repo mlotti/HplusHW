@@ -17,6 +17,11 @@ namespace {
     else
       return true;
   }
+
+  template <typename T>
+  T square(T x) {
+    return x*x;
+  }
 }
 
 namespace HPlus {
@@ -52,7 +57,9 @@ namespace HPlus {
 
       fBinLowEdges.push_back(bin);
       fData.fEffMCValues.push_back(mcBins[i].getParameter<double>("efficiency"));
-      fData.fEffMCUncertainties.push_back(mcBins[i].getParameter<double>("uncertainty"));
+      std::pair<double, double> uncPlusMinus = parseUncertainty(mcBins[i]);
+      fData.fEffMCUncertaintiesPlus.push_back(uncPlusMinus.first);
+      fData.fEffMCUncertaintiesMinus.push_back(uncPlusMinus.second);
     }
 
     // Get data efficiencies for the given run periods, calculate the
@@ -79,7 +86,9 @@ namespace HPlus {
           throw cms::Exception("Configuration") << "TauTriggerEfficiencyScaleFactor: Bin " << i << " in dataParameters." << *iSelect << " must have same low edge as mcParameters" << *iSelect << ", now data hs " << bin << " while mc has " << fBinLowEdges[i] << std::endl;
 
         dv.values.push_back(dataBins[i].getParameter<double>("efficiency"));
-        dv.uncertainties.push_back(dataBins[i].getParameter<double>("uncertainty"));
+        std::pair<double, double> uncPlusMinus = parseUncertainty(dataBins[i]);
+        dv.uncertaintiesPlus.push_back(uncPlusMinus.first);
+        dv.uncertaintiesMinus.push_back(uncPlusMinus.second);
       }
       fData.fDataValues.push_back(dv);
     }
@@ -91,35 +100,50 @@ namespace HPlus {
       std::cout << "Scale factor uncertainties:" << std::endl;
     for(size_t i=0; i<fBinLowEdges.size(); ++i) {
       double dataValue = 0;
-      double dataUncertaintySquared = 0;
+      double dataUncertaintySquaredPlus = 0;
+      double dataUncertaintySquaredMinus = 0;
       if(fData.fDataValues.size() == 1) {
         dataValue = fData.fDataValues[0].values[i];
-        dataUncertaintySquared = fData.fDataValues[0].uncertainties[i];
-        dataUncertaintySquared = dataUncertaintySquared*dataUncertaintySquared;
+        dataUncertaintySquaredPlus = square(fData.fDataValues[0].uncertaintiesPlus[i]);
+        dataUncertaintySquaredMinus = square(fData.fDataValues[0].uncertaintiesMinus[i]);
       }
       else {
         for(size_t iPeriod = 0; iPeriod != fData.fDataValues.size(); ++iPeriod) {
           double lumi = fData.fDataValues[iPeriod].luminosity;
           dataValue += lumi*fData.fDataValues[iPeriod].values[i];
-          double unc = lumi*fData.fDataValues[iPeriod].uncertainties[i];
-          dataUncertaintySquared += unc*unc;
+          dataUncertaintySquaredPlus += square(lumi*fData.fDataValues[iPeriod].uncertaintiesPlus[i]);
+          dataUncertaintySquaredMinus += square(lumi*fData.fDataValues[iPeriod].uncertaintiesMinus[i]);
         }
         dataValue = dataValue / totalLuminosity;
-        dataUncertaintySquared = dataUncertaintySquared / (totalLuminosity*totalLuminosity);
+        dataUncertaintySquaredPlus = dataUncertaintySquaredPlus / square(totalLuminosity);
+        dataUncertaintySquaredMinus = dataUncertaintySquaredMinus / square(totalLuminosity);
       }
       fData.fEffDataAverageValues.push_back(dataValue);
-      fData.fEffDataAverageUncertainties.push_back(std::sqrt(dataUncertaintySquared));
+      fData.fEffDataAverageUncertaintiesPlus.push_back(std::sqrt(dataUncertaintySquaredPlus));
+      fData.fEffDataAverageUncertaintiesMinus.push_back(std::sqrt(dataUncertaintySquaredMinus));
 
-      double dataRelativeUncertainty = std::sqrt(dataUncertaintySquared)/dataValue;
+      // Vary data and MC efficiencies, if enabled
+      for(size_t iPeriod = 0; iPeriod != fData.fDataValues.size(); ++iPeriod) {
+        varyData(&fData.fDataValues[iPeriod].values[i], &fData.fDataValues[iPeriod].uncertaintiesPlus[i], &fData.fDataValues[iPeriod].uncertaintiesMinus[i]);
+      }
+      varyData(&fData.fEffDataAverageValues.back(), &fData.fEffDataAverageUncertaintiesPlus.back(), &fData.fEffDataAverageUncertaintiesMinus.back());
+      dataValue = fData.fEffDataAverageValues.back();
+      varyMC(&fData.fEffMCValues[i], &fData.fEffMCUncertaintiesPlus[i], &fData.fEffMCUncertaintiesMinus[i]);
+
+      // Take max of plus and minus for SF
+      double dataRelativeUncertainty = std::sqrt(std::max(dataUncertaintySquaredPlus, dataUncertaintySquaredMinus))/dataValue;
 
       double mcValue = fData.fEffMCValues[i];
-      double mcRelativeUncertainty = fData.fEffMCUncertainties[i]/mcValue;
+      double mcRelativeUncertainty = std::max(fData.fEffMCUncertaintiesPlus[i], fData.fEffMCUncertaintiesMinus[i])/mcValue;
 
       double scaleFactor = dataValue/mcValue;
       double scaleFactorRelativeUncertainty = std::sqrt(dataRelativeUncertainty*dataRelativeUncertainty + mcRelativeUncertainty*mcRelativeUncertainty);
       double scaleFactorAbsoluteUncertainty = scaleFactor * scaleFactorRelativeUncertainty;
 
       //std::cout << "Bin " << fBinLowEdges[i] << " data / mc = " << dataValue << " / " << mcValue << " = " << scaleFactor << " +- " << scaleFactorAbsoluteUncertainty << std::endl;
+
+      // Vary SF, if enabled;
+      varySF(&scaleFactor, &scaleFactorAbsoluteUncertainty);
 
       fData.fScaleValues.push_back(scaleFactor);
       fData.fScaleUncertainties.push_back(scaleFactorAbsoluteUncertainty);
@@ -154,45 +178,37 @@ namespace HPlus {
     if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "BinnedEfficiencyScaleFactor: Must call BinnedEfficiencyScaleFactor::setRun() before dataEfficiency()" << std::endl;
     return fData.fCurrentRunData->values[index(value)];
   }
-  double BinnedEfficiencyScaleFactor::dataEfficiencyRelativeUncertainty(double value) const {
-    if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "BinnedEfficiencyScaleFactor: Must call BinnedEfficiencyScaleFactor::setRun() before dataEfficiencyRelativeUncertainty()" << std::endl;
-    size_t i = index(value);
-    return fData.fCurrentRunData->uncertainties[i] / fData.fCurrentRunData->values[i];
+  double BinnedEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertaintyPlus(double value) const {
+    if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "BinnedEfficiencyScaleFactor: Must call BinnedEfficiencyScaleFactor::setRun() before dataEfficiencyAbsoluteUncertaintyPlus()" << std::endl;
+    return fData.fCurrentRunData->uncertaintiesPlus[index(value)];
   }
-  double BinnedEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty(double value) const {
-    if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "BinnedEfficiencyScaleFactor: Must call BinnedEfficiencyScaleFactor::setRun() before dataEfficiencyAbsoluteUncertainty()" << std::endl;
-    return fData.fCurrentRunData->uncertainties[index(value)];
+  double BinnedEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertaintyMinus(double value) const {
+    if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "BinnedEfficiencyScaleFactor: Must call BinnedEfficiencyScaleFactor::setRun() before dataEfficiencyAbsoluteUncertaintyMinus()" << std::endl;
+    return fData.fCurrentRunData->uncertaintiesMinus[index(value)];
   }
 
   double BinnedEfficiencyScaleFactor::dataAverageEfficiency(double value) const {
     return fData.fEffDataAverageValues[index(value)];
   }
-  double BinnedEfficiencyScaleFactor::dataAverageEfficiencyRelativeUncertainty(double value) const {
-    size_t i = index(value);
-    return fData.fEffDataAverageUncertainties[i] / fData.fEffDataAverageValues[i];
+  double BinnedEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertaintyPlus(double value) const {
+    return fData.fEffDataAverageUncertaintiesPlus[index(value)];
   }
-  double BinnedEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty(double value) const {
-    return fData.fEffDataAverageUncertainties[index(value)];
+  double BinnedEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertaintyMinus(double value) const {
+    return fData.fEffDataAverageUncertaintiesMinus[index(value)];
   }
 
   double BinnedEfficiencyScaleFactor::mcEfficiency(double value) const {
     return fData.fEffMCValues[index(value)];
   }
-  double BinnedEfficiencyScaleFactor::mcEfficiencyRelativeUncertainty(double value) const {
-    size_t i = index(value);
-    return fData.fEffMCUncertainties[i] / fData.fEffMCValues[i];
+  double BinnedEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertaintyPlus(double value) const {
+    return fData.fEffMCUncertaintiesPlus[index(value)];
   }
-  double BinnedEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertainty(double value) const {
-    return fData.fEffMCUncertainties[index(value)];
+  double BinnedEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertaintyMinus(double value) const {
+    return fData.fEffMCUncertaintiesMinus[index(value)];
   }
-
 
   double BinnedEfficiencyScaleFactor::scaleFactor(double value) const {
     return fData.fScaleValues[index(value)];
-  }
-  double BinnedEfficiencyScaleFactor::scaleFactorRelativeUncertainty(double value) const {
-    size_t i = index(value);
-    return fData.fScaleUncertainties[i] / fData.fScaleValues[i];
   }
   double BinnedEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty(double value) const {
     return fData.fScaleUncertainties[index(value)];
@@ -204,14 +220,16 @@ namespace HPlus {
 
     if(getMode() == kScaleFactor) {
       output.fWeight = scaleFactor(value);
-      output.fWeightAbsUnc = scaleFactorAbsoluteUncertainty(value);
+      output.fWeightAbsUncPlus = scaleFactorAbsoluteUncertainty(value);
+      output.fWeightAbsUncMinus = output.fWeightAbsUncPlus;
     }
     else if(getMode() == kDataEfficiency) {
       if(isData) {
         if(!fData.fCurrentRunData)
           throw cms::Exception("LogicError") << "TBinnedEfficiencyScaleFactor: With efficiency mode and data input, must call setRun() before getEventWeight()" << std::endl;
         output.fWeight = dataEfficiency(value);
-        output.fWeightAbsUnc = dataEfficiencyAbsoluteUncertainty(value);
+        output.fWeightAbsUncPlus = dataEfficiencyAbsoluteUncertaintyPlus(value);
+        output.fWeightAbsUncMinus = dataEfficiencyAbsoluteUncertaintyMinus(value);
       }
       else {
         // Efficiency mode is needed only for embedding, and in there
@@ -220,7 +238,8 @@ namespace HPlus {
         // comparison will always be with respect to the efficiency of
         // data.
         output.fWeight = dataAverageEfficiency(value);
-        output.fWeightAbsUnc = dataAverageEfficiencyAbsoluteUncertainty(value);
+        output.fWeightAbsUncPlus = dataAverageEfficiencyAbsoluteUncertaintyPlus(value);
+        output.fWeightAbsUncMinus = dataAverageEfficiencyAbsoluteUncertaintyMinus(value);
         /*
         output.fWeight = mcEfficiency(value);
         output.fWeightAbsUnc = mcEfficiencyAbsoluteUncertainty(value);
@@ -230,13 +249,8 @@ namespace HPlus {
     }
     else if(getMode() == kMCEfficiency) {
       output.fWeight = mcEfficiency(value);
-      output.fWeightAbsUnc = mcEfficiencyAbsoluteUncertainty(value);
-    }
-
-
-    if(fVariationEnabled) {
-      output.fWeight += fVariationShiftBy*output.fWeightAbsUnc;
-      output.fWeightAbsUnc = 0; // Absolute uncertainty does not make much sense after variation
+      output.fWeightAbsUncPlus = mcEfficiencyAbsoluteUncertaintyPlus(value);
+      output.fWeightAbsUncMinus = mcEfficiencyAbsoluteUncertaintyMinus(value);
     }
 
     return output;
