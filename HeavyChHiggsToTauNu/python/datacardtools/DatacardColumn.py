@@ -302,7 +302,6 @@ class DatacardColumn():
                     if e.isShapeNuisance():
                         myHistograms = e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                         # Histograms constain abs uncertainty, need to add nominal histogram so that Lands accepts the histograms
-                        print e.getDistribution()
                         if e.getDistribution() == "shapeQ":
                             for i in range(0,len(myHistograms)):
                                 myHistograms[i].Add(self._rateResult.getHistograms()[0])
