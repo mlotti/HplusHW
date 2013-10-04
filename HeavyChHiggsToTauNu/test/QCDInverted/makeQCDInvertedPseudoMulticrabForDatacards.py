@@ -6,32 +6,16 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 import math
 import sys
 import os
+import time
 from optparse import OptionParser
 import cProfile
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.QCDInvertedResult import *
-
+from HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.pseudoMultiCrabCreator import *
-
-myMtSpecs = {
-    "basicName": "QCDfactorised/MtAfterStandardSelections",
-    "leg1Name": "QCDfactorised/MtAfterLeg1",
-    "leg2Name": "QCDfactorised/MtAfterLeg2",
-    "binList": systematics.getBinningForPlot("shapeTransverseMass"),
-}
-
-myFullMassSpecs = {
-    "basicName": "QCDfactorised/MassAfterStandardSelections",
-    "leg1Name": "QCDfactorised/MassAfterLeg1",
-    "leg2Name": "QCDfactorised/MassAfterLeg2",
-    "binList": systematics.getBinningForPlot("shapeInvariantMass"),
-}
 
 myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
 
@@ -88,7 +72,7 @@ def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,m
     myLuminosity = systDsetMgr.getDataset("Data").getLuminosity()
     # Obtain results
     mySystModuleResults = PseudoMultiCrabModule(systDsetMgr, era, searchMode, optimizationMode, syst)
-    mySystResult = QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity, myModuleInfoString, myNormFactors, shapeOnly=False, displayPurityBreakdown=False)
+    mySystResult = QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", systDsetMgr, myLuminosity, myModuleInfoString, myNormFactors, shapeOnly=False, displayPurityBreakdown=False)
     mySystModuleResults.addShape(mySystResult.getShape(), myShapeString)
     mySystModuleResults.addDataDrivenControlPlots(mySystResult.getControlPlots(),mySystResult.getControlPlotLabels())
     mySystResult.delete()
@@ -108,8 +92,10 @@ def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
 if __name__ == "__main__":
     # Obtain normalization factors
     myNormFactors = None
+    myNormFactorsSafetyCheck = None
     if os.path.exists(myNormalizationFactorSource):
         myNormFactorsImport = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalization")
+        myNormFactorsSafetyCheck = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalizationSafetyCheck")
         #QCDInvertedNormalizationSafetyCheck(era)
         myNormFactors = myNormFactorsImport.copy()
     else:
@@ -133,6 +119,8 @@ if __name__ == "__main__":
     myMulticrabDir = "."
     if opts.multicrabDir != None:
         myMulticrabDir = opts.multicrabDir
+    if not os.path.exists("%s/multicrab.cfg"%myMulticrabDir):
+        raise Exception(ErrorLabel()+"No multicrab directory found at path '%s'! Please check path or specify it with --mdir!"%(myMulticrabDir)+NormalStyle())
 
     myShapes = ["mt","invmass"]
     if opts.transverseMassOnly != None and opts.transverseMassOnly:
@@ -162,7 +150,7 @@ if __name__ == "__main__":
     # Loop over era/searchMode/optimizationMode options
 
     # Create pseudo-multicrab creator
-    myOutputCreator = PseudoMultiCrabCreator("QCDfactorised", myMulticrabDir)
+    myOutputCreator = PseudoMultiCrabCreator("QCDinverted", myMulticrabDir)
     n = 0
     myGlobalStartTime = time.time()
     for massType in myShapes:
@@ -174,6 +162,8 @@ if __name__ == "__main__":
         myOutputCreator.initialize(massType)
         print HighlightStyle()+"Creating dataset for shape: %s%s"%(massType,NormalStyle())
         for era in myModuleSelector.getSelectedEras():
+            # Check if normalization coefficients are suitable for era
+            myNormFactorsSafetyCheck(era)
             for searchMode in myModuleSelector.getSelectedSearchModes():
                 for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
                     myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
@@ -194,4 +184,4 @@ if __name__ == "__main__":
     myOutputCreator.writeRootFileToDisk(massType)
     # Create rest of pseudo multicrab directory
     myOutputCreator.finalize()
-    print "Average processing time of one module: %.1f s"%((time.time()-myGlobalStartTime)/float(myTotalModules))
+    print "Average processing time of one module: %.1f s, total elapsed time: %.1f s"%((time.time()-myGlobalStartTime)/float(myTotalModules), (time.time()-myGlobalStartTime))
