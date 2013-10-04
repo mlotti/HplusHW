@@ -51,8 +51,17 @@ namespace HPlus {
     double ptmin[] = {20, 30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 600};
   }
   namespace EffBins {
-    double bins_BC[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
-    double bins_GUDS[] = {20, 30, 60, 100, 150, 250};
+<<<<<<< HEAD
+    double bins_B[] = {30, 40, 60, 80, 100, 120, 150, 250};
+    double bins_C[] = {30, 70, 110, 150};
+    double bins_G[] = {30, 50};
+    double bins_GUDS[] = {30};
+=======
+    double bins_B[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
+    double bins_C[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
+    double bins_G[] = {20, 30, 60, 100, 150, 250};
+    double bins_UDS[] = {20, 30, 60, 100, 150, 250};
+>>>>>>> lauri/2011
   }
   namespace CSVL {
     // B-tagging scale factors
@@ -83,6 +92,8 @@ namespace HPlus {
     TF1 *SFl     = new TF1("SFlight","((0.991915+(0.00172552*x))+(-3.92652e-06*(x*x)))+(2.56816e-09*(x*(x*x)))", 20., 800.);
     TF1 *SFl_min = new TF1("SFlightMin","((0.921518+(0.00129098*x))+(-2.86488e-06*(x*x)))+(1.86022e-09*(x*(x*x)))", 20., 800.);
     TF1 *SFl_max = new TF1("SFlightMax","((1.06231+(0.00215815*x))+(-4.9844e-06*(x*x)))+(3.27623e-09*(x*(x*x)))", 20., 800.);
+
+    // FIXME these are 2011 efficiencies, update
     // B->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
     double eff_BtoB_byPt[] = {0.000000, 0.843692, 0.841796, 0.847828, 0.848339, 0.851303, 0.848301, 0.847911, 0.849353, 0.853927, 0.849528, 0.844153, 0.819833, 0.827717, 0.776372, 0.758767, 0.631211};
@@ -133,6 +144,8 @@ namespace HPlus {
     TF1 *SFl     = new TF1("SFlight","((1.06238+(0.00198635*x))+(-4.89082e-06*(x*x)))+(3.29312e-09*(x*(x*x)))", 20., 800.);
     TF1 *SFl_min = new TF1("SFlightMin","((0.972746+(0.00104424*x))+(-2.36081e-06*(x*x)))+(1.53438e-09*(x*(x*x)))", 20., 800.);
     TF1 *SFl_max = new TF1("SFlightMax","((1.15201+(0.00292575*x))+(-7.41497e-06*(x*x)))+(5.0512e-09*(x*(x*x)))", 20., 800.);
+
+    // FIXME these are 2011 efficiencies, update
     // B->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
     double eff_BtoB_byPt[] = {0.000000, 0.605497, 0.660818, 0.696156, 0.717718, 0.721635, 0.725644, 0.733542, 0.742611, 0.754529, 0.733295, 0.720926, 0.693444, 0.666824, 0.606797, 0.570024, 0.427823};
@@ -185,24 +198,24 @@ namespace HPlus {
     TF1 *SFl_max = new TF1("SFlightMax","((1.08119+(0.00441909*x))+(-1.18764e-05*(x*x)))+(8.71372e-09*(x*(x*x)))", 20., 800.);
     // B->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
-    double eff_BtoB_byPt[] = {0.000000, 0.458483, 0.518979, 0.553481, 0.571330, 0.579789, 0.577360, 0.560711, 0.559940, 0.580829, 0.526322, 0.464904, 0.426719, 0.352917, 0.275715, 0.266566, 0.168526};
-    double effUncertUp_BtoB_byPt[] = {0.000000, 0.005856, 0.006119, 0.006500, 0.006984, 0.007535, 0.008196, 0.008910, 0.007097, 0.008298, 0.009980, 0.009487, 0.012849, 0.019915, 0.029559, 0.041264, 0.035311};
-    double effUncertDown_BtoB_byPt[] = {0.000000, 0.005856, 0.006119, 0.006500, 0.006984, 0.007535, 0.008196, 0.008910, 0.007097, 0.008298, 0.009980, 0.009487, 0.012849, 0.019915, 0.029559, 0.041264, 0.035311};
+    double eff_BtoB_byPt[] = {0.464638, 0.481490, 0.556796, 0.521733, 0.532051, 0.561771, 0.445548, 0.245012};
+    double effUncertUp_BtoB_byPt[] = {0.018888, 0.013588, 0.015345, 0.018571, 0.021240, 0.020751, 0.018731, 0.037964};
+    double effUncertDown_BtoB_byPt[] = {0.018888, 0.013588, 0.015345, 0.018571, 0.021240, 0.020751, 0.018731, 0.037964};
     // C->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
-    double eff_CtoB_byPt[] = {0.000000, 0.059786, 0.053019, 0.068237, 0.058548, 0.059453, 0.063899, 0.048850, 0.047686, 0.056202, 0.047481, 0.040659, 0.042219, 0.027147, 0.000000, 0.031319, 0.028526};
-    double effUncertUp_CtoB_byPt[] = {0.000000, 0.005852, 0.005966, 0.006897, 0.007087, 0.007513, 0.008420, 0.008020, 0.006123, 0.007539, 0.008558, 0.007140, 0.009909, 0.011899, 0.000000, 0.021816, 0.019897};
-    double effUncertDown_CtoB_byPt[] = {0.000000, 0.005852, 0.005966, 0.006897, 0.007087, 0.007513, 0.008420, 0.008020, 0.006123, 0.007539, 0.008558, 0.007140, 0.009909, 0.011899, 0.000000, 0.021816, 0.019897};
+    double eff_CtoB_byPt[] = {0.075239, 0.059511, 0.060751, 0.014452};
+    double effUncertUp_CtoB_byPt[] = {0.011157, 0.013925, 0.018606, 0.006868};
+    double effUncertDown_CtoB_byPt[] = {0.011157, 0.013925, 0.018606, 0.006868};
     // G->B efficiencies
     // From W+jets (WJets) sample with Rtau cut deactivated
-    double eff_GtoB_byPt[] = {0.000000, 0.003232, 0.001569, 0.000304, 0.001146, 0.002640};
-    double effUncertUp_GtoB_byPt[] = {0.000000, 0.000491, 0.000478, 0.000244, 0.000673, 0.001866};
-    double effUncertDown_GtoB_byPt[] = {0.000000, 0.000491, 0.000478, 0.000244, 0.000673, 0.001866};
+    double eff_GtoB_byPt[] = {0.003357, 0.001166};
+    double effUncertUp_GtoB_byPt[] = {0.000967, 0.000373};
+    double effUncertDown_GtoB_byPt[] = {0.000967, 0.000373};
     // UDS->B efficiencies
     // From W+jets (WJets) sample with Rtau cut deactivated
-    double eff_UDStoB_byPt[] = {0.000000, 0.002185, 0.001140, 0.001492, 0.000834, 0.001265};
-    double effUncertUp_UDStoB_byPt[] = {0.000000, 0.000415, 0.000354, 0.000498, 0.000441, 0.000895};
-    double effUncertDown_UDStoB_byPt[] = {0.000000, 0.000415, 0.000354, 0.000498, 0.000441, 0.000895};
+    double eff_UDStoB_byPt[] = {0.000504};
+    double effUncertUp_UDStoB_byPt[] = {0.000192};
+    double effUncertDown_UDStoB_byPt[] = {0.000192};
   }
 
 
@@ -590,24 +603,24 @@ namespace HPlus {
     if (fLeadingDiscrCut > 0.243 && fLeadingDiscrCut < 0.245) { // CSVL (Combined Secondary Vertex b-tagging method, Loose working point)
       fTagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVL::SFb, toVector(CSVL::SFb_error));
       fMistagSFTable.setScaleFactorTable(CSVL::SFl, CSVL::SFl_max, CSVL::SFl_min);
-      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVL::eff_BtoB_byPt), toVector(CSVL::effUncertUp_BtoB_byPt), toVector(CSVL::effUncertDown_BtoB_byPt));
-      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVL::eff_CtoB_byPt), toVector(CSVL::effUncertUp_CtoB_byPt), toVector(CSVL::effUncertDown_CtoB_byPt));
-      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVL::eff_GtoB_byPt), toVector(CSVL::effUncertUp_GtoB_byPt), toVector(CSVL::effUncertDown_GtoB_byPt));
-      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVL::eff_UDStoB_byPt), toVector(CSVL::effUncertUp_UDStoB_byPt), toVector(CSVL::effUncertDown_UDStoB_byPt));
+      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_B), toVector(CSVL::eff_BtoB_byPt), toVector(CSVL::effUncertUp_BtoB_byPt), toVector(CSVL::effUncertDown_BtoB_byPt));
+      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_C), toVector(CSVL::eff_CtoB_byPt), toVector(CSVL::effUncertUp_CtoB_byPt), toVector(CSVL::effUncertDown_CtoB_byPt));
+      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_G), toVector(CSVL::eff_GtoB_byPt), toVector(CSVL::effUncertUp_GtoB_byPt), toVector(CSVL::effUncertDown_GtoB_byPt));
+      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_UDS), toVector(CSVL::eff_UDStoB_byPt), toVector(CSVL::effUncertUp_UDStoB_byPt), toVector(CSVL::effUncertDown_UDStoB_byPt));
     } else if (fLeadingDiscrCut > 0.678 && fLeadingDiscrCut < 0.680) { // CSVM (Combined Secondary Vertex b-tagging method, Medium working point)
       fTagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVM::SFb, toVector(CSVM::SFb_error));
       fMistagSFTable.setScaleFactorTable(CSVM::SFl, CSVM::SFl_max, CSVM::SFl_min);
-      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVM::eff_BtoB_byPt), toVector(CSVM::effUncertUp_BtoB_byPt), toVector(CSVM::effUncertDown_BtoB_byPt));
-      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVM::eff_CtoB_byPt), toVector(CSVM::effUncertUp_CtoB_byPt), toVector(CSVM::effUncertDown_CtoB_byPt));
-      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVM::eff_GtoB_byPt), toVector(CSVM::effUncertUp_GtoB_byPt), toVector(CSVM::effUncertDown_GtoB_byPt));
-      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVM::eff_UDStoB_byPt), toVector(CSVM::effUncertUp_UDStoB_byPt), toVector(CSVM::effUncertDown_UDStoB_byPt));
+      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_B), toVector(CSVM::eff_BtoB_byPt), toVector(CSVM::effUncertUp_BtoB_byPt), toVector(CSVM::effUncertDown_BtoB_byPt));
+      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_C), toVector(CSVM::eff_CtoB_byPt), toVector(CSVM::effUncertUp_CtoB_byPt), toVector(CSVM::effUncertDown_CtoB_byPt));
+      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_G), toVector(CSVM::eff_GtoB_byPt), toVector(CSVM::effUncertUp_GtoB_byPt), toVector(CSVM::effUncertDown_GtoB_byPt));
+      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_UDS), toVector(CSVM::eff_UDStoB_byPt), toVector(CSVM::effUncertUp_UDStoB_byPt), toVector(CSVM::effUncertDown_UDStoB_byPt));
     } else if (fLeadingDiscrCut > 0.897 && fLeadingDiscrCut < 0.899) { // CSVT (Combined Secondary Vertex b-tagging method, Tight working point)
       fTagSFTable.setScaleFactorTable(toVector(SFBins::ptmin), CSVT::SFb, toVector(CSVT::SFb_error));
       fMistagSFTable.setScaleFactorTable(CSVT::SFl, CSVT::SFl_max, CSVT::SFl_min);
-      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVT::eff_BtoB_byPt), toVector(CSVT::effUncertUp_BtoB_byPt), toVector(CSVT::effUncertDown_BtoB_byPt));
-      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_BC), toVector(CSVT::eff_CtoB_byPt), toVector(CSVT::effUncertUp_CtoB_byPt), toVector(CSVT::effUncertDown_CtoB_byPt));
-      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVT::eff_GtoB_byPt), toVector(CSVT::effUncertUp_GtoB_byPt), toVector(CSVT::effUncertDown_GtoB_byPt));
-      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_GUDS), toVector(CSVT::eff_UDStoB_byPt), toVector(CSVT::effUncertUp_UDStoB_byPt), toVector(CSVT::effUncertDown_UDStoB_byPt));
+      fTagEffTable.setEfficiencyTable(toVector(EffBins::bins_B), toVector(CSVT::eff_BtoB_byPt), toVector(CSVT::effUncertUp_BtoB_byPt), toVector(CSVT::effUncertDown_BtoB_byPt));
+      fCMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_C), toVector(CSVT::eff_CtoB_byPt), toVector(CSVT::effUncertUp_CtoB_byPt), toVector(CSVT::effUncertDown_CtoB_byPt));
+      fGMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_G), toVector(CSVT::eff_GtoB_byPt), toVector(CSVT::effUncertUp_GtoB_byPt), toVector(CSVT::effUncertDown_GtoB_byPt));
+      fUDSMistagEffTable.setEfficiencyTable(toVector(EffBins::bins_UDS), toVector(CSVT::eff_UDStoB_byPt), toVector(CSVT::effUncertUp_UDStoB_byPt), toVector(CSVT::effUncertDown_UDStoB_byPt));
     } else {
       throw cms::Exception("LogicError")  << "The given b-tagging discriminator value does not correspond to any known working point!";
     }
