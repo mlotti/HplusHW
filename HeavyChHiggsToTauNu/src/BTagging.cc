@@ -51,17 +51,10 @@ namespace HPlus {
     double ptmin[] = {20, 30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 600};
   }
   namespace EffBins {
-<<<<<<< HEAD
     double bins_B[] = {30, 40, 60, 80, 100, 120, 150, 250};
     double bins_C[] = {30, 70, 110, 150};
     double bins_G[] = {30, 50};
-    double bins_GUDS[] = {30};
-=======
-    double bins_B[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
-    double bins_C[] = {20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 200, 250, 300, 350, 400};
-    double bins_G[] = {20, 30, 60, 100, 150, 250};
-    double bins_UDS[] = {20, 30, 60, 100, 150, 250};
->>>>>>> lauri/2011
+    double bins_UDS[] = {30};
   }
   namespace CSVL {
     // B-tagging scale factors
