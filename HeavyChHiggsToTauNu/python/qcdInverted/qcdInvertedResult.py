@@ -8,7 +8,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
+import math
 
 ## Class for calculating the QCD factorised results
 # Shape has to be a dataDrivenQCDCount object
@@ -42,7 +45,7 @@ class QCDInvertedShape:
         # Calculate final shape in signal region (shape * w_QCD)
         nSplitBins = shape.getNumberOfPhaseSpaceSplitBins()
         # Initialize result containers
-        self._resultShape = aux.clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
+        self._resultShape = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
         self._resultShape.Reset()
         self._resultShape.SetTitle("NQCDFinal_Total_%s"%moduleInfoString)
         self._resultShape.SetName("NQCDFinal_Total_%s"%moduleInfoString)
@@ -51,8 +54,8 @@ class QCDInvertedShape:
         self._resultCountObject = ExtendedCount(0.0, [0.0, 0.0], myUncertaintyLabels)
         for i in range(0, nSplitBins):
             hBin = aux.Clone(self._resultShape)
-            hBin.SetTitle("NQCDFinal_%s_%s"%(basicShape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
-            hBin.SetName("NQCDFinal_%s_%s"%(basicShape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
+            hBin.SetTitle("NQCDFinal_%s_%s"%(shape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
+            hBin.SetName("NQCDFinal_%s_%s"%(shape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
             self._histogramsList.append(hBin)
         # Intialize counters for purity calculation in final shape binning
         myShapeDataSum = []
@@ -147,7 +150,7 @@ class QCDInvertedControlPlot:
         # Calculate final shape in signal region (shape * w_QCD)
         nSplitBins = shape.getNumberOfPhaseSpaceSplitBins()
         # Initialize result containers
-        self._resultShape = aux.clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
+        self._resultShape = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
         self._resultShape.Reset()
         self._resultShape.SetTitle(self._title+"tmp")
         self._resultShape.SetName(self._title+"tmp")
@@ -187,7 +190,7 @@ class QCDInvertedResultManager:
         # Obtain QCD shapes
         myShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", shapeString, luminosity, systematics.getBinningForPlot(shapeString))
         # Calculate final shape in signal region (leg1 * leg2 / basic)
-        myResult = QCDInvertedShape(myShape, moduleInfoString, displayPurityBreakdown=displayPurityBreakdown)
+        myResult = QCDInvertedShape(myShape, moduleInfoString, normFactors, optionPrintPurityByBins=displayPurityBreakdown)
         myShape.delete()
         self._hShape = aux.Clone(myResult.getResultShape())
         self._hShape.SetName(self._hShape.GetName()+"finalShapeInManager")
