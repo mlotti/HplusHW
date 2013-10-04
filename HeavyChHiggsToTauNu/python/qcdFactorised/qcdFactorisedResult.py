@@ -211,7 +211,7 @@ class QCDFactorisedResultManager:
         if not shapeOnly:
             print HighlightStyle()+"...Obtaining region transition systematics"+NormalStyle()
             # Do systematics coming from met shape difference
-            myRegionTransitionSyst = SystematicsForMetShapeDifference(mySignalRegionShape, myCtrlRegionShape, self._hShape, histoSpecs=None, moduleInfoString=moduleInfoString)
+            myRegionTransitionSyst = SystematicsForMetShapeDifference(mySignalRegionShape, myCtrlRegionShape, self._hShape, moduleInfoString=moduleInfoString)
             self._hRegionSystUp = aux.Clone(myRegionTransitionSyst.getUpHistogram(), "QCDfactMgrQCDSystUp")
             self._hRegionSystDown = aux.Clone(myRegionTransitionSyst.getDownHistogram(), "QCDfactMgrQCDSystDown")
             myRegionTransitionSyst.delete()
@@ -238,7 +238,7 @@ class QCDFactorisedResultManager:
                 # Do systematics coming from met shape difference for control plots
                 myCtrlPlotSignalRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationSignal",item), luminosity, rebinList=myRebinList)
                 myCtrlPlotControlRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationControl",item), luminosity, rebinList=myRebinList)
-                myCtrlPlotRegionTransitionSyst = SystematicsForMetShapeDifference(myCtrlPlotSignalRegionShape, myCtrlPlotControlRegionShape, myCtrlPlotHisto, histoSpecs=None, moduleInfoString=moduleInfoString, quietMode=True)
+                myCtrlPlotRegionTransitionSyst = SystematicsForMetShapeDifference(myCtrlPlotSignalRegionShape, myCtrlPlotControlRegionShape, myCtrlPlotHisto, moduleInfoString=moduleInfoString, quietMode=True)
                 myCtrlPlotSignalRegionShape.delete()
                 myCtrlPlotControlRegionShape.delete()
                 hUp = aux.Clone(myCtrlPlotRegionTransitionSyst.getUpHistogram(), "QCDfactMgrSystQCDSystUp%d"%i)

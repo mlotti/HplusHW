@@ -14,7 +14,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
-#from HiggsAnalysis.HeavyChHiggsToTauNu.qcdFactorised.qcdFactorisedResult import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.QCDInvertedResult import *
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.pseudoMultiCrabCreator import *
@@ -35,7 +35,7 @@ myFullMassSpecs = {
 
 myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
 
-def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myDisplayStatus):
+def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myNormFactors,myDisplayStatus):
     # Construct info string of module
     myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
     # Obtain dataset manager
@@ -60,11 +60,8 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     myQCDNormalizationSystUpResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDNormPlus")
     myQCDNormalizationSystDownResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDNormMinus")
     # Obtain results
-    myResult = None
-    if massType == "mt":
-        myResult = QCDFactorisedResultManager(myMtSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False,displayPurityBreakdown=True)
-    elif massType == "invmass":
-        myResult = QCDFactorisedResultManager(myFullMassSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False,displayPurityBreakdown=True)
+    myResult = QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity, myModuleInfoString, myNormFactors, shapeOnly=False, displayPurityBreakdown=True)
+    # Store results
     myModuleResults.addShape(myResult.getShape(), myShapeString)
     myModuleResults.addDataDrivenControlPlots(myResult.getControlPlots(),myResult.getControlPlotLabels())
     myOutputCreator.addModule(myModuleResults)
@@ -79,7 +76,7 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     myResult.delete()
     dsetMgr.close()
 
-def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString):
+def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString,myNormFactors):
     myModuleInfoString = "%s_%s_%s_%s"%(era, searchMode, optimizationMode,syst)
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=myMulticrabDir)
     systDsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode,systematicVariation=syst)
@@ -91,11 +88,7 @@ def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,m
     myLuminosity = systDsetMgr.getDataset("Data").getLuminosity()
     # Obtain results
     mySystModuleResults = PseudoMultiCrabModule(systDsetMgr, era, searchMode, optimizationMode, syst)
-    mySystResult = None
-    if massType == "mt":
-        mySystResult = QCDFactorisedResultManager(myMtSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
-    elif massType == "invmass":
-        mySystResult = QCDFactorisedResultManager(myFullMassSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
+    mySystResult = QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity, myModuleInfoString, myNormFactors, shapeOnly=False, displayPurityBreakdown=False)
     mySystModuleResults.addShape(mySystResult.getShape(), myShapeString)
     mySystModuleResults.addDataDrivenControlPlots(mySystResult.getControlPlots(),mySystResult.getControlPlotLabels())
     mySystResult.delete()
@@ -187,14 +180,14 @@ if __name__ == "__main__":
                     n += 1
                     print CaptionStyle()+"Module %d/%d: %s/%s%s"%(n,myTotalModules,myModuleInfoString,massType,NormalStyle())
                     myStartTime = time.time()
-                    doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myDisplayStatus)
+                    doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myNormFactors,myDisplayStatus)
                     printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
                     # Now do the rest of systematics variations
                     for syst in mySystematicsNames:
                         n += 1
                         print CaptionStyle()+"Analyzing systematics variations %d/%d: %s/%s/%s%s"%(n,myTotalModules,myModuleInfoString,syst,massType,NormalStyle())
                         myStartTime = time.time()
-                        doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString)
+                        doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString,myNormFactors)
                         printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
     # Now write output to disk
     print "\nWriting output to disk shape %s..."%massType
