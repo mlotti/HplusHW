@@ -651,7 +651,7 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
     myScaleFactors = tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium  # FIXME changed default to best so far
     myScaleFactors.variationEnabled = cms.bool(False)
-    myScaleFactors.variationShiftBy = cms.double(0)
+    myScaleFactors.useMaxUncertainty = cms.bool(True)
     return myScaleFactors
     # FIXME
     if tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr3Hits":
@@ -671,13 +671,13 @@ def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(tausele):
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
     myScaleFactors = tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium # FIXME changed default to best so far
     myScaleFactors.variationEnabled = cms.bool(False)
-    myScaleFactors.variationShiftBy = cms.double(0)
+    myScaleFactors.useMaxUncertainty = cms.bool(True)
     return myScaleFactors
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
 tauTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
-tauTriggerEfficiencyScaleFactor.variationShiftBy = cms.double(0)
+tauTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
 
 metTriggerEfficiencyScaleFactor = cms.untracked.PSet(
     dataParameters = cms.PSet(),
@@ -686,7 +686,7 @@ metTriggerEfficiencyScaleFactor = cms.untracked.PSet(
     mcSelect = cms.string(""),
     mode = cms.untracked.string("disabled"), # dataEfficiency, scaleFactor, disabled
     variationEnabled = cms.bool(False),
-    variationShiftBy = cms.double(0),
+    useMaxUncertainty = cms.bool(True),
 )
 
 # Muon trigger+ID efficiencies, for embedding normalization
@@ -697,11 +697,11 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTrig
 
 embeddingMuonIdEfficiency = muonTriggerIDEfficiency.efficiency_ID
 embeddingMuonIdEfficiency.variationEnabled = cms.bool(False)
-embeddingMuonIdEfficiency.variationShiftBy = cms.double(0)
+embeddingMuonIdEfficiency.useMaxUncertainty = cms.bool(True)
 
 embeddingMuonTriggerEfficiency = muonTriggerIDEfficiency.efficiency_trigger
 embeddingMuonTriggerEfficiency.variationEnabled = cms.bool(False)
-embeddingMuonTriggerEfficiency.variationShiftBy = cms.double(0)
+embeddingMuonTriggerEfficiency.useMaxUncertainty = cms.bool(True)
 
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff

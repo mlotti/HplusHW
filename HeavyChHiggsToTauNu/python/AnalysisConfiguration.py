@@ -1138,22 +1138,69 @@ class ConfigBuilder:
     # \param process   cms.Process object
     # \param name      Name of the module to be used as a prototype
     def _addScaleFactorVariation(self, process, name):
+        #useAsymmetricUncertainties = True
+        useAsymmetricUncertainties = False
+
         def addTauTrgSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
             effSF = module.tauTriggerEfficiencyScaleFactor
             effSF.variationEnabled = True
-            effSF.variationShiftBy = shiftBy
+            effSF.useMaxUncertainty = True
+            effSF.variationSFShiftBy = cms.double(shiftBy)
             if hasattr(effSF, "printScaleFactors"):
                 effSF.printScaleFactors = False
             return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgSF"+postfix)
+        def addTauTrgDataEff(shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = module.tauTriggerEfficiencyScaleFactor
+            effSF.variationEnabled = True
+            effSF.useMaxUncertainty = False
+            effSF.variationDataShiftBy = cms.double(shiftBy)
+            effSF.variationMCShiftBy = cms.double(0.0)
+            if hasattr(effSF, "printScaleFactors"):
+                effSF.printScaleFactors = False
+            return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgDataEff"+postfix)
+        def addTauTrgMCEff(shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = module.tauTriggerEfficiencyScaleFactor
+            effSF.variationEnabled = True
+            effSF.useMaxUncertainty = False
+            effSF.variationDataShiftBy = cms.double(0.0)
+            effSF.variationMCShiftBy = cms.double(shiftBy)
+            if hasattr(effSF, "printScaleFactors"):
+                effSF.printScaleFactors = False
+            return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgMCEff"+postfix)
+
         def addMETTrgSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
             effSF = module.metTriggerEfficiencyScaleFactor
             effSF.variationEnabled = True
-            effSF.variationShiftBy = shiftBy
+            effSF.useMaxUncertainty = True
+            effSF.variationSFShiftBy = cms.double(shiftBy)
             if hasattr(effSF, "printScaleFactors"):
                 effSF.printScaleFactors = False
             return self._addVariationModule(process, module, name+self.systPrefix+"MetTrgSF"+postfix)
+        def addMETTrgDataEff(shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = module.metTriggerEfficiencyScaleFactor
+            effSF.variationEnabled = True
+            effSF.useMaxUncertainty = False
+            effSF.variationDataShiftBy = cms.double(shiftBy)
+            effSF.variationMCShiftBy = cms.double(0.0)
+            if hasattr(effSF, "printScaleFactors"):
+                effSF.printScaleFactors = False
+            return self._addVariationModule(process, module, name+self.systPrefix+"MetTrgDataEff"+postfix)
+        def addMETTrgMCEff(shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = module.metTriggerEfficiencyScaleFactor
+            effSF.variationEnabled = True
+            effSF.useMaxUncertainty = False
+            effSF.variationDataShiftBy = cms.double(0.0)
+            effSF.variationMCShiftBy = cms.double(shiftBy)
+            if hasattr(effSF, "printScaleFactors"):
+                effSF.printScaleFactors = False
+            return self._addVariationModule(process, module, name+self.systPrefix+"MetTrgMCEff"+postfix)
+
         def addBTagSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
             module.bTagging.variationEnabled = True
@@ -1165,13 +1212,25 @@ class ConfigBuilder:
 
         # Tau trigger SF
         if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
-            names.append(addTauTrgSF( 1.0, "Plus"))
-            names.append(addTauTrgSF(-1.0, "Minus"))
+            if useAsymmetricUncertainties:
+                names.append(addTauTrgDataEff( 1.0, "Plus"))
+                names.append(addTauTrgDataEff(-1.0, "Minus"))
+                names.append(addTauTrgMCEff( 1.0, "Plus"))
+                names.append(addTauTrgMCEff(-1.0, "Minus"))
+            else:
+                names.append(addTauTrgSF( 1.0, "Plus"))
+                names.append(addTauTrgSF(-1.0, "Minus"))
 
         # MET trigger SF
         if self.applyMETTriggerScaleFactor:
-            names.append(addTauTrgSF( 1.0, "Plus"))
-            names.append(addTauTrgSF(-1.0, "Minus"))
+            if useAsymmetricUncertainties:
+                names.append(addTauTrgDataEff( 1.0, "Plus"))
+                names.append(addTauTrgDataEff(-1.0, "Minus"))
+                names.append(addTauTrgMCEff( 1.0, "Plus"))
+                names.append(addTauTrgMCEff(-1.0, "Minus"))
+            else:
+                names.append(addTauTrgSF( 1.0, "Plus"))
+                names.append(addTauTrgSF(-1.0, "Minus"))
 
         # BTag SF
         names.append(addBTagSF( 1.0, "Plus"))
