@@ -111,17 +111,7 @@ def customise(process):
 
     # Setup trigger matching
     if not (dataVersion.isMC() and options.triggerMC == 0 and options.triggerMCInAnalysis == 0):
-        tightenedMuonsName = process.tauEmbeddingMuons.src.value()
-        tightenedMuonsMatched = HChTriggerMatching.createMuonTriggerMatchingInAnalysis(options.trigger, tightenedMuonsName)
-        setattr(process, tightenedMuonsName+"Matched", tightenedMuonsMatched)
-        tightenedMuonsMatchedFilter = cms.EDFilter("CandViewCountFilter",
-            src = cms.InputTag(tightenedMuonsName+"Matched"),
-            minNumber = cms.uint32(1),
-        )
-        setattr(process, tightenedMuonsName+"MatchedFilter", tightenedMuonsMatchedFilter)
-        process.ProductionFilterSequence.replace(process.tightenedMuonsMatchedCount,
-                                                 (tightenedMuonsMatched + tightenedMuonsMatchedFilter + process.tightenedMuonsMatchedCount))
-        process.tauEmbeddingMuons.src = tightenedMuonsName+"Matched"
+        HChTriggerMatching.setMuonTriggerMatchingInAnalysis(process.tightenedMuonsMatched, options.trigger)
 
     # Setup output
     outputModule = None

@@ -251,11 +251,12 @@ def createTauTriggerMatchingInAnalysis(trigger, taus, pathFilterMap=tauPathLastF
         src = cms.InputTag(taus),
         patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
         deltaR = cms.double(0.4),
-        filterNames = cms.vstring(matched)
+        filterNames = cms.vstring(matched),
+        enabled = cms.bool(True)
     )
     return module
 
-def createMuonTriggerMatchingInAnalysis(trigger, muons, throw=True):
+def setMuonTriggerMatchingInAnalysis(module, trigger, throw=True):
     if isinstance(trigger, basestring):
         trigger = [trigger]
 
@@ -266,13 +267,16 @@ def createMuonTriggerMatchingInAnalysis(trigger, muons, throw=True):
             matched.append(filt)
         elif throw:
             raise Exception("No filter found for path %s" % path)
+    module.deltaR = cms.double(0.1)
+    module.filterNames = cms.vstring(matched)
+    module.enabled = cms.bool(True)
 
+def createMuonTriggerMatchingInAnalysis(trigger, muons, throw=True):
     module = cms.EDProducer("HPlusMuonTriggerMatchSelector",
         src = cms.InputTag(muons),
         patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
-        deltaR = cms.double(0.1),
-        filterNames = cms.vstring(matched),
     )
+    setMuonTriggerMatchingInAnalysis(module, trigger, throw)
     return module
 
 def triggerMatchingInAnalysis(process, sequence, triggers, param):

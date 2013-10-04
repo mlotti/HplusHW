@@ -631,6 +631,12 @@ class TaskDef:
             if val is not None:
                 setattr(self, a, val)
 
+    def setArg(self, name, value):
+        if self.args is None:
+            self.args = {name: value}
+        else:
+            self.args[name] = value
+
 ## Update task definition dictionary from another dictionary
 #
 # \param oldDefinitions   Dictionary from dataset names to TaskDef objects
