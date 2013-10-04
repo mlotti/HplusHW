@@ -680,7 +680,7 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele, triggerEfficiency, leg):
         raise Exception("Error: no scale factors are supported for '%s'!"%myString)
     print "Trigger %s leg scale factors set to %s" % (leg, myString)
     myScaleFactors.variationEnabled = cms.bool(False)
-    myScaleFactors.variationShiftBy = cms.double(0)
+    myScaleFactors.useMaxUncertainty = cms.bool(True)
     return myScaleFactors
 
 # Set trigger efficiency / scale factor for low purity depending on tau selection params
@@ -696,19 +696,19 @@ def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(tausele):
         raise Exception("Error: no tau trigger low purity scale factors are supported for '%s'!"%myString)
     print "Trigger tau leg low purity scale factors set to %s" % (myString)
     myScaleFactors.variationEnabled = cms.bool(False)
-    myScaleFactors.variationShiftBy = cms.double(0)
+    myScaleFactors.useMaxUncertainty = cms.bool(True)
     return myScaleFactors
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2012_cff as tauTriggerEfficiency
 tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection, tauTriggerEfficiency, "tau")
 tauTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
-tauTriggerEfficiencyScaleFactor.variationShiftBy = cms.double(0)
+tauTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2012_cff as metTriggerEfficiency
 metTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection, metTriggerEfficiency, "met")
 metTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
-metTriggerEfficiencyScaleFactor.variationShiftBy = cms.double(0)
+metTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
@@ -718,11 +718,11 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTrig
 
 embeddingMuonIdEfficiency = muonTriggerIDEfficiency.efficiency_ID
 embeddingMuonIdEfficiency.variationEnabled = cms.bool(False)
-embeddingMuonIdEfficiency.variationShiftBy = cms.double(0)
+embeddingMuonIdEfficiency.useMaxUncertainty = cms.bool(True)
 
 embeddingMuonTriggerEfficiency = muonTriggerIDEfficiency.efficiency_trigger
 embeddingMuonTriggerEfficiency.variationEnabled = cms.bool(False)
-embeddingMuonTriggerEfficiency.variationShiftBy = cms.double(0)
+embeddingMuonTriggerEfficiency.useMaxUncertainty = cms.bool(True)
 
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff

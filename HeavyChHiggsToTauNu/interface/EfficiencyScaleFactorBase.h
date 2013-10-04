@@ -6,6 +6,8 @@
 
 #include<vector>
 #include<sstream>
+#include<algorithm>
+#include<utility>
 
 namespace edm {
   class ParameterSet;
@@ -29,17 +31,24 @@ namespace HPlus {
       const double getEventWeight() const {
         return fWeight;
       }
+      const double getEventWeightAbsoluteUncertaintyPlus() const {
+        return fWeightAbsUncPlus;
+      }
+      const double getEventWeightAbsoluteUncertaintyMinus() const {
+        return fWeightAbsUncMinus;
+      }
       const double getEventWeightAbsoluteUncertainty() const {
-        return fWeightAbsUnc;
+        return std::max(fWeightAbsUncPlus, fWeightAbsUncMinus);
       }
       const double getEventWeightRelativeUncertainty() const {
         if(fWeight == 0.0) return 0.0;
-        else return fWeightAbsUnc / fWeight;
+        else return getEventWeightAbsoluteUncertainty() / fWeight;
       }
 
     protected:
       double fWeight;
-      double fWeightAbsUnc;
+      double fWeightAbsUncPlus;
+      double fWeightAbsUncMinus;
     };
 
     explicit EfficiencyScaleFactorBase(const edm::ParameterSet& iConfig);
@@ -49,12 +58,21 @@ namespace HPlus {
 
     virtual void setRun(unsigned run) = 0;
 
+    std::pair<double, double> parseUncertainty(const edm::ParameterSet& pset);
+
   protected:
+    void varyData(double *eff, double *uncPlus, double *uncMinus) const;
+    void varyMC(double *eff, double *uncPlus, double *uncMinus) const;
+    void varySF(double *sf, double *unc) const;
+
+    const bool fUseMaxUncertainty;
     const bool fVariationEnabled;
-    const double fVariationShiftBy;
 
   private:
     Mode fMode;
+    double fVariationSFShiftBy;
+    double fVariationDataShiftBy;
+    double fVariationMCShiftBy;
   };
 
   template <typename T>
@@ -85,15 +103,18 @@ namespace HPlus {
       unsigned lastRun;
       double luminosity;
       T values;
-      T uncertainties;
+      T uncertaintiesPlus;
+      T uncertaintiesMinus;
     };
     std::vector<DataValue> fDataValues;
     const DataValue *fCurrentRunData;
 
     T fEffDataAverageValues;
-    T fEffDataAverageUncertainties;
+    T fEffDataAverageUncertaintiesPlus;
+    T fEffDataAverageUncertaintiesMinus;
     T fEffMCValues;
-    T fEffMCUncertainties;
+    T fEffMCUncertaintiesPlus;
+    T fEffMCUncertaintiesMinus;
 
     T fScaleValues;
     T fScaleUncertainties;

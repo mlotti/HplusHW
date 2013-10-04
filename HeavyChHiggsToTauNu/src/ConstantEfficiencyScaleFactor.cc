@@ -6,6 +6,13 @@
 #include<algorithm>
 #include<iostream>
 
+namespace {
+  template <typename T>
+  T square(T x) {
+    return x*x;
+  }
+}
+
 namespace HPlus {
   ConstantEfficiencyScaleFactor::Data::Data() {}
   ConstantEfficiencyScaleFactor::Data::~Data() {}
@@ -29,7 +36,9 @@ namespace HPlus {
     // Get MC efficiencies for the given MC era
     edm::ParameterSet pset = mcParameters.getParameter<edm::ParameterSet>(mcSelect);
     fData.fEffMCValues = pset.getParameter<double>("efficiency");
-    fData.fEffMCUncertainties = pset.getParameter<double>("uncertainty");
+    std::pair<double, double> uncPlusMinus = parseUncertainty(pset);
+    fData.fEffMCUncertaintiesPlus = uncPlusMinus.first;
+    fData.fEffMCUncertaintiesMinus = uncPlusMinus.second;
 
     // Get data efficiencies for the given run periods, calculate the
     // total luminosity of those periods for the weighted average of
@@ -44,7 +53,9 @@ namespace HPlus {
       totalLuminosity += dv.luminosity;
 
       dv.values = pset.getParameter<double>("efficiency");
-      dv.uncertainties = pset.getParameter<double>("uncertainty");
+      uncPlusMinus = parseUncertainty(pset);
+      dv.uncertaintiesPlus = uncPlusMinus.first;
+      dv.uncertaintiesMinus = uncPlusMinus.second;
 
       fData.fDataValues.push_back(dv);
     }
@@ -55,35 +66,50 @@ namespace HPlus {
     if(print)
       std::cout << "Scale factor uncertainties:" << std::endl;
     double dataValue = 0;
-    double dataUncertaintySquared = 0;
+    double dataUncertaintySquaredPlus = 0;
+    double dataUncertaintySquaredMinus = 0;
     if(fData.fDataValues.size() == 1) {
       dataValue = fData.fDataValues[0].values;
-      dataUncertaintySquared = fData.fDataValues[0].uncertainties;
-      dataUncertaintySquared = dataUncertaintySquared*dataUncertaintySquared;
+      dataUncertaintySquaredPlus = square(fData.fDataValues[0].uncertaintiesPlus);
+      dataUncertaintySquaredMinus = square(fData.fDataValues[0].uncertaintiesMinus);
     }
     else {
       for(size_t iPeriod = 0; iPeriod != fData.fDataValues.size(); ++iPeriod) {
         double lumi = fData.fDataValues[iPeriod].luminosity;
         dataValue += lumi*fData.fDataValues[iPeriod].values;
-        double unc = lumi*fData.fDataValues[iPeriod].uncertainties;
-        dataUncertaintySquared += unc*unc;
+        dataUncertaintySquaredPlus += square(lumi*fData.fDataValues[iPeriod].uncertaintiesPlus);
+        dataUncertaintySquaredMinus += square(lumi*fData.fDataValues[iPeriod].uncertaintiesMinus);
       }
       dataValue = dataValue / totalLuminosity;
-      dataUncertaintySquared = dataUncertaintySquared / (totalLuminosity*totalLuminosity);
+      dataUncertaintySquaredPlus = dataUncertaintySquaredPlus / (totalLuminosity*totalLuminosity);
+      dataUncertaintySquaredMinus = dataUncertaintySquaredMinus / (totalLuminosity*totalLuminosity);
     }
     fData.fEffDataAverageValues = dataValue;
-    fData.fEffDataAverageUncertainties = std::sqrt(dataUncertaintySquared);
+    fData.fEffDataAverageUncertaintiesPlus = std::sqrt(dataUncertaintySquaredPlus);
+    fData.fEffDataAverageUncertaintiesMinus = std::sqrt(dataUncertaintySquaredMinus);
 
-    double dataRelativeUncertainty = std::sqrt(dataUncertaintySquared)/dataValue;
+    // Vary data and MC efficiencies, if enabled
+    for(size_t iPeriod = 0; iPeriod != fData.fDataValues.size(); ++iPeriod) {
+      varyData(&fData.fDataValues[iPeriod].values, &fData.fDataValues[iPeriod].uncertaintiesPlus, &fData.fDataValues[iPeriod].uncertaintiesMinus);
+    }
+    varyData(&fData.fEffDataAverageValues, &fData.fEffDataAverageUncertaintiesPlus, &fData.fEffDataAverageUncertaintiesMinus);
+    dataValue = fData.fEffDataAverageValues;
+    varyMC(&fData.fEffMCValues, &fData.fEffMCUncertaintiesPlus, &fData.fEffMCUncertaintiesMinus);
+
+    // Take max of plus and minus for SF
+    double dataRelativeUncertainty = std::sqrt(std::max(dataUncertaintySquaredPlus, dataUncertaintySquaredMinus))/dataValue;
 
     double mcValue = fData.fEffMCValues;
-    double mcRelativeUncertainty = fData.fEffMCUncertainties/mcValue;
+    double mcRelativeUncertainty = std::max(fData.fEffMCUncertaintiesPlus, fData.fEffMCUncertaintiesMinus)/mcValue;
 
     double scaleFactor = dataValue/mcValue;
     double scaleFactorRelativeUncertainty = std::sqrt(dataRelativeUncertainty*dataRelativeUncertainty + mcRelativeUncertainty*mcRelativeUncertainty);
     double scaleFactorAbsoluteUncertainty = scaleFactor * scaleFactorRelativeUncertainty;
 
     //std::cout << "Bin " << fBinLowEdges[i] << " data / mc = " << dataValue << " / " << mcValue << " = " << scaleFactor << " +- " << scaleFactorAbsoluteUncertainty << std::endl;
+
+    // Vary SF, if enabled
+    varySF(&scaleFactor, &scaleFactorAbsoluteUncertainty);
 
     fData.fScaleValues = scaleFactor;
     fData.fScaleUncertainties = scaleFactorAbsoluteUncertainty;
@@ -105,41 +131,38 @@ namespace HPlus {
     if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "ConstantEfficiencyScaleFactor: Must call ConstantEfficiencyScaleFactor::setRun() before dataEfficiency()" << std::endl;
     return fData.fCurrentRunData->values;
   }
-  double ConstantEfficiencyScaleFactor::dataEfficiencyRelativeUncertainty() const {
-    if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "ConstantEfficiencyScaleFactor: Must call ConstantEfficiencyScaleFactor::setRun() before dataEfficiencyRelativeUncertainty()" << std::endl;
-    return fData.fCurrentRunData->uncertainties / fData.fCurrentRunData->values;
-  }
-  double ConstantEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty() const {
+  double ConstantEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertaintyPlus() const {
     if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "ConstantEfficiencyScaleFactor: Must call ConstantEfficiencyScaleFactor::setRun() before dataEfficiencyAbsoluteUncertainty()" << std::endl;
-    return fData.fCurrentRunData->uncertainties;
+    return fData.fCurrentRunData->uncertaintiesPlus;
+  }
+  double ConstantEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertaintyMinus() const {
+    if(!fData.fCurrentRunData) throw cms::Exception("Assert") << "ConstantEfficiencyScaleFactor: Must call ConstantEfficiencyScaleFactor::setRun() before dataEfficiencyAbsoluteUncertainty()" << std::endl;
+    return fData.fCurrentRunData->uncertaintiesMinus;
   }
 
   double ConstantEfficiencyScaleFactor::dataAverageEfficiency() const {
     return fData.fEffDataAverageValues;
   }
-  double ConstantEfficiencyScaleFactor::dataAverageEfficiencyRelativeUncertainty() const {
-    return fData.fEffDataAverageUncertainties / fData.fEffDataAverageValues;
+  double ConstantEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertaintyPlus() const {
+    return fData.fEffDataAverageUncertaintiesPlus;
   }
-  double ConstantEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty() const {
-    return fData.fEffDataAverageUncertainties;
+  double ConstantEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertaintyMinus() const {
+    return fData.fEffDataAverageUncertaintiesMinus;
   }
 
   double ConstantEfficiencyScaleFactor::mcEfficiency() const {
     return fData.fEffMCValues;
   }
-  double ConstantEfficiencyScaleFactor::mcEfficiencyRelativeUncertainty() const {
-    return fData.fEffMCUncertainties / fData.fEffMCValues;
+  double ConstantEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertaintyPlus() const {
+    return fData.fEffMCUncertaintiesPlus;
   }
-  double ConstantEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertainty() const {
-    return fData.fEffMCUncertainties;
+  double ConstantEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertaintyMinus() const {
+    return fData.fEffMCUncertaintiesMinus;
   }
 
 
   double ConstantEfficiencyScaleFactor::scaleFactor() const {
     return fData.fScaleValues;
-  }
-  double ConstantEfficiencyScaleFactor::scaleFactorRelativeUncertainty() const {
-    return fData.fScaleUncertainties / fData.fScaleValues;
   }
   double ConstantEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty() const {
     return fData.fScaleUncertainties;
@@ -151,14 +174,16 @@ namespace HPlus {
 
     if(getMode() == kScaleFactor) {
       output.fWeight = scaleFactor();
-      output.fWeightAbsUnc = scaleFactorAbsoluteUncertainty();
+      output.fWeightAbsUncPlus = scaleFactorAbsoluteUncertainty();
+      output.fWeightAbsUncMinus = output.fWeightAbsUncPlus;
     }
     else if(getMode() == kDataEfficiency) {
       if(isData) {
         if(!fData.fCurrentRunData)
           throw cms::Exception("LogicError") << "ConstantEfficiencyScaleFactor: With efficiency mode and data input, must call setRun() before getEventWeight()" << std::endl;
         output.fWeight = dataEfficiency();
-        output.fWeightAbsUnc = dataEfficiencyAbsoluteUncertainty();
+        output.fWeightAbsUncPlus = dataEfficiencyAbsoluteUncertaintyPlus();
+        output.fWeightAbsUncMinus = dataEfficiencyAbsoluteUncertaintyMinus();
       }
       else {
         // Efficiency mode is needed only for embedding, and in there
@@ -167,7 +192,8 @@ namespace HPlus {
         // comparison will always be with respect to the efficiency of
         // data.
         output.fWeight = dataAverageEfficiency();
-        output.fWeightAbsUnc = dataAverageEfficiencyAbsoluteUncertainty();
+        output.fWeightAbsUncPlus = dataAverageEfficiencyAbsoluteUncertaintyPlus();
+        output.fWeightAbsUncMinus = dataAverageEfficiencyAbsoluteUncertaintyMinus();
         /*
         output.fWeight = mcEfficiency(value);
         output.fWeightAbsUnc = mcEfficiencyAbsoluteUncertainty(value);
@@ -177,12 +203,8 @@ namespace HPlus {
     }
     else if(getMode() == kMCEfficiency) {
       output.fWeight = mcEfficiency();
-      output.fWeightAbsUnc = mcEfficiencyAbsoluteUncertainty();
-    }
-
-    if(fVariationEnabled) {
-      output.fWeight += fVariationShiftBy*output.fWeightAbsUnc;
-      output.fWeightAbsUnc = 0; // Absolute uncertainty does not make much sense after variation
+      output.fWeightAbsUncPlus = mcEfficiencyAbsoluteUncertaintyPlus();
+      output.fWeightAbsUncPlus = mcEfficiencyAbsoluteUncertaintyMinus();
     }
 
     return output;

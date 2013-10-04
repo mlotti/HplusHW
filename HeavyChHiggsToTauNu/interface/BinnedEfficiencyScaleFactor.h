@@ -24,22 +24,6 @@ namespace HPlus {
 
     void setRun(unsigned run);
 
-    double dataEfficiency(double value) const;
-    double dataEfficiencyRelativeUncertainty(double value) const;
-    double dataEfficiencyAbsoluteUncertainty(double value) const;
-
-    double dataAverageEfficiency(double value) const;
-    double dataAverageEfficiencyRelativeUncertainty(double value) const;
-    double dataAverageEfficiencyAbsoluteUncertainty(double value) const;
-
-    double mcEfficiency(double value) const;
-    double mcEfficiencyRelativeUncertainty(double value) const;
-    double mcEfficiencyAbsoluteUncertainty(double value) const;
-
-    double scaleFactor(double value) const;
-    double scaleFactorRelativeUncertainty(double value) const;
-    double scaleFactorAbsoluteUncertainty(double value) const;
-
     size_t nbins() const { return fBinLowEdges.size(); }
     double binLowEdge(size_t bin) const { return fBinLowEdges[bin]; }
     double binScaleFactor(size_t bin) const { return fData.fScaleValues[bin]; }
@@ -48,6 +32,21 @@ namespace HPlus {
     Data getEventWeight(double value, bool isData) const;
 
   private:
+    double dataEfficiency(double value) const;
+    double dataEfficiencyAbsoluteUncertaintyPlus(double value) const;
+    double dataEfficiencyAbsoluteUncertaintyMinus(double value) const;
+
+    double dataAverageEfficiency(double value) const;
+    double dataAverageEfficiencyAbsoluteUncertaintyPlus(double value) const;
+    double dataAverageEfficiencyAbsoluteUncertaintyMinus(double value) const;
+
+    double mcEfficiency(double value) const;
+    double mcEfficiencyAbsoluteUncertaintyPlus(double value) const;
+    double mcEfficiencyAbsoluteUncertaintyMinus(double value) const;
+
+    double scaleFactor(double value) const;
+    double scaleFactorAbsoluteUncertainty(double value) const;
+
     typedef EfficiencyScaleFactorData<std::vector<double> > EffData;
 
     EffData fData;
