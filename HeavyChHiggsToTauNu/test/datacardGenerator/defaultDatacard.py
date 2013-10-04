@@ -10,6 +10,7 @@ Path = "/home/wendland/data/v445/2013-09-24"
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 LightMassPoints      = [120]
+#LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300]
 HeavyMassPoints      = []
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
@@ -129,17 +130,17 @@ myQCDInv = DataGroup(
     landsProcess = 3,
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
-    datasetDefinition = "QCDfactorisedmt",
+    datasetDefinition = "QCDinvertedmt",
     nuisances    = myShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","stat_binByBin","QCDinvTemplateFit"],
     shapeHisto   = SignalShapeHisto,
 )
 
 if OptionMassShape == "TransverseMass":
     myQCDFact.setDatasetDefinition("QCDfactorisedmt")
-    myQCDInv.setDatasetDefinition("QCDfactorisedmt")
+    myQCDInv.setDatasetDefinition("QCDinvertedmt")
 elif OptionMassShape == "FullMass":
     myQCDFact.setDatasetDefinition("QCDfactorisedinvmass")
-    myQCDInv.setDatasetDefinition("QCDfactorisedinvmass")
+    myQCDInv.setDatasetDefinition("QCDinvertedinvmass")
 
 DataGroups.append(myQCDFact)
 DataGroups.append(myQCDInv)
