@@ -255,15 +255,15 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
         "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=2490, njobsOut=60), # embedding: 5 s per event
         "WJets_TuneZ2_Fall11":               TaskDef(njobsIn= 200, njobsOut= 5),
 #        "W3Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 140, njobsOut=42),
-        "W1Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 350, njobsOut=20), # FIXME: njobsOut
+        "W1Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 500, njobsOut=20), # FIXME: njobsOut
         "W2Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 400, njobsOut=20), # FIXME: njobsOut
-        "W3Jets_TuneZ2_v2_Fall11":           TaskDef(njobsIn= 400, njobsOut=20), # FIXME: njobsOut
-        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 400, njobsOut=20), # FIXME: njobsOut
-        "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn= 500, njobsOut=12),
+        "W3Jets_TuneZ2_v2_Fall11":           TaskDef(njobsIn= 300, njobsOut=20), # FIXME: njobsOut
+        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 600, njobsOut=20), # FIXME: njobsOut
+        "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn= 600, njobsOut=12),
         "T_t-channel_TuneZ2_Fall11":         TaskDef(njobsIn=  40, njobsOut= 1),
         "Tbar_t-channel_TuneZ2_Fall11":      TaskDef(njobsIn=  20, njobsOut= 1),
-        "T_tW-channel_TuneZ2_Fall11":        TaskDef(njobsIn=  30, njobsOut= 1),
-        "Tbar_tW-channel_TuneZ2_Fall11":     TaskDef(njobsIn=  30, njobsOut= 1),
+        "T_tW-channel_TuneZ2_Fall11":        TaskDef(njobsIn=  40, njobsOut= 1),
+        "Tbar_tW-channel_TuneZ2_Fall11":     TaskDef(njobsIn=  40, njobsOut= 1),
         "T_s-channel_TuneZ2_Fall11":         TaskDef(njobsIn=   3, njobsOut= 1),
         "Tbar_s-channel_TuneZ2_Fall11":      TaskDef(njobsIn=   2, njobsOut= 1),
         "WW_TuneZ2_Fall11":                  TaskDef(njobsIn=  55, njobsOut= 2),
