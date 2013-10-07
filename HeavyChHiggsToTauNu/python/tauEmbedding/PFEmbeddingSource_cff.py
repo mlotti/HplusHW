@@ -59,7 +59,7 @@ tightenedMuonsMatchedCount = cms.EDProducer("EventCountProducer")
 muscleCorrectedMuons = cms.EDProducer("MuScleFitPATMuonCorrector", 
     src = cms.InputTag("tightenedMuonsMatched"),
     debug = cms.bool(False), 
-    identifier = cms.string("Data2011_44X"),
+    identifier = cms.string("DUMMY"),
     applySmearing = cms.bool(False), 
     fakeSmearing = cms.bool(False)
 )
