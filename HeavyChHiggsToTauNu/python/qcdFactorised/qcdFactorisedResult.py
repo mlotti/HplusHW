@@ -230,7 +230,7 @@ class QCDFactorisedResultManager:
                     myStatus = False
                     print WarningLabel()+"Skipping '%s', because it does not exist for EWK (you probably forgot to set histo level to Vital when producing the multicrab)!"%(item)+NormalStyle()
                 else:
-                    (myRootObject, myRootObjectName) = dsetMgr.getDataset("EWK").getRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item))
+                    (myRootObject, myRootObjectName) = dsetMgr.getDataset("EWK").getFirstRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item))
                     if isinstance(myRootObject, ROOT.TH2):
                         print WarningLabel()+"Skipping '%s', because it is not a TH1 object!"%(item)+NormalStyle()
                         myStatus = False
