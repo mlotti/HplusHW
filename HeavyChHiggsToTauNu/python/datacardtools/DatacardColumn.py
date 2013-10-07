@@ -255,10 +255,7 @@ class DatacardColumn():
                      # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
                      dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
-                     # Normalize signal to 1 pb
-                     myDatasetRootHisto.normalizeToLuminosity(1)
-                else:
-                    myDatasetRootHisto.normalizeToLuminosity(luminosity)
+                myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()
             # Rebin and move under/overflow bins to visible bins
             myArray = array("d",config.ShapeHistogramsDimensions)
@@ -303,7 +300,11 @@ class DatacardColumn():
                     # Obtain histograms
                     myHistograms = []
                     if e.isShapeNuisance():
-                        myHistograms.extend(e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+                        myHistograms = e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                        # Histograms constain abs uncertainty, need to add nominal histogram so that Lands accepts the histograms
+                        if e.getDistribution() == "shapeQ":
+                            for i in range(0,len(myHistograms)):
+                                myHistograms[i].Add(self._rateResult.getHistograms()[0])
                     else:
                         # Add scalar uncertainties
                         if isinstance(myResult, ScalarUncertaintyItem):
@@ -333,10 +334,7 @@ class DatacardColumn():
                     myCtrlDsetRootHisto = c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                     # Now normalize
                     if myDatasetRootHisto.isMC():
-                        if (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
-                            myCtrlDsetRootHisto.normalizeToLuminosity(1) # Normalize signal yield to 1 pb
-                        else:
-                            myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
+                        myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
                     h = myCtrlDsetRootHisto.getHistogramWithUncertainties()
                     # Rebin and move under/overflow bins to visible bins
                     myArray = array("d",getBinningForPlot(c._histoName))

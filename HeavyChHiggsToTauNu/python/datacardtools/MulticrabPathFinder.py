@@ -108,7 +108,7 @@ class MulticrabPathFinder:
     def qcdinvfind(self,dirs):
         myList = []
         for d in dirs:
-            if "pseudoMulticrab_signalAnalysisInverted" in d:
+            if "pseudoMulticrab_QCDinverted" in d:
                 myList.append(d)
         return self.selectLatest(myList)
 

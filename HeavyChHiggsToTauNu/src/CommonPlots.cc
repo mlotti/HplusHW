@@ -266,7 +266,8 @@ namespace HPlus {
                                FullHiggsMassCalculator& fullHiggsMassCalculator) {
     fSplittedHistogramHandler.initialize();
     fFakeTauIdentifier = &fakeTauIdentifier;
-    metTrgSF.setRun(iEvent.id().run());
+    if (iEvent.isRealData())
+      metTrgSF.setRun(iEvent.id().run());
     fMetTrgSF = &metTrgSF;
     // Obtain data objects
     fVertexData = vertexData;
@@ -473,6 +474,8 @@ namespace HPlus {
         if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis)
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet4, data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
       }
+      if (!data.passBackToBackCutForJet(i))
+        myPassStatus = false;
     }
   }
 

@@ -6,49 +6,25 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflows as multicrabWorkflows
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff as multicrabWorkflowsTriggerEff
 ####multicrabWorkflowsTriggerEff.addMetLegSkim_cmssw44X_v5(multicrabWorkflows.datasets)
+####multicrabWorkflowsTriggerEff.addTauLegSkim_cmssw44X_v5(multicrabWorkflows.datasets)
 
 multicrab = Multicrab("../../HeavyChHiggsToTauNu/test/pattuple/crab_pat.cfg", "../../HeavyChHiggsToTauNu/test/pattuple/patTuple_cfg.py", lumiMaskDir="../../HeavyChHiggsToTauNu/test")
 
-datasets = [
+datasets_SingleMu = [
+    "SingleMu_165970-167913_2011A_Nov08_RAWRECO",
+    "SingleMu_170722-173198_2011A_Nov08_RAWRECO",
+    "SingleMu_173236-173692_2011A_Nov08_RAWRECO",
+    "SingleMu_175832-180252_2011B_Nov19_RAWRECO",
+]
 
-        # Data 2011
-        # tau+met trigger
-       "Tau_165970-167913_2011A_Nov08",     # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
-       "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
-       "Tau_175832-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
-
-        # Fall11
-        # Background MC
-        "TTJets_TuneZ2_Fall11",
-        "WJets_TuneZ2_Fall11",
-        "W2Jets_TuneZ2_Fall11",
-#        "W3Jets_TuneZ2_Fall11",
-	"W3Jets_TuneZ2_v2_Fall11",
-        "W4Jets_TuneZ2_Fall11",
-        "DYJetsToLL_M10to50_TuneZ2_Fall11",
-        "DYJetsToLL_M50_TuneZ2_Fall11",
-        "T_t-channel_TuneZ2_Fall11",
-        "Tbar_t-channel_TuneZ2_Fall11",
-        "T_tW-channel_TuneZ2_Fall11",
-        "Tbar_tW-channel_TuneZ2_Fall11",
-        "T_s-channel_TuneZ2_Fall11",
-        "Tbar_s-channel_TuneZ2_Fall11",
-        "WW_TuneZ2_Fall11",
-        "WZ_TuneZ2_Fall11",
-        "ZZ_TuneZ2_Fall11",
-        "QCD_Pt30to50_TuneZ2_Fall11",
-        "QCD_Pt50to80_TuneZ2_Fall11",
-        "QCD_Pt80to120_TuneZ2_Fall11",
-        "QCD_Pt120to170_TuneZ2_Fall11",
-        "QCD_Pt170to300_TuneZ2_Fall11",
-        "QCD_Pt300to470_TuneZ2_Fall11",
+datasets_DY = [
+     "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW",
 ]
            
-workflow = "triggerMetLeg_skim_v44_v5"
+workflow = "triggerTauLeg_skim_v44_v5"
 
 tasks = [
-     ("MetLeg", datasets),
+     ("TauLeg", datasets_SingleMu+datasets_DY),
 ]
 
 for midfix, datasets in tasks:
@@ -56,17 +32,23 @@ for midfix, datasets in tasks:
 
     multicrab.extendDatasets(workflow, datasets)
 
+    multicrab.appendLineAll("CMSSW.total_number_of_lumis = -1")
+
     # local_stage_out doesn't work due to denied permission because we're
     # writing to /store/group/local ... 
     #multicrab.appendLineAll("USER.local_stage_out=1")
 
-    multicrab.appendLineAll("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X")
+    multicrab.appendLineAll("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/TriggerTauLeg/CMSSW_4_4_X")
     #multicrab.appendLineAll("GRID.maxtarballsize = 40")
 
     #def addCopyConfig(dataset):
     #    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
     #    dataset.appendCopyFile("../copy_cfg.py")
     #multicrab.forEachDataset(addCopyConfig)
+
+    def modify(datasets):
+	datasets.appendArg("doTauHLTMatching=0")
+    multicrab.forEachDataset(modify)
 
     multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 

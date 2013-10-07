@@ -68,6 +68,13 @@ process.out = cms.OutputModule("PoolOutputModule",
 # Add PAT sequences
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
+if len(options.customizeConfig) > 0:
+    print "Customizing (before PAT) with configurations ", ", ".join(options.customizeConfig)
+    for config in options.customizeConfig:
+        module = __import__("HiggsAnalysis.HeavyChHiggsToTauNu."+config, fromlist=[config])
+        if hasattr(module, "customizeBeforePat"):
+            module.customizeBeforePat(process,dataVersion)
+
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
                                    patArgs={"doTauHLTMatching": doTauHLTMatching,
