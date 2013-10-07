@@ -319,7 +319,7 @@ class TableProducer:
         myResult = []
         # Loop over rows
         for n in self._extractors:
-            if n.isPrintable() and n.getDistribution() == "shapeQ":
+            if n.isPrintable() and (n.getDistribution() == "shapeQ"):
                 myDownRow = ["%s_ShapeDown"%(n.getId()), ""]
                 myScalarDownRow = ["%s_DownDevFromScalar"%(n.getId()), ""]
                 myUpRow = ["%s_ShapeUp"%(n.getId()), ""]
@@ -361,6 +361,25 @@ class TableProducer:
                 #myResult.append(myScalarDownRow)
                 myResult.append(myUpRow)
                 #myResult.append(myScalarUpRow)
+            if n.isPrintable() and (n.getDistribution() == "shapeStat"):
+                myDownRow = ["%s_ShapeStat"%(n.getId()), ""]
+                # Loop over columns
+                for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
+                    if c.isActiveForMass(mass,self._config):
+                        # Check that column has current nuisance or has nuisance that is slave to current nuisance
+                        if c.hasNuisanceByMasterId(n.getId()):
+                            mySum = 0.0
+                            hNominal = c.getRateHistogram()
+                            for i in range(1,hNominal.GetNbinsX()+1):
+                                mySum += hNominal.GetBinError(i)**2
+                            myIntegral = hNominal.Integral()
+                            if myIntegral > 0.0:
+                                myDownRow.append("%.3f"%(sqrt(mySum)/myIntegral))
+                            else:
+                                myDownRow.append("0.0")
+                        else:
+                            myDownRow.append("-")
+                myResult.append(myDownRow)
         return myResult
 
     ## Save histograms to root file

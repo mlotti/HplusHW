@@ -109,6 +109,9 @@ backgroundCrossSections = CrossSectionList(
             "8": 214.0,
             }),
     # end W+Njets 
+    CrossSection("DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW", {
+            "7": 1.0,#"7": 3048.0, # [4], NNLO
+            }),
     CrossSection("DYJetsToLL_M50", {
             "7": 3048.0, # [4], NNLO
             }),

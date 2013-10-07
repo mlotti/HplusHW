@@ -367,7 +367,7 @@ class DataCardGenerator:
             print "  Please check if this was intended."
         # determine if datacard was ok
         if mymsg != "":
-            print ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"
+            print ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"+NormalStyle()
             print mymsg
             raise Exception()
         return True

@@ -717,8 +717,8 @@ def _graphRemoveNoncommonPoints(graph1, graph2):
     xfound = []
     for i in range(graph1.GetN()):
         for j in range(graph2.GetN()):
-            if histo1.GetX()[i] == graph2.GetX()[j]:
-        	xfound.append(histo1.GetX()[i])
+            if graph1.GetX()[i] == graph2.GetX()[j]:
+        	xfound.append(graph1.GetX()[i])
     remove1 = []
     for i in range(graph1.GetN()):
         found = False
@@ -728,19 +728,19 @@ def _graphRemoveNoncommonPoints(graph1, graph2):
         if not found:
             remove1.append(i)
     remove2 = []
-    for j in range(histo2.GetN()):
+    for j in range(graph2.GetN()):
         found = False
         for x in xfound:
-            if histo2.GetX()[j] == x:
+            if graph2.GetX()[j] == x:
                 found = True
         if not found:
             remove2.append(j)
 
     remove1.reverse()
-    for i in reverse1:
+    for i in remove1:
         ret1.RemovePoint(i)
     remove2.reverse()
-    for i in reverse2:
+    for i in remove2:
         ret2.RemovePoint(i)
 
     return (ret1, ret2)
@@ -782,6 +782,9 @@ def _createRatioBinomial(histo1, histo2, ytitle):
 # histo2 values. Creates separate entries for histo2 statistical and
 # stat+syst uncertainties, if systematic uncertainties exist.
 def _createRatioHistosErrorScale(histo1, histo2, ytitle):
+    addAlsoHatchedUncertaintyHisto = False
+    #addAlsoHatchedUncertaintyHisto = True
+
     ret = []
     if isinstance(histo1, ROOT.TH1) and isinstance(histo2, ROOT.TH1):
         ratio = histo1.Clone()
@@ -807,6 +810,12 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         ret.append(_createHisto(ratio, drawStyle="EP", legendLabel=None))
         if histograms.uncertaintyMode.showStatOnly():
             ret.append(_createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"))
+            if addAlsoHatchedUncertaintyHisto:
+                ratioErr2 = ratioErr.Clone("BackgroundStatError2")
+                ratioErr2.SetDirectory(0)
+                styles.errorStyle.apply(ratioErr2)
+                ratioErr2.SetFillStyle(3344)
+                ret.append(_createHisto(ratioErr2, drawStyle="E2", legendLabel=None))
         return ret
     elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
         xvalues1 = []
@@ -880,14 +889,22 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         ret.append(_createHisto(ratio, drawStyle="EP", legendLabel=None))
         if histograms.uncertaintyMode.showStatOnly():
             ret.append(_createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"))
+            if addAlsoHatchedUncertaintyHisto:
+                ratioErr2 = ratioErr.Clone("BackgroundStatError2")
+                styles.errorStyle.apply(ratioErr2)
+                ratioErr2.SetFillStyle(3344)
+                ret.append(_createHisto(ratioErr2, drawStyle="E2", legendLabel=None))
         return ret
     elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
         h1 = histo1.getRootHisto()
         h2 = histo2.getRootHisto()
 
+        # Add scaled stat uncertainty
         ret.extend(_createRatioHistosErrorScale(h1, h2, ytitle))
         if histograms.uncertaintyMode.equal(histograms.Uncertainty.StatOnly):
             return ret
+
+        # Then add scaled stat+syst uncertainty
 
         # Get new TGraphAsymmErrors for stat+syst, then scale it
         ratioSyst = histo2.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
@@ -913,6 +930,11 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         _plotStyles[name].apply(ratioSyst)
 
         ret.append(_createHisto(ratioSyst, drawStyle="2", legendLabel=_legendLabels[name], legendStyle="F"))
+        if addAlsoHatchedUncertaintyHisto:
+            ratioSyst2 = ratioSyst.Clone("BackgroundStatSystError2")
+            styles.errorStyle.apply(ratioSyst2)
+            ratioSyst2.SetFillStyle(3354)
+            ret.append(_createHisto(ratioSyst2, drawStyle="2", legendLabel=None))
         return ret
     else:
         raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
@@ -1122,7 +1144,7 @@ class PlotBase:
         for h in self.histoMgr.getHistos():
             if h.isData():
                 h.setLegendStyle("P")
-            elif "TTTo" in h.getName():
+            elif isSignal(h.getName()):
                 h.setLegendStyle("L")
 
     ## Set the default legend labels
@@ -1453,8 +1475,8 @@ class PlotRatioBase:
         delattr(self, "legend")
         del self.ratioLegend
 
-    def setRatioLegendHEader(self, legendHeader):
-        self.ratioLegendHEader = legendHeader
+    def setRatioLegendHeader(self, legendHeader):
+        self.ratioLegendHeader = legendHeader
 
     ## Create TCanvas and frame with ratio pad for single ratio
     #
@@ -1953,8 +1975,8 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
 
             self._normalizeToOne()
             self._createFrameRatio(filename,
-                                   self.histoMgr.getHisto("Data").getRootHisto(),
-                                   self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
+                                   self.histoMgr.getHisto("Data").getRootHistoWithUncertainties(),
+                                   self.histoMgr.getHisto("StackedMC").getSumRootHistoWithUncertainties(),
                                    "Data/MC", **kwargs)
 
     ## Add cut box and/or line
@@ -2296,7 +2318,7 @@ class PlotDrawer:
         except KeyError:
             pass
         try:
-            ret = _update(ret, args[attr])
+            ret = _update(ret, args[attr+attrPostfix])
         except KeyError:
             pass
 

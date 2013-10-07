@@ -1180,8 +1180,6 @@ class RootHistoWithUncertainties:
             myStatus &= abs(th1Minus.GetBinContent(0)) < 0.00001
             if not myStatus:
                 raise Exception("addShapeUncertainty(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
-            print "addShapeUncertainty before"
-            #self.Debug()
 
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
@@ -1190,9 +1188,6 @@ class RootHistoWithUncertainties:
         th1Minus.Add(self._rootHisto, -1.0)
         # Store
         self._shapeUncertainties[name] = (th1Plus, th1Minus)
-        if self._flowBinsVisibleStatus:
-            print "addShapeUncertainty after"
-            #self.Debug()
 
 
     ## Add bin-wise relative uncertainty

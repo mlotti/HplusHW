@@ -46,11 +46,17 @@ class QCDInvertedPlot(QCDInvertedPlotBase):
         QCDInvertedPlotBase.__init__(self, opts, dsetMgr, moduleInfoString, myDir, luminosity, normFactors)
 
     def getIntegratedHistogram(self, histoName, histoSpecs, optionPrintPurityByBins=False):
-        myShape = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", histoName, self._luminosity)
+        myRebinList = None
+        if histoSpecs["variableBinSizeLowEdges"] != None and len(histoSpecs["variableBinSizeLowEdges"] > 0):
+            myRebinList = histoSpecs["variableBinSizeLowEdges"][:]
+        myShape = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", histoName, self._luminosity, rebinList=myRebinList)
         return myShape.getIntegratedDataDrivenQCDHisto(histoSpecs)
 
     def getFinalHistogram(self, histoName, histoSpecs, optionPrintPurityByBins=False):
-        myShape = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", histoName, self._luminosity)
+        myRebinList = None
+        if histoSpecs["variableBinSizeLowEdges"] != None and len(histoSpecs["variableBinSizeLowEdges"] > 0):
+            myRebinList = histoSpecs["variableBinSizeLowEdges"][:]
+        myShape = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", histoName, self._luminosity, rebinList=myRebinList)
         myShapeResult = QCDInvertedShape(myShape, histoSpecs, self._moduleInfoString, self._normFactors, optionPrintPurityByBins)
         return myShapeResult.getResultShape()
 
@@ -77,7 +83,9 @@ class QCDInvertedSystematics(QCDInvertedPlotBase):
         QCDInvertedPlotBase.__init__(self, opts, dsetMgr, moduleInfoString, myDir, luminosity, normFactors)
         # Input quantities
         self._systName = systName
-        self._histoSpecs = histoSpecs
+        self._myRebinList = None
+        if histoSpecs["variableBinSizeLowEdges"] != None and len(histoSpecs["variableBinSizeLowEdges"] > 0):
+            self._myRebinList = histoSpecs["variableBinSizeLowEdges"][:]
         self._hFinalShape = None
         # Output quantities
         self._hSystematicsUp = None
@@ -105,8 +113,8 @@ class QCDInvertedSystematics(QCDInvertedPlotBase):
             raise Exception(ErrorLabel()+"You forgot to give final shape histo name or to cache the final shape histogram!")
         print WarningLabel()+"Final shape histo was not cached to QCDInvertedSystematics. Obtaining final shape from '%s'."%histoName
         # Obtain final result
-        myFinalShape = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", histoName, self._luminosity)
-        myFinalShapeResult = QCDInvertedShape(myFinalShape, self._histoSpecs, self._moduleInfoString, self._normFactors, optionPrintPurityByBins=False)
+        myFinalShape = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", histoName, self._luminosity, rebinList=self._myRebinList)
+        myFinalShapeResult = QCDInvertedShape(myFinalShape, self._moduleInfoString, self._normFactors, optionPrintPurityByBins=False)
         self._hFinalShape = myFinalShapeResult.getResultShape().Clone()
 
     ## Do systematics coming from met shape difference
@@ -119,10 +127,10 @@ class QCDInvertedSystematics(QCDInvertedPlotBase):
         myCtrlRegionName = "Inverted/%sInvertedTauId%s"%(histoNamePrefix, histoNameSuffix)
         mySignalRegionName = "baseline/%sBaselineTauId%s"%(histoNamePrefix, histoNameSuffix)
         # Obtain QCD shapes
-        self._myCtrlRegion = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", myCtrlRegionName, self._luminosity)
-        self._mySignalRegion = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", mySignalRegionName, self._luminosity)
+        self._myCtrlRegion = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", myCtrlRegionName, self._luminosity, rebinList=self._myRebinList)
+        self._mySignalRegion = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", mySignalRegionName, self._luminosity, rebinList=self._myRebinList)
         # Calculate uncertainty
-        self._mySystObject = SystematicsForMetShapeDifference(self._mySignalRegion, self._myCtrlRegion, self._hFinalShape, self._histoSpecs, self._moduleInfoString)
+        self._mySystObject = SystematicsForMetShapeDifference(self._mySignalRegion, self._myCtrlRegion, self._hFinalShape, self._moduleInfoString)
         self._hSystematicsUp = self._mySystObject.getUpHistogram().Clone()
         self._hSystematicsDown = self._mySystObject.getDownHistogram().Clone()
         print "Evaluated MET shape systematics"

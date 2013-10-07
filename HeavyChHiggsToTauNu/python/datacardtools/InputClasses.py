@@ -197,33 +197,19 @@ class Nuisance:
 class ControlPlotInput:
     def __init__(self,
                  title,
-                 signalHHid,
-                 signalHWid,
-                 QCDid,
-                 embeddingId,
-                 EWKfakeId,
                  signalHistoPath,
                  signalHistoName,
                  EWKfakeHistoPath,
                  EWKfakeHistoName,
-                 QCDFactNormalisation,
-                 QCDFactHistoName,
                  details,
                  blindedRange,
                  evaluationRange,
                  flowPlotCaption):
         self.title = title
-        self.signalHHid = signalHHid
-        self.signalHWid = signalHWid
-        self.QCDid = QCDid
-        self.embeddingId = embeddingId
-        self.EWKfakeId = EWKfakeId
         self.signalHistoPath = signalHistoPath
         self.signalHistoName = signalHistoName
         self.EWKfakeHistoPath = EWKfakeHistoPath
         self.EWKfakeHistoName = EWKfakeHistoName
-        self.QCDFactNormalisation = QCDFactNormalisation
-        self.QCDFactHistoName = QCDFactHistoName
         self.details = details
         self.blindedRange = blindedRange
         self.evaluationRange = evaluationRange

@@ -21,6 +21,8 @@ import ROOT
 class ControlPlotMaker:
     ## Constructor
     def __init__(self, opts, config, dirname, luminosity, observation, datasetGroups):
+        plots._legendLabels["MCStatError"] = "Bkg. stat."
+        plots._legendLabels["MCStatSystError"] = "Bkg. stat.#oplussyst."
         if config.ControlPlots == None:
             return
         myStyle = tdrstyle.TDRStyle()
@@ -39,6 +41,7 @@ class ControlPlotMaker:
         print "\n"+HighlightStyle()+"Generating control plots"+NormalStyle()
         # Loop over mass points
         for m in self._config.MassPoints:
+            print "... mass = %d GeV"%m
             # Initialize flow plot
             selectionFlow = SelectionFlowPlotMaker(self._config, m)
             myBlindingCount = 0
@@ -114,14 +117,18 @@ class ControlPlotMaker:
                 myHisto.setIsDataMC(isData=False, isMC=True)
                 myStackList.insert(1, myHisto)
                 # Add data to selection flow plot
-                selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hData,myStackList[1:])
+                if len(myCtrlPlot.blindedRange) > 0:
+                    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
+                else:
+                    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hData,myStackList[1:])
                 # Make plot
                 myStackPlot = plots.DataMCPlot2(myStackList)
                 myStackPlot.setLuminosity(self._luminosity)
                 myStackPlot.setDefaultStyles()
                 myParams = myCtrlPlot.details.copy()
                 # Tweak paramaters
-                myParams["xlabel"] = "%s, %s"%(myParams["xlabel"],myParams["unit"])
+                if myParams["unit"] != "":
+                    myParams["xlabel"] = "%s, %s"%(myParams["xlabel"],myParams["unit"])
                 myMinWidth = 10000.0
                 myMaxWidth = 0.0
                 for j in range(1,hData.getRootHisto().GetNbinsX()+1):
@@ -136,6 +143,7 @@ class ControlPlotMaker:
                 if not (myParams["unit"] == "" and myWidthSuffix == "1"):
                     myParams["ylabel"] = "%s / %s %s"%(myParams["ylabel"],myWidthSuffix,myParams["unit"])
                 myParams["ratio"] = True
+                myParams["ratioType"] = "errorScale"
                 myParams["ratioYlabel"] = "Data/#Sigma Exp."
                 myParams["stackMCHistograms"] = True
                 myParams["addMCUncertainty"] = True
@@ -149,8 +157,6 @@ class ControlPlotMaker:
             selectionFlow.makePlot(self._dirname,m,len(self._config.ControlPlots),self._luminosity)
         #myEvaluator.save(dirname)
         print "Control plots done"
-
-
 
     def _applyBlinding(self,myObject,blindedRange = []):
         myHisto = myObject.getRootHisto()
@@ -211,24 +217,16 @@ class SelectionFlowPlotMaker:
         self._config = config
         self._mass = mass
         # Calculate number of bins
-        myBinCount = 0
+        myBinList = []
         for c in self._config.ControlPlots:
-            if c.flowPlotCaption != "":
-                myBinCount += 1
-        self.plotDetails = { "bins": myBinCount,
-                            "rangeMin": 0.0,
-                            "rangeMax": myBinCount,
-                            "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                            "xlabel": "Step",
-                            "ylabel": "Events",
-                            "unit": "",
-                            "logy": True,
-                            "DeltaRatio": 0.5,
-                            "ymin": 0.9,
-                            "ymax": -1 }
+            if c.flowPlotCaption != "" and c.flowPlotCaption != "final":
+                myBinList.append(c.flowPlotCaption)
+        myBinCount = len(myBinList)
         # Make an empty frame
         myPlotName = "SelectionFlow_%d"%mass
         self._hFrame = ROOT.TH1F(myPlotName,myPlotName,myBinCount,0,myBinCount)
+        for i in range(0,myBinCount):
+            self._hFrame.GetXaxis().SetBinLabel(i+1, myBinList[i])
         # Make empty histograms for HH, HW, QCD, EWKtau, EWKfake, datacard
         self._expectedList = []
         self._expectedLabelList = []
@@ -236,10 +234,15 @@ class SelectionFlowPlotMaker:
         self._expectedListSystDown = []
         self._data = None
         # Initialise column pointer
-        self._myCurrentColumn = 0
+        self._myCurrentColumn = 1
+        self._pickStatus = False
+        self._pickLabel = ""
 
     def addColumn(self,label,data,expectedList):
-        self._myCurrentColumn += 1
+        # System to pick the correct input for correct label
+        if self._pickLabel == "":
+            self._pickLabel = label
+            return
         # Create histograms if necessary
         if self._data == None:
             self._createHistograms(data,expectedList)
@@ -260,6 +263,9 @@ class SelectionFlowPlotMaker:
             self._data.SetBinError(self._myCurrentColumn, data.getRateStatUncertainty())
         else:
             self._data.SetBinContent(self._myCurrentColumn, -1)
+        self._myCurrentColumn += 1
+        # Refresh pick status
+        self._pickLabel = label
 
     def _createHistograms(self,data,expectedList):
         for e in expectedList:
@@ -290,8 +296,10 @@ class SelectionFlowPlotMaker:
         myParams = {}
         myParams["ylabel"] = "Events"
         myParams["log"] = True
-        myParams["optsLog"] = {"ymin": 0.9}
+        myParams["optsLog"] = {"ymin": 0.5}
+        myParams["opts2"] = {"ymin": 0.8, "ymax":1.2}
         myParams["ratio"] = True
+        myParams["ratioType"] = "errorScale"
         myParams["ratioYlabel"] = "Data/#Sigma Exp."
         myParams["stackMCHistograms"] = True
         myParams["addMCUncertainty"] = True
