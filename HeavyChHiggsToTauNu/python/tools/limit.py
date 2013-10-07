@@ -36,10 +36,10 @@ process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu"
 BRassumption = ""
 
 ## Y axis label for the BR
-BRlimit = "95%% CL limit for %s(t#rightarrowH^{+}b)%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
+BRlimit = "95%% CL limit for %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
 
 ## Y axis label for the sigma x BR
-sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}(%s(t#rightarrowH^{+}b)%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
+sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}#times%s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}, pb"%(BR,BR)
 
 ## Y axis label for the tanbeta
 tanblimit = "tan #beta"
@@ -69,6 +69,14 @@ _finalstateYmaxBR = {
     "default": 0.06,
 }
 
+## Default y axis maximum values for sigma x BR limit for the final states
+_finalstateYmaxSigmaBR = {
+    "etau": 10.0, # FIXME
+    "mutau": 10.0, # FIXME
+    "emu": 10.0, # FIXME
+    "default": 4.0,
+}
+
 
 ## Class for reading the BR limits from the JSON file produced by
 ## landsMergeHistograms.py
@@ -88,6 +96,10 @@ class BRLimits:
         self.lumi = float(limits["luminosity"])
 
         self.mass = limits["masspoints"].keys()
+        self.isHeavyStatus = False
+        for m in self.mass:
+            if int(m) > 175:
+                self.isHeavyStatus = True
         members = ["mass"]
 
         # sort mass
@@ -165,13 +177,18 @@ class BRLimits:
 
     ## Get the maximum value for Y axis for the BR limit
     def getFinalstateYmaxBR(self):
+        myObject = None
+        if self.isHeavyStatus:
+            myObject = _finalstateYmaxSigmaBR
+        else:
+            myObject = _finalstateYmaxBR
         if len(self.finalstates) == 1:
             try:
-                ymax = _finalstateYmaxBR[self.finalstates[0]]
+                ymax = myObject[self.finalstates[0]]
             except KeyError:
-                ymax = _finalstateYmaxBR["default"]
+                ymax = myObject["default"]
         else:
-            ymax = _finalstateYmaxBR["default"]
+            ymax = myObject["default"]
         return ymax
 
     ## Print the BR limits
