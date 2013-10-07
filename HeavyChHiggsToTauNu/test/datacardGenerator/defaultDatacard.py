@@ -11,7 +11,7 @@ Path = "/home/wendland/data/v445/2013-09-24"
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 #LightMassPoints      = [120]
 #LightMassPoints      = []
-HeavyMassPoints      = [180,190,200,220,250,300]
+HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # points 400, 500, 600 are not available in 2011 branch
 HeavyMassPoints      = []
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
