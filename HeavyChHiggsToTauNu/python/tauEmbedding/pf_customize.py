@@ -113,6 +113,13 @@ def customise(process):
     if not (dataVersion.isMC() and options.triggerMC == 0 and options.triggerMCInAnalysis == 0):
         HChTriggerMatching.setMuonTriggerMatchingInAnalysis(process.tightenedMuonsMatched, options.trigger)
 
+    # Setup MuScleFit
+    if dataVersion.isMC():
+        process.muscleCorrectedMuons.identifier = "Fall11_START44"
+        process.muscleCorrectedMuons.applySmearing = True
+    else:
+        process.muscleCorrectedMuons.identifier = "Data2011_44X"
+
     # Setup output
     outputModule = None
     outdict = process.outputModules_()
