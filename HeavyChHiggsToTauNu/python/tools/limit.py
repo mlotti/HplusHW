@@ -32,10 +32,14 @@ BR = "#it{B}"
 process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu"
 
 ## Label for the H+->tau BR assumption
-BRassumption = "%s(H^{+} #rightarrow #tau#nu) = 1"%BR
+#BRassumption = "%s(H^{+} #rightarrow #tau#nu) = 1"%BR
+BRassumption = ""
 
 ## Y axis label for the BR
-BRlimit = "95%% CL limit for %s(t#rightarrow H^{+}b)"%BR
+BRlimit = "95%% CL limit for %s(t#rightarrowH^{+}b)%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
+
+## Y axis label for the sigma x BR
+sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}(%s(t#rightarrowH^{+}b)%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
 
 ## Y axis label for the tanbeta
 tanblimit = "tan #beta"
