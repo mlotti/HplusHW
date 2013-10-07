@@ -2837,7 +2837,29 @@ class DatasetMerged:
             return DatasetRootHistoMergedPseudo(wrappers, self)
         else:
             raise Exception("Internal error (unknown dataset type)")
-        
+
+    ## Get ROOT histogram
+    #
+    # \param name    Path of the ROOT histogram relative to the analysis
+    #                root directory
+    # \param kwargs  Keyword arguments, forwarded to getRootObjects()
+    #
+    # \return pair (\a histogram, \a realName)
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    #
+    # If dataset consists of multiple files, the histograms are added
+    # with the ROOT.TH1.Add() method.
+    # 
+    # If dataset.TreeDraw object is given (or actually anything with
+    # draw() method), the draw() method is called by giving the
+    # Dataset object as parameters. The draw() method is expected to
+    # return a TH1 which is then returned.
+    def getRootHisto(self, name, **kwargs):
+        content = self.datasets[0].getRootHisto(name, **kwargs)
+        return content
+
     ## Get the directory content of a given directory in the ROOT file.
     # 
     # \param directory   Path of the directory in the ROOT file
