@@ -332,7 +332,8 @@ class Plotter:
                 print "Bin low edge %.0f" % (eff1.GetX()[i] - eff1.GetErrorXlow(i))
                 print "   1: efficiency %.7f + %.7f - %.7f" % (eff1.GetY()[i], eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i)), "Entries num"#,n1.GetBinContent(bin),"denom",d1.GetBinContent(bin)
                 print "   2: efficiency %.7f + %.7f - %.7f" % (eff2.GetY()[i], eff2.GetErrorYhigh(i), eff2.GetErrorYlow(i)), "Entries num"#,n2.GetBinContent(bin),"denom",d2.GetBinContent(bin)
-                print "   ratio:        %.7f + %.7f - %.7f" % (ratio.getRootGraph().GetY()[i], ratio.getRootGraph().GetErrorYhigh(i), ratio.getRootGraph().GetErrorYlow(i))
+                if eff1.GetY()[i] > 0 and eff2.GetY()[i] > 0:
+                    print "   ratio:        %.7f + %.7f - %.7f" % (ratio.getRootGraph().GetY()[i], ratio.getRootGraph().GetErrorYhigh(i), ratio.getRootGraph().GetErrorYlow(i))
                 #if n1.GetBinLowEdge(bin) >= 41:
                 #    weight += eff1.GetY()[i]
                 #    ratioweighted += eff1.GetY()[i]*max(eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i))
