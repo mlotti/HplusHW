@@ -1030,6 +1030,7 @@ def addEmbeddingEmbedding_v53_3(datasets):
         for name, taskDef in definitions.iteritems():
             taskDef.setArg("tauDecayMode", 230)
             taskDef.setArg("tauMinVisPt", 30)
+            taskDef.update(TaskDef(publishPostfix="b"))
         addEmbeddingEmbedding_53X(skimVersion, version, datasets, definitions)
 
     addEmbedding("v53_3", {
