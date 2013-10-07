@@ -3821,7 +3821,7 @@ class DatasetManagerCreator:
         precursors = self._precursors[:]
         if dataEra is not None:
             def isInEra(eras, precursor):
-                if precursor.isMC():
+                if precursor.isMC() or precursor.isPseudo():
                     return True
                 if isinstance(eras, basestring):
                     eras = [eras]
