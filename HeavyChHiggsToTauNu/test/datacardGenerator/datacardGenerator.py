@@ -67,10 +67,10 @@ def main(opts, moduleSelector):
     else:
         embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput, not config.OptionReplaceEmbeddingByMC)
     qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
-    if qcdFactorisedDsetCreator == None:
+    if qcdFactorisedDsetCreator == None and not opts.useQCDinverted:
         myQCDMethods.remove(DataCard.DatacardQCDMethod.FACTORISED)
     qcdInvertedDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
-    if qcdInvertedDsetCreator == None:
+    if qcdInvertedDsetCreator == None and not opts.useQCDfactorised:
         myQCDMethods.remove(DataCard.DatacardQCDMethod.INVERTED)
 
     # Require existence of signal analysis and one QCD measurement
