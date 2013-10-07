@@ -484,10 +484,10 @@ def addEmbeddingEmbedding_53X(sourceWorkflow, version, datasets, updateDefinitio
     # njobsIn default value is for embedding
     njobs = {
         # FIXME: njobsOut
-        "SingleMu_190456-193621_2012A_Jan22": TaskDef(njobsIn= 420, njobsOut=20),
-        "SingleMu_193834-196531_2012B_Jan22": TaskDef(njobsIn=2200, njobsOut=100),
-        "SingleMu_198022-200381_2012C_Jan22": TaskDef(njobsIn=1600, njobsOut=70),
-        "SingleMu_200466-203742_2012C_Jan22": TaskDef(njobsIn=2200, njobsOut=90),
+        "SingleMu_190456-193621_2012A_Jan22": TaskDef(njobsIn= 400, njobsOut=20),
+        "SingleMu_193834-196531_2012B_Jan22": TaskDef(njobsIn=2000, njobsOut=100),
+        "SingleMu_198022-200381_2012C_Jan22": TaskDef(njobsIn=1500, njobsOut=70),
+        "SingleMu_200466-203742_2012C_Jan22": TaskDef(njobsIn=2000, njobsOut=90),
         "SingleMu_203777-205834_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=60),
         "SingleMu_205908-207100_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=60),
         "SingleMu_207214-208686_2012D_Jan22": TaskDef(njobsIn=1300, njobsOut=60),
@@ -497,22 +497,22 @@ def addEmbeddingEmbedding_53X(sourceWorkflow, version, datasets, updateDefinitio
         # FIXME: njobsOut
         "WJets_TuneZ2star_v1_Summer12":            TaskDef(njobsIn= 130, njobsOut=5),
         "WJets_TuneZ2star_v2_Summer12":            TaskDef(njobsIn= 380, njobsOut=15),
-        "W1Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 200, njobsOut=10),
+        "W1Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 300, njobsOut=10),
         "W2Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=1300, njobsOut=40),
         "W3Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 800, njobsOut=35),
         "W4Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=1100, njobsOut=40),
-        "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn= 600, njobsOut=25),
+        "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn= 400, njobsOut=25),
         "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(njobsIn= 900, njobsOut=40),
         "T_t-channel_TuneZ2star_Summer12":         TaskDef(njobsIn=  50, njobsOut=3),
         "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(njobsIn=  30, njobsOut=1),
-        "T_tW-channel_TuneZ2star_Summer12":        TaskDef(njobsIn=  50, njobsOut=2),
-        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDef(njobsIn=  50, njobsOut=2),
+        "T_tW-channel_TuneZ2star_Summer12":        TaskDef(njobsIn=  40, njobsOut=2),
+        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDef(njobsIn=  40, njobsOut=2),
         "T_s-channel_TuneZ2star_Summer12":         TaskDef(njobsIn=   6, njobsOut=1),
         "Tbar_s-channel_TuneZ2star_Summer12":      TaskDef(njobsIn=   5, njobsOut=1),
-        "WW_TuneZ2star_Summer12":                  TaskDef(njobsIn= 150, njobsOut=7),
+        "WW_TuneZ2star_Summer12":                  TaskDef(njobsIn= 200, njobsOut=7),
         "WZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 150, njobsOut=7),
         "ZZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 150, njobsOut=7),
-        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef(njobsIn= 100, njobsOut=4),
+        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef(njobsIn=  50, njobsOut=4),
         }
     # Update the default definitions from the argument
     updateTaskDefinitions(defaultDefinitions, njobs)
