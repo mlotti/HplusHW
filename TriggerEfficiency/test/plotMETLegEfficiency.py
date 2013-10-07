@@ -50,6 +50,8 @@ def main():
     if len(sys.argv) < 2:
         usage()
 
+    pythonWriter.setInput(sys.argv[1])
+
 #    datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False)
     datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), weightedCounters=False, includeOnlyTasks="Tau_|TauParked_")
 #    datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sys.argv[1], "multicrab.cfg"), counters=counters, doEraReplace=False, weightedCounters=False, includeOnlyTasks="_2012C_")
@@ -295,8 +297,8 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
     else:
         raise Exception("Invalid run range %s" % pyScenario)
 
-
-    offlineTriggerData = "(%s) && %s" % (offlineTriggerData, runs)
+    if not runs == "": 
+        offlineTriggerData = "(%s) && %s" % (offlineTriggerData, runs)
 #    offlineTriggerMc = "HLT_MediumIsoPFTau35_Trk20_v1"
 
 #    offlineSelection1 = And(offlineSelection,offlineTriggerMc)
