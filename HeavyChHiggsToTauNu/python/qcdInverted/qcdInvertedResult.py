@@ -168,8 +168,7 @@ class QCDInvertedControlPlot:
             # Loop over bins in the shape histogram
             for j in range(1,h.GetNbinsX()+1):
                 myResult = 0.0
-                myStatDataUncert = 0.0
-                myStatEwkUncert = 0.0
+                myResultStatUncert = 0.0
                 if abs(h.GetBinContent(j)) > 0.00001: # Ignore zero bins
                     # Calculate result
                     myResult = h.GetBinContent(j) * wQCD
@@ -217,34 +216,45 @@ class QCDInvertedResultManager:
             myObjects = dsetMgr.getDataset("Data").getDirectoryContent("ForDataDrivenCtrlPlots")
             i = 0
             for item in myObjects:
-                self._hCtrlPlotLabels.append(item)
+                myStatus = True
                 i += 1
                 print HighlightStyle()+"...Obtaining ctrl plot %d/%d: %s%s"%(i,len(myObjects),item,NormalStyle())
-                myRebinList = systematics.getBinningForPlot(item)
-                myCtrlShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity, rebinList=myRebinList)
-                myCtrlPlot = QCDInvertedControlPlot(myCtrlShape, moduleInfoString, normFactors, title=item)
-                myCtrlShape.delete()
-                myCtrlPlotHisto = aux.Clone(myCtrlPlot.getResultShape(), "ctrlPlotShapeInManager")
-                myCtrlPlot.delete()
-                myCtrlPlotHisto.SetName(item+"%d"%i)
-                myCtrlPlotHisto.SetTitle(item)
-                self._hCtrlPlots.append(myCtrlPlotHisto)
-                # Do systematics coming from met shape difference for control plots
-                myCtrlPlotSignalRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationSignal",item), luminosity, rebinList=myRebinList)
-                myCtrlPlotControlRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationControl",item), luminosity, rebinList=myRebinList)
-                myCtrlPlotRegionTransitionSyst = SystematicsForMetShapeDifference(myCtrlPlotSignalRegionShape, myCtrlPlotControlRegionShape, myCtrlPlotHisto, moduleInfoString=moduleInfoString, quietMode=True)
-                myCtrlPlotSignalRegionShape.delete()
-                myCtrlPlotControlRegionShape.delete()
-                hUp = aux.Clone(myCtrlPlotRegionTransitionSyst.getUpHistogram(), "QCDfactMgrSystQCDSystUp%d"%i)
-                hUp.SetTitle(item)
-                self._hRegionSystUpCtrlPlots.append(hUp)
-                hDown = aux.Clone(myCtrlPlotRegionTransitionSyst.getDownHistogram(), "QCDfactMgrSystQCDSystDown%d"%i)
-                hDown.SetTitle(item)
-                self._hRegionSystDownCtrlPlots.append(hDown)
-                myCtrlPlotRegionTransitionSyst.delete()
-                #print "\n***** memdebug %d\n"%i
-                #if i <= 2:
-                #    ROOT.gDirectory.GetList().ls()
+                if not dsetMgr.getDataset("EWK").datasets[0].hasRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item)):
+                    myStatus = False
+                    print WarningLabel()+"Skipping '%s', because it does not exist for EWK (you probably forgot to set histo level to Vital when producing the multicrab)!"%(item)+NormalStyle()
+                else:
+                    (myRootObject, myRootObjectName) = dsetMgr.getDataset("EWK").getRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item))
+                    if isinstance(myRootObject, ROOT.TH2):
+                        print WarningLabel()+"Skipping '%s', because it is not a TH1 object!"%(item)+NormalStyle()
+                        myStatus = False
+                if myStatus:
+                    self._hCtrlPlotLabels.append(item)
+                    myRebinList = systematics.getBinningForPlot(item)
+                    myCtrlShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity, rebinList=myRebinList)
+                    myCtrlPlot = QCDInvertedControlPlot(myCtrlShape, moduleInfoString, normFactors, title=item)
+                    myCtrlShape.delete()
+                    myCtrlPlotHisto = aux.Clone(myCtrlPlot.getResultShape(), "ctrlPlotShapeInManager")
+                    myCtrlPlot.delete()
+                    myCtrlPlotHisto.SetName(item+"%d"%i)
+                    myCtrlPlotHisto.SetTitle(item)
+                    self._hCtrlPlots.append(myCtrlPlotHisto)
+                    # Do systematics coming from met shape difference for control plots
+                    myCtrlPlotSignalRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationSignal",item), luminosity, rebinList=myRebinList)
+                    myCtrlPlotControlRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationControl",item), luminosity, rebinList=myRebinList)
+                    myCtrlPlotRegionTransitionSyst = SystematicsForMetShapeDifference(myCtrlPlotSignalRegionShape, myCtrlPlotControlRegionShape, myCtrlPlotHisto, moduleInfoString=moduleInfoString, quietMode=True)
+                    myCtrlPlotSignalRegionShape.delete()
+                    myCtrlPlotControlRegionShape.delete()
+                    hUp = aux.Clone(myCtrlPlotRegionTransitionSyst.getUpHistogram(), "QCDfactMgrSystQCDSystUp%d"%i)
+                    hUp.SetTitle(item)
+                    self._hRegionSystUpCtrlPlots.append(hUp)
+                    hDown = aux.Clone(myCtrlPlotRegionTransitionSyst.getDownHistogram(), "QCDfactMgrSystQCDSystDown%d"%i)
+                    hDown.SetTitle(item)
+                    self._hRegionSystDownCtrlPlots.append(hDown)
+                    myCtrlPlotRegionTransitionSyst.delete()
+                    #print "\n***** memdebug %d\n"%i
+                    #if i <= 2:
+                    #    ROOT.gDirectory.GetList().ls()
+                ROOT.gDirectory.Delete(myRootObject.GetName())
         myCtrlRegionShape.delete()
         mySignalRegionShape.delete()
 
