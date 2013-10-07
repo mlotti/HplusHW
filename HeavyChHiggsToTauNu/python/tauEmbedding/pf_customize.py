@@ -115,10 +115,10 @@ def customise(process):
 
     # Setup MuScleFit
     if dataVersion.isMC():
-        process.muscleCorrectedMuons.identifier = "Fall11_START44"
+        process.muscleCorrectedMuons.identifier = "Summer12_DR53X_smearReReco"
         process.muscleCorrectedMuons.applySmearing = True
     else:
-        process.muscleCorrectedMuons.identifier = "Data2011_44X"
+        process.muscleCorrectedMuons.identifier = "Data2012_53X_ReReco"
 
     # Setup output
     outputModule = None
