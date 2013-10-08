@@ -2286,7 +2286,7 @@ class Dataset:
 
     ## Get the ParameterSet stored in the ROOT file
     def getParameterSet(self):
-        (objs, realNames) = self.getRootObjects("parameterSet")
+        (objs, realNames) = self.getRootObjects("configInfo/parameterSet")
         return objs[0].GetTitle()        
 
     def getAvailableSystematicVariationSources(self):
