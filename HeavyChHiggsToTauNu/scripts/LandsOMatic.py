@@ -9,6 +9,7 @@ import select
 import pty
 import subprocess
 import json
+from optparse import OptionParser
 
 
 class Result:
@@ -30,7 +31,7 @@ class Result:
                 print "Limit already calculated"
                 self._limitCalculated = True
             else:
-                if not self._opts.printResults:
+                if not self._opts.printonly:
                     self._getOutput()
 
     def _findJobDir(self):
@@ -183,12 +184,17 @@ class Result:
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
+    parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")
     parser.add_option("--brlimit", dest="brlimit", action="store_true", default=False, help="Calculate limit on Br(t->bH+)")
     parser.add_option("--sigmabrlimit", dest="sigmabrlimit", action="store_true", default=False, help="Calculate limit on sigma(H+)xBr(t->bH+)")
     parser.add_option("--printonly", dest="printonly", action="store_true", default=False, help="Print only the ready results")
-    opts = lands.parseOptionParser(parser)
+    (opts, args) = parser.parse_args()
+    if opts.helpStatus:
+        parser.print_help()
+        sys.exit()
+
     # Check options
-    if opts.brlimit == opts.sigmabrlimit:
+    if opts.brlimit == opts.sigmabrlimit and not opts.printonly:
         if opts.brlimit:
             raise Exception("Error: Please enable only --brlimit or --sigmabrlimit !")
         else:
