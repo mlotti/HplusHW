@@ -62,7 +62,10 @@ def doBRlimit(limits,unblindedStatus):
     else:
         plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": limits.getFinalstateYmaxBR()})
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
-    plot.frame.GetYaxis().SetTitle(limit.BRlimit)
+    if limits.isHeavyStatus:
+        plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
+    else:
+        plot.frame.GetYaxis().SetTitle(limit.BRlimit)
 
     plot.draw()
 
