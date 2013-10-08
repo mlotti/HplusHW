@@ -40,7 +40,8 @@ LandS_tag = "t3-06-05" # Given by Mingshui 15.8.2012 at 11:56 EEST
 #
 # These options are common for all CLs flavours, channels, and mass
 # points. At the moment the only such option is the physics model.
-commonOptions  = "--PhysicsModel ChargedHiggs"
+commonOptionsBrLimit  = "--PhysicsModel ChargedHiggs"
+commonOptionsSigmaBrLimit  = ""
 
 ## Default command-line options for LEP-CLs
 lepHybridOptions = "-M Hybrid --bQuickEstimateInitialLimit 0"
@@ -57,13 +58,16 @@ lhcHybridOptionsMinos = "-M Hybrid --freq --scanRs 1 --maximumFunctionCallsInAFi
 ## Default command-line options for LHC-CLs (hybrid)
 lhcHybridOptions = lhcHybridOptionsMinos + "  --PLalgorithm Migrad"
 ## Default number of toys for CLsb for LHC-CLs (hybrid)
-lhcHybridToysCLsb = 300
+lhcHybridToysCLsb = 600 
+#300
 ## Default number of toys for CLb for LHC-CLs (hybrid)
-lhcHybridToysCLb = 150
+lhcHybridToysCLb = 300 
+#150
 ## Default "Rmin" parameter for LHC-CLs (hybrid)
 lhcHybridRmin = "0"
 ## Default "Rmax" parameter for LHC-CLs (hybrid)
-lhcHybridRmax = "1"
+lhcHybridRmax = "40" 
+# 1
 
 ## Default command line options for LHC-CLs (asymptotic, observed limit)
 lhcAsymptoticOptionsObserved = "-M Asymptotic --maximumFunctionCallsInAFit 500000"
@@ -82,8 +86,6 @@ defaultNumberOfJobs = 20
 ## Default number of first random number seed in the jobs
 defaultFirstSeed = 1000
 
-## List of all mass points
-allMassPoints = ["80", "90", "100", "120", "140", "150", "155", "160"] # FIXME, currently mass point 100 is not available
 ## Default mass points
 defaultMassPoints = ["120"]
 
@@ -112,6 +114,35 @@ defaultDatacardPatterns = [
 defaultRootfilePatterns = [
     taujetsRootfilePattern
 ]
+
+## Deduces from directory listing the mass point list
+def obtainMassPoints(pattern):
+    myPattern = pattern%" "
+    mySplit = myPattern.split(" ")
+    prefix = mySplit[0]
+    suffix = mySplit[1]
+    myList = os.listdir(".")
+    myMasses = []
+    for item in myList:
+        if prefix in item:
+            myMasses.append(item.replace(prefix,"").replace(suffix,""))
+    myMasses.sort()
+    return myMasses
+
+## Returns true if mass list contains only heavy H+
+def isHeavyHiggs(massList):
+    for m in massList:
+        if int(m) < 175:
+            return False
+    return True
+
+## Returns true if mass list contains only light H+
+def isLightHiggs(massList):
+    for m in massList:
+        if int(m) > 175:
+            return False
+    return True
+
 
 ## Generate multicrab configuration for LEP-CLs or LHC-CLs (hybrid)
 # \param opts               optparse.OptionParser object, constructed with createOptionParser()
@@ -219,7 +250,7 @@ def produceLHCAsymptotic(opts,
 
     cls = clsType
     if clsType == None:
-        cls = LHCTypeAsymptotic()
+        cls = LHCTypeAsymptotic(opts.brlimit, opts.sigmabrlimit)
 
     print "Computing limits with %s CLs flavour" % cls.nameHuman()
     print "Computing limits with LandS version %s" % landsInstall.getVersion()
@@ -554,7 +585,9 @@ class LEPType:
     #
     # Note: if you add any parameters to the constructor, add the
     # parameters to the clone() method correspondingly.
-    def __init__(self, options=None, toysPerJob=None, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
+    def __init__(self, brlimit=True, sigmabrlimit=False, options=None, toysPerJob=None, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
+        self.brlimit = brlimit
+        self.sigmabrlimit = sigmabrlimit
         self.options = ValuePerMass(_ifNotNoneElse(options, lepHybridOptions))
         self.firstSeed = firstSeed
         self.toysPerJob = ValuePerMass(_ifNotNoneElse(toysPerJob, lepHybridToys))
@@ -606,7 +639,12 @@ class LEPType:
     # \param datacardFiles   List of strings for datacard file names of the mass point
     def _createObs(self, mass, datacardFiles):
         fileName = "runLandS_Observed_m" + mass
-        opts = commonOptions + " " + self.options.getValue(mass) + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts = ""
+        if self.brlimit:
+            opts += commonOptionsBrLimit
+        if self.sigmabrlimit:
+            opts += commonOptionsSigmaBrLimit
+        opts += " " + self.options.getValue(mass) + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         command = [
             "#!/bin/sh",
             "",
@@ -626,7 +664,12 @@ class LEPType:
     # \param datacardFiles   List of strings for datacard file names of the mass point
     def _createExp(self, mass, datacardFiles):
         fileName = "runLandS_Expected_m" + mass
-        opts = commonOptions + " " + self.options.getValue(mass) + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts = ""
+        if self.brlimit:
+            opts += commonOptionsBrLimit
+        if self.sigmabrlimit:
+            opts += commonOptionsSigmaBrLimit
+        opts = " " + self.options.getValue(mass) + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         command = [
             "#!/bin/sh",
             "",
@@ -817,7 +860,9 @@ class LHCType:
     # configuration.json file, and can be overridden by editing the
     # file between the multicrab configuration generation and the call
     # to \a landsMergeHistograms.py.
-    def __init__(self, options=None, toysCLsb=None, toysCLb=None, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None, scanRmin=None, scanRmax=None):
+    def __init__(self, brlimit=True, sigmabrlimit=False, options=None, toysCLsb=None, toysCLb=None, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None, scanRmin=None, scanRmax=None):
+        self.brlimit = brlimit
+        self.sigmabrlimit = sigmabrlimit
         self.options = ValuePerMass(_ifNotNoneElse(options, lhcHybridOptions))
 
         self.firstSeed = firstSeed
@@ -876,7 +921,12 @@ class LHCType:
     # \param datacardFiles   List of strings for datacard file names of the mass point
     def createScripts(self, mass, datacardFiles):
         filename = "runLandS_m%s" % mass
-        opts = commonOptions + " " + self.options.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts = ""
+        if self.brlimit:
+            opts += commonOptionsBrLimit
+        if self.sigmabrlimit:
+            opts += commonOptionsSigmaBrLimit
+        opts = " " + self.options.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR == None:
             opts += " --ExpectationHints Asymptotic"
@@ -902,7 +952,12 @@ class LHCType:
         self.scripts[mass] = filename
 
         # Produce also scripts for ML fit, they're not run on the grid however
-        opts = commonOptions + " -M MaxLikelihoodFit -v 1"
+        opts = ""
+        if self.brlimit:
+            opts += commonOptionsBrLimit
+        if self.sigmabrlimit:
+            opts += commonOptionsSigmaBrLimit
+        opts = " -M MaxLikelihoodFit -v 1"
         b_file = "mlfit_b_m%s_output.txt" % mass
         b_file2 = "mlfit_b_m%s.txt" % mass
         sb_file = "mlfit_sb_m%s_output.txt" % mass
@@ -1064,7 +1119,9 @@ class LHCTypeAsymptotic:
     #
     # Note: if you add any parameters to the constructor, add the
     # parameters to the clone() method correspondingly.
-    def __init__(self, optionsObserved=None, optionsExpected=None, rMin=None, rMax=None, vR=None):
+    def __init__(self, brlimit=True, sigmabrlimit=False, optionsObserved=None, optionsExpected=None, rMin=None, rMax=None, vR=None):
+        self.brlimit = brlimit
+        self.sigmabrlimit = sigmabrlimit
         self.optionsObserved = ValuePerMass(_ifNotNoneElse(optionsObserved, lhcAsymptoticOptionsObserved))
         self.optionsExpected = ValuePerMass(_ifNotNoneElse(optionsExpected, lhcAsymptoticOptionsExpected))
         self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lhcAsymptoticRmin))
@@ -1121,7 +1178,12 @@ class LHCTypeAsymptotic:
     # \param datacardFiles   List of strings for datacard file names of the mass point
     def _createObs(self, mass, datacardFiles):
         fileName = "runLandS_Observed_m" + mass
-        opts = commonOptions + " " + self.optionsObserved.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts = ""
+        if self.brlimit:
+            opts += commonOptionsBrLimit
+        if self.sigmabrlimit:
+            opts += commonOptionsSigmaBrLimit
+        opts = " " + self.optionsObserved.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR != None:
             if len(vR) == 2:
@@ -1145,7 +1207,12 @@ class LHCTypeAsymptotic:
     # \param datacardFiles   List of strings for datacard file names of the mass point
     def _createExp(self, mass, datacardFiles):
         fileName = "runLandS_Expected_m" + mass
-        opts = commonOptions + " " + self.optionsExpected.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts = ""
+        if self.brlimit:
+            opts += commonOptionsBrLimit
+        if self.sigmabrlimit:
+            opts += commonOptionsSigmaBrLimit
+        opts = " " + self.optionsExpected.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR != None:
             if len(vR) == 2:
@@ -1673,3 +1740,5 @@ def _ifNotNoneElse(value, default):
     if value == None:
         return default
     return value
+
+

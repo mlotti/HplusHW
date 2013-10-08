@@ -1,6 +1,6 @@
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
-DataCardName    = 'Default_7TeV'
+DataCardName    = 'Default_8TeV'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeIsolationDependent'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_vitalonly_correctCtrlPlots'
@@ -9,8 +9,9 @@ Path = "/home/wendland/data/v445/2013-09-24"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
-LightMassPoints      = [120]
-HeavyMassPoints      = [180,190,200,220,250,300]
+#LightMassPoints      = [120]
+#LightMassPoints      = []
+HeavyMassPoints      = [180,190,200,220,250,300] # points 400, 500, 600 are not available in 2011 branch
 HeavyMassPoints      = []
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
@@ -92,7 +93,7 @@ for mass in LightMassPoints:
     hhx.setLabel("HH"+str(mass)+"_a")
     hhx.setLandSProcess(-1)
     hhx.setValidMassPoints(myMassList)
-    hhx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_tt_7TeV","lumi"])
+    hhx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_tt_8TeV","lumi"])
     hhx.setDatasetDefinition("TTToHplusBHminusB_M"+str(mass))
     DataGroups.append(hhx)
 
@@ -100,7 +101,7 @@ for mass in LightMassPoints:
     hwx.setLabel("HW"+str(mass)+"_a")
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
-    hwx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_tt_7TeV","lumi"])
+    hwx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_tt_8TeV","lumi"])
     hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass))
     DataGroups.append(hwx)
 
@@ -110,7 +111,7 @@ for mass in HeavyMassPoints:
     hx.setLabel("Hp"+str(mass)+"_a")
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
-    hx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_heavyHplus_7TeV","lumi"])
+    hx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_heavyHplus_8TeV","lumi"])
     hx.setDatasetDefinition("HplusTB_M"+str(mass))
     DataGroups.append(hx)
 
@@ -129,17 +130,17 @@ myQCDInv = DataGroup(
     landsProcess = 3,
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
-    datasetDefinition = "QCDfactorisedmt",
+    datasetDefinition = "QCDinvertedmt",
     nuisances    = myShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","stat_binByBin","QCDinvTemplateFit"],
     shapeHisto   = SignalShapeHisto,
 )
 
 if OptionMassShape == "TransverseMass":
     myQCDFact.setDatasetDefinition("QCDfactorisedmt")
-    myQCDInv.setDatasetDefinition("QCDfactorisedmt")
+    myQCDInv.setDatasetDefinition("QCDinvertedmt")
 elif OptionMassShape == "FullMass":
     myQCDFact.setDatasetDefinition("QCDfactorisedinvmass")
-    myQCDInv.setDatasetDefinition("QCDfactorisedinvmass")
+    myQCDInv.setDatasetDefinition("QCDinvertedinvmass")
 
 DataGroups.append(myQCDFact)
 DataGroups.append(myQCDInv)
@@ -169,7 +170,7 @@ if not OptionReplaceEmbeddingByMC:
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","top_pt","xsect_tt_7TeV","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","top_pt","xsect_tt_8TeV","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "W_EWK_faketau",
@@ -217,7 +218,7 @@ else:
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","top_pt","xsect_tt_7TeV","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","top_pt","xsect_tt_8TeV","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "Wjets_MC",
@@ -783,7 +784,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "xsect_heavyHplus_7TeV",
+    id            = "xsect_heavyHplus_8TeV",
     label         = "ttbar cross section",
     distr         = "lnN",
     function      = "Constant",
@@ -792,7 +793,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "xsect_tt_7TeV",
+    id            = "xsect_tt_8TeV",
     label         = "ttbar cross section",
     distr         = "lnN",
     function      = "Constant",
@@ -916,11 +917,6 @@ ControlPlots = []
 if False: # there's a bug in data for this plot (the underflow was not empty, under investigation)
     ControlPlots.append(ControlPlotInput(
         title            = "Njets",
-        signalHHid       = [-1],
-        signalHWid       = [0],
-        QCDid            = [3],
-        embeddingId      = EmbeddingIdList,
-        EWKfakeId        = EWKFakeIdList,
         signalHistoPath  = "ForDataDrivenCtrlPlots",
         signalHistoName  = "Njets",
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
@@ -937,11 +933,6 @@ if False: # there's a bug in data for this plot (the underflow was not empty, un
     ))
 ControlPlots.append(ControlPlotInput(
     title            = "NjetsAfterMETSF",
-    signalHHid       = [-1],
-    signalHWid       = [0],
-    QCDid            = [3],
-    embeddingId      = EmbeddingIdList,
-    EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "ForDataDrivenCtrlPlots",
     signalHistoName  = "NjetsAfterJetSelectionAndMETSF",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
@@ -960,11 +951,6 @@ ControlPlots.append(ControlPlotInput(
 for i in range(0,3):
     ControlPlots.append(ControlPlotInput(
         title            = "CollinearTailKillerJet%d"%(i+1),
-        signalHHid       = [-1],
-        signalHWid       = [0],
-        QCDid            = [3],
-        embeddingId      = EmbeddingIdList,
-        EWKfakeId        = EWKFakeIdList,
         signalHistoPath  = "ForDataDrivenCtrlPlots",
         signalHistoName  = "ImprovedDeltaPhiCutsJet%dCollinear"%(i+1),
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
@@ -985,11 +971,6 @@ for i in range(0,3):
 
 ControlPlots.append(ControlPlotInput(
     title            = "MET",
-    signalHHid       = [-1],
-    signalHWid       = [0],
-    QCDid            = [3],
-    embeddingId      = EmbeddingIdList,
-    EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "ForDataDrivenCtrlPlots",
     signalHistoName  = "MET",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
@@ -1007,11 +988,6 @@ ControlPlots.append(ControlPlotInput(
 
 ControlPlots.append(ControlPlotInput(
     title            = "BJetSelection",
-    signalHHid       = [-1],
-    signalHWid       = [0],
-    QCDid            = [3],
-    embeddingId      = EmbeddingIdList,
-    EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "ForDataDrivenCtrlPlots",
     signalHistoName  = "NBjets",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
@@ -1033,17 +1009,10 @@ ControlPlots.append(ControlPlotInput(
 
 #ControlPlots.append(ControlPlotInput(
     #title            = "DeltaPhi",
-    #signalHHid       = [-1],
-    #signalHWid       = [0],
-    #QCDid            = [3],
-    #embeddingId      = EmbeddingIdList,
-    #EWKfakeId        = EWKFakeIdList,
     #signalHistoPath  = "",
     #signalHistoName  = "deltaPhi",
     #EWKfakeHistoPath  = "",
     #EWKfakeHistoName  = "EWKFakeTausDeltaPhi",
-    #QCDFactNormalisation = "/factorisation/Leg1AfterBTagging",
-    #QCDFactHistoName = "/CtrlLeg1AfterDeltaPhiTauMET", #FIXME
     #details          = { "bins": 11,
                          #"rangeMin": 0.0,
                          #"rangeMax": 180.0,
@@ -1063,15 +1032,8 @@ ControlPlots.append(ControlPlotInput(
 
 #ControlPlots.append(ControlPlotInput(
     #title            = "MaxDeltaPhi",
-    #signalHHid       = [-1],
-    #signalHWid       = [0],
-    #QCDid            = [3],
-    #embeddingId      = EmbeddingIdList,
-    #EWKfakeId        = EWKFakeIdList,
     #signalHistoPath  = "",
     #signalHistoName  = "maxDeltaPhiJetMet",
-    #QCDFactNormalisation = "/factorisation/Leg1AfterDeltaPhiTauMET",
-    #QCDFactHistoName = "/CtrlLeg1AfterMaxDeltaPhiJetMET", #FIXME
     #details          = { "bins": 18,
                          #"rangeMin": 0.0,
                          #"rangeMax": 180.0,
@@ -1091,15 +1053,8 @@ ControlPlots.append(ControlPlotInput(
 
 #ControlPlots.append(ControlPlotInput(
     #title            = "WMass",
-    #signalHHid       = [-1],
-    #signalHWid       = [0],
-    #QCDid            = [3],
-    #embeddingId      = EmbeddingIdList,
-    #EWKfakeId        = EWKFakeIdList,
     #signalHistoPath  = "TopChiSelection",
     #signalHistoName  = "WMass",
-    #QCDFactNormalisation = "/factorisation/Leg1AfterDeltaPhiTauMET",
-    #QCDFactHistoName = "/CtrlLeg1AfterTopMass", #FIXME
     #details          = { "bins": 20,
                          #"rangeMin": 0.0,
                          #"rangeMax": 200.0,
@@ -1119,15 +1074,8 @@ ControlPlots.append(ControlPlotInput(
 
 #ControlPlots.append(ControlPlotInput(
     #title            = "TopMass",
-    #signalHHid       = [-1],
-    #signalHWid       = [0],
-    #QCDid            = [3],
-    #embeddingId      = EmbeddingIdList,
-    #EWKfakeId        = EWKFakeIdList,
     #signalHistoPath  = "TopChiSelection",
     #signalHistoName  = "TopMass",
-    #QCDFactNormalisation = "/factorisation/Leg1AfterDeltaPhiTauMET",
-    #QCDFactHistoName = "/CtrlLeg1AfterTopMass", #FIXME
     #details          = { "bins": 20,
                          #"rangeMin": 0.0,
                          #"rangeMax": 400.0,
@@ -1148,11 +1096,6 @@ ControlPlots.append(ControlPlotInput(
 for i in range(0,3):
     ControlPlots.append(ControlPlotInput(
         title            = "BackToBackTailKillerJet%d"%(i+1),
-        signalHHid       = [-1],
-        signalHWid       = [0],
-        QCDid            = [3],
-        embeddingId      = EmbeddingIdList,
-        EWKfakeId        = EWKFakeIdList,
         signalHistoPath  = "ForDataDrivenCtrlPlots",
         signalHistoName  = "ImprovedDeltaPhiCutsJet%dBackToBack"%(i+1),
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
@@ -1170,36 +1113,26 @@ for i in range(0,3):
     if i == 2:
         ControlPlots[len(ControlPlots)-1].flowPlotCaption = "#Delta#phi_{#uparrow#downarrow}"
 
-ControlPlots.append(ControlPlotInput(
-    title            = "TransverseMass",
-    signalHHid       = [-1],
-    signalHWid       = [0],
-    QCDid            = [3],
-    embeddingId      = EmbeddingIdList,
-    EWKfakeId        = EWKFakeIdList,
-    signalHistoPath  = "",
-    signalHistoName  = "shapeTransverseMass",
-    EWKfakeHistoPath  = "",
-    EWKfakeHistoName  = "shapeEWKFakeTausTransverseMass",
-    details          = { "xlabel": "m_{T}(#tau_{h},E_{T}^{miss})",
-                     "ylabel": "Events/#Deltam_{T}",
-                     "divideByBinWidth": True,
-                     "unit": "GeV",
-                     "log": False,
-                     "opts": {"ymin": 0.0} },
-    blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
-    evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
-))
-
-if False:
+if OptionMassShape == "TransverseMass":
+    ControlPlots.append(ControlPlotInput(
+        title            = "TransverseMass",
+        signalHistoPath  = "",
+        signalHistoName  = "shapeTransverseMass",
+        EWKfakeHistoPath  = "",
+        EWKfakeHistoName  = "shapeEWKFakeTausTransverseMass",
+        details          = { "xlabel": "m_{T}(#tau_{h},E_{T}^{miss})",
+                         "ylabel": "Events/#Deltam_{T}",
+                         "divideByBinWidth": True,
+                         "unit": "GeV",
+                         "log": False,
+                         "opts": {"ymin": 0.0} },
+        blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
+elif OptionMassShape == "FullMass":
     ControlPlots.append(ControlPlotInput(
         title            = "FullMass",
-        signalHHid       = [-1],
-        signalHWid       = [0],
-        QCDid            = [3],
-        embeddingId      = EmbeddingIdList,
-        EWKfakeId        = EWKFakeIdList,
         signalHistoPath  = "",
         signalHistoName  = "shapeInvariantMass",
         EWKfakeHistoPath  = "",

@@ -35,7 +35,7 @@ def addTauLegSkim_44X(version, datasets, updateDefinitions):
         # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
         "SingleMu_173236-173692_2011A_Nov08_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=allMuonTriggers, triggerThrow=False),
         # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
-        "SingleMu_175832-180252_2011B_Nov19_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=allMuonTriggers, triggerThrow=False),
+        "SingleMu_175832-180252_2011B_Nov19_RAWRECO": TaskDef(njobsIn=500, njobsOut=50, triggerOR=allMuonTriggers, triggerThrow=False),
         
         "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW":       TaskDefMC(njobsIn=4000, njobsOut=2000),
         }

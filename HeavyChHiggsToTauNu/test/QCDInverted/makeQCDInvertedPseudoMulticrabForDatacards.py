@@ -179,9 +179,7 @@ if __name__ == "__main__":
                         myStartTime = time.time()
                         doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString,myNormFactors)
                         printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
-    # Now write output to disk
-    print "\nWriting output to disk shape %s..."%massType
-    myOutputCreator.writeRootFileToDisk(massType)
+        print "\nPseudo-multicrab ready for mass %s...\n"%massType
     # Create rest of pseudo multicrab directory
     myOutputCreator.finalize()
     print "Average processing time of one module: %.1f s, total elapsed time: %.1f s"%((time.time()-myGlobalStartTime)/float(myTotalModules), (time.time()-myGlobalStartTime))

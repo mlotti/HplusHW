@@ -1180,8 +1180,6 @@ class RootHistoWithUncertainties:
             myStatus &= abs(th1Minus.GetBinContent(0)) < 0.00001
             if not myStatus:
                 raise Exception("addShapeUncertainty(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
-            print "addShapeUncertainty before"
-            #self.Debug()
 
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
@@ -1190,9 +1188,6 @@ class RootHistoWithUncertainties:
         th1Minus.Add(self._rootHisto, -1.0)
         # Store
         self._shapeUncertainties[name] = (th1Plus, th1Minus)
-        if self._flowBinsVisibleStatus:
-            print "addShapeUncertainty after"
-            #self.Debug()
 
 
     ## Add bin-wise relative uncertainty
@@ -2837,7 +2832,29 @@ class DatasetMerged:
             return DatasetRootHistoMergedPseudo(wrappers, self)
         else:
             raise Exception("Internal error (unknown dataset type)")
-        
+
+    ## Get ROOT histogram
+    #
+    # \param name    Path of the ROOT histogram relative to the analysis
+    #                root directory
+    # \param kwargs  Keyword arguments, forwarded to getRootObjects()
+    #
+    # \return pair (\a first histogram, \a realName)
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    #
+    # If dataset.TreeDraw object is given (or actually anything with
+    # draw() method), the draw() method is called by giving the
+    # Dataset object as parameters. The draw() method is expected to
+    # return a TH1 which is then returned.
+    def getFirstRootHisto(self, name, **kwargs):
+        if hasattr(self.datasets[0], "getFirstRootHisto"):
+            content = self.datasets[0].getFirstRootHisto(name, **kwargs)
+        else:
+            content = self.datasets[0].getRootHisto(name, **kwargs)
+        return content
+
     ## Get the directory content of a given directory in the ROOT file.
     # 
     # \param directory   Path of the directory in the ROOT file
