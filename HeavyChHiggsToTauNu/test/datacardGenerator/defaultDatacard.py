@@ -9,7 +9,7 @@ Path = "/home/wendland/data/v445/2013-09-24"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
-#LightMassPoints      = [120]
+LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300] # points 400, 500, 600 are not available in 2011 branch
 HeavyMassPoints      = []
@@ -998,7 +998,7 @@ ControlPlots.append(ControlPlotInput(
                          "unit": "",
                          "log": True,
                          "optsLog": {"ymin": 0.09} },
-    blindedRange=[],
+    blindedRange=[1.5,10],
     #blindedRange     = [1.5,10], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "#geq1 b tag", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1106,7 +1106,7 @@ for i in range(0,3):
                              "unit": "^{o}",
                              "log": True,
                              "optsLog": {"ymin": 0.9} },
-        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        blindedRange     = [0,300], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
     ))
@@ -1124,8 +1124,9 @@ if OptionMassShape == "TransverseMass":
                          "ylabel": "Events/#Deltam_{T}",
                          "divideByBinWidth": True,
                          "unit": "GeV",
-                         "log": False,
-                         "opts": {"ymin": 0.0} },
+                         "log": not False,
+                         "opts": {"ymin": 0.0},
+                         "optsLog": {"ymin": 1e-5} },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1142,7 +1143,8 @@ elif OptionMassShape == "FullMass":
                              "divideByBinWidth": True,
                              "unit": "GeV",
                              "log": False,
-                             "opts": {"ymin": 0.0} },
+                             "opts": {"ymin": 0.0},
+                             "optsLog": {"ymin": 1e-5} },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
