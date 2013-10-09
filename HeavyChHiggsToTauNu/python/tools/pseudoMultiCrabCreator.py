@@ -25,9 +25,31 @@ class PseudoMultiCrabCreator:
         self._modulesList = [] # List of PseudoMultiCrabModule objects
         self._inputMulticrabDir = inputMulticrabDir
         self._myBaseDir = None
+        self._energy = None
+        self._dataVersion = None
+        self._codeVersion = None
 
     def addModule(self, module):
-        self._modulesList.append(module)
+        if self._energy == None:
+            self._energy = module._energy
+            self._dataVersion = module._dataVersion.Clone()
+            self._codeVersion = module._codeVersion.Clone()
+            self._writeRootFileToDisk(self._currentSubTitle)
+            self._dataVersion = None # No need to delete from gDirectory, since they were saved to disk already
+            self._codeVersion = None
+
+        # Open root file
+        myFilename = "%s/%s/res/histograms-%s.root"%(self._myBaseDir,self._title+self._mySubTitles[-1],self._title+self._mySubTitles[-1])
+        myRootFile = None
+        if os.path.exists(myFilename):
+            myRootFile = ROOT.TFile(myFilename,"UPDATE")
+        else:
+            myRootFile = ROOT.TFile(myFilename,"CREATE")
+        # Write module
+        module.writeModuleToRootFile(myRootFile)
+        myRootFile.Write()
+        myRootFile.Close()
+        module.delete()
 
     def _createBaseDirectory(self):
         if self._myBaseDir != None:
@@ -37,6 +59,16 @@ class PseudoMultiCrabCreator:
         if os.path.exists(self._myBaseDir):
             shutil.rmtree(self._myBaseDir)
         os.mkdir(self._myBaseDir)
+
+    def initialize(self, subTitle):
+        self._energy = None
+        self._dataVersion = None
+        self._codeVersion = None
+        self._createBaseDirectory()
+        self._mySubTitles.append(subTitle)
+        self._currentSubTitle = subTitle
+        os.mkdir("%s/%s"%(self._myBaseDir,self._title+subTitle))
+        os.mkdir("%s/%s/res"%(self._myBaseDir,self._title+subTitle))
 
     def finalize(self):
         # Copy lumi.json file from input multicrab directory
@@ -50,16 +82,12 @@ class PseudoMultiCrabCreator:
         # Done
         print HighlightStyle()+"Created pseudo-multicrab directory %s%s"%(self._myBaseDir,NormalStyle())
 
-    def writeRootFileToDisk(self, subTitle):
-        self._createBaseDirectory()
-        self._mySubTitles.append(subTitle)
-        os.mkdir("%s/%s"%(self._myBaseDir,self._title+subTitle))
-        os.mkdir("%s/%s/res"%(self._myBaseDir,self._title+subTitle))
+    def _writeRootFileToDisk(self, subTitle):
         # Open root file
-        myRootFile = ROOT.TFile("%s/%s/res/histograms-%s.root"%(self._myBaseDir,self._title+subTitle,self._title+subTitle),"CREATE")
+        myRootFile = ROOT.TFile("%s/%s/res/histograms-%s.root"%(self._myBaseDir,self._title+self._mySubTitles[-1],self._title+self._mySubTitles[-1]),"UPDATE")
         # Write modules
-        for m in self._modulesList:
-            m.writeModuleToRootFile(myRootFile)
+        #for m in self._modulesList:
+        #    m.writeModuleToRootFile(myRootFile)
         # Create config info histogram
         myRootFile.cd("/")
         myConfigInfoDir = myRootFile.mkdir("configInfo")
@@ -67,18 +95,16 @@ class PseudoMultiCrabCreator:
         hConfigInfo.GetXaxis().SetBinLabel(1,"control")
         hConfigInfo.SetBinContent(1, 1)
         hConfigInfo.GetXaxis().SetBinLabel(2,"energy")
-        hConfigInfo.SetBinContent(2, self._modulesList[0]._energy)
+        hConfigInfo.SetBinContent(2, self._energy)
         #hConfigInfo.GetXaxis().SetBinLabel(3,"luminosity")
         #hConfigInfo.SetBinContent(3, 1)
         hConfigInfo.SetDirectory(myConfigInfoDir)
         # Write a copy of data version and code version
-        myConfigInfoDir.Add(self._modulesList[0]._dataVersion.Clone())
-        myConfigInfoDir.Add(self._modulesList[0]._codeVersion.Clone())
+        myConfigInfoDir.Add(self._dataVersion)
+        myConfigInfoDir.Add(self._codeVersion)
         # Write and close the root file
         myRootFile.Write()
         myRootFile.Close()
-        # Clear the module list
-        self._modulesList = []
 
 class PseudoMultiCrabModule:
     ## Constructor
@@ -113,8 +139,8 @@ class PseudoMultiCrabModule:
             self._hSplittedBinInfo.SetBinContent(i, self._hSplittedBinInfo.GetBinContent(i)/myControlValue)
         self._hSplittedBinInfo.SetName("SplittedBinInfo")
         # Copy parameter set information
-        (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("parameterSet")
-        self._psetInfo = objs[0].Clone()
+        #(objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("parameterSet")
+        #self._psetInfo = objs[0].Clone()
         # Copy data version and set it to pseudo
         (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/dataVersion")
         self._dataVersion = objs[0].Clone()
@@ -122,6 +148,19 @@ class PseudoMultiCrabModule:
         # Copy code version
         (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/codeVersion")
         self._codeVersion = objs[0].Clone()
+
+    def delete(self):
+        if False:
+            # Once the objects are written to file, they are erased from the list
+            for h in self._shapes:
+                ROOT.gDirectory.Delete(h.GetName())
+            for h in self._dataDrivenControlPlots:
+                ROOT.gDirectory.Delete(h.GetName())
+            self._counters = None
+            self._counterUncertainties = None
+            ROOT.gDirectory.Delete(self._hSplittedBinInfo.GetName())
+            ROOT.gDirectory.Delete(self._dataVersion.GetName())
+            ROOT.gDirectory.Delete(self._codeVersion.GetName())
 
     def addShape(self, shapeHisto, plotName):
         self._shapes.append(shapeHisto.Clone(plotName))
@@ -134,11 +173,14 @@ class PseudoMultiCrabModule:
         self._counterUncertainties[plotName] = sqrt(myUncert)
 
     def addDataDrivenControlPlot(self, histo, name):
-        self._dataDrivenControlPlots.append(histo.Clone("%s%s"%(name,h.GetTitle())))
+        self._dataDrivenControlPlots.append(histo.Clone(name))
 
-    def addDataDrivenControlPlots(self, histoList):
-        for h in histoList:
-            self._dataDrivenControlPlots.append(h.Clone())
+    def addDataDrivenControlPlots(self, histoList, labelList):
+        for i in range(0,len(histoList)):
+            h = histoList[i].Clone()
+            h.SetTitle(labelList[i])
+            h.SetName(labelList[i])
+            self._dataDrivenControlPlots.append(h)
 
     def writeModuleToRootFile(self, rootfile):
         # Create module directory
@@ -166,7 +208,7 @@ class PseudoMultiCrabModule:
         # Save splittedBinInfo
         self._hSplittedBinInfo.SetDirectory(myModuleDir)
         # Save parameter set, code version and data version
-        myModuleDir.Add(self._psetInfo)
+        #myModuleDir.Add(self._psetInfo)
         # Create config info for the module
         myConfigInfoDir = myModuleDir.mkdir("configInfo")
         self._hConfigInfo = ROOT.TH1F("configinfo","configinfo",2,0,2) # Have to store the histogram to keep it alive for writing        self._hConfigInfo.GetXaxis().SetBinLabel(1,"control")
@@ -179,7 +221,6 @@ class PseudoMultiCrabModule:
         self._hConfigInfo.SetDirectory(myConfigInfoDir)
         myConfigInfoDir.Add(self._dataVersion)
         myConfigInfoDir.Add(self._codeVersion)
-        #self._psetInfo.SetDirectory(rootfile)
         #.SetDirectory(rootfile)
         #self._codeVersion.SetDirectory(rootfile)
 

@@ -15,6 +15,7 @@ import array
 import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pileupReweightedAllEvents as pileupReweightedAllEvents
 
@@ -913,7 +914,7 @@ class Systematics:
                                  additionalNormalizations={},
                                  additionalShapes={},
                                  additionalShapesRelative={},
-                                 applyToDatasets=OnlyForPseudoAndMC,
+                                 applyToDatasets=Systematics.OnlyForPseudoAndMC,
                                  verbose=False,
                                  )
         self.settings.set(**kwargs)
@@ -982,12 +983,12 @@ class SystematicsHelper:
 
         onlyFor = self._settings.get("applyToDatasets")
         if dset.isMC():
-            if onlyFor is not Systematics.OnlyForPseudo:
+            if onlyFor is Systematics.OnlyForPseudo:
                 if verbose:
                     print "  Dataset is MC, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
                 return
         elif dset.isPseudo():
-            if onlyFor is not Systematics.OnlyForMC:
+            if onlyFor is Systematics.OnlyForMC:
                 if verbose:
                     print "  Dataset is pseudo, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
                 return
@@ -1080,21 +1081,27 @@ class RootHistoWithUncertainties:
         self._shapeUncertainties = {}
 
         # TH1 to hold square sum of bin-wise relative uncertainties
-        self._shapeUncertaintyRelativeSquared = None
-        self._shapeUncertaintyRelativeNames = []
+        self._shapeUncertaintyAbsoluteSquaredPlus = None
+        self._shapeUncertaintyAbsoluteSquaredMinus = None
+        self._shapeUncertaintyAbsoluteNames = []
 
-        # Float to hold square sum of relative normalization uncertainty
-        self._normalizationUncertaintyRelativeSquared = 0.0
-        self._normalizationUncertaintyRelativeNames = []
+        # Boolean to save the status if the under- and overflow bins have been made visible (i.e. summed to the first and last bin)
+        self._flowBinsVisibleStatus = False
 
     def _checkConsistency(self, name, th1):
         # I can't use this since it's private/protected :(
         #if not ROOT.TH1.CheckConsistency(self._rootHisto, th1):
         #    raise Exception("Adding uncertainty %s, histogram consistency check fails (ROOT.TH1.CheckConsistency())" % name)
         if self._rootHisto.GetDimension() != th1.GetDimension():
-            raise Exception("Adding uncertainty %s, histograms have different dimension (%d != %d)" % (self._rootHisto.GetDimension(), th1.GetDimension()))
+            raise Exception("Adding uncertainty %s, histograms have different dimension (%d != %d)" % (name, self._rootHisto.GetDimension(), th1.GetDimension()))
         if self._rootHisto.GetNbinsX() != th1.GetNbinsX():
-            raise Exception("Adding uncertainty %s, histograms have different number of X bins (%d != %d)" % (self._rootHisto.GetNbinsX(), th1.GetNbinsX()))
+            raise Exception("Adding uncertainty %s, histograms have different number of X bins (%d != %d)" % (name, self._rootHisto.GetNbinsX(), th1.GetNbinsX()))
+
+    def _createShapeUncertaintyAbsoluteSquared(self):
+        self._shapeUncertaintyAbsoluteSquaredPlus = aux.Clone(self._rootHisto)
+        self._shapeUncertaintyAbsoluteSquaredMinus = aux.Clone(self._rootHisto)
+        self._shapeUncertaintyAbsoluteSquaredPlus.Reset()
+        self._shapeUncertaintyAbsoluteSquaredMinus.Reset()
 
     ## Set the ROOT histogram object
     #
@@ -1110,49 +1117,131 @@ class RootHistoWithUncertainties:
     def getRootHisto(self):
         return self._rootHisto
 
+    ## Get the event rate, i.e. integral of the root histo object (usually at this point the under and overflow bins are already merged to actual bins)
+    def getRate(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        myRate = self._rootHisto.Integral()
+        myRateIncludingOverflow = self.integral()
+        if abs(myRate - myRateIncludingOverflow) > 0.00001:
+            raise Exception("getRate(): Weird, the under/overflow should be empty at this point, but apparantly they are not?!")
+        return myRate
+
+    ## Get the stat. uncertainty of the root histo object
+    def getRateStatUncertainty(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        mySum = 0.0
+        if isinstance(self._rootHisto, ROOT.TH2):
+            raise Exception("getRateStatUncertainty() supported currently only for TH1!")
+        for i in range(1, self._rootHisto.GetNbinsX()):
+            mySum += self._rootHisto.GetBinError(i)**2
+        return math.sqrt(mySum)
+
+    ## Get the syst. uncertainty of the root histo object
+    def getRateSystUncertainty(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        if isinstance(self._rootHisto, ROOT.TH2):
+            raise Exception("getRateSystUncertainty() supported currently only for TH1!")
+        # Integrate first over distribution, then sum
+        myClone = self.Clone()
+        myClone.Rebin(self._rootHisto.GetNbinsX())
+        g = myClone.getSystematicUncertaintyGraph()
+        return (g.GetErrorYhigh(0),g.GetErrorYlow(0))
+
+    ## Adds the underflow and overflow bins to the first and last bins, respectively
+    def makeFlowBinsVisible(self):
+        if self._flowBinsVisibleStatus:
+            return
+        self._flowBinsVisibleStatus = True
+        # Update systematics histograms first
+        for key, (hPlus, hMinus) in self._shapeUncertainties.iteritems():
+            histogramsExtras.makeFlowBinsVisible(hPlus)
+            histogramsExtras.makeFlowBinsVisible(hMinus)
+        # Update nominal histogram
+        histogramsExtras.makeFlowBinsVisible(self._rootHisto)
+        # Update shape uncertainty squared histograms
+        if self._shapeUncertaintyAbsoluteSquaredPlus is not None:
+            histogramsExtras.makeFlowBinsVisible(self._shapeUncertaintyAbsoluteSquaredPlus)
+            histogramsExtras.makeFlowBinsVisible(self._shapeUncertaintyAbsoluteSquaredMinus)
+
     ## Add shape variation uncertainty
     #
     # \param name     Name of the uncertainty
     # \param th1Plus  TH1 for the 'plus' variation
     # \param th1Minus TH1 for the 'minus' variation
     def addShapeUncertainty(self, name, th1Plus, th1Minus):
+        if self._flowBinsVisibleStatus:
+            # Check if flow bins have entries
+            myStatus = abs(th1Plus.GetBinContent(th1Plus.GetNbinsX()+1)) < 0.00001
+            myStatus &= abs(th1Minus.GetBinContent(th1Minus.GetNbinsX()+1)) < 0.00001
+            myStatus &= abs(th1Plus.GetBinContent(0)) < 0.00001
+            myStatus &= abs(th1Minus.GetBinContent(0)) < 0.00001
+            if not myStatus:
+                raise Exception("addShapeUncertainty(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
+
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
+        # Subtract nominal to get absolute uncertainty
+        th1Plus.Add(self._rootHisto, -1.0)
+        th1Minus.Add(self._rootHisto, -1.0)
+        # Store
         self._shapeUncertainties[name] = (th1Plus, th1Minus)
+
 
     ## Add bin-wise relative uncertainty
     #
     # \param name     Name of the uncertainty
-    # \param th1      TH1 holding the relative uncertainties (e.g. 0.2 for 20 %)
+    # \param th1Plus  TH1 holding the relative uncertainties (e.g. 0.2 for 20 %)
+    # \param th1Minus TH1 holding the relative uncertainties (e.g. 0.2 for 20 %); if None, then th1Plus values are used
     #
     # The bin-wise uncertainties are summed quadratically
-    def addShapeUncertaintyRelative(self, name, th1):
-        if isinstance(th1, ROOT.TH2):
+    def addShapeUncertaintyRelative(self, name, th1Plus, th1Minus=None):
+        if self._flowBinsVisibleStatus:
+            raise Exception("addShapeUncertaintyRelative(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
+        if isinstance(th1Plus, ROOT.TH2) or isinstance(th1Minus, ROOT.TH2):
             raise Exception("So far only TH1's are supported (and not TH2/TH3).")
 
-        self._checkConsistency(name, th1)
-        self._shapeUncertaintyRelativeNames.append(name)
-        if self._shapeUncertaintyRelativeSquared is None:
-            # Loop over all bins of TH1/TH2/TH3, including
-            # under/overflow bins in a general manner
-            for bin in xrange(0, th1.GetNbinsX()):
-                th1.SetBinContent(bin, th1.GetBinContent(bin)**2)
-            self._shapeUncertaintyRelativeSquared = th1
-        else:
-            squareSum = self._shapeUncertaintyRelativeSquared # just for a shorter name
-            for bin in xrange(0, th1.GetNbinsX()+2):
-                squareSum.SetBinContent(bin, squareSum.GetBinContent(bin) +
-                                             th1.GetBinContent(bin)**2)
+        self._checkConsistency(name, th1Plus)
+        self._checkConsistency(name, th1Minus)
+        if self._shapeUncertaintyAbsoluteSquaredPlus is None:
+            self._createShapeUncertaintyAbsoluteSquared()
+
+        self._shapeUncertaintyAbsoluteNames.append(name)
+        sqSumPlus = self._shapeUncertaintyAbsoluteSquaredPlus # just for a shorter name
+        sqSumMinus = self._shapeUncertaintyAbsoluteSquaredMinus # just for a shorter name
+        th1MinusSource = th1Minus
+        if th1MinusSource == None:
+            th1MinusSource = th1Plus
+        for bin in xrange(0, th1Plus.GetNbinsX()+2):
+            absUncertUp = th1Plus.GetBinContent(bin)*self._rootHisto.GetBinContent(bin)
+            sqSumPlus.SetBinError(bin, math.sqrt(sqSumPlus.GetBinError(bin)**2+absUncertUp**2))
+            absUncertDown = th1MinusSource.GetBinContent(bin)*self._rootHisto.GetBinContent(bin)
+            sqSumMinus.SetBinError(bin, math.sqrt(sqSumMinus.GetBinError(bin)**2+absUncertDown**2))
 
     ## Add normalization relative uncertainty
     #
-    # \param name         Name of the uncertainty
-    # \param uncertainty  Float for the value (e.g. 0.2 for 20 %)
+    # \param name             Name of the uncertainty
+    # \param uncertaintyPlus  Float for the value (e.g. 0.2 for 20 %)
+    # \param uncertaintyMinus  Float for the value (e.g. 0.2 for 20 %); if None, then uncertaintyPlus value is used
     #
     # The normalization relative uncertainties are summed quadratically
-    def addNormalizationUncertaintyRelative(self, name, uncertainty):
-        self._normalizationUncertaintyRelativeNames.append(name)
-        self._normalizationUncertaintyRelativeSquared += uncertainty*uncertainty
+    def addNormalizationUncertaintyRelative(self, name, uncertaintyPlus, uncertaintyMinus=None):
+        if self._shapeUncertaintyAbsoluteSquaredPlus is None:
+            self._createShapeUncertaintyAbsoluteSquared()
+
+        self._shapeUncertaintyAbsoluteNames.append(name)
+        sqSumPlus = self._shapeUncertaintyAbsoluteSquaredPlus # just for a shorter name
+        sqSumMinus = self._shapeUncertaintyAbsoluteSquaredMinus # just for a shorter name
+        uncertMinusSource = uncertaintyMinus
+        if uncertMinusSource == None:
+            uncertMinusSource = uncertaintyPlus
+        for bin in xrange(0, self._rootHisto.GetNbinsX()+2):
+            absUncertUp = uncertaintyPlus*self._rootHisto.GetBinContent(bin)
+            sqSumPlus.SetBinError(bin, math.sqrt(sqSumPlus.GetBinError(bin)**2+absUncertUp**2))
+            absUncertDown = uncertMinusSource*self._rootHisto.GetBinContent(bin)
+            sqSumMinus.SetBinError(bin, math.sqrt(sqSumMinus.GetBinError(bin)**2+absUncertDown**2))
 
     ## Get the dictionary of shape variation uncertainties
     def getShapeUncertainties(self):
@@ -1160,7 +1249,7 @@ class RootHistoWithUncertainties:
 
     ## Return True if this histogram has any systematic uncertainties associated to it
     def hasSystematicUncertainties(self):
-        return len(self._shapeUncertainties) > 0 or len(self._shapeUncertaintyRelativeNames) > 0 or len(self._normalizationUncertaintyRelativeNames) > 0
+        return len(self._shapeUncertainties) > 0 or len(self._shapeUncertaintyAbsoluteNames) > 0
 
     ## Create TGraphAsymmErrors for the sum of uncertainties
     #
@@ -1203,8 +1292,8 @@ class RootHistoWithUncertainties:
                 ylowSquareSum += stat**2
 
             for shapePlus, shapeMinus in self._shapeUncertainties.itervalues():
-                diffPlus = shapePlus.GetBinContent(i)-yval
-                diffMinus = shapeMinus.GetBinContent(i)-yval
+                diffPlus = shapePlus.GetBinContent(i)
+                diffMinus = shapeMinus.GetBinContent(i)
 
                 if diffPlus > 0 and diffMinus > 0:
                     yhighSquareSum += max(diffPlus, diffMinus)**2
@@ -1217,16 +1306,9 @@ class RootHistoWithUncertainties:
                     yhighSquareSum += diffMinus**2
                     ylowSquareSum += diffPlus**2
 
-            if self._shapeUncertaintyRelativeSquared is not None:
-                relUnc = math.sqrt(self._shapeUncertaintyRelativeSquared.GetBinContent(i))
-                absUnc = relUnc * yval
-                yhighSquareSum += absUnc**2
-                ylowSquareSum += absUnc**2
-
-            relUnc = math.sqrt(self._normalizationUncertaintyRelativeSquared)
-            absUnc = relUnc * yval
-            yhighSquareSum += absUnc**2
-            ylowSquareSum += absUnc**2
+            if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+                yhighSquareSum += self._shapeUncertaintyAbsoluteSquaredPlus.GetBinError(i)**2
+                ylowSquareSum += self._shapeUncertaintyAbsoluteSquaredMinus.GetBinError(i)**2
 
             xvalues.append(xval)
             xerrhigh.append(xhigh)
@@ -1246,11 +1328,8 @@ class RootHistoWithUncertainties:
         keys.sort()
         for key in keys:
             print "  %s" % key
-        print "Bin-wise relative uncertainties (%d):" % len(self._shapeUncertaintyRelativeNames)
-        for n in self._shapeUncertaintyRelativeNames:
-            print "  %s" % n
-        print "Normalization uncertainties (%d):" % len(self._normalizationUncertaintyRelativeNames)
-        for n in self._normalizationUncertaintyRelativeNames:
+        print "Bin-wise relative uncertainties (%d):" % len(self._shapeUncertaintyAbsoluteNames)
+        for n in self._shapeUncertaintyAbsoluteNames:
             print "  %s" % n
 
     #### Below are methods for "better" implementation for some ROOT TH1 methods
@@ -1350,8 +1429,9 @@ class RootHistoWithUncertainties:
             plus = plus.Rebin(*args)
             minus = minus.Rebin(*args)
             self._shapeUncertainties[key] = (plus, minus)
-        if self._shapeUncertaintyRelativeSquared is not None:
-            self._shapeUncertaintyRelativeSquared.Rebin(*args)
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Rebin(*args)
+            self._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Rebin(*args)
 
     ## Rebin histogram
     #
@@ -1364,32 +1444,51 @@ class RootHistoWithUncertainties:
             plus = plus.Rebin2D(*args)
             minus = minus.Rebin2D(*args)
             self._shapeUncertainties[key] = (plus, minus)
-        if self._shapeUncertaintyRelativeSquared is not None:
-            self._shapeUncertaintyRelativeSquared.Rebin2D(*args)
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus = self._shapeUncertaintyAbsoluteSquaredPlus.Rebin2D(*args)
+            self._shapeUncertaintyAbsoluteSquaredMinus = self._shapeUncertaintyAbsoluteSquaredMinus.Rebin2D(*args)
 
     ## Add another RootHistoWithUncertainties object
     #
     # \param other   RootHistoWithUncertainties object
     def Add(self, other):
-        self._rootHisto.Add(other._rootHisto)
+        # Make sure the flow bins are handled in the same way before adding
+        if self._flowBinsVisibleStatus and not other._flowBinsVisibleStatus:
+            other.makeFlowBinsVisible()
+        if not self._flowBinsVisibleStatus and other._flowBinsVisibleStatus:
+            self.makeFlowBinsVisible()
+
+        # Absolute shape uncertainty (values are squares, can add directly)
+        if other._shapeUncertaintyAbsoluteSquaredPlus != None:
+            if self._shapeUncertaintyAbsoluteSquaredPlus == None:
+                self._createShapeUncertaintyAbsoluteSquared()
+            self._shapeUncertaintyAbsoluteSquaredPlus.Add(other._shapeUncertaintyAbsoluteSquaredPlus)
+            self._shapeUncertaintyAbsoluteSquaredMinus.Add(other._shapeUncertaintyAbsoluteSquaredMinus)
+        for item in other._shapeUncertaintyAbsoluteNames:
+            if not item in self._shapeUncertaintyAbsoluteNames:
+                self._shapeUncertaintyAbsoluteNames.append(item)
 
         keys1 = self._shapeUncertainties.keys()
         keys2 = other._shapeUncertainties.keys()
-        keys1.sort()
-        keys2.sort()
-        if keys1 != keys2:
-            raise Exception("In adding two RootHistoWithUncertainties, the two objects have different sets of shape uncertainties (by variations): self has %s, parameter has %s. The assumption of equal sets of uncertainties is made for simplification only, and can be removed if really necessary" % (",".join(keys1), ",".join(keys2)))
+        #keys1.sort()
+        #keys2.sort()
         for key in keys1:
-            (plus, minus) = self._shapeUncertainties[key]
-            (otherPlus, otherMinus) = other._shapeUncertainties[key]
-            plus.Add(otherPlus)
-            minus.Add(otherMinus)
+            if key in keys2:
+                (plus, minus) = self._shapeUncertainties[key]
+                (otherPlus, otherMinus) = other._shapeUncertainties[key]
+                plus.Add(otherPlus)
+                minus.Add(otherMinus)
+            #else:
+                # key is not in other, keep it like it is
+        for key in keys2:
+            if not key in keys1:
+                # Add those histograms, which so far did not exist
+                self._shapeUncertainties[key] = other._shapeUncertainties[key]
+                #self.addShapeUncertainty(key, *)
 
-        if other._shapeUncertaintyRelativeSquared is not None:
-            if self._shapeUncertaintyRelativeSquared is None:
-                self._shapeUncertaintyRelativeSquared = other._shapeUncertaintyRelativeSquared.Clone()
-            else:
-                self._shapeUncertaintyRelativeSquared.Add(other._shapeUncertaintyRelativeSquared)
+        # Add histo
+        self._rootHisto.Add(other._rootHisto)
+
 
     ## Scale the histogram
     #
@@ -1398,28 +1497,32 @@ class RootHistoWithUncertainties:
     # relative uncertainties.
     def Scale(self, *args):
         self._rootHisto.Scale(*args)
+        i = 0
         for (plus, minus) in self._shapeUncertainties.itervalues():
             plus.Scale(*args)
             minus.Scale(*args)
+            i += 1
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus.Scale(*args)
+            self._shapeUncertaintyAbsoluteSquaredMinus.Scale(*args)
 
     ## Clone the histogram
     #
     # All contained histograms are also cloned. For all cloned
     # histograms, th1.SetDirectory(0) is called.
     def Clone(self):
-        clone = RootHistoWithUncertainties(self._rootHisto.Clone())
-        clone._rootHisto.SetDirectory(0)
+        clone = RootHistoWithUncertainties(aux.Clone(self._rootHisto))
         for key, value in self._shapeUncertainties.iteritems():
-            (plus, minus) = (value[0].Clone(), value[1].Clone())
-            plus.SetDirectory(0)
-            minus.SetDirectory(0)
+            (plus, minus) = (aux.Clone(value[0]), aux.Clone(value[1]))
             clone._shapeUncertainties[key] = (plus, minus)
-        if self._shapeUncertaintyRelativeSquared is not None:
-            clone._shapeUncertaintyRelativeSquared = self._shapeUncertaintyRelativeSquared.Clone()
-            clone._shapeUncertaintyRelativeSquared.SetDirectory(0)
-            clone._shapeUncertaintyRelativeNames = self._shapeUncertaintyRelativeNames[:]
-        clone._normalizationUncertaintyRelativeSquared = self._normalizationUncertaintyRelativeSquared
-        clone._normalizationUncertaintyRelativeNames = self._normalizationUncertaintyRelativeNames
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            clone._shapeUncertaintyAbsoluteSquaredPlus = aux.Clone(self._shapeUncertaintyAbsoluteSquaredPlus)
+            clone._shapeUncertaintyAbsoluteSquaredMinus = aux.Clone(self._shapeUncertaintyAbsoluteSquaredMinus)
+        else:
+            clone._shapeUncertaintyAbsoluteSquaredPlus = None
+            clone._shapeUncertaintyAbsoluteSquaredMinus = None
+        clone._shapeUncertaintyAbsoluteNames = self._shapeUncertaintyAbsoluteNames[:]
+        clone._flowBinsVisibleStatus = self._flowBinsVisibleStatus
         return clone
 
     ## Delete all contained histograms
@@ -1428,17 +1531,61 @@ class RootHistoWithUncertainties:
         for (plus, minus) in self._shapeUncertainties.itervalues():
             plus.Delete()
             minus.Delete()
-        if self._shapeUncertaintyRelativeSquared is not None:
-            self._shapeUncertaintyRelativeSquared.Delete()
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            self._shapeUncertaintyAbsoluteSquaredPlus.Delete()
+            self._shapeUncertaintyAbsoluteSquaredMinus.Delete()
 
         self._rootHisto = None
         self._shapeUncertainties = None
-        self._shapeUncertaintyRelativeSquared = None
-        self._normalizationUncertaintyRelativeSquared = None
+        self._shapeUncertaintyAbsoluteSquaredPlus = None
+        self._shapeUncertaintyAbsoluteSquaredMinus = None
+        self._shapeUncertaintyAbsoluteNames = None
 
     ## "Eats" SetDirectory() call for interface compatibility, i.e. do nothing
     def SetDirectory(self, *args):
         pass
+
+    ## Print a lot of comma separated info for debugging
+    def Debug(self):
+        def histoContentsHelper(h):
+            s = ""
+            for i in range(0, h.GetNbinsX()+2):
+                s += ", %f"%h.GetBinContent(i)
+            return s
+        def histoErrorHelper(h):
+            s = ""
+            for i in range(0, h.GetNbinsX()+2):
+                s += ", %f"%h.GetBinError(i)
+            return s
+
+        print "*** Debug info for RootHistoWithUncertainties:"
+        print "histogram %s"%(self.GetName())
+        print "nominal%s"%histoContentsHelper(self._rootHisto)
+        print "nominal_error%s"%histoErrorHelper(self._rootHisto)
+        sUp = ""
+        sDown = ""
+        if self._shapeUncertaintyAbsoluteSquaredPlus != None:
+            for i in range(0, self._rootHisto.GetNbinsX()+2):
+                sUp += ", %f"%math.sqrt(self._shapeUncertaintyAbsoluteSquaredPlus.GetBinError(i))
+                sDown += ", %f"%math.sqrt(self._shapeUncertaintyAbsoluteSquaredMinus.GetBinError(i))
+        print "shape_error_up%s"%sUp
+        print "shape_error_down%s"%sDown
+        keys = self._shapeUncertainties.keys()
+        for key in keys:
+            (hPlus, hMinus) = self._shapeUncertainties[key]
+            print "uncert_%s_up%s"%(key,histoContentsHelper(hPlus))
+            print "uncert_%s_down%s"%(key,histoContentsHelper(hMinus))
+        print "rate, %f"%self.getRate()
+        print "rate_stat_uncert, %f"%self.getRateStatUncertainty()
+        print "rate_syst_uncert, +%f, -%f"%self.getRateSystUncertainty()
+        g = self.getSystematicUncertaintyGraph()
+        sUp = ""
+        sDown = ""
+        for i in range(0, g.GetN()):
+            sUp += ", %f"%g.GetErrorYhigh(i)
+            sDown += ", %f"%g.GetErrorYlow(i)
+        print "rate_syst_uncert_up,%s"%sUp
+        print "rate_syst_uncert_down,%s\n"%sDown
 
 ## Base class for DatasetRootHisto classes (wrapper for TH1 histogram and the originating Dataset)
 # 
@@ -1989,16 +2136,16 @@ class Dataset:
             content = aux.listDirectoryContent(tdirectory, lambda key: key.GetClassName() == "TNamed" and key.GetName() not in ["dataVersion", "parameterSet"])
             for name in content:
                 if name not in dictionary:
-                    dictionary[name] = tdirectory.Get(name).GetTitle()
+                    dictionary[name] = aux.Get(tdirectory, name).GetTitle()
 
         for f in self.files:
             if not f.IsOpen():
                 raise Exception("File %s of dataset %s has been closed! Maybe this Dataset has been removed without 'close=False'?" % (f.GetName(), self.name))
-            configInfo = f.Get("configInfo")
+            configInfo = aux.Get(f, "configInfo")
             if configInfo == None:
                 raise Exception("configInfo directory is missing from file %s" % f.GetName())
 
-            info = _rescaleInfo(_histoToDict(configInfo.Get("configinfo")))
+            info = _rescaleInfo(_histoToDict(aux.Get(configInfo, "configinfo")))
             if "energy" in info:
                 info["energy"] = str(int(round(info["energy"])))
             addDirContentsToDict(configInfo, info)
@@ -2007,7 +2154,7 @@ class Dataset:
             else:
                 assertInfo(self.info, info, self.files[0], f, "configInfo/configinfo")
 
-            dataVersion = configInfo.Get("dataVersion")
+            dataVersion = aux.Get(configInfo, "dataVersion")
             if dataVersion == None:
                 raise Exception("Unable to determine dataVersion for dataset %s from file %s" % (name, f.GetName()))
             if self.dataVersion is None:
@@ -2042,23 +2189,23 @@ class Dataset:
 
         # Check that analysis directory exists
         for f in self.files:
-            if f.Get(self._analysisDirectoryName) == None:
+            if aux.Get(f, self._analysisDirectoryName) == None:
                 raise AnalysisNotFoundException("Analysis directory '%s' does not exist in file '%s'" % (self._analysisDirectoryName, f.GetName()))
         self._analysisDirectoryName += "/"
 
         # Update info from analysis directory specific histogram, if one exists
         realDirName = self._translateName("configInfo")
-        if self.files[0].Get(realDirName) != None: # important to use !=
+        if aux.Get(self.files[0], realDirName) != None: # important to use !=
             updateInfo = None
             for f in self.files:
-                d = f.Get(realDirName)
+                d = aux.Get(f, realDirName)
                 if d == None:
                     raise Exception("%s directory is missing from file %s, it was in %s" % (realDirName, f.GetName(), self.files[0].GetName()))
                 info = {}
-                h = d.Get("configinfo")
+                h = aux.Get(d, "configinfo")
                 if h != None:
-                    info = _rescaleInfo(_histoToDict(d.Get("configinfo")))
-                addDirContentsToDict(f.Get(realDirName), info)
+                    info = _rescaleInfo(_histoToDict(aux.Get(d, "configinfo")))
+                addDirContentsToDict(aux.Get(f, realDirName), info)
                 if updateInfo == None:
                     updateInfo = info
                 else:
@@ -2079,6 +2226,12 @@ class Dataset:
             #print "%s: is pileup-reweighted, calling updateNAllEventsToPUWeighted()" % self.name
             self.updateNAllEventsToPUWeighted()
 
+        # For some reason clearing the in-memory representations of
+        # the files increases the reading (object lookup?) performance
+        # when reading from many analysis directories in a single
+        # script.
+        for f in self.files:
+            f.Clear()
 
     ## Close the files
     #
@@ -2128,7 +2281,7 @@ class Dataset:
 
     ## Get the ParameterSet stored in the ROOT file
     def getParameterSet(self):
-        (objs, realNames) = self.getRootObjects("parameterSet")
+        (objs, realNames) = self.getRootObjects("configInfo/parameterSet")
         return objs[0].GetTitle()        
 
     def getAvailableSystematicVariationSources(self):
@@ -2164,7 +2317,7 @@ class Dataset:
                 h = histos[0]
             else:
                 h = histos[0]
-                h = h.Clone(h.GetName()+"_cloned")
+                h = aux.Clone(h. h.GetName()+"_cloned")
                 for h2 in histos[1:]:
                     h.Add(h2)
     
@@ -2225,16 +2378,11 @@ class Dataset:
             raise Exception("Trying to read object %s from dataset %s, but the file is already closed!" % (name, self.name))
 
         for f in self.files:
-            o = f.Get(realName)
+            o = aux.Get(f, realName)
             # below it is important to use '==' instead of 'is',
             # because null TObject == None, but is not None
             if o == None:
                 raise HistogramNotFoundException("Unable to find object '%s' (requested '%s') from file '%s'" % (realName, name, self.files[0].GetName()))
-
-            # http://root.cern.ch/phpBB3/viewtopic.php?f=14&t=15496
-            # This one seems to save quite a lot of "garbage
-            # collection" time
-            ROOT.SetOwnership(o, True)
 
             ret.append(o)
         return (ret, realName)
@@ -2684,7 +2832,29 @@ class DatasetMerged:
             return DatasetRootHistoMergedPseudo(wrappers, self)
         else:
             raise Exception("Internal error (unknown dataset type)")
-        
+
+    ## Get ROOT histogram
+    #
+    # \param name    Path of the ROOT histogram relative to the analysis
+    #                root directory
+    # \param kwargs  Keyword arguments, forwarded to getRootObjects()
+    #
+    # \return pair (\a first histogram, \a realName)
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    #
+    # If dataset.TreeDraw object is given (or actually anything with
+    # draw() method), the draw() method is called by giving the
+    # Dataset object as parameters. The draw() method is expected to
+    # return a TH1 which is then returned.
+    def getFirstRootHisto(self, name, **kwargs):
+        if hasattr(self.datasets[0], "getFirstRootHisto"):
+            content = self.datasets[0].getFirstRootHisto(name, **kwargs)
+        else:
+            content = self.datasets[0].getRootHisto(name, **kwargs)
+        return content
+
     ## Get the directory content of a given directory in the ROOT file.
     # 
     # \param directory   Path of the directory in the ROOT file
@@ -3180,7 +3350,7 @@ class DatasetPrecursor:
                 raise Exception("Unable to open ROOT file '%s' for dataset '%s'" % (name, self._name))
             self._rootFiles.append(rf)
 
-            dv = rf.Get("configInfo/dataVersion")
+            dv = aux.Get(rf, "configInfo/dataVersion")
             if dv == None:
                 raise Exception("Unable to find 'configInfo/dataVersion' from ROOT file '%s'" % name)
                 

@@ -44,7 +44,7 @@ class AnalysisModuleSelectorSource:
 
 ## Class for handling the book keeping of available modules common to all multicrab directories and selecting of the desired modules
 class AnalysisModuleSelector:
-    def __init__(self):
+    def __init__(self, disableSystematicsList=True):
         self._primarySource = None   # AnalysisModuleSelectorSource object that always exists
         self._otherSources = []      # AnalysisModuleSelectorSource object
         self._availableEras = []
@@ -55,6 +55,7 @@ class AnalysisModuleSelector:
         self._selectedSearchModes = []
         self._selectedOptimizationModes = []
         self._selectedSystematicVariations = []
+        self._disableSystematicsList = disableSystematicsList
 
     def getAvailableEras(self):
         return self._availableEras
@@ -81,11 +82,17 @@ class AnalysisModuleSelector:
         return self._selectedSystematicVariations
 
     def getSelectedCombinationCount(self):
-        return len(self.getSelectedEras()) * len(self.getSelectedSearchModes()) * len(self.getSelectedOptimizationModes()) * len(self.getSelectedSystematicVariations())
+        if not self._disableSystematicsList:
+            return len(self.getSelectedEras()) * len(self.getSelectedSearchModes()) * len(self.getSelectedOptimizationModes()) * len(self.getSelectedSystematicVariations())
+        else:
+            return len(self.getSelectedEras()) * len(self.getSelectedSearchModes()) * len(self.getSelectedOptimizationModes())
 
     def printSelectedCombinationCount(self):
         count = self.getSelectedCombinationCount()
-        print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes x %d systematic variations)" % (count, len(self.getSelectedEras()), len(self.getSelectedSearchModes()), len(self.getSelectedOptimizationModes()), len(self.getSelectedSystematicVariations()))
+        if not self._disableSystematicsList:
+            print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes x %d systematic variations)" % (count, len(self.getSelectedEras()), len(self.getSelectedSearchModes()), len(self.getSelectedOptimizationModes()), len(self.getSelectedSystematicVariations()))
+        else:
+            print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes)" % (count, len(self.getSelectedEras()), len(self.getSelectedSearchModes()), len(self.getSelectedOptimizationModes()))
         return count
 
     def iterSelectedCombinations(self):
@@ -101,7 +108,8 @@ class AnalysisModuleSelector:
         parser.add_option("-e", "--dataEra", dest="era", type="string", action="append", help="Evaluate specified data eras")
         parser.add_option("-m", "--searchMode", dest="searchMode", type="string", action="append", help="name of search mode")
         parser.add_option("-o", "--optimizationMode", dest="optimizationMode", type="string", action="append", help="Evaluate specified optimization mode")
-        parser.add_option("-s", "--systematicVariation", dest="systematicVariation", type="string", action="append", help="Evaluated specified systematic variations")
+        if not self._disableSystematicsList:
+            parser.add_option("-s", "--systematicVariation", dest="systematicVariation", type="string", action="append", help="Evaluated specified systematic variations")
         parser.add_option("-l", "--list", dest="listVariations", action="store_true", default=False, help="Print a list of available variations")
 
     def setPrimarySource(self, label, dsetMgrCreator):
@@ -126,7 +134,8 @@ class AnalysisModuleSelector:
         self._selectedEras = self._applySelectionOnModules("Era", opts.era, self._availableEras)
         self._selectedSearchModes = self._applySelectionOnModules("SearchMode", opts.searchMode, self._availableSearchModes)
         self._selectedOptimizationModes = self._applySelectionOnModules("OptimizationMode", opts.optimizationMode, self._availableOptimizationModes)
-        self._selectedSystematicVariations = self._applySelectionOnModules("SystematicVariation", opts.systematicVariation, self._availableSystematicVariations, [""]) # pick only the nominal as default
+        if not self._disableSystematicsList:
+            self._selectedSystematicVariations = self._applySelectionOnModules("SystematicVariation", opts.systematicVariation, self._availableSystematicVariations, [""]) # pick only the nominal as default
         # Print as information a breakdown of selected eras, search modes, and optimization modes
         self._printSelection()
         # Now, the selected eras, search modes, and optimization modes are available with the getters
@@ -216,13 +225,14 @@ class AnalysisModuleSelector:
                 print "  %2d: (nominal analysis)"%(i)
             else:
                 print "  %2d: %s"%(i, self._availableOptimizationModes[i].replace("Opt",""))
-        print "\nAvailable systematic variations common for all multicrab directories:"
-        print "(you may choose any with command line options, either with the digit shown below or the full name, example: -o 1-3,5)"
-        for i, systVar in enumerate(self._availableSystematicVariations):
-            if systVar == "":
-                print "  %2d: (nominal analysis)"%(i)
-            else:
-                print "  %2d: %s"%(i, systVar.replace("SystVar",""))
+        if not self._disableSystematicsList:
+            print "\nAvailable systematic variations common for all multicrab directories:"
+            print "(you may choose any with command line options, either with the digit shown below or the full name, example: -s 1-3,5)"
+            for i, systVar in enumerate(self._availableSystematicVariations):
+                if systVar == "":
+                    print "  %2d: (nominal analysis)"%(i)
+                else:
+                    print "  %2d: %s"%(i, systVar.replace("SystVar",""))
 
     def _correctOptionsFormat(self, opts):
         # Make sure that format of options for eras, search modes, and optimization modes is fine
@@ -248,11 +258,12 @@ class AnalysisModuleSelector:
                 if not opts.optimizationMode[i].isdigit():
                     if not "Opt" in opts.optimizationMode[i]:
                         opts.optimizationMode[i] = "Opt%s"%opts.optimizationMode[i]
-        if opts.systematicVariation is not None:
-            opts.systematicVariation = self._disentangleDigitsInOptionString(opts.systematicVariation)
-            for i, systVar in enumerate(opts.systematicVariation):
-                if not systVar.isdigit() and not "SystVar" in systVar:
-                    opts.systematicVariation[i] = "SystVar"+systVar
+        if not self._disableSystematicsList:
+            if opts.systematicVariation is not None:
+                opts.systematicVariation = self._disentangleDigitsInOptionString(opts.systematicVariation)
+                for i, systVar in enumerate(opts.systematicVariation):
+                    if not systVar.isdigit() and not "SystVar" in systVar:
+                        opts.systematicVariation[i] = "SystVar"+systVar
 
     def _disentangleDigitsInOptionString(self, inputList):
         myDigits = []
@@ -311,15 +322,16 @@ class AnalysisModuleSelector:
                 print "%s%2d: (nominal)%s"%(myStr, i, mySuffix)
             else:
                 print "%s%2d: %s%s"%(myStr, i, self._availableOptimizationModes[i].replace("Opt",""),mySuffix)
-        print "\nSelected systematic variations:"
-        for i, systVar in enumerate(self._availableSystematicVariations):
-            myStr = myNotSelectedStr
-            mySuffix = ""
-            if systVar in self._selectedSystematicVariations:
-                myStr = mySelectedStr
-                mySuffix = mySelectedSuffix
-            if systVar == "":
-                print "%s%2d: (nominal)%s"%(myStr, i, mySuffix)
-            else:
-                print "%s%2d: %s%s"%(myStr, i, systVar.replace("SystVar",""), mySuffix)
+        if not self._disableSystematicsList:
+            print "\nSelected systematic variations:"
+            for i, systVar in enumerate(self._availableSystematicVariations):
+                myStr = myNotSelectedStr
+                mySuffix = ""
+                if systVar in self._selectedSystematicVariations:
+                    myStr = mySelectedStr
+                    mySuffix = mySelectedSuffix
+                if systVar == "":
+                    print "%s%2d: (nominal)%s"%(myStr, i, mySuffix)
+                else:
+                    print "%s%2d: %s%s"%(myStr, i, systVar.replace("SystVar",""), mySuffix)
         print ""

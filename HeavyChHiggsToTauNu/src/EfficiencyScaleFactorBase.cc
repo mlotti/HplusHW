@@ -3,25 +3,45 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/Exception.h"
 
+#include <limits>
 
 namespace HPlus {
   EfficiencyScaleFactorBase::Data::Data():
     fWeight(1.0),
-    fWeightAbsUnc(0.0)
+    fWeightAbsUncPlus(0.0),
+    fWeightAbsUncMinus(0.0)
   {}
   EfficiencyScaleFactorBase::Data::~Data() {}
 
   EfficiencyScaleFactorBase::EfficiencyScaleFactorBase(const edm::ParameterSet& iConfig):
+    fUseMaxUncertainty(iConfig.getParameter<bool>("useMaxUncertainty")),
     fVariationEnabled(iConfig.getParameter<bool>("variationEnabled")),
-    fVariationShiftBy(iConfig.getParameter<double>("variationShiftBy"))
+    fVariationSFShiftBy(std::numeric_limits<double>::quiet_NaN()),
+    fVariationDataShiftBy(std::numeric_limits<double>::quiet_NaN()),
+    fVariationMCShiftBy(std::numeric_limits<double>::quiet_NaN())
   {
     std::string mode = iConfig.getUntrackedParameter<std::string>("mode");
-    if(mode == "dataEfficiency")
+    if(mode == "dataEfficiency") {
       fMode = kDataEfficiency;
-    else if(mode == "mcEfficiency")
+      if(fVariationEnabled)
+        fVariationDataShiftBy = iConfig.getParameter<double>("variationDataShiftBy");
+    }
+    else if(mode == "mcEfficiency") {
       fMode = kMCEfficiency;
-    else if(mode == "scaleFactor")
+      if(fVariationEnabled)
+        fVariationMCShiftBy = iConfig.getParameter<double>("variationMCShiftBy");
+    }
+    else if(mode == "scaleFactor") {
       fMode = kScaleFactor;
+      if(fVariationEnabled) {
+        if(fUseMaxUncertainty)
+          fVariationSFShiftBy = iConfig.getParameter<double>("variationSFShiftBy");
+        else {
+          fVariationDataShiftBy = iConfig.getParameter<double>("variationDataShiftBy");
+          fVariationMCShiftBy = iConfig.getParameter<double>("variationMCShiftBy");
+        }
+      }
+    }
     else if(mode == "disabled")
       fMode = kDisabled;
     else
@@ -29,4 +49,47 @@ namespace HPlus {
   }
 
   EfficiencyScaleFactorBase::~EfficiencyScaleFactorBase() {}
+
+  std::pair<double, double> EfficiencyScaleFactorBase::parseUncertainty(const edm::ParameterSet& pset) {
+    if(pset.exists("uncertaintyPlus")) {
+      double uncPlus = pset.getParameter<double>("uncertaintyPlus");
+      double uncMinus = pset.getParameter<double>("uncertaintyMinus");
+      if(fUseMaxUncertainty) {
+        double uncMax = std::max(uncPlus, uncMinus);
+        return std::make_pair(uncMax, uncMax);
+      }
+      return std::make_pair(uncPlus, uncMinus);
+    }
+
+    // Backwards compatibility
+    double unc = pset.getParameter<double>("uncertainty");
+    return std::make_pair(unc, unc);
+  }
+
+  void EfficiencyScaleFactorBase::varyData(double *eff, double *uncPlus, double *uncMinus) const {
+    if(fVariationEnabled && (fMode == kDataEfficiency || (fMode == kScaleFactor && !fUseMaxUncertainty))) {
+      if(fVariationDataShiftBy > 0.0)
+        (*eff) += (*eff)*fVariationDataShiftBy*(*uncPlus);
+      else
+        (*eff) += (*eff)*fVariationDataShiftBy*(*uncMinus);
+      *uncPlus = 0.0;
+      *uncMinus = 0.0;
+    }
+  }
+
+  void EfficiencyScaleFactorBase::varyMC(double *eff, double *uncPlus, double *uncMinus) const {
+    if(fVariationEnabled && (fMode == kMCEfficiency || (fMode == kScaleFactor && !fUseMaxUncertainty))) {
+      if(fVariationMCShiftBy > 0.0)
+        (*eff) += (*eff)*fVariationMCShiftBy*(*uncPlus);
+      else
+        (*eff) += (*eff)*fVariationMCShiftBy*(*uncMinus);
+    }
+  }
+
+  void EfficiencyScaleFactorBase::varySF(double *sf, double *unc) const {
+    if(fVariationEnabled && fMode == kScaleFactor && fUseMaxUncertainty) {
+      (*sf) += (*sf)*fVariationSFShiftBy*(*unc);
+      *unc = 0.0;
+    }
+  }
 }

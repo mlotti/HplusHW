@@ -338,8 +338,8 @@ namespace HPlus {
 
 //------ Jet selection
     const JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedTau, nVertices);
-    fCommonPlots.fillControlPlotsAtJetSelection(iEvent, jetData);
     if (!jetData.passedEvent()) return false;
+    fCommonPlots.fillControlPlotsAtJetSelection(iEvent, jetData);
     increment(fNJetsCounter);
     fCommonPlotsAfterJetSelection->fill();
 
@@ -354,7 +354,7 @@ namespace HPlus {
     fTree.setMETTriggerWeight(metTriggerWeight.getEventWeight(), metTriggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fMETTriggerScaleFactorCounter);
     fCommonPlotsAfterMETScaleFactor->fill();
-
+    fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(iEvent);
 
 //------ Improved delta phi cut, a.k.a. QCD tail killer - collinear part
     const QCDTailKiller::Data qcdTailKillerDataCollinear = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());

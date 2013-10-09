@@ -25,22 +25,6 @@ namespace HPlus {
 
     void setRun(unsigned run) { fBinned.setRun(run); }
 
-    double dataEfficiency(const reco::MET& met) const;
-    double dataEfficiencyRelativeUncertainty(const reco::MET& met) const;
-    double dataEfficiencyAbsoluteUncertainty(const reco::MET& met) const;
-
-    double dataAverageEfficiency(const reco::MET& met) const;
-    double dataAverageEfficiencyRelativeUncertainty(const reco::MET& met) const;
-    double dataAverageEfficiencyAbsoluteUncertainty(const reco::MET& met) const;
-
-    double mcEfficiency(const reco::MET& met) const;
-    double mcEfficiencyRelativeUncertainty(const reco::MET& met) const;
-    double mcEfficiencyAbsoluteUncertainty(const reco::MET& met) const;
-
-    double scaleFactor(const reco::MET& met) const;
-    double scaleFactorRelativeUncertainty(const reco::MET& met) const;
-    double scaleFactorAbsoluteUncertainty(const reco::MET& met) const;
-
     Data applyEventWeight(const reco::MET& met, bool isData, HPlus::EventWeight& eventWeight);
     double getEventWeight(const reco::MET& met);
 

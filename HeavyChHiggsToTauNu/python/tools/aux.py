@@ -97,6 +97,24 @@ def addConfigInfo(of, dataset):
 
     of.cd()
 
+def Get(tdir, name):
+    o = tdir.Get(name)
+    if o == None:
+        return o
+    # http://root.cern.ch/phpBB3/viewtopic.php?f=14&t=15496
+    # This one seems to save quite a lot of "garbage
+    # collection" time
+    ROOT.SetOwnership(o, True)
+    if hasattr(o, "SetDirectory"):
+        o.SetDirectory(0)
+    return o
+
+def Clone(obj, *args):
+    cl = obj.Clone(*args)
+    ROOT.SetOwnership(cl, True)
+    if hasattr(cl, "SetDirectory"):
+        cl.SetDirectory(0)
+    return cl
 
 def listDirectoryContent(tdirectory, predicate=None):
     if not hasattr(tdirectory, "GetListOfKeys"):

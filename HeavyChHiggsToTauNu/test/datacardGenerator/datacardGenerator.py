@@ -18,7 +18,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as Data
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 def getDsetCreator(label, mcrabPath, mcrabInfoOutput, enabledStatus=True):
@@ -58,6 +58,7 @@ def main(opts, moduleSelector):
     multicrabPaths = PathFinder.MulticrabPathFinder(config.Path)
     mcrabInfoOutput = []
     mcrabInfoOutput.append("Input directories:")
+
     signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
     embeddingDsetCreator = None
     if config.OptionReplaceEmbeddingByMC:
@@ -66,10 +67,10 @@ def main(opts, moduleSelector):
     else:
         embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput, not config.OptionReplaceEmbeddingByMC)
     qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
-    if qcdFactorisedDsetCreator == None:
+    if qcdFactorisedDsetCreator == None and not opts.useQCDinverted:
         myQCDMethods.remove(DataCard.DatacardQCDMethod.FACTORISED)
     qcdInvertedDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
-    if qcdInvertedDsetCreator == None:
+    if qcdInvertedDsetCreator == None and not opts.useQCDfactorised:
         myQCDMethods.remove(DataCard.DatacardQCDMethod.INVERTED)
 
     # Require existence of signal analysis and one QCD measurement
@@ -105,17 +106,32 @@ def main(opts, moduleSelector):
         for era in moduleSelector.getSelectedEras():
             for searchMode in moduleSelector.getSelectedSearchModes():
                 for optimizationMode in moduleSelector.getSelectedOptimizationModes():
+                    # Create the dataset creator managers separately for each module
+                    signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
+                    embeddingDsetCreator = None
+                    if config.OptionReplaceEmbeddingByMC:
+                        mcrabInfoOutput.append("- Embedding: estimated from signal analysis MC")
+                        print "- %sWarning:%s Embedding: estimated from signal analysis MC"%(WarningStyle(),NormalStyle())
+                    else:
+                        embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput, not config.OptionReplaceEmbeddingByMC)
+                    myQCDDsetCreator = None
+                    if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
+                        myQCDDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
+                        if myQCDDsetCreator == None:
+                            raise Exception(ErrorLabel()+"Could not find factorised QCD pseudomulticrab!"+NormalStyle())
+                    elif qcdMethod == DataCard.DatacardQCDMethod.INVERTED:
+                        myQCDDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
+                        if myQCDDsetCreator == None:
+                            raise Exception(ErrorLabel()+"Could not find inverted QCD pseudomulticrab!"+NormalStyle())
+                    # Print progress info
                     myCounter += 1
                     print "%sProducing datacard %d/%d ...%s\n"%(CaptionStyle(),myCounter,myDatacardCount,NormalStyle())
                     # Create the generator, check config file contents
                     dcgen = DataCard.DataCardGenerator(opts, config, qcdMethod)
                     # Tweak to provide the correct datasetMgrCreator to the generator
-                    myQCDDsetCreator = None
                     if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
-                        myQCDDsetCreator = qcdFactorisedDsetCreator
                         print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sfactorised%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
                     elif qcdMethod == DataCard.DatacardQCDMethod.INVERTED:
-                        myQCDDsetCreator = qcdInvertedDsetCreator
                         print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sinverted%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
                     dcgen.setDsetMgrCreators(signalDsetCreator,embeddingDsetCreator,myQCDDsetCreator)
                     # Do the heavy stuff
@@ -187,9 +203,6 @@ if __name__ == "__main__":
     parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
     myModuleSelector.addParserOptions(parser)
-    #parser.add_option("-e", "--era", dest="eraId", type="string", action="append", help="Evaluate specified eras")
-    #parser.add_option("-m", "--searchMode", dest="searchModeId", action="append", help="name of search mode")
-    #parser.add_option("-v", "--variation", dest="variationId", type="int", action="append", help="Evaluate specified variations")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
     parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
     parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
@@ -198,6 +211,7 @@ if __name__ == "__main__":
     parser.add_option("--debugMining", dest="debugMining", action="store_true", default=False, help="Enable debugging print for data mining")
     parser.add_option("--debugQCD", dest="debugQCD", action="store_true", default=False, help="Enable debugging print for QCD measurement")
     parser.add_option("--debugShapeHistogram", dest="debugShapeHistogram", action="store_true", default=False, help="Debug shape histogram modifying algorithm")
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
     (opts, args) = parser.parse_args()
 
     myStatus = True

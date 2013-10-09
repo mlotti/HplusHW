@@ -16,9 +16,11 @@
 namespace HPlus {
   EmbeddingMuonEfficiency::Data::Data() {
     fWeight = std::numeric_limits<double>::quiet_NaN();
-    fWeightAbsUnc = 0.0;
+    fWeightAbsUncPlus = 0.0;
+    fWeightAbsUncMinus = 0.0;
     fEfficiency = fWeight;
-    fEfficiencyAbsUnc = fWeightAbsUnc;
+    fEfficiencyAbsUncPlus = fWeightAbsUncPlus;
+    fEfficiencyAbsUncMinus = fWeightAbsUncMinus;
   }
   EmbeddingMuonEfficiency::Data::~Data() {}
   void EmbeddingMuonEfficiency::Data::check() const {
@@ -82,7 +84,8 @@ namespace HPlus {
     EfficiencyScaleFactorBase::Mode mode = fEfficiencyScaleFactor->getMode();
     if(mode == EfficiencyScaleFactorBase::kDataEfficiency || mode == EfficiencyScaleFactorBase::kMCEfficiency) {
       if(output.fWeight != 0.0) {
-        output.fWeightAbsUnc = output.fWeightAbsUnc / (output.fWeight*output.fWeight);
+        output.fWeightAbsUncPlus = output.fWeightAbsUncPlus / (output.fWeight*output.fWeight);
+        output.fWeightAbsUncMinus = output.fWeightAbsUncMinus / (output.fWeight*output.fWeight);
         output.fWeight = 1.0/output.fWeight;
       }
     }

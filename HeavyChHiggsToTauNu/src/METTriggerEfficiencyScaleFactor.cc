@@ -35,47 +35,6 @@ namespace HPlus {
   }
   METTriggerEfficiencyScaleFactor::~METTriggerEfficiencyScaleFactor() {}
 
-  double METTriggerEfficiencyScaleFactor::dataEfficiency(const reco::MET& met) const {
-    return fBinned.dataEfficiency(met.et());
-  }
-  double METTriggerEfficiencyScaleFactor::dataEfficiencyRelativeUncertainty(const reco::MET& met) const {
-    return fBinned.dataEfficiencyRelativeUncertainty(met.et());
-  }
-  double METTriggerEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty(const reco::MET& met) const {
-    return fBinned.dataEfficiencyAbsoluteUncertainty(met.et());
-  }
-
-  double METTriggerEfficiencyScaleFactor::dataAverageEfficiency(const reco::MET& met) const {
-    return fBinned.dataAverageEfficiency(met.et());
-  }
-  double METTriggerEfficiencyScaleFactor::dataAverageEfficiencyRelativeUncertainty(const reco::MET& met) const {
-    return fBinned.dataAverageEfficiencyRelativeUncertainty(met.et());
-  }
-  double METTriggerEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty(const reco::MET& met) const {
-    return fBinned.dataAverageEfficiencyAbsoluteUncertainty(met.et());
-  }
-
-
-  double METTriggerEfficiencyScaleFactor::mcEfficiency(const reco::MET& met) const {
-    return fBinned.mcEfficiency(met.et());
-  }
-  double METTriggerEfficiencyScaleFactor::mcEfficiencyRelativeUncertainty(const reco::MET& met) const {
-    return fBinned.mcEfficiencyRelativeUncertainty(met.et());
-  }
-  double METTriggerEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertainty(const reco::MET& met) const {
-    return fBinned.mcEfficiencyAbsoluteUncertainty(met.et());
-  }
-
-  double METTriggerEfficiencyScaleFactor::scaleFactor(const reco::MET& met) const {
-    return fBinned.scaleFactor(met.et());
-  }
-  double METTriggerEfficiencyScaleFactor::scaleFactorRelativeUncertainty(const reco::MET& met) const {
-    return fBinned.scaleFactorRelativeUncertainty(met.et());
-  }
-  double METTriggerEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty(const reco::MET& met) const {
-    return fBinned.scaleFactorAbsoluteUncertainty(met.et());
-  }
-
   METTriggerEfficiencyScaleFactor::Data METTriggerEfficiencyScaleFactor::applyEventWeight(const reco::MET& met, bool isData, EventWeight& eventWeight) {
     Data output = fBinned.getEventWeight(met.et(), isData);
 
