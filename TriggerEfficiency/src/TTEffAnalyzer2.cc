@@ -21,6 +21,7 @@
 #include "DataFormats/Common/interface/PtrVector.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/TauReco/interface/PFTauDiscriminator.h"
@@ -38,7 +39,7 @@
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapFwd.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMap.h"
-//#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMaps.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMaps.h"
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
@@ -72,6 +73,8 @@ private:
 
   void reset();
   int MCMatch(const edm::Event&,const reco::Candidate&);
+  double L1EtmCorrection(double,const edm::Event&);
+  double L1EtmCorrectionAlgo(double, double, double);
 
   // Input stuff
   edm::InputTag hltResultsSrc_;
@@ -117,6 +120,8 @@ private:
   std::string rootFile_;
   std::vector<edm::InputTag> counters_;
 
+  edm::InputTag topPtWeightSrc_;
+
   struct TriggerBit {
     TriggerBit(const std::string& n): name(n), value(false) {}
     void book(TTree *tree) {
@@ -149,8 +154,9 @@ private:
     }
     void fill(const edm::Event& iEvent) {
       edm::Handle<edm::View<reco::MET> > hmet;
+//      edm::Handle<edm::View<pat::MET> > hmet;
       if(iEvent.getByLabel(src, hmet)){
-        et = hmet->front().et();
+        et = hmet->front().pt();
         phi = hmet->front().phi();
       }
     }
@@ -206,6 +212,7 @@ private:
   int NUP;
   bool primaryVertexIsValid_;
   unsigned nGoodOfflinePV_;
+  float topPtWeight_;
   std::vector<TriggerBit> l1Bits_;
   std::vector<TriggerBit> hltBits_;
   std::vector<MET> METs_;
@@ -230,6 +237,7 @@ private:
 
   // L1 per-event
   float L1MET_;
+  float L1METcorr_;
   float L1MHT_;
 
   std::vector<bool> l1JetIsTau_;
@@ -310,6 +318,7 @@ TTEffAnalyzer2::TTEffAnalyzer2(const edm::ParameterSet& iConfig):
   patTriggerEventSrc(iConfig.getParameter<edm::InputTag>("PatTriggerEvent")),
   rootFile_(iConfig.getParameter<std::string>("outputFileName")),
   counters_(iConfig.getParameter<std::vector<edm::InputTag> >("Counters")),
+  topPtWeightSrc_(iConfig.getParameter<edm::InputTag>("TopPtWeight")),
   triggerBitsOnly(iConfig.getParameter<bool>("triggerBitsOnly"))
 {
   std::string l1MatchMode = iConfig.getParameter<std::string>("L1JetMatchingMode");
@@ -354,8 +363,9 @@ TTEffAnalyzer2::TTEffAnalyzer2(const edm::ParameterSet& iConfig):
   edm::ParameterSet mets = iConfig.getParameter<edm::ParameterSet>("METs");
   std::vector<std::string> metNames = mets.getParameterNames();
   METs_.reserve(metNames.size());
-  for(size_t i=0; i<metNames.size(); ++i)
+  for(size_t i=0; i<metNames.size(); ++i){
     METs_.push_back(MET(mets.getParameter<edm::InputTag>(metNames[i]), metNames[i]));
+  }
 
   edm::ParameterSet l25Discs = iConfig.getParameter<edm::ParameterSet>("L25Discriminators");
   std::vector<std::string> l25Names = l25Discs.getParameterNames();
@@ -387,6 +397,7 @@ TTEffAnalyzer2::TTEffAnalyzer2(const edm::ParameterSet& iConfig):
   tree_->Branch("MCNPU", &nPU_);
   tree_->Branch("MCNUP", &NUP);
   tree_->Branch("numGoodOfflinePV", &nGoodOfflinePV_);
+  tree_->Branch("topPtWeight", &topPtWeight_);
   tree_->Branch("primaryVertexIsValid", &primaryVertexIsValid_);
 
   for(size_t i=0; i<l1Bits_.size(); ++i)
@@ -398,6 +409,7 @@ TTEffAnalyzer2::TTEffAnalyzer2(const edm::ParameterSet& iConfig):
 
   tree_->Branch("L1MET", &L1MET_);
   tree_->Branch("L1MHT", &L1MHT_);
+  tree_->Branch("L1METcorr", &L1METcorr_);
 
   tree_->Branch("PFTauPt", &PFTauPt_);
   tree_->Branch("PFTauEt", &PFTauEt_);
@@ -486,6 +498,7 @@ void TTEffAnalyzer2::reset() {
   NUP = 0;
   primaryVertexIsValid_ = false;
   nGoodOfflinePV_ = 0;
+  topPtWeight_ = 1;
 
   for(size_t i=0; i<l1Bits_.size(); ++i)
     l1Bits_[i].reset();
@@ -496,6 +509,7 @@ void TTEffAnalyzer2::reset() {
     METs_[i].reset();
   }
   L1MET_ = 0;
+  L1METcorr_ = 0;
   L1MHT_ = 0;
 
   PFTauPt_.clear();
@@ -613,6 +627,36 @@ int TTEffAnalyzer2::MCMatch(const edm::Event& iEvent,const reco::Candidate& dire
   return mcMatch;
 }
 
+double TTEffAnalyzer2::L1EtmCorrection(double L1ETM,const edm::Event& iEvent){
+
+    edm::InputTag caloMETnoHFsrc = edm::InputTag("patCaloMETnoHF");
+    edm::InputTag caloMETnoHFsrcResidualCorrected = edm::InputTag("patResidualCorrectedCaloMETnoHF");
+
+    edm::Handle<edm::View<pat::MET> > hCaloMETnoHF;
+    edm::Handle<edm::View<pat::MET> > hCaloMETnoHFresidualCorrected;
+
+    if(iEvent.getByLabel(caloMETnoHFsrc, hCaloMETnoHF) && iEvent.getByLabel(caloMETnoHFsrcResidualCorrected, hCaloMETnoHFresidualCorrected)){
+	double caloMETnoHF = hCaloMETnoHF->front().et();
+	double caloMETnoHFresidualCorrected = hCaloMETnoHFresidualCorrected->front().et();
+
+	return L1EtmCorrectionAlgo(L1ETM,caloMETnoHF,caloMETnoHFresidualCorrected);
+    }else{
+	return L1ETM;
+    }
+}
+
+double TTEffAnalyzer2::L1EtmCorrectionAlgo(double L1ETM, double caloMETnoHF, double caloMETnoHFresidualCorrected){
+
+    double R = 0.9322;
+    double H = -0.1172+0.0499*log(caloMETnoHF);
+    double K = 0.6693;
+
+    double L1etmScaleCorr = L1ETM*caloMETnoHFresidualCorrected/caloMETnoHF*R;
+    double correctedL1ETM = L1etmScaleCorr + H*(L1etmScaleCorr - K*caloMETnoHF);
+
+    return correctedL1ETM;
+}
+
 void TTEffAnalyzer2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   event_ = iEvent.id().event();
   run_ = iEvent.run();
@@ -641,6 +685,12 @@ void TTEffAnalyzer2::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   edm::Handle<edm::View<reco::Vertex> > hoffvertex;
   if(iEvent.getByLabel(offlinePrimaryVertexSrc_, hoffvertex)){
     nGoodOfflinePV_ = hoffvertex->size();  
+  }
+
+  // Top pt weight
+  edm::Handle<double> hTopPtWeight;
+  if(iEvent.getByLabel(topPtWeightSrc_, hTopPtWeight)){
+    topPtWeight_ = *hTopPtWeight;
   }
 
   // Selections
@@ -730,11 +780,13 @@ void TTEffAnalyzer2::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     if(!l1mets.empty()) {
         if(l1mets.size() == 1) {
             L1MET_ = l1mets[0]->et();
+	    L1METcorr_ = L1EtmCorrection(L1MET_,iEvent);
         }else{
             bool found = false; 
             for(size_t i=0; i<l1mets.size(); ++i) {
                 if(l1mets[i]->coll("l1extraParticles:MET")) {
                     L1MET_ = l1mets[i]->et();
+		    L1METcorr_ = L1EtmCorrection(L1MET_,iEvent);
                     found = true;
                     break;
                 }
