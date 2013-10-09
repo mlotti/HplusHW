@@ -110,6 +110,13 @@ print "GlobalTag="+dataVersion.getGlobalTag()
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeight_cfi as topPtWeight
+process.topPtWeight = topPtWeight.topPtWeight.clone()
+if options.sample == "TTJets":
+    topPtWeight.addTtGenEvent(process, process.commonSequence)
+    process.topPtWeight.enabled = True
+    process.commonSequence += process.topPtWeight
+
 if dataVersion.isMC():
     process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
         GenParticles  = cms.untracked.InputTag("genParticles"),
@@ -391,7 +398,8 @@ process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
 
         PileupSummaryInfoSource                 = cms.InputTag("addPileupInfo"),
         outputFileName          		= cms.string("tteffAnalysis-hltpftau-hpspftau.root"),
-	triggerBitsOnly				= cms.bool(False)
+	triggerBitsOnly				= cms.bool(False),
+	TopPtWeight                             = cms.InputTag("topPtWeight")
 )
 
 #process.TTEffAnalysisHLTPFtauHPS.clone(

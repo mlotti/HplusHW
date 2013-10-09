@@ -120,6 +120,8 @@ private:
   std::string rootFile_;
   std::vector<edm::InputTag> counters_;
 
+  edm::InputTag topPtWeightSrc_;
+
   struct TriggerBit {
     TriggerBit(const std::string& n): name(n), value(false) {}
     void book(TTree *tree) {
@@ -210,6 +212,7 @@ private:
   int NUP;
   bool primaryVertexIsValid_;
   unsigned nGoodOfflinePV_;
+  float topPtWeight_;
   std::vector<TriggerBit> l1Bits_;
   std::vector<TriggerBit> hltBits_;
   std::vector<MET> METs_;
@@ -315,6 +318,7 @@ TTEffAnalyzer2::TTEffAnalyzer2(const edm::ParameterSet& iConfig):
   patTriggerEventSrc(iConfig.getParameter<edm::InputTag>("PatTriggerEvent")),
   rootFile_(iConfig.getParameter<std::string>("outputFileName")),
   counters_(iConfig.getParameter<std::vector<edm::InputTag> >("Counters")),
+  topPtWeightSrc_(iConfig.getParameter<edm::InputTag>("TopPtWeight")),
   triggerBitsOnly(iConfig.getParameter<bool>("triggerBitsOnly"))
 {
   std::string l1MatchMode = iConfig.getParameter<std::string>("L1JetMatchingMode");
@@ -393,6 +397,7 @@ TTEffAnalyzer2::TTEffAnalyzer2(const edm::ParameterSet& iConfig):
   tree_->Branch("MCNPU", &nPU_);
   tree_->Branch("MCNUP", &NUP);
   tree_->Branch("numGoodOfflinePV", &nGoodOfflinePV_);
+  tree_->Branch("topPtWeight", &topPtWeight_);
   tree_->Branch("primaryVertexIsValid", &primaryVertexIsValid_);
 
   for(size_t i=0; i<l1Bits_.size(); ++i)
@@ -493,6 +498,7 @@ void TTEffAnalyzer2::reset() {
   NUP = 0;
   primaryVertexIsValid_ = false;
   nGoodOfflinePV_ = 0;
+  topPtWeight_ = 1;
 
   for(size_t i=0; i<l1Bits_.size(); ++i)
     l1Bits_[i].reset();
@@ -679,6 +685,12 @@ void TTEffAnalyzer2::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   edm::Handle<edm::View<reco::Vertex> > hoffvertex;
   if(iEvent.getByLabel(offlinePrimaryVertexSrc_, hoffvertex)){
     nGoodOfflinePV_ = hoffvertex->size();  
+  }
+
+  // Top pt weight
+  edm::Handle<double> hTopPtWeight;
+  if(iEvent.getByLabel(topPtWeightSrc_, hTopPtWeight)){
+    topPtWeight_ = *hTopPtWeight;
   }
 
   // Selections
