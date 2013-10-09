@@ -44,7 +44,7 @@ class ControlPlotMaker:
             print "... mass = %d GeV"%m
             # Initialize flow plot
             selectionFlow = SelectionFlowPlotMaker(self._config, m)
-            myBlindingCount = 0
+            myBlindedStatus = False
             for i in range(0,len(self._config.ControlPlots)):
                 myCtrlPlot = self._config.ControlPlots[i]
                 myMassSuffix = "_M%d"%m
@@ -103,6 +103,7 @@ class ControlPlotMaker:
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList.append(myHisto)
                 hData = observation.getControlPlotByIndex(i).Clone()
+                hDataUnblinded = hData.Clone()
                 # Apply blinding
                 if len(myCtrlPlot.blindedRange) > 0:
                     self._applyBlinding(hData,myCtrlPlot.blindedRange)
@@ -117,10 +118,14 @@ class ControlPlotMaker:
                 myHisto.setIsDataMC(isData=False, isMC=True)
                 myStackList.insert(1, myHisto)
                 # Add data to selection flow plot
-                if len(myCtrlPlot.blindedRange) > 0:
+                if myBlindedStatus:
                     selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
                 else:
-                    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hData,myStackList[1:])
+                    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hDataUnblinded,myStackList[1:])
+                if len(myCtrlPlot.blindedRange) > 0:
+                    myBlindedStatus = True
+                else:
+                    myBlindedStatus = False
                 # Make plot
                 myStackPlot = plots.DataMCPlot2(myStackList)
                 myStackPlot.setLuminosity(self._luminosity)
