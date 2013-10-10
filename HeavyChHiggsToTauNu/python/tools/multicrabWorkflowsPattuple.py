@@ -599,9 +599,9 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         # Construct processing workflow
         wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName="pattuple_"+version, skimConfig=skim)
 
-        # Setup the publish name
-        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName, taskDef)
-        wf.addCrabLine("USER.publish_data_name = "+name)
+        # Clone for AOD-based analysis
+        wfAodAnalysis = wf.clone()
+        wfAodAnalysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
 
         # For MC, split by events, for data, split by lumi
         if dataset.isMC():
@@ -609,43 +609,54 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         else:
             wf.addCrabLine("CMSSW.total_number_of_lumis = -1")
 
+        # Setup the publish name
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName, taskDef)
+        wf.addCrabLine("USER.publish_data_name = "+name)
+
         # Add the pattuple Workflow to Dataset
         dataset.addWorkflow(wf)
-        # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
-        if wf.output != None:
-            commonArgs = {
-                "source": Source("pattuple_"+version),
-                "args": wf.args,
-                "skimConfig": skim,
-                "dataVersionAppend": wf.dataVersionAppend,
-                }
 
-            if dataset.isData():
-                # For data, construct one analysis workflow per trigger type
-                found = False
-                if datasetName in tauTriggers:
-                    found = True
-                    dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=tauTriggers[datasetName], **commonArgs))
-                if datasetName in quadJetTriggers:
-                    found = True
-                    dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
-                if datasetName in quadJetBTagTriggers:
-                    found = True
-                    dataset.addWorkflow(Workflow("analysis_quadjetbtag_"+version, triggerOR=quadJetBTagTriggers[datasetName], **commonArgs))
-                if datasetName in quadPFJetBTagTriggers:
-                    found = True
-                    dataset.addWorkflow(Workflow("analysis_quadpfjetbtag_"+version, triggerOR=quadPFJetBTagTriggers[datasetName], **commonArgs))
+        # Add analysis workflows
+        commonArgs = {
+            "source": Source("pattuple_"+version),
+            "args": wf.args,
+            "skimConfig": skim,
+            "dataVersionAppend": wf.dataVersionAppend,
+            }
+        def addAnalysisWorkflow(name, triggerOR):
+            # Add AOD-based analysis workflow in all cases
+            aodWf = wfAodAnalysis.clone()
+            aodWf.setName("aod"+name[0].upper()+name[1:])
+            dataset.addWorkflow(aodWf)
+            # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
+            if wf.output is not None:
+                dataset.addWorkflow(Workflow(name, triggerOR=triggerOR, **commonArgs))
 
-                if not found:
-                    raise Exception("No trigger specified for dataset %s" % datasetName)
-            else:
-                # For MC, also construct one analysis workflow per trigger type
-                dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=[mcTriggerTauMET], **commonArgs))
-                dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=[mcTriggerQuadJet], **commonArgs))
-                dataset.addWorkflow(Workflow("analysis_quadjetbtag_"+version, triggerOR=[mcTriggerQuadJetBTag], **commonArgs))
-                dataset.addWorkflow(Workflow("analysis_quadpfjet78btag_"+version, triggerOR=[mcTriggerQuadPFJet78BTag], **commonArgs))
-                dataset.addWorkflow(Workflow("analysis_quadpfjet82btag_"+version, triggerOR=[mcTriggerQuadPFJet82BTag], **commonArgs))
+        if dataset.isData():
+            # For data, construct one analysis workflow per trigger type
+            found = False
+            if datasetName in tauTriggers:
+                found = True
+                addAnalysisWorkflow("analysis_taumet_"+version, triggerOR=tauTriggers[datasetName])
+            if datasetName in quadJetTriggers:
+                found = True
+                addAnalysisWorkflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName])
+            if datasetName in quadJetBTagTriggers:
+                found = True
+                addAnalysisWorkflow("analysis_quadjetbtag_"+version, triggerOR=quadJetBTagTriggers[datasetName])
+            if datasetName in quadPFJetBTagTriggers:
+                found = True
+                addAnalysisWorkflow("analysis_quadpfjetbtag_"+version, triggerOR=quadPFJetBTagTriggers[datasetName])
 
+            if not found:
+                raise Exception("No trigger specified for dataset %s" % datasetName)
+        else:
+            # For MC, also construct one analysis workflow per trigger type
+            addAnalysisWorkflow("analysis_taumet_"+version, triggerOR=[mcTriggerTauMET])
+            addAnalysisWorkflow("analysis_quadjet_"+version, triggerOR=[mcTriggerQuadJet])
+            addAnalysisWorkflow("analysis_quadjetbtag_"+version, triggerOR=[mcTriggerQuadJetBTag])
+            addAnalysisWorkflow("analysis_quadpfjet78btag_"+version, triggerOR=[mcTriggerQuadPFJet78BTag])
+            addAnalysisWorkflow("analysis_quadpfjet82btag_"+version, triggerOR=[mcTriggerQuadPFJet82BTag])
 
 ## Main function for generating 53X pattuples
 #
