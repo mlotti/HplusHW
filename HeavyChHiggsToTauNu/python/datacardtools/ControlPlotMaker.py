@@ -91,7 +91,7 @@ class ControlPlotMaker:
                             else:
                                 hEWKfake.Add(h)
                 if hQCD != None:
-                    myHisto = histograms.Histo(hQCD,"QCD")
+                    myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList = [myHisto]+myStackList
                 if hEmbedded != None:
@@ -153,6 +153,9 @@ class ControlPlotMaker:
                 myParams["stackMCHistograms"] = True
                 myParams["addMCUncertainty"] = True
                 myParams["addLuminosityText"] = True
+                myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+                myParams["ratioCreateLegend"] = True
+                myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
                 # Remove non-dientified keywords
                 del myParams["unit"]
                 # Do plotting
@@ -309,5 +312,8 @@ class SelectionFlowPlotMaker:
         myParams["stackMCHistograms"] = True
         myParams["addMCUncertainty"] = True
         myParams["addLuminosityText"] = True
+        myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+        myParams["ratioCreateLegend"] = True
+        myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
         plots.drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(dirname,m,index), **myParams)
 
