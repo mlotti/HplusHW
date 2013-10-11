@@ -48,6 +48,7 @@ class CrossSectionList:
 # [8] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma8TeV (other useful page https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopMC2012)
 # [9] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV
 # [10] http://arxiv.org/abs/1303.6254
+# [11] https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsToTauTauWorkingSummer2013
 
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt30to50", {
@@ -89,6 +90,15 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("ZZ", {
             "7": 5.9, # [3]
             "8": 17.654, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation, this is slightly questionmark, since the computed value is for m(ll) > 12
+            }),
+    CrossSection("TTJets_FullLept", {
+            "8": 245.794* 26.1975/249.50, # [10], BR from [11]
+            }),
+    CrossSection("TTJets_SemiLept", {
+            "8": 245.794* 109.281/249.50, # [10], BR from [11]
+            }),
+    CrossSection("TTJets_Hadronic", {
+            "8": 245.794* 114.0215/249.50, # [10], BR from [11]
             }),
     CrossSection("TTJets", {
 #            "7": 165.0, # [3,4], approx. NNLO
