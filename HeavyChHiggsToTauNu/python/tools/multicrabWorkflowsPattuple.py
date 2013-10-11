@@ -930,11 +930,14 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(TauMET(njobsIn= 30, njobsOut= 6), QuadJet(njobsIn= 670, njobsOut= 6)),
         "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(TauMET(njobsIn= 20, njobsOut= 4), QuadJet(njobsIn= 390, njobsOut= 4)),
         "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(TauMET(njobsIn=100, njobsOut=22), QuadJet(njobsIn=2200, njobsOut=22)),
-                                            
+
         "WW_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut=16), QuadJet(njobsIn=260, njobsOut=16)),
         "WZ_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut=13), QuadJet(njobsIn=260, njobsOut=13)),
         "ZZ_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut=10), QuadJet(njobsIn=260, njobsOut=10)),
         "TTJets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn=450, njobsOut=50), QuadJet(njobsIn=1350, njobsOut=50)),
+        "TTJets_FullLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn= 900, njobsOut=50), QuadJet(njobsIn=2700, njobsOut=50)), # FIXME: njobsOut
+        "TTJets_SemiLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn=1350, njobsOut=50), QuadJet(njobsIn=4000, njobsOut=50)), # FIXME: njobsOut
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12":TaskDefMC(TauMET(njobsIn=2300, njobsOut=50), QuadJet(njobsIn=4990, njobsOut=50)), # FIXME: njobsOut
         "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(TauMET(njobsIn= 30, njobsOut= 4), QuadJet(njobsIn=  90, njobsOut= 4), args={"wjetsWeighting": 1, "wjetBin": -1}),
         "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(TauMET(njobsIn= 90, njobsOut=17), QuadJet(njobsIn= 280, njobsOut=17), args={"wjetsWeighting": 1, "wjetBin": -1}),
         "W1Jets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn= 60, njobsOut=10), QuadJet(njobsIn= 170, njobsOut=10), args={"wjetsWeighting": 1, "wjetBin": 1}),
@@ -2796,6 +2799,9 @@ def addPattuple_v53_3_taumet(datasets):
         # User mean 2658.0, min 759.5, max 4381.4
         # Mean 124.6 MB, min 42.2 MB, max 134.0 MB
         "TTJets_TuneZ2star_Summer12":             TaskDef("/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        "TTJets_FullLept_TuneZ2star_Summer12":    TaskDef(""),
+        "TTJets_SemiLept_TuneZ2star_Summer12":    TaskDef(""),
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12":TaskDef(""),
         # 92052 events, 34 jobs
         # User mean 7107.4, min 241.5, max 8368.6
         # Mean 223.2 MB, min 8.7 MB, max 259.6 MB
