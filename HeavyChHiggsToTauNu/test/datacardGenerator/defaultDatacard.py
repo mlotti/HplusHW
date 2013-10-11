@@ -1125,6 +1125,7 @@ if OptionMassShape == "TransverseMass":
                          "divideByBinWidth": True,
                          "unit": "GeV",
                          "log": False,
+                         "opts2": {"ymin": 0.0, "ymax":2.0},
                          "opts": {"ymin": 0.0} },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
