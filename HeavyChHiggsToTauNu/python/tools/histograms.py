@@ -87,7 +87,7 @@ energyText = "7 TeV"
 class TextDefaults:
     def __init__(self):
         self._setDefaults("cmsPreliminary", x=0.62, y=0.96)
-        self._setDefaults("energy", x=0.2, y=0.96)
+        self._setDefaults("energy", x=0.19, y=0.96)
         self._setDefaults("lumi", x=0.43, y=0.96)
 
     ## Modify the default values

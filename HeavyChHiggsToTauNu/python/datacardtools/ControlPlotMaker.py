@@ -30,6 +30,8 @@ class ControlPlotMaker:
 
         self._opts = opts
         self._config = config
+        if config.OptionSqrtS == None:
+            raise Exception(ErrorLabel()+"Please set the parameter OptionSqrtS = <integer_value_in_TeV> in the config file!"+NormalStyle())
         self._dirname = dirname
         self._luminosity = luminosity
         self._observation = observation
@@ -129,6 +131,7 @@ class ControlPlotMaker:
                 # Make plot
                 myStackPlot = plots.DataMCPlot2(myStackList)
                 myStackPlot.setLuminosity(self._luminosity)
+                myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
                 myStackPlot.setDefaultStyles()
                 myParams = myCtrlPlot.details.copy()
                 # Tweak paramaters
@@ -289,7 +292,10 @@ class SelectionFlowPlotMaker:
         for i in range(0,len(self._expectedList)):
             myRHWU = RootHistoWithUncertainties(self._expectedList[i])
             myRHWU.addShapeUncertaintyRelative("syst", self._expectedListSystUp[i], self._expectedListSystUp[i])
-            myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i])
+            if self._expectedLabelList[i] == "QCD":
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel="QCD (data)")
+            else:
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i])
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
         # data
@@ -300,6 +306,7 @@ class SelectionFlowPlotMaker:
         # Make plot
         myStackPlot = plots.DataMCPlot2(myStackList)
         myStackPlot.setLuminosity(luminosity)
+        myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
         myStackPlot.setDefaultStyles()
         myParams = {}
         myParams["ylabel"] = "Events"
