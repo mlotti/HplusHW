@@ -156,6 +156,9 @@ datasets_53X = [
     "WZ_TuneZ2star_Summer12",
     "ZZ_TuneZ2star_Summer12",
     "TTJets_TuneZ2star_Summer12",
+    "TTJets_FullLept_TuneZ2star_Summer12",
+    "TTJets_SemiLept_TuneZ2star_Summer12",
+    "TTJets_Hadronic_TuneZ2star_ext_Summer12",
     "WJets_TuneZ2star_v1_Summer12",
     "WJets_TuneZ2star_v2_Summer12",
     "W1Jets_TuneZ2star_Summer12",
@@ -163,7 +166,7 @@ datasets_53X = [
     "W3Jets_TuneZ2star_Summer12",
     "W4Jets_TuneZ2star_Summer12",
     "DYJetsToLL_M50_TuneZ2star_Summer12",
-    "DYJetsToLL_M10to50_TuneZ2star_Summer12"
+    "DYJetsToLL_M10to50_TuneZ2star_Summer12",
     "T_t-channel_TuneZ2star_Summer12",
     "Tbar_t-channel_TuneZ2star_Summer12",
     "T_tW-channel_TuneZ2star_Summer12",
