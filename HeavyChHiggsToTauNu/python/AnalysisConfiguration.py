@@ -1224,13 +1224,13 @@ class ConfigBuilder:
         # MET trigger SF
         if self.applyMETTriggerScaleFactor:
             if useAsymmetricUncertainties:
-                names.append(addTauTrgDataEff( 1.0, "Plus"))
-                names.append(addTauTrgDataEff(-1.0, "Minus"))
-                names.append(addTauTrgMCEff( 1.0, "Plus"))
-                names.append(addTauTrgMCEff(-1.0, "Minus"))
+                names.append(addMETTrgDataEff( 1.0, "Plus"))
+                names.append(addMETTrgDataEff(-1.0, "Minus"))
+                names.append(addMETTrgMCEff( 1.0, "Plus"))
+                names.append(addMETTrgMCEff(-1.0, "Minus"))
             else:
-                names.append(addTauTrgSF( 1.0, "Plus"))
-                names.append(addTauTrgSF(-1.0, "Minus"))
+                names.append(addMETTrgSF( 1.0, "Plus"))
+                names.append(addMETTrgSF(-1.0, "Minus"))
 
         # BTag SF
         names.append(addBTagSF( 1.0, "Plus"))
