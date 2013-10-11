@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import glob
+import gzip
 
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
@@ -86,33 +87,76 @@ class SizeAnalysis:
         ret += "  "+self.size()
         return ret
 
-def analyseFiles(files, analyses):
+class MemoryAnalysis:
+    def __init__(self):
+        #                         mon+day     time+timezone       pid
+        self.mem_re = re.compile("\S+\s+\d+\s+\d+:\d+:\d+\s+\S+\s+\S+\s+(?P<rss>\d+)\s+(?P<vsize>\d+)\s+(?P<disk>\d+)")
+
+    def reset(self):
+        self.rss = []
+        self.vsize = []
+        self.disk = []
+
+    def analyse(self, line):
+        m = self.mem_re.search(line)
+        if m:
+            def _app(lst, name, div=1024):
+                lst.append(float(m.group(name))/div)
+            _app(self.rss, "rss")
+            _app(self.vsize, "vsize")
+            _app(self.disk, "disk", div=1)
+            return True
+        return False
+
+    def _mems(self, name, lst):
+        return "%s mean %.1f, min %.1f, max %.1f" % (name, sum(lst)/len(lst), min(lst), max(lst))
+
+    def result(self):
+        ret = " Memory analysis:\n"
+        ret += "  "+self._mems("RSS (MB)", self.rss) + "\n"
+        ret += "  "+self._mems("VSIZE (MB)", self.vsize) + "\n"
+        ret += "  "+self._mems("Disk (MB)", self.disk)
+        return ret
+
+def analyseFiles(files, analyses, reverse=False, breakWhenFirstFound=False):
     for a in analyses:
         a.reset()
 
     for name in files:
-        f = open(name)
-        for line in f:
+        if ".gz" in name:
+            f = gzip.open(name, "rb")
+        else:
+            f = open(name)
+
+        if reverse:
+            content = f.readlines()
+            content.reverse()
+        else:
+            content = f
+
+        for line in content:
             found = False
             for a in analyses:
                 found = a.analyse(line)
                 if found:
                     break
-            if found:
-                continue
+            if found and breakWhenFirstFound:
+                break
         f.close()
-
 
 def main(opts):
     taskDirs = multicrab.getTaskDirectories(opts)
 
     analyses = []
+    watchdogAnalyses = []
     if opts.time:
         analyses.append(TimeAnalysis())
     if opts.size:
         analyses.append(SizeAnalysis(opts.sizeFile))
+    if opts.memory:
+        watchdogAnalyses.append(MemoryAnalysis())
 
-    if len(analyses) == 0:
+    if len(analyses)+len(watchdogAnalyses) == 0:
         return 1
 
     for task in taskDirs:
@@ -121,10 +165,15 @@ def main(opts):
         if len(files) == 0:
             continue
 
-        analyseFiles(files, analyses)
+        if len(analyses) > 0:
+            analyseFiles(files, analyses)
+        if len(watchdogAnalyses) > 0:
+            wfiles = glob.glob(os.path.join(task, "res", "Watchdog_*.log.gz"))
+            if len(wfiles) > 0:
+                analyseFiles(wfiles, watchdogAnalyses, reverse=True, breakWhenFirstFound=True)
 
         print "Task %s, %d jobs" % (task, len(files))
-        for a in analyses:
+        for a in analyses+watchdogAnalyses:
             print a.result()
 
     return 0
@@ -137,6 +186,8 @@ if __name__ == "__main__":
                       help="Analyse output file size (see also --sizeFile)")
     parser.add_option("--sizeFile", dest="sizeFile", default="pattuple.root",
                       help="For --size, specify the output file name (default: 'pattuple.root')")
+    parser.add_option("--memory", dest="memory", action="store_true", default=False,
+                      help="Analyse memory usage")
     multicrab.addOptions(parser)
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
