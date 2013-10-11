@@ -14,11 +14,13 @@ class TimeAnalysis:
         self.exe_re = re.compile("ExeTime=(?P<time>\d+)")
         self.user_re = re.compile("CrabUserCpuTime=(?P<time>\d+(\.\d+)?)")
         self.sys_re = re.compile("CrabSysCpuTime=(?P<time>\d+(\.\d+)?)")
+        self.stageout_re = re.compile("CrabStageoutTime=(?P<time>\d+(\.\d+)?)")
 
     def reset(self):
         self.exe_times = []
         self.user_times = []
         self.sys_times = []
+        self.stageout_times = []
 
     def analyse(self, line):
         m = self.exe_re.search(line)
@@ -33,6 +35,10 @@ class TimeAnalysis:
         if m:
             self.sys_times.append(float(m.group("time")))
             return True
+        m = self.stageout_re.search(line)
+        if m:
+            self.stageout_times.append(float(m.group("time")))
+            return True
 
         return False
 
@@ -46,7 +52,8 @@ class TimeAnalysis:
         ret = " Time analysis:\n"
         ret += "  "+self._times("Exe", self.exe_times) + "\n"
         ret += "  "+self.userTime() + "\n"
-        ret += "  "+self._times("Sys", self.sys_times)
+        ret += "  "+self._times("Sys", self.sys_times) + "\n"
+        ret += "  "+self._times("Stageout", self.stageout_times)
         return ret
 
 class SizeAnalysis:
