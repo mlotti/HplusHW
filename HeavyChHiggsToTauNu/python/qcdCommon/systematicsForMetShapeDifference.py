@@ -120,8 +120,8 @@ class SystematicsForMetShapeDifference:
                 myRatioSigma = errorPropagationForDivision(self._hCombinedSignalRegion.GetBinContent(i), self._hCombinedSignalRegion.GetBinError(i),
                                                            self._hCombinedCtrlRegion.GetBinContent(i), self._hCombinedCtrlRegion.GetBinError(i))
             #print i, (myRatio+myRatioSigma)*finalShape.GetBinContent(i), (myRatio-myRatioSigma)*finalShape.GetBinContent(i), finalShape.GetBinContent(i)
-            self._systUpHistogram.SetBinContent(i, (myRatio+myRatioSigma)*finalShape.GetBinContent(i))
-            self._systDownHistogram.SetBinContent(i, (myRatio-myRatioSigma)*finalShape.GetBinContent(i))
+            self._systUpHistogram.SetBinContent(i, (1.0+myRatioSigma)*finalShape.GetBinContent(i))
+            self._systDownHistogram.SetBinContent(i, (1.0-myRatioSigma)*finalShape.GetBinContent(i))
         # Calculate total uncertainty
         if not quietMode:
             mySignalIntegral = self._hCombinedSignalRegion.Integral()
