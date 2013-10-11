@@ -29,13 +29,11 @@ class CrossSection:
 ## List of CrossSection objects
 class CrossSectionList:
     def __init__(self, *args):
-        self.crossSections = {}
-        for a in args:
-            self.crossSections[a.name] = a
+        self.crossSections = args[:]
 
     def crossSection(self, name, energy):
-        for key, obj in self.crossSections.iteritems():
-            if name[:len(key)] == key:
+        for obj in self.crossSections:
+            if name[:len(obj.name)] == obj.name:
                 return obj.get(energy)
         return None
 
