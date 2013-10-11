@@ -30,6 +30,8 @@ class ControlPlotMaker:
 
         self._opts = opts
         self._config = config
+        if config.OptionSqrtS == None:
+            raise Exception(ErrorLabel()+"Please set the parameter OptionSqrtS = <integer_value_in_TeV> in the config file!"+NormalStyle())
         self._dirname = dirname
         self._luminosity = luminosity
         self._observation = observation
@@ -44,7 +46,7 @@ class ControlPlotMaker:
             print "... mass = %d GeV"%m
             # Initialize flow plot
             selectionFlow = SelectionFlowPlotMaker(self._config, m)
-            myBlindingCount = 0
+            myBlindedStatus = False
             for i in range(0,len(self._config.ControlPlots)):
                 myCtrlPlot = self._config.ControlPlots[i]
                 myMassSuffix = "_M%d"%m
@@ -91,7 +93,7 @@ class ControlPlotMaker:
                             else:
                                 hEWKfake.Add(h)
                 if hQCD != None:
-                    myHisto = histograms.Histo(hQCD,"QCD")
+                    myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList = [myHisto]+myStackList
                 if hEmbedded != None:
@@ -103,6 +105,7 @@ class ControlPlotMaker:
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList.append(myHisto)
                 hData = observation.getControlPlotByIndex(i).Clone()
+                hDataUnblinded = hData.Clone()
                 # Apply blinding
                 if len(myCtrlPlot.blindedRange) > 0:
                     self._applyBlinding(hData,myCtrlPlot.blindedRange)
@@ -117,13 +120,18 @@ class ControlPlotMaker:
                 myHisto.setIsDataMC(isData=False, isMC=True)
                 myStackList.insert(1, myHisto)
                 # Add data to selection flow plot
-                if len(myCtrlPlot.blindedRange) > 0:
+                if myBlindedStatus:
                     selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
                 else:
-                    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hData,myStackList[1:])
+                    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hDataUnblinded,myStackList[1:])
+                if len(myCtrlPlot.blindedRange) > 0:
+                    myBlindedStatus = True
+                else:
+                    myBlindedStatus = False
                 # Make plot
                 myStackPlot = plots.DataMCPlot2(myStackList)
                 myStackPlot.setLuminosity(self._luminosity)
+                myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
                 myStackPlot.setDefaultStyles()
                 myParams = myCtrlPlot.details.copy()
                 # Tweak paramaters
@@ -148,6 +156,9 @@ class ControlPlotMaker:
                 myParams["stackMCHistograms"] = True
                 myParams["addMCUncertainty"] = True
                 myParams["addLuminosityText"] = True
+                myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+                myParams["ratioCreateLegend"] = True
+                myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
                 # Remove non-dientified keywords
                 del myParams["unit"]
                 # Do plotting
@@ -281,7 +292,10 @@ class SelectionFlowPlotMaker:
         for i in range(0,len(self._expectedList)):
             myRHWU = RootHistoWithUncertainties(self._expectedList[i])
             myRHWU.addShapeUncertaintyRelative("syst", self._expectedListSystUp[i], self._expectedListSystUp[i])
-            myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i])
+            if self._expectedLabelList[i] == "QCD":
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel="QCD (data)")
+            else:
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i])
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
         # data
@@ -292,6 +306,7 @@ class SelectionFlowPlotMaker:
         # Make plot
         myStackPlot = plots.DataMCPlot2(myStackList)
         myStackPlot.setLuminosity(luminosity)
+        myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
         myStackPlot.setDefaultStyles()
         myParams = {}
         myParams["ylabel"] = "Events"
@@ -304,5 +319,8 @@ class SelectionFlowPlotMaker:
         myParams["stackMCHistograms"] = True
         myParams["addMCUncertainty"] = True
         myParams["addLuminosityText"] = True
+        myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+        myParams["ratioCreateLegend"] = True
+        myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
         plots.drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(dirname,m,index), **myParams)
 
