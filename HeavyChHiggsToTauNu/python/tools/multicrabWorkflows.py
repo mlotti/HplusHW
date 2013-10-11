@@ -499,6 +499,9 @@ datasets.extend([
     # The original 8 TeV madgraph samples had massless b-quark. This
     # has been fixed in Massive B in DECAY samples
     MCDataset("TTJets_TuneZ2star_Summer12",             aod="/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 6.9 Mevt; v2 has currently ~1 Mevt
+    MCDataset("TTJets_FullLept_TuneZ2star_Summer12",    aod="/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7C-v2/AODSIM"), # 12 Mevt
+    MCDataset("TTJets_SemiLept_TuneZ2star_Summer12",    aod="/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"), # 25 Mevt
+    MCDataset("TTJets_Hadronic_TuneZ2star_ext_Summer12",aod="/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM"), # 31 Mevt
     MCDataset("WJets_TuneZ2star_v1_Summer12",           aod="/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 18.4 Mevt
     MCDataset("WJets_TuneZ2star_v2_Summer12",           aod="/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM"), # 57.7
     MCDataset("W1Jets_TuneZ2star_Summer12",             aod="/W1JetsToLNu_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 23 Mevt

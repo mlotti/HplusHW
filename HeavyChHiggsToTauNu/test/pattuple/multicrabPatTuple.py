@@ -135,8 +135,14 @@ datasets_VV =[
     "ZZ_TuneZ2star_Summer12",
 ]
 
-datasets_TT_EWK = [
-    "TTJets_TuneZ2star_Summer12",
+datasets_TT = [
+#    "TTJets_TuneZ2star_Summer12",
+    "TTJets_FullLept_TuneZ2star_Summer12",
+    "TTJets_SemiLept_TuneZ2star_Summer12",
+    "TTJets_Hadronic_TuneZ2star_ext_Summer12",
+]
+
+datasets_EWK = [
     "WJets_TuneZ2star_v1_Summer12",
     "WJets_TuneZ2star_v2_Summer12",
     "W1Jets_TuneZ2star_Summer12",
@@ -175,10 +181,12 @@ elif "quadjet" in workflow:
         except ValueError:
             pass
 
+tasks = []
 tasks.extend([
     ("Signal", datasets_Signal),
     ("QCD_VV_SingleTop", datasets_QCD+datasets_VV+datasets_SingleTop),
-    ("TT_EWK", datasets_TT_EWK),
+    ("TT", datasets_TT),
+    ("EWK", datasets_EWK),
 ])
 
 # patch CMSSW.sh
