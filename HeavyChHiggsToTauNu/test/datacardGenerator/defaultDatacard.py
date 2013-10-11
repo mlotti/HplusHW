@@ -37,7 +37,7 @@ OptionLimitOnSigmaBr = False # Is automatically set to true for heavy H+
 
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
-OptionSqrtS = 7 # sqrt(s)
+OptionSqrtS = 8 # sqrt(s)
 
 # Tolerance for throwing error on luminosity difference (0.01 = 1 percent agreement is required)
 ToleranceForLuminosityDifference = 0.01
