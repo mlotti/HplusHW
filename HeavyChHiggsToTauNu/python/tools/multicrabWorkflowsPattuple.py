@@ -941,11 +941,14 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(TauMET(njobsIn= 30, njobsOut= 3), QuadJet(njobsIn= 670, njobsOut= 6)),
         "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(TauMET(njobsIn= 20, njobsOut= 1), QuadJet(njobsIn= 390, njobsOut= 4)),
         "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(TauMET(njobsIn=100, njobsOut= 6), QuadJet(njobsIn=2200, njobsOut=22)),
-                                            
+
         "WW_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut= 7), QuadJet(njobsIn=260, njobsOut=16)),
         "WZ_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut= 6), QuadJet(njobsIn=260, njobsOut=13)),
         "ZZ_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut= 5), QuadJet(njobsIn=260, njobsOut=10)),
         "TTJets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn=450, njobsOut=20), QuadJet(njobsIn=1350, njobsOut=50)),
+        "TTJets_FullLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn= 900, njobsOut=50), QuadJet(njobsIn=2700, njobsOut=50)), # FIXME: njobsOut
+        "TTJets_SemiLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn=1350, njobsOut=50), QuadJet(njobsIn=4000, njobsOut=50)), # FIXME: njobsOut
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12":TaskDefMC(TauMET(njobsIn=2300, njobsOut=50), QuadJet(njobsIn=4990, njobsOut=50)), # FIXME: njobsOut
         "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(TauMET(njobsIn= 30, njobsOut= 2), QuadJet(njobsIn=  90, njobsOut= 4), args={"wjetsWeighting": 1}),
         "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(TauMET(njobsIn= 90, njobsOut= 8), QuadJet(njobsIn= 280, njobsOut=17), args={"wjetsWeighting": 1}),
         "W1Jets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn= 60, njobsOut= 5), QuadJet(njobsIn= 170, njobsOut=10), args={"wjetsWeighting": 1}),
@@ -1834,12 +1837,18 @@ def addPattuple_v53_3_taumet(datasets):
         # User mean 2803.4, min 875.0, max 7831.1
         # Mean 85.1 MB, min 34.7 MB, max 189.6 MB
         "Tau_198022-198523_2012C_Aug24":          TaskDef("/Tau/local-Run2012C_24Aug2012_v1_AOD_198022_198523_pattuple_taumet_v53_3-450df8079da161796ef812c3271c9793/USER"),
-        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
+        # 3498600 events, 1703 jobs
+        # User mean 2173.1, min 115.7, max 12412.6
+        # Mean 65.8 MB, min 4.6 MB, max 275.6 MB
+        "Tau_198941-202504_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_198941_202504_pattuple_taumet_v53_3-71928e872913442feb2116b8eeda1951/USER"),
         # 78436 events, 17 jobs
         # User mean 5151.1, min 1659.8, max 11922.5
         # Mean 138.2 MB, min 62.5 MB, max 270.4 MB
         "Tau_201191-201191_2012C_Dec11":          TaskDef("/Tau/local-Run2012C_EcalRecover_11Dec2012_v1_AOD_201191_201191_pattuple_taumet_v53_3-44499bd8f201cef0239f3c1d1b9cedf4/USER"),
-        "Tau_202972-203742_2012C_Prompt":         TaskDef(""),
+        # 166145 events, 33 jobs
+        # User mean 4980.1, min 575.2, max 15776.4
+        # Mean 146.1 MB, min 20.1 MB, max 377.4 MB
+        "Tau_202972-203742_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_202972_203742_pattuple_taumet_v53_3-6f655fd49a479f9532abee7850e734b5/USER"),
 
         #### Winter13 Reprocessing
         # 474834 events, 187 jobs
@@ -2205,6 +2214,9 @@ def addPattuple_v53_3_taumet(datasets):
         # User mean 2658.0, min 759.5, max 4381.4
         # Mean 124.6 MB, min 42.2 MB, max 134.0 MB
         "TTJets_TuneZ2star_Summer12":             TaskDef("/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        "TTJets_FullLept_TuneZ2star_Summer12":    TaskDef(""),
+        "TTJets_SemiLept_TuneZ2star_Summer12":    TaskDef(""),
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12":TaskDef(""),
         # 92052 events, 34 jobs
         # User mean 7107.4, min 241.5, max 8368.6
         # Mean 223.2 MB, min 8.7 MB, max 259.6 MB

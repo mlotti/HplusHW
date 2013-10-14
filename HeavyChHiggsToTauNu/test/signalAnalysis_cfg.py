@@ -32,6 +32,7 @@ def customize(signalAnalysis):
     # signalAnalysis.trigger.selectionType = "disabled"
     # signalAnalysis.tauTriggerEfficiencyScaleFactor.mode = "mcEfficiency"
     # signalAnalysis.tauTriggerEfficiencyScaleFactor.dataSelect = ["runs_190456_208686"]
+    # signalAnalysis.MET.preMETCut = 20
     # signalAnalysis.metTriggerEfficiencyScaleFactor.mode = "mcEfficiency"
     # signalAnalysis.metTriggerEfficiencyScaleFactor.dataSelect = ["runs_190456_208686"]
 

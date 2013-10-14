@@ -56,8 +56,8 @@ defaultVersions = [
 #    "v44_5_notrg2"
     "v44_5_1_notrg2"
 ]
-skimVersion = "v44_5_1"
-genTauSkimVersion = "v44_5"
+skimVersion = "v53_3"
+genTauSkimVersion = "v53_3"
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,         "config": "muonSkim_cfg.py"},
@@ -97,63 +97,58 @@ if defaultStep in ["signalAnalysis", "signalAnalysisGenTau"]:
 #dirPrefix += "_test"
 #dirPrefix += "_debug"
 
-# Define dataset collections
-#datasetsData2010 = [
-#    "Mu_136035-144114_Apr21", # HLT_Mu9
-#    "Mu_146428-147116_Apr21", # HLT_Mu9
-#    "Mu_147196-149294_Apr21", # HLT_Mu15_v1
-#]
-datasetsData2011 = [
-    # Run2011A
-    "SingleMu_160431-163261_2011A_Nov08", # HLT_Mu20_v1
-    "SingleMu_163270-163869_2011A_Nov08", # HLT_Mu24_v2
-    "SingleMu_165088-166150_2011A_Nov08", # HLT_Mu30_v3
-    "SingleMu_166161-173198_2011A_Nov08", # HLT_Mu40_v1, v2, v3, v5
-    "SingleMu_173236-173692_2011A_Nov08", # HLT_Mu40_eta2p1_v1
-    # Run2011B
-    "SingleMu_175832-180252_2011B_Nov19", # HLT_Mu40_eta2p1_v1, v4, v5
+datasetsData2012 = [
+    "SingleMu_190456-193621_2012A_Jan22",
+    "SingleMu_193834-196531_2012B_Jan22",
+    "SingleMu_198022-200381_2012C_Jan22",
+    "SingleMu_200466-203742_2012C_Jan22",
+    "SingleMu_203777-205834_2012D_Jan22",
+    "SingleMu_205908-207100_2012D_Jan22",
+    "SingleMu_207214-208686_2012D_Jan22",
 ]
 datasetsMCTT = [
-    "TTJets_TuneZ2_Fall11",
+    "TTJets_TuneZ2star_Summer12"
 ]
 datasetsMCWDY = [
-    "WJets_TuneZ2_Fall11",
-    "W2Jets_TuneZ2_Fall11",
-    "W3Jets_TuneZ2_Fall11",
-    "W4Jets_TuneZ2_Fall11",
-    "DYJetsToLL_M50_TuneZ2_Fall11",
+    "WJets_TuneZ2star_v1_Summer12",
+    "WJets_TuneZ2star_v2_Summer12",
+    "W1Jets_TuneZ2star_Summer12",
+    "W2Jets_TuneZ2star_Summer12",
+    "W3Jets_TuneZ2star_Summer12",
+    "W4Jets_TuneZ2star_Summer12",
+    "DYJetsToLL_M50_TuneZ2star_Summer12",
 ]
 datasetsMCSTVV = [
-    "T_t-channel_TuneZ2_Fall11",
-    "Tbar_t-channel_TuneZ2_Fall11",
-    "T_tW-channel_TuneZ2_Fall11",
-    "Tbar_tW-channel_TuneZ2_Fall11",
-    "T_s-channel_TuneZ2_Fall11",
-    "Tbar_s-channel_TuneZ2_Fall11",
-    "WW_TuneZ2_Fall11",
-    "WZ_TuneZ2_Fall11",
-    "ZZ_TuneZ2_Fall11",
+    "T_t-channel_TuneZ2star_Summer12",
+    "Tbar_t-channel_TuneZ2star_Summer12",
+    "T_tW-channel_TuneZ2star_Summer12",
+    "Tbar_tW-channel_TuneZ2star_Summer12",
+    "T_s-channel_TuneZ2star_Summer12",
+    "Tbar_s-channel_TuneZ2star_Summer12",
+    "WW_TuneZ2star_Summer12",
+    "WZ_TuneZ2star_Summer12",
+    "ZZ_TuneZ2star_Summer12",
 ]
 datasetsMCQCD = [
-    "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
+    "QCD_Pt20_MuEnriched_TuneZ2star_Summer12",
 ]
 datasetsMCSignal = [
-    "TTToHplusBWB_M80_Fall11",
-    "TTToHplusBWB_M90_Fall11",
-    "TTToHplusBWB_M100_Fall11",
-    "TTToHplusBWB_M120_Fall11",
-    "TTToHplusBWB_M140_Fall11",
-    "TTToHplusBWB_M150_Fall11",
-    "TTToHplusBWB_M155_Fall11",
-    "TTToHplusBWB_M160_Fall11",
-    "TTToHplusBHminusB_M80_Fall11",
-    "TTToHplusBHminusB_M90_Fall11",
-    "TTToHplusBHminusB_M100_Fall11",
-    "TTToHplusBHminusB_M120_Fall11",
-    "TTToHplusBHminusB_M140_Fall11",
-    "TTToHplusBHminusB_M150_Fall11",
-    "TTToHplusBHminusB_M155_Fall11",
-    "TTToHplusBHminusB_M160_Fall11",
+    "TTToHplusBWB_M80_ext_Summer12",
+    "TTToHplusBWB_M90_ext_Summer12",
+    "TTToHplusBWB_M100_ext_Summer12",
+    "TTToHplusBWB_M120_ext_Summer12",
+    "TTToHplusBWB_M140_ext_Summer12",
+    "TTToHplusBWB_M150_ext_Summer12",
+    "TTToHplusBWB_M155_ext_Summer12",
+    "TTToHplusBWB_M160_ext_Summer12",
+    "TTToHplusBHminusB_M80_ext_Summer12",
+    "TTToHplusBHminusB_M90_Summer12",
+    "TTToHplusBHminusB_M100_ext_Summer12",
+    "TTToHplusBHminusB_M120_ext_Summer12",
+    "TTToHplusBHminusB_M140_ext_Summer12",
+    "TTToHplusBHminusB_M150_ext_Summer12",
+    "TTToHplusBHminusB_M155_ext_Summer12",
+    "TTToHplusBHminusB_M160_ext_Summer12",
 ]
 
 datasetsData2011 = []
@@ -166,10 +161,9 @@ datasetsMCSignal = []
 #datasetsData2011 = datasetsData2011B
 
 datasetsMCnoQCD = datasetsMCTT + datasetsMCWDY + datasetsMCSTVV
-
-datasetsMCnoQCD = ["TTJets_TuneZ2_Fall11"]
-#datasetsMCnoQCD = ["WJets_TuneZ2_Fall11"]
-#datasetsMCnoQCD = ["DYJetsToLL_M50_TuneZ2_Fall11"]
+datasetsMCnoQCD = ["TTJets_TuneZ2star_Summer12"]
+#datasetsMCnoQCD = ["WJets_TuneZ2star_Summer12"]
+#datasetsMCnoQCD = ["DYJetsToLL_M50_TuneZ2star_Summer12"]
 
 def main():
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -219,12 +213,12 @@ def createTasks(opts, step, version=None):
     crabcfg = "crab.cfg"
     crabcfgtemplate = None
     scheduler = "arc"
+    if "HOST" in os.environ and "lxplus" in os.environ["HOST"]:
+        scheduler = "remoteGlidein"
     if step in ["genTauSkim"]:
         crabcfg = "../pattuple/crab_pat.cfg"
     if step in ["analysis", "analysisTau", "analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
         crabcfg = None
-        if "HOST" in os.environ and "lxplus" in os.environ["HOST"]:
-            scheduler = "remoteGlidein"
         args = {}
         if step in ["analysisTauAod", "ewkBackgroundCoverageAnalysisAod"]:
             args["copy_data"] = True
@@ -250,7 +244,7 @@ def createTasks(opts, step, version=None):
         def app(name, lst):
             if len(lst) > 0:
                 tasks.append( (name, lst) )
-        app("Data", datasetsData2011)
+        app("Data", datasetsData2012)
         app("TT", datasetsMCTT)
         app("W_DY", datasetsMCWDY)
         app("ST_VV_QCD", datasetsMCSTVV+datasetsMCQCD)
@@ -262,7 +256,7 @@ def createTasks(opts, step, version=None):
         elif step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
             datasets.extend(datasetsMCTTWJets)
         else:
-            datasets.extend(datasetsData2011)
+            datasets.extend(datasetsData2012)
             datasets.extend(datasetsMCnoQCD)
             datasets.extend(datasetsMCQCD)
         if step in ["embedding", "signalAnalysis","EWKMatching"]:
@@ -280,7 +274,7 @@ def createTasks(opts, step, version=None):
         multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..", crabConfigTemplate=crabcfgtemplate)
 
         if step in ["skim", "embedding", "genTauSkim"]:
-            multicrab.addCommonLine("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X")
+            multicrab.addCommonLine("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_5_3_X")
 
         multicrab.extendDatasets(workflow, datasets)
 
@@ -291,14 +285,14 @@ def createTasks(opts, step, version=None):
         if step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
             multicrab.addCommonLine("CMSSW.output_file = histograms.root")
 
-            # Let's do the naming like this until we get some answer from crab people
-            #if step in ["skim", "embedding"]:
-            #    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
-        
-            # For this workflow we need one additional command line argument
-            if step == "signalAnalysisGenTau":
-                multicrab.appendArgAll("doTauEmbeddingLikePreselection=1")
-        
+        # Let's do the naming like this until we get some answer from crab people
+        #if step in ["skim", "embedding"]:
+        #    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
+    
+        # For this workflow we need one additional command line argument
+        if step == "signalAnalysisGenTau":
+            multicrab.appendArgAll("doTauEmbeddingLikePreselection=1")
+    
         if step in ["skim"]:
             multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
         else:
@@ -315,13 +309,7 @@ def createTasks(opts, step, version=None):
                 except KeyError:
                     continue
                 md.setNumberOfJobs(njobs)
-    
-        if step in ["skim", "embedding", "genTauSkim"]:
-            def addCopyConfig(dataset):
-                dataset.appendLine("USER.additional_input_files = copy_cfg.py")
-                dataset.appendCopyFile("../copy_cfg.py")
-            multicrab.forEachDataset(addCopyConfig)
-    
+
         # Create multicrab task(s)
         prefix = "multicrab_"+step+dirName
         if midfix != "":
@@ -329,15 +317,15 @@ def createTasks(opts, step, version=None):
         taskDirs.extend(multicrab.createTasks(configOnly = opts.configOnly, prefix=prefix))
             
         # patch CMSSW.sh
-        if not opts.configOnly and step in ["skim", "embedding", "genTauSkim"]:
-            import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
-            for td, dsets in taskDirs:
-                os.chdir(td)
-                patch.main(Wrapper(dirs=dsets, input={"skim": "skim",
-                                                      "embedding": "embedded",
-                                                      "genTauSkim": "pattuple",
-                                                      }[step]))
-                os.chdir("..")
+#        if not opts.configOnly and step in ["skim", "embedding", "genTauSkim"]:
+#            import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
+#            for td, dsets in taskDirs:
+#                os.chdir(td)
+#                patch.main(Wrapper(dirs=dsets, input={"skim": "skim",
+#                                                      "embedding": "embedded",
+#                                                      "genTauSkim": "pattuple",
+#                                                      }[step]))
+#                os.chdir("..")
     
     if len(taskDirs) > 1:
         print 
