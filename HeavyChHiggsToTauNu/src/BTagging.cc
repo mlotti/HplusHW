@@ -519,6 +519,8 @@ namespace HPlus {
     genuineBJetsWithBTagCount2(eventCounter.addSubCounter("genuineBJetsWithBTagCount2", "All b-jets with b-tag"))
     //    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
   {
+    fSubLeadingDiscrCut = fLeadingDiscrCut; // Force subleading cut to be the same as leading cut, i.e. no asymmetry allowed
+
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("Btagging");
     hDiscriminator = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
