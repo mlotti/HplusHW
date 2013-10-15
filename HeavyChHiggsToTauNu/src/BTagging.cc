@@ -510,7 +510,8 @@ namespace HPlus {
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     fLeadingDiscrCut(iConfig.getUntrackedParameter<double>("leadingDiscriminatorCut")),
-    fSubLeadingDiscrCut(iConfig.getUntrackedParameter<double>("subleadingDiscriminatorCut")),
+    fSubLeadingDiscrCut(iConfig.getUntrackedParameter<double>("leadingDiscriminatorCut")),// Force subleading cut to be the same as leading cut, i.e. no asymmetry allowed
+    //fSubLeadingDiscrCut(iConfig.getUntrackedParameter<double>("subleadingDiscriminatorCut")),
     fNumberOfBJets(iConfig.getUntrackedParameter<uint32_t>("jetNumber"),iConfig.getUntrackedParameter<std::string>("jetNumberCutDirection")),
     fVariationEnabled(iConfig.getUntrackedParameter<bool>("variationEnabled")),
     fVariationShiftBy(iConfig.getUntrackedParameter<double>("variationShiftBy")),
@@ -674,11 +675,11 @@ namespace HPlus {
       }
 
       // Apply transverse momentum cut
-      if(iJet->pt() < fPtCut) continue;
+      //if(iJet->pt() < fPtCut) continue; // disabled, jet pT is chosen in jet selection
       increment(fTaggedPtCutSubCount);
 
       // Apply pseudorapidity cut
-      if(fabs(iJet->eta()) > fEtaCut) continue;
+      //if(fabs(iJet->eta()) > fEtaCut) continue; // disabled, jet eta is chosen in jet selection
       increment(fTaggedEtaCutSubCount);
 
       // Do b-tagging using the chosen discriminator and working point

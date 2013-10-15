@@ -555,7 +555,7 @@ namespace HPlus {
     // Obtain transverse mass for plotting
     double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metDataTmp.getSelectedMET()));
     double invariantMass = -1.0;
-    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     if (btagDataTmp.passedEvent()) {
       FullHiggsMassCalculator::Data fullHiggsMassData = fFullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, selectedTau, btagDataTmp, metDataTmp, &genData);
       if (fullHiggsMassData.passedEvent()) {
@@ -593,7 +593,7 @@ namespace HPlus {
     // Fill normalization systematics plots
     fNormalizationSystematicsSignalRegion.fillAllControlPlots(iEvent, transverseMass);
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
-    //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     // double myWeightWithBtagSF = fEventWeight.getWeight() * btagDataTmp.getScaleFactor();
     hNBBaselineTauIdJet->Fill(btagDataTmp.getSelectedJets().size(), myWeightWithBtagSF);
     if (btagDataTmp.passedEvent()) {
@@ -650,7 +650,7 @@ namespace HPlus {
     }
 
 //------ b tagging cut
-    BTagging::Data btagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    BTagging::Data btagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     if (btagData.passedEvent()) increment(fBaselineBtagCounter);
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
@@ -742,7 +742,7 @@ namespace HPlus {
     // Obtain transverse mass and invariant mass for plotting
     double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metDataTmp.getSelectedMET()));
     double invariantMass = -1.0;
-    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     if (btagDataTmp.passedEvent()) {
       FullHiggsMassCalculator::Data fullHiggsMassData = fFullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, selectedTau, btagDataTmp, metDataTmp, &genData);
       if (fullHiggsMassData.passedEvent()) {
@@ -786,7 +786,7 @@ namespace HPlus {
     fNormalizationSystematicsControlRegion.fillAllControlPlots(iEvent, transverseMass);
 
     // Use btag scale factor in histogram filling if btagging or btag veto is applied
-    //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     //    double myWeightWithBtagSF = fEventWeight.getWeight() * btagDataTmp.getScaleFactor();
     // MT with b tagging
     if(btagDataTmp.passedEvent()) {
@@ -865,7 +865,7 @@ namespace HPlus {
     }
 
     //------ b tagging cut
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     // Apply scale factor as weight to event
     if (btagData.passedEvent()) increment(fInvertedBTaggingCounter);
 
