@@ -345,9 +345,9 @@ QCDTailKillerZeroPlus = QCDTailKiller.clone(
         QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
     ),
     collinear = cms.untracked.VPSet(
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
         QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
     )
 )
@@ -361,9 +361,9 @@ QCDTailKillerLoosePlus = QCDTailKiller.clone(
         QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
     ),
     collinear = cms.untracked.VPSet(
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
         QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
     )
 )
@@ -377,9 +377,9 @@ QCDTailKillerMediumPlus = QCDTailKiller.clone(
         QCDTailKillerBin("noCut", 60.0, 60.0), # jet 4
     ),
     collinear = cms.untracked.VPSet(
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
         QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
     )
 )
@@ -393,17 +393,35 @@ QCDTailKillerTightPlus = QCDTailKiller.clone(
         QCDTailKillerBin("noCut", 80.0, 80.0), # jet 4
     ),
     collinear = cms.untracked.VPSet(
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
         QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
     )
 )
+
+QCDTailKillerVeryTightPlus = QCDTailKiller.clone(
+    scenarioLabel = cms.untracked.string("VeryTightPlus"),
+    backToBack = cms.untracked.VPSet(
+        QCDTailKillerBin("circular", 100.0, 100.0), # jet 1
+        QCDTailKillerBin("circular", 100.0, 100.0), # jet 2
+        QCDTailKillerBin("circular", 100.0, 100.0), # jet 3
+        QCDTailKillerBin("noCut", 100.0, 100.0), # jet 4
+    ),
+    collinear = cms.untracked.VPSet(
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
+    )
+)
+
 # Define here QCD tail killer scenarios (note that the nominal module will be produced in addition to these)
 QCDTailKillerScenarios = ["QCDTailKillerZeroPlus",
                           "QCDTailKillerLoosePlus",
                           "QCDTailKillerMediumPlus",
-                          "QCDTailKillerTightPlus"]
+                          "QCDTailKillerTightPlus",
+                          "QCDTailKillerVeryTightPlus"]
 
 invMassReco = cms.untracked.PSet(
     #topInvMassCutName = cms.untracked.string("None")
