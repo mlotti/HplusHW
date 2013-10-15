@@ -40,6 +40,9 @@ namespace HPlus {
     // Do jet selection
     if (!jetData.passedEvent()) return;
 
+    // Do MET preselection
+    if(!metData.passedPreMetCut()) return;
+
     // Obtain MET trg SF
     if (!iEvent.isRealData()) {
       myEventWeight *= metTrgSF->getEventWeight(*(metData.getSelectedMET()));
@@ -108,6 +111,9 @@ namespace HPlus {
 
     // Do jet selection
     if (!jetData.passedEvent()) return;
+
+    // Do MET preselection
+    if(!metData.passedPreMetCut()) return;
 
     // Obtain MET trg SF
     if (!iEvent.isRealData()) {
