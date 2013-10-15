@@ -658,11 +658,11 @@ namespace HPlus {
       }
 
       // Apply transverse momentum cut
-      if(iJet->pt() < fPtCut) continue;
+      //if(iJet->pt() < fPtCut) continue; // disabled, jet pT is chosen in jet selection
       increment(fTaggedPtCutSubCount);
 
       // Apply pseudorapidity cut
-      if(fabs(iJet->eta()) > fEtaCut) continue;
+      //if(fabs(iJet->eta()) > fEtaCut) continue; // disabled, jet eta is chosen in jet selection
       increment(fTaggedEtaCutSubCount);
 
       // Do b-tagging using the chosen discriminator and working point

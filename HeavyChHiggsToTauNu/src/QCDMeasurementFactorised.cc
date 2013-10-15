@@ -396,7 +396,7 @@ namespace HPlus {
       fTauSelection.getPassesRtauStatusOfTauObject(tauData.getSelectedTau());
     double myMetValue = metData.getSelectedMET()->et();
     const double myTransverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
-    const BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    const BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     double myFullMass = -1.0;
     FullHiggsMassCalculator::Data myFullHiggsMassData;
     if (btagDataTmp.passedEvent()) {
@@ -447,7 +447,7 @@ namespace HPlus {
     }
 
     // Leg 1 / b tagging
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     if (btagData.passedEvent()) {
       increment(fBTaggingCounter);
       fCommonPlotsAfterMETAndBtag->fill();
@@ -501,7 +501,7 @@ namespace HPlus {
       fTauSelection.getPassesRtauStatusOfTauObject(tauData.getSelectedTau());
     double myMetValue = metData.getSelectedMET()->et();
     const double myTransverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
-    const BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    const BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     const QCDTailKiller::Data qcdTailKillerDataTmp = fQCDTailKiller.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
     BjetSelection::Data bjetSelectionData = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagDataTmp.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
     TopSelectionManager::Data topSelectionData = fTopSelectionManager.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagDataTmp.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
@@ -563,7 +563,7 @@ namespace HPlus {
       }
 
       // Leg 1 / b tagging
-      BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+      BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
       if (btagData.passedEvent()) {
         increment(fBTaggingCounter);
         fCommonPlotsAfterMETAndBtag->fill();
