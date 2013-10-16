@@ -87,7 +87,6 @@ namespace HPlus {
     // Get the parameters from the configuration
     fTopInvMassLowerCut(iConfig.getUntrackedParameter<double>("topInvMassLowerCut")),
     fTopInvMassUpperCut(iConfig.getUntrackedParameter<double>("topInvMassUpperCut")),
-    fPzSelectionMethod(iConfig.getUntrackedParameter<std::string>("pzSelectionMethod")),
     // Define counters to be incremented during this analysis
     allEvents_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All events")),
     positiveDiscriminant_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator",
@@ -130,20 +129,32 @@ namespace HPlus {
     selectionTauNuDeltaEtaMinCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", 
 									 "TauNuDeltaEtaMin solution closest"))
   {
+    std::string myMethod = iConfig.getUntrackedParameter<std::string>("pzSelectionMethod");
+    if (myMethod == "DeltaEtaMax") fPzSelectionMethod = eTauNuDeltaEtaMax;
+    else if (myMethod == "DeltaEtaMin") fPzSelectionMethod = eTauNuDeltaEtaMin;
+    else if (myMethod == "AngleMax") fPzSelectionMethod = eTauNuAngleMax;
+    else if (myMethod == "AngleMin") fPzSelectionMethod = eTauNuAngleMin;
+    else if (myMethod == "Smaller") fPzSelectionMethod = eSmaller;
+    else if (myMethod == "Greater") fPzSelectionMethod = eGreater;
+    else {
+      throw cms::Exception("LogicError") << "Error: Invariant mass config parameter pzSelectionMethod = '" << myMethod << "' is unknown!" << std::endl
+        << "Options are 'DeltaEtaMax', 'DeltaEtaMin', 'AngleMax', 'AngleMin', 'Smaller', 'Greater'" << std::endl;
+    }
+
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
     // Book histograms to be filled by this code
     // Vital histograms
-    hHiggsMass                = histoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, myDir, "HiggsMass", 
+    hHiggsMass                = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass", 
 							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMassPositiveDiscriminant = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassPositiveDiscriminant", 
+    hHiggsMassPositiveDiscriminant = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassPositiveDiscriminant", 
 							       "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMassNegativeDiscriminant = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassNegativeDiscriminant", 
+    hHiggsMassNegativeDiscriminant = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassNegativeDiscriminant", 
 							       "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMass_GEN            = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass_GEN", 
+    hHiggsMass_GEN            = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_GEN", 
 							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMass_GEN_NeutrinosReplacedWithMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, 
+    hHiggsMass_GEN_NeutrinosReplacedWithMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
 									"HiggsMass_GEN_NeutrinosReplacedWithMET", 
 									"Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hDiscriminant             = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Discriminant",
@@ -156,21 +167,21 @@ namespace HPlus {
     h2TransverseMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kSystematics, myDir, "TransMassVsInvMass", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
 				      100, 0, 500, 100, 0, 500);
-    h2TransverseMassVsInvariantMassPositiveDiscriminant = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, 
+    h2TransverseMassVsInvariantMassPositiveDiscriminant = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, 
 										    "TransMassVsInvMassPositiveDiscriminant", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
 				      100, 0, 500, 100, 0, 500);
-    h2TransverseMassVsInvariantMassNegativeDiscriminant = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, 
+    h2TransverseMassVsInvariantMassNegativeDiscriminant = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, 
 										    "TransMassVsInvMassNegativeDiscriminant", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
 				      100, 0, 500, 100, 0, 500);
-    h2TopMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, "TopMassVsInvMass", 
+    h2TopMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TopMassVsInvMass", 
 							 "TransMassVsInvMass;m_{top};Invariant mass m(#tau, #nu_{#tau});Events",
 							 100, 0, 500, 100, 0, 500);
-    h2TopMassVsNeutrinoNumber = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, "TopMassVsNeutrinoNumber",
+    h2TopMassVsNeutrinoNumber = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TopMassVsNeutrinoNumber",
 							  "TransMassVsNeutrinoNumber;m_{top};Number of neutrinos);Events",
 							  100, 0, 500, 10, 0, 10);
-    h2InvariantMassVsNeutrinoNumber = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, "InvMassVsNeutrinoNumber",
+    h2InvariantMassVsNeutrinoNumber = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "InvMassVsNeutrinoNumber",
 						   "InvMassVsNeutrinoNumber;m(#tau,#nu_{#tau};Number of neutrinos);Events",
 								100, 0, 500, 10, 0, 10);
     hHiggsMass_betterSolution = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_betterSolution", 
@@ -863,9 +874,7 @@ namespace HPlus {
   void FullHiggsMassCalculator::doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, 
 							   InputDataType myInputDataType) {
     // Choose the neutrino p_z selection method (can be set in python configuration scripts)
-    if (fPzSelectionMethod == "DeltaEtaMax") selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax);
-    else if (fPzSelectionMethod == "Smaller") selectNeutrinoPzAndHiggsMassSolution(output, eSmaller);
-    else selectNeutrinoPzAndHiggsMassSolution(output, eSmaller); // Default (smaller solution)
+    selectNeutrinoPzAndHiggsMassSolution(output, fPzSelectionMethod);
     // Increment counters and fill Histograms
     switch (myInputDataType) {
     case eRECO:

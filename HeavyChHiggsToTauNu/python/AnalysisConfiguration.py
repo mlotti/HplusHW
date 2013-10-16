@@ -68,7 +68,7 @@ class ConfigBuilder:
                  doPrescalesForData = False, # Keep / Ignore prescaling for data (suppresses greatly error messages in datasets with or-function of triggers)
                  doFillTree = False, # Tree filling
                  histogramAmbientLevel = "Debug", # Set level of how many histograms are stored to files options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms),
-                 histogramAmbientLevelOptimization = "Vital",
+                 histogramAmbientLevelOptimization = "Systematics", #"Vital",
                  histogramAmbientLevelSystematics = "Systematics",
                  applyTauTriggerScaleFactor = True, # Apply tau trigger scale factor or not
                  applyTauTriggerLowPurityScaleFactor = False, # Apply tau trigger scale factor or not

@@ -50,6 +50,9 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         doSystematics=False,
 
                         #histogramAmbientLevel = "Vital",
+                        #doOptimisation=True, optimisationScheme="metScenarios",
+                        #doOptimisation=True, optimisationScheme="jetScenarios",
+                        #doOptimisation=True, optimisationScheme="btagSymmetricScenarios",
                         #doOptimisation=True, optimisationScheme="myOptimisation"
                         )
 
