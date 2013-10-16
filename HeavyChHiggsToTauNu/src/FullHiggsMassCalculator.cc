@@ -87,7 +87,6 @@ namespace HPlus {
     // Get the parameters from the configuration
     fTopInvMassLowerCut(iConfig.getUntrackedParameter<double>("topInvMassLowerCut")),
     fTopInvMassUpperCut(iConfig.getUntrackedParameter<double>("topInvMassUpperCut")),
-    fPzSelectionMethod(iConfig.getUntrackedParameter<std::string>("pzSelectionMethod")),
     // Define counters to be incremented during this analysis
     allEvents_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All events")),
     positiveDiscriminant_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator",
@@ -130,6 +129,18 @@ namespace HPlus {
     selectionTauNuDeltaEtaMinCorrect_SubCount(eventCounter.addSubCounter("SolutionSelection", 
 									 "TauNuDeltaEtaMin solution closest"))
   {
+    std::string myMethod = iConfig.getUntrackedParameter<std::string>("pzSelectionMethod");
+    if (myMethod == "DeltaEtaMax") fPzSelectionMethod = eTauNuDeltaEtaMax;
+    else if (myMethod == "DeltaEtaMin") fPzSelectionMethod = eTauNuDeltaEtaMin;
+    else if (myMethod == "AngleMax") fPzSelectionMethod = eTauNuAngleMax;
+    else if (myMethod == "AngleMin") fPzSelectionMethod = eTauNuAngleMin;
+    else if (myMethod == "Smaller") fPzSelectionMethod = eSmaller;
+    else if (myMethod == "Greater") fPzSelectionMethod = eGreater;
+    else {
+      throw cms::Exception("LogicError") << "Error: Invariant mass config parameter pzSelectionMethod = '" << myMethod << "' is unknown!" << std::endl
+        << "Options are 'DeltaEtaMax', 'DeltaEtaMin', 'AngleMax', 'AngleMin', 'Smaller', 'Greater'" << std::endl;
+    }
+
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
@@ -863,9 +874,7 @@ namespace HPlus {
   void FullHiggsMassCalculator::doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, 
 							   InputDataType myInputDataType) {
     // Choose the neutrino p_z selection method (can be set in python configuration scripts)
-    if (fPzSelectionMethod == "DeltaEtaMax") selectNeutrinoPzAndHiggsMassSolution(output, eTauNuDeltaEtaMax);
-    else if (fPzSelectionMethod == "Smaller") selectNeutrinoPzAndHiggsMassSolution(output, eSmaller);
-    else selectNeutrinoPzAndHiggsMassSolution(output, eSmaller); // Default (smaller solution)
+    selectNeutrinoPzAndHiggsMassSolution(output, fPzSelectionMethod);
     // Increment counters and fill Histograms
     switch (myInputDataType) {
     case eRECO:
