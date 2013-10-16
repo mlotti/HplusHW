@@ -1315,7 +1315,15 @@ class PlotBase:
         if isinstance(energy, basestring):
             self.energies = [energy]
         else:
-            self.energies = energy
+            if len(energy) == 1:
+                self.energies = energy[:]
+            else:
+                tmp = {}
+                for e in energy:
+                    tmp[e] = 1
+                self.energies = tmp.keys()
+                self.energies.sort()
+
 
     ## Add text for centre-of-mass energy
     #
