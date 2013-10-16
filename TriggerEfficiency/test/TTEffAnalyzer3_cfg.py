@@ -186,8 +186,8 @@ process.commonSequence *= process.hPlusMETNoiseFilters
 
 # Analyzer definition
 process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
-####        LoopingOver	        = cms.InputTag("selectedPatTausHpsPFTau"),
-	LoopingOver		= cms.InputTag("selectedPatTaus"),
+        LoopingOver	        = cms.InputTag("selectedPatTausHpsPFTau"),
+####	LoopingOver		= cms.InputTag("selectedPatTaus"),
 	PFTauDiscriminators     = cms.vstring(
             "decayModeFinding",
             "againstMuonLoose",
