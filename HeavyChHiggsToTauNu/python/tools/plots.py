@@ -313,10 +313,11 @@ _plotStyles = {
     "Diboson":               styles.dibStyle,
 
     # Ratio stuff
-    "Ratio":                   styles.dataStyle,
+    "Ratio":                   styles.ratioStyle,
     "BackgroundStatError":     styles.errorRatioStatStyle,
     "BackgroundSystError":     styles.errorRatioSystStyle,
     "BackgroundStatSystError": styles.errorRatioSystStyle,
+    "RatioLine":               styles.ratioLineStyle,
 }
 # Other
 _plotStyles["Embedding"] = _plotStyles["TTJets"].clone()
@@ -924,10 +925,7 @@ def _divideOrZero(numerator, denominator):
 # First use case: 1-line for ratio plots
 def _createRatioLine(xmin, xmax, yvalue=1.0):
     line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [yvalue, yvalue]))
-#    line.SetLineColor(ROOT.kBlack)
-    line.SetLineColor(ROOT.kRed)
-    line.SetLineWidth(2)
-    line.SetLineStyle(3)
+    _plotStyles["RatioLine"].apply(line)
     return line
 
 ## Creates a cover pad
