@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+import time
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions as HChOptions
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
@@ -11,6 +13,14 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisati
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.pileupReweightedAllEvents import PileupWeightType
 
 tooManyAnalyzersLimit = 100
+
+class Timer:
+    def __init__(self):
+        self._start = time.time()
+
+    def stop(self, message):
+        stop = time.time()
+        print message, "%.0f s" % (stop-self._start)
 
 ## Infrastucture to help analysis configuration building
 #
@@ -446,6 +456,7 @@ class ConfigBuilder:
             except AttributeError:
                 raise Exception("Module HiggsAnalysis.HeavyChHiggsToTauNu.optimisation."+self.optimisationScheme+" does not have an object 'optimisation'")
 
+            timer = Timer()
             analysisNamesForTailKillerScenarios = []
             for module, name in zip(analysisModules, analysisNames):
                 names = optimisationScheme.generateVariations(process, additionalCounters, process.commonSequence, module, name)
@@ -453,6 +464,7 @@ class ConfigBuilder:
                 #analysisNamesForTailKillerScenarios = names
                 analysisNamesForTailKillerScenarios.extend(names)
                 analysisNamesForSystematics.extend(names)
+            timer.stop("Added optimisation modules in")
 
         # QCD tail killer scenarios (do them also for optimisation variations)
         qcdTailKillerNames = self._buildQCDTailKillerScenarios(process, analysisNamesForTailKillerScenarios)
@@ -698,6 +710,7 @@ class ConfigBuilder:
         if not self.doQCDTailKillerScenarios:
             return []
 
+        timer = Timer()
         import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
         names = []
         modules = []
@@ -711,6 +724,7 @@ class ConfigBuilder:
                 mod.QCDTailKiller = obj.clone()
                 mod.QCDTailKiller.disableCollinearCuts = module.QCDTailKiller.disableCollinearCuts
                 createQCDTailKillerModule(process, "QCDTailKiller%s"%mod.QCDTailKiller.scenarioLabel.value(), mod, names, modules)
+        timer.stop("Added QCD tail killer scenarios in")
         self._accumulateAnalyzers("Modules for QCDTailKiller scenarios", names)
 
         return names
@@ -985,9 +999,10 @@ class ConfigBuilder:
             doJetUnclusteredVariation = False
 
         if self.dataVersion.isMC() or self.options.tauEmbeddingInput != 0:
+            timer = Timer()
             for name in analysisNamesForSystematics:
                 self._addJESVariation(process, name, doJetUnclusteredVariation)
-            print "Added JES variation for %d modules"%len(analysisNamesForSystematics)
+            timer.stop("Added JES variation for %d modules in"%len(analysisNamesForSystematics))
         else:
             print "JES variation disabled for data (not meaningful for data)"
 
@@ -1047,9 +1062,10 @@ class ConfigBuilder:
             return
 
         if self.dataVersion.isMC():
+            timer = Timer()
             for name in analysisNamesForSystematics:
                 self._addPUWeightVariation(process, name, param)
-            print "Added PU weight variation for %d modules"%len(analysisNamesForSystematics)
+            timer.stop("Added PU weight variation for %d modules in"%len(analysisNamesForSystematics))
         else:
             print "PU weight variation disabled for data (not meaningful for data)"
 
@@ -1104,9 +1120,10 @@ class ConfigBuilder:
             return
 
         if self.dataVersion.isMC():
+            timer = Timer()
             for name in analysisNamesForSystematics:
                 self._addTopPtWeightVariation(process, name)
-            print "Added Top pt weight variation for %d modules" % len(analysisNamesForSystematics)
+            timer.stop("Added Top pt weight variation for %d modules in" % len(analysisNamesForSystematics))
         else:
             print "PU weight variation disabled for data (not meaningful for data)"
 
@@ -1145,8 +1162,10 @@ class ConfigBuilder:
             return
 
         if self.dataVersion.isMC():
+            timer = Timer()
             for name in analysisNamesForSystematics:
                 self._addScaleFactorVariation(process, name)
+            timer.stop("Added scale factor variation for %d modules in" % len(analysisNamesForSystematics))
         else:
             print "SF variation disabled for data (not meaningful for data"
 

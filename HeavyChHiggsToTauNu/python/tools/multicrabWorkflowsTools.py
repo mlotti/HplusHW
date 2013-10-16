@@ -287,6 +287,9 @@ class Workflow:
     def setOutputFile(self, output_file):
         self.output_file = output_file
 
+    def setName(self, name):
+        self.name = name
+
     def getName(self):
         return self.name
 

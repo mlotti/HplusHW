@@ -536,7 +536,6 @@ namespace HPlus {
     hSFBCSVM_pt = histoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, myDir, "hSFBCSVM", "hSFBCSVM", 100, 0.9, 1,200,0,200);
     //hEffBCSVM_eta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "hEffBCSVM_eta", "hEffBCSVM_eta", 100, -5., 5.);
     //hEffBCSVM_eta_pt = histoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, myDir, "hEffBCSVM_eta_pt", "hEffBCSVM_eta_pt", 100, -5., 5.,80, 0., 400. );
-    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_pt", "bjet_pt", 100, 0., 500.);
     hDiscriminator = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
     hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet_pt", "bjet_pt", 100, 0., 500.);
     hPtBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVM_pt", "realbjetCSVM_pt", 100, 0., 500.);
