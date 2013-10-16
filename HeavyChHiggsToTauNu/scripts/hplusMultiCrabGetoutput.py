@@ -43,7 +43,8 @@ def main(opts):
             ret = subprocess.call(command)
             if ret != 0:
                 print "Command '%s' failed with exit code %s" % (" ".join(command), ret)
-                return 1
+                if not opts.allowFails:
+                    return 1
 
     return 0
 
@@ -54,6 +55,8 @@ if __name__ == "__main__":
                       help="Number of jobs whose output is retrieved in one crab call (default: -1, retrieve all)")
     parser.add_option("--getoutput", dest="getoutput", type="string", default=None,
                       help="Get the output of these jobs only (default is to get output of all jobs). This also prevents the call to 'crab -status'.")
+    parser.add_option("--allowFails", dest="allowFails", default=False, action="store_true",
+                      help="Continue getoutput even if crab -getoutput fails for any reason")
 
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
