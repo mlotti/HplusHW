@@ -297,10 +297,10 @@ def addMetLegSkim_53X_v3(datasets):
                                                                                              
     addMetLegSkim_53X("v53_v3", datasets, definitions)                                        
 
-def addMetLegSkim_44X(version, datasets, updateDefinitions):
-    mcTrigger = "HLT_MediumIsoPFTau35_Trk20_v1"
+def addMetLegSkim_44X(version, datasets, updateDefinitions, skim=None):
+    mcTriggerMETLeg = "HLT_MediumIsoPFTau35_Trk20_v1"
     def TaskDefMC(**kwargs):
-        return TaskDef(triggerOR=[mcTrigger], **kwargs)
+        return TaskDef(triggerOR=[mcTriggerMETLeg], **kwargs)
 
     # The numbers of jobs are from multicrabDatasetsPattuple, they may have to be adjusted
     defaultDefinitions = {
@@ -332,15 +332,15 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
         "WJets_TuneZ2_Fall11":              TaskDefMC(njobsIn=490, njobsOut=10),
         "W2Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=20),
         "W3Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=120, njobsOut=10),
-        "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=12),
+        "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=20),
         "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDefMC(njobsIn=350, njobsOut=35),
         "DYJetsToLL_M10to50_TuneZ2_Fall11": TaskDefMC(njobsIn=300, njobsOut=10),
-        "T_t-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=50, njobsOut=2),
-        "Tbar_t-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=50, njobsOut=1),
-        "T_tW-channel_TuneZ2_Fall11":       TaskDefMC(njobsIn=20, njobsOut=1),
-        "Tbar_tW-channel_TuneZ2_Fall11":    TaskDefMC(njobsIn=20, njobsOut=1),
-        "T_s-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=10, njobsOut=1),
-        "Tbar_s-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=10, njobsOut=1),
+        "T_t-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=50, njobsOut=5),
+        "Tbar_t-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=50, njobsOut=5),
+        "T_tW-channel_TuneZ2_Fall11":       TaskDefMC(njobsIn=20, njobsOut=5),
+        "Tbar_tW-channel_TuneZ2_Fall11":    TaskDefMC(njobsIn=20, njobsOut=5),
+        "T_s-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=10, njobsOut=2),
+        "Tbar_s-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=10, njobsOut=2),
 
         # Here is an example how to specity number of events/job
         # instead of number of jobs, and how to give dataset-specific
@@ -364,10 +364,10 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
         dataset.addWorkflow(wf)
 
         # If have skim output, define the workflows which depend on it
-        if wf.output != None:
-	    wf.output.dbs_url = common.tteff_dbs
-            dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, source=Source(workflowName),
-                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="tteffAnalysis-metleg.root"))
+#        if wf.output != None:
+#	    wf.output.dbs_url = common.tteff_dbs
+#            dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, source=Source(workflowName),
+#                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="tteffAnalysis-metleg.root"))
 
 
 def addMetLegSkim_cmssw44X_v1(datasets):

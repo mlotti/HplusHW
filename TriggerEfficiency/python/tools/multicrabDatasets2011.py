@@ -2,7 +2,7 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTools import TaskDef
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff import addMetLegSkim_44X
 
-skimVersion = "v44_v5"
+skimVersion = "v44_v5_CMSSW445_v1"
 
 def addMetLegSkim_v44_v5(datasets):
     definitions = {
