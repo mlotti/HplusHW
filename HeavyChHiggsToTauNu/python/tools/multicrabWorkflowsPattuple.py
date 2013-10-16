@@ -937,7 +937,7 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "TTJets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn=450, njobsOut=50), QuadJet(njobsIn=1350, njobsOut=50)),
         "TTJets_FullLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn= 900, njobsOut=50), QuadJet(njobsIn=2700, njobsOut=50)), # FIXME: njobsOut
         "TTJets_SemiLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn=1350, njobsOut=50), QuadJet(njobsIn=4000, njobsOut=50)), # FIXME: njobsOut
-        "TTJets_Hadronic_TuneZ2star_ext_Summer12":TaskDefMC(TauMET(njobsIn=2300, njobsOut=50), QuadJet(njobsIn=4990, njobsOut=50)), # FIXME: njobsOut
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12":TaskDefMC(TauMET(njobsIn=100, njobsOut=4),  QuadJet(njobsIn=4990, njobsOut=50)), # FIXME: njobsOut
         "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(TauMET(njobsIn= 30, njobsOut= 4), QuadJet(njobsIn=  90, njobsOut= 4), args={"wjetsWeighting": 1, "wjetBin": -1}),
         "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(TauMET(njobsIn= 90, njobsOut=17), QuadJet(njobsIn= 280, njobsOut=17), args={"wjetsWeighting": 1, "wjetBin": -1}),
         "W1Jets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn= 60, njobsOut=10), QuadJet(njobsIn= 170, njobsOut=10), args={"wjetsWeighting": 1, "wjetBin": 1}),
@@ -2799,9 +2799,18 @@ def addPattuple_v53_3_taumet(datasets):
         # User mean 2658.0, min 759.5, max 4381.4
         # Mean 124.6 MB, min 42.2 MB, max 134.0 MB
         "TTJets_TuneZ2star_Summer12":             TaskDef("/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
-        "TTJets_FullLept_TuneZ2star_Summer12":    TaskDef(""),
-        "TTJets_SemiLept_TuneZ2star_Summer12":    TaskDef(""),
-        "TTJets_Hadronic_TuneZ2star_ext_Summer12":TaskDef(""),
+        # 2612775 events, 901 jobs
+        # User mean 5658.1, min 1551.1, max 9810.3
+        # Mean 285.3 MB, min 95.5 MB, max 298.7 MB
+        "TTJets_FullLept_TuneZ2star_Summer12":    TaskDef("/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v2_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 2923306 events, 1380 jobs
+        # User mean 4579.3, min 163.1, max 35236.4
+        # Mean 216.5 MB, min 8.8 MB, max 237.9 MB
+        "TTJets_SemiLept_TuneZ2star_Summer12":    TaskDef("/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 81670 events, 108 jobs
+        # User mean 3317.8, min 143.6, max 9529.8
+        # Mean 96.9 MB, min 3.6 MB, max 111.5 MB
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("/TTJets_HadronicMGDecays_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_ext_v1_AODSIM_pattuple_taumet_v53_3_b-273552554d4b0d57d96245d6e3a6de1a/USER"),
         # 92052 events, 34 jobs
         # User mean 7107.4, min 241.5, max 8368.6
         # Mean 223.2 MB, min 8.7 MB, max 259.6 MB
