@@ -332,7 +332,6 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions, skim=None):
         "WJets_TuneZ2_Fall11":              TaskDefMC(njobsIn=490, njobsOut=10),
         "W2Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=20),
         "W3Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=120, njobsOut=10),
-        "W3Jets_TuneZ2_v2_Fall11":          TaskDefMC(njobsIn=120, njobsOut=10),
         "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=20),
         "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDefMC(njobsIn=350, njobsOut=35),
         "DYJetsToLL_M10to50_TuneZ2_Fall11": TaskDefMC(njobsIn=300, njobsOut=10),
@@ -364,32 +363,6 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions, skim=None):
 
         dataset.addWorkflow(wf)
 
-        # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
-        if wf.output != None:
-            commonArgs = {
-                "source": Source(workflowName),
-                "args": wf.args,
-                "skimConfig": skim
-                }
-            commonArgs["args"]["trgAnalysis"] = "MetLeg"
-
-            if dataset.isData():
-                # For data, construct one analysis workflow per trigger type
-                pd = datasetName.split("_")[0]                              
-                if pd == "Tau" or pd == "TauPlusX":                         
-                    dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=wf.triggerOR, **commonArgs))
-                elif pd == "MultiJet":
-                    if datasetName in quadJetTriggers:
-                        dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
-                    if datasetName in quadJetBTagTriggers:
-                        dataset.addWorkflow(Workflow("analysis_quadjetbtag_"+version, triggerOR=quadJetBTagTriggers[datasetName], **commonArgs))
-                    if datasetName in quadPFJetBTagTriggers:
-                        dataset.addWorkflow(Workflow("analysis_quadpfjetbtag_"+version, triggerOR=quadPFJetBTagTriggers[datasetName], **commonArgs))
-                else:
-                    raise Exception("Unsupported PD name %s" % pd)
-            else:
-                # For MC, also construct one analysis workflow per trigger type
-                dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=[mcTriggerMETLeg], **commonArgs))
 
         # If have skim output, define the workflows which depend on it
 #        if wf.output != None:

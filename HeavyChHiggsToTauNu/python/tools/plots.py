@@ -104,6 +104,9 @@ for mcEra in ["Summer11", "Fall11", "Summer12"]:
 for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     _physicalToLogical.update({
     "TTJets_%s"%mcEra: "TTJets",
+    "TTJets_FullLept_%s"%mcEra: "TTJets_FullLept",
+    "TTJets_SemiLept_%s"%mcEra: "TTJets_SemiLept",
+    "TTJets_Hadronic_%s"%mcEra: "TTJets_Hadronic",
     "WJets_%s"%mcEra: "WJets",
     "W1Jets_%s"%mcEra: "W1Jets",
     "W2Jets_%s"%mcEra: "W2Jets",
@@ -173,6 +176,10 @@ _datasetMerge = {
     "Tbar_tW-channel": "SingleTop",
     "T_s-channel":     "SingleTop",
     "Tbar_s-channel":  "SingleTop",
+
+    "TTJets_FullLept": "TTJets",
+    "TTJets_SemiLept": "TTJets",
+    "TTJets_Hadronic": "TTJets",
 
     "WJets": "WJets",
     "W1Jets": "WJets",
@@ -313,10 +320,11 @@ _plotStyles = {
     "Diboson":               styles.dibStyle,
 
     # Ratio stuff
-    "Ratio":                   styles.dataStyle,
+    "Ratio":                   styles.ratioStyle,
     "BackgroundStatError":     styles.errorRatioStatStyle,
     "BackgroundSystError":     styles.errorRatioSystStyle,
     "BackgroundStatSystError": styles.errorRatioSystStyle,
+    "RatioLine":               styles.ratioLineStyle,
 }
 # Other
 _plotStyles["Embedding"] = _plotStyles["TTJets"].clone()
@@ -924,10 +932,7 @@ def _divideOrZero(numerator, denominator):
 # First use case: 1-line for ratio plots
 def _createRatioLine(xmin, xmax, yvalue=1.0):
     line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [yvalue, yvalue]))
-#    line.SetLineColor(ROOT.kBlack)
-    line.SetLineColor(ROOT.kRed)
-    line.SetLineWidth(2)
-    line.SetLineStyle(3)
+    _plotStyles["RatioLine"].apply(line)
     return line
 
 ## Creates a cover pad
@@ -1286,7 +1291,15 @@ class PlotBase:
         if isinstance(energy, basestring):
             self.energies = [energy]
         else:
-            self.energies = energy
+            if len(energy) == 1:
+                self.energies = energy[:]
+            else:
+                tmp = {}
+                for e in energy:
+                    tmp[e] = 1
+                self.energies = tmp.keys()
+                self.energies.sort()
+
 
     ## Add text for centre-of-mass energy
     #

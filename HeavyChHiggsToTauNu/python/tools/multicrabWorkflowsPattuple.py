@@ -599,9 +599,9 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         # Construct processing workflow
         wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName="pattuple_"+version, skimConfig=skim)
 
-        # Setup the publish name
-        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName, taskDef)
-        wf.addCrabLine("USER.publish_data_name = "+name)
+        # Clone for AOD-based analysis
+        wfAodAnalysis = wf.clone()
+        wfAodAnalysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
 
         # For MC, split by events, for data, split by lumi
         if dataset.isMC():
@@ -609,43 +609,54 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         else:
             wf.addCrabLine("CMSSW.total_number_of_lumis = -1")
 
+        # Setup the publish name
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName, taskDef)
+        wf.addCrabLine("USER.publish_data_name = "+name)
+
         # Add the pattuple Workflow to Dataset
         dataset.addWorkflow(wf)
-        # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
-        if wf.output != None:
-            commonArgs = {
-                "source": Source("pattuple_"+version),
-                "args": wf.args,
-                "skimConfig": skim,
-                "dataVersionAppend": wf.dataVersionAppend,
-                }
 
-            if dataset.isData():
-                # For data, construct one analysis workflow per trigger type
-                found = False
-                if datasetName in tauTriggers:
-                    found = True
-                    dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=tauTriggers[datasetName], **commonArgs))
-                if datasetName in quadJetTriggers:
-                    found = True
-                    dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
-                if datasetName in quadJetBTagTriggers:
-                    found = True
-                    dataset.addWorkflow(Workflow("analysis_quadjetbtag_"+version, triggerOR=quadJetBTagTriggers[datasetName], **commonArgs))
-                if datasetName in quadPFJetBTagTriggers:
-                    found = True
-                    dataset.addWorkflow(Workflow("analysis_quadpfjetbtag_"+version, triggerOR=quadPFJetBTagTriggers[datasetName], **commonArgs))
+        # Add analysis workflows
+        commonArgs = {
+            "source": Source("pattuple_"+version),
+            "args": wf.args,
+            "skimConfig": skim,
+            "dataVersionAppend": wf.dataVersionAppend,
+            }
+        def addAnalysisWorkflow(name, triggerOR):
+            # Add AOD-based analysis workflow in all cases
+            aodWf = wfAodAnalysis.clone()
+            aodWf.setName("aod"+name[0].upper()+name[1:])
+            dataset.addWorkflow(aodWf)
+            # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
+            if wf.output is not None:
+                dataset.addWorkflow(Workflow(name, triggerOR=triggerOR, **commonArgs))
 
-                if not found:
-                    raise Exception("No trigger specified for dataset %s" % datasetName)
-            else:
-                # For MC, also construct one analysis workflow per trigger type
-                dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=[mcTriggerTauMET], **commonArgs))
-                dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=[mcTriggerQuadJet], **commonArgs))
-                dataset.addWorkflow(Workflow("analysis_quadjetbtag_"+version, triggerOR=[mcTriggerQuadJetBTag], **commonArgs))
-                dataset.addWorkflow(Workflow("analysis_quadpfjet78btag_"+version, triggerOR=[mcTriggerQuadPFJet78BTag], **commonArgs))
-                dataset.addWorkflow(Workflow("analysis_quadpfjet82btag_"+version, triggerOR=[mcTriggerQuadPFJet82BTag], **commonArgs))
+        if dataset.isData():
+            # For data, construct one analysis workflow per trigger type
+            found = False
+            if datasetName in tauTriggers:
+                found = True
+                addAnalysisWorkflow("analysis_taumet_"+version, triggerOR=tauTriggers[datasetName])
+            if datasetName in quadJetTriggers:
+                found = True
+                addAnalysisWorkflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName])
+            if datasetName in quadJetBTagTriggers:
+                found = True
+                addAnalysisWorkflow("analysis_quadjetbtag_"+version, triggerOR=quadJetBTagTriggers[datasetName])
+            if datasetName in quadPFJetBTagTriggers:
+                found = True
+                addAnalysisWorkflow("analysis_quadpfjetbtag_"+version, triggerOR=quadPFJetBTagTriggers[datasetName])
 
+            if not found:
+                raise Exception("No trigger specified for dataset %s" % datasetName)
+        else:
+            # For MC, also construct one analysis workflow per trigger type
+            addAnalysisWorkflow("analysis_taumet_"+version, triggerOR=[mcTriggerTauMET])
+            addAnalysisWorkflow("analysis_quadjet_"+version, triggerOR=[mcTriggerQuadJet])
+            addAnalysisWorkflow("analysis_quadjetbtag_"+version, triggerOR=[mcTriggerQuadJetBTag])
+            addAnalysisWorkflow("analysis_quadpfjet78btag_"+version, triggerOR=[mcTriggerQuadPFJet78BTag])
+            addAnalysisWorkflow("analysis_quadpfjet82btag_"+version, triggerOR=[mcTriggerQuadPFJet82BTag])
 
 ## Main function for generating 53X pattuples
 #
@@ -930,11 +941,14 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(TauMET(njobsIn= 30, njobsOut= 3), QuadJet(njobsIn= 670, njobsOut= 6)),
         "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(TauMET(njobsIn= 20, njobsOut= 1), QuadJet(njobsIn= 390, njobsOut= 4)),
         "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(TauMET(njobsIn=100, njobsOut= 6), QuadJet(njobsIn=2200, njobsOut=22)),
-                                            
+
         "WW_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut= 7), QuadJet(njobsIn=260, njobsOut=16)),
         "WZ_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut= 6), QuadJet(njobsIn=260, njobsOut=13)),
         "ZZ_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut= 5), QuadJet(njobsIn=260, njobsOut=10)),
         "TTJets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn=450, njobsOut=20), QuadJet(njobsIn=1350, njobsOut=50)),
+        "TTJets_FullLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn= 900, njobsOut=100), QuadJet(njobsIn=2700, njobsOut=50)),
+        "TTJets_SemiLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn=1350, njobsOut=110), QuadJet(njobsIn=4000, njobsOut=50)),
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12":TaskDefMC(TauMET(njobsIn= 100, njobsOut=3),  QuadJet(njobsIn=4990, njobsOut=50)),
         "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(TauMET(njobsIn= 30, njobsOut= 2), QuadJet(njobsIn=  90, njobsOut= 4), args={"wjetsWeighting": 1}),
         "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(TauMET(njobsIn= 90, njobsOut= 8), QuadJet(njobsIn= 280, njobsOut=17), args={"wjetsWeighting": 1}),
         "W1Jets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn= 60, njobsOut= 5), QuadJet(njobsIn= 170, njobsOut=10), args={"wjetsWeighting": 1}),
@@ -976,6 +990,10 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         # Construct processing workflow
         wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName="pattuple_"+version, skimConfig=skim)
 
+        # Clone for AOD-based analysis
+        wfAodAnalysis = wf.clone()
+        wfAodAnalysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
+
         # Setup the publish name
         name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName, taskDef)
         wf.addCrabLine("USER.publish_data_name = "+name)
@@ -988,39 +1006,27 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
 
         # Add the pattuple Workflow to Dataset
         dataset.addWorkflow(wf)
+
+        # Add analysis workflows
+        commonArgs = {
+            "source": Source("pattuple_"+version),
+            "args": wf.args,
+            "skimConfig": skim,
+            "dataVersionAppend": wf.dataVersionAppend,
+            }
+        triggers = mcTriggers
+        if dataset.isData():
+            if "taumet" in version:
+                triggers = tauTriggers[datasetName]
+            elif "quadjet" in version:
+                triggers = quadJetTriggers[datasetName]
+        # Add AOD-based analysis workflow in all cases
+        aodWf = wfAodAnalysis.clone()
+        aodWf.setName("aodAnalysis_"+version)
+        dataset.addWorkflow(aodWf)
         # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
-        if wf.output != None:
-            commonArgs = {
-                "source": Source("pattuple_"+version),
-                "args": wf.args,
-                "skimConfig": skim,
-                "dataVersionAppend": wf.dataVersionAppend,
-                }
-
-            triggers = mcTriggers
-            if dataset.isData():
-                if "taumet" in version:
-                    triggers = tauTriggers[datasetName]
-                elif "quadjet" in version:
-                    triggers = quadJetTriggers[datasetName]
-
+        if wf.output is not None:
             dataset.addWorkflow(Workflow("analysis_"+version, triggerOR=triggers, **commonArgs))
-#            if dataset.isData():
-#                # For data, construct one analysis workflow per trigger type
-#                found = False
-#                
-#                if datasetName in tauTriggers:
-#                    found = True
-#                    dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=tauTriggers[datasetName], **commonArgs))
-#                if datasetName in quadJetTriggers:
-#                    found = True
-#                    dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
-#                if not found:
-#                    raise Exception("No trigger specified for dataset %s" % datasetName)
-#            else:
-#                # For MC, also construct one analysis workflow per trigger type
-#                dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=[mcTriggerTauMET], **commonArgs))
-#                dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=[mcTriggerQuadJet], **commonArgs))
 
 
 ## Add v44_5 pattuple production workflows
@@ -1831,12 +1837,18 @@ def addPattuple_v53_3_taumet(datasets):
         # User mean 2803.4, min 875.0, max 7831.1
         # Mean 85.1 MB, min 34.7 MB, max 189.6 MB
         "Tau_198022-198523_2012C_Aug24":          TaskDef("/Tau/local-Run2012C_24Aug2012_v1_AOD_198022_198523_pattuple_taumet_v53_3-450df8079da161796ef812c3271c9793/USER"),
-        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
+        # 3498600 events, 1703 jobs
+        # User mean 2173.1, min 115.7, max 12412.6
+        # Mean 65.8 MB, min 4.6 MB, max 275.6 MB
+        "Tau_198941-202504_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_198941_202504_pattuple_taumet_v53_3-71928e872913442feb2116b8eeda1951/USER"),
         # 78436 events, 17 jobs
         # User mean 5151.1, min 1659.8, max 11922.5
         # Mean 138.2 MB, min 62.5 MB, max 270.4 MB
         "Tau_201191-201191_2012C_Dec11":          TaskDef("/Tau/local-Run2012C_EcalRecover_11Dec2012_v1_AOD_201191_201191_pattuple_taumet_v53_3-44499bd8f201cef0239f3c1d1b9cedf4/USER"),
-        "Tau_202972-203742_2012C_Prompt":         TaskDef(""),
+        # 166145 events, 33 jobs
+        # User mean 4980.1, min 575.2, max 15776.4
+        # Mean 146.1 MB, min 20.1 MB, max 377.4 MB
+        "Tau_202972-203742_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_202972_203742_pattuple_taumet_v53_3-6f655fd49a479f9532abee7850e734b5/USER"),
 
         #### Winter13 Reprocessing
         # 474834 events, 187 jobs
@@ -2202,6 +2214,18 @@ def addPattuple_v53_3_taumet(datasets):
         # User mean 2658.0, min 759.5, max 4381.4
         # Mean 124.6 MB, min 42.2 MB, max 134.0 MB
         "TTJets_TuneZ2star_Summer12":             TaskDef("/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 2612775 events, 901 jobs
+        # User mean 5658.1, min 1551.1, max 9810.3
+        # Mean 285.3 MB, min 95.5 MB, max 298.7 MB
+        "TTJets_FullLept_TuneZ2star_Summer12":    TaskDef("/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v2_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 2923306 events, 1380 jobs
+        # User mean 4579.3, min 163.1, max 35236.4
+        # Mean 216.5 MB, min 8.8 MB, max 237.9 MB
+        "TTJets_SemiLept_TuneZ2star_Summer12":    TaskDef("/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 81670 events, 108 jobs
+        # User mean 3317.8, min 143.6, max 9529.8
+        # Mean 96.9 MB, min 3.6 MB, max 111.5 MB
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("/TTJets_HadronicMGDecays_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_ext_v1_AODSIM_pattuple_taumet_v53_3_b-273552554d4b0d57d96245d6e3a6de1a/USER"),
         # 92052 events, 34 jobs
         # User mean 7107.4, min 241.5, max 8368.6
         # Mean 223.2 MB, min 8.7 MB, max 259.6 MB

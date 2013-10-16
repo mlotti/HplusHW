@@ -266,6 +266,9 @@ datasetsMC_2012.extend([
     "WZ_TuneZ2star_Summer12",
     "ZZ_TuneZ2star_Summer12",
     "TTJets_TuneZ2star_Summer12",
+    "TTJets_FullLept_TuneZ2star_Summer12",
+    "TTJets_SemiLept_TuneZ2star_Summer12",
+    "TTJets_Hadronic_TuneZ2star_ext_Summer12",
     "WJets_TuneZ2star_v1_Summer12",
     "WJets_TuneZ2star_v2_Summer12",
     "W1Jets_TuneZ2star_Summer12",
@@ -358,8 +361,6 @@ if runPatOnTheFly:
 prefix = "multicrab_"+workflow
 if "QCD" in cfg:
     prefix += "_QCD"
-
-prefix += "_"+workflow
 
 # Generate configuration only?
 configOnly=True

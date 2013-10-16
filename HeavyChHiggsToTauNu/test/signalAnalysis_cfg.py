@@ -28,6 +28,14 @@ def customize(signalAnalysis):
     #import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
     #signalAnalysis.QCDTailKiller = param.QCDTailKillerMediumPlus.clone()
 
+    # Disable trigger, and weight events by trigger MC efficiencies
+    # signalAnalysis.trigger.selectionType = "disabled"
+    # signalAnalysis.tauTriggerEfficiencyScaleFactor.mode = "mcEfficiency"
+    # signalAnalysis.tauTriggerEfficiencyScaleFactor.dataSelect = ["runs_190456_208686"]
+    # signalAnalysis.MET.preMETCut = 20
+    # signalAnalysis.metTriggerEfficiencyScaleFactor.mode = "mcEfficiency"
+    # signalAnalysis.metTriggerEfficiencyScaleFactor.dataSelect = ["runs_190456_208686"]
+
     print "Customisations done"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
