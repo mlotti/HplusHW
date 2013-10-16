@@ -65,11 +65,12 @@ objectVariationToMet = cms.EDProducer("ShiftedParticleMETcorrInputProducer",
 )
 def addTESVariation(process, prefix, name, prototype, direction, postfix="", histogramAmbientLevel="Systematics"):
     tauVariationName = name+"TauVariation"
-    rawMetVariationName = name+"RawMetVariation"
-    type1MetVariationName = name+"Type1MetVariation"
-    type2MetVariationName = name+"Type2MetVariation"
     analysisName = prefix+name
-    sequenceName = name+"VariationSequence"
+    rawMetVariationName = analysisName+"RawMetVariation"
+    type1MetVariationName = analysisName+"Type1MetVariation"
+    type2MetVariationName = analysisName+"Type2MetVariation"
+    sequenceName = analysisName+"VariationSequence"
+    analysisName = prefix+name
     pathName = analysisName+"Path"
 
     sequence = cms.Sequence()
@@ -84,6 +85,8 @@ def addTESVariation(process, prefix, name, prototype, direction, postfix="", his
         seq *= mod
         return n
 
+    # Variation of all tau candidates
+    # It is enough to do this once per job (nothing depends on tau ID)
     tauv = tauVariation.clone(
         src = prototype.tauSelection.src.value(),
     )
@@ -95,23 +98,31 @@ def addTESVariation(process, prefix, name, prototype, direction, postfix="", his
         raise Exception("direction should be 'Up' or 'Down', was '%s'" % direction)
     add(tauVariationName, tauv)
 
-    # For tau variation for type I MET, we need the selected tau only
+    # To propagate tau variation to type I MET, we need the selected tau only
+    # First do the tau ID to get the selected tau, then variate it, and propagate to MET
+
+    # Repeat the procedure for each call of addTESVariation in case
+    # tauID parameters have changed (e.g. due to optimization). This
+    # could be optimized by inspecting if tauID parameters have really
+    # changed. That would be more complex, and it looks like the time
+    # penalty of this KISS approach is not that much (couple of
+    # percents with full systematics).
     m = TauFilter.hPlusTauSelectorFilter.clone(
         tauSelection = prototype.tauSelection.clone(),
         vertexSrc = prototype.primaryVertexSelection.selectedSrc.value(),
         filter = False,
         histogramAmbientLevel = histogramAmbientLevel
     )
-    selectedTauName = add(name+"SelectedTauForVariation", m)
+    selectedTauName = add(analysisName+"SelectedTauForVariation", m)
     m = tauv.clone(
         src = selectedTauName
     )
-    selectedVariatedTauName = add(name+"SelectedTauVariated", m)
+    selectedVariatedTauName = add(analysisName+"SelectedTauVariated", m)
     metCorr = objectVariationToMet.clone(
         srcOriginal = selectedTauName,
         srcShifted = selectedVariatedTauName
     )
-    variationMetCorrection = add(tauVariationName+"METCorr", metCorr)
+    variationMetCorrection = add(selectedTauName+"METCorr", metCorr)
 
     # Raw MET
     metrawv = patPFMETCorrections.patType1CorrectedPFMet.clone(
