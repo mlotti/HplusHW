@@ -103,7 +103,7 @@ def addTESVariation(process, prefix, name, prototype, direction, postfix="", his
         histogramAmbientLevel = histogramAmbientLevel
     )
     selectedTauName = add(name+"SelectedTauForVariation", m)
-    m = tauVariation.clone(
+    m = tauv.clone(
         src = selectedTauName
     )
     selectedVariatedTauName = add(name+"SelectedTauVariated", m)
