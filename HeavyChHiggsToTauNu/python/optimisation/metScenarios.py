@@ -6,4 +6,7 @@ optimisation = HPlusOptimisationScheme()
 _pt = [50,60,70,80,90]
 
 for pt in _pt:
-    optimisation.addMETSelectionVariation(pt)
+    scenarios.append(Scenario("%d"%(pt),
+                              METCut = pt))
+
+optimisation.addMETVariations(scenarios)
