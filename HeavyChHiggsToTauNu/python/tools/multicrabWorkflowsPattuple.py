@@ -946,9 +946,9 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "WZ_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut= 6), QuadJet(njobsIn=260, njobsOut=13)),
         "ZZ_TuneZ2star_Summer12":                 TaskDefMC(TauMET(njobsIn=90, njobsOut= 5), QuadJet(njobsIn=260, njobsOut=10)),
         "TTJets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn=450, njobsOut=20), QuadJet(njobsIn=1350, njobsOut=50)),
-        "TTJets_FullLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn= 900, njobsOut=50), QuadJet(njobsIn=2700, njobsOut=50)), # FIXME: njobsOut
-        "TTJets_SemiLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn=1350, njobsOut=50), QuadJet(njobsIn=4000, njobsOut=50)), # FIXME: njobsOut
-        "TTJets_Hadronic_TuneZ2star_ext_Summer12":TaskDefMC(TauMET(njobsIn=100, njobsOut=4),  QuadJet(njobsIn=4990, njobsOut=50)), # FIXME: njobsOut
+        "TTJets_FullLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn= 900, njobsOut=100), QuadJet(njobsIn=2700, njobsOut=50)),
+        "TTJets_SemiLept_TuneZ2star_Summer12":    TaskDefMC(TauMET(njobsIn=1350, njobsOut=110), QuadJet(njobsIn=4000, njobsOut=50)),
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12":TaskDefMC(TauMET(njobsIn= 100, njobsOut=3),  QuadJet(njobsIn=4990, njobsOut=50)),
         "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(TauMET(njobsIn= 30, njobsOut= 2), QuadJet(njobsIn=  90, njobsOut= 4), args={"wjetsWeighting": 1}),
         "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(TauMET(njobsIn= 90, njobsOut= 8), QuadJet(njobsIn= 280, njobsOut=17), args={"wjetsWeighting": 1}),
         "W1Jets_TuneZ2star_Summer12":             TaskDefMC(TauMET(njobsIn= 60, njobsOut= 5), QuadJet(njobsIn= 170, njobsOut=10), args={"wjetsWeighting": 1}),
