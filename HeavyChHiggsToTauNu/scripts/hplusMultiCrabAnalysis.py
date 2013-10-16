@@ -112,7 +112,7 @@ class MemoryAnalysis:
         return "%s mean %.1f, min %.1f, max %.1f" % (name, sum(lst)/len(lst), min(lst), max(lst))
 
     def result(self):
-        ret = " Memory analysis:\n"
+        ret = " Memory analysis (%d jobs):\n" % len(self.rss)
         ret += "  "+self._mems("RSS (MB)", self.rss) + "\n"
         ret += "  "+self._mems("VSIZE (MB)", self.vsize) + "\n"
         ret += "  "+self._mems("Disk (MB)", self.disk)
@@ -159,8 +159,28 @@ def main(opts):
     if len(analyses)+len(watchdogAnalyses) == 0:
         return 1
 
+    def excludeInclude(files):
+        if opts.exclude is None and opts.include is None:
+            return files
+        if opts.exclude is not None:
+            jobNums = multicrab.prettyToJobList(opts.exclude)
+        else:
+            jobNums = multicrab.prettyToJobList(opts.include)
+        ret = []
+        for name in files:
+            found = False
+            for num in jobNums:
+                if "_%d." % num in name:
+                    found = True
+                    break
+            if ((found and opts.include is not None) or
+                (not found and opts.exclude is not None)):
+                ret.append(name)
+        return ret
+
     for task in taskDirs:
         files = glob.glob(os.path.join(task, "res", "CMSSW_*.stdout"))
+        files = excludeInclude(files)
 
         if len(files) == 0:
             continue
@@ -169,6 +189,7 @@ def main(opts):
             analyseFiles(files, analyses)
         if len(watchdogAnalyses) > 0:
             wfiles = glob.glob(os.path.join(task, "res", "Watchdog_*.log.gz"))
+            wfiles = excludeInclude(wfiles)
             if len(wfiles) > 0:
                 analyseFiles(wfiles, watchdogAnalyses, reverse=True, breakWhenFirstFound=True)
 
@@ -188,8 +209,14 @@ if __name__ == "__main__":
                       help="For --size, specify the output file name (default: 'pattuple.root')")
     parser.add_option("--memory", dest="memory", action="store_true", default=False,
                       help="Analyse memory usage")
+    parser.add_option("--exclude", dest="exclude", type="string", default=None,
+                      help="Exclude these jobs from the analysis (clashes with --include)")
+    parser.add_option("--include", dest="include", type="string", default=None,
+                      help="Include only these jobs from the analysis (clashes with --exclude)")
     multicrab.addOptions(parser)
     (opts, args) = parser.parse_args()
+    if opts.exclude is not None and opts.include is not None:
+        parser.error("You may not specify both --exclude and --include")
     opts.dirs.extend(args)
 
     sys.exit(main(opts))
