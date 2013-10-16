@@ -359,8 +359,6 @@ prefix = "multicrab_"+workflow
 if "QCD" in cfg:
     prefix += "_QCD"
 
-prefix += "_"+workflow
-
 # Generate configuration only?
 configOnly=True
 #configOnly=False
