@@ -104,6 +104,9 @@ for mcEra in ["Summer11", "Fall11", "Summer12"]:
 for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     _physicalToLogical.update({
     "TTJets_%s"%mcEra: "TTJets",
+    "TTJets_FullLept_%s"%mcEra: "TTJets_FullLept",
+    "TTJets_SemiLept_%s"%mcEra: "TTJets_SemiLept",
+    "TTJets_Hadronic_%s"%mcEra: "TTJets_Hadronic",
     "WJets_%s"%mcEra: "WJets",
     "W1Jets_%s"%mcEra: "W1Jets",
     "W2Jets_%s"%mcEra: "W2Jets",
@@ -173,6 +176,10 @@ _datasetMerge = {
     "Tbar_tW-channel": "SingleTop",
     "T_s-channel":     "SingleTop",
     "Tbar_s-channel":  "SingleTop",
+
+    "TTJets_FullLept": "TTJets",
+    "TTJets_SemiLept": "TTJets",
+    "TTJets_Hadronic": "TTJets",
 
     "WJets": "WJets",
     "W1Jets": "WJets",
