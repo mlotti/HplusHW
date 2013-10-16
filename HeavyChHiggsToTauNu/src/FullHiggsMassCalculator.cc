@@ -146,15 +146,15 @@ namespace HPlus {
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
     // Book histograms to be filled by this code
     // Vital histograms
-    hHiggsMass                = histoWrapper.makeTH<TH1F>(HistoWrapper::kSystematics, myDir, "HiggsMass", 
+    hHiggsMass                = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass", 
 							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMassPositiveDiscriminant = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassPositiveDiscriminant", 
+    hHiggsMassPositiveDiscriminant = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassPositiveDiscriminant", 
 							       "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMassNegativeDiscriminant = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassNegativeDiscriminant", 
+    hHiggsMassNegativeDiscriminant = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassNegativeDiscriminant", 
 							       "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMass_GEN            = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass_GEN", 
+    hHiggsMass_GEN            = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_GEN", 
 							  "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMass_GEN_NeutrinosReplacedWithMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, 
+    hHiggsMass_GEN_NeutrinosReplacedWithMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
 									"HiggsMass_GEN_NeutrinosReplacedWithMET", 
 									"Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hDiscriminant             = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Discriminant",
@@ -167,21 +167,21 @@ namespace HPlus {
     h2TransverseMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kSystematics, myDir, "TransMassVsInvMass", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
 				      100, 0, 500, 100, 0, 500);
-    h2TransverseMassVsInvariantMassPositiveDiscriminant = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, 
+    h2TransverseMassVsInvariantMassPositiveDiscriminant = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, 
 										    "TransMassVsInvMassPositiveDiscriminant", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
 				      100, 0, 500, 100, 0, 500);
-    h2TransverseMassVsInvariantMassNegativeDiscriminant = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, 
+    h2TransverseMassVsInvariantMassNegativeDiscriminant = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, 
 										    "TransMassVsInvMassNegativeDiscriminant", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
 				      100, 0, 500, 100, 0, 500);
-    h2TopMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, "TopMassVsInvMass", 
+    h2TopMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TopMassVsInvMass", 
 							 "TransMassVsInvMass;m_{top};Invariant mass m(#tau, #nu_{#tau});Events",
 							 100, 0, 500, 100, 0, 500);
-    h2TopMassVsNeutrinoNumber = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, "TopMassVsNeutrinoNumber",
+    h2TopMassVsNeutrinoNumber = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TopMassVsNeutrinoNumber",
 							  "TransMassVsNeutrinoNumber;m_{top};Number of neutrinos);Events",
 							  100, 0, 500, 10, 0, 10);
-    h2InvariantMassVsNeutrinoNumber = histoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myDir, "InvMassVsNeutrinoNumber",
+    h2InvariantMassVsNeutrinoNumber = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "InvMassVsNeutrinoNumber",
 						   "InvMassVsNeutrinoNumber;m(#tau,#nu_{#tau};Number of neutrinos);Events",
 								100, 0, 500, 10, 0, 10);
     hHiggsMass_betterSolution = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMass_betterSolution", 
