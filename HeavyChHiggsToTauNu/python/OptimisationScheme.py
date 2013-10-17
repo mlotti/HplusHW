@@ -113,6 +113,9 @@ class HPlusOptimisationScheme:
     def addMETSelectionVariation(self, values):
         self._variationItems.append(OptimisationItem("MET", values, "MET.METCut", "MET%.0f"))
 
+    def addMETVariations(self, scenarios):
+        self._variationItems.append(OptimisationItem("MET", scenarios, "MET", "MET%s"))
+
     def addBJetLeadingDiscriminatorVariation(self, values):
         self._variationItems.append(OptimisationItem("btag discriminator", values, "bTagging.leadingDiscriminatorCut", "Bdiscr%.1f"))
 
