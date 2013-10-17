@@ -3,7 +3,13 @@
 
 import FWCore.ParameterSet.Config as cms
 
-def triggerBin(pt, efficiency, uncertaintyPlus, uncertaintyMinus):
+def triggerBin(pt, efficiency, uncertaintyPlus, uncertaintyMinus=None):
+    if uncertaintyMinus is None:
+        return cms.PSet(
+            pt = cms.double(pt),
+            efficiency = cms.double(efficiency),
+            uncertainty = cms.double(uncertaintyPlus),
+            )
     return cms.PSet(
         pt = cms.double(pt),
         efficiency = cms.double(efficiency),
