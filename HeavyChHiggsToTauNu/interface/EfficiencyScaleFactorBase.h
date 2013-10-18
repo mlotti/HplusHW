@@ -4,6 +4,8 @@
 
 #include "FWCore/Utilities/interface/Exception.h"
 
+#include "boost/property_tree/ptree.hpp"
+
 #include<vector>
 #include<sstream>
 #include<algorithm>
@@ -59,6 +61,7 @@ namespace HPlus {
     virtual void setRun(unsigned run) = 0;
 
     std::pair<double, double> parseUncertainty(const edm::ParameterSet& pset);
+    std::pair<double, double> parseUncertainty(const boost::property_tree::ptree& pset);
 
   protected:
     void varyData(double *eff, double *uncPlus, double *uncMinus) const;

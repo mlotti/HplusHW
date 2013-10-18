@@ -332,7 +332,7 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions, skim=None):
         "WJets_TuneZ2_Fall11":              TaskDefMC(njobsIn=490, njobsOut=10),
         "W2Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=20),
         "W3Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=120, njobsOut=10),
-        "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=20),
+        "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=40),
         "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDefMC(njobsIn=350, njobsOut=35),
         "DYJetsToLL_M10to50_TuneZ2_Fall11": TaskDefMC(njobsIn=300, njobsOut=10),
         "T_t-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=50, njobsOut=5),

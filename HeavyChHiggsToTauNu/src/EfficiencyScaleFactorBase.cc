@@ -3,6 +3,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/Exception.h"
 
+#include "boost/optional/optional.hpp"
+
 #include <limits>
 
 namespace HPlus {
@@ -63,6 +65,24 @@ namespace HPlus {
 
     // Backwards compatibility
     double unc = pset.getParameter<double>("uncertainty");
+    return std::make_pair(unc, unc);
+  }
+
+  std::pair<double, double> EfficiencyScaleFactorBase::parseUncertainty(const boost::property_tree::ptree& pt) {
+    using boost::property_tree::ptree;
+
+    boost::optional<double> uncPlus = pt.get_optional<double>("uncertaintyPlus");
+    if(uncPlus) {
+      double uncMinus = pt.get<double>("uncertaintyMinus");
+      if(fUseMaxUncertainty) {
+        double uncMax = std::max(*uncPlus, uncMinus);
+        return std::make_pair(uncMax, uncMax);
+      }
+      return std::make_pair(*uncPlus, uncMinus);
+    }
+
+    // Backwards compatibility
+    double unc = pt.get<double>("uncertainty");
     return std::make_pair(unc, unc);
   }
 
