@@ -2,10 +2,13 @@
 
 import sys
 import os
-import ROOT
 import tarfile
 from optparse import OptionParser
 from datetime import date, time, datetime
+
+import ROOT
+ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -988,9 +991,11 @@ if __name__ == "__main__":
     ROOT.gROOT.SetBatch() # no flashing canvases
 
     parser = OptionParser(usage="Usage: %prog [options]")
-    parser.add_option("--ref", dest="reference", action="store", help="reference multicrab directory")
+    parser.add_option("--ref", dest="reference", action="store", default=None, help="reference multicrab directory")
+    parser.add_option("--refFile", dest="referenceFile", default=None, help="Reference file (give either this or --ref")
     parser.add_option("--oldref", dest="oldreference", action="store_true", help="use this flag if the reference is using signalAnalysisCounters")
     parser.add_option("--test", dest="test", action="store", help="multicrab directory to be tested/validated")
+    parser.add_option("--testFile", dest="testFile", default=None, help="Test file (give either this or --test")
     parser.add_option("-d", dest="dirs", action="append", help="name of sample directory inside multicrab dir (multiple directories can be specified with multiple -d arguments)")
     parser.add_option("--testDir", dest="testDir", default=None, help="Name of the sample directory in test multicrab dir")
     parser.add_option("-v", dest="variation", action="append", help="name of variation")
@@ -1001,10 +1006,10 @@ if __name__ == "__main__":
 
     # Check that proper arguments were given
     mystatus = True
-    if opts.reference == None:
+    if opts.reference is None and opts.referenceFile is None:
         print "Error: Missing reference multicrab directory!"
         mystatus = False
-    if opts.test == None:
+    if opts.test is None and opts.testFile is None:
         print "Error: Missing multicrab directory for testing/validation!"
         mystatus = False
     if opts.dirs == None:
@@ -1031,10 +1036,16 @@ if __name__ == "__main__":
     kwargs = {}
     if opts.dirs is not None:
         kwargs["includeOnlyTasks"] = opts.dirs[:]
-    refDsetCreator = dataset.readFromMulticrabCfg(directory=opts.reference, **kwargs)
+    if opts.reference is not None:
+        refDsetCreator = dataset.readFromMulticrabCfg(directory=opts.reference, **kwargs)
+    else:
+        refDsetCreator = dataset.readFromRootFiles([("File", opts.referenceFile)])
     if opts.testDir is not None:
         kwargs["includeOnlyTasks"] = [opts.testDir]
-    testDsetCreator = dataset.readFromMulticrabCfg(directory=opts.test, **kwargs)
+    if opts.test is not None:
+        testDsetCreator = dataset.readFromMulticrabCfg(directory=opts.test, **kwargs)
+    else:
+        testDsetCreator = dataset.readFromRootFiles([("File", opts.testFile)])
     myEraList = compareLists(refDsetCreator.getDataEras(), testDsetCreator.getDataEras(), opts.era)
     mySearchModeList = compareLists(refDsetCreator.getSearchModes(), testDsetCreator.getSearchModes(), opts.searchMode)
     myVariationList = compareLists(refDsetCreator.getOptimizationModes(), testDsetCreator.getOptimizationModes(), opts.variation)
