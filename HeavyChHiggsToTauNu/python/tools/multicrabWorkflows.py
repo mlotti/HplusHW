@@ -53,7 +53,7 @@ class MCDatasetHelper:
         if "TTToHplusBWB" in name or "TTToHplusBHminusB" in name:
             # For BR limit LandS expectes WH and HH samples to have ttbar cross section
             crossSection = xsect.backgroundCrossSections.crossSection("TTJets", self.energy)
-        elif "HplusTB" in name:
+        elif "HplusTB" in name or "HplusToTBbar" in name:
             # For sigma*BR limit LandS expects heavy H+ samples to have cross section of 1 pb
             crossSection = 1
         elif "Hplus_taunu" in name:
@@ -485,6 +485,20 @@ datasets.extend([
     MCDataset("HplusTB_M220_ext_Summer12", aod="/HplusTB_M-220_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("HplusTB_M250_ext_Summer12", aod="/HplusTB_M-250_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("HplusTB_M300_ext_Summer12", aod="/HplusTB_M-300_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
+    # Signal H+ -> tb, heavy, 300 kevt/sample
+    MCDataset("HplusToTBbar_M180_Summer12", aod="/HplusToTBbar_M-180_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M200_Summer12", aod="/HplusToTBbar_M-200_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M220_Summer12", aod="/HplusToTBbar_M-220_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M240_Summer12", aod="/HplusToTBbar_M-240_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M250_Summer12", aod="/HplusToTBbar_M-250_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M260_Summer12", aod="/HplusToTBbar_M-260_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M280_Summer12", aod="/HplusToTBbar_M-280_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M300_Summer12", aod="/HplusToTBbar_M-300_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M350_Summer12", aod="/HplusToTBbar_M-350_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M400_Summer12", aod="/HplusToTBbar_M-400_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M500_Summer12", aod="/HplusToTBbar_M-500_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M600_Summer12", aod="/HplusToTBbar_M-600_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
+    MCDataset("HplusToTBbar_M700_Summer12", aod="/HplusToTBbar_M-700_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM"),
     # QCD backgrounds, 6 Mevt/sample
     MCDataset("QCD_Pt30to50_TuneZ2star_Summer12",        aod="/QCD_Pt-30to50_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM"),
     MCDataset("QCD_Pt50to80_TuneZ2star_Summer12",        aod="/QCD_Pt-50to80_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM"),

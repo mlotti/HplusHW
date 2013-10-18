@@ -932,6 +932,20 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "HplusTB_M250_ext_Summer12":       TaskDefMC(TauMET(njobsIn=130, njobsOut=10), QuadJet(njobsIn=350, njobsOut=20)),
         "HplusTB_M300_ext_Summer12":       TaskDefMC(TauMET(njobsIn=130, njobsOut=10), QuadJet(njobsIn=350, njobsOut=20)),
 
+        "HplusToTBbar_M180_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M200_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M220_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M240_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M250_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M260_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M280_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M300_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M350_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M400_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M500_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M600_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+        "HplusToTBbar_M700_Summer12":       TaskDefMC(TauMET(njobsIn=70, njobsOut=7), QuadJet(njobsIn=120,njobsOut=10)),
+
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(TauMET(njobsIn=  5, njobsOut= 1), QuadJet(njobsIn=   5, njobsOut= 1)),
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(TauMET(njobsIn=  5, njobsOut= 1), QuadJet(njobsIn=   5, njobsOut= 1)),
         "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(TauMET(njobsIn= 10, njobsOut= 1), QuadJet(njobsIn=  25, njobsOut= 1)),
@@ -2160,6 +2174,20 @@ def addPattuple_v53_3_taumet(datasets):
         # User mean 4555.6, min 823.8, max 6286.4
         # Mean 226.6 MB, min 39.0 MB, max 239.5 MB
         "HplusTB_M300_ext_Summer12":              TaskDef("/HplusTB_M-300_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+
+        "HplusToTBbar_M180_Summer12":             TaskDef(""),
+        "HplusToTBbar_M200_Summer12":             TaskDef(""),
+        "HplusToTBbar_M220_Summer12":             TaskDef(""),
+        "HplusToTBbar_M240_Summer12":             TaskDef(""),
+        "HplusToTBbar_M250_Summer12":             TaskDef(""),
+        "HplusToTBbar_M260_Summer12":             TaskDef(""),
+        "HplusToTBbar_M280_Summer12":             TaskDef(""),
+        "HplusToTBbar_M300_Summer12":             TaskDef(""),
+        "HplusToTBbar_M350_Summer12":             TaskDef(""),
+        "HplusToTBbar_M400_Summer12":             TaskDef(""),
+        "HplusToTBbar_M500_Summer12":             TaskDef(""),
+        "HplusToTBbar_M600_Summer12":             TaskDef(""),
+        "HplusToTBbar_M700_Summer12":             TaskDef(""),
 
         # 28 events, 10 jobs
         # User mean 2952.2, min 57.5, max 5627.0
