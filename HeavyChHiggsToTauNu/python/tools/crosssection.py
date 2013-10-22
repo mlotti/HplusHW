@@ -102,9 +102,8 @@ backgroundCrossSections = CrossSectionList(
             }),
     CrossSection("TTJets", {
 #            "7": 165.0, # [3,4], approx. NNLO
-#            "8": 225.2, # [7]
-            "7": 172.025, # [10], NNLO+NNLL
-            "8": 245.794, # [10], NNLO+NNLL 
+            "7": 177.3, # TOP LHC WG NNLO+NNLL, see https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
+            "8": 252.9, # TOP LHC WG NNLO+NNLL, see https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
             }),
     CrossSection("WJets", {
             "7": 31314.0, # [2], NNLO

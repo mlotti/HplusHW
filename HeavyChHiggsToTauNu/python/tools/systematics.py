@@ -80,8 +80,8 @@ class ScalarUncertaintyItem:
         return sqrt(self._uncertUp)
 
 _crossSectionUncertainty = {
-    "TTJets": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.053),
-    "TTToHplus": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.053),
+    "TTJets": ScalarUncertaintyItem("xsect", plus=0.053, minus=0.057), # see https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
+    "TTToHplus": ScalarUncertaintyItem("xsect", plus=0.053, minus=0.057), # https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
     "HplusTB": ScalarUncertaintyItem("xsect", 0.30),
     "WJets":  ScalarUncertaintyItem("xsect", 0.05),
     "SingleTop": ScalarUncertaintyItem("xsect", 0.08),
