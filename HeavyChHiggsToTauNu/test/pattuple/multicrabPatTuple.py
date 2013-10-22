@@ -117,6 +117,22 @@ datasets_Signal = [
     "HplusTB_M300_ext_Summer12",
 ]
 
+datasets_Signal_TB = [
+    "HplusToTBbar_M180_Summer12",
+    "HplusToTBbar_M200_Summer12",
+    "HplusToTBbar_M220_Summer12",
+    "HplusToTBbar_M240_Summer12",
+    "HplusToTBbar_M250_Summer12",
+    "HplusToTBbar_M260_Summer12",
+    "HplusToTBbar_M280_Summer12",
+    "HplusToTBbar_M300_Summer12",
+    "HplusToTBbar_M350_Summer12",
+    "HplusToTBbar_M400_Summer12",
+    "HplusToTBbar_M500_Summer12",
+    "HplusToTBbar_M600_Summer12",
+    "HplusToTBbar_M700_Summer12",
+]
+
 datasets_QCD = [
     "QCD_Pt30to50_TuneZ2star_Summer12",
     "QCD_Pt50to80_TuneZ2star_Summer12",
@@ -141,6 +157,7 @@ datasets_TT = [
     "TTJets_SemiLept_TuneZ2star_Summer12",
     "TTJets_Hadronic_TuneZ2star_ext_Summer12",
 ]
+
 
 datasets_EWK = [
     "WJets_TuneZ2star_v1_Summer12",
@@ -184,6 +201,7 @@ elif "quadjet" in workflow:
 tasks = []
 tasks.extend([
     ("Signal", datasets_Signal),
+     ("Signal_TB", datasets_Signal_TB),
     ("QCD_VV_SingleTop", datasets_QCD+datasets_VV+datasets_SingleTop),
     ("TT", datasets_TT),
     ("EWK", datasets_EWK),
