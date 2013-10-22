@@ -64,10 +64,16 @@ def main(opts, args):
         for f in files:
             if os.path.isfile(f):
                 #print "rm "+f
-                os.remove(f)
+                try:
+                    os.remove(f)
+                except OSError, e:
+                    print "Warning: failed to remove %s: %s" % (f, str(e))
             elif os.path.isdir(f):
                 #print "rm -fR "+f
-                shutil.rmtree(f)
+                try:
+                    shutil.rmtree(f)
+                except OSError, e:
+                    print "Warning: failed to remove %s: %s" % (f, str(e))
             else:
                 print "Not removing "+f
         print "Compacted", d
