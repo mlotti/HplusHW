@@ -257,8 +257,9 @@ datasetsMC_2012.extend([
     "HplusTB_M600_Summer12",
     ])
 
-if minimalTBDatasets:
-    datasetsMC_2012 = []
+if not minimalDatasets:
+    if minimalTBDatasets:
+        datasetsMC_2012 = []
     datasetsMC_2012.extend([
     "HplusToTBbar_M180_Summer12",
     "HplusToTBbar_M200_Summer12",
