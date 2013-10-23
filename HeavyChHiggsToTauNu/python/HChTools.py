@@ -27,6 +27,34 @@ def insertPSetContentsTo(src, dst):
     for n in names:
         setattr(dst, n, getattr(src, n))
 
+def dumpPSetAsJson(pset, outputFile=None):
+    def dumpRec(pset):
+        ret = {}
+        for name in pset.parameterNames_():
+            val = getattr(pset, name)
+            if isinstance(val, cms.PSet):
+                ret[name] = dumpRec(val)
+            elif isinstance(val, cms.VPSet):
+                ret[name] = [dumpRec(ps) for ps in val]
+            else:
+                ret[name] = val.value()
+        return ret
+
+    data = {
+        "dataParameters": dumpRec(pset.dataParameters),
+        "mcParameters": dumpRec(pset.mcParameters)
+        }
+
+    import json
+    kwargs = {"sort_keys": True, "indent": 2, "separators": (",", ":")}
+    if outputFile is None:
+        print json.dumps(data, **kwargs)
+    else:
+        f = open(outputFile, "w")
+        json.dump(data, f, **kwargs)
+        f.close()
+
+
 # Add an array of analysis+counter modules by varying one
 # configuration parameter of the analysis module. This is done by
 # cloning a given example module configuration and then calling a
