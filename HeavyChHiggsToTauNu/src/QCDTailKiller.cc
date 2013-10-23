@@ -145,7 +145,7 @@ namespace HPlus {
     } else if (fCutShape == QCDTailKiller::kCircle) {
     // Circular cut
       if (fCutDirection == QCDTailKiller::kCutUpperLeftCorner) {
-        myPassedStatus = std::sqrt(std::pow(180.0-y,2)+std::pow(x,2)) < fCutX;
+        myPassedStatus = std::sqrt(std::pow(180.0-y,2)+std::pow(x,2)) > fCutX;
       } else {
         myPassedStatus = std::sqrt(std::pow(180.0-x,2)+std::pow(y,2)) > fCutX;
       }
