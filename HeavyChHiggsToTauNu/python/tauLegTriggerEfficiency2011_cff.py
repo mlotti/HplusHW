@@ -3,12 +3,21 @@
 
 import FWCore.ParameterSet.Config as cms
 
-def triggerBin(pt, efficiency, uncertainty):
-    return cms.PSet(
-        pt = cms.double(pt),
-        efficiency = cms.double(efficiency),
-        uncertainty = cms.double(uncertainty)
+_prototype = cms.untracked.PSet(
+    data = cms.FileInPath("NOT_YET_SET"),
+    dataSelect = cms.vstring(),
+    mcSelect = cms.string("Fall11_PU_2011AB"),
+    mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
+)
+
+def getTauLegEfficiency(isolation, againstElectron):
+    return _prototype.clone(
+        data = "HiggsAnalysis/HeavyChHiggsToTauNu/data/tauLegTriggerEfficiency2011_%s_%s.json" % (isolation, againstElectron)
     )
+
+
+
+## Below are legacy definitions (although the same files are still in use)
 
 tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium = cms.untracked.PSet(
     # The selected triggers for the efficiency. If one trigger is
@@ -123,18 +132,3 @@ tauLegEfficiency_HIG11019_byTightIsolation_againstElectronMedium = cms.untracked
     mcSelect = cms.string("Fall11_PU_2011A"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
-
-# if __name__ == "__main__":
-#     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as tools
-
-#     sets = [
-# #        "byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium",
-# #        "byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA",
-# #        "byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA",
-# #        "byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium",
-# #        "HIG11019_byTightIsolation_againstElectronMedium",
-#         ]
-#     for s in sets:
-#         dst = "data/tauLegTriggerEfficiency2011_%s.json"%s
-#         tools.dumpPSetAsJson(globals()["tauLegEfficiency_"+s], dst)
-#         print "Created", dst
