@@ -61,7 +61,6 @@ def getEfficiencyJsonFullPath(name, prefix, setname):
     datapath = "HiggsAnalysis/HeavyChHiggsToTauNu/data"
     fullprefix = os.path.join(datapath, prefix)
     fullpath = fullprefix + "_%s.json" % setname
-    print fullpath
     if not os.path.exists(os.path.join(os.environ["CMSSW_BASE"], "src", fullpath)):
         globprefix = os.path.join(os.environ["CMSSW_BASE"], "src", fullprefix+"_")
         available = glob.glob(globprefix+"*.json")
