@@ -688,14 +688,8 @@ def cloneForHeavyAnalysis(lightModule):
 # Set trigger efficiency / scale factor depending on tau selection params
 
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele, triggerEfficiency, leg):
-    myString = "%sLegEfficiency_%s_%s_%s" % (leg, tausele.isolationDiscriminator.value(),tausele.againstMuonDiscriminator.value(),tausele.againstElectronDiscriminator.value())
-    myScaleFactors = getattr(triggerEfficiency, myString, None)
-    if myScaleFactors == None:
-        print "Supported trigger tau leg scale factor options are:"
-        for item in dir(triggerEfficiency):
-            if leg+"LegEfficiency" in item:
-                print "  ",item
-        raise Exception("Error: no scale factors are supported for '%s'!"%myString)
+    myString = "%s_%s_%s" % (tausele.isolationDiscriminator.value(),tausele.againstMuonDiscriminator.value(),tausele.againstElectronDiscriminator.value())
+    myScaleFactors = triggerEfficiency.getEfficiency(tausele.isolationDiscriminator.value(), tausele.againstMuonDiscriminator.value(), tausele.againstElectronDiscriminator.value())
     print "Trigger %s leg scale factors set to %s" % (leg, myString)
     myScaleFactors.variationEnabled = cms.bool(False)
     myScaleFactors.useMaxUncertainty = cms.bool(True)
@@ -704,14 +698,8 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele, triggerEfficiency, leg):
 # Set trigger efficiency / scale factor for low purity depending on tau selection params
 def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(tausele):
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2012lowPurity_cff as tauTriggerEfficiency
-    myString = "tauLegEfficiency_%s_%s_%s" % (tausele.isolationDiscriminator.value(),tausele.againstMuonDiscriminator.value(),tausele.againstElectronDiscriminator.value())
-    myScaleFactors = getattr(tauTriggerEfficiency, myString, None)
-    if myScaleFactors == None:
-        print "Supported low purity trigger tau leg scale factor options are:"
-        for item in dir(tauTriggerEfficiency):
-            if "tauLegEfficiency" in item:
-                print "  ",item
-        raise Exception("Error: no tau trigger low purity scale factors are supported for '%s'!"%myString)
+    myString = "%s_%s_%s" % (tausele.isolationDiscriminator.value(),tausele.againstMuonDiscriminator.value(),tausele.againstElectronDiscriminator.value())
+    myScaleFactors = tauTriggerEfficiency.getEfficiency(tausele.isolationDiscriminator.value(), tausele.againstMuonDiscriminator.value(), tausele.againstElectronDiscriminator.value())
     print "Trigger tau leg low purity scale factors set to %s" % (myString)
     myScaleFactors.variationEnabled = cms.bool(False)
     myScaleFactors.useMaxUncertainty = cms.bool(True)
