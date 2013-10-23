@@ -6,6 +6,7 @@ import hashlib
 import imp
 import re
 import ROOT
+import OrderedDict
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
 def higgsAnalysisPath():
@@ -222,3 +223,27 @@ def addToLegend(legend, rootObject, legendLabel, legendStyle, canModify=False):
         legend.AddEntry(None, lab, "")
 
     return ret
+
+## Class for holding multiple objects in a nice way
+class MultiObject:
+    def __init__(self):
+        self._items = OrderedDict.OrderedDict()
+
+    def add(self, name, item):
+        if name in self._items:
+            raise Exception("Item %s already exists" % name)
+        self._items[name] = item
+
+    def get(self, name):
+        return self._items[name]
+
+    def forEach(self, function):
+        return [function(item) for item in self._items.itervalues()]
+
+    ## Delegate all other calls to the contained objects
+    def __getattr__(self, name):
+        # https://mail.python.org/pipermail/python-list/2011-February/598125.html
+        def _multiplex(*args, **kwargs):
+            return [getattr(item, name)(*args, **kwargs) for item in self._items.itervalues()]
+        return _multiplex
+

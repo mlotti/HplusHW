@@ -48,6 +48,10 @@ if runPatOnTheFly:
 minimalDatasets = True
 #minimalDatasets = False
 
+# For H+ -> tb samples
+#minimalTBDatasets = True
+minimalTBDatasets = False
+
 
 # Uncomment below the datasets you want to process
 # The dataset definitions are in python/tools/multicrabWorkflows.py
@@ -251,7 +255,29 @@ datasetsMC_2012.extend([
     "HplusTB_M400_Summer12",
     "HplusTB_M500_Summer12",
     "HplusTB_M600_Summer12",
+    ])
 
+if not minimalDatasets:
+    if minimalTBDatasets:
+        datasetsMC_2012 = []
+    datasetsMC_2012.extend([
+    "HplusToTBbar_M180_Summer12",
+    "HplusToTBbar_M200_Summer12",
+    "HplusToTBbar_M220_Summer12",
+    "HplusToTBbar_M240_Summer12",
+    "HplusToTBbar_M250_Summer12",
+    "HplusToTBbar_M260_Summer12",
+    "HplusToTBbar_M280_Summer12",
+    "HplusToTBbar_M300_Summer12",
+    "HplusToTBbar_M350_Summer12",
+    "HplusToTBbar_M400_Summer12",
+    "HplusToTBbar_M500_Summer12",
+    "HplusToTBbar_M600_Summer12",
+    "HplusToTBbar_M700_Summer12",
+    ])
+
+if not minimalTBDatasets:
+    datasetsMC_2012.extend([
     "QCD_Pt30to50_TuneZ2star_Summer12",
     "QCD_Pt50to80_TuneZ2star_Summer12",
     "QCD_Pt80to120_TuneZ2star_Summer12",
@@ -261,7 +287,9 @@ datasetsMC_2012.extend([
     "QCD_Pt300to470_TuneZ2star_Summer12",
     "QCD_Pt300to470_TuneZ2star_v2_Summer12",
     "QCD_Pt300to470_TuneZ2star_v3_Summer12",
+    ])
 
+datasetsMC_2012.extend([
     "WW_TuneZ2star_Summer12",
     "WZ_TuneZ2star_Summer12",
     "ZZ_TuneZ2star_Summer12",

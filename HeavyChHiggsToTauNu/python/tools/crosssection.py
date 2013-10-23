@@ -92,19 +92,18 @@ backgroundCrossSections = CrossSectionList(
             "8": 17.654, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation, this is slightly questionmark, since the computed value is for m(ll) > 12
             }),
     CrossSection("TTJets_FullLept", {
-            "8": 245.794* 26.1975/249.50, # [10], BR from [11]
+            "8": 252.9* 26.1975/249.50, # [10], BR from [11]
             }),
     CrossSection("TTJets_SemiLept", {
-            "8": 245.794* 109.281/249.50, # [10], BR from [11]
+            "8": 252.9* 109.281/249.50, # [10], BR from [11]
             }),
     CrossSection("TTJets_Hadronic", {
-            "8": 245.794* 114.0215/249.50, # [10], BR from [11]
+            "8": 252.9* 114.0215/249.50, # [10], BR from [11]
             }),
     CrossSection("TTJets", {
 #            "7": 165.0, # [3,4], approx. NNLO
-#            "8": 225.2, # [7]
-            "7": 172.025, # [10], NNLO+NNLL
-            "8": 245.794, # [10], NNLO+NNLL 
+            "7": 177.3, # TOP LHC WG NNLO+NNLL, see https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
+            "8": 252.9, # TOP LHC WG NNLO+NNLL, see https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
             }),
     CrossSection("WJets", {
             "7": 31314.0, # [2], NNLO

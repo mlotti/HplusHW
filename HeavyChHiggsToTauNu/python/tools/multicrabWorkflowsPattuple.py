@@ -932,6 +932,20 @@ def addPattuple_53X_v2(version, datasets, updateDefinitions, skim=None):
         "HplusTB_M250_ext_Summer12":       TaskDefMC(TauMET(njobsIn=130, njobsOut=10), QuadJet(njobsIn=350, njobsOut=20)),
         "HplusTB_M300_ext_Summer12":       TaskDefMC(TauMET(njobsIn=130, njobsOut=10), QuadJet(njobsIn=350, njobsOut=20)),
 
+        "HplusToTBbar_M180_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M200_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M220_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M240_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M250_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M260_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M280_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M300_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M350_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M400_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M500_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M600_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+        "HplusToTBbar_M700_Summer12":       TaskDefMC(TauMET(njobsIn=30, njobsOut=3), QuadJet(njobsIn=50, njobsOut=5)),
+
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(TauMET(njobsIn=  5, njobsOut= 1), QuadJet(njobsIn=   5, njobsOut= 1)),
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(TauMET(njobsIn=  5, njobsOut= 1), QuadJet(njobsIn=   5, njobsOut= 1)),
         "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(TauMET(njobsIn= 10, njobsOut= 1), QuadJet(njobsIn=  25, njobsOut= 1)),
@@ -2160,6 +2174,59 @@ def addPattuple_v53_3_taumet(datasets):
         # User mean 4555.6, min 823.8, max 6286.4
         # Mean 226.6 MB, min 39.0 MB, max 239.5 MB
         "HplusTB_M300_ext_Summer12":              TaskDef("/HplusTB_M-300_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+
+        # 0 events, 30 jobs # note that the event counts are a bit buggy for tb
+        # User mean 1775.5, min 1265.6, max 2568.2
+        # Mean 91.8 MB, min 85.3 MB, max 97.7 MB
+        "HplusToTBbar_M180_Summer12": TaskDef("/HplusToTBbar_M-180_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 23741 events, 30 jobs
+        # User mean 2156.0, min 1311.5, max 2984.6
+        # Mean 92.6 MB, min 86.7 MB, max 99.4 MB
+        "HplusToTBbar_M200_Summer12": TaskDef("/HplusToTBbar_M-200_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 6351 events, 30 jobs
+        # User mean 2173.2, min 1347.1, max 2988.9
+        # Mean 94.3 MB, min 84.7 MB, max 102.3 MB
+        "HplusToTBbar_M220_Summer12": TaskDef("/HplusToTBbar_M-220_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 0 events, 30 jobs
+        # User mean 1900.7, min 1371.5, max 2549.5
+        # Mean 98.0 MB, min 89.1 MB, max 104.5 MB
+        "HplusToTBbar_M240_Summer12": TaskDef("/HplusToTBbar_M-240_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 2 events, 31 jobs
+        # User mean 2068.9, min 116.6, max 3040.6
+        # Mean 95.4 MB, min 3.2 MB, max 103.9 MB
+        "HplusToTBbar_M250_Summer12": TaskDef("/HplusToTBbar_M-250_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 0 events, 31 jobs
+        # User mean 2405.6, min 117.8, max 3767.9
+        # Mean 97.9 MB, min 3.3 MB, max 106.1 MB
+        "HplusToTBbar_M260_Summer12": TaskDef("/HplusToTBbar_M-260_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 0 events, 30 jobs
+        # User mean 2174.9, min 1503.3, max 3450.9
+        # Mean 105.4 MB, min 99.6 MB, max 113.0 MB
+        "HplusToTBbar_M280_Summer12": TaskDef("/HplusToTBbar_M-280_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 1876 events, 30 jobs
+        # User mean 2350.6, min 1569.7, max 2955.5
+        # Mean 110.8 MB, min 102.7 MB, max 117.4 MB
+        "HplusToTBbar_M300_Summer12": TaskDef("/HplusToTBbar_M-300_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 29937 events, 31 jobs
+        # User mean 2421.1, min 978.9, max 3796.0
+        # Mean 117.0 MB, min 58.5 MB, max 127.5 MB
+        "HplusToTBbar_M350_Summer12": TaskDef("/HplusToTBbar_M-350_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 33218 events, 31 jobs
+        # User mean 2662.8, min 210.6, max 3665.7
+        # Mean 129.5 MB, min 11.7 MB, max 145.1 MB
+        "HplusToTBbar_M400_Summer12": TaskDef("/HplusToTBbar_M-400_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 38613 events, 31 jobs
+        # User mean 2672.5, min 708.0, max 4040.4
+        # Mean 151.5 MB, min 52.9 MB, max 163.9 MB
+        "HplusToTBbar_M500_Summer12": TaskDef("/HplusToTBbar_M-500_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3b-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 4831 events, 31 jobs
+        # User mean 3040.4, min 1236.5, max 4016.1
+        # Mean 165.6 MB, min 85.6 MB, max 176.6 MB
+        "HplusToTBbar_M600_Summer12": TaskDef("/HplusToTBbar_M-600_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
+        # 297 events, 31 jobs
+        # User mean 3040.6, min 719.6, max 4980.6
+        # Mean 178.8 MB, min 44.3 MB, max 188.8 MB
+        "HplusToTBbar_M700_Summer12": TaskDef("/HplusToTBbar_M-700_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_pattuple_taumet_v53_3-273552554d4b0d57d96245d6e3a6de1a/USER"),
 
         # 28 events, 10 jobs
         # User mean 2952.2, min 57.5, max 5627.0
