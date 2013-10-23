@@ -667,18 +667,18 @@ def cloneForHeavyAnalysis(lightModule):
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    myScaleFactors = tauTriggerEfficiency.getTauLegEfficiency("byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
+    myScaleFactors = tauTriggerEfficiency.getEfficiency("byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
     myScaleFactors.variationEnabled = cms.bool(False)
     myScaleFactors.useMaxUncertainty = cms.bool(True)
     return myScaleFactors
     # FIXME
-    return tauTriggerEfficiency.getTauLegEfficiency(tauSele.isolationDiscriminator.value(), tauSele.againstElectronDiscriminator.value())
+    return tauTriggerEfficiency.getEfficiency(tauSele.isolationDiscriminator.value(), tauSele.againstElectronDiscriminator.value())
     raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byLooseCombinedIsolationDeltaBetaCorr3Hits', 'byMediumCombinedIsolationDeltaBetaCorr3Hits'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
 # Set trigger efficiency / scale factor for low purity depending on tau selection params
 def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(tausele):
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency # FIXME
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    myScaleFactors = tauTriggerEfficiency.getTauLegEfficiency("byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
+    myScaleFactors = tauTriggerEfficiency.getEfficiency("byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
     myScaleFactors.variationEnabled = cms.bool(False)
     myScaleFactors.useMaxUncertainty = cms.bool(True)
     return myScaleFactors

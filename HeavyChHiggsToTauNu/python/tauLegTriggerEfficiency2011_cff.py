@@ -2,6 +2,7 @@
 # by HiggsAnalysis/TriggerEfficiency/test/plotTauEfficiency.py
 
 import FWCore.ParameterSet.Config as cms
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 
 _prototype = cms.untracked.PSet(
     data = cms.FileInPath("NOT_YET_SET"),
@@ -10,9 +11,9 @@ _prototype = cms.untracked.PSet(
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
-def getTauLegEfficiency(isolation, againstElectron):
+def getEfficiency(isolation, againstElectron):
     return _prototype.clone(
-        data = "HiggsAnalysis/HeavyChHiggsToTauNu/data/tauLegTriggerEfficiency2011_%s_%s.json" % (isolation, againstElectron)
+        data = HChTools.getEfficiencyJsonFullPath("tau trigger scale factors", "tauLegTriggerEfficiency2011", "%s_%s" % (isolation, againstElectron))
     )
 
 
