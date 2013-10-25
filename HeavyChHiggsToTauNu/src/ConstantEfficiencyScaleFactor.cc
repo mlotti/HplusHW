@@ -6,6 +6,9 @@
 #include<algorithm>
 #include<iostream>
 
+#include "boost/property_tree/ptree.hpp"
+#include "boost/property_tree/json_parser.hpp"
+
 namespace {
   template <typename T>
   T square(T x) {
@@ -23,9 +26,6 @@ namespace HPlus {
     if(getMode() == kDisabled)
       return;
 
-    edm::ParameterSet dataParameters = iConfig.getParameter<edm::ParameterSet>("dataParameters");
-    edm::ParameterSet mcParameters = iConfig.getParameter<edm::ParameterSet>("mcParameters");
-
     std::vector<std::string> dataSelects = iConfig.getParameter<std::vector<std::string> >("dataSelect");
     std::string mcSelect = iConfig.getParameter<std::string>("mcSelect");
 
@@ -33,31 +33,43 @@ namespace HPlus {
       throw cms::Exception("Configuration") << "ConstantEfficiencyScaleFactor: Must select at least one data run period in dataSelect" << std::endl;
     }
 
-    // Get MC efficiencies for the given MC era
-    edm::ParameterSet pset = mcParameters.getParameter<edm::ParameterSet>(mcSelect);
-    fData.fEffMCValues = pset.getParameter<double>("efficiency");
-    std::pair<double, double> uncPlusMinus = parseUncertainty(pset);
-    fData.fEffMCUncertaintiesPlus = uncPlusMinus.first;
-    fData.fEffMCUncertaintiesMinus = uncPlusMinus.second;
-
-    // Get data efficiencies for the given run periods, calculate the
-    // total luminosity of those periods for the weighted average of
-    // scale factors
+    // Read the efficiency data
+    edm::FileInPath dataPath = iConfig.getParameter<edm::FileInPath>("data");
     double totalLuminosity = 0;
-    for(std::vector<std::string>::const_iterator iSelect = dataSelects.begin(); iSelect != dataSelects.end(); ++iSelect) {
-      edm::ParameterSet pset = dataParameters.getParameter<edm::ParameterSet>(*iSelect);
-      EfficiencyScaleFactorData<double>::DataValue dv;
-      dv.firstRun = pset.getParameter<unsigned>("firstRun");
-      dv.lastRun = pset.getParameter<unsigned>("lastRun");
-      dv.luminosity = pset.getParameter<double>("luminosity");
-      totalLuminosity += dv.luminosity;
+    try {
+      using boost::property_tree::ptree;
+      ptree data;
+      boost::property_tree::read_json(dataPath.fullPath(), data);
 
-      dv.values = pset.getParameter<double>("efficiency");
-      uncPlusMinus = parseUncertainty(pset);
-      dv.uncertaintiesPlus = uncPlusMinus.first;
-      dv.uncertaintiesMinus = uncPlusMinus.second;
+      // Get MC efficiencies for the given MC era
+      ptree& mcParameters = data.get_child("mcParameters").get_child(mcSelect);
+      fData.fEffMCValues = mcParameters.get<double>("efficiency");
+      std::pair<double, double> uncPlusMinus = parseUncertainty(mcParameters);
+      fData.fEffMCUncertaintiesPlus = uncPlusMinus.first;
+      fData.fEffMCUncertaintiesMinus = uncPlusMinus.second;
 
-      fData.fDataValues.push_back(dv);
+      // Get data efficiencies for the given run periods, calculate the
+      // total luminosity of those periods for the weighted average of
+      // scale factors
+      for(std::vector<std::string>::const_iterator iSelect = dataSelects.begin(); iSelect != dataSelects.end(); ++iSelect) {
+        ptree& pset = data.get_child("dataParameters").get_child(*iSelect);
+        EfficiencyScaleFactorData<double>::DataValue dv;
+        dv.firstRun = pset.get<unsigned>("firstRun");
+        dv.lastRun = pset.get<unsigned>("lastRun");
+        dv.luminosity = pset.get<double>("luminosity");
+        totalLuminosity += dv.luminosity;
+
+        dv.values = pset.get<double>("efficiency");
+        uncPlusMinus = parseUncertainty(pset);
+        dv.uncertaintiesPlus = uncPlusMinus.first;
+        dv.uncertaintiesMinus = uncPlusMinus.second;
+
+        fData.fDataValues.push_back(dv);
+      }
+
+    } catch(const std::exception& e) {
+      throw cms::Exception("Configuration") << "Error in parsing efficiency JSON" << dataPath.fullPath()
+                                            << ":\n" << e.what();
     }
 
     // Calculate the scale factor in tau pt bins as data/MC, where

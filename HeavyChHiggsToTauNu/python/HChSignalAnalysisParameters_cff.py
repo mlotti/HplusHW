@@ -427,7 +427,8 @@ invMassReco = cms.untracked.PSet(
     #topInvMassCutName = cms.untracked.string("None")
     topInvMassLowerCut = cms.untracked.double(-1.0), # Negative value means no cut. This is currently the default.
     topInvMassUpperCut = cms.untracked.double(-1.0),  # Negative value means no cut. This is currently the default.
-    pzSelectionMethod = cms.untracked.string("DeltaEtaMin"),
+    pzSelectionMethod = cms.untracked.string("DeltaEtaMin"), # Method of selecting the pZ of neutrino for real solutions
+    metSelectionMethod = cms.untracked.string("SmallestMagnitude"), #Method of selecting MET for complex solutions
     )
 
 topReconstruction = cms.untracked.string("None") # Options: None, chi, std, Bselection, Wselection
@@ -667,27 +668,18 @@ def cloneForHeavyAnalysis(lightModule):
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    myScaleFactors = tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium  # FIXME changed default to best so far
+    myScaleFactors = tauTriggerEfficiency.getEfficiency("byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
     myScaleFactors.variationEnabled = cms.bool(False)
     myScaleFactors.useMaxUncertainty = cms.bool(True)
     return myScaleFactors
     # FIXME
-    if tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr3Hits":
-        if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
-        elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
-            return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA
-    elif tausele.isolationDiscriminator.value() == "byMediumCombinedIsolationDeltaBetaCorr3Hits":
-        if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium
-        elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
-            return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA
+    return tauTriggerEfficiency.getEfficiency(tauSele.isolationDiscriminator.value(), tauSele.againstElectronDiscriminator.value())
     raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byLooseCombinedIsolationDeltaBetaCorr3Hits', 'byMediumCombinedIsolationDeltaBetaCorr3Hits'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
 # Set trigger efficiency / scale factor for low purity depending on tau selection params
 def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(tausele):
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency # FIXME
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    myScaleFactors = tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium # FIXME changed default to best so far
+    myScaleFactors = tauTriggerEfficiency.getEfficiency("byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
     myScaleFactors.variationEnabled = cms.bool(False)
     myScaleFactors.useMaxUncertainty = cms.bool(True)
     return myScaleFactors
@@ -698,8 +690,7 @@ tauTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
 tauTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
 
 metTriggerEfficiencyScaleFactor = cms.untracked.PSet(
-    dataParameters = cms.PSet(),
-    mcParameters = cms.PSet(),
+#    data = cms.FileInPath("dummy")
     dataSelect = cms.vstring(),
     mcSelect = cms.string(""),
     mode = cms.untracked.string("disabled"), # dataEfficiency, scaleFactor, disabled

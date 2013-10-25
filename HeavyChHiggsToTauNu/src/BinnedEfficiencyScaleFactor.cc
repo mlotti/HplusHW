@@ -7,6 +7,10 @@
 #include<algorithm>
 #include<iostream>
 
+#include "boost/property_tree/ptree.hpp"
+#include "boost/property_tree/json_parser.hpp"
+#include "boost/foreach.hpp"
+
 namespace {
   bool doubleEqual(double a, double b) {
     const double epsilon = 0.0001;
@@ -34,9 +38,6 @@ namespace HPlus {
     if(getMode() == kDisabled)
       return;
 
-    edm::ParameterSet dataParameters = iConfig.getParameter<edm::ParameterSet>("dataParameters");
-    edm::ParameterSet mcParameters = iConfig.getParameter<edm::ParameterSet>("mcParameters");
-
     std::vector<std::string> dataSelects = iConfig.getParameter<std::vector<std::string> >("dataSelect");
     std::string mcSelect = iConfig.getParameter<std::string>("mcSelect");
 
@@ -44,53 +45,63 @@ namespace HPlus {
       throw cms::Exception("Configuration") << "BinnedEfficiencyScaleFactor: Must select at least one data run period in dataSelect" << std::endl;
     }
 
-    // Get MC efficiencies for the given MC era
-    edm::ParameterSet pset = mcParameters.getParameter<edm::ParameterSet>(mcSelect);
-    std::vector<edm::ParameterSet> mcBins = pset.getParameter<std::vector<edm::ParameterSet> >("bins");
-    for(size_t i=0; i<mcBins.size(); ++i) {
-      double bin = mcBins[i].getParameter<double>(quantity);
-      if(!fBinLowEdges.empty() && bin <= fBinLowEdges.back())
-        throw cms::Exception("Configuration") << "BinnedEfficiencyScaleFactor:  Bins must be in an ascending order of lowEdges (new "
-                                              << bin << " previous " << fBinLowEdges.back() << ")"
-                                              << " in mcParameters." << mcSelect
-                                              << std::endl;
-
-      fBinLowEdges.push_back(bin);
-      fData.fEffMCValues.push_back(mcBins[i].getParameter<double>("efficiency"));
-      std::pair<double, double> uncPlusMinus = parseUncertainty(mcBins[i]);
-      fData.fEffMCUncertaintiesPlus.push_back(uncPlusMinus.first);
-      fData.fEffMCUncertaintiesMinus.push_back(uncPlusMinus.second);
-    }
-
-    // Get data efficiencies for the given run periods, calculate the
-    // total luminosity of those periods for the weighted average of
-    // scale factors
+    // Read the efficiency data
+    edm::FileInPath dataPath = iConfig.getParameter<edm::FileInPath>("data");
     double totalLuminosity = 0;
-    for(std::vector<std::string>::const_iterator iSelect = dataSelects.begin(); iSelect != dataSelects.end(); ++iSelect) {
-      edm::ParameterSet pset = dataParameters.getParameter<edm::ParameterSet>(*iSelect);
+    try {
+      using boost::property_tree::ptree;
+      ptree data;
+      boost::property_tree::read_json(dataPath.fullPath(), data);
 
-      std::vector<edm::ParameterSet> dataBins = pset.getParameter<std::vector<edm::ParameterSet> >("bins");
-      if(dataBins.size() != fBinLowEdges.size())
-        throw cms::Exception("Configuration") << "TauTriggerEfficiencyScaleFactor: dataParameters." << *iSelect << " must have same number of bins as mcParameters." << *iSelect << ", now data has " << dataBins.size() << " while mc has " << fBinLowEdges.size() << std::endl;
-
-      EffData::DataValue dv;
-      dv.firstRun = pset.getParameter<unsigned>("firstRun");
-      dv.lastRun = pset.getParameter<unsigned>("lastRun");
-      dv.luminosity = pset.getParameter<double>("luminosity");
-      totalLuminosity += dv.luminosity;
-
-      for(size_t i=0; i<dataBins.size(); ++i) {
-        double bin = dataBins[i].getParameter<double>(quantity);
-
-        if(!doubleEqual(bin, fBinLowEdges[i]))
-          throw cms::Exception("Configuration") << "TauTriggerEfficiencyScaleFactor: Bin " << i << " in dataParameters." << *iSelect << " must have same low edge as mcParameters" << *iSelect << ", now data hs " << bin << " while mc has " << fBinLowEdges[i] << std::endl;
-
-        dv.values.push_back(dataBins[i].getParameter<double>("efficiency"));
-        std::pair<double, double> uncPlusMinus = parseUncertainty(dataBins[i]);
-        dv.uncertaintiesPlus.push_back(uncPlusMinus.first);
-        dv.uncertaintiesMinus.push_back(uncPlusMinus.second);
+      // Get MC efficiencies for the given MC era
+      ptree& mcParameters = data.get_child("mcParameters").get_child(mcSelect);
+      BOOST_FOREACH(ptree::value_type& v, mcParameters.get_child("bins")) {
+        double bin = v.second.get<double>(quantity);
+        if(!fBinLowEdges.empty() && bin <= fBinLowEdges.back())
+          throw cms::Exception("Configuration") << "BinnedEfficiencyScaleFactor:  Bins must be in an ascending order of lowEdges (new "
+                                                << bin << " previous " << fBinLowEdges.back() << ")"
+                                                << " in mcParameters." << mcSelect
+                                                << std::endl;
+        fBinLowEdges.push_back(bin);
+        fData.fEffMCValues.push_back(v.second.get<double>("efficiency"));
+        std::pair<double, double> uncPlusMinus = parseUncertainty(v.second);
+        fData.fEffMCUncertaintiesPlus.push_back(uncPlusMinus.first);
+        fData.fEffMCUncertaintiesMinus.push_back(uncPlusMinus.second);
       }
-      fData.fDataValues.push_back(dv);
+
+      // Get data efficiencies for the given run periods, calculate the
+      // total luminosity of those periods for the weighted average of
+      // scale factors
+      for(std::vector<std::string>::const_iterator iSelect = dataSelects.begin(); iSelect != dataSelects.end(); ++iSelect) {
+        ptree& pset = data.get_child("dataParameters").get_child(*iSelect);
+        ptree& dataBins = pset.get_child("bins");
+        if(dataBins.size() != fBinLowEdges.size())
+          throw cms::Exception("Configuration") << "TauTriggerEfficiencyScaleFactor: dataParameters." << *iSelect << " must have same number of bins as mcParameters." << mcSelect << ", now data has " << dataBins.size() << " while mc has " << fBinLowEdges.size() << std::endl;
+
+        EffData::DataValue dv;
+        dv.firstRun = pset.get<unsigned>("firstRun");
+        dv.lastRun = pset.get<unsigned>("lastRun");
+        dv.luminosity = pset.get<double>("luminosity");
+        totalLuminosity += dv.luminosity;
+
+        int i=0;
+        BOOST_FOREACH(ptree::value_type& v, dataBins) {
+          double bin = v.second.get<double>(quantity);
+
+          if(!doubleEqual(bin, fBinLowEdges[i]))
+            throw cms::Exception("Configuration") << "TauTriggerEfficiencyScaleFactor: Bin " << i << " in dataParameters." << *iSelect << " must have same low edge as mcParameters" << mcSelect << ", now data hs " << bin << " while mc has " << fBinLowEdges[i] << std::endl;
+
+          dv.values.push_back(v.second.get<double>("efficiency"));
+          std::pair<double, double> uncPlusMinus = parseUncertainty(v.second);
+          dv.uncertaintiesPlus.push_back(uncPlusMinus.first);
+          dv.uncertaintiesMinus.push_back(uncPlusMinus.second);
+          ++i;
+        }
+        fData.fDataValues.push_back(dv);
+      }
+    } catch(const std::exception& e) {
+      throw cms::Exception("Configuration") << "Error in parsing efficiency JSON" << dataPath.fullPath()
+                                            << ":\n" << e.what();
     }
 
     // Calculate the scale factor in tau pt bins as data/MC, where
