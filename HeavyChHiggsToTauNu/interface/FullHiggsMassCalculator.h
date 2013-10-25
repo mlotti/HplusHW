@@ -171,8 +171,8 @@ namespace HPlus {
     bool modifiedMETSolutionOneWasSelected(FullHiggsMassCalculator::Data& output);
     bool modifiedMETSolutionTwoWasSelected(FullHiggsMassCalculator::Data& output);
     void doEventClassification(const edm::Event& iEvent, TVector3& bJetVector, TVector3& tauVector, 
-			       TVector3& METVector, FullHiggsMassCalculator::Data& output, 
-			       const GenParticleAnalysis::Data* genDataPtr = NULL);
+			       TVector3& METVector, FullHiggsMassCalculator::Data& output, const METSelection::Data& metData,
+			       const GenParticleAnalysis::Data* genDataPtr = NULL );
     void applyCuts(FullHiggsMassCalculator::Data& output);
     void doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
     void analyzeMETComposition(TVector3& recoMETVector, TVector3& genBothNeutrinosVector, TVector3& genMETVector);
@@ -239,6 +239,7 @@ namespace HPlus {
     WrappedTH2* h2TopMassVsInvariantMass;
     WrappedTH2* h2TopMassVsNeutrinoNumber;
     WrappedTH2* h2InvariantMassVsNeutrinoNumber;
+    WrappedTH2* h2MetSignificanceVsBadMet;
 
     WrappedTH1* hTopMassSolution;
     WrappedTH1* hSelectedNeutrinoPzSolution;

@@ -176,6 +176,9 @@ namespace HPlus {
     h2TransverseMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kSystematics, myDir, "TransMassVsInvMass", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
 				      100, 0, 500, 100, 0, 500);
+    h2MetSignificanceVsBadMet = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "METSignificanceVsBadMet", 
+				      "METSignificnce;E_{T}^{miss} Significance; bad E_{T}^{miss};Events",
+				      100, 0, 500, 100, 0, 500);
     h2TransverseMassVsInvariantMassPositiveDiscriminant = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, 
 										    "TransMassVsInvMassPositiveDiscriminant", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
@@ -384,8 +387,7 @@ namespace HPlus {
     if (output.bPassedEvent) hMETSignificance->Fill(metData.getSelectedMET()->significance());
     // Classify MC events according to what was identified correctly and what was not
     if (!iEvent.isRealData())
-      doEventClassification(iEvent, recoBJetVector, recoTauVector, recoMETVector, output, genDataPtr);
-
+      doEventClassification(iEvent, recoBJetVector, recoTauVector, recoMETVector, output, metData, genDataPtr);
 
     // The rest of the analysis is only done for MC signal events with a light charged Higgs (at least for now)
     if (iEvent.isRealData() || !eventHasLightChargedHiggs(iEvent)) return output;
@@ -990,7 +992,7 @@ namespace HPlus {
   }
 
   void FullHiggsMassCalculator::doEventClassification(const edm::Event& iEvent, TVector3& bJetVector, TVector3& tauVector,
-						      TVector3& METVector, FullHiggsMassCalculator::Data& output,
+						      TVector3& METVector, FullHiggsMassCalculator::Data& output, const METSelection::Data& metData,
 						      const GenParticleAnalysis::Data* genDataPtr) {
     if (!output.bPassedEvent) return; // Only passing events are classified; remove this if desired!
     increment(count_passedEvent);
@@ -1092,7 +1094,10 @@ namespace HPlus {
       output.eEventClassCode = eOnlyBadMET;
       eventClassName = "OnlyBadMET";
       increment(eventClass_OnlyBadMET_SubCount);
-      if (output.bPassedEvent) hHiggsMassBadMET->Fill(output.fHiggsMassSolutionSelected);
+      if (output.bPassedEvent){
+	hHiggsMassBadMET->Fill(output.fHiggsMassSolutionSelected);
+	h2MetSignificanceVsBadMet->Fill(metData.getSelectedMET()->significance(), metData.getSelectedMET()->pt());
+      }
       break;
     case eOnlyBadTauAndMET:
       output.eEventClassCode = eOnlyBadTauAndMET;
