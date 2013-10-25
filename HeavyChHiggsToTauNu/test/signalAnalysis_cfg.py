@@ -43,9 +43,11 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #doBTagScan=True,
                         #doSystematics=True,
                         #histogramAmbientLevel = "Vital",
-                        #doOptimisation=True, optimisationScheme="myOptimisation"
+                        #doOptimisation=True, optimisationScheme="metScenarios",
+                        #doOptimisation=True, optimisationScheme="jetScenarios",
+                        #doOptimisation=True, optimisationScheme="btagSymmetricScenarios",
+                        #doOptimisation=True, optimisationScheme="myOptimisation",
                         )
-
 
 process = builder.buildSignalAnalysis()
 

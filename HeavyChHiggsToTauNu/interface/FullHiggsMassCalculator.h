@@ -172,7 +172,7 @@ namespace HPlus {
 
     double fTopInvMassLowerCut;
     double fTopInvMassUpperCut;
-    std::string fPzSelectionMethod;
+    PzSelectionMethod fPzSelectionMethod;
 
     // Counters
     // Discriminant and neutrino p_z calculation

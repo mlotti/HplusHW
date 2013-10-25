@@ -123,13 +123,27 @@ def main(opts):
             print "Submitting %d jobs from task %s" % (len(jobs), task)
             print "Command", " ".join(command)
             if not opts.test:
-                ret = subprocess.call(command)
-                if ret != 0:
-                    message = "Command '%s' failed with exit code %d" % (" ".join(command), ret)
-                    if opts.allowFails:
-                        print message
+                timesLeft = 1
+                if opts.tryAgainTimes > 0:
+                    timesLeft = opts.tryAgainTimes
+                while timesLeft > 0:
+                    ret = subprocess.call(command)
+                    if ret == 0:
+                        break
                     else:
-                        raise Exception()
+                        timesLeft -= 1
+                        message = "Command '%s' failed with exit code %d" % (" ".join(command), ret)
+                        if opts.allowFails:
+                            print message
+                        if opts.tryAgainTimes > 0:
+                            print message
+                            if timesLeft > 0:
+                                print "Trying again after %d seconds (%d trials left)" % (opts.tryAgainSeconds, timesLeft)
+                                time.sleep(opts.tryAgainSeconds)
+                            else:
+                                print "No trials left, continuing with next job block"
+                        else:
+                            raise Exception()
 
         # Sleep between submissions
         if njobsSubmitted < maxJobs:
@@ -159,6 +173,10 @@ if __name__ == "__main__":
                       help="Test only, do not submit anything")
     parser.add_option("--allowFails", dest="allowFails", default=False, action="store_true",
                       help="Continue submissions even if crab -submit fails for any reason")
+    parser.add_option("--tryAgainTimes", dest="tryAgainTimes", type="int", default=-1,
+                      help="Try again this many times if 'crab -submit' fails, see also --tryAgainSeconds (default: -1 to not to try again)")
+    parser.add_option("--tryAgainSeconds", dest="tryAgainSeconds", type="int", default=60,
+                      help="Try again after this many seconds if 'crab -submit', and --tryAgainTimes is given fails (default: 60 s)")
     parser.add_option("--crabArgs", dest="crabArgs", default="",
                       help="String of options to pass to CRAB")
     parser.add_option("--toSites", dest="toSites", default="",

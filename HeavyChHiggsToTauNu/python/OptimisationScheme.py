@@ -98,14 +98,23 @@ class HPlusOptimisationScheme:
     def addRtauVariation(self, values):
         self._variationItems.append(OptimisationItem("tau Rtau cut", values, "tauSelection.rtauCut", "Rtau%.1f"))
 
+    def addTauVariations(self, scenarios):
+        self._variationItems.append(OptimisationItem("tau", scenarios, "tauSelection", "Tau%s"))
+
     def addJetNumberSelectionVariation(self, values):
         self._variationItems.append(OptimisationItem("jet Njets", values, "jetSelection.jetNumber", "Jets%s"))
 
     def addJetEtVariation(self, values):
         self._variationItems.append(OptimisationItem("jet pT", values, "jetSelection.ptCut", "Jetpt%d"))
 
+    def addJetVariations(self, scenarios):
+        self._variationItems.append(OptimisationItem("jet", scenarios, "jetSelection", "Jets%s"))
+
     def addMETSelectionVariation(self, values):
         self._variationItems.append(OptimisationItem("MET", values, "MET.METCut", "MET%.0f"))
+
+    def addMETVariations(self, scenarios):
+        self._variationItems.append(OptimisationItem("MET", scenarios, "MET", "MET%s"))
 
     def addBJetLeadingDiscriminatorVariation(self, values):
         self._variationItems.append(OptimisationItem("btag discriminator", values, "bTagging.leadingDiscriminatorCut", "Bdiscr%.1f"))

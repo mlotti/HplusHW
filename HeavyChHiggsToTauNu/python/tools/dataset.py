@@ -2281,7 +2281,7 @@ class Dataset:
 
     ## Get the ParameterSet stored in the ROOT file
     def getParameterSet(self):
-        (objs, realNames) = self.getRootObjects("parameterSet")
+        (objs, realNames) = self.getRootObjects("configInfo/parameterSet")
         return objs[0].GetTitle()        
 
     def getAvailableSystematicVariationSources(self):
@@ -2317,7 +2317,7 @@ class Dataset:
                 h = histos[0]
             else:
                 h = histos[0]
-                h = aux.Clone(h. h.GetName()+"_cloned")
+                h = aux.Clone(h, h.GetName()+"_cloned")
                 for h2 in histos[1:]:
                     h.Add(h2)
     
@@ -3462,6 +3462,8 @@ class DatasetManagerCreator:
             # Look for systematic variation
             start = directoryName.find("SystVar")
             if start >= 0:
+                if "SelectedTauForVariation" in directoryName[start:]:
+                    continue
                 systematicVariations[directoryName[start:]] = 1
                 directoryName = directoryName[:start]
 

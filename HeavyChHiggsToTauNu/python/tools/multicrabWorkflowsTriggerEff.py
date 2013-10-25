@@ -35,7 +35,7 @@ def addTauLegSkim_44X(version, datasets, updateDefinitions):
         # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
         "SingleMu_173236-173692_2011A_Nov08_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=allMuonTriggers, triggerThrow=False),
         # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
-        "SingleMu_175832-180252_2011B_Nov19_RAWRECO": TaskDef(njobsIn=300, njobsOut=30, triggerOR=allMuonTriggers, triggerThrow=False),
+        "SingleMu_175832-180252_2011B_Nov19_RAWRECO": TaskDef(njobsIn=500, njobsOut=50, triggerOR=allMuonTriggers, triggerThrow=False),
         
         "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW":       TaskDefMC(njobsIn=4000, njobsOut=2000),
         }
@@ -80,10 +80,10 @@ def addTauLegSkim_v44_v5(datasets):
 
     addTauLegSkim_44X("v44_v5", datasets, definitions)
 
-def addMetLegSkim_44X(version, datasets, updateDefinitions):
-    mcTrigger = "HLT_MediumIsoPFTau35_Trk20_v1"
+def addMetLegSkim_44X(version, datasets, updateDefinitions, skim=None):
+    mcTriggerMETLeg = "HLT_MediumIsoPFTau35_Trk20_v1"
     def TaskDefMC(**kwargs):
-        return TaskDef(triggerOR=[mcTrigger], **kwargs)
+        return TaskDef(triggerOR=[mcTriggerMETLeg], **kwargs)
 
     # The numbers of jobs are from multicrabDatasetsPattuple, they may have to be adjusted
     defaultDefinitions = {
@@ -116,15 +116,15 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
         "W2Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=20),
         "W3Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=120, njobsOut=10),
         "W3Jets_TuneZ2_v2_Fall11":          TaskDefMC(njobsIn=120, njobsOut=10),
-        "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=12),
+        "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=20),
         "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDefMC(njobsIn=350, njobsOut=35),
         "DYJetsToLL_M10to50_TuneZ2_Fall11": TaskDefMC(njobsIn=300, njobsOut=10),
-        "T_t-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=50, njobsOut=2),
-        "Tbar_t-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=50, njobsOut=1),
-        "T_tW-channel_TuneZ2_Fall11":       TaskDefMC(njobsIn=20, njobsOut=1),
-        "Tbar_tW-channel_TuneZ2_Fall11":    TaskDefMC(njobsIn=20, njobsOut=1),
-        "T_s-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=10, njobsOut=1),
-        "Tbar_s-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=10, njobsOut=1),
+        "T_t-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=50, njobsOut=5),
+        "Tbar_t-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=50, njobsOut=5),
+        "T_tW-channel_TuneZ2_Fall11":       TaskDefMC(njobsIn=20, njobsOut=5),
+        "Tbar_tW-channel_TuneZ2_Fall11":    TaskDefMC(njobsIn=20, njobsOut=5),
+        "T_s-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=10, njobsOut=2),
+        "Tbar_s-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=10, njobsOut=2),
 
         # Here is an example how to specity number of events/job
         # instead of number of jobs, and how to give dataset-specific
@@ -181,7 +181,7 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
                     raise Exception("Unsupported PD name %s" % pd)
             else:
                 # For MC, also construct one analysis workflow per trigger type
-                dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=[mcTriggerTauLeg], **commonArgs))
+                dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=[mcTriggerMETLeg], **commonArgs))
 
 
 
@@ -189,10 +189,10 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
 
 
         # If have skim output, define the workflows which depend on it
-        if wf.output != None:
-	    wf.output.dbs_url = common.tteff_dbs
-            dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, source=Source(workflowName),
-                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="tteffAnalysis-metleg.root"))
+#        if wf.output != None:
+#	    wf.output.dbs_url = common.tteff_dbs
+#            dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, source=Source(workflowName),
+#                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="tteffAnalysis-metleg.root"))
 
 
 def addMetLegSkim_v44_v5(datasets):
