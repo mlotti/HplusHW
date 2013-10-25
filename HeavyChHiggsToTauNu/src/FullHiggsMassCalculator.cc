@@ -280,8 +280,16 @@ namespace HPlus {
                                                           "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMassBadBjetAndMETAndTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassBadBjetAndMETAndTau",
                                                           "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    // Quantities related to the neutrino longitudinal momentum calculation and solution selection
+    hDeltaPhiTauAndMetForBadMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaPhiTauAndMetForBadMet",
+                                                          "#Delta #phi tau-MET for bad MET;#Delta #phi (#tau , E_{T}^{miss}) (degrees)", 180, -180, 180);
+    hDeltaPhiTauAndBjetForBadMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaPhiTauAndBjetForBadMet",
+                                                          "#Delta #phi tau-bjet for bad MET;#Delta #phi (#tau , b-jet) (degrees)", 180, -180, 180);
+    hDeltaRTauAndMetForBadMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaRTauAndMetForBadMet",
+                                                          "#Delta R tau-MET for bad MET;#Delta R (#tau , E_{T}^{miss})", 100, 0, 10);
+    hDeltaRTauAndBjetForBadMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaRTauAndBjetForBadMet",
+                                                          "#Delta R tau-bjet for bad MET;#Delta R (#tau , b-jet)", 100, 0, 10);
 
+    // Quantities related to the neutrino longitudinal momentum calculation and solution selection
     hDiscriminantPure         = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DiscriminantPure",
 							  "DiscriminantPure", 100, -50000, 50000);
     hDiscriminantImpure       = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DiscriminantImpure",
@@ -1098,6 +1106,16 @@ namespace HPlus {
       if (output.bPassedEvent){
 	hHiggsMassBadMET->Fill(output.fHiggsMassSolutionSelected);
 	h2MetSignificanceVsBadMet->Fill(metData.getSelectedMET()->significance(), metData.getSelectedMET()->pt());
+	// attikis
+ 	std::cout << "*** METVector.DeltaPhi(tauVector) = " << METVector.DeltaPhi(tauVector)*TMath::RadToDeg()  << std::endl;
+ 	std::cout << "*** bJetVector.DeltaPhi(tauVector) = " <<  bJetVector.DeltaPhi(tauVector)*TMath::RadToDeg() << std::endl;
+ 	std::cout << "*** METVector.DeltaR(tauVector) = " << METVector.DeltaR(tauVector) << std::endl;
+ 	std::cout << "*** bJetVector.DeltaR(tauVector) = " << bJetVector.DeltaR(tauVector)  << std::endl;
+ 	hDeltaPhiTauAndMetForBadMet->Fill( METVector.DeltaPhi(tauVector)*TMath::RadToDeg() );
+  	hDeltaPhiTauAndBjetForBadMet->Fill( bJetVector.DeltaPhi(tauVector)*TMath::RadToDeg() );
+ 	hDeltaRTauAndMetForBadMet->Fill( METVector.DeltaR(tauVector) );
+ 	hDeltaRTauAndBjetForBadMet->Fill( bJetVector.DeltaR(tauVector) );
+	// attikis
       }
       break;
     case eOnlyBadTauAndMET:

@@ -297,6 +297,10 @@ namespace HPlus {
     WrappedTH1* hHiggsMassBadBjetAndMETAndTau;
     WrappedTH1* hDiscriminantPure;
     WrappedTH1* hDiscriminantImpure;
+    WrappedTH1* hDeltaPhiTauAndMetForBadMet;
+    WrappedTH1* hDeltaPhiTauAndBjetForBadMet;
+    WrappedTH1* hDeltaRTauAndMetForBadMet;
+    WrappedTH1* hDeltaRTauAndBjetForBadMet;
 
     // Event classification variable histograms
     WrappedTH1* hBDeltaR;
