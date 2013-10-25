@@ -711,7 +711,7 @@ namespace HPlus {
       else output.fModifiedMETSolutionSelected = output.fModifiedMETSolution2;
       break;
     case eGreatestMagnitude:
-      if (TMath::Abs(output.fModifiedMETSolution1) < TMath::Abs(output.fModifiedMETSolution2) ){
+      if (TMath::Abs(output.fModifiedMETSolution1) > TMath::Abs(output.fModifiedMETSolution2) ){
 	output.fModifiedMETSolutionSelected = output.fModifiedMETSolution1;
       }
       else output.fModifiedMETSolutionSelected = output.fModifiedMETSolution2;

@@ -428,7 +428,7 @@ invMassReco = cms.untracked.PSet(
     topInvMassLowerCut = cms.untracked.double(-1.0), # Negative value means no cut. This is currently the default.
     topInvMassUpperCut = cms.untracked.double(-1.0),  # Negative value means no cut. This is currently the default.
     pzSelectionMethod = cms.untracked.string("DeltaEtaMin"), # Method of selecting the pZ of neutrino for real solutions
-    metSelectionMethod = cms.untracked.string("ClosestToTopMass"), #Method of selecting MET for complex solutions
+    metSelectionMethod = cms.untracked.string("SmallestMagnitude"), #Method of selecting MET for complex solutions
     )
 
 topReconstruction = cms.untracked.string("None") # Options: None, chi, std, Bselection, Wselection
