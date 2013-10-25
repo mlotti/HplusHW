@@ -140,6 +140,15 @@ namespace HPlus {
       throw cms::Exception("LogicError") << "Error: Invariant mass config parameter pzSelectionMethod = '" << myMethod << "' is unknown!" << std::endl
         << "Options are 'DeltaEtaMax', 'DeltaEtaMin', 'AngleMax', 'AngleMin', 'Smaller', 'Greater'" << std::endl;
     }
+    
+    std::string myMetMethod = iConfig.getUntrackedParameter<std::string>("metSelectionMethod");
+    if (myMetMethod == "SmallestMagnitude") fMetSelectionMethod = eSmallestMagnitude;
+    else if (myMetMethod == "GreatestMagnitude") fMetSelectionMethod = eGreatestMagnitude;
+    else if (myMetMethod == "ClosestToTopMass") fMetSelectionMethod = eClosestToTopMass;
+    else {
+      throw cms::Exception("LogicError") << "Error: Invariant mass config parameter metSelectionMethod = '" << myMetMethod << "' is unknown!" << std::endl
+        << "Options are 'SmallestMagnitude', 'GreatestMagnitude', 'ClosestToTopMass'" << std::endl;
+    }
 
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
@@ -457,7 +466,8 @@ namespace HPlus {
     calculateNeutrinoPz(tauVector, bJetVector, METVector, output);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMasses(output);
-    selectModifiedMETSolution(output);
+    // selectModifiedMETSolution(output);
+    selectModifiedMETSolution(output, fMetSelectionMethod);
     calculateHiggsMasses(output);
 
     // Now select which neutrino p_z solution (if there are two) and which Higgs mass solution (there are always two) to select
@@ -687,6 +697,36 @@ namespace HPlus {
     if (TMath::Abs(output.fTopMassSolution1 - c_fPhysicalTopMass) < TMath::Abs(output.fTopMassSolution2 - c_fPhysicalTopMass))
       output.fModifiedMETSolutionSelected = output.fModifiedMETSolution1;
     else output.fModifiedMETSolutionSelected = output.fModifiedMETSolution2;
+  }
+
+  void FullHiggsMassCalculator::selectModifiedMETSolution(FullHiggsMassCalculator::Data& output, MetSelectionMethod myMetSelectionMethod) {
+    /* This method saves the modified MET solution according to the method passed from the python cfg file parameters.
+       one in output. If the MET was not modified (the discriminant was positive), this method is a dummy. */
+
+    switch (myMetSelectionMethod) {
+    case eSmallestMagnitude:
+      if (TMath::Abs(output.fModifiedMETSolution1) < TMath::Abs(output.fModifiedMETSolution2) ){
+	output.fModifiedMETSolutionSelected = output.fModifiedMETSolution1;
+      }
+      else output.fModifiedMETSolutionSelected = output.fModifiedMETSolution2;
+      break;
+    case eGreatestMagnitude:
+      if (TMath::Abs(output.fModifiedMETSolution1) < TMath::Abs(output.fModifiedMETSolution2) ){
+	output.fModifiedMETSolutionSelected = output.fModifiedMETSolution1;
+      }
+      else output.fModifiedMETSolutionSelected = output.fModifiedMETSolution2;
+    case eClosestToTopMass:
+      if (TMath::Abs(output.fTopMassSolution1 - c_fPhysicalTopMass) < TMath::Abs(output.fTopMassSolution2 - c_fPhysicalTopMass))
+	output.fModifiedMETSolutionSelected = output.fModifiedMETSolution1;
+      else output.fModifiedMETSolutionSelected = output.fModifiedMETSolution2;
+      break;
+    default:
+      // Throw exception!
+      throw cms::Exception("LogicError")
+	<< "No implementation for the MET selection method found! Please check FullHiggsMassCalculator.cc and .h";
+    }
+   
+    return;
   }
   
   void FullHiggsMassCalculator::calculateHiggsMasses(FullHiggsMassCalculator::Data& output) {

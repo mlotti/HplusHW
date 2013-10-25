@@ -1,4 +1,4 @@
-// -*- c++ -*-
+ // -*- c++ -*-
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_FullHiggsMassCalculator_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_FullHiggsMassCalculator_h
 
@@ -57,6 +57,12 @@ namespace HPlus {
       eTauNuAngleMin,
       eTauNuDeltaEtaMax,
       eTauNuDeltaEtaMin
+    };
+
+    enum MetSelectionMethod {
+      eGreatestMagnitude,
+      eSmallestMagnitude,
+      eClosestToTopMass
     };
 
     enum InputDataType {
@@ -160,6 +166,7 @@ namespace HPlus {
     void constructFourMomenta(TVector3& pTau, TVector3& pB, TVector3& MET, FullHiggsMassCalculator::Data& output);
     void calculateTopMasses(FullHiggsMassCalculator::Data& output);
     void selectModifiedMETSolution(FullHiggsMassCalculator::Data& output);
+    void selectModifiedMETSolution(FullHiggsMassCalculator::Data& output, MetSelectionMethod myMetSelectionMethod);
     void calculateHiggsMasses(FullHiggsMassCalculator::Data& output);
     bool modifiedMETSolutionOneWasSelected(FullHiggsMassCalculator::Data& output);
     bool modifiedMETSolutionTwoWasSelected(FullHiggsMassCalculator::Data& output);
@@ -173,6 +180,7 @@ namespace HPlus {
     double fTopInvMassLowerCut;
     double fTopInvMassUpperCut;
     PzSelectionMethod fPzSelectionMethod;
+    MetSelectionMethod fMetSelectionMethod;
 
     // Counters
     // Discriminant and neutrino p_z calculation
