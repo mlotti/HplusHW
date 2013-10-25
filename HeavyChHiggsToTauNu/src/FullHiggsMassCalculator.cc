@@ -140,6 +140,15 @@ namespace HPlus {
       throw cms::Exception("LogicError") << "Error: Invariant mass config parameter pzSelectionMethod = '" << myMethod << "' is unknown!" << std::endl
         << "Options are 'DeltaEtaMax', 'DeltaEtaMin', 'AngleMax', 'AngleMin', 'Smaller', 'Greater'" << std::endl;
     }
+    
+    std::string myMetMethod = iConfig.getUntrackedParameter<std::string>("metSelectionMethod");
+    if (myMetMethod == "SmallestMagnitude") fMetSelectionMethod = eSmallestMagnitude;
+    else if (myMetMethod == "GreatestMagnitude") fMetSelectionMethod = eGreatestMagnitude;
+    else if (myMetMethod == "ClosestToTopMass") fMetSelectionMethod = eClosestToTopMass;
+    else {
+      throw cms::Exception("LogicError") << "Error: Invariant mass config parameter metSelectionMethod = '" << myMetMethod << "' is unknown!" << std::endl
+        << "Options are 'SmallestMagnitude', 'GreatestMagnitude', 'ClosestToTopMass'" << std::endl;
+    }
 
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
@@ -166,6 +175,9 @@ namespace HPlus {
 									   "Discriminant", 100, -50000, 50000);
     h2TransverseMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kSystematics, myDir, "TransMassVsInvMass", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
+				      100, 0, 500, 100, 0, 500);
+    h2MetSignificanceVsBadMet = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "METSignificanceVsBadMet", 
+				      "METSignificnce;E_{T}^{miss} Significance; bad E_{T}^{miss};Events",
 				      100, 0, 500, 100, 0, 500);
     h2TransverseMassVsInvariantMassPositiveDiscriminant = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, 
 										    "TransMassVsInvMassPositiveDiscriminant", 
@@ -268,8 +280,16 @@ namespace HPlus {
                                                           "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMassBadBjetAndMETAndTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassBadBjetAndMETAndTau",
                                                           "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    // Quantities related to the neutrino longitudinal momentum calculation and solution selection
+    hDeltaPhiTauAndMetForBadMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaPhiTauAndMetForBadMet",
+                                                          "#Delta #phi tau-MET for bad MET;#Delta #phi (#tau , E_{T}^{miss}) (degrees)", 180, -180, 180);
+    hDeltaPhiTauAndBjetForBadMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaPhiTauAndBjetForBadMet",
+                                                          "#Delta #phi tau-bjet for bad MET;#Delta #phi (#tau , b-jet) (degrees)", 180, -180, 180);
+    hDeltaRTauAndMetForBadMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaRTauAndMetForBadMet",
+                                                          "#Delta R tau-MET for bad MET;#Delta R (#tau , E_{T}^{miss})", 100, 0, 10);
+    hDeltaRTauAndBjetForBadMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaRTauAndBjetForBadMet",
+                                                          "#Delta R tau-bjet for bad MET;#Delta R (#tau , b-jet)", 100, 0, 10);
 
+    // Quantities related to the neutrino longitudinal momentum calculation and solution selection
     hDiscriminantPure         = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DiscriminantPure",
 							  "DiscriminantPure", 100, -50000, 50000);
     hDiscriminantImpure       = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DiscriminantImpure",
@@ -375,8 +395,7 @@ namespace HPlus {
     if (output.bPassedEvent) hMETSignificance->Fill(metData.getSelectedMET()->significance());
     // Classify MC events according to what was identified correctly and what was not
     if (!iEvent.isRealData())
-      doEventClassification(iEvent, recoBJetVector, recoTauVector, recoMETVector, output, genDataPtr);
-
+      doEventClassification(iEvent, recoBJetVector, recoTauVector, recoMETVector, output, metData, genDataPtr);
 
     // The rest of the analysis is only done for MC signal events with a light charged Higgs (at least for now)
     if (iEvent.isRealData() || !eventHasLightChargedHiggs(iEvent)) return output;
@@ -457,7 +476,8 @@ namespace HPlus {
     calculateNeutrinoPz(tauVector, bJetVector, METVector, output);
     constructFourMomenta(tauVector, bJetVector, METVector, output);
     calculateTopMasses(output);
-    selectModifiedMETSolution(output);
+    // selectModifiedMETSolution(output);
+    selectModifiedMETSolution(output, fMetSelectionMethod);
     calculateHiggsMasses(output);
 
     // Now select which neutrino p_z solution (if there are two) and which Higgs mass solution (there are always two) to select
@@ -687,6 +707,37 @@ namespace HPlus {
     if (TMath::Abs(output.fTopMassSolution1 - c_fPhysicalTopMass) < TMath::Abs(output.fTopMassSolution2 - c_fPhysicalTopMass))
       output.fModifiedMETSolutionSelected = output.fModifiedMETSolution1;
     else output.fModifiedMETSolutionSelected = output.fModifiedMETSolution2;
+  }
+
+  void FullHiggsMassCalculator::selectModifiedMETSolution(FullHiggsMassCalculator::Data& output, MetSelectionMethod myMetSelectionMethod) {
+    /* This method saves the modified MET solution according to the method passed from the python cfg file parameters.
+       one in output. If the MET was not modified (the discriminant was positive), this method is a dummy. */
+
+    switch (myMetSelectionMethod) {
+    case eSmallestMagnitude:
+      if (TMath::Abs(output.fModifiedMETSolution1) < TMath::Abs(output.fModifiedMETSolution2) ){
+	output.fModifiedMETSolutionSelected = output.fModifiedMETSolution1;
+      }
+      else output.fModifiedMETSolutionSelected = output.fModifiedMETSolution2;
+      break;
+    case eGreatestMagnitude:
+      if (TMath::Abs(output.fModifiedMETSolution1) > TMath::Abs(output.fModifiedMETSolution2) ){
+	output.fModifiedMETSolutionSelected = output.fModifiedMETSolution1;
+      }
+      else output.fModifiedMETSolutionSelected = output.fModifiedMETSolution2;
+      break;
+    case eClosestToTopMass:
+      if (TMath::Abs(output.fTopMassSolution1 - c_fPhysicalTopMass) < TMath::Abs(output.fTopMassSolution2 - c_fPhysicalTopMass))
+	output.fModifiedMETSolutionSelected = output.fModifiedMETSolution1;
+      else output.fModifiedMETSolutionSelected = output.fModifiedMETSolution2;
+      break;
+    default:
+      // Throw exception!
+      throw cms::Exception("LogicError")
+	<< "No implementation for the MET selection method found! Please check FullHiggsMassCalculator.cc and .h";
+    }
+   
+    return;
   }
   
   void FullHiggsMassCalculator::calculateHiggsMasses(FullHiggsMassCalculator::Data& output) {
@@ -950,7 +1001,7 @@ namespace HPlus {
   }
 
   void FullHiggsMassCalculator::doEventClassification(const edm::Event& iEvent, TVector3& bJetVector, TVector3& tauVector,
-						      TVector3& METVector, FullHiggsMassCalculator::Data& output,
+						      TVector3& METVector, FullHiggsMassCalculator::Data& output, const METSelection::Data& metData,
 						      const GenParticleAnalysis::Data* genDataPtr) {
     if (!output.bPassedEvent) return; // Only passing events are classified; remove this if desired!
     increment(count_passedEvent);
@@ -1052,7 +1103,14 @@ namespace HPlus {
       output.eEventClassCode = eOnlyBadMET;
       eventClassName = "OnlyBadMET";
       increment(eventClass_OnlyBadMET_SubCount);
-      if (output.bPassedEvent) hHiggsMassBadMET->Fill(output.fHiggsMassSolutionSelected);
+      if (output.bPassedEvent){
+	hHiggsMassBadMET->Fill(output.fHiggsMassSolutionSelected);
+	h2MetSignificanceVsBadMet->Fill(metData.getSelectedMET()->significance(), metData.getSelectedMET()->pt());
+ 	hDeltaPhiTauAndMetForBadMet->Fill( METVector.DeltaPhi(tauVector)*TMath::RadToDeg() );
+  	hDeltaPhiTauAndBjetForBadMet->Fill( bJetVector.DeltaPhi(tauVector)*TMath::RadToDeg() );
+ 	hDeltaRTauAndMetForBadMet->Fill( METVector.DeltaR(tauVector) );
+ 	hDeltaRTauAndBjetForBadMet->Fill( bJetVector.DeltaR(tauVector) );
+      }
       break;
     case eOnlyBadTauAndMET:
       output.eEventClassCode = eOnlyBadTauAndMET;

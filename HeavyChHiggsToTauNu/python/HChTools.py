@@ -2,6 +2,9 @@ import FWCore.ParameterSet.Config as cms
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
+import os
+import glob
+
 def addConfigInfo(process, options, dataVersion):
     process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer",
         dataVersion = cms.untracked.string(dataVersion.version),
@@ -68,6 +71,16 @@ def dumpPSetAsJson(pset, outputFile=None):
         json.dump(data, f, **kwargs)
         f.close()
 
+def getEfficiencyJsonFullPath(name, prefix, setname):
+    datapath = "HiggsAnalysis/HeavyChHiggsToTauNu/data"
+    fullprefix = os.path.join(datapath, prefix)
+    fullpath = fullprefix + "_%s.json" % setname
+    if not os.path.exists(os.path.join(os.environ["CMSSW_BASE"], "src", fullpath)):
+        globprefix = os.path.join(os.environ["CMSSW_BASE"], "src", fullprefix+"_")
+        available = glob.glob(globprefix+"*.json")
+        available = [a.replace(globprefix, "").replace(".json", "") for a in available]
+        raise Exception("No %s for %s. Available (in %s):\n%s" % (name, setname, datapath, "\n".join(available)))
+    return fullpath
 
 # Add an array of analysis+counter modules by varying one
 # configuration parameter of the analysis module. This is done by

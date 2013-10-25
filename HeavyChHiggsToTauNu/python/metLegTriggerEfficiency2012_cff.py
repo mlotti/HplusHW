@@ -2,21 +2,21 @@
 # by HiggsAnalysis/TriggerEfficiency/test/PythonWriter.py
 
 import FWCore.ParameterSet.Config as cms
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 
-def triggerBin(pt, efficiency, uncertaintyPlus, uncertaintyMinus=None):
-    if uncertaintyMinus is None:
-        return cms.PSet(
-            pt = cms.double(pt),
-            efficiency = cms.double(efficiency),
-            uncertainty = cms.double(uncertaintyPlus),
-            )
-    return cms.PSet(
-        pt = cms.double(pt),
-        efficiency = cms.double(efficiency),
-        uncertaintyPlus = cms.double(uncertaintyPlus),
-        uncertaintyMinus = cms.double(uncertaintyMinus)
-    )
+_prototype = cms.untracked.PSet(
+    data = cms.FileInPath("NOT_YET_SET"),
+    dataSelect = cms.vstring(),
+    mcSelect = cms.string("Summer12_PU_2012ABCD"),
+    mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
+)
 
+def getEfficiency(isolation, againstMuon, againstElectron):
+    return _prototype.clone(
+        data = HChTools.getEfficiencyJsonFullPath("met trigger scale factors", "metLegTriggerEfficiency2012", "%s_%s_%s" % (isolation, againstMuon, againstElectron))
+     )
+
+## Below are legacy definitions (although the same files are still in use)
 
 metLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronMediumMVA3 = cms.untracked.PSet(
     # The selected triggers for the efficiency. If one trigger is
@@ -449,31 +449,3 @@ metLegEfficiency_byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_ag
     mcSelect = cms.string("Summer12_PU_2012A"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
-
-# if __name__ == "__main__":
-#     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as tools
-
-#     sets = [
-#        "byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronMediumMVA3",
-#        "byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronMediumMVA3",
-#        "byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronMediumMVA3",
-#        "byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_againstElectronMediumMVA3",
-#        "byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_againstElectronMediumMVA3",
-#        "byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_againstElectronMediumMVA3",
-#        "byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronTightMVA3",
-#        "byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronTightMVA3",
-#        "byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronTightMVA3",
-#        "byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_againstElectronTightMVA3",
-#        "byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_againstElectronTightMVA3",
-#        "byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_againstElectronTightMVA3",
-#        "byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronVTightMVA3",
-#        "byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronVTightMVA3",
-#        "byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonMedium2_againstElectronVTightMVA3",
-#        "byLooseCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_againstElectronVTightMVA3",
-#        "byMediumCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_againstElectronVTightMVA3",
-#        "byTightCombinedIsolationDeltaBetaCorr3Hits_againstMuonTight2_againstElectronVTightMVA3"
-#         ]
-#     for s in sets:
-#         dst = "data/metLegTriggerEfficiency2012_%s.json"%s
-#         tools.dumpPSetAsJson(globals()["metLegEfficiency_"+s], dst)
-#         print "Created", dst

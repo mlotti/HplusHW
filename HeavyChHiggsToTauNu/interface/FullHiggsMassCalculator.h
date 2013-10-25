@@ -1,4 +1,4 @@
-// -*- c++ -*-
+ // -*- c++ -*-
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_FullHiggsMassCalculator_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_FullHiggsMassCalculator_h
 
@@ -57,6 +57,12 @@ namespace HPlus {
       eTauNuAngleMin,
       eTauNuDeltaEtaMax,
       eTauNuDeltaEtaMin
+    };
+
+    enum MetSelectionMethod {
+      eGreatestMagnitude,
+      eSmallestMagnitude,
+      eClosestToTopMass
     };
 
     enum InputDataType {
@@ -160,12 +166,13 @@ namespace HPlus {
     void constructFourMomenta(TVector3& pTau, TVector3& pB, TVector3& MET, FullHiggsMassCalculator::Data& output);
     void calculateTopMasses(FullHiggsMassCalculator::Data& output);
     void selectModifiedMETSolution(FullHiggsMassCalculator::Data& output);
+    void selectModifiedMETSolution(FullHiggsMassCalculator::Data& output, MetSelectionMethod myMetSelectionMethod);
     void calculateHiggsMasses(FullHiggsMassCalculator::Data& output);
     bool modifiedMETSolutionOneWasSelected(FullHiggsMassCalculator::Data& output);
     bool modifiedMETSolutionTwoWasSelected(FullHiggsMassCalculator::Data& output);
     void doEventClassification(const edm::Event& iEvent, TVector3& bJetVector, TVector3& tauVector, 
-			       TVector3& METVector, FullHiggsMassCalculator::Data& output, 
-			       const GenParticleAnalysis::Data* genDataPtr = NULL);
+			       TVector3& METVector, FullHiggsMassCalculator::Data& output, const METSelection::Data& metData,
+			       const GenParticleAnalysis::Data* genDataPtr = NULL );
     void applyCuts(FullHiggsMassCalculator::Data& output);
     void doCountingAndHistogramming(const edm::Event& iEvent, FullHiggsMassCalculator::Data& output, InputDataType myInputDataType);
     void analyzeMETComposition(TVector3& recoMETVector, TVector3& genBothNeutrinosVector, TVector3& genMETVector);
@@ -173,6 +180,7 @@ namespace HPlus {
     double fTopInvMassLowerCut;
     double fTopInvMassUpperCut;
     PzSelectionMethod fPzSelectionMethod;
+    MetSelectionMethod fMetSelectionMethod;
 
     // Counters
     // Discriminant and neutrino p_z calculation
@@ -231,6 +239,7 @@ namespace HPlus {
     WrappedTH2* h2TopMassVsInvariantMass;
     WrappedTH2* h2TopMassVsNeutrinoNumber;
     WrappedTH2* h2InvariantMassVsNeutrinoNumber;
+    WrappedTH2* h2MetSignificanceVsBadMet;
 
     WrappedTH1* hTopMassSolution;
     WrappedTH1* hSelectedNeutrinoPzSolution;
@@ -288,6 +297,10 @@ namespace HPlus {
     WrappedTH1* hHiggsMassBadBjetAndMETAndTau;
     WrappedTH1* hDiscriminantPure;
     WrappedTH1* hDiscriminantImpure;
+    WrappedTH1* hDeltaPhiTauAndMetForBadMet;
+    WrappedTH1* hDeltaPhiTauAndBjetForBadMet;
+    WrappedTH1* hDeltaRTauAndMetForBadMet;
+    WrappedTH1* hDeltaRTauAndBjetForBadMet;
 
     // Event classification variable histograms
     WrappedTH1* hBDeltaR;
