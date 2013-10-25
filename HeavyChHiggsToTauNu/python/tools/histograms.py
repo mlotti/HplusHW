@@ -176,8 +176,9 @@ class PlotText:
     # \param text    String to draw
     # \param size    Size of text (None for the default value, taken from gStyle)
     # \param bold    Should the text be bold?
+    # \param align   Alignment of text (left, center, right)
     # \param color   Color of the text
-    def __init__(self, x, y, text, size=None, bold=True, color=ROOT.kBlack):
+    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack):
         self.x = x
         self.y = y
         self.text = text
@@ -188,6 +189,14 @@ class PlotText:
             self.l.SetTextFont(self.l.GetTextFont()-20) # bold -> normal
         if size != None:
             self.l.SetTextSize(size)
+        if align.lower() == "left":
+            self.l.SetTextAlign(11)
+        elif align.lower() == "center":
+            self.l.SetTextAlign(21)
+        elif align.lower() == "right":
+            self.l.SetTextAlign(31)
+        else:
+            raise Exception("Error: Invalid option '%s' for text alignment! Options are: 'left', 'center', 'right'."%align)
         self.l.SetTextColor(color)
 
     ## Draw the text to the current TPad
