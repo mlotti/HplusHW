@@ -717,6 +717,7 @@ namespace HPlus {
 	output.fModifiedMETSolutionSelected = output.fModifiedMETSolution1;
       }
       else output.fModifiedMETSolutionSelected = output.fModifiedMETSolution2;
+      break;
     case eClosestToTopMass:
       if (TMath::Abs(output.fTopMassSolution1 - c_fPhysicalTopMass) < TMath::Abs(output.fTopMassSolution2 - c_fPhysicalTopMass))
 	output.fModifiedMETSolutionSelected = output.fModifiedMETSolution1;
