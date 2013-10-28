@@ -363,10 +363,11 @@ _plotStyles = {
     "Diboson":               styles.dibStyle,
 
     # Ratio stuff
-    "Ratio":                   styles.dataStyle,
+    "Ratio":                   styles.ratioStyle,
     "BackgroundStatError":     styles.errorRatioStatStyle,
     "BackgroundSystError":     styles.errorRatioSystStyle,
     "BackgroundStatSystError": styles.errorRatioSystStyle,
+    "RatioLine":               styles.ratioLineStyle,
 }
 # Other
 _plotStyles["Embedding"] = _plotStyles["TTJets"].clone()
@@ -652,11 +653,11 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=False):
                                         array.array("d", yerrs), array.array("d", yerrs))
         else:
             gr = ROOT.TGraphAsymmErrors()
-        _plotStyles["Ratio"].apply(ratio)
+        _plotStyles["Ratio"].apply(gr)
         gr.GetYaxis().SetTitle(ytitle)
 
         if returnHisto:
-            return [_createHisto(ratio, drawStyle="EPZ", legendLabel=None)]
+            return [_createHisto(gr, drawStyle="EPZ", legendLabel=None)]
         else:
             return gr
     elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
@@ -955,10 +956,7 @@ def _divideOrZero(numerator, denominator):
 # First use case: 1-line for ratio plots
 def _createRatioLine(xmin, xmax, yvalue=1.0):
     line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [yvalue, yvalue]))
-#    line.SetLineColor(ROOT.kBlack)
-    line.SetLineColor(ROOT.kRed)
-    line.SetLineWidth(2)
-    line.SetLineStyle(3)
+    _plotStyles["RatioLine"].apply(line)
     return line
 
 ## Creates a cover pad
@@ -1317,7 +1315,15 @@ class PlotBase:
         if isinstance(energy, basestring):
             self.energies = [energy]
         else:
-            self.energies = energy
+            if len(energy) == 1:
+                self.energies = energy[:]
+            else:
+                tmp = {}
+                for e in energy:
+                    tmp[e] = 1
+                self.energies = tmp.keys()
+                self.energies.sort()
+
 
     ## Add text for centre-of-mass energy
     #

@@ -39,7 +39,7 @@ BRassumption = ""
 BRlimit = "95%% CL limit for %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
 
 ## Y axis label for the sigma x BR
-sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}#times%s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}, pb"%(BR,BR)
+sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}#times%s_{H^{+}#rightarrow#tau#nu}, pb"%(BR)
 
 ## Y axis label for the tanbeta
 tanblimit = "tan #beta"
@@ -74,7 +74,7 @@ _finalstateYmaxSigmaBR = {
     "etau": 10.0, # FIXME
     "mutau": 10.0, # FIXME
     "emu": 10.0, # FIXME
-    "default": 4.0,
+    "default": 2.0,
 }
 
 

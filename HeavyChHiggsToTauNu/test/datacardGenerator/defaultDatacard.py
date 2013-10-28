@@ -1,6 +1,6 @@
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
-DataCardName    = 'Default_8TeV'
+DataCardName    = 'Default_7TeV'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeIsolationDependent'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_vitalonly_correctCtrlPlots'
@@ -9,7 +9,7 @@ Path = "/home/wendland/data/v445/2013-09-24"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
-#LightMassPoints      = [120]
+LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300] # points 400, 500, 600 are not available in 2011 branch
 HeavyMassPoints      = []
@@ -37,6 +37,7 @@ OptionLimitOnSigmaBr = False # Is automatically set to true for heavy H+
 
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
+OptionSqrtS = 7 # sqrt(s)
 
 # Tolerance for throwing error on luminosity difference (0.01 = 1 percent agreement is required)
 ToleranceForLuminosityDifference = 0.01
@@ -93,7 +94,7 @@ for mass in LightMassPoints:
     hhx.setLabel("HH"+str(mass)+"_a")
     hhx.setLandSProcess(-1)
     hhx.setValidMassPoints(myMassList)
-    hhx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_tt_8TeV","lumi"])
+    hhx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_tt_7TeV","lumi"])
     hhx.setDatasetDefinition("TTToHplusBHminusB_M"+str(mass))
     DataGroups.append(hhx)
 
@@ -101,7 +102,7 @@ for mass in LightMassPoints:
     hwx.setLabel("HW"+str(mass)+"_a")
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
-    hwx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_tt_8TeV","lumi"])
+    hwx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_tt_7TeV","lumi"])
     hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass))
     DataGroups.append(hwx)
 
@@ -111,7 +112,7 @@ for mass in HeavyMassPoints:
     hx.setLabel("Hp"+str(mass)+"_a")
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
-    hx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_heavyHplus_8TeV","lumi"])
+    hx.setNuisances(myShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","stat_binByBin","xsect_heavyHplus_7TeV","lumi"])
     hx.setDatasetDefinition("HplusTB_M"+str(mass))
     DataGroups.append(hx)
 
@@ -170,7 +171,7 @@ if not OptionReplaceEmbeddingByMC:
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","top_pt","xsect_tt_8TeV","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_misID","e_mu_veto_fakes","b_tag_fakes","top_pt","xsect_tt_7TeV","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "W_EWK_faketau",
@@ -218,7 +219,7 @@ else:
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","top_pt","xsect_tt_8TeV","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["tau_ID","e_mu_veto","b_tag","top_pt","xsect_tt_7TeV","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "Wjets_MC",
@@ -784,7 +785,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "xsect_heavyHplus_8TeV",
+    id            = "xsect_heavyHplus_7TeV",
     label         = "ttbar cross section",
     distr         = "lnN",
     function      = "Constant",
@@ -793,7 +794,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "xsect_tt_8TeV",
+    id            = "xsect_tt_7TeV",
     label         = "ttbar cross section",
     distr         = "lnN",
     function      = "Constant",
@@ -998,7 +999,7 @@ ControlPlots.append(ControlPlotInput(
                          "unit": "",
                          "log": True,
                          "optsLog": {"ymin": 0.09} },
-    blindedRange=[],
+    blindedRange=[1.5,10],
     #blindedRange     = [1.5,10], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "#geq1 b tag", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1106,7 +1107,7 @@ for i in range(0,3):
                              "unit": "^{o}",
                              "log": True,
                              "optsLog": {"ymin": 0.9} },
-        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        blindedRange     = [0,300], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
     ))
@@ -1125,7 +1126,9 @@ if OptionMassShape == "TransverseMass":
                          "divideByBinWidth": True,
                          "unit": "GeV",
                          "log": False,
-                         "opts": {"ymin": 0.0} },
+                         "opts": {"ymin": 0.0},
+                         "opts2": {"ymin": 0.0, "ymax":2.0},
+                         "optsLog": {"ymin": 1e-5} },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1142,7 +1145,8 @@ elif OptionMassShape == "FullMass":
                              "divideByBinWidth": True,
                              "unit": "GeV",
                              "log": False,
-                             "opts": {"ymin": 0.0} },
+                             "opts": {"ymin": 0.0},
+                             "optsLog": {"ymin": 1e-5} },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
