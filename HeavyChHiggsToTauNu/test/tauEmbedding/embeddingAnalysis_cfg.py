@@ -43,7 +43,11 @@ process.source = cms.Source('PoolSource',
         # should have lumi 336953
         #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed0/2dedf078d8faded30b2dddce6fe8cdec/embedded_955_1_PMC.root"
 
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5c/2c4d260f86ba3e9db4d6ef0e80af6278/embedded_69_1_35J.root"
+#        "/store/group/local/HiggsChToTauNuFullyHadronic/embedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_notrg2/b4444849cbd68cba8058d20690fa09f4/embedded_1000_1_M8J.root",
+        "/store/group/local/HiggsChToTauNuFullyHadronic/embedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1/7e75763c5b9284e37debaf454cd27985/embedded_1000_1_FCn.root",
+#        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad/d57ea742826c3abce18a6ceed0c3bca3/embedded_1000_1_ONr.root",
+#        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad_vispt30_b/d57ea742826c3abce18a6ceed0c3bca3/embedded_1000_2_vFL.root",
+
     ),
     inputCommands = cms.untracked.vstring(
         "keep *",
@@ -77,10 +81,7 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
 
-#recoProcess = "REDIGI36X"
-#recoProcess = "REDIGI39X"
-#recoProcess = "REDIGI311X"
-#recoProcess = "REDIGI311X"
+skimProcess = "MUONSKIM"
 recoProcess = dataVersion.getRecoProcess()
 hltProcess = dataVersion.getTriggerProcess()
 if dataVersion.isData():
@@ -223,8 +224,11 @@ process.commonSequence.insert(0, process.goodPrimaryVertices)
 muons = cms.InputTag("tauEmbeddingMuons")
 #taus = cms.InputTag("selectedPatTausShrinkingConePFTau")
 taus = cms.InputTag("selectedPatTausHpsPFTau")
-pfMET = cms.InputTag("pfMet")
+pfMET = cms.InputTag("patPFMet")
+pfMETType1 = cms.InputTag("patType1CorrectedPFMet")
 pfMETOriginal = cms.InputTag("pfMet", "", recoProcess)
+#pfMETOriginal = cms.InputTag("patPFMet", "", skimProcess)
+#pfMETType1Original = cms.InputTag("patType1CorrectedPFMet", "", skimProcess)
 
 # Finalise muon selection
 process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
@@ -262,6 +266,7 @@ process.commonSequence *= process.genTausOriginal
 
 # FIXME
 lookOriginalGenTaus = True
+lookOriginalGenTaus = False
 if lookOriginalGenTaus:
     # Temporary, for ttbar only
     process.genTaus = cms.EDFilter("GenParticleSelector",
@@ -354,19 +359,19 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
         functions = analysisConfig.muonFunctions.clone(),
     ),
     muonEfficiencies = cms.PSet(
-        Run2011A = param.embeddingMuonIdEfficiency.clone(
+        id_Run2011A = param.embeddingMuonIdEfficiency.clone(
             mode = "mcEfficiency",
             mcSelect = "Run2011A",
         ),
-        Run2011B = param.embeddingMuonIdEfficiency.clone(
+        id_Run2011B = param.embeddingMuonIdEfficiency.clone(
             mode = "mcEfficiency",
             mcSelect = "Run2011B",
         ),
-        Run2011AB = param.embeddingMuonIdEfficiency.clone(
+        id_Run2011AB = param.embeddingMuonIdEfficiency.clone(
             mode = "mcEfficiency",
             mcSelect = "Run2011AB",
         ),
-        trigger = param.embeddingMuonTriggerEfficiency.clone(
+        trigger_Run2011AB = param.embeddingMuonTriggerEfficiency.clone(
             mode = "mcEfficiency",
             dataSelect = ["Run2011AB"],
         ),
@@ -381,7 +386,7 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = analysisConfig.tauFunctions.clone(),
 
-    jets = Ntuple.clone(
+    jets = Ntuple.jets.clone(
         src = "muonFinalSelectionJetSelectionFilter",
 #        src = cms.InputTag("selectedPatJets", "", "MUONSKIM"),
         functions = analysisConfig.jetFunctions.clone(),
@@ -393,18 +398,23 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     genTauOriginalSrc = cms.InputTag("genTausOriginal"),
     genTauEmbeddedSrc = cms.InputTag("tauEmbeddingGenTauVisibleMatchGenTaus"),
     mets = cms.PSet(
-        pfMet_p4 = cms.InputTag(pfMET.value()),
-        pfMetOriginal_p4 = cms.InputTag(pfMETOriginal.value()),
+        pfMetRaw_p4 = cms.InputTag(pfMET.value()),
+        pfMetType1_p4 = cms.InputTag(pfMETType1.value()),
+
+        pfMetRawOriginal_p4 = cms.InputTag(pfMETOriginal.value()),
+#        pfMetType1Original_p4 = cms.InputTag(pfMETType1Original.value()), # FIXME: not contained in the embedded dataset
 #        pfMetOriginalNoMuon_p4 = cms.InputTag("pfMETOriginalNoMuon"), # FIXME: broken ATM
     ),
-    doubles = cms.PSet(),
+    doubles = cms.PSet(
+        weightGenerator = cms.InputTag("generator", "weight"),
+    ),
     bools = cms.PSet(),
 
     eventCounter = param.eventCounter.clone(),
     histogramAmbientLevel = cms.untracked.string("Informative"),
 )
-for name in ntuple.jetPileupIDs.parameterNames_():
-    pset = ntuple.jetPileupIDs.getParameter(name)
+for name in ntuple.jets.pileupIDs.parameterNames_():
+    pset = ntuple.jets.pileupIDs.getParameter(name)
     for tagname in pset.parameterNames_():
         tag = pset.getParameter(tagname)
         tag.setProcessName(tauEmbeddingCustomisations.skimProcessName)

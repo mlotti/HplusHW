@@ -234,27 +234,36 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
         "SingleMu_160431-163261_2011A_Nov08": TaskDef(njobsIn=100, njobsOut=1),
         "SingleMu_163270-163869_2011A_Nov08": TaskDef(njobsIn= 70, njobsOut=1),
         "SingleMu_165088-166150_2011A_Nov08": TaskDef(njobsIn=100, njobsOut=1),
+
         "SingleMu_166161-166164_2011A_Nov08": TaskDef(njobsIn=  1, njobsOut=1),
         "SingleMu_166346-166346_2011A_Nov08": TaskDef(njobsIn=  1, njobsOut=1),
         "SingleMu_166374-167043_2011A_Nov08": TaskDef(njobsIn=110, njobsOut=2),
         "SingleMu_167078-167913_2011A_Nov08": TaskDef(njobsIn= 60, njobsOut=1),
         "SingleMu_170722-172619_2011A_Nov08": TaskDef(njobsIn=120, njobsOut=2),
         "SingleMu_172620-173198_2011A_Nov08": TaskDef(njobsIn=120, njobsOut=2),
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef(njobsIn=450, njobsOut=10), # FIXME: njobsOut
+
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(njobsIn= 70, njobsOut=1),
         "SingleMu_173693-177452_2011B_Nov19": TaskDef(njobsIn=300, njobsOut=4),
         "SingleMu_177453-178380_2011B_Nov19": TaskDef(njobsIn=210, njobsOut=3),
         "SingleMu_178411-179889_2011B_Nov19": TaskDef(njobsIn=200, njobsOut=3),
         "SingleMu_179942-180371_2011B_Nov19": TaskDef(njobsIn= 35, njobsOut=1),
+        "SingleMu_175832-180252_2011B_Nov19": TaskDef(njobsIn=900, njobsOut=15), # FIXME: njobsOut
+
 
         # MC, triggered with mcTrigger
         "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=2490, njobsOut=60), # embedding: 5 s per event
         "WJets_TuneZ2_Fall11":               TaskDef(njobsIn= 200, njobsOut= 5),
 #        "W3Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 140, njobsOut=42),
-        "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn= 500, njobsOut=12),
+        "W1Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 500, njobsOut=20), # FIXME: njobsOut
+        "W2Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 400, njobsOut=20), # FIXME: njobsOut
+        "W3Jets_TuneZ2_v2_Fall11":           TaskDef(njobsIn= 300, njobsOut=20), # FIXME: njobsOut
+        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 600, njobsOut=20), # FIXME: njobsOut
+        "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn= 600, njobsOut=12),
         "T_t-channel_TuneZ2_Fall11":         TaskDef(njobsIn=  40, njobsOut= 1),
         "Tbar_t-channel_TuneZ2_Fall11":      TaskDef(njobsIn=  20, njobsOut= 1),
-        "T_tW-channel_TuneZ2_Fall11":        TaskDef(njobsIn=  30, njobsOut= 1),
-        "Tbar_tW-channel_TuneZ2_Fall11":     TaskDef(njobsIn=  30, njobsOut= 1),
+        "T_tW-channel_TuneZ2_Fall11":        TaskDef(njobsIn=  40, njobsOut= 1),
+        "Tbar_tW-channel_TuneZ2_Fall11":     TaskDef(njobsIn=  40, njobsOut= 1),
         "T_s-channel_TuneZ2_Fall11":         TaskDef(njobsIn=   3, njobsOut= 1),
         "Tbar_s-channel_TuneZ2_Fall11":      TaskDef(njobsIn=   2, njobsOut= 1),
         "WW_TuneZ2_Fall11":                  TaskDef(njobsIn=  55, njobsOut= 2),
@@ -300,10 +309,12 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
             args = {}
             args.update(wf.args)
             args["tauEmbeddingInput"] = "1"
-            try:
-                del args["overrideBeamSpot"] # this is needed only for embedding jobs
-            except KeyError:
-                pass
+            # these is needed only for embedding jobs
+            for a in ["overrideBeamSpot", "tauDecayMode", "tauMinVisPt"]:
+                try:
+                    del args[a] 
+                except KeyError:
+                    pass
             wf_analysis = Workflow("tauembedding_analysis_"+version, source=Source("tauembedding_embedding_"+version),
                                    triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root")
             wf_analysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
@@ -584,14 +595,14 @@ def addEmbeddingEmbedding_v44_5_1(datasets):
         # 4741432 events, 2254 jobs
         # User mean 10503.6, min 8873.8, max 15635.7
         # Mean 341.6 MB, min 290.8 MB, max 498.7 MB
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1-7e75763c5b9284e37debaf454cd27985/USER", args={"triggerMC": 1}),
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1-7e75763c5b9284e37debaf454cd27985/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
         })
 
     addEmbedding("v44_5_1_tauhad", {
         # 4883090 events, 2254 jobs
         # User mean 11790.0, min 9915.0, max 17016.8
         # Mean 344.0 MB, min 291.0 MB, max 499.5 MB
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad-d57ea742826c3abce18a6ceed0c3bca3/USER", args={"triggerMC": 1, "tauDecayMode": 230}),
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad-d57ea742826c3abce18a6ceed0c3bca3/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1, "tauDecayMode": 230}),
         })
 
     # addEmbedding("v44_5_1_tauhad_vispt10", {
@@ -606,8 +617,114 @@ def addEmbeddingEmbedding_v44_5_1(datasets):
         # 4933858 events, 2254 jobs
         # User mean 13113.8, min 10899.2, max 19112.7
         # Mean 345.6 MB, min 291.8 MB, max 500.5 MB
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad_vispt30_b-d57ea742826c3abce18a6ceed0c3bca3/USER", args={"triggerMC": 1, "tauDecayMode": 230, "tauMinVisPt": 30}, publishPostfix="_b"),
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad_vispt30_b-d57ea742826c3abce18a6ceed0c3bca3/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1, "tauDecayMode": 230, "tauMinVisPt": 30}, publishPostfix="_b"),
         })
+
+
+def addEmbeddingEmbedding_v44_5_2(datasets):
+    skimVersion = "tauembedding_skim_v44_5_1"
+
+    def addEmbedding(version, definitions):
+        for name, taskDef in definitions.iteritems():
+            taskDef.setArg("tauDecayMode", 230)
+            taskDef.setArg("tauMinVisPt", 30)
+        addEmbeddingEmbedding_44X(skimVersion, version, datasets, definitions)
+
+    addEmbedding("v44_5_2", {
+        # 13315 events, 58 jobs
+        # User mean 1444.7, min 433.6, max 2464.4
+        # Mean 14.0 MB, min 6.1 MB, max 22.0 MB
+        "SingleMu_160431-163261_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_163261_tauembedding_embedding_v44_5_2-4b9e91852299cce62eff776049ac5822/USER"),
+        # 49125 events, 61 jobs
+        # User mean 4357.1, min 1701.6, max 9108.6
+        # Mean 35.6 MB, min 15.1 MB, max 66.0 MB
+        "SingleMu_163270-163869_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_163869_tauembedding_embedding_v44_5_2-2c17852ef696a3ed09cb5262eac8cdf8/USER"),
+        # 72343 events, 87 jobs
+        # User mean 4529.7, min 246.9, max 7952.5
+        # Mean 35.7 MB, min 3.0 MB, max 59.5 MB
+        "SingleMu_165088-166150_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_165088_166150_tauembedding_embedding_v44_5_2-1912cc159ac3ad2b58a6f5a6df3bf913/USER"),
+        # 459497 events, 382 jobs
+        # User mean 6374.5, min 2459.8, max 12818.7
+        # Mean 50.1 MB, min 19.6 MB, max 98.4 MB
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_embedding_v44_5_2-82a321c5cc2fa6d80afd1d36f2e86392/USER"),
+        # 80095 events, 57 jobs
+        # User mean 7571.1, min 2896.6, max 11448.5
+        # Mean 57.8 MB, min 23.1 MB, max 89.1 MB
+        "SingleMu_173236-173692_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_173236_173692_tauembedding_embedding_v44_5_2-0944a293d00ba3ce937cd71c1284c56a/USER"),
+        # 918468 events, 749 jobs
+        # User mean 6952.9, min 2535.5, max 11994.9
+        # Mean 56.0 MB, min 22.8 MB, max 95.2 MB
+        "SingleMu_175832-180252_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_175832_180252_tauembedding_embedding_v44_5_2-9ac2839189e198f869de484b3febc4c2/USER"),
+
+        # 4910876 events, 2254 jobs
+        # User mean 13007.3, min 10870.2, max 18553.6
+        # Mean 397.3 MB, min 334.9 MB, max 575.4 MB
+        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
+        # 545092 events, 174 jobs
+        # User mean 18964.7, min 13730.5, max 24159.7
+        # Mean 397.9 MB, min 290.7 MB, max 501.9 MB
+        "WJets_TuneZ2_Fall11":                TaskDef("/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 811495 events, 347 jobs
+        # User mean 14433.4, min 7018.9, max 42790.2
+        # Mean 302.7 MB, min 166.5 MB, max 891.6 MB
+        "W1Jets_TuneZ2_Fall11":               TaskDef("/W1Jet_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 1173751 events, 375 jobs
+        # User mean 18574.8, min 9354.5, max 24575.3
+        # Mean 439.3 MB, min 221.3 MB, max 591.1 MB
+        "W2Jets_TuneZ2_Fall11":               TaskDef("/W2Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 544362 events, 251 jobs
+        # User mean 13343.0, min 492.4, max 14310.0
+        # Mean 333.5 MB, min 7.7 MB, max 352.7 MB
+        "W3Jets_TuneZ2_v2_Fall11":            TaskDef("/W3Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v2_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 1198454 events, 409 jobs
+        # User mean 18973.0, min 9689.6, max 36561.3
+        # Mean 432.6 MB, min 253.1 MB, max 822.5 MB
+        "W4Jets_TuneZ2_Fall11":               TaskDef("/W4Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 1186693 events, 509 jobs
+        # User mean 13899.9, min 4742.0, max 28827.2
+        # Mean 290.8 MB, min 102.6 MB, max 596.3 MB
+        "DYJetsToLL_M50_TuneZ2_Fall11":       TaskDef("/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 85380 events, 37 jobs
+        # User mean 13067.3, min 3521.8, max 18584.3
+        # Mean 303.8 MB, min 92.7 MB, max 429.9 MB
+        "T_t-channel_TuneZ2_Fall11":          TaskDef("/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 46964 events, 18 jobs
+        # User mean 14522.2, min 9203.0, max 16980.6
+        # Mean 338.5 MB, min 212.7 MB, max 393.6 MB
+        "Tbar_t-channel_TuneZ2_Fall11":       TaskDef("/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 66719 events, 32 jobs
+        # User mean 12595.7, min 8713.6, max 19838.5
+        # Mean 304.3 MB, min 235.7 MB, max 547.4 MB
+        "T_tW-channel_TuneZ2_Fall11":         TaskDef("/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 66393 events, 32 jobs
+        # User mean 12493.5, min 5941.6, max 20031.6
+        # Mean 302.3 MB, min 163.5 MB, max 546.6 MB
+        "Tbar_tW-channel_TuneZ2_Fall11":      TaskDef("/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 6781 events, 3 jobs
+        # User mean 13302.3, min 10437.0, max 14978.1
+        # Mean 345.8 MB, min 272.0 MB, max 392.1 MB
+        "T_s-channel_TuneZ2_Fall11":          TaskDef("/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 3784 events, 2 jobs
+        # User mean 10890.3, min 9608.6, max 12172.1
+        # Mean 290.4 MB, min 259.4 MB, max 321.4 MB
+        "Tbar_s-channel_TuneZ2_Fall11":       TaskDef("/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 151731 events, 50 jobs
+        # User mean 18167.9, min 17353.4, max 18977.8
+        # Mean 444.2 MB, min 372.6 MB, max 469.9 MB
+        "WW_TuneZ2_Fall11":                   TaskDef("/WW_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 127378 events, 50 jobs
+        # User mean 15334.0, min 14600.6, max 16251.9
+        # Mean 377.2 MB, min 315.7 MB, max 400.7 MB
+        "WZ_TuneZ2_Fall11":                   TaskDef("/WZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 109233 events, 42 jobs
+        # User mean 15833.2, min 6993.8, max 17666.5
+        # Mean 393.3 MB, min 171.8 MB, max 437.7 MB
+        "ZZ_TuneZ2_Fall11":                   TaskDef("/ZZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+        # 7544 events, 40 jobs
+        # User mean 1496.0, min 1226.6, max 1614.1
+        # Mean 54.5 MB, min 45.6 MB, max 59.1 MB
+        "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef("/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
+    })
 
 
 def addEmbedding_SKELETON(datasets):
