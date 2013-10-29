@@ -5,8 +5,10 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 #dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
 #dataVersion = "311Xredigi"
-dataVersion = "44XmcS6"
+#dataVersion = "44XmcS6"
 #dataVersion = "44Xdata"
+dataVersion = "53XmcS10"
+#dataVersion = "53Xdata22Jan2013"
 
 #PF2PATVersion = "PFlow"
 
@@ -44,13 +46,13 @@ process.source = cms.Source('PoolSource',
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
 #        "file:skim.root"
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_5_1/29c7b20153e31b2c86faa8316de20ff4/skim_997_1_NUn.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_5_3_X/TTJets_TuneZ2star_Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_tauembedding_skim_v53_3/9a24e6fe0421ec76a55ad5183bef176f/skim_172_1_F0R.root"
   )
 )
 if dataVersion.isData():
-    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/SingleMu_173236-173692_2011A_Nov08/SingleMu/Run2011A_08Nov2011_v1_AOD_173236_173692_tauembedding_skim_v44_5_2/883c99ed2824db47683a70a86f21fc2e/skim_100_1_KK3.root"]
+    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_5_3_X/SingleMu_200466-203742_2012C_Jan22/SingleMu/Run2012C_22Jan2013_v1_AOD_200466_203742_tauembedding_skim_v53_3/bf6e26bfda4583e5a02e30bcb8e788ff/skim_1000_1_yfC.root"]
     if len(options.trigger) == 0:
-        options.trigger = ["HLT_Mu40_eta2p1_v1"]
+        options.trigger = ["HLT_Mu40_eta2p1_v11"]
 
 ################################################################################
 
@@ -77,22 +79,27 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
                                                             doHBHENoiseFilter=False,
                                                             )
 
+# Add configuration information to histograms.root
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+process.infoPath = HChTools.addConfigInfo(process, options, dataVersion)
+
 # PU weights
 import HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration as AnalysisConfiguration
 dataEras = [
-    "Run2011AB",
-    "Run2011A",
-    "Run2011B",
+    "Run2012ABCD",
+    "Run2012AB",
+    "Run2012C",
+    "Run2012D",
 ]
 #puWeights = AnalysisConfiguration.addPuWeightProducers(dataVersion, process, process.commonSequence, dataEras)
 if dataVersion.isMC():
-    puEraSuffixWeights = AnalysisConfiguration.addPuWeightProducersVariations(dataVersion, process, process.commonSequence, dataEras)
+    puEraSuffixWeights = AnalysisConfiguration.addPuWeightProducersVariations(dataVersion, process, process.commonSequence, dataEras, doVariations=False)
 
     # W+jets weights
     import HiggsAnalysis.HeavyChHiggsToTauNu.WJetsWeight as WJetsWeight
     wjetsEraSuffixWeights = []
     for era, suffix, weight in puEraSuffixWeights:
-        weight = WJetsWeight.getWJetsWeight(dataVersion, options, "embedding_skim_v44_5_1", era, suffix)
+        weight = WJetsWeight.getWJetsWeight(dataVersion, options, "embedding_skim_v53_3", era, suffix, useInclusiveIfNotFound=True)
         name = "wjetsWeight"+era+suffix
         weight.enabled = False
         weight.alias = name
@@ -101,16 +108,22 @@ if dataVersion.isMC():
         wjetsEraSuffixWeights.append( (era, suffix, name) )
         if options.wjetsWeighting != 0:
             weight.enabled = True
-    
+
+    # Top pt reweihting
+    import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeight_cfi as topPtWeight
+    process.topPtWeight = topPtWeight.topPtWeight.clone()
+    process.topPtWeightSeparate = process.topPtWeight.clone(scheme="TopPtSeparate")
+    if options.sample == "TTJets":
+        topPtWeight.addTtGenEvent(process, process.commonSequence)
+        process.topPtWeight.enabled = True
+        process.topPtWeightSeparate.enabled = True
+        process.configInfo.topPtReweightScheme = cms.untracked.string(process.topPtWeight.scheme.value())
+    process.commonSequence += (process.topPtWeight+process.topPtWeightSeparate)
+
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
 additionalCounters.extend(MuonSelection.getMuonPreSelectionCountersForEmbedding())
 additionalCounters.extend(MuonSelection.getMuonSelectionCountersForEmbedding(dataVersion))
-
-# Add configuration information to histograms.root
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
-process.infoPath = HChTools.addConfigInfo(process, options, dataVersion)
-
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 #customisations.PF2PATVersion = PF2PATVersion
@@ -139,7 +152,9 @@ process.preselectedMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag(muons),
     cut = cms.string(
         "isGlobalMuon() && isTrackerMuon()"
-        "&& muonID('GlobalMuonPromptTight')"
+        # Take out chi2<10 cut for testing TuneP cocktail
+#        "&& muonID('GlobalMuonPromptTight')"
+        "&& globalTrack().hitPattern().numberOfValidMuonHits() > 0"
         "&& numberOfMatchedStations() > 1"
         "&& abs(dB()) < 0.2" 
         "&& innerTrack().hitPattern().numberOfValidPixelHits() > 0"
@@ -193,14 +208,14 @@ additionalCounters.append("preselectedMuons41Count")
 muscle = cms.EDProducer("MuScleFitPATMuonCorrector", 
     src = cms.InputTag(muons), 
     debug = cms.bool(False), 
-    identifier = cms.string("Data2011_44X"),
-    applySmearing = cms.bool(False), 
+    identifier = cms.string("Data2012_53X_ReReco"),
+    applySmearing = cms.bool(False),
     fakeSmearing = cms.bool(False)
 )
 setattr(process, muons+"Muscle", muscle)
 process.commonSequence += muscle
 if dataVersion.isMC():
-    muscle.identifier = "Fall11_START44"
+    muscle.identifier = "Summer12_DR53X_smearReReco"
     muscle.applySmearing = True
 
 
@@ -232,6 +247,8 @@ process.btagging = btagFilter_cfi.hPlusBTaggingPtrSelectorFilter.clone(
     histogramAmbientLevel = "Systematics",
     filter = False,
 )
+process.btagging.btagging.ptCut = 0
+process.btagging.btagging.etaCut = 9999
 process.commonSequence += process.btagging
 #process.debug = cms.EDAnalyzer("EventContentAnalyzer")
 #process.commonSequence += process.debug
@@ -242,6 +259,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChMETFilter_cfi as METFilter_cfi
 process.metNoiseFilters = METFilter_cfi.hPlusMETNoiseFilters.clone(
     filter = False,
 )
+process.metNoiseFilters.metFilters.triggerResultsSrc.setProcessName("MUONSKIM")
 #process.metNoiseFilters.metFilters.beamHaloEnabled = False
 #process.metNoiseFilters.metFilters.trackingFailureFilterEnabled = False
 #process.metNoiseFilters.metFilters.EcalDeadCellEventFilterEnabled = False
@@ -283,27 +301,15 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
         src = muons,
         correctedEnabled = cms.bool(True),
         correctedSrc = muons+"Muscle",
+        tunePEnabled = True,
         functions = analysisConfig.muonFunctions.clone(),
         bools = cms.PSet(
             triggerMatched = cms.InputTag(muons+"Matched")
         ),
     ),
     muonEfficiencies = cms.PSet(
-        id_Run2011A = param.embeddingMuonIdEfficiency.clone(
-            dataSelect = ["Run2011A"],
-            mcSelect = "Run2011A",
-        ),
-        id_Run2011B = param.embeddingMuonIdEfficiency.clone(
-            dataSelect = ["Run2011B"],
-            mcSelect = "Run2011B",
-        ),
-        id_Run2011AB = param.embeddingMuonIdEfficiency.clone(
-            dataSelect = ["Run2011A", "Run2011B"],
-            mcSelect = "Run2011AB",
-        ),
-        trigger = param.embeddingMuonTriggerEfficiency.clone(
-            dataSelect = ["Run2011AB"],
-        ),
+        id_Run2012ABCD = param.embeddingMuonIdEfficiency.clone(),
+        trigger = param.embeddingMuonTriggerEfficiency.clone(),
     ),
 
 #    electronSrc = cms.InputTag("selectedPatElectrons"),
@@ -345,6 +351,8 @@ if dataVersion.isMC():
         setattr(ntuple.doubles, "weightPileup_"+era+suffix, cms.InputTag(weight))
     for era, suffix, weight in wjetsEraSuffixWeights:
         setattr(ntuple.doubles, "weightWJets_"+era+suffix, cms.InputTag(weight))
+    setattr(ntuple.doubles, "weightTopPt", cms.InputTag("topPtWeight"))
+    setattr(ntuple.doubles, "weightTopPt_TopPtSeparate", cms.InputTag("topPtWeightSeparate"))
 
     for name in ntuple.muonEfficiencies.parameterNames_():
         pset = getattr(ntuple.muonEfficiencies, name)

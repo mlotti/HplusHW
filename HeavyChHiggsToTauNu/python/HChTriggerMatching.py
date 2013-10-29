@@ -71,6 +71,7 @@ tauPathLastFilter = {
     }
 
 muPathLastFilter = {
+    # 2011
     "HLT_Mu20_v1": "hltSingleMu20L3Filtered20",
     "HLT_Mu24_v2": "hltSingleMu24L3Filtered24",
     "HLT_Mu30_v3": "hltSingleMu30L3Filtered30",
@@ -81,6 +82,11 @@ muPathLastFilter = {
     "HLT_Mu40_eta2p1_v1": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40",
     "HLT_Mu40_eta2p1_v4": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40",
     "HLT_Mu40_eta2p1_v5": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40",
+
+    # 2012
+    "HLT_Mu40_eta2p1_v9":  "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40Q",
+    "HLT_Mu40_eta2p1_v10": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40Q",
+    "HLT_Mu40_eta2p1_v11": "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40Q",
 }
 
 def addTauTriggerMatching(process, trigger, collections, postfix="", outputCommands=None, pathFilterMap=tauPathLastFilter, throw=True):
@@ -245,11 +251,12 @@ def createTauTriggerMatchingInAnalysis(trigger, taus, pathFilterMap=tauPathLastF
         src = cms.InputTag(taus),
         patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
         deltaR = cms.double(0.4),
-        filterNames = cms.vstring(matched)
+        filterNames = cms.vstring(matched),
+        enabled = cms.bool(True)
     )
     return module
 
-def createMuonTriggerMatchingInAnalysis(trigger, muons, throw=True):
+def setMuonTriggerMatchingInAnalysis(module, trigger, throw=True):
     if isinstance(trigger, basestring):
         trigger = [trigger]
 
@@ -260,13 +267,16 @@ def createMuonTriggerMatchingInAnalysis(trigger, muons, throw=True):
             matched.append(filt)
         elif throw:
             raise Exception("No filter found for path %s" % path)
+    module.deltaR = cms.double(0.1)
+    module.filterNames = cms.vstring(matched)
+    module.enabled = cms.bool(True)
 
+def createMuonTriggerMatchingInAnalysis(trigger, muons, throw=True):
     module = cms.EDProducer("HPlusMuonTriggerMatchSelector",
         src = cms.InputTag(muons),
         patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
-        deltaR = cms.double(0.1),
-        filterNames = cms.vstring(matched),
     )
+    setMuonTriggerMatchingInAnalysis(module, trigger, throw)
     return module
 
 def triggerMatchingInAnalysis(process, sequence, triggers, param):

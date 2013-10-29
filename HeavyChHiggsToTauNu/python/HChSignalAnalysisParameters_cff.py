@@ -718,7 +718,7 @@ metTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
 metTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
 
 # Muon trigger+ID efficiencies, for embedding normalization
-import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
+import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency2012_cff as muonTriggerIDEfficiency
 #embeddingMuonEfficiency = muonTriggerIDEfficiency.efficiency
 #embeddingMuonEfficiency.variationEnabled = cms.bool(False)
 #embeddingMuonEfficiency.variationShiftBy = cms.double(0)

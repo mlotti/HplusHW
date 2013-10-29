@@ -144,10 +144,16 @@ _wjetsNumberOfEvents = {
                               jet2=34044920,
                               jet3=15457717,
                               jet4=13382803),
+    "embedding_skim_v53_3": NEvents(inclusive_v1=18393090,
+                                    inclusive_v2=57709908,
+                                    jet1=23141596,
+                                    jet2=34044948,
+                                    jet3=15539503,
+                                    jet4=13382803),
 }
 
 
-def getWJetsWeight(dataVersion, options, inputWorkflow, era, suffix=""):
+def getWJetsWeight(dataVersion, options, inputWorkflow, era, suffix="", useInclusiveIfNotFound=False):
     weightType = {"": pileupReweightedAllEvents.PileupWeightType.NOMINAL,
                   "up": pileupReweightedAllEvents.PileupWeightType.UP,
                   "down": pileupReweightedAllEvents.PileupWeightType.DOWN
@@ -159,10 +165,17 @@ def getWJetsWeight(dataVersion, options, inputWorkflow, era, suffix=""):
         pset = _wjetsNumberOfEvents[inputWorkflow].construct8TeV(era, weightType)
     else:
         raise Exception("WJets weights are available only for 44X and 53X")
-    pset.sampleJetBin = {"WJets": -1,
-                         "W1Jets": 1, 
-                         "W2Jets": 2,
-                         "W3Jets": 3,
-                         "W4Jets": 4}[options.sample]
+    try:
+        pset.sampleJetBin = {"WJets": -1,
+                             "W1Jets": 1,
+                             "W2Jets": 2,
+                             "W3Jets": 3,
+                             "W4Jets": 4}[options.sample]
+    except KeyError, e:
+        if useInclusiveIfNotFound:
+            pset.sampleJetBin = -1
+        else:
+            raise e
+
     return pset
 

@@ -5,12 +5,6 @@
 import sys
 import pickle
 
-numbers = "TIGHT_nL8"
-dataEras = [
-    "2011A",
-    "2011B"
-]
-
 class EffValue:
     def __init__(self, name, firstRun=None, lastRun=None):
         self.name = name
@@ -38,18 +32,17 @@ class EffValue:
 
         return ret
 
-def main(args):
-    if len(args) != 1:
-        raise Exception("Expecting one pickle file")
-
-    f = open(args[0])
-    data = pickle.load(f)
-    f.close()
-
+def extract2011(data):
     dataParameters = []
     mcParameters = []
 
-    for era in dataEras:
+    numbers = "TIGHT_nL8"
+    dataEras = [
+        "2011A",
+        "2011B"
+    ]
+
+    for era in dataEras2011:
         etaBinDict = data[numbers+"_"+era]["eta_pt>20"]
         etaBinNames = etaBinDict.keys()
         etaBins = [(n.split("_")[0], n) for n in etaBinNames]
@@ -67,6 +60,72 @@ def main(args):
 
         dataParameters.append(dataEff)
         mcParameters.append(mcEff)
+
+    return (dataParameters, mcParameters)
+
+def extract2012id(data):
+    dataParameters = []
+    mcParameters = []
+
+    numbers = "Tight"
+
+    etaBinDict = data[numbers]["etapt20-500"]
+    etaBinNames = etaBinDict.keys()
+    etaBins = [(n.split("_")[0], n) for n in etaBinNames]
+    etaBins.sort(key=lambda x: float(x[0]))
+
+    dataEff = EffValue("Run2012ABCD")
+    mcEff = EffValue("Run2012ABCD")
+    for bin, name in etaBins:
+        mcEff.addBin(bin,
+                     etaBinDict[name]["mc"]["efficiency"],
+                     max(etaBinDict[name]["mc"]["err_low"], etaBinDict[name]["mc"]["err_hi"]))
+        dataEff.addBin(bin,
+                       etaBinDict[name]["data"]["efficiency"],
+                       max(etaBinDict[name]["data"]["err_low"], etaBinDict[name]["data"]["err_hi"]))
+    dataParameters.append(dataEff)
+    mcParameters.append(mcEff)
+
+    return (dataParameters, mcParameters)
+
+def extract2012trigger(data):
+    dataParameters = []
+    mcParameters = []
+
+    trigger = "Mu40"
+    id = "TightID"
+
+    etaBinDict = data[trigger][id]["ETA"]
+    etaBinNames = etaBinDict.keys()
+    etaBins = [(n.split("_")[0], n) for n in etaBinNames]
+    etaBins.sort(key=lambda x: float(x[0]))
+
+    dataEff = EffValue("Run2012ABCD")
+    mcEff = EffValue("Run2012ABCD")
+    for bin, name in etaBins:
+        mcEff.addBin(bin,
+                     etaBinDict[name]["mc"]["efficiency"],
+                     max(etaBinDict[name]["mc"]["err_low"], etaBinDict[name]["mc"]["err_hi"]))
+        dataEff.addBin(bin,
+                       etaBinDict[name]["data"]["efficiency"],
+                       max(etaBinDict[name]["data"]["err_low"], etaBinDict[name]["data"]["err_hi"]))
+    dataParameters.append(dataEff)
+    mcParameters.append(mcEff)
+
+    return (dataParameters, mcParameters)
+
+def main(args):
+    if len(args) != 1:
+        raise Exception("Expecting one pickle file")
+
+    f = open(args[0])
+    data = pickle.load(f)
+    f.close()
+
+    #(dataParameters, mcParameters) = extract2011(data)
+    #(dataParameters, mcParameters) = extract2012id(data)
+    (dataParameters, mcParameters) = extract2012trigger(data)
+    
 
     res = [
         "def triggerBin(eta, eff, unc):",

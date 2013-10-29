@@ -59,6 +59,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Should MC be triggered? (default: 0) If MC is to be triggered, the default trigger is taken from HChDataVersion (called signalTrigger in there). This can be overridden with the 'trigger' command line argument.")
+    options.register("triggerMCInAnalysis",
+                     0,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Should MC be triggered in analysis job, if triggerMC=0? (default: 0)")
     options.register("skimConfig",
                      [],
                      options.multiplicity.list,
