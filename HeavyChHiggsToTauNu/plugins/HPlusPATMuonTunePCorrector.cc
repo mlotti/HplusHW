@@ -46,7 +46,8 @@ public:
       // Make copy of the original
       pat::Muon copy = (*hmuons)[iMuon];
 
-      //throw cms::Exception("NotYetImplemented") << "TuneP needs update of DataFormats/MuonReco, which is not yet integrated to the common checkoutTags.sh in " << __FILE__ << ":" << __LINE__;
+      throw cms::Exception("NotYetImplemented") << "TuneP needs update of DataFormats/MuonReco, which is not yet integrated to the common checkoutTags.sh in " << __FILE__ << ":" << __LINE__;
+      /*
       reco::TrackRef cktTrack = (muon::tevOptimized(copy, 200, 30., 0., 0.25));
       if(copy.pt() < 200.0 && cktTrack->pt() < 200.0) {
         if(fDoId) {
@@ -73,6 +74,7 @@ public:
         p4.SetPz(cktTrack->pz());
         copy.setP4(p4);
       }
+      */
 
       prod->push_back(copy);
       prodOrig->push_back((*hmuonsOrig)[iMuon]);
