@@ -914,10 +914,18 @@ class ConfigBuilder:
                     return name.replace(n, postfix+n)
             raise Exception("Analysis name '%s' broke assumptions on naming convention")
 
+        def disablePrintCounter(mod):
+            if hasattr(mod.eventCounter, "printMainCounter"):
+                mod.eventCounter.printMainCounter = False
+        def enablePrintCounter(mod):
+            if hasattr(mod.eventCounter, "printMainCounter"):
+                mod.eventCounter.printMainCounter = True
 
         allNames = []
         retNames = []
         for module, name in zip(analysisModules, analysisNames):
+            disablePrintCounter(module)
+
             postfix = "MIdEff"
             mod = module.clone()
             mod.histogramAmbientLevel = "Vital"
@@ -949,6 +957,7 @@ class ConfigBuilder:
 
             postfix += "TEff"
             mod = mod.clone()
+            enablePrintCounter(mod)
             mod.histogramAmbientLevel = self.histogramAmbientLevel
             mod.tauTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
             path = cms.Path(process.commonSequence * mod)
