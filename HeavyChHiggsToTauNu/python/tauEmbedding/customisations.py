@@ -506,7 +506,8 @@ def addMuonVeto(process, sequence, param, prefix="muonSelectionMuonVeto"):
 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as muonVetoFilter_cfi
     m1 = muonVetoFilter_cfi.hPlusGlobalMuonVetoFilter.clone(
-        vertexSrc = "firstPrimaryVertex"
+        vertexSrc = "firstPrimaryVertex",
+        histogramAmbientLevel = "Systematics"
     )
     m1.MuonSelection.MuonCollectionName = "selectedPatMuonsEmbeddingMuonCleaned"
     m2 = cms.EDProducer("EventCountProducer")
@@ -523,7 +524,9 @@ def addElectronVeto(process, sequence, param, prefix="muonSelectionElectronVeto"
     counter = prefix
 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as electronVetoFilter_cfi
-    m1 = electronVetoFilter_cfi.hPlusGlobalElectronVetoFilter.clone()
+    m1 = electronVetoFilter_cfi.hPlusGlobalElectronVetoFilter.clone(
+        histogramAmbientLevel = "Systematics"
+    )
     m1.vertexSrc = m1.vertexSrc.value()+"Original"
     m2 = cms.EDProducer("EventCountProducer")
 
@@ -877,6 +880,7 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
     if pileupWeight == None:
         puModule = cms.EDProducer("HPlusVertexWeightProducer",
             alias = cms.string("pileupWeight"),
+            histogramAmbientLevel = cms.untracked.string("Systematics")
         )
         HChTools.insertPSetContentsTo(param.vertexWeight.clone(), puModule)
         pileupWeight = prefix+"PileupWeight"
@@ -933,6 +937,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     if pileupWeight == None:
         puModule = cms.EDProducer("HPlusVertexWeightProducer",
             alias = cms.string("pileupWeight"),
+            histogramAmbientLevel = cms.untracked.string("Systematics")
         )
         HChTools.insertPSetContentsTo(param.vertexWeight.clone(), puModule)
         pileupWeight = prefix+"PileupWeight"
