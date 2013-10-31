@@ -4,6 +4,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChSignalAnalysisParameters
 import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
+
 PF2PATVersion = "" # empty for standard PAT
 #PF2PATVersion = "PFlow"
 #PF2PATVersion = "PFlowChs"
@@ -58,8 +60,9 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     param.metTriggerEfficiencyScaleFactor.mode = "disabled"
     # For data, we have "select" all run periods for tau+MET trigger efficiency
     if dataVersion.isData():
-        param.tauTriggerEfficiencyScaleFactor.dataSelect = param.tauTriggerEfficiencyScaleFactor.dataParameters.parameterNames_()
-        param.metTriggerEfficiencyScaleFactor.dataSelect = param.metTriggerEfficiencyScaleFactor.dataParameters.parameterNames_()
+        param.tauTriggerEfficiencyScaleFactor.dataSelect = tauTriggerEfficiency.getRunsForEra("Run2011AB")
+        # FIXME when we get MET-leg efficiencies
+        #param.metTriggerEfficiencyScaleFactor.dataSelect = param.metTriggerEfficiencyScaleFactor.dataParameters.parameterNames_()
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
