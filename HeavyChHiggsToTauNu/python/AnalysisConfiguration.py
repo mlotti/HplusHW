@@ -854,7 +854,13 @@ class ConfigBuilder:
             raise Exception("doTauEmbeddingLikePreselection is meaningless for data")
         if self.options.tauEmbeddingInput != 0:
             raise Exception("tauEmbegginInput clashes with doTauEmbeddingLikePreselection")
-        
+
+        def makeName(name, postfix):
+            for n in ["Light", "Heavy"]:
+                if n in name:
+                    return name.replace(n, postfix+n)
+            raise Exception("Analysis name '%s' broke assumptions on naming convention")
+
         allNames = []
         def add(name, sequence, module, counters):
             module.eventCounter.counters = [cms.InputTag(c) for c in counters]
@@ -864,37 +870,41 @@ class ConfigBuilder:
             path = cms.Path(sequence * module)
             setattr(process, name+"Path", path)
 
-        retNames = []
+        maxGenTaus = None # not set
+        maxGenTaus = 1 # events with exactly one genuine tau in acceptance
 
+        retNames = []
         for module, name in zip(analysisModules, analysisNames):
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), no tau+MET trigger required
             seq = cms.Sequence(process.commonSequence)
             mod = module.clone()
             counters = additionalCounters[:]
-            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikePreselection"))
-            add(name+"TauEmbeddingLikePreselection", seq, mod, counters)
+            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikePreselection", maxGenTaus=maxGenTaus))
+            add(makeName(name, "TauEmbeddingLikePreselection"), seq, mod, counters)
 
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), tau+MET trigger required
             seq = cms.Sequence(process.commonSequence)
             mod = module.clone()
             counters = additionalCounters[:]
-            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikeTriggeredPreselection", disableTrigger=False))
-            add(name+"TauEmbeddingLikeTriggeredPreselection", seq, mod, counters)
+            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikeTriggeredPreselection", maxGenTaus=maxGenTaus, disableTrigger=False))
+            add(makeName(name, "TauEmbeddingLikeTriggeredPreselection"), seq, mod, counters)
             
             # Genuine tau preselection
             seq = cms.Sequence(process.commonSequence)
             mod = module.clone()
             counters = additionalCounters[:]
-            counters.extend(tauEmbeddingCustomisations.addGenuineTauPreselection(process, seq, mod, prefix=name+"GenuineTauPreselection"))
-            add(name+"GenuineTauPreselection", seq, mod, counters)
+            counters.extend(tauEmbeddingCustomisations.addGenuineTauPreselection(process, seq, mod, prefix=name+"GenuineTauPreselection", maxGenTaus=maxGenTaus))
+            add(makeName(name, "GenuineTauPreselection"), seq, mod, counters)
 
             # Require genuine tau after tau ID in analysis
             mod = module.clone()
             module.onlyGenuineTaus = cms.untracked.bool(True)
-            setattr(process, name+"GenuineTau", mod)
+            modName = makeName(name, "GenuineTau")
+            setattr(process, modName, mod)
             path = cms.Path(process.commonSequence * mod)
-            setattr(process, name+"GenuineTauPath", path)
-            retNames.append(name+"GenuineTau")
+            setattr(process, modName+"Path", path)
+            retNames.append(modName)
+            allNames.append(modName)
         self._accumulateAnalyzers("Tau embedding -like preselection", allNames)
         return retNames
 
