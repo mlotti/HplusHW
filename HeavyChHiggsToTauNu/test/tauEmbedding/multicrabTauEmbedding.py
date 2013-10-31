@@ -95,7 +95,10 @@ datasetsData2012 = [
     "SingleMu_207214-208686_2012D_Jan22",
 ]
 datasetsMCTT = [
-    "TTJets_TuneZ2star_Summer12"
+    "TTJets_TuneZ2star_Summer12",
+    "TTJets_FullLept_TuneZ2star_Summer12",
+    "TTJets_SemiLept_TuneZ2star_Summer12",
+    "TTJets_Hadronic_TuneZ2star_ext_Summer12",
 ]
 datasetsMCWDY = [
     "WJets_TuneZ2star_v1_Summer12",

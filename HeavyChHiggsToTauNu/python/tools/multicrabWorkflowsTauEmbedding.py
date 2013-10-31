@@ -143,6 +143,9 @@ def getDefaultDefinitions_53X():
         "W3Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 3}),
         "W4Jets_TuneZ2star_Summer12":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 4}),
         "TTJets_TuneZ2star_Summer12":              TaskDefMC(),
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDefMC(),
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDefMC(),
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDefMC(),
         "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDefMC(),
         "T_t-channel_TuneZ2star_Summer12":         TaskDefMC(),
         "Tbar_t-channel_TuneZ2star_Summer12":      TaskDefMC(),
@@ -299,6 +302,9 @@ def addEmbeddingSkim_53X(version, datasets, updateDefinitions):
         "W3Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2300, njobsOut=1),
         "W4Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2200, njobsOut=1),
         "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn=1700, njobsOut=1),
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=3400, njobsOut=1), # FIXME: njobsOut
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=4990, njobsOut=1), # FIXME: njobsOut
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(njobsIn= 400, njobsOut=1), # FIXME: njobsOut
         "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(njobsIn=2700, njobsOut=1),
         "T_t-channel_TuneZ2star_Summer12":         TaskDef(njobsIn= 200, njobsOut=1),
         "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(njobsIn= 100, njobsOut=1),
@@ -813,6 +819,9 @@ def addEmbeddingSkim_v53_3(datasets):
         # User mean 1246.4, min 257.4, max 2356.3
         # Mean 165.9 MB, min 32.3 MB, max 188.3 MB
         "TTJets_TuneZ2star_Summer12":              TaskDef("/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_tauembedding_skim_v53_3-9a24e6fe0421ec76a55ad5183bef176f/USER", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
         # 1739021 events, 2704 jobs
         # User mean 1997.3, min 473.7, max 3827.5
         # Mean 162.0 MB, min 36.4 MB, max 186.1 MB
@@ -941,6 +950,9 @@ def addEmbedding_SKELETON_53X(datasets):
         "W3Jets_TuneZ2star_Summer12":              TaskDef(""),
         "W4Jets_TuneZ2star_Summer12":              TaskDef(""),
         "TTJets_TuneZ2star_Summer12":              TaskDef(""),
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(""),
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(""),
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(""),
         "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(""),
         "T_t-channel_TuneZ2star_Summer12":         TaskDef(""),
         "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(""),
