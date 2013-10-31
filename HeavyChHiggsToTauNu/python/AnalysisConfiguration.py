@@ -1170,7 +1170,7 @@ class ConfigBuilder:
         if not (self.doScaleFactorVariation or self.doSystematics):
             return
 
-        if self.dataVersion.isMC():
+        if self.dataVersion.isMC() or self.options.tauEmbeddingInput != 0:
             timer = Timer()
             for name in analysisNamesForSystematics:
                 self._addScaleFactorVariation(process, name)
@@ -1185,6 +1185,8 @@ class ConfigBuilder:
     def _addScaleFactorVariation(self, process, name):
         #useAsymmetricUncertainties = True
         useAsymmetricUncertainties = False
+
+        embeddingData = self.options.tauEmbeddingInput != 0 and self.dataVersion.isData()
 
         def disablePrint(pset):
             if hasattr(pset, "printScaleFactors"):
@@ -1247,29 +1249,38 @@ class ConfigBuilder:
 
         # Tau trigger SF
         if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
-            if useAsymmetricUncertainties:
+            if embeddingData:
                 names.append(addTauTrgDataEff( 1.0, "Plus"))
                 names.append(addTauTrgDataEff(-1.0, "Minus"))
-                names.append(addTauTrgMCEff( 1.0, "Plus"))
-                names.append(addTauTrgMCEff(-1.0, "Minus"))
             else:
-                names.append(addTauTrgSF( 1.0, "Plus"))
-                names.append(addTauTrgSF(-1.0, "Minus"))
+                if useAsymmetricUncertainties:
+                    names.append(addTauTrgDataEff( 1.0, "Plus"))
+                    names.append(addTauTrgDataEff(-1.0, "Minus"))
+                    names.append(addTauTrgMCEff( 1.0, "Plus"))
+                    names.append(addTauTrgMCEff(-1.0, "Minus"))
+                else:
+                    names.append(addTauTrgSF( 1.0, "Plus"))
+                    names.append(addTauTrgSF(-1.0, "Minus"))
 
         # MET trigger SF
         if self.applyMETTriggerScaleFactor:
-            if useAsymmetricUncertainties:
+            if embeddingData:
                 names.append(addMETTrgDataEff( 1.0, "Plus"))
                 names.append(addMETTrgDataEff(-1.0, "Minus"))
-                names.append(addMETTrgMCEff( 1.0, "Plus"))
-                names.append(addMETTrgMCEff(-1.0, "Minus"))
             else:
-                names.append(addMETTrgSF( 1.0, "Plus"))
-                names.append(addMETTrgSF(-1.0, "Minus"))
+                if useAsymmetricUncertainties:
+                    names.append(addMETTrgDataEff( 1.0, "Plus"))
+                    names.append(addMETTrgDataEff(-1.0, "Minus"))
+                    names.append(addMETTrgMCEff( 1.0, "Plus"))
+                    names.append(addMETTrgMCEff(-1.0, "Minus"))
+                else:
+                    names.append(addMETTrgSF( 1.0, "Plus"))
+                    names.append(addMETTrgSF(-1.0, "Minus"))
 
         # BTag SF
-        names.append(addBTagSF( 1.0, "Plus"))
-        names.append(addBTagSF(-1.0, "Minus"))
+        if not embeddingData:
+            names.append(addBTagSF( 1.0, "Plus"))
+            names.append(addBTagSF(-1.0, "Minus"))
 
         self._accumulateAnalyzers("SF variation", names)
 
