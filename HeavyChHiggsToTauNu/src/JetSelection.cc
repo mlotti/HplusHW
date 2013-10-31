@@ -116,7 +116,8 @@ namespace HPlus {
 
     // Create histograms
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("JetSelection");
+    // Create directory only if histo level is at most kInformative, which is the highest level within JetSelection
+    TFileDirectory myDir = histoWrapper.mkdir(HistoWrapper::kInformative, *fs, "JetSelection");
 
     hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt", "identified jet_pt", 120, 0., 600.);
     hPtCentral = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt_central", "identified jet_pt_central", 120, 0., 600.);
@@ -157,7 +158,7 @@ namespace HPlus {
     fSelectedJetsDetailHistograms = new JetDetailHistograms(fHistoWrapper, myDir, "SelectedJets");
 
     // MHT related
-    TFileDirectory myMHTDir = myDir.mkdir("MHT");
+    TFileDirectory myMHTDir = histoWrapper.mkdir(HistoWrapper::kInformative, myDir, "MHT");
     hMHT = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMHTDir, "MHT", "MHT;MHT, GeV;N_{events}", 100, 0., 500.);
     hMHTphi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMHTDir, "MHTphi", "MHTphi;MHT #phi;N_{events}", 72, -3.14159265, -3.14159265);
     hDeltaPhiMHTJet1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMHTDir, "DeltaPhiMHTJet1", "DeltaPhiMHTJet1;#Delta#phi(MHT,jet1), ^{o};N_{events}", 36, 0., 180.);
@@ -167,7 +168,7 @@ namespace HPlus {
     hDeltaPhiMHTTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMHTDir, "DeltaPhiMHTTau", "DeltaPhiMHTTau;#Delta#phi(MHT,tau), ^{o};N_{events}", 36, 0., 180.);
 
     // Reference tau related
-    TFileDirectory myRefDir = myDir.mkdir("ReferenceJetToTau");
+    TFileDirectory myRefDir = histoWrapper.mkdir(HistoWrapper::kInformative, myDir, "ReferenceJetToTau");
     hReferenceJetToTauMatchingDeltaR = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "MatchingDeltaR", "MatchingDeltaR;Matching #DeltaR;N_{events}", 30, 0., 1.);
     hReferenceJetToTauPartonFlavour = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "PartonFlavour", "ReferenceJetToTauPartonFlavour;ReferenceJetToTauPartonFlavour;N_{events}", 30, 0., 30.);
     hReferenceJetToTauDeltaPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "DeltaPt", "ReferenceJetToTauDeltaPt;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);

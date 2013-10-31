@@ -879,21 +879,21 @@ class ConfigBuilder:
             seq = cms.Sequence(process.commonSequence)
             mod = module.clone()
             counters = additionalCounters[:]
-            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikePreselection", maxGenTaus=maxGenTaus))
+            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikePreselection", maxGenTaus=maxGenTaus, pileupWeight=mod.pileupWeightReader.weightSrc.value()))
             add(makeName(name, "TauEmbeddingLikePreselection"), seq, mod, counters)
 
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), tau+MET trigger required
             seq = cms.Sequence(process.commonSequence)
             mod = module.clone()
             counters = additionalCounters[:]
-            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikeTriggeredPreselection", maxGenTaus=maxGenTaus, disableTrigger=False))
+            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikeTriggeredPreselection", maxGenTaus=maxGenTaus, pileupWeight=mod.pileupWeightReader.weightSrc.value(), disableTrigger=False))
             add(makeName(name, "TauEmbeddingLikeTriggeredPreselection"), seq, mod, counters)
             
             # Genuine tau preselection
             seq = cms.Sequence(process.commonSequence)
             mod = module.clone()
             counters = additionalCounters[:]
-            counters.extend(tauEmbeddingCustomisations.addGenuineTauPreselection(process, seq, mod, prefix=name+"GenuineTauPreselection", maxGenTaus=maxGenTaus))
+            counters.extend(tauEmbeddingCustomisations.addGenuineTauPreselection(process, seq, mod, prefix=name+"GenuineTauPreselection", maxGenTaus=maxGenTaus, pileupWeight=mod.pileupWeightReader.weightSrc.value()))
             add(makeName(name, "GenuineTauPreselection"), seq, mod, counters)
 
             # Require genuine tau after tau ID in analysis
