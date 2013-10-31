@@ -1195,60 +1195,46 @@ class ConfigBuilder:
                 "dataEfficiency": "variationDataShiftBy",
                 "mcEfficiency": "variationMCShiftBy"}[pset.mode.value()],
                     cms.double(shiftBy))
+        def addTrgSF(attr, shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = getattr(module, attr)
+            effSF.variationEnabled = True
+            effSF.useMaxUncertainty = True
+            variationBy(effSF, shiftBy)
+            disablePrint(effSF)
+            return self._addVariationModule(process, module, name+self.systPrefix+postfix)
+        def addTrgDataEff(attr, shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = getattr(module, attr)
+            effSF.variationEnabled = True
+            effSF.useMaxUncertainty = False
+            effSF.variationDataShiftBy = cms.double(shiftBy)
+            effSF.variationMCShiftBy = cms.double(0.0)
+            disablePrint(effSF)
+            return self._addVariationModule(process, module, name+self.systPrefix+postfix)
+        def addTrgMCEff(attr, shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = getattr(module, attr)
+            effSF.variationEnabled = True
+            effSF.useMaxUncertainty = False
+            effSF.variationMCShiftBy = cms.double(shiftBy)
+            effSF.variationDataShiftBy = cms.double(0.0)
+            disablePrint(effSF)
+            return self._addVariationModule(process, module, name+self.systPrefix+postfix)
 
         def addTauTrgSF(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.tauTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = True
-            variationBy(effSF, shiftBy)
-            disablePrint(effSF)
-            return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgSF"+postfix)
+            return addTrgSF("tauTriggerEfficiencyScaleFactor", shiftBy, "TauTrgSF"+postfix)
         def addTauTrgDataEff(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.tauTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = False
-            effSF.variationDataShiftBy = cms.double(shiftBy)
-            effSF.variationMCShiftBy = cms.double(0.0)
-            disablePrint(effSF)
-            return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgDataEff"+postfix)
+            return addTrgDataEff("tauTriggerEfficiencyScaleFactor", shiftBy, "TauTrgDataEff"+postfix)
         def addTauTrgMCEff(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.tauTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = False
-            effSF.variationDataShiftBy = cms.double(0.0)
-            effSF.variationMCShiftBy = cms.double(shiftBy)
-            disablePrint(effSF)
-            return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgMCEff"+postfix)
+            return addTrgMCEff("tauTriggerEfficiencyScaleFactor", shiftBy, "TauTrgMCEff"+postfix)
 
         def addMETTrgSF(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.metTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = True
-            variationBy(effSF, shiftBy)
-            disablePrint(effSF)
-            return self._addVariationModule(process, module, name+self.systPrefix+"MetTrgSF"+postfix)
+            return addTrgSF("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgSF"+postfix)
         def addMETTrgDataEff(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.metTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = False
-            effSF.variationDataShiftBy = cms.double(shiftBy)
-            effSF.variationMCShiftBy = cms.double(0.0)
-            disablePrint(effSF)
-            return self._addVariationModule(process, module, name+self.systPrefix+"MetTrgDataEff"+postfix)
+            return addTrgDataEff("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgDataEff"+postfix)
         def addMETTrgMCEff(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.metTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = False
-            effSF.variationDataShiftBy = cms.double(0.0)
-            effSF.variationMCShiftBy = cms.double(shiftBy)
-            disablePrint(effSF)
-            return self._addVariationModule(process, module, name+self.systPrefix+"MetTrgMCEff"+postfix)
+            return addTrgMCEff("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgMCEff"+postfix)
 
         def addBTagSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
