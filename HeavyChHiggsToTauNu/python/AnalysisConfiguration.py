@@ -1238,6 +1238,11 @@ class ConfigBuilder:
         def addMETTrgMCEff(shiftBy, postfix):
             return addTrgMCEff("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgMCEff"+postfix)
 
+        def addMuonTrgDataEff(shiftBy, postfix):
+            return addTrgDataEff("embeddingMuonTriggerEfficiency", shiftBy, "MuonTrgDataEff"+postfix)
+        def addMuonIdDataEff(shiftBy, postfix):
+            return addTrgDataEff("embeddingMuonIdEfficiency", shiftBy, "MuonIdDataEff"+postfix)
+
         def addBTagSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
             module.bTagging.variationEnabled = True
@@ -1276,6 +1281,13 @@ class ConfigBuilder:
                 else:
                     names.append(addMETTrgSF( 1.0, "Plus"))
                     names.append(addMETTrgSF(-1.0, "Minus"))
+
+        if self.options.tauEmbeddingInput != 0:
+            names.append(addMuonTrgDataEff( 1.0, "Plus"))
+            names.append(addMuonTrgDataEff( -1.0, "Minus"))
+
+            names.append(addMuonIdDataEff( 1.0, "Plus"))
+            names.append(addMuonIdDataEff( -1.0, "Minus"))
 
         # BTag SF
         if not embeddingData:
