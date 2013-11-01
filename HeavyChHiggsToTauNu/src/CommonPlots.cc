@@ -24,8 +24,8 @@ namespace HPlus {
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper),
     fSplittedHistogramHandler(iConfig.getUntrackedParameter<edm::ParameterSet>("histogramSplitting"), histoWrapper, (analysisType != kQCDNormalizationSystematicsSignalRegion && analysisType != kQCDNormalizationSystematicsControlRegion)),
-    fCommonBaseDirectory(fs->mkdir("CommonPlots")),
-    fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
+    fCommonBaseDirectory(histoWrapper.mkdir(HistoWrapper::kVital, *fs, "CommonPlots")),
+    fEveryStepDirectory(histoWrapper.mkdir(HistoWrapper::kVital, fCommonBaseDirectory, "AtEveryStep")),
     fTauFakeRateAnalysis(0),
     fTauSelection(0),
     fFakeTauIdentifier(0),
@@ -92,8 +92,8 @@ namespace HPlus {
       myLabel += "QCDNormalizationControl";
       myFakeLabel = "Empty";
     }
-    TFileDirectory myCtrlDir = fs->mkdir(myLabel.c_str());
-    TFileDirectory myCtrlEWKFakeTausDir = fs->mkdir(myFakeLabel.c_str());
+    TFileDirectory myCtrlDir = fHistoWrapper.mkdir(HistoWrapper::kSystematics, *fs, myLabel);
+    TFileDirectory myCtrlEWKFakeTausDir = fHistoWrapper.mkdir(HistoWrapper::kSystematics, *fs, myFakeLabel);
 
     // Create histograms
 

@@ -169,9 +169,9 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     std::string myDirName = "QCDTailKiller"+postfix;
-    TFileDirectory myDir = fs->mkdir(myDirName);
-    TFileDirectory myBackToBackDir = myDir.mkdir("BackToBackSystem");
-    TFileDirectory myCollinearDir = myDir.mkdir("CollinearSystem");
+    TFileDirectory myDir = histoWrapper.mkdir(HistoWrapper::kVital, *fs, myDirName);
+    TFileDirectory myBackToBackDir = histoWrapper.mkdir(HistoWrapper::kVital, myDir, "BackToBackSystem");
+    TFileDirectory myCollinearDir = histoWrapper.mkdir(HistoWrapper::kVital, myDir, "CollinearSystem");
 
     // Create and initialise cut items for back to back system
     std::vector<edm::ParameterSet> myBackToBackPSets = iConfig.getUntrackedParameter<std::vector<edm::ParameterSet> >("backToBack");
