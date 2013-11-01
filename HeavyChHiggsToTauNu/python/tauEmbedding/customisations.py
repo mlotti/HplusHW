@@ -485,6 +485,7 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
         tauSrc = tauEmbeddingMuons,
         histogramAmbientLevel = "Systematics",
     )
+    m2.eventCounter.enabled = cms.untracked.bool(False)
     m2.jetSelection.src.setProcessName(skimProcessName) # FIXME: use smeared collection for MC
     m2.jetSelection.jetPileUpMVAValues.setProcessName(skimProcessName)
     m2.jetSelection.jetPileUpIdFlag.setProcessName(skimProcessName)
@@ -509,6 +510,7 @@ def addMuonVeto(process, sequence, param, prefix="muonSelectionMuonVeto"):
         vertexSrc = "firstPrimaryVertex",
         histogramAmbientLevel = "Systematics"
     )
+    m1.eventCounter.enabled = cms.untracked.bool(False)
     m1.MuonSelection.MuonCollectionName = "selectedPatMuonsEmbeddingMuonCleaned"
     m2 = cms.EDProducer("EventCountProducer")
 
@@ -527,6 +529,7 @@ def addElectronVeto(process, sequence, param, prefix="muonSelectionElectronVeto"
     m1 = electronVetoFilter_cfi.hPlusGlobalElectronVetoFilter.clone(
         histogramAmbientLevel = "Systematics"
     )
+    m1.eventCounter.enabled = cms.untracked.bool(False)
     m1.vertexSrc = m1.vertexSrc.value()+"Original"
     m2 = cms.EDProducer("EventCountProducer")
 
@@ -1056,7 +1059,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     if not selectOnlyFirstGenTau:
         # Select the tau candidate which is most likely going to pass the identification
         genTauSelected = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
-            eventCounter = param.eventCounter.clone(),
+            eventCounter = param.eventCounter.clone(enabled = cms.untracked.bool(False)),
             tauSelection = param.tauSelection.clone(),
             vertexSrc = cms.InputTag(param.primaryVertexSelection.selectedSrc.value()),
             histogramAmbientLevel = cms.untracked.string("Systematics"),
@@ -1107,11 +1110,13 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     eveto = ElectronVeto.hPlusGlobalElectronVetoFilter.clone(
         histogramAmbientLevel = "Systematics"
     )
+    eveto.eventCounter.enabled = cms.untracked.bool(False)
     evetoCount = counterPrototype.clone()
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as MuonVeto
     muveto = MuonVeto.hPlusGlobalMuonVetoFilter.clone(
         histogramAmbientLevel = "Systematics"
     )
+    muveto.eventCounter.enabled = cms.untracked.bool(False)
     muvetoCount = counterPrototype.clone()
     setattr(process, prefix+"ElectronVeto", eveto)
     setattr(process, prefix+"ElectronVetoCount", evetoCount)
@@ -1146,6 +1151,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
         allowEmptyTau = True,
         histogramAmbientLevel = "Systematics",
     )
+    cleanedJets.eventCounter.enabled = cms.untracked.bool(False)
     cleanedJetsName = prefix+"CleanedJets"
     setattr(process, cleanedJetsName, cleanedJets)
 
