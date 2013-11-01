@@ -40,6 +40,9 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     # Enable generator weight
     param.embeddingGeneratorWeightReader.enabled = True
 
+    # Override TriggerResults process name for MET noise filters
+    param.metFilters.triggerResultsSrc.setProcessName(skimProcessName)
+
     # Change the triggers to muon
     param.trigger.triggers = [
         "HLT_Mu9",
@@ -55,7 +58,6 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     if len(tauTrigger) == 0:
         tauTrigger = "HLT_IsoPFTau35_Trk20_EPS"
 
-    # FIXME: this will not quite work in 2012
     param.trigger.selectionType = "disabled"
     param.tauTriggerEfficiencyScaleFactor.mode = "disabled"
     param.metTriggerEfficiencyScaleFactor.mode = "disabled"
