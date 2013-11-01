@@ -56,7 +56,7 @@ namespace HPlus {
     fElecSelectionSubCountPassedVetoAndElectronFromBjet(eventCounter.addSubCounter("ElectronSelection", "Electron veto passed and e in b jet"))
   {
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("ElectronSelection");
+    TFileDirectory myDir = histoWrapper.mkdir(HistoWrapper::kInformative, *fs, "ElectronSelection");
 
     hElectronPt_all  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_all", "ElectronPt_all;electron candidates p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0.0, 400.0);
     hElectronEta_all = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_all", "ElectronEta_all;electron candiates #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);

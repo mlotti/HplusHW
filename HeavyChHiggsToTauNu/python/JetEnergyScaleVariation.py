@@ -113,6 +113,8 @@ def addTESVariation(process, prefix, name, prototype, direction, postfix="", his
         filter = False,
         histogramAmbientLevel = histogramAmbientLevel
     )
+    if histogramAmbientLevel == "Systematics":
+        m.eventCounter.enabled = cms.untracked.bool(False)
     selectedTauName = add(analysisName+"SelectedTauForVariation", m)
     m = tauv.clone(
         src = selectedTauName

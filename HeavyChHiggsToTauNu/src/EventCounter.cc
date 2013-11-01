@@ -50,6 +50,7 @@ namespace HPlus {
       allCounters_[0].insert(inputCountTags_[i].encode());
     }
 
+    fIsEnabled = pset.getUntrackedParameter<bool>("enabled", fIsEnabled);
     printMainCounter = pset.getUntrackedParameter<bool>("printMainCounter", false);
     printSubCounters = pset.getUntrackedParameter<bool>("printSubCounters", false);
   }
@@ -100,6 +101,9 @@ namespace HPlus {
   }
 
   void EventCounter::endJob() {
+    if(!fIsEnabled)
+      return;
+
     edm::Service<TFileService> fs;
     if(!fs.isAvailable())
       return;

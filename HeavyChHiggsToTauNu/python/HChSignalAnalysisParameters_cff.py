@@ -687,7 +687,6 @@ def cloneForHeavyAnalysis(lightModule):
     return heavyModule
 
 # Set trigger efficiency / scale factor depending on tau selection params
-
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele, triggerEfficiency, leg):
     myString = "%s_%s_%s" % (tausele.isolationDiscriminator.value(),tausele.againstMuonDiscriminator.value(),tausele.againstElectronDiscriminator.value())
     myScaleFactors = triggerEfficiency.getEfficiency(tausele.isolationDiscriminator.value(), tausele.againstMuonDiscriminator.value(), tausele.againstElectronDiscriminator.value())
@@ -759,51 +758,27 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-def setDataTriggerEfficiency(dataVersion, era, pset):
-    if dataVersion.isMC():
-        if dataVersion.isS4():
-            pset.mcSelect = "Summer11"
-        elif dataVersion.isS6():
-            if era == "Run2011A":
-                pset.mcSelect = "Fall11_PU_2011A"
-            if era == "Run2011B":
-                pset.mcSelect = "Fall11_PU_2011B"
-            if era == "Run2011AB":
-                pset.mcSelect = "Fall11_PU_2011AB"
+def _setTriggerEfficiencyForEraMC(dataVersion, era, pset):
+    if dataVersion.isS4():
+        pset.mcSelect = "Summer11"
+    elif dataVersion.isS6():
+        if era == "Run2011A":
+            pset.mcSelect = "Fall11_PU_2011A"
+        if era == "Run2011B":
+            pset.mcSelect = "Fall11_PU_2011B"
+        if era == "Run2011AB":
+            pset.mcSelect = "Fall11_PU_2011AB"
         elif dataVersion.isS10():
             pset.mcSelect = "Summer12_PU_"+era.replace("Run", "")
-        elif dataVersion.isHighPU():
-	    pset.mode = "disabled"
-        else:
-            raise Exception("MC trigger efficencies are available only for Summer11, Fall11 and Summer12")
-    if era == "EPS":
-        pset.dataSelect = ["runs_160404_167913"]
-    elif era == "Run2011A":
-        pset.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692"]
-    elif era == "Run2011A-EPS":
-        pset.dataSelect = ["runs_170722_173198", "runs_173236_173692"]
-    elif era == "Run2011B":
-        pset.dataSelect = ["runs_175832_180252"]
-    elif era == "Run2011AB":
-        pset.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
-    elif era == "Run2012A":
-        pset.dataSelect = ["runs_190456_193621"]
-    elif era == "Run2012B":
-        pset.dataSelect = ["runs_193834_196531"]
-    elif era == "Run2012C":
-#        pset.dataSelect = ["runs_198022_202585"]
-        pset.dataSelect = ["runs_198022_203742"] # FIXME: temporary fix
-    elif era == "Run2012D":
-        pset.dataSelect = ["runs_202807_208686"]
-    elif era == "Run2012AB":
-        pset.dataSelect = ["runs_190456_196531"]
-    elif era == "Run2012ABC":
-        pset.dataSelect = ["runs_190456_202585"]
-    elif era == "Run2012ABCD":
-        pset.dataSelect = ["runs_190456_208686"]
+    elif dataVersion.isHighPU():
+        pset.mode = "disabled"
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012AB', 'Run2012ABC', 'Run2012ABCD'" % era)
+        raise Exception("MC trigger efficencies are available only for Summer11, Fall11 and Summer12")
 
+def setTauTriggerEfficiencyForEra(dataVersion, era, pset):
+    if dataVersion.isMC():
+        _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
+    pset.dataSelect = tauTriggerEfficiency.getRunsForEra(era)
 
 # Weighting by instantaneous luminosity, and the number of true
 # simulated pile up interactions

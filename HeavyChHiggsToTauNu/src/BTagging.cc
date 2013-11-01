@@ -529,7 +529,7 @@ namespace HPlus {
     //    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
   {
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("Btagging");
+    TFileDirectory myDir = histoWrapper.mkdir(HistoWrapper::kInformative, *fs, "Btagging");
     hSFBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "hSFBCSVM", "hSFBCSVM", 100, 0.9, 1);
     hSFBCSVM_eta = histoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, myDir, "hSFBCSVM", "hSFBCSVM", 100, 0.9, 1, 10, -2.5,2.5);
     hSFBCSVM_pt = histoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, myDir, "hSFBCSVM", "hSFBCSVM", 100, 0.9, 1,200,0,200);
@@ -564,7 +564,7 @@ namespace HPlus {
     }
 
     // MC btagging and mistagging efficiency
-    TFileDirectory myMCEffDir = myDir.mkdir("MCEfficiency");
+    TFileDirectory myMCEffDir = histoWrapper.mkdir(HistoWrapper::kInformative, myDir, "MCEfficiency");
     hMCAllBJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "AllBJetsByPt", "AllBJetsByPt;b jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
     hMCAllCJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "AllCJetsByPt", "AllCJetsByPt;c jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
     hMCAllLightJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "AllLightJetsByPt", "AllLightJetsByPt;udsg jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
