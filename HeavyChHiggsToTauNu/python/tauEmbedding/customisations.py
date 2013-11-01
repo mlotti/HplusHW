@@ -806,7 +806,8 @@ def addTauEmbeddingMuonTausUsingVisible(process, prefix = "tauEmbeddingGenTauVis
 
     m = cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
 #        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
-        src = cms.InputTag("selectedPatTausHpsPFTau", "", "EMBEDDING"),
+#        src = cms.InputTag("selectedPatTausHpsPFTau", "", "EMBEDDING"), # 2011
+        src = cms.InputTag("selectedPatTaus", "", "EMBEDDING"),
         refSrc = cms.InputTag(visibleName),
         maxDeltaR = cms.double(0.5),
     )
@@ -1037,7 +1038,8 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     # )
     genTauReco = cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
 #        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
-        src = cms.InputTag("selectedPatTausHpsPFTau"),
+#        src = cms.InputTag("selectedPatTausHpsPFTau"), # 2011
+        src = cms.InputTag("selectedPatTaus"),
         refSrc = cms.InputTag(genTausVisibleName),
         maxDeltaR = cms.double(0.5),
     )
