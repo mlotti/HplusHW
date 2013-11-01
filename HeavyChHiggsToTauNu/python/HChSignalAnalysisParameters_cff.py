@@ -769,8 +769,8 @@ def _setTriggerEfficiencyForEraMC(dataVersion, era, pset):
             pset.mcSelect = "Fall11_PU_2011B"
         if era == "Run2011AB":
             pset.mcSelect = "Fall11_PU_2011AB"
-        elif dataVersion.isS10():
-            pset.mcSelect = "Summer12_PU_"+era.replace("Run", "")
+    elif dataVersion.isS10():
+        pset.mcSelect = "Summer12_PU_"+era.replace("Run", "")
     elif dataVersion.isHighPU():
         pset.mode = "disabled"
     else:
@@ -780,6 +780,11 @@ def setTauTriggerEfficiencyForEra(dataVersion, era, pset):
     if dataVersion.isMC():
         _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
     pset.dataSelect = tauTriggerEfficiency.getRunsForEra(era)
+
+def setMetTriggerEfficiencyForEra(dataVersion, era, pset):
+    if dataVersion.isMC():
+        _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
+    pset.dataSelect = metTriggerEfficiency.getRunsForEra(era)
 
 # Weighting by instantaneous luminosity, and the number of true
 # simulated pile up interactions
