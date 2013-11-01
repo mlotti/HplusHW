@@ -356,12 +356,6 @@ class ConfigBuilder:
         analysisModules = analysisLightModules+analysisHeavyModules
         analysisNames = analysisLightNames+analysisHeavyNames
 
-        analysisNamesForSystematics = []
-        # For optimisation and embedding, the modules for systematics
-        # are added to analysisNamesForSystematics later
-        if not self.doOptimisation and self.options.tauEmbeddingInput == 0:
-            analysisNamesForSystematics = analysisNames[:]
-
         for module in analysisModules:
             module.Tree.fill = self.doFillTree
             module.histogramAmbientLevel = self.histogramAmbientLevel
@@ -405,6 +399,12 @@ class ConfigBuilder:
         self._printModule(analysisModules[0])
 
         (analysisModules, analysisNames) = self._setupTauEmbeddingAnalyses(process, analysisModules, analysisNames)
+
+        analysisNamesForSystematics = []
+        # For optimisation, the modules for systematics are added to
+        # analysisNamesForSystematics later
+        if not self.doOptimisation:
+            analysisNamesForSystematics = analysisNames[:]
 
         # Construct normal path
         analysisNamesForTailKillerScenarios = analysisNames
