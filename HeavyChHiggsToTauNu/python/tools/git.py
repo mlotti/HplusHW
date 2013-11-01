@@ -11,15 +11,32 @@
 # histogram files), and from multicrab code (to store everything to
 # text files in multicrab directories).
 
+import os
+import copy
 import subprocess
 import errno
+
+def _findInPath(exe):
+    for p in os.environ["PATH"].split(os.pathsep):
+        if os.path.exists(os.path.join(p, exe)):
+            return p
+    return None
 
 ## Wrapper for executing the git commands
 #
 # \param cmd   The command and arguments as a list (forwarded to subprocess.Popen)
 def _execute(cmd):
+    gitLocation = _findInPath("git")
+    if gitLocation is None:
+        print "WARNING: Did not find git in $PATH"
+        return None
+    env = os.environ
+    if gitLocation.find("/usr/bin") == 0:
+        env = copy.copy(env)
+        if "LD_LIBRARY_PATH" in env:
+            del env["LD_LIBRARY_PATH"]
     try:
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
         (output, error) = p.communicate()
         ret = p.returncode
         if ret != 0:

@@ -29,6 +29,7 @@ namespace {
     edm::InputTag fPatTriggerSrc;
     double fDeltaR;
     std::vector<std::string> fFilterNames;
+    const bool fEnabled;
   };
 
   template <typename T>
@@ -36,7 +37,8 @@ namespace {
     fSrc(iConfig.getParameter<edm::InputTag>("src")),
     fPatTriggerSrc(iConfig.getParameter<edm::InputTag>("patTriggerEventSrc")),
     fDeltaR(iConfig.getParameter<double>("deltaR")),
-    fFilterNames(iConfig.getParameter<std::vector<std::string> >("filterNames"))
+    fFilterNames(iConfig.getParameter<std::vector<std::string> >("filterNames")),
+    fEnabled(iConfig.getParameter<bool>("enabled"))
   {
     produces<std::vector<T> >();
     produces<edm::ValueMap<bool> >();
@@ -63,11 +65,16 @@ namespace {
     std::vector<bool> matched;
     for(size_t iCand = 0; iCand < hcands->size(); ++iCand) {
       bool match = false;
-      for(size_t iTrigger =0; iTrigger < filterObjects.size(); ++iTrigger) {
-        if(reco::deltaR(hcands->at(iCand), *(filterObjects[iTrigger])) < fDeltaR) {
-          match = true;
-          break;
+      if(fEnabled) {
+        for(size_t iTrigger =0; iTrigger < filterObjects.size(); ++iTrigger) {
+          if(reco::deltaR(hcands->at(iCand), *(filterObjects[iTrigger])) < fDeltaR) {
+            match = true;
+            break;
+          }
         }
+      }
+      else {
+        match = true;
       }
       if(match) {
         T copy = hcands->at(iCand);

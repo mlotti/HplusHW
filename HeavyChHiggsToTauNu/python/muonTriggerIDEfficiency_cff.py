@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 # Efficiencies for muon pT > 41, by Sami 20121003-160154
 efficiency_pt41 = cms.untracked.PSet(
-    data = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/muonTriggerIDEfficiency_pt41.json"),
+    data = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/muonTriggerIDEfficiency2011_pt41.json"),
     dataSelect = cms.vstring(
         "Run2011A_Mu20",
         "Run2011A_Mu24",
@@ -27,7 +27,7 @@ def triggerBin(eta, eff, unc):
 # Taken from https://twiki.cern.ch/twiki/bin/view/CMS/MuonReferenceEffs
 # file MuonEfficiencies2011_44X.pkl
 efficiency_ID_pickle = cms.untracked.PSet(
-    data = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/muonIDEfficiency_reference.json"),
+    data = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/muonIDEfficiency2011_reference.json"),
     dataSelect = cms.vstring(
         "Run2011A",
         "Run2011B",
@@ -59,7 +59,7 @@ efficiency_ID_pickle = cms.untracked.PSet(
 # From https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonHLT#Reference_Efficiencies_for_2011
 # Run ranges from https://indico.cern.ch/getFile.py/access?contribId=1&resId=0&materialId=slides&confId=156713
 efficiency_trigger_reference = cms.untracked.PSet(
-    data = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/muonTriggerEfficiency_reference.json"),
+    data = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/muonTriggerEfficiency2011_reference.json"),
     dataSelect = cms.vstring(
         "lumi1e33",
         "lumi2e33",
