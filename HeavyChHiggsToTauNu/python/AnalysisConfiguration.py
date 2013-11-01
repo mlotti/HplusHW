@@ -349,7 +349,7 @@ class ConfigBuilder:
                         print "# This is suitable only for preliminary testing."
                         print "#"
                         print "########################################"
-                        param.setDataTriggerEfficiency(self.dataVersion, era="Run2012ABCD", pset=mod.metTriggerEfficiencyScaleFactor)
+                        param.setMetTriggerEfficiencyForEra(self.dataVersion, era="Run2012ABCD", pset=mod.metTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         mod.configInfo.pileupReweightType = PileupWeightType.toString[PileupWeightType.NOMINAL]
