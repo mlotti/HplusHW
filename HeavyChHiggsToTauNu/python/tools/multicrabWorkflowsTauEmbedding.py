@@ -303,7 +303,7 @@ def addEmbeddingSkim_53X(version, datasets, updateDefinitions):
         "W4Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2200, njobsOut=1),
         "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn=1700, njobsOut=1),
         "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=3400, njobsOut=1), # FIXME: njobsOut
-        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=4990, njobsOut=1), # FIXME: njobsOut
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=4950, njobsOut=1), # FIXME: njobsOut
         "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(njobsIn= 400, njobsOut=1), # FIXME: njobsOut
         "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(njobsIn=2700, njobsOut=1),
         "T_t-channel_TuneZ2star_Summer12":         TaskDef(njobsIn= 200, njobsOut=1),
@@ -819,9 +819,18 @@ def addEmbeddingSkim_v53_3(datasets):
         # User mean 1246.4, min 257.4, max 2356.3
         # Mean 165.9 MB, min 32.3 MB, max 188.3 MB
         "TTJets_TuneZ2star_Summer12":              TaskDef("/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_tauembedding_skim_v53_3-9a24e6fe0421ec76a55ad5183bef176f/USER", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
-        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
-        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
-        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
+        # 4165117 events, 3403 jobs
+        # User mean 2921.2, min 283.2, max 18418.4
+        # Mean 338.3 MB, min 39.1 MB, max 365.6 MB
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v2_AODSIM_tauembedding_skim_v53_3-9a24e6fe0421ec76a55ad5183bef176f/USER", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
+        # 5127612 events, 4977 jobs
+        # User mean 2619.9, min 178.7, max 17758.3
+        # Mean 298.9 MB, min 12.3 MB, max 332.1 MB
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_skim_v53_3-9a24e6fe0421ec76a55ad5183bef176f/USER", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
+        # 632794 events, 407 jobs
+        # User mean 4880.2, min 208.2, max 33993.4
+        # Mean 481.7 MB, min 11.5 MB, max 522.5 MB
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("/TTJets_HadronicMGDecays_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_ext_v1_AODSIM_tauembedding_skim_v53_3-9a24e6fe0421ec76a55ad5183bef176f/USER", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
         # 1739021 events, 2704 jobs
         # User mean 1997.3, min 473.7, max 3827.5
         # Mean 162.0 MB, min 36.4 MB, max 186.1 MB
