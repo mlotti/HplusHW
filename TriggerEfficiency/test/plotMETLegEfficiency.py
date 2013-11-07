@@ -19,7 +19,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 
 from PythonWriter import PythonWriter
-pythonWriter = PythonWriter("metLegEfficiency")
+pythonWriter = PythonWriter("metLegTriggerEfficiency2012")
 from Plotter import Plotter
 
 METCorrection = ""
