@@ -134,15 +134,15 @@ def main():
     againstElectronDiscriminators = []
 
     tauIDdiscriminators.append("byLooseCombinedIsolationDeltaBetaCorr3Hits")
-####    tauIDdiscriminators.append("byMediumCombinedIsolationDeltaBetaCorr3Hits")
-####    tauIDdiscriminators.append("byTightCombinedIsolationDeltaBetaCorr3Hits")
+    tauIDdiscriminators.append("byMediumCombinedIsolationDeltaBetaCorr3Hits")
+    tauIDdiscriminators.append("byTightCombinedIsolationDeltaBetaCorr3Hits")
 
     againstMuonDiscriminators.append("againstMuonMedium2")
-####    againstMuonDiscriminators.append("againstMuonTight2")
+    againstMuonDiscriminators.append("againstMuonTight2")
 
     againstElectronDiscriminators.append("againstElectronMediumMVA3")
-####    againstElectronDiscriminators.append("againstElectronTightMVA3")
-####    againstElectronDiscriminators.append("againstElectronVTightMVA3")
+    againstElectronDiscriminators.append("againstElectronTightMVA3")
+    againstElectronDiscriminators.append("againstElectronVTightMVA3")
 
     offlineSelections = []
     for eleD in againstElectronDiscriminators:
@@ -151,21 +151,21 @@ def main():
 
                 ### Offline selection definition (H+)                                                                         
                 offlineTauSelection = "PFTauPt > 41 && abs(PFTauEta) < 2.1"
-####                offlineTauSelection += "&& PFTauLeadChargedHadrCandPt > 20"
-####                offlineTauSelection += "&& PFTauProng == 1"
-####                offlineTauSelection += "&& PFTau_decayModeFinding > 0.5"
-####                offlineTauSelection+= "&& PFTau_%s > 0.5"%eleD
-####                offlineTauSelection+= "&& PFTau_%s > 0.5"%muonD
-####                offlineTauSelection+= "&& PFTau_%s > 0.5"%tauD
+                offlineTauSelection += "&& PFTauLeadChargedHadrCandPt > 20"
+                offlineTauSelection += "&& PFTauProng == 1"
+                offlineTauSelection += "&& PFTau_decayModeFinding > 0.5"
+                offlineTauSelection+= "&& PFTau_%s > 0.5"%eleD
+                offlineTauSelection+= "&& PFTau_%s > 0.5"%muonD
+                offlineTauSelection+= "&& PFTau_%s > 0.5"%tauD
 
                 offlineJetSelection = "PFJetPt > 0"
                 #    offlineJetSelection+= "&& PFJetPUIDloose"
                 #    offlineJetSelection+= "&& PFJetPUIDmedium"
-####                offlineJetSelection+= "&& PFJetPUIDtight"
+                offlineJetSelection+= "&& PFJetPUIDtight"
 
                 offlineSelection = "Sum$(%s) >= 1"%offlineTauSelection
                 offlineSelection = And(offlineSelection,"Sum$(%s) >= 3+Sum$(%s && PFTauJetMinDR < 0.5)"%(offlineJetSelection,offlineTauSelection))
-####                offlineSelection += "&& hPlusGlobalElectronVetoFilter > 0.5 && hPlusGlobalMuonVetoFilter > 0.5"
+                offlineSelection += "&& hPlusGlobalElectronVetoFilter > 0.5 && hPlusGlobalMuonVetoFilter > 0.5"
 
                 if len(againstElectronDiscriminators) + len(againstMuonDiscriminators) + len(tauIDdiscriminators) > 3:
                     offlineSelections.append(namedselection(tauD+"_"+muonD+"_"+eleD,offlineSelection))
