@@ -35,6 +35,7 @@ analysis = "analysis"
 counters = analysis+"/counters"
 
 plotDir = "METLeg2011"
+pythonWriter.setPlotDir(plotDir)
 
 def L1ETMCorrection(L1ETM,caloMETnoHF,caloMETnoHFresidualCorrected):
     R = 0.9322
@@ -197,7 +198,7 @@ def main():
 #                doPlots(datasets,selection=selection,dataVsMc=0,pyScenario=pyScenario)
                 doPlots(datasets,selection=selection,dataVsMc=1,pyScenario=pyScenario)
 #                doPlots(datasets,selection=selection,dataVsMc=2,pyScenario=pyScenario)
-    pythonWriter.write(os.path.join(plotDir,"metLegTriggerEfficiency2012_cff.py"))
+    pythonWriter.write("metLegTriggerEfficiency2011_cff.py")
 
 def namedselection(name,selection):
     namedSelection = []

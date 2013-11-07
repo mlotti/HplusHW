@@ -23,11 +23,15 @@ class PythonWriter:
         self.mcs    = []
         self.namedSelection = []
         self.bins   = []
+        self.plotDir = "./"
 
         self.rootVersion = ROOT.gROOT.GetVersion()
 
     def setInput(self,inString):
         self.inString = os.path.basename(inString)
+
+    def setPlotDir(self,dirname):
+        self.plotDir = dirname
 
     def setStatOption(self,statOption):
         self.statOption = statOption
@@ -69,7 +73,8 @@ class PythonWriter:
 
         self.writeParameters(fOUT,label,runrange,lumi,eff)
 
-    def write(self,fName):
+    def write(self,fileName):
+        fName = os.path.join(self.plotDir,fileName)
         fOUT = open(fName,"w")
         time = self.timeStamp()
         fOUT.write("# Generated on "+time+"\n")
@@ -241,7 +246,7 @@ class PythonWriter:
         selection = namedSelection[1]
         selection = selection.replace("&&","\n                   &&")
 
-        fName = self.title+"_"+name+".json"
+        fName = os.path.join(self.plotDir,self.title+"_"+name+".json")
         fOUT = open(fName,"w")
         fOUT.write("{\n")
         time = self.timeStamp()
