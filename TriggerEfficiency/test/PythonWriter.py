@@ -266,7 +266,7 @@ class PythonWriter:
                     print "Run range not valid",r.runrange
                     sys.exit()
 
-                fOUT.write("      \"era\":"+r.label+",\n")
+                fOUT.write("      \"era\": \""+r.label+"\",\n")
                 fOUT.write("      \"runs_"+match.group("firstRun")+"_"+match.group("lastRun")+"\": {\n")
                 fOUT.write("          \"firstRun\"  :"+match.group("firstRun")+",\n")
                 fOUT.write("          \"lastRun\"   :"+match.group("lastRun")+",\n")
@@ -284,7 +284,7 @@ class PythonWriter:
             if mc.name == name:
                 fOUT.write("      \""+mc.label+"\": {\n")
                 self.writeJSONBins(fOUT,mc.label,mc.eff,ihisto=1)
-                fOUT.write("      }\n")
+                fOUT.write("      }"+comma+"\n")
         fOUT.write("  }\n")
 
         fOUT.write("}\n")
@@ -306,7 +306,7 @@ class PythonWriter:
         fOUT.write("      }\n")
 
     def writeJSONBins(self,fOUT,label,eff,ihisto=0):
-        fOUT.write("          \"bins\" = [\n")
+        fOUT.write("          \"bins\" : [\n")
         nbins = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetN()
         comma = ","
         for i in range(1,nbins):

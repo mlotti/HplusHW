@@ -19,7 +19,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 
 from PythonWriter import PythonWriter
-pythonWriter = PythonWriter("metLegEfficiency")
+pythonWriter = PythonWriter("metLegTriggerEfficiency2012")
 from Plotter import Plotter
 
 METCorrection = ""
@@ -167,7 +167,10 @@ def main():
                 offlineSelection = And(offlineSelection,"Sum$(%s) >= 3+Sum$(%s && PFTauJetMinDR < 0.5)"%(offlineJetSelection,offlineTauSelection))
                 offlineSelection += "&& hPlusGlobalElectronVetoFilter > 0.5 && hPlusGlobalMuonVetoFilter > 0.5"
 
-                offlineSelections.append(namedselection(tauD+"_"+muonD+"_"+eleD,offlineSelection))
+                if len(againstElectronDiscriminators) + len(againstMuonDiscriminators) + len(tauIDdiscriminators) > 3:
+                    offlineSelections.append(namedselection(tauD+"_"+muonD+"_"+eleD,offlineSelection))
+                else:
+                    offlineSelections.append(namedselection("loose",offlineSelection))
 
 
     pu_re = re.compile("pileupWeight_(?P<scenario>(\S+))\.C")
