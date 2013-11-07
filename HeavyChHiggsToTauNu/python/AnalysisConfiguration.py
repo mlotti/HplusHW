@@ -341,7 +341,7 @@ class ConfigBuilder:
                 for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
                     if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
-                        param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
+                        param.setTauTriggerEfficiencyForEra(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
                     if self.applyMETTriggerScaleFactor:
                         print "########################################"
                         print "#"
