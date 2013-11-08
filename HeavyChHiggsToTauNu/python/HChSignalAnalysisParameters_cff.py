@@ -786,11 +786,6 @@ def setMetTriggerEfficiencyForEra(dataVersion, era, pset):
         _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
     pset.dataSelect = metTriggerEfficiency.getRunsForEra(era)
 
-def setMetTriggerEfficiencyForEra(dataVersion, era, pset):
-    if dataVersion.isMC():
-        _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
-    pset.dataSelect = metTriggerEfficiency.getRunsForEra(era)
-
 # Weighting by instantaneous luminosity, and the number of true
 # simulated pile up interactions
 # See test/PUtools for tools to generate distributions and links to twiki
