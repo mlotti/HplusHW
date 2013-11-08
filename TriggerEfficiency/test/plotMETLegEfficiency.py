@@ -19,7 +19,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 
 from PythonWriter import PythonWriter
-pythonWriter = PythonWriter("metLegEfficiency")
+pythonWriter = PythonWriter("metLegTriggerEfficiency2012")
 from Plotter import Plotter
 
 METCorrection = ""
@@ -35,6 +35,7 @@ analysis = "analysis"
 counters = analysis+"/counters"
 
 plotDir = "METLeg2012"
+pythonWriter.setPlotDir(plotDir)
 
 def L1ETMCorrection(L1ETM,caloMETnoHF,caloMETnoHFresidualCorrected):
     R = 0.9322
@@ -166,7 +167,10 @@ def main():
                 offlineSelection = And(offlineSelection,"Sum$(%s) >= 3+Sum$(%s && PFTauJetMinDR < 0.5)"%(offlineJetSelection,offlineTauSelection))
                 offlineSelection += "&& hPlusGlobalElectronVetoFilter > 0.5 && hPlusGlobalMuonVetoFilter > 0.5"
 
-                offlineSelections.append(namedselection(tauD+"_"+muonD+"_"+eleD,offlineSelection))
+                if len(againstElectronDiscriminators) + len(againstMuonDiscriminators) + len(tauIDdiscriminators) > 3:
+                    offlineSelections.append(namedselection(tauD+"_"+muonD+"_"+eleD,offlineSelection))
+                else:
+                    offlineSelections.append(namedselection("loose",offlineSelection))
 
 
     pu_re = re.compile("pileupWeight_(?P<scenario>(\S+))\.C")
@@ -197,7 +201,7 @@ def main():
 #                doPlots(datasets,selection=selection,dataVsMc=0,pyScenario=pyScenario)
                 doPlots(datasets,selection=selection,dataVsMc=1,pyScenario=pyScenario)
 #                doPlots(datasets,selection=selection,dataVsMc=2,pyScenario=pyScenario)
-    pythonWriter.write(os.path.join(plotDir,"metLegTriggerEfficiency2012_cff.py"))
+    pythonWriter.write("metLegTriggerEfficiency2011_cff.py")
 
 def namedselection(name,selection):
     namedSelection = []
