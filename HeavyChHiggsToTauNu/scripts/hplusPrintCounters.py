@@ -23,11 +23,12 @@ def main(opts):
     if os.path.exists(opts.lumifile):
         datasets.loadLuminosities(opts.lumifile)
 
+    if opts.weighted and opts.PUreweight:
+        datasets.updateNAllEventsToPUWeighted(era=opts.dataEra)
+
     if opts.mergeData:
         datasets.mergeData()
 
-    if opts.weighted and opts.PUreweight:
-        datasets.updateNAllEventsToPUWeighted(era=opts.dataEra)
     eventCounter = counter.EventCounter(datasets)
     
 
