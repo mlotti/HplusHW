@@ -689,14 +689,10 @@ tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauS
 tauTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
 tauTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
 
-metTriggerEfficiencyScaleFactor = cms.untracked.PSet(
-#    data = cms.FileInPath("dummy")
-    dataSelect = cms.vstring(),
-    mcSelect = cms.string(""),
-    mode = cms.untracked.string("disabled"), # dataEfficiency, scaleFactor, disabled
-    variationEnabled = cms.bool(False),
-    useMaxUncertainty = cms.bool(True),
-)
+import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2011_cff as metTriggerEfficiency
+metTriggerEfficiencyScaleFactor = metTriggerEfficiency.getEfficiency()
+metTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
+metTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
@@ -754,6 +750,11 @@ def setTauTriggerEfficiencyForEra(dataVersion, era, pset):
     if dataVersion.isMC():
         _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
     pset.dataSelect = tauTriggerEfficiency.getRunsForEra(era)
+
+def setMetTriggerEfficiencyForEra(dataVersion, era, pset):
+    if dataVersion.isMC():
+        _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
+    pset.dataSelect = metTriggerEfficiency.getRunsForEra(era)
 
 # Weighting by instantaneous luminosity, and the number of true
 # simulated pile up interactions

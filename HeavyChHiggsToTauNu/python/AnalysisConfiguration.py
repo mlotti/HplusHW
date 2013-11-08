@@ -333,6 +333,14 @@ class ConfigBuilder:
                     mod = module.clone()
                     if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
                         param.setTauTriggerEfficiencyForEra(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
+                    if self.applyMETTriggerScaleFactor:
+                        print "########################################"
+                        print "#"
+                        print "# MET trigger efficiency/scale factor is from the whole Run2011AB for the moment (dataEra was %s)." % dataEra
+                        print "# This is suitable only for preliminary testing."
+                        print "#"
+                        print "########################################"
+                        param.setMetTriggerEfficiencyForEra(self.dataVersion, era="Run2011AB", pset=mod.metTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         mod.configInfo.pileupReweightType = PileupWeightType.toString[PileupWeightType.NOMINAL]

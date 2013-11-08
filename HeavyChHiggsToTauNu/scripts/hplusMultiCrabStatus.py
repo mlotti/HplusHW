@@ -55,7 +55,13 @@ def main(opts):
                 print >>sys.stderr, "%s: Task directory missing" % task
             continue
 
-        jobs = multicrab.crabStatusToJobs(task, opts.printCrab)
+        try:
+            jobs = multicrab.crabStatusToJobs(task, opts.printCrab)
+        except Exception:
+            if not opts.allowFails:
+                raise
+            print "%s: crab -status failed" % task
+            continue
 
         jobSummaries = {}
         njobs = 0
@@ -192,6 +198,8 @@ if __name__ == "__main__":
                       help="File where the output is saved with --save (default: 'status.txt')")
     parser.add_option("--printCrab", dest="printCrab", action="store_true", default=False,
                       help="Print CRAB output")
+    parser.add_option("--allowFails", dest="allowFails", default=False, action="store_true",
+                      help="Continue submissions even if crab -status fails for any reason")
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
 
