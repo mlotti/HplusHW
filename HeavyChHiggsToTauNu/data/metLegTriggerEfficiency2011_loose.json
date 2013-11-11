@@ -1,5 +1,5 @@
 {
-  "_timestamp":   "Generated on Thu Nov  7 11:34:51 2013,
+  "_timestamp":   "Generated on Mon Nov 11 09:33:14 2013,
                    by HiggsAnalysis/TriggerEfficiency/test/PythonWriter.py",
   "_rootVersion": "5.34/02",
   "_statOption" : 1,
@@ -16,6 +16,12 @@
           "lastRun"   :180252,
           "luminosity": 5094.834,
           "bins" : [
+             {
+               "pt"              :0.0,
+               "efficiency"      :0.0885057471264,
+               "uncertaintyPlus" :0.00591456576629,
+               "uncertaintyMinus":0.00558844449094
+             },
              {
                "pt"              :20.0,
                "efficiency"      :0.120249221184,
@@ -89,6 +95,12 @@
       "Fall11_PU_2011AB": {
           "bins" : [
              {
+               "pt"              :0.0,
+               "efficiency"      :0.126858384995,
+               "uncertaintyPlus" :0.000617665926956,
+               "uncertaintyMinus":0.000617665926956
+             },
+             {
                "pt"              :20.0,
                "efficiency"      :0.168757674285,
                "uncertaintyPlus" :0.000725530106724,
@@ -158,6 +170,12 @@
       },
       "Fall11_PU_Unweighted": {
           "bins" : [
+             {
+               "pt"              :0.0,
+               "efficiency"      :0.129398227225,
+               "uncertaintyPlus" :0.000636469133186,
+               "uncertaintyMinus":0.000636469133186
+             },
              {
                "pt"              :20.0,
                "efficiency"      :0.172305005821,
