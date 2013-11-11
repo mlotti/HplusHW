@@ -19,7 +19,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 
 from PythonWriter import PythonWriter
-pythonWriter = PythonWriter("metLegEfficiency")
+pythonWriter = PythonWriter("metLegTriggerEfficiency2012")
 from Plotter import Plotter
 
 METCorrection = ""
@@ -35,6 +35,7 @@ analysis = "analysis"
 counters = analysis+"/counters"
 
 plotDir = "METLeg2012"
+pythonWriter.setPlotDir(plotDir)
 
 def L1ETMCorrection(L1ETM,caloMETnoHF,caloMETnoHFresidualCorrected):
     R = 0.9322
@@ -166,7 +167,10 @@ def main():
                 offlineSelection = And(offlineSelection,"Sum$(%s) >= 3+Sum$(%s && PFTauJetMinDR < 0.5)"%(offlineJetSelection,offlineTauSelection))
                 offlineSelection += "&& hPlusGlobalElectronVetoFilter > 0.5 && hPlusGlobalMuonVetoFilter > 0.5"
 
-                offlineSelections.append(namedselection(tauD+"_"+muonD+"_"+eleD,offlineSelection))
+                if len(againstElectronDiscriminators) + len(againstMuonDiscriminators) + len(tauIDdiscriminators) > 3:
+                    offlineSelections.append(namedselection(tauD+"_"+muonD+"_"+eleD,offlineSelection))
+                else:
+                    offlineSelections.append(namedselection("loose",offlineSelection))
 
 
     pu_re = re.compile("pileupWeight_(?P<scenario>(\S+))\.C")
@@ -197,7 +201,7 @@ def main():
 #                doPlots(datasets,selection=selection,dataVsMc=0,pyScenario=pyScenario)
                 doPlots(datasets,selection=selection,dataVsMc=1,pyScenario=pyScenario)
 #                doPlots(datasets,selection=selection,dataVsMc=2,pyScenario=pyScenario)
-    pythonWriter.write(os.path.join(plotDir,"metLegTriggerEfficiency2012_cff.py"))
+    pythonWriter.write("metLegTriggerEfficiency2011_cff.py")
 
 def namedselection(name,selection):
     namedSelection = []
@@ -350,7 +354,7 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
     plotter.setTextPos(0.2,0.9,17,0.045)
     plotter.setTriggers(dataVsMc, l1TriggerName1, hltTriggerName1, l1TriggerName2, hltTriggerName2, runsText)
 
-    ptbins = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
+    ptbins  = [0, 20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
     etabins = [-2.1, -1.05, 0, 1.05, 2.1]
     vtxbins = [0,5,10,15,20,25,30,35]
     ptbins2 = [0, 10, 20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]

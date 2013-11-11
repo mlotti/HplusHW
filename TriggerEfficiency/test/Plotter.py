@@ -77,6 +77,11 @@ class Plotter:
             tree.Draw(varexp, denom, "goff e")
             d = tree.GetHistogram().Clone()
             print dataset.getName(),"n=",n.GetEntries(),"d=",d.GetEntries()
+<<<<<<< HEAD
+=======
+	    if d.GetEntries() == 0:
+		continue
+>>>>>>> 2011
             for i in range(1,d.GetNbinsX()+1):
                 print "    bin",i,n.GetBinContent(i),d.GetBinContent(i)
             eff = ROOT.TEfficiency(n, d)
@@ -93,18 +98,19 @@ class Plotter:
             return ROOT.TEfficiency.Combine(collection,"",len(weights),array.array("d",weights)),n,d
         return eff
 
+    def getStatOption(self):
+        return self.statOption
+
     def getEfficiency(self,datasets,varexp,num,denom):
 
 #        statOption = ROOT.TEfficiency.kBUniform
-        statOption = ROOT.TEfficiency.kFNormal
+        self.statOption = ROOT.TEfficiency.kFNormal
+
 #        print "check getEfficiency"                                                                                                        
         print "    varexp",varexp
         print "    num",num
         print "    denom",denom
-        teff = ROOT.TEfficiency()
-#        teff.SetStatisticOption(statOption)
-        tn = ROOT.TH1F()
-        td = ROOT.TH1F()
+
         first = True
         isData = False
 #        collection = ROOT.TObjArray()
@@ -132,7 +138,7 @@ class Plotter:
                 continue
 
             eff = ROOT.TEfficiency(n, d)
-#            eff.SetStatisticOption(statOption)
+            eff.SetStatisticOption(self.statOption)
 
             weight = 1
             if dataset.isMC():
@@ -164,7 +170,7 @@ class Plotter:
 #            return ROOT.TEfficiency.Combine(collection,"",len(weights),array.array("d",weights)),n,d
         if isData:
             teff = ROOT.TEfficiency(tn, td)
-#            teff.SetStatisticOption(statOption)
+            teff.SetStatisticOption(self.statOption)
             for i in range(1,td.GetNbinsX()+1):
                 if td.GetBinContent(i) > 0:
                     print "    bin",i,td.GetBinLowEdge(i),tn.GetBinContent(i),td.GetBinContent(i),tn.GetBinContent(i)/td.GetBinContent(i)

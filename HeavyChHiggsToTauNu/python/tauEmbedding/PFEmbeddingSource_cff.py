@@ -14,7 +14,7 @@ TauolaPolar = cms.PSet(
 tightenedMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("tightMuons"),
     cut = cms.string(
-        "pt() > 41 && abs(eta()) < 2.1"
+        "abs(eta()) < 2.1"
         # chi2<10 && globalTrack().hitPattern().numberOfValidMuonHits() > 0
         "&& muonID('GlobalMuonPromptTight')"
         "&& numberOfMatchedStations() > 1"
@@ -41,24 +41,38 @@ tightenedMuonsWithIso = customisations.constructMuonIsolationOnTheFly("tightened
 
 ### Trigger matching
 ## Matching is added in pf_customize.py
-# tightenedMuonsMatched = cms.EDProducer("HPlusMuonTriggerMatchSelector",
-#    src = cms.InputTag("tightenedMuons"),
-#    patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
-#    deltaR = cms.double(0.1),
-# #   filterNames = cms.vstring("hltSingleMu20L3Filtered20"),
-#    filterNames = cms.vstring("hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40"),
-# )
-# tightenedMuonsMatchedFilter = cms.EDFilter("CandViewCountFilter",
-#     src = cms.InputTag("tightenedMuonsMatched"),
-#     minNumber = cms.uint32(1)
-# )
+tightenedMuonsMatched = cms.EDProducer("HPlusMuonTriggerMatchSelector",
+   src = cms.InputTag("tightenedMuonsWithIso"),
+   patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
+   deltaR = cms.double(0.1),
+   filterNames = cms.vstring("dummy"),
+   enabled = cms.bool(False)
+)
+tightenedMuonsMatchedFilter = cms.EDFilter("CandViewCountFilter",
+    src = cms.InputTag("tightenedMuonsMatched"),
+    minNumber = cms.uint32(1)
+)
 tightenedMuonsMatchedCount = cms.EDProducer("EventCountProducer")
 
-tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag("tightenedMuonsWithIso"),
-    cut = cms.string("chargedHadronIso()/pt() < 0.1"), # <--- This is the current isolation
-#    cut = cms.string("(userFloat('embeddingStep_pfChargedHadrons') + max(userFloat('embeddingStep_pfPhotons')-0.5*userFloat('embeddingStep_pfPUChargedHadrons'), 0)) < 2") 
-#    cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
+# MuScleFit correction
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/MuScleFitCorrections2012
+muscleCorrectedMuons = cms.EDProducer("MuScleFitPATMuonCorrector", 
+    src = cms.InputTag("tightenedMuonsMatched"),
+    debug = cms.bool(False), 
+    identifier = cms.string("DUMMY"),
+    applySmearing = cms.bool(False), 
+    fakeSmearing = cms.bool(False)
+)
+# Must do all pt-dependent selections here because of momentum correction
+tauEmbeddingMuons = cms.EDProducer("HPlusPATMuonTunePCorrector",
+    src = cms.InputTag("muscleCorrectedMuons"),
+    originalSrc = cms.InputTag("tightenedMuonsMatched"),
+    finalizeId = cms.bool(True),
+    idMaxChi2 = cms.double(10.0),
+    idMaxPtError = cms.double(0.03),
+    idCut = cms.string("pt() > 41 && chargedHadronIso()/pt() < 0.1"), # <--- This is the current isolation
+#    idCut = cms.string("(userFloat('embeddingStep_pfChargedHadrons') + max(userFloat('embeddingStep_pfPhotons')-0.5*userFloat('embeddingStep_pfPUChargedHadrons'), 0)) < 2") 
+#    idCut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
 )
 tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("tauEmbeddingMuons"),
@@ -110,7 +124,6 @@ adaptedMuonsFromWmunu = cms.EDProducer("HPlusMuonMetAdapter",
 dimuonsGlobal = cms.EDProducer('ZmumuPFEmbedder',
     tracks = cms.InputTag("generalTracks"),
     selectedMuons = cms.InputTag("tauEmbeddingMuons"),
-    keepMuonTrack = cms.bool(False)
 )
 
 filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
@@ -132,7 +145,7 @@ try:
     # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideTauolaInterface for mdtau parameter
     newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(0) # for all decay modes
     #newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(230) # for hadronic modes
-    newSource.ZTauTau.minVisibleTransverseMomentum = cms.untracked.double(0)
+    newSource.ZTauTau.minVisibleTransverseMomentum = cms.untracked.string("")
     newSource.ZTauTau.transformationMode = cms.untracked.int32(3)
 
     generator = newSource.clone()
@@ -143,9 +156,10 @@ try:
         tightenedMuonsFilter *
         tightenedMuonsCount *
         tightenedMuonsWithIso *
-#        tightenedMuonsMatched *
-#        tightenedMuonsMatchedFilter *
+        tightenedMuonsMatched *
+        tightenedMuonsMatchedFilter *
         tightenedMuonsMatchedCount *
+        muscleCorrectedMuons *
         tauEmbeddingMuons *
         tauEmbeddingMuonsFilter *
         tauEmbeddingMuonsCount *
