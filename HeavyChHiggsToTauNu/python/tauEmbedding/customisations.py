@@ -35,9 +35,15 @@ generatorTauPt = 40
 #generatorTauPt = 41
 generatorTauSelection = "abs(pdgId()) == 15 && pt() > %d && abs(eta()) < 2.1 && abs(mother().pdgId()) != 15"
 
-def customiseParamForTauEmbedding(param, options, dataVersion):
+def customiseParamForTauEmbedding(process, param, options, dataVersion):
     # Enable generator weight
     param.embeddingGeneratorWeightReader.enabled = True
+
+    # Fix top-pt weighting
+    if hasattr(process, "initSubset"):
+        process.initSubset.src.setProcessName("HLT")
+        process.decaySubset.src.setProcessName("HLT")
+
 
     # Change the triggers to muon
     param.trigger.triggers = [

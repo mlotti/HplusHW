@@ -630,7 +630,7 @@ class ConfigBuilder:
         if self.options.tauEmbeddingInput != 0:
             #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
             tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, self.options, self.dataVersion)
-            tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, self.options, self.dataVersion)
+            tauEmbeddingCustomisations.customiseParamForTauEmbedding(process, param, self.options, self.dataVersion)
             if self.tauEmbeddingFinalizeMuonSelection:
                 # applyIsolation = not doTauEmbeddingMuonSelectionScan
                 applyIsolation = False
