@@ -54,7 +54,12 @@ defaultVersions = [
 #    "v44_4_2_seed1"
 
 #    "v44_5_notrg2"
-    "v44_5_1_notrg2"
+#    "v44_5_1_notrg2",
+#    "v44_5_1",
+#    "v44_5_1_tauhad",
+#    "v44_5_1_tauhad_vispt10",
+#    "v44_5_1_tauhad_vispt20",
+    "v44_5_1_tauhad_vispt30",
 ]
 skimVersion = "v44_5_1"
 genTauSkimVersion = "v44_5"
@@ -63,17 +68,21 @@ genTauSkimVersion = "v44_5"
 config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,         "config": "muonSkim_cfg.py"},
           "embedding":            {"workflow": "tauembedding_embedding_%s",              "config": "embed.py"},
           "analysis":             {"workflow": "tauembedding_analysis_%s",               "config": "embeddingAnalysis_cfg.py"},
+#          "analysis":             {"workflow": "tauembedding_analysis_%s",               "config": "debugAnalysis_cfg.py"},
           "genTauSkim":           {"workflow": "tauembedding_gentauskim_"+genTauSkimVersion,     "config": "../pattuple/patTuple_cfg.py"},
           "analysisTau":          {"workflow": "tauembedding_gentauanalysis_"+genTauSkimVersion, "config": "tauAnalysis_cfg.py"},
+#          "analysisTau":          {"workflow": "tauembedding_gentauanalysis_"+genTauSkimVersion, "config": "genTauDebugAnalysis_cfg.py"},
+#          "analysisTau":          {"workflow": "tauembedding_gentauanalysis_"+genTauSkimVersion, "config": "genTauDebugAnalysisNtuple_cfg.py"},
           "analysisTauAod":       {"workflow": "embeddingAodAnalysis_44X",               "config": "tauAnalysis_cfg.py"},
           "muonDebugAnalysisAod": {"workflow": "embeddingAodAnalysis_44X",               "config": "genMuonDebugAnalysisAOD_cfg.py"},
           "muonDebugAnalysisNtupleAod": {"workflow": "embeddingAodAnalysis_44X",         "config": "genMuonDebugAnalysisNtupleAOD_cfg.py"},
           "signalAnalysis":       {"workflow": "tauembedding_analysis_%s",               "config": "../signalAnalysis_cfg.py"},
-          "signalAnalysisGenTau": {"workflow": "analysis_v44_4",                         "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysisGenTau": {"workflow": "analysis_v44_5",                         "config": "../signalAnalysis_cfg.py"},
           "EWKMatching":          {"workflow": "tauembedding_analysis_%s",               "config": "../EWKMatching_cfg.py"},
           "muonAnalysis":         {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "muonAnalysisFromSkim_cfg.py"},
+#          "muonAnalysis":         {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "genMuonDebugAnalysis_cfg.py"},
           "caloMetEfficiency":    {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "caloMetEfficiency_cfg.py"},
-          "ewkBackgroundCoverageAnalysis":    {"workflow": "analysis_v44_4",             "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
+          "ewkBackgroundCoverageAnalysis":    {"workflow": "analysis_v44_5",             "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
           "ewkBackgroundCoverageAnalysisAod": {"workflow": "embeddingAodAnalysis_44X",   "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
           }
 
@@ -118,8 +127,9 @@ datasetsMCTT = [
 ]
 datasetsMCWDY = [
     "WJets_TuneZ2_Fall11",
+    "W1Jets_TuneZ2_Fall11",
     "W2Jets_TuneZ2_Fall11",
-    "W3Jets_TuneZ2_Fall11",
+    "W3Jets_TuneZ2_v2_Fall11",
     "W4Jets_TuneZ2_Fall11",
     "DYJetsToLL_M50_TuneZ2_Fall11",
 ]

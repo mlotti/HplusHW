@@ -332,7 +332,15 @@ class ConfigBuilder:
                 for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
                     if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
-                        param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
+                        param.setTauTriggerEfficiencyForEra(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
+                    if self.applyMETTriggerScaleFactor:
+                        print "########################################"
+                        print "#"
+                        print "# MET trigger efficiency/scale factor is from the whole Run2011AB for the moment (dataEra was %s)." % dataEra
+                        print "# This is suitable only for preliminary testing."
+                        print "#"
+                        print "########################################"
+                        param.setMetTriggerEfficiencyForEra(self.dataVersion, era="Run2011AB", pset=mod.metTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         mod.configInfo.pileupReweightType = PileupWeightType.toString[PileupWeightType.NOMINAL]
@@ -1272,17 +1280,18 @@ def addPuWeightProducers(dataVersion, process, commonSequence, dataEras, firstIn
 
     return names
 
-def addPuWeightProducersVariations(dataVersion, process, commonSequence, dataEras):
+def addPuWeightProducersVariations(dataVersion, process, commonSequence, dataEras, doVariations=True):
     ret = []
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
     for era in dataEras:
         name = param.setPileupWeight(dataVersion, process, commonSequence, era=era)
         ret.append( (era, "",  name) )
         nominalModule = getattr(process, name)
-        for suffix in ["up", "down"]:
-            ret.append( (era, suffix,
-                         param.setPileupWeightForVariation(dataVersion, process, commonSequence, suffix=suffix,
-                                                           pset=nominalModule.clone(), psetReader=param.pileupWeightReader))
-                        )
+        if doVariations:
+            for suffix in ["up", "down"]:
+                ret.append( (era, suffix,
+                             param.setPileupWeightForVariation(dataVersion, process, commonSequence, suffix=suffix,
+                                                               pset=nominalModule.clone(), psetReader=param.pileupWeightReader))
+                            )
 
     return ret

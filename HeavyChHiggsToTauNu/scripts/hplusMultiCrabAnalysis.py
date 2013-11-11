@@ -87,10 +87,79 @@ class SizeAnalysis:
         ret += "  "+self.size()
         return ret
 
+class HostAnalysis:
+    def __init__(self):
+        self.host_re = re.compile("Job submitted on host (?P<host>\S+)")
+
+    def reset(self):
+        self.hosts = {}
+
+    def analyse(self, line):
+        m = self.host_re.search(line)
+        if m:
+            self.hosts[m.group("host")] = self.hosts.get(m.group("host"), 0)+1
+            return True
+        return False
+
+    def result(self):
+        ret = " Host analysis:"
+        keys = self.hosts.keys()
+        keys.sort()
+        for k in keys:
+            ret += "\n  %s: %d" % (k, self.hosts[k])
+        return ret
+
+#                         mon+day     time+timezone       pid
+watchdog_re = re.compile("\S+\s+\d+\s+\d+:\d+:\d+\s+\S+\s+\S+\s+(?P<rss>\d+)\s+(?P<vsize>\d+)\s+(?P<disk>\d+)\s+(?P<cpu>\d+)\s+(?P<wall>\d+)")
+
+class WatchdogAnalysis:
+    def __init__(self):
+        pass
+
+    def reset(self):
+        self.rss = []
+        self.vsize = []
+        self.disk = []
+        self.cpu = []
+        self.wall = []
+        self.prevMatch = None
+        self.watchdogOn = False
+
+    def analyse(self, line):
+        if "WATCHDOG LOG ENDED" in line:
+            def _app(lst, name, div=1024):
+                lst.append(float(self.prevMatch.group(name))/div)
+            _app(self.rss, "rss")
+            _app(self.vsize, "vsize")
+            _app(self.disk, "disk", div=1)
+            _app(self.cpu, "cpu", div=1)
+            _app(self.wall, "wall", div=1)
+            self.watchdogOn = False
+            return True
+        if not self.watchdogOn:
+            self.watchdogOn = "LINES OF WATCHDOG LOG" in line
+            return False
+
+        m = watchdog_re.search(line)
+        if m:
+            self.prevMatch = m
+        return False
+
+    def _mems(self, name, lst):
+        return "%s mean %.1f, min %.1f, max %.1f" % (name, sum(lst)/len(lst), min(lst), max(lst))
+
+    def result(self):
+        ret =" Watchod resource analysis:"
+        ret += "\n  "+self._mems("RSS (MB)", self.rss)
+        ret += "\n  "+self._mems("VSIZE (MB)", self.vsize)
+        ret += "\n  "+self._mems("Disk (MB)", self.disk)
+        ret += "\n  "+self._mems("CPU (s)", self.cpu)
+        ret += "\n  "+self._mems("Wall (s)", self.wall)
+        return ret
+
 class MemoryAnalysis:
     def __init__(self):
-        #                         mon+day     time+timezone       pid
-        self.mem_re = re.compile("\S+\s+\d+\s+\d+:\d+:\d+\s+\S+\s+\S+\s+(?P<rss>\d+)\s+(?P<vsize>\d+)\s+(?P<disk>\d+)")
+        pass
 
     def reset(self):
         self.rss = []
@@ -98,7 +167,7 @@ class MemoryAnalysis:
         self.disk = []
 
     def analyse(self, line):
-        m = self.mem_re.search(line)
+        m = watchdog_re.search(line)
         if m:
             def _app(lst, name, div=1024):
                 lst.append(float(m.group(name))/div)
@@ -155,6 +224,10 @@ def main(opts):
         analyses.append(SizeAnalysis(opts.sizeFile))
     if opts.memory:
         watchdogAnalyses.append(MemoryAnalysis())
+    if opts.host:
+        analyses.append(HostAnalysis())
+    if opts.watchdog:
+        analyses.append(WatchdogAnalysis())
 
     if len(analyses)+len(watchdogAnalyses) == 0:
         return 1
@@ -209,6 +282,10 @@ if __name__ == "__main__":
                       help="For --size, specify the output file name (default: 'pattuple.root')")
     parser.add_option("--memory", dest="memory", action="store_true", default=False,
                       help="Analyse memory usage")
+    parser.add_option("--host", dest="host", action="store_true", default=False,
+                      help="Analyse host names where jobs were run")
+    parser.add_option("--watchdog", dest="watchdog", action="store_true", default=False,
+                      help="Analyse resource usage from watchdog output (from CMSSW.stdout)")
     parser.add_option("--exclude", dest="exclude", type="string", default=None,
                       help="Exclude these jobs from the analysis (clashes with --include)")
     parser.add_option("--include", dest="include", type="string", default=None,

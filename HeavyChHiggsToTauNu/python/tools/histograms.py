@@ -1345,7 +1345,7 @@ class Histo:
                 print >>sys.stderr, 'WARNING: encountered fill styles %d and %d for stat and syst uncertainties, and there is no support yet for "combining" them for stat. Consider adding your case to %s near line %d' % (fillStyles[0], fillStyles[1], info.filename, info.lineno)
 
         # Keep reference to avoid segfault
-        self.rootHistoForLegend = aux.addToLegend(legend, h, self.legendLabel, self.legendStyle, canModify=not cloned)
+        self.rootHistoForLegend = aux.addToLegend(legend, h, self.legendLabel, self.legendStyle, canModify=cloned)
 
     def _addToLegendUncertainty(self, legend):
         gr = self.getSystematicUncertaintyGraph()
