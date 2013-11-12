@@ -437,7 +437,7 @@ def doCounters(myDsetMgr, mySuffix, isSystematicVariation):
     
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
-    myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
+    myModuleSelector = AnalysisModuleSelector(disableSystematicsList=False) # Object for selecting data eras, search modes, and optimization modes
     parser = OptionParser(usage="Usage: %prog [options]")
     myModuleSelector.addParserOptions(parser)
     parser.add_option("--noMCQCD", dest="noMCQCD", action="store_true", default=False, help="remove MC QCD")
