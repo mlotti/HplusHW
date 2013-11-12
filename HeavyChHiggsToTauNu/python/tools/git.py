@@ -32,7 +32,7 @@ def _execute(cmd):
         return None
     env = os.environ
     if gitLocation.find("/usr/bin") == 0:
-        env = copy.copy(env)
+        env = copy.deepcopy(env)
         if "LD_LIBRARY_PATH" in env:
             del env["LD_LIBRARY_PATH"]
     try:
