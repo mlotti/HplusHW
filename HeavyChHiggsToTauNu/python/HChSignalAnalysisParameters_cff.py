@@ -178,6 +178,7 @@ fakeTauSFandSystematicsBase = cms.untracked.PSet(
     scalefactorFakeTauEndcapMuon = cms.untracked.double(1.0),
     scalefactorFakeTauBarrelJet = cms.untracked.double(1.0),
     scalefactorFakeTauEndcapJet = cms.untracked.double(1.0),
+    # The following numbers are to be understood as SF +- the indicated number
     systematicsFakeTauBarrelElectron = cms.untracked.double(0.4),
     systematicsFakeTauEndcapElectron = cms.untracked.double(0.4),
     systematicsFakeTauBarrelMuon = cms.untracked.double(0.3),
