@@ -508,7 +508,7 @@ namespace HPlus {
     if(!tauData.passedEvent()) return false; // Require at least one tau
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
-    bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
+    bool myFakeTauStatus = !fFakeTauIdentifier.isEmbeddingGenuineTau(tauMatchData.getTauMatchType()); // True if the sample is negation of sample selected for embedding
     fCommonPlotsAfterTauSelection->fill();
     fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauData, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
     fTree.setTauIsFake(myFakeTauStatus);
@@ -1257,7 +1257,7 @@ namespace HPlus {
   void SignalAnalysis::fillSelectionFlowAndCounterGroups(int nVertices, FakeTauIdentifier::Data& tauMatchData, SignalSelectionOrder selection, const TauSelection::Data& tauData) {
     hSelectionFlow->Fill(selection);
     hSelectionFlowVsVertices->Fill(nVertices, selection);
-    if (tauMatchData.isFakeTau())
+    if (tauMatchData.isEmbeddingGenuineTau())
       hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, selection);
     fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), selection, tauData);
   }
@@ -1266,8 +1266,8 @@ namespace HPlus {
     // Get out if no match has been found
     if (tauMatch == FakeTauIdentifier::kkNoMC) return;
     // Obtain status for main counter
-    // Define event as type II if no genuine tau was identified as the selected tau
-    bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatch); // FIXME: think here if the tau_e -> tau  and tau_mu -> tau should be excluded
+    // Define event as type II if not selected to embedding
+    bool myFakeTauStatus = fFakeTauIdentifier.isEmbeddingGenuineTau(tauMatch);
     // Fill main and subcounter for the selection
     SignalAnalysis::CounterGroup* myCounterGroup = getCounterGroupByTauMatch(tauMatch);
     if (selection == kSignalOrderTauID) {

@@ -110,7 +110,8 @@ namespace HPlus {
     // Return if event is real data
     if (iEvent.isRealData()) return output;
 
-    bool foundMCTauOutsideAcceptanceStatus = false;
+    bool foundMCVisibleTauOutsideAcceptanceStatus = false;
+    bool foundHadronicMCTauLeptonOutsideAcceptanceStatus = false;
     bool isHadronicTau = false;
     bool isOneProngMCTau = false;
     bool isMCElectron = false;
@@ -123,17 +124,57 @@ namespace HPlus {
     // Check matching to visible MC taus
     edm::Handle <std::vector<LorentzVector> > myMCVisibleTaus;
     iEvent.getByLabel(fVisibleMCTauSrc, myMCVisibleTaus);
+    // Load list of genParticles
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+
     // Check matching to MC visible taus
-    double tmpPt = 0;
-    for (std::vector<LorentzVector>::const_iterator it = myMCVisibleTaus->begin(); it != myMCVisibleTaus->end(); ++it) {
-      if (reco::deltaR((*it), tau.p4()) < fMatchingConditionDeltaR) {
-        // Match found
-        isHadronicTau = true;
-        tmpPt = (*it).pt();
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      // Look for a tau
+      const reco::Candidate & p = (*genParticles)[i];
+      if (std::abs(p.pdgId()) == 15) {
+        // Ignore tau that is radiating before decay
+        bool myVetoStatus = false;
+        for (size_t im=0; im < p.numberOfDaughters(); ++im){
+          if (std::abs(p.daughter(im)->pdgId()) == 15) myVetoStatus = true;
+        }
+        if (myVetoStatus) continue;
+        // Obtain visible tau momentum vector
+        LorentzVector myTauLeptonMomentum = p.p4();
+        LorentzVector myVisibleTauMomentum = p.p4();
+        for (size_t im=0; im < p.numberOfDaughters(); ++im) {
+          int myAbsPdgId = std::abs(p.daughter(im)->pdgId());
+          if (myAbsPdgId == 12 || myAbsPdgId == 14 || myAbsPdgId == 16)
+            myVisibleTauMomentum -= p.daughter(im)->p4();
+        }
+        // Check if tau decays to electron or muon
+        bool tmpTauToElectron = false;
+        bool tmpTauToMuon = false;
+        for (size_t im=0; im < p.numberOfDaughters(); ++im) {
+          int myAbsPdgId = std::abs(p.daughter(im)->pdgId());
+          if (myAbsPdgId == 11)
+            tmpTauToElectron = true;
+          if (myAbsPdgId == 13)
+            tmpTauToMuon = true;
+        }
+        // Check matching of MC visible tau and reconstructed tau
+        if (reco::deltaR(myVisibleTauMomentum, tau.p4()) < fMatchingConditionDeltaR) {
+          // Match found, this is the generated tau matching to the reconstructed tau
+          myTauIndex = i;
+          if (tmpTauToElectron || tmpTauToMuon)
+            isLeptonicTauDecay = true;
+          else
+            isHadronicTau = true;
+        } else {
+          // This particle is a tau, but not the reconstructed tau; now check if it is outside acceptance
+          if (myVisibleTauMomentum.pt() < fPtAcceptance || abs(myVisibleTauMomentum.eta()) > fEtaAcceptance)
+            foundMCVisibleTauOutsideAcceptanceStatus = true; // Note that all tau decay modes are considered here
+          // For embedding selection and fake tau selection, require that tau is hadronic tau and do matching for tau lepton
+          if (isHadronicTau)
+            if (myTauLeptonMomentum.pt() < fPtAcceptance || abs(myTauLeptonMomentum.eta()) > fEtaAcceptance)
+              foundHadronicMCTauLeptonOutsideAcceptanceStatus = true;
+        }
       }
-      // Check if a MC tau is outside acceptance
-      if ((*it).pt() < fPtAcceptance || abs((*it).eta()) > fEtaAcceptance)
-        foundMCTauOutsideAcceptanceStatus = true;
     }
     // Check matching to visible MC 1-prong taus
     edm::Handle <std::vector<LorentzVector> > myMCVisibleOneProngTaus;
@@ -145,21 +186,20 @@ namespace HPlus {
         isOneProngMCTau = true;
       }
     }
-    // Load list of genParticles and look for matching with MC electrons or MC muons
-    edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("genParticles", genParticles);
+    // Look for matching with MC electrons or MC muons
     //std::cout << "matchfinding:" << std::endl;
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
-      if (std::abs(p.pdgId()) == 11 || std::abs(p.pdgId()) == 13) {
+      int myAbsPdgId = std::abs(p.pdgId());
+      if (myAbsPdgId == 11 || myAbsPdgId == 13) {
         // Check match with tau
         if (reco::deltaR(p.p4(), tau.p4()) < fMatchingConditionDeltaR) {
           if (p.pt() > 10.) {
             //std::cout << "  match found, pid=" << p.pdgId() << " eta=" << std::abs(p.eta()) << " pt=" << p.pt() << std::endl;
-            if (std::abs(p.pdgId()) == 11) {
+            if (myAbsPdgId == 11) {
               isMCElectron = true;
               myElectronIndex = i;
-            } else if (std::abs(p.pdgId()) == 13) {
+            } else if (myAbsPdgId == 13) {
               isMCMuon = true;
               myMuIndex = i;
             }
@@ -167,65 +207,11 @@ namespace HPlus {
         }
       }
     }
-    // Find MC tau lepton index corresponding to the MC visible tau
-    if (isHadronicTau) {
-      //std::cout << "start" << std::endl;
-      for (size_t i=0; i < genParticles->size(); ++i) {
-        const reco::Candidate & p = (*genParticles)[i];
-        if (std::abs(p.pdgId()) == 15) {
-          // Ignore tau that is radiating before decay
-          bool myVetoStatus = false;
-          for (size_t im=0; im < p.numberOfDaughters(); ++im){
-            if (std::abs(p.daughter(im)->pdgId()) == 15) myVetoStatus = true;
-          }
-          if (myVetoStatus) continue;
-          // Tau lepton found
-          LorentzVector myVisibleTau;
-          // Subtract neutrino momenta from tau lepton momentum
-          for (size_t j=0; j < genParticles->size(); ++j) {
-            // Consider only stable particles
-            if ((*genParticles)[j].status() != 1) continue;
-            // Skip neutrinos
-            int myId = std::abs((*genParticles)[j].pdgId());
-            if (myId == 12 || myId == 14 || myId == 16) continue;
-            // Check if particles mother is the tau lepton on row i
-            const reco::Candidate* ppmother = (*genParticles)[j].mother();
-            bool myBelongsToTauStatus = false;
-            while (ppmother) {
-              if (ppmother->p4() == p.p4() && ppmother->pdgId() == p.pdgId()) {
-                myBelongsToTauStatus = true;
-              }
-              // move to next
-              ppmother = ppmother->mother();
-            }
-            if (myBelongsToTauStatus) {
-              //std::cout << "   add " << (*genParticles)[j].pdgId() << " status=" << (*genParticles)[j].status() << std::endl;
-              myVisibleTau += (*genParticles)[j].p4();
-            }
-          }
-          if (reco::deltaR(myVisibleTau, tau.p4()) < fMatchingConditionDeltaR) {
-            myTauIndex = i;
-          }
-          //std::cout <<" is tau, idx=" << myTauIndex << ", pt=" << tau.pt() << " vs. " << myVisibleTau.pt() << " vs. " << " vs. " << tmpPt << std::endl;
-        }
-      }
-    }
-    // If an electron or muon was matched, look if it comes from a tau decay
-    if (isMCElectron || isMCMuon) {
-      size_t myIndex = myMuIndex;
-      if (isMCElectron) {
-        myIndex = myElectronIndex;
-      }
-      const reco::Candidate* p = (*genParticles)[myIndex].mother();
-      while (p) {
-        if (std::abs(p->pdgId()) == 15)
-          isLeptonicTauDecay = true;
-        // move to next
-        p = p->mother();
-      }
-    }
+
     // Set result
-    if (!foundMCTauOutsideAcceptanceStatus) {
+    // Checking is done in following order: electron, muon, tau
+    // If none of them matches to the reconstructed tau, jet->tau is assumed
+    if (!foundHadronicMCTauLeptonOutsideAcceptanceStatus) {
       if (isMCElectron) {
         if (isLeptonicTauDecay) {
           output.fTauMatchType = kkElectronFromTauDecayToTau;
