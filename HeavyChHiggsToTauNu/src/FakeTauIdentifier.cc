@@ -17,7 +17,7 @@ namespace HPlus {
   FakeTauIdentifier::Data::Data(): fTauMatchType(kkNoMC), fTauOriginType(kkUnknownOrigin), fTauMatchGenParticle(0) {}
   FakeTauIdentifier::Data::~Data() {}
   
-  FakeTauIdentifier::FakeTauIdentifier(const edm::ParameterSet& iConfig, HPlus::HistoWrapper& histoWrapper, std::string label):
+  FakeTauIdentifier::FakeTauIdentifier(const edm::ParameterSet& iConfig, const edm::ParameterSet& tauIDConfig, HPlus::HistoWrapper& histoWrapper, std::string label):
     fVisibleMCTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("visibleMCTauSrc")),
     fVisibleMCTauOneProngSrc(iConfig.getUntrackedParameter<edm::InputTag>("visibleMCTauOneProngSrc")),
     fMatchingConditionDeltaR(iConfig.getUntrackedParameter<double>("matchingConditionDeltaR")),
@@ -32,7 +32,9 @@ namespace HPlus {
     fSystematicsFakeTauBarrelMuon(iConfig.getUntrackedParameter<double>("systematicsFakeTauBarrelMuon")),
     fSystematicsFakeTauEndcapMuon(iConfig.getUntrackedParameter<double>("systematicsFakeTauEndcapMuon")),
     fSystematicsFakeTauBarrelJet(iConfig.getUntrackedParameter<double>("systematicsFakeTauBarrelJet")),
-    fSystematicsFakeTauEndcapJet(iConfig.getUntrackedParameter<double>("systematicsFakeTauEndcapJet"))
+    fSystematicsFakeTauEndcapJet(iConfig.getUntrackedParameter<double>("systematicsFakeTauEndcapJet")),
+    fPtAcceptance(tauIDConfig.getUntrackedParameter<double>("ptCut")),
+    fEtaAcceptance(tauIDConfig.getUntrackedParameter<double>("etaCut"))
   {
     edm::Service<TFileService> fs;
     // Create histograms
@@ -130,7 +132,7 @@ namespace HPlus {
         tmpPt = (*it).pt();
       }
       // Check if a MC tau is outside acceptance
-      if ((*it).pt() < 41 || abs((*it).eta()) > 2.1)
+      if ((*it).pt() < fPtAcceptance || abs((*it).eta()) > fEtaAcceptance)
         foundMCTauOutsideAcceptanceStatus = true;
     }
     // Check matching to visible MC 1-prong taus

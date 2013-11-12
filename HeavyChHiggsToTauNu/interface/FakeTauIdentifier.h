@@ -80,7 +80,7 @@ namespace HPlus {
       const reco::GenParticle *fTauMatchGenParticle;
     };
 
-    FakeTauIdentifier(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper, std::string label);
+    FakeTauIdentifier(const edm::ParameterSet& iConfig, const edm::ParameterSet& tauIDConfig,HistoWrapper& histoWrapper, std::string label);
     ~FakeTauIdentifier();
 
     Data matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
@@ -122,6 +122,9 @@ namespace HPlus {
     const double fSystematicsFakeTauEndcapMuon;
     const double fSystematicsFakeTauBarrelJet;
     const double fSystematicsFakeTauEndcapJet;
+    // Cut values for acceptance (taken from tau ID config)
+    const double fPtAcceptance;
+    const double fEtaAcceptance;
 
     WrappedTH1* hTauMatchType;
     WrappedTH1* hTauOrigin;

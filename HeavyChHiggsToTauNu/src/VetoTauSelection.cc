@@ -48,7 +48,7 @@ namespace HPlus {
     fZMassWindow(iConfig.getUntrackedParameter<double>("ZmassWindow")),
     fTauSource(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection").getUntrackedParameter<edm::InputTag>("src")),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, histoWrapper, "TauVeto"),
-    fFakeTauIdentifier(fakeTauSFandSystematicsConfig, histoWrapper, "VetoTauSelection"),
+    fFakeTauIdentifier(fakeTauSFandSystematicsConfig, iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), histoWrapper, "VetoTauSelection"),
     fAllEventsCounter(eventCounter.addSubCounter("VetoTauSelection","All events")),
     //    fVetoTauCandidatesCounter(eventCounter.addSubCounter("VetoTauSelection","Veto tau candidates"));
     fVetoTausSelectedCounter(eventCounter.addSubCounter("VetoTauSelection","Veto taus found")),
