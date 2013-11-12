@@ -314,7 +314,6 @@ def doPlots(myDsetMgr, opts, mySuffix, isSystematicVariation):
     myDir = "Btagging"
     createDrawPlot(myDir+"/NumberOfBtaggedJets", xlabel="N_{selected b jets}")
     createDrawPlot(myDir+"/jet_bdiscriminator", xlabel="b-taggind discriminator", ylabel="N_{jets}")
-    createDrawPlot(myDir+"/RealBjet_discrim", xlabel="b-tagging discriminator for genuine b jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/bjet_pt", xlabel="p_{T} of selected b jets, GeV/c", ylabel="N_{jets}")
     createDrawPlot(myDir+"/bjet_eta", xlabel="#eta of selected b jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/bjet1_pt", xlabel="p_{T} of first b jets, GeV/c", ylabel="N_{jets}")
