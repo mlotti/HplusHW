@@ -466,6 +466,7 @@ ElectronSelection = cms.untracked.PSet(
 MuonSelection = cms.untracked.PSet(
     genParticleSrc = cms.untracked.InputTag("genParticles"),
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
+    applyMuonIsolation = cms.untracked.bool(True),
     MuonPtCut = cms.untracked.double(10.0),
     MuonEtaCut = cms.untracked.double(2.5),
 )

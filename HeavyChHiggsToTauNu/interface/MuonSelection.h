@@ -70,7 +70,7 @@ namespace HPlus {
       friend class MuonSelection;
 
     private:
-      // pt and eta of muon with highest pt passing the selections
+      /// pt and eta of muon with highest pt passing the selections
       float fSelectedMuonPt;
       float fSelectedMuonEta;
       float fSelectedMuonPtBeforePtCut;
@@ -103,6 +103,7 @@ namespace HPlus {
     // Input parameters
     const edm::InputTag fGenParticleSrc;
     const edm::InputTag fMuonCollectionName;
+    const bool fApplyMuonIsolation;
     const double fMuonPtCut;
     const double fMuonEtaCut;
     
