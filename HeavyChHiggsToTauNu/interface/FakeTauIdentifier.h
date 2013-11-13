@@ -41,7 +41,7 @@ namespace HPlus {
       kkNumberOfSelectedTauMatchTypes
     };
     enum MCSelectedTauOriginType {
-      kkUnknownOrigin,
+      kkUnknownOrigin = 0,
       kkFromW,
       kkFromZ,
       kkFromHplus,
@@ -49,7 +49,12 @@ namespace HPlus {
       kkFromZTauTau,
       kkFromHplusTau
     };
-
+    enum MCBackgroundType {
+      kkUnknown = 0,
+      kkQCDMeasurementLike,
+      kkEmbedding,
+      kkEWKWithFakeTau
+    };
     class Data {
     public:
       Data();
@@ -70,13 +75,17 @@ namespace HPlus {
       const bool isJetToTau() const { return FakeTauIdentifier::isJetToTau(fTauMatchType); }
       const bool isElectronOrMuonFromTauDecay() const { return FakeTauIdentifier::isElectronOrMuonFromTauDecay(fTauMatchType); }
 
-      const bool isEmbeddingGenuineTau() const { return FakeTauIdentifier::isEmbeddingGenuineTau(fTauMatchType); }
+      const MCBackgroundType getBackgroundType() const { return fBackgroundType; }
+      const bool isQCDMeasurementLike() const { return fBackgroundType == kkQCDMeasurementLike; }
+      const bool isEmbeddingGenuineTau() const { return fBackgroundType == kkEmbedding; }
+      const bool isEWKFakeTau() const { return fBackgroundType == kkEWKWithFakeTau; }
 
       friend class FakeTauIdentifier;
 
     private:
       MCSelectedTauMatchType fTauMatchType;
       MCSelectedTauOriginType fTauOriginType;
+      MCBackgroundType fBackgroundType;
       const reco::GenParticle *fTauMatchGenParticle;
     };
 
@@ -108,14 +117,18 @@ namespace HPlus {
     edm::InputTag fVisibleMCTauSrc;
     edm::InputTag fVisibleMCTauOneProngSrc;
     const double fMatchingConditionDeltaR;
-    // Scale factors for X->tau fakes
+    // Scale factors for tau ID and X->tau fakes mis-ID
+    const double fSFGenuineTauBarrel;
+    const double fSFGenuineTauEndcap;
     const double fSFFakeTauBarrelElectron;
     const double fSFFakeTauEndcapElectron;
     const double fSFFakeTauBarrelMuon;
     const double fSFFakeTauEndcapMuon;
     const double fSFFakeTauBarrelJet;
     const double fSFFakeTauEndcapJet;
-    // Systematic uncertainties for X->tau fakes
+    // Systematic uncertainties for tau ID and X->tau fakes mis-ID
+    const double fSystematicsGenuineTauBarrel;
+    const double fSystematicsGenuineTauEndcap;
     const double fSystematicsFakeTauBarrelElectron;
     const double fSystematicsFakeTauEndcapElectron;
     const double fSystematicsFakeTauBarrelMuon;
