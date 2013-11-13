@@ -324,9 +324,9 @@ def addEmbeddingSkim_53X(version, datasets, updateDefinitions):
         "W3Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2300, njobsOut=35),
         "W4Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=2200, njobsOut=40),
         "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn=1700, njobsOut=25),
-        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=3400, njobsOut=1), # FIXME: njobsOut
-        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=4950, njobsOut=1), # FIXME: njobsOut
-        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(njobsIn= 400, njobsOut=1), # FIXME: njobsOut
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=3400, njobsOut=50),
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=4950, njobsOut=100),
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(njobsIn= 400, njobsOut=10),
         "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(njobsIn=2700, njobsOut=40),
         "T_t-channel_TuneZ2star_Summer12":         TaskDef(njobsIn= 200, njobsOut=3),
         "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(njobsIn= 100, njobsOut=1),
@@ -508,6 +508,9 @@ def addEmbeddingEmbedding_53X(sourceWorkflow, version, datasets, updateDefinitio
         "W3Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 800, njobsOut=35),
         "W4Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=1100, njobsOut=40),
         "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn= 400, njobsOut=25),
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=1800, njobsOut=50), # FIXME: njobs
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=2200, njobsOut=100), # FIXME: njobs
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(njobsIn= 200, njobsOut=10), # FIXME: njobs
         "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(njobsIn= 900, njobsOut=40),
         "T_t-channel_TuneZ2star_Summer12":         TaskDef(njobsIn=  50, njobsOut=3),
         "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(njobsIn=  30, njobsOut=1),
@@ -1178,6 +1181,9 @@ def addEmbeddingEmbedding_v53_3(datasets):
         # User mean 10265.6, min 4603.3, max 11330.1
         # Mean 658.5 MB, min 276.9 MB, max 721.0 MB
         "TTJets_TuneZ2star_Summer12":              TaskDef("/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_tauembedding_embedding_v53_3b-1af76047aea9759528c81258e6b8769f/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
         # 1240013 events, 754 jobs
         # User mean 10140.2, min 3000.9, max 12275.1
         # Mean 596.4 MB, min 165.3 MB, max 723.9 MB
