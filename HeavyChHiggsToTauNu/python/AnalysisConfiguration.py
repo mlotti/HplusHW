@@ -71,7 +71,7 @@ class ConfigBuilder:
                  histogramAmbientLevelSystematics = "Systematics",
                  applyTauTriggerScaleFactor = True, # Apply tau trigger scale factor or not
                  applyTauTriggerLowPurityScaleFactor = False, # Apply tau trigger scale factor or not
-                 applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
+                 applyMETTriggerScaleFactor = True, # Apply MET trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  applyTopPtReweight = True, # Apply Top Pt reweighting on TTJets sample
                  topPtReweightScheme = None, # None for default, see TopPtWeight_cfi.py for allowed values
@@ -332,7 +332,15 @@ class ConfigBuilder:
                 for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
                     if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
-                        param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
+                        param.setTauTriggerEfficiencyForEra(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
+                    if self.applyMETTriggerScaleFactor:
+                        print "########################################"
+                        print "#"
+                        print "# MET trigger efficiency/scale factor is from the whole Run2011AB for the moment (dataEra was %s)." % dataEra
+                        print "# This is suitable only for preliminary testing."
+                        print "#"
+                        print "########################################"
+                        param.setMetTriggerEfficiencyForEra(self.dataVersion, era="Run2011AB", pset=mod.metTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         mod.configInfo.pileupReweightType = PileupWeightType.toString[PileupWeightType.NOMINAL]

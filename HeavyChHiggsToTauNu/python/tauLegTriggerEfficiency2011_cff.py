@@ -11,11 +11,24 @@ _prototype = cms.untracked.PSet(
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
+eraRunMap = {
+    "EPS": ["runs_160404_167913"],
+    "Run2011A": ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692"],
+    "Run2011A-EPS": ["runs_170722_173198", "runs_173236_173692"],
+    "Run2011B": ["runs_175832_180252"],
+    "Run2011AB": ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
+}
+
 def getEfficiency(isolation, againstElectron):
     return _prototype.clone(
         data = HChTools.getEfficiencyJsonFullPath("tau trigger scale factors", "tauLegTriggerEfficiency2011", "%s_%s" % (isolation, againstElectron))
     )
 
+def getRunsForEra(era):
+    try:
+        return eraRunMap[era]
+    except KeyError:
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are %s" % (era, ", ".join(["'%s'"%e for e in eraRunMap.iterkeys()])))
 
 
 ## Below are legacy definitions (although the same files are still in use)

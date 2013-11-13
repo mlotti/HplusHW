@@ -665,8 +665,8 @@ def cloneForHeavyAnalysis(lightModule):
     return heavyModule
 
 # Set trigger efficiency / scale factor depending on tau selection params
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
     myScaleFactors = tauTriggerEfficiency.getEfficiency("byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
     myScaleFactors.variationEnabled = cms.bool(False)
@@ -689,14 +689,10 @@ tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauS
 tauTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
 tauTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
 
-metTriggerEfficiencyScaleFactor = cms.untracked.PSet(
-#    data = cms.FileInPath("dummy")
-    dataSelect = cms.vstring(),
-    mcSelect = cms.string(""),
-    mode = cms.untracked.string("disabled"), # dataEfficiency, scaleFactor, disabled
-    variationEnabled = cms.bool(False),
-    useMaxUncertainty = cms.bool(True),
-)
+import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2011_cff as metTriggerEfficiency
+metTriggerEfficiencyScaleFactor = metTriggerEfficiency.getEfficiency()
+metTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
+metTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
@@ -735,34 +731,30 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-def setDataTriggerEfficiency(dataVersion, era, pset=tauTriggerEfficiencyScaleFactor):
-    if dataVersion.isMC():
-        if dataVersion.isS4():
-            pset.mcSelect = "Summer11"
-        elif dataVersion.isS6():
-            if era == "Run2011A":
-                pset.mcSelect = "Fall11_PU_2011A"
-            if era == "Run2011B":
-                pset.mcSelect = "Fall11_PU_2011B"
-            if era == "Run2011AB":
-                pset.mcSelect = "Fall11_PU_2011AB"
-        elif dataVersion.isHighPU():
-	    pset.mode = "disabled"
-        else:
-            raise Exception("MC trigger efficencies are available only for Summer11 and Fall11")
-    if era == "EPS":
-        pset.dataSelect = ["runs_160404_167913"]
-    elif era == "Run2011A":
-        pset.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692"]
-    elif era == "Run2011A-EPS":
-        pset.dataSelect = ["runs_170722_173198", "runs_173236_173692"]
-    elif era == "Run2011B":
-        pset.dataSelect = ["runs_175832_180252"]
-    elif era == "Run2011AB":
-        pset.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
+def _setTriggerEfficiencyForEraMC(dataVersion, era, pset):
+    if dataVersion.isS4():
+        pset.mcSelect = "Summer11"
+    elif dataVersion.isS6():
+        if era == "Run2011A":
+            pset.mcSelect = "Fall11_PU_2011A"
+        if era == "Run2011B":
+            pset.mcSelect = "Fall11_PU_2011B"
+        if era == "Run2011AB":
+            pset.mcSelect = "Fall11_PU_2011AB"
+    elif dataVersion.isHighPU():
+        pset.mode = "disabled"
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB'")
+        raise Exception("MC trigger efficencies are available only for Summer11 and Fall11")
 
+def setTauTriggerEfficiencyForEra(dataVersion, era, pset):
+    if dataVersion.isMC():
+        _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
+    pset.dataSelect = tauTriggerEfficiency.getRunsForEra(era)
+
+def setMetTriggerEfficiencyForEra(dataVersion, era, pset):
+    if dataVersion.isMC():
+        _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
+    pset.dataSelect = metTriggerEfficiency.getRunsForEra(era)
 
 # Weighting by instantaneous luminosity, and the number of true
 # simulated pile up interactions
