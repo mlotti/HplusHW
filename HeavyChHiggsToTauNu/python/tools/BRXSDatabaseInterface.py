@@ -9,7 +9,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 class BRXSDatabaseInterface:
-    def __init__(self,rootfile,heavy=False,program="FH"):
+    def __init__(self,rootfile,heavy=False,program="FeynHiggs"):
         print "BRXSDatabaseInterface: reading file",rootfile
 	self.rootfile  = rootfile
 	self.fIN       = ROOT.TFile.Open(rootfile)
@@ -37,7 +37,7 @@ class BRXSDatabaseInterface:
             self.names.append(branch.GetName())
             
     def GetProgram(self):
-        program_re = re.compile("(?P<program>\S+)_version += +(?P<version>\S+)")
+        program_re = re.compile("(?P<program>\S+)_version *= +(?P<version>\S+)")
         keys = self.fIN.GetListOfKeys()
         program = ""
         for key in keys:
@@ -49,7 +49,7 @@ class BRXSDatabaseInterface:
         return program        
 
     def GetVersion(self):
-        version_re = re.compile(self.GetProgram()+"_version += +(?P<version>\S+)")
+        version_re = re.compile(self.GetProgram()+"_version *= +(?P<version>\S+)")
         keys = self.fIN.GetListOfKeys()
         for key in keys:
             match = version_re.search(key.GetName())
