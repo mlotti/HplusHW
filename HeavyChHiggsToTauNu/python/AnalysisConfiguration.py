@@ -944,6 +944,8 @@ class ConfigBuilder:
         disableIntermediateAnalyzers = (self.doQCDTailKillerScenarios or self.doOptimisation)
         disableIntermediateAnalyzers = False
 
+        useCaloMet = not self.applyMETTriggerScaleFactor
+
         additionalNames = []
         retNames = []
         retModules = []
@@ -978,9 +980,14 @@ class ConfigBuilder:
                 setattr(process, modName+"Path", path)
                 additionalNames.append(modName)
 
-            postfix += "CaloMet60"
-            mod = mod.clone()
-            mod.trigger.caloMetSelection.metEmulationCut = 60.0
+            if useCaloMet:
+                postfix += "CaloMet60"
+                mod = mod.clone()
+                mod.trigger.caloMetSelection.metEmulationCut = 60.0
+            else:
+                postfix = "MetEff"
+                mod = mod.clone()
+                mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
             if not disableIntermediateAnalyzers:
                 path = cms.Path(process.commonSequence * mod)
                 modName = makeName(name, postfix)
