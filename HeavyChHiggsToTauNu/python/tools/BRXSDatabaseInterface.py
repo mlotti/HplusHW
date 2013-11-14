@@ -9,7 +9,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 class BRXSDatabaseInterface:
-    def __init__(self,rootfile,heavy=False,program="FH"):
+    def __init__(self,rootfile,heavy=False,program="FeynHiggs"):
         print "BRXSDatabaseInterface: reading file",rootfile
 	self.rootfile  = rootfile
 	self.fIN       = ROOT.TFile.Open(rootfile)
@@ -22,7 +22,7 @@ class BRXSDatabaseInterface:
 
 	self.expLimit  = {}
 
-	self.tree      = self.fIN.Get(self.program+"_results")
+	self.tree      = self.fIN.Get(self.GetProgram()+"_results")
 
 	self.variables = []
 	self.names     = []
@@ -35,11 +35,21 @@ class BRXSDatabaseInterface:
             branch.SetAddress(variable)
             self.variables.append(variable)
             self.names.append(branch.GetName())
+            
     def GetProgram(self):
-        return self.program
+        program_re = re.compile("(?P<program>\S+)_version *= +(?P<version>\S+)")
+        keys = self.fIN.GetListOfKeys()
+        program = ""
+        for key in keys:
+            match = program_re.search(key.GetName())
+            if match:
+                program = match.group("program")
+                if program == self.program:
+                    return self.program
+        return program        
 
     def GetVersion(self):
-        version_re = re.compile(self.program+"_version += +(?P<version>\S+)")
+        version_re = re.compile(self.GetProgram()+"_version *= +(?P<version>\S+)")
         keys = self.fIN.GetListOfKeys()
         for key in keys:
             match = version_re.search(key.GetName())
