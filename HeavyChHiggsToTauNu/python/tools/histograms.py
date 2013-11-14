@@ -76,7 +76,7 @@ class Uncertainty:
 uncertaintyMode = Uncertainty()
 
 ## Default energy text
-energyText = "7 TeV"
+energyText = "8 TeV"
 
 ## Class to provide default positions of the various texts.
 #
