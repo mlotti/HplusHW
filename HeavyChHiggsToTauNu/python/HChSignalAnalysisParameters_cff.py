@@ -172,6 +172,8 @@ fakeTauSFandSystematicsBase = cms.untracked.PSet(
     visibleMCTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"), # All MC visible taus
     visibleMCTauOneProngSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"), # MC visible 1-prong taus
     matchingConditionDeltaR = cms.untracked.double(0.1), # Matching cone size
+    scalefactorGenuineTauBarrel = cms.untracked.double(1.0),
+    scalefactorGenuineTauEndcap = cms.untracked.double(1.0),
     scalefactorFakeTauBarrelElectron = cms.untracked.double(2.0),
     scalefactorFakeTauEndcapElectron = cms.untracked.double(1.2),
     scalefactorFakeTauBarrelMuon = cms.untracked.double(1.0),
@@ -179,6 +181,8 @@ fakeTauSFandSystematicsBase = cms.untracked.PSet(
     scalefactorFakeTauBarrelJet = cms.untracked.double(1.0),
     scalefactorFakeTauEndcapJet = cms.untracked.double(1.0),
     # The following numbers are to be understood as SF +- the indicated number
+    systematicsGenuineTauBarrel = cms.untracked.double(0.06),
+    systematicsGenuineTauEndcap = cms.untracked.double(0.06),
     systematicsFakeTauBarrelElectron = cms.untracked.double(0.4),
     systematicsFakeTauEndcapElectron = cms.untracked.double(0.4),
     systematicsFakeTauBarrelMuon = cms.untracked.double(0.3),
@@ -190,29 +194,53 @@ fakeTauSFandSystematicsBase = cms.untracked.PSet(
 fakeTauSFandSystematicsAgainstElectronMedium = fakeTauSFandSystematicsBase.clone(
     scalefactorFakeTauBarrelElectron = cms.untracked.double(0.95),
     scalefactorFakeTauEndcapElectron = cms.untracked.double(0.75),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.10),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.15),
+    systematicsFakeTauBarrelElectron = cms.untracked.double(0.95*0.10),
+    systematicsFakeTauEndcapElectron = cms.untracked.double(0.75*0.15),
 )
-
 fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
     scalefactorFakeTauBarrelElectron = cms.untracked.double(0.85),
     scalefactorFakeTauEndcapElectron = cms.untracked.double(0.65),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.20),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.25),
+    systematicsFakeTauBarrelElectron = cms.untracked.double(0.85*0.2),
+    systematicsFakeTauEndcapElectron = cms.untracked.double(0.65*0.2),
 )
-
+fakeTauSFandSystematicsAgainstElectronLooseMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = cms.untracked.double(1.4),
+    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.8),
+    systematicsFakeTauBarrelElectron = cms.untracked.double(0.3),
+    systematicsFakeTauEndcapElectron = cms.untracked.double(0.3),
+)
+fakeTauSFandSystematicsAgainstElectronMediumMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = cms.untracked.double(1.6),
+    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.8),
+    systematicsFakeTauBarrelElectron = cms.untracked.double(0.3),
+    systematicsFakeTauEndcapElectron = cms.untracked.double(0.3),
+)
+fakeTauSFandSystematicsAgainstElectronTightMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = cms.untracked.double(2.0),
+    scalefactorFakeTauEndcapElectron = cms.untracked.double(1.2),
+    systematicsFakeTauBarrelElectron = cms.untracked.double(0.4),
+    systematicsFakeTauEndcapElectron = cms.untracked.double(0.4),
+)
+fakeTauSFandSystematicsAgainstElectronVTightMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = cms.untracked.double(2.4),
+    scalefactorFakeTauEndcapElectron = cms.untracked.double(1.2),
+    systematicsFakeTauBarrelElectron = cms.untracked.double(0.5),
+    systematicsFakeTauEndcapElectron = cms.untracked.double(0.5),
+)
+# Obtain genuine and fake tau systematics automatically based on tau against electron discriminator
 fakeTauSFandSystematics = None
-# FIXME: add scale factors for MVA3 against electron discriminators
-print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
-print "As a temporary solution, the AgainstElectronMVA scale factors and uncertainties are used (as per tau POG instructions)"
-fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
-#if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
-    #fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
-#elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
-    #fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
-#else:
-    #print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
-    #fakeTauSFandSystematics = fakeTauSFandSystematicsBase
+fakeTauSFandSystematicsSource = "fakeTauSFandSystematics"+tauSelection.againstElectronDiscriminator.value().replace("against","Against")
+if fakeTauSFandSystematicsSource in globals().keys():
+    import sys
+    fakeTauSFandSystematics = getattr(sys.modules[__name__], fakeTauSFandSystematicsSource)
+    print "fakeTauSFandSystematics set to",fakeTauSFandSystematicsSource
+else:
+    myDirList = globals().keys()
+    myOptionList = []
+    for item in myDirList:
+        if "fakeTauSFandSystematics" in item:
+            myOptionList.append(item)
+    raise Exception("Error: Could not find fakeTauSFandSystematics for against electron discriminator %s! Options are: %s"%(tauSelection.againstElectronDiscriminator.value(), ", ".join(map(str, myOptionList))))
 
 jetSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),  # PF jets
