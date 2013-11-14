@@ -30,6 +30,7 @@ BR = "#it{B}"
 
 ## The label for the physics process
 process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu"
+processHeavy = "pp #rightarrow tH^{+}, H^{+} #rightarrow #tau#nu"
 
 ## Label for the H+->tau BR assumption
 #BRassumption = "%s(H^{+} #rightarrow #tau#nu) = 1"%BR

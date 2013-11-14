@@ -31,17 +31,17 @@ namespace HPlus {
       kkTauToTau,
       kkOneProngTauToTau,
       kkJetToTau,
-      kkElectronToTauAndTauOutsideAcceptance,
-      kkElectronFromTauDecayToTauAndTauOutsideAcceptance,
-      kkMuonToTauAndTauOutsideAcceptance,
-      kkMuonFromTauDecayToTauAndTauOutsideAcceptance,
-      kkTauToTauAndTauOutsideAcceptance,
-      kkOneProngTauToTauAndTauOutsideAcceptance,
-      kkJetToTauAndTauOutsideAcceptance,
+      kkElectronToTauAndTauJetInsideAcceptance,
+      kkElectronFromTauDecayToTauAndTauJetInsideAcceptance,
+      kkMuonToTauAndTauJetInsideAcceptance,
+      kkMuonFromTauDecayToTauAndTauJetInsideAcceptance,
+      kkTauToTauAndTauJetInsideAcceptance,
+      kkOneProngTauToTauAndTauJetInsideAcceptance,
+      kkJetToTauAndTauJetInsideAcceptance,
       kkNumberOfSelectedTauMatchTypes
     };
     enum MCSelectedTauOriginType {
-      kkUnknownOrigin,
+      kkUnknownOrigin = 0,
       kkFromW,
       kkFromZ,
       kkFromHplus,
@@ -49,7 +49,12 @@ namespace HPlus {
       kkFromZTauTau,
       kkFromHplusTau
     };
-
+    enum MCBackgroundType {
+      kkUnknown = 0,
+      kkQCDMeasurementLike,
+      kkEmbedding,
+      kkEWKWithFakeTau
+    };
     class Data {
     public:
       Data();
@@ -70,58 +75,69 @@ namespace HPlus {
       const bool isJetToTau() const { return FakeTauIdentifier::isJetToTau(fTauMatchType); }
       const bool isElectronOrMuonFromTauDecay() const { return FakeTauIdentifier::isElectronOrMuonFromTauDecay(fTauMatchType); }
 
-      const bool isEmbeddingGenuineTau() const { return FakeTauIdentifier::isEmbeddingGenuineTau(fTauMatchType); }
+      const MCBackgroundType getBackgroundType() const { return fBackgroundType; }
+      const bool isQCDMeasurementLike() const { return fBackgroundType == kkQCDMeasurementLike; }
+      const bool isEmbeddingGenuineTau() const { return fBackgroundType == kkEmbedding; }
+      const bool isEWKFakeTau() const { return fBackgroundType == kkEWKWithFakeTau; }
 
       friend class FakeTauIdentifier;
 
     private:
       MCSelectedTauMatchType fTauMatchType;
       MCSelectedTauOriginType fTauOriginType;
+      MCBackgroundType fBackgroundType;
       const reco::GenParticle *fTauMatchGenParticle;
     };
 
-    FakeTauIdentifier(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper, std::string label);
+    FakeTauIdentifier(const edm::ParameterSet& iConfig, const edm::ParameterSet& tauIDConfig,HistoWrapper& histoWrapper, std::string label);
     ~FakeTauIdentifier();
 
     Data matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
     Data silentMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
     static const bool isFakeTau(MCSelectedTauMatchType type) { return !isGenuineTau(type); }
-    static const bool isGenuineTau(MCSelectedTauMatchType type) { return (type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance || isGenuineOneProngTau(type)); }
-    static const bool isGenuineOneProngTau(MCSelectedTauMatchType type) { return (type == kkOneProngTauToTau || type == kkOneProngTauToTauAndTauOutsideAcceptance); }
+    static const bool isGenuineTau(MCSelectedTauMatchType type) { return (type == kkTauToTau || type == kkTauToTauAndTauJetInsideAcceptance || isGenuineOneProngTau(type)); }
+    static const bool isGenuineOneProngTau(MCSelectedTauMatchType type) { return (type == kkOneProngTauToTau || type == kkOneProngTauToTauAndTauJetInsideAcceptance); }
 
     double getFakeTauScaleFactor(MCSelectedTauMatchType matchType, double eta);
     double getFakeTauSystematics(MCSelectedTauMatchType matchType, double eta);
 
     static const bool isElectronToTau(MCSelectedTauMatchType type) { return (type == kkElectronToTau || type == kkElectronFromTauDecayToTau ||
-      type == kkElectronToTauAndTauOutsideAcceptance || type == kkElectronFromTauDecayToTauAndTauOutsideAcceptance); }
+      type == kkElectronToTauAndTauJetInsideAcceptance || type == kkElectronFromTauDecayToTauAndTauJetInsideAcceptance); }
     static const bool isMuonToTau(MCSelectedTauMatchType type) { return (type == kkMuonToTau || type == kkMuonFromTauDecayToTau ||
-      type == kkMuonToTauAndTauOutsideAcceptance || type == kkMuonFromTauDecayToTauAndTauOutsideAcceptance); }
-    static const bool isJetToTau(MCSelectedTauMatchType type) { return (type == kkJetToTau || type == kkJetToTauAndTauOutsideAcceptance); }
-    static const bool isElectronOrMuonFromTauDecay(MCSelectedTauMatchType type) { return (type == kkElectronFromTauDecayToTau || type == kkElectronToTauAndTauOutsideAcceptance ||
-      type == kkMuonFromTauDecayToTau || type == kkMuonFromTauDecayToTauAndTauOutsideAcceptance); }
-
-    static const bool isEmbeddingGenuineTau(MCSelectedTauMatchType type) { return (!isFakeTau(type) || isElectronOrMuonFromTauDecay(type)); }
+      type == kkMuonToTauAndTauJetInsideAcceptance || type == kkMuonFromTauDecayToTauAndTauJetInsideAcceptance); }
+    static const bool isJetToTau(MCSelectedTauMatchType type) { return (type == kkJetToTau || type == kkJetToTauAndTauJetInsideAcceptance); }
+    static const bool isElectronOrMuonFromTauDecay(MCSelectedTauMatchType type) { return (type == kkElectronFromTauDecayToTau || type == kkElectronToTauAndTauJetInsideAcceptance ||
+      type == kkMuonFromTauDecayToTau || type == kkMuonFromTauDecayToTauAndTauJetInsideAcceptance); }
+    // For embedding, consider events where selected tau is hadronic tau and there is no second tau LEPTON in acceptance
+    static const bool isEmbeddingGenuineTau(MCSelectedTauMatchType type) { return type == kkTauToTau; }
 
   private:
     Data privateMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau, bool silentMode);
-    
+
     edm::InputTag fVisibleMCTauSrc;
     edm::InputTag fVisibleMCTauOneProngSrc;
     const double fMatchingConditionDeltaR;
-    // Scale factors for X->tau fakes
+    // Scale factors for tau ID and X->tau fakes mis-ID
+    const double fSFGenuineTauBarrel;
+    const double fSFGenuineTauEndcap;
     const double fSFFakeTauBarrelElectron;
     const double fSFFakeTauEndcapElectron;
     const double fSFFakeTauBarrelMuon;
     const double fSFFakeTauEndcapMuon;
     const double fSFFakeTauBarrelJet;
     const double fSFFakeTauEndcapJet;
-    // Systematic uncertainties for X->tau fakes
+    // Systematic uncertainties for tau ID and X->tau fakes mis-ID
+    const double fSystematicsGenuineTauBarrel;
+    const double fSystematicsGenuineTauEndcap;
     const double fSystematicsFakeTauBarrelElectron;
     const double fSystematicsFakeTauEndcapElectron;
     const double fSystematicsFakeTauBarrelMuon;
     const double fSystematicsFakeTauEndcapMuon;
     const double fSystematicsFakeTauBarrelJet;
     const double fSystematicsFakeTauEndcapJet;
+    // Cut values for acceptance (taken from tau ID config)
+    const double fPtAcceptance;
+    const double fEtaAcceptance;
 
     WrappedTH1* hTauMatchType;
     WrappedTH1* hTauOrigin;

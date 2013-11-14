@@ -32,7 +32,10 @@ def _execute(cmd):
         return None
     env = os.environ
     if gitLocation.find("/usr/bin") == 0:
-        env = copy.copy(env)
+        # Using copy.deepcopy will result in mysterious failures with crab and voms-proxy-info
+        env2 = {}
+        env2.update(env)
+        env = env2
         if "LD_LIBRARY_PATH" in env:
             del env["LD_LIBRARY_PATH"]
     try:

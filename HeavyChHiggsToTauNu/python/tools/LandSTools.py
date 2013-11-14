@@ -129,6 +129,21 @@ def obtainMassPoints(pattern):
     myMasses.sort()
     return myMasses
 
+def readLuminosityFromDatacard(myPath, filename):
+    lumi_re = re.compile("luminosity=\s*(?P<lumi>\d+\.\d+)")
+    fname = os.path.join(myPath, filename)
+    f = open(fname)
+    myLuminosity = None
+    for line in f:
+        match = lumi_re.search(line)
+        if match:
+            #self.lumi = str(1000*float(match.group("lumi"))) # 1/fb -> 1/pb
+            # Nowadays the luminosity is in 1/pb
+            myLuminosity = match.group("lumi")
+            f.close()
+            return myLuminosity
+    raise Exception("Did not find luminosity information from '%s'" % fname)
+
 ## Returns true if mass list contains only heavy H+
 def isHeavyHiggs(massList):
     for m in massList:
@@ -1360,18 +1375,7 @@ class ResultContainer:
     #
     # \param filename  Name of the datacard file inside the multicrab directory
     def _readLuminosityTaujets(self, filename):
-        lumi_re = re.compile("luminosity=\s*(?P<lumi>\d+\.\d+)")
-        fname = os.path.join(self.path, filename)
-        f = open(fname)
-        for line in f:
-            match = lumi_re.search(line)
-            if match:
-                #self.lumi = str(1000*float(match.group("lumi"))) # 1/fb -> 1/pb
-                # Nowadays the luminosity is in 1/pb
-                self.lumi = match.group("lumi")
-                f.close()
-                return
-        raise Exception("Did not find luminosity information from '%s'" % fname)
+        self.lumi = readLuminosityFromDatacard(self.path, filename)
 
     ## Read luminosity from a datacard assuming it follows the leptonic convention
     #

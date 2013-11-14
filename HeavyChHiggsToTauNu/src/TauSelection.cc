@@ -1166,9 +1166,9 @@ namespace HPlus {
     for(edm::PtrVector<pat::Tau>::const_iterator iter = htaus->ptrVector().begin(); iter != htaus->ptrVector().end(); ++iter) {
       const edm::Ptr<pat::Tau> iTau = *iter;
       FakeTauIdentifier::Data tauMatchData = fakeTauIdentifier.matchTauToMC(iEvent, *iTau);
-      bool isElectron = (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkElectronToTau || tauMatchData.getTauMatchType() == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance);
-      bool isJet = (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkJetToTau || tauMatchData.getTauMatchType() == FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance);
-      bool isTau = (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkTauToTau || tauMatchData.getTauMatchType() == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance);
+      bool isElectron = tauMatchData.isElectronToTau();
+      bool isJet = tauMatchData.isJetToTau();
+      bool isTau = tauMatchData.isGenuineTau();
       bool isAtDeadCell = !fTauID->passVetoAgainstDeadECALCells(iTau);
       // Tau candidate selections
       if (!fTauID->passDecayModeFinding(iTau)) continue;
