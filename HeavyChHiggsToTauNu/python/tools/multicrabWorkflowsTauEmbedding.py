@@ -1181,9 +1181,18 @@ def addEmbeddingEmbedding_v53_3(datasets):
         # User mean 10265.6, min 4603.3, max 11330.1
         # Mean 658.5 MB, min 276.9 MB, max 721.0 MB
         "TTJets_TuneZ2star_Summer12":              TaskDef("/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_tauembedding_embedding_v53_3b-1af76047aea9759528c81258e6b8769f/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
-        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
-        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
-        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
+        # 2610140 events, 1701 jobs
+        # User mean 9777.0, min 929.0, max 12657.9
+        # Mean 605.2 MB, min 47.8 MB, max 792.1 MB
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v2_AODSIM_tauembedding_embedding_v53_3b-1af76047aea9759528c81258e6b8769f/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
+        # 3118601 events, 1655 jobs
+        # User mean 12192.9, min 4592.5, max 13702.5
+        # Mean 774.2 MB, min 283.6 MB, max 863.8 MB
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_embedding_v53_3b-1af76047aea9759528c81258e6b8769f/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
+        # 8464 events, 159 jobs
+        # User mean 664.5, min 471.0, max 899.2
+        # Mean 42.5 MB, min 28.3 MB, max 60.6 MB
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("/TTJets_HadronicMGDecays_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_ext_v1_AODSIM_tauembedding_embedding_v53_3b-1af76047aea9759528c81258e6b8769f/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
         # 1240013 events, 754 jobs
         # User mean 10140.2, min 3000.9, max 12275.1
         # Mean 596.4 MB, min 165.3 MB, max 723.9 MB
