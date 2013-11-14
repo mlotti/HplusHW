@@ -71,7 +71,7 @@ class ConfigBuilder:
                  histogramAmbientLevelSystematics = "Systematics",
                  applyTauTriggerScaleFactor = True, # Apply tau trigger scale factor or not
                  applyTauTriggerLowPurityScaleFactor = False, # Apply tau trigger scale factor or not
-                 applyMETTriggerScaleFactor = True, # Apply MET trigger scale factor or not
+                 applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  applyTopPtReweight = True, # Apply Top Pt reweighting on TTJets sample
                  topPtReweightScheme = None, # None for default, see TopPtWeight_cfi.py for allowed values
@@ -89,6 +89,7 @@ class ConfigBuilder:
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doTauIDandMisIDSystematicsAsShapes = False, # If systematic variations are produced, variations are produced also for misidentified tau systematics
+                 doAsymmetricTriggerUncertainties = False, # If true, will vary the efficiency uncertainties instead of the scale factor uncertainty
                  doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
@@ -139,6 +140,7 @@ class ConfigBuilder:
         self.pickEvents = pickEvents
         self.doSystematics = doSystematics
         self.doTauIDandMisIDSystematicsAsShapes = doTauIDandMisIDSystematicsAsShapes
+        self.doAsymmetricTriggerUncertainties = doAsymmetricTriggerUncertainties
         self.doJESVariation = doJESVariation
         self.doPUWeightVariation = doPUWeightVariation
         self.doTopPtWeightVariation = doTopPtWeightVariation
@@ -1222,9 +1224,6 @@ class ConfigBuilder:
     # \param process   cms.Process object
     # \param name      Name of the module to be used as a prototype
     def _addScaleFactorVariation(self, process, name):
-        #useAsymmetricUncertainties = True
-        useAsymmetricUncertainties = False
-
         def addTauTrgSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
             effSF = module.tauTriggerEfficiencyScaleFactor
@@ -1296,7 +1295,7 @@ class ConfigBuilder:
 
         # Tau trigger SF
         if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
-            if useAsymmetricUncertainties:
+            if self.doAsymmetricTriggerUncertainties:
                 names.append(addTauTrgDataEff( 1.0, "Plus"))
                 names.append(addTauTrgDataEff(-1.0, "Minus"))
                 names.append(addTauTrgMCEff( 1.0, "Plus"))
@@ -1307,7 +1306,7 @@ class ConfigBuilder:
 
         # MET trigger SF
         if self.applyMETTriggerScaleFactor:
-            if useAsymmetricUncertainties:
+            if self.doAsymmetricTriggerUncertainties:
                 names.append(addMETTrgDataEff( 1.0, "Plus"))
                 names.append(addMETTrgDataEff(-1.0, "Minus"))
                 names.append(addMETTrgMCEff( 1.0, "Plus"))
