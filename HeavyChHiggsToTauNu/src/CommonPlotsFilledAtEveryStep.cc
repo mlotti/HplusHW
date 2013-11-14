@@ -15,20 +15,38 @@ namespace HPlus {
     TFileDirectory myDir = dir.mkdir(label.c_str());
     // Create histograms
     hNVertices = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "nVertices", "Number of vertices;N_{vertices};N_{events}", 60, 0, 60);
-    hFakeTauStatus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "tau_fakeStatus", "tau_fakeStatus;N_{events}", 11, 0, 11);
+    hFakeTauStatus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "tau_fakeStatus", "tau_fakeStatus;N_{events}", 26, 0, 26);
     if (hFakeTauStatus->isActive()) {
       // items labeled 'main count' sum up to Nevents (useful if you want to know the fractions)
       hFakeTauStatus->GetXaxis()->SetBinLabel(1, "All events"); // control to give Nevents
-      hFakeTauStatus->GetXaxis()->SetBinLabel(2, "1-prong #tau"); // main count
-      hFakeTauStatus->GetXaxis()->SetBinLabel(3, "3-prong #tau"); // main count
+      hFakeTauStatus->GetXaxis()->SetBinLabel(2, "1-pr. #tau"); // main count
+      hFakeTauStatus->GetXaxis()->SetBinLabel(3, "3-pr. #tau"); // main count
       hFakeTauStatus->GetXaxis()->SetBinLabel(4, "e#rightarrow#tau"); // main count
       hFakeTauStatus->GetXaxis()->SetBinLabel(5, "#mu#rightarrow#tau"); // main count
       hFakeTauStatus->GetXaxis()->SetBinLabel(6, "jet#rightarrow#tau"); // main count
-      hFakeTauStatus->GetXaxis()->SetBinLabel(7, "uds#rightarrow#tau"); // subcount
-      hFakeTauStatus->GetXaxis()->SetBinLabel(8, "cb#rightarrow#tau"); // subcount
-      hFakeTauStatus->GetXaxis()->SetBinLabel(9, "g#rightarrow#tau"); // subcount
-      hFakeTauStatus->GetXaxis()->SetBinLabel(10, "#tau#rightarrowe#rightarrow#tau"); // subcount
-      hFakeTauStatus->GetXaxis()->SetBinLabel(11, "#tau#rightarrow#mu#rightarrow#tau"); // subcount
+      hFakeTauStatus->GetXaxis()->SetBinLabel(7, "uds#rightarrow#tau"); // subcount of jet->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(8, "cb#rightarrow#tau"); // subcount of jet->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(9, "g#rightarrow#tau"); // subcount of jet->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(10, "#tau#rightarrowe#rightarrow#tau"); // subcount of jet->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(11, "#tau#rightarrow#mu#rightarrow#tau"); // subcount of jet->tau
+      // Additional non-matched hadronic tau lepton in acceptance
+      hFakeTauStatus->GetXaxis()->SetBinLabel(12, "#tau+#tau_{h}"); // subcount of tau->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(13, "e#rightarrow#tau+#tau_{h}"); // subcount of e->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(14, "#mu#rightarrow#tau+#tau_{h}"); // subcount of mu->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(15, "jet#rightarrow#tau+#tau_{h}"); // subcount of jet->tau
+      // Background type
+      hFakeTauStatus->GetXaxis()->SetBinLabel(16, "bkg:QCD"); // main count 2
+      hFakeTauStatus->GetXaxis()->SetBinLabel(17, "bkg:emb."); // main count 2
+      hFakeTauStatus->GetXaxis()->SetBinLabel(18, "bkg:fake"); // main count 2
+      hFakeTauStatus->GetXaxis()->SetBinLabel(19, "bkg:unkn."); // main count 2
+      // Tau origin
+      hFakeTauStatus->GetXaxis()->SetBinLabel(20, "W->fake#tau"); // subcount of e/mu->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(21, "Z->fake#tau"); // subcount of e/mu->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(22, "H+->fake#tau"); // subcount of e/mu->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(23, "W#rightarrow#tau"); // subcount of tau->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(24, "Z#rightarrow#tau#tau"); // subcount of tau->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(25, "H+#rightarrow#tau#nu"); // subcount of tau->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(26, "orig.unkn."); // jet->tau
     }
     hTauPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tau_pT", "tau_pT;#tau p_{T}, GeV/c;N_{events}", 100, 0.0, 500.0);
     hTauEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tau_eta", "tau_eta;#tau #eta;N_{events}", 50, -2.5, 2.5);
@@ -91,6 +109,7 @@ namespace HPlus {
             hFakeTauStatus->Fill(10);
         } else if (fFakeTauData->isJetToTau()) {
           hFakeTauStatus->Fill(5);
+          // jet->tau parton details
           if (fJetData->getReferenceJetToTau().isNonnull()) {
             if (fJetData->getReferenceJetToTauPartonFlavour() >= 1 && fJetData->getReferenceJetToTauPartonFlavour() <= 3)
               hFakeTauStatus->Fill(6);
@@ -100,6 +119,42 @@ namespace HPlus {
               hFakeTauStatus->Fill(8);
           }
         }
+        // Hadronic tau lepton in acceptance
+        if (fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkTauToTauAndTauJetInsideAcceptance ||
+            fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkOneProngTauToTauAndTauJetInsideAcceptance)
+          hFakeTauStatus->Fill(12);
+        else if (fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkElectronToTauAndTauJetInsideAcceptance ||
+                 fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauJetInsideAcceptance)
+          hFakeTauStatus->Fill(13);
+        else if (fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkMuonToTauAndTauJetInsideAcceptance ||
+                 fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauJetInsideAcceptance)
+          hFakeTauStatus->Fill(14);
+        else if (fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkJetToTauAndTauJetInsideAcceptance)
+          hFakeTauStatus->Fill(15);
+        // Background type
+        if (fFakeTauData->isQCDMeasurementLike())
+          hFakeTauStatus->Fill(16);
+        else if (fFakeTauData->isEmbeddingGenuineTau())
+          hFakeTauStatus->Fill(17);
+        else if (fFakeTauData->isEWKFakeTau())
+          hFakeTauStatus->Fill(18);
+        else
+          hFakeTauStatus->Fill(19);
+        // Tau origin
+        if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromW)
+          hFakeTauStatus->Fill(20);
+        else if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromZ)
+          hFakeTauStatus->Fill(21);
+        else if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromHplus)
+          hFakeTauStatus->Fill(22);
+        else if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromWTau)
+          hFakeTauStatus->Fill(23);
+        else if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromZTauTau)
+          hFakeTauStatus->Fill(24);
+        else if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromHplusTau)
+          hFakeTauStatus->Fill(25);
+        else
+          hFakeTauStatus->Fill(26);
       }
     }
     if (fTauData) {
