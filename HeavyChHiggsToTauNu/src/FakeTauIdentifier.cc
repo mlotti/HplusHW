@@ -59,13 +59,13 @@ namespace HPlus {
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkTauToTau, "genuine hadr. #tau");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkOneProngTauToTau, "genuine 1-pr. hadr. #tau");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkJetToTau, "jet#rightarrow#tau");
-      hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronToTauAndTauOutsideAcceptance, "e#rightarrow#tau, #tau outside");
-      hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronFromTauDecayToTauAndTauOutsideAcceptance, "#tau#rightarrowe#rightarrow#tau, #tau outside");
-      hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonToTauAndTauOutsideAcceptance, "#mu#rightarrow#tau, #tau outside");
-      hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonFromTauDecayToTauAndTauOutsideAcceptance, "#tau#rightarrow#mu#rightarrow#tau, #tau outside");
-      hTauMatchType->GetXaxis()->SetBinLabel(1+kkTauToTauAndTauOutsideAcceptance, "genuine hadr. #tau, #tau outside");
-      hTauMatchType->GetXaxis()->SetBinLabel(1+kkOneProngTauToTauAndTauOutsideAcceptance, "genuine 1-pr. hadr. #tau, #tau outside");
-      hTauMatchType->GetXaxis()->SetBinLabel(1+kkJetToTauAndTauOutsideAcceptance, "jet#rightarrow#tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronToTauAndTauJetInsideAcceptance, "e#rightarrow#tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronFromTauDecayToTauAndTauJetInsideAcceptance, "#tau#rightarrowe#rightarrow#tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonToTauAndTauJetInsideAcceptance, "#mu#rightarrow#tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonFromTauDecayToTauAndTauJetInsideAcceptance, "#tau#rightarrow#mu#rightarrow#tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkTauToTauAndTauJetInsideAcceptance, "genuine hadr. #tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkOneProngTauToTauAndTauJetInsideAcceptance, "genuine 1-pr. hadr. #tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkJetToTauAndTauJetInsideAcceptance, "jet#rightarrow#tau, #tau outside");
     }
     hTauOrigin = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauOrigin", "TauOrigin", 7, 0, 7);
     if (hTauOrigin->isActive()) {
@@ -275,13 +275,13 @@ namespace HPlus {
         if (!nNonMatchedHadronicTausInAcceptance) {
           output.fTauMatchType = kkElectronFromTauDecayToTau;
         } else {
-          output.fTauMatchType = kkElectronFromTauDecayToTauAndTauOutsideAcceptance;
+          output.fTauMatchType = kkElectronFromTauDecayToTauAndTauJetInsideAcceptance;
         }
       } else {
         if (!nNonMatchedHadronicTausInAcceptance) {
           output.fTauMatchType = kkElectronToTau;
         } else {
-          output.fTauMatchType = kkElectronToTauAndTauOutsideAcceptance;
+          output.fTauMatchType = kkElectronToTauAndTauJetInsideAcceptance;
         }
       }
     } else if (isMCMuon) {
@@ -289,33 +289,33 @@ namespace HPlus {
         if (!nNonMatchedHadronicTausInAcceptance) {
           output.fTauMatchType = kkMuonFromTauDecayToTau;
         } else {
-          output.fTauMatchType = kkMuonFromTauDecayToTauAndTauOutsideAcceptance;
+          output.fTauMatchType = kkMuonFromTauDecayToTauAndTauJetInsideAcceptance;
         }
       } else {
         if (!nNonMatchedHadronicTausInAcceptance) {
           output.fTauMatchType = kkMuonToTau;
         } else {
-          output.fTauMatchType = kkMuonToTauAndTauOutsideAcceptance;
+          output.fTauMatchType = kkMuonToTauAndTauJetInsideAcceptance;
         }
       }
     } else if (isHadronicTau) {
       if (!nNonMatchedHadronicTausInAcceptance) {
         output.fTauMatchType = kkTauToTau;
       } else {
-        output.fTauMatchType = kkTauToTauAndTauOutsideAcceptance;
+        output.fTauMatchType = kkTauToTauAndTauJetInsideAcceptance;
       }
       if (isOneProngMCTau) {
         if (!nNonMatchedHadronicTausInAcceptance) {
           output.fTauMatchType = kkOneProngTauToTau;
         } else {
-          output.fTauMatchType = kkOneProngTauToTauAndTauOutsideAcceptance;
+          output.fTauMatchType = kkOneProngTauToTauAndTauJetInsideAcceptance;
         }
       }
     } else {
       if (!nNonMatchedHadronicTausInAcceptance) {
         output.fTauMatchType = kkJetToTau;
       } else {
-        output.fTauMatchType = kkJetToTauAndTauOutsideAcceptance;
+        output.fTauMatchType = kkJetToTauAndTauJetInsideAcceptance;
       }
     }
 
@@ -329,6 +329,7 @@ namespace HPlus {
       output.fBackgroundType = kkEWKWithFakeTau;
 
     // Look at ancestor information
+    output.fTauOriginType = kkUnknownOrigin;
     if (output.fTauMatchType != kkJetToTau) {
       size_t myIndex = 0;
       if (isMCElectron)
@@ -372,7 +373,7 @@ namespace HPlus {
       // Fill histograms
       hTauMatchType->Fill(output.fTauMatchType);
       if (output.fTauMatchType == kkOneProngTauToTau) hTauMatchType->Fill(kkTauToTau);
-      if (output.fTauMatchType == kkOneProngTauToTauAndTauOutsideAcceptance) hTauMatchType->Fill(kkTauToTauAndTauOutsideAcceptance);
+      if (output.fTauMatchType == kkOneProngTauToTauAndTauJetInsideAcceptance) hTauMatchType->Fill(kkTauToTauAndTauJetInsideAcceptance);
       if (isMCElectron)
         hElectronOrigin->Fill(output.fTauOriginType);
       else if (isMCMuon)
@@ -387,33 +388,33 @@ namespace HPlus {
   double FakeTauIdentifier::getFakeTauScaleFactor(FakeTauIdentifier::MCSelectedTauMatchType matchType, double eta) {
     if (matchType == FakeTauIdentifier::kkTauToTau ||
         matchType == FakeTauIdentifier::kkOneProngTauToTau ||
-        matchType == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance ||
-        matchType == FakeTauIdentifier::kkOneProngTauToTauAndTauOutsideAcceptance) {
+        matchType == FakeTauIdentifier::kkTauToTauAndTauJetInsideAcceptance ||
+        matchType == FakeTauIdentifier::kkOneProngTauToTauAndTauJetInsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSFGenuineTauBarrel;
       } else {
         return fSFGenuineTauEndcap;
       }
     } else if (matchType == FakeTauIdentifier::kkElectronToTau ||
-               matchType == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance ||
+               matchType == FakeTauIdentifier::kkElectronToTauAndTauJetInsideAcceptance ||
                matchType == FakeTauIdentifier::kkElectronFromTauDecayToTau ||
-               matchType == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauOutsideAcceptance) {
+               matchType == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauJetInsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSFFakeTauBarrelElectron;
       } else {
         return fSFFakeTauEndcapElectron;
       }
     } else if (matchType == FakeTauIdentifier::kkMuonToTau ||
-               matchType == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance ||
+               matchType == FakeTauIdentifier::kkMuonToTauAndTauJetInsideAcceptance ||
                matchType == FakeTauIdentifier::kkMuonFromTauDecayToTau ||
-               matchType == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauOutsideAcceptance) {
+               matchType == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauJetInsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSFFakeTauBarrelMuon;
       } else {
         return fSFFakeTauEndcapMuon;
       }
     } else if (matchType == FakeTauIdentifier::kkJetToTau ||
-               matchType == FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance) {
+               matchType == FakeTauIdentifier::kkJetToTauAndTauJetInsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSFFakeTauBarrelJet;
       } else {
@@ -426,33 +427,33 @@ namespace HPlus {
   double FakeTauIdentifier::getFakeTauSystematics(MCSelectedTauMatchType matchType, double eta) {
     if (matchType == FakeTauIdentifier::kkTauToTau ||
         matchType == FakeTauIdentifier::kkOneProngTauToTau ||
-        matchType == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance ||
-        matchType == FakeTauIdentifier::kkOneProngTauToTauAndTauOutsideAcceptance) {
+        matchType == FakeTauIdentifier::kkTauToTauAndTauJetInsideAcceptance ||
+        matchType == FakeTauIdentifier::kkOneProngTauToTauAndTauJetInsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSystematicsGenuineTauBarrel;
       } else {
         return fSystematicsGenuineTauEndcap;
       }
     } else if (matchType == FakeTauIdentifier::kkElectronToTau ||
-               matchType == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance ||
+               matchType == FakeTauIdentifier::kkElectronToTauAndTauJetInsideAcceptance ||
                matchType == FakeTauIdentifier::kkElectronFromTauDecayToTau ||
-               matchType == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauOutsideAcceptance) {
+               matchType == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauJetInsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSystematicsFakeTauBarrelElectron;
       } else {
         return fSystematicsFakeTauEndcapElectron;
       }
     } else if (matchType == FakeTauIdentifier::kkMuonToTau ||
-               matchType == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance ||
+               matchType == FakeTauIdentifier::kkMuonToTauAndTauJetInsideAcceptance ||
                matchType == FakeTauIdentifier::kkMuonFromTauDecayToTau ||
-               matchType == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauOutsideAcceptance) {
+               matchType == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauJetInsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSystematicsFakeTauBarrelMuon;
       } else {
         return fSystematicsFakeTauEndcapMuon;
       }
     } else if (matchType == FakeTauIdentifier::kkJetToTau ||
-               matchType == FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance) {
+               matchType == FakeTauIdentifier::kkJetToTauAndTauJetInsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSystematicsFakeTauBarrelJet;
       } else {

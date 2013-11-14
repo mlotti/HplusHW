@@ -381,14 +381,14 @@ namespace HPlus {
     CounterGroup fGenuineToTausCounterGroup;
     CounterGroup fGenuineOneProngToTausCounterGroup;
     CounterGroup fJetToTausCounterGroup;
-    CounterGroup fAllTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fElectronToTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fElectronFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fMuonToTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fMuonFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fGenuineOneProngToTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fJetToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fAllTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fElectronToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fElectronFromTauDecayToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fMuonToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fMuonFromTauDecayToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fGenuineToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fGenuineOneProngToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fJetToTausAndTauJetInsideAcceptanceCounterGroup;
 
     WrappedTH1 *hEMFractionAll;
     WrappedTH1 *hEMFractionElectrons;
