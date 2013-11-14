@@ -203,7 +203,7 @@ namespace HPlus {
         isHadronicTau = true;
       }
       // Check acceptance
-      if (myTauLeptonMomentum.pt() < fPtAcceptance || abs(myTauLeptonMomentum.eta()) > fEtaAcceptance) {
+      if (myTauLeptonMomentum.pt() > fPtAcceptance && abs(myTauLeptonMomentum.eta()) < fEtaAcceptance) {
         if (tmpTauToElectron)
           ++nMatchedElectronicTausInAcceptance;
         else if (tmpTauToMuon)
@@ -226,7 +226,7 @@ namespace HPlus {
           tmpTauToLeptons = true;
       }
       // Check acceptance
-      if (myTauLeptonMomentum.pt() < fPtAcceptance || abs(myTauLeptonMomentum.eta()) > fEtaAcceptance) {
+      if (myTauLeptonMomentum.pt() > fPtAcceptance && abs(myTauLeptonMomentum.eta()) < fEtaAcceptance) {
         if (tmpTauToLeptons)
           ++nNonMatchedLeptonicTausInAcceptance;
         else
@@ -327,6 +327,9 @@ namespace HPlus {
       output.fBackgroundType = kkEmbedding;
     else if (nMatchedHadronicTausInAcceptance >= 1 && nNonMatchedHadronicTausInAcceptance >= 1)
       output.fBackgroundType = kkEWKWithFakeTau;
+
+    std::cout << "Nmatched=" << myMatchingTauIndices.size() << " NmatchHadronic=" << nMatchedHadronicTausInAcceptance
+      << " Nnonmatched=" << myNonMatchingTauIndices.size() << " NnonmatchHadronic=" << nNonMatchedHadronicTausInAcceptance << " bkgtype=" << output.fBackgroundType << std::endl;
 
     // Look at ancestor information
     output.fTauOriginType = kkUnknownOrigin;
