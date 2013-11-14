@@ -1279,7 +1279,7 @@ class ConfigBuilder:
 
         # Tau trigger SF
         if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
-            if embeddingData:
+            if self.options.tauEmbeddingInput != 0:
                 names.append(addTauTrgDataEff( 1.0, "Plus"))
                 names.append(addTauTrgDataEff(-1.0, "Minus"))
             else:
@@ -1294,7 +1294,7 @@ class ConfigBuilder:
 
         # MET trigger SF
         if self.applyMETTriggerScaleFactor:
-            if embeddingData:
+            if self.options.tauEmbeddingInput != 0:
                 names.append(addMETTrgDataEff( 1.0, "Plus"))
                 names.append(addMETTrgDataEff(-1.0, "Minus"))
             else:
