@@ -9,14 +9,16 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 class BRXSDatabaseInterface:
-    def __init__(self,rootfile):
+    def __init__(self,rootfile,heavy=False,program="FH"):
         print "BRXSDatabaseInterface: reading file",rootfile
 	self.rootfile  = rootfile
 	self.fIN       = ROOT.TFile.Open(rootfile)
-	self.program   = "FH"
+	self.program   = program
 	self.selection = ""
 
         self.BRvariable= "BR_tHpb*BR_Hp_taunu"
+	if heavy:
+	    self.BRvariable= "tHp_xsec*BR_Hp_taunu"
 
 	self.expLimit  = {}
 
@@ -33,6 +35,17 @@ class BRXSDatabaseInterface:
             branch.SetAddress(variable)
             self.variables.append(variable)
             self.names.append(branch.GetName())
+    def GetProgram(self):
+        return self.program
+
+    def GetVersion(self):
+        version_re = re.compile(self.program+"_version += +(?P<version>\S+)")
+        keys = self.fIN.GetListOfKeys()
+        for key in keys:
+            match = version_re.search(key.GetName())
+            if match:
+                return match.group("version")
+        return None
         
     def setSelection(self,selection):
 	self.selection = selection
@@ -82,7 +95,9 @@ class BRXSDatabaseInterface:
 
 	y = []
 	for xval in x:
-	    yselection = xVariableName+"=="+str(xval)+"&&"+selection
+	    yselection = xVariableName+"=="+str(xval)
+            if not selection == "":
+                yselection +="&&"+selection
 	    expLimit = self.getExpLimit(yselection)
 	    ylimit = self.getTanbFromLightHpBR(expLimit,yselection)
 	    #print "x,y",xval,ylimit
@@ -94,6 +109,7 @@ class BRXSDatabaseInterface:
 	return x,y
 
     def graphToTanBeta(self,graph,xVariableName,selection,highTanbRegion=True,limitBRtoMin=True):
+        #print "check graphToTanBeta",xVariableName,selection,highTanbRegion,limitBRtoMin
         # Don't modify the original
         graph = graph.Clone()
         if highTanbRegion:
@@ -102,8 +118,11 @@ class BRXSDatabaseInterface:
             print "GraphToTanBeta low tanb region",xVariableName,graph.GetName()
         for i in xrange(0, graph.GetN()):
             xval = graph.GetX()[i]
-            yselection = xVariableName+"=="+str(xval)+"&&"+selection
+            yselection = xVariableName+"=="+str(xval)
+            if not selection == "":
+                yselection =+ "&&"+selection
             yval = graph.GetY()[i]
+            #print "check graphToTanBeta",yselection
             ylimit = self.getTanbFromLightHpBR(yval,yselection,highTanbRegion)
             graph.SetPoint(i, xval, ylimit)
             print "    ",i, xval, yval, ylimit 
@@ -183,7 +202,10 @@ class BRXSDatabaseInterface:
             if self.isEqual(yval,1):
                 pointsAtTanb1.append(i)
                 graphX.append(graph.GetX()[i])
-                ymin = self.getMinimumTanb(self.BRvariable,selection+"&&"+xVariableName+"==%s"%graph.GetX()[i])
+                tmpsele = xVariableName+"==%s"%graph.GetX()[i]
+                if not selection == "":
+                    tmpsele+=selection
+                ymin = self.getMinimumTanb(self.BRvariable,tmpsele)
                 graphY.append(ymin)
         if len(pointsAtTanb1) == 0 and pointBelowTanb1 == 0:
             return graph
@@ -200,12 +222,14 @@ class BRXSDatabaseInterface:
             y1 = graph.GetY()[firstUnExcludedPoint]
             x2 = graph.GetX()[firstUnExcludedPoint+1]
             y2 = graph.GetY()[firstUnExcludedPoint+1]
-#            print "check x1,y1,x2,y2",x1,y1,x2,y2
+            #print "check x1,y1,x2,y2",x1,y1,x2,y2
             graph = graph.Clone()
             for i,val in enumerate(pointsAtTanb1):
                 graph.RemovePoint(len(pointsAtTanb1)-1 - i)
-            
-            ymin = self.getMinimumTanb(self.BRvariable,selection+"&&"+xVariableName+"==%s"%graph.GetX()[firstUnExcludedPoint-1])
+            tmpsele = xVariableName+"==%s"%graph.GetX()[firstUnExcludedPoint-1]
+            if not selection == "":
+                tmpsele += "&&"+selection
+            ymin = self.getMinimumTanb(self.BRvariable,tmpsele)
 
             # y = ax+b
             b = float(x1*y2 - y1*x2)/(x1-x2)
@@ -273,7 +297,10 @@ class BRXSDatabaseInterface:
         graphX = []
         graphY = []
         for x in xs:
-            y = self.getMinimumTanb(self.BRvariable,selection+"&&"+xVariableName+"==%s"%x)
+            tmpsele = xVariableName+"==%s"%x
+            if not selection == "":
+                tmpsele += "&&"+selection
+            y = self.getMinimumTanb(self.BRvariable,tmpsele)
             graphX.append(x)
             graphY.append(y)
         retGraph = ROOT.TGraph(len(graphX),array('d',graphX),array('d',graphY))
@@ -382,7 +409,9 @@ class BRXSDatabaseInterface:
         limits_y = []
 
         for x in xvalues:
-            theSelection = selection+"&&"+self.floatSelection(xVariableName+"==%s"%x)
+            theSelection = self.floatSelection(xVariableName+"==%s"%x)
+            if not selection == "":
+                theSelection += "&&"+selection
             ymin = self.getMinimum(higgs,theSelection)
             if limit < ymin:
                 continue
@@ -420,7 +449,9 @@ class BRXSDatabaseInterface:
         limits_y = []
 
         for x in xvalues:
-            theSelection = selection+"&&"+self.floatSelection(xVariableName+"==%s"%x)
+            theSelection = self.floatSelection(xVariableName+"==%s"%x)
+            if not selection == "":
+                theSelection += "&&"+selection
             ymin = self.getMinimum(higgs,theSelection)
             #print "check ymin",ymin,higgs,theSelection
             if limit < ymin:
@@ -505,7 +536,9 @@ class BRXSDatabaseInterface:
         for i in xrange(0, graph.GetN()):
             mHp = graph.GetX()[i]
             tanb = graph.GetY()[i]
-            selection = "mHp=="+str(mHp)+"&&tanb=="+str(tanb)+"&&"+self.selection
+            selection = "mHp=="+str(mHp)+"&&tanb=="+str(tanb)
+            if not self.selection == "":
+                selection +="&&"+self.selection
             mA = self.get("mA","tanb",selection)
             graph.SetPoint(i, mA, tanb)
 
@@ -590,7 +623,7 @@ class BRXSDatabaseInterface:
         return True
     
     def getValues(self,variable,selection,roundValues=0,sort=True):
-        #print "check",variable,selection
+        #print "check getValues",variable,selection
         if not self.selection == "" and not selection == "":
             selection = self.selection+"&&"+selection
         values = []
@@ -635,7 +668,10 @@ class BRXSDatabaseInterface:
 
         tanbs = self.getValues("tanb",selection,roundValues=1)
         for tgb in tanbs:
-            value = self.get("tanb",variable,selection+"&&tanb==%s"%tgb)
+            tmpsele = "tanb==%s"%tgb
+            if not selection == "":
+                tmpsele+="&&"+selection
+            value = self.get("tanb",variable,tmpsele)
             if value < min and value > 0:
                 min = value
                 tanb = tgb
@@ -649,8 +685,10 @@ class BRXSDatabaseInterface:
         xvars = self.getValues(xvariable,selection,roundValues=1)
         for tgb in tanbs:
             for xvar in xvars:
-                varSelection = selection+"&&tanb==%s"%tgb
+                varSelection = "tanb==%s"%tgb
                 varSelection+= "&&"+xvariable+"==%s"%xvar
+                if not selection == "":
+                    varSelection+= "&&"+selection
                 value = self.get(yvariable,"tanb",varSelection)
                 if value < min:
                     min = value
@@ -670,8 +708,13 @@ class BRXSDatabaseInterface:
         x1 = self.lowerPoint(xvariable,xvalue,selection)
         x2 = self.higherPoint(xvariable,xvalue,selection)
 
-        y1 = self.getMinimumTanb(yvariable,selection+"&&"+xvariable+"==%s"%x1)
-        y2 = self.getMinimumTanb(yvariable,selection+"&&"+xvariable+"==%s"%x2)
+        sele1 = xvariable+"==%s"%x1
+        sele2 = xvariable+"==%s"%x2
+        if not selection == "":
+            sele1 += "&&"+selection
+            sele2 += "&&"+selection
+        y1 = self.getMinimumTanb(yvariable,sele1)
+        y2 = self.getMinimumTanb(yvariable,sele2)
 #        print "check getMinTanbInterpolation",x1,y1,x2,y2
         return self.linearFunction(xvalue,x1,y1,x2,y2)
 
@@ -706,7 +749,10 @@ class BRXSDatabaseInterface:
             tanbs = self.getValues("tanb",selection,roundValues=-1)
             print "tanb      ",variable
             for tanb in tanbs:
-                sele = self.floatSelection(selection+"&&tanb==%s"%tanb)
+                tmpsele = "tanb==%s"%tanb
+                if not selection == "":
+                    tmpsele += "&&"+selection
+                sele = self.floatSelection(tmpsele)
                 value = self.getValues(variable,sele,roundValues=-1)
                 tanbstr = str(tanb)
                 while len(tanbstr) < 10:
@@ -764,11 +810,11 @@ class BRXSDatabaseInterface:
 	return value
 
     def linearBRInterpolation(self,variable,target,min,max,selection):
-#        print "check linearBRInterpolation",variable,target,min,max,selection
-#        print "      self.getMinimum(variable,selection)",self.getMinimum(variable,selection)
-#        print "      self.getMaximum(variable,selection)",self.getMaximum(variable,selection)
-#        print "tanbs",len(self.getValues("tanb",selection,roundValues=-1)),self.getValues("tanb",selection,roundValues=-1)
-#        print variable,len(self.getValues(variable,selection,roundValues=-1))
+        #print "check linearBRInterpolation",variable,target,min,max,selection
+        #print "      self.getMinimum(variable,selection)",self.getMinimum(variable,selection)
+        #print "      self.getMaximum(variable,selection)",self.getMaximum(variable,selection)
+        #print "tanbs",len(self.getValues("tanb",selection,roundValues=-1)),self.getValues("tanb",selection,roundValues=-1)
+        #print variable,len(self.getValues(variable,selection,roundValues=-1))
         if min >= max:
 	    tanbs = self.getValues("tanb",selection,roundValues=-1)
             newMin = 999
@@ -842,7 +888,7 @@ class BRXSDatabaseInterface:
             tanbmin = 10
             tanbmax = 20
         return self.linearBRInterpolation(self.BRvariable,targetBR,tanbmin,tanbmax,self.floatSelection(selection))
-            
+                
     def getCutValue(self,variable,selection):
 	var_re = re.compile(variable+"==(?P<value>(\d+))")
 	for s in selection.split("&&"):
@@ -871,7 +917,10 @@ def test():
     match = root_re.search(sys.argv[1])
     if match:
 
-	db = BRXSDatabaseInterface(match.group(0))
+	db = BRXSDatabaseInterface(match.group(0),program="2HDMC")
+        print db.GetVersion()
+        sys.exit()
+        
 #	db.Print()
 #        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mHp==155&&mu==200&&Xt==2000&&m2==200")
 #        db.Print(variable="BR_Hp_taunu",selection="mHp==155&&mu==200&&Xt==2000&&m2==200")
