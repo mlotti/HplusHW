@@ -314,7 +314,6 @@ def doPlots(myDsetMgr, opts, mySuffix, isSystematicVariation):
     myDir = "Btagging"
     createDrawPlot(myDir+"/NumberOfBtaggedJets", xlabel="N_{selected b jets}")
     createDrawPlot(myDir+"/jet_bdiscriminator", xlabel="b-taggind discriminator", ylabel="N_{jets}")
-    createDrawPlot(myDir+"/RealBjet_discrim", xlabel="b-tagging discriminator for genuine b jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/bjet_pt", xlabel="p_{T} of selected b jets, GeV/c", ylabel="N_{jets}")
     createDrawPlot(myDir+"/bjet_eta", xlabel="#eta of selected b jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/bjet1_pt", xlabel="p_{T} of first b jets, GeV/c", ylabel="N_{jets}")
@@ -437,7 +436,7 @@ def doCounters(myDsetMgr, mySuffix, isSystematicVariation):
     
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
-    myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
+    myModuleSelector = AnalysisModuleSelector(disableSystematicsList=False) # Object for selecting data eras, search modes, and optimization modes
     parser = OptionParser(usage="Usage: %prog [options]")
     myModuleSelector.addParserOptions(parser)
     parser.add_option("--noMCQCD", dest="noMCQCD", action="store_true", default=False, help="remove MC QCD")
