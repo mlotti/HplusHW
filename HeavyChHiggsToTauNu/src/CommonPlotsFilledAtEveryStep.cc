@@ -40,12 +40,12 @@ namespace HPlus {
       hFakeTauStatus->GetXaxis()->SetBinLabel(18, "bkg:fake"); // main count 2
       hFakeTauStatus->GetXaxis()->SetBinLabel(19, "bkg:unkn."); // main count 2
       // Tau origin
-      hFakeTauStatus->GetXaxis()->SetBinLabel(20, "W->fake#tau"); // subcount of e/mu->tau
-      hFakeTauStatus->GetXaxis()->SetBinLabel(21, "Z->fake#tau"); // subcount of e/mu->tau
-      hFakeTauStatus->GetXaxis()->SetBinLabel(22, "H+->fake#tau"); // subcount of e/mu->tau
-      hFakeTauStatus->GetXaxis()->SetBinLabel(23, "W#rightarrow#tau"); // subcount of tau->tau
-      hFakeTauStatus->GetXaxis()->SetBinLabel(24, "Z#rightarrow#tau#tau"); // subcount of tau->tau
-      hFakeTauStatus->GetXaxis()->SetBinLabel(25, "H+#rightarrow#tau#nu"); // subcount of tau->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(20, "orig.W->fake#tau"); // subcount of e/mu->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(21, "orig.Z->fake#tau"); // subcount of e/mu->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(22, "orig.H+->fake#tau"); // subcount of e/mu->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(23, "orig.W#rightarrow#tau"); // subcount of tau->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(24, "orig.Z#rightarrow#tau#tau"); // subcount of tau->tau
+      hFakeTauStatus->GetXaxis()->SetBinLabel(25, "orig.H+#rightarrow#tau#nu"); // subcount of tau->tau
       hFakeTauStatus->GetXaxis()->SetBinLabel(26, "orig.unkn."); // jet->tau
     }
     hTauPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tau_pT", "tau_pT;#tau p_{T}, GeV/c;N_{events}", 100, 0.0, 500.0);
@@ -122,39 +122,39 @@ namespace HPlus {
         // Hadronic tau lepton in acceptance
         if (fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkTauToTauAndTauJetInsideAcceptance ||
             fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkOneProngTauToTauAndTauJetInsideAcceptance)
-          hFakeTauStatus->Fill(12);
+          hFakeTauStatus->Fill(11);
         else if (fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkElectronToTauAndTauJetInsideAcceptance ||
                  fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauJetInsideAcceptance)
-          hFakeTauStatus->Fill(13);
+          hFakeTauStatus->Fill(12);
         else if (fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkMuonToTauAndTauJetInsideAcceptance ||
                  fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauJetInsideAcceptance)
-          hFakeTauStatus->Fill(14);
+          hFakeTauStatus->Fill(13);
         else if (fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkJetToTauAndTauJetInsideAcceptance)
-          hFakeTauStatus->Fill(15);
+          hFakeTauStatus->Fill(14);
         // Background type
         if (fFakeTauData->isQCDMeasurementLike())
-          hFakeTauStatus->Fill(16);
+          hFakeTauStatus->Fill(15);
         else if (fFakeTauData->isEmbeddingGenuineTau())
-          hFakeTauStatus->Fill(17);
+          hFakeTauStatus->Fill(16);
         else if (fFakeTauData->isEWKFakeTau())
-          hFakeTauStatus->Fill(18);
+          hFakeTauStatus->Fill(17);
         else
-          hFakeTauStatus->Fill(19);
+          hFakeTauStatus->Fill(18);
         // Tau origin
         if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromW)
-          hFakeTauStatus->Fill(20);
+          hFakeTauStatus->Fill(19);
         else if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromZ)
-          hFakeTauStatus->Fill(21);
+          hFakeTauStatus->Fill(20);
         else if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromHplus)
-          hFakeTauStatus->Fill(22);
+          hFakeTauStatus->Fill(21);
         else if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromWTau)
-          hFakeTauStatus->Fill(23);
+          hFakeTauStatus->Fill(22);
         else if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromZTauTau)
-          hFakeTauStatus->Fill(24);
+          hFakeTauStatus->Fill(23);
         else if (fFakeTauData->getTauOriginType() == FakeTauIdentifier::kkFromHplusTau)
-          hFakeTauStatus->Fill(25);
+          hFakeTauStatus->Fill(24);
         else
-          hFakeTauStatus->Fill(26);
+          hFakeTauStatus->Fill(25);
       }
     }
     if (fTauData) {
