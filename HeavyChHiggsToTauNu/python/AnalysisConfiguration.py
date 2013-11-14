@@ -989,7 +989,7 @@ class ConfigBuilder:
         #if not (self.doTauIDandMisIDSystematicsAsShapes or self.doSystematics):
         if not (self.doTauIDandMisIDSystematicsAsShapes): # FIXME: for now, do not run as part of systematics unless explicitly asked
             return
-        if self.dataVersion.isMC() or self.options.tauEmbeddingInput != 0:
+        if self.dataVersion.isMC():
             timer = Timer()
             for name in analysisNamesForSystematics:
                 self._addTauIDandMisIdVariation(process, name)
@@ -1017,18 +1017,20 @@ class ConfigBuilder:
         # Add genuine tau ID systematics
         names.append(addVariation(+1, "GenuineTauPlus",  ["GenuineTauBarrel","GenuineTauEndcap"]))
         names.append(addVariation(-1, "GenuineTauMinus", ["GenuineTauBarrel","GenuineTauEndcap"]))
-        # Add e->tau systematics for barrel
-        names.append(addVariation(+1, "FakeTauBarrelElectronPlus",  ["FakeTauBarrelElectron"]))
-        names.append(addVariation(-1, "FakeTauBarrelElectronMinus", ["FakeTauBarrelElectron"]))
-        # Add e->tau systematics for endcap
-        names.append(addVariation(+1, "FakeTauEndcapElectronPlus",  ["FakeTauEndcapElectron"]))
-        names.append(addVariation(-1, "FakeTauEndcapElectronMinus", ["FakeTauEndcapElectron"]))
-        # Add e->tau systematics
-        names.append(addVariation(+1, "FakeTauMuonPlus",  ["FakeTauBarrelMuon","FakeTauEndcapMuon"]))
-        names.append(addVariation(-1, "FakeTauMuonMinus", ["FakeTauBarrelMuon","FakeTauEndcapMuon"]))
-        # Add jet->tau systematics
-        names.append(addVariation(+1, "FakeTauJetPlus",  ["FakeTauBarrelJet","FakeTauEndcapJet"]))
-        names.append(addVariation(-1, "FakeTauJetMinus", ["FakeTauBarrelJet","FakeTauEndcapJet"]))
+        # Do not add fake tau mis-ID systematics for embedding
+        if self.options.tauEmbeddingInput == 0:
+            # Add e->tau systematics for barrel
+            names.append(addVariation(+1, "FakeTauBarrelElectronPlus",  ["FakeTauBarrelElectron"]))
+            names.append(addVariation(-1, "FakeTauBarrelElectronMinus", ["FakeTauBarrelElectron"]))
+            # Add e->tau systematics for endcap
+            names.append(addVariation(+1, "FakeTauEndcapElectronPlus",  ["FakeTauEndcapElectron"]))
+            names.append(addVariation(-1, "FakeTauEndcapElectronMinus", ["FakeTauEndcapElectron"]))
+            # Add e->tau systematics
+            names.append(addVariation(+1, "FakeTauMuonPlus",  ["FakeTauBarrelMuon","FakeTauEndcapMuon"]))
+            names.append(addVariation(-1, "FakeTauMuonMinus", ["FakeTauBarrelMuon","FakeTauEndcapMuon"]))
+            # Add jet->tau systematics
+            names.append(addVariation(+1, "FakeTauJetPlus",  ["FakeTauBarrelJet","FakeTauEndcapJet"]))
+            names.append(addVariation(-1, "FakeTauJetMinus", ["FakeTauBarrelJet","FakeTauEndcapJet"]))
         # Accumulate
         self._accumulateAnalyzers("Fake tau variation", names)
 
