@@ -29,6 +29,7 @@ namespace HPlus {
     BaseSelection(eventCounter, histoWrapper),
     fGenParticleSrc(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
     fMuonCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollectionName")),
+    fApplyMuonIsolation(iConfig.getUntrackedParameter<bool>("applyMuonIsolation")),
     fMuonPtCut(iConfig.getUntrackedParameter<double>("MuonPtCut")),
     fMuonEtaCut(iConfig.getUntrackedParameter<double>("MuonEtaCut")),
     fMuonSelectionSubCountAllEvents(eventCounter.addSubCounter("MuonSelection","AllEvent")),
@@ -256,14 +257,16 @@ namespace HPlus {
         output.fSelectedMuonsBeforeIsolation.push_back(*iMuon);
 
       // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Basline_muon_selections_for_2011
-      if (relIsol < 0.12) {
-        hTightMuonEta->Fill(myMuonEta);
-        if (std::abs(myMuonEta) < fMuonEtaCut)
-          hTightMuonPt->Fill(myMuonPt);
-      }
-      if (relIsol > 0.20) {
-        output.fSelectedNonIsolatedMuons.push_back(*iMuon);
-        continue;
+      if (fApplyMuonIsolation) {
+        if (relIsol < 0.12) {
+          hTightMuonEta->Fill(myMuonEta);
+          if (std::abs(myMuonEta) < fMuonEtaCut)
+            hTightMuonPt->Fill(myMuonPt);
+        }
+        if (relIsol > 0.20) {
+          output.fSelectedNonIsolatedMuons.push_back(*iMuon);
+          continue;
+        }
       }
       bMuonRelIsolationCut = true;
       output.fSelectedMuonsBeforePtAndEtaCuts.push_back(*iMuon);
@@ -280,7 +283,7 @@ namespace HPlus {
       if (myMuonPt < fMuonPtCut) continue;
       bMuonPtCut = true;
       output.fSelectedMuonsLoose.push_back(*iMuon);
-      if (relIsol < 0.12)
+      if (relIsol < 0.12 || !fApplyMuonIsolation)
         output.fSelectedMuonsTight.push_back(*iMuon);
 
 

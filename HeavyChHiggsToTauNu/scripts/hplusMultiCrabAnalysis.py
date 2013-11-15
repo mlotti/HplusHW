@@ -44,7 +44,10 @@ class TimeAnalysis:
         return False
 
     def _times(self, name, lst):
-        return "%s mean %.1f, min %.1f, max %.1f" % (name, sum(lst)/len(lst), min(lst), max(lst))
+        if len(lst) > 0:
+            return "%s mean %.1f, min %.1f, max %.1f" % (name, sum(lst)/len(lst), min(lst), max(lst))
+        else:
+            return "%s empty" % name
 
     def userTime(self):
         return self._times("User", self.user_times)

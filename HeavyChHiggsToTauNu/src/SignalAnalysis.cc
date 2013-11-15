@@ -182,7 +182,7 @@ namespace HPlus {
     fTopPtWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("topPtWeightReader"), fHistoWrapper, "TopPtWeight"),
     fEmbeddingGeneratorWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingGeneratorWeightReader"), fHistoWrapper, "EmbeddingGeneratorWeight"),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
-    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
+    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), fHistoWrapper, "TauID"),
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fTauEmbeddingMuonIsolationQuantifier(eventCounter, fHistoWrapper),
@@ -200,14 +200,14 @@ namespace HPlus {
     fGenuineToTausCounterGroup(eventCounter, "tau->tau"),
     fGenuineOneProngToTausCounterGroup(eventCounter, "1-prong tau->tau"),
     fJetToTausCounterGroup(eventCounter, "jet->tau"),
-    fAllTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "All with tau outside acceptance"),
-    fElectronToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "e->tau with tau outside acceptance"),
-    fElectronFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "tau_e->tau with tau outside acceptance"),
-    fMuonToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "mu->tau with tau outside acceptance"),
-    fMuonFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "tau_mu->tau with tau outside acceptance"),
-    fGenuineToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "tau->tau with tau outside acceptance"),
-    fGenuineOneProngToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "1-prong tau->tau with tau outside acceptance"),
-    fJetToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "jet->tau with tau outside acceptance"),
+    fAllTausAndTauJetInsideAcceptanceCounterGroup(eventCounter, "All with tau jet inside acceptance"),
+    fElectronToTausAndTauJetInsideAcceptanceCounterGroup(eventCounter, "e->tau with tau jet inside acceptance"),
+    fElectronFromTauDecayToTausAndTauJetInsideAcceptanceCounterGroup(eventCounter, "tau_e->tau with tau jet inside acceptance"),
+    fMuonToTausAndTauJetInsideAcceptanceCounterGroup(eventCounter, "mu->tau with tau jet inside acceptance"),
+    fMuonFromTauDecayToTausAndTauJetInsideAcceptanceCounterGroup(eventCounter, "tau_mu->tau with tau jet inside acceptance"),
+    fGenuineToTausAndTauJetInsideAcceptanceCounterGroup(eventCounter, "tau->tau with tau jet inside acceptance"),
+    fGenuineOneProngToTausAndTauJetInsideAcceptanceCounterGroup(eventCounter, "1-prong tau->tau with tau jet inside acceptance"),
+    fJetToTausAndTauJetInsideAcceptanceCounterGroup(eventCounter, "jet->tau with tau jet inside acceptance"),
     fModuleLabel(iConfig.getParameter<std::string>("@module_label")),
     fProduce(iConfig.getUntrackedParameter<bool>("produceCollections", false)),
     fOnlyGenuineTaus(iConfig.getUntrackedParameter<bool>("onlyGenuineTaus", false)),
@@ -522,7 +522,7 @@ namespace HPlus {
 
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
-    bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
+    bool myFakeTauStatus = !fFakeTauIdentifier.isEmbeddingGenuineTau(tauMatchData.getTauMatchType()); // True if the sample is negation of sample selected for embedding
     fCommonPlotsAfterTauSelection->fill();
     fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauData, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
     fTree.setTauIsFake(myFakeTauStatus);
@@ -1378,20 +1378,20 @@ namespace HPlus {
     else if (tauMatch == FakeTauIdentifier::kkTauToTau) return &fGenuineToTausCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkOneProngTauToTau) return &fGenuineToTausCounterGroup; // Handle separation in filling
     else if (tauMatch == FakeTauIdentifier::kkJetToTau) return &fJetToTausCounterGroup;
-    else if (tauMatch == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance) return &fElectronToTausAndTauOutsideAcceptanceCounterGroup;
-    else if (tauMatch == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauOutsideAcceptance) return &fElectronFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
-    else if (tauMatch == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance) return &fMuonToTausAndTauOutsideAcceptanceCounterGroup;
-    else if (tauMatch == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauOutsideAcceptance) return &fMuonFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
-    else if (tauMatch == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance) return &fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
-    else if (tauMatch == FakeTauIdentifier::kkOneProngTauToTauAndTauOutsideAcceptance) return &fGenuineToTausAndTauOutsideAcceptanceCounterGroup; // Handle separation in filling
-    else if (tauMatch == FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance) return &fJetToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkElectronToTauAndTauJetInsideAcceptance) return &fElectronToTausAndTauJetInsideAcceptanceCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauJetInsideAcceptance) return &fElectronFromTauDecayToTausAndTauJetInsideAcceptanceCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkMuonToTauAndTauJetInsideAcceptance) return &fMuonToTausAndTauJetInsideAcceptanceCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauJetInsideAcceptance) return &fMuonFromTauDecayToTausAndTauJetInsideAcceptanceCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkTauToTauAndTauJetInsideAcceptance) return &fGenuineToTausAndTauJetInsideAcceptanceCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkOneProngTauToTauAndTauJetInsideAcceptance) return &fGenuineToTausAndTauJetInsideAcceptanceCounterGroup; // Handle separation in filling
+    else if (tauMatch == FakeTauIdentifier::kkJetToTauAndTauJetInsideAcceptance) return &fJetToTausAndTauJetInsideAcceptanceCounterGroup;
     return 0;
   }
 
   void SignalAnalysis::fillSelectionFlowAndCounterGroups(int nVertices, FakeTauIdentifier::Data& tauMatchData, SignalSelectionOrder selection, const TauSelection::Data& tauData) {
     hSelectionFlow->Fill(selection);
     hSelectionFlowVsVertices->Fill(nVertices, selection);
-    if (tauMatchData.isFakeTau())
+    if (tauMatchData.isEmbeddingGenuineTau())
       hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, selection);
     fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), selection, tauData);
   }
@@ -1400,8 +1400,8 @@ namespace HPlus {
     // Get out if no match has been found
     if (tauMatch == FakeTauIdentifier::kkNoMC) return;
     // Obtain status for main counter
-    // Define event as type II if no genuine tau was identified as the selected tau
-    bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatch); // FIXME: think here if the tau_e -> tau  and tau_mu -> tau should be excluded
+    // Define event as type II if not selected to embedding
+    bool myFakeTauStatus = fFakeTauIdentifier.isEmbeddingGenuineTau(tauMatch);
     // Fill main and subcounter for the selection
     SignalAnalysis::CounterGroup* myCounterGroup = getCounterGroupByTauMatch(tauMatch);
     if (selection == kSignalOrderTauID) {
@@ -1449,8 +1449,8 @@ namespace HPlus {
     // Check status for genuine one prong taus
     if (fFakeTauIdentifier.isGenuineOneProngTau(tauMatch)) {
       SignalAnalysis::CounterGroup* mySpecialGroup = &fGenuineOneProngToTausCounterGroup;
-      if (tauMatch == FakeTauIdentifier::kkOneProngTauToTauAndTauOutsideAcceptance) {
-        mySpecialGroup = &fGenuineOneProngToTausAndTauOutsideAcceptanceCounterGroup;
+      if (tauMatch == FakeTauIdentifier::kkOneProngTauToTauAndTauJetInsideAcceptance) {
+        mySpecialGroup = &fGenuineOneProngToTausAndTauJetInsideAcceptanceCounterGroup;
       }
       if (selection == kSignalOrderTauID) {
         mySpecialGroup->incrementOneTauCounter();
