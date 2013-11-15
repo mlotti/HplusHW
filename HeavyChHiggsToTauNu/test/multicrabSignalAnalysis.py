@@ -48,9 +48,9 @@ if runPatOnTheFly:
 minimalDatasets = True
 #minimalDatasets = False
 
-# For H+ -> tb samples
-#minimalTBDatasets = True
+# Add H+ -> tb samples if minimalDatasets == True
 minimalTBDatasets = False
+#minimalTBDatasets = True
 
 
 # Uncomment below the datasets you want to process
@@ -257,9 +257,7 @@ datasetsMC_2012.extend([
     "HplusTB_M600_Summer12",
     ])
 
-if not minimalDatasets:
-    if minimalTBDatasets:
-        datasetsMC_2012 = []
+if minimalTBDatasets or not minimalDatasets:
     datasetsMC_2012.extend([
     "HplusToTBbar_M180_Summer12",
     "HplusToTBbar_M200_Summer12",
@@ -276,8 +274,7 @@ if not minimalDatasets:
     "HplusToTBbar_M700_Summer12",
     ])
 
-if not minimalTBDatasets:
-    datasetsMC_2012.extend([
+datasetsMC_2012.extend([
     "QCD_Pt30to50_TuneZ2star_Summer12",
     "QCD_Pt50to80_TuneZ2star_Summer12",
     "QCD_Pt80to120_TuneZ2star_Summer12",
