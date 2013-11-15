@@ -116,9 +116,9 @@ namespace HPlus {
   private:
     /// Fill TTree (after delta phi collinear cuts)
     void doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronVetoData, const MuonSelection::Data& muonVetoData, const JetSelection::Data& jetData);
-    void fillSelectionFlowAndCounterGroups(int nVertices, FakeTauIdentifier::Data& tauMatchData, SignalSelectionOrder selection, const TauSelection::Data& tauData);
+    void fillSelectionFlowAndCounterGroups(int nVertices, FakeTauIdentifier::Data& tauMatchData, bool selectedToEWKFakeTauBackgroundStatus, SignalSelectionOrder selection, const TauSelection::Data& tauData);
     CounterGroup* getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
-    void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
+    void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, bool selectedToEWKFakeTauBackgroundStatus, SignalSelectionOrder selection, const TauSelection::Data& tauData);
     void doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData, const METSelection::Data& metData, const GenParticleAnalysis::Data& genData);
     bool selectTailEvents(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData);
 
@@ -325,7 +325,7 @@ namespace HPlus {
 
     WrappedTH1 *hSelectionFlow;
     WrappedTH2 *hSelectionFlowVsVertices;
-    WrappedTH2 *hSelectionFlowVsVerticesFakeTaus;
+    WrappedTH2 *hSelectionFlowVsVerticesEWKFakeTausBkg;
 
     // Histograms for jet flavour tagging efficiency calculation in MC
     // Pseudorapidity (eta)
@@ -422,17 +422,17 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTail;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMass;
 
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelectionFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeightFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVetoFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVetoFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelectionFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBackToBackDeltaPhiFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailFakeTaus;
-    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMassFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelectionEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeightEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVetoEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVetoEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelectionEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBackToBackDeltaPhiEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMassEWKFakeTausBkg;
 
   };
 }

@@ -108,8 +108,6 @@ namespace HPlus {
     static const bool isJetToTau(MCSelectedTauMatchType type) { return (type == kkJetToTau || type == kkJetToTauAndTauJetInsideAcceptance); }
     static const bool isElectronOrMuonFromTauDecay(MCSelectedTauMatchType type) { return (type == kkElectronFromTauDecayToTau || type == kkElectronToTauAndTauJetInsideAcceptance ||
       type == kkMuonFromTauDecayToTau || type == kkMuonFromTauDecayToTauAndTauJetInsideAcceptance); }
-    // For embedding, consider events where selected tau is hadronic tau and there is no second tau LEPTON in acceptance
-    static const bool isEmbeddingGenuineTau(MCSelectedTauMatchType type) { return type == kkTauToTau; }
 
   private:
     Data privateMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau, bool silentMode);

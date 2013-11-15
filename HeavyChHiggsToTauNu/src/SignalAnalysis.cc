@@ -226,17 +226,17 @@ namespace HPlus {
     fCommonPlotsSelected(fCommonPlots.createCommonPlotsFilledAtEveryStep("Selected",true,"Selected")),
     fCommonPlotsSelectedMtTail(fCommonPlots.createCommonPlotsFilledAtEveryStep("SelectedMtTail",false,"SelectedMtTail")),
     fCommonPlotsSelectedFullMass(fCommonPlots.createCommonPlotsFilledAtEveryStep("SelectedFullMass",false,"SelectedFullMass")),
-    fCommonPlotsAfterTauSelectionFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_TauSelection",false,"TauID")),
-    fCommonPlotsAfterTauWeightFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_TauWeight",false,"Tau")),
-    fCommonPlotsAfterElectronVetoFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ElectronVeto",false,"e veto")),
-    fCommonPlotsAfterMuonVetoFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_MuonVeto",false,"#mu veto")),
-    fCommonPlotsAfterJetSelectionFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_JetSelection",false,"#geq3j")),
-    fCommonPlotsAfterMETFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_MET",false,"E_{T}^{miss}")),
-    fCommonPlotsAfterBTaggingFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_BTagging",false,"#geq1b tag")),
-    fCommonPlotsAfterBackToBackDeltaPhiFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_DeltaPhiBackToBack",true,"#Delta#phi b2b")),
-    fCommonPlotsSelectedFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_Selected",false,"Selected")),
-    fCommonPlotsSelectedMtTailFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedMtTail",false,"SelectedMtTail")),
-    fCommonPlotsSelectedFullMassFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedFullMass",false,"FakeTaus_SelectedFullMass"))    
+    fCommonPlotsAfterTauSelectionEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_TauSelection",false,"TauID")),
+    fCommonPlotsAfterTauWeightEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_TauWeight",false,"Tau")),
+    fCommonPlotsAfterElectronVetoEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ElectronVeto",false,"e veto")),
+    fCommonPlotsAfterMuonVetoEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_MuonVeto",false,"#mu veto")),
+    fCommonPlotsAfterJetSelectionEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_JetSelection",false,"#geq3j")),
+    fCommonPlotsAfterMETEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_MET",false,"E_{T}^{miss}")),
+    fCommonPlotsAfterBTaggingEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_BTagging",false,"#geq1b tag")),
+    fCommonPlotsAfterBackToBackDeltaPhiEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_DeltaPhiBackToBack",true,"#Delta#phi b2b")),
+    fCommonPlotsSelectedEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_Selected",false,"Selected")),
+    fCommonPlotsSelectedMtTailEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedMtTail",false,"SelectedMtTail")),
+    fCommonPlotsSelectedFullMassEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedFullMass",false,"FakeTaus_SelectedFullMass"))    
   {
     // Check parameter initialisation
     if (fTopRecoName != "None" && fTopRecoName != "chi" && fTopRecoName != "std" && fTopRecoName != "Wselection" && fTopRecoName != "Bselection") {
@@ -354,7 +354,7 @@ namespace HPlus {
     
     hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 15, 0, 15);
     hSelectionFlowVsVertices = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "SignalSelectionFlowVsVertices", "SignalSelectionFlowVsVertices;N_{vertices};Step", 50, 0, 50, 15, 0, 15);
-    hSelectionFlowVsVerticesFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "SignalSelectionFlowVsVerticesFakeTaus", "SignalSelectionFlowVsVerticesFakeTaus;N_{vertices};Step", 50, 0, 50, 15, 0, 15);
+    hSelectionFlowVsVerticesEWKFakeTausBkg = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "SignalSelectionFlowVsVerticesFakeTaus", "SignalSelectionFlowVsVerticesFakeTaus;N_{vertices};Step", 50, 0, 50, 15, 0, 15);
     if(hSelectionFlow->getHisto()) {
       hSelectionFlow->getHisto()->GetXaxis()->SetBinLabel(1+kSignalOrderTrigger,"Trigger");
       hSelectionFlow->getHisto()->GetXaxis()->SetBinLabel(1+kSignalOrderVertexSelection,"PV selection");
@@ -376,7 +376,7 @@ namespace HPlus {
 
       for (int i = 0; i < 13; ++i) {
         hSelectionFlowVsVertices->getHisto()->GetYaxis()->SetBinLabel(i+1, hSelectionFlow->getHisto()->GetXaxis()->GetBinLabel(i+1));
-        hSelectionFlowVsVerticesFakeTaus->getHisto()->GetYaxis()->SetBinLabel(i+1, hSelectionFlow->getHisto()->GetXaxis()->GetBinLabel(i+1));
+        hSelectionFlowVsVerticesEWKFakeTausBkg->getHisto()->GetYaxis()->SetBinLabel(i+1, hSelectionFlow->getHisto()->GetXaxis()->GetBinLabel(i+1));
       }
     }
 
@@ -522,13 +522,13 @@ namespace HPlus {
 
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
-    bool myFakeTauStatus = !fFakeTauIdentifier.isEmbeddingGenuineTau(tauMatchData.getTauMatchType()); // True if the sample is negation of sample selected for embedding
+    bool mySelectedToEWKFakeTauBackgroundStatus = (tauMatchData.isQCDMeasurementLike() || tauMatchData.isEWKFakeTau());
     fCommonPlotsAfterTauSelection->fill();
     fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauData, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
-    fTree.setTauIsFake(myFakeTauStatus);
-    if (myFakeTauStatus) fCommonPlotsAfterTauSelectionFakeTaus->fill();
+    fTree.setTauIsFake(mySelectedToEWKFakeTauBackgroundStatus);
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterTauSelectionEWKFakeTausBkg->fill();
     // Below "genuine tau" is in the context of embedding (i.e. irrespective of the tau decay)
-    if(fOnlyGenuineTaus && !fFakeTauIdentifier.isEmbeddingGenuineTau(tauMatchData.getTauMatchType())) return false;
+    if (fOnlyGenuineTaus && tauMatchData.isFakeTau()) return false;
     increment(fTausExistCounter);
     // Apply scale factor for fake tau
     if (!iEvent.isRealData())
@@ -548,17 +548,17 @@ namespace HPlus {
     TauTriggerEfficiencyScaleFactor::Data tauTriggerWeight = fTauTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getSelectedTau()), iEvent.isRealData(), fEventWeight);
     fTree.setTauTriggerWeight(tauTriggerWeight.getEventWeight(), tauTriggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fTauTriggerScaleFactorCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderTauID, tauData);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderTauID, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
       copyPtrToVector(tauData.getSelectedTaus(), *saveTaus);
       iEvent.put(saveTaus, "selectedTaus");
     }
     fCommonPlotsAfterTauWeight->fill();
-    if (myFakeTauStatus) fCommonPlotsAfterTauWeightFakeTaus->fill();
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterTauWeightEWKFakeTausBkg->fill();
     fCommonPlots.fillControlPlotsAfterTauTriggerScaleFactor(iEvent);
     //    hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau());  
-    if (!myFakeTauStatus)
+    if (!tauMatchData.isGenuineTau())
       increment(fGenuineTauCounter);
 
     // For plotting Rtau
@@ -591,9 +591,9 @@ namespace HPlus {
     //    NonIsolatedElectronVeto::Data electronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
     fCommonPlotsAfterElectronVeto->fill();
-    if (myFakeTauStatus) fCommonPlotsAfterElectronVetoFakeTaus->fill();
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterElectronVetoEWKFakeTausBkg->fill();
     increment(fElectronVetoCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderElectronVeto, tauData);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderElectronVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Electron> > saveElectrons(new std::vector<pat::Electron>());
       copyPtrToVector(electronVetoData.getSelectedElectronsBeforePtAndEtaCuts(), *saveElectrons);
@@ -606,9 +606,9 @@ namespace HPlus {
     fCommonPlots.fillControlPlotsAtMuonSelection(iEvent, muonVetoData);
     if (!muonVetoData.passedEvent()) return false;
     fCommonPlotsAfterMuonVeto->fill();
-    if (myFakeTauStatus) fCommonPlotsAfterMuonVetoFakeTaus->fill();
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterMuonVetoEWKFakeTausBkg->fill();
     increment(fMuonVetoCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderMuonVeto, tauData);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderMuonVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Muon> > saveMuons(new std::vector<pat::Muon>());
       copyPtrToVector(muonVetoData.getSelectedMuonsBeforePtAndEtaCuts(), *saveMuons);
@@ -636,9 +636,9 @@ namespace HPlus {
 
     if(!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderJetSelection, tauData);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderJetSelection, tauData);
     fCommonPlotsAfterJetSelection->fill();
-    if (myFakeTauStatus) fCommonPlotsAfterJetSelectionFakeTaus->fill();
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterJetSelectionEWKFakeTausBkg->fill();
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveJets(new std::vector<pat::Jet>());
       copyPtrToVector(jetData.getSelectedJets(), *saveJets);
@@ -668,7 +668,7 @@ namespace HPlus {
     fCommonPlots.fillControlPlotsAtCollinearDeltaPhiCuts(iEvent, qcdTailKillerDataCollinear);
     if (!qcdTailKillerDataCollinear.passedCollinearCuts()) return false;
     increment(fQCDTailKillerCollinearCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderDeltaPhiCollinearSelection, tauData);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderDeltaPhiCollinearSelection, tauData);
 
 
 //------ Fill TTree, if it is active
@@ -744,9 +744,9 @@ namespace HPlus {
     if (metData.getPhiCorrectedSelectedMET()->et() > 50.0) fCommonPlotsAfterMETWithPhiOscillationCorrection->fill(); // FIXME: temp
     if(!metData.passedEvent()) return false;
     fCommonPlotsAfterMET->fill();
-    if (myFakeTauStatus) fCommonPlotsAfterMETFakeTaus->fill();
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterMETEWKFakeTausBkg->fill();
     increment(fMETCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderMETSelection, tauData);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderMETSelection, tauData);
 
     // Plot jet matrix
     if (transverseMass > 40 && transverseMass < 100) {
@@ -770,10 +770,10 @@ namespace HPlus {
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingScaleFactorCounter);
     fCommonPlotsAfterBTagging->fill();
-    if (myFakeTauStatus) fCommonPlotsAfterBTaggingFakeTaus->fill();
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterBTaggingEWKFakeTausBkg->fill();
 
    
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderBTagSelection, tauData);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderBTagSelection, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveBJets(new std::vector<pat::Jet>());
       copyPtrToVector(btagData.getSelectedJets(), *saveBJets);
@@ -787,14 +787,14 @@ namespace HPlus {
     fCommonPlots.fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, qcdTailKillerData);
     if (!qcdTailKillerData.passedBackToBackCuts()) return false;
     increment(fQCDTailKillerBackToBackCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderDeltaPhiBackToBackSelection, tauData);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderDeltaPhiBackToBackSelection, tauData);
     fCommonPlotsAfterBackToBackDeltaPhi->fill();
-    if (myFakeTauStatus) fCommonPlotsAfterBackToBackDeltaPhiFakeTaus->fill();
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterBackToBackDeltaPhiEWKFakeTausBkg->fill();
 
 
 //------ Delta phi(tau,MET) after delta phi cuts
     hDeltaPhi->Fill(deltaPhi);
-    if (myFakeTauStatus) hEWKFakeTausDeltaPhi->Fill(deltaPhi);
+    if (mySelectedToEWKFakeTauBackgroundStatus) hEWKFakeTausDeltaPhi->Fill(deltaPhi);
 
 
 //------ Top reconstruction
@@ -803,7 +803,7 @@ namespace HPlus {
     fCommonPlots.fillControlPlotsAtTopSelection(iEvent, topSelectionData);
     if (!(topSelectionData.passedEvent())) return false;
     increment(fTopReconstructionCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderTopSelection, tauData);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderTopSelection, tauData);
 
 
 //------ Calculate alphaT
@@ -814,14 +814,14 @@ namespace HPlus {
 //------ Transverse mass and control plots
     fCommonPlots.fillControlPlotsAfterAllSelections(iEvent, transverseMass);
     increment(fSelectedEventsCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderSelectedEvents, tauData);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderSelectedEvents, tauData);
     if (btagData.hasGenuineBJets()) increment(fSelectedEventsCounterWithGenuineBjets);
     hTransverseMassVsNjets->Fill(transverseMass, jetData.getHadronicJetCount());
     fCommonPlotsSelected->fill();
-    if (myFakeTauStatus) fCommonPlotsSelectedFakeTaus->fill();
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsSelectedEWKFakeTausBkg->fill();
     if (transverseMass > 120) {
       fCommonPlotsSelectedMtTail->fill();
-      if (myFakeTauStatus) fCommonPlotsSelectedMtTailFakeTaus->fill();
+      if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsSelectedMtTailEWKFakeTausBkg->fill();
     }
 
     hSelectedTauRtauAfterCuts->Fill(tauData.getSelectedTauRtauValue());
@@ -830,7 +830,7 @@ namespace HPlus {
 
 
 //------ Syst. uncertainties handling FIXME: to be phased out
-    fSFUncertaintiesAfterSelection.setScaleFactorUncertainties(myFakeTauStatus,
+    fSFUncertaintiesAfterSelection.setScaleFactorUncertainties(mySelectedToEWKFakeTauBackgroundStatus,
                                                             fEventWeight.getWeight(),
                                                             fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
                                                             fFakeTauIdentifier.getFakeTauSystematics(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
@@ -847,9 +847,9 @@ namespace HPlus {
                                                                            embeddingMuonIdData.getEventWeight(),
                                                                            embeddingMuonIdData.getEventWeightAbsoluteUncertainty());
 
-    if (myFakeTauStatus) {
+    if (mySelectedToEWKFakeTauBackgroundStatus) {
       hEWKFakeTausTransverseMassVsNjets->Fill(transverseMass, jetData.getHadronicJetCount());
-      fEWKFakeTausSFUncertaintiesAfterSelection.setScaleFactorUncertainties(myFakeTauStatus,
+      fEWKFakeTausSFUncertaintiesAfterSelection.setScaleFactorUncertainties(mySelectedToEWKFakeTauBackgroundStatus,
                                                                             fEventWeight.getWeight(),
                                                                             fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
                                                                             fFakeTauIdentifier.getFakeTauSystematics(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
@@ -870,9 +870,9 @@ namespace HPlus {
     fCommonPlots.fillControlPlotsAfterAllSelectionsWithFullMass(iEvent, fullHiggsMassData);
     //double myHiggsMass = fullHiggsMassData.getHiggsMass();
     increment(fHiggsMassSelectionCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderSelectedEventsFullMass, tauData);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderSelectedEventsFullMass, tauData);
     fCommonPlotsSelectedFullMass->fill();
-    if (myFakeTauStatus) fCommonPlotsSelectedFullMassFakeTaus->fill();
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsSelectedFullMassEWKFakeTausBkg->fill();
 
 
 //------ Experimental cuts, counters, and histograms
@@ -954,7 +954,7 @@ namespace HPlus {
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
     if (fakeMETData.passedEvent() ) {
       increment(fFakeMETVetoCounter);
-      fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, kSignalOrderFakeMETVeto, tauData);
+      fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderFakeMETVeto, tauData);
       hTransverseMassFakeMetVeto->Fill(transverseMass);
     }
 
@@ -1388,39 +1388,37 @@ namespace HPlus {
     return 0;
   }
 
-  void SignalAnalysis::fillSelectionFlowAndCounterGroups(int nVertices, FakeTauIdentifier::Data& tauMatchData, SignalSelectionOrder selection, const TauSelection::Data& tauData) {
+  void SignalAnalysis::fillSelectionFlowAndCounterGroups(int nVertices, FakeTauIdentifier::Data& tauMatchData, bool selectedToEWKFakeTauBackgroundStatus, SignalSelectionOrder selection, const TauSelection::Data& tauData) {
     hSelectionFlow->Fill(selection);
     hSelectionFlowVsVertices->Fill(nVertices, selection);
     if (tauMatchData.isEmbeddingGenuineTau())
-      hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, selection);
-    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), selection, tauData);
+      hSelectionFlowVsVerticesEWKFakeTausBkg->Fill(nVertices, selection);
+    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), selectedToEWKFakeTauBackgroundStatus, selection, tauData);
   }
 
-  void SignalAnalysis::fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, HPlus::SignalAnalysis::SignalSelectionOrder selection, const HPlus::TauSelection::Data& tauData) {
+  void SignalAnalysis::fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, bool selectedToEWKFakeTauBackgroundStatus, HPlus::SignalAnalysis::SignalSelectionOrder selection, const HPlus::TauSelection::Data& tauData) {
     // Get out if no match has been found
     if (tauMatch == FakeTauIdentifier::kkNoMC) return;
     // Obtain status for main counter
-    // Define event as type II if not selected to embedding
-    bool myFakeTauStatus = fFakeTauIdentifier.isEmbeddingGenuineTau(tauMatch);
     // Fill main and subcounter for the selection
     SignalAnalysis::CounterGroup* myCounterGroup = getCounterGroupByTauMatch(tauMatch);
     if (selection == kSignalOrderTauID) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementOneTauCounter();
+      if (selectedToEWKFakeTauBackgroundStatus) fEWKFakeTausGroup.incrementOneTauCounter();
       myCounterGroup->incrementOneTauCounter();
     } else if (selection == kSignalOrderMETSelection) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementMETCounter();
+      if (selectedToEWKFakeTauBackgroundStatus) fEWKFakeTausGroup.incrementMETCounter();
       myCounterGroup->incrementMETCounter();
     } else if (selection == kSignalOrderElectronVeto) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementElectronVetoCounter();
+      if (selectedToEWKFakeTauBackgroundStatus) fEWKFakeTausGroup.incrementElectronVetoCounter();
       myCounterGroup->incrementElectronVetoCounter();
     } else if (selection == kSignalOrderMuonVeto) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementMuonVetoCounter();
+      if (selectedToEWKFakeTauBackgroundStatus) fEWKFakeTausGroup.incrementMuonVetoCounter();
       myCounterGroup->incrementMuonVetoCounter();
     } else if (selection == kSignalOrderJetSelection) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementNJetsCounter();
+      if (selectedToEWKFakeTauBackgroundStatus) fEWKFakeTausGroup.incrementNJetsCounter();
       myCounterGroup->incrementNJetsCounter();
     } else if (selection == kSignalOrderBTagSelection) {
-      if (myFakeTauStatus) {
+      if (selectedToEWKFakeTauBackgroundStatus) {
         fEWKFakeTausGroup.incrementBTaggingCounter();
         // Fill histograms
         hEWKFakeTausSelectedTauEtAfterCuts->Fill(tauData.getSelectedTau()->pt());
@@ -1428,22 +1426,22 @@ namespace HPlus {
       }
       myCounterGroup->incrementBTaggingCounter();
     } else if (selection == kSignalOrderDeltaPhiBackToBackSelection) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementDeltaPhiBackToBackCounter();
+      if (selectedToEWKFakeTauBackgroundStatus) fEWKFakeTausGroup.incrementDeltaPhiBackToBackCounter();
       myCounterGroup->incrementDeltaPhiBackToBackCounter();
     } else if (selection == kSignalOrderFakeMETVeto) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementFakeMETVetoCounter();
+      if (selectedToEWKFakeTauBackgroundStatus) fEWKFakeTausGroup.incrementFakeMETVetoCounter();
       myCounterGroup->incrementFakeMETVetoCounter();
     } else if (selection == kSignalOrderTopSelection) {
-      //if (myFakeTauStatus) fEWKFakeTausGroup.incrementTopSelectionCounter();
+      //if (selectedToEWKFakeTauBackgroundStatus) fEWKFakeTausGroup.incrementTopSelectionCounter();
       //myCounterGroup->incrementTopSelectionCounter();
     } else if (selection == kSignalOrderDeltaPhiCollinearSelection) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementDeltaPhiCollinearCounter();
+      if (selectedToEWKFakeTauBackgroundStatus) fEWKFakeTausGroup.incrementDeltaPhiCollinearCounter();
       myCounterGroup->incrementDeltaPhiCollinearCounter();
     } else if (selection == kSignalOrderSelectedEvents) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementSelectedEventsCounter();
+      if (selectedToEWKFakeTauBackgroundStatus) fEWKFakeTausGroup.incrementSelectedEventsCounter();
       myCounterGroup->incrementSelectedEventsCounter();
     } else if (selection == kSignalOrderSelectedEventsFullMass) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementSelectedEventsFullMassCounter();
+      if (selectedToEWKFakeTauBackgroundStatus) fEWKFakeTausGroup.incrementSelectedEventsFullMassCounter();
       myCounterGroup->incrementSelectedEventsFullMassCounter();
     }
     // Check status for genuine one prong taus
