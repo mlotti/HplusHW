@@ -230,7 +230,7 @@ fakeTauSFandSystematicsAgainstElectronVTightMVA3 = fakeTauSFandSystematicsBase.c
     systematicsFakeTauEndcapElectron = 0.5,
 )
 # Obtain genuine and fake tau systematics automatically based on tau against electron discriminator
-def setFakeTauSFAndSystematics(fakeTauPSet, tausele):
+def setFakeTauSFAndSystematics(fakeTauPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
     source = "fakeTauSFandSystematics"+tausele.againstElectronDiscriminator.value().replace("against","Against")
     try:
         pset = globals()[source]
@@ -239,7 +239,7 @@ def setFakeTauSFAndSystematics(fakeTauPSet, tausele):
         raise Exception("Error: Could not find fakeTauSFandSystematics for against electron discriminator %s! Options are: %s"%(tauSelection.againstElectronDiscriminator.value(), ", ".join(map(str, myOptionList))))
 
     HChTools.insertPSetContentsTo(pset, fakeTauPSet)
-    print "fakeTauSFandSystematics set to", source
+    print "fakeTauSFandSystematics set to %s for %s" % (source, mod)
 fakeTauSFandSystematics = fakeTauSFandSystematicsBase.clone()
 setFakeTauSFAndSystematics(fakeTauSFandSystematics, tauSelection)
 
@@ -706,17 +706,17 @@ triggerEffPrototype = cms.untracked.PSet(
 )
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
-def setTriggerEfficiencyScaleFactorBasedOnTau(scaleFactorPSet, tausele):
-    print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
+def setTriggerEfficiencyScaleFactorBasedOnTau(scaleFactorPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
+    print "Trigger efficiency / scalefactor set according to tau isolation '%s' and tau against electron discr. '%s' for %s" % (tausele.isolationDiscriminator.value(), tausele.againstElectronDiscriminator.value(), mod)
     tauTriggerEfficiency.setEfficiency(scaleFactorPSet, "byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
     return
     # FIXME
     tauTriggerEfficiency.setEfficiency(scaleFactorPSet, tausele.isolationDiscriminator.value(), tausele.againstElectronDiscriminator.value())
     raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byLooseCombinedIsolationDeltaBetaCorr3Hits', 'byMediumCombinedIsolationDeltaBetaCorr3Hits'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
 # Set trigger efficiency / scale factor for low purity depending on tau selection params
-def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(scaleFactorPSet, tausele):
+def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(scaleFactorPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency # FIXME
-    print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
+    print "Trigger efficiency / scalefactor set according to tau isolation '%s' and tau against electron discr. '%s' for %s" % (tausele.isolationDiscriminator.value(), tausele.againstElectronDiscriminator.value(), mod)
     tauTriggerEfficiency.setEfficiency(scaleFactorPSet, "byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
