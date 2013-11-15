@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+
 configInfo = cms.PSet(
     pileupReweightType = cms.string("UNWEIGHTED"),
     topPtReweightType = cms.string("UNWEIGHTED"),
@@ -228,19 +230,18 @@ fakeTauSFandSystematicsAgainstElectronVTightMVA3 = fakeTauSFandSystematicsBase.c
     systematicsFakeTauEndcapElectron = cms.untracked.double(0.5),
 )
 # Obtain genuine and fake tau systematics automatically based on tau against electron discriminator
-fakeTauSFandSystematics = None
-fakeTauSFandSystematicsSource = "fakeTauSFandSystematics"+tauSelection.againstElectronDiscriminator.value().replace("against","Against")
-if fakeTauSFandSystematicsSource in globals().keys():
-    import sys
-    fakeTauSFandSystematics = getattr(sys.modules[__name__], fakeTauSFandSystematicsSource)
-    print "fakeTauSFandSystematics set to",fakeTauSFandSystematicsSource
-else:
-    myDirList = globals().keys()
-    myOptionList = []
-    for item in myDirList:
-        if "fakeTauSFandSystematics" in item:
-            myOptionList.append(item)
-    raise Exception("Error: Could not find fakeTauSFandSystematics for against electron discriminator %s! Options are: %s"%(tauSelection.againstElectronDiscriminator.value(), ", ".join(map(str, myOptionList))))
+def setFakeTauSFAndSystematics(fakeTauPSet, tausele):
+    source = "fakeTauSFandSystematics"+tausele.againstElectronDiscriminator.value().replace("against","Against")
+    try:
+        pset = globals()[source]
+    except KeyError:
+        myOptionList = filter(lambda item: "fakeTauSFandSystematics" in item, globals().keys())
+        raise Exception("Error: Could not find fakeTauSFandSystematics for against electron discriminator %s! Options are: %s"%(tauSelection.againstElectronDiscriminator.value(), ", ".join(map(str, myOptionList))))
+
+    HChTools.insertPSetContentsTo(pset, fakeTauPSet)
+    print "fakeTauSFandSystematics set to", source
+fakeTauSFandSystematics = fakeTauSFandSystematicsBase.clone()
+setFakeTauSFAndSystematics(fakeTauSFandSystematics, tauSelection)
 
 jetSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),  # PF jets
