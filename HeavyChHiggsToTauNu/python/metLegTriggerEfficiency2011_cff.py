@@ -9,7 +9,7 @@ _prototype = cms.untracked.PSet(
 )
 
 eraRunMap = {
-    "Run2011AB": ["runs_170722_180252"]
+    "Run2011AB": ["runs_160431_180252"]
 }
 
 def getEfficiency():
