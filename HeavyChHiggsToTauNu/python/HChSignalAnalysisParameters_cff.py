@@ -194,40 +194,40 @@ fakeTauSFandSystematicsBase = cms.untracked.PSet(
 )
 
 fakeTauSFandSystematicsAgainstElectronMedium = fakeTauSFandSystematicsBase.clone(
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(0.95),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.75),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.95*0.10),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.75*0.15),
+    scalefactorFakeTauBarrelElectron = 0.95,
+    scalefactorFakeTauEndcapElectron = 0.75,
+    systematicsFakeTauBarrelElectron = 0.95*0.10,
+    systematicsFakeTauEndcapElectron = 0.75*0.15,
 )
 fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(0.85),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.65),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.85*0.2),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.65*0.2),
+    scalefactorFakeTauBarrelElectron = 0.85,
+    scalefactorFakeTauEndcapElectron = 0.65,
+    systematicsFakeTauBarrelElectron = 0.85*0.2,
+    systematicsFakeTauEndcapElectron = 0.65*0.2,
 )
 fakeTauSFandSystematicsAgainstElectronLooseMVA3 = fakeTauSFandSystematicsBase.clone(
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(1.4),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.8),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.3),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.3),
+    scalefactorFakeTauBarrelElectron = 1.4,
+    scalefactorFakeTauEndcapElectron = 0.8,
+    systematicsFakeTauBarrelElectron = 0.3,
+    systematicsFakeTauEndcapElectron = 0.3,
 )
 fakeTauSFandSystematicsAgainstElectronMediumMVA3 = fakeTauSFandSystematicsBase.clone(
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(1.6),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.8),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.3),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.3),
+    scalefactorFakeTauBarrelElectron = 1.6,
+    scalefactorFakeTauEndcapElectron = 0.8,
+    systematicsFakeTauBarrelElectron = 0.3,
+    systematicsFakeTauEndcapElectron = 0.3,
 )
 fakeTauSFandSystematicsAgainstElectronTightMVA3 = fakeTauSFandSystematicsBase.clone(
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(2.0),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(1.2),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.4),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.4),
+    scalefactorFakeTauBarrelElectron = 2.0,
+    scalefactorFakeTauEndcapElectron = 1.2,
+    systematicsFakeTauBarrelElectron = 0.4,
+    systematicsFakeTauEndcapElectron = 0.4,
 )
 fakeTauSFandSystematicsAgainstElectronVTightMVA3 = fakeTauSFandSystematicsBase.clone(
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(2.4),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(1.2),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.5),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.5),
+    scalefactorFakeTauBarrelElectron = 2.4,
+    scalefactorFakeTauEndcapElectron = 1.2,
+    systematicsFakeTauBarrelElectron = 0.5,
+    systematicsFakeTauEndcapElectron = 0.5,
 )
 # Obtain genuine and fake tau systematics automatically based on tau against electron discriminator
 def setFakeTauSFAndSystematics(fakeTauPSet, tausele):
