@@ -505,9 +505,15 @@ class ConfigBuilder:
             )
             process.outpath = cms.EndPath(process.out)
 
+        def runSetter(func):
+            for name in self.getAnalyzerModuleNames():
+                func(getattr(process, name), name)
+        # Set trigger efficiencies
+        runSetter(lambda module, name: param.setTriggerEfficiencyScaleFactorBasedOnTau(module.tauTriggerEfficiencyScaleFactor, module.tauSelection, name))
+        # Set fake tau SF
+        runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
         # Set PU ID src for modules
-        for name in self.getAnalyzerModuleNames():
-            param.setJetPUIdSrc(getattr(process, name).jetSelection, name)
+        runSetter(lambda module, name: param.setJetPUIdSrc(module.jetSelection, name))
 
         # Check number of analyzers
         self._checkNumberOfAnalyzers()

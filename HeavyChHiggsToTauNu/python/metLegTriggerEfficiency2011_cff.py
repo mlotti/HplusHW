@@ -7,7 +7,6 @@ eraRunMap = {
 
 def setEfficiency(pset):
     pset.data = HChTools.getEfficiencyJsonFullPath("met trigger scale factors", "metLegTriggerEfficiency2011", "loose")
-    pset.mcSelect = "Fall11_PU_2011AB"
 
 def getRunsForEra(era):
     try:

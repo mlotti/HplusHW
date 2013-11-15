@@ -14,7 +14,6 @@ eraRunMap = {
 
 def setEfficiency(pset, isolation, againstElectron):
     pset.data = HChTools.getEfficiencyJsonFullPath("tau trigger scale factors", "tauLegTriggerEfficiency2011", "%s_%s" % (isolation, againstElectron))
-    pset.mcSelect = "Fall11_PU_2011AB"
 
 def getRunsForEra(era):
     try:
