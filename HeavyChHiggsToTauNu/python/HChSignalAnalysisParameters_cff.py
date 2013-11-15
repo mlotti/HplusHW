@@ -750,7 +750,7 @@ tauTriggerEfficiencyScaleFactor = triggerEffPrototype.clone()
 setTauTriggerEfficiencyScaleFactorBasedOnTau(tauTriggerEfficiency, tauSelection)
 
 metTriggerEfficiencyScaleFactor = triggerEffPrototype.clone()
-metTriggerEfficiencyScaleFactor = setMetTriggerEfficiencyScaleFactorBasedOnTau(metTriggerEfficiency, tauSelection)
+setMetTriggerEfficiencyScaleFactorBasedOnTau(metTriggerEfficiency, tauSelection)
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency2012_cff as muonTriggerIDEfficiency

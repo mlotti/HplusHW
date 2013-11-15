@@ -4,17 +4,8 @@
 import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 
-_prototype = cms.untracked.PSet(
-    data = cms.FileInPath("NOT_YET_SET"),
-    dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABCD"),
-    mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
-)
-
-def getEfficiency(isolation, againstMuon, againstElectron):
-    return _prototype.clone(
-        data = HChTools.getEfficiencyJsonFullPath("tau trigger scale factors (low purity)", "tauLegTriggerEfficiency2012lowPurity", "%s_%s_%s" % (isolation, againstMuon, againstElectron))
-     )
+def setEfficiency(pset, isolation, againstMuon, againstElectron):
+    pset.data = HChTools.getEfficiencyJsonFullPath("tau trigger scale factors (low purity)", "tauLegTriggerEfficiency2012lowPurity", "%s_%s_%s" % (isolation, againstMuon, againstElectron))
 
 ## Below are legacy definitions (although the same files are still in use)
 

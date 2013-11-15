@@ -4,13 +4,6 @@
 import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 
-_prototype = cms.untracked.PSet(
-    data = cms.FileInPath("NOT_YET_SET"),
-    dataSelect = cms.vstring(),
-    mcSelect = cms.string("Summer12_PU_2012ABCD"),
-    mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
-)
-
 eraRunMap = {
     "Run2012A": ["runs_190456_193621"],
     "Run2012B": ["runs_193834_196531"],
@@ -22,10 +15,8 @@ eraRunMap = {
     "Run2012ABCD": ["runs_190456_208686"],
 }
 
-def getEfficiency(isolation, againstMuon, againstElectron):
-    return _prototype.clone(
-        data = HChTools.getEfficiencyJsonFullPath("tau trigger scale factors", "tauLegTriggerEfficiency2012", "%s_%s_%s" % (isolation, againstMuon, againstElectron))
-     )
+def setEfficiency(pset, isolation, againstMuon, againstElectron):
+    pset.data = HChTools.getEfficiencyJsonFullPath("tau trigger scale factors", "tauLegTriggerEfficiency2012", "%s_%s_%s" % (isolation, againstMuon, againstElectron))
 
 def getRunsForEra(era):
     try:
