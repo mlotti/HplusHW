@@ -301,6 +301,9 @@ namespace HPlus {
     // Shapes for closure test systematics for data-driven control plots are done via the extra Common plots objects
     fNormalizationSystematicsSignalRegion.disableCommonPlotsFilledAtEveryStep();
     fNormalizationSystematicsControlRegion.disableCommonPlotsFilledAtEveryStep();
+    // Print info about number of booked histograms
+    std::cout << iConfig.getParameter<std::string>("@module_label") << std::endl;
+    fHistoWrapper.printHistoStatistics();
   }
 
   SignalAnalysisInvertedTau::~SignalAnalysisInvertedTau() { }
