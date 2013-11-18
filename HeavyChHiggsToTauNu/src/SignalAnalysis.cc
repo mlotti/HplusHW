@@ -740,7 +740,7 @@ namespace HPlus {
     BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
     TopSelectionManager::Data topSelectionData = fTopSelectionManager.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
     fCommonPlots.fillControlPlotsAtTopSelection(iEvent, topSelectionData);
-    //    if (!(topSelectionData.passedEvent())) return false;
+    if (!(topSelectionData.passedEvent())) return false;
     increment(fTopReconstructionCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderTopSelection, tauData);
 
