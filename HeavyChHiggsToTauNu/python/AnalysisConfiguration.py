@@ -88,6 +88,8 @@ class ConfigBuilder:
 
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
+                 doTauIDandMisIDSystematicsAsShapes = False, # If systematic variations are produced, variations are produced also for misidentified tau systematics
+                 doAsymmetricTriggerUncertainties = False, # If true, will vary the efficiency uncertainties instead of the scale factor uncertainty
                  doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
@@ -137,6 +139,8 @@ class ConfigBuilder:
 
         self.pickEvents = pickEvents
         self.doSystematics = doSystematics
+        self.doTauIDandMisIDSystematicsAsShapes = doTauIDandMisIDSystematicsAsShapes
+        self.doAsymmetricTriggerUncertainties = doAsymmetricTriggerUncertainties
         self.doJESVariation = doJESVariation
         self.doPUWeightVariation = doPUWeightVariation
         self.doTopPtWeightVariation = doTopPtWeightVariation
@@ -476,6 +480,7 @@ class ConfigBuilder:
 
         ## Systematics
         #if "QCDMeasurement" not in analysisNames_: # Need also for QCD measurements, since they contain MC EWK
+        self._buildTauIDandMisIdVariation(process, analysisNamesForSystematics, param)
         self._buildJESVariation(process, analysisNamesForSystematics)
         self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
         self._buildTopPtWeightVariation(process, analysisNamesForSystematics)
@@ -499,9 +504,15 @@ class ConfigBuilder:
             )
             process.outpath = cms.EndPath(process.out)
 
+        def runSetter(func):
+            for name in self.getAnalyzerModuleNames():
+                func(getattr(process, name), name)
+        # Set trigger efficiencies
+        runSetter(lambda module, name: param.setTriggerEfficiencyScaleFactorBasedOnTau(module.tauTriggerEfficiencyScaleFactor, module.tauSelection, name))
+        # Set fake tau SF
+        runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
         # Set PU ID src for modules
-        for name in self.getAnalyzerModuleNames():
-            param.setJetPUIdSrc(getattr(process, name).jetSelection, name)
+        runSetter(lambda module, name: param.setJetPUIdSrc(module.jetSelection, name))
 
         # Check number of analyzers
         self._checkNumberOfAnalyzers()
@@ -1020,6 +1031,60 @@ class ConfigBuilder:
         mod.histogramAmbientLevel = self.histogramAmbientLevelSystematics
         return mod
 
+    ## Build tau ID and mis-ID variation
+    #
+    # \param process                      cms.Process object
+    # \param analysisNamesForSystematics  Names of the analysis modules for which the JES variation should be done
+    # \param param     HChSignalAnalysisParameters_cff module object
+    def _buildTauIDandMisIdVariation(self, process, analysisNamesForSystematics, param):
+        #if not (self.doTauIDandMisIDSystematicsAsShapes or self.doSystematics):
+        if not (self.doTauIDandMisIDSystematicsAsShapes): # FIXME: for now, do not run as part of systematics unless explicitly asked
+            return
+        if self.dataVersion.isMC():
+            timer = Timer()
+            for name in analysisNamesForSystematics:
+                self._addTauIDandMisIdVariation(process, name)
+            timer.stop("Added tau ID and mis-ID variation for %d modules in"%len(analysisNamesForSystematics))
+        else:
+            print "Tau ID and mis-ID variation disabled for data (not meaningful for data)"
+
+    ## Add tau ID and mis-ID variation
+    #
+    # \param process                    cms.Process object
+    # \param name                       Name of the module to be used as a prototype
+    def _addTauIDandMisIdVariation(self, process, name):
+        def addVariation(direction, directionName, affectedItems):
+            module = self._cloneForVariation(getattr(process, name))
+            for item in affectedItems:
+                sfValue = getattr(module.fakeTauSFandSystematics, "scalefactor"+item)
+                systValue = getattr(module.fakeTauSFandSystematics, "systematics"+item)
+                newSfValue = sfValue.value() + systValue.value()
+                if direction < 0:
+                    newSfValue = sfValue.value() - systValue.value()
+                setattr(module.fakeTauSFandSystematics, "scalefactor"+item, newSfValue)
+            return self._addVariationModule(process, module, name+self.systPrefix+directionName)
+
+        names = []
+        # Add genuine tau ID systematics
+        names.append(addVariation(+1, "GenuineTauPlus",  ["GenuineTauBarrel","GenuineTauEndcap"]))
+        names.append(addVariation(-1, "GenuineTauMinus", ["GenuineTauBarrel","GenuineTauEndcap"]))
+        # Do not add fake tau mis-ID systematics for embedding
+        if self.options.tauEmbeddingInput == 0:
+            # Add e->tau systematics for barrel
+            names.append(addVariation(+1, "FakeTauBarrelElectronPlus",  ["FakeTauBarrelElectron"]))
+            names.append(addVariation(-1, "FakeTauBarrelElectronMinus", ["FakeTauBarrelElectron"]))
+            # Add e->tau systematics for endcap
+            names.append(addVariation(+1, "FakeTauEndcapElectronPlus",  ["FakeTauEndcapElectron"]))
+            names.append(addVariation(-1, "FakeTauEndcapElectronMinus", ["FakeTauEndcapElectron"]))
+            # Add e->tau systematics
+            names.append(addVariation(+1, "FakeTauMuonPlus",  ["FakeTauBarrelMuon","FakeTauEndcapMuon"]))
+            names.append(addVariation(-1, "FakeTauMuonMinus", ["FakeTauBarrelMuon","FakeTauEndcapMuon"]))
+            # Add jet->tau systematics
+            names.append(addVariation(+1, "FakeTauJetPlus",  ["FakeTauBarrelJet","FakeTauEndcapJet"]))
+            names.append(addVariation(-1, "FakeTauJetMinus", ["FakeTauBarrelJet","FakeTauEndcapJet"]))
+        # Accumulate
+        self._accumulateAnalyzers("Fake tau variation", names)
+
     ## Build JES variation
     #
     # \param process                      cms.Process object
@@ -1208,9 +1273,6 @@ class ConfigBuilder:
     # \param process   cms.Process object
     # \param name      Name of the module to be used as a prototype
     def _addScaleFactorVariation(self, process, name):
-        #useAsymmetricUncertainties = True
-        useAsymmetricUncertainties = False
-
         embeddingData = self.options.tauEmbeddingInput != 0 and self.dataVersion.isData()
 
         def disablePrint(pset):
@@ -1283,7 +1345,7 @@ class ConfigBuilder:
                 names.append(addTauTrgDataEff( 1.0, "Plus"))
                 names.append(addTauTrgDataEff(-1.0, "Minus"))
             else:
-                if useAsymmetricUncertainties:
+                if self.doAsymmetricTriggerUncertainties:
                     names.append(addTauTrgDataEff( 1.0, "Plus"))
                     names.append(addTauTrgDataEff(-1.0, "Minus"))
                     names.append(addTauTrgMCEff( 1.0, "Plus"))
@@ -1298,7 +1360,7 @@ class ConfigBuilder:
                 names.append(addMETTrgDataEff( 1.0, "Plus"))
                 names.append(addMETTrgDataEff(-1.0, "Minus"))
             else:
-                if useAsymmetricUncertainties:
+                if self.doAsymmetricTriggerUncertainties:
                     names.append(addMETTrgDataEff( 1.0, "Plus"))
                     names.append(addMETTrgDataEff(-1.0, "Minus"))
                     names.append(addMETTrgMCEff( 1.0, "Plus"))

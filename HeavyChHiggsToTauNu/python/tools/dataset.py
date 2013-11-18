@@ -3490,6 +3490,8 @@ class DatasetManagerCreator:
             # Look for systematic variation
             start = directoryName.find("SystVar")
             if start >= 0:
+                if "SelectedTauForVariation" in directoryName[start:]:
+                    continue
                 systematicVariations[directoryName[start:]] = 1
                 directoryName = directoryName[:start]
 
