@@ -985,7 +985,7 @@ class ConfigBuilder:
                 mod = mod.clone()
                 mod.trigger.caloMetSelection.metEmulationCut = 60.0
             else:
-                postfix = "MetEff"
+                postfix += "MetEff"
                 mod = mod.clone()
                 mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
             if not disableIntermediateAnalyzers:
