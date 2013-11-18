@@ -22,6 +22,7 @@ from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -151,9 +152,9 @@ if __name__ == "__main__":
 
     configInfoAdded = False
 
-    for searchMode in datasetCreator.getSearchModes()
+    for searchMode in datasetCreator.getSearchModes():
         for era in eras:
-            for optMode in datasetCreator.getOptimizationModes()
+            for optMode in datasetCreator.getOptimizationModes():
                 for systVar in [None]+datasetCreator.getSystematicVariations():
                     f.write("Analysis %s, searchMode %s, dataEra %s, optimizationMode %s, systematicVariation %s\n" % (analysisName, searchMode, era, optMode, systVar))
                     dsetMgr = datasetCreator.createDatasetManager(analysisName=analysisName, searchMode=searchMode,
