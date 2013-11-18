@@ -545,6 +545,11 @@ bjetSelection = cms.untracked.PSet(
   oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng") 
 )
 
+MCAnalysisOfSelectedEvents = cms.untracked.PSet(
+  src = cms.untracked.InputTag("genParticles"),
+  oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
+  oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng") 
+)
 
 
 topChiSelection = cms.untracked.PSet(

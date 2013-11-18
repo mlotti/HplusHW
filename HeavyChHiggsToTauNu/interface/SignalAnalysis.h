@@ -22,6 +22,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MCAnalysisOfSelectedEvents.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
@@ -72,7 +73,9 @@ namespace HPlus {
       void incrementDeltaPhiBackToBackCounter() { increment(fDeltaPhiBackToBackCounter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
       void incrementSelectedEventsCounter() { increment(fSelectedEventsCounter); }
-      void incrementSelectedEventsFullMassCounter() { increment(fSelectedEventsFullMassCounter); }
+      void incrementSelectedEventsFullMassCounter() { increment(fSelectedEventsFullMassCounter);}
+
+
 
     private:
       Count fOneTauCounter;
@@ -86,6 +89,7 @@ namespace HPlus {
       Count fSelectedEventsCounter;
       Count fSelectedEventsFullMassCounter;
       Count fFakeMETVetoCounter;
+
     };
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
@@ -170,47 +174,7 @@ namespace HPlus {
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
 
-    Count fElectronNotInTauCounter;
-    Count fElectronNotInTauFromWCounter;
-    Count fElectronNotInTauFromBottomCounter;
-    Count fElectronNotInTauFromTauCounter;
 
-    Count fMuonNotInTauCounter;
-    Count fMuonNotInTauFromWCounter;
-    Count fMuonNotInTauFromBottomCounter;
-    Count fMuonNotInTauFromTauCounter;
-
-    Count fTauNotInTauCounter;
-    Count fTauNotInTauFromWCounter;
-    Count fTauNotInTauFromBottomCounter;
-    Count fTauNotInTauFromHplusCounter;
-
-    Count fObservableMuonsCounter;
-    Count fObservableElectronsCounter;
-    Count fObservableTausCounter;
-
-    Count fTauIsHadronFromHplusCounter;
-    Count fTauIsElectronFromHplusCounter;
-    Count fTauIsMuonFromHplusCounter;
-    Count fTauIsQuarkFromWCounter;
-    Count fTauIsQuarkFromZCounter;
-    Count fTauIsElectronFromWCounter;
-    Count fTauIsElectronFromZCounter;
-    Count fTauIsMuonFromWCounter;
-    Count fTauIsHadronFromWTauCounter;
-    Count fTauIsElectronFromWTauCounter;
-    Count fTauIsMuonFromWTauCounter;
-    Count fTauIsMuonFromZCounter;
-    Count fTauIsHadronFromZTauCounter;
-    Count fTauIsElectronFromZTauCounter;
-    Count fTauIsMuonFromZTauCounter;
-    Count fTauIsElectronFromBottomCounter;
-    Count fTauIsMuonFromBottomCounter;
-    Count fTauIsHadronFromBottomCounter;
-    Count fTauIsElectronFromJetCounter;
-    Count fTauIsMuonFromJetCounter;
-    Count fTauIsHadronFromJetCounter;
-    
     Count fSelectedEventsCounterWithGenuineBjets;
 
     TriggerSelection fTriggerSelection;
@@ -226,6 +190,7 @@ namespace HPlus {
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
     BjetSelection fBjetSelection;
+    MCAnalysisOfSelectedEvents fMCAnalysisOfSelectedEvents;
     //    BjetWithPtSelection fBjetWithPtSelection;
     TopSelectionManager fTopSelectionManager;
     FullHiggsMassCalculator fFullHiggsMassCalculator;
@@ -262,25 +227,7 @@ namespace HPlus {
     WrappedTH1 *hVerticesBeforeWeight;
     WrappedTH1 *hVerticesAfterWeight;
 
-    // MCAnalysis histograms
-    WrappedTH1 *hgenWmass;
-    WrappedTH1 *hGenMET;
-    WrappedTH1 *hdeltaPhiMetGenMet;
-    WrappedTH1 *hdeltaEtMetGenMet;
-    WrappedTH1 *htransverseMassMuonNotInTau;
-    WrappedTH1 *htransverseMassElectronNotInTau;
-    WrappedTH1 *htransverseMassTauNotInTau;
-    WrappedTH1 *htransverseMassMetReso02;
-    WrappedTH1 *htransverseMassLeptonNotInTau;
-    WrappedTH1 *htransverseMassNoLeptonNotInTau;
-    WrappedTH1 *htransverseMassNoLeptonGoodMet;
-    WrappedTH1 *htransverseMassNoLeptonGoodMetGoodTau;
-    WrappedTH1 *htransverseMassLeptonRealSignalTau;
-    WrappedTH1 *htransverseMassLeptonFakeSignalTau;
-    WrappedTH1 *htransverseMassNoObservableLeptons;
-    WrappedTH1 *htransverseMassObservableLeptons;
 
-    // Transverse mass histogram
     
 
     // Transverse mass for top algorithms
