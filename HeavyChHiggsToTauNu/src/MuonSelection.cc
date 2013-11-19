@@ -56,7 +56,7 @@ namespace HPlus {
 
   {
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("MuonSelection");
+    TFileDirectory myDir = histoWrapper.mkdir(HistoWrapper::kInformative, *fs, "MuonSelection");
     
     hTightMuonEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightMuonEta", "TightMuonEta;Tight muon #eta;N_{muons} / 0.1", 60, -3., 3.);
     hTightMuonPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightMuonPt", "TightMuonPt;Tight muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);

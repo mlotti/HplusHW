@@ -59,6 +59,13 @@ namespace HPlus {
     WrappedUnfoldedFactorisationHisto* makeTH(const int unfoldedBinCount, HistoLevel level, TFileDirectory& fd, const Arg1& a1, const Arg2& a2, const Arg3& a3,
                                               const Arg4& a4, const Arg5& a5);
 
+    // Create directory if level is high enough
+    TFileDirectory mkdir(HistoLevel level, TFileDirectory& parent, const std::string& name) {
+      if(isActive(level))
+        return parent.mkdir(name);
+      return parent;
+    }
+
     /// Returns the event weight
     double getWeight() const { return fEventWeight.getWeight(); }
 
