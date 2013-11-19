@@ -59,7 +59,7 @@ def swap(list,n1,n2):
     list[n1] = list[n2]
     list[n2] = tmp
 
-def addConfigInfo(of, dataset):
+def addConfigInfo(of, dataset, addLuminosity=True, dataVersionPostfix="", additionalText={}):
     d = of.mkdir("configInfo")
     d.cd()
 
@@ -72,12 +72,12 @@ def addConfigInfo(of, dataset):
         configinfo.SetBinContent(bin, value)
 
     setValue(1, "control", 1)
+    setValue(2, "energy", float(dataset.getEnergy()))
     if dataset.isData():
-        setValue(2, "luminosity", dataset.getLuminosity())
-        setValue(3, "isData", 1)
+        if addLuminosity:
+            setValue(3, "luminosity", dataset.getLuminosity())
     elif dataset.isMC():
-        setValue(2, "crossSection", 1.0)
-        setValue(3, "isData", 0)
+        setValue(3, "crossSection", 1.0)
 
     configinfo.Write()
     configinfo.Delete()
@@ -87,7 +87,7 @@ def addConfigInfo(of, dataset):
     if dataset.isData():
         ds = dataset.datasets[0]
 
-    dataVersion = ROOT.TNamed("dataVersion", ds.dataVersion)
+    dataVersion = ROOT.TNamed("dataVersion", ds.dataVersion+dataVersionPostfix)
     dataVersion.Write()
     dataVersion.Delete()
 
@@ -95,6 +95,11 @@ def addConfigInfo(of, dataset):
     codeVersion = ROOT.TNamed("codeVersion", git.getCommitId())
     codeVersion.Write()
     codeVersion.Delete()
+
+    for name, content in additionalText.iteritems():
+        txt = ROOT.TNamed(name, content)
+        txt.Write()
+        txt.Delete()
 
     of.cd()
 

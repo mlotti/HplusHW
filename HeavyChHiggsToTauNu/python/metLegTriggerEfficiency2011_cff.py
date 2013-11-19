@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 
 eraRunMap = {
-    "Run2011AB": ["runs_170722_180252"]
+    "Run2011AB": ["runs_160431_180252"]
 }
 
 def setEfficiency(pset):

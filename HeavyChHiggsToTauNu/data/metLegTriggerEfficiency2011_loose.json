@@ -11,8 +11,8 @@
   "_input"      : "multicrab_MetLeg2011_130806_111553",
   "dataParameters": {
       "era":"2011AB",
-      "runs_170722_180252": {
-          "firstRun"  :170722,
+      "runs_160431_180252": {
+          "firstRun"  :160431,
           "lastRun"   :180252,
           "luminosity": 5094.834,
           "bins" : [

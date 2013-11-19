@@ -330,7 +330,7 @@ namespace HPlus {
     std::string fModuleLabel;
 
     bool fProduce;
-    bool fOnlyGenuineTaus; 
+    bool fOnlyEmbeddingGenuineTaus;
     
     // FIXME move these to common plots
     WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode0;

@@ -4,6 +4,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChSignalAnalysisParameters
 import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
+import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2011_cff as metTriggerEfficiency
+
 PF2PATVersion = "" # empty for standard PAT
 #PF2PATVersion = "PFlow"
 #PF2PATVersion = "PFlowChs"
@@ -33,9 +36,15 @@ generatorTauPt = 40
 #generatorTauPt = 41
 generatorTauSelection = "abs(pdgId()) == 15 && pt() > %d && abs(eta()) < 2.1 && abs(mother().pdgId()) != 15"
 
-def customiseParamForTauEmbedding(param, options, dataVersion):
+def customiseParamForTauEmbedding(process, param, options, dataVersion):
     # Enable generator weight
     param.embeddingGeneratorWeightReader.enabled = True
+
+    # Fix top-pt weighting
+    if hasattr(process, "initSubset"):
+        process.initSubset.src.setProcessName("HLT")
+        process.decaySubset.src.setProcessName("HLT")
+
 
     # Change the triggers to muon
     param.trigger.triggers = [
@@ -52,14 +61,13 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     if len(tauTrigger) == 0:
         tauTrigger = "HLT_IsoPFTau35_Trk20_EPS"
 
-    # FIXME: this will not quite work in 2012
     param.trigger.selectionType = "disabled"
     param.tauTriggerEfficiencyScaleFactor.mode = "disabled"
     param.metTriggerEfficiencyScaleFactor.mode = "disabled"
     # For data, we have "select" all run periods for tau+MET trigger efficiency
     if dataVersion.isData():
-        param.tauTriggerEfficiencyScaleFactor.dataSelect = param.tauTriggerEfficiencyScaleFactor.dataParameters.parameterNames_()
-        param.metTriggerEfficiencyScaleFactor.dataSelect = param.metTriggerEfficiencyScaleFactor.dataParameters.parameterNames_()
+        param.tauTriggerEfficiencyScaleFactor.dataSelect = tauTriggerEfficiency.getRunsForEra("Run2011AB")
+        param.metTriggerEfficiencyScaleFactor.dataSelect = metTriggerEfficiency.getRunsForEra("Run2011AB")
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
@@ -482,6 +490,7 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
         tauSrc = tauEmbeddingMuons,
         histogramAmbientLevel = "Systematics",
     )
+    m2.eventCounter.enabled = cms.untracked.bool(False)
     m2.jetSelection.src.setProcessName(skimProcessName) # FIXME: use smeared collection for MC
     m2.jetSelection.jetPileUpMVAValues.setProcessName(skimProcessName)
     m2.jetSelection.jetPileUpIdFlag.setProcessName(skimProcessName)
@@ -503,8 +512,10 @@ def addMuonVeto(process, sequence, param, prefix="muonSelectionMuonVeto"):
 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as muonVetoFilter_cfi
     m1 = muonVetoFilter_cfi.hPlusGlobalMuonVetoFilter.clone(
-        vertexSrc = "firstPrimaryVertex"
+        vertexSrc = "firstPrimaryVertex",
+        histogramAmbientLevel = "Systematics"
     )
+    m1.eventCounter.enabled = cms.untracked.bool(False)
     m1.MuonSelection.MuonCollectionName = "selectedPatMuonsEmbeddingMuonCleaned"
     m2 = cms.EDProducer("EventCountProducer")
 
@@ -520,7 +531,10 @@ def addElectronVeto(process, sequence, param, prefix="muonSelectionElectronVeto"
     counter = prefix
 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as electronVetoFilter_cfi
-    m1 = electronVetoFilter_cfi.hPlusGlobalElectronVetoFilter.clone()
+    m1 = electronVetoFilter_cfi.hPlusGlobalElectronVetoFilter.clone(
+        histogramAmbientLevel = "Systematics"
+    )
+    m1.eventCounter.enabled = cms.untracked.bool(False)
     m1.vertexSrc = m1.vertexSrc.value()+"Original"
     m2 = cms.EDProducer("EventCountProducer")
 
@@ -874,6 +888,7 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
     if pileupWeight == None:
         puModule = cms.EDProducer("HPlusVertexWeightProducer",
             alias = cms.string("pileupWeight"),
+            histogramAmbientLevel = cms.untracked.string("Systematics")
         )
         HChTools.insertPSetContentsTo(param.vertexWeight.clone(), puModule)
         pileupWeight = prefix+"PileupWeight"
@@ -930,6 +945,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     if pileupWeight == None:
         puModule = cms.EDProducer("HPlusVertexWeightProducer",
             alias = cms.string("pileupWeight"),
+            histogramAmbientLevel = cms.untracked.string("Systematics")
         )
         HChTools.insertPSetContentsTo(param.vertexWeight.clone(), puModule)
         pileupWeight = prefix+"PileupWeight"
@@ -1048,7 +1064,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     if not selectOnlyFirstGenTau:
         # Select the tau candidate which is most likely going to pass the identification
         genTauSelected = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
-            eventCounter = param.eventCounter.clone(),
+            eventCounter = param.eventCounter.clone(enabled = cms.untracked.bool(False)),
             tauSelection = param.tauSelection.clone(),
             vertexSrc = cms.InputTag(param.primaryVertexSelection.selectedSrc.value()),
             histogramAmbientLevel = cms.untracked.string("Systematics"),
@@ -1099,11 +1115,13 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     eveto = ElectronVeto.hPlusGlobalElectronVetoFilter.clone(
         histogramAmbientLevel = "Systematics"
     )
+    eveto.eventCounter.enabled = cms.untracked.bool(False)
     evetoCount = counterPrototype.clone()
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as MuonVeto
     muveto = MuonVeto.hPlusGlobalMuonVetoFilter.clone(
         histogramAmbientLevel = "Systematics"
     )
+    muveto.eventCounter.enabled = cms.untracked.bool(False)
     muvetoCount = counterPrototype.clone()
     setattr(process, prefix+"ElectronVeto", eveto)
     setattr(process, prefix+"ElectronVetoCount", evetoCount)
@@ -1138,6 +1156,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
         allowEmptyTau = True,
         histogramAmbientLevel = "Systematics",
     )
+    cleanedJets.eventCounter.enabled = cms.untracked.bool(False)
     cleanedJetsName = prefix+"CleanedJets"
     setattr(process, cleanedJetsName, cleanedJets)
 
