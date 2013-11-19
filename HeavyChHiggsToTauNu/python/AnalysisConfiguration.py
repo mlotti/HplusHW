@@ -917,7 +917,7 @@ class ConfigBuilder:
 
             # Require genuine tau after tau ID in analysis
             mod = module.clone()
-            module.onlyGenuineTaus = cms.untracked.bool(True)
+            mod.onlyEmbeddingGenuineTaus = cms.untracked.bool(True)
             modName = makeName(name, "GenuineTau")
             setattr(process, modName, mod)
             path = cms.Path(process.commonSequence * mod)

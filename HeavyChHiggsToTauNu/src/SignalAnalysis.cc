@@ -169,7 +169,7 @@ namespace HPlus {
     fJetToTausAndTauJetInsideAcceptanceCounterGroup(eventCounter, "jet->tau with tau jet inside acceptance"),
     fModuleLabel(iConfig.getParameter<std::string>("@module_label")),
     fProduce(iConfig.getUntrackedParameter<bool>("produceCollections", false)),
-    fOnlyGenuineTaus(iConfig.getUntrackedParameter<bool>("onlyGenuineTaus", false)),
+    fOnlyEmbeddingGenuineTaus(iConfig.getUntrackedParameter<bool>("onlyEmbeddingGenuineTaus", false)),
     // Common plots
     fCommonPlots(iConfig.getUntrackedParameter<edm::ParameterSet>("commonPlotsSettings"), eventCounter, fHistoWrapper, CommonPlots::kSignalAnalysis, bTauEmbeddingStatus),
     fCommonPlotsAfterVertexSelection(fCommonPlots.createCommonPlotsFilledAtEveryStep("VertexSelection",false,"Vtx")),
@@ -457,7 +457,7 @@ namespace HPlus {
     fTree.setTauIsFake(mySelectedToEWKFakeTauBackgroundStatus);
     if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterTauSelectionEWKFakeTausBkg->fill();
     // Below "genuine tau" is in the context of embedding (i.e. irrespective of the tau decay)
-    if (fOnlyGenuineTaus && tauMatchData.isFakeTau()) return false;
+    if (fOnlyEmbeddingGenuineTaus && !tauMatchData.isEmbeddingGenuineTau()) return false;
     increment(fTausExistCounter);
     // Apply scale factor for fake tau
     if (!iEvent.isRealData())
