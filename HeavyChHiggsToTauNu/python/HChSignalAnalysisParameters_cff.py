@@ -731,7 +731,6 @@ triggerEffPrototype = cms.untracked.PSet(
     variationEnabled = cms.bool(False),
     useMaxUncertainty = cms.bool(True),
 )
-
 def _setTriggerEfficiencyScaleFactorBasedOnTau(scaleFactorPSet, tausele, triggerEfficiency, leg, mod, midfix=""):
     myString = "%s_%s_%s" % (tausele.isolationDiscriminator.value(),tausele.againstMuonDiscriminator.value(),tausele.againstElectronDiscriminator.value())
     triggerEfficiency.setEfficiency(scaleFactorPSet, tausele.isolationDiscriminator.value(), tausele.againstMuonDiscriminator.value(), tausele.againstElectronDiscriminator.value())
@@ -814,7 +813,7 @@ def _setTriggerEfficiencyForEraMC(dataVersion, era, pset):
     elif dataVersion.isHighPU():
         pset.mode = "disabled"
     else:
-            raise Exception("MC trigger efficencies are available only for Summer11, Fall11 and Summer12")
+        raise Exception("MC trigger efficencies are available only for Summer11, Fall11 and Summer12")
 
 def setTauTriggerEfficiencyForEra(dataVersion, era, pset):
     if dataVersion.isMC():

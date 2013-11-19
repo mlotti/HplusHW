@@ -4,8 +4,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChSignalAnalysisParameters
 import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
-import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2011_cff as metTriggerEfficiency
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2012_cff as tauTriggerEfficiency
+import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2012_cff as metTriggerEfficiency
 
 PF2PATVersion = "" # empty for standard PAT
 #PF2PATVersion = "PFlow"
@@ -40,6 +40,9 @@ def customiseParamForTauEmbedding(process, param, options, dataVersion):
     # Enable generator weight
     param.embeddingGeneratorWeightReader.enabled = True
 
+    # Override TriggerResults process name for MET noise filters
+    param.metFilters.triggerResultsSrc.setProcessName(skimProcessName)
+
     # Fix top-pt weighting
     if hasattr(process, "initSubset"):
         process.initSubset.src.setProcessName("HLT")
@@ -66,8 +69,8 @@ def customiseParamForTauEmbedding(process, param, options, dataVersion):
     param.metTriggerEfficiencyScaleFactor.mode = "disabled"
     # For data, we have "select" all run periods for tau+MET trigger efficiency
     if dataVersion.isData():
-        param.tauTriggerEfficiencyScaleFactor.dataSelect = tauTriggerEfficiency.getRunsForEra("Run2011AB")
-        param.metTriggerEfficiencyScaleFactor.dataSelect = metTriggerEfficiency.getRunsForEra("Run2011AB")
+        param.tauTriggerEfficiencyScaleFactor.dataSelect = tauTriggerEfficiency.getRunsForEra("Run2012ABCD")
+        param.metTriggerEfficiencyScaleFactor.dataSelect = metTriggerEfficiency.getRunsForEra("Run2012ABCD")
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
@@ -809,7 +812,8 @@ def addTauEmbeddingMuonTausUsingVisible(process, prefix = "tauEmbeddingGenTauVis
 
     m = cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
 #        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
-        src = cms.InputTag("selectedPatTausHpsPFTau", "", "EMBEDDING"),
+#        src = cms.InputTag("selectedPatTausHpsPFTau", "", "EMBEDDING"), # 2011
+        src = cms.InputTag("selectedPatTaus", "", "EMBEDDING"),
         refSrc = cms.InputTag(visibleName),
         maxDeltaR = cms.double(0.5),
     )
@@ -1040,7 +1044,8 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     # )
     genTauReco = cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
 #        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
-        src = cms.InputTag("selectedPatTausHpsPFTau"),
+#        src = cms.InputTag("selectedPatTausHpsPFTau"), # 2011
+        src = cms.InputTag("selectedPatTaus"),
         refSrc = cms.InputTag(genTausVisibleName),
         maxDeltaR = cms.double(0.5),
     )
