@@ -326,7 +326,7 @@ namespace HPlus {
   {
     const std::string mySelection = iConfig.getUntrackedParameter<std::string>("selection");
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir(label);
+    TFileDirectory myDir = histoWrapper.mkdir(HistoWrapper::kInformative, *fs, label);
     
     // Create tauID algorithm handler
     //if(mySelection == "PFTauTaNCBased")
@@ -517,7 +517,7 @@ namespace HPlus {
 
     if (fAnalyseFakeTauComposition) {
       std::string myFakeLabel = label+"_fakeAnalysis";
-      TFileDirectory myFakeDir = fs->mkdir(myFakeLabel);
+      TFileDirectory myFakeDir = histoWrapper.mkdir(HistoWrapper::kInformative, *fs, myFakeLabel);
       hFakeElectronEtaPhiAfterKinematics = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
         "eToTauAfterKinematicalCuts", "eToTauAfterKinematicalCuts;e#rightarrow#tau #eta;e#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
       hFakeElectronEtaPhiAfterAgainstElectron = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
@@ -1166,9 +1166,9 @@ namespace HPlus {
     for(edm::PtrVector<pat::Tau>::const_iterator iter = htaus->ptrVector().begin(); iter != htaus->ptrVector().end(); ++iter) {
       const edm::Ptr<pat::Tau> iTau = *iter;
       FakeTauIdentifier::Data tauMatchData = fakeTauIdentifier.matchTauToMC(iEvent, *iTau);
-      bool isElectron = (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkElectronToTau || tauMatchData.getTauMatchType() == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance);
-      bool isJet = (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkJetToTau || tauMatchData.getTauMatchType() == FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance);
-      bool isTau = (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkTauToTau || tauMatchData.getTauMatchType() == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance);
+      bool isElectron = tauMatchData.isElectronToTau();
+      bool isJet = tauMatchData.isJetToTau();
+      bool isTau = tauMatchData.isGenuineTau();
       bool isAtDeadCell = !fTauID->passVetoAgainstDeadECALCells(iTau);
       // Tau candidate selections
       if (!fTauID->passDecayModeFinding(iTau)) continue;

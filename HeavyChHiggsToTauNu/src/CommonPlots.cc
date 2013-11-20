@@ -24,8 +24,8 @@ namespace HPlus {
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper),
     fSplittedHistogramHandler(iConfig.getUntrackedParameter<edm::ParameterSet>("histogramSplitting"), histoWrapper, (analysisType != kQCDNormalizationSystematicsSignalRegion && analysisType != kQCDNormalizationSystematicsControlRegion)),
-    fCommonBaseDirectory(fs->mkdir("CommonPlots")),
-    fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
+    fCommonBaseDirectory(histoWrapper.mkdir(HistoWrapper::kVital, *fs, "CommonPlots")),
+    fEveryStepDirectory(histoWrapper.mkdir(HistoWrapper::kVital, fCommonBaseDirectory, "AtEveryStep")),
     fTauFakeRateAnalysis(0),
     fTauSelection(0),
     fFakeTauIdentifier(0),
@@ -92,8 +92,8 @@ namespace HPlus {
       myLabel += "QCDNormalizationControl";
       myFakeLabel = "Empty";
     }
-    TFileDirectory myCtrlDir = fs->mkdir(myLabel.c_str());
-    TFileDirectory myCtrlEWKFakeTausDir = fs->mkdir(myFakeLabel.c_str());
+    TFileDirectory myCtrlDir = fHistoWrapper.mkdir(HistoWrapper::kSystematics, *fs, myLabel);
+    TFileDirectory myCtrlEWKFakeTausDir = fHistoWrapper.mkdir(HistoWrapper::kSystematics, *fs, myFakeLabel);
 
     // Create histograms
 
@@ -381,13 +381,13 @@ namespace HPlus {
   void CommonPlots::fillControlPlotsAtJetSelection(const edm::Event& iEvent, const JetSelection::Data& data) {
     fJetData = data;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNjets, data.getHadronicJetCount());
-    if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjets, data.getHadronicJetCount());
+    if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjets, data.getHadronicJetCount());
     if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterNjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
   void CommonPlots::fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent) {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNjetsAfterJetSelectionAndMETSF, fJetData.getHadronicJetCount());
-    if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF, fJetData.getHadronicJetCount());
+    if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF, fJetData.getHadronicJetCount());
     if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterMETSF->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
@@ -397,19 +397,19 @@ namespace HPlus {
     for (int i = 0; i < data.getNConsideredJets(); ++i) {
       if (i == 0 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet1, data.getRadiusFromCollinearCorner(i)); // Make control plot before cut
-        if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis)
+        if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis)
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet1, data.getRadiusFromCollinearCorner(i)); // Make control pl
       } else if (i == 1 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet2, data.getRadiusFromCollinearCorner(i)); // Make control plot before cut
-        if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis)
+        if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis)
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet2, data.getRadiusFromCollinearCorner(i)); // Make control pl
       } else if (i == 2 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet3, data.getRadiusFromCollinearCorner(i)); // Make control plot before cut
-        if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis)
+        if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis)
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet3, data.getRadiusFromCollinearCorner(i)); // Make control pl
       } else if (i == 3 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet4, data.getRadiusFromCollinearCorner(i)); // Make control plot before cut
-        if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis)
+        if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis)
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet4, data.getRadiusFromCollinearCorner(i)); // Make control pl
       }
       if (!data.passCollinearCutForJet(i))
@@ -424,7 +424,7 @@ namespace HPlus {
     hSelectedTauEtaVsPhiAfterStandardSelections->Fill(fTauData.getSelectedTau()->eta(), fTauData.getSelectedTau()->phi());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauPAfterStandardSelections, fTauData.getSelectedTau()->p());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauLeadingTrkPAfterStandardSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->p());
-    if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) {
+    if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections, fTauData.getSelectedTauRtauValue());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections, fTauData.getSelectedTau()->pt());
@@ -436,20 +436,20 @@ namespace HPlus {
     }
     // Fill other control plots
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNjetsAfterStandardSelections, fJetData.getHadronicJetCount());
-    if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjetsAfterStandardSelections, fJetData.getHadronicJetCount());
+    if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjetsAfterStandardSelections, fJetData.getHadronicJetCount());
     if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterCollinearCuts->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
   void CommonPlots::fillControlPlotsAtMETSelection(const edm::Event& iEvent, const METSelection::Data& data) {
     fMETData = data;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMET, data.getSelectedMET()->et());
-    if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMET, data.getSelectedMET()->et());
+    if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMET, data.getSelectedMET()->et());
   }
 
   void CommonPlots::fillControlPlotsAtBtagging(const edm::Event& iEvent, const BTagging::Data& data) {
     fBJetData = data;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNbjets, data.getBJetCount());
-    if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNbjets, data.getBJetCount());
+    if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNbjets, data.getBJetCount());
     if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
@@ -459,19 +459,19 @@ namespace HPlus {
     for (int i = 0; i < data.getNConsideredJets(); ++i) {
       if (i == 0 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet1, data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
-        if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis)
+        if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis)
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet1, data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
       } else if (i == 1 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet2, data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
-        if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis)
+        if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis)
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet2, data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
       } else if (i == 2 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet3, data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
-        if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis)
+        if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis)
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet3, data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
       } else if (i == 3 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet4, data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
-        if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis)
+        if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis)
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet4, data.getRadiusFromBackToBackCorner(i)); // Make control plot before cut
       }
       if (!data.passBackToBackCutForJet(i))
@@ -485,7 +485,7 @@ namespace HPlus {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTopPt, data.getTopP4().pt());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlWMass, data.getWMass());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlWPt, data.getWP4().pt());
-    if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) {
+    if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTopMass, data.getTopMass());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTopPt, data.getTopP4().pt());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausWMass, data.getWMass());
@@ -507,7 +507,7 @@ namespace HPlus {
     //double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.fillShapeHistogram(hShapeTransverseMass, transverseMass);
-      if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausTransverseMass, transverseMass);
+      if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausTransverseMass, transverseMass);
     }
   }
 
@@ -515,7 +515,7 @@ namespace HPlus {
     fFullHiggsMassData = data;
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.fillShapeHistogram(hShapeFullMass, data.getHiggsMass());
-      if (fFakeTauData.isFakeTau() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausFullMass, data.getHiggsMass());
+      if ((fFakeTauData.isQCDMeasurementLike() && fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausFullMass, data.getHiggsMass());
     }
   }
 

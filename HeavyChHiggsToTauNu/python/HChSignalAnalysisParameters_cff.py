@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+
 configInfo = cms.PSet(
     pileupReweightType = cms.string("UNWEIGHTED"),
     topPtReweightType = cms.string("UNWEIGHTED"),
@@ -172,14 +174,19 @@ fakeTauSFandSystematicsBase = cms.untracked.PSet(
     visibleMCTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"), # All MC visible taus
     visibleMCTauOneProngSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"), # MC visible 1-prong taus
     matchingConditionDeltaR = cms.untracked.double(0.1), # Matching cone size
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(1.0),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(1.0),
+    scalefactorGenuineTauBarrel = cms.untracked.double(1.0),
+    scalefactorGenuineTauEndcap = cms.untracked.double(1.0),
+    scalefactorFakeTauBarrelElectron = cms.untracked.double(2.0),
+    scalefactorFakeTauEndcapElectron = cms.untracked.double(1.2),
     scalefactorFakeTauBarrelMuon = cms.untracked.double(1.0),
     scalefactorFakeTauEndcapMuon = cms.untracked.double(1.0),
     scalefactorFakeTauBarrelJet = cms.untracked.double(1.0),
     scalefactorFakeTauEndcapJet = cms.untracked.double(1.0),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.0),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.0),
+    # The following numbers are to be understood as SF +- the indicated number
+    systematicsGenuineTauBarrel = cms.untracked.double(0.06),
+    systematicsGenuineTauEndcap = cms.untracked.double(0.06),
+    systematicsFakeTauBarrelElectron = cms.untracked.double(0.4),
+    systematicsFakeTauEndcapElectron = cms.untracked.double(0.4),
     systematicsFakeTauBarrelMuon = cms.untracked.double(0.3),
     systematicsFakeTauEndcapMuon = cms.untracked.double(0.3),
     systematicsFakeTauBarrelJet = cms.untracked.double(0.2),
@@ -187,31 +194,54 @@ fakeTauSFandSystematicsBase = cms.untracked.PSet(
 )
 
 fakeTauSFandSystematicsAgainstElectronMedium = fakeTauSFandSystematicsBase.clone(
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(0.95),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.75),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.10),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.15),
+    scalefactorFakeTauBarrelElectron = 0.95,
+    scalefactorFakeTauEndcapElectron = 0.75,
+    systematicsFakeTauBarrelElectron = 0.95*0.10,
+    systematicsFakeTauEndcapElectron = 0.75*0.15,
 )
-
 fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(0.85),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.65),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.20),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.25),
+    scalefactorFakeTauBarrelElectron = 0.85,
+    scalefactorFakeTauEndcapElectron = 0.65,
+    systematicsFakeTauBarrelElectron = 0.85*0.2,
+    systematicsFakeTauEndcapElectron = 0.65*0.2,
 )
+fakeTauSFandSystematicsAgainstElectronLooseMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = 1.4,
+    scalefactorFakeTauEndcapElectron = 0.8,
+    systematicsFakeTauBarrelElectron = 0.3,
+    systematicsFakeTauEndcapElectron = 0.3,
+)
+fakeTauSFandSystematicsAgainstElectronMediumMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = 1.6,
+    scalefactorFakeTauEndcapElectron = 0.8,
+    systematicsFakeTauBarrelElectron = 0.3,
+    systematicsFakeTauEndcapElectron = 0.3,
+)
+fakeTauSFandSystematicsAgainstElectronTightMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = 2.0,
+    scalefactorFakeTauEndcapElectron = 1.2,
+    systematicsFakeTauBarrelElectron = 0.4,
+    systematicsFakeTauEndcapElectron = 0.4,
+)
+fakeTauSFandSystematicsAgainstElectronVTightMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = 2.4,
+    scalefactorFakeTauEndcapElectron = 1.2,
+    systematicsFakeTauBarrelElectron = 0.5,
+    systematicsFakeTauEndcapElectron = 0.5,
+)
+# Obtain genuine and fake tau systematics automatically based on tau against electron discriminator
+def setFakeTauSFAndSystematics(fakeTauPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
+    source = "fakeTauSFandSystematics"+tausele.againstElectronDiscriminator.value().replace("against","Against")
+    try:
+        pset = globals()[source]
+    except KeyError:
+        myOptionList = filter(lambda item: "fakeTauSFandSystematics" in item, globals().keys())
+        raise Exception("Error: Could not find fakeTauSFandSystematics for against electron discriminator %s! Options are: %s"%(tauSelection.againstElectronDiscriminator.value(), ", ".join(map(str, myOptionList))))
 
-fakeTauSFandSystematics = None
-# FIXME: add scale factors for MVA3 against electron discriminators
-print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
-print "As a temporary solution, the AgainstElectronMVA scale factors and uncertainties are used (as per tau POG instructions)"
-fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
-#if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
-    #fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
-#elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
-    #fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
-#else:
-    #print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
-    #fakeTauSFandSystematics = fakeTauSFandSystematicsBase
+    HChTools.insertPSetContentsTo(pset, fakeTauPSet)
+    print "fakeTauSFandSystematics set to %s for %s" % (source, mod)
+fakeTauSFandSystematics = fakeTauSFandSystematicsBase.clone()
+setFakeTauSFAndSystematics(fakeTauSFandSystematics, tauSelection)
 
 jetSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),  # PF jets
@@ -465,6 +495,7 @@ ElectronSelection = cms.untracked.PSet(
 MuonSelection = cms.untracked.PSet(
     genParticleSrc = cms.untracked.InputTag("genParticles"),
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
+    applyMuonIsolation = cms.untracked.bool(True),
     MuonPtCut = cms.untracked.double(10.0),
     MuonEtaCut = cms.untracked.double(2.5),
 )
@@ -515,6 +546,11 @@ bjetSelection = cms.untracked.PSet(
   oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng") 
 )
 
+MCAnalysisOfSelectedEvents = cms.untracked.PSet(
+  src = cms.untracked.InputTag("genParticles"),
+  oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
+  oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng") 
+)
 
 
 topChiSelection = cms.untracked.PSet(
@@ -665,34 +701,36 @@ def cloneForHeavyAnalysis(lightModule):
     return heavyModule
 
 # Set trigger efficiency / scale factor depending on tau selection params
+triggerEffPrototype = cms.untracked.PSet(
+    data = cms.FileInPath("NOT_YET_SET"),
+    dataSelect = cms.vstring(),
+    mcSelect = cms.string("NOT_YET_SET"),
+    mode = cms.untracked.string("disabled"), # mcEfficiency, dataEfficiency, scaleFactor, disabled
+    variationEnabled = cms.bool(False),
+    useMaxUncertainty = cms.bool(True),
+)
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
-def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
-    print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    myScaleFactors = tauTriggerEfficiency.getEfficiency("byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
-    myScaleFactors.variationEnabled = cms.bool(False)
-    myScaleFactors.useMaxUncertainty = cms.bool(True)
-    return myScaleFactors
+def setTriggerEfficiencyScaleFactorBasedOnTau(scaleFactorPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
+    print "Trigger efficiency / scalefactor set according to tau isolation '%s' and tau against electron discr. '%s' for %s" % (tausele.isolationDiscriminator.value(), tausele.againstElectronDiscriminator.value(), mod)
+    tauTriggerEfficiency.setEfficiency(scaleFactorPSet, "byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
+    return
     # FIXME
-    return tauTriggerEfficiency.getEfficiency(tauSele.isolationDiscriminator.value(), tauSele.againstElectronDiscriminator.value())
+    tauTriggerEfficiency.setEfficiency(scaleFactorPSet, tausele.isolationDiscriminator.value(), tausele.againstElectronDiscriminator.value())
     raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byLooseCombinedIsolationDeltaBetaCorr3Hits', 'byMediumCombinedIsolationDeltaBetaCorr3Hits'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
 # Set trigger efficiency / scale factor for low purity depending on tau selection params
-def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(tausele):
+def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(scaleFactorPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency # FIXME
-    print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    myScaleFactors = tauTriggerEfficiency.getEfficiency("byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
-    myScaleFactors.variationEnabled = cms.bool(False)
-    myScaleFactors.useMaxUncertainty = cms.bool(True)
-    return myScaleFactors
+    print "Trigger efficiency / scalefactor set according to tau isolation '%s' and tau against electron discr. '%s' for %s" % (tausele.isolationDiscriminator.value(), tausele.againstElectronDiscriminator.value(), mod)
+    tauTriggerEfficiency.setEfficiency(scaleFactorPSet, "byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
-tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
-tauTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
-tauTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
+tauTriggerEfficiencyScaleFactor = triggerEffPrototype.clone()
+setTriggerEfficiencyScaleFactorBasedOnTau(tauTriggerEfficiencyScaleFactor, tauSelection)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2011_cff as metTriggerEfficiency
-metTriggerEfficiencyScaleFactor = metTriggerEfficiency.getEfficiency()
-metTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
-metTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
+metTriggerEfficiencyScaleFactor = triggerEffPrototype.clone()
+metTriggerEfficiency.setEfficiency(metTriggerEfficiencyScaleFactor)
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency

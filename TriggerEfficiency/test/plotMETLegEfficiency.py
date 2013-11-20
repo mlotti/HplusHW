@@ -228,8 +228,10 @@ def doPlots(datasets,selection, dataVsMc, pyScenario="Unweighted"):
         lumi = 5094.834
 #        runs = "run >= 160404 && run <= 180252"
 #        runsText = "160404-180252"
-        runs = "run >= 170722 && run <= 180252"
-        runsText = "170722-180252"
+#        runs = "run >= 170722 && run <= 180252"
+#        runsText = "170722-180252"
+	runs = "run >= 160431 && run <= 180252" # start run for embedding needs.. 15112013/SL
+	runsText = "160431-180252"
         offlineTriggerData = "(HLT_IsoPFTau35_Trk20_v2 || HLT_IsoPFTau35_Trk20_v3 || HLT_IsoPFTau35_Trk20_v4 || HLT_IsoPFTau35_Trk20_v6)"
         offlineTriggerData += "|| (HLT_MediumIsoPFTau35_Trk20_v1 || HLT_MediumIsoPFTau35_Trk20_v5 || HLT_MediumIsoPFTau35_Trk20_v6)"
         offlineTriggerMc = "HLT_MediumIsoPFTau35_Trk20_v1"
