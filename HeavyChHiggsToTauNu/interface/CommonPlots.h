@@ -273,11 +273,13 @@ namespace HPlus {
     // MET selection
     std::vector<WrappedTH1*> hCtrlMET;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMET;
-    
+
     // b tagging
     std::vector<WrappedTH1*> hCtrlNbjets;
+    std::vector<WrappedTH1*> hCtrlBDiscriminator;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausNbjets;
-    
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausBDiscriminator;
+
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterBjets;
 
     // improved delta phi back to back cuts
