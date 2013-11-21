@@ -38,21 +38,25 @@ class HistogramInput:
     def getLogStatus(self):
         return self._logStatus
 
-    def getHistogram(self, dataset, isRef):
+    def getHistogram(self, dset, isRef):
         hname = None
         for name in self._histoNameList:
-            if dataset.hasRootHisto(name):
+            if dset.hasRootHisto(name):
                 hname = name
         if hname == None:
             if isRef:
-                raise Exception("Error: could not open histogram '%s' in reference file %s!"%(', '.join(map(str, self._histoNameList)),dataset.getName()))
+                print "Warning: could not open histogram '%s' in reference file %s!"%(', '.join(map(str, self._histoNameList)),dset.getName())
+                return ("_".join(map(str,self._histoNameList)),None)
             else:
-                raise Exception("Error: could not open histogram '%s' in test file %s!"%(', '.join(map(str, self._histoNameList)),dataset.getName()))
-        roothisto = dataset.getDatasetRootHisto(hname)
+                print "Error: could not open histogram '%s' in test file %s!"%(', '.join(map(str, self._histoNameList)),dset.getName())
+                return ("_".join(map(str,self._histoNameList)),None)
+        roothisto = dset.getDatasetRootHisto(hname)
         #roothisto.normalizeToOne()
-        if dataset.isMC():
+        if dset.isMC():
             if "normalizeToLumi" in self._mcNormalization:
                 roothisto.normalizeToLuminosity(self._mcNormalization["normalizeToLumi"])
+            elif isinstance(dset, dataset.DatasetMerged):
+                roothisto.normalizeToLuminosity(1)
         hnew = roothisto.getHistogram()
         # Rebin
         binwidth = hnew.GetXaxis().GetBinWidth(1)
@@ -184,7 +188,11 @@ class ValidateGroup:
         myOutput = ""
         # Get event counters
         refEventCounter = counter.EventCounter(refDataset)
+        if isinstance(refDataset, dataset.DatasetMerged):
+            refEventCounter.normalizeMCToLuminosity(1)
         testEventCounter = counter.EventCounter(testDataset)
+        if isinstance(testDataset, dataset.DatasetMerged):
+            testEventCounter.normalizeMCToLuminosity(1)
         mcNormalization = ""
         for ds, ec in [(refDataset, refEventCounter), (testDataset, testEventCounter)]:
             if ds.isMC():
@@ -345,6 +353,8 @@ class ValidateGroup:
             #print "Obtaining histogram histogram %s"% ', '.join(map(str, h.getHistoNameList()))
             (hrefname, hRef) = h.getHistogram(refDataset, True)
             (htestname, hTest) = h.getHistogram(testDataset, False)
+            if hRef == None or hTest == None:
+                continue
             # Histograms exist
             myindexcount += 1
             if mycount == 0:
@@ -864,6 +874,40 @@ def createValidateHistograms():
     myGroup.addCounter("tau->tau")
     myGroups.append(myGroup)
 
+    myGroup = ValidateGroup("ForDataDrivenCtrlPlots")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/Njets", 1, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/NjetsAfterJetSelectionAndMETSF", 1, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/ImprovedDeltaPhiCutsJet1Collinear", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/ImprovedDeltaPhiCutsJet2Collinear", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/ImprovedDeltaPhiCutsJet3Collinear", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/ImprovedDeltaPhiCutsJet4Collinear", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/MET", 10, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/NBjets", 1, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/ImprovedDeltaPhiCutsJet1BackToBack", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/ImprovedDeltaPhiCutsJet2BackToBack", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/ImprovedDeltaPhiCutsJet3BackToBack", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/ImprovedDeltaPhiCutsJet4BackToBack", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/TopMass", 10, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlots/WMass", 10, "log")
+    myGroups.append(myGroup)
+
+    myGroup = ValidateGroup("ForDataDrivenCtrlPlotsEWKFakeTaus")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/Njets", 1, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/NjetsAfterJetSelectionAndMETSF", 1, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/ImprovedDeltaPhiCutsJet1Collinear", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/ImprovedDeltaPhiCutsJet2Collinear", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/ImprovedDeltaPhiCutsJet3Collinear", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/ImprovedDeltaPhiCutsJet4Collinear", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/MET", 10, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/NBjets", 1, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/ImprovedDeltaPhiCutsJet1BackToBack", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/ImprovedDeltaPhiCutsJet2BackToBack", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/ImprovedDeltaPhiCutsJet3BackToBack", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/ImprovedDeltaPhiCutsJet4BackToBack", 20, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/TopMass", 10, "log")
+    myGroup.addHistogram("ForDataDrivenCtrlPlotsEWKFakeTaus/WMass", 10, "log")
+    myGroups.append(myGroup)
+
     # Add common plots
     myCommonPlots = ["VertexSelection","TauSelection","TauWeight","ElectronVeto","MuonVeto","JetSelection","MET","BTagging","Selected"]
     myGroups.append(addCommonPlotsAtEveryStep(myCommonPlots, "nVertices", 1, "log"))
@@ -937,7 +981,17 @@ def main(opts,timeStamp,refDsetCreator,testDsetCreator,myValidateGroups,era,sear
     refDatasetMgr.updateNAllEventsToPUWeighted()
     testDatasetMgr.updateNAllEventsToPUWeighted()
     # Find common dataset names
-    if opts.testDir is None:
+    commonDatasetNames = None
+    if opts.mergeRefDataset != None or opts.mergeTestDataset != None:
+        # Merge datasets
+        refName = "mergedRef_%s"%("_".join(map(str,opts.mergeRefDataset)))
+        testName = "mergedTest_%s"%("_".join(map(str,opts.mergeTestDataset)))
+        commonDatasetNames = [(refName, testName)]
+        print "Merging: %s -> ref."%", ".join(map(str,opts.mergeRefDataset))
+        refDatasetMgr.merge(refName, opts.mergeRefDataset)
+        print "Merging: %s -> test"%", ".join(map(str,opts.mergeTestDataset))
+        testDatasetMgr.merge(testName, opts.mergeTestDataset)
+    elif optcommonDatasetNamess.testDir is None:
         commonDatasetNames = compareLists(refDatasetMgr.getAllDatasetNames(),testDatasetMgr.getAllDatasetNames(),opts.dirs)
         commonDatasetNames = [(x, x) for x in commonDatasetNames]
     else:
@@ -998,6 +1052,8 @@ if __name__ == "__main__":
     parser.add_option("--testFile", dest="testFile", default=None, help="Test file (give either this or --test")
     parser.add_option("-d", dest="dirs", action="append", help="name of sample directory inside multicrab dir (multiple directories can be specified with multiple -d arguments)")
     parser.add_option("--testDir", dest="testDir", default=None, help="Name of the sample directory in test multicrab dir")
+    parser.add_option("--mergeRefDataset", dest="mergeRefDataset", action="append", help="name of tasks inside multicrab dir to be merged as the ref dataset (multiple directories can be specified with multiple -d arguments)")
+    parser.add_option("--mergeTestDataset", dest="mergeTestDataset", action="append", help="name of tasks inside multicrab dir to be merged as the test dataset (multiple directories can be specified with multiple -d arguments)")
     parser.add_option("-v", dest="variation", action="append", help="name of variation")
     parser.add_option("-e", dest="era", action="append", help="name of era")
     parser.add_option("-m", dest="searchMode", action="append", help="name of search mode")
@@ -1012,7 +1068,7 @@ if __name__ == "__main__":
     if opts.test is None and opts.testFile is None:
         print "Error: Missing multicrab directory for testing/validation!"
         mystatus = False
-    if opts.dirs == None:
+    if opts.dirs == None and not (opts.mergeRefDataset != None and opts.mergeTestDataset != None):
         print "(optional) Missing source for sample directories (use -d if desired) will use all sample directories"
         #mystatus = False
     if opts.era == None:
@@ -1027,7 +1083,12 @@ if __name__ == "__main__":
     if opts.testDir is not None and (opts.dirs is None or len(opts.dirs) != 1):
         print "Error: with --testDir exactly one -d is allowed (got %d)" % (len(opts.dirs))
         myStatus = False
-
+    if opts.mergeRefDataset != None and opts.mergeTestDataset == None:
+        print "Error: --mergeRefDataset has been used, please define also --mergeTestDataset !"
+        myStatus = False
+    if opts.mergeRefDataset == None and opts.mergeTestDataset != None:
+        print "Error: --mergeTestDataset has been used, please define also --mergeRefDataset !"
+        myStatus = False
     if not mystatus:
         parser.print_help()
         sys.exit()
