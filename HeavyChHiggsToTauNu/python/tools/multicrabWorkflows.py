@@ -54,9 +54,8 @@ class MCDatasetHelper:
             # For BR limit LandS expectes WH and HH samples to have ttbar cross section
             crossSection = xsect.backgroundCrossSections.crossSection("TTJets", self.energy)
         elif "HplusTB" in name or "HplusToTBbar" in name:
-            # FIXME: ttbar cross section is clearly incorrect, but what to do?
-            # Is there actually a need to store it?
-            crossSection = xsect.backgroundCrossSections.crossSection("TTJets", self.energy)
+            # For sigma*BR limit LandS expects heavy H+ samples to have cross section of 1 pb
+            crossSection = 1
         elif "Hplus_taunu" in name:
             if "t-channel" in name:
                 crossSection = sum([xsect.backgroundCrossSections.crossSection(st, self.energy) for st in ["T_t-channel", "Tbar_t-channel"]])

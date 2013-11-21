@@ -328,8 +328,8 @@ namespace HPlus {
     else if (nMatchedHadronicTausInAcceptance >= 1 && nNonMatchedHadronicTausInAcceptance >= 1)
       output.fBackgroundType = kkEWKWithFakeTau;
 
-    std::cout << "Nmatched=" << myMatchingTauIndices.size() << " NmatchHadronic=" << nMatchedHadronicTausInAcceptance
-      << " Nnonmatched=" << myNonMatchingTauIndices.size() << " NnonmatchHadronic=" << nNonMatchedHadronicTausInAcceptance << " bkgtype=" << output.fBackgroundType << std::endl;
+    //std::cout << "Nmatched=" << myMatchingTauIndices.size() << " NmatchHadronic=" << nMatchedHadronicTausInAcceptance
+    //  << " Nnonmatched=" << myNonMatchingTauIndices.size() << " NnonmatchHadronic=" << nNonMatchedHadronicTausInAcceptance << " bkgtype=" << output.fBackgroundType << std::endl;
 
     // Look at ancestor information
     output.fTauOriginType = kkUnknownOrigin;

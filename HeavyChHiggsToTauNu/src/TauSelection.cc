@@ -326,7 +326,7 @@ namespace HPlus {
   {
     const std::string mySelection = iConfig.getUntrackedParameter<std::string>("selection");
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir(label);
+    TFileDirectory myDir = histoWrapper.mkdir(HistoWrapper::kInformative, *fs, label);
     
     // Create tauID algorithm handler
     //if(mySelection == "PFTauTaNCBased")
@@ -517,7 +517,7 @@ namespace HPlus {
 
     if (fAnalyseFakeTauComposition) {
       std::string myFakeLabel = label+"_fakeAnalysis";
-      TFileDirectory myFakeDir = fs->mkdir(myFakeLabel);
+      TFileDirectory myFakeDir = histoWrapper.mkdir(HistoWrapper::kInformative, *fs, myFakeLabel);
       hFakeElectronEtaPhiAfterKinematics = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
         "eToTauAfterKinematicalCuts", "eToTauAfterKinematicalCuts;e#rightarrow#tau #eta;e#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
       hFakeElectronEtaPhiAfterAgainstElectron = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,

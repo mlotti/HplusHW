@@ -2257,6 +2257,7 @@ class Dataset:
     #                            inferred only from analysisName?
     # \param availableSystematicVariationSources List of strings of the systematic variations
     #                                      available on the ROOT file (without the "Plus"/"Minus" postfix)
+    # \param enableSystematicVariationForData Add \a systematicVariation to directory name also for data (needed for embedding)
     #
     # 
     # Opens the ROOT file, reads 'configInfo/configInfo' histogram
@@ -2271,15 +2272,16 @@ class Dataset:
     # directory name. 
     #
     # The final directory name is (if \a useAnalysisNameOnly is False)
-    # data: analysisName+searchMode+optimizationMode
-    # MC:   analysisName+searchMode+dataEra+optimizationMode
+    # data: analysisName+searchMode+optimizationMode(+systematicVariation)
+    # MC:   analysisName+searchMode+dataEra+optimizationMode+systematicVariation
+    # For data, \a systematicVariation is added only if \a enableSystematicVariationForData is True
     #
     # The \a useAnalysisNameOnly parameter is needed e.g. for ntuples
     # which store the era-specific weights to the tree itself, and
     # therefore the 
     def __init__(self, name, tfiles, analysisName,
                  searchMode=None, dataEra=None, optimizationMode=None, systematicVariation=None,
-                 weightedCounters=True, counterDir="counters", useAnalysisNameOnly=False, availableSystematicVariationSources=[]):
+                 weightedCounters=True, counterDir="counters", useAnalysisNameOnly=False, availableSystematicVariationSources=[], enableSystematicVariationForData=False):
         self.rawName = name
         self.name = name
         self.files = tfiles
@@ -2356,7 +2358,8 @@ class Dataset:
                 self._analysisDirectoryName += self._dataEra
             if self._optimizationMode is not None:
                 self._analysisDirectoryName += self._optimizationMode
-            if (self.isMC() or self.isPseudo()) and self._systematicVariation is not None:
+            if (((self.isMC() or self.isPseudo()) or (self.isData() and enableSystematicVariationForData)) and
+                self._systematicVariation is not None):
                 self._analysisDirectoryName += self._systematicVariation
 
         # Check that analysis directory exists
@@ -2432,6 +2435,29 @@ class Dataset:
         d.name = self.name
         return d
 
+    def getAnalysisName(self):
+        return self._analysisName
+
+    def getSearchMode(self):
+        if self._searchMode is None:
+            return ""
+        return self._searchMode
+
+    def getDataEra(self):
+        if self._dataEra is None:
+            return ""
+        return self._dataEra
+
+    def getOptimizationMode(self):
+        if self._optimizationMode is None:
+            return ""
+        return self._optimizationMode
+
+    def getSystematicVariation(self):
+        if self._systematicVariation is None:
+            return ""
+        return self._systematicVariation
+
     ## Translate a logical name to a physical name in the file
     #
     # \param name            Name to translate
@@ -2442,13 +2468,15 @@ class Dataset:
     # If name starts with slash ('/'), it is interpreted as a absolute
     # path within the ROOT file.
     def _translateName(self, name, analysisPostfix=""):
-        if name[0] == '/':
+        if len(name) > 0 and name[0] == '/':
             return name[1:]
         else:
             ret = self._analysisDirectoryName
             if analysisPostfix != "":
                 ret = ret.replace("/", analysisPostfix+"/")
             ret += name
+            if ret[-1] == "/":
+                return ret[0:-1]
             return ret
 
     ## Get the ParameterSet stored in the ROOT file
@@ -3655,9 +3683,9 @@ class DatasetPrecursor:
         return self._isMC
 
     ## Close the ROOT files
-    def close():
+    def close(self):
         for f in self._rootFiles:
-            f.close("R")
+            f.Close("R")
             f.Delete()
         self._rootFiles = []
 
