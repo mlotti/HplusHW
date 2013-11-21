@@ -173,9 +173,9 @@ namespace HPlus {
     hDiscriminant_GEN_NeutrinosReplacedWithMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, 
 									   "Discriminant_GEN_NeutrinosReplacedWithMET",
 									   "Discriminant", 100, -50000, 50000);
-    h2TransverseMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kSystematics, myDir, "TransMassVsInvMass", 
+    h2TransverseMassVsInvariantMass = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "TransMassVsInvMass", 
 				      "TransMassVsInvMass;Transverse mass m_{T};Invariant mass m(#tau, #nu_{#tau});Events",
-				      100, 0, 500, 100, 0, 500);
+				      100, 0, 500, 100, 0, 500); // Do not put as kSystematics
     h2MetSignificanceVsBadMet = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "METSignificanceVsBadMet", 
 				      "METSignificnce;E_{T}^{miss} Significance; bad E_{T}^{miss};Events",
 				      100, 0, 500, 100, 0, 500);
