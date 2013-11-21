@@ -106,7 +106,7 @@ for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     "TTJets_%s"%mcEra: "TTJets",
     "TTJets_FullLept_%s"%mcEra: "TTJets_FullLept",
     "TTJets_SemiLept_%s"%mcEra: "TTJets_SemiLept",
-    "TTJets_Hadronic_%s"%mcEra: "TTJets_Hadronic",
+    "TTJets_Hadronic_%s"%mcEra.replace("_", "_ext_"): "TTJets_Hadronic",
     "WJets_%s"%mcEra: "WJets",
     "W1Jets_%s"%mcEra: "W1Jets",
     "W2Jets_%s"%mcEra: "W2Jets",
