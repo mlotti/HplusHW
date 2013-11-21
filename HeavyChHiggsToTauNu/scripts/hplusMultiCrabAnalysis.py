@@ -9,6 +9,7 @@ import gzip
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import hplusFileSize as fileSize
+import hplusMultiCrabStatus as multicrabStatus
 
 class TimeAnalysis:
     def __init__(self):
@@ -52,12 +53,14 @@ class TimeAnalysis:
     def userTime(self):
         return self._times("User", self.user_times)
 
-    def result(self):
-        ret = " Time analysis:\n"
-        ret += "  "+self._times("Exe", self.exe_times) + "\n"
-        ret += "  "+self.userTime() + "\n"
-        ret += "  "+self._times("Sys", self.sys_times) + "\n"
-        ret += "  "+self._times("Stageout", self.stageout_times)
+    def result(self, prefix=""):
+        pref = prefix+" "
+        ret = pref+"Time analysis:\n"
+        pref += " "
+        ret += pref+self._times("Exe", self.exe_times) + "\n"
+        ret += pref+self.userTime() + "\n"
+        ret += pref+self._times("Sys", self.sys_times) + "\n"
+        ret += pref+self._times("Stageout", self.stageout_times)
         return ret
 
 class SizeAnalysis:
@@ -85,9 +88,9 @@ class SizeAnalysis:
         s_max = float(max(self.sizes))
         return "Mean %s, min %s, max %s" % (fileSize.pretty(s_mean), fileSize.pretty(s_min), fileSize.pretty(s_max))
 
-    def result(self):
-        ret = " Size analysis:\n"
-        ret += "  "+self.size()
+    def result(self, prefix=""):
+        ret = prefix+"Size analysis:\n"
+        ret += prefix+" "+self.size()
         return ret
 
 class HostAnalysis:
@@ -104,12 +107,14 @@ class HostAnalysis:
             return True
         return False
 
-    def result(self):
-        ret = " Host analysis:"
+    def result(self, prefix=""):
+        pref = prefix+" "
+        ret = pref+"Host analysis:"
+        pref += " "
         keys = self.hosts.keys()
         keys.sort()
         for k in keys:
-            ret += "\n  %s: %d" % (k, self.hosts[k])
+            ret += "\n%s%s: %d" % (pref, k, self.hosts[k])
         return ret
 
 #                         mon+day     time+timezone       pid
@@ -151,13 +156,15 @@ class WatchdogAnalysis:
     def _mems(self, name, lst):
         return "%s mean %.1f, min %.1f, max %.1f" % (name, sum(lst)/len(lst), min(lst), max(lst))
 
-    def result(self):
-        ret =" Watchod resource analysis:"
-        ret += "\n  "+self._mems("RSS (MB)", self.rss)
-        ret += "\n  "+self._mems("VSIZE (MB)", self.vsize)
-        ret += "\n  "+self._mems("Disk (MB)", self.disk)
-        ret += "\n  "+self._mems("CPU (s)", self.cpu)
-        ret += "\n  "+self._mems("Wall (s)", self.wall)
+    def result(self, prefix=""):
+        pref = prefix+" "
+        ret = pref+"Watchod resource analysis:"
+        pref += " "
+        ret += "\n"+pref+self._mems("RSS (MB)", self.rss)
+        ret += "\n"+pref+self._mems("VSIZE (MB)", self.vsize)
+        ret += "\n"+pref+self._mems("Disk (MB)", self.disk)
+        ret += "\n"+pref+self._mems("CPU (s)", self.cpu)
+        ret += "\n"+pref+self._mems("Wall (s)", self.wall)
         return ret
 
 class MemoryAnalysis:
@@ -183,11 +190,13 @@ class MemoryAnalysis:
     def _mems(self, name, lst):
         return "%s mean %.1f, min %.1f, max %.1f" % (name, sum(lst)/len(lst), min(lst), max(lst))
 
-    def result(self):
-        ret = " Memory analysis (%d jobs):\n" % len(self.rss)
-        ret += "  "+self._mems("RSS (MB)", self.rss) + "\n"
-        ret += "  "+self._mems("VSIZE (MB)", self.vsize) + "\n"
-        ret += "  "+self._mems("Disk (MB)", self.disk)
+    def result(self, prefix=""):
+        pref = prefix+" "
+        ret = pref+"Memory analysis (%d jobs):\n" % len(self.rss)
+        pref += " "
+        ret += pref+self._mems("RSS (MB)", self.rss) + "\n"
+        ret += pref+self._mems("VSIZE (MB)", self.vsize) + "\n"
+        ret += pref+self._mems("Disk (MB)", self.disk)
         return ret
 
 def analyseFiles(files, analyses, reverse=False, breakWhenFirstFound=False):
@@ -216,6 +225,37 @@ def analyseFiles(files, analyses, reverse=False, breakWhenFirstFound=False):
                 break
         f.close()
 
+def analyseTask(files, wfiles, analyses, watchdogAnalyses, prefix=""):
+    if len(files) == 0:
+        return
+
+    if len(analyses) > 0:
+        analyseFiles(files, analyses)
+    if len(wfiles) > 0:
+        analyseFiles(wfiles, watchdogAnalyses, reverse=True, breakWhenFirstFound=True)
+
+    for a in analyses+watchdogAnalyses:
+        print a.result(prefix)
+
+def excludeInclude(files, include, exclude=None):
+    if exclude is None and include is None:
+        return files
+    if exclude is not None:
+        jobNums = multicrab.prettyToJobList(exclude)
+    else:
+        jobNums = multicrab.prettyToJobList(include)
+    ret = []
+    for name in files:
+        found = False
+        for num in jobNums:
+            if "_%d." % num in name:
+                found = True
+                break
+        if ((found and include is not None) or
+            (not found and exclude is not None)):
+            ret.append(name)
+    return ret
+
 def main(opts):
     taskDirs = multicrab.getTaskDirectories(opts)
 
@@ -235,43 +275,38 @@ def main(opts):
     if len(analyses)+len(watchdogAnalyses) == 0:
         return 1
 
-    def excludeInclude(files):
-        if opts.exclude is None and opts.include is None:
-            return files
-        if opts.exclude is not None:
-            jobNums = multicrab.prettyToJobList(opts.exclude)
-        else:
-            jobNums = multicrab.prettyToJobList(opts.include)
-        ret = []
-        for name in files:
-            found = False
-            for num in jobNums:
-                if "_%d." % num in name:
-                    found = True
-                    break
-            if ((found and opts.include is not None) or
-                (not found and opts.exclude is not None)):
-                ret.append(name)
-        return ret
-
     for task in taskDirs:
         files = glob.glob(os.path.join(task, "res", "CMSSW_*.stdout"))
-        files = excludeInclude(files)
-
-        if len(files) == 0:
-            continue
-
-        if len(analyses) > 0:
-            analyseFiles(files, analyses)
+        files = excludeInclude(files, opts.include, opts.exclude)
+        wfiles = []
         if len(watchdogAnalyses) > 0:
             wfiles = glob.glob(os.path.join(task, "res", "Watchdog_*.log.gz"))
-            wfiles = excludeInclude(wfiles)
-            if len(wfiles) > 0:
-                analyseFiles(wfiles, watchdogAnalyses, reverse=True, breakWhenFirstFound=True)
+            wfiles = excludeInclude(wfiles, opts.include, opts.exclude)
 
-        print "Task %s, %d jobs" % (task, len(files))
-        for a in analyses+watchdogAnalyses:
-            print a.result()
+        if opts.byStatus:
+            try:
+                jobs = multicrab.crabStatusToJobs(task, opts.printCrab)
+            except Exception:
+                if not opts.allowFails:
+                    raise
+                print "%s: crab -status failed" % task
+                continue
+            print "Task %s" % task
+            # Ignore running jobs
+            for status in multicrabStatus.order_run:
+                if status in jobs:
+                    del jobs[status]
+            stats = jobs.keys()
+            stats.sort()
+            for status in stats:
+                ids = ",".join(["%d"%j.id for j in jobs[status]])
+                f = excludeInclude(files, ids)
+                wf = excludeInclude(wfiles, ids)
+                print " %s, %d jobs" % (status, len(files))
+                analyseTask(f, wf, analyses, watchdogAnalyses, prefix=" ")
+        else:
+            print "Task %s, %d jobs" % (task, len(files))
+            analyseTask(files, wfiles, analyses, watchdogAnalyses)
 
     return 0
 
@@ -293,10 +328,18 @@ if __name__ == "__main__":
                       help="Exclude these jobs from the analysis (clashes with --include)")
     parser.add_option("--include", dest="include", type="string", default=None,
                       help="Include only these jobs from the analysis (clashes with --exclude)")
+    parser.add_option("--byStatus", dest="byStatus", action="store_true", default=False,
+                      help="Show results by status type")
+    parser.add_option("--printCrab", dest="printCrab", action="store_true", default=False,
+                      help="Print CRAB output (relevant for --byStatus)")
+    parser.add_option("--allowFails", dest="allowFails", default=False, action="store_true",
+                      help="Continue submissions even if crab -status fails for any reason (relevant for --byStatus)")
     multicrab.addOptions(parser)
     (opts, args) = parser.parse_args()
     if opts.exclude is not None and opts.include is not None:
         parser.error("You may not specify both --exclude and --include")
+    if (opts.exclude is not None or opts.include is not None) and opts.byStatus:
+        parser.error("--byStatus conflicts with --exclude and --include")
     opts.dirs.extend(args)
 
     sys.exit(main(opts))

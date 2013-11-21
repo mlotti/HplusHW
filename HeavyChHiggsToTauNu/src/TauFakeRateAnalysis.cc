@@ -8,12 +8,12 @@
 namespace HPlus {
   TauFakeRateAnalysis::TauFakeRateAnalysis(HistoWrapper& histoWrapper) {
     edm::Service<TFileService> fs;
-    TFileDirectory myBaseDir = fs->mkdir("TauFakeRate");
+    TFileDirectory myBaseDir = histoWrapper.mkdir(HistoWrapper::kInformative, *fs, "TauFakeRate");
 
     // Create histograms
 
     // e -> tau fakes
-    TFileDirectory myEtoTauDir = myBaseDir.mkdir("eToTau");
+    TFileDirectory myEtoTauDir = histoWrapper.mkdir(HistoWrapper::kInformative, myBaseDir, "eToTau");
     hEtoTauZmassAll = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_mZ_all", "etotau_mZ_all;m_{ee} / GeV/c^{2};N_{events}", 50, 0, 250);
     hEtoTauZmassDecayMode0 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_mZ_decayMode0", "etotau_mZ_decayMode0;m_{ee} / GeV/c^{2};N_{events}", 50, 0, 250);
     hEtoTauZmassDecayMode1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_mZ_decayMode1", "etotau_mZ_decayMode1;m_{ee} / GeV/c^{2};N_{events}", 50, 0, 250);
@@ -24,7 +24,7 @@ namespace HPlus {
     hEtoTauTauPtDecayMode2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_taupT_decayMode2", "etotau_tauPt_decayMode2;#tau p_{T} / GeV/c;N_{events}", 50, 0, 250);
 
     // tau fake rate
-    TFileDirectory myTauDebugDir = myBaseDir.mkdir("TauFakeRate");
+    TFileDirectory myTauDebugDir = histoWrapper.mkdir(HistoWrapper::kInformative, myBaseDir, "TauFakeRate");
     hTauVsJetDeltaPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaPt", "#Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
     hTauVsJetDeltaR = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaR", "#DeltaR(#tau,jet), GeV/c", 100, 0, .5);
     hTauVsJetMCFlavor = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetMCFlavor", "MC flavor of jet matching to tau", 30, 0, 30);

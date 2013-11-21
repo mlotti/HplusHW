@@ -29,6 +29,7 @@ def createEDFilter(param):
         topReconstruction = param.topReconstruction,
         topSelection = param.topSelection.clone(),
         bjetSelection = param.bjetSelection.clone(),
+        MCAnalysisOfSelectedEvents = param.MCAnalysisOfSelectedEvents.clone(),
         topChiSelection = param.topChiSelection.clone(),
         topWithBSelection = param.topWithBSelection.clone(),
         topWithWSelection = param.topWithWSelection.clone(),

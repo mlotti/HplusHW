@@ -24,8 +24,8 @@ namespace HPlus {
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper),
     fSplittedHistogramHandler(iConfig.getUntrackedParameter<edm::ParameterSet>("histogramSplitting"), histoWrapper, (analysisType != kQCDNormalizationSystematicsSignalRegion && analysisType != kQCDNormalizationSystematicsControlRegion)),
-    fCommonBaseDirectory(fs->mkdir("CommonPlots")),
-    fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
+    fCommonBaseDirectory(histoWrapper.mkdir(HistoWrapper::kVital, *fs, "CommonPlots")),
+    fEveryStepDirectory(histoWrapper.mkdir(HistoWrapper::kVital, fCommonBaseDirectory, "AtEveryStep")),
     fTauFakeRateAnalysis(0),
     fTauSelection(0),
     fFakeTauIdentifier(0),
@@ -92,8 +92,8 @@ namespace HPlus {
       myLabel += "QCDNormalizationControl";
       myFakeLabel = "Empty";
     }
-    TFileDirectory myCtrlDir = fs->mkdir(myLabel.c_str());
-    TFileDirectory myCtrlEWKFakeTausDir = fs->mkdir(myFakeLabel.c_str());
+    TFileDirectory myCtrlDir = fHistoWrapper.mkdir(HistoWrapper::kSystematics, *fs, myLabel);
+    TFileDirectory myCtrlEWKFakeTausDir = fHistoWrapper.mkdir(HistoWrapper::kSystematics, *fs, myFakeLabel);
 
     // Create histograms
 
@@ -180,15 +180,15 @@ namespace HPlus {
     }
 
     // top selection
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlTopPt,   "TopPt", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlWPt,     "WPt", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,         myCtrlDir,            hCtrlTopPt,   "TopPt", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,         myCtrlDir,            hCtrlWPt,     "WPt", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopPt,   "TopPt", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWPt,     "WPt", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,       myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopPt,   "TopPt", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,       myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWPt,     "WPt", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     }
 
     // evt topology
