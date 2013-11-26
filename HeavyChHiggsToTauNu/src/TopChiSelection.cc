@@ -10,26 +10,7 @@
 
 #include <limits>
 
-//Declarations
-std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
-std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
-bool  hasImmediateMother(const reco::Candidate& p, int id);
-bool  hasMother(const reco::Candidate& p, int id);
-void  printImmediateMothers(const reco::Candidate& p);
-void  printMothers(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>  getImmediateDaughters(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p);
-bool  hasImmediateDaughter(const reco::Candidate& p, int id);
-bool  hasDaughter(const reco::Candidate& p, int id);
-void  printImmediateDaughters(const reco::Candidate& p);
-void printDaughters(const reco::Candidate& p);
-
 namespace HPlus {
-
-  //constructor and destructor for TopChiSelection::Data class
-  /* TopChiSelection::Data::Data():
-    fPassedEvent(false) {}
-  TopChiSelection::Data::~Data() {} */
 
   //constructor
   TopChiSelection::TopChiSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper) : TopSelectionBase::TopSelectionBase(iConfig, eventCounter, histoWrapper),
@@ -42,27 +23,46 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
 
-    TFileDirectory myDir = fs->mkdir("TopChiSelection");
-    hPtTop = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "PtTop", "PtTop", 80, 0., 400.);
-    hPtTopChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "PtTopChiCut", "PtTopChiCut", 80, 0., 400.);
-    hjjbMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jjbMass", "jjbMass", 80, 0., 400.);
-    htopMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass", "TopMass", 80, 0., 400.);
-    hWMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass", "WMass", 100, 0., 200.);
-    htopMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_fullMatch", "TopMass_fullMatch", 80, 0., 400.);
-    hWMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_fullMatch", "WMass_fullMatchMatch", 100, 0., 200.);
-    htopMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_bMatch", "TopMass_bMatch", 80, 0., 400.);
-    hWMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_bMatch", "WMass_bMatch", 100, 0., 200.);
-    htopMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_qMatch", "TopMass_qMatch", 80, 0., 400.);
-    hWMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_qMatch", "WMass_qMatch", 100, 0., 200.);
-    htopMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_MatchWrongB", "TopMass_MatchWrongB", 80, 0., 400.);
-    hWMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_MatchWrongB", "WMass_MatchWrongB", 100, 0., 200.);
-    hChi2Min = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Chi2Min", "Chi2Min", 200, 0., 40.);
-    htopMassChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassChiCut", "TopMassChiCut", 80, 0., 400.);
-    hWMassChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMassChiCut", "WMassChiCut", 100, 0., 200.);
+    TFileDirectory myDir = fs->mkdir("TopSelection");
+
+    //top histograms
+    htopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopPt", "TopPt;top p_{T} (GeV)", 80, 0., 400.);
+    htopMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass", "TopMass; m_{t} (GeV)", 80, 0., 400.);
+    htopEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopEta", "TopEta; #eta_{t}", 100, -5., 5.);
+    
+    htopPtAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopPtAfterCut", "TopPtAfterCut; top p_{T} (GeV)", 80, 0., 400.);
+    htopMassAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassAfterCut", "TopMassAfterCut; m_{t}", 80, 0., 400.);
+    htopEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopEtaAfterCut", "TopEtaAfterCut; #eta_{t}", 100, -5., 5.);
+    htopMassRejected = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassRejected", "TopMassRejected; m_{t} (GeV)", 80, 0., 400.);
+
+    //W histograms
+    hWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WPt", "WPt; W p_{T} (GeV)", 80, 0., 400.);
+    hWMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass", "WMass; m_{W} (GeV)", 100, 0., 200.);
+    hWEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WEta", "WEta; #eta_{W}", 80, 0., 400.);
+
+    hWPtAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WPtAfterCut", "WPtAfterCut; W p_{T} (GeV)", 80, 0., 400.);
+    hWMassAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMassAfterCut", "WMassAfterCut; m_{W} (GeV)", 100, 0., 200.);
+    hWEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WEtaAfterCut", "WEtaAfterCut; #eta_{W}", 80, 0., 400.);
+    
+    //MC matching histograms
+    htopMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_fullMatch", "TopMass_fullMatch; m_{t} (GeV)", 80, 0., 400.);
+    htopMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_bMatch", "TopMass_bMatch; m_{t} (GeV)", 80, 0., 400.);
+    htopMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_qMatch", "TopMass_qMatch; m_{t} (GeV)", 80, 0., 400.);
+    htopMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_MatchWrongB", "TopMass_MatchWrongB; m_{t} (GeV)", 80, 0., 400.);
+    hWMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_fullMatch", "WMass_fullMatchMatch; m_{W} (GeV)", 100, 0., 200.);
+    hWMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_bMatch", "WMass_bMatch; m_{W} (GeV)", 100, 0., 200.);
+    hWMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_qMatch", "WMass_qMatch; m_{W} (GeV)", 100, 0., 200.);
+    hWMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_MatchWrongB", "WMass_MatchWrongB; m_{W} (GeV)", 100, 0., 200.);
+
+    //other histograms    
+    hjjbMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jjbMass", "jjbMass;m_{jjb} (GeV)", 80, 0., 400.);
+    hChi2Min = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Chi2Min", "Chi2Min; {#chi^2}_{min}", 200, 0., 40.);
   }
 
   //destructor
   TopChiSelection::~TopChiSelection() {}
+
+//---------------------------------------------------------------------------------------------
 
   //privateAnalyze
   TopChiSelection::Data TopChiSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
@@ -115,42 +115,57 @@ namespace HPlus {
       }
     }
   
-    hPtTop->Fill(output.top.Pt());
-    htopMass->Fill(output.getTopMass());
-    hWMass->Fill(output.getWMass());
     hChi2Min->Fill(sqrt(chi2Min));
-    if (sqrt(chi2Min) < fChi2Cut) {
-      htopMassChiCut->Fill(output.getTopMass());
-      hWMassChiCut->Fill(output.getWMass());
-      hPtTopChiCut->Fill(output.top.Pt());
-      }
 
-    // search correct combinations
-    //    if (!iEvent.isRealData() && chi2Min < fChi2Cut ) {
+    htopPt->Fill(output.top.Pt());
+    htopMass->Fill(output.getTopMass());
+    htopEta->Fill(output.getTopEta());
+    hWPt->Fill(output.W.Pt());
+    hWMass->Fill(output.getWMass());
+    hWEta->Fill(output.getWEta());
+
+    if( output.getTopMass() >= fTopMassLow && output.getTopMass() <= fTopMassHigh ) {    
+//    if (sqrt(chi2Min) < fChi2Cut) { //TODO: the cut criterion should be changed to this or something more sophisticated later
+        htopPtAfterCut->Fill(output.top.Pt());
+        htopMassAfterCut->Fill(output.getTopMass());
+        htopEtaAfterCut->Fill(output.getTopEta());
+        hWPtAfterCut->Fill(output.W.Pt());
+        hWMassAfterCut->Fill(output.getWMass());
+        hWEtaAfterCut->Fill(output.getWEta());
+        }
+
+//---------------------------------------------------------------------------------------------
+    //Search correct combinations
+
+    //if (!iEvent.isRealData() && chi2Min < fChi2Cut ) {
     if (!iEvent.isRealData() && topmassfound ) {
       edm::Handle <reco::GenParticleCollection> genParticles;
       iEvent.getByLabel(fSrc, genParticles);
 
+      bool bMatchHiggsSide = false;
+      bool bMatchTauSide = false;
+      bool Jet1Match = false;
+      bool Jet2Match = false;
+
+    //Determine HiggSide variable: 6 if top, -6 if antitop, 0 if top not found
       int idHiggsSide = 0;
       for (size_t i=0; i < genParticles->size(); ++i){
         const reco::Candidate & p = (*genParticles)[i];
         int id = p.pdgId();
+        //if top and has immediate Higgs daughter:
         if(abs(id) == 6 && (hasImmediateDaughter(p,37) || hasImmediateDaughter(p,-37))) {
           idHiggsSide = id;
           }
         }
-      bool bMatchHiggsSide = false;
-      bool bMatchTopSide = false;
-      bool Jet1Match = false;
-      bool Jet2Match = false;
-     
+             
+    //Test if b-jet is tau-side or Higgs-side
       for (size_t i=0; i < genParticles->size(); ++i){
         const reco::Candidate & p = (*genParticles)[i];
         int id = p.pdgId();
+        // select only b-jet particles
         if ( abs(id) != 5 || hasImmediateMother(p,5) || hasImmediateMother(p,-5) )continue;
+        //if immediate top mother
         if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
-          //      printImmediateMothers(p);
-          //      std::cout << " b quarks " << id <<  " idHiggsSide " <<   idHiggsSide << std::endl;
           if ( id * idHiggsSide > 0 ) {
             // test with b jet to tau side
             double deltaR = ROOT::Math::VectorUtil::DeltaR(Jetb->p4(),p.p4() );
@@ -159,164 +174,62 @@ namespace HPlus {
           if ( id * idHiggsSide < 0 ) {
             // test with b jet to top side
             double deltaR = ROOT::Math::VectorUtil::DeltaR(Jetb->p4(),p.p4() );
-            if ( deltaR < 0.4) bMatchTopSide = true;
+            if ( deltaR < 0.4) bMatchTauSide = true;
           }
         }
       } 
-      
+
+      //Check light quark jets      
       for (size_t i=0; i < genParticles->size(); ++i){
-        const reco::Candidate & p = (*genParticles)[i];
-        int id = p.pdgId();
-        if ( abs(id) > 4  )continue;
-        if ( hasImmediateMother(p,1) || hasImmediateMother(p,-1) )continue;
-        if ( hasImmediateMother(p,2) || hasImmediateMother(p,-2) )continue;
-        if ( hasImmediateMother(p,3) || hasImmediateMother(p,-3) )continue;
-        if ( hasImmediateMother(p,4) || hasImmediateMother(p,-4) )continue;
+          const reco::Candidate & p = (*genParticles)[i];
+          int id = p.pdgId();
+          //if not light quark but from light quark
+          if ( abs(id) > 4  )continue;
+          if ( hasImmediateMother(p,1) || hasImmediateMother(p,-1) )continue;
+          if ( hasImmediateMother(p,2) || hasImmediateMother(p,-2) )continue;
+          if ( hasImmediateMother(p,3) || hasImmediateMother(p,-3) )continue;
+          if ( hasImmediateMother(p,4) || hasImmediateMother(p,-4) )continue;
+          //if from W
+          if(hasImmediateMother(p,24) || hasImmediateMother(p,-24)) {
+              double deltaR1 = ROOT::Math::VectorUtil::DeltaR(Jet1->p4(),p.p4() );
+              if ( deltaR1 < 0.4) Jet1Match = true;
+              double deltaR2 = ROOT::Math::VectorUtil::DeltaR(Jet2->p4(),p.p4() );
+              if ( deltaR2 < 0.4) Jet2Match = true;
+              }
+          }    
 
-      if(hasImmediateMother(p,24) || hasImmediateMother(p,-24)) {
-        double deltaR1 = ROOT::Math::VectorUtil::DeltaR(Jet1->p4(),p.p4() );
-        if ( deltaR1 < 0.4) Jet1Match = true;
-        double deltaR2 = ROOT::Math::VectorUtil::DeltaR(Jet2->p4(),p.p4() );
-        if ( deltaR2 < 0.4) Jet2Match = true;
-        }
-      }    
-
-     if ( bMatchTopSide && Jet1Match && Jet2Match) {
+    //Fill histograms
+     //everything matches
+     if ( bMatchTauSide && Jet1Match && Jet2Match) {
        htopMassMatch->Fill(output.getTopMass());
        hWMassMatch->Fill(output.getWMass()); 
        }
+     //everything matches but b
      if ( bMatchHiggsSide && Jet1Match && Jet2Match) {
        htopMassMatchWrongB->Fill(output.getTopMass());
        hWMassMatchWrongB->Fill(output.getWMass()); 
        }
-     if ( bMatchTopSide ) {
+     //b matches
+     if ( bMatchTauSide ) {
        htopMassBMatch->Fill(output.getTopMass());
        hWMassBMatch->Fill(output.getWMass()); 
        }
+     //quark jets match
      if ( Jet1Match && Jet2Match ) {
        htopMassQMatch->Fill(output.getTopMass());
        hWMassQMatch->Fill(output.getWMass()); 
        }
       }
 
+    //Event selection based on top reconstruction
     if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
       output.fPassedEvent = false;
+      htopMassRejected->Fill(output.getTopMass());      
       } else {
       output.fPassedEvent = true;
       //increment(fTopChiMassCount); //TODO
       } 
     return output;
   }
-
-  /*  
-      std::vector<const reco::GenParticle*>   TopChiSelection::getImmediateMothers(const reco::Candidate& p){ 
-    std::vector<const reco::GenParticle*> mothers;
-    for (size_t im=0; im < p.numberOfMothers(); ++im){
-      const reco::GenParticle* mparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
-      if (mparticle) mothers.push_back(mparticle);
-    }
-    return mothers;
-      }
-      
-      std::vector<const reco::GenParticle*>   TopChiSelection::getMothers(const reco::Candidate& p){ 
-    std::vector<const reco::GenParticle*> mothers;
-    for (size_t im=0; im < p.numberOfMothers(); ++im){
-      const reco::GenParticle* mparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
-      if (mparticle) { 
-        mothers.push_back(mparticle);
-        std::vector<const reco::GenParticle*> mmothers = getMothers( * (dynamic_cast<const reco::Candidate*> (mparticle)) );
-        mothers.insert(mothers.end(), mmothers.begin(), mmothers.end()); 
-      }
-    }
-    return mothers;
-      }
-      
-      bool  TopChiSelection::hasImmediateMother(const reco::Candidate& p, int id){
-    std::vector<const reco::GenParticle*> mothers = getImmediateMothers(p);
-    for (size_t im=0; im < mothers.size(); ++im){
-      if (mothers[im]->pdgId() == id) return true;
-    }
-    return false;
-      }  
-      
-      bool  TopChiSelection::hasMother(const reco::Candidate& p, int id){
-    std::vector<const reco::GenParticle*> mothers = getMothers(p);
-    for (size_t im=0; im < mothers.size(); ++im){
-      if (mothers[im]->pdgId() == id) return true;
-    }
-    return false;
-      } 
- 
-     void  TopChiSelection::printImmediateMothers(const reco::Candidate& p){
-    std::vector<const reco::GenParticle*> mothers = getImmediateMothers(p);
-    std::cout << "Immediate mothers of " << p.pdgId() << ":" << std::endl;
-    for (size_t im=0; im < mothers.size(); ++im){
-      std::cout << "  " << mothers[im]->pdgId() << std::endl;
-    }
-    std::cout << std::endl;
-      }  
-      
-      void  TopChiSelection::printMothers(const reco::Candidate& p){
-    std::vector<const reco::GenParticle*> mothers = getMothers(p);
-    std::cout << "Mothers of " << p.pdgId() << ":" << std::endl;
-    for (size_t im=0; im < mothers.size(); ++im){
-      std::cout << "  " << mothers[im]->pdgId() << std::endl;
-    }
-    std::cout << std::endl;
-      }  
-      std::vector<const reco::GenParticle*>  TopChiSelection::getImmediateDaughters(const reco::Candidate& p){ 
-    std::vector<const reco::GenParticle*> daughters;
-    for (size_t im=0; im < p.numberOfDaughters(); ++im){
-      const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.daughter(im));
-      if (dparticle) daughters.push_back(dparticle);
-    }
-    return daughters;
-      }
-      
-      std::vector<const reco::GenParticle*>   TopChiSelection::getDaughters(const reco::Candidate& p){ 
-    std::vector<const reco::GenParticle*> daughters;
-    for (size_t im=0; im < p.numberOfDaughters(); ++im){
-      const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.daughter(im));
-      if (dparticle) {
-        daughters.push_back(dparticle);
-        std::vector<const reco::GenParticle*> ddaughters = getDaughters( * (dynamic_cast<const reco::Candidate*> (dparticle)) );
-        daughters.insert(daughters.end(), ddaughters.begin(), ddaughters.end()); 
-      }
-    }
-    return daughters;
-      }
-      
-      bool  TopChiSelection::hasImmediateDaughter(const reco::Candidate& p, int id){
-    std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
-    for (size_t im=0; im < daughters.size(); ++im){
-      if (daughters[im]->pdgId() == id) return true;
-    }
-    return false;
-      }
-      bool  TopChiSelection::hasDaughter(const reco::Candidate& p, int id){
-    std::vector<const reco::GenParticle*> daughters = getDaughters(p);
-    for (size_t im=0; im < daughters.size(); ++im){
-      if (daughters[im]->pdgId() == id) return true;
-    }
-    return false;
-      }
-      
-      void  TopChiSelection::printImmediateDaughters(const reco::Candidate& p){
-    std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
-    std::cout << "Immediate daughters of " << p.pdgId() << ":" << std::endl;
-    for (size_t im=0; im < daughters.size(); ++im){
-      std::cout << "  " << daughters[im]->pdgId() << std::endl;
-    }
-    std::cout << std::endl;
-      }  
-      
-      void  TopChiSelection::printDaughters(const reco::Candidate& p){
-    std::vector<const reco::GenParticle*> daughters = getDaughters(p);
-    std::cout << "Daughters of " << p.pdgId() << ":" << std::endl;
-    for (size_t im=0; im < daughters.size(); ++im){
-      std::cout << "  " << daughters[im]->pdgId() << std::endl;
-    }
-    std::cout << std::endl;
-      }  
-  */    
+     
 }

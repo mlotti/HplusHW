@@ -535,7 +535,7 @@ GenParticleAnalysis = cms.untracked.PSet(
 
 
 topSelection = cms.untracked.PSet(
-  TopMassLow = cms.untracked.double(100.0),
+  TopMassLow = cms.untracked.double(120.0),
   TopMassHigh = cms.untracked.double(300.0),
   src = cms.untracked.InputTag("genParticles")
 )
