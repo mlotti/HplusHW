@@ -4188,20 +4188,30 @@ class NtupleCache:
 
         print "Processing dataset", datasetName
         
+        # Setup cache
+        useCache = True
+        if useCache:
+            tree.SetCacheSize(1024*1024) # 10 MB
+            tree.SetCacheLearnEntries(100);
+
         readBytesStart = ROOT.TFile.GetFileBytesRead()
+        readCallsStart = ROOT.TFile.GetFileReadCalls()
         timeStart = time.time()
         clockStart = time.clock()
         if useMaxEvents:
+            if useCache:
+                tree.SetCacheEntryRange(0, N)
             tree.Process(selector, "", N)
         else:
             tree.Process(selector)
         timeStop = time.time()
         clockStop = time.clock()
+        readCallsStop = ROOT.TFile.GetFileReadCalls()
         readBytesStop = ROOT.TFile.GetFileBytesRead()
         cpuTime = clockStop-clockStart
         realTime = timeStop-timeStart
         readMbytes = float(readBytesStop-readBytesStart)/1024/1024
-        print "Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB, read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, readMbytes/realTime)
+        print "Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB (%d calls), read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, readCallsStop-readCallsStart, readMbytes/realTime)
         for d in directories:
             d.Write()
 
