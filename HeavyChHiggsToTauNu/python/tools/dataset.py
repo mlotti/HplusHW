@@ -8,6 +8,7 @@
 import glob, os, sys, re
 import math
 import copy
+import time
 import StringIO
 import hashlib
 import array
@@ -4187,10 +4188,20 @@ class NtupleCache:
 
         print "Processing dataset", datasetName
         
+        readBytesStart = ROOT.TFile.GetFileBytesRead()
+        timeStart = time.time()
+        clockStart = time.clock()
         if useMaxEvents:
             tree.Process(selector, "", N)
         else:
             tree.Process(selector)
+        timeStop = time.time()
+        clockStop = time.clock()
+        readBytesStop = ROOT.TFile.GetFileBytesRead()
+        cpuTime = clockStop-clockStart
+        realTime = timeStop-timeStart
+        readMbytes = float(readBytesStop-readBytesStart)/1024/1024
+        print "Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB, read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, readMbytes/realTime)
         for d in directories:
             d.Write()
 
