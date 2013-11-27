@@ -63,8 +63,10 @@ namespace HPlus {
     fTree->Branch("weightPileup", &fPileupWeight);
     fTree->Branch("weightWjets", &fWjetsWeight);
     fTree->Branch("weightTopPt", &fTopPtWeight);
-    if(fTauEmbeddingInput)
+    if(fTauEmbeddingInput) {
       fTree->Branch("weightEmbeddingGenerator", &fEmbeddingGeneratorWeight);
+      fTree->Branch("weightEmbeddingWTauMu", &fEmbeddingWTauMuWeight);
+    }
     fTree->Branch("weightTauFakes", &fTauFakeWeight);
     fTree->Branch("weightTauFakesAbsUnc", &fTauFakeWeightAbsUnc);
     fTree->Branch("weightTauTrigger", &fTauTriggerWeight);
@@ -721,6 +723,7 @@ namespace HPlus {
     fWjetsWeight = 1.0;
     fTopPtWeight = 1.0;
     fEmbeddingGeneratorWeight = 1.0;
+    fEmbeddingWTauMuWeight = 1.0;
     fTauFakeWeight = 1.0;
     fTauFakeWeightAbsUnc = nan;
     fTauTriggerWeight = 1.0;
