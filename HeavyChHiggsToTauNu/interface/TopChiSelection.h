@@ -38,22 +38,29 @@ namespace HPlus {
     
     // Histograms
     
-    WrappedTH1 *hPtTopChiCut;
-    WrappedTH1 *hPtTop;
-    WrappedTH1 *hjjbMass;
-    WrappedTH1 *htopMass;
-    WrappedTH1 *htopMassMatch;
-    WrappedTH1 *htopMassChiCut;
-    WrappedTH1 *hWMass;
-    WrappedTH1 *hWMassMatch;
-    WrappedTH1 *hWMassChiCut;
-    WrappedTH1 *hChi2Min;
-    WrappedTH1 *htopMassBMatch;
-    WrappedTH1 *hWMassBMatch;
-    WrappedTH1 *htopMassQMatch;
-    WrappedTH1 *hWMassQMatch;
-    WrappedTH1 *htopMassMatchWrongB;
-    WrappedTH1 *hWMassMatchWrongB;
+    WrappedTH1* htopPt;
+    WrappedTH1* htopMass;
+    WrappedTH1* htopEta;
+    WrappedTH1* htopPtAfterCut;
+    WrappedTH1* htopMassAfterCut;
+    WrappedTH1* htopEtaAfterCut;
+    WrappedTH1* htopMassRejected;
+    WrappedTH1* hWPt;
+    WrappedTH1* hWMass;
+    WrappedTH1* hWEta;
+    WrappedTH1* hWPtAfterCut;
+    WrappedTH1* hWMassAfterCut;
+    WrappedTH1* hWEtaAfterCut;    
+    WrappedTH1* hjjbMass;
+    WrappedTH1* htopMassMatch;
+    WrappedTH1* hWMassMatch;
+    WrappedTH1* hChi2Min;
+    WrappedTH1* htopMassBMatch;
+    WrappedTH1* hWMassBMatch;
+    WrappedTH1* htopMassQMatch;
+    WrappedTH1* hWMassQMatch;
+    WrappedTH1* htopMassMatchWrongB;
+    WrappedTH1* hWMassMatchWrongB;
 
   };
 }
