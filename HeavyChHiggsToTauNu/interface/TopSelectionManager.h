@@ -21,15 +21,18 @@ namespace edm {
 
 namespace HPlus {
   class TopSelectionManager {
+
+  private:
+    const edm::ParameterSet& iConfig;
+    EventCounter& eventCounter;
+    HistoWrapper& fHistoWrapper;
+    const std::string fTopRecoName;
+
   public:    
     typedef math::XYZTLorentzVector XYZTLorentzVector;
     typedef TopSelectionBase::Data Data;
     
-    TopSelection fTopSelection;
-    TopChiSelection fTopChiSelection;
-    TopWithBSelection fTopWithBSelection;
-    TopWithWSelection fTopWithWSelection;
-    //TopWithMHSelection fTopWithMHSelection;
+    TopSelectionBase* fSelectedAlgorithm;
 
     TopSelectionManager(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& fHistoWrapper, const std::string topRecoName);
     ~TopSelectionManager();
@@ -37,9 +40,7 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, edm::Ptr<pat::Jet> bjet, bool bjetPassed);
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, edm::Ptr<pat::Jet> bjet, bool bjetPassed);
     bool getPassedTopRecoStatus();
-    
-  private:
-    const std::string fTopRecoName;
+        
   };
 }
 
