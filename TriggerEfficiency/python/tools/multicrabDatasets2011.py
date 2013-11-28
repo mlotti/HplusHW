@@ -1,8 +1,20 @@
 # Generated on Thu Nov 29 13:47:54 2012 by multicrabDatasetsCfgCreator.py 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTools import TaskDef
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff import addMetLegSkim_44X
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff import addTauLegSkim_44X,addMetLegSkim_44X
 
 skimVersion = "v44_v5_CMSSW445_v1"
+
+def addTauLegSkim_v44_v5(datasets):
+    definitions = {
+        "SingleMu_165970-167913_2011A_Nov08_RAWRECO":     TaskDef("/SingleMu/local-pattuple_v25bfix_TTEffSkim_SingleMu_165970-167913_2011A_Nov08_RAWRECO-f73b0045e7e1eac08bdc8374111fc3ea/USER"),
+        "SingleMu_170722-173198_2011A_Nov08_RAWRECO":     TaskDef("/SingleMu/local-pattuple_v25bfix_TTEffSkim_SingleMu_170722-173198_2011A_Nov08_RAWRECO-f73b0045e7e1eac08bdc8374111fc3ea/USER"),
+        "SingleMu_173236-173692_2011A_Nov08_RAWRECO":     TaskDef("/SingleMu/local-pattuple_v25bfix_TTEffSkim_SingleMu_173236-173692_2011A_Nov08_RAWRECO-f73b0045e7e1eac08bdc8374111fc3ea/USER"),
+        "SingleMu_175832-180252_2011B_Nov19_RAWRECO":     TaskDef("/SingleMu/local-pattuple_v25bfix_TTEffSkim_SingleMu_175832-180252_2011B_Nov19_RAWRECO-f73b0045e7e1eac08bdc8374111fc3ea/USER"),
+
+        "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW": TaskDef("/DYJetsToLL_TuneZ2_MPIoff_M-50_7TeV-madgraph-tauola/local-pattuple_v25bfix_TTEffSkim_DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW-7cc2aee836bd13479c6162f567a9f02e/USER"),
+    }
+
+    addTauLegSkim_44X(skimVersion, datasets, definitions)
 
 def addMetLegSkim_v44_v5(datasets):
     definitions = {
