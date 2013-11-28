@@ -226,9 +226,13 @@ class QCDFactorisedResultManager:
                 myStatus = True
                 i += 1
                 print HighlightStyle()+"...Obtaining ctrl plot %d/%d: %s%s"%(i,len(myObjects),item,NormalStyle())
-                if not dsetMgr.getDataset("EWK").datasets[0].hasRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item)):
+                myEWKFoundStatus = True
+                for d in dsetMgr.getDataset("EWK").datasets:
+                    if not d.hasRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item)):
+                        myEWKFoundStatus = False
+                if not myEWKFoundStatus:
                     myStatus = False
-                    print WarningLabel()+"Skipping '%s', because it does not exist for EWK (you probably forgot to set histo level to Vital when producing the multicrab)!"%(item)+NormalStyle()
+                    print WarningLabel()+"Skipping '%s', because it does not exist for EWK datasets (you probably forgot to set histo level to Vital when producing the multicrab)!"%(item)+NormalStyle()
                 else:
                     (myRootObject, myRootObjectName) = dsetMgr.getDataset("EWK").getFirstRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item))
                     if isinstance(myRootObject, ROOT.TH2):
