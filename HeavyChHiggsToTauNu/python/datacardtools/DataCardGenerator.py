@@ -61,7 +61,7 @@ class DatasetMgrCreatorManager:
                 myDsetMgr.updateNAllEventsToPUWeighted()
                 # Obtain luminosity
                 myLuminosity = 0.0
-                if i != DatacardDatasetMgrSourceType.QCDMEASUREMENT:
+                if i != DatacardDatasetMgrSourceType.QCDMEASUREMENT and i != DatacardDatasetMgrSourceType.EMBEDDING:
                     myDsetMgr.loadLuminosities()
                     myDataDatasets = myDsetMgr.getDataDatasets()
                     for d in myDataDatasets:
