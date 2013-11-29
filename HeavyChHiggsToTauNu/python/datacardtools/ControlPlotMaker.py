@@ -45,7 +45,7 @@ class ControlPlotMaker:
         for m in self._config.MassPoints:
             print "... mass = %d GeV"%m
             # Initialize flow plot
-            selectionFlow = SelectionFlowPlotMaker(self._config, m)
+            selectionFlow = SelectionFlowPlotMaker(self._opts, self._config, m)
             myBlindedStatus = False
             for i in range(0,len(self._config.ControlPlots)):
                 myCtrlPlot = self._config.ControlPlots[i]
@@ -224,7 +224,8 @@ class SignalAreaEvaluator:
         return Count(myResult,sqrt(myError))
 
 class SelectionFlowPlotMaker:
-    def __init__(self, config, mass):
+    def __init__(self, opts, config, mass):
+        self._opts = opts
         self._config = config
         self._mass = mass
         # Calculate number of bins
@@ -268,6 +269,15 @@ class SelectionFlowPlotMaker:
                 (uncertUp,uncertDown) = expectedList[i].getRootHistoWithUncertainties().getRateSystUncertainty()
                 self._expectedListSystUp[i].SetBinContent(self._myCurrentColumn, uncertUp/myRate)
                 self._expectedListSystDown[i].SetBinContent(self._myCurrentColumn, uncertDown/myRate)
+            if self._opts.debugControlPlots:
+                s = "debugControlPlots:,"
+                s += "After "+self._pickLabel
+                s += ","+expectedList[i].getName()
+                s += ",%f"%myRate
+                s += ",+-,%f,(stat.)"%self._expectedList[i].GetBinError(self._myCurrentColumn)
+                s += ",+,%f"%self._expectedListSystUp[i].GetBinContent(self._myCurrentColumn)
+                s += ",-,%f,(syst.)"%self._expectedListSystDown[i].GetBinContent(self._myCurrentColumn)
+                print s
         # Add data
         if data != None:
             self._data.SetBinContent(self._myCurrentColumn, data.getRate())
