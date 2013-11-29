@@ -453,7 +453,8 @@ class ShapeExtractor(ExtractorBase):
             raise Exception(ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+NormalStyle())
         # Get histogram from cache
         h = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
-        h.Scale(additionalNormalisation) # Scale by additional normalisation
+        # Do not apply here additional normalization, it has already been applied
+        # via RootHistoWithUncertainties.Scale() in DatacardColumn::doDataMining()
         if self.isRate() or self.isObservation():
             # Shape histogram is the result
             h.SetTitle(datasetColumn.getLabel())
@@ -520,9 +521,8 @@ class ShapeVariationExtractor(ExtractorBase):
         hDown = hSystDown.Clone()
         hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
         hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
-        # Apply formatting
-        hUp.Scale(additionalNormalisation) # Scale by additional normalisation
-        hDown.Scale(additionalNormalisation) # Scale by additional normalisation
+        # Do not apply here additional normalization, it has already been applied
+        # via RootHistoWithUncertainties.Scale() in DatacardColumn::doDataMining()
         # Append histograms to output list
         myHistograms.append(hUp)
         myHistograms.append(hDown)

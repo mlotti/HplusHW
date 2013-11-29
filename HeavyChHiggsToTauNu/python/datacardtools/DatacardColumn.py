@@ -257,6 +257,9 @@ class DatacardColumn():
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()
+            # Apply additional normalization
+            # Note: this applies the normalizatoin also to the syst. uncertainties
+            self._cachedShapeRootHistogramWithUncertainties.Scale(self._additionalNormalisationFactor)
             # Rebin and move under/overflow bins to visible bins
             myArray = array("d",config.ShapeHistogramsDimensions)
             self._cachedShapeRootHistogramWithUncertainties.Rebin(len(config.ShapeHistogramsDimensions)-1,"",myArray)
