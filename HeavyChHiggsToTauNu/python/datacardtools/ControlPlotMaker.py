@@ -275,8 +275,8 @@ class SelectionFlowPlotMaker:
                 s += ","+expectedList[i].getName()
                 s += ",%f"%myRate
                 s += ",+-,%f,(stat.)"%self._expectedList[i].GetBinError(self._myCurrentColumn)
-                s += ",+,%f"%self._expectedListSystUp[i].GetBinContent(self._myCurrentColumn)
-                s += ",-,%f,(syst.)"%self._expectedListSystDown[i].GetBinContent(self._myCurrentColumn)
+                s += ",+,%f"%uncertUp
+                s += ",-,%f,(syst.)"%uncertDown
                 print s
         # Add data
         if data != None:
