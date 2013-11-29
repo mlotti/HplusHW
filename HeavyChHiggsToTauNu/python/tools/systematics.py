@@ -147,6 +147,11 @@ _dataDrivenCtrlPlotBinning = {
     "SelectedTau_p_AfterStandardSelections": [0,20,40,60,80,100,150,200,300,400],
     "SelectedTau_LeadingTrackP_AfterStandardSelections": [0,20,40,60,80,100,150,200,300,400],
 }
+# Add EWK fake tau shape definitions
+for key in _dataDrivenCtrlPlotBinning.keys():
+    if "shape" in key:
+        _dataDrivenCtrlPlotBinning[key.replace("shape","shapeEWKFakeTaus")] = _dataDrivenCtrlPlotBinning[key]
+
 
 def getBinningForPlot(plotName):
     for plot in _dataDrivenCtrlPlotBinning:
