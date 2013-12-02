@@ -257,6 +257,11 @@ class DatacardColumn():
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()
+            # Apply additional normalization
+            # Note: this applies the normalizatoin also to the syst. uncertainties
+            if abs(self._additionalNormalisationFactor - 1.0) > 0.00001:
+                print WarningLabel()+"Applying normalization factor %f to sample '%s'!"%(self._additionalNormalisationFactor, self.getLabel())
+                self._cachedShapeRootHistogramWithUncertainties.Scale(self._additionalNormalisationFactor)
             # Rebin and move under/overflow bins to visible bins
             myArray = array("d",config.ShapeHistogramsDimensions)
             self._cachedShapeRootHistogramWithUncertainties.Rebin(len(config.ShapeHistogramsDimensions)-1,"",myArray)
@@ -285,7 +290,9 @@ class DatacardColumn():
                                            myRateHistograms)
         if self.typeIsEmptyColumn() or dsetMgr == None:
             return
+
         # Obtain results for nuisances
+        # Add the scalar uncertainties to the cached RootHistoWithUncertainties object
         for nid in self._nuisanceIds:
             if self._opts.verbose:
                 print "  - Extracting nuisance by id=%s"%nid
@@ -301,12 +308,32 @@ class DatacardColumn():
                     myHistograms = []
                     if e.isShapeNuisance():
                         myHistograms = e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                        # FIXME: begin temp code
+                        if self.typeIsEWK() and e.getId() == "tau_ID_shape" and not config.OptionReplaceEmbeddingByMC:
+                            print WarningLabel()+"(temporary hack): Generating adhoc the tau_ID_shape uncertainty for embedding rate plot!"
+                            import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
+                            myUncertainty = systematics.getTauIDUncertainty(isGenuineTau=True).getUncertaintyDown()
+                            hUp = myRateHistograms[0].Clone()
+                            hDown = myRateHistograms[0].Clone()
+                            hUp.SetTitle(self.getLabel()+"_"+e._masterExID+"Up")
+                            hDown.SetTitle(self.getLabel()+"_"+e._masterExID+"Down")
+                            for k in range(0, hUp.GetNbinsX()):
+                                myValue = hUp.GetBinContent(k)
+                                hUp.SetBinContent(k, myValue * (1.0 + myUncertainty))
+                                hDown.SetBinContent(k, myValue * (1.0 - myUncertainty))
+                            myHistograms.append(hUp)
+                            myHistograms.append(hDown)
+                            # Add uncertainty also to RootHistoWithUncertainties
+                            self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myUncertainty, myUncertainty)
+                        # FIXME: end temp code
                         # Histograms constain abs uncertainty, need to add nominal histogram so that Lands accepts the histograms
                         if e.getDistribution() == "shapeQ":
                             for i in range(0,len(myHistograms)):
                                 myHistograms[i].Add(self._rateResult.getHistograms()[0])
                     else:
                         # Add scalar uncertainties
+                        if self._opts.verbose:
+                            print "Adding scalar uncert. ",e.getId()
                         if isinstance(myResult, ScalarUncertaintyItem):
                             self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                         elif isinstance(myResult, list):
@@ -336,6 +363,13 @@ class DatacardColumn():
                     if myDatasetRootHisto.isMC():
                         myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
                     h = myCtrlDsetRootHisto.getHistogramWithUncertainties()
+                    # FIXME: begin temp code
+                    if self.typeIsEWK() and not config.OptionReplaceEmbeddingByMC and "tau_ID_shape" in config.myEmbeddingShapeSystematics:
+                        print WarningLabel()+"(temporary hack): Generating adhoc the tau_ID_shape uncertainty for embedding ctrl. plot!"
+                        import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
+                        myUncertainty = systematics.getTauIDUncertainty(isGenuineTau=True).getUncertaintyDown()
+                        self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative("tau_ID_shape", myUncertainty, myUncertainty)
+                    # FIXME: end temp code
                     # Rebin and move under/overflow bins to visible bins
                     myArray = array("d",getBinningForPlot(c._histoName))
                     h.Rebin(len(myArray)-1,"",myArray)

@@ -188,11 +188,10 @@ class ValidateGroup:
         myOutput = ""
         # Get event counters
         refEventCounter = counter.EventCounter(refDataset)
-        if isinstance(refDataset, dataset.DatasetMerged):
-            refEventCounter.normalizeMCToLuminosity(1)
         testEventCounter = counter.EventCounter(testDataset)
-        if isinstance(testDataset, dataset.DatasetMerged):
-            testEventCounter.normalizeMCToLuminosity(1)
+        if isinstance(refDataset, dataset.DatasetMerged) or isinstance(testDataset, dataset.DatasetMerged):
+            refEventCounter.normalizeMCToLuminosity(self._mcNormalization["normalizeToLumi"])
+            testEventCounter.normalizeMCToLuminosity(self._mcNormalization["normalizeToLumi"])
         mcNormalization = ""
         for ds, ec in [(refDataset, refEventCounter), (testDataset, testEventCounter)]:
             if ds.isMC():
@@ -254,9 +253,10 @@ class ValidateGroup:
             c = refCounter.getColumn(index=0)
             c.setName("Ref")
             table.appendColumn(c)
-        c = testCounter.getColumn(index=0)
-        c.setName("Test")
-        table.appendColumn(c)
+        if testCounter is not None:
+            c = testCounter.getColumn(index=0)
+            c.setName("Test")
+            table.appendColumn(c)
 
         for row in table.getRowNames():
             myOutput += self._testCounterValues(oldrow, row, refCounter, testCounter)

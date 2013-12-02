@@ -132,6 +132,7 @@ _dataDrivenCtrlPlotBinning = {
     "ImprovedDeltaPhiCuts": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
     "MET": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
     "NBjets": [0,1,2,3,4,5,6,7,8],
+    "BtagDiscriminator": [-2, -1.8, -1.6, -1.4, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0],
     "TopMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500],
     "TopPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500],
     "WMass": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
@@ -146,6 +147,11 @@ _dataDrivenCtrlPlotBinning = {
     "SelectedTau_p_AfterStandardSelections": [0,20,40,60,80,100,150,200,300,400],
     "SelectedTau_LeadingTrackP_AfterStandardSelections": [0,20,40,60,80,100,150,200,300,400],
 }
+# Add EWK fake tau shape definitions
+for key in _dataDrivenCtrlPlotBinning.keys():
+    if "shape" in key:
+        _dataDrivenCtrlPlotBinning[key.replace("shape","shapeEWKFakeTaus")] = _dataDrivenCtrlPlotBinning[key]
+
 
 def getBinningForPlot(plotName):
     for plot in _dataDrivenCtrlPlotBinning:

@@ -338,8 +338,12 @@ namespace HPlus {
     hReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode2NoNeutralHadrons", "ReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
 
     // Print info about number of booked histograms
-    std::cout << iConfig.getParameter<std::string>("@module_label") << std::endl;
-    fHistoWrapper.printHistoStatistics();
+    std::string myModuleLabel = iConfig.getParameter<std::string>("@module_label");
+    
+    if (myModuleLabel.find("SystVar") == std::string::npos && myModuleLabel.find("Opt") == std::string::npos) {
+      std::cout << "Histogram breakdown for module " << myModuleLabel << std::endl;
+      fHistoWrapper.printHistoStatistics();
+    }
   }
 
   SignalAnalysis::~SignalAnalysis() { }

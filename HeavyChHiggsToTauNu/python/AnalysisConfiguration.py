@@ -488,6 +488,17 @@ class ConfigBuilder:
         # Tau embedding-like preselection for normal MC
         analysisNamesForSystematics.extend(self._buildTauEmbeddingLikePreselection(process, analysisModules, analysisNames, additionalCounters))
 
+        def runSetter(func):
+            for name in self.getAnalyzerModuleNames():
+                func(getattr(process, name), name)
+        # Set trigger efficiencies
+        runSetter(lambda module, name: param.setTauTriggerEfficiencyScaleFactorBasedOnTau(module.tauTriggerEfficiencyScaleFactor, module.tauSelection, name))
+        runSetter(lambda module, name: param.setMetTriggerEfficiencyScaleFactorBasedOnTau(module.metTriggerEfficiencyScaleFactor, module.tauSelection, name))
+        # Set fake tau SF (call before systematics!)
+        runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
+        # Set PU ID src for modules
+        runSetter(lambda module, name: param.setJetPUIdSrc(module.jetSelection, name))
+
         ## Systematics
         #if "QCDMeasurement" not in analysisNames_: # Need also for QCD measurements, since they contain MC EWK
         self._buildTauIDandMisIdVariation(process, analysisNamesForSystematics, param)
@@ -513,17 +524,6 @@ class ConfigBuilder:
                 )
             )
             process.outpath = cms.EndPath(process.out)
-
-        def runSetter(func):
-            for name in self.getAnalyzerModuleNames():
-                func(getattr(process, name), name)
-        # Set trigger efficiencies
-        runSetter(lambda module, name: param.setTauTriggerEfficiencyScaleFactorBasedOnTau(module.tauTriggerEfficiencyScaleFactor, module.tauSelection, name))
-        runSetter(lambda module, name: param.setMetTriggerEfficiencyScaleFactorBasedOnTau(module.metTriggerEfficiencyScaleFactor, module.tauSelection, name))
-        # Set fake tau SF
-        runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
-        # Set PU ID src for modules
-        runSetter(lambda module, name: param.setJetPUIdSrc(module.jetSelection, name))
 
         # Check number of analyzers
         self._checkNumberOfAnalyzers()
