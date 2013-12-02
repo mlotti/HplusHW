@@ -41,6 +41,10 @@ namespace HPlus {
       const bool passedEvent() const { return fPassedEvent; }
       const double getTopMass() const { return top.M(); }
       const double getWMass() const { return W.M(); }
+      const double getTopPt() const { return top.Pt(); }
+      const double getWPt() const { return W.Pt(); }
+      const double getTopEta() const { return top.Eta(); }
+      const double getWEta() const { return W.Eta(); }
       const XYZTLorentzVector& getTopP4() const { return top; }
       const XYZTLorentzVector& getWP4() const { return W; }
       const edm::Ptr<pat::Jet>& getSelectedBjet() const { return bjetInTop; }
@@ -65,6 +69,20 @@ namespace HPlus {
     virtual Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
     // Overloading for BSelection
     virtual Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
+    
+    //Helper function declarations
+    std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
+    std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
+    bool  hasImmediateMother(const reco::Candidate& p, int id);
+    bool  hasMother(const reco::Candidate& p, int id);
+    void  printImmediateMothers(const reco::Candidate& p);
+    void  printMothers(const reco::Candidate& p);
+    std::vector<const reco::GenParticle*>  getImmediateDaughters(const reco::Candidate& p);
+    std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p);
+    bool  hasImmediateDaughter(const reco::Candidate& p, int id);
+    bool  hasDaughter(const reco::Candidate& p, int id);
+    void  printImmediateDaughters(const reco::Candidate& p);
+    void printDaughters(const reco::Candidate& p);    
 
     void init();
     //Input parameters, counters and histograms are defined for each algorighm separately
