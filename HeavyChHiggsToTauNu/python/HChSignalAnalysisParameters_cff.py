@@ -535,7 +535,7 @@ GenParticleAnalysis = cms.untracked.PSet(
 
 
 topSelection = cms.untracked.PSet(
-  TopMassLow = cms.untracked.double(100.0),
+  TopMassLow = cms.untracked.double(120.0),
   TopMassHigh = cms.untracked.double(300.0),
   src = cms.untracked.InputTag("genParticles")
 )
@@ -613,17 +613,17 @@ commonPlotsSettings = cms.untracked.PSet(
         #splitHistogramByDeltaPhiTauMetInDegrees = cms.untracked.vdouble(90.)
     ),
     # Histogram dimension definitions for control plots and shapes (input for datacard generator)
-    ptBins = SetHistogramBinSettings(100, 0., 500.),
+    ptBins = SetHistogramBinSettings(50, 0., 500.),
     etaBins = SetHistogramBinSettings(60, -3., 3.),
     phiBins = SetHistogramBinSettings(72, -3.1415926, 3.1415926),
     rtauBins = SetHistogramBinSettings(55, 0., 1.1),
     njetsBins = SetHistogramBinSettings(20, 0., 20.),
-    metBins = SetHistogramBinSettings(250, 0., 500.),
+    metBins = SetHistogramBinSettings(50, 0., 500.),
     tailKiller1DBins = SetHistogramBinSettings(52, 0., 260.),
-    topMassBins = SetHistogramBinSettings(100, 0., 500.),
+    topMassBins = SetHistogramBinSettings(50, 0., 500.),
     WMassBins = SetHistogramBinSettings(60, 0., 300.),
-    mtBins = SetHistogramBinSettings(100, 0., 500.),
-    invmassBins = SetHistogramBinSettings(100, 0., 500.),
+    mtBins = SetHistogramBinSettings(50, 0., 500.),
+    invmassBins = SetHistogramBinSettings(50, 0., 500.),
 )
 
 tree = cms.untracked.PSet(

@@ -625,6 +625,7 @@ namespace HPlus {
     
     // Initialize output data object
     Data output;
+    output.fDiscriminatorName = fDiscriminator;
     output.fSelectedJets.reserve(jets.size());
     output.fSelectedSubLeadingJets.reserve(jets.size());
     // Initialize structure for collecting event SF term of each jet

@@ -36,6 +36,13 @@ namespace HPlus {
     edm::InputTag fSrc;
     
     // Histograms
+    WrappedTH1* htopPt;
+    WrappedTH1* htopMass;
+    WrappedTH1* htopEta;
+    WrappedTH1* htopMassRejected;
+    WrappedTH1* hWPt;
+    WrappedTH1* hWMass;
+    WrappedTH1* hWEta;
     WrappedTH1 *hPtjjb;
     WrappedTH1 *hPtmax;
     WrappedTH1 *hPtmaxMatch;
@@ -43,9 +50,7 @@ namespace HPlus {
     WrappedTH1 *hPtmaxQMatch;
     WrappedTH1 *hPtmaxMatchWrongB;
     WrappedTH1 *hjjbMass;
-    WrappedTH1 *htopMass;
     WrappedTH1 *htopMassMatch;
-    WrappedTH1 *hWMass;
     WrappedTH1 *hWMassMatch;
     WrappedTH1 *htopMassBMatch;
     WrappedTH1 *hWMassBMatch;
