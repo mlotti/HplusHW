@@ -52,9 +52,9 @@ namespace HPlus {
   }
   namespace EffBins {
     double bins_B[] = {30, 40, 60, 80, 100, 120, 150, 250};
-    double bins_C[] = {30, 70, 110, 150};
-    double bins_G[] = {30, 50, 80};
-    double bins_UDS[] = {30, 50, 80};
+    double bins_C[] = {30, 40, 60, 80, 100, 120, 150, 250};
+    double bins_G[] = {30, 50, 80, 110};
+    double bins_UDS[] = {30, 50, 80, 110};
   }
   namespace CSVL {
     // B-tagging scale factors
@@ -88,24 +88,24 @@ namespace HPlus {
 
     // B->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
-    double eff_BtoB_byPt[] = {0.587535, 0.626579, 0.709791, 0.700110, 0.725765, 0.734357, 0.711013, 0.608094};
-    double effUncertUp_BtoB_byPt[] = {0.015329, 0.011032, 0.011808, 0.013914, 0.015624, 0.015357, 0.014045, 0.032729};
-    double effUncertDown_BtoB_byPt[] = {0.015329, 0.011032, 0.011808, 0.013914, 0.015624, 0.015357, 0.014045, 0.032729};
+    double eff_BtoB_byPt[] = {0.819170, 0.833921, 0.834410, 0.839505, 0.831300, 0.836299, 0.827112, 0.739550};
+    double effUncertUp_BtoB_byPt[] = {0.004037, 0.002897, 0.003357, 0.003782, 0.004551, 0.004391, 0.004118, 0.009749};
+    double effUncertDown_BtoB_byPt[] = {0.004037, 0.002897, 0.003357, 0.003782, 0.004551, 0.004391, 0.004118, 0.009749};
     // C->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
-    double eff_CtoB_byPt[] = {0.177571, 0.218580, 0.232158, 0.179510};
-    double effUncertUp_CtoB_byPt[] = {0.013076, 0.018677, 0.024900, 0.019877};
-    double effUncertDown_CtoB_byPt[] = {0.013076, 0.018677, 0.024900, 0.019877};
+    double eff_CtoB_byPt[] = {0.470827, 0.434801, 0.412765, 0.388843, 0.366202, 0.368871, 0.361137, 0.278889};
+    double effUncertUp_CtoB_byPt[] = {0.011035, 0.008513, 0.009656, 0.010917, 0.011982, 0.011676, 0.010440, 0.016191};
+    double effUncertDown_CtoB_byPt[] = {0.011035, 0.008513, 0.009656, 0.010917, 0.011982, 0.011676, 0.010440, 0.016191};
     // G->B efficiencies
-    // From ttbar (TTJets) sample with Rtau cut deactivated (two bins, 30;50)
-    double eff_GtoB_byPt[] = {0.016889, 0.016429, 0.016429};
-    double effUncertUp_GtoB_byPt[] = {0.002841, 0.002401, 0.002401};
-    double effUncertDown_GtoB_byPt[] = {0.002841, 0.002401, 0.002401};
+    // From ttbar (TTJets) sample with Rtau cut deactivated (bins 30, 50, 80, 110)
+    double eff_GtoB_byPt[] = {0.178542, 0.113611, 0.094050, 0.084568};
+    double effUncertUp_GtoB_byPt[] = {0.003068, 0.003048, 0.003927, 0.002774};
+    double effUncertDown_GtoB_byPt[] = {0.003068, 0.003048, 0.003927, 0.002774};
     // UDS->B efficiencies
-    // From ttbar (TTJets) sample with Rtau cut deactivated (two bins, 30;50)
-    double eff_UDStoB_byPt[] = {0.006397, 0.011576};
-    double effUncertUp_UDStoB_byPt[] = {0.002033, 0.001684, 0.011576};
-    double effUncertDown_UDStoB_byPt[] = {0.002033, 0.001684, 0.001684};
+    // From ttbar (TTJets) sample with Rtau cut deactivated (bins 30, 50, 80, 110)
+    double eff_UDStoB_byPt[] = {0.152502, 0.098610, 0.088156, 0.095471};
+    double effUncertUp_UDStoB_byPt[] = {0.003274, 0.002707, 0.003258, 0.002365};
+    double effUncertDown_UDStoB_byPt[] = {0.003274, 0.002707, 0.003258, 0.002365};
   }
   namespace CSVM {
     // B-tagging scale factors
@@ -139,25 +139,26 @@ namespace HPlus {
 
     // B->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
-    double eff_BtoB_byPt[] = {0.818535, 0.811450, 0.832490, 0.829375, 0.841815, 0.841159, 0.832512, 0.780968};
-    double effUncertUp_BtoB_byPt[] = {0.011961, 0.008902, 0.009790, 0.011502, 0.012752, 0.012763, 0.011517, 0.027057};
-    double effUncertDown_BtoB_byPt[] = {0.011961, 0.008902, 0.009790, 0.011502, 0.012752, 0.012763, 0.011517, 0.027057};
+    double eff_BtoB_byPt[] = {0.583873, 0.658456, 0.693304, 0.719771, 0.718013, 0.727179, 0.698458, 0.559913};
+    double effUncertUp_BtoB_byPt[] = {0.005190, 0.003708, 0.004154, 0.004632, 0.005460, 0.005300, 0.004989, 0.010866};
+    double effUncertDown_BtoB_byPt[] = {0.005190, 0.003708, 0.004154, 0.004632, 0.005460, 0.005300, 0.004989, 0.010866};
     // C->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
-    double eff_CtoB_byPt[] = {0.426136, 0.452682, 0.408613, 0.352782};
-    double effUncertUp_CtoB_byPt[] = {0.017027, 0.022215, 0.029380, 0.024538};
-    double effUncertDown_CtoB_byPt[] = {0.017027, 0.022215, 0.029380, 0.024538};
+    double eff_CtoB_byPt[] = {0.162039, 0.186800, 0.208506, 0.192302, 0.194814, 0.194324, 0.177678, 0.129831};
+    double effUncertUp_CtoB_byPt[] = {0.008133, 0.006738, 0.008069, 0.008799, 0.009788, 0.009684, 0.008393, 0.012525};
+    double effUncertDown_CtoB_byPt[] = {0.008133, 0.006738, 0.008069, 0.008799, 0.009788, 0.009684, 0.008393, 0.012525};
     // G->B efficiencies
-    // From W+jets (WJets) sample with Rtau cut deactivated (30;50;80)
-    double eff_GtoB_byPt[] = {0.169333, 0.110327, 0.085347};
-    double effUncertUp_GtoB_byPt[] = {0.008552, 0.008690, 0.006604};
-    double effUncertDown_GtoB_byPt[] = {0.008552, 0.008690, 0.006604};
+    // From W+jets (WJets) sample with Rtau cut deactivated (bins 30, 50, 80, 110)
+    double eff_GtoB_byPt[] = {0.016493, 0.013899, 0.013192, 0.013781};
+    double effUncertUp_GtoB_byPt[] = {0.001013, 0.001078, 0.001445, 0.001131};
+    double effUncertDown_GtoB_byPt[] = {0.001013, 0.001078, 0.001445, 0.001131};
     // UDS->B efficiencies
-    // From W+jets (WJets) sample with Rtau cut deactivated (30;50;80)
-    double eff_UDStoB_byPt[] = {0.147674, 0.092395, 0.090213};
-    double effUncertUp_UDStoB_byPt[] = {0.009078, 0.007559, 0.005440};
-    double effUncertDown_UDStoB_byPt[] = {0.009078, 0.007559, 0.005440};
+    // From W+jets (WJets) sample with Rtau cut deactivated (bins 30, 50, 80, 110)
+    double eff_UDStoB_byPt[] = {0.012744, 0.010347, 0.011219, 0.013690};
+    double effUncertUp_UDStoB_byPt[] = {0.001014, 0.000942, 0.001178, 0.000960};
+    double effUncertDown_UDStoB_byPt[] = {0.001014, 0.000942, 0.001178, 0.000960};
   }
+
   namespace CSVT {
     // B-tagging scale factors
     // Source:    https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_payload_Moriond13.txt
@@ -189,24 +190,24 @@ namespace HPlus {
     TF1 *SFl_max = new TF1("SFlightMax","((1.08119+(0.00441909*x))+(-1.18764e-05*(x*x)))+(8.71372e-09*(x*(x*x)))", 20., 800.);
     // B->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
-    double eff_BtoB_byPt[] = {0.464638, 0.481490, 0.556796, 0.521733, 0.532051, 0.561771, 0.445548, 0.245012};
-    double effUncertUp_BtoB_byPt[] = {0.018888, 0.013588, 0.015345, 0.018571, 0.021240, 0.020751, 0.018731, 0.037964};
-    double effUncertDown_BtoB_byPt[] = {0.018888, 0.013588, 0.015345, 0.018571, 0.021240, 0.020751, 0.018731, 0.037964};
+    double eff_BtoB_byPt[] = {0.424917, 0.511366, 0.540217, 0.544629, 0.535567, 0.527726, 0.429966, 0.277588};
+    double effUncertUp_BtoB_byPt[] = {0.005212, 0.003910, 0.004479, 0.005138, 0.006045, 0.005954, 0.005378, 0.009649};
+    double effUncertDown_BtoB_byPt[] = {0.005212, 0.003910, 0.004479, 0.005138, 0.006045, 0.005954, 0.005378, 0.009649};
     // C->B efficiencies
     // From ttbar (TTJets) sample with Rtau cut deactivated
-    double eff_CtoB_byPt[] = {0.075239, 0.059511, 0.060751, 0.014452};
-    double effUncertUp_CtoB_byPt[] = {0.011157, 0.013925, 0.018606, 0.006868};
-    double effUncertDown_CtoB_byPt[] = {0.011157, 0.013925, 0.018606, 0.006868};
+    double eff_CtoB_byPt[] = {0.060850, 0.056845, 0.062090, 0.050748, 0.044112, 0.045104, 0.022237, 0.011290};
+    double effUncertUp_CtoB_byPt[] = {0.005292, 0.004047, 0.004838, 0.004938, 0.004948, 0.005237, 0.003134, 0.003529};
+    double effUncertDown_CtoB_byPt[] = {0.005292, 0.004047, 0.004838, 0.004938, 0.004948, 0.005237, 0.003134, 0.003529};
     // G->B efficiencies
-    // From W+jets (WJets) sample with Rtau cut deactivated (2 bins, 30;50)
-    double eff_GtoB_byPt[] = {0.003357, 0.001166, 0.001166};
-    double effUncertUp_GtoB_byPt[] = {0.000967, 0.000373, 0.000373};
-    double effUncertDown_GtoB_byPt[] = {0.000967, 0.000373, 0.000373};
+    // From W+jets (WJets) sample with Rtau cut deactivated (bins 30, 50, 80, 110)
+    double eff_GtoB_byPt[] = {0.002936, 0.002285, 0.002201, 0.001159};
+    double effUncertUp_GtoB_byPt[] = {0.000420, 0.000483, 0.000557, 0.000316};
+    double effUncertDown_GtoB_byPt[] = {0.000420, 0.000483, 0.000557, 0.000316};
     // UDS->B efficiencies
-    // From W+jets (WJets) sample with Rtau cut deactivated (just one bin)
-    double eff_UDStoB_byPt[] = {0.000504, 0.000504, 0.000504};
-    double effUncertUp_UDStoB_byPt[] = {0.000192, 0.000192, 0.000192};
-    double effUncertDown_UDStoB_byPt[] = {0.000192, 0.000192, 0.000192};
+    // From W+jets (WJets) sample with Rtau cut deactivated (bins 30, 50, 80, 110)
+    double eff_UDStoB_byPt[] = {0.002484, 0.001464, 0.000722, 0.001100};
+    double effUncertUp_UDStoB_byPt[] = {0.000455, 0.000345, 0.000291, 0.000307};
+    double effUncertDown_UDStoB_byPt[] = {0.000455, 0.000345, 0.000291, 0.000307};
   }
 
 
