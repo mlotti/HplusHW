@@ -165,9 +165,10 @@ namespace HPlus {
     // b tagging
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlNbjets,            "NBjets", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlBDiscriminator,    "BtagDiscriminator", "Btag discriminator;b tag discriminator;N_{events}", 40, -2, 2);
-    if (fAnalysisType == kSignalAnalysis)
+    if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausNbjets,         "NBjets", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausBDiscriminator, "BtagDiscriminator", "Btag discriminator;b tag discriminator;N_{events}", 40, -2, 2);
+    }
 
     // improved delta phi back to back cuts
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet1,           "ImprovedDeltaPhiCutsJet1BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
