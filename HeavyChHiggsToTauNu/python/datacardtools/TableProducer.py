@@ -332,21 +332,27 @@ class TableProducer:
                             #print "column=%s extractor id=%s"%(c.getLabel(),n.getId())
                             # Obtain histograms
                             myHistograms = c.getFullNuisanceResultByMasterId(n.getId()).getHistograms()
-                            hUp = myHistograms[0]
-                            hDown = myHistograms[1]
-                            hNominal = c.getRateHistogram()
-                            # Calculate
-                            myDownDeltaSquared = 0.0
-                            myUpDeltaSquared = 0.0
-                            myDownAverage = abs(hDown.Integral()-hNominal.Integral())/hNominal.Integral()
-                            myUpAverage = abs(hUp.Integral()-hNominal.Integral())/hNominal.Integral()
-                            for i in range(1,hNominal.GetNbinsX()):
-                                myDownDeltaSquared += (abs(hDown.GetBinContent(i) - hNominal.GetBinContent(i)) - myDownAverage)**2
-                                myUpDeltaSquared += (abs(hUp.GetBinContent(i) - hNominal.GetBinContent(i)) - myUpAverage)**2
-                            myScalarDownRow.append("%.3f"%(sqrt(myDownDeltaSquared)/hNominal.Integral()))
-                            myScalarUpRow.append("%.3f"%(sqrt(myUpDeltaSquared)/hNominal.Integral()))
-                            myDownRow.append("%.3f"%(myDownAverage))
-                            myUpRow.append("%.3f"%(myUpAverage))
+                            if len(myHistograms) > 0:
+                                hUp = myHistograms[0]
+                                hDown = myHistograms[1]
+                                hNominal = c.getRateHistogram()
+                                # Calculate
+                                myDownDeltaSquared = 0.0
+                                myUpDeltaSquared = 0.0
+                                myDownAverage = abs(hDown.Integral()-hNominal.Integral())/hNominal.Integral()
+                                myUpAverage = abs(hUp.Integral()-hNominal.Integral())/hNominal.Integral()
+                                for i in range(1,hNominal.GetNbinsX()):
+                                    myDownDeltaSquared += (abs(hDown.GetBinContent(i) - hNominal.GetBinContent(i)) - myDownAverage)**2
+                                    myUpDeltaSquared += (abs(hUp.GetBinContent(i) - hNominal.GetBinContent(i)) - myUpAverage)**2
+                                myScalarDownRow.append("%.3f"%(sqrt(myDownDeltaSquared)/hNominal.Integral()))
+                                myScalarUpRow.append("%.3f"%(sqrt(myUpDeltaSquared)/hNominal.Integral()))
+                                myDownRow.append("%.3f"%(myDownAverage))
+                                myUpRow.append("%.3f"%(myUpAverage))
+                            else:
+                                myDownRow.append("ignored")
+                                myUpRow.append("ignored")
+                                myScalarDownRow.append("ignored")
+                                myScalarUpRow.append("ignored")
                         else:
                             myDownRow.append("-")
                             myUpRow.append("-")
@@ -523,7 +529,6 @@ class TableProducer:
                             QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
                     elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionReplaceEmbeddingByMC):
                         if Embedding == None:
-                            print c.getLabel()
                             Embedding = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
                             Embedding.Add(c.getCachedShapeRootHistogramWithUncertainties())
