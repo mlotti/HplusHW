@@ -2,12 +2,13 @@ import FWCore.ParameterSet.Config as cms
 import copy
 
 #dataVersion="53XmcS10"
-dataVersion="53XdataPromptCv2"
+#dataVersion="53XdataPromptCv2"
+dataVersion="44Xdata"
 #isData = False
 runL1Emulator = False
 runOpenHLT = False
-#analysis = "TauLeg"
-analysis = "MetLeg"
+analysis = "TauLeg"
+#analysis = "MetLeg"
 hltType = "HLT"
 #hltType = "TEST"
 
@@ -63,7 +64,8 @@ else:
 #        "file:/afs/cern.ch/work/s/slehti/TriggerMETLeg_Tau_173236-173692_2011A_Nov08_pattuple_9_1_LSf.root"
 #        "file:TTEffSkim.root"
 #	"file:/tmp/slehti/TriggerMETLeg_Tau_Run2012C_PromptReco_v2_AOD_202792_203742_analysis_metleg_v53_v1_pattuple_28_1_L19.root"
-       'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X/TauParked/Run2012D_22Jan2013_v1_AOD_203777_208686_triggerMetLeg_skim_v53_3c/65583ace3198f0f55b2cd7d093b9f259/pattuple_3940_3_oJW.root'
+#       'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X/TauParked/Run2012D_22Jan2013_v1_AOD_203777_208686_triggerMetLeg_skim_v53_3c/65583ace3198f0f55b2cd7d093b9f259/pattuple_3940_3_oJW.root'
+	'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerTauLeg/CMSSW_4_4_X/SingleMu/pattuple_v25bfix_TTEffSkim_SingleMu_175832-180252_2011B_Nov19_RAWRECO/f73b0045e7e1eac08bdc8374111fc3ea/pattuple_1_1_7wa.root'
         )
     )
 
@@ -145,7 +147,7 @@ process.commonSequence *= process.selectedPrimaryVertexFilter
 if analysis == "TauLeg":
     import HiggsAnalysis.HeavyChHiggsToTauNu.TauLegZMuTauFilter as zmutau
     process.muTauPairs = zmutau.muTauPairs.clone()
-    process.muTauPairs.decay = cms.string('selectedPatMuons@+ selectedPatTaus@-')
+    process.muTauPairs.decay = cms.string('selectedPatMuons@+ selectedPatTausHpsPFTau@-')
     process.commonSequence *= process.muTauPairs
     additionalCounters.extend(zmutau.getSelectionCounters())
 
