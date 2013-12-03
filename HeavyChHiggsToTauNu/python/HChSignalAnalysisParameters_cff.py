@@ -233,13 +233,37 @@ fakeTauSFandSystematicsAgainstElectronVTightMVA3 = fakeTauSFandSystematicsBase.c
 def setFakeTauSFAndSystematics(fakeTauPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
     source = "fakeTauSFandSystematics"+tausele.againstElectronDiscriminator.value().replace("against","Against")
     try:
-        pset = globals()[source]
+        pset = globals()[source].clone()
     except KeyError:
         myOptionList = filter(lambda item: "fakeTauSFandSystematics" in item, globals().keys())
         raise Exception("Error: Could not find fakeTauSFandSystematics for against electron discriminator %s! Options are: %s"%(tauSelection.againstElectronDiscriminator.value(), ", ".join(map(str, myOptionList))))
 
     HChTools.insertPSetContentsTo(pset, fakeTauPSet)
-    print "fakeTauSFandSystematics set to %s for %s" % (source, mod)
+    # Update scale factor values for systematics variations
+    myList = []
+    if "GenuineTau" in mod or "FakeTau" in mod:
+        if "GenuineTau" in mod:
+            myList = ["GenuineTauBarrel","GenuineTauEndcap"]
+        elif "FakeTauBarrelElectron" in mod:
+            myList = ["FakeTauBarrelElectron"]
+        elif "FakeTauEndcapElectron" in mod:
+            myList = ["FakeTauEndcapElectron"]
+        elif "FakeTauMuon" in mod:
+            myList = ["FakeTauBarrelMuon","FakeTauEndcapMuon"]
+        elif "FakeTauJet" in mod:
+            myList = ["FakeTauBarrelJet","FakeTauEndcapJet"]
+        for item in myList:
+            sfValue = getattr(fakeTauPSet, "scalefactor"+item)
+            systValue = getattr(fakeTauPSet, "systematics"+item)
+            newSfValue = float(sfValue.value()) + float(systValue.value())
+            if "Minus" in mod:
+                newSfValue = float(sfValue.value()) - float(systValue.value())
+            setattr(fakeTauPSet, "scalefactor"+item, newSfValue)
+    # Print info
+    if len(myList):
+        print "fakeTauSFandSystematics set to %s for %s; SF variatated for %s" % (source, mod, ", ".join(map(str,myList)))
+    else:
+        print "fakeTauSFandSystematics set to %s for %s" % (source, mod)
 fakeTauSFandSystematics = fakeTauSFandSystematicsBase.clone()
 setFakeTauSFAndSystematics(fakeTauSFandSystematics, tauSelection)
 
