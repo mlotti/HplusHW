@@ -246,6 +246,10 @@ class DatacardColumn():
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
         print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
+        # Check status for HH
+        if self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr):
+            print WarningLabel()+"Skipping ..."
+            return
         # Obtain root histogram with uncertainties for shape and cache it
         if not (self.typeIsEmptyColumn() or dsetMgr == None):
             mySystematics = dataset.Systematics(allShapes=True) #,verbose=True)
