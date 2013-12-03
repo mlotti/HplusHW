@@ -25,7 +25,8 @@ vetoPatMuonsHighPurityFilter = cms.EDFilter(
 )
 
 selectedPatTausHpsPFTauHighPurity = cms.EDFilter("PATTauSelector",
-    src = cms.InputTag("selectedPatTaus"),
+#    src = cms.InputTag("selectedPatTaus"),
+    src = cms.InputTag("selectedPatTausHpsPFTau"),
     cut = cms.string("leadPFChargedHadrCand().isNonnull() && leadPFChargedHadrCand().pt() > 20"
 ##                     " && tauID('againstElectronMedium') && tauID('againstMuonTight')"
                      " && tauID('decayModeFinding')"

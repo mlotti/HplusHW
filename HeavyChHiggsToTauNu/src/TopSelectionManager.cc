@@ -37,10 +37,10 @@ namespace HPlus {
   // analyze
   TopSelectionManager::Data TopSelectionManager::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, edm::Ptr<pat::Jet> bjet, bool bjetPassed) {
     TopSelectionManager::Data TopSelectionData;
+    if (fTopRecoName == "None") // LAW 3.12.2013 (note that fSelectedAlgorithm == NULL in this case, i.e. all events failed for top reco if topRecoName == "None")
+      TopSelectionData.makeEventPassed();
     if(fSelectedAlgorithm){
-        if (fTopRecoName == "None")
-            TopSelectionData.makeEventPassed();
-        else if (fTopRecoName == "std")
+        if (fTopRecoName == "std")
             TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjets);
         else if (fTopRecoName == "chi")
             TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjets);
@@ -55,10 +55,11 @@ namespace HPlus {
     // silentAnalyze
    TopSelectionManager::Data TopSelectionManager::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, edm::Ptr<pat::Jet> bjet, bool bjetPassed){
     TopSelectionManager::Data TopSelectionData;
+    if (fTopRecoName == "None")  // LAW 3.12.2013 (note that fSelectedAlgorithm == NULL in this case, i.e. all events failed for top reco if topRecoName == "None")
+      TopSelectionData.makeEventPassed();
+
     if(fSelectedAlgorithm){
-        if (fTopRecoName == "None")
-            TopSelectionData.makeEventPassed();
-        else if (fTopRecoName == "std")
+        if (fTopRecoName == "std")
             TopSelectionData = fSelectedAlgorithm->silentAnalyze(iEvent, iSetup, jets, bjets);
         else if (fTopRecoName == "chi")
             TopSelectionData = fSelectedAlgorithm->silentAnalyze(iEvent, iSetup, jets, bjets);

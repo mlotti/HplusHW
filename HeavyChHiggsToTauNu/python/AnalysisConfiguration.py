@@ -478,16 +478,6 @@ class ConfigBuilder:
         # Tau embedding-like preselection for normal MC
         analysisNamesForSystematics.extend(self._buildTauEmbeddingLikePreselection(process, analysisModules, analysisNames, additionalCounters))
 
-        def runSetter(func):
-            for name in self.getAnalyzerModuleNames():
-                func(getattr(process, name), name)
-        # Set trigger efficiencies
-        runSetter(lambda module, name: param.setTriggerEfficiencyScaleFactorBasedOnTau(module.tauTriggerEfficiencyScaleFactor, module.tauSelection, name))
-        # Set fake tau SF (call before systematics!)
-        runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
-        # Set PU ID src for modules
-        runSetter(lambda module, name: param.setJetPUIdSrc(module.jetSelection, name))
-
         ## Systematics
         #if "QCDMeasurement" not in analysisNames_: # Need also for QCD measurements, since they contain MC EWK
         self._buildTauIDandMisIdVariation(process, analysisNamesForSystematics, param)
@@ -498,6 +488,16 @@ class ConfigBuilder:
         #handle SF uncertainties by error propagation after all
         # Re-enabled for test
         self._buildScaleFactorVariation(process, analysisNamesForSystematics)
+
+        def runSetter(func):
+            for name in self.getAnalyzerModuleNames():
+                func(getattr(process, name), name)
+        # Set trigger efficiencies
+        runSetter(lambda module, name: param.setTriggerEfficiencyScaleFactorBasedOnTau(module.tauTriggerEfficiencyScaleFactor, module.tauSelection, name))
+        # Set fake tau SF
+        runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
+        # Set PU ID src for modules
+        runSetter(lambda module, name: param.setJetPUIdSrc(module.jetSelection, name))
 
         # Optional output
         if self.edmOutput:
@@ -1053,35 +1053,30 @@ class ConfigBuilder:
     # \param process                    cms.Process object
     # \param name                       Name of the module to be used as a prototype
     def _addTauIDandMisIdVariation(self, process, name):
-        def addVariation(direction, directionName, affectedItems):
+        def addVariation(directionName):
             module = self._cloneForVariation(getattr(process, name))
-            for item in affectedItems:
-                sfValue = getattr(module.fakeTauSFandSystematics, "scalefactor"+item)
-                systValue = getattr(module.fakeTauSFandSystematics, "systematics"+item)
-                newSfValue = sfValue.value() + systValue.value()
-                if direction < 0:
-                    newSfValue = sfValue.value() - systValue.value()
-                setattr(module.fakeTauSFandSystematics, "scalefactor"+item, newSfValue)
+            # NOTE: The actual variation of the values is done in params.setFakeTauSFAndSystematics()
+            # which is called after the creation of the syst. variations based on the name of the module
             return self._addVariationModule(process, module, name+self.systPrefix+directionName)
 
         names = []
         # Add genuine tau ID systematics
-        names.append(addVariation(+1, "GenuineTauPlus",  ["GenuineTauBarrel","GenuineTauEndcap"]))
-        names.append(addVariation(-1, "GenuineTauMinus", ["GenuineTauBarrel","GenuineTauEndcap"]))
+        names.append(addVariation("GenuineTauPlus"))
+        names.append(addVariation("GenuineTauMinus"))
         # Do not add fake tau mis-ID systematics for embedding
         if self.options.tauEmbeddingInput == 0:
             # Add e->tau systematics for barrel
-            names.append(addVariation(+1, "FakeTauBarrelElectronPlus",  ["FakeTauBarrelElectron"]))
-            names.append(addVariation(-1, "FakeTauBarrelElectronMinus", ["FakeTauBarrelElectron"]))
+            names.append(addVariation("FakeTauBarrelElectronPlus"))
+            names.append(addVariation("FakeTauBarrelElectronMinus"))
             # Add e->tau systematics for endcap
-            names.append(addVariation(+1, "FakeTauEndcapElectronPlus",  ["FakeTauEndcapElectron"]))
-            names.append(addVariation(-1, "FakeTauEndcapElectronMinus", ["FakeTauEndcapElectron"]))
+            names.append(addVariation("FakeTauEndcapElectronPlus"))
+            names.append(addVariation("FakeTauEndcapElectronMinus"))
             # Add e->tau systematics
-            names.append(addVariation(+1, "FakeTauMuonPlus",  ["FakeTauBarrelMuon","FakeTauEndcapMuon"]))
-            names.append(addVariation(-1, "FakeTauMuonMinus", ["FakeTauBarrelMuon","FakeTauEndcapMuon"]))
+            names.append(addVariation("FakeTauMuonPlus"))
+            names.append(addVariation("FakeTauMuonMinus"))
             # Add jet->tau systematics
-            names.append(addVariation(+1, "FakeTauJetPlus",  ["FakeTauBarrelJet","FakeTauEndcapJet"]))
-            names.append(addVariation(-1, "FakeTauJetMinus", ["FakeTauBarrelJet","FakeTauEndcapJet"]))
+            names.append(addVariation("FakeTauJetPlus"))
+            names.append(addVariation("FakeTauJetMinus"))
         # Accumulate
         self._accumulateAnalyzers("Fake tau variation", names)
 
