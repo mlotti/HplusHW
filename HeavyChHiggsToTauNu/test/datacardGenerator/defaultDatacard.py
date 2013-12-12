@@ -5,14 +5,14 @@ DataCardName    = 'Default_8TeV'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_vitalonly_correctCtrlPlots'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/testInverted'
-Path = "/home/wendland/data/v533/2013-10-04"
+Path = "/home/wendland/data/v533/2013-12-04"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
-LightMassPoints      = [120]
+#LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
-HeavyMassPoints      = []
+#HeavyMassPoints      = [180]
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
 BlindAnalysis   = True
@@ -26,7 +26,7 @@ OptionMassShape = "TransverseMass"
 #OptionMassShape = "FullMass"
 #OptionMassShape = "TransverseAndFullMass2D" #FIXME not yet supported!!!
 
-OptionReplaceEmbeddingByMC = not True
+OptionReplaceEmbeddingByMC = True
 OptionIncludeSystematics = True # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = True
@@ -73,8 +73,8 @@ Observation = ObservationInput(datasetDefinition="Data",
 
 #myTrgShapeSystematics = ["trg_tau","trg_MET"] # Variation of trg scale factors
 myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_MET_dataeff","trg_MET_MCeff"] # Variation done separately for data and MC efficiencies
-myTauIDShapeSystematics = ["tau_ID"] # tau ID and mis-ID systematics done with constants
-#myTauIDShapeSystematics = ["tau_ID_shape","tau_ID_eToTauBarrel_shape","tau_ID_eToTauEndcap_shape","tau_ID_muToTau_shape","tau_ID_jetToTau_shape"] # tau ID and mis-ID systematics done with shape variation
+#myTauIDShapeSystematics = ["tau_ID"] # tau ID and mis-ID systematics done with constants
+myTauIDShapeSystematics = ["tau_ID_shape","tau_ID_eToTauBarrel_shape","tau_ID_eToTauEndcap_shape","tau_ID_muToTau_shape","tau_ID_jetToTau_shape"] # tau ID and mis-ID systematics done with shape variation
 
 myShapeSystematics = []
 myShapeSystematics.extend(myTrgShapeSystematics)
@@ -369,21 +369,22 @@ if not OptionReplaceEmbeddingByMC:
         systVariation = "MuonTrgDataEff",
     ))
 
-Nuisances.append(Nuisance(
-    id            = "tau_ID",
-    label         = "tau-jet ID (no Rtau)",
-    distr         = "lnN",
-    function      = "Constant",
-    value         = systematics.getTauIDUncertainty(isGenuineTau=True)
-))
+if not "tau_ID_shape" in myShapeSystematics:
+    Nuisances.append(Nuisance(
+        id            = "tau_ID",
+        label         = "tau-jet ID (no Rtau)",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = systematics.getTauIDUncertainty(isGenuineTau=True)
+    ))
 
-Nuisances.append(Nuisance(
-    id            = "tau_misID",
-    label         = "tau-jet mis ID (no Rtau)",
-    distr         = "lnN",
-    function      = "Constant",
-    value         = 0.15, # FIXME
-))
+    Nuisances.append(Nuisance(
+        id            = "tau_misID",
+        label         = "tau-jet mis ID (no Rtau)",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.15, # FIXME
+    ))
 
 if "tau_ID_shape" in myShapeSystematics:
     Nuisances.append(Nuisance(
