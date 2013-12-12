@@ -95,16 +95,34 @@ def main(opts, moduleSelector):
         moduleSelector.addOtherSource("QCD inverted", qcdInvertedDsetCreator)
     moduleSelector.doSelect(opts)
 
+    # Separate light and heavy masses if they are not separated
+    mySearchModeList = moduleSelector.getSelectedSearchModes()
+    if ("Light" not in mySearchModeList and len(config.LightMassPoints) > 0) or \
+       ("Heavy" not in mySearchModeList and len(config.HeavyMassPoints) > 0):
+        mySearchModeList.append(mySearchModeList[0])
+
     # Summarise the consequences of the user choises
     myDatacardCount = len(moduleSelector.getSelectedEras())*len(moduleSelector.getSelectedSearchModes())*len(moduleSelector.getSelectedOptimizationModes())*len(myQCDMethods)
     print "\nProducing %s%d sets of datacards%s (%d era(s) x %d search mode(s) x %d optimization mode(s) x %d QCD measurement(s))\n"%(HighlightStyle(),myDatacardCount,NormalStyle(),len(moduleSelector.getSelectedEras()),len(moduleSelector.getSelectedSearchModes()),len(moduleSelector.getSelectedOptimizationModes()),len(myQCDMethods))
     # Produce datacards
     myCounter = 0
     myStartTime = time.time()
+    myOriginalName = config.DataCardName
     myOutputDirectories = []
     for qcdMethod in myQCDMethods:
         for era in moduleSelector.getSelectedEras():
-            for searchMode in moduleSelector.getSelectedSearchModes():
+            mySearchModeCounter = 0
+            for searchMode in mySearchModeList:
+                # Separate light and heavy mass points into their own subdirectories
+                if len(mySearchModeList) > 1:
+                    if mySearchModeList[0] == mySearchModeList[1]:
+                        if mySearchModeCounter == 0:
+                            config.MassPoints = config.LightMassPoints
+                            config.DataCardName = myOriginalName + "_LightHplus"
+                        elif mySearchModeCounter == 1:
+                            config.MassPoints = config.HeavyMassPoints
+                            config.DataCardName = myOriginalName + "_HeavyHplus"
+                mySearchModeCounter += 1
                 for optimizationMode in moduleSelector.getSelectedOptimizationModes():
                     # Create the dataset creator managers separately for each module
                     signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
