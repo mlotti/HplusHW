@@ -339,13 +339,22 @@ class TableProducer:
                                 # Calculate
                                 myDownDeltaSquared = 0.0
                                 myUpDeltaSquared = 0.0
-                                myDownAverage = abs(hDown.Integral()-hNominal.Integral())/hNominal.Integral()
-                                myUpAverage = abs(hUp.Integral()-hNominal.Integral())/hNominal.Integral()
+                                myDownAverage = 0.0
+                                myUpAverage = 0.0
+                                if hNominal.Integral() > 0.0:
+                                    myDownAverage = abs(hDown.Integral()-hNominal.Integral())/hNominal.Integral()
+                                    myUpAverage = abs(hUp.Integral()-hNominal.Integral())/hNominal.Integral()
                                 for i in range(1,hNominal.GetNbinsX()):
                                     myDownDeltaSquared += (abs(hDown.GetBinContent(i) - hNominal.GetBinContent(i)) - myDownAverage)**2
                                     myUpDeltaSquared += (abs(hUp.GetBinContent(i) - hNominal.GetBinContent(i)) - myUpAverage)**2
-                                myScalarDownRow.append("%.3f"%(sqrt(myDownDeltaSquared)/hNominal.Integral()))
-                                myScalarUpRow.append("%.3f"%(sqrt(myUpDeltaSquared)/hNominal.Integral()))
+                                if hNominal.Integral() > 0.0:
+                                    myDownDeltaSquared = sqrt(myDownDeltaSquared)/hNominal.Integral()
+                                    myUpDeltaSquared = sqrt(myUpDeltaSquared)/hNominal.Integral()
+                                else:
+                                    myDownDeltaSquared = 0.0
+                                    myUpDeltaSquared = 0.0
+                                    myScalarDownRow.append("%.3f"%(myDownDeltaSquared))
+                                    myScalarUpRow.append("%.3f"%(myUpDeltaSquared))
                                 myDownRow.append("%.3f"%(myDownAverage))
                                 myUpRow.append("%.3f"%(myUpAverage))
                             else:
