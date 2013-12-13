@@ -1523,6 +1523,25 @@ class RootHistoWithUncertainties:
             self._shapeUncertaintyAbsoluteSquaredPlus.Scale(*args)
             self._shapeUncertaintyAbsoluteSquaredMinus.Scale(*args)
 
+    ## Scale a variation uncertainty
+    #
+    # It is enough to forward the call to self._rootHisto and
+    # self._shapeUncertainties, because it does not affect the
+    # relative uncertainties.
+    def ScaleVariationUncertainty(self, name, value):
+        if name not in self._shapeUncertainties.keys():
+            raise Exception("Error: Cannot find '%s' in list of variation uncertainties (%s)!"%(name, ", ".join(map(str, self._shapeUncertainties.keys()))))
+        (plus, minus) = self._shapeUncertainties[name]
+        plus.Scale(value)
+        minus.Scale(value)
+        #for i in xrange(0, self._rootHisto.GetNbinsX()+2):
+            #if abs(self._rootHisto.GetBinContent(i)) > 0.0:
+                #oldValue = (plus.GetBinContent(i),self._rootHisto.GetBinContent(i))
+                #plus.SetBinContent(i, plus.GetBinContent(i)*value)
+                #minus.SetBinContent(i, minus.GetBinContent(i)*value)
+                #print oldValue, plus.GetBinContent(i)
+        self._shapeUncertainties[name] = (plus, minus)
+
     ## Clone the histogram
     #
     # All contained histograms are also cloned. For all cloned
