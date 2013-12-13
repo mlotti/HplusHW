@@ -328,11 +328,15 @@ class DatacardColumn():
                             # Add also to the uncertainties as normalization uncertainty
                             self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                         else:
+                            # Apply any further scaling (only necessary for the unceratainties from variation)
+                            if e.getDistribution() == "shapeQ" and abs(e.getScaleFactor() - 1.0) > 0.0:
+                                self._cachedShapeRootHistogramWithUncertainties.ScaleVariationUncertainty(e._systVariation, e.getScaleFactor())
                             myHistograms = e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                             # Histograms constain abs uncertainty, need to add nominal histogram so that Lands accepts the histograms
                             if e.getDistribution() == "shapeQ":
                                 for i in range(0,len(myHistograms)):
                                     myHistograms[i].Add(self._rateResult.getHistograms()[0])
+
                     else:
                         # Add scalar uncertainties
                         if self._opts.verbose:
@@ -361,6 +365,7 @@ class DatacardColumn():
                 if dsetMgr != None and not self.typeIsEmptyColumn():
                     if self._opts.verbose:
                         print "  - Extracting data-driven control plot %s"%c._histoTitle
+
                     myCtrlDsetRootHisto = c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                     # Now normalize
                     if myDatasetRootHisto.isMC():
@@ -370,6 +375,12 @@ class DatacardColumn():
                     myArray = array("d",getBinningForPlot(c._histoName))
                     h.Rebin(len(myArray)-1,"",myArray)
                     h.makeFlowBinsVisible()
+                    # Apply any further scaling (only necessary for the unceratainties from variation)
+                    for nid in self._nuisanceIds:
+                        for e in extractors:
+                            if e.getId() == nid:
+                                if e.getDistribution() == "shapeQ" and abs(e.getScaleFactor() - 1.0) > 0.0:
+                                    h.ScaleVariationUncertainty(e._systVariation, e.getScaleFactor())
                     # Add to RootHistogramWithUncertainties non-shape uncertainties
                     for n in self._nuisanceResults:
                         if not n.resultIsStatUncertainty() and len(n.getHistograms()) == 0: # systematic uncert., but not shapeQ

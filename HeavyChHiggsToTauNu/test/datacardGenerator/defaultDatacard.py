@@ -35,6 +35,9 @@ OptionNumberOfDecimalsInSummaries = 1
 OptionRemoveHHDataGroup = False
 OptionLimitOnSigmaBr = False # Is automatically set to true for heavy H+
 
+# For projections
+trg_MET_dataeffScaleFactor = None # Default is None, i.e. 1.0
+
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
 OptionSqrtS = 7 # sqrt(s)
@@ -350,6 +353,7 @@ else:
         distr         = "shapeQ",
         function      = "ShapeVariation",
         systVariation = "MetTrgDataEff",
+        scaleFactor   = trg_MET_dataeffScaleFactor,
     ))
 
     Nuisances.append(Nuisance(

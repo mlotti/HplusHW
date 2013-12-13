@@ -503,7 +503,8 @@ class DataCardGenerator:
                                                          distribution = n.distr,
                                                          description = n.label,
                                                          mode = myMode,
-                                                         opts = self._opts))
+                                                         opts = self._opts,
+                                                         scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "ConstantToShape":
                 self._extractors.append(ConstantExtractor(exid = n.id,
                                                          constantValue = n.getArg("value"),
@@ -511,14 +512,16 @@ class DataCardGenerator:
                                                          distribution = n.distr,
                                                          description = n.label,
                                                          mode = ExtractorMode.SHAPENUISANCE,
-                                                         opts = self._opts))
+                                                         opts = self._opts,
+                                                         scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "Counter":
                 self._extractors.append(CounterExtractor(exid = n.id,
                                                         counterItem = n.getArg("counter"),
                                                         distribution = n.distr,
                                                         description = n.label,
                                                         mode = myMode,
-                                                        opts = self._opts))
+                                                        opts = self._opts,
+                                                        scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "maxCounter":
                 self._extractors.append(MaxCounterExtractor(exid = n.id,
                                                            counterItem = n.getArg("counter"),
@@ -526,7 +529,8 @@ class DataCardGenerator:
                                                            distribution = n.distr,
                                                            description = n.label,
                                                            mode = myMode,
-                                                          opts = self._opts))
+                                                           opts = self._opts,
+                                                           scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "pileupUncertainty":
                 self._extractors.append(PileupUncertaintyExtractor(exid = n.id,
                                                                    counterItem = n.getArg("counter"),
@@ -534,20 +538,23 @@ class DataCardGenerator:
                                                                    distribution = n.distr,
                                                                    description = n.label,
                                                                    mode = myMode,
-                                                                   opts = self._opts))
+                                                                   opts = self._opts,
+                                                                   scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "Shape":
                 self._extractors.append(ShapeExtractor(exid = n.id,
                                                        distribution = n.distr,
                                                        description = n.label,
                                                        mode = ExtractorMode.SHAPENUISANCE,
-                                                       opts = self._opts))
+                                                       opts = self._opts,
+                                                       scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "ShapeVariation":
                 self._extractors.append(ShapeVariationExtractor(exid = n.id,
                                                                 distribution = n.distr,
                                                                 description = n.label,
                                                                 systVariation = n.getArg("systVariation"),
                                                                 mode = ExtractorMode.SHAPENUISANCE,
-                                                                opts = self._opts))
+                                                                opts = self._opts,
+                                                                scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "ScaleFactor":
                 self._extractors.append(ScaleFactorExtractor(exid = n.id,
                                                             histoDirs = n.getArg("histoDir"),
@@ -557,7 +564,8 @@ class DataCardGenerator:
                                                             distribution = n.distr,
                                                             description = n.label,
                                                             mode = myMode,
-                                                            opts = self._opts))
+                                                            opts = self._opts,
+                                                            scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "Ratio":
                 self._extractors.append(RatioExtractor(exid = n.id,
                                                       numeratorCounterItem = n.getArg("numerator"),
@@ -566,7 +574,8 @@ class DataCardGenerator:
                                                       description = n.label,
                                                       scale = n.getArg("scaling"),
                                                       mode = myMode,
-                                                      opts = self._opts))
+                                                      opts = self._opts,
+                                                      scaleFactor = n.getArg("scaleFactor")))
             else:
                 print ErrorStyle()+"Error in nuisance with id='"+n.id+"':"+NormalStyle()+" unknown or missing field function '"+n.function+"' (string)!"
                 print "Options are: 'Constant', 'ConstantToShape', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio'"

@@ -24,14 +24,20 @@ class ExtractorMode:
 ## ExtractorBase class
 class ExtractorBase:
     ## Constructor
-    def __init__(self, mode, exid, distribution, description, opts=None):
+    def __init__(self, mode, exid, distribution, description, opts=None, scaleFactor = 1.0):
         self._mode = mode
         self._isPrintable = True
         self._exid = exid
         self._distribution = distribution
         self._description = description
+        self._opts = opts
+        self._scaleFactor = scaleFactor
         self._extractablesToBeMerged = []
         self._masterExID = exid
+        if self._scaleFactor == None:
+            self._scaleFactor = 1.0
+        if abs(self._scaleFactor - 1.0) > 0.00001:
+            print WarningLabel()+"Scaling nuisance parameter %s by factor %f"%(self._exid, self._scaleFactor)
 
     ## Returns true if extractable mode is observation
     def isObservation(self):
@@ -58,6 +64,10 @@ class ExtractorBase:
     ## Returns true if extractable mode is shape nuisance
     def isShapeNuisance(self):
         return self._mode == ExtractorMode.SHAPENUISANCE
+
+    ## Returns the scale factor (used for projection estimates)
+    def getScaleFactor(self):
+        return self._scaleFactor
 
     ## True if nuisance will generate a new line in output (i.e. is not merged)
     def isPrintable(self):
@@ -122,6 +132,7 @@ class ExtractorBase:
         if self.isAnyNuisance():
             print "- distribution = ", self._distribution
             print "- description = ", self._description
+            print "- scale factor = ", self._scaleFactor
             if not self.isPrintable():
                 print "- is slave of extractable with ID = ", self._masterExID
 
@@ -147,16 +158,17 @@ class ExtractorBase:
 # Returns a fixed constant number
 class ConstantExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, constantValue, mode, exid = "", distribution = "lnN", description = "", constantUpperValue = 0.0, opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, constantValue, mode, exid = "", distribution = "lnN", description = "", constantUpperValue = 0.0, opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._constantValue = None
         if isinstance(constantValue, ScalarUncertaintyItem):
-            self._constantValue = constantValue
+            self._constantValue = constantValue.Clone()
+            self._constantValue.scale(self._scaleFactor)
         else:
             if self.isAsymmetricNuisance() or constantUpperValue != None:
-                self._constantValue = ScalarUncertaintyItem(exid,plus=constantUpperValue,minus=constantValue)
+                self._constantValue = ScalarUncertaintyItem(exid,plus=constantUpperValue*self._scaleFactor,minus=constantValue*self._scaleFactor)
             else:
-                self._constantValue = ScalarUncertaintyItem(exid,constantValue)
+                self._constantValue = ScalarUncertaintyItem(exid,constantValue*self._scaleFactor)
 
     ## Method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -175,8 +187,8 @@ class ConstantExtractor(ExtractorBase):
 # Extracts a value from a given counter in the list of main counters
 class CounterExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, counterItem, mode, exid = "", distribution = "lnN", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, counterItem, mode, exid = "", distribution = "lnN", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._counterItem = counterItem
 
     ## Method for extracking information
@@ -194,7 +206,7 @@ class CounterExtractor(ExtractorBase):
                 print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' counter ('"+self._counterItem+"') value is zero!"
                 myResult = ScalarUncertaintyItem(self._exid,0.0)
             else:
-                myResult = ScalarUncertaintyItem(self._exid,myCount.uncertainty() / myCount.value())
+                myResult = ScalarUncertaintyItem(self._exid,myCount.uncertainty() / myCount.value()*self._scaleFactor)
         return myResult
 
     ## Virtual method for printing debug information
@@ -211,8 +223,8 @@ class CounterExtractor(ExtractorBase):
 # Largest deviation from the reference (nominal) value is taken
 class MaxCounterExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, counterDirs, counterItem, mode, exid = "", distribution = "lnN", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, counterDirs, counterItem, mode, exid = "", distribution = "lnN", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._counterItem = counterItem
         self._counterDirs = counterDirs
         if len(self._counterDirs) < 2:
@@ -248,7 +260,7 @@ class MaxCounterExtractor(ExtractorBase):
                 myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
                 if (myValue > myMaxValue):
                     myMaxValue = myValue
-        return ScalarUncertaintyItem(self._exid,myMaxValue)
+        return ScalarUncertaintyItem(self._exid,myMaxValue*self._scaleFactor)
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -326,8 +338,8 @@ class MaxCounterExtractor(ExtractorBase):
 # Extracts two values from two counter items in the list of main counters and returns th ratio of these scaled by some factor
 class RatioExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, scale, numeratorCounterItem, denominatorCounterItem, mode, exid = "", distribution = "lnN", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, scale, numeratorCounterItem, denominatorCounterItem, mode, exid = "", distribution = "lnN", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._numeratorCounterItem = numeratorCounterItem
         self._denominatorCounterItem = denominatorCounterItem
         self._scale = scale
@@ -343,7 +355,7 @@ class RatioExtractor(ExtractorBase):
         else:
             myResult = (myDenominatorCount.value() / myNumeratorCount.value() - 1.0) * self._scale
         # Return result
-        return ScalarUncertaintyItem(self._exid,myResult)
+        return ScalarUncertaintyItem(self._exid,myResult*self._scaleFactor)
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -363,8 +375,8 @@ class RatioExtractor(ExtractorBase):
 # Extracts an uncertainty for a scale factor
 class ScaleFactorExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, histoDirs, histograms, normalisation, addSystInQuadrature = 0.0, mode = ExtractorMode.NUISANCE, exid = "", distribution = "lnN", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, histoDirs, histograms, normalisation, addSystInQuadrature = 0.0, mode = ExtractorMode.NUISANCE, exid = "", distribution = "lnN", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._histoDirs = histoDirs
         self._histograms = histograms
         self._normalisation = normalisation
@@ -415,7 +427,7 @@ class ScaleFactorExtractor(ExtractorBase):
             myCombinedResult += pow(myResult[i], 2)
         myCombinedResult += pow(self._addSystInQuadrature, 2)
         # Return result
-        return ScalarUncertaintyItem(self._exid,sqrt(myCombinedResult))
+        return ScalarUncertaintyItem(self._exid,sqrt(myCombinedResult)*self._scaleFactor)
 
 
     ## Virtual method for printing debug information
@@ -433,8 +445,8 @@ class ScaleFactorExtractor(ExtractorBase):
 # Extracts histogram shapes
 class ShapeExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         if not (self.isRate() or self.isObservation()):
             if self._distribution != "shapeStat":
                 self.printDebugInfo()
@@ -469,7 +481,7 @@ class ShapeExtractor(ExtractorBase):
             hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
             hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
             for k in range(1, h.GetNbinsX()+1):
-                hUp.SetBinContent(k, h.GetBinContent(k) + h.GetBinError(k))
+                hUp.SetBinContent(k, h.GetBinContent(k) + h.GetBinError(k)) # no scaling because this is the stat uncertainty
                 hDown.SetBinContent(k, h.GetBinContent(k) - h.GetBinError(k))
             # Append histograms to output list
             myHistograms.append(hUp)
@@ -487,8 +499,8 @@ class ShapeExtractor(ExtractorBase):
 # Extracts histogram shapes from up and down variation
 class ShapeVariationExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._systVariation = systVariation
         if not "SystVar" in self._systVariation:
             self._systVariation = "SystVar%s"%self._systVariation
@@ -538,8 +550,8 @@ class ShapeVariationExtractor(ExtractorBase):
 # Extracts histograms for control plot
 class ControlPlotExtractor(ExtractorBase):
     ## Constructor, note that if multiplet directories and names are given, the second, third, etc. are substracted from the first one
-    def __init__(self, histoSpecs, histoTitle, histoDirs, histoNames, opts=None):
-        ExtractorBase.__init__(self, mode=ExtractorMode.CONTROLPLOT, exid="-1", distribution="-", description="-", opts=opts)
+    def __init__(self, histoSpecs, histoTitle, histoDirs, histoNames, opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode=ExtractorMode.CONTROLPLOT, exid="-1", distribution="-", description="-", opts=opts, scaleFactor=scaleFactor)
         self._histoSpecs = histoSpecs
         self._histoTitle = histoTitle
         self._histoName = histoNames
