@@ -59,7 +59,11 @@ class ScalarUncertaintyItem:
         self._uncertDown += other._uncertDown
 
     def Clone(self):
-        return ScalarUncertaintyItem(self.name, self._uncertUp, self._uncertDown)
+        return ScalarUncertaintyItem(self._name, plus=self._uncertUp, minus=self._uncertDown)
+
+    def scale(self, factor):
+        self._uncertUp *= factor
+        self._uncertDown *= factor
 
     def getName(self):
         return self._name
