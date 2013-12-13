@@ -504,6 +504,14 @@ class DataCardGenerator:
                                                          description = n.label,
                                                          mode = myMode,
                                                          opts = self._opts))
+            elif n.function == "ConstantToShape":
+                self._extractors.append(ConstantExtractor(exid = n.id,
+                                                         constantValue = n.getArg("value"),
+                                                         constantUpperValue = n.getArg("upperValue"),
+                                                         distribution = n.distr,
+                                                         description = n.label,
+                                                         mode = ExtractorMode.SHAPENUISANCE,
+                                                         opts = self._opts))
             elif n.function == "Counter":
                 self._extractors.append(CounterExtractor(exid = n.id,
                                                         counterItem = n.getArg("counter"),
@@ -561,7 +569,7 @@ class DataCardGenerator:
                                                       opts = self._opts))
             else:
                 print ErrorStyle()+"Error in nuisance with id='"+n.id+"':"+NormalStyle()+" unknown or missing field function '"+n.function+"' (string)!"
-                print "Options are: 'Constant', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio'"
+                print "Options are: 'Constant', 'ConstantToShape', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio'"
                 raise Exception()
         # Create reserved nuisances
         for n in self._config.ReservedNuisances:

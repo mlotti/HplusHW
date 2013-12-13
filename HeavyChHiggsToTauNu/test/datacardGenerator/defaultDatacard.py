@@ -73,8 +73,8 @@ Observation = ObservationInput(datasetDefinition="Data",
 
 #myTrgShapeSystematics = ["trg_tau","trg_MET"] # Variation of trg scale factors
 myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_MET_dataeff","trg_MET_MCeff"] # Variation done separately for data and MC efficiencies
-myTauIDShapeSystematics = ["tau_ID"] # tau ID and mis-ID systematics done with constants
-#myTauIDShapeSystematics = ["tau_ID_shape","tau_ID_eToTauBarrel_shape","tau_ID_eToTauEndcap_shape","tau_ID_muToTau_shape","tau_ID_jetToTau_shape"] # tau ID and mis-ID systematics done with shape variation
+#myTauIDShapeSystematics = ["tau_ID"] # tau ID and mis-ID systematics done with constants
+myTauIDShapeSystematics = ["tau_ID_shape","tau_ID_eToTauBarrel_shape","tau_ID_eToTauEndcap_shape","tau_ID_muToTau_shape","tau_ID_jetToTau_shape"] # tau ID and mis-ID systematics done with shape variation
 
 myShapeSystematics = []
 myShapeSystematics.extend(myTrgShapeSystematics)
@@ -84,7 +84,7 @@ myShapeSystematics.extend(["ES_taus","ES_jets","JER","ES_METunclustered","pileup
 myEmbeddingShapeSystematics = ["trg_tau_dataeff","trg_MET_dataeff","trg_muon_dataeff","ES_taus","Emb_mu_ID","Emb_WtauTomu"]
 # Add tau ID uncert. to embedding either as a shape or as a constant
 if "tau_ID_shape" in myTauIDShapeSystematics:
-    myEmbeddingShapeSystematics.append("tau_ID_shape")
+    myEmbeddingShapeSystematics.append("tau_ID_constShape")
 else:
     myEmbeddingShapeSystematics.append("tau_ID")
 
@@ -369,20 +369,29 @@ if not OptionReplaceEmbeddingByMC:
         systVariation = "MuonTrgDataEff",
     ))
 
-Nuisances.append(Nuisance(
-    id            = "tau_ID",
-    label         = "tau-jet ID (no Rtau)",
-    distr         = "lnN",
-    function      = "Constant",
-    value         = systematics.getTauIDUncertainty(isGenuineTau=True)
-))
+if not "tau_ID_shape" in myShapeSystematics:
+    Nuisances.append(Nuisance(
+        id            = "tau_ID",
+        label         = "tau-jet ID (no Rtau)",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = systematics.getTauIDUncertainty(isGenuineTau=True)
+    ))
+
+    Nuisances.append(Nuisance(
+        id            = "tau_misID",
+        label         = "tau-jet mis ID (no Rtau)",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.15, # FIXME
+    ))
 
 Nuisances.append(Nuisance(
-    id            = "tau_misID",
-    label         = "tau-jet mis ID (no Rtau)",
-    distr         = "lnN",
-    function      = "Constant",
-    value         = 0.15, # FIXME
+    id            = "tau_ID_constShape",
+    label         = "tau-jet ID (no Rtau)",
+    distr         = "shapeQ",
+    function      = "ConstantToShape",
+    value         = systematics.getTauIDUncertainty(isGenuineTau=True)
 ))
 
 if "tau_ID_shape" in myShapeSystematics:
@@ -738,6 +747,8 @@ Nuisances.append(Nuisance(
 ))
 
 MergeNuisances = []
+if not OptionReplaceEmbeddingByMC and "tau_ID_shape" in myTauIDShapeSystematics:
+    MergeNuisances.append(["tau_ID_shape", "tau_ID_constShape"])
 #MergeNuisances.append(["ES_taus","ES_taus_fakes","ES_taus_tempForEmbedding"])
 #MergeNuisances.append(["ES_jets","ES_jets_fakes"])
 #MergeNuisances.append(["JER","JER_fakes"])

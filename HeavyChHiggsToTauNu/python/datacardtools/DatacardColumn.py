@@ -7,7 +7,7 @@ import sys
 from ROOT import TH1F
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,ConstantExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from math import sqrt,pow
@@ -311,29 +311,28 @@ class DatacardColumn():
                     # Obtain histograms
                     myHistograms = []
                     if e.isShapeNuisance():
-                        myHistograms = e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
-                        # FIXME: begin temp code
-                        if self.typeIsEWK() and e.getId() == "tau_ID_shape" and not config.OptionReplaceEmbeddingByMC:
-                            print WarningLabel()+"(temporary hack): Generating adhoc the tau_ID_shape uncertainty for embedding rate plot!"
-                            import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
-                            myUncertainty = systematics.getTauIDUncertainty(isGenuineTau=True).getUncertaintyDown()
+                        if isinstance(e, ConstantExtractor):
+                            # Create up and down histograms out of the constant values
                             hUp = myRateHistograms[0].Clone()
                             hDown = myRateHistograms[0].Clone()
                             hUp.SetTitle(self.getLabel()+"_"+e._masterExID+"Up")
                             hDown.SetTitle(self.getLabel()+"_"+e._masterExID+"Down")
                             for k in range(0, hUp.GetNbinsX()):
                                 myValue = hUp.GetBinContent(k)
-                                hUp.SetBinContent(k, myValue * (1.0 + myUncertainty))
-                                hDown.SetBinContent(k, myValue * (1.0 - myUncertainty))
+                                hUp.SetBinContent(k, myValue * (1.0 + myResult.getUncertaintyUp()))
+                                hUp.SetBinError(k, 0.0)
+                                hDown.SetBinContent(k, myValue * (1.0 - myResult.getUncertaintyDown()))
+                                hDown.SetBinError(k, 0.0)
                             myHistograms.append(hUp)
                             myHistograms.append(hDown)
-                            # Add uncertainty also to RootHistoWithUncertainties
-                            self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myUncertainty, myUncertainty)
-                        # FIXME: end temp code
-                        # Histograms constain abs uncertainty, need to add nominal histogram so that Lands accepts the histograms
-                        if e.getDistribution() == "shapeQ":
-                            for i in range(0,len(myHistograms)):
-                                myHistograms[i].Add(self._rateResult.getHistograms()[0])
+                            # Add also to the uncertainties as normalization uncertainty
+                            self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                        else:
+                            myHistograms = e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                            # Histograms constain abs uncertainty, need to add nominal histogram so that Lands accepts the histograms
+                            if e.getDistribution() == "shapeQ":
+                                for i in range(0,len(myHistograms)):
+                                    myHistograms[i].Add(self._rateResult.getHistograms()[0])
                     else:
                         # Add scalar uncertainties
                         if self._opts.verbose:
@@ -367,14 +366,6 @@ class DatacardColumn():
                     if myDatasetRootHisto.isMC():
                         myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
                     h = myCtrlDsetRootHisto.getHistogramWithUncertainties()
-                    # FIXME: begin temp code
-                    if self.typeIsEWK() and not config.OptionReplaceEmbeddingByMC and "tau_ID_shape" in config.myEmbeddingShapeSystematics:
-                        if "tau_ID_shape" not in self._cachedShapeRootHistogramWithUncertainties._shapeUncertaintyAbsoluteNames:
-                            print WarningLabel()+"(temporary hack): Generating adhoc the tau_ID_shape uncertainty for embedding ctrl. plot!"
-                            import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
-                            myUncertainty = systematics.getTauIDUncertainty(isGenuineTau=True).getUncertaintyDown()
-                            self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative("tau_ID_shape", myUncertainty, myUncertainty)
-                    # FIXME: end temp code
                     # Rebin and move under/overflow bins to visible bins
                     myArray = array("d",getBinningForPlot(c._histoName))
                     h.Rebin(len(myArray)-1,"",myArray)
@@ -391,6 +382,11 @@ class DatacardColumn():
                                 h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult[1], myResult[0])
                             else:
                                 h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult, myResult)
+                        elif not n.resultIsStatUncertainty() and len(n.getHistograms()) > 0 and isinstance(n.getResult(), ScalarUncertaintyItem): # constantToShape
+                            if self._opts.verbose:
+                                print "    - Adding norm. uncertainty: %s"%n.getMasterId()
+                            myResult = n.getResult()
+                            h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                     # Scale if asked
                     if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
                         h.Scale(self._additionalNormalisationFactor)

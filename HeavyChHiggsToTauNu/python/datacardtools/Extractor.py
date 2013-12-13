@@ -153,7 +153,7 @@ class ConstantExtractor(ExtractorBase):
         if isinstance(constantValue, ScalarUncertaintyItem):
             self._constantValue = constantValue
         else:
-            if self.isAsymmetricNuisance():
+            if self.isAsymmetricNuisance() or constantUpperValue != None:
                 self._constantValue = ScalarUncertaintyItem(exid,plus=constantUpperValue,minus=constantValue)
             else:
                 self._constantValue = ScalarUncertaintyItem(exid,constantValue)
