@@ -369,10 +369,11 @@ class DatacardColumn():
                     h = myCtrlDsetRootHisto.getHistogramWithUncertainties()
                     # FIXME: begin temp code
                     if self.typeIsEWK() and not config.OptionReplaceEmbeddingByMC and "tau_ID_shape" in config.myEmbeddingShapeSystematics:
-                        print WarningLabel()+"(temporary hack): Generating adhoc the tau_ID_shape uncertainty for embedding ctrl. plot!"
-                        import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
-                        myUncertainty = systematics.getTauIDUncertainty(isGenuineTau=True).getUncertaintyDown()
-                        self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative("tau_ID_shape", myUncertainty, myUncertainty)
+                        if "tau_ID_shape" not in self._cachedShapeRootHistogramWithUncertainties._shapeUncertaintyAbsoluteNames:
+                            print WarningLabel()+"(temporary hack): Generating adhoc the tau_ID_shape uncertainty for embedding ctrl. plot!"
+                            import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
+                            myUncertainty = systematics.getTauIDUncertainty(isGenuineTau=True).getUncertaintyDown()
+                            self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative("tau_ID_shape", myUncertainty, myUncertainty)
                     # FIXME: end temp code
                     # Rebin and move under/overflow bins to visible bins
                     myArray = array("d",getBinningForPlot(c._histoName))
