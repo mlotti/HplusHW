@@ -27,6 +27,7 @@ OptionMassShape = "TransverseMass"
 #OptionMassShape = "TransverseAndFullMass2D" #FIXME not yet supported!!!
 
 OptionReplaceEmbeddingByMC = True
+OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionIncludeSystematics = True # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = True
@@ -178,13 +179,13 @@ if not OptionReplaceEmbeddingByMC:
         #datasetDefinition   = ["SingleMu"],
         datasetDefinition   = "Data",
         validMassPoints = MassPoints,
-        #additionalNormalisation = 0.5, # not needed anymore
+        #additionalNormalisation = 0.25, # not needed anymore
         nuisances    = myEmbeddingShapeSystematics[:]+["Emb_QCDcontam","stat_binByBin"]
         #nuisances    = ["trg_tau_embedding","tau_ID","ES_taus","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb","stat_binByBin"]
     ))
 
     # EWK + ttbar with fake taus
-    EWKFakeIdList = [1,5,6]
+    EWKFakeIdList = [1,5,6,7,8]
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
         landsProcess = 1,
@@ -215,7 +216,7 @@ if not OptionReplaceEmbeddingByMC:
     DataGroups.append(DataGroup(
         label        = "DY_EWK_faketau",
         landsProcess = 7,
-        shapeHisto   = SignalShapeHisto,
+        shapeHisto   = FakeShapeHisto,
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
@@ -224,14 +225,110 @@ if not OptionReplaceEmbeddingByMC:
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
         landsProcess = 8,
+        shapeHisto   = FakeShapeHisto,
+        datasetType  = "EWKfake",
+        datasetDefinition   = "Diboson",
+        validMassPoints = MassPoints,
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin"],
+    ))
+elif OptionRealisticEmbeddingWithMC:
+    # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
+    EmbeddingIdList = [4]
+    myEmbeddingShapeSystematics = ["trg_tau_dataeff","trg_MET_dataeff","ES_taus"]
+    myEmbeddingShapeSystematics.extend(["Emb_QCDcontam","Emb_rest","stat_binByBin"])
+    DataGroups.append(DataGroup(
+        label        = "pseudo_emb_TTJets_MC",
+        landsProcess = 4,
         shapeHisto   = SignalShapeHisto,
+        datasetType  = "Embedding",
+        datasetDefinition = "TTJets",
+        validMassPoints = MassPoints,
+        nuisances    = myEmbeddingShapeSystematics,
+    ))
+    DataGroups.append(DataGroup(
+        label        = "pseudo_emb_Wjets_MC",
+        landsProcess = None,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Embedding",
+        datasetDefinition = "WJets",
+        validMassPoints = MassPoints,
+        nuisances    = myEmbeddingShapeSystematics,
+    ))
+    DataGroups.append(DataGroup(
+        label        = "pseudo_emb_t_MC",
+        landsProcess = None,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Embedding",
+        datasetDefinition = "SingleTop",
+        validMassPoints = MassPoints,
+        nuisances    = myEmbeddingShapeSystematics,
+    ))
+    DataGroups.append(DataGroup(
+        label        = "pseudo_emb_DY_MC",
+        landsProcess = None,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Embedding",
+        datasetDefinition   = "DYJetsToLL",
+        validMassPoints = MassPoints,
+        nuisances    = myEmbeddingShapeSystematics,
+    ))
+    DataGroups.append(DataGroup(
+        label        = "pseudo_emb_VV_MC",
+        landsProcess = None,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Embedding",
+        datasetDefinition   = "Diboson",
+        validMassPoints = MassPoints,
+        nuisances    = myEmbeddingShapeSystematics,
+    ))
+    EWKFakeIdList = [1,5,6,7,8]
+    DataGroups.append(DataGroup(
+        label        = "tt_EWK_faketau",
+        landsProcess = 1,
+        shapeHisto   = FakeShapeHisto,
+        datasetType  = "EWKfake",
+        datasetDefinition = "TTJets",
+        validMassPoints = MassPoints,
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","top_pt","xsect_tt_7TeV","lumi","stat_binByBin"],
+    ))
+    DataGroups.append(DataGroup(
+        label        = "W_EWK_faketau",
+        landsProcess = 5,
+        shapeHisto   = FakeShapeHisto,
+        datasetType  = "EWKfake",
+        datasetDefinition = "WJets",
+        validMassPoints = MassPoints,
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin"],
+    ))
+    DataGroups.append(DataGroup(
+        label        = "t_EWK_faketau",
+        landsProcess = 6,
+        shapeHisto   = FakeShapeHisto,
+        datasetType  = "EWKfake",
+        datasetDefinition = "SingleTop",
+        validMassPoints = MassPoints,
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin"],
+    ))
+    DataGroups.append(DataGroup(
+        label        = "DY_EWK_faketau",
+        landsProcess = 7,
+        shapeHisto   = FakeShapeHisto,
+        datasetType  = "EWKfake",
+        datasetDefinition   = "DYJetsToLL",
+        validMassPoints = MassPoints,
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin"],
+    ))
+    DataGroups.append(DataGroup(
+        label        = "VV_EWK_faketau",
+        landsProcess = 8,
+        shapeHisto   = FakeShapeHisto,
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin"],
     ))
 else:
-    # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
+    # Replace embedding and fakes with MC
     EmbeddingIdList = [1,4,5,6,7]
     DataGroups.append(DataGroup(
         label        = "ttbar_MC",
@@ -240,7 +337,7 @@ else:
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto","b_tag","top_pt","xsect_tt_7TeV","lumi","stat_binByBin"],
+        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","top_pt","xsect_tt_7TeV","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "Wjets_MC",
@@ -249,7 +346,7 @@ else:
         datasetType  = "Embedding",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_Wjets","lumi","stat_binByBin"],
+        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_Wjets","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_MC",
@@ -258,32 +355,26 @@ else:
         datasetType  = "Embedding",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto","b_tag","xsect_singleTop","lumi","stat_binByBin"],
+        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_singleTop","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "DY_MC",
         landsProcess = 6,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
-        datasetDefinition   = "DYJetsToLL",
+        datasetDefinition = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_DYtoll","lumi","stat_binByBin"],
+        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_DYtoll","lumi","stat_binByBin"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_MC",
         landsProcess = 7,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
-        datasetDefinition   = "Diboson",
+        datasetDefinition = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_VV","lumi","stat_binByBin"],
+        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_VV","lumi","stat_binByBin"],
     ))
-    #DataGroups.append(DataGroup(
-        #label        = "empty",
-        #landsProcess = 1,
-        #datasetType  = "None",
-        #validMassPoints = MassPoints,
-    #))
 
 
 # Reserve column 2
@@ -609,7 +700,7 @@ Nuisances.append(Nuisance(
     systVariation = "QCDNorm",
 ))
 
-if not OptionReplaceEmbeddingByMC:
+if not OptionReplaceEmbeddingByMC or OptionRealisticEmbeddingWithMC:
     Nuisances.append(Nuisance(
         id            = "Emb_QCDcontam",
         label         = "EWK with taus QCD contamination",
@@ -635,6 +726,15 @@ if not OptionReplaceEmbeddingByMC:
             function      = "Constant",
             value         = 0.007
         ))
+
+if OptionRealisticEmbeddingWithMC and OptionReplaceEmbeddingByMC:
+    Nuisances.append(Nuisance(
+        id            = "Emb_rest",
+        label         = "EWK with taus W->tau->mu",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.03
+    ))
 
 #Nuisances.append(Nuisance(
     #id            = "Emb_musel_ditau_mutrg",

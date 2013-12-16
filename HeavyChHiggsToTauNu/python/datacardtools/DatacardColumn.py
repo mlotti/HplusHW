@@ -191,7 +191,7 @@ class DatacardColumn():
         # Ignore HH if chosen in options
         myHHStatus = not (self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr))
         #print self._label,myResult,myMassStatus,myHHStatus
-        return myResult and myMassStatus and myHHStatus
+        return myResult and myMassStatus and myHHStatus and self.getLandsProcess != None
 
     ## Disables the datacard column
     def disable(self):
@@ -246,6 +246,12 @@ class DatacardColumn():
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
         print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
+        # Construct list of shape variables used by the column
+        myShapeVariationList = []
+        for nid in self._nuisanceIds:
+            for e in extractors:
+                if e.getId() == nid and e.getDistribution() == "shapeQ" and not isinstance(e, ConstantExtractor):
+                    myShapeVariationList.append(e._systVariation)
         # Check status for HH
         if self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr):
             print WarningLabel()+"Skipping ..."
@@ -261,6 +267,8 @@ class DatacardColumn():
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()
+            # Remove any variations not active for the column
+            self._cachedShapeRootHistogramWithUncertainties.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
             # Apply additional normalization
             # Note: this applies the normalizatoin also to the syst. uncertainties
             if abs(self._additionalNormalisationFactor - 1.0) > 0.00001:
@@ -371,6 +379,8 @@ class DatacardColumn():
                     if myDatasetRootHisto.isMC():
                         myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
                     h = myCtrlDsetRootHisto.getHistogramWithUncertainties()
+                    # Remove any variations not active for the column
+                    h.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
                     # Rebin and move under/overflow bins to visible bins
                     myArray = array("d",getBinningForPlot(c._histoName))
                     h.Rebin(len(myArray)-1,"",myArray)
