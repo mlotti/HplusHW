@@ -339,13 +339,22 @@ class TableProducer:
                                 # Calculate
                                 myDownDeltaSquared = 0.0
                                 myUpDeltaSquared = 0.0
-                                myDownAverage = abs(hDown.Integral()-hNominal.Integral())/hNominal.Integral()
-                                myUpAverage = abs(hUp.Integral()-hNominal.Integral())/hNominal.Integral()
+                                myDownAverage = 0.0
+                                myUpAverage = 0.0
+                                if hNominal.Integral() > 0.0:
+                                    myDownAverage = abs(hDown.Integral()-hNominal.Integral())/hNominal.Integral()
+                                    myUpAverage = abs(hUp.Integral()-hNominal.Integral())/hNominal.Integral()
                                 for i in range(1,hNominal.GetNbinsX()):
                                     myDownDeltaSquared += (abs(hDown.GetBinContent(i) - hNominal.GetBinContent(i)) - myDownAverage)**2
                                     myUpDeltaSquared += (abs(hUp.GetBinContent(i) - hNominal.GetBinContent(i)) - myUpAverage)**2
-                                myScalarDownRow.append("%.3f"%(sqrt(myDownDeltaSquared)/hNominal.Integral()))
-                                myScalarUpRow.append("%.3f"%(sqrt(myUpDeltaSquared)/hNominal.Integral()))
+                                if hNominal.Integral() > 0.0:
+                                    myDownDeltaSquared = sqrt(myDownDeltaSquared)/hNominal.Integral()
+                                    myUpDeltaSquared = sqrt(myUpDeltaSquared)/hNominal.Integral()
+                                else:
+                                    myDownDeltaSquared = 0.0
+                                    myUpDeltaSquared = 0.0
+                                    myScalarDownRow.append("%.3f"%(myDownDeltaSquared))
+                                    myScalarUpRow.append("%.3f"%(myUpDeltaSquared))
                                 myDownRow.append("%.3f"%(myDownAverage))
                                 myUpRow.append("%.3f"%(myUpAverage))
                             else:
@@ -527,7 +536,7 @@ class TableProducer:
                             QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
                             QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
-                    elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionReplaceEmbeddingByMC):
+                    elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC):
                         if Embedding == None:
                             Embedding = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
@@ -553,7 +562,7 @@ class TableProducer:
             # Calculate expected yield
             TotalExpected = QCD.Clone()
             TotalExpected.Add(Embedding)
-            if not self._config.OptionReplaceEmbeddingByMC:
+            if not (self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC):
                 TotalExpected.Add(EWKFakes)
             # Construct table
             myOutput = "*** Event yield summary ***\n"
@@ -566,7 +575,7 @@ class TableProducer:
                 myOutput += "Signal, mH+=%3d GeV,                : %s"%(m,getResultString(HW,formatStr,myPrecision))
             myOutput += "Backgrounds:\n"
             myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
-            if self._config.OptionReplaceEmbeddingByMC:
+            if self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC:
                 myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
             else:
                 myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
@@ -605,7 +614,7 @@ class TableProducer:
             myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n"%(m,getLatexResultString(HW,formatStr,myPrecision))
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n"%getLatexResultString(QCD,formatStr,myPrecision)
-            if self._config.OptionReplaceEmbeddingByMC:
+            if self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC:
                 myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
             else:
                 myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)

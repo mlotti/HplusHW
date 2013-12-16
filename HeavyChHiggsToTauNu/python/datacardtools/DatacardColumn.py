@@ -7,7 +7,7 @@ import sys
 from ROOT import TH1F
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,ConstantExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from math import sqrt,pow
@@ -191,7 +191,7 @@ class DatacardColumn():
         # Ignore HH if chosen in options
         myHHStatus = not (self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr))
         #print self._label,myResult,myMassStatus,myHHStatus
-        return myResult and myMassStatus and myHHStatus
+        return myResult and myMassStatus and myHHStatus and self.getLandsProcess != None
 
     ## Disables the datacard column
     def disable(self):
@@ -246,6 +246,12 @@ class DatacardColumn():
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
         print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
+        # Construct list of shape variables used by the column
+        myShapeVariationList = []
+        for nid in self._nuisanceIds:
+            for e in extractors:
+                if e.getId() == nid and e.getDistribution() == "shapeQ" and not isinstance(e, ConstantExtractor):
+                    myShapeVariationList.append(e._systVariation)
         # Check status for HH
         if self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr):
             print WarningLabel()+"Skipping ..."
@@ -261,6 +267,8 @@ class DatacardColumn():
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()
+            # Remove any variations not active for the column
+            self._cachedShapeRootHistogramWithUncertainties.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
             # Apply additional normalization
             # Note: this applies the normalizatoin also to the syst. uncertainties
             if abs(self._additionalNormalisationFactor - 1.0) > 0.00001:
@@ -311,29 +319,32 @@ class DatacardColumn():
                     # Obtain histograms
                     myHistograms = []
                     if e.isShapeNuisance():
-                        myHistograms = e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
-                        # FIXME: begin temp code
-                        if self.typeIsEWK() and e.getId() == "tau_ID_shape" and not config.OptionReplaceEmbeddingByMC:
-                            print WarningLabel()+"(temporary hack): Generating adhoc the tau_ID_shape uncertainty for embedding rate plot!"
-                            import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
-                            myUncertainty = systematics.getTauIDUncertainty(isGenuineTau=True).getUncertaintyDown()
+                        if isinstance(e, ConstantExtractor):
+                            # Create up and down histograms out of the constant values
                             hUp = myRateHistograms[0].Clone()
                             hDown = myRateHistograms[0].Clone()
                             hUp.SetTitle(self.getLabel()+"_"+e._masterExID+"Up")
                             hDown.SetTitle(self.getLabel()+"_"+e._masterExID+"Down")
                             for k in range(0, hUp.GetNbinsX()):
                                 myValue = hUp.GetBinContent(k)
-                                hUp.SetBinContent(k, myValue * (1.0 + myUncertainty))
-                                hDown.SetBinContent(k, myValue * (1.0 - myUncertainty))
+                                hUp.SetBinContent(k, myValue * (1.0 + myResult.getUncertaintyUp()))
+                                hUp.SetBinError(k, 0.0)
+                                hDown.SetBinContent(k, myValue * (1.0 - myResult.getUncertaintyDown()))
+                                hDown.SetBinError(k, 0.0)
                             myHistograms.append(hUp)
                             myHistograms.append(hDown)
-                            # Add uncertainty also to RootHistoWithUncertainties
-                            self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myUncertainty, myUncertainty)
-                        # FIXME: end temp code
-                        # Histograms constain abs uncertainty, need to add nominal histogram so that Lands accepts the histograms
-                        if e.getDistribution() == "shapeQ":
-                            for i in range(0,len(myHistograms)):
-                                myHistograms[i].Add(self._rateResult.getHistograms()[0])
+                            # Add also to the uncertainties as normalization uncertainty
+                            self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                        else:
+                            # Apply any further scaling (only necessary for the unceratainties from variation)
+                            if e.getDistribution() == "shapeQ" and abs(e.getScaleFactor() - 1.0) > 0.0:
+                                self._cachedShapeRootHistogramWithUncertainties.ScaleVariationUncertainty(e._systVariation, e.getScaleFactor())
+                            myHistograms = e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                            # Histograms constain abs uncertainty, need to add nominal histogram so that Lands accepts the histograms
+                            if e.getDistribution() == "shapeQ":
+                                for i in range(0,len(myHistograms)):
+                                    myHistograms[i].Add(self._rateResult.getHistograms()[0])
+
                     else:
                         # Add scalar uncertainties
                         if self._opts.verbose:
@@ -362,22 +373,24 @@ class DatacardColumn():
                 if dsetMgr != None and not self.typeIsEmptyColumn():
                     if self._opts.verbose:
                         print "  - Extracting data-driven control plot %s"%c._histoTitle
+
                     myCtrlDsetRootHisto = c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                     # Now normalize
                     if myDatasetRootHisto.isMC():
                         myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
                     h = myCtrlDsetRootHisto.getHistogramWithUncertainties()
-                    # FIXME: begin temp code
-                    if self.typeIsEWK() and not config.OptionReplaceEmbeddingByMC and "tau_ID_shape" in config.myEmbeddingShapeSystematics:
-                        print WarningLabel()+"(temporary hack): Generating adhoc the tau_ID_shape uncertainty for embedding ctrl. plot!"
-                        import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
-                        myUncertainty = systematics.getTauIDUncertainty(isGenuineTau=True).getUncertaintyDown()
-                        self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative("tau_ID_shape", myUncertainty, myUncertainty)
-                    # FIXME: end temp code
+                    # Remove any variations not active for the column
+                    h.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
                     # Rebin and move under/overflow bins to visible bins
                     myArray = array("d",getBinningForPlot(c._histoName))
                     h.Rebin(len(myArray)-1,"",myArray)
                     h.makeFlowBinsVisible()
+                    # Apply any further scaling (only necessary for the unceratainties from variation)
+                    for nid in self._nuisanceIds:
+                        for e in extractors:
+                            if e.getId() == nid:
+                                if e.getDistribution() == "shapeQ" and abs(e.getScaleFactor() - 1.0) > 0.0:
+                                    h.ScaleVariationUncertainty(e._systVariation, e.getScaleFactor())
                     # Add to RootHistogramWithUncertainties non-shape uncertainties
                     for n in self._nuisanceResults:
                         if not n.resultIsStatUncertainty() and len(n.getHistograms()) == 0: # systematic uncert., but not shapeQ
@@ -390,6 +403,11 @@ class DatacardColumn():
                                 h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult[1], myResult[0])
                             else:
                                 h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult, myResult)
+                        elif not n.resultIsStatUncertainty() and len(n.getHistograms()) > 0 and isinstance(n.getResult(), ScalarUncertaintyItem): # constantToShape
+                            if self._opts.verbose:
+                                print "    - Adding norm. uncertainty: %s"%n.getMasterId()
+                            myResult = n.getResult()
+                            h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                     # Scale if asked
                     if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
                         h.Scale(self._additionalNormalisationFactor)
