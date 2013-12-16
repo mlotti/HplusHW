@@ -991,7 +991,7 @@ def main(opts,timeStamp,refDsetCreator,testDsetCreator,myValidateGroups,era,sear
         refDatasetMgr.merge(refName, opts.mergeRefDataset)
         print "Merging: %s -> test"%", ".join(map(str,opts.mergeTestDataset))
         testDatasetMgr.merge(testName, opts.mergeTestDataset)
-    elif optcommonDatasetNamess.testDir is None:
+    elif opts.testDir is None:
         commonDatasetNames = compareLists(refDatasetMgr.getAllDatasetNames(),testDatasetMgr.getAllDatasetNames(),opts.dirs)
         commonDatasetNames = [(x, x) for x in commonDatasetNames]
     else:
