@@ -97,8 +97,9 @@ def main(opts, moduleSelector):
 
     # Separate light and heavy masses if they are not separated
     mySearchModeList = moduleSelector.getSelectedSearchModes()
-    if ("Light" not in mySearchModeList and len(config.LightMassPoints) > 0) or \
-       ("Heavy" not in mySearchModeList and len(config.HeavyMassPoints) > 0):
+    if ("Light" not in mySearchModeList and len(config.LightMassPoints) > 0 and len(config.HeavyMassPoints) > 0) or \
+       ("Heavy" not in mySearchModeList and len(config.HeavyMassPoints) > 0 and len(config.LightMassPoints) > 0):
+        print "***"
         mySearchModeList.append(mySearchModeList[0])
 
     # Summarise the consequences of the user choises
