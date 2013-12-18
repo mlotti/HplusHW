@@ -28,7 +28,10 @@ OptionMassShape = "TransverseMass"
 
 OptionReplaceEmbeddingByMC = True
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
-OptionIncludeSystematics = True # Set to true if the JES and PU uncertainties were produced
+OptionTreatTriggerUncertaintiesAsAsymmetric = False # Set to true, if you produced multicrabs with doAsymmetricTriggerUncertainties=True
+OptionTreatTauIDAndMisIDSystematicsAsShapes = False # Set to true, if you produced multicrabs with doTauIDandMisIDSystematicsAsShapes=True
+OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
+
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = True
 OptionDisplayEventYieldSummary = True
@@ -74,11 +77,18 @@ Observation = ObservationInput(datasetDefinition="Data",
 
 ##############################################################################
 # Systematics lists
+myTrgShapeSystematics = []
+if OptionTreatTriggerUncertaintiesAsAsymmetric:
+    myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_MET_dataeff","trg_MET_MCeff"] # Variation done separately for data and MC efficiencies
+else:
+    myTrgShapeSystematics = ["trg_tau","trg_MET"] # Variation of trg scale factors
 
-#myTrgShapeSystematics = ["trg_tau","trg_MET"] # Variation of trg scale factors
-myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_MET_dataeff","trg_MET_MCeff"] # Variation done separately for data and MC efficiencies
-#myTauIDShapeSystematics = ["tau_ID"] # tau ID and mis-ID systematics done with constants
-myTauIDShapeSystematics = ["tau_ID_shape","tau_ID_eToTauBarrel_shape","tau_ID_eToTauEndcap_shape","tau_ID_muToTau_shape","tau_ID_jetToTau_shape"] # tau ID and mis-ID systematics done with shape variation
+    myTauIDShapeSystematics = []
+if OptionTreatTauIDAndMisIDSystematicsAsShapes:
+    myTauIDShapeSystematics = ["tau_ID_shape","tau_ID_eToTauBarrel_shape","tau_ID_eToTauEndcap_shape","tau_ID_muToTau_shape","tau_ID_jetToTau_shape"] # tau ID and mis-ID systematics done with shape variation
+else:
+    myTauIDShapeSystematics = ["tau_ID"] # tau ID and mis-ID systematics done with constants
+
 
 myShapeSystematics = []
 myShapeSystematics.extend(myTrgShapeSystematics)
@@ -234,7 +244,16 @@ if not OptionReplaceEmbeddingByMC:
 elif OptionRealisticEmbeddingWithMC:
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
     EmbeddingIdList = [4]
-    myEmbeddingShapeSystematics = ["trg_tau_dataeff","trg_MET_dataeff","ES_taus"]
+    myEmbeddingShapeSystematics = []
+    if OptionTreatTriggerUncertaintiesAsAsymmetric:
+        myEmbeddingShapeSystematics = ["trg_tau_dataeff","trg_MET_dataeff","ES_taus"]
+    else:
+        myEmbeddingShapeSystematics = ["trg_tau","trg_MET","ES_taus"]
+    myEmbeddingShapeSystematics.append("ES_taus")
+    if OptionTreatTauIDAndMisIDSystematicsAsShapes:
+        myEmbeddingShapeSystematics.append("tau_ID_shape")
+    else:
+        myEmbeddingShapeSystematics.append("tau_ID")
     myEmbeddingShapeSystematics.extend(["Emb_QCDcontam","Emb_rest","stat_binByBin"])
     DataGroups.append(DataGroup(
         label        = "pseudo_emb_TTJets_MC",

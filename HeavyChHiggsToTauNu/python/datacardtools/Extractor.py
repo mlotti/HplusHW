@@ -525,8 +525,7 @@ class ShapeVariationExtractor(ExtractorBase):
         myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
         # Check that asked variation exists
         if not self._systVariation in myShapeUncertDict.keys():
-            print WarningLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, ignoring it! Available: %s"%(datasetColumn.getLabel(), self._systVariation, ', '.join(map(str, myShapeUncertDict.keys())))
-            return myHistograms
+            raise Exception(ErrorLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, check that options in the datacard match to multicrab content!")
         # Get histogram from cache
         (hSystUp, hSystDown) = myShapeUncertDict[self._systVariation]
         hUp = hSystUp.Clone()
