@@ -38,6 +38,8 @@ class TableProducer:
         os.mkdir(self._infoDirname)
         self._ctrlPlotDirname = self._dirname + "/controlPlots"
         os.mkdir(self._ctrlPlotDirname)
+        # Copy datacard to directory
+        os.system("cp %s %s/inputDatacardForDatacardGenerator.py"%(opts.datacard, self._dirname))
 
         # Make datacards
         self.makeDataCards()
