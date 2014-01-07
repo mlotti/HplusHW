@@ -47,7 +47,7 @@ def main(opts, moduleSelector, multipleDirs):
     # Replace source directory if necessary
     if multipleDirs != None:
         opts.Path = multipleDirs
-    print "Input directory:",opts.Path
+    print "Input directory:",config.Path
 
     # If user insisted on certain QCD method on command line, produce datacards only for that QCD method
     # Otherwise produce cards for all QCD methods
@@ -161,6 +161,14 @@ def main(opts, moduleSelector, multipleDirs):
     print "\nDatacard generator is done."
     myEndTime = time.time()
     print "Running took on average %.1f s / datacard (total elapsed time: %.1f s)"%((myEndTime-myStartTime)/float(myDatacardCount), (myEndTime-myStartTime))
+    # Generate plots for systematics
+    if opts.systAnalysis:
+        for d in myOutputDirectories:
+            print "\nGenerating systematics plots for",d
+            os.chdir(d)
+            os.system("../../brlimit/plotShapes.py")
+            os.chdir("..")
+
     # Make tar file
     myTimestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
     myFilename = "datacards_archive_%s.tgz"%myTimestamp
@@ -226,6 +234,7 @@ if __name__ == "__main__":
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
     myModuleSelector.addParserOptions(parser)
     parser.add_option("--multipleDirs", dest="multipleDirs", action="store", help="Name of base dir for creating datacards for multiple directories (wildcard is added at the end)")
+    parser.add_option("--systAnalysis", dest="systAnalysis", action="store_true", default=False, help="Runs the macro for generating systematic uncertainties plots")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
     parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
     parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
