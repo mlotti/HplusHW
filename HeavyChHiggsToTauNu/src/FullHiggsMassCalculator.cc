@@ -149,6 +149,8 @@ namespace HPlus {
       throw cms::Exception("LogicError") << "Error: Invariant mass config parameter metSelectionMethod = '" << myMetMethod << "' is unknown!" << std::endl
         << "Options are 'SmallestMagnitude', 'GreatestMagnitude', 'ClosestToTopMass'" << std::endl;
     }
+    
+    fReApplyMetCut = iConfig.getUntrackedParameter<double>("reApplyMetCut");
 
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
@@ -914,6 +916,12 @@ namespace HPlus {
       output.bPassedEvent = false;
     if (fTopInvMassLowerCut >= 0 && output.fTopMassSolutionSelected < fTopInvMassLowerCut) output.bPassedEvent = false;
     if (fTopInvMassUpperCut >= 0 && output.fTopMassSolutionSelected > fTopInvMassUpperCut) output.bPassedEvent = false;
+    // Re-apply (or not) the SignalAnalysis MET cut on the modified MET object
+    if (output.fDiscriminant < 0 && fReApplyMetCut >= 0) {
+      if (output.fModifiedMETSolutionSelected >= fReApplyMetCut) output.bPassedEvent = true;
+      else output.bPassedEvent = false;
+    }
+
     //std::cout << "fTopInvMassLowerCut: " << fTopInvMassLowerCut << std::endl;
     //std::cout << "fTopInvMassUpperCut: " << fTopInvMassUpperCut << std::endl;
     //if (output.fTopMassSolutionSelected < 140.0 || output.fTopMassSolutionSelected > 200.0) output.bPassedEvent = false;
