@@ -499,12 +499,15 @@ QCDTailKillerScenarios = ["QCDTailKillerZeroPlus",
                           "QCDTailKillerTightPlus",
                           "QCDTailKillerVeryTightPlus"]
 
+# Define H+ Invariant Mass Reco options
 invMassReco = cms.untracked.PSet(
     #topInvMassCutName = cms.untracked.string("None")
     topInvMassLowerCut = cms.untracked.double(-1.0), # Negative value means no cut. This is currently the default.
     topInvMassUpperCut = cms.untracked.double(-1.0),  # Negative value means no cut. This is currently the default.
-    pzSelectionMethod = cms.untracked.string("DeltaEtaMin"), # Method of selecting the pZ of neutrino for real solutions
+    pzSelectionMethod  = cms.untracked.string("DeltaEtaMin"), # Method of selecting the pZ of neutrino for real solutions
     metSelectionMethod = cms.untracked.string("SmallestMagnitude"), #Method of selecting MET for complex solutions
+    reApplyMetCut      = MET.METCut, #Re-apply the MET cut after invariant mass reconstruction calculations (only for complex solutions). Set value as <0 to disable.
+    #reApplyMetCut      = cms.untracked.double(0.0)
     )
 
 topReconstruction = cms.untracked.string("None") # Options: None, chi, std, Bselection, Wselection
