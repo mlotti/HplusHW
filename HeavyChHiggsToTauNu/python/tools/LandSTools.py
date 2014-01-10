@@ -1674,6 +1674,16 @@ class LandSInstaller:
             # Patch
             os.system("patch -p0 < $CMSSW_BASE/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit/mypatch")
             # Compile
+            if os.environ["HOST"] == "jade.hip.fi":
+                print "LandS has been downloaded and patched."
+                print "Since you are working on jade, you must now manually do the following:"
+                print "1) log on jade-five.hip.fi"
+                print "2) cd %s"%landsDirAbs
+                print '3) setenv SCRAM_ARCH "slc5_amd64_gcc472"'
+                print "4) cmsenv"
+                print "5) make -j 4"
+                print "If the make is successful (it should be), then return to this terminal and redo this command"
+                sys.exit()
             os.chdir(landsDir)
             ret = subprocess.call(["make", "clean"])
             if ret != 0:
