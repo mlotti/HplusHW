@@ -647,6 +647,9 @@ class ConfigBuilder:
     def _customizeTauEmbeddingInput(self, process, param):
         ret = []
         if self.options.tauEmbeddingInput != 0:
+            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.WTauMuWeight_cfi")
+            process.commonSequence += process.wtaumuWeight
+
             #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
             tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, self.options, self.dataVersion)
             tauEmbeddingCustomisations.customiseParamForTauEmbedding(process, param, self.options, self.dataVersion)
@@ -960,36 +963,33 @@ class ConfigBuilder:
         additionalNames = []
         retNames = []
         retModules = []
+        def addIntermediateAnalyzer(module, name, postfix):
+            if disableIntermediateAnalyzers:
+                return
+            modName = name
+            if postfix is not None:
+                modName = makeName(name, postfix)
+            path = cms.Path(process.commonSequence * module)
+            setattr(process, modName, module)
+            setattr(process, modName+"Path", path)
+            additionalNames.append(modName)
+
         for module, name in zip(analysisModules, analysisNames):
             disablePrintCounter(module)
-            if not disableIntermediateAnalyzers:
-                path = cms.Path(process.commonSequence * module)
-                setattr(process, name, module)
-                setattr(process, name+"Path", path)
-                additionalNames.append(name)
+            addIntermediateAnalyzer(module, name, None)
 
             postfix = "MIdEff"
             mod = module.clone()
             setLevelToVital(mod)
             mod.embeddingMuonIdEfficiency.mode = "dataEfficiency"
             mod.embeddingMuonIdEfficiency.muonSrc = mod.Tree.tauEmbedding.muons.src.value()
-            if not disableIntermediateAnalyzers:
-                path = cms.Path(process.commonSequence * mod)
-                modName = makeName(name, postfix)
-                setattr(process, modName, mod)
-                setattr(process, modName+"Path", path)
-                additionalNames.append(modName)
+            addIntermediateAnalyzer(mod, name, postfix)
 
             postfix += "TrgEff"
             mod = mod.clone()
             mod.embeddingMuonTriggerEfficiency.mode = "dataEfficiency"
             mod.embeddingMuonTriggerEfficiency.muonSrc = mod.embeddingMuonIdEfficiency.muonSrc.value()
-            if not disableIntermediateAnalyzers:
-                path = cms.Path(process.commonSequence * mod)
-                modName = makeName(name, postfix)
-                setattr(process, modName, mod)
-                setattr(process, modName+"Path", path)
-                additionalNames.append(modName)
+            addIntermediateAnalyzer(mod, name, postfix)
 
             if useCaloMet:
                 postfix += "CaloMet60"
@@ -999,24 +999,25 @@ class ConfigBuilder:
                 postfix += "MetEff"
                 mod = mod.clone()
                 mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
-            if not disableIntermediateAnalyzers:
-                path = cms.Path(process.commonSequence * mod)
-                modName = makeName(name, postfix)
-                setattr(process, modName, mod)
-                setattr(process, modName+"Path", path)
-                additionalNames.append(modName)
+            addIntermediateAnalyzer(mod, name, postfix)
 
             postfix += "TEff"
             mod = mod.clone()
+            mod.tauTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
+            addIntermediateAnalyzer(mod, name, postfix)
+
+            postfix += "WTauMu"
+            mod = mod.clone()
+            mod.embeddingWTauMuWeightReader.enabled = True
             enablePrintCounter(mod)
             mod.histogramAmbientLevel = self.histogramAmbientLevel
-            mod.tauTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
             path = cms.Path(process.commonSequence * mod)
             modName = makeName(name, postfix)
 #            setattr(process, modName, mod)
 #            setattr(process, modName+"Path", path)
             retNames.append(modName)
             retModules.append(mod)
+
 
         if len(additionalNames) > 0:
             self._accumulateAnalyzers("Tau embedding intermediate analyses", additionalNames)
@@ -1336,7 +1337,6 @@ class ConfigBuilder:
             module.bTagging.variationShiftBy = shiftBy
             return self._addVariationModule(process, module, name+self.systPrefix+"BTagSF"+postfix)
 
-
         names = []
 
         # Tau trigger SF
@@ -1369,12 +1369,27 @@ class ConfigBuilder:
                     names.append(addMETTrgSF( 1.0, "Plus"))
                     names.append(addMETTrgSF(-1.0, "Minus"))
 
+        # Embedding-specific
         if self.options.tauEmbeddingInput != 0:
             names.append(addMuonTrgDataEff( 1.0, "Plus"))
             names.append(addMuonTrgDataEff( -1.0, "Minus"))
 
             names.append(addMuonIdDataEff( 1.0, "Plus"))
             names.append(addMuonIdDataEff( -1.0, "Minus"))
+
+            if not hasattr(process, "wtaumuWeightPlus"):
+                process.wtaumuWeightPlus = process.wtaumuWeight.clone(variationEnabled=True)
+                process.wtaumuWeightMinus = process.wtaumuWeightPlus.clone(
+                    variationAmount = -process.wtaumuWeightPlus.variationAmount.value()
+                )
+                process.commonSequence += (process.wtaumuWeightPlus + process.wtaumuWeightMinus)
+            mod = self._cloneForVariation(getattr(process, name))
+            mod.embeddingWTauMuWeightReader.weightSrc = "wtaumuWeightPlus"
+            names.append(self._addVariationModule(process, mod, name+self.systPrefix+"WTauMuPlus"))
+
+            mod = mod.clone()
+            mod.embeddingWTauMuWeightReader.weightSrc = "wtaumuWeightMinus"
+            names.append(self._addVariationModule(process, mod, name+self.systPrefix+"WTauMuMinus"))
 
         # BTag SF
         if not embeddingData:
