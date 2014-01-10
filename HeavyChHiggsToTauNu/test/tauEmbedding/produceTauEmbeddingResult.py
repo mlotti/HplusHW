@@ -38,7 +38,7 @@ BR_tau_hadr = 1 - 0.1783 - 0.1741
 
 def normalize(h):
     # All other normalization is within the job
-    h.Scale(1/BR_tau_hadr)
+    h.Scale(BR_tau_hadr)
 
 def processDirectory(dset, srcDirName, dstDir):
     # Get directories, recurse to them

@@ -718,6 +718,11 @@ embeddingGeneratorWeightReader = cms.untracked.PSet(
     enabled = cms.bool(False),
 )
 
+embeddingWTauMuWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("wtaumuWeight"),
+    enabled = cms.bool(False)
+)
+
 vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices"),
 #    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
