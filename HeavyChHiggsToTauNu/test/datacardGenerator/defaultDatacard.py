@@ -40,7 +40,7 @@ OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
 OptionRemoveHHDataGroup = False
 OptionLimitOnSigmaBr = False # Is automatically set to true for heavy H+
-OptionDoTBbarForHeavy = False
+OptionDoTBbarForHeavy = False # NOTE: usable only for 2012
 
 # For projections
 trg_MET_dataeffScaleFactor = None # Default is None, i.e. 1.0
