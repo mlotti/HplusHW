@@ -1673,6 +1673,9 @@ class LandSInstaller:
                 raise Exception("cvs checkout failed to create directory '%s' under '%s'" % (brlimitBase, landsDir))
     
             os.chdir(landsDir)
+            # Patch
+            ret = subprocess.call(["patch", "p0", "<", "mypatch"])
+            # Compile
             ret = subprocess.call(["make", "clean"])
             if ret != 0:
                 raise Exception("Compiling LandS failed (exit code %d), command 'make clean'" % ret)
