@@ -47,6 +47,7 @@ import aux
 
 _lightHplusMasses = [80, 90, 100, 120, 140, 150, 155, 160]
 _heavyHplusMasses = [180, 190, 200, 220, 250, 300, 400, 500, 600]
+_heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 500, 600, 700]
 
 ## These MC datasets must be added together before any
 ## merging/renaming. They are split to two datasets just for more
@@ -75,6 +76,8 @@ for mass in [180, 190, 200, 220, 250, 300]:
 for bquark in [0, 1, 2, 3, 4]:
     _physicalMcAdd["WJets_%dbquark_TuneZ2star_v1_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
     _physicalMcAdd["WJets_%dbquark_TuneZ2star_v2_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
+for mass in _heavyHplusToTBbarMasses:
+    _physicalMcAdd["HplusToTBbar_M%d_Summer12"%mass] = "HplusToTBbar_M%d_Summer12"%mass
 
 ## Map the physical dataset names to logical names
 #
@@ -100,6 +103,9 @@ for mcEra in ["Summer11", "Fall11", "Summer12"]:
 
     for mass in _heavyHplusMasses:
         _physicalToLogical["HplusTB_M%d_%s"%(mass, mcEra)] = "HplusTB_M%d" % mass
+
+    for mass in _heavyHplusToTBbarMasses:
+        _physicalToLogical["HplusToTBbar_M%d_%s"%(mass, mcEra)] = "HplusToTBbar_M%d" % mass
 
 for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     _physicalToLogical.update({
@@ -158,7 +164,7 @@ for mass in _lightHplusMasses:
 
     _lightSignalMerge["TTToHplus_M%d"%mass] = "TTOrTToHplus_M%d"%mass
     _lightSignalMerge["Hplus_taunu_M%d" % mass] = "TTOrTToHplus_M%d"%mass
-    
+
 _datasetMerge = {
     "QCD_Pt30to50":   "QCD",
     "QCD_Pt50to80":   "QCD",
@@ -294,7 +300,8 @@ for mass in _lightHplusMasses:
     _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
 for mass in _heavyHplusMasses:
     _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
-
+for mass in _heavyHplusToTBbarMasses:
+    _legendLabels["HplusToTBbar_M%d"%mass] = "H^{+}#rightarrowtb m_{H^{+}}=%d" % mass
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {
