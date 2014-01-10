@@ -1671,11 +1671,10 @@ class LandSInstaller:
                 raise Exception("cvs checkout failed (exit code %d), command '%s'" % (ret, " ".join(command)))
             if not os.path.exists(landsDir):
                 raise Exception("cvs checkout failed to create directory '%s' under '%s'" % (brlimitBase, landsDir))
-    
-            os.chdir(landsDir)
             # Patch
-            ret = subprocess.call(["patch", "p0", "<", "mypatch"])
+            os.system("patch -p0 < $CMSSW_BASE/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit/mypatch")
             # Compile
+            os.chdir(landsDir)
             ret = subprocess.call(["make", "clean"])
             if ret != 0:
                 raise Exception("Compiling LandS failed (exit code %d), command 'make clean'" % ret)
