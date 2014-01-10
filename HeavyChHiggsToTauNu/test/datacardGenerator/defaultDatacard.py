@@ -9,10 +9,12 @@ Path = "/home/wendland/data/v533/2013-12-04"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
-#LightMassPoints      = [120]
+LightMassPoints      = [80,120,160]
+LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
-#HeavyMassPoints      = [180]
+HeavyMassPoints      = [180,220,300,400]
+HeavyMassPoints      = []
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
 BlindAnalysis   = True
@@ -38,6 +40,7 @@ OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
 OptionRemoveHHDataGroup = False
 OptionLimitOnSigmaBr = False # Is automatically set to true for heavy H+
+OptionDoTBbarForHeavy = False
 
 # For projections
 trg_MET_dataeffScaleFactor = None # Default is None, i.e. 1.0
@@ -145,7 +148,10 @@ for mass in HeavyMassPoints:
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
     hx.setNuisances(myShapeSystematics[:]+["e_mu_veto","b_tag","stat_binByBin","lumi"])
-    hx.setDatasetDefinition("HplusTB_M"+str(mass))
+    if not OptionDoTBbarForHeavy:
+        hx.setDatasetDefinition("HplusTB_M"+str(mass))
+    else:
+        hx.setDatasetDefinition("HplusToTBbar_M"+str(mass))
     DataGroups.append(hx)
 
 myQCDFact = DataGroup(

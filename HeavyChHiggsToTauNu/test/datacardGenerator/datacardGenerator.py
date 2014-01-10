@@ -11,6 +11,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True) # no flashing canvases
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 import tarfile
+import cProfile
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
@@ -46,7 +47,7 @@ def main(opts, moduleSelector, multipleDirs):
     config = load_module(opts.datacard)
     # Replace source directory if necessary
     if multipleDirs != None:
-        opts.Path = multipleDirs
+        config.Path = multipleDirs
     print "Input directory:",config.Path
 
     # If user insisted on certain QCD method on command line, produce datacards only for that QCD method
@@ -98,6 +99,7 @@ def main(opts, moduleSelector, multipleDirs):
     if qcdInvertedDsetCreator != None:
         moduleSelector.addOtherSource("QCD inverted", qcdInvertedDsetCreator)
     moduleSelector.doSelect(opts)
+    moduleSelector.closeFiles()
 
     # Separate light and heavy masses if they are not separated
     mySearchModeList = moduleSelector.getSelectedSearchModes()
@@ -128,6 +130,10 @@ def main(opts, moduleSelector, multipleDirs):
                             config.DataCardName = myOriginalName + "_HeavyHplus"
                 mySearchModeCounter += 1
                 for optimizationMode in moduleSelector.getSelectedOptimizationModes():
+                    ROOT.gROOT.CloseFiles()
+                    ROOT.gROOT.GetListOfCanvases().Delete()
+                    # After these, three histograms are still left in memory
+                    # Worst memory leak seems to come from storing and not freeing the main counters
                     # Create the dataset creator managers separately for each module
                     signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
                     embeddingDsetCreator = None
@@ -261,7 +267,8 @@ if __name__ == "__main__":
         sys.exit()
     # Run main program
     if opts.multipleDirs == None:
-        main(opts, myModuleSelector, multipleDirs=None)
+        #main(opts, myModuleSelector, multipleDirs=None)
+        cProfile.run("main(opts, myModuleSelector, multipleDirs=None)")
     else:
         # Find matching directories
         (head, tail) = os.path.split(opts.multipleDirs)
