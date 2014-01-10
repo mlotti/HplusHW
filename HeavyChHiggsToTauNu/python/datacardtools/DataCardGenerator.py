@@ -45,10 +45,22 @@ class DatasetMgrCreatorManager:
         self._toleranceForLuminosityDifference = config.ToleranceForLuminosityDifference
         self._optionDebugConfig = opts.debugConfig
 
+    def __del__(self):
+        self.closeManagers()
+        for d in self._dsetMgrCreators:
+            if d != None:
+                d.close()
+        self._dsetMgrCreators = []
+        self._dsetMgrs = []
+        self._luminosities = []
+        self._mainCounterTables = []
+
     def closeManagers(self):
         for dMgr in self._dsetMgrs:
             if dMgr != None:
                 dMgr.close()
+        self._dsetMgrs = []
+        print "DatasetManagerCreators closed"
 
     def obtainDatasetMgrs(self, era, searchMode, optimizationMode):
         if len(self._dsetMgrs) > 0:
@@ -257,6 +269,27 @@ class DataCardGenerator:
         if len(self._config.MassPoints) > 0:
             myMassRange += "-"+str(self._config.MassPoints[len(self._config.MassPoints)-1])
         print "Cards will be generated for "+HighlightStyle()+myOutputPrefix+NormalStyle()+" in mass range "+HighlightStyle()+myMassRange+" GeV"+NormalStyle()
+
+    def __del__(self):
+        print "\nDeleting cached objects"
+        self.closeFiles()
+        self.opts = None
+        self._config = None
+        del self._dsetMgrManager
+        self._dsetMgrManager = None
+        self._observation = None
+        for c in self._columns:
+            del c
+        self._columns = None
+        for e in self._extractors:
+            del e
+        self._extractors = None
+        for e in self._controlPlotExtractors:
+            del e
+        self._controlPlotExtractors = None
+        for e in self._controlPlotExtractorsEWKfake:
+            del e
+        self._controlPlotExtractorsEWKfake
 
     #def overrideConfigOptionsFromCommandLine(self):
         # Obtain QCD measurement method
@@ -575,8 +608,8 @@ class DataCardGenerator:
 
     ## Closes files in dataset managers
     def closeFiles(self):
-        print "Closing open input files"
-        self._dsetMgrManager.closeManagers()
+        #print "Closing open input files"
+        #self._dsetMgrManager.closeManagers()
         print "DatasetManagers closed"
 
     ## Check landsProcess in datacard columns
