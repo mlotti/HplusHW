@@ -41,8 +41,6 @@ class Result:
             for subdirname in dirnames:
                 if "LandSMultiCrab" in subdirname:
                     self._jobDir = subdirname
-        if self._jobDir == None:
-            raise Exception("Error: Could not find 'LandSMultiCrab' in a sub directory name under the base directory '%s'!"%self._basedir)
 
     def _createAndSubmit(self):
         # Go to base directory
@@ -64,6 +62,8 @@ class Result:
         os.system(myCommand)
         # Change to job directory
         self._findJobDir()
+        if self._jobDir == None:
+            raise Exception("Error: Could not find 'LandSMultiCrab' in a sub directory name under the base directory '%s'!"%self._basedir)
         os.chdir(self._jobDir)
         # Submit jobs
         print "Submitting jobs"
