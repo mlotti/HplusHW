@@ -20,7 +20,7 @@ class Result:
         self._allRetrieved = False
         self._limitCalculated = False
         self._output = ""
-        self._findJobDir()
+        self._findJobDir(basedir)
         print self._jobDir
         if self._jobDir == None:
             if self._opts.printonly:
@@ -35,9 +35,9 @@ class Result:
                 if not self._opts.printonly:
                     self._getOutput()
 
-    def _findJobDir(self):
+    def _findJobDir(self, basedir):
         self._jobDir = None
-        for dirname, dirnames, filenames in os.walk(self._basedir):
+        for dirname, dirnames, filenames in os.walk(basedir):
             for subdirname in dirnames:
                 if "LandSMultiCrab" in subdirname:
                     self._jobDir = subdirname
@@ -61,7 +61,7 @@ class Result:
         print "Creating jobs with:",myCommand
         os.system(myCommand)
         # Change to job directory
-        self._findJobDir()
+        self._findJobDir(".")
         if self._jobDir == None:
             raise Exception("Error: Could not find 'LandSMultiCrab' in a sub directory name under the base directory '%s'!"%self._basedir)
         os.chdir(self._jobDir)
