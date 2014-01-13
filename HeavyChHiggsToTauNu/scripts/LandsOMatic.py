@@ -23,7 +23,7 @@ class Result:
         self._findJobDir()
         print self._jobDir
         if self._jobDir == None:
-            if self._opts.printOnly:
+            if self._opts.printonly:
                 raise Exception("Error: need to create and submit jobs first!")
             self._createAndSubmit()
         else:
