@@ -941,7 +941,7 @@ class LHCType:
             opts += commonOptionsBrLimit
         if self.sigmabrlimit:
             opts += commonOptionsSigmaBrLimit
-        opts = " " + self.options.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts += " " + self.options.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR == None:
             opts += " --ExpectationHints Asymptotic"
@@ -1198,7 +1198,7 @@ class LHCTypeAsymptotic:
             opts += commonOptionsBrLimit
         if self.sigmabrlimit:
             opts += commonOptionsSigmaBrLimit
-        opts = " " + self.optionsObserved.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts += " " + self.optionsObserved.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR != None:
             if len(vR) == 2:
