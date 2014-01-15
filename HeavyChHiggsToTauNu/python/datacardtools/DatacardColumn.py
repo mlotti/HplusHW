@@ -285,8 +285,10 @@ class DatacardColumn():
         if self.typeIsEmptyColumn() or dsetMgr == None:
             if self._opts.verbose:
                 print "  - Creating empty rate shape"
-            myArray = array("d",config.ShapeHistogramsDimensions)
-            h = TH1F(self.getLabel(),self.getLabel(),len(myArray)-1,myArray)
+            #myArray = array("d",config.ShapeHistogramsDimensions)
+            #h = TH1F(self.getLabel(),self.getLabel(),len(myArray)-1,myArray)
+            # Use here just one bin to speed up LandS (yes, one needs a histogram for the empty columns even if ShapeStat is off)
+            h = TH1F(self.getLabel(),self.getLabel(),1,0,1)
             myRateHistograms.append(h)
         else:
             if self._opts.verbose:
@@ -298,10 +300,9 @@ class DatacardColumn():
                 myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         # Cache result
-        self._rateResult = ExtractorResult("rate",
-                                           "rate",
-                                           myRateHistograms[0].Integral(), # Take only visible part
-                                           myRateHistograms)
+        self._rateResult = ExtractorResult("rate", "rate",
+                               myRateHistograms[0].Integral(), # Take only visible part
+                               myRateHistograms)
         if self.typeIsEmptyColumn() or dsetMgr == None:
             return
 
