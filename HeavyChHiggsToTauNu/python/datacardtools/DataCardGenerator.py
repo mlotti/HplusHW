@@ -44,6 +44,7 @@ class DatasetMgrCreatorManager:
             raise Exception(ErrorLabel()+"Input datacard should contain entry for ToleranceForLuminosityDifference (for example: ToleranceForLuminosityDifference=0.01)!"+NormalStyle())
         self._toleranceForLuminosityDifference = config.ToleranceForLuminosityDifference
         self._optionDebugConfig = opts.debugConfig
+        self._config = config
 
     def __del__(self):
         self.closeManagers()
@@ -89,6 +90,14 @@ class DatasetMgrCreatorManager:
                 myDsetMgr.printDatasetTree()
                 # Store DatasetManager
                 self._dsetMgrs.append(myDsetMgr)
+                # For embedding, check setting on CaloMET
+                if i == DatacardDatasetMgrSourceType.EMBEDDING:
+                    myProperty = self._dsetMgrs.getAllDatasets()[0].getProperty("analysisName")
+                    if not self._config.OptionReplaceEmbeddingByMC:
+                        if "CaloMet" in myProperty and not self._config.OptionUseCaloMetApproximationForEmbedding:
+                            raise Exception(ErrorLabel()+"Embedding has been done with CaloMet approximation, please turn on OptionUseCaloMetApproximationForEmbedding in config!")
+                        if not "CaloMet" in myProperty and self._config.OptionUseCaloMetApproximationForEmbedding:
+                            raise Exception(ErrorLabel()+"Embedding has not been done with CaloMet approximation, please turn off OptionUseCaloMetApproximationForEmbedding in config!")
             else:
                 # No dsetMgrCreator, append zero pointers to retain list dimension
                 self._dsetMgrs.append(None)
@@ -504,6 +513,26 @@ class DataCardGenerator:
             else:
                 c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
+        # Purge columns with zero rate
+        myLastUntouchableLandsProcessNumber = 0 # For sigma x br
+        if not self._config.OptionLimitOnSigmaBr and (self._columns[0].getLabel()[:2] == "HW" or self._columns[1].getLabel()[:2] == "HW"):
+            myLastUntouchableLandsProcessNumber = 2 # For light H+ physics model
+        myIdsForRemoval = []
+        for c in self._columns:
+            if c.getLandsProcess() > myLastUntouchableLandsProcessNumber:
+                if abs(c._rateResult.getResult()) < self._config.ToleranceForMinimumRate:
+                    # Zero rate, flag column for removal
+                    myIdsForRemoval.append(c.getLandsProcess())
+        for i in myIdsForRemoval:
+            # Remove columns
+            for c in self._columns:
+                if c.getLandsProcess() == i:
+                    print WarningLabel()+"Rate for column '%s' is smaller than %f. Removing column from datacard."%(c.getLabel(),self._config.ToleranceForMinimumRate)
+                    self._columns.remove(c)
+            # Update process numbers
+            for c in self._columns:
+                if c.getLandsProcess() > i:
+                    c._landsProcess -= 1
 
     def doMergeForRealisticEmbedding(self):
         print "\nStart merge for realistic embedding"
