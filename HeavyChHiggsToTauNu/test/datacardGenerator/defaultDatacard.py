@@ -29,6 +29,7 @@ OptionMassShape = "TransverseMass"
 #OptionMassShape = "TransverseAndFullMass2D" #FIXME not yet supported!!!
 
 OptionReplaceEmbeddingByMC = True
+OptionUseCaloMetApproximationForEmbedding = False # Only relevant for OptionReplaceEmbeddingByMC==False (either calo met or MET SF uncert.)
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionTreatTriggerUncertaintiesAsAsymmetric = False # Set to true, if you produced multicrabs with doAsymmetricTriggerUncertainties=True
 OptionTreatTauIDAndMisIDSystematicsAsShapes = False # Set to true, if you produced multicrabs with doTauIDandMisIDSystematicsAsShapes=True
@@ -98,7 +99,10 @@ myShapeSystematics.extend(myTrgShapeSystematics)
 myShapeSystematics.extend(myTauIDShapeSystematics)
 myShapeSystematics.extend(["ES_taus","ES_jets","JER","ES_METunclustered","pileup"]) # btag is not added, because it has the tag and mistag categories
 
-myEmbeddingShapeSystematics = ["trg_tau_dataeff","trg_MET_dataeff","trg_muon_dataeff","ES_taus","Emb_mu_ID","Emb_WtauTomu"]
+myEmbeddingMETUncert = "trg_MET_dataeff"
+if OptionUseCaloMetApproximationForEmbedding:
+    myEmbeddingMETUncert = "trg_MET_calomet"
+myEmbeddingShapeSystematics = ["trg_tau_dataeff",myEmbeddingMETUncert,"trg_muon_dataeff","ES_taus","Emb_mu_ID","Emb_WtauTomu"]
 # Add tau ID uncert. to embedding either as a shape or as a constant
 if "tau_ID_shape" in myTauIDShapeSystematics:
     myEmbeddingShapeSystematics.append("tau_ID_constShape")
@@ -183,7 +187,7 @@ DataGroups.append(myQCDInv)
 
 if not OptionReplaceEmbeddingByMC:
     # EWK + ttbar with genuine taus
-    EmbeddingIdList = [4]
+    EmbeddingIdList = [3]
     DataGroups.append(DataGroup(
         label        = "EWK_Tau",
         landsProcess = 4,
@@ -249,9 +253,11 @@ elif OptionRealisticEmbeddingWithMC:
     EmbeddingIdList = [4]
     myEmbeddingShapeSystematics = []
     if OptionTreatTriggerUncertaintiesAsAsymmetric:
-        myEmbeddingShapeSystematics = ["trg_tau_dataeff","trg_MET_dataeff","ES_taus"]
+        myEmbeddingShapeSystematics.append("trg_tau_dataeff")
+        myEmbeddingShapeSystematics.append("trg_MET_dataeff")
     else:
-        myEmbeddingShapeSystematics = ["trg_tau","trg_MET","ES_taus"]
+        myEmbeddingShapeSystematics.append("trg_tau")
+        myEmbeddingShapeSystematics.append("trg_MET")
     myEmbeddingShapeSystematics.append("ES_taus")
     if OptionTreatTauIDAndMisIDSystematicsAsShapes:
         myEmbeddingShapeSystematics.append("tau_ID_shape")
@@ -475,6 +481,15 @@ else:
         distr         = "shapeQ",
         function      = "ShapeVariation",
         systVariation = "MetTrgMCEff",
+    ))
+
+if not OptionReplaceEmbeddingByMC and OptionUseCaloMetApproximationForEmbedding:
+    Nuisances.append(Nuisance(
+        id            = "trg_MET_calomet",
+        label         = "tau+MET trg MET part from caloMET.",
+        distr         = "shapeQ",
+        function      = "ConstantToShape",
+        value         = 0.15,
     ))
 
 if not OptionReplaceEmbeddingByMC:
@@ -875,6 +890,12 @@ Nuisances.append(Nuisance(
 MergeNuisances = []
 if not OptionReplaceEmbeddingByMC and "tau_ID_shape" in myTauIDShapeSystematics:
     MergeNuisances.append(["tau_ID_shape", "tau_ID_constShape"])
+if not OptionReplaceEmbeddingByMC and OptionUseCaloMetApproximationForEmbedding:
+    if "trg_MET" in myShapeSystematics:
+        MergeNuisances.append(["trg_MET","trg_MET_calomet"])
+    else:
+        MergeNuisances.append(["trg_MET_dataeff","trg_MET_calomet"])
+
 #MergeNuisances.append(["ES_taus","ES_taus_fakes","ES_taus_tempForEmbedding"])
 #MergeNuisances.append(["ES_jets","ES_jets_fakes"])
 #MergeNuisances.append(["JER","JER_fakes"])

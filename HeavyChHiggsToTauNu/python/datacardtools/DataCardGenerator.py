@@ -44,6 +44,7 @@ class DatasetMgrCreatorManager:
             raise Exception(ErrorLabel()+"Input datacard should contain entry for ToleranceForLuminosityDifference (for example: ToleranceForLuminosityDifference=0.01)!"+NormalStyle())
         self._toleranceForLuminosityDifference = config.ToleranceForLuminosityDifference
         self._optionDebugConfig = opts.debugConfig
+        self._config = config
 
     def __del__(self):
         self.closeManagers()
@@ -89,6 +90,14 @@ class DatasetMgrCreatorManager:
                 myDsetMgr.printDatasetTree()
                 # Store DatasetManager
                 self._dsetMgrs.append(myDsetMgr)
+                # For embedding, check setting on CaloMET
+                if i == DatacardDatasetMgrSourceType.EMBEDDING:
+                    myProperty = self._dsetMgrs.getAllDatasets()[0].getProperty("analysisName")
+                    if not self._config.OptionReplaceEmbeddingByMC:
+                        if "CaloMet" in myProperty and not self._config.OptionUseCaloMetApproximationForEmbedding:
+                            raise Exception(ErrorLabel()+"Embedding has been done with CaloMet approximation, please turn on OptionUseCaloMetApproximationForEmbedding in config!")
+                        if not "CaloMet" in myProperty and self._config.OptionUseCaloMetApproximationForEmbedding:
+                            raise Exception(ErrorLabel()+"Embedding has not been done with CaloMet approximation, please turn off OptionUseCaloMetApproximationForEmbedding in config!")
             else:
                 # No dsetMgrCreator, append zero pointers to retain list dimension
                 self._dsetMgrs.append(None)
