@@ -149,6 +149,8 @@ namespace HPlus {
       throw cms::Exception("LogicError") << "Error: Invariant mass config parameter metSelectionMethod = '" << myMetMethod << "' is unknown!" << std::endl
         << "Options are 'SmallestMagnitude', 'GreatestMagnitude', 'ClosestToTopMass'" << std::endl;
     }
+    
+    fReApplyMetCut = iConfig.getUntrackedParameter<double>("reApplyMetCut");
 
     fReApplyMetCut = iConfig.getUntrackedParameter<double>("reApplyMetCut");
 

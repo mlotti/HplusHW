@@ -141,7 +141,7 @@ namespace HPlus {
 		 const GenParticleAnalysis::Data* genDataPtr = NULL);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau, 
 		 const BTagging::Data& bData, const METSelection::Data& metData, 
-		 const GenParticleAnalysis::Data* genDataPtr = NULL);
+		 const GenParticleAnalysis::Data* genDataPtr = NULL);    
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau, 
