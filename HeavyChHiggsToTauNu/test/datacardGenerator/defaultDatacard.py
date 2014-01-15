@@ -52,6 +52,8 @@ OptionSqrtS = 7 # sqrt(s)
 
 # Tolerance for throwing error on luminosity difference (0.01 = 1 percent agreement is required)
 ToleranceForLuminosityDifference = 0.01
+# Tolerance for almost zero rate (columns with smaller rate are suppressed)
+ToleranceForMinimumRate = 0.1
 
 # Shape histogram definitions
 SignalShapeHisto = None
