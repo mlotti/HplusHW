@@ -250,6 +250,7 @@ if __name__ == "__main__":
     parser.add_option("--debugQCD", dest="debugQCD", action="store_true", default=False, help="Enable debugging print for QCD measurement")
     parser.add_option("--debugShapeHistogram", dest="debugShapeHistogram", action="store_true", default=False, help="Debug shape histogram modifying algorithm")
     parser.add_option("--debugControlPlots", dest="debugControlPlots", action="store_true", default=False, help="Enable debugging print for data-driven control plots")
+    parser.add_option("--debugProfiler", dest="debugProfiler", action="store_true", default=False, help="Enable profiler")
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
     (opts, args) = parser.parse_args()
 
@@ -267,12 +268,18 @@ if __name__ == "__main__":
         sys.exit()
     # Run main program
     if opts.multipleDirs == None:
-        #main(opts, myModuleSelector, multipleDirs=None)
-        cProfile.run("main(opts, myModuleSelector, multipleDirs=None)")
+        if opts.debugProfiler:
+            cProfile.run("main(opts, myModuleSelector, multipleDirs=None)")
+        else:
+            main(opts, myModuleSelector, multipleDirs=None)
+        #cProfile.run("main(opts, myModuleSelector, multipleDirs=None)")
     else:
         # Find matching directories
         (head, tail) = os.path.split(opts.multipleDirs)
         myDirList = os.listdir(head)
         for myDir in myDirList:
             if myDir.startswith(tail):
-                main(opts, myModuleSelector, multipleDirs=os.path.join(head,myDir))
+                if opts.debugProfiler:
+                    cProfile.run("main(opts, myModuleSelector, multipleDirs=os.path.join(head,myDir))")
+                else:
+                    main(opts, myModuleSelector, multipleDirs=os.path.join(head,myDir))
