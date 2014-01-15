@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import os
 from optparse import OptionParser
 
 import ROOT
@@ -17,6 +18,7 @@ _cHeaderHeight = 40
 _cBodyHeight = 180
 _cFooterHeight = 70
 
+_dirname = "shapeSyst"
 
 class RatioPlotContainer:
     def __init__(self, datasetName):
@@ -50,7 +52,7 @@ class RatioPlotContainer:
             backup = ROOT.gErrorIgnoreLevel
             ROOT.gErrorIgnoreLevel = ROOT.kError
             for suffix in [".png",".C",".eps"]:
-                c.Print("%s%s"%(myPlotName,suffix))
+                c.Print("%s/%s%s"%(_dirname,myPlotName,suffix))
             ROOT.gErrorIgnoreLevel = backup
 
     def drawAllInOne(self, myAllShapeNuisances, cmsText, luminosity):
@@ -143,7 +145,7 @@ class RatioPlotContainer:
         backup = ROOT.gErrorIgnoreLevel
         ROOT.gErrorIgnoreLevel = ROOT.kError
         for suffix in [".png",".C",".eps"]:
-            c.Print("%s%s"%(myPlotName,suffix))
+            c.Print("%s/%s%s"%(_dirname,myPlotName,suffix))
         ROOT.gErrorIgnoreLevel = backup
 
 class DatasetContainer:
@@ -211,7 +213,7 @@ class DatasetContainer:
             plot = plots.ComparisonManyPlot(nomHisto, [upHisto, downHisto])
             plot.setLuminosity(luminosity)
             plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineWidth(3))
-            myPlotName = "shapeSyst_%s_syst%s" % (self._name, uncName.replace("Up",""))
+            myPlotName = "%s/shapeSyst_%s_syst%s" % (_dirname, self._name, uncName.replace("Up",""))
             myParams = {}
             myParams["ylabel"] = "Events"
             myParams["log"] = False
@@ -295,6 +297,9 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit()
 
+    # Create directory for plots
+    if not os.path.exists(_dirname):
+        os.mkdir(_dirname)
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.15)

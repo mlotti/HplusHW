@@ -152,6 +152,8 @@ namespace HPlus {
     
     fReApplyMetCut = iConfig.getUntrackedParameter<double>("reApplyMetCut");
 
+    fReApplyMetCut = iConfig.getUntrackedParameter<double>("reApplyMetCut");
+
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");

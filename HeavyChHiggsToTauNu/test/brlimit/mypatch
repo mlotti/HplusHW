@@ -1,0 +1,136 @@
+diff -ru LandS_t3-06-05/src/CLsLimit.cc LandS_t3-06-05_patched/src/CLsLimit.cc
+--- LandS_t3-06-05/src/CLsLimit.cc	2012-06-22 20:17:16.000000000 +0300
++++ LandS_t3-06-05_patched/src/CLsLimit.cc	2013-09-30 13:15:20.000000000 +0300
+@@ -5,7 +5,7 @@
+  */
+ #include <iostream>
+ #include <iomanip>
+-#include <math.h>
++#include <cmath>
+ #include <ctime> // upto second
+ #include <time.h> // upto micro second
+ #include <utility>
+@@ -103,7 +103,7 @@
+ 		}
+ 
+ 		if(par[0]>9e10) {f=-9e10; return;}
+-		for(int i=0; i<npar; i++) {if(isnan(par[i]) or isinf(par[i])) {f=9e20; if(cms_global->GetDebug())  cout<<" i="<<i<<", p="<<par[i]<<endl; return;} }
++		for(int i=0; i<npar; i++) {if(std::isnan(par[i]) or std::isinf(par[i])) {f=9e20; if(cms_global->GetDebug())  cout<<" i="<<i<<", p="<<par[i]<<endl; return;} }
+ 		
+ 		bool bAllChannelsAreFlagged = false;
+ 		npar = cms_global->Get_max_uncorrelation()+1;
+@@ -241,7 +241,7 @@
+ 							if(added){
+ 								if(h<=0) { h=10e-9;} // cout<<" *h<0* "<<endl; 
+ 								bs = h*normalization*(s<nsigproc?par[0]:1);
+-								if(isnan(bs)) {cout<<" morphing bs=nan "<<bs<<" c "<<c<<" s="<<s<<" h=" << h<<" normalization="<<normalization<<endl; }
++								if(std::isnan(bs)) {cout<<" morphing bs=nan "<<bs<<" c "<<c<<" s="<<s<<" h=" << h<<" normalization="<<normalization<<endl; }
+ 							}
+ 						}
+ 						for(u=0; u<vvv_pdftype[c][s].size(); u++){
+@@ -285,11 +285,11 @@
+ 									//cout<<*(uncpars+5)<<" "<<*(uncpars+4)<<endl;
+ 									bs*=pow( (ran>0? *(uncpars+5):*(uncpars+4)) , ran>0?ran*(*(uncpars+6)): -ran*(*(uncpars+6)));
+ 									//bs*=pow( (ran>0? *(uncpars+4):*(uncpars+5)) , ran>0?ran*(*(uncpars+6)): -ran*(*(uncpars+6)));
+-									if(isnan(bs)) {cout<<" typeShapeGaussianQuadraticMorph bs=nan "<<bs<<" c "<<c<<" s="<<s<<" uncpars4: "<<uncpars[4]<<" 5: "<<uncpars[5]<<" 6:"<<uncpars[6]<<" ran="<<ran<<endl;}
++									if(std::isnan(bs)) {cout<<" typeShapeGaussianQuadraticMorph bs=nan "<<bs<<" c "<<c<<" s="<<s<<" uncpars4: "<<uncpars[4]<<" 5: "<<uncpars[5]<<" 6:"<<uncpars[6]<<" ran="<<ran<<endl;}
+ 									break;
+ 								case typeLogNormal:
+ 									bs*=(pow( 1+ (*(uncpars+ (ran>0?1:0))), ran) );
+-									if(isnan(bs)) {cout<<" typeLogNormal bs=nan "<<bs<<" c "<<c<<" s="<<s<<" uncpars "<<uncpars[0]<<" "<<uncpars[1]<<" ran="<<ran<<endl;}
++									if(std::isnan(bs)) {cout<<" typeLogNormal bs=nan "<<bs<<" c "<<c<<" s="<<s<<" uncpars "<<uncpars[0]<<" "<<uncpars[1]<<" ran="<<ran<<endl;}
+ 									break;
+ 								case typeTruncatedGaussian:
+ 									bs*=(1+ (*(uncpars+ (ran>0?1:0)))*ran);
+@@ -317,7 +317,7 @@
+ 									cout<<"pdf_type = "<<vvv_pdftype[c][s][u]<<" not defined yet"<<endl;
+ 									exit(0);
+ 							}
+-							if(isnan(bs)) {cout<<" bs=nan "<<bs<<" c "<<cms_global->GetChannelName(c).c_str()<<" s="<<cms_global->GetProcessNames(c)[s].c_str()<<" pdftype="<<vvv_pdftype[c][s][u]<<endl; }
++							if(std::isnan(bs)) {cout<<" bs=nan "<<bs<<" c "<<cms_global->GetChannelName(c).c_str()<<" s="<<cms_global->GetProcessNames(c)[s].c_str()<<" pdftype="<<vvv_pdftype[c][s][u]<<endl; }
+ 						}
+ 					}
+ 
+@@ -333,7 +333,7 @@
+ 				}
+ 
+ 					tc+=bs;
+-				if(isnan(tc)) {cout<<" tc=nan "<<"  bs="<<bs<<" c "<<c<<" s="<<s<<endl; }
++				if(std::isnan(tc)) {cout<<" tc=nan "<<"  bs="<<bs<<" c "<<c<<" s="<<s<<endl; }
+ 			}
+ 			if(vdata_global[c]<=0){
+ 				if(tc<0) {f=10e9;cms_global->FlagAllChannels(); return;} // tc < 0, which means non-physical, return f = 10e9
+@@ -342,11 +342,11 @@
+ 			}else { 
+ 				if(tc<=0) {f=10e9;cms_global->FlagAllChannels(); return;} // tc < 0, which means non-physical, return f = 10e9
+ 				chisq += (tc-vdata_global[c] - vdata_global[c]*log(tc/vdata_global[c]));
+-				if(isnan(chisq)) {cout<<" chisq = nan "<<" tc="<<tc<<" data="<<vdata_global[c]<<" in channel: "<<c<<endl;}
++				if(std::isnan(chisq)) {cout<<" chisq = nan "<<" tc="<<tc<<" data="<<vdata_global[c]<<" in channel: "<<c<<endl;}
+ 			}
+ 			//		else chisq += (tc - vdata_global[c]*log(tc));   // to be identical with ATLAS TDR description, for limit only
+ 		}
+-		if(isnan(chisq) || chisq>=10e9){ 
++		if(std::isnan(chisq) || chisq>=10e9){ 
+ 			cout<<" DELETEME counting ** ** ** ** chi2="<<chisq<<endl;
+ 			cms_global->FlagAllChannels();
+ 			f=10e9; return; 
+@@ -354,7 +354,7 @@
+ 		if(cms_global->hasParametricShape()){
+ 			chisq+=	cms_global->EvaluateChi2(par, vvv_cachPdfValues);// use default, norminal sigbkgs for evaluation, not randomized one 		
+ 		}
+-		if(isnan(chisq) || chisq>=10e9){ 
++		if(std::isnan(chisq) || chisq>=10e9){ 
+ 			cout<<" DELETEME shaping ** ** ** ** chi2="<<chisq<<endl;
+ 			cms_global->FlagAllChannels();
+ 			f=10e9; return; 
+@@ -374,7 +374,7 @@
+ 					case typeShapeGaussianLinearMorph:
+ 					case typeLogNormal:
+ 						chisq += pow(par[u]-_inputNuisances[u],2); // make sure if doing lep/tev type and also data fit, then _inputNuisances = norminal set 
+-						//if(isnan(chisq)) {cout<<"DELETEME chi2=nan _inputNuisances["<<u<<"]="<<_inputNuisances[u]<<endl;}
++						//if(std::isnan(chisq)) {cout<<"DELETEME chi2=nan _inputNuisances["<<u<<"]="<<_inputNuisances[u]<<endl;}
+ 						break;
+ 					case typeGamma:
+ 						// this is important, one need constraint on the pdf 
+@@ -419,7 +419,7 @@
+ 		// to be identical with ATLAS TDR description, for limit only
+ 		f=chisq;
+ 
+-		if(isnan(f)) f=10e9; // checking if it's nan  
++		if(std::isnan(f)) f=10e9; // checking if it's nan  
+ 
+ 		if( (cms_global->GetPrintParameterFrom() >= 0) && (cms_global->GetPrintParameterTo() >= cms_global->GetPrintParameterFrom()) ){
+ 			if(npar>=cms_global->GetPrintParameterFrom()) 
+Only in LandS_t3-06-05_patched/src: CLsLimit.cc.~1.131.~
+diff -ru LandS_t3-06-05/src/CountingModel.cc LandS_t3-06-05_patched/src/CountingModel.cc
+--- LandS_t3-06-05/src/CountingModel.cc	2012-06-24 17:35:31.000000000 +0300
++++ LandS_t3-06-05_patched/src/CountingModel.cc	2013-09-30 13:16:46.000000000 +0300
+@@ -3168,7 +3168,7 @@
+ 					    }
+ 					    tmp +=tmp2;
+ 				    }
+-				    if(isnan(tmp) || isinf(tmp)) {
++				    if(std::isnan(tmp) || std::isinf(tmp)) {
+ 					    cout<<" DELETEME * pdf  "<<tmp<<endl;
+ 					    FlagAllChannels();
+ 					    return 10e9;
+@@ -3190,7 +3190,7 @@
+ 		    ret+=retch;
+ 	    }// loop over channels
+ 
+-	   if(isnan(ret) || isinf(ret)) cout<<" DELETEME **** pdfs ret = "<<ret<<endl;
++	   if(std::isnan(ret) || std::isinf(ret)) cout<<" DELETEME **** pdfs ret = "<<ret<<endl;
+ 
+ 
+ 	    return ret;
+diff -ru LandS_t3-06-05/src/UtilsROOT.cc LandS_t3-06-05_patched/src/UtilsROOT.cc
+--- LandS_t3-06-05/src/UtilsROOT.cc	2012-06-22 11:10:30.000000000 +0300
++++ LandS_t3-06-05_patched/src/UtilsROOT.cc	2013-10-02 16:52:17.000000000 +0300
+@@ -1173,7 +1173,6 @@
+ 										if(hunc_dn[t][u]->Integral()== 0 && hnorm[t]->Integral()!=0) { 
+ 											cout<<"ERROR: channel ["<<channelnames[c]<<"] process ["<<vv_procnames[c][t]
+ 												<<"] is shape, but the down_shift histogram->Integral = 0"<<endl;
+-											exit(0);
+ 										}
+ 										TString sname  = "up_clone"; sname+=t; sname+=u;
+ 										hunc_up_norm[t][u]=(TH1F*)hunc_up[t][u]->Clone(sname);

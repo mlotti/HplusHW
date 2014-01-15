@@ -941,7 +941,7 @@ class LHCType:
             opts += commonOptionsBrLimit
         if self.sigmabrlimit:
             opts += commonOptionsSigmaBrLimit
-        opts = " " + self.options.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts += " " + self.options.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR == None:
             opts += " --ExpectationHints Asymptotic"
@@ -1198,7 +1198,7 @@ class LHCTypeAsymptotic:
             opts += commonOptionsBrLimit
         if self.sigmabrlimit:
             opts += commonOptionsSigmaBrLimit
-        opts = " " + self.optionsObserved.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts += " " + self.optionsObserved.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR != None:
             if len(vR) == 2:
@@ -1671,7 +1671,19 @@ class LandSInstaller:
                 raise Exception("cvs checkout failed (exit code %d), command '%s'" % (ret, " ".join(command)))
             if not os.path.exists(landsDir):
                 raise Exception("cvs checkout failed to create directory '%s' under '%s'" % (brlimitBase, landsDir))
-    
+            # Patch
+            os.system("patch -p0 < $CMSSW_BASE/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit/mypatch")
+            # Compile
+            if os.environ["HOST"] == "jade.hip.fi":
+                print "LandS has been downloaded and patched."
+                print "Since you are working on jade, you must now manually do the following:"
+                print "1) log on jade-five.hip.fi"
+                print "2) cd %s"%landsDirAbs
+                print '3) setenv SCRAM_ARCH "slc5_amd64_gcc472"'
+                print "4) cmsenv"
+                print "5) make -j 4"
+                print "If the make is successful (it should be), then return to this terminal and redo this command"
+                sys.exit()
             os.chdir(landsDir)
             ret = subprocess.call(["make", "clean"])
             if ret != 0:
