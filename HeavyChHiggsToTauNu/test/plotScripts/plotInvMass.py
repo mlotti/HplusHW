@@ -99,18 +99,15 @@ yMaxFactor     = 2
 yMaxFactorLog  = 100
 
 # Define the path of the multicrab directory here
-localPath      = "/Users/attikis/my_work/cms/lxplus/MyRootFiles/HIG-12-037/signalAnalysis/"
-#crabDir        = "FullHplusMass_29Oct2013_131028_232429/" #29 Oct 2013
-#crabDir        = "FullHPlusMass_Run2012_131112_144044/" #16 Nov 2013
-crabDir        = "signal_nominal_invmassupgrade/" #13 Jan 2014
+mcrabDir        = "/mnt/flustre/attikis/InvMass/Test" #/mnt/flustre/attikis/InvMass/FullHPlusMass_Run2012_131112_144044/
 
 # Define data era to be used
 # myDataEra      = "Run2011AB" #"Run2011A", "Run2011B"
 myDataEra      = "Run2012ABCD" #"Run2012C", "Run2012D", "Run2012AB" "Run2012ABC", "Run2012ABCD" (NO standalone 2012A or 2012B)
 
 # Datasets to consider
-datasetsToKeep  = ["Data", "WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson", "TTToHplus_M" + signalMass]
-#datasetsToKeep   = ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson", "TTToHplus_M" + signalMass]
+datasetsToKeep  = ["TTJets", "WJets", "DYJetsToLL", "SingleTop", "Diboson", "TTToHplus_M" + signalMass]
+#datasetsToKeep  = ["Data", "WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson", "TTToHplus_M" + signalMass]
 #datasetsToKeep  = ["Data", "QCD", "WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson", "TTToHplus_M" + signalMass]
 #datasetsToKeep  = ["EWK MC"]
 
@@ -127,7 +124,7 @@ bStackHistos      = True
 ######################################################################
 # Other
 ######################################################################
-multicrabPath  = localPath + crabDir
+multicrabPath  = mcrabDir
 ROOT.gROOT.SetBatch(bBatchMode)
 
 ######################################################################
@@ -143,8 +140,8 @@ def main():
     datasets = getDatasets(multicrabPath, myDataEra)
     
     # Define the signifiance plots directional cut
-    signifPlotsDir = [">", "<"]
-    #signifPlotsDir = []
+    #signifPlotsDir = [">", "<"]
+    signifPlotsDir = []
 
     # Plot desired histograms
     # doPlots(datasets, TH1List, TH2List, signifPlotsDir)
