@@ -991,6 +991,17 @@ class ConfigBuilder:
             mod.embeddingMuonTriggerEfficiency.muonSrc = mod.embeddingMuonIdEfficiency.muonSrc.value()
             addIntermediateAnalyzer(mod, name, postfix)
 
+            postfix += "WTauMu"
+            mod = mod.clone()
+            mod.embeddingWTauMuWeightReader.enabled = True
+            addIntermediateAnalyzer(mod, name, postfix)
+
+            postfix += "TEff"
+            mod = mod.clone()
+            mod.tauTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
+            mod.histogramAmbientLevel = self.histogramAmbientLevel # already here for met-leg efficiency
+            addIntermediateAnalyzer(mod, name, postfix)
+
             if useCaloMet:
                 postfix += "CaloMet60"
                 mod = mod.clone()
@@ -999,18 +1010,7 @@ class ConfigBuilder:
                 postfix += "MetEff"
                 mod = mod.clone()
                 mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
-            addIntermediateAnalyzer(mod, name, postfix)
-
-            postfix += "TEff"
-            mod = mod.clone()
-            mod.tauTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
-            addIntermediateAnalyzer(mod, name, postfix)
-
-            postfix += "WTauMu"
-            mod = mod.clone()
-            mod.embeddingWTauMuWeightReader.enabled = True
             enablePrintCounter(mod)
-            mod.histogramAmbientLevel = self.histogramAmbientLevel
             path = cms.Path(process.commonSequence * mod)
             modName = makeName(name, postfix)
 #            setattr(process, modName, mod)
