@@ -98,11 +98,13 @@ def customiseParamForTauEmbedding(process, param, options, dataVersion):
         muons = Ntuple.muons.clone(
             src = tauEmbeddingMuons,
         ),
-        genParticleOriginalSrc = cms.InputTag("genParticles", "", dataVersion.getSimProcess()),
+        genParticleOriginalSrc = cms.InputTag("genParticles", "", dataVersion.getTriggerProcess()),
         metSrc = cms.InputTag("pfMet", "", dataVersion.getRecoProcess()),
         caloMetNoHFSrc = cms.InputTag("caloMetNoHFSum"),
         caloMetSrc = cms.InputTag("caloMetSum"),
     )
+    if dataVersion.isMC():
+        param.tree.tauEmbedding.genParticleOriginalSrc.setProcessName(dataVersion.getSimProcess())
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
     muonIsolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGammaIso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]
     for name in muonIsolations:
