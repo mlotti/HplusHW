@@ -239,7 +239,7 @@ def createTasks(opts, step, version=None):
         app("ST_VV_QCD", datasetsMCSTVV+datasetsMCQCD)
         app("Signal", datasetsMCSignal)        
     else:
-        datasest = []
+        datasets = []
         if step in ["analysisTauAod", "signalAnalysisGenTau", "genTauSkim", "analysisTau"]:
             datasets.extend(datasetsMCnoQCD)
         elif step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
