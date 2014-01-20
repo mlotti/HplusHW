@@ -45,8 +45,8 @@ def customiseParamForTauEmbedding(process, param, options, dataVersion):
 
     # Fix top-pt weighting
     if hasattr(process, "initSubset"):
-        process.initSubset.src.setProcessName("HLT")
-        process.decaySubset.src.setProcessName("HLT")
+        process.initSubset.src.setProcessName(dataVersion.getSimProcess())
+        process.decaySubset.src.setProcessName(dataVersion.getSimProcess())
 
 
     # Change the triggers to muon
@@ -70,9 +70,9 @@ def customiseParamForTauEmbedding(process, param, options, dataVersion):
     # For data, we have "select" all run periods for tau+MET trigger efficiency
     if dataVersion.isData():
         param.tauTriggerEfficiencyScaleFactor.dataSelect = tauTriggerEfficiency.getRunsForEra("Run2012ABCD")
-        param.tauTriggerEfficiencyScaleFactor.mcSelect = "Fall11_PU_2011AB"
+        param.tauTriggerEfficiencyScaleFactor.mcSelect = "Summer12_PU_2012ABCD"
         param.metTriggerEfficiencyScaleFactor.dataSelect = metTriggerEfficiency.getRunsForEra("Run2012ABCD")
-        param.metTriggerEfficiencyScaleFactor.mcSelect = "Fall11_PU_2011AB"
+        param.metTriggerEfficiencyScaleFactor.mcSelect = "Summer12_PU_2012ABCd"
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
@@ -98,7 +98,7 @@ def customiseParamForTauEmbedding(process, param, options, dataVersion):
         muons = Ntuple.muons.clone(
             src = tauEmbeddingMuons,
         ),
-        genParticleOriginalSrc = cms.InputTag("genParticles", "", dataVersion.getTriggerProcess()),
+        genParticleOriginalSrc = cms.InputTag("genParticles", "", dataVersion.getSimProcess()),
         metSrc = cms.InputTag("pfMet", "", dataVersion.getRecoProcess()),
         caloMetNoHFSrc = cms.InputTag("caloMetNoHFSum"),
         caloMetSrc = cms.InputTag("caloMetSum"),
