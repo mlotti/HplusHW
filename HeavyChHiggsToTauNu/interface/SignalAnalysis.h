@@ -229,6 +229,8 @@ namespace HPlus {
     WrappedTH1 *hVerticesBeforeWeight;
     WrappedTH1 *hVerticesAfterWeight;
 
+    // CaloMET
+    WrappedTH1 *hCaloMETAfterJetSelection;
     // Transverse mass for top algorithms
     WrappedTH1 *hTransverseMassTopSelection;
     WrappedTH1 *hTransverseMassTopChiSelection;

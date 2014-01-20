@@ -70,10 +70,13 @@ def customiseParamForTauEmbedding(process, param, options, dataVersion):
     # For data, we have "select" all run periods for tau+MET trigger efficiency
     if dataVersion.isData():
         param.tauTriggerEfficiencyScaleFactor.dataSelect = tauTriggerEfficiency.getRunsForEra("Run2012ABCD")
+        param.tauTriggerEfficiencyScaleFactor.mcSelect = "Fall11_PU_2011AB"
         param.metTriggerEfficiencyScaleFactor.dataSelect = metTriggerEfficiency.getRunsForEra("Run2012ABCD")
+        param.metTriggerEfficiencyScaleFactor.mcSelect = "Fall11_PU_2011AB"
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
+    param.MET.caloSrc = options.tauEmbeddingCaloMet
     #param.MET.rawSrc = "pfMet" # no PAT object at the moment
 
     # Use the muons where the original muon is removed in global muon veto
