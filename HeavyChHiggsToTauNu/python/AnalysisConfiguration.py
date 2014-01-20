@@ -1013,9 +1013,9 @@ class ConfigBuilder:
             addIntermediateAnalyzer(mod, name, postfix)
 
             if useCaloMet:
-                postfix += "CaloMet60"
+                postfix += "CaloMet70"
                 mod = mod.clone()
-                mod.trigger.caloMetSelection.metEmulationCut = 60.0
+                mod.trigger.caloMetSelection.metEmulationCut = 70.0
             else:
                 postfix += "MetEff"
                 mod = mod.clone()
