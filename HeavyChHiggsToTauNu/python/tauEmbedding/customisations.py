@@ -71,6 +71,7 @@ def customiseParamForTauEmbedding(process, param, options, dataVersion):
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
+    param.MET.caloSrc = options.tauEmbeddingCaloMet
     #param.MET.rawSrc = "pfMet" # no PAT object at the moment
 
     # Use the muons where the original muon is removed in global muon veto
