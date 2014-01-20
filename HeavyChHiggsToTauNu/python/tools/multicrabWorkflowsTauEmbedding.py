@@ -30,6 +30,32 @@ def addEmbeddingGenTauSkim_44X(version, datasets, updateDefinitions):
             dataset.addWorkflow(Workflow("tauembedding_gentauanalysis_"+version, source=Source(workflowName),
                                          args=wf.args, output_file="histograms.root"))
 
+def addEmbeddingGenTauSkim_53X(version, datasets, updateDefinitions):
+    # Tau+MET trigger has 5 % efficiency, GenTauSkim has 10 %, so 2x jobs
+    defaultDefinitions = {
+        "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn= 900, njobsOut= 20), # FIXME: njobsOut
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=1800, njobsOut=100), # FIXME: njobsOut
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=2700, njobsOut=110), # FIXME: njobsOut
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(njobsIn= 200, njobsOut=  3), # FIXME: njobsOut
+        }
+    workflowName = "tauembedding_gentauskim_"+version
+    updateTaskDefinitions(defaultDefinitions, updateDefinitions, workflowName)
+    for datasetName, taskDef in defaultDefinitions.iteritems():
+        dataset = datasets.getDataset(datasetName)
+        wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName)
+        if dataset.isData():
+            raise Exception("GenTauSkim workflow is not supported for data")
+        wf.addCrabLine("CMSSW.total_number_of_events = -1")
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
+        wf.addCrabLine("USER.publish_data_name = "+name)
+
+        wf.addArg("customizeConfig", "CustomGenTauSkim")
+
+        dataset.addWorkflow(wf)
+        if wf.output is not None:
+            dataset.addWorkflow(Workflow("tauembedding_gentauanalysis_"+version, source=Source(workflowName),
+                                         args=wf.args, output_file="histograms.root", crabLines=["CMSSW.total_number_of_lumis = -1"]))
+
 def addEmbeddingAodAnalysis_44X(datasets):
     njobs = {
         "WJets_TuneZ2_Fall11":               TaskDef(njobsIn=490),
@@ -759,6 +785,15 @@ def addEmbeddingSkim_v44_5_2(datasets):
         }
     addEmbeddingSkim_44X("v44_5_2", datasets, definitions)
 
+
+def addEmbeddingGenTauSkim_v53_3(datasets):
+    definitions = {
+        "TTJets_TuneZ2star_Summer12":              TaskDef(""),
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(""),
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(""),
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(""),
+        }
+    addEmbeddingGenTauSkim_53X("v53_3", datasets, definitions)
 
 def addEmbeddingSkim_v53_3(datasets):
     definitions = {
