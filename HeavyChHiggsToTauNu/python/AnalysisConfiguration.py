@@ -155,8 +155,8 @@ class ConfigBuilder:
 
         if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor or self.applyMETTriggerScaleFactor:
             for trg in self.options.trigger:
-                if not "IsoPFTau" in trg:
-                    print "applyTauTriggerScaleFactor=True or applyTauTriggerLowPurityScaleFactor=True or applyMETTriggerScaleFactor=True, and got non-tau trigger, setting applyTauTriggerScaleFactor=False and applyMETTriggerScaleFactor=False"
+                if not "IsoPFTau" in trg and self.options.tauEmbeddingInput == 0:
+                    print "applyTauTriggerScaleFactor=True or applyTauTriggerLowPurityScaleFactor=True or applyMETTriggerScaleFactor=True, and got non-tau trigger for non-embedding input, setting applyTauTriggerScaleFactor=False and applyMETTriggerScaleFactor=False"
                     self.applyTauTriggerScaleFactor = False
                     self.applyTauTriggerLowPurityScaleFactor = False
                     self.applyMETTriggerScaleFactor = False
