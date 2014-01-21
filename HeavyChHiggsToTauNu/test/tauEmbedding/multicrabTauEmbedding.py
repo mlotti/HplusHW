@@ -117,7 +117,9 @@ datasetsData2011 = [
     "SingleMu_160431-163261_2011A_Nov08", # HLT_Mu20_v1
     "SingleMu_163270-163869_2011A_Nov08", # HLT_Mu24_v2
     "SingleMu_165088-166150_2011A_Nov08", # HLT_Mu30_v3
-    "SingleMu_166161-173198_2011A_Nov08", # HLT_Mu40_v1, v2, v3, v5
+#    "SingleMu_166161-173198_2011A_Nov08", # HLT_Mu40_v1, v2, v3, v5
+    "SingleMu_166161-167913_2011A_Nov08", # HLT_Mu40_v1, v2, v3, v5
+    "SingleMu_170722-173198_2011A_Nov08", # HLT_Mu40_v5, hltMet includes HF from here
     "SingleMu_173236-173692_2011A_Nov08", # HLT_Mu40_eta2p1_v1
     # Run2011B
     "SingleMu_175832-180252_2011B_Nov19", # HLT_Mu40_eta2p1_v1, v4, v5
