@@ -954,6 +954,9 @@ class ConfigBuilder:
         def setLevelToVital(mod):
             if mod.histogramAmbientLevel != "Systematics":
                 mod.histogramAmbientLevel = "Vital"
+        def setLevelToInformative(mod):
+            if mod.histogramAmbientLevel != "Debug":
+                mod.histogramAmbientLevel = "Informative"
 
         disableIntermediateAnalyzers = (self.doQCDTailKillerScenarios or self.doOptimisation)
         disableIntermediateAnalyzers = False
@@ -996,10 +999,11 @@ class ConfigBuilder:
             mod.embeddingWTauMuWeightReader.enabled = True
             addIntermediateAnalyzer(mod, name, postfix)
 
+            # already here for met-leg efficiency
             postfix += "TEff"
             mod = mod.clone()
             mod.tauTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
-            mod.histogramAmbientLevel = self.histogramAmbientLevel # already here for met-leg efficiency
+            setLevelToInformative(mod)
             addIntermediateAnalyzer(mod, name, postfix)
 
             if useCaloMet:
@@ -1011,6 +1015,7 @@ class ConfigBuilder:
                 mod = mod.clone()
                 mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
             enablePrintCounter(mod)
+            mod.histogramAmbientLevel = self.histogramAmbientLevel
             path = cms.Path(process.commonSequence * mod)
             modName = makeName(name, postfix)
 #            setattr(process, modName, mod)
