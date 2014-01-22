@@ -32,13 +32,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
-# http://pdg.lbl.gov/2013/reviews/rpp2012-rev-tau-branching-fractions.pdf
-#                 e        mu
-BR_tau_hadr = 1 - 0.1783 - 0.1741
-
-def normalize(h):
-    # All other normalization is within the job
-    h.Scale(BR_tau_hadr)
 
 def processDirectory(dset, srcDirName, dstDir):
     # Get directories, recurse to them
@@ -58,7 +51,7 @@ def processDirectory(dset, srcDirName, dstDir):
         hnew.SetName(hname)
         hnew.SetDirectory(dstDir)
         if hname not in "SplittedBinInfo":
-            normalize(hnew)
+            tauEmbedding.scaleTauBRNormalization(hnew)
         hnew.Write()
 #        ROOT.gDirectory.Delete(hname)
         hnew.Delete()
