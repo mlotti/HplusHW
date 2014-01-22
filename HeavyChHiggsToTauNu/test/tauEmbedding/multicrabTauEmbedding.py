@@ -59,8 +59,10 @@ defaultVersions = [
 #    "v44_5_1_tauhad",
 #    "v44_5_1_tauhad_vispt10",
 #    "v44_5_1_tauhad_vispt20",
-    "v44_5_1_tauhad_vispt30",
+#    "v44_5_1_tauhad_vispt30",
+    "v44_5_2",
 ]
+
 skimVersion = "v44_5_1"
 genTauSkimVersion = "v44_5"
 
