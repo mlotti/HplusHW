@@ -2044,7 +2044,7 @@ class ComparisonPlot(PlotBase, PlotRatioBase):
             PlotBase.createFrame(self, filename, **kwargs)
         else:
             histos = self.histoMgr.getHistos()
-            self._createFrameRatio(filename, histos[0].getRootHisto(), histos[1].getRootHisto(), "Ratio",
+            self._createFrameRatio(filename, histos[0].getRootHistoWithUncertainties(), histos[1].getRootHistoWithUncertainties(), "Ratio",
                                    invertRatio=invertRatio, coverPadOpts=coverPadOpts, **kwargs)
 
     ## Add cut box and/or line
@@ -2098,7 +2098,7 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
         else:
             histos = filter(lambda h: h.getName() != self.referenceName, self.histoMgr.getHistos())
             reference = self.histoMgr.getHisto(self.referenceName)
-            self._createFrameRatioMany(filename, [h.getRootHisto() for h in histos], reference.getRootHisto(),
+            self._createFrameRatioMany(filename, [h.getRootHistoWithUncertainties() for h in histos], reference.getRootHistoWithUncertainties(),
                                        invertRatio=invertRatio, coverPadOpts={}, **kwargs)
 
     ## Add cut box and/or line
