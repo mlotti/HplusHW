@@ -64,6 +64,15 @@ class PATBuilder:
             # If MC preselection is enabled, add the counters from there
             self.counters = HChMcSelection.mcSelectionCounters[:]
 
+        if len(options.customizeConfig) > 0:
+            for config in options.customizeConfig:
+                module = __import__("HiggsAnalysis.HeavyChHiggsToTauNu."+config, fromlist=[config])
+                if hasattr(module, "getCountersPrepend"):
+                    self.counters = module.getCountersPrepend() + self.counters
+
+                if hasattr(module, "getCounters"):
+                    self.counters.extend(module.getCounters())
+
         if options.tauEmbeddingInput != 0:
             # Add the tau embedding counters, if that's the input
             import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
