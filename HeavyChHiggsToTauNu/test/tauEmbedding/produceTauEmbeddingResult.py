@@ -14,6 +14,7 @@
 
 
 import os
+import sys
 import math
 import time
 import json
@@ -31,16 +32,17 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
 
-def processDirectory(dset, srcDirName, dstDir):
+def processDirectory(dset, srcDirName, dstDir, scaleBy):
     # Get directories, recurse to them
     dirs = dset.getDirectoryContent(srcDirName, lambda o: isinstance(o, ROOT.TDirectory))
     dirs = filter(lambda n: n != "configInfo", dirs)
 
     for d in dirs:
         newDir = dstDir.mkdir(d)
-        processDirectory(dset, os.path.join(srcDirName, d), newDir)
+        processDirectory(dset, os.path.join(srcDirName, d), newDir, scaleBy)
 
     # Then process histograms
     histos = dset.getDirectoryContent(srcDirName, lambda o: isinstance(o, ROOT.TH1))
@@ -52,11 +54,13 @@ def processDirectory(dset, srcDirName, dstDir):
         hnew.SetDirectory(dstDir)
         if hname not in "SplittedBinInfo":
             tauEmbedding.scaleTauBRNormalization(hnew)
+        if scaleBy is not None:
+            hnew.Scale(scaleBy)
         hnew.Write()
 #        ROOT.gDirectory.Delete(hname)
         hnew.Delete()
 
-def main(output, dsetMgr):
+def main(output, dsetMgr, dstPostfix="", scaleBy=None):
     start = time.time()
     dset = dsetMgr.getDataset("Data")
 
@@ -64,7 +68,7 @@ def main(output, dsetMgr):
     tmp = dset
     if not hasattr(tmp, "getSearchMode"):
         tmp = dset.datasets[0]
-    analysisDirName = "signalAnalysis"+tmp.getSearchMode()+tmp.getDataEra()+tmp.getOptimizationMode()+tmp.getSystematicVariation()
+    analysisDirName = "signalAnalysis"+tmp.getSearchMode()+tmp.getDataEra()+tmp.getOptimizationMode()+tmp.getSystematicVariation()+dstPostfix
     analysisDir = output.mkdir(analysisDirName)
 
     # Create config info directory
@@ -80,27 +84,38 @@ def main(output, dsetMgr):
     configInfoHist.Delete()
 
     # Process histograms
-    processDirectory(dset, "", analysisDir)
+    processDirectory(dset, "", analysisDir, scaleBy)
 
     stop = time.time()
     print "Processed in %f.2 s" % (stop-start)
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options] multicrab-dir")
+    parser.add_option("--analysisName", dest="analysisName", type="string", default=None,
+                      help="Specify analysisName explicitly (by default the longest one is selected")
     parser.add_option("--allEras", dest="allEras", action="store_true", default=False,
                       help="Process all data eras (default is to process the longest one)")
+    parser.add_option("--list", dest="listAnalyses", action="store_true", default=False,
+                      help="List available analysis name information, and quit.")
+    parser.add_option("--mc", dest="mcs", action="append", type="string", default=[],
+                      help="Process also these MC samples")
     (opts, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("Expected exactly one multicrab directory, got %d" % len(args))
 
-    createArgs = {"directory": args[0], "includeOnlyTasks": "SingleMu"}
+    createArgs = {"directory": args[0], "includeOnlyTasks": "|".join(["SingleMu"]+opts.mcs)}
     datasetCreator = dataset.readFromMulticrabCfg(**createArgs)
-    analysisName = ""
-    for a in datasetCreator.getAnalyses():
-        if len(a) > len(analysisName):
-            analysisName = a
-    if len(analysisName) == 0:
-        raise Exception("Did not find analysis name")
+    if opts.listAnalyses:
+        datasetCreator.printAnalyses()
+        sys.exit(0)
+    analysisName = opts.analysisName
+    if analysisName is None:
+        analysisName = ""
+        for a in datasetCreator.getAnalyses():
+            if len(a) > len(analysisName):
+                analysisName = a
+        if len(analysisName) == 0:
+            raise Exception("Did not find analysis name")
 
     # Deduce eras
     eras = datasetCreator.getDataEras()
@@ -167,8 +182,12 @@ if __name__ == "__main__":
                         resultFile = ROOT.TFile.Open(os.path.join(resdir, "histograms-Data.root"), "UPDATE")
 
                     main(resultFile, dsetMgr)
-                    resultFile.Close()
+                    if systVar is None and "SystVarGenuineTau" not in datasetCreator.getSystematicVariations():
+                        unc = systematics.getTauIDUncertainty(isGenuineTau=True)
+                        main(resultFile, dsetMgr, dstPostfix="SystVarGenuineTauPlus", scaleBy=(1+unc.getUncertaintyUp()))
+                        main(resultFile, dsetMgr, dstPostfix="SystVarGenuineTauMinus", scaleBy=(1-unc.getUncertaintyDown()))
 
+                    resultFile.Close()
 #                    break
 #                break
 #            break
