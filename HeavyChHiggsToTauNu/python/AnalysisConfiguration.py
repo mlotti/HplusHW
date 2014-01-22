@@ -920,13 +920,17 @@ class ConfigBuilder:
 
             # Require genuine tau after tau ID in analysis
             mod = module.clone()
+            mod.trigger.selectionType = "disabled"
             mod.onlyEmbeddingGenuineTaus = cms.untracked.bool(True)
             modName = makeName(name, "GenuineTau")
-            setattr(process, modName, mod)
-            path = cms.Path(process.commonSequence * mod)
-            setattr(process, modName+"Path", path)
+            add(modName, process.commonSequence, mod, additionalCounters)
+
+            mod = mod.clone()
+            mod.trigger.selectionType = module.trigger.selectionType
+            modName = makeName(name, "GenuineTauTriggered")
+            add(modName, process.commonSequence, mod, additionalCounters)
             retNames.append(modName)
-            allNames.append(modName)
+
         self._accumulateAnalyzers("Tau embedding -like preselection", allNames)
         return retNames
 
