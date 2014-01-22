@@ -161,13 +161,14 @@ if __name__ == "__main__":
                     # per-analysis time blowing up (because of ROOT)
                     if not configInfoAdded:
                         resultFile = ROOT.TFile.Open(os.path.join(resdir, "histograms-Data.root"), "RECREATE")
-                        aux.addConfigInfo(resultFile, dsetMgr.getDataset("Data"), addLuminosity=False, dataVersionPostfix="pseudo", additionalText={"analysisName": analysisName})
+                        aux.addConfigInfo(resultFile, dsetMgr.getDataset("Data"), addLuminosity=False, dataVersion="pseudo", additionalText={"analysisName": analysisName})
                         configInfoAdded = True
                     else:
                         resultFile = ROOT.TFile.Open(os.path.join(resdir, "histograms-Data.root"), "UPDATE")
 
                     main(resultFile, dsetMgr)
                     resultFile.Close()
+
 #                    break
 #                break
 #            break
