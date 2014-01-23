@@ -908,34 +908,42 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         # Then add scaled stat+syst uncertainty
 
         # Get new TGraphAsymmErrors for stat+syst, then scale it
-        ratioSyst = histo2.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
+        ratioSyst1 = histo1.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
+        ratioSyst2 = histo2.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
         removes = []
-        for i in xrange(0, ratioSyst.GetN()):
-            yval = ratioSyst.GetY()[i]
+        for i in xrange(0, ratioSyst2.GetN()):
+            yval = ratioSyst2.GetY()[i]
             if yval == 0.0:
                 removes.append(i)
                 continue
-            ratioSyst.SetPoint(i, ratioSyst.GetX()[i], 1)
-            ratioSyst.SetPointEYhigh(i, ratioSyst.GetErrorYhigh(i)/yval)
-            ratioSyst.SetPointEYlow(i, ratioSyst.GetErrorYlow(i)/yval)
-#            print i, ratioSyst.GetX()[i], ratioSyst.GetErrorXlow(i), ratioSyst.GetErrorXhigh(i), yval, ratioSyst.GetY()[i], ratioSyst.GetErrorYhigh(i), ratioSyst.GetErrorYlow(i)
+            ratioSyst1.SetPoint(i, ratioSyst1.GetX()[i], ratioSyst1.GetY()[i]/yval)
+            ratioSyst1.SetPointEYhigh(i, ratioSyst1.GetErrorYhigh(i)/yval)
+            ratioSyst1.SetPointEYlow(i, ratioSyst1.GetErrorYlow(i)/yval)
+            ratioSyst1.SetPointEXhigh(i, 0)
+            ratioSyst1.SetPointEXlow(i, 0)
+            ratioSyst2.SetPoint(i, ratioSyst2.GetX()[i], 1)
+            ratioSyst2.SetPointEYhigh(i, ratioSyst2.GetErrorYhigh(i)/yval)
+            ratioSyst2.SetPointEYlow(i, ratioSyst2.GetErrorYlow(i)/yval)
+#            print i, ratioSyst2.GetX()[i], ratioSyst2.GetErrorXlow(i), ratioSyst2.GetErrorXhigh(i), yval, ratioSyst2.GetY()[i], ratioSyst2.GetErrorYhigh(i), ratioSyst2.GetErrorYlow(i)
         removes.reverse()
         for i in removes:
-            ratioSyst.RemovePoint(i)        
+            ratioSyst1.RemovePoint(i)
+            ratioSyst2.RemovePoint(i)
 
-        ratioSyst.GetYaxis().SetTitle(ytitle)
+        ratioSyst2.GetYaxis().SetTitle(ytitle)
         name = "BackgroundStatSystError"
-        ratioSyst.SetName(name)
+        ratioSyst2.SetName(name)
         if not histograms.uncertaintyMode.addStatToSyst():
             name = "BackgroundSystError"
-        _plotStyles[name].apply(ratioSyst)
+        _plotStyles[name].apply(ratioSyst2)
 
-        ret.append(_createHisto(ratioSyst, drawStyle="2", legendLabel=_legendLabels[name], legendStyle="F"))
+        ret.append(_createHisto(ratioSyst1, drawStyle="[]", legendLabel=None))
+        ret.append(_createHisto(ratioSyst2, drawStyle="2", legendLabel=_legendLabels[name], legendStyle="F"))
         if addAlsoHatchedUncertaintyHisto:
-            ratioSyst2 = ratioSyst.Clone("BackgroundStatSystError2")
-            styles.errorStyle.apply(ratioSyst2)
-            ratioSyst2.SetFillStyle(3354)
-            ret.append(_createHisto(ratioSyst2, drawStyle="2", legendLabel=None))
+            ratioSyst2_2 = ratioSyst.Clone("BackgroundStatSystError2")
+            styles.errorStyle.apply(ratioSyst2_2)
+            ratioSyst2_2.SetFillStyle(3354)
+            ret.append(_createHisto(ratioSyst2_2, drawStyle="2", legendLabel=None))
         return ret
     else:
         raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
