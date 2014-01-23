@@ -140,6 +140,8 @@ def listDirectoryContent(tdirectory, predicate=None):
     while key:
         if predicate is not None and predicate(key):
             ret.append(key.GetName())
+        elif predicate == None:
+            ret.append(key.GetName())
         key = diriter.Next()
     return ret
 
