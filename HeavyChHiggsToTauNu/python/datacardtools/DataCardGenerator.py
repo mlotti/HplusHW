@@ -92,7 +92,7 @@ class DatasetMgrCreatorManager:
                 self._dsetMgrs.append(myDsetMgr)
                 # For embedding, check setting on CaloMET
                 if i == DatacardDatasetMgrSourceType.EMBEDDING:
-                    myProperty = self._dsetMgrs.getAllDatasets()[0].getProperty("analysisName")
+                    myProperty = myDsetMgr.getAllDatasets()[0].getProperty("analysisName")
                     if not self._config.OptionReplaceEmbeddingByMC:
                         if "CaloMet" in myProperty and not self._config.OptionUseCaloMetApproximationForEmbedding:
                             raise Exception(ErrorLabel()+"Embedding has been done with CaloMet approximation, please turn on OptionUseCaloMetApproximationForEmbedding in config!")
