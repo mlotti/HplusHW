@@ -59,6 +59,9 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     myOutputCreator.addModule(myQCDNormalizationSystDownResults)
     myResult.delete()
     dsetMgr.close()
+    dsetMgrCreator.close()
+    ROOT.gROOT.CloseFiles()
+    ROOT.gROOT.GetListOfCanvases().Delete()
 
 def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString,myNormFactors):
     myModuleInfoString = "%s_%s_%s_%s"%(era, searchMode, optimizationMode,syst)
@@ -79,6 +82,10 @@ def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,m
     ## Save module info
     myOutputCreator.addModule(mySystModuleResults)
     systDsetMgr.close()
+    dsetMgrCreator.close()
+    ROOT.gROOT.CloseFiles()
+    ROOT.gROOT.GetListOfCanvases().Delete()
+
 
 def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
     myLocalDelta = time.time() - localStart
