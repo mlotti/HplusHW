@@ -177,7 +177,12 @@ def main(opts, moduleSelector, multipleDirs):
 
     # Make tar file
     myTimestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
-    myFilename = "datacards_archive_%s.tgz"%myTimestamp
+    myLimitCode = None
+    if opts.lands:
+        myLimitCode = "lands"
+    elif opts.combine:
+        myLimitCode = "combine"
+    myFilename = "datacards_%s_archive_%s.tgz"%(myLimitCode,myTimestamp)
     fTar = tarfile.open(myFilename, mode="w:gz")
     for d in myOutputDirectories:
         fTar.add(d)
@@ -239,6 +244,8 @@ if __name__ == "__main__":
     parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
     myModuleSelector.addParserOptions(parser)
+    parser.add_option("--lands", dest="lands", action="store_true", default=False, help="Generate datacards for LandS")
+    parser.add_option("--combine", dest="combine", action="store_true", default=False, help="Generate datacards for Combine")
     parser.add_option("--multipleDirs", dest="multipleDirs", action="store", help="Name of base dir for creating datacards for multiple directories (wildcard is added at the end)")
     parser.add_option("--systAnalysis", dest="systAnalysis", action="store_true", default=False, help="Runs the macro for generating systematic uncertainties plots")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
@@ -262,6 +269,12 @@ if __name__ == "__main__":
         myStatus = False
     if opts.useQCDfactorised and opts.useQCDinverted:
         print ErrorStyle()+"Error: use either '--QCDfactorised' or '--QCDinverted' (only one can exist in the datacard)"+NormalStyle()
+        myStatus = False
+    if not opts.lands and not opts.combine:
+        print ErrorStyle()+"Error: use either '--lands' or '--combine' to indicate which type of cards to generate!"+NormalStyle()
+        myStatus = False
+    if opts.lands and opts.combine:
+        print ErrorStyle()+"Error: use either '--lands' or '--combine' to indicate which type of cards to generate (not both)!"+NormalStyle()
         myStatus = False
     if not myStatus or opts.helpStatus:
         parser.print_help()
