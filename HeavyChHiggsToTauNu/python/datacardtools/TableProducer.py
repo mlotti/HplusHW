@@ -28,11 +28,20 @@ class TableProducer:
         self._datasetGroups = datasetGroups
         self._extractors = extractors
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
-        self._outputFileStem = "lands_datacard_hplushadronic_m"
-        self._outputRootFileStem = "lands_histograms_hplushadronic_m"
+        if self._opts.lands:
+            self._outputFileStem = "lands_datacard_hplushadronic_m"
+            self._outputRootFileStem = "lands_histograms_hplushadronic_m"
+        elif self._opts.combine:
+            self._outputFileStem = "combine_datacard_hplushadronic_m"
+            self._outputRootFileStem = "combine_histograms_hplushadronic_m"
         # Calculate number of nuisance parameters
         # Make directory for output
-        self._dirname = "datacards_%s_%s_%s"%(self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
+        myLimitCode = None
+        if opts.lands:
+            myLimitCode = "lands"
+        elif opts.combine:
+            myLimitCode = "combine"
+        self._dirname = "datacards_%s_%s_%s_%s"%(myLimitCode,self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
         os.mkdir(self._dirname)
         self._infoDirname = self._dirname + "/info"
         os.mkdir(self._infoDirname)
@@ -82,6 +91,27 @@ class TableProducer:
 
     ## Generates datacards
     def makeDataCards(self):
+        # For combine, do some formatting
+        if self._opts.combine:
+            mySubtractAfterId = None
+            mySmallestColumnId = 9
+            # Find and remove empty column
+            myRemoveList = []
+            for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
+                if c.getLandsProcess() < mySmallestColumnId:
+                    mySmallestColumnId = c.getLandsProcess()
+                if c.typeIsEmptyColumn():
+                    mySubtractAfterId = c.getLandsProcess()
+                    myRemoveList.append(c)
+            if len(myRemoveList) > 0:
+                self._datasetGroups.remove(c)
+            for c in self._datasetGroups:
+                if c.getLandsProcess() > mySubtractAfterId:
+                    c._landsProcess = c.getLandsProcess() - 1
+            # Move column with ID -1 to zero
+            if mySmallestColumnId < 0:
+                for c in self._datasetGroups:
+                    c._landsProcess = c.getLandsProcess() + 1
         # Loop over mass points
         for m in self._config.MassPoints:
             print "\n"+HighlightStyle()+"Generating datacard for mass point %d for "%m +self._outputPrefix+NormalStyle()
@@ -145,10 +175,15 @@ class TableProducer:
     ## Generates header of datacard
     def _generateHeader(self, mass=None):
         myString = ""
+        myLimitCode = None
+        if self._opts.lands:
+            myLimitCode = "LandS"
+        elif self._opts.combine:
+            myLimitCode = "Combine"
         if mass == None:
-            myString += "Description: LandS datacard (auto generated) luminosity=%f 1/pb, %s/%s\n"%(self._luminosity,self._config.DataCardName,self._outputPrefix)
+            myString += "Description: %s datacard (auto generated) luminosity=%f 1/pb, %s/%s\n"%(myLimitCode, self._luminosity,self._config.DataCardName,self._outputPrefix)
         else:
-            myString += "Description: LandS datacard (auto generated) mass=%d, luminosity=%f 1/pb, %s/%s\n"%(mass,self._luminosity,self._config.DataCardName,self._outputPrefix)
+            myString += "Description: %s datacard (auto generated) mass=%d, luminosity=%f 1/pb, %s/%s\n"%(myLimitCode, mass,self._luminosity,self._config.DataCardName,self._outputPrefix)
         myString += "Date: %s\n"%time.ctime()
         return myString
 
@@ -271,7 +306,11 @@ class TableProducer:
         for n in self._extractors:
             if n.isPrintable() and n.getId() not in myVetoList:
                 # Suppress rows that are not affecting anything
-                myRow = ["%s"%(n.getId()), n.getDistribution()]
+                myRow = ["%s"%(n.getId())]
+                if self._opts.lands:
+                    myRow.append(n.getDistribution())
+                elif self._opts.combine:
+                    myRow.append(n.getDistribution().replace("shapeQ","shape").replace("shapeStat","shape"))
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
                     if c.isActiveForMass(mass,self._config):
@@ -307,11 +346,12 @@ class TableProducer:
                                 myRow.append("0")
                             else:
                                 myRow.append("1")
-                # Add description to end of the row
-                if n.getId() in myVirtualMergeInformation.keys():
-                    myRow.append(myVirtualMergeInformation["%sdescription"%n.getId()])
-                else:
-                    myRow.append(n.getDescription())
+                if self._opts.lands:
+                    # Add description to end of the row for LandS
+                    if n.getId() in myVirtualMergeInformation.keys():
+                        myRow.append(myVirtualMergeInformation["%sdescription"%n.getId()])
+                    else:
+                        myRow.append(n.getDescription())
                 myResult.append(myRow)
         return myResult
 
@@ -529,9 +569,9 @@ class TableProducer:
             for c in self._datasetGroups:
                 if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
                     # Find out what type the column is
-                    if c.getLandsProcess() == -1:
+                    if c.getLabel().startswith("HH"):
                         HH = c.getCachedShapeRootHistogramWithUncertainties().Clone()
-                    elif c.getLandsProcess() == 0:
+                    elif c.getLabel().startswith("WH") or c.getLabel().startswith("HW"):
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.typeIsQCD():
                         if QCD == None:
