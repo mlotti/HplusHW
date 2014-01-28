@@ -13,12 +13,22 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 
 from Plotter import Plotter
 
-analysis_d = "signalAnalysisMIdEffTrgEffWTauMuTEff"
-analysis_n = "signalAnalysisMIdEffTrgEffWTauMuTEffCaloMet60"
-#counters = analysis+"Counters"
 
 dataEra = "Run2011AB"
+#dataEra = "Run2012ABCD"
 searchMode = "Light"
+
+energy = "7"
+lumi = 5094.834
+caloMETCut = "60"
+if dataEra.find("2012") > -1:
+    energy = "8"
+    lumi = 887.501000+4440.000000+6843.000000+281.454000+7318.000000
+    caloMETCut = "70"
+
+analysis_d = "signalAnalysisMIdEffTrgEffWTauMuTEff"
+analysis_n = "signalAnalysisMIdEffTrgEffWTauMuTEffCaloMet"+caloMETCut
+
 
 def usage():
     print
@@ -41,6 +51,10 @@ def main():
 
     plots.mergeRenameReorderForDataMC(datasets_d)
     plots.mergeRenameReorderForDataMC(datasets_n)
+
+    for d in datasets_n.getAllDatasetNames():
+        print d
+
     datasets_d.merge("MC", [
             "TTJets",
             "WJets",
@@ -91,8 +105,8 @@ def main():
     eff1 = ROOT.TEfficiency(num1,den1)
     eff2 = ROOT.TEfficiency(num2,den2)
 
-    plotDir = "CaloMET"
-    plotter = Plotter("",plotDir,5094.834)
+    plotDir = "CaloMET"+dataEra
+    plotter = Plotter("",plotDir,lumi)
 
     graph1 = plotter.convert2TGraph(eff1)
     graph2 = plotter.convert2TGraph(eff2)
@@ -107,7 +121,7 @@ def main():
     p = plots.ComparisonPlot(histograms.HistoGraph(graph1, "eff1", "p", "P"),
                              histograms.HistoGraph(graph2, "eff2", "p", "P"))
         
-    p.histoMgr.setHistoLegendLabelMany({"eff1": "Data, CaloMET>60", "eff2": "MC, CaloMET>60"})
+    p.histoMgr.setHistoLegendLabelMany({"eff1": "Data, CaloMET>"+caloMETCut, "eff2": "MC, CaloMET>"+caloMETCut})
           
     opts = {}
     opts_ = {"ymin": 0, "ymax": 1.1}
@@ -119,7 +133,7 @@ def main():
     moveLegend_ = {"dx": -0.55}
     moveLegend_.update(moveLegend)
 
-    plotter._common("calometEff", p, xlabel="MET (GeV)", ylabel="CaloMET>60 efficiency", ratio=True, energy = "7", opts=opts_, opts2=opts2_, moveLegend=moveLegend_)
+    plotter._common("calometEff", p, xlabel="MET (GeV)", ylabel="CaloMET>"+caloMETCut+" efficiency", ratio=True, energy = energy, opts=opts_, opts2=opts2_, moveLegend=moveLegend_)
 
     p.getFrame2().GetYaxis().SetTitle("Ratio")
     p.save()
