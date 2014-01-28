@@ -1597,22 +1597,26 @@ class PlotRatioBase:
 
         self.cf.canvas.cd(2)
 
-        for obj, option in self.ratioPlotObjectsBefore:
-            obj.Draw(option+"same")
-
+        # Draw first stat+syst errors going to background
         until = None
         for n in ["BackgroundStatSystError", "BackgroundStatError"]:
             if self.ratioHistoMgr.hasHisto(n):
                 until = n
-
         index = self.ratioHistoMgr.draw(untilName=until)
 
+        # Then prepended plot objects
+        for obj, option in self.ratioPlotObjectsBefore:
+            obj.Draw(option+"same")
+
+        # Then ratio line
         self.ratioLine = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
         self.ratioLine.Draw("L")
 
+        # Then actual plot content
         if index is not None:
             self.ratioHistoMgr.draw(fromIndex=index+1)
 
+        # And finally the appended plot objects
         for obj, option in self.ratioPlotObjectsAfter:
             obj.Draw(option+"same")
 
