@@ -30,16 +30,19 @@ def addEmbeddingGenTauSkim_44X(version, datasets, updateDefinitions):
             dataset.addWorkflow(Workflow("tauembedding_gentauanalysis_"+version, source=Source(workflowName),
                                          args=wf.args, output_file="histograms.root"))
 
-def addEmbeddingGenTauSkim_44X(version, datasets, updateDefinitions):
+def addEmbeddingGenTauSkim_53X(version, datasets, updateDefinitions):
     # Tau+MET trigger has 5 % efficiency, GenTauSkim has 10 %, so 2x jobs
     defaultDefinitions = {
-        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=4000, njobsOut=50),
+        "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn= 900, njobsOut= 20), # FIXME: njobsOut
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=1800, njobsOut=100), # FIXME: njobsOut
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=2700, njobsOut=110), # FIXME: njobsOut
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(njobsIn= 200, njobsOut=  3), # FIXME: njobsOut
         }
     workflowName = "tauembedding_gentauskim_"+version
     updateTaskDefinitions(defaultDefinitions, updateDefinitions, workflowName)
     for datasetName, taskDef in defaultDefinitions.iteritems():
         dataset = datasets.getDataset(datasetName)
-        wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName)
+        wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName)
         if dataset.isData():
             raise Exception("GenTauSkim workflow is not supported for data")
         wf.addCrabLine("CMSSW.total_number_of_events = -1")
@@ -978,6 +981,24 @@ def addEmbeddingEmbedding_v44_5_2(datasets):
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef("/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
     })
 
+
+def addEmbeddingGenTauSkim_v53_3(datasets):
+    definitions = {
+        "TTJets_TuneZ2star_Summer12":              TaskDef(""),
+        # 3720617 events, 1801 jobs
+        # User mean 4105.7, min 539.6, max 28921.8
+        # Mean 195.1 MB, min 119.0 MB, max 208.1 MB
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v2_AODSIM_tauembedding_gentauskim_v53_3-0a62a3dd997afd2375bf66b2a5c6545f/USER"),
+        # 4320120 events, 2723 jobs
+        # User mean 4416.5, min 193.3, max 24415.8
+        # Mean 156.0 MB, min 9.9 MB, max 168.0 MB
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_gentauskim_v53_3-0a62a3dd997afd2375bf66b2a5c6545f/USER"),
+        # 262833 events, 206 jobs
+        # User mean 3331.3, min 118.2, max 5683.8
+        # Mean 139.5 MB, min 4.0 MB, max 152.4 MB
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("/TTJets_HadronicMGDecays_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_ext_v1_AODSIM_tauembedding_gentauskim_v53_3-0a62a3dd997afd2375bf66b2a5c6545f/USER"),
+        }
+    addEmbeddingGenTauSkim_53X("v53_3", datasets, definitions)
 
 def addEmbeddingSkim_v53_3(datasets):
     definitions = {
