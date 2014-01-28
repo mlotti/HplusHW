@@ -77,11 +77,10 @@ class Plotter:
             tree.Draw(varexp, denom, "goff e")
             d = tree.GetHistogram().Clone()
             print dataset.getName(),"n=",n.GetEntries(),"d=",d.GetEntries()
-<<<<<<< HEAD
-=======
+
 	    if d.GetEntries() == 0:
 		continue
->>>>>>> 2011
+
             for i in range(1,d.GetNbinsX()+1):
                 print "    bin",i,n.GetBinContent(i),d.GetBinContent(i)
             eff = ROOT.TEfficiency(n, d)
@@ -189,13 +188,17 @@ class Plotter:
         yerrh = []
         h = tefficiency.GetCopyTotalHisto()
         n = h.GetNbinsX()
-        for i in range(0,n):
+        for i in range(1,n+1):
             x.append(h.GetBinLowEdge(i)+0.5*h.GetBinWidth(i))
             xerrl.append(0.5*h.GetBinWidth(i))
             xerrh.append(0.5*h.GetBinWidth(i))
             y.append(tefficiency.GetEfficiency(i))
             yerrl.append(tefficiency.GetEfficiencyErrorLow(i))
-            yerrh.append(tefficiency.GetEfficiencyErrorUp(i))
+            # ugly hack to prevent error going above 1
+            errUp = tefficiency.GetEfficiencyErrorUp(i)
+            if y[-1] == 1.0:
+                errUp = 0
+            yerrh.append(errUp)
         return ROOT.TGraphAsymmErrors(n,array.array("d",x),
                                         array.array("d",y),
                                         array.array("d",xerrl),
@@ -258,14 +261,27 @@ class Plotter:
     def plotEfficiency(self, name, varexp, num1, denom1, num2, denom2, weight2=None, xlabel=None, ylabel=None, opts={}, opts2={}, fit=False, fitMin=None, fitMax=None, moveLegend={}, drawText=False, printResults=False):
 
         dataset1 = self.datasets.getDataDatasets()
-        dataset2 = dataset1
-        if self.dataVsMc > 0:
-            dataset2 = self.datasets.getMCDatasets()
+        dataset2 = self.datasets.getMCDatasets()
+        if self.dataVsMc == 3:
+            dataset2 = dataset1
+        if self.dataVsMc == 4:
+            dataset1 = dataset2
+
+        if self.dataVsMc == 1 or self.dataVsMc == 2 or self.dataVsMc == 4:
             if weight2 == None:
                 dataset1 = dataset2
             else:
-                num2   = "%s*(%s)" % (weight2, num2)
-                denom2 = "%s*(%s)" % (weight2, denom2)
+                num2   = "%s*%s*(%s)" % (weight2, "topPtWeight", num2)
+                denom2 = "%s*%s*(%s)" % (weight2, "topPtWeight", denom2)
+
+        if self.dataVsMc == 4:
+            if not weight2 == None:
+                num1   = "%s*%s*(%s)" % (weight2, "topPtWeight", num1)
+                denom1 = "%s*%s*(%s)" % (weight2, "topPtWeight", denom1)
+
+#                num2   = "%s*(%s)" % (weight2, num2)                                         
+#                denom2 = "%s*(%s)" % (weight2, denom2)
+
 
         eff1 = self.getEfficiency(dataset1,varexp, num1, denom1)
         eff2 = self.getEfficiency(dataset2,varexp, num2, denom2)
@@ -372,8 +388,8 @@ class Plotter:
 
     def _common(self, name, plot, xlabel=None, ylabel=None, ratio=False, energy = 0, opts={}, opts2={}, moveLegend={}):
         plot.createFrame(os.path.join(self.plotDir, name), createRatio=ratio, opts=opts, opts2=opts2)
-        if hasattr(self, "legend1"):
-            plot.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+#        if hasattr(self, "legend1"):
+        plot.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
 
         if xlabel != None:
             plot.frame.GetXaxis().SetTitle(xlabel)
