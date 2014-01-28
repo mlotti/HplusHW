@@ -97,7 +97,7 @@ class TableProducer:
             mySmallestColumnId = 9
             # Find and remove empty column
             myRemoveList = []
-            for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
+            for c in self._datasetGroups:
                 if c.getLandsProcess() < mySmallestColumnId:
                     mySmallestColumnId = c.getLandsProcess()
                 if c.typeIsEmptyColumn():
@@ -105,6 +105,7 @@ class TableProducer:
                     myRemoveList.append(c)
             if len(myRemoveList) > 0:
                 self._datasetGroups.remove(c)
+                print "Removed empty column for combine datacard"
             for c in self._datasetGroups:
                 if c.getLandsProcess() > mySubtractAfterId:
                     c._landsProcess = c.getLandsProcess() - 1
@@ -112,6 +113,7 @@ class TableProducer:
             if mySmallestColumnId < 0:
                 for c in self._datasetGroups:
                     c._landsProcess = c.getLandsProcess() + 1
+
         # Loop over mass points
         for m in self._config.MassPoints:
             print "\n"+HighlightStyle()+"Generating datacard for mass point %d for "%m +self._outputPrefix+NormalStyle()
@@ -208,7 +210,11 @@ class TableProducer:
         myObsCount = self._observation.getRateResult()
         if self._opts.debugMining:
             print "  Observation is %d"%myObsCount
-        myResult = "Observation    %d\n"%myObsCount
+        if self._opts.lands:
+            myResult = "Observation    %d\n"%myObsCount
+        elif self._opts.combine:
+            myResult =  "bin            1\n"
+            myResult += "observation    %d\n"%myObsCount
         return myResult
 
     ## Generates header for rate table as list
