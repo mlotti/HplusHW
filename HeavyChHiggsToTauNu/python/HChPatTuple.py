@@ -60,7 +60,7 @@ class PATBuilder:
         if dataVersion.isData():
             # Append the data selection counters for data
             self.counters.extend(HChDataSelection.dataSelectionCounters[:])
-        elif dataVersion.isMC() and options.tauEmbeddingInput == 0:
+        elif dataVersion.isMC() and options.triggerMC == 1:
             # If MC preselection is enabled, add the counters from there
             self.counters = HChMcSelection.mcSelectionCounters[:]
 
