@@ -167,8 +167,8 @@ class ConfigBuilder:
         if self.options.wjetsWeighting != 0:
             if not self.dataVersion.isMC():
                 raise Exception("Command line option 'wjetsWeighting' works only with MC")
-            if self.options.tauEmbeddingInput != 0:
-                raise Exception("There are no WJets weights for embedding yet")
+#            if self.options.tauEmbeddingInput != 0:
+#                raise Exception("There are no WJets weights for embedding yet")
 
         if self.applyTopPtReweight and not self.applyPUReweight:
             raise Exception("When applyTopPtReweight=True, also applyPUReweight must be True (you had it False)")
@@ -930,13 +930,17 @@ class ConfigBuilder:
 
             # Require genuine tau after tau ID in analysis
             mod = module.clone()
+            mod.trigger.selectionType = "disabled"
             mod.onlyEmbeddingGenuineTaus = cms.untracked.bool(True)
             modName = makeName(name, "GenuineTau")
-            setattr(process, modName, mod)
-            path = cms.Path(process.commonSequence * mod)
-            setattr(process, modName+"Path", path)
+            add(modName, process.commonSequence, mod, additionalCounters)
+
+            mod = mod.clone()
+            mod.trigger.selectionType = module.trigger.selectionType
+            modName = makeName(name, "GenuineTauTriggered")
+            add(modName, process.commonSequence, mod, additionalCounters)
             retNames.append(modName)
-            allNames.append(modName)
+
         self._accumulateAnalyzers("Tau embedding -like preselection", allNames)
         return retNames
 
@@ -964,9 +968,14 @@ class ConfigBuilder:
         def setLevelToVital(mod):
             if mod.histogramAmbientLevel != "Systematics":
                 mod.histogramAmbientLevel = "Vital"
+        def setLevelToInformative(mod):
+            if mod.histogramAmbientLevel != "Debug":
+                mod.histogramAmbientLevel = "Informative"
 
-        disableIntermediateAnalyzers = (self.doQCDTailKillerScenarios or self.doOptimisation)
-        disableIntermediateAnalyzers = False
+
+#        disableIntermediateAnalyzers = (self.doQCDTailKillerScenarios or self.doOptimisation)
+        disableIntermediateAnalyzers = self.doOptimisation
+#        disableIntermediateAnalyzers = False
 
         useCaloMet = not self.applyMETTriggerScaleFactor
 
@@ -1004,12 +1013,14 @@ class ConfigBuilder:
             postfix += "WTauMu"
             mod = mod.clone()
             mod.embeddingWTauMuWeightReader.enabled = True
+            setLevelToInformative(mod)
             addIntermediateAnalyzer(mod, name, postfix)
 
+            # already here for met-leg efficiency
             postfix += "TEff"
             mod = mod.clone()
             mod.tauTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
-            mod.histogramAmbientLevel = self.histogramAmbientLevel # already here for met-leg efficiency
+            setLevelToInformative(mod)
             addIntermediateAnalyzer(mod, name, postfix)
 
             if useCaloMet:
@@ -1021,6 +1032,7 @@ class ConfigBuilder:
                 mod = mod.clone()
                 mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
             enablePrintCounter(mod)
+            mod.histogramAmbientLevel = self.histogramAmbientLevel
             path = cms.Path(process.commonSequence * mod)
             modName = makeName(name, postfix)
 #            setattr(process, modName, mod)

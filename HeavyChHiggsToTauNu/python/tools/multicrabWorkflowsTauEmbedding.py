@@ -90,17 +90,21 @@ def getDefaultDefinitions_44X():
         return TaskDef(triggerOR=[mcTrigger], **kwargs)
 
     return {
-        "SingleMu_160431-163261_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu20_v1"]),
-        "SingleMu_163270-163869_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu24_v2"]),
-        "SingleMu_165088-166150_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu30_v3"]),
+        "SingleMu_160431-163261_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu20_v1"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_163270-163869_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu24_v2"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_165088-166150_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu30_v3"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
 
-        "SingleMu_166161-166164_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1"]),
-        "SingleMu_166346-166346_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v2"]),
-        "SingleMu_166374-167043_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1"]),
-        "SingleMu_167078-167913_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v3"]),
+        "SingleMu_166161-166164_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_166346-166346_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v2"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_166374-167043_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_167078-167913_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v3"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_166161-167913_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1", "HLT_Mu40_v2", "HLT_Mu40_v3"], triggerThrow=False, args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+
         "SingleMu_170722-172619_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v5"]),
         "SingleMu_172620-173198_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v5"]),
-        "SingleMu_166161-173198_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1", "HLT_Mu40_v2", "HLT_Mu40_v3", "HLT_Mu40_v5"], triggerThrow=False),
+        "SingleMu_170722-173198_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v5"]),
+
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1", "HLT_Mu40_v2", "HLT_Mu40_v3", "HLT_Mu40_v5"], triggerThrow=False, args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}), # caloMET is changed within these runs
 
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v1"]),
 
@@ -114,7 +118,7 @@ def getDefaultDefinitions_44X():
         "WJets_TuneZ2_Fall11":               TaskDefMC(args={"wjetsWeighting": 1}),
         "W1Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1}),
         "W2Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1}),
-        "W3Jets_TuneZ2_Fall11":           TaskDefMC(args={"wjetsWeighting": 1}),
+        "W3Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1}),
         "W3Jets_TuneZ2_v2_Fall11":           TaskDefMC(args={"wjetsWeighting": 1}),
         "W4Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1}),
         "TTJets_TuneZ2_Fall11":              TaskDefMC(),
@@ -220,8 +224,12 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         "SingleMu_166346-166346_2011A_Nov08": TaskDef(njobsIn=  2, njobsOut= 1),
         "SingleMu_166374-167043_2011A_Nov08": TaskDef(njobsIn=300, njobsOut= 6),
         "SingleMu_167078-167913_2011A_Nov08": TaskDef(njobsIn=230, njobsOut= 3),
+        "SingleMu_166161-167913_2011A_Nov08": TaskDef(njobsIn=600, njobsOut=11), # caloMETnoHF up to this
+
         "SingleMu_170722-172619_2011A_Nov08": TaskDef(njobsIn=200, njobsOut= 6),
         "SingleMu_172620-173198_2011A_Nov08": TaskDef(njobsIn=230, njobsOut= 6),
+        "SingleMu_170722-173198_2011A_Nov08": TaskDef(njobsIn=500, njobsOut=12), # caloMET from here
+
         "SingleMu_166161-173198_2011A_Nov08": TaskDef(njobsIn=1700, njobsOut= 25),
 
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(njobsIn=200, njobsOut= 4),
@@ -407,8 +415,12 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
         "SingleMu_166346-166346_2011A_Nov08": TaskDef(njobsIn=  1, njobsOut=1),
         "SingleMu_166374-167043_2011A_Nov08": TaskDef(njobsIn=110, njobsOut=2),
         "SingleMu_167078-167913_2011A_Nov08": TaskDef(njobsIn= 60, njobsOut=1),
+        "SingleMu_166161-167913_2011A_Nov08": TaskDef(njobsIn=170, njobsOut=4), # caloMETnoHF up to this
+
         "SingleMu_170722-172619_2011A_Nov08": TaskDef(njobsIn=120, njobsOut=2),
         "SingleMu_172620-173198_2011A_Nov08": TaskDef(njobsIn=120, njobsOut=2),
+        "SingleMu_170722-173198_2011A_Nov08": TaskDef(njobsIn=170, njobsOut=4), # caloMET from here
+
         "SingleMu_166161-173198_2011A_Nov08": TaskDef(njobsIn=450, njobsOut=10), # FIXME: njobsOut
 
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(njobsIn= 70, njobsOut=1),
@@ -734,6 +746,9 @@ def addEmbeddingSkim_v44_5_1(datasets):
         # User mean 3107.2, min 374.8, max 9280.2
         # Mean 100.6 MB, min 15.2 MB, max 219.0 MB
         "SingleMu_166161-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_skim_v44_5_2-9279e439e9124cd35585c1246e432cfd/USER"),
+        # hack to split the above one to two, let the analysis-time JSON splitting take care of the rest
+        "SingleMu_166161-167913_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_skim_v44_5_2-9279e439e9124cd35585c1246e432cfd/USER"),
+        "SingleMu_170722-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_skim_v44_5_2-9279e439e9124cd35585c1246e432cfd/USER"),
         # 245801 events, 162 jobs
         # User mean 4546.0, min 1653.9, max 10561.0
         # Mean 140.6 MB, min 55.2 MB, max 226.0 MB
@@ -742,6 +757,7 @@ def addEmbeddingSkim_v44_5_1(datasets):
         # User mean 3423.2, min 1095.3, max 7534.9
         # Mean 120.9 MB, min 47.4 MB, max 253.1 MB
         "SingleMu_175832-180252_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_175832_180252_tauembedding_skim_v44_5_2-ff6b0c8176db587721dc02d5ab403d42/USER"),
+
 
         # 8183108 events, 4994 jobs
         # User mean 3079.8, min 14.8, max 6305.4
@@ -901,7 +917,10 @@ def addEmbeddingEmbedding_v44_5_2(datasets):
         # 459497 events, 382 jobs
         # User mean 6374.5, min 2459.8, max 12818.7
         # Mean 50.1 MB, min 19.6 MB, max 98.4 MB
-        "SingleMu_166161-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_embedding_v44_5_2-82a321c5cc2fa6d80afd1d36f2e86392/USER"),
+#        "SingleMu_166161-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_embedding_v44_5_2-82a321c5cc2fa6d80afd1d36f2e86392/USER"),
+        # hack to split the above one to two, let the analysis-time JSON splitting take care of the rest
+        "SingleMu_166161-167913_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_embedding_v44_5_2-82a321c5cc2fa6d80afd1d36f2e86392/USER"),
+        "SingleMu_170722-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_embedding_v44_5_2-82a321c5cc2fa6d80afd1d36f2e86392/USER"),
         # 80095 events, 57 jobs
         # User mean 7571.1, min 2896.6, max 11448.5
         # Mean 57.8 MB, min 23.1 MB, max 89.1 MB

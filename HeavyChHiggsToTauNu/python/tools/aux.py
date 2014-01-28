@@ -59,7 +59,7 @@ def swap(list,n1,n2):
     list[n1] = list[n2]
     list[n2] = tmp
 
-def addConfigInfo(of, dataset, addLuminosity=True, dataVersionPostfix="", additionalText={}):
+def addConfigInfo(of, dataset, addLuminosity=True, dataVersion=None, additionalText={}):
     d = of.mkdir("configInfo")
     d.cd()
 
@@ -87,9 +87,12 @@ def addConfigInfo(of, dataset, addLuminosity=True, dataVersionPostfix="", additi
     if dataset.isData():
         ds = dataset.datasets[0]
 
-    dataVersion = ROOT.TNamed("dataVersion", ds.dataVersion+dataVersionPostfix)
-    dataVersion.Write()
-    dataVersion.Delete()
+    if dataVersion is None:
+        dataVersion = ds.dataVersion
+
+    dv = ROOT.TNamed("dataVersion", dataVersion)
+    dv.Write()
+    dv.Delete()
 
     # codeVersion
     codeVersion = ROOT.TNamed("codeVersion", git.getCommitId())

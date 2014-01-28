@@ -215,14 +215,11 @@ namespace HPlus {
     hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesBeforeWeight", "Number of vertices without weighting", 40, 0, 40);
     hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesAfterWeight", "Number of vertices with weighting", 40, 0, 40);
 
-    // CaloMET (for embedding checks)
-    hCaloMETAfterJetSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "caloMETAfterJetSelection", "CaloMET after jet selection", 100, 0, 500);
     /*
     htransverseMassElectronFromTauFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassElectronFromTauFound", "transverseMassElectronFromTauFound", 200, 0., 400.);
     htransverseMassElectronFromWFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassElectronFromWFound", "transverseMassElectronFromWFound", 200, 0., 400.);
     htransverseMassElectronFromBottomFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassElectronFromBottomFound", "transverseMassElectronFromBottpmFound", 200, 0., 400.);
     htransverseMassElectronFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassElectronFound", "transverseMassElectronFound", 200, 0., 400.);
-
 
     htransverseMassMuonFromTauFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMuonFromTauFound", "transverseMassMuonFromTauFound", 200, 0., 400.);
     htransverseMassMuonFromWFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMuonFromWFound", "transverseMassMuonFromWFound", 200, 0., 400.);
@@ -634,9 +631,6 @@ namespace HPlus {
     increment(fQCDTailKillerCollinearCounter);
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderDeltaPhiCollinearSelection, tauData);
 
-
-//------ Fill CaloMET histogram
-    hCaloMETAfterJetSelection->Fill(metDataTmp.getCaloMET()->et());
 
 //------ Fill TTree, if it is active
     if (fTree.isActive()) {
