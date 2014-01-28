@@ -67,6 +67,12 @@ def doPlots(dsetNormal, dsetEmb, lumi):
         th.SetLineColor(color)
         th.SetLineWidth(3)
 
+    def doLineStyle(l):
+        l.SetLineColor(ROOT.kBlue)
+        l.SetLineWidth(2)
+        l.SetLineStyle(ROOT.kDotted)
+        return l
+
     global ind
     ind = 0
     def compare(step):
@@ -84,13 +90,16 @@ def doPlots(dsetNormal, dsetEmb, lumi):
         p.histoMgr.forHisto("Embedded ttbar", lambda h: doStyle(h, ROOT.kRed))
         p.histoMgr.forHisto("Embedded ttbar", lambda h: tauEmbedding.scaleTauBRNormalization(h.getRootHisto()))
     
+        p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 1.1, 500, 1.1)))
+        p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 0.9, 500, 0.9)))
+
         global ind
         ind += 1
         bins = range(0, 200, 20) + [200, 250, 300, 500]
         plots.drawPlot(p, "%02d_calomet_%s"%(ind, step), xlabel="Calo MET (GeV)", ylabel="Events / #DeltaMET / %.0f-%.0f GeV",
                        #rebinToWidthX=20,
                        rebin=bins, divideByBinWidth=True,
-                       ratio=True, ratioYlabel="Emb./norm.", ratioType="errorScale",
+                       ratio=True, ratioYlabel="Norm./emb.", ratioType="errorScale",
                        opts2={"ymin": 0.5, "ymax": 1.5},
                        addLuminosityText=True, moveLegend={"dx": -0.2})
 
