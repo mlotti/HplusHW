@@ -158,8 +158,8 @@ class ConfigBuilder:
         if self.options.wjetsWeighting != 0:
             if not self.dataVersion.isMC():
                 raise Exception("Command line option 'wjetsWeighting' works only with MC")
-            if self.options.tauEmbeddingInput != 0:
-                raise Exception("There are no WJets weights for embedding yet")
+#            if self.options.tauEmbeddingInput != 0:
+#                raise Exception("There are no WJets weights for embedding yet")
 
         if self.applyTopPtReweight and not self.applyPUReweight:
             raise Exception("When applyTopPtReweight=True, also applyPUReweight must be True (you had it False)")
@@ -962,8 +962,10 @@ class ConfigBuilder:
             if mod.histogramAmbientLevel != "Debug":
                 mod.histogramAmbientLevel = "Informative"
 
-        disableIntermediateAnalyzers = (self.doQCDTailKillerScenarios or self.doOptimisation)
-        disableIntermediateAnalyzers = False
+
+#        disableIntermediateAnalyzers = (self.doQCDTailKillerScenarios or self.doOptimisation)
+        disableIntermediateAnalyzers = self.doOptimisation
+#        disableIntermediateAnalyzers = False
 
         useCaloMet = not self.applyMETTriggerScaleFactor
 
@@ -1001,6 +1003,7 @@ class ConfigBuilder:
             postfix += "WTauMu"
             mod = mod.clone()
             mod.embeddingWTauMuWeightReader.enabled = True
+            setLevelToInformative(mod)
             addIntermediateAnalyzer(mod, name, postfix)
 
             # already here for met-leg efficiency
