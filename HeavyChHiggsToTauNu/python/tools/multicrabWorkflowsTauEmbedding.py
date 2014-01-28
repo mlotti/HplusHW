@@ -789,9 +789,18 @@ def addEmbeddingSkim_v44_5_2(datasets):
 def addEmbeddingGenTauSkim_v53_3(datasets):
     definitions = {
         "TTJets_TuneZ2star_Summer12":              TaskDef(""),
-        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(""),
-        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(""),
-        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(""),
+        # 3720617 events, 1801 jobs
+        # User mean 4105.7, min 539.6, max 28921.8
+        # Mean 195.1 MB, min 119.0 MB, max 208.1 MB
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v2_AODSIM_tauembedding_gentauskim_v53_3-0a62a3dd997afd2375bf66b2a5c6545f/USER"),
+        # 4320120 events, 2723 jobs
+        # User mean 4416.5, min 193.3, max 24415.8
+        # Mean 156.0 MB, min 9.9 MB, max 168.0 MB
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_gentauskim_v53_3-0a62a3dd997afd2375bf66b2a5c6545f/USER"),
+        # 262833 events, 206 jobs
+        # User mean 3331.3, min 118.2, max 5683.8
+        # Mean 139.5 MB, min 4.0 MB, max 152.4 MB
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("/TTJets_HadronicMGDecays_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_ext_v1_AODSIM_tauembedding_gentauskim_v53_3-0a62a3dd997afd2375bf66b2a5c6545f/USER"),
         }
     addEmbeddingGenTauSkim_53X("v53_3", datasets, definitions)
 
