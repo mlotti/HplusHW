@@ -84,8 +84,8 @@ def addConfigInfo(of, dataset, addLuminosity=True, dataVersion=None, additionalT
 
     # dataVersion
     ds = dataset
-    if dataset.isData():
-        ds = dataset.datasets[0]
+    while hasattr(ds, "datasets"):
+        ds = ds.datasets[0]
 
     if dataVersion is None:
         dataVersion = ds.dataVersion
