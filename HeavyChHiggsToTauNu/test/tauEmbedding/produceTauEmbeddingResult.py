@@ -155,7 +155,10 @@ if __name__ == "__main__":
             eras = [tmp]
 
     # Create pseudo multicrab directory
-    taskDir = multicrab.createTaskDir("embedding")
+    dirname = "embedding"
+    if datasetCreatorMC is not None:
+        dirname += "_mc"
+    taskDir = multicrab.createTaskDir(dirname)
 
     f = open(os.path.join(taskDir, "codeVersion.txt"), "w")
     f.write(git.getCommitId()+"\n")
