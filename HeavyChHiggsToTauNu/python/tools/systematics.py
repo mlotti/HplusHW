@@ -42,9 +42,13 @@ class ScalarUncertaintyItem:
         self._uncertDown = 0.0 # relative uncertainty squared
         # Handle inputs
         if len(args) == 1:
-            # Symmetric uncertainty
-            self._uncertUp = args[0]**2
-            self._uncertDown = args[0]**2
+            if isinstance(args[0], ScalarUncertaintyItem):
+                self._uncertUp = args[0]._uncertUp
+                self._uncertDown = args[0]._uncertDown
+            else:
+                # Symmetric uncertainty
+                self._uncertUp = args[0]**2
+                self._uncertDown = args[0]**2
         elif len(args) == 0 and len(kwargs) == 2:
             if not "plus" in kwargs or not "minus" in kwargs:
                 raise Exception("Error: You forgot to give plus= and minus= arguments to ScalarUncertaintyItem()!")
@@ -59,7 +63,7 @@ class ScalarUncertaintyItem:
         self._uncertDown += other._uncertDown
 
     def Clone(self):
-        return ScalarUncertaintyItem(self._name, plus=self._uncertUp, minus=self._uncertDown)
+        return ScalarUncertaintyItem(self._name, self)
 
     def scale(self, factor):
         self._uncertUp *= factor
@@ -117,7 +121,7 @@ def getTauIDUncertainty(isGenuineTau=True):
         return ScalarUncertaintyItem("tauID", 0.00)
 
 def getLuminosityUncertainty():
-    return ScalarUncertaintyItem("tauMisID", 0.026)
+    return ScalarUncertaintyItem("lumi", 0.026)
 
 # Note: if majority of sample is genuine taus, set isGenuineTau=true
 def getScalarUncertainties(datasetName, isGenuineTau):
