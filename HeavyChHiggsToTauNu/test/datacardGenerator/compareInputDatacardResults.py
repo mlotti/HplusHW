@@ -13,7 +13,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
-
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 def getDatacardList():
     myDict = {}
@@ -48,7 +48,7 @@ def getColumns(mydir):
     myList.sort()
     myFile = None
     for d in myList:
-        if d.startswith("lands_datacard_") and d.endswith(".txt"):
+        if d.startswith("lands_datacard_") or d.startswith("combine_datacard_") and d.endswith(".txt"):
             # Read file contents
             f = open("%s/%s"%(mydir,d))
             lines = f.readlines()
@@ -108,10 +108,10 @@ def addUncertainties(filename, column, h):
             if len(llist) > 1:
                 mySystName = llist[0]
                 myValue = llist[index+1]
-                if llist[1] == "shapeQ" and myValue == "1":
+                if llist[1].startswith("shape") and myValue == "1" and llist[0] != "stat_binByBin":
                     # add shape uncertainty
                     myShapeUncertList.append(mySystName)
-                elif llist[1] != "shapeStat" and myValue != "1" and myValue != "0":
+                elif llist[0] != "stat_binByBin" and myValue != "1" and myValue != "0" and myValue != "-":
                     # add normalization uncertainty
                     if "/" in myValue:
                         mySplit = myValue.split("/")
