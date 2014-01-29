@@ -93,11 +93,8 @@ class DatasetMgrCreatorManager:
                 # For embedding, check setting on CaloMET
                 if i == DatacardDatasetMgrSourceType.EMBEDDING:
                     myProperty = myDsetMgr.getAllDatasets()[0].getProperty("analysisName")
-                    if not self._config.OptionReplaceEmbeddingByMC:
-                        if "CaloMet" in myProperty and not self._config.OptionUseCaloMetApproximationForEmbedding:
-                            raise Exception(ErrorLabel()+"Embedding has been done with CaloMet approximation, please turn on OptionUseCaloMetApproximationForEmbedding in config!")
-                        if not "CaloMet" in myProperty and self._config.OptionUseCaloMetApproximationForEmbedding:
-                            raise Exception(ErrorLabel()+"Embedding has not been done with CaloMet approximation, please turn off OptionUseCaloMetApproximationForEmbedding in config!")
+                    if not "CaloMet" in myProperty:
+                        raise Exception(ErrorLabel()+"Embedding has not been done with CaloMet approximation!")
             else:
                 # No dsetMgrCreator, append zero pointers to retain list dimension
                 self._dsetMgrs.append(None)
@@ -592,25 +589,28 @@ class DataCardGenerator:
                     #print "new=",myEmbColumn._rateResult._histograms[0].Integral(),myEmbColumn._cachedShapeRootHistogramWithUncertainties.getRateStatUncertainty()
                     #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
                     # Merge nuisance results (ExtractorResult objects)
-                    for i in range(0, len(myEmbColumn.getNuisanceResults())):
-                        # It is enough to merge only histograms
-                        nhistos = len(myEmbColumn.getNuisanceResults()[i]._histograms)
-                        if nhistos > 0:
-                            if myEmbColumn.getNuisanceResults()[i].resultIsStatUncertainty():
+                    for i in range(0, len(c.getNuisanceResults())):
+                        myMatchIndex = None
+                        for j in range(0, len(myEmbColumn.getNuisanceResults())):
+                            if c.getNuisanceResults()[i]._masterId == myEmbColumn.getNuisanceResults()[j]._masterId:
+                                myMatchIndex = j
+                        if myMatchIndex != None and len(myEmbColumn.getNuisanceResults()[myMatchIndex]._histograms) > 0:
+                            # Match found, let's do the addition
+                            if myEmbColumn.getNuisanceResults()[myMatchIndex].resultIsStatUncertainty():
                                 # replace shapestat by values from new merged rate histo
-                                for k in range(1, myEmbColumn._nuisanceResults[i]._histograms[k].GetNbinsX()+1):
+                                for k in range(1, myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k].GetNbinsX()+1):
                                     myRate = myEmbColumn._rateResult._histograms[0].GetBinContent(k)
                                     myRateUncert = myEmbColumn._rateResult._histograms[0].GetBinError(k)
                                     # up histogram
-                                    myEmbColumn._nuisanceResults[i]._histograms[0].SetBinContent(k, myRate + myRateUncert)
+                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[0].SetBinContent(k, myRate + myRateUncert)
                                     # down histogram
-                                    myEmbColumn._nuisanceResults[i]._histograms[1].SetBinContent(k, myRate - myRateUncert)
+                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[1].SetBinContent(k, myRate - myRateUncert)
                             else:
                                 # linear addition, because these are variation histograms
-                                for k in range(0,nhistos):
-                                    if not isinstance(myEmbColumn._nuisanceResults[i]._histograms[k], ROOT.TH1):
+                                for k in range(0,len(myEmbColumn.getNuisanceResults()[myMatchIndex]._histograms)):
+                                    if not isinstance(myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k], ROOT.TH1):
                                         raise Exception(ErrorLabel()+"The logic has been written under the assumption that one is dealing with histograms and only binContent is meaningful")
-                                    myEmbColumn._nuisanceResults[i]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k], -1.0)
+                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k], -1.0)
                     # Merge control plots (HistoRootWithUncertainties objects)
                     for i in range(0, len(myEmbColumn._controlPlots)):
                         myEmbColumn._controlPlots[i].Add(c._controlPlots[i], -1.0)
