@@ -936,8 +936,8 @@ class ConfigBuilder:
             add(modName, process.commonSequence, mod, additionalCounters)
 
             mod2 = mod.clone()
-            mod2.trigger.caloMetSelection.metEmulationCut = 60
-            modName = makeName(name, "GenuineTauCaloMet60")
+            mod2.trigger.caloMetSelection.metEmulationCut = 70
+            modName = makeName(name, "GenuineTauCaloMet70")
             add(modName, process.commonSequence, mod2, additionalCounters)
 
             mod = mod.clone()
