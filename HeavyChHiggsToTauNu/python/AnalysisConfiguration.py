@@ -935,6 +935,11 @@ class ConfigBuilder:
             modName = makeName(name, "GenuineTau")
             add(modName, process.commonSequence, mod, additionalCounters)
 
+            mod2 = mod.clone()
+            mod2.trigger.caloMetSelection.metEmulationCut = 60
+            modName = makeName(name, "GenuineTauCaloMet60")
+            add(modName, process.commonSequence, mod2, additionalCounters)
+
             mod = mod.clone()
             mod.trigger.selectionType = module.trigger.selectionType
             modName = makeName(name, "GenuineTauTriggered")
@@ -1027,6 +1032,10 @@ class ConfigBuilder:
                 postfix += "CaloMet70"
                 mod = mod.clone()
                 mod.trigger.caloMetSelection.metEmulationCut = 70.0
+
+                mod2 = mod.clone()
+                setLevelToInformative(mod2)
+                addIntermediateAnalyzer(mod2, name, postfix.replace("TEff", ""))
             else:
                 postfix += "MetEff"
                 mod = mod.clone()
