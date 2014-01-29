@@ -213,7 +213,7 @@ class TableProducer:
         if self._opts.lands:
             myResult = "Observation    %d\n"%myObsCount
         elif self._opts.combine:
-            myResult =  "bin            1\n"
+            myResult =  "bin            taunuhadr\n"
             myResult += "observation    %d\n"%myObsCount
         return myResult
 
@@ -224,7 +224,10 @@ class TableProducer:
         myRow = ["bin",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass,self._config):
-                myRow.append("1")
+                if self._opts.lands:
+                    myRow.append("1")
+                elif self._opts.combine:
+                    myRow.append("taunuhadr")
         myResult.append(myRow)
         # obtain labels
         myRow = ["process",""]
@@ -349,7 +352,10 @@ class TableProducer:
                             myRow.append(myValueString)
                         else:
                             if n.isShapeNuisance():
-                                myRow.append("0")
+                                if self._opts.lands:
+                                    myRow.append("0")
+                                elif self._opts.combine:
+                                    myRow.append("-")
                             else:
                                 myRow.append("1")
                 if self._opts.lands:
