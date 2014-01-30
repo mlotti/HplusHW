@@ -510,26 +510,6 @@ class DataCardGenerator:
             else:
                 c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
-        # Purge columns with zero rate
-        myLastUntouchableLandsProcessNumber = 0 # For sigma x br
-        if not self._config.OptionLimitOnSigmaBr and (self._columns[0].getLabel()[:2] == "HW" or self._columns[1].getLabel()[:2] == "HW"):
-            myLastUntouchableLandsProcessNumber = 2 # For light H+ physics model
-        myIdsForRemoval = []
-        for c in self._columns:
-            if c.getLandsProcess() > myLastUntouchableLandsProcessNumber:
-                if abs(c._rateResult.getResult()) < self._config.ToleranceForMinimumRate:
-                    # Zero rate, flag column for removal
-                    myIdsForRemoval.append(c.getLandsProcess())
-        for i in myIdsForRemoval:
-            # Remove columns
-            for c in self._columns:
-                if c.getLandsProcess() == i:
-                    print WarningLabel()+"Rate for column '%s' is smaller than %f. Removing column from datacard."%(c.getLabel(),self._config.ToleranceForMinimumRate)
-                    self._columns.remove(c)
-            # Update process numbers
-            for c in self._columns:
-                if c.getLandsProcess() > i:
-                    c._landsProcess -= 1
 
     def doMergeForRealisticEmbedding(self):
         print "\nStart merge for realistic embedding"
