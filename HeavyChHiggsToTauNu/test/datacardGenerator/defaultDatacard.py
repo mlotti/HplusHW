@@ -5,7 +5,7 @@ DataCardName    = 'Default_8TeV'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_metModeNeverIsolated'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/met50_vitalonly_correctCtrlPlots'
 #Path            = '/home/wendland/data/v445/met50_2013-05-13/testInverted'
-Path = "/home/wendland/data/v533/2013-12-04_nominal_invmassupgrade"
+Path = "/home/wendland/data/v533/2013-12-04_nominal_invmassupgrade"#2014-01-29-noMetSF-withL1ETMfix"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
@@ -28,7 +28,7 @@ OptionMassShape = "TransverseMass"
 #OptionMassShape = "FullMass"
 #OptionMassShape = "TransverseAndFullMass2D" #FIXME not yet supported!!!
 
-OptionReplaceEmbeddingByMC = not True
+OptionReplaceEmbeddingByMC = True
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionTreatTriggerUncertaintiesAsAsymmetric = not False # Set to true, if you produced multicrabs with doAsymmetricTriggerUncertainties=True
 OptionTreatTauIDAndMisIDSystematicsAsShapes = not False # Set to true, if you produced multicrabs with doTauIDandMisIDSystematicsAsShapes=True
@@ -199,7 +199,7 @@ if not OptionReplaceEmbeddingByMC:
         datasetDefinition   = "Data",
         validMassPoints = MassPoints,
         #additionalNormalisation = 0.25, # not needed anymore
-        nuisances    = myEmbeddingShapeSystematics[:]+["Emb_QCDcontam","stat_binByBin"]
+        nuisances    = myEmbeddingShapeSystematics[:]+["Emb_QCDcontam","Emb_hybridCaloMETAndL1ETM","stat_binByBin"]
         #nuisances    = ["trg_tau_embedding","tau_ID","ES_taus","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb","stat_binByBin"]
     ))
 
@@ -265,7 +265,7 @@ elif OptionRealisticEmbeddingWithMC:
         myEmbeddingShapeSystematics.append("tau_ID_shape")
     else:
         myEmbeddingShapeSystematics.append("tau_ID")
-    myEmbeddingShapeSystematics.extend(["Emb_QCDcontam","Emb_rest","stat_binByBin"])
+    myEmbeddingShapeSystematics.extend(["Emb_QCDcontam","Emb_hybridCaloMETAndL1ETM","Emb_rest","stat_binByBin"])
     DataGroups.append(DataGroup(
         label        = "pseudo_emb_TTJets_MC",
         landsProcess = 4,
@@ -465,7 +465,7 @@ if "trg_CaloMET" in myShapeSystematics:
         label         = "tau+MET trg MET part",
         distr         = "lnN",
         function      = "Constant",
-        value         = 0.215
+        value         = 0.12
         #distr         = "shapeQ",
         #function      = "ShapeVariation",
         #systVariation = "METTrgSF",
@@ -480,7 +480,7 @@ else:
         #scaleFactor   = trg_MET_dataeffScaleFactor,
         distr         = "lnN",
         function      = "Constant",
-        value         = 0.215
+        value         = 0.12
     ))
 
     Nuisances.append(Nuisance(
@@ -491,7 +491,7 @@ else:
         #systVariation = "MetTrgMCEff",
         distr         = "lnN",
         function      = "Constant",
-        value         = 0.08
+        value         = 0.01
     ))
 
 if not OptionReplaceEmbeddingByMC:
@@ -745,8 +745,16 @@ if not OptionReplaceEmbeddingByMC or OptionRealisticEmbeddingWithMC:
         label         = "EWK with taus QCD contamination",
         distr         = "lnN",
         function      = "Constant",
-        value         = 0.012 #FIXME
+        value         = 0.020 #FIXME
     ))
+    Nuisances.append(Nuisance(
+        id            = "Emb_hybridCaloMETAndL1ETM",
+        label         = "EWK with taus QCD contamination",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.22 #FIXME
+    ))
+
 
 if not OptionReplaceEmbeddingByMC:
     if "Emb_WtauTomu" in myEmbeddingShapeSystematics:
