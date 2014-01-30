@@ -91,6 +91,7 @@ class TableProducer:
 
     ## Generates datacards
     def makeDataCards(self):
+
         # For combine, do some formatting
         if self._opts.combine:
             mySubtractAfterId = None
@@ -113,6 +114,8 @@ class TableProducer:
             if mySmallestColumnId < 0:
                 for c in self._datasetGroups:
                     c._landsProcess = c.getLandsProcess() + 1
+
+        self._purgeColumnsWithSmallRate()
 
         # Loop over mass points
         for m in self._config.MassPoints:
@@ -173,6 +176,34 @@ class TableProducer:
             myRootFile.Write()
             myRootFile.Close()
             print "Written shape root file to:",myRootFilename
+
+    ## Purge columns with zero rate
+    def _purgeColumnsWithSmallRate(self):
+        myLastUntouchableLandsProcessNumber = 0 # For sigma x br
+        if not self._config.OptionLimitOnSigmaBr and (self._datasetGroups[0].getLabel()[:2] == "HW" or self._datasetGroups[1].getLabel()[:2] == "HW"):
+            if self._opts.lands:
+                myLastUntouchableLandsProcessNumber = 2 # For light H+ physics model
+            elif self._opts.combine:
+                myLastUntouchableLandsProcessNumber = 1 # For light H+ physics model
+        myIdsForRemoval = []
+        for c in self._datasetGroups:
+            if c.getLandsProcess() > myLastUntouchableLandsProcessNumber:
+                if abs(c._rateResult.getResult()) < self._config.ToleranceForMinimumRate:
+                    # Zero rate, flag column for removal
+                    myIdsForRemoval.append(c.getLandsProcess())
+        # Remove columns
+        for i in myIdsForRemoval:
+            for c in self._datasetGroups:
+                if c.getLandsProcess() == i:
+                    print WarningLabel()+"Rate for column '%s' (%f) is smaller than %f. Removing column from datacard."%(c.getLabel(),c._rateResult.getResult(),self._config.ToleranceForMinimumRate)
+                    self._datasetGroups.remove(c)
+        # Update process numbers
+        for c in self._datasetGroups:
+            offset = 0
+            for i in myIdsForRemoval:
+                if int(c.getLandsProcess()) > int(i):
+                    offset += 1
+            c._landsProcess -= offset
 
     ## Generates header of datacard
     def _generateHeader(self, mass=None):

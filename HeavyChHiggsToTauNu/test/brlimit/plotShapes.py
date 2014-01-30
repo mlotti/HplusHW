@@ -232,8 +232,8 @@ class DatasetContainer:
         else:
             myRatioContainer.drawAllInOne(myAllShapeNuisances, myCMSText, luminosity)
 
-def doPlot(opts,mass,nameList,luminosity):
-    f = ROOT.TFile.Open(lands.taujetsRootfilePattern%mass)
+def doPlot(opts,mass,nameList,luminosity,rootFilePattern):
+    f = ROOT.TFile.Open(rootFilePattern%mass)
 
     content = f.GetListOfKeys()
     # Suppress the warning message of missing dictionary for some iterator
@@ -304,11 +304,16 @@ if __name__ == "__main__":
     style = tdrstyle.TDRStyle()
     histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.15)
     # Find out the mass points
-    massPoints = lands.obtainMassPoints(lands.taujetsRootfilePattern)
+    myDatacardPattern = lands.taujetsDatacardPattern
+    myRootFilePattern = lands.taujetsRootfilePattern
+    if not os.path.exists(myDatacardPattern):
+        myDatacardPattern = myDatacardPattern.replace("lands","combine")
+        myRootFilePattern = myRootFilePattern.replace("lands","combine")
+    massPoints = lands.obtainMassPoints(myRootFilePattern)
     print "The following masses are considered:",massPoints
     nameList = []
     for m in massPoints:
         # Obtain luminosity from datacard
-        myLuminosity = float(lands.readLuminosityFromDatacard(".",lands.taujetsDatacardPattern%m))
+        myLuminosity = float(lands.readLuminosityFromDatacard(".",myDatacardPattern%m))
         # Do plots
-        doPlot(opts,int(m),nameList,myLuminosity)
+        doPlot(opts,int(m),nameList,myLuminosity,myRootFilePattern)
