@@ -66,7 +66,7 @@ def main():
     histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
     histograms.createLegend.setDefaults(y1=0.93, y2=0.8, x1=0.82, x2=0.93)
 
-    #doPlots(dsetsNormal.getDataset("TTJets"), dsetsEmb.getDataset("TTJets"), dsetsEmb.getDataset("Data").getLuminosity())
+    doPlots(dsetsNormal.getDataset("TTJets"), dsetsEmb.getDataset("TTJets"), dsetsEmb.getDataset("Data").getLuminosity())
     doEffPlots(dsetsNormalCut.getDataset("TTJets"), dsetsNormal.getDataset("TTJets"), dsetsEmbCut.getDataset("TTJets"), dsetsEmb.getDataset("TTJets"), dsetsEmb.getDataset("Data").getLuminosity())
 
 def doLineStyle(l):
@@ -154,12 +154,12 @@ def doEffPlots(dsetNormalNum, dsetNormalDenom, dsetEmbNum, dsetEmbDenom, lumi):
         th1NormalNum = getTH1(dsetNormalNum)
         th1NormalDenom = getTH1(dsetNormalDenom)
 
-        print th1NormalNum.Integral(0, th1NormalNum.GetNbinsX()+1), th1NormalDenom.Integral(0, th1NormalDenom.GetNbinsX()+1)
+        #print th1NormalNum.Integral(0, th1NormalNum.GetNbinsX()+1), th1NormalDenom.Integral(0, th1NormalDenom.GetNbinsX()+1)
 
         th1EmbNum = getTH1(dsetEmbNum)
         th1EmbDenom = getTH1(dsetEmbDenom)
 
-        print th1EmbNum.Integral(0, th1EmbNum.GetNbinsX()+1), th1EmbDenom.Integral(0, th1EmbDenom.GetNbinsX()+1)
+        #print th1EmbNum.Integral(0, th1EmbNum.GetNbinsX()+1), th1EmbDenom.Integral(0, th1EmbDenom.GetNbinsX()+1)
 
         effNormal = ROOT.TGraphAsymmErrors(th1NormalNum, th1NormalDenom, "n")
         effEmb = ROOT.TGraphAsymmErrors(th1EmbNum, th1EmbDenom, "n")
@@ -175,11 +175,13 @@ def doEffPlots(dsetNormalNum, dsetNormalDenom, dsetEmbNum, dsetEmbDenom, lumi):
 
         p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 1.1, 500, 1.1)))
         p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 0.9, 500, 0.9)))
+        p.appendPlotObject(histograms.PlotText(x=0.6, y=0.6, text="CaloMET>60", size=20))
 
         global ind
         ind += 1
         plots.drawPlot(p, "eff_%02d_calomet_%s"%(ind, step), xlabel="Type I PF MET (GeV)", ylabel="CaloMET cut efficiency",
                        ratio=True, ratioYlabel="Norm./emb.", ratioType="errorScale",
+                       opts={"xmin": 0, "xmax": 500},
                        opts2={"ymin": 0.5, "ymax": 1.5},
                        addLuminosityText=True, moveLegend={"dx": -0.2, "dy": -0.5})
 
@@ -201,11 +203,11 @@ def doEffPlots(dsetNormalNum, dsetNormalDenom, dsetEmbNum, dsetEmbDenom, lumi):
 
     for step in [
         "JetSelection",
-#        "MET",
-#        "METPhiCorrected",
-#        "BTagging",
-#        "DeltaPhiBackToBack",
-#        "Selected"
+        "MET",
+        "METPhiCorrected",
+        "BTagging",
+        "DeltaPhiBackToBack",
+        "Selected"
         ]:
         compare(step)
 
