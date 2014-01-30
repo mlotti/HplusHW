@@ -1024,6 +1024,7 @@ class ConfigBuilder:
                 mod.trigger.caloMetSelection.metEmulationCut = 60.0
 
                 mod2 = mod.clone()
+                mod2.tauTriggerEfficiencyScaleFactor.mode = module.tauTriggerEfficiencyScaleFactor.mode
                 setLevelToInformative(mod2)
                 addIntermediateAnalyzer(mod2, name, postfix.replace("TEff", ""))
             else:
