@@ -67,6 +67,8 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     elif massType == "invmass":
         myResult = QCDFactorisedResultManager(myFullMassSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False,displayPurityBreakdown=True)
     myModuleResults.addShape(myResult.getShape(), myShapeString)
+    myModuleResults.addShape(myResult.getShapeMCEWK(), myShapeString+"_MCEWK")
+    myModuleResults.addShape(myResult.getShapePurity(), myShapeString+"_Purity")
     myModuleResults.addDataDrivenControlPlots(myResult.getControlPlots(),myResult.getControlPlotLabels())
     myOutputCreator.addModule(myModuleResults)
     # Up variation of QCD normalization (i.e. ctrl->signal region transition)
