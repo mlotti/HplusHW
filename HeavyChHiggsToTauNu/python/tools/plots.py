@@ -1559,8 +1559,8 @@ class PlotRatioBase:
                         h.setName(numer.GetName())
                         h = _createHisto(h)
                     tmp.append(h)
-            if len(tmp) > 1:
-                raise Exception("This shouldn't happen")
+            #if len(tmp) > 1:
+                #raise Exception("This shouldn't happen")
             self.extendRatios(tmp)
 
         if statError is not None:
