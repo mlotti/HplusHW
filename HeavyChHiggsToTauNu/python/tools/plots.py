@@ -819,7 +819,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
                 continue
 
             # histo2 is missing an item
-            if xval1 < xval2:
+            if xval1 is not None and xval1 < xval2:
                 i1 += 1
                 continue
 
@@ -851,7 +851,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         else:
             ratio = ROOT.TGraphAsymmErrors()
         if len(xvalues2) > 0:
-            ratioErr = ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues2), array.array("d", [1]*len(xvalues2)),
+            ratioErr = ROOT.TGraphAsymmErrors(len(xvalues2), array.array("d", xvalues2), array.array("d", [1]*len(xvalues2)),
                                          histo1.GetEXlow(), histo1.GetEXhigh(),
                                          array.array("d", yerrs2low), array.array("d", yerrs2high))
         else:
