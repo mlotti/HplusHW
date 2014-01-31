@@ -240,6 +240,7 @@ class QCDInvertedResultManager:
             myRegionTransitionSyst.delete()
             # Obtain data-driven control plots
             self._hCtrlPlotLabels = []
+            self._hCtrlPlotLabelsForQCDSyst = []
             self._hCtrlPlots = []
             self._hRegionSystUpCtrlPlots = []
             self._hRegionSystDownCtrlPlots = []
@@ -263,6 +264,7 @@ class QCDInvertedResultManager:
                         myStatus = False
                 if myStatus:
                     self._hCtrlPlotLabels.append(item)
+                    self._hCtrlPlotLabelsForQCDSyst.append(item)
                     myRebinList = systematics.getBinningForPlot(item)
                     myCtrlShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity, rebinList=myRebinList)
                     myCtrlPlot = QCDInvertedShape(myCtrlShape, moduleInfoString+"_"+item, normFactors)
@@ -289,12 +291,15 @@ class QCDInvertedResultManager:
                     myCtrlPlotRegionTransitionSyst = SystematicsForMetShapeDifference(myCtrlPlotSignalRegionShape, myCtrlPlotControlRegionShape, myCtrlPlotHisto, moduleInfoString=moduleInfoString, quietMode=True)
                     myCtrlPlotSignalRegionShape.delete()
                     myCtrlPlotControlRegionShape.delete()
+                    # Up variation
                     hUp = aux.Clone(myCtrlPlotRegionTransitionSyst.getUpHistogram(), "QCDfactMgrSystQCDSystUp%d"%i)
-                    hUp.SetTitle(item)
+                    hUp.SetTitle(item+"systQCDUp")
                     self._hRegionSystUpCtrlPlots.append(hUp)
+                    # Down variation
                     hDown = aux.Clone(myCtrlPlotRegionTransitionSyst.getDownHistogram(), "QCDfactMgrSystQCDSystDown%d"%i)
-                    hDown.SetTitle(item)
+                    hDown.SetTitle(item+"systQCDDown")
                     self._hRegionSystDownCtrlPlots.append(hDown)
+                    # Free memory
                     myCtrlPlotRegionTransitionSyst.delete()
                     #print "\n***** memdebug %d\n"%i
                     #if i <= 2:
@@ -338,6 +343,9 @@ class QCDInvertedResultManager:
 
     def getControlPlotLabels(self):
         return self._hCtrlPlotLabels
+
+    def getControlPlotLabelsForQCDSyst(self):
+        return self._hCtrlPlotLabelsForQCDSyst
 
     def getControlPlots(self):
         return self._hCtrlPlots
