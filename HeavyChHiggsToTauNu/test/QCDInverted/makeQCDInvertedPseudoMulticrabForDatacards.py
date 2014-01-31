@@ -53,11 +53,11 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     myOutputCreator.addModule(myModuleResults)
     # Up variation of QCD normalization (i.e. ctrl->signal region transition)
     myQCDNormalizationSystUpResults.addShape(myResult.getRegionSystUp(), myShapeString)
-    myQCDNormalizationSystUpResults.addDataDrivenControlPlots(myResult.getRegionSystUpCtrlPlots(),myResult.getControlPlotLabels())
+    myQCDNormalizationSystUpResults.addDataDrivenControlPlots(myResult.getRegionSystUpCtrlPlots(),myResult.getControlPlotLabelsForQCDSyst())
     myOutputCreator.addModule(myQCDNormalizationSystUpResults)
     # Down variation of QCD normalization (i.e. ctrl->signal region transition)
     myQCDNormalizationSystDownResults.addShape(myResult.getRegionSystDown(), myShapeString)
-    myQCDNormalizationSystDownResults.addDataDrivenControlPlots(myResult.getRegionSystDownCtrlPlots(),myResult.getControlPlotLabels())
+    myQCDNormalizationSystDownResults.addDataDrivenControlPlots(myResult.getRegionSystDownCtrlPlots(),myResult.getControlPlotLabelsForQCDSyst())
     myOutputCreator.addModule(myQCDNormalizationSystDownResults)
     myResult.delete()
     dsetMgr.close()
@@ -79,6 +79,8 @@ def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,m
     mySystModuleResults = PseudoMultiCrabModule(systDsetMgr, era, searchMode, optimizationMode, syst)
     mySystResult = QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", systDsetMgr, myLuminosity, myModuleInfoString, myNormFactors, shapeOnly=False, displayPurityBreakdown=False)
     mySystModuleResults.addShape(mySystResult.getShape(), myShapeString)
+    mySystModuleResults.addShape(mySystResult.getShapeMCEWK(), myShapeString+"_MCEWK")
+    mySystModuleResults.addShape(mySystResult.getShapePurity(), myShapeString+"_Purity")
     mySystModuleResults.addDataDrivenControlPlots(mySystResult.getControlPlots(),mySystResult.getControlPlotLabels())
     mySystResult.delete()
     ## Save module info
@@ -87,7 +89,6 @@ def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,m
     dsetMgrCreator.close()
     ROOT.gROOT.CloseFiles()
     ROOT.gROOT.GetListOfCanvases().Delete()
-
 
 def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
     myLocalDelta = time.time() - localStart

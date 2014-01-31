@@ -245,6 +245,7 @@ class QCDFactorisedResultManager:
             myRegionTransitionSyst.delete()
             # Obtain data-driven control plots
             self._hCtrlPlotLabels = []
+            self._hCtrlPlotLabelsForQCDSyst = []
             self._hCtrlPlots = []
             self._hRegionSystUpCtrlPlots = []
             self._hRegionSystDownCtrlPlots = []
@@ -268,6 +269,7 @@ class QCDFactorisedResultManager:
                         myStatus = False
                 if myStatus:
                     self._hCtrlPlotLabels.append(item)
+                    self._hCtrlPlotLabelsForQCDSyst.append(item)
                     myRebinList = systematics.getBinningForPlot(item)
                     myCtrlShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity, rebinList=myRebinList)
                     myCtrlPlot = QCDControlPlot(myCtrlRegionShape, myCtrlShape, mySignalRegionShape, moduleInfoString, title=item)
@@ -295,10 +297,10 @@ class QCDFactorisedResultManager:
                     myCtrlPlotSignalRegionShape.delete()
                     myCtrlPlotControlRegionShape.delete()
                     hUp = aux.Clone(myCtrlPlotRegionTransitionSyst.getUpHistogram(), "QCDfactMgrSystQCDSystUp%d"%i)
-                    hUp.SetTitle(item)
+                    hUp.SetTitle(item+"systQCDUp")
                     self._hRegionSystUpCtrlPlots.append(hUp)
                     hDown = aux.Clone(myCtrlPlotRegionTransitionSyst.getDownHistogram(), "QCDfactMgrSystQCDSystDown%d"%i)
-                    hDown.SetTitle(item)
+                    hDown.SetTitle(item+"systQCDDown")
                     self._hRegionSystDownCtrlPlots.append(hDown)
                     myCtrlPlotRegionTransitionSyst.delete()
                     #print "\n***** memdebug %d\n"%i
@@ -346,6 +348,9 @@ class QCDFactorisedResultManager:
 
     def getControlPlots(self):
         return self._hCtrlPlots
+
+    def getControlPlotLabelsForQCDSyst(self):
+        return self._hCtrlPlotLabelsForQCDSyst
 
     def getRegionSystUpCtrlPlots(self):
         return self._hRegionSystUpCtrlPlots
