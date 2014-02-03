@@ -7,6 +7,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 from math import pow,sqrt
 import sys
 import ROOT
@@ -19,7 +20,8 @@ class ExtractorMode:
     NUISANCE = 3
     ASYMMETRICNUISANCE = 4
     SHAPENUISANCE = 5
-    CONTROLPLOT = 6
+    QCDNUISANCE = 6
+    CONTROLPLOT = 7
 
 ## ExtractorBase class
 class ExtractorBase:
@@ -51,7 +53,8 @@ class ExtractorBase:
     def isAnyNuisance(self):
         return self._mode == ExtractorMode.NUISANCE or \
                self._mode == ExtractorMode.ASYMMETRICNUISANCE or \
-               self._mode == ExtractorMode.SHAPENUISANCE
+               self._mode == ExtractorMode.SHAPENUISANCE or \
+               self._mode == ExtractorMode.QCDNUISANCE
 
     ## Returns true if extractable mode is nuisance
     def isNuisance(self):
@@ -64,6 +67,10 @@ class ExtractorBase:
     ## Returns true if extractable mode is shape nuisance
     def isShapeNuisance(self):
         return self._mode == ExtractorMode.SHAPENUISANCE
+
+    ## Returns true if extractable mode is QCD nuisance
+    def isQCDNuisance(self):
+        return self._mode == ExtractorMode.QCDNUISANCE
 
     ## Returns the scale factor (used for projection estimates)
     def getScaleFactor(self):
@@ -177,6 +184,37 @@ class ConstantExtractor(ExtractorBase):
     ## Virtual method for printing debug information
     def printDebugInfo(self):
         print "ConstantExtractor"
+        print "- value = + %f - %f"%(self._constantValue.getUncertaintyUp,self._constantValue.getUncertaintyDown)
+        ExtractorBase.printDebugInfo(self)
+
+    ## \var _constantValue
+    # ScalarUncertaintyItem containting the uncertainty
+
+## ConstantExtractor class
+# Returns a fixed constant number
+class ConstantExtractorForDataDrivenQCD(ExtractorBase):
+    ## Constructor
+    def __init__(self, constantValue, mode, exid = "", distribution = "lnN", description = "", constantUpperValue = 0.0, opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
+        self._constantValue = None
+        if isinstance(constantValue, ScalarUncertaintyItem):
+            self._constantValue = constantValue.Clone()
+            self._constantValue.scale(self._scaleFactor)
+        else:
+            if self.isAsymmetricNuisance() or constantUpperValue != None:
+                self._constantValue = ScalarUncertaintyItem(exid,plus=constantUpperValue*self._scaleFactor,minus=constantValue*self._scaleFactor)
+            else:
+                self._constantValue = ScalarUncertaintyItem(exid,constantValue*self._scaleFactor)
+        # Flip sign
+        self._constantValue.scale(-1.0)
+
+    ## Method for extracking information
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        return self._constantValue
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "ConstantExtractorForDataDrivenQCD"
         print "- value = + %f - %f"%(self._constantValue.getUncertaintyUp,self._constantValue.getUncertaintyDown)
         ExtractorBase.printDebugInfo(self)
 
@@ -489,6 +527,49 @@ class ShapeExtractor(ExtractorBase):
             #h.IsA().Destructor(h) # Delete the nominal histo
         # Return result
         return myHistograms
+
+    ## QCD specific method for extracting purity histogram
+    def extractQCDPurityHistogram(self, datasetColumn, dsetMgr, shapeHistoName):
+        myHistograms = []
+        # Check that results have been cached
+        if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
+            raise Exception(ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+NormalStyle())
+        # Get histogram from cache
+        h = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
+        # Do not apply here additional normalization, it has already been applied
+        # via RootHistoWithUncertainties.Scale() in DatacardColumn::doDataMining()
+        if not datasetColumn.typeIsQCD:
+            raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
+        if not self.isRate():
+            raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for nuisance! (only valid for rate)")
+        # Obtain purity histogram
+        h = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(shapeHistoName+"_Purity")
+        return h
+
+    ## QCD specific method for extracting purity for a shape
+    def extractQCDPurityAsValue(self, datasetColumn, dsetMgr, shapeHistoName, shapeHisto):
+        hPurity = self.extractQCDPurityHistogram(datasetColumn, dsetMgr, shapeHistoName)
+        return self._calculateAverageQCDPurity(shapeHisto, hPurity)
+
+    ## QCD specific method for extracting purity for a shape
+    def extractQCDPurityAsValue(self, shapeHisto, purityHisto):
+        if isinstance(purityHisto, dataset.DatasetRootHisto):
+            return self._calculateAverageQCDPurity(shapeHisto, purityHisto.getHistogram())
+        elif isinstance(purityHisto, ROOT.TH1):
+            return self._calculateAverageQCDPurity(shapeHisto, purityHisto)
+
+    ## QCD specific method for extracting purity for a shape
+    def _calculateAverageQCDPurity(self, shapeHisto, purityHisto):
+        # Calculated weighted average (weight = Nevents in the shape)
+        mySum = 0.0
+        myTotalWeight = 0.0
+        for i in range(0,purityHisto.GetNbinsX()+1):
+            mySum += purityHisto.GetBinContent(i) * shapeHisto.GetBinContent(i)
+            myTotalWeight += shapeHisto.GetBinContent(i)
+        if abs(myTotalWeight) < 0.00001:
+            return 0.0
+        else:
+            return mySum / myTotalWeight
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
