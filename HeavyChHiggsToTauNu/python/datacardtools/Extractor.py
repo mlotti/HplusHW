@@ -544,18 +544,14 @@ class ShapeExtractor(ExtractorBase):
 
     ## QCD specific method for extracting purity histogram
     def extractQCDPurityHistogram(self, datasetColumn, dsetMgr, shapeHistoName):
-        myHistograms = []
-        # Check that results have been cached
-        if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
-            raise Exception(ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+NormalStyle())
-        # Get histogram from cache
-        h = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
         # Do not apply here additional normalization, it is not needed
         if not datasetColumn.typeIsQCD:
             raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
         if not self.isRate():
             raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for nuisance! (only valid for rate)")
         # Obtain purity histogram
+        if not dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).hasRootHisto(shapeHistoName+"_Purity"):
+            raise Exception(ErrorLabel()+"T1he pseudo-multicrab directory for QCD is outdated! Please regenerate it (with the proper normalization!!!)")
         h = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(shapeHistoName+"_Purity")
         return h
 
