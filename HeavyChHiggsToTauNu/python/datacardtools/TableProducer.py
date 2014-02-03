@@ -8,6 +8,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import Datac
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker import ControlPlotMaker
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
 from math import pow,sqrt
@@ -67,7 +68,9 @@ class TableProducer:
         self.makeEventYieldSummary()
         # Print systematics summary table
         self.makeSystematicsSummary()
-
+        # Prints QCD purity information
+        self.makeQCDPuritySummary()
+        
         # Debugging info
         # Make copy of input datacard
         os.system("cp %s %s/input_datacard.py"%(self._opts.datacard,self._infoDirname))
@@ -866,3 +869,40 @@ class TableProducer:
         myFile.write(myOutput)
         myFile.close()
         print HighlightStyle()+"Latex table of systematics summary written to: "+NormalStyle()+myFilename
+
+    ## Prints QCD purity information
+    def makeQCDPuritySummary(self):
+        h = aux.Clone(self._observation.getRateHistogram(), "dummy")
+        h.Reset()
+        hQCD = None
+        hQCDPurity = None
+        for c in self._datasetGroups:
+            if c.typeIsQCD():
+                hQCD = c.getRateHistogram()
+                hQCDPurity = c.getPurityHistogram()
+            elif not c.typeIsSignal():
+                h.Add(c.getRateHistogram())
+        s = "QCD purity by bins for shape histogram:\n"
+        for i in range(1,hQCD.GetNbinsX()+1):
+            # bin
+            s += "  bin: %03d..%03d"%(hQCDPurity.GetXaxis().GetBinLowEdge(i), hQCDPurity.GetXaxis().GetBinUpEdge(i))
+            # QCD purity
+            myGoodPurityStatus = hQCDPurity.GetBinContent(i) > 0.5
+            s += "  purity: %.3f +- %.3f"%(hQCDPurity.GetBinContent(i), hQCDPurity.GetBinError(i))
+            # QCD fraction out of all expected events
+            f = 0.0
+            if abs(h.GetBinContent(i)+hQCD.GetBinContent(i)) > 0.0:
+                f = (hQCD.GetBinContent(i)) / (h.GetBinContent(i)+hQCD.GetBinContent(i))
+            s += "  QCD/Exp.: %.3f"%f
+            mySignificantFractionStatus = f > 0.2
+            if not myGoodPurityStatus and mySignificantFractionStatus:
+                s += "  #W# check if bad purity of QCD has impact on results!"
+            else:
+                s += "  OK"
+            s += "\n"
+        print "\n%s"%s.replace("#W#",WarningLabel())
+        myFilename = self._infoDirname+"/QCDpurity.txt"
+        myFile = open(myFilename, "w")
+        myFile.write(s.replace("#W#","Warning:"))
+        myFile.close()
+        h.IsA().Destructor(h)

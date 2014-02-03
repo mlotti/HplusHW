@@ -24,9 +24,15 @@ class ExtractorResult():
         self._masterId = masterId
         self._result = result
         self._resultIsStat = resultIsStat
+        self._purityHistogram = None # Only used for QCD
 
         self._histograms = histograms # histograms going into the datacard root file
         self._tempHistos = [] # Needed to make histograms going into root file persistent
+
+    def delete(self):
+        if self._purityHistogram != None:
+            self._purityHistogram.IsA().Destructor(self._purityHistogram)
+            self._purityHistogram = None
 
     def getId(self):
         return self._exId
@@ -36,6 +42,12 @@ class ExtractorResult():
 
     def getResult(self):
         return self._result
+
+    def setPurityHistogram(self, h):
+        self._purityHistogram = h
+
+    def getPurityHistogram(self):
+        return self._purityHistogram
 
     def getResultAverage(self):
         if isinstance(self._result, list):
@@ -122,6 +134,14 @@ class DatacardColumn():
         self._shapeHisto = shapeHisto
         self._isPrintable = True
         self.checkInputValidity()
+
+    def delete(self):
+        self._rateResult.delete()
+        self._nuisanceIds = None
+        self._nuisanceResults = None
+        self._controlPlots = None
+        self._cachedShapeRootHistogramWithUncertainties = None
+        self._datasetMgrColumn = None
 
     ## Returns true if the column is using the observation data samples
     def typeIsObservation(self):
@@ -312,9 +332,9 @@ class DatacardColumn():
         myAveragePurity = None
         if self.typeIsQCD():
             myDsetRootHisto = myShapeExtractor.extractQCDPurityHistogram(self, dsetMgr, self._shapeHisto)
-            self._purityForFinalShape = aux.Clone(myDsetRootHisto.getHistogram())
-            myAveragePurity = myShapeExtractor.extractQCDPurityAsValue(myRateHistograms[0], self._purityForFinalShape)
-            print "*** Average QCD purity", myAveragePurity
+            self._rateResult.setPurityHistogram(aux.Clone(myDsetRootHisto.getHistogram()))
+            myAveragePurity = myShapeExtractor.extractQCDPurityAsValue(myRateHistograms[0], self.getPurityHistogram())
+            #print "*** Average QCD purity", myAveragePurity
 
         # Obtain results for nuisances
         # Add the scalar uncertainties to the cached RootHistoWithUncertainties object
@@ -395,12 +415,14 @@ class DatacardColumn():
                 if dsetMgr != None and not self.typeIsEmptyColumn():
                     if self._opts.verbose:
                         print "  - Extracting data-driven control plot %s"%c._histoTitle
-
                     myCtrlDsetRootHisto = c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                     # Obtain overall purity for QCD
                     myAverageCtrlPlotPurity = None
+                    hCtrlPlotPurity = None
                     if self.typeIsQCD():
-                        myAverageCtrlPlotPurity = c.extractQCDPurityAsValue(self, dsetMgr, myRateHistograms[0])
+                        myDsetHisto = c.extractQCDPurityHistogram(self, dsetMgr)
+                        hCtrlPlotPurity = aux.Clone(myDsetHisto.getHistogram())
+                        myAverageCtrlPlotPurity = c.extractQCDPurityAsValue(myRateHistograms[0], hCtrlPlotPurity)
                     # Now normalize
                     if myDatasetRootHisto.isMC():
                         myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
@@ -445,7 +467,18 @@ class DatacardColumn():
                     if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
                         h.Scale(self._additionalNormalisationFactor)
                     # Store RootHistogramWithUncertainties
-                    self._controlPlots.append(h)
+                    myDictionary = {}
+                    myDictionary["shape"] = h
+                    myDictionary["purity"] = hCtrlPlotPurity
+                    myDictionary["averagePurity"] = myAverageCtrlPlotPurity
+                    for item in dir(self):
+                        if item.startswith("typeIs"):
+                            try:
+                                myStatus = getattr(self, item)()
+                                myDictionary[item] = myStatus
+                            except TypeError:
+                                pass
+                    self._controlPlots.append(myDictionary)
 
     ## Returns rate for column
     def getRateResult(self):
@@ -462,6 +495,10 @@ class DatacardColumn():
         if self._rateResult.getHistograms() == None:
             raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate histograms have not been cached! (did you forget to call doDataMining()?)")
         return self._rateResult.getHistograms()[0]
+
+    ## Returns purity histogram (only relevant for QCD)
+    def getPurityHistogram(self):
+        return self._rateResult.getPurityHistogram()
 
     ## Returns true if column has a nuisance Id
     def hasNuisanceByMasterId(self, id):

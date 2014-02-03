@@ -550,8 +550,7 @@ class ShapeExtractor(ExtractorBase):
             raise Exception(ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+NormalStyle())
         # Get histogram from cache
         h = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
-        # Do not apply here additional normalization, it has already been applied
-        # via RootHistoWithUncertainties.Scale() in DatacardColumn::doDataMining()
+        # Do not apply here additional normalization, it is not needed
         if not datasetColumn.typeIsQCD:
             raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
         if not self.isRate():
@@ -654,6 +653,15 @@ class ControlPlotExtractor(ExtractorBase):
         myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._histoNameWithPath))
         return myDatasetRootHisto
 
+    ## QCD specific method for extracting purity histogram
+    def extractQCDPurityHistogram(self, datasetColumn, dsetMgr):
+        # Do not apply here additional normalization, it is not needed
+        if not datasetColumn.typeIsQCD:
+            raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
+        # Obtain purity histogram
+        h = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoNameWithPath+"_Purity")
+        return h
+
     ## QCD specific method for extracting purity for a shape
     def extractQCDPurityAsValue(self, datasetColumn, dsetMgr, shapeHisto):
         hPurity = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoNameWithPath+"_Purity")
@@ -661,6 +669,15 @@ class ControlPlotExtractor(ExtractorBase):
             return _calculateAverageQCDPurity(shapeHisto, hPurity.getHistogram())
         elif isinstance(hPurity, ROOT.TH1):
             return _calculateAverageQCDPurity(shapeHisto, hPurity)
+        else:
+            raise Exception("This should not happen")
+
+    ## QCD specific method for extracting purity for a shape
+    def extractQCDPurityAsValue(self, shapeHisto, purityHisto):
+        if isinstance(purityHisto, dataset.DatasetRootHisto):
+            return self._calculateAverageQCDPurity(shapeHisto, purityHisto.getHistogram())
+        elif isinstance(purityHisto, ROOT.TH1):
+            return _calculateAverageQCDPurity(shapeHisto, purityHisto)
         else:
             raise Exception("This should not happen")
 

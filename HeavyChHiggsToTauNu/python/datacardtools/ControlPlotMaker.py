@@ -60,7 +60,7 @@ class ControlPlotMaker:
                 myStackList = []
                 for c in self._datasetGroups:
                     if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
-                        h = c.getControlPlotByIndex(i).Clone()
+                        h = c.getControlPlotByIndex(i)["shape"].Clone()
                         if c.typeIsSignal():
                             # Scale light H+ signal
                             if m < 179:
@@ -104,7 +104,7 @@ class ControlPlotMaker:
                     myHisto = histograms.Histo(hEWKfake,"EWKfakes")
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList.append(myHisto)
-                hData = observation.getControlPlotByIndex(i).Clone()
+                hData = observation.getControlPlotByIndex(i)["shape"].Clone()
                 hDataUnblinded = hData.Clone()
                 # Apply blinding
                 if len(myCtrlPlot.blindedRange) > 0:

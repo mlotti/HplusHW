@@ -545,7 +545,7 @@ class DataCardGenerator:
                     # Constants remain same, since they are relative uncertainties
                 # Merge control plots (HistoRootWithUncertainties objects)
                 for i in range(0, len(myEmbColumn._controlPlots)):
-                    myEmbColumn._controlPlots[i].Add(c._controlPlots[i])
+                    myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"])
                 # Mark for removal
                 myRemoveList.append(c)
         for c in myRemoveList:
@@ -586,7 +586,7 @@ class DataCardGenerator:
                                     myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k], -1.0)
                     # Merge control plots (HistoRootWithUncertainties objects)
                     for i in range(0, len(myEmbColumn._controlPlots)):
-                        myEmbColumn._controlPlots[i].Add(c._controlPlots[i], -1.0)
+                        myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"], -1.0)
         # Rate: Purge relative normalization uncertainties and replace by those for embedding
         myEmbColumn._cachedShapeRootHistogramWithUncertainties.resetNormalizationUncertaintyRelative()
         for i in range(0, len(myEmbColumn.getNuisanceResults())):
@@ -601,17 +601,22 @@ class DataCardGenerator:
                     myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult, myResult)
         # Control plots: Purge relative normalization uncertainties and replace by those for embedding
         for i in range(0, len(myEmbColumn._controlPlots)):
-            myEmbColumn._controlPlots[i].resetNormalizationUncertaintyRelative()
+            myEmbColumn._controlPlots[i]["shape"].resetNormalizationUncertaintyRelative()
             for k in range(0, len(myEmbColumn.getNuisanceResults())):
                 if len(myEmbColumn.getNuisanceResults()[k]._histograms) == 0:
                     myResult = myEmbColumn.getNuisanceResults()[k].getResult()
                     myName = myEmbColumn.getNuisanceResults()[k].getId()
                     if isinstance(myResult, ScalarUncertaintyItem):
-                        myEmbColumn._controlPlots[i].addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                        myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                     elif isinstance(myResult, list):
-                        myEmbColumn._controlPlots[i].addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
+                        myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
                     else:
-                        myEmbColumn._controlPlots[i].addNormalizationUncertaintyRelative(myName, myResult, myResult)
+                        myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult, myResult)
+        # Set type of control plots
+        for i in range(0, len(myEmbColumn._controlPlots)):
+            myEmbColumn._controlPlots[i]["typeIsEWKfake"] = False
+            myEmbColumn._controlPlots[i]["typeIsEWK"] = True
+
         #print "Final:"
         #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
 
