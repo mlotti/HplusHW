@@ -47,20 +47,20 @@ class ScalarUncertaintyItem:
                 self._uncertDown = args[0]._uncertDown
             else:
                 # Symmetric uncertainty
-                self._uncertUp = args[0]**2
-                self._uncertDown = args[0]**2
+                self._uncertUp = args[0]
+                self._uncertDown = args[0]
         elif len(args) == 0 and len(kwargs) == 2:
             if not "plus" in kwargs or not "minus" in kwargs:
                 raise Exception("Error: You forgot to give plus= and minus= arguments to ScalarUncertaintyItem()!")
-            self._uncertUp = kwargs["plus"]**2
-            self._uncertDown = kwargs["minus"]**2
+            self._uncertUp = kwargs["plus"]
+            self._uncertDown = kwargs["minus"]
         else:
             raise Exception("Error: You forgot to give the uncertainty value(s) to ScalarUncertaintyItem()!")
 
     def add(self,other):
         self._name += "+%s"%other._name
-        self._uncertUp += other._uncertUp
-        self._uncertDown += other._uncertDown
+        self._uncertUp = sqrt(self._uncertUp**2 + other._uncertUp**2)
+        self._uncertDown = sqrt(self._uncertDown**2 + other._uncertDown**2)
 
     def Clone(self):
         return ScalarUncertaintyItem(self._name, self)
@@ -76,16 +76,16 @@ class ScalarUncertaintyItem:
         return abs(self._uncertDown - self._uncertUp) > 0.0000001
 
     def getUncertaintySquaredDown(self):
-        return self._uncertDown
+        return self._uncertDown**2
 
     def getUncertaintyDown(self):
-        return sqrt(self._uncertDown)
+        return self._uncertDown
 
     def getUncertaintySquaredUp(self):
-        return self._uncertUp
+        return self._uncertUp**2
 
     def getUncertaintyUp(self):
-        return sqrt(self._uncertUp)
+        return self._uncertUp
 
 _crossSectionUncertainty = {
     "TTJets": ScalarUncertaintyItem("xsect", plus=0.057, minus=0.061), # see https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
