@@ -397,6 +397,10 @@ class DatacardColumn():
                         print "  - Extracting data-driven control plot %s"%c._histoTitle
 
                     myCtrlDsetRootHisto = c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                    # Obtain overall purity for QCD
+                    myAverageCtrlPlotPurity = None
+                    if self.typeIsQCD():
+                        myAverageCtrlPlotPurity = c.extractQCDPurityAsValue(self, dsetMgr, myRateHistograms[0])
                     # Now normalize
                     if myDatasetRootHisto.isMC():
                         myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
@@ -419,6 +423,14 @@ class DatacardColumn():
                             if self._opts.verbose:
                                 print "    - Adding norm. uncertainty: %s"%n.getMasterId()
                             myResult = n.getResult()
+                            if self.typeIsQCD():
+                                # Scale QCD nuisance by impurity (and unscale by shape impurity already applied to nuisance)
+                                for e in extractors:
+                                    if e.getId() == n.getId():
+                                        if e.isQCDNuisance():
+                                            myResult = n.getResult().Clone()
+                                            myResult.scale((1.0-myAverageCtrlPlotPurity) / (1.0 - myAveragePurity))
+                                            #print n._exId, n.getResult().getUncertaintyUp(), myAverageCtrlPlotPurity, myResult.getUncertaintyUp()
                             if isinstance(myResult, ScalarUncertaintyItem):
                                 h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                             elif isinstance(myResult, list):
@@ -428,7 +440,6 @@ class DatacardColumn():
                         elif not n.resultIsStatUncertainty() and len(n.getHistograms()) > 0 and isinstance(n.getResult(), ScalarUncertaintyItem): # constantToShape
                             if self._opts.verbose:
                                 print "    - Adding norm. uncertainty: %s"%n.getMasterId()
-                            myResult = n.getResult()
                             h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                     # Scale if asked
                     if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":

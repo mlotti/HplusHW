@@ -12,6 +12,20 @@ from math import pow,sqrt
 import sys
 import ROOT
 
+## QCD specific method for extracting purity for a shape
+def _calculateAverageQCDPurity(shapeHisto, purityHisto):
+    # Calculated weighted average (weight = Nevents in the shape)
+    mySum = 0.0
+    myTotalWeight = 0.0
+    for i in range(0,purityHisto.GetNbinsX()+1):
+        mySum += purityHisto.GetBinContent(i) * shapeHisto.GetBinContent(i)
+        myTotalWeight += shapeHisto.GetBinContent(i)
+    if abs(myTotalWeight) < 0.00001:
+        return 0.0
+    else:
+        return mySum / myTotalWeight
+
+
 # Enumerator class for data mining mode
 class ExtractorMode:
     UNKNOWN = 0
@@ -549,27 +563,16 @@ class ShapeExtractor(ExtractorBase):
     ## QCD specific method for extracting purity for a shape
     def extractQCDPurityAsValue(self, datasetColumn, dsetMgr, shapeHistoName, shapeHisto):
         hPurity = self.extractQCDPurityHistogram(datasetColumn, dsetMgr, shapeHistoName)
-        return self._calculateAverageQCDPurity(shapeHisto, hPurity)
+        return _calculateAverageQCDPurity(shapeHisto, hPurity)
 
     ## QCD specific method for extracting purity for a shape
     def extractQCDPurityAsValue(self, shapeHisto, purityHisto):
         if isinstance(purityHisto, dataset.DatasetRootHisto):
             return self._calculateAverageQCDPurity(shapeHisto, purityHisto.getHistogram())
         elif isinstance(purityHisto, ROOT.TH1):
-            return self._calculateAverageQCDPurity(shapeHisto, purityHisto)
-
-    ## QCD specific method for extracting purity for a shape
-    def _calculateAverageQCDPurity(self, shapeHisto, purityHisto):
-        # Calculated weighted average (weight = Nevents in the shape)
-        mySum = 0.0
-        myTotalWeight = 0.0
-        for i in range(0,purityHisto.GetNbinsX()+1):
-            mySum += purityHisto.GetBinContent(i) * shapeHisto.GetBinContent(i)
-            myTotalWeight += shapeHisto.GetBinContent(i)
-        if abs(myTotalWeight) < 0.00001:
-            return 0.0
+            return _calculateAverageQCDPurity(shapeHisto, purityHisto)
         else:
-            return mySum / myTotalWeight
+            raise Exception("This should not happen")
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -650,6 +653,16 @@ class ControlPlotExtractor(ExtractorBase):
         mySystematics = dataset.Systematics(allShapes=True)
         myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._histoNameWithPath))
         return myDatasetRootHisto
+
+    ## QCD specific method for extracting purity for a shape
+    def extractQCDPurityAsValue(self, datasetColumn, dsetMgr, shapeHisto):
+        hPurity = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoNameWithPath+"_Purity")
+        if isinstance(hPurity, dataset.DatasetRootHisto):
+            return _calculateAverageQCDPurity(shapeHisto, hPurity.getHistogram())
+        elif isinstance(hPurity, ROOT.TH1):
+            return _calculateAverageQCDPurity(shapeHisto, hPurity)
+        else:
+            raise Exception("This should not happen")
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
