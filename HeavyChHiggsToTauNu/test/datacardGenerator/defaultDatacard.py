@@ -52,7 +52,7 @@ OptionSqrtS = 7 # sqrt(s)
 # Tolerance for throwing error on luminosity difference (0.01 = 1 percent agreement is required)
 ToleranceForLuminosityDifference = 0.01
 # Tolerance for almost zero rate (columns with smaller rate are suppressed)
-ToleranceForMinimumRate = 0.1
+ToleranceForMinimumRate = 0.5
 
 # Shape histogram definitions
 SignalShapeHisto = None
@@ -154,13 +154,18 @@ for mass in HeavyMassPoints:
     hx.setDatasetDefinition("HplusTB_M"+str(mass))
     DataGroups.append(hx)
 
+myQCDShapeSystematics = myShapeSystematics[:]
+for i in range(0,len(myQCDShapeSystematics)):
+    if myQCDShapeSystematics[i].startswith("trg_CaloMET") and not "forQCD" in myQCDShapeSystematics[i]:
+        myQCDShapeSystematics[i] = myQCDShapeSystematics[i]+"_forQCD"
+
 myQCDFact = DataGroup(
     label        = "QCDfact",
     landsProcess = 3,
     validMassPoints = MassPoints,
     datasetType  = "QCD factorised",
     datasetDefinition = "QCDfactorisedmt",
-    nuisances    = myShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","stat_binByBin"],
+    nuisances    = myQCDShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","xsect_tt_7TeV_forQCD","stat_binByBin"],
     shapeHisto   = SignalShapeHisto,
 )
 
@@ -170,7 +175,7 @@ myQCDInv = DataGroup(
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
     datasetDefinition = "QCDinvertedmt",
-    nuisances    = myShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","stat_binByBin","QCDinvTemplateFit"],
+    nuisances    = myQCDShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","stat_binByBin","xsect_tt_7TeV_forQCD","QCDinvTemplateFit"],
     shapeHisto   = SignalShapeHisto,
 )
 
@@ -467,6 +472,16 @@ if "trg_CaloMET" in myShapeSystematics:
         #function      = "ShapeVariation",
         #systVariation = "METTrgSF",
     ))
+    Nuisances.append(Nuisance(
+        id            = "trg_CaloMET_forQCD",
+        label         = "tau+MET trg MET part",
+        distr         = "lnN",
+        function      = "ConstantForQCD",
+        value         = 0.12
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        #systVariation = "METTrgSF",
+    ))
 else:
     Nuisances.append(Nuisance(
         id            = "trg_CaloMET_dataeff",
@@ -488,6 +503,27 @@ else:
         #systVariation = "MetTrgMCEff",
         distr         = "lnN",
         function      = "Constant",
+        value         = 0.01
+    ))
+    Nuisances.append(Nuisance(
+        id            = "trg_CaloMET_dataeff_forQCD",
+        label         = "tau+MET trg MET part data eff.",
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        #systVariation = "MetTrgDataEff",
+        #scaleFactor   = trg_MET_dataeffScaleFactor,
+        distr         = "lnN",
+        function      = "ConstantForQCD",
+        value         = 0.12
+    ))
+    Nuisances.append(Nuisance(
+        id            = "trg_CaloMET_MCeff_forQCD",
+        label         = "tau+MET trg MET part MC eff.",
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        #systVariation = "MetTrgMCEff",
+        distr         = "lnN",
+        function      = "ConstantForQCD",
         value         = 0.01
     ))
 
@@ -798,6 +834,15 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
+    id            = "xsect_tt_7TeV_forQCD",
+    label         = "ttbar cross section",
+    distr         = "lnN",
+    function      = "ConstantForQCD",
+    value         = systematics.getCrossSectionUncertainty("TTJets").getUncertaintyDown(),
+    upperValue    = systematics.getCrossSectionUncertainty("TTJets").getUncertaintyUp(),
+))
+
+Nuisances.append(Nuisance(
     id            = "xsect_Wjets",
     label         = "W+jets cross section",
     distr         = "lnN",
@@ -897,7 +942,11 @@ Nuisances.append(Nuisance(
 MergeNuisances = []
 if not OptionReplaceEmbeddingByMC and "tau_ID_shape" in myTauIDShapeSystematics:
     MergeNuisances.append(["tau_ID_shape", "tau_ID_constShape"])
-
+if OptionTreatTriggerUncertaintiesAsAsymmetric:
+    MergeNuisances.append(["trg_CaloMET_dataeff", "trg_CaloMET_dataeff_forQCD"])
+    MergeNuisances.append(["trg_CaloMET_MCeff", "trg_CaloMET_MCeff_forQCD"])
+else:
+    MergeNuisances.append(["trg_CaloMET", "trg_CaloMET_forQCD"])
 #MergeNuisances.append(["ES_taus","ES_taus_fakes","ES_taus_tempForEmbedding"])
 #MergeNuisances.append(["ES_jets","ES_jets_fakes"])
 #MergeNuisances.append(["JER","JER_fakes"])
@@ -906,6 +955,7 @@ MergeNuisances.append(["e_mu_veto","e_mu_veto_fakes"])
 MergeNuisances.append(["b_tag","b_tag_fakes"])
 MergeNuisances.append(["b_mistag","b_mistag_fakes"])
 MergeNuisances.append(["pileup","pileup_fakes"])
+MergeNuisances.append(["xsect_tt_7TeV", "xsect_tt_7TeV_forQCD"])
 #MergeNuisances.append(["stat_binByBin","stat_binByBin_QCDfact","stat_binByBin_fakes"])
 
 # Control plots

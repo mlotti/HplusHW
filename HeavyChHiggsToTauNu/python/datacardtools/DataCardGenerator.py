@@ -663,6 +663,16 @@ class DataCardGenerator:
                                                          mode = myMode,
                                                          opts = self._opts,
                                                          scaleFactor = n.getArg("scaleFactor")))
+            elif n.function == "ConstantForQCD":
+                myMode = ExtractorMode.QCDNUISANCE
+                self._extractors.append(ConstantExtractorForDataDrivenQCD(exid = n.id,
+                                                         constantValue = n.getArg("value"),
+                                                         constantUpperValue = n.getArg("upperValue"),
+                                                         distribution = n.distr,
+                                                         description = n.label,
+                                                         mode = myMode,
+                                                         opts = self._opts,
+                                                         scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "ConstantToShape":
                 self._extractors.append(ConstantExtractor(exid = n.id,
                                                          constantValue = n.getArg("value"),

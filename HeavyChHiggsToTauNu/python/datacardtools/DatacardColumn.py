@@ -10,6 +10,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,ConstantExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 from math import sqrt,pow
 from array import array
 
@@ -306,6 +307,15 @@ class DatacardColumn():
         if self.typeIsEmptyColumn() or dsetMgr == None:
             return
 
+        # Obtain overall purity for QCD
+        self._purityForFinalShape = None
+        myAveragePurity = None
+        if self.typeIsQCD():
+            myDsetRootHisto = myShapeExtractor.extractQCDPurityHistogram(self, dsetMgr, self._shapeHisto)
+            self._purityForFinalShape = aux.Clone(myDsetRootHisto.getHistogram())
+            myAveragePurity = myShapeExtractor.extractQCDPurityAsValue(myRateHistograms[0], self._purityForFinalShape)
+            print "*** Average QCD purity", myAveragePurity
+
         # Obtain results for nuisances
         # Add the scalar uncertainties to the cached RootHistoWithUncertainties object
         for nid in self._nuisanceIds:
@@ -349,6 +359,15 @@ class DatacardColumn():
                                     myHistograms[i].Add(self._rateResult.getHistograms()[0])
 
                     else:
+                        # For QCD, scale the QCD type constants by the purity
+                        if self.typeIsQCD() and e.isQCDNuisance():
+                            if isinstance(myResult, ScalarUncertaintyItem):
+                                myResult.scale(1.0-myAveragePurity)
+                            elif isinstance(myResult, list):
+                                for i in range(0,len(myResult)):
+                                    myResult[i] *= 1.0-myAveragePurity
+                            else:
+                                myResult *= 1.0-myAveragePurity
                         # Add scalar uncertainties
                         if self._opts.verbose:
                             print "Adding scalar uncert. ",e.getId()
