@@ -1230,11 +1230,23 @@ class RootHistoWithUncertainties:
             raise Exception("So far only TH1's are supported (and not TH2/TH3).")
 
         self._checkConsistency(name, th1Plus)
+        hplus = aux.Clone(th1Plus)
+
+        hminus = None
         if th1Minus != None:
             self._checkConsistency(name, th1Minus)
-            th1Minus = aux.Clone(th1Plus)
+            hminus = aux.Clone(th1Minus)
+        else:
+            hminus = aux.Clone(th1Plus)
+            hminus.Scale(-1)
 
-        self._shapeUncertainties[name] = (th1Plus, th1Minus)
+        for bin in xrange(1, self._rootHisto.GetNbinsX()+1):
+            myRate = self._rootHisto.GetBinContent(bin)
+            hplus.SetBinContent(bin, myRate * hplus.GetBinContent(bin))
+            hminus.SetBinContent(bin, myRate * hminus.GetBinContent(bin))
+
+        self._shapeUncertainties[name] = (hplus, hminus)
+
 
     ## Add normalization relative uncertainty
     #
