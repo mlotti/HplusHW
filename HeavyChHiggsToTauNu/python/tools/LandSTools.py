@@ -1076,7 +1076,7 @@ class LHCType:
         lines = output.split("\n")
         lines.reverse()
         if "Error in <ACLiC>: Compilation failed!" in output:
-            raise Exception("Error: Please run the script on jade-five or lxplus5! Root needs to compile the library for fitRvsCLs.C")
+            raise Exception("Error: Please run this same script on jade-five or lxplus5 with --skipMerge parameter! Root needs to compile the library for fitRvsCLs.C")
         if "Error" in output:
             print "Encountered an error, here's the full notification:"
             print output
