@@ -595,30 +595,32 @@ class DataCardGenerator:
                     for i in range(0, len(myEmbColumn._controlPlots)):
                         myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"], -1.0)
         # Rate: Purge relative normalization uncertainties and replace by those for embedding
-        myEmbColumn._cachedShapeRootHistogramWithUncertainties.resetNormalizationUncertaintyRelative()
-        for i in range(0, len(myEmbColumn.getNuisanceResults())):
-            if len(myEmbColumn.getNuisanceResults()[i]._histograms) == 0:
-                myResult = myEmbColumn.getNuisanceResults()[i].getResult()
-                myName = myEmbColumn.getNuisanceResults()[i].getId()
-                if isinstance(myResult, ScalarUncertaintyItem):
-                    myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
-                elif isinstance(myResult, list):
-                    myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
-                else:
-                    myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult, myResult)
-        # Control plots: Purge relative normalization uncertainties and replace by those for embedding
-        for i in range(0, len(myEmbColumn._controlPlots)):
-            myEmbColumn._controlPlots[i]["shape"].resetNormalizationUncertaintyRelative()
-            for k in range(0, len(myEmbColumn.getNuisanceResults())):
-                if len(myEmbColumn.getNuisanceResults()[k]._histograms) == 0:
-                    myResult = myEmbColumn.getNuisanceResults()[k].getResult()
-                    myName = myEmbColumn.getNuisanceResults()[k].getId()
-                    if isinstance(myResult, ScalarUncertaintyItem):
-                        myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
-                    elif isinstance(myResult, list):
-                        myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
-                    else:
-                        myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult, myResult)
+        #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
+        ##myEmbColumn._cachedShapeRootHistogramWithUncertainties.resetNormalizationUncertaintyRelative()
+        #for i in range(0, len(myEmbColumn.getNuisanceResults())):
+            #if len(myEmbColumn.getNuisanceResults()[i]._histograms) == 0:
+                #myResult = myEmbColumn.getNuisanceResults()[i].getResult()
+                #myName = myEmbColumn.getNuisanceResults()[i].getId()
+                #if not 
+                #if isinstance(myResult, ScalarUncertaintyItem):
+                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                #elif isinstance(myResult, list):
+                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
+                #else:
+                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult, myResult)
+        ## Control plots: Purge relative normalization uncertainties and replace by those for embedding
+        #for i in range(0, len(myEmbColumn._controlPlots)):
+            #myEmbColumn._controlPlots[i]["shape"].resetNormalizationUncertaintyRelative()
+            #for k in range(0, len(myEmbColumn.getNuisanceResults())):
+                #if len(myEmbColumn.getNuisanceResults()[k]._histograms) == 0:
+                    #myResult = myEmbColumn.getNuisanceResults()[k].getResult()
+                    #myName = myEmbColumn.getNuisanceResults()[k].getId()
+                    #if isinstance(myResult, ScalarUncertaintyItem):
+                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                    #elif isinstance(myResult, list):
+                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
+                    #else:
+                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult, myResult)
         # Set type of control plots
         for i in range(0, len(myEmbColumn._controlPlots)):
             myEmbColumn._controlPlots[i]["typeIsEWKfake"] = False
