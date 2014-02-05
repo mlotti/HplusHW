@@ -104,7 +104,7 @@ def validateRootHistoWithUncertainties(codeValidator):
     # Add shape uncertainty
     htestUp = createHisto("shapeUp", [0,10.5,12.1,13.3,0],[0,0,0,0,0])
     htestDown = createHisto("shapeDown", [0,8.8,8.1,15.5,0],[0,0,0,0,0])
-    rhwu.addShapeUncertainty("shape",htestUp,htestDown)
+    rhwu.addShapeUncertaintyFromVariation("shape",htestUp,htestDown)
     testHistoContents("after shape", rhwu.getRootHisto(), [0.0,9.6,7.6,15.7,0.0], [0.0,2.4186773245,2.3,2.561249695,0.0])
     codeValidator.test("getRate()", rhwu.getRate(), 32.9)
     codeValidator.test("getRateStatUncertainty()", rhwu.getRateStatUncertainty(), 4.2071367936)
@@ -131,7 +131,7 @@ def validateRootHistoWithUncertainties(codeValidator):
     # Add second shape uncertainty
     htest2Up = createHisto("shape2Up", [0,11.2,13.5,16.3,0],[0,0,0,0,0])
     htest2Down = createHisto("shape2Down", [0,8.2,6.1,13.5,0],[0,0,0,0,0])
-    rhwu.addShapeUncertainty("shape2",htest2Up,htest2Down)
+    rhwu.addShapeUncertaintyFromVariation("shape2",htest2Up,htest2Down)
     testHistoContents("after shape2", rhwu.getRootHisto(), [0.0,9.6,7.6,15.7,0.0], [0.0,2.4186773245,2.3,2.561249695,0.0])
     g = rhwu.getSystematicUncertaintyGraph(addStatistical=False)
     testGraphContents("syst.graph,addStat=False", g, [9.6,7.6,15.7], [2.0716177254,7.4590616032,1.6807438829], [2.5072694311,2.1355093069,4.5232289352])

@@ -1220,9 +1220,9 @@ class Histo:
     # \param name     Name of the uncertainty
     # \param th1plus  TH1 for plus variation
     # \param th1minus TH1 for minus variation
-    def addShapeUncertainty(self, name, th1Plus, th1Minus):
+    def addShapeUncertaintyFromVariation(self, name, th1Plus, th1Minus):
         self._uncertaintyGraphValid = False
-        self._histo.addShapeUncertainty(name, th1Plus, th1Minus)
+        self._histo.addShapeUncertaintyFromVariation(name, th1Plus, th1Minus)
 
     ## Add shape systematics as bin-wise relative uncertainties
     #
