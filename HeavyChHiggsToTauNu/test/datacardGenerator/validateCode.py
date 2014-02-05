@@ -16,10 +16,10 @@ if __name__ == "__main__":
     from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import *
     validateExtendedCount(cv)
 
-    #from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.UnfoldedHistogramReader import validateUnfoldedHistogramReader
-    #validateUnfoldedHistogramReader(cv)
-
     from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import validateErrorPropagation
     validateErrorPropagation(cv)
+
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.validateSystematics as validateSystematics
+    validateSystematics.validateAll(cv)
 
     cv.finish()
