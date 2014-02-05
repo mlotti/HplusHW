@@ -1046,7 +1046,7 @@ class SystematicsHelper:
             if modify is not None:
                 modify(plus)
                 modify(minus)
-            rootHistoWithUncertainties.addShapeUncertainty(source, plus, minus)
+            rootHistoWithUncertainties.addShapeUncertaintyFromVariation(source, plus, minus)
 
         # Add any additional shape variation histograms supplied by the user
         additShapes = self._settings.get("additionalShapes")
@@ -1064,7 +1064,7 @@ class SystematicsHelper:
                     (hm, realName) = dset.getRootHisto(th1minus)
                     if modify is not None:
                         modify(hm)
-                rootHistoWithUncertainties.addShapeUncertainty(source, hp, hm)
+                rootHistoWithUncertainties.addShapeUncertaintyFromVariation(source, hp, hm)
 
         # Add any bin-wise relative uncertainties supplied by the user
         relShapes = self._settings.get("additionalShapesRelative")
@@ -1072,7 +1072,7 @@ class SystematicsHelper:
             if verbose:
                 print "  Adding additional bin-wise relative uncertainties %s" % ",".join(relShapes.keys())
             for source, th1 in relShapes.iteritems():
-                rootHistoWithUncertainties.addShapeUncertaintyRelative(source, th1)
+                rootHistoWithUncertainties.addShapeUncertaintyFromVariationRelative(source, th1)
 
         # Add normalization uncertainties given the selection step
         normSel = self._settings.get("normalizationSelections")
@@ -1185,7 +1185,7 @@ class RootHistoWithUncertainties:
     # \param name     Name of the uncertainty
     # \param th1Plus  TH1 for the 'plus' variation
     # \param th1Minus TH1 for the 'minus' variation
-    def addShapeUncertainty(self, name, th1Plus, th1Minus):
+    def addShapeUncertaintyFromVariation(self, name, th1Plus, th1Minus):
         if self._flowBinsVisibleStatus:
             # Check if flow bins have entries
             myStatus = abs(th1Plus.GetBinContent(th1Plus.GetNbinsX()+1)) < 0.00001
@@ -1193,7 +1193,7 @@ class RootHistoWithUncertainties:
             myStatus &= abs(th1Plus.GetBinContent(0)) < 0.00001
             myStatus &= abs(th1Minus.GetBinContent(0)) < 0.00001
             if not myStatus:
-                raise Exception("addShapeUncertainty(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
+                raise Exception("addShapeUncertaintyFromVariation(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
 
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
@@ -1492,7 +1492,7 @@ class RootHistoWithUncertainties:
                         self._shapeUncertainties[key] = other._shapeUncertainties[key]
                 else:
                     self._shapeUncertainties[key] = other._shapeUncertainties[key]
-                #self.addShapeUncertainty(key, *)
+                #self.addShapeUncertaintyFromVariation(key, *)
 
         # Add histo
         self._rootHisto.Add(other._rootHisto, *args)

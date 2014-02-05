@@ -132,7 +132,7 @@ def addUncertainties(filename, column, h):
         hdown = f.Get("%s_%sDown"%(column,item)).Clone()
         hup.SetDirectory(None)
         hdown.SetDirectory(None)
-        h.addShapeUncertainty(item, hup, hdown)
+        h.addShapeUncertaintyFromVariation(item, hup, hdown)
     f.Close()
 
 def getLuminosity(filename):
