@@ -188,11 +188,10 @@ class ValidateGroup:
         myOutput = ""
         # Get event counters
         refEventCounter = counter.EventCounter(refDataset)
-        if isinstance(refDataset, dataset.DatasetMerged):
-            refEventCounter.normalizeMCToLuminosity(1)
         testEventCounter = counter.EventCounter(testDataset)
-        if isinstance(testDataset, dataset.DatasetMerged):
-            testEventCounter.normalizeMCToLuminosity(1)
+        if isinstance(refDataset, dataset.DatasetMerged) or isinstance(testDataset, dataset.DatasetMerged):
+            refEventCounter.normalizeMCToLuminosity(self._mcNormalization["normalizeToLumi"])
+            testEventCounter.normalizeMCToLuminosity(self._mcNormalization["normalizeToLumi"])
         mcNormalization = ""
         for ds, ec in [(refDataset, refEventCounter), (testDataset, testEventCounter)]:
             if ds.isMC():
@@ -254,9 +253,10 @@ class ValidateGroup:
             c = refCounter.getColumn(index=0)
             c.setName("Ref")
             table.appendColumn(c)
-        c = testCounter.getColumn(index=0)
-        c.setName("Test")
-        table.appendColumn(c)
+        if testCounter is not None:
+            c = testCounter.getColumn(index=0)
+            c.setName("Test")
+            table.appendColumn(c)
 
         for row in table.getRowNames():
             myOutput += self._testCounterValues(oldrow, row, refCounter, testCounter)
@@ -975,6 +975,7 @@ def main(opts,timeStamp,refDsetCreator,testDsetCreator,myValidateGroups,era,sear
         #myOutput += "AnalysisVariation = %s<br>\n"%analysisVariation
     #myOutput = "<hr><br>\n"
     # Obtain dataset managers (using default value for analysisName)
+    #refDatasetMgr = refDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=analysisVariation,analysisName="signalAnalysisMIdEffTrgEffMetEffTEff")
     refDatasetMgr = refDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=analysisVariation)
     testDatasetMgr = testDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=analysisVariation)
     # Normalisation
@@ -991,7 +992,7 @@ def main(opts,timeStamp,refDsetCreator,testDsetCreator,myValidateGroups,era,sear
         refDatasetMgr.merge(refName, opts.mergeRefDataset)
         print "Merging: %s -> test"%", ".join(map(str,opts.mergeTestDataset))
         testDatasetMgr.merge(testName, opts.mergeTestDataset)
-    elif optcommonDatasetNamess.testDir is None:
+    elif opts.testDir is None:
         commonDatasetNames = compareLists(refDatasetMgr.getAllDatasetNames(),testDatasetMgr.getAllDatasetNames(),opts.dirs)
         commonDatasetNames = [(x, x) for x in commonDatasetNames]
     else:

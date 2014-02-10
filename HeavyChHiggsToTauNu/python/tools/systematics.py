@@ -42,24 +42,32 @@ class ScalarUncertaintyItem:
         self._uncertDown = 0.0 # relative uncertainty squared
         # Handle inputs
         if len(args) == 1:
-            # Symmetric uncertainty
-            self._uncertUp = args[0]**2
-            self._uncertDown = args[0]**2
+            if isinstance(args[0], ScalarUncertaintyItem):
+                self._uncertUp = args[0]._uncertUp
+                self._uncertDown = args[0]._uncertDown
+            else:
+                # Symmetric uncertainty
+                self._uncertUp = args[0]
+                self._uncertDown = args[0]
         elif len(args) == 0 and len(kwargs) == 2:
             if not "plus" in kwargs or not "minus" in kwargs:
                 raise Exception("Error: You forgot to give plus= and minus= arguments to ScalarUncertaintyItem()!")
-            self._uncertUp = kwargs["plus"]**2
-            self._uncertDown = kwargs["minus"]**2
+            self._uncertUp = kwargs["plus"]
+            self._uncertDown = kwargs["minus"]
         else:
             raise Exception("Error: You forgot to give the uncertainty value(s) to ScalarUncertaintyItem()!")
 
     def add(self,other):
         self._name += "+%s"%other._name
-        self._uncertUp += other._uncertUp
-        self._uncertDown += other._uncertDown
+        self._uncertUp = sqrt(self._uncertUp**2 + other._uncertUp**2)
+        self._uncertDown = sqrt(self._uncertDown**2 + other._uncertDown**2)
 
     def Clone(self):
-        return ScalarUncertaintyItem(self.name, self._uncertUp, self._uncertDown)
+        return ScalarUncertaintyItem(self._name, self)
+
+    def scale(self, factor):
+        self._uncertUp *= factor
+        self._uncertDown *= factor
 
     def getName(self):
         return self._name
@@ -68,20 +76,20 @@ class ScalarUncertaintyItem:
         return abs(self._uncertDown - self._uncertUp) > 0.0000001
 
     def getUncertaintySquaredDown(self):
-        return self._uncertDown
+        return self._uncertDown**2
 
     def getUncertaintyDown(self):
-        return sqrt(self._uncertDown)
+        return self._uncertDown
 
     def getUncertaintySquaredUp(self):
-        return self._uncertUp
+        return self._uncertUp**2
 
     def getUncertaintyUp(self):
-        return sqrt(self._uncertUp)
+        return self._uncertUp
 
 _crossSectionUncertainty = {
-    "TTJets": ScalarUncertaintyItem("xsect", plus=0.057, minus=0.061), # see https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
-    "TTToHplus": ScalarUncertaintyItem("xsect", plus=0.057, minus=0.061), # https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
+    "TTJets": ScalarUncertaintyItem("xsect", plus=0.0529, minus=0.0616), # see https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
+    "TTToHplus": ScalarUncertaintyItem("xsect", plus=0.0529, minus=0.0616), # https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
     "HplusTB": ScalarUncertaintyItem("xsect", 0.30),
     "WJets":  ScalarUncertaintyItem("xsect", 0.05),
     "SingleTop": ScalarUncertaintyItem("xsect", 0.08),
@@ -113,7 +121,7 @@ def getTauIDUncertainty(isGenuineTau=True):
         return ScalarUncertaintyItem("tauID", 0.00)
 
 def getLuminosityUncertainty():
-    return ScalarUncertaintyItem("tauMisID", 0.026)
+    return ScalarUncertaintyItem("lumi", 0.026)
 
 # Note: if majority of sample is genuine taus, set isGenuineTau=true
 def getScalarUncertainties(datasetName, isGenuineTau):
@@ -132,6 +140,7 @@ _dataDrivenCtrlPlotBinning = {
     "ImprovedDeltaPhiCuts": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
     "MET": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
     "NBjets": [0,1,2,3,4,5,6,7,8],
+    "BtagDiscriminator": [-2, -1.8, -1.6, -1.4, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0],
     "TopMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500],
     "TopPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500],
     "WMass": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
@@ -146,6 +155,11 @@ _dataDrivenCtrlPlotBinning = {
     "SelectedTau_p_AfterStandardSelections": [0,20,40,60,80,100,150,200,300,400],
     "SelectedTau_LeadingTrackP_AfterStandardSelections": [0,20,40,60,80,100,150,200,300,400],
 }
+# Add EWK fake tau shape definitions
+for key in _dataDrivenCtrlPlotBinning.keys():
+    if "shape" in key:
+        _dataDrivenCtrlPlotBinning[key.replace("shape","shapeEWKFakeTaus")] = _dataDrivenCtrlPlotBinning[key]
+
 
 def getBinningForPlot(plotName):
     for plot in _dataDrivenCtrlPlotBinning:

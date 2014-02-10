@@ -233,13 +233,37 @@ fakeTauSFandSystematicsAgainstElectronVTightMVA3 = fakeTauSFandSystematicsBase.c
 def setFakeTauSFAndSystematics(fakeTauPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
     source = "fakeTauSFandSystematics"+tausele.againstElectronDiscriminator.value().replace("against","Against")
     try:
-        pset = globals()[source]
+        pset = globals()[source].clone()
     except KeyError:
         myOptionList = filter(lambda item: "fakeTauSFandSystematics" in item, globals().keys())
         raise Exception("Error: Could not find fakeTauSFandSystematics for against electron discriminator %s! Options are: %s"%(tauSelection.againstElectronDiscriminator.value(), ", ".join(map(str, myOptionList))))
 
     HChTools.insertPSetContentsTo(pset, fakeTauPSet)
-    print "fakeTauSFandSystematics set to %s for %s" % (source, mod)
+    # Update scale factor values for systematics variations
+    myList = []
+    if "GenuineTau" in mod or "FakeTau" in mod:
+        if "GenuineTau" in mod:
+            myList = ["GenuineTauBarrel","GenuineTauEndcap"]
+        elif "FakeTauBarrelElectron" in mod:
+            myList = ["FakeTauBarrelElectron"]
+        elif "FakeTauEndcapElectron" in mod:
+            myList = ["FakeTauEndcapElectron"]
+        elif "FakeTauMuon" in mod:
+            myList = ["FakeTauBarrelMuon","FakeTauEndcapMuon"]
+        elif "FakeTauJet" in mod:
+            myList = ["FakeTauBarrelJet","FakeTauEndcapJet"]
+        for item in myList:
+            sfValue = getattr(fakeTauPSet, "scalefactor"+item)
+            systValue = getattr(fakeTauPSet, "systematics"+item)
+            newSfValue = float(sfValue.value()) + float(systValue.value())
+            if "Minus" in mod:
+                newSfValue = float(sfValue.value()) - float(systValue.value())
+            setattr(fakeTauPSet, "scalefactor"+item, newSfValue)
+    # Print info
+    if len(myList):
+        print "fakeTauSFandSystematics set to %s for %s; SF variatated for %s" % (source, mod, ", ".join(map(str,myList)))
+    else:
+        print "fakeTauSFandSystematics set to %s for %s" % (source, mod)
 fakeTauSFandSystematics = fakeTauSFandSystematicsBase.clone()
 setFakeTauSFAndSystematics(fakeTauSFandSystematics, tauSelection)
 
@@ -453,12 +477,15 @@ QCDTailKillerScenarios = ["QCDTailKillerZeroPlus",
                           "QCDTailKillerTightPlus",
                           "QCDTailKillerVeryTightPlus"]
 
+# Define H+ Invariant Mass Reco options
 invMassReco = cms.untracked.PSet(
     #topInvMassCutName = cms.untracked.string("None")
     topInvMassLowerCut = cms.untracked.double(-1.0), # Negative value means no cut. This is currently the default.
     topInvMassUpperCut = cms.untracked.double(-1.0),  # Negative value means no cut. This is currently the default.
-    pzSelectionMethod = cms.untracked.string("DeltaEtaMin"), # Method of selecting the pZ of neutrino for real solutions
+    pzSelectionMethod  = cms.untracked.string("DeltaEtaMin"), # Method of selecting the pZ of neutrino for real solutions
     metSelectionMethod = cms.untracked.string("SmallestMagnitude"), #Method of selecting MET for complex solutions
+    reApplyMetCut      = MET.METCut, #Re-apply the MET cut after invariant mass reconstruction calculations (only for complex solutions). Set value as <0 to disable.
+    #reApplyMetCut      = cms.untracked.double(0.0)
     )
 
 topReconstruction = cms.untracked.string("None") # Options: None, chi, std, Bselection, Wselection
@@ -535,7 +562,7 @@ GenParticleAnalysis = cms.untracked.PSet(
 
 
 topSelection = cms.untracked.PSet(
-  TopMassLow = cms.untracked.double(100.0),
+  TopMassLow = cms.untracked.double(120.0),
   TopMassHigh = cms.untracked.double(300.0),
   src = cms.untracked.InputTag("genParticles")
 )

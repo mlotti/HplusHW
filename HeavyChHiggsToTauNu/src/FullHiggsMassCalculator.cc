@@ -150,6 +150,8 @@ namespace HPlus {
         << "Options are 'SmallestMagnitude', 'GreatestMagnitude', 'ClosestToTopMass'" << std::endl;
     }
 
+    fReApplyMetCut = iConfig.getUntrackedParameter<double>("reApplyMetCut");
+
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
@@ -355,7 +357,7 @@ namespace HPlus {
   const edm::Ptr<pat::Tau> myTau, const BTagging::Data& bData, const METSelection::Data& metData, 
   const GenParticleAnalysis::Data* genDataPtr) {
     // Define a FullHiggsMassCalculator::Data object to hold many different values of interest and be returned at the end.
-    Data output;
+    Data outputReco;
 
     if (bPrintDebugOutput) std::cout << "==================================================================" << std::endl;
 
@@ -367,9 +369,9 @@ namespace HPlus {
     if (selectedRecoBJet.isNull()) {
       // ...the event does not contain a tagged b-jet, set a few values and return:
       if (bPrintDebugOutput) std::cout << "No reco Higgs side b-jet found!" << std::endl;
-      output.fHiggsMassSolutionSelected = -1;
-      output.bPassedEvent = false;
-      return output;
+      outputReco.fHiggsMassSolutionSelected = -1;
+      outputReco.bPassedEvent = false;
+      return outputReco;
     }
     TVector3 recoBJetVector(selectedRecoBJet->px(), selectedRecoBJet->py(), selectedRecoBJet->pz());
     TVector3 recoTauVector(myTau->px(), myTau->py(), myTau->pz());
@@ -381,27 +383,28 @@ namespace HPlus {
       std::cout << "recoTauVector: " << recoTauVector.Px() << ", " << recoTauVector.Py() << ", " << recoTauVector.Pz() << std::endl;
       std::cout << "recoMETVector: " << recoMETVector.Px() << ", " << recoMETVector.Py() << ", " << recoMETVector.Pz() << std::endl;
     }
-    doCalculations(iEvent, recoTauVector, recoBJetVector, recoMETVector, output, eRECO);
+    doCalculations(iEvent, recoTauVector, recoBJetVector, recoMETVector, outputReco, eRECO);
     // Make a 2D histogram of the transverse mass and the invariant mass
     double transverseMass = TransverseMass::reconstruct(*myTau, *(metData.getSelectedMET()));
-    if (output.bPassedEvent) {
-      h2TransverseMassVsInvariantMass->Fill(transverseMass, output.fHiggsMassSolutionSelected);
-      if (output.fDiscriminant >= 0) 
-	h2TransverseMassVsInvariantMassPositiveDiscriminant->Fill(transverseMass, output.fHiggsMassSolutionSelected);
+    if (outputReco.bPassedEvent) {
+      h2TransverseMassVsInvariantMass->Fill(transverseMass, outputReco.fHiggsMassSolutionSelected);
+      if (outputReco.fDiscriminant >= 0) 
+	h2TransverseMassVsInvariantMassPositiveDiscriminant->Fill(transverseMass, outputReco.fHiggsMassSolutionSelected);
       else
-	h2TransverseMassVsInvariantMassNegativeDiscriminant->Fill(transverseMass, output.fHiggsMassSolutionSelected);
+	h2TransverseMassVsInvariantMassNegativeDiscriminant->Fill(transverseMass, outputReco.fHiggsMassSolutionSelected);
     }
     // Make a histogram of the MET significance variable (we may want to cut on it)
-    if (output.bPassedEvent) hMETSignificance->Fill(metData.getSelectedMET()->significance());
+    if (outputReco.bPassedEvent) hMETSignificance->Fill(metData.getSelectedMET()->significance());
     // Classify MC events according to what was identified correctly and what was not
     if (!iEvent.isRealData())
-      doEventClassification(iEvent, recoBJetVector, recoTauVector, recoMETVector, output, metData, genDataPtr);
+      doEventClassification(iEvent, recoBJetVector, recoTauVector, recoMETVector, outputReco, metData, genDataPtr);
 
     // The rest of the analysis is only done for MC signal events with a light charged Higgs (at least for now)
-    if (iEvent.isRealData() || !eventHasLightChargedHiggs(iEvent)) return output;
+    if (iEvent.isRealData() || !eventHasLightChargedHiggs(iEvent)) return outputReco;
 
     // CALCULATION USING TRUE MOMENTA FROM MC
     // --------------------------------------
+    Data outputMC;
     reco::Candidate* myGenBJet = getGenHiggsSideBJet(iEvent);
     TVector3 genBJetVector(myGenBJet->px(), myGenBJet->py(), myGenBJet->pz());
     reco::Candidate* myGenTau = getGenTauFromHiggs(iEvent);
@@ -412,13 +415,13 @@ namespace HPlus {
     TVector3 myNeutrino2Vector = getInvisibleMomentum(*myGenTau);
     TVector3 genBothNeutrinosVector = myNeutrino1Vector + myNeutrino2Vector;
     // Set true value of neutrino p_z
-    output.fTrueNeutrinoPz = genBothNeutrinosVector.Pz();
-    doCalculations(iEvent, genVisibleTauVector, genBJetVector, genBothNeutrinosVector, output, eGEN);
+    outputMC.fTrueNeutrinoPz = genBothNeutrinosVector.Pz();
+    doCalculations(iEvent, genVisibleTauVector, genBJetVector, genBothNeutrinosVector, outputMC, eGEN);
     // Histogram of top invariant mass in generator:
     if (eventHasTopQuark(iEvent)) hTopInvariantMassInGenerator->Fill(getTopQuarkInvariantMass(iEvent));
 
     // NOTE: doEventClassification should only be called once for each event. DO NOT uncomment this line without commenting above!
-    // doEventClassification(iEvent, genBJetVector, genVisibleTauVector, genBothNeutrinosVector, output, genDataPtr);
+    // doEventClassification(iEvent, genBJetVector, genVisibleTauVector, genBothNeutrinosVector, outputMC, genDataPtr);
 
 
     // CALCULATION USING TRUE MOMENTA FROM MC FOR B-JET AND VISIBLE TAU, BUT GEN MET INSTEAD OF TAU NEUTRINO MOMENTA
@@ -427,6 +430,7 @@ namespace HPlus {
     // If GenParticleAnalysis::Data* genData is available, the correct GenMET vector is retrieved from it.
     // If it is not available, an estimate for the GenMET is calculated by summing the momenta of all GEN neutrinos that were
     // not filtered from the event to save space.
+    Data outputMCHybrid;
     TVector3 genMETVector(0.0, 0.0, 0.0);
     if (genDataPtr != NULL && genDataPtr->isValid()) {
       edm::Ptr<reco::GenMET> myGenMET = genDataPtr->getGenMET();
@@ -434,12 +438,12 @@ namespace HPlus {
     } else {
       genMETVector = calculateGenMETVectorFromNeutrinos(iEvent);
     }
-    doCalculations(iEvent, genVisibleTauVector, genBJetVector, genMETVector, output, eGEN_NeutrinosReplacedWithMET);
+    doCalculations(iEvent, genVisibleTauVector, genBJetVector, genMETVector, outputMCHybrid, eGEN_NeutrinosReplacedWithMET);
 
     // Now we can also analyze the composition of the MET
     analyzeMETComposition(recoMETVector, genBothNeutrinosVector, genMETVector);
     
-    return output;
+    return outputReco;
   }
 
   edm::Ptr<pat::Jet> FullHiggsMassCalculator::findHiggsSideBJet(const BTagging::Data bData, const edm::Ptr<pat::Tau> myTau) {
@@ -914,6 +918,12 @@ namespace HPlus {
       output.bPassedEvent = false;
     if (fTopInvMassLowerCut >= 0 && output.fTopMassSolutionSelected < fTopInvMassLowerCut) output.bPassedEvent = false;
     if (fTopInvMassUpperCut >= 0 && output.fTopMassSolutionSelected > fTopInvMassUpperCut) output.bPassedEvent = false;
+    // Re-apply (or not) the SignalAnalysis MET cut on the modified MET object
+    if (output.fDiscriminant < 0 && fReApplyMetCut >= 0) {
+      if (output.fModifiedMETSolutionSelected >= fReApplyMetCut) output.bPassedEvent = true;
+      else output.bPassedEvent = false;
+    }
+
     //std::cout << "fTopInvMassLowerCut: " << fTopInvMassLowerCut << std::endl;
     //std::cout << "fTopInvMassUpperCut: " << fTopInvMassUpperCut << std::endl;
     //if (output.fTopMassSolutionSelected < 140.0 || output.fTopMassSolutionSelected > 200.0) output.bPassedEvent = false;

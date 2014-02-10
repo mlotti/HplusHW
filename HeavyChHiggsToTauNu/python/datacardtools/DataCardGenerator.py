@@ -44,11 +44,24 @@ class DatasetMgrCreatorManager:
             raise Exception(ErrorLabel()+"Input datacard should contain entry for ToleranceForLuminosityDifference (for example: ToleranceForLuminosityDifference=0.01)!"+NormalStyle())
         self._toleranceForLuminosityDifference = config.ToleranceForLuminosityDifference
         self._optionDebugConfig = opts.debugConfig
+        self._config = config
+
+    def __del__(self):
+        self.closeManagers()
+        for d in self._dsetMgrCreators:
+            if d != None:
+                d.close()
+        self._dsetMgrCreators = []
+        self._dsetMgrs = []
+        self._luminosities = []
+        self._mainCounterTables = []
 
     def closeManagers(self):
         for dMgr in self._dsetMgrs:
             if dMgr != None:
                 dMgr.close()
+        self._dsetMgrs = []
+        print "DatasetManagerCreators closed"
 
     def obtainDatasetMgrs(self, era, searchMode, optimizationMode):
         if len(self._dsetMgrs) > 0:
@@ -61,7 +74,7 @@ class DatasetMgrCreatorManager:
                 myDsetMgr.updateNAllEventsToPUWeighted()
                 # Obtain luminosity
                 myLuminosity = 0.0
-                if i != DatacardDatasetMgrSourceType.QCDMEASUREMENT:
+                if i != DatacardDatasetMgrSourceType.QCDMEASUREMENT and i != DatacardDatasetMgrSourceType.EMBEDDING:
                     myDsetMgr.loadLuminosities()
                     myDataDatasets = myDsetMgr.getDataDatasets()
                     for d in myDataDatasets:
@@ -77,6 +90,11 @@ class DatasetMgrCreatorManager:
                 myDsetMgr.printDatasetTree()
                 # Store DatasetManager
                 self._dsetMgrs.append(myDsetMgr)
+                # For embedding, check setting on CaloMET
+                if i == DatacardDatasetMgrSourceType.EMBEDDING:
+                    myProperty = myDsetMgr.getAllDatasets()[0].getProperty("analysisName")
+                    if not "CaloMet" in myProperty:
+                        raise Exception(ErrorLabel()+"Embedding has not been done with CaloMet approximation!")
             else:
                 # No dsetMgrCreator, append zero pointers to retain list dimension
                 self._dsetMgrs.append(None)
@@ -241,19 +259,43 @@ class DataCardGenerator:
             print myMsg+" (if this is not intented, check your config!)\n"
             return
         # Construct prefix for output name
-        myOutputPrefix = ""
+        myPathSplit = self._config.Path.split("/")
+        myOutputPrefix = "%s_"%myPathSplit[len(myPathSplit)-1]
         if self._QCDMethod == DatacardQCDMethod.FACTORISED:
             myOutputPrefix += "QCDfact"
         elif self._QCDMethod == DatacardQCDMethod.INVERTED:
             myOutputPrefix += "QCDinv"
         if self._config.OptionReplaceEmbeddingByMC:
             myOutputPrefix += "_MCEWK"
+            if self._config.OptionRealisticEmbeddingWithMC:
+                myOutputPrefix += "_realisticProjection"
         self._outputPrefix = myOutputPrefix
 
         myMassRange = str(self._config.MassPoints[0])
         if len(self._config.MassPoints) > 0:
             myMassRange += "-"+str(self._config.MassPoints[len(self._config.MassPoints)-1])
         print "Cards will be generated for "+HighlightStyle()+myOutputPrefix+NormalStyle()+" in mass range "+HighlightStyle()+myMassRange+" GeV"+NormalStyle()
+
+    def __del__(self):
+        print "\nDeleting cached objects"
+        self.closeFiles()
+        self.opts = None
+        self._config = None
+        del self._dsetMgrManager
+        self._dsetMgrManager = None
+        self._observation = None
+        for c in self._columns:
+            del c
+        self._columns = None
+        for e in self._extractors:
+            del e
+        self._extractors = None
+        for e in self._controlPlotExtractors:
+            del e
+        self._controlPlotExtractors = None
+        for e in self._controlPlotExtractorsEWKfake:
+            del e
+        self._controlPlotExtractorsEWKfake
 
     #def overrideConfigOptionsFromCommandLine(self):
         # Obtain QCD measurement method
@@ -284,6 +326,10 @@ class DataCardGenerator:
 
         # do data mining to cache results into datacard column objects
         self.doDataMining()
+
+        # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
+        if self._config.OptionReplaceEmbeddingByMC and self._config.OptionRealisticEmbeddingWithMC:
+            self.doMergeForRealisticEmbedding()
 
         # Make datacards
         myProducer = TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
@@ -458,10 +504,128 @@ class DataCardGenerator:
                 c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
 
+    def doMergeForRealisticEmbedding(self):
+        print "\nStart merge for realistic embedding"
+        # Obtain column for embedding
+        myEmbColumn = None
+        for c in self._columns:
+            if c.getLandsProcess() == self._config.EmbeddingIdList[0]:
+                myEmbColumn = c
+        if myEmbColumn == None:
+            raise Exception(ErrorLabel()+"You need to specify EmbeddingIdList in the datacard!")
+        # Add results from dataset columns with landsProcess == None
+        myRemoveList = []
+        for c in self._columns:
+            if c.getLandsProcess() == None:
+                print "... merging column %s"%c.getLabel()
+                # Merge rate result, (ExtractorResult objects)
+                # Merge cached shape histo
+                myEmbColumn._cachedShapeRootHistogramWithUncertainties.Add(c.getCachedShapeRootHistogramWithUncertainties())
+                myEmbColumn._rateResult._result = myEmbColumn._rateResult._histograms[0].Integral()
+                #print "new=",myEmbColumn._rateResult._histograms[0].Integral(),myEmbColumn._cachedShapeRootHistogramWithUncertainties.getRateStatUncertainty()
+                #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
+                # Merge nuisance results (ExtractorResult objects)
+                for i in range(0, len(myEmbColumn.getNuisanceResults())):
+                    # It is enough to merge only histograms
+                    nhistos = len(myEmbColumn.getNuisanceResults()[i]._histograms)
+                    if nhistos > 0:
+                        if myEmbColumn.getNuisanceResults()[i].resultIsStatUncertainty():
+                            # replace shapestat by values from new merged rate histo
+                            for k in range(1, myEmbColumn._nuisanceResults[i]._histograms[k].GetNbinsX()+1):
+                                myRate = myEmbColumn._rateResult._histograms[0].GetBinContent(k)
+                                myRateUncert = myEmbColumn._rateResult._histograms[0].GetBinError(k)
+                                # up histogram
+                                myEmbColumn._nuisanceResults[i]._histograms[0].SetBinContent(k, myRate + myRateUncert)
+                                # down histogram
+                                myEmbColumn._nuisanceResults[i]._histograms[1].SetBinContent(k, myRate - myRateUncert)
+                        else:
+                            # linear addition, because these are variation histograms
+                            for k in range(0,nhistos):
+                                myEmbColumn._nuisanceResults[i]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k])
+                    # Constants remain same, since they are relative uncertainties
+                # Merge control plots (HistoRootWithUncertainties objects)
+                for i in range(0, len(myEmbColumn._controlPlots)):
+                    myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"])
+                # Mark for removal
+                myRemoveList.append(c)
+        for c in myRemoveList:
+            self._columns.remove(c)
+        # Subtract results from dataset columns in EWKFakeIdList list
+        for fakeId in self._config.EWKFakeIdList:
+            for c in self._columns:
+                if c.getLandsProcess() == fakeId:
+                    print "... subtracting fake column %s"%c.getLabel()
+                    # Subtract rate result, (ExtractorResult objects)
+                    # Merge cached shape histo
+                    myEmbColumn._cachedShapeRootHistogramWithUncertainties.Add(c.getCachedShapeRootHistogramWithUncertainties(), -1.0)
+                    myEmbColumn._rateResult._result = myEmbColumn._rateResult._histograms[0].Integral()
+                    #print "new=",myEmbColumn._rateResult._histograms[0].Integral(),myEmbColumn._cachedShapeRootHistogramWithUncertainties.getRateStatUncertainty()
+                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
+                    # Merge nuisance results (ExtractorResult objects)
+                    for i in range(0, len(c.getNuisanceResults())):
+                        myMatchIndex = None
+                        for j in range(0, len(myEmbColumn.getNuisanceResults())):
+                            if c.getNuisanceResults()[i]._masterId == myEmbColumn.getNuisanceResults()[j]._masterId:
+                                myMatchIndex = j
+                        if myMatchIndex != None and len(myEmbColumn.getNuisanceResults()[myMatchIndex]._histograms) > 0:
+                            # Match found, let's do the addition
+                            if myEmbColumn.getNuisanceResults()[myMatchIndex].resultIsStatUncertainty():
+                                # replace shapestat by values from new merged rate histo
+                                for k in range(1, myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k].GetNbinsX()+1):
+                                    myRate = myEmbColumn._rateResult._histograms[0].GetBinContent(k)
+                                    myRateUncert = myEmbColumn._rateResult._histograms[0].GetBinError(k)
+                                    # up histogram
+                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[0].SetBinContent(k, myRate + myRateUncert)
+                                    # down histogram
+                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[1].SetBinContent(k, myRate - myRateUncert)
+                            else:
+                                # linear addition, because these are variation histograms
+                                for k in range(0,len(myEmbColumn.getNuisanceResults()[myMatchIndex]._histograms)):
+                                    if not isinstance(myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k], ROOT.TH1):
+                                        raise Exception(ErrorLabel()+"The logic has been written under the assumption that one is dealing with histograms and only binContent is meaningful")
+                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k], -1.0)
+                    # Merge control plots (HistoRootWithUncertainties objects)
+                    for i in range(0, len(myEmbColumn._controlPlots)):
+                        myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"], -1.0)
+        # Rate: Purge relative normalization uncertainties and replace by those for embedding
+        #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
+        ##myEmbColumn._cachedShapeRootHistogramWithUncertainties.resetNormalizationUncertaintyRelative()
+        #for i in range(0, len(myEmbColumn.getNuisanceResults())):
+            #if len(myEmbColumn.getNuisanceResults()[i]._histograms) == 0:
+                #myResult = myEmbColumn.getNuisanceResults()[i].getResult()
+                #myName = myEmbColumn.getNuisanceResults()[i].getId()
+                #if not 
+                #if isinstance(myResult, ScalarUncertaintyItem):
+                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                #elif isinstance(myResult, list):
+                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
+                #else:
+                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult, myResult)
+        ## Control plots: Purge relative normalization uncertainties and replace by those for embedding
+        #for i in range(0, len(myEmbColumn._controlPlots)):
+            #myEmbColumn._controlPlots[i]["shape"].resetNormalizationUncertaintyRelative()
+            #for k in range(0, len(myEmbColumn.getNuisanceResults())):
+                #if len(myEmbColumn.getNuisanceResults()[k]._histograms) == 0:
+                    #myResult = myEmbColumn.getNuisanceResults()[k].getResult()
+                    #myName = myEmbColumn.getNuisanceResults()[k].getId()
+                    #if isinstance(myResult, ScalarUncertaintyItem):
+                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                    #elif isinstance(myResult, list):
+                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
+                    #else:
+                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult, myResult)
+        # Set type of control plots
+        for i in range(0, len(myEmbColumn._controlPlots)):
+            myEmbColumn._controlPlots[i]["typeIsEWKfake"] = False
+            myEmbColumn._controlPlots[i]["typeIsEWK"] = True
+
+        #print "Final:"
+        #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
+
     ## Closes files in dataset managers
     def closeFiles(self):
-        print "Closing open input files"
-        self._dsetMgrManager.closeManagers()
+        #print "Closing open input files"
+        #self._dsetMgrManager.closeManagers()
         print "DatasetManagers closed"
 
     ## Check landsProcess in datacard columns
@@ -472,13 +636,14 @@ class DataCardGenerator:
             for c in sorted(self._columns, key=lambda x: x.getLandsProcess()):
                 if (c.isActiveForMass(m,self._config)):
                     #sprint c.getLabel(), c.getLandsProcess()
-                    if i == 0:
-                        myFirstValue = c.getLandsProcess()
-                    else:
-                        if myFirstValue + i != c.getLandsProcess():
-                            print ErrorLabel()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
-                            raise Exception()
-                    i += 1
+                    if c.getLandsProcess() != None:
+                        if i == 0:
+                            myFirstValue = c.getLandsProcess()
+                        else:
+                            if myFirstValue + i != c.getLandsProcess():
+                                print ErrorLabel()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
+                                raise Exception()
+                        i += 1
                 else:
                     if c.getLabel() == "res.":
                         i += 1 # Take into account that the empty column is no longer needed for sigma x Br limits
@@ -503,14 +668,35 @@ class DataCardGenerator:
                                                          distribution = n.distr,
                                                          description = n.label,
                                                          mode = myMode,
-                                                         opts = self._opts))
+                                                         opts = self._opts,
+                                                         scaleFactor = n.getArg("scaleFactor")))
+            elif n.function == "ConstantForQCD":
+                myMode = ExtractorMode.QCDNUISANCE
+                self._extractors.append(ConstantExtractorForDataDrivenQCD(exid = n.id,
+                                                         constantValue = n.getArg("value"),
+                                                         constantUpperValue = n.getArg("upperValue"),
+                                                         distribution = n.distr,
+                                                         description = n.label,
+                                                         mode = myMode,
+                                                         opts = self._opts,
+                                                         scaleFactor = n.getArg("scaleFactor")))
+            elif n.function == "ConstantToShape":
+                self._extractors.append(ConstantExtractor(exid = n.id,
+                                                         constantValue = n.getArg("value"),
+                                                         constantUpperValue = n.getArg("upperValue"),
+                                                         distribution = n.distr,
+                                                         description = n.label,
+                                                         mode = ExtractorMode.SHAPENUISANCE,
+                                                         opts = self._opts,
+                                                         scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "Counter":
                 self._extractors.append(CounterExtractor(exid = n.id,
                                                         counterItem = n.getArg("counter"),
                                                         distribution = n.distr,
                                                         description = n.label,
                                                         mode = myMode,
-                                                        opts = self._opts))
+                                                        opts = self._opts,
+                                                        scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "maxCounter":
                 self._extractors.append(MaxCounterExtractor(exid = n.id,
                                                            counterItem = n.getArg("counter"),
@@ -518,7 +704,8 @@ class DataCardGenerator:
                                                            distribution = n.distr,
                                                            description = n.label,
                                                            mode = myMode,
-                                                          opts = self._opts))
+                                                           opts = self._opts,
+                                                           scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "pileupUncertainty":
                 self._extractors.append(PileupUncertaintyExtractor(exid = n.id,
                                                                    counterItem = n.getArg("counter"),
@@ -526,20 +713,23 @@ class DataCardGenerator:
                                                                    distribution = n.distr,
                                                                    description = n.label,
                                                                    mode = myMode,
-                                                                   opts = self._opts))
+                                                                   opts = self._opts,
+                                                                   scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "Shape":
                 self._extractors.append(ShapeExtractor(exid = n.id,
                                                        distribution = n.distr,
                                                        description = n.label,
                                                        mode = ExtractorMode.SHAPENUISANCE,
-                                                       opts = self._opts))
+                                                       opts = self._opts,
+                                                       scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "ShapeVariation":
                 self._extractors.append(ShapeVariationExtractor(exid = n.id,
                                                                 distribution = n.distr,
                                                                 description = n.label,
                                                                 systVariation = n.getArg("systVariation"),
                                                                 mode = ExtractorMode.SHAPENUISANCE,
-                                                                opts = self._opts))
+                                                                opts = self._opts,
+                                                                scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "ScaleFactor":
                 self._extractors.append(ScaleFactorExtractor(exid = n.id,
                                                             histoDirs = n.getArg("histoDir"),
@@ -549,7 +739,8 @@ class DataCardGenerator:
                                                             distribution = n.distr,
                                                             description = n.label,
                                                             mode = myMode,
-                                                            opts = self._opts))
+                                                            opts = self._opts,
+                                                            scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "Ratio":
                 self._extractors.append(RatioExtractor(exid = n.id,
                                                       numeratorCounterItem = n.getArg("numerator"),
@@ -558,10 +749,11 @@ class DataCardGenerator:
                                                       description = n.label,
                                                       scale = n.getArg("scaling"),
                                                       mode = myMode,
-                                                      opts = self._opts))
+                                                      opts = self._opts,
+                                                      scaleFactor = n.getArg("scaleFactor")))
             else:
                 print ErrorStyle()+"Error in nuisance with id='"+n.id+"':"+NormalStyle()+" unknown or missing field function '"+n.function+"' (string)!"
-                print "Options are: 'Constant', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio'"
+                print "Options are: 'Constant', 'ConstantToShape', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio'"
                 raise Exception()
         # Create reserved nuisances
         for n in self._config.ReservedNuisances:

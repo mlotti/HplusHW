@@ -11,6 +11,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True) # no flashing canvases
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 import tarfile
+import cProfile
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
@@ -35,7 +36,7 @@ def getDsetCreator(label, mcrabPath, mcrabInfoOutput, enabledStatus=True):
         print "- %s: not considered"%(label)
     return None
 
-def main(opts, moduleSelector):
+def main(opts, moduleSelector, multipleDirs):
     print CaptionStyle()+"*** Datacard generator ***"+NormalStyle()+"\n"
     #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
     #gc.set_debug(gc.DEBUG_STATS)
@@ -44,6 +45,10 @@ def main(opts, moduleSelector):
     print "Loading datacard:",opts.datacard
     os.system("python %s"%opts.datacard) # Catch any errors in the input datacard
     config = load_module(opts.datacard)
+    # Replace source directory if necessary
+    if multipleDirs != None:
+        config.Path = multipleDirs
+    print "Input directory:",config.Path
 
     # If user insisted on certain QCD method on command line, produce datacards only for that QCD method
     # Otherwise produce cards for all QCD methods
@@ -94,6 +99,13 @@ def main(opts, moduleSelector):
     if qcdInvertedDsetCreator != None:
         moduleSelector.addOtherSource("QCD inverted", qcdInvertedDsetCreator)
     moduleSelector.doSelect(opts)
+    moduleSelector.closeFiles()
+
+    # Separate light and heavy masses if they are not separated
+    mySearchModeList = moduleSelector.getSelectedSearchModes()
+    if ("Light" not in mySearchModeList and len(config.LightMassPoints) > 0 and len(config.HeavyMassPoints) > 0) or \
+       ("Heavy" not in mySearchModeList and len(config.HeavyMassPoints) > 0 and len(config.LightMassPoints) > 0):
+        mySearchModeList.append(mySearchModeList[0])
 
     # Summarise the consequences of the user choises
     myDatacardCount = len(moduleSelector.getSelectedEras())*len(moduleSelector.getSelectedSearchModes())*len(moduleSelector.getSelectedOptimizationModes())*len(myQCDMethods)
@@ -101,11 +113,27 @@ def main(opts, moduleSelector):
     # Produce datacards
     myCounter = 0
     myStartTime = time.time()
+    myOriginalName = config.DataCardName
     myOutputDirectories = []
     for qcdMethod in myQCDMethods:
         for era in moduleSelector.getSelectedEras():
-            for searchMode in moduleSelector.getSelectedSearchModes():
+            mySearchModeCounter = 0
+            for searchMode in mySearchModeList:
+                # Separate light and heavy mass points into their own subdirectories
+                if len(mySearchModeList) > 1:
+                    if mySearchModeList[0] == mySearchModeList[1]:
+                        if mySearchModeCounter == 0:
+                            config.MassPoints = config.LightMassPoints
+                            config.DataCardName = myOriginalName + "_LightHplus"
+                        elif mySearchModeCounter == 1:
+                            config.MassPoints = config.HeavyMassPoints
+                            config.DataCardName = myOriginalName + "_HeavyHplus"
+                mySearchModeCounter += 1
                 for optimizationMode in moduleSelector.getSelectedOptimizationModes():
+                    ROOT.gROOT.CloseFiles()
+                    ROOT.gROOT.GetListOfCanvases().Delete()
+                    # After these, three histograms are still left in memory
+                    # Worst memory leak seems to come from storing and not freeing the main counters
                     # Create the dataset creator managers separately for each module
                     signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
                     embeddingDsetCreator = None
@@ -139,9 +167,22 @@ def main(opts, moduleSelector):
     print "\nDatacard generator is done."
     myEndTime = time.time()
     print "Running took on average %.1f s / datacard (total elapsed time: %.1f s)"%((myEndTime-myStartTime)/float(myDatacardCount), (myEndTime-myStartTime))
+    # Generate plots for systematics
+    if opts.systAnalysis:
+        for d in myOutputDirectories:
+            print "\nGenerating systematics plots for",d
+            os.chdir(d)
+            os.system("../../brlimit/plotShapes.py")
+            os.chdir("..")
+
     # Make tar file
     myTimestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
-    myFilename = "datacards_archive_%s.tgz"%myTimestamp
+    myLimitCode = None
+    if opts.lands:
+        myLimitCode = "lands"
+    elif opts.combine:
+        myLimitCode = "combine"
+    myFilename = "datacards_%s_archive_%s.tgz"%(myLimitCode,myTimestamp)
     fTar = tarfile.open(myFilename, mode="w:gz")
     for d in myOutputDirectories:
         fTar.add(d)
@@ -203,6 +244,10 @@ if __name__ == "__main__":
     parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
     myModuleSelector.addParserOptions(parser)
+    parser.add_option("--lands", dest="lands", action="store_true", default=False, help="Generate datacards for LandS")
+    parser.add_option("--combine", dest="combine", action="store_true", default=False, help="Generate datacards for Combine")
+    parser.add_option("--multipleDirs", dest="multipleDirs", action="store", help="Name of base dir for creating datacards for multiple directories (wildcard is added at the end)")
+    parser.add_option("--systAnalysis", dest="systAnalysis", action="store_true", default=False, help="Runs the macro for generating systematic uncertainties plots")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
     parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
     parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
@@ -211,6 +256,8 @@ if __name__ == "__main__":
     parser.add_option("--debugMining", dest="debugMining", action="store_true", default=False, help="Enable debugging print for data mining")
     parser.add_option("--debugQCD", dest="debugQCD", action="store_true", default=False, help="Enable debugging print for QCD measurement")
     parser.add_option("--debugShapeHistogram", dest="debugShapeHistogram", action="store_true", default=False, help="Debug shape histogram modifying algorithm")
+    parser.add_option("--debugControlPlots", dest="debugControlPlots", action="store_true", default=False, help="Enable debugging print for data-driven control plots")
+    parser.add_option("--debugProfiler", dest="debugProfiler", action="store_true", default=False, help="Enable profiler")
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
     (opts, args) = parser.parse_args()
 
@@ -223,8 +270,29 @@ if __name__ == "__main__":
     if opts.useQCDfactorised and opts.useQCDinverted:
         print ErrorStyle()+"Error: use either '--QCDfactorised' or '--QCDinverted' (only one can exist in the datacard)"+NormalStyle()
         myStatus = False
+    if not opts.lands and not opts.combine:
+        print ErrorStyle()+"Error: use either '--lands' or '--combine' to indicate which type of cards to generate!"+NormalStyle()
+        myStatus = False
+    if opts.lands and opts.combine:
+        print ErrorStyle()+"Error: use either '--lands' or '--combine' to indicate which type of cards to generate (not both)!"+NormalStyle()
+        myStatus = False
     if not myStatus or opts.helpStatus:
         parser.print_help()
         sys.exit()
     # Run main program
-    main(opts, myModuleSelector)
+    if opts.multipleDirs == None:
+        if opts.debugProfiler:
+            cProfile.run("main(opts, myModuleSelector, multipleDirs=None)")
+        else:
+            main(opts, myModuleSelector, multipleDirs=None)
+        #cProfile.run("main(opts, myModuleSelector, multipleDirs=None)")
+    else:
+        # Find matching directories
+        (head, tail) = os.path.split(opts.multipleDirs)
+        myDirList = os.listdir(head)
+        for myDir in myDirList:
+            if myDir.startswith(tail):
+                if opts.debugProfiler:
+                    cProfile.run("main(opts, myModuleSelector, multipleDirs=os.path.join(head,myDir))")
+                else:
+                    main(opts, myModuleSelector, multipleDirs=os.path.join(head,myDir))

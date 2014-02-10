@@ -5,6 +5,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import Datac
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 #from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count,RootHistoWithUncertainties
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
@@ -45,7 +46,7 @@ class ControlPlotMaker:
         for m in self._config.MassPoints:
             print "... mass = %d GeV"%m
             # Initialize flow plot
-            selectionFlow = SelectionFlowPlotMaker(self._config, m)
+            selectionFlow = SelectionFlowPlotMaker(self._opts, self._config, m)
             myBlindedStatus = False
             for i in range(0,len(self._config.ControlPlots)):
                 myCtrlPlot = self._config.ControlPlots[i]
@@ -60,7 +61,7 @@ class ControlPlotMaker:
                 myStackList = []
                 for c in self._datasetGroups:
                     if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
-                        h = c.getControlPlotByIndex(i).Clone()
+                        h = c.getControlPlotByIndex(i)["shape"].Clone()
                         if c.typeIsSignal():
                             # Scale light H+ signal
                             if m < 179:
@@ -104,7 +105,7 @@ class ControlPlotMaker:
                     myHisto = histograms.Histo(hEWKfake,"EWKfakes")
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList.append(myHisto)
-                hData = observation.getControlPlotByIndex(i).Clone()
+                hData = observation.getControlPlotByIndex(i)["shape"].Clone()
                 hDataUnblinded = hData.Clone()
                 # Apply blinding
                 if len(myCtrlPlot.blindedRange) > 0:
@@ -224,7 +225,8 @@ class SignalAreaEvaluator:
         return Count(myResult,sqrt(myError))
 
 class SelectionFlowPlotMaker:
-    def __init__(self, config, mass):
+    def __init__(self, opts, config, mass):
+        self._opts = opts
         self._config = config
         self._mass = mass
         # Calculate number of bins
@@ -249,6 +251,19 @@ class SelectionFlowPlotMaker:
         self._pickStatus = False
         self._pickLabel = ""
 
+    def delete(self):
+        for h in self._expectedList:
+            h.Delete()
+        self._expectedList = None
+        for h in self._expectedListSystUp:
+            h.Delete()
+        self._expectedListSystUp = None
+        for h in self._expectedListSystDown:
+            h.Delete()
+        self._expectedListSystDown = None
+        self._expectedLabelList = None
+        self._data.Delete()
+
     def addColumn(self,label,data,expectedList):
         # System to pick the correct input for correct label
         if self._pickLabel == "":
@@ -267,7 +282,16 @@ class SelectionFlowPlotMaker:
             if myRate > 0.0:
                 (uncertUp,uncertDown) = expectedList[i].getRootHistoWithUncertainties().getRateSystUncertainty()
                 self._expectedListSystUp[i].SetBinContent(self._myCurrentColumn, uncertUp/myRate)
-                self._expectedListSystDown[i].SetBinContent(self._myCurrentColumn, uncertDown/myRate)
+                self._expectedListSystDown[i].SetBinContent(self._myCurrentColumn, -uncertDown/myRate)
+            if self._opts.debugControlPlots:
+                s = "debugControlPlots:,"
+                s += "After "+self._pickLabel
+                s += ","+expectedList[i].getName()
+                s += ",%f"%myRate
+                s += ",+-,%f,(stat.)"%self._expectedList[i].GetBinError(self._myCurrentColumn)
+                s += ",+,%f"%uncertUp
+                s += ",-,%f,(syst.)"%uncertDown
+                print s
         # Add data
         if data != None:
             self._data.SetBinContent(self._myCurrentColumn, data.getRate())
@@ -280,18 +304,23 @@ class SelectionFlowPlotMaker:
 
     def _createHistograms(self,data,expectedList):
         for e in expectedList:
-            self._expectedList.append(self._hFrame.Clone())
-            self._expectedListSystUp.append(self._hFrame.Clone())
-            self._expectedListSystDown.append(self._hFrame.Clone())
+            self._expectedList.append(aux.Clone(self._hFrame))
+            self._expectedList[len(self._expectedList)-1].Reset()
+            self._expectedListSystUp.append(aux.Clone(self._hFrame))
+            self._expectedListSystUp[len(self._expectedListSystUp)-1].Reset()
+            self._expectedListSystDown.append(aux.Clone(self._hFrame))
+            self._expectedListSystDown[len(self._expectedListSystDown)-1].Reset()
             self._expectedLabelList.append(e.name)
-        self._data = self._hFrame.Clone()
+        self._data = aux.Clone(self._hFrame)
+        self._data.Reset()
 
     def makePlot(self, dirname, m, index, luminosity):
         myStackList = []
         # expected
         for i in range(0,len(self._expectedList)):
             myRHWU = RootHistoWithUncertainties(self._expectedList[i])
-            myRHWU.addShapeUncertaintyRelative("syst", self._expectedListSystUp[i], self._expectedListSystUp[i])
+            myRHWU.addShapeUncertaintyRelative("syst", th1Plus=self._expectedListSystUp[i], th1Minus=self._expectedListSystDown[i])
+            myRHWU.makeFlowBinsVisible()
             if self._expectedLabelList[i] == "QCD":
                 myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel="QCD (data)")
             else:
@@ -300,6 +329,7 @@ class SelectionFlowPlotMaker:
             myStackList.append(myHisto)
         # data
         myRHWU = RootHistoWithUncertainties(self._data)
+        myRHWU.makeFlowBinsVisible()
         myHisto = histograms.Histo(myRHWU, "Data")
         myHisto.setIsDataMC(isData=True, isMC=False)
         myStackList.insert(0, myHisto)
@@ -312,7 +342,7 @@ class SelectionFlowPlotMaker:
         myParams["ylabel"] = "Events"
         myParams["log"] = True
         myParams["optsLog"] = {"ymin": 0.5}
-        myParams["opts2"] = {"ymin": 0.8, "ymax":1.2}
+        myParams["opts2"] = {"ymin": 0.5, "ymax":1.5}
         myParams["ratio"] = True
         myParams["ratioType"] = "errorScale"
         myParams["ratioYlabel"] = "Data/#Sigma Exp."
