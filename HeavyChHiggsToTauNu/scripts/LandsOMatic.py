@@ -20,9 +20,10 @@ class Result:
         self._allRetrieved = False
         self._limitCalculated = False
         self._output = ""
-        self._findJobDir()
+        self._findJobDir(basedir)
+        print self._jobDir
         if self._jobDir == None:
-            if self._opts.printResults:
+            if self._opts.printonly:
                 raise Exception("Error: need to create and submit jobs first!")
             self._createAndSubmit()
         else:
@@ -34,9 +35,9 @@ class Result:
                 if not self._opts.printonly:
                     self._getOutput()
 
-    def _findJobDir(self):
+    def _findJobDir(self, basedir):
         self._jobDir = None
-        for dirname, dirnames, filenames in os.walk(self._basedir):
+        for dirname, dirnames, filenames in os.walk(basedir):
             for subdirname in dirnames:
                 if "LandSMultiCrab" in subdirname:
                     self._jobDir = subdirname
@@ -60,8 +61,10 @@ class Result:
         print "Creating jobs with:",myCommand
         os.system(myCommand)
         # Change to job directory
-        self._findJobDir()
-        os.chdir(self._jobdir)
+        self._findJobDir(".")
+        if self._jobDir == None:
+            raise Exception("Error: Could not find 'LandSMultiCrab' in a sub directory name under the base directory '%s'!"%self._basedir)
+        os.chdir(self._jobDir)
         # Submit jobs
         print "Submitting jobs"
         proc = subprocess.Popen(["multicrab","-submit all"], stdout=subprocess.PIPE)
@@ -207,6 +210,8 @@ if __name__ == "__main__":
             #if "LandSMultiCrab" in subdirname:
             if "datacards_" in subdirname:
                 myDirs.append(os.path.join(dirname, subdirname))
+    if len(myDirs) == 0:
+        raise Exception("Error: Could not find any sub directories starting with 'datacards_' below this directory!")
     myDirs.sort()
     myResults = []
     for d in myDirs:

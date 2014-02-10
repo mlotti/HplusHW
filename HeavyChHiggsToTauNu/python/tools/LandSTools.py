@@ -31,7 +31,8 @@ import git
 import aux
 
 ## The LandS CVS tag to be used
-LandS_tag = "t3-06-05" # Given by Mingshui 15.8.2012 at 11:56 EEST
+LandS_tag = "HEAD" # 28.01.2014: this is the only available, where shape bug in H+ has been fixed
+#LandS_tag = "t3-06-05" # Given by Mingshui 15.8.2012 at 11:56 EEST
 #LandS_tag	    = "HEAD" # Recommended by Mingshui 10.5.2012 at 23:23:22 EEST
 #LandS_tag           = "V3-04-01_eps" # this one is in the Tapio's scripts
 #LandS_tag           = "t3-04-13"
@@ -941,7 +942,7 @@ class LHCType:
             opts += commonOptionsBrLimit
         if self.sigmabrlimit:
             opts += commonOptionsSigmaBrLimit
-        opts = " " + self.options.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts += " " + self.options.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR == None:
             opts += " --ExpectationHints Asymptotic"
@@ -1037,7 +1038,7 @@ class LHCType:
         fitScript = os.path.join(landsInstall.findDir(), "test", "fitRvsCLs.C")
         if not os.path.exists(fitScript):
             raise Exception("Did not find fit script '%s'" % fitScript)
-        rootCommand = ["root", "-l", "-n", "-b", fitScript+"+"]
+        rootCommand = ["root", "-l", "-n", "-b", fitScript+"+"] # Must have the plus, i.e. must be run on jade5 or lxplus5
         p = subprocess.Popen(rootCommand, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         commands = []
@@ -1074,6 +1075,11 @@ class LHCType:
         f.close()
         lines = output.split("\n")
         lines.reverse()
+        if "Error in <ACLiC>: Compilation failed!" in output:
+            raise Exception("Error: Please run this same script on jade-five or lxplus5 with --skipMerge parameter! Root needs to compile the library for fitRvsCLs.C")
+        if "Error" in output:
+            print "Encountered an error, here's the full notification:"
+            print output
 
         def res(s):
             return "(?P<%s>[^+]+)\+/-(?P<%se>[^,]+)" % (s, s)
@@ -1198,7 +1204,7 @@ class LHCTypeAsymptotic:
             opts += commonOptionsBrLimit
         if self.sigmabrlimit:
             opts += commonOptionsSigmaBrLimit
-        opts = " " + self.optionsObserved.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts += " " + self.optionsObserved.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR != None:
             if len(vR) == 2:
@@ -1671,7 +1677,19 @@ class LandSInstaller:
                 raise Exception("cvs checkout failed (exit code %d), command '%s'" % (ret, " ".join(command)))
             if not os.path.exists(landsDir):
                 raise Exception("cvs checkout failed to create directory '%s' under '%s'" % (brlimitBase, landsDir))
-    
+            # Patch - no patch needed
+            #os.system("patch -p0 < $CMSSW_BASE/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit/mypatch")
+            # Compile
+            if os.environ["HOST"] == "jade.hip.fi":
+                print "LandS has been downloaded and patched."
+                print "Since you are working on jade, you must now manually do the following:"
+                print "1) log on jade-five.hip.fi"
+                print "2) cd %s"%landsDirAbs
+                print '3) setenv SCRAM_ARCH "slc5_amd64_gcc472"'
+                print "4) cmsenv"
+                print "5) make -j 4"
+                print "If the make is successful (it should be), then return to this terminal and redo this command"
+                sys.exit()
             os.chdir(landsDir)
             ret = subprocess.call(["make", "clean"])
             if ret != 0:

@@ -42,24 +42,28 @@ class ScalarUncertaintyItem:
         self._uncertDown = 0.0 # relative uncertainty squared
         # Handle inputs
         if len(args) == 1:
-            # Symmetric uncertainty
-            self._uncertUp = args[0]**2
-            self._uncertDown = args[0]**2
+            if isinstance(args[0], ScalarUncertaintyItem):
+                self._uncertUp = args[0]._uncertUp
+                self._uncertDown = args[0]._uncertDown
+            else:
+                # Symmetric uncertainty
+                self._uncertUp = args[0]
+                self._uncertDown = args[0]
         elif len(args) == 0 and len(kwargs) == 2:
             if not "plus" in kwargs or not "minus" in kwargs:
                 raise Exception("Error: You forgot to give plus= and minus= arguments to ScalarUncertaintyItem()!")
-            self._uncertUp = kwargs["plus"]**2
-            self._uncertDown = kwargs["minus"]**2
+            self._uncertUp = kwargs["plus"]
+            self._uncertDown = kwargs["minus"]
         else:
             raise Exception("Error: You forgot to give the uncertainty value(s) to ScalarUncertaintyItem()!")
 
     def add(self,other):
         self._name += "+%s"%other._name
-        self._uncertUp += other._uncertUp
-        self._uncertDown += other._uncertDown
+        self._uncertUp = sqrt(self._uncertUp**2 + other._uncertUp**2)
+        self._uncertDown = sqrt(self._uncertDown**2 + other._uncertDown**2)
 
     def Clone(self):
-        return ScalarUncertaintyItem(self._name, plus=self._uncertUp, minus=self._uncertDown)
+        return ScalarUncertaintyItem(self._name, self)
 
     def scale(self, factor):
         self._uncertUp *= factor
@@ -72,20 +76,20 @@ class ScalarUncertaintyItem:
         return abs(self._uncertDown - self._uncertUp) > 0.0000001
 
     def getUncertaintySquaredDown(self):
-        return self._uncertDown
+        return self._uncertDown**2
 
     def getUncertaintyDown(self):
-        return sqrt(self._uncertDown)
+        return self._uncertDown
 
     def getUncertaintySquaredUp(self):
-        return self._uncertUp
+        return self._uncertUp**2
 
     def getUncertaintyUp(self):
-        return sqrt(self._uncertUp)
+        return self._uncertUp
 
 _crossSectionUncertainty = {
-    "TTJets": ScalarUncertaintyItem("xsect", plus=0.053, minus=0.057), # see https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
-    "TTToHplus": ScalarUncertaintyItem("xsect", plus=0.053, minus=0.057), # https://hypernews.cern.ch/HyperNews/CMS/get/top/1754/1/1/1.html
+    "TTJets": ScalarUncertaintyItem("xsect", plus=0.0517, minus=0.060), # arxiv:1303.6254
+    "TTToHplus": ScalarUncertaintyItem("xsect", plus=0.0517, minus=0.060), # arxiv:1303.6254
     "HplusTB": ScalarUncertaintyItem("xsect", 0.30),
     "WJets":  ScalarUncertaintyItem("xsect", 0.05),
     "SingleTop": ScalarUncertaintyItem("xsect", 0.08),
@@ -117,7 +121,7 @@ def getTauIDUncertainty(isGenuineTau=True):
         return ScalarUncertaintyItem("tauID", 0.00)
 
 def getLuminosityUncertainty():
-    return ScalarUncertaintyItem("tauMisID", 0.026)
+    return ScalarUncertaintyItem("lumi", 0.026)
 
 # Note: if majority of sample is genuine taus, set isGenuineTau=true
 def getScalarUncertainties(datasetName, isGenuineTau):

@@ -44,11 +44,24 @@ class DatasetMgrCreatorManager:
             raise Exception(ErrorLabel()+"Input datacard should contain entry for ToleranceForLuminosityDifference (for example: ToleranceForLuminosityDifference=0.01)!"+NormalStyle())
         self._toleranceForLuminosityDifference = config.ToleranceForLuminosityDifference
         self._optionDebugConfig = opts.debugConfig
+        self._config = config
+
+    def __del__(self):
+        self.closeManagers()
+        for d in self._dsetMgrCreators:
+            if d != None:
+                d.close()
+        self._dsetMgrCreators = []
+        self._dsetMgrs = []
+        self._luminosities = []
+        self._mainCounterTables = []
 
     def closeManagers(self):
         for dMgr in self._dsetMgrs:
             if dMgr != None:
                 dMgr.close()
+        self._dsetMgrs = []
+        print "DatasetManagerCreators closed"
 
     def obtainDatasetMgrs(self, era, searchMode, optimizationMode):
         if len(self._dsetMgrs) > 0:
@@ -77,6 +90,11 @@ class DatasetMgrCreatorManager:
                 myDsetMgr.printDatasetTree()
                 # Store DatasetManager
                 self._dsetMgrs.append(myDsetMgr)
+                # For embedding, check setting on CaloMET
+                if i == DatacardDatasetMgrSourceType.EMBEDDING:
+                    myProperty = myDsetMgr.getAllDatasets()[0].getProperty("analysisName")
+                    if not "CaloMet" in myProperty:
+                        raise Exception(ErrorLabel()+"Embedding has not been done with CaloMet approximation!")
             else:
                 # No dsetMgrCreator, append zero pointers to retain list dimension
                 self._dsetMgrs.append(None)
@@ -247,6 +265,13 @@ class DataCardGenerator:
             myOutputPrefix += "QCDfact"
         elif self._QCDMethod == DatacardQCDMethod.INVERTED:
             myOutputPrefix += "QCDinv"
+        if self._config.OptionDoTBbarForHeavy:
+            myStatus = True
+            for m in self._config.MassPoints:
+                if m < 179:
+                    myStatus = False
+            if myStatus:
+                myOutputPrefix += "_TBbar"
         if self._config.OptionReplaceEmbeddingByMC:
             myOutputPrefix += "_MCEWK"
             if self._config.OptionRealisticEmbeddingWithMC:
@@ -257,6 +282,27 @@ class DataCardGenerator:
         if len(self._config.MassPoints) > 0:
             myMassRange += "-"+str(self._config.MassPoints[len(self._config.MassPoints)-1])
         print "Cards will be generated for "+HighlightStyle()+myOutputPrefix+NormalStyle()+" in mass range "+HighlightStyle()+myMassRange+" GeV"+NormalStyle()
+
+    def __del__(self):
+        print "\nDeleting cached objects"
+        self.closeFiles()
+        self.opts = None
+        self._config = None
+        del self._dsetMgrManager
+        self._dsetMgrManager = None
+        self._observation = None
+        for c in self._columns:
+            del c
+        self._columns = None
+        for e in self._extractors:
+            del e
+        self._extractors = None
+        for e in self._controlPlotExtractors:
+            del e
+        self._controlPlotExtractors = None
+        for e in self._controlPlotExtractorsEWKfake:
+            del e
+        self._controlPlotExtractorsEWKfake
 
     #def overrideConfigOptionsFromCommandLine(self):
         # Obtain QCD measurement method
@@ -506,7 +552,7 @@ class DataCardGenerator:
                     # Constants remain same, since they are relative uncertainties
                 # Merge control plots (HistoRootWithUncertainties objects)
                 for i in range(0, len(myEmbColumn._controlPlots)):
-                    myEmbColumn._controlPlots[i].Add(c._controlPlots[i])
+                    myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"])
                 # Mark for removal
                 myRemoveList.append(c)
         for c in myRemoveList:
@@ -523,60 +569,70 @@ class DataCardGenerator:
                     #print "new=",myEmbColumn._rateResult._histograms[0].Integral(),myEmbColumn._cachedShapeRootHistogramWithUncertainties.getRateStatUncertainty()
                     #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
                     # Merge nuisance results (ExtractorResult objects)
-                    for i in range(0, len(myEmbColumn.getNuisanceResults())):
-                        # It is enough to merge only histograms
-                        nhistos = len(myEmbColumn.getNuisanceResults()[i]._histograms)
-                        if nhistos > 0:
-                            if myEmbColumn.getNuisanceResults()[i].resultIsStatUncertainty():
+                    for i in range(0, len(c.getNuisanceResults())):
+                        myMatchIndex = None
+                        for j in range(0, len(myEmbColumn.getNuisanceResults())):
+                            if c.getNuisanceResults()[i]._masterId == myEmbColumn.getNuisanceResults()[j]._masterId:
+                                myMatchIndex = j
+                        if myMatchIndex != None and len(myEmbColumn.getNuisanceResults()[myMatchIndex]._histograms) > 0:
+                            # Match found, let's do the addition
+                            if myEmbColumn.getNuisanceResults()[myMatchIndex].resultIsStatUncertainty():
                                 # replace shapestat by values from new merged rate histo
-                                for k in range(1, myEmbColumn._nuisanceResults[i]._histograms[k].GetNbinsX()+1):
+                                for k in range(1, myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k].GetNbinsX()+1):
                                     myRate = myEmbColumn._rateResult._histograms[0].GetBinContent(k)
                                     myRateUncert = myEmbColumn._rateResult._histograms[0].GetBinError(k)
                                     # up histogram
-                                    myEmbColumn._nuisanceResults[i]._histograms[0].SetBinContent(k, myRate + myRateUncert)
+                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[0].SetBinContent(k, myRate + myRateUncert)
                                     # down histogram
-                                    myEmbColumn._nuisanceResults[i]._histograms[1].SetBinContent(k, myRate - myRateUncert)
+                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[1].SetBinContent(k, myRate - myRateUncert)
                             else:
                                 # linear addition, because these are variation histograms
-                                for k in range(0,nhistos):
-                                    if not isinstance(myEmbColumn._nuisanceResults[i]._histograms[k], ROOT.TH1):
+                                for k in range(0,len(myEmbColumn.getNuisanceResults()[myMatchIndex]._histograms)):
+                                    if not isinstance(myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k], ROOT.TH1):
                                         raise Exception(ErrorLabel()+"The logic has been written under the assumption that one is dealing with histograms and only binContent is meaningful")
-                                    myEmbColumn._nuisanceResults[i]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k], -1.0)
+                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k], -1.0)
                     # Merge control plots (HistoRootWithUncertainties objects)
                     for i in range(0, len(myEmbColumn._controlPlots)):
-                        myEmbColumn._controlPlots[i].Add(c._controlPlots[i], -1.0)
+                        myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"], -1.0)
         # Rate: Purge relative normalization uncertainties and replace by those for embedding
-        myEmbColumn._cachedShapeRootHistogramWithUncertainties.resetNormalizationUncertaintyRelative()
-        for i in range(0, len(myEmbColumn.getNuisanceResults())):
-            if len(myEmbColumn.getNuisanceResults()[i]._histograms) == 0:
-                myResult = myEmbColumn.getNuisanceResults()[i].getResult()
-                myName = myEmbColumn.getNuisanceResults()[i].getId()
-                if isinstance(myResult, ScalarUncertaintyItem):
-                    myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
-                elif isinstance(myResult, list):
-                    myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
-                else:
-                    myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult, myResult)
-        # Control plots: Purge relative normalization uncertainties and replace by those for embedding
+        #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
+        ##myEmbColumn._cachedShapeRootHistogramWithUncertainties.resetNormalizationUncertaintyRelative()
+        #for i in range(0, len(myEmbColumn.getNuisanceResults())):
+            #if len(myEmbColumn.getNuisanceResults()[i]._histograms) == 0:
+                #myResult = myEmbColumn.getNuisanceResults()[i].getResult()
+                #myName = myEmbColumn.getNuisanceResults()[i].getId()
+                #if not 
+                #if isinstance(myResult, ScalarUncertaintyItem):
+                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                #elif isinstance(myResult, list):
+                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
+                #else:
+                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult, myResult)
+        ## Control plots: Purge relative normalization uncertainties and replace by those for embedding
+        #for i in range(0, len(myEmbColumn._controlPlots)):
+            #myEmbColumn._controlPlots[i]["shape"].resetNormalizationUncertaintyRelative()
+            #for k in range(0, len(myEmbColumn.getNuisanceResults())):
+                #if len(myEmbColumn.getNuisanceResults()[k]._histograms) == 0:
+                    #myResult = myEmbColumn.getNuisanceResults()[k].getResult()
+                    #myName = myEmbColumn.getNuisanceResults()[k].getId()
+                    #if isinstance(myResult, ScalarUncertaintyItem):
+                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                    #elif isinstance(myResult, list):
+                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
+                    #else:
+                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult, myResult)
+        # Set type of control plots
         for i in range(0, len(myEmbColumn._controlPlots)):
-            myEmbColumn._controlPlots[i].resetNormalizationUncertaintyRelative()
-            for k in range(0, len(myEmbColumn.getNuisanceResults())):
-                if len(myEmbColumn.getNuisanceResults()[k]._histograms) == 0:
-                    myResult = myEmbColumn.getNuisanceResults()[k].getResult()
-                    myName = myEmbColumn.getNuisanceResults()[k].getId()
-                    if isinstance(myResult, ScalarUncertaintyItem):
-                        myEmbColumn._controlPlots[i].addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
-                    elif isinstance(myResult, list):
-                        myEmbColumn._controlPlots[i].addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
-                    else:
-                        myEmbColumn._controlPlots[i].addNormalizationUncertaintyRelative(myName, myResult, myResult)
+            myEmbColumn._controlPlots[i]["typeIsEWKfake"] = False
+            myEmbColumn._controlPlots[i]["typeIsEWK"] = True
+
         #print "Final:"
         #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
 
     ## Closes files in dataset managers
     def closeFiles(self):
-        print "Closing open input files"
-        self._dsetMgrManager.closeManagers()
+        #print "Closing open input files"
+        #self._dsetMgrManager.closeManagers()
         print "DatasetManagers closed"
 
     ## Check landsProcess in datacard columns
@@ -614,6 +670,16 @@ class DataCardGenerator:
                 if n.getArg("upperValue") != None and n.getArg("upperValue") > 0:
                     myMode = ExtractorMode.ASYMMETRICNUISANCE
                 self._extractors.append(ConstantExtractor(exid = n.id,
+                                                         constantValue = n.getArg("value"),
+                                                         constantUpperValue = n.getArg("upperValue"),
+                                                         distribution = n.distr,
+                                                         description = n.label,
+                                                         mode = myMode,
+                                                         opts = self._opts,
+                                                         scaleFactor = n.getArg("scaleFactor")))
+            elif n.function == "ConstantForQCD":
+                myMode = ExtractorMode.QCDNUISANCE
+                self._extractors.append(ConstantExtractorForDataDrivenQCD(exid = n.id,
                                                          constantValue = n.getArg("value"),
                                                          constantUpperValue = n.getArg("upperValue"),
                                                          distribution = n.distr,

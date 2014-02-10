@@ -8,6 +8,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import Datac
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker import ControlPlotMaker
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
 from math import pow,sqrt
@@ -28,11 +29,20 @@ class TableProducer:
         self._datasetGroups = datasetGroups
         self._extractors = extractors
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
-        self._outputFileStem = "lands_datacard_hplushadronic_m"
-        self._outputRootFileStem = "lands_histograms_hplushadronic_m"
+        if self._opts.lands:
+            self._outputFileStem = "lands_datacard_hplushadronic_m"
+            self._outputRootFileStem = "lands_histograms_hplushadronic_m"
+        elif self._opts.combine:
+            self._outputFileStem = "combine_datacard_hplushadronic_m"
+            self._outputRootFileStem = "combine_histograms_hplushadronic_m"
         # Calculate number of nuisance parameters
         # Make directory for output
-        self._dirname = "datacards_%s_%s_%s"%(self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
+        myLimitCode = None
+        if opts.lands:
+            myLimitCode = "lands"
+        elif opts.combine:
+            myLimitCode = "combine"
+        self._dirname = "datacards_%s_%s_%s_%s"%(myLimitCode,self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
         os.mkdir(self._dirname)
         self._infoDirname = self._dirname + "/info"
         os.mkdir(self._infoDirname)
@@ -58,7 +68,9 @@ class TableProducer:
         self.makeEventYieldSummary()
         # Print systematics summary table
         self.makeSystematicsSummary()
-
+        # Prints QCD purity information
+        self.makeQCDPuritySummary()
+        
         # Debugging info
         # Make copy of input datacard
         os.system("cp %s %s/input_datacard.py"%(self._opts.datacard,self._infoDirname))
@@ -82,6 +94,32 @@ class TableProducer:
 
     ## Generates datacards
     def makeDataCards(self):
+
+        # For combine, do some formatting
+        if self._opts.combine:
+            mySubtractAfterId = None
+            mySmallestColumnId = 9
+            # Find and remove empty column
+            myRemoveList = []
+            for c in self._datasetGroups:
+                if c.getLandsProcess() < mySmallestColumnId:
+                    mySmallestColumnId = c.getLandsProcess()
+                if c.typeIsEmptyColumn():
+                    mySubtractAfterId = c.getLandsProcess()
+                    myRemoveList.append(c)
+            if len(myRemoveList) > 0:
+                self._datasetGroups.remove(c)
+                print "Removed empty column for combine datacard"
+            for c in self._datasetGroups:
+                if c.getLandsProcess() > mySubtractAfterId:
+                    c._landsProcess = c.getLandsProcess() - 1
+            # Move column with ID -1 to zero
+            if mySmallestColumnId < 0:
+                for c in self._datasetGroups:
+                    c._landsProcess = c.getLandsProcess() + 1
+
+        self._purgeColumnsWithSmallRate()
+
         # Loop over mass points
         for m in self._config.MassPoints:
             print "\n"+HighlightStyle()+"Generating datacard for mass point %d for "%m +self._outputPrefix+NormalStyle()
@@ -142,13 +180,46 @@ class TableProducer:
             myRootFile.Close()
             print "Written shape root file to:",myRootFilename
 
+    ## Purge columns with zero rate
+    def _purgeColumnsWithSmallRate(self):
+        myLastUntouchableLandsProcessNumber = 0 # For sigma x br
+        if not self._config.OptionLimitOnSigmaBr and (self._datasetGroups[0].getLabel()[:2] == "HW" or self._datasetGroups[1].getLabel()[:2] == "HW"):
+            if self._opts.lands:
+                myLastUntouchableLandsProcessNumber = 2 # For light H+ physics model
+            elif self._opts.combine:
+                myLastUntouchableLandsProcessNumber = 1 # For light H+ physics model
+        myIdsForRemoval = []
+        for c in self._datasetGroups:
+            if c.getLandsProcess() > myLastUntouchableLandsProcessNumber:
+                if abs(c._rateResult.getResult()) < self._config.ToleranceForMinimumRate:
+                    # Zero rate, flag column for removal
+                    myIdsForRemoval.append(c.getLandsProcess())
+        # Remove columns
+        for i in myIdsForRemoval:
+            for c in self._datasetGroups:
+                if c.getLandsProcess() == i:
+                    print WarningLabel()+"Rate for column '%s' (%f) is smaller than %f. Removing column from datacard."%(c.getLabel(),c._rateResult.getResult(),self._config.ToleranceForMinimumRate)
+                    self._datasetGroups.remove(c)
+        # Update process numbers
+        for c in self._datasetGroups:
+            offset = 0
+            for i in myIdsForRemoval:
+                if int(c.getLandsProcess()) > int(i):
+                    offset += 1
+            c._landsProcess -= offset
+
     ## Generates header of datacard
     def _generateHeader(self, mass=None):
         myString = ""
+        myLimitCode = None
+        if self._opts.lands:
+            myLimitCode = "LandS"
+        elif self._opts.combine:
+            myLimitCode = "Combine"
         if mass == None:
-            myString += "Description: LandS datacard (auto generated) luminosity=%f 1/pb, %s/%s\n"%(self._luminosity,self._config.DataCardName,self._outputPrefix)
+            myString += "Description: %s datacard (auto generated) luminosity=%f 1/pb, %s/%s\n"%(myLimitCode, self._luminosity,self._config.DataCardName,self._outputPrefix)
         else:
-            myString += "Description: LandS datacard (auto generated) mass=%d, luminosity=%f 1/pb, %s/%s\n"%(mass,self._luminosity,self._config.DataCardName,self._outputPrefix)
+            myString += "Description: %s datacard (auto generated) mass=%d, luminosity=%f 1/pb, %s/%s\n"%(myLimitCode, mass,self._luminosity,self._config.DataCardName,self._outputPrefix)
         myString += "Date: %s\n"%time.ctime()
         return myString
 
@@ -173,7 +244,11 @@ class TableProducer:
         myObsCount = self._observation.getRateResult()
         if self._opts.debugMining:
             print "  Observation is %d"%myObsCount
-        myResult = "Observation    %d\n"%myObsCount
+        if self._opts.lands:
+            myResult = "Observation    %d\n"%myObsCount
+        elif self._opts.combine:
+            myResult =  "bin            taunuhadr\n"
+            myResult += "observation    %d\n"%myObsCount
         return myResult
 
     ## Generates header for rate table as list
@@ -183,7 +258,10 @@ class TableProducer:
         myRow = ["bin",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass,self._config):
-                myRow.append("1")
+                if self._opts.lands:
+                    myRow.append("1")
+                elif self._opts.combine:
+                    myRow.append("taunuhadr")
         myResult.append(myRow)
         # obtain labels
         myRow = ["process",""]
@@ -271,7 +349,11 @@ class TableProducer:
         for n in self._extractors:
             if n.isPrintable() and n.getId() not in myVetoList:
                 # Suppress rows that are not affecting anything
-                myRow = ["%s"%(n.getId()), n.getDistribution()]
+                myRow = ["%s"%(n.getId())]
+                if self._opts.lands:
+                    myRow.append(n.getDistribution())
+                elif self._opts.combine:
+                    myRow.append(n.getDistribution().replace("shapeQ","shape").replace("shapeStat","shape"))
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
                     if c.isActiveForMass(mass,self._config):
@@ -304,14 +386,18 @@ class TableProducer:
                             myRow.append(myValueString)
                         else:
                             if n.isShapeNuisance():
-                                myRow.append("0")
+                                if self._opts.lands:
+                                    myRow.append("0")
+                                elif self._opts.combine:
+                                    myRow.append("-")
                             else:
                                 myRow.append("1")
-                # Add description to end of the row
-                if n.getId() in myVirtualMergeInformation.keys():
-                    myRow.append(myVirtualMergeInformation["%sdescription"%n.getId()])
-                else:
-                    myRow.append(n.getDescription())
+                if self._opts.lands:
+                    # Add description to end of the row for LandS
+                    if n.getId() in myVirtualMergeInformation.keys():
+                        myRow.append(myVirtualMergeInformation["%sdescription"%n.getId()])
+                    else:
+                        myRow.append(n.getDescription())
                 myResult.append(myRow)
         return myResult
 
@@ -529,9 +615,9 @@ class TableProducer:
             for c in self._datasetGroups:
                 if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
                     # Find out what type the column is
-                    if c.getLandsProcess() == -1:
+                    if c.getLabel().startswith("HH"):
                         HH = c.getCachedShapeRootHistogramWithUncertainties().Clone()
-                    elif c.getLandsProcess() == 0:
+                    elif c.getLabel().startswith("WH") or c.getLabel().startswith("HW"):
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.typeIsQCD():
                         if QCD == None:
@@ -783,3 +869,40 @@ class TableProducer:
         myFile.write(myOutput)
         myFile.close()
         print HighlightStyle()+"Latex table of systematics summary written to: "+NormalStyle()+myFilename
+
+    ## Prints QCD purity information
+    def makeQCDPuritySummary(self):
+        h = aux.Clone(self._observation.getRateHistogram(), "dummy")
+        h.Reset()
+        hQCD = None
+        hQCDPurity = None
+        for c in self._datasetGroups:
+            if c.typeIsQCD():
+                hQCD = c.getRateHistogram()
+                hQCDPurity = c.getPurityHistogram()
+            elif not c.typeIsSignal():
+                h.Add(c.getRateHistogram())
+        s = "QCD purity by bins for shape histogram:\n"
+        for i in range(1,hQCD.GetNbinsX()+1):
+            # bin
+            s += "  bin: %03d..%03d"%(hQCDPurity.GetXaxis().GetBinLowEdge(i), hQCDPurity.GetXaxis().GetBinUpEdge(i))
+            # QCD purity
+            myGoodPurityStatus = hQCDPurity.GetBinContent(i) > 0.5
+            s += "  purity: %.3f +- %.3f"%(hQCDPurity.GetBinContent(i), hQCDPurity.GetBinError(i))
+            # QCD fraction out of all expected events
+            f = 0.0
+            if abs(h.GetBinContent(i)+hQCD.GetBinContent(i)) > 0.0:
+                f = (hQCD.GetBinContent(i)) / (h.GetBinContent(i)+hQCD.GetBinContent(i))
+            s += "  QCD/Exp.: %.3f"%f
+            mySignificantFractionStatus = f > 0.2
+            if not myGoodPurityStatus and mySignificantFractionStatus:
+                s += "  #W# check if bad purity of QCD has impact on results!"
+            else:
+                s += "  OK"
+            s += "\n"
+        print "\n%s"%s.replace("#W#",WarningLabel())
+        myFilename = self._infoDirname+"/QCDpurity.txt"
+        myFile = open(myFilename, "w")
+        myFile.write(s.replace("#W#","Warning:"))
+        myFile.close()
+        h.IsA().Destructor(h)

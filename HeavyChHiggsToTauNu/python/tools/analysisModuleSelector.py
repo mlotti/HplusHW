@@ -57,6 +57,15 @@ class AnalysisModuleSelector:
         self._selectedSystematicVariations = []
         self._disableSystematicsList = disableSystematicsList
 
+    def closeFiles(self):
+        if self._primarySource != None:
+            del self._primarySource
+            self._primarySource = None
+        for d in self._otherSources:
+            if d != None:
+                del d
+        self._otherSources = []
+
     def getAvailableEras(self):
         return self._availableEras
 

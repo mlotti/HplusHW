@@ -975,6 +975,7 @@ def main(opts,timeStamp,refDsetCreator,testDsetCreator,myValidateGroups,era,sear
         #myOutput += "AnalysisVariation = %s<br>\n"%analysisVariation
     #myOutput = "<hr><br>\n"
     # Obtain dataset managers (using default value for analysisName)
+    #refDatasetMgr = refDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=analysisVariation,analysisName="signalAnalysisMIdEffTrgEffMetEffTEff")
     refDatasetMgr = refDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=analysisVariation)
     testDatasetMgr = testDsetCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=analysisVariation)
     # Normalisation
