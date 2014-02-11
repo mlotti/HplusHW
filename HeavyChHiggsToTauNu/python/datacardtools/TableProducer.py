@@ -619,6 +619,8 @@ class TableProducer:
                         HH = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.getLabel().startswith("WH") or c.getLabel().startswith("HW"):
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                    elif c.getLabel().startswith("Hp"):
+                        HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.typeIsQCD():
                         if QCD == None:
                             QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
@@ -660,7 +662,7 @@ class TableProducer:
             if not (self._config.OptionLimitOnSigmaBr or m > 179):
                 myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %s"%(m,myBr,getResultString(HW,formatStr,myPrecision))
             else:
-                myOutput += "Signal, mH+=%3d GeV,                : %s"%(m,getResultString(HW,formatStr,myPrecision))
+                myOutput += "Signal, mH+=%3d GeV, sigma x Br=1 pb: %s"%(m,getResultString(HW,formatStr,myPrecision))
             myOutput += "Backgrounds:\n"
             myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
             if self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC:
