@@ -95,7 +95,7 @@
                "uncertaintyMinus":0.094868329805
              }
           ]
-      }
+      },
       "era": "2012D",
       "runs_202807_208686": {
           "firstRun"  :202807,
@@ -181,7 +181,7 @@
                "uncertaintyMinus":0.0
              }
           ]
-      }
+      },
       "era": "2012ABCD",
       "runs_190456_208686": {
           "firstRun"  :190456,
