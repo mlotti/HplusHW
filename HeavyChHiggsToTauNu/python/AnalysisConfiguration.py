@@ -73,6 +73,7 @@ class ConfigBuilder:
                  applyTauTriggerScaleFactor = True, # Apply tau trigger scale factor or not
                  applyTauTriggerLowPurityScaleFactor = False, # Apply tau trigger scale factor or not
                  applyMETTriggerScaleFactor = True, # Apply MET trigger scale factor or not
+                 applyL1ETMScaleFactor = False, # Apply L1ETM scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  applyTopPtReweight = True, # Apply Top Pt reweighting on TTJets sample
                  topPtReweightScheme = None, # None for default, see TopPtWeight_cfi.py for allowed values
@@ -123,6 +124,7 @@ class ConfigBuilder:
         self.applyTauTriggerScaleFactor = applyTauTriggerScaleFactor
         self.applyTauTriggerLowPurityScaleFactor = applyTauTriggerLowPurityScaleFactor
         self.applyMETTriggerScaleFactor = applyMETTriggerScaleFactor
+        self.applyL1ETMScaleFactor = applyL1ETMScaleFactor
         self.applyPUReweight = applyPUReweight
         self.applyTopPtReweight = applyTopPtReweight
         self.topPtReweightScheme = topPtReweightScheme
@@ -132,6 +134,9 @@ class ConfigBuilder:
         self.useJERSmearedJets = useJERSmearedJets
         self.customizeLightAnalysis = customizeLightAnalysis
         self.customizeHeavyAnalysis = customizeHeavyAnalysis
+
+        if self.applyMETTriggerScaleFactor and self.applyL1ETMScaleFactor:
+            raise Exception("Only one of applyMETTriggerScaleFactor and applyL1ETMScaleFactor can be set to True")
 
         self.doLightAnalysis = doLightAnalysis
         self.doHeavyAnalysis = doHeavyAnalysis
@@ -153,13 +158,14 @@ class ConfigBuilder:
 
         self.inputWorkflow = inputWorkflow
 
-        if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor or self.applyMETTriggerScaleFactor:
+        if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor or self.applyMETTriggerScaleFactor or self.applyL1ETMScaleFactor:
             for trg in self.options.trigger:
                 if not "IsoPFTau" in trg and self.options.tauEmbeddingInput == 0:
-                    print "applyTauTriggerScaleFactor=True or applyTauTriggerLowPurityScaleFactor=True or applyMETTriggerScaleFactor=True, and got non-tau trigger for non-embedding input, setting applyTauTriggerScaleFactor=False and applyMETTriggerScaleFactor=False"
+                    print "applyTauTriggerScaleFactor=True or applyTauTriggerLowPurityScaleFactor=True or applyMETTriggerScaleFactor=True or applyL1ETMScaleFactor=True, and got non-tau trigger for non-embedding input, setting applyTauTriggerScaleFactor=False and applyMETTriggerScaleFactor=False"
                     self.applyTauTriggerScaleFactor = False
                     self.applyTauTriggerLowPurityScaleFactor = False
                     self.applyMETTriggerScaleFactor = False
+                    self.applyL1ETMScaleFactor = False
 
         if self.doMETResolution and self.doOptimisation:
             raise Exception("doMETResolution and doOptimisation conflict")
@@ -354,6 +360,14 @@ class ConfigBuilder:
                         print "#"
                         print "########################################"
                         param.setMetTriggerEfficiencyForEra(self.dataVersion, era="Run2012ABCD", pset=mod.metTriggerEfficiencyScaleFactor)
+                    if self.applyL1ETMScaleFactor:
+                        print "########################################"
+                        print "#"
+                        print "# L1ETM trigger efficiency/scale factor is from 190456-202585 for eras 2012ABC and 202807-208686 for 2012D."
+                        print "# The division comes from the high-pt tau bugfix, which does NOT coincide with C-D transition."
+                        print "#"
+                        print "########################################"
+                        param.setL1ETMEfficiencyForEra(self.dataVersion, era=dataEra, pset=mod.metTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         mod.configInfo.pileupReweightType = PileupWeightType.toString[PileupWeightType.NOMINAL]
@@ -505,6 +519,8 @@ class ConfigBuilder:
         # Set trigger efficiencies
         runSetter(lambda module, name: param.setTauTriggerEfficiencyScaleFactorBasedOnTau(module.tauTriggerEfficiencyScaleFactor, module.tauSelection, name))
         runSetter(lambda module, name: param.setMetTriggerEfficiencyScaleFactorBasedOnTau(module.metTriggerEfficiencyScaleFactor, module.tauSelection, name))
+        if self.applyL1ETMScaleFactor:
+            runSetter(lambda module, name: param.setL1ETMEfficiencyScaleFactorBasedOnTau(module.metTriggerEfficiencyScaleFactor, module.tauSelection, name))
         # Set fake tau SF
         runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
         # Set PU ID src for modules
@@ -640,6 +656,9 @@ class ConfigBuilder:
             if self.applyMETTriggerScaleFactor:
                 print "Applying trigger MET leg scale factor"
                 param.metTriggerEfficiencyScaleFactor.mode = "scaleFactor"
+            if self.applyL1ETMScaleFactor:
+                print "Applying L1ETM scale factor"
+                param.metTriggerEfficiencyScaleFactor.mode = "scaleFactor" # yes, we re-use the MET-leg scale factor weighting code here
 
         if self.doBTagTree:
             param.tree.fillNonIsoLeptonVars = True
@@ -1346,12 +1365,12 @@ class ConfigBuilder:
         def addTauTrgMCEff(shiftBy, postfix):
             return addTrgMCEff("tauTriggerEfficiencyScaleFactor", shiftBy, "TauTrgMCEff"+postfix)
 
-        def addMETTrgSF(shiftBy, postfix):
-            return addTrgSF("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgSF"+postfix)
+        def addMETTrgSF(shiftBy, postfix, prefix):
+            return addTrgSF("metTriggerEfficiencyScaleFactor", shiftBy, prefix+"SF"+postfix)
         def addMETTrgDataEff(shiftBy, postfix):
-            return addTrgDataEff("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgDataEff"+postfix)
+            return addTrgDataEff("metTriggerEfficiencyScaleFactor", shiftBy, prefix+"DataEff"+postfix)
         def addMETTrgMCEff(shiftBy, postfix):
-            return addTrgMCEff("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgMCEff"+postfix)
+            return addTrgMCEff("metTriggerEfficiencyScaleFactor", shiftBy, prefix+"MCEff"+postfix)
 
         def addMuonTrgDataEff(shiftBy, postfix):
             return addTrgDataEff("embeddingMuonTriggerEfficiency", shiftBy, "MuonTrgDataEff"+postfix)
@@ -1382,19 +1401,23 @@ class ConfigBuilder:
                     names.append(addTauTrgSF(-1.0, "Minus"))
 
         # MET trigger SF
-        if self.applyMETTriggerScaleFactor:
+        if self.applyMETTriggerScaleFactor or self.applyL1ETMScaleFactor:
+            prefix = "MetTrg"
+            if self.applyL1ETMScaleFactor:
+                prefix = "L1ETM"
+
             if self.options.tauEmbeddingInput != 0:
-                names.append(addMETTrgDataEff( 1.0, "Plus"))
-                names.append(addMETTrgDataEff(-1.0, "Minus"))
+                names.append(addMETTrgDataEff( 1.0, "Plus", prefix))
+                names.append(addMETTrgDataEff(-1.0, "Minus", prefix))
             else:
                 if self.doAsymmetricTriggerUncertainties:
-                    names.append(addMETTrgDataEff( 1.0, "Plus"))
-                    names.append(addMETTrgDataEff(-1.0, "Minus"))
-                    names.append(addMETTrgMCEff( 1.0, "Plus"))
-                    names.append(addMETTrgMCEff(-1.0, "Minus"))
+                    names.append(addMETTrgDataEff( 1.0, "Plus", prefix))
+                    names.append(addMETTrgDataEff(-1.0, "Minus", prefix))
+                    names.append(addMETTrgMCEff( 1.0, "Plus", prefix))
+                    names.append(addMETTrgMCEff(-1.0, "Minus", prefix))
                 else:
-                    names.append(addMETTrgSF( 1.0, "Plus"))
-                    names.append(addMETTrgSF(-1.0, "Minus"))
+                    names.append(addMETTrgSF( 1.0, "Plus", prefix))
+                    names.append(addMETTrgSF(-1.0, "Minus", prefix))
 
         # Embedding-specific
         if self.options.tauEmbeddingInput != 0:

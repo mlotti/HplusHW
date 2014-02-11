@@ -781,6 +781,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2012_cff as metT
 def setMetTriggerEfficiencyScaleFactorBasedOnTau(scaleFactorPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
     _setTriggerEfficiencyScaleFactorBasedOnTau(scaleFactorPSet, tausele, metTriggerEfficiency, "met", mod)
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.l1etmEfficiency2012_cff as l1etmEfficiency
+def setL1ETMEfficiencyScaleFactorBasedOnTau(scaleFactorPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
+    _setTriggerEfficiencyScaleFactorBasedOnTau(scaleFactorPSet, tausele, l1etmEfficiency, "l1etm", mod)
 
 tauTriggerEfficiencyScaleFactor = triggerEffPrototype.clone()
 setTauTriggerEfficiencyScaleFactorBasedOnTau(tauTriggerEfficiency, tauSelection)
@@ -856,6 +859,11 @@ def setMetTriggerEfficiencyForEra(dataVersion, era, pset):
     if dataVersion.isMC():
         _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
     pset.dataSelect = metTriggerEfficiency.getRunsForEra(era)
+
+def setL1ETMEfficiencyForEra(dataVersion, era, pset):
+    if dataVersion.isMC():
+        _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
+    pset.dataSelect = l1etmEfficiency.getRunsForEra(era)
 
 # Weighting by instantaneous luminosity, and the number of true
 # simulated pile up interactions
