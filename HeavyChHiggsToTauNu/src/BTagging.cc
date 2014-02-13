@@ -737,9 +737,9 @@ namespace HPlus {
       for (size_t i = 0; i < nPermutations; ++i) {
         // Set status vector according to the permutation
         std::cout << "permutation " << i << ":";
-        int nPassed = 0;
+        size_t nPassed = 0;
         for (size_t j = 0; j < jets.size(); ++j) {
-          bool myStatus = (i % TMath::Power(2,j) == 0);
+          bool myStatus = (i % static_cast<int>(TMath::Power(2,j)) == 0);
           myPassedStatus[j] = myStatus;
           if (myStatus) ++nPassed;
           std::cout << "," << myPassedStatus[j];
