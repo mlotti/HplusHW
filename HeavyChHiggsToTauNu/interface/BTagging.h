@@ -125,6 +125,7 @@ namespace HPlus {
       const double getScaleFactorRelativeUncertainty_up() const { return fEventSFRelUncert_up; }
       const double getScaleFactorRelativeUncertainty_down() const { return fEventSFRelUncert_down; }
       const std::string getDiscriminatorName() const { return fDiscriminatorName; }
+      const double getProbabilityToPassBtagging() const { return fProbabilityToPassBtagging; }
 
       const bool hasGenuineBJets() const;
 
@@ -144,6 +145,7 @@ namespace HPlus {
       double fEventSFRelUncert_down;
       double fEventSFAbsUncert_max;
       std::string fDiscriminatorName;
+      double fProbabilityToPassBtagging;
     };
 
     struct PerJetInfo {
