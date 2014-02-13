@@ -368,7 +368,13 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelected;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTail;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMass;
+    // Probabilistic b tag as event weight (note: for invariant mass, b tag is needed!)
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagAfterBTagging;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhi;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagSelected;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagSelectedMtTail;
 
+    // EWK fake taus background
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelectionEWKFakeTausBkg;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeightEWKFakeTausBkg;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVetoEWKFakeTausBkg;
@@ -380,7 +386,11 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedEWKFakeTausBkg;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailEWKFakeTausBkg;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMassEWKFakeTausBkg;
-
+    // Probabilistic b tag as event weight (note: for invariant mass, b tag is needed!)
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagAfterBTaggingEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhiEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagSelectedEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagSelectedMtTailEWKFakeTausBkg;
   };
 }
 
