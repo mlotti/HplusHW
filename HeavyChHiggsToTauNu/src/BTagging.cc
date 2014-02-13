@@ -733,13 +733,13 @@ namespace HPlus {
       for (size_t j = 0; j < jets.size(); ++j) {
         myPassedStatus.push_back(false); // initialize
       }
-      size_t nPermutations = TMath::Pow(2, nJets);
+      size_t nPermutations = TMath::Power(2, nJets);
       for (size_t i = 0; i < nPermutations; ++i) {
         // Set status vector according to the permutation
-        std::cout << "permutation " << i << ":"
+        std::cout << "permutation " << i << ":";
         int nPassed = 0;
         for (size_t j = 0; j < jets.size(); ++j) {
-          bool myStatus = (i % TMath::Pow(2,j) == 0);
+          bool myStatus = (i % TMath::Power(2,j) == 0);
           myPassedStatus[j] = myStatus;
           if (myStatus) ++nPassed;
           std::cout << "," << myPassedStatus[j];
@@ -752,20 +752,20 @@ namespace HPlus {
             EfficiencyTable* myTable = 0;
             int myJetFlavor = std::abs(jets[j]->partonFlavour());
             if (myJetFlavor >= 1 && myJetFlavor <= 3 ) { // uds jet
-              EfficiencyTable = &fUDSMistagEffTable;
+              myTable = &fUDSMistagEffTable;
             } else if (myJetFlavor == 4) { // c jet
-              EfficiencyTable = &fCMistagEffTable;
+              myTable = &fCMistagEffTable;
             } else if (myJetFlavor == 5) { // b jet
-              EfficiencyTable = &fTagEffTable;
+              myTable = &fTagEffTable;
             } else { // gluon jet or unknown; assume unknown is rather a gluon than uds jet (mistag rate is higher)
-              EfficiencyTable = &fGMistagEffTable;
+              myTable = &fGMistagEffTable;
             }
             if (myPassedStatus[j]) {
-              myProbability *= EfficiencyTable->getEfficiency(jets[j]->pt());
-              std::cout << "," << EfficiencyTable->getEfficiency(jets[j]->pt());
+              myProbability *= myTable->getEfficiency(jets[j]->pt());
+              std::cout << "," << myTable->getEfficiency(jets[j]->pt());
             } else {
-              myProbability *= 1.0 - EfficiencyTable->getEfficiency(jets[j]->pt());
-              std::cout << "," << 1.0-EfficiencyTable->getEfficiency(jets[j]->pt());
+              myProbability *= 1.0 - myTable->getEfficiency(jets[j]->pt());
+              std::cout << "," << 1.0 - myTable->getEfficiency(jets[j]->pt());
             }
           }
           myProbabilitySum += myProbability;
