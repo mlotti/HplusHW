@@ -1813,9 +1813,21 @@ class DatasetRootHistoCompoundBase(DatasetRootHistoBase):
         for h in self.histoWrappers[i+1:]:
             histo = h.getHistogramWithUncertainties()
             if histo.GetNbinsX() != hsum.GetNbinsX():
-                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[i].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
-
-            hsum.Add(histo)
+                hh = nSuccess = 0
+                if len(hsum.getRootHisto().GetXaxis().GetBinLabel(1)) > 0:
+                    # Try to recover for histograms with bin labels, i.e. counters
+                    for i in range(1,hsum.getRootHisto().GetNbinsX()+1):
+                        for j in range(1,histo.getRootHisto().GetNbinsX()+1):
+                            if len(hsum.getRootHisto().GetXaxis().GetBinLabel(i)) > 0:
+                                if hsum.getRootHisto().GetXaxis().GetBinLabel(i) == histo.getRootHisto().GetXaxis().GetBinLabel(j):
+                                    nSuccess += 1
+                                    hsum.getRootHisto().SetBinContent(i, hsum.getRootHisto().GetBinContent(i) + histo.getRootHisto().GetBinContent(j));
+                                    hsum.getRootHisto().SetBinError(i, math.sqrt(hsum.getRootHisto().GetBinError(i)**2 + histo.getRootHisto().GetBinError(j)**2));
+                                    # Ignore uncertainties
+                if nSuccess == 0:
+                    raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[i].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
+            else:
+                hsum.Add(histo)
             histo.Delete()
         return hsum
 
