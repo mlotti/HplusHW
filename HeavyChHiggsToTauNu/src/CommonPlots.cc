@@ -524,7 +524,7 @@ namespace HPlus {
   void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const edm::Event& iEvent, double transverseMass) {
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagTransverseMass, transverseMass);
-      if ((fFakeTauData.isQCDMeasurementLike() || fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagEWKFakeTausTransverseMass);
+      if ((fFakeTauData.isQCDMeasurementLike() || fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagEWKFakeTausTransverseMass, transverseMass);
     }
   }
 
