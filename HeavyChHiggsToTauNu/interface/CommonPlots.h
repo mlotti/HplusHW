@@ -127,6 +127,7 @@ namespace HPlus {
     void fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterAllSelections(const edm::Event& iEvent, double transverseMass);
+    void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const edm::Event& iEvent, double transverseMass);
     void fillControlPlotsAfterAllSelectionsWithFullMass(const edm::Event& iEvent, FullHiggsMassCalculator::Data& data);
     /// unique filling methods (to be called BEFORE return statement)
     void fillControlPlotsAtTauVetoSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const VetoTauSelection::Data& tauVetoData);
@@ -309,6 +310,9 @@ namespace HPlus {
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKControlRegion;
     std::vector<WrappedTH1*> hShapeTransverseMass;
     std::vector<WrappedTH1*> hShapeEWKFakeTausTransverseMass;
+
+    std::vector<WrappedTH1*> hShapeProbabilisticBtagTransverseMass;
+    std::vector<WrappedTH1*> hShapeProbabilisticBtagEWKFakeTausTransverseMass;
     // NOTE: do we want to try out something like mT vs. rTau?
 
     // all selections with full mass

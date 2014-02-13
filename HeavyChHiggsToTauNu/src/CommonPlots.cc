@@ -199,9 +199,11 @@ namespace HPlus {
     // all selections
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeTransverseMass,            "shapeTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
-      if (fAnalysisType == kSignalAnalysis)
+      if (fAnalysisType == kSignalAnalysis) {
         fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEWKFakeTausTransverseMass, "shapeEWKFakeTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
-
+        fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeProbabilisticBtagTransverseMass, "shapeProbabilisticBtagTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+        fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeProbabilisticBtagEWKFakeTausTransverseMass, "shapeProbabilisticBtagEWKFakeTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+      }
       // all selections with full mass
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeFullMass,            "shapeInvariantMass", "m_{H+}, GeV/c^{2};N_{events}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
       if (fAnalysisType == kSignalAnalysis)
@@ -516,6 +518,13 @@ namespace HPlus {
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.fillShapeHistogram(hShapeTransverseMass, transverseMass);
       if ((fFakeTauData.isQCDMeasurementLike() || fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausTransverseMass, transverseMass);
+    }
+  }
+
+  void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const edm::Event& iEvent, double transverseMass) {
+    if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
+      fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagTransverseMass, transverseMass);
+      if ((fFakeTauData.isQCDMeasurementLike() || fFakeTauData.isEWKFakeTau()) && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagEWKFakeTausTransverseMass);
     }
   }
 

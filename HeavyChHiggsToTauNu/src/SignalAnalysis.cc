@@ -711,6 +711,7 @@ namespace HPlus {
       fCommonPlotsProbabilisticBTagSelected->fill();
       if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhiEWKFakeTausBkg->fill();
       if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagSelectedEWKFakeTausBkg->fill();
+      fCommonPlots.fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(iEvent, transverseMass);
       if (transverseMass > 120) {
         fCommonPlotsProbabilisticBTagSelectedMtTail->fill();
         if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagSelectedMtTailEWKFakeTausBkg->fill();

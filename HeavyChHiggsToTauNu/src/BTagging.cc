@@ -739,7 +739,7 @@ namespace HPlus {
         std::cout << "permutation " << i << ":";
         size_t nPassed = 0;
         for (size_t j = 0; j < jets.size(); ++j) {
-          bool myStatus = (static_cast<int>(i) % static_cast<int>(TMath::Power(2,j)) == 0);
+          bool myStatus = (((i >> j) % 2) == 1);
           myPassedStatus[j] = myStatus;
           if (myStatus) ++nPassed;
           std::cout << "," << myPassedStatus[j];
