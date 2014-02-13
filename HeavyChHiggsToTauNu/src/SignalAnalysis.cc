@@ -704,7 +704,7 @@ namespace HPlus {
     // Apply btag pass probability as weight to event (to get better stats. for W+jets and DY)
     double myBTagPassProbability = btagData.getProbabilityToPassBtagging();
     fEventWeight.multiplyWeight(myBTagPassProbability);
-    fCommonPlotsProbabilisticBTagAfterBTagging->fill()
+    fCommonPlotsProbabilisticBTagAfterBTagging->fill();
     if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagAfterBTaggingEWKFakeTausBkg->fill();
     if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
       fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhi->fill();
