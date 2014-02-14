@@ -80,7 +80,7 @@ namespace HPlus {
       const bool isEmbeddingGenuineTauLike() const { return isEmbeddingGenuineTauLikeWithSingleTauInAcceptance() || isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance(); }
       const bool isEmbeddingGenuineTauLikeWithSingleTauInAcceptance() const { return fBackgroundType == kkEmbeddingLikeSingleTauInAcceptance; }
       const bool isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance() const { return fBackgroundType == kkEmbeddingLikeMultipleTausInAcceptance; }
-//isEWKFakeTau
+
       friend class FakeTauIdentifier;
 
     private:
