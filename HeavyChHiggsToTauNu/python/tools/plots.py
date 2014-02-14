@@ -826,7 +826,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
                 continue
 
             # histo2 is missing an item
-            if xval1 < xval2:
+            if xval1 is not None and xval1 < xval2:
                 i1 += 1
                 continue
 
@@ -858,7 +858,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         else:
             ratio = ROOT.TGraphAsymmErrors()
         if len(xvalues2) > 0:
-            ratioErr = ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues2), array.array("d", [1]*len(xvalues2)),
+            ratioErr = ROOT.TGraphAsymmErrors(len(xvalues2), array.array("d", xvalues2), array.array("d", [1]*len(xvalues2)),
                                          histo1.GetEXlow(), histo1.GetEXhigh(),
                                          array.array("d", yerrs2low), array.array("d", yerrs2high))
         else:
@@ -1554,6 +1554,9 @@ class PlotRatioBase:
                     if isinstance(numer, histograms.Histo):
                         aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
                         h.setName(numer.getName())
+                    elif isinstance(numer, dataset.RootHistoWithUncertainties):
+                        aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
+                        h.setName(numer.GetName())
                     else:
                         aux.copyStyle(numer, h.getRootHisto())
                         h.setName(numer.GetName())
@@ -1588,22 +1591,26 @@ class PlotRatioBase:
 
         self.cf.canvas.cd(2)
 
-        for obj, option in self.ratioPlotObjectsBefore:
-            obj.Draw(option+"same")
-
+        # Draw first stat+syst errors going to background
         until = None
         for n in ["BackgroundStatSystError", "BackgroundStatError"]:
             if self.ratioHistoMgr.hasHisto(n):
                 until = n
-
         index = self.ratioHistoMgr.draw(untilName=until)
 
+        # Then prepended plot objects
+        for obj, option in self.ratioPlotObjectsBefore:
+            obj.Draw(option+"same")
+
+        # Then ratio line
         self.ratioLine = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
         self.ratioLine.Draw("L")
 
+        # Then actual plot content
         if index is not None:
             self.ratioHistoMgr.draw(fromIndex=index+1)
 
+        # And finally the appended plot objects
         for obj, option in self.ratioPlotObjectsAfter:
             obj.Draw(option+"same")
 
@@ -2315,7 +2322,7 @@ class PlotDrawer:
         except KeyError:
             pass
         try:
-            ret = _update(ret, args[attr+attrPostfix])
+            ret = _update(ret, args[attr])
         except KeyError:
             pass
 

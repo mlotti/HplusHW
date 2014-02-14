@@ -266,13 +266,13 @@ class PythonWriter:
                     print "Run range not valid",r.runrange
                     sys.exit()
 
-                fOUT.write("      \"era\": \""+r.label+"\",\n")
                 fOUT.write("      \"runs_"+match.group("firstRun")+"_"+match.group("lastRun")+"\": {\n")
+		fOUT.write("          \"era\": \""+r.label+"\",\n")
                 fOUT.write("          \"firstRun\"  :"+match.group("firstRun")+",\n")
                 fOUT.write("          \"lastRun\"   :"+match.group("lastRun")+",\n")
                 fOUT.write("          \"luminosity\": %s,\n"%r.lumi)
                 self.writeJSONBins(fOUT,r.label,r.eff)
-                fOUT.write("      }\n")
+                fOUT.write("      },\n")
 #                self.writeParametersJSON(fOUT,r.label,r.runrange,r.lumi,r.eff)
         fOUT.write("  },\n")
 

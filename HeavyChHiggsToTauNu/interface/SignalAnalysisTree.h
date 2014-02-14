@@ -49,6 +49,7 @@ namespace HPlus {
     void setWjetsWeight(double w)   { fWjetsWeight = w; }
     void setTopPtWeight(double w)   { fTopPtWeight = w; }
     void setEmbeddingGeneratorWeight(double w) { fEmbeddingGeneratorWeight = w; }
+    void setEmbeddingWTauMuWeight(double w) { fEmbeddingWTauMuWeight = w; }
     void setTauFakeWeight(double w, double au)  { fTauFakeWeight = w; fTauFakeWeightAbsUnc = au; }
     void setTauTriggerWeight(double w, double au)  { fTauTriggerWeight = w; fTauTriggerWeightAbsUnc = au; }
     void setMETTriggerWeight(double w, double au)  { fMETTriggerWeight = w; fMETTriggerWeightAbsUnc = au; }
@@ -156,6 +157,7 @@ namespace HPlus {
     double fWjetsWeight;
     double fTopPtWeight;
     double fEmbeddingGeneratorWeight;
+    double fEmbeddingWTauMuWeight;
     double fTauFakeWeight;
     double fTauFakeWeightAbsUnc; // These are the relative uncertainties
     double fTauTriggerWeight;
