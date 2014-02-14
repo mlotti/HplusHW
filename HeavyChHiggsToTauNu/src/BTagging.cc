@@ -900,7 +900,7 @@ namespace HPlus {
       for (size_t j = 0; j < jets.size(); ++j) {
         myPassedStatus.push_back(false); // initialize
       }
-      size_t nPermutations = TMath::Power(2, nJets);
+      size_t nPermutations = TMath::Power(2, static_cast<int>(nJets));
       for (size_t i = 0; i < nPermutations; ++i) {
         // Set status vector according to the permutation
         //std::cout << "permutation " << i << ":";
