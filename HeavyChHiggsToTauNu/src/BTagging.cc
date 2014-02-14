@@ -903,16 +903,16 @@ namespace HPlus {
       size_t nPermutations = TMath::Power(2, nJets);
       for (size_t i = 0; i < nPermutations; ++i) {
         // Set status vector according to the permutation
-        std::cout << "permutation " << i << ":";
+        //std::cout << "permutation " << i << ":";
         size_t nPassed = 0;
         for (size_t j = 0; j < jets.size(); ++j) {
           bool myStatus = (((i >> j) % 2) == 1);
           myPassedStatus[j] = myStatus;
           if (myStatus) ++nPassed;
-          std::cout << "," << myPassedStatus[j];
+          //std::cout << "," << myPassedStatus[j];
         }
         // Sum probability only if the number of passed jets would match to the cut criteria
-        if (fNumberOfBJets.passedCut(nPassed) || true) {
+        if (fNumberOfBJets.passedCut(nPassed)) {
           double myProbability = 1.0;
           for (size_t j = 0; j < jets.size(); ++j) {
             // Obtain correct efficiency table depending on jet flavor
@@ -929,21 +929,18 @@ namespace HPlus {
             }
             if (myPassedStatus[j]) {
               myProbability *= myTable->getEfficiency(jets[j]->pt());
-              std::cout << "," << myTable->getEfficiency(jets[j]->pt());
+              //std::cout << "," << myTable->getEfficiency(jets[j]->pt());
             } else {
               myProbability *= 1.0 - myTable->getEfficiency(jets[j]->pt());
-              std::cout << "," << 1.0 - myTable->getEfficiency(jets[j]->pt());
+              //std::cout << "," << 1.0 - myTable->getEfficiency(jets[j]->pt());
             }
           }
-          if (fNumberOfBJets.passedCut(nPassed)) {
-            myProbabilitySum += myProbability;
-            std::cout << ",***";
-          }
-          std::cout << ",prob=," << myProbability << std::endl;
+          myProbabilitySum += myProbability;
+          //std::cout << ",prob=," << myProbability << std::endl;
         }
       }
     }
-    std::cout << "Overall prob:," << myProbabilitySum << std::endl;
+    //std::cout << "Overall prob:," << myProbabilitySum << std::endl;
     return myProbabilitySum;
   }
 }
