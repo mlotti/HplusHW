@@ -272,7 +272,11 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections;
 
     std::vector<WrappedTH1*> hCtrlNjetsAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlJetPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlJetEtaAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausNjetsAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausJetPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausJetEtaAfterStandardSelections;
 
     // MET selection
     std::vector<WrappedTH1*> hCtrlMET;
@@ -282,9 +286,13 @@ namespace HPlus {
 
     // b tagging
     std::vector<WrappedTH1*> hCtrlNbjets;
+    std::vector<WrappedTH1*> hCtrlBJetPt;
+    std::vector<WrappedTH1*> hCtrlBJetEta;
     std::vector<WrappedTH1*> hCtrlBDiscriminator;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausNbjets;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausBDiscriminator;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetPt;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetEta;
 
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterBjets;
 
