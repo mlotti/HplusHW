@@ -1367,9 +1367,9 @@ class ConfigBuilder:
 
         def addMETTrgSF(shiftBy, postfix, prefix):
             return addTrgSF("metTriggerEfficiencyScaleFactor", shiftBy, prefix+"SF"+postfix)
-        def addMETTrgDataEff(shiftBy, postfix):
+        def addMETTrgDataEff(shiftBy, postfix, prefix):
             return addTrgDataEff("metTriggerEfficiencyScaleFactor", shiftBy, prefix+"DataEff"+postfix)
-        def addMETTrgMCEff(shiftBy, postfix):
+        def addMETTrgMCEff(shiftBy, postfix, prefix):
             return addTrgMCEff("metTriggerEfficiencyScaleFactor", shiftBy, prefix+"MCEff"+postfix)
 
         def addMuonTrgDataEff(shiftBy, postfix):
