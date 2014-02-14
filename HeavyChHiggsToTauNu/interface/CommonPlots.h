@@ -242,10 +242,12 @@ namespace HPlus {
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterMETSF;
 
     // improved delta phi collinear cuts (currently the point of the std. selections)
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearMinimum;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet1;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet2;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet3;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet4;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearMinimum;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet1;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet2;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet3;
@@ -287,10 +289,12 @@ namespace HPlus {
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterBjets;
 
     // improved delta phi back to back cuts
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackMinimum;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet1;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet2;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet3;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet4;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackMinimum;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet1;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet2;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet3;
