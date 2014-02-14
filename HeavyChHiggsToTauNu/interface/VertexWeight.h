@@ -25,7 +25,7 @@ namespace HPlus {
     VertexWeight(const edm::ParameterSet& iConfig, HPlus::HistoWrapper& histoWrapper);
     ~VertexWeight();
 
-    std::pair<double, size_t> getWeightAndSize(const edm::Event& iEvent, const edm::EventSetup& iSetup) const;
+    std::pair<double, size_t> getWeightAndSize(const edm::Event& iEvent, const edm::EventSetup& iSetup, bool getSize=true) const;
     double getWeight(const edm::Event& iEvent, const edm::EventSetup& iSetup) const;
 
   private:

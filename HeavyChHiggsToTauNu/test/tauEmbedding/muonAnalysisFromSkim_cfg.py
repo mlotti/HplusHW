@@ -76,6 +76,11 @@ patArgs = {"doPatTrigger": False,
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs,
                                                             doHBHENoiseFilter=False,
                                                             )
+# hack
+if "allEvents" in additionalCounters and not hasattr(process, "allEvents"):
+    del additionalCounters[additionalCounters.index("allEvents")]
+if "passedTrigger" in additionalCounters and not hasattr(process, "allEvents"):
+    del additionalCounters[additionalCounters.index("passedTrigger")]
 
 # Add configuration information to histograms.root
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
@@ -90,7 +95,9 @@ dataEras = [
 ]
 #puWeights = AnalysisConfiguration.addPuWeightProducers(dataVersion, process, process.commonSequence, dataEras)
 if dataVersion.isMC():
-    puEraSuffixWeights = AnalysisConfiguration.addPuWeightProducersVariations(dataVersion, process, process.commonSequence, dataEras, doVariations=False)
+    process.puWeightSequence = cms.Sequence()
+    puEraSuffixWeights = AnalysisConfiguration.addPuWeightProducersVariations(dataVersion, process, process.puWeightSequence, dataEras, doVariations=True)
+    process.commonSequence.insert(0, process.puWeightSequence)
 
     # W+jets weights
     import HiggsAnalysis.HeavyChHiggsToTauNu.WJetsWeight as WJetsWeight
@@ -106,10 +113,14 @@ if dataVersion.isMC():
         if options.wjetsWeighting != 0:
             weight.enabled = True
 
-    # Top pt reweihting
+    # Top pt reweighting
     import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeight_cfi as topPtWeight
     process.topPtWeight = topPtWeight.topPtWeight.clone()
     process.topPtWeightSeparate = process.topPtWeight.clone(scheme="TopPtSeparate")
+    topPtWeights = [
+        (process.topPtWeight.scheme.value(), "topPtWeight"),
+        (process.topPtWeightSeparate.scheme.value(), "topPtWeightSeparate")
+        ]
     if options.sample == "TTJets":
         topPtWeight.addTtGenEvent(process, process.commonSequence)
         process.topPtWeight.enabled = True
@@ -117,10 +128,31 @@ if dataVersion.isMC():
         process.configInfo.topPtReweightScheme = cms.untracked.string(process.topPtWeight.scheme.value())
     process.commonSequence += (process.topPtWeight+process.topPtWeightSeparate)
 
+    # variations
+    for label, name in topPtWeights[:]:
+        mod = getattr(process, name).clone(
+            variationEnabled=True,
+            variationDirection=+1
+        )
+        setattr(process, name+"Plus", mod)
+        process.commonSequence += mod
+        topPtWeights.append( (mod.scheme.value()+"Plus", name+"Plus") )
+
+        mod = mod.clone(
+            variationDirection=-1
+        )
+        setattr(process, name+"Minus", mod)
+        process.commonSequence += mod
+        topPtWeights.append( (mod.scheme.value()+"Minus", name+"Minus") )
+
+
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
+tmp = additionalCounters[:]
+additionalCounters = []
 additionalCounters.extend(MuonSelection.getMuonPreSelectionCountersForEmbedding())
 additionalCounters.extend(MuonSelection.getMuonSelectionCountersForEmbedding(dataVersion))
+additionalCounters.extend(tmp)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 #customisations.PF2PATVersion = PF2PATVersion
@@ -360,8 +392,8 @@ if dataVersion.isMC():
         setattr(ntuple.doubles, "weightPileup_"+era+suffix, cms.InputTag(weight))
     for era, suffix, weight in wjetsEraSuffixWeights:
         setattr(ntuple.doubles, "weightWJets_"+era+suffix, cms.InputTag(weight))
-    setattr(ntuple.doubles, "weightTopPt", cms.InputTag("topPtWeight"))
-    setattr(ntuple.doubles, "weightTopPt_TopPtSeparate", cms.InputTag("topPtWeightSeparate"))
+    for label, tag in topPtWeights:
+        setattr(ntuple.doubles, "weightTopPt_"+label, cms.InputTag(tag))
 
     for name in ntuple.muonEfficiencies.parameterNames_():
         pset = getattr(ntuple.muonEfficiencies, name)

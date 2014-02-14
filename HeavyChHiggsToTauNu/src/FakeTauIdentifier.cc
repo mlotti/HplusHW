@@ -322,11 +322,11 @@ namespace HPlus {
     // Determine if event goes to embedding or to EWK+tt with fake tau background
     output.fBackgroundType = kkUnknown;
     if (nMatchedHadronicTausInAcceptance == 0)
-      output.fBackgroundType = kkQCDMeasurementLike;
+      output.fBackgroundType = kkEWKFakeTauLike;
     else if (nMatchedHadronicTausInAcceptance >= 1 && nNonMatchedHadronicTausInAcceptance == 0)
-      output.fBackgroundType = kkEmbedding;
+      output.fBackgroundType = kkEmbeddingLikeSingleTauInAcceptance;
     else if (nMatchedHadronicTausInAcceptance >= 1 && nNonMatchedHadronicTausInAcceptance >= 1)
-      output.fBackgroundType = kkEWKWithFakeTau;
+      output.fBackgroundType = kkEmbeddingLikeMultipleTausInAcceptance;
 
     //std::cout << "Nmatched=" << myMatchingTauIndices.size() << " NmatchHadronic=" << nMatchedHadronicTausInAcceptance
     //  << " Nnonmatched=" << myNonMatchingTauIndices.size() << " NnonmatchHadronic=" << nNonMatchedHadronicTausInAcceptance << " bkgtype=" << output.fBackgroundType << std::endl;

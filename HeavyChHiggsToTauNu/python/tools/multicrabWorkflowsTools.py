@@ -586,9 +586,13 @@ class TaskDef:
     # Only non-None values are copied from taskDef.
     def update(self, taskDef):
         for a in ["outputPath"] + self.options:
+            selfVal = getattr(self, a)
             val = getattr(taskDef, a)
             if val is not None:
-                setattr(self, a, val)
+                if a == "args" and selfVal is not None:
+                    getattr(self, a).update(val)
+                else:
+                    setattr(self, a, val)
 
     def setArg(self, name, value):
         if self.args is None:

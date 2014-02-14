@@ -2314,6 +2314,9 @@ class Dataset:
         (objs, realNames) = self.getRootObjects("configInfo/parameterSet")
         return objs[0].GetTitle()        
 
+    def getDataVersion(self):
+        return self.dataVersion
+
     def getAvailableSystematicVariationSources(self):
         return self._availableSystematicVariationSources
 
