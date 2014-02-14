@@ -1554,6 +1554,9 @@ class PlotRatioBase:
                     if isinstance(numer, histograms.Histo):
                         aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
                         h.setName(numer.getName())
+                    elif isinstance(numer, dataset.RootHistoWithUncertainties):
+                        aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
+                        h.setName(numer.GetName())
                     else:
                         aux.copyStyle(numer, h.getRootHisto())
                         h.setName(numer.GetName())
