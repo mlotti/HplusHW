@@ -47,20 +47,24 @@ class QCDInvertedPlot(QCDInvertedPlotBase):
 
     def getIntegratedHistogram(self, histoName, histoSpecs, optionPrintPurityByBins=False):
         myRebinList = None
-        if histoSpecs["variableBinSizeLowEdges"] != None and len(histoSpecs["variableBinSizeLowEdges"] > 0):
+        if "variableBinSizeLowEdges" in histoSpecs.keys() and len(histoSpecs["variableBinSizeLowEdges"]) > 0:
             myRebinList = histoSpecs["variableBinSizeLowEdges"][:]
         myShape = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", histoName, self._luminosity, rebinList=myRebinList)
         return myShape.getIntegratedDataDrivenQCDHisto(histoSpecs)
 
     def getFinalHistogram(self, histoName, histoSpecs, optionPrintPurityByBins=False):
         myRebinList = None
-        if histoSpecs["variableBinSizeLowEdges"] != None and len(histoSpecs["variableBinSizeLowEdges"] > 0):
+        if "variableBinSizeLowEdges" in histoSpecs.keys() and len(histoSpecs["variableBinSizeLowEdges"]) > 0:
             myRebinList = histoSpecs["variableBinSizeLowEdges"][:]
         myShape = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", histoName, self._luminosity, rebinList=myRebinList)
-        myShapeResult = QCDInvertedShape(myShape, histoSpecs, self._moduleInfoString, self._normFactors, optionPrintPurityByBins)
+        myShapeResult = QCDInvertedShape(myShape, self._moduleInfoString, self._normFactors, optionPrintPurityByBins)
         return myShapeResult.getResultShape()
 
     def makeFinalPlot(self, histoName, outName, histoSpecs, plotOptions, optionPrintPurityByBins=False):
+        # Check if plot exists
+        if not self._dsetMgr.getDataset("Data").hasRootHisto(histoName):
+            print "Could not find histogram or directory '%s' in the multicrab root files (perhaps you did not run on Informative level), skipping it ..."%histoName
+            return
         h = self.getFinalHistogram(histoName, histoSpecs, optionPrintPurityByBins)
         plot = plots.PlotBase([histograms.Histo(h,"shape", drawStyle="E")])
         plot.createFrame("%s/%s_%s"%(self._myDir,outName,self._moduleInfoString), opts=plotOptions)
@@ -84,7 +88,7 @@ class QCDInvertedSystematics(QCDInvertedPlotBase):
         # Input quantities
         self._systName = systName
         self._myRebinList = None
-        if histoSpecs["variableBinSizeLowEdges"] != None and len(histoSpecs["variableBinSizeLowEdges"] > 0):
+        if "variableBinSizeLowEdges" in histoSpecs.keys() and len(histoSpecs["variableBinSizeLowEdges"]) > 0:
             self._myRebinList = histoSpecs["variableBinSizeLowEdges"][:]
         self._hFinalShape = None
         # Output quantities
@@ -93,6 +97,7 @@ class QCDInvertedSystematics(QCDInvertedPlotBase):
         self._myCtrlRegion = None
         self._mySignalRegion = None
         self._mySystObject = None
+        self._histoSpecs = histoSpecs
 
     ## Cache final result to speed up code
     def setFinalShapeHistogram(self, h):
@@ -119,24 +124,36 @@ class QCDInvertedSystematics(QCDInvertedPlotBase):
 
     ## Do systematics coming from met shape difference
     def doSystematicsForMetShapeDifference(self, histoNamePrefix, histoNameSuffix, finalShapeHisto=None):
+        # Set here the names of the histograms you want to access
+        myCtrlRegionName = "Inverted/%sInvertedTauId%s"%(histoNamePrefix, histoNameSuffix)
+        mySignalRegionName = "baseline/%sBaselineTauId%s"%(histoNamePrefix, histoNameSuffix)
+        # Check if histograms exist
+        if not self._dsetMgr.getDataset("Data").hasRootHisto(finalShapeHisto):
+            print "Could not find histogram or directory '%s', skipping ..."%finalShapeHisto
+            return
+        if not self._dsetMgr.getDataset("Data").hasRootHisto(myCtrlRegionName):
+            print "Could not find histogram or directory '%s', skipping ..."%myCtrlRegionName
+            return
+        if not self._dsetMgr.getDataset("Data").hasRootHisto(mySignalRegionName):
+            print "Could not find histogram or directory '%s', skipping ..."%mySignalRegionName
+            return
         # Obtain final shape histo, if it is not cached
         if self._hFinalShape == None:
             if finalShapeHisto != None:
                 self._obtainFinalShapeHistogram(finalShapeHisto)
-        # Set here the names of the histograms you want to access
-        myCtrlRegionName = "Inverted/%sInvertedTauId%s"%(histoNamePrefix, histoNameSuffix)
-        mySignalRegionName = "baseline/%sBaselineTauId%s"%(histoNamePrefix, histoNameSuffix)
         # Obtain QCD shapes
         self._myCtrlRegion = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", myCtrlRegionName, self._luminosity, rebinList=self._myRebinList)
         self._mySignalRegion = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", mySignalRegionName, self._luminosity, rebinList=self._myRebinList)
         # Calculate uncertainty
-        self._mySystObject = SystematicsForMetShapeDifference(self._mySignalRegion, self._myCtrlRegion, self._hFinalShape, self._moduleInfoString)
+        self._mySystObject = SystematicsForMetShapeDifference(self._mySignalRegion, self._myCtrlRegion, self._hFinalShape, self._moduleInfoString, optionDoBinByBinHistograms=True)
         self._hSystematicsUp = self._mySystObject.getUpHistogram().Clone()
         self._hSystematicsDown = self._mySystObject.getDownHistogram().Clone()
         print "Evaluated MET shape systematics"
 
     ## Make nice plots
     def doSystematicsPlots(self):
+        if self._mySystObject == None:
+            return
         # Make sure results have been obtained
         if self._hSystematicsUp == None:
             self.doSystematicsForMetShapeDifference()

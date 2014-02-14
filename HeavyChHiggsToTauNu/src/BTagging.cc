@@ -743,6 +743,57 @@ namespace HPlus {
     if (output.fPassedEvent)
       increment(fTaggedCount);
 
+    // Calculate probability to pass b tagging
+    double myProbabilitySum = 0.0;
+    if (!iEvent.isRealData()) {
+      size_t nJets = jets.size();
+      std::vector<bool> myPassedStatus;
+      for (size_t j = 0; j < jets.size(); ++j) {
+        myPassedStatus.push_back(false); // initialize
+      }
+      size_t nPermutations = TMath::Pow(2, nJets);
+      for (size_t i = 0; i < nPermutations; ++i) {
+        // Set status vector according to the permutation
+        std::cout << "permutation " << i << ":"
+        int nPassed = 0;
+        for (size_t j = 0; j < jets.size(); ++j) {
+          bool myStatus = (i % TMath::Pow(2,j) == 0);
+          myPassedStatus[j] = myStatus;
+          if (myStatus) ++nPassed;
+          std::cout << "," << myPassedStatus[j];
+        }
+        // Sum probability only if the number of passed jets would match to the cut criteria
+        if (fNumberOfBJets.passedCut(nPassed)) {
+          double myProbability = 1.0;
+          for (size_t j = 0; j < jets.size(); ++j) {
+            // Obtain correct efficiency table depending on jet flavor
+            EfficiencyTable* myTable = 0;
+            int myJetFlavor = std::abs(jets[j]->partonFlavour());
+            if (myJetFlavor >= 1 && myJetFlavor <= 3 ) { // uds jet
+              EfficiencyTable = &fUDSMistagEffTable;
+            } else if (myJetFlavor == 4) { // c jet
+              EfficiencyTable = &fCMistagEffTable;
+            } else if (myJetFlavor == 5) { // b jet
+              EfficiencyTable = &fTagEffTable;
+            } else { // gluon jet or unknown; assume unknown is rather a gluon than uds jet (mistag rate is higher)
+              EfficiencyTable = &fGMistagEffTable;
+            }
+            if (myPassedStatus[j]) {
+              myProbability *= EfficiencyTable->getEfficiency(jets[j]->pt());
+              std::cout << "," << EfficiencyTable->getEfficiency(jets[j]->pt());
+            } else {
+              myProbability *= 1.0 - EfficiencyTable->getEfficiency(jets[j]->pt());
+              std::cout << "," << 1.0-EfficiencyTable->getEfficiency(jets[j]->pt());
+            }
+          }
+          myProbabilitySum += myProbability;
+          std::cout << ",prob=," << myProbability << std::endl;
+        }
+      }
+    }
+    std::cout << "Overall prob:," << myProbabilitySum << std::endl;
+    output.fProbabilityToPassBtagging = myProbabilitySum;
+
     return output;
   }
 

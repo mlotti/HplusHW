@@ -7,9 +7,24 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 from math import pow,sqrt
 import sys
 import ROOT
+
+## QCD specific method for extracting purity for a shape
+def _calculateAverageQCDPurity(shapeHisto, purityHisto):
+    # Calculated weighted average (weight = Nevents in the shape)
+    mySum = 0.0
+    myTotalWeight = 0.0
+    for i in range(0,purityHisto.GetNbinsX()+1):
+        mySum += purityHisto.GetBinContent(i) * shapeHisto.GetBinContent(i)
+        myTotalWeight += shapeHisto.GetBinContent(i)
+    if abs(myTotalWeight) < 0.00001:
+        return 0.0
+    else:
+        return mySum / myTotalWeight
+
 
 # Enumerator class for data mining mode
 class ExtractorMode:
@@ -19,19 +34,26 @@ class ExtractorMode:
     NUISANCE = 3
     ASYMMETRICNUISANCE = 4
     SHAPENUISANCE = 5
-    CONTROLPLOT = 6
+    QCDNUISANCE = 6
+    CONTROLPLOT = 7
 
 ## ExtractorBase class
 class ExtractorBase:
     ## Constructor
-    def __init__(self, mode, exid, distribution, description, opts=None):
+    def __init__(self, mode, exid, distribution, description, opts=None, scaleFactor = 1.0):
         self._mode = mode
         self._isPrintable = True
         self._exid = exid
         self._distribution = distribution
         self._description = description
+        self._opts = opts
+        self._scaleFactor = scaleFactor
         self._extractablesToBeMerged = []
         self._masterExID = exid
+        if self._scaleFactor == None:
+            self._scaleFactor = 1.0
+        if abs(self._scaleFactor - 1.0) > 0.00001:
+            print WarningLabel()+"Scaling nuisance parameter %s by factor %f"%(self._exid, self._scaleFactor)
 
     ## Returns true if extractable mode is observation
     def isObservation(self):
@@ -45,7 +67,8 @@ class ExtractorBase:
     def isAnyNuisance(self):
         return self._mode == ExtractorMode.NUISANCE or \
                self._mode == ExtractorMode.ASYMMETRICNUISANCE or \
-               self._mode == ExtractorMode.SHAPENUISANCE
+               self._mode == ExtractorMode.SHAPENUISANCE or \
+               self._mode == ExtractorMode.QCDNUISANCE
 
     ## Returns true if extractable mode is nuisance
     def isNuisance(self):
@@ -58,6 +81,14 @@ class ExtractorBase:
     ## Returns true if extractable mode is shape nuisance
     def isShapeNuisance(self):
         return self._mode == ExtractorMode.SHAPENUISANCE
+
+    ## Returns true if extractable mode is QCD nuisance
+    def isQCDNuisance(self):
+        return self._mode == ExtractorMode.QCDNUISANCE
+
+    ## Returns the scale factor (used for projection estimates)
+    def getScaleFactor(self):
+        return self._scaleFactor
 
     ## True if nuisance will generate a new line in output (i.e. is not merged)
     def isPrintable(self):
@@ -122,6 +153,7 @@ class ExtractorBase:
         if self.isAnyNuisance():
             print "- distribution = ", self._distribution
             print "- description = ", self._description
+            print "- scale factor = ", self._scaleFactor
             if not self.isPrintable():
                 print "- is slave of extractable with ID = ", self._masterExID
 
@@ -147,16 +179,17 @@ class ExtractorBase:
 # Returns a fixed constant number
 class ConstantExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, constantValue, mode, exid = "", distribution = "lnN", description = "", constantUpperValue = 0.0, opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, constantValue, mode, exid = "", distribution = "lnN", description = "", constantUpperValue = 0.0, opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._constantValue = None
         if isinstance(constantValue, ScalarUncertaintyItem):
-            self._constantValue = constantValue
+            self._constantValue = constantValue.Clone()
+            self._constantValue.scale(self._scaleFactor)
         else:
-            if self.isAsymmetricNuisance():
-                self._constantValue = ScalarUncertaintyItem(exid,plus=constantUpperValue,minus=constantValue)
+            if self.isAsymmetricNuisance() or constantUpperValue != None:
+                self._constantValue = ScalarUncertaintyItem(exid,plus=constantUpperValue*self._scaleFactor,minus=constantValue*self._scaleFactor)
             else:
-                self._constantValue = ScalarUncertaintyItem(exid,constantValue)
+                self._constantValue = ScalarUncertaintyItem(exid,constantValue*self._scaleFactor)
 
     ## Method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -171,12 +204,43 @@ class ConstantExtractor(ExtractorBase):
     ## \var _constantValue
     # ScalarUncertaintyItem containting the uncertainty
 
+## ConstantExtractor class
+# Returns a fixed constant number
+class ConstantExtractorForDataDrivenQCD(ExtractorBase):
+    ## Constructor
+    def __init__(self, constantValue, mode, exid = "", distribution = "lnN", description = "", constantUpperValue = 0.0, opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
+        self._constantValue = None
+        if isinstance(constantValue, ScalarUncertaintyItem):
+            self._constantValue = constantValue.Clone()
+            self._constantValue.scale(self._scaleFactor)
+        else:
+            if self.isAsymmetricNuisance() or constantUpperValue != None:
+                self._constantValue = ScalarUncertaintyItem(exid,plus=constantUpperValue*self._scaleFactor,minus=constantValue*self._scaleFactor)
+            else:
+                self._constantValue = ScalarUncertaintyItem(exid,constantValue*self._scaleFactor)
+        # Flip sign
+        self._constantValue.scale(-1.0)
+
+    ## Method for extracking information
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        return self._constantValue
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "ConstantExtractorForDataDrivenQCD"
+        print "- value = + %f - %f"%(self._constantValue.getUncertaintyUp,self._constantValue.getUncertaintyDown)
+        ExtractorBase.printDebugInfo(self)
+
+    ## \var _constantValue
+    # ScalarUncertaintyItem containting the uncertainty
+
 ## CounterExtractor class
 # Extracts a value from a given counter in the list of main counters
 class CounterExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, counterItem, mode, exid = "", distribution = "lnN", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, counterItem, mode, exid = "", distribution = "lnN", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._counterItem = counterItem
 
     ## Method for extracking information
@@ -194,7 +258,7 @@ class CounterExtractor(ExtractorBase):
                 print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' counter ('"+self._counterItem+"') value is zero!"
                 myResult = ScalarUncertaintyItem(self._exid,0.0)
             else:
-                myResult = ScalarUncertaintyItem(self._exid,myCount.uncertainty() / myCount.value())
+                myResult = ScalarUncertaintyItem(self._exid,myCount.uncertainty() / myCount.value()*self._scaleFactor)
         return myResult
 
     ## Virtual method for printing debug information
@@ -211,8 +275,8 @@ class CounterExtractor(ExtractorBase):
 # Largest deviation from the reference (nominal) value is taken
 class MaxCounterExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, counterDirs, counterItem, mode, exid = "", distribution = "lnN", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, counterDirs, counterItem, mode, exid = "", distribution = "lnN", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._counterItem = counterItem
         self._counterDirs = counterDirs
         if len(self._counterDirs) < 2:
@@ -248,7 +312,7 @@ class MaxCounterExtractor(ExtractorBase):
                 myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
                 if (myValue > myMaxValue):
                     myMaxValue = myValue
-        return ScalarUncertaintyItem(self._exid,myMaxValue)
+        return ScalarUncertaintyItem(self._exid,myMaxValue*self._scaleFactor)
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -326,8 +390,8 @@ class MaxCounterExtractor(ExtractorBase):
 # Extracts two values from two counter items in the list of main counters and returns th ratio of these scaled by some factor
 class RatioExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, scale, numeratorCounterItem, denominatorCounterItem, mode, exid = "", distribution = "lnN", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, scale, numeratorCounterItem, denominatorCounterItem, mode, exid = "", distribution = "lnN", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._numeratorCounterItem = numeratorCounterItem
         self._denominatorCounterItem = denominatorCounterItem
         self._scale = scale
@@ -343,7 +407,7 @@ class RatioExtractor(ExtractorBase):
         else:
             myResult = (myDenominatorCount.value() / myNumeratorCount.value() - 1.0) * self._scale
         # Return result
-        return ScalarUncertaintyItem(self._exid,myResult)
+        return ScalarUncertaintyItem(self._exid,myResult*self._scaleFactor)
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -363,8 +427,8 @@ class RatioExtractor(ExtractorBase):
 # Extracts an uncertainty for a scale factor
 class ScaleFactorExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, histoDirs, histograms, normalisation, addSystInQuadrature = 0.0, mode = ExtractorMode.NUISANCE, exid = "", distribution = "lnN", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, histoDirs, histograms, normalisation, addSystInQuadrature = 0.0, mode = ExtractorMode.NUISANCE, exid = "", distribution = "lnN", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._histoDirs = histoDirs
         self._histograms = histograms
         self._normalisation = normalisation
@@ -415,7 +479,7 @@ class ScaleFactorExtractor(ExtractorBase):
             myCombinedResult += pow(myResult[i], 2)
         myCombinedResult += pow(self._addSystInQuadrature, 2)
         # Return result
-        return ScalarUncertaintyItem(self._exid,sqrt(myCombinedResult))
+        return ScalarUncertaintyItem(self._exid,sqrt(myCombinedResult)*self._scaleFactor)
 
 
     ## Virtual method for printing debug information
@@ -433,8 +497,8 @@ class ScaleFactorExtractor(ExtractorBase):
 # Extracts histogram shapes
 class ShapeExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         if not (self.isRate() or self.isObservation()):
             if self._distribution != "shapeStat":
                 self.printDebugInfo()
@@ -469,7 +533,7 @@ class ShapeExtractor(ExtractorBase):
             hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
             hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
             for k in range(1, h.GetNbinsX()+1):
-                hUp.SetBinContent(k, h.GetBinContent(k) + h.GetBinError(k))
+                hUp.SetBinContent(k, h.GetBinContent(k) + h.GetBinError(k)) # no scaling because this is the stat uncertainty
                 hDown.SetBinContent(k, h.GetBinContent(k) - h.GetBinError(k))
             # Append histograms to output list
             myHistograms.append(hUp)
@@ -477,6 +541,33 @@ class ShapeExtractor(ExtractorBase):
             #h.IsA().Destructor(h) # Delete the nominal histo
         # Return result
         return myHistograms
+
+    ## QCD specific method for extracting purity histogram
+    def extractQCDPurityHistogram(self, datasetColumn, dsetMgr, shapeHistoName):
+        # Do not apply here additional normalization, it is not needed
+        if not datasetColumn.typeIsQCD:
+            raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
+        if not self.isRate():
+            raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for nuisance! (only valid for rate)")
+        # Obtain purity histogram
+        if not dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).hasRootHisto(shapeHistoName+"_Purity"):
+            raise Exception(ErrorLabel()+"T1he pseudo-multicrab directory for QCD is outdated! Please regenerate it (with the proper normalization!!!)")
+        h = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(shapeHistoName+"_Purity")
+        return h
+
+    ## QCD specific method for extracting purity for a shape
+    def extractQCDPurityAsValue(self, datasetColumn, dsetMgr, shapeHistoName, shapeHisto):
+        hPurity = self.extractQCDPurityHistogram(datasetColumn, dsetMgr, shapeHistoName)
+        return _calculateAverageQCDPurity(shapeHisto, hPurity)
+
+    ## QCD specific method for extracting purity for a shape
+    def extractQCDPurityAsValue(self, shapeHisto, purityHisto):
+        if isinstance(purityHisto, dataset.DatasetRootHisto):
+            return self._calculateAverageQCDPurity(shapeHisto, purityHisto.getHistogram())
+        elif isinstance(purityHisto, ROOT.TH1):
+            return _calculateAverageQCDPurity(shapeHisto, purityHisto)
+        else:
+            raise Exception("This should not happen")
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -487,8 +578,8 @@ class ShapeExtractor(ExtractorBase):
 # Extracts histogram shapes from up and down variation
 class ShapeVariationExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None):
-        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts)
+    def __init__(self, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._systVariation = systVariation
         if not "SystVar" in self._systVariation:
             self._systVariation = "SystVar%s"%self._systVariation
@@ -513,8 +604,7 @@ class ShapeVariationExtractor(ExtractorBase):
         myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
         # Check that asked variation exists
         if not self._systVariation in myShapeUncertDict.keys():
-            print WarningLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, ignoring it! Available: %s"%(datasetColumn.getLabel(), self._systVariation, ', '.join(map(str, myShapeUncertDict.keys())))
-            return myHistograms
+            raise Exception(ErrorLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, check that options in the datacard match to multicrab content!"%(datasetColumn.getLabel(),self._systVariation))
         # Get histogram from cache
         (hSystUp, hSystDown) = myShapeUncertDict[self._systVariation]
         hUp = hSystUp.Clone()
@@ -538,8 +628,8 @@ class ShapeVariationExtractor(ExtractorBase):
 # Extracts histograms for control plot
 class ControlPlotExtractor(ExtractorBase):
     ## Constructor, note that if multiplet directories and names are given, the second, third, etc. are substracted from the first one
-    def __init__(self, histoSpecs, histoTitle, histoDirs, histoNames, opts=None):
-        ExtractorBase.__init__(self, mode=ExtractorMode.CONTROLPLOT, exid="-1", distribution="-", description="-", opts=opts)
+    def __init__(self, histoSpecs, histoTitle, histoDirs, histoNames, opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode=ExtractorMode.CONTROLPLOT, exid="-1", distribution="-", description="-", opts=opts, scaleFactor=scaleFactor)
         self._histoSpecs = histoSpecs
         self._histoTitle = histoTitle
         self._histoName = histoNames
@@ -558,6 +648,34 @@ class ControlPlotExtractor(ExtractorBase):
         mySystematics = dataset.Systematics(allShapes=True)
         myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._histoNameWithPath))
         return myDatasetRootHisto
+
+    ## QCD specific method for extracting purity histogram
+    def extractQCDPurityHistogram(self, datasetColumn, dsetMgr):
+        # Do not apply here additional normalization, it is not needed
+        if not datasetColumn.typeIsQCD:
+            raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
+        # Obtain purity histogram
+        h = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoNameWithPath+"_Purity")
+        return h
+
+    ## QCD specific method for extracting purity for a shape
+    def extractQCDPurityAsValue(self, datasetColumn, dsetMgr, shapeHisto):
+        hPurity = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoNameWithPath+"_Purity")
+        if isinstance(hPurity, dataset.DatasetRootHisto):
+            return _calculateAverageQCDPurity(shapeHisto, hPurity.getHistogram())
+        elif isinstance(hPurity, ROOT.TH1):
+            return _calculateAverageQCDPurity(shapeHisto, hPurity)
+        else:
+            raise Exception("This should not happen")
+
+    ## QCD specific method for extracting purity for a shape
+    def extractQCDPurityAsValue(self, shapeHisto, purityHisto):
+        if isinstance(purityHisto, dataset.DatasetRootHisto):
+            return self._calculateAverageQCDPurity(shapeHisto, purityHisto.getHistogram())
+        elif isinstance(purityHisto, ROOT.TH1):
+            return _calculateAverageQCDPurity(shapeHisto, purityHisto)
+        else:
+            raise Exception("This should not happen")
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
