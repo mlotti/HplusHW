@@ -30,16 +30,19 @@ def addEmbeddingGenTauSkim_44X(version, datasets, updateDefinitions):
             dataset.addWorkflow(Workflow("tauembedding_gentauanalysis_"+version, source=Source(workflowName),
                                          args=wf.args, output_file="histograms.root"))
 
-def addEmbeddingGenTauSkim_44X(version, datasets, updateDefinitions):
+def addEmbeddingGenTauSkim_53X(version, datasets, updateDefinitions):
     # Tau+MET trigger has 5 % efficiency, GenTauSkim has 10 %, so 2x jobs
     defaultDefinitions = {
-        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=4000, njobsOut=50),
+        "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn= 900, njobsOut=20), # FIXME: njobsOut
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=1800, njobsOut=30),
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=2700, njobsOut=30),
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(njobsIn= 200, njobsOut= 3),
         }
     workflowName = "tauembedding_gentauskim_"+version
     updateTaskDefinitions(defaultDefinitions, updateDefinitions, workflowName)
     for datasetName, taskDef in defaultDefinitions.iteritems():
         dataset = datasets.getDataset(datasetName)
-        wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName)
+        wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName)
         if dataset.isData():
             raise Exception("GenTauSkim workflow is not supported for data")
         wf.addCrabLine("CMSSW.total_number_of_events = -1")
@@ -87,17 +90,21 @@ def getDefaultDefinitions_44X():
         return TaskDef(triggerOR=[mcTrigger], **kwargs)
 
     return {
-        "SingleMu_160431-163261_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu20_v1"]),
-        "SingleMu_163270-163869_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu24_v2"]),
-        "SingleMu_165088-166150_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu30_v3"]),
+        "SingleMu_160431-163261_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu20_v1"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_163270-163869_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu24_v2"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_165088-166150_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu30_v3"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
 
-        "SingleMu_166161-166164_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1"]),
-        "SingleMu_166346-166346_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v2"]),
-        "SingleMu_166374-167043_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1"]),
-        "SingleMu_167078-167913_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v3"]),
+        "SingleMu_166161-166164_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_166346-166346_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v2"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_166374-167043_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_167078-167913_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v3"], args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+        "SingleMu_166161-167913_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1", "HLT_Mu40_v2", "HLT_Mu40_v3"], triggerThrow=False, args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}),
+
         "SingleMu_170722-172619_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v5"]),
         "SingleMu_172620-173198_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v5"]),
-        "SingleMu_166161-173198_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1", "HLT_Mu40_v2", "HLT_Mu40_v3", "HLT_Mu40_v5"], triggerThrow=False),
+        "SingleMu_170722-173198_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v5"]),
+
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1", "HLT_Mu40_v2", "HLT_Mu40_v3", "HLT_Mu40_v5"], triggerThrow=False, args={"tauEmbeddingCaloMet": "caloMetNoHFSum"}), # caloMET is changed within these runs
 
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v1"]),
 
@@ -111,7 +118,7 @@ def getDefaultDefinitions_44X():
         "WJets_TuneZ2_Fall11":               TaskDefMC(args={"wjetsWeighting": 1}),
         "W1Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1}),
         "W2Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1}),
-        "W3Jets_TuneZ2_Fall11":           TaskDefMC(args={"wjetsWeighting": 1}),
+        "W3Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1}),
         "W3Jets_TuneZ2_v2_Fall11":           TaskDefMC(args={"wjetsWeighting": 1}),
         "W4Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1}),
         "TTJets_TuneZ2_Fall11":              TaskDefMC(),
@@ -217,8 +224,12 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         "SingleMu_166346-166346_2011A_Nov08": TaskDef(njobsIn=  2, njobsOut= 1),
         "SingleMu_166374-167043_2011A_Nov08": TaskDef(njobsIn=300, njobsOut= 6),
         "SingleMu_167078-167913_2011A_Nov08": TaskDef(njobsIn=230, njobsOut= 3),
+        "SingleMu_166161-167913_2011A_Nov08": TaskDef(njobsIn=600, njobsOut=11), # caloMETnoHF up to this
+
         "SingleMu_170722-172619_2011A_Nov08": TaskDef(njobsIn=200, njobsOut= 6),
         "SingleMu_172620-173198_2011A_Nov08": TaskDef(njobsIn=230, njobsOut= 6),
+        "SingleMu_170722-173198_2011A_Nov08": TaskDef(njobsIn=500, njobsOut=12), # caloMET from here
+
         "SingleMu_166161-173198_2011A_Nov08": TaskDef(njobsIn=1700, njobsOut= 25),
 
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(njobsIn=200, njobsOut= 4),
@@ -404,8 +415,12 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
         "SingleMu_166346-166346_2011A_Nov08": TaskDef(njobsIn=  1, njobsOut=1),
         "SingleMu_166374-167043_2011A_Nov08": TaskDef(njobsIn=110, njobsOut=2),
         "SingleMu_167078-167913_2011A_Nov08": TaskDef(njobsIn= 60, njobsOut=1),
+        "SingleMu_166161-167913_2011A_Nov08": TaskDef(njobsIn=170, njobsOut=4), # caloMETnoHF up to this
+
         "SingleMu_170722-172619_2011A_Nov08": TaskDef(njobsIn=120, njobsOut=2),
         "SingleMu_172620-173198_2011A_Nov08": TaskDef(njobsIn=120, njobsOut=2),
+        "SingleMu_170722-173198_2011A_Nov08": TaskDef(njobsIn=170, njobsOut=4), # caloMET from here
+
         "SingleMu_166161-173198_2011A_Nov08": TaskDef(njobsIn=450, njobsOut=10), # FIXME: njobsOut
 
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(njobsIn= 70, njobsOut=1),
@@ -490,38 +505,38 @@ def addEmbeddingEmbedding_53X(sourceWorkflow, version, datasets, updateDefinitio
     # njobsIn default value is for embedding
     njobs = {
         # FIXME: njobsOut
-        "SingleMu_190456-193621_2012A_Jan22": TaskDef(njobsIn= 400, njobsOut=20),
-        "SingleMu_193834-196531_2012B_Jan22": TaskDef(njobsIn=2000, njobsOut=100),
-        "SingleMu_198022-200381_2012C_Jan22": TaskDef(njobsIn=1500, njobsOut=70),
-        "SingleMu_200466-203742_2012C_Jan22": TaskDef(njobsIn=2000, njobsOut=90),
-        "SingleMu_203777-205834_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=60),
-        "SingleMu_205908-207100_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=60),
-        "SingleMu_207214-208686_2012D_Jan22": TaskDef(njobsIn=1300, njobsOut=60),
+        "SingleMu_190456-193621_2012A_Jan22": TaskDef(njobsIn= 400, njobsOut=10),
+        "SingleMu_193834-196531_2012B_Jan22": TaskDef(njobsIn=2000, njobsOut=50),
+        "SingleMu_198022-200381_2012C_Jan22": TaskDef(njobsIn=1500, njobsOut=40),
+        "SingleMu_200466-203742_2012C_Jan22": TaskDef(njobsIn=2000, njobsOut=50),
+        "SingleMu_203777-205834_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=20),
+        "SingleMu_205908-207100_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=40),
+        "SingleMu_207214-208686_2012D_Jan22": TaskDef(njobsIn=1300, njobsOut=30),
 
 
         # MC, triggered with mcTrigger
         # FIXME: njobsOut
-        "WJets_TuneZ2star_v1_Summer12":            TaskDef(njobsIn= 130, njobsOut=5),
+        "WJets_TuneZ2star_v1_Summer12":            TaskDef(njobsIn= 130, njobsOut=4),
         "WJets_TuneZ2star_v2_Summer12":            TaskDef(njobsIn= 380, njobsOut=15),
         "W1Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 300, njobsOut=10),
         "W2Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=1300, njobsOut=40),
         "W3Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 800, njobsOut=35),
         "W4Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=1100, njobsOut=40),
         "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn= 400, njobsOut=25),
-        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=1800, njobsOut=50), # FIXME: njobs
-        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=2200, njobsOut=100), # FIXME: njobs
-        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(njobsIn= 200, njobsOut=10), # FIXME: njobs
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=1800, njobsOut=50),
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=2200, njobsOut=100),
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(njobsIn= 200, njobsOut=5),
         "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(njobsIn= 900, njobsOut=40),
         "T_t-channel_TuneZ2star_Summer12":         TaskDef(njobsIn=  50, njobsOut=3),
         "Tbar_t-channel_TuneZ2star_Summer12":      TaskDef(njobsIn=  30, njobsOut=1),
-        "T_tW-channel_TuneZ2star_Summer12":        TaskDef(njobsIn=  40, njobsOut=2),
-        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDef(njobsIn=  40, njobsOut=2),
+        "T_tW-channel_TuneZ2star_Summer12":        TaskDef(njobsIn=  40, njobsOut=1),
+        "Tbar_tW-channel_TuneZ2star_Summer12":     TaskDef(njobsIn=  40, njobsOut=1),
         "T_s-channel_TuneZ2star_Summer12":         TaskDef(njobsIn=   6, njobsOut=1),
         "Tbar_s-channel_TuneZ2star_Summer12":      TaskDef(njobsIn=   5, njobsOut=1),
         "WW_TuneZ2star_Summer12":                  TaskDef(njobsIn= 200, njobsOut=7),
-        "WZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 150, njobsOut=7),
-        "ZZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 150, njobsOut=7),
-        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef(njobsIn=  50, njobsOut=4),
+        "WZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 150, njobsOut=4),
+        "ZZ_TuneZ2star_Summer12":                  TaskDef(njobsIn= 150, njobsOut=4),
+        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef(njobsIn=  50, njobsOut=2),
         }
     # Update the default definitions from the argument
     updateTaskDefinitions(defaultDefinitions, njobs)
@@ -731,6 +746,9 @@ def addEmbeddingSkim_v44_5_1(datasets):
         # User mean 3107.2, min 374.8, max 9280.2
         # Mean 100.6 MB, min 15.2 MB, max 219.0 MB
         "SingleMu_166161-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_skim_v44_5_2-9279e439e9124cd35585c1246e432cfd/USER"),
+        # hack to split the above one to two, let the analysis-time JSON splitting take care of the rest
+        "SingleMu_166161-167913_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_skim_v44_5_2-9279e439e9124cd35585c1246e432cfd/USER"),
+        "SingleMu_170722-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_skim_v44_5_2-9279e439e9124cd35585c1246e432cfd/USER"),
         # 245801 events, 162 jobs
         # User mean 4546.0, min 1653.9, max 10561.0
         # Mean 140.6 MB, min 55.2 MB, max 226.0 MB
@@ -739,6 +757,7 @@ def addEmbeddingSkim_v44_5_1(datasets):
         # User mean 3423.2, min 1095.3, max 7534.9
         # Mean 120.9 MB, min 47.4 MB, max 253.1 MB
         "SingleMu_175832-180252_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_175832_180252_tauembedding_skim_v44_5_2-ff6b0c8176db587721dc02d5ab403d42/USER"),
+
 
         # 8183108 events, 4994 jobs
         # User mean 3079.8, min 14.8, max 6305.4
@@ -898,7 +917,10 @@ def addEmbeddingEmbedding_v44_5_2(datasets):
         # 459497 events, 382 jobs
         # User mean 6374.5, min 2459.8, max 12818.7
         # Mean 50.1 MB, min 19.6 MB, max 98.4 MB
-        "SingleMu_166161-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_embedding_v44_5_2-82a321c5cc2fa6d80afd1d36f2e86392/USER"),
+#        "SingleMu_166161-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_embedding_v44_5_2-82a321c5cc2fa6d80afd1d36f2e86392/USER"),
+        # hack to split the above one to two, let the analysis-time JSON splitting take care of the rest
+        "SingleMu_166161-167913_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_embedding_v44_5_2-82a321c5cc2fa6d80afd1d36f2e86392/USER"),
+        "SingleMu_170722-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_173198_tauembedding_embedding_v44_5_2-82a321c5cc2fa6d80afd1d36f2e86392/USER"),
         # 80095 events, 57 jobs
         # User mean 7571.1, min 2896.6, max 11448.5
         # Mean 57.8 MB, min 23.1 MB, max 89.1 MB
@@ -978,6 +1000,24 @@ def addEmbeddingEmbedding_v44_5_2(datasets):
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef("/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_2b-09beb674645d38b540e73d5d439e3d78/USER", publishPostfix="b"),
     })
 
+
+def addEmbeddingGenTauSkim_v53_3(datasets):
+    definitions = {
+        "TTJets_TuneZ2star_Summer12":              TaskDef(""),
+        # 3720617 events, 1801 jobs
+        # User mean 4105.7, min 539.6, max 28921.8
+        # Mean 195.1 MB, min 119.0 MB, max 208.1 MB
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v2_AODSIM_tauembedding_gentauskim_v53_3-0a62a3dd997afd2375bf66b2a5c6545f/USER"),
+        # 4320120 events, 2723 jobs
+        # User mean 4416.5, min 193.3, max 24415.8
+        # Mean 156.0 MB, min 9.9 MB, max 168.0 MB
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_gentauskim_v53_3-0a62a3dd997afd2375bf66b2a5c6545f/USER"),
+        # 262833 events, 206 jobs
+        # User mean 3331.3, min 118.2, max 5683.8
+        # Mean 139.5 MB, min 4.0 MB, max 152.4 MB
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("/TTJets_HadronicMGDecays_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_ext_v1_AODSIM_tauembedding_gentauskim_v53_3-0a62a3dd997afd2375bf66b2a5c6545f/USER"),
+        }
+    addEmbeddingGenTauSkim_53X("v53_3", datasets, definitions)
 
 def addEmbeddingSkim_v53_3(datasets):
     definitions = {

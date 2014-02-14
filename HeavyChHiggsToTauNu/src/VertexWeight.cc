@@ -71,11 +71,14 @@ namespace HPlus {
     //}
   }
 
-  std::pair<double, size_t> VertexWeight::getWeightAndSize(const edm::Event& iEvent, const edm::EventSetup& iSetup) const {
-    edm::Handle<edm::View<reco::Vertex> > hvertex;
-    iEvent.getByLabel(fVertexSrc, hvertex);
+  std::pair<double, size_t> VertexWeight::getWeightAndSize(const edm::Event& iEvent, const edm::EventSetup& iSetup, bool getSize) const {
+    size_t vertSize = 0;
+    if(getSize) {
+      edm::Handle<edm::View<reco::Vertex> > hvertex;
+      iEvent.getByLabel(fVertexSrc, hvertex);
 
-    size_t vertSize = hvertex->size();
+      vertSize = hvertex->size();
+    }
 
     if(!fEnabled || iEvent.isRealData()) {
       hWeights->Fill(1.0);
@@ -120,7 +123,7 @@ namespace HPlus {
 
 
   double VertexWeight::getWeight(const edm::Event& iEvent, const edm::EventSetup& iSetup) const {
-    return getWeightAndSize(iEvent, iSetup).first;
+    return getWeightAndSize(iEvent, iSetup, false).first;
   }
 
   double VertexWeight::myLumiWeights(float nvtx) const {

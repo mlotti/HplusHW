@@ -22,8 +22,7 @@ def customize(process):
         process.skimGenTauTausCount
     )
 
-
-def getCounters():
+def getCountersPrepend():
     return [
         "skimGenTauTausCountAll",
         "skimGenTauTausCount"

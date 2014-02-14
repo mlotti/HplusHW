@@ -196,6 +196,13 @@ signalNtuple.weight = "weightPileup*weightTrigger"
 signalNtuple.weightBTagging = signalNtuple.weight+"*weightBTagging"
 
 
+# http://pdg.lbl.gov/2013/reviews/rpp2012-rev-tau-branching-fractions.pdf
+#                 e        mu
+BR_tau_hadr = 1 - 0.1783 - 0.1741
+def scaleTauBRNormalization(h):
+    # All other normalization is within the job
+    h.Scale(BR_tau_hadr)
+
 
 ## Apply embedding normalization
 #

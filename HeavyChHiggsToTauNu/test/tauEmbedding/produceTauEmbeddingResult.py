@@ -14,6 +14,7 @@
 
 
 import os
+import sys
 import math
 import time
 import json
@@ -31,104 +32,133 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
-# http://pdg.lbl.gov/2013/reviews/rpp2012-rev-tau-branching-fractions.pdf
-#                 e        mu
-BR_tau_hadr = 1 - 0.1783 - 0.1741
 
-def normalize(h):
-    # All other normalization is within the job
-    h.Scale(1/BR_tau_hadr)
-
-def processDirectory(dset, srcDirName, dstDir):
+def processDirectory(dset, srcDirName, dstDir, scaleBy):
     # Get directories, recurse to them
     dirs = dset.getDirectoryContent(srcDirName, lambda o: isinstance(o, ROOT.TDirectory))
     dirs = filter(lambda n: n != "configInfo", dirs)
 
     for d in dirs:
         newDir = dstDir.mkdir(d)
-        processDirectory(dset, os.path.join(srcDirName, d), newDir)
+        processDirectory(dset, os.path.join(srcDirName, d), newDir, scaleBy)
 
     # Then process histograms
     histos = dset.getDirectoryContent(srcDirName, lambda o: isinstance(o, ROOT.TH1))
     dstDir.cd()
+    shouldScale = True
+    if srcDirName == "counters":
+        # Don't touch unweighted counters
+        shouldScale = False
     for hname in histos:
         drh = dset.getDatasetRootHisto(os.path.join(srcDirName, hname))
         hnew = drh.getHistogram() # TH1
         hnew.SetName(hname)
         hnew.SetDirectory(dstDir)
-        if hname not in "SplittedBinInfo":
-            normalize(hnew)
+        if shouldScale and hname not in "SplittedBinInfo":
+            tauEmbedding.scaleTauBRNormalization(hnew)
+            if scaleBy is not None:
+                hnew.Scale(scaleBy)
         hnew.Write()
 #        ROOT.gDirectory.Delete(hname)
         hnew.Delete()
 
-def main(output, dsetMgr):
+def main(output, dset, dstPostfix="", scaleBy=None):
     start = time.time()
-    dset = dsetMgr.getDataset("Data")
 
     # Create analysis directory
     tmp = dset
     if not hasattr(tmp, "getSearchMode"):
         tmp = dset.datasets[0]
-    analysisDirName = "signalAnalysis"+tmp.getSearchMode()+tmp.getDataEra()+tmp.getOptimizationMode()+tmp.getSystematicVariation()
+    analysisDirName = "signalAnalysis"+tmp.getSearchMode()+tmp.getDataEra()+tmp.getOptimizationMode()+tmp.getSystematicVariation()+dstPostfix
     analysisDir = output.mkdir(analysisDirName)
 
     # Create config info directory
     configInfoDir = analysisDir.mkdir("configInfo")
     configInfoDir.cd()
-    configInfoHist = ROOT.TH1F("configinfo", "configinfo", 2, 0, 2)
+    nbins = 2
+    configInfoHist = ROOT.TH1F("configinfo", "configinfo", nbins, 0, nbins)
     configInfoHist.SetDirectory(configInfoDir)
     configInfoHist.GetXaxis().SetBinLabel(1, "control")
     configInfoHist.SetBinContent(1, 1)
-    configInfoHist.GetXaxis().SetBinLabel(2, "luminosity")
-    configInfoHist.SetBinContent(2, dset.getLuminosity())
+    if dset.isData():
+        configInfoHist.GetXaxis().SetBinLabel(2, "luminosity")
+        configInfoHist.SetBinContent(2, dset.getLuminosity())
+    if dset.isMC():
+        configInfoHist.GetXaxis().SetBinLabel(2, "crossSection")
+        configInfoHist.SetBinContent(2, dset.getCrossSection())
     configInfoHist.Write()
     configInfoHist.Delete()
 
     # Process histograms
-    processDirectory(dset, "", analysisDir)
+    processDirectory(dset, "", analysisDir, scaleBy)
 
     stop = time.time()
     print "Processed in %f.2 s" % (stop-start)
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options] multicrab-dir")
+    parser.add_option("--analysisName", dest="analysisName", type="string", default=None,
+                      help="Specify analysisName explicitly (by default the longest one is selected")
     parser.add_option("--allEras", dest="allEras", action="store_true", default=False,
                       help="Process all data eras (default is to process the longest one)")
+    parser.add_option("--list", dest="listAnalyses", action="store_true", default=False,
+                      help="List available analysis name information, and quit.")
+    parser.add_option("--mc", dest="mcs", action="append", type="string", default=[],
+                      help="Process also these MC samples. If any of them is '*', all available MC's are used")
     (opts, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("Expected exactly one multicrab directory, got %d" % len(args))
 
     createArgs = {"directory": args[0], "includeOnlyTasks": "SingleMu"}
     datasetCreator = dataset.readFromMulticrabCfg(**createArgs)
-    analysisName = ""
-    for a in datasetCreator.getAnalyses():
-        if len(a) > len(analysisName):
-            analysisName = a
-    if len(analysisName) == 0:
-        raise Exception("Did not find analysis name")
+    datasetCreatorMC = None
+    if len(opts.mcs) > 0:
+        if "*" in opts.mcs:
+            del createArgs["includeOnlyTasks"]
+            createArgs["excludeTasks"] = "SingleMu"
+        else:
+            createArgs["includeOnlyTasks"] = "|".join(opts.mcs)
+        datasetCreatorMC = dataset.readFromMulticrabCfg(**createArgs)
+    if opts.listAnalyses:
+        datasetCreator.printAnalyses()
+        sys.exit(0)
+    analysisName = opts.analysisName
+    if analysisName is None:
+        analysisName = ""
+        for a in datasetCreator.getAnalyses():
+            if len(a) > len(analysisName):
+                analysisName = a
+        if len(analysisName) == 0:
+            raise Exception("Did not find analysis name")
 
     # Deduce eras
-    eras = datasetCreator.getDataEras()
-    letters = {}
-    for e in eras:
-        letters[e[-1]] = 1
-    keys = letters.keys()
-    keys.sort()
-    tmp = eras[0]
-    for k in keys[1:]:
-        tmp += k
-        eras.append(tmp)
-    if not opts.allEras:
+    if datasetCreatorMC is not None:
+        eras = datasetCreatorMC.getDataEras()
+    else:
+        eras = datasetCreator.getDataEras()
+        letters = {}
+        for e in eras:
+            letters[e[-1]] = 1
+        keys = letters.keys()
+        keys.sort()
         tmp = eras[0]
-        for e in eras[1:]:
-            if len(e) > len(tmp):
-                tmp = e
-        eras = [tmp]
+        for k in keys[1:]:
+            tmp += k
+            eras.append(tmp)
+        if not opts.allEras:
+            tmp = eras[0]
+            for e in eras[1:]:
+                if len(e) > len(tmp):
+                    tmp = e
+            eras = [tmp]
 
     # Create pseudo multicrab directory
-    taskDir = multicrab.createTaskDir("embedding")
+    dirname = "embedding"
+    if datasetCreatorMC is not None:
+        dirname += "_mc"
+    taskDir = multicrab.createTaskDir(dirname)
 
     f = open(os.path.join(taskDir, "codeVersion.txt"), "w")
     f.write(git.getCommitId()+"\n")
@@ -143,41 +173,62 @@ if __name__ == "__main__":
     f = open(os.path.join(taskDir, "multicrab.cfg"), "w")
     f.write("[Data]\n")
     f.write("dummy = embedded\n\n")
+    if datasetCreatorMC is not None:
+        for mc in datasetCreatorMC.getDatasetNames():
+            f.write("[%s]\n"%mc)
+            f.write("dummy = embedded\n\n")
     f.close()
     f = open(os.path.join(taskDir, "inputInfo.txt"), "w")
     f.write("Embedded directory: %s\n" % args[0])
 
-    resdir = os.path.join(taskDir, "Data", "res")
-    os.makedirs(resdir)
+    configInfoAdded = {}
 
-    configInfoAdded = False
+    dcs = [datasetCreator]
+    if datasetCreatorMC is not None:
+        dcs.append(datasetCreatorMC)
 
-    for searchMode in datasetCreator.getSearchModes():
-        for era in eras:
-            for optMode in datasetCreator.getOptimizationModes():
-                for systVar in [None]+datasetCreator.getSystematicVariations():
-                    f.write("Analysis %s, searchMode %s, dataEra %s, optimizationMode %s, systematicVariation %s\n" % (analysisName, searchMode, era, optMode, systVar))
-                    dsetMgr = datasetCreator.createDatasetManager(analysisName=analysisName, searchMode=searchMode,
-                                                                  dataEra=era, optimizationMode=optMode,
-                                                                  systematicVariation=systVar,
-                                                                  enableSystematicVariationForData=True)
+    for dc in dcs:
+        for searchMode in dc.getSearchModes():
+            for era in eras:
+                for optMode in dc.getOptimizationModes():
+                    for systVar in [None]+dc.getSystematicVariations():
+                        f.write("Analysis %s, searchMode %s, dataEra %s, optimizationMode %s, systematicVariation %s\n" % (analysisName, searchMode, era, optMode, systVar))
+                        dsetMgr = dc.createDatasetManager(analysisName=analysisName, searchMode=searchMode,
+                                                          dataEra=era, optimizationMode=optMode,
+                                                          systematicVariation=systVar,
+                                                          enableSystematicVariationForData=True)
 
-                    dsetMgr.loadLuminosities()
-                    dsetMgr.mergeData()
-                    # Open and close result file in order to prevent
-                    # per-analysis time blowing up (because of ROOT)
-                    if not configInfoAdded:
-                        resultFile = ROOT.TFile.Open(os.path.join(resdir, "histograms-Data.root"), "RECREATE")
-                        aux.addConfigInfo(resultFile, dsetMgr.getDataset("Data"), addLuminosity=False, dataVersionPostfix="pseudo", additionalText={"analysisName": analysisName})
-                        configInfoAdded = True
-                    else:
-                        resultFile = ROOT.TFile.Open(os.path.join(resdir, "histograms-Data.root"), "UPDATE")
+                        if len(dsetMgr.getDataDatasets()) > 0:
+                            dsetMgr.loadLuminosities()
+                            dsetMgr.mergeData()
+                        for dset in dsetMgr.getAllDatasets():
+                            print "Dataset", dset.getName()
+                            resdir = os.path.join(taskDir, dset.getName(), "res")
+                            if not os.path.exists(resdir):
+                                os.makedirs(resdir)
 
-                    main(resultFile, dsetMgr)
-                    resultFile.Close()
+                            # Open and close result file in order to prevent
+                            # per-analysis time blowing up (because of ROOT)
+                            if not dset.getName() in configInfoAdded:
+                                dv = "pseudo"
+                                if dset.isMC():
+                                    dv = dset.getDataVersion()
+                                resultFile = ROOT.TFile.Open(os.path.join(resdir, "histograms-%s.root"%dset.getName()), "RECREATE")
+                                aux.addConfigInfo(resultFile, dset, addLuminosity=False, dataVersion=dv, additionalText={"analysisName": analysisName})
+                                configInfoAdded[dset.getName()] = True
+                            else:
+                                resultFile = ROOT.TFile.Open(os.path.join(resdir, "histograms-%s.root"%dset.getName()), "UPDATE")
+
+                            main(resultFile, dset)
+                            if systVar is None and "SystVarGenuineTau" not in dc.getSystematicVariations():
+                                unc = systematics.getTauIDUncertainty(isGenuineTau=True)
+                                main(resultFile, dset, dstPostfix="SystVarGenuineTauPlus", scaleBy=(1+unc.getUncertaintyUp()))
+                                main(resultFile, dset, dstPostfix="SystVarGenuineTauMinus", scaleBy=(1-unc.getUncertaintyDown()))
+
+                            resultFile.Close()
+#                        break
 #                    break
 #                break
-#            break
 
     f.close()
     print "Created", taskDir
