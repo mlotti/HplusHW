@@ -51,9 +51,9 @@ namespace HPlus {
     };
     enum MCBackgroundType {
       kkUnknown = 0,
-      kkQCDMeasurementLike,
-      kkEmbedding,
-      kkEWKWithFakeTau
+      kkEWKFakeTauLike, // e/mu/jet -> identified tau, identified tau matches to visible tau lepton, tau lepton(s) in accepance
+      kkEmbeddingLikeSingleTauInAcceptance, // genuine tau identified, matches to vis. tau lepton, one tau lepton in accepance
+      kkEmbeddingLikeMultipleTausInAcceptance // genuine tau identified, matches to vis. tau lepton, more than one tau lepton in accepance
     };
     class Data {
     public:
@@ -76,10 +76,11 @@ namespace HPlus {
       const bool isElectronOrMuonFromTauDecay() const { return FakeTauIdentifier::isElectronOrMuonFromTauDecay(fTauMatchType); }
 
       const MCBackgroundType getBackgroundType() const { return fBackgroundType; }
-      const bool isQCDMeasurementLike() const { return fBackgroundType == kkQCDMeasurementLike; }
-      const bool isEmbeddingGenuineTau() const { return fBackgroundType == kkEmbedding; }
-      const bool isEWKFakeTau() const { return fBackgroundType == kkEWKWithFakeTau; }
-
+      const bool isEWKFakeTauLike() const { return fBackgroundType == kkEWKFakeTauLike; }
+      const bool isEmbeddingGenuineTauLike() const { return isEmbeddingGenuineTauLikeWithSingleTauInAcceptance() || isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance(); }
+      const bool isEmbeddingGenuineTauLikeWithSingleTauInAcceptance() const { return fBackgroundType == kkEmbeddingLikeSingleTauInAcceptance; }
+      const bool isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance() const { return fBackgroundType == kkEmbeddingLikeMultipleTausInAcceptance; }
+//isEWKFakeTau
       friend class FakeTauIdentifier;
 
     private:

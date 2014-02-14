@@ -477,13 +477,13 @@ namespace HPlus {
     if(!tauData.passedEvent()) return false; // Require at least one tau
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
-    bool mySelectedToEWKFakeTauBackgroundStatus = (tauMatchData.isQCDMeasurementLike() || tauMatchData.isEWKFakeTau());
+    bool mySelectedToEWKFakeTauBackgroundStatus = tauMatchData.isEWKFakeTauLike();
     fCommonPlotsAfterTauSelection->fill();
     fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauData, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
     fTree.setTauIsFake(mySelectedToEWKFakeTauBackgroundStatus);
     if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterTauSelectionEWKFakeTausBkg->fill();
     // Below "genuine tau" is in the context of embedding (i.e. irrespective of the tau decay)
-    if (fOnlyEmbeddingGenuineTaus && !tauMatchData.isEmbeddingGenuineTau()) return false;
+    if (fOnlyEmbeddingGenuineTaus && !tauMatchData.isEmbeddingGenuineTauLike()) return false;
     increment(fTausExistCounter);
     // Apply scale factor for fake tau
     if (!iEvent.isRealData())
@@ -984,9 +984,10 @@ namespace HPlus {
   void SignalAnalysis::fillSelectionFlowAndCounterGroups(int nVertices, FakeTauIdentifier::Data& tauMatchData, bool selectedToEWKFakeTauBackgroundStatus, SignalSelectionOrder selection, const TauSelection::Data& tauData) {
     hSelectionFlow->Fill(selection);
     hSelectionFlowVsVertices->Fill(nVertices, selection);
-    if (tauMatchData.isEmbeddingGenuineTau())
+    if (selectedToEWKFakeTauBackgroundStatus) {
       hSelectionFlowVsVerticesEWKFakeTausBkg->Fill(nVertices, selection);
-    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), selectedToEWKFakeTauBackgroundStatus, selection, tauData);
+      fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), selectedToEWKFakeTauBackgroundStatus, selection, tauData);
+    }
   }
 
   void SignalAnalysis::fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, bool selectedToEWKFakeTauBackgroundStatus, HPlus::SignalAnalysis::SignalSelectionOrder selection, const HPlus::TauSelection::Data& tauData) {
