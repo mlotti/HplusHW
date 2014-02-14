@@ -586,10 +586,12 @@ namespace HPlus {
     hMCBmistaggedCJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "MistaggedCJetsByPtAndEta", "MistaggedCJetsByPtAndEta;c jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
     hMCBmistaggedLightJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "MistaggedLightJetsByPtAndEta", "MistaggedLightJetsByPtAndEta;udsg jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
 
-    // Scale factor histograms (needed for evaluating syst. uncertainty of btagging in datacard generator)
+    // Scale factor histograms (as a control)
     hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
-    hBTagRelativeUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 3000, 0., 3.);
-    hBTagAbsoluteUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 3000, 0., 3.);
+    hBTagRelativeUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 100, 0., 3.);
+    hBTagAbsoluteUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 100, 0., 3.);
+    // Probability for passing btag (as a control)
+    hProbabilityForPassingBtag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ProbabilityForPassingBTag", "ProbabilityForPassingBTag;Probability;N_{events}", 100, 0., 1.);
 
     // Set scale factor and efficiency look-up tables and functions
     if (fLeadingDiscrCut > 0.243 && fLeadingDiscrCut < 0.245) { // CSVL (Combined Secondary Vertex b-tagging method, Loose working point)
@@ -740,55 +742,9 @@ namespace HPlus {
       increment(fTaggedCount);
 
     // Calculate probability to pass b tagging
-    double myProbabilitySum = 0.0;
-    if (!iEvent.isRealData()) {
-      size_t nJets = jets.size();
-      std::vector<bool> myPassedStatus;
-      for (size_t j = 0; j < jets.size(); ++j) {
-        myPassedStatus.push_back(false); // initialize
-      }
-      size_t nPermutations = TMath::Pow(2, nJets);
-      for (size_t i = 0; i < nPermutations; ++i) {
-        // Set status vector according to the permutation
-        std::cout << "permutation " << i << ":"
-        int nPassed = 0;
-        for (size_t j = 0; j < jets.size(); ++j) {
-          bool myStatus = (i % TMath::Pow(2,j) == 0);
-          myPassedStatus[j] = myStatus;
-          if (myStatus) ++nPassed;
-          std::cout << "," << myPassedStatus[j];
-        }
-        // Sum probability only if the number of passed jets would match to the cut criteria
-        if (fNumberOfBJets.passedCut(nPassed)) {
-          double myProbability = 1.0;
-          for (size_t j = 0; j < jets.size(); ++j) {
-            // Obtain correct efficiency table depending on jet flavor
-            EfficiencyTable* myTable = 0;
-            int myJetFlavor = std::abs(jets[j]->partonFlavour());
-            if (myJetFlavor >= 1 && myJetFlavor <= 3 ) { // uds jet
-              EfficiencyTable = &fUDSMistagEffTable;
-            } else if (myJetFlavor == 4) { // c jet
-              EfficiencyTable = &fCMistagEffTable;
-            } else if (myJetFlavor == 5) { // b jet
-              EfficiencyTable = &fTagEffTable;
-            } else { // gluon jet or unknown; assume unknown is rather a gluon than uds jet (mistag rate is higher)
-              EfficiencyTable = &fGMistagEffTable;
-            }
-            if (myPassedStatus[j]) {
-              myProbability *= EfficiencyTable->getEfficiency(jets[j]->pt());
-              std::cout << "," << EfficiencyTable->getEfficiency(jets[j]->pt());
-            } else {
-              myProbability *= 1.0 - EfficiencyTable->getEfficiency(jets[j]->pt());
-              std::cout << "," << 1.0-EfficiencyTable->getEfficiency(jets[j]->pt());
-            }
-          }
-          myProbabilitySum += myProbability;
-          std::cout << ",prob=," << myProbability << std::endl;
-        }
-      }
-    }
-    std::cout << "Overall prob:," << myProbabilitySum << std::endl;
-    output.fProbabilityToPassBtagging = myProbabilitySum;
+    double myProbability = calculateProbabilityToPassBTagging(iEvent, jets);
+    hProbabilityForPassingBtag->Fill(myProbability);
+    output.fProbabilityToPassBtagging = myProbability;
 
     return output;
   }
@@ -948,5 +904,57 @@ namespace HPlus {
       uncertainty = TMath::Sqrt(uncertainty2);
     }
     return uncertainty;
+  }
+
+  double BTagging::calculateProbabilityToPassBTagging(const edm::Event& iEvent, const edm::PtrVector<pat::Jet>& jets) {
+    double myProbabilitySum = 0.0;
+    if (!iEvent.isRealData()) {
+      size_t nJets = jets.size();
+      std::vector<bool> myPassedStatus;
+      for (size_t j = 0; j < jets.size(); ++j) {
+        myPassedStatus.push_back(false); // initialize
+      }
+      size_t nPermutations = TMath::Power(2, nJets);
+      for (size_t i = 0; i < nPermutations; ++i) {
+        // Set status vector according to the permutation
+        //std::cout << "permutation " << i << ":";
+        size_t nPassed = 0;
+        for (size_t j = 0; j < jets.size(); ++j) {
+          bool myStatus = (((i >> j) % 2) == 1);
+          myPassedStatus[j] = myStatus;
+          if (myStatus) ++nPassed;
+          //std::cout << "," << myPassedStatus[j];
+        }
+        // Sum probability only if the number of passed jets would match to the cut criteria
+        if (fNumberOfBJets.passedCut(nPassed)) {
+          double myProbability = 1.0;
+          for (size_t j = 0; j < jets.size(); ++j) {
+            // Obtain correct efficiency table depending on jet flavor
+            EfficiencyTable* myTable = 0;
+            int myJetFlavor = std::abs(jets[j]->partonFlavour());
+            if (myJetFlavor >= 1 && myJetFlavor <= 3 ) { // uds jet
+              myTable = &fUDSMistagEffTable;
+            } else if (myJetFlavor == 4) { // c jet
+              myTable = &fCMistagEffTable;
+            } else if (myJetFlavor == 5) { // b jet
+              myTable = &fTagEffTable;
+            } else { // gluon jet or unknown; assume unknown is rather a gluon than uds jet (mistag rate is higher)
+              myTable = &fGMistagEffTable;
+            }
+            if (myPassedStatus[j]) {
+              myProbability *= myTable->getEfficiency(jets[j]->pt());
+              //std::cout << "," << myTable->getEfficiency(jets[j]->pt());
+            } else {
+              myProbability *= 1.0 - myTable->getEfficiency(jets[j]->pt());
+              //std::cout << "," << 1.0 - myTable->getEfficiency(jets[j]->pt());
+            }
+          }
+          myProbabilitySum += myProbability;
+          //std::cout << ",prob=," << myProbability << std::endl;
+        }
+      }
+    }
+    //std::cout << "Overall prob:," << myProbabilitySum << std::endl;
+    return myProbabilitySum;
   }
 }

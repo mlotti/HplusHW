@@ -102,11 +102,11 @@ namespace HPlus {
           hFakeTauStatus->Fill(2);
         else if (fFakeTauData->isElectronToTau()) {
           hFakeTauStatus->Fill(3);
-          if (fFakeTauData->isEmbeddingGenuineTau())
+          if (fFakeTauData->isEmbeddingGenuineTauLike())
             hFakeTauStatus->Fill(9);
         } else if (fFakeTauData->isMuonToTau()) {
           hFakeTauStatus->Fill(4);
-          if (fFakeTauData->isEmbeddingGenuineTau())
+          if (fFakeTauData->isEmbeddingGenuineTauLike())
             hFakeTauStatus->Fill(10);
         } else if (fFakeTauData->isJetToTau()) {
           hFakeTauStatus->Fill(5);
@@ -133,11 +133,11 @@ namespace HPlus {
         else if (fFakeTauData->getTauMatchType() == FakeTauIdentifier::kkJetToTauAndTauJetInsideAcceptance)
           hFakeTauStatus->Fill(14);
         // Background type
-        if (fFakeTauData->isQCDMeasurementLike())
+        if (fFakeTauData->isEWKFakeTauLike())
           hFakeTauStatus->Fill(15);
-        else if (fFakeTauData->isEmbeddingGenuineTau())
+        else if (fFakeTauData->isEmbeddingGenuineTauLikeWithSingleTauInAcceptance())
           hFakeTauStatus->Fill(16);
-        else if (fFakeTauData->isEWKFakeTau())
+        else if (fFakeTauData->isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance())
           hFakeTauStatus->Fill(17);
         else
           hFakeTauStatus->Fill(18);
