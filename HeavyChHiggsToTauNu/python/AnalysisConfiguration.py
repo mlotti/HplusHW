@@ -518,7 +518,8 @@ class ConfigBuilder:
                 func(getattr(process, name), name)
         # Set trigger efficiencies
         runSetter(lambda module, name: param.setTauTriggerEfficiencyScaleFactorBasedOnTau(module.tauTriggerEfficiencyScaleFactor, module.tauSelection, name))
-        runSetter(lambda module, name: param.setMetTriggerEfficiencyScaleFactorBasedOnTau(module.metTriggerEfficiencyScaleFactor, module.tauSelection, name))
+        if self.applyMETTriggerScaleFactor:
+            runSetter(lambda module, name: param.setMetTriggerEfficiencyScaleFactorBasedOnTau(module.metTriggerEfficiencyScaleFactor, module.tauSelection, name))
         if self.applyL1ETMScaleFactor:
             runSetter(lambda module, name: param.setL1ETMEfficiencyScaleFactorBasedOnTau(module.metTriggerEfficiencyScaleFactor, module.tauSelection, name))
         # Set fake tau SF
