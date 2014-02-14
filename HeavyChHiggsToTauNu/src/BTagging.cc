@@ -944,6 +944,6 @@ namespace HPlus {
       }
     }
     std::cout << "Overall prob:," << myProbabilitySum << std::endl;
-    return myProbabilitySum
+    return myProbabilitySum;
   }
 }
