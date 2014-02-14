@@ -646,6 +646,7 @@ commonPlotsSettings = cms.untracked.PSet(
     rtauBins = SetHistogramBinSettings(55, 0., 1.1),
     njetsBins = SetHistogramBinSettings(20, 0., 20.),
     metBins = SetHistogramBinSettings(50, 0., 500.),
+    bjetDiscriminatorBins = SetHistogramBinSettings(20, -1., 1.),
     tailKiller1DBins = SetHistogramBinSettings(52, 0., 260.),
     topMassBins = SetHistogramBinSettings(50, 0., 500.),
     WMassBins = SetHistogramBinSettings(60, 0., 300.),

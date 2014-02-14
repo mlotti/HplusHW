@@ -36,6 +36,7 @@ namespace HPlus {
     fRtauBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("rtauBins")),
     fNjetsBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("njetsBins")),
     fMetBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("metBins")),
+    fBJetDiscriminatorBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetDiscriminatorBins")),
     fTailKiller1DSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("tailKiller1DBins")),
     fTopMassBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("topMassBins")),
     fWMassBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("WMassBins")),
@@ -115,9 +116,9 @@ namespace HPlus {
     // muon veto
 
     // jet selection
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlNjets,            "Njets", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlNjets,            "Njets", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
     if (fAnalysisType == kSignalAnalysis)
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausNjets, "Njets", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausNjets, "Njets", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
 
     // MET trigger SF
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlNjetsAfterJetSelectionAndMETSF,            "NjetsAfterJetSelectionAndMETSF", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
@@ -159,15 +160,17 @@ namespace HPlus {
 
     // MET selection
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMET,            "MET", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis)
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhi,         "METPhi", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMET, "MET", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
-
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhi, "METPhi", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    }
     // b tagging
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlNbjets,            "NBjets", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlBDiscriminator,    "BtagDiscriminator", "Btag discriminator;b tag discriminator;N_{events}", 40, -2, 2);
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlBDiscriminator,    "BtagDiscriminator", "Btag discriminator;b tag discriminator;N_{events}", fBJetDiscriminatorBinSettings.bins(), fBJetDiscriminatorBinSettings.min(), fBJetDiscriminatorBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausNbjets,         "NBjets", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausBDiscriminator, "BtagDiscriminator", "Btag discriminator;b tag discriminator;N_{events}", 40, -2, 2);
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausBDiscriminator, "BtagDiscriminator", "Btag discriminator;b tag discriminator;N_{events}", fBJetDiscriminatorBinSettings.bins(), fBJetDiscriminatorBinSettings.min(), fBJetDiscriminatorBinSettings.max());
     }
 
     // improved delta phi back to back cuts
@@ -448,7 +451,11 @@ namespace HPlus {
   void CommonPlots::fillControlPlotsAtMETSelection(const edm::Event& iEvent, const METSelection::Data& data) {
     fMETData = data;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMET, data.getSelectedMET()->et());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMET, data.getSelectedMET()->et());
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhi, data.getSelectedMET()->phi());
+    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMET, data.getSelectedMET()->et());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhi, data.getSelectedMET()->phi());
+    }
   }
 
   void CommonPlots::fillControlPlotsAtBtagging(const edm::Event& iEvent, const BTagging::Data& data) {

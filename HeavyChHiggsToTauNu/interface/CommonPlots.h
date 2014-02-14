@@ -202,6 +202,7 @@ namespace HPlus {
     HistogramSettings fRtauBinSettings;
     HistogramSettings fNjetsBinSettings;
     HistogramSettings fMetBinSettings;
+    HistogramSettings fBJetDiscriminatorBinSettings;
     HistogramSettings fTailKiller1DSettings;
     HistogramSettings fTopMassBinSettings;
     HistogramSettings fWMassBinSettings;
@@ -273,7 +274,9 @@ namespace HPlus {
 
     // MET selection
     std::vector<WrappedTH1*> hCtrlMET;
+    std::vector<WrappedTH1*> hCtrlMETPhi;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMET;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausMETPhi;
 
     // b tagging
     std::vector<WrappedTH1*> hCtrlNbjets;
