@@ -72,7 +72,7 @@ def customiseParamForTauEmbedding(process, param, options, dataVersion):
         param.tauTriggerEfficiencyScaleFactor.dataSelect = tauTriggerEfficiency.getRunsForEra("Run2012ABCD")
         param.tauTriggerEfficiencyScaleFactor.mcSelect = "Summer12_PU_2012ABCD"
         param.metTriggerEfficiencyScaleFactor.dataSelect = metTriggerEfficiency.getRunsForEra("Run2012ABCD")
-        param.metTriggerEfficiencyScaleFactor.mcSelect = "Summer12_PU_2012ABCd"
+        param.metTriggerEfficiencyScaleFactor.mcSelect = "Summer12_PU_2012ABCD"
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
