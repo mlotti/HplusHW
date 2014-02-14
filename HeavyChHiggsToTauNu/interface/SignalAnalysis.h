@@ -144,6 +144,7 @@ namespace HPlus {
     Count fTopPtWeightCounter;
     Count fWJetsWeightCounter;
     Count fEmbeddingGeneratorWeightCounter;
+    Count fEmbeddingWTauMuWeightCounter;
     Count fMETFiltersCounter;
     Count fEmbeddingMuonTriggerEfficiencyCounter;
     Count fEmbeddingMuonIdEfficiencyCounter;
@@ -207,6 +208,7 @@ namespace HPlus {
     WeightReader fWJetsWeightReader;
     WeightReader fTopPtWeightReader;
     WeightReader fEmbeddingGeneratorWeightReader;
+    WeightReader fEmbeddingWTauMuWeightReader;
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;
@@ -227,8 +229,6 @@ namespace HPlus {
     WrappedTH1 *hVerticesBeforeWeight;
     WrappedTH1 *hVerticesAfterWeight;
 
-
-    
 
     // Transverse mass for top algorithms
     WrappedTH1 *hTransverseMassTopSelection;

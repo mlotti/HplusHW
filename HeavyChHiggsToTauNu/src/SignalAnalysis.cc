@@ -70,7 +70,8 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
     fTopPtWeightCounter(eventCounter.addCounter("Top pt reweight")),
     fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
-    fEmbeddingGeneratorWeightCounter(eventCounter.addCounter("Embedding: generator weight weight")),
+    fEmbeddingGeneratorWeightCounter(eventCounter.addCounter("Embedding: generator weight")),
+    fEmbeddingWTauMuWeightCounter(eventCounter.addCounter("Embedding: W->tau->mu weight")),
     fMETFiltersCounter(eventCounter.addCounter("MET filters")),
     fEmbeddingMuonTriggerEfficiencyCounter(eventCounter.addCounter("Embedding: muon trig eff weight")),
     fEmbeddingMuonIdEfficiencyCounter(eventCounter.addCounter("Embedding: muon ID eff weight")),
@@ -140,6 +141,7 @@ namespace HPlus {
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
     fTopPtWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("topPtWeightReader"), fHistoWrapper, "TopPtWeight"),
     fEmbeddingGeneratorWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingGeneratorWeightReader"), fHistoWrapper, "EmbeddingGeneratorWeight"),
+    fEmbeddingWTauMuWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingWTauMuWeightReader"), fHistoWrapper, "EmbeddingWTauMuWeight"),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), fHistoWrapper, "TauID"),
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
@@ -222,7 +224,6 @@ namespace HPlus {
     TFileDirectory myVertexDir = fs->mkdir("Vertices");
     hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesBeforeWeight", "Number of vertices without weighting", 40, 0, 40);
     hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesAfterWeight", "Number of vertices with weighting", 40, 0, 40);
-
 
     // Transverse mass for top algorithms
     hTransverseMassTopSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "transverseMassTopSelection", "transverseMassTopSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
@@ -404,6 +405,13 @@ namespace HPlus {
       fTree.setEmbeddingGeneratorWeight(embeddingWeight);
     }
     increment(fEmbeddingGeneratorWeightCounter);
+
+    if(bTauEmbeddingStatus) {
+      double embeddingWeight = fEmbeddingWTauMuWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(embeddingWeight);
+      fTree.setEmbeddingWTauMuWeight(embeddingWeight);
+    }
+    increment(fEmbeddingWTauMuWeightCounter);
 
 
 //------ MET (noise) filters for data (reject events with instrumental fake MET)

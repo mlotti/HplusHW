@@ -312,7 +312,7 @@ MET = cms.untracked.PSet(
     rawSrc = cms.untracked.InputTag("patPFMet"), # PF MET
     type1Src = cms.untracked.InputTag("patType1CorrectedPFMet"),
     type2Src = cms.untracked.InputTag("patType1p2CorrectedPFMet"),
-    caloSrc = cms.untracked.InputTag("patMETs"),
+    caloSrc = cms.untracked.InputTag("metNoHF"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("type1"), # raw, type1, type2
     METCut = cms.untracked.double(60.0),
@@ -694,6 +694,11 @@ wjetsWeightReader = cms.untracked.PSet(
 embeddingGeneratorWeightReader = cms.untracked.PSet(
     weightSrc = cms.InputTag("generator", "weight"),
     enabled = cms.bool(False),
+)
+
+embeddingWTauMuWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("wtaumuWeight"),
+    enabled = cms.bool(False)
 )
 
 vertexWeight = cms.untracked.PSet(
