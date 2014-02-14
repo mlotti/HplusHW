@@ -203,12 +203,12 @@ namespace HPlus {
     fCommonPlotsAfterBackToBackDeltaPhiEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_DeltaPhiBackToBack",true,"#Delta#phi b2b")),
     fCommonPlotsSelectedEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_Selected",false,"Selected")),
     fCommonPlotsSelectedMtTailEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedMtTail",false,"SelectedMtTail")),
-    fCommonPlotsSelectedFullMassEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedFullMass",false,"FakeTaus_SelectedFullMass"))    
+    fCommonPlotsSelectedFullMassEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedFullMass",false,"FakeTaus_SelectedFullMass")),
     // Probabilistic b tag as event weight (note: for invariant mass, b tag is needed!)
     fCommonPlotsProbabilisticBTagAfterBTaggingEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ProbBtag:BTagging",false,"#geq1b tag")),
     fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhiEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ProbBtag:DeltaPhiBackToBack",false,"#Delta#phi b2b")),
     fCommonPlotsProbabilisticBTagSelectedEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ProbBtag:Selected",false,"Selected")),
-    fCommonPlotsProbabilisticBTagSelectedMtTailEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ProbBtag:SelectedMtTail",false,"SelectedMtTail")),
+    fCommonPlotsProbabilisticBTagSelectedMtTailEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ProbBtag:SelectedMtTail",false,"SelectedMtTail"))
   {
     // Check parameter initialisation
     if (fTopRecoName != "None" && fTopRecoName != "chi" && fTopRecoName != "std" && fTopRecoName != "Wselection" && fTopRecoName != "Bselection") {
