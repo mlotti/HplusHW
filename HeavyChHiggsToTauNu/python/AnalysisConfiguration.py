@@ -1060,6 +1060,14 @@ class ConfigBuilder:
                 postfix += "MetEff"
                 mod = mod.clone()
                 mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
+
+            if self.applyL1ETMScaleFactor:
+                addIntermediateAnalyzer(mod, name, postfix)
+
+                postfix += "L1ETMEff"
+                mod = mod.clone()
+                mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
+
             enablePrintCounter(mod)
             mod.histogramAmbientLevel = self.histogramAmbientLevel
             path = cms.Path(process.commonSequence * mod)
