@@ -325,14 +325,17 @@ namespace HPlus {
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKControlRegion;
     std::vector<WrappedTH1*> hShapeTransverseMass;
     std::vector<WrappedTH1*> hShapeEWKFakeTausTransverseMass;
+    std::vector<WrappedTH1*> hShapeEmbeddingLikeMultipleTausTransverseMass;
 
     std::vector<WrappedTH1*> hShapeProbabilisticBtagTransverseMass;
     std::vector<WrappedTH1*> hShapeProbabilisticBtagEWKFakeTausTransverseMass;
+    std::vector<WrappedTH1*> hShapeProbabilisticBtagEmbeddingLikeMultipleTausTransverseMass;
     // NOTE: do we want to try out something like mT vs. rTau?
 
     // all selections with full mass
     std::vector<WrappedTH1*> hShapeFullMass;
     std::vector<WrappedTH1*> hShapeEWKFakeTausFullMass;
+    std::vector<WrappedTH1*> hShapeEmbeddingLikeMultipleTausFullMass;
     // FIXME: Add unfolded histogram for mT vs. full mass
 
     // histograms to be filled at every step
