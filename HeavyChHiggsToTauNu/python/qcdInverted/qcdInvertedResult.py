@@ -133,7 +133,7 @@ class QCDInvertedShape:
         if optionPrintPurityByBins:
             print "Purity of shape %s"%shape.getHistoName()
             print "shapeBin purity purityUncert"
-        for j in range (1,h.GetNbinsX()+1):
+        for j in range (1,self._resultShape.GetNbinsX()+1):
             myPurity = 0.0
             myPurityUncert = 0.0
             if abs(myShapeDataSum[j-1]) > 0.000001:
@@ -147,10 +147,10 @@ class QCDInvertedShape:
             # Print purity info of final shape
             if optionPrintPurityByBins:
                 myString = ""
-                if j < h.GetNbinsX():
-                    myString = "%d..%d"%(h.GetXaxis().GetBinLowEdge(j),h.GetXaxis().GetBinUpEdge(j))
+                if j < self._resultShape.GetNbinsX():
+                    myString = "%d..%d"%(self._resultShape.GetXaxis().GetBinLowEdge(j),self._resultShape.GetXaxis().GetBinUpEdge(j))
                 else:
-                    myString = ">%d"%(h.GetXaxis().GetBinLowEdge(j))
+                    myString = ">%d"%(self._resultShape.GetXaxis().GetBinLowEdge(j))
                 myString += " %.3f %.3f"%(myPurity, myPurityUncert)
                 print myString
 

@@ -139,7 +139,7 @@ class QCDFactorisedResult:
         if self._displayPurityBreakdown:
             print "Purity as function of final shape"
             print "shapeBin purity purityUncert"
-        for j in range (1,hLeg1.GetNbinsX()+1):
+        for j in range (1,self._resultShape.GetNbinsX()+1):
             myPurity = 0.0
             myPurityUncert = 0.0
             if abs(myShapeDataSum[j-1]) > 0.000001:
@@ -153,10 +153,10 @@ class QCDFactorisedResult:
             # Print purity info of final shape
             if self._displayPurityBreakdown:
                 myString = ""
-                if j < hLeg1.GetNbinsX():
-                    myString = "%d..%d"%(hLeg1.GetXaxis().GetBinLowEdge(j),hLeg1.GetXaxis().GetBinUpEdge(j))
+                if j < self._resultShape.GetNbinsX():
+                    myString = "%d..%d"%(self._resultShape.GetXaxis().GetBinLowEdge(j),self._resultShape.GetXaxis().GetBinUpEdge(j))
                 else:
-                    myString = ">%d"%(hLeg1.GetXaxis().GetBinLowEdge(j))
+                    myString = ">%d"%(self._resultShape.GetXaxis().GetBinLowEdge(j))
                 myString += " %.3f %.3f"%(myPurity, myPurityUncert)
                 print myString
 
