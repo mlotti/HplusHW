@@ -29,6 +29,16 @@ import multicrabWorkflows
 import git
 import aux
 
+## Returns the software to which the datacards are compatible to
+def getSoftware():
+    mySoftware = ["lands","combine"]
+    myList = os.listdir(".")
+    for item in myList:
+        for s in mySoftware
+        if item.endswith(".txt" and "datacards_%s"%s in item:
+            return s
+    raise Exception("Automatic detection of limit calculation software failed! Please run this script in the directory of the datacards!")
+
 ## Deduces from directory listing the mass point list
 def obtainMassPoints(pattern):
     myPattern = pattern%" "
@@ -113,6 +123,12 @@ def parseOptionParser(parser):
     opts.dirs.extend(args)
     if len(opts.dirs) == 0:
         opts.dirs = ["."]
+    # Check options
+    if opts.brlimit == opts.sigmabrlimit:
+        if opts.brlimit:
+            raise Exception("Error: Please enable only --brlimit or --sigmabrlimit !")
+        else:
+            raise Exception("Error: Please enable --brlimit or --sigmabrlimit !")
     return opts
 
 ## Class to hold the limit results

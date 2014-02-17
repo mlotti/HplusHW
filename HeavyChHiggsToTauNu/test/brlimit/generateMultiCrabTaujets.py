@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CombineTools as combine
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTools
 
 lepType = True
 lhcType = True
@@ -10,8 +12,7 @@ lepType = False
 lhcType = False
 lhcTypeAsymptotic = False
 
-#massPoints = lands.allMassPoints
-massPoints = lands.obtainMassPoints(lands.taujetsDatacardPattern)
+massPoints = [] # auto detect
 #massPoints = ["180", "190", "200","220","250","300"]
 #massPoints = ["180", "190", "200","220","250","300","400","500","600"]
 #massPoints = ["120"]
@@ -40,7 +41,7 @@ def _ntoysCLsb():
 def _ntoysCLb():
     return _ntoys(2)
 
-def main(opts):
+def main(opts, mySoftware):
     postfix = "taujets"
 
 #    lepType = True
@@ -56,19 +57,19 @@ def main(opts):
         }
 
     if opts.lepType:
-        lands.generateMultiCrab(
+        getattr(mySoftware, generateMultiCrab(
             opts,
             massPoints = massPoints,
-            datacardPatterns = [lands.taujetsDatacardPattern],
-            rootfilePatterns = [lands.taujetsRootfilePattern],
-            clsType = lands.LEPType(opts.brlimit,opts.sigmabrlimit,toysPerJob=100),
+            datacardPatterns = [getattr(mySoftware, taujetsDatacardPattern)],
+            rootfilePatterns = [getattr(mySoftware, taujetsRootfilePattern)],
+            clsType = getattr(mySoftware, LEPType(opts.brlimit,opts.sigmabrlimit,toysPerJob=100)),
             numberOfJobs = 10,
             postfix = postfix+"_lep_toys1k",
-            crabScheduler=crabScheduler, crabOptions=crabOptions)
+            crabScheduler=crabScheduler, crabOptions=crabOptions))
     if opts.lhcType:
         myVR = None
         if opts.brlimit:
-            if lands.isHeavyHiggs(massPoints):
+            if getattr(mySoftware, isHeavyHiggs(massPoints)):
                 raise Exception("Error: --brlimit is not available for heavy H+! Please use --sigmabrlimit !")
             myVR = {"default": None,
                 # Initially obtained from asymp. limit as min/max of +-2 sigma and observed
@@ -106,38 +107,35 @@ def main(opts):
                 "500": ("0.005", "1", "x1.03"),
                 "600": ("0.005", "1", "x1.03"),
             }
-        lands.generateMultiCrab(
+        getattr(mySoftware, generateMultiCrab(
             opts,
             massPoints = massPoints,
-            datacardPatterns = [lands.taujetsDatacardPattern],
-            rootfilePatterns = [lands.taujetsRootfilePattern],
-            clsType = lands.LHCType(opts.brlimit,
+            datacardPatterns = [getattr(mySoftware, taujetsDatacardPattern)],
+            rootfilePatterns = [getattr(mySoftware, taujetsRootfilePattern)],
+            clsType = getattr(mySoftware, LHCType(opts.brlimit,
                                     opts.sigmabrlimit,
                                     toysCLsb=_ntoysCLsb(),
                                     toysCLb=_ntoysCLb(),
                                     vR=myVR
-                                    ),
+                                    )),
             numberOfJobs = _njobs(),
             postfix = postfix+"_lhc_jobs160_sb150_b75",
-            crabScheduler=crabScheduler, crabOptions=crabOptions)
+            crabScheduler=crabScheduler, crabOptions=crabOptions))
     if opts.lhcTypeAsymptotic:
-        lands.produceLHCAsymptotic(
+        getattr(mySoftware, produceLHCAsymptotic(
             opts,
             massPoints = massPoints,
-            datacardPatterns = [lands.taujetsDatacardPattern],
-            rootfilePatterns = [lands.taujetsRootfilePattern],
+            datacardPatterns = [getattr(mySoftware, taujetsDatacardPattern)],
+            rootfilePatterns = [getattr(mySoftware, taujetsRootfilePattern)],
             postfix = postfix+"_lhcasy"
-            )
+            ))
 
 if __name__ == "__main__":
-    parser = lands.createOptionParser(lepType, lhcType, lhcTypeAsymptotic)
-    parser.add_option("--brlimit", dest="brlimit", action="store_true", default=False, help="Calculate limit on Br(t->bH+)")
-    parser.add_option("--sigmabrlimit", dest="sigmabrlimit", action="store_true", default=False, help="Calculate limit on sigma(H+)xBr(t->bH+)")
-    opts = lands.parseOptionParser(parser)
-    # Check options
-    if opts.brlimit == opts.sigmabrlimit:
-        if opts.brlimit:
-            raise Exception("Error: Please enable only --brlimit or --sigmabrlimit !")
-        else:
-            raise Exception("Error: Please enable --brlimit or --sigmabrlimit !")
-    main(opts)
+    mySoftware = commonLimitTools.getSoftware()
+    if len(massPoints) == 0:
+        massPoints = getattr(mySoftware, obtainMassPoints(getattr(mySoftware, taujetsDatacardPattern)))
+
+    parser = getattr(mySoftware, commonLimitTools.createOptionParser(lepType, lhcType, lhcTypeAsymptotic))
+    opts = getattr(mySoftware, commonLimitTools.parseOptionParser(parser))
+
+    main(opts, mySoftware)
