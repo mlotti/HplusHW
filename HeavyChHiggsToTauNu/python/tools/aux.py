@@ -5,6 +5,7 @@ import os
 import hashlib
 import imp
 import re
+import stat
 import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 

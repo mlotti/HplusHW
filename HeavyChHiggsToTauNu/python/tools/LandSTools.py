@@ -19,7 +19,6 @@ import os
 import re
 import sys
 import glob
-import stat
 import json
 import time
 import random
