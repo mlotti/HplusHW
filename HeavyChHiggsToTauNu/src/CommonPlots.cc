@@ -217,19 +217,15 @@ namespace HPlus {
     // all selections
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeTransverseMass,            "shapeTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
-      if (fAnalysisType == kSignalAnalysis) {
         fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEWKFakeTausTransverseMass, "shapeEWKFakeTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
         fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEmbeddingLikeMultipleTausTransverseMass, "shapeEmbeddingLikeMultipleTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
         fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeProbabilisticBtagTransverseMass, "shapeProbabilisticBtagTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
         fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeProbabilisticBtagEWKFakeTausTransverseMass, "shapeProbabilisticBtagEWKFakeTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
         fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeProbabilisticBtagEmbeddingLikeMultipleTausTransverseMass, "shapeProbabilisticBtagEmbeddingLikeMultipleTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
-      }
       // all selections with full mass
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeFullMass,            "shapeInvariantMass", "m_{H+}, GeV/c^{2};N_{events}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
-      if (fAnalysisType == kSignalAnalysis) {
-        fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEWKFakeTausFullMass, "shapeEWKFakeTausInvariantMass", "m_{H+}, GeV/c^{2};N_{events}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
-        fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEmbeddingLikeMultipleTausFullMass, "shapeEmbeddingLikeMultipleTausFullMass", "m_{H+}, GeV/c^{2};N_{events}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
-      }
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEWKFakeTausFullMass, "shapeEWKFakeTausInvariantMass", "m_{H+}, GeV/c^{2};N_{events}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEmbeddingLikeMultipleTausFullMass, "shapeEmbeddingLikeMultipleTausFullMass", "m_{H+}, GeV/c^{2};N_{events}", fInvmassBinSettings.bins(), fInvmassBinSettings.min(), fInvmassBinSettings.max());
     }
   }
 
@@ -581,19 +577,19 @@ namespace HPlus {
     //double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.fillShapeHistogram(hShapeTransverseMass, transverseMass);
-      if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
-        fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausTransverseMass, transverseMass);
-      if (fFakeTauData.isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance() && fAnalysisType == kSignalAnalysis)
-        fSplittedHistogramHandler.fillShapeHistogram(hShapeEmbeddingLikeMultipleTausTransverseMass, transverseMass);
+        if (fFakeTauData.isEWKFakeTauLike())
+          fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausTransverseMass, transverseMass);
+        if (fFakeTauData.isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance())
+          fSplittedHistogramHandler.fillShapeHistogram(hShapeEmbeddingLikeMultipleTausTransverseMass, transverseMass);
     }
   }
 
   void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const edm::Event& iEvent, double transverseMass) {
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagTransverseMass, transverseMass);
-      if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+      if (fFakeTauData.isEWKFakeTauLike())
         fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagEWKFakeTausTransverseMass, transverseMass);
-      if (fFakeTauData.isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance() && fAnalysisType == kSignalAnalysis)
+      if (fFakeTauData.isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance())
         fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagEmbeddingLikeMultipleTausTransverseMass, transverseMass);
     }
   }
@@ -602,9 +598,9 @@ namespace HPlus {
     fFullHiggsMassData = data;
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.fillShapeHistogram(hShapeFullMass, data.getHiggsMass());
-      if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+      if (fFakeTauData.isEWKFakeTauLike())
         fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausFullMass, data.getHiggsMass());
-      if (fFakeTauData.isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance() && fAnalysisType == kSignalAnalysis)
+      if (fFakeTauData.isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance())
         fSplittedHistogramHandler.fillShapeHistogram(hShapeEmbeddingLikeMultipleTausFullMass, data.getHiggsMass());
     }
   }
