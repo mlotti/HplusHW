@@ -108,149 +108,6 @@ def isHeavyHiggs(massList):
 def isLightHiggs(massList):
     commonLimitTools.isLightHiggs(massList)
 
-## Class to parse the limits from LandS output
-#
-# This is used from \a landsMergeHistograms.py to read the LandS
-# output. The limits are stored in \a limits.json file for easier
-# subsequent access.
-class ParseLandsOutput:
-    ## Constructor
-    #
-    # \param path   Path to the multicrab directory
-    def __init__(self, path, unblindedStatus=False):
-        self.path = path
-        self.lumi = 0
-
-        # Read task configuration json file
-        configFile = os.path.join(path, "configuration.json")
-        f = open(configFile)
-        self.config = json.load(f)
-        f.close()
-
-        if self.config["methodObject"] == "LEP":
-            self.methodObject = HybridLEPTypeCLs()
-        elif self.config["methodObject"] == "LHC":
-            self.methodObject = HybridLHCTypeCLs()
-        else:
-            raise Exception("Unsupported CLs type '%s' in %s" % (self.config["methodObject"], configFile))
-
-        # Read in the results
-        self.results = commonLimitTools.commonLimitTools.ResultContainer(self.path)
-        try:
-            clsConfig = self.config["clsConfig"]
-        except KeyError:
-            clsConfig = None
-        for mass in self.config["masspoints"]:
-            self.results.append(self.methodObject.getResult(self.path, mass, clsConfig, unblindedStatus))
-            print "Processed mass point %s" % mass
-
-
-    ## Get the integrated luminosity as a string in 1/pb
-    def getLuminosity(self):
-        return self.results.getLuminosity()
-
-    ## Print the results
-    def print2(self,unblindedStatus=False):
-        self.results.print2(unblindedStatus)
-
-    ## Save the results to \a limits.json file
-    def saveJson(self):
-        fname = self.results.saveJson()
-        print "Wrote results to %s" % fname
-
-
-## Parse the nuisance fit values from LandS ML output
-#
-# \return dictionary
-def parseLandsMLOutput(outputFileName):
-    f = open(outputFileName)
-
-    # Skip first lines
-    for line in f:
-        if "fReadFile: Reading --> rate" in line:
-            break
-
-    # Infer nuisance parameter names
-    nuisanceNames = []
-    nuisanceTypes = []
-    nuis_re = re.compile("--> (?P<nuisance>\S+)\s+(?P<type>\S+)\s+\S+")
-    for line in f:
-        if not "fReadFile" in line:
-            break
-
-        m = nuis_re.search(line)
-        if m:
-            nuisanceNames.append(m.group("nuisance"))
-            nuisanceTypes.append(m.group("type"))
-
-
-    # Read the last set of "par" lines
-    parLines = []
-    while True:
-        # Skip until "par" lines are found
-        for line in f:
-            if "par" in line and "name" in line and "fitted_value" in line and "input_value"in line:
-                break
-
-        # Read "par" lines
-        parLinesTmp = []
-        for line in f:
-            if not "par" in line:
-                break
-            parLinesTmp.append(line.rstrip())
-        if len(parLinesTmp) > 0:
-            parLines = parLinesTmp
-        else:
-            break
-
-    f.close()
-
-    # Parse "par" lines
-    num = "-?\d+.\d+"
-    par_re = re.compile("par\s+(?P<nuisance>\S+)\s+(?P<fittedvalue>%s) \+/- (?P<fittedunc>%s)\s+(?P<inputvalue>%s) \+/- (?P<inputunc>%s)\s+(?P<startvalue>%s)\s+(?P<dxsin>%s),\s+(?P<soutsin>%s)" % (num, num, num, num, num, num, num))
-    values = {
-        "nuisanceParameters": nuisanceNames,
-    }
-    for par in parLines:
-        m = par_re.search(par)
-        if not m:
-            raise Exception("Unable to parse line '%s'" % par)
-
-        type = None
-        key = m.group("nuisance")
-        subkey = None
-        if key == "signal_strength":
-            type = key
-        else:
-            if key not in nuisanceNames:
-                for nuis in nuisanceNames:
-                    if key[0:len(nuis)] == nuis:
-                        subkey = key[len(nuis):]
-                        key = nuis
-            type = nuisanceTypes[nuisanceNames.index(key)]
-
-        d = {
-            "fitted_value": m.group("fittedvalue"),
-            "fitted_uncertainty": m.group("fittedunc"),
-            "input_value": m.group("inputvalue"),
-            "input_uncertainty": m.group("inputunc"),
-            "start_value": m.group("startvalue"),
-            "dx/s_in": m.group("dxsin"),
-            "s_out/s_in": m.group("soutsin"),
-            }
-
-        if subkey is None:
-            values[key] = d
-        else:
-            if key in values:
-                values[key][subkey] = d
-            else:
-                values[key] = {subkey: d}
-
-        values[key]["type"] = type
-
-    return values
-
 ## Generate multicrab configuration for LEP-CLs or LHC-CLs (hybrid)
 # \param opts               optparse.OptionParser object, constructed with createOptionParser()
 # \param massPoints         List of mass points to calculate the limit for
@@ -309,7 +166,7 @@ def generateMultiCrab(opts,
 
     landsObjects = []
 
-    lands = MultiCrabLandS(directory, massPoints, datacardPatterns, rootfilePatterns, cls)
+    lands = MultiCrabLandS(opts, directory, massPoints, datacardPatterns, rootfilePatterns, cls)
     lands.createMultiCrabDir(postfix)
     lands.copyInputFiles()
     lands.writeScripts()
@@ -335,7 +192,7 @@ def generateMultiCrab(opts,
 #
 # \return optparse.OptionParser object
 def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
-    commonLimitTools.createOptionParser(lepDefault, lhcDefault, lhcasyDefault)
+    return commonLimitTools.createOptionParser(lepDefault, lhcDefault, lhcasyDefault)
 
 ## Parse OptionParser object
 #
@@ -365,7 +222,7 @@ def parseOptionParser(parser):
 #                           name
 #
 # The options of LHCTypeAsymptotic are controlled by the constructor.
-def produceLHCAsymptotic(directory,
+def produceLHCAsymptotic(opts, directory,
                          massPoints,
                          datacardPatterns,
                          rootfilePatterns,
@@ -380,7 +237,7 @@ def produceLHCAsymptotic(directory,
     print "Computing limits with %s CLs flavour" % cls.nameHuman()
     print "Computing limits with LandS version %s" % landsInstall.getVersion()
 
-    lands = MultiCrabLandS(directory, massPoints, datacardPatterns, rootfilePatterns, cls)
+    lands = MultiCrabLandS(opts, directory, massPoints, datacardPatterns, rootfilePatterns, cls)
     lands.createMultiCrabDir(postfix)
     lands.copyInputFiles()
     lands.writeScripts()
@@ -401,8 +258,8 @@ class MultiCrabLandS(commonLimitTools.LimitMultiCrabBase):
     #                           in the limit calculation
     # \param clsType            Object defining the CLs flavour (should be either
     #                           LEPType, or LHCType).
-    def __init__(self, directory, massPoints, datacardPatterns, rootfilePatterns, clsType):
-        commonLimitTools.LimitMultiCrabBase.__init__(self, directory, massPoints, datacardPatterns, rootfilePatterns, clsType)
+    def __init__(self, opts, directory, massPoints, datacardPatterns, rootfilePatterns, clsType):
+        commonLimitTools.LimitMultiCrabBase.__init__(self, opts, directory, massPoints, datacardPatterns, rootfilePatterns, clsType)
         self.exe = landsInstall.findExe()
         self.configuration["landsVersion"] = LandS_tag
 
@@ -424,7 +281,7 @@ class MultiCrabLandS(commonLimitTools.LimitMultiCrabBase):
         json.dump(self.configuration, f, sort_keys=True, indent=2)
         f.close()
 
-        results = commonLimitTools.ResultContainer(self.dirname)
+        results = commonLimitTools.ResultContainer(self.opts.unblinded, self.dirname)
         for mass in self.massPoints:
             results.append(self.clsType.runLandS(mass))
             print "Processed mass point %s" % mass
@@ -568,13 +425,14 @@ class LEPType:
     # \param mass        String for the mass point
     # \param inputFiles  List of strings for the (additional) input files to pack in the crab job
     # \param numJobs     Number of jobs for the expected task
-    def writeMultiCrabConfig(self, output, mass, inputFiles, numJobs):
-        output.write("[Observed_m%s]\n" % mass)
-        output.write("USER.script_exe = %s\n" % self.obsScripts[mass])
-        output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
-        output.write("CMSSW.number_of_jobs = 1\n")
-        output.write("CMSSW.output_file = lands.out\n")
-        output.write("\n")
+    def writeMultiCrabConfig(self, opts, output, mass, inputFiles, numJobs):
+        if opts.unblinded:
+            output.write("[Observed_m%s]\n" % mass)
+            output.write("USER.script_exe = %s\n" % self.obsScripts[mass])
+            output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
+            output.write("CMSSW.number_of_jobs = 1\n")
+            output.write("CMSSW.output_file = lands.out\n")
+            output.write("\n")
 
         output.write("[Expected_m%s]\n" % mass)
         output.write("USER.script_exe = %s\n" % self.expScripts[mass])
@@ -871,7 +729,7 @@ class LHCType:
     # \param mass        String for the mass point
     # \param inputFiles  List of strings for the (additional) input files to pack in the crab job
     # \param numJobs     Number of jobs for the expected task
-    def writeMultiCrabConfig(self, output, mass, inputFiles, numJobs):
+    def writeMultiCrabConfig(self, opts, output, mass, inputFiles, numJobs):
         output.write("[Limit_m%s]\n" % mass)
         output.write("USER.script_exe = %s\n" % self.scripts[mass])
         output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
@@ -1223,13 +1081,13 @@ class ParseLandsOutput:
             raise Exception("Unsupported CLs type '%s' in %s" % (self.config["clsType"], configFile))
 
         # Read in the results
-        self.results = commonLimitTools.ResultContainer(self.path)
+        self.results = commonLimitTools.ResultContainer(unblindedStatus, self.path)
         try:
             clsConfig = self.config["clsConfig"]
         except KeyError:
             clsConfig = None
         for mass in self.config["masspoints"]:
-            self.results.append(self.clsType.getResult(self.path, mass, clsConfig, unblindedStatus))
+            self.results.append(self.clsType.getResult(self.path, mass, clsConfig))
             print "Processed mass point %s" % mass
 
 

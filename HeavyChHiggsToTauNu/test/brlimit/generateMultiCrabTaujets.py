@@ -118,7 +118,8 @@ def main(opts, settings, myDir):
                 postfix = postfix+"_lhc_jobs160_sb150_b75",
                 crabScheduler=crabScheduler, crabOptions=crabOptions)
         elif opts.lhcTypeAsymptotic:
-            lands.produceLHCAsymptotic(
+            combine.produceLHCAsymptotic(
+                opts,
                 myDir,
                 massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
                 datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],
@@ -134,7 +135,15 @@ def main(opts, settings, myDir):
         elif opts.lhcType:
             raise Exception("LHC type Hybrid CLs not implemented yet for combine")
         elif opts.lhcTypeAsymptotic:
-            raise Exception("LHC type asymptotic CLs not implemented yet for combine")
+            combine.produceLHCAsymptotic(
+                opts,
+                myDir,
+                massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
+                datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],
+                rootfilePatterns = [settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS)],
+                clsType = combine.LHCTypeAsymptotic(opts),
+                postfix = postfix+"_lhcasy"
+                )
         else:
             return False
     return True

@@ -215,6 +215,8 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
                       help="Mass points to be considered (if none are specified, mass points are auto-detected")
     parser.add_option("--create", dest="multicrabCreate", action="store_true", default=False,
                       help="Run 'multicrab -create' for each multicrab task directory")
+    parser.add_option("--final", dest="unblinded", action="store_true", default=False,
+                      help="Do not set to true unless you know what you are doing and have permission to do so")
 
     return parser
 
@@ -253,7 +255,8 @@ class ResultContainer:
     ## Constructor
     #
     # \param path  Path to the multicrab directory (where configuration.json exists)
-    def __init__(self, path):
+    def __init__(self, unblindedStatus, path):
+        self.unblindedStatus = unblindedStatus
         self.path = path
 
         # Read task configuration json file
@@ -324,7 +327,7 @@ class ResultContainer:
         return self.lumi
 
     ## Print the limits
-    def print2(self,unblindedStatus=False):
+    def print2(self):
         print
         print "                  Expected"
         print "Mass  Observed    Median       -2sigma     -1sigma     +1sigma     +2sigma"
@@ -335,7 +338,7 @@ class ResultContainer:
             result = self.results[index]
             if result.empty():
                 continue
-            if unblindedStatus:
+            if self.unblindedStatus:
                 print format % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
             else:
                 print format % (result.mass, "BLINDED", result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
@@ -344,7 +347,7 @@ class ResultContainer:
     ## Store the results in a limits.json file
     #
     # \param data   Dictionary of additional data to be stored
-    def saveJson(self, data={}, unblindedStatus=False):
+    def saveJson(self, data={}):
         output = {}
         output.update(data)
         output.update({
@@ -359,7 +362,7 @@ class ResultContainer:
             if result.empty():
                 continue
 
-            if unblindedStatus:
+            if self.unblindedStatus:
                 output["masspoints"][result.mass] = {
                     "mass": result.mass,
                     "observed": result.observed,
@@ -384,7 +387,7 @@ class ResultContainer:
                         }
                     }
 
-            if unblindedStatus:
+            if self.unblindedStatus:
                 if hasattr(result, "observedError"):
                     output["masspoints"][result.mass]["observed_error"] = result.observedError
             if hasattr(result, "expectedError"):
@@ -419,7 +422,8 @@ class LimitMultiCrabBase:
     #                           in the limit calculation
     # \param clsType            Object defining the CLs flavour (should be either
     #                           LEPType, or LHCType).
-    def __init__(self, directory, massPoints, datacardPatterns, rootfilePatterns, clsType):
+    def __init__(self, opts, directory, massPoints, datacardPatterns, rootfilePatterns, clsType):
+        self.opts = opts
         self.datacardDirectory = directory
         self.massPoints = massPoints
         self.datacardPatterns = datacardPatterns
@@ -470,13 +474,15 @@ class LimitMultiCrabBase:
         self.dirname = multicrab.createTaskDir(prefix=prefix, path=self.datacardDirectory)
         self.clsType.setDirectory(self.dirname)
 
-    ## Copy input files for LandS (datacards, rootfiles) to the multicrab directory
+    ## Copy input files for LandS/Combine (datacards, rootfiles) to the multicrab directory
     def copyInputFiles(self):
         for d in [self.datacards, self.rootfiles]:
             for mass, files in d.iteritems():
                 for f in files:
                     shutil.copy(f, self.dirname)
-        shutil.copy(self.exe, self.dirname)
+        # Copy exe file only for LandS
+        if os.path.exists(self.exe):
+            shutil.copy(self.exe, self.dirname)
 
     ## Write  shell scripts to the multicrab directory
     def writeScripts(self):
@@ -547,7 +553,7 @@ class LimitMultiCrabBase:
             inputFiles = [exe]+self.datacards[mass]
             if len(self.rootfiles) > 0:
                 inputFiles += self.rootfiles[mass]
-            self.clsType.writeMultiCrabConfig(fOUT, mass, inputFiles, numberOfJobs.getValue(mass))
+            self.clsType.writeMultiCrabConfig(opts, fOUT, mass, inputFiles, numberOfJobs.getValue(mass))
             fOUT.write("\n\n")
 
         f = open(os.path.join(self.dirname, "configuration.json"), "wb")
