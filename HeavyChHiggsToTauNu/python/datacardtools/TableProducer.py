@@ -114,9 +114,9 @@ class TableProducer:
                 if c.getLandsProcess() > mySubtractAfterId:
                     c._landsProcess = c.getLandsProcess() - 1
             # Move column with ID -1 to zero
-            if mySmallestColumnId < 0:
-                for c in self._datasetGroups:
-                    c._landsProcess = c.getLandsProcess() + 1
+            #if mySmallestColumnId < 0:
+            #    for c in self._datasetGroups:
+            #        c._landsProcess = c.getLandsProcess() + 1
 
         self._purgeColumnsWithSmallRate()
 
