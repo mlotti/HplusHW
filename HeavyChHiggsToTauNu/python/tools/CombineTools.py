@@ -380,7 +380,11 @@ class LHCTypeAsymptotic:
         nMatches = 0
         lines = output.split("\n")
         obsresult_re = re.compile("Observed Limit: r < \s*(?P<value>\d+\.\d+)")
-        expresult_re = re.compile("Expected \s*(?P<quantile>\d+\.\d+)%: r < \s*(?P<value>\d+\.\d+)")
+        expresult_re = None
+        if self.brlimit:
+            expresult_re = re.compile("Expected \s*(?P<quantile>\d+\.\d+)%: BR < \s*(?P<value>\d+\.\d+)")
+        elif self.sigmabrlimit:
+            expresult_re = re.compile("Expected \s*(?P<quantile>\d+\.\d+)%: r < \s*(?P<value>\d+\.\d+)")
         myExp = []
         for line in lines:
             if line.startswith("Observed"):
@@ -396,6 +400,7 @@ class LHCTypeAsymptotic:
             if line.startswith("fail search for crossing of r between"):
                 raise Exception("Error: failed to search for a crossing of r between the rMin and rMax values! Please enlargen the range in tools/CombineTools.py")
         if not len(myExp) == 5:
+            print output
             raise Exception("Oops, was expecting 5 values for expected")
         result.expectedMinus2Sigma = myExp[0]
         result.expectedMinus1Sigma = myExp[1]

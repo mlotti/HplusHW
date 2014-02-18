@@ -553,7 +553,7 @@ class LimitMultiCrabBase:
             inputFiles = [exe]+self.datacards[mass]
             if len(self.rootfiles) > 0:
                 inputFiles += self.rootfiles[mass]
-            self.clsType.writeMultiCrabConfig(opts, fOUT, mass, inputFiles, numberOfJobs.getValue(mass))
+            self.clsType.writeMultiCrabConfig(self.opts, fOUT, mass, inputFiles, numberOfJobs.getValue(mass))
             fOUT.write("\n\n")
 
         f = open(os.path.join(self.dirname, "configuration.json"), "wb")

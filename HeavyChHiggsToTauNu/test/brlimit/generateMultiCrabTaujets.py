@@ -118,7 +118,7 @@ def main(opts, settings, myDir):
                 postfix = postfix+"_lhc_jobs160_sb150_b75",
                 crabScheduler=crabScheduler, crabOptions=crabOptions)
         elif opts.lhcTypeAsymptotic:
-            combine.produceLHCAsymptotic(
+            lands.produceLHCAsymptotic(
                 opts,
                 myDir,
                 massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
