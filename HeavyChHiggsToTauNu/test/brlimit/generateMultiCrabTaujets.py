@@ -121,6 +121,7 @@ def main(opts, settings, myDir):
                 massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
                 datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],
                 rootfilePatterns = [settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS)],
+                clsType = lands.LHCTypeAsymptotic(opts.brlimit,opts.sigmabrlimit),
                 postfix = postfix+"_lhcasy"
                 )
         else:
