@@ -434,6 +434,15 @@ class LimitMultiCrabBase:
         if not os.path.isdir(directory):
             raise Exception("Datacard directory '%s' does not exist" % directory)
 
+        # this is a dictionary dumped to configuration.json
+        self.configuration = {
+            "masspoints": massPoints,
+            "datacards": datacardPatterns,
+            "rootfiles": rootfilePatterns,
+            "landsVersion": LandS_tag,
+            "codeVersion": git.getCommitId(),
+            "clsType": self.clsType.name(),
+        }
         clsConfig = self.clsType.getConfiguration()
         if clsConfig != None:
             self.configuration["clsConfig"] = clsConfig
