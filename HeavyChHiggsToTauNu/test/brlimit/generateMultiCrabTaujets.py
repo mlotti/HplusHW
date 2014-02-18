@@ -54,14 +54,13 @@ def main(opts, settings):
 #            "ce_white_list = korundi.grid.helsinki.fi",
 #            ]
         }
-
     if settings.isLands():
         if opts.lepType:
             lands.generateMultiCrab(
                 opts,
                 massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
-                datacardPatterns = settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS),
-                rootfilePatterns = settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS),
+                datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],
+                rootfilePatterns = [settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS)],
                 clsType = lands.LEPType(opts.brlimit,opts.sigmabrlimit,toysPerJob=100,firstSeed=settings.getFirstSeed()),
                 numberOfJobs = 10,
                 postfix = postfix+"_lep_toys1k",
@@ -110,8 +109,8 @@ def main(opts, settings):
             lands.generateMultiCrab(
                 opts,
                 massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
-                datacardPatterns = settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS),
-                rootfilePatterns = settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS),
+                datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],
+                rootfilePatterns = [settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS)],
                 clsType = lands.LHCType(opts.brlimit,opts.sigmabrlimit,toysCLsb=_ntoysCLsb(),toysCLb=_ntoysCLb(),firstSeed=settings.getFirstSeed(),vR=myVR),
                 numberOfJobs = _njobs(),
                 postfix = postfix+"_lhc_jobs160_sb150_b75",
@@ -120,8 +119,8 @@ def main(opts, settings):
             lands.produceLHCAsymptotic(
                 opts,
                 massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
-                datacardPatterns = settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS),
-                rootfilePatterns = settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS),
+                datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],
+                rootfilePatterns = [settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS)],
                 postfix = postfix+"_lhcasy"
                 )
         else:

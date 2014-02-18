@@ -404,7 +404,7 @@ class MultiCrabLandS(commonLimitTools.LimitMultiCrabBase):
     # \param clsType            Object defining the CLs flavour (should be either
     #                           LEPType, or LHCType).
     def __init__(self, directory, massPoints, datacardPatterns, rootfilePatterns, clsType):
-        LimitMultiCrabBase.__init__(directory, massPoints, datacardPatterns, rootfilePatterns, clsType)
+        commonLimitTools.LimitMultiCrabBase.__init__(self, directory, massPoints, datacardPatterns, rootfilePatterns, clsType)
         self.exe = landsInstall.findExe()
 
     ## Create the multicrab task directory

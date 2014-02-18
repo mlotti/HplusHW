@@ -432,6 +432,7 @@ class LimitMultiCrabBase:
         if not os.path.isdir(directory):
             raise Exception("Datacard directory '%s' does not exist" % directory)
 
+        clsConfig = self.clsType.getConfiguration()
         if clsConfig != None:
             self.configuration["clsConfig"] = clsConfig
 
