@@ -57,6 +57,7 @@ def main(opts, settings, myDir):
     if settings.isLands():
         if opts.lepType:
             lands.generateMultiCrab(
+                opts,
                 myDir,
                 massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
                 datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],
@@ -107,6 +108,7 @@ def main(opts, settings, myDir):
                     "600": ("0.005", "1", "x1.03"),
                 }
             lands.generateMultiCrab(
+                opts,
                 myDir,
                 massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
                 datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],

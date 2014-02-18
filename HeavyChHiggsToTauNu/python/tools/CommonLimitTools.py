@@ -258,6 +258,8 @@ class ResultContainer:
 
         # Read task configuration json file
         configFile = os.path.join(path, "configuration.json")
+        if not os.path.exists(configFile):
+            raise Exception("Error: Cannot open file '%s'!"%configFile)
         f = open(configFile)
         self.config = json.load(f)
         f.close()

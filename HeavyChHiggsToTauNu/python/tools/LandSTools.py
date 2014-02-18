@@ -288,6 +288,7 @@ def parseLandsMLOutput(outputFileName):
 # The CLs-flavour specific options are controlled by the constructors
 # of LEPType and LHCType classes.
 def generateMultiCrab(opts,
+                      directory,
                       massPoints,
                       datacardPatterns,
                       rootfilePatterns,
@@ -308,15 +309,14 @@ def generateMultiCrab(opts,
 
     landsObjects = []
 
-    for d in opts.dirs:
-        lands = MultiCrabLandS(d, massPoints, datacardPatterns, rootfilePatterns, cls)
-        lands.createMultiCrabDir(postfix)
-        lands.copyInputFiles()
-        lands.writeScripts()
-        lands.writeCrabCfg(crabScheduler, crabOptions, ["lands.out"])
-        lands.writeMultiCrabCfg(njobs)
+    lands = MultiCrabLandS(directory, massPoints, datacardPatterns, rootfilePatterns, cls)
+    lands.createMultiCrabDir(postfix)
+    lands.copyInputFiles()
+    lands.writeScripts()
+    lands.writeCrabCfg(crabScheduler, crabOptions, ["lands.out"])
+    lands.writeMultiCrabCfg(njobs)
 
-        landsObjects.append(lands)
+    landsObjects.append(lands)
 
     if opts.multicrabCreate:
         for lands in landsObjects:
