@@ -439,7 +439,6 @@ class LimitMultiCrabBase:
             "masspoints": massPoints,
             "datacards": datacardPatterns,
             "rootfiles": rootfilePatterns,
-            "landsVersion": LandS_tag,
             "codeVersion": git.getCommitId(),
             "clsType": self.clsType.name(),
         }

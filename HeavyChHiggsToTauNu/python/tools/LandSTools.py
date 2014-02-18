@@ -404,6 +404,7 @@ class MultiCrabLandS(commonLimitTools.LimitMultiCrabBase):
     def __init__(self, directory, massPoints, datacardPatterns, rootfilePatterns, clsType):
         commonLimitTools.LimitMultiCrabBase.__init__(self, directory, massPoints, datacardPatterns, rootfilePatterns, clsType)
         self.exe = landsInstall.findExe()
+        self.configuration["landsVersion"] = LandS_tag
 
     ## Create the multicrab task directory
     #
