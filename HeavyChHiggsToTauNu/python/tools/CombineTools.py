@@ -178,8 +178,12 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
 
         results = commonLimitTools.ResultContainer(self.opts.unblinded, self.dirname)
         for mass in self.massPoints:
-            results.append(self.clsType.runCombine(mass))
-            print "Processed mass point %s" % mass
+            myResult = self.clsType.runCombine(mass)
+            if myResult.failed:
+                print "Fit failed for mass point %s, skipping ..." % mass
+            else:
+                results.append(myResult)
+                print "Processed successfully mass point %s" % mass
         print
 
         results.print2()
@@ -397,8 +401,10 @@ class LHCTypeAsymptotic:
                 if match:
                     myExp.append(match.group("value"))
                     nMatches += 1
-            if line.startswith("fail search for crossing of r between"):
-                raise Exception("Error: failed to search for a crossing of r between the rMin and rMax values! Please enlargen the range in tools/CombineTools.py")
+            if line.startswith("fail") or line.startswith("Fail"):
+                print line
+                result.failed = True
+                return -1
         if not len(myExp) == 5:
             print output
             raise Exception("Oops, was expecting 5 values for expected")
@@ -419,7 +425,8 @@ class LHCTypeAsymptotic:
         n = self._parseResultFromCombineOutput(result, output)
         if n == 6: # 1 obs + 5 exp values
             return result
-
+        if n < 0: # fit failed
+            return result
         print output
         raise Exception("Unable to parse the output of command '%s'" % script)
 
@@ -432,6 +439,8 @@ class LHCTypeAsymptotic:
         output = self._run(script, "blinded_m%s_output.txt"%mass)
         n = self._parseResultFromCombineOutput(result, output)
         if n == 5: # 5 exp values
+            return result
+        if n < 0: # fit failed
             return result
 
         print output

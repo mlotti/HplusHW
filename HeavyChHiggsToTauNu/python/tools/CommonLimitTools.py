@@ -245,6 +245,7 @@ class Result:
         self.mass                = mass
         self.observed            = None
         self.expected            = None
+        self.failed              = False
 
     ## Check if the result is empty, i.e. no limits has been assigned
     def empty(self):
