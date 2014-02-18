@@ -24,32 +24,131 @@ import random
 import shutil
 import subprocess
 
+from optparse import OptionParser
 import multicrab
 import multicrabWorkflows
 import git
 import aux
 
+
+class GeneralSettings():
+    def __init__(self, directory, masspoints):
+        self.datacardPatterns = {}
+        self.rootfilePatterns = {}
+        self.massPoints = {}
+
+        ## Pattern for tau+jets datacard files (%s denotes the place of the software string and the mass)
+        self.datacardPatterns[LimitProcessType.TAUJETS] = "%s_datacard_hplushadronic_m%s.txt"
+        ## Pattern for tau+jets shape files (%s denotes the place of the software string and the mass)
+        self.rootfilePatterns[LimitProcessType.TAUJETS] = "%s_histograms_hplushadronic_m%s.root"
+
+        ## Default number of first random number seed in the jobs
+        self.defaultFirstSeed = 1000
+        ## Default number of crab jobs
+        self.defaultNumberOfJobs = 20
+
+        # Obtain software Id and string
+        (mySoftwareId, mySoftwareString) = getSoftware(directory)
+        self.setSoftware(mySoftwareString)
+        self.softwareId = mySoftwareId
+
+        # Obtain mass points
+        if len(masspoints) == 0:
+            print "Auto-detecting mass points"
+        for key,value in self.datacardPatterns.iteritems():
+            if len(masspoints) == 0:
+                self.massPoints[key] = obtainMassPoints(value, directory)
+            else:
+                self.massPoints[key] = masspoints
+
+    def setSoftware(self, software):
+        for key in self.datacardPatterns:
+            self.datacardPatterns[key] = self.datacardPatterns[key]%(software,"%s")
+        for key in self.rootfilePatterns:
+            self.rootfilePatterns[key] = self.rootfilePatterns[key]%(software,"%s")
+        print "Limit calculation software set to: %s"%software
+
+    def checkPatterns(self):
+        for key in self.datacardPatterns:
+            if self.datacardPatterns[key].count("%s") > 1:
+                raise Exception("You forgot to call setSoftware()!")
+        for key in self.rootfilePatterns:
+            if self.rootfilePatterns[key].count("%s") > 1:
+                raise Exception("You forgot to call setSoftware()!")
+
+    def getDatacardPattern(self, limitProcessType):
+        self.checkPatterns()
+        return self.datacardPatterns[limitProcessType]
+
+    def getRootfilePattern(self, limitProcessType):
+        self.checkPatterns()
+        return self.rootfilePatterns[limitProcessType]
+
+    def getDatacardName(self, limitProcessType, mass):
+        self.checkPatterns()
+        return self.datacardPatterns[limitProcessType]%mass
+
+    def getRootfileName(self, mass):
+        self.checkPatterns()
+        return self.rootfilePatterns[limitProcessType]%mass
+
+    def getFirstSeed(self):
+        return self.defaultFirstSeed
+
+    def getNumberOfGridJobs(self):
+        return self.defaultNumberOfJobs
+
+    def isLands(self):
+        return self.softwareId == LimitSoftwareType.LANDS
+
+    def isCombine(self):
+        return self.softwareId == LimitSoftwareType.COMBINE
+
+    def getMassPoints(self, limitProcessType):
+        return self.massPoints[limitProcessType]
+
+class LimitSoftwareType:
+    LANDS = 0
+    COMBINE = 1
+
+class LimitProcessType:
+    TAUJETS = 0
+
 ## Returns the software to which the datacards are compatible to
-def getSoftware():
-    mySoftware = ["lands","combine"]
-    myList = os.listdir(".")
+def getSoftware(directory="."):
+    mySoftware = {}
+    mySoftware[LimitSoftwareType.LANDS] = "lands"
+    mySoftware[LimitSoftwareType.COMBINE] = "combine"
+    myDir = directory
+    if directory == None:
+        myDir = "."
+    elif isinstance(directory,list):
+        myDir = directory[0]
+
+    myList = os.listdir(myDir)
     for item in myList:
-        for s in mySoftware
-        if item.endswith(".txt" and "datacards_%s"%s in item:
-            return s
+        for key,value in mySoftware.iteritems():
+            if item.endswith(".txt") and "%s_datacard"%value in item:
+                print "Datacards for limit calculation software '%s' auto-detected"%value
+                return (key,value)
     raise Exception("Automatic detection of limit calculation software failed! Please run this script in the directory of the datacards!")
 
 ## Deduces from directory listing the mass point list
-def obtainMassPoints(pattern):
-    myPattern = pattern%" "
-    mySplit = myPattern.split(" ")
-    prefix = mySplit[0]
-    suffix = mySplit[1]
-    myList = os.listdir(".")
+def obtainMassPoints(pattern, directory):
+    mass_re = re.compile(pattern%"(?P<mass>\S+)")
+    myDir = directory
+    if myDir == None:
+        myDir = "."
+    elif isinstance(directory, list):
+        myDir = directory[0]
+    myList = os.listdir(myDir)
     myMasses = []
     for item in myList:
-        if prefix in item:
-            myMasses.append(item.replace(prefix,"").replace(suffix,""))
+        match = mass_re.search(item)
+        if match:
+            myMass = match.group("mass")
+            if not myMass in myMasses:
+                myMasses.append(myMass)
     myMasses.sort()
     return myMasses
 
@@ -105,9 +204,15 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
         parser.add_option("--lhcasy", dest="lhcTypeAsymptotic", default=lhcasyDefault, action="store_true",
                           help="Use asymptotic LHC-CLs (default %s)" % str(lhcasyDefault))
 
+    # Mu parameter selection
+    parser.add_option("--brlimit", dest="brlimit", action="store_true", default=False, help="Calculate limit on Br(t->bH+)")
+    parser.add_option("--sigmabrlimit", dest="sigmabrlimit", action="store_true", default=False, help="Calculate limit on sigma(H+)xBr(t->bH+)")
+
     # Datacard directories
     parser.add_option("-d", "--dir", dest="dirs", type="string", action="append", default=[],
                       help="Datacard directories to create the LandS MultiCrab tasks into (default: use the working directory")
+    parser.add_option("-m", "--mass", dest="masspoints", type="string", action="append", default=[],
+                      help="Mass points to be considered (if none are specified, mass points are auto-detected")
     parser.add_option("--create", dest="multicrabCreate", action="store_true", default=False,
                       help="Run 'multicrab -create' for each multicrab task directory")
 
@@ -465,23 +570,23 @@ class LimitMultiCrabBase:
             print "cd %s && multicrab -create" % self.dirname
 
 
-def generateMultiCrab(opts,
-                      massPoints=defaultMassPoints,
-                      datacardPatterns=defaultDatacardPatterns,
-                      rootfilePatterns=defaultRootfilePatterns,
-                      clsType=None,
-                      numberOfJobs=None,
-                      crabScheduler="arc",
-                      crabOptions={},
-                      postfix=""
-                      ):
-def produceLHCAsymptotic(opts,
-                         massPoints=defaultMassPoints,
-                         datacardPatterns=defaultDatacardPatterns,
-                         rootfilePatterns=defaultRootfilePatterns,
-                         clsType = None,
-                         postfix=""
-                         ):
+#def generateMultiCrab(opts,
+                      #massPoints=defaultMassPoints,
+                      #datacardPatterns=defaultDatacardPatterns,
+                      #rootfilePatterns=defaultRootfilePatterns,
+                      #clsType=None,
+                      #numberOfJobs=None,
+                      #crabScheduler="arc",
+                      #crabOptions={},
+                      #postfix=""
+                      #):
+#def produceLHCAsymptotic(opts,
+                         #massPoints=defaultMassPoints,
+                         #datacardPatterns=defaultDatacardPatterns,
+                         #rootfilePatterns=defaultRootfilePatterns,
+                         #clsType = None,
+                         #postfix=""
+                         #):
 
 ## Helper class to manage mass-specific configuration values
 #class LEPType:

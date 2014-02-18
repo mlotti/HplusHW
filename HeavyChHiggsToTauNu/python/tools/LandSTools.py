@@ -25,7 +25,7 @@ import time
 import random
 import shutil
 import subprocess
-from optparse import OptionParser
+
 
 import multicrab
 import multicrabWorkflows
@@ -86,37 +86,13 @@ defaultOptions = lepHybridOptions
 ## Default number of crab jobs
 defaultNumberOfJobs = 20
 
-## Default number of first random number seed in the jobs
-defaultFirstSeed = 1000
-
-## Default mass points
-defaultMassPoints = ["120"]
-
-## Pattern for tau+jets datacard files (%s denotes the place of the mass)
-taujetsDatacardPattern = "lands_datacard_hplushadronic_m%s.txt"
+# FIXME: migrate theses if necessary to tools/CommonLimitTools.py
 ## Pattern for mu+tau datacard files (%s denotes the place of the mass)
 mutauDatacardPattern = "datacard_m%s_mutau_miso_20mar12.txt"
 ## Pattern for e+tau datacard files (%s denotes the place of the mass)
 etauDatacardPattern = "datacard_m%s_etau_miso_20mar12.txt"
 ## Pattern for e+mu datacard files (%s denotes the place of the mass)
 emuDatacardPattern = "datacard_m%s_emu_nobtag_20mar12.txt"
-
-## Pattern for tau+jets shape root files (%s denotes the place of the mass)
-taujetsRootfilePattern = "lands_histograms_hplushadronic_m%s.root"
-
-## Default list of datacard patterns
-defaultDatacardPatterns = [
-    taujetsDatacardPattern,
-    emuDatacardPattern,
-    etauDatacardPattern,
-    mutauDatacardPattern
-    ]
-#defaultDatacardPatterns = [defaultDatacardPatterns[i] for i in [3, 1, 0, 2]] # order in my first crab tests
-
-## Default list of shape root files
-defaultRootfilePatterns = [
-    taujetsRootfilePattern
-]
 
 ## Deduces from directory listing the mass point list
 def obtainMassPoints(pattern):
@@ -127,11 +103,11 @@ def readLuminosityFromDatacard(myPath, filename):
 
 ## Returns true if mass list contains only heavy H+
 def isHeavyHiggs(massList):
-    commonLimitTools.isHeavyHiggs(massList):
+    commonLimitTools.isHeavyHiggs(massList)
 
 ## Returns true if mass list contains only light H+
 def isLightHiggs(massList):
-    commonLimitTools.isLightHiggs(massList):
+    commonLimitTools.isLightHiggs(massList)
 
 ## Class to parse the limits from LandS output
 #
@@ -143,8 +119,8 @@ class ParseLandsOutput:
     #
     # \param path   Path to the multicrab directory
     def __init__(self, path, unblindedStatus=False):
-  self.path = path
-  self.lumi = 0
+        self.path = path
+        self.lumi = 0
 
         # Read task configuration json file
         configFile = os.path.join(path, "configuration.json")
@@ -172,7 +148,7 @@ class ParseLandsOutput:
 
     ## Get the integrated luminosity as a string in 1/pb
     def getLuminosity(self):
-  return self.results.getLuminosity()
+        return self.results.getLuminosity()
 
     ## Print the results
     def print2(self,unblindedStatus=False):
@@ -276,12 +252,6 @@ def parseLandsMLOutput(outputFileName):
 
     return values
 
-    
-    
-#########################    
-    
-    
-    
 ## Generate multicrab configuration for LEP-CLs or LHC-CLs (hybrid)
 # \param opts               optparse.OptionParser object, constructed with createOptionParser()
 # \param massPoints         List of mass points to calculate the limit for
@@ -319,9 +289,9 @@ def parseLandsMLOutput(outputFileName):
 # The CLs-flavour specific options are controlled by the constructors
 # of LEPType and LHCType classes.
 def generateMultiCrab(opts,
-                      massPoints=defaultMassPoints,
-                      datacardPatterns=defaultDatacardPatterns,
-                      rootfilePatterns=defaultRootfilePatterns,
+                      massPoints,
+                      datacardPatterns,
+                      rootfilePatterns,
                       clsType=None,
                       numberOfJobs=None,
                       crabScheduler="arc",
@@ -366,7 +336,7 @@ def generateMultiCrab(opts,
 #
 # \return optparse.OptionParser object
 def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
-    commonLimitTools.createOptionParser(lepDefault, lhcDefault, lhcasyDefault):
+    commonLimitTools.createOptionParser(lepDefault, lhcDefault, lhcasyDefault)
 
 ## Parse OptionParser object
 #
@@ -397,9 +367,9 @@ def parseOptionParser(parser):
 #
 # The options of LHCTypeAsymptotic are controlled by the constructor.
 def produceLHCAsymptotic(opts,
-                         massPoints=defaultMassPoints,
-                         datacardPatterns=defaultDatacardPatterns,
-                         rootfilePatterns=defaultRootfilePatterns,
+                         massPoints,
+                         datacardPatterns,
+                         rootfilePatterns,
                          clsType = None,
                          postfix=""
                          ):
@@ -422,7 +392,7 @@ def produceLHCAsymptotic(opts,
 #
 # The class is not intended to be used directly by casual user, but
 # from generateMultiCrab() and produceLHCAsymptotic()
-class MultiCrabLandS(LimitMultiCrabBase):
+class MultiCrabLandS(commonLimitTools.LimitMultiCrabBase):
     ## Constructor
     #
     # \param directory          Datacard directory
@@ -496,7 +466,7 @@ class LEPType:
     #
     # Note: if you add any parameters to the constructor, add the
     # parameters to the clone() method correspondingly.
-    def __init__(self, brlimit=True, sigmabrlimit=False, options=None, toysPerJob=None, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
+    def __init__(self, brlimit=True, sigmabrlimit=False, options=None, toysPerJob=None, firstSeed=1000, rMin=None, rMax=None):
         self.brlimit = brlimit
         self.sigmabrlimit = sigmabrlimit
         self.options = ValuePerMass(aux.ifNotNoneElse(options, lepHybridOptions))
@@ -770,7 +740,7 @@ class LHCType:
     # configuration.json file, and can be overridden by editing the
     # file between the multicrab configuration generation and the call
     # to \a landsMergeHistograms.py.
-    def __init__(self, brlimit=True, sigmabrlimit=False, options=None, toysCLsb=None, toysCLb=None, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None, scanRmin=None, scanRmax=None):
+    def __init__(self, brlimit=True, sigmabrlimit=False, options=None, toysCLsb=None, toysCLb=None, firstSeed=1000, vR=None, rMin=None, rMax=None, scanRmin=None, scanRmax=None):
         self.brlimit = brlimit
         self.sigmabrlimit = sigmabrlimit
         self.options = aux.ValuePerMass(aux.ifNotNoneElse(options, lhcHybridOptions))
