@@ -40,7 +40,7 @@ def _ntoysCLsb():
 def _ntoysCLb():
     return _ntoys(2)
 
-def main(opts, settings):
+def main(opts, settings, myDir):
     postfix = "taujets"
 
 #    lepType = True
@@ -57,7 +57,7 @@ def main(opts, settings):
     if settings.isLands():
         if opts.lepType:
             lands.generateMultiCrab(
-                opts,
+                myDir,
                 massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
                 datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],
                 rootfilePatterns = [settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS)],
@@ -107,7 +107,7 @@ def main(opts, settings):
                     "600": ("0.005", "1", "x1.03"),
                 }
             lands.generateMultiCrab(
-                opts,
+                myDir,
                 massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
                 datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],
                 rootfilePatterns = [settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS)],
@@ -117,7 +117,7 @@ def main(opts, settings):
                 crabScheduler=crabScheduler, crabOptions=crabOptions)
         elif opts.lhcTypeAsymptotic:
             lands.produceLHCAsymptotic(
-                opts,
+                myDir,
                 massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS),
                 datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],
                 rootfilePatterns = [settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS)],
@@ -140,11 +140,17 @@ if __name__ == "__main__":
     parser = commonLimitTools.createOptionParser(lepType, lhcType, lhcTypeAsymptotic)
     opts = commonLimitTools.parseOptionParser(parser)
     # General settings
-    settings = commonLimitTools.GeneralSettings(opts.dirs, opts.masspoints)
-    print "The following masses are considered:",settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS)
 
-    if not main(opts, settings):
-        print ""
-        parser.print_help()
-        print ""
-        raise Exception("You forgot to specify limit calculation method as a command line parameter!")
+    myDirs = opts.dirs[:]
+    if len(myDirs) == 0:
+        myDirs.append(".")
+
+    for myDir in myDirs:
+        print "Considering directory:",myDir
+        settings = commonLimitTools.GeneralSettings(myDir, opts.masspoints)
+        print "The following masses are considered:",settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS)
+        if not main(opts, settings, myDir):
+            print ""
+            parser.print_help()
+            print ""
+            raise Exception("You forgot to specify limit calculation method as a command line parameter!")

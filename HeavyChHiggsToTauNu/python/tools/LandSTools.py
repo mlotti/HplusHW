@@ -366,6 +366,7 @@ def parseOptionParser(parser):
 #
 # The options of LHCTypeAsymptotic are controlled by the constructor.
 def produceLHCAsymptotic(opts,
+                         directory,
                          massPoints,
                          datacardPatterns,
                          rootfilePatterns,
@@ -381,7 +382,7 @@ def produceLHCAsymptotic(opts,
     print "Computing limits with LandS version %s" % landsInstall.getVersion()
 
     for d in opts.dirs:
-        lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, cls)
+        lands = MultiCrabLandS(directory, massPoints, datacardPatterns, rootfilePatterns, cls)
         lands.createMultiCrabDir(postfix)
         lands.copyInputFiles()
         lands.writeScripts()
