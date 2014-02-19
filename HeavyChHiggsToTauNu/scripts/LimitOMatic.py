@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# This is the swiss pocket knife for running Lands on large array of datacards
+# This is the swiss pocket knife for running Lands/Combine on large array of datacards
 # Author: Lauri Wendland
 
 import os
@@ -11,6 +11,7 @@ import subprocess
 import json
 from optparse import OptionParser
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTools
 
 class Result:
     def __init__(self, opts, basedir):
@@ -32,14 +33,14 @@ class Result:
                 print "Limit already calculated"
                 self._limitCalculated = True
             else:
-                if not self._opts.printonly:
+                if not self._opts.printonly and not self._opts.lhcTypeAsymptotic:
                     self._getOutput()
 
     def _findJobDir(self, basedir):
         self._jobDir = None
         for dirname, dirnames, filenames in os.walk(basedir):
             for subdirname in dirnames:
-                if "LandSMultiCrab" in subdirname:
+                if "LandSMultiCrab" in subdirname or "CombineMultiCrab" in subdirname:
                     self._jobDir = subdirname
 
     def _createAndSubmit(self):
@@ -53,25 +54,37 @@ class Result:
         if i == 5:
             raise Exception("Error: Could not find test/brlimit directory!")
         # Create jobs
-        myCommand = "%sbrlimit/generateMultiCrabTaujets.py --lhc --create"%(s)
+        myCommand = "%sbrlimit/generateMultiCrabTaujets.py"%(s)
         if self._opts.brlimit:
             myCommand += " --brlimit"
         if self._opts.sigmabrlimit:
             myCommand += " --sigmabrlimit"
+        myGridStatus = True
+        if hasattr(self._opts, "lepType") and self._opts.lepType:
+            myCommand += " --lep"
+        if hasattr(self._opts, "lhcType") and self._opts.lhcType:
+            myCommand += " --lhc"
+        if hasattr(self._opts, "lhcTypeAsymptotic") and self._opts.lhcTypeAsymptotic:
+            myCommand += " --lhcasy"
+            myGridStatus = False
+        if myGridStatus:
+            myCommand += " --create"
         print "Creating jobs with:",myCommand
         os.system(myCommand)
-        # Change to job directory
-        self._findJobDir(".")
-        if self._jobDir == None:
-            raise Exception("Error: Could not find 'LandSMultiCrab' in a sub directory name under the base directory '%s'!"%self._basedir)
-        os.chdir(self._jobDir)
-        # Submit jobs
-        print "Submitting jobs"
-        proc = subprocess.Popen(["multicrab","-submit all"], stdout=subprocess.PIPE)
-        (out, err) = proc.communicate()
-        print out
-        # Change directory back
-        os.chdir(self._backToTopLevel())
+        if myGridStatus:
+            # asymptotic jobs are run on the fly
+            # Change to job directory
+            self._findJobDir(".")
+            if self._jobDir == None:
+                raise Exception("Error: Could not find 'LandSMultiCrab' or 'CombineMultiCrab' in a sub directory name under the base directory '%s'!"%self._basedir)
+            os.chdir(self._jobDir)
+            # Submit jobs
+            print "Submitting jobs"
+            proc = subprocess.Popen(["multicrab","-submit all"], stdout=subprocess.PIPE)
+            (out, err) = proc.communicate()
+            print out
+            # Change directory back
+            os.chdir(self._backToTopLevel())
 
     def _getOutput(self):
         # Go to job directory
@@ -176,42 +189,34 @@ class Result:
             for item in myKeys:
                 line += " %9.5f"%(float(masspoints[k]["expected"][item]))
             for item in myKeys:
-                a = float(masspoints[k]["expected"]["%s_error"%item])
-                b = float(masspoints[k]["expected"][item])
-                r = 0.0
-                if b > 0:
-                    r = a/b
-                line += " %9.4f"%(r)
+                if "%s_error"%item in masspoints[k]["expected"]:
+                    a = float(masspoints[k]["expected"]["%s_error"%item])
+                    b = float(masspoints[k]["expected"][item])
+                    r = 0.0
+                    if b > 0:
+                        r = a/b
+                    line += " %9.4f"%(r)
+                else:
+                    line += "      n.a."
             print line
         myFile.close()
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
-    parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")
-    parser.add_option("--brlimit", dest="brlimit", action="store_true", default=False, help="Calculate limit on Br(t->bH+)")
-    parser.add_option("--sigmabrlimit", dest="sigmabrlimit", action="store_true", default=False, help="Calculate limit on sigma(H+)xBr(t->bH+)")
+    parser = commonLimitTools.createOptionParser(lepDefault=None, lhcDefault=False, lhcasyDefault=False, fullOptions=False)
     parser.add_option("--printonly", dest="printonly", action="store_true", default=False, help="Print only the ready results")
-    (opts, args) = parser.parse_args()
-    if opts.helpStatus:
-        parser.print_help()
-        sys.exit()
-
-    # Check options
-    if opts.brlimit == opts.sigmabrlimit and not opts.printonly:
-        if opts.brlimit:
-            raise Exception("Error: Please enable only --brlimit or --sigmabrlimit !")
-        else:
-            raise Exception("Error: Please enable --brlimit or --sigmabrlimit !")
+    opts = commonLimitTools.parseOptionParser(parser)
 
     # Obtain directory list
-    myDirs = []
-    for dirname, dirnames, filenames in os.walk('.'):
-        for subdirname in dirnames:
-            #if "LandSMultiCrab" in subdirname:
-            if "datacards_" in subdirname:
-                myDirs.append(os.path.join(dirname, subdirname))
-    if len(myDirs) == 0:
-        raise Exception("Error: Could not find any sub directories starting with 'datacards_' below this directory!")
+    myDirs = opts.dirs[:]
+    if len(myDirs) == 0 or (len(myDirs) == 1 and myDirs[0] == "."):
+        myDirs = []
+        for dirname, dirnames, filenames in os.walk('.'):
+            for subdirname in dirnames:
+                #if "LandSMultiCrab" in subdirname:
+                if "datacards_" in subdirname:
+                    myDirs.append(os.path.join(dirname, subdirname))
+        if len(myDirs) == 0:
+            raise Exception("Error: Could not find any sub directories starting with 'datacards_' below this directory!")
     myDirs.sort()
     myResults = []
     for d in myDirs:

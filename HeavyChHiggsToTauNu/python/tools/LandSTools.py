@@ -13,17 +13,18 @@
 # easily. Since the amount of information in the result file is
 # relatively small, the performance penalty should be negligible.
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTools
+
 import os
 import re
 import sys
 import glob
-import stat
 import json
 import time
 import random
 import shutil
 import subprocess
-from optparse import OptionParser
+
 
 import multicrab
 import multicrabWorkflows
@@ -84,14 +85,7 @@ defaultOptions = lepHybridOptions
 ## Default number of crab jobs
 defaultNumberOfJobs = 20
 
-## Default number of first random number seed in the jobs
-defaultFirstSeed = 1000
-
-## Default mass points
-defaultMassPoints = ["120"]
-
-## Pattern for tau+jets datacard files (%s denotes the place of the mass)
-taujetsDatacardPattern = "lands_datacard_hplushadronic_m%s.txt"
+# FIXME: migrate theses if necessary to tools/CommonLimitTools.py
 ## Pattern for mu+tau datacard files (%s denotes the place of the mass)
 mutauDatacardPattern = "datacard_m%s_mutau_miso_20mar12.txt"
 ## Pattern for e+tau datacard files (%s denotes the place of the mass)
@@ -99,66 +93,20 @@ etauDatacardPattern = "datacard_m%s_etau_miso_20mar12.txt"
 ## Pattern for e+mu datacard files (%s denotes the place of the mass)
 emuDatacardPattern = "datacard_m%s_emu_nobtag_20mar12.txt"
 
-## Pattern for tau+jets shape root files (%s denotes the place of the mass)
-taujetsRootfilePattern = "lands_histograms_hplushadronic_m%s.root"
-
-## Default list of datacard patterns
-defaultDatacardPatterns = [
-    taujetsDatacardPattern,
-    emuDatacardPattern,
-    etauDatacardPattern,
-    mutauDatacardPattern
-    ]
-#defaultDatacardPatterns = [defaultDatacardPatterns[i] for i in [3, 1, 0, 2]] # order in my first crab tests
-
-## Default list of shape root files
-defaultRootfilePatterns = [
-    taujetsRootfilePattern
-]
-
 ## Deduces from directory listing the mass point list
 def obtainMassPoints(pattern):
-    myPattern = pattern%" "
-    mySplit = myPattern.split(" ")
-    prefix = mySplit[0]
-    suffix = mySplit[1]
-    myList = os.listdir(".")
-    myMasses = []
-    for item in myList:
-        if prefix in item:
-            myMasses.append(item.replace(prefix,"").replace(suffix,""))
-    myMasses.sort()
-    return myMasses
+    commonLimitTools.obtainMassPoints(pattern)
 
 def readLuminosityFromDatacard(myPath, filename):
-    lumi_re = re.compile("luminosity=\s*(?P<lumi>\d+\.\d+)")
-    fname = os.path.join(myPath, filename)
-    f = open(fname)
-    myLuminosity = None
-    for line in f:
-        match = lumi_re.search(line)
-        if match:
-            #self.lumi = str(1000*float(match.group("lumi"))) # 1/fb -> 1/pb
-            # Nowadays the luminosity is in 1/pb
-            myLuminosity = match.group("lumi")
-            f.close()
-            return myLuminosity
-    raise Exception("Did not find luminosity information from '%s'" % fname)
+    commonLimitTools.readLuminosityFromDatacard(myPath, filename)
 
 ## Returns true if mass list contains only heavy H+
 def isHeavyHiggs(massList):
-    for m in massList:
-        if int(m) < 175:
-            return False
-    return True
+    commonLimitTools.isHeavyHiggs(massList)
 
 ## Returns true if mass list contains only light H+
 def isLightHiggs(massList):
-    for m in massList:
-        if int(m) > 175:
-            return False
-    return True
-
+    commonLimitTools.isLightHiggs(massList)
 
 ## Generate multicrab configuration for LEP-CLs or LHC-CLs (hybrid)
 # \param opts               optparse.OptionParser object, constructed with createOptionParser()
@@ -197,9 +145,10 @@ def isLightHiggs(massList):
 # The CLs-flavour specific options are controlled by the constructors
 # of LEPType and LHCType classes.
 def generateMultiCrab(opts,
-                      massPoints=defaultMassPoints,
-                      datacardPatterns=defaultDatacardPatterns,
-                      rootfilePatterns=defaultRootfilePatterns,
+                      directory,
+                      massPoints,
+                      datacardPatterns,
+                      rootfilePatterns,
                       clsType=None,
                       numberOfJobs=None,
                       crabScheduler="arc",
@@ -213,19 +162,18 @@ def generateMultiCrab(opts,
     print "Computing limits with %s CLs flavour" % cls.nameHuman()
     print "Computing limits with LandS version %s" % landsInstall.getVersion()
 
-    njobs = ValuePerMass(_ifNotNoneElse(numberOfJobs, defaultNumberOfJobs))
+    njobs = aux.ValuePerMass(aux.ifNotNoneElse(numberOfJobs, defaultNumberOfJobs))
 
     landsObjects = []
 
-    for d in opts.dirs:
-        lands = MultiCrabLandS(d, massPoints, datacardPatterns, rootfilePatterns, cls)
-        lands.createMultiCrabDir(postfix)
-        lands.copyLandsInputFiles()
-        lands.writeLandsScripts()
-        lands.writeCrabCfg(crabScheduler, crabOptions)
-        lands.writeMultiCrabCfg(njobs)
+    lands = MultiCrabLandS(opts, directory, massPoints, datacardPatterns, rootfilePatterns, cls)
+    lands.createMultiCrabDir(postfix)
+    lands.copyInputFiles()
+    lands.writeScripts()
+    lands.writeCrabCfg(crabScheduler, crabOptions, ["lands.out"])
+    lands.writeMultiCrabCfg(njobs)
 
-        landsObjects.append(lands)
+    landsObjects.append(lands)
 
     if opts.multicrabCreate:
         for lands in landsObjects:
@@ -235,6 +183,24 @@ def generateMultiCrab(opts,
         if len(landsObjects) > 1:
             print
         lands.printInstruction()
+
+## Create OptionParser, and add common LandS options to OptionParser object
+#
+# \param lepDefault     Boolean for the default value of --lep switch (if None, switch is not added)
+# \param lhcDefault     Boolean for the default value of --lhc switch (if None, switch is not added)
+# \param lhcasyDefault  Boolean for the default value of --lhcasy switch (if None, switch is not added)
+#
+# \return optparse.OptionParser object
+def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
+    return commonLimitTools.createOptionParser(lepDefault, lhcDefault, lhcasyDefault)
+
+## Parse OptionParser object
+#
+# \param parser   optparse.OptionParser object
+#
+# \return Options object
+def parseOptionParser(parser):
+    commonLimitTools.parseOptionParser(parser)
 
 
 ## Run LandS for the LHC-CLs asymptotic limit
@@ -256,10 +222,10 @@ def generateMultiCrab(opts,
 #                           name
 #
 # The options of LHCTypeAsymptotic are controlled by the constructor.
-def produceLHCAsymptotic(opts,
-                         massPoints=defaultMassPoints,
-                         datacardPatterns=defaultDatacardPatterns,
-                         rootfilePatterns=defaultRootfilePatterns,
+def produceLHCAsymptotic(opts, directory,
+                         massPoints,
+                         datacardPatterns,
+                         rootfilePatterns,
                          clsType = None,
                          postfix=""
                          ):
@@ -271,60 +237,17 @@ def produceLHCAsymptotic(opts,
     print "Computing limits with %s CLs flavour" % cls.nameHuman()
     print "Computing limits with LandS version %s" % landsInstall.getVersion()
 
-    for d in opts.dirs:
-        lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, cls)
-        lands.createMultiCrabDir(postfix)
-        lands.copyLandsInputFiles()
-        lands.writeLandsScripts()
-        lands.runLandSForAsymptotic()
-
-## Create OptionParser, and add common LandS options to OptionParser object
-#
-# \param lepDefault     Boolean for the default value of --lep switch (if None, switch is not added)
-# \param lhcDefault     Boolean for the default value of --lhc switch (if None, switch is not added)
-# \param lhcasyDefault  Boolean for the default value of --lhcasy switch (if None, switch is not added)
-#
-# \return optparse.OptionParser object
-def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
-    parser = OptionParser(usage="Usage: %prog [options] [datacard directories]\nDatacard directories can be given either as the last arguments, or with -d.")
-
-    # Switches for different CLs flavours, the interpretation of these
-    # is in the generate* scripts (i.e. in the caller responsibility)
-    if lepDefault != None:
-        parser.add_option("--lep", dest="lepType", default=lepDefault, action="store_true",
-                          help="Use hybrid LEP-CLs (default %s)" % str(lepDefault))
-    if lhcDefault != None:
-        parser.add_option("--lhc", dest="lhcType", default=lhcDefault, action="store_true",
-                          help="Use hybrid LHC-CLs (default %s)" % str(lhcDefault))
-    if lhcasyDefault != None:
-        parser.add_option("--lhcasy", dest="lhcTypeAsymptotic", default=lhcasyDefault, action="store_true",
-                          help="Use asymptotic LHC-CLs (default %s)" % str(lhcasyDefault))
-
-    # Datacard directories
-    parser.add_option("-d", "--dir", dest="dirs", type="string", action="append", default=[],
-                      help="Datacard directories to create the LandS MultiCrab tasks into (default: use the working directory")
-    parser.add_option("--create", dest="multicrabCreate", action="store_true", default=False,
-                      help="Run 'multicrab -create' for each multicrab task directory")
-
-    return parser
-
-## Parse OptionParser object
-#
-# \param parser   optparse.OptionParser object
-#
-# \return Options object
-def parseOptionParser(parser):
-    (opts, args) = parser.parse_args()
-    opts.dirs.extend(args)
-    if len(opts.dirs) == 0:
-        opts.dirs = ["."]
-    return opts
+    lands = MultiCrabLandS(opts, directory, massPoints, datacardPatterns, rootfilePatterns, cls)
+    lands.createMultiCrabDir(postfix)
+    lands.copyInputFiles()
+    lands.writeScripts()
+    lands.runLandSForAsymptotic()
 
 ## Class to generate (LEP-CLs, LHC-CLs) multicrab configuration, or run (LHC-CLs asymptotic) LandS
 #
 # The class is not intended to be used directly by casual user, but
 # from generateMultiCrab() and produceLHCAsymptotic()
-class MultiCrabLandS:
+class MultiCrabLandS(commonLimitTools.LimitMultiCrabBase):
     ## Constructor
     #
     # \param directory          Datacard directory
@@ -335,166 +258,17 @@ class MultiCrabLandS:
     #                           in the limit calculation
     # \param clsType            Object defining the CLs flavour (should be either
     #                           LEPType, or LHCType).
-    def __init__(self, directory, massPoints, datacardPatterns, rootfilePatterns, clsType):
-        if not os.path.isdir(directory):
-            raise Exception("Datacard directory '%s' does not exist" % d)
-
-        self.datacardDirectory = directory
+    def __init__(self, opts, directory, massPoints, datacardPatterns, rootfilePatterns, clsType):
+        commonLimitTools.LimitMultiCrabBase.__init__(self, opts, directory, massPoints, datacardPatterns, rootfilePatterns, clsType)
         self.exe = landsInstall.findExe()
-        self.clsType = clsType.clone()
-        self.jobsCreated = False
-
-        self.massPoints = massPoints
-        self.datacards = {}
-        self.rootfiles = {}
-        self.scripts   = []
-
-        # this is a dictionary dumped to configuration.json
-        self.configuration = {
-            "masspoints": massPoints,
-            "datacards": datacardPatterns,
-            "rootfiles": rootfilePatterns,
-            "landsVersion": LandS_tag,
-            "codeVersion": git.getCommitId(),
-            "clsType": self.clsType.name(),
-        }
-        clsConfig = self.clsType.getConfiguration()
-        if clsConfig != None:
-            self.configuration["clsConfig"] = clsConfig
-
-        for mass in self.massPoints:
-            for dc in datacardPatterns:
-                fname = os.path.join(self.datacardDirectory, dc % mass)
-                if not os.path.isfile(fname):
-                    raise Exception("Datacard file '%s' does not exist!" % fname)
-
-                aux.addToDictList(self.datacards, mass, fname)
-
-            for rf in rootfilePatterns:
-                fname = os.path.join(self.datacardDirectory, rf % mass)
-                if not os.path.isfile(fname):
-                    raise Exception("ROOT file (for shapes) '%s' does not exist!" % fname)
-
-                aux.addToDictList(self.rootfiles, mass, fname)
+        self.configuration["landsVersion"] = LandS_tag
 
     ## Create the multicrab task directory
     #
     # \param postfix   Additional string to be included in the directory name
     def createMultiCrabDir(self, postfix):
         prefix = "LandSMultiCrab"
-        if len(postfix) > 0:
-            prefix += "_"+postfix
-	self.dirname = multicrab.createTaskDir(prefix=prefix, path=self.datacardDirectory)
-        self.clsType.setDirectory(self.dirname)
-
-    ## Copy input files for LandS (datacards, rootfiles) to the multicrab directory
-    def copyLandsInputFiles(self):
-        for d in [self.datacards, self.rootfiles]:
-            for mass, files in d.iteritems():
-                for f in files:
-                    shutil.copy(f, self.dirname)
-        shutil.copy(self.exe, self.dirname)
-
-    ## Write LandS shell scripts to the multicrab directory
-    def writeLandsScripts(self):
-        for mass, datacardFiles in self.datacards.iteritems():
-            self.clsType.createScripts(mass, datacardFiles)
-
-    ## Write crab.cfg to the multicrab directory
-    # \param crabScheduler      CRAB scheduler to use
-    # \param crabOptions        Dictionary for specifying additional CRAB
-    #                           options. The keys correspond to the
-    #                           sections in crab.cfg. The values are lists
-    #                           containing lines to be appended to the
-    #                           section.
-    def writeCrabCfg(self, crabScheduler, crabOptions):
-	filename = os.path.join(self.dirname, "crab.cfg")
-	fOUT = open(filename,'w')
-	fOUT.write("[CRAB]\n")
-        fOUT.write("jobtype                 = cmssw\n")
-        fOUT.write("scheduler               = %s\n" % crabScheduler)
-        fOUT.write("use_server              = 0\n")
-        if "CRAB" in crabOptions:
-            for line in crabOptions["CRAB"]:
-                fOUT.write(line+"\n")
-        fOUT.write("\n")
-
-        fOUT.write("[CMSSW]\n")
-        fOUT.write("datasetpath             = none\n")
-        fOUT.write("pset                    = none\n")
-        fOUT.write("number_of_jobs          = 1\n")
-        fOUT.write("output_file             = lands.out\n")
-        if "CMSSW" in crabOptions:
-            for line in crabOptions["CMSSW"]:
-                fOUT.write(line+"\n")
-        fOUT.write("\n")
-
-        fOUT.write("[USER]\n")
-        fOUT.write("return_data             = 1\n")
-        fOUT.write("copy_data               = 0\n")
-        if "USER" in crabOptions:
-            for line in crabOptions["USER"]:
-                fOUT.write(line+"\n")
-        fOUT.write("\n")
-
-        if "GRID" in crabOptions:
-            fOUT.write("[GRID]\n")
-            for line in crabOptions["GRID"]:
-                fOUT.write(line+"\n")
-            fOUT.write("\n")
-
-	fOUT.close()
-
-    ## Write multicrab.cfg to the multicrab directory
-    #
-    # \param numberOfJobs   ValuePerMass object holding the information
-    #                       of number of crab jobs (per mass point)
-    def writeMultiCrabCfg(self, numberOfJobs):
-	filename = os.path.join(self.dirname, "multicrab.cfg")
-        fOUT = open(filename,'w')
-        fOUT.write("[COMMON]\n")
-        fOUT.write("CRAB.use_server              = 0\n")
-	fOUT.write("CMSSW.datasetpath            = none\n")
-	fOUT.write("CMSSW.pset                   = none\n")
-        fOUT.write("\n")
-
-        exe = self.exe.split("/")[-1]
-        for mass in self.massPoints:
-            inputFiles = [exe]+self.datacards[mass]
-            if len(self.rootfiles) > 0:
-                inputFiles += self.rootfiles[mass]
-            self.clsType.writeMultiCrabConfig(fOUT, mass, inputFiles, numberOfJobs.getValue(mass))
-            fOUT.write("\n\n")
-
-        f = open(os.path.join(self.dirname, "configuration.json"), "wb")
-        json.dump(self.configuration, f, sort_keys=True, indent=2)
-        f.close()
-
-    ## Run 'multicrab create' inside the multicrab directory
-    def createMultiCrab(self):
-        print "Creating multicrab task %s" % self.dirname
-        print
-        print "############################################################"
-        print
-        pwd = os.getcwd()
-        os.chdir(self.dirname)
-        ret = subprocess.call(["multicrab", "-create"])
-        if ret != 0:
-            raise Exception("'multicrab -create' failed with exit code %d in directory '%s'" % (ret, self.dirname))
-        os.chdir(pwd)
-        print
-        print "############################################################"
-        print
-
-        self.jobsCreated = True
-
-    def printInstruction(self):
-        if self.jobsCreated:
-            print "Multicrab cfg and jobs created. Type"
-            print "cd %s && multicrab -submit" % self.dirname
-        else:
-            print "Multicrab cfg created. Type"
-            print "cd %s && multicrab -create" % self.dirname
+        self._createMultiCrabDir(prefix, postfix)
 
 
     ## Run LandS for the asymptotic limit
@@ -507,7 +281,7 @@ class MultiCrabLandS:
         json.dump(self.configuration, f, sort_keys=True, indent=2)
         f.close()
 
-        results = ResultContainer(self.dirname)
+        results = commonLimitTools.ResultContainer(self.opts.unblinded, self.dirname)
         for mass in self.massPoints:
             results.append(self.clsType.runLandS(mass))
             print "Processed mass point %s" % mass
@@ -516,59 +290,6 @@ class MultiCrabLandS:
         results.print2()
         fname = results.saveJson()
         print "Wrote results to %s" % fname
-
-## Helper class to manage mass-specific configuration values
-class ValuePerMass:
-    ## Constructor
-    #
-    # \param dictionary   Input dictionary/ValuePerMass object/value
-    #
-    # If dictionary is dictionary, it must have a "default" key, and
-    # it may have more than or equal to zero keys for the mass points.
-    # The value of the "default" key is used as the default value for
-    # those mass points for which the specific value is not given.
-    #
-    # If the dictionary is ValuePerMass object, the default and
-    # per-mass values are copied from it.
-    #
-    # If the dictionary is something else, it is used as the default
-    # value for all masses
-    def __init__(self, dictionary):
-        self.values = {}
-        if isinstance(dictionary, dict):
-            self.values.update(dictionary)
-            self.default = self.values["default"]
-            del self.values["default"]
-        elif isinstance(dictionary, ValuePerMass):
-            self.values.update(dictionary.values)
-            self.default = dictionary.default
-        else:
-            self.default = dictionary
-
-    ## Apply a function for all values
-    #
-    # \param function   Function taking one parameter (the value), the
-    #                   return value is not used
-    #
-    # This allows sanity checks to be performed on the values.
-    def forEachValue(self, function):
-        function(self.default)
-        for value in self.values.values():
-            function(value)
-
-    ## Get the value for a given mass point
-    def getValue(self, mass):
-        return self.values.get(mass, self.default)
-
-    ## Serialize the object to a dictionary
-    #
-    # Another ValuePerMass can be constructed from the dictionary. The
-    # dictionary can be written to a JSON file, allowing the
-    # ValuePerMass to be constructed from other scripts.
-    def serialize(self):
-        ret = {"default": self.default}
-        ret.update(self.values)
-        return ret
 
 ## Definition of the LEP-type CLs (with hybrid treatment of nuisance parameters)
 #
@@ -601,14 +322,14 @@ class LEPType:
     #
     # Note: if you add any parameters to the constructor, add the
     # parameters to the clone() method correspondingly.
-    def __init__(self, brlimit=True, sigmabrlimit=False, options=None, toysPerJob=None, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
+    def __init__(self, brlimit=True, sigmabrlimit=False, options=None, toysPerJob=None, firstSeed=1000, rMin=None, rMax=None):
         self.brlimit = brlimit
         self.sigmabrlimit = sigmabrlimit
-        self.options = ValuePerMass(_ifNotNoneElse(options, lepHybridOptions))
+        self.options = ValuePerMass(aux.ifNotNoneElse(options, lepHybridOptions))
         self.firstSeed = firstSeed
-        self.toysPerJob = ValuePerMass(_ifNotNoneElse(toysPerJob, lepHybridToys))
-        self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lepHybridRmin))
-        self.rMax = ValuePerMass(_ifNotNoneElse(rMax, lepHybridRmax))
+        self.toysPerJob = aux.ValuePerMass(aux.ifNotNoneElse(toysPerJob, lepHybridToys))
+        self.rMin = aux.ValuePerMass(aux.ifNotNoneElse(rMin, lepHybridRmin))
+        self.rMax = aux.ValuePerMass(aux.ifNotNoneElse(rMax, lepHybridRmax))
 
         self.expScripts = {}
         self.obsScripts = {}
@@ -632,11 +353,10 @@ class LEPType:
     # \param kwargs   Keyword arguments, can be any of the arguments of
     #                 __init__(), with the same meaning.
     def clone(self, **kwargs):
-        args = _updateArgs(kwargs, self, ["options", "toysPerJob", "firstSeed", "rMin", "rMax"])
+        args = aux.updateArgs(kwargs, self, ["options", "toysPerJob", "firstSeed", "rMin", "rMax"])
         return LEPType(**args)
 
     ## Set the multicrab directory path
-    #
     # \param dirname   Path to the multicrab directory
     def setDirectory(self, dirname):
         self.dirname = dirname
@@ -671,7 +391,7 @@ class LEPType:
             ""
             "cat lands.out"
             ]
-        _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
+        aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.obsScripts[mass] = fileName
 
     ## Create the expected job script for a single mass point
@@ -696,7 +416,7 @@ class LEPType:
             "",
             "cat lands.out",
             ]
-        _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
+        aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.expScripts[mass] = fileName
 
     ## Write the multicrab configuration snippet of a single mass point
@@ -705,13 +425,14 @@ class LEPType:
     # \param mass        String for the mass point
     # \param inputFiles  List of strings for the (additional) input files to pack in the crab job
     # \param numJobs     Number of jobs for the expected task
-    def writeMultiCrabConfig(self, output, mass, inputFiles, numJobs):
-        output.write("[Observed_m%s]\n" % mass)
-        output.write("USER.script_exe = %s\n" % self.obsScripts[mass])
-        output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
-        output.write("CMSSW.number_of_jobs = 1\n")
-        output.write("CMSSW.output_file = lands.out\n")
-        output.write("\n")
+    def writeMultiCrabConfig(self, opts, output, mass, inputFiles, numJobs):
+        if opts.unblinded:
+            output.write("[Observed_m%s]\n" % mass)
+            output.write("USER.script_exe = %s\n" % self.obsScripts[mass])
+            output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
+            output.write("CMSSW.number_of_jobs = 1\n")
+            output.write("CMSSW.output_file = lands.out\n")
+            output.write("\n")
 
         output.write("[Expected_m%s]\n" % mass)
         output.write("USER.script_exe = %s\n" % self.expScripts[mass])
@@ -730,7 +451,7 @@ class LEPType:
     #
     # \return Result object containing the limits for the mass point
     def getResult(self, path, mass, clsConfig, unblindedStatus=False):
-        result = Result(mass)
+        result = commonLimitTools.Result(mass)
         if unblindedStatus:
             self._parseObserved(result, path, mass)
         self._parseExpected(result, path, mass)
@@ -876,27 +597,27 @@ class LHCType:
     # configuration.json file, and can be overridden by editing the
     # file between the multicrab configuration generation and the call
     # to \a landsMergeHistograms.py.
-    def __init__(self, brlimit=True, sigmabrlimit=False, options=None, toysCLsb=None, toysCLb=None, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None, scanRmin=None, scanRmax=None):
+    def __init__(self, brlimit=True, sigmabrlimit=False, options=None, toysCLsb=None, toysCLb=None, firstSeed=1000, vR=None, rMin=None, rMax=None, scanRmin=None, scanRmax=None):
         self.brlimit = brlimit
         self.sigmabrlimit = sigmabrlimit
-        self.options = ValuePerMass(_ifNotNoneElse(options, lhcHybridOptions))
+        self.options = aux.ValuePerMass(aux.ifNotNoneElse(options, lhcHybridOptions))
 
         self.firstSeed = firstSeed
 
-        self.toysCLsb = ValuePerMass(_ifNotNoneElse(toysCLsb, lhcHybridToysCLsb))
-        self.toysCLb = ValuePerMass(_ifNotNoneElse(toysCLb, lhcHybridToysCLb))
+        self.toysCLsb = aux.ValuePerMass(aux.ifNotNoneElse(toysCLsb, lhcHybridToysCLsb))
+        self.toysCLb = aux.ValuePerMass(aux.ifNotNoneElse(toysCLb, lhcHybridToysCLb))
 
         def assertvR(value):
             if value != None and len(value) != 2 and len(value) != 3:
                 raise Exception("vR should be pair (min, max) or triple (min, max, factor), got length %d: %s" % (len(value), str(value)))
-        self.vR = ValuePerMass(vR)
+        self.vR = aux.ValuePerMass(vR)
         self.vR.forEachValue(assertvR)
 
-        self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lhcHybridRmin))
-        self.rMax = ValuePerMass(_ifNotNoneElse(rMax, lhcHybridRmax))
+        self.rMin = aux.ValuePerMass(aux.ifNotNoneElse(rMin, lhcHybridRmin))
+        self.rMax = aux.ValuePerMass(aux.ifNotNoneElse(rMax, lhcHybridRmax))
 
-        self.scanRmin = ValuePerMass(scanRmin)
-        self.scanRmax = ValuePerMass(scanRmax)
+        self.scanRmin = aux.ValuePerMass(scanRmin)
+        self.scanRmax = aux.ValuePerMass(scanRmax)
         self.configuration = {}
         self.configuration["scanRmin"] = self.scanRmin.serialize()
         self.configuration["scanRmax"] = self.scanRmax.serialize()
@@ -922,7 +643,7 @@ class LHCType:
     # \param kwargs   Keyword arguments, can be any of the arguments of
     #                 __init__(), with the same meaning.
     def clone(self, **kwargs):
-        args = _updateArgs(kwargs, self, ["options", "toysCLsb", "toysCLb", "firstSeed", "vR", "rMin", "rMax", "scanRmin", "scanRmax"])
+        args = aux.updateArgs(kwargs, self, ["options", "toysCLsb", "toysCLb", "firstSeed", "vR", "rMin", "rMax", "scanRmin", "scanRmax"])
         return LHCType(**args)
 
     ## Set the multicrab directory path
@@ -964,7 +685,7 @@ class LHCType:
             "cat lands.out"
             ]
 
-        _writeScript(os.path.join(self.dirname, filename), "\n".join(command)+"\n")
+        aux.writeScript(os.path.join(self.dirname, filename), "\n".join(command)+"\n")
         self.scripts[mass] = filename
 
         # Produce also scripts for ML fit, they're not run on the grid however
@@ -988,7 +709,7 @@ class LHCType:
             "landsReadMLFit.py -b %s -s %s -o mlfit.json -m %s" % (b_file, sb_file, mass),
             'echo "ML fit results are in %s and %s, and also in mlfit.json"' % (sb_file2, b_file2)
             ]
-        _writeScript(os.path.join(self.dirname, "runLandS_m%s_mlfit" % mass), "\n".join(command)+"\n")
+        aux.writeScript(os.path.join(self.dirname, "runLandS_m%s_mlfit" % mass), "\n".join(command)+"\n")
 
         command = [
         ]
@@ -999,7 +720,7 @@ class LHCType:
                     "",
                     ])
         command.append("./runLandS_m%s_mlfit" % mass)
-        _writeScript(allMlFitPath, "\n".join(command)+"\n", truncate=False)                
+        aux.writeScript(allMlFitPath, "\n".join(command)+"\n", truncate=False)                
         
 
     ## Write the multicrab configuration snippet of a single mass point
@@ -1008,7 +729,7 @@ class LHCType:
     # \param mass        String for the mass point
     # \param inputFiles  List of strings for the (additional) input files to pack in the crab job
     # \param numJobs     Number of jobs for the expected task
-    def writeMultiCrabConfig(self, output, mass, inputFiles, numJobs):
+    def writeMultiCrabConfig(self, opts, output, mass, inputFiles, numJobs):
         output.write("[Limit_m%s]\n" % mass)
         output.write("USER.script_exe = %s\n" % self.scripts[mass])
         output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
@@ -1028,7 +749,7 @@ class LHCType:
     # reads the observed and expected limits from the output. The
     # script output is also stored in a text file for later referecence.
     def getResult(self, path, mass, clsConfig, unblindedStatus=False):
-        result = Result(mass)
+        result = commonLimitTools.Result(mass)
 
         rootFile = os.path.join(path, "Limit_m%s"%mass, "res", "histograms-Limit_m%s.root"%mass)
         if not os.path.exists(rootFile):
@@ -1044,12 +765,12 @@ class LHCType:
         commands = []
 
         if clsConfig != None and "scanRmin" in clsConfig:
-            scanRmin = ValuePerMass(clsConfig["scanRmin"])
+            scanRmin = aux.ValuePerMass(clsConfig["scanRmin"])
             val = scanRmin.getValue(mass)
             if val != None:
                 commands.append("scanRmin = %s" % val)
         if clsConfig != None and "scanRmax" in clsConfig:
-            scanRmax = ValuePerMass(clsConfig["scanRmax"])
+            scanRmax = aux.ValuePerMass(clsConfig["scanRmax"])
             val = scanRmax.getValue(mass)
             if val != None:
                 commands.append("scanRmax = %s" % val)
@@ -1143,15 +864,15 @@ class LHCTypeAsymptotic:
     def __init__(self, brlimit=True, sigmabrlimit=False, optionsObserved=None, optionsExpected=None, rMin=None, rMax=None, vR=None):
         self.brlimit = brlimit
         self.sigmabrlimit = sigmabrlimit
-        self.optionsObserved = ValuePerMass(_ifNotNoneElse(optionsObserved, lhcAsymptoticOptionsObserved))
-        self.optionsExpected = ValuePerMass(_ifNotNoneElse(optionsExpected, lhcAsymptoticOptionsExpected))
-        self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lhcAsymptoticRmin))
-        self.rMax = ValuePerMass(_ifNotNoneElse(rMax, lhcAsymptoticRmax))
+        self.optionsObserved = aux.ValuePerMass(aux.ifNotNoneElse(optionsObserved, lhcAsymptoticOptionsObserved))
+        self.optionsExpected = aux.ValuePerMass(aux.ifNotNoneElse(optionsExpected, lhcAsymptoticOptionsExpected))
+        self.rMin = aux.ValuePerMass(aux.ifNotNoneElse(rMin, lhcAsymptoticRmin))
+        self.rMax = aux.ValuePerMass(aux.ifNotNoneElse(rMax, lhcAsymptoticRmax))
 
         def assertvR(value):
             if value != None and len(value) != 2 and len(value) != 3:
                 raise Exception("vR should be pair (min, max) or triple (min, max, factor), got length %d: %s" % (len(value), str(value)))
-        self.vR = ValuePerMass(vR)
+        self.vR = aux.ValuePerMass(vR)
         self.vR.forEachValue(assertvR)
 
         self.obsScripts = {}
@@ -1176,7 +897,7 @@ class LHCTypeAsymptotic:
     # \param kwargs   Keyword arguments, can be any of the arguments of
     #                 __init__(), with the same meaning.
     def clone(self, **kwargs):
-        args = _updateArgs(kwargs, self, ["optionsObserved", "optionsExpected", "rMin", "rMax", "vR"])
+        args = aux.updateArgs(kwargs, self, ["optionsObserved", "optionsExpected", "rMin", "rMax", "vR"])
         return LHCTypeAsymptotic(**args)
 
     ## Set the multicrab directory path
@@ -1219,7 +940,7 @@ class LHCTypeAsymptotic:
             "",
             "./lands.exe %s --minuitSTRATEGY 1 -n obs_m%s -d %s" % (opts, mass, " ".join(datacardFiles)),
             ]
-        _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
+        aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.obsScripts[mass] = fileName
 
     ## Create the expected job script for a single mass point
@@ -1248,7 +969,7 @@ class LHCTypeAsymptotic:
             "",
             "./lands.exe %s --minuitSTRATEGY 2 -n exp_m%s -D asimov_b -d %s" % (opts, mass, " ".join(datacardFiles)),
             ]
-        _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
+        aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.expScripts[mass] = fileName
 
     ## Run LandS for the observed and expected limits for a single mass point
@@ -1257,7 +978,7 @@ class LHCTypeAsymptotic:
     #
     # \return Result object containing the limits for the mass point
     def runLandS(self, mass):
-        result = Result(mass)
+        result = commonLimitTools.Result(mass)
         self._runObserved(result, mass)
         self._runExpected(result, mass)
         return result
@@ -1331,170 +1052,7 @@ class LHCTypeAsymptotic:
         print output
         raise Exception("Unable to parse the output of command '%s'" % script)
 
-## Class to hold the limit results
-class Result:
-    ## Constructor
-    def __init__(self, mass):
-        self.mass                = mass
-        self.observed            = None
-        self.expected            = None
 
-    ## Check if the result is empty, i.e. no limits has been assigned
-    def empty(self):
-        return self.observed == None and self.expected == None
-
-## Collection of Result objects
-class ResultContainer:
-    ## Constructor
-    #
-    # \param path  Path to the multicrab directory (where configuration.json exists)
-    def __init__(self, path):
-        self.path = path
-
-        # Read task configuration json file
-        configFile = os.path.join(path, "configuration.json")
-        f = open(configFile)
-        self.config = json.load(f)
-        f.close()
-
-        # Read the luminosity, use tau+jets one if that's available, if not, use the first one
-        datacards = self.config["datacards"]
-        taujetsDc = None
-        for dc in datacards:
-            if "hplushadronic" in dc:
-                taujetsDc = dc
-                break
-        if taujetsDc != None:
-            self._readLuminosityTaujets(taujetsDc % self.config["masspoints"][0])
-        else:
-            self._readLuminosityLeptonic(self.config["datacards"][0] % self.config["masspoints"][0])
-
-        self.results = []
-
-    ## Append a result object to the list
-    #
-    # \param obj   Result object
-    def append(self, obj):
-        self.results.append(obj)
-
-    ## Read luminosity from a datacard assuming it follows the tau+jets convention
-    #
-    # \param filename  Name of the datacard file inside the multicrab directory
-    def _readLuminosityTaujets(self, filename):
-        self.lumi = readLuminosityFromDatacard(self.path, filename)
-
-    ## Read luminosity from a datacard assuming it follows the leptonic convention
-    #
-    # \param filename  Name of the datacard file inside the multicrab directory
-    #
-    # \todo This needs to be updated, it get's the scale wrong
-    def _readLuminosityLeptonic(self, filename):
-        scale_re = re.compile("lumi scale (?P<scale>\S+)")
-        lumi_re = re.compile("lumi=(?P<lumi>\S+)")
-        scale = None
-        lumi = None
-
-        fname = os.path.join(self.path, filename)
-        f = open(fname)
-        for line in f:
-            match = scale_re.search(line)
-            if match:
-                scale = float(match.group("scale"))
-                continue
-            match = lumi_re.search(line)
-            if match:
-                lumi = float(match.group("lumi"))
-                break
-        f.close()
-        if lumi == None:
-            raise Exception("Did not find luminosity information from '%s'" % fname)
-        if scale != None:
-            lumi *= scale
-        self.lumi = str(lumi)
-
-    ## Get the integrated luminosity as a string in 1/pb
-    def getLuminosity(self):
-        return self.lumi
-
-    ## Print the limits
-    def print2(self,unblindedStatus=False):
-        print
-        print "                  Expected"
-        print "Mass  Observed    Median       -2sigma     -1sigma     +1sigma     +2sigma"
-        format = "%3s:  %-9s   %-10s   %-10s  %-10s  %-10s  %-10s"
-        massIndex = [(int(self.results[i].mass), i) for i in range(len(self.results))]
-        massIndex.sort()
-        for mass, index in massIndex:
-            result = self.results[index]
-            if result.empty():
-                continue
-            if unblindedStatus:
-                print format % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
-            else:
-                print format % (result.mass, "BLINDED", result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
-        print
-    
-    ## Store the results in a limits.json file
-    #
-    # \param data   Dictionary of additional data to be stored
-    def saveJson(self, data={}, unblindedStatus=False):
-        output = {}
-        output.update(data)
-        output.update({
-                "luminosity": self.getLuminosity(),
-                "masspoints": {}
-                })
-
-        massIndex = [(int(self.results[i].mass), i) for i in range(len(self.results))]
-        massIndex.sort()
-        for mass, index in massIndex:
-            result = self.results[index]
-            if result.empty():
-                continue
-
-            if unblindedStatus:
-                output["masspoints"][result.mass] = {
-                    "mass": result.mass,
-                    "observed": result.observed,
-                    "expected": {
-                        "-2sigma": result.expectedMinus2Sigma,
-                        "-1sigma": result.expectedMinus1Sigma,
-                        "median": result.expected,
-                        "+1sigma": result.expectedPlus1Sigma,
-                        "+2sigma": result.expectedPlus2Sigma,
-                        }
-                    }
-            else:
-                output["masspoints"][result.mass] = {
-                    "mass": result.mass,
-                    "observed": 0,
-                    "expected": {
-                        "-2sigma": result.expectedMinus2Sigma,
-                        "-1sigma": result.expectedMinus1Sigma,
-                        "median": result.expected,
-                        "+1sigma": result.expectedPlus1Sigma,
-                        "+2sigma": result.expectedPlus2Sigma,
-                        }
-                    }
-
-            if unblindedStatus:
-                if hasattr(result, "observedError"):
-                    output["masspoints"][result.mass]["observed_error"] = result.observedError
-            if hasattr(result, "expectedError"):
-                output["masspoints"][result.mass]["expected"].update({
-                        "-2sigma_error": result.expectedMinus2SigmaError,
-                        "-1sigma_error": result.expectedMinus1SigmaError,
-                        "median_error": result.expectedError,
-                        "+1sigma_error": result.expectedPlus1SigmaError,
-                        "+2sigma_error": result.expectedPlus2SigmaError,
-                        })
-
-
-        fname = os.path.join(self.path, "limits.json")
-        f = open(fname, "wb")
-        json.dump(output, f, sort_keys=True, indent=2)
-        f.close()
-        return fname
 
 ## Class to parse the limits from LandS output
 #
@@ -1523,13 +1081,13 @@ class ParseLandsOutput:
             raise Exception("Unsupported CLs type '%s' in %s" % (self.config["clsType"], configFile))
 
         # Read in the results
-        self.results = ResultContainer(self.path)
+        self.results = commonLimitTools.ResultContainer(unblindedStatus, self.path)
         try:
             clsConfig = self.config["clsConfig"]
         except KeyError:
             clsConfig = None
         for mass in self.config["masspoints"]:
-            self.results.append(self.clsType.getResult(self.path, mass, clsConfig, unblindedStatus))
+            self.results.append(self.clsType.getResult(self.path, mass, clsConfig))
             print "Processed mass point %s" % mass
 
 
@@ -1716,51 +1274,3 @@ class LandSInstaller:
 
 ## Object to contain LandS installation information
 landsInstall = LandSInstaller()
-
-
-## Helper function to update keyword argument dictionary
-#
-# \param kwargs    Dictionary for keyword arguments
-# \param obj       Object
-# \param names     List of attribute names
-#
-# Constructs a new dictionary, where key,value pairs are taken from
-# kwargs for all attribute names, or if some name does not exist in
-# the kwargs, the value is taken from the object.
-#
-# The kwargs may not contain any other keys than the ones in names
-# (typo protection)
-def _updateArgs(kwargs, obj, names):
-    for k in kwargs.keys():
-        if not k in names:
-            raise Exception("Unknown keyword argument '%s', known arguments are %s" % ", ".join(names))
-
-    args = {}
-    for n in names:
-        args[n] = kwargs.get(n, getattr(obj, n))
-    return args
-
-## Write content to file, and make the file executable
-#
-# \param filename   Path to file
-# \param content    String to write to the file
-# \param truncate   Truncate (True) or append (False)
-def _writeScript(filename, content, truncate=True):
-    mode = "w"
-    if not truncate:
-        mode = "a"
-    fOUT = open(filename, mode)
-    fOUT.write(content)
-    fOUT.close()
-
-    # make the script executable
-    st = os.stat(filename)
-    os.chmod(filename, st.st_mode | stat.S_IXUSR)
-
-## Pick default value if value is None
-def _ifNotNoneElse(value, default):
-    if value == None:
-        return default
-    return value
-
-
