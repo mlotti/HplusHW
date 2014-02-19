@@ -189,8 +189,8 @@ def isLightHiggs(massList):
 # \param lhcasyDefault  Boolean for the default value of --lhcasy switch (if None, switch is not added)
 #
 # \return optparse.OptionParser object
-def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
-    parser = OptionParser(usage="Usage: %prog [options] [datacard directories]\nDatacard directories can be given either as the last arguments, or with -d.")
+def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None, fullOptions=True):
+    parser = OptionParser(usage="Usage: %prog [options]")
 
     # Switches for different CLs flavours, the interpretation of these
     # is in the generate* scripts (i.e. in the caller responsibility)
@@ -211,10 +211,12 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
     # Datacard directories
     parser.add_option("-d", "--dir", dest="dirs", type="string", action="append", default=[],
                       help="Datacard directories to create the LandS MultiCrab tasks into (default: use the working directory")
-    parser.add_option("-m", "--mass", dest="masspoints", type="string", action="append", default=[],
-                      help="Mass points to be considered (if none are specified, mass points are auto-detected")
-    parser.add_option("--create", dest="multicrabCreate", action="store_true", default=False,
-                      help="Run 'multicrab -create' for each multicrab task directory")
+    if fullOptions:
+        parser.add_option("-m", "--mass", dest="masspoints", type="string", action="append", default=[],
+                          help="Mass points to be considered (if none are specified, mass points are auto-detected")
+        parser.add_option("--create", dest="multicrabCreate", action="store_true", default=False,
+                          help="Run 'multicrab -create' for each multicrab task directory")
+
     parser.add_option("--final", dest="unblinded", action="store_true", default=False,
                       help="Do not set to true unless you know what you are doing and have permission to do so")
 
@@ -227,10 +229,26 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
 # \return Options object
 def parseOptionParser(parser):
     (opts, args) = parser.parse_args()
-    opts.dirs.extend(args)
-    if len(opts.dirs) == 0:
-        opts.dirs = ["."]
+    if hasattr(opts,"dirs"):
+        opts.dirs.extend(args)
+        if len(opts.dirs) == 0:
+            opts.dirs = ["."]
     # Check options
+    n = 0
+    s = ""
+    if hasattr(opts, "lepType") and opts.lepType:
+        s += "  --lep (Hybrid LEP type CLs, discouraged)\n"
+        n += 1
+    if hasattr(opts, "lhcType") and opts.lhcType:
+        s += "  --lhc (Hybrid LHC type CLs, use for final limit, very slow)\n"
+        n += 1
+    if hasattr(opts, "lhcTypeAsymptotic") and opts.lhcTypeAsymptotic:
+        s += "  --lhcasy (Asymptotic LHC type CLs, very quick)\n"
+        n += 1
+    if n == 0:
+        raise Exception("Error: Please specify limit type: \n%s"%s)
+    if n > 1:
+        raise Exception("Error: Please specify only one limit type: \n%s"%s)
     if opts.brlimit == opts.sigmabrlimit:
         if opts.brlimit:
             raise Exception("Error: Please enable only --brlimit or --sigmabrlimit !")
