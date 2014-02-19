@@ -127,6 +127,7 @@ namespace HPlus {
     void fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterAllSelections(const edm::Event& iEvent, double transverseMass);
+    void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const edm::Event& iEvent, double transverseMass);
     void fillControlPlotsAfterAllSelectionsWithFullMass(const edm::Event& iEvent, FullHiggsMassCalculator::Data& data);
     /// unique filling methods (to be called BEFORE return statement)
     void fillControlPlotsAtTauVetoSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const VetoTauSelection::Data& tauVetoData);
@@ -201,6 +202,7 @@ namespace HPlus {
     HistogramSettings fRtauBinSettings;
     HistogramSettings fNjetsBinSettings;
     HistogramSettings fMetBinSettings;
+    HistogramSettings fBJetDiscriminatorBinSettings;
     HistogramSettings fTailKiller1DSettings;
     HistogramSettings fTopMassBinSettings;
     HistogramSettings fWMassBinSettings;
@@ -240,10 +242,12 @@ namespace HPlus {
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterMETSF;
 
     // improved delta phi collinear cuts (currently the point of the std. selections)
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearMinimum;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet1;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet2;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet3;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet4;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearMinimum;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet1;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet2;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet3;
@@ -268,25 +272,37 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections;
 
     std::vector<WrappedTH1*> hCtrlNjetsAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlJetPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlJetEtaAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausNjetsAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausJetPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausJetEtaAfterStandardSelections;
 
     // MET selection
     std::vector<WrappedTH1*> hCtrlMET;
+    std::vector<WrappedTH1*> hCtrlMETPhi;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMET;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausMETPhi;
 
     // b tagging
     std::vector<WrappedTH1*> hCtrlNbjets;
+    std::vector<WrappedTH1*> hCtrlBJetPt;
+    std::vector<WrappedTH1*> hCtrlBJetEta;
     std::vector<WrappedTH1*> hCtrlBDiscriminator;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausNbjets;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausBDiscriminator;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetPt;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetEta;
 
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterBjets;
 
     // improved delta phi back to back cuts
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackMinimum;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet1;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet2;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet3;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet4;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackMinimum;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet1;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet2;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet3;
@@ -309,11 +325,17 @@ namespace HPlus {
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKControlRegion;
     std::vector<WrappedTH1*> hShapeTransverseMass;
     std::vector<WrappedTH1*> hShapeEWKFakeTausTransverseMass;
+    std::vector<WrappedTH1*> hShapeEmbeddingLikeMultipleTausTransverseMass;
+
+    std::vector<WrappedTH1*> hShapeProbabilisticBtagTransverseMass;
+    std::vector<WrappedTH1*> hShapeProbabilisticBtagEWKFakeTausTransverseMass;
+    std::vector<WrappedTH1*> hShapeProbabilisticBtagEmbeddingLikeMultipleTausTransverseMass;
     // NOTE: do we want to try out something like mT vs. rTau?
 
     // all selections with full mass
     std::vector<WrappedTH1*> hShapeFullMass;
     std::vector<WrappedTH1*> hShapeEWKFakeTausFullMass;
+    std::vector<WrappedTH1*> hShapeEmbeddingLikeMultipleTausFullMass;
     // FIXME: Add unfolded histogram for mT vs. full mass
 
     // histograms to be filled at every step

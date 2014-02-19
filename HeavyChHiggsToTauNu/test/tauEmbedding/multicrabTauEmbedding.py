@@ -62,6 +62,7 @@ defaultVersions = [
 #    "v44_5_1_tauhad_vispt30",
     "v53_3" # skim version   
 ]
+
 skimVersion = "v53_3"
 genTauSkimVersion = "v53_3"
 
@@ -79,6 +80,7 @@ config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,
           "muonDebugAnalysisNtupleAod": {"workflow": "embeddingAodAnalysis_44X",         "config": "genMuonDebugAnalysisNtupleAOD_cfg.py"},
           "signalAnalysis":       {"workflow": "tauembedding_analysis_%s",               "config": "../signalAnalysis_cfg.py"},
           "signalAnalysisGenTau": {"workflow": "analysis_v44_5",                         "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysisGenTauSkim": {"workflow": "tauembedding_gentauanalysis_"+genTauSkimVersion, "config": "../signalAnalysis_cfg.py"},
           "EWKMatching":          {"workflow": "tauembedding_analysis_%s",               "config": "../EWKMatching_cfg.py"},
           "muonAnalysis":         {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "muonAnalysisFromSkim_cfg.py"},
 #          "muonAnalysis":         {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "genMuonDebugAnalysis_cfg.py"},
@@ -230,7 +232,9 @@ def createTasks(opts, step, version=None):
         scheduler = "remoteGlidein"
     if step in ["genTauSkim"]:
         crabcfg = "../pattuple/crab_pat.cfg"
-    if step in ["analysis", "analysisTau", "analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
+    elif step in ["signalAnalysisGenTau", "signalAnalysisGenTauSkim"]:
+        crabcfg = "../crab_analysis.cfg"
+    elif step in ["analysis", "analysisTau", "analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysis", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
         crabcfg = None
         args = {}
         if step in ["analysisTauAod", "ewkBackgroundCoverageAnalysisAod"]:
@@ -268,6 +272,8 @@ def createTasks(opts, step, version=None):
                 datasets.extend(datasetsMCnoQCD)
         elif step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
             datasets.extend(datasetsMCTTWJets)
+        elif step in ["signalAnalysisGenTauSkim"]:
+            datasets.extend(datasetsMCTT)
         else:
             datasets.extend(datasetsData2012)
             datasets.extend(datasetsMCnoQCD)
@@ -303,7 +309,7 @@ def createTasks(opts, step, version=None):
         #    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
     
         # For this workflow we need one additional command line argument
-        if step == "signalAnalysisGenTau":
+        if step in ["signalAnalysisGenTau", "signalAnalysisGenTauSkim"]:
             multicrab.appendArgAll("doTauEmbeddingLikePreselection=1")
     
         if step in ["skim"]:

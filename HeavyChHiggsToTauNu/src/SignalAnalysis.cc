@@ -70,7 +70,8 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
     fTopPtWeightCounter(eventCounter.addCounter("Top pt reweight")),
     fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
-    fEmbeddingGeneratorWeightCounter(eventCounter.addCounter("Embedding: generator weight weight")),
+    fEmbeddingGeneratorWeightCounter(eventCounter.addCounter("Embedding: generator weight")),
+    fEmbeddingWTauMuWeightCounter(eventCounter.addCounter("Embedding: W->tau->mu weight")),
     fMETFiltersCounter(eventCounter.addCounter("MET filters")),
     fEmbeddingMuonTriggerEfficiencyCounter(eventCounter.addCounter("Embedding: muon trig eff weight")),
     fEmbeddingMuonIdEfficiencyCounter(eventCounter.addCounter("Embedding: muon ID eff weight")),
@@ -141,6 +142,7 @@ namespace HPlus {
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
     fTopPtWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("topPtWeightReader"), fHistoWrapper, "TopPtWeight"),
     fEmbeddingGeneratorWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingGeneratorWeightReader"), fHistoWrapper, "EmbeddingGeneratorWeight"),
+    fEmbeddingWTauMuWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingWTauMuWeightReader"), fHistoWrapper, "EmbeddingWTauMuWeight"),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), fHistoWrapper, "TauID"),
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
@@ -186,6 +188,12 @@ namespace HPlus {
     fCommonPlotsSelected(fCommonPlots.createCommonPlotsFilledAtEveryStep("Selected",true,"Selected")),
     fCommonPlotsSelectedMtTail(fCommonPlots.createCommonPlotsFilledAtEveryStep("SelectedMtTail",false,"SelectedMtTail")),
     fCommonPlotsSelectedFullMass(fCommonPlots.createCommonPlotsFilledAtEveryStep("SelectedFullMass",false,"SelectedFullMass")),
+    // Probabilistic b tag as event weight (note: for invariant mass, b tag is needed!)
+    fCommonPlotsProbabilisticBTagAfterBTagging(fCommonPlots.createCommonPlotsFilledAtEveryStep("ProbBtag_BTagging",false,"#geq1b tag")),
+    fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhi(fCommonPlots.createCommonPlotsFilledAtEveryStep("ProbBtag_DeltaPhiBackToBack",false,"#Delta#phi b2b")),
+    fCommonPlotsProbabilisticBTagSelected(fCommonPlots.createCommonPlotsFilledAtEveryStep("ProbBtag_Selected",false,"Selected")),
+    fCommonPlotsProbabilisticBTagSelectedMtTail(fCommonPlots.createCommonPlotsFilledAtEveryStep("ProbBtag_SelectedMtTail",false,"SelectedMtTail")),
+    // Common plots for EWK fake taus background
     fCommonPlotsAfterTauSelectionEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_TauSelection",false,"TauID")),
     fCommonPlotsAfterTauWeightEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_TauWeight",false,"Tau")),
     fCommonPlotsAfterElectronVetoEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ElectronVeto",false,"e veto")),
@@ -196,7 +204,12 @@ namespace HPlus {
     fCommonPlotsAfterBackToBackDeltaPhiEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_DeltaPhiBackToBack",true,"#Delta#phi b2b")),
     fCommonPlotsSelectedEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_Selected",false,"Selected")),
     fCommonPlotsSelectedMtTailEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedMtTail",false,"SelectedMtTail")),
-    fCommonPlotsSelectedFullMassEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedFullMass",false,"FakeTaus_SelectedFullMass"))    
+    fCommonPlotsSelectedFullMassEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedFullMass",false,"FakeTaus_SelectedFullMass")),
+    // Probabilistic b tag as event weight (note: for invariant mass, b tag is needed!)
+    fCommonPlotsProbabilisticBTagAfterBTaggingEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ProbBtag_BTagging",false,"#geq1b tag")),
+    fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhiEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ProbBtag_DeltaPhiBackToBack",false,"#Delta#phi b2b")),
+    fCommonPlotsProbabilisticBTagSelectedEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ProbBtag_Selected",false,"Selected")),
+    fCommonPlotsProbabilisticBTagSelectedMtTailEWKFakeTausBkg(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ProbBtag_SelectedMtTail",false,"SelectedMtTail"))
   {
     // Check parameter initialisation
     if (fTopRecoName != "None" && fTopRecoName != "chi" && fTopRecoName != "std" && fTopRecoName != "Wselection" && fTopRecoName != "Bselection") {
@@ -218,7 +231,6 @@ namespace HPlus {
     htransverseMassElectronFromWFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassElectronFromWFound", "transverseMassElectronFromWFound", 200, 0., 400.);
     htransverseMassElectronFromBottomFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassElectronFromBottomFound", "transverseMassElectronFromBottpmFound", 200, 0., 400.);
     htransverseMassElectronFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassElectronFound", "transverseMassElectronFound", 200, 0., 400.);
-
 
     htransverseMassMuonFromTauFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMuonFromTauFound", "transverseMassMuonFromTauFound", 200, 0., 400.);
     htransverseMassMuonFromWFound = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMuonFromWFound", "transverseMassMuonFromWFound", 200, 0., 400.);
@@ -404,6 +416,13 @@ namespace HPlus {
     }
     increment(fEmbeddingGeneratorWeightCounter);
 
+    if(bTauEmbeddingStatus) {
+      double embeddingWeight = fEmbeddingWTauMuWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(embeddingWeight);
+      fTree.setEmbeddingWTauMuWeight(embeddingWeight);
+    }
+    increment(fEmbeddingWTauMuWeightCounter);
+
 
 //------ MET (noise) filters for data (reject events with instrumental fake MET)
     if(iEvent.isRealData()) {
@@ -470,13 +489,13 @@ namespace HPlus {
 
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
-    bool mySelectedToEWKFakeTauBackgroundStatus = (tauMatchData.isQCDMeasurementLike() || tauMatchData.isEWKFakeTau());
+    bool mySelectedToEWKFakeTauBackgroundStatus = tauMatchData.isEWKFakeTauLike();
     fCommonPlotsAfterTauSelection->fill();
     fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauData, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
     fTree.setTauIsFake(mySelectedToEWKFakeTauBackgroundStatus);
     if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterTauSelectionEWKFakeTausBkg->fill();
     // Below "genuine tau" is in the context of embedding (i.e. irrespective of the tau decay)
-    if (fOnlyEmbeddingGenuineTaus && !tauMatchData.isEmbeddingGenuineTau()) return false;
+    if (fOnlyEmbeddingGenuineTaus && !tauMatchData.isEmbeddingGenuineTauLike()) return false;
     increment(fTausExistCounter);
     // Apply scale factor for fake tau
     if (!iEvent.isRealData())
@@ -712,6 +731,24 @@ namespace HPlus {
 
 //------ b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    // Apply btag pass probability as weight to event (to get better stats. for W+jets and DY)
+    double myBTagPassProbability = btagData.getProbabilityToPassBtagging();
+    fEventWeight.multiplyWeight(myBTagPassProbability);
+    fCommonPlotsProbabilisticBTagAfterBTagging->fill();
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagAfterBTaggingEWKFakeTausBkg->fill();
+    if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
+      fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhi->fill();
+      fCommonPlotsProbabilisticBTagSelected->fill();
+      if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhiEWKFakeTausBkg->fill();
+      if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagSelectedEWKFakeTausBkg->fill();
+      fCommonPlots.fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(iEvent, transverseMass);
+      if (transverseMass > 120) {
+        fCommonPlotsProbabilisticBTagSelectedMtTail->fill();
+        if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagSelectedMtTailEWKFakeTausBkg->fill();
+      }
+    }
+    // Undo btag pass probability weight and continue selection as usual
+    fEventWeight.multiplyWeight(1.0/myBTagPassProbability);
     if(btagData.passedEvent())
       increment(fBTaggingCounter);
     // Apply scale factor as weight to event
@@ -724,8 +761,6 @@ namespace HPlus {
     increment(fBTaggingScaleFactorCounter);
     fCommonPlotsAfterBTagging->fill();
     if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterBTaggingEWKFakeTausBkg->fill();
-
-   
     fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderBTagSelection, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveBJets(new std::vector<pat::Jet>());
@@ -1027,9 +1062,10 @@ namespace HPlus {
   void SignalAnalysis::fillSelectionFlowAndCounterGroups(int nVertices, FakeTauIdentifier::Data& tauMatchData, bool selectedToEWKFakeTauBackgroundStatus, SignalSelectionOrder selection, const TauSelection::Data& tauData) {
     hSelectionFlow->Fill(selection);
     hSelectionFlowVsVertices->Fill(nVertices, selection);
-    if (tauMatchData.isEmbeddingGenuineTau())
+    if (selectedToEWKFakeTauBackgroundStatus) {
       hSelectionFlowVsVerticesEWKFakeTausBkg->Fill(nVertices, selection);
-    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), selectedToEWKFakeTauBackgroundStatus, selection, tauData);
+      fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), selectedToEWKFakeTauBackgroundStatus, selection, tauData);
+    }
   }
 
   void SignalAnalysis::fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, bool selectedToEWKFakeTauBackgroundStatus, HPlus::SignalAnalysis::SignalSelectionOrder selection, const HPlus::TauSelection::Data& tauData) {

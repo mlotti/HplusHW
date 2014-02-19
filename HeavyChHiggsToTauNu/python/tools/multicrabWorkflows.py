@@ -141,6 +141,11 @@ datasets.splitDataByRuns("SingleMu_165088-166150_2011A_Nov08", [
         (165088, 165633), # Split this run range into two (and keep original),
         (165970, 166150), # because IsoMu trigger changes between them
         ])
+# Split for hltMet not including and including HF
+datasets.splitDataByRuns("SingleMu_160431-173692_2011A_Nov08", [
+        (166161, 167913),
+        (170722, 173198),
+        ])
 
 datasets.extend([
     ## Fall11 MC
@@ -582,6 +587,7 @@ multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5_1(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_5_1(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_5_2(datasets)
+multicrabWorkflowsTauEmbedding.addEmbeddingGenTauSkim_v53_3(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v53_3(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v53_3(datasets)
 

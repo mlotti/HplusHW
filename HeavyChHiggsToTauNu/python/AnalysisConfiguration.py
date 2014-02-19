@@ -73,6 +73,7 @@ class ConfigBuilder:
                  applyTauTriggerScaleFactor = True, # Apply tau trigger scale factor or not
                  applyTauTriggerLowPurityScaleFactor = False, # Apply tau trigger scale factor or not
                  applyMETTriggerScaleFactor = True, # Apply MET trigger scale factor or not
+                 applyL1ETMScaleFactor = False, # Apply L1ETM scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  applyTopPtReweight = True, # Apply Top Pt reweighting on TTJets sample
                  topPtReweightScheme = None, # None for default, see TopPtWeight_cfi.py for allowed values
@@ -123,6 +124,7 @@ class ConfigBuilder:
         self.applyTauTriggerScaleFactor = applyTauTriggerScaleFactor
         self.applyTauTriggerLowPurityScaleFactor = applyTauTriggerLowPurityScaleFactor
         self.applyMETTriggerScaleFactor = applyMETTriggerScaleFactor
+        self.applyL1ETMScaleFactor = applyL1ETMScaleFactor
         self.applyPUReweight = applyPUReweight
         self.applyTopPtReweight = applyTopPtReweight
         self.topPtReweightScheme = topPtReweightScheme
@@ -132,6 +134,9 @@ class ConfigBuilder:
         self.useJERSmearedJets = useJERSmearedJets
         self.customizeLightAnalysis = customizeLightAnalysis
         self.customizeHeavyAnalysis = customizeHeavyAnalysis
+
+        if self.applyMETTriggerScaleFactor and self.applyL1ETMScaleFactor:
+            raise Exception("Only one of applyMETTriggerScaleFactor and applyL1ETMScaleFactor can be set to True")
 
         self.doLightAnalysis = doLightAnalysis
         self.doHeavyAnalysis = doHeavyAnalysis
@@ -153,13 +158,14 @@ class ConfigBuilder:
 
         self.inputWorkflow = inputWorkflow
 
-        if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor or self.applyMETTriggerScaleFactor:
+        if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor or self.applyMETTriggerScaleFactor or self.applyL1ETMScaleFactor:
             for trg in self.options.trigger:
-                if not "IsoPFTau" in trg:
-                    print "applyTauTriggerScaleFactor=True or applyTauTriggerLowPurityScaleFactor=True or applyMETTriggerScaleFactor=True, and got non-tau trigger, setting applyTauTriggerScaleFactor=False and applyMETTriggerScaleFactor=False"
+                if not "IsoPFTau" in trg and self.options.tauEmbeddingInput == 0:
+                    print "applyTauTriggerScaleFactor=True or applyTauTriggerLowPurityScaleFactor=True or applyMETTriggerScaleFactor=True or applyL1ETMScaleFactor=True, and got non-tau trigger for non-embedding input, setting applyTauTriggerScaleFactor=False and applyMETTriggerScaleFactor=False"
                     self.applyTauTriggerScaleFactor = False
                     self.applyTauTriggerLowPurityScaleFactor = False
                     self.applyMETTriggerScaleFactor = False
+                    self.applyL1ETMScaleFactor = False
 
         if self.doMETResolution and self.doOptimisation:
             raise Exception("doMETResolution and doOptimisation conflict")
@@ -167,8 +173,8 @@ class ConfigBuilder:
         if self.options.wjetsWeighting != 0:
             if not self.dataVersion.isMC():
                 raise Exception("Command line option 'wjetsWeighting' works only with MC")
-            if self.options.tauEmbeddingInput != 0:
-                raise Exception("There are no WJets weights for embedding yet")
+#            if self.options.tauEmbeddingInput != 0:
+#                raise Exception("There are no WJets weights for embedding yet")
 
         if self.applyTopPtReweight and not self.applyPUReweight:
             raise Exception("When applyTopPtReweight=True, also applyPUReweight must be True (you had it False)")
@@ -354,6 +360,14 @@ class ConfigBuilder:
                         print "#"
                         print "########################################"
                         param.setMetTriggerEfficiencyForEra(self.dataVersion, era="Run2012ABCD", pset=mod.metTriggerEfficiencyScaleFactor)
+                    if self.applyL1ETMScaleFactor:
+                        print "########################################"
+                        print "#"
+                        print "# L1ETM trigger efficiency/scale factor is from 190456-202585 for eras 2012ABC and 202807-208686 for 2012D."
+                        print "# The division comes from the high-pt tau bugfix, which does NOT coincide with C-D transition."
+                        print "#"
+                        print "########################################"
+                        param.setL1ETMEfficiencyForEra(self.dataVersion, era=dataEra, pset=mod.metTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         mod.configInfo.pileupReweightType = PileupWeightType.toString[PileupWeightType.NOMINAL]
@@ -504,7 +518,10 @@ class ConfigBuilder:
                 func(getattr(process, name), name)
         # Set trigger efficiencies
         runSetter(lambda module, name: param.setTauTriggerEfficiencyScaleFactorBasedOnTau(module.tauTriggerEfficiencyScaleFactor, module.tauSelection, name))
-        runSetter(lambda module, name: param.setMetTriggerEfficiencyScaleFactorBasedOnTau(module.metTriggerEfficiencyScaleFactor, module.tauSelection, name))
+        if self.applyMETTriggerScaleFactor:
+            runSetter(lambda module, name: param.setMetTriggerEfficiencyScaleFactorBasedOnTau(module.metTriggerEfficiencyScaleFactor, module.tauSelection, name))
+        if self.applyL1ETMScaleFactor:
+            runSetter(lambda module, name: param.setL1ETMEfficiencyScaleFactorBasedOnTau(module.metTriggerEfficiencyScaleFactor, module.tauSelection, name))
         # Set fake tau SF
         runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
         # Set PU ID src for modules
@@ -640,6 +657,9 @@ class ConfigBuilder:
             if self.applyMETTriggerScaleFactor:
                 print "Applying trigger MET leg scale factor"
                 param.metTriggerEfficiencyScaleFactor.mode = "scaleFactor"
+            if self.applyL1ETMScaleFactor:
+                print "Applying L1ETM scale factor"
+                param.metTriggerEfficiencyScaleFactor.mode = "scaleFactor" # yes, we re-use the MET-leg scale factor weighting code here
 
         if self.doBTagTree:
             param.tree.fillNonIsoLeptonVars = True
@@ -656,6 +676,9 @@ class ConfigBuilder:
     def _customizeTauEmbeddingInput(self, process, param):
         ret = []
         if self.options.tauEmbeddingInput != 0:
+            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.WTauMuWeight_cfi")
+            process.commonSequence += process.wtaumuWeight
+
             #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
             tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, self.options, self.dataVersion)
             tauEmbeddingCustomisations.customiseParamForTauEmbedding(process, param, self.options, self.dataVersion)
@@ -927,13 +950,22 @@ class ConfigBuilder:
 
             # Require genuine tau after tau ID in analysis
             mod = module.clone()
+            mod.trigger.selectionType = "disabled"
             mod.onlyEmbeddingGenuineTaus = cms.untracked.bool(True)
             modName = makeName(name, "GenuineTau")
-            setattr(process, modName, mod)
-            path = cms.Path(process.commonSequence * mod)
-            setattr(process, modName+"Path", path)
+            add(modName, process.commonSequence, mod, additionalCounters)
+
+            mod2 = mod.clone()
+            mod2.trigger.caloMetSelection.metEmulationCut = 70
+            modName = makeName(name, "GenuineTauCaloMet70")
+            add(modName, process.commonSequence, mod2, additionalCounters)
+
+            mod = mod.clone()
+            mod.trigger.selectionType = module.trigger.selectionType
+            modName = makeName(name, "GenuineTauTriggered")
+            add(modName, process.commonSequence, mod, additionalCounters)
             retNames.append(modName)
-            allNames.append(modName)
+
         self._accumulateAnalyzers("Tau embedding -like preselection", allNames)
         return retNames
 
@@ -961,72 +993,91 @@ class ConfigBuilder:
         def setLevelToVital(mod):
             if mod.histogramAmbientLevel != "Systematics":
                 mod.histogramAmbientLevel = "Vital"
+        def setLevelToInformative(mod):
+            if mod.histogramAmbientLevel != "Debug":
+                mod.histogramAmbientLevel = "Informative"
 
-        disableIntermediateAnalyzers = (self.doQCDTailKillerScenarios or self.doOptimisation)
-        disableIntermediateAnalyzers = False
+
+#        disableIntermediateAnalyzers = (self.doQCDTailKillerScenarios or self.doOptimisation)
+        disableIntermediateAnalyzers = self.doOptimisation
+#        disableIntermediateAnalyzers = False
 
         useCaloMet = not self.applyMETTriggerScaleFactor
 
         additionalNames = []
         retNames = []
         retModules = []
+        def addIntermediateAnalyzer(module, name, postfix):
+            if disableIntermediateAnalyzers:
+                return
+            modName = name
+            if postfix is not None:
+                modName = makeName(name, postfix)
+            path = cms.Path(process.commonSequence * module)
+            setattr(process, modName, module)
+            setattr(process, modName+"Path", path)
+            additionalNames.append(modName)
+
         for module, name in zip(analysisModules, analysisNames):
             disablePrintCounter(module)
-            if not disableIntermediateAnalyzers:
-                path = cms.Path(process.commonSequence * module)
-                setattr(process, name, module)
-                setattr(process, name+"Path", path)
-                additionalNames.append(name)
+            addIntermediateAnalyzer(module, name, None)
 
             postfix = "MIdEff"
             mod = module.clone()
             setLevelToVital(mod)
             mod.embeddingMuonIdEfficiency.mode = "dataEfficiency"
             mod.embeddingMuonIdEfficiency.muonSrc = mod.Tree.tauEmbedding.muons.src.value()
-            if not disableIntermediateAnalyzers:
-                path = cms.Path(process.commonSequence * mod)
-                modName = makeName(name, postfix)
-                setattr(process, modName, mod)
-                setattr(process, modName+"Path", path)
-                additionalNames.append(modName)
+            addIntermediateAnalyzer(mod, name, postfix)
 
             postfix += "TrgEff"
             mod = mod.clone()
             mod.embeddingMuonTriggerEfficiency.mode = "dataEfficiency"
             mod.embeddingMuonTriggerEfficiency.muonSrc = mod.embeddingMuonIdEfficiency.muonSrc.value()
-            if not disableIntermediateAnalyzers:
-                path = cms.Path(process.commonSequence * mod)
-                modName = makeName(name, postfix)
-                setattr(process, modName, mod)
-                setattr(process, modName+"Path", path)
-                additionalNames.append(modName)
+            addIntermediateAnalyzer(mod, name, postfix)
+
+            postfix += "WTauMu"
+            mod = mod.clone()
+            mod.embeddingWTauMuWeightReader.enabled = True
+            setLevelToInformative(mod)
+            addIntermediateAnalyzer(mod, name, postfix)
+
+            # already here for met-leg efficiency
+            postfix += "TEff"
+            mod = mod.clone()
+            mod.tauTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
+            setLevelToInformative(mod)
+            addIntermediateAnalyzer(mod, name, postfix)
 
             if useCaloMet:
-                postfix += "CaloMet60"
+                postfix += "CaloMet70"
                 mod = mod.clone()
-                mod.trigger.caloMetSelection.metEmulationCut = 60.0
+                mod.trigger.caloMetSelection.metEmulationCut = 70.0
+
+                mod2 = mod.clone()
+                mod2.tauTriggerEfficiencyScaleFactor.mode = module.tauTriggerEfficiencyScaleFactor.mode
+                setLevelToInformative(mod2)
+                addIntermediateAnalyzer(mod2, name, postfix.replace("TEff", ""))
             else:
                 postfix += "MetEff"
                 mod = mod.clone()
                 mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
-            if not disableIntermediateAnalyzers:
-                path = cms.Path(process.commonSequence * mod)
-                modName = makeName(name, postfix)
-                setattr(process, modName, mod)
-                setattr(process, modName+"Path", path)
-                additionalNames.append(modName)
 
-            postfix += "TEff"
-            mod = mod.clone()
+            if self.applyL1ETMScaleFactor:
+                addIntermediateAnalyzer(mod, name, postfix)
+
+                postfix += "L1ETMEff"
+                mod = mod.clone()
+                mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
+
             enablePrintCounter(mod)
             mod.histogramAmbientLevel = self.histogramAmbientLevel
-            mod.tauTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
             path = cms.Path(process.commonSequence * mod)
             modName = makeName(name, postfix)
 #            setattr(process, modName, mod)
 #            setattr(process, modName+"Path", path)
             retNames.append(modName)
             retModules.append(mod)
+
 
         if len(additionalNames) > 0:
             self._accumulateAnalyzers("Tau embedding intermediate analyses", additionalNames)
@@ -1323,12 +1374,12 @@ class ConfigBuilder:
         def addTauTrgMCEff(shiftBy, postfix):
             return addTrgMCEff("tauTriggerEfficiencyScaleFactor", shiftBy, "TauTrgMCEff"+postfix)
 
-        def addMETTrgSF(shiftBy, postfix):
-            return addTrgSF("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgSF"+postfix)
-        def addMETTrgDataEff(shiftBy, postfix):
-            return addTrgDataEff("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgDataEff"+postfix)
-        def addMETTrgMCEff(shiftBy, postfix):
-            return addTrgMCEff("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgMCEff"+postfix)
+        def addMETTrgSF(shiftBy, postfix, prefix):
+            return addTrgSF("metTriggerEfficiencyScaleFactor", shiftBy, prefix+"SF"+postfix)
+        def addMETTrgDataEff(shiftBy, postfix, prefix):
+            return addTrgDataEff("metTriggerEfficiencyScaleFactor", shiftBy, prefix+"DataEff"+postfix)
+        def addMETTrgMCEff(shiftBy, postfix, prefix):
+            return addTrgMCEff("metTriggerEfficiencyScaleFactor", shiftBy, prefix+"MCEff"+postfix)
 
         def addMuonTrgDataEff(shiftBy, postfix):
             return addTrgDataEff("embeddingMuonTriggerEfficiency", shiftBy, "MuonTrgDataEff"+postfix)
@@ -1340,7 +1391,6 @@ class ConfigBuilder:
             module.bTagging.variationEnabled = True
             module.bTagging.variationShiftBy = shiftBy
             return self._addVariationModule(process, module, name+self.systPrefix+"BTagSF"+postfix)
-
 
         names = []
 
@@ -1360,26 +1410,45 @@ class ConfigBuilder:
                     names.append(addTauTrgSF(-1.0, "Minus"))
 
         # MET trigger SF
-        if self.applyMETTriggerScaleFactor:
+        if self.applyMETTriggerScaleFactor or self.applyL1ETMScaleFactor:
+            prefix = "MetTrg"
+            if self.applyL1ETMScaleFactor:
+                prefix = "L1ETM"
+
             if self.options.tauEmbeddingInput != 0:
-                names.append(addMETTrgDataEff( 1.0, "Plus"))
-                names.append(addMETTrgDataEff(-1.0, "Minus"))
+                names.append(addMETTrgDataEff( 1.0, "Plus", prefix))
+                names.append(addMETTrgDataEff(-1.0, "Minus", prefix))
             else:
                 if self.doAsymmetricTriggerUncertainties:
-                    names.append(addMETTrgDataEff( 1.0, "Plus"))
-                    names.append(addMETTrgDataEff(-1.0, "Minus"))
-                    names.append(addMETTrgMCEff( 1.0, "Plus"))
-                    names.append(addMETTrgMCEff(-1.0, "Minus"))
+                    names.append(addMETTrgDataEff( 1.0, "Plus", prefix))
+                    names.append(addMETTrgDataEff(-1.0, "Minus", prefix))
+                    names.append(addMETTrgMCEff( 1.0, "Plus", prefix))
+                    names.append(addMETTrgMCEff(-1.0, "Minus", prefix))
                 else:
-                    names.append(addMETTrgSF( 1.0, "Plus"))
-                    names.append(addMETTrgSF(-1.0, "Minus"))
+                    names.append(addMETTrgSF( 1.0, "Plus", prefix))
+                    names.append(addMETTrgSF(-1.0, "Minus", prefix))
 
+        # Embedding-specific
         if self.options.tauEmbeddingInput != 0:
             names.append(addMuonTrgDataEff( 1.0, "Plus"))
             names.append(addMuonTrgDataEff( -1.0, "Minus"))
 
             names.append(addMuonIdDataEff( 1.0, "Plus"))
             names.append(addMuonIdDataEff( -1.0, "Minus"))
+
+            if not hasattr(process, "wtaumuWeightPlus"):
+                process.wtaumuWeightPlus = process.wtaumuWeight.clone(variationEnabled=True)
+                process.wtaumuWeightMinus = process.wtaumuWeightPlus.clone(
+                    variationAmount = -process.wtaumuWeightPlus.variationAmount.value()
+                )
+                process.commonSequence += (process.wtaumuWeightPlus + process.wtaumuWeightMinus)
+            mod = self._cloneForVariation(getattr(process, name))
+            mod.embeddingWTauMuWeightReader.weightSrc = "wtaumuWeightPlus"
+            names.append(self._addVariationModule(process, mod, name+self.systPrefix+"WTauMuPlus"))
+
+            mod = mod.clone()
+            mod.embeddingWTauMuWeightReader.weightSrc = "wtaumuWeightMinus"
+            names.append(self._addVariationModule(process, mod, name+self.systPrefix+"WTauMuMinus"))
 
         # BTag SF
         if not embeddingData:

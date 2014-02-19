@@ -100,7 +100,7 @@ namespace HPlus {
         fData.fDataValues.push_back(dv);
       }
     } catch(const std::exception& e) {
-      throw cms::Exception("Configuration") << "Error in parsing efficiency JSON" << dataPath.fullPath()
+      throw cms::Exception("Configuration") << "Error in parsing efficiency JSON " << dataPath.fullPath()
                                             << ":\n" << e.what();
     }
 

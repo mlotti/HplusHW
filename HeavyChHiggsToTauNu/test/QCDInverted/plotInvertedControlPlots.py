@@ -39,7 +39,7 @@ from InvertedTauID import *
 # Configuration
 optionBrTopToHplusb = 0.01 # Br(t->bH+), needed only for plotting signal for light H+
 
-era              = "Run2011AB"
+era              = "Run2012ABCD"
 searchMode       = "Light"
 optimizationMode = "OptQCDTailKillerLoosePlus"
 
@@ -65,7 +65,7 @@ histoSpecsMt = { "bins": 11,
     "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200,250], # if an empty list is given, then uniform bin width is used
     "xtitle": "Transverse mass / GeV",
     "ytitle": "N_{Events}" }
-histoSpecsInvMass = { "bins": 14,
+histoSpecsInvMass = { "bins": 15,
     "rangeMin": 0.0,
     "rangeMax": 500.0,
     #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
