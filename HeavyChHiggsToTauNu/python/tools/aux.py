@@ -5,9 +5,16 @@ import os
 import hashlib
 import imp
 import re
+import stat
 import ROOT
 import OrderedDict
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
+
+def cmsswVersion():
+    if "CMSSW_VERSION" in os.environ:
+        return os.environ["CMSSW_VERSION"]
+    else:
+        raise Exception("No $CMSSW_VERSION environment variable. Apply first cmsenv and then for standalone environment setupStandalone.(c)sh (needs to be done in test directory)")
 
 def higgsAnalysisPath():
     if "HIGGSANALYSIS_BASE" in os.environ:
@@ -15,7 +22,7 @@ def higgsAnalysisPath():
     elif "CMSSW_BASE" in os.environ:
         return os.path.join(os.environ["CMSSW_BASE"], "src", "HiggsAnalysis")
     else:
-        raise Exception("No $HIGGSANALYSIS_BASE nor $CMSSW_BASE environet variable. For standalone environment use setupStandalone.(c)sh, for CMSSW environment use cmsenv")
+        raise Exception("No $HIGGSANALYSIS_BASE nor $CMSSW_BASE environment variable. For standalone environment use setupStandalone.(c)sh, for CMSSW environment use cmsenv")
 
 def execute(cmd):
     f = os.popen(cmd)
@@ -254,3 +261,100 @@ class MultiObject:
             return [getattr(item, name)(*args, **kwargs) for item in self._items.itervalues()]
         return _multiplex
 
+## Helper function to update keyword argument dictionary
+#
+# \param kwargs    Dictionary for keyword arguments
+# \param obj       Object
+# \param names     List of attribute names
+#
+# Constructs a new dictionary, where key,value pairs are taken from
+# kwargs for all attribute names, or if some name does not exist in
+# the kwargs, the value is taken from the object.
+#
+# The kwargs may not contain any other keys than the ones in names
+# (typo protection)
+def updateArgs(kwargs, obj, names):
+    for k in kwargs.keys():
+        if not k in names:
+            raise Exception("Unknown keyword argument '%s', known arguments are %s" % ", ".join(names))
+
+    args = {}
+    for n in names:
+        args[n] = kwargs.get(n, getattr(obj, n))
+    return args
+
+## Write content to file, and make the file executable
+#
+# \param filename   Path to file
+# \param content    String to write to the file
+# \param truncate   Truncate (True) or append (False)
+def writeScript(filename, content, truncate=True):
+    mode = "w"
+    if not truncate:
+        mode = "a"
+    fOUT = open(filename, mode)
+    fOUT.write(content)
+    fOUT.close()
+
+    # make the script executable
+    st = os.stat(filename)
+    os.chmod(filename, st.st_mode | stat.S_IXUSR)
+
+## Pick default value if value is None
+def ifNotNoneElse(value, default):
+    if value == None:
+        return default
+    return value
+
+## Helper class to manage mass-specific configuration values
+class ValuePerMass:
+    ## Constructor
+    #
+    # \param dictionary   Input dictionary/ValuePerMass object/value
+    #
+    # If dictionary is dictionary, it must have a "default" key, and
+    # it may have more than or equal to zero keys for the mass points.
+    # The value of the "default" key is used as the default value for
+    # those mass points for which the specific value is not given.
+    #
+    # If the dictionary is ValuePerMass object, the default and
+    # per-mass values are copied from it.
+    #
+    # If the dictionary is something else, it is used as the default
+    # value for all masses
+    def __init__(self, dictionary):
+        self.values = {}
+        if isinstance(dictionary, dict):
+            self.values.update(dictionary)
+            self.default = self.values["default"]
+            del self.values["default"]
+        elif isinstance(dictionary, ValuePerMass):
+            self.values.update(dictionary.values)
+            self.default = dictionary.default
+        else:
+            self.default = dictionary
+
+    ## Apply a function for all values
+    #
+    # \param function   Function taking one parameter (the value), the
+    #                   return value is not used
+    #
+    # This allows sanity checks to be performed on the values.
+    def forEachValue(self, function):
+        function(self.default)
+        for value in self.values.values():
+            function(value)
+
+    ## Get the value for a given mass point
+    def getValue(self, mass):
+        return self.values.get(mass, self.default)
+
+    ## Serialize the object to a dictionary
+    #
+    # Another ValuePerMass can be constructed from the dictionary. The
+    # dictionary can be written to a JSON file, allowing the
+    # ValuePerMass to be constructed from other scripts.
+    def serialize(self):
+        ret = {"default": self.default}
+        ret.update(self.values)
+        return ret
