@@ -732,25 +732,27 @@ namespace HPlus {
 //------ b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     // Apply btag pass probability as weight to event (to get better stats. for W+jets and DY)
-    double myBTagPassProbability = btagData.getProbabilityToPassBtagging();
-    fEventWeight.multiplyWeight(myBTagPassProbability);
-    fCommonPlotsProbabilisticBTagAfterBTagging->fill();
-    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagAfterBTaggingEWKFakeTausBkg->fill();
-    if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
-      fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhi->fill();
-      fCommonPlotsProbabilisticBTagSelected->fill();
-      if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhiEWKFakeTausBkg->fill();
-      if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagSelectedEWKFakeTausBkg->fill();
-      fCommonPlots.fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(iEvent, transverseMass);
-      if (transverseMass > 120) {
-        fCommonPlotsProbabilisticBTagSelectedMtTail->fill();
-        if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagSelectedMtTailEWKFakeTausBkg->fill();
+    if (!iEvent.isRealData()) {
+      double myBTagPassProbability = btagData.getProbabilityToPassBtagging();
+      fEventWeight.multiplyWeight(myBTagPassProbability);
+      fCommonPlotsProbabilisticBTagAfterBTagging->fill();
+      if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagAfterBTaggingEWKFakeTausBkg->fill();
+      if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
+        fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhi->fill();
+        fCommonPlotsProbabilisticBTagSelected->fill();
+        if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhiEWKFakeTausBkg->fill();
+        if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagSelectedEWKFakeTausBkg->fill();
+        fCommonPlots.fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(iEvent, transverseMass);
+        if (transverseMass > 120) {
+          fCommonPlotsProbabilisticBTagSelectedMtTail->fill();
+          if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagSelectedMtTailEWKFakeTausBkg->fill();
+        }
       }
+      // Undo btag pass probability weight and continue selection as usual
+      fEventWeight.multiplyWeight(1.0/myBTagPassProbability);
+      if(btagData.passedEvent())
+        increment(fBTaggingCounter);
     }
-    // Undo btag pass probability weight and continue selection as usual
-    fEventWeight.multiplyWeight(1.0/myBTagPassProbability);
-    if(btagData.passedEvent())
-      increment(fBTaggingCounter);
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
       fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
