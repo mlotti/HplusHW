@@ -175,6 +175,9 @@ def th2Ymax(th2):
         return None
     return th2.GetYaxis().GetBinUpEdge(th2.GetYaxis().GetLast())
 
+def th1Integral(th1):
+    return th1.Integral(0, th1.GetNbinsX())
+
 ## Copy (some) style attributes from one ROOT object to another
 #
 # \param src  Source object (copy attributes from)
