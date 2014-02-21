@@ -72,8 +72,8 @@ class ConfigBuilder:
                  histogramAmbientLevelSystematics = "Systematics",
                  applyTauTriggerScaleFactor = True, # Apply tau trigger scale factor or not
                  applyTauTriggerLowPurityScaleFactor = False, # Apply tau trigger scale factor or not
-                 applyMETTriggerScaleFactor = True, # Apply MET trigger scale factor or not
-                 applyL1ETMScaleFactor = False, # Apply L1ETM scale factor or not
+                 applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
+                 applyL1ETMScaleFactor = True, # Apply L1ETM scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  applyTopPtReweight = True, # Apply Top Pt reweighting on TTJets sample
                  topPtReweightScheme = None, # None for default, see TopPtWeight_cfi.py for allowed values
