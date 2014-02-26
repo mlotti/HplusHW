@@ -136,18 +136,23 @@ def getScalarUncertainties(datasetName, isGenuineTau):
 # Needed to get systematics right for QCD anti-isol. -> isol. systematics
 # Format: list of left bin edges; last entry is maximum value
 _dataDrivenCtrlPlotBinning = {
-    "Njets": [3,4,5,6,7,8,9,10],
-    "ImprovedDeltaPhiCuts": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
+    "Njets*": [3,4,5,6,7,8,9,10],
+    "JetPt_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
+    "JetEta_AfterStandardSelections": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
+    "ImprovedDeltaPhiCuts*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
     "MET": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
+    "METPhi": [-3.14,-2.75,-2.36,-1.96,-1.57,-1.18,-0.79,-0.39,0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
     "NBjets": [0,1,2,3,4,5,6,7,8],
-    "BtagDiscriminator": [-2, -1.8, -1.6, -1.4, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0],
+    "BJetPt": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
+    "BJetEta": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
+    "BtagDiscriminator": [-1.0, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1.0],
     "TopMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500],
     "TopPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500],
     "WMass": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
     "WPt": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
     "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,200,250,400],
     "shapeInvariantMass": [0,20,40,60,80,100,120,140,160,200,400],
-    "SelectedTau_pT_AfterStandardSelections": [0,40,60,80,100,150,200,300,400],
+    "SelectedTau_pT_AfterStandardSelections": [0,40,50,60,70,80,100,150,200,300,400],
     "SelectedTau_eta_AfterStandardSelections": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
     "SelectedTau_phi_AfterStandardSelections": [-3.14,-2.36,-1.57,-0.79,0.0,0.79,1.57,2.36,3.14],
     "SelectedTau_LeadingTrackPt_AfterStandardSelections": [0,20,40,60,80,100,150,200,300,400],
@@ -163,6 +168,8 @@ for key in _dataDrivenCtrlPlotBinning.keys():
 
 def getBinningForPlot(plotName):
     for plot in _dataDrivenCtrlPlotBinning:
-        if plot == plotName[:len(plot)]:
+        if plot[len(plot)-1] == "*" and plot[:(len(plot)-1)] == plotName[:(len(plot)-1)]:
             return _dataDrivenCtrlPlotBinning[plot]
+    if plotName in _dataDrivenCtrlPlotBinning.keys():
+        return _dataDrivenCtrlPlotBinning[plotName]
     raise Exception("Cannot find bin specifications for plotname %s! (implemented are: %s)"%(plotName,', '.join(map(str, _dataDrivenCtrlPlotBinning.keys()))))
