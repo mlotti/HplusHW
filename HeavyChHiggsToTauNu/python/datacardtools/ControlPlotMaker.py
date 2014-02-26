@@ -60,7 +60,7 @@ class ControlPlotMaker:
                 # Loop over dataset columns to find histograms
                 myStackList = []
                 for c in self._datasetGroups:
-                    if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
+                    if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn() and not c.getControlPlotByIndex(i) == None:
                         h = c.getControlPlotByIndex(i)["shape"].Clone()
                         if c.typeIsSignal():
                             # Scale light H+ signal
@@ -93,77 +93,78 @@ class ControlPlotMaker:
                                 hEWKfake = h.Clone()
                             else:
                                 hEWKfake.Add(h)
-                if hQCD != None:
-                    myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
+                if len(myStackList) > 0:
+                    if hQCD != None:
+                        myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
+                        myHisto.setIsDataMC(isData=False, isMC=True)
+                        myStackList = [myHisto]+myStackList
+                    if hEmbedded != None:
+                        myHisto = histograms.Histo(hEmbedded,"Embedding")
+                        myHisto.setIsDataMC(isData=False, isMC=True)
+                        myStackList.append(myHisto)
+                    if hEWKfake != None:
+                        myHisto = histograms.Histo(hEWKfake,"EWKfakes")
+                        myHisto.setIsDataMC(isData=False, isMC=True)
+                        myStackList.append(myHisto)
+                    hData = observation.getControlPlotByIndex(i)["shape"].Clone()
+                    hDataUnblinded = hData.Clone()
+                    # Apply blinding
+                    if len(myCtrlPlot.blindedRange) > 0:
+                        self._applyBlinding(hData,myCtrlPlot.blindedRange)
+                    myHisto = histograms.Histo(hData,"Data")
+                    myHisto.setIsDataMC(isData=True, isMC=False)
+                    myStackList.insert(0, myHisto)
+                    # Add signal
+                    mySignalLabel = "TTToHplus_M%d"%m
+                    if m > 179:
+                        mySignalLabel = "HplusTB_M%d"%m
+                    myHisto = histograms.Histo(hSignal,mySignalLabel)
                     myHisto.setIsDataMC(isData=False, isMC=True)
-                    myStackList = [myHisto]+myStackList
-                if hEmbedded != None:
-                    myHisto = histograms.Histo(hEmbedded,"Embedding")
-                    myHisto.setIsDataMC(isData=False, isMC=True)
-                    myStackList.append(myHisto)
-                if hEWKfake != None:
-                    myHisto = histograms.Histo(hEWKfake,"EWKfakes")
-                    myHisto.setIsDataMC(isData=False, isMC=True)
-                    myStackList.append(myHisto)
-                hData = observation.getControlPlotByIndex(i)["shape"].Clone()
-                hDataUnblinded = hData.Clone()
-                # Apply blinding
-                if len(myCtrlPlot.blindedRange) > 0:
-                    self._applyBlinding(hData,myCtrlPlot.blindedRange)
-                myHisto = histograms.Histo(hData,"Data")
-                myHisto.setIsDataMC(isData=True, isMC=False)
-                myStackList.insert(0, myHisto)
-                # Add signal
-                mySignalLabel = "TTToHplus_M%d"%m
-                if m > 179:
-                    mySignalLabel = "HplusTB_M%d"%m
-                myHisto = histograms.Histo(hSignal,mySignalLabel)
-                myHisto.setIsDataMC(isData=False, isMC=True)
-                myStackList.insert(1, myHisto)
-                # Add data to selection flow plot
-                if myBlindedStatus:
-                    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
-                else:
-                    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hDataUnblinded,myStackList[1:])
-                if len(myCtrlPlot.blindedRange) > 0:
-                    myBlindedStatus = True
-                else:
-                    myBlindedStatus = False
-                # Make plot
-                myStackPlot = plots.DataMCPlot2(myStackList)
-                myStackPlot.setLuminosity(self._luminosity)
-                myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
-                myStackPlot.setDefaultStyles()
-                myParams = myCtrlPlot.details.copy()
-                # Tweak paramaters
-                if myParams["unit"] != "":
-                    myParams["xlabel"] = "%s, %s"%(myParams["xlabel"],myParams["unit"])
-                myMinWidth = 10000.0
-                myMaxWidth = 0.0
-                for j in range(1,hData.getRootHisto().GetNbinsX()+1):
-                    w = hData.getRootHisto().GetBinWidth(j)
-                    if w < myMinWidth:
-                        myMinWidth = w
-                    if w > myMaxWidth:
-                        myMaxWidth = w
-                myWidthSuffix = "%d-%d"%(myMinWidth,myMaxWidth)
-                if abs(myMinWidth-myMaxWidth) < 0.0001:
-                    myWidthSuffix = "%d"%(myMinWidth)
-                if not (myParams["unit"] == "" and myWidthSuffix == "1"):
-                    myParams["ylabel"] = "%s / %s %s"%(myParams["ylabel"],myWidthSuffix,myParams["unit"])
-                myParams["ratio"] = True
-                myParams["ratioType"] = "errorScale"
-                myParams["ratioYlabel"] = "Data/#Sigma Exp."
-                myParams["stackMCHistograms"] = True
-                myParams["addMCUncertainty"] = True
-                myParams["addLuminosityText"] = True
-                myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
-                myParams["ratioCreateLegend"] = True
-                myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-                # Remove non-dientified keywords
-                del myParams["unit"]
-                # Do plotting
-                plots.drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
+                    myStackList.insert(1, myHisto)
+                    # Add data to selection flow plot
+                    if myBlindedStatus:
+                        selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
+                    else:
+                        selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hDataUnblinded,myStackList[1:])
+                    if len(myCtrlPlot.blindedRange) > 0:
+                        myBlindedStatus = True
+                    else:
+                        myBlindedStatus = False
+                    # Make plot
+                    myStackPlot = plots.DataMCPlot2(myStackList)
+                    myStackPlot.setLuminosity(self._luminosity)
+                    myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
+                    myStackPlot.setDefaultStyles()
+                    myParams = myCtrlPlot.details.copy()
+                    # Tweak paramaters
+                    if myParams["unit"] != "":
+                        myParams["xlabel"] = "%s, %s"%(myParams["xlabel"],myParams["unit"])
+                    myMinWidth = 10000.0
+                    myMaxWidth = 0.0
+                    for j in range(1,hData.getRootHisto().GetNbinsX()+1):
+                        w = hData.getRootHisto().GetBinWidth(j)
+                        if w < myMinWidth:
+                            myMinWidth = w
+                        if w > myMaxWidth:
+                            myMaxWidth = w
+                    myWidthSuffix = "%d-%d"%(myMinWidth,myMaxWidth)
+                    if abs(myMinWidth-myMaxWidth) < 0.0001:
+                        myWidthSuffix = "%d"%(myMinWidth)
+                    if not (myParams["unit"] == "" and myWidthSuffix == "1"):
+                        myParams["ylabel"] = "%s / %s %s"%(myParams["ylabel"],myWidthSuffix,myParams["unit"])
+                    myParams["ratio"] = True
+                    myParams["ratioType"] = "errorScale"
+                    myParams["ratioYlabel"] = "Data/#Sigma Exp."
+                    myParams["stackMCHistograms"] = True
+                    myParams["addMCUncertainty"] = True
+                    myParams["addLuminosityText"] = True
+                    myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+                    myParams["ratioCreateLegend"] = True
+                    myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
+                    # Remove non-dientified keywords
+                    del myParams["unit"]
+                    # Do plotting
+                    plots.drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
 
             # Do selection flow plot
             selectionFlow.makePlot(self._dirname,m,len(self._config.ControlPlots),self._luminosity)

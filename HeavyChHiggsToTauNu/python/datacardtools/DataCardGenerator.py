@@ -545,7 +545,8 @@ class DataCardGenerator:
                     # Constants remain same, since they are relative uncertainties
                 # Merge control plots (HistoRootWithUncertainties objects)
                 for i in range(0, len(myEmbColumn._controlPlots)):
-                    myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"])
+                    if myEmbColumn._controlPlots[i] != None:
+                        myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"])
                 # Mark for removal
                 myRemoveList.append(c)
         for c in myRemoveList:
@@ -586,7 +587,8 @@ class DataCardGenerator:
                                     myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k], -1.0)
                     # Merge control plots (HistoRootWithUncertainties objects)
                     for i in range(0, len(myEmbColumn._controlPlots)):
-                        myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"], -1.0)
+                        if myEmbColumn._controlPlots[i] != None:
+                            myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"], -1.0)
         # Rate: Purge relative normalization uncertainties and replace by those for embedding
         #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
         ##myEmbColumn._cachedShapeRootHistogramWithUncertainties.resetNormalizationUncertaintyRelative()
@@ -616,8 +618,9 @@ class DataCardGenerator:
                         #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult, myResult)
         # Set type of control plots
         for i in range(0, len(myEmbColumn._controlPlots)):
-            myEmbColumn._controlPlots[i]["typeIsEWKfake"] = False
-            myEmbColumn._controlPlots[i]["typeIsEWK"] = True
+            if myEmbColumn._controlPlots[i] != None:
+                myEmbColumn._controlPlots[i]["typeIsEWKfake"] = False
+                myEmbColumn._controlPlots[i]["typeIsEWK"] = True
 
         #print "Final:"
         #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()

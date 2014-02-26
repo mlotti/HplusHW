@@ -646,8 +646,11 @@ class ControlPlotExtractor(ExtractorBase):
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         myLabel = datasetColumn.getLabel()+"_"+self._histoTitle
         mySystematics = dataset.Systematics(allShapes=True)
-        myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._histoNameWithPath))
-        return myDatasetRootHisto
+        try:
+            myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._histoNameWithPath))
+            return myDatasetRootHisto
+        except dataset.HistogramNotFoundException:
+            return None
 
     ## QCD specific method for extracting purity histogram
     def extractQCDPurityHistogram(self, datasetColumn, dsetMgr):
