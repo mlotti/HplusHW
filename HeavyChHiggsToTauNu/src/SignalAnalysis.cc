@@ -750,9 +750,8 @@ namespace HPlus {
       }
       // Undo btag pass probability weight and continue selection as usual
       fEventWeight.multiplyWeight(1.0/myBTagPassProbability);
-      if(btagData.passedEvent())
-        increment(fBTaggingCounter);
     }
+    if(btagData.passedEvent()) increment(fBTaggingCounter);
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
       fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
