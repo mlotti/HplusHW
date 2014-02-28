@@ -497,7 +497,8 @@ QCDTailKillerScenarios = [#"QCDTailKillerZeroPlus",
                           "QCDTailKillerLoosePlus",
                           "QCDTailKillerMediumPlus",
                           "QCDTailKillerTightPlus",
-                          #"QCDTailKillerVeryTightPlus"]
+                          #"QCDTailKillerVeryTightPlus"
+                          ]
 
 # Define H+ Invariant Mass Reco options
 invMassReco = cms.untracked.PSet(
