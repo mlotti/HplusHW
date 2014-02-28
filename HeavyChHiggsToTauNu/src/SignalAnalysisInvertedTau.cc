@@ -913,7 +913,7 @@ namespace HPlus {
     }
     // Beyond this point, the b tag scale factor has already been applied
     fCommonPlots.fillControlPlotsAtBtagging(iEvent, btagData);
-    if (!btagData.passedEvent()
+    if (!btagData.passedEvent()) {
       // Inverted btag control region
       if (qcdTailKillerDataCollinear.passedBackToBackCuts() && topSelectionDataTmp.passedEvent()) {
         myHandler.fillShapeHistogram(hMTInvertedTauIdFinalReversedBtag, transverseMass);
@@ -938,7 +938,7 @@ namespace HPlus {
     fCommonPlots.fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, qcdTailKillerData);
     if (!qcdTailKillerData.passedBackToBackCuts()) {
       // Inverted back-to-back delta phi control region
-      if (topSelectionData.passedEvent()) {
+      if (topSelectionDataTmp.passedEvent()) {
         myHandler.fillShapeHistogram(hMTInvertedTauIdFinalReversedBacktoBackDeltaPhi, transverseMass);
         if (fullHiggsMassDataTmp.passedEvent()) {
           myHandler.fillShapeHistogram(hInvMassInvertedTauIdFinalReversedBacktoBackDeltaPhi, fullHiggsMassDataTmp.getHiggsMass());
