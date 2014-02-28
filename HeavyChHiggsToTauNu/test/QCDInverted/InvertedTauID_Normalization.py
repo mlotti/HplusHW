@@ -99,6 +99,7 @@ def main(argv):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    style.setOptStat(True)
 
     invertedQCD = InvertedTauID()
     invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
@@ -112,12 +113,14 @@ def main(argv):
         title = datasets.getDataset("Data").getDatasetRootHisto("baseline/METBaseline"+HISTONAME+"/"+histoname).getHistogram().GetTitle()
         title = title.replace("METBaseline"+HISTONAME,"")
         title = title.replace("#tau p_{T}","taup_T")
+        title = title.replace("#tau eta","taueta")
         title = title.replace("<","lt")
         title = title.replace(">","gt")
         title = title.replace("=","eq")
         title = title.replace("..","to")
+        title = title.replace(".","p")
+        title = title.replace("/","_")
         binLabels.append(title)
-        
     print
     print "Histogram bins available",bins
 
@@ -141,8 +144,8 @@ def main(argv):
         metBase = plots.DataMCPlot(datasets, "baseline/METBaseline"+HISTONAME+"/METBaseline"+HISTONAME+bin)
         metInver = plots.DataMCPlot(datasets, "Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
         # Rebin before subtracting
-        metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
-        metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+        #metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+        #metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
         
         metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
         metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
