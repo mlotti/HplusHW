@@ -152,13 +152,13 @@ _dataDrivenCtrlPlotBinning = {
     "WPt": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
     "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,200,250],
     "shapeInvariantMass": [0,20,40,60,80,100,120,140,160,200,400],
-    "SelectedTau_pT_AfterStandardSelections": [0,41,50,60,70,80,90,100,110,120,130,140,150,200,170,190,220,250,300,400,500],
+    "SelectedTau_pT_AfterStandardSelections": [0,41,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
     "SelectedTau_eta_AfterStandardSelections": [-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5],
     "SelectedTau_phi_AfterStandardSelections": [-3.14,-2.75,-2.36,-1.96,-1.57,-1.18,-0.79,-0.39,0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
-    "SelectedTau_LeadingTrackPt_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,200,170,190,220,250,300,400,500],
+    "SelectedTau_LeadingTrackPt_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
     "SelectedTau_Rtau_AfterStandardSelections": [0.70,0.72,0.74,0.76,0.78,0.80,0.82,0.84,0.86,0.88,0.90,0.92,0.94,0.96,0.98,1.00],
-    "SelectedTau_p_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,200,170,190,220,250,300,400,500],
-    "SelectedTau_LeadingTrackP_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,200,170,190,220,250,300,400,500],
+    "SelectedTau_p_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
+    "SelectedTau_LeadingTrackP_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
 }
 # Add EWK fake tau shape definitions
 for key in _dataDrivenCtrlPlotBinning.keys():
