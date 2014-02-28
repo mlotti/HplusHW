@@ -921,7 +921,8 @@ namespace HPlus {
           myHandler.fillShapeHistogram(hInvMassInvertedTauIdFinalReversedBtag, fullHiggsMassDataTmp.getHiggsMass());
         }
       }
-    ) return false;
+      return false;
+    }
     increment(fInvertedBTaggingScaleFactorCounter);
 
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBtagging, selectedTau->pt());
