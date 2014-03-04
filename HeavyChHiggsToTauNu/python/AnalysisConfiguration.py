@@ -187,6 +187,10 @@ class ConfigBuilder:
         if self.doBTagTree:
             self.tauSelectionOperatingMode = 'tauCandidateSelectionOnly'
 
+        if self.options.tauEmbeddingInput != 0:
+            print "Tau embedding input, disabling trigger matching (mu-trigger matching done in embedding jobs)"
+            self.doTriggerMatching = False
+
         self.systPrefix = "SystVar"
 
         self.numberOfAnalyzers = {}
