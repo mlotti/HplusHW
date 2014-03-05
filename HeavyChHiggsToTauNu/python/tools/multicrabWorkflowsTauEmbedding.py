@@ -1155,15 +1155,15 @@ def addEmbeddingSkim_v53_3(datasets):
 def addEmbeddingEmbedding_v53_3(datasets):
     skimVersion = "tauembedding_skim_v53_3"
 
-    def addEmbedding(version, definitions):
+    def addEmbedding(version, defaultPostfix=None, definitions={}):
         for name, taskDef in definitions.iteritems():
             taskDef.setArg("tauDecayMode", 230)
             taskDef.setArg("tauMinVisPt", 30)
-            if taskDef.publishPostfix is None:
-                taskDef.update(TaskDef(publishPostfix="b"))
+            if defaultPostfix is not None and taskDef.publishPostfix is None:
+                taskDef.update(TaskDef(publishPostfix=defaultPostfix))
         addEmbeddingEmbedding_53X(skimVersion, version, datasets, definitions)
 
-    addEmbedding("v53_3", {
+    addEmbedding("v53_3", defaultPostfix="b", definitions={
         # 417822 events, 306 jobs
         # User mean 7174.1, min 1941.1, max 12388.9
         # Mean 66.1 MB, min 19.5 MB, max 115.9 MB
@@ -1279,7 +1279,15 @@ def addEmbeddingEmbedding_v53_3(datasets):
         "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef("/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v3_AODSIM_tauembedding_embedding_v53_3b-1af76047aea9759528c81258e6b8769f/USER"),
         })
 
-
+    addEmbedding("v53_3_seedTest1", definitions={
+        "SingleMu_190456-193621_2012A_Jan22":      TaskDef(""),
+        "SingleMu_193834-196531_2012B_Jan22":      TaskDef(""),
+        "SingleMu_198022-200381_2012C_Jan22":      TaskDef(""),
+        "SingleMu_200466-203742_2012C_Jan22":      TaskDef(""),
+        "SingleMu_203777-205834_2012D_Jan22":      TaskDef(""),
+        "SingleMu_205908-207100_2012D_Jan22":      TaskDef(""),
+        "SingleMu_207214-208686_2012D_Jan22":      TaskDef(""),
+        })
 
 def addEmbedding_SKELETON(datasets):
     definitions = {
