@@ -72,13 +72,12 @@ if builder.options.tauEmbeddingInput != 0:
 
     if builder.dataVersion.isMC():
         process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/embedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_notrg2/b4444849cbd68cba8058d20690fa09f4/embedded_1000_1_M8J.root",
-#        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad_vispt30_b/d57ea742826c3abce18a6ceed0c3bca3/embedded_1000_2_vFL.root",
-            
+            "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_5_3_X/TTJets_TuneZ2star_Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_tauembedding_embedding_v53_3b/1af76047aea9759528c81258e6b8769f/embedded_100_1_y9H.root"
             ]
     else:
         # HLT_Mu40_eta2p1_v1
         process.source.fileNames = [
+            "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_5_3_X/SingleMu_207214-208686_2012D_Jan22/SingleMu/Run2012D_22Jan2013_v1_AOD_207214_208686_tauembedding_embedding_v53_3b/82ba5743f53794eef04b654ef0f32265/embedded_1000_1_1rY.root"
             ]
 
     #process.maxEvents.input = 10

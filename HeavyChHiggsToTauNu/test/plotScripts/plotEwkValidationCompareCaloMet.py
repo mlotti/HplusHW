@@ -39,13 +39,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 
 def main():
-    dirNormal = "../multicrab_signalAnalysisGenTauSkim_140129_140448"
+    dirNormal = "../multicrab_signalAnalysisGenTauSkim_140129_210746"
     dirEmb = "."
 
     dsetsNormal = dataset.getDatasetsFromMulticrabCfg(directory=dirNormal, analysisName="signalAnalysisGenuineTau")
-    dsetsNormalCut = dataset.getDatasetsFromMulticrabCfg(directory=dirNormal, analysisName="signalAnalysisGenuineTauCaloMet60")
+    dsetsNormalCut = dataset.getDatasetsFromMulticrabCfg(directory=dirNormal, analysisName="signalAnalysisGenuineTauCaloMet70")
     dsetsEmb = dataset.getDatasetsFromMulticrabCfg(directory=dirEmb, analysisName="signalAnalysisMIdEffTrgEffWTauMu")
-    dsetsEmbCut = dataset.getDatasetsFromMulticrabCfg(directory=dirEmb, analysisName="signalAnalysisMIdEffTrgEffWTauMuCaloMet60")
+    dsetsEmbCut = dataset.getDatasetsFromMulticrabCfg(directory=dirEmb, analysisName="signalAnalysisMIdEffTrgEffWTauMuCaloMet70")
 
     dsetsNormal.updateNAllEventsToPUWeighted()
     dsetsNormalCut.updateNAllEventsToPUWeighted()
@@ -175,14 +175,14 @@ def doEffPlots(dsetNormalNum, dsetNormalDenom, dsetEmbNum, dsetEmbDenom, lumi):
 
         p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 1.1, 500, 1.1)))
         p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 0.9, 500, 0.9)))
-        p.appendPlotObject(histograms.PlotText(x=0.6, y=0.6, text="CaloMET>60", size=20))
+        p.appendPlotObject(histograms.PlotText(x=0.6, y=0.6, text="CaloMET>70", size=20))
 
         global ind
         ind += 1
         plots.drawPlot(p, "eff_%02d_calomet_%s"%(ind, step), xlabel="Type I PF MET (GeV)", ylabel="CaloMET cut efficiency",
                        ratio=True, ratioYlabel="Norm./emb.", ratioType="errorScale",
                        opts={"xmin": 0, "xmax": 500},
-                       opts2={"ymin": 0.5, "ymax": 1.5},
+                       opts2={"ymin": 0.8, "ymax": 1.2},
                        addLuminosityText=True, moveLegend={"dx": -0.2, "dy": -0.5})
 
 
