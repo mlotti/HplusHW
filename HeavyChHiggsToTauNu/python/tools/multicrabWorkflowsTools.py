@@ -601,6 +601,7 @@ class TaskDef:
     # \li \a args              Additional command line arguments to add for this task and dataset
     # \li \a publishPostfix    Postfix for publish name
     # \li \a dataVersionAppend String to append to Dataset's dataVersion for the Workflow's of this task
+    # \li \a dbs               Which DBS instance to use (if not default)
     def __init__(self, outputPath=None, **kwargs):
         self.outputPath = outputPath
         self.options = ["njobsIn", "njobsOut",
@@ -608,7 +609,7 @@ class TaskDef:
                         "nlumisPerJobIn", "nlumisPerJobOut",
                         "triggerOR", "triggerThrow",
                         "crabLines", "args", "publishPostfix",
-                        "dataVersionAppend"]
+                        "dataVersionAppend", "dbs"]
 
         args = {}
         args.update(kwargs)
