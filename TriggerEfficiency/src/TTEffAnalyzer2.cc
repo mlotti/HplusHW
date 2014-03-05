@@ -937,7 +937,7 @@ void TTEffAnalyzer2::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   if(iEvent.getByLabel(pfJetSrc_, hjets)){
   for(size_t i=0; i<hjets->size(); ++i) {
     edm::Ptr<pat::Jet> jet = hjets->ptrAt(i);
-    if(jet->pt() > 30 && // kinematics
+    if(jet->pt() > 20 && // kinematics
        std::abs(jet->eta()) < 2.4 && 
        jet->numberOfDaughters() > 1 && jet->chargedEmEnergyFraction() < 0.99 &&
        jet->neutralHadronEnergyFraction() < 0.99 && jet->neutralEmEnergyFraction() < 0.99 &&
