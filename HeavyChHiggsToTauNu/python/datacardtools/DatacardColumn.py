@@ -408,7 +408,7 @@ class DatacardColumn():
         # Print list of uncertainties
         if self._opts.verbose and dsetMgr != None and not self.typeIsEmptyColumn():
             print "  - Has shape variation syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
-            print "  - Has shape squared syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties._shapeUncertaintyAbsoluteNames)))
+
         # Obtain results for control plots
         if config.OptionDoControlPlots:
             for c in controlPlotExtractors:

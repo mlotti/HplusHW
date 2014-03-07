@@ -206,7 +206,7 @@ class DatasetMgrCreatorManager:
             if self._luminosities[i] != None:
                 myDiff = abs(self._luminosities[i] / mySignalLuminosity - 1.0)
                 if myDiff > self._toleranceForLuminosityDifference:
-                    raise Exception(ErrorLabel()+"signal and embedding luminosities differ more than 1 %!")
+                    raise Exception(ErrorLabel()+"signal and embedding luminosities differ more than 1 %%! (%s vs. %s)"%(self._luminosities[i], mySignalLuminosity))
                 elif myDiff > 0.0001:
                     print WarningLabel()+"%s and %s luminosities differ slightly (%.2f %%)!"%(self.getDatasetMgrLabel(DatacardDatasetMgrSourceType.SIGNALANALYSIS),self.getDatasetMgrLabel(i),myDiff*100.0)
         print ""

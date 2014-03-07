@@ -50,6 +50,7 @@ class ControlPlotMaker:
             myBlindedStatus = False
             for i in range(0,len(self._config.ControlPlots)):
                 myCtrlPlot = self._config.ControlPlots[i]
+                print "......", myCtrlPlot.title
                 myMassSuffix = "_M%d"%m
                 # Initialize histograms
                 hSignal = None
@@ -93,7 +94,7 @@ class ControlPlotMaker:
                                 hEWKfake = h.Clone()
                             else:
                                 hEWKfake.Add(h)
-                if len(myStackList) > 0:
+                if len(myStackList) > 0 or not self._config.OptionReplaceEmbeddingByMC:
                     if hQCD != None:
                         myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
                         myHisto.setIsDataMC(isData=False, isMC=True)
@@ -316,6 +317,8 @@ class SelectionFlowPlotMaker:
         self._data.Reset()
 
     def makePlot(self, dirname, m, index, luminosity):
+        if self._data == None:
+            return
         myStackList = []
         # expected
         for i in range(0,len(self._expectedList)):
