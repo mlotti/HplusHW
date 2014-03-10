@@ -664,15 +664,15 @@ namespace HPlus {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausJetEtaAfterMtSelections, (*jet)->eta());
       }
     }
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETAfterMtSelections, data.getSelectedMET()->et());
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiAfterMtSelections, data.getSelectedMET()->phi());
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETAfterMtSelections, fMETData.getSelectedMET()->et());
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETAfterMtSelections, data.getSelectedMET()->et());
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiAfterMtSelections, data.getSelectedMET()->phi());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETAfterMtSelections, fMETData.getSelectedMET()->et());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
     }
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlNbjetsAfterMtSelections, data.getBJetCount());
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlNbjetsAfterMtSelections, fBJetData.getBJetCount());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNbjetsAfterMtSelections, data.getBJetCount());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNbjetsAfterMtSelections, fBJetData.getBJetCount());
     for (edm::PtrVector<pat::Jet>::const_iterator iJet = fJetData.getSelectedJets().begin(); iJet != fJetData.getSelectedJets().end(); ++iJet) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlBDiscriminatorAfterMtSelections, (*iJet)->bDiscriminator(fBJetData.getDiscriminatorName()));
       if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
@@ -687,7 +687,7 @@ namespace HPlus {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausBJetEtaAfterMtSelections, (*iJet)->eta());
       }
     }
-    double myMinimumRadius = 999.;
+    myMinimumRadius = 999.;
     for (int i = 0; i < fQCDTailKillerData.getNConsideredJets(); ++i) {
       double myRadius = fQCDTailKillerData.getRadiusFromBackToBackCorner(i);
       if (myRadius < myMinimumRadius) 
