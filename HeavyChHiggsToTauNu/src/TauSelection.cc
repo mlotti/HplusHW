@@ -1282,7 +1282,7 @@ namespace HPlus {
   const bool TauSelection::passesDecayModeFilter(const edm::Ptr<pat::Tau>& tau) const {
     // Return true if filter is disabled
     if (fDecayModeFilterValue < 0) return true;
-    return tau->DecayMode() == fDecayModeFilterValue
+    return tau->decayMode() == fDecayModeFilterValue;
   }
 
   // Horror getters - these should never be used in analysis for other purposes than testing / debugging !!!
