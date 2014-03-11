@@ -262,6 +262,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlSelectedTauRtauAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauPAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauDecayModeAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections;
@@ -270,6 +271,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauDecayModeAfterStandardSelections;
 
     std::vector<WrappedTH1*> hCtrlNjetsAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlJetPtAfterStandardSelections;
@@ -330,6 +332,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlSelectedTauRtauAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauPAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauDecayModeAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPtAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauEtaAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPhiAfterMtSelections;
@@ -337,6 +340,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauRtauAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauDecayModeAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlNjetsAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlJetPtAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlJetEtaAfterMtSelections;
