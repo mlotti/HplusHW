@@ -978,6 +978,8 @@ namespace HPlus {
     if (tauEta < xAxis[20]) return 1.0/1.122231;
     if (tauEta < xAxis[21]) return 1.0/1.067155;
     if (tauEta < xAxis[22]) return 1.0/0.9381483;
+    throw cms::Exception("eta correction factor") << "This part should not be reached! eta = " << tauEta;
+    return 1.0;
   }
 
 }
