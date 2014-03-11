@@ -27,6 +27,7 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fHistoWrapper(histoWrapper),
     bBlindAnalysisStatus(iConfig.getUntrackedParameter<bool>("blindAnalysisStatus")),
+    bMakeEtaCorrectionStatus(iConfig.getUntrackedParameter<bool>("makeEtaCorrectionStatus")),
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     // Common counters
@@ -474,6 +475,7 @@ namespace HPlus {
       increment(fBaselineTauTriggerScaleFactorCounter);
       // Check if multiple taus passed
       if (!myMultipleTausPassForBaselineStatus) increment(fBaselineOneTauCounter);
+      // Do baseline analysis
       return doBaselineAnalysis(iEvent, iSetup, tauDataForBaseline.getSelectedTau(), pvData, genData);
     }
     // end of baseline selection
@@ -513,6 +515,12 @@ namespace HPlus {
       myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauRtauAfterTauID, tauDataForInverted.getSelectedTauRtauValue());
       myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauLeadingTrackPtAfterTauID, tauDataForInverted.getSelectedTau()->leadPFChargedHadrCand()->pt());
 
+      // Apply additional weights
+      if (bMakeEtaCorrectionStatus) {
+        double myCorrectionWeight = getQCDEtaCorrectionFactor(tauDataForInverted.getSelectedTau()->eta());
+        fEventWeight.multiplyWeight(myCorrectionWeight);
+      }
+      // Do inverted analysis
       return doInvertedAnalysis(iEvent, iSetup, tauDataForInverted.getSelectedTau(), pvData, genData);
     }
     // end of inverted selection
@@ -941,6 +949,33 @@ namespace HPlus {
     if(transverseMass < 100 ) increment(ftransverseMassCut100Counter);
 
     return true;
+  }
+
+  double SignalAnalysisInvertedTau::getQCDEtaCorrectionFactor(double tauEta) {
+    // Experimental code
+    Double_t xAxis[23] = {-2.5, -2, -1.8, -1.6, -1.4, -1.2, -1, -0.8, -0.6, -0.4, -0.2, -0, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2, 2.5};
+    if (tauEta < xAxis[1]) return 1.0/0.8767081;
+    if (tauEta < xAxis[2]) return 1.0/0.9659707;
+    if (tauEta < xAxis[3]) return 1.0/1.137967;
+    if (tauEta < xAxis[4]) return 1.0/1.311167;
+    if (tauEta < xAxis[5]) return 1.0/1.095265;
+    if (tauEta < xAxis[6]) return 1.0/0.9898405;
+    if (tauEta < xAxis[7]) return 1.0/0.9719643;
+    if (tauEta < xAxis[8]) return 1.0/0.937053;
+    if (tauEta < xAxis[9]) return 1.0/0.908424;
+    if (tauEta < xAxis[10]) return 1.0/0.9101083;
+    if (tauEta < xAxis[11]) return 1.0/0.8675937;
+    if (tauEta < xAxis[12]) return 1.0/0.9433836;
+    if (tauEta < xAxis[13]) return 1.0/0.8938621;
+    if (tauEta < xAxis[14]) return 1.0/0.934237;
+    if (tauEta < xAxis[15]) return 1.0/0.8606384;
+    if (tauEta < xAxis[16]) return 1.0/0.9480098;
+    if (tauEta < xAxis[17]) return 1.0/1.096861;
+    if (tauEta < xAxis[18]) return 1.0/1.248765;
+    if (tauEta < xAxis[19]) return 1.0/1.157337;
+    if (tauEta < xAxis[20]) return 1.0/1.122231;
+    if (tauEta < xAxis[21]) return 1.0/1.067155;
+    if (tauEta < xAxis[22]) return 1.0/0.9381483;
   }
 
 }

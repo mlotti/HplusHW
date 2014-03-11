@@ -23,6 +23,9 @@ def customize(signalAnalysis):
     print "Phase space is splitted in analysis as follows:"
     print signalAnalysis.commonPlotsSettings.histogramSplitting
 
+    #signalAnalysis.bMakeEtaCorrectionStatus = True
+    print "QCD corrections to inverted leg are applied status:",signalAnalysis.bMakeEtaCorrectionStatus
+
     signalAnalysis.bTagging.subleadingDiscriminatorCut = 0.244
     #signalAnalysis.MET.METCut = 50.0
     #signalAnalysis.MET.preMETCut = 30.0
