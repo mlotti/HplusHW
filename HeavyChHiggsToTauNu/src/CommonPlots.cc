@@ -147,6 +147,7 @@ namespace HPlus {
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauRtauAfterStandardSelections, "SelectedTau_Rtau_AfterStandardSelections", "R_{#tau};N_{events} / 0.1", fRtauBinSettings.bins(), fRtauBinSettings.min(), fRtauBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauPAfterStandardSelections, "SelectedTau_p_AfterStandardSelections", "#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauLeadingTrkPAfterStandardSelections, "SelectedTau_LeadingTrackP_AfterStandardSelections", "#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauDecayModeAfterStandardSelections, "SelectedTau_DecayMode_AfterStandardSelections", "#tau decay mode;N_{events}", 30,0,30);
     if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections, "SelectedTau_pT_AfterStandardSelections", "#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections, "SelectedTau_eta_AfterStandardSelections", "#tau #eta;N_{events} / 0.1", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
@@ -156,6 +157,7 @@ namespace HPlus {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections, "SelectedTau_Rtau_AfterStandardSelections", "R_{#tau};N_{events} / 0.1", fRtauBinSettings.bins(), fRtauBinSettings.min(), fRtauBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauPAfterStandardSelections, "SelectedTau_p_AfterStandardSelections", "#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections, "SelectedTau_LeadingTrackP_AfterStandardSelections", "#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauDecayModeAfterStandardSelections, "SelectedTau_DecayMode_AfterStandardSelections", "#tau decay mode;N_{events}", 30,0,30);
     }
 
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlNjetsAfterStandardSelections, "Njets_AfterStandardSelections", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
@@ -225,6 +227,7 @@ namespace HPlus {
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauRtauAfterMtSelections, "SelectedTau_Rtau_AfterMtSelections", "R_{#tau};N_{events} / 0.1", fRtauBinSettings.bins(), fRtauBinSettings.min(), fRtauBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauPAfterMtSelections, "SelectedTau_p_AfterMtSelections", "#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauLeadingTrkPAfterMtSelections, "SelectedTau_LeadingTrackP_AfterMtSelections", "#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauDecayModeAfterMtSelections, "SelectedTau_DecayMode_AfterMtSelections", "#tau decay mode;N_{events}", 30,0,30);
     if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauPtAfterMtSelections, "SelectedTau_pT_AfterMtSelections", "#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauEtaAfterMtSelections, "SelectedTau_eta_AfterMtSelections", "#tau #eta;N_{events} / 0.1", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
@@ -233,6 +236,7 @@ namespace HPlus {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauRtauAfterMtSelections, "SelectedTau_Rtau_AfterMtSelections", "R_{#tau};N_{events} / 0.1", fRtauBinSettings.bins(), fRtauBinSettings.min(), fRtauBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauPAfterMtSelections, "SelectedTau_p_AfterMtSelections", "#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterMtSelections, "SelectedTau_LeadingTrackP_AfterMtSelections", "#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauDecayModeAfterMtSelections, "SelectedTau_DecayMode_AfterMtSelections", "#tau decay mode;N_{events}", 30,0,30);
     }
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlNjetsAfterMtSelections, "Njets_AfterMtSelections", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlJetPtAfterMtSelections, "JetPt_AfterMtSelections", "Jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
@@ -514,6 +518,7 @@ namespace HPlus {
     hSelectedTauEtaVsPhiAfterStandardSelections->Fill(fTauData.getSelectedTau()->eta(), fTauData.getSelectedTau()->phi());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauPAfterStandardSelections, fTauData.getSelectedTau()->p());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauLeadingTrkPAfterStandardSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->p());
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauDecayModeAfterStandardSelections, fTauData.getSelectedTau()->decayMode());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections, fTauData.getSelectedTauRtauValue());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
@@ -523,6 +528,7 @@ namespace HPlus {
       hEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections->Fill(fTauData.getSelectedTau()->eta(), fTauData.getSelectedTau()->phi());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauPAfterStandardSelections, fTauData.getSelectedTau()->p());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->p());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauDecayModeAfterStandardSelections, fTauData.getSelectedTau()->decayMode());
     }
     // Fill control plots for selected jets
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNjetsAfterStandardSelections, fJetData.getHadronicJetCount());
@@ -644,6 +650,7 @@ namespace HPlus {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauPhiAfterMtSelections, fTauData.getSelectedTau()->phi());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauPAfterMtSelections, fTauData.getSelectedTau()->p());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauLeadingTrkPAfterMtSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->p());
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauDecayModeAfterMtSelections, fTauData.getSelectedTau()->decayMode());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauRtauAfterMtSelections, fTauData.getSelectedTauRtauValue());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterMtSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
@@ -652,6 +659,7 @@ namespace HPlus {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauPhiAfterMtSelections, fTauData.getSelectedTau()->phi());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauPAfterMtSelections, fTauData.getSelectedTau()->p());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterMtSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->p());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauDecayModeAfterMtSelections, fTauData.getSelectedTau()->decayMode());
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNjetsAfterMtSelections, fJetData.getHadronicJetCount());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
