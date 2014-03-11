@@ -60,6 +60,8 @@ namespace HPlus {
     bool doInvertedAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
     bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
 
+    double getQCDEtaCorrectionFactor(double tauEta);
+
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisInvertedTauProducer
     EventWeight& fEventWeight;
@@ -68,6 +70,7 @@ namespace HPlus {
 
     //    const double ftransverseMassCut;
     const bool bBlindAnalysisStatus;
+    const bool bMakeEtaCorrectionStatus;
     const double fDeltaPhiCutValue;
     // Common counters
     Count fAllCounter;

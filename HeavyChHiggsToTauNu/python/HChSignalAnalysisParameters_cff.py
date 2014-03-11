@@ -10,6 +10,9 @@ configInfo = cms.PSet(
 # Blind analysis - do not fill final counter and histogram for data if true
 blindAnalysisStatus = cms.untracked.bool(False)
 
+# QCD corrections
+makeQCDEtaCorrectionStatus = cms.untracked.bool(False)
+
 # Ambient level for filling histograms (options: Vital, Informative, Debug)
 histogramAmbientLevel = cms.untracked.string("Debug")
 
