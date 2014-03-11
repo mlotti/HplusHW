@@ -104,6 +104,7 @@ tauSelectionBase = cms.untracked.PSet(
     rtauCut = cms.untracked.double(0.7), # rtau > value
     nprongs = cms.untracked.uint32(1), # number of prongs (options: 1, 3, or 13 == 1 || 3)
     analyseFakeTauComposition = cms.untracked.bool(False),
+    decayModeFilterValue = cms.untracked.int32(-1), # filter for tau decay mode, set to negative value to disable
 )
 
 # Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)

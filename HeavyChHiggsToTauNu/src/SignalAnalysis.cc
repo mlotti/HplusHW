@@ -475,6 +475,9 @@ namespace HPlus {
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
     fTauSelection.analyseFakeTauComposition(fFakeTauIdentifier,iEvent);
     if(!tauData.passedEvent()) return false; // Require at least one tau
+    if (!fTauSelection.passesDecayModeFilter(tauData.getSelectedTau())) return false;
+    //    std::cout << "taus  " << tauData.getSelectedTaus().size() << std::endl;
+
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
     bool mySelectedToEWKFakeTauBackgroundStatus = tauMatchData.isEWKFakeTauLike();

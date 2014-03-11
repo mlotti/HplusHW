@@ -321,6 +321,7 @@ namespace HPlus {
     BaseSelection(eventCounter, histoWrapper),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fAnalyseFakeTauComposition(iConfig.getUntrackedParameter<bool>("analyseFakeTauComposition")),
+    fDecayModeFilterValue(iConfig.getUntrackedParameter<int>("decayModeFilterValue")),
     fTauID(0),
     fOperationMode(kNormalTauID)
   {
@@ -1275,6 +1276,13 @@ namespace HPlus {
         tmp.push_back(selected[i]);
     }
       */
+  }
+
+  // Returns true if tau passes Decay Mode filter
+  const bool TauSelection::passesDecayModeFilter(const edm::Ptr<pat::Tau>& tau) const {
+    // Return true if filter is disabled
+    if (fDecayModeFilterValue < 0) return true;
+    return tau->DecayMode() == fDecayModeFilterValue
   }
 
   // Horror getters - these should never be used in analysis for other purposes than testing / debugging !!!

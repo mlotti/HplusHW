@@ -452,6 +452,7 @@ namespace HPlus {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // baseline (full tauID) selection (use same counters like for signal analysis to be able to cross-check)
     if (tauDataForBaseline.passedEvent()) {
+      if (!fTauSelection.passesDecayModeFilter(tauDataForBaseline.getSelectedTau())) return false;
       increment(fBaselineTauIDCounter);
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForBaseline.getSelectedTau()));
@@ -484,6 +485,7 @@ namespace HPlus {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Inverted tau selection starts (do here common plots)
     if (tauDataForInverted.passedEvent()) {
+      if (!fTauSelection.passesDecayModeFilter(tauDataForInverted.getSelectedTau())) return false;
       increment(fInvertedTauIDCounter);
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForInverted.getSelectedTau()));
