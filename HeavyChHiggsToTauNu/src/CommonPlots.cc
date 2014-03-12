@@ -637,7 +637,7 @@ namespace HPlus {
     double myMinimumRadius = 999.;
     for (int i = 0; i < fQCDTailKillerData.getNConsideredJets(); ++i) {
       double myRadius = fQCDTailKillerData.getRadiusFromCollinearCorner(i);
-      if (myRadius < myMinimumRadius && data.collinearCutActiveForJet(i))
+      if (myRadius < myMinimumRadius && fQCDTailKillerData.collinearCutActiveForJet(i))
         myMinimumRadius = myRadius;
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearMinimumAfterMtSelections, myMinimumRadius);
@@ -698,7 +698,7 @@ namespace HPlus {
     myMinimumRadius = 999.;
     for (int i = 0; i < fQCDTailKillerData.getNConsideredJets(); ++i) {
       double myRadius = fQCDTailKillerData.getRadiusFromBackToBackCorner(i);
-      if (myRadius < myMinimumRadius && data.backToBackCutActiveForJet(i))
+      if (myRadius < myMinimumRadius && fQCDTailKillerData.backToBackCutActiveForJet(i))
         myMinimumRadius = myRadius;
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackMinimumAfterMtSelections, myMinimumRadius);
