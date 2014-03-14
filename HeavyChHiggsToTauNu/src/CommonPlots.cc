@@ -171,9 +171,11 @@ namespace HPlus {
     // MET selection
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMET,            "MET", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhi,         "METPhi", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTauPlusMETPt,   "TauPlusMETPt", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMET,    "MET", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhi, "METPhi", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTauPlusMETPt, "TauPlusMETPt", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     }
     // b tagging
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlNbjets,            "NBjets", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
@@ -248,9 +250,11 @@ namespace HPlus {
     }
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETAfterMtSelections,            "METAfterMtSelections", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiAfterMtSelections,         "METPhiAfterMtSelections", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTauPlusMETPtAfterMtSelections,   "TauPlusMETPtAfterMtSelections", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETAfterMtSelections,    "METAfterMtSelections", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiAfterMtSelections, "METPhiAfterMtSelections", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections, "TauPlusMETPtAfterMtSelections", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     }
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlNbjetsAfterMtSelections,            "NBjetsAfterMtSelections", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlBJetPtAfterMtSelections,            "BJetPtAfterMtSelections", "b jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
@@ -550,9 +554,11 @@ namespace HPlus {
     fMETData = data;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMET, data.getSelectedMET()->et());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhi, data.getSelectedMET()->phi());
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlTauPlusMETPt, (fTauData.getSelectedTau()->p4()+data.getSelectedMET()->p4()).pt());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMET, data.getSelectedMET()->et());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhi, data.getSelectedMET()->phi());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTauPlusMETPt, (fTauData.getSelectedTau()->p4()+data.getSelectedMET()->p4()).pt());
     }
   }
 
@@ -674,9 +680,11 @@ namespace HPlus {
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETAfterMtSelections, fMETData.getSelectedMET()->et());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlTauPlusMETPtAfterMtSelections, (fTauData.getSelectedTau()->p4()+fMETData.getSelectedMET()->p4()).pt());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETAfterMtSelections, fMETData.getSelectedMET()->et());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections, (fTauData.getSelectedTau()->p4()+fMETData.getSelectedMET()->p4()).pt());
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNbjetsAfterMtSelections, fBJetData.getBJetCount());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
