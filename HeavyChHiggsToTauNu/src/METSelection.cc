@@ -24,6 +24,9 @@ namespace HPlus {
    }
 
    const edm::Ptr<reco::MET> METSelection::Data::getPhiCorrectedSelectedMET() const {
+     if (fPhiOscillationCorrectedType1MET.size() == 0) {
+       throw cms::Exception("Configuration") << "fPhiOscillationCorrectedType1MET not calculated! " << __FILE__ << ":" << __LINE__ << std::endl;
+     }
      if (fMETMode == METSelection::kType1)
        return edm::Ptr<reco::MET>(&fPhiOscillationCorrectedType1MET, 0);
      else if (fMETMode == METSelection::kType2)
@@ -177,7 +180,10 @@ namespace HPlus {
       output.fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(output.fType1MET, selectedTau, allJets, kType1, possiblyIsolatedTaus));
       output.fType1MET = edm::Ptr<reco::MET>(&output.fType1METCorrected, 0);
       // MET phi correction
+      output.fPhiOscillationCorrectedType1MET.clear();
       output.fPhiOscillationCorrectedType1MET.push_back(getPhiOscillationCorrectedMET(output.fType1MET, iEvent.isRealData(), nVertices));
+    } else {
+      throw cms::Exception("LogicError") << "This should never happen at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
     /*
     if(htype2met.isValid()) {
