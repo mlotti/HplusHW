@@ -407,8 +407,9 @@ namespace HPlus {
     // sumet is not set for pat::MET in the corrections anyway
     //double correctedSumEt = met->sumEt() + sumet;
 
-    reco::MET correctedMet = *met;
-    correctedMet.setP4(correctedP4);
+    reco::MET correctedMet(correctedP4, met->vertex());
+    //correctedMet.setP4(correctedP4);
+    std::cout << "corrected type I MET: " << correctedMet->et() << std::endl;
     return correctedMet;
   }
 
@@ -430,8 +431,9 @@ namespace HPlus {
       myCorrectionY = met->py() - (static_cast<double>(nVertices)*fPhiCorrectionSlopeYForMC + fPhiCorrectionOffsetYForMC);
     }
     reco::Candidate::LorentzVector myCorrectedP4(myCorrectionX, myCorrectionY, 0., std::sqrt(myCorrectionX*myCorrectionX + myCorrectionY*myCorrectionY));
-    reco::MET correctedMet = *met;
-    correctedMet.setP4(myCorrectedP4);
+    reco::MET correctedMet(myCorrectedP4, met->vertex());
+    std::cout << "phi corrected MET: " << correctedMet->et() << std::endl;
+    //correctedMet.setP4(myCorrectedP4);
     return correctedMet;
   }
 
