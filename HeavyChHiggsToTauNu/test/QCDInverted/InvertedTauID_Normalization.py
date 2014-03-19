@@ -22,6 +22,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabConsistencyCheck as consistencyCheck
 
 from InvertedTauID import *
 #dataEra = "Run2011A"
@@ -62,6 +63,9 @@ def main(argv):
     datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
    
+    # Check multicrab consistency
+    consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="QCD inverted")
+
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
     # the analysis job uses skimmed pattuple as an input

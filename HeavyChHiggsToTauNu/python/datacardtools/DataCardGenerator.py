@@ -14,8 +14,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabConsistencyCheck as consistencyCheck
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
+
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
@@ -70,6 +72,8 @@ class DatasetMgrCreatorManager:
             if self._dsetMgrCreators[i] != None:
                 # Create DatasetManager object and set pointer to the selected era, searchMode, and optimizationMode
                 myDsetMgr = self._dsetMgrCreators[i].createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+                # Check consistency
+                consistencyCheck.checkConsistencyStandalone(self._dsetMgrCreators[i]._baseDirectory,myDsetMgr,name=self.getDatasetMgrLabel(i))
                 # Normalize
                 myDsetMgr.updateNAllEventsToPUWeighted()
                 # Obtain luminosity
