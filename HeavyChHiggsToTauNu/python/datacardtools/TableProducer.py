@@ -51,14 +51,14 @@ class TableProducer:
         # Copy datacard to directory
         os.system("cp %s %s/inputDatacardForDatacardGenerator.py"%(opts.datacard, self._dirname))
 
-        # Make datacards
-        self.makeDataCards()
-
         # Make control plots
         if self._config.OptionDoControlPlots:
             ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
         else:
             print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
+
+        # Make datacards
+        self.makeDataCards()
 
         # Make other reports
         print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()
