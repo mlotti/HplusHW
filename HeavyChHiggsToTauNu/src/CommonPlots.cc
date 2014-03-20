@@ -375,7 +375,7 @@ namespace HPlus {
 
     // Need to require one tau in the event
     if (fTauData.getSelectedTau().isNull()) {
-      fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup);
+      fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup, fVertexData.getNumberOfAllVertices());
       // Plots do not make sense if no tau has been found
       edm::Ptr<pat::Tau> myZeroTauPointer;
       for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
@@ -413,7 +413,7 @@ namespace HPlus {
 //------ Control plot filling
   void CommonPlots::fillControlPlotsAfterVertexSelection(const edm::Event& iEvent, const VertexSelection::Data& data) {
     //----- MET phi oscillation
-    //fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup, fJetData.getAllJets());
+    //fMETData = metSelection.silentAnalyzeNoIsolatedTaus(iEvent, iSetup, fJetData.getAllJets(), data.getNumberOfAllVertices());
     if (bOptionEnableTauFakeRateAnalysis && fTauSelection && fFakeTauIdentifier) {
       fTauFakeRateAnalysis->analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
     }
