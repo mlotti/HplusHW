@@ -45,6 +45,15 @@ def lineCmp(a, b):
         return cmp(a.size, b.size)
     return cmp(unitOrder.index(a.unit), unitOrder.index(b.unit))
 
+def makeRegex(aggregate):
+    split = aggregate.split("=")
+    if len(split) == 1:
+        name = split[0]
+        regex = name
+    else:
+        (name, regex) = split
+    return (name, re.compile(regex))
+
 def main(opts, dufile):
     # Read file
     f = open(dufile)
@@ -65,13 +74,12 @@ def main(opts, dufile):
         if line.path == srmDir:
             totalLine = line
             continue
-        if not "/" in line.path.replace(srmDir+"/", ""):
+        if line.path.replace(srmDir+"/", "").count("/") == opts.depth:
             subLines.append(line)
 
     # Aggregation
     if len(opts.aggregate) > 0:
-        aggregates = [a.split("=") for a in opts.aggregate]
-        aggregates = [(name, re.compile(regex)) for name, regex in aggregates]
+        aggregates = [makeRegex(a) for a in opts.aggregate]
         notFound = []
         aggregated = {}
         for line in subLines:
@@ -108,10 +116,16 @@ if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options] du.txt")
     parser.add_option("--srmDir", dest="srmDir", default=None,
                       help="Specify the srm directory whose content to look (default is to pick the last one in the du.txt file)")
-    parser.add_option("--aggregate", dest="aggregate", default=[], action="append",
+    parser.add_option("-a", "--aggregate", dest="aggregate", default=[], action="append",
                       help="Aggregate directories, 'name=regex'")
+    parser.add_option("-r", dest="depth", default=0, type="int",
+                      help="Recursion depth (default: 0, i.e. look for immediate subdirectories of srmDir")
     (opts, args) = parser.parse_args()
     if not len(args) == 1:
         parser.error("You should give exactly one txt file, got %d" % len(args))
+
+    # One '/' is implicitly included
+    if opts.depth < 0:
+        parser.error("-r should be >= 0, got %d" % opts.r)
 
     sys.exit(main(opts, args[0]))
