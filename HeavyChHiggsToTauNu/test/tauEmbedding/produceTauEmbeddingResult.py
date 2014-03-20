@@ -107,6 +107,8 @@ if __name__ == "__main__":
                       help="List available analysis name information, and quit.")
     parser.add_option("--mc", dest="mcs", action="append", type="string", default=[],
                       help="Process also these MC samples. If any of them is '*', all available MC's are used")
+    parser.add_option("--midfix", dest="midfix", default=None,
+                      help="Midfix to add to the output directory name")
     (opts, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("Expected exactly one multicrab directory, got %d" % len(args))
@@ -158,6 +160,8 @@ if __name__ == "__main__":
     dirname = "embedding"
     if datasetCreatorMC is not None:
         dirname += "_mc"
+    if opts.midfix is not None:
+        dirname += "_"+opts.midfix
     taskDir = multicrab.createTaskDir(dirname)
 
     f = open(os.path.join(taskDir, "codeVersion.txt"), "w")
