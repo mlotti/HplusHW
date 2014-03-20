@@ -14,7 +14,7 @@ LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 HeavyMassPoints      = [180,220,300,400]
-#HeavyMassPoints      = [180]
+HeavyMassPoints      = [180]
 HeavyMassPoints      = []
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
