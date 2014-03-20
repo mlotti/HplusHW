@@ -10,6 +10,7 @@ def createEDFilter(param):
         configInfo = param.configInfo.clone(),
         blindAnalysisStatus = param.blindAnalysisStatus,
         makeQCDEtaCorrectionStatus = param.makeQCDEtaCorrectionStatus,
+        lowBoundForQCDInvertedIsolation = param.lowBoundForQCDInvertedIsolation,
 	histogramAmbientLevel = param.histogramAmbientLevel,
         trigger = param.trigger.clone(),
         tauTriggerEfficiencyScaleFactor = param.tauTriggerEfficiencyScaleFactor.clone(),

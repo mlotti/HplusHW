@@ -71,6 +71,7 @@ namespace HPlus {
     //    const double ftransverseMassCut;
     const bool bBlindAnalysisStatus;
     const bool bMakeEtaCorrectionStatus;
+    std::string fLowBoundForQCDInvertedIsolation;
     const double fDeltaPhiCutValue;
     // Common counters
     Count fAllCounter;
