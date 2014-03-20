@@ -27,6 +27,7 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fHistoWrapper(histoWrapper),
     bBlindAnalysisStatus(iConfig.getUntrackedParameter<bool>("blindAnalysisStatus")),
+    fLowBoundForQCDInvertedIsolation(iConfig.getUntrackedParameter<std::string>("lowBoundForQCDInvertedIsolation")),
     bMakeEtaCorrectionStatus(iConfig.getUntrackedParameter<bool>("makeQCDEtaCorrectionStatus")),
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
@@ -442,8 +443,18 @@ namespace HPlus {
 
 //------ Select most likely tau candidate for inverted analysis (full tau ID)
     for (edm::PtrVector<pat::Tau>::iterator iTau = mySelectedTauList.begin(); iTau != mySelectedTauList.end(); ++iTau) {
-      if (!fTauSelection.getPassesIsolationStatusOfTauObject(*iTau))
-        myTmpVector.push_back(*iTau);
+      if (!fTauSelection.getPassesIsolationStatusOfTauObject(*iTau)) {
+        // Ok, does not pass tau isolation
+        if (fLowBoundForQCDInvertedIsolation.size()) {
+          if (!fTauSelection.getPassesIsolationStatusOfTauObject(*iTau, fLowBoundForQCDInvertedIsolation)) {
+            // Does not pass tau isolation, but passes a looser isolation, select this tau
+            myTmpVector.push_back(*iTau);
+          }
+        } else {
+          // No low bound required, select this tau
+          myTmpVector.push_back(*iTau);
+        }
+      }
     }
     TauSelection::Data tauDataForInverted;
     bool myMultipleTausPassForInvertedStatus = false;
