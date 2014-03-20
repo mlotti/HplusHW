@@ -46,9 +46,9 @@ def checkConsistency(myDict, myMergedDict, name=None, printStatus=True):
                 if myMergedDict[m] == myDict[k]:
                     myTable.append((k, "OK"))
                 elif myMergedDict[m] <= myDict[k]:
-                    myTable.append((k, "merged root file contains %d jobs instead of requested %d jobs -> this is recoved automatically for MC (although stat. resolution is poorer)"%(myDict[m],myMergedDict[k])))
+                    myTable.append((k, "merged root file contains %d jobs instead of requested %d jobs -> this is recoved automatically for MC (although stat. resolution is poorer)"%(myMergedDict[m],myDict[k])))
                 else:
-                    myTable.append((k, "merged root file contains %d jobs instead of requested %d jobs -> ERROR: you need to rerun the multicrab or hplusMultiCrabMerge.py for this dataset!"%(myDict[m],myMergedDict[k])))
+                    myTable.append((k, "merged root file contains %d jobs instead of requested %d jobs -> ERROR: you need to rerun the multicrab or hplusMultiCrabMerge.py for this dataset!"%(myMergedDict[m],myDict[k])))
                     myGoodStatus = False
     if printStatus or not myGoodStatus:
         if name == None:
