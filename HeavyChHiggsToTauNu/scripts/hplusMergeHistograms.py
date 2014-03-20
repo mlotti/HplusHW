@@ -7,7 +7,12 @@ import shutil
 import subprocess
 from optparse import OptionParser
 
+import ROOT
+ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
 re_histos = []
 re_se = re.compile("newPfn =\s*(?P<url>\S+)")
@@ -134,6 +139,19 @@ def hplusHadd(opts, mergeName, inputFiles):
     
     return 0
 
+# Check that configInfo/configinfo control bin matches to number of
+# input files, in order to monitor a mysterious bug reported by Lauri
+class SanityCheckException(Exception):
+    def __init__(self, message):
+        super(SanityCheckException, self).__init__(message)
+def sanityCheck(mergedFile, inputFiles):
+    tfile = ROOT.TFile.Open(mergedFile)
+    configinfo = tfile.Get("configInfo/configinfo")
+    if configinfo:
+        info = dataset._histoToDict(configinfo)
+        if int(info["control"]) != len(inputFiles):
+            raise SanityCheckException("configInfo/configinfo:control = %d, len(inputFiles) = %d" % (int(info["control"]), len(inputFiles)))
+
 def main(opts, args):
     crabdirs = multicrab.getTaskDirectories(opts)
 
@@ -214,6 +232,12 @@ def main(opts, args):
             if len(filesSplit) > 1:
                 print "  done %d" % index
             mergedFiles.append((mergeName, inputFiles))
+            try:
+                sanityCheck(mergeName, inputFiles)
+            except SanityCheckException, e:
+                print "Task %s: %s; disabling input file deletion" % (d, str(e))
+                opts.deleteImmediately = False
+                opts.delete = False
             if opts.deleteImmediately:
                 for srcFile in inputFiles:
                     if opts.verbose:

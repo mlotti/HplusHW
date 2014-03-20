@@ -19,11 +19,57 @@ class Task:
         self.inputDataset = None
         self.publishName = None
 
-        self.events = None
+#        self.events = None
         self.jobs = None
         self.time = None
         self.size = None
         self.dbsPath = None
+        self.jobs_published = None
+        self.jobs_failed = None
+        self.jobs_still_to_publish = None
+
+def addInputPublishToTasks(tasks):
+    for key, task in tasks.iteritems():
+        cfgparser = ConfigParser.ConfigParser()
+        cfgparser.read(os.path.join(task.directory, "share", "crab.cfg"))
+        task.inputDataset = cfgparser.get("CMSSW", "datasetpath").split("/")[1]
+        task.publishName = cfgparser.get("USER", "publish_data_name")
+        #print task.inputDataset, task.publishName
+
+#log_re = re.compile("total events: (?P<events>\d+) in dataset: (?P<dbs>/\S+)")
+log_re = re.compile("Publishing block (?P<dbs>/[^#]+)#")
+summary_re = re.compile("published (?P<published>\d+), failed (?P<failed>\d+), still_to_publish (?P<still>\d+)")
+def parseLog(logFile, tasks):
+    dbsPath = None
+    f = open(logFile)
+    for line in f:
+        # Infer DBS path
+        m = log_re.search(line)
+        if m:
+            tmp = m.group("dbs")
+            if dbsPath is None:
+                dbsPath = tmp
+            elif dbsPath != tmp:
+                raise Exception("Internal error: dbsPath '%s' tmp '%s'" % (dbsPath, tmp))
+            continue
+        # After summary line, find the corresponding task
+        m = summary_re.search(line)
+        if m:
+            if dbsPath is None:
+                raise Exception("Did not find DBS path before summary, line '%s' of file %s" % (line, logFile))
+            found = False
+            for key, task in tasks.iteritems():
+                if task.inputDataset in dbsPath and task.publishName in dbsPath:
+#                    task.events = m.group("events")
+                    task.jobs_published = int(m.group("published"))
+                    task.jobs_failed = int(m.group("failed"))
+                    task.jobs_still_to_publish = int(m.group("still"))
+                    task.dbsPath = dbsPath
+                    found = True
+                    break
+            if not found:
+                print "Did not find crab task matching to published %s" % dbsPath
+            dbsPath = None
 
 def main(opts):
     taskDirs = multicrab.getTaskDirectories(opts)
@@ -42,12 +88,7 @@ def main(opts):
     print
 
     # Find publish name from crab.cfg's
-    for key, task in tasks.iteritems():
-        cfgparser = ConfigParser.ConfigParser()
-        cfgparser.read(os.path.join(task.directory, "share", "crab.cfg"))
-        task.inputDataset = cfgparser.get("CMSSW", "datasetpath").split("/")[1]
-        task.publishName = cfgparser.get("USER", "publish_data_name")
-        #print task.inputDataset, task.publishName
+    addInputPublishToTasks(tasks)
     #print
 
     # Read publish.log files produced by hplusMultiCrabPublish.py
@@ -55,22 +96,21 @@ def main(opts):
     if len(publishLogs) == 0:
         print "Did not find any publish_*.log files, are you sure you've run hplusMultiCrabPublish?"
         return 1
-    log_re = re.compile("total events: (?P<events>\d+) in dataset: (?P<dbs>/\S+)")
+    publishLogs.sort()
     for logFile in publishLogs:
-        f = open(logFile)
-        for line in f:
-            m = log_re.search(line)
-            if m:
-                dbsPath = m.group("dbs")
-                found = False
-                for key, task in tasks.iteritems():
-                    if task.inputDataset in dbsPath and task.publishName in dbsPath:
-                        task.events = m.group("events")
-                        task.dbsPath = dbsPath
-                        found = True
-                if not found:
-                    print "Did not find crab task matching to published %s" % dbsPath
+        parseLog(logFile, tasks)
+
     #print
+
+    # Check if publication is complete
+    taskNames = tasks.keys()
+    taskNames.sort()
+    for name in taskNames:
+        task = tasks[name]
+        still = task.jobs_still_to_publish
+        if still is not None and still > 0:
+            print "%s publication not complete (published %d, failed %d, still_to_publish %d)" % (name, task.jobs_published, task.jobs_failed, still)
+            del tasks[name]
 
     # Read time and size information
     timeAnalysis = multicrabAnalysis.TimeAnalysis()
@@ -92,10 +132,11 @@ def main(opts):
     # Print out
 #    print
 #    for key, task in tasks.iteritems():
-        print "# %s events, %d jobs" % (task.events, task.jobs)
+#        print "# %s events, %d jobs" % (task.events, task.jobs)
+        print "# %d jobs" % (task.jobs)
         print "# %s" % task.time
         print "# %s" % task.size
-        print '"%s": TaskDef("%s"),' % (key, task.dbsPath)
+        print '"%s": TaskDef("%s", dbs="phys03"),' % (key, task.dbsPath)
 
     return 0
     
