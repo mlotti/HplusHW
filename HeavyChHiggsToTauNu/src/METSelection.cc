@@ -87,12 +87,14 @@ namespace HPlus {
       fSelect = kRaw;
     else if(select == "type1")
       fSelect = kType1;
+    else if(select == "type1phicorrected")
+      fSelect = kType1PhiCorrected;
     else if(select == "type2") {
       fSelect = kType2;
       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment" << std::endl;
     }
     else
-      throw cms::Exception("Configuration") << "Invalid value for select '" << select << "', valid values are raw, type1, type2" << std::endl;
+      throw cms::Exception("Configuration") << "Invalid value for select '" << select << "', valid values are raw, type1, type1phicorrected, type2" << std::endl;
 
     std::string possiblyMode = iConfig.getUntrackedParameter<std::string>("doTypeICorrectionForPossiblyIsolatedTaus");
     if(possiblyMode == "disabled")
@@ -204,6 +206,8 @@ namespace HPlus {
       met = output.fRawMET;
     else if(fSelect == kType1)
       met = output.fType1MET;
+    else if(fSelect == kType1PhiCorrected)
+      met = output.getPhiCorrectedSelectedMET();
     else if(fSelect == kType2)
       //met = htype2met->ptrAt(0);
       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
@@ -242,7 +246,7 @@ namespace HPlus {
     return output;
   }
 
-  METSelection::Data METSelection::silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  METSelection::Data METSelection::silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices) {
     Data output;
     output.fMETMode = fSelect;
 
@@ -270,6 +274,9 @@ namespace HPlus {
       output.fType1METCorrected.clear();
       output.fType1MET = htype1met->ptrAt(0);
       output.fType1METCorrected.push_back(*output.fType1MET);
+      // MET phi correction
+      output.fPhiOscillationCorrectedType1MET.clear();
+      output.fPhiOscillationCorrectedType1MET.push_back(getPhiOscillationCorrectedMET(output.fType1MET, iEvent.isRealData(), nVertices));
     }
     if(hcalomet.isValid())
       output.fCaloMET = hcalomet->ptrAt(0);
@@ -282,6 +289,8 @@ namespace HPlus {
       met = output.fRawMET;
     else if(fSelect == kType1)
       met = output.fType1MET;
+    else if(fSelect == kType1PhiCorrected)
+      met = output.getPhiCorrectedSelectedMET();
     if(met->et() > fMetCut) {
       output.fPassedEvent = true;
     } else {
