@@ -64,6 +64,7 @@ class ControlPlotMaker:
                     if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn() and not c.getControlPlotByIndex(i) == None:
                         h = c.getControlPlotByIndex(i)["shape"].Clone()
                         if c.typeIsSignal():
+                            #print "signal:",c.getLabel()
                             # Scale light H+ signal
                             if m < 179:
                                 if c.getLabel()[:2] == "HH":
@@ -75,11 +76,13 @@ class ControlPlotMaker:
                             else:
                                 hSignal.Add(h)
                         elif c.typeIsQCD():
+                            #print "QCD:",c.getLabel()
                             if hQCD == None:
                                 hQCD = h.Clone()
                             else:
                                 hQCD.Add(h)
                         elif c.typeIsEWK():
+                            #print "EWK genuine:",c.getLabel(),h.getRootHisto().Integral(0,h.GetNbinsX()+2)
                             if self._config.OptionReplaceEmbeddingByMC:# or False: # FIXME
                                 myHisto = histograms.Histo(h,c._datasetMgrColumn)
                                 myHisto.setIsDataMC(isData=False, isMC=True)
@@ -90,6 +93,7 @@ class ControlPlotMaker:
                                 else:
                                     hEmbedded.Add(h)
                         elif c.typeIsEWKfake():
+                            #print "EWK fake:",c.getLabel(),h.getRootHisto().Integral(0,h.GetNbinsX()+2)
                             if hEWKfake == None:
                                 hEWKfake = h.Clone()
                             else:
@@ -110,8 +114,17 @@ class ControlPlotMaker:
                     hData = observation.getControlPlotByIndex(i)["shape"].Clone()
                     hDataUnblinded = hData.Clone()
                     # Apply blinding
-                    if len(myCtrlPlot.blindedRange) > 0:
-                        self._applyBlinding(hData,myCtrlPlot.blindedRange)
+                    if self._config.BlindAnalysis:
+                        if len(myCtrlPlot.blindedRange) > 0:
+                            self._applyBlinding(hData,myCtrlPlot.blindedRange)
+                        if self._config.OptionBlindThreshold != None:
+                            for k in xrange(1, hData.GetNbinsX()+1):
+                                myExpValue = 0.0
+                                for item in myStackList:
+                                    myExpValue += item.getRootHisto().GetBinContent(k)
+                                if hSignal.getRootHisto().GetBinContent(k) >= myExpValue * self._config.OptionBlindThreshold:
+                                    hData.getRootHisto().SetBinContent(k, -1.0)
+                                    hData.getRootHisto().SetBinError(k, 0.0)
                     myHisto = histograms.Histo(hData,"Data")
                     myHisto.setIsDataMC(isData=True, isMC=False)
                     myStackList.insert(0, myHisto)

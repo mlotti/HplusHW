@@ -1368,11 +1368,11 @@ class RootHistoWithUncertainties:
     ## Calculate integral including under/overflow bins
     def integral(self):
         if isinstance(self._rootHisto, ROOT.TH3):
-            return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+1, 0, self._rootHisto.GetNbinsY()+1, 0, self._rootHisto.GetNbinsZ()+1)
+            return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+2, 0, self._rootHisto.GetNbinsY()+2, 0, self._rootHisto.GetNbinsZ()+2)
         elif isinstance(self._rootHisto, ROOT.TH2):
-            return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+1, 0, self._rootHisto.GetNbinsY()+1)
+            return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+2, 0, self._rootHisto.GetNbinsY()+2)
         else:
-            return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+1)
+            return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+2)
 
     ## Get minimum of X axis
     def getXmin(self):

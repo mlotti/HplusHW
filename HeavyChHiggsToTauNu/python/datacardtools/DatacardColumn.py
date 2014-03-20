@@ -324,6 +324,15 @@ class DatacardColumn():
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
                                myRateHistograms)
+        if self._opts.verbose:
+            print "  - Rate: integral = ", myRateHistograms[0].Integral()
+            if (self.typeIsEWK()) or self.typeIsEWKfake():
+                if isinstance(dsetMgr.getDataset(self.getDatasetMgrColumn()), dataset.DatasetMerged):
+                    for dset in dsetMgr.getDataset(self.getDatasetMgrColumn()).datasets:
+                        print "  - normalization coefficient for %s: %g"%(dset.getName(),dset.getNormFactor())
+                print "  - normalization coefficient = ", dsetMgr.getDataset(self.getDatasetMgrColumn()).getNormFactor()
+        if abs(myRateHistograms[0].Integral() - myRateHistograms[0].Integral(0,myRateHistograms[0].GetNbinsX()+2)) > 0.00001:
+            raise Exception("Error: under/overflow bins contain data!")
         if self.typeIsEmptyColumn() or dsetMgr == None:
             return
 
