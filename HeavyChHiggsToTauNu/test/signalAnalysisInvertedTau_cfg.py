@@ -24,9 +24,10 @@ def customize(signalAnalysis):
     print signalAnalysis.commonPlotsSettings.histogramSplitting
 
     #signalAnalysis.bMakeEtaCorrectionStatus = True
+    #signalAnalysis.lowBoundForQCDInvertedIsolation = "byVLooseCombinedIsolationDeltaBetaCorr"
     print "QCD corrections to inverted leg are applied status:",signalAnalysis.makeQCDEtaCorrectionStatus
     if len(signalAnalysis.lowBoundForQCDInvertedIsolation.value()):
-        print "Applying low bound for QCD inverted isolation in addition to inverting the isolation, low bound=",signalAnalysis.lowBoundForQCDInvertedIsolation
+        print "Applying low bound for QCD inverted isolation in addition to inverting the isolation, low bound=",signalAnalysis.lowBoundForQCDInvertedIsolation.value()
 
     signalAnalysis.bTagging.subleadingDiscriminatorCut = 0.244
     #signalAnalysis.MET.METCut = 50.0
