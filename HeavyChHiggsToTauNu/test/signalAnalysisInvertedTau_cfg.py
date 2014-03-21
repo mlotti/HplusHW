@@ -34,7 +34,7 @@ def customize(signalAnalysis):
 
     #signalAnalysis.bMakeEtaCorrectionStatus = True
     print "QCD corrections to inverted leg are applied status:",signalAnalysis.makeQCDEtaCorrectionStatus
-    if len(signalAnalysis.lowBoundForQCDInvertedIsolation):
+    if len(signalAnalysis.lowBoundForQCDInvertedIsolation.value()):
         print "Applying low bound for QCD inverted isolation in addition to inverting the isolation, low bound=",signalAnalysis.lowBoundForQCDInvertedIsolation
 
     signalAnalysis.bTagging.subleadingDiscriminatorCut = 0.244
