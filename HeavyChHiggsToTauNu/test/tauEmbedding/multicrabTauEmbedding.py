@@ -79,7 +79,7 @@ config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,
           "muonDebugAnalysisAod": {"workflow": "embeddingAodAnalysis_44X",               "config": "genMuonDebugAnalysisAOD_cfg.py"},
           "muonDebugAnalysisNtupleAod": {"workflow": "embeddingAodAnalysis_44X",         "config": "genMuonDebugAnalysisNtupleAOD_cfg.py"},
           "signalAnalysis":       {"workflow": "tauembedding_analysis_%s",               "config": "../signalAnalysis_cfg.py"},
-          "signalAnalysisGenTau": {"workflow": "analysis_v44_5",                         "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysisGenTau": {"workflow": "analysis_taumet_v53_3",                         "config": "../signalAnalysis_cfg.py"},
           "signalAnalysisGenTauSkim": {"workflow": "tauembedding_gentauanalysis_"+genTauSkimVersion, "config": "../signalAnalysis_cfg.py"},
           "EWKMatching":          {"workflow": "tauembedding_analysis_%s",               "config": "../EWKMatching_cfg.py"},
           "muonAnalysis":         {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "muonAnalysisFromSkim_cfg.py"},
@@ -119,7 +119,7 @@ datasetsData2012 = [
     "SingleMu_207214-208686_2012D_Jan22",
 ]
 datasetsMCTT = [
-    "TTJets_TuneZ2star_Summer12",
+#    "TTJets_TuneZ2star_Summer12",
     "TTJets_FullLept_TuneZ2star_Summer12",
     "TTJets_SemiLept_TuneZ2star_Summer12",
     "TTJets_Hadronic_TuneZ2star_ext_Summer12",
@@ -166,19 +166,24 @@ datasetsMCSignal = [
     "TTToHplusBHminusB_M160_ext_Summer12",
 ]
 
-datasetsData2011 = []
-datasetsMCTT = []
-datasetsMCWDY = []
-datasetsMCSTVV = []
+#datasetsData2012 = []
+#datasetsMCTT = []
+#datasetsMCWDY = []
+#datasetsMCSTVV = []
 #datasetsMCnoQCD = []
-datasetsMCQCD = []
+#datasetsMCQCD = []
 datasetsMCSignal = []
-#datasetsData2011 = datasetsData2011B
 
 datasetsMCnoQCD = datasetsMCTT + datasetsMCWDY + datasetsMCSTVV
-datasetsMCnoQCD = ["TTJets_TuneZ2star_Summer12"]
-#datasetsMCnoQCD = ["WJets_TuneZ2star_Summer12"]
+#datasetsMCnoQCD = ["TTJets_TuneZ2star_Summer12"]
+#datasetsMCnoQCD = ["W4Jets_TuneZ2star_Summer12"]
 #datasetsMCnoQCD = ["DYJetsToLL_M50_TuneZ2star_Summer12"]
+#datasetsMCnoQCD = ["W1Jets_TuneZ2star_Summer12"]
+#datasetsMCnoQCD = [
+#    "TTJets_FullLept_TuneZ2star_Summer12",
+#    "TTJets_SemiLept_TuneZ2star_Summer12",
+#    "TTJets_Hadronic_TuneZ2star_ext_Summer12",
+#]
 
 def main():
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -192,7 +197,8 @@ def main():
                       help="String to add in the middle of the multicrab directory name (default: %s)" % dirPrefix)
     parser.add_option("--configOnly", dest="configOnly", action="store_true", default=False,
                       help="Generate multicrab configurations only, do not create crab jobs (default is to create crab jobs)")
-
+    parser.add_option("--dataOnly", dest="dataOnly", action="store_true", default=False,
+                      help="Use only data datasets (default is to use data+MC, or an applicable subset)")
     (opts, args) = parser.parse_args()
     step = opts.step
     versions = opts.version
@@ -269,17 +275,22 @@ def createTasks(opts, step, version=None):
     else:
         datasets = []
         if step in ["analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysisGenTau", "genTauSkim", "analysisTau"]:
+            if not opts.dataOnly:
                 datasets.extend(datasetsMCnoQCD)
         elif step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
-            datasets.extend(datasetsMCTTWJets)
+            if not opts.dataOnly:
+                datasets.extend(datasetsMCTTWJets)
         elif step in ["signalAnalysisGenTauSkim"]:
-            datasets.extend(datasetsMCTT)
+            if not ops.dataOnly:
+                datasets.extend(datasetsMCTT)
         else:
             datasets.extend(datasetsData2012)
-            datasets.extend(datasetsMCnoQCD)
-            datasets.extend(datasetsMCQCD)
+            if not opts.dataOnly:
+                datasets.extend(datasetsMCnoQCD)
+                datasets.extend(datasetsMCQCD)
         if step in ["embedding", "signalAnalysis","EWKMatching"]:
-            datasets.extend(datasetsMCSignal)
+            if not opts.dataOnly:
+                datasets.extend(datasetsMCSignal)
         tasks.append( ("", datasets) )
 
     # Setup the version number for tauembedding_{embedding,analysis} workflows

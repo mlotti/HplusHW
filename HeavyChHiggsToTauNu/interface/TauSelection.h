@@ -115,6 +115,8 @@ namespace HPlus {
     void analyseFakeTauComposition(FakeTauIdentifier& fakeTauIdentifier, const edm::Event& iEvent);
     /// Select the pat::Tau object which most likely passes the tau candidate selection + ID
     const edm::Ptr<pat::Tau> selectMostLikelyTau(const edm::PtrVector<pat::Tau>& taus, double vertexZ);
+    /// Returns true if tau passes Decay Mode filter
+    const bool passesDecayModeFilter(const edm::Ptr<pat::Tau>& tau) const;
 
     // Horror getters - these should never be used in analysis for other purposes than testing / debugging !!!
     // If you use these for analysis, you forget about the sorting in the case of multiple taus -> physics results will not be accurate
@@ -169,6 +171,8 @@ namespace HPlus {
     edm::InputTag fSrc;
     /// Option for analysing fake tau composition
     const bool fAnalyseFakeTauComposition;
+    /// Option for Decay Mode filter
+    const int fDecayModeFilterValue;
     /// TauID object
     TauIDBase* fTauID;
     /// Operation mode of tau selection

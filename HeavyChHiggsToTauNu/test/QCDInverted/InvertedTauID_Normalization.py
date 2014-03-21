@@ -22,6 +22,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabConsistencyCheck as consistencyCheck
 
 from InvertedTauID import *
 #dataEra = "Run2011A"
@@ -62,6 +63,9 @@ def main(argv):
     datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
    
+    # Check multicrab consistency
+    consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="QCD inverted")
+
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
     # the analysis job uses skimmed pattuple as an input
@@ -99,6 +103,7 @@ def main(argv):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    style.setOptStat(True)
 
     invertedQCD = InvertedTauID()
     invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
@@ -112,12 +117,14 @@ def main(argv):
         title = datasets.getDataset("Data").getDatasetRootHisto("baseline/METBaseline"+HISTONAME+"/"+histoname).getHistogram().GetTitle()
         title = title.replace("METBaseline"+HISTONAME,"")
         title = title.replace("#tau p_{T}","taup_T")
+        title = title.replace("#tau eta","taueta")
         title = title.replace("<","lt")
         title = title.replace(">","gt")
         title = title.replace("=","eq")
         title = title.replace("..","to")
+        title = title.replace(".","p")
+        title = title.replace("/","_")
         binLabels.append(title)
-        
     print
     print "Histogram bins available",bins
 
@@ -141,8 +148,8 @@ def main(argv):
         metBase = plots.DataMCPlot(datasets, "baseline/METBaseline"+HISTONAME+"/METBaseline"+HISTONAME+bin)
         metInver = plots.DataMCPlot(datasets, "Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
         # Rebin before subtracting
-        metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
-        metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+        #metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+        #metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
         
         metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
         metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)

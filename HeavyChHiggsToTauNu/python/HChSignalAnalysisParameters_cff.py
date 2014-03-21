@@ -10,6 +10,9 @@ configInfo = cms.PSet(
 # Blind analysis - do not fill final counter and histogram for data if true
 blindAnalysisStatus = cms.untracked.bool(False)
 
+# QCD corrections
+makeQCDEtaCorrectionStatus = cms.untracked.bool(False)
+
 # Ambient level for filling histograms (options: Vital, Informative, Debug)
 histogramAmbientLevel = cms.untracked.string("Debug")
 
@@ -124,6 +127,7 @@ tauSelectionBase = cms.untracked.PSet(
     rtauCut = cms.untracked.double(0.7), # rtau > value
     nprongs = cms.untracked.uint32(1), # number of prongs (options: 1, 3, or 13 == 1 || 3)
     analyseFakeTauComposition = cms.untracked.bool(False),
+    decayModeFilterValue = cms.untracked.int32(-1), # filter for tau decay mode, set to negative value to disable
 )
 
 # Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)
@@ -336,7 +340,7 @@ MET = cms.untracked.PSet(
     type2Src = cms.untracked.InputTag("patType1p2CorrectedPFMet"),
     caloSrc = cms.untracked.InputTag("metNoHF"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
-    select = cms.untracked.string("type1"), # raw, type1, type2
+    select = cms.untracked.string("type1phicorrected"), # raw, type1, type1phicorrected, type2
     METCut = cms.untracked.double(60.0),
     preMETCut = cms.untracked.double(0.0), # Pre-cut is important for background measurements
 #    METCut = cms.untracked.double(80.0), # MET cut for heavy charged Higgs
@@ -493,11 +497,12 @@ QCDTailKillerVeryTightPlus = QCDTailKiller.clone(
 )
 
 # Define here QCD tail killer scenarios (note that the nominal module will be produced in addition to these)
-QCDTailKillerScenarios = ["QCDTailKillerZeroPlus",
+QCDTailKillerScenarios = [#"QCDTailKillerZeroPlus",
                           "QCDTailKillerLoosePlus",
                           "QCDTailKillerMediumPlus",
                           "QCDTailKillerTightPlus",
-                          "QCDTailKillerVeryTightPlus"]
+                          #"QCDTailKillerVeryTightPlus"
+                          ]
 
 # Define H+ Invariant Mass Reco options
 invMassReco = cms.untracked.PSet(

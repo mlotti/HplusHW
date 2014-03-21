@@ -1155,15 +1155,15 @@ def addEmbeddingSkim_v53_3(datasets):
 def addEmbeddingEmbedding_v53_3(datasets):
     skimVersion = "tauembedding_skim_v53_3"
 
-    def addEmbedding(version, definitions):
+    def addEmbedding(version, defaultPostfix=None, definitions={}):
         for name, taskDef in definitions.iteritems():
             taskDef.setArg("tauDecayMode", 230)
             taskDef.setArg("tauMinVisPt", 30)
-            if taskDef.publishPostfix is None:
-                taskDef.update(TaskDef(publishPostfix="b"))
+            if defaultPostfix is not None and taskDef.publishPostfix is None:
+                taskDef.update(TaskDef(publishPostfix=defaultPostfix))
         addEmbeddingEmbedding_53X(skimVersion, version, datasets, definitions)
 
-    addEmbedding("v53_3", {
+    addEmbedding("v53_3", defaultPostfix="b", definitions={
         # 417822 events, 306 jobs
         # User mean 7174.1, min 1941.1, max 12388.9
         # Mean 66.1 MB, min 19.5 MB, max 115.9 MB
@@ -1279,7 +1279,36 @@ def addEmbeddingEmbedding_v53_3(datasets):
         "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef("/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v3_AODSIM_tauembedding_embedding_v53_3b-1af76047aea9759528c81258e6b8769f/USER"),
         })
 
-
+    addEmbedding("v53_3_seedTest1", definitions={
+            # 306 jobs
+            # User mean 6962.5, min 1891.6, max 12098.1
+            # Mean 66.1 MB, min 19.6 MB, max 115.9 MB
+            "SingleMu_190456-193621_2012A_Jan22": TaskDef("/SingleMu/local-Run2012A_22Jan2013_v1_AOD_190456_193621_tauembedding_embedding_v53_3_seedTest1-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1542 jobs
+            # User mean 7251.5, min 2338.9, max 13760.6
+            # Mean 70.2 MB, min 23.7 MB, max 133.7 MB
+            "SingleMu_193834-196531_2012B_Jan22": TaskDef("/SingleMu/local-Run2012B_22Jan2013_v1_AOD_193834_196531_tauembedding_embedding_v53_3_seedTest1-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1152 jobs
+            # User mean 7266.7, min 3104.6, max 13720.5
+            # Mean 70.6 MB, min 30.1 MB, max 137.3 MB
+            "SingleMu_198022-200381_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_198022_200381_tauembedding_embedding_v53_3_seedTest1-f6fb104f8850e16de1453ab643f4a3e0/USER", dbs="phys03"),
+            # 1518 jobs
+            # User mean 6878.6, min 1775.4, max 13256.9
+            # Mean 67.8 MB, min 19.5 MB, max 132.4 MB
+            "SingleMu_200466-203742_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_200466_203742_tauembedding_embedding_v53_3_seedTest1-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 937 jobs
+            # User mean 7471.3, min 2737.8, max 14216.6
+            # Mean 74.2 MB, min 27.6 MB, max 141.4 MB
+            "SingleMu_203777-205834_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_203777_205834_tauembedding_embedding_v53_3_seedTest1-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 925 jobs
+            # User mean 7142.5, min 702.3, max 12709.4
+            # Mean 72.2 MB, min 9.2 MB, max 129.7 MB
+            "SingleMu_205908-207100_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_205908_207100_tauembedding_embedding_v53_3_seedTest1-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1029 jobs
+            # User mean 7028.0, min 728.9, max 13562.4
+            # Mean 70.6 MB, min 9.6 MB, max 135.6 MB
+            "SingleMu_207214-208686_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_207214_208686_tauembedding_embedding_v53_3_seedTest1-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+        })
 
 def addEmbedding_SKELETON(datasets):
     definitions = {

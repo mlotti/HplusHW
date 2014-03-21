@@ -169,7 +169,7 @@ namespace HPlus {
   size_t SplittedHistogramHandler::getTauEtaBinIndex(double eta) const {
     size_t mySize = fTauEtaBinLowEdges.size();
     for (size_t i = 0; i < mySize; ++i) {
-      if (eta < fTauEtaBinLowEdges[i])
+      if (std::fabs(eta) < fTauEtaBinLowEdges[i])
         return i;
     }
     return mySize;

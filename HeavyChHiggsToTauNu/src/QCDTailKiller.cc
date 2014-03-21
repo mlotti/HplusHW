@@ -24,6 +24,8 @@ namespace HPlus {
     for (int i = 0; i < fMaxEntries; ++i) {
       fPassedBackToBackJet.push_back(false);
       fPassedCollinearJet.push_back(false);
+      fCutActiveBackToBackJet.push_back(false);
+      fCutActiveCollinearJet.push_back(false);
       fDeltaPhiJetMET.push_back(-1.0);
     }
   }
@@ -58,6 +60,18 @@ namespace HPlus {
     if (njet > fMaxEntries)
       throw cms::Exception("LogicError") << "QCDTailKiller::Data::passCollinearCutForJet() Called for jet " << njet << " but only values 0-" << fMaxEntries << " are allowed!" << std::endl;
     return fPassedCollinearJet[njet];
+  }
+
+  const bool QCDTailKiller::Data::backToBackCutActiveForJet(int njet) const {
+    if (njet > fMaxEntries)
+      throw cms::Exception("LogicError") << "QCDTailKiller::Data::passBackToBackCutForJet() Called for jet " << njet << " but only values 0-" << fMaxEntries << " are allowed!" << std::endl;
+    return fCutActiveBackToBackJet[njet];
+  }
+
+  const bool QCDTailKiller::Data::collinearCutActiveForJet(int njet) const {
+    if (njet > fMaxEntries)
+      throw cms::Exception("LogicError") << "QCDTailKiller::Data::passCollinearCutForJet() Called for jet " << njet << " but only values 0-" << fMaxEntries << " are allowed!" << std::endl;
+    return fCutActiveCollinearJet[njet];
   }
 
   QCDTailKiller::CutItem::CutItem(EventCounter& eventCounter, std::string cutName, QCDTailKiller::CutDirection cutDirection) :
@@ -252,6 +266,7 @@ namespace HPlus {
         // failed
         output.fPassedEvent = false;
       }
+      output.fCutActiveBackToBackJet[i] = fBackToBackJetCut[i].isActive();
       ++i;
     }
     i = 0;
@@ -265,6 +280,7 @@ namespace HPlus {
         // failed
         output.fPassedEvent = false;
       }
+      output.fCutActiveCollinearJet[i] = fCollinearJetCut[i].isActive();
       ++i;
     }
     // Return if cut failed

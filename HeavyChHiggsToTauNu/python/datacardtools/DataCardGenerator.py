@@ -14,8 +14,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabConsistencyCheck as consistencyCheck
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
+
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
@@ -70,6 +72,8 @@ class DatasetMgrCreatorManager:
             if self._dsetMgrCreators[i] != None:
                 # Create DatasetManager object and set pointer to the selected era, searchMode, and optimizationMode
                 myDsetMgr = self._dsetMgrCreators[i].createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+                # Check consistency
+                consistencyCheck.checkConsistencyStandalone(self._dsetMgrCreators[i]._baseDirectory,myDsetMgr,name=self.getDatasetMgrLabel(i))
                 # Normalize
                 myDsetMgr.updateNAllEventsToPUWeighted()
                 # Obtain luminosity
@@ -206,7 +210,7 @@ class DatasetMgrCreatorManager:
             if self._luminosities[i] != None:
                 myDiff = abs(self._luminosities[i] / mySignalLuminosity - 1.0)
                 if myDiff > self._toleranceForLuminosityDifference:
-                    raise Exception(ErrorLabel()+"signal and embedding luminosities differ more than 1 %!")
+                    raise Exception(ErrorLabel()+"signal and embedding luminosities differ more than 1 %%! (%s vs. %s)"%(self._luminosities[i], mySignalLuminosity))
                 elif myDiff > 0.0001:
                     print WarningLabel()+"%s and %s luminosities differ slightly (%.2f %%)!"%(self.getDatasetMgrLabel(DatacardDatasetMgrSourceType.SIGNALANALYSIS),self.getDatasetMgrLabel(i),myDiff*100.0)
         print ""
@@ -552,7 +556,8 @@ class DataCardGenerator:
                     # Constants remain same, since they are relative uncertainties
                 # Merge control plots (HistoRootWithUncertainties objects)
                 for i in range(0, len(myEmbColumn._controlPlots)):
-                    myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"])
+                    if myEmbColumn._controlPlots[i] != None:
+                        myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"])
                 # Mark for removal
                 myRemoveList.append(c)
         for c in myRemoveList:
@@ -593,7 +598,8 @@ class DataCardGenerator:
                                     myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k], -1.0)
                     # Merge control plots (HistoRootWithUncertainties objects)
                     for i in range(0, len(myEmbColumn._controlPlots)):
-                        myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"], -1.0)
+                        if myEmbColumn._controlPlots[i] != None:
+                            myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"], -1.0)
         # Rate: Purge relative normalization uncertainties and replace by those for embedding
         #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
         ##myEmbColumn._cachedShapeRootHistogramWithUncertainties.resetNormalizationUncertaintyRelative()
@@ -623,8 +629,9 @@ class DataCardGenerator:
                         #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult, myResult)
         # Set type of control plots
         for i in range(0, len(myEmbColumn._controlPlots)):
-            myEmbColumn._controlPlots[i]["typeIsEWKfake"] = False
-            myEmbColumn._controlPlots[i]["typeIsEWK"] = True
+            if myEmbColumn._controlPlots[i] != None:
+                myEmbColumn._controlPlots[i]["typeIsEWKfake"] = False
+                myEmbColumn._controlPlots[i]["typeIsEWK"] = True
 
         #print "Final:"
         #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()

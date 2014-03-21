@@ -225,7 +225,7 @@ namespace HPlus {
     }
 
     // Boost of the Higgs
-    hChargedHiggsPt->Fill((fMETData->getSelectedMET()->p4(), fTauData->getSelectedTau()->p4()).pt());
+    hChargedHiggsPt->Fill((fMETData->getSelectedMET()->p4()+fTauData->getSelectedTau()->p4()).pt());
 
     // transverse mass
     double myMT = TransverseMass::reconstruct(*(fTauData->getSelectedTau()), *(fMETData->getSelectedMET()) );

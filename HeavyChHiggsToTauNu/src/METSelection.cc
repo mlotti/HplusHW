@@ -24,7 +24,10 @@ namespace HPlus {
    }
 
    const edm::Ptr<reco::MET> METSelection::Data::getPhiCorrectedSelectedMET() const {
-     if (fMETMode == METSelection::kType1)
+     if (fPhiOscillationCorrectedType1MET.size() == 0) {
+       throw cms::Exception("Configuration") << "fPhiOscillationCorrectedType1MET not calculated! " << __FILE__ << ":" << __LINE__ << std::endl;
+     }
+     if (fMETMode == METSelection::kType1PhiCorrected)
        return edm::Ptr<reco::MET>(&fPhiOscillationCorrectedType1MET, 0);
      else if (fMETMode == METSelection::kType2)
        throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
@@ -84,12 +87,14 @@ namespace HPlus {
       fSelect = kRaw;
     else if(select == "type1")
       fSelect = kType1;
+    else if(select == "type1phicorrected")
+      fSelect = kType1PhiCorrected;
     else if(select == "type2") {
       fSelect = kType2;
       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment" << std::endl;
     }
     else
-      throw cms::Exception("Configuration") << "Invalid value for select '" << select << "', valid values are raw, type1, type2" << std::endl;
+      throw cms::Exception("Configuration") << "Invalid value for select '" << select << "', valid values are raw, type1, type1phicorrected, type2" << std::endl;
 
     std::string possiblyMode = iConfig.getUntrackedParameter<std::string>("doTypeICorrectionForPossiblyIsolatedTaus");
     if(possiblyMode == "disabled")
@@ -177,7 +182,10 @@ namespace HPlus {
       output.fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(output.fType1MET, selectedTau, allJets, kType1, possiblyIsolatedTaus));
       output.fType1MET = edm::Ptr<reco::MET>(&output.fType1METCorrected, 0);
       // MET phi correction
+      output.fPhiOscillationCorrectedType1MET.clear();
       output.fPhiOscillationCorrectedType1MET.push_back(getPhiOscillationCorrectedMET(output.fType1MET, iEvent.isRealData(), nVertices));
+    } else {
+      throw cms::Exception("LogicError") << "This should never happen at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
     /*
     if(htype2met.isValid()) {
@@ -198,6 +206,8 @@ namespace HPlus {
       met = output.fRawMET;
     else if(fSelect == kType1)
       met = output.fType1MET;
+    else if(fSelect == kType1PhiCorrected)
+      met = output.getPhiCorrectedSelectedMET();
     else if(fSelect == kType2)
       //met = htype2met->ptrAt(0);
       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
@@ -236,7 +246,7 @@ namespace HPlus {
     return output;
   }
 
-  METSelection::Data METSelection::silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  METSelection::Data METSelection::silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices) {
     Data output;
     output.fMETMode = fSelect;
 
@@ -264,6 +274,9 @@ namespace HPlus {
       output.fType1METCorrected.clear();
       output.fType1MET = htype1met->ptrAt(0);
       output.fType1METCorrected.push_back(*output.fType1MET);
+      // MET phi correction
+      output.fPhiOscillationCorrectedType1MET.clear();
+      output.fPhiOscillationCorrectedType1MET.push_back(getPhiOscillationCorrectedMET(output.fType1MET, iEvent.isRealData(), nVertices));
     }
     if(hcalomet.isValid())
       output.fCaloMET = hcalomet->ptrAt(0);
@@ -276,6 +289,8 @@ namespace HPlus {
       met = output.fRawMET;
     else if(fSelect == kType1)
       met = output.fType1MET;
+    else if(fSelect == kType1PhiCorrected)
+      met = output.getPhiCorrectedSelectedMET();
     if(met->et() > fMetCut) {
       output.fPassedEvent = true;
     } else {
@@ -401,8 +416,9 @@ namespace HPlus {
     // sumet is not set for pat::MET in the corrections anyway
     //double correctedSumEt = met->sumEt() + sumet;
 
-    reco::MET correctedMet = *met;
-    correctedMet.setP4(correctedP4);
+    reco::MET correctedMet(correctedP4, met->vertex());
+    //correctedMet.setP4(correctedP4);
+    //std::cout << "corrected type I MET: " << correctedMet.et() << std::endl;
     return correctedMet;
   }
 
@@ -424,8 +440,9 @@ namespace HPlus {
       myCorrectionY = met->py() - (static_cast<double>(nVertices)*fPhiCorrectionSlopeYForMC + fPhiCorrectionOffsetYForMC);
     }
     reco::Candidate::LorentzVector myCorrectedP4(myCorrectionX, myCorrectionY, 0., std::sqrt(myCorrectionX*myCorrectionX + myCorrectionY*myCorrectionY));
-    reco::MET correctedMet = *met;
-    correctedMet.setP4(myCorrectedP4);
+    reco::MET correctedMet(myCorrectedP4, met->vertex());
+    //std::cout << "phi corrected MET: " << correctedMet.et() << std::endl;
+    //correctedMet.setP4(myCorrectedP4);
     return correctedMet;
   }
 

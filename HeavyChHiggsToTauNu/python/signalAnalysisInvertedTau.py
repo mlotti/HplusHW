@@ -9,6 +9,7 @@ def createEDFilter(param):
     return cms.EDFilter("HPlusSignalAnalysisInvertedTauFilter",
         configInfo = param.configInfo.clone(),
         blindAnalysisStatus = param.blindAnalysisStatus,
+        makeQCDEtaCorrectionStatus = param.makeQCDEtaCorrectionStatus,
 	histogramAmbientLevel = param.histogramAmbientLevel,
         trigger = param.trigger.clone(),
         tauTriggerEfficiencyScaleFactor = param.tauTriggerEfficiencyScaleFactor.clone(),

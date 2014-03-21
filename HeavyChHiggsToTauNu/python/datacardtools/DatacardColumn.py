@@ -324,6 +324,15 @@ class DatacardColumn():
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
                                myRateHistograms)
+        if self._opts.verbose:
+            print "  - Rate: integral = ", myRateHistograms[0].Integral()
+            if (self.typeIsEWK()) or self.typeIsEWKfake():
+                if isinstance(dsetMgr.getDataset(self.getDatasetMgrColumn()), dataset.DatasetMerged):
+                    for dset in dsetMgr.getDataset(self.getDatasetMgrColumn()).datasets:
+                        print "  - normalization coefficient for %s: %g"%(dset.getName(),dset.getNormFactor())
+                print "  - normalization coefficient = ", dsetMgr.getDataset(self.getDatasetMgrColumn()).getNormFactor()
+        if abs(myRateHistograms[0].Integral() - myRateHistograms[0].Integral(0,myRateHistograms[0].GetNbinsX()+2)) > 0.00001:
+            raise Exception("Error: under/overflow bins contain data!")
         if self.typeIsEmptyColumn() or dsetMgr == None:
             return
 
@@ -408,7 +417,7 @@ class DatacardColumn():
         # Print list of uncertainties
         if self._opts.verbose and dsetMgr != None and not self.typeIsEmptyColumn():
             print "  - Has shape variation syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
-            print "  - Has shape squared syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties._shapeUncertaintyAbsoluteNames)))
+
         # Obtain results for control plots
         if config.OptionDoControlPlots:
             for c in controlPlotExtractors:
@@ -416,69 +425,73 @@ class DatacardColumn():
                     if self._opts.verbose:
                         print "  - Extracting data-driven control plot %s"%c._histoTitle
                     myCtrlDsetRootHisto = c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
-                    # Obtain overall purity for QCD
-                    myAverageCtrlPlotPurity = None
-                    hCtrlPlotPurity = None
-                    if self.typeIsQCD():
-                        myDsetHisto = c.extractQCDPurityHistogram(self, dsetMgr)
-                        hCtrlPlotPurity = aux.Clone(myDsetHisto.getHistogram())
-                        myAverageCtrlPlotPurity = c.extractQCDPurityAsValue(myRateHistograms[0], hCtrlPlotPurity)
-                    # Now normalize
-                    if myDatasetRootHisto.isMC():
-                        myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
-                    h = myCtrlDsetRootHisto.getHistogramWithUncertainties()
-                    # Remove any variations not active for the column
-                    h.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
-                    # Rebin and move under/overflow bins to visible bins
-                    myArray = array("d",getBinningForPlot(c._histoName))
-                    h.Rebin(len(myArray)-1,"",myArray)
-                    h.makeFlowBinsVisible()
-                    # Apply any further scaling (only necessary for the unceratainties from variation)
-                    for nid in self._nuisanceIds:
-                        for e in extractors:
-                            if e.getId() == nid:
-                                if e.getDistribution() == "shapeQ" and abs(e.getScaleFactor() - 1.0) > 0.0:
-                                    h.ScaleVariationUncertainty(e._systVariation, e.getScaleFactor())
-                    # Add to RootHistogramWithUncertainties non-shape uncertainties
-                    for n in self._nuisanceResults:
-                        if not n.resultIsStatUncertainty() and len(n.getHistograms()) == 0: # systematic uncert., but not shapeQ
-                            if self._opts.verbose:
-                                print "    - Adding norm. uncertainty: %s"%n.getMasterId()
-                            myResult = n.getResult()
-                            if self.typeIsQCD():
-                                # Scale QCD nuisance by impurity (and unscale by shape impurity already applied to nuisance)
-                                for e in extractors:
-                                    if e.getId() == n.getId():
-                                        if e.isQCDNuisance():
-                                            myResult = n.getResult().Clone()
-                                            myResult.scale((1.0-myAverageCtrlPlotPurity) / (1.0 - myAveragePurity))
-                                            #print n._exId, n.getResult().getUncertaintyUp(), myAverageCtrlPlotPurity, myResult.getUncertaintyUp()
-                            if isinstance(myResult, ScalarUncertaintyItem):
+                    if myCtrlDsetRootHisto == None:
+                        print WarningLabel()+"Could not find control plot '%s', skipping..."%c._histoTitle
+                        self._controlPlots.append(None)
+                    else:
+                        # Obtain overall purity for QCD
+                        myAverageCtrlPlotPurity = None
+                        hCtrlPlotPurity = None
+                        if self.typeIsQCD():
+                            myDsetHisto = c.extractQCDPurityHistogram(self, dsetMgr)
+                            hCtrlPlotPurity = aux.Clone(myDsetHisto.getHistogram())
+                            myAverageCtrlPlotPurity = c.extractQCDPurityAsValue(myRateHistograms[0], hCtrlPlotPurity)
+                        # Now normalize
+                        if myDatasetRootHisto.isMC():
+                            myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
+                        h = myCtrlDsetRootHisto.getHistogramWithUncertainties()
+                        # Remove any variations not active for the column
+                        h.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
+                        # Rebin and move under/overflow bins to visible bins
+                        myArray = array("d",getBinningForPlot(c._histoName))
+                        h.Rebin(len(myArray)-1,"",myArray)
+                        h.makeFlowBinsVisible()
+                        # Apply any further scaling (only necessary for the unceratainties from variation)
+                        for nid in self._nuisanceIds:
+                            for e in extractors:
+                                if e.getId() == nid:
+                                    if e.getDistribution() == "shapeQ" and abs(e.getScaleFactor() - 1.0) > 0.0:
+                                        h.ScaleVariationUncertainty(e._systVariation, e.getScaleFactor())
+                        # Add to RootHistogramWithUncertainties non-shape uncertainties
+                        for n in self._nuisanceResults:
+                            if not n.resultIsStatUncertainty() and len(n.getHistograms()) == 0: # systematic uncert., but not shapeQ
+                                if self._opts.verbose:
+                                    print "    - Adding norm. uncertainty: %s"%n.getMasterId()
+                                myResult = n.getResult()
+                                if self.typeIsQCD():
+                                    # Scale QCD nuisance by impurity (and unscale by shape impurity already applied to nuisance)
+                                    for e in extractors:
+                                        if e.getId() == n.getId():
+                                            if e.isQCDNuisance():
+                                                myResult = n.getResult().Clone()
+                                                myResult.scale((1.0-myAverageCtrlPlotPurity) / (1.0 - myAveragePurity))
+                                                #print n._exId, n.getResult().getUncertaintyUp(), myAverageCtrlPlotPurity, myResult.getUncertaintyUp()
+                                if isinstance(myResult, ScalarUncertaintyItem):
+                                    h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                                elif isinstance(myResult, list):
+                                    h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult[1], myResult[0])
+                                else:
+                                    h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult, myResult)
+                            elif not n.resultIsStatUncertainty() and len(n.getHistograms()) > 0 and isinstance(n.getResult(), ScalarUncertaintyItem): # constantToShape
+                                if self._opts.verbose:
+                                    print "    - Adding norm. uncertainty: %s"%n.getMasterId()
                                 h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
-                            elif isinstance(myResult, list):
-                                h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult[1], myResult[0])
-                            else:
-                                h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult, myResult)
-                        elif not n.resultIsStatUncertainty() and len(n.getHistograms()) > 0 and isinstance(n.getResult(), ScalarUncertaintyItem): # constantToShape
-                            if self._opts.verbose:
-                                print "    - Adding norm. uncertainty: %s"%n.getMasterId()
-                            h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
-                    # Scale if asked
-                    if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
-                        h.Scale(self._additionalNormalisationFactor)
-                    # Store RootHistogramWithUncertainties
-                    myDictionary = {}
-                    myDictionary["shape"] = h
-                    myDictionary["purity"] = hCtrlPlotPurity
-                    myDictionary["averagePurity"] = myAverageCtrlPlotPurity
-                    for item in dir(self):
-                        if item.startswith("typeIs"):
-                            try:
-                                myStatus = getattr(self, item)()
-                                myDictionary[item] = myStatus
-                            except TypeError:
-                                pass
-                    self._controlPlots.append(myDictionary)
+                        # Scale if asked
+                        if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
+                            h.Scale(self._additionalNormalisationFactor)
+                        # Store RootHistogramWithUncertainties
+                        myDictionary = {}
+                        myDictionary["shape"] = h
+                        myDictionary["purity"] = hCtrlPlotPurity
+                        myDictionary["averagePurity"] = myAverageCtrlPlotPurity
+                        for item in dir(self):
+                            if item.startswith("typeIs"):
+                                try:
+                                    myStatus = getattr(self, item)()
+                                    myDictionary[item] = myStatus
+                                except TypeError:
+                                    pass
+                        self._controlPlots.append(myDictionary)
 
     ## Returns rate for column
     def getRateResult(self):
