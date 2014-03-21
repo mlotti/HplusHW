@@ -12,7 +12,7 @@ blindAnalysisStatus = cms.untracked.bool(False)
 
 # QCD corrections
 makeQCDEtaCorrectionStatus = cms.untracked.bool(False)
-lowBoundForQCDInvertedIsolation = cms.string("") # Set to "" to disable, experimental: "byVLooseCombinedIsolationDeltaBetaCorr"
+lowBoundForQCDInvertedIsolation = cms.untracked.string("") # Set to "" to disable, experimental: "byVLooseCombinedIsolationDeltaBetaCorr"
 
 # Ambient level for filling histograms (options: Vital, Informative, Debug)
 histogramAmbientLevel = cms.untracked.string("Debug")
