@@ -12,11 +12,12 @@ def getNumberOfJobsFromMultiCrabCfg(multicrabDir):
     myDict = {}
     myDsetName = None
     for line in myLines:
-        if "[" in line and "]" in line:
-            myDsetName = line.replace("[","").replace("]","").replace("#","").replace("\n","")
-        if "CMSSW.number_of_jobs" in line:
-            myNumber = line.replace("CMSSW.number_of_jobs","").replace(" ","").replace("=","").replace("#","").replace("\n","")
-            myDict[myDsetName] = int(myNumber)
+        if not line.startswith("#"):
+            if "[" in line and "]" in line:
+                myDsetName = line.replace("[","").replace("]","").replace("#","").replace("\n","")
+            if "CMSSW.number_of_jobs" in line:
+                myNumber = line.replace("CMSSW.number_of_jobs","").replace(" ","").replace("=","").replace("#","").replace("\n","")
+                myDict[myDsetName] = int(myNumber)
     return myDict
 
 def getNumberOfJobsFromMergedHistogramsFromDsetMgr(dsetMgr,myMergedDict):
