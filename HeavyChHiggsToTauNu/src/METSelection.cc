@@ -15,7 +15,7 @@ namespace HPlus {
   METSelection::Data::~Data() {}
 
    const edm::Ptr<reco::MET> METSelection::Data::getPhiUncorrectedSelectedMET() const {
-     if (fMETMode == METSelection::kType1)
+     if (fMETMode == METSelection::kType1 || fMETMode == METSelection::kType1PhiCorrected)
        return getType1MET();
      else if (fMETMode == METSelection::kType2)
        throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
@@ -27,7 +27,7 @@ namespace HPlus {
      if (fPhiOscillationCorrectedType1MET.size() == 0) {
        throw cms::Exception("Configuration") << "fPhiOscillationCorrectedType1MET not calculated! " << __FILE__ << ":" << __LINE__ << std::endl;
      }
-     if (fMETMode == METSelection::kType1PhiCorrected)
+     if (fMETMode == METSelection::kType1 || fMETMode == METSelection::kType1PhiCorrected)
        return edm::Ptr<reco::MET>(&fPhiOscillationCorrectedType1MET, 0);
      else if (fMETMode == METSelection::kType2)
        throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
