@@ -45,11 +45,11 @@ def checkConsistency(myDict, myMergedDict, name=None, printStatus=True):
             if m == k:
                 myStatus = True
                 if myMergedDict[m] == myDict[k]:
-                    myTable.append((k, "OK"))
+                    myTable.append([k, "OK"])
                 elif myMergedDict[m] <= myDict[k]:
-                    myTable.append((k, "merged root file contains %d jobs instead of requested %d jobs -> this is recoved automatically for MC (although stat. resolution is poorer)"%(myMergedDict[m],myDict[k])))
+                    myTable.append([k, "merged root file contains %d jobs instead of requested %d jobs -> this is recoved automatically for MC (although stat. resolution is poorer)"%(myMergedDict[m],myDict[k])])
                 else:
-                    myTable.append((k, "merged root file contains %d jobs instead of requested %d jobs -> ERROR: you need to rerun the multicrab or hplusMultiCrabMerge.py for this dataset!"%(myMergedDict[m],myDict[k])))
+                    myTable.append([k, "merged root file contains %d jobs instead of requested %d jobs -> ERROR: you need to rerun the multicrab or hplusMultiCrabMerge.py for this dataset!"%(myMergedDict[m],myDict[k])])
                     myGoodStatus = False
     if printStatus or not myGoodStatus:
         if name == None:
@@ -58,8 +58,7 @@ def checkConsistency(myDict, myMergedDict, name=None, printStatus=True):
             print "\nMulticrab consistency check (%s):"%name
         col_width = [max(len(x) for x in col) for col in zip(*myTable)]
         for line in myTable:
-            print "| " + " | ".join("{:{}}".format(x, col_width[i])
-                                    for i, x in enumerate(line)) + " |"
+            print "| %s | %s |"%(line[0].ljust(col_width[0]), line[1].ljust(col_width[1]))
         print
     if not myGoodStatus:
         raise Exception("Error: did not pass consistency check, see table above!")
