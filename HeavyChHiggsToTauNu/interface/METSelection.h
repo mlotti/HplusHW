@@ -40,8 +40,7 @@ namespace HPlus {
 
       const bool passedEvent() const { return fPassedEvent; }
       const bool passedPreMetCut() const { return fPassedPreMetCut; }
-      //const edm::Ptr<reco::MET> getSelectedMET() const { return fSelectedMET; }
-      const edm::Ptr<reco::MET> getSelectedMET() const { return fSelectedMET; }
+      const edm::Ptr<reco::MET> getSelectedMET() const;
       const edm::Ptr<reco::MET> getPhiUncorrectedSelectedMET() const;
       const edm::Ptr<reco::MET> getPhiCorrectedSelectedMET() const;
       const edm::Ptr<reco::MET> getRawMET() const { return fRawMET; }
@@ -57,7 +56,6 @@ namespace HPlus {
       bool fPassedPreMetCut;
       Select fMETMode;
       // MET objects
-      edm::Ptr<reco::MET> fSelectedMET;
       edm::Ptr<reco::MET> fRawMET;
       edm::Ptr<reco::MET> fType1MET;
       edm::Ptr<reco::MET> fType2MET;
