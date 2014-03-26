@@ -3,7 +3,7 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
-
+namespace HPlus {
    std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate& p){ 
 	std::vector<const reco::GenParticle*> mothers;
 	for (size_t im=0; im < p.numberOfMothers(); ++im){
@@ -120,3 +120,4 @@
 	}
 	std::cout << std::endl;
       }  
+}
