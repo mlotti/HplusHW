@@ -183,7 +183,7 @@ namespace HPlus {
     hNjets->Fill(fJetData->getHadronicJetCount());
     hNjetsAllIdentified->Fill(fJetData->getAllIdentifiedJets().size());
     if (fJetData->getAllJets().size() == 0) return; // Safety for MET selection data to exist
-    if (fMETData.getSelectedMET().isNull()) return;
+    if (fMETData->getSelectedMET().isNull()) return;
     hMETCalo->Fill(fMETData->getCaloMET()->et());
     hMETRaw->Fill(fMETData->getRawMET()->et());
     hMET->Fill(fMETData->getSelectedMET()->et());
