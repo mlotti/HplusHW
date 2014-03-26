@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
@@ -19,19 +20,6 @@
 #include "TVector3.h"
 #include "TMath.h"
 #include "TString.h"
-
-std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
-std::vector<const reco::GenParticle*> getMothers(const reco::Candidate& p);
-bool hasImmediateMother(const reco::Candidate& p, int id);
-bool hasMother(const reco::Candidate& p, int id);
-void printImmediateMothers(const reco::Candidate& p);
-void printMothers(const reco::Candidate& p);
-std::vector<const reco::GenParticle*> getImmediateDaughters(const reco::Candidate& p);
-std::vector<const reco::GenParticle*> getDaughters(const reco::Candidate& p);
-bool hasImmediateDaughter(const reco::Candidate& p, int id);
-bool hasDaughter(const reco::Candidate& p, int id);
-void printImmediateDaughters(const reco::Candidate& p);
-void printDaughters(const reco::Candidate& p);
 
 namespace {
   // (Containing these variables in an anonymous namespace prevents them from being accessed from code in another file)
