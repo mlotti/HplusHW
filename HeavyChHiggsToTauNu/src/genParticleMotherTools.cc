@@ -83,10 +83,17 @@
       std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p){ 
 	std::vector<const reco::GenParticle*> daughters;
 	for (size_t im=0; im < p.numberOfDaughters(); ++im){
-	  const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.daughter(im));
+          const reco::Candidate *d = p.daughter(im);
+          // if the parentage information is screwed up for some
+          // reason such that p is its own daughter, skip the daughter
+          // to prevent infinite loop
+          if(d == &p)
+            continue;
+
+	  const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(d);
 	  if (dparticle) {
 	    daughters.push_back(dparticle);
-	    std::vector<const reco::GenParticle*> ddaughters = getDaughters( * (dynamic_cast<const reco::Candidate*> (dparticle)) );
+	    std::vector<const reco::GenParticle*> ddaughters = getDaughters( *dparticle );
 	    daughters.insert(daughters.end(), ddaughters.begin(), ddaughters.end()); 
 	  }
 	}
