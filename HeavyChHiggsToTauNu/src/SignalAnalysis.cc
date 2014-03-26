@@ -3,6 +3,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ConfigInfo.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
 
 // #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
 
@@ -11,12 +12,6 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-
-bool  hasImmediateMother(const reco::Candidate& p, int id);
-bool  hasImmediateDaughter(const reco::Candidate& p, int id);
-void  printImmediateMothers(const reco::Candidate& p);
-void  printImmediateDaughters(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
 
 namespace {
   template <typename T>
