@@ -1,19 +1,7 @@
-#ifndef GENPARTICLEMOTHERTOOLS_CC
-#define GENPARTICLEMOTHERTOOLS_CC
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
-
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "Math/GenVector/VectorUtil.h"
-#include "TH1F.h"
-#include "TLorentzVector.h"
-#include "TVector3.h"
-#include <limits>
-
 
 
    std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate& p){ 
@@ -132,4 +120,3 @@
 	}
 	std::cout << std::endl;
       }  
-#endif
