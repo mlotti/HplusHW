@@ -385,14 +385,16 @@ namespace HPlus {
     }
     // A tau exists beyond this point, now obtain MET with residual type I MET
     fMETData = metSelection.silentAnalyze(iEvent, iSetup, vertexData.getNumberOfAllVertices(), fTauData.getSelectedTau(), fJetData.getAllJets());
-    // Obtain improved delta phi cut data object
-    fQCDTailKillerData = qcdTailKiller.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fJetData.getSelectedJetsIncludingTau(), fMETData.getSelectedMET());
-    // Obtain top selection object
-    BjetSelection::Data bjetSelectionData = bjetSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets(), fTauData.getSelectedTau(), fMETData.getSelectedMET());
-    fTopData = topSelectionManager.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
-    // Do full higgs mass only if tau and b jet was found
-    if (fBJetData.passedEvent()) {
-      fFullHiggsMassData = fullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fBJetData, fMETData);
+    if (!fMETData.getSelectedMET().isNull() && fJetData.getAllJets().size()) { // Calculate objects only if MET is valid
+      // Obtain improved delta phi cut data object
+      fQCDTailKillerData = qcdTailKiller.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fJetData.getSelectedJetsIncludingTau(), fMETData.getSelectedMET());
+      // Obtain top selection object
+      BjetSelection::Data bjetSelectionData = bjetSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets(), fTauData.getSelectedTau(), fMETData.getSelectedMET());
+      fTopData = topSelectionManager.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
+      // Do full higgs mass only if tau and b jet was found
+      if (fBJetData.passedEvent()) {
+        fFullHiggsMassData = fullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fBJetData, fMETData);
+      }
     }
 //FIXME : add met SF also to every set plots
     // Pass pointer to cached data objects to CommonPlotsFilledAtEveryStep

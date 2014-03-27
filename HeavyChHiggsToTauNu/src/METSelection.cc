@@ -14,21 +14,42 @@ namespace HPlus {
     fPassedEvent(false) {}
   METSelection::Data::~Data() {}
 
+  const edm::Ptr<reco::MET> METSelection::Data::getSelectedMET() const {
+    if (fMETMode == METSelection::kRaw)
+      return fRawMET;
+    if (fMETMode == METSelection::kType1)
+      return getPhiUncorrectedSelectedMET();
+    if (fMETMode == METSelection::kType1PhiCorrected)
+      return getPhiCorrectedSelectedMET();
+    if (fMETMode == METSelection::kType2)
+      throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
+    else
+      throw cms::Exception("Logic") << "This should not happen" << __FILE__ << ":" << __LINE__ << std::endl;
+  }
+
    const edm::Ptr<reco::MET> METSelection::Data::getPhiUncorrectedSelectedMET() const {
-     if (fMETMode == METSelection::kType1)
+     if (fMETMode == METSelection::kRaw)
+       return fRawMET;
+     if (fMETMode == METSelection::kType1 || fMETMode == METSelection::kType1PhiCorrected)
        return getType1MET();
      else if (fMETMode == METSelection::kType2)
        throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
      // Fallback
-     return fSelectedMET;
+     edm::Ptr<reco::MET> myNullPointer;
+     return myNullPointer;
    }
 
    const edm::Ptr<reco::MET> METSelection::Data::getPhiCorrectedSelectedMET() const {
      if (fPhiOscillationCorrectedType1MET.size() == 0) {
        throw cms::Exception("Configuration") << "fPhiOscillationCorrectedType1MET not calculated! " << __FILE__ << ":" << __LINE__ << std::endl;
      }
-     if (fMETMode == METSelection::kType1PhiCorrected)
-       return edm::Ptr<reco::MET>(&fPhiOscillationCorrectedType1MET, 0);
+     if (fMETMode == METSelection::kType1 || fMETMode == METSelection::kType1PhiCorrected)
+       if (fPhiOscillationCorrectedType1MET.size() > 0) {
+         return edm::Ptr<reco::MET>(&fPhiOscillationCorrectedType1MET, 0);
+       } else {
+         edm::Ptr<reco::MET> myNullPointer;
+         return myNullPointer;
+       }
      else if (fMETMode == METSelection::kType2)
        throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
      else
@@ -205,7 +226,7 @@ namespace HPlus {
     if(fSelect == kRaw)
       met = output.fRawMET;
     else if(fSelect == kType1)
-      met = output.fType1MET;
+      met = output.getType1MET();
     else if(fSelect == kType1PhiCorrected)
       met = output.getPhiCorrectedSelectedMET();
     else if(fSelect == kType2)
@@ -213,7 +234,6 @@ namespace HPlus {
       throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
     else
       throw cms::Exception("LogicError") << "This should never happen at " << __FILE__ << ":" << __LINE__ << std::endl;
-    output.fSelectedMET = met;
     if (met.isNull()) {
       output.fPassedEvent = false;
       return output;
@@ -288,7 +308,7 @@ namespace HPlus {
     if(fSelect == kRaw)
       met = output.fRawMET;
     else if(fSelect == kType1)
-      met = output.fType1MET;
+      met = output.getType1MET();
     else if(fSelect == kType1PhiCorrected)
       met = output.getPhiCorrectedSelectedMET();
     if(met->et() > fMetCut) {
@@ -296,7 +316,6 @@ namespace HPlus {
     } else {
       output.fPassedEvent = false;
     }
-    output.fSelectedMET = met;
     //std::cout << "type1MET valid = " << htype1met.isValid() << std::endl;
     //std::cout << "type1MET = " << htype1met->ptrAt(0)->et() << std::endl;
 
