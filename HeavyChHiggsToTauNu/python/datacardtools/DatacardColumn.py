@@ -386,7 +386,6 @@ class DatacardColumn():
                             if e.getDistribution() == "shapeQ":
                                 for i in range(0,len(myHistograms)):
                                     myHistograms[i].Add(self._rateResult.getHistograms()[0])
-
                     else:
                         # For QCD, scale the QCD type constants by the purity
                         if self.typeIsQCD() and e.isQCDNuisance():

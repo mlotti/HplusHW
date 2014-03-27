@@ -589,7 +589,10 @@ class DataCardGenerator:
                                     # up histogram
                                     myEmbColumn._nuisanceResults[myMatchIndex]._histograms[0].SetBinContent(k, myRate + myRateUncert)
                                     # down histogram
-                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[1].SetBinContent(k, myRate - myRateUncert)
+                                    if myRate - myRateUncert < self._config.MinimumStatUncertainty:
+                                        myEmbColumn._nuisanceResults[myMatchIndex]._histograms[1].SetBinContent(k, self._config.MinimumStatUncertainty)
+                                    else:
+                                        myEmbColumn._nuisanceResults[myMatchIndex]._histograms[1].SetBinContent(k, myRate - myRateUncert)
                             else:
                                 # linear addition, because these are variation histograms
                                 for k in range(0,len(myEmbColumn.getNuisanceResults()[myMatchIndex]._histograms)):
@@ -735,6 +738,8 @@ class DataCardGenerator:
                                                        description = n.label,
                                                        mode = ExtractorMode.SHAPENUISANCE,
                                                        opts = self._opts,
+                                                       minimumStatUncert = self._config.MinimumStatUncertainty,
+                                                       minimumRate = self._config.ToleranceForMinimumRate, # Only for suppressing warn prints
                                                        scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "ShapeVariation":
                 self._extractors.append(ShapeVariationExtractor(exid = n.id,

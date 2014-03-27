@@ -198,7 +198,7 @@ class TableProducer:
         for i in myIdsForRemoval:
             for c in self._datasetGroups:
                 if c.getLandsProcess() == i:
-                    print WarningLabel()+"Rate for column '%s' (%f) is smaller than %f. Removing column from datacard."%(c.getLabel(),c._rateResult.getResult(),self._config.ToleranceForMinimumRate)
+                    print WarningLabel()+"Rate for column '%s' (%f) is smaller than %.2f. Removing column from datacard. The threshold is set by the ToleranceForMinimumRate flag."%(c.getLabel(),c._rateResult.getResult(),self._config.ToleranceForMinimumRate)
                     self._datasetGroups.remove(c)
         # Update process numbers
         for c in self._datasetGroups:

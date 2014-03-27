@@ -2,8 +2,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
 DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-01-29-noMetSF-withL1ETMfix"#2014-01-29-noMetSF-withL1ETMfix"
-Path = "/home/wendland/data/v533/2014_02_14_v3_etacorrected"
-#Path = "/home/wendland/data/v533/2014_03_12"
+#Path = "/home/wendland/data/v533/2014_02_14_v3_etacorrected"
+Path = "/home/wendland/data/v533/2014-03-20_seed1"
+#Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
 #Path = "/home/wendland/data/v533/2014_03_12_metphicorrected"
 #Path = "/home/wendland/data/v533/2014_02_14_v3_decaymode1"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
@@ -30,14 +31,14 @@ OptionMassShape = "TransverseMass"
 #OptionMassShape = "FullMass"
 #OptionMassShape = "TransverseAndFullMass2D" #FIXME not yet supported!!!
 
-OptionReplaceEmbeddingByMC = True
+OptionReplaceEmbeddingByMC = not True
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionTreatTriggerUncertaintiesAsAsymmetric = True # Set to true, if you produced multicrabs with doAsymmetricTriggerUncertainties=True
 OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produced multicrabs with doTauIDandMisIDSystematicsAsShapes=True
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = True
+OptionDoControlPlots = not True
 OptionCtrlPlotsAtMt = True
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
@@ -55,7 +56,10 @@ OptionSqrtS = 8 # sqrt(s)
 # Tolerance for throwing error on luminosity difference (0.01 = 1 percent agreement is required)
 ToleranceForLuminosityDifference = 0.05
 # Tolerance for almost zero rate (columns with smaller rate are suppressed)
-ToleranceForMinimumRate = 0.5
+ToleranceForMinimumRate = 1.5
+# Minimum stat. uncertainty to set to bins with zero events
+MinimumStatUncertainty = 0.5
+
 
 # Shape histogram definitions
 SignalShapeHisto = None
@@ -64,13 +68,16 @@ ShapeHistogramsDimensions = None
 
 if OptionMassShape == "TransverseMass":
     SignalShapeHisto = "shapeTransverseMass"
-    FakeShapeHisto = "shapeEWKFakeTausTransverseMass"
+    FakeShapeTTbarHisto = "shapeEWKFakeTausTransverseMass"
+    FakeShapeOtherHisto = "shapeProbabilisticBtagEWKFakeTausTransverseMass"
 elif OptionMassShape == "FullMass":
     SignalShapeHisto = "shapeInvariantMass"
-    FakeShapeHisto = "shapeEWKFakeTausInvariantMass"
+    FakeShapeOtherHisto = "shapeEWKFakeTausInvariantMass"
+    FakeShapeTTbarHisto = FakeShapeOtherHisto
 elif OptionMassShape == "TransverseAndFullMass2D": # FIXME: preparing to add support, not yet working
     SignalShapeHisto = "shapetransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
-    FakeShapeHisto = "shapeEWKFakeTausTransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
+    FakeShapeOtherHisto = "shapeEWKFakeTausTransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
+    FakeShapeTTbarHisto = FakeShapeOtherHisto
 ShapeHistogramsDimensions = systematics.getBinningForPlot(SignalShapeHisto)
 
 DataCardName += "_"+OptionMassShape
@@ -216,7 +223,7 @@ if not OptionReplaceEmbeddingByMC:
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
         landsProcess = 1,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeTTbarHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
@@ -225,38 +232,38 @@ if not OptionReplaceEmbeddingByMC:
     DataGroups.append(DataGroup(
         label        = "W_EWK_faketau",
         landsProcess = 5,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
         landsProcess = 6,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "DY_EWK_faketau",
         landsProcess = 7,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
         landsProcess = 8,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin","probBtag"],
     ))
 elif OptionRealisticEmbeddingWithMC:
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
@@ -323,7 +330,7 @@ elif OptionRealisticEmbeddingWithMC:
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
         landsProcess = 1,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeTTbarHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
@@ -332,38 +339,38 @@ elif OptionRealisticEmbeddingWithMC:
     DataGroups.append(DataGroup(
         label        = "W_EWK_faketau",
         landsProcess = 5,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
         landsProcess = 6,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "DY_EWK_faketau",
         landsProcess = 7,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
         landsProcess = 8,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin","probBtag"],
     ))
 else:
     # Replace embedding and fakes with MC
@@ -925,8 +932,7 @@ Nuisances.append(Nuisance(
     id            = "stat_binByBin",
     label         = "Bin-by-bin stat. uncertainty on the shape",
     distr         = "shapeStat",
-    function      = "Shape",
-    histograms    = SignalShapeHisto,
+    function      = "Shape"
 ))
 
 #Nuisances.append(Nuisance(
@@ -938,11 +944,19 @@ Nuisances.append(Nuisance(
 #))
 
 Nuisances.append(Nuisance(
+    id            = "probBtag",
+    label         = "probabilistic btag", 
+    distr         = "lnN",
+    function      = "Constant", 
+    value         = 0.5
+))
+
+Nuisances.append(Nuisance(
     id            = "QCDinvTemplateFit",
     label         = "QCDInv: fit", 
     distr         = "lnN",
     function      = "Constant", 
-    value         = 0.0043
+    value         = 0.03,
 ))
 
 MergeNuisances = []
@@ -1590,7 +1604,7 @@ if OptionCtrlPlotsAtMt:
                              "optsLog": {"ymin": 0.9} },
         blindedRange     = [], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
-        flowPlotCaption  = "#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
     ))
 
     ControlPlots.append(ControlPlotInput(
