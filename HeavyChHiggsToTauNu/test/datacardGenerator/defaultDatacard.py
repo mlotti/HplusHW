@@ -42,7 +42,7 @@ OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produce
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = not True
+OptionDoControlPlots = True
 OptionDoControlPlots = True
 OptionCtrlPlotsAtMt = True
 OptionDisplayEventYieldSummary = True
