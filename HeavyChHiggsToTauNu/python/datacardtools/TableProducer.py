@@ -323,33 +323,41 @@ class TableProducer:
         # Only solution is to do a virtual merge affecting only this method
         myVirtualMergeInformation = {}
         myVirtuallyInactivatedIds = []
-        for c in self._datasetGroups:
-            if c.isActiveForMass(mass,self._config):
-                myFoundSingles = []
-                for n in self._extractors:
-                    if c.hasNuisanceByMasterId(n.getId()) and n.getId() in mySingleList and not n.isShapeNuisance():
-                        myFoundSingles.append(n.getId())
-                if len(myFoundSingles) > 1:
-                    # Do virtual merge
-                    myDescription = ""
-                    myValue = ScalarUncertaintyItem("sum",0.0)
+        if self._config.OptionCombineSingleColumnUncertainties:
+            for c in self._datasetGroups:
+                if c.isActiveForMass(mass,self._config):
+                    myFoundSingles = []
                     for n in self._extractors:
-                        if n.getId() in myFoundSingles:
-                            if myDescription == "":
-                                myDescription = n.getDescription()
-                                myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
-                            else:
-                                myDescription += " + "+n.getDescription()
-                                myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
-                                myVetoList.append(n.getId())
-                    myVirtualMergeInformation[myFoundSingles[0]] = myValue
-                    myVirtualMergeInformation["%sdescription"%myFoundSingles[0]] = myDescription
-                    print WarningLabel()+"Combined nuisances '%s' for column %s!"%(myDescription, c.getLabel())
+                        if c.hasNuisanceByMasterId(n.getId()) and n.getId() in mySingleList and not n.isShapeNuisance():
+                            myFoundSingles.append(n.getId())
+                    if len(myFoundSingles) > 1:
+                        # Do virtual merge
+                        myDescription = ""
+                        myID = ""
+                        myValue = ScalarUncertaintyItem("sum",0.0)
+                        for n in self._extractors:
+                            if n.getId() in myFoundSingles:
+                                if myDescription == "":
+                                    myDescription = n.getDescription()
+                                    myID = n.getId()
+                                    myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
+                                else:
+                                    myDescription += " + "+n.getDescription()
+                                    myID += "_AND_"+n.getId()
+                                    myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
+                                    myVetoList.append(n.getId())
+                        myVirtualMergeInformation[myFoundSingles[0]] = myValue
+                        myVirtualMergeInformation[myFoundSingles[0]+"ID"] = myID
+                        myVirtualMergeInformation["%sdescription"%myFoundSingles[0]] = myDescription
+                        print WarningLabel()+"Combined nuisances '%s' for column %s!"%(myDescription, c.getLabel())
         # Loop over rows
         for n in self._extractors:
             if n.isPrintable() and n.getId() not in myVetoList:
                 # Suppress rows that are not affecting anything
-                myRow = ["%s"%(n.getId())]
+                if n.getId() in myVirtualMergeInformation.keys():
+                    myRow = [myVirtualMergeInformation[n.getId()+"ID"]]
+                else:
+                    myRow = ["%s"%(n.getId())]
                 if self._opts.lands:
                     myRow.append(n.getDistribution())
                 elif self._opts.combine:
