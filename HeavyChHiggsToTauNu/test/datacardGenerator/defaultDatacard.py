@@ -100,8 +100,11 @@ Observation = ObservationInput(datasetDefinition="Data",
 myTrgShapeSystematics = []
 if OptionTreatTriggerUncertaintiesAsAsymmetric:
     myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_CaloMET_dataeff","trg_CaloMET_MCeff"] # Variation done separately for data and MC efficiencies
+    #myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_CaloMET_dataeff","trg_CaloMET_MCeff"] # Variation done separately for data and MC efficiencies
 else:
     myTrgShapeSystematics = ["trg_tau","trg_CaloMET"] # Variation of trg scale factors
+    #myTrgShapeSystematics = ["trg_tau","trg_CaloMET"] # Variation of trg scale factors
+myTrgShapeSystematics.append("trg_CaloMET") # For now, use a constant uncertainty for trg MET part
 
     myTauIDShapeSystematics = []
 if OptionTreatTauIDAndMisIDSystematicsAsShapes:
@@ -115,7 +118,7 @@ myShapeSystematics.extend(myTrgShapeSystematics)
 myShapeSystematics.extend(myTauIDShapeSystematics)
 myShapeSystematics.extend(["ES_taus","ES_jets","JER","ES_METunclustered","pileup"]) # btag is not added, because it has the tag and mistag categories
 
-myEmbeddingMETUncert = "trg_CaloMET_dataeff"
+myEmbeddingMETUncert = "trg_CaloMET"
 myEmbeddingShapeSystematics = ["trg_tau_dataeff",myEmbeddingMETUncert,"trg_muon_dataeff","ES_taus","Emb_mu_ID","Emb_WtauTomu"]
 # Add tau ID uncert. to embedding either as a shape or as a constant
 if "tau_ID_shape" in myTauIDShapeSystematics:
@@ -216,7 +219,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetDefinition   = "Data",
         validMassPoints = MassPoints,
         #additionalNormalisation = 0.25, # not needed anymore
-        nuisances    = myEmbeddingShapeSystematics[:]+["Emb_QCDcontam","Emb_hybridCaloMETAndL1ETM","stat_binByBin"]
+        nuisances    = myEmbeddingShapeSystematics[:]+["Emb_QCDcontam","stat_binByBin"]
         #nuisances    = ["trg_tau_embedding","tau_ID","ES_taus","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb","stat_binByBin"]
     ))
 
@@ -279,6 +282,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         else:
             myEmbeddingShapeSystematics.append("trg_tau")
             #myEmbeddingShapeSystematics.append("trg_CaloMET")
+        myEmbeddingShapeSystematics.append("trg_CaloMET")
         myEmbeddingShapeSystematics.append("ES_taus")
         if OptionTreatTauIDAndMisIDSystematicsAsShapes:
             myEmbeddingShapeSystematics.append("tau_ID_shape")
@@ -286,7 +290,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         else:
             myEmbeddingShapeSystematics.append("tau_ID")
             myFakeShapeSystematics.append("tau_ID")
-        myEmbeddingShapeSystematics.extend(["Emb_QCDcontam","Emb_hybridCaloMETAndL1ETM","Emb_rest","stat_binByBin"])
+        myEmbeddingShapeSystematics.extend(["Emb_QCDcontam","Emb_rest","stat_binByBin"])
     elif OptionGenuineTauBackgroundSource == "MC_FullSystematics":
         # Use full MC systematics; approximate xsect uncertainty with ttbar xsect unsertainty
         myEmbeddingShapeSystematics = myShapeSystematics[:]+["top_pt","e_mu_veto","b_tag","stat_binByBin","xsect_tt_8TeV","lumi"]
@@ -808,7 +812,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven" or OptionGenuineTauBackgroun
         label         = "EWK with taus QCD contamination",
         distr         = "lnN",
         function      = "Constant",
-        value         = 0.22 #FIXME
+        value         = 0.22 #FIXME, not usable for 2011
     ))
 
 
