@@ -277,20 +277,25 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
     EmbeddingIdList = [4]
     myEmbeddingShapeSystematics = []
-    if OptionTreatTriggerUncertaintiesAsAsymmetric:
-        myEmbeddingShapeSystematics.append("trg_tau_dataeff")
-        myEmbeddingShapeSystematics.append("trg_L1ETM_dataeff")
-    else:
-        myEmbeddingShapeSystematics.append("trg_tau")
-        myEmbeddingShapeSystematics.append("trg_L1ETM")
-    myEmbeddingShapeSystematics.append("ES_taus")
-    if OptionTreatTauIDAndMisIDSystematicsAsShapes:
-        myEmbeddingShapeSystematics.append("tau_ID_shape")
-        myFakeShapeSystematics.append("tau_ID_shape")
-    else:
-        myEmbeddingShapeSystematics.append("tau_ID")
-        myFakeShapeSystematics.append("tau_ID")
-    myEmbeddingShapeSystematics.extend(["Emb_QCDcontam","Emb_hybridCaloMET","Emb_rest","stat_binByBin"])
+    if OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
+        # Mimic with uncertainties the outcome of data-driven embedding
+        if OptionTreatTriggerUncertaintiesAsAsymmetric:
+            myEmbeddingShapeSystematics.append("trg_tau_dataeff")
+            myEmbeddingShapeSystematics.append("trg_L1ETM_dataeff")
+        else:
+            myEmbeddingShapeSystematics.append("trg_tau")
+            myEmbeddingShapeSystematics.append("trg_L1ETM")
+        myEmbeddingShapeSystematics.append("ES_taus")
+        if OptionTreatTauIDAndMisIDSystematicsAsShapes:
+            myEmbeddingShapeSystematics.append("tau_ID_shape")
+            myFakeShapeSystematics.append("tau_ID_shape")
+        else:
+            myEmbeddingShapeSystematics.append("tau_ID")
+            myFakeShapeSystematics.append("tau_ID")
+        myEmbeddingShapeSystematics.extend(["Emb_QCDcontam","Emb_hybridCaloMET","Emb_rest","stat_binByBin"])
+    elif OptionGenuineTauBackgroundSource == "MC_FullSystematics":
+        # Use full MC systematics; approximate xsect uncertainty with ttbar xsect unsertainty
+        myEmbeddingShapeSystematics = myShapeSystematics[:]+["top_pt","e_mu_veto","b_tag","stat_binByBin","xsect_tt_8TeV","lumi"]
     DataGroups.append(DataGroup(
         label        = "pseudo_emb_TTJets_MC",
         landsProcess = 4,
@@ -298,7 +303,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myEmbeddingShapeSystematics,
+        nuisances    = myEmbeddingShapeSystematics[:],
     ))
     DataGroups.append(DataGroup(
         label        = "pseudo_emb_Wjets_MC",
