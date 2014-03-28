@@ -367,12 +367,12 @@ class DatacardColumn():
                             hDown = myRateHistograms[0].Clone()
                             hUp.SetTitle(self.getLabel()+"_"+e._masterExID+"Up")
                             hDown.SetTitle(self.getLabel()+"_"+e._masterExID+"Down")
-                            for k in range(0, hUp.GetNbinsX()):
+                            for k in range(0, hUp.GetNbinsX()+2):
                                 myValue = hUp.GetBinContent(k)
                                 hUp.SetBinContent(k, myValue * (1.0 + myResult.getUncertaintyUp()))
-                                hUp.SetBinError(k, 0.0)
+                                hUp.SetBinError(k, 0.01)
                                 hDown.SetBinContent(k, myValue * (1.0 - myResult.getUncertaintyDown()))
-                                hDown.SetBinError(k, 0.0)
+                                hDown.SetBinError(k, 0.01)
                             myHistograms.append(hUp)
                             myHistograms.append(hDown)
                             # Add also to the uncertainties as normalization uncertainty
@@ -386,7 +386,6 @@ class DatacardColumn():
                             if e.getDistribution() == "shapeQ":
                                 for i in range(0,len(myHistograms)):
                                     myHistograms[i].Add(self._rateResult.getHistograms()[0])
-
                     else:
                         # For QCD, scale the QCD type constants by the purity
                         if self.typeIsQCD() and e.isQCDNuisance():

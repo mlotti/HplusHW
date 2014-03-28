@@ -57,9 +57,6 @@ class TableProducer:
         else:
             print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
 
-        # Make datacards
-        self.makeDataCards()
-
         # Make other reports
         print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()
         # Print table of shape variation for shapeQ nuisances
@@ -70,7 +67,10 @@ class TableProducer:
         self.makeSystematicsSummary()
         # Prints QCD purity information
         self.makeQCDPuritySummary()
-        
+
+        # Make datacards
+        self.makeDataCards()
+
         # Debugging info
         # Make copy of input datacard
         os.system("cp %s %s/input_datacard.py"%(self._opts.datacard,self._infoDirname))
@@ -198,7 +198,7 @@ class TableProducer:
         for i in myIdsForRemoval:
             for c in self._datasetGroups:
                 if c.getLandsProcess() == i:
-                    print WarningLabel()+"Rate for column '%s' (%f) is smaller than %f. Removing column from datacard."%(c.getLabel(),c._rateResult.getResult(),self._config.ToleranceForMinimumRate)
+                    print WarningLabel()+"Rate for column '%s' (%f) is smaller than %.2f. Removing column from datacard. The threshold is set by the ToleranceForMinimumRate flag."%(c.getLabel(),c._rateResult.getResult(),self._config.ToleranceForMinimumRate)
                     self._datasetGroups.remove(c)
         # Update process numbers
         for c in self._datasetGroups:
@@ -323,33 +323,41 @@ class TableProducer:
         # Only solution is to do a virtual merge affecting only this method
         myVirtualMergeInformation = {}
         myVirtuallyInactivatedIds = []
-        for c in self._datasetGroups:
-            if c.isActiveForMass(mass,self._config):
-                myFoundSingles = []
-                for n in self._extractors:
-                    if c.hasNuisanceByMasterId(n.getId()) and n.getId() in mySingleList and not n.isShapeNuisance():
-                        myFoundSingles.append(n.getId())
-                if len(myFoundSingles) > 1:
-                    # Do virtual merge
-                    myDescription = ""
-                    myValue = ScalarUncertaintyItem("sum",0.0)
+        if self._config.OptionCombineSingleColumnUncertainties:
+            for c in self._datasetGroups:
+                if c.isActiveForMass(mass,self._config):
+                    myFoundSingles = []
                     for n in self._extractors:
-                        if n.getId() in myFoundSingles:
-                            if myDescription == "":
-                                myDescription = n.getDescription()
-                                myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
-                            else:
-                                myDescription += " + "+n.getDescription()
-                                myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
-                                myVetoList.append(n.getId())
-                    myVirtualMergeInformation[myFoundSingles[0]] = myValue
-                    myVirtualMergeInformation["%sdescription"%myFoundSingles[0]] = myDescription
-                    print WarningLabel()+"Combined nuisances '%s' for column %s!"%(myDescription, c.getLabel())
+                        if c.hasNuisanceByMasterId(n.getId()) and n.getId() in mySingleList and not n.isShapeNuisance():
+                            myFoundSingles.append(n.getId())
+                    if len(myFoundSingles) > 1:
+                        # Do virtual merge
+                        myDescription = ""
+                        myID = ""
+                        myValue = ScalarUncertaintyItem("sum",0.0)
+                        for n in self._extractors:
+                            if n.getId() in myFoundSingles:
+                                if myDescription == "":
+                                    myDescription = n.getDescription()
+                                    myID = n.getId()
+                                    myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
+                                else:
+                                    myDescription += " + "+n.getDescription()
+                                    myID += "_AND_"+n.getId()
+                                    myValue.add(c.getNuisanceResultByMasterId(n.getId())) # Is added quadratically via ScalarUncertaintyItem
+                                    myVetoList.append(n.getId())
+                        myVirtualMergeInformation[myFoundSingles[0]] = myValue
+                        myVirtualMergeInformation[myFoundSingles[0]+"ID"] = myID
+                        myVirtualMergeInformation["%sdescription"%myFoundSingles[0]] = myDescription
+                        print WarningLabel()+"Combined nuisances '%s' for column %s!"%(myDescription, c.getLabel())
         # Loop over rows
         for n in self._extractors:
             if n.isPrintable() and n.getId() not in myVetoList:
                 # Suppress rows that are not affecting anything
-                myRow = ["%s"%(n.getId())]
+                if n.getId() in myVirtualMergeInformation.keys():
+                    myRow = [myVirtualMergeInformation[n.getId()+"ID"]]
+                else:
+                    myRow = ["%s"%(n.getId())]
                 if self._opts.lands:
                     myRow.append(n.getDistribution())
                 elif self._opts.combine:
@@ -626,7 +634,7 @@ class TableProducer:
                             QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
                             QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
-                    elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC):
+                    elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated"):
                         if Embedding == None:
                             Embedding = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
@@ -652,7 +660,7 @@ class TableProducer:
             # Calculate expected yield
             TotalExpected = QCD.Clone()
             TotalExpected.Add(Embedding)
-            if not (self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC):
+            if not self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
                 TotalExpected.Add(EWKFakes)
             # Construct table
             myOutput = "*** Event yield summary ***\n"
@@ -665,7 +673,7 @@ class TableProducer:
                 myOutput += "Signal, mH+=%3d GeV, sigma x Br=1 pb: %s"%(m,getResultString(HW,formatStr,myPrecision))
             myOutput += "Backgrounds:\n"
             myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
-            if self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC:
+            if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
                 myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
             else:
                 myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
@@ -704,7 +712,7 @@ class TableProducer:
             myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n"%(m,getLatexResultString(HW,formatStr,myPrecision))
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n"%getLatexResultString(QCD,formatStr,myPrecision)
-            if self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC:
+            if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
                 myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
             else:
                 myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
@@ -882,7 +890,7 @@ class TableProducer:
             if c.typeIsQCD():
                 hQCD = c.getRateHistogram()
                 hQCDPurity = c.getPurityHistogram()
-            elif not c.typeIsSignal():
+            elif not c.typeIsSignal() and not c.typeIsEmptyColumn():
                 h.Add(c.getRateHistogram())
         s = "QCD purity by bins for shape histogram:\n"
         for i in range(1,hQCD.GetNbinsX()+1):

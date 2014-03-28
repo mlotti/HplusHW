@@ -2,8 +2,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
 DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-01-29-noMetSF-withL1ETMfix"#2014-01-29-noMetSF-withL1ETMfix"
-Path = "/home/wendland/data/v533/2014_02_14_v3_etacorrected"
-#Path = "/home/wendland/data/v533/2014_03_12"
+#Path = "/home/wendland/data/v533/2014_02_14_v3_etacorrected"
+Path = "/home/wendland/data/v533/2014-03-20"
+#Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
 #Path = "/home/wendland/data/v533/2014_03_12_metphicorrected"
 #Path = "/home/wendland/data/v533/2014_02_14_v3_decaymode1"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
@@ -30,13 +31,19 @@ OptionMassShape = "TransverseMass"
 #OptionMassShape = "FullMass"
 #OptionMassShape = "TransverseAndFullMass2D" #FIXME not yet supported!!!
 
-OptionReplaceEmbeddingByMC = True
+# Choose source of EWK+tt genuine tau background
+#OptionGenuineTauBackgroundSource = "DataDriven"                          # State-of-the-art: embedded data used (use for optimization and results)
+#OptionGenuineTauBackgroundSource = "MC_FakeAndGenuineTauNotSeparated" # MC used, fake taus are not separated from genuine taus
+#OptionGenuineTauBackgroundSource = "MC_FullSystematics"               # MC used, fake and genuine taus separated (use for embedding closure test)
+OptionGenuineTauBackgroundSource = "MC_RealisticProjection"            # MC used, fake and genuine taus separated (can be used for optimization)
+
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionTreatTriggerUncertaintiesAsAsymmetric = True # Set to true, if you produced multicrabs with doAsymmetricTriggerUncertainties=True
 OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produced multicrabs with doTauIDandMisIDSystematicsAsShapes=True
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
+OptionCombineSingleColumnUncertainties = True # Makes limit running faster
 OptionDoControlPlots = True
 OptionCtrlPlotsAtMt = True
 OptionDisplayEventYieldSummary = True
@@ -55,7 +62,10 @@ OptionSqrtS = 8 # sqrt(s)
 # Tolerance for throwing error on luminosity difference (0.01 = 1 percent agreement is required)
 ToleranceForLuminosityDifference = 0.05
 # Tolerance for almost zero rate (columns with smaller rate are suppressed)
-ToleranceForMinimumRate = 0.5
+ToleranceForMinimumRate = 1.5
+# Minimum stat. uncertainty to set to bins with zero events
+MinimumStatUncertainty = 0.5
+
 
 # Shape histogram definitions
 SignalShapeHisto = None
@@ -64,13 +74,16 @@ ShapeHistogramsDimensions = None
 
 if OptionMassShape == "TransverseMass":
     SignalShapeHisto = "shapeTransverseMass"
-    FakeShapeHisto = "shapeEWKFakeTausTransverseMass"
+    FakeShapeTTbarHisto = "shapeEWKFakeTausTransverseMass"
+    FakeShapeOtherHisto = "shapeProbabilisticBtagEWKFakeTausTransverseMass"
 elif OptionMassShape == "FullMass":
     SignalShapeHisto = "shapeInvariantMass"
-    FakeShapeHisto = "shapeEWKFakeTausInvariantMass"
+    FakeShapeOtherHisto = "shapeEWKFakeTausInvariantMass"
+    FakeShapeTTbarHisto = FakeShapeOtherHisto
 elif OptionMassShape == "TransverseAndFullMass2D": # FIXME: preparing to add support, not yet working
     SignalShapeHisto = "shapetransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
-    FakeShapeHisto = "shapeEWKFakeTausTransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
+    FakeShapeOtherHisto = "shapeEWKFakeTausTransverseAndFullMass2D" # FIXME: Not yet implemented to signal analysis, etc.
+    FakeShapeTTbarHisto = FakeShapeOtherHisto
 ShapeHistogramsDimensions = systematics.getBinningForPlot(SignalShapeHisto)
 
 DataCardName += "_"+OptionMassShape
@@ -87,9 +100,9 @@ Observation = ObservationInput(datasetDefinition="Data",
 # Systematics lists
 myTrgShapeSystematics = []
 if OptionTreatTriggerUncertaintiesAsAsymmetric:
-    myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_CaloMET_dataeff","trg_CaloMET_MCeff"] # Variation done separately for data and MC efficiencies
+    myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_L1ETM_dataeff","trg_L1ETM_MCeff"] # Variation done separately for data and MC efficiencies
 else:
-    myTrgShapeSystematics = ["trg_tau","trg_CaloMET"] # Variation of trg scale factors
+    myTrgShapeSystematics = ["trg_tau","trg_L1ETM"] # Variation of trg scale factors
 
     myTauIDShapeSystematics = []
 if OptionTreatTauIDAndMisIDSystematicsAsShapes:
@@ -103,11 +116,11 @@ myShapeSystematics.extend(myTrgShapeSystematics)
 myShapeSystematics.extend(myTauIDShapeSystematics)
 myShapeSystematics.extend(["ES_taus","ES_jets","JER","ES_METunclustered","pileup"]) # btag is not added, because it has the tag and mistag categories
 
-myEmbeddingMETUncert = "trg_CaloMET_dataeff"
+myEmbeddingMETUncert = "trg_L1ETM_dataeff"
 myEmbeddingShapeSystematics = ["trg_tau_dataeff",myEmbeddingMETUncert,"trg_muon_dataeff","ES_taus","Emb_mu_ID","Emb_WtauTomu"]
 # Add tau ID uncert. to embedding either as a shape or as a constant
 if "tau_ID_shape" in myTauIDShapeSystematics:
-    myEmbeddingShapeSystematics.append("tau_ID_constShape")
+    myEmbeddingShapeSystematics.append("tau_ID_shape")
 else:
     myEmbeddingShapeSystematics.append("tau_ID")
 
@@ -116,7 +129,8 @@ for item in myShapeSystematics:
     if item == "tau_ID":
         myFakeShapeSystematics.append("tau_misID")
     else:
-        myFakeShapeSystematics.append(item)
+        if not item == "tau_ID_shape":
+            myFakeShapeSystematics.append(item)
 
 ##############################################################################
 # DataGroup (i.e. columns in datacard) definitions
@@ -161,9 +175,9 @@ for mass in HeavyMassPoints:
     DataGroups.append(hx)
 
 myQCDShapeSystematics = myShapeSystematics[:]
-for i in range(0,len(myQCDShapeSystematics)):
-    if myQCDShapeSystematics[i].startswith("trg_CaloMET") and not "forQCD" in myQCDShapeSystematics[i]:
-        myQCDShapeSystematics[i] = myQCDShapeSystematics[i]+"_forQCD"
+#for i in range(0,len(myQCDShapeSystematics)):
+    #if myQCDShapeSystematics[i].startswith("trg_CaloMET") and not "forQCD" in myQCDShapeSystematics[i]:
+    #    myQCDShapeSystematics[i] = myQCDShapeSystematics[i]+"_forQCD"
 
 myQCDFact = DataGroup(
     label        = "QCDfact",
@@ -195,7 +209,7 @@ elif OptionMassShape == "FullMass":
 DataGroups.append(myQCDFact)
 DataGroups.append(myQCDInv)
 
-if not OptionReplaceEmbeddingByMC:
+if OptionGenuineTauBackgroundSource == "DataDriven":
     # EWK + ttbar with genuine taus
     EmbeddingIdList = [3]
     DataGroups.append(DataGroup(
@@ -207,7 +221,7 @@ if not OptionReplaceEmbeddingByMC:
         datasetDefinition   = "Data",
         validMassPoints = MassPoints,
         #additionalNormalisation = 0.25, # not needed anymore
-        nuisances    = myEmbeddingShapeSystematics[:]+["Emb_QCDcontam","Emb_hybridCaloMETAndL1ETM","stat_binByBin"]
+        nuisances    = myEmbeddingShapeSystematics[:]+["Emb_QCDcontam","Emb_hybridCaloMET","stat_binByBin"]
         #nuisances    = ["trg_tau_embedding","tau_ID","ES_taus","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb","stat_binByBin"]
     ))
 
@@ -216,7 +230,7 @@ if not OptionReplaceEmbeddingByMC:
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
         landsProcess = 1,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeTTbarHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
@@ -225,55 +239,62 @@ if not OptionReplaceEmbeddingByMC:
     DataGroups.append(DataGroup(
         label        = "W_EWK_faketau",
         landsProcess = 5,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
         landsProcess = 6,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "DY_EWK_faketau",
         landsProcess = 7,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
         landsProcess = 8,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin","probBtag"],
     ))
-elif OptionRealisticEmbeddingWithMC:
+elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
     EmbeddingIdList = [4]
     myEmbeddingShapeSystematics = []
-    if OptionTreatTriggerUncertaintiesAsAsymmetric:
-        myEmbeddingShapeSystematics.append("trg_tau_dataeff")
-        myEmbeddingShapeSystematics.append("trg_CaloMET_dataeff")
-    else:
-        myEmbeddingShapeSystematics.append("trg_tau")
-        myEmbeddingShapeSystematics.append("trg_CaloMET")
-    myEmbeddingShapeSystematics.append("ES_taus")
-    if OptionTreatTauIDAndMisIDSystematicsAsShapes:
-        myEmbeddingShapeSystematics.append("tau_ID_shape")
-    else:
-        myEmbeddingShapeSystematics.append("tau_ID")
-    myEmbeddingShapeSystematics.extend(["Emb_QCDcontam","Emb_hybridCaloMETAndL1ETM","Emb_rest","stat_binByBin"])
+    if OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
+        # Mimic with uncertainties the outcome of data-driven embedding
+        if OptionTreatTriggerUncertaintiesAsAsymmetric:
+            myEmbeddingShapeSystematics.append("trg_tau_dataeff")
+            myEmbeddingShapeSystematics.append("trg_L1ETM_dataeff")
+        else:
+            myEmbeddingShapeSystematics.append("trg_tau")
+            myEmbeddingShapeSystematics.append("trg_L1ETM")
+        myEmbeddingShapeSystematics.append("ES_taus")
+        if OptionTreatTauIDAndMisIDSystematicsAsShapes:
+            myEmbeddingShapeSystematics.append("tau_ID_shape")
+            myFakeShapeSystematics.append("tau_ID_shape")
+        else:
+            myEmbeddingShapeSystematics.append("tau_ID")
+            myFakeShapeSystematics.append("tau_ID")
+        myEmbeddingShapeSystematics.extend(["Emb_QCDcontam","Emb_hybridCaloMET","Emb_rest","stat_binByBin"])
+    elif OptionGenuineTauBackgroundSource == "MC_FullSystematics":
+        # Use full MC systematics; approximate xsect uncertainty with ttbar xsect unsertainty
+        myEmbeddingShapeSystematics = myShapeSystematics[:]+["top_pt","e_mu_veto","b_tag","stat_binByBin","xsect_tt_8TeV","lumi"]
     DataGroups.append(DataGroup(
         label        = "pseudo_emb_TTJets_MC",
         landsProcess = 4,
@@ -281,7 +302,7 @@ elif OptionRealisticEmbeddingWithMC:
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myEmbeddingShapeSystematics,
+        nuisances    = myEmbeddingShapeSystematics[:],
     ))
     DataGroups.append(DataGroup(
         label        = "pseudo_emb_Wjets_MC",
@@ -323,7 +344,7 @@ elif OptionRealisticEmbeddingWithMC:
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
         landsProcess = 1,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeTTbarHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
@@ -332,40 +353,40 @@ elif OptionRealisticEmbeddingWithMC:
     DataGroups.append(DataGroup(
         label        = "W_EWK_faketau",
         landsProcess = 5,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
         landsProcess = 6,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "DY_EWK_faketau",
         landsProcess = 7,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","stat_binByBin","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
         landsProcess = 8,
-        shapeHisto   = FakeShapeHisto,
+        shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin","probBtag"],
     ))
-else:
+elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
     # Replace embedding and fakes with MC
     EmbeddingIdList = [1,4,5,6,7]
     DataGroups.append(DataGroup(
@@ -413,7 +434,8 @@ else:
         validMassPoints = MassPoints,
         nuisances    = myShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_VV","lumi","stat_binByBin"],
     ))
-
+else:
+    raise Exception("Error: unknown value for flag OptionGenuineTauBackgroundSource!")
 
 # Reserve column 2
 DataGroups.append(DataGroup(
@@ -467,73 +489,23 @@ else:
         systVariation = "TauTrgMCEff",
     ))
 
-if "trg_CaloMET" in myShapeSystematics:
+if OptionIncludeSystematics:
     Nuisances.append(Nuisance(
-        id            = "trg_CaloMET",
-        label         = "tau+MET trg MET part",
-        distr         = "lnN",
-        function      = "Constant",
-        value         = 0.12
-        #distr         = "shapeQ",
-        #function      = "ShapeVariation",
-        #systVariation = "METTrgSF",
+        id            = "trg_L1ETM_dataeff",
+        label         = "tau+MET trg L1ETM data eff.",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "L1ETMDataEff",
     ))
     Nuisances.append(Nuisance(
-        id            = "trg_CaloMET_forQCD",
-        label         = "tau+MET trg MET part",
-        distr         = "lnN",
-        function      = "ConstantForQCD",
-        value         = 0.12
-        #distr         = "shapeQ",
-        #function      = "ShapeVariation",
-        #systVariation = "METTrgSF",
-    ))
-else:
-    Nuisances.append(Nuisance(
-        id            = "trg_CaloMET_dataeff",
-        label         = "tau+MET trg MET part data eff.",
-        #distr         = "shapeQ",
-        #function      = "ShapeVariation",
-        #systVariation = "MetTrgDataEff",
-        #scaleFactor   = trg_MET_dataeffScaleFactor,
-        distr         = "lnN",
-        function      = "Constant",
-        value         = 0.12
+        id            = "trg_L1ETM_MCeff",
+        label         = "tau+MET trg L1ETM MC eff.",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "L1ETMMCEff",
     ))
 
-    Nuisances.append(Nuisance(
-        id            = "trg_CaloMET_MCeff",
-        label         = "tau+MET trg MET part MC eff.",
-        #distr         = "shapeQ",
-        #function      = "ShapeVariation",
-        #systVariation = "MetTrgMCEff",
-        distr         = "lnN",
-        function      = "Constant",
-        value         = 0.01
-    ))
-    Nuisances.append(Nuisance(
-        id            = "trg_CaloMET_dataeff_forQCD",
-        label         = "tau+MET trg MET part data eff.",
-        #distr         = "shapeQ",
-        #function      = "ShapeVariation",
-        #systVariation = "MetTrgDataEff",
-        #scaleFactor   = trg_MET_dataeffScaleFactor,
-        distr         = "lnN",
-        function      = "ConstantForQCD",
-        value         = 0.12
-    ))
-    Nuisances.append(Nuisance(
-        id            = "trg_CaloMET_MCeff_forQCD",
-        label         = "tau+MET trg MET part MC eff.",
-        #distr         = "shapeQ",
-        #function      = "ShapeVariation",
-        #systVariation = "MetTrgMCEff",
-        distr         = "lnN",
-        function      = "ConstantForQCD",
-        value         = 0.01
-    ))
-
-if not OptionReplaceEmbeddingByMC:
+if OptionGenuineTauBackgroundSource == "DataDriven":
     Nuisances.append(Nuisance(
         id            = "trg_muon_dataeff",
         label         = "SingleMu trg data eff.",
@@ -741,7 +713,7 @@ else:
         value         = 0.15,
     ))
 
-if not OptionReplaceEmbeddingByMC:
+if OptionGenuineTauBackgroundSource == "DataDriven":
     Nuisances.append(Nuisance(
         id            = "Emb_mu_ID",
         label         = "Muon ID for embedding",
@@ -778,7 +750,7 @@ Nuisances.append(Nuisance(
     systVariation = "QCDNorm",
 ))
 
-if not OptionReplaceEmbeddingByMC or OptionRealisticEmbeddingWithMC:
+if OptionGenuineTauBackgroundSource == "DataDriven" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     Nuisances.append(Nuisance(
         id            = "Emb_QCDcontam",
         label         = "EWK with taus QCD contamination",
@@ -787,15 +759,15 @@ if not OptionReplaceEmbeddingByMC or OptionRealisticEmbeddingWithMC:
         value         = 0.020 #FIXME
     ))
     Nuisances.append(Nuisance(
-        id            = "Emb_hybridCaloMETAndL1ETM",
-        label         = "EWK with taus QCD contamination",
+        id            = "Emb_hybridCaloMET",
+        label         = "EWK with taus hybrid calo MET and L1ETM",
         distr         = "lnN",
         function      = "Constant",
-        value         = 0.22 #FIXME
+        value         = 0.12 #FIXME
     ))
 
 
-if not OptionReplaceEmbeddingByMC:
+if OptionGenuineTauBackgroundSource == "DataDriven":
     if "Emb_WtauTomu" in myEmbeddingShapeSystematics:
         Nuisances.append(Nuisance(
             id            = "Emb_WtauTomu",
@@ -813,7 +785,7 @@ if not OptionReplaceEmbeddingByMC:
             value         = 0.007
         ))
 
-if OptionRealisticEmbeddingWithMC and OptionReplaceEmbeddingByMC:
+if OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     Nuisances.append(Nuisance(
         id            = "Emb_rest",
         label         = "EWK with taus W->tau->mu",
@@ -925,8 +897,7 @@ Nuisances.append(Nuisance(
     id            = "stat_binByBin",
     label         = "Bin-by-bin stat. uncertainty on the shape",
     distr         = "shapeStat",
-    function      = "Shape",
-    histograms    = SignalShapeHisto,
+    function      = "Shape"
 ))
 
 #Nuisances.append(Nuisance(
@@ -938,21 +909,29 @@ Nuisances.append(Nuisance(
 #))
 
 Nuisances.append(Nuisance(
+    id            = "probBtag",
+    label         = "probabilistic btag", 
+    distr         = "lnN",
+    function      = "Constant", 
+    value         = 0.5
+))
+
+Nuisances.append(Nuisance(
     id            = "QCDinvTemplateFit",
     label         = "QCDInv: fit", 
     distr         = "lnN",
     function      = "Constant", 
-    value         = 0.0043
+    value         = 0.03,
 ))
 
 MergeNuisances = []
-if not OptionReplaceEmbeddingByMC and "tau_ID_shape" in myTauIDShapeSystematics:
+if "tau_ID_constShape" in myEmbeddingShapeSystematics:
     MergeNuisances.append(["tau_ID_shape", "tau_ID_constShape"])
-if OptionTreatTriggerUncertaintiesAsAsymmetric:
-    MergeNuisances.append(["trg_CaloMET_dataeff", "trg_CaloMET_dataeff_forQCD"])
-    MergeNuisances.append(["trg_CaloMET_MCeff", "trg_CaloMET_MCeff_forQCD"])
-else:
-    MergeNuisances.append(["trg_CaloMET", "trg_CaloMET_forQCD"])
+#if OptionTreatTriggerUncertaintiesAsAsymmetric:
+#    MergeNuisances.append(["trg_CaloMET_dataeff", "trg_CaloMET_dataeff_forQCD"])
+#    MergeNuisances.append(["trg_CaloMET_MCeff", "trg_CaloMET_MCeff_forQCD"])
+#else:
+#    MergeNuisances.append(["trg_CaloMET", "trg_CaloMET_forQCD"])
 #MergeNuisances.append(["ES_taus","ES_taus_fakes","ES_taus_tempForEmbedding"])
 #MergeNuisances.append(["ES_jets","ES_jets_fakes"])
 #MergeNuisances.append(["JER","JER_fakes"])
@@ -1590,7 +1569,7 @@ if OptionCtrlPlotsAtMt:
                              "optsLog": {"ymin": 0.9} },
         blindedRange     = [], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
-        flowPlotCaption  = "#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
     ))
 
     ControlPlots.append(ControlPlotInput(

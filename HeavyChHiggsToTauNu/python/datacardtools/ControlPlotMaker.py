@@ -83,7 +83,7 @@ class ControlPlotMaker:
                                 hQCD.Add(h)
                         elif c.typeIsEWK():
                             #print "EWK genuine:",c.getLabel(),h.getRootHisto().Integral(0,h.GetNbinsX()+2)
-                            if self._config.OptionReplaceEmbeddingByMC:# or False: # FIXME
+                            if not self._config.OptionGenuineTauBackgroundSource == "DataDriven":
                                 myHisto = histograms.Histo(h,c._datasetMgrColumn)
                                 myHisto.setIsDataMC(isData=False, isMC=True)
                                 myStackList.append(myHisto)
@@ -98,7 +98,7 @@ class ControlPlotMaker:
                                 hEWKfake = h.Clone()
                             else:
                                 hEWKfake.Add(h)
-                if len(myStackList) > 0 or not self._config.OptionReplaceEmbeddingByMC:
+                if len(myStackList) > 0 or self._config.OptionGenuineTauBackgroundSource == "DataDriven":
                     if hQCD != None:
                         myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
                         myHisto.setIsDataMC(isData=False, isMC=True)
@@ -136,10 +136,10 @@ class ControlPlotMaker:
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList.insert(1, myHisto)
                     # Add data to selection flow plot
-                    if myBlindedStatus:
-                        selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
-                    else:
-                        selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hDataUnblinded,myStackList[1:])
+                    #if myBlindedStatus:
+                    #    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
+                    #else:
+                    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hDataUnblinded,myStackList[1:])
                     if len(myCtrlPlot.blindedRange) > 0:
                         myBlindedStatus = True
                     else:
@@ -281,12 +281,12 @@ class SelectionFlowPlotMaker:
 
     def addColumn(self,label,data,expectedList):
         # System to pick the correct input for correct label
-        if self._pickLabel == "":
-            self._pickLabel = label
+        if label == "":
             return
         # Create histograms if necessary
         if self._data == None:
             self._createHistograms(data,expectedList)
+            return
         # Add expected
         for i in range(0,len(expectedList)):
             myRate = expectedList[i].getRootHistoWithUncertainties().getRate()

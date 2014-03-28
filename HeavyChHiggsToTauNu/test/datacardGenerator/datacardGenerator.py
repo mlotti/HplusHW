@@ -66,11 +66,11 @@ def main(opts, moduleSelector, multipleDirs):
 
     signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
     embeddingDsetCreator = None
-    if config.OptionReplaceEmbeddingByMC:
+    if not config.OptionGenuineTauBackgroundSource == "DataDriven":
         mcrabInfoOutput.append("- Embedding: estimated from signal analysis MC")
         print "- %sWarning:%s Embedding: estimated from signal analysis MC"%(WarningStyle(),NormalStyle())
     else:
-        embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput, not config.OptionReplaceEmbeddingByMC)
+        embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput)
     qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
     if qcdFactorisedDsetCreator == None and not opts.useQCDinverted:
         myQCDMethods.remove(DataCard.DatacardQCDMethod.FACTORISED)
@@ -137,11 +137,11 @@ def main(opts, moduleSelector, multipleDirs):
                     # Create the dataset creator managers separately for each module
                     signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
                     embeddingDsetCreator = None
-                    if config.OptionReplaceEmbeddingByMC:
+                    if not config.OptionGenuineTauBackgroundSource == "DataDriven":
                         mcrabInfoOutput.append("- Embedding: estimated from signal analysis MC")
                         print "- %sWarning:%s Embedding: estimated from signal analysis MC"%(WarningStyle(),NormalStyle())
                     else:
-                        embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput, not config.OptionReplaceEmbeddingByMC)
+                        embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput)
                     myQCDDsetCreator = None
                     if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
                         myQCDDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
