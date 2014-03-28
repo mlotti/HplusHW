@@ -15,18 +15,17 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTo
 
 class Result:
     def __init__(self, opts, basedir):
-        print basedir
         self._opts = opts
         self._basedir = basedir
         self._allRetrieved = False
         self._limitCalculated = False
         self._output = ""
         self._findJobDir(basedir)
-        print self._jobDir
         if self._jobDir == None:
             if self._opts.printonly:
-                raise Exception("Error: need to create and submit jobs first!")
-            self._createAndSubmit()
+                print "Error: need to create and submit jobs first! Skipping ..."
+            else:
+                self._createAndSubmit()
         else:
             # Check if limits have already been calculated
             if os.path.exists("%s/%s/limits.json"%(self._basedir,self._jobDir)):
@@ -83,8 +82,9 @@ class Result:
             proc = subprocess.Popen(["multicrab","-submit all"], stdout=subprocess.PIPE)
             (out, err) = proc.communicate()
             print out
-            # Change directory back
-            os.chdir(self._backToTopLevel())
+        # Change directory back
+        os.chdir(self._backToTopLevel())
+        #print "current dir =",os.getcwd()
 
     def _getOutput(self):
         # Go to job directory
@@ -158,7 +158,7 @@ class Result:
     def _backToTopLevel(self):
         mySplit = self._basedir.split("/")
         s = ""
-        for i in range(0,len(mySplit)):
+        for i in range(0,len(mySplit)-1):
             s += "../"
         return s 
 
