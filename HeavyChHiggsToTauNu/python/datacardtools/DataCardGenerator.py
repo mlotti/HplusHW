@@ -520,7 +520,7 @@ class DataCardGenerator:
                 myEmbColumn = c
         if myEmbColumn == None:
             raise Exception(ErrorLabel()+"You need to specify EmbeddingIdList in the datacard!")
-        myEmbColumn._label = "MCEWKtau"
+        #myEmbColumn._label = "MCEWKtau"
         # Add results from dataset columns with landsProcess == None
         myRemoveList = []
         for c in self._columns:
