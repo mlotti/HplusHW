@@ -57,9 +57,6 @@ class TableProducer:
         else:
             print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
 
-        # Make datacards
-        self.makeDataCards()
-
         # Make other reports
         print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()
         # Print table of shape variation for shapeQ nuisances
@@ -70,7 +67,10 @@ class TableProducer:
         self.makeSystematicsSummary()
         # Prints QCD purity information
         self.makeQCDPuritySummary()
-        
+
+        # Make datacards
+        self.makeDataCards()
+
         # Debugging info
         # Make copy of input datacard
         os.system("cp %s %s/input_datacard.py"%(self._opts.datacard,self._infoDirname))
@@ -634,7 +634,7 @@ class TableProducer:
                             QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
                             QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
-                    elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC):
+                    elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated"):
                         if Embedding == None:
                             Embedding = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
@@ -660,7 +660,7 @@ class TableProducer:
             # Calculate expected yield
             TotalExpected = QCD.Clone()
             TotalExpected.Add(Embedding)
-            if not (self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC):
+            if not self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
                 TotalExpected.Add(EWKFakes)
             # Construct table
             myOutput = "*** Event yield summary ***\n"
@@ -673,7 +673,7 @@ class TableProducer:
                 myOutput += "Signal, mH+=%3d GeV, sigma x Br=1 pb: %s"%(m,getResultString(HW,formatStr,myPrecision))
             myOutput += "Backgrounds:\n"
             myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
-            if self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC:
+            if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
                 myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
             else:
                 myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
@@ -712,7 +712,7 @@ class TableProducer:
             myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n"%(m,getLatexResultString(HW,formatStr,myPrecision))
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n"%getLatexResultString(QCD,formatStr,myPrecision)
-            if self._config.OptionReplaceEmbeddingByMC and not self._config.OptionRealisticEmbeddingWithMC:
+            if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
                 myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
             else:
                 myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
@@ -890,7 +890,7 @@ class TableProducer:
             if c.typeIsQCD():
                 hQCD = c.getRateHistogram()
                 hQCDPurity = c.getPurityHistogram()
-            elif not c.typeIsSignal():
+            elif not c.typeIsSignal() and not c.typeIsEmptyColumn():
                 h.Add(c.getRateHistogram())
         s = "QCD purity by bins for shape histogram:\n"
         for i in range(1,hQCD.GetNbinsX()+1):
