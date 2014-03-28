@@ -135,10 +135,10 @@ class ControlPlotMaker:
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList.insert(1, myHisto)
                     # Add data to selection flow plot
-                    if myBlindedStatus:
-                        selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
-                    else:
-                        selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hDataUnblinded,myStackList[1:])
+                    #if myBlindedStatus:
+                    #    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
+                    #else:
+                    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hDataUnblinded,myStackList[1:])
                     if len(myCtrlPlot.blindedRange) > 0:
                         myBlindedStatus = True
                     else:
@@ -279,13 +279,14 @@ class SelectionFlowPlotMaker:
         self._data.Delete()
 
     def addColumn(self,label,data,expectedList):
+        print label
         # System to pick the correct input for correct label
-        if self._pickLabel == "":
-            self._pickLabel = label
+        if label == "":
             return
         # Create histograms if necessary
         if self._data == None:
             self._createHistograms(data,expectedList)
+            return
         # Add expected
         for i in range(0,len(expectedList)):
             myRate = expectedList[i].getRootHistoWithUncertainties().getRate()
