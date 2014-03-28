@@ -10,7 +10,7 @@ ROOT.gROOT.SetBatch(True)
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as limitTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 # Height settings for the all-in-one ratio plot
@@ -217,7 +217,8 @@ class DatasetContainer:
             myParams = {}
             myParams["ylabel"] = "Events"
             myParams["log"] = False
-            myParams["opts2"] = {"ymin": 0.0, "ymax":2.0}
+            #myParams["opts2"] = {"ymin": 0.0, "ymax":2.0}
+            myParams["opts2"] = {"ymin": 0.7, "ymax":1.3}
             myParams["opts"] = {"ymin": 0.0}
             myParams["ratio"] = True
             myParams["ratioType"] = "errorScale"
@@ -304,16 +305,12 @@ if __name__ == "__main__":
     style = tdrstyle.TDRStyle()
     histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.15)
     # Find out the mass points
-    myDatacardPattern = lands.taujetsDatacardPattern
-    myRootFilePattern = lands.taujetsRootfilePattern
-    if not os.path.exists(myDatacardPattern):
-        myDatacardPattern = myDatacardPattern.replace("lands","combine")
-        myRootFilePattern = myRootFilePattern.replace("lands","combine")
-    massPoints = lands.obtainMassPoints(myRootFilePattern)
+    mySettings = limitTools.GeneralSettings(".",[])
+    massPoints = mySettings.getMassPoints(limitTools.LimitProcessType.TAUJETS)
     print "The following masses are considered:",massPoints
     nameList = []
     for m in massPoints:
         # Obtain luminosity from datacard
-        myLuminosity = float(lands.readLuminosityFromDatacard(".",myDatacardPattern%m))
+        myLuminosity = float(limitTools.readLuminosityFromDatacard(".", mySettings.getDatacardPattern(limitTools.LimitProcessType.TAUJETS)%m))
         # Do plots
-        doPlot(opts,int(m),nameList,myLuminosity,myRootFilePattern)
+        doPlot(opts,int(m),nameList,myLuminosity,mySettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS))
