@@ -44,7 +44,7 @@ OptionIncludeSystematics = True # Set to true if you produced multicrabs with do
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionCombineSingleColumnUncertainties = True # Makes limit running faster
-OptionDoControlPlots = not True
+OptionDoControlPlots = True
 OptionCtrlPlotsAtMt = True
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
