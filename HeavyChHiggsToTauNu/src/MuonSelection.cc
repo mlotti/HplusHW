@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -13,8 +14,6 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "TLorentzVector.h"
 #include "TVector3.h"
-
-std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
 
 namespace HPlus {
   MuonSelection::Data::Data():
