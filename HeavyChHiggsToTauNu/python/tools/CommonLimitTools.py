@@ -246,8 +246,10 @@ def parseOptionParser(parser):
         s += "  --lhcasy (Asymptotic LHC type CLs, very quick)\n"
         n += 1
     if n == 0:
+        parser.print_help()
         raise Exception("Error: Please specify limit type: \n%s"%s)
     if n > 1:
+        parser.print_help()
         raise Exception("Error: Please specify only one limit type: \n%s"%s)
     if opts.brlimit == opts.sigmabrlimit:
         if opts.brlimit:
