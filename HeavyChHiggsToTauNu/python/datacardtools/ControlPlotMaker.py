@@ -82,7 +82,7 @@ class ControlPlotMaker:
                                 hQCD.Add(h)
                         elif c.typeIsEWK():
                             #print "EWK genuine:",c.getLabel(),h.getRootHisto().Integral(0,h.GetNbinsX()+2)
-                            if self._config.OptionReplaceEmbeddingByMC:# or False: # FIXME
+                            if not self._config.OptionGenuineTauBackgroundSource == "DataDriven":
                                 myHisto = histograms.Histo(h,c._datasetMgrColumn)
                                 myHisto.setIsDataMC(isData=False, isMC=True)
                                 myStackList.append(myHisto)
@@ -97,7 +97,7 @@ class ControlPlotMaker:
                                 hEWKfake = h.Clone()
                             else:
                                 hEWKfake.Add(h)
-                if len(myStackList) > 0:
+                if len(myStackList) > 0 or self._config.OptionGenuineTauBackgroundSource == "DataDriven":
                     if hQCD != None:
                         myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
                         myHisto.setIsDataMC(isData=False, isMC=True)
@@ -279,7 +279,6 @@ class SelectionFlowPlotMaker:
         self._data.Delete()
 
     def addColumn(self,label,data,expectedList):
-        print label
         # System to pick the correct input for correct label
         if label == "":
             return

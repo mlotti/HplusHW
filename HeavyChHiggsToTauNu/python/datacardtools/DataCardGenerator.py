@@ -249,8 +249,6 @@ class DataCardGenerator:
         #self.overrideConfigOptionsFromCommandLine()
         #if self._QCDMethod != DatacardQCDMethod.FACTORISED and self._QCDMethod != DatacardQCDMethod.INVERTED:
             #raise Exception(ErrorLabel()+"QCD method was not properly specified when creating DataCardGenerator!")
-        #if self._config.OptionReplaceEmbeddingByMC != None:
-            #self._replaceEmbeddingByMC = self._config.OptionReplaceEmbeddingByMC
 
         # Check that all necessary parameters have been specified in config file
         myStatus = self._checkCfgFile()
@@ -269,10 +267,8 @@ class DataCardGenerator:
             myOutputPrefix += "QCDfact"
         elif self._QCDMethod == DatacardQCDMethod.INVERTED:
             myOutputPrefix += "QCDinv"
-        if self._config.OptionReplaceEmbeddingByMC:
-            myOutputPrefix += "_MCEWK"
-            if self._config.OptionRealisticEmbeddingWithMC:
-                myOutputPrefix += "_realisticProjection"
+        myOutputPrefix += "_%s"%self._config.OptionGenuineTauBackgroundSource
+
         self._outputPrefix = myOutputPrefix
 
         myMassRange = str(self._config.MassPoints[0])
@@ -332,7 +328,7 @@ class DataCardGenerator:
         self.doDataMining()
 
         # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
-        if self._config.OptionReplaceEmbeddingByMC and self._config.OptionRealisticEmbeddingWithMC:
+        if self._config.OptionGenuineTauBackgroundSource == "MC_FullSystematics" or self._config.OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
             self.doMergeForRealisticEmbedding()
 
         # Make datacards
@@ -492,7 +488,7 @@ class DataCardGenerator:
             self._observation.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         for c in self._columns:
             myDsetMgrIndex = 0
-            if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or (c.typeIsEWK() and self._config.OptionReplaceEmbeddingByMC):
+            if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or (c.typeIsEWK() and not self._config.OptionGenuineTauBackgroundSource == "DataDriven"):
                 myDsetMgrIndex = 0
             elif c.typeIsEWK():
                 myDsetMgrIndex = 1

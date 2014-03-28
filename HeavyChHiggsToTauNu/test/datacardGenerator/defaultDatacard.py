@@ -30,7 +30,12 @@ OptionMassShape = "TransverseMass"
 #OptionMassShape = "FullMass"
 #OptionMassShape = "TransverseAndFullMass2D" #FIXME not yet supported!!!
 
-OptionReplaceEmbeddingByMC = not True
+# Choose source of EWK+tt genuine tau background
+#OptionGenuineTauBackgroundSource = "DataDriven"                          # State-of-the-art: embedded data used (use for optimization and results)
+#OptionGenuineTauBackgroundSource = "MC_FakeAndGenuineTauNotSeparated" # MC used, fake taus are not separated from genuine taus
+#OptionGenuineTauBackgroundSource = "MC_FullSystematics"               # MC used, fake and genuine taus separated (use for embedding closure test)
+OptionGenuineTauBackgroundSource = "MC_RealisticProjection"            # MC used, fake and genuine taus separated (can be used for optimization)
+
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionTreatTriggerUncertaintiesAsAsymmetric = True # Set to true, if you produced multicrabs with doAsymmetricTriggerUncertainties=True
 OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produced multicrabs with doTauIDandMisIDSystematicsAsShapes=True
@@ -38,6 +43,7 @@ OptionIncludeSystematics = True # Set to true if you produced multicrabs with do
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = not True
+OptionDoControlPlots = True
 OptionCtrlPlotsAtMt = True
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
@@ -198,7 +204,7 @@ elif OptionMassShape == "FullMass":
 DataGroups.append(myQCDFact)
 DataGroups.append(myQCDInv)
 
-if not OptionReplaceEmbeddingByMC:
+if OptionGenuineTauBackgroundSource == "DataDriven":
     # EWK + ttbar with genuine taus
     EmbeddingIdList = [3]
     DataGroups.append(DataGroup(
@@ -261,7 +267,7 @@ if not OptionReplaceEmbeddingByMC:
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin","probBtag"],
     ))
-elif OptionRealisticEmbeddingWithMC:
+elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
     EmbeddingIdList = [4]
     myEmbeddingShapeSystematics = []
@@ -368,7 +374,7 @@ elif OptionRealisticEmbeddingWithMC:
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","stat_binByBin","probBtag"],
     ))
-else:
+elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
     # Replace embedding and fakes with MC
     EmbeddingIdList = [1,4,5,6,7]
     DataGroups.append(DataGroup(
@@ -416,7 +422,8 @@ else:
         validMassPoints = MassPoints,
         nuisances    = myShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_VV","lumi","stat_binByBin"],
     ))
-
+else:
+    raise Exception("Error: unknown value for flag OptionGenuineTauBackgroundSource!")
 
 # Reserve column 2
 DataGroups.append(DataGroup(
@@ -536,7 +543,7 @@ else:
         value         = 0.01
     ))
 
-if not OptionReplaceEmbeddingByMC:
+if OptionGenuineTauBackgroundSource == "DataDriven":
     Nuisances.append(Nuisance(
         id            = "trg_muon_dataeff",
         label         = "SingleMu trg data eff.",
@@ -744,7 +751,7 @@ else:
         value         = 0.15,
     ))
 
-if not OptionReplaceEmbeddingByMC:
+if OptionGenuineTauBackgroundSource == "DataDriven":
     Nuisances.append(Nuisance(
         id            = "Emb_mu_ID",
         label         = "Muon ID for embedding",
@@ -781,7 +788,7 @@ Nuisances.append(Nuisance(
     systVariation = "QCDNorm",
 ))
 
-if not OptionReplaceEmbeddingByMC or OptionRealisticEmbeddingWithMC:
+if OptionGenuineTauBackgroundSource == "DataDriven" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     Nuisances.append(Nuisance(
         id            = "Emb_QCDcontam",
         label         = "EWK with taus QCD contamination",
@@ -798,7 +805,7 @@ if not OptionReplaceEmbeddingByMC or OptionRealisticEmbeddingWithMC:
     ))
 
 
-if not OptionReplaceEmbeddingByMC:
+if OptionGenuineTauBackgroundSource == "DataDriven":
     if "Emb_WtauTomu" in myEmbeddingShapeSystematics:
         Nuisances.append(Nuisance(
             id            = "Emb_WtauTomu",
@@ -816,7 +823,7 @@ if not OptionReplaceEmbeddingByMC:
             value         = 0.007
         ))
 
-if OptionRealisticEmbeddingWithMC and OptionReplaceEmbeddingByMC:
+if OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     Nuisances.append(Nuisance(
         id            = "Emb_rest",
         label         = "EWK with taus W->tau->mu",
@@ -956,7 +963,7 @@ Nuisances.append(Nuisance(
 ))
 
 MergeNuisances = []
-if not OptionReplaceEmbeddingByMC and "tau_ID_shape" in myTauIDShapeSystematics:
+if "tau_ID_constShape" in myEmbeddingShapeSystematics:
     MergeNuisances.append(["tau_ID_shape", "tau_ID_constShape"])
 if OptionTreatTriggerUncertaintiesAsAsymmetric:
     MergeNuisances.append(["trg_CaloMET_dataeff", "trg_CaloMET_dataeff_forQCD"])
