@@ -329,7 +329,7 @@ class DataCardGenerator:
 
         # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
         if self._config.OptionGenuineTauBackgroundSource == "MC_FullSystematics" or self._config.OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
-            self.doMergeForRealisticEmbedding()
+            self.separateMCEWKTausAndFakes()
 
         # Make datacards
         myProducer = TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
@@ -504,8 +504,8 @@ class DataCardGenerator:
                 c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
 
-    def doMergeForRealisticEmbedding(self):
-        print "\nStart merge for realistic embedding"
+    def separateMCEWKTausAndFakes(self):
+        print "\nStart merge for MC EWK with genuine taus"
         # Obtain column for embedding
         myEmbColumn = None
         for c in self._columns:
@@ -513,11 +513,12 @@ class DataCardGenerator:
                 myEmbColumn = c
         if myEmbColumn == None:
             raise Exception(ErrorLabel()+"You need to specify EmbeddingIdList in the datacard!")
+        myEmbColumn._label = "MCEWKtau"
         # Add results from dataset columns with landsProcess == None
         myRemoveList = []
         for c in self._columns:
             if c.getLandsProcess() == None:
-                print "... merging column %s"%c.getLabel()
+                print "... merging genuine tau column %s"%c.getLabel()
                 # Merge rate result, (ExtractorResult objects)
                 # Merge cached shape histo
                 myEmbColumn._cachedShapeRootHistogramWithUncertainties.Add(c.getCachedShapeRootHistogramWithUncertainties())
@@ -555,7 +556,7 @@ class DataCardGenerator:
         for fakeId in self._config.EWKFakeIdList:
             for c in self._columns:
                 if c.getLandsProcess() == fakeId:
-                    print "... subtracting fake column %s"%c.getLabel()
+                    print "... subtracting fake tau column %s"%c.getLabel()
                     # Subtract rate result, (ExtractorResult objects)
                     # Merge cached shape histo
                     myEmbColumn._cachedShapeRootHistogramWithUncertainties.Add(c.getCachedShapeRootHistogramWithUncertainties(), -1.0)
