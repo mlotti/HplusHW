@@ -106,7 +106,7 @@ else:
     #myTrgShapeSystematics = ["trg_tau","trg_CaloMET"] # Variation of trg scale factors
 myTrgShapeSystematics.append("trg_CaloMET") # For now, use a constant uncertainty for trg MET part
 
-    myTauIDShapeSystematics = []
+myTauIDShapeSystematics = []
 if OptionTreatTauIDAndMisIDSystematicsAsShapes:
     myTauIDShapeSystematics = ["tau_ID_shape","tau_ID_eToTauBarrel_shape","tau_ID_eToTauEndcap_shape","tau_ID_muToTau_shape","tau_ID_jetToTau_shape"] # tau ID and mis-ID systematics done with shape variation
 else:
