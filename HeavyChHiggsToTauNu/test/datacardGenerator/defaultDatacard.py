@@ -99,10 +99,10 @@ Observation = ObservationInput(datasetDefinition="Data",
 # Systematics lists
 myTrgShapeSystematics = []
 if OptionTreatTriggerUncertaintiesAsAsymmetric:
-    myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_CaloMET_dataeff","trg_CaloMET_MCeff"] # Variation done separately for data and MC efficiencies
+    myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff"] # Variation done separately for data and MC efficiencies
     #myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_CaloMET_dataeff","trg_CaloMET_MCeff"] # Variation done separately for data and MC efficiencies
 else:
-    myTrgShapeSystematics = ["trg_tau","trg_CaloMET"] # Variation of trg scale factors
+    myTrgShapeSystematics = ["trg_tau"] # Variation of trg scale factors
     #myTrgShapeSystematics = ["trg_tau","trg_CaloMET"] # Variation of trg scale factors
 myTrgShapeSystematics.append("trg_CaloMET") # For now, use a constant uncertainty for trg MET part
 
