@@ -3128,7 +3128,7 @@ class DatasetAddedMC(DatasetMerged):
                 raise Exception("Datasets must be MC, got %s which is data" % d.getName())
             xs2 = d.getCrossSection()
             if abs((xs2-crossSection)/crossSection) > 1e-6:
-                raise Exception("Datasets must have the same cross section, got %f from %s and %f from %s" % (crossSection, self.dataests[0].getName(), xs2, d.getName()))
+                raise Exception("Datasets must have the same cross section, got %f from %s and %f from %s" % (crossSection, self.datasets[0].getName(), xs2, d.getName()))
 
         self.info["crossSection"] = crossSection
 
