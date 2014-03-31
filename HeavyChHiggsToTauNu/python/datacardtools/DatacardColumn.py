@@ -284,7 +284,7 @@ class DatacardColumn():
                 raise Exception(ErrorLabel()+"Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?"%self.getDatasetMgrColumn())
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
             if myDatasetRootHisto.isMC():
-                if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH") or self._label[:2] == "Hp":
+                if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
                      # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
                      dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
