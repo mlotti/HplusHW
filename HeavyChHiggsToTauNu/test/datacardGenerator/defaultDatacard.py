@@ -104,7 +104,7 @@ if OptionTreatTriggerUncertaintiesAsAsymmetric:
 else:
     myTrgShapeSystematics = ["trg_tau","trg_L1ETM"] # Variation of trg scale factors
 
-    myTauIDShapeSystematics = []
+myTauIDShapeSystematics = []
 if OptionTreatTauIDAndMisIDSystematicsAsShapes:
     myTauIDShapeSystematics = ["tau_ID_shape","tau_ID_eToTauBarrel_shape","tau_ID_eToTauEndcap_shape","tau_ID_muToTau_shape","tau_ID_jetToTau_shape"] # tau ID and mis-ID systematics done with shape variation
 else:
