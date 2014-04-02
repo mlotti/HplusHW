@@ -16,7 +16,7 @@ namespace HPlus {
     {
     if (topRecoName == "chi"){   
         fSelectedAlgorithm = new TopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper);
-        }
+        }        
     else if (topRecoName == "std"){
         fSelectedAlgorithm = new TopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper);
         }

@@ -27,37 +27,46 @@ namespace HPlus {
     TFileDirectory myDir = fs->mkdir("TopSelection");
 
     //top histograms
-    htopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopPt", "TopPt;top p_{T} (GeV)", 80, 0., 400.);
-    htopMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass", "TopMass; m_{t} (GeV)", 80, 0., 400.);
-    htopEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopEta", "TopEta; #eta_{t}", 100, -5., 5.);
+    htopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopPt", "TopPt;top p_{T} (GeV)", 80, 0., 400.);
+    htopMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass", "TopMass; m_{t} (GeV)", 80, 0., 400.);
+    htopEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopEta", "TopEta; #eta_{t}", 100, -5., 5.);
     
-    htopPtAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopPtAfterCut", "TopPtAfterCut; top p_{T} (GeV)", 80, 0., 400.);
-    htopMassAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassAfterCut", "TopMassAfterCut; m_{t}", 80, 0., 400.);
-    htopEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopEtaAfterCut", "TopEtaAfterCut; #eta_{t}", 100, -5., 5.);
-    htopMassRejected = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassRejected", "TopMassRejected; m_{t} (GeV)", 80, 0., 400.);
+    htopPtAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopPtAfterCut", "TopPtAfterCut; top p_{T} (GeV)", 80, 0., 400.);
+    htopMassAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMassAfterCut", "TopMassAfterCut; m_{t}", 80, 0., 400.);
+
+    htopMassAfterTightChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMassAfterTightChiCut", "TopMassAfterCut; m_{t}", 80, 0., 400.);
+    htopMassAfterMediumChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMassAfterMediumChiCut", "TopMassAfterCut; m_{t}", 80, 0., 400.);
+    htopMassAfterLooseChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMassAfterLooseChiCut", "TopMassAfterCut; m_{t}", 80, 0., 400.);
+
+    htopEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopEtaAfterCut", "TopEtaAfterCut; #eta_{t}", 100, -5., 5.);
+    htopMassRejected = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMassRejected", "TopMassRejected; m_{t} (GeV)", 80, 0., 400.);
 
     //W histograms
-    hWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WPt", "WPt; W p_{T} (GeV)", 80, 0., 400.);
-    hWMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass", "WMass; m_{W} (GeV)", 100, 0., 200.);
-    hWEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WEta", "WEta; #eta_{W}", 80, 0., 400.);
+    hWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WPt", "WPt; W p_{T} (GeV)", 80, 0., 400.);
+    hWMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass", "WMass; m_{W} (GeV)", 100, 0., 200.);
+    hWEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WEta", "WEta; #eta_{W}", 80, 0., 400.);
 
-    hWPtAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WPtAfterCut", "WPtAfterCut; W p_{T} (GeV)", 80, 0., 400.);
-    hWMassAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMassAfterCut", "WMassAfterCut; m_{W} (GeV)", 100, 0., 200.);
-    hWEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WEtaAfterCut", "WEtaAfterCut; #eta_{W}", 80, 0., 400.);
+    hWPtAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WPtAfterCut", "WPtAfterCut; W p_{T} (GeV)", 80, 0., 400.);
+    hWMassAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMassAfterCut", "WMassAfterCut; m_{W} (GeV)", 100, 0., 200.);
+    hWEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WEtaAfterCut", "WEtaAfterCut; #eta_{W}", 80, 0., 400.);
     
     //MC matching histograms
-    htopMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_fullMatch", "TopMass_fullMatch; m_{t} (GeV)", 80, 0., 400.);
-    htopMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_bMatch", "TopMass_bMatch; m_{t} (GeV)", 80, 0., 400.);
-    htopMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_qMatch", "TopMass_qMatch; m_{t} (GeV)", 80, 0., 400.);
-    htopMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_MatchWrongB", "TopMass_MatchWrongB; m_{t} (GeV)", 80, 0., 400.);
-    hWMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_fullMatch", "WMass_fullMatchMatch; m_{W} (GeV)", 100, 0., 200.);
-    hWMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_bMatch", "WMass_bMatch; m_{W} (GeV)", 100, 0., 200.);
-    hWMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_qMatch", "WMass_qMatch; m_{W} (GeV)", 100, 0., 200.);
-    hWMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_MatchWrongB", "WMass_MatchWrongB; m_{W} (GeV)", 100, 0., 200.);
+    htopMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass_fullMatch", "TopMass_fullMatch; m_{t} (GeV)", 80, 0., 400.);
+    htopMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass_bMatch", "TopMass_bMatch; m_{t} (GeV)", 80, 0., 400.);
+    htopMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass_qMatch", "TopMass_qMatch; m_{t} (GeV)", 80, 0., 400.);
+    htopMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass_MatchWrongB", "TopMass_MatchWrongB; m_{t} (GeV)", 80, 0., 400.);
+    hWMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_fullMatch", "WMass_fullMatchMatch; m_{W} (GeV)", 100, 0., 200.);
+    hWMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_bMatch", "WMass_bMatch; m_{W} (GeV)", 100, 0., 200.);
+    hWMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_qMatch", "WMass_qMatch; m_{W} (GeV)", 100, 0., 200.);
+    hWMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_MatchWrongB", "WMass_MatchWrongB; m_{W} (GeV)", 100, 0., 200.);
+    hWMassLepton = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_lepton", "WMass_lepton; m_{W} (GeV)", 100, 0., 200.);
+    hWMassNotLepton = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_not_lepton", "WMass_not_lepton; m_{W} (GeV)", 100, 0., 200.);
 
     //other histograms    
-    hjjbMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jjbMass", "jjbMass;m_{jjb} (GeV)", 80, 0., 400.);
-    hChi2Min = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Chi2Min", "Chi2Min; {#chi^2}_{min}", 200, 0., 40.);
+    hjjbMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jjbMass", "jjbMass;m_{jjb} (GeV)", 80, 0., 400.);
+    hChi2Min = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Chi2Min", "Chi2Min; {#chi^2}_{min}", 200, 0., 40.);
+    hChi2Top = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Chi2Top", "Chi2Top; {#chi^2}_{t}", 200, 0., 40.);
+    hChi2W = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Chi2W", "Chi2W; {#chi^2}_{W}", 200, 0., 40.);
   }
 
   //destructor
@@ -87,20 +96,22 @@ namespace HPlus {
 
       for(edm::PtrVector<pat::Jet>::const_iterator iter2 = jets.begin(); iter2 != jets.end(); ++iter2) {
         edm::Ptr<pat::Jet> iJet2 = *iter2;
-
-      if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJet2->p4()) < 0.4) continue;
-
+      
+//      if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJet2->p4()) < jetSeparation) continue;
+      if (iter==iter2) continue;
+      
       for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb) {
         edm::Ptr<pat::Jet> iJetb = *iterb;
-        if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJetb->p4()) < 0.4) continue;
-        if (ROOT::Math::VectorUtil::DeltaR(iJet2->p4(), iJetb->p4()) < 0.4) continue;      
+
+//        if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJetb->p4()) < jetSeparation) continue;
+        if (iter==iterb || iter2==iterb) continue;
 
         //...find top and W candidates with minimum chi2
         XYZTLorentzVector candTop = iJet1->p4() + iJet2->p4() + iJetb->p4();
         XYZTLorentzVector candW = iJet1->p4() + iJet2->p4();
 
         hjjbMass->Fill(candTop.M());
-        double chi2 = ((candTop.M() - nominalTop)/sigmaTop)*((candTop.M() - nominalTop)/sigmaTop) + ((candW.M() - nominalW)/sigmaW)*((candW.M() - nominalW)/sigmaW); 
+        double chi2 = ((candTop.M() - nominalTop)/sigmaTop)*((candTop.M() - nominalTop)/sigmaTop) + ((candW.M() - nominalW)/sigmaW)*((candW.M() - nominalW)/sigmaW);
 
         if (chi2 < chi2Min ) {
           chi2Min = chi2;
@@ -116,7 +127,14 @@ namespace HPlus {
       }
     }
   
-    hChi2Min->Fill(sqrt(chi2Min));
+    hChi2Min->Fill(chi2Min);
+
+    hChi2Top->Fill(((output.top.M() - nominalTop)/sigmaTop)*((output.top.M() - nominalTop)/sigmaTop));
+    hChi2W->Fill(((output.W.M() - nominalW)/sigmaW)*((output.W.M() - nominalW)/sigmaW));
+
+    if (chi2Min<5) htopMassAfterTightChiCut->Fill(output.getTopMass());
+    if (chi2Min<10) htopMassAfterMediumChiCut->Fill(output.getTopMass());
+    if (chi2Min<20) htopMassAfterLooseChiCut->Fill(output.getTopMass());
 
     htopPt->Fill(output.top.Pt());
     htopMass->Fill(output.getTopMass());
@@ -125,8 +143,8 @@ namespace HPlus {
     hWMass->Fill(output.getWMass());
     hWEta->Fill(output.getWEta());
 
-    if( output.getTopMass() >= fTopMassLow && output.getTopMass() <= fTopMassHigh ) {    
-//    if (sqrt(chi2Min) < fChi2Cut) { //TODO: the cut criterion should be changed to this or something more sophisticated later
+//    if( output.getTopMass() >= fTopMassLow && output.getTopMass() <= fTopMassHigh ) {    
+    if (chi2Min < fChi2Cut) { //TODO: the cut criterion should be changed to this or something more sophisticated later
         htopPtAfterCut->Fill(output.top.Pt());
         htopMassAfterCut->Fill(output.getTopMass());
         htopEtaAfterCut->Fill(output.getTopEta());
@@ -144,9 +162,10 @@ namespace HPlus {
       iEvent.getByLabel(fSrc, genParticles);
 
       bool bMatchHiggsSide = false;
-      bool bMatchTauSide = false;
+      bool bMatchWSide = false;
       bool Jet1Match = false;
       bool Jet2Match = false;
+      bool lepton = false;
 
     //Determine HiggSide variable: 6 if top, -6 if antitop, 0 if top not found
       int idHiggsSide = 0;
@@ -159,7 +178,7 @@ namespace HPlus {
           }
         }
              
-    //Test if b-jet is tau-side or Higgs-side
+    //Test if b-jet is W-side or Higgs-side
       for (size_t i=0; i < genParticles->size(); ++i){
         const reco::Candidate & p = (*genParticles)[i];
         int id = p.pdgId();
@@ -168,14 +187,14 @@ namespace HPlus {
         //if immediate top mother
         if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
           if ( id * idHiggsSide > 0 ) {
-            // test with b jet to tau side
+            // test with b jet to Higgs side
             double deltaR = ROOT::Math::VectorUtil::DeltaR(Jetb->p4(),p.p4() );
             if ( deltaR < 0.4) bMatchHiggsSide = true;
             }
           if ( id * idHiggsSide < 0 ) {
-            // test with b jet to top side
+            // test with b jet to W side
             double deltaR = ROOT::Math::VectorUtil::DeltaR(Jetb->p4(),p.p4() );
-            if ( deltaR < 0.4) bMatchTauSide = true;
+            if ( deltaR < 0.4) bMatchWSide = true;
           }
         }
       } 
@@ -184,7 +203,7 @@ namespace HPlus {
       for (size_t i=0; i < genParticles->size(); ++i){
           const reco::Candidate & p = (*genParticles)[i];
           int id = p.pdgId();
-          //if not light quark but from light quark
+          //if not a light quark or comes from a light quark, skip
           if ( abs(id) > 4  )continue;
           if ( hasImmediateMother(p,1) || hasImmediateMother(p,-1) )continue;
           if ( hasImmediateMother(p,2) || hasImmediateMother(p,-2) )continue;
@@ -196,12 +215,15 @@ namespace HPlus {
               if ( deltaR1 < 0.4) Jet1Match = true;
               double deltaR2 = ROOT::Math::VectorUtil::DeltaR(Jet2->p4(),p.p4() );
               if ( deltaR2 < 0.4) Jet2Match = true;
+              //if decays to leptons
+              if (hasDaughter(p,11) || hasDaughter(p,-11) || hasDaughter(p,13) || hasDaughter(p,-13) || hasDaughter(p,15) || hasDaughter(p,-15) || hasDaughter(p,17) || hasDaughter(p,-17))
+                  lepton = true;
               }
           }    
 
     //Fill histograms
      //everything matches
-     if ( bMatchTauSide && Jet1Match && Jet2Match) {
+     if ( bMatchWSide && Jet1Match && Jet2Match) {
        htopMassMatch->Fill(output.getTopMass());
        hWMassMatch->Fill(output.getWMass()); 
        }
@@ -211,7 +233,7 @@ namespace HPlus {
        hWMassMatchWrongB->Fill(output.getWMass()); 
        }
      //b matches
-     if ( bMatchTauSide ) {
+     if ( bMatchWSide ) {
        htopMassBMatch->Fill(output.getTopMass());
        hWMassBMatch->Fill(output.getWMass()); 
        }
@@ -220,10 +242,14 @@ namespace HPlus {
        htopMassQMatch->Fill(output.getTopMass());
        hWMassQMatch->Fill(output.getWMass()); 
        }
-      }
+     //leptons found
+     if (lepton) hWMassLepton->Fill(output.getWMass()); 
+     if (!lepton) hWMassNotLepton->Fill(output.getWMass());        
+    }
 
     //Event selection based on top reconstruction
-    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
+//    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
+    if (chi2Min >= fChi2Cut) {
       output.fPassedEvent = false;
       htopMassRejected->Fill(output.getTopMass());      
       } else {

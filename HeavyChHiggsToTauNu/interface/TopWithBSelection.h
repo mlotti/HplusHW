@@ -43,6 +43,9 @@ namespace HPlus {
     WrappedTH1* htopEta;
     WrappedTH1* htopPtAfterCut;
     WrappedTH1* htopMassAfterCut;
+    WrappedTH1* htopMassAfterTightChiCut;
+    WrappedTH1* htopMassAfterMediumChiCut;
+    WrappedTH1* htopMassAfterLooseChiCut;        
     WrappedTH1* htopEtaAfterCut;
     WrappedTH1* htopMassRejected;
     WrappedTH1* hWPt;

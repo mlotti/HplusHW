@@ -39,6 +39,7 @@ namespace HPlus {
     WrappedTH1* htopPt;
     WrappedTH1* htopMass;
     WrappedTH1* htopEta;
+    WrappedTH1* htopMassAfterCut;
     WrappedTH1* htopMassRejected;
     WrappedTH1* hWPt;
     WrappedTH1* hWMass;

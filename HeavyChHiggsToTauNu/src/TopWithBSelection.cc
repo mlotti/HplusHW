@@ -24,40 +24,45 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
 
-    TFileDirectory myDir = fs->mkdir("TopWithBSelection");
+    TFileDirectory myDir = fs->mkdir("TopSelection");
 
     //top histograms
-    htopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopPt", "TopPt;top p_{T} (GeV)", 80, 0., 400.);
-    htopMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass", "TopMass; m_{t} (GeV)", 80, 0., 400.);
-    htopEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopEta", "TopEta; #eta_{t}", 100, -5., 5.);
+    htopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopPt", "TopPt;top p_{T} (GeV)", 80, 0., 400.);
+    htopMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass", "TopMass; m_{t} (GeV)", 80, 0., 400.);
+    htopEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopEta", "TopEta; #eta_{t}", 100, -5., 5.);
     
-    htopPtAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopPtAfterCut", "TopPtAfterCut; top p_{T} (GeV)", 80, 0., 400.);
-    htopMassAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassAfterCut", "TopMassAfterCut; m_{t}", 80, 0., 400.);
-    htopEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopEtaAfterCut", "TopEtaAfterCut; #eta_{t}", 100, -5., 5.);
-    htopMassRejected = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassRejected", "TopMassRejected; m_{t} (GeV)", 80, 0., 400.);
+    htopPtAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopPtAfterCut", "TopPtAfterCut; top p_{T} (GeV)", 80, 0., 400.);
+    htopMassAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMassAfterCut", "TopMassAfterCut; m_{t}", 80, 0., 400.);
+    
+    htopMassAfterTightChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMassAfterTightChiCut", "TopMassAfterCut; m_{t}", 80, 0., 400.);
+    htopMassAfterMediumChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMassAfterMediumChiCut", "TopMassAfterCut; m_{t}", 80, 0., 400.);
+    htopMassAfterLooseChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMassAfterLooseChiCut", "TopMassAfterCut; m_{t}", 80, 0., 400.);    
+    
+    htopEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopEtaAfterCut", "TopEtaAfterCut; #eta_{t}", 100, -5., 5.);
+    htopMassRejected = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMassRejected", "TopMassRejected; m_{t} (GeV)", 80, 0., 400.);
     
     //W histograms
-    hWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WPt", "WPt; W p_{T} (GeV)", 80, 0., 400.);
-    hWMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass", "WMass; m_{W} (GeV)", 100, 0., 200.);
-    hWEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WEta", "WEta; #eta_{W}", 80, 0., 400.);
+    hWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WPt", "WPt; W p_{T} (GeV)", 80, 0., 400.);
+    hWMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass", "WMass; m_{W} (GeV)", 100, 0., 200.);
+    hWEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WEta", "WEta; #eta_{W}", 80, 0., 400.);
 
-    hWPtAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WPtAfterCut", "WPtAfterCut; W p_{T} (GeV)", 80, 0., 400.);
-    hWMassAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMassAfterCut", "WMassAfterCut; m_{W} (GeV)", 100, 0., 200.);
-    hWEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WEtaAfterCut", "WEtaAfterCut; #eta_{W}", 80, 0., 400.);
+    hWPtAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WPtAfterCut", "WPtAfterCut; W p_{T} (GeV)", 80, 0., 400.);
+    hWMassAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMassAfterCut", "WMassAfterCut; m_{W} (GeV)", 100, 0., 200.);
+    hWEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WEtaAfterCut", "WEtaAfterCut; #eta_{W}", 80, 0., 400.);
     
     //MC matching histograms
-    htopMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_fullMatch", "TopMass_fullMatch; m_{t} (GeV)", 80, 0., 400.);
-    htopMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_bMatch", "TopMass_bMatch; m_{t} (GeV)", 80, 0., 400.);
-    htopMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_qMatch", "TopMass_qMatch; m_{t} (GeV)", 80, 0., 400.);
-    htopMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass_MatchWrongB", "TopMass_MatchWrongB; m_{t} (GeV)", 80, 0., 400.);
-    hWMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_fullMatch", "WMass_fullMatchMatch; m_{W} (GeV)", 100, 0., 200.);
-    hWMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_bMatch", "WMass_bMatch; m_{W} (GeV)", 100, 0., 200.);
-    hWMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_qMatch", "WMass_qMatch; m_{W} (GeV)", 100, 0., 200.);
-    hWMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMass_MatchWrongB", "WMass_MatchWrongB; m_{W} (GeV)", 100, 0., 200.);
+    htopMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass_fullMatch", "TopMass_fullMatch; m_{t} (GeV)", 80, 0., 400.);
+    htopMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass_bMatch", "TopMass_bMatch; m_{t} (GeV)", 80, 0., 400.);
+    htopMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass_qMatch", "TopMass_qMatch; m_{t} (GeV)", 80, 0., 400.);
+    htopMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass_MatchWrongB", "TopMass_MatchWrongB; m_{t} (GeV)", 80, 0., 400.);
+    hWMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_fullMatch", "WMass_fullMatchMatch; m_{W} (GeV)", 100, 0., 200.);
+    hWMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_bMatch", "WMass_bMatch; m_{W} (GeV)", 100, 0., 200.);
+    hWMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_qMatch", "WMass_qMatch; m_{W} (GeV)", 100, 0., 200.);
+    hWMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_MatchWrongB", "WMass_MatchWrongB; m_{W} (GeV)", 100, 0., 200.);
 
     //other histograms    
-    hjjbMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jjbMass", "jjbMass;m_{jjb} (GeV)", 80, 0., 400.);
-    hChi2Min = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Chi2Min", "Chi2Min; {#chi^2}_{min}", 200, 0., 40.);
+    hjjbMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jjbMass", "jjbMass;m_{jjb} (GeV)", 80, 0., 400.);
+    hChi2Min = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Chi2Min", "Chi2Min; {#chi^2}_{min}", 200, 0., 40.);
   }
 
   //destructor
@@ -110,7 +115,10 @@ namespace HPlus {
     }
   }
 
-    hChi2Min->Fill(sqrt(chi2Min));
+    hChi2Min->Fill(chi2Min); //used to be sqrt(chi2Min) which was misleading, corrected 27.2.14
+    if (chi2Min<5) htopMassAfterTightChiCut->Fill(output.getTopMass());
+    if (chi2Min<10) htopMassAfterMediumChiCut->Fill(output.getTopMass());
+    if (chi2Min<20) htopMassAfterLooseChiCut->Fill(output.getTopMass());
 
     htopPt->Fill(output.top.Pt());
     htopMass->Fill(output.getTopMass());
@@ -119,8 +127,8 @@ namespace HPlus {
     hWMass->Fill(output.getWMass());
     hWEta->Fill(output.getWEta());
     
-    if( output.getTopMass() >= fTopMassLow && output.getTopMass() <= fTopMassHigh ) {    
-//    if (sqrt(chi2Min) < fChi2Cut) { //TODO: the cut criterion should be changed to this or something more sophisticated later
+//    if( output.getTopMass() >= fTopMassLow && output.getTopMass() <= fTopMassHigh ) {    
+    if (chi2Min < fChi2Cut) {
         htopPtAfterCut->Fill(output.top.Pt());
         htopMassAfterCut->Fill(output.getTopMass());
         htopEtaAfterCut->Fill(output.getTopEta());
@@ -217,7 +225,8 @@ namespace HPlus {
       }
 
     //Event selection based on top reconstruction
-    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
+//    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
+    if (chi2Min >= fChi2Cut) {
       output.fPassedEvent = false;
       htopMassRejected->Fill(output.getTopMass());      
       } else {
