@@ -514,7 +514,9 @@ namespace HPlus {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearMinimum, myMinimumRadius);
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearMinimum, myMinimumRadius);
+  }
 
+  void CommonPlots::fillControlPlotsAfterTopologicalSelections(const edm::Event& iEvent) {
     // Fill control plots for selected taus after standard selections
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauRtauAfterStandardSelections, fTauData.getSelectedTauRtauValue());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauLeadingTrkPtAfterStandardSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());

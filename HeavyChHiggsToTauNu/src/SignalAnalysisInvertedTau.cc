@@ -826,12 +826,15 @@ namespace HPlus {
     fCommonPlotsInvertedAfterCollinearCuts->fill();
 
     // At this point, let's fill histograms for closure test and for normalisation
+    BjetSelection::Data bjetSelectionDataTmp = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagDataTmp.getSelectedJets(), selectedTau, metDataTmp.getSelectedMET());
+    TopSelectionManager::Data topSelectionDataTmp = fTopSelectionManager.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagDataTmp.getSelectedJets(), bjetSelectionDataTmp.getBjetTopSide(), bjetSelectionDataTmp.passedEvent());
+    FullHiggsMassCalculator::Data fullHiggsMassDataTmp = fFullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, selectedTau, btagDataTmp, metDataTmp, &genData);
 
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterCollinearCuts, selectedTau->pt());
     myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCuts, metDataTmp.getSelectedMET()->et());
     myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCuts, transverseMass);
     if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearCuts, invariantMass);
-    if (qcdTailKillerDataCollinear.passedBackToBackCuts()) { // Pass also back-to-back cuts
+    if (qcdTailKillerDataCollinear.passedBackToBackCuts() && metDataTmp.passedEvent() && topSelectionDataTmp.passedEvent()) { // Pass also back-to-back cuts and MET cut
       myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, metDataTmp.getSelectedMET()->et());
       myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, transverseMass);
       if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
@@ -865,6 +868,42 @@ namespace HPlus {
         fCommonPlotsInvertedAfterCollinearCutsPlusBvetoPlusBackToBackCuts->fill();
       }
     }
+
+    //------ b tagging cut
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+
+    // Apply scale factor as weight to event
+    if (btagData.passedEvent()) increment(fInvertedBTaggingCounter);
+
+    if (!iEvent.isRealData()) {
+      fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fEventWeight.multiplyWeight(btagData.getScaleFactor());
+    }
+    // Beyond this point, the b tag scale factor has already been applied
+    fCommonPlots.fillControlPlotsAtBtagging(iEvent, btagData);
+    if (!btagData.passedEvent()) {
+      // Inverted btag control region
+      if (qcdTailKillerDataCollinear.passedBackToBackCuts() && topSelectionDataTmp.passedEvent()) {
+        myHandler.fillShapeHistogram(hMTInvertedTauIdFinalReversedBtag, transverseMass);
+        if (fullHiggsMassDataTmp.passedEvent()) {
+          myHandler.fillShapeHistogram(hInvMassInvertedTauIdFinalReversedBtag, fullHiggsMassDataTmp.getHiggsMass());
+        }
+      }
+      return false;
+    }
+    increment(fInvertedBTaggingScaleFactorCounter);
+
+    myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBtagging, selectedTau->pt());
+    fCommonPlotsInvertedAfterMETAndBtagWithSF->fill();
+
+    // mt for inverted tau with b tagging
+    myHandler.fillShapeHistogram(hMTInvertedTauIdAfterBtag, transverseMass);
+    // deltaPhi with b tagging
+    myHandler.fillShapeHistogram(hDeltaPhiInverted, deltaPhi);
+    hTransverseMassVsDphi->Fill(transverseMass,deltaPhi);
+
+    //------ ttbar topology selected
+    fCommonPlots.fillControlPlotsAfterTopologicalSelections(iEvent);
 
     //------ MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), selectedTau, jetData.getAllJets());
@@ -918,42 +957,6 @@ namespace HPlus {
         fCommonPlotsInvertedAfterMetPlusSoftBtaggingPlusBackToBackCuts->fill();
       }
     }
-
-    //------ b tagging cut
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
-    BjetSelection::Data bjetSelectionDataTmp = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
-    TopSelectionManager::Data topSelectionDataTmp = fTopSelectionManager.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), bjetSelectionDataTmp.getBjetTopSide(), bjetSelectionDataTmp.passedEvent());
-    FullHiggsMassCalculator::Data fullHiggsMassDataTmp = fFullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, selectedTau, btagData, metData, &genData);
-
-    // Apply scale factor as weight to event
-    if (btagData.passedEvent()) increment(fInvertedBTaggingCounter);
-
-    if (!iEvent.isRealData()) {
-      fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
-      fEventWeight.multiplyWeight(btagData.getScaleFactor());
-    }
-    // Beyond this point, the b tag scale factor has already been applied
-    fCommonPlots.fillControlPlotsAtBtagging(iEvent, btagData);
-    if (!btagData.passedEvent()) {
-      // Inverted btag control region
-      if (qcdTailKillerDataCollinear.passedBackToBackCuts() && topSelectionDataTmp.passedEvent()) {
-        myHandler.fillShapeHistogram(hMTInvertedTauIdFinalReversedBtag, transverseMass);
-        if (fullHiggsMassDataTmp.passedEvent()) {
-          myHandler.fillShapeHistogram(hInvMassInvertedTauIdFinalReversedBtag, fullHiggsMassDataTmp.getHiggsMass());
-        }
-      }
-      return false;
-    }
-    increment(fInvertedBTaggingScaleFactorCounter);
-
-    myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBtagging, selectedTau->pt());
-    fCommonPlotsInvertedAfterMETAndBtagWithSF->fill();
-
-    // mt for inverted tau with b tagging
-    myHandler.fillShapeHistogram(hMTInvertedTauIdAfterBtag, transverseMass);
-    // deltaPhi with b tagging
-    myHandler.fillShapeHistogram(hDeltaPhiInverted, deltaPhi);
-    hTransverseMassVsDphi->Fill(transverseMass,deltaPhi);
 
     //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, selectedTau, jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
