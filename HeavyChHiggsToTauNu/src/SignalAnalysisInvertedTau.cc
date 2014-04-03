@@ -777,7 +777,7 @@ namespace HPlus {
     fCommonPlotsInvertedAfterMetSF->fill();
     // Obtain transverse mass and invariant mass for plotting
     double transverseMass = TransverseMass::reconstruct(*(selectedTau), *(metDataTmp.getSelectedMET()));
-    double deltaPhi = DeltaPhi::reconstruct(*(selectedTau), *(metData.getSelectedMET())) * 57.3; // converted to degrees
+    double deltaPhi = DeltaPhi::reconstruct(*(selectedTau), *(metDataTmp.getSelectedMET())) * 57.3; // converted to degrees
     double invariantMass = -1.0;
     BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
     if (btagDataTmp.passedEvent()) {
