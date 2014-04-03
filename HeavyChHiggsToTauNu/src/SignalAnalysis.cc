@@ -701,6 +701,10 @@ namespace HPlus {
     }
 
 
+    // Obtain delta phi and transverse mass here, but do not yet cut on them
+    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metDataTmp.getSelectedMET())) * 57.3; // converted to degrees
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metDataTmp.getSelectedMET()));
+
 //------ b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     // Apply btag pass probability as weight to event (to get better stats. for W+jets and DY)
@@ -750,9 +754,6 @@ namespace HPlus {
 //------ MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, nVertices, tauData.getSelectedTau(), jetData.getAllJets());
     fCommonPlots.fillControlPlotsAtMETSelection(iEvent, metData);
-    // Obtain delta phi and transverse mass here, but do not yet cut on them
-    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
-    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
     if (transverseMass > 40 && transverseMass < 100)
       hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), btagDataTmp.getBJetCount());
     // Now cut on MET
