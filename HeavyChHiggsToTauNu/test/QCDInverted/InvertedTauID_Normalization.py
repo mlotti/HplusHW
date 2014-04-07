@@ -27,7 +27,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabConsistencyCheck as cons
 from InvertedTauID import *
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2011AB"
+dataEra = "Run2012ABCD"
 
 
 searchMode = "Light"
@@ -62,10 +62,10 @@ def main(argv):
     #datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
     datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
-   
+
     # Check multicrab consistency
     consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="QCD inverted")
-
+   
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
     # the analysis job uses skimmed pattuple as an input
@@ -121,7 +121,9 @@ def main(argv):
         title = title.replace("=","eq")
         title = title.replace("..","to")
         binLabels.append(title)
-        
+
+    bins = ["Inclusive"]
+    binLabels = ["Inclusive"]
     print
     print "Histogram bins available",bins
 
@@ -145,8 +147,8 @@ def main(argv):
         metBase = plots.DataMCPlot(datasets, "baseline/METBaseline"+HISTONAME+"/METBaseline"+HISTONAME+bin)
         metInver = plots.DataMCPlot(datasets, "Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
         # Rebin before subtracting
-        metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
-        metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+#        metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+#        metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
         
         metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
         metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
@@ -158,15 +160,41 @@ def main(argv):
 
         metInverted_QCD = metInverted_data.Clone("QCD")
         metInverted_QCD.Add(metInverted_EWK,-1)
-        
+
+        metInverted_data = addlabels(metInverted_data)
+        metInverted_EWK  = addlabels(metInverted_EWK)
+        metBase_data     = addlabels(metBase_data)
+        metBase_EWK      = addlabels(metBase_EWK)
+        metInverted_QCD  = addlabels(metInverted_QCD)
+
         invertedQCD.plotHisto(metInverted_data,"inverted")
         invertedQCD.plotHisto(metInverted_EWK,"invertedEWK")
         invertedQCD.plotHisto(metBase_data,"baseline")
         invertedQCD.plotHisto(metBase_EWK,"baselineEWK")
 
-        invertedQCD.fitEWK(metInverted_EWK,"LR")
-        invertedQCD.fitEWK(metBase_EWK,"LR")
-        invertedQCD.fitQCD(metInverted_QCD)
+
+#        fitOptions = "LRB"
+        fitOptions = "RB"
+#        fitOptions = "IEB"
+
+#        ROOT.TVirtualFitter.SetDefaultFitter("Minuit")
+#        ROOT.TVirtualFitter.SetDefaultFitter("Minuit2")
+#        fitOptions = "Q"   # Chi2 Fit
+#        fitOptions = "VEB"  # Chi2 Fit with Minos Error
+#        fitOptions = "IEB"  # Chi2 Fit with Integral and Minos
+#        fitOptions = "VLEB" # Likelihood Fit with Minos Error
+
+#        ROOT.TVirtualFitter.SetDefaultFitter("Fumili")
+#        ROOT.TVirtualFitter.SetDefaultFitter("Fumili2")
+#        fitOptions = "Q"   # Chi2 Fit
+#        fitOptions = "VE"  # Chi2 Fit with Minos Error
+#        fitOptions = "IE"  # Chi2 Fit with Integral and Minos
+#        fitOptions = "VLE" # Likelihood Fit with Minos Error
+        
+
+        invertedQCD.fitEWK(metInverted_EWK,fitOptions)
+        invertedQCD.fitEWK(metBase_EWK,fitOptions)
+        invertedQCD.fitQCD(metInverted_QCD,fitOptions)
         invertedQCD.fitData(metBase_data)
 
         invertedQCD.getNormalization()
@@ -174,6 +202,13 @@ def main(argv):
     invertedQCD.Summary()
     invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactors.py")
     invertedQCD.WriteLatexOutput("fits.tex")
+
+def addlabels(histo):
+    binwidth = int(histo.GetXaxis().GetBinWidth(1))
+    histo.GetXaxis().SetTitle("Type1 PFMET (GeV)")
+    histo.GetYaxis().SetTitle("Events / %i GeV"%binwidth)
+    histo.GetYaxis().SetTitleOffset(1.5)
+    return histo
 
 if __name__ == "__main__":
     main(sys.argv)
