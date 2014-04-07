@@ -1584,6 +1584,12 @@ class PlotRatioBase:
         self.cf.frame2.GetYaxis().SetNdivisions(505)
         self.coverPadOpts = coverPadOpts
 
+    ## Add label for blinded range
+    #
+    # \param blindingRangeString   String containing the range for the blinding
+    def addBlindingRangeString(self, blindingRangeString):
+        self.blindingRangeString = blindingRangeString
+
     ## Draw the ratio histograms to the ratio pad
     def _draw(self):
         if len(self.ratioHistoMgr) == 0:
@@ -1618,6 +1624,10 @@ class PlotRatioBase:
             if hasattr(self, "ratioLegendHeader"):
                 self.ratioLegend.SetHeader(self.ratioLegendHeader)
             self.ratioLegend.Draw()
+
+        # Add label for blinded range
+        if hasattr(self, "blindingRangeString"):
+            histograms.addText(0.55, 0.33, "Data blinded: %s"%self.blindingRangeString, align="center", bold=True)
 
         # Redraw the axes in order to get the tick marks on top of the
         # histogram
@@ -2254,6 +2264,7 @@ class PlotDrawer:
                  addLuminosityText=False,
                  stackMCHistograms=False,
                  addMCUncertainty=False,
+                 blindingRangeString=None,
                  cmsText=None,
                  ):
         self.xlabelDefault = xlabel
@@ -2289,6 +2300,7 @@ class PlotDrawer:
         self.addLuminosityTextDefault = addLuminosityText
         self.stackMCHistogramsDefault = stackMCHistograms
         self.addMCUncertaintyDefault = addMCUncertainty
+        self.blindingRangeStringDefault = None
         self.cmsTextDefault = cmsText
 
     ## Modify the defaults
@@ -2695,7 +2707,12 @@ class PlotDrawer:
         customize = self._getValue("customizeBeforeDraw", p, kwargs)
         if customize != None:
             customize(p)
-        
+
+        # Add string for blinded range into the ratio plot
+        blindingRangeString = self._getValue("blindingRangeString", p, kwargs)
+        if blindingRangeString != None and isinstance(p, PlotRatioBase):
+            p.addBlindingRangeString(blindingRangeString)
+
         p.draw()
 
         # Updates the possible Z axis label styles
@@ -2710,6 +2727,7 @@ class PlotDrawer:
         p.addEnergyText()
         if self._getValue("addLuminosityText", p, kwargs):
             p.addLuminosityText()
+
 
         customize2 = self._getValue("customizeBeforeSave", p, kwargs)
         if customize2 is not None:
