@@ -1221,7 +1221,7 @@ class InvertedTauID:
             
         self.plotIntegral(plot, histo.GetName())
     
-    def fitQCD(self,histo):
+    def fitQCD(self,histo,options="R"):
         if histo.GetEntries() == 0:
             return
                     
@@ -1269,10 +1269,11 @@ class InvertedTauID:
         print "check self.nInvData",self.nInvData
 
         histo.Scale(1/self.normInvQCD)
-        histo.Fit(theFit,"LR")
+        histo.Fit(theFit,options)
 
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
+        theFit.SetLineWidth(3)
         theFit.Draw("same")
 
         par = theFit.GetParameters()
@@ -1286,6 +1287,7 @@ class InvertedTauID:
         qcdOnly.FixParameter(0,par[0])
         qcdOnly.FixParameter(1,par[1])
         qcdOnly.SetLineStyle(2)
+        qcdOnly.SetLineWidth(3)
         qcdOnly.Draw("same")
 
         parQCD = qcdOnly.GetParameters()
@@ -1507,6 +1509,7 @@ class InvertedTauID:
             theFit.SetParLimits(2,10,100)
             theFit.SetParLimits(3,0.01,10)
 
+	gStyle.SetOptFit(0)
 
         plot = plots.PlotBase()
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
@@ -1528,6 +1531,7 @@ class InvertedTauID:
        
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
+        theFit.SetLineWidth(3)
         theFit.Draw("same")
 
         self.parMCEWK = theFit.GetParameters()
@@ -1556,7 +1560,7 @@ class InvertedTauID:
         self.nMCEWK = theFit.Integral(0,1000,self.parMCEWK)
         print "Integral ",self.normEWK*self.nMCEWK
 
-    def fitData(self,histo):
+    def fitData(self,histo,options="R"):
 
         if histo.GetEntries() == 0:
             self.nBaseData = 0
@@ -1598,11 +1602,12 @@ class InvertedTauID:
         self.nBaseData = histo.Integral(0,histo.GetNbinsX())
 	print "data events ",self.nBaseData
 
-        histo.Fit(theFit,"R")
+        histo.Fit(theFit,options)
 
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
         theFit.SetLineColor(4)
+        theFit.SetLineWidth(3)
         theFit.Draw("same")
 
 	par = theFit.GetParameters()
@@ -1611,6 +1616,7 @@ class InvertedTauID:
 	qcdOnly.FixParameter(0,par[0])
 	qcdOnly.FixParameter(1,par[1])
 	qcdOnly.SetLineStyle(2)
+        qcdOnly.SetLineWidth(3)
 	qcdOnly.Draw("same")
 
  #       histograms.addText(0.35,0.8,"Data, Baseline selection")
