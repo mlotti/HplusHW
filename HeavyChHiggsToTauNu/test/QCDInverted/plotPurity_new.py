@@ -21,13 +21,17 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 
 # Set here the names of the histograms you want to access
 histoNameList = ["shapeTransverseMass",
-                 "shapeInvariantMass"]
+                 "shapeInvariantMass",
+                 "ForDataDrivenCtrlPlots/SelectedTau_pT_AfterMtSelections"]
 
-def doSinglePlot(histograms, myDir, histoname, luminosity):
+def doSinglePlot(histograms, myDir, histoName, luminosity):
     plot = plots.PlotBase(histograms)
     plot.setLuminosity(luminosity)
     plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineWidth(3))
+    mySplit = histoName.split("/")
+    histoName = mySplit[len(mySplit)-1]
     myPlotName = "%s/QCDInv_Purity_%s"%(myDir, histoName)
+    print myPlotName
     myParams = {}
     myParams["ylabel"] = "Purity"
     myParams["log"] = False
@@ -55,6 +59,8 @@ def doPurityPlots(opts, histoName, dsetMgr, moduleInfoString, myDir, luminosity,
         h.SetBinError(h.GetNbinsX()+2, 0.0)
 
     myQCDShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", histoName, luminosity)
+    mySplit = histoName.split("/")
+    histoName = mySplit[len(mySplit)-1]
     # Get data and EWK histograms
     hData = myQCDShape.getIntegratedDataHisto()
     hEWK = myQCDShape.getIntegratedEwkHisto()
@@ -81,7 +87,6 @@ def doPurityPlots(opts, histoName, dsetMgr, moduleInfoString, myDir, luminosity,
                 myUncert = 0.0
             else:
                 myUncert = sqrt(myPurity * (1.0-myPurity) / nData) # Assume binomial error
-        print nData,nEWK,myPurity,myUncert
         hPurity.SetBinContent(i, myPurity)
         hPurity.SetBinError(i, myUncert)
     # Find out tail killer scenario
@@ -142,15 +147,14 @@ if __name__ == "__main__":
     # Loop over era/searchMode/optimizationMode options
     for era in myModuleSelector.getSelectedEras():
         for searchMode in myModuleSelector.getSelectedSearchModes():
+            # Construct info string of module
+            myModuleInfoString = "%s_%s"%(era, searchMode)
+            # Make a directory for output
+            myDir = "purityplots_%s"%myModuleInfoString
+            createOutputdirectory(myDir)
             for histoName in histoNameList:
-                print histoName
                 myShapePurityHistograms = []
-                # Construct info string of module
-                myModuleInfoString = "%s_%s"%(era, searchMode)
-                print HighlightStyle()+"Module:",myModuleInfoString,NormalStyle()
-                # Make a directory for output
-                myDir = "purityplots_%s"%myModuleInfoString
-                createOutputdirectory(myDir)
+                print HighlightStyle()+"Module:",myModuleInfoString,"histogram:",histoName,NormalStyle()
                 for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
                     # Obtain dataset manager
                     dsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
