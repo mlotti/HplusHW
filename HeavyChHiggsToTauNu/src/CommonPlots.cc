@@ -613,7 +613,7 @@ namespace HPlus {
       }
     }
     // MET oscillation analysis
-    if (data.passedEvent) {
+    if (data.passedEvent()) {
       if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
     }
   }
