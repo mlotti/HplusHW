@@ -46,7 +46,9 @@ namespace HPlus {
     fMETPhiOscillationCorrectionAfterLeptonVeto(0),
     fMETPhiOscillationCorrectionAfterNjets(0),
     fMETPhiOscillationCorrectionAfterMET(0),
+    fMETPhiOscillationCorrectionEWKFakeTausAfterMET(0),
     fMETPhiOscillationCorrectionAfterBjets(0),
+    fMETPhiOscillationCorrectionEWKFakeTausAfterBjets(0),
     fMETPhiOscillationCorrectionAfterAllSelections(0),
     fMETPhiOscillationCorrectionEWKControlRegion(0) {
     // Update analysis type for embedding
@@ -77,7 +79,9 @@ namespace HPlus {
       fMETPhiOscillationCorrectionAfterMETSF = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterMETSF");
       fMETPhiOscillationCorrectionAfterCollinearCuts = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterCollinearCuts");
       fMETPhiOscillationCorrectionAfterMET = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterMET");
+      fMETPhiOscillationCorrectionEWKFakeTausAfterMET = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterMETEWKFakeTaus");
       fMETPhiOscillationCorrectionAfterBjets = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterBjets");
+      fMETPhiOscillationCorrectionEWKFakeTausAfterBjets = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterBjetsEWKFakeTaus");
       fMETPhiOscillationCorrectionAfterAllSelections = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterAllSelections");
       fMETPhiOscillationCorrectionEWKControlRegion = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterAllSelections_EKWControlRegion");
     }
@@ -587,7 +591,12 @@ namespace HPlus {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTauPlusMETPt, (fTauData.getSelectedTau()->p4()+data.getSelectedMET()->p4()).pt());
     }
     if (data.passedEvent()) {
-      if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterMET->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+      if (bOptionEnableMETOscillationAnalysis) {
+        fMETPhiOscillationCorrectionAfterMET->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+          fMETPhiOscillationCorrectionEWKFakeTausAfterMET->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+        }
+      }
     }
   }
 
@@ -614,7 +623,12 @@ namespace HPlus {
     }
     // MET oscillation analysis
     if (data.passedEvent()) {
-      if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+      if (bOptionEnableMETOscillationAnalysis) {
+        fMETPhiOscillationCorrectionAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+          fMETPhiOscillationCorrectionEWKFakeTausAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+        }
+      }
     }
   }
 
