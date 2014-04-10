@@ -49,14 +49,17 @@ def main():
     dirEmb = "."
 #    dirSig = "../multicrab_signalAnalysisGenTau_140206_122901"
 #    dirSig = "../multicrab_signalAnalysisGenTau_140211_100710"
-    dirSig = "../multicrab_signalAnalysisGenTau_140217_152148"
+#    dirSig = "../multicrab_signalAnalysisGenTau_140217_152148"
+    dirSig = "../multicrab_signalAnalysisGenTau_140326_132754"
 
     for optMode in [
-        "OptQCDTailKillerZeroPlus",
+#        "OptQCDTailKillerZeroPlus",
+
         "OptQCDTailKillerLoosePlus",
         "OptQCDTailKillerMediumPlus",
         "OptQCDTailKillerTightPlus",
-        "OptQCDTailKillerVeryTightPlus",
+
+#        "OptQCDTailKillerVeryTightPlus",
         ]:
         datasetsEmb = dataset.getDatasetsFromMulticrabCfg(directory=dirEmb, dataEra=dataEra, analysisName=analysisEmb, optimizationMode=optMode)
         datasetsSig = dataset.getDatasetsFromMulticrabCfg(directory=dirSig, dataEra=dataEra, analysisName=analysisSig, optimizationMode=optMode)
@@ -91,9 +94,12 @@ def doDataset(datasetsEmb, datasetsSig, optMode):
     dop("EWKMC", addData=True)
     dop("TTJets")
     dop("WJets")
-    dop("DYJetsToLL", mtOnly=True)
-    dop("SingleTop", mtOnly=True)
-    dop("Diboson", mtOnly=True)
+    dop("DYJetsToLL", mtOnly=False)
+    dop("SingleTop", mtOnly=False)
+    dop("Diboson", mtOnly=False)
+#    dop("DYJetsToLL", mtOnly=True)
+#    dop("SingleTop", mtOnly=True)
+#    dop("Diboson", mtOnly=True)
 
 
 #drawPlotCommon = tauEmbedding.PlotDrawerTauEmbeddingEmbeddedNormal(ylabel="Events / %.0f GeV", stackMCHistograms=False, log=True, addMCUncertainty=True, ratio=True, addLuminosityText=True)
@@ -173,7 +179,8 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, optMode, addData, mtOnly=Fals
     opts = optsdef
 
     # After Njets
-    drawControlPlot("SelectedTau_pT_AfterStandardSelections", rebin=[0]+range(40, 160, 10)+[160, 200, 300, 400, 500], divideByBinWidth=True)
+    tauPtBins = [0]+range(40, 160, 10)+[160, 200, 300, 400, 500]
+    drawControlPlot("SelectedTau_pT_AfterStandardSelections", rebin=tauPtBins, divideByBinWidth=True)
     drawControlPlot("SelectedTau_eta_AfterStandardSelections", rebin=2, opts={"xmin": -2.1, "xmax": 2.1}, moveLegend={"dy": -0.4})
     drawControlPlot("SelectedTau_phi_AfterStandardSelections", rebin=2, moveLegend={"dy": -0.4})
     drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", opts={"xmin": 0.7, "xmax":1 }, moveLegend={"dy": -0.4, "dx": -0.3})
@@ -182,9 +189,10 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, optMode, addData, mtOnly=Fals
     drawControlPlot("JetEta_AfterStandardSelections", moveLegend={"dy": -0.4})
 
 #    drawControlPlot("NjetsAfterJetSelectionAndMETSF", opts={"xmin": 0, "xmax": 16}, ylabel="Events", cutLine=3)
-    drawControlPlot("ImprovedDeltaPhiCutsJet1Collinear", rebinToWidthX=10)
-    drawControlPlot("ImprovedDeltaPhiCutsJet2Collinear", rebinToWidthX=10, moveLegend={"dy": -0.4, "dx": -0.2})
-    drawControlPlot("ImprovedDeltaPhiCutsJet3Collinear", rebinToWidthX=10, moveLegend={"dy": -0.4, "dx": -0.2})
+#    drawControlPlot("ImprovedDeltaPhiCutsJet1Collinear", rebinToWidthX=10)
+#    drawControlPlot("ImprovedDeltaPhiCutsJet2Collinear", rebinToWidthX=10, moveLegend={"dy": -0.4, "dx": -0.2})<
+#    drawControlPlot("ImprovedDeltaPhiCutsJet3Collinear", rebinToWidthX=10, moveLegend={"dy": -0.4, "dx": -0.2})
+    drawControlPlot("ImprovedDeltaPhiCutsCollinearMinimum", rebinToWidthX=10)
 
     moveLegend = {"DYJetsToLL": {"dx": -0.02}}.get(datasetName, {})
     drawControlPlot("MET",
@@ -206,7 +214,8 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, optMode, addData, mtOnly=Fals
     drawControlPlot("NBjets", "Number of selected b jets", opts=update(opts, {"xmax": 6}), ylabel="Events", moveLegend=moveLegend, cutLine=1)
 
     drawControlPlot("BtagDiscriminator", opts={"xmin": -1, "xmax": 1.5}, ylabel="Events / %.1f")
-    drawControlPlot("BJetPt", rebin=[0]+range(30, 100, 10)+range(100, 200, 20)+[200, 250, 300, 400, 500], divideByBinWidth=True)
+    bjetPtBins = [0]+range(30, 100, 10)+range(100, 200, 20)+[200, 250, 300, 400, 500]
+    drawControlPlot("BJetPt", rebin=bjetPtBins, divideByBinWidth=True)
     drawControlPlot("BJetEta", rebin=2, opts={"xmin": -2.4, "xmax": 2.4}, moveLegend={"dy": -0.4})
 
     # DeltapPhi
@@ -219,9 +228,10 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, optMode, addData, mtOnly=Fals
     moveLegend = {
         "DYJetsToLL": {"dx": -0.24},
         }.get(datasetName, {"dx":-0.22})
-    drawControlPlot("ImprovedDeltaPhiCutsJet1BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
-    drawControlPlot("ImprovedDeltaPhiCutsJet2BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
-    drawControlPlot("ImprovedDeltaPhiCutsJet3BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
+#    drawControlPlot("ImprovedDeltaPhiCutsJet1BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
+#    drawControlPlot("ImprovedDeltaPhiCutsJet2BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
+#    drawControlPlot("ImprovedDeltaPhiCutsJet3BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
+    drawControlPlot("ImprovedDeltaPhiCutsBackToBackMinimum", rebinToWidthX=10, moveLegend={"dy": -0.4})
 
     # Remaining control plots
     #drawControlPlot("TopMass")
@@ -230,6 +240,21 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, optMode, addData, mtOnly=Fals
     #drawControlPlot("WPt")
 
     # Transverse mass
+    drawControlPlot("SelectedTau_pT_AfterMtSelections", rebin=[0]+range(40, 100, 10)+[100,120,140,160,200,250,300,400,500], divideByBinWidth=True, opts={"ymin": 1e-3})
+    drawControlPlot("SelectedTau_eta_AfterMtSelections", rebin=2, opts={"xmin": -2.1, "xmax": 2.1}, moveLegend={"dy": -0.4})
+    drawControlPlot("SelectedTau_phi_AfterMtSelections", rebin=2, moveLegend={"dy": -0.4})
+    drawControlPlot("SelectedTau_LeadingTrackPt_AfterMtSelections", rebin=range(0, 100, 10)+[150,200,300,400,500], divideByBinWidth=True, opts={"ymin": 1e-3})
+    drawControlPlot("SelectedTau_Rtau_AfterMtSelections", opts={"xmin": 0.7, "xmax":1 }, moveLegend={"dy": -0.4, "dx": -0.3})
+    drawControlPlot("SelectedTau_DecayMode_AfterMtSelections")
+    drawControlPlot("Njets_AfterMtSelections")
+    drawControlPlot("JetPt_AfterMtSelections", rebin=[0]+range(30,200,10)+range(200,300,20)+[300,350,400,500], divideByBinWidth=True)
+    drawControlPlot("JetEta_AfterMtSelections", moveLegend={"dy": -0.4})
+    drawControlPlot("METAfterMtSelections", "Type I PF E_{T}^{miss} (GeV)", rebin=5, opts=update(opts, {"xmax": 400}), moveLegend={"dx": -0.1, "dy":-0.4})
+    drawControlPlot("METPhiAfterMtSelections", rebin=2, moveLegend={"dy": -0.4})
+    drawControlPlot("BJetPtAfterMtSelections", rebin=bjetPtBins, divideByBinWidth=True)
+    drawControlPlot("BJetEtaAfterMtSelections", rebin=2, opts={"xmin": -2.4, "xmax": 2.4}, moveLegend={"dy": -0.4})
+    drawControlPlot("BtagDiscriminatorAfterMtSelections", opts={"xmin": -1, "xmax": 1.5}, ylabel="Events / %.1f", moveLegend={"dy": -0.4})
+    drawControlPlot("ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections", rebinToWidthX=10, moveLegend={"dy": -0.4, "dx": -0.2})
 
     opts = {
 #        "TTJets": {"ymax": 28},

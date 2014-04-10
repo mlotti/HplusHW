@@ -1310,6 +1310,78 @@ def addEmbeddingEmbedding_v53_3(datasets):
             "SingleMu_207214-208686_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_207214_208686_tauembedding_embedding_v53_3_seedTest1-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
         })
 
+    addEmbedding("v53_3_seedTest2", definitions={
+            # 306 jobs
+            # User mean 7018.9, min 1946.2, max 12077.1
+            # Mean 66.1 MB, min 19.6 MB, max 115.9 MB
+            "SingleMu_190456-193621_2012A_Jan22": TaskDef("/SingleMu/local-Run2012A_22Jan2013_v1_AOD_190456_193621_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1542 jobs
+            # User mean 7418.5, min 2368.4, max 13986.6
+            # Mean 70.2 MB, min 23.7 MB, max 133.6 MB
+            "SingleMu_193834-196531_2012B_Jan22": TaskDef("/SingleMu/local-Run2012B_22Jan2013_v1_AOD_193834_196531_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1152 jobs
+            # User mean 7373.0, min 3023.3, max 14033.7
+            # Mean 70.6 MB, min 30.1 MB, max 137.3 MB
+            "SingleMu_198022-200381_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_198022_200381_tauembedding_embedding_v53_3_seedTest2-f6fb104f8850e16de1453ab643f4a3e0/USER", dbs="phys03"),
+            # 1518 jobs
+            # User mean 7032.9, min 1839.0, max 13588.4
+            # Mean 67.8 MB, min 19.5 MB, max 132.5 MB
+            "SingleMu_200466-203742_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_200466_203742_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 937 jobs
+            # User mean 7464.0, min 2734.0, max 14349.0
+            # Mean 74.2 MB, min 27.6 MB, max 141.3 MB
+            "SingleMu_203777-205834_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_203777_205834_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 925 jobs
+            # User mean 7279.6, min 719.5, max 13079.9
+            # Mean 72.2 MB, min 9.2 MB, max 129.7 MB
+            "SingleMu_205908-207100_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_205908_207100_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1029 jobs
+            # User mean 7091.5, min 705.3, max 13695.2
+            # Mean 70.6 MB, min 9.6 MB, max 135.7 MB
+            "SingleMu_207214-208686_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_207214_208686_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+        })
+
+    addEmbedding("v53_3_seedTest3", definitions={
+            # 306 jobs
+            # User mean 7177.1, min 1958.0, max 12479.5
+            # Mean 66.1 MB, min 19.5 MB, max 115.9 MB
+            "SingleMu_190456-193621_2012A_Jan22": TaskDef("/SingleMu/local-Run2012A_22Jan2013_v1_AOD_190456_193621_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1542 jobs
+            # User mean 7443.9, min 2373.1, max 14109.3
+            # Mean 70.2 MB, min 23.7 MB, max 133.7 MB
+            "SingleMu_193834-196531_2012B_Jan22": TaskDef("/SingleMu/local-Run2012B_22Jan2013_v1_AOD_193834_196531_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1152 jobs
+            # User mean 7379.3, min 3133.1, max 14054.9
+            # Mean 70.6 MB, min 30.1 MB, max 137.3 MB
+            "SingleMu_198022-200381_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_198022_200381_tauembedding_embedding_v53_3_seedTest3-f6fb104f8850e16de1453ab643f4a3e0/USER", dbs="phys03"),
+            # 1518 jobs
+            # User mean 6907.5, min 1782.5, max 13156.2
+            # Mean 67.8 MB, min 19.5 MB, max 132.4 MB
+            "SingleMu_200466-203742_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_200466_203742_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 937 jobs
+            # User mean 7439.9, min 2736.2, max 14130.2
+            # Mean 74.2 MB, min 27.6 MB, max 141.4 MB
+            "SingleMu_203777-205834_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_203777_205834_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 925 jobs
+            # User mean 7259.2, min 691.4, max 13041.5
+            # Mean 72.2 MB, min 9.2 MB, max 129.7 MB
+            "SingleMu_205908-207100_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_205908_207100_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1029 jobs
+            # User mean 7119.8, min 701.5, max 13984.5
+            # Mean 70.6 MB, min 9.6 MB, max 135.6 MB
+            "SingleMu_207214-208686_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_207214_208686_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+        })
+
+    addEmbedding("v53_3_seedTest4", definitions={
+            "SingleMu_190456-193621_2012A_Jan22": TaskDef(""),
+            "SingleMu_193834-196531_2012B_Jan22": TaskDef(""),
+            "SingleMu_198022-200381_2012C_Jan22": TaskDef(""),
+            "SingleMu_200466-203742_2012C_Jan22": TaskDef(""),
+            "SingleMu_203777-205834_2012D_Jan22": TaskDef(""),
+            "SingleMu_205908-207100_2012D_Jan22": TaskDef(""),
+            "SingleMu_207214-208686_2012D_Jan22": TaskDef(""),
+        })
+
 def addEmbedding_SKELETON(datasets):
     definitions = {
         "SingleMu_160431-163261_2011A_Nov08": TaskDef(""),
