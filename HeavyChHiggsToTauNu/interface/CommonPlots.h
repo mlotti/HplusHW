@@ -281,6 +281,9 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausJetPtAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausJetEtaAfterStandardSelections;
 
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearMinimumAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterStandardSelections;
+
     // MET selection
     std::vector<WrappedTH1*> hCtrlMET;
     std::vector<WrappedTH1*> hCtrlMETPhi;
@@ -288,6 +291,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMET;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMETPhi;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausTauPlusMETPt; // a.k.a. boost
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterMET;
 
     // b tagging
     std::vector<WrappedTH1*> hCtrlNbjets;
@@ -298,7 +302,6 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausBDiscriminator;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetPt;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetEta;
-
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterBjets;
 
     // improved delta phi back to back cuts
