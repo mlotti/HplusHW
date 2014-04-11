@@ -1290,7 +1290,7 @@ class InvertedTauID:
         self.nFitInvQCD = qcdOnly.Integral(0,1000,parQCD)
         print "check self.nFitInvQCD",self.nFitInvQCD
         """
-        histograms.addText(0.4,0.8,"Inverted TauID")
+        histograms.addText(0.4,0.8,"Data, Inverted TauID")
         #histograms.addText(0.4,0.25,"QCD",15)
                 
         plot.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))
@@ -1622,7 +1622,7 @@ class InvertedTauID:
  #       histo.GetXaxis().SetTitle("MET  (GeV)")
 
         histograms.addText(0.35,0.8,"Data, Baseline TauID")
-        histograms.addText(0.4,0.25,"QCD",15)
+        histograms.addText(0.45,0.25,"QCD",20)
 
         plot.histoMgr.appendHisto(histograms.Histo(qcdOnly,"qcdOnly"))
         
