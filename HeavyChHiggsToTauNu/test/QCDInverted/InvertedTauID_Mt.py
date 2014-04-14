@@ -5,6 +5,8 @@ ROOT.gROOT.SetBatch(True)
 from ROOT import *
 import math
 import sys
+import os
+import re
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -25,10 +27,51 @@ searchMode = "Light"
 HISTONAME = "shapeTransverseMass"
 
 def usage():
-    print "\n"
-    print "### Usage:   InvertedTauID_Normalization.py <multicrab dir>\n"
-    print "\n"
+    print
+    print "### Usage:   ",os.path.basename(sys.argv[0])," <multicrab dir>"
+    print
     sys.exit()
+
+try:
+    import QCDInvertedNormalizationFactors
+except ImportError:
+    print
+    print "    WARNING, QCDInvertedNormalizationFactors.py not found!"
+    print "    Run script InvertedTauID_Normalization.py to generate QCDInvertedNormalizationFactors.py"
+    print 
+
+def sort(normdict):
+
+    eq_re = re.compile("taup_Teq(?P<value>\d+)to")
+    lt_re = re.compile("taup_Tlt(?P<value>\d+)")
+    gt_re = re.compile("taup_Tgt(?P<value>\d+)")
+
+    binmap = {}
+    value = 0
+    for bin in normdict.keys():
+        match = eq_re.search(bin)
+        if match:
+            value = int(match.group("value"))
+            binmap[value] = bin
+            continue
+        match = lt_re.search(bin)
+        if match:
+            value = int(match.group("value")) - 1
+            binmap[value] = bin
+            continue
+        match = gt_re.search(bin)
+        if match:
+            value = int(match.group("value")) + 1
+            binmap[value] = bin
+            continue
+
+    i = 0
+    retdict = {}
+    for bin in sorted(binmap.keys()):
+        retdict[i] = normdict[binmap[bin]]
+        i += 1
+
+    return retdict
 
 def main(argv):
 
@@ -37,6 +80,8 @@ def main(argv):
 	usage()
 
     dirs.append(sys.argv[1])
+
+    QCDInvertedNormalization = sort(QCDInvertedNormalizationFactors.QCDInvertedNormalization)
 
     analysis = "signalAnalysisInvertedTau"
     optModes = []
@@ -56,6 +101,7 @@ def main(argv):
         plots.mergeRenameReorderForDataMC(datasets)
 
         histonames = datasets.getDataset("Data").getDirectoryContent(HISTONAME)
+
         bins = []
         for histoname in histonames:
             binname = histoname.replace(HISTONAME,"")
@@ -71,11 +117,14 @@ def main(argv):
                 legendName = legendName.replace("Plus","")
                 mt.SetName(legendName)
                 mt.SetLineColor(color)
+                mt.Scale(QCDInvertedNormalization[i])
                 color += 1
                 if color == 5:
                     color += 1
             else:
-                mt.Add(mtplot.histoMgr.getHisto("Data").getRootHisto().Clone(HISTONAME+"/"+HISTONAME+bin))
+                h = mtplot.histoMgr.getHisto("Data").getRootHisto().Clone(HISTONAME+"/"+HISTONAME+bin)
+                h.Scale(QCDInvertedNormalization[i])
+                mt.Add(h)
  
         plot.histoMgr.appendHisto(histograms.Histo(mt,mt.GetName()))
 
