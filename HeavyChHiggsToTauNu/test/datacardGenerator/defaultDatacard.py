@@ -519,6 +519,14 @@ if OptionIncludeSystematics:
             function      = "ShapeVariation",
             systVariation = "L1ETMSF",
         ))
+    else:
+        Nuisances.append(Nuisance(
+            id            = "trg_L1ETM",
+            label         = "tau+MET trg L1ETM",
+            distr         = "shapeQ",
+            function      = "ShapeVariation",
+            systVariation = "L1ETMSF",
+        ))
 
 if OptionGenuineTauBackgroundSource == "DataDriven":
     if OptionTreatTriggerUncertaintiesAsAsymmetric:
