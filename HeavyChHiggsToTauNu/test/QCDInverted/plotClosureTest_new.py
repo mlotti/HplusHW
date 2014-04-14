@@ -90,6 +90,71 @@ def doClosureTestPlots(opts, dsetMgr, moduleInfoString, myDir, luminosity, normF
         doSinglePlot(myBaselineShape.getIntegratedDataDrivenQCDHisto(), myInvertedResults.getResultShape(), myDir, histoName, luminosity)
     print HighlightStyle()+"doClosureTestPlots is ready"+NormalStyle()
 
+def doEventYieldTable(opts, dsetMgr, moduleInfoString, myDir, luminosity, normFactors):
+    def _calculateCellWidths(widths, row):
+        myResult = widths
+        # Initialise widths if necessary
+        if len(row) == 0:
+          return myResult
+        for i in range(len(widths),len(row)):
+            myResult.append(0)
+        # Loop over row cells
+        for i in range(0,len(row)):
+            if len(row[i]) > myResult[i]:
+                myResult[i] = len(row[i])
+        return myResult
+
+    def _printRow(widths, row):
+        myResult = ""
+        for i in range(0,len(row)):
+            if i != 0:
+                myResult += " "
+            myResult += row[i].ljust(widths[i])
+        print myResult
+
+    histoName = "shapeTransverseMass"
+    print "Event yield table for shape: %s"%histoName
+    # Obtain shape
+    myShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", histoName, luminosity)
+    myHeader = []
+    myDataList = []
+    myMCEWKList = []
+    myNormList = []
+    myResultList = []
+    for i in range(0,len(myShape._dataList)):
+        # Get histograms
+        hData = myShape._dataList[i]
+        hMCEWK = myShape._ewkList[i]
+        # Get event count and stat. uncert.
+        myDataStatUncert = ROOT.Double(0.0)
+        myMCEWKStatUncert = ROOT.Double(0.0)
+        myDataCount = hData.IntegralAndError(0, hData.GetNbinsX()+2, myDataStatUncert)
+        myMCEWKCount = hMCEWK.IntegralAndError(0, hMCEWK.GetNbinsX()+2, myMCEWKStatUncert)
+        # Store result
+        myHeader.append(myShape.getPhaseSpaceBinFileFriendlyTitle(i))
+        myDataList.append("%.1f +- %.1f"%(myDataCount, myDataStatUncert))
+        myMCEWKList.append("%.1f +- %.1f"%(myMCEWKCount, myMCEWKStatUncert))
+        myNormFactor = normFactors[myShape.getPhaseSpaceBinFileFriendlyTitle(i)]
+        myNormList.append("%.3f"%myNormFactor)
+        myTotalCount = myDataCount - myMCEWKCount
+        myTotalStatUncert = math.sqrt(myDataStatUncert**2 + myMCEWKStatUncert**2)
+        myTotalCount *= myNormFactor
+        myTotalStatUncert *= myNormFactor
+        myResultList.append("%.1f +- %.1f"%(myTotalCount, myTotalStatUncert))
+    # Format table
+    myWidths = []
+    myWidths = _calculateCellWidths(myWidths, myHeader)
+    myWidths = _calculateCellWidths(myWidths, myDataList)
+    myWidths = _calculateCellWidths(myWidths, myMCEWKList)
+    myWidths = _calculateCellWidths(myWidths, myNormList)
+    myWidths = _calculateCellWidths(myWidths, myResultList)
+    # Print result
+    _printRow(myWidths, myHeader)
+    _printRow(myWidths, myDataList)
+    _printRow(myWidths, myMCEWKList)
+    _printRow(myWidths, myNormList)
+    _printRow(myWidths, myResultList)
+
 def createOutputdirectory(myDir):
     if os.path.exists(myDir):
         # Remove very old files
@@ -176,5 +241,6 @@ if __name__ == "__main__":
                     myDisplayStatus = False
                 # Run plots
                 doClosureTestPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity, myNormFactors)
+                doEventYieldTable(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity, myNormFactors)
                 #doPurityPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
                 #doQCDfactorisedResultPlots(opts, dsetMgr, myModuleInfoString, myDir, myLuminosity)
