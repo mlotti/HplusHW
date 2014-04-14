@@ -4,7 +4,9 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-01-29-noMetSF-withL1ETMfix"#2014-01-29-noMetSF-withL1ETMfix"
 #Path = "/home/wendland/data/v533/2014_02_14_v3_etacorrected"
 #Path = "/home/wendland/data/v533/2014-03-20"
-Path = "/home/wendland/data/v533/2014-03-20_expCtrlPlots"
+#Path = "/home/wendland/data/v533/2014-03-20_expCtrlPlots"
+Path = "/home/wendland/data/v533/2014-03-20_expCtrlPlots_mt20gev"
+#Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
 #Path = "/home/wendland/data/v533/2014_03_12_metphicorrected"
 #Path = "/home/wendland/data/v533/2014_02_14_v3_decaymode1"
@@ -15,8 +17,8 @@ LightMassPoints      = [80,120,160]
 LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
-HeavyMassPoints      = [180,220,300,400]
-HeavyMassPoints      = [180]
+#HeavyMassPoints      = [180,220,300,600]
+#HeavyMassPoints      = [180]
 HeavyMassPoints      = []
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
@@ -111,14 +113,17 @@ if OptionTreatTauIDAndMisIDSystematicsAsShapes:
 else:
     myTauIDShapeSystematics = ["tau_ID"] # tau ID and mis-ID systematics done with constants
 
-
 myShapeSystematics = []
 myShapeSystematics.extend(myTrgShapeSystematics)
 myShapeSystematics.extend(myTauIDShapeSystematics)
 myShapeSystematics.extend(["ES_taus","ES_jets","JER","ES_METunclustered","pileup"]) # btag is not added, because it has the tag and mistag categories
 
-myEmbeddingMETUncert = "trg_L1ETM_dataeff"
-myEmbeddingShapeSystematics = ["trg_tau_dataeff",myEmbeddingMETUncert,"trg_muon_dataeff","ES_taus","Emb_mu_ID","Emb_WtauTomu"]
+myEmbeddingMETUncert = "trg_L1ETM"
+if OptionTreatTriggerUncertaintiesAsAsymmetric:
+    myEmbeddingMETUncert += "_dataeff"
+    myEmbeddingShapeSystematics = ["trg_tau_dataeff",myEmbeddingMETUncert,"trg_muon_dataeff","ES_taus","Emb_mu_ID","Emb_WtauTomu"]
+else:
+    myEmbeddingShapeSystematics = ["trg_tau",myEmbeddingMETUncert,"trg_muon","ES_taus","Emb_mu_ID","Emb_WtauTomu"]
 # Add tau ID uncert. to embedding either as a shape or as a constant
 if "tau_ID_shape" in myTauIDShapeSystematics:
     myEmbeddingShapeSystematics.append("tau_ID_shape")
@@ -491,29 +496,47 @@ else:
     ))
 
 if OptionIncludeSystematics:
-    Nuisances.append(Nuisance(
-        id            = "trg_L1ETM_dataeff",
-        label         = "tau+MET trg L1ETM data eff.",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
-        systVariation = "L1ETMDataEff",
-    ))
-    Nuisances.append(Nuisance(
-        id            = "trg_L1ETM_MCeff",
-        label         = "tau+MET trg L1ETM MC eff.",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
-        systVariation = "L1ETMMCEff",
-    ))
+    if OptionTreatTriggerUncertaintiesAsAsymmetric:
+        Nuisances.append(Nuisance(
+            id            = "trg_L1ETM_dataeff",
+            label         = "tau+MET trg L1ETM data eff.",
+            distr         = "shapeQ",
+            function      = "ShapeVariation",
+            systVariation = "L1ETMDataEff",
+        ))
+        Nuisances.append(Nuisance(
+            id            = "trg_L1ETM_MCeff",
+            label         = "tau+MET trg L1ETM MC eff.",
+            distr         = "shapeQ",
+            function      = "ShapeVariation",
+            systVariation = "L1ETMMCEff",
+        ))
+    else:
+        Nuisances.append(Nuisance(
+            id            = "trg_L1ETM",
+            label         = "tau+MET trg L1ETM",
+            distr         = "shapeQ",
+            function      = "ShapeVariation",
+            systVariation = "L1ETMSF",
+        ))
 
 if OptionGenuineTauBackgroundSource == "DataDriven":
-    Nuisances.append(Nuisance(
-        id            = "trg_muon_dataeff",
-        label         = "SingleMu trg data eff.",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
-        systVariation = "MuonTrgDataEff",
-    ))
+    if OptionTreatTriggerUncertaintiesAsAsymmetric:
+        Nuisances.append(Nuisance(
+            id            = "trg_muon_dataeff",
+            label         = "SingleMu trg data eff.",
+            distr         = "shapeQ",
+            function      = "ShapeVariation",
+            systVariation = "MuonTrgDataEff",
+        ))
+    else:
+        Nuisances.append(Nuisance(
+            id            = "trg_muon",
+            label         = "SingleMu trg data eff.",
+            distr         = "lnN",
+            function      = "Constant",
+            value         = 0.02,
+        ))
 
 if not "tau_ID_shape" in myShapeSystematics:
     Nuisances.append(Nuisance(
