@@ -84,14 +84,12 @@ class ConfigBuilder:
                  useJERSmearedJets = True,
                  customizeLightAnalysis = None,
                  customizeHeavyAnalysis = None,
-
                  doLightAnalysis = True,
                  doHeavyAnalysis = False,
-
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doTauIDandMisIDSystematicsAsShapes = False, # If systematic variations are produced, variations are produced also for misidentified tau systematics
-                 doAsymmetricTriggerUncertainties = False, # If true, will vary the efficiency uncertainties instead of the scale factor uncertainty
+                 doAsymmetricTriggerUncertainties = True, # If true, will vary the efficiency uncertainties instead of the scale factor uncertainty
                  doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
