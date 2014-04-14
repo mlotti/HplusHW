@@ -1084,8 +1084,8 @@ namespace HPlus {
     if (jetData.getHadronicJetCount() == 0) return false;
     METSelection::Data metData = fMETSelection.silentAnalyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), tauData.getSelectedTau(), jetData.getAllJets());
     if (!(metData.getSelectedMET()->et() > 30)) return false;
-    
-    i = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
+
+    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
     if (deltaPhi < 90) return false;
     if (transverseMass < 80) return false;
