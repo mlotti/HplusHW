@@ -528,12 +528,6 @@ class ShapeExtractor(ExtractorBase):
         if self.isRate() or self.isObservation():
             # Shape histogram is the result
             h.SetTitle(datasetColumn.getLabel())
-            # Look for negative bins
-            for k in range(1, h.GetNbinsX()+1):
-                if h.GetBinContent(k) < 0.000001:
-                    if h.GetBinContent(k) < -0.001:
-                        raise Exception(ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
-                    h.SetBinContent(k, 0.0)
             # Append histogram to output list
             myHistograms.append(h)
         else:

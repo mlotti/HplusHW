@@ -325,6 +325,14 @@ class DatacardColumn():
             else:
                 myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+        # Look for negative bins in rage
+        for k in range(1, myRateHistograms[0].GetNbinsX()+1):
+            if myRateHistograms[0].GetBinContent(k) < 0.000001:
+                if myRateHistograms[0].GetBinContent(k) < -0.001:
+                    print WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), myRateHistograms[0].GetBinContent(k))
+                    myRateHistograms[0].SetBinContent(k, 0.0)
+                    myRateHistograms[0].SetBinError(k, config.MinimumStatUncertainty)
+                    #raise Exception(ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
         # Cache result
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
@@ -391,6 +399,14 @@ class DatacardColumn():
                             if e.getDistribution() == "shapeQ":
                                 for i in range(0,len(myHistograms)):
                                     myHistograms[i].Add(self._rateResult.getHistograms()[0])
+                                    # Check for negative bins and correct if necessary
+                                    for k in range(1, myHistograms[i].GetNbinsX()+1):
+                                        if myHistograms[i].GetBinContent(k) < 0.000001:
+                                            if myHistograms[i].GetBinContent(k) < -0.001:
+                                              print WarningLabel()+"Up/down nuisance %s value in bin %d is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(e._exid, k, self.getLabel(), myHistograms[i].GetBinContent(k))
+                                              myHistograms[i].SetBinContent(k, 0.0)
+                                              myHistograms[i].SetBinError(k, config.MinimumStatUncertainty)
+                                              #raise Exception(ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
                     else:
                         # For QCD, scale the QCD type constants by the purity
                         if self.typeIsQCD() and e.isQCDNuisance():
