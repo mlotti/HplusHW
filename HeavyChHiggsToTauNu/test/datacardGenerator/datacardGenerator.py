@@ -70,6 +70,9 @@ def main(opts, moduleSelector, multipleDirs):
         mcrabInfoOutput.append("- Embedding: estimated from signal analysis MC")
         print "- %sWarning:%s Embedding: estimated from signal analysis MC"%(WarningStyle(),NormalStyle())
     else:
+        multicrabPaths.getEWKPath()
+        if multicrabPaths.getEWKPath() == "":
+            raise Exception(ErrorLabel()+"You asked for data driven EWK+tt with taus, but no corresponding multicrab was found!")
         embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput)
     qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
     if qcdFactorisedDsetCreator == None and not opts.useQCDinverted:

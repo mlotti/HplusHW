@@ -126,6 +126,7 @@ namespace HPlus {
     void setSplittingOfPhaseSpaceInfoAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, METSelection& metSelection);
     void fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent);
+    void fillControlPlotsAfterTopologicalSelections(const edm::Event& iEvent);
     void fillControlPlotsAfterAllSelections(const edm::Event& iEvent, double transverseMass);
     void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const edm::Event& iEvent, double transverseMass);
     void fillControlPlotsAfterAllSelectionsWithFullMass(const edm::Event& iEvent, FullHiggsMassCalculator::Data& data);
@@ -280,6 +281,9 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausJetPtAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausJetEtaAfterStandardSelections;
 
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearMinimumAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterStandardSelections;
+
     // MET selection
     std::vector<WrappedTH1*> hCtrlMET;
     std::vector<WrappedTH1*> hCtrlMETPhi;
@@ -287,6 +291,8 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMET;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMETPhi;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausTauPlusMETPt; // a.k.a. boost
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterMET;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKFakeTausAfterMET;
 
     // b tagging
     std::vector<WrappedTH1*> hCtrlNbjets;
@@ -297,8 +303,8 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausBDiscriminator;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetPt;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetEta;
-
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterBjets;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKFakeTausAfterBjets;
 
     // improved delta phi back to back cuts
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackMinimum;
