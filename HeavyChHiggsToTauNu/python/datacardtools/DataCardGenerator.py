@@ -440,7 +440,11 @@ class DataCardGenerator:
         # Loop over data groups to create datacard columns
         for dg in self._config.DataGroups:
             myIngoreOtherQCDMeasurementStatus = (dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED) or (dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED)
-            if not myIngoreOtherQCDMeasurementStatus:
+            myMassIsConsideredStatus = False
+            for validMass in dg.validMassPoints:
+                if validMass in self._config.MassPoints:
+                    myMassIsConsideredStatus = True
+            if not myIngoreOtherQCDMeasurementStatus and myMassIsConsideredStatus:
                 print "Constructing datacard column for data group: "+HighlightStyle()+""+dg.label+""+NormalStyle()
                 # Construct datacard column object
                 myColumn = None
