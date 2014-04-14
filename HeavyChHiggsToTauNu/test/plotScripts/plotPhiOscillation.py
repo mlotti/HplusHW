@@ -21,12 +21,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
-MergeSpecs = { "Data": ["Tau_", "TauParked_", "MultiJet_"],
-               "QCD": ["QCD_"],
-               "TTJets": ["TTJets"],
-               "WJets": ["WJets_", "W1Jets_", "W2Jets_", "W3Jets_", "W4Jets_",]
-             }
-
 def myfitfunc(x, par):
     return par[0]*x[0]+par[1]
 
@@ -60,27 +54,37 @@ def produceCurve(h, histoNamePrefix):
                 hOut.SetBinError(i, htmp.GetMeanError(1))
     return hOut
 
-def producePlotX(mydir, h, axisLabel, dsetName, title, maxbins):
-    producePlot(mydir, h, axisLabel, dsetName, title, maxbins, isX=True, isY=False)
+def producePlotX(myCounter, mydir, h, axisLabel, dsetName, title, maxbins):
+    producePlot(myCounter, mydir, h, axisLabel, dsetName, title, maxbins, isX=True, isY=False)
 
-def producePlotY(mydir, h, axisLabel, dsetName, title, maxbins):
-    producePlot(mydir, h, axisLabel, dsetName, title, maxbins, isX=False, isY=True)
+def producePlotY(myCounter, mydir, h, axisLabel, dsetName, title, maxbins):
+    producePlot(myCounter, mydir, h, axisLabel, dsetName, title, maxbins, isX=False, isY=True)
 
-def producePlot(mydir, h, axisLabel, dsetName, title, maxbins, isX=False, isY=False):
+def producePlot(myCounter, mydir, h, axisLabel, dsetName, title, maxbins, isX=False, isY=False):
     myRebinFactor = 1
 
+    # Find fit minimum and maximum
+    myMin = 9999
+    myMax = 0
+    for i in range(1,h.GetNbinsX()+1):
+        a = h.GetBinContent(i)
+        if abs(a) > 0.000001:
+            if i < myMin:
+                myMin = i-1
+            if i > myMax:
+                myMax = i
     # Obtain canvas
     c = ROOT.TCanvas()
     # Do fit
     fit = None
     if isX:
-        fit = ROOT.TF1("fit",myMCfitfuncX,10,30,1)
+        fit = ROOT.TF1("fit",myMCfitfuncX,myMin,myMax,1)
         fit.SetParNames ("Offset")
     if isY:
-        fit = ROOT.TF1("fit",myMCfitfuncY,10,30,1)
+        fit = ROOT.TF1("fit",myMCfitfuncY,myMin,myMax,1)
         fit.SetParNames ("Offset")
     if fit == None:
-        fit = ROOT.TF1("fit",myfitfunc,10,30,2)
+        fit = ROOT.TF1("fit",myfitfunc,myMin,myMax,2)
         fit.SetParNames ("Slope","Offset")
     fit.SetLineWidth(2)
 
@@ -114,7 +118,7 @@ def producePlot(mydir, h, axisLabel, dsetName, title, maxbins, isX=False, isY=Fa
 
     # Do ugly hack to force creation of fit stats object and make a clone of it (since drawing the frame destroys the stats object)
     # If the fit -command is called after the frame has been drawn, the axis labels on the frame diasppear :)
-    h.Fit("fit","","",10,30)
+    h.Fit("fit","","",myMin,myMax)
     ROOT.gPad.Update()
     statsObject = h.FindObject("stats")
     stats = None
@@ -161,7 +165,7 @@ def producePlot(mydir, h, axisLabel, dsetName, title, maxbins, isX=False, isY=Fa
     tex.SetLineWidth(2)
     tex.Draw()
 
-    c.Print("%s/phiOscillation_%s_%s.png"%(mydir, title, dsetName))
+    c.Print("%s/phiOscillation_%s_%02d_%s.png"%(mydir, dsetName, myCounter, title))
 
 def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     # Make directory for output
@@ -183,19 +187,22 @@ def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     for d in myDataDatasets:
         myLuminosity += d.getLuminosity()
 
-    # Merge divided datasets
-    myDsetMgr.mergeMany(plots._physicalMcAdd, addition=True)
-    # Merge other datasets
-    myAllDatasetNames = myDsetMgr.getAllDatasetNames()
-    for (key, value) in MergeSpecs.iteritems():
-        myMatchedNames = []
-        for v in value:
-            for dset in myAllDatasetNames:
-                if v in dset:
-                    myMatchedNames.append(dset)
-        if len(myMatchedNames) > 0:
-            myDsetMgr.merge(key, myMatchedNames, silent=True)
-    myAvailableDatasetNames = myDsetMgr.getAllDatasetNames()
+    # Merge datasets
+    plots.mergeRenameReorderForDataMC(myDsetMgr)
+    mergeEWK = not True
+    
+    myAvailableDatasetNames = ["Data", "TTToHplusBWB_M120"]
+    if mergeEWK:
+        myDsetMgr.merge("EWK", [
+                      "TTJets",
+                      "WJets",
+                      "DYJetsToLL",
+                      "SingleTop", 
+                      "Diboson"
+                      ])
+        myAvailableDatasetNames.extend(["EWK"])
+    else:
+        myAvailableDatasetNames.extend(["TTJets", "WJets"])
 
     # loop over datasets
     myList = []
@@ -215,9 +222,16 @@ def doPlots(dsetName, dset, opts, mySuffix, luminosity):
     myPlotNames = ["METPhiOscillationCorrectionAfterTaus/NverticesVsMET",
                    "METPhiOscillationCorrectionAfterLeptonVeto/NverticesVsMET",
                    "METPhiOscillationCorrectionAfterNjets/NverticesVsMET",
+                   "METPhiOscillationCorrectionAfterMETSF/NverticesVsMET",
+                   "METPhiOscillationCorrectionAfterCollinearCuts/NverticesVsMET",
                    "METPhiOscillationCorrectionAfterBjets/NverticesVsMET",
+                   "METPhiOscillationCorrectionAfterMET/NverticesVsMET",
+                   "METPhiOscillationCorrectionAfterBjetsEWKFakeTaus/NverticesVsMET",
+                   "METPhiOscillationCorrectionAfterMETEWKFakeTaus/NverticesVsMET",
                    "METPhiOscillationCorrectionAfterAllSelections/NverticesVsMET"]
+    myCounter = 0
     for n in myPlotNames:
+        myCounter += 1
         hDX = dset.getDatasetRootHisto(n+"X")
         hDY = dset.getDatasetRootHisto(n+"Y")
         if hDX.isMC():
@@ -227,25 +241,29 @@ def doPlots(dsetName, dset, opts, mySuffix, luminosity):
         hY = produceCurve(hDY.getHistogram(), n+dsetName+"Y")
         # We have the histograms and names, lets make the plot
         myName = n.replace("/","_")
-        if hDX.isMC():
-            producePlotX(mySuffix, hX, "Average MET_{x}, GeV", dsetName, "%s_X"%myName, maxbins)
-            producePlotY(mySuffix, hY, "Average MET_{y}, GeV", dsetName, "%s_Y"%myName, maxbins)
+        if hDX.isMC() and False:
+            producePlotX(myCounter, mySuffix, hX, "Average MET_{x}, GeV", dsetName, "%s_X"%myName, maxbins)
+            producePlotY(myCounter, mySuffix, hY, "Average MET_{y}, GeV", dsetName, "%s_Y"%myName, maxbins)
         else:
-            producePlot(mySuffix, hX, "Average MET_{x}, GeV", dsetName, "%s_X"%myName, maxbins)
-            producePlot(mySuffix, hY, "Average MET_{y}, GeV", dsetName, "%s_Y"%myName, maxbins)
+            producePlot(myCounter, mySuffix, hX, "Average MET_{x}, GeV", dsetName, "%s_X"%myName, maxbins)
+            producePlot(myCounter, mySuffix, hY, "Average MET_{y}, GeV", dsetName, "%s_Y"%myName, maxbins)
         # Plots before and after correction
-        hPhiAfter = dset.getDatasetRootHisto(n.replace("NverticesVsMET","METPhiCorrected")
-        hPhiBefore = dset.getDatasetRootHisto(n.replace("NverticesVsMET","METPhiUnorrected")
+        hPhiAfter = dset.getDatasetRootHisto(n.replace("NverticesVsMET","METPhiCorrected"))
+        hPhiBefore = dset.getDatasetRootHisto(n.replace("NverticesVsMET","METPhiUncorrected"))
 
 if __name__ == "__main__":
     myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
     parser = OptionParser(usage="Usage: %prog [options]")
     myModuleSelector.addParserOptions(parser)
     parser.add_option("-d", dest="dirs", action="append", help="name of sample directory inside multicrab dir (multiple directories can be specified with multiple -d arguments)")
+    parser.add_option("--mdir", dest="multicrabDir", action="store", help="Multicrab directory")
     (opts, args) = parser.parse_args()
 
     # Get dataset manager creator and handle different era/searchMode/optimizationMode combinations
-    signalDsetCreator = dataset.readFromMulticrabCfg(directory=".")
+    myPath = "."
+    if opts.multicrabDir != None:
+        myPath = opts.multicrabDir
+    signalDsetCreator = dataset.readFromMulticrabCfg(directory=myPath)
     myModuleSelector.setPrimarySource("Signal analysis", signalDsetCreator)
     myModuleSelector.doSelect(opts)
 
