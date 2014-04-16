@@ -35,6 +35,7 @@ heavyMassSamples = ["HplusTB_M180",
                     #"HplusTB_M600",
                     ]
 
+optionRemoveStatUncert = True
 
 def doSinglePlot(histograms, myDir, histoName, luminosity, suffix):
     plot = plots.PlotBase(histograms)
@@ -91,6 +92,11 @@ def getPlots(opts, histoName, dsetMgr, myDir, luminosity, myHistograms, samples)
         h.SetLineColor(styles.styles[len(myHistograms)].color)
         h.SetMarkerColor(styles.styles[len(myHistograms)].color)
         h.SetMarkerStyle(styles.styles[len(myHistograms)].marker)
+
+        # Remove stat uncert
+        if optionRemoveStatUncert:
+            for i in range(1, h.GetNbinsX()+1):
+                h.SetBinError(i, 0.0)
 
         myMass = sample.split("_")
         histo = histograms.Histo(h, "H^{+}, m=%s"%myMass[len(myMass)-1].replace("M",""), drawStyle="", legendStyle="lp")

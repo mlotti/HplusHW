@@ -165,7 +165,9 @@ def producePlot(myCounter, mydir, h, axisLabel, dsetName, title, maxbins, isX=Fa
     tex.SetLineWidth(2)
     tex.Draw()
 
-    c.Print("%s/phiOscillation_%s_%02d_%s.png"%(mydir, dsetName, myCounter, title))
+    myFormats = ["png","C","eps"]
+    for f in myFormats:
+        c.Print("%s/phiOscillation_%s_%02d_%s.%s"%(mydir, dsetName, myCounter, title, f))
 
 def main(opts,signalDsetCreator,era,searchMode,optimizationMode):
     # Make directory for output
