@@ -199,6 +199,8 @@ def main():
                       help="Generate multicrab configurations only, do not create crab jobs (default is to create crab jobs)")
     parser.add_option("--dataOnly", dest="dataOnly", action="store_true", default=False,
                       help="Use only data datasets (default is to use data+MC, or an applicable subset)")
+    parser.add_option("--pickEvents", dest="pickEvents", action="store_true", default=False,
+                      help="Retrieve also pickEvents.txt")
     (opts, args) = parser.parse_args()
     step = opts.step
     versions = opts.version
@@ -312,8 +314,11 @@ def createTasks(opts, step, version=None):
             multicrab.addCommonLine("GRID.maxtarballsize = 50")
 #        if not step in ["skim", "genTauSkim", "analysisTauAod"]:
 #            multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
-        if step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
-            multicrab.addCommonLine("CMSSW.output_file = histograms.root")
+        if step in ["analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysisGenTau", "analysisTau", "signalAnalysisGenTauSkim", "signalAnalysis", "ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
+            outputFiles = "histograms.root"
+            if opts.pickEvents:
+                outputFiles += ",pickEvents.txt"
+            multicrab.addCommonLine("CMSSW.output_file = "+outputFiles)
 
         # Let's do the naming like this until we get some answer from crab people
         #if step in ["skim", "embedding"]:
