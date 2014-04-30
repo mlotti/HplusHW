@@ -38,6 +38,7 @@ def addTauLegSkim_44X(version, datasets, updateDefinitions):
         "SingleMu_175832-180252_2011B_Nov19_RAWRECO": TaskDef(njobsIn=500, njobsOut=50, triggerOR=allMuonTriggers, triggerThrow=False),
         
         "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW":       TaskDefMC(njobsIn=4000, njobsOut=2000),
+	"DYToTauTau_M20_CT10_TuneZ2_7TeV_powheg_pythia_tauola_TTEffSkim_v447_v1": TaskDefMC(njobsIn=4000, njobsOut=2000),
         }
 
     workflowName = "triggerTauLeg_skim_"+version      
@@ -75,7 +76,8 @@ def addTauLegSkim_v44_v5(datasets):
         "SingleMu_173236-173692_2011A_Nov08_RAWRECO":    TaskDef(""),
         "SingleMu_175832-180252_2011B_Nov19_RAWRECO":    TaskDef(""),
 
-        "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW":    TaskDef("")
+        "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW":    TaskDef(""),
+	"DYToTauTau_M20_CT10_TuneZ2_7TeV_powheg_pythia_tauola_TTEffSkim_v447_v1":    TaskDef(""),
         }
 
     addTauLegSkim_44X("v44_v5", datasets, definitions)
