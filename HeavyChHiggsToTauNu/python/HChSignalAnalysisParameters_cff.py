@@ -11,6 +11,9 @@ blindAnalysisStatus = cms.untracked.bool(False)
 # Ambient level for filling histograms (options: Vital, Informative, Debug)
 histogramAmbientLevel = cms.untracked.string("Debug")
 
+# QCD specific
+selectOnlyGenuineTausForMC = cms.untracked.bool(False)
+
 singleTauMetTriggerPaths = [
 # 2010
 #    "HLT_SingleLooseIsoTau20",

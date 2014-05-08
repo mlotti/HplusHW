@@ -57,8 +57,8 @@ namespace HPlus {
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    bool doInvertedAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
-    bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
+    bool doInvertedAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const FakeTauIdentifier::Data& tauMatchData, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
+    bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const FakeTauIdentifier::Data& tauMatchData, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisInvertedTauProducer
@@ -68,6 +68,7 @@ namespace HPlus {
 
     //    const double ftransverseMassCut;
     const bool bBlindAnalysisStatus;
+    const bool bSelectOnlyGenuineTausForMC;
     const double fDeltaPhiCutValue;
     // Common counters
     Count fAllCounter;
