@@ -7,6 +7,7 @@ import sys
 import os
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import hplusMultiCrabPrintPublished as printPublished
 
 def execute(command, log):
     log.write("========================================\n")
@@ -55,10 +56,25 @@ def main(opts):
                 log.close()
                 return 1
 
-        if opts.move:
-            shutil.move(task, task+"_published")
+    log.close()
 
-    log.close()    
+    # See if publication is complete, report if not and possibly move if is
+    log = open(logfile)
+    tasks = {}
+    for d in taskDirs:
+        tasks[d] = printPublished.Task(d)
+
+    printPublished.addInputPublishToTasks(tasks)
+    printPublished.parseLog(logfile, tasks)
+
+    for key, task in tasks.iteritems():
+        if task.jobs_still_to_publish > 0:
+            print "%s publication not complete, not moving (published %d, failed %d, still_to_publish %d)" % (key, task.jobs_published, task.jobs_failed, task.jobs_still_to_publish)
+        elif opts.move:
+            shutil.move(key, key+"_published")
+
+    log.close()
+
     return 0
 
 if __name__ == "__main__":

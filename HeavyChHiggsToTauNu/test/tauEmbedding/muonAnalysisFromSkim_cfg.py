@@ -76,6 +76,15 @@ patArgs = {"doPatTrigger": False,
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs,
                                                             doHBHENoiseFilter=False,
                                                             )
+# hack
+if "allEvents" in additionalCounters and not hasattr(process, "allEvents"):
+    del additionalCounters[additionalCounters.index("allEvents")]
+if "passedTrigger" in additionalCounters and not hasattr(process, "allEvents"):
+    del additionalCounters[additionalCounters.index("passedTrigger")]
+
+# Add configuration information to histograms.root
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+process.infoPath = HChTools.addConfigInfo(process, options, dataVersion)
 
 # PU weights
 import HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration as AnalysisConfiguration
@@ -86,13 +95,15 @@ dataEras = [
 ]
 #puWeights = AnalysisConfiguration.addPuWeightProducers(dataVersion, process, process.commonSequence, dataEras)
 if dataVersion.isMC():
-    puEraSuffixWeights = AnalysisConfiguration.addPuWeightProducersVariations(dataVersion, process, process.commonSequence, dataEras)
+    process.puWeightSequence = cms.Sequence()
+    puEraSuffixWeights = AnalysisConfiguration.addPuWeightProducersVariations(dataVersion, process, process.puWeightSequence, dataEras, doVariations=True)
+    process.commonSequence.insert(0, process.puWeightSequence)
 
     # W+jets weights
     import HiggsAnalysis.HeavyChHiggsToTauNu.WJetsWeight as WJetsWeight
     wjetsEraSuffixWeights = []
     for era, suffix, weight in puEraSuffixWeights:
-        weight = WJetsWeight.getWJetsWeight(dataVersion, options, "embedding_skim_v44_5_1", era, suffix)
+        weight = WJetsWeight.getWJetsWeight(dataVersion, options, "embedding_skim_v44_5_1", era, suffix, useInclusiveIfNotFound=True)
         name = "wjetsWeight"+era+suffix
         weight.enabled = False
         weight.alias = name
@@ -101,16 +112,47 @@ if dataVersion.isMC():
         wjetsEraSuffixWeights.append( (era, suffix, name) )
         if options.wjetsWeighting != 0:
             weight.enabled = True
-    
+
+    # Top pt reweighting
+    import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeight_cfi as topPtWeight
+    process.topPtWeight = topPtWeight.topPtWeight.clone()
+    process.topPtWeightSeparate = process.topPtWeight.clone(scheme="TopPtSeparate")
+    topPtWeights = [
+        (process.topPtWeight.scheme.value(), "topPtWeight"),
+        (process.topPtWeightSeparate.scheme.value(), "topPtWeightSeparate")
+        ]
+    if options.sample == "TTJets":
+        topPtWeight.addTtGenEvent(process, process.commonSequence)
+        process.topPtWeight.enabled = True
+        process.topPtWeightSeparate.enabled = True
+        process.configInfo.topPtReweightScheme = cms.untracked.string(process.topPtWeight.scheme.value())
+    process.commonSequence += (process.topPtWeight+process.topPtWeightSeparate)
+
+    # variations
+    for label, name in topPtWeights[:]:
+        mod = getattr(process, name).clone(
+            variationEnabled=True,
+            variationDirection=+1
+        )
+        setattr(process, name+"Plus", mod)
+        process.commonSequence += mod
+        topPtWeights.append( (mod.scheme.value()+"Plus", name+"Plus") )
+
+        mod = mod.clone(
+            variationDirection=-1
+        )
+        setattr(process, name+"Minus", mod)
+        process.commonSequence += mod
+        topPtWeights.append( (mod.scheme.value()+"Minus", name+"Minus") )
+
+
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
+tmp = additionalCounters[:]
+additionalCounters = []
 additionalCounters.extend(MuonSelection.getMuonPreSelectionCountersForEmbedding())
 additionalCounters.extend(MuonSelection.getMuonSelectionCountersForEmbedding(dataVersion))
-
-# Add configuration information to histograms.root
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
-process.infoPath = HChTools.addConfigInfo(process, options, dataVersion)
-
+additionalCounters.extend(tmp)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 #customisations.PF2PATVersion = PF2PATVersion
@@ -139,7 +181,9 @@ process.preselectedMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag(muons),
     cut = cms.string(
         "isGlobalMuon() && isTrackerMuon()"
-        "&& muonID('GlobalMuonPromptTight')"
+        # Take out chi2<10 cut for testing TuneP cocktail
+#        "&& muonID('GlobalMuonPromptTight')"
+        "&& globalTrack().hitPattern().numberOfValidMuonHits() > 0"
         "&& numberOfMatchedStations() > 1"
         "&& abs(dB()) < 0.2" 
         "&& innerTrack().hitPattern().numberOfValidPixelHits() > 0"
@@ -194,7 +238,7 @@ muscle = cms.EDProducer("MuScleFitPATMuonCorrector",
     src = cms.InputTag(muons), 
     debug = cms.bool(False), 
     identifier = cms.string("Data2011_44X"),
-    applySmearing = cms.bool(False), 
+    applySmearing = cms.bool(False),
     fakeSmearing = cms.bool(False)
 )
 setattr(process, muons+"Muscle", muscle)
@@ -232,6 +276,8 @@ process.btagging = btagFilter_cfi.hPlusBTaggingPtrSelectorFilter.clone(
     histogramAmbientLevel = "Systematics",
     filter = False,
 )
+process.btagging.btagging.ptCut = 0
+process.btagging.btagging.etaCut = 9999
 process.commonSequence += process.btagging
 #process.debug = cms.EDAnalyzer("EventContentAnalyzer")
 #process.commonSequence += process.debug
@@ -283,6 +329,7 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
         src = muons,
         correctedEnabled = cms.bool(True),
         correctedSrc = muons+"Muscle",
+        tunePEnabled = True,
         functions = analysisConfig.muonFunctions.clone(),
         bools = cms.PSet(
             triggerMatched = cms.InputTag(muons+"Matched")
@@ -345,6 +392,8 @@ if dataVersion.isMC():
         setattr(ntuple.doubles, "weightPileup_"+era+suffix, cms.InputTag(weight))
     for era, suffix, weight in wjetsEraSuffixWeights:
         setattr(ntuple.doubles, "weightWJets_"+era+suffix, cms.InputTag(weight))
+    for label, tag in topPtWeights:
+        setattr(ntuple.doubles, "weightTopPt_"+label, cms.InputTag(tag))
 
     for name in ntuple.muonEfficiencies.parameterNames_():
         pset = getattr(ntuple.muonEfficiencies, name)

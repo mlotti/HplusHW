@@ -81,8 +81,8 @@ backgroundCrossSections = CrossSectionList(
             }),
     CrossSection("TTJets", {
 #            "7": 165.0, # [3,4], approx. NNLO
-            "7": 172.025, # [10], NNLO+NNLL
-            "8": 245.794, # [10], NNLO+NNLL 
+            "7": 172.0, # [10]
+            "8": 245.8, # [10]
             }),
     CrossSection("WJets", {
             "7": 31314.0, # [2], NNLO

@@ -53,6 +53,9 @@ namespace HPlus {
       const double getTailKillerYaxisIntercept(int njet) const { return getDeltaPhiJetMET(njet) - getDeltaPhiTauMET(); } // Assumes equilateral triangle: y = 1*x + c
       const bool passBackToBackCutForJet(int njet) const;
       const bool passCollinearCutForJet(int njet) const;
+      const bool backToBackCutActiveForJet(int njet) const;
+      const bool collinearCutActiveForJet(int njet) const;
+
 
       friend class QCDTailKiller;
 
@@ -61,6 +64,8 @@ namespace HPlus {
       bool fPassedEvent;
       std::vector<bool> fPassedBackToBackJet;
       std::vector<bool> fPassedCollinearJet;
+      std::vector<bool> fCutActiveBackToBackJet;
+      std::vector<bool> fCutActiveCollinearJet;
       double fDeltaPhiTauMET;
       std::vector<double> fDeltaPhiJetMET;
 
@@ -72,6 +77,7 @@ namespace HPlus {
       ~CutItem();
       void initialise(HistoWrapper& histoWrapper, TFileDirectory& histoDir, std::string cutShape, double cutX, double cutY, int jetN);
       bool passedCut(double x, double y);
+      bool isActive() { return fCutShape != QCDTailKiller::kNoCut; }
       void fillAfterAllCuts(double x, double y);
 
     private:

@@ -54,8 +54,15 @@ defaultVersions = [
 #    "v44_4_2_seed1"
 
 #    "v44_5_notrg2"
-    "v44_5_1_notrg2"
+#    "v44_5_1_notrg2",
+#    "v44_5_1",
+#    "v44_5_1_tauhad",
+#    "v44_5_1_tauhad_vispt10",
+#    "v44_5_1_tauhad_vispt20",
+#    "v44_5_1_tauhad_vispt30",
+    "v44_5_2",
 ]
+
 skimVersion = "v44_5_1"
 genTauSkimVersion = "v44_5"
 
@@ -63,17 +70,22 @@ genTauSkimVersion = "v44_5"
 config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,         "config": "muonSkim_cfg.py"},
           "embedding":            {"workflow": "tauembedding_embedding_%s",              "config": "embed.py"},
           "analysis":             {"workflow": "tauembedding_analysis_%s",               "config": "embeddingAnalysis_cfg.py"},
+#          "analysis":             {"workflow": "tauembedding_analysis_%s",               "config": "debugAnalysis_cfg.py"},
           "genTauSkim":           {"workflow": "tauembedding_gentauskim_"+genTauSkimVersion,     "config": "../pattuple/patTuple_cfg.py"},
           "analysisTau":          {"workflow": "tauembedding_gentauanalysis_"+genTauSkimVersion, "config": "tauAnalysis_cfg.py"},
+#          "analysisTau":          {"workflow": "tauembedding_gentauanalysis_"+genTauSkimVersion, "config": "genTauDebugAnalysis_cfg.py"},
+#          "analysisTau":          {"workflow": "tauembedding_gentauanalysis_"+genTauSkimVersion, "config": "genTauDebugAnalysisNtuple_cfg.py"},
           "analysisTauAod":       {"workflow": "embeddingAodAnalysis_44X",               "config": "tauAnalysis_cfg.py"},
           "muonDebugAnalysisAod": {"workflow": "embeddingAodAnalysis_44X",               "config": "genMuonDebugAnalysisAOD_cfg.py"},
           "muonDebugAnalysisNtupleAod": {"workflow": "embeddingAodAnalysis_44X",         "config": "genMuonDebugAnalysisNtupleAOD_cfg.py"},
           "signalAnalysis":       {"workflow": "tauembedding_analysis_%s",               "config": "../signalAnalysis_cfg.py"},
-          "signalAnalysisGenTau": {"workflow": "analysis_v44_4",                         "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysisGenTau": {"workflow": "analysis_v44_5",                         "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysisGenTauSkim": {"workflow": "tauembedding_gentauanalysis_"+genTauSkimVersion, "config": "../signalAnalysis_cfg.py"},
           "EWKMatching":          {"workflow": "tauembedding_analysis_%s",               "config": "../EWKMatching_cfg.py"},
           "muonAnalysis":         {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "muonAnalysisFromSkim_cfg.py"},
+#          "muonAnalysis":         {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "genMuonDebugAnalysis_cfg.py"},
           "caloMetEfficiency":    {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "caloMetEfficiency_cfg.py"},
-          "ewkBackgroundCoverageAnalysis":    {"workflow": "analysis_v44_4",             "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
+          "ewkBackgroundCoverageAnalysis":    {"workflow": "analysis_v44_5",             "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
           "ewkBackgroundCoverageAnalysisAod": {"workflow": "embeddingAodAnalysis_44X",   "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
           }
 
@@ -108,7 +120,9 @@ datasetsData2011 = [
     "SingleMu_160431-163261_2011A_Nov08", # HLT_Mu20_v1
     "SingleMu_163270-163869_2011A_Nov08", # HLT_Mu24_v2
     "SingleMu_165088-166150_2011A_Nov08", # HLT_Mu30_v3
-    "SingleMu_166161-173198_2011A_Nov08", # HLT_Mu40_v1, v2, v3, v5
+#    "SingleMu_166161-173198_2011A_Nov08", # HLT_Mu40_v1, v2, v3, v5
+    "SingleMu_166161-167913_2011A_Nov08", # HLT_Mu40_v1, v2, v3, v5
+    "SingleMu_170722-173198_2011A_Nov08", # HLT_Mu40_v5, hltMet includes HF from here
     "SingleMu_173236-173692_2011A_Nov08", # HLT_Mu40_eta2p1_v1
     # Run2011B
     "SingleMu_175832-180252_2011B_Nov19", # HLT_Mu40_eta2p1_v1, v4, v5
@@ -118,8 +132,9 @@ datasetsMCTT = [
 ]
 datasetsMCWDY = [
     "WJets_TuneZ2_Fall11",
+    "W1Jets_TuneZ2_Fall11",
     "W2Jets_TuneZ2_Fall11",
-    "W3Jets_TuneZ2_Fall11",
+    "W3Jets_TuneZ2_v2_Fall11",
     "W4Jets_TuneZ2_Fall11",
     "DYJetsToLL_M50_TuneZ2_Fall11",
 ]
@@ -221,7 +236,9 @@ def createTasks(opts, step, version=None):
     scheduler = "arc"
     if step in ["genTauSkim"]:
         crabcfg = "../pattuple/crab_pat.cfg"
-    if step in ["analysis", "analysisTau", "analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
+    elif step in ["signalAnalysisGenTau", "signalAnalysisGenTauSkim"]:
+        crabcfg = "../crab_analysis.cfg"
+    elif step in ["analysis", "analysisTau", "analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysis", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
         crabcfg = None
         if "HOST" in os.environ and "lxplus" in os.environ["HOST"]:
             scheduler = "remoteGlidein"
@@ -261,6 +278,8 @@ def createTasks(opts, step, version=None):
                 datasets.extend(datasetsMCnoQCD)
         elif step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
             datasets.extend(datasetsMCTTWJets)
+        elif step in ["signalAnalysisGenTauSkim"]:
+            datasets.extend(datasetsMCTT)
         else:
             datasets.extend(datasetsData2011)
             datasets.extend(datasetsMCnoQCD)
@@ -295,9 +314,9 @@ def createTasks(opts, step, version=None):
             #if step in ["skim", "embedding"]:
             #    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
         
-            # For this workflow we need one additional command line argument
-            if step == "signalAnalysisGenTau":
-                multicrab.appendArgAll("doTauEmbeddingLikePreselection=1")
+        # For this workflow we need one additional command line argument
+        if step in ["signalAnalysisGenTau", "signalAnalysisGenTauSkim"]:
+            multicrab.appendArgAll("doTauEmbeddingLikePreselection=1")
         
         if step in ["skim"]:
             multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)

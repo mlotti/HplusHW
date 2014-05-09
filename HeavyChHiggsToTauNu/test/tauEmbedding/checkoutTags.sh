@@ -18,6 +18,7 @@ set -e
 # 10.7.2011/M.Kortelainen CMSSW_4_2_5 Included AnalysisDataFormats/EWK back
 # 13.8.2012/M.Kortelainen CMSSW_4_4_4 Fix compilation of SelectReplacementCandidates.cc
 # 6.5.2013/M.Kortelainen CMSSW_4_4_5 Added MuScleFit correction class
+# 7.10.2013/M.Kortelainen CMSSW_4_4_5 Add patch for the PAT helpers.py perf improvement
 
 cvs co -r V00-00-13 TauAnalysis/MCEmbeddingTools
 cvs up -r 1.7 TauAnalysis/MCEmbeddingTools/plugins/SelectReplacementCandidates.cc
@@ -37,3 +38,6 @@ cvs up -r1.3 AnalysisDataFormats/EWK/BuildFile.xml
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/MuScleFitCorrections2012
 cvs co -r muscle_v4_2_0 -d MuScleFit/Calibration UserCode/scasasso/MuScleFit/Calibration 
+
+# Improves the performance of massSearchReplaceAnyInputTag significantly
+patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/PAT_helpers.patch

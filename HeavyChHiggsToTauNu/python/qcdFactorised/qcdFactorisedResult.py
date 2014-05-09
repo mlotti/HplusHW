@@ -18,7 +18,9 @@ import time
 class QCDFactorisedResult:
     def __init__(self, basicShape, leg1Shape, leg2Shape, moduleInfoString, createBinHistos=False, displayPurityBreakdown=False):
         self._resultCountObject = None # ExtendedCount object which contains the result
-        self._resultShape = None # TH1F which contains the final shape histogram
+        self._resultShape = None # TH1F which contains the final shape histogram for NQCD
+        self._resultShapeEWK = None # TH1F which contains the final shape histogram for EWK MC
+        self._resultShapePurity = None # TH1F which contains the final shape histogram for QCD purity
         self._nQCDHistogramsList = [] # List of TH1F histograms
         self._displayPurityBreakdown = displayPurityBreakdown
         self._createBinHistos = createBinHistos
@@ -39,6 +41,14 @@ class QCDFactorisedResult:
     def getResultShape(self):
         return self._resultShape
 
+    ## Returns the MC EWK contribution to final shape histogram
+    def getResultMCEWK(self):
+        return self._resultShapeEWK
+
+    ## Returns the final shape purity histogram
+    def getResultPurity(self):
+        return self._resultShapePurity
+
     ## Returns the list of shape histograms (one for each split phase space bin)
     def getNQCDHistograms(self):
         return self._nQCDHistogramsList
@@ -53,6 +63,14 @@ class QCDFactorisedResult:
         self._resultShape.Reset()
         self._resultShape.SetTitle("NQCDFinal_Total_%s"%moduleInfoString)
         self._resultShape.SetName("NQCDFinal_Total_%s"%moduleInfoString)
+        self._resultShapeEWK = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
+        self._resultShapeEWK.Reset()
+        self._resultShapeEWK.SetTitle("NQCDFinal_EWK_%s"%moduleInfoString)
+        self._resultShapeEWK.SetName("NQCDFinal_EWK_%s"%moduleInfoString)
+        self._resultShapePurity = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
+        self._resultShapePurity.Reset()
+        self._resultShapePurity.SetTitle("NQCDFinal_Purity_%s"%moduleInfoString)
+        self._resultShapePurity.SetName("NQCDFinal_Purity_%s"%moduleInfoString)
         self._nQCDHistogramsList = []
         myUncertaintyLabels = ["statData", "statEWK"]
         self._resultCountObject = ExtendedCount(0.0, [0.0, 0.0], myUncertaintyLabels)
@@ -121,22 +139,28 @@ class QCDFactorisedResult:
         if self._displayPurityBreakdown:
             print "Purity as function of final shape"
             print "shapeBin purity purityUncert"
-            for j in range (1,hLeg1.GetNbinsX()+1):
-                myPurity = 0.0
-                myPurityUncert = 0.0
-                if abs(myShapeDataSum[j-1]) > 0.000001:
-                    myPurity = 1.0 - myShapeEwkSum[j-1] / myShapeDataSum[j-1]
-                    myPurityUncert = errorPropagationForDivision(myShapeEwkSum[j-1], myShapeEwkSumUncert[j-1], myShapeDataSum[j-1], myShapeDataSumUncert[j-1])
-                # Print purity info of final shape
+        for j in range (1,self._resultShape.GetNbinsX()+1):
+            myPurity = 0.0
+            myPurityUncert = 0.0
+            if abs(myShapeDataSum[j-1]) > 0.000001:
+                myPurity = 1.0 - myShapeEwkSum[j-1] / myShapeDataSum[j-1]
+                myPurityUncert = errorPropagationForDivision(myShapeEwkSum[j-1], math.sqrt(myShapeEwkSumUncert[j-1]), myShapeDataSum[j-1], math.sqrt(myShapeDataSumUncert[j-1]))
+            # Store MC EWK content
+            self._resultShapeEWK.SetBinContent(j, myShapeEwkSum[j-1])
+            self._resultShapeEWK.SetBinError(j, math.sqrt(myShapeEwkSumUncert[j-1]))
+            self._resultShapePurity.SetBinContent(j, myPurity)
+            self._resultShapePurity.SetBinError(j, myPurityUncert)
+            # Print purity info of final shape
+            if self._displayPurityBreakdown:
                 myString = ""
-                if j < hLeg1.GetNbinsX():
-                    myString = "%d..%d"%(hLeg1.GetXaxis().GetBinLowEdge(j),hLeg1.GetXaxis().GetBinUpEdge(j))
+                if j < self._resultShape.GetNbinsX():
+                    myString = "%d..%d"%(self._resultShape.GetXaxis().GetBinLowEdge(j),self._resultShape.GetXaxis().GetBinUpEdge(j))
                 else:
-                    myString = ">%d"%(hLeg1.GetXaxis().GetBinLowEdge(j))
+                    myString = ">%d"%(self._resultShape.GetXaxis().GetBinLowEdge(j))
                 myString += " %.3f %.3f"%(myPurity, myPurityUncert)
                 print myString
 
-class QCDControlPlot:
+class QCDControlPlot: # OBSOLETE
     def __init__(self, basicShape, leg1Shape, leg2Shape, moduleInfoString, title=""):
         self._resultShape = None # TH1F which contains the final shape histogram
         self._title = title
@@ -207,6 +231,10 @@ class QCDFactorisedResultManager:
         myLeg1Shape.delete()
         self._hShape = aux.Clone(myResult.getResultShape())
         self._hShape.SetName(self._hShape.GetName()+"finalShapeInManager")
+        self._hShapeMCEWK = aux.Clone(myResult.getResultMCEWK())
+        self._hShapeMCEWK.SetName(self._hShape.GetName()+"finalShapeInManager")
+        self._hShapePurity = aux.Clone(myResult.getResultPurity())
+        self._hShapePurity.SetName(self._hShape.GetName()+"finalShapeInManager")
         myResult.delete()
         if not shapeOnly:
             print HighlightStyle()+"...Obtaining region transition systematics"+NormalStyle()
@@ -217,6 +245,7 @@ class QCDFactorisedResultManager:
             myRegionTransitionSyst.delete()
             # Obtain data-driven control plots
             self._hCtrlPlotLabels = []
+            self._hCtrlPlotLabelsForQCDSyst = []
             self._hCtrlPlots = []
             self._hRegionSystUpCtrlPlots = []
             self._hRegionSystDownCtrlPlots = []
@@ -226,9 +255,13 @@ class QCDFactorisedResultManager:
                 myStatus = True
                 i += 1
                 print HighlightStyle()+"...Obtaining ctrl plot %d/%d: %s%s"%(i,len(myObjects),item,NormalStyle())
-                if not dsetMgr.getDataset("EWK").datasets[0].hasRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item)):
+                myEWKFoundStatus = True
+                for d in dsetMgr.getDataset("EWK").datasets:
+                    if not d.hasRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item)):
+                        myEWKFoundStatus = False
+                if not myEWKFoundStatus:
                     myStatus = False
-                    print WarningLabel()+"Skipping '%s', because it does not exist for EWK (you probably forgot to set histo level to Vital when producing the multicrab)!"%(item)+NormalStyle()
+                    print WarningLabel()+"Skipping '%s', because it does not exist for EWK datasets (you probably forgot to set histo level to Vital when producing the multicrab)!"%(item)+NormalStyle()
                 else:
                     (myRootObject, myRootObjectName) = dsetMgr.getDataset("EWK").getFirstRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item))
                     if isinstance(myRootObject, ROOT.TH2):
@@ -236,15 +269,27 @@ class QCDFactorisedResultManager:
                         myStatus = False
                 if myStatus:
                     self._hCtrlPlotLabels.append(item)
+                    self._hCtrlPlotLabelsForQCDSyst.append(item)
                     myRebinList = systematics.getBinningForPlot(item)
                     myCtrlShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity, rebinList=myRebinList)
                     myCtrlPlot = QCDControlPlot(myCtrlRegionShape, myCtrlShape, mySignalRegionShape, moduleInfoString, title=item)
                     myCtrlShape.delete()
                     myCtrlPlotHisto = aux.Clone(myCtrlPlot.getResultShape(), "ctrlPlotShapeInManager")
-                    myCtrlPlot.delete()
                     myCtrlPlotHisto.SetName(item+"%d"%i)
                     myCtrlPlotHisto.SetTitle(item)
                     self._hCtrlPlots.append(myCtrlPlotHisto)
+                    # MC EWK and purity
+                    self._hCtrlPlotLabels.append(item+"_MCEWK")
+                    myCtrlPlotMCEWKHisto = aux.Clone(myCtrlPlot.getResultMCEWK(), "ctrlPlotMCEWKInManager")
+                    myCtrlPlotMCEWKHisto.SetName(item+"%d_MCEWK"%i)
+                    myCtrlPlotMCEWKHisto.SetTitle(item+"_MCEWK")
+                    self._hCtrlPlots.append(myCtrlPlotMCEWKHisto)
+                    self._hCtrlPlotLabels.append(item+"_Purity")
+                    myCtrlPlotPurityHisto = aux.Clone(myCtrlPlot.getResultPurity(), "ctrlPlotPurityInManager")
+                    myCtrlPlotPurityHisto.SetName(item+"%d_Purity"%i)
+                    myCtrlPlotPurityHisto.SetTitle(item+"_Purity")
+                    self._hCtrlPlots.append(myCtrlPlotPurityHisto)
+                    myCtrlPlot.delete()
                     # Do systematics coming from met shape difference for control plots
                     myCtrlPlotSignalRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationSignal",item), luminosity, rebinList=myRebinList)
                     myCtrlPlotControlRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationControl",item), luminosity, rebinList=myRebinList)
@@ -252,10 +297,10 @@ class QCDFactorisedResultManager:
                     myCtrlPlotSignalRegionShape.delete()
                     myCtrlPlotControlRegionShape.delete()
                     hUp = aux.Clone(myCtrlPlotRegionTransitionSyst.getUpHistogram(), "QCDfactMgrSystQCDSystUp%d"%i)
-                    hUp.SetTitle(item)
+                    hUp.SetTitle(item+"systQCDUp")
                     self._hRegionSystUpCtrlPlots.append(hUp)
                     hDown = aux.Clone(myCtrlPlotRegionTransitionSyst.getDownHistogram(), "QCDfactMgrSystQCDSystDown%d"%i)
-                    hDown.SetTitle(item)
+                    hDown.SetTitle(item+"systQCDDown")
                     self._hRegionSystDownCtrlPlots.append(hDown)
                     myCtrlPlotRegionTransitionSyst.delete()
                     #print "\n***** memdebug %d\n"%i
@@ -268,6 +313,8 @@ class QCDFactorisedResultManager:
     ## Delete the histograms
     def delete(self):
         ROOT.gDirectory.Delete(self._hShape.GetName())
+        ROOT.gDirectory.Delete(self._hShapeMCEWK.GetName())
+        ROOT.gDirectory.Delete(self._hShapePurity.GetName())
         ROOT.gDirectory.Delete(self._hRegionSystDown.GetName())
         ROOT.gDirectory.Delete(self._hRegionSystUp.GetName())
         self._hCtrlPlotLabels = None
@@ -284,6 +331,12 @@ class QCDFactorisedResultManager:
     def getShape(self):
         return self._hShape
 
+    def getShapeMCEWK(self):
+        return self._hShapeMCEWK
+
+    def getShapePurity(self):
+        return self._hShapePurity
+
     def getRegionSystUp(self):
         return self._hRegionSystUp
 
@@ -295,6 +348,9 @@ class QCDFactorisedResultManager:
 
     def getControlPlots(self):
         return self._hCtrlPlots
+
+    def getControlPlotLabelsForQCDSyst(self):
+        return self._hCtrlPlotLabelsForQCDSyst
 
     def getRegionSystUpCtrlPlots(self):
         return self._hRegionSystUpCtrlPlots

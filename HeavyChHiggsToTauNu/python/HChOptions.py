@@ -59,6 +59,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Should MC be triggered? (default: 0) If MC is to be triggered, the default trigger is taken from HChDataVersion (called signalTrigger in there). This can be overridden with the 'trigger' command line argument.")
+    options.register("triggerMCInAnalysis",
+                     0,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Should MC be triggered in analysis job, if triggerMC=0? (default: 0)")
     options.register("skimConfig",
                      [],
                      options.multiplicity.list,
@@ -80,7 +85,8 @@ def getOptions(options=None):
                      options.varType.int,
                      "Input is from tau embedding (default: 0)")
     options.register("tauEmbeddingCaloMet",
-                     "caloMetNoHFSum",
+#                     "caloMetNoHFSum", no-HF in first part of 2011A, after that HF is included
+                     "caloMetSum",
                      options.multiplicity.singleton, options.varType.string,
                      "What calo MET object to use in signal analysis of tau embedded samples")
     options.register("tauEmbeddingTauTrigger",

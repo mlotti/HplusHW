@@ -9,48 +9,66 @@
 namespace HPlus {
   // constructor and desturctor
   TopSelectionManager::TopSelectionManager(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& fHistoWrapper, const std::string topRecoName):
-  
-    fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper),
-    fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
-    fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
-    fTopWithWSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithWSelection"), eventCounter, fHistoWrapper),
-    //    fTopWithMHSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithMHSelection"), eventCounter, fHistoWrapper)
+    iConfig(iConfig),
+    eventCounter(eventCounter),
+    fHistoWrapper(fHistoWrapper),
     fTopRecoName(topRecoName)
+    {
+    if (topRecoName == "chi"){   
+        fSelectedAlgorithm = new TopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper);
+        }
+    else if (topRecoName == "std"){
+        fSelectedAlgorithm = new TopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper);
+        }
+    else if (topRecoName == "Wselection"){
+        fSelectedAlgorithm = new TopWithWSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithWSelection"), eventCounter, fHistoWrapper);
+        }
+    else if (topRecoName == "Bselection"){ 
+        fSelectedAlgorithm = new TopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper);
+        }
+    else 
+        fSelectedAlgorithm = NULL;
+    }
 
-    {}
-
-  TopSelectionManager::~TopSelectionManager() {}
+  TopSelectionManager::~TopSelectionManager() {
+      delete fSelectedAlgorithm;
+      }
 
   // analyze
   TopSelectionManager::Data TopSelectionManager::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, edm::Ptr<pat::Jet> bjet, bool bjetPassed) {
     TopSelectionManager::Data TopSelectionData;
-    if (fTopRecoName == "None")
+    if (fTopRecoName == "None") // LAW 3.12.2013 (note that fSelectedAlgorithm == NULL in this case, i.e. all events failed for top reco if topRecoName == "None")
       TopSelectionData.makeEventPassed();
-    else if (fTopRecoName == "std")
-      TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jets, bjets);
-    else if (fTopRecoName == "chi")
-      TopSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jets, bjets);
-    else if (fTopRecoName == "Wselection" && bjetPassed)
-      TopSelectionData = fTopWithWSelection.analyze(iEvent, iSetup, jets, bjet);
-    else if (fTopRecoName == "Bselection" && bjetPassed)
-      TopSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jets, bjet);
+    if(fSelectedAlgorithm){
+        if (fTopRecoName == "std")
+            TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjets);
+        else if (fTopRecoName == "chi")
+            TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjets);
+        else if (fTopRecoName == "Wselection" && bjetPassed)
+            TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjet);
+        else if (fTopRecoName == "Bselection" && bjetPassed)
+            TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjet);
+        }
     return TopSelectionData;
     }       
     
     // silentAnalyze
    TopSelectionManager::Data TopSelectionManager::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, edm::Ptr<pat::Jet> bjet, bool bjetPassed){
     TopSelectionManager::Data TopSelectionData;
-    if (fTopRecoName == "None")
+    if (fTopRecoName == "None")  // LAW 3.12.2013 (note that fSelectedAlgorithm == NULL in this case, i.e. all events failed for top reco if topRecoName == "None")
       TopSelectionData.makeEventPassed();
-    else if (fTopRecoName == "std")
-      TopSelectionData = fTopSelection.silentAnalyze(iEvent, iSetup, jets, bjets);
-    else if (fTopRecoName == "chi")
-      TopSelectionData = fTopChiSelection.silentAnalyze(iEvent, iSetup, jets, bjets);
-    else if (fTopRecoName == "Wselection" && bjetPassed)
-      TopSelectionData = fTopWithWSelection.silentAnalyze(iEvent, iSetup, jets, bjet);
-    else if (fTopRecoName == "Bselection" && bjetPassed)
-      TopSelectionData = fTopWithBSelection.silentAnalyze(iEvent, iSetup, jets, bjet);
+
+    if(fSelectedAlgorithm){
+        if (fTopRecoName == "std")
+            TopSelectionData = fSelectedAlgorithm->silentAnalyze(iEvent, iSetup, jets, bjets);
+        else if (fTopRecoName == "chi")
+            TopSelectionData = fSelectedAlgorithm->silentAnalyze(iEvent, iSetup, jets, bjets);
+        else if (fTopRecoName == "Wselection" && bjetPassed)
+            TopSelectionData = fSelectedAlgorithm->silentAnalyze(iEvent, iSetup, jets, bjet);
+        else if (fTopRecoName == "Bselection" && bjetPassed)
+            TopSelectionData = fSelectedAlgorithm->silentAnalyze(iEvent, iSetup, jets, bjet);
+        }
     return TopSelectionData;
-   }
+    }   
     
 }

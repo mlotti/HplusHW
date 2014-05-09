@@ -41,6 +41,10 @@ namespace HPlus {
       const bool passedEvent() const { return fPassedEvent; }
       const double getTopMass() const { return top.M(); }
       const double getWMass() const { return W.M(); }
+      const double getTopPt() const { return top.Pt(); }
+      const double getWPt() const { return W.Pt(); }
+      const double getTopEta() const { return top.Eta(); }
+      const double getWEta() const { return W.Eta(); }
       const XYZTLorentzVector& getTopP4() const { return top; }
       const XYZTLorentzVector& getWP4() const { return W; }
       const edm::Ptr<pat::Jet>& getSelectedBjet() const { return bjetInTop; }
@@ -65,7 +69,7 @@ namespace HPlus {
     virtual Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
     // Overloading for BSelection
     virtual Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
-
+    
     void init();
     //Input parameters, counters and histograms are defined for each algorighm separately
   };

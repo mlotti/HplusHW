@@ -25,8 +25,8 @@ namespace HPlus {
 
   void NormalisationAnalysis::createCommonHistograms(std::string label) {
     edm::Service<TFileService> fs;
-    TFileDirectory myBaseDir = fs->mkdir("NormalisationAnalysis");
-    TFileDirectory myDir = myBaseDir.mkdir(label.c_str());
+    TFileDirectory myBaseDir = fHistoWrapper.mkdir(HistoWrapper::kInformative, *fs, "NormalisationAnalysis");
+    TFileDirectory myDir = fHistoWrapper.mkdir(HistoWrapper::kInformative, myBaseDir, label);
     fMyDir += "NormalisationAnalysis/";
     fMyDir += label;
 

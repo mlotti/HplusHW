@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -14,8 +15,6 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
-
 namespace HPlus {
   MuonSelection::Data::Data():
     fSelectedMuonPt(0.),
@@ -29,6 +28,7 @@ namespace HPlus {
     BaseSelection(eventCounter, histoWrapper),
     fGenParticleSrc(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
     fMuonCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollectionName")),
+    fApplyMuonIsolation(iConfig.getUntrackedParameter<bool>("applyMuonIsolation")),
     fMuonPtCut(iConfig.getUntrackedParameter<double>("MuonPtCut")),
     fMuonEtaCut(iConfig.getUntrackedParameter<double>("MuonEtaCut")),
     fMuonSelectionSubCountAllEvents(eventCounter.addSubCounter("MuonSelection","AllEvent")),
@@ -55,7 +55,7 @@ namespace HPlus {
 
   {
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("MuonSelection");
+    TFileDirectory myDir = histoWrapper.mkdir(HistoWrapper::kInformative, *fs, "MuonSelection");
     
     hTightMuonEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightMuonEta", "TightMuonEta;Tight muon #eta;N_{muons} / 0.1", 60, -3., 3.);
     hTightMuonPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightMuonPt", "TightMuonPt;Tight muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
@@ -258,14 +258,16 @@ namespace HPlus {
         output.fSelectedMuonsBeforeIsolation.push_back(*iMuon);
 
       // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Basline_muon_selections_for_2011
-      if (relIsol < 0.12) {
-        hTightMuonEta->Fill(myMuonEta);
-        if (std::abs(myMuonEta) < fMuonEtaCut)
-          hTightMuonPt->Fill(myMuonPt);
-      }
-      if (relIsol > 0.20) {
-        output.fSelectedNonIsolatedMuons.push_back(*iMuon);
-        continue;
+      if (fApplyMuonIsolation) {
+        if (relIsol < 0.12) {
+          hTightMuonEta->Fill(myMuonEta);
+          if (std::abs(myMuonEta) < fMuonEtaCut)
+            hTightMuonPt->Fill(myMuonPt);
+        }
+        if (relIsol > 0.20) {
+          output.fSelectedNonIsolatedMuons.push_back(*iMuon);
+          continue;
+        }
       }
       bMuonRelIsolationCut = true;
       output.fSelectedMuonsBeforePtAndEtaCuts.push_back(*iMuon);
@@ -282,7 +284,7 @@ namespace HPlus {
       if (myMuonPt < fMuonPtCut) continue;
       bMuonPtCut = true;
       output.fSelectedMuonsLoose.push_back(*iMuon);
-      if (relIsol < 0.12)
+      if (relIsol < 0.12 || !fApplyMuonIsolation)
         output.fSelectedMuonsTight.push_back(*iMuon);
 
 

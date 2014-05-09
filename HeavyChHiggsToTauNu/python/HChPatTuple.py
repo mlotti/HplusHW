@@ -60,9 +60,18 @@ class PATBuilder:
         if dataVersion.isData():
             # Append the data selection counters for data
             self.counters.extend(HChDataSelection.dataSelectionCounters[:])
-        elif dataVersion.isMC() and options.triggerMC != 0:
+        elif dataVersion.isMC() and options.triggerMC == 1:
             # If MC preselection is enabled, add the counters from there
             self.counters = HChMcSelection.mcSelectionCounters[:]
+
+        if len(options.customizeConfig) > 0:
+            for config in options.customizeConfig:
+                module = __import__("HiggsAnalysis.HeavyChHiggsToTauNu."+config, fromlist=[config])
+                if hasattr(module, "getCountersPrepend"):
+                    self.counters = module.getCountersPrepend() + self.counters
+
+                if hasattr(module, "getCounters"):
+                    self.counters.extend(module.getCounters())
 
         if options.tauEmbeddingInput != 0:
             # Add the tau embedding counters, if that's the input
@@ -85,8 +94,8 @@ class PATBuilder:
                 # normal AOD input
                 if dataVersion.isData():
                     self.process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options, calculateEventCleaning)
-                elif dataVersion.isMC() and options.triggerMC != 0:
-                    self.process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
+                elif dataVersion.isMC():
+                    self.process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.triggerMC != 0, options.trigger)
 
                 # Do some manipulation of PAT arguments, ensure that the
                 # trigger has been given if Tau-HLT matching is required
@@ -119,6 +128,13 @@ class PATBuilder:
         self.addFilters(dataVersion, sequence, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=(options.doPat != 0))
 
         if not patOnTheFly:
+            # FIXME, this is hack only for v53_3 pattuples, remove for any future processing
+            if dataVersion.isMC() and options.triggerMC == 0:
+                # Add "missing" counters for datasets which were not
+                # triggered in pattuple job
+                self.process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, False, options.trigger)
+                sequence += self.process.eventPreSelection
+
             # Add primary vertex selection
             # Selects the first primary vertex, applies the quality cuts to it
             # Applies quality cuts to all vertices too

@@ -57,6 +57,15 @@ class AnalysisModuleSelector:
         self._selectedSystematicVariations = []
         self._disableSystematicsList = disableSystematicsList
 
+    def closeFiles(self):
+        if self._primarySource != None:
+            del self._primarySource
+            self._primarySource = None
+        for d in self._otherSources:
+            if d != None:
+                del d
+        self._otherSources = []
+
     def getAvailableEras(self):
         return self._availableEras
 
@@ -96,13 +105,21 @@ class AnalysisModuleSelector:
         return count
 
     def iterSelectedCombinations(self):
-        def gen(lst1, lst2, lst3, lst4):
+        def gen3(lst1, lst2, lst3):
+            for x1 in lst1:
+                for x2 in lst2:
+                    for x3 in lst3:
+                        yield x1, x2, x3
+        def gen4(lst1, lst2, lst3, lst4):
             for x1 in lst1:
                 for x2 in lst2:
                     for x3 in lst3:
                         for x4 in lst4:
                             yield x1, x2, x3, x4
-        return gen(self.getSelectedEras(), self.getSelectedSearchModes(), self.getSelectedOptimizationModes(), self.getSelectedSystematicVariations())
+        if self._disableSystematicsList:
+            return gen3(self.getSelectedEras(), self.getSelectedSearchModes(), self.getSelectedOptimizationModes())
+        else:
+            return gen4(self.getSelectedEras(), self.getSelectedSearchModes(), self.getSelectedOptimizationModes(), self.getSelectedSystematicVariations())
 
     def addParserOptions(self, parser):
         parser.add_option("-e", "--dataEra", dest="era", type="string", action="append", help="Evaluate specified data eras")

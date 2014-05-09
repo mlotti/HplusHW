@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 #analysis = "TauLeg2012"
-analysis = "MetLeg2011"
+analysis = "TauLeg2011"
+#analysis = "MetLeg2011"
 #analysis = "QuadJet2012"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
@@ -17,7 +18,7 @@ import HiggsAnalysis.TriggerEfficiency.tools.multicrabDatasets2011 as multicrabD
 #multicrabDatasets2011.addMetLegSkim_V00_10_11_CMSSW445_v4(multicrabWorkflows.datasets)
 #multicrabWorkflows.printAllDatasets()
 if analysis[:-4] == "TauLeg":
-    multicrabDatasetsTTEff.addTauLegSkim(multicrabWorkflows.datasets)
+    multicrabDatasetsTTEff.addTauLegSkim_v44_v5(multicrabWorkflows.datasets)
 if analysis[:-4] == "MetLeg":
     multicrabDatasetsTTEff.addMetLegSkim_v44_v5(multicrabWorkflows.datasets)
 #    multicrabDatasetsTTEff.addMetLegSkim_CaloMETCorr(multicrabWorkflows.datasets)
@@ -40,6 +41,18 @@ multicrab = Multicrab("crab.cfg_TTEffAnalyzer",
 # The dataset definitions are in python/tools/multicrabDatasets.py
 
 #from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasets import collisionData11Nov08Nov19,mcFall11
+
+datasetsData2011TauLeg = [
+    "SingleMu_165970-167913_2011A_Nov08_RAWRECO",
+    "SingleMu_170722-173198_2011A_Nov08_RAWRECO",
+    "SingleMu_173236-173692_2011A_Nov08_RAWRECO",
+    "SingleMu_175832-180252_2011B_Nov19_RAWRECO"
+]
+datasetsMC2011TauLeg = [
+#    "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW"
+    "DYToTauTau_M20_CT10_TuneZ2_7TeV_powheg_pythia_tauola_TTEffSkim_v447_v1"
+]
+
 datasetsData2011MetLeg = [
     "Tau_165970-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
     "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
@@ -181,6 +194,11 @@ print "Analysis",analysis
 print
 
 outputfiles = ""
+if analysis == "TauLeg2011":
+    datasets.extend(datasetsData2011TauLeg)
+    datasets.extend(datasetsMC2011TauLeg)
+    outputfiles = "tteffAnalysis-hltpftau-hpspftau.root, tteffAnalysis-hltpftau-hpspftau-highpurity.root"
+
 if analysis == "MetLeg2011":
     datasets.extend(datasetsData2011MetLeg)
     datasets.extend(datasetsMC2011MetLeg)

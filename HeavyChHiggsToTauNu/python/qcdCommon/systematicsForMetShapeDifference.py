@@ -17,7 +17,7 @@ class SystematicsForMetShapeDifference:
     # signalRegion and ctrlRegion are of type dataDrivenQCDCount, they are the shape histograms at the tested stage
     # finalShape is the final shape histogram (needs to be already properly normalised)
     # moduleInfoString is a string that is unique to the analysis module
-    def __init__(self, signalRegion, ctrlRegion, finalShape, moduleInfoString, quietMode=False):
+    def __init__(self, signalRegion, ctrlRegion, finalShape, moduleInfoString, quietMode=False, optionDoBinByBinHistograms=False):
         self._signalRegionHistograms = []
         self._ctrlRegionHistograms = []
         self._hCombinedSignalRegion = None
@@ -25,7 +25,7 @@ class SystematicsForMetShapeDifference:
         self._systUpHistogram = None
         self._systDownHistogram = None
         # Calculate
-        self._calculate(signalRegion, ctrlRegion, finalShape, moduleInfoString, quietMode)
+        self._calculate(signalRegion, ctrlRegion, finalShape, moduleInfoString, quietMode, optionDoBinByBinHistograms)
 
     ## Delete the histograms
     def delete(self):
@@ -56,7 +56,7 @@ class SystematicsForMetShapeDifference:
     def getDownHistogram(self):
         return self._systDownHistogram
 
-    def _calculate(self, signalRegion, ctrlRegion, finalShape, moduleInfoString, quietMode):
+    def _calculate(self, signalRegion, ctrlRegion, finalShape, moduleInfoString, quietMode, optionDoBinByBinHistograms):
         def normaliseToUnity(h):
             # Normalise area to unity since we only care about the shape
             myIntegral = abs(h.Integral(1, h.GetNbinsX()+2))
@@ -73,15 +73,16 @@ class SystematicsForMetShapeDifference:
         self._hCombinedCtrlRegion.Reset()
         self._hCombinedCtrlRegion.SetTitle("QCDSystCtrlRegion_Total_%s"%(moduleInfoString))
         self._hCombinedCtrlRegion.SetName("QCDSystCtrlRegion_Total_%s"%(moduleInfoString))
-        for i in range(0, nSplitBins):
-            h = aux.Clone(self._hCombinedSignalRegion)
-            h.SetTitle("QCDSystSignalRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
-            h.SetName("QCDSystSignalRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
-            self._signalRegionHistograms.append(h)
-            h = aux.Clone(self._hCombinedSignalRegion)
-            h.SetTitle("QCDSystCtrlRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
-            h.SetName("QCDSystCtrlRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
-            self._ctrlRegionHistograms.append(h)
+        if optionDoBinByBinHistograms:
+            for i in range(0, nSplitBins):
+                h = aux.Clone(self._hCombinedSignalRegion)
+                h.SetTitle("QCDSystSignalRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
+                h.SetName("QCDSystSignalRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
+                self._signalRegionHistograms.append(h)
+                h = aux.Clone(self._hCombinedSignalRegion)
+                h.SetTitle("QCDSystCtrlRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
+                h.SetName("QCDSystCtrlRegion_%s_%s"%(signalRegion.getPhaseSpaceBinFileFriendlyTitle(i), moduleInfoString))
+                self._ctrlRegionHistograms.append(h)
         self._systUpHistogram = aux.Clone(self._hCombinedSignalRegion)
         self._systUpHistogram.SetTitle("QCDSystUp_%s"%(moduleInfoString))
         self._systUpHistogram.SetName("QCDSystUp_%s"%(moduleInfoString))
@@ -93,13 +94,14 @@ class SystematicsForMetShapeDifference:
             # Get data-driven QCD shapes for MET
             hSignalRegion = signalRegion.getDataDrivenQCDHistoForSplittedBin(i)
             hCtrlRegion = ctrlRegion.getDataDrivenQCDHistoForSplittedBin(i)
-            # Add to output histograms
-            self._signalRegionHistograms[i].Add(hSignalRegion)
-            self._ctrlRegionHistograms[i].Add(hCtrlRegion)
-            histogramsExtras.makeFlowBinsVisible(self._signalRegionHistograms[i])
-            histogramsExtras.makeFlowBinsVisible(self._ctrlRegionHistograms[i])
-            normaliseToUnity(self._signalRegionHistograms[i])
-            normaliseToUnity(self._ctrlRegionHistograms[i])
+            if optionDoBinByBinHistograms:
+                # Add to output histograms
+                self._signalRegionHistograms[i].Add(hSignalRegion)
+                self._ctrlRegionHistograms[i].Add(hCtrlRegion)
+                histogramsExtras.makeFlowBinsVisible(self._signalRegionHistograms[i])
+                histogramsExtras.makeFlowBinsVisible(self._ctrlRegionHistograms[i])
+                normaliseToUnity(self._signalRegionHistograms[i])
+                normaliseToUnity(self._ctrlRegionHistograms[i])
             # Add to total histograms
             self._hCombinedSignalRegion.Add(hSignalRegion)
             self._hCombinedCtrlRegion.Add(hCtrlRegion)
@@ -120,8 +122,8 @@ class SystematicsForMetShapeDifference:
                 myRatioSigma = errorPropagationForDivision(self._hCombinedSignalRegion.GetBinContent(i), self._hCombinedSignalRegion.GetBinError(i),
                                                            self._hCombinedCtrlRegion.GetBinContent(i), self._hCombinedCtrlRegion.GetBinError(i))
             #print i, (myRatio+myRatioSigma)*finalShape.GetBinContent(i), (myRatio-myRatioSigma)*finalShape.GetBinContent(i), finalShape.GetBinContent(i)
-            self._systUpHistogram.SetBinContent(i, (myRatio+myRatioSigma)*finalShape.GetBinContent(i))
-            self._systDownHistogram.SetBinContent(i, (myRatio-myRatioSigma)*finalShape.GetBinContent(i))
+            self._systUpHistogram.SetBinContent(i, (1.0+myRatioSigma)*finalShape.GetBinContent(i))
+            self._systDownHistogram.SetBinContent(i, (1.0-myRatioSigma)*finalShape.GetBinContent(i))
         # Calculate total uncertainty
         if not quietMode:
             mySignalIntegral = self._hCombinedSignalRegion.Integral()

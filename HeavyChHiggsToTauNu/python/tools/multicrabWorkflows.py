@@ -117,6 +117,7 @@ datasets.extend([
     DataDataset("SingleMu_%s_2011B_Nov19_RAWRECO", runs=(175832, 180252), aod="/SingleMu/Run2011B-Tau-19Nov2011-v1/RAW-RECO"),                                                                                            
                                                                                                                                                                                                                           
     MCDataset("DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW", aod="/DYJetsToLL_TuneZ2_MPIoff_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/GEN-RAW"),                                                
+    MCDataset("DYToTauTau_M20_CT10_TuneZ2_7TeV_powheg_pythia_tauola_TTEffSkim_v447_v1", aod="/DYToTauTau_M-20_CT10_TuneZ2_7TeV-powheg-pythia-tauola/Fall11-PU_S6_START42_V14B-v1/GEN-RAW"),
 ])
 
 # Split for backward compatibility, also for Mu-trigger thresholds
@@ -145,6 +146,11 @@ datasets.splitDataByRuns("SingleMu_160431-173692_2011A_Nov08", [
 datasets.splitDataByRuns("SingleMu_165088-166150_2011A_Nov08", [
         (165088, 165633), # Split this run range into two (and keep original),
         (165970, 166150), # because IsoMu trigger changes between them
+        ])
+# Split for hltMet not including and including HF
+datasets.splitDataByRuns("SingleMu_160431-173692_2011A_Nov08", [
+        (166161, 167913),
+        (170722, 173198),
         ])
 
 datasets.extend([
@@ -220,6 +226,7 @@ multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_5(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5_1(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_5_1(datasets)
+multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_5_2(datasets)
 
 # Add muon tag&probe definitions
 multicrabWorkflowsMuonTagProbe.addMuonTagProbe_44X(datasets)
