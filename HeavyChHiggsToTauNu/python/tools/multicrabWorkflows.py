@@ -114,6 +114,21 @@ datasets.extend([
     DataDataset("SingleMu_%s_2011B_Nov19", runs=(173693, 180371), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"), # for backward compatibility only
     DataDataset("SingleMu_%s_2011B_Nov19", runs=(175832, 180252), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"), # 50367238 events, 3431 files
 ])
+
+# 2011 Tau leg trigger efficiency with RAW samples                                                                                                                                                                        
+datasets.extend([                                                                                                                                                                                                         
+    # SingleMu, Run2011A RAW-RECO                                                                                                                                                                                         
+    DataDataset("SingleMu_%s_2011A_Nov08_RAWRECO", runs=(165970, 167913), aod="/SingleMu/Run2011A-Tau-08Nov2011-v1/RAW-RECO"),                                                                                            
+    DataDataset("SingleMu_%s_2011A_Nov08_RAWRECO", runs=(170722, 173198), aod="/SingleMu/Run2011A-Tau-08Nov2011-v1/RAW-RECO"),                                                                                            
+    DataDataset("SingleMu_%s_2011A_Nov08_RAWRECO", runs=(173236, 173692), aod="/SingleMu/Run2011A-Tau-08Nov2011-v1/RAW-RECO"),                                                                                            
+                                                                                                                                                                                                                          
+    # SingleMu, Run2011B RAW-RECO                                                                                                                                                                                         
+    DataDataset("SingleMu_%s_2011B_Nov19_RAWRECO", runs=(175832, 180252), aod="/SingleMu/Run2011B-Tau-19Nov2011-v1/RAW-RECO"),                                                                                            
+                                                                                                                                                                                                                          
+    MCDataset("DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW", aod="/DYJetsToLL_TuneZ2_MPIoff_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/GEN-RAW"),                                                
+    MCDataset("DYToTauTau_M20_CT10_TuneZ2_7TeV_powheg_pythia_tauola_TTEffSkim_v447_v1", aod="/DYToTauTau_M-20_CT10_TuneZ2_7TeV-powheg-pythia-tauola/Fall11-PU_S6_START42_V14B-v1/GEN-RAW"),
+])
+
 # Split for backward compatibility, also for Mu-trigger thresholds
 datasets.splitDataByRuns("SingleMu_160431-173692_2011A_Nov08", [
         (160431, 163261), # 38372194 events, 1415 files
