@@ -119,7 +119,10 @@ addpkg CondFormats/EgammaObjects  V00-04-00
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
 # https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1417.html
 # With respect to V00-03-01 in the twiki page, this one contains only bugfixes
-cvs co -r V00-03-03 -d CMGTools/External UserCode/CMG/CMGTools/External
+cvs co -r V00-03-01 UserCode/CMG/CMGTools/External
+mkdir CMGTools
+mv UserCode/CMG/CMGTools/External CMSGTools/.
+
 
 # Type I/II MET
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
@@ -161,7 +164,9 @@ cd ../..
 #
 # 1. Check out the full package with the MVA tag
 # 2. Check out classes needed for the cut-based id with the cut-based tag
-cvs co -r V00-00-16 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+cvs co -r V00-00-16 UserCode/EGamma/EGammaAnalysisTools
+mkdir EGamma
+mv UserCode/EGamma/EGammaAnalysisTools EGamma/.
 cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/src/EGammaCutBasedEleId.cc
 cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h
 
