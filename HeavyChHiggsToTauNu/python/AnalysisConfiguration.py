@@ -72,8 +72,8 @@ class ConfigBuilder:
                  histogramAmbientLevelSystematics = "Systematics",
                  applyTauTriggerScaleFactor = True, # Apply tau trigger scale factor or not
                  applyTauTriggerLowPurityScaleFactor = False, # Apply tau trigger scale factor or not
-                 applyMETTriggerScaleFactor = True, # Apply MET trigger scale factor or not
-                 applyL1ETMScaleFactor = False, # Apply L1ETM scale factor or not
+                 applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
+                 applyL1ETMScaleFactor = True, # Apply L1ETM scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  applyTopPtReweight = True, # Apply Top Pt reweighting on TTJets sample
                  topPtReweightScheme = None, # None for default, see TopPtWeight_cfi.py for allowed values
@@ -84,14 +84,12 @@ class ConfigBuilder:
                  useJERSmearedJets = True,
                  customizeLightAnalysis = None,
                  customizeHeavyAnalysis = None,
-
                  doLightAnalysis = True,
                  doHeavyAnalysis = False,
-
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doTauIDandMisIDSystematicsAsShapes = False, # If systematic variations are produced, variations are produced also for misidentified tau systematics
-                 doAsymmetricTriggerUncertainties = False, # If true, will vary the efficiency uncertainties instead of the scale factor uncertainty
+                 doAsymmetricTriggerUncertainties = True, # If true, will vary the efficiency uncertainties instead of the scale factor uncertainty
                  doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
@@ -186,6 +184,10 @@ class ConfigBuilder:
 
         if self.doBTagTree:
             self.tauSelectionOperatingMode = 'tauCandidateSelectionOnly'
+
+        if self.options.tauEmbeddingInput != 0:
+            print "Tau embedding input, disabling trigger matching (mu-trigger matching done in embedding jobs)"
+            self.doTriggerMatching = False
 
         self.systPrefix = "SystVar"
 
@@ -500,7 +502,7 @@ class ConfigBuilder:
         self._buildBTagScan(process, analysisModules, analysisNames)
 
         # Tau embedding-like preselection for normal MC
-        analysisNamesForSystematics.extend(self._buildTauEmbeddingLikePreselection(process, analysisModules, analysisNames, additionalCounters))
+        self._buildTauEmbeddingLikePreselection(process, analysisNamesForSystematics, additionalCounters)
 
         ## Systematics
         #if "QCDMeasurement" not in analysisNames_: # Need also for QCD measurements, since they contain MC EWK
@@ -895,10 +897,9 @@ class ConfigBuilder:
     ## Build "tau embedding"-like preselection for normal MC
     #
     # \param process             cms.Process object
-    # \param analysisModules     List of analysis modules to be used as prototypes
     # \param analysisNames       List of analysis module names
     # \param additionalCounters  List of strings for additional counters
-    def _buildTauEmbeddingLikePreselection(self, process, analysisModules, analysisNames, additionalCounters):
+    def _buildTauEmbeddingLikePreselection(self, process, analysisNames, additionalCounters):
         if self.options.doTauEmbeddingLikePreselection == 0:
             return []
 
@@ -926,7 +927,8 @@ class ConfigBuilder:
         maxGenTaus = 1 # events with exactly one genuine tau in acceptance
 
         retNames = []
-        for module, name in zip(analysisModules, analysisNames):
+        for name in analysisNames:
+            module = getattr(process, name)
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), no tau+MET trigger required
             seq = cms.Sequence(process.commonSequence)
             mod = module.clone()
@@ -940,7 +942,7 @@ class ConfigBuilder:
             counters = additionalCounters[:]
             counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikeTriggeredPreselection", maxGenTaus=maxGenTaus, pileupWeight=mod.pileupWeightReader.weightSrc.value(), disableTrigger=False))
             add(makeName(name, "TauEmbeddingLikeTriggeredPreselection"), seq, mod, counters)
-            
+
             # Genuine tau preselection
             seq = cms.Sequence(process.commonSequence)
             mod = module.clone()

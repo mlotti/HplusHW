@@ -3,6 +3,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ConfigInfo.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
 
 // #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
 
@@ -11,12 +12,6 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-
-bool  hasImmediateMother(const reco::Candidate& p, int id);
-bool  hasImmediateDaughter(const reco::Candidate& p, int id);
-void  printImmediateMothers(const reco::Candidate& p);
-void  printImmediateDaughters(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
 
 namespace {
   template <typename T>
@@ -474,7 +469,7 @@ namespace HPlus {
     // Setup common plots
     fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
 
-    fCommonPlotsAfterVertexSelection->fill();
+    //fCommonPlotsAfterVertexSelection->fill();
     fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
 
 //------ Apply filter (if chosen) to select tail events
@@ -485,6 +480,7 @@ namespace HPlus {
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
     fTauSelection.analyseFakeTauComposition(fFakeTauIdentifier,iEvent);
     if(!tauData.passedEvent()) return false; // Require at least one tau
+    if (!fTauSelection.passesDecayModeFilter(tauData.getSelectedTau())) return false;
     //    std::cout << "taus  " << tauData.getSelectedTaus().size() << std::endl;
 
     // Obtain MC matching - for EWK without genuine taus
@@ -703,31 +699,11 @@ namespace HPlus {
       hGenuineLJetWithBTagEta->Fill((*jet)->eta());
       hGenuineLJetWithBTagPtAndEta->Fill((*jet)->pt(),(*jet)->eta());
     }
-    
-//------ MET cut
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, nVertices, tauData.getSelectedTau(), jetData.getAllJets());
-    fCommonPlots.fillControlPlotsAtMETSelection(iEvent, metData);
+
+
     // Obtain delta phi and transverse mass here, but do not yet cut on them
-    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
-    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
-    if (transverseMass > 40 && transverseMass < 100)
-      hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), btagDataTmp.getBJetCount());
-    // Now cut on MET
-    if (metData.getPhiCorrectedSelectedMET()->et() > 50.0) fCommonPlotsAfterMETWithPhiOscillationCorrection->fill(); // FIXME: temp
-    if(!metData.passedEvent()) return false;
-    fCommonPlotsAfterMET->fill();
-    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterMETEWKFakeTausBkg->fill();
-    increment(fMETCounter);
-    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderMETSelection, tauData);
-
-    // Plot jet matrix
-    if (transverseMass > 40 && transverseMass < 100) {
-      hCtrlJetMatrixAfterMET->Fill(jetData.getHadronicJetCount(), btagDataTmp.getBJetCount());
-      if (metData.getSelectedMET()->et() > 100.0)
-        hCtrlJetMatrixAfterMET100->Fill(jetData.getHadronicJetCount(), btagDataTmp.getBJetCount());
-
-    }
-
+    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metDataTmp.getSelectedMET())) * 57.3; // converted to degrees
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metDataTmp.getSelectedMET()));
 
 //------ b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
@@ -737,7 +713,8 @@ namespace HPlus {
       fEventWeight.multiplyWeight(myBTagPassProbability);
       fCommonPlotsProbabilisticBTagAfterBTagging->fill();
       if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagAfterBTaggingEWKFakeTausBkg->fill();
-      if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
+      METSelection::Data metDataTmp = fMETSelection.silentAnalyze(iEvent, iSetup, nVertices, tauData.getSelectedTau(), jetData.getAllJets());
+      if (metDataTmp.passedEvent() && qcdTailKillerDataCollinear.passedBackToBackCuts()) {
         fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhi->fill();
         fCommonPlotsProbabilisticBTagSelected->fill();
         if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhiEWKFakeTausBkg->fill();
@@ -770,8 +747,32 @@ namespace HPlus {
     }
 
 
+//------ ttbar topology selected
+    fCommonPlots.fillControlPlotsAfterTopologicalSelections(iEvent);
+
+
+//------ MET cut
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, nVertices, tauData.getSelectedTau(), jetData.getAllJets());
+    fCommonPlots.fillControlPlotsAtMETSelection(iEvent, metData);
+    if (transverseMass > 40 && transverseMass < 100)
+      hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), btagDataTmp.getBJetCount());
+    // Now cut on MET
+    if (metData.getPhiCorrectedSelectedMET()->et() > 50.0) fCommonPlotsAfterMETWithPhiOscillationCorrection->fill(); // FIXME: temp
+    if(!metData.passedEvent()) return false;
+    fCommonPlotsAfterMET->fill();
+    if (mySelectedToEWKFakeTauBackgroundStatus) fCommonPlotsAfterMETEWKFakeTausBkg->fill();
+    increment(fMETCounter);
+    fillSelectionFlowAndCounterGroups(nVertices, tauMatchData, mySelectedToEWKFakeTauBackgroundStatus, kSignalOrderMETSelection, tauData);
+
+    // Plot jet matrix
+    if (transverseMass > 40 && transverseMass < 100) {
+      hCtrlJetMatrixAfterMET->Fill(jetData.getHadronicJetCount(), btagDataTmp.getBJetCount());
+      if (metData.getSelectedMET()->et() > 100.0)
+        hCtrlJetMatrixAfterMET100->Fill(jetData.getHadronicJetCount(), btagDataTmp.getBJetCount());
+    }
+
+
 //------ Improved delta phi cut, a.k.a. QCD tail killer, back-to-back part
-//------ Improved delta phi cut, a.k.a. QCD tail killer // FIXME: place of cut still to be determined
     const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metData.getSelectedMET());
     fCommonPlots.fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, qcdTailKillerData);
     if (!qcdTailKillerData.passedBackToBackCuts()) return false;
@@ -1158,6 +1159,7 @@ namespace HPlus {
     if (jetData.getHadronicJetCount() == 0) return false;
     METSelection::Data metData = fMETSelection.silentAnalyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), tauData.getSelectedTau(), jetData.getAllJets());
     if (!(metData.getSelectedMET()->et() > 30)) return false;
+
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
     if (deltaPhi < 90) return false;

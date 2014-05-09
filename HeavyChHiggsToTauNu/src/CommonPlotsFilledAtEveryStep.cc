@@ -183,6 +183,7 @@ namespace HPlus {
     hNjets->Fill(fJetData->getHadronicJetCount());
     hNjetsAllIdentified->Fill(fJetData->getAllIdentifiedJets().size());
     if (fJetData->getAllJets().size() == 0) return; // Safety for MET selection data to exist
+    if (fMETData->getSelectedMET().isNull()) return;
     hMETCalo->Fill(fMETData->getCaloMET()->et());
     hMETRaw->Fill(fMETData->getRawMET()->et());
     hMET->Fill(fMETData->getSelectedMET()->et());
@@ -225,7 +226,7 @@ namespace HPlus {
     }
 
     // Boost of the Higgs
-    hChargedHiggsPt->Fill((fMETData->getSelectedMET()->p4(), fTauData->getSelectedTau()->p4()).pt());
+    hChargedHiggsPt->Fill((fMETData->getSelectedMET()->p4()+fTauData->getSelectedTau()->p4()).pt());
 
     // transverse mass
     double myMT = TransverseMass::reconstruct(*(fTauData->getSelectedTau()), *(fMETData->getSelectedMET()) );

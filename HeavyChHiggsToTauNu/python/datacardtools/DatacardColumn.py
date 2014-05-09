@@ -284,10 +284,15 @@ class DatacardColumn():
                 raise Exception(ErrorLabel()+"Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?"%self.getDatasetMgrColumn())
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
             if myDatasetRootHisto.isMC():
-                if (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
+                if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
                      # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
                      dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
+                elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
+                     if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - 245.8) > 0.0001:
+                         print WarningLabel()+"Forcing light H+ xsection to 245.8 pb according to arXiv:1303.6254"
+                         dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(245.8)
+                         myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()
             # Remove any variations not active for the column
@@ -320,10 +325,27 @@ class DatacardColumn():
             else:
                 myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+        # Look for negative bins in rage
+        for k in range(1, myRateHistograms[0].GetNbinsX()+1):
+            if myRateHistograms[0].GetBinContent(k) < 0.000001:
+                if myRateHistograms[0].GetBinContent(k) < -0.001:
+                    print WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), myRateHistograms[0].GetBinContent(k))
+                    myRateHistograms[0].SetBinContent(k, 0.0)
+                    myRateHistograms[0].SetBinError(k, config.MinimumStatUncertainty)
+                    #raise Exception(ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
         # Cache result
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
                                myRateHistograms)
+        if self._opts.verbose:
+            print "  - Rate: integral = ", myRateHistograms[0].Integral()
+            if (self.typeIsEWK()) or self.typeIsEWKfake():
+                if isinstance(dsetMgr.getDataset(self.getDatasetMgrColumn()), dataset.DatasetMerged):
+                    for dset in dsetMgr.getDataset(self.getDatasetMgrColumn()).datasets:
+                        print "  - normalization coefficient for %s: %g"%(dset.getName(),dset.getNormFactor())
+                print "  - normalization coefficient = ", dsetMgr.getDataset(self.getDatasetMgrColumn()).getNormFactor()
+        if abs(myRateHistograms[0].Integral() - myRateHistograms[0].Integral(0,myRateHistograms[0].GetNbinsX()+2)) > 0.00001:
+            raise Exception("Error: under/overflow bins contain data!")
         if self.typeIsEmptyColumn() or dsetMgr == None:
             return
 
@@ -358,12 +380,12 @@ class DatacardColumn():
                             hDown = myRateHistograms[0].Clone()
                             hUp.SetTitle(self.getLabel()+"_"+e._masterExID+"Up")
                             hDown.SetTitle(self.getLabel()+"_"+e._masterExID+"Down")
-                            for k in range(0, hUp.GetNbinsX()):
+                            for k in range(0, hUp.GetNbinsX()+2):
                                 myValue = hUp.GetBinContent(k)
                                 hUp.SetBinContent(k, myValue * (1.0 + myResult.getUncertaintyUp()))
-                                hUp.SetBinError(k, 0.0)
+                                hUp.SetBinError(k, 0.01)
                                 hDown.SetBinContent(k, myValue * (1.0 - myResult.getUncertaintyDown()))
-                                hDown.SetBinError(k, 0.0)
+                                hDown.SetBinError(k, 0.01)
                             myHistograms.append(hUp)
                             myHistograms.append(hDown)
                             # Add also to the uncertainties as normalization uncertainty
@@ -377,7 +399,14 @@ class DatacardColumn():
                             if e.getDistribution() == "shapeQ":
                                 for i in range(0,len(myHistograms)):
                                     myHistograms[i].Add(self._rateResult.getHistograms()[0])
-
+                                    # Check for negative bins and correct if necessary
+                                    for k in range(1, myHistograms[i].GetNbinsX()+1):
+                                        if myHistograms[i].GetBinContent(k) < 0.000001:
+                                            if myHistograms[i].GetBinContent(k) < -0.001:
+                                              print WarningLabel()+"Up/down nuisance %s value in bin %d is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(e._exid, k, self.getLabel(), myHistograms[i].GetBinContent(k))
+                                              myHistograms[i].SetBinContent(k, 0.0)
+                                              myHistograms[i].SetBinError(k, config.MinimumStatUncertainty)
+                                              #raise Exception(ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
                     else:
                         # For QCD, scale the QCD type constants by the purity
                         if self.typeIsQCD() and e.isQCDNuisance():

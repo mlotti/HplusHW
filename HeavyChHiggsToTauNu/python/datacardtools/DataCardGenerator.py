@@ -14,8 +14,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabConsistencyCheck as consistencyCheck
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
+
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
@@ -70,6 +72,8 @@ class DatasetMgrCreatorManager:
             if self._dsetMgrCreators[i] != None:
                 # Create DatasetManager object and set pointer to the selected era, searchMode, and optimizationMode
                 myDsetMgr = self._dsetMgrCreators[i].createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+                # Check consistency
+                consistencyCheck.checkConsistencyStandalone(self._dsetMgrCreators[i]._baseDirectory,myDsetMgr,name=self.getDatasetMgrLabel(i))
                 # Normalize
                 myDsetMgr.updateNAllEventsToPUWeighted()
                 # Obtain luminosity
@@ -245,8 +249,6 @@ class DataCardGenerator:
         #self.overrideConfigOptionsFromCommandLine()
         #if self._QCDMethod != DatacardQCDMethod.FACTORISED and self._QCDMethod != DatacardQCDMethod.INVERTED:
             #raise Exception(ErrorLabel()+"QCD method was not properly specified when creating DataCardGenerator!")
-        #if self._config.OptionReplaceEmbeddingByMC != None:
-            #self._replaceEmbeddingByMC = self._config.OptionReplaceEmbeddingByMC
 
         # Check that all necessary parameters have been specified in config file
         myStatus = self._checkCfgFile()
@@ -272,10 +274,8 @@ class DataCardGenerator:
                     myStatus = False
             if myStatus:
                 myOutputPrefix += "_TBbar"
-        if self._config.OptionReplaceEmbeddingByMC:
-            myOutputPrefix += "_MCEWK"
-            if self._config.OptionRealisticEmbeddingWithMC:
-                myOutputPrefix += "_realisticProjection"
+        myOutputPrefix += "_%s"%self._config.OptionGenuineTauBackgroundSource
+
         self._outputPrefix = myOutputPrefix
 
         myMassRange = str(self._config.MassPoints[0])
@@ -335,8 +335,8 @@ class DataCardGenerator:
         self.doDataMining()
 
         # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
-        if self._config.OptionReplaceEmbeddingByMC and self._config.OptionRealisticEmbeddingWithMC:
-            self.doMergeForRealisticEmbedding()
+        if self._config.OptionGenuineTauBackgroundSource == "MC_FullSystematics" or self._config.OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
+            self.separateMCEWKTausAndFakes()
 
         # Make datacards
         myProducer = TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
@@ -447,7 +447,11 @@ class DataCardGenerator:
         # Loop over data groups to create datacard columns
         for dg in self._config.DataGroups:
             myIngoreOtherQCDMeasurementStatus = (dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED) or (dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED)
-            if not myIngoreOtherQCDMeasurementStatus:
+            myMassIsConsideredStatus = False
+            for validMass in dg.validMassPoints:
+                if validMass in self._config.MassPoints:
+                    myMassIsConsideredStatus = True
+            if not myIngoreOtherQCDMeasurementStatus and myMassIsConsideredStatus:
                 print "Constructing datacard column for data group: "+HighlightStyle()+""+dg.label+""+NormalStyle()
                 # Construct datacard column object
                 myColumn = None
@@ -495,7 +499,7 @@ class DataCardGenerator:
             self._observation.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         for c in self._columns:
             myDsetMgrIndex = 0
-            if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or (c.typeIsEWK() and self._config.OptionReplaceEmbeddingByMC):
+            if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or (c.typeIsEWK() and not self._config.OptionGenuineTauBackgroundSource == "DataDriven"):
                 myDsetMgrIndex = 0
             elif c.typeIsEWK():
                 myDsetMgrIndex = 1
@@ -511,8 +515,8 @@ class DataCardGenerator:
                 c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
 
-    def doMergeForRealisticEmbedding(self):
-        print "\nStart merge for realistic embedding"
+    def separateMCEWKTausAndFakes(self):
+        print "\nStart merge for MC EWK with genuine taus"
         # Obtain column for embedding
         myEmbColumn = None
         for c in self._columns:
@@ -520,11 +524,12 @@ class DataCardGenerator:
                 myEmbColumn = c
         if myEmbColumn == None:
             raise Exception(ErrorLabel()+"You need to specify EmbeddingIdList in the datacard!")
+        #myEmbColumn._label = "MCEWKtau"
         # Add results from dataset columns with landsProcess == None
         myRemoveList = []
         for c in self._columns:
             if c.getLandsProcess() == None:
-                print "... merging column %s"%c.getLabel()
+                print "... merging genuine tau column %s"%c.getLabel()
                 # Merge rate result, (ExtractorResult objects)
                 # Merge cached shape histo
                 myEmbColumn._cachedShapeRootHistogramWithUncertainties.Add(c.getCachedShapeRootHistogramWithUncertainties())
@@ -562,7 +567,7 @@ class DataCardGenerator:
         for fakeId in self._config.EWKFakeIdList:
             for c in self._columns:
                 if c.getLandsProcess() == fakeId:
-                    print "... subtracting fake column %s"%c.getLabel()
+                    print "... subtracting fake tau column %s"%c.getLabel()
                     # Subtract rate result, (ExtractorResult objects)
                     # Merge cached shape histo
                     myEmbColumn._cachedShapeRootHistogramWithUncertainties.Add(c.getCachedShapeRootHistogramWithUncertainties(), -1.0)
@@ -585,7 +590,10 @@ class DataCardGenerator:
                                     # up histogram
                                     myEmbColumn._nuisanceResults[myMatchIndex]._histograms[0].SetBinContent(k, myRate + myRateUncert)
                                     # down histogram
-                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[1].SetBinContent(k, myRate - myRateUncert)
+                                    if myRate - myRateUncert < self._config.MinimumStatUncertainty:
+                                        myEmbColumn._nuisanceResults[myMatchIndex]._histograms[1].SetBinContent(k, self._config.MinimumStatUncertainty)
+                                    else:
+                                        myEmbColumn._nuisanceResults[myMatchIndex]._histograms[1].SetBinContent(k, myRate - myRateUncert)
                             else:
                                 # linear addition, because these are variation histograms
                                 for k in range(0,len(myEmbColumn.getNuisanceResults()[myMatchIndex]._histograms)):
@@ -731,6 +739,8 @@ class DataCardGenerator:
                                                        description = n.label,
                                                        mode = ExtractorMode.SHAPENUISANCE,
                                                        opts = self._opts,
+                                                       minimumStatUncert = self._config.MinimumStatUncertainty,
+                                                       minimumRate = self._config.ToleranceForMinimumRate, # Only for suppressing warn prints
                                                        scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "ShapeVariation":
                 self._extractors.append(ShapeVariationExtractor(exid = n.id,

@@ -10,6 +10,10 @@ configInfo = cms.PSet(
 # Blind analysis - do not fill final counter and histogram for data if true
 blindAnalysisStatus = cms.untracked.bool(False)
 
+# QCD corrections
+makeQCDEtaCorrectionStatus = cms.untracked.bool(False)
+lowBoundForQCDInvertedIsolation = cms.untracked.string("") # Set to "" to disable, experimental: "byVLooseCombinedIsolationDeltaBetaCorr"
+
 # Ambient level for filling histograms (options: Vital, Informative, Debug)
 histogramAmbientLevel = cms.untracked.string("Debug")
 
@@ -124,6 +128,7 @@ tauSelectionBase = cms.untracked.PSet(
     rtauCut = cms.untracked.double(0.7), # rtau > value
     nprongs = cms.untracked.uint32(1), # number of prongs (options: 1, 3, or 13 == 1 || 3)
     analyseFakeTauComposition = cms.untracked.bool(False),
+    decayModeFilterValue = cms.untracked.int32(-1), # filter for tau decay mode, set to negative value to disable
 )
 
 # Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)
@@ -336,7 +341,7 @@ MET = cms.untracked.PSet(
     type2Src = cms.untracked.InputTag("patType1p2CorrectedPFMet"),
     caloSrc = cms.untracked.InputTag("metNoHF"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
-    select = cms.untracked.string("type1"), # raw, type1, type2
+    select = cms.untracked.string("type1phicorrected"), # raw, type1, type1phicorrected, type2
     METCut = cms.untracked.double(60.0),
     preMETCut = cms.untracked.double(0.0), # Pre-cut is important for background measurements
 #    METCut = cms.untracked.double(80.0), # MET cut for heavy charged Higgs
@@ -347,15 +352,15 @@ MET = cms.untracked.PSet(
     jetOffsetCorrLabel = cms.untracked.string("L1FastJet"),
     #type2ScaleFactor = cms.untracked.double(1.4),
 
-    # For phi oscillation correction - very preliminary parameters
-    phiCorrectionSlopeXForData = cms.untracked.double(0.6224), # +- 0.0286
-    phiCorrectionOffsetXForData = cms.untracked.double(-0.3173), # +- 0.597
-    phiCorrectionSlopeYForData = cms.untracked.double(-0.4129), # +- 0.0285
-    phiCorrectionOffsetYForData = cms.untracked.double(1.14), # +- 0.59
-    phiCorrectionSlopeXForMC = cms.untracked.double(-0.02390), # taken from Christian
-    phiCorrectionOffsetXForMC = cms.untracked.double(0.11438), # taken from Christian
-    phiCorrectionSlopeYForMC = cms.untracked.double(-0.27637), # taken from Christian
-    phiCorrectionOffsetYForMC = cms.untracked.double(2.1351), # taken from Christian
+    # For phi oscillation correction - After collinear angular cuts
+    phiCorrectionSlopeXForData  = cms.untracked.double( 0.574), # +- 0.023 (after tau selection)
+    phiCorrectionOffsetXForData = cms.untracked.double( 0.526), # +- 0.049 (after tau selection)
+    phiCorrectionSlopeYForData  = cms.untracked.double(-0.408), # +- 0.023 (after tau selection)
+    phiCorrectionOffsetYForData = cms.untracked.double( 1.016), # +- 0.487 (after tau selection)
+    phiCorrectionSlopeXForMC    = cms.untracked.double(-0.336), # +- 0.098 (TTJets after tau selection)
+    phiCorrectionOffsetXForMC   = cms.untracked.double( 3.061), # +- 1.770 (TTJets after tau selection)
+    phiCorrectionSlopeYForMC    = cms.untracked.double(-0.719), # +- 0.098 (TTJets after tau selection)
+    phiCorrectionOffsetYForMC   = cms.untracked.double( 4.721), # +- 1.776 (TTJets after tau selection)
 )
 
 bTagging = cms.untracked.PSet(

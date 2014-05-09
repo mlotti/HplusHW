@@ -497,12 +497,16 @@ class ScaleFactorExtractor(ExtractorBase):
 # Extracts histogram shapes
 class ShapeExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "", description = "", opts=None, scaleFactor=1.0):
+    def __init__(self, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "", description = "", opts=None, minimumStatUncert=None, minimumRate=0.0, scaleFactor=1.0):
         ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         if not (self.isRate() or self.isObservation()):
             if self._distribution != "shapeStat":
                 self.printDebugInfo()
                 raise Exception(ErrorLabel()+"Only shapeStat allowed for the ShapeExtractor!"+NormalStyle())
+        self._minimumStatUncert = minimumStatUncert
+        if minimumStatUncert == None:
+            self._minimumStatUncert = 0.0
+        self._minimumRate = minimumRate
 
     ## Method for extracking result
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -517,12 +521,15 @@ class ShapeExtractor(ExtractorBase):
             raise Exception(ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+NormalStyle())
         # Get histogram from cache
         h = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
+        myTotalRate = h.Integral()
+        rateWillBeSuppressedStatus = myTotalRate < self._minimumRate
         # Do not apply here additional normalization, it has already been applied
         # via RootHistoWithUncertainties.Scale() in DatacardColumn::doDataMining()
         if self.isRate() or self.isObservation():
             # Shape histogram is the result
             h.SetTitle(datasetColumn.getLabel())
-            myHistograms.append(h) # Append histogram to output list
+            # Append histogram to output list
+            myHistograms.append(h)
         else:
             # Ok, it's a nuisance
             # Create up and down histograms for shape stat
@@ -533,8 +540,18 @@ class ShapeExtractor(ExtractorBase):
             hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
             hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
             for k in range(1, h.GetNbinsX()+1):
-                hUp.SetBinContent(k, h.GetBinContent(k) + h.GetBinError(k)) # no scaling because this is the stat uncertainty
-                hDown.SetBinContent(k, h.GetBinContent(k) - h.GetBinError(k))
+                if h.GetBinContent(k) + h.GetBinError(k) < self._minimumStatUncert:
+                    if not rateWillBeSuppressedStatus:
+                        print WarningLabel()+"Corrected bin %d stat.uncert plus value to %.2f for column '%s' (it was %f)! The value is set by MinimumStatUncertainty flag."%(k, self._minimumStatUncert, datasetColumn.getLabel(), hUp.GetBinContent(k))
+                    hUp.SetBinContent(k, self._minimumStatUncert)
+                else:
+                    hUp.SetBinContent(k, h.GetBinContent(k) + h.GetBinError(k)) # no scaling because this is the stat uncertainty
+                if h.GetBinContent(k) - h.GetBinError(k) < 0.000001:
+                    if h.GetBinContent(k) < 0.0 and not rateWillBeSuppressedStatus:
+                        print WarningLabel()+"Corrected bin %d stat.uncert minus value to zero for column '%s' (it was %f)!"%(k, datasetColumn.getLabel(), hDown.GetBinContent(k))
+                    hDown.SetBinContent(k, 0.0)
+                else:
+                    hDown.SetBinContent(k, h.GetBinContent(k) - h.GetBinError(k))
             # Append histograms to output list
             myHistograms.append(hUp)
             myHistograms.append(hDown)

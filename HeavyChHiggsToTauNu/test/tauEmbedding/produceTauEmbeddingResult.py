@@ -34,6 +34,104 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
+class DatasetCreatorMany:
+    def __init__(self, directories, **kwargs):
+        if len(directories) == 0:
+            raise Exception("Need at least one directory")
+        self._creators = [dataset.readFromMulticrabCfg(directory=d, **kwargs) for d in directories]
+
+    def printAnalyses(self):
+        if len(self._creators) > 1:
+            print "Analyses in the first DatasetCreator"
+        self._creators[0].printAnalyses()
+
+    def getAnalyses(self):
+        return self._creators[0].getAnalyses()
+
+    def getDataEras(self):
+        return self._creators[0].getDataEras()
+
+    def getSearchModes(self):
+        return self._creators[0].getSearchModes()
+
+    def getOptimizationModes(self):
+        return self._creators[0].getOptimizationModes()
+
+    def getSystematicVariations(self):
+        return self._creators[0].getSystematicVariations()
+
+    def createDatasetManager(self, **kwargs):
+        return DatasetManagerMany([dc.createDatasetManager(**kwargs) for dc in self._creators])
+
+class DatasetManagerMany:
+    def __init__(self, datasetManagers):
+        self._dsetMgrs = datasetManagers
+
+    def _getDatasetsGeneric(self, methodName):
+        datasets = [getattr(dm, methodName)() for dm in self._dsetMgrs]
+        tmp = [[]]*len(datasets[0])
+        for i in xrange(len(datasets[0])):
+            for j in xrange(len(self._dsetMgrs)):
+                tmp[i].append(datasets[j][i])
+
+        return [DatasetMany(t) for t in tmp]
+
+    def getDataDatasets(self):
+        return self._getDatasetsGeneric("getDataDatasets")
+
+    def getAllDatasets(self):
+        return self._getDatasetsGeneric("getAllDatasets")
+
+    # Generic delegation
+    def __getattr__(self, name):
+        class Caller:
+            def __init__(self, dsetMgrs):
+                self._dsetMgrs = dsetMgrs
+            def __call__(self, **kwargs):
+                return [getattr(dm, name)(**kwargs) for dm in self._dsetMgrs]
+
+        return Caller(self._dsetMgrs)
+
+class DatasetMany:
+    def __init__(self, datasets):
+        self._datasets = datasets
+
+    def getFirstDataset(self):
+        return self._datasets[0]
+
+    def getName(self):
+        return self._datasets[0].getName()
+
+    def isMC(self):
+        return self._datasets[0].isMC()
+
+    def isData(self):
+        return self._datasets[0].isData()
+
+    def getEnergy(self):
+        return self._datasets[0].getEnergy()
+
+    def getLuminosity(self):
+        return self._datasets[0].getLuminosity()
+
+    def getDataVersion(self):
+        return self._datasets[0].getDataVersion()
+
+    def getDirectoryContent(self, *args, **kwargs):
+        return self._datasets[0].getDirectoryContent(*args, **kwargs)
+
+    def getAverageHistogram(self, path):
+        th1s = [dset.getDatasetRootHisto(path).getHistogram() for dset in self._datasets]
+        ret = th1s[0].Clone("tmp")
+        ret.SetDirectory(0)
+        for h in th1s[1:]:
+            for bin in xrange(0, ret.GetNbinsX()+2):
+                ret.SetBinContent(bin, ret.GetBinContent(bin)+h.GetBinContent(bin))
+                ret.SetBinError(bin, math.sqrt(ret.GetBinError(bin)+h.GetBinError(bin)))
+        for bin in xrange(0, ret.GetNbinsX()+2):
+            ret.SetBinContent(bin, ret.GetBinContent(bin)/len(th1s))
+            ret.SetBinError(bin, ret.GetBinError(bin)/len(th1s))
+        return ret
 
 def processDirectory(dset, srcDirName, dstDir, scaleBy):
     # Get directories, recurse to them
@@ -52,8 +150,9 @@ def processDirectory(dset, srcDirName, dstDir, scaleBy):
         # Don't touch unweighted counters
         shouldScale = False
     for hname in histos:
-        drh = dset.getDatasetRootHisto(os.path.join(srcDirName, hname))
-        hnew = drh.getHistogram() # TH1
+#        drh = dset.getDatasetRootHisto(os.path.join(srcDirName, hname))
+#        hnew = drh.getHistogram() # TH1
+        hnew = dset.getAverageHistogram(os.path.join(srcDirName, hname))
         hnew.SetName(hname)
         hnew.SetDirectory(dstDir)
         if shouldScale and hname not in "SplittedBinInfo":
@@ -68,9 +167,9 @@ def main(output, dset, dstPostfix="", scaleBy=None):
     start = time.time()
 
     # Create analysis directory
-    tmp = dset
+    tmp = dset.getFirstDataset()
     if not hasattr(tmp, "getSearchMode"):
-        tmp = dset.datasets[0]
+        tmp = tmp.datasets[0]
     analysisDirName = "signalAnalysis"+tmp.getSearchMode()+tmp.getDataEra()+tmp.getOptimizationMode()+tmp.getSystematicVariation()+dstPostfix
     analysisDir = output.mkdir(analysisDirName)
 
@@ -98,7 +197,7 @@ def main(output, dset, dstPostfix="", scaleBy=None):
     print "Processed in %f.2 s" % (stop-start)
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options] multicrab-dir")
+    parser = OptionParser(usage="Usage: %prog [options] multicrab-dir [multicrab-dir] ...\nIf multiple multicrab directories are given, they are averaged.")
     parser.add_option("--analysisName", dest="analysisName", type="string", default=None,
                       help="Specify analysisName explicitly (by default the longest one is selected")
     parser.add_option("--allEras", dest="allEras", action="store_true", default=False,
@@ -107,12 +206,17 @@ if __name__ == "__main__":
                       help="List available analysis name information, and quit.")
     parser.add_option("--mc", dest="mcs", action="append", type="string", default=[],
                       help="Process also these MC samples. If any of them is '*', all available MC's are used")
+    parser.add_option("--midfix", dest="midfix", default=None,
+                      help="Midfix to add to the output directory name")
     (opts, args) = parser.parse_args()
-    if len(args) != 1:
-        parser.error("Expected exactly one multicrab directory, got %d" % len(args))
+    if len(args) == 0:
+        parser.error("Expected at least one multicrab directory, got %d" % len(args))
+    if len(args) > 1:
+        print "Got %d multicrab directories, averaging the result" % len(args)
+    multicrabDirs = args
 
-    createArgs = {"directory": args[0], "includeOnlyTasks": "SingleMu"}
-    datasetCreator = dataset.readFromMulticrabCfg(**createArgs)
+    createArgs = {"includeOnlyTasks": "SingleMu"}
+    datasetCreator = DatasetCreatorMany(multicrabDirs, **createArgs)
     datasetCreatorMC = None
     if len(opts.mcs) > 0:
         if "*" in opts.mcs:
@@ -120,7 +224,7 @@ if __name__ == "__main__":
             createArgs["excludeTasks"] = "SingleMu"
         else:
             createArgs["includeOnlyTasks"] = "|".join(opts.mcs)
-        datasetCreatorMC = dataset.readFromMulticrabCfg(**createArgs)
+        datasetCreatorMC = DatasetCreatorMany(multicrabDirs, **createArgs)
     if opts.listAnalyses:
         datasetCreator.printAnalyses()
         sys.exit(0)
@@ -158,6 +262,8 @@ if __name__ == "__main__":
     dirname = "embedding"
     if datasetCreatorMC is not None:
         dirname += "_mc"
+    if opts.midfix is not None:
+        dirname += "_"+opts.midfix
     taskDir = multicrab.createTaskDir(dirname)
 
     f = open(os.path.join(taskDir, "codeVersion.txt"), "w")
@@ -179,7 +285,10 @@ if __name__ == "__main__":
             f.write("dummy = embedded\n\n")
     f.close()
     f = open(os.path.join(taskDir, "inputInfo.txt"), "w")
-    f.write("Embedded directory: %s\n" % args[0])
+    for d in multicrabDirs:
+        f.write("Embedded input directory: %s\n" % d)
+    if len(multicrabDirs) > 1:
+        f.write("Histograms are averaged\n")
 
     configInfoAdded = {}
 
