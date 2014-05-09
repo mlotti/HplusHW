@@ -711,8 +711,8 @@ namespace HPlus {
 //     hQCDTailKillerJet3BackToBackBaseline->Fill(qcdTailKillerData.getRadiusFromBackToBackCorner(3)); // Make control plot before cut
 
     // Top reconstruction
-    BjetSelection::Data bjetSelectionData = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
-    TopSelectionManager::Data topSelectionData = fTopSelectionManager.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
+////FIXME! Duplicate, did not compile, 30042014/SL    BjetSelection::Data bjetSelectionData = fBjetSelection.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), selectedTau, metData.getSelectedMET());
+////FIXME! Duplicate, did not compile, 30042014/SL    TopSelectionManager::Data topSelectionData = fTopSelectionManager.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), bjetSelectionData.getBjetTopSide(), bjetSelectionData.passedEvent());
     if (!(topSelectionData.passedEvent())) return false;
     increment(fBaselineTopSelectionCounter);
     myHandler.fillShapeHistogram(hMTBaselineTauIdAfterTopReco, transverseMass);

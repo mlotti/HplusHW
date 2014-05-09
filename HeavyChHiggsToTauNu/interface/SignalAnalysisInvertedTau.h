@@ -242,9 +242,11 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterBtag;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterBackToBackCuts;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterTopReco;
+    std::vector<WrappedTH1*> hMTBaselineTauIdFinalReversedBtag;
     // baseline invariant mass histos
     std::vector<WrappedTH1*> hInvMassBaselineTauIdAfterCollinearCuts; // <-- used for closure test
     std::vector<WrappedTH1*> hInvMassBaselineTauIdAfterCollinearCutsPlusBackToBackCuts;
+    std::vector<WrappedTH1*> hInvMassBaselineTauIdFinalReversedBtag;
     // inverted MET histos
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterJets;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterMetSF;
@@ -271,9 +273,11 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterBtag;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterBackToBackCuts;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterTopReco;
+    std::vector<WrappedTH1*> hMTInvertedTauIdFinalReversedBtag;
     // inverted invariant mass histos
     std::vector<WrappedTH1*> hInvMassInvertedTauIdAfterCollinearCuts; // <-- used for closure test
     std::vector<WrappedTH1*> hInvMassInvertedTauIdAfterCollinearCutsPlusBackToBackCuts;
+    std::vector<WrappedTH1*> hInvMassInvertedTauIdFinalReversedBtag;
 
 //     WrappedTH1* hQCDTailKillerJet0BackToBackInverted;
 //     WrappedTH1* hQCDTailKillerJet1BackToBackInverted;
