@@ -50,7 +50,8 @@ datasetsData2011TauLeg = [
     "SingleMu_175832-180252_2011B_Nov19_RAWRECO"
 ]
 datasetsMC2011TauLeg = [
-    "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW"
+#    "DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW"
+    "DYToTauTau_M20_CT10_TuneZ2_7TeV_powheg_pythia_tauola_TTEffSkim_v447_v1"
 ]
 
 datasetsData2011MetLeg = [

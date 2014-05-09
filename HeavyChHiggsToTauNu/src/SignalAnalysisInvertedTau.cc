@@ -27,6 +27,7 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fHistoWrapper(histoWrapper),
     bBlindAnalysisStatus(iConfig.getUntrackedParameter<bool>("blindAnalysisStatus")),
+    bSelectOnlyGenuineTausForMC(iConfig.getUntrackedParameter<bool>("selectOnlyGenuineTausForMC")),
     fLowBoundForQCDInvertedIsolation(iConfig.getUntrackedParameter<std::string>("lowBoundForQCDInvertedIsolation")),
     bMakeEtaCorrectionStatus(iConfig.getUntrackedParameter<bool>("makeQCDEtaCorrectionStatus")),
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
@@ -479,6 +480,10 @@ namespace HPlus {
       increment(fBaselineTauIDCounter);
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForBaseline.getSelectedTau()));
+      // Require that genuine tau has been selected
+      if (selectOnlyGenuineTausForMC && !iEvent.isRealData()) {
+        if (!tauMatchData.isGenuineTau()) return false;
+      }
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
       fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
       // Initialize also normalization systematics plotting
@@ -500,7 +505,7 @@ namespace HPlus {
       // Check if multiple taus passed
       if (!myMultipleTausPassForBaselineStatus) increment(fBaselineOneTauCounter);
       // Do baseline analysis
-      return doBaselineAnalysis(iEvent, iSetup, tauDataForBaseline.getSelectedTau(), pvData, genData);
+      return doBaselineAnalysis(iEvent, iSetup, tauDataForBaseline.getSelectedTau(), tauMatchData, pvData, genData);
     }
     // end of baseline selection
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -512,8 +517,11 @@ namespace HPlus {
       increment(fInvertedTauIDCounter);
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForInverted.getSelectedTau()));
+      // Require that genuine tau has been selected
+      if (selectOnlyGenuineTausForMC && !iEvent.isRealData()) {
+        if (!tauMatchData.isGenuineTau()) return false;
+      }
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
-
       fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
       fCommonPlots.fillControlPlotsAfterTauSelection(iEvent, iSetup, tauDataForInverted, tauMatchData, fJetSelection, fMETSelection, fBTagging, fQCDTailKiller);
       // Initialize also normalization systematics plotting
@@ -546,7 +554,7 @@ namespace HPlus {
         fEventWeight.multiplyWeight(myCorrectionWeight);
       }
       // Do inverted analysis
-      return doInvertedAnalysis(iEvent, iSetup, tauDataForInverted.getSelectedTau(), pvData, genData);
+      return doInvertedAnalysis(iEvent, iSetup, tauDataForInverted.getSelectedTau(), tauMatchData, pvData, genData);
     }
     // end of inverted selection
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -555,7 +563,7 @@ namespace HPlus {
     return true;
   }
 
-  bool SignalAnalysisInvertedTau::doBaselineAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData) {
+  bool SignalAnalysisInvertedTau::doBaselineAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const FakeTauIdentifier::Data& tauMatchData, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData) {
     SplittedHistogramHandler& myHandler = fCommonPlots.getSplittedHistogramHandler();
 //------ Veto against second tau in event
     // Implement only, if necessary
@@ -754,7 +762,7 @@ namespace HPlus {
 
   ////////////////////////////////////////////////////////////////////////////////////
 
-  bool SignalAnalysisInvertedTau::doInvertedAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau , const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData) {
+  bool SignalAnalysisInvertedTau::doInvertedAnalysis( const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const FakeTauIdentifier::Data& tauMatchData, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData) {
     SplittedHistogramHandler& myHandler = fCommonPlots.getSplittedHistogramHandler();
 //------ Veto against second tau in event
     // Implement only, if necessary
