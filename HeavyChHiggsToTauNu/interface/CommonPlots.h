@@ -126,7 +126,9 @@ namespace HPlus {
     void setSplittingOfPhaseSpaceInfoAfterTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data& tauData, METSelection& metSelection);
     void fillControlPlotsAfterTauTriggerScaleFactor(const edm::Event& iEvent);
     void fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent);
+    void fillControlPlotsAfterTopologicalSelections(const edm::Event& iEvent);
     void fillControlPlotsAfterAllSelections(const edm::Event& iEvent, double transverseMass);
+    void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const edm::Event& iEvent, double transverseMass);
     void fillControlPlotsAfterAllSelectionsWithFullMass(const edm::Event& iEvent, FullHiggsMassCalculator::Data& data);
     /// unique filling methods (to be called BEFORE return statement)
     void fillControlPlotsAtTauVetoSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const VetoTauSelection::Data& tauVetoData);
@@ -201,6 +203,7 @@ namespace HPlus {
     HistogramSettings fRtauBinSettings;
     HistogramSettings fNjetsBinSettings;
     HistogramSettings fMetBinSettings;
+    HistogramSettings fBJetDiscriminatorBinSettings;
     HistogramSettings fTailKiller1DSettings;
     HistogramSettings fTopMassBinSettings;
     HistogramSettings fWMassBinSettings;
@@ -240,10 +243,12 @@ namespace HPlus {
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterMETSF;
 
     // improved delta phi collinear cuts (currently the point of the std. selections)
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearMinimum;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet1;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet2;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet3;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearJet4;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearMinimum;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet1;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet2;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearJet3;
@@ -258,6 +263,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlSelectedTauRtauAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauPAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauDecayModeAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections;
@@ -266,25 +272,47 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauDecayModeAfterStandardSelections;
 
     std::vector<WrappedTH1*> hCtrlNjetsAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlJetPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlJetEtaAfterStandardSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausNjetsAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausJetPtAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausJetEtaAfterStandardSelections;
+
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearMinimumAfterStandardSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterStandardSelections;
 
     // MET selection
     std::vector<WrappedTH1*> hCtrlMET;
+    std::vector<WrappedTH1*> hCtrlMETPhi;
+    std::vector<WrappedTH1*> hCtrlTauPlusMETPt; // a.k.a. boost
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMET;
-    
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausMETPhi;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausTauPlusMETPt; // a.k.a. boost
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterMET;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKFakeTausAfterMET;
+
     // b tagging
     std::vector<WrappedTH1*> hCtrlNbjets;
+    std::vector<WrappedTH1*> hCtrlBJetPt;
+    std::vector<WrappedTH1*> hCtrlBJetEta;
+    std::vector<WrappedTH1*> hCtrlBDiscriminator;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausNbjets;
-    
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausBDiscriminator;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetPt;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetEta;
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterBjets;
+    METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKFakeTausAfterBjets;
 
     // improved delta phi back to back cuts
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackMinimum;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet1;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet2;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet3;
     std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackJet4;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackMinimum;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet1;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet2;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackJet3;
@@ -301,17 +329,73 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausWPt;
 
     // evt topology
-    
+
+    // ctrl plots after all selections
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearMinimumAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauEtaAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauPhiAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauRtauAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauPAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedTauDecayModeAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauEtaAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPhiAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauRtauAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauPAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausSelectedTauDecayModeAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlNjetsAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlJetPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlJetEtaAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausNjetsAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausJetPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausJetEtaAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlMETAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlMETPhiAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlTauPlusMETPtAfterMtSelections; // a.k.a. boost
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausMETAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausMETPhiAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections; // a.k.a. boost
+    std::vector<WrappedTH1*> hCtrlNbjetsAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlBJetPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlBJetEtaAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlBDiscriminatorAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausNbjetsAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausBDiscriminatorAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausBJetEtaAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlQCDTailKillerBackToBackMinimumAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerBackToBackMinimumAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlTopMassAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlTopPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlWMassAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlWPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausTopMassAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausTopPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausWMassAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausWPtAfterMtSelections;
+
     // all selections
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterAllSelections;
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKControlRegion;
     std::vector<WrappedTH1*> hShapeTransverseMass;
     std::vector<WrappedTH1*> hShapeEWKFakeTausTransverseMass;
+    std::vector<WrappedTH1*> hShapeEmbeddingLikeMultipleTausTransverseMass;
+
+    std::vector<WrappedTH1*> hShapeProbabilisticBtagTransverseMass;
+    std::vector<WrappedTH1*> hShapeProbabilisticBtagEWKFakeTausTransverseMass;
+    std::vector<WrappedTH1*> hShapeProbabilisticBtagEmbeddingLikeMultipleTausTransverseMass;
     // NOTE: do we want to try out something like mT vs. rTau?
 
     // all selections with full mass
     std::vector<WrappedTH1*> hShapeFullMass;
     std::vector<WrappedTH1*> hShapeEWKFakeTausFullMass;
+    std::vector<WrappedTH1*> hShapeEmbeddingLikeMultipleTausFullMass;
     // FIXME: Add unfolded histogram for mT vs. full mass
 
     // histograms to be filled at every step

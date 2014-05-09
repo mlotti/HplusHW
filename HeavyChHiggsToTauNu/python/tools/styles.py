@@ -65,6 +65,10 @@ class StyleCompound(StyleBase):
     def append(self, style):
         self.styles.append(style)
 
+    ## Extend style objects
+    def extend(self, styles):
+        self.styles.extend(styles)
+
     ## Apply the style
     #
     # \param h ROOT object
@@ -197,7 +201,10 @@ errorStyle = StyleCompound([StyleError(ROOT.kBlack, 3345, styleSyst=3354)])
 errorStyle2 = StyleCompound([StyleError(ROOT.kGray+2, 3354)])
 errorStyle3 = StyleCompound([StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)])
 errorRatioStatStyle = StyleCompound([StyleError(ROOT.kGray, 1001, linecolor=ROOT.kGray)])
-errorRatioSystStyle = StyleCompound([StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)])
+errorRatioSystStyle = StyleCompound([StyleError(ROOT.kGray+1, 1001, linecolor=ROOT.kGray+1)])
+
+ratioStyle = dataStyle.clone()
+ratioLineStyle = StyleCompound([StyleLine(lineColor=ROOT.kRed, lineWidth=2, lineStyle=3)])
 
 #mcStyle = Style(ROOT.kFullSquare, ROOT.kGreen-2)
 mcStyle = StyleCompound([Style(ROOT.kFullSquare, ROOT.kRed+1)])

@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetDetailHistograms.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 #include "Math/GenVector/VectorUtil.h"
@@ -12,8 +13,8 @@ std::vector<const reco::GenParticle*> getMothers(const reco::Candidate& p);
 namespace HPlus {
   JetDetailHistograms::JetDetailHistograms(HistoWrapper& histoWrapper, TFileDirectory& myDir, std::string prefix, bool enableExtraHistograms) :
     bEnableExtraHistograms(enableExtraHistograms) {
-    // Create subdirectory for containting the histograms
-    TFileDirectory mySubDir = myDir.mkdir(prefix.c_str());
+    // Create subdirectory for containting the histograms, but only if there are any histograms to put
+    TFileDirectory mySubDir = histoWrapper.mkdir(HistoWrapper::kInformative, myDir, prefix);
     // Create histograms
     hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_pt", "jet_pt", 40, 0., 400.);
     hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySubDir, "jet_eta", "jet_eta", 50, -2.5, 2.5);

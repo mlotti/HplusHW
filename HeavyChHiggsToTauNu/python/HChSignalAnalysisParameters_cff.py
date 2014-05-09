@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+
 configInfo = cms.PSet(
     pileupReweightType = cms.string("UNWEIGHTED"),
     topPtReweightType = cms.string("UNWEIGHTED"),
@@ -7,6 +9,10 @@ configInfo = cms.PSet(
 
 # Blind analysis - do not fill final counter and histogram for data if true
 blindAnalysisStatus = cms.untracked.bool(False)
+
+# QCD corrections
+makeQCDEtaCorrectionStatus = cms.untracked.bool(False)
+lowBoundForQCDInvertedIsolation = cms.untracked.string("") # Set to "" to disable, experimental: "byVLooseCombinedIsolationDeltaBetaCorr"
 
 # Ambient level for filling histograms (options: Vital, Informative, Debug)
 histogramAmbientLevel = cms.untracked.string("Debug")
@@ -99,6 +105,7 @@ tauSelectionBase = cms.untracked.PSet(
     rtauCut = cms.untracked.double(0.7), # rtau > value
     nprongs = cms.untracked.uint32(1), # number of prongs (options: 1, 3, or 13 == 1 || 3)
     analyseFakeTauComposition = cms.untracked.bool(False),
+    decayModeFilterValue = cms.untracked.int32(-1), # filter for tau decay mode, set to negative value to disable
 )
 
 # Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)
@@ -172,14 +179,19 @@ fakeTauSFandSystematicsBase = cms.untracked.PSet(
     visibleMCTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"), # All MC visible taus
     visibleMCTauOneProngSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"), # MC visible 1-prong taus
     matchingConditionDeltaR = cms.untracked.double(0.1), # Matching cone size
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(1.0),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(1.0),
+    scalefactorGenuineTauBarrel = cms.untracked.double(1.0),
+    scalefactorGenuineTauEndcap = cms.untracked.double(1.0),
+    scalefactorFakeTauBarrelElectron = cms.untracked.double(2.0),
+    scalefactorFakeTauEndcapElectron = cms.untracked.double(1.2),
     scalefactorFakeTauBarrelMuon = cms.untracked.double(1.0),
     scalefactorFakeTauEndcapMuon = cms.untracked.double(1.0),
     scalefactorFakeTauBarrelJet = cms.untracked.double(1.0),
     scalefactorFakeTauEndcapJet = cms.untracked.double(1.0),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.0),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.0),
+    # The following numbers are to be understood as SF +- the indicated number
+    systematicsGenuineTauBarrel = cms.untracked.double(0.06),
+    systematicsGenuineTauEndcap = cms.untracked.double(0.06),
+    systematicsFakeTauBarrelElectron = cms.untracked.double(0.4),
+    systematicsFakeTauEndcapElectron = cms.untracked.double(0.4),
     systematicsFakeTauBarrelMuon = cms.untracked.double(0.3),
     systematicsFakeTauEndcapMuon = cms.untracked.double(0.3),
     systematicsFakeTauBarrelJet = cms.untracked.double(0.2),
@@ -187,31 +199,78 @@ fakeTauSFandSystematicsBase = cms.untracked.PSet(
 )
 
 fakeTauSFandSystematicsAgainstElectronMedium = fakeTauSFandSystematicsBase.clone(
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(0.95),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.75),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.10),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.15),
+    scalefactorFakeTauBarrelElectron = 0.95,
+    scalefactorFakeTauEndcapElectron = 0.75,
+    systematicsFakeTauBarrelElectron = 0.95*0.10,
+    systematicsFakeTauEndcapElectron = 0.75*0.15,
 )
-
 fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
-    scalefactorFakeTauBarrelElectron = cms.untracked.double(0.85),
-    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.65),
-    systematicsFakeTauBarrelElectron = cms.untracked.double(0.20),
-    systematicsFakeTauEndcapElectron = cms.untracked.double(0.25),
+    scalefactorFakeTauBarrelElectron = 0.85,
+    scalefactorFakeTauEndcapElectron = 0.65,
+    systematicsFakeTauBarrelElectron = 0.85*0.2,
+    systematicsFakeTauEndcapElectron = 0.65*0.2,
 )
+fakeTauSFandSystematicsAgainstElectronLooseMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = 1.4,
+    scalefactorFakeTauEndcapElectron = 0.8,
+    systematicsFakeTauBarrelElectron = 0.3,
+    systematicsFakeTauEndcapElectron = 0.3,
+)
+fakeTauSFandSystematicsAgainstElectronMediumMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = 1.6,
+    scalefactorFakeTauEndcapElectron = 0.8,
+    systematicsFakeTauBarrelElectron = 0.3,
+    systematicsFakeTauEndcapElectron = 0.3,
+)
+fakeTauSFandSystematicsAgainstElectronTightMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = 2.0,
+    scalefactorFakeTauEndcapElectron = 1.2,
+    systematicsFakeTauBarrelElectron = 0.4,
+    systematicsFakeTauEndcapElectron = 0.4,
+)
+fakeTauSFandSystematicsAgainstElectronVTightMVA3 = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = 2.4,
+    scalefactorFakeTauEndcapElectron = 1.2,
+    systematicsFakeTauBarrelElectron = 0.5,
+    systematicsFakeTauEndcapElectron = 0.5,
+)
+# Obtain genuine and fake tau systematics automatically based on tau against electron discriminator
+def setFakeTauSFAndSystematics(fakeTauPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
+    source = "fakeTauSFandSystematics"+tausele.againstElectronDiscriminator.value().replace("against","Against")
+    try:
+        pset = globals()[source].clone()
+    except KeyError:
+        myOptionList = filter(lambda item: "fakeTauSFandSystematics" in item, globals().keys())
+        raise Exception("Error: Could not find fakeTauSFandSystematics for against electron discriminator %s! Options are: %s"%(tauSelection.againstElectronDiscriminator.value(), ", ".join(map(str, myOptionList))))
 
-fakeTauSFandSystematics = None
-# FIXME: add scale factors for MVA3 against electron discriminators
-print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
-print "As a temporary solution, the AgainstElectronMVA scale factors and uncertainties are used (as per tau POG instructions)"
-fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
-#if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
-    #fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
-#elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
-    #fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
-#else:
-    #print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
-    #fakeTauSFandSystematics = fakeTauSFandSystematicsBase
+    HChTools.insertPSetContentsTo(pset, fakeTauPSet)
+    # Update scale factor values for systematics variations
+    myList = []
+    if "GenuineTau" in mod or "FakeTau" in mod:
+        if "GenuineTau" in mod:
+            myList = ["GenuineTauBarrel","GenuineTauEndcap"]
+        elif "FakeTauBarrelElectron" in mod:
+            myList = ["FakeTauBarrelElectron"]
+        elif "FakeTauEndcapElectron" in mod:
+            myList = ["FakeTauEndcapElectron"]
+        elif "FakeTauMuon" in mod:
+            myList = ["FakeTauBarrelMuon","FakeTauEndcapMuon"]
+        elif "FakeTauJet" in mod:
+            myList = ["FakeTauBarrelJet","FakeTauEndcapJet"]
+        for item in myList:
+            sfValue = getattr(fakeTauPSet, "scalefactor"+item)
+            systValue = getattr(fakeTauPSet, "systematics"+item)
+            newSfValue = float(sfValue.value()) + float(systValue.value())
+            if "Minus" in mod:
+                newSfValue = float(sfValue.value()) - float(systValue.value())
+            setattr(fakeTauPSet, "scalefactor"+item, newSfValue)
+    # Print info
+    if len(myList):
+        print "fakeTauSFandSystematics set to %s for %s; SF variatated for %s" % (source, mod, ", ".join(map(str,myList)))
+    else:
+        print "fakeTauSFandSystematics set to %s for %s" % (source, mod)
+fakeTauSFandSystematics = fakeTauSFandSystematicsBase.clone()
+setFakeTauSFAndSystematics(fakeTauSFandSystematics, tauSelection)
 
 jetSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),  # PF jets
@@ -258,9 +317,9 @@ MET = cms.untracked.PSet(
     rawSrc = cms.untracked.InputTag("patPFMet"), # PF MET
     type1Src = cms.untracked.InputTag("patType1CorrectedPFMet"),
     type2Src = cms.untracked.InputTag("patType1p2CorrectedPFMet"),
-    caloSrc = cms.untracked.InputTag("patMETs"),
+    caloSrc = cms.untracked.InputTag("metNoHF"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
-    select = cms.untracked.string("type1"), # raw, type1, type2
+    select = cms.untracked.string("type1"), # raw, type1, type1phicorrected, type2
     METCut = cms.untracked.double(60.0),
     preMETCut = cms.untracked.double(0.0), # Pre-cut is important for background measurements
 #    METCut = cms.untracked.double(80.0), # MET cut for heavy charged Higgs
@@ -289,10 +348,10 @@ bTagging = cms.untracked.PSet(
     discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
 #    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
     leadingDiscriminatorCut = cms.untracked.double(0.898), # used for best bjet candidates (best discriminator)
-    subleadingDiscriminatorCut = cms.untracked.double(0.898), # used for other bjet candidates
-    ptCut = cms.untracked.double(30.0),
+    subleadingDiscriminatorCut = cms.untracked.double(0.898), # disabled, use leading discriminator cut only (was used for other bjet candidates)
+    ptCut = cms.untracked.double(30.0), # No effect, change value in jet selection, if necessary!
 #    ptCut = cms.untracked.double(30.0), # for heavy charged Higgs
-    etaCut = cms.untracked.double(2.4),
+    etaCut = cms.untracked.double(2.4), # No effect, change value in jet selection, if necessary!
     jetNumber = cms.untracked.uint32(1),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
     variationEnabled = cms.untracked.bool(False),
@@ -345,9 +404,9 @@ QCDTailKillerZeroPlus = QCDTailKiller.clone(
         QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
     ),
     collinear = cms.untracked.VPSet(
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
         QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
     )
 )
@@ -361,9 +420,9 @@ QCDTailKillerLoosePlus = QCDTailKiller.clone(
         QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
     ),
     collinear = cms.untracked.VPSet(
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
         QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
     )
 )
@@ -377,9 +436,9 @@ QCDTailKillerMediumPlus = QCDTailKiller.clone(
         QCDTailKillerBin("noCut", 60.0, 60.0), # jet 4
     ),
     collinear = cms.untracked.VPSet(
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
         QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
     )
 )
@@ -393,23 +452,46 @@ QCDTailKillerTightPlus = QCDTailKiller.clone(
         QCDTailKillerBin("noCut", 80.0, 80.0), # jet 4
     ),
     collinear = cms.untracked.VPSet(
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
-        QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
         QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
     )
 )
+
+QCDTailKillerVeryTightPlus = QCDTailKiller.clone(
+    scenarioLabel = cms.untracked.string("VeryTightPlus"),
+    backToBack = cms.untracked.VPSet(
+        QCDTailKillerBin("circular", 100.0, 100.0), # jet 1
+        QCDTailKillerBin("circular", 100.0, 100.0), # jet 2
+        QCDTailKillerBin("circular", 100.0, 100.0), # jet 3
+        QCDTailKillerBin("noCut", 100.0, 100.0), # jet 4
+    ),
+    collinear = cms.untracked.VPSet(
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
+    )
+)
+
 # Define here QCD tail killer scenarios (note that the nominal module will be produced in addition to these)
-QCDTailKillerScenarios = ["QCDTailKillerZeroPlus",
+QCDTailKillerScenarios = [#"QCDTailKillerZeroPlus",
                           "QCDTailKillerLoosePlus",
                           "QCDTailKillerMediumPlus",
-                          "QCDTailKillerTightPlus"]
+                          "QCDTailKillerTightPlus",
+                          #"QCDTailKillerVeryTightPlus"
+                         ]
 
+# Define H+ Invariant Mass Reco options
 invMassReco = cms.untracked.PSet(
     #topInvMassCutName = cms.untracked.string("None")
     topInvMassLowerCut = cms.untracked.double(-1.0), # Negative value means no cut. This is currently the default.
     topInvMassUpperCut = cms.untracked.double(-1.0),  # Negative value means no cut. This is currently the default.
-    pzSelectionMethod = cms.untracked.string("deltaEtaMax"),
+    pzSelectionMethod  = cms.untracked.string("DeltaEtaMin"), # Method of selecting the pZ of neutrino for real solutions
+    metSelectionMethod = cms.untracked.string("SmallestMagnitude"), #Method of selecting MET for complex solutions
+    reApplyMetCut      = MET.METCut, #Re-apply the MET cut after invariant mass reconstruction calculations (only for complex solutions). Set value as <0 to disable.
+    #reApplyMetCut      = cms.untracked.double(0.0)
     )
 
 topReconstruction = cms.untracked.string("None") # Options: None, chi, std, Bselection, Wselection
@@ -446,6 +528,7 @@ ElectronSelection = cms.untracked.PSet(
 MuonSelection = cms.untracked.PSet(
     genParticleSrc = cms.untracked.InputTag("genParticles"),
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
+    applyMuonIsolation = cms.untracked.bool(True),
     MuonPtCut = cms.untracked.double(10.0),
     MuonEtaCut = cms.untracked.double(2.5),
 )
@@ -485,7 +568,7 @@ GenParticleAnalysis = cms.untracked.PSet(
 
 
 topSelection = cms.untracked.PSet(
-  TopMassLow = cms.untracked.double(100.0),
+  TopMassLow = cms.untracked.double(120.0),
   TopMassHigh = cms.untracked.double(300.0),
   src = cms.untracked.InputTag("genParticles")
 )
@@ -496,6 +579,11 @@ bjetSelection = cms.untracked.PSet(
   oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng") 
 )
 
+MCAnalysisOfSelectedEvents = cms.untracked.PSet(
+  src = cms.untracked.InputTag("genParticles"),
+  oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
+  oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng") 
+)
 
 
 topChiSelection = cms.untracked.PSet(
@@ -558,17 +646,18 @@ commonPlotsSettings = cms.untracked.PSet(
         #splitHistogramByDeltaPhiTauMetInDegrees = cms.untracked.vdouble(90.)
     ),
     # Histogram dimension definitions for control plots and shapes (input for datacard generator)
-    ptBins = SetHistogramBinSettings(100, 0., 500.),
+    ptBins = SetHistogramBinSettings(50, 0., 500.),
     etaBins = SetHistogramBinSettings(60, -3., 3.),
     phiBins = SetHistogramBinSettings(72, -3.1415926, 3.1415926),
     rtauBins = SetHistogramBinSettings(55, 0., 1.1),
     njetsBins = SetHistogramBinSettings(20, 0., 20.),
-    metBins = SetHistogramBinSettings(250, 0., 500.),
+    metBins = SetHistogramBinSettings(50, 0., 500.),
+    bjetDiscriminatorBins = SetHistogramBinSettings(20, -1., 1.),
     tailKiller1DBins = SetHistogramBinSettings(52, 0., 260.),
-    topMassBins = SetHistogramBinSettings(100, 0., 500.),
+    topMassBins = SetHistogramBinSettings(50, 0., 500.),
     WMassBins = SetHistogramBinSettings(60, 0., 300.),
-    mtBins = SetHistogramBinSettings(100, 0., 500.),
-    invmassBins = SetHistogramBinSettings(100, 0., 500.),
+    mtBins = SetHistogramBinSettings(50, 0., 500.),
+    invmassBins = SetHistogramBinSettings(50, 0., 500.),
 )
 
 tree = cms.untracked.PSet(
@@ -614,6 +703,11 @@ embeddingGeneratorWeightReader = cms.untracked.PSet(
     enabled = cms.bool(False),
 )
 
+embeddingWTauMuWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("wtaumuWeight"),
+    enabled = cms.bool(False)
+)
+
 vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices"),
 #    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
@@ -646,48 +740,36 @@ def cloneForHeavyAnalysis(lightModule):
     return heavyModule
 
 # Set trigger efficiency / scale factor depending on tau selection params
-def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
-    print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    myScaleFactors = tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium  # FIXME changed default to best so far
-    myScaleFactors.variationEnabled = cms.bool(False)
-    myScaleFactors.useMaxUncertainty = cms.bool(True)
-    return myScaleFactors
-    # FIXME
-    if tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr3Hits":
-        if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
-        elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
-            return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA
-    elif tausele.isolationDiscriminator.value() == "byMediumCombinedIsolationDeltaBetaCorr3Hits":
-        if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium
-        elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
-            return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA
-    raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byLooseCombinedIsolationDeltaBetaCorr3Hits', 'byMediumCombinedIsolationDeltaBetaCorr3Hits'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
-# Set trigger efficiency / scale factor for low purity depending on tau selection params
-def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(tausele):
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency # FIXME
-    print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    myScaleFactors = tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium # FIXME changed default to best so far
-    myScaleFactors.variationEnabled = cms.bool(False)
-    myScaleFactors.useMaxUncertainty = cms.bool(True)
-    return myScaleFactors
-
-#triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
-tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
-tauTriggerEfficiencyScaleFactor.variationEnabled = cms.bool(False)
-tauTriggerEfficiencyScaleFactor.useMaxUncertainty = cms.bool(True)
-
-metTriggerEfficiencyScaleFactor = cms.untracked.PSet(
-    dataParameters = cms.PSet(),
-    mcParameters = cms.PSet(),
+triggerEffPrototype = cms.untracked.PSet(
+    data = cms.FileInPath("NOT_YET_SET"),
     dataSelect = cms.vstring(),
-    mcSelect = cms.string(""),
-    mode = cms.untracked.string("disabled"), # dataEfficiency, scaleFactor, disabled
+    mcSelect = cms.string("NOT_YET_SET"),
+    mode = cms.untracked.string("disabled"), # mcEfficiency, dataEfficiency, scaleFactor, disabled
     variationEnabled = cms.bool(False),
     useMaxUncertainty = cms.bool(True),
 )
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
+def setTriggerEfficiencyScaleFactorBasedOnTau(scaleFactorPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
+    print "Trigger efficiency / scalefactor set according to tau isolation '%s' and tau against electron discr. '%s' for %s" % (tausele.isolationDiscriminator.value(), tausele.againstElectronDiscriminator.value(), mod)
+    tauTriggerEfficiency.setEfficiency(scaleFactorPSet, "byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
+    return
+    # FIXME
+    tauTriggerEfficiency.setEfficiency(scaleFactorPSet, tausele.isolationDiscriminator.value(), tausele.againstElectronDiscriminator.value())
+    raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byLooseCombinedIsolationDeltaBetaCorr3Hits', 'byMediumCombinedIsolationDeltaBetaCorr3Hits'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
+# Set trigger efficiency / scale factor for low purity depending on tau selection params
+def setTriggerEfficiencyLowPurityScaleFactorBasedOnTau(scaleFactorPSet, tausele, mod="HChSignalAnalysisParameters_cff"):
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency # FIXME
+    print "Trigger efficiency / scalefactor set according to tau isolation '%s' and tau against electron discr. '%s' for %s" % (tausele.isolationDiscriminator.value(), tausele.againstElectronDiscriminator.value(), mod)
+    tauTriggerEfficiency.setEfficiency(scaleFactorPSet, "byMediumCombinedIsolationDeltaBetaCorr", "againstElectronMedium") # FIXME changed default to best so far
+
+#triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
+tauTriggerEfficiencyScaleFactor = triggerEffPrototype.clone()
+setTriggerEfficiencyScaleFactorBasedOnTau(tauTriggerEfficiencyScaleFactor, tauSelection)
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2011_cff as metTriggerEfficiency
+metTriggerEfficiencyScaleFactor = triggerEffPrototype.clone()
+metTriggerEfficiency.setEfficiency(metTriggerEfficiencyScaleFactor)
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
@@ -726,34 +808,30 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-def setDataTriggerEfficiency(dataVersion, era, pset=tauTriggerEfficiencyScaleFactor):
-    if dataVersion.isMC():
-        if dataVersion.isS4():
-            pset.mcSelect = "Summer11"
-        elif dataVersion.isS6():
-            if era == "Run2011A":
-                pset.mcSelect = "Fall11_PU_2011A"
-            if era == "Run2011B":
-                pset.mcSelect = "Fall11_PU_2011B"
-            if era == "Run2011AB":
-                pset.mcSelect = "Fall11_PU_2011AB"
-        elif dataVersion.isHighPU():
-	    pset.mode = "disabled"
-        else:
-            raise Exception("MC trigger efficencies are available only for Summer11 and Fall11")
-    if era == "EPS":
-        pset.dataSelect = ["runs_160404_167913"]
-    elif era == "Run2011A":
-        pset.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692"]
-    elif era == "Run2011A-EPS":
-        pset.dataSelect = ["runs_170722_173198", "runs_173236_173692"]
-    elif era == "Run2011B":
-        pset.dataSelect = ["runs_175832_180252"]
-    elif era == "Run2011AB":
-        pset.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
+def _setTriggerEfficiencyForEraMC(dataVersion, era, pset):
+    if dataVersion.isS4():
+        pset.mcSelect = "Summer11"
+    elif dataVersion.isS6():
+        if era == "Run2011A":
+            pset.mcSelect = "Fall11_PU_2011A"
+        if era == "Run2011B":
+            pset.mcSelect = "Fall11_PU_2011B"
+        if era == "Run2011AB":
+            pset.mcSelect = "Fall11_PU_2011AB"
+    elif dataVersion.isHighPU():
+        pset.mode = "disabled"
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB'")
+        raise Exception("MC trigger efficencies are available only for Summer11 and Fall11")
 
+def setTauTriggerEfficiencyForEra(dataVersion, era, pset):
+    if dataVersion.isMC():
+        _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
+    pset.dataSelect = tauTriggerEfficiency.getRunsForEra(era)
+
+def setMetTriggerEfficiencyForEra(dataVersion, era, pset):
+    if dataVersion.isMC():
+        _setTriggerEfficiencyForEraMC(dataVersion, era, pset)
+    pset.dataSelect = metTriggerEfficiency.getRunsForEra(era)
 
 # Weighting by instantaneous luminosity, and the number of true
 # simulated pile up interactions

@@ -1221,7 +1221,7 @@ class InvertedTauID:
             
         self.plotIntegral(plot, histo.GetName())
     
-    def fitQCD(self,histo):
+    def fitQCD(self,histo,options="R"):
         if histo.GetEntries() == 0:
             return
                     
@@ -1260,19 +1260,16 @@ class InvertedTauID:
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
         plot.createFrame("qcdfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
-
         self.nInvData = histo.Integral(0,histo.GetNbinsX())
         self.normInvQCD = self.nInvData
         print "check self.nInvData",self.nInvData
 
         histo.Scale(1/self.normInvQCD)
-        histo.Fit(theFit,"LR")
+        histo.Fit(theFit,options)
 
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
+        theFit.SetLineWidth(3)
         theFit.Draw("same")
 
         par = theFit.GetParameters()
@@ -1286,17 +1283,23 @@ class InvertedTauID:
         qcdOnly.FixParameter(0,par[0])
         qcdOnly.FixParameter(1,par[1])
         qcdOnly.SetLineStyle(2)
+        qcdOnly.SetLineWidth(3)
         qcdOnly.Draw("same")
 
         parQCD = qcdOnly.GetParameters()
         self.nFitInvQCD = qcdOnly.Integral(0,1000,parQCD)
         print "check self.nFitInvQCD",self.nFitInvQCD
         """
-        histograms.addText(0.4,0.8,"Inverted TauID")
+        histograms.addText(0.4,0.8,"Data, Inverted TauID")
         #histograms.addText(0.4,0.25,"QCD",15)
                 
         plot.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))
         plot.getPad().SetLogy(True)
+
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+
         plot.draw()
         plot.save()
         """
@@ -1507,15 +1510,12 @@ class InvertedTauID:
             theFit.SetParLimits(2,10,100)
             theFit.SetParLimits(3,0.01,10)
 
+	gStyle.SetOptFit(0)
 
         plot = plots.PlotBase()
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
         plot.createFrame("ewkfit"+name+"_"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
-                        
 	self.normEWK = histo.Integral(0,histo.GetNbinsX())
         if name == "Inverted":
             self.nEWKinverted = self.normEWK
@@ -1528,6 +1528,7 @@ class InvertedTauID:
        
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
+        theFit.SetLineWidth(3)
         theFit.Draw("same")
 
         self.parMCEWK = theFit.GetParameters()
@@ -1547,6 +1548,10 @@ class InvertedTauID:
 
         plot.getPad().SetLogy(True)
 
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+
         plot.draw()
         plot.save()
                            
@@ -1556,7 +1561,7 @@ class InvertedTauID:
         self.nMCEWK = theFit.Integral(0,1000,self.parMCEWK)
         print "Integral ",self.normEWK*self.nMCEWK
 
-    def fitData(self,histo):
+    def fitData(self,histo,options="R"):
 
         if histo.GetEntries() == 0:
             self.nBaseData = 0
@@ -1590,19 +1595,15 @@ class InvertedTauID:
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
         plot.createFrame("combinedfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
-
-
         self.nBaseData = histo.Integral(0,histo.GetNbinsX())
 	print "data events ",self.nBaseData
 
-        histo.Fit(theFit,"R")
+        histo.Fit(theFit,options)
 
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
         theFit.SetLineColor(4)
+        theFit.SetLineWidth(3)
         theFit.Draw("same")
 
 	par = theFit.GetParameters()
@@ -1611,6 +1612,7 @@ class InvertedTauID:
 	qcdOnly.FixParameter(0,par[0])
 	qcdOnly.FixParameter(1,par[1])
 	qcdOnly.SetLineStyle(2)
+        qcdOnly.SetLineWidth(3)
 	qcdOnly.Draw("same")
 
  #       histograms.addText(0.35,0.8,"Data, Baseline selection")
@@ -1620,11 +1622,15 @@ class InvertedTauID:
  #       histo.GetXaxis().SetTitle("MET  (GeV)")
 
         histograms.addText(0.35,0.8,"Data, Baseline TauID")
-        histograms.addText(0.4,0.25,"QCD",15)
+        histograms.addText(0.45,0.25,"QCD",20)
 
         plot.histoMgr.appendHisto(histograms.Histo(qcdOnly,"qcdOnly"))
         
         plot.getPad().SetLogy(True)
+
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
 
         plot.draw()
         plot.save()

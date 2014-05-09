@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -16,22 +17,6 @@
 #include "TMath.h"
 #include "TLorentzVector.h"
 
-
-
-std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
-std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
-bool  hasImmediateMother(const reco::Candidate& p, int id);
-bool  hasMother(const reco::Candidate& p, int id);
-void  printImmediateMothers(const reco::Candidate& p);
-void  printMothers(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>  getImmediateDaughters(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p);
-bool  hasImmediateDaughter(const reco::Candidate& p, int id);
-bool  hasDaughter(const reco::Candidate& p, int id);
-void  printImmediateDaughters(const reco::Candidate& p);
-void printDaughters(const reco::Candidate& p);
-
-
 namespace HPlus {
   VetoTauSelection::Data::Data() :
   fPassedEvent(false) { }
@@ -48,7 +33,7 @@ namespace HPlus {
     fZMassWindow(iConfig.getUntrackedParameter<double>("ZmassWindow")),
     fTauSource(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection").getUntrackedParameter<edm::InputTag>("src")),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, histoWrapper, "TauVeto"),
-    fFakeTauIdentifier(fakeTauSFandSystematicsConfig, histoWrapper, "VetoTauSelection"),
+    fFakeTauIdentifier(fakeTauSFandSystematicsConfig, iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), histoWrapper, "VetoTauSelection"),
     fAllEventsCounter(eventCounter.addSubCounter("VetoTauSelection","All events")),
     //    fVetoTauCandidatesCounter(eventCounter.addSubCounter("VetoTauSelection","Veto tau candidates"));
     fVetoTausSelectedCounter(eventCounter.addSubCounter("VetoTauSelection","Veto taus found")),
@@ -212,13 +197,13 @@ namespace HPlus {
      
      
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
-      if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
+      if (tauMatchData.isGenuineTau())
         hCandidateTauNumber->Fill(0.);
-      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isElectronToTau())
         hCandidateTauNumber->Fill(1);
-      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isMuonToTau())
         hCandidateTauNumber->Fill(2);
-      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isJetToTau())
         hCandidateTauNumber->Fill(3);
     }
     // Do tau selection on the veto tau candidates
@@ -239,13 +224,13 @@ namespace HPlus {
       output.fSelectedVetoTaus.push_back(*it);
       // Count how many selected veto taus are genuine taus
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
-      if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
+      if (tauMatchData.isGenuineTau())
         hSelectedTauNumber->Fill(0.);
-      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isElectronToTau())
         hSelectedTauNumber->Fill(1);
-      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isMuonToTau())
         hSelectedTauNumber->Fill(2);
-      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isJetToTau())
         hSelectedTauNumber->Fill(3);
 
       bool isGenuineTau = !(fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()));

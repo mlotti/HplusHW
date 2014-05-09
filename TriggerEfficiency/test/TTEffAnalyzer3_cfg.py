@@ -3,18 +3,14 @@ import copy
 
 #dataVersion="53XmcS10"
 #dataVersion="53XdataPromptCv2"
-#dataVersion="44XmcS6"
 dataVersion="44Xdata"
+#isData = False
 runL1Emulator = False
 runOpenHLT = False
 analysis = "TauLeg"
 #analysis = "MetLeg"
 hltType = "HLT"
 #hltType = "TEST"
-
-if analysis == "TauLeg":
-    runL1Emulator = True
-    runOpenHLT = True
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 options, dataVersion = getOptionsDataVersion(dataVersion)
@@ -56,9 +52,9 @@ process.options = cms.untracked.PSet(
 if dataVersion.isMC():
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-       "file:pattuple.root"
+#       "file:TTEffSkim.root"
 #	"root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_analysis_metleg_v53_v1/638a70bdbf1f7414f9f442a75689ed2b/pattuple_486_2_ZHP.root"
-#	"root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerTauLeg/CMSSW_5_3_X/DYToTauTau_M-20_CT10_TuneZ2star_8TeV-powheg-tauola-pythia6/Summer12_DR53X_PU_S8_START53_V7A_v1_AODSIM_triggerTauLeg_skim_v53_v2/8728052812930676480ae2a242229ec9/pattuple_32_1_0N1.root"
+	"root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerTauLeg/CMSSW_5_3_X/DYToTauTau_M-20_CT10_TuneZ2star_8TeV-powheg-tauola-pythia6/Summer12_DR53X_PU_S8_START53_V7A_v1_AODSIM_triggerTauLeg_skim_v53_v2/8728052812930676480ae2a242229ec9/pattuple_32_1_0N1.root"
 #        "file:/tmp/slehti/TauTriggerEff_DYToTauTau_M_20_TuneZ2star_8TeV_pythia6_tauola_Summer12_PU_S8_START52_V9_v1_AODSIM_TTEffSkim_v525_V00_10_04_v2_TTEffSkim_70_1_hQW.root"
         )
     )
@@ -66,10 +62,10 @@ else:
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(   
 #        "file:/afs/cern.ch/work/s/slehti/TriggerMETLeg_Tau_173236-173692_2011A_Nov08_pattuple_9_1_LSf.root"
-        "file:pattuple.root"
+#        "file:TTEffSkim.root"
 #	"file:/tmp/slehti/TriggerMETLeg_Tau_Run2012C_PromptReco_v2_AOD_202792_203742_analysis_metleg_v53_v1_pattuple_28_1_L19.root"
-#       'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerTauLeg/CMSSW_5_3_X/TauPlusX/Run2012A_13Jul2012_v1_AOD_190456_190738_triggerTauLeg_noTauIDTestSkim2noJSON_v53_v2/a3e0eb2b4b011c1375d601a0aac09e7c/pattuple_9_1_Ygp.root'
-#	'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X/Tau/Run2011B_19Nov2011_v1_AOD_175832_180252_triggerMetLeg_skim_v44_v5/428837ef15cd9a9f94b001400f1034d7/pattuple_1_5_koL.root'
+#       'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X/TauParked/Run2012D_22Jan2013_v1_AOD_203777_208686_triggerMetLeg_skim_v53_3c/65583ace3198f0f55b2cd7d093b9f259/pattuple_3940_3_oJW.root'
+	'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerTauLeg/CMSSW_4_4_X/SingleMu/pattuple_v25bfix_TTEffSkim_SingleMu_175832-180252_2011B_Nov19_RAWRECO/f73b0045e7e1eac08bdc8374111fc3ea/pattuple_1_1_7wa.root'
         )
     )
 
@@ -115,6 +111,13 @@ print "GlobalTag="+dataVersion.getGlobalTag()
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeight_cfi as topPtWeight
+process.topPtWeight = topPtWeight.topPtWeight.clone()
+if options.sample == "TTJets":
+    topPtWeight.addTtGenEvent(process, process.commonSequence)
+    process.topPtWeight.enabled = True
+    process.commonSequence += process.topPtWeight
 
 if dataVersion.isMC():
     process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
@@ -236,6 +239,10 @@ process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
 ##            HLTMET = cms.InputTag("hltMet"),
 ##            HLTMHT = cms.InputTag("hltPFMHTProducer"),
             CaloMET = cms.InputTag("met")
+#            CaloMET = cms.InputTag("patCaloMET"),
+#            CaloMETresidualCorrected = cms.InputTag("patResidualCorrectedCaloMET"),
+#            CaloMETnoHF = cms.InputTag("patCaloMETnoHF"),
+#            CaloMETnoHFresidualCorrected = cms.InputTag("patResidualCorrectedCaloMETnoHF"),
         ),
 
 	MuonSource        = cms.InputTag("selectedPatMuons"),
@@ -393,18 +400,19 @@ process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
 
         PileupSummaryInfoSource                 = cms.InputTag("addPileupInfo"),
         outputFileName          		= cms.string("tteffAnalysis-hltpftau-hpspftau.root"),
-	triggerBitsOnly				= cms.bool(False)
+	triggerBitsOnly				= cms.bool(False),
+	TopPtWeight                             = cms.InputTag("topPtWeight")
 )
 
 #process.TTEffAnalysisHLTPFtauHPS.clone(
 #    L2AssociationCollection = "openhltL2TauGlobalIsolationProducer",
 #    outputFileName = cms.string("tteffAnalysis-hltpftaul2global-hpspftau.root")
 #)
-#process.TTEffAnalysisHLTPFTauTightHPS = process.TTEffAnalysisHLTPFTauHPS.clone(
+# process.TTEffAnalysisHLTPFTauTightHPS = process.TTEffAnalysisHLTPFTauHPS.clone(
 #     L25TauSource = "hltPFTausTightIso",
 #     L3IsoQualityCuts = process.hltPFTauTightIsoIsolationDiscriminator.qualityCuts.isolationQualityCuts.clone(),
 #     outputFileName = "tteffAnalysis-hltpftautight-hpspftau.root",
-#)
+# )
 process.TTEffAnalysisHLTPFTauMediumHPS = process.TTEffAnalysisHLTPFTauHPS.clone(
     L25TauSource = "hltPFTausMediumIso",
     L3IsoQualityCuts = process.hltPFTauMediumIsoIsolationDiscriminator.qualityCuts.isolationQualityCuts.clone(),
@@ -446,8 +454,8 @@ process.runTTEffAna = cms.Path(process.commonSequence)
 process.runTTEffAna += process.hPlusGlobalElectronVetoFilter
 process.runTTEffAna += process.hPlusGlobalMuonVetoFilter
 if analysis == "TauLeg":
-####    process.runTTEffAna += process.TTEffAnalysisHLTPFTauHPS
-#    process.runTTEffAna += process.TTEffAnalysisHLTPFTauTightHPS
+    process.runTTEffAna += process.TTEffAnalysisHLTPFTauHPS
+    #process.runTTEffAna += process.TTEffAnalysisHLTPFTauTightHPS
     process.runTTEffAna += process.TTEffAnalysisHLTPFTauMediumHPS
 #    process.runTTEffAna += process.TTEffAnalysisHLTPFTauMediumHPSL2Global
 if analysis == "MetLeg":
@@ -480,7 +488,7 @@ process.runTTEffAnaHighPurity = cms.Path(
 # L1 emulator
 process.L1simulation_step = cms.Path()
 if runL1Emulator:
-    if dataVersion.isData():
+    if isData:
         process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
     else:
         process.load('Configuration.StandardSequences.RawToDigi_cff')
@@ -515,21 +523,21 @@ if runL1Emulator:
         module.L1extraCentralJetSource = cms.InputTag("l1emuL1extraParticles", "Central")
         module.L1extraMETSource = cms.InputTag("l1emuL1extraParticles", "MET")
         module.L1extraMHTSource = cms.InputTag("l1emuL1extraParticles", "MHT")
-###FIXME        module.L1CaloRegionSource = "simRctDigis"
+        module.L1CaloRegionSource = "simRctDigis"
         module.L1GtReadoutRecord = "simGtDigis"
         module.L1GtObjectMapRecord = "l1emuL1GtObjectMap"
 
-    process.TEffAnalysisHLTPFTauMediumHPSL1Emu = process.TTEffAnalysisHLTPFTauMediumHPS.clone(
-        outputFileName = "tteffAnalysis-hltpftaumedium-hpspftau-l1emu.root"
+    process.TEffAnalysisHLTPFTauTightHPSL1Emu = process.TTEffAnalysisHLTPFTauTightHPS.clone(
+        outputFileName = "tteffAnalysis-hltpftautight-hpspftau-l1emu.root"
     )
-    setL1Emu(process.TEffAnalysisHLTPFTauMediumHPSL1Emu)
-    process.runTTEffAna += process.TEffAnalysisHLTPFTauMediumHPSL1Emu
+    setL1Emu(process.TEffAnalysisHLTPFTauTightHPSL1Emu)
+    process.runTTEffAna += process.TEffAnalysisHLTPFTauTightHPSL1Emu
 
-#    process.TTEffAnalysisHLTPFTauTightHPSHighPurityL1Emu = process.TTEffAnalysisHLTPFTauTightHPSHighPurity.clone(
-#        outputFileName = "tteffAnalysis-hltpftautight-hpspftau-l1emu-highpurity.root"
-#    )
-#    setL1Emu(process.TTEffAnalysisHLTPFTauTightHPSHighPurityL1Emu)
-#    process.runTTEffAnaHighPurity *= process.TTEffAnalysisHLTPFTauTightHPSHighPurityL1Emu
+    process.TTEffAnalysisHLTPFTauTightHPSHighPurityL1Emu = process.TTEffAnalysisHLTPFTauTightHPSHighPurity.clone(
+        outputFileName = "tteffAnalysis-hltpftautight-hpspftau-l1emu-highpurity.root"
+    )
+    setL1Emu(process.TTEffAnalysisHLTPFTauTightHPSHighPurityL1Emu)
+    process.runTTEffAnaHighPurity *= process.TTEffAnalysisHLTPFTauTightHPSHighPurityL1Emu
 
 process.o1 = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring("keep *"),
@@ -542,8 +550,8 @@ process.DoMiscHLT = cms.Path(process.hltPFMHTProducer)
 
 process.schedule = cms.Schedule(
 #    process.runMETCleaning,
-    process.runTTEffAna
-#    process.runTTEffAnaHighPurity
+    process.runTTEffAna,
+    process.runTTEffAnaHighPurity
 #    ,process.outpath
 )
 if analysis == "MetLeg" or analysis == "QuadJet":
@@ -559,7 +567,7 @@ if runOpenHLT:
 				process.DoHLTTau,
 				process.DoHLTMinBiasPixelTracks,
                                 process.DoMiscHLT,
-#				process.runMETCleaning,
+				process.runMETCleaning,
                                 process.L1simulation_step,
 				process.runTTEffAna,
 #                                process.runTTEffAnaHighPurity

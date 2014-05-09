@@ -23,7 +23,7 @@ namespace HPlus {
 
   class METSelection: public BaseSelection {
   public:
-    enum Select {kRaw, kType1, kType2};
+    enum Select {kRaw, kType1, kType1PhiCorrected, kType2};
 
     /**
      * Class to encapsulate the access to the data members of
@@ -40,8 +40,7 @@ namespace HPlus {
 
       const bool passedEvent() const { return fPassedEvent; }
       const bool passedPreMetCut() const { return fPassedPreMetCut; }
-      //const edm::Ptr<reco::MET> getSelectedMET() const { return fSelectedMET; }
-      const edm::Ptr<reco::MET> getSelectedMET() const { return getPhiUncorrectedSelectedMET(); }
+      const edm::Ptr<reco::MET> getSelectedMET() const;
       const edm::Ptr<reco::MET> getPhiUncorrectedSelectedMET() const;
       const edm::Ptr<reco::MET> getPhiCorrectedSelectedMET() const;
       const edm::Ptr<reco::MET> getRawMET() const { return fRawMET; }
@@ -57,7 +56,6 @@ namespace HPlus {
       bool fPassedPreMetCut;
       Select fMETMode;
       // MET objects
-      edm::Ptr<reco::MET> fSelectedMET;
       edm::Ptr<reco::MET> fRawMET;
       edm::Ptr<reco::MET> fType1MET;
       edm::Ptr<reco::MET> fType2MET;
@@ -85,7 +83,7 @@ namespace HPlus {
     Data analyzeWithPossiblyIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
 
     // Returns type I MET object for assumption "no isolated taus" (use case: common plots or met phi oscillation before tau selection)
-    Data silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    Data silentAnalyzeNoIsolatedTaus(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices);
 
     const double getCutValue() const { return fMetCut; }
 

@@ -15,6 +15,7 @@ import shutil
 from math import sqrt
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
 class PseudoMultiCrabCreator:
     ## Constructor
@@ -128,7 +129,10 @@ class PseudoMultiCrabModule:
             myLuminosity += d.getLuminosity()
         self._luminosity = myLuminosity
         # Obtain energy information
-        self._energy = float(dsetMgr.getDataset("Data").datasets[0].getEnergy())
+        if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
+            self._energy = float(dsetMgr.getDataset("Data").getEnergy())
+        else:
+            self._energy = float(dsetMgr.getDataset("Data").datasets[0].getEnergy())
         #myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
         self._counters["luminosity"] = myLuminosity
         self._counterUncertainties["luminosity"] = 0
@@ -142,11 +146,19 @@ class PseudoMultiCrabModule:
         #(objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("parameterSet")
         #self._psetInfo = objs[0].Clone()
         # Copy data version and set it to pseudo
-        (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/dataVersion")
+        objs = None
+        realNames = None
+        if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
+            (objs, realNames) = dsetMgr.getDataset("Data").getRootObjects("../configInfo/dataVersion")
+        else:
+            (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/dataVersion")
         self._dataVersion = objs[0].Clone()
         self._dataVersion.SetTitle("pseudo")
         # Copy code version
-        (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/codeVersion")
+        if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
+            (objs, realNames) = dsetMgr.getDataset("Data").getRootObjects("../configInfo/codeVersion")
+        else:
+            (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/codeVersion")
         self._codeVersion = objs[0].Clone()
 
     def delete(self):

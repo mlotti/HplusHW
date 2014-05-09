@@ -87,7 +87,7 @@ energyText = "7 TeV"
 class TextDefaults:
     def __init__(self):
         self._setDefaults("cmsPreliminary", x=0.62, y=0.96)
-        self._setDefaults("energy", x=0.2, y=0.96)
+        self._setDefaults("energy", x=0.19, y=0.96)
         self._setDefaults("lumi", x=0.43, y=0.96)
 
     ## Modify the default values
@@ -176,8 +176,9 @@ class PlotText:
     # \param text    String to draw
     # \param size    Size of text (None for the default value, taken from gStyle)
     # \param bold    Should the text be bold?
+    # \param align   Alignment of text (left, center, right)
     # \param color   Color of the text
-    def __init__(self, x, y, text, size=None, bold=True, color=ROOT.kBlack):
+    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack):
         self.x = x
         self.y = y
         self.text = text
@@ -188,6 +189,14 @@ class PlotText:
             self.l.SetTextFont(self.l.GetTextFont()-20) # bold -> normal
         if size != None:
             self.l.SetTextSize(size)
+        if align.lower() == "left":
+            self.l.SetTextAlign(11)
+        elif align.lower() == "center":
+            self.l.SetTextAlign(21)
+        elif align.lower() == "right":
+            self.l.SetTextAlign(31)
+        else:
+            raise Exception("Error: Invalid option '%s' for text alignment! Options are: 'left', 'center', 'right'."%align)
         self.l.SetTextColor(color)
 
     ## Draw the text to the current TPad
@@ -1211,9 +1220,9 @@ class Histo:
     # \param name     Name of the uncertainty
     # \param th1plus  TH1 for plus variation
     # \param th1minus TH1 for minus variation
-    def addShapeUncertainty(self, name, th1Plus, th1Minus):
+    def addShapeUncertaintyFromVariation(self, name, th1Plus, th1Minus):
         self._uncertaintyGraphValid = False
-        self._histo.addShapeUncertainty(name, th1Plus, th1Minus)
+        self._histo.addShapeUncertaintyFromVariation(name, th1Plus, th1Minus)
 
     ## Add shape systematics as bin-wise relative uncertainties
     #
@@ -1336,7 +1345,7 @@ class Histo:
                 print >>sys.stderr, 'WARNING: encountered fill styles %d and %d for stat and syst uncertainties, and there is no support yet for "combining" them for stat. Consider adding your case to %s near line %d' % (fillStyles[0], fillStyles[1], info.filename, info.lineno)
 
         # Keep reference to avoid segfault
-        self.rootHistoForLegend = aux.addToLegend(legend, h, self.legendLabel, self.legendStyle, canModify=not cloned)
+        self.rootHistoForLegend = aux.addToLegend(legend, h, self.legendLabel, self.legendStyle, canModify=cloned)
 
     def _addToLegendUncertainty(self, legend):
         gr = self.getSystematicUncertaintyGraph()

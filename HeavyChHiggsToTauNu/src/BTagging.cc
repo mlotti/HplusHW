@@ -7,6 +7,7 @@
 */
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -16,19 +17,6 @@
 #include "TMath.h"
 #include<vector>
 #include<algorithm>
-
-std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
-std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
-bool  hasImmediateMother(const reco::Candidate& p, int id);
-bool  hasMother(const reco::Candidate& p, int id);
-void  printImmediateMothers(const reco::Candidate& p);
-void  printMothers(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>  getImmediateDaughters(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p);
-bool  hasImmediateDaughter(const reco::Candidate& p, int id);
-bool  hasDaughter(const reco::Candidate& p, int id);
-void  printImmediateDaughters(const reco::Candidate& p);
-void printDaughters(const reco::Candidate& p);
 
 namespace {
   // The below things are contained in an anonymous namespace to prevent them from being accessed from outside this file.
@@ -500,7 +488,8 @@ namespace HPlus {
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     fLeadingDiscrCut(iConfig.getUntrackedParameter<double>("leadingDiscriminatorCut")),
-    fSubLeadingDiscrCut(iConfig.getUntrackedParameter<double>("subleadingDiscriminatorCut")),
+    fSubLeadingDiscrCut(iConfig.getUntrackedParameter<double>("leadingDiscriminatorCut")),// Force subleading cut to be the same as leading cut, i.e. no asymmetry allowed
+    //fSubLeadingDiscrCut(iConfig.getUntrackedParameter<double>("subleadingDiscriminatorCut")),
     fNumberOfBJets(iConfig.getUntrackedParameter<uint32_t>("jetNumber"),iConfig.getUntrackedParameter<std::string>("jetNumberCutDirection")),
     fVariationEnabled(iConfig.getUntrackedParameter<bool>("variationEnabled")),
     fVariationShiftBy(iConfig.getUntrackedParameter<double>("variationShiftBy")),
@@ -520,7 +509,7 @@ namespace HPlus {
     //    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
   {
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("Btagging");
+    TFileDirectory myDir = histoWrapper.mkdir(HistoWrapper::kInformative, *fs, "Btagging");
     hDiscriminator = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
     hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet_pt", "bjet_pt", 100, 0., 500.);
     hPtBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetCSVM_pt", "realbjetCSVM_pt", 100, 0., 500.);
@@ -550,7 +539,7 @@ namespace HPlus {
     }
 
     // MC btagging and mistagging efficiency
-    TFileDirectory myMCEffDir = myDir.mkdir("MCEfficiency");
+    TFileDirectory myMCEffDir = histoWrapper.mkdir(HistoWrapper::kInformative, myDir, "MCEfficiency");
     hMCAllBJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "AllBJetsByPt", "AllBJetsByPt;b jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
     hMCAllCJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "AllCJetsByPt", "AllCJetsByPt;c jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
     hMCAllLightJetsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMCEffDir, "AllLightJetsByPt", "AllLightJetsByPt;udsg jets p_{T}, GeV/c;N_{jets}", 50, 0., 500.);
@@ -571,10 +560,12 @@ namespace HPlus {
     hMCBmistaggedCJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "MistaggedCJetsByPtAndEta", "MistaggedCJetsByPtAndEta;c jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
     hMCBmistaggedLightJetsByPtAndEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myMCEffDir, "MistaggedLightJetsByPtAndEta", "MistaggedLightJetsByPtAndEta;udsg jets p_{T}, GeV/c;jet #eta", 50, 0., 500., 10, -2.5, 2.5);
 
-    // Scale factor histograms (needed for evaluating syst. uncertainty of btagging in datacard generator)
+    // Scale factor histograms (as a control)
     hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
-    hBTagRelativeUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 3000, 0., 3.);
-    hBTagAbsoluteUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 3000, 0., 3.);
+    hBTagRelativeUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 100, 0., 3.);
+    hBTagAbsoluteUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 100, 0., 3.);
+    // Probability for passing btag (as a control)
+    hProbabilityForPassingBtag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ProbabilityForPassingBTag", "ProbabilityForPassingBTag;Probability;N_{events}", 100, 0., 1.);
 
     // Set scale factor and efficiency look-up tables and functions
     if (fLeadingDiscrCut > 0.243 && fLeadingDiscrCut < 0.245) { // CSVL (Combined Secondary Vertex b-tagging method, Loose working point)
@@ -624,6 +615,7 @@ namespace HPlus {
     
     // Initialize output data object
     Data output;
+    output.fDiscriminatorName = fDiscriminator;
     output.fSelectedJets.reserve(jets.size());
     output.fSelectedSubLeadingJets.reserve(jets.size());
     // Initialize structure for collecting event SF term of each jet
@@ -658,11 +650,11 @@ namespace HPlus {
       }
 
       // Apply transverse momentum cut
-      if(iJet->pt() < fPtCut) continue;
+      //if(iJet->pt() < fPtCut) continue; // disabled, jet pT is chosen in jet selection
       increment(fTaggedPtCutSubCount);
 
       // Apply pseudorapidity cut
-      if(fabs(iJet->eta()) > fEtaCut) continue;
+      //if(fabs(iJet->eta()) > fEtaCut) continue; // disabled, jet eta is chosen in jet selection
       increment(fTaggedEtaCutSubCount);
 
       // Do b-tagging using the chosen discriminator and working point
@@ -722,6 +714,11 @@ namespace HPlus {
     output.fPassedEvent= fNumberOfBJets.passedCut(output.fSelectedJets.size());
     if (output.fPassedEvent)
       increment(fTaggedCount);
+
+    // Calculate probability to pass b tagging
+    double myProbability = calculateProbabilityToPassBTagging(iEvent, jets);
+    hProbabilityForPassingBtag->Fill(myProbability);
+    output.fProbabilityToPassBtagging = myProbability;
 
     return output;
   }
@@ -881,5 +878,57 @@ namespace HPlus {
       uncertainty = TMath::Sqrt(uncertainty2);
     }
     return uncertainty;
+  }
+
+  double BTagging::calculateProbabilityToPassBTagging(const edm::Event& iEvent, const edm::PtrVector<pat::Jet>& jets) {
+    double myProbabilitySum = 0.0;
+    if (!iEvent.isRealData()) {
+      size_t nJets = jets.size();
+      std::vector<bool> myPassedStatus;
+      for (size_t j = 0; j < jets.size(); ++j) {
+        myPassedStatus.push_back(false); // initialize
+      }
+      size_t nPermutations = TMath::Power(2, static_cast<int>(nJets));
+      for (size_t i = 0; i < nPermutations; ++i) {
+        // Set status vector according to the permutation
+        //std::cout << "permutation " << i << ":";
+        size_t nPassed = 0;
+        for (size_t j = 0; j < jets.size(); ++j) {
+          bool myStatus = (((i >> j) % 2) == 1);
+          myPassedStatus[j] = myStatus;
+          if (myStatus) ++nPassed;
+          //std::cout << "," << myPassedStatus[j];
+        }
+        // Sum probability only if the number of passed jets would match to the cut criteria
+        if (fNumberOfBJets.passedCut(nPassed)) {
+          double myProbability = 1.0;
+          for (size_t j = 0; j < jets.size(); ++j) {
+            // Obtain correct efficiency table depending on jet flavor
+            EfficiencyTable* myTable = 0;
+            int myJetFlavor = std::abs(jets[j]->partonFlavour());
+            if (myJetFlavor >= 1 && myJetFlavor <= 3 ) { // uds jet
+              myTable = &fUDSMistagEffTable;
+            } else if (myJetFlavor == 4) { // c jet
+              myTable = &fCMistagEffTable;
+            } else if (myJetFlavor == 5) { // b jet
+              myTable = &fTagEffTable;
+            } else { // gluon jet or unknown; assume unknown is rather a gluon than uds jet (mistag rate is higher)
+              myTable = &fGMistagEffTable;
+            }
+            if (myPassedStatus[j]) {
+              myProbability *= myTable->getEfficiency(jets[j]->pt());
+              //std::cout << "," << myTable->getEfficiency(jets[j]->pt());
+            } else {
+              myProbability *= 1.0 - myTable->getEfficiency(jets[j]->pt());
+              //std::cout << "," << 1.0 - myTable->getEfficiency(jets[j]->pt());
+            }
+          }
+          myProbabilitySum += myProbability;
+          //std::cout << ",prob=," << myProbability << std::endl;
+        }
+      }
+    }
+    //std::cout << "Overall prob:," << myProbabilitySum << std::endl;
+    return myProbabilitySum;
   }
 }

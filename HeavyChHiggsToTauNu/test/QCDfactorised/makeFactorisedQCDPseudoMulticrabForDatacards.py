@@ -67,18 +67,24 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     elif massType == "invmass":
         myResult = QCDFactorisedResultManager(myFullMassSpecs,dsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False,displayPurityBreakdown=True)
     myModuleResults.addShape(myResult.getShape(), myShapeString)
+    myModuleResults.addShape(myResult.getShapeMCEWK(), myShapeString+"_MCEWK")
+    myModuleResults.addShape(myResult.getShapePurity(), myShapeString+"_Purity")
     myModuleResults.addDataDrivenControlPlots(myResult.getControlPlots(),myResult.getControlPlotLabels())
     myOutputCreator.addModule(myModuleResults)
     # Up variation of QCD normalization (i.e. ctrl->signal region transition)
     myQCDNormalizationSystUpResults.addShape(myResult.getRegionSystUp(), myShapeString)
-    myQCDNormalizationSystUpResults.addDataDrivenControlPlots(myResult.getRegionSystUpCtrlPlots(),myResult.getControlPlotLabels())
+    myQCDNormalizationSystUpResults.addDataDrivenControlPlots(myResult.getRegionSystUpCtrlPlots(),myResult.getControlPlotLabelsForQCDSyst())
     myOutputCreator.addModule(myQCDNormalizationSystUpResults)
     # Down variation of QCD normalization (i.e. ctrl->signal region transition)
     myQCDNormalizationSystDownResults.addShape(myResult.getRegionSystDown(), myShapeString)
-    myQCDNormalizationSystDownResults.addDataDrivenControlPlots(myResult.getRegionSystDownCtrlPlots(),myResult.getControlPlotLabels())
+    myQCDNormalizationSystDownResults.addDataDrivenControlPlots(myResult.getRegionSystDownCtrlPlots(),myResult.getControlPlotLabelsForQCDSyst())
     myOutputCreator.addModule(myQCDNormalizationSystDownResults)
     myResult.delete()
     dsetMgr.close()
+    dsetMgrCreator.close()
+    ROOT.gROOT.CloseFiles()
+    ROOT.gROOT.GetListOfCanvases().Delete()
+
 
 def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString):
     myModuleInfoString = "%s_%s_%s_%s"%(era, searchMode, optimizationMode,syst)
@@ -98,11 +104,17 @@ def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,m
     elif massType == "invmass":
         mySystResult = QCDFactorisedResultManager(myFullMassSpecs,systDsetMgr,myLuminosity,myModuleInfoString,shapeOnly=False)
     mySystModuleResults.addShape(mySystResult.getShape(), myShapeString)
+    mySystModuleResults.addShape(mySystResult.getShapeMCEWK(), myShapeString+"_MCEWK")
+    mySystModuleResults.addShape(mySystResult.getShapePurity(), myShapeString+"_Purity")
     mySystModuleResults.addDataDrivenControlPlots(mySystResult.getControlPlots(),mySystResult.getControlPlotLabels())
     mySystResult.delete()
     ## Save module info
     myOutputCreator.addModule(mySystModuleResults)
     systDsetMgr.close()
+    dsetMgrCreator.close()
+    ROOT.gROOT.CloseFiles()
+    ROOT.gROOT.GetListOfCanvases().Delete()
+
 
 def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
     myLocalDelta = time.time() - localStart

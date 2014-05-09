@@ -1,21 +1,9 @@
-#ifndef GENPARTICLEMOTHERTOOLS_CC
-#define GENPARTICLEMOTHERTOOLS_CC
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "Math/GenVector/VectorUtil.h"
-#include "TH1F.h"
-#include "TLorentzVector.h"
-#include "TVector3.h"
-#include <limits>
-
-
-
+namespace HPlus {
    std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate& p){ 
 	std::vector<const reco::GenParticle*> mothers;
 	for (size_t im=0; im < p.numberOfMothers(); ++im){
@@ -83,10 +71,17 @@
       std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p){ 
 	std::vector<const reco::GenParticle*> daughters;
 	for (size_t im=0; im < p.numberOfDaughters(); ++im){
-	  const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.daughter(im));
+          const reco::Candidate *d = p.daughter(im);
+          // if the parentage information is screwed up for some
+          // reason such that p is its own daughter, skip the daughter
+          // to prevent infinite loop
+          if(d == &p)
+            continue;
+
+	  const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(d);
 	  if (dparticle) {
 	    daughters.push_back(dparticle);
-	    std::vector<const reco::GenParticle*> ddaughters = getDaughters( * (dynamic_cast<const reco::Candidate*> (dparticle)) );
+	    std::vector<const reco::GenParticle*> ddaughters = getDaughters( *dparticle );
 	    daughters.insert(daughters.end(), ddaughters.begin(), ddaughters.end()); 
 	  }
 	}
@@ -125,4 +120,4 @@
 	}
 	std::cout << std::endl;
       }  
-#endif
+}

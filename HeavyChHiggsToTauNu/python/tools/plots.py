@@ -363,10 +363,11 @@ _plotStyles = {
     "Diboson":               styles.dibStyle,
 
     # Ratio stuff
-    "Ratio":                   styles.dataStyle,
+    "Ratio":                   styles.ratioStyle,
     "BackgroundStatError":     styles.errorRatioStatStyle,
     "BackgroundSystError":     styles.errorRatioSystStyle,
     "BackgroundStatSystError": styles.errorRatioSystStyle,
+    "RatioLine":               styles.ratioLineStyle,
 }
 # Other
 _plotStyles["Embedding"] = _plotStyles["TTJets"].clone()
@@ -652,11 +653,11 @@ def _createRatioErrorPropagation(histo1, histo2, ytitle, returnHisto=False):
                                         array.array("d", yerrs), array.array("d", yerrs))
         else:
             gr = ROOT.TGraphAsymmErrors()
-        _plotStyles["Ratio"].apply(ratio)
+        _plotStyles["Ratio"].apply(gr)
         gr.GetYaxis().SetTitle(ytitle)
 
         if returnHisto:
-            return [_createHisto(ratio, drawStyle="EPZ", legendLabel=None)]
+            return [_createHisto(gr, drawStyle="EPZ", legendLabel=None)]
         else:
             return gr
     elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
@@ -842,7 +843,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
                 continue
 
             # histo2 is missing an item
-            if xval1 < xval2:
+            if xval1 is not None and xval1 < xval2:
                 i1 += 1
                 continue
 
@@ -874,7 +875,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         else:
             ratio = ROOT.TGraphAsymmErrors()
         if len(xvalues2) > 0:
-            ratioErr = ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues2), array.array("d", [1]*len(xvalues2)),
+            ratioErr = ROOT.TGraphAsymmErrors(len(xvalues2), array.array("d", xvalues2), array.array("d", [1]*len(xvalues2)),
                                          histo1.GetEXlow(), histo1.GetEXhigh(),
                                          array.array("d", yerrs2low), array.array("d", yerrs2high))
         else:
@@ -907,34 +908,42 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         # Then add scaled stat+syst uncertainty
 
         # Get new TGraphAsymmErrors for stat+syst, then scale it
-        ratioSyst = histo2.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
+        ratioSyst1 = histo1.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
+        ratioSyst2 = histo2.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
         removes = []
-        for i in xrange(0, ratioSyst.GetN()):
-            yval = ratioSyst.GetY()[i]
+        for i in xrange(0, ratioSyst2.GetN()):
+            yval = ratioSyst2.GetY()[i]
             if yval == 0.0:
                 removes.append(i)
                 continue
-            ratioSyst.SetPoint(i, ratioSyst.GetX()[i], 1)
-            ratioSyst.SetPointEYhigh(i, ratioSyst.GetErrorYhigh(i)/yval)
-            ratioSyst.SetPointEYlow(i, ratioSyst.GetErrorYlow(i)/yval)
-#            print i, ratioSyst.GetX()[i], ratioSyst.GetErrorXlow(i), ratioSyst.GetErrorXhigh(i), yval, ratioSyst.GetY()[i], ratioSyst.GetErrorYhigh(i), ratioSyst.GetErrorYlow(i)
+            ratioSyst1.SetPoint(i, ratioSyst1.GetX()[i], ratioSyst1.GetY()[i]/yval)
+            ratioSyst1.SetPointEYhigh(i, ratioSyst1.GetErrorYhigh(i)/yval)
+            ratioSyst1.SetPointEYlow(i, ratioSyst1.GetErrorYlow(i)/yval)
+            ratioSyst1.SetPointEXhigh(i, 0)
+            ratioSyst1.SetPointEXlow(i, 0)
+            ratioSyst2.SetPoint(i, ratioSyst2.GetX()[i], 1)
+            ratioSyst2.SetPointEYhigh(i, ratioSyst2.GetErrorYhigh(i)/yval)
+            ratioSyst2.SetPointEYlow(i, ratioSyst2.GetErrorYlow(i)/yval)
+#            print i, ratioSyst2.GetX()[i], ratioSyst2.GetErrorXlow(i), ratioSyst2.GetErrorXhigh(i), yval, ratioSyst2.GetY()[i], ratioSyst2.GetErrorYhigh(i), ratioSyst2.GetErrorYlow(i)
         removes.reverse()
         for i in removes:
-            ratioSyst.RemovePoint(i)        
+            ratioSyst1.RemovePoint(i)
+            ratioSyst2.RemovePoint(i)
 
-        ratioSyst.GetYaxis().SetTitle(ytitle)
+        ratioSyst2.GetYaxis().SetTitle(ytitle)
         name = "BackgroundStatSystError"
-        ratioSyst.SetName(name)
+        ratioSyst2.SetName(name)
         if not histograms.uncertaintyMode.addStatToSyst():
             name = "BackgroundSystError"
-        _plotStyles[name].apply(ratioSyst)
+        _plotStyles[name].apply(ratioSyst2)
 
-        ret.append(_createHisto(ratioSyst, drawStyle="2", legendLabel=_legendLabels[name], legendStyle="F"))
+        ret.append(_createHisto(ratioSyst1, drawStyle="[]", legendLabel=None))
+        ret.append(_createHisto(ratioSyst2, drawStyle="2", legendLabel=_legendLabels[name], legendStyle="F"))
         if addAlsoHatchedUncertaintyHisto:
-            ratioSyst2 = ratioSyst.Clone("BackgroundStatSystError2")
-            styles.errorStyle.apply(ratioSyst2)
-            ratioSyst2.SetFillStyle(3354)
-            ret.append(_createHisto(ratioSyst2, drawStyle="2", legendLabel=None))
+            ratioSyst2_2 = ratioSyst.Clone("BackgroundStatSystError2")
+            styles.errorStyle.apply(ratioSyst2_2)
+            ratioSyst2_2.SetFillStyle(3354)
+            ret.append(_createHisto(ratioSyst2_2, drawStyle="2", legendLabel=None))
         return ret
     else:
         raise Exception("Arguments are of unsupported type, histo1 is %s and histo2 is %s" % (histo1.__class__.__name__, histo2.__class__.__name__))
@@ -955,10 +964,7 @@ def _divideOrZero(numerator, denominator):
 # First use case: 1-line for ratio plots
 def _createRatioLine(xmin, xmax, yvalue=1.0):
     line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [yvalue, yvalue]))
-#    line.SetLineColor(ROOT.kBlack)
-    line.SetLineColor(ROOT.kRed)
-    line.SetLineWidth(2)
-    line.SetLineStyle(3)
+    _plotStyles["RatioLine"].apply(line)
     return line
 
 ## Creates a cover pad
@@ -1317,7 +1323,15 @@ class PlotBase:
         if isinstance(energy, basestring):
             self.energies = [energy]
         else:
-            self.energies = energy
+            if len(energy) == 1:
+                self.energies = energy[:]
+            else:
+                tmp = {}
+                for e in energy:
+                    tmp[e] = 1
+                self.energies = tmp.keys()
+                self.energies.sort()
+
 
     ## Add text for centre-of-mass energy
     #
@@ -1557,13 +1571,16 @@ class PlotRatioBase:
                     if isinstance(numer, histograms.Histo):
                         aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
                         h.setName(numer.getName())
+                    elif isinstance(numer, dataset.RootHistoWithUncertainties):
+                        aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
+                        h.setName(numer.GetName())
                     else:
                         aux.copyStyle(numer, h.getRootHisto())
                         h.setName(numer.GetName())
                         h = _createHisto(h)
                     tmp.append(h)
-            if len(tmp) > 1:
-                raise Exception("This shouldn't happen")
+            #if len(tmp) > 1:
+                #raise Exception("This shouldn't happen")
             self.extendRatios(tmp)
 
         if statError is not None:
@@ -1584,6 +1601,12 @@ class PlotRatioBase:
         self.cf.frame2.GetYaxis().SetNdivisions(505)
         self.coverPadOpts = coverPadOpts
 
+    ## Add label for blinded range
+    #
+    # \param blindingRangeString   String containing the range for the blinding
+    def addBlindingRangeString(self, blindingRangeString):
+        self.blindingRangeString = blindingRangeString
+
     ## Draw the ratio histograms to the ratio pad
     def _draw(self):
         if len(self.ratioHistoMgr) == 0:
@@ -1591,22 +1614,26 @@ class PlotRatioBase:
 
         self.cf.canvas.cd(2)
 
-        for obj, option in self.ratioPlotObjectsBefore:
-            obj.Draw(option+"same")
-
+        # Draw first stat+syst errors going to background
         until = None
         for n in ["BackgroundStatSystError", "BackgroundStatError"]:
             if self.ratioHistoMgr.hasHisto(n):
                 until = n
-
         index = self.ratioHistoMgr.draw(untilName=until)
 
+        # Then prepended plot objects
+        for obj, option in self.ratioPlotObjectsBefore:
+            obj.Draw(option+"same")
+
+        # Then ratio line
         self.ratioLine = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
         self.ratioLine.Draw("L")
 
+        # Then actual plot content
         if index is not None:
             self.ratioHistoMgr.draw(fromIndex=index+1)
 
+        # And finally the appended plot objects
         for obj, option in self.ratioPlotObjectsAfter:
             obj.Draw(option+"same")
 
@@ -1614,6 +1641,10 @@ class PlotRatioBase:
             if hasattr(self, "ratioLegendHeader"):
                 self.ratioLegend.SetHeader(self.ratioLegendHeader)
             self.ratioLegend.Draw()
+
+        # Add label for blinded range
+        if hasattr(self, "blindingRangeString"):
+            histograms.addText(0.55, 0.33, "Data blinded: %s"%self.blindingRangeString, align="center", bold=True)
 
         # Redraw the axes in order to get the tick marks on top of the
         # histogram
@@ -2055,7 +2086,7 @@ class ComparisonPlot(PlotBase, PlotRatioBase):
             PlotBase.createFrame(self, filename, **kwargs)
         else:
             histos = self.histoMgr.getHistos()
-            self._createFrameRatio(filename, histos[0].getRootHisto(), histos[1].getRootHisto(), "Ratio",
+            self._createFrameRatio(filename, histos[0].getRootHistoWithUncertainties(), histos[1].getRootHistoWithUncertainties(), "Ratio",
                                    invertRatio=invertRatio, coverPadOpts=coverPadOpts, **kwargs)
 
     ## Add cut box and/or line
@@ -2109,7 +2140,7 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
         else:
             histos = filter(lambda h: h.getName() != self.referenceName, self.histoMgr.getHistos())
             reference = self.histoMgr.getHisto(self.referenceName)
-            self._createFrameRatioMany(filename, [h.getRootHisto() for h in histos], reference.getRootHisto(),
+            self._createFrameRatioMany(filename, [h.getRootHistoWithUncertainties() for h in histos], reference.getRootHistoWithUncertainties(),
                                        invertRatio=invertRatio, coverPadOpts={}, **kwargs)
 
     ## Add cut box and/or line
@@ -2250,6 +2281,7 @@ class PlotDrawer:
                  addLuminosityText=False,
                  stackMCHistograms=False,
                  addMCUncertainty=False,
+                 blindingRangeString=None,
                  cmsText=None,
                  ):
         self.xlabelDefault = xlabel
@@ -2285,6 +2317,7 @@ class PlotDrawer:
         self.addLuminosityTextDefault = addLuminosityText
         self.stackMCHistogramsDefault = stackMCHistograms
         self.addMCUncertaintyDefault = addMCUncertainty
+        self.blindingRangeStringDefault = None
         self.cmsTextDefault = cmsText
 
     ## Modify the defaults
@@ -2318,7 +2351,7 @@ class PlotDrawer:
         except KeyError:
             pass
         try:
-            ret = _update(ret, args[attr+attrPostfix])
+            ret = _update(ret, args[attr])
         except KeyError:
             pass
 
@@ -2691,7 +2724,12 @@ class PlotDrawer:
         customize = self._getValue("customizeBeforeDraw", p, kwargs)
         if customize != None:
             customize(p)
-        
+
+        # Add string for blinded range into the ratio plot
+        blindingRangeString = self._getValue("blindingRangeString", p, kwargs)
+        if blindingRangeString != None and isinstance(p, PlotRatioBase):
+            p.addBlindingRangeString(blindingRangeString)
+
         p.draw()
 
         # Updates the possible Z axis label styles
@@ -2706,6 +2744,7 @@ class PlotDrawer:
         p.addEnergyText()
         if self._getValue("addLuminosityText", p, kwargs):
             p.addLuminosityText()
+
 
         customize2 = self._getValue("customizeBeforeSave", p, kwargs)
         if customize2 is not None:

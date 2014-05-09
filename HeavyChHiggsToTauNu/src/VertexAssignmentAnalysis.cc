@@ -16,7 +16,7 @@
 namespace HPlus {
   VertexAssignmentAnalysis::VertexAssignmentAnalysis(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
-    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), histoWrapper, "VertexAssignment"),
+    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), histoWrapper, "VertexAssignment"),
     fAllEventsWithGenuineTaus(eventCounter.addSubCounter("VtxAssignment","genuine tau/all events")),
     fGenuineTausWithCorrectPV(eventCounter.addSubCounter("VtxAssignment","genuine tau/passed events")),
     fAllEventsWithFakeTaus(eventCounter.addSubCounter("VtxAssignment","fake tau/all events")),

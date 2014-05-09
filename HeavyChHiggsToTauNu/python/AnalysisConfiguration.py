@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+import time
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions as HChOptions
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
@@ -10,6 +12,14 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisati
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.pileupReweightedAllEvents import PileupWeightType
 
 tooManyAnalyzersLimit = 100
+
+class Timer:
+    def __init__(self):
+        self._start = time.time()
+
+    def stop(self, message):
+        stop = time.time()
+        print message, "%.0f s" % (stop-self._start)
 
 ## Infrastucture to help analysis configuration building
 #
@@ -57,11 +67,11 @@ class ConfigBuilder:
                  doPrescalesForData = False, # Keep / Ignore prescaling for data (suppresses greatly error messages in datasets with or-function of triggers)
                  doFillTree = False, # Tree filling
                  histogramAmbientLevel = "Debug", # Set level of how many histograms are stored to files options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms),
-                 histogramAmbientLevelOptimization = "Vital",
+                 histogramAmbientLevelOptimization = "Systematics", #"Vital",
                  histogramAmbientLevelSystematics = "Systematics",
                  applyTauTriggerScaleFactor = True, # Apply tau trigger scale factor or not
                  applyTauTriggerLowPurityScaleFactor = False, # Apply tau trigger scale factor or not
-                 applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
+                 applyMETTriggerScaleFactor = True, # Apply MET trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  applyTopPtReweight = True, # Apply Top Pt reweighting on TTJets sample
                  topPtReweightScheme = None, # None for default, see TopPtWeight_cfi.py for allowed values
@@ -72,12 +82,12 @@ class ConfigBuilder:
                  useJERSmearedJets = True,
                  customizeLightAnalysis = None,
                  customizeHeavyAnalysis = None,
-
                  doLightAnalysis = True,
                  doHeavyAnalysis = False,
-
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
+                 doTauIDandMisIDSystematicsAsShapes = False, # If systematic variations are produced, variations are produced also for misidentified tau systematics
+                 doAsymmetricTriggerUncertainties = True, # If true, will vary the efficiency uncertainties instead of the scale factor uncertainty
                  doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
@@ -127,6 +137,8 @@ class ConfigBuilder:
 
         self.pickEvents = pickEvents
         self.doSystematics = doSystematics
+        self.doTauIDandMisIDSystematicsAsShapes = doTauIDandMisIDSystematicsAsShapes
+        self.doAsymmetricTriggerUncertainties = doAsymmetricTriggerUncertainties
         self.doJESVariation = doJESVariation
         self.doPUWeightVariation = doPUWeightVariation
         self.doTopPtWeightVariation = doTopPtWeightVariation
@@ -144,8 +156,8 @@ class ConfigBuilder:
         if self.options.wjetsWeighting != 0:
             if not self.dataVersion.isMC():
                 raise Exception("Command line option 'wjetsWeighting' works only with MC")
-            if self.options.tauEmbeddingInput != 0:
-                raise Exception("There are no WJets weights for embedding yet")
+#            if self.options.tauEmbeddingInput != 0:
+#                raise Exception("There are no WJets weights for embedding yet")
 
         if self.applyTopPtReweight and not self.applyPUReweight:
             raise Exception("When applyTopPtReweight=True, also applyPUReweight must be True (you had it False)")
@@ -322,7 +334,15 @@ class ConfigBuilder:
                 for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
                     if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
-                        param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
+                        param.setTauTriggerEfficiencyForEra(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
+                    if self.applyMETTriggerScaleFactor:
+                        print "########################################"
+                        print "#"
+                        print "# MET trigger efficiency/scale factor is from the whole Run2011AB for the moment (dataEra was %s)." % dataEra
+                        print "# This is suitable only for preliminary testing."
+                        print "#"
+                        print "########################################"
+                        param.setMetTriggerEfficiencyForEra(self.dataVersion, era="Run2011AB", pset=mod.metTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         mod.configInfo.pileupReweightType = PileupWeightType.toString[PileupWeightType.NOMINAL]
@@ -345,12 +365,6 @@ class ConfigBuilder:
 
         analysisModules = analysisLightModules+analysisHeavyModules
         analysisNames = analysisLightNames+analysisHeavyNames
-
-        analysisNamesForSystematics = []
-        # For optimisation, no systematics
-        # For embedding input, the systematics should be evaluated with the analyzer with Muon eff, Tau trigger eff, CaloMET>60 (this is added to analysisNamesForSystematics later)
-        if not self.doOptimisation and self.options.tauEmbeddingInput == 0:
-            analysisNamesForSystematics = analysisNames[:]
 
         for module in analysisModules:
             module.Tree.fill = self.doFillTree
@@ -394,6 +408,14 @@ class ConfigBuilder:
         # Print output
         self._printModule(analysisModules[0])
 
+        (analysisModules, analysisNames) = self._setupTauEmbeddingAnalyses(process, analysisModules, analysisNames)
+
+        analysisNamesForSystematics = []
+        # For optimisation, the modules for systematics are added to
+        # analysisNamesForSystematics later
+        if not self.doOptimisation:
+            analysisNamesForSystematics = analysisNames[:]
+
         # Construct normal path
         analysisNamesForTailKillerScenarios = analysisNames
         if not self.doOptimisation:
@@ -428,6 +450,7 @@ class ConfigBuilder:
             except AttributeError:
                 raise Exception("Module HiggsAnalysis.HeavyChHiggsToTauNu.optimisation."+self.optimisationScheme+" does not have an object 'optimisation'")
 
+            timer = Timer()
             analysisNamesForTailKillerScenarios = []
             for module, name in zip(analysisModules, analysisNames):
                 names = optimisationScheme.generateVariations(process, additionalCounters, process.commonSequence, module, name)
@@ -435,6 +458,7 @@ class ConfigBuilder:
                 #analysisNamesForTailKillerScenarios = names
                 analysisNamesForTailKillerScenarios.extend(names)
                 analysisNamesForSystematics.extend(names)
+            timer.stop("Added optimisation modules in")
 
         # QCD tail killer scenarios (do them also for optimisation variations)
         qcdTailKillerNames = self._buildQCDTailKillerScenarios(process, analysisNamesForTailKillerScenarios)
@@ -452,11 +476,9 @@ class ConfigBuilder:
         # Tau embedding-like preselection for normal MC
         analysisNamesForSystematics.extend(self._buildTauEmbeddingLikePreselection(process, analysisModules, analysisNames, additionalCounters))
 
-        # Additional analyses for tau embedding input (with caloMET>60 and tau-efficiency)
-        analysisNamesForSystematics.extend(self._additionalTauEmbeddingAnalyses(process, analysisModules, analysisNames))
-
         ## Systematics
         #if "QCDMeasurement" not in analysisNames_: # Need also for QCD measurements, since they contain MC EWK
+        self._buildTauIDandMisIdVariation(process, analysisNamesForSystematics, param)
         self._buildJESVariation(process, analysisNamesForSystematics)
         self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
         self._buildTopPtWeightVariation(process, analysisNamesForSystematics)
@@ -464,6 +486,16 @@ class ConfigBuilder:
         #handle SF uncertainties by error propagation after all
         # Re-enabled for test
         self._buildScaleFactorVariation(process, analysisNamesForSystematics)
+
+        def runSetter(func):
+            for name in self.getAnalyzerModuleNames():
+                func(getattr(process, name), name)
+        # Set trigger efficiencies
+        runSetter(lambda module, name: param.setTriggerEfficiencyScaleFactorBasedOnTau(module.tauTriggerEfficiencyScaleFactor, module.tauSelection, name))
+        # Set fake tau SF
+        runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
+        # Set PU ID src for modules
+        runSetter(lambda module, name: param.setJetPUIdSrc(module.jetSelection, name))
 
         # Optional output
         if self.edmOutput:
@@ -479,10 +511,6 @@ class ConfigBuilder:
                 )
             )
             process.outpath = cms.EndPath(process.out)
-
-        # Set PU ID src for modules
-        for name in self.getAnalyzerModuleNames():
-            param.setJetPUIdSrc(getattr(process, name).jetSelection, name)
 
         # Check number of analyzers
         self._checkNumberOfAnalyzers()
@@ -617,9 +645,12 @@ class ConfigBuilder:
     def _customizeTauEmbeddingInput(self, process, param):
         ret = []
         if self.options.tauEmbeddingInput != 0:
+            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.WTauMuWeight_cfi")
+            process.commonSequence += process.wtaumuWeight
+
             #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
             tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, self.options, self.dataVersion)
-            tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, self.options, self.dataVersion)
+            tauEmbeddingCustomisations.customiseParamForTauEmbedding(process, param, self.options, self.dataVersion)
             if self.tauEmbeddingFinalizeMuonSelection:
                 # applyIsolation = not doTauEmbeddingMuonSelectionScan
                 applyIsolation = False
@@ -681,6 +712,7 @@ class ConfigBuilder:
         if not self.doQCDTailKillerScenarios:
             return []
 
+        timer = Timer()
         import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
         names = []
         modules = []
@@ -694,6 +726,7 @@ class ConfigBuilder:
                 mod.QCDTailKiller = obj.clone()
                 mod.QCDTailKiller.disableCollinearCuts = module.QCDTailKiller.disableCollinearCuts
                 createQCDTailKillerModule(process, "QCDTailKiller%s"%mod.QCDTailKiller.scenarioLabel.value(), mod, names, modules)
+        timer.stop("Added QCD tail killer scenarios in")
         self._accumulateAnalyzers("Modules for QCDTailKiller scenarios", names)
 
         return names
@@ -841,7 +874,13 @@ class ConfigBuilder:
             raise Exception("doTauEmbeddingLikePreselection is meaningless for data")
         if self.options.tauEmbeddingInput != 0:
             raise Exception("tauEmbegginInput clashes with doTauEmbeddingLikePreselection")
-        
+
+        def makeName(name, postfix):
+            for n in ["Light", "Heavy"]:
+                if n in name:
+                    return name.replace(n, postfix+n)
+            raise Exception("Analysis name '%s' broke assumptions on naming convention")
+
         allNames = []
         def add(name, sequence, module, counters):
             module.eventCounter.counters = [cms.InputTag(c) for c in counters]
@@ -851,37 +890,50 @@ class ConfigBuilder:
             path = cms.Path(sequence * module)
             setattr(process, name+"Path", path)
 
-        retNames = []
+        maxGenTaus = None # not set
+        maxGenTaus = 1 # events with exactly one genuine tau in acceptance
 
+        retNames = []
         for module, name in zip(analysisModules, analysisNames):
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), no tau+MET trigger required
             seq = cms.Sequence(process.commonSequence)
             mod = module.clone()
             counters = additionalCounters[:]
-            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikePreselection"))
-            add(name+"TauEmbeddingLikePreselection", seq, mod, counters)
+            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikePreselection", maxGenTaus=maxGenTaus, pileupWeight=mod.pileupWeightReader.weightSrc.value()))
+            add(makeName(name, "TauEmbeddingLikePreselection"), seq, mod, counters)
 
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), tau+MET trigger required
             seq = cms.Sequence(process.commonSequence)
             mod = module.clone()
             counters = additionalCounters[:]
-            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikeTriggeredPreselection", disableTrigger=False))
-            add(name+"TauEmbeddingLikeTriggeredPreselection", seq, mod, counters)
+            counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikeTriggeredPreselection", maxGenTaus=maxGenTaus, pileupWeight=mod.pileupWeightReader.weightSrc.value(), disableTrigger=False))
+            add(makeName(name, "TauEmbeddingLikeTriggeredPreselection"), seq, mod, counters)
             
             # Genuine tau preselection
             seq = cms.Sequence(process.commonSequence)
             mod = module.clone()
             counters = additionalCounters[:]
-            counters.extend(tauEmbeddingCustomisations.addGenuineTauPreselection(process, seq, mod, prefix=name+"GenuineTauPreselection"))
-            add(name+"GenuineTauPreselection", seq, mod, counters)
+            counters.extend(tauEmbeddingCustomisations.addGenuineTauPreselection(process, seq, mod, prefix=name+"GenuineTauPreselection", maxGenTaus=maxGenTaus, pileupWeight=mod.pileupWeightReader.weightSrc.value()))
+            add(makeName(name, "GenuineTauPreselection"), seq, mod, counters)
 
             # Require genuine tau after tau ID in analysis
             mod = module.clone()
-            module.onlyGenuineTaus = cms.untracked.bool(True)
-            setattr(process, name+"GenuineTau", mod)
-            path = cms.Path(process.commonSequence * mod)
-            setattr(process, name+"GenuineTauPath", path)
-            retNames.append(name+"GenuineTau")
+            mod.trigger.selectionType = "disabled"
+            mod.onlyEmbeddingGenuineTaus = cms.untracked.bool(True)
+            modName = makeName(name, "GenuineTau")
+            add(modName, process.commonSequence, mod, additionalCounters)
+
+            mod2 = mod.clone()
+            mod2.trigger.caloMetSelection.metEmulationCut = 60
+            modName = makeName(name, "GenuineTauCaloMet60")
+            add(modName, process.commonSequence, mod2, additionalCounters)
+
+            mod = mod.clone()
+            mod.trigger.selectionType = module.trigger.selectionType
+            modName = makeName(name, "GenuineTauTriggered")
+            add(modName, process.commonSequence, mod, additionalCounters)
+            retNames.append(modName)
+
         self._accumulateAnalyzers("Tau embedding -like preselection", allNames)
         return retNames
 
@@ -890,9 +942,9 @@ class ConfigBuilder:
     # \param process          cms.Process object
     # \param analysisModules  List of analysis modules to be used as prototypes
     # \param analysisNames    List of analysis module names
-    def _additionalTauEmbeddingAnalyses(self, process, analysisModules, analysisNames):
+    def _setupTauEmbeddingAnalyses(self, process, analysisModules, analysisNames):
         if self.options.tauEmbeddingInput == 0:
-            return []
+            return (analysisModules, analysisNames)
 
         def makeName(name, postfix):
             for n in ["Light", "Heavy"]:
@@ -900,51 +952,96 @@ class ConfigBuilder:
                     return name.replace(n, postfix+n)
             raise Exception("Analysis name '%s' broke assumptions on naming convention")
 
+        def disablePrintCounter(mod):
+            if hasattr(mod.eventCounter, "printMainCounter"):
+                mod.eventCounter.printMainCounter = False
+        def enablePrintCounter(mod):
+            if hasattr(mod.eventCounter, "printMainCounter"):
+                mod.eventCounter.printMainCounter = True
+        def setLevelToVital(mod):
+            if mod.histogramAmbientLevel != "Systematics":
+                mod.histogramAmbientLevel = "Vital"
+        def setLevelToInformative(mod):
+            if mod.histogramAmbientLevel != "Debug":
+                mod.histogramAmbientLevel = "Informative"
 
-        allNames = []
+
+#        disableIntermediateAnalyzers = (self.doQCDTailKillerScenarios or self.doOptimisation)
+        disableIntermediateAnalyzers = self.doOptimisation
+#        disableIntermediateAnalyzers = False
+
+        useCaloMet = not self.applyMETTriggerScaleFactor
+
+        additionalNames = []
         retNames = []
+        retModules = []
+        def addIntermediateAnalyzer(module, name, postfix):
+            if disableIntermediateAnalyzers:
+                return
+            modName = name
+            if postfix is not None:
+                modName = makeName(name, postfix)
+            path = cms.Path(process.commonSequence * module)
+            setattr(process, modName, module)
+            setattr(process, modName+"Path", path)
+            additionalNames.append(modName)
+
         for module, name in zip(analysisModules, analysisNames):
+            disablePrintCounter(module)
+            addIntermediateAnalyzer(module, name, None)
+
             postfix = "MIdEff"
             mod = module.clone()
-            mod.histogramAmbientLevel = "Vital"
+            setLevelToVital(mod)
             mod.embeddingMuonIdEfficiency.mode = "dataEfficiency"
             mod.embeddingMuonIdEfficiency.muonSrc = mod.Tree.tauEmbedding.muons.src.value()
-            path = cms.Path(process.commonSequence * mod)
-            modName = makeName(name, postfix)
-            setattr(process, modName, mod)
-            setattr(process, modName+"Path", path)
-            allNames.append(modName)
+            addIntermediateAnalyzer(mod, name, postfix)
 
             postfix += "TrgEff"
+            mod = mod.clone()
             mod.embeddingMuonTriggerEfficiency.mode = "dataEfficiency"
             mod.embeddingMuonTriggerEfficiency.muonSrc = mod.embeddingMuonIdEfficiency.muonSrc.value()
-            path = cms.Path(process.commonSequence * mod)
-            modName = makeName(name, postfix)
-            setattr(process, modName, mod)
-            setattr(process, modName+"Path", path)
-            allNames.append(modName)
+            addIntermediateAnalyzer(mod, name, postfix)
 
-            postfix += "CaloMet60"
+            postfix += "WTauMu"
             mod = mod.clone()
-            mod.trigger.caloMetSelection.metEmulationCut = 60.0
-            path = cms.Path(process.commonSequence * mod)
-            modName = makeName(name, postfix)
-            setattr(process, modName, mod)
-            setattr(process, modName+"Path", path)
-            allNames.append(modName)
+            mod.embeddingWTauMuWeightReader.enabled = True
+            setLevelToInformative(mod)
+            addIntermediateAnalyzer(mod, name, postfix)
 
+            # already here for met-leg efficiency
             postfix += "TEff"
             mod = mod.clone()
-            mod.histogramAmbientLevel = self.histogramAmbientLevel
             mod.tauTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
+            setLevelToInformative(mod)
+            addIntermediateAnalyzer(mod, name, postfix)
+
+            if useCaloMet:
+                postfix += "CaloMet60"
+                mod = mod.clone()
+                mod.trigger.caloMetSelection.metEmulationCut = 60.0
+
+                mod2 = mod.clone()
+                mod2.tauTriggerEfficiencyScaleFactor.mode = module.tauTriggerEfficiencyScaleFactor.mode
+                setLevelToInformative(mod2)
+                addIntermediateAnalyzer(mod2, name, postfix.replace("TEff", ""))
+            else:
+                postfix += "MetEff"
+                mod = mod.clone()
+                mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
+            enablePrintCounter(mod)
+            mod.histogramAmbientLevel = self.histogramAmbientLevel
             path = cms.Path(process.commonSequence * mod)
             modName = makeName(name, postfix)
-            setattr(process, modName, mod)
-            setattr(process, modName+"Path", path)
-            allNames.append(modName)
+#            setattr(process, modName, mod)
+#            setattr(process, modName+"Path", path)
             retNames.append(modName)
-        self._accumulateAnalyzers("Tau embedding analyses", allNames)
-        return retNames
+            retModules.append(mod)
+
+
+        if len(additionalNames) > 0:
+            self._accumulateAnalyzers("Tau embedding intermediate analyses", additionalNames)
+        return (retModules, retNames)
 
     def _cloneForVariation(self, module):
         mod = module.clone()
@@ -954,6 +1051,55 @@ class ConfigBuilder:
         mod.eventCounter.printMainCounter = cms.untracked.bool(False)
         mod.histogramAmbientLevel = self.histogramAmbientLevelSystematics
         return mod
+
+    ## Build tau ID and mis-ID variation
+    #
+    # \param process                      cms.Process object
+    # \param analysisNamesForSystematics  Names of the analysis modules for which the JES variation should be done
+    # \param param     HChSignalAnalysisParameters_cff module object
+    def _buildTauIDandMisIdVariation(self, process, analysisNamesForSystematics, param):
+        #if not (self.doTauIDandMisIDSystematicsAsShapes or self.doSystematics):
+        if not (self.doTauIDandMisIDSystematicsAsShapes): # FIXME: for now, do not run as part of systematics unless explicitly asked
+            return
+        if self.dataVersion.isMC():
+            timer = Timer()
+            for name in analysisNamesForSystematics:
+                self._addTauIDandMisIdVariation(process, name)
+            timer.stop("Added tau ID and mis-ID variation for %d modules in"%len(analysisNamesForSystematics))
+        else:
+            print "Tau ID and mis-ID variation disabled for data (not meaningful for data)"
+
+    ## Add tau ID and mis-ID variation
+    #
+    # \param process                    cms.Process object
+    # \param name                       Name of the module to be used as a prototype
+    def _addTauIDandMisIdVariation(self, process, name):
+        def addVariation(directionName):
+            module = self._cloneForVariation(getattr(process, name))
+            # NOTE: The actual variation of the values is done in params.setFakeTauSFAndSystematics()
+            # which is called after the creation of the syst. variations based on the name of the module
+            return self._addVariationModule(process, module, name+self.systPrefix+directionName)
+
+        names = []
+        # Add genuine tau ID systematics
+        names.append(addVariation("GenuineTauPlus"))
+        names.append(addVariation("GenuineTauMinus"))
+        # Do not add fake tau mis-ID systematics for embedding
+        if self.options.tauEmbeddingInput == 0:
+            # Add e->tau systematics for barrel
+            names.append(addVariation("FakeTauBarrelElectronPlus"))
+            names.append(addVariation("FakeTauBarrelElectronMinus"))
+            # Add e->tau systematics for endcap
+            names.append(addVariation("FakeTauEndcapElectronPlus"))
+            names.append(addVariation("FakeTauEndcapElectronMinus"))
+            # Add e->tau systematics
+            names.append(addVariation("FakeTauMuonPlus"))
+            names.append(addVariation("FakeTauMuonMinus"))
+            # Add jet->tau systematics
+            names.append(addVariation("FakeTauJetPlus"))
+            names.append(addVariation("FakeTauJetMinus"))
+        # Accumulate
+        self._accumulateAnalyzers("Fake tau variation", names)
 
     ## Build JES variation
     #
@@ -968,9 +1114,10 @@ class ConfigBuilder:
             doJetUnclusteredVariation = False
 
         if self.dataVersion.isMC() or self.options.tauEmbeddingInput != 0:
+            timer = Timer()
             for name in analysisNamesForSystematics:
                 self._addJESVariation(process, name, doJetUnclusteredVariation)
-            print "Added JES variation for %d modules"%len(analysisNamesForSystematics)
+            timer.stop("Added JES variation for %d modules in"%len(analysisNamesForSystematics))
         else:
             print "JES variation disabled for data (not meaningful for data)"
 
@@ -1030,9 +1177,10 @@ class ConfigBuilder:
             return
 
         if self.dataVersion.isMC():
+            timer = Timer()
             for name in analysisNamesForSystematics:
                 self._addPUWeightVariation(process, name, param)
-            print "Added PU weight variation for %d modules"%len(analysisNamesForSystematics)
+            timer.stop("Added PU weight variation for %d modules in"%len(analysisNamesForSystematics))
         else:
             print "PU weight variation disabled for data (not meaningful for data)"
 
@@ -1087,9 +1235,10 @@ class ConfigBuilder:
             return
 
         if self.dataVersion.isMC():
+            timer = Timer()
             for name in analysisNamesForSystematics:
                 self._addTopPtWeightVariation(process, name)
-            print "Added Top pt weight variation for %d modules" % len(analysisNamesForSystematics)
+            timer.stop("Added Top pt weight variation for %d modules in" % len(analysisNamesForSystematics))
         else:
             print "PU weight variation disabled for data (not meaningful for data)"
 
@@ -1127,9 +1276,11 @@ class ConfigBuilder:
         if not (self.doScaleFactorVariation or self.doSystematics):
             return
 
-        if self.dataVersion.isMC():
+        if self.dataVersion.isMC() or self.options.tauEmbeddingInput != 0:
+            timer = Timer()
             for name in analysisNamesForSystematics:
                 self._addScaleFactorVariation(process, name)
+            timer.stop("Added scale factor variation for %d modules in" % len(analysisNamesForSystematics))
         else:
             print "SF variation disabled for data (not meaningful for data"
 
@@ -1138,68 +1289,62 @@ class ConfigBuilder:
     # \param process   cms.Process object
     # \param name      Name of the module to be used as a prototype
     def _addScaleFactorVariation(self, process, name):
-        #useAsymmetricUncertainties = True
-        useAsymmetricUncertainties = False
+        embeddingData = self.options.tauEmbeddingInput != 0 and self.dataVersion.isData()
+
+        def disablePrint(pset):
+            if hasattr(pset, "printScaleFactors"):
+                pset.printScaleFactors = False
+        def variationBy(pset, shiftBy):
+            setattr(pset, {
+                "scaleFactor": "variationSFShiftBy",
+                "dataEfficiency": "variationDataShiftBy",
+                "mcEfficiency": "variationMCShiftBy"}[pset.mode.value()],
+                    cms.double(shiftBy))
+        def addTrgSF(attr, shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = getattr(module, attr)
+            effSF.variationEnabled = True
+            effSF.useMaxUncertainty = True
+            variationBy(effSF, shiftBy)
+            disablePrint(effSF)
+            return self._addVariationModule(process, module, name+self.systPrefix+postfix)
+        def addTrgDataEff(attr, shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = getattr(module, attr)
+            effSF.variationEnabled = True
+            effSF.useMaxUncertainty = False
+            effSF.variationDataShiftBy = cms.double(shiftBy)
+            effSF.variationMCShiftBy = cms.double(0.0)
+            disablePrint(effSF)
+            return self._addVariationModule(process, module, name+self.systPrefix+postfix)
+        def addTrgMCEff(attr, shiftBy, postfix):
+            module = self._cloneForVariation(getattr(process, name))
+            effSF = getattr(module, attr)
+            effSF.variationEnabled = True
+            effSF.useMaxUncertainty = False
+            effSF.variationMCShiftBy = cms.double(shiftBy)
+            effSF.variationDataShiftBy = cms.double(0.0)
+            disablePrint(effSF)
+            return self._addVariationModule(process, module, name+self.systPrefix+postfix)
 
         def addTauTrgSF(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.tauTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = True
-            effSF.variationSFShiftBy = cms.double(shiftBy)
-            if hasattr(effSF, "printScaleFactors"):
-                effSF.printScaleFactors = False
-            return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgSF"+postfix)
+            return addTrgSF("tauTriggerEfficiencyScaleFactor", shiftBy, "TauTrgSF"+postfix)
         def addTauTrgDataEff(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.tauTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = False
-            effSF.variationDataShiftBy = cms.double(shiftBy)
-            effSF.variationMCShiftBy = cms.double(0.0)
-            if hasattr(effSF, "printScaleFactors"):
-                effSF.printScaleFactors = False
-            return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgDataEff"+postfix)
+            return addTrgDataEff("tauTriggerEfficiencyScaleFactor", shiftBy, "TauTrgDataEff"+postfix)
         def addTauTrgMCEff(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.tauTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = False
-            effSF.variationDataShiftBy = cms.double(0.0)
-            effSF.variationMCShiftBy = cms.double(shiftBy)
-            if hasattr(effSF, "printScaleFactors"):
-                effSF.printScaleFactors = False
-            return self._addVariationModule(process, module, name+self.systPrefix+"TauTrgMCEff"+postfix)
+            return addTrgMCEff("tauTriggerEfficiencyScaleFactor", shiftBy, "TauTrgMCEff"+postfix)
 
         def addMETTrgSF(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.metTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = True
-            effSF.variationSFShiftBy = cms.double(shiftBy)
-            if hasattr(effSF, "printScaleFactors"):
-                effSF.printScaleFactors = False
-            return self._addVariationModule(process, module, name+self.systPrefix+"MetTrgSF"+postfix)
+            return addTrgSF("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgSF"+postfix)
         def addMETTrgDataEff(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.metTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = False
-            effSF.variationDataShiftBy = cms.double(shiftBy)
-            effSF.variationMCShiftBy = cms.double(0.0)
-            if hasattr(effSF, "printScaleFactors"):
-                effSF.printScaleFactors = False
-            return self._addVariationModule(process, module, name+self.systPrefix+"MetTrgDataEff"+postfix)
+            return addTrgDataEff("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgDataEff"+postfix)
         def addMETTrgMCEff(shiftBy, postfix):
-            module = self._cloneForVariation(getattr(process, name))
-            effSF = module.metTriggerEfficiencyScaleFactor
-            effSF.variationEnabled = True
-            effSF.useMaxUncertainty = False
-            effSF.variationDataShiftBy = cms.double(0.0)
-            effSF.variationMCShiftBy = cms.double(shiftBy)
-            if hasattr(effSF, "printScaleFactors"):
-                effSF.printScaleFactors = False
-            return self._addVariationModule(process, module, name+self.systPrefix+"MetTrgMCEff"+postfix)
+            return addTrgMCEff("metTriggerEfficiencyScaleFactor", shiftBy, "MetTrgMCEff"+postfix)
+
+        def addMuonTrgDataEff(shiftBy, postfix):
+            return addTrgDataEff("embeddingMuonTriggerEfficiency", shiftBy, "MuonTrgDataEff"+postfix)
+        def addMuonIdDataEff(shiftBy, postfix):
+            return addTrgDataEff("embeddingMuonIdEfficiency", shiftBy, "MuonIdDataEff"+postfix)
 
         def addBTagSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
@@ -1207,34 +1352,64 @@ class ConfigBuilder:
             module.bTagging.variationShiftBy = shiftBy
             return self._addVariationModule(process, module, name+self.systPrefix+"BTagSF"+postfix)
 
-
         names = []
 
         # Tau trigger SF
         if self.applyTauTriggerScaleFactor or self.applyTauTriggerLowPurityScaleFactor:
-            if useAsymmetricUncertainties:
+            if self.options.tauEmbeddingInput != 0:
                 names.append(addTauTrgDataEff( 1.0, "Plus"))
                 names.append(addTauTrgDataEff(-1.0, "Minus"))
-                names.append(addTauTrgMCEff( 1.0, "Plus"))
-                names.append(addTauTrgMCEff(-1.0, "Minus"))
             else:
-                names.append(addTauTrgSF( 1.0, "Plus"))
-                names.append(addTauTrgSF(-1.0, "Minus"))
+                if self.doAsymmetricTriggerUncertainties:
+                    names.append(addTauTrgDataEff( 1.0, "Plus"))
+                    names.append(addTauTrgDataEff(-1.0, "Minus"))
+                    names.append(addTauTrgMCEff( 1.0, "Plus"))
+                    names.append(addTauTrgMCEff(-1.0, "Minus"))
+                else:
+                    names.append(addTauTrgSF( 1.0, "Plus"))
+                    names.append(addTauTrgSF(-1.0, "Minus"))
 
         # MET trigger SF
         if self.applyMETTriggerScaleFactor:
-            if useAsymmetricUncertainties:
-                names.append(addTauTrgDataEff( 1.0, "Plus"))
-                names.append(addTauTrgDataEff(-1.0, "Minus"))
-                names.append(addTauTrgMCEff( 1.0, "Plus"))
-                names.append(addTauTrgMCEff(-1.0, "Minus"))
+            if self.options.tauEmbeddingInput != 0:
+                names.append(addMETTrgDataEff( 1.0, "Plus"))
+                names.append(addMETTrgDataEff(-1.0, "Minus"))
             else:
-                names.append(addTauTrgSF( 1.0, "Plus"))
-                names.append(addTauTrgSF(-1.0, "Minus"))
+                if self.doAsymmetricTriggerUncertainties:
+                    names.append(addMETTrgDataEff( 1.0, "Plus"))
+                    names.append(addMETTrgDataEff(-1.0, "Minus"))
+                    names.append(addMETTrgMCEff( 1.0, "Plus"))
+                    names.append(addMETTrgMCEff(-1.0, "Minus"))
+                else:
+                    names.append(addMETTrgSF( 1.0, "Plus"))
+                    names.append(addMETTrgSF(-1.0, "Minus"))
+
+        # Embedding-specific
+        if self.options.tauEmbeddingInput != 0:
+            names.append(addMuonTrgDataEff( 1.0, "Plus"))
+            names.append(addMuonTrgDataEff( -1.0, "Minus"))
+
+            names.append(addMuonIdDataEff( 1.0, "Plus"))
+            names.append(addMuonIdDataEff( -1.0, "Minus"))
+
+            if not hasattr(process, "wtaumuWeightPlus"):
+                process.wtaumuWeightPlus = process.wtaumuWeight.clone(variationEnabled=True)
+                process.wtaumuWeightMinus = process.wtaumuWeightPlus.clone(
+                    variationAmount = -process.wtaumuWeightPlus.variationAmount.value()
+                )
+                process.commonSequence += (process.wtaumuWeightPlus + process.wtaumuWeightMinus)
+            mod = self._cloneForVariation(getattr(process, name))
+            mod.embeddingWTauMuWeightReader.weightSrc = "wtaumuWeightPlus"
+            names.append(self._addVariationModule(process, mod, name+self.systPrefix+"WTauMuPlus"))
+
+            mod = mod.clone()
+            mod.embeddingWTauMuWeightReader.weightSrc = "wtaumuWeightMinus"
+            names.append(self._addVariationModule(process, mod, name+self.systPrefix+"WTauMuMinus"))
 
         # BTag SF
-        names.append(addBTagSF( 1.0, "Plus"))
-        names.append(addBTagSF(-1.0, "Minus"))
+        if not embeddingData:
+            names.append(addBTagSF( 1.0, "Plus"))
+            names.append(addBTagSF(-1.0, "Minus"))
 
         self._accumulateAnalyzers("SF variation", names)
 
@@ -1253,17 +1428,18 @@ def addPuWeightProducers(dataVersion, process, commonSequence, dataEras, firstIn
 
     return names
 
-def addPuWeightProducersVariations(dataVersion, process, commonSequence, dataEras):
+def addPuWeightProducersVariations(dataVersion, process, commonSequence, dataEras, doVariations=True):
     ret = []
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
     for era in dataEras:
         name = param.setPileupWeight(dataVersion, process, commonSequence, era=era)
         ret.append( (era, "",  name) )
         nominalModule = getattr(process, name)
-        for suffix in ["up", "down"]:
-            ret.append( (era, suffix,
-                         param.setPileupWeightForVariation(dataVersion, process, commonSequence, suffix=suffix,
-                                                           pset=nominalModule.clone(), psetReader=param.pileupWeightReader))
-                        )
+        if doVariations:
+            for suffix in ["up", "down"]:
+                ret.append( (era, suffix,
+                             param.setPileupWeightForVariation(dataVersion, process, commonSequence, suffix=suffix,
+                                                               pset=nominalModule.clone(), psetReader=param.pileupWeightReader))
+                            )
 
     return ret
