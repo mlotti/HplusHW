@@ -31,6 +31,11 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 analysisEmb = "signalAnalysis"
 dataEra = "Run2012ABCD"
 
+myStyles = [styles.getDataStyle()]
+for st in styles.getStyles():
+    myStyles.append(st)
+    #myStyles.append(styles.StyleCompound([st, styles.StyleLine(lineStyle=2)]))
+
 def main():
     dirAve = "."
     # dirSeeds = []
@@ -45,18 +50,35 @@ def main():
     # if len(dirSeeds) == 0:
     #     raise Exception("Found 0 input directories from %s" % inputInfoPath)
     dirSeeds = [
-        "../embedding_mc_140327_122732",
-        "../embedding_seedTest1_140326_114053",
+#        "../embedding_mc_140327_122732",
+#        "../embedding_seedTest1_140326_114053",
+#        "../embedding_seedTest2_140414_121814",
+#        "../embedding_seedTest3_140414_122132",
+#        "../embedding_seedTest4_140414_122827",
+        "../embedding_140509_100532",
+        "../embedding_seedTest1_140508_154221",
+        "../embedding_seedTest2_140508_154540",
+        "../embedding_seedTest3_140508_155055",
+        "../embedding_seedTest4_140508_155742"
         ]
+
+    # Apply TDR style
+    style = tdrstyle.TDRStyle()
+    histograms.createLegend.moveDefaults(dx=-0.02)
+    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
+    histograms.createLegendRatio.moveDefaults(dh=-0.1, dx=-0.53)
+    plots._legendLabels["BackgroundStatError"] = "Avg. stat. unc."
 
     for optMode in [
 #        "OptQCDTailKillerZeroPlus",
 
-        "OptQCDTailKillerLoosePlus",
+#        "OptQCDTailKillerLoosePlus",
 #        "OptQCDTailKillerMediumPlus",
 #        "OptQCDTailKillerTightPlus",
 
 #        "OptQCDTailKillerVeryTightPlus",
+
+            None
         ]:
         datasetsAve = dataset.getDatasetsFromMulticrabCfg(directory=dirAve, dataEra=dataEra, analysisName=analysisEmb, optimizationMode=optMode)
         datasetsSeeds = [
@@ -68,7 +90,7 @@ def main():
             d.close()
 
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=False, log=True, addMCUncertainty=True,
-                                  ratio=True, ratioType="errorScale",
+                                  ratio=True, ratioType="errorScale", ratioCreateLegend=True,
                                   addLuminosityText=True)
 
 def doDataset(datasetsAve, datasetsSeeds, optMode):
@@ -77,9 +99,6 @@ def doDataset(datasetsAve, datasetsSeeds, optMode):
     for d in ds:
         d.updateNAllEventsToPUWeighted()
         plots.mergeRenameReorderForDataMC(d)
-
-    # Apply TDR style
-    style = tdrstyle.TDRStyle()
 
     plotter = tauEmbedding.CommonPlotter(optMode, "average", drawPlotCommon)
 
@@ -90,6 +109,8 @@ def doPlots(datasetsAve, datasetsSeeds, datasetName, plotter):
     dsetAve = datasetsAve.getDataset(datasetName)
     dsetSeeds = [d.getDataset(datasetName) for d in datasetsSeeds]
     lumi = datasetsAve.getDataset("Data").getLuminosity()
+
+    addEventCounts = False
 
     def createPlot(name):
         drhAve = dsetAve.getDatasetRootHisto(name)
@@ -103,10 +124,16 @@ def doPlots(datasetsAve, datasetsSeeds, datasetName, plotter):
         p = plots.ComparisonManyPlot(drhAve, drhSeeds)
         p.setLuminosity(lumi)
         legLabel = plots._legendLabels.get(datasetName, datasetName)
-        p.histoMgr.setHistoLegendLabelMany({"Average": "Average "+legLabel + "("+tauEmbedding.strIntegral(drhAve.getHistogram())+")"})
+        leg = "Average "+legLabel
+        if addEventCounts:
+            leg += " ("+tauEmbedding.strIntegral(drhAve.getHistogram())+")"
+        p.histoMgr.setHistoLegendLabelMany({"Average": leg})
         for i, drh in enumerate(drhSeeds):
-            p.histoMgr.setHistoLegendLabelMany({"Seed %d"%i: ("Seed %d "%i)+legLabel + "("+tauEmbedding.strIntegral(drh.getHistogram())+")"})
-        p.histoMgr.forEachHisto(styles.Generator([styles.getDataStyle()]+styles.getStyles()))
+            leg = ("Seed %d "%i)+legLabel
+            if addEventCounts:
+                leg += " ("+tauEmbedding.strIntegral(drh.getHistogram())+")"
+            p.histoMgr.setHistoLegendLabelMany({"Seed %d"%i: leg})
+        p.histoMgr.forEachHisto(styles.Generator(styles=myStyles))
 
         p.setDrawOptions(ratioYlabel="Seed/Average")
         return p
