@@ -3820,6 +3820,9 @@ class DatasetManagerCreator:
         self._systematicVariationSources = systTmp.keys()
         self._systematicVariationSources.sort()
 
+    def getBaseDirectory(self):
+        return self._baseDirectory
+
     ## Create DatasetManager
     #
     # \param kwargs   Keyword arguments (see below)
