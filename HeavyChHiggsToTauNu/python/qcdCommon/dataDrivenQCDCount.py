@@ -21,7 +21,7 @@ class DataDrivenQCDShape:
         self._histoName = histoName
         self._dataList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, histoName, luminosity))
         self._ewkList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, histoName, luminosity))
-        self._rebinDoneStatus = False
+        self._rebinDoneStatus = True
         if rebinList != None:
             # Rebin
             myArray = array.array("d",rebinList)

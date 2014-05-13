@@ -265,7 +265,8 @@ class QCDInvertedResultManager:
                 if myStatus:
                     self._hCtrlPlotLabels.append(item)
                     self._hCtrlPlotLabelsForQCDSyst.append(item)
-                    myRebinList = systematics.getBinningForPlot(item)
+                    #myRebinList = systematics.getBinningForPlot(item) 
+                    myRebinList = None # Do rebinning in datacard generator
                     myCtrlShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity, rebinList=myRebinList)
                     myCtrlPlot = QCDInvertedShape(myCtrlShape, moduleInfoString+"_"+item, normFactors)
                     myCtrlShape.delete()
