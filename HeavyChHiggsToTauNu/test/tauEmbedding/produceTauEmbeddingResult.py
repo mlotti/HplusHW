@@ -48,6 +48,9 @@ class DatasetCreatorMany:
     def getBaseDirectory(self):
         return self._creators[0].getBaseDirectory()
 
+    def getDatasetNames(self):
+        return self._creators[0].getDatasetNames()
+
     def getAnalyses(self):
         return self._creators[0].getAnalyses()
 
@@ -72,10 +75,12 @@ class DatasetManagerMany:
 
     def _getDatasetsGeneric(self, methodName):
         datasets = [getattr(dm, methodName)() for dm in self._dsetMgrs]
-        tmp = [[]]*len(datasets[0])
+        tmp = []
         for i in xrange(len(datasets[0])):
+            lst = []
             for j in xrange(len(self._dsetMgrs)):
-                tmp[i].append(datasets[j][i])
+                lst.append(datasets[j][i])
+            tmp.append(lst) # tmp[i]
 
         return [DatasetMany(t) for t in tmp]
 
@@ -116,6 +121,9 @@ class DatasetMany:
 
     def getLuminosity(self):
         return self._datasets[0].getLuminosity()
+
+    def getCrossSection(self):
+        return self._datasets[0].getCrossSection()
 
     def getDataVersion(self):
         return self._datasets[0].getDataVersion()
@@ -326,6 +334,7 @@ if __name__ == "__main__":
                         if len(dsetMgr.getDataDatasets()) > 0:
                             dsetMgr.loadLuminosities()
                             dsetMgr.mergeData()
+
                         for dset in dsetMgr.getAllDatasets():
                             print "Dataset", dset.getName()
                             resdir = os.path.join(taskDir, dset.getName(), "res")
