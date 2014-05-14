@@ -1337,7 +1337,7 @@ class CommonPlotter:
         drawControlPlot("METPhiAfterMtSelections", "E_{T}^{miss} #phi", ylabel="Events / %.2f-%.2f", moveLegend={"dy": -0.4}, log=False)
         drawControlPlot("NBjetsAfterMtSelections", ylabel="Events", opts={"ymin": 1e-1})
         drawControlPlot("BJetPtAfterMtSelections", ylabel="Events / #Delta p_{T} / %.0f-%.0f GeV/c", divideByBinWidth=True)
-        drawControlPlot("BJetEtaAfterMtSelections", opts={"xmin": -2.5, "xmax": 2.5}, moveLegend={"dy": -0.4})
+        drawControlPlot("BJetEtaAfterMtSelections", ylabel="Events / %.1f", opts={"xmin": -2.5, "xmax": 2.5}, moveLegend={"dy": -0.4})
         drawControlPlot("BtagDiscriminatorAfterMtSelections", opts={"xmin": -1, "xmax": 1, "ymin": 1}, ylabel="Events / %.2f-%.2f", moveLegend={"dy": -0.4})
         drawControlPlot("ImprovedDeltaPhiCutsCollinearMinimumAfterMtSelections", "R_{coll}^{min} (^{o})", ylabel="Events / %.0f^{o}", opts={"ymin": 1e-1}, moveLegend={"dy": -0.43, "dx": -0.3})
         drawControlPlot("ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections", "R_{bb}^{min} (^{o})", ylabel="Events / %.0f^{o}", opts={"ymin": 1e-1}, moveLegend={"dy": -0.43, "dx": -0.2})
