@@ -1141,7 +1141,10 @@ class RootHistoWithUncertainties:
         myClone = self.Clone()
         myClone.Rebin(self._rootHisto.GetNbinsX())
         g = myClone.getSystematicUncertaintyGraph()
-        return (g.GetErrorYhigh(0),g.GetErrorYlow(0))
+        myClone.Delete()
+        myResult = (g.GetErrorYhigh(0),g.GetErrorYlow(0))
+        g.Delete()
+        return myResult
 
     ## Adds the underflow and overflow bins to the first and last bins, respectively
     def makeFlowBinsVisible(self):
@@ -1428,25 +1431,51 @@ class RootHistoWithUncertainties:
     #
     # \param args  Positional arguments, forwarded to TH1.Rebin()
     def Rebin(self, *args):
-        self._rootHisto = self._rootHisto.Rebin(*args)
+        if self._rootHisto == None:
+            raise Exception("Tried to call Rebin for a histogram which has been deleted")
+        htmp = self._rootHisto.Rebin(*args)
+        if len(args) > 1: # If more than 1 argument is given, ROOT creates a clone of the histogram
+            self._rootHisto.Delete()
+        ROOT.SetOwnership(htmp, True)
+        htmp.SetDirectory(0)
+        self._rootHisto = htmp
         keys = self._shapeUncertainties.keys()
         for key in keys:
             (plus, minus) = self._shapeUncertainties[key]
-            plus = plus.Rebin(*args)
-            minus = minus.Rebin(*args)
-            self._shapeUncertainties[key] = (plus, minus)
+            plustmp = plus.Rebin(*args)
+            minustmp = minus.Rebin(*args)
+            if len(args) > 1: # If more than 1 argument is given, ROOT creates a clone of the histogram
+                plus.Delete()
+                minus.Delete()
+            ROOT.SetOwnership(plustmp, True)
+            ROOT.SetOwnership(minustmp, True)
+            plustmp.SetDirectory(0)
+            minustmp.SetDirectory(0)
+            self._shapeUncertainties[key] = (plustmp, minustmp)
 
     ## Rebin histogram
     #
     # \param args  Positional arguments, forwarded to TH1.Rebin()
     def Rebin2D(self, *args):
-        self._rootHisto = self._rootHisto.Rebin2D(*args)
+        htmp = self._rootHisto.Rebin2D(*args)
+        if len(args) > 2: # If more than 2 arguments are given, ROOT creates a clone of the histogram
+            self._rootHisto.Delete()
+        ROOT.SetOwnership(htmp, True)
+        htmp.SetDirectory(0)
+        self._rootHisto = htmp
         keys = self._shapeUncertainties.keys()
         for key in keys:
             (plus, minus) = self._shapeUncertainties[key]
-            plus = plus.Rebin2D(*args)
-            minus = minus.Rebin2D(*args)
-            self._shapeUncertainties[key] = (plus, minus)
+            plustmp = plus.Rebin2D(*args)
+            minustmp = minus.Rebin2D(*args)
+            if len(args) > 2: # If more than 2 arguments are given, ROOT creates a clone of the histogram
+                plus.Delete()
+                minus.Delete()
+            ROOT.SetOwnership(plustmp, True)
+            ROOT.SetOwnership(minustmp, True)
+            plustmp.SetDirectory(0)
+            minustmp.SetDirectory(0)
+            self._shapeUncertainties[key] = (plustmp, minustmp)
 
     ## Add another RootHistoWithUncertainties object
     #
@@ -1483,7 +1512,6 @@ class RootHistoWithUncertainties:
 
         # Add histo
         self._rootHisto.Add(other._rootHisto, *args)
-
 
     ## Scale the histogram
     #
@@ -1531,11 +1559,12 @@ class RootHistoWithUncertainties:
 
     ## Delete all contained histograms
     def Delete(self):
-        self._rootHisto.Delete()
-        for (plus, minus) in self._shapeUncertainties.itervalues():
-            plus.Delete()
-            minus.Delete()
-
+        if self._rootHisto != None:
+            self._rootHisto.Delete()
+        if self._shapeUncertainties != None:
+            for (plus, minus) in self._shapeUncertainties.itervalues():
+                plus.Delete()
+                minus.Delete()
         self._rootHisto = None
         self._shapeUncertainties = None
 
@@ -2649,7 +2678,6 @@ class Dataset:
         wrapper = RootHistoWithUncertainties(h)
         if hasattr(name, "addUncertainties"):
             name.addUncertainties(self, wrapper, modify)
-
         return DatasetRootHisto(wrapper, self) 
 
     ## Get the directory content of a given directory in the ROOT file.
