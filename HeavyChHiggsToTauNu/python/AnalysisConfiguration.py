@@ -501,8 +501,8 @@ class ConfigBuilder:
         # scan various btagging working points
         self._buildBTagScan(process, analysisModules, analysisNames)
 
-        # Tau embedding-like preselection for normal MC
-        self._buildTauEmbeddingLikePreselection(process, analysisNamesForSystematics, additionalCounters)
+        # Tau embedding-like preselection for normal MC (overrides te list of analysisNamesForSystematics)
+        analysisNamesForSystematics = self._buildTauEmbeddingLikePreselection(process, analysisNamesForSystematics, additionalCounters)
 
         ## Systematics
         #if "QCDMeasurement" not in analysisNames_: # Need also for QCD measurements, since they contain MC EWK
@@ -901,7 +901,7 @@ class ConfigBuilder:
     # \param additionalCounters  List of strings for additional counters
     def _buildTauEmbeddingLikePreselection(self, process, analysisNames, additionalCounters):
         if self.options.doTauEmbeddingLikePreselection == 0:
-            return []
+            return analysisNames
 
         if self.dataVersion.isData():
             raise Exception("doTauEmbeddingLikePreselection is meaningless for data")
@@ -926,7 +926,7 @@ class ConfigBuilder:
         maxGenTaus = None # not set
         maxGenTaus = 1 # events with exactly one genuine tau in acceptance
 
-        retNames = []
+        namesForSyst = []
         for name in analysisNames:
             module = getattr(process, name)
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), no tau+MET trigger required
@@ -966,10 +966,10 @@ class ConfigBuilder:
             mod.trigger.selectionType = module.trigger.selectionType
             modName = makeName(name, "GenuineTauTriggered")
             add(modName, process.commonSequence, mod, additionalCounters)
-            retNames.append(modName)
+            namesForSyst.append(modName)
 
         self._accumulateAnalyzers("Tau embedding -like preselection", allNames)
-        return retNames
+        return namesForSyst
 
     ## Build additional analyses for tau embedding input
     #
