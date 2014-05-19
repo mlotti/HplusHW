@@ -22,7 +22,7 @@ class SplittedHistoReader:
         try:
             dsetRootHisto = dsetMgr.getDataset(dsetLabel).getDatasetRootHisto(mySplittedBinInfoHistoName)
         except Exception, e:
-            raise Exception (ErrorLabel()+"Cannot find histogram '%s'!\n  Message = %s!"%(mySplittedBinInfoHistoName, str(e)))
+            raise Exception (ShellStyles.ErrorLabel()+"Cannot find histogram '%s'!\n  Message = %s!"%(mySplittedBinInfoHistoName, str(e)))
         splittedBinInfoHisto = dsetRootHisto.getHistogram()
         ROOT.SetOwnership(splittedBinInfoHisto, True)
         # Copy splitting information with proper normalisation (to account for a merge)

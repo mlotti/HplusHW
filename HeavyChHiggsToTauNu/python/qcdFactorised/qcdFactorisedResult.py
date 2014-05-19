@@ -4,7 +4,7 @@
 #
 # Authors: LAW
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import *
@@ -221,7 +221,7 @@ class QCDControlPlot: # OBSOLETE
 
 class QCDFactorisedResultManager:
     def __init__(self, specs, dsetMgr, luminosity, moduleInfoString, shapeOnly=False, displayPurityBreakdown=False):
-        print HighlightStyle()+"...Obtaining final shape"+NormalStyle()
+        print ShellStyles.HighlightStyle()+"...Obtaining final shape"+ShellStyles.NormalStyle()
         # Obtain QCD shapes
         myCtrlRegionShape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", specs["basicName"], luminosity, rebinList=specs["binList"])
         myLeg1Shape = DataDrivenQCDShape(dsetMgr, "Data", "EWK", specs["leg1Name"], luminosity, rebinList=specs["binList"])
@@ -237,7 +237,7 @@ class QCDFactorisedResultManager:
         self._hShapePurity.SetName(self._hShape.GetName()+"finalShapeInManager")
         myResult.delete()
         if not shapeOnly:
-            print HighlightStyle()+"...Obtaining region transition systematics"+NormalStyle()
+            print ShellStyles.HighlightStyle()+"...Obtaining region transition systematics"+ShellStyles.NormalStyle()
             # Do systematics coming from met shape difference
             myRegionTransitionSyst = SystematicsForMetShapeDifference(mySignalRegionShape, myCtrlRegionShape, self._hShape, moduleInfoString=moduleInfoString)
             self._hRegionSystUp = aux.Clone(myRegionTransitionSyst.getUpHistogram(), "QCDfactMgrQCDSystUp")
@@ -254,18 +254,18 @@ class QCDFactorisedResultManager:
             for item in myObjects:
                 myStatus = True
                 i += 1
-                print HighlightStyle()+"...Obtaining ctrl plot %d/%d: %s%s"%(i,len(myObjects),item,NormalStyle())
+                print ShellStyles.HighlightStyle()+"...Obtaining ctrl plot %d/%d: %s%s"%(i,len(myObjects),item,ShellStyles.NormalStyle())
                 myEWKFoundStatus = True
                 for d in dsetMgr.getDataset("EWK").datasets:
                     if not d.hasRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item)):
                         myEWKFoundStatus = False
                 if not myEWKFoundStatus:
                     myStatus = False
-                    print WarningLabel()+"Skipping '%s', because it does not exist for EWK datasets (you probably forgot to set histo level to Vital when producing the multicrab)!"%(item)+NormalStyle()
+                    print ShellStyles.WarningLabel()+"Skipping '%s', because it does not exist for EWK datasets (you probably forgot to set histo level to Vital when producing the multicrab)!"%(item)+ShellStyles.NormalStyle()
                 else:
                     (myRootObject, myRootObjectName) = dsetMgr.getDataset("EWK").getFirstRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item))
                     if isinstance(myRootObject, ROOT.TH2):
-                        print WarningLabel()+"Skipping '%s', because it is not a TH1 object!"%(item)+NormalStyle()
+                        print ShellStyles.WarningLabel()+"Skipping '%s', because it is not a TH1 object!"%(item)+ShellStyles.NormalStyle()
                         myStatus = False
                 if myStatus:
                     self._hCtrlPlotLabels.append(item)

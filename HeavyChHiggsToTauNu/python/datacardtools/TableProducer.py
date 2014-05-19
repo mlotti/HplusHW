@@ -7,7 +7,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorB
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker import ControlPlotMaker
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
@@ -55,10 +55,10 @@ class TableProducer:
         if self._config.OptionDoControlPlots:
             ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
         else:
-            print "\n"+WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
+            print "\n"+ShellStyles.WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
 
         # Make other reports
-        print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()
+        print "\n"+ShellStyles.HighlightStyle()+"Generating reports"+ShellStyles.NormalStyle()
         # Print table of shape variation for shapeQ nuisances
         self.makeShapeVariationTable()
         # Print event yield summary table
@@ -122,13 +122,13 @@ class TableProducer:
 
         # Loop over mass points
         for m in self._config.MassPoints:
-            print "\n"+HighlightStyle()+"Generating datacard for mass point %d for "%m +self._outputPrefix+NormalStyle()
+            print "\n"+ShellStyles.HighlightStyle()+"Generating datacard for mass point %d for "%m +self._outputPrefix+ShellStyles.NormalStyle()
             # Open output root file
             myFilename = self._dirname+"/"+self._outputFileStem+"%d.txt"%m
             myRootFilename = self._dirname+"/"+self._outputRootFileStem+"%d.root"%m
             myRootFile = ROOT.TFile.Open(myRootFilename, "RECREATE")
             if myRootFile == None:
-                print ErrorStyle()+"Error:"+NormalStyle()+" Cannot open file '"+myRootFilename+"' for output!"
+                print ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Cannot open file '"+myRootFilename+"' for output!"
                 sys.exit()
             # Invoke extractors
             if self._opts.verbose:
@@ -165,7 +165,7 @@ class TableProducer:
             # Print datacard to screen if requested
             if self._opts.showDatacard:
                 if self._config.BlindAnalysis:
-                    print WarningStyle()+"You are BLINDED: Refused cowardly to print datacard on screen (you're not supposed to look at it)!"+NormalStyle()
+                    print ShellStyles.WarningStyle()+"You are BLINDED: Refused cowardly to print datacard on screen (you're not supposed to look at it)!"+ShellStyles.NormalStyle()
                 else:
                     print myCard
             # Save datacard to file
@@ -198,7 +198,7 @@ class TableProducer:
         for i in myIdsForRemoval:
             for c in self._datasetGroups:
                 if c.getLandsProcess() == i:
-                    print WarningLabel()+"Rate for column '%s' (%f) is smaller than %.2f. Removing column from datacard. The threshold is set by the ToleranceForMinimumRate flag."%(c.getLabel(),c._rateResult.getResult(),self._config.ToleranceForMinimumRate)
+                    print ShellStyles.WarningLabel()+"Rate for column '%s' (%f) is smaller than %.2f. Removing column from datacard. The threshold is set by the ToleranceForMinimumRate flag."%(c.getLabel(),c._rateResult.getResult(),self._config.ToleranceForMinimumRate)
                     self._datasetGroups.remove(c)
         # Update process numbers
         for c in self._datasetGroups:
@@ -314,7 +314,7 @@ class TableProducer:
                 if c.isActiveForMass(mass,self._config) and n.isPrintable() and c.hasNuisanceByMasterId(n.getId()):
                     myCount += 1
             if myCount == 0 and n.isPrintable():
-                print WarningLabel()+"Suppressed nuisance %s: '%s' because it does not affect any data column!"%(n.getId(),n.getDescription())
+                print ShellStyles.WarningLabel()+"Suppressed nuisance %s: '%s' because it does not affect any data column!"%(n.getId(),n.getDescription())
                 myVetoList.append(n.getId())
             if myCount == 1:
                 mySingleList.append(n.getId())
@@ -349,7 +349,7 @@ class TableProducer:
                         myVirtualMergeInformation[myFoundSingles[0]] = myValue
                         myVirtualMergeInformation[myFoundSingles[0]+"ID"] = myID
                         myVirtualMergeInformation["%sdescription"%myFoundSingles[0]] = myDescription
-                        print WarningLabel()+"Combined nuisances '%s' for column %s!"%(myDescription, c.getLabel())
+                        print ShellStyles.WarningLabel()+"Combined nuisances '%s' for column %s!"%(myDescription, c.getLabel())
         # Loop over rows
         for n in self._extractors:
             if n.isPrintable() and n.getId() not in myVetoList:
@@ -572,14 +572,14 @@ class TableProducer:
         myFile = open(myFilename, "w")
         myFile.write(myOutput)
         myFile.close()
-        print HighlightStyle()+"Shape variation tables written to: "+NormalStyle()+myFilename
+        print ShellStyles.HighlightStyle()+"Shape variation tables written to: "+ShellStyles.NormalStyle()+myFilename
 
     ## Prints event yield summary table
     def makeEventYieldSummary(self):
         formatStr = "%6."
         myPrecision = None
         if self._config.OptionNumberOfDecimalsInSummaries == None:
-            print WarningLabel()+"Using default value for number of decimals in summaries. To change, set OptionNumberOfDecimalsInSummaries in your config."+NormalStyle()
+            print ShellStyles.WarningLabel()+"Using default value for number of decimals in summaries. To change, set OptionNumberOfDecimalsInSummaries in your config."+ShellStyles.NormalStyle()
             formatStr += "1"
             myPrecision = 1
         else:
@@ -645,12 +645,12 @@ class TableProducer:
                         else:
                             EWKFakes.Add(c.getCachedShapeRootHistogramWithUncertainties())
                     else:
-                        raise Exception(ErrorLabel()+"Unknown dataset type for dataset %s!%s"%(c.getLabel(),NormalStyle()))
+                        raise Exception(ShellStyles.ErrorLabel()+"Unknown dataset type for dataset %s!%s"%(c.getLabel(),ShellStyles.NormalStyle()))
             # Calculate signal yield
             myBr = self._config.OptionBr
             if not (self._config.OptionLimitOnSigmaBr or m > 179):
                 if self._config.OptionBr == None:
-                    print WarningStyle()+"Warning: Br(t->bH+) has not been specified in config file, using default 0.01! To specify, add OptionBr=0.05 to the config file."+NormalStyle()
+                    print ShellStyles.WarningLabel()+"Br(t->bH+) has not been specified in config file, using default 0.01! To specify, add OptionBr=0.05 to the config file."+ShellStyles.NormalStyle()
                     myBr = 0.01
                 HW.Scale(2.0 * myBr * (1.0 - myBr))
             if HH != None:
@@ -691,7 +691,7 @@ class TableProducer:
             myFile = open(myFilename, "w")
             myFile.write(myOutput)
             myFile.close()
-            print HighlightStyle()+"Event yield summary for mass %d written to: "%m +NormalStyle()+myFilename
+            print ShellStyles.HighlightStyle()+"Event yield summary for mass %d written to: "%m +ShellStyles.NormalStyle()+myFilename
 
             myOutputLatex = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
             myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
@@ -732,7 +732,7 @@ class TableProducer:
             myFile = open(myFilename, "w")
             myFile.write(myOutputLatex)
             myFile.close()
-            print HighlightStyle()+"Latex table of event yield summary for mass %d written to: "%m +NormalStyle()+myFilename
+            print ShellStyles.HighlightStyle()+"Latex table of event yield summary for mass %d written to: "%m +ShellStyles.NormalStyle()+myFilename
 
     ## Returns a string with proper numerical formatting
     def _getFormattedSystematicsNumber(self,value):
@@ -878,7 +878,7 @@ class TableProducer:
         myFile = open(myFilename, "w")
         myFile.write(myOutput)
         myFile.close()
-        print HighlightStyle()+"Latex table of systematics summary written to: "+NormalStyle()+myFilename
+        print ShellStyles.HighlightStyle()+"Latex table of systematics summary written to: "+ShellStyles.NormalStyle()+myFilename
 
     ## Prints QCD purity information
     def makeQCDPuritySummary(self):
@@ -910,7 +910,7 @@ class TableProducer:
             else:
                 s += "  OK"
             s += "\n"
-        print "\n%s"%s.replace("#W#",WarningLabel())
+        print "\n%s"%s.replace("#W#",ShellStyles.WarningLabel())
         myFilename = self._infoDirname+"/QCDpurity.txt"
         myFile = open(myFilename, "w")
         myFile.write(s.replace("#W#","Warning:"))

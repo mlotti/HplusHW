@@ -2,8 +2,7 @@
 # Classes for making control plots (surprise, surprise ...)
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-#from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count,RootHistoWithUncertainties
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
@@ -32,7 +31,7 @@ class ControlPlotMaker:
         self._opts = opts
         self._config = config
         if config.OptionSqrtS == None:
-            raise Exception(ErrorLabel()+"Please set the parameter OptionSqrtS = <integer_value_in_TeV> in the config file!"+NormalStyle())
+            raise Exception(ShellStyles.ErrorLabel()+"Please set the parameter OptionSqrtS = <integer_value_in_TeV> in the config file!"+ShellStyles.NormalStyle())
         self._dirname = dirname
         self._luminosity = luminosity
         self._observation = observation
@@ -41,7 +40,7 @@ class ControlPlotMaker:
         #myEvaluator = SignalAreaEvaluator()
 
         # Make control plots
-        print "\n"+HighlightStyle()+"Generating control plots"+NormalStyle()
+        print "\n"+ShellStyles.HighlightStyle()+"Generating control plots"+ShellStyles.NormalStyle()
         # Loop over mass points
         for m in self._config.MassPoints:
             print "... mass = %d GeV"%m
@@ -284,7 +283,7 @@ class SignalAreaEvaluator:
         myFile = open(myFilename, "w")
         myFile.write(self._output)
         myFile.close()
-        print HighlightStyle()+"Signal area evaluation written to: "+NormalStyle()+myFilename
+        print ShellStyles.HighlightStyle()+"Signal area evaluation written to: "+ShellStyles.NormalStyle()+myFilename
         self._output = ""
 
     def _evaluate(self,evaluationRange,h):

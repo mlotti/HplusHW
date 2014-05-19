@@ -14,7 +14,7 @@ import os
 import shutil
 from math import sqrt
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
 class PseudoMultiCrabCreator:
@@ -81,7 +81,7 @@ class PseudoMultiCrabCreator:
             f.write("[%s]\n"%(self._title+item))
         f.close()
         # Done
-        print HighlightStyle()+"Created pseudo-multicrab directory %s%s"%(self._myBaseDir,NormalStyle())
+        print ShellStyles.HighlightStyle()+"Created pseudo-multicrab directory %s%s"%(self._myBaseDir,ShellStyles.NormalStyle())
 
     def _writeRootFileToDisk(self, subTitle):
         # Open root file
