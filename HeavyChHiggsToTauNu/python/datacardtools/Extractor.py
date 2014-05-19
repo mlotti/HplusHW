@@ -520,7 +520,7 @@ class ShapeExtractor(ExtractorBase):
         if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
             raise Exception(ShellStyles.ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+ShellStyles.NormalStyle())
         # Get histogram from cache
-        h = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
+        h = aux.Clone(datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto())
         myTotalRate = h.Integral()
         rateWillBeSuppressedStatus = myTotalRate < self._minimumRate
         # Do not apply here additional normalization, it has already been applied
@@ -533,8 +533,8 @@ class ShapeExtractor(ExtractorBase):
         else:
             # Ok, it's a nuisance
             # Create up and down histograms for shape stat
-            hUp = h.Clone()
-            hDown = h.Clone()
+            hUp = aux.Clone(h)
+            hDown = aux.Clone(h)
             hUp.Reset()
             hDown.Reset()
             hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
@@ -575,7 +575,9 @@ class ShapeExtractor(ExtractorBase):
     ## QCD specific method for extracting purity for a shape
     def extractQCDPurityAsValue(self, datasetColumn, dsetMgr, shapeHistoName, shapeHisto):
         hPurity = self.extractQCDPurityHistogram(datasetColumn, dsetMgr, shapeHistoName)
-        return _calculateAverageQCDPurity(shapeHisto, hPurity)
+        myValue = _calculateAverageQCDPurity(shapeHisto, hPurity)
+        hPurity.Delete()
+        return myValue
 
     ## QCD specific method for extracting purity for a shape
     def extractQCDPurityAsValue(self, shapeHisto, purityHisto):
@@ -624,8 +626,8 @@ class ShapeVariationExtractor(ExtractorBase):
             raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, check that options in the datacard match to multicrab content!"%(datasetColumn.getLabel(),self._systVariation))
         # Get histogram from cache
         (hSystUp, hSystDown) = myShapeUncertDict[self._systVariation]
-        hUp = hSystUp.Clone()
-        hDown = hSystDown.Clone()
+        hUp = aux.Clone(hSystUp)
+        hDown = aux.Clone(hSystDown)
         hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
         hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
         # Do not apply here additional normalization, it has already been applied

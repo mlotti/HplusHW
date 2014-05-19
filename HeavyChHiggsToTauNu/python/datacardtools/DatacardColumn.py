@@ -15,7 +15,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 from math import sqrt,pow
 from array import array
 
-
 ## ExtractorResult
 # Helper class to cache the result for each extractor in each datacard column
 class ExtractorResult():
@@ -75,6 +74,12 @@ class ExtractorResult():
             htemp = h.Clone(h.GetTitle())
             htemp.SetDirectory(rootfile)
             self._tempHistos.append(htemp)
+
+    def debug(self):
+        print "Cached results:"
+        print "- shape histos:",len(self._histograms)
+        print "- purity histos (QCD):",self._purityHistogram
+        print "- tmp histos:",len(self._tempHistos)
 
     def getContractedShapeUncertainty(self,hNominal):
         if len(self._histograms) == 0:
@@ -268,7 +273,10 @@ class DatacardColumn():
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
         print "... processing column: "+ShellStyles.HighlightStyle()+self._label+ShellStyles.NormalStyle()
-        print "begin keys =",ROOT.gROOT.GetNkeys()
+        #print "begin files =",ROOT.gROOT.GetListOfFiles().GetSize()
+        #print "DBG: list at beginning of data mining:",ROOT.gDirectory.GetList().GetSize()
+        #for i in range(0,ROOT.gDirectory.GetListOfKeys().GetSize()):
+        #    print "keys %d = %s"%(i,ROOT.gDirectory.GetListOfKeys().At(i).GetTitle())
         # Construct list of shape variables used by the column
         myShapeVariationList = []
         for nid in self._nuisanceIds:
@@ -288,15 +296,17 @@ class DatacardColumn():
             if myDatasetRootHisto.isMC():
                 if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
                      # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
+                     myDatasetRootHisto.Delete()
                      dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
                      if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - 245.8) > 0.0001:
                          print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 245.8 pb according to arXiv:1303.6254"
+                         myDatasetRootHisto.Delete()
                          dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(245.8)
                          myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
-            self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties()
+            self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties().Clone()
             # Remove any variations not active for the column
             self._cachedShapeRootHistogramWithUncertainties.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
             # Apply additional normalization
@@ -317,6 +327,7 @@ class DatacardColumn():
             #h = TH1F(self.getLabel(),self.getLabel(),len(myArray)-1,myArray)
             # Use here just one bin to speed up LandS (yes, one needs a histogram for the empty columns even if ShapeStat is off)
             h = ROOT.TH1F(self.getLabel(),self.getLabel(),1,0,1)
+            ROOT.SetOwnership(h, True)
             myRateHistograms.append(h)
         else:
             if self._opts.verbose:
@@ -364,7 +375,7 @@ class DatacardColumn():
         myAveragePurity = None
         if self.typeIsQCD():
             myDsetRootHisto = myShapeExtractor.extractQCDPurityHistogram(self, dsetMgr, self._shapeHisto)
-            self._rateResult.setPurityHistogram(aux.Clone(myDsetRootHisto.getHistogram()))
+            self._rateResult.setPurityHistogram(myDsetRootHisto.getHistogram())
             myAveragePurity = myShapeExtractor.extractQCDPurityAsValue(myRateHistograms[0], self.getPurityHistogram())
             #print "*** Average QCD purity", myAveragePurity
 
@@ -386,8 +397,8 @@ class DatacardColumn():
                     if e.isShapeNuisance():
                         if isinstance(e, ConstantExtractor):
                             # Create up and down histograms out of the constant values
-                            hUp = myRateHistograms[0].Clone()
-                            hDown = myRateHistograms[0].Clone()
+                            hUp = aux.Clone(myRateHistograms[0])
+                            hDown = aux.Clone(myRateHistograms[0])
                             hUp.SetTitle(self.getLabel()+"_"+e._masterExID+"Up")
                             hDown.SetTitle(self.getLabel()+"_"+e._masterExID+"Down")
                             for k in range(0, hUp.GetNbinsX()+2):
@@ -408,7 +419,7 @@ class DatacardColumn():
                             # Histograms constain abs uncertainty, need to add nominal histogram so that Lands accepts the histograms
                             if e.getDistribution() == "shapeQ":
                                 for i in range(0,len(myHistograms)):
-                                    myHistograms[i].Add(self._rateResult.getHistograms()[0])
+                                    myHistograms[i].Add(aux.Clone(self._rateResult.getHistograms()[0]))
                                     # Check for negative bins and correct if necessary
                                     for k in range(1, myHistograms[i].GetNbinsX()+1):
                                         if myHistograms[i].GetBinContent(k) < 0.000001:
@@ -522,7 +533,6 @@ class DatacardColumn():
                                 except TypeError:
                                     pass
                         self._controlPlots.append(myDictionary)
-    print "end keys =",ROOT.gROOT.GetNkeys()
 
     ## Returns rate for column
     def getRateResult(self):
