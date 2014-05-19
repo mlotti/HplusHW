@@ -1,4 +1,4 @@
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import ROOT
 from array import array
 from math import sqrt
@@ -9,7 +9,7 @@ from math import sqrt
 class ShapeHistoModifier():
     def __init__(self, histoSpecs, histoObjectForSpecs=None, debugMode=False):
         if isinstance(histoSpecs,list):
-            raise Exception(ErrorLabel()+"ShapeHistoModifier: Requested a %d-dimensional histogram, but code currently supports only 1 dimension!"%len(histoSpecs))
+            raise Exception(ShellStyles.ErrorLabel()+"ShapeHistoModifier: Requested a %d-dimensional histogram, but code currently supports only 1 dimension!"%len(histoSpecs))
         mySpecs = self._retrieveHistoSpecsFromHisto(histoObjectForSpecs, histoSpecs)
         self._nbins = mySpecs["bins"]
         self._min = mySpecs["rangeMin"]
@@ -78,7 +78,7 @@ class ShapeHistoModifier():
                     myMsg += "\nDestination bin low edges:"
                     for k in range(1,dest.GetNbinsX()+1):
                         myMsg += " %.2f"%dest.GetXaxis().GetBinLowEdge(k)
-                    print ErrorStyle()+"Error:"+NormalStyle()+" Shape histogram binning mismatch!"
+                    print ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Shape histogram binning mismatch!"
                     print myMsg
                     raise Exception()
         # Histogram binnings are consistent, loop bin by bin over the source histogram
@@ -113,7 +113,7 @@ class ShapeHistoModifier():
                                myMsgList.append(["Shape histo bin %d purity is low! (purity=%f, event count=%f)"%(iDest,myPurity,myResidual),myResidual])
                     dest.SetBinContent(iDest, dest.GetBinContent(iDest)-countSum)
                 else:
-                    raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Unknown operation (only + or - are valid)!")
+                    raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Unknown operation (only + or - are valid)!")
                 dest.SetBinError(iDest, dest.GetBinError(iDest)+errorSum)
                 iDest += 1
                 countSum = 0.0
@@ -130,7 +130,7 @@ class ShapeHistoModifier():
                         myMsgList.append(["Shape histo bin %d purity is low! (purity=%f, event count=%f)"%(iDest,myPurity,myResidual),myResidual])
             dest.SetBinContent(self._nbins+1, dest.GetBinContent(self._nbins+1)-countSum)
         else:
-            raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Unknown operation (only + or - are valid)!")
+            raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Unknown operation (only + or - are valid)!")
         dest.SetBinError(self._nbins+1, dest.GetBinError(self._nbins+1)+errorSum)
         return myMsgList
 
@@ -169,7 +169,7 @@ class ShapeHistoModifier():
     ## Retrieve the default specs from the histogram if necessary
     def _retrieveHistoSpecsFromHisto(self, histo, specs):
         if histo == None and specs == None:
-            raise Exception(ErrorLabel()+"Need to supply either a histogram or dictionary with bin specification for the histograms!")
+            raise Exception(ShellStyles.ErrorLabel()+"Need to supply either a histogram or dictionary with bin specification for the histograms!")
         mySpecs = None
         if specs == None:
             mySpecs = {}

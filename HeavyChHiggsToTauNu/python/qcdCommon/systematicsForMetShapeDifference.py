@@ -2,7 +2,7 @@
 #
 # Authors: LAW
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from math import sqrt
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
@@ -121,6 +121,9 @@ class SystematicsForMetShapeDifference:
                 myRatio = self._hCombinedSignalRegion.GetBinContent(i) / self._hCombinedCtrlRegion.GetBinContent(i)
                 myRatioSigma = errorPropagationForDivision(self._hCombinedSignalRegion.GetBinContent(i), self._hCombinedSignalRegion.GetBinError(i),
                                                            self._hCombinedCtrlRegion.GetBinContent(i), self._hCombinedCtrlRegion.GetBinError(i))
+                #if myRatio < 0.0:
+                #    myRatioSigma *= -1.0 # this would take a potential cross-over into account, but it is discouraged
+                # because merging bins could lead to potential cancellations and underestimation of syst. uncertainty
             #print i, (myRatio+myRatioSigma)*finalShape.GetBinContent(i), (myRatio-myRatioSigma)*finalShape.GetBinContent(i), finalShape.GetBinContent(i)
             self._systUpHistogram.SetBinContent(i, (1.0+myRatioSigma)*finalShape.GetBinContent(i))
             self._systDownHistogram.SetBinContent(i, (1.0-myRatioSigma)*finalShape.GetBinContent(i))

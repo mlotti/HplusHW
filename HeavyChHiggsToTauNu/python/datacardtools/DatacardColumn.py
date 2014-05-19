@@ -4,12 +4,13 @@
 
 import os
 import sys
-from ROOT import TH1F
+import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TailFitter as TailFitter
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,ConstantExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 from math import sqrt,pow
 from array import array
@@ -201,7 +202,7 @@ class DatacardColumn():
                 myMsg += "Missing or empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
 
         if myMsg != "":
-            print ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+"\n"+myMsg
+            print ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+"\n"+myMsg
             raise Exception()
 
     ## Returns true if column is enabled for given mass point
@@ -262,11 +263,12 @@ class DatacardColumn():
         print "Available control plot names:"
         for h in self._controlPlots:
             print "  "+h.getRootHisto().GetTitle()
-        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Could not find control plot by title '%s' in column %s!"%(title, self._label))
+        raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Could not find control plot by title '%s' in column %s!"%(title, self._label))
 
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
-        print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
+        print "... processing column: "+ShellStyles.HighlightStyle()+self._label+ShellStyles.NormalStyle()
+        print "begin keys =",ROOT.gROOT.GetNkeys()
         # Construct list of shape variables used by the column
         myShapeVariationList = []
         for nid in self._nuisanceIds:
@@ -275,13 +277,13 @@ class DatacardColumn():
                     myShapeVariationList.append(e._systVariation)
         # Check status for HH
         if self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr):
-            print WarningLabel()+"Skipping ..."
+            print ShellStyles.WarningLabel()+"Skipping ..."
             return
         # Obtain root histogram with uncertainties for shape and cache it
         if not (self.typeIsEmptyColumn() or dsetMgr == None):
             mySystematics = dataset.Systematics(allShapes=True) #,verbose=True)
             if not dsetMgr.hasDataset(self.getDatasetMgrColumn()):
-                raise Exception(ErrorLabel()+"Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?"%self.getDatasetMgrColumn())
+                raise Exception(ShellStyles.ErrorLabel()+"Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?"%self.getDatasetMgrColumn())
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
             if myDatasetRootHisto.isMC():
                 if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
@@ -290,7 +292,7 @@ class DatacardColumn():
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
                      if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - 172.0) > 0.0001:
-                         print WarningLabel()+"Forcing light H+ xsection to 172.0 pb according to arXiv:1303.6254"
+                         print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 172.0 pb according to arXiv:1303.6254"
                          dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(172.0)
                          myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
@@ -300,7 +302,7 @@ class DatacardColumn():
             # Apply additional normalization
             # Note: this applies the normalizatoin also to the syst. uncertainties
             if abs(self._additionalNormalisationFactor - 1.0) > 0.00001:
-                print WarningLabel()+"Applying normalization factor %f to sample '%s'!"%(self._additionalNormalisationFactor, self.getLabel())
+                print ShellStyles.WarningLabel()+"Applying normalization factor %f to sample '%s'!"%(self._additionalNormalisationFactor, self.getLabel())
                 self._cachedShapeRootHistogramWithUncertainties.Scale(self._additionalNormalisationFactor)
             # Rebin and move under/overflow bins to visible bins
             myArray = array("d",config.ShapeHistogramsDimensions)
@@ -314,7 +316,7 @@ class DatacardColumn():
             #myArray = array("d",config.ShapeHistogramsDimensions)
             #h = TH1F(self.getLabel(),self.getLabel(),len(myArray)-1,myArray)
             # Use here just one bin to speed up LandS (yes, one needs a histogram for the empty columns even if ShapeStat is off)
-            h = TH1F(self.getLabel(),self.getLabel(),1,0,1)
+            h = ROOT.TH1F(self.getLabel(),self.getLabel(),1,0,1)
             myRateHistograms.append(h)
         else:
             if self._opts.verbose:
@@ -324,15 +326,23 @@ class DatacardColumn():
                 myShapeExtractor = ShapeExtractor(ExtractorMode.OBSERVATION)
             else:
                 myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
-            myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+            myShapeHistograms = myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+            if self.typeIsObservation() or self.typeIsSignal():
+                myRateHistograms.extend(myShapeHistograms)
+            else:
+                # Shape histo for background or signal, do tail fit
+                
+                #myFitter = TailFitter.TailFitter(myShapeHistograms[0], self.getLabel(), myShapeHistograms[0].GetTitle(), 120.0, 200.0)
+
+                myRateHistograms.append(myShapeHistograms[0])
         # Look for negative bins in rage
         for k in range(1, myRateHistograms[0].GetNbinsX()+1):
             if myRateHistograms[0].GetBinContent(k) < 0.000001:
                 if myRateHistograms[0].GetBinContent(k) < -0.001:
-                    print WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), myRateHistograms[0].GetBinContent(k))
+                    print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), myRateHistograms[0].GetBinContent(k))
                     myRateHistograms[0].SetBinContent(k, 0.0)
                     myRateHistograms[0].SetBinError(k, config.MinimumStatUncertainty)
-                    #raise Exception(ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
+                    #raise Exception(ShellStyles.ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
         # Cache result
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
@@ -403,10 +413,10 @@ class DatacardColumn():
                                     for k in range(1, myHistograms[i].GetNbinsX()+1):
                                         if myHistograms[i].GetBinContent(k) < 0.000001:
                                             if myHistograms[i].GetBinContent(k) < -0.001:
-                                              print WarningLabel()+"Up/down nuisance %s value in bin %d is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(e._exid, k, self.getLabel(), myHistograms[i].GetBinContent(k))
+                                              print ShellStyles.WarningLabel()+"Up/down nuisance %s value in bin %d is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(e._exid, k, self.getLabel(), myHistograms[i].GetBinContent(k))
                                               myHistograms[i].SetBinContent(k, 0.0)
                                               myHistograms[i].SetBinError(k, config.MinimumStatUncertainty)
-                                              #raise Exception(ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
+                                              #raise Exception(ShellStyles.ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
                     else:
                         # For QCD, scale the QCD type constants by the purity
                         if self.typeIsQCD() and e.isQCDNuisance():
@@ -433,7 +443,7 @@ class DatacardColumn():
                                                                  myHistograms,
                                                                  "Stat." in e.getDescription() or "stat." in e.getDescription() or e.getDistribution()=="shapeStat"))
             if not myFoundStatus:
-                raise Exception("\n"+ErrorLabel()+"(data group ='"+self._label+"'): Cannot find nuisance with id '"+nid+"'!")
+                raise Exception("\n"+ShellStyles.ErrorLabel()+"(data group ='"+self._label+"'): Cannot find nuisance with id '"+nid+"'!")
         # Print list of uncertainties
         if self._opts.verbose and dsetMgr != None and not self.typeIsEmptyColumn():
             print "  - Has shape variation syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
@@ -446,7 +456,7 @@ class DatacardColumn():
                         print "  - Extracting data-driven control plot %s"%c._histoTitle
                     myCtrlDsetRootHisto = c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                     if myCtrlDsetRootHisto == None:
-                        print WarningLabel()+"Could not find control plot '%s', skipping..."%c._histoTitle
+                        print ShellStyles.WarningLabel()+"Could not find control plot '%s', skipping..."%c._histoTitle
                         self._controlPlots.append(None)
                     else:
                         # Obtain overall purity for QCD
@@ -512,21 +522,22 @@ class DatacardColumn():
                                 except TypeError:
                                     pass
                         self._controlPlots.append(myDictionary)
+    print "end keys =",ROOT.gROOT.GetNkeys()
 
     ## Returns rate for column
     def getRateResult(self):
         if self._rateResult == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         if self._rateResult.getResult() == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         return self._rateResult.getResult()
 
     ## Returns rate histogram for column
     def getRateHistogram(self):
         if self._rateResult == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         if self._rateResult.getHistograms() == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate histograms have not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Rate histograms have not been cached! (did you forget to call doDataMining()?)")
         return self._rateResult.getHistograms()[0]
 
     ## Returns purity histogram (only relevant for QCD)
@@ -543,9 +554,9 @@ class DatacardColumn():
     ## Returns nuisance for column (as string)
     def getNuisanceResultByMasterId(self, id):
         if self._nuisanceResults == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
         if len(self._nuisanceResults) == 0:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
         for result in self._nuisanceResults:
             if id == result.getMasterId():
                 return result.getResult()
@@ -554,9 +565,9 @@ class DatacardColumn():
     ## Returns full nuisance for column (as string)
     def getFullNuisanceResultByMasterId(self, id):
         if self._nuisanceResults == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
         if len(self._nuisanceResults) == 0:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
         for result in self._nuisanceResults:
             if id == result.getMasterId():
                 return result
@@ -565,9 +576,9 @@ class DatacardColumn():
     ## Stores the cached result histograms to root file
     def setResultHistogramsToRootFile(self, rootfile):
         if self._rateResult == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         if self._rateResult.getResult() == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         # Set rate histogram
         self._rateResult.linkHistogramsToRootFile(rootfile)
         # Set nuisance histograms
