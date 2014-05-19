@@ -100,7 +100,7 @@ class ControlPlotMaker:
                     if hQCD != None:
                         myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
                         myHisto.setIsDataMC(isData=False, isMC=True)
-                        myStackList = [myHisto]+myStackList
+                        myStackList.insert(0, myHisto)
                     if hEmbedded != None:
                         myHisto = histograms.Histo(hEmbedded,"Embedding")
                         myHisto.setIsDataMC(isData=False, isMC=True)
@@ -125,9 +125,9 @@ class ControlPlotMaker:
                                     hData.getRootHisto().SetBinContent(k, -1.0)
                                     hData.getRootHisto().SetBinError(k, 0.0)
                     # Data
-                    myHisto = histograms.Histo(hData,"Data")
-                    myHisto.setIsDataMC(isData=True, isMC=False)
-                    myStackList.insert(0, myHisto)
+                    myDataHisto = histograms.Histo(hData,"Data")
+                    myDataHisto.setIsDataMC(isData=True, isMC=False)
+                    myStackList.insert(0, myDataHisto)
                     # Add signal
                     mySignalLabel = "TTToHplus_M%d"%m
                     if m > 179:

@@ -2,8 +2,7 @@
 
 import os
 import sys
-
-#import ROOT
+import cProfile
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
@@ -503,8 +502,10 @@ class DataCardGenerator:
             myLuminosity = self._dsetMgrManager.getLuminosity(myDsetMgrIndex)
             myMainCounterTable = self._dsetMgrManager.getMainCounterTable(myDsetMgrIndex)
             if c.getLandsProcess() in self._config.EWKFakeIdList:
+                #cProfile.runctx("c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractorsEWKfake)",globals(),locals())
                 c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractorsEWKfake)
             else:
+                #cProfile.runctx("c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)",globals(),locals())
                 c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
 
