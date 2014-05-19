@@ -112,6 +112,9 @@ def doPlots(datasetsAve, datasetsSeeds, datasetName, plotter):
 
     addEventCounts = False
 
+    compatTests = []
+    compatTestsAve = []
+
     def createPlot(name):
         drhAve = dsetAve.getDatasetRootHisto(name)
         drhAve.setName("Average")
@@ -120,6 +123,20 @@ def doPlots(datasetsAve, datasetsSeeds, datasetName, plotter):
             drh = d.getDatasetRootHisto(name)
             drh.setName("Seed %d" % i)
             drhSeeds.append(drh)
+
+        if name == "shapeTransverseMass":
+            tha = drhAve.getHistogram()
+            for i, di in enumerate(drhSeeds):
+                thi = di.getHistogram()
+                chi2 = tha.Chi2Test(thi, "WW")
+                kolmo = tha.KolmogorovTest(thi)
+                compatTestsAve.append( ("a+%d" % i, chi2, kolmo) )
+
+                for j in xrange(i+1, len(drhSeeds)):
+                    thj = drhSeeds[j].getHistogram()
+                    chi2 = thi.Chi2Test(thj, "WW")
+                    kolmo = thi.KolmogorovTest(thj)
+                    compatTests.append( ("%d+%d" % (i, j), chi2, kolmo) )
 
         p = plots.ComparisonManyPlot(drhAve, drhSeeds)
         p.setLuminosity(lumi)
@@ -140,6 +157,24 @@ def doPlots(datasetsAve, datasetsSeeds, datasetName, plotter):
 
     plotter.plot(datasetName, createPlot)
 
+    print "Chi2-probability and Kolmogorov-probability of all pair-wise comparisons"
+    hchi2 = ROOT.TH1F("chi2", "chi2;#chi^{2} probability;Entries", 100, 0, 1)
+    hchi2a = ROOT.TH1F("chi2_ave", "chi2;#chi^{2} probability;Entries", 100, 0, 1)
+    hkolmo = ROOT.TH1F("kolmogorov", "kolmo;Kolmogorov probability;Entries", 100, 0, 1)
+    hkolmoa = ROOT.TH1F("kolmogorov_ave", "kolmo;Kolmogorov probability;Entries", 100, 0, 1)
+    for pair, chi2, kolmo in compatTests:
+        print "%s: %f %f" % (pair, chi2, kolmo)
+        hchi2.Fill(chi2)
+        hkolmo.Fill(kolmo)
+    for pair, chi2, kolmo in compatTestsAve:
+        print "%s: %f %f" % (pair, chi2, kolmo)
+        hchi2a.Fill(chi2)
+        hkolmoa.Fill(kolmo)
+
+    for th1 in [hchi2, hchi2a, hkolmo, hkolmoa]:
+        p = plots.PlotBase([th1])
+        p.setLuminosity(lumi)
+        plots.drawPlot(p, th1.GetName(), ylabel="Entries", createLegend=None)
 
 if __name__ == "__main__":
     main()
