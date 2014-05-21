@@ -176,7 +176,7 @@ class PseudoMultiCrabModule:
         ROOT.gDirectory.GetList().Delete()
 
     def addShape(self, shapeHisto, plotName):
-        self._shapes.append(shapeHisto.Clone(plotName)) # aux
+        self._shapes.append(shapeHisto.Clone(plotName))
         myValue = 0.0
         myUncert = 0.0
         for i in range(1, shapeHisto.GetNbinsX()+1):

@@ -54,10 +54,15 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     # Note that only the source histograms for the shape uncert are stored
     # because the result must be calculated after rebinning
     # (and rebinning is no longer done here for flexibility reasons)
-    myQCDNormalizationSystResults.addShape(myResult.getRegionSystNumerator(), myShapeString)
-    myQCDNormalizationSystResults.addDataDrivenControlPlots(myResult.getRegionSystNumeratorCtrlPlots(),myResult.getControlPlotLabelsForQCDSyst())
-    myQCDNormalizationSystResults.addShape(myResult.getRegionSystDenominator(), myShapeString)
-    myQCDNormalizationSystResults.addDataDrivenControlPlots(myResult.getRegionSystDenominatorCtrlPlots(),myResult.getControlPlotLabelsForQCDSyst())
+    myQCDNormalizationSystResults.addShape(myResult.getRegionSystNumerator(), myShapeString+"Numerator")
+    myQCDNormalizationSystResults.addShape(myResult.getRegionSystDenominator(), myShapeString+"Denominator")
+    myLabels = myResult.getControlPlotLabelsForQCDSyst()
+    for i in range(0,len(myLabels)):
+        myLabels[i] = myLabels[i]+"Numerator"
+    myQCDNormalizationSystResults.addDataDrivenControlPlots(myResult.getRegionSystNumeratorCtrlPlots(),myLabels)
+    for i in range(0,len(myLabels)):
+        myLabels[i] = myLabels[i].replace("Numerator","Denominator")
+    myQCDNormalizationSystResults.addDataDrivenControlPlots(myResult.getRegionSystDenominatorCtrlPlots(),myLabels)
     myOutputCreator.addModule(myQCDNormalizationSystResults)
     # Clean up
     myResult.delete()
@@ -91,6 +96,7 @@ def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,m
     dsetMgrCreator.close()
     ROOT.gROOT.CloseFiles()
     ROOT.gROOT.GetListOfCanvases().Delete()
+    ROOT.gDirectory.GetList().Delete()
 
 def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
     myLocalDelta = time.time() - localStart
