@@ -165,17 +165,18 @@ class PseudoMultiCrabModule:
         if False:
             # Once the objects are written to file, they are erased from the list
             for h in self._shapes:
-                ROOT.gDirectory.Delete(h.GetName())
+                h.Delete()
             for h in self._dataDrivenControlPlots:
-                ROOT.gDirectory.Delete(h.GetName())
+                h.Delete()
             self._counters = None
             self._counterUncertainties = None
-            ROOT.gDirectory.Delete(self._hSplittedBinInfo.GetName())
-            ROOT.gDirectory.Delete(self._dataVersion.GetName())
-            ROOT.gDirectory.Delete(self._codeVersion.GetName())
+            self._hSplittedBinInfo.Delete()
+            self._dataVersion.Delete()
+            self._codeVersion.Delete()
+        ROOT.gDirectory.GetList().Delete()
 
     def addShape(self, shapeHisto, plotName):
-        self._shapes.append(shapeHisto.Clone(plotName))
+        self._shapes.append(shapeHisto.Clone(plotName)) # aux
         myValue = 0.0
         myUncert = 0.0
         for i in range(1, shapeHisto.GetNbinsX()+1):

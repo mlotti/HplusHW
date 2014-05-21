@@ -12,10 +12,10 @@ import cProfile
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.pseudoMultiCrabCreator import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector as analysisModuleSelector
+import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult as qcdInvertedResult
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pseudoMultiCrabCreator as pseudoMultiCrabCreator
 
 myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
 
@@ -40,11 +40,10 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
         myDisplayStatus = False
     # Gather results
     # Create containers for results
-    myModuleResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode)
-    myQCDNormalizationSystUpResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDNormPlus")
-    myQCDNormalizationSystDownResults = PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDNormMinus")
+    myModuleResults = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode)
+    myQCDNormalizationSystResults = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDNormSource")
     # Obtain results
-    myResult = QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity, myModuleInfoString, myNormFactors, shapeOnly=False, displayPurityBreakdown=True)
+    myResult = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity, myModuleInfoString, myNormFactors, shapeOnly=False, displayPurityBreakdown=True, noRebin=True)
     # Store results
     myModuleResults.addShape(myResult.getShape(), myShapeString)
     myModuleResults.addShape(myResult.getShapeMCEWK(), myShapeString+"_MCEWK")
@@ -52,18 +51,21 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     myModuleResults.addDataDrivenControlPlots(myResult.getControlPlots(),myResult.getControlPlotLabels())
     myOutputCreator.addModule(myModuleResults)
     # Up variation of QCD normalization (i.e. ctrl->signal region transition)
-    myQCDNormalizationSystUpResults.addShape(myResult.getRegionSystUp(), myShapeString)
-    myQCDNormalizationSystUpResults.addDataDrivenControlPlots(myResult.getRegionSystUpCtrlPlots(),myResult.getControlPlotLabelsForQCDSyst())
-    myOutputCreator.addModule(myQCDNormalizationSystUpResults)
-    # Down variation of QCD normalization (i.e. ctrl->signal region transition)
-    myQCDNormalizationSystDownResults.addShape(myResult.getRegionSystDown(), myShapeString)
-    myQCDNormalizationSystDownResults.addDataDrivenControlPlots(myResult.getRegionSystDownCtrlPlots(),myResult.getControlPlotLabelsForQCDSyst())
-    myOutputCreator.addModule(myQCDNormalizationSystDownResults)
+    # Note that only the source histograms for the shape uncert are stored
+    # because the result must be calculated after rebinning
+    # (and rebinning is no longer done here for flexibility reasons)
+    myQCDNormalizationSystResults.addShape(myResult.getRegionSystNumerator(), myShapeString)
+    myQCDNormalizationSystResults.addDataDrivenControlPlots(myResult.getRegionSystNumeratorCtrlPlots(),myResult.getControlPlotLabelsForQCDSyst())
+    myQCDNormalizationSystResults.addShape(myResult.getRegionSystDenominator(), myShapeString)
+    myQCDNormalizationSystResults.addDataDrivenControlPlots(myResult.getRegionSystDenominatorCtrlPlots(),myResult.getControlPlotLabelsForQCDSyst())
+    myOutputCreator.addModule(myQCDNormalizationSystResults)
+    # Clean up
     myResult.delete()
     dsetMgr.close()
     dsetMgrCreator.close()
     ROOT.gROOT.CloseFiles()
     ROOT.gROOT.GetListOfCanvases().Delete()
+    ROOT.gDirectory.GetList().Delete()
 
 def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString,myNormFactors):
     myModuleInfoString = "%s_%s_%s_%s"%(era, searchMode, optimizationMode,syst)
@@ -76,8 +78,8 @@ def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,m
     systDsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
     myLuminosity = systDsetMgr.getDataset("Data").getLuminosity()
     # Obtain results
-    mySystModuleResults = PseudoMultiCrabModule(systDsetMgr, era, searchMode, optimizationMode, syst)
-    mySystResult = QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", systDsetMgr, myLuminosity, myModuleInfoString, myNormFactors, shapeOnly=False, displayPurityBreakdown=False)
+    mySystModuleResults = pseudoMultiCrabCreator.PseudoMultiCrabModule(systDsetMgr, era, searchMode, optimizationMode, syst)
+    mySystResult = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", systDsetMgr, myLuminosity, myModuleInfoString, myNormFactors, shapeOnly=False, displayPurityBreakdown=False, noRebin=True)
     mySystModuleResults.addShape(mySystResult.getShape(), myShapeString)
     mySystModuleResults.addShape(mySystResult.getShapeMCEWK(), myShapeString+"_MCEWK")
     mySystModuleResults.addShape(mySystResult.getShapePurity(), myShapeString+"_Purity")
@@ -109,9 +111,9 @@ if __name__ == "__main__":
         #QCDInvertedNormalizationSafetyCheck(era)
         myNormFactors = myNormFactorsImport.copy()
     else:
-        raise Exception(ErrorLabel()+"Normalisation factors ('%s.py') not found!\nRun script InvertedTauID_Normalization.py to generate the normalization factors."%myNormalizationFactorSource)
+        raise Exception(ShellStyles.ErrorLabel()+"Normalisation factors ('%s.py') not found!\nRun script InvertedTauID_Normalization.py to generate the normalization factors."%myNormalizationFactorSource)
     # Object for selecting data eras, search modes, and optimization modes
-    myModuleSelector = AnalysisModuleSelector() 
+    myModuleSelector = analysisModuleSelector.AnalysisModuleSelector()
     # Parse command line options
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=True,conflict_handler="resolve")
     myModuleSelector.addParserOptions(parser)
@@ -130,7 +132,7 @@ if __name__ == "__main__":
     if opts.multicrabDir != None:
         myMulticrabDir = opts.multicrabDir
     if not os.path.exists("%s/multicrab.cfg"%myMulticrabDir):
-        raise Exception(ErrorLabel()+"No multicrab directory found at path '%s'! Please check path or specify it with --mdir!"%(myMulticrabDir)+NormalStyle())
+        raise Exception(ShellStyles.ErrorLabel()+"No multicrab directory found at path '%s'! Please check path or specify it with --mdir!"%(myMulticrabDir)+ShellStyles.NormalStyle())
 
     myShapes = ["mt","invmass"]
     if opts.transverseMassOnly != None and opts.transverseMassOnly:
@@ -160,7 +162,7 @@ if __name__ == "__main__":
     # Loop over era/searchMode/optimizationMode options
 
     # Create pseudo-multicrab creator
-    myOutputCreator = PseudoMultiCrabCreator("QCDinverted", myMulticrabDir)
+    myOutputCreator = pseudoMultiCrabCreator.PseudoMultiCrabCreator("QCDinverted", myMulticrabDir)
     n = 0
     myGlobalStartTime = time.time()
     for massType in myShapes:
@@ -170,7 +172,7 @@ if __name__ == "__main__":
         elif massType == "invmass":
             myShapeString = "shapeInvariantMass"
         myOutputCreator.initialize(massType)
-        print HighlightStyle()+"Creating dataset for shape: %s%s"%(massType,NormalStyle())
+        print ShellStyles.HighlightStyle()+"Creating dataset for shape: %s%s"%(massType,ShellStyles.NormalStyle())
         for era in myModuleSelector.getSelectedEras():
             # Check if normalization coefficients are suitable for era
             myNormFactorsSafetyCheck(era)
@@ -178,14 +180,14 @@ if __name__ == "__main__":
                 for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
                     myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
                     n += 1
-                    print CaptionStyle()+"Module %d/%d: %s/%s%s"%(n,myTotalModules,myModuleInfoString,massType,NormalStyle())
+                    print ShellStyles.CaptionStyle()+"Module %d/%d: %s/%s%s"%(n,myTotalModules,myModuleInfoString,massType,ShellStyles.NormalStyle())
                     myStartTime = time.time()
                     doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myNormFactors,myDisplayStatus)
                     printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
                     # Now do the rest of systematics variations
                     for syst in mySystematicsNames:
                         n += 1
-                        print CaptionStyle()+"Analyzing systematics variations %d/%d: %s/%s/%s%s"%(n,myTotalModules,myModuleInfoString,syst,massType,NormalStyle())
+                        print ShellStyles.CaptionStyle()+"Analyzing systematics variations %d/%d: %s/%s/%s%s"%(n,myTotalModules,myModuleInfoString,syst,massType,ShellStyles.NormalStyle())
                         myStartTime = time.time()
                         doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,myOutputCreator,myShapeString,myNormFactors)
                         printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)

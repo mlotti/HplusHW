@@ -30,13 +30,13 @@ class SystematicsForMetShapeDifference:
     ## Delete the histograms
     def delete(self):
         for h in self._signalRegionHistograms:
-            ROOT.gDirectory.Delete(h.GetName())
+            h.Delete()
         for h in self._ctrlRegionHistograms:
-            ROOT.gDirectory.Delete(h.GetName())
-        ROOT.gDirectory.Delete(self._hCombinedSignalRegion.GetName())
-        ROOT.gDirectory.Delete(self._hCombinedCtrlRegion.GetName())
-        ROOT.gDirectory.Delete(self._systUpHistogram.GetName())
-        ROOT.gDirectory.Delete(self._systDownHistogram.GetName())
+            h.Delete()
+        self._hCombinedSignalRegion.Delete()
+        self._hCombinedCtrlRegion.Delete()
+        self._systUpHistogram.Delete()
+        self._systDownHistogram.Delete()
 
     def getHistogramsForSignalRegion(self):
         return self._signalRegionHistograms
