@@ -31,7 +31,7 @@ class SplittedHistoReader:
             if splittedBinInfoHisto.GetBinContent(i) > 1:
                 self._binLabels.append(splittedBinInfoHisto.GetXaxis().GetBinLabel(i))
                 self._binCount.append(int(splittedBinInfoHisto.GetBinContent(i) / myNormalizer))
-        ROOT.gDirectory.Delete(splittedBinInfoHisto.GetName())
+        splittedBinInfoHisto.Delete()
 
     ## Returns the maximum bin number
     def getMaxBinNumber(self):

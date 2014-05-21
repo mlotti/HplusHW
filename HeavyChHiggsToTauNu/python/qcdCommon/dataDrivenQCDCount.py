@@ -27,10 +27,14 @@ class DataDrivenQCDShape:
             for i in range(0,len(self._dataList)):
                 if self._dataList[i].GetXaxis().GetXmax() - rebinList[len(rebinList)-1] < -0.00001:
                     raise Exception(ShellStyles.ErrorLabel()+"You tried to set as maximum x value %f in rebinning, but maximum of histogram is %f!%s"%(rebinList[len(rebinList)-1],self._dataList[i].GetXaxis().GetXmax(),ShellStyles.NormalStyle()))
-                self._dataList[i] = self._dataList[i].Rebin(len(myArray)-1,"",myArray)
+                htmp = self._dataList[i].Rebin(len(myArray)-1,"",myArray)
+                self._dataList[i].Delete()
+                self._dataList[i] = htmp
                 self._dataList[i].SetName(self._dataList[i].GetName()+histoName.replace("/",""))
                 histogramsExtras.makeFlowBinsVisible(self._dataList[i])
-                self._ewkList[i] = self._ewkList[i].Rebin(len(myArray)-1,"",myArray)
+                htmp = self._ewkList[i].Rebin(len(myArray)-1,"",myArray)
+                self._ewkList[i].Delete()
+                self._ewkList[i] = htmp
                 self._ewkList[i].SetName(self._ewkList[i].GetName()+histoName.replace("/",""))
                 histogramsExtras.makeFlowBinsVisible(self._ewkList[i])
             self._rebinDoneStatus = True
@@ -40,13 +44,14 @@ class DataDrivenQCDShape:
         for h in self._dataList:
             if h == None:
                 raise Exception("asdf")
-            ROOT.gDirectory.Delete(h.GetName())
+            h.Delete()
         for h in self._ewkList:
             if h == None:
                 raise Exception()
-            ROOT.gDirectory.Delete(h.GetName())
+            h.Delete()
         self._dataList = []
         self._ewkList = []
+        
 
     def getFileFriendlyHistoName(self):
         return self._histoName.replace("/","_")
