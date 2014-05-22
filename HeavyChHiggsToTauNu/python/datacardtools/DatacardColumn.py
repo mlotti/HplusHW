@@ -466,7 +466,6 @@ class DatacardColumn():
             print "  - Has shape variation syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
             print "  - Has shape squared syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties._shapeUncertaintyAbsoluteNames)))
         # Obtain results for control plots
-        print "Obtaining control plots ..."
         if config.OptionDoControlPlots:
             for c in controlPlotExtractors:
                 if dsetMgr != None and not self.typeIsEmptyColumn():
@@ -520,10 +519,16 @@ class DatacardColumn():
                                     h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult[1], myResult[0])
                                 else:
                                     h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult, myResult)
-                            elif not n.resultIsStatUncertainty() and len(n.getHistograms()) > 0 and isinstance(n.getResult(), ScalarUncertaintyItem): # constantToShape
-                                if self._opts.verbose:
-                                    print "    - Adding norm. uncertainty: %s"%n.getMasterId()
-                                h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                            elif not n.resultIsStatUncertainty() and len(n.getHistograms()) > 0:
+                                if isinstance(n.getResult(), ScalarUncertaintyItem): # constantToShape
+                                    if self._opts.verbose:
+                                        print "    - Adding norm. uncertainty: %s"%n.getMasterId()
+                                    h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                                for e in extractors:
+                                    if e.getId() == n.getId():
+                                        if isinstance(e,QCDShapeVariationExtractor):
+                                            # Calculate and add QCD shape uncertainty to h
+                                            e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor, rootHistoWithUncertainties=h)
                         # Scale if asked
                         if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
                             h.Scale(self._additionalNormalisationFactor)
