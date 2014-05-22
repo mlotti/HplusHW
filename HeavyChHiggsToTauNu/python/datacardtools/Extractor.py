@@ -665,25 +665,35 @@ class QCDShapeVariationExtractor(ExtractorBase):
         return 1.0
 
     ## Virtual method for extracting histograms
-    def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+    def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0, rootHistoWithUncertainties = None):
         myHistograms = []
-        # Check that results have been cached
-        if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
-            raise Exception(ShellStyles.ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+ShellStyles.NormalStyle())
+        if not rootHistoWithUncertainties:
+            # Check that results have been cached
+            if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
+                raise Exception(ShellStyles.ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+ShellStyles.NormalStyle())
         # Get uncertainty variation dictionary
         myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
+        if rootHistoWithUncertainties != None:
+            myShapeUncertDict = rootHistoWithUncertainties.getShapeUncertainties()
         # Check that asked variation does not exist yet
         if self._systVariation in myShapeUncertDict.keys():
             raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': QCD systematics %s exists already!!"%(datasetColumn.getLabel(),self._systVariation))
         # Obtain histograms
         dset = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn())
         mySource = "SystVar"+self._systVariation
-        myRateHisto = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
+        myRateHisto = None
+        if rootHistoWithUncertainties == None:
+            myRateHisto = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
+        else:
+            myRateHisto = rootHistoWithUncertainties.getRootHisto()
         myHistoNamePrefix = myRateHisto.GetName().replace("_cloned","").replace("_"+dset.name,"")
+        myHistoNameShort = myHistoNamePrefix
+        if not "shape" in myHistoNamePrefix:
+            myHistoNamePrefix = "ForDataDrivenCtrlPlots/"+myHistoNamePrefix
         (hNum, hNumName) = dset.getRootHisto(myHistoNamePrefix+"Numerator", analysisPostfix=mySource)
         (hDenom, hDenomName) = dset.getRootHisto(myHistoNamePrefix+"Denominator", analysisPostfix=mySource)
         # Rebin histograms
-        myArray = array("d",getBinningForPlot(myHistoNamePrefix))
+        myArray = array("d",getBinningForPlot(myHistoNameShort))
         hRebinnedNum = hNum.Rebin(len(myArray)-1,"",myArray)
         hRebinnedDenom = hDenom.Rebin(len(myArray)-1,"",myArray)
         hNum.Delete()
@@ -700,10 +710,13 @@ class QCDShapeVariationExtractor(ExtractorBase):
         hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
         # Do calculation and fill output histograms
         systematicsForMetShapeDifference.createSystHistograms(myRateHisto, hUp, hDown, hRebinnedNum, hRebinnedDenom)
-        hUp.Add(myRateHisto, -1.0)
+        hUp.Add(myRateHisto, -1.0) # all other syst.var histograms use this convention
         hDown.Add(myRateHisto, -1.0)
         # Store uncertainty histograms
-        datasetColumn.getCachedShapeRootHistogramWithUncertainties()._shapeUncertainties[self._systVariation] = (hUp, hDown)
+        if rootHistoWithUncertainties == None:
+            datasetColumn.getCachedShapeRootHistogramWithUncertainties()._shapeUncertainties[self._systVariation] = (hUp, hDown)
+        else:
+            rootHistoWithUncertainties._shapeUncertainties[self._systVariation] = (hUp, hDown)
         # Do not apply here additional normalization, it does not affect this uncertainty
         # Append histograms to output list
         myHistograms.append(hUp)
