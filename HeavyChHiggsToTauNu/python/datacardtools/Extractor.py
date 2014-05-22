@@ -5,12 +5,15 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
+import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference as systematicsForMetShapeDifference
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 from math import pow,sqrt
 import sys
 import ROOT
+from array import array
 
 ## QCD specific method for extracting purity for a shape
 def _calculateAverageQCDPurity(shapeHisto, purityHisto):
@@ -641,6 +644,76 @@ class ShapeVariationExtractor(ExtractorBase):
     ## Virtual method for printing debug information
     def printDebugInfo(self):
         print "ShapeExtractor"
+        ExtractorBase.printDebugInfo(self)
+
+## QCDShapeVariationExtractor class
+# Extracts histogram shapes from up and down variation
+class QCDShapeVariationExtractor(ExtractorBase):
+    ## Constructor
+    def __init__(self, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
+        self._systVariation = systVariation
+        if self.isRate() or self.isObservation():
+            raise Exception(ShellStyles.ErrorLabel()+"Rate or observation not allowed for ShapeVariationExtractor!"+ShellStyles.NormalStyle())
+
+    ## Method for extracking result
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
+        if not self._systVariation in myShapeUncertDict.keys():
+            return 0.0
+        # Tell Lands / Combine that the nuisance is active for the given column, histogram is added to input root file via extractHistograms()
+        return 1.0
+
+    ## Virtual method for extracting histograms
+    def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        myHistograms = []
+        # Check that results have been cached
+        if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
+            raise Exception(ShellStyles.ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+ShellStyles.NormalStyle())
+        # Get uncertainty variation dictionary
+        myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
+        # Check that asked variation does not exist yet
+        if self._systVariation in myShapeUncertDict.keys():
+            raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': QCD systematics %s exists already!!"%(datasetColumn.getLabel(),self._systVariation))
+        # Obtain histograms
+        dset = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn())
+        mySource = "SystVar"+self._systVariation
+        myRateHisto = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
+        myHistoNamePrefix = myRateHisto.GetName().replace("_cloned","").replace("_"+dset.name,"")
+        (hNum, hNumName) = dset.getRootHisto(myHistoNamePrefix+"Numerator", analysisPostfix=mySource)
+        (hDenom, hDenomName) = dset.getRootHisto(myHistoNamePrefix+"Denominator", analysisPostfix=mySource)
+        # Rebin histograms
+        myArray = array("d",getBinningForPlot(myHistoNamePrefix))
+        hRebinnedNum = hNum.Rebin(len(myArray)-1,"",myArray)
+        hRebinnedDenom = hDenom.Rebin(len(myArray)-1,"",myArray)
+        hNum.Delete()
+        hDenom.Delete()
+        # Handle under/overflow bins
+        histogramsExtras.makeFlowBinsVisible(hRebinnedNum)
+        histogramsExtras.makeFlowBinsVisible(hRebinnedDenom)
+        # Create output histograms
+        hUp = aux.Clone(myRateHisto)
+        hUp.Reset()
+        hDown = aux.Clone(myRateHisto)
+        hDown.Reset()
+        hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
+        hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
+        # Do calculation and fill output histograms
+        systematicsForMetShapeDifference.createSystHistograms(myRateHisto, hUp, hDown, hRebinnedNum, hRebinnedDenom)
+        hUp.Add(myRateHisto, -1.0)
+        hDown.Add(myRateHisto, -1.0)
+        # Store uncertainty histograms
+        datasetColumn.getCachedShapeRootHistogramWithUncertainties()._shapeUncertainties[self._systVariation] = (hUp, hDown)
+        # Do not apply here additional normalization, it does not affect this uncertainty
+        # Append histograms to output list
+        myHistograms.append(hUp)
+        myHistograms.append(hDown)
+        # Return result
+        return myHistograms
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "QCDShapeVariationExtractor"
         ExtractorBase.printDebugInfo(self)
 
 ## ControlPlotExtractor class
