@@ -118,7 +118,7 @@ class SystematicsForMetShapeDifference:
 def createSystHistograms(hRate, hSystUp, hSystDown, hNumerator, hDenominator, quietMode=True):
     for i in range(1, hRate.GetNbinsX()+1):
         myRatio = 1.0
-        myRatioSigma = 0.5 # Absolute uncertainty default value
+        myRatioSigma = 0.2 # Relative uncertainty default value
         if abs(hNumerator.GetBinContent(i)) > 0.00001 and abs(hDenominator.GetBinContent(i)) > 0.00001:
             # Allow ratio to fluctuate also to negative side (it may happen for small numbers of the final shape)
             myRatio = hNumerator.GetBinContent(i) / hDenominator.GetBinContent(i)
