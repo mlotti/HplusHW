@@ -2,7 +2,7 @@
 # Class for obtaining lists of available eras, search modes, and variations
 
 import sys
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 
 ## Container class for dataset manager creator and its label
 class AnalysisModuleSelectorSource:
@@ -201,7 +201,7 @@ class AnalysisModuleSelector:
                 availableList.append(item)
             else:
                 if not item in otherList:
-                    print WarningStyle()+"Warning:"+NormalStyle()+" %s selection: item '%s' is available in '%s', but missing from '%s'!"%(itemLabel, item, primaryLabel, otherLabel)
+                    print ShellStyles.WarningLabel()+" %s selection: item '%s' is available in '%s', but missing from '%s'!"%(itemLabel, item, primaryLabel, otherLabel)
         # Return list of items available in both multicrab directories
         return availableList
 
@@ -217,11 +217,11 @@ class AnalysisModuleSelector:
         for item in optionsList:
             if item.isdigit():
                 if int(item) >= len(availableList) or int(item) < 0:
-                    raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" %s selection: requested for index %s, but only options 0-%d are available!"%(itemLabel, item, len(availableList)-1))
+                    raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" %s selection: requested for index %s, but only options 0-%d are available!"%(itemLabel, item, len(availableList)-1))
                 selectList.append(availableList[int(item)])
             else:
                 if not item in availableList:
-                    raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" %s selection: requested for %s, but only options (%s) are available!"%(itemLabel, item, (', '.join(map(str, availableList)))))
+                    raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" %s selection: requested for %s, but only options (%s) are available!"%(itemLabel, item, (', '.join(map(str, availableList)))))
                 else:
                     selectList.append(item)
         return selectList
@@ -309,8 +309,8 @@ class AnalysisModuleSelector:
     def _printSelection(self):
         # Define style here
         myNotSelectedStr = "      "
-        mySelectedStr = "  %s--> "%(HighlightStyle())
-        mySelectedSuffix = " <--%s"%(NormalStyle())
+        mySelectedStr = "  %s--> "%(ShellStyles.HighlightStyle())
+        mySelectedSuffix = " <--%s"%(ShellStyles.NormalStyle())
 
         print "\nSelected data eras:"
         for i in range (0,len(self._availableEras)):
