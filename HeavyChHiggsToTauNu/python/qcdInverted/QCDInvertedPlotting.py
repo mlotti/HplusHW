@@ -15,7 +15,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult import *
 
@@ -115,8 +115,8 @@ class QCDInvertedSystematics(QCDInvertedPlotBase):
 
     def _obtainFinalShapeHistogram(self, histoName):
         if histoName == None:
-            raise Exception(ErrorLabel()+"You forgot to give final shape histo name or to cache the final shape histogram!")
-        print WarningLabel()+"Final shape histo was not cached to QCDInvertedSystematics. Obtaining final shape from '%s'."%histoName
+            raise Exception(ShellStyles.ErrorLabel()+"You forgot to give final shape histo name or to cache the final shape histogram!")
+        print ShellStyles.WarningLabel()+"Final shape histo was not cached to QCDInvertedSystematics. Obtaining final shape from '%s'."%histoName
         # Obtain final result
         myFinalShape = DataDrivenQCDShape(self._dsetMgr, "Data", "EWK", histoName, self._luminosity, rebinList=self._myRebinList)
         myFinalShapeResult = QCDInvertedShape(myFinalShape, self._moduleInfoString, self._normFactors, optionPrintPurityByBins=False)
@@ -231,7 +231,7 @@ class QCDInvertedBridgeToDatacard(QCDInvertedPlot):
         mySearchMode = mySplit[1]
         myVariation = mySplit[2]
         if len(mySplit) > 2:
-            raise Exception(ErrorLabel()+"Assert len(moduleInfoString.split('_') == 3 failed! (mod = %s)"%self._moduleInfoString)
+            raise Exception(ShellStyles.ErrorLabel()+"Assert len(moduleInfoString.split('_') == 3 failed! (mod = %s)"%self._moduleInfoString)
         myModuleDir = "signalAnalysisInvertedTau%s%s%s"%(mySearchMode, myEra, myVariation)
         rootFile.cd("/")
         rootFile.mkdir(myModuleDir)
@@ -248,7 +248,7 @@ class QCDInvertedBridgeToDatacard(QCDInvertedPlot):
                 mySubDir = mySplit[0]
                 myHistoName = mySplit[1]
                 if len(mySplit) > 1:
-                    raise Exception(ErrorLabel()+"Assert len(directoryNames.split('/') == 2 failed! (mod = %s)"%self._directoryNames[i])
+                    raise Exception(ShellStyles.ErrorLabel()+"Assert len(directoryNames.split('/') == 2 failed! (mod = %s)"%self._directoryNames[i])
                 rootFile.mkdir(mySubDir)
                 rootFile.cd(mySubDir)
                 self._histograms[i].Clone(myHistoName).Write()

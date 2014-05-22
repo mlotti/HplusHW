@@ -481,7 +481,7 @@ namespace HPlus {
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForBaseline.getSelectedTau()));
       // Require that genuine tau has been selected
-      if (selectOnlyGenuineTausForMC && !iEvent.isRealData()) {
+      if (bSelectOnlyGenuineTausForMC && !iEvent.isRealData()) {
         if (!tauMatchData.isGenuineTau()) return false;
       }
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
@@ -518,7 +518,7 @@ namespace HPlus {
       // Match tau to MC
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForInverted.getSelectedTau()));
       // Require that genuine tau has been selected
-      if (selectOnlyGenuineTausForMC && !iEvent.isRealData()) {
+      if (bSelectOnlyGenuineTausForMC && !iEvent.isRealData()) {
         if (!tauMatchData.isGenuineTau()) return false;
       }
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)

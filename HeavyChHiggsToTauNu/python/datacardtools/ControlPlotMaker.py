@@ -2,8 +2,7 @@
 # Classes for making control plots (surprise, surprise ...)
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-#from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count,RootHistoWithUncertainties
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
@@ -32,7 +31,7 @@ class ControlPlotMaker:
         self._opts = opts
         self._config = config
         if config.OptionSqrtS == None:
-            raise Exception(ErrorLabel()+"Please set the parameter OptionSqrtS = <integer_value_in_TeV> in the config file!"+NormalStyle())
+            raise Exception(ShellStyles.ErrorLabel()+"Please set the parameter OptionSqrtS = <integer_value_in_TeV> in the config file!"+ShellStyles.NormalStyle())
         self._dirname = dirname
         self._luminosity = luminosity
         self._observation = observation
@@ -41,7 +40,7 @@ class ControlPlotMaker:
         #myEvaluator = SignalAreaEvaluator()
 
         # Make control plots
-        print "\n"+HighlightStyle()+"Generating control plots"+NormalStyle()
+        print "\n"+ShellStyles.HighlightStyle()+"Generating control plots"+ShellStyles.NormalStyle()
         # Loop over mass points
         for m in self._config.MassPoints:
             print "... mass = %d GeV"%m
@@ -102,7 +101,7 @@ class ControlPlotMaker:
                     if hQCD != None:
                         myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
                         myHisto.setIsDataMC(isData=False, isMC=True)
-                        myStackList = [myHisto]+myStackList
+                        myStackList.insert(0, myHisto)
                     if hEmbedded != None:
                         myHisto = histograms.Histo(hEmbedded,"Embedding")
                         myHisto.setIsDataMC(isData=False, isMC=True)
@@ -127,9 +126,9 @@ class ControlPlotMaker:
                                     hData.getRootHisto().SetBinContent(k, -1.0)
                                     hData.getRootHisto().SetBinError(k, 0.0)
                     # Data
-                    myHisto = histograms.Histo(hData,"Data")
-                    myHisto.setIsDataMC(isData=True, isMC=False)
-                    myStackList.insert(0, myHisto)
+                    myDataHisto = histograms.Histo(hData,"Data")
+                    myDataHisto.setIsDataMC(isData=True, isMC=False)
+                    myStackList.insert(0, myDataHisto)
                     # Add signal
                     mySignalLabel = "TTToHplus_M%d"%m
                     if m > 179:
@@ -284,7 +283,7 @@ class SignalAreaEvaluator:
         myFile = open(myFilename, "w")
         myFile.write(self._output)
         myFile.close()
-        print HighlightStyle()+"Signal area evaluation written to: "+NormalStyle()+myFilename
+        print ShellStyles.HighlightStyle()+"Signal area evaluation written to: "+ShellStyles.NormalStyle()+myFilename
         self._output = ""
 
     def _evaluate(self,evaluationRange,h):

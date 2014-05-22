@@ -2,7 +2,7 @@
 #
 # Authors: LAW
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from math import sqrt
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
@@ -30,13 +30,13 @@ class SystematicsForMetShapeDifference:
     ## Delete the histograms
     def delete(self):
         for h in self._signalRegionHistograms:
-            ROOT.gDirectory.Delete(h.GetName())
+            h.Delete()
         for h in self._ctrlRegionHistograms:
-            ROOT.gDirectory.Delete(h.GetName())
-        ROOT.gDirectory.Delete(self._hCombinedSignalRegion.GetName())
-        ROOT.gDirectory.Delete(self._hCombinedCtrlRegion.GetName())
-        ROOT.gDirectory.Delete(self._systUpHistogram.GetName())
-        ROOT.gDirectory.Delete(self._systDownHistogram.GetName())
+            h.Delete()
+        self._hCombinedSignalRegion.Delete()
+        self._hCombinedCtrlRegion.Delete()
+        self._systUpHistogram.Delete()
+        self._systDownHistogram.Delete()
 
     def getHistogramsForSignalRegion(self):
         return self._signalRegionHistograms
@@ -113,31 +113,39 @@ class SystematicsForMetShapeDifference:
         # Fill up and down variation histogram (bin-by-bin)
         if finalShape == None:
             return
-        for i in range(1, self._systUpHistogram.GetNbinsX()+1):
-            myRatio = 1.0
-            myRatioSigma = 0.0 # Absolute uncertainty
-            if abs(self._hCombinedSignalRegion.GetBinContent(i)) > 0.00001 and abs(self._hCombinedCtrlRegion.GetBinContent(i)) > 0.00001:
-                # Allow ratio to fluctuate also to negative side (it may happen for small numbers of the final shape)
-                myRatio = self._hCombinedSignalRegion.GetBinContent(i) / self._hCombinedCtrlRegion.GetBinContent(i)
-                myRatioSigma = errorPropagationForDivision(self._hCombinedSignalRegion.GetBinContent(i), self._hCombinedSignalRegion.GetBinError(i),
-                                                           self._hCombinedCtrlRegion.GetBinContent(i), self._hCombinedCtrlRegion.GetBinError(i))
-            #print i, (myRatio+myRatioSigma)*finalShape.GetBinContent(i), (myRatio-myRatioSigma)*finalShape.GetBinContent(i), finalShape.GetBinContent(i)
-            self._systUpHistogram.SetBinContent(i, (1.0+myRatioSigma)*finalShape.GetBinContent(i))
-            self._systDownHistogram.SetBinContent(i, (1.0-myRatioSigma)*finalShape.GetBinContent(i))
-        # Calculate total uncertainty
-        if not quietMode:
-            mySignalIntegral = self._hCombinedSignalRegion.Integral()
-            myCtrlIntegral = self._hCombinedCtrlRegion.Integral()
-            mySignalUncert = 0.0
-            myCtrlUncert = 0.0
-            for i in range(1, self._systUpHistogram.GetNbinsX()+1):
-                mySignalUncert += self._hCombinedSignalRegion.GetBinError(i)**2
-                myCtrlUncert += self._hCombinedCtrlRegion.GetBinError(i)**2
-            myRatio = 1.0
-            myRatioSigma = 0.0
-            if mySignalIntegral > 0.0 and myCtrlIntegral > 0.0:
-                myRatio = mySignalIntegral / myCtrlIntegral
-                myRatioSigma = errorPropagationForDivision(mySignalIntegral,sqrt(mySignalUncert),myCtrlIntegral,sqrt(myCtrlUncert))
-            mySigmaUp = myRatio + myRatioSigma - 1.0
-            mySigmaDown = myRatio - myRatioSigma - 1.0
-            print "Estimate for syst. uncertainty of non-isol.->isol. shape difference: up: %.1f %% down: %.1f %%"%(mySigmaUp*100.0,mySigmaDown*100.0)
+        self.createSystHistograms(finalShape, self._systUpHistogram, self._systDownHistogram, self._hCombinedSignalRegion, self._hCombinedCtrlRegion, quietMode)
+
+def createSystHistograms(hRate, hSystUp, hSystDown, hNumerator, hDenominator, quietMode=True):
+    for i in range(1, hRate.GetNbinsX()+1):
+        myRatio = 1.0
+        myRatioSigma = 0.2 # Relative uncertainty default value
+        if abs(hNumerator.GetBinContent(i)) > 0.00001 and abs(hDenominator.GetBinContent(i)) > 0.00001:
+            # Allow ratio to fluctuate also to negative side (it may happen for small numbers of the final shape)
+            myRatio = hNumerator.GetBinContent(i) / hDenominator.GetBinContent(i)
+            myRatioSigma = errorPropagationForDivision(hNumerator.GetBinContent(i), hNumerator.GetBinError(i),
+                                                        hDenominator.GetBinContent(i), hDenominator.GetBinError(i))
+            if myRatioSigma > 1.0:
+                myRatioSigma = 1.0
+            #if myRatio < 0.0:
+            #    myRatioSigma *= -1.0 # this would take a potential cross-over into account, but it is discouraged
+            # because merging bins could lead to potential cancellations and underestimation of syst. uncertainty
+        #print i, (myRatio+myRatioSigma)*hRate.GetBinContent(i), (myRatio-myRatioSigma)*hRate.GetBinContent(i), hRate.GetBinContent(i)
+        hSystUp.SetBinContent(i, (1.0+myRatioSigma)*hRate.GetBinContent(i))
+        hSystDown.SetBinContent(i, (1.0-myRatioSigma)*hRate.GetBinContent(i))
+    # Calculate total uncertainty
+    if not quietMode:
+        mySignalIntegral = hNumerator.Integral()
+        myCtrlIntegral = hDenominator.Integral()
+        mySignalUncert = 0.0
+        myCtrlUncert = 0.0
+        for i in range(1, hSystUp.GetNbinsX()+1):
+            mySignalUncert += hNumerator.GetBinError(i)**2
+            myCtrlUncert += hDenominator.GetBinError(i)**2
+        myRatio = 1.0
+        myRatioSigma = 0.0
+        if mySignalIntegral > 0.0 and myCtrlIntegral > 0.0:
+            myRatio = mySignalIntegral / myCtrlIntegral
+            myRatioSigma = errorPropagationForDivision(mySignalIntegral,sqrt(mySignalUncert),myCtrlIntegral,sqrt(myCtrlUncert))
+        mySigmaUp = myRatio + myRatioSigma - 1.0
+        mySigmaDown = myRatio - myRatioSigma - 1.0
+        print "Estimate for syst. uncertainty of non-isol.->isol. shape difference: up: %.1f %% down: %.1f %%"%(mySigmaUp*100.0,mySigmaDown*100.0)

@@ -5,7 +5,7 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014_02_14_v3_etacorrected"
 #Path = "/home/wendland/data/v533/2014-03-20"
 #Path = "/home/wendland/data/v533/2014-03-20_expCtrlPlots"
-Path = "/home/wendland/data/v533/2014-03-20_expCtrlPlots_mt20gev"
+Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
 #Path = "/home/wendland/data/v533/2014_03_12_metphicorrected"
@@ -770,8 +770,8 @@ Nuisances.append(Nuisance(
     id            = "QCD_metshape",
     label         = "QCD met shape syst.",
     distr         = "shapeQ",
-    function      = "ShapeVariation",
-    systVariation = "QCDNorm",
+    function      = "QCDShapeVariation",
+    systVariation = "QCDNormSource",
 ))
 
 if OptionGenuineTauBackgroundSource == "DataDriven" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
