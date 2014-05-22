@@ -8,7 +8,7 @@ import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TailFitter as TailFitter
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,ConstantExtractor
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,QCDShapeVariationExtractor,ConstantExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
@@ -294,17 +294,20 @@ class DatacardColumn():
                 raise Exception(ShellStyles.ErrorLabel()+"Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?"%self.getDatasetMgrColumn())
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
             if myDatasetRootHisto.isMC():
+                # Set signal xsection
                 if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
                      # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
                      myDatasetRootHisto.Delete()
                      dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
+                # Fix a bug in signal xsection
                 elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
                      if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - 172.0) > 0.0001:
                          print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 172.0 pb according to arXiv:1303.6254"
                          myDatasetRootHisto.Delete()
                          dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(172.0)
                          myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
+                # Normalize to luminosity
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties().Clone()
             # Remove any variations not active for the column
@@ -412,9 +415,12 @@ class DatacardColumn():
                             # Add also to the uncertainties as normalization uncertainty
                             self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                         else:
-                            # Apply any further scaling (only necessary for the unceratainties from variation)
-                            if e.getDistribution() == "shapeQ" and abs(e.getScaleFactor() - 1.0) > 0.0:
-                                self._cachedShapeRootHistogramWithUncertainties.ScaleVariationUncertainty(e._systVariation, e.getScaleFactor())
+                            myHistograms = []
+                            if not isinstance(e,QCDShapeVariationExtractor):
+                                # Apply any further scaling (only necessary for the uncertainties from variation)
+                                if e.getDistribution() == "shapeQ" and abs(e.getScaleFactor() - 1.0) > 0.0:
+                                    self._cachedShapeRootHistogramWithUncertainties.ScaleVariationUncertainty(e._systVariation, e.getScaleFactor())
+                            # Obtain histograms
                             myHistograms = e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                             # Histograms constain abs uncertainty, need to add nominal histogram so that Lands accepts the histograms
                             if e.getDistribution() == "shapeQ":
@@ -460,6 +466,7 @@ class DatacardColumn():
             print "  - Has shape variation syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
             print "  - Has shape squared syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties._shapeUncertaintyAbsoluteNames)))
         # Obtain results for control plots
+        print "Obtaining control plots ..."
         if config.OptionDoControlPlots:
             for c in controlPlotExtractors:
                 if dsetMgr != None and not self.typeIsEmptyColumn():

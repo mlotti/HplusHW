@@ -809,8 +809,8 @@ Nuisances.append(Nuisance(
     id            = "QCD_metshape",
     label         = "QCD met shape syst.",
     distr         = "shapeQ",
-    function      = "ShapeVariation",
-    systVariation = "QCDNorm",
+    function      = "QCDShapeVariation",
+    systVariation = "QCDNormSource",
 ))
 
 if OptionGenuineTauBackgroundSource == "DataDriven" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":

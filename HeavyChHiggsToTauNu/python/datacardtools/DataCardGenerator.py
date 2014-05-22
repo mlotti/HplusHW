@@ -744,6 +744,13 @@ class DataCardGenerator:
                                                                 mode = Extractor.ExtractorMode.SHAPENUISANCE,
                                                                 opts = self._opts,
                                                                 scaleFactor = n.getArg("scaleFactor")))
+            elif n.function == "QCDShapeVariation":
+                self._extractors.append(Extractor.QCDShapeVariationExtractor(exid = n.id,
+                                                                distribution = n.distr,
+                                                                description = n.label,
+                                                                systVariation = n.getArg("systVariation"),
+                                                                mode = Extractor.ExtractorMode.SHAPENUISANCE,
+                                                                opts = self._opts))
             elif n.function == "ScaleFactor":
                 self._extractors.append(Extractor.ScaleFactorExtractor(exid = n.id,
                                                             histoDirs = n.getArg("histoDir"),
