@@ -1041,12 +1041,16 @@ class SystematicsHelper:
                 print "  Using explicitly specified shape variations (%s)" % ",".join(shapes)
 
         for source in shapes:
-            (plus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Plus")
-            (minus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Minus")
-            if modify is not None:
-                modify(plus)
-                modify(minus)
-            rootHistoWithUncertainties.addShapeUncertaintyFromVariation(source, plus, minus)
+            plus = None
+            minus = None
+            # Need to do the check, because of QCD shape uncertainty
+            if dset.hasRootHisto(self._histoName, analysisPostfix=source+"Plus"):
+                (plus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Plus")
+                (minus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Minus")
+                if modify is not None:
+                    modify(plus)
+                    modify(minus)
+                rootHistoWithUncertainties.addShapeUncertaintyFromVariation(source, plus, minus)
 
         # Add any additional shape variation histograms supplied by the user
         additShapes = self._settings.get("additionalShapes")
@@ -1200,9 +1204,10 @@ class RootHistoWithUncertainties:
 
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
-        # Subtract nominal to get absolute uncertainty
-        th1Plus.Add(self._rootHisto, -1.0)
-        th1Minus.Add(self._rootHisto, -1.0)
+        # Subtract nominal to get absolute uncertainty (except for source histograms)
+        if not "Source" in name:
+            th1Plus.Add(self._rootHisto, -1.0)
+            th1Minus.Add(self._rootHisto, -1.0)
         # Store
         self._shapeUncertainties[name] = (th1Plus, th1Minus)
 
@@ -1217,7 +1222,28 @@ class RootHistoWithUncertainties:
             if not key in keepList:
                 dropList.append(key)
         for key in dropList:
+            (hplus,hminus) = self._shapeUncertainties[key]
+            hplus.Delete()
+            hminus.Delete()
             del self._shapeUncertainties[key]
+
+    ## Remove shape variation uncertainties for a key
+    #
+    # \param name   String of key to be removed
+    #
+    # The normalization relative uncertainties are summed quadratically
+    def removeShapeUncertainty(self, name):
+        myKey = None
+        if name in self._shapeUncertainties.keys():
+            myKey = name
+        elif "SystVar"+name in self._shapeUncertainties.keys():
+            myKey = "SystVar"+name
+        else:
+            raise Exception("Could not find key '%s' in syst. var.! (list = %s)"%(name,", ".join(map(str,self._shapeUncertainties.keys()))))
+        (hplus,hminus) = self._shapeUncertainties[myKey]
+        hplus.Delete()
+        hminus.Delete()
+        del self._shapeUncertainties[myKey]
 
     ## Add bin-wise relative uncertainty
     #
@@ -2808,14 +2834,16 @@ class Dataset:
     #
     # If dataset.TreeDraw object is given, it is considered to always
     # exist.
-    def hasRootHisto(self, name):
-        if hasattr(name, "draw"):
+    def hasRootHisto(self, name, **kwargs):
+        realName = self._translateName(name, **kwargs)
+        if hasattr(realName, "draw"):
             return True
 
-        try:
-            return len(self.getRootObjects(name)) > 0
-        except HistogramNotFoundException:
-            return False
+        for f in self.files:
+            o = aux.Get(f, realName)
+            if o != None:
+                o.Delete()
+                return True
 
     ## Get the dataset.DatasetRootHisto object for a named histogram.
     # 
