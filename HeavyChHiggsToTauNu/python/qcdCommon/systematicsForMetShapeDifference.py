@@ -113,7 +113,7 @@ class SystematicsForMetShapeDifference:
         # Fill up and down variation histogram (bin-by-bin)
         if finalShape == None:
             return
-        self.createSystHistograms(finalShape, self._systUpHistogram, self._systDownHistogram, self._hCombinedSignalRegion, self._hCombinedCtrlRegion, quietMode)
+        createSystHistograms(finalShape, self._systUpHistogram, self._systDownHistogram, self._hCombinedSignalRegion, self._hCombinedCtrlRegion, quietMode)
 
 def createSystHistograms(hRate, hSystUp, hSystDown, hNumerator, hDenominator, quietMode=True):
     for i in range(1, hRate.GetNbinsX()+1):
