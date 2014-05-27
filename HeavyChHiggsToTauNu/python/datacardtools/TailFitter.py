@@ -10,7 +10,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 
-fitOptions = "RM"
+fitOptions = "RMS"
 #fitOptions = "LRB"
 
 # Fitting functions
@@ -38,7 +38,7 @@ class FitFuncGausExpTail(FitFuncBase):
         fit.SetParameter(2, 90.0)
         fit.SetParameter(3, 100.0)
 
-class FitFuncExpTail(FitFuncBase):
+class FitFuncExpTailExo(FitFuncBase):
     def __init__(self):
         FitFuncBase.__init__(self, 3)
 
@@ -53,7 +53,7 @@ class FitFuncExpTail(FitFuncBase):
         fit.SetParameter(1,0.002)
         fit.SetParameter(2,0.00001)
 
-class FitFuncExpTailAlternate(FitFuncBase):
+class FitFuncExpTailExoAlternate(FitFuncBase):
     def __init__(self):
         FitFuncBase.__init__(self, 3)
 
@@ -68,6 +68,39 @@ class FitFuncExpTailAlternate(FitFuncBase):
         fit.SetParameter(1, 1.0)
         fit.SetParameter(2, 1.0)
 
+class FitFuncExpTailTauTau(FitFuncBase):
+    def __init__(self):
+        FitFuncBase.__init__(self, 3)
+
+    def __call__(self, x, par):
+        return par[0]*ROOT.TMath.Exp(-x[0] / (par[1] + x[0]*par[2]))
+
+    def setParamLimits(self, fit):
+        fit.SetParLimits(0,1,100000)
+        fit.SetParLimits(1,0.1,200)
+        fit.SetParLimits(2,-20.0,20.0)
+        fit.SetParameter(0,10.0)
+        fit.SetParameter(1,1)
+        fit.SetParameter(2,0.00001)
+
+class FitFuncExpTailTauTauTest(FitFuncBase):
+    def __init__(self):
+        FitFuncBase.__init__(self, 4)
+
+    def __call__(self, x, par):
+        return par[3]*ROOT.TMath.Exp(-(x[0]-par[2]) / (par[0] + (x[0]-par[2])*par[1]))
+
+    def setParamLimits(self, fit):
+        fit.SetParLimits(0,0.1,2000)
+        fit.SetParLimits(1,0.0001,2.0)
+        fit.SetParLimits(2,0,200)
+        fit.SetParLimits(3,0.01,4000)
+        fit.SetParameter(0,10.0)
+        fit.SetParameter(1,0.003)
+        fit.SetParameter(2,100.0)
+        fit.SetParameter(3,1.0)
+
+
 def doPlusVariation(self, func):
     for i in range(1,self._npar):
         func.SetParameter(i, func.GetParameter(i) + func.GetParError(i))
@@ -78,129 +111,167 @@ def doMinusVariation(self, func):
 
 class TailFitter:
     def __init__(self, h, label, name, fitmin, fitmax):
-        print "Fitting tail for shape: %s, range = %d-%d"%(label, fitmin, fitmax)
-        
+        def printEigenVectors(matrix):
+            s = "Eigenvectors: "
+            for i in range(0, matrix.GetNcols()):
+                if i > 0:
+                    s += " and "
+                s += "("
+                for j in range(0, matrix.GetNrows()):
+                    if j > 0:
+                        s += ","
+                    s += "%f"%matrix(j,i)
+                s += ")"
+            print s
+
+        def printEigenValues(vector):
+            s = "Eigenvalues: "
+            for j in range(0, vector.GetNrows()):
+                if i > 0:
+                    s += " and "
+                s += "%f"%vector(j)
+            print s
+
         myStyle = tdrstyle.TDRStyle()
         myStyle.setOptStat(True)
         myStyle.tdrStyle.SetOptFit(True)
         ROOT.TVirtualFitter.SetDefaultFitter("Minuit2")
 
         myFitFunc = None
-        if label.startswith("HH") or label.startswith("HW"):
-            # signal
-            #myFitFunc = FitFuncGausExpTail()
-            myFitFunc = FitFuncExpTail()
-        elif label.startswith("QCD"):
+        if label.startswith("QCD"):
             # QCD
             #myFitFunc = FitFuncExpTail()
-            myFitFunc = FitFuncGausExpTail()
-            fitmin = 40
+            myFitFunc = FitFuncExpTailTauTauTest()
+            fitmin = 110
             fitmax = 200
         else:
             fitmin = 100
             fitmax = 200
-            myFitFunc = FitFuncExpTail()
+            myFitFunc = FitFuncExpTailTauTauTest()
 
-        myM = ROOT.RooRealVar("m","m",h.GetXaxis().GetXmin(),h.GetXaxis().GetXmax())
-        myA = ROOT.RooRealVar("a","a",50,0.1,200)
-        myB = ROOT.RooRealVar("b","b",50,-10500,10500) # //lB.setConstant(kTRUE);
-        myRooHisto = ROOT.RooDataHist("Data","Data",ROOT.RooArgList(myM),h)
+        # Do fit
+        print "Fitting tail for shape: %s, range = %d-%d"%(label, fitmin, fitmax)
+        myFit = ROOT.TF1("myFit", myFitFunc, fitmin, fitmax, myFitFunc.getNparam())
+        myFitFunc.setParamLimits(myFit)
+        myFitResult = h.Fit(myFit, fitOptions)
 
-        _fitModel = 0
-        myFitFunction = None
-        if _fitModel == 0:
-            myFitFunction = "exp(-(m-%d)/(a+0.001*b(m-%d)))"%(fitmin,fitmin)
+        # Check if fit is successful
+        self._myChi2 = myFitResult.Prob()
+        self._myNdof = h.FindBin(fitmax) - h.FindBin(fitmin)
+        print myFitResult.Status(), myFitResult.CovMatrixStatus()
+        if not (myFitResult.Status() == 0 and myFitResult.CovMatrixStatus() == 3):
+            print "Fit failed"
+        else:
+            print "Fit success"
+        print "chi2/ndof=%f (ndof=%d)"%(self._myChi2/float(self._myNdof),self._myNdof)
 
-        print "Using fit function:", myFitFunction
+        # Nominal histograms
+        myCentralParams = []
+        for i in range(0, myFitFunc.getNparam()):
+            myCentralParams.append(myFitResult.Parameter(i))
+        hFit = self._functionToHistogram("fit", myFit, myCentralParams, h.GetNbinsX(),h.GetXaxis().GetXmin(),h.GetXaxis().GetXmax(),fitmin)
 
-        myFit = ROOT.RooGenericPdf("genPdf",myFitFunction,ROOT.RooArgList(myM,myA,myB));
-        #if(iFitModel == 1) lFit = new RooGenericPdf("genPdf","exp(-a*pow(m,b))",RooArgList(lM,lA,lB));
-        #if(iFitModel == 1) {lA.setVal(0.3); lB.setVal(0.5);}
-        #if(iFitModel == 2) lFit = new RooGenericPdf("genPdf","a*exp(b*m)",RooArgList(lM,lA,lB));
-        #if(iFitModel == 3) lFit = new RooGenericPdf("genPdf","a/pow(m,b)",RooArgList(lM,lA,lB));
-        #if(iFitModel == 4) lFit = new RooGenericPdf("genPdf","a*pow(m,b)",RooArgList(lM,lA,lB));
-        #if(iFitModel == 5) lFit = new RooGenericPdf("genPdf","a*exp(pow(m,b))",RooArgList(lM,lA,lB));
-        myFitResult = myFit.fitTo(myRooHisto,ROOT.RooFit.Save(True),ROOT.RooFit.Range(fitmin,fitmax))
-        #RooFitResult *lRFit = 0;
-        #double lFirst = iFirst;
-        #double lLast = iLast;
-        #//lRFit = lFit->chi2FitTo(*pH0,Save(kTRUE),Range(lFirst,lLast));
-        #lRFit = lFit->fitTo(*pH0,Save(kTRUE),Range(lFirst,lLast),Strategy(0));
-        
-        #//std::cout << lRFit->status() << " " << lRFit->covQual() << std::endl;
-        if (not(myFitResult.status() == 0 and myFitResult.covQual() == 3)):
-            raise Exception("Fit failed")
+        # Eigenvectors
+        myCovMatrix = myFitResult.GetCovarianceMatrix()
+        myDiagonalizedMatrix = ROOT.TMatrixDSymEigen(myCovMatrix)
+        self._myEigenVectors = ROOT.TMatrixD(myFitFunc.getNparam(),myFitFunc.getNparam())
+        self._myEigenVectors = myDiagonalizedMatrix.GetEigenVectors()
+        printEigenVectors(self._myEigenVectors)
+        # Eigenvalues
+        self._myEigenValues = ROOT.TVectorD(myFitFunc.getNparam())
+        self._myEigenValues = myDiagonalizedMatrix.GetEigenValues()
+        for i in range(0, self._myEigenValues.GetNrows()):
+            self._myEigenValues[i] = math.sqrt(self._myEigenValues(i))
+        printEigenValues(self._myEigenValues)
 
-        print "Fit success"
-        raise Exception()
-            
-            
-            
-        #plot = plots.PlotBase()
-        #plot.histoMgr.appendHisto(histograms.Histo(h,"%s_%s"%(label,name)))
+        # Up histograms
+        myUpHistograms = []
+        for i in range(0, self._myEigenValues.GetNrows()):
+            myParams = list(myCentralParams)
+            for j in range(0,len(myParams)):
+                myParams[j] = myCentralParams[j] + self._myEigenValues(i)*self._myEigenVectors(j,i)
+                if myParams[j] < 0:
+                    myParams[j] = 1e-10
+            #myShiftUp = (-1.0 * myA.getVal() / myB.getVal())
+            #myFirstBin = fitmin
+            #if myFirstBin < myShiftUp and myShiftUp < h.GetXaxis().GetXmax():
+                #myM.setRange(0, h.GetBinLowEdge(h.FindBin(myShiftUp)))
+            hUp = self._functionToHistogram("fitUp%d"%i, myFit, myParams, h.GetNbinsX(),h.GetXaxis().GetXmin(),h.GetXaxis().GetXmax(),fitmin)
+            myUpHistograms.append(hUp)
+
+        # Down histograms
+        myDownHistograms = []
+        for i in range(0, self._myEigenValues.GetNrows()):
+            myParams = list(myCentralParams)
+            for j in range(0,len(myParams)):
+                myParams[j] = myCentralParams[j] - self._myEigenValues(i)*self._myEigenVectors(j,i)
+                if myParams[j] < 0:
+                    myParams[j] = 1e-10
+            #myShiftDown = (-1.0 * myA.getVal() / myB.getVal())
+            #myFirstBin = fitmin
+            #if myFirstBin < myShiftDown and myShiftDown < h.GetXaxis().GetXmax():
+                #myM.setRange(0, h.GetBinLowEdge(h.FindBin(myShiftDown)))
+            hDown = self._functionToHistogram("fitDown%d"%i, myFit, myParams, h.GetNbinsX(),h.GetXaxis().GetXmin(),h.GetXaxis().GetXmax(),fitmin)
+            myDownHistograms.append(hDown)
+
+        # Make plot
+        plot = plots.PlotBase()
+        h.SetLineColor(ROOT.kBlack)
+        h.SetLineWidth(2)
+        plot.histoMgr.appendHisto(histograms.Histo(h,"nominal"))
+        hFit.SetLineColor(ROOT.kMagenta)
+        plot.histoMgr.appendHisto(histograms.Histo(hFit,"fit"))
+        #for j in range(1, hFit.GetNbinsX()+1):
+        #    print "fit: %d: %f"%(j,hFit.GetBinContent(j))
+
+        myColor = 2
+        for i in range(0, len(myUpHistograms)):
+            myUpHistograms[i].SetLineStyle(myColor)
+            myUpHistograms[i].SetLineColor(ROOT.kBlue)
+            myColor += 1
+            plot.histoMgr.appendHisto(histograms.Histo(myUpHistograms[i],"up%d"%(i)))
+        myColor = 2
+        for i in range(0, len(myDownHistograms)):
+            myDownHistograms[i].SetLineStyle(myColor)
+            myDownHistograms[i].SetLineColor(ROOT.kRed)
+            myColor += 1
+            plot.histoMgr.appendHisto(histograms.Histo(myDownHistograms[i],"down%d"%(i)))
+
+        myName = "tailfit_%s_%s"%(label,name)
         #plot.createFrame("tailfit_%s_%s"%(label,name), opts={"ymin": 1e-5, "ymaxfactor": 2.})
-
-        #myFit = ROOT.TF1("myFit", myFitFunc, fitmin, fitmax, myFitFunc.getNparam())
-        #myExtrapolation = ROOT.TF1("myExtrapolation", myFitFunc, fitmax, h.GetXaxis().GetXmax(), myFitFunc.getNparam())
-        #myExtrapolationPlus = ROOT.TF1("myExtrapolationPlus", myFitFunc, fitmax, h.GetXaxis().GetXmax(), myFitFunc.getNparam())
-        #myExtrapolationMinus = ROOT.TF1("myExtrapolationMinus", myFitFunc, fitmax, h.GetXaxis().GetXmax(), myFitFunc.getNparam())
-        #myFitFunc.setParamLimits(myFit)
-        #h.Fit(myFit, fitOptions)
-        ##theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
-        #myFit.SetLineStyle(1)
-        #myFit.SetLineColor(ROOT.kBlue)
-        #myFit.SetLineWidth(3)
-        #myExtrapolation.SetLineStyle(1)
-        #myExtrapolation.SetLineColor(ROOT.kRed)
-        #myExtrapolation.SetLineWidth(3)
-        #myExtrapolationPlus.SetLineWidth(2)
-        #myExtrapolationMinus.SetLineWidth(2)
-        #myExtrapolationPlus.SetLineColor(ROOT.kGray+1)
-        #myExtrapolationMinus.SetLineColor(ROOT.kGray+1)
-        #for i in range(0, myFitFunc.getNparam()):
-            #myExtrapolation.SetParameter(i, myFit.GetParameters()[i])
-            #if i != 1:
-                #myExtrapolationPlus.SetParameter(i, myFit.GetParameters()[i])
-                #myExtrapolationMinus.SetParameter(i, myFit.GetParameters()[i])
-            #else:
-                #myExtrapolationPlus.SetParameter(i, myFit.GetParameter(i) + myFit.GetParError(i))
-                #myExtrapolationMinus.SetParameter(i, myFit.GetParameter(i) - myFit.GetParError(i))
-        #myExtrapolation.Draw("same")
-        #myExtrapolationPlus.Draw("same")
-        #myExtrapolationMinus.Draw("same")
-        #myFit.Draw("same")
-        ##histograms.addText(0.35,0.8,"Data, Baseline TauID")
-        ##histograms.addText(0.45,0.25,"QCD",20)
-
-        #plot.getPad().SetLogy( True)
-
+        #plot.getPad().SetLogy(True)
         #histograms.addCmsPreliminaryText()
         #histograms.addEnergyText()
-        ##histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        #histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        myParams = {}
+        myParams["ylabel"] = "Events / %.0f GeV"
+        myParams["log"] = True
+        myParams["opts"] = {"ymin": 1e-5}
+        myDrawer = plots.PlotDrawer()
+        myDrawer(plot, myName, **myParams)
 
-        #plot.draw()
-        #plot.save()
 
-        ## Obtain fit parameters
-        #par = myFit.GetParameters()
+        #myParameters = myFitResult.Parameter(i)
+        #myExtrapolation = ROOT.TF1("myExtrapolation", myFitFunc, fitmax, h.GetXaxis().GetXmax(), myFitFunc.getNparam())
 
-        #myDebugStatus = not True
-        #if myDebugStatus:
-            #print "shape histogram info dump for %s"%label
-            #print "h = ROOT.TH1F('h','h',%d,%f,%f)"%(h.GetNbinsX(),h.GetXaxis().GetXmin(),h.GetXaxis().GetXmax())
-            #for i in range(1,h.GetNbinsX()+1):
-                #print "h.SetBinContent(%d, %f)"%(i, h.GetBinContent(i))
-            #for i in range(1,h.GetNbinsX()+1):
-                #print "h.SetBinError(%d, %f)"%(i, h.GetBinError(i))
-                
-        ## Find bins for integral
-        #a = 0
-        #b = 0
-        #for i in range(1,h.GetNbinsX()+1):
-            #if h.GetXaxis().GetBinLowEdge(i) < fitmin:
-                #a = i
-            #if h.GetXaxis().GetBinUpEdge(i) < fitmax:
-                #b = i
-        #print "Histogram integral: %f"%(h.Integral(a,b))
-        #print "Fit integral: %f"%(myFit.Integral(fitmin,fitmax))
+        raise Exception()
 
+
+
+    def __del__(self):
+        self._myEigenVectors.Delete()
+        self._myEigenValues.Delete()
+
+    def _functionToHistogram(self, name, function, parameters, nbins, xmin, xmax, cutoff):
+        h = ROOT.TH1F(name, name, nbins, xmin, xmax)
+        print "Params for %s: %s"%(name,", ".join("%f" % x for x in parameters))
+        for i in range(0,len(parameters)):
+            function.SetParameter(i, parameters[i])
+            #print function.GetParameter(i)
+        for i in range(1,h.GetNbinsX()+1):
+            if h.GetXaxis().GetBinLowEdge(i) >= cutoff:
+                myIntegral = function.Integral(h.GetXaxis().GetBinLowEdge(i), h.GetXaxis().GetBinUpEdge(i))
+                w = h.GetXaxis().GetBinUpEdge(i) - h.GetXaxis().GetBinLowEdge(i)
+                print "integral: %d, %d: %f"%(w, i, myIntegral/w)
+                h.SetBinContent(i, myIntegral / w)
+        return h

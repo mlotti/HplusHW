@@ -331,7 +331,7 @@ class DataCardGenerator:
 
         # do data mining to cache results into datacard column objects
         self.doDataMining()
-        #raise Exception("temp stop")
+        raise Exception("DBG stop to develop tail fitter")
 
         # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
         if self._config.OptionGenuineTauBackgroundSource == "MC_FullSystematics" or self._config.OptionGenuineTauBackgroundSource == "MC_RealisticProjection":

@@ -344,9 +344,9 @@ class DatacardColumn():
             if self.typeIsObservation() or self.typeIsSignal():
                 myRateHistograms.extend(myShapeHistograms)
             else:
-                # Shape histo for background or signal, do tail fit
+                # Shape histo for background, do tail fit
                 
-                #myFitter = TailFitter.TailFitter(myShapeHistograms[0], self.getLabel(), myShapeHistograms[0].GetTitle(), 120.0, 200.0)
+                myFitter = TailFitter.TailFitter(myShapeHistograms[0], self.getLabel(), myShapeHistograms[0].GetTitle(), 120.0, 200.0)
 
                 myRateHistograms.append(myShapeHistograms[0])
         # Look for negative bins in rage
