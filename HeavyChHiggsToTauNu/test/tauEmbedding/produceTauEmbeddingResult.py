@@ -321,7 +321,7 @@ if __name__ == "__main__":
             createArgs["excludeTasks"] = "SingleMu"
         else:
             createArgs["includeOnlyTasks"] = "|".join(opts.mcs)
-        datasetCreatorMC = DatasetCreatorMany(multicrabDirs, **createArgs)
+        datasetCreatorMC = DatasetCreatorMany(multicrabDirs, emptyDatasetsAsNone=True, **createArgs)
     if opts.residual is not None:
         datasetCreatorMC = DatasetCreatorMany(multicrabDirs, includeOnlyTasks=["DYJetsToLL"], emptyDatasetsAsNone=True)
         datasetCreatorSig = dataset.readFromMulticrabCfg(directory=opts.residual, includeOnlyTasks=["DYJetsToLL"])

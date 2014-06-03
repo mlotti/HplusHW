@@ -1226,7 +1226,10 @@ class CommonPlotter:
         if plot is None:
             return
         self._ind += 1
-        path = "%03d_%s_%s_%s" % (self._ind, self._midfix, self._datasetName, name)
+        if self._datasetName is None:
+            path = "%03d_%s_%s" % (self._ind, self._midfix, name)
+        else:
+            path = "%03d_%s_%s_%s" % (self._ind, self._midfix, self._datasetName, name)
         if self._optMode is not None:
             path = "%s/%s" % (self._optMode, path)
         self._drawPlotCommon(plot, name, path, *args, **kwargs)
