@@ -1019,6 +1019,7 @@ class ConfigBuilder:
             setattr(process, modName, module)
             setattr(process, modName+"Path", path)
             additionalNames.append(modName)
+            return path
 
         for module, name in zip(analysisModules, analysisNames):
             disablePrintCounter(module)
@@ -1070,6 +1071,26 @@ class ConfigBuilder:
                 postfix += "L1ETMEff"
                 mod = mod.clone()
                 mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
+
+            # Reject at gen level W->tau->mu
+            if False:
+                mod2 = mod.clone()
+                mod2.embeddingWTauMuWeightReader.enabled = False
+                postfix2 = postfix.replace("WTauMu", "") + "GenWTau"
+
+                genmatchFilter = cms.EDFilter("HPlusMuonGenMatchFilter",
+                    genParticleSrc = cms.InputTag("genParticles", "", "SIM"),
+                    muonSrc = cms.InputTag(tauEmbeddingCustomisations.tauEmbeddingMuons),
+                    motherPdgIds = cms.vint32(24)
+                )
+                genmatchCount = cms.EDProducer("EventCountProducer")
+                setattr(process, postfix+"GenMatchFilter", genmatchFilter)
+                setattr(process, postfix+"GenMatchCount", genmatchCount)
+
+                path = addIntermediateAnalyzer(mod2, name, postfix2)
+                path.replace(process.commonSequence,
+                             process.commonSequence+genmatchFilter+genmatchCount)
+                mod2.eventCounter.counters.append(postfix+"GenMatchCount")
 
             enablePrintCounter(mod)
             mod.histogramAmbientLevel = self.histogramAmbientLevel
