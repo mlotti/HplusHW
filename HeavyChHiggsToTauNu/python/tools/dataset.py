@@ -192,6 +192,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 # 
 # \param taskdirs     List of strings for the CRAB task directories (relative
 #                     to the working directory)
+# \param emptyDatasetsAsNone  If true, in case of no datasets return None instead of raising an Exception (default False)
 # \param kwargs       Keyword arguments (see below) 
 # 
 # <b>Keyword arguments</b>, all are also forwarded to readFromRootFiles()
@@ -203,7 +204,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 # The basename of the task directories are taken as the dataset names
 # in the DatasetManagerCreator object (e.g. for directory '../Foo',
 # 'Foo' will be the dataset name)
-def readFromCrabDirs(taskdirs, **kwargs):
+def readFromCrabDirs(taskdirs, emptyDatasetsAsNone=False, **kwargs):
     inputFile = None
     if "opts" in kwargs:
         opts = kwargs["opts"]
@@ -231,6 +232,8 @@ def readFromCrabDirs(taskdirs, **kwargs):
             raise Exception("No datasets. Have you merged the files with hplusMergeHistograms.py?")
 
     if len(dlist) == 0:
+        if emptyDatasetsAsNone:
+            return None
         raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
 
     return readFromRootFiles(dlist, **kwargs)
