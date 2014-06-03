@@ -1859,7 +1859,7 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
         if normalizeToLumi == None:
             self.histoMgr.normalizeMCByLuminosity()
         else:
-            if datasetMgr.hasDataset("Data"):
+            if datasetMgr.hasDataset("Data") and datasetMgr.getDataset("Data").isData():
                 raise Exception("Got 'normalizeToLumi' while there is 'Data' dataset. You should use the 'Data' luminosity instead (i.e. do not give 'normalizeToLumi')")
             self.histoMgr.normalizeMCToLuminosity(normalizeToLumi)
 
@@ -1874,7 +1874,7 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
     # \param kwargs       Keyword arguments, forwarded to PlotSameBase.createFrame() or PlotRatioBase._createFrameRatio()
     def createFrame(self, filename, createRatio=False, **kwargs):
         if createRatio and not self.histoMgr.hasHisto("Data"):
-            print >> sys.stderr, "Warning: Trying to createdata/MC ratio, but there is no 'Data' histogram."
+            print >> sys.stderr, "Warning: Trying to create data/MC ratio, but there is no 'Data' histogram."
             createRatio = False
 
         if not createRatio:
