@@ -9,7 +9,7 @@ from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CombineTools as combine
 
 def main(opts):
-    (bkg, sbkg, corr) = combine.parseDiffNuisancesOutput(opts.file)
+    (bkg, sbkg, corr) = combine.parseDiffNuisancesOutput(opts.file, opts.configFile, opts.mass)
 
     content = {}
     if not opts.truncate and os.path.exists(opts.output):
@@ -32,7 +32,9 @@ def main(opts):
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("-f", dest="file", default=None,
-                      help="diffNuisances.py output file ")
+                      help="Path to diffNuisances.py output file")
+    parser.add_option("-c", dest="configFile", default=None,
+                      help="Path to configuration.json")
     parser.add_option("-m", dest="mass", default=None,
                       help="H+ mass point")
     parser.add_option("-o", dest="output", default=None,
@@ -44,6 +46,8 @@ if __name__ == "__main__":
 
     if opts.file is None:
         parser.error("-f is missing")
+    if opts.configFile is None:
+        parser.error("-c is missing")
     if opts.mass is None:
         parser.error("-m is missing")
     if opts.output is None:

@@ -360,7 +360,7 @@ class LHCTypeAsymptotic:
         if self.brlimit:
             opts += " -p BR"
         command.append("python %s/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py %s %s/mlfit.root > %s/diffNuisances.txt" % (os.environ["CMSSW_BASE"], opts, outputdir, outputdir))
-        command.append("combineReadMLFit.py -f %s/diffNuisances.txt -m %s -o mlfit.json" % (outputdir, mass))
+        command.append("combineReadMLFit.py -f %s/diffNuisances.txt -c configuration.json -m %s -o mlfit.json" % (outputdir, mass))
         aux.writeScript(os.path.join(self.dirname, fname), "\n".join(command)+"\n")
 
         self.mlfitScripts[mass] = fname
@@ -479,7 +479,27 @@ class LHCTypeAsymptotic:
         script = self.mlfitScripts[mass]
         self._run(script, "mlfit_m_%s_output.txt" % mass)
 
-def parseDiffNuisancesOutput(outputFileName):
+def parseDiffNuisancesOutput(outputFileName, configFileName, mass):
+    # first read nuisance types from datacards
+    f = open(configFileName)
+    config = json.load(f)
+    f.close()
+    datacardFiles = [dc % mass for dc in config["datacards"]]
+
+    nuisanceTypes = {}
+    type_re = re.compile("\s*(?P<name>\S+)\s+(?P<type>\S+)\s+[\d-]")
+    for dc in datacardFiles:
+        f = open(dc)
+        # rewind until rate
+        for line in f:
+            if line[0:4] == "rate":
+                break
+        for line in f:
+            m = type_re.search(line)
+            if m:
+                aux.addToDictList(nuisanceTypes, m.group("name"), m.group("type"))
+
+    # then read the fit values
     f = open(outputFileName)
 
     ret_bkg = {}
@@ -495,12 +515,17 @@ def parseDiffNuisancesOutput(outputFileName):
         m = nuis_re.search(line)
         if m:
             nuisanceNames.append(m.group("name"))
+            nuisanceType = nuisanceTypes.get(m.group("name"), None)
+            if nuisanceType is not None and len(nuisanceType) == 1:
+                nuisanceType = nuisanceType[0]
+            if nuisanceType is None:
+                nuisanceType = "unknown"
             ret_bkg[m.group("name")] = {"fitted_value": m.group("bshift"),
                                         "fitted_uncertainty": m.group("bunc"),
-                                        "type": "unknown"}
+                                        "type": nuisanceType}
             ret_sbkg[m.group("name")] = {"fitted_value": m.group("sbshift"),
                                          "fitted_uncertainty": m.group("sbunc"),
-                                         "type": "unknown"}
+                                         "type": nuisanceType}
             ret_rho[m.group("name")] = {"value": m.group("rho")}
 
     f.close()
