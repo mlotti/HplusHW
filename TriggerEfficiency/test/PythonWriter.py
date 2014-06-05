@@ -2,6 +2,7 @@
 
 import os
 import re
+import sys
 from math import sqrt
 
 import ROOT
@@ -259,7 +260,14 @@ class PythonWriter:
 
         fOUT.write("  \"dataParameters\": {\n")
         runrange_re = re.compile("(?P<firstRun>(\d+))-(?P<lastRun>(\d+))")
+        comma = ","
+        subranges = []
         for r in self.ranges:
+            if r.name == name:
+                subranges.append(r)
+        for i,r in enumerate(subranges):
+            if i == len(subranges)-1:
+                comma = ""
             if r.name == name:
                 match = runrange_re.search(r.runrange)
                 if not match:
@@ -272,14 +280,17 @@ class PythonWriter:
                 fOUT.write("          \"lastRun\"   :"+match.group("lastRun")+",\n")
                 fOUT.write("          \"luminosity\": %s,\n"%r.lumi)
                 self.writeJSONBins(fOUT,r.label,r.eff)
-                fOUT.write("      },\n")
-#                self.writeParametersJSON(fOUT,r.label,r.runrange,r.lumi,r.eff)
+                fOUT.write("      }"+comma+"\n")
         fOUT.write("  },\n")
 
         fOUT.write("  \"mcParameters\": {\n")
         comma = ","
-        for i,mc in enumerate(self.mcs):
-            if i == len(self.mcs)-1:
+        subranges = []
+        for mc in self.mcs:
+            if mc.name == name:
+                subranges.append(mc)
+        for i,mc in enumerate(subranges):
+            if i == len(subranges)-1:
                 comma = ""
             if mc.name == name:
                 fOUT.write("      \""+mc.label+"\": {\n")
