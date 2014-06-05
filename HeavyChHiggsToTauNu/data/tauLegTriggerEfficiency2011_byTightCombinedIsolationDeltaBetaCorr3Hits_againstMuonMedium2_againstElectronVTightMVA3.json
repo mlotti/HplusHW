@@ -1,5 +1,5 @@
 {
-  "_timestamp":   "Generated on Thu May 22 11:42:58 2014,
+  "_timestamp":   "Generated on Thu Jun  5 13:37:42 2014,
                    by HiggsAnalysis/TriggerEfficiency/test/PythonWriter.py",
   "_rootVersion": "5.34/18",
   "_statOption" : 1,
@@ -12,8 +12,72 @@
                    && PFTau_byTightCombinedIsolationDeltaBetaCorr3Hits > 0.5
                    && sqrt(2*(sqrt(MuonPt*TMath::Cos(MuonPhi)*MuonPt*TMath::Cos(MuonPhi)+MuonPt*TMath::Sin(MuonPhi)*MuonPt*TMath::Sin(MuonPhi)+MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta))))*sqrt(PFTauPt*TMath::Cos(PFTauPhi)*PFTauPt*TMath::Cos(PFTauPhi)+PFTauPt*TMath::Sin(PFTauPhi)*PFTauPt*TMath::Sin(PFTauPhi)+PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))-MuonPt*TMath::Cos(MuonPhi)*PFTauPt*TMath::Cos(PFTauPhi)-MuonPt*TMath::Sin(MuonPhi)*PFTauPt*TMath::Sin(PFTauPhi)-MuonPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-MuonEta)))*PFTauPt/TMath::Tan(2.0*TMath::ATan(TMath::Exp(-PFTauEta))))) < 80
                    && sqrt( 2 * MuonPt * PFMET_ET * (1-cos(MuonPhi-PFMET_phi)) ) < 40",
-  "_input"      : "",
+  "_input"      : "multicrab_TauLeg2011_140509_105827_combined",
   "dataParameters": {
+      "runs_160404_180252": {
+          "era": "2011AB",
+          "firstRun"  :160404,
+          "lastRun"   :180252,
+          "luminosity": 5095,
+          "bins" : [
+             {
+               "pt"              :30.0,
+               "efficiency"      :0.117903930131,
+               "uncertaintyPlus" :0.0213110252326,
+               "uncertaintyMinus":0.0213110252326
+             },
+             {
+               "pt"              :40.0,
+               "efficiency"      :0.514285714286,
+               "uncertaintyPlus" :0.0487750832532,
+               "uncertaintyMinus":0.0487750832532
+             },
+             {
+               "pt"              :50.0,
+               "efficiency"      :0.931034482759,
+               "uncertaintyPlus" :0.0470543613256,
+               "uncertaintyMinus":0.0470543613256
+             },
+             {
+               "pt"              :60.0,
+               "efficiency"      :0.875,
+               "uncertaintyPlus" :0.0826797284708,
+               "uncertaintyMinus":0.0826797284708
+             }
+          ]
+      },
+      "runs_160404_173692": {
+          "era": "2011A",
+          "firstRun"  :160404,
+          "lastRun"   :173692,
+          "luminosity": 2332.834,
+          "bins" : [
+             {
+               "pt"              :30.0,
+               "efficiency"      :0.117514124294,
+               "uncertaintyPlus" :0.00765441989983,
+               "uncertaintyMinus":0.00765441989983
+             },
+             {
+               "pt"              :40.0,
+               "efficiency"      :0.56660412758,
+               "uncertaintyPlus" :0.021464394803,
+               "uncertaintyMinus":0.021464394803
+             },
+             {
+               "pt"              :50.0,
+               "efficiency"      :0.813953488372,
+               "uncertaintyPlus" :0.0419624980882,
+               "uncertaintyMinus":0.0419624980882
+             },
+             {
+               "pt"              :60.0,
+               "efficiency"      :0.808219178082,
+               "uncertaintyPlus" :0.0460792851956,
+               "uncertaintyMinus":0.0460792851956
+             }
+          ]
+      },
       "runs_160404_167913": {
           "era": "2011A_RR1",
           "firstRun"  :160404,
@@ -111,7 +175,7 @@
           ]
       },
       "runs_175832_180252": {
-          "era": "L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)",
+          "era": "2011B",
           "firstRun"  :175832,
           "lastRun"   :180252,
           "luminosity": 2762,
@@ -141,10 +205,66 @@
                "uncertaintyMinus":0.0826797284708
              }
           ]
-      },
+      }
   },
   "mcParameters": {
-      "Summer12_PU_2011A_RR1": {
+      "Fall11_PU_2011AB": {
+          "bins" : [
+             {
+               "pt"              :30.0,
+               "efficiency"      :0.144974589297,
+               "uncertaintyPlus" :0.00640629112856,
+               "uncertaintyMinus":0.00640629112856
+             },
+             {
+               "pt"              :40.0,
+               "efficiency"      :0.581432468584,
+               "uncertaintyPlus" :0.0167849864082,
+               "uncertaintyMinus":0.0167849864082
+             },
+             {
+               "pt"              :50.0,
+               "efficiency"      :0.86393984045,
+               "uncertaintyPlus" :0.0306469739871,
+               "uncertaintyMinus":0.0306469739871
+             },
+             {
+               "pt"              :60.0,
+               "efficiency"      :0.810811168051,
+               "uncertaintyPlus" :0.0323464550991,
+               "uncertaintyMinus":0.0323464550991
+             }
+          ]
+      },
+      "Fall11_PU_2011A": {
+          "bins" : [
+             {
+               "pt"              :30.0,
+               "efficiency"      :0.151690640576,
+               "uncertaintyPlus" :0.00645318743975,
+               "uncertaintyMinus":0.00645318743975
+             },
+             {
+               "pt"              :40.0,
+               "efficiency"      :0.602220296007,
+               "uncertaintyPlus" :0.0161249134588,
+               "uncertaintyMinus":0.0161249134588
+             },
+             {
+               "pt"              :50.0,
+               "efficiency"      :0.885570092973,
+               "uncertaintyPlus" :0.0273565067441,
+               "uncertaintyMinus":0.0273565067441
+             },
+             {
+               "pt"              :60.0,
+               "efficiency"      :0.789813756857,
+               "uncertaintyPlus" :0.0330129157139,
+               "uncertaintyMinus":0.0330129157139
+             }
+          ]
+      },
+      "Fall11_PU_2011A_RR1": {
           "bins" : [
              {
                "pt"              :30.0,
@@ -172,7 +292,7 @@
              }
           ]
       },
-      "Summer12_PU_2011A_RR2": {
+      "Fall11_PU_2011A_RR2": {
           "bins" : [
              {
                "pt"              :30.0,
@@ -200,7 +320,7 @@
              }
           ]
       },
-      "Summer12_PU_2011A_RR3": {
+      "Fall11_PU_2011A_RR3": {
           "bins" : [
              {
                "pt"              :30.0,
@@ -228,7 +348,7 @@
              }
           ]
       },
-      "Summer12_PU_2011B": {
+      "Fall11_PU_2011B": {
           "bins" : [
              {
                "pt"              :30.0,
@@ -255,6 +375,6 @@
                "uncertaintyMinus":0.0315700421714
              }
           ]
-      },
+      }
   }
 }
