@@ -109,7 +109,10 @@ addpkg PhysicsTools/Utilities     V08-03-17
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
 # https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1417.html
-cvs co -r V00-03-01 -d CMGTools/External UserCode/CMG/CMGTools/External
+cvs co -r V00-03-01 UserCode/CMG/CMGTools/External
+mkdir CMGTools
+mv UserCode/CMG/CMGTools/External CMSGTools/.
+
 rm CMGTools/External/src/PileupJetIdAlgoSubStructure.cc
 rm CMGTools/External/interface/PileupJetIdAlgoSubstructure.h
 cvs up -r V00-02-10 CMGTools/External/src/classes.h
@@ -160,7 +163,9 @@ addpkg RecoLuminosity/LumiDB      V04-01-09
 #
 # 1. Check out the full package with the MVA tag
 # 2. Check out classes needed for the cut-based id with the cut-based tag
-cvs co -r V00-00-16 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+cvs co -r V00-00-16 UserCode/EGamma/EGammaAnalysisTools
+mkdir EGamma
+mv UserCode/EGamma/EGammaAnalysisTools EGamma/.
 cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/src/EGammaCutBasedEleId.cc
 cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h
 # EGammaCutBasedEleId.cc includes ElectronEffectiveArea.h, but the

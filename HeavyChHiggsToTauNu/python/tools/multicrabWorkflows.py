@@ -117,6 +117,7 @@ datasets.extend([
     DataDataset("SingleMu_%s_2011B_Nov19_RAWRECO", runs=(175832, 180252), aod="/SingleMu/Run2011B-Tau-19Nov2011-v1/RAW-RECO"),                                                                                            
                                                                                                                                                                                                                           
     MCDataset("DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW", aod="/DYJetsToLL_TuneZ2_MPIoff_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/GEN-RAW"),                                                
+    MCDataset("DYToTauTau_M20_CT10_TuneZ2_7TeV_powheg_pythia_tauola_TTEffSkim_v447_v1", aod="/DYToTauTau_M-20_CT10_TuneZ2_7TeV-powheg-pythia-tauola/Fall11-PU_S6_START42_V14B-v1/GEN-RAW"),
 ])
 
 # Split for backward compatibility, also for Mu-trigger thresholds
