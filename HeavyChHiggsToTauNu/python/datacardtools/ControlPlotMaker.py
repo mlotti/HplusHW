@@ -103,11 +103,11 @@ class ControlPlotMaker:
                         myHisto.setIsDataMC(isData=False, isMC=True)
                         myStackList.insert(0, myHisto)
                     if hEmbedded != None:
-                        myHisto = histograms.Histo(hEmbedded,"Embedding")
+                        myHisto = histograms.Histo(hEmbedded,"Embedding",legendLabel="EWK+tt with #tau_{h} (data)")
                         myHisto.setIsDataMC(isData=False, isMC=True)
                         myStackList.append(myHisto)
                     if hEWKfake != None:
-                        myHisto = histograms.Histo(hEWKfake,"EWKfakes")
+                        myHisto = histograms.Histo(hEWKfake,"EWKfakes",legendLabel="EWK+tt with e/#mu/jet#rightarrow#tau_{h} (MC)")
                         myHisto.setIsDataMC(isData=False, isMC=True)
                         myStackList.append(myHisto)
                     hData = observation.getControlPlotByIndex(i)["shape"].Clone()
@@ -191,9 +191,9 @@ class ControlPlotMaker:
                     myParams["addLuminosityText"] = True
                     if "legendPosition" in myParams.keys():
                         if myParams["legendPosition"] == "NW":
-                            myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+                            myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
                         elif myParams["legendPosition"] == "SW":
-                            myParams["moveLegend"] = {"dx": -0.05, "dy": -0.45}
+                            myParams["moveLegend"] = {"dx": -0.2, "dy": -0.45}
                         elif myParams["legendPosition"] == "SE":
                             myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
                         elif myParams["legendPosition"] == "NE":
@@ -202,7 +202,7 @@ class ControlPlotMaker:
                             raise Exception("Unknown value for option legendPosition: %s!", myParams["legendPosition"])
                         del myParams["legendPosition"]
                     else:
-                        myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+                        myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
                     myParams["ratioCreateLegend"] = True
                     if "ratioLegendPosition" in myParams.keys():
                         if myParams["ratioLegendPosition"] == "left":
@@ -217,7 +217,8 @@ class ControlPlotMaker:
                     # Remove non-dientified keywords
                     del myParams["unit"]
                     # Do plotting
-                    plots.drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
+                    plots.drawPlot(myStackPlot, "DataDrivenCtrlPlot_M%d_%02d_%s"%(m,i,myCtrlPlot.title), **myParams)
+                    os.system("mv DataDrivenCtrlPlot_M%d_%02d_%s.* %s/."%(m,i,myCtrlPlot.title,self._dirname))
 
             # Do selection flow plot
             selectionFlow.makePlot(self._dirname,m,len(self._config.ControlPlots),self._luminosity)
@@ -427,5 +428,6 @@ class SelectionFlowPlotMaker:
         myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
         myParams["ratioCreateLegend"] = True
         myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-        plots.drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(dirname,m,index), **myParams)
+        plots.drawPlot(myStackPlot, "DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(m,index), **myParams)
+        os.system("mv DataDrivenCtrlPlot_M%d_%02d_SelectionFlow.* %s/."%(m,index,dirname))
 
