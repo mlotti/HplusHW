@@ -1205,11 +1205,12 @@ class RootHistoWithUncertainties:
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
         # Subtract nominal to get absolute uncertainty (except for source histograms)
-        if not "Source" in name:
-            th1Plus.Add(self._rootHisto, -1.0)
-            th1Minus.Add(self._rootHisto, -1.0)
+        if name in self._shapeUncertainties.keys():
+            raise Exception("Uncertainty '%s' has already been added!"%name)
+        th1Plus.Add(self._rootHisto, -1.0)
+        th1Minus.Add(self._rootHisto, -1.0)
         # Store
-        self._shapeUncertainties[name] = (th1Plus, th1Minus)
+        self._shapeUncertainties[name] = (aux.Clone(th1Plus), aux.Clone(th1Minus))
 
     ## Remove superfluous shape variation uncertainties
     #
