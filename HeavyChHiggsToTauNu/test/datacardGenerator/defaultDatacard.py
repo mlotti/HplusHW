@@ -32,8 +32,8 @@ OptionMassShape = "TransverseMass"
 #OptionMassShape = "TransverseAndFullMass2D" #FIXME not yet supported!!!
 
 # Choose source of EWK+tt genuine tau background
-OptionGenuineTauBackgroundSource = "DataDriven"                          # State-of-the-art: embedded data used (use for optimization and results)
-#OptionGenuineTauBackgroundSource = "MC_FakeAndGenuineTauNotSeparated" # MC used, fake taus are not separated from genuine taus
+#OptionGenuineTauBackgroundSource = "DataDriven"                          # State-of-the-art: embedded data used (use for optimization and results)
+OptionGenuineTauBackgroundSource = "MC_FakeAndGenuineTauNotSeparated" # MC used, fake taus are not separated from genuine taus
 #OptionGenuineTauBackgroundSource = "MC_FullSystematics"               # MC used, fake and genuine taus separated (use for embedding closure test)
 #OptionGenuineTauBackgroundSource = "MC_RealisticProjection"            # MC used, fake and genuine taus separated (can be used for optimization)
 
@@ -86,7 +86,7 @@ elif OptionMassShape == "TransverseAndFullMass2D": # FIXME: preparing to add sup
     FakeShapeTTbarHisto = FakeShapeOtherHisto
 ShapeHistogramsDimensions = systematics.getBinningForPlot(SignalShapeHisto)
 
-DataCardName += "_"+OptionMassShape
+DataCardName += "_"+OptionMassShape.replace("TransverseMass","mT").replace("FullMass","invMass")
 
 ##############################################################################
 # Observation definition (how to retrieve number of observed events)
