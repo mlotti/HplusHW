@@ -217,11 +217,11 @@ class AnalysisModuleSelector:
         for item in optionsList:
             if item.isdigit():
                 if int(item) >= len(availableList) or int(item) < 0:
-                    raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" %s selection: requested for index %s, but only options 0-%d are available!"%(itemLabel, item, len(availableList)-1))
+                    raise Exception(ShellStyles.ErrorLabel()+" %s selection: requested for index %s, but only options 0-%d are available!"%(itemLabel, item, len(availableList)-1))
                 selectList.append(availableList[int(item)])
             else:
                 if not item in availableList:
-                    raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" %s selection: requested for %s, but only options (%s) are available!"%(itemLabel, item, (', '.join(map(str, availableList)))))
+                    raise Exception(ShellStyles.ErrorLabel()+" %s selection: requested for %s, but only options (%s) are available!"%(itemLabel, item, (', '.join(map(str, availableList)))))
                 else:
                     selectList.append(item)
         return selectList
