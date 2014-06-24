@@ -6,7 +6,6 @@ import os
 import sys
 import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TailFitter as TailFitter
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,QCDShapeVariationExtractor,ConstantExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
@@ -341,14 +340,7 @@ class DatacardColumn():
             else:
                 myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
             myShapeHistograms = myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
-            if self.typeIsObservation() or self.typeIsSignal():
-                myRateHistograms.extend(myShapeHistograms)
-            else:
-                # Shape histo for background, do tail fit
-                
-                myFitter = TailFitter.TailFitter(myShapeHistograms[0], self.getLabel(), myShapeHistograms[0].GetTitle(), 120.0, 200.0)
-
-                myRateHistograms.append(myShapeHistograms[0])
+            myRateHistograms.extend(myShapeHistograms)
         # Look for negative bins in rage
         for k in range(1, myRateHistograms[0].GetNbinsX()+1):
             if myRateHistograms[0].GetBinContent(k) < 0.000001:

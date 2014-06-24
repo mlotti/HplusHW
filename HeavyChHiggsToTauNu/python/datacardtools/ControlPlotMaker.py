@@ -17,6 +17,10 @@ import os
 import sys
 import ROOT
 
+_legendLabelQCD = "QCD (data)"
+_legendLabelEmbedding = "EWK+tt with #tau_{h} (data)"
+_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (MC)"
+
 ##
 class ControlPlotMaker:
     ## Constructor
@@ -98,15 +102,15 @@ class ControlPlotMaker:
                                 hEWKfake.Add(h)
                 if len(myStackList) > 0 or self._config.OptionGenuineTauBackgroundSource == "DataDriven":
                     if hQCD != None:
-                        myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
+                        myHisto = histograms.Histo(hQCD,"QCD",legendLabel=_legendLabelQCD)
                         myHisto.setIsDataMC(isData=False, isMC=True)
                         myStackList.insert(0, myHisto)
                     if hEmbedded != None:
-                        myHisto = histograms.Histo(hEmbedded,"Embedding",legendLabel="EWK+tt with #tau_{h} (data)")
+                        myHisto = histograms.Histo(hEmbedded,"Embedding",legendLabel=_legendLabelEmbedding)
                         myHisto.setIsDataMC(isData=False, isMC=True)
                         myStackList.append(myHisto)
                     if hEWKfake != None:
-                        myHisto = histograms.Histo(hEWKfake,"EWKfakes",legendLabel="EWK+tt with e/#mu/jet#rightarrow#tau_{h} (MC)")
+                        myHisto = histograms.Histo(hEWKfake,"EWKfakes",legendLabel=_legendLabelEWKFakes)
                         myHisto.setIsDataMC(isData=False, isMC=True)
                         myStackList.append(myHisto)
                     hData = observation.getControlPlotByIndex(i)["shape"].Clone()
@@ -394,7 +398,11 @@ class SelectionFlowPlotMaker:
             myRHWU.addShapeUncertaintyRelative("syst", th1Plus=self._expectedListSystUp[i], th1Minus=self._expectedListSystDown[i])
             myRHWU.makeFlowBinsVisible()
             if self._expectedLabelList[i] == "QCD":
-                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel="QCD (data)")
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelQCD)
+            elif self._expectedLabelList[i] == "Embedding":
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelEmbedding)
+            elif self._expectedLabelList[i] == "EWKfakes":
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelEWKFakes)
             else:
                 myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i])
             myHisto.setIsDataMC(isData=False, isMC=True)

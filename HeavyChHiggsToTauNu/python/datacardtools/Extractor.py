@@ -710,13 +710,11 @@ class QCDShapeVariationExtractor(ExtractorBase):
         hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
         # Do calculation and fill output histograms
         systematicsForMetShapeDifference.createSystHistograms(myRateHisto, hUp, hDown, hRebinnedNum, hRebinnedDenom)
-        hUp.Add(myRateHisto, -1.0) # all other syst.var histograms use this convention
-        hDown.Add(myRateHisto, -1.0)
         # Store uncertainty histograms
         if rootHistoWithUncertainties == None:
-            datasetColumn.getCachedShapeRootHistogramWithUncertainties()._shapeUncertainties[self._systVariation] = (hUp, hDown)
+            datasetColumn.getCachedShapeRootHistogramWithUncertainties().addShapeUncertaintyFromVariation(self._systVariation, hUp, hDown)
         else:
-            rootHistoWithUncertainties._shapeUncertainties[self._systVariation] = (hUp, hDown)
+            rootHistoWithUncertainties.addShapeUncertaintyFromVariation(self._systVariation, hUp, hDown)
         # Do not apply here additional normalization, it does not affect this uncertainty
         # Append histograms to output list
         myHistograms.append(hUp)
