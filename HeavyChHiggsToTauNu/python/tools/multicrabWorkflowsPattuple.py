@@ -22,10 +22,13 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
     # If taskDef contains the DBS-path of the pattuple, setup also the Data for the pattuple
     output = None
     if taskDef.outputPath != None and len(taskDef.outputPath) > 0:
+        dbs_url = taskDef.dbs
+        if dbs_url is None:
+            dbs_url = common.pattuple_dbs
         output = Data(taskDef.outputPath,
                       # These are exclusive, but the default values of None and a check in Workflow ensure correctness
                       number_of_jobs=taskDef.njobsOut, events_per_job=taskDef.neventsPerJobOut, lumis_per_job=taskDef.nlumisPerJobOut,
-                      lumiMask=outputLumiMask, dbs_url=common.pattuple_dbs)
+                      lumiMask=outputLumiMask, dbs_url=dbs_url)
 
     # Additional, necessary command line arguments relaring to trigger
     args = {}
@@ -35,8 +38,8 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
         args["triggerMC"] = 1
     if taskDef.args != None:
         args.update(taskDef.args)
-
-    wf = Workflow(workflowName, source=source, triggerOR=taskDef.triggerOR, args=args, output=output, **kwargs)
+        
+    wf = Workflow(workflowName, source=source, triggerOR=taskDef.triggerOR, args=args, output=output, dataVersionAppend=taskDef.dataVersionAppend, **kwargs)
     if taskDef.crabLines != None:
         for line in taskDef.crabLines:
             wf.addCrabLine(line)
@@ -168,7 +171,7 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         dataset.addWorkflow(wf)
         # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
         if wf.output != None:
-            dataset.addWorkflow(Workflow("analysis_"+version, source=Source("pattuple_"+version), triggerOR=taskDef.triggerOR, args=wf.args, skimConfig=skim))
+            dataset.addWorkflow(Workflow("analysis_"+version, source=Source("pattuple_"+version), triggerOR=taskDef.triggerOR, args=wf.args, dataVersionAppend=wf.dataVersionAppend, skimConfig=skim))
 
 ## Add v44_5 pattuple production workflows
 def addPattuple_v44_5(datasets):

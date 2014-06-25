@@ -312,7 +312,10 @@ def crabCfgTemplate(scheduler="arc", return_data=None, copy_data=None, crabLines
         ]
     lines.extend(crabLines)
     if len(cmsswLines) > 0:
-        lines.extend(["", "[CMSSW"])
+        lines.extend(["",
+                      "[CMSSW]",
+                      "use_dbs3 = 1"
+                      ])
         lines.extend(cmsswLines)
     lines.extend([
         "",

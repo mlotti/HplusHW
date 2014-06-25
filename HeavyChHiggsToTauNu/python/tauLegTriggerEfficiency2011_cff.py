@@ -6,14 +6,16 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 
 eraRunMap = {
     "EPS": ["runs_160404_167913"],
-    "Run2011A": ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692"],
+#    "Run2011A": ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692"],
+    "Run2011A": ["runs_160404_167913", "runs_170722_173198", "runs_173236_175770"], # runs 173693-175770 are not certified, so these two are equivalent in practice 
     "Run2011A-EPS": ["runs_170722_173198", "runs_173236_173692"],
     "Run2011B": ["runs_175832_180252"],
-    "Run2011AB": ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
+#    "Run2011AB": ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
+    "Run2011AB": ["runs_160404_167913", "runs_170722_173198", "runs_173236_175770", "runs_175832_180252"] # same here in runs_173236_173692 vs. runs_173236_175770
 }
 
-def setEfficiency(pset, isolation, againstElectron):
-    pset.data = HChTools.getEfficiencyJsonFullPath("tau trigger scale factors", "tauLegTriggerEfficiency2011", "%s_%s" % (isolation, againstElectron))
+def setEfficiency(pset, isolation, againstMuon, againstElectron):
+    pset.data = HChTools.getEfficiencyJsonFullPath("tau trigger scale factors", "tauLegTriggerEfficiency2011", "%s_%s_%s" % (isolation, againstMuon, againstElectron))
 
 def getRunsForEra(era):
     try:

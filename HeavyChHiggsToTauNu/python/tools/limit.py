@@ -86,9 +86,9 @@ class BRLimits:
     #
     # \param directory          Path to the multicrab task directory with the JSON files
     # \param excludeMassPoints  List of strings for mass points to exclude
-    def __init__(self, directory=".", excludeMassPoints=[]):
-        resultfile="limits.json"
-        configfile="configuration.json"
+    def __init__(self, directory=".", excludeMassPoints=[], limitsfile="limits.json", configfile="configuration.json"):
+        #resultfile="limits.json"
+        #configfile="configuration.json"
 
         f = open(os.path.join(directory, resultfile), "r")
         limits = json.load(f)
