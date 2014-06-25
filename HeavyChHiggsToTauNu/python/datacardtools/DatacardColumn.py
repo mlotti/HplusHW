@@ -296,7 +296,7 @@ class DatacardColumn():
                 # Set signal xsection
                 if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
                      # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
-                     myDatasetRootHisto.Delete()
+                     #myDatasetRootHisto.Delete()
                      dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 # Fix a bug in signal xsection
