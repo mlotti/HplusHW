@@ -92,7 +92,7 @@ class FitFuncExpTailTauTauTest(FitFuncBase):
 
     def setParamLimits(self, fit):
         fit.SetParLimits(0,0.1,2000)
-        fit.SetParLimits(1,0.0001,2.0)
+        fit.SetParLimits(1,0.000001,2.0)
         fit.SetParLimits(2,0,200)
         fit.SetParLimits(3,0.01,4000)
         fit.SetParameter(0,10.0)
@@ -171,19 +171,20 @@ class TailFitter:
             myCentralParams.append(myFitResult.Parameter(i))
         hFit = self._functionToHistogram("fit", myFit, myCentralParams, h.GetNbinsX(),h.GetXaxis().GetXmin(),h.GetXaxis().GetXmax(),fitmin)
 
-        # Eigenvectors
+        # Get eigenvectors
         myCovMatrix = myFitResult.GetCovarianceMatrix()
         myDiagonalizedMatrix = ROOT.TMatrixDSymEigen(myCovMatrix)
         self._myEigenVectors = ROOT.TMatrixD(myFitFunc.getNparam(),myFitFunc.getNparam())
         self._myEigenVectors = myDiagonalizedMatrix.GetEigenVectors()
         printEigenVectors(self._myEigenVectors)
-        # Eigenvalues
+        # Get eigenvalues
         self._myEigenValues = ROOT.TVectorD(myFitFunc.getNparam())
         self._myEigenValues = myDiagonalizedMatrix.GetEigenValues()
         for i in range(0, self._myEigenValues.GetNrows()):
             self._myEigenValues[i] = math.sqrt(self._myEigenValues(i))
         printEigenValues(self._myEigenValues)
 
+        # Construct from eigenvalues and vectors the orthogonal variations
         # Up histograms
         myUpHistograms = []
         for i in range(0, self._myEigenValues.GetNrows()):
@@ -214,30 +215,77 @@ class TailFitter:
             hDown = self._functionToHistogram("fitDown%d"%i, myFit, myParams, h.GetNbinsX(),h.GetXaxis().GetXmin(),h.GetXaxis().GetXmax(),fitmin)
             myDownHistograms.append(hDown)
 
+        # Calculate total uncertainty
+        self._hFitUncertaintyUp = aux.Clone(h, label+"_TailFitUp")
+        self._hFitUncertaintyUp.Reset()
+        self._hFitUncertaintyDown = aux.Clone(h, label+"_TailFitDown")
+        self._hFitUncertaintyDown.Reset()
+        for i in range(1, h.GetNbinsX()+1):
+            myPedestal = hFit.GetBinContent(i)
+            myVariance = 0.0
+            for hUp in myUpHistograms:
+                if hUp.GetBinContent(i) > 2e-10:
+                    myVariance += (hUp.GetBinContent(i) - myPedestal)**2
+                    #print i, (hUp.GetBinContent(i) - myPedestal)**2
+            self._hFitUncertaintyUp.SetBinContent(i, myPedestal + math.sqrt(myVariance))
+            myVariance = 0.0
+            for hDown in myUpHistograms:
+                if hDown.GetBinContent(i) > 2e-10:
+                    myVariance += (myPedestal - hDown.GetBinContent(i))**2
+            self._hFitUncertaintyDown.SetBinContent(i, myPedestal - math.sqrt(myVariance))
+
+        # Make plots
+        self._makeVariationPlotSimple(label, name, h, hFit, self._hFitUncertaintyUp, self._hFitUncertaintyDown)
+        self._makeVariationPlotDetailed(label, name, h, hFit, myUpHistograms, myDownHistograms)
+
+        #myParameters = myFitResult.Parameter(i)
+        #myExtrapolation = ROOT.TF1("myExtrapolation", myFitFunc, fitmax, h.GetXaxis().GetXmax(), myFitFunc.getNparam())
+
+        #raise Exception()
+
+
+
+    def __del__(self):
+        print "test"
+        #self._myEigenVectors.Delete()
+        #self._myEigenValues.Delete()
+
+    def _functionToHistogram(self, name, function, parameters, nbins, xmin, xmax, cutoff):
+        h = ROOT.TH1F(name, name, nbins, xmin, xmax)
+        #print "Params for %s: %s"%(name,", ".join("%f" % x for x in parameters))
+        for i in range(0,len(parameters)):
+            function.SetParameter(i, parameters[i])
+            #print function.GetParameter(i)
+        for i in range(1,h.GetNbinsX()+1):
+            if h.GetXaxis().GetBinLowEdge(i) >= cutoff:
+                myIntegral = function.Integral(h.GetXaxis().GetBinLowEdge(i), h.GetXaxis().GetBinUpEdge(i))
+                w = h.GetXaxis().GetBinUpEdge(i) - h.GetXaxis().GetBinLowEdge(i)
+                #print "integral: %d, %d: %f"%(w, i, myIntegral/w)
+                h.SetBinContent(i, myIntegral / w)
+        return h
+
+    def _makeVariationPlotSimple(self, label, name, hNominal, hFit, hUp, hDown):
         # Make plot
         plot = plots.PlotBase()
-        h.SetLineColor(ROOT.kBlack)
-        h.SetLineWidth(2)
-        plot.histoMgr.appendHisto(histograms.Histo(h,"nominal"))
+        hNominal.SetLineColor(ROOT.kBlack)
+        hNominal.SetLineWidth(2)
+        plot.histoMgr.appendHisto(histograms.Histo(hNominal,"nominal"))
         hFit.SetLineColor(ROOT.kMagenta)
+        hFit.SetLineWidth(2)
         plot.histoMgr.appendHisto(histograms.Histo(hFit,"fit"))
         #for j in range(1, hFit.GetNbinsX()+1):
         #    print "fit: %d: %f"%(j,hFit.GetBinContent(j))
 
-        myColor = 2
-        for i in range(0, len(myUpHistograms)):
-            myUpHistograms[i].SetLineStyle(myColor)
-            myUpHistograms[i].SetLineColor(ROOT.kBlue)
-            myColor += 1
-            plot.histoMgr.appendHisto(histograms.Histo(myUpHistograms[i],"up%d"%(i)))
-        myColor = 2
-        for i in range(0, len(myDownHistograms)):
-            myDownHistograms[i].SetLineStyle(myColor)
-            myDownHistograms[i].SetLineColor(ROOT.kRed)
-            myColor += 1
-            plot.histoMgr.appendHisto(histograms.Histo(myDownHistograms[i],"down%d"%(i)))
+        hUp.SetLineStyle(2)
+        hUp.SetLineColor(ROOT.kBlue)
+        hUp.SetLineWidth(2)
+        plot.histoMgr.appendHisto(histograms.Histo(hUp,"Up"))
+        hDown.SetLineStyle(2)
+        hDown.SetLineColor(ROOT.kRed)
+        hDown.SetLineWidth(2)
+        plot.histoMgr.appendHisto(histograms.Histo(hDown,"Down"))
 
-        myName = "tailfit_%s_%s"%(label,name)
+        myName = "tailfit_uncertainty_%s_%s"%(label,name)
         #plot.createFrame("tailfit_%s_%s"%(label,name), opts={"ymin": 1e-5, "ymaxfactor": 2.})
         #plot.getPad().SetLogy(True)
         #histograms.addCmsPreliminaryText()
@@ -250,28 +298,42 @@ class TailFitter:
         myDrawer = plots.PlotDrawer()
         myDrawer(plot, myName, **myParams)
 
+    def _makeVariationPlotDetailed(self, label, name, hNominal, hFit, myUpHistograms, myDownHistograms):
+        # Make plot
+        plot = plots.PlotBase()
+        hNominal.SetLineColor(ROOT.kBlack)
+        hNominal.SetLineWidth(2)
+        plot.histoMgr.appendHisto(histograms.Histo(hNominal,"nominal"))
+        hFit.SetLineColor(ROOT.kMagenta)
+        hFit.SetLineWidth(2)
+        plot.histoMgr.appendHisto(histograms.Histo(hFit,"fit"))
+        #for j in range(1, hFit.GetNbinsX()+1):
+        #    print "fit: %d: %f"%(j,hFit.GetBinContent(j))
 
-        #myParameters = myFitResult.Parameter(i)
-        #myExtrapolation = ROOT.TF1("myExtrapolation", myFitFunc, fitmax, h.GetXaxis().GetXmax(), myFitFunc.getNparam())
+        myColor = 2
+        for i in range(0, len(myUpHistograms)):
+            myUpHistograms[i].SetLineStyle(myColor)
+            myUpHistograms[i].SetLineColor(ROOT.kBlue)
+            myUpHistograms[i].SetLineWidth(2)
+            myColor += 1
+            plot.histoMgr.appendHisto(histograms.Histo(myUpHistograms[i],"Up%d"%(i)))
+        myColor = 2
+        for i in range(0, len(myDownHistograms)):
+            myDownHistograms[i].SetLineStyle(myColor)
+            myDownHistograms[i].SetLineColor(ROOT.kRed)
+            myDownHistograms[i].SetLineWidth(2)
+            myColor += 1
+            plot.histoMgr.appendHisto(histograms.Histo(myDownHistograms[i],"Down%d"%(i)))
 
-        raise Exception()
-
-
-
-    def __del__(self):
-        self._myEigenVectors.Delete()
-        self._myEigenValues.Delete()
-
-    def _functionToHistogram(self, name, function, parameters, nbins, xmin, xmax, cutoff):
-        h = ROOT.TH1F(name, name, nbins, xmin, xmax)
-        print "Params for %s: %s"%(name,", ".join("%f" % x for x in parameters))
-        for i in range(0,len(parameters)):
-            function.SetParameter(i, parameters[i])
-            #print function.GetParameter(i)
-        for i in range(1,h.GetNbinsX()+1):
-            if h.GetXaxis().GetBinLowEdge(i) >= cutoff:
-                myIntegral = function.Integral(h.GetXaxis().GetBinLowEdge(i), h.GetXaxis().GetBinUpEdge(i))
-                w = h.GetXaxis().GetBinUpEdge(i) - h.GetXaxis().GetBinLowEdge(i)
-                print "integral: %d, %d: %f"%(w, i, myIntegral/w)
-                h.SetBinContent(i, myIntegral / w)
-        return h
+        myName = "tailfit_detailed_%s_%s"%(label,name)
+        #plot.createFrame("tailfit_%s_%s"%(label,name), opts={"ymin": 1e-5, "ymaxfactor": 2.})
+        #plot.getPad().SetLogy(True)
+        #histograms.addCmsPreliminaryText()
+        #histograms.addEnergyText()
+        #histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        myParams = {}
+        myParams["ylabel"] = "Events / %.0f GeV"
+        myParams["log"] = True
+        myParams["opts"] = {"ymin": 1e-5}
+        myDrawer = plots.PlotDrawer()
+        myDrawer(plot, myName, **myParams)
