@@ -1177,8 +1177,8 @@ class RootHistoWithUncertainties:
 
     ## Adds the underflow and overflow bins to the first and last bins, respectively
     def makeFlowBinsVisible(self):
-        if self._flowBinsVisibleStatus:
-            return
+        #if self._flowBinsVisibleStatus:
+        #    return
         self._flowBinsVisibleStatus = True
         # Update systematics histograms first
         for key, (hPlus, hMinus) in self._shapeUncertainties.iteritems():
@@ -1504,6 +1504,7 @@ class RootHistoWithUncertainties:
             plustmp.SetDirectory(0)
             minustmp.SetDirectory(0)
             self._shapeUncertainties[key] = (plustmp, minustmp)
+        self.makeFlowBinsVisible()
 
     ## Rebin histogram
     #
@@ -1528,6 +1529,7 @@ class RootHistoWithUncertainties:
             plustmp.SetDirectory(0)
             minustmp.SetDirectory(0)
             self._shapeUncertainties[key] = (plustmp, minustmp)
+        self.makeFlowBinsVisible()
 
     ## Add another RootHistoWithUncertainties object
     #
