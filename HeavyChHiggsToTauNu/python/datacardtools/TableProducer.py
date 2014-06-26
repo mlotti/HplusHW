@@ -17,6 +17,35 @@ import sys
 import time
 import ROOT
 
+## Creates and returns a list of bin-by-bin stat. uncert. histograms
+# Inputs:
+#   hRate  rate histogram
+def createBinByBinStatUncertHistograms(hRate):
+    myList = []
+    myName = hRate.GetTitle()
+    for i in range(1, hRate.GetNbinsX()+1):
+        hUp = aux.Clone(hRate, "%s_%s_statBin%dUp"%(myName,myName,i))
+        hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"%(myName,myName,i))
+        hUp.SetBinContent(i, hUp.GetBinContent(i)+hUp.GetBinError(i))
+        hDown.SetBinContent(i, hDown.GetBinContent(i)-hDown.GetBinError(i))
+        # Clear uncertainty bins, because they have no effect on LandS/Combine
+        for j in range(1, hRate.GetNbinsX()+1):
+            hUp.SetBinError(j, 0.0)
+            hDown.SetBinError(j, 0.0)
+        myList.append(hUp)
+        myList.append(hDown)
+    return myList
+
+## Creates and returns a list of bin-by-bin stat. uncert. name strings
+# Inputs:
+#   hRate  rate histogram
+def createBinByBinStatUncertNames(hRate):
+    myList = []
+    myName = hRate.GetTitle()
+    for i in range(1, hRate.GetNbinsX()+1):
+        myList.append(myName+"_statBin%d"%i)
+    return myList
+
 ## TableProducer class
 class TableProducer:
     ## Constructor
@@ -141,11 +170,15 @@ class TableProducer:
             if self._opts.verbose:
                 print "TableProducer/producing nuisance lines"
             myNuisanceTable = self._generateNuisanceTable(m)
+            if self._opts.verbose:
+                print "TableProducer/producing bin-by-bin stat. lines"
+            myBinByBinStatUncertTable = self._generateBinByBinStatUncertTable(m)
             # Calculate dimensions of tables
             myWidths = []
             myWidths = self._calculateCellWidths(myWidths, myRateHeaderTable)
             myWidths = self._calculateCellWidths(myWidths, myRateDataTable)
             myWidths = self._calculateCellWidths(myWidths, myNuisanceTable)
+            myWidths = self._calculateCellWidths(myWidths, myBinByBinStatUncertTable)
             mySeparatorLine = self._getSeparatorLine(myWidths)
             # Construct datacard
             myCard = ""
@@ -162,6 +195,9 @@ class TableProducer:
             myCard += self._getTableOutput(myWidths,myRateDataTable)
             myCard += mySeparatorLine
             myCard += self._getTableOutput(myWidths,myNuisanceTable)
+            if self._opts.combine:
+                myCard += mySeparatorLine
+                myCard += self._getTableOutput(myWidths,myBinByBinStatUncertTable)
             # Print datacard to screen if requested
             if self._opts.showDatacard:
                 if self._config.BlindAnalysis:
@@ -228,7 +264,8 @@ class TableProducer:
         # Produce result
         myResult =  "imax     1     number of channels\n"
         myResult += "jmax     *     number of backgrounds\n"
-        myResult += "kmax    %2d     number of parameters\n"%kmax
+        #myResult += "kmax    %2d     number of parameters\n"%kmax
+        myResult += "kmax    *     number of parameters\n"
         return myResult
 
     ## Generates shape header
@@ -410,6 +447,27 @@ class TableProducer:
         return myResult
 
     ## Generates nuisance table as list
+    def _generateBinByBinStatUncertTable(self,mass):
+        myTable = []
+        # Loop over columns
+        for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
+            if c.isActiveForMass(mass,self._config):
+                hRate = c._rateResult.getHistograms()[0]
+                myNames = createBinByBinStatUncertNames(hRate)
+                for name in myNames:
+                    myRow = []
+                    myRow.append(name)
+                    myRow.append("shape")
+                    for cc in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
+                        if cc.isActiveForMass(mass,self._config):
+                            if cc.getLabel() == c.getLabel():
+                                myRow.append("1")
+                            else:
+                                myRow.append("-")
+                    myTable.append(myRow)
+        return myTable
+
+    ## Generates nuisance table as list
     # Recipe is to integrate first (linear sum for variations), then to evaluate
     def _generateShapeNuisanceVariationTable(self,mass):
         myResult = []
@@ -502,6 +560,12 @@ class TableProducer:
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass,self._config):
                 c.setResultHistogramsToRootFile(rootFile)
+                # Add bin-by-bin stat.uncert.
+                hRate = c._rateResult.getHistograms()[0]
+                myHistos = createBinByBinStatUncertHistograms(hRate)
+                for h in myHistos:
+                    h.SetDirectory(rootFile)
+                c._rateResult._tempHistos.extend(myHistos)
 
     ## Calculates maximum width of each table cell
     def _calculateCellWidths(self,widths,table):
