@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 #analysis = "TauLeg2012"
-analysis = "MetLeg2012"
+#analysis = "MetLeg2012"
+analysis = "MetLegWMuons2012"
 #analysis = "TauLeg2011"
 #analysis = "MetLeg2011"
 #analysis = "QuadJet2012"
@@ -15,14 +16,17 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflows as multicrabWorkflows
 #import ElectroWeakAnalysis.TauTriggerEfficiency.tools.multicrabDatasets2011 as multicrabDatasetsTTEff
 import HiggsAnalysis.TriggerEfficiency.tools.multicrabDatasets2012 as multicrabDatasetsTTEff
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTauEmbedding as multicrabDatasetsEmbedding
 
 #multicrabDatasets2011.addMetLegSkim_V00_10_11_CMSSW445_v4(multicrabWorkflows.datasets)
 #multicrabWorkflows.printAllDatasets()
 if analysis[:-4] == "TauLeg":
     multicrabDatasetsTTEff.addTauLegSkim_v44_v5(multicrabWorkflows.datasets)
 if analysis[:-4] == "MetLeg":
-#    multicrabDatasetsTTEff.addMetLegSkim(multicrabWorkflows.datasets)
+#    	multicrabDatasetsTTEff.addMetLegSkim(multicrabWorkflows.datasets)
     multicrabDatasetsTTEff.addMetLegSkim_CaloMETCorr(multicrabWorkflows.datasets)
+#if analysis[:-4] == "MetLegWMuons":
+#    multicrabDatasetsEmbedding.addEmbeddingSkim_v53_3(multicrabWorkflows.datasets)
 if analysis[:-4] == "QuadJet":
     multicrabDatasetsTTEff.addQuadJetSkim(multicrabWorkflows.datasets)
 #multicrabWorkflows.printAllDatasets()
@@ -177,6 +181,38 @@ datasetsMC2012MetLeg = [
         "T_s-channel_TuneZ2star_Summer12",
         "Tbar_s-channel_TuneZ2star_Summer12"
 ]
+datasetsData2012MetLegWMuons = [
+        "SingleMu_190456-193621_2012A_Jan22",
+        "SingleMu_193834-196531_2012B_Jan22",
+        "SingleMu_198022-200381_2012C_Jan22",
+        "SingleMu_200466-203742_2012C_Jan22",
+        "SingleMu_203777-205834_2012D_Jan22",
+        "SingleMu_205908-207100_2012D_Jan22",
+        "SingleMu_207214-208686_2012D_Jan22",
+]
+datasetsMC2012MetLegWMuons = [
+        "WJets_TuneZ2star_v1_Summer12",
+        "WJets_TuneZ2star_v2_Summer12",
+        "W1Jets_TuneZ2star_Summer12",
+        "W2Jets_TuneZ2star_Summer12",
+        "W3Jets_TuneZ2star_Summer12",
+        "W4Jets_TuneZ2star_Summer12",
+        "TTJets_TuneZ2star_Summer12",
+        "TTJets_FullLept_TuneZ2star_Summer12",
+        "TTJets_SemiLept_TuneZ2star_Summer12",
+        "TTJets_Hadronic_TuneZ2star_ext_Summer12",
+        "DYJetsToLL_M50_TuneZ2star_Summer12",
+        "T_t-channel_TuneZ2star_Summer12",
+        "Tbar_t-channel_TuneZ2star_Summer12",
+        "T_tW-channel_TuneZ2star_Summer12",
+        "Tbar_tW-channel_TuneZ2star_Summer12",
+        "T_s-channel_TuneZ2star_Summer12",
+        "Tbar_s-channel_TuneZ2star_Summer12",
+        "WW_TuneZ2star_Summer12",
+        "WZ_TuneZ2star_Summer12",
+        "ZZ_TuneZ2star_Summer12",
+        "QCD_Pt20_MuEnriched_TuneZ2star_Summer12"
+]    
 datasetsData2012QuadJet = [
         "SingleMu_190456-190738_2012A_Jul13",
 ]
@@ -216,12 +252,21 @@ if analysis == "MetLeg2012":
     datasets.extend(datasetsMC2012MetLeg)
     outputfiles = "tteffAnalysis-metleg.root"
 
+if analysis == "MetLegWMuons2012":
+    datasets.extend(datasetsData2012MetLegWMuons)
+    datasets.extend(datasetsMC2012MetLegWMuons)
+    outputfiles = "tteffAnalysis-metleg.root"
+                
 if analysis == "QuadJet2012":
     datasets.extend(datasetsData2012QuadJet)
     datasets.extend(datasetsMC2012QuadJet)
     outputfiles = "tteffAnalysis-quadjet.root"
 
-multicrab.extendDatasets("trigger"+analysis[:-4]+"_analysis_"+multicrabDatasetsTTEff.skimVersion, datasets)
+if analysis == "MetLegWMuons2012":
+    multicrab.extendDatasets("tauembedding_skim_v53_3", datasets)
+#        "trigger2012"+"_analysis_wMuons_"+multicrabDatasetsTTEff.skimVersion, datasets)
+else:
+    multicrab.extendDatasets("trigger"+analysis[:-4]+"_analysis_"+multicrabDatasetsTTEff.skimVersion, datasets)
 #multicrab.extendDatasets("triggerMetLeg_analysis_vXXX", datasets)
 #multicrab.appendLineAll("GRID.maxtarballsize = 20") 
 multicrab.appendLineAll("CMSSW.output_file = "+outputfiles)

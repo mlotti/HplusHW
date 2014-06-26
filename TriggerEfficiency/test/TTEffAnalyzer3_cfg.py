@@ -2,8 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import copy
 
 #dataVersion="53XmcS10"
-#dataVersion="53XdataPromptCv2"
-dataVersion="44Xdata"
+dataVersion="53XdataPromptCv2"
 #isData = False
 runL1Emulator = False
 runOpenHLT = False
@@ -64,8 +63,7 @@ else:
 #        "file:/afs/cern.ch/work/s/slehti/TriggerMETLeg_Tau_173236-173692_2011A_Nov08_pattuple_9_1_LSf.root"
 #        "file:TTEffSkim.root"
 #	"file:/tmp/slehti/TriggerMETLeg_Tau_Run2012C_PromptReco_v2_AOD_202792_203742_analysis_metleg_v53_v1_pattuple_28_1_L19.root"
-#       'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X/TauParked/Run2012D_22Jan2013_v1_AOD_203777_208686_triggerMetLeg_skim_v53_3c/65583ace3198f0f55b2cd7d093b9f259/pattuple_3940_3_oJW.root'
-	'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerTauLeg/CMSSW_4_4_X/SingleMu/pattuple_v25bfix_TTEffSkim_SingleMu_175832-180252_2011B_Nov19_RAWRECO/f73b0045e7e1eac08bdc8374111fc3ea/pattuple_1_1_7wa.root'
+       'root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X/TauParked/Run2012D_22Jan2013_v1_AOD_203777_208686_triggerMetLeg_skim_v53_3c/65583ace3198f0f55b2cd7d093b9f259/pattuple_3940_3_oJW.root'
         )
     )
 
@@ -147,7 +145,7 @@ process.commonSequence *= process.selectedPrimaryVertexFilter
 if analysis == "TauLeg":
     import HiggsAnalysis.HeavyChHiggsToTauNu.TauLegZMuTauFilter as zmutau
     process.muTauPairs = zmutau.muTauPairs.clone()
-    process.muTauPairs.decay = cms.string('selectedPatMuons@+ selectedPatTausHpsPFTau@-')
+    process.muTauPairs.decay = cms.string('selectedPatMuons@+ selectedPatTaus@-')
     process.commonSequence *= process.muTauPairs
     additionalCounters.extend(zmutau.getSelectionCounters())
 
@@ -188,8 +186,8 @@ process.commonSequence *= process.hPlusMETNoiseFilters
 
 # Analyzer definition
 process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
-        LoopingOver	        = cms.InputTag("selectedPatTausHpsPFTau"),
-####	LoopingOver		= cms.InputTag("selectedPatTaus"),
+####        LoopingOver	        = cms.InputTag("selectedPatTausHpsPFTau"),
+	LoopingOver		= cms.InputTag("selectedPatTaus"),
 	PFTauDiscriminators     = cms.vstring(
             "decayModeFinding",
             "againstMuonLoose",
@@ -238,8 +236,8 @@ process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
 ##	    PFMETtype1 = cms.InputTag("pfType1CorrectedMet"),
 ##            HLTMET = cms.InputTag("hltMet"),
 ##            HLTMHT = cms.InputTag("hltPFMHTProducer"),
-            CaloMET = cms.InputTag("met")
-#            CaloMET = cms.InputTag("patCaloMET"),
+##            CaloMET = cms.InputTag("met")
+            CaloMET = cms.InputTag("patCaloMET"),
 #            CaloMETresidualCorrected = cms.InputTag("patResidualCorrectedCaloMET"),
 #            CaloMETnoHF = cms.InputTag("patCaloMETnoHF"),
 #            CaloMETnoHFresidualCorrected = cms.InputTag("patResidualCorrectedCaloMETnoHF"),
@@ -303,12 +301,15 @@ process.TTEffAnalysisHLTPFTauHPS = cms.EDAnalyzer("TTEffAnalyzer2",
             "HLT_IsoMu17_v5", "HLT_IsoMu17_v6", "HLT_IsoMu17_v8", "HLT_IsoMu17_v9", "HLT_IsoMu17_v10", "HLT_IsoMu17_v11", "HLT_IsoMu17_v13", "HLT_IsoMu17_v14",
             "HLT_IsoMu17_eta2p1_v1",
             "HLT_IsoMu20_v8", "HLT_IsoMu20_v9", "HLT_IsoMu20_v12", "HLT_IsoMu20_v13",
-            "HLT_IsoMu20_eta2p1_v1",
+            "HLT_IsoMu20_eta2p1_v1","HLT_IsoMu20_eta2p1_v2","HLT_IsoMu20_eta2p1_v3","HLT_IsoMu20_eta2p1_v4","HLT_IsoMu20_eta2p1_v5","HLT_IsoMu20_eta2p1_v6","HLT_IsoMu20_eta2p1_v7",
             "HLT_IsoMu24_v1", "HLT_IsoMu24_v2", "HLT_IsoMu24_v4", "HLT_IsoMu24_v5", "HLT_IsoMu24_v6", "HLT_IsoMu24_v7", "HLT_IsoMu24_v8", "HLT_IsoMu24_v9", "HLT_IsoMu24_v12", "HLT_IsoMu24_v13",
-            "HLT_IsoMu24_eta2p1_v3", "HLT_IsoMu24_eta2p1_v6", "HLT_IsoMu24_eta2p1_v7"
+            "HLT_IsoMu24_eta2p1_v3", "HLT_IsoMu24_eta2p1_v6", "HLT_IsoMu24_eta2p1_v7","HLT_IsoMu24_eta2p1_v8","HLT_IsoMu24_eta2p1_v9",
+	    "HLT_IsoMu24_eta2p1_v10","HLT_IsoMu24_eta2p1_v11","HLT_IsoMu24_eta2p1_v12","HLT_IsoMu24_eta2p1_v13","HLT_IsoMu24_eta2p1_v14","HLT_IsoMu24_eta2p1_v15",
             "HLT_IsoMu30_v1", "HLT_IsoMu30_v2", "HLT_IsoMu30_v4", "HLT_IsoMu30_v5", "HLT_IsoMu30_v6", "HLT_IsoMu30_v7", "HLT_IsoMu30_v8",
             "HLT_IsoMu30_eta2p1_v3", "HLT_IsoMu30_eta2p1_v6", "HLT_IsoMu30_eta2p1_v7",
             "HLT_IsoMu34_eta2p1_v1",
+
+	    "HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v7",
 
 	    "HLT_IsoMu15_eta2p1_L1ETM20_v1",
             "HLT_IsoMu15_eta2p1_L1ETM20_v2",
