@@ -70,7 +70,7 @@ class ExtractorResult():
         #       i.e. it is enough to just clear the list.
         #self._tempHistos = []
         for h in self._histograms:
-            htemp = h.Clone(h.GetTitle())
+            htemp = aux.Clone(h, h.GetTitle())
             htemp.SetDirectory(rootfile)
             self._tempHistos.append(htemp)
 
@@ -287,6 +287,7 @@ class DatacardColumn():
             print ShellStyles.WarningLabel()+"Skipping ..."
             return
         # Obtain root histogram with uncertainties for shape and cache it
+        hRateWithFineBinning = None
         if not (self.typeIsEmptyColumn() or dsetMgr == None):
             mySystematics = dataset.Systematics(allShapes=True) #,verbose=True)
             if not dsetMgr.hasDataset(self.getDatasetMgrColumn()):
@@ -316,10 +317,12 @@ class DatacardColumn():
             if abs(self._additionalNormalisationFactor - 1.0) > 0.00001:
                 print ShellStyles.WarningLabel()+"Applying normalization factor %f to sample '%s'!"%(self._additionalNormalisationFactor, self.getLabel())
                 self._cachedShapeRootHistogramWithUncertainties.Scale(self._additionalNormalisationFactor)
-            # Rebin and move under/overflow bins to visible bins
+            # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
+            self._cachedShapeRootHistogramWithUncertainties.makeFlowBinsVisible()
+            hRateWithFineBinning = aux.Clone(self._cachedShapeRootHistogramWithUncertainties.getRootHisto(), "%s_fineBinning"%self.getLabel())
+            hRateWithFineBinning.SetTitle("%s_fineBinning"%self.getLabel())
             myArray = array("d",config.ShapeHistogramsDimensions)
             self._cachedShapeRootHistogramWithUncertainties.Rebin(len(config.ShapeHistogramsDimensions)-1,"",myArray)
-            self._cachedShapeRootHistogramWithUncertainties.makeFlowBinsVisible()
         # Obtain rate histogram
         myRateHistograms = []
         if self.typeIsEmptyColumn() or dsetMgr == None:
@@ -353,6 +356,7 @@ class DatacardColumn():
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
                                myRateHistograms)
+        self._rateResult._histograms.append(hRateWithFineBinning)
         if self._opts.verbose:
             print "  - Rate: integral = ", myRateHistograms[0].Integral()
             if (self.typeIsEWK()) or self.typeIsEWKfake():
