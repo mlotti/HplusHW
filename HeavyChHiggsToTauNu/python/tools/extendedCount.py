@@ -3,7 +3,7 @@
 #
 # Authors: LAW
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from math import sqrt
 
 ## Represents counter count value with multiple uncertainty fields.
@@ -19,7 +19,7 @@ class ExtendedCount:
         self._uncertaintyLabelList = list(uncertaintyLabelList)
         # check that list lengths match
         if len(uncertaintyList) != len(uncertaintyLabelList):
-            raise Exception (ErrorLabel()+"ExtendedCount::__init__(): please provide equal amount of entries for uncertaintyList and uncertaintyLabelList! (%d vs. %d)"%(len(uncertaintyList),len(uncertaintyLabelList)))
+            raise Exception (ShellStyles.ErrorLabel()+"ExtendedCount::__init__(): please provide equal amount of entries for uncertaintyList and uncertaintyLabelList! (%d vs. %d)"%(len(uncertaintyList),len(uncertaintyLabelList)))
         # check that labels contain word 'stat' or 'syst'
         for item in self._uncertaintyLabelList:
             myFoundStatus = False
@@ -28,7 +28,7 @@ class ExtendedCount:
             elif "syst" in item:
                 myFoundStatus = True
             if not myFoundStatus:
-                raise Exception (ErrorLabel()+"ExtendedCount::__init__(): uncertainty labels must contain 'stat' or 'syst' in them!")
+                raise Exception (ShellStyles.ErrorLabel()+"ExtendedCount::__init__(): uncertainty labels must contain 'stat' or 'syst' in them!")
 
     def copy(self):
         return ExtendedCount(self._value, self._uncertaintyList, self._uncertaintyLabelList)
@@ -48,7 +48,7 @@ class ExtendedCount:
         for i in range(0, len(self._uncertaintyLabelList)):
             if label == self._uncertaintyLabelList[i]:
                 return self._uncertaintyList[i]
-        raise Exception(ErrorLabel()+"ExtendedCount::uncertainty(): Cannot find asked label '%s'! options are: %s"%(label, ', '.join(map(str,self._uncertaintyLabelList))))
+        raise Exception(ShellStyles.ErrorLabel()+"ExtendedCount::uncertainty(): Cannot find asked label '%s'! options are: %s"%(label, ', '.join(map(str,self._uncertaintyLabelList))))
 
     # Getters for stat. uncertainty
     def statUncertainty(self):

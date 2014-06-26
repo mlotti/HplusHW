@@ -14,12 +14,11 @@ import tarfile
 import cProfile
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector as analysisModuleSelector
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 def getDsetCreator(label, mcrabPath, mcrabInfoOutput, enabledStatus=True):
@@ -206,42 +205,8 @@ def memoryDump():
             cls = str(obj.__class__)
             cPickle.dump({'id': i, 'class': cls, 'size': size, 'referents': referents}, dump)
 
-def testShapeHistogram():
-    # FIXME: Move this code as validate() of the ShapeHistoModifier class
-    print "Testing shape histogram modifying algorithm:"
-    # Create specification
-    ShapeHistogramsDimensions = { "bins": 6,
-                              "rangeMin": 0.0,
-                              "rangeMax": 400.0,
-                              "variableBinSizeLowEdges": [0.0,20.0,40.0,60.0,80.0,120.0], # if an empty list is given, then uniform bin width is used
-                              "xtitle": "Transverse mass / GeV",
-                              "ytitle": "Events" }
-    # Create source histogram
-    hSrc = ROOT.TH1F("hsrc","hsrc",40, 0.0, 400.0)
-    hSrc.Sumw2()
-    for i in range(0,45):
-        hSrc.Fill(i*10-.5,i)
-    print "Source:"
-    for k in range(0,hSrc.GetNbinsX()+2):
-        print "  src bin %d = %f +- %f"%(k,hSrc.GetBinContent(k),hSrc.GetBinError(k))
-    # Invoke shape histo class
-    myShapeHistoModifier = ShapeHistoModifier(histoSpecs=ShapeHistogramsDimensions,debugMode=True)
-    # Obtain empty histogram
-    h = myShapeHistoModifier.createEmptyShapeHistogram("hello")
-    # Add source
-    myShapeHistoModifier.addShape(source=hSrc,dest=h)
-    print "After adding source:"
-    for k in range(0,h.GetNbinsX()+2):
-        print "  dest bin %d = %f +- %f"%(k,h.GetBinContent(k),h.GetBinError(k))
-    myShapeHistoModifier.subtractShape(source=hSrc,dest=h)
-    myShapeHistoModifier.finaliseShape(dest=h)
-    print "After subtracting and finalising:"
-    for k in range(0,h.GetNbinsX()+2):
-        print "  dest bin %d = %f +- %f"%(k,h.GetBinContent(k),h.GetBinError(k))
-    sys.exit()
-
 if __name__ == "__main__":
-    myModuleSelector = AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
+    myModuleSelector = analysisModuleSelector.AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
 
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
     parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")

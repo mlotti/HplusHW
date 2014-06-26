@@ -809,6 +809,7 @@ namespace HPlus {
   void CommonPlots::fillAllControlPlots(const edm::Event& iEvent, double transverseMass) {
     fillControlPlotsAtJetSelection(iEvent, fJetData);
     fillControlPlotsAtCollinearDeltaPhiCuts(iEvent, fQCDTailKillerData);
+    fillControlPlotsAfterTopologicalSelections(iEvent);
     fillControlPlotsAtMETSelection(iEvent, fMETData);
     fillControlPlotsAtBtagging(iEvent, fBJetData);
     fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, fQCDTailKillerData);
