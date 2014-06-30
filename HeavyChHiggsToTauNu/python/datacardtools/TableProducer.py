@@ -20,20 +20,35 @@ import ROOT
 ## Creates and returns a list of bin-by-bin stat. uncert. histograms
 # Inputs:
 #   hRate  rate histogram
-def createBinByBinStatUncertHistograms(hRate):
+#   xmin   float, specifies minimum value for which bin-by-bin histograms are created (default: all)
+#   xmax   float, specifies maximum value for which bin-by-bin histograms are created (default: all)
+def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
     myList = []
     myName = hRate.GetTitle()
+    # Construct range
+    myRangeMin = xmin
+    myRangeMax = xmax
+    if myRangeMin == None:
+        myRangeMin = hRate.GetXaxis().GetBinLowEdge(1)
+    if myRangeMax == None:
+        myRangeMax = hRate.GetXaxis().GetBinUpEdge(hRate.GetNbinsX())
+    # Loop over bins
     for i in range(1, hRate.GetNbinsX()+1):
-        hUp = aux.Clone(hRate, "%s_%s_statBin%dUp"%(myName,myName,i))
-        hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"%(myName,myName,i))
-        hUp.SetBinContent(i, hUp.GetBinContent(i)+hUp.GetBinError(i))
-        hDown.SetBinContent(i, hDown.GetBinContent(i)-hDown.GetBinError(i))
-        # Clear uncertainty bins, because they have no effect on LandS/Combine
-        for j in range(1, hRate.GetNbinsX()+1):
-            hUp.SetBinError(j, 0.0)
-            hDown.SetBinError(j, 0.0)
-        myList.append(hUp)
-        myList.append(hDown)
+        #print hRate.GetXaxis().GetBinLowEdge(i), xmin, hRate.GetXaxis().GetBinUpEdge(i), xmax
+        if hRate.GetXaxis().GetBinLowEdge(i) > myRangeMin-0.0001 and hRate.GetXaxis().GetBinUpEdge(i) < myRangeMax+0.0001:
+            #print "*"
+            hUp = aux.Clone(hRate, "%s_%s_statBin%dUp"%(myName,myName,i))
+            hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"%(myName,myName,i))
+            hUp.SetTitle(hUp.GetName())
+            hDown.SetTitle(hDown.GetName())
+            hUp.SetBinContent(i, hUp.GetBinContent(i)+hUp.GetBinError(i))
+            hDown.SetBinContent(i, hDown.GetBinContent(i)-hDown.GetBinError(i))
+            # Clear uncertainty bins, because they have no effect on LandS/Combine
+            for j in range(1, hRate.GetNbinsX()+1):
+                hUp.SetBinError(j, 0.0)
+                hDown.SetBinError(j, 0.0)
+            myList.append(hUp)
+            myList.append(hDown)
     return myList
 
 ## Creates and returns a list of bin-by-bin stat. uncert. name strings
