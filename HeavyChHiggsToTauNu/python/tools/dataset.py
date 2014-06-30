@@ -1486,6 +1486,8 @@ class RootHistoWithUncertainties:
         if self._rootHisto == None:
             raise Exception("Tried to call Rebin for a histogram which has been deleted")
         htmp = self._rootHisto.Rebin(*args)
+        if htmp.GetBinContent(htmp.GetNbinsX()) == float('Inf'):
+            raise Exception("Check the rebin range, it produces infinity!")
         if len(args) > 1: # If more than 1 argument is given, ROOT creates a clone of the histogram
             self._rootHisto.Delete()
         ROOT.SetOwnership(htmp, True)
@@ -1496,6 +1498,8 @@ class RootHistoWithUncertainties:
             (plus, minus) = self._shapeUncertainties[key]
             plustmp = plus.Rebin(*args)
             minustmp = minus.Rebin(*args)
+            if plustmp.GetBinContent(htmp.GetNbinsX()) == float('Inf') or minustmp.GetBinContent(htmp.GetNbinsX()) == float('Inf'):
+                raise Exception("Check the rebin range, it produces infinity!")
             if len(args) > 1: # If more than 1 argument is given, ROOT creates a clone of the histogram
                 plus.Delete()
                 minus.Delete()
