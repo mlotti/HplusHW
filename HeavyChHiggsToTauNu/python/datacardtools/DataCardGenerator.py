@@ -411,7 +411,7 @@ class DataCardGenerator:
             print "  Please check if this was intended."
         # determine if datacard was ok
         if mymsg != "":
-            print ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"+ShellStyles.NormalStyle()
+            print ShellStyles.ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"+ShellStyles.NormalStyle()
             print mymsg
             raise Exception()
         return True
@@ -772,7 +772,7 @@ class DataCardGenerator:
                                                       opts = self._opts,
                                                       scaleFactor = n.getArg("scaleFactor")))
             else:
-                print ErrorStyle()+"Error in nuisance with id='"+n.id+"':"+ShellStyles.NormalStyle()+" unknown or missing field function '"+n.function+"' (string)!"
+                print ShellStyles.ErrorStyle()+"Error in nuisance with id='"+n.id+"':"+ShellStyles.NormalStyle()+" unknown or missing field function '"+n.function+"' (string)!"
                 print "Options are: 'Constant', 'ConstantToShape', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio'"
                 raise Exception()
         # Create reserved nuisances
@@ -787,7 +787,7 @@ class DataCardGenerator:
         for i in range(0,len(self._extractors)):
             for j in range(0,len(self._extractors)):
                 if self._extractors[i].isId(self._extractors[j].getId()) and i != j:
-                    print ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" You have defined two nuisances with id='"+self._extractors[j].getId()+"'! The id has to be unique!"
+                    print ShellStyles.ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" You have defined two nuisances with id='"+self._extractors[j].getId()+"'! The id has to be unique!"
                     raise Exception()
         # Merge nuisances
         self.mergeNuisances()
@@ -810,7 +810,7 @@ class DataCardGenerator:
                 if n.isId(mset[0]):
                     myFoundStatus = True
             if not myFoundStatus:
-                print ErrorStyle()+"Error in merging Nuisances:"+ShellStyles.NormalStyle()+" cannot find a nuisance with id '"+mset[0]+"'!"
+                print ShellStyles.ErrorStyle()+"Error in merging Nuisances:"+ShellStyles.NormalStyle()+" cannot find a nuisance with id '"+mset[0]+"'!"
                 raise Exception()
             # assign master to slave nuisances
             for i in range(1, len(mset)):
@@ -820,7 +820,7 @@ class DataCardGenerator:
                         n.setAsSlave(mset[0])
                         myFoundStatus = True
                 if not myFoundStatus:
-                    print ErrorStyle()+"Error in merging Nuisances:"+ShellStyles.NormalStyle()+" tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
+                    print ShellStyles.ErrorStyle()+"Error in merging Nuisances:"+ShellStyles.NormalStyle()+" tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
                     raise Exception()
         print "Merged Nuisances"
 
