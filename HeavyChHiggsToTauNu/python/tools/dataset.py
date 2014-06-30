@@ -1304,23 +1304,6 @@ class RootHistoWithUncertainties:
     # direction (i.e. asymmetrically). Again, a rather crude
     # approximation.
     def getSystematicUncertaintyGraph(self, addStatistical=False):
-        def _getProperAdditives(diffPlus, diffMinus):
-            if diffPlus > 0 and diffMinus > 0:
-                return (max(diffPlus, diffMinus)**2, 0.0)
-            elif diffPlus < 0 and diffMinus < 0:
-                return (0.0, max(-diffPlus, -diffMinus)**2)
-            elif diffPlus > 0:
-                return (diffPlus**2, diffMinus**2)
-            elif diffPlus < 0:
-                return (diffMinus**2, diffPlus**2)
-            elif diffMinus > 0:
-                return (diffMinus**2, diffPlus**2)
-            elif diffMinus < 0:
-                return (diffPlus**2, diffMinus**2)
-            elif diffPlus == 0 and diffMinus == 0:
-                return (0.0, 0.0)
-            raise Exception("Error: Unknown situation diffPlus=%f, diffMinus=%f!"%(diffPlus, diffMinus))
-
         xvalues = []
         xerrhigh = []
         xerrlow = []
@@ -1345,7 +1328,7 @@ class RootHistoWithUncertainties:
             for shapePlus, shapeMinus in self._shapeUncertainties.itervalues():
                 diffPlus = shapePlus.GetBinContent(i) # Note that this could have + or - sign
                 diffMinus = shapeMinus.GetBinContent(i) # Note that this could have + or - sign
-                (addPlus, addMinus) = _getProperAdditives(diffPlus, diffMinus)
+                (addPlus, addMinus) = aux.getProperAdditivesForVariationUncertainties(diffPlus, diffMinus)
                 yhighSquareSum += addPlus
                 ylowSquareSum += addMinus
 
