@@ -44,12 +44,18 @@ namespace HPlus {
     //W histograms
     hWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WPt", "WPt; W p_{T} (GeV)", 80, 0., 400.);
     hWMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass", "WMass; m_{W} (GeV)", 100, 0., 200.);
-    hWEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WEta", "WEta; #eta_{W}", 80, 0., 400.);
+    hWEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WEta", "WEta; #eta_{W}", 100, -5., 5.);
 
     hWPtAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WPtAfterCut", "WPtAfterCut; W p_{T} (GeV)", 80, 0., 400.);
     hWMassAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMassAfterCut", "WMassAfterCut; m_{W} (GeV)", 100, 0., 200.);
-    hWEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WEtaAfterCut", "WEtaAfterCut; #eta_{W}", 80, 0., 400.);
+    hWEtaAfterCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WEtaAfterCut", "WEtaAfterCut; #eta_{W}", 100, -5., 5.);
     
+    //angular hisrograms:
+    hdeltaPhi_Wb = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "DeltaPhi_Wb","DeltaPhi_Wb;#Delta#phi(W,b) (^{o}); N_{events} / 5^{o}", 36, 0., 180.);
+    hdeltaR_Wb = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "DeltaR_Wb", "hDeltaR_Wb;#Delta R(W,b) (^{o});N_{events} / 5^{o}", 52, 0.0, 260.);
+    hdeltaPhi_jets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "DeltaPhi_jets","DeltaPhi_jets;#Delta#phi(jet_{1},jet_{2}) (^{o}); N_{events} / 5^{o}", 36, 0., 180.);
+    hdeltaR_jets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "DeltaR_jets", "hDeltaR_jets;#Delta R(jet_{1},jet_{2}) (^{o});N_{events} / 5^{o}", 52, 0.0, 260.);
+
     //MC matching histograms
     htopMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass_fullMatch", "TopMass_fullMatch; m_{t} (GeV)", 80, 0., 400.);
     htopMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass_bMatch", "TopMass_bMatch; m_{t} (GeV)", 80, 0., 400.);
@@ -58,9 +64,15 @@ namespace HPlus {
     hWMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_fullMatch", "WMass_fullMatchMatch; m_{W} (GeV)", 100, 0., 200.);
     hWMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_bMatch", "WMass_bMatch; m_{W} (GeV)", 100, 0., 200.);
     hWMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_qMatch", "WMass_qMatch; m_{W} (GeV)", 100, 0., 200.);
+    htopPt_match = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopPt_fullMatch", "TopPt_fullMatch;top p_{T} (GeV)", 80, 0., 400.);
+    hWPt_match = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WPt_fullMatch", "WPt_fullMatch; W p_{T} (GeV)", 80, 0., 400.);
     hWMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_MatchWrongB", "WMass_MatchWrongB; m_{W} (GeV)", 100, 0., 200.);
     hWMassLepton = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_lepton", "WMass_lepton; m_{W} (GeV)", 100, 0., 200.);
     hWMassNotLepton = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass_not_lepton", "WMass_not_lepton; m_{W} (GeV)", 100, 0., 200.);
+    hdeltaPhi_Wb_match = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "DeltaPhi_Wb_fullMatch","DeltaPhi_Wb_fullMatch;#Delta#phi(W,b) (^{o}); N_{events} / 5^{o}", 36, 0., 180.);
+    hdeltaR_Wb_match = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "DeltaR_Wb_fullMatch", "hDeltaR_Wb_fullMatch;#Delta R(W,b) (^{o});N_{events} / 5^{o}", 52, 0.0, 260.);
+    hdeltaPhi_jets_match = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "DeltaPhi_jets_fullMatch","DeltaPhi_jets_fullMatch;#Delta#phi(jet_{1},jet_{2}) (^{o}); N_{events} / 5^{o}", 36, 0., 180.);
+    hdeltaR_jets_match = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "DeltaR_jets_fullMatch", "hDeltaR_jets_fullMatch;#Delta R(jet_{1},jet_{2}) (^{o});N_{events} / 5^{o}", 52, 0.0, 260.);
 
     //other histograms    
     hjjbMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jjbMass", "jjbMass;m_{jjb} (GeV)", 80, 0., 400.);
@@ -80,15 +92,19 @@ namespace HPlus {
 
     // Reset variables
     double chi2Min = 999999;
-    double nominalTop = 172.9;
-    double nominalW = 80.4;
-    double sigmaTop = 18.;
-    double sigmaW = 12.;
+    double nominalTop = 172.5; //value used in simulation (used to be 172.9)
+    double nominalW = 80.4; //value used in simulation (unchanged)
+    double sigmaTop = 26.9; //RMS of Gaussian fit to 2012 TTJets_SemiLept (used to be 18.0)
+    double sigmaW = 14.4; //RMS of Gaussian fit to 2012 TTJets_SemiLept (used to be 11.0)
     bool topmassfound = false;
 
     edm::Ptr<pat::Jet> Jet1;
     edm::Ptr<pat::Jet> Jet2;
     edm::Ptr<pat::Jet> Jetb;
+    double dR_jets;
+    double dPhi_jets;
+    double dR_Wb;
+    double dPhi_Wb;
 
     //for all combos of 3 jets close enough to each other...
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
@@ -112,6 +128,11 @@ namespace HPlus {
 
         hjjbMass->Fill(candTop.M());
         double chi2 = ((candTop.M() - nominalTop)/sigmaTop)*((candTop.M() - nominalTop)/sigmaTop) + ((candW.M() - nominalW)/sigmaW)*((candW.M() - nominalW)/sigmaW);
+
+        dR_jets = (180.0/TMath::Pi())*ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJet2->p4());
+        dPhi_jets = (180.0/TMath::Pi())*ROOT::Math::VectorUtil::DeltaPhi(iJet1->p4(), iJet2->p4());
+        dR_Wb = (180.0/TMath::Pi())*ROOT::Math::VectorUtil::DeltaR(candW, iJetb->p4());
+        dPhi_Wb = (180.0/TMath::Pi())*ROOT::Math::VectorUtil::DeltaPhi(candW, iJetb->p4());
 
         if (chi2 < chi2Min ) {
           chi2Min = chi2;
@@ -142,16 +163,13 @@ namespace HPlus {
     hWPt->Fill(output.W.Pt());
     hWMass->Fill(output.getWMass());
     hWEta->Fill(output.getWEta());
+    
+    //angular hisrograms:
+    hdeltaPhi_Wb->Fill(dPhi_Wb);
+    hdeltaR_Wb->Fill(dR_Wb);
 
-//    if( output.getTopMass() >= fTopMassLow && output.getTopMass() <= fTopMassHigh ) {    
-    if (chi2Min < fChi2Cut) { //TODO: the cut criterion should be changed to this or something more sophisticated later
-        htopPtAfterCut->Fill(output.top.Pt());
-        htopMassAfterCut->Fill(output.getTopMass());
-        htopEtaAfterCut->Fill(output.getTopEta());
-        hWPtAfterCut->Fill(output.W.Pt());
-        hWMassAfterCut->Fill(output.getWMass());
-        hWEtaAfterCut->Fill(output.getWEta());
-        }
+    hdeltaPhi_jets->Fill(dPhi_jets);
+    hdeltaR_jets->Fill(dR_jets);
 
 //---------------------------------------------------------------------------------------------
     //Search correct combinations
@@ -167,7 +185,7 @@ namespace HPlus {
       bool Jet2Match = false;
       bool lepton = false;
 
-    //Determine HiggSide variable: 6 if top, -6 if antitop, 0 if top not found
+    //Determine Higgs-side variable: 6 if top, -6 if antitop, 0 if top not found
       int idHiggsSide = 0;
       for (size_t i=0; i < genParticles->size(); ++i){
         const reco::Candidate & p = (*genParticles)[i];
@@ -226,6 +244,12 @@ namespace HPlus {
      if ( bMatchWSide && Jet1Match && Jet2Match) {
        htopMassMatch->Fill(output.getTopMass());
        hWMassMatch->Fill(output.getWMass()); 
+      htopPt_match->Fill(output.top.Pt());
+      hWPt_match->Fill(output.W.Pt());
+      hdeltaPhi_Wb_match->Fill(dPhi_Wb);
+      hdeltaR_Wb_match->Fill(dR_Wb);
+      hdeltaPhi_jets_match->Fill(dPhi_jets);
+      hdeltaR_jets_match->Fill(dR_jets);
        }
      //everything matches but b
      if ( bMatchHiggsSide && Jet1Match && Jet2Match) {
@@ -249,12 +273,23 @@ namespace HPlus {
 
     //Event selection based on top reconstruction
 //    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
-    if (chi2Min >= fChi2Cut) {
-      output.fPassedEvent = false;
+//    if(output.top.Pt() > 300){
+//    if (chi2Min >= 5.0) {
+//    double chi2TopDiscriminator = ((output.top.M() - nominalTop)/sigmaTop)*((output.top.M() - nominalTop)/sigmaTop);    
+//    if(chi2TopDiscriminator >=5.0 || chi2TopDiscriminator < 0.1){
+    if(output.getTopMass() < 120.0 || output.getTopMass() > 300.0 || output.getWMass() < 60.0 || output.getWMass() > 140.0){
+//    if(output.getTopMass() < 120.0 || output.getTopMass() > 250.0 || output.getWMass() < 60.0 || output.getWMass() > 120.0){
+          output.fPassedEvent = false;
       htopMassRejected->Fill(output.getTopMass());      
-      } else {
-      output.fPassedEvent = true;
-      //increment(fTopChiMassCount); //TODO
+      } 
+    else{
+        output.fPassedEvent = true;
+        htopPtAfterCut->Fill(output.top.Pt());
+        htopMassAfterCut->Fill(output.getTopMass());
+        htopEtaAfterCut->Fill(output.getTopEta());
+        hWPtAfterCut->Fill(output.W.Pt());
+        hWMassAfterCut->Fill(output.getWMass());
+        hWEtaAfterCut->Fill(output.getWEta());
       } 
     return output;
   }

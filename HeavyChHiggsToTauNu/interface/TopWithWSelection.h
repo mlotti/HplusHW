@@ -42,7 +42,7 @@ namespace HPlus {
     WrappedTH1* htopMass;
     WrappedTH1* htopEta;
     WrappedTH1* htopPtAfterCut;
-    WrappedTH1* htopMassAfterCut;
+    WrappedTH1* htopMassAfterCut; 
     WrappedTH1* htopEtaAfterCut;
     WrappedTH1* htopMassRejected;
     WrappedTH1* hWPt;
@@ -50,7 +50,17 @@ namespace HPlus {
     WrappedTH1* hWEta;
     WrappedTH1* hWPtAfterCut;
     WrappedTH1* hWMassAfterCut;
-    WrappedTH1* hWEtaAfterCut;    
+    WrappedTH1* hWEtaAfterCut;   
+    WrappedTH1* hdeltaPhi_Wb;
+    WrappedTH1* hdeltaR_Wb;
+    WrappedTH1* hdeltaPhi_jets;
+    WrappedTH1* hdeltaR_jets; 
+    WrappedTH1* htopPt_match;
+    WrappedTH1* hWPt_match;
+    WrappedTH1* hdeltaPhi_Wb_match;
+    WrappedTH1* hdeltaR_Wb_match;
+    WrappedTH1* hdeltaPhi_jets_match;
+    WrappedTH1* hdeltaR_jets_match; 
     WrappedTH1* hjjMass;
     WrappedTH1* htopMassMatch;
     WrappedTH1* hWMassMatch;
@@ -60,7 +70,8 @@ namespace HPlus {
     WrappedTH1* htopMassQMatch;
     WrappedTH1* hWMassQMatch;
     WrappedTH1* htopMassMatchWrongB;
-    WrappedTH1* hWMassMatchWrongB;  
+    WrappedTH1* hWMassMatchWrongB;
+
   };
 }
 
