@@ -1592,6 +1592,8 @@ class InvertedTauID:
         theFit = TF1("theFit",FitFunction(),rangeMin,rangeMax,numberOfParameters)
         
         plot = plots.PlotBase()
+        histo.SetName(os.path.basename(histo.GetName()))
+        histo.SetStats(0)
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
         plot.createFrame("combinedfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
