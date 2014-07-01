@@ -132,7 +132,8 @@ def main(opts, moduleSelector, multipleDirs):
                             config.DataCardName = myOriginalName + "_HeavyHplus"
                 mySearchModeCounter += 1
                 for optimizationMode in moduleSelector.getSelectedOptimizationModes():
-                    ROOT.gROOT.CloseFiles()
+                    if hasattr(ROOT.gROOT, "CloseFiles"):
+                        ROOT.gROOT.CloseFiles()
                     ROOT.gROOT.GetListOfCanvases().Delete()
                     # After these, three histograms are still left in memory
                     # Worst memory leak seems to come from storing and not freeing the main counters
