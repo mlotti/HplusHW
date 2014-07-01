@@ -287,9 +287,11 @@ namespace HPlus {
     // MET selection
     std::vector<WrappedTH1*> hCtrlMET;
     std::vector<WrappedTH1*> hCtrlMETPhi;
+    std::vector<WrappedTH1*> hCtrlMETPhiMinusTauPhi;
     std::vector<WrappedTH1*> hCtrlTauPlusMETPt; // a.k.a. boost
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMET;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMETPhi;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausMETPhiMinusTauPhi;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausTauPlusMETPt; // a.k.a. boost
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionAfterMET;
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKFakeTausAfterMET;
@@ -357,9 +359,11 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlEWKFakeTausJetEtaAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlMETAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlMETPhiAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlMETPhiMinusTauPhiAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlTauPlusMETPtAfterMtSelections; // a.k.a. boost
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMETAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausMETPhiAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlEWKFakeTausMETPhiMinusTauPhiAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections; // a.k.a. boost
     std::vector<WrappedTH1*> hCtrlNbjetsAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlBJetPtAfterMtSelections;
