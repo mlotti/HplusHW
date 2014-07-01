@@ -91,9 +91,9 @@ _crossSectionUncertainty = {
     "TTJets": ScalarUncertaintyItem("xsect", plus=0.0517, minus=0.060), # arxiv:1303.6254
     "TTToHplus": ScalarUncertaintyItem("xsect", plus=0.0517, minus=0.060), # arxiv:1303.6254
     "HplusTB": ScalarUncertaintyItem("xsect", 0.30),
-    "WJets":  ScalarUncertaintyItem("xsect", 0.05),
-    "SingleTop": ScalarUncertaintyItem("xsect", 0.08),
-    "DYJetsToLL": ScalarUncertaintyItem("xsect", 0.04),
+    "WJets":  ScalarUncertaintyItem("xsect", plus=0.0403, minus=0.0371), # https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV
+    "SingleTop": ScalarUncertaintyItem("xsect", 0.0901), # for tW https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV
+    "DYJetsToLL": ScalarUncertaintyItem("xsect", plus=0.0380, minus=0.0360), # https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV
     "Diboson": ScalarUncertaintyItem("xsect", 0.04),
     "QCD": ScalarUncertaintyItem("xsect", 1.00), # We do not trust the MC QCD, therefore 100 % uncertainty
     "QCD_Pt20_MuEnriched": ScalarUncertaintyItem("xsect", 1.00), # We do not trust the MC QCD, therefore 100 % uncertainty
