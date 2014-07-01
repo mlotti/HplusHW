@@ -6,7 +6,6 @@ import os
 import sys
 import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TailFitter as TailFitter
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,QCDShapeVariationExtractor,ConstantExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
@@ -71,7 +70,7 @@ class ExtractorResult():
         #       i.e. it is enough to just clear the list.
         #self._tempHistos = []
         for h in self._histograms:
-            htemp = h.Clone(h.GetTitle())
+            htemp = aux.Clone(h, h.GetTitle())
             htemp.SetDirectory(rootfile)
             self._tempHistos.append(htemp)
 
@@ -270,6 +269,54 @@ class DatacardColumn():
             print "  "+h.getRootHisto().GetTitle()
         raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Could not find control plot by title '%s' in column %s!"%(title, self._label))
 
+    ## Creates an up and down variation histogram from a constant nuisance parameters
+    ## Returns list of created histograms
+    def _createShapeNuisanceFromConstant(self, hRate, uncertaintyUp, uncertaintyDown, suffix=""):
+        myNamePrefix = self.getLabel()+"_"+e._masterExID
+        hUp = aux.Clone(hRate, myNamePrefix+"Up"+suffix)
+        hDown = aux.Clone(hRate, myNamePrefix+"Down"+suffix)
+        hUp.SetTitle(myNamePrefix+"Up"+suffix)
+        hDown.SetTitle(myNamePrefix+"Down"+suffix)
+        for k in range(0, hUp.GetNbinsX()+2):
+            myValue = hUp.GetBinContent(k)
+            hUp.SetBinContent(k, myValue * (1.0 + uncertaintyUp))
+            hUp.SetBinError(k, 0.01)
+            hDown.SetBinContent(k, myValue * (1.0 - uncertaintyDown))
+            hDown.SetBinError(k, 0.01)
+        return [hUp, hDown]
+
+
+    def _getShapeNuisanceHistogramsFromRHWU(self, rhwu, systVariationName, masterExtractorId, suffix=""):
+        myHistograms = []
+        myShapeUncertDict = rhwu.getShapeUncertainties()
+        # Check that asked variation exists
+        if not systVariationName in myShapeUncertDict.keys():
+            raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, check that options in the datacard match to multicrab content!"%(self.getLabel(),systVariationName))
+        # Get histograms
+        (hSystUp, hSystDown) = myShapeUncertDict[systVariationName]
+        myNamePrefix = self.getLabel()+"_"+masterExtractorId
+        hUp = aux.Clone(hSystUp, myNamePrefix+"Up"+suffix)
+        hDown = aux.Clone(hSystDown, myNamePrefix+"Down"+suffix)
+        hUp.SetTitle(myNamePrefix+"Up"+suffix)
+        hDown.SetTitle(myNamePrefix+"Down"+suffix)
+        # Do not apply here additional normalization, it has already been applied
+        # via RootHistoWithUncertainties.Scale() in DatacardColumn::doDataMining()
+        # Append histograms to output list
+        myHistograms.append(hUp)
+        myHistograms.append(hDown)
+        # These histograms contain abs uncertainty, need to add nominal histogram so that Lands/Combine accepts the histograms
+        for h in myHistograms:
+            h.Add(rhwu.getRootHisto())
+            # Check for negative bins and correct if necessary
+            #for k in range(1, h.GetNbinsX()+1):
+            #    if h.GetBinContent(k) < 0.000001:
+            #        if h.GetBinContent(k) < -0.001:
+            #            #print ShellStyles.WarningLabel()+"Up/down nuisance %s value in bin %d is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(e._exid, k, self.getLabel(), h.GetBinContent(k))
+            #            #h.SetBinContent(k, 0.0)
+            #            #h.SetBinError(k, config.MinimumStatUncertainty)
+        # Return result
+        return myHistograms
+
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
         print "... processing column: "+ShellStyles.HighlightStyle()+self._label+ShellStyles.NormalStyle()
@@ -288,6 +335,7 @@ class DatacardColumn():
             print ShellStyles.WarningLabel()+"Skipping ..."
             return
         # Obtain root histogram with uncertainties for shape and cache it
+        hRateWithFineBinning = None
         if not (self.typeIsEmptyColumn() or dsetMgr == None):
             mySystematics = dataset.Systematics(allShapes=True) #,verbose=True)
             if not dsetMgr.hasDataset(self.getDatasetMgrColumn()):
@@ -297,7 +345,7 @@ class DatacardColumn():
                 # Set signal xsection
                 if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
                      # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
-                     myDatasetRootHisto.Delete()
+                     #myDatasetRootHisto.Delete()
                      dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 # Fix a bug in signal xsection
@@ -317,10 +365,13 @@ class DatacardColumn():
             if abs(self._additionalNormalisationFactor - 1.0) > 0.00001:
                 print ShellStyles.WarningLabel()+"Applying normalization factor %f to sample '%s'!"%(self._additionalNormalisationFactor, self.getLabel())
                 self._cachedShapeRootHistogramWithUncertainties.Scale(self._additionalNormalisationFactor)
-            # Rebin and move under/overflow bins to visible bins
+            # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
+            self._cachedShapeRootHistogramWithUncertainties.makeFlowBinsVisible()
+            myShapeRHWUWithFineBinning = self._cachedShapeRootHistogramWithUncertainties.Clone()
+            hRateWithFineBinning = aux.Clone(self._cachedShapeRootHistogramWithUncertainties.getRootHisto(), "%s_fineBinning"%self.getLabel())
+            hRateWithFineBinning.SetTitle("%s_fineBinning"%self.getLabel())
             myArray = array("d",config.ShapeHistogramsDimensions)
             self._cachedShapeRootHistogramWithUncertainties.Rebin(len(config.ShapeHistogramsDimensions)-1,"",myArray)
-            self._cachedShapeRootHistogramWithUncertainties.makeFlowBinsVisible()
         # Obtain rate histogram
         myRateHistograms = []
         if self.typeIsEmptyColumn() or dsetMgr == None:
@@ -341,14 +392,7 @@ class DatacardColumn():
             else:
                 myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
             myShapeHistograms = myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
-            if self.typeIsObservation() or self.typeIsSignal():
-                myRateHistograms.extend(myShapeHistograms)
-            else:
-                # Shape histo for background or signal, do tail fit
-                
-                #myFitter = TailFitter.TailFitter(myShapeHistograms[0], self.getLabel(), myShapeHistograms[0].GetTitle(), 120.0, 200.0)
-
-                myRateHistograms.append(myShapeHistograms[0])
+            myRateHistograms.extend(myShapeHistograms)
         # Look for negative bins in rage
         for k in range(1, myRateHistograms[0].GetNbinsX()+1):
             if myRateHistograms[0].GetBinContent(k) < 0.000001:
@@ -361,6 +405,7 @@ class DatacardColumn():
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
                                myRateHistograms)
+        self._rateResult._histograms.append(hRateWithFineBinning)
         if self._opts.verbose:
             print "  - Rate: integral = ", myRateHistograms[0].Integral()
             if (self.typeIsEWK()) or self.typeIsEWKfake():
@@ -400,18 +445,8 @@ class DatacardColumn():
                     if e.isShapeNuisance():
                         if isinstance(e, ConstantExtractor):
                             # Create up and down histograms out of the constant values
-                            hUp = aux.Clone(myRateHistograms[0])
-                            hDown = aux.Clone(myRateHistograms[0])
-                            hUp.SetTitle(self.getLabel()+"_"+e._masterExID+"Up")
-                            hDown.SetTitle(self.getLabel()+"_"+e._masterExID+"Down")
-                            for k in range(0, hUp.GetNbinsX()+2):
-                                myValue = hUp.GetBinContent(k)
-                                hUp.SetBinContent(k, myValue * (1.0 + myResult.getUncertaintyUp()))
-                                hUp.SetBinError(k, 0.01)
-                                hDown.SetBinContent(k, myValue * (1.0 - myResult.getUncertaintyDown()))
-                                hDown.SetBinError(k, 0.01)
-                            myHistograms.append(hUp)
-                            myHistograms.append(hDown)
+                            myHistograms.extend(_createShapeNuisanceFromConstant(myRateHistograms[0], myResult.getUncertaintyUp(), myResult.getUncertaintyDown()))
+                            myHistograms.extend(_createShapeNuisanceFromConstant(hRateWithFineBinning, myResult.getUncertaintyUp(), myResult.getUncertaintyDown()), suffix="_fineBinning")
                             # Add also to the uncertainties as normalization uncertainty
                             self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                         else:
@@ -421,19 +456,11 @@ class DatacardColumn():
                                 if e.getDistribution() == "shapeQ" and abs(e.getScaleFactor() - 1.0) > 0.0:
                                     self._cachedShapeRootHistogramWithUncertainties.ScaleVariationUncertainty(e._systVariation, e.getScaleFactor())
                             # Obtain histograms
-                            myHistograms = e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
-                            # Histograms constain abs uncertainty, need to add nominal histogram so that Lands accepts the histograms
-                            if e.getDistribution() == "shapeQ":
-                                for i in range(0,len(myHistograms)):
-                                    myHistograms[i].Add(aux.Clone(self._rateResult.getHistograms()[0]))
-                                    # Check for negative bins and correct if necessary
-                                    for k in range(1, myHistograms[i].GetNbinsX()+1):
-                                        if myHistograms[i].GetBinContent(k) < 0.000001:
-                                            if myHistograms[i].GetBinContent(k) < -0.001:
-                                              print ShellStyles.WarningLabel()+"Up/down nuisance %s value in bin %d is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(e._exid, k, self.getLabel(), myHistograms[i].GetBinContent(k))
-                                              myHistograms[i].SetBinContent(k, 0.0)
-                                              myHistograms[i].SetBinError(k, config.MinimumStatUncertainty)
-                                              #raise Exception(ShellStyles.ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
+                            if isinstance(e, QCDShapeVariationExtractor):
+                                myHistograms.extend(e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+                            else:
+                                myHistograms.extend(self._getShapeNuisanceHistogramsFromRHWU(self._cachedShapeRootHistogramWithUncertainties, e._systVariation, e.getMasterId()))
+                                myHistograms.extend(self._getShapeNuisanceHistogramsFromRHWU(myShapeRHWUWithFineBinning, e._systVariation, e.getMasterId(), suffix="_fineBinning"))
                     else:
                         # For QCD, scale the QCD type constants by the purity
                         if self.typeIsQCD() and e.isQCDNuisance():
@@ -464,6 +491,7 @@ class DatacardColumn():
         # Print list of uncertainties
         if self._opts.verbose and dsetMgr != None and not self.typeIsEmptyColumn():
             print "  - Has shape variation syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
+        myShapeRHWUWithFineBinning.Delete()
 
         # Obtain results for control plots
         if config.OptionDoControlPlots:

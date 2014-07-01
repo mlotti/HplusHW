@@ -13,10 +13,11 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor as Extractor
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer as TableProducer
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabConsistencyCheck as consistencyCheck
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 
-
+import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
@@ -331,7 +332,6 @@ class DataCardGenerator:
 
         # do data mining to cache results into datacard column objects
         self.doDataMining()
-        #raise Exception("temp stop")
 
         # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
         if self._config.OptionGenuineTauBackgroundSource == "MC_FullSystematics" or self._config.OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
@@ -419,7 +419,7 @@ class DataCardGenerator:
             print "  Please check if this was intended."
         # determine if datacard was ok
         if mymsg != "":
-            print ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"+ShellStyles.NormalStyle()
+            print ShellStyles.ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"+ShellStyles.NormalStyle()
             print mymsg
             raise Exception()
         return True
@@ -528,33 +528,37 @@ class DataCardGenerator:
         #myEmbColumn._label = "MCEWKtau"
         # Add results from dataset columns with landsProcess == None
         myRemoveList = []
+        myNuisanceIdList = list(myEmbColumn.getNuisanceIds())
         for c in self._columns:
             if c.getLandsProcess() == None:
                 print "... merging genuine tau column %s"%c.getLabel()
                 # Merge rate result, (ExtractorResult objects)
                 # Merge cached shape histo
                 myEmbColumn._cachedShapeRootHistogramWithUncertainties.Add(c.getCachedShapeRootHistogramWithUncertainties())
-                myEmbColumn._rateResult._result = myEmbColumn._rateResult._histograms[0].Integral()
+                for n in c.getNuisanceIds():
+                    if not n in myNuisanceIdList:
+                        myNuisanceIdList.append(n)
+                #myEmbColumn._rateResult._result = myEmbColumn._rateResult._histograms[0].Integral()
                 #print "new=",myEmbColumn._rateResult._histograms[0].Integral(),myEmbColumn._cachedShapeRootHistogramWithUncertainties.getRateStatUncertainty()
                 #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
                 # Merge nuisance results (ExtractorResult objects)
-                for i in range(0, len(myEmbColumn.getNuisanceResults())):
-                    # It is enough to merge only histograms
-                    nhistos = len(myEmbColumn.getNuisanceResults()[i]._histograms)
-                    if nhistos > 0:
-                        if myEmbColumn.getNuisanceResults()[i].resultIsStatUncertainty():
-                            # replace shapestat by values from new merged rate histo
-                            for k in range(1, myEmbColumn._nuisanceResults[i]._histograms[k].GetNbinsX()+1):
-                                myRate = myEmbColumn._rateResult._histograms[0].GetBinContent(k)
-                                myRateUncert = myEmbColumn._rateResult._histograms[0].GetBinError(k)
-                                # up histogram
-                                myEmbColumn._nuisanceResults[i]._histograms[0].SetBinContent(k, myRate + myRateUncert)
-                                # down histogram
-                                myEmbColumn._nuisanceResults[i]._histograms[1].SetBinContent(k, myRate - myRateUncert)
-                        else:
-                            # linear addition, because these are variation histograms
-                            for k in range(0,nhistos):
-                                myEmbColumn._nuisanceResults[i]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k])
+                #for i in range(0, len(myEmbColumn.getNuisanceResults())):
+                    ## It is enough to merge only histograms
+                    #nhistos = len(myEmbColumn.getNuisanceResults()[i]._histograms)
+                    #if nhistos > 0:
+                        #if myEmbColumn.getNuisanceResults()[i].resultIsStatUncertainty():
+                            ## replace shapestat by values from new merged rate histo
+                            #for k in range(1, myEmbColumn._nuisanceResults[i]._histograms[k].GetNbinsX()+1):
+                                #myRate = myEmbColumn._rateResult._histograms[0].GetBinContent(k)
+                                #myRateUncert = myEmbColumn._rateResult._histograms[0].GetBinError(k)
+                                ## up histogram
+                                #myEmbColumn._nuisanceResults[i]._histograms[0].SetBinContent(k, myRate + myRateUncert)
+                                ## down histogram
+                                #myEmbColumn._nuisanceResults[i]._histograms[1].SetBinContent(k, myRate - myRateUncert)
+                        #else:
+                            ## linear addition, because these are variation histograms
+                            #for k in range(0,nhistos):
+                                #myEmbColumn._nuisanceResults[i]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k])
                     # Constants remain same, since they are relative uncertainties
                 # Merge control plots (HistoRootWithUncertainties objects)
                 for i in range(0, len(myEmbColumn._controlPlots)):
@@ -572,66 +576,79 @@ class DataCardGenerator:
                     # Subtract rate result, (ExtractorResult objects)
                     # Merge cached shape histo
                     myEmbColumn._cachedShapeRootHistogramWithUncertainties.Add(c.getCachedShapeRootHistogramWithUncertainties(), -1.0)
-                    myEmbColumn._rateResult._result = myEmbColumn._rateResult._histograms[0].Integral()
-                    #print "new=",myEmbColumn._rateResult._histograms[0].Integral(),myEmbColumn._cachedShapeRootHistogramWithUncertainties.getRateStatUncertainty()
-                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
-                    # Merge nuisance results (ExtractorResult objects)
-                    for i in range(0, len(c.getNuisanceResults())):
-                        myMatchIndex = None
-                        for j in range(0, len(myEmbColumn.getNuisanceResults())):
-                            if c.getNuisanceResults()[i]._masterId == myEmbColumn.getNuisanceResults()[j]._masterId:
-                                myMatchIndex = j
-                        if myMatchIndex != None and len(myEmbColumn.getNuisanceResults()[myMatchIndex]._histograms) > 0:
-                            # Match found, let's do the addition
-                            if myEmbColumn.getNuisanceResults()[myMatchIndex].resultIsStatUncertainty():
-                                # replace shapestat by values from new merged rate histo
-                                for k in range(1, myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k].GetNbinsX()+1):
-                                    myRate = myEmbColumn._rateResult._histograms[0].GetBinContent(k)
-                                    myRateUncert = myEmbColumn._rateResult._histograms[0].GetBinError(k)
-                                    # up histogram
-                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[0].SetBinContent(k, myRate + myRateUncert)
-                                    # down histogram
-                                    if myRate - myRateUncert < self._config.MinimumStatUncertainty:
-                                        myEmbColumn._nuisanceResults[myMatchIndex]._histograms[1].SetBinContent(k, self._config.MinimumStatUncertainty)
-                                    else:
-                                        myEmbColumn._nuisanceResults[myMatchIndex]._histograms[1].SetBinContent(k, myRate - myRateUncert)
-                            else:
-                                # linear addition, because these are variation histograms
-                                for k in range(0,len(myEmbColumn.getNuisanceResults()[myMatchIndex]._histograms)):
-                                    if not isinstance(myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k], ROOT.TH1):
-                                        raise Exception(ShellStyles.ErrorLabel()+"The logic has been written under the assumption that one is dealing with histograms and only binContent is meaningful")
-                                    myEmbColumn._nuisanceResults[myMatchIndex]._histograms[k].Add(c.getNuisanceResults()[i].getHistograms()[k], -1.0)
+                    for n in c.getNuisanceIds():
+                        if not n in myNuisanceIdList:
+                            myNuisanceIdList.append(n)
                     # Merge control plots (HistoRootWithUncertainties objects)
                     for i in range(0, len(myEmbColumn._controlPlots)):
                         if myEmbColumn._controlPlots[i] != None:
                             myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"], -1.0)
-        # Rate: Purge relative normalization uncertainties and replace by those for embedding
-        #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
-        ##myEmbColumn._cachedShapeRootHistogramWithUncertainties.resetNormalizationUncertaintyRelative()
-        #for i in range(0, len(myEmbColumn.getNuisanceResults())):
-            #if len(myEmbColumn.getNuisanceResults()[i]._histograms) == 0:
-                #myResult = myEmbColumn.getNuisanceResults()[i].getResult()
-                #myName = myEmbColumn.getNuisanceResults()[i].getId()
-                #if not 
-                #if isinstance(myResult, ScalarUncertaintyItem):
-                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
-                #elif isinstance(myResult, list):
-                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
-                #else:
-                    #myEmbColumn._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(myName, myResult, myResult)
-        ## Control plots: Purge relative normalization uncertainties and replace by those for embedding
-        #for i in range(0, len(myEmbColumn._controlPlots)):
-            #myEmbColumn._controlPlots[i]["shape"].resetNormalizationUncertaintyRelative()
-            #for k in range(0, len(myEmbColumn.getNuisanceResults())):
-                #if len(myEmbColumn.getNuisanceResults()[k]._histograms) == 0:
-                    #myResult = myEmbColumn.getNuisanceResults()[k].getResult()
-                    #myName = myEmbColumn.getNuisanceResults()[k].getId()
-                    #if isinstance(myResult, ScalarUncertaintyItem):
-                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
-                    #elif isinstance(myResult, list):
-                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult[1], myResult[0])
-                    #else:
-                        #myEmbColumn._controlPlots[i]["shape"].addNormalizationUncertaintyRelative(myName, myResult, myResult)
+        # Update rate
+        myEmbColumn._rateResult._result = myEmbColumn._rateResult._histograms[0].Integral()
+        # Update rate stat. uncert.
+        for i in range(0, len(myEmbColumn.getNuisanceResults())):
+            nhistos = len(myEmbColumn.getNuisanceResults()[i]._histograms)
+            if nhistos > 0:
+                if myEmbColumn.getNuisanceResults()[i].resultIsStatUncertainty():
+                    for k in range(1, myEmbColumn._nuisanceResults[i]._histograms[0].GetNbinsX()+1):
+                        myRate = myEmbColumn._rateResult._histograms[0].GetBinContent(k)
+                        myRateUncert = myEmbColumn._rateResult._histograms[0].GetBinError(k)
+                        if myRateUncert < self._config.ToleranceForMinimumRate:
+                            myRateUncert = self._config.ToleranceForMinimumRate
+                        # up histogram
+                        myEmbColumn._nuisanceResults[i]._histograms[0].SetBinContent(k, myRate + myRateUncert)
+                        ## down histogram
+                        myEmbColumn._nuisanceResults[i]._histograms[1].SetBinContent(k, myRate - myRateUncert)
+        # Update shape uncertainties
+        for e in self._extractors:
+            if e in myNuisanceIdList:
+                # Check that all uncertainties exist in root histo with uncertainties:
+                mySystVarName = e.getId()
+                if e.isShapeNuisance():
+                    mySystVarName = e._systVariation
+                if not mySystVarName in myEmbColumn._cachedShapeRootHistogramWithUncertainties._shapeUncertainties.keys():
+                    myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
+                    raise Exception(ErrorLabel()+"Syst.uncert. '%s' not in RootHistogramWithUncertainties()!"%mySystVarName)
+                # Find index for existing nuisance result (keep at None if no index is found)
+                myNuisanceResultIndex = None
+                for i in range(0, len(myEmbColumn.getNuisanceIds())):
+                    if e.getId() == myEmbColumn.getNuisanceIds()[i]:
+                        myNuisanceResultIndex = i
+                myResult = None
+                # Obtain plus and minus variation histograms
+                (hUp, hMinus) = myEmbColumn._cachedShapeRootHistogramWithUncertainties._shapeUncertainties[mySystVarName]
+                if e.isShapeNuisance():
+                    myModUp = aux.Clone(hUp)
+                    myModUp.Add(myEmbColumn._cachedShapeRootHistogramWithUncertainties.getRootHisto())
+                    myModDown = aux.Clone(hDown)
+                    myModDown.Add(myEmbColumn._cachedShapeRootHistogramWithUncertainties.getRootHisto())
+                    myResult = DatacardColumn.ExtractorResult(e.getId(),
+                                                              e.getMasterId(),
+                                                              0.0,
+                                                              [myModUp,myModDown],
+                                                              "Stat." in e.getDescription() or "stat." in e.getDescription() or e.getDistribution()=="shapeStat")
+                else:
+                    myUpInt = hUp.Integral()
+                    myDownInt = hDown.Integral()
+                    myRateInt = myEmbColumn._cachedShapeRootHistogramWithUncertainties.getRootHisto().Integral()
+                    myPlus = 0.0
+                    myMinus = 0.0
+                    if abs(myRateInt) > 0.000001:
+                        myPlus = (myPlus-myRate)/myRate
+                        myMinus = (myMinus-myRate)/myRate
+                    myResultItem = ScalarUncertaintyItem(plus=myPlus, minus=myMinus)
+                    myResult = DatacardColumn.ExtractorResult(e.getId(),
+                                                              e.getMasterId(),
+                                                              myResultItem,
+                                                              [],
+                                                              "Stat." in e.getDescription() or "stat." in e.getDescription() or e.getDistribution()=="shapeStat")
+                # Update result
+                if myNuisanceResultIndex == None:
+                    myEmbColumn._nuisanceResults.append(myResult)
+                    myEmbColumn._nuisanceIds.append(e.getId())
+                else:
+                    myEmbColumn._nuisanceResults[myNuisanceResultIndex] = myResult
+
         # Set type of control plots
         for i in range(0, len(myEmbColumn._controlPlots)):
             if myEmbColumn._controlPlots[i] != None:
@@ -780,7 +797,7 @@ class DataCardGenerator:
                                                       opts = self._opts,
                                                       scaleFactor = n.getArg("scaleFactor")))
             else:
-                print ErrorStyle()+"Error in nuisance with id='"+n.id+"':"+ShellStyles.NormalStyle()+" unknown or missing field function '"+n.function+"' (string)!"
+                print ShellStyles.ErrorStyle()+"Error in nuisance with id='"+n.id+"':"+ShellStyles.NormalStyle()+" unknown or missing field function '"+n.function+"' (string)!"
                 print "Options are: 'Constant', 'ConstantToShape', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio'"
                 raise Exception()
         # Create reserved nuisances
@@ -795,7 +812,7 @@ class DataCardGenerator:
         for i in range(0,len(self._extractors)):
             for j in range(0,len(self._extractors)):
                 if self._extractors[i].isId(self._extractors[j].getId()) and i != j:
-                    print ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" You have defined two nuisances with id='"+self._extractors[j].getId()+"'! The id has to be unique!"
+                    print ShellStyles.ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" You have defined two nuisances with id='"+self._extractors[j].getId()+"'! The id has to be unique!"
                     raise Exception()
         # Merge nuisances
         self.mergeNuisances()
@@ -818,7 +835,7 @@ class DataCardGenerator:
                 if n.isId(mset[0]):
                     myFoundStatus = True
             if not myFoundStatus:
-                print ErrorStyle()+"Error in merging Nuisances:"+ShellStyles.NormalStyle()+" cannot find a nuisance with id '"+mset[0]+"'!"
+                print ShellStyles.ErrorStyle()+"Error in merging Nuisances:"+ShellStyles.NormalStyle()+" cannot find a nuisance with id '"+mset[0]+"'!"
                 raise Exception()
             # assign master to slave nuisances
             for i in range(1, len(mset)):
@@ -828,7 +845,7 @@ class DataCardGenerator:
                         n.setAsSlave(mset[0])
                         myFoundStatus = True
                 if not myFoundStatus:
-                    print ErrorStyle()+"Error in merging Nuisances:"+ShellStyles.NormalStyle()+" tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
+                    print ShellStyles.ErrorStyle()+"Error in merging Nuisances:"+ShellStyles.NormalStyle()+" tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
                     raise Exception()
         print "Merged Nuisances"
 

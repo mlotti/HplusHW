@@ -45,8 +45,9 @@ output_file		= tteffAnalysis-metleg.root
 
 skip_TFileService_output = 1
 
-dbs_url                 = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_01_writer/servlet/DBSServlet
+#dbs_url                 = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_01_writer/servlet/DBSServlet
 #dbs_url 		= https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
+dbs_url			= phys03
 
 [USER]
 return_data             = 1
