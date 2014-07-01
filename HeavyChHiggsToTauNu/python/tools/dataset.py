@@ -1544,12 +1544,13 @@ class RootHistoWithUncertainties:
         for key in keys2:
             if not key in keys1:
                 # Add those histograms, which so far did not exist
+                (plus, minus) = other._shapeUncertainties[key]
+                newPlus = aux.Clone(plus)
+                newMinus = aux.Clone(minus)
                 if len(args) > 0:
-                    if args[0] >= 0.0:
-                        self._shapeUncertainties[key] = other._shapeUncertainties[key]
-                else:
-                    self._shapeUncertainties[key] = other._shapeUncertainties[key]
-                #self.addShapeUncertaintyFromVariation(key, *)
+                    newPlus.Scale(args[0])
+                    newMinus.Scale(args[0])
+                self._shapeUncertainties[key] = (newPlus, newMinus)
 
         # Add histo
         self._rootHisto.Add(other._rootHisto, *args)
