@@ -558,6 +558,7 @@ class ShapeExtractor(ExtractorBase):
             # Append histograms to output list
             myHistograms.append(hUp)
             myHistograms.append(hDown)
+            h.Delete()
             #h.IsA().Destructor(h) # Delete the nominal histo
         # Return result
         return myHistograms
@@ -618,6 +619,8 @@ class ShapeVariationExtractor(ExtractorBase):
 
     ## Virtual method for extracting histograms
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        # Obsolete
+        raise Exception("obsolete")
         myHistograms = []
         # Check that results have been cached
         if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
@@ -692,6 +695,16 @@ class QCDShapeVariationExtractor(ExtractorBase):
             myHistoNamePrefix = "ForDataDrivenCtrlPlots/"+myHistoNamePrefix
         (hNum, hNumName) = dset.getRootHisto(myHistoNamePrefix+"Numerator", analysisPostfix=mySource)
         (hDenom, hDenomName) = dset.getRootHisto(myHistoNamePrefix+"Denominator", analysisPostfix=mySource)
+        # Store original source histograms
+        mySourceNamePrefix = "%s_%sSource"%(datasetColumn.getLabel(),self.getId())
+        hNumSource = aux.Clone(hNum, mySourceNamePrefix+"_Numerator")
+        hNumSource.SetTitle(mySourceNamePrefix+"_Numerator")
+        histogramsExtras.makeFlowBinsVisible(hNumSource)
+        myHistograms.append(hNumSource)
+        hDenomSource = aux.Clone(hDenom, mySourceNamePrefix+"_Denominator")
+        hDenomSource.SetTitle(mySourceNamePrefix+"_Denominator")
+        histogramsExtras.makeFlowBinsVisible(hDenomSource)
+        myHistograms.append(hDenomSource)
         # Rebin histograms
         myArray = array("d",getBinningForPlot(myHistoNameShort))
         hRebinnedNum = hNum.Rebin(len(myArray)-1,"",myArray)
@@ -716,6 +729,9 @@ class QCDShapeVariationExtractor(ExtractorBase):
         else:
             rootHistoWithUncertainties.addShapeUncertaintyFromVariation(self._systVariation, hUp, hDown)
         # Do not apply here additional normalization, it does not affect this uncertainty
+        # Add rate histogram to make the histograms compatible with LandS/Combine
+        hUp.Add(myRateHisto)
+        hDown.Add(myRateHisto)
         # Append histograms to output list
         myHistograms.append(hUp)
         myHistograms.append(hDown)

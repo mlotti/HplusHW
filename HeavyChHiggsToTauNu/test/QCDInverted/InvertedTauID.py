@@ -1203,6 +1203,18 @@ class InvertedTauID:
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
         plot.createFrame(canvasName+self.label, opts={"ymin": 0.1, "ymaxfactor": 2.})
 
+
+        plot.histoMgr.setHistoLegendLabelMany({"Inv": "b-jet veto ","Base": "b tagging "})
+            
+        
+        histo.GetYaxis().SetTitle("Events ")
+        histo.GetXaxis().SetTitle("#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{0},MET)^{2}}")
+
+
+#        if "MtBtaggingNoBtaggingInverted" in name:
+        histograms.addText(0.6, 0.67, "Inverted #tau selection", 22)
+        histograms.addText(0.6, 0.6, "TailKiller: Loose", 22)
+                                                  
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
         histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
@@ -1592,6 +1604,8 @@ class InvertedTauID:
         theFit = TF1("theFit",FitFunction(),rangeMin,rangeMax,numberOfParameters)
         
         plot = plots.PlotBase()
+        histo.SetName(os.path.basename(histo.GetName()))
+        histo.SetStats(0)
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
         plot.createFrame("combinedfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
@@ -1604,7 +1618,26 @@ class InvertedTauID:
         theFit.SetLineStyle(2)
         theFit.SetLineColor(4)
         theFit.SetLineWidth(3)
+        histo.GetYaxis().SetTitle("Events ")
+        histo.GetXaxis().SetTitle("Type I PFMET (GeV)")
+        if self.label=="taup_Tlt50": 
+            histograms.addText(0.45,0.75,"p_{T}^{#tau jet}< 50 GeV")
+        if self.label=="taup_Teq50to60": 
+            histograms.addText(0.45,0.75,"50 GeV < p_{T}^{#tau jet}< 60 GeV")
+        if self.label=="taup_Teq60to70": 
+            histograms.addText(0.45,0.75,"60 GeV < p_{T}^{#tau jet}< 70 GeV")
+        if self.label=="taup_Teq70to80": 
+            histograms.addText(0.45,0.75,"70 GeV < p_{T}^{#tau jet}< 80 GeV")
+        if self.label=="taup_Teq80to100": 
+            histograms.addText(0.45,0.75,"80 GeV < p_{T}^{#tau jet}< 100 GeV")
+        if self.label=="taup_Teq100to120": 
+            histograms.addText(0.45,0.75,"100 GeV < p_{T}^{#tau jet}< 120 GeV")   
+        if self.label=="taup_Tgt120": 
+            histograms.addText(0.45,0.75,"p_{T}^{#tau jet}> 120 GeV")
+
+            
         theFit.Draw("same")
+
 
 	par = theFit.GetParameters()
 
@@ -1621,8 +1654,8 @@ class InvertedTauID:
  #       histo.GetYaxis().SetTitle("Events / 10 GeV")
  #       histo.GetXaxis().SetTitle("MET  (GeV)")
 
-        histograms.addText(0.35,0.8,"Data, Baseline TauID")
-        histograms.addText(0.45,0.25,"QCD",20)
+        histograms.addText(0.4,0.85,"Data, Baseline TauID")
+       # histograms.addText(0.45,0.25,"QCD",20)
 
         plot.histoMgr.appendHisto(histograms.Histo(qcdOnly,"qcdOnly"))
         

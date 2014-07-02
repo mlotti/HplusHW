@@ -26,8 +26,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabConsistencyCheck as cons
 
 from InvertedTauID import *
 #dataEra = "Run2011A"
-dataEra = "Run2011AB"
-#dataEra = "Run2012ABCD"
+#dataEra = "Run2011AB"
+dataEra = "Run2012ABCD"
 
 
 searchMode = "Light"
