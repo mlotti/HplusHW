@@ -5,12 +5,15 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
+import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference as systematicsForMetShapeDifference
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 from math import pow,sqrt
 import sys
 import ROOT
+from array import array
 
 ## QCD specific method for extracting purity for a shape
 def _calculateAverageQCDPurity(shapeHisto, purityHisto):
@@ -53,7 +56,7 @@ class ExtractorBase:
         if self._scaleFactor == None:
             self._scaleFactor = 1.0
         if abs(self._scaleFactor - 1.0) > 0.00001:
-            print WarningLabel()+"Scaling nuisance parameter %s by factor %f"%(self._exid, self._scaleFactor)
+            print ShellStyles.WarningLabel()+"Scaling nuisance parameter %s by factor %f"%(self._exid, self._scaleFactor)
 
     ## Returns true if extractable mode is observation
     def isObservation(self):
@@ -128,7 +131,7 @@ class ExtractorBase:
     def getCounterHistogram(self, rootFile, counterHisto):
         histo = rootFile.Get(counterHisto)
         if not histo:
-            raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Cannot find counter histogram '"+counterHisto+"'!")
+            raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Cannot find counter histogram '"+counterHisto+"'!")
         return histo
 
     ## Returns index to bin corresponding to first matching label in a counter histogram
@@ -136,7 +139,7 @@ class ExtractorBase:
         for i in range(1, histo.GetNbinsX()+1):
             if histo.GetXaxis().GetBinLabel(i) == myBinLabel:
                 return i
-        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Cannot find counter by name "+counterItem+"!")
+        raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Cannot find counter by name "+counterItem+"!")
 
     ## Virtual method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -255,7 +258,7 @@ class CounterExtractor(ExtractorBase):
         elif self.isNuisance():
             # protection against zero
             if myCount.value() == 0:
-                print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' counter ('"+self._counterItem+"') value is zero!"
+                print ShellStyles.WarningLabel()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' counter ('"+self._counterItem+"') value is zero!"
                 myResult = ScalarUncertaintyItem(self._exid,0.0)
             else:
                 myResult = ScalarUncertaintyItem(self._exid,myCount.uncertainty() / myCount.value()*self._scaleFactor)
@@ -280,7 +283,7 @@ class MaxCounterExtractor(ExtractorBase):
         self._counterItem = counterItem
         self._counterDirs = counterDirs
         if len(self._counterDirs) < 2:
-            raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"':"+NormalStyle()+" need to specify at least two directories for counters!")
+            raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"':"+ShellStyles.NormalStyle()+" need to specify at least two directories for counters!")
 
     ## Method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -290,7 +293,7 @@ class MaxCounterExtractor(ExtractorBase):
             try:
                 datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
             except Exception, e:
-                raise Exception (ErrorStyle()+"Error in extracting max counter value:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
+                raise Exception (ErrorStyle()+"Error in extracting max counter value:"+ShellStyles.NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
             datasetRootHisto.normalizeToLuminosity(luminosity)
             myHisto = datasetRootHisto.getHistogram()
             counterList = dataset._histoToCounter(myHisto)
@@ -301,12 +304,12 @@ class MaxCounterExtractor(ExtractorBase):
                     myResult.append(count)
                     myFoundStatus = True
             if not myFoundStatus:
-                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!")
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+ShellStyles.NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!")
         # Loop over results
         myMaxValue = 0.0
         # Protect for div by zero
         if myResult[0].value() == 0:
-            print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
+            print ShellStyles.WarningLabel()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
         else:
             for i in range(1,len(myResult)):
                 myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
@@ -334,7 +337,7 @@ class MaxCounterExtractor(ExtractorBase):
         #self._counterItem = counterItem
         #self._counterDirs = counterDirs
         #if len(self._counterDirs) < 2:
-            #raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"':"+NormalStyle()+" need to specify at least two directories for counters!")
+            #raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"':"+ShellStyles.NormalStyle()+" need to specify at least two directories for counters!")
 
     ### Method for extracking information
     #def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -348,7 +351,7 @@ class MaxCounterExtractor(ExtractorBase):
             #try:
                 #datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             #except Exception, e:
-                #raise Exception (ErrorStyle()+"Error in extracting PU uncertainty:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
+                #raise Exception (ErrorStyle()+"Error in extracting PU uncertainty:"+ShellStyles.NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
             #datasetRootHisto.normalizeToLuminosity(luminosity)
             #myHisto = datasetRootHisto.getHistogram()
             #counterList = dataset._histoToCounter(myHisto)
@@ -359,14 +362,14 @@ class MaxCounterExtractor(ExtractorBase):
                     #myResult.append(count)
                     #myFoundStatus = True
             #if not myFoundStatus:
-                #raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoName+"'!")
+                #raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+ShellStyles.NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoName+"'!")
         ## Revert back to nominal normalisation
         ## mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.NOMINAL) #FIXME
         ## Loop over results
         #myMaxValue = 0.0
         ## Protect for div by zero
         #if myResult[0].value() == 0:
-            #print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
+            #print ShellStyles.WarningLabel()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
         #else:
             #for i in range(1,len(myResult)):
                 #myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
@@ -402,7 +405,7 @@ class RatioExtractor(ExtractorBase):
         myDenominatorCount = mainCounterTable.getCount(rowName=self._denominatorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
         # Protection against div by zero
         if myDenominatorCount.value() == 0.0:
-            print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._counterItem+"') value is zero!"
+            print ShellStyles.WarningLabel()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._counterItem+"') value is zero!"
             myResult = 0.0
         else:
             myResult = (myDenominatorCount.value() / myNumeratorCount.value() - 1.0) * self._scale
@@ -434,7 +437,7 @@ class ScaleFactorExtractor(ExtractorBase):
         self._normalisation = normalisation
         self._addSystInQuadrature = addSystInQuadrature
         if len(self._histoDirs) != len(self._normalisation) or len(self._histoDirs) != len(self._histograms):
-            raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" need to specify equal amount of histoDirs, histograms and normalisation histograms!")
+            raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+ShellStyles.NormalStyle()+" need to specify equal amount of histoDirs, histograms and normalisation histograms!")
 
     ## Method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -448,20 +451,20 @@ class ScaleFactorExtractor(ExtractorBase):
             try:
                 myValueRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             except Exception, e:
-                raise Exception (ErrorStyle()+"Error in extracting scale factor uncertainty:"+NormalStyle()+" cannot find value histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
+                raise Exception (ErrorStyle()+"Error in extracting scale factor uncertainty:"+ShellStyles.NormalStyle()+" cannot find value histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
             myValueRootHisto.normalizeToLuminosity(luminosity)
             hValues = myValueRootHisto.getHistogram()
             if hValues == None:
-                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot open histogram '"+myHistoName+"'!")
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+ShellStyles.NormalStyle()+" Cannot open histogram '"+myHistoName+"'!")
             myHistoName = self._histoDirs[i]+"/"+self._normalisation[i]
             try:
                 myNormalisationRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             except Exception, e:
-                raise Exception (ErrorStyle()+"Error in extracting scale factor uncertainty:"+NormalStyle()+" cannot find normalisation histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
+                raise Exception (ErrorStyle()+"Error in extracting scale factor uncertainty:"+ShellStyles.NormalStyle()+" cannot find normalisation histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
             myNormalisationRootHisto.normalizeToLuminosity(luminosity)
             hNormalisation = myNormalisationRootHisto.getHistogram()
             if hNormalisation == None:
-                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot open histogram '"+myHistoName+"'!")
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+ShellStyles.NormalStyle()+" Cannot open histogram '"+myHistoName+"'!")
             for j in range (1, hValues.GetNbinsX()+1):
                 mySum += pow(hValues.GetBinContent(j) * hValues.GetBinCenter(j),2)
             myTotal = hNormalisation.GetBinContent(1)
@@ -469,7 +472,7 @@ class ScaleFactorExtractor(ExtractorBase):
             hNormalisation.IsA().Destructor(hNormalisation)
             # Calculate result, protection against div by zero
             if myTotal == 0.0:
-                print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' total count from normalisation histograms is zero!"
+                print ShellStyles.WarningLabel()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' total count from normalisation histograms is zero!"
                 myResult.append(0.0)
             else:
                 myResult.append(sqrt(mySum) / myTotal)
@@ -502,7 +505,7 @@ class ShapeExtractor(ExtractorBase):
         if not (self.isRate() or self.isObservation()):
             if self._distribution != "shapeStat":
                 self.printDebugInfo()
-                raise Exception(ErrorLabel()+"Only shapeStat allowed for the ShapeExtractor!"+NormalStyle())
+                raise Exception(ShellStyles.ErrorLabel()+"Only shapeStat allowed for the ShapeExtractor!"+ShellStyles.NormalStyle())
         self._minimumStatUncert = minimumStatUncert
         if minimumStatUncert == None:
             self._minimumStatUncert = 0.0
@@ -518,9 +521,9 @@ class ShapeExtractor(ExtractorBase):
         myHistograms = []
         # Check that results have been cached
         if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
-            raise Exception(ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+NormalStyle())
+            raise Exception(ShellStyles.ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+ShellStyles.NormalStyle())
         # Get histogram from cache
-        h = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
+        h = aux.Clone(datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto())
         myTotalRate = h.Integral()
         rateWillBeSuppressedStatus = myTotalRate < self._minimumRate
         # Do not apply here additional normalization, it has already been applied
@@ -533,8 +536,8 @@ class ShapeExtractor(ExtractorBase):
         else:
             # Ok, it's a nuisance
             # Create up and down histograms for shape stat
-            hUp = h.Clone()
-            hDown = h.Clone()
+            hUp = aux.Clone(h)
+            hDown = aux.Clone(h)
             hUp.Reset()
             hDown.Reset()
             hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
@@ -542,19 +545,20 @@ class ShapeExtractor(ExtractorBase):
             for k in range(1, h.GetNbinsX()+1):
                 if h.GetBinContent(k) + h.GetBinError(k) < self._minimumStatUncert:
                     if not rateWillBeSuppressedStatus:
-                        print WarningLabel()+"Corrected bin %d stat.uncert plus value to %.2f for column '%s' (it was %f)! The value is set by MinimumStatUncertainty flag."%(k, self._minimumStatUncert, datasetColumn.getLabel(), hUp.GetBinContent(k))
+                        print ShellStyles.WarningLabel()+"Corrected bin %d stat.uncert plus value to %.2f for column '%s' (it was %f)! The value is set by MinimumStatUncertainty flag."%(k, self._minimumStatUncert, datasetColumn.getLabel(), hUp.GetBinContent(k))
                     hUp.SetBinContent(k, self._minimumStatUncert)
                 else:
                     hUp.SetBinContent(k, h.GetBinContent(k) + h.GetBinError(k)) # no scaling because this is the stat uncertainty
                 if h.GetBinContent(k) - h.GetBinError(k) < 0.000001:
                     if h.GetBinContent(k) < 0.0 and not rateWillBeSuppressedStatus:
-                        print WarningLabel()+"Corrected bin %d stat.uncert minus value to zero for column '%s' (it was %f)!"%(k, datasetColumn.getLabel(), hDown.GetBinContent(k))
+                        print ShellStyles.WarningLabel()+"Corrected bin %d stat.uncert minus value to zero for column '%s' (it was %f)!"%(k, datasetColumn.getLabel(), hDown.GetBinContent(k))
                     hDown.SetBinContent(k, 0.0)
                 else:
                     hDown.SetBinContent(k, h.GetBinContent(k) - h.GetBinError(k))
             # Append histograms to output list
             myHistograms.append(hUp)
             myHistograms.append(hDown)
+            h.Delete()
             #h.IsA().Destructor(h) # Delete the nominal histo
         # Return result
         return myHistograms
@@ -563,19 +567,21 @@ class ShapeExtractor(ExtractorBase):
     def extractQCDPurityHistogram(self, datasetColumn, dsetMgr, shapeHistoName):
         # Do not apply here additional normalization, it is not needed
         if not datasetColumn.typeIsQCD:
-            raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
+            raise Exception(ShellStyles.ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
         if not self.isRate():
-            raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for nuisance! (only valid for rate)")
+            raise Exception(ShellStyles.ErrorLabel()+"extractQCDPurityHistogram() called for nuisance! (only valid for rate)")
         # Obtain purity histogram
         if not dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).hasRootHisto(shapeHistoName+"_Purity"):
-            raise Exception(ErrorLabel()+"T1he pseudo-multicrab directory for QCD is outdated! Please regenerate it (with the proper normalization!!!)")
+            raise Exception(ShellStyles.ErrorLabel()+"T1he pseudo-multicrab directory for QCD is outdated! Please regenerate it (with the proper normalization!!!)")
         h = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(shapeHistoName+"_Purity")
         return h
 
     ## QCD specific method for extracting purity for a shape
     def extractQCDPurityAsValue(self, datasetColumn, dsetMgr, shapeHistoName, shapeHisto):
         hPurity = self.extractQCDPurityHistogram(datasetColumn, dsetMgr, shapeHistoName)
-        return _calculateAverageQCDPurity(shapeHisto, hPurity)
+        myValue = _calculateAverageQCDPurity(shapeHisto, hPurity)
+        hPurity.Delete()
+        return myValue
 
     ## QCD specific method for extracting purity for a shape
     def extractQCDPurityAsValue(self, shapeHisto, purityHisto):
@@ -601,7 +607,7 @@ class ShapeVariationExtractor(ExtractorBase):
         if not "SystVar" in self._systVariation:
             self._systVariation = "SystVar%s"%self._systVariation
         if self.isRate() or self.isObservation():
-            raise Exception(ErrorLabel()+"Rate or observation not allowed for ShapeVariationExtractor!"+NormalStyle())
+            raise Exception(ShellStyles.ErrorLabel()+"Rate or observation not allowed for ShapeVariationExtractor!"+ShellStyles.NormalStyle())
 
     ## Method for extracking result
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -613,19 +619,21 @@ class ShapeVariationExtractor(ExtractorBase):
 
     ## Virtual method for extracting histograms
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        # Obsolete
+        raise Exception("obsolete")
         myHistograms = []
         # Check that results have been cached
         if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
-            raise Exception(ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+NormalStyle())
+            raise Exception(ShellStyles.ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+ShellStyles.NormalStyle())
         # Get uncertainty variation dictionary
         myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
         # Check that asked variation exists
         if not self._systVariation in myShapeUncertDict.keys():
-            raise Exception(ErrorLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, check that options in the datacard match to multicrab content!"%(datasetColumn.getLabel(),self._systVariation))
+            raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, check that options in the datacard match to multicrab content!"%(datasetColumn.getLabel(),self._systVariation))
         # Get histogram from cache
         (hSystUp, hSystDown) = myShapeUncertDict[self._systVariation]
-        hUp = hSystUp.Clone()
-        hDown = hSystDown.Clone()
+        hUp = aux.Clone(hSystUp)
+        hDown = aux.Clone(hSystDown)
         hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
         hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
         # Do not apply here additional normalization, it has already been applied
@@ -639,6 +647,100 @@ class ShapeVariationExtractor(ExtractorBase):
     ## Virtual method for printing debug information
     def printDebugInfo(self):
         print "ShapeExtractor"
+        ExtractorBase.printDebugInfo(self)
+
+## QCDShapeVariationExtractor class
+# Extracts histogram shapes from up and down variation
+class QCDShapeVariationExtractor(ExtractorBase):
+    ## Constructor
+    def __init__(self, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
+        self._systVariation = systVariation
+        if self.isRate() or self.isObservation():
+            raise Exception(ShellStyles.ErrorLabel()+"Rate or observation not allowed for ShapeVariationExtractor!"+ShellStyles.NormalStyle())
+
+    ## Method for extracking result
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
+        if not self._systVariation in myShapeUncertDict.keys():
+            return 0.0
+        # Tell Lands / Combine that the nuisance is active for the given column, histogram is added to input root file via extractHistograms()
+        return 1.0
+
+    ## Virtual method for extracting histograms
+    def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0, rootHistoWithUncertainties = None):
+        myHistograms = []
+        if not rootHistoWithUncertainties:
+            # Check that results have been cached
+            if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
+                raise Exception(ShellStyles.ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"+ShellStyles.NormalStyle())
+        # Get uncertainty variation dictionary
+        myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
+        if rootHistoWithUncertainties != None:
+            myShapeUncertDict = rootHistoWithUncertainties.getShapeUncertainties()
+        # Check that asked variation does not exist yet
+        if self._systVariation in myShapeUncertDict.keys():
+            raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': QCD systematics %s exists already!!"%(datasetColumn.getLabel(),self._systVariation))
+        # Obtain histograms
+        dset = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn())
+        mySource = "SystVar"+self._systVariation
+        myRateHisto = None
+        if rootHistoWithUncertainties == None:
+            myRateHisto = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
+        else:
+            myRateHisto = rootHistoWithUncertainties.getRootHisto()
+        myHistoNamePrefix = myRateHisto.GetName().replace("_cloned","").replace("_"+dset.name,"")
+        myHistoNameShort = myHistoNamePrefix
+        if not "shape" in myHistoNamePrefix:
+            myHistoNamePrefix = "ForDataDrivenCtrlPlots/"+myHistoNamePrefix
+        (hNum, hNumName) = dset.getRootHisto(myHistoNamePrefix+"Numerator", analysisPostfix=mySource)
+        (hDenom, hDenomName) = dset.getRootHisto(myHistoNamePrefix+"Denominator", analysisPostfix=mySource)
+        # Store original source histograms
+        mySourceNamePrefix = "%s_%sSource"%(datasetColumn.getLabel(),self.getId())
+        hNumSource = aux.Clone(hNum, mySourceNamePrefix+"_Numerator")
+        hNumSource.SetTitle(mySourceNamePrefix+"_Numerator")
+        histogramsExtras.makeFlowBinsVisible(hNumSource)
+        myHistograms.append(hNumSource)
+        hDenomSource = aux.Clone(hDenom, mySourceNamePrefix+"_Denominator")
+        hDenomSource.SetTitle(mySourceNamePrefix+"_Denominator")
+        histogramsExtras.makeFlowBinsVisible(hDenomSource)
+        myHistograms.append(hDenomSource)
+        # Rebin histograms
+        myArray = array("d",getBinningForPlot(myHistoNameShort))
+        hRebinnedNum = hNum.Rebin(len(myArray)-1,"",myArray)
+        hRebinnedDenom = hDenom.Rebin(len(myArray)-1,"",myArray)
+        hNum.Delete()
+        hDenom.Delete()
+        # Handle under/overflow bins
+        histogramsExtras.makeFlowBinsVisible(hRebinnedNum)
+        histogramsExtras.makeFlowBinsVisible(hRebinnedDenom)
+        # Create output histograms
+        hUp = aux.Clone(myRateHisto)
+        hUp.Reset()
+        hDown = aux.Clone(myRateHisto)
+        hDown.Reset()
+        hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
+        hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
+        # Do calculation and fill output histograms
+        systematicsForMetShapeDifference.createSystHistograms(myRateHisto, hUp, hDown, hRebinnedNum, hRebinnedDenom)
+        # Store uncertainty histograms
+        if rootHistoWithUncertainties == None:
+            datasetColumn.getCachedShapeRootHistogramWithUncertainties().addShapeUncertaintyFromVariation(self._systVariation, hUp, hDown)
+        else:
+            rootHistoWithUncertainties.addShapeUncertaintyFromVariation(self._systVariation, hUp, hDown)
+        # Do not apply here additional normalization, it does not affect this uncertainty
+        # Add rate histogram to make the histograms compatible with LandS/Combine
+        hUp.Add(myRateHisto)
+        hDown.Add(myRateHisto)
+        # Append histograms to output list
+        myHistograms.append(hUp)
+        myHistograms.append(hDown)
+        # Return result
+        return myHistograms
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "QCDShapeVariationExtractor"
         ExtractorBase.printDebugInfo(self)
 
 ## ControlPlotExtractor class
@@ -657,7 +759,7 @@ class ControlPlotExtractor(ExtractorBase):
 
     ## Method for extracking result
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
-        raise Exception(ErrorStyle()+"Did you actually call extractResult for a ControlPlot by name "+self._histoTitle+"? (you shouldn't)"+NormalStyle())
+        raise Exception(ErrorStyle()+"Did you actually call extractResult for a ControlPlot by name "+self._histoTitle+"? (you shouldn't)"+ShellStyles.NormalStyle())
 
     ## Virtual method for extracting histograms
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -673,7 +775,7 @@ class ControlPlotExtractor(ExtractorBase):
     def extractQCDPurityHistogram(self, datasetColumn, dsetMgr):
         # Do not apply here additional normalization, it is not needed
         if not datasetColumn.typeIsQCD:
-            raise Exception(ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
+            raise Exception(ShellStyles.ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
         # Obtain purity histogram
         h = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoNameWithPath+"_Purity")
         return h

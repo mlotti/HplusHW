@@ -26,7 +26,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabConsistencyCheck as cons
 
 from InvertedTauID import *
 #dataEra = "Run2011A"
-#dataEra = "Run2011B"
+#dataEra = "Run2011AB"
 dataEra = "Run2012ABCD"
 
 
@@ -149,8 +149,8 @@ def main(argv):
         metBase = plots.DataMCPlot(datasets, "baseline/METBaseline"+HISTONAME+"/METBaseline"+HISTONAME+bin)
         metInver = plots.DataMCPlot(datasets, "Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
         # Rebin before subtracting
-        #metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
-        #metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+        metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+        metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
         
         metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
         metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
@@ -175,8 +175,8 @@ def main(argv):
         invertedQCD.plotHisto(metBase_EWK,"baselineEWK")
 
 
-#        fitOptions = "LRB"
-        fitOptions = "RB"
+        fitOptions = "LRB"
+#        fitOptions = "RB"
 #        fitOptions = "IEB"
 
 #        ROOT.TVirtualFitter.SetDefaultFitter("Minuit")
