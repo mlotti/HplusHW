@@ -1,11 +1,10 @@
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.splittedHistoReader import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
-#from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.splittedHistoReader as splittedHistoReader
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier as ShapeHistoModifier
 from math import sqrt
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation as errorPropagation
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import ExtendedCount
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import array
@@ -17,21 +16,25 @@ ROOT.gROOT.SetBatch(True) # no flashing canvases
 class DataDrivenQCDShape:
     def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, luminosity, rebinList=None):
         self._uniqueN = 0
-        self._splittedHistoReader = SplittedHistoReader(dsetMgr, dsetLabelData)
+        self._splittedHistoReader = splittedHistoReader.SplittedHistoReader(dsetMgr, dsetLabelData)
         self._histoName = histoName
         self._dataList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, histoName, luminosity))
         self._ewkList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, histoName, luminosity))
-        self._rebinDoneStatus = False
+        self._rebinDoneStatus = True
         if rebinList != None:
             # Rebin
             myArray = array.array("d",rebinList)
             for i in range(0,len(self._dataList)):
                 if self._dataList[i].GetXaxis().GetXmax() - rebinList[len(rebinList)-1] < -0.00001:
-                    raise Exception(ErrorLabel()+"You tried to set as maximum x value %f in rebinning, but maximum of histogram is %f!%s"%(rebinList[len(rebinList)-1],self._dataList[i].GetXaxis().GetXmax(),NormalStyle()))
-                self._dataList[i] = self._dataList[i].Rebin(len(myArray)-1,"",myArray)
+                    raise Exception(ShellStyles.ErrorLabel()+"You tried to set as maximum x value %f in rebinning, but maximum of histogram is %f!%s"%(rebinList[len(rebinList)-1],self._dataList[i].GetXaxis().GetXmax(),ShellStyles.NormalStyle()))
+                htmp = self._dataList[i].Rebin(len(myArray)-1,"",myArray)
+                self._dataList[i].Delete()
+                self._dataList[i] = htmp
                 self._dataList[i].SetName(self._dataList[i].GetName()+histoName.replace("/",""))
                 histogramsExtras.makeFlowBinsVisible(self._dataList[i])
-                self._ewkList[i] = self._ewkList[i].Rebin(len(myArray)-1,"",myArray)
+                htmp = self._ewkList[i].Rebin(len(myArray)-1,"",myArray)
+                self._ewkList[i].Delete()
+                self._ewkList[i] = htmp
                 self._ewkList[i].SetName(self._ewkList[i].GetName()+histoName.replace("/",""))
                 histogramsExtras.makeFlowBinsVisible(self._ewkList[i])
             self._rebinDoneStatus = True
@@ -41,13 +44,14 @@ class DataDrivenQCDShape:
         for h in self._dataList:
             if h == None:
                 raise Exception("asdf")
-            ROOT.gDirectory.Delete(h.GetName())
+            h.Delete()
         for h in self._ewkList:
             if h == None:
                 raise Exception()
-            ROOT.gDirectory.Delete(h.GetName())
+            h.Delete()
         self._dataList = []
         self._ewkList = []
+        
 
     def getFileFriendlyHistoName(self):
         return self._histoName.replace("/","_")
@@ -58,7 +62,7 @@ class DataDrivenQCDShape:
     ## Return the sum of data-ewk in a given phase space split bin
     def getDataDrivenQCDHistoForSplittedBin(self, binIndex, histoSpecs=None):
         if binIndex >= len(self._dataList):
-            raise Exception(ErrorLabel()+"DataDrivenQCDShape::getDataDrivenQCDForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
+            raise Exception(ShellStyles.ErrorLabel()+"DataDrivenQCDShape::getDataDrivenQCDForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
         if self._rebinDoneStatus:
             h = aux.Clone(self._dataList[binIndex])
             h.SetName(h.GetName()+"dataDriven")
@@ -66,7 +70,7 @@ class DataDrivenQCDShape:
             return h
 
         # Do summing within shape histo modifier
-        myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[binIndex])
+        myModifier = ShapeHistoModifier.ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[binIndex])
         h = myModifier.createEmptyShapeHistogram("%s_%d"%(self._dataList[binIndex].GetName(), self._uniqueN), self._dataList[binIndex].GetTitle())
         self._uniqueN += 1
         myModifier.addShape(source=self._dataList[binIndex], dest=h)
@@ -77,14 +81,14 @@ class DataDrivenQCDShape:
     ## Return the data in a given phase space split bin
     def getDataHistoForSplittedBin(self, binIndex, histoSpecs=None):
         if binIndex >= len(self._dataList):
-            raise Exception(ErrorLabel()+"DataDrivenQCDShape::getDataHistoForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
+            raise Exception(ShellStyles.ErrorLabel()+"DataDrivenQCDShape::getDataHistoForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
         if self._rebinDoneStatus:
             h = aux.Clone(self._dataList[binIndex])
             h.SetName(h.GetName()+"_")
             return h
 
         # Do summing within shape histo modifier
-        myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[binIndex])
+        myModifier = ShapeHistoModifier.ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[binIndex])
         h = myModifier.createEmptyShapeHistogram("%s_%d"%(self._dataList[binIndex].GetName(), self._uniqueN), self._dataList[binIndex].GetTitle())
         self._uniqueN += 1
         myModifier.addShape(source=self._dataList[binIndex], dest=h)
@@ -94,7 +98,7 @@ class DataDrivenQCDShape:
     ## Return the EWK MC in a given phase space split bin
     def getEwkHistoForSplittedBin(self, binIndex, histoSpecs=None):
         if binIndex >= len(self._dataList):
-            raise Exception(ErrorLabel()+"DataDrivenQCDShape::getEwkHistoForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._ewkList)))
+            raise Exception(ShellStyles.ErrorLabel()+"DataDrivenQCDShape::getEwkHistoForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._ewkList)))
         if self._rebinDoneStatus:
             h = aux.Clone(self._ewkList[binIndex])
             h.SetName(h.GetName()+"_")
@@ -120,7 +124,7 @@ class DataDrivenQCDShape:
             return h
 
         # Do summing within shape histo modifier
-        myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[0])
+        myModifier = ShapeHistoModifier.ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[0])
         myNameList = self._dataList[0].GetName().split("_")
         h = myModifier.createEmptyShapeHistogram("%s_%d"%(self._dataList[0].GetName(), self._uniqueN), myNameList[0][:len(myNameList[0])-1])
         self._uniqueN += 1
@@ -140,7 +144,7 @@ class DataDrivenQCDShape:
             return h
 
         # Do summing within shape histo modifier
-        myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[0])
+        myModifier = ShapeHistoModifier.ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._dataList[0])
         myNameList = self._dataList[0].GetName().split("_")
         h = myModifier.createEmptyShapeHistogram("%s_%d"%(self._dataList[0].GetName(), self._uniqueN), myNameList[0][:len(myNameList[0])-1])
         self._uniqueN += 1
@@ -159,7 +163,7 @@ class DataDrivenQCDShape:
             return h
 
         # Do summing within shape histo modifier
-        myModifier = ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._ewkList[0])
+        myModifier = ShapeHistoModifier.ShapeHistoModifier(histoSpecs, histoObjectForSpecs=self._ewkList[0])
         myNameList = self._ewkList[0].GetName().split("_")
         h = myModifier.createEmptyShapeHistogram("%s_%d"%(self._ewkList[0].GetName(), self._uniqueN), myNameList[0][:len(myNameList[0])-1])
         self._uniqueN += 1
@@ -255,14 +259,14 @@ class DataDrivenQCDShape:
     ## Returns phase space split title for a bin
     def getPhaseSpaceBinTitle(self, binIndex):
         if binIndex >= len(self._dataList):
-            raise Exception(ErrorLabel()+"DataDrivenQCDShape::getPhaseSpaceBinTitle: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
+            raise Exception(ShellStyles.ErrorLabel()+"DataDrivenQCDShape::getPhaseSpaceBinTitle: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
         return self._dataList[binIndex].GetTitle()
 
     ## Returns phase space split title for a bin
     def getPhaseSpaceBinFileFriendlyTitle(self, binIndex):
         if binIndex >= len(self._dataList):
-            raise Exception(ErrorLabel()+"DataDrivenQCDShape::getPhaseSpaceBinTitle: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
-        return self._dataList[binIndex].GetTitle().replace(">","gt").replace("<","lt").replace("=","eq").replace("{","").replace("}","").replace(" ","").replace("#","").replace("..","to").replace("(","").replace(")","").replace(",","").replace("/","_")
+            raise Exception(ShellStyles.ErrorLabel()+"DataDrivenQCDShape::getPhaseSpaceBinTitle: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
+        return self._dataList[binIndex].GetTitle().replace(">","gt").replace("<","lt").replace("=","eq").replace("{","").replace("}","").replace(" ","").replace("#","").replace("..","to").replace("(","").replace(")","").replace(",","").replace("/","_").replace(".","p")
 
     ## Returns number of phase space bins
     def getNumberOfPhaseSpaceSplitBins(self):
@@ -317,8 +321,8 @@ class DataDrivenQCDEfficiency:
             mySumDenomEwkUncert = integratedUncertaintyForHistogram(1, hDenomEwk.GetNbinsX()+2, hDenomEwk)
             # Calculate efficiency
             myEfficiency = 0.0
-            myEfficiencyUncertData = errorPropagationForDivision(mySumNum, mySumNumDataUncert, mySumDenom, mySumDenomDataUncert)
-            myEfficiencyUncertEwk = errorPropagationForDivision(mySumNum, mySumNumEwkUncert, mySumDenom, mySumDenomEwkUncert)
+            myEfficiencyUncertData = errorPropagation.errorPropagationForDivision(mySumNum, mySumNumDataUncert, mySumDenom, mySumDenomDataUncert)
+            myEfficiencyUncertEwk = errorPropagation.errorPropagationForDivision(mySumNum, mySumNumEwkUncert, mySumDenom, mySumDenomEwkUncert)
             if abs(mySumNum) > 0.000001 and abs(mySumDenom) > 0.000001:
                 myEfficiency = mySumNum / mySumDenom
             self._efficiencies.append(ExtendedCount(myEfficiency, [myEfficiencyUncertData, myEfficiencyUncertEwk], myUncertaintyLabels))

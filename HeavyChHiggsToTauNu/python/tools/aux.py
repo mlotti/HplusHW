@@ -337,3 +337,26 @@ class ValuePerMass:
         ret = {"default": self.default}
         ret.update(self.values)
         return ret
+
+
+# Helper function for getting up and down variance
+# \param diffPlus  float for up variation - nominal
+# \param diffMinus  float for down variation - nominal
+#
+# \return pair of floats (variance for minus, variance for plus)
+def getProperAdditivesForVariationUncertainties(diffPlus, diffMinus):
+    if diffPlus > 0 and diffMinus > 0:
+        return (max(diffPlus, diffMinus)**2, 0.0)
+    elif diffPlus < 0 and diffMinus < 0:
+        return (0.0, max(-diffPlus, -diffMinus)**2)
+    elif diffPlus > 0:
+        return (diffPlus**2, diffMinus**2)
+    elif diffPlus < 0:
+        return (diffMinus**2, diffPlus**2)
+    elif diffMinus > 0:
+        return (diffMinus**2, diffPlus**2)
+    elif diffMinus < 0:
+        return (diffPlus**2, diffMinus**2)
+    elif diffPlus == 0 and diffMinus == 0:
+        return (0.0, 0.0)
+    raise Exception("Error: Unknown situation diffPlus=%f, diffMinus=%f!"%(diffPlus, diffMinus))

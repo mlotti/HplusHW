@@ -1,5 +1,5 @@
 ## Collection of functions for adding colourful printing to shell via escapes
-# Note: to end the style, call NormalStyle()
+# Note: to end the style, call ShellStyles.NormalStyle()
 
 def WarningStyle():
     # White text on orange background, bold

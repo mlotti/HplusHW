@@ -2,8 +2,7 @@
 # Classes for making control plots (surprise, surprise ...)
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-#from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count,RootHistoWithUncertainties
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
@@ -17,6 +16,10 @@ from math import pow,sqrt,log10
 import os
 import sys
 import ROOT
+
+_legendLabelQCD = "QCD (data)"
+_legendLabelEmbedding = "EWK+tt with #tau_{h} (data)"
+_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (MC)"
 
 ##
 class ControlPlotMaker:
@@ -32,7 +35,7 @@ class ControlPlotMaker:
         self._opts = opts
         self._config = config
         if config.OptionSqrtS == None:
-            raise Exception(ErrorLabel()+"Please set the parameter OptionSqrtS = <integer_value_in_TeV> in the config file!"+NormalStyle())
+            raise Exception(ShellStyles.ErrorLabel()+"Please set the parameter OptionSqrtS = <integer_value_in_TeV> in the config file!"+ShellStyles.NormalStyle())
         self._dirname = dirname
         self._luminosity = luminosity
         self._observation = observation
@@ -41,7 +44,7 @@ class ControlPlotMaker:
         #myEvaluator = SignalAreaEvaluator()
 
         # Make control plots
-        print "\n"+HighlightStyle()+"Generating control plots"+NormalStyle()
+        print "\n"+ShellStyles.HighlightStyle()+"Generating control plots"+ShellStyles.NormalStyle()
         # Loop over mass points
         for m in self._config.MassPoints:
             print "... mass = %d GeV"%m
@@ -99,15 +102,15 @@ class ControlPlotMaker:
                                 hEWKfake.Add(h)
                 if len(myStackList) > 0 or self._config.OptionGenuineTauBackgroundSource == "DataDriven":
                     if hQCD != None:
-                        myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
+                        myHisto = histograms.Histo(hQCD,"QCD",legendLabel=_legendLabelQCD)
                         myHisto.setIsDataMC(isData=False, isMC=True)
-                        myStackList = [myHisto]+myStackList
+                        myStackList.insert(0, myHisto)
                     if hEmbedded != None:
-                        myHisto = histograms.Histo(hEmbedded,"Embedding")
+                        myHisto = histograms.Histo(hEmbedded,"Embedding",legendLabel=_legendLabelEmbedding)
                         myHisto.setIsDataMC(isData=False, isMC=True)
                         myStackList.append(myHisto)
                     if hEWKfake != None:
-                        myHisto = histograms.Histo(hEWKfake,"EWKfakes")
+                        myHisto = histograms.Histo(hEWKfake,"EWKfakes",legendLabel=_legendLabelEWKFakes)
                         myHisto.setIsDataMC(isData=False, isMC=True)
                         myStackList.append(myHisto)
                     hData = observation.getControlPlotByIndex(i)["shape"].Clone()
@@ -126,9 +129,9 @@ class ControlPlotMaker:
                                     hData.getRootHisto().SetBinContent(k, -1.0)
                                     hData.getRootHisto().SetBinError(k, 0.0)
                     # Data
-                    myHisto = histograms.Histo(hData,"Data")
-                    myHisto.setIsDataMC(isData=True, isMC=False)
-                    myStackList.insert(0, myHisto)
+                    myDataHisto = histograms.Histo(hData,"Data")
+                    myDataHisto.setIsDataMC(isData=True, isMC=False)
+                    myStackList.insert(0, myDataHisto)
                     # Add signal
                     mySignalLabel = "TTToHplus_M%d"%m
                     if m > 179:
@@ -191,9 +194,9 @@ class ControlPlotMaker:
                     myParams["addLuminosityText"] = True
                     if "legendPosition" in myParams.keys():
                         if myParams["legendPosition"] == "NW":
-                            myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+                            myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
                         elif myParams["legendPosition"] == "SW":
-                            myParams["moveLegend"] = {"dx": -0.05, "dy": -0.45}
+                            myParams["moveLegend"] = {"dx": -0.2, "dy": -0.45}
                         elif myParams["legendPosition"] == "SE":
                             myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
                         elif myParams["legendPosition"] == "NE":
@@ -202,7 +205,7 @@ class ControlPlotMaker:
                             raise Exception("Unknown value for option legendPosition: %s!", myParams["legendPosition"])
                         del myParams["legendPosition"]
                     else:
-                        myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+                        myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
                     myParams["ratioCreateLegend"] = True
                     if "ratioLegendPosition" in myParams.keys():
                         if myParams["ratioLegendPosition"] == "left":
@@ -217,7 +220,8 @@ class ControlPlotMaker:
                     # Remove non-dientified keywords
                     del myParams["unit"]
                     # Do plotting
-                    plots.drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
+                    plots.drawPlot(myStackPlot, "DataDrivenCtrlPlot_M%d_%02d_%s"%(m,i,myCtrlPlot.title), **myParams)
+                    os.system("mv DataDrivenCtrlPlot_M%d_%02d_%s.* %s/."%(m,i,myCtrlPlot.title,self._dirname))
 
             # Do selection flow plot
             selectionFlow.makePlot(self._dirname,m,len(self._config.ControlPlots),self._luminosity)
@@ -283,7 +287,7 @@ class SignalAreaEvaluator:
         myFile = open(myFilename, "w")
         myFile.write(self._output)
         myFile.close()
-        print HighlightStyle()+"Signal area evaluation written to: "+NormalStyle()+myFilename
+        print ShellStyles.HighlightStyle()+"Signal area evaluation written to: "+ShellStyles.NormalStyle()+myFilename
         self._output = ""
 
     def _evaluate(self,evaluationRange,h):
@@ -394,7 +398,11 @@ class SelectionFlowPlotMaker:
             myRHWU.addShapeUncertaintyRelative("syst", th1Plus=self._expectedListSystUp[i], th1Minus=self._expectedListSystDown[i])
             myRHWU.makeFlowBinsVisible()
             if self._expectedLabelList[i] == "QCD":
-                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel="QCD (data)")
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelQCD)
+            elif self._expectedLabelList[i] == "Embedding":
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelEmbedding)
+            elif self._expectedLabelList[i] == "EWKfakes":
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelEWKFakes)
             else:
                 myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i])
             myHisto.setIsDataMC(isData=False, isMC=True)
@@ -425,5 +433,6 @@ class SelectionFlowPlotMaker:
         myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
         myParams["ratioCreateLegend"] = True
         myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-        plots.drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(dirname,m,index), **myParams)
+        plots.drawPlot(myStackPlot, "DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(m,index), **myParams)
+        os.system("mv DataDrivenCtrlPlot_M%d_%02d_SelectionFlow.* %s/."%(m,index,dirname))
 

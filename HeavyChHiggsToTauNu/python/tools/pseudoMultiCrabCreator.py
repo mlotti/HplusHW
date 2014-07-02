@@ -14,7 +14,7 @@ import os
 import shutil
 from math import sqrt
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
 class PseudoMultiCrabCreator:
@@ -81,7 +81,7 @@ class PseudoMultiCrabCreator:
             f.write("[%s]\n"%(self._title+item))
         f.close()
         # Done
-        print HighlightStyle()+"Created pseudo-multicrab directory %s%s"%(self._myBaseDir,NormalStyle())
+        print ShellStyles.HighlightStyle()+"Created pseudo-multicrab directory %s%s"%(self._myBaseDir,ShellStyles.NormalStyle())
 
     def _writeRootFileToDisk(self, subTitle):
         # Open root file
@@ -165,14 +165,15 @@ class PseudoMultiCrabModule:
         if False:
             # Once the objects are written to file, they are erased from the list
             for h in self._shapes:
-                ROOT.gDirectory.Delete(h.GetName())
+                h.Delete()
             for h in self._dataDrivenControlPlots:
-                ROOT.gDirectory.Delete(h.GetName())
+                h.Delete()
             self._counters = None
             self._counterUncertainties = None
-            ROOT.gDirectory.Delete(self._hSplittedBinInfo.GetName())
-            ROOT.gDirectory.Delete(self._dataVersion.GetName())
-            ROOT.gDirectory.Delete(self._codeVersion.GetName())
+            self._hSplittedBinInfo.Delete()
+            self._dataVersion.Delete()
+            self._codeVersion.Delete()
+        ROOT.gDirectory.GetList().Delete()
 
     def addShape(self, shapeHisto, plotName):
         self._shapes.append(shapeHisto.Clone(plotName))
