@@ -15,7 +15,7 @@ Path = "/home/wendland/data/v533/2014-07-01_nominal"
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 #LightMassPoints      = [80,120,160]
-#LightMassPoints      = [120]
+LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
@@ -47,7 +47,7 @@ OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produce
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = not True
+OptionDoControlPlots = True
 OptionCombineSingleColumnUncertainties = True # Makes limit running faster
 OptionCtrlPlotsAtMt = True
 OptionDisplayEventYieldSummary = True
