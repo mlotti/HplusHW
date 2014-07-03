@@ -45,6 +45,9 @@ class DatasetCreatorMany:
             print "Analyses in the first DatasetCreator"
         self._creators[0].printAnalyses()
 
+    def getBaseDirectory(self):
+        return self._creators[0].getBaseDirectory()
+
     def getAnalyses(self):
         return self._creators[0].getAnalyses()
 
@@ -296,12 +299,25 @@ if __name__ == "__main__":
     if datasetCreatorMC is not None:
         dcs.append(datasetCreatorMC)
 
+    if len(dcs) == 0:
+        print "No DatasetManagerCreators! Maybe there were no multicrab directories given as input?"
+    if len(eras) == 0:
+        print "No data eras!"
+
     for dc in dcs:
+        if len(dc.getSearchModes()) == 0:
+            print "No search modes for DatasetManagerCreator with baseDirectory %s" % dc.getBaseDirectory()
         for searchMode in dc.getSearchModes():
             for era in eras:
-                for optMode in dc.getOptimizationModes():
+                optModes = dc.getOptimizationModes()
+                if len(optModes) == 0:
+                    optModes = [None]
+                for optMode in optModes:
                     for systVar in [None]+dc.getSystematicVariations():
-                        f.write("Analysis %s, searchMode %s, dataEra %s, optimizationMode %s, systematicVariation %s\n" % (analysisName, searchMode, era, optMode, systVar))
+                        if optMode is None:
+                            f.write("Analysis %s, searchMode %s, dataEra %s, systematicVariation %s\n" % (analysisName, searchMode, era, systVar))
+                        else:
+                            f.write("Analysis %s, searchMode %s, dataEra %s, optimizationMode %s, systematicVariation %s\n" % (analysisName, searchMode, era, optMode, systVar))
                         dsetMgr = dc.createDatasetManager(analysisName=analysisName, searchMode=searchMode,
                                                           dataEra=era, optimizationMode=optMode,
                                                           systematicVariation=systVar,

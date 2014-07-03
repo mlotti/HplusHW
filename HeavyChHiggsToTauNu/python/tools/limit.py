@@ -90,7 +90,7 @@ class BRLimits:
         resultfile="limits.json"
         #configfile="configuration.json"
 
-        f = open(os.path.join(directory, resultfile), "r")
+        f = open(os.path.join(directory, limitsfile), "r")
         limits = json.load(f)
         f.close()
 
@@ -440,23 +440,41 @@ class MLFitData:
         else:
             content = self.data[mass]["signal+background"]
 
+        isCombine = False
+
         for nuis in content["nuisanceParameters"]:
             if not nuis in content or content[nuis]["type"] != "shapeStat":
                 continue
 
             shapeStatNuisance = nuis
-            labels = filter(lambda x: x != "type", content[nuis].keys())
-            labels.sort(key=lambda x: int(x))
+            if "fitted_value" in content[nuis]:
+                # combine
+                isCombine = True
+                labels.append(nuis)
+                values.append(float(content[nuis]["fitted_value"]))
+                uncertainties.append(float(content[nuis]["fitted_uncertainty"]))
+            else:
+                # LandS 
+                labels = filter(lambda x: x != "type", content[nuis].keys())
+                labels.sort(key=lambda x: int(x))
 
-            for l in labels:
-                values.append(float(content[nuis][l]["fitted_value"]))
-                uncertainties.append(float(content[nuis][l]["fitted_uncertainty"]))
-
-            break
+                for l in labels:
+                    values.append(float(content[nuis][l]["fitted_value"]))
+                    uncertainties.append(float(content[nuis][l]["fitted_uncertainty"]))
 
         if shapeStatNuisance is None:
             raise Exception("No shapeStat nuisance parameters found")
 
+        if isCombine:
+            toSort = zip(labels, values, uncertainties)
+            def sortKey(tpl):
+                i = tpl[0].index("statBin")
+                ch = tpl[0][:i]
+                bin = int(tpl[0][i+7:])
+                return "%s%02d" % (ch, bin) 
+
+            toSort.sort(key=sortKey)
+            (labels, values, uncertainties) = zip(*toSort)
 
         yvalues = range(1, len(values)+1)
         yvalues.reverse()
