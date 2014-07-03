@@ -67,7 +67,7 @@ _finalstateYmaxBR = {
     "etau": 0.4,
     "mutau": 0.4,
     "emu": 0.8,
-    "default": 0.06,
+    "default": 0.02,
 }
 
 ## Default y axis maximum values for sigma x BR limit for the final states
@@ -75,7 +75,7 @@ _finalstateYmaxSigmaBR = {
     "etau": 10.0, # FIXME
     "mutau": 10.0, # FIXME
     "emu": 10.0, # FIXME
-    "default": 2.0,
+    "default": 1.0,
 }
 
 
@@ -87,10 +87,10 @@ class BRLimits:
     # \param directory          Path to the multicrab task directory with the JSON files
     # \param excludeMassPoints  List of strings for mass points to exclude
     def __init__(self, directory=".", excludeMassPoints=[], limitsfile="limits.json", configfile="configuration.json"):
-        #resultfile="limits.json"
+        resultfile="limits.json"
         #configfile="configuration.json"
 
-        f = open(os.path.join(directory, resultfile), "r")
+        f = open(os.path.join(directory, limitsfile), "r")
         limits = json.load(f)
         f.close()
 
@@ -440,23 +440,41 @@ class MLFitData:
         else:
             content = self.data[mass]["signal+background"]
 
+        isCombine = False
+
         for nuis in content["nuisanceParameters"]:
             if not nuis in content or content[nuis]["type"] != "shapeStat":
                 continue
 
             shapeStatNuisance = nuis
-            labels = filter(lambda x: x != "type", content[nuis].keys())
-            labels.sort(key=lambda x: int(x))
+            if "fitted_value" in content[nuis]:
+                # combine
+                isCombine = True
+                labels.append(nuis)
+                values.append(float(content[nuis]["fitted_value"]))
+                uncertainties.append(float(content[nuis]["fitted_uncertainty"]))
+            else:
+                # LandS 
+                labels = filter(lambda x: x != "type", content[nuis].keys())
+                labels.sort(key=lambda x: int(x))
 
-            for l in labels:
-                values.append(float(content[nuis][l]["fitted_value"]))
-                uncertainties.append(float(content[nuis][l]["fitted_uncertainty"]))
-
-            break
+                for l in labels:
+                    values.append(float(content[nuis][l]["fitted_value"]))
+                    uncertainties.append(float(content[nuis][l]["fitted_uncertainty"]))
 
         if shapeStatNuisance is None:
             raise Exception("No shapeStat nuisance parameters found")
 
+        if isCombine:
+            toSort = zip(labels, values, uncertainties)
+            def sortKey(tpl):
+                i = tpl[0].index("statBin")
+                ch = tpl[0][:i]
+                bin = int(tpl[0][i+7:])
+                return "%s%02d" % (ch, bin) 
+
+            toSort.sort(key=sortKey)
+            (labels, values, uncertainties) = zip(*toSort)
 
         yvalues = range(1, len(values)+1)
         yvalues.reverse()

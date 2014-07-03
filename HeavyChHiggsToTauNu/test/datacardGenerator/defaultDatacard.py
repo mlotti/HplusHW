@@ -5,7 +5,8 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014_02_14_v3_etacorrected"
 #Path = "/home/wendland/data/v533/2014-03-20"
 #Path = "/home/wendland/data/v533/2014-03-20_expCtrlPlots"
-Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
+#Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
+Path = "/home/wendland/data/v533/2014-07-01_nominal"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
 #Path = "/home/wendland/data/v533/2014_03_12_metphicorrected"
@@ -18,7 +19,7 @@ LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
-#HeavyMassPoints      = [180]
+#HeavyMassPoints      = [200]
 HeavyMassPoints      = []
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
@@ -1276,6 +1277,24 @@ ControlPlots.append(ControlPlotInput(
 ))
 
 ControlPlots.append(ControlPlotInput(
+    title            = "METPhiMinusTauPhi",
+    signalHistoPath  = "ForDataDrivenCtrlPlots",
+    signalHistoName  = "METPhiMinusTauPhi",
+    EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+    EWKfakeHistoName  = "METPhiMinusTauPt",
+    details          = { "xlabel": "E_{T}^{miss} #phi - #tau #phi",
+                         "ylabel": "Events",
+                         "divideByBinWidth": False,
+                         "unit": "^{o}",
+                         "log": True,
+                         "legendPosition": "SW",
+                         "opts": {"ymin": 0.09} },
+    blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [], # specify range to be evaluated and saved into a file
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+))
+
+ControlPlots.append(ControlPlotInput(
     title            = "TauPlusMETPt",
     signalHistoPath  = "ForDataDrivenCtrlPlots",
     signalHistoName  = "TauPlusMETPt",
@@ -1763,6 +1782,24 @@ if OptionCtrlPlotsAtMt:
         EWKfakeHistoName  = "METPhiAfterMtSelections",
         details          = { "xlabel": "E_{T}^{miss} #phi",
                              "ylabel": "Events/#DeltaE_{T}^{miss}#phi",
+                             "divideByBinWidth": True,
+                             "unit": "^{o}",
+                             "log": True,
+                             "legendPosition": "SW",
+                             "opts": {"ymin": 0.09} },
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
+
+    ControlPlots.append(ControlPlotInput(
+        title            = "METPhiMinusTauPhiAfterMtSelections",
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "METPhiMinusTauPhiAfterMtSelections",
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "METPhiAfterMtSelections",
+        details          = { "xlabel": "E_{T}^{miss} #phi - #tau #phi",
+                             "ylabel": "Events/#Delta(E_{T}^{miss}#phi-#tau#phi)",
                              "divideByBinWidth": True,
                              "unit": "^{o}",
                              "log": True,

@@ -350,16 +350,25 @@ class LHCTypeAsymptotic:
         fname = fileName.replace("runCombine", "runCombineMLFit")
         outputdir = "mlfit_m%s" % mass
         opts = "-M MaxLikelihoodFit"
+        opts += " -m %s" % mass
         opts += " --out %s" % outputdir
+        # From https://github.com/cms-analysis/HiggsAnalysis-HiggsToTauTau/blob/master/scripts/limit.py
+        #opts += " --minimizerAlgo minuit"
+        opts += " --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=0 --minimizerTolerance=0.001 --cminFallbackAlgo \"Minuit,0:0.001\" --keepFailures" # following options may not suit for us? --preFitValue=1.
         command = ["#!/bin/sh", ""]
         command.append("mkdir -p %s" % outputdir)
         command.append("combine %s %s" % (opts, datacardName))
 
         opts = "-a"
-        opts += " -g mlfit_m%s_pulls.png" % mass
         if self.brlimit:
             opts += " -p BR"
-        command.append("python %s/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py %s %s/mlfit.root > %s/diffNuisances.txt" % (os.environ["CMSSW_BASE"], opts, outputdir, outputdir))
+        opts2 = opts + " -g mlfit_m%s_pulls.png" % mass
+        command.append("python %s/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py %s %s/mlfit.root > %s/diffNuisances.txt" % (os.environ["CMSSW_BASE"], opts2, outputdir, outputdir))
+        opts += " -A"
+        opts2 = opts + " --vtol 1.0 --stol 0.99 --vtol2 2.0 --stol2 0.99" 
+        command.append("python %s/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py %s %s/mlfit.root > %s/diffNuisances_largest_pulls.txt" % (os.environ["CMSSW_BASE"], opts2, outputdir, outputdir))
+        opts2 = opts + " --vtol 99. --stol 0.50 --vtol2 99. --stol2 0.90" 
+        command.append("python %s/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py %s %s/mlfit.root > %s/diffNuisances_largest_constraints.txt" % (os.environ["CMSSW_BASE"], opts2, outputdir, outputdir))
         command.append("combineReadMLFit.py -f %s/diffNuisances.txt -c configuration.json -m %s -o mlfit.json" % (outputdir, mass))
         aux.writeScript(os.path.join(self.dirname, fname), "\n".join(command)+"\n")
 
@@ -510,7 +519,7 @@ def parseDiffNuisancesOutput(outputFileName, configFileName, mass):
 
     num1 = "[+-]\d+.\d+"
     num2 = "\d+.\d+"
-    nuis_re = re.compile("(?P<name>\S+)\s+\*?\s+(?P<bshift>%s),\s+(?P<bunc>%s)\s*\*?\s+\*?\s+(?P<sbshift>%s),\s+(?P<sbunc>%s)\s*\*?\s+(?P<rho>%s)" % (num1, num2, num1, num2, num1))
+    nuis_re = re.compile("(?P<name>\S+)\s+(!|\*)?\s+(?P<bshift>%s),\s+(?P<bunc>%s)\s*(!|\*)?\s+(!|\*)?\s+(?P<sbshift>%s),\s+(?P<sbunc>%s)\s*(!|\*)?\s+(?P<rho>%s)" % (num1, num2, num1, num2, num1))
     for line in f:
         m = nuis_re.search(line)
         if m:
@@ -518,6 +527,8 @@ def parseDiffNuisancesOutput(outputFileName, configFileName, mass):
             nuisanceType = nuisanceTypes.get(m.group("name"), None)
             if nuisanceType is not None and len(nuisanceType) == 1:
                 nuisanceType = nuisanceType[0]
+            if "statBin" in m.group("name"):
+                nuisanceType = "shapeStat"
             if nuisanceType is None:
                 nuisanceType = "unknown"
             ret_bkg[m.group("name")] = {"fitted_value": m.group("bshift"),
