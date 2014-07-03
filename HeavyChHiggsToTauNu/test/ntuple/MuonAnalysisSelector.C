@@ -31,7 +31,7 @@ namespace BQuark {
 // MuonAnalysisSelector
 class MuonAnalysisSelector: public BaseSelector {
 public:
-  MuonAnalysisSelector(const std::string& era = "", const std::string& isolationMode="standard", const std::string& bquarkMode="disabled", bool topPtReweighting=true, const std::string& topPtReweightingScheme = "");
+  MuonAnalysisSelector(const std::string& era = "", const std::string& puVariation="", const std::string& isolationMode="standard", const std::string& bquarkMode="disabled", bool topPtReweighting=true, const std::string& topPtReweightingScheme = "");
   ~MuonAnalysisSelector();
 
   void setOutput(TDirectory *dir);
@@ -64,6 +64,7 @@ private:
   Branch<math::XYZTLorentzVector> *fType1Met;
 
   const std::string fDataEra;
+  const std::string fPuVariation;
   Branch<double> *fPuWeight;
   Branch<double> *fWJetsWeight;
   Branch<double> *fTopPtWeight;
@@ -183,9 +184,10 @@ private:
   TH1 *hTransverseMassType1Met_AfterBTagging;
 };
 
-MuonAnalysisSelector::MuonAnalysisSelector(const std::string& era, const std::string& isolationMode, const std::string& bquarkMode, bool topPtReweighting, const std::string& topPtReweightingScheme):
+MuonAnalysisSelector::MuonAnalysisSelector(const std::string& era, const std::string& puVariation, const std::string& isolationMode, const std::string& bquarkMode, bool topPtReweighting, const std::string& topPtReweightingScheme):
   BaseSelector(),
   fDataEra(era),
+  fPuVariation(puVariation),
   fIsolationMode(EmbeddingMuonIsolation::stringToMode(isolationMode)),
   fBQuarkMode(BQuark::stringToMode(bquarkMode)),
   fTopPtReweighting(topPtReweighting),
@@ -327,10 +329,11 @@ void MuonAnalysisSelector::setupBranches(BranchManager& branchManager) {
 
   if(isMC()) {
     if(!fDataEra.empty()) {
-      branchManager.book("weightPileup_"+fDataEra, &fPuWeight);
-      branchManager.book("weightWJets_"+fDataEra, &fWJetsWeight);
+      branchManager.book("weightPileup_"+fDataEra+fPuVariation, &fPuWeight);
+      branchManager.book("weightWJets_"+fDataEra+fPuVariation, &fWJetsWeight);
     }
-    branchManager.book("weightTopPt"+fTopPtReweightingScheme, &fTopPtWeight);
+    //branchManager.book("weightTopPt"+fTopPtReweightingScheme, &fTopPtWeight);
+    branchManager.book("weight"+fTopPtReweightingScheme, &fTopPtWeight);
   }
 
   branchManager.book("ElectronVetoPassed", &fElectronVetoPassed);

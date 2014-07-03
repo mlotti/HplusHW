@@ -2746,6 +2746,8 @@ class Dataset:
                 pass
             print "Using top-pt reweighted Nallevents for sample %s" % self.name
         else:
+            if "topPtWeightType" in args:
+                del args["topPtWeightType"]
             try:
                 self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, **args)
             except KeyError:

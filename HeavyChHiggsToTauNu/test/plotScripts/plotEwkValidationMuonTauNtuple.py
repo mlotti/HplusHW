@@ -31,7 +31,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 #mcLumi = 5049.0
-mcLumi = 5000.0
+#mcLumi = 5000.0
+mcLumi = 2300.0
 
 class MuonSelectorArgs(dataset.SelectorArgs):
     def __init__(self, **kwargs):
@@ -47,7 +48,8 @@ class TauSelectorArgs(dataset.SelectorArgs):
                                        ], **kwargs)
 
 def main(opts):
-    muonDir = "/opt/data/matti/embedding/v44_5/multicrab_muonDebugAnalysisNtupleAod_130507_141258"
+#    muonDir = "/opt/data/matti/embedding/v44_5/multicrab_muonDebugAnalysisNtupleAod_130507_141258"
+    muonDir = "/opt/data/matti/embedding/v44_5/multicrab_muonDebugAnalysisNtupleAod_130515_104754"
     tauDir = "/opt/data/matti/embedding/v44_5/multicrab_analysisTau_v44_5_GenTauDebug_130508_123329"
 
 
@@ -59,13 +61,16 @@ def main(opts):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    tdrstyle.setDarkBodyRadiatorPalette()
     histograms.cmsTextMode = histograms.CMSMode.SIMULATION
     histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
-    histograms.createLegend.setDefaults(y1=0.93, y2=0.8, x1=0.82, x2=0.93)
+    histograms.createLegend.setDefaults(y1=0.93, y2=0.8, x1=0.7, x2=0.93)
 
     selectorArgsMuon = MuonSelectorArgs()
     selectorArgsTau = TauSelectorArgs()
 
+    selectorArgsMuon.set(puWeight="Run2011A")
+    selectorArgsTau.set(puWeight="Run2011A")
 
     args = {
         "process": opts.process,
@@ -115,7 +120,7 @@ def doPlots(muonDataset, tauDataset, ntupleCacheMuon, ntupleCacheTau):
    
         global pc
         pc += 1
-        plots.drawPlot(p, ("%02d_genmuontau_"%pc)+step+quantity, xlabel="Gen "+quantity, ylabel="Events / %.2f",
+        plots.drawPlot(p, ("%02d_genmuontau_"%pc)+step+quantity, xlabel="Gen "+quantity,
                        ratio=True, ratioYlabel="Muon/Tau", addLuminosityText=True, **args)
     
    
@@ -141,11 +146,28 @@ def doPlots(muonDataset, tauDataset, ntupleCacheMuon, ntupleCacheTau):
 
         global pc
         pc += 1
-        plots.drawPlot(p, ("%02d_recogenmuon_"%pc)+step+quantity, xlabel="Reco/gen "+quantity, ylabel="Events / %.2f",
+        plots.drawPlot(p, ("%02d_recogenmuon_"%pc)+step+quantity, xlabel="Reco/gen "+quantity,
                        ratio=True, ratioYlabel="Reco/Gen",
                        addLuminosityText=True, **args)
 
-    def doPlotRecoMuGenTau(quantity, step, stepTau="", **kwargs):
+    def doPlotRecoMu2(quantity, step, **kwargs):
+        if step != "":
+            step = step+"_"
+
+        drh = muonDataset.getDatasetRootHisto(ntupleCacheMuon.histogram("recomuon_"+step+quantity))
+        p = plots.PlotBase([drh])
+        p.histoMgr.normalizeMCToLuminosity(mcLumi)
+        p.histoMgr.setHistoDrawStyleAll("COLZ")
+        args = {
+            "opts": {"ymin": -1, "ymax": 1}
+        }
+        args.update(kwargs)
+        global pc
+        pc += 1
+        plots.drawPlot(p, ("%02d_recogenmuon_"%pc)+step+quantity, addLuminosityText=True, createLegend=None, backgroundColor=ROOT.kGray, **args)
+        
+
+    def doPlotRecoMuGenTau(quantity, step, stepTau="", saveCorrection=False, **kwargs):
         if step != "":
             step = step+"_"
         if stepTau != "":
@@ -169,26 +191,43 @@ def doPlots(muonDataset, tauDataset, ntupleCacheMuon, ntupleCacheTau):
 
         global pc
         pc += 1
-        plots.drawPlot(p, ("%02d_recomuongentau_"%pc)+step+stepTau+quantity, xlabel="Reco/gen "+quantity, ylabel="Events / %.2f",
+        plots.drawPlot(p, ("%02d_recomuongentau_"%pc)+step+stepTau+quantity, xlabel="Reco/gen "+quantity,
                        ratio=True, ratioYlabel="Muon/Tau",
                        addLuminosityText=True, **args)
 
+        if saveCorrection:
+            ratio = p.ratioHistoMgr.getHistos()[0]
+            tf = ROOT.TFile.Open("muonptcorrection.root", "RECREATE")
+            corr = ratio.getRootHisto().Clone("correction_pt")
+            for i in xrange(0, corr.GetNbinsX()+2):
+                val = corr.GetBinContent(i)
+                if val != 0.0:
+                    corr.SetBinContent(i, 1/val)
+            corr.SetDirectory(tf)
+            tf.Write()
+            tf.Close()
+            print "Saved muon pt correction to muonptcorrection.root"
 
 #    ptBinning = [0, 41]+range(45,120,5)+range(120,200,10)+range(200, 400, 40)+[400]
     ptBinning = [0, 5, 10, 15, 20, 25, 30, 35, 41]+range(45,120,5)+range(120,200,10)+range(200, 400, 40)+[400]
     etaBinning = [-2.1, -1.6, -1.2, -0.9, -0.6, -0.3, -0.2, 0.2, 0.3, 0.6, 0.9, 1.2, 1.6, 2.1]
     phiBinning = 2
 
+    plots.drawPlot.setDefaults(ylabel="Events / %.1f - %.1f")
+    ylabel_pt = "dEvents / dpt"
+
     step = ""
-    doPlotMuTau("pt", step=step, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1})
+    doPlotMuTau("pt", step=step, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, ylabel=ylabel_pt)
     doPlotMuTau("eta", step=step)
     doPlotMuTau("phi", step=step, rebin=phiBinning)
 
     step = "afterRecoFound"
     opts2 = {"ymin": 0.9, "ymax": 1.05}
-    doPlotMuTau("pt", step=step, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2)
+    doPlotMuTau("pt", step=step, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2, ylabel=ylabel_pt)
     doPlotMuTau("eta", step=step, rebin=etaBinning, opts2=opts2)
     doPlotMuTau("phi", step=step, rebin=phiBinning, opts2=opts2)
+
+    doPlotRecoMu2("PtRes", step=step, xlabel="Reco muon pt", ylabel="(Reco pt - gen pt)/gen pt")
 
     step = "afterEffWeight"
     doPlotMuTau("pt", step=step, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2)
@@ -196,27 +235,42 @@ def doPlots(muonDataset, tauDataset, ntupleCacheMuon, ntupleCacheTau):
     doPlotMuTau("phi", step=step, rebin=phiBinning, opts2=opts2)
 
     opts2Reco = {"ymin": 0.75, "ymax": 1.1}
-    doPlotRecoMu("pt", step=step, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco)
+    doPlotRecoMu("pt", step=step, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco, ylabel=ylabel_pt)
     doPlotRecoMu("eta", step=step, rebin=etaBinning)
     doPlotRecoMu("phi", step=step, rebin=phiBinning)
 
-    doPlotRecoMuGenTau("pt", step=step, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco)
+    doPlotRecoMuGenTau("pt", step=step, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco, ylabel=ylabel_pt)
     doPlotRecoMuGenTau("eta", step=step, rebin=etaBinning)
     doPlotRecoMuGenTau("phi", step=step, rebin=phiBinning)
 
     stepTau = "afterMuonVeto"
     opts2Reco = {"ymin": 0.8, "ymax": 1.01}
-    doPlotRecoMuGenTau("pt", step=step, stepTau=stepTau, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco)
+    doPlotRecoMuGenTau("pt", step=step, stepTau=stepTau, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco, ylabel=ylabel_pt, saveCorrection=True)
+    doPlotRecoMuGenTau("eta", step=step, stepTau=stepTau, rebin=etaBinning)
+    doPlotRecoMuGenTau("phi", step=step, stepTau=stepTau, rebin=phiBinning)
+
+    step = "afterEffWeightScaleUp"
+    doPlotRecoMuGenTau("pt", step=step, stepTau=stepTau, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco, ylabel=ylabel_pt)
+    doPlotRecoMuGenTau("eta", step=step, stepTau=stepTau, rebin=etaBinning)
+    doPlotRecoMuGenTau("phi", step=step, stepTau=stepTau, rebin=phiBinning)
+
+    step = "afterEffWeightScaleDown"
+    doPlotRecoMuGenTau("pt", step=step, stepTau=stepTau, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco, ylabel=ylabel_pt)
     doPlotRecoMuGenTau("eta", step=step, stepTau=stepTau, rebin=etaBinning)
     doPlotRecoMuGenTau("phi", step=step, stepTau=stepTau, rebin=phiBinning)
 
     step = "afterEffWeightMuscle"
-    doPlotRecoMuGenTau("pt", step=step, stepTau=stepTau, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco)
+    doPlotRecoMuGenTau("pt", step=step, stepTau=stepTau, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco, ylabel=ylabel_pt)
     doPlotRecoMuGenTau("eta", step=step, stepTau=stepTau, rebin=etaBinning)
     doPlotRecoMuGenTau("phi", step=step, stepTau=stepTau, rebin=phiBinning)
 
     step = "afterEffWeightRochester"
-    doPlotRecoMuGenTau("pt", step=step, stepTau=stepTau, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco)
+    doPlotRecoMuGenTau("pt", step=step, stepTau=stepTau, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco, ylabel=ylabel_pt)
+    doPlotRecoMuGenTau("eta", step=step, stepTau=stepTau, rebin=etaBinning)
+    doPlotRecoMuGenTau("phi", step=step, stepTau=stepTau, rebin=phiBinning)
+
+    step = "afterEffWeightTuneP"
+    doPlotRecoMuGenTau("pt", step=step, stepTau=stepTau, log=True, rebin=ptBinning, divideByBinWidth=True, opts={"ymin": 0.1}, opts2=opts2Reco, ylabel=ylabel_pt)
     doPlotRecoMuGenTau("eta", step=step, stepTau=stepTau, rebin=etaBinning)
     doPlotRecoMuGenTau("phi", step=step, stepTau=stepTau, rebin=phiBinning)
 
@@ -274,22 +328,12 @@ def doCounters(muonDatasets, tauDatasets, datasetName, ntupleCacheMuon, ntupleCa
 
         print "Tau/Muon = %f +- %f, Muon/Tau = %f +- %f" % (ratio1.value(), ratio1.uncertainty(), ratio2.value(), ratio2.uncertainty())
 
-    ratio = tauEvents.clone()
-    ratio.divide(muonEvents)
-    ratioWeighted = tauEvents.clone()
-    # ratioWeighted.divide(muonEventsWeighted)
-    print "Tau/Muon     = %f +- %f" % (ratio.value(), ratio.uncertainty())
-    # print "Tau/Muon(ID) = %f +- %f" % (ratioWeighted.value(), ratioWeighted.uncertainty())
+    print "Generator level"
+    printRatio("= 1 gen muon", "= 1 gen tau")
     print
 
-    ratio = muonEvents.clone()
-    ratio.divide(tauEvents)
-    # ratioWeighted = muonEventsWeighted.clone()
-    #ratioWeighted.divide(tauEvents)
-    print "Muon/Tau     = %f +- %f" % (ratio.value(), ratio.uncertainty())
-    # print "Muon(ID)/Tau = %f +- %f" % (ratioWeighted.value(), ratioWeighted.uncertainty())
-
-
+    print "Reco muon vs. gen tau, after muon veto"
+    printRatio("muon id eff weighting", "reco muon veto")
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")

@@ -16,7 +16,7 @@ public:
   ~EmbeddingDebugTauAnalysisSelector();
 
   void setOutput(TDirectory *dir);
-  void setupBranches(TTree *tree);
+  void setupBranches(BranchManager& branchManager);
   bool process(Long64_t entry);
 
 private:
@@ -121,7 +121,7 @@ bool EmbeddingDebugTauAnalysisSelector::process(Long64_t entry) {
       return true;
 
     cOneTau.increment();
-    hGenTau.fill(genTau.p4());
+    hGenTau.fill(genTau.p4(), weight);
 
     // Find the more proper "generator tau" to access the daughter of it
     GenParticleCollection::GenParticle genTmp;
@@ -149,7 +149,7 @@ bool EmbeddingDebugTauAnalysisSelector::process(Long64_t entry) {
     }
 
     cMuonVeto.increment();
-    hGenTau_AfterMuonVeto.fill(genTau.p4());
+    hGenTau_AfterMuonVeto.fill(genTau.p4(), weight);
 
   }
 

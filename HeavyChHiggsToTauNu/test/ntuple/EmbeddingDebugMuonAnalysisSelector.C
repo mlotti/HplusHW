@@ -8,6 +8,7 @@
 
 #include "TDirectory.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include "Math/VectorUtil.h"
 #include "TLorentzVector.h"
 
@@ -86,6 +87,8 @@ private:
   Kinematics hRecoMuon_AfterEffWeightMuscle;
   Kinematics hRecoMuon_AfterEffWeightRochester;
   Kinematics hRecoMuon_AfterEffWeightTuneP;
+
+  TH2 *hRecoMuonResPt_AfterRecoFound;
 };
 
 
@@ -116,6 +119,8 @@ void EmbeddingDebugMuonAnalysisSelector::setOutput(TDirectory *dir) {
   hGenMuon_AfterEffWeight.book("genmuon_afterEffWeight");
 
   hRecoMuon_AfterRecoFound.book("recomuon_afterRecoFound");
+  hRecoMuonResPt_AfterRecoFound = makeTH<TH2F>("recomuon_afterRecoFound_PtRes", "PtRes", 40,0,400, 40, -1,1);
+
   hRecoMuon_AfterEffWeight.book("recomuon_afterEffWeight");
   hRecoMuon_AfterEffWeightScaleUp.book("recomuon_afterEffWeightScaleUp");
   hRecoMuon_AfterEffWeightScaleDown.book("recomuon_afterEffWeightScaleDown");
@@ -138,7 +143,7 @@ void EmbeddingDebugMuonAnalysisSelector::setupBranches(BranchManager& branchMana
 }
 
 bool EmbeddingDebugMuonAnalysisSelector::process(Long64_t entry) {
-  Double weight = 1.0;
+  double weight = 1.0;
   if(!fPuWeightName.empty()) {
     weight *= fPuWeight->value();
   }
@@ -228,6 +233,8 @@ bool EmbeddingDebugMuonAnalysisSelector::process(Long64_t entry) {
 
     hGenMuon_AfterRecoFound.fill(genMuon.p4(), weight);
     hRecoMuon_AfterRecoFound.fill(recoMuon.p4(), weight);
+
+    hRecoMuonResPt_AfterRecoFound->Fill(recoMuon.p4().Pt(), (recoMuon.p4().Pt()-genMuon.p4().Pt())/genMuon.p4().Pt(), weight);
 
     weight *= 1/recoMuon.idEfficiency();
     fEventCounter.setWeight(weight);

@@ -94,11 +94,20 @@ public:
   class Muon: public Impl::Particle<MuonCollection> {
     typedef Impl::Particle<MuonCollection> Base;
   public:
-    Muon();
-    Muon(MuonCollection *mc, size_t i): Base(mc, i) {}
+    enum CorrectionType {
+      kUncorrected,
+      kCorrected,
+      kTuneP,
+    };
+
+    Muon(): Base(), fCorrectionType(kUncorrected) {}
+    Muon(MuonCollection *mc, size_t i): Base(mc, i), fCorrectionType(kUncorrected) {}
     ~Muon();
 
     void ensureValidity() const;
+
+    void assignP4();
+    CorrectionType p4CorrectionType() const { return fCorrectionType; }
 
     const math::XYZTLorentzVector& correctedP4() { return fCollection->fCorrectedP4->value()[index()]; }
 
@@ -126,6 +135,9 @@ public:
     int pdgId() { return fCollection->fPdgId->value()[index()]; }
     int motherPdgId() { return fCollection->fMotherPdgId->value()[index()]; }
     int grandMotherPdgId() { return fCollection->fGrandMotherPdgId->value()[index()]; }
+
+  private:
+    CorrectionType fCorrectionType;
   };
 
 
@@ -292,6 +304,8 @@ public:
 
     unsigned numberOfDaughters() { return fCollection->fNumberOfDaughters->value()[index()]; }
 
+    double csv() { return fCollection->fCSV->value()[index()]; }
+
     bool btagged() { return fCollection->fBTagged->value()[index()]; }
     float btagScaleFactor() { return fCollection->fBTagSF->value()[index()]; }
     float btagScaleFactorUncertainty() { return fCollection->fBTagSFUnc->value()[index()]; }
@@ -318,6 +332,7 @@ private:
   Branch<std::vector<unsigned> > *fNumberOfDaughters;
   Branch<std::vector<bool> > *fLooseId;
   Branch<std::vector<bool> > *fTightId;
+  Branch<std::vector<double> > *fCSV;
   Branch<std::vector<bool> > *fBTagged;
   Branch<std::vector<float> > *fBTagSF;
   Branch<std::vector<float> > *fBTagSFUnc;
