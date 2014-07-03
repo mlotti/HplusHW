@@ -2432,12 +2432,11 @@ class PlotDrawer:
                 raise Exception("If 'rebinX' is a list, it must have at least two elements")
             n = len(rebinX)-1
             def rebinList(h):
-                th1 = h.getRootHisto()
-                if hasattr(th1, "Rebin2D"):
+                rhwu = h.getRootHistoWithUncertainties()
+                if hasattr(rhwu.getRootHisto(), "Rebin2D"):
                     print >>sys.stderr, "WARNING: Plot '%s', trying to rebin TH2 histogram '%s' with nonequal bin sizes" % (name, h.getName())
                     return
-                rebinned = th1.Rebin(n, th1.GetName(), array.array("d", rebinX))
-                h.setRootHisto(rebinned)
+                rhwu.Rebin(n, rhwu.GetName(), array.array("d", rebinX))
 
             rebinFunction = rebinList
         else:
