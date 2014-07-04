@@ -30,7 +30,7 @@ class ExtractorResult():
 
     def delete(self):
         if self._purityHistogram != None:
-            self._purityHistogram.IsA().Destructor(self._purityHistogram)
+            self._purityHistogram.Delete()
             self._purityHistogram = None
 
     def getId(self):
