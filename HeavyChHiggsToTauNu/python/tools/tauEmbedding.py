@@ -62,9 +62,12 @@ tauDirSig = "multicrab_analysisTau_firstGenTau_121011_112052"
 class MuonAnalysisSelectorArgs(dataset.SelectorArgs):
     def __init__(self, **kwargs):
         dataset.SelectorArgs.__init__(self,
-                                      [("puWeight", ""),
+                                      [("era", ""),
+                                       ("puVariation", ""),
                                        ("isolationMode", "standard"),
-                                       ("bquarkMode", "disabled")
+                                       ("bquarkMode", "disabled"),
+                                       ("topPtReweighting", True),
+                                       ("topPtReweightingScheme", ""),
                                        ],
                                       **kwargs)
 
@@ -75,7 +78,10 @@ class TauAnalysisSelectorArgs(dataset.SelectorArgs):
                                        ("isEmbedded", False),
                                        ("embeddingWTauMuFile", ""),
                                        ("embeddingWTauMuPath", ""),
+                                       ("mcTauMultiplicity", ""),
                                        ("mcTauMode", ""),
+                                       ("embeddingNormalizationMode", ""),
+                                       ("embeddingMuonWeights", None),
                                        ],
                                       **kwargs)
 
@@ -243,7 +249,7 @@ def scaleNormalization(obj):
         return
 
     #scaleMCfromWmunu(obj) # data/MC trigger correction
-    scaleMuTriggerIdEff(obj)
+#    scaleMuTriggerIdEff(obj)
 #    scaleWmuFraction(obj)
 
 ## Apply muon trigger and ID efficiency normalization
@@ -305,6 +311,7 @@ def scaleMuTriggerIdEff(obj):
 #    scaleMap = scaleMapOld
 
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffs
+    # This is only ID efficiency
     scaleMap = {"MC": (0.955+0.9519)/2}
 
     # Transform to inverse
@@ -431,7 +438,7 @@ class DatasetsMany:
         for d in dirs:
             datasets = dataset.getDatasetsFromMulticrabCfg(directory=d, **kwargs)
             datasets.updateNAllEventsToPUWeighted()
-            datasets.loadLuminosities()
+#            datasets.loadLuminosities()
             self.datasetManagers.append(datasets)
 
         self.normalizeMCByCrossSection = normalizeMCByCrossSection
@@ -989,8 +996,8 @@ class PlotDrawerTauEmbedding(plots.PlotDrawer):
         if kwargs.get("normalize", self.normalizeDefault):
             scaleNormalization(p)
 
-    def __call__(self, p, name, xlabel, **kwargs):
-        self.rebin(p, **kwargs)
+    def __call__(self, p, name, **kwargs):
+        self.rebin(p, name, **kwargs)
 
         self.tauEmbeddingNormalization(p, **kwargs)
 
@@ -999,7 +1006,7 @@ class PlotDrawerTauEmbedding(plots.PlotDrawer):
         self.setLegend(p, **kwargs)
         self.addCutLineBox(p, **kwargs)
         self.customise(p, **kwargs)
-        self.finish(p, xlabel, **kwargs)
+        self.finish(p, **kwargs)
 
 ## Default plot drawer object for tau embedding (embedded data vs. embedded MC) plots
 drawPlot = PlotDrawerTauEmbedding(ylabel="Events / %.0f GeV/c", log=True, stackMCHistograms=True, addMCUncertainty=True)
@@ -1015,12 +1022,10 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
     def __init__(self, **kwargs):
         PlotDrawerTauEmbedding.__init__(self, normalize=False, **kwargs)
 
-    def __call__(self, p, name, xlabel, **kwargs):
-        self.rebin(p, **kwargs)
+    def __call__(self, p, name, **kwargs):
+        self.rebin(p, name, **kwargs)
 
         self.tauEmbeddingNormalization(p, **kwargs)
-
-        print ROOT.gStyle.GetHatchesLineWidth()
 
         sigErr = p.histoMgr.getHisto("Normal").getRootHisto().Clone("Normal_err")
         sigErr.SetFillColor(ROOT.kRed-7)
@@ -1049,7 +1054,7 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             # Very, very ugly hack
 
-            for r in p.ratios:
+            for r in p.ratioHistoMgr.getHistos():
                 r.getRootHisto().SetLineStyle(1)
 
             if p.histoMgr.hasHisto("EmbeddedData"):
@@ -1086,7 +1091,7 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
 
         self.addCutLineBox(p, **kwargs)
         self.customise(p, **kwargs)
-        self.finish(p, xlabel, **kwargs)
+        self.finish(p, **kwargs)
 
 ## Plot creator for embedded vs. normal plots
 class PlotCreatorMany:

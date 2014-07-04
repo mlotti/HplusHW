@@ -51,8 +51,8 @@ def main(opts):
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
-#    process(datasets, "TTJets", "Before", ">= 1 genuine tau in acceptance")
-    process(datasets, "TTJets", "AfterJetSelection", "njets")
+    process(datasets, "TTJets", "Before", ">= 1 genuine tau in acceptance")
+#    process(datasets, "TTJets", "AfterJetSelection", "njets")
 #    process(datasets, "TTJets", "AfterMET", "MET")
 #    process(datasets, "TTJets", "AfterBTag", "btagging")
 #    process(datasets, "TTJets", "AfterAllSelections", "DeltaPhi(Tau MET) upper limit")
@@ -106,27 +106,27 @@ def process(datasets, datasetName, postfix, countName):
 
     neventsCount = mainTable.getCount(rowName=countName, colName=datasetName)
     nevents = neventsCount.value()
-    column = eventCounter.getSubCounterTable("Classification"+postfix).getColumn(name=datasetName)
-
-    columnFraction = column.clone()
-    columnFraction.setName("Fraction (%)")
-
-    # Consistency check, and do the division
-    tmp = 0
-    for irow in xrange(column.getNrows()):
-        tmp += column.getCount(irow).value()
-
-        frac = dataset.divideBinomial(columnFraction.getCount(irow), neventsCount)
-        frac.multiply(dataset.Count(100))
-        columnFraction.setCount(irow, frac)
-
-    if int(nevents) != int(tmp):
-        raise Exception("Consistency check failed: nevents = %d, tmp = %d" % (int(nevents), int(tmp)))
-
+#    column = eventCounter.getSubCounterTable("Classification"+postfix).getColumn(name=datasetName)
+#
+#    columnFraction = column.clone()
+#    columnFraction.setName("Fraction (%)")
+#
+#    # Consistency check, and do the division
+#    tmp = 0
+#    for irow in xrange(column.getNrows()):
+#        tmp += column.getCount(irow).value()
+#
+#        frac = dataset.divideBinomial(columnFraction.getCount(irow), neventsCount)
+#        frac.multiply(dataset.Count(100))
+#        columnFraction.setCount(irow, frac)
+#
+#    if int(nevents) != int(tmp):
+#        raise Exception("Consistency check failed: nevents = %d, tmp = %d" % (int(nevents), int(tmp)))
+#
     table = counter.CounterTable()
-    table.appendColumn(column)
-    table.appendColumn(columnFraction)
-
+#    table.appendColumn(column)
+#    table.appendColumn(columnFraction)
+#
     cellFormat = counter.CellFormatText(valueFormat='%.4f', withPrecision=2)
     tableFormat = counter.TableFormatText(cellFormat)
 
