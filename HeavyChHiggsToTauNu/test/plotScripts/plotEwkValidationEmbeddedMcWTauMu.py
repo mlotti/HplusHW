@@ -80,9 +80,12 @@ def doDataset(datasetsEmb, datasetsSig, optMode):
     #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
     histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2)
     #histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
-    histograms.uncertaintyMode.set(histograms.uncertaintyMode.SystOnly)
+    #histograms.uncertaintyMode.set(histograms.uncertaintyMode.SystOnly)
+    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatPlusSyst)
     histograms.createLegendRatio.moveDefaults(dh=-0.1, dx=-0.53)
     plots._legendLabels["BackgroundStatError"] = "Truth stat. unc."
+    plots._legendLabels["BackgroundStatSystError"] = "Truth stat. unc."
+    plots._plotStyles["BackgroundStatSystError"] = plots._plotStyles["BackgroundStatError"]
 
     plotter = tauEmbedding.CommonPlotter(optMode, "mcembwtaumu", drawPlotCommon)
 
@@ -93,8 +96,8 @@ def doDataset(datasetsEmb, datasetsSig, optMode):
     dop("TTJets")
 #drawPlotCommon = tauEmbedding.PlotDrawerTauEmbeddingEmbeddedNormal(ylabel="Events / %.0f GeV", stackMCHistograms=False, log=True, addMCUncertainty=True, ratio=True, addLuminosityText=True)
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=False, log=True, addMCUncertainty=True,
-                                  ratio=True, ratioType="errorScale", #ratioCreateLegend=True,
-                                  opts2={"ymin": 0.9, "ymax": 1.1},
+                                  ratio=True, ratioType="errorScale", ratioCreateLegend=True,
+                                  opts2={"ymin": 0.85, "ymax": 1.15},
                                   addLuminosityText=True)
 
 def strIntegral(th1):
