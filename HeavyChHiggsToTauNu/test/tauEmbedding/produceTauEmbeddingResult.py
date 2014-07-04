@@ -38,7 +38,7 @@ class DatasetCreatorMany:
     def __init__(self, directories, **kwargs):
         if len(directories) == 0:
             raise Exception("Need at least one directory")
-        self._creators = [dataset.readFromMulticrabCfg(directory=d, **kwargs) for d in directories]
+        self._creators = filter(lambda c: c is not None, [dataset.readFromMulticrabCfg(directory=d, **kwargs) for d in directories])
 
     def printAnalyses(self):
         if len(self._creators) > 1:
@@ -47,6 +47,9 @@ class DatasetCreatorMany:
 
     def getBaseDirectory(self):
         return self._creators[0].getBaseDirectory()
+
+    def getDatasetNames(self):
+        return self._creators[0].getDatasetNames()
 
     def getAnalyses(self):
         return self._creators[0].getAnalyses()
@@ -72,10 +75,12 @@ class DatasetManagerMany:
 
     def _getDatasetsGeneric(self, methodName):
         datasets = [getattr(dm, methodName)() for dm in self._dsetMgrs]
-        tmp = [[]]*len(datasets[0])
+        tmp = []
         for i in xrange(len(datasets[0])):
+            lst = []
             for j in xrange(len(self._dsetMgrs)):
-                tmp[i].append(datasets[j][i])
+                lst.append(datasets[j][i])
+            tmp.append(lst) # tmp[i]
 
         return [DatasetMany(t) for t in tmp]
 
@@ -117,14 +122,21 @@ class DatasetMany:
     def getLuminosity(self):
         return self._datasets[0].getLuminosity()
 
+    def getCrossSection(self):
+        return self._datasets[0].getCrossSection()
+
     def getDataVersion(self):
         return self._datasets[0].getDataVersion()
 
     def getDirectoryContent(self, *args, **kwargs):
         return self._datasets[0].getDirectoryContent(*args, **kwargs)
 
-    def getAverageHistogram(self, path):
-        th1s = [dset.getDatasetRootHisto(path).getHistogram() for dset in self._datasets]
+    def getAverageHistogram(self, path, normalizeMCByCrossSection=False):
+        drhs = [dset.getDatasetRootHisto(path) for dset in self._datasets]
+        if self.isMC() and normalizeMCByCrossSection:
+            for d in drhs:
+                d.normalizeByCrossSection()
+        th1s = [drh.getHistogram() for drh in drhs]
         ret = th1s[0].Clone("tmp")
         ret.SetDirectory(0)
         for h in th1s[1:]:
@@ -136,14 +148,14 @@ class DatasetMany:
             ret.SetBinError(bin, ret.GetBinError(bin)/len(th1s))
         return ret
 
-def processDirectory(dset, srcDirName, dstDir, scaleBy):
+def processDirectory(dset, srcDirName, dstDir, scaleBy, dsetSubtractFrom):
     # Get directories, recurse to them
     dirs = dset.getDirectoryContent(srcDirName, lambda o: isinstance(o, ROOT.TDirectory))
     dirs = filter(lambda n: n != "configInfo", dirs)
 
     for d in dirs:
         newDir = dstDir.mkdir(d)
-        processDirectory(dset, os.path.join(srcDirName, d), newDir, scaleBy)
+        processDirectory(dset, os.path.join(srcDirName, d), newDir, scaleBy, dsetSubtractFrom)
 
     # Then process histograms
     histos = dset.getDirectoryContent(srcDirName, lambda o: isinstance(o, ROOT.TH1))
@@ -152,21 +164,55 @@ def processDirectory(dset, srcDirName, dstDir, scaleBy):
     if srcDirName == "counters":
         # Don't touch unweighted counters
         shouldScale = False
+    isCounter = srcDirName in ["counters", "counters/weighted"]
     for hname in histos:
 #        drh = dset.getDatasetRootHisto(os.path.join(srcDirName, hname))
 #        hnew = drh.getHistogram() # TH1
-        hnew = dset.getAverageHistogram(os.path.join(srcDirName, hname))
+        hnew = dset.getAverageHistogram(os.path.join(srcDirName, hname), normalizeMCByCrossSection = (dsetSubtractFrom is not None))
         hnew.SetName(hname)
-        hnew.SetDirectory(dstDir)
         if shouldScale and hname not in "SplittedBinInfo":
             tauEmbedding.scaleTauBRNormalization(hnew)
             if scaleBy is not None:
                 hnew.Scale(scaleBy)
+        if dsetSubtractFrom is not None:
+            drh = dsetSubtractFrom.getDatasetRootHisto(os.path.join(srcDirName, hname))
+            if dsetSubtractFrom.isMC():
+                drh.normalizeByCrossSection()
+            hsub = drh.getHistogram()
+            if not isCounter:
+                # hnew = hsub-hnew
+                hnew.Scale(-1)
+                hnew.Add(hsub)
+            else:
+                cnew = counter.HistoCounter("Emb", hnew)
+                csub = counter.HistoCounter("Norm", hsub)
+
+                table = counter.CounterTable()
+                table.appendColumn(cnew)
+                table.appendColumn(csub)
+                cres = counter.subtractColumn("Result", table.getColumn(name="Norm"), table.getColumn(name="Emb"))
+
+                hnew2 = dataset._counterToHisto(hnew.GetName(), cres.getPairList())
+                hnew2.SetTitle(hnew.GetTitle())
+                hnew = hnew2
+                if srcDirName == "counters" and hname == "counter" and hnew.GetBinContent(1) < 0:
+                    hnew.SetBinContent(1, 0)
+
+
+        hnew.SetDirectory(dstDir)
+
+            # # set the first count in main counters to 0 if it is negative,
+            # # this is to circumvent certain assumptions made elsewhere in
+            # # the code
+            # if hname == "counter" and (srcDirName == "counters" or srcDirName == "counters/weighted") and hnew.GetBinContent(1) < 0:
+            #     hnew.SetBinContent(1, 0)
+            #     hnew.SetBinError(1, 0)
+
         hnew.Write()
 #        ROOT.gDirectory.Delete(hname)
         hnew.Delete()
 
-def main(output, dset, dstPostfix="", scaleBy=None):
+def main(output, dset, dsetSig=None, dstPostfix="", scaleBy=None):
     start = time.time()
 
     # Create analysis directory
@@ -189,15 +235,57 @@ def main(output, dset, dstPostfix="", scaleBy=None):
         configInfoHist.SetBinContent(2, dset.getLuminosity())
     if dset.isMC():
         configInfoHist.GetXaxis().SetBinLabel(2, "crossSection")
-        configInfoHist.SetBinContent(2, dset.getCrossSection())
+        if dsetSig is not None:
+            # MC is already normalized to cross section and the allEvents counter is adjusted accordingly
+            configInfoHist.SetBinContent(2, 1.0)
+        else:
+            configInfoHist.SetBinContent(2, dset.getCrossSection())
     configInfoHist.Write()
     configInfoHist.Delete()
 
     # Process histograms
-    processDirectory(dset, "", analysisDir, scaleBy)
+    processDirectory(dset, "", analysisDir, scaleBy, dsetSig)
 
     stop = time.time()
     print "Processed in %f.2 s" % (stop-start)
+
+class MainRunner:
+    def __init__(self, systematicVariationNames):
+        self._configInfoAdded = {}
+        self._systematicVariationNames = systematicVariationNames
+
+    def operateDataset(self, dset):
+        self.operateDatasetResidual(dset, dset.getName())
+
+    def operateDatasetResidual(self, dsetEmb, dsetName, dsetSig=None):
+        print "Dataset", dsetName
+        resdir = os.path.join(taskDir, dsetName, "res")
+        if not os.path.exists(resdir):
+            os.makedirs(resdir)
+
+        # Open and close result file in order to prevent
+        # per-analysis time blowing up (because of ROOT)
+        if not dsetName in self._configInfoAdded:
+            dv = "pseudo"
+            if dsetEmb.isMC():
+                dv = dsetEmb.getDataVersion()
+            resultFile = ROOT.TFile.Open(os.path.join(resdir, "histograms-%s.root"%dsetName), "RECREATE")
+            aux.addConfigInfo(resultFile, dsetEmb, addLuminosity=False, dataVersion=dv, additionalText={"analysisName": analysisName})
+            self._configInfoAdded[dsetName] = True
+        else:
+            resultFile = ROOT.TFile.Open(os.path.join(resdir, "histograms-%s.root"%dsetName), "UPDATE")
+
+        main(resultFile, dsetEmb, dsetSig=dsetSig)
+        if systVar is None and "SystVarGenuineTau" not in self._systematicVariationNames:
+            unc = systematics.getTauIDUncertainty(isGenuineTau=True)
+            main(resultFile, dsetEmb, dsetSig=dsetSig, dstPostfix="SystVarGenuineTauPlus", scaleBy=(1+unc.getUncertaintyUp()))
+            main(resultFile, dsetEmb, dsetSig=dsetSig, dstPostfix="SystVarGenuineTauMinus", scaleBy=(1-unc.getUncertaintyDown()))
+
+        resultFile.Close()
+
+
+                        
+
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options] multicrab-dir [multicrab-dir] ...\nIf multiple multicrab directories are given, they are averaged.")
@@ -209,13 +297,19 @@ if __name__ == "__main__":
                       help="List available analysis name information, and quit.")
     parser.add_option("--mc", dest="mcs", action="append", type="string", default=[],
                       help="Process also these MC samples. If any of them is '*', all available MC's are used")
+    parser.add_option("--residual", dest="residual", type="string", default=None,
+                      help="Produce the residual DY dataset to the output pseudo-multicrab. RESIDUAL is the path to multicrab directory of signalAnalysis with GenTau.")
     parser.add_option("--midfix", dest="midfix", default=None,
                       help="Midfix to add to the output directory name")
+    parser.add_option("--nosyst", dest="dosyst", default=True, action="store_false",
+                      help="Don't process systematic variations")
     (opts, args) = parser.parse_args()
     if len(args) == 0:
         parser.error("Expected at least one multicrab directory, got %d" % len(args))
     if len(args) > 1:
         print "Got %d multicrab directories, averaging the result" % len(args)
+    if len(opts.mcs) > 0 and opts.residual is not None:
+        parser.error("--mc and --residual can't be given at the same time")
     multicrabDirs = args
 
     createArgs = {"includeOnlyTasks": "SingleMu"}
@@ -227,7 +321,10 @@ if __name__ == "__main__":
             createArgs["excludeTasks"] = "SingleMu"
         else:
             createArgs["includeOnlyTasks"] = "|".join(opts.mcs)
-        datasetCreatorMC = DatasetCreatorMany(multicrabDirs, **createArgs)
+        datasetCreatorMC = DatasetCreatorMany(multicrabDirs, emptyDatasetsAsNone=True, **createArgs)
+    if opts.residual is not None:
+        datasetCreatorMC = DatasetCreatorMany(multicrabDirs, includeOnlyTasks=["DYJetsToLL"], emptyDatasetsAsNone=True)
+        datasetCreatorSig = dataset.readFromMulticrabCfg(directory=opts.residual, includeOnlyTasks=["DYJetsToLL"])
     if opts.listAnalyses:
         datasetCreator.printAnalyses()
         sys.exit(0)
@@ -282,9 +379,12 @@ if __name__ == "__main__":
     f = open(os.path.join(taskDir, "multicrab.cfg"), "w")
     f.write("[Data]\n")
     f.write("dummy = embedded\n\n")
+    residualPrefix = ""
+    if opts.residual is not None:
+        residualPrefix = "Residual_"
     if datasetCreatorMC is not None:
         for mc in datasetCreatorMC.getDatasetNames():
-            f.write("[%s]\n"%mc)
+            f.write("[%s%s]\n"%(residualPrefix,mc))
             f.write("dummy = embedded\n\n")
     f.close()
     f = open(os.path.join(taskDir, "inputInfo.txt"), "w")
@@ -292,8 +392,8 @@ if __name__ == "__main__":
         f.write("Embedded input directory: %s\n" % d)
     if len(multicrabDirs) > 1:
         f.write("Histograms are averaged\n")
-
-    configInfoAdded = {}
+    if opts.residual is not None:
+        f.write("DYResidual is calculated as normal-embedded, normal taken from %s\n" % opts.residual)
 
     dcs = [datasetCreator]
     if datasetCreatorMC is not None:
@@ -304,6 +404,8 @@ if __name__ == "__main__":
     if len(eras) == 0:
         print "No data eras!"
 
+    runner = MainRunner(datasetCreator.getSystematicVariations())
+
     for dc in dcs:
         if len(dc.getSearchModes()) == 0:
             print "No search modes for DatasetManagerCreator with baseDirectory %s" % dc.getBaseDirectory()
@@ -313,7 +415,10 @@ if __name__ == "__main__":
                 if len(optModes) == 0:
                     optModes = [None]
                 for optMode in optModes:
-                    for systVar in [None]+dc.getSystematicVariations():
+                    systVars = [None]
+                    if opts.dosyst:
+                        systVars.extend(dc.getSystematicVariations())
+                    for systVar in systVars:
                         if optMode is None:
                             f.write("Analysis %s, searchMode %s, dataEra %s, systematicVariation %s\n" % (analysisName, searchMode, era, systVar))
                         else:
@@ -326,31 +431,19 @@ if __name__ == "__main__":
                         if len(dsetMgr.getDataDatasets()) > 0:
                             dsetMgr.loadLuminosities()
                             dsetMgr.mergeData()
-                        for dset in dsetMgr.getAllDatasets():
-                            print "Dataset", dset.getName()
-                            resdir = os.path.join(taskDir, dset.getName(), "res")
-                            if not os.path.exists(resdir):
-                                os.makedirs(resdir)
 
-                            # Open and close result file in order to prevent
-                            # per-analysis time blowing up (because of ROOT)
-                            if not dset.getName() in configInfoAdded:
-                                dv = "pseudo"
-                                if dset.isMC():
-                                    dv = dset.getDataVersion()
-                                resultFile = ROOT.TFile.Open(os.path.join(resdir, "histograms-%s.root"%dset.getName()), "RECREATE")
-                                aux.addConfigInfo(resultFile, dset, addLuminosity=False, dataVersion=dv, additionalText={"analysisName": analysisName})
-                                configInfoAdded[dset.getName()] = True
-                            else:
-                                resultFile = ROOT.TFile.Open(os.path.join(resdir, "histograms-%s.root"%dset.getName()), "UPDATE")
+                        if opts.residual is not None and dc == datasetCreatorMC:
+                            if systVar is not None and systVar not in datasetCreatorSig.getSystematicVariations():
+                                continue
 
-                            main(resultFile, dset)
-                            if systVar is None and "SystVarGenuineTau" not in dc.getSystematicVariations():
-                                unc = systematics.getTauIDUncertainty(isGenuineTau=True)
-                                main(resultFile, dset, dstPostfix="SystVarGenuineTauPlus", scaleBy=(1+unc.getUncertaintyUp()))
-                                main(resultFile, dset, dstPostfix="SystVarGenuineTauMinus", scaleBy=(1-unc.getUncertaintyDown()))
-
-                            resultFile.Close()
+                            dsetMgrSig = datasetCreatorSig.createDatasetManager(analysisName="signalAnalysisGenuineTauTriggered", searchMode=searchMode,
+                                                                                dataEra=era, optimizationMode=optMode,
+                                                                                systematicVariation=systVar)
+                            for dset in dsetMgr.getAllDatasets():
+                                runner.operateDatasetResidual(dset, residualPrefix+dset.getName(), dsetMgrSig.getDataset(dset.getName()))
+                        else:
+                            for dset in dsetMgr.getAllDatasets():
+                                runner.operateDataset(dset)
 #                        break
 #                    break
 #                break
