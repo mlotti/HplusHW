@@ -1152,6 +1152,7 @@ def addEmbeddingSkim_v53_3(datasets):
         "TTToHplusBHminusB_M160_ext_Summer12":     TaskDef(""),
         }
     addEmbeddingSkim_53X("v53_3", datasets, definitions)
+
 def addEmbeddingEmbedding_v53_3(datasets):
     skimVersion = "tauembedding_skim_v53_3"
 
@@ -1308,9 +1309,18 @@ def addEmbeddingEmbedding_v53_3(datasets):
             # User mean 7028.0, min 728.9, max 13562.4
             # Mean 70.6 MB, min 9.6 MB, max 135.6 MB
             "SingleMu_207214-208686_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_207214_208686_tauembedding_embedding_v53_3_seedTest1-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
-            "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
-            "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
-            "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
+            # 1701 jobs
+            # User mean 9666.3, min 899.6, max 12635.3
+            # Mean 605.2 MB, min 47.8 MB, max 792.1 MB
+            "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v2_AODSIM_tauembedding_embedding_v53_3_seedTest1-1af76047aea9759528c81258e6b8769f/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}, dbs="phys03"),
+            # 1655 jobs
+            # User mean 12015.3, min 4605.3, max 13648.2
+            # Mean 774.2 MB, min 283.5 MB, max 863.7 MB
+            "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_embedding_v53_3_seedTest1-1af76047aea9759528c81258e6b8769f/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}, dbs="phys03"),
+            # 159 jobs
+            # User mean 640.1, min 457.5, max 875.5
+            # Mean 42.5 MB, min 28.4 MB, max 60.5 MB
+            "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("/TTJets_HadronicMGDecays_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_ext_v1_AODSIM_tauembedding_embedding_v53_3_seedTest1-1af76047aea9759528c81258e6b8769f/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}, dbs="phys03"),
         })
 
     addEmbedding("v53_3_seedTest2", definitions={
