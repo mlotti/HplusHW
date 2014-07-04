@@ -8,6 +8,7 @@
 import glob, os, sys, re
 import math
 import copy
+import time
 import StringIO
 import hashlib
 import array
@@ -192,6 +193,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 # 
 # \param taskdirs     List of strings for the CRAB task directories (relative
 #                     to the working directory)
+# \param emptyDatasetsAsNone  If true, in case of no datasets return None instead of raising an Exception (default False)
 # \param kwargs       Keyword arguments (see below) 
 # 
 # <b>Keyword arguments</b>, all are also forwarded to readFromRootFiles()
@@ -203,7 +205,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 # The basename of the task directories are taken as the dataset names
 # in the DatasetManagerCreator object (e.g. for directory '../Foo',
 # 'Foo' will be the dataset name)
-def readFromCrabDirs(taskdirs, **kwargs):
+def readFromCrabDirs(taskdirs, emptyDatasetsAsNone=False, **kwargs):
     inputFile = None
     if "opts" in kwargs:
         opts = kwargs["opts"]
@@ -231,6 +233,8 @@ def readFromCrabDirs(taskdirs, **kwargs):
             raise Exception("No datasets. Have you merged the files with hplusMergeHistograms.py?")
 
     if len(dlist) == 0:
+        if emptyDatasetsAsNone:
+            return None
         raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
 
     return readFromRootFiles(dlist, **kwargs)
@@ -2796,6 +2800,8 @@ class Dataset:
                 pass
             print "Using top-pt reweighted Nallevents for sample %s" % self.name
         else:
+            if "topPtWeightType" in args:
+                del args["topPtWeightType"]
             try:
                 self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, **args)
             except KeyError:
@@ -3867,6 +3873,9 @@ class DatasetManagerCreator:
         self._systematicVariationSources = systTmp.keys()
         self._systematicVariationSources.sort()
 
+    def getBaseDirectory(self):
+        return self._baseDirectory
+
     ## Create DatasetManager
     #
     # \param kwargs   Keyword arguments (see below)
@@ -4239,10 +4248,30 @@ class NtupleCache:
 
         print "Processing dataset", datasetName
         
+        # Setup cache
+        useCache = True
+        if useCache:
+            tree.SetCacheSize(1024*1024) # 10 MB
+            tree.SetCacheLearnEntries(100);
+
+        readBytesStart = ROOT.TFile.GetFileBytesRead()
+        readCallsStart = ROOT.TFile.GetFileReadCalls()
+        timeStart = time.time()
+        clockStart = time.clock()
         if useMaxEvents:
+            if useCache:
+                tree.SetCacheEntryRange(0, N)
             tree.Process(selector, "", N)
         else:
             tree.Process(selector)
+        timeStop = time.time()
+        clockStop = time.clock()
+        readCallsStop = ROOT.TFile.GetFileReadCalls()
+        readBytesStop = ROOT.TFile.GetFileBytesRead()
+        cpuTime = clockStop-clockStart
+        realTime = timeStop-timeStart
+        readMbytes = float(readBytesStop-readBytesStart)/1024/1024
+        print "Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB (%d calls), read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, readCallsStop-readCallsStart, readMbytes/realTime)
         for d in directories:
             d.Write()
 

@@ -1859,7 +1859,7 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
         if normalizeToLumi == None:
             self.histoMgr.normalizeMCByLuminosity()
         else:
-            if datasetMgr.hasDataset("Data"):
+            if datasetMgr.hasDataset("Data") and datasetMgr.getDataset("Data").isData():
                 raise Exception("Got 'normalizeToLumi' while there is 'Data' dataset. You should use the 'Data' luminosity instead (i.e. do not give 'normalizeToLumi')")
             self.histoMgr.normalizeMCToLuminosity(normalizeToLumi)
 
@@ -1874,7 +1874,7 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
     # \param kwargs       Keyword arguments, forwarded to PlotSameBase.createFrame() or PlotRatioBase._createFrameRatio()
     def createFrame(self, filename, createRatio=False, **kwargs):
         if createRatio and not self.histoMgr.hasHisto("Data"):
-            print >> sys.stderr, "Warning: Trying to createdata/MC ratio, but there is no 'Data' histogram."
+            print >> sys.stderr, "Warning: Trying to create data/MC ratio, but there is no 'Data' histogram."
             createRatio = False
 
         if not createRatio:
@@ -2432,12 +2432,11 @@ class PlotDrawer:
                 raise Exception("If 'rebinX' is a list, it must have at least two elements")
             n = len(rebinX)-1
             def rebinList(h):
-                th1 = h.getRootHisto()
-                if hasattr(th1, "Rebin2D"):
+                rhwu = h.getRootHistoWithUncertainties()
+                if hasattr(rhwu.getRootHisto(), "Rebin2D"):
                     print >>sys.stderr, "WARNING: Plot '%s', trying to rebin TH2 histogram '%s' with nonequal bin sizes" % (name, h.getName())
                     return
-                rebinned = th1.Rebin(n, th1.GetName(), array.array("d", rebinX))
-                h.setRootHisto(rebinned)
+                rhwu.Rebin(n, rhwu.GetName(), array.array("d", rebinX))
 
             rebinFunction = rebinList
         else:

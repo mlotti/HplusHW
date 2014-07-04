@@ -54,7 +54,7 @@ def addEmbeddingGenTauSkim_53X(version, datasets, updateDefinitions):
         dataset.addWorkflow(wf)
         if wf.output is not None:
             dataset.addWorkflow(Workflow("tauembedding_gentauanalysis_"+version, source=Source(workflowName),
-                                         args=wf.args, output_file="histograms.root", crabLines=["CMSSW.total_number_of_lumis = -1"]))
+                                         args=wf.args, crabLines=["CMSSW.total_number_of_lumis = -1"]))
 
 def addEmbeddingAodAnalysis_44X(datasets):
     njobs = {
@@ -79,7 +79,7 @@ def addEmbeddingAodAnalysis_44X(datasets):
     for datasetName, taskDef in njobs.iteritems():
         dataset = datasets.getDataset(datasetName)
         source = Source("AOD", number_of_jobs=taskDef.njobsIn)
-        wf = Workflow("embeddingAodAnalysis_44X", source=source, output_file="histograms.root")
+        wf = Workflow("embeddingAodAnalysis_44X", source=source)
         wf.addCrabLine("CMSSW.total_number_of_lumis = -1")
         wf.addArg("doPat", 1)
         dataset.addWorkflow(wf)
@@ -313,7 +313,7 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         # If have skim output, define the workflows which depend on it
         if wf.output != None:
             dataset.addWorkflow(Workflow("tauembedding_skimAnalysis_"+version, source=Source("tauembedding_skim_"+version),
-                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="histograms.root", crabLines=["CMSSW.total_number_of_lumis = -1"]))
+                                         triggerOR=taskDef.triggerOR, args=wf.args, crabLines=["CMSSW.total_number_of_lumis = -1"]))
 
 def addEmbeddingSkim_53X(version, datasets, updateDefinitions):
     defaultDefinitions = getDefaultDefinitions_53X()
@@ -400,7 +400,7 @@ def addEmbeddingSkim_53X(version, datasets, updateDefinitions):
         # If have skim output, define the workflows which depend on it
         if wf.output != None:
             dataset.addWorkflow(Workflow("tauembedding_skimAnalysis_"+version, source=Source("tauembedding_skim_"+version),
-                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="histograms.root", crabLines=["CMSSW.total_number_of_lumis = -1"]))
+                                         triggerOR=taskDef.triggerOR, args=wf.args, crabLines=["CMSSW.total_number_of_lumis = -1"]))
 
 
 def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitions):
@@ -496,7 +496,7 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
                 except KeyError:
                     pass
             wf_analysis = Workflow("tauembedding_analysis_"+version, source=Source("tauembedding_embedding_"+version),
-                                   triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root")
+                                   triggerOR=taskDef.triggerOR, args=args)
             wf_analysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
             dataset.addWorkflow(wf_analysis)
 
@@ -583,7 +583,7 @@ def addEmbeddingEmbedding_53X(sourceWorkflow, version, datasets, updateDefinitio
                 except KeyError:
                     pass
             wf_analysis = Workflow("tauembedding_analysis_"+version, source=Source("tauembedding_embedding_"+version),
-                                   triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root")
+                                   triggerOR=taskDef.triggerOR, args=args)
             wf_analysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
             dataset.addWorkflow(wf_analysis)
  
@@ -1308,6 +1308,9 @@ def addEmbeddingEmbedding_v53_3(datasets):
             # User mean 7028.0, min 728.9, max 13562.4
             # Mean 70.6 MB, min 9.6 MB, max 135.6 MB
             "SingleMu_207214-208686_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_207214_208686_tauembedding_embedding_v53_3_seedTest1-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
+            "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
+            "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
         })
 
     addEmbedding("v53_3_seedTest2", definitions={
