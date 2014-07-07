@@ -44,7 +44,7 @@ def main():
         if match:
             jsonfile = match.group(0)
                                                                                 
-    limits = limit.BRLimits(limitsfile=jsonfile)
+    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limitdata/lightHplus_configuration.json")
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -93,7 +93,7 @@ def main():
 
     # Remove m=80
     for gr in graphs.values():
-        limit.cleanGraph(gr, minX=100)
+        limit.cleanGraph(gr, minX=90)
 
     print "Plotting graphs"                    
     for key in graphs.keys():
@@ -203,7 +203,8 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     plot.legend.SetFillStyle(1001)
     if blinded:
 	name += "_blinded"
-    plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax, "xmin": 100, "xmax": 160})
+    name = name.replace("-","_")
+    plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax, "xmin": 90, "xmax": 160})
     plot.frame.GetXaxis().SetTitle(xlabel)
     plot.frame.GetYaxis().SetTitle(limit.tanblimit)
 
@@ -224,8 +225,9 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     #Adding a LHC label:
 #    ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
     FH_version = db.getVersion("FeynHiggs")
-    HD_version = db.getVersion("HDECAY")
-    histograms.addText(x, 0.55, FH_version+" and "+HD_version, size=size)
+    histograms.addText(x, 0.55, FH_version)
+#    HD_version = db.getVersion("HDECAY")
+#    histograms.addText(x, 0.55, FH_version+" and "+HD_version, size=size)
 #    histograms.addText(x, 0.48, "Derived from", size=size)
 #    histograms.addText(x, 0.43, "CMS HIG-12-052", size=size)
 
