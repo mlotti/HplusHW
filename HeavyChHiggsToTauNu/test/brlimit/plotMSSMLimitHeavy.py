@@ -120,14 +120,13 @@ def main():
     graphs["Allowed"] = db.mhLimit("mh","mHp",selection,"125.9+-3.0")
     
     doPlot("limitsTanb_heavy_"+scenario, graphs, limits, limit.mHplus(),scenario)
-    sys.exit()
 	
     # mH+ -> mA
     print "Replotting the graphs for (mA,tanb)"
     for key in graphs.keys():
 	print key
-        db.PrintGraph(graphs[key])
-	print "check loop db.graphToMa"
+        #db.PrintGraph(graphs[key])
+	#print "check loop db.graphToMa"
         db.graphToMa(graphs[key])
     doPlot("limitsTanb_mA_heavy_"+scenario, graphs, limits, limit.mA(),scenario)	
 

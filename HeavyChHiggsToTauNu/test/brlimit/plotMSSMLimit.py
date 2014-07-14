@@ -119,6 +119,15 @@ def main():
     
     doPlot("limitsTanb_light_"+scenario, graphs, limits, limit.mHplus(),scenario)
 
+    # mH+ -> mA
+    print "Replotting the graphs for (mA,tanb)"
+    for key in graphs.keys():
+        print key
+        #db.PrintGraph(graphs[key])
+        #print "check loop db.graphToMa"
+        db.graphToMa(graphs[key])
+    doPlot("limitsTanb_mA_light_"+scenario, graphs, limits, limit.mA(),scenario)
+
     sys.exit()
 
     

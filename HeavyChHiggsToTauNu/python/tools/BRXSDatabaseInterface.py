@@ -335,6 +335,10 @@ class BRXSDatabaseInterface:
                     y.append(upper_y0[i])
 
         if higgs == "mh":
+            if len(upper_x0) == 0:
+                x.append(600)
+                y.append(100)
+                                        
             for i in range(0,len(upper_x00)):
                 x.append(upper_x00[i])
                 y.append(upper_y00[i])
@@ -491,30 +495,60 @@ class BRXSDatabaseInterface:
         return graph
 
     def graphToMa(self,graph):
+        #self.PrintGraph(graph)
         for i in xrange(0, graph.GetN()):
             mHp = graph.GetX()[i]
             tanb = graph.GetY()[i]
-
+            #print "check graphToMa",mHp,tanb
             if tanb < 0:
                 continue
 
-            selection = "tanb==%s"%tanb
-            if len(self.selection) > 0:
-                selection += "&&"+self.selection
-            mHps = self.getValues("mHp",selection,roundValues=-1)
-            mAs = []
-            for x in mHps:
-                sele = self.floatSelection(selection+"&&mHp==%s"%x)
-                value = self.getValues("mA",sele,roundValues=-1)
-                #print "print check graphToMa",x,value[0]
-                mAs.append(value[0])
+            massPoint = False
+            deltam = 0.001
+            for m in [80,90,100,120,140,150,155,160,180,190,200,220,250,300,400,500,600]:
+                if self.isbetween(mHp,m-deltam,m+deltam):
+                    massPoint = True
+                    
+            if massPoint:        
+                sele = self.floatSelection("mHp==%s"%mHp)
+                tanbs = self.getValues("tanb",sele,roundValues=-1)
+                closestValues = [999,999]
+                for t in tanbs:
+                    if abs(t - tanb) < abs(closestValues[0] - tanb):
+                        closestValues[0] = t
+                        if abs(closestValues[0] - tanb) < abs(closestValues[1] - tanb):
+                            tmp = closestValues[1]
+                            closestValues[1] = closestValues[0]
+                            closestValues[0] = tmp
+                        
+                #print "check closestValues",closestValues
+                mAs = []
+                for j in range(len(closestValues)):
+                    mAval = self.getValues("mA",sele + "&&"+ self.floatSelection("tanb==%s"%closestValues[j]),roundValues=-1)
+                    mAs.append(mAval[0])
+                #print "check mAs",mAs
+                mgraph = ROOT.TGraph(len(closestValues),array("d",closestValues),array("d",mAs))
+                mA = mgraph.Eval(tanb,None,"S")
+                #print "check mA",mA
 
-            mgraph = ROOT.TGraph(len(mHps),array("d",mHps),array("d",mAs))
-            mA = mgraph.Eval(mHp,None,"S")
-            
-            print "    graphToMa",mHp,mA, tanb
+                if mHp == 600:
+                    mA = mHp
+            else:
+                selection = "tanb==%s"%tanb
+                mHps = self.getValues("mHp",selection,roundValues=-1)
+                #print "check mHps",mHps
+                mAs = []
+                for x in mHps:
+                    sele = self.floatSelection(selection+"&&mHp==%s"%x)
+                    value = self.getValues("mA",sele,roundValues=-1)
+                    #print "print check graphToMa",x,value[0]
+                    mAs.append(value[0])
+                mgraph = ROOT.TGraph(len(mHps),array("d",mHps),array("d",mAs))
+                mA = mgraph.Eval(mHp,None,"S")
+                
+            print "    mHp -> mA",mHp,"->",mA, tanb
             graph.SetPoint(i, mA, tanb)
-
+        
     def getGraph(self,xVariable,yVariable,selection):
         graph = ROOT.TGraph()
         self.tree.Draw(yVariable+":"+xVariable,self.floatSelection(selection))
@@ -976,6 +1010,11 @@ def test():
     if match:
 
 	db = BRXSDatabaseInterface(match.group(0))
+        x = array('d',[180.0,190,200.0,220.0,250.0,300.0,400])
+        y = array('d',[26.8026641155,29.014188416,30.7101331784,35.8734454992,43.1435998472,52.0940183849,75.0])
+        graph1 = ROOT.TGraph(len(x),x,y)
+        db.graphToMa(graph1)
+        
 #        min,max = db.getMinMaxTanb("BR_tHpb*BR_Hp_taunu",0.0027,"mHp>159.99&&mHp<160.01&&mu>199.99&&mu<200.01",False)
 #        print "check min,max",min,max
 #        sys.exit()
