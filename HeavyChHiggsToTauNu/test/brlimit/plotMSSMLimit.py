@@ -116,6 +116,7 @@ def main():
 
     graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
     graphs["Allowed"] = db.mhLimit("mh","mHp",selection,"125.9+-3.0")
+    graphs["isomass"] = None
     
     doPlot("limitsTanb_light_"+scenario, graphs, limits, limit.mHplus(),scenario)
 
@@ -126,6 +127,9 @@ def main():
         #db.PrintGraph(graphs[key])
         #print "check loop db.graphToMa"
         db.graphToMa(graphs[key])
+
+    graphs["isomass"] = db.getIsoMass(160)
+
     doPlot("limitsTanb_mA_light_"+scenario, graphs, limits, limit.mA(),scenario)
 
     sys.exit()
@@ -167,6 +171,8 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             histograms.HistoGraph(graphs["obs"], "Observed", drawStyle="PL", legendStyle="lp"),
             histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
             histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L"),
+            histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
+            histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
             histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
 #            histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
@@ -176,7 +182,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
 #            histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
 #            histograms.HistoGraph(graphs["exp2"], "Expected2", drawStyle="F", legendStyle="fl"),
             histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
-            histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl"),
+            histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl")
             ])
 
         plot.histoMgr.setHistoLegendLabelMany({
@@ -187,11 +193,18 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             "MinTanb": None,
             "AllowedCopy": None,
             "Expected1": "Expected median #pm 1#sigma",
-            "Expected2": "Expected median #pm 2#sigma"
+            "Expected2": "Expected median #pm 2#sigma",
+            "IsoMass": None,
+            "IsoMassCopy": None
             })
     else:
+        if not graphs["isomass"] == None:
+            graphs["isomass"].SetFillColor(0)
+            graphs["isomass"].SetFillStyle(1)
         plot = plots.PlotBase([
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
+            histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
+            histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
             histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{h} = 125.9#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
@@ -204,7 +217,9 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             "MinTanb": None,
             "AllowedCopy": None,
             "Expected1": "Expected median #pm 1#sigma",
-            "Expected2": "Expected median #pm 2#sigma"
+            "Expected2": "Expected median #pm 2#sigma",
+            "IsoMass": None,
+            "IsoMassCopy": None
             })
         
     plot.setLegend(histograms.createLegend(0.19, 0.60, 0.57, 0.80))
@@ -231,6 +246,9 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     histograms.addText(x, 0.815,scenario, size=size)
     histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
 
+    if not graphs["isomass"] == None:
+        histograms.addText(0.8, 0.15, "m_{H^{#pm}} = 160 GeV/c^{2}", size=0.5*size)
+
     #Adding a LHC label:
 #    ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
     FH_version = db.getVersion("FeynHiggs")
@@ -242,5 +260,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
 
     plot.save()
 
+    print "Created",name
+    
 if __name__ == "__main__":
     main()

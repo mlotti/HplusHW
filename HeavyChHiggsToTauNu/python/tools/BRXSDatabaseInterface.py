@@ -365,6 +365,47 @@ class BRXSDatabaseInterface:
         retGraph.SetFillStyle(3008)
         return retGraph
 
+    def getIsoMass(self,mHp):
+        x = []
+        y = []
+
+        sele = self.selection
+        
+        tanbs = self.getValues("tanb",sele,roundValues=-1)
+        for tanb in tanbs:
+            selection = "tanb==%s"%tanb
+            mHps = self.getValues("mHp",selection,roundValues=-1)
+            #print "check mHps",mHps
+            mAs = []
+            for m in mHps:
+                sele = self.floatSelection(selection+"&&mHp==%s"%m)
+                value = self.getValues("mA",sele,roundValues=-1)
+                mAs.append(value[0])
+            mgraph = ROOT.TGraph(len(mHps),array("d",mHps),array("d",mAs))
+            mA = mgraph.Eval(mHp,None,"S")
+            x.append(mA)
+            y.append(tanb)
+
+        x.append(160)
+        y.append(75)
+
+        x.append(160)
+        y.append(1)
+
+        x.append(x[0])
+        y.append(y[0])
+        
+        for i in range(0,len(x)):
+            print "isomass:  m,tanb",x[i],y[i]
+
+        retGraph = ROOT.TGraph(len(x),array('d',x,),array('d',y))
+        retGraph.SetName("isomass")
+        retGraph.SetLineWidth(1)
+        retGraph.SetLineStyle(7)
+        retGraph.SetFillColor(0)
+        retGraph.SetFillStyle(1)
+        return retGraph
+                   
     def getLimitsLT(self,higgs,xVariableName,yVariableName,selection,limit):
 
         xvalues = self.getValues(xVariableName,selection)
@@ -495,6 +536,9 @@ class BRXSDatabaseInterface:
         return graph
 
     def graphToMa(self,graph):
+        if graph == None:
+            return
+        
         #self.PrintGraph(graph)
         for i in xrange(0, graph.GetN()):
             mHp = graph.GetX()[i]
@@ -1010,14 +1054,16 @@ def test():
     if match:
 
 	db = BRXSDatabaseInterface(match.group(0))
-        x = array('d',[180.0,190,200.0,220.0,250.0,300.0,400])
-        y = array('d',[26.8026641155,29.014188416,30.7101331784,35.8734454992,43.1435998472,52.0940183849,75.0])
-        graph1 = ROOT.TGraph(len(x),x,y)
-        db.graphToMa(graph1)
+        graph = db.getIsoMass(160)
+        
+#        x = array('d',[180.0,190,200.0,220.0,250.0,300.0,400])
+#        y = array('d',[26.8026641155,29.014188416,30.7101331784,35.8734454992,43.1435998472,52.0940183849,75.0])
+#        graph1 = ROOT.TGraph(len(x),x,y)
+#        db.graphToMa(graph1)
         
 #        min,max = db.getMinMaxTanb("BR_tHpb*BR_Hp_taunu",0.0027,"mHp>159.99&&mHp<160.01&&mu>199.99&&mu<200.01",False)
 #        print "check min,max",min,max
-#        sys.exit()
+        sys.exit()
 #        print db.getVersion("FeynHiggs")
 
 #	db.Print()

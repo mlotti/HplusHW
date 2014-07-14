@@ -246,5 +246,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
 
     plot.save()
 
+    print "Created",name
+    
 if __name__ == "__main__":
     main()
