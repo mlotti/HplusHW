@@ -44,7 +44,8 @@ def main():
         if match:
             jsonfile = match.group(0)
                                                                                 
-    limits = limit.BRLimits(limitsfile=jsonfile,configfile="configurationHeavy.json")
+#    limits = limit.BRLimits(limitsfile=jsonfile,configfile="configurationHeavy.json")
+    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limitdata/heavyHplus_configuration.json")
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -119,6 +120,15 @@ def main():
     graphs["Allowed"] = db.mhLimit("mh","mHp",selection,"125.9+-3.0")
     
     doPlot("limitsTanb_heavy_"+scenario, graphs, limits, limit.mHplus(),scenario)
+	
+    # mH+ -> mA
+    print "Replotting the graphs for (mA,tanb)"
+    for key in graphs.keys():
+	print key
+        #db.PrintGraph(graphs[key])
+	#print "check loop db.graphToMa"
+        db.graphToMa(graphs[key])
+    doPlot("limitsTanb_mA_heavy_"+scenario, graphs, limits, limit.mA(),scenario)	
 
     sys.exit()
 
@@ -206,7 +216,8 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     plot.legend.SetFillStyle(1001)
     if blinded:
         name += "_blinded"
-    plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax, "xmin": 200, "xmax": 600})
+    name = name.replace("-","_")
+    plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax, "xmin": 180, "xmax": 600})
     plot.frame.GetXaxis().SetTitle(xlabel)
     plot.frame.GetYaxis().SetTitle(limit.tanblimit)
 
@@ -226,13 +237,16 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     #Adding a LHC label:
 #    ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
     FH_version = db.getVersion("FeynHiggs")
-    HD_version = db.getVersion("HDECAY")
-    histograms.addText(x, y+0.55, FH_version+" and", size=size)
-    histograms.addText(x, y+0.50, HD_version, size=size)
+    histograms.addText(x, y+0.55, FH_version, size=size)	
+#    HD_version = db.getVersion("HDECAY")
+#    histograms.addText(x, y+0.55, FH_version+" and", size=size)
+#    histograms.addText(x, y+0.50, HD_version, size=size)
 #    histograms.addText(x, 0.48, "Derived from", size=size)
 #    histograms.addText(x, 0.43, "CMS HIG-12-052", size=size)
 
     plot.save()
 
+    print "Created",name
+    
 if __name__ == "__main__":
     main()
