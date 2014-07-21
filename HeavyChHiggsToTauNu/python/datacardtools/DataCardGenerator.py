@@ -331,9 +331,15 @@ class DataCardGenerator:
         # do data mining to cache results into datacard column objects
         self.doDataMining()
 
-        # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
+        # Merge columns, if necessary
         if self._config.OptionGenuineTauBackgroundSource == "MC_FullSystematics" or self._config.OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
-            self.separateMCEWKTausAndFakes()
+            # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
+            print "\nPerforming merge for MC genuine tau column"
+            self.separateMCEWKTausAndFakes(targetColumn="",targetColumnNewName="MC_EWKTau",addColumnList=None,subtractColumnList=self._config.EWKFakeIdList)
+        if self._config.OptionDoMergeFakeTauColumns:
+            # For data-driven, merge fake tau columns into one
+            print "\nPerforming merge for MC fake tau column"
+            self.separateMCEWKTausAndFakes(targetColumn=self._config.EWKFakeIdList[0],targetColumnNewName="MC_faketau",addColumnList=self._config.EWKFakeIdList[1:],subtractColumnList=[])
 
         # Make datacards
         myProducer = TableProducer.TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
@@ -514,39 +520,48 @@ class DataCardGenerator:
                 c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
 
-    def separateMCEWKTausAndFakes(self):
-        print "\nStart merge for MC EWK with genuine taus"
+    def separateMCEWKTausAndFakes(self, targetColumn, targetColumnNewName, addColumnList, subtractColumnList):
         # Obtain column for embedding
         myEmbColumn = None
         for c in self._columns:
-            if c.getLandsProcess() == self._config.EmbeddingIdList[0]:
+            if c.getLandsProcess() == targetColumn:
                 myEmbColumn = c
         if myEmbColumn == None:
-            raise Exception(ShellStyles.ErrorLabel()+"You need to specify EmbeddingIdList in the datacard!")
-        #myEmbColumn._label = "MCEWKtau"
+            raise Exception(ShellStyles.ErrorLabel()+"Could not find column with landsProcess %d!"%targetColumn)
+        print ".. renaming column '%s' -> '%s'"%(myEmbColumn.getLabel(), targetColumnNewName)
+        myEmbColumn._label = targetColumnNewName
         # Add results from dataset columns with landsProcess == None
+        if addColumnList == None:
+            addColumnList = []
+            for c in self._columns:
+                if c.getLandsProcess() == None:
+                    addColumnList.append(c.getLandsProcess())
+        # Now do the adding
         myRemoveList = []
         myNuisanceIdList = list(myEmbColumn.getNuisanceIds())
-        for c in self._columns:
-            if c.getLandsProcess() == None:
-                # Merge rate result, (ExtractorResult objects)
-                # Merge cached shape histo
-                myEmbColumn._cachedShapeRootHistogramWithUncertainties.Add(c.getCachedShapeRootHistogramWithUncertainties())
-                for n in c.getNuisanceIds():
-                    if not n in myNuisanceIdList:
-                        myNuisanceIdList.append(n)
-                # Merge control plots (HistoRootWithUncertainties objects)
-                for i in range(0, len(myEmbColumn._controlPlots)):
-                    if myEmbColumn._controlPlots[i] != None:
-                        myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"])
-                # Mark for removal
-                myRemoveList.append(c)
+        for myid in addColumnList:
+            for c in self._columns:
+                if c.getLandsProcess() == myid:
+                    print ".. adding column '%s' -> '%s'"%(c.getLabel(), targetColumnNewName)
+                    # Merge rate result, (ExtractorResult objects)
+                    # Merge cached shape histo
+                    myEmbColumn._cachedShapeRootHistogramWithUncertainties.Add(c.getCachedShapeRootHistogramWithUncertainties())
+                    for n in c.getNuisanceIds():
+                        if not n in myNuisanceIdList:
+                            myNuisanceIdList.append(n)
+                    # Merge control plots (HistoRootWithUncertainties objects)
+                    for i in range(0, len(myEmbColumn._controlPlots)):
+                        if myEmbColumn._controlPlots[i] != None:
+                            myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"])
+                    # Mark for removal
+                    myRemoveList.append(c)
         for c in myRemoveList:
             self._columns.remove(c)
         # Subtract results from dataset columns in EWKFakeIdList list
-        for fakeId in self._config.EWKFakeIdList:
+        for fakeId in subtractColumnList:
             for c in self._columns:
                 if c.getLandsProcess() == fakeId:
+                    print ".. subtracting column '%s' from '%s'"%(c.getLabel(), targetColumnNewName)
                     # Subtract rate result, (ExtractorResult objects)
                     # Merge cached shape histo
                     myEmbColumn._cachedShapeRootHistogramWithUncertainties.Add(c.getCachedShapeRootHistogramWithUncertainties(), -1.0)
@@ -557,6 +572,7 @@ class DataCardGenerator:
                     for i in range(0, len(myEmbColumn._controlPlots)):
                         if myEmbColumn._controlPlots[i] != None:
                             myEmbColumn._controlPlots[i]["shape"].Add(c._controlPlots[i]["shape"], -1.0)
+        print ".. finalizing merge"
         # Update rate
         myEmbColumn._rateResult._result = myEmbColumn._cachedShapeRootHistogramWithUncertainties.getRate()
         #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
