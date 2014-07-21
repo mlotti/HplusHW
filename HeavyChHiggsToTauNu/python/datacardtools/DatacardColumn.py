@@ -11,6 +11,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorM
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramExtras
 from math import sqrt,pow
 from array import array
 
@@ -365,13 +366,8 @@ class DatacardColumn():
             if abs(self._additionalNormalisationFactor - 1.0) > 0.00001:
                 print ShellStyles.WarningLabel()+"Applying normalization factor %f to sample '%s'!"%(self._additionalNormalisationFactor, self.getLabel())
                 self._cachedShapeRootHistogramWithUncertainties.Scale(self._additionalNormalisationFactor)
-            # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
+            # Leave histograms with the original binning at this stage, but do move under/overflow into first/last bin
             self._cachedShapeRootHistogramWithUncertainties.makeFlowBinsVisible()
-            myShapeRHWUWithFineBinning = self._cachedShapeRootHistogramWithUncertainties.Clone()
-            hRateWithFineBinning = aux.Clone(self._cachedShapeRootHistogramWithUncertainties.getRootHisto(), "%s_fineBinning"%self.getLabel())
-            hRateWithFineBinning.SetTitle("%s_fineBinning"%self.getLabel())
-            myArray = array("d",config.ShapeHistogramsDimensions)
-            self._cachedShapeRootHistogramWithUncertainties.Rebin(len(config.ShapeHistogramsDimensions)-1,"",myArray)
         # Obtain rate histogram
         myRateHistograms = []
         if self.typeIsEmptyColumn() or dsetMgr == None:
@@ -393,19 +389,10 @@ class DatacardColumn():
                 myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
             myShapeHistograms = myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
             myRateHistograms.extend(myShapeHistograms)
-        # Look for negative bins in rage
-        for k in range(1, myRateHistograms[0].GetNbinsX()+1):
-            if myRateHistograms[0].GetBinContent(k) < 0.000001:
-                if myRateHistograms[0].GetBinContent(k) < -0.001:
-                    print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), myRateHistograms[0].GetBinContent(k))
-                    myRateHistograms[0].SetBinContent(k, 0.0)
-                    myRateHistograms[0].SetBinError(k, config.MinimumStatUncertainty)
-                    #raise Exception(ShellStyles.ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
         # Cache result
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
                                myRateHistograms)
-        self._rateResult._histograms.append(hRateWithFineBinning)
         if self._opts.verbose:
             print "  - Rate: integral = ", myRateHistograms[0].Integral()
             if (self.typeIsEWK()) or self.typeIsEWKfake():
@@ -446,7 +433,6 @@ class DatacardColumn():
                         if isinstance(e, ConstantExtractor):
                             # Create up and down histograms out of the constant values
                             myHistograms.extend(_createShapeNuisanceFromConstant(myRateHistograms[0], myResult.getUncertaintyUp(), myResult.getUncertaintyDown()))
-                            myHistograms.extend(_createShapeNuisanceFromConstant(hRateWithFineBinning, myResult.getUncertaintyUp(), myResult.getUncertaintyDown()), suffix="_fineBinning")
                             # Add also to the uncertainties as normalization uncertainty
                             self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                         else:
@@ -460,7 +446,6 @@ class DatacardColumn():
                                 myHistograms.extend(e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
                             else:
                                 myHistograms.extend(self._getShapeNuisanceHistogramsFromRHWU(self._cachedShapeRootHistogramWithUncertainties, e._systVariation, e.getMasterId()))
-                                myHistograms.extend(self._getShapeNuisanceHistogramsFromRHWU(myShapeRHWUWithFineBinning, e._systVariation, e.getMasterId(), suffix="_fineBinning"))
                     else:
                         # For QCD, scale the QCD type constants by the purity
                         if self.typeIsQCD() and e.isQCDNuisance():
@@ -491,7 +476,6 @@ class DatacardColumn():
         # Print list of uncertainties
         if self._opts.verbose and dsetMgr != None and not self.typeIsEmptyColumn():
             print "  - Has shape variation syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
-        myShapeRHWUWithFineBinning.Delete()
         # Obtain results for control plots
         if config.OptionDoControlPlots:
             for c in controlPlotExtractors:
@@ -572,6 +556,40 @@ class DatacardColumn():
                                 except TypeError:
                                     pass
                         self._controlPlots.append(myDictionary)
+
+    ## Rebin the cached histograms and save a copy of the fine binned version
+    def doRebinningOfCachedResults(self, config):
+        myArray = array("d",config.ShapeHistogramsDimensions)
+        for i in range(0,len(self._rateResult._histograms)):
+            myTitle = self._rateResult._histograms[i].GetTitle()
+            self._rateResult._histograms[i].SetTitle(myTitle+"_fineBinning")
+            # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
+            if self._rateResult._histograms[i].GetNbinsX() > 1:
+                # Note that Rebin() does a clone operation in this case
+                h = self._rateResult._histograms[i].Rebin(len(config.ShapeHistogramsDimensions)-1,myTitle,myArray)
+                h.SetTitle(myTitle)
+                histogramExtras.makeFlowBinsVisible(h)
+                self._rateResult._histograms.insert(0,h) # The first one is assumed to be the one with the final binning elsewhere
+        # Look for negative bins in rate histogram
+        for k in range(1, self._rateResult._histograms[0].GetNbinsX()+1):
+            if self._rateResult._histograms[0].GetBinContent(k) < 0.000001:
+                if self._rateResult._histograms[0].GetBinContent(k) < -0.001:
+                    print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
+                    self._rateResult._histograms[0].SetBinContent(k, 0.0)
+                    self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)
+                    #raise Exception(ShellStyles.ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
+
+        for j in range(0,len(self._nuisanceResults)):
+            myNewHistograms = []
+            for i in range(0,len(self._nuisanceResults[j]._histograms)):
+                myTitle = self._nuisanceResults[j]._histograms[i].GetTitle()
+                self._nuisanceResults[j]._histograms[i].SetTitle(myTitle+"_fineBinning")
+                # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
+                h = self._nuisanceResults[j]._histograms[i].Rebin(len(config.ShapeHistogramsDimensions)-1,myTitle,myArray)
+                h.SetTitle(myTitle)
+                histogramExtras.makeFlowBinsVisible(h)
+                myNewHistograms.append(h)
+            self._nuisanceResults[j]._histograms.extend(myNewHistograms)
 
     ## Returns rate for column
     def getRateResult(self):

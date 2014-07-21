@@ -334,6 +334,11 @@ class DataCardGenerator:
             print "\nPerforming merge for MC fake tau column"
             self.separateMCEWKTausAndFakes(targetColumn=self._config.EWKFakeIdList[0],targetColumnNewName="MC_faketau",addColumnList=self._config.EWKFakeIdList[1:],subtractColumnList=[])
 
+        # Do rebinning of results, store a fine binned copy of all histograms as well
+        for c in self._columns:
+            c.doRebinningOfCachedResults(self._config)
+        self._observation.doRebinningOfCachedResults(self._config)
+
         # Make datacards
         myProducer = TableProducer.TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
                                    luminosity=self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),
@@ -521,7 +526,15 @@ class DataCardGenerator:
                 myEmbColumn = c
         if myEmbColumn == None:
             raise Exception(ShellStyles.ErrorLabel()+"Could not find column with landsProcess %d!"%targetColumn)
+        # Rename column and cached histograms
         print ".. renaming column '%s' -> '%s'"%(myEmbColumn.getLabel(), targetColumnNewName)
+        for i in range(0,len(myEmbColumn._rateResult._histograms)):
+            myEmbColumn._rateResult._histograms[i].SetTitle(myEmbColumn._rateResult._histograms[i].GetTitle().replace(myEmbColumn._label, targetColumnNewName))
+            myEmbColumn._rateResult._histograms[i].SetName(myEmbColumn._rateResult._histograms[i].GetName().replace(myEmbColumn._label, targetColumnNewName))
+        for j in range(0,len(myEmbColumn._nuisanceResults)):
+            for i in range(0,len(myEmbColumn._nuisanceResults[j]._histograms)):
+                myEmbColumn._nuisanceResults[j]._histograms[i].SetTitle(myEmbColumn._nuisanceResults[j]._histograms[i].GetTitle().replace(myEmbColumn._label, targetColumnNewName))
+                myEmbColumn._nuisanceResults[j]._histograms[i].SetName(myEmbColumn._nuisanceResults[j]._histograms[i].GetName().replace(myEmbColumn._label, targetColumnNewName))
         myEmbColumn._label = targetColumnNewName
         # Add results from dataset columns with landsProcess == None
         if addColumnList == None:
@@ -550,6 +563,7 @@ class DataCardGenerator:
                     myRemoveList.append(c)
         for c in myRemoveList:
             self._columns.remove(c)
+            del c
         # Subtract results from dataset columns in EWKFakeIdList list
         for fakeId in subtractColumnList:
             for c in self._columns:
