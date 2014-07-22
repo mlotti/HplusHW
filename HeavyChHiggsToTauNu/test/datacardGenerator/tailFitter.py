@@ -315,12 +315,12 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos):
         myRHWU = RootHistoWithUncertainties(hRate)
         for n in myNuisanceInfo:
             # Add shape uncertainties
-            if n["distribution"] == "shape" and n[c] == 1 and "statBin" not in n["name"]:
+            if n["distribution"] == "shape" and n[c] == "1" and not "statBin" in n["name"]:
                 hUp = aux.Clone(getHisto(cachedHistos, "%s_%sUp"%(c,n["name"])))
                 hDown = aux.Clone(getHisto(cachedHistos, "%s_%sDown"%(c,n["name"])))
                 myRHWU.addShapeUncertaintyFromVariation(n["name"], hUp, hDown)
             # Add constant uncertainties
-            elif n["name"] != "rate" and n["name"] != "process" and n[c] != "-":
+            elif n["name"] != "rate" and n["name"] != "process" and n[c] != "-" and n[c] != "1" and not "statBin" in n["name"]:
                 diffUp = 0.0
                 diffDown = 0.0
                 if "/" in n[c]:
@@ -328,8 +328,8 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos):
                     diffDown = float(mySplit[0])-1.0
                     diffUp = float(mySplit[1])-1.0
                 else:
-                    diffDown = float(n[c])
-                    diffUp = float(n[c])
+                    diffDown = float(n[c])-1.0
+                    diffUp = float(n[c])-1.0
                 myRHWU.addNormalizationUncertaintyRelative(n["name"], diffUp, diffDown)
         # Store column info
         _myBr = 0.01
@@ -370,6 +370,7 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos):
             rate = myDict[item].getRate()
             stat = myDict[item].getRateStatUncertainty()
             (systUp,systDown) = myDict[item].getRateSystUncertainty()
+            #myDict[item].Debug()
             print "%10s: %.1f +- %.1f (stat.) + %.1f - %.1f (syst.)"%(item,rate,stat,systUp,systDown)
     print ""
 
@@ -505,7 +506,7 @@ if __name__ == "__main__":
                 for hup in huplist:
                     addNuisanceForIndividualColumn(myColumnNames,myNuisanceInfo,c,hup.GetTitle())
                 # Create bin-by-bin stat. histograms for fitted distribution and update the nuisance table
-                myStatHistograms = addBinByBinStatUncert(c, myFittedRateHistograms[0], myColumnNames, myNuisanceInfo, 0.0, myFitSettings["fitmin"])
+                myStatHistograms = addBinByBinStatUncert(c, myFittedRateHistograms[0], myColumnNames, myNuisanceInfo, 0.0, myFitSettings["applyFrom"])
                 myHistogramCache.extend(myStatHistograms)
                 # Clear memory
                 hFineBinning.Delete()
