@@ -413,6 +413,7 @@ if __name__ == "__main__":
     myRootfilePattern = myLimitSettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS)
 
     # Loop over mass points
+    myDrawPlotsStatus = True
     for m in massPoints:
         myHistogramCache = []
         # Obtain luminosity
@@ -451,6 +452,7 @@ if __name__ == "__main__":
                 # Not signal or blacklist, do fit
                 hFineBinning = myRootFile.Get(c+"_fineBinning")
                 hOriginalShape = myRootFile.Get(c)
+                hOriginalShape.SetName(hOriginalShape.GetName()+"Original")
                 if hFineBinning == None:
                     raise Exception(ErrorLabel()+"Cannot find histogram '%s'!"%(c+"_fineBinning"))
                 if hOriginalShape == None:
@@ -462,13 +464,12 @@ if __name__ == "__main__":
                         myFitSettings = s
                         print "... using fitfunc: %s and range %d-%d"%(s["fitfunc"],s["fitmin"],s["fitmax"])
                 if myFitSettings == None:
-                    raise Exception()
-                myFitter = TailFitter.TailFitter(hFineBinning, c, m, myFitSettings["fitfunc"], myFitSettings["fitmin"], myFitSettings["fitmax"])
+                    raise Exception("Could not determine fit function for column '%s'!"%c)
+                myFitter = TailFitter.TailFitter(hFineBinning, c, myFitSettings["fitfunc"], myFitSettings["fitmin"], myFitSettings["fitmax"], myFitSettings["applyFrom"], doPlots=myDrawPlotsStatus)
                 # Obtain fitted rate with final binning
-                myFittedRateHistograms = myFitter.getFittedRateHistogram(hFineBinning, config.finalBinning["shape"])
+                myFittedRateHistograms = myFitter.getFittedRateHistogram(hFineBinning, config.finalBinning["shape"], myFitSettings["applyFrom"])
                 myHistogramCache.extend(myFittedRateHistograms)
                 # Update rate
-                print hFineBinning.Integral(),hOriginalShape.Integral()
                 for n in myNuisanceInfo:
                     if n["name"] == "rate":
                         n[c] = "%f"%myFittedRateHistograms[0].Integral()
@@ -476,11 +477,20 @@ if __name__ == "__main__":
                 # Update all those shape nuisances (update histograms only, no need to touch nuisance table)
                 for n in myNuisanceInfo:
                     if n["distribution"] == "shape" and n[c] == "1":
-                        print "... Updating shape nuisance '%s' tail"%n["name"]
+                        #print "... Updating shape nuisance '%s' tail"%n["name"]
                         myUpdatedNuisanceHistograms = updateNuisanceTail(hOriginalShape, myFittedRateHistograms[0], myRootFile, "%s_%s"%(c,n["name"]))
                         myHistogramCache.extend(myUpdatedNuisanceHistograms)
+                print "Updated shape nuisance tails (rel.uncert. kept constant, but central value changed to the fitted one)"
                 # Obtain fit uncertainty histograms and add them to cache
-                (huplist, hdownlist) = myFitter.calculateVariationHistograms(config.finalBinning["shape"])
+                (huplist, hdownlist) = myFitter.calculateVariationHistograms(config.finalBinning["shape"], myFitSettings["applyFrom"])
+                if myDrawPlotsStatus:
+                    myArray = array.array("d",config.finalBinning["shape"])
+                    hFinalBinning = hFineBinning.Rebin(len(myArray)-1, "", myArray)
+                    myFitter.makeVariationPlotDetailed("", hFinalBinning, myFittedRateHistograms[0], huplist, hdownlist)
+                    (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
+                    myFitter.makeVariationPlotSimple("", hFinalBinning, myFittedRateHistograms[0], hupTotal, hdownTotal)
+                    hFinalBinning.Delete()
+
                 # Treat blancs (norm == 0)
                 for i in range(0, len(huplist)):
                     if huplist[i].Integral() == 0:
@@ -500,6 +510,7 @@ if __name__ == "__main__":
                 # Clear memory
                 hFineBinning.Delete()
                 hOriginalShape.Delete()
+        myDrawPlotsStatus = False
         # Print summary info
         printSummaryInfo(myColumnNames, myNuisanceInfo, myHistogramCache)
         # Histogram cache contains now all root files and nuisance table is now up to date
