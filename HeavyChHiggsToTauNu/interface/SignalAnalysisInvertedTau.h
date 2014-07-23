@@ -57,8 +57,8 @@ namespace HPlus {
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    bool doInvertedAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
-    bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
+    bool doInvertedAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const FakeTauIdentifier::Data& tauMatchData, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
+    bool doBaselineAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> selectedTau, const FakeTauIdentifier::Data& tauMatchData, const VertexSelection::Data& pvData, const GenParticleAnalysis::Data& genData);
 
     double getQCDEtaCorrectionFactor(double tauEta);
 
@@ -70,6 +70,7 @@ namespace HPlus {
 
     //    const double ftransverseMassCut;
     const bool bBlindAnalysisStatus;
+    const bool bSelectOnlyGenuineTausForMC;
     const bool bMakeEtaCorrectionStatus;
     std::string fLowBoundForQCDInvertedIsolation;
     const double fDeltaPhiCutValue;
@@ -242,6 +243,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterBtag;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterBackToBackCuts;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterTopReco;
+
     // baseline MT histos for closure test in control region
     std::vector<WrappedTH1*> hMTBaselineTauIdFinalReversedBtag;
     std::vector<WrappedTH1*> hMTBaselineTauIdFinalReversedBacktoBackDeltaPhi;
@@ -251,6 +253,7 @@ namespace HPlus {
     // baseline invariant mass histos for closure test in control region
     std::vector<WrappedTH1*> hInvMassBaselineTauIdFinalReversedBtag;
     std::vector<WrappedTH1*> hInvMassBaselineTauIdFinalReversedBacktoBackDeltaPhi;
+
     // inverted MET histos
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterJets;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterMetSF;
@@ -277,6 +280,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterBtag;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterBackToBackCuts;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterTopReco;
+
     // inverted MT histos for closure test in control region
     std::vector<WrappedTH1*> hMTInvertedTauIdFinalReversedBtag;
     std::vector<WrappedTH1*> hMTInvertedTauIdFinalReversedBacktoBackDeltaPhi;

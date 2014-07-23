@@ -28,7 +28,7 @@ def doBkgFitPlots(mlfit):
         if len(labels) > 15:
             canvasOpts["addHeight"] = 0.03*(len(labels)-15)
 
-        plot.createFrame(fname, opts={"ymin": 0, "xmin": -2.5, "xmax": 2.5}, canvasOpts=canvasOpts)
+        plot.createFrame(fname, opts={"ymin": 0, "xmin": -3.2, "xmax": 2.5}, canvasOpts=canvasOpts)
         plot.getFrame().GetXaxis().SetTitle("Fitted value")
 
         scale = 1
@@ -61,16 +61,16 @@ def doBkgFitPlots(mlfit):
         l.SetTextFont(l.GetTextFont()-20) # bold->normal
         l.SetTextSize(17)
 
-        x_nuis = -2
+        x_nuis = -3.0
         x_value = 1.5
 
-        l.DrawLatex(x_nuis-0.4, ymax*0.93, "Nuisance parameter")
+        l.DrawLatex(x_nuis, ymax*0.93, "Nuisance parameter")
         l.DrawLatex(x_value, ymax*0.93, "Fitted value")
 
         for i, label in enumerate(labels):
             y = gr.GetY()[i]-0.3
     
-            l.DrawLatex(x_nuis, y, label)
+            l.DrawLatex(x_nuis, y, label[:20])
             l.DrawLatex(x_value, y, "%.2f #pm %.2f" % (gr.GetX()[i], gr.GetErrorX(i)))
         
         plot.save()
@@ -79,8 +79,11 @@ def doBkgFitPlots(mlfit):
     (gr, labels) = mlfit.fittedGraph(firstMass, backgroundOnly=True)
     createDrawPlot(gr, labels, "mlfit_backgroundOnly")
 
-    (gr, labels, shapeStatNuisance) = mlfit.fittedGraphShapeStat(firstMass, backgroundOnly=True)
-    createDrawPlot(gr, labels, "mlfit_backgroundOnlyShapeStat")
+    try:
+        (gr, labels, shapeStatNuisance) = mlfit.fittedGraphShapeStat(firstMass, backgroundOnly=True)
+        createDrawPlot(gr, labels, "mlfit_backgroundOnlyShapeStat")
+    except Exception, e:
+        print "Warning: %s" % str(e)
 
 
 if __name__ == "__main__":

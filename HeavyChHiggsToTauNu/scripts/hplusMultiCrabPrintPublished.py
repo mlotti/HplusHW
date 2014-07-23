@@ -129,6 +129,10 @@ def main(opts):
         task.time = timeAnalysis.userTime()
         task.size = sizeAnalysis.size()
 
+        npublished = task.jobs_published
+        if npublished is not None and npublished != task.jobs:
+            print "%s publication nto complete (published %d of %d jobs)" % (npublished, task.jobs)
+
     # Print out
 #    print
 #    for key, task in tasks.iteritems():

@@ -45,7 +45,10 @@ namespace HPlus {
     fMETPhiOscillationCorrectionAfterTaus(0),
     fMETPhiOscillationCorrectionAfterLeptonVeto(0),
     fMETPhiOscillationCorrectionAfterNjets(0),
+    fMETPhiOscillationCorrectionAfterMET(0),
+    fMETPhiOscillationCorrectionEWKFakeTausAfterMET(0),
     fMETPhiOscillationCorrectionAfterBjets(0),
+    fMETPhiOscillationCorrectionEWKFakeTausAfterBjets(0),
     fMETPhiOscillationCorrectionAfterAllSelections(0),
     fMETPhiOscillationCorrectionEWKControlRegion(0) {
     // Update analysis type for embedding
@@ -75,7 +78,10 @@ namespace HPlus {
       fMETPhiOscillationCorrectionAfterNjets = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterNjets");
       fMETPhiOscillationCorrectionAfterMETSF = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterMETSF");
       fMETPhiOscillationCorrectionAfterCollinearCuts = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterCollinearCuts");
+      fMETPhiOscillationCorrectionAfterMET = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterMET");
+      fMETPhiOscillationCorrectionEWKFakeTausAfterMET = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterMETEWKFakeTaus");
       fMETPhiOscillationCorrectionAfterBjets = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterBjets");
+      fMETPhiOscillationCorrectionEWKFakeTausAfterBjets = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterBjetsEWKFakeTaus");
       fMETPhiOscillationCorrectionAfterAllSelections = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterAllSelections");
       fMETPhiOscillationCorrectionEWKControlRegion = new METPhiOscillationCorrection(eventCounter, fHistoWrapper, "AfterAllSelections_EKWControlRegion");
     }
@@ -168,13 +174,21 @@ namespace HPlus {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausJetPtAfterStandardSelections, "JetPt_AfterStandardSelections", "Jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausJetEtaAfterStandardSelections, "JetEta_AfterStandardSelections", "Jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
     }
+
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerCollinearMinimumAfterStandardSelections,         "ImprovedDeltaPhiCutsCollinearMinimumAfterStandardSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    if (fAnalysisType == kSignalAnalysis) {
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterStandardSelections, "ImprovedDeltaPhiCutsCollinearMinimumAfterStandardSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    }
+
     // MET selection
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMET,            "MET", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhi,         "METPhi", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhi,         "METPhi", "MET #phi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiMinusTauPhi, "METPhiMinusTauPhi", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTauPlusMETPt,   "TauPlusMETPt", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMET,    "MET", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhi, "METPhi", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiMinusTauPhi, "METPhiMinusTauPhi", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTauPlusMETPt, "TauPlusMETPt", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     }
     // b tagging
@@ -250,10 +264,12 @@ namespace HPlus {
     }
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETAfterMtSelections,            "METAfterMtSelections", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiAfterMtSelections,         "METPhiAfterMtSelections", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiMinusTauPhiAfterMtSelections, "METPhiMinusTauPhiAfterMtSelections", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTauPlusMETPtAfterMtSelections,   "TauPlusMETPtAfterMtSelections", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETAfterMtSelections,    "METAfterMtSelections", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiAfterMtSelections, "METPhiAfterMtSelections", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiMinusTauPhiAfterMtSelections, "METPhiMinusTauPhiAfterMtSelections", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections, "TauPlusMETPtAfterMtSelections", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     }
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlNbjetsAfterMtSelections,            "NBjetsAfterMtSelections", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
@@ -515,6 +531,13 @@ namespace HPlus {
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearMinimum, myMinimumRadius);
 
+    if (myPassStatus) {
+      // MET oscillation analysis
+      if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterCollinearCuts->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+    }
+  }
+
+  void CommonPlots::fillControlPlotsAfterTopologicalSelections(const edm::Event& iEvent) {
     // Fill control plots for selected taus after standard selections
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauRtauAfterStandardSelections, fTauData.getSelectedTauRtauValue());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauLeadingTrkPtAfterStandardSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
@@ -548,19 +571,41 @@ namespace HPlus {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausJetEtaAfterStandardSelections, (*jet)->eta());
       }
     }
-    // MET oscillation analysis
-    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterCollinearCuts->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+    // Fill control plots for collinear tail killer
+    double myMinimumRadius = 999.;
+    for (int i = 0; i < fQCDTailKillerData.getNConsideredJets(); ++i) {
+      double myRadius = fQCDTailKillerData.getRadiusFromCollinearCorner(i);
+      if (myRadius < myMinimumRadius && fQCDTailKillerData.collinearCutActiveForJet(i))
+        myMinimumRadius = myRadius;
+    }
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearMinimumAfterStandardSelections, myMinimumRadius);
+    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterStandardSelections, myMinimumRadius);
+
   }
 
   void CommonPlots::fillControlPlotsAtMETSelection(const edm::Event& iEvent, const METSelection::Data& data) {
     fMETData = data;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMET, data.getSelectedMET()->et());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhi, data.getSelectedMET()->phi());
+    double myPhiDiff = data.getSelectedMET()->phi() - fTauData.getSelectedTau()->phi();
+    if (myPhiDiff < -3.1415926)
+      myPhiDiff += 3.1415926 * 2.0;
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiMinusTauPhi, myPhiDiff);
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTauPlusMETPt, (fTauData.getSelectedTau()->p4()+data.getSelectedMET()->p4()).pt());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMET, data.getSelectedMET()->et());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhi, data.getSelectedMET()->phi());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiMinusTauPhi, myPhiDiff);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTauPlusMETPt, (fTauData.getSelectedTau()->p4()+data.getSelectedMET()->p4()).pt());
+    }
+    if (data.passedEvent()) {
+      if (bOptionEnableMETOscillationAnalysis) {
+        fMETPhiOscillationCorrectionAfterMET->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+          fMETPhiOscillationCorrectionEWKFakeTausAfterMET->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+        }
+      }
     }
   }
 
@@ -586,7 +631,14 @@ namespace HPlus {
       }
     }
     // MET oscillation analysis
-    if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+    if (data.passedEvent()) {
+      if (bOptionEnableMETOscillationAnalysis) {
+        fMETPhiOscillationCorrectionAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+          fMETPhiOscillationCorrectionEWKFakeTausAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
+        }
+      }
+    }
   }
 
   void CommonPlots::fillControlPlotsAtBackToBackDeltaPhiCuts(const edm::Event& iEvent, const QCDTailKiller::Data& data) {
@@ -682,10 +734,15 @@ namespace HPlus {
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETAfterMtSelections, fMETData.getSelectedMET()->et());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
+    double myPhiDiff = fMETData.getSelectedMET()->phi() - fTauData.getSelectedTau()->phi();
+    if (myPhiDiff < -3.1415926)
+      myPhiDiff += 3.1415926 * 2.0;
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiMinusTauPhiAfterMtSelections, myPhiDiff);
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTauPlusMETPtAfterMtSelections, (fTauData.getSelectedTau()->p4()+fMETData.getSelectedMET()->p4()).pt());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETAfterMtSelections, fMETData.getSelectedMET()->et());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiMinusTauPhiAfterMtSelections, myPhiDiff);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections, (fTauData.getSelectedTau()->p4()+fMETData.getSelectedMET()->p4()).pt());
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNbjetsAfterMtSelections, fBJetData.getBJetCount());
@@ -766,6 +823,7 @@ namespace HPlus {
   void CommonPlots::fillAllControlPlots(const edm::Event& iEvent, double transverseMass) {
     fillControlPlotsAtJetSelection(iEvent, fJetData);
     fillControlPlotsAtCollinearDeltaPhiCuts(iEvent, fQCDTailKillerData);
+    fillControlPlotsAfterTopologicalSelections(iEvent);
     fillControlPlotsAtMETSelection(iEvent, fMETData);
     fillControlPlotsAtBtagging(iEvent, fBJetData);
     fillControlPlotsAtBackToBackDeltaPhiCuts(iEvent, fQCDTailKillerData);

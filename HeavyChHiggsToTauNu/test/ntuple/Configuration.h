@@ -28,9 +28,12 @@ namespace EmbeddingMuonIsolation {
 }
 
 namespace MuonID {
-  template <typename T> bool pt(T& muon) { return muon.p4().Pt() > 40; }
+  template <typename T> bool pt(T& muon) { return muon.p4().Pt() > 41; }
   template <typename T> bool eta(T& muon) { return std::abs(muon.p4().Eta()) < 2.1; }
-  template <typename T> bool dB(T& muon) { return std::abs(muon.dB()) < 0.02; }
+  template <typename T> bool dB(T& muon) { return std::abs(muon.dB()) < 0.2; }
+  template <typename T> bool chi2(T& muon) { return muon.normalizedChi2() < 10; }
+
+  template <typename T> bool tunePPtError(T& muon) { return muon.tunePPtError() / std::sqrt(muon.tunePP3().Perp2()) < 0.3; }
 
   template <typename T> bool standardRelativeIsolation(T& muon) { return standardRelativeIsolationCut(muon.standardRelativeIsolation()); }
   bool standardRelativeIsolationCut(double isoVar) { return isoVar < 0.12; }
@@ -50,6 +53,7 @@ namespace MuonID {
 namespace MuonVeto {
   template <typename T> bool pt(T& muon) { return muon.p4().Pt() > 10; }
   template <typename T> bool eta(T& muon) { return std::abs(muon.p4().Eta()) < 2.5; }
+  template <typename T> bool chi2(T& muon) { return muon.normalizedChi2() < 10; }
   template <typename T> bool dB(T& muon) { return std::abs(muon.dB()) < 0.02; }
   template <typename T> bool subdetectorIsolation(T& muon) { return (muon.trackIso() + muon.caloIso())/muon.p4().Pt() <= 0.15; }
   template <typename T> bool pfIsolation(T& muon) { return muon.standardRelativeIsolation() <= 0.2; }

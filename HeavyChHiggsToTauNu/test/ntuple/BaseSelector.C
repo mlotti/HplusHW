@@ -119,6 +119,7 @@ private:
 
   TStopwatch                 fStopwatch;
   Long64_t fPrintStep;
+  Long64_t fReadLastTime;
   double fPrintLastTime;
   int fPrintAdaptCount;
   bool fPrintStatus;
@@ -265,7 +266,10 @@ void SelectorImp::printStatus() {
     double myFraction = static_cast<double>(fProcessed) / static_cast<double>(fEntries);
     std::cout << "\rProcessing ... ";
     
-    if (fProcessed == 0) { 
+    Long64_t bytes = 0;
+    double timeDiff = 1;
+    if (fProcessed == 0) {
+      fReadLastTime = TFile::GetFileBytesRead();
       fStopwatch.Start();
       fPrintLastTime = fStopwatch.RealTime();
       fStopwatch.Continue();
@@ -274,16 +278,20 @@ void SelectorImp::printStatus() {
       // Calculate the time estimate (realTime = totalIime * percent)
       double myRealTime = fStopwatch.RealTime();
       fStopwatch.Continue();
+      Long64_t readBytes = TFile::GetFileBytesRead();
+      bytes = readBytes - fReadLastTime;
+      fReadLastTime = readBytes;
 
       // adjust the step
-      if((myRealTime - fPrintLastTime) < 0.5) {
+      timeDiff = myRealTime - fPrintLastTime;
+      if(timeDiff < 0.5) {
         fPrintAdaptCount += 1;
         if(fPrintAdaptCount > 2) {
           fPrintStep *= 10; 
           fPrintAdaptCount = 0;
         }
       }
-      else if((myRealTime - fPrintLastTime) > 5)
+      else if(timeDiff > 5)
         fPrintStep /= 10;
       fPrintLastTime = myRealTime;
 
@@ -300,13 +308,16 @@ void SelectorImp::printStatus() {
       std::cout << std::setw(2) << std::setfill('0') << myMinutes << ":"
                 << std::setw(2) << std::setfill('0') << mySeconds << " ";
     }
-    std::cout << " (" << std::setprecision(4) << myFraction * 100.0 << " %)   " << std::flush;
+    std::cout << " (" << std::setprecision(4) << myFraction * 100.0 << " %) at "
+              << std::setprecision(3) << (bytes/timeDiff/1024/1024) << " MB/s"
+              << "       " // to clear
+              << std::flush;
   }
 }
 
 void SelectorImp::resetStatus() {
   fStopwatch.Stop();
   std::cout << "\rDataset processed (" << fProcessed << " entries). ";
-  fStopwatch.Print();
+  //fStopwatch.Print();
   fPrintStep = 20000;
 }

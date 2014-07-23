@@ -84,14 +84,12 @@ class ConfigBuilder:
                  useJERSmearedJets = True,
                  customizeLightAnalysis = None,
                  customizeHeavyAnalysis = None,
-
                  doLightAnalysis = True,
                  doHeavyAnalysis = False,
-
                  pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doTauIDandMisIDSystematicsAsShapes = False, # If systematic variations are produced, variations are produced also for misidentified tau systematics
-                 doAsymmetricTriggerUncertainties = False, # If true, will vary the efficiency uncertainties instead of the scale factor uncertainty
+                 doAsymmetricTriggerUncertainties = True, # If true, will vary the efficiency uncertainties instead of the scale factor uncertainty
                  doQCDTailKillerScenarios = False, # Run different scenarios of the QCD tail killer (improved delta phi cuts)
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
@@ -503,8 +501,8 @@ class ConfigBuilder:
         # scan various btagging working points
         self._buildBTagScan(process, analysisModules, analysisNames)
 
-        # Tau embedding-like preselection for normal MC
-        self._buildTauEmbeddingLikePreselection(process, analysisNamesForSystematics, additionalCounters)
+        # Tau embedding-like preselection for normal MC (overrides te list of analysisNamesForSystematics)
+        analysisNamesForSystematics = self._buildTauEmbeddingLikePreselection(process, analysisNamesForSystematics, additionalCounters)
 
         ## Systematics
         #if "QCDMeasurement" not in analysisNames_: # Need also for QCD measurements, since they contain MC EWK
@@ -903,7 +901,7 @@ class ConfigBuilder:
     # \param additionalCounters  List of strings for additional counters
     def _buildTauEmbeddingLikePreselection(self, process, analysisNames, additionalCounters):
         if self.options.doTauEmbeddingLikePreselection == 0:
-            return []
+            return analysisNames
 
         if self.dataVersion.isData():
             raise Exception("doTauEmbeddingLikePreselection is meaningless for data")
@@ -928,7 +926,7 @@ class ConfigBuilder:
         maxGenTaus = None # not set
         maxGenTaus = 1 # events with exactly one genuine tau in acceptance
 
-        retNames = []
+        namesForSyst = []
         for name in analysisNames:
             module = getattr(process, name)
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), no tau+MET trigger required
@@ -968,10 +966,10 @@ class ConfigBuilder:
             mod.trigger.selectionType = module.trigger.selectionType
             modName = makeName(name, "GenuineTauTriggered")
             add(modName, process.commonSequence, mod, additionalCounters)
-            retNames.append(modName)
+            namesForSyst.append(modName)
 
         self._accumulateAnalyzers("Tau embedding -like preselection", allNames)
-        return retNames
+        return namesForSyst
 
     ## Build additional analyses for tau embedding input
     #
@@ -1021,6 +1019,7 @@ class ConfigBuilder:
             setattr(process, modName, module)
             setattr(process, modName+"Path", path)
             additionalNames.append(modName)
+            return path
 
         for module, name in zip(analysisModules, analysisNames):
             disablePrintCounter(module)
@@ -1072,6 +1071,26 @@ class ConfigBuilder:
                 postfix += "L1ETMEff"
                 mod = mod.clone()
                 mod.metTriggerEfficiencyScaleFactor.mode = "dataEfficiency"
+
+            # Reject at gen level W->tau->mu
+            if False:
+                mod2 = mod.clone()
+                mod2.embeddingWTauMuWeightReader.enabled = False
+                postfix2 = postfix.replace("WTauMu", "") + "GenWTau"
+
+                genmatchFilter = cms.EDFilter("HPlusMuonGenMatchFilter",
+                    genParticleSrc = cms.InputTag("genParticles", "", "SIM"),
+                    muonSrc = cms.InputTag(tauEmbeddingCustomisations.tauEmbeddingMuons),
+                    motherPdgIds = cms.vint32(24)
+                )
+                genmatchCount = cms.EDProducer("EventCountProducer")
+                setattr(process, postfix+"GenMatchFilter", genmatchFilter)
+                setattr(process, postfix+"GenMatchCount", genmatchCount)
+
+                path = addIntermediateAnalyzer(mod2, name, postfix2)
+                path.replace(process.commonSequence,
+                             process.commonSequence+genmatchFilter+genmatchCount)
+                mod2.eventCounter.counters.append(postfix+"GenMatchCount")
 
             enablePrintCounter(mod)
             mod.histogramAmbientLevel = self.histogramAmbientLevel

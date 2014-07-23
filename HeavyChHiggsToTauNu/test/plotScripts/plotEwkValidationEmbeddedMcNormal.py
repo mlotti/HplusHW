@@ -49,14 +49,15 @@ def main():
     dirEmb = "."
 #    dirSig = "../multicrab_signalAnalysisGenTau_140206_122901"
 #    dirSig = "../multicrab_signalAnalysisGenTau_140211_100710"
-    dirSig = "../multicrab_signalAnalysisGenTau_140217_152148"
+#    dirSig = "../multicrab_signalAnalysisGenTau_140217_152148"
+#    dirSig = "../multicrab_signalAnalysisGenTau_140326_132754"
+    dirSig = "../multicrab_signalAnalysisGenTautightPlus_140512_094945"
 
     for optMode in [
-        "OptQCDTailKillerZeroPlus",
-        "OptQCDTailKillerLoosePlus",
-        "OptQCDTailKillerMediumPlus",
-        "OptQCDTailKillerTightPlus",
-        "OptQCDTailKillerVeryTightPlus",
+#        "OptQCDTailKillerLoosePlus",
+#        "OptQCDTailKillerMediumPlus",
+#        "OptQCDTailKillerTightPlus",
+            None
         ]:
         datasetsEmb = dataset.getDatasetsFromMulticrabCfg(directory=dirEmb, dataEra=dataEra, analysisName=analysisEmb, optimizationMode=optMode)
         datasetsSig = dataset.getDatasetsFromMulticrabCfg(directory=dirSig, dataEra=dataEra, analysisName=analysisSig, optimizationMode=optMode)
@@ -67,6 +68,8 @@ def main():
 def doDataset(datasetsEmb, datasetsSig, optMode):
     global ind
     ind = 0
+
+#    datasetsEmb.loadLuminosities() # not needed for pseudo-multicrab
 
     datasetsSig.updateNAllEventsToPUWeighted()
     datasetsEmb.updateNAllEventsToPUWeighted()
@@ -83,36 +86,45 @@ def doDataset(datasetsEmb, datasetsSig, optMode):
     style = tdrstyle.TDRStyle()
     histograms.cmsTextMode = histograms.CMSMode.SIMULATION
     histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
-    histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
+    #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
+    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2)
+    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
+    histograms.createLegendRatio.moveDefaults(dh=-0.1, dx=-0.53)
+    plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
+
+    plotter = tauEmbedding.CommonPlotter(optMode, "mcembsig", drawPlotCommon)
+
     def dop(name, addData=False, **kwargs):
-        doPlots(datasetsEmb, datasetsSig, name, optMode, addData, **kwargs)
+        doPlots(datasetsEmb, datasetsSig, name, plotter, optMode, addData, **kwargs)
 #        doCounters(datasetsEmb, datasetsSig, name)
 
     dop("EWKMC", addData=True)
     dop("TTJets")
     dop("WJets")
-    dop("DYJetsToLL", mtOnly=True)
-    dop("SingleTop", mtOnly=True)
-    dop("Diboson", mtOnly=True)
+    dop("DYJetsToLL", mtOnly=False)
+    dop("SingleTop", mtOnly=False)
+    dop("Diboson", mtOnly=False)
+#    dop("DYJetsToLL", mtOnly=True)
+#    dop("SingleTop", mtOnly=True)
+#    dop("Diboson", mtOnly=True)
 
 
 #drawPlotCommon = tauEmbedding.PlotDrawerTauEmbeddingEmbeddedNormal(ylabel="Events / %.0f GeV", stackMCHistograms=False, log=True, addMCUncertainty=True, ratio=True, addLuminosityText=True)
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=False, log=True, addMCUncertainty=True,
-                                  ratio=True, ratioType="errorScale",
+                                  ratio=True, ratioType="errorScale", ratioCreateLegend=True,
                                   addLuminosityText=True)
 
 def strIntegral(th1):
     return "%.1f" % aux.th1Integral(th1)
 
-def doPlots(datasetsEmb, datasetsSig, datasetName, optMode, addData, mtOnly=False):
+def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, optMode, addData, mtOnly=False):
     dsetEmb = datasetsEmb.getDataset(datasetName)
     dsetSig = datasetsSig.getDataset(datasetName)
     dsetEmbData = datasetsEmb.getDataset("Data")
     lumi = dsetEmbData.getLuminosity()
-    
-    if not os.path.exists(optMode):
-        os.mkdir(optMode)
 
+    addEventCounts = False
+    
     def createPlot(name):
         if mtOnly and "shapeTransverseMass" not in name:
             return None
@@ -133,9 +145,14 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, optMode, addData, mtOnly=Fals
             p = plots.ComparisonManyPlot(drhSig, [drhEmb])
         p.setLuminosity(lumi)
         legLabel = plots._legendLabels.get(datasetName, datasetName)
+        legEmb = "Embedded "+legLabel
+        legSig = "Normal "+legLabel
+        if addEventCounts:
+            legEmb += " ("+strIntegral(drhEmb.getHistogram())+")"
+            legSig += " ("+strIntegral(drhSig.getHistogram())+")"
         p.histoMgr.setHistoLegendLabelMany({
-                "Embedded": "Embedded "+legLabel + "("+strIntegral(drhEmb.getHistogram())+")",
-                "Normal": "Normal "+legLabel + "("+strIntegral(drhSig.getHistogram())+")",
+                "Embedded": legEmb,
+                "Normal": legSig,
                 })
         p.histoMgr.forEachHisto(styles.generator())
         if addData:
@@ -147,107 +164,10 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, optMode, addData, mtOnly=Fals
         p.setDrawOptions(ratioYlabel="Emb./Norm.")
         return p
 
-    def drawPlot(plot, name, *args, **kwargs):
-        if plot is None:
-            return
-        global ind
-        ind += 1
-        #drawPlotCommon(plot, "%03d_mcembsig_%s_%s_%s"%(ind, optMode, datasetName, name), *args, **kwargs)
-        drawPlotCommon(plot, "%s/%03d_mcembsig_%s_%s"%(optMode, ind, datasetName, name), *args, **kwargs)
+    plotter.plot(datasetName, createPlot, {
+        "NBjets": {"moveLegend": {"dx": -0.4, "dy": -0.45}}
+    })
 
-#    opts2def = {"ymin": 0.8, "ymax": 1.2}
-#    opts2def = {"ymin": 0.5, "ymax": 1.5}
-    opts2def = {"ymin": 0, "ymax": 2}
-    drawPlotCommon.setDefaults(opts2=opts2def)
-    def drawControlPlot(path, *args, **kwargs):
-        drawPlot(createPlot("ForDataDrivenCtrlPlots/"+path), path, *args, **kwargs)
-
-    def update(d1, d2):
-        tmp = {}
-        tmp.update(d1)
-        tmp.update(d2)
-        return tmp
-
-    # Control plots
-    optsdef = {}
-    opts = optsdef
-
-    # After Njets
-    drawControlPlot("SelectedTau_pT_AfterStandardSelections", rebin=[0]+range(40, 160, 10)+[160, 200, 300, 400, 500], divideByBinWidth=True)
-    drawControlPlot("SelectedTau_eta_AfterStandardSelections", rebin=2, opts={"xmin": -2.1, "xmax": 2.1}, moveLegend={"dy": -0.4})
-    drawControlPlot("SelectedTau_phi_AfterStandardSelections", rebin=2, moveLegend={"dy": -0.4})
-    drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", opts={"xmin": 0.7, "xmax":1 }, moveLegend={"dy": -0.4, "dx": -0.3})
-    drawControlPlot("Njets_AfterStandardSelections")
-    drawControlPlot("JetPt_AfterStandardSelections")
-    drawControlPlot("JetEta_AfterStandardSelections", moveLegend={"dy": -0.4})
-
-#    drawControlPlot("NjetsAfterJetSelectionAndMETSF", opts={"xmin": 0, "xmax": 16}, ylabel="Events", cutLine=3)
-    drawControlPlot("ImprovedDeltaPhiCutsJet1Collinear", rebinToWidthX=10)
-    drawControlPlot("ImprovedDeltaPhiCutsJet2Collinear", rebinToWidthX=10, moveLegend={"dy": -0.4, "dx": -0.2})
-    drawControlPlot("ImprovedDeltaPhiCutsJet3Collinear", rebinToWidthX=10, moveLegend={"dy": -0.4, "dx": -0.2})
-
-    moveLegend = {"DYJetsToLL": {"dx": -0.02}}.get(datasetName, {})
-    drawControlPlot("MET",
-                    #"Uncorrected PF E_{T}^{miss} (GeV)",
-                    "Type I PF E_{T}^{miss} (GeV)",
-                    rebin=5, opts=update(opts, {"xmax": 400}), cutLine=50, moveLegend=moveLegend)
-
-    drawControlPlot("METPhi", rebin=2, moveLegend={"dy": -0.4})
-
-
-    # after MET
-    moveLegend = {"dx": -0.23, "dy": -0.5}
-    moveLegend = {
-        "WJets": {},
-        "DYJetsToLL": {"dx": -0.02},
-        "SingleTop": {},
-        "Diboson": {}
-        }.get(datasetName, moveLegend)
-    drawControlPlot("NBjets", "Number of selected b jets", opts=update(opts, {"xmax": 6}), ylabel="Events", moveLegend=moveLegend, cutLine=1)
-
-    drawControlPlot("BtagDiscriminator", opts={"xmin": -1, "xmax": 1.5}, ylabel="Events / %.1f")
-    drawControlPlot("BJetPt", rebin=[0]+range(30, 100, 10)+range(100, 200, 20)+[200, 250, 300, 400, 500], divideByBinWidth=True)
-    drawControlPlot("BJetEta", rebin=2, opts={"xmin": -2.4, "xmax": 2.4}, moveLegend={"dy": -0.4})
-
-    # DeltapPhi
-    opts = {
-#        "WJets": {"ymax": 35},
-#        "DYJetsToLL": {"ymax": 12},
-#        "Diboson": {"ymax": 1},
-        }.get(datasetName, {"ymaxfactor": 1.2})
-    opts2=opts2def
-    moveLegend = {
-        "DYJetsToLL": {"dx": -0.24},
-        }.get(datasetName, {"dx":-0.22})
-    drawControlPlot("ImprovedDeltaPhiCutsJet1BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
-    drawControlPlot("ImprovedDeltaPhiCutsJet2BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
-    drawControlPlot("ImprovedDeltaPhiCutsJet3BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
-
-    # Remaining control plots
-    #drawControlPlot("TopMass")
-    #drawControlPlot("TopPt")
-    #drawControlPlot("WMass")
-    #drawControlPlot("WPt")
-
-    # Transverse mass
-
-    opts = {
-#        "TTJets": {"ymax": 28},
-#        "SingleTop": {"ymax": 4.5},
-#        "DYJetsToLL": {"ymax": 18},
-#        "Diboson": {"ymax": 1.2},
-#        "WJets": {"ymax": 50},
-        }.get(datasetName, {})
-    opts["xmax"] = 400
-    #opts2 = {"ymin": 0, "ymax": 2}
-    moveLegend = {"DYJetsToLL": {"dx": -0.02}}.get(datasetName, {})
-    p = createPlot("shapeTransverseMass")
-    #p.appendPlotObject(histograms.PlotText(0.6, 0.7, "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", size=20))
-    drawPlot(p, "shapeTransverseMass", "m_{T}(#tau jet, E_{T}^{miss}) (GeV)", opts=opts, opts2=opts2, ylabel="Events / #Delta m_{T} %.0f-%.0f GeV", log=False, moveLegend=moveLegend,
-             rebin=range(0, 160, 20)+[160, 200, 250, 400], divideByBinWidth=True
-             )
-
-    drawPlot(createPlot("shapeInvariantMass"), "shapeInvariantMass", log=False, rebinToBinWidth=20)
 
 
 def doTauCounters(datasetsEmb, datasetsSig, datasetName, ntupleCacheEmb, ntupleCacheSig, normalizeEmb=True):

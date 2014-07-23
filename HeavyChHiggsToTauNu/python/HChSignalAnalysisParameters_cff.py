@@ -17,6 +17,9 @@ lowBoundForQCDInvertedIsolation = cms.untracked.string("") # Set to "" to disabl
 # Ambient level for filling histograms (options: Vital, Informative, Debug)
 histogramAmbientLevel = cms.untracked.string("Debug")
 
+# QCD specific
+selectOnlyGenuineTausForMC = cms.untracked.bool(False)
+
 singleTauMetTriggerPaths = [
 # 2010
 #    "HLT_SingleLooseIsoTau20",
@@ -352,15 +355,15 @@ MET = cms.untracked.PSet(
     jetOffsetCorrLabel = cms.untracked.string("L1FastJet"),
     #type2ScaleFactor = cms.untracked.double(1.4),
 
-    # For phi oscillation correction - very preliminary parameters
-    phiCorrectionSlopeXForData = cms.untracked.double(0.6224), # +- 0.0286
-    phiCorrectionOffsetXForData = cms.untracked.double(-0.3173), # +- 0.597
-    phiCorrectionSlopeYForData = cms.untracked.double(-0.4129), # +- 0.0285
-    phiCorrectionOffsetYForData = cms.untracked.double(1.14), # +- 0.59
-    phiCorrectionSlopeXForMC = cms.untracked.double(-0.02390), # taken from Christian
-    phiCorrectionOffsetXForMC = cms.untracked.double(0.11438), # taken from Christian
-    phiCorrectionSlopeYForMC = cms.untracked.double(-0.27637), # taken from Christian
-    phiCorrectionOffsetYForMC = cms.untracked.double(2.1351), # taken from Christian
+    # For phi oscillation correction - After collinear angular cuts
+    phiCorrectionSlopeXForData  = cms.untracked.double( 0.574), # +- 0.023 (after tau selection)
+    phiCorrectionOffsetXForData = cms.untracked.double( 0.526), # +- 0.049 (after tau selection)
+    phiCorrectionSlopeYForData  = cms.untracked.double(-0.408), # +- 0.023 (after tau selection)
+    phiCorrectionOffsetYForData = cms.untracked.double( 1.016), # +- 0.487 (after tau selection)
+    phiCorrectionSlopeXForMC    = cms.untracked.double(-0.336), # +- 0.098 (TTJets after tau selection)
+    phiCorrectionOffsetXForMC   = cms.untracked.double( 3.061), # +- 1.770 (TTJets after tau selection)
+    phiCorrectionSlopeYForMC    = cms.untracked.double(-0.719), # +- 0.098 (TTJets after tau selection)
+    phiCorrectionOffsetYForMC   = cms.untracked.double( 4.721), # +- 1.776 (TTJets after tau selection)
 )
 
 bTagging = cms.untracked.PSet(
@@ -678,7 +681,7 @@ commonPlotsSettings = cms.untracked.PSet(
     tailKiller1DBins = SetHistogramBinSettings(52, 0., 260.),
     topMassBins = SetHistogramBinSettings(50, 0., 500.),
     WMassBins = SetHistogramBinSettings(60, 0., 300.),
-    mtBins = SetHistogramBinSettings(50, 0., 500.),
+    mtBins = SetHistogramBinSettings(160, 0., 800.),
     invmassBins = SetHistogramBinSettings(50, 0., 500.),
 )
 

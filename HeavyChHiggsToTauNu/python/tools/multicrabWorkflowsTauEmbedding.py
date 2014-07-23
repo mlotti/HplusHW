@@ -54,7 +54,7 @@ def addEmbeddingGenTauSkim_53X(version, datasets, updateDefinitions):
         dataset.addWorkflow(wf)
         if wf.output is not None:
             dataset.addWorkflow(Workflow("tauembedding_gentauanalysis_"+version, source=Source(workflowName),
-                                         args=wf.args, output_file="histograms.root", crabLines=["CMSSW.total_number_of_lumis = -1"]))
+                                         args=wf.args, crabLines=["CMSSW.total_number_of_lumis = -1"]))
 
 def addEmbeddingAodAnalysis_44X(datasets):
     njobs = {
@@ -79,7 +79,7 @@ def addEmbeddingAodAnalysis_44X(datasets):
     for datasetName, taskDef in njobs.iteritems():
         dataset = datasets.getDataset(datasetName)
         source = Source("AOD", number_of_jobs=taskDef.njobsIn)
-        wf = Workflow("embeddingAodAnalysis_44X", source=source, output_file="histograms.root")
+        wf = Workflow("embeddingAodAnalysis_44X", source=source)
         wf.addCrabLine("CMSSW.total_number_of_lumis = -1")
         wf.addArg("doPat", 1)
         dataset.addWorkflow(wf)
@@ -313,7 +313,7 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         # If have skim output, define the workflows which depend on it
         if wf.output != None:
             dataset.addWorkflow(Workflow("tauembedding_skimAnalysis_"+version, source=Source("tauembedding_skim_"+version),
-                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="histograms.root", crabLines=["CMSSW.total_number_of_lumis = -1"]))
+                                         triggerOR=taskDef.triggerOR, args=wf.args, crabLines=["CMSSW.total_number_of_lumis = -1"]))
 
 def addEmbeddingSkim_53X(version, datasets, updateDefinitions):
     defaultDefinitions = getDefaultDefinitions_53X()
@@ -400,7 +400,7 @@ def addEmbeddingSkim_53X(version, datasets, updateDefinitions):
         # If have skim output, define the workflows which depend on it
         if wf.output != None:
             dataset.addWorkflow(Workflow("tauembedding_skimAnalysis_"+version, source=Source("tauembedding_skim_"+version),
-                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="histograms.root", crabLines=["CMSSW.total_number_of_lumis = -1"]))
+                                         triggerOR=taskDef.triggerOR, args=wf.args, crabLines=["CMSSW.total_number_of_lumis = -1"]))
 
 
 def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitions):
@@ -496,7 +496,7 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
                 except KeyError:
                     pass
             wf_analysis = Workflow("tauembedding_analysis_"+version, source=Source("tauembedding_embedding_"+version),
-                                   triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root")
+                                   triggerOR=taskDef.triggerOR, args=args)
             wf_analysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
             dataset.addWorkflow(wf_analysis)
 
@@ -583,7 +583,7 @@ def addEmbeddingEmbedding_53X(sourceWorkflow, version, datasets, updateDefinitio
                 except KeyError:
                     pass
             wf_analysis = Workflow("tauembedding_analysis_"+version, source=Source("tauembedding_embedding_"+version),
-                                   triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root")
+                                   triggerOR=taskDef.triggerOR, args=args)
             wf_analysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
             dataset.addWorkflow(wf_analysis)
  
@@ -1152,6 +1152,7 @@ def addEmbeddingSkim_v53_3(datasets):
         "TTToHplusBHminusB_M160_ext_Summer12":     TaskDef(""),
         }
     addEmbeddingSkim_53X("v53_3", datasets, definitions)
+
 def addEmbeddingEmbedding_v53_3(datasets):
     skimVersion = "tauembedding_skim_v53_3"
 
@@ -1308,6 +1309,111 @@ def addEmbeddingEmbedding_v53_3(datasets):
             # User mean 7028.0, min 728.9, max 13562.4
             # Mean 70.6 MB, min 9.6 MB, max 135.6 MB
             "SingleMu_207214-208686_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_207214_208686_tauembedding_embedding_v53_3_seedTest1-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1701 jobs
+            # User mean 9666.3, min 899.6, max 12635.3
+            # Mean 605.2 MB, min 47.8 MB, max 792.1 MB
+            "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef("/TTJets_FullLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v2_AODSIM_tauembedding_embedding_v53_3_seedTest1-1af76047aea9759528c81258e6b8769f/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}, dbs="phys03"),
+            # 1655 jobs
+            # User mean 12015.3, min 4605.3, max 13648.2
+            # Mean 774.2 MB, min 283.5 MB, max 863.7 MB
+            "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef("/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_embedding_v53_3_seedTest1-1af76047aea9759528c81258e6b8769f/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}, dbs="phys03"),
+            # 159 jobs
+            # User mean 640.1, min 457.5, max 875.5
+            # Mean 42.5 MB, min 28.4 MB, max 60.5 MB
+            "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef("/TTJets_HadronicMGDecays_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_ext_v1_AODSIM_tauembedding_embedding_v53_3_seedTest1-1af76047aea9759528c81258e6b8769f/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}, dbs="phys03"),
+        })
+
+    addEmbedding("v53_3_seedTest2", definitions={
+            # 306 jobs
+            # User mean 7018.9, min 1946.2, max 12077.1
+            # Mean 66.1 MB, min 19.6 MB, max 115.9 MB
+            "SingleMu_190456-193621_2012A_Jan22": TaskDef("/SingleMu/local-Run2012A_22Jan2013_v1_AOD_190456_193621_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1542 jobs
+            # User mean 7418.5, min 2368.4, max 13986.6
+            # Mean 70.2 MB, min 23.7 MB, max 133.6 MB
+            "SingleMu_193834-196531_2012B_Jan22": TaskDef("/SingleMu/local-Run2012B_22Jan2013_v1_AOD_193834_196531_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1152 jobs
+            # User mean 7373.0, min 3023.3, max 14033.7
+            # Mean 70.6 MB, min 30.1 MB, max 137.3 MB
+            "SingleMu_198022-200381_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_198022_200381_tauembedding_embedding_v53_3_seedTest2-f6fb104f8850e16de1453ab643f4a3e0/USER", dbs="phys03"),
+            # 1518 jobs
+            # User mean 7032.9, min 1839.0, max 13588.4
+            # Mean 67.8 MB, min 19.5 MB, max 132.5 MB
+            "SingleMu_200466-203742_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_200466_203742_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 937 jobs
+            # User mean 7464.0, min 2734.0, max 14349.0
+            # Mean 74.2 MB, min 27.6 MB, max 141.3 MB
+            "SingleMu_203777-205834_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_203777_205834_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 925 jobs
+            # User mean 7279.6, min 719.5, max 13079.9
+            # Mean 72.2 MB, min 9.2 MB, max 129.7 MB
+            "SingleMu_205908-207100_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_205908_207100_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1029 jobs
+            # User mean 7091.5, min 705.3, max 13695.2
+            # Mean 70.6 MB, min 9.6 MB, max 135.7 MB
+            "SingleMu_207214-208686_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_207214_208686_tauembedding_embedding_v53_3_seedTest2-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+        })
+
+    addEmbedding("v53_3_seedTest3", definitions={
+            # 306 jobs
+            # User mean 7177.1, min 1958.0, max 12479.5
+            # Mean 66.1 MB, min 19.5 MB, max 115.9 MB
+            "SingleMu_190456-193621_2012A_Jan22": TaskDef("/SingleMu/local-Run2012A_22Jan2013_v1_AOD_190456_193621_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1542 jobs
+            # User mean 7443.9, min 2373.1, max 14109.3
+            # Mean 70.2 MB, min 23.7 MB, max 133.7 MB
+            "SingleMu_193834-196531_2012B_Jan22": TaskDef("/SingleMu/local-Run2012B_22Jan2013_v1_AOD_193834_196531_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1152 jobs
+            # User mean 7379.3, min 3133.1, max 14054.9
+            # Mean 70.6 MB, min 30.1 MB, max 137.3 MB
+            "SingleMu_198022-200381_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_198022_200381_tauembedding_embedding_v53_3_seedTest3-f6fb104f8850e16de1453ab643f4a3e0/USER", dbs="phys03"),
+            # 1518 jobs
+            # User mean 6907.5, min 1782.5, max 13156.2
+            # Mean 67.8 MB, min 19.5 MB, max 132.4 MB
+            "SingleMu_200466-203742_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_200466_203742_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 937 jobs
+            # User mean 7439.9, min 2736.2, max 14130.2
+            # Mean 74.2 MB, min 27.6 MB, max 141.4 MB
+            "SingleMu_203777-205834_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_203777_205834_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 925 jobs
+            # User mean 7259.2, min 691.4, max 13041.5
+            # Mean 72.2 MB, min 9.2 MB, max 129.7 MB
+            "SingleMu_205908-207100_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_205908_207100_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1029 jobs
+            # User mean 7119.8, min 701.5, max 13984.5
+            # Mean 70.6 MB, min 9.6 MB, max 135.6 MB
+            "SingleMu_207214-208686_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_207214_208686_tauembedding_embedding_v53_3_seedTest3-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+        })
+
+    addEmbedding("v53_3_seedTest4", definitions={
+            # 306 jobs
+            # User mean 7112.9, min 1993.8, max 12269.3
+            # Mean 66.1 MB, min 19.6 MB, max 115.8 MB
+            "SingleMu_190456-193621_2012A_Jan22": TaskDef("/SingleMu/local-Run2012A_22Jan2013_v1_AOD_190456_193621_tauembedding_embedding_v53_3_seedTest4-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1542 jobs
+            # User mean 7413.1, min 2359.9, max 13943.0
+            # Mean 70.2 MB, min 23.7 MB, max 133.8 MB
+            "SingleMu_193834-196531_2012B_Jan22": TaskDef("/SingleMu/local-Run2012B_22Jan2013_v1_AOD_193834_196531_tauembedding_embedding_v53_3_seedTest4-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1152 jobs
+            # User mean 7308.6, min 3068.2, max 14265.1
+            # Mean 70.6 MB, min 30.1 MB, max 137.3 MB
+            "SingleMu_198022-200381_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_198022_200381_tauembedding_embedding_v53_3_seedTest4-f6fb104f8850e16de1453ab643f4a3e0/USER", dbs="phys03"),
+            # 1518 jobs
+            # User mean 6994.1, min 1817.2, max 13667.6
+            # Mean 67.8 MB, min 19.5 MB, max 132.6 MB
+            "SingleMu_200466-203742_2012C_Jan22": TaskDef("/SingleMu/local-Run2012C_22Jan2013_v1_AOD_200466_203742_tauembedding_embedding_v53_3_seedTest4-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 937 jobs
+            # User mean 7537.0, min 2778.6, max 14662.1
+            # Mean 74.2 MB, min 27.6 MB, max 141.4 MB
+            "SingleMu_203777-205834_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_203777_205834_tauembedding_embedding_v53_3_seedTest4-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 925 jobs
+            # User mean 7232.4, min 704.3, max 13307.5
+            # Mean 72.2 MB, min 9.2 MB, max 129.7 MB
+            "SingleMu_205908-207100_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_205908_207100_tauembedding_embedding_v53_3_seedTest4-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
+            # 1029 jobs
+            # User mean 7163.7, min 718.8, max 13916.5
+            # Mean 70.6 MB, min 9.6 MB, max 135.6 MB
+            "SingleMu_207214-208686_2012D_Jan22": TaskDef("/SingleMu/local-Run2012D_22Jan2013_v1_AOD_207214_208686_tauembedding_embedding_v53_3_seedTest4-82ba5743f53794eef04b654ef0f32265/USER", dbs="phys03"),
         })
 
 def addEmbedding_SKELETON(datasets):

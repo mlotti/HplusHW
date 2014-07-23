@@ -69,7 +69,7 @@ def main(opts):
 
     for key, task in tasks.iteritems():
         if task.jobs_still_to_publish > 0:
-            print "%s publication not complete, not moving (published %d, failed %d, still_to_publish %d)" % (key, task.jobs_published, task.jobs_failed, still)
+            print "%s publication not complete, not moving (published %d, failed %d, still_to_publish %d)" % (key, task.jobs_published, task.jobs_failed, task.jobs_still_to_publish)
         elif opts.move:
             shutil.move(key, key+"_published")
 
