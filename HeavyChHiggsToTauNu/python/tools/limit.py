@@ -67,7 +67,7 @@ _finalstateYmaxBR = {
     "etau": 0.4,
     "mutau": 0.4,
     "emu": 0.8,
-    "default": 0.06,
+    "default": 0.03,
 }
 
 ## Default y axis maximum values for sigma x BR limit for the final states
@@ -75,7 +75,7 @@ _finalstateYmaxSigmaBR = {
     "etau": 10.0, # FIXME
     "mutau": 10.0, # FIXME
     "emu": 10.0, # FIXME
-    "default": 2.0,
+    "default": 1.0,
 }
 
 
