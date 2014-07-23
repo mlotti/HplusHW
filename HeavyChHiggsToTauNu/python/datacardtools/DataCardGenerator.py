@@ -326,13 +326,15 @@ class DataCardGenerator:
 
         # Merge columns, if necessary
         if self._config.OptionGenuineTauBackgroundSource == "MC_FullSystematics" or self._config.OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
-            # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
-            print "\nPerforming merge for MC genuine tau column"
-            self.separateMCEWKTausAndFakes(targetColumn="",targetColumnNewName="MC_EWKTau",addColumnList=None,subtractColumnList=self._config.EWKFakeIdList)
+            if hasattr(self._config, "EWKFakeIdList") and len(self._config.EWKFakeIdList) > 0:
+                # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
+                print "\nPerforming merge for MC genuine tau column"
+                self.separateMCEWKTausAndFakes(targetColumn="",targetColumnNewName="MC_EWKTau",addColumnList=None,subtractColumnList=self._config.EWKFakeIdList)
         if self._config.OptionDoMergeFakeTauColumns:
-            # For data-driven, merge fake tau columns into one
-            print "\nPerforming merge for MC fake tau column"
-            self.separateMCEWKTausAndFakes(targetColumn=self._config.EWKFakeIdList[0],targetColumnNewName="MC_faketau",addColumnList=self._config.EWKFakeIdList[1:],subtractColumnList=[])
+            if hasattr(self._config, "EWKFakeIdList") and len(self._config.EWKFakeIdList) > 0:
+                # For data-driven, merge fake tau columns into one
+                print "\nPerforming merge for MC fake tau column"
+                self.separateMCEWKTausAndFakes(targetColumn=self._config.EWKFakeIdList[0],targetColumnNewName="MC_faketau",addColumnList=self._config.EWKFakeIdList[1:],subtractColumnList=[])
 
         # Do rebinning of results, store a fine binned copy of all histograms as well
         for c in self._columns:
