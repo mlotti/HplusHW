@@ -2,8 +2,7 @@
 # Classes for making control plots (surprise, surprise ...)
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-#from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count,RootHistoWithUncertainties
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
@@ -17,6 +16,10 @@ from math import pow,sqrt,log10
 import os
 import sys
 import ROOT
+
+_legendLabelQCD = "QCD (data)"
+_legendLabelEmbedding = "EWK+tt with #tau_{h} (data)"
+_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (MC)"
 
 ##
 class ControlPlotMaker:
@@ -32,7 +35,7 @@ class ControlPlotMaker:
         self._opts = opts
         self._config = config
         if config.OptionSqrtS == None:
-            raise Exception(ErrorLabel()+"Please set the parameter OptionSqrtS = <integer_value_in_TeV> in the config file!"+NormalStyle())
+            raise Exception(ShellStyles.ErrorLabel()+"Please set the parameter OptionSqrtS = <integer_value_in_TeV> in the config file!"+ShellStyles.NormalStyle())
         self._dirname = dirname
         self._luminosity = luminosity
         self._observation = observation
@@ -41,7 +44,7 @@ class ControlPlotMaker:
         #myEvaluator = SignalAreaEvaluator()
 
         # Make control plots
-        print "\n"+HighlightStyle()+"Generating control plots"+NormalStyle()
+        print "\n"+ShellStyles.HighlightStyle()+"Generating control plots"+ShellStyles.NormalStyle()
         # Loop over mass points
         for m in self._config.MassPoints:
             print "... mass = %d GeV"%m
@@ -100,23 +103,24 @@ class ControlPlotMaker:
                                 hEWKfake.Add(h)
                 if len(myStackList) > 0 or self._config.OptionGenuineTauBackgroundSource == "DataDriven":
                     if hQCD != None:
-                        myHisto = histograms.Histo(hQCD,"QCD",legendLabel="QCD (data)")
+                        myHisto = histograms.Histo(hQCD,"QCD",legendLabel=_legendLabelQCD)
                         myHisto.setIsDataMC(isData=False, isMC=True)
-                        myStackList = [myHisto]+myStackList
+                        myStackList.insert(0, myHisto)
                     if hEmbedded != None:
-                        myHisto = histograms.Histo(hEmbedded,"Embedding")
+                        myHisto = histograms.Histo(hEmbedded,"Embedding",legendLabel=_legendLabelEmbedding)
                         myHisto.setIsDataMC(isData=False, isMC=True)
                         myStackList.append(myHisto)
                     if hEWKfake != None:
-                        myHisto = histograms.Histo(hEWKfake,"EWKfakes")
+                        myHisto = histograms.Histo(hEWKfake,"EWKfakes",legendLabel=_legendLabelEWKFakes)
                         myHisto.setIsDataMC(isData=False, isMC=True)
                         myStackList.append(myHisto)
                     hData = observation.getControlPlotByIndex(i)["shape"].Clone()
                     hDataUnblinded = hData.Clone()
                     # Apply blinding
+                    myBlindingString = None
                     if self._config.BlindAnalysis:
                         if len(myCtrlPlot.blindedRange) > 0:
-                            self._applyBlinding(hData,myCtrlPlot.blindedRange)
+                            myBlindingString = self._applyBlinding(hData,myCtrlPlot.blindedRange)
                         if self._config.OptionBlindThreshold != None:
                             for k in xrange(1, hData.GetNbinsX()+1):
                                 myExpValue = 0.0
@@ -125,9 +129,10 @@ class ControlPlotMaker:
                                 if hSignal.getRootHisto().GetBinContent(k) >= myExpValue * self._config.OptionBlindThreshold:
                                     hData.getRootHisto().SetBinContent(k, -1.0)
                                     hData.getRootHisto().SetBinError(k, 0.0)
-                    myHisto = histograms.Histo(hData,"Data")
-                    myHisto.setIsDataMC(isData=True, isMC=False)
-                    myStackList.insert(0, myHisto)
+                    # Data
+                    myDataHisto = histograms.Histo(hData,"Data")
+                    myDataHisto.setIsDataMC(isData=True, isMC=False)
+                    myStackList.insert(0, myDataHisto)
                     # Add signal
                     mySignalLabel = "TTToHplus_M%d"%m
                     if m > 179:
@@ -151,6 +156,8 @@ class ControlPlotMaker:
                     myStackPlot.setDefaultStyles()
                     myParams = myCtrlPlot.details.copy()
                     # Tweak paramaters
+                    if not "unit" in myParams.keys():
+                        myParams["unit"] = ""
                     if myParams["unit"] != "":
                         myParams["xlabel"] = "%s, %s"%(myParams["xlabel"],myParams["unit"])
                     myMinWidth = 10000.0
@@ -161,24 +168,61 @@ class ControlPlotMaker:
                             myMinWidth = w
                         if w > myMaxWidth:
                             myMaxWidth = w
-                    myWidthSuffix = "%d-%d"%(myMinWidth,myMaxWidth)
-                    if abs(myMinWidth-myMaxWidth) < 0.0001:
-                        myWidthSuffix = "%d"%(myMinWidth)
+                    myWidthSuffix = ""
+                    myMinWidthString = "%d"%myMinWidth
+                    myMaxWidthString = "%d"%myMaxWidth
+                    if myMinWidth < 1.0:
+                        myFormat = "%%.%df"%(abs(int(log10(myMinWidth)))+1)
+                        myMinWidthString = myFormat%myMinWidth
+                    if myMaxWidth < 1.0:
+                        myFormat = "%%.%df"%(abs(int(log10(myMaxWidth)))+1)
+                        myMaxWidthString = myFormat%myMaxWidth
+                    myWidthSuffix = "%s-%s"%(myMinWidthString,myMaxWidthString)
+                    if abs(myMinWidth-myMaxWidth) < 0.001:
+                        myWidthSuffix = "%s"%(myMinWidthString)
                     if not (myParams["unit"] == "" and myWidthSuffix == "1"):
                         myParams["ylabel"] = "%s / %s %s"%(myParams["ylabel"],myWidthSuffix,myParams["unit"])
+                    if myBlindingString != None:
+                        if myParams["unit"] != "" and myParams["unit"][0] == "^":
+                            myParams["blindingRangeString"] = "%s%s"%(myBlindingString, myParams["unit"])
+                        else:
+                            myParams["blindingRangeString"] = "%s %s"%(myBlindingString, myParams["unit"])
                     myParams["ratio"] = True
                     myParams["ratioType"] = "errorScale"
                     myParams["ratioYlabel"] = "Data/#Sigma Exp."
                     myParams["stackMCHistograms"] = True
                     myParams["addMCUncertainty"] = True
                     myParams["addLuminosityText"] = True
-                    myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+                    if "legendPosition" in myParams.keys():
+                        if myParams["legendPosition"] == "NW":
+                            myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
+                        elif myParams["legendPosition"] == "SW":
+                            myParams["moveLegend"] = {"dx": -0.2, "dy": -0.45}
+                        elif myParams["legendPosition"] == "SE":
+                            myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
+                        elif myParams["legendPosition"] == "NE":
+                            myParams["moveLegend"] = {"dx": -0.53, "dy": 0.00}
+                        else:
+                            raise Exception("Unknown value for option legendPosition: %s!", myParams["legendPosition"])
+                        del myParams["legendPosition"]
+                    else:
+                        myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
                     myParams["ratioCreateLegend"] = True
-                    myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
+                    if "ratioLegendPosition" in myParams.keys():
+                        if myParams["ratioLegendPosition"] == "left":
+                            myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
+                        elif myParams["ratioLegendPosition"] == "right":
+                            myParams["ratioMoveLegend"] = {"dx": 0.00, "dy": 0.03}
+                        else:
+                            raise Exception("Unknown value for option ratioLegendPosition: %s!", myParams["ratioLegendPosition"])
+                        del myParams["ratioLegendPosition"]
+                    else:
+                        myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
                     # Remove non-dientified keywords
                     del myParams["unit"]
                     # Do plotting
-                    plots.drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
+                    plots.drawPlot(myStackPlot, "DataDrivenCtrlPlot_M%d_%02d_%s"%(m,i,myCtrlPlot.title), **myParams)
+                    os.system("mv DataDrivenCtrlPlot_M%d_%02d_%s.* %s/."%(m,i,myCtrlPlot.title,self._dirname))
 
             # Do selection flow plot
             selectionFlow.makePlot(self._dirname,m,len(self._config.ControlPlots),self._luminosity)
@@ -186,14 +230,32 @@ class ControlPlotMaker:
         print "Control plots done"
 
     def _applyBlinding(self,myObject,blindedRange = []):
+        myMin = None
+        myMax = None
         myHisto = myObject.getRootHisto()
         for i in range (1, myHisto.GetNbinsX()+1):
+            myUpEdge = myHisto.GetXaxis().GetBinUpEdge(i)
+            myLowEdge = myHisto.GetXaxis().GetBinLowEdge(i)
             # Blind if any edge of the current bin is inside the blinded range or if bin spans over the blinded range
-            if ((myHisto.GetXaxis().GetBinLowEdge(i) >= blindedRange[0] and myHisto.GetXaxis().GetBinLowEdge(i) <= blindedRange[1]) or
-                (myHisto.GetXaxis().GetBinUpEdge(i) >= blindedRange[0] and myHisto.GetXaxis().GetBinUpEdge(i) <= blindedRange[1]) or 
-                (myHisto.GetXaxis().GetBinLowEdge(i) <= blindedRange[0] and myHisto.GetXaxis().GetBinUpEdge(i) >= blindedRange[1])):
+            if ((myLowEdge >= blindedRange[0] and myLowEdge <= blindedRange[1]) or
+                (myUpEdge >= blindedRange[0] and myUpEdge <= blindedRange[1]) or 
+                (myLowEdge <= blindedRange[0] and myUpEdge >= blindedRange[1])):
+                if myMin == None or myLowEdge < myMin:
+                    myMin = myLowEdge
+                if myMax == None or myUpEdge > myMax:
+                    myMax = myUpEdge
                 myHisto.SetBinContent(i, -1.0)
                 myHisto.SetBinError(i, 0.0)
+        if myMin == None:
+            return None
+        myMinFormat = "%"+"d"
+        myMaxFormat = "%"+"d"
+        if abs(myMin) < 1.0 and abs(myMin) > 0.00000001:
+            myMinFormat = "%%.%df"%(abs(int(log10(myMin)))+1)
+        if abs(myMax) < 1.0  and abs(myMax) > 0.00000001:
+            myMaxFormat = "%%.%df"%(abs(int(log10(myMax)))+1)
+        s = myMinFormat%myMin+"-"+myMaxFormat%myMax
+        return s
 
 class SignalAreaEvaluator:
     def __init__(self):
@@ -226,7 +288,7 @@ class SignalAreaEvaluator:
         myFile = open(myFilename, "w")
         myFile.write(self._output)
         myFile.close()
-        print HighlightStyle()+"Signal area evaluation written to: "+NormalStyle()+myFilename
+        print ShellStyles.HighlightStyle()+"Signal area evaluation written to: "+ShellStyles.NormalStyle()+myFilename
         self._output = ""
 
     def _evaluate(self,evaluationRange,h):
@@ -339,7 +401,11 @@ class SelectionFlowPlotMaker:
             myRHWU.addShapeUncertaintyRelative("syst", th1Plus=self._expectedListSystUp[i], th1Minus=self._expectedListSystDown[i])
             myRHWU.makeFlowBinsVisible()
             if self._expectedLabelList[i] == "QCD":
-                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel="QCD (data)")
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelQCD)
+            elif self._expectedLabelList[i] == "Embedding":
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelEmbedding)
+            elif self._expectedLabelList[i] == "EWKfakes":
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelEWKFakes)
             else:
                 myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i])
             myHisto.setIsDataMC(isData=False, isMC=True)
@@ -358,7 +424,7 @@ class SelectionFlowPlotMaker:
         myParams = {}
         myParams["ylabel"] = "Events"
         myParams["log"] = True
-        myParams["optsLog"] = {"ymin": 0.5}
+        myParams["opts"] = {"ymin": 0.9}
         myParams["opts2"] = {"ymin": 0.5, "ymax":1.5}
         myParams["ratio"] = True
         myParams["ratioType"] = "errorScale"
@@ -366,8 +432,10 @@ class SelectionFlowPlotMaker:
         myParams["stackMCHistograms"] = True
         myParams["addMCUncertainty"] = True
         myParams["addLuminosityText"] = True
-        myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+        #myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
+        myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
         myParams["ratioCreateLegend"] = True
         myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-        plots.drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(dirname,m,index), **myParams)
+        plots.drawPlot(myStackPlot, "DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(m,index), **myParams)
+        os.system("mv DataDrivenCtrlPlot_M%d_%02d_SelectionFlow.* %s/."%(m,index,dirname))
 

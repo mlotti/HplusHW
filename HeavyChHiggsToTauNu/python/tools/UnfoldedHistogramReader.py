@@ -19,7 +19,7 @@ import sys
 import ROOT
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from math import sqrt
 
 class UnfoldedHistogramReader:
@@ -215,15 +215,15 @@ class UnfoldedHistogramReader:
             else:
                 # try a bug fix by taking first character only
                 if myList[i*2+1][0].isdigit():
-                    print WarningLabel()+"UnfoldedHistogramReader::_initialize(): tried naive bug fix for last factorisation bin dimension (guessed dimension: %s, histo: %s)"%(myList[i*2+1][0],myList[i*2+1][1:])
+                    print ShellStyles.WarningLabel()+"UnfoldedHistogramReader::_initialize(): tried naive bug fix for last factorisation bin dimension (guessed dimension: %s, histo: %s)"%(myList[i*2+1][0],myList[i*2+1][1:])
                     self._binCount.append(int(myList[i*2+1][0]))
                 else:
-                    raise Exception(ErrorLabel()+"UnfoldedHistogramReader: failed to decompose histogram title (it should contain the bin label and nbins information for n bins separated with '%s'\nHistogram title was: %s"%(self._separator, myTitle))
+                    raise Exception(ShellStyles.ErrorLabel()+"UnfoldedHistogramReader: failed to decompose histogram title (it should contain the bin label and nbins information for n bins separated with '%s'\nHistogram title was: %s"%(self._separator, myTitle))
             myOutput += "%s nbins=%d "%(self._binLabels[i], self._binCount[i])
         if self._debugStatus:
             print "UnfoldedHistogramReader: Histogram binning determined as : %s"%myOutput
         if len(self._binLabels) == 0:
-            raise Exception(ErrorLabel()+"UnfoldedHistogramReader: failed to decompose histogram title (it should contain the bin label and nbins information for n bins separated with '%s'\nHistogram title was: %s"%(self._separator, myTitle))
+            raise Exception(ShellStyles.ErrorLabel()+"UnfoldedHistogramReader: failed to decompose histogram title (it should contain the bin label and nbins information for n bins separated with '%s'\nHistogram title was: %s"%(self._separator, myTitle))
         self._unfoldedBinCount = h.GetNbinsY()
         # Loop over y axis to find axis values
         myBinCaptions = []
@@ -267,11 +267,11 @@ class UnfoldedHistogramReader:
 def validateUnfoldedHistogramReader():
     def check(a,b):
         if abs(a-b) < 0.00001:
-            return TestPassedStyle()+"PASSED"+NormalStyle()
+            return TestPassedStyle()+"PASSED"+ShellStyles.NormalStyle()
         else:
-            print ErrorStyle()+"FAILED (%f != %f)"%(a,b)+NormalStyle()
+            print ErrorStyle()+"FAILED (%f != %f)"%(a,b)+ShellStyles.NormalStyle()
             raise Exception("Error: validation test failed!")
-    print HighlightStyle()+"validate: UnfoldedHistogramReader\n"+NormalStyle()
+    print ShellStyles.HighlightStyle()+"validate: UnfoldedHistogramReader\n"+ShellStyles.NormalStyle()
     print "Creating dummy histogram for testing..."
     # Create histogram with factorisation dimensions 4 x 3 x 4
     h = ROOT.TH2F("testHisto","AxisA:4:AxisB:3:AxisC:4:testHisto",10,0.,10.,48,0.,48.)

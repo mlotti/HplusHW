@@ -4,7 +4,7 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,ExtractorBase
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import ExtractorResult,DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.UnfoldedHistogramReader import *
@@ -37,7 +37,7 @@ class QCDResultObject:
     def getInfoString(self, chosenResult=False):
         myOutput = "QCD factorised results summary for %s\n"%self._title
         if chosenResult:
-            myOutput += "%s... NQCD = %s  (data stat=%.2f, MC EWK stat=%.2f)%s\n"%(HighlightStyle(),self._NQCDResult.getResultStringFull("%.2f"),self._NQCDResult._dataUncert.uncertainty(),self._NQCDResult._mcUncert.uncertainty(),NormalStyle())
+            myOutput += "%s... NQCD = %s  (data stat=%.2f, MC EWK stat=%.2f)%s\n"%(ShellStyles.HighlightStyle(),self._NQCDResult.getResultStringFull("%.2f"),self._NQCDResult._dataUncert.uncertainty(),self._NQCDResult._mcUncert.uncertainty(),ShellStyles.NormalStyle())
         else:
             myOutput += "... NQCD = %s  (data stat=%.2f, MC EWK stat=%.2f)\n"%(self._NQCDResult.getResultStringFull("%.2f"),self._NQCDResult._dataUncert.uncertainty(),self._NQCDResult._mcUncert.uncertainty())
         myOutput += "... Purity after std. sel.: minimum = %s, average = %s\n"%(self._minPurityObjects[0].getResultStringFull("%.3f"),self._avgPurityObjects[0].getResultStringFull("%.3f"))
@@ -314,9 +314,9 @@ class QCDfactorisedColumn(DatacardColumn):
 
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
-        print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
+        print "... processing column: "+ShellStyles.HighlightStyle()+self._label+ShellStyles.NormalStyle()
         if dsetMgr == None:
-            raise Exception(ErrorLabel()+"You called data mining for QCD factorised, but it's multicrab directory is not there. Such undertaking is currently not supported.")
+            raise Exception(ShellStyles.ErrorLabel()+"You called data mining for QCD factorised, but it's multicrab directory is not there. Such undertaking is currently not supported.")
         # Obtain data driven QCD shape objects for the points
         myQCDCountAfterStdSel = DataDrivenQCDShape(dsetMgr, self._datasetMgrColumn, self._datasetMgrColumnForQCDMCEWK, self._factorisedConfig["afterStdSelSource"], luminosity)
         myQCDCountAfterTauLeg = DataDrivenQCDShape(dsetMgr, self._datasetMgrColumn, self._datasetMgrColumnForQCDMCEWK, self._factorisedConfig["afterTauLegSource"], luminosity)
@@ -372,7 +372,7 @@ class QCDfactorisedColumn(DatacardColumn):
                                                                  myHistograms,
                                                                  e.getQCDmode() == "statistics" or e.getQCDmode() == "shapestat"))
             if not myFoundStatus:
-                raise Exception("\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!")
+                raise Exception("\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Cannot find nuisance with id '"+nid+"'!")
         # Obtain results for control plots
         if config.OptionDoControlPlots != None:
             if config.OptionDoControlPlots:
@@ -557,7 +557,7 @@ class QCDfactorisedColumn(DatacardColumn):
                         # Filter out only important warnings of inpurity (impact more than one percent to whole bin)
                         if myTotal > 0.0:
                             if m[1] / myTotal > 0.01:
-                                self._messages.append(WarningLabel()+"Low purity in QCD factorised shape %s for unfolded bin %d : %s"%(histoName, i, m[0]))
+                                self._messages.append(ShellStyles.WarningLabel()+"Low purity in QCD factorised shape %s for unfolded bin %d : %s"%(histoName, i, m[0]))
                 # Save histograms
                 self._infoHistograms.append(hStatBin)
                 self._infoHistograms.append(hFullBin)
@@ -653,7 +653,7 @@ class QCDfactorisedColumn(DatacardColumn):
                         # Filter out only important warnings of inpurity (impact more than one percent to whole bin)
                         if myTotal > 0.0:
                             if m[1] / myTotal > 0.01:
-                                self._messages.append(WarningLabel()+"Low purity in QCD factorised shape %s for contraction %d bin %d : %s"%(histoName, axisToKeep, i, m[0]))
+                                self._messages.append(ShellStyles.WarningLabel()+"Low purity in QCD factorised shape %s for contraction %d bin %d : %s"%(histoName, axisToKeep, i, m[0]))
                 # Save histograms
                 self._infoHistograms.append(hStatBin)
                 self._infoHistograms.append(hFullBin)
@@ -691,7 +691,7 @@ class QCDfactorisedColumn(DatacardColumn):
         myRootFilename = outputDir+"/QCDMeasurementFactorisedInfo.root"
         myRootFile = ROOT.TFile.Open(myRootFilename, "RECREATE")
         if myRootFile == None:
-            print ErrorStyle()+"Error:"+NormalStyle()+" Cannot open file '"+myRootFilename+"' for output!"
+            print ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Cannot open file '"+myRootFilename+"' for output!"
             sys.exit()
         # Make base directories
         myBaseDirs = []
@@ -739,7 +739,7 @@ class QCDfactorisedColumn(DatacardColumn):
         myRootFile.Close()
         # Cleanup (closing the root file destroys the objects assigned to it, do not redestroy the histos in the _infoHistograms list
         self._infoHistograms = []
-        print "\n"+HighlightStyle()+"QCD Measurement factorised info histograms saved to: "+NormalStyle()+myRootFilename
+        print "\n"+ShellStyles.HighlightStyle()+"QCD Measurement factorised info histograms saved to: "+ShellStyles.NormalStyle()+myRootFilename
 
 ## QCDfactorisedExtractor class
 # It is essentially wrapper for QCD mode string
@@ -768,11 +768,11 @@ class QCDfactorisedExtractor(ExtractorBase):
 def validateQCDCountObject():
     def check(a,b):
         if abs(a-b) < 0.00001:
-            return TestPassedStyle()+"PASSED"+NormalStyle()
+            return TestPassedStyle()+"PASSED"+ShellStyles.NormalStyle()
         else:
-            print ErrorStyle()+"FAILED (%f != %f)"%(a,b)+NormalStyle()
+            print ErrorStyle()+"FAILED (%f != %f)"%(a,b)+ShellStyles.NormalStyle()
             raise Exception("Error: validation test failed!")
-    print HighlightStyle()+"validate: QCDCountObject\n"+NormalStyle()
+    print ShellStyles.HighlightStyle()+"validate: QCDCountObject\n"+ShellStyles.NormalStyle()
     #aa = Count(25.0, 3.0, 0.0)
     #bb = Count(30.0, 0.0, 2.0)
     #cc = aa.copy()

@@ -258,6 +258,7 @@ class LHCTypeAsymptotic:
 
         self.obsAndExpScripts = {}
         self.blindedScripts = {}
+        self.mlfitScripts = {}
 
     ## Return the name of the CLs flavour (for serialization to configuration.json)
     def name(self):
@@ -319,6 +320,8 @@ class LHCTypeAsymptotic:
         aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.obsAndExpScripts[mass] = fileName
 
+        self._createMLFit(mass, fileName, myInputDatacardName)
+
     ## Create the expected job script for a single mass point
     #
     # \param mass            String for the mass point
@@ -341,6 +344,36 @@ class LHCTypeAsymptotic:
         aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.blindedScripts[mass] = fileName
 
+        self._createMLFit(mass, fileName, myInputDatacardName)
+
+    def _createMLFit(self, mass, fileName, datacardName):
+        fname = fileName.replace("runCombine", "runCombineMLFit")
+        outputdir = "mlfit_m%s" % mass
+        opts = "-M MaxLikelihoodFit"
+        opts += " -m %s" % mass
+        opts += " --out %s" % outputdir
+        # From https://github.com/cms-analysis/HiggsAnalysis-HiggsToTauTau/blob/master/scripts/limit.py
+        #opts += " --minimizerAlgo minuit"
+        opts += " --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=0 --minimizerTolerance=0.001 --cminFallbackAlgo \"Minuit,0:0.001\" --keepFailures" # following options may not suit for us? --preFitValue=1.
+        command = ["#!/bin/sh", ""]
+        command.append("mkdir -p %s" % outputdir)
+        command.append("combine %s %s" % (opts, datacardName))
+
+        opts = "-a"
+        if self.brlimit:
+            opts += " -p BR"
+        opts2 = opts + " -g mlfit_m%s_pulls.png" % mass
+        command.append("python %s/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py %s %s/mlfit.root > %s/diffNuisances.txt" % (os.environ["CMSSW_BASE"], opts2, outputdir, outputdir))
+        opts += " -A"
+        opts2 = opts + " --vtol 1.0 --stol 0.99 --vtol2 2.0 --stol2 0.99" 
+        command.append("python %s/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py %s %s/mlfit.root > %s/diffNuisances_largest_pulls.txt" % (os.environ["CMSSW_BASE"], opts2, outputdir, outputdir))
+        opts2 = opts + " --vtol 99. --stol 0.50 --vtol2 99. --stol2 0.90" 
+        command.append("python %s/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py %s %s/mlfit.root > %s/diffNuisances_largest_constraints.txt" % (os.environ["CMSSW_BASE"], opts2, outputdir, outputdir))
+        command.append("combineReadMLFit.py -f %s/diffNuisances.txt -c configuration.json -m %s -o mlfit.json" % (outputdir, mass))
+        aux.writeScript(os.path.join(self.dirname, fname), "\n".join(command)+"\n")
+
+        self.mlfitScripts[mass] = fname
+
     ## Run LandS for the observed and expected limits for a single mass point
     #
     # \param mass   String for the mass point
@@ -352,6 +385,7 @@ class LHCTypeAsymptotic:
             self._runObservedAndExpected(result, mass)
         else:
             self._runBlinded(result, mass)
+        self._runMLFit(mass)
         return result
 
     ## Helper method to run a script
@@ -450,3 +484,64 @@ class LHCTypeAsymptotic:
         print output
         raise Exception("Unable to parse the output of command '%s'" % script)
 
+    def _runMLFit(self, mass):
+        script = self.mlfitScripts[mass]
+        self._run(script, "mlfit_m_%s_output.txt" % mass)
+
+def parseDiffNuisancesOutput(outputFileName, configFileName, mass):
+    # first read nuisance types from datacards
+    f = open(configFileName)
+    config = json.load(f)
+    f.close()
+    datacardFiles = [dc % mass for dc in config["datacards"]]
+
+    nuisanceTypes = {}
+    type_re = re.compile("\s*(?P<name>\S+)\s+(?P<type>\S+)\s+[\d-]")
+    for dc in datacardFiles:
+        f = open(dc)
+        # rewind until rate
+        for line in f:
+            if line[0:4] == "rate":
+                break
+        for line in f:
+            m = type_re.search(line)
+            if m:
+                aux.addToDictList(nuisanceTypes, m.group("name"), m.group("type"))
+
+    # then read the fit values
+    f = open(outputFileName)
+
+    ret_bkg = {}
+    ret_sbkg = {}
+    ret_rho = {}
+
+    nuisanceNames = []
+
+    num1 = "[+-]\d+.\d+"
+    num2 = "\d+.\d+"
+    nuis_re = re.compile("(?P<name>\S+)\s+(!|\*)?\s+(?P<bshift>%s),\s+(?P<bunc>%s)\s*(!|\*)?\s+(!|\*)?\s+(?P<sbshift>%s),\s+(?P<sbunc>%s)\s*(!|\*)?\s+(?P<rho>%s)" % (num1, num2, num1, num2, num1))
+    for line in f:
+        m = nuis_re.search(line)
+        if m:
+            nuisanceNames.append(m.group("name"))
+            nuisanceType = nuisanceTypes.get(m.group("name"), None)
+            if nuisanceType is not None and len(nuisanceType) == 1:
+                nuisanceType = nuisanceType[0]
+            if "statBin" in m.group("name"):
+                nuisanceType = "shapeStat"
+            if nuisanceType is None:
+                nuisanceType = "unknown"
+            ret_bkg[m.group("name")] = {"fitted_value": m.group("bshift"),
+                                        "fitted_uncertainty": m.group("bunc"),
+                                        "type": nuisanceType}
+            ret_sbkg[m.group("name")] = {"fitted_value": m.group("sbshift"),
+                                         "fitted_uncertainty": m.group("sbunc"),
+                                         "type": nuisanceType}
+            ret_rho[m.group("name")] = {"value": m.group("rho")}
+
+    f.close()
+
+    ret_bkg["nuisanceParameters"] = nuisanceNames
+    ret_sbkg["nuisanceParameters"] = nuisanceNames
+
+    return (ret_bkg, ret_sbkg, ret_rho)

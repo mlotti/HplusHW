@@ -49,36 +49,37 @@ class MCDatasetHelper:
     #
     # \param name          Name of the dataset
     # \param aod           String for the DBS-dataset path of AOD
-    def __call__(self, name, aod):
-        if "TTToHplusBWB" in name or "TTToHplusBHminusB" in name:
-            # For BR limit LandS expectes WH and HH samples to have ttbar cross section
-            crossSection = xsect.backgroundCrossSections.crossSection("TTJets", self.energy)
-        elif "HplusTB" in name or "HplusToTBbar" in name:
-            # For sigma*BR limit LandS expects heavy H+ samples to have cross section of 1 pb
-            crossSection = 1
-        elif "Hplus_taunu" in name:
-            if "t-channel" in name:
-                crossSection = sum([xsect.backgroundCrossSections.crossSection(st, self.energy) for st in ["T_t-channel", "Tbar_t-channel"]])
-            elif "tW-channel" in name:
-                crossSection = sum([xsect.backgroundCrossSections.crossSection(st, self.energy) for st in ["T_tW-channel", "Tbar_tW-channel"]])
-            elif "s-channel" in name:
-                crossSection = sum([xsect.backgroundCrossSections.crossSection(st, self.energy) for st in ["T_s-channel", "Tbar_s-channel"]])
+    def __call__(self, name, aod, setCrossSection=True):
+        crossSection = None
+        if setCrossSection:
+            if "TTToHplusBWB" in name or "TTToHplusBHminusB" in name:
+                # For BR limit LandS expectes WH and HH samples to have ttbar cross section
+                crossSection = xsect.backgroundCrossSections.crossSection("TTJets", self.energy)
+            elif "HplusTB" in name or "HplusToTBbar" in name:
+                # For sigma*BR limit LandS expects heavy H+ samples to have cross section of 1 pb
+                crossSection = 1
+            elif "Hplus_taunu" in name:
+                if "t-channel" in name:
+                    crossSection = sum([xsect.backgroundCrossSections.crossSection(st, self.energy) for st in ["T_t-channel", "Tbar_t-channel"]])
+                elif "tW-channel" in name:
+                    crossSection = sum([xsect.backgroundCrossSections.crossSection(st, self.energy) for st in ["T_tW-channel", "Tbar_tW-channel"]])
+                elif "s-channel" in name:
+                    crossSection = sum([xsect.backgroundCrossSections.crossSection(st, self.energy) for st in ["T_s-channel", "Tbar_s-channel"]])
+                else:
+                    raise Exception("Unrecognized single top -> H+ sample: %s" % name)
             else:
-                raise Exception("Unrecognized single top -> H+ sample: %s" % name)
-        else:
-
-            # W+Njets, with the assumption that they are weighted (see
-            # src/WJetsWeight.cc) And if they are not, the cross section can
-            # always be set in the plot scripts by the user.
-            nameTmp = name
-            for wNjets in ["W1Jets", "W2Jets", "W3Jets", "W4Jets"]:
-                if wNjets in name:
-                    nameTmp = name.replace(wNjets, "WJets")
-                    break
+                # W+Njets, with the assumption that they are weighted (see
+                # src/WJetsWeight.cc) And if they are not, the cross section can
+                # always be set in the plot scripts by the user.
+                nameTmp = name
+                for wNjets in ["W1Jets", "W2Jets", "W3Jets", "W4Jets"]:
+                    if wNjets in name:
+                        nameTmp = name.replace(wNjets, "WJets")
+                        break
                 
-            crossSection = xsect.backgroundCrossSections.crossSection(nameTmp, self.energy)
-            if crossSection is None:
-                print "Warning: unable to find cross section for dataset %s with energy %s (check python/tools/crosssection.py)" % (name, self.energy)
+                crossSection = xsect.backgroundCrossSections.crossSection(nameTmp, self.energy)
+                if crossSection is None:
+                    print "Warning: unable to find cross section for dataset %s with energy %s (check python/tools/crosssection.py)" % (name, self.energy)
 
         args = {}
         for sname in self.argSamples:
@@ -114,6 +115,21 @@ datasets.extend([
     DataDataset("SingleMu_%s_2011B_Nov19", runs=(173693, 180371), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"), # for backward compatibility only
     DataDataset("SingleMu_%s_2011B_Nov19", runs=(175832, 180252), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"), # 50367238 events, 3431 files
 ])
+
+# 2011 Tau leg trigger efficiency with RAW samples                                                                                                                                                                        
+datasets.extend([                                                                                                                                                                                                         
+    # SingleMu, Run2011A RAW-RECO                                                                                                                                                                                         
+    DataDataset("SingleMu_%s_2011A_Nov08_RAWRECO", runs=(165970, 167913), aod="/SingleMu/Run2011A-Tau-08Nov2011-v1/RAW-RECO"),                                                                                            
+    DataDataset("SingleMu_%s_2011A_Nov08_RAWRECO", runs=(170722, 173198), aod="/SingleMu/Run2011A-Tau-08Nov2011-v1/RAW-RECO"),                                                                                            
+    DataDataset("SingleMu_%s_2011A_Nov08_RAWRECO", runs=(173236, 173692), aod="/SingleMu/Run2011A-Tau-08Nov2011-v1/RAW-RECO"),                                                                                            
+                                                                                                                                                                                                                          
+    # SingleMu, Run2011B RAW-RECO                                                                                                                                                                                         
+    DataDataset("SingleMu_%s_2011B_Nov19_RAWRECO", runs=(175832, 180252), aod="/SingleMu/Run2011B-Tau-19Nov2011-v1/RAW-RECO"),                                                                                            
+                                                                                                                                                                                                                          
+    MCDataset("DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW", aod="/DYJetsToLL_TuneZ2_MPIoff_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/GEN-RAW"),                                                
+    MCDataset("DYToTauTau_M20_CT10_TuneZ2_7TeV_powheg_pythia_tauola_TTEffSkim_v447_v1", aod="/DYToTauTau_M-20_CT10_TuneZ2_7TeV-powheg-pythia-tauola/Fall11-PU_S6_START42_V14B-v1/GEN-RAW", setCrossSection=False), # disable cross section setting to silence a harmless warning
+])
+
 # Split for backward compatibility, also for Mu-trigger thresholds
 datasets.splitDataByRuns("SingleMu_160431-173692_2011A_Nov08", [
         (160431, 163261), # 38372194 events, 1415 files

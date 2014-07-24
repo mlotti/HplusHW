@@ -8,6 +8,7 @@
 import glob, os, sys, re
 import math
 import copy
+import time
 import StringIO
 import hashlib
 import array
@@ -192,6 +193,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 # 
 # \param taskdirs     List of strings for the CRAB task directories (relative
 #                     to the working directory)
+# \param emptyDatasetsAsNone  If true, in case of no datasets return None instead of raising an Exception (default False)
 # \param kwargs       Keyword arguments (see below) 
 # 
 # <b>Keyword arguments</b>, all are also forwarded to readFromRootFiles()
@@ -203,7 +205,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 # The basename of the task directories are taken as the dataset names
 # in the DatasetManagerCreator object (e.g. for directory '../Foo',
 # 'Foo' will be the dataset name)
-def readFromCrabDirs(taskdirs, **kwargs):
+def readFromCrabDirs(taskdirs, emptyDatasetsAsNone=False, **kwargs):
     inputFile = None
     if "opts" in kwargs:
         opts = kwargs["opts"]
@@ -231,6 +233,8 @@ def readFromCrabDirs(taskdirs, **kwargs):
             raise Exception("No datasets. Have you merged the files with hplusMergeHistograms.py?")
 
     if len(dlist) == 0:
+        if emptyDatasetsAsNone:
+            return None
         raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
 
     return readFromRootFiles(dlist, **kwargs)
@@ -1041,12 +1045,16 @@ class SystematicsHelper:
                 print "  Using explicitly specified shape variations (%s)" % ",".join(shapes)
 
         for source in shapes:
-            (plus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Plus")
-            (minus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Minus")
-            if modify is not None:
-                modify(plus)
-                modify(minus)
-            rootHistoWithUncertainties.addShapeUncertaintyFromVariation(source, plus, minus)
+            plus = None
+            minus = None
+            # Need to do the check, because of QCD shape uncertainty
+            if dset.hasRootHisto(self._histoName, analysisPostfix=source+"Plus"):
+                (plus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Plus")
+                (minus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Minus")
+                if modify is not None:
+                    modify(plus)
+                    modify(minus)
+                rootHistoWithUncertainties.addShapeUncertaintyFromVariation(source, plus, minus)
 
         # Add any additional shape variation histograms supplied by the user
         additShapes = self._settings.get("additionalShapes")
@@ -1166,12 +1174,15 @@ class RootHistoWithUncertainties:
         myClone = self.Clone()
         myClone.Rebin(self._rootHisto.GetNbinsX())
         g = myClone.getSystematicUncertaintyGraph()
-        return (g.GetErrorYhigh(0),g.GetErrorYlow(0))
+        myClone.Delete()
+        myResult = (g.GetErrorYhigh(0),g.GetErrorYlow(0))
+        g.Delete()
+        return myResult
 
     ## Adds the underflow and overflow bins to the first and last bins, respectively
     def makeFlowBinsVisible(self):
-        if self._flowBinsVisibleStatus:
-            return
+        #if self._flowBinsVisibleStatus:
+        #    return
         self._flowBinsVisibleStatus = True
         # Update systematics histograms first
         for key, (hPlus, hMinus) in self._shapeUncertainties.iteritems():
@@ -1197,11 +1208,13 @@ class RootHistoWithUncertainties:
 
         self._checkConsistency(name, th1Plus)
         self._checkConsistency(name, th1Minus)
-        # Subtract nominal to get absolute uncertainty
+        # Subtract nominal to get absolute uncertainty (except for source histograms)
+        if name in self._shapeUncertainties.keys():
+            raise Exception("Uncertainty '%s' has already been added!"%name)
         th1Plus.Add(self._rootHisto, -1.0)
         th1Minus.Add(self._rootHisto, -1.0)
         # Store
-        self._shapeUncertainties[name] = (th1Plus, th1Minus)
+        self._shapeUncertainties[name] = (aux.Clone(th1Plus), aux.Clone(th1Minus))
 
     ## Remove superfluous shape variation uncertainties
     #
@@ -1214,7 +1227,28 @@ class RootHistoWithUncertainties:
             if not key in keepList:
                 dropList.append(key)
         for key in dropList:
+            (hplus,hminus) = self._shapeUncertainties[key]
+            hplus.Delete()
+            hminus.Delete()
             del self._shapeUncertainties[key]
+
+    ## Remove shape variation uncertainties for a key
+    #
+    # \param name   String of key to be removed
+    #
+    # The normalization relative uncertainties are summed quadratically
+    def removeShapeUncertainty(self, name):
+        myKey = None
+        if name in self._shapeUncertainties.keys():
+            myKey = name
+        elif "SystVar"+name in self._shapeUncertainties.keys():
+            myKey = "SystVar"+name
+        else:
+            raise Exception("Could not find key '%s' in syst. var.! (list = %s)"%(name,", ".join(map(str,self._shapeUncertainties.keys()))))
+        (hplus,hminus) = self._shapeUncertainties[myKey]
+        hplus.Delete()
+        hminus.Delete()
+        del self._shapeUncertainties[myKey]
 
     ## Add bin-wise relative uncertainty
     #
@@ -1299,23 +1333,6 @@ class RootHistoWithUncertainties:
     # direction (i.e. asymmetrically). Again, a rather crude
     # approximation.
     def getSystematicUncertaintyGraph(self, addStatistical=False):
-        def _getProperAdditives(diffPlus, diffMinus):
-            if diffPlus > 0 and diffMinus > 0:
-                return (max(diffPlus, diffMinus)**2, 0.0)
-            elif diffPlus < 0 and diffMinus < 0:
-                return (0.0, max(-diffPlus, -diffMinus)**2)
-            elif diffPlus > 0:
-                return (diffPlus**2, diffMinus**2)
-            elif diffPlus < 0:
-                return (diffMinus**2, diffPlus**2)
-            elif diffMinus > 0:
-                return (diffMinus**2, diffPlus**2)
-            elif diffMinus < 0:
-                return (diffPlus**2, diffMinus**2)
-            elif diffPlus == 0 and diffMinus == 0:
-                return (0.0, 0.0)
-            raise Exception("Error: Unknown situation diffPlus=%f, diffMinus=%f!"%(diffPlus, diffMinus))
-
         xvalues = []
         xerrhigh = []
         xerrlow = []
@@ -1340,7 +1357,7 @@ class RootHistoWithUncertainties:
             for shapePlus, shapeMinus in self._shapeUncertainties.itervalues():
                 diffPlus = shapePlus.GetBinContent(i) # Note that this could have + or - sign
                 diffMinus = shapeMinus.GetBinContent(i) # Note that this could have + or - sign
-                (addPlus, addMinus) = _getProperAdditives(diffPlus, diffMinus)
+                (addPlus, addMinus) = aux.getProperAdditivesForVariationUncertainties(diffPlus, diffMinus)
                 yhighSquareSum += addPlus
                 ylowSquareSum += addMinus
 
@@ -1453,25 +1470,57 @@ class RootHistoWithUncertainties:
     #
     # \param args  Positional arguments, forwarded to TH1.Rebin()
     def Rebin(self, *args):
-        self._rootHisto = self._rootHisto.Rebin(*args)
+        if self._rootHisto == None:
+            raise Exception("Tried to call Rebin for a histogram which has been deleted")
+        htmp = self._rootHisto.Rebin(*args)
+        if htmp.GetBinContent(htmp.GetNbinsX()) == float('Inf'):
+            raise Exception("Check the rebin range, it produces infinity!")
+        if len(args) > 1: # If more than 1 argument is given, ROOT creates a clone of the histogram
+            self._rootHisto.Delete()
+        ROOT.SetOwnership(htmp, True)
+        htmp.SetDirectory(0)
+        self._rootHisto = htmp
         keys = self._shapeUncertainties.keys()
         for key in keys:
             (plus, minus) = self._shapeUncertainties[key]
-            plus = plus.Rebin(*args)
-            minus = minus.Rebin(*args)
-            self._shapeUncertainties[key] = (plus, minus)
+            plustmp = plus.Rebin(*args)
+            minustmp = minus.Rebin(*args)
+            if plustmp.GetBinContent(htmp.GetNbinsX()) == float('Inf') or minustmp.GetBinContent(htmp.GetNbinsX()) == float('Inf'):
+                raise Exception("Check the rebin range, it produces infinity!")
+            if len(args) > 1: # If more than 1 argument is given, ROOT creates a clone of the histogram
+                plus.Delete()
+                minus.Delete()
+            ROOT.SetOwnership(plustmp, True)
+            ROOT.SetOwnership(minustmp, True)
+            plustmp.SetDirectory(0)
+            minustmp.SetDirectory(0)
+            self._shapeUncertainties[key] = (plustmp, minustmp)
+        self.makeFlowBinsVisible()
 
     ## Rebin histogram
     #
     # \param args  Positional arguments, forwarded to TH1.Rebin()
     def Rebin2D(self, *args):
-        self._rootHisto = self._rootHisto.Rebin2D(*args)
+        htmp = self._rootHisto.Rebin2D(*args)
+        if len(args) > 2: # If more than 2 arguments are given, ROOT creates a clone of the histogram
+            self._rootHisto.Delete()
+        ROOT.SetOwnership(htmp, True)
+        htmp.SetDirectory(0)
+        self._rootHisto = htmp
         keys = self._shapeUncertainties.keys()
         for key in keys:
             (plus, minus) = self._shapeUncertainties[key]
-            plus = plus.Rebin2D(*args)
-            minus = minus.Rebin2D(*args)
-            self._shapeUncertainties[key] = (plus, minus)
+            plustmp = plus.Rebin2D(*args)
+            minustmp = minus.Rebin2D(*args)
+            if len(args) > 2: # If more than 2 arguments are given, ROOT creates a clone of the histogram
+                plus.Delete()
+                minus.Delete()
+            ROOT.SetOwnership(plustmp, True)
+            ROOT.SetOwnership(minustmp, True)
+            plustmp.SetDirectory(0)
+            minustmp.SetDirectory(0)
+            self._shapeUncertainties[key] = (plustmp, minustmp)
+        self.makeFlowBinsVisible()
 
     ## Add another RootHistoWithUncertainties object
     #
@@ -1499,16 +1548,16 @@ class RootHistoWithUncertainties:
         for key in keys2:
             if not key in keys1:
                 # Add those histograms, which so far did not exist
+                (plus, minus) = other._shapeUncertainties[key]
+                newPlus = aux.Clone(plus)
+                newMinus = aux.Clone(minus)
                 if len(args) > 0:
-                    if args[0] >= 0.0:
-                        self._shapeUncertainties[key] = other._shapeUncertainties[key]
-                else:
-                    self._shapeUncertainties[key] = other._shapeUncertainties[key]
-                #self.addShapeUncertaintyFromVariation(key, *)
+                    newPlus.Scale(args[0])
+                    newMinus.Scale(args[0])
+                self._shapeUncertainties[key] = (newPlus, newMinus)
 
         # Add histo
         self._rootHisto.Add(other._rootHisto, *args)
-
 
     ## Scale the histogram
     #
@@ -1556,11 +1605,12 @@ class RootHistoWithUncertainties:
 
     ## Delete all contained histograms
     def Delete(self):
-        self._rootHisto.Delete()
-        for (plus, minus) in self._shapeUncertainties.itervalues():
-            plus.Delete()
-            minus.Delete()
-
+        if self._rootHisto != None:
+            self._rootHisto.Delete()
+        if self._shapeUncertainties != None:
+            for (plus, minus) in self._shapeUncertainties.itervalues():
+                plus.Delete()
+                minus.Delete()
         self._rootHisto = None
         self._shapeUncertainties = None
 
@@ -2750,6 +2800,8 @@ class Dataset:
                 pass
             print "Using top-pt reweighted Nallevents for sample %s" % self.name
         else:
+            if "topPtWeightType" in args:
+                del args["topPtWeightType"]
             try:
                 self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, **args)
             except KeyError:
@@ -2779,14 +2831,16 @@ class Dataset:
     #
     # If dataset.TreeDraw object is given, it is considered to always
     # exist.
-    def hasRootHisto(self, name):
-        if hasattr(name, "draw"):
+    def hasRootHisto(self, name, **kwargs):
+        realName = self._translateName(name, **kwargs)
+        if hasattr(realName, "draw"):
             return True
 
-        try:
-            return len(self.getRootObjects(name)) > 0
-        except HistogramNotFoundException:
-            return False
+        for f in self.files:
+            o = aux.Get(f, realName)
+            if o != None:
+                o.Delete()
+                return True
 
     ## Get the dataset.DatasetRootHisto object for a named histogram.
     # 
@@ -2822,7 +2876,6 @@ class Dataset:
         wrapper = RootHistoWithUncertainties(h)
         if hasattr(name, "addUncertainties"):
             name.addUncertainties(self, wrapper, modify)
-
         return DatasetRootHisto(wrapper, self) 
 
     ## Get the directory content of a given directory in the ROOT file.
@@ -3820,6 +3873,9 @@ class DatasetManagerCreator:
         self._systematicVariationSources = systTmp.keys()
         self._systematicVariationSources.sort()
 
+    def getBaseDirectory(self):
+        return self._baseDirectory
+
     ## Create DatasetManager
     #
     # \param kwargs   Keyword arguments (see below)
@@ -4192,10 +4248,30 @@ class NtupleCache:
 
         print "Processing dataset", datasetName
         
+        # Setup cache
+        useCache = True
+        if useCache:
+            tree.SetCacheSize(1024*1024) # 10 MB
+            tree.SetCacheLearnEntries(100);
+
+        readBytesStart = ROOT.TFile.GetFileBytesRead()
+        readCallsStart = ROOT.TFile.GetFileReadCalls()
+        timeStart = time.time()
+        clockStart = time.clock()
         if useMaxEvents:
+            if useCache:
+                tree.SetCacheEntryRange(0, N)
             tree.Process(selector, "", N)
         else:
             tree.Process(selector)
+        timeStop = time.time()
+        clockStop = time.clock()
+        readCallsStop = ROOT.TFile.GetFileReadCalls()
+        readBytesStop = ROOT.TFile.GetFileBytesRead()
+        cpuTime = clockStop-clockStart
+        realTime = timeStop-timeStart
+        readMbytes = float(readBytesStop-readBytesStart)/1024/1024
+        print "Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB (%d calls), read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, readCallsStop-readCallsStart, readMbytes/realTime)
         for d in directories:
             d.Write()
 

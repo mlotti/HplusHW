@@ -22,11 +22,24 @@ namespace Impl {
 }
 
 //////////////////// MuonCollection ////////////////////
-MuonCollection::Muon::Muon(): Base() {}
 MuonCollection::Muon::~Muon() {}
 void MuonCollection::Muon::ensureValidity() const {
   if(!isValid())
     throw std::logic_error("Muon is not valid (fCollection is NULL)");
+}
+void MuonCollection::Muon::assignP4() {
+  if(correctedP4().Pt() < 200 && std::sqrt(tunePP3().Perp2()) < 200) {
+    setP4(correctedP4());
+    fCorrectionType = kCorrected;
+  }
+  else {
+    math::XYZTLorentzVector p = correctedP4();
+    p.SetPx(tunePP3().X());
+    p.SetPy(tunePP3().Y());
+    p.SetPz(tunePP3().Z());
+    setP4(p);
+    fCorrectionType = kTuneP;
+  }
 }
 
 MuonCollection::MuonCollection(const std::string prefix):
@@ -127,6 +140,7 @@ void JetCollection::setupBranches(BranchManager& branchManager) {
   branchManager.book(fPrefix+"_numberOfDaughters", &fNumberOfDaughters);
   branchManager.book(fPrefix+"_looseId", &fLooseId);
   branchManager.book(fPrefix+"_tightId", &fTightId);
+  branchManager.book(fPrefix+"_f_csv", &fCSV);
   branchManager.book(fPrefix+"_btagged", &fBTagged);
   branchManager.book(fPrefix+"_btagScaleFactor", &fBTagSF);
   branchManager.book(fPrefix+"_btagScaleFactorUncertainty", &fBTagSFUnc);
