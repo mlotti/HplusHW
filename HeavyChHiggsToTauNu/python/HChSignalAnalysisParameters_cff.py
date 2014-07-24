@@ -403,17 +403,17 @@ QCDTailKiller = cms.untracked.PSet(
     maxJetsToConsider = cms.untracked.uint32(4),
     # Back to back (bottom right corner of 2D plane tau,MET vs. jet,MET)
     backToBack = cms.untracked.VPSet(
-        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 1
-        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 2
-        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 3
-        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
+        QCDTailKillerBin("circular", 0.0, 40.0), # jet 1
+        QCDTailKillerBin("circular", 0.0, 40.0), # jet 2
+        QCDTailKillerBin("circular", 0.0, 40.0), # jet 3
+        QCDTailKillerBin("circular", 0.0, 40.0), # jet 4
     ),
     # Collinear topology (top left corner of 2D plane tau,MET vs. jet,MET)
     collinear = cms.untracked.VPSet(
-        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 1
-        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 2
-        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 3
-        QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 1
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 2
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 3
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 4
     ),
     disableCollinearCuts = cms.untracked.bool(False),
 )
@@ -501,9 +501,10 @@ QCDTailKillerVeryTightPlus = QCDTailKiller.clone(
 )
 
 # Define here QCD tail killer scenarios (note that the nominal module will be produced in addition to these)
-QCDTailKillerScenarios = [#"QCDTailKillerZeroPlus",
-                          #"QCDTailKillerLoosePlus",
-                          #"QCDTailKillerMediumPlus",
+QCDTailKillerScenarios = ["QCDTailKillerNoCuts",
+                          #"QCDTailKillerZeroPlus",
+                          "QCDTailKillerLoosePlus",
+                          "QCDTailKillerMediumPlus",
                           "QCDTailKillerTightPlus",
                           #"QCDTailKillerVeryTightPlus"
                           ]
