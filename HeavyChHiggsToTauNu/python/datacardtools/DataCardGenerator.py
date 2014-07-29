@@ -329,7 +329,7 @@ class DataCardGenerator:
             if hasattr(self._config, "EWKFakeIdList") and len(self._config.EWKFakeIdList) > 0:
                 # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
                 print "\nPerforming merge for MC genuine tau column"
-                self.separateMCEWKTausAndFakes(targetColumn="",targetColumnNewName="MC_EWKTau",addColumnList=None,subtractColumnList=self._config.EWKFakeIdList)
+                self.separateMCEWKTausAndFakes(targetColumn=self._config.EmbeddingIdList[0],targetColumnNewName="MC_EWKTau",addColumnList=None,subtractColumnList=self._config.EWKFakeIdList)
         if self._config.OptionDoMergeFakeTauColumns:
             if hasattr(self._config, "EWKFakeIdList") and len(self._config.EWKFakeIdList) > 0:
                 # For data-driven, merge fake tau columns into one
@@ -540,10 +540,7 @@ class DataCardGenerator:
         myEmbColumn._label = targetColumnNewName
         # Add results from dataset columns with landsProcess == None
         if addColumnList == None:
-            addColumnList = []
-            for c in self._columns:
-                if c.getLandsProcess() == None:
-                    addColumnList.append(c.getLandsProcess())
+            addColumnList = [None]
         # Now do the adding
         myRemoveList = []
         myNuisanceIdList = list(myEmbColumn.getNuisanceIds())
