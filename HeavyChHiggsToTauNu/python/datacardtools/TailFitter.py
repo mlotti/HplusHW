@@ -400,7 +400,7 @@ class TailFitter:
         myParams = {}
         myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
         myParams["log"] = True
-        myParams["opts"] = {"ymin": 1e-7}
+        myParams["opts"] = {"ymin": 1e-5}
         myParams["divideByBinWidth"] = True
         myDrawer = plots.PlotDrawer()
         myDrawer(plot, myName, **myParams)
@@ -450,7 +450,7 @@ class TailFitter:
         myParams = {}
         myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
         myParams["log"] = True
-        myParams["opts"] = {"ymin": 1e-7}
+        myParams["opts"] = {"ymin": 1e-5}
         myParams["divideByBinWidth"] = True
         myDrawer = plots.PlotDrawer()
         myDrawer(plot, myName, **myParams)
