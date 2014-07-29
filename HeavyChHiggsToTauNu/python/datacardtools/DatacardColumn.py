@@ -12,6 +12,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaint
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramExtras
+import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference as systematicsForMetShapeDifference
 from math import sqrt,pow
 from array import array
 
@@ -368,6 +369,8 @@ class DatacardColumn():
                 self._cachedShapeRootHistogramWithUncertainties.Scale(self._additionalNormalisationFactor)
             # Leave histograms with the original binning at this stage, but do move under/overflow into first/last bin
             self._cachedShapeRootHistogramWithUncertainties.makeFlowBinsVisible()
+	    if not self.typeIsObservation():
+		print "..... event yield: %f +- %f (stat.)"%(self._cachedShapeRootHistogramWithUncertainties.getRate(),self._cachedShapeRootHistogramWithUncertainties.getRateStatUncertainty())
         # Obtain rate histogram
         myRateHistograms = []
         if self.typeIsEmptyColumn() or dsetMgr == None:
@@ -590,6 +593,29 @@ class DatacardColumn():
                 histogramExtras.makeFlowBinsVisible(h)
                 myNewHistograms.append(h)
             self._nuisanceResults[j]._histograms.extend(myNewHistograms)
+	# Treat QCD MET shape nuisance
+	for j in range(0,len(self._nuisanceResults)):
+	    if self._nuisanceResults[j].getId() == "QCD_metshape":
+		hDenominator = None
+		hNumerator = None
+		hUp = None
+		hDown = None
+		for i in range(0,len(self._nuisanceResults[j]._histograms)):
+		    if not "fineBinning" in self._nuisanceResults[j]._histograms[i].GetTitle():
+			if "Numerator" in self._nuisanceResults[j]._histograms[i].GetTitle():
+			    hNumerator = self._nuisanceResults[j]._histograms[i]
+			if "Denominator" in self._nuisanceResults[j]._histograms[i].GetTitle():
+			    hDenominator = self._nuisanceResults[j]._histograms[i]
+			if "Up" in self._nuisanceResults[j]._histograms[i].GetTitle():
+			    hUp = self._nuisanceResults[j]._histograms[i]
+			if "Down" in self._nuisanceResults[j]._histograms[i].GetTitle():
+			    hDown = self._nuisanceResults[j]._histograms[i]
+		if hDenominator == None or hNumerator == None or hUp == None or hDown == None:
+		    raise Exception()
+		systematicsForMetShapeDifference.createSystHistograms(self._rateResult._histograms[0], hUp, hDown, hNumerator, hDenominator)
+		# Add rate histogram to make the histograms compatible with LandS/Combine
+		#hUp.Add(self._rateResult._histograms[0])
+		#hDown.Add(self._rateResult._histograms[0])  
 
     ## Returns rate for column
     def getRateResult(self):
