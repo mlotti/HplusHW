@@ -416,34 +416,41 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
     myHisto.setIsDataMC(isData=False, isMC=True)
     myStackList.insert(1, myHisto)
     # Make plot
-    myStackPlot = plots.DataMCPlot2(myStackList)
-    myStackPlot.setLuminosity(luminosity)
-    #myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
-    myStackPlot.setDefaultStyles()
-    myParams = {}
-    if myBlindedStatus:
-	myParams["blindingRangeString"] = myBlindingString
-    myParams["ratio"] = True
-    myParams["ratioType"] = "errorScale"
-    myParams["ratioYlabel"] = "Data/#Sigma Exp."
-    myParams["stackMCHistograms"] = True
-    myParams["addMCUncertainty"] = True
-    myParams["addLuminosityText"] = True
-    myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
-    myParams["ratioCreateLegend"] = True
-    myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-    myParams["xlabel"] = "m_{T}(#tau_{h},E_{T}^{miss})"
-    myParams["ylabel"] = "Events/#Deltam_{T} / "
-    a = hObsLocal.GetXaxis().GetBinWidth(1)
-    b = hObsLocal.GetXaxis().GetBinWidth(hObsLocal.GetNbinsX())
-    if abs(a-b) < 0.0001:
-	myParams["ylabel"]  += "%d GeV"%a
-    else:
-	myParams["ylabel"]  += "%d-%d GeV"%(a,b)
-    myParams["divideByBinWidth"] = True
-    myParams["log"] = True
-    myParams["opts"] = {"ymin": 1e-5}
-    plots.drawPlot(myStackPlot, "PostTailFitShape_M%d"%float(m), **myParams)
+    myLogList = [True, False]
+    for l in myLogList:
+	myStackPlot = plots.DataMCPlot2(myStackList)
+	myStackPlot.setLuminosity(luminosity)
+	#myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
+	myStackPlot.setDefaultStyles()
+	myParams = {}
+	if myBlindedStatus:
+	    myParams["blindingRangeString"] = myBlindingString
+	myParams["ratio"] = True
+	myParams["ratioType"] = "errorScale"
+	myParams["ratioYlabel"] = "Data/#Sigma Exp."
+	myParams["stackMCHistograms"] = True
+	myParams["addMCUncertainty"] = True
+	myParams["addLuminosityText"] = True
+	myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
+	myParams["ratioCreateLegend"] = True
+	myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
+	myParams["xlabel"] = "m_{T}(#tau_{h},E_{T}^{miss})"
+	myParams["ylabel"] = "Events/#Deltam_{T} / "
+	a = hObsLocal.GetXaxis().GetBinWidth(1)
+	b = hObsLocal.GetXaxis().GetBinWidth(hObsLocal.GetNbinsX())
+	if abs(a-b) < 0.0001:
+	    myParams["ylabel"]  += "%d GeV"%a
+	else:
+	    myParams["ylabel"]  += "%d-%d GeV"%(a,b)
+	myParams["divideByBinWidth"] = True
+	myParams["log"] = l
+	myPlotName = "PostTailFitShape_M%d"%float(m)
+	if l:
+	    myParams["opts"] = {"ymin": 1e-5}
+	else:
+	    myParams["opts"] = {"ymin": 0.0}
+	    myPlotName += "_Linear"
+	plots.drawPlot(myStackPlot, myPlotName, **myParams)
 
 def createBinnedFitUncertaintyHistograms(hRate, hUp, hDown, applyFrom):
     hupList = []
