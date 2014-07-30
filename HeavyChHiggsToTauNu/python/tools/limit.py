@@ -422,6 +422,44 @@ class MLFitData:
 
         return (gr, labels)
 
+    def fittedGraphHeavy(self, mass, backgroundOnly=False, signalPlusBackground=False):
+        if not backgroundOnly and not signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
+        if backgroundOnly and signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (both were)")
+        if signalPlusBackground:
+            backgroundOnly = False
+
+        labels = []
+        values = []
+        uncertainties = []
+        
+        if backgroundOnly:
+            content = self.data[mass]["background"]
+        else:
+            content = self.data[mass]["signal+background"]
+        labels = content["nuisanceParameters"][:]
+
+        for nuis in labels[:]:
+            if "BinByBin" in nuis:
+                del labels[labels.index(nuis)]
+                continue               
+            if not nuis in content or content[nuis]["type"] == "shapeStat":
+                del labels[labels.index(nuis)]
+                continue
+            values.append(float(content[nuis]["fitted_value"]))
+            uncertainties.append(float(content[nuis]["fitted_uncertainty"]))
+
+        yvalues = range(1, len(values)+1)
+
+        yvalues.reverse()
+
+        gr = ROOT.TGraphErrors(len(values),
+                               array.array("d", values), array.array("d", yvalues),
+                               array.array("d", uncertainties))
+
+        return (gr, labels)
+
     def fittedGraphShapeStat(self, mass, backgroundOnly=False, signalPlusBackground=False):
         if not backgroundOnly and not signalPlusBackground:
             raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
@@ -432,6 +470,7 @@ class MLFitData:
 
         shapeStatNuisance = None
         labels = []
+        labels2= []
         values = []
         uncertainties = []
         
@@ -442,9 +481,19 @@ class MLFitData:
 
         isCombine = False
 
-        for nuis in content["nuisanceParameters"]:
+#        for nuis in content["nuisanceParameters"]:
+#            if not nuis in content or content[nuis]["type"] != "shapeStat":
+#                continue
+
+###
+        labels2 = content["nuisanceParameters"]
+        for nuis in labels2:             
+            if "Hp" in nuis:
+                del labels2[labels2.index(nuis)]
+                continue               
             if not nuis in content or content[nuis]["type"] != "shapeStat":
                 continue
+###
 
             shapeStatNuisance = nuis
             if "fitted_value" in content[nuis]:
@@ -461,7 +510,7 @@ class MLFitData:
                 for l in labels:
                     values.append(float(content[nuis][l]["fitted_value"]))
                     uncertainties.append(float(content[nuis][l]["fitted_uncertainty"]))
-
+    
         if shapeStatNuisance is None:
             raise Exception("No shapeStat nuisance parameters found")
 
@@ -484,6 +533,44 @@ class MLFitData:
                                array.array("d", uncertainties))
 
         return (gr, labels, shapeStatNuisance)
+
+    def fittedGraphShapeBinByBinHeavy(self, mass, backgroundOnly=False, signalPlusBackground=False):
+        if not backgroundOnly and not signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
+        if backgroundOnly and signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (both were)")
+        if signalPlusBackground:
+            backgroundOnly = False
+
+        labels = []
+        values = []
+        uncertainties = []
+        
+        if backgroundOnly:
+            content = self.data[mass]["background"]
+        else:
+            content = self.data[mass]["signal+background"]
+        labels = content["nuisanceParameters"][:]
+
+        for nuis in labels[:]:
+            if not "BinByBin" in nuis:
+                del labels[labels.index(nuis)]
+                continue     
+            if not nuis in content or content[nuis]["type"] == "shapeStat":
+                del labels[labels.index(nuis)]
+                continue
+            values.append(float(content[nuis]["fitted_value"]))
+            uncertainties.append(float(content[nuis]["fitted_uncertainty"]))
+
+        yvalues = range(1, len(values)+1)
+
+        yvalues.reverse()
+
+        gr = ROOT.TGraphErrors(len(values),
+                               array.array("d", values), array.array("d", yvalues),
+                               array.array("d", uncertainties))
+
+        return (gr, labels)
 
 
 ## Remove mass points lower than 100
