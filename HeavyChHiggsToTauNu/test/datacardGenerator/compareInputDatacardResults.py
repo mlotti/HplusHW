@@ -222,7 +222,7 @@ if __name__ == "__main__":
     htest.getRootHisto().SetLineColor(ROOT.kRed)
     addUncertainties(testFile, opts.testColumn, htest)
     testHistoName = "ref: %s %.1f"%(opts.testColumn, htest.getRootHisto().Integral())
-    testHistoName = testHistoName.replace("ref: pseudo_emb_TTJets_MC", "EWK+tt with #tau_{h} (MC)")
+    testHistoName = testHistoName.replace("ref: MC_EWKTau", "EWK+tt with #tau_{h} (MC)")
     testHisto = histograms.Histo(htest, testHistoName, drawStyle="HIST", legendStyle="l")
     testLumi = getLuminosity(testFile)
     # Check lumi
@@ -252,5 +252,6 @@ if __name__ == "__main__":
     myParams["moveLegend"] = {"dx": -0.3}
     myParams["ratioType"] = "errorScale"
     myParams["ratioCreateLegend"] = True
+    myParams["ratioMoveLegend"] = {"dx": -0.03, "dy": -0.38}
     plots.drawPlot(plot, myPlotName, **myParams)
     print "Generated plot for",myPlotName
