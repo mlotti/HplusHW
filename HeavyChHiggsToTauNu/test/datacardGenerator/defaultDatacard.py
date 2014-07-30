@@ -1487,7 +1487,7 @@ if OptionMassShape == "TransverseMass":
                          "divideByBinWidth": True,
                          "unit": "GeV",
                          "log": True,
-                         "opts": {"ymin": 0.009}},
+                         "opts": {"ymin": 1e-5}},
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1505,7 +1505,7 @@ elif OptionMassShape == "FullMass":
                              "unit": "GeV",
                              "log": False,
                              "opts": {"ymin": 0.0},
-                             "opts": {"ymin": 1e-5} },
+                             #"opts": {"ymin": 1e-5} },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
