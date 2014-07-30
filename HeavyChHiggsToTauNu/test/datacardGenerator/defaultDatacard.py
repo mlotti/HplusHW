@@ -246,7 +246,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_Wjets","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
@@ -264,7 +264,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_DYtoll","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
@@ -273,7 +273,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_VV","lumi","probBtag"],
     ))
 elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
@@ -361,7 +361,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_Wjets","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
@@ -379,7 +379,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_DYtoll","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
@@ -388,7 +388,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_VV","lumi","probBtag"],
     ))
 elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
     # Replace embedding and fakes with MC
@@ -409,7 +409,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         datasetType  = "Embedding",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_Wjets","lumi"],
+        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_Wjets","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_MC",
@@ -427,7 +427,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         datasetType  = "Embedding",
         datasetDefinition = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_DYtoll","lumi"],
+        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_DYtoll","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_MC",
@@ -436,7 +436,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         datasetType  = "Embedding",
         datasetDefinition = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_VV","lumi"],
+        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_VV","lumi"],
     ))
 else:
     raise Exception("Error: unknown value for flag OptionGenuineTauBackgroundSource!")
@@ -691,20 +691,20 @@ if OptionIncludeSystematics:
         function      = "ShapeVariation",
         systVariation = "BTagSF",
     ))
-    Nuisances.append(Nuisance(
-        id            = "b_mistag",
-        label         = "mistagging",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
-        systVariation = "BTagSF",
-    ))
-    Nuisances.append(Nuisance(
-        id            = "b_mistag_fakes",
-        label         = "mistagging EWK fake taus",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
-        systVariation = "BTagSF",
-    ))
+    #Nuisances.append(Nuisance(
+        #id            = "b_mistag",
+        #label         = "mistagging",
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        #systVariation = "BTagSF",
+    #))
+    #Nuisances.append(Nuisance(
+        #id            = "b_mistag_fakes",
+        #label         = "mistagging EWK fake taus",
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        #systVariation = "BTagSF",
+    #))
     Nuisances.append(Nuisance(
         id            = "top_pt",
         label         = "top pT reweighting",
@@ -756,14 +756,14 @@ else:
         value         = 0.05,
     ))
     Nuisances.append(Nuisance(
-        id            = "b_mistag",
+        id            = "b_tag",
         label         = "NON-EXACT VALUE for mistagging",
         distr         = "lnN",
         function      = "Constant",
         value         = 0.05,
     ))
     Nuisances.append(Nuisance(
-        id            = "b_mistag_fakes",
+        id            = "b_tag_fakes",
         label         = "NON-EXACT VALUE for mistagging EWK fake taus",
         distr         = "lnN",
         function      = "Constant",
@@ -986,7 +986,7 @@ else:
 #MergeNuisances.append(["ES_METunclustered","ES_METunclustered_fakes"])
 MergeNuisances.append(["e_mu_veto","e_mu_veto_fakes"])
 MergeNuisances.append(["b_tag","b_tag_fakes"])
-MergeNuisances.append(["b_mistag","b_mistag_fakes"])
+#MergeNuisances.append(["b_tag","b_tag_fakes"])
 MergeNuisances.append(["pileup","pileup_fakes"])
 MergeNuisances.append(["xsect_tt_7TeV", "xsect_tt_7TeV_forQCD"])
 
@@ -1506,6 +1506,7 @@ elif OptionMassShape == "FullMass":
                              "log": False,
                              "opts": {"ymin": 0.0},
                              #"opts": {"ymin": 1e-5} },
+                           },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
