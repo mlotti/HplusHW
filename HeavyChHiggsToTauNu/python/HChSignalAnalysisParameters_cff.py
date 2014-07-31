@@ -407,10 +407,10 @@ QCDTailKiller = cms.untracked.PSet(
     maxJetsToConsider = cms.untracked.uint32(4),
     # Back to back (bottom right corner of 2D plane tau,MET vs. jet,MET)
     backToBack = cms.untracked.VPSet(
-        QCDTailKillerBin("circular", 0.0, 40.0), # jet 1
-        QCDTailKillerBin("circular", 0.0, 40.0), # jet 2
-        QCDTailKillerBin("circular", 0.0, 40.0), # jet 3
-        QCDTailKillerBin("circular", 0.0, 40.0), # jet 4
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 1
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 2
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 3
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 4
     ),
     # Collinear topology (top left corner of 2D plane tau,MET vs. jet,MET)
     collinear = cms.untracked.VPSet(
