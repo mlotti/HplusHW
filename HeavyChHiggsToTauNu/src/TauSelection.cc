@@ -1339,6 +1339,8 @@ namespace HPlus {
   }
 
   double TauSelection::getTauDecayModeReweightingFactor(const edm::Ptr<pat::Tau> tau) {
+    if (tau->isNull())
+      return 1.0;
     if (tau->decayMode() == reco::PFTauDecayMode::tauDecay1ChargedPion0PiZero)
       return fTauDecayModeReweightFactorForZero;
     if (tau->decayMode() == reco::PFTauDecayMode::tauDecay1ChargedPion1PiZero)
