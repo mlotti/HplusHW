@@ -15,6 +15,7 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/TauReco/interface/PFTauDecayMode.h"
 
 #include "DataFormats/Math/interface/LorentzVector.h"
 typedef math::XYZTLorentzVector LorentzVector;
