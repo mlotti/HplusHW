@@ -75,7 +75,7 @@ namespace HPlus {
       /// Invalidate data object (as a safety precaution)
       void invalidate() { fSelectedTau = edm::Ptr<pat::Tau>(); }
       /// Obtain event weight for tau decay mode
-      void getTauDecayModeReweightingFactor() const { return fTauDecayModeReweightingFactor; }
+      double getTauDecayModeReweightingFactor() const { return fTauDecayModeReweightingFactor; }
 
       friend class TauSelection;
 
