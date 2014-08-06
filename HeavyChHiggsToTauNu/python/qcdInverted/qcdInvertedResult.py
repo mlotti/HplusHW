@@ -211,7 +211,7 @@ class QCDInvertedControlPlot: # OBSOLETE
         print "Control plot integral(%s) = %s "%(self._title, self._resultShape.Integral())
 
 class QCDInvertedResultManager:
-    def __init__(self, shapeString, normalizationPoint, dsetMgr, luminosity, moduleInfoString, normFactors, shapeOnly=False, displayPurityBreakdown=False, noRebin=False):
+    def __init__(self, shapeString, normalizationPoint, dsetMgr, luminosity, moduleInfoString, normFactors, dataDrivenFakeTaus=False, shapeOnly=False, displayPurityBreakdown=False, noRebin=False):
         print ShellStyles.HighlightStyle()+"...Obtaining final shape"+ShellStyles.NormalStyle()
         # Obtain QCD shapes
         myRebinList = None
@@ -237,8 +237,8 @@ class QCDInvertedResultManager:
                 histoNamePrefix = "INVMASS"
             myCtrlRegionName = "Inverted/%sInvertedTauId%s"%(histoNamePrefix, normalizationPoint)
             mySignalRegionName = "baseline/%sBaselineTauId%s"%(histoNamePrefix, normalizationPoint)
-            myCtrlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", myCtrlRegionName, luminosity, myRebinList)
-            mySignalRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", mySignalRegionName, luminosity, myRebinList)
+            myCtrlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", myCtrlRegionName, luminosity, myRebinList,dataDrivenFakeTaus=dataDrivenFakeTaus)
+            mySignalRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", mySignalRegionName, luminosity, myRebinList,dataDrivenFakeTaus=dataDrivenFakeTaus)
             myRegionTransitionSyst = systematicsForMetShapeDifference.SystematicsForMetShapeDifference(mySignalRegionShape, myCtrlRegionShape, self._hShape, moduleInfoString=moduleInfoString)
             self._hRegionSystUp = aux.Clone(myRegionTransitionSyst.getUpHistogram(), "QCDinvMgrQCDSystUp")
             self._hRegionSystDown = aux.Clone(myRegionTransitionSyst.getDownHistogram(), "QCDinvMgrQCDSystDown")
