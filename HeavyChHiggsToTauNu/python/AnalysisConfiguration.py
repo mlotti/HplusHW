@@ -585,7 +585,7 @@ class ConfigBuilder:
         process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
         process.GlobalTag.globaltag = cms.string(self.dataVersion.getGlobalTag())
         if self.options.tauEmbeddingInput != 0:
-            process.GlobalTag.globaltag = "START44_V13::All"
+            process.GlobalTag.globaltag = "START53_V21::All"
         print "GlobalTag="+process.GlobalTag.globaltag.value()
 
         # Common stuff
