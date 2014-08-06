@@ -303,7 +303,9 @@ def createTasks(opts, step, version=None):
     taskDirs = []
     for midfix, datasets in tasks:
         # Create multicrab
-        multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..", crabConfigTemplate=crabcfgtemplate)
+        multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..", crabConfigTemplate=crabcfgtemplate,
+                              ignoreMissingDatasets=True
+                          )
 
         if step in ["skim", "embedding", "genTauSkim"]:
             multicrab.addCommonLine("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_5_3_X")
