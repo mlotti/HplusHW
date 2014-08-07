@@ -123,12 +123,12 @@ namespace HPlus {
 
     // jet selection
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlNjets,            "Njets", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis)
+    //if (fAnalysisType == kSignalAnalysis)
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausNjets, "Njets", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
 
     // MET trigger SF
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlNjetsAfterJetSelectionAndMETSF,            "NjetsAfterJetSelectionAndMETSF", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis)
+    //if (fAnalysisType == kSignalAnalysis)
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF, "NjetsAfterJetSelectionAndMETSF", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
 
     // improved delta phi collinear cuts (currently the point of the std. selections)
@@ -137,13 +137,13 @@ namespace HPlus {
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerCollinearJet2,            "ImprovedDeltaPhiCutsJet2Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{2},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerCollinearJet3,            "ImprovedDeltaPhiCutsJet3Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{3},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerCollinearJet4,            "ImprovedDeltaPhiCutsJet4Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{4},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearMinimum, "ImprovedDeltaPhiCutsCollinearMinimum", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet1, "ImprovedDeltaPhiCutsJet1Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet2, "ImprovedDeltaPhiCutsJet2Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{2},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet3, "ImprovedDeltaPhiCutsJet3Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{3},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet4, "ImprovedDeltaPhiCutsJet4Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{4},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    }
+      //}
 
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauPtAfterStandardSelections, "SelectedTau_pT_AfterStandardSelections", "#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauEtaAfterStandardSelections, "SelectedTau_eta_AfterStandardSelections", "#tau #eta;N_{events} / 0.1", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
@@ -154,7 +154,7 @@ namespace HPlus {
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauPAfterStandardSelections, "SelectedTau_p_AfterStandardSelections", "#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauLeadingTrkPAfterStandardSelections, "SelectedTau_LeadingTrackP_AfterStandardSelections", "#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauDecayModeAfterStandardSelections, "SelectedTau_DecayMode_AfterStandardSelections", "#tau decay mode;N_{events}", 30,0,30);
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections, "SelectedTau_pT_AfterStandardSelections", "#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections, "SelectedTau_eta_AfterStandardSelections", "#tau #eta;N_{events} / 0.1", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections, "SelectedTau_phi_AfterStandardSelections", "#tau #phi;N_{events} / 0.087", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
@@ -164,44 +164,44 @@ namespace HPlus {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauPAfterStandardSelections, "SelectedTau_p_AfterStandardSelections", "#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections, "SelectedTau_LeadingTrackP_AfterStandardSelections", "#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauDecayModeAfterStandardSelections, "SelectedTau_DecayMode_AfterStandardSelections", "#tau decay mode;N_{events}", 30,0,30);
-    }
+    //}
 
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlNjetsAfterStandardSelections, "Njets_AfterStandardSelections", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlJetPtAfterStandardSelections, "JetPt_AfterStandardSelections", "Jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlJetEtaAfterStandardSelections, "JetEta_AfterStandardSelections", "Jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausNjetsAfterStandardSelections, "Njets_AfterStandardSelections", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausJetPtAfterStandardSelections, "JetPt_AfterStandardSelections", "Jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausJetEtaAfterStandardSelections, "JetEta_AfterStandardSelections", "Jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
-    }
+      //}
 
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerCollinearMinimumAfterStandardSelections,         "ImprovedDeltaPhiCutsCollinearMinimumAfterStandardSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterStandardSelections, "ImprovedDeltaPhiCutsCollinearMinimumAfterStandardSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    }
+      //}
 
     // MET selection
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMET,            "MET", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhi,         "METPhi", "MET #phi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiMinusTauPhi, "METPhiMinusTauPhi", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiMinusTauPhi, "METPhiMinusTauPhi", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins()/2.0, 0.0, fPhiBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTauPlusMETPt,   "TauPlusMETPt", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMET,    "MET", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhi, "METPhi", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiMinusTauPhi, "METPhiMinusTauPhi", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiMinusTauPhi, "METPhiMinusTauPhi", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins()/2.0, 0.0, fPhiBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTauPlusMETPt, "TauPlusMETPt", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-    }
+      //}
     // b tagging
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlNbjets,            "NBjets", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlBJetPt,            "BJetPt", "b jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlBJetEta,           "BJetEta", "b jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlBDiscriminator,    "BtagDiscriminator", "Btag discriminator;b tag discriminator;N_{events}", fBJetDiscriminatorBinSettings.bins(), fBJetDiscriminatorBinSettings.min(), fBJetDiscriminatorBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausNbjets,         "NBjets", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausBJetPt,         "BJetPt", "b jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausBJetEta,        "BJetEta", "b jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausBDiscriminator, "BtagDiscriminator", "Btag discriminator;b tag discriminator;N_{events}", fBJetDiscriminatorBinSettings.bins(), fBJetDiscriminatorBinSettings.min(), fBJetDiscriminatorBinSettings.max());
-    }
+      //}
 
     // improved delta phi back to back cuts
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerBackToBackMinimum,        "ImprovedDeltaPhiCutsBackToBackMinimum", "min(#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
@@ -209,33 +209,33 @@ namespace HPlus {
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet2,           "ImprovedDeltaPhiCutsJet2BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet3,           "ImprovedDeltaPhiCutsJet3BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet4,           "ImprovedDeltaPhiCutsJet4BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackMinimum, "ImprovedDeltaPhiCutsBackToBackMinimum", "min(#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet1,"ImprovedDeltaPhiCutsJet1BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet2,"ImprovedDeltaPhiCutsJet2BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet3,"ImprovedDeltaPhiCutsJet3BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet4,"ImprovedDeltaPhiCutsJet4BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    }
+      //}
 
     // top selection
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlTopPt,   "TopPt", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlWPt,     "WPt", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopPt,   "TopPt", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWPt,     "WPt", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-    }
+      //}
 
     // evt topology
 
     // ctrl plots after all selections
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerCollinearMinimumAfterMtSelections,         "ImprovedDeltaPhiCutsCollinearMinimumAfterMtSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterMtSelections, "ImprovedDeltaPhiCutsCollinearMinimumAfterMtSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    }
+      //}
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauPtAfterMtSelections, "SelectedTau_pT_AfterMtSelections", "#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauEtaAfterMtSelections, "SelectedTau_eta_AfterMtSelections", "#tau #eta;N_{events} / 0.1", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauPhiAfterMtSelections, "SelectedTau_phi_AfterMtSelections", "#tau #phi;N_{events} / 0.087", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
@@ -244,7 +244,7 @@ namespace HPlus {
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauPAfterMtSelections, "SelectedTau_p_AfterMtSelections", "#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauLeadingTrkPAfterMtSelections, "SelectedTau_LeadingTrackP_AfterMtSelections", "#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauDecayModeAfterMtSelections, "SelectedTau_DecayMode_AfterMtSelections", "#tau decay mode;N_{events}", 30,0,30);
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauPtAfterMtSelections, "SelectedTau_pT_AfterMtSelections", "#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauEtaAfterMtSelections, "SelectedTau_eta_AfterMtSelections", "#tau #eta;N_{events} / 0.1", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauPhiAfterMtSelections, "SelectedTau_phi_AfterMtSelections", "#tau #phi;N_{events} / 0.087", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
@@ -253,54 +253,56 @@ namespace HPlus {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauPAfterMtSelections, "SelectedTau_p_AfterMtSelections", "#tau p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterMtSelections, "SelectedTau_LeadingTrackP_AfterMtSelections", "#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausSelectedTauDecayModeAfterMtSelections, "SelectedTau_DecayMode_AfterMtSelections", "#tau decay mode;N_{events}", 30,0,30);
-    }
+      //}
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlNjetsAfterMtSelections, "Njets_AfterMtSelections", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlJetPtAfterMtSelections, "JetPt_AfterMtSelections", "Jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlJetEtaAfterMtSelections, "JetEta_AfterMtSelections", "Jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausNjetsAfterMtSelections, "Njets_AfterMtSelections", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausJetPtAfterMtSelections, "JetPt_AfterMtSelections", "Jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausJetEtaAfterMtSelections, "JetEta_AfterMtSelections", "Jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
-    }
+      //}
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETAfterMtSelections,            "METAfterMtSelections", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiAfterMtSelections,         "METPhiAfterMtSelections", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiMinusTauPhiAfterMtSelections, "METPhiMinusTauPhiAfterMtSelections", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiMinusTauPhiAfterMtSelections, "METPhiMinusTauPhiAfterMtSelections", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins()/2.0, 0.0, fPhiBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTauPlusMETPtAfterMtSelections,   "TauPlusMETPtAfterMtSelections", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETAfterMtSelections,    "METAfterMtSelections", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiAfterMtSelections, "METPhiAfterMtSelections", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiMinusTauPhiAfterMtSelections, "METPhiMinusTauPhiAfterMtSelections", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiMinusTauPhiAfterMtSelections, "METPhiMinusTauPhiAfterMtSelections", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins()/2.0, 0.0, fPhiBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections, "TauPlusMETPtAfterMtSelections", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-    }
+      //}
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlNbjetsAfterMtSelections,            "NBjetsAfterMtSelections", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlBJetPtAfterMtSelections,            "BJetPtAfterMtSelections", "b jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlBJetEtaAfterMtSelections,           "BJetEtaAfterMtSelections", "b jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlBDiscriminatorAfterMtSelections,    "BtagDiscriminatorAfterMtSelections", "Btag discriminator;b tag discriminator;N_{events}", fBJetDiscriminatorBinSettings.bins(), fBJetDiscriminatorBinSettings.min(), fBJetDiscriminatorBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausNbjetsAfterMtSelections,         "NBjetsAfterMtSelections", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausBJetPtAfterMtSelections,         "BJetPtAfterMtSelections", "b jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausBJetEtaAfterMtSelections,        "BJetEtaAfterMtSelections", "b jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausBDiscriminatorAfterMtSelections, "BtagDiscriminatorAfterMtSelections", "Btag discriminator;b tag discriminator;N_{events}", fBJetDiscriminatorBinSettings.bins(), fBJetDiscriminatorBinSettings.min(), fBJetDiscriminatorBinSettings.max());
-    }
+      //}
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerBackToBackMinimumAfterMtSelections,        "ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections", "min(#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackMinimumAfterMtSelections, "ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections", "min(#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    }
+      //}
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTopMassAfterMtSelections, "TopMassAfterMtSelections", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlTopPtAfterMtSelections,   "TopPtAfterMtSelections", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlWMassAfterMtSelections,   "WMassAfterMtSelections", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlWPtAfterMtSelections,     "WPtAfterMtSelections", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-    if (fAnalysisType == kSignalAnalysis) {
+    //if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopMassAfterMtSelections, "TopMassAfterMtSelections", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopPtAfterMtSelections,   "TopPtAfterMtSelections", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWMassAfterMtSelections,   "WMassAfterMtSelections", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWPtAfterMtSelections,     "WPtAfterMtSelections", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-    }
+      //}
 
     // all selections
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeTransverseMass,            "shapeTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
         fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEWKFakeTausTransverseMass, "shapeEWKFakeTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+	fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEWKGenuineTausTransverseMass, "shapeEWKGenuineTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+
         fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeEmbeddingLikeMultipleTausTransverseMass, "shapeEmbeddingLikeMultipleTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
         fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeProbabilisticBtagTransverseMass, "shapeProbabilisticBtagTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
         fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, *fs, hShapeProbabilisticBtagEWKFakeTausTransverseMass, "shapeProbabilisticBtagEWKFakeTausTransverseMass", "m_{T}(tau,MET), GeV/c^{2};N_{events}", fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
@@ -489,13 +491,17 @@ namespace HPlus {
   void CommonPlots::fillControlPlotsAtJetSelection(const edm::Event& iEvent, const JetSelection::Data& data) {
     fJetData = data;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNjets, data.getHadronicJetCount());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjets, data.getHadronicJetCount());
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) 
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
+	fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjets, data.getHadronicJetCount());
     if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterNjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
   void CommonPlots::fillControlPlotsAfterMETTriggerScaleFactor(const edm::Event& iEvent) {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNjetsAfterJetSelectionAndMETSF, fJetData.getHadronicJetCount());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF, fJetData.getHadronicJetCount());
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) 
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
+	fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF, fJetData.getHadronicJetCount());
     if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterMETSF->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
   }
 
@@ -509,27 +515,32 @@ namespace HPlus {
         myMinimumRadius = myRadius;
       if (i == 0 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet1, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet1, myRadius); // Make control pl
+        //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))  
+	    fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet1, myRadius); // Make control pl
       } else if (i == 1 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet2, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet2, myRadius); // Make control pl
+        //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+	if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))          
+	    fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet2, myRadius); // Make control pl
       } else if (i == 2 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet3, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet3, myRadius); // Make control pl
+        //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))  
+	    fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet3, myRadius); // Make control pl
       } else if (i == 3 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet4, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet4, myRadius); // Make control pl
+        //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))  
+	    fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet4, myRadius); // Make control pl
       }
       if (!data.passCollinearCutForJet(i))
         myPassStatus = false;
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearMinimum, myMinimumRadius);
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearMinimum, myMinimumRadius);
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))      
+	fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearMinimum, myMinimumRadius);
 
     if (myPassStatus) {
       // MET oscillation analysis
@@ -548,8 +559,9 @@ namespace HPlus {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauPAfterStandardSelections, fTauData.getSelectedTau()->p());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauLeadingTrkPAfterStandardSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->p());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauDecayModeAfterStandardSelections, fTauData.getSelectedTau()->decayMode());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections, fTauData.getSelectedTauRtauValue());
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
+	fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections, fTauData.getSelectedTauRtauValue());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections, fTauData.getSelectedTau()->pt());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections, fTauData.getSelectedTau()->eta());
@@ -561,12 +573,14 @@ namespace HPlus {
     }
     // Fill control plots for selected jets
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNjetsAfterStandardSelections, fJetData.getHadronicJetCount());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjetsAfterStandardSelections, fJetData.getHadronicJetCount());
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))  
+	fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjetsAfterStandardSelections, fJetData.getHadronicJetCount());
     for (edm::PtrVector<pat::Jet>::iterator jet = fJetData.getSelectedJets().begin(); jet != fJetData.getSelectedJets().end(); ++jet) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlJetPtAfterStandardSelections, (*jet)->pt());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlJetEtaAfterStandardSelections, (*jet)->eta());
-      if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausJetPtAfterStandardSelections, (*jet)->pt());
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausJetEtaAfterStandardSelections, (*jet)->eta());
       }
@@ -579,7 +593,8 @@ namespace HPlus {
         myMinimumRadius = myRadius;
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearMinimumAfterStandardSelections, myMinimumRadius);
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterStandardSelections, myMinimumRadius);
 
   }
@@ -588,12 +603,13 @@ namespace HPlus {
     fMETData = data;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMET, data.getSelectedMET()->et());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhi, data.getSelectedMET()->phi());
-    double myPhiDiff = data.getSelectedMET()->phi() - fTauData.getSelectedTau()->phi();
-    if (myPhiDiff < -3.1415926)
-      myPhiDiff += 3.1415926 * 2.0;
+    double myPhiDiff = std::fabs(data.getSelectedMET()->phi() - fTauData.getSelectedTau()->phi());
+    if (myPhiDiff > 3.1415926)
+      myPhiDiff -= 3.1415926 * 2.0;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiMinusTauPhi, myPhiDiff);
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTauPlusMETPt, (fTauData.getSelectedTau()->p4()+data.getSelectedMET()->p4()).pt());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMET, data.getSelectedMET()->et());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhi, data.getSelectedMET()->phi());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiMinusTauPhi, myPhiDiff);
@@ -602,7 +618,8 @@ namespace HPlus {
     if (data.passedEvent()) {
       if (bOptionEnableMETOscillationAnalysis) {
         fMETPhiOscillationCorrectionAfterMET->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+        //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+	if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
           fMETPhiOscillationCorrectionEWKFakeTausAfterMET->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
         }
       }
@@ -612,12 +629,14 @@ namespace HPlus {
   void CommonPlots::fillControlPlotsAtBtagging(const edm::Event& iEvent, const BTagging::Data& data) {
     fBJetData = data;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNbjets, data.getBJetCount());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNbjets, data.getBJetCount());
     // Loop over selected jets
     for (edm::PtrVector<pat::Jet>::const_iterator iJet = fJetData.getSelectedJets().begin(); iJet != fJetData.getSelectedJets().end(); ++iJet) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlBDiscriminator, (*iJet)->bDiscriminator(fBJetData.getDiscriminatorName()));
-      if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausBDiscriminator, (*iJet)->bDiscriminator(fBJetData.getDiscriminatorName()));
       }
     }
@@ -625,7 +644,8 @@ namespace HPlus {
     for (edm::PtrVector<pat::Jet>::const_iterator iJet = data.getSelectedJets().begin(); iJet != data.getSelectedJets().end(); ++iJet) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlBJetPt, (*iJet)->pt());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlBJetEta, (*iJet)->eta());
-      if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausBJetPt, (*iJet)->pt());
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausBJetEta, (*iJet)->eta());
       }
@@ -634,7 +654,8 @@ namespace HPlus {
     if (data.passedEvent()) {
       if (bOptionEnableMETOscillationAnalysis) {
         fMETPhiOscillationCorrectionAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+        //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+	if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
           fMETPhiOscillationCorrectionEWKFakeTausAfterBjets->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
         }
       }
@@ -651,26 +672,31 @@ namespace HPlus {
         myMinimumRadius = myRadius;
       if (i == 0 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet1, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+	if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet1, myRadius); // Make control plot before cut
       } else if (i == 1 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet2, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+	if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet2, myRadius); // Make control plot before cut
       } else if (i == 2 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet3, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+	if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet3, myRadius); // Make control plot before cut
       } else if (i == 3 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet4, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+	if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet4, myRadius); // Make control plot before cut
       }
       if (!data.passBackToBackCutForJet(i))
         myPassStatus = false;
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackMinimum, myMinimumRadius);
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackMinimum, myMinimumRadius);
   }
 
@@ -680,7 +706,8 @@ namespace HPlus {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTopPt, data.getTopP4().pt());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlWMass, data.getWMass());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlWPt, data.getWP4().pt());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTopMass, data.getTopMass());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTopPt, data.getTopP4().pt());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausWMass, data.getWMass());
@@ -701,7 +728,8 @@ namespace HPlus {
         myMinimumRadius = myRadius;
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearMinimumAfterMtSelections, myMinimumRadius);
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterMtSelections, myMinimumRadius);
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauRtauAfterMtSelections, fTauData.getSelectedTauRtauValue());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauLeadingTrkPtAfterMtSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
@@ -711,7 +739,8 @@ namespace HPlus {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauPAfterMtSelections, fTauData.getSelectedTau()->p());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauLeadingTrkPAfterMtSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->p());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlSelectedTauDecayModeAfterMtSelections, fTauData.getSelectedTau()->decayMode());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauRtauAfterMtSelections, fTauData.getSelectedTauRtauValue());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterMtSelections, fTauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauPtAfterMtSelections, fTauData.getSelectedTau()->pt());
@@ -722,42 +751,48 @@ namespace HPlus {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausSelectedTauDecayModeAfterMtSelections, fTauData.getSelectedTau()->decayMode());
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNjetsAfterMtSelections, fJetData.getHadronicJetCount());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNjetsAfterMtSelections, fJetData.getHadronicJetCount());
     for (edm::PtrVector<pat::Jet>::iterator jet = fJetData.getSelectedJets().begin(); jet != fJetData.getSelectedJets().end(); ++jet) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlJetPtAfterMtSelections, (*jet)->pt());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlJetEtaAfterMtSelections, (*jet)->eta());
-      if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausJetPtAfterMtSelections, (*jet)->pt());
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausJetEtaAfterMtSelections, (*jet)->eta());
       }
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETAfterMtSelections, fMETData.getSelectedMET()->et());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
-    double myPhiDiff = fMETData.getSelectedMET()->phi() - fTauData.getSelectedTau()->phi();
-    if (myPhiDiff < -3.1415926)
-      myPhiDiff += 3.1415926 * 2.0;
+    double myPhiDiff = std::fabs(fMETData.getSelectedMET()->phi() - fTauData.getSelectedTau()->phi());
+    if (myPhiDiff > 3.1415926)
+      myPhiDiff -= 3.1415926 * 2.0;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiMinusTauPhiAfterMtSelections, myPhiDiff);
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTauPlusMETPtAfterMtSelections, (fTauData.getSelectedTau()->p4()+fMETData.getSelectedMET()->p4()).pt());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETAfterMtSelections, fMETData.getSelectedMET()->et());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiMinusTauPhiAfterMtSelections, myPhiDiff);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections, (fTauData.getSelectedTau()->p4()+fMETData.getSelectedMET()->p4()).pt());
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNbjetsAfterMtSelections, fBJetData.getBJetCount());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausNbjetsAfterMtSelections, fBJetData.getBJetCount());
     for (edm::PtrVector<pat::Jet>::const_iterator iJet = fJetData.getSelectedJets().begin(); iJet != fJetData.getSelectedJets().end(); ++iJet) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlBDiscriminatorAfterMtSelections, (*iJet)->bDiscriminator(fBJetData.getDiscriminatorName()));
-      if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausBDiscriminatorAfterMtSelections, (*iJet)->bDiscriminator(fBJetData.getDiscriminatorName()));
       }
     }
     for (edm::PtrVector<pat::Jet>::const_iterator iJet = fBJetData.getSelectedJets().begin(); iJet != fBJetData.getSelectedJets().end(); ++iJet) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlBJetPtAfterMtSelections, (*iJet)->pt());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlBJetEtaAfterMtSelections, (*iJet)->eta());
-      if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+      if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausBJetPtAfterMtSelections, (*iJet)->pt());
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausBJetEtaAfterMtSelections, (*iJet)->eta());
       }
@@ -769,13 +804,15 @@ namespace HPlus {
         myMinimumRadius = myRadius;
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackMinimumAfterMtSelections, myMinimumRadius);
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackMinimumAfterMtSelections, myMinimumRadius);
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTopMassAfterMtSelections, fTopData.getTopMass());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTopPtAfterMtSelections, fTopData.getTopP4().pt());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlWMassAfterMtSelections, fTopData.getWMass());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlWPtAfterMtSelections, fTopData.getWP4().pt());
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+    //if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
+    if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike())) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTopMassAfterMtSelections, fTopData.getTopMass());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTopPtAfterMtSelections, fTopData.getTopP4().pt());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausWMassAfterMtSelections, fTopData.getWMass());
@@ -794,6 +831,8 @@ namespace HPlus {
       fSplittedHistogramHandler.fillShapeHistogram(hShapeTransverseMass, transverseMass);
         if (fFakeTauData.isEWKFakeTauLike())
           fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausTransverseMass, transverseMass);
+	if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
+	    fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKGenuineTausTransverseMass, transverseMass);
         if (fFakeTauData.isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance())
           fSplittedHistogramHandler.fillShapeHistogram(hShapeEmbeddingLikeMultipleTausTransverseMass, transverseMass);
     }
@@ -802,7 +841,8 @@ namespace HPlus {
   void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const edm::Event& iEvent, double transverseMass) {
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagTransverseMass, transverseMass);
-      if (fFakeTauData.isEWKFakeTauLike())
+      //if (fFakeTauData.isEWKFakeTauLike())
+      if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
         fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagEWKFakeTausTransverseMass, transverseMass);
       if (fFakeTauData.isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance())
         fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagEmbeddingLikeMultipleTausTransverseMass, transverseMass);
@@ -813,7 +853,8 @@ namespace HPlus {
     fFullHiggsMassData = data;
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.fillShapeHistogram(hShapeFullMass, data.getHiggsMass());
-      if (fFakeTauData.isEWKFakeTauLike())
+      //if (fFakeTauData.isEWKFakeTauLike())
+      if (fFakeTauData.isGenuineTau() || iEvent.isRealData() || (!fFakeTauData.isGenuineTau() && !fFakeTauData.isEWKFakeTauLike()))
         fSplittedHistogramHandler.fillShapeHistogram(hShapeEWKFakeTausFullMass, data.getHiggsMass());
       if (fFakeTauData.isEmbeddingGenuineTauLikeWithMultipleTausInAcceptance())
         fSplittedHistogramHandler.fillShapeHistogram(hShapeEmbeddingLikeMultipleTausFullMass, data.getHiggsMass());

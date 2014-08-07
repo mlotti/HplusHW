@@ -227,9 +227,12 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCuts;
     std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusBtag;
     std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusBveto;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus;
     // baseline MT histos
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterMetSF;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearCuts; // <-- used for closure test
+      std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearCutsPlusBackToBackCuts;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearCutsPlusBtag;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts;
@@ -264,9 +267,12 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsPlusBtag;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsPlusBveto;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterBackToBackCuts;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsOnlyEWKFakeTaus;
     // inverted MT histos
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterMetSF;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearCuts; // <-- used for closure test
+      std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearCutsPlusBackToBackCuts;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearCutsPlusBtag;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts;

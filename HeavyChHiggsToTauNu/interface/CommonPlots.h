@@ -389,6 +389,7 @@ namespace HPlus {
     METPhiOscillationCorrection* fMETPhiOscillationCorrectionEWKControlRegion;
     std::vector<WrappedTH1*> hShapeTransverseMass;
     std::vector<WrappedTH1*> hShapeEWKFakeTausTransverseMass;
+    std::vector<WrappedTH1*> hShapeEWKGenuineTausTransverseMass;
     std::vector<WrappedTH1*> hShapeEmbeddingLikeMultipleTausTransverseMass;
 
     std::vector<WrappedTH1*> hShapeProbabilisticBtagTransverseMass;

@@ -108,16 +108,18 @@ def addUncertainties(filename, column, h):
             if len(llist) > 1:
                 mySystName = llist[0]
                 myValue = llist[index+1]
-                if llist[1].startswith("shape") and myValue == "1" and llist[0] != "stat_binByBin":
+                if llist[1].startswith("shape") and myValue == "1" and not "stat_binByBin" in llist[0]:
                     # add shape uncertainty
                     myShapeUncertList.append(mySystName)
-                elif llist[0] != "stat_binByBin" and myValue != "1" and myValue != "0" and myValue != "-":
+                elif not "stat_binByBin" in llist[0] and myValue != "1" and myValue != "0" and myValue != "-":
                     # add normalization uncertainty
                     if "/" in myValue:
                         mySplit = myValue.split("/")
                         h.addNormalizationUncertaintyRelative(mySystName, float(mySplit[1])-1.0, float(mySplit[0])-1.0)
+                        #raise Exception()
                     else:
                         h.addNormalizationUncertaintyRelative(mySystName, float(myValue)-1.0)
+
         else:
             if llist[0] == "process":
                 for i in range(0,len(llist)):
@@ -210,14 +212,18 @@ if __name__ == "__main__":
     href = getMainHistogram(refFile, opts.refColumn)
     href.getRootHisto().SetLineColor(ROOT.kBlack)
     addUncertainties(refFile, opts.refColumn, href)
-    refHisto = histograms.Histo(href, "ref: %s %.1f"%(opts.refColumn, href.getRootHisto().Integral()), drawStyle="HIST", legendStyle="l")
+    refHistoName = "ref: %s %.1f"%(opts.refColumn, href.getRootHisto().Integral())
+    refHistoName = refHistoName.replace("ref: EWK_Tau", "EWK+tt with #tau_{h} (data)")
+    refHisto = histograms.Histo(href, refHistoName, drawStyle="HIST", legendStyle="l")
     refLumi = getLuminosity(refFile)
     # Get test histogram
     testFile = "%s/%s"%(opts.testDir, myTestColumnDict[opts.testColumn])
     htest = getMainHistogram(testFile, opts.testColumn)
     htest.getRootHisto().SetLineColor(ROOT.kRed)
     addUncertainties(testFile, opts.testColumn, htest)
-    testHisto = histograms.Histo(htest, "test: %s %.1f"%(opts.testColumn, htest.getRootHisto().Integral()), drawStyle="HIST", legendStyle="l")
+    testHistoName = "ref: %s %.1f"%(opts.testColumn, htest.getRootHisto().Integral())
+    testHistoName = testHistoName.replace("ref: pseudo_emb_TTJets_MC", "EWK+tt with #tau_{h} (MC)")
+    testHisto = histograms.Histo(htest, testHistoName, drawStyle="HIST", legendStyle="l")
     testLumi = getLuminosity(testFile)
     # Check lumi
     myLumiStatus = True
@@ -245,5 +251,6 @@ if __name__ == "__main__":
     #myParams["addMCUncertainty"] = True
     myParams["moveLegend"] = {"dx": -0.3}
     myParams["ratioType"] = "errorScale"
+    myParams["ratioCreateLegend"] = True
     plots.drawPlot(plot, myPlotName, **myParams)
     print "Generated plot for",myPlotName

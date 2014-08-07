@@ -127,6 +127,7 @@ if __name__ == "__main__":
     parser.add_option("--mtonly", dest="transverseMassOnly", action="store_true", default=False, help="Create only transverse mass plots")
     parser.add_option("--invmassonly", dest="invariantMassOnly", action="store_true", default=False, help="Create only invariant mass plots")
     parser.add_option("--test", dest="test", action="store_true", default=False, help="Make short test by limiting number of syst. variations")
+
     # Add here parser options, if necessary, following line is an example
     #parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
 
@@ -146,6 +147,7 @@ if __name__ == "__main__":
     elif opts.invariantMassOnly != None and opts.invariantMassOnly:
         myShapes = ["invmass"]
 
+    
     # Obtain dsetMgrCreator and register it to module selector
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=myMulticrabDir)
     # Obtain systematics names

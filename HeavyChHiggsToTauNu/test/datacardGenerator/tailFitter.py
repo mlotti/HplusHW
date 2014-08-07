@@ -81,6 +81,9 @@ def checkSettings(config):
     # binning
     if not hasattr(config, "finalBinning"):
         raise Exception(ErrorLabel()+"Dictionary 'finalBinning' missing from settings! Please add!")
+    # treatment of fit uncertainty
+    if not hasattr(config, "applyFitUncertaintyAsBinByBinUncertainty"):
+        raise Exception(ErrorLabel()+"Boolean variable 'applyFitUncertaintyAsBinByBinUncertainty' is missing from settings! Please add!")
     # QCD
     if not hasattr(config, "QCD"):
         raise Exception(ErrorLabel()+"Dictionary 'QCD' with settings for QCD is missing from settings! Please add!")
@@ -315,12 +318,12 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos):
         myRHWU = RootHistoWithUncertainties(hRate)
         for n in myNuisanceInfo:
             # Add shape uncertainties
-            if n["distribution"] == "shape" and n[c] == 1 and "statBin" not in n["name"]:
+            if n["distribution"] == "shape" and n[c] == "1" and not "statBin" in n["name"] and not "BinByBin" in n["name"]:
                 hUp = aux.Clone(getHisto(cachedHistos, "%s_%sUp"%(c,n["name"])))
                 hDown = aux.Clone(getHisto(cachedHistos, "%s_%sDown"%(c,n["name"])))
                 myRHWU.addShapeUncertaintyFromVariation(n["name"], hUp, hDown)
             # Add constant uncertainties
-            elif n["name"] != "rate" and n["name"] != "process" and n[c] != "-":
+            elif n["name"] != "rate" and n["name"] != "process" and n[c] != "-" and n[c] != "1" and not "statBin" in n["name"] and not "BinByBin" in n["name"]:
                 diffUp = 0.0
                 diffDown = 0.0
                 if "/" in n[c]:
@@ -328,8 +331,8 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos):
                     diffDown = float(mySplit[0])-1.0
                     diffUp = float(mySplit[1])-1.0
                 else:
-                    diffDown = float(n[c])
-                    diffUp = float(n[c])
+                    diffDown = float(n[c])-1.0
+                    diffUp = float(n[c])-1.0
                 myRHWU.addNormalizationUncertaintyRelative(n["name"], diffUp, diffDown)
         # Store column info
         _myBr = 0.01
@@ -370,8 +373,31 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos):
             rate = myDict[item].getRate()
             stat = myDict[item].getRateStatUncertainty()
             (systUp,systDown) = myDict[item].getRateSystUncertainty()
+            #myDict[item].Debug()
             print "%10s: %.1f +- %.1f (stat.) + %.1f - %.1f (syst.)"%(item,rate,stat,systUp,systDown)
     print ""
+
+def createBinnedFitUncertaintyHistograms(hRate, hUp, hDown, applyFrom):
+    hupList = []
+    hDownList = []
+    # find bin
+    myFirstBin = hRate.GetXaxis().FindBin(applyFrom+0.0001)
+    for i in range(myFirstBin, hRate.GetNbinsX()+1):
+        hup = aux.Clone(hRate, "%s_%s_fitBinByBin%dUp"%(hRate.GetTitle(),hRate.GetTitle(),i))
+        hup.SetTitle(hup.GetName())
+        hdown = aux.Clone(hRate, "%s_%s_fitBinByBin%dDown"%(hRate.GetTitle(),hRate.GetTitle(),i))
+        hup.SetTitle(hdown.GetName())
+        for j in range(1, hRate.GetNbinsX()+1):
+            hup.SetBinError(j, 0.0)
+            hdown.SetBinError(j, 0.0)
+        hup.SetBinContent(i, hUp.GetBinContent(i))
+        hdown.SetBinContent(i, hDown.GetBinContent(i))
+        if hDown.GetBinContent(i) < 0.0:
+            hdown.SetBinContent(i, 0.0)
+        hupList.append(hup)
+        hDownList.append(hdown)
+    # Return histogram lists
+    return (hupList, hDownList)
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
@@ -413,6 +439,7 @@ if __name__ == "__main__":
     myRootfilePattern = myLimitSettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS)
 
     # Loop over mass points
+    myDrawPlotsStatus = True
     for m in massPoints:
         myHistogramCache = []
         # Obtain luminosity
@@ -451,6 +478,7 @@ if __name__ == "__main__":
                 # Not signal or blacklist, do fit
                 hFineBinning = myRootFile.Get(c+"_fineBinning")
                 hOriginalShape = myRootFile.Get(c)
+                hOriginalShape.SetName(hOriginalShape.GetName()+"Original")
                 if hFineBinning == None:
                     raise Exception(ErrorLabel()+"Cannot find histogram '%s'!"%(c+"_fineBinning"))
                 if hOriginalShape == None:
@@ -462,13 +490,12 @@ if __name__ == "__main__":
                         myFitSettings = s
                         print "... using fitfunc: %s and range %d-%d"%(s["fitfunc"],s["fitmin"],s["fitmax"])
                 if myFitSettings == None:
-                    raise Exception()
-                myFitter = TailFitter.TailFitter(hFineBinning, c, m, myFitSettings["fitfunc"], myFitSettings["fitmin"], myFitSettings["fitmax"])
+                    raise Exception("Could not determine fit function for column '%s'!"%c)
+                myFitter = TailFitter.TailFitter(hFineBinning, c, myFitSettings["fitfunc"], myFitSettings["fitmin"], myFitSettings["fitmax"], myFitSettings["applyFrom"], doPlots=myDrawPlotsStatus)
                 # Obtain fitted rate with final binning
-                myFittedRateHistograms = myFitter.getFittedRateHistogram(hFineBinning, config.finalBinning["shape"])
+                myFittedRateHistograms = myFitter.getFittedRateHistogram(hFineBinning, config.finalBinning["shape"], myFitSettings["applyFrom"])
                 myHistogramCache.extend(myFittedRateHistograms)
                 # Update rate
-                print hFineBinning.Integral(),hOriginalShape.Integral()
                 for n in myNuisanceInfo:
                     if n["name"] == "rate":
                         n[c] = "%f"%myFittedRateHistograms[0].Integral()
@@ -476,11 +503,21 @@ if __name__ == "__main__":
                 # Update all those shape nuisances (update histograms only, no need to touch nuisance table)
                 for n in myNuisanceInfo:
                     if n["distribution"] == "shape" and n[c] == "1":
-                        print "... Updating shape nuisance '%s' tail"%n["name"]
+                        #print "... Updating shape nuisance '%s' tail"%n["name"]
                         myUpdatedNuisanceHistograms = updateNuisanceTail(hOriginalShape, myFittedRateHistograms[0], myRootFile, "%s_%s"%(c,n["name"]))
                         myHistogramCache.extend(myUpdatedNuisanceHistograms)
+                print "Updated shape nuisance tails (rel.uncert. kept constant, but central value changed to the fitted one)"
                 # Obtain fit uncertainty histograms and add them to cache
-                (huplist, hdownlist) = myFitter.calculateVariationHistograms(config.finalBinning["shape"])
+                (huplist, hdownlist) = myFitter.calculateVariationHistograms(config.finalBinning["shape"], myFitSettings["applyFrom"])
+                # Plot if requested
+                if myDrawPlotsStatus:
+                    myArray = array.array("d",config.finalBinning["shape"])
+                    hFinalBinning = hFineBinning.Rebin(len(myArray)-1, "", myArray)
+                    myFitter.makeVariationPlotDetailed("", hFinalBinning, myFittedRateHistograms[0], huplist, hdownlist)
+                    (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
+                    myFitter.makeVariationPlotSimple("", hFinalBinning, myFittedRateHistograms[0], hupTotal, hdownTotal)
+                    hFinalBinning.Delete()
+
                 # Treat blancs (norm == 0)
                 for i in range(0, len(huplist)):
                     if huplist[i].Integral() == 0:
@@ -489,17 +526,29 @@ if __name__ == "__main__":
                     if hdownlist[i].Integral() == 0:
                         for k in range(0, hdownlist[i].GetNbinsX()+2):
                             hdownlist[i].SetBinContent(k, myFittedRateHistograms[0].GetBinContent(k))
-                myHistogramCache.extend(huplist)
-                myHistogramCache.extend(hdownlist)
-                # Add fit parameter nuisances to nuisance table
-                for hup in huplist:
-                    addNuisanceForIndividualColumn(myColumnNames,myNuisanceInfo,c,hup.GetTitle())
+                if config.applyFitUncertaintyAsBinByBinUncertainty:
+                    # Add fit uncertainty as bin-by-bin type uncertainty
+                    (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
+                    (myBinByBinUpHistograms, myBinByBinDownHistograms) = createBinnedFitUncertaintyHistograms(myFittedRateHistograms[0], hupTotal, hdownTotal, myFitSettings["applyFrom"])
+                    myHistogramCache.extend(myBinByBinUpHistograms)
+                    myHistogramCache.extend(myBinByBinDownHistograms)
+                    # Add fit parameter nuisances to nuisance table
+                    for hup in myBinByBinUpHistograms:
+                        addNuisanceForIndividualColumn(myColumnNames,myNuisanceInfo,c,hup.GetTitle().replace("%s_%s"%(c,c),c))
+                else:
+                    # Add fit uncertainty as nuisances parameters
+                    myHistogramCache.extend(huplist)
+                    myHistogramCache.extend(hdownlist)
+                    # Add fit parameter nuisances to nuisance table
+                    for hup in huplist:
+                        addNuisanceForIndividualColumn(myColumnNames,myNuisanceInfo,c,hup.GetTitle())
                 # Create bin-by-bin stat. histograms for fitted distribution and update the nuisance table
-                myStatHistograms = addBinByBinStatUncert(c, myFittedRateHistograms[0], myColumnNames, myNuisanceInfo, 0.0, myFitSettings["fitmin"])
+                myStatHistograms = addBinByBinStatUncert(c, myFittedRateHistograms[0], myColumnNames, myNuisanceInfo, 0.0, myFitSettings["applyFrom"])
                 myHistogramCache.extend(myStatHistograms)
                 # Clear memory
                 hFineBinning.Delete()
                 hOriginalShape.Delete()
+        myDrawPlotsStatus = False
         # Print summary info
         printSummaryInfo(myColumnNames, myNuisanceInfo, myHistogramCache)
         # Histogram cache contains now all root files and nuisance table is now up to date

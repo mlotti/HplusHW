@@ -14,11 +14,15 @@ ROOT.gROOT.SetBatch(True) # no flashing canvases
 
 ## Container class for information of data and MC EWK at certain point of selection
 class DataDrivenQCDShape:
-    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, luminosity, rebinList=None):
+    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, luminosity, rebinList=None, dataDrivenFakeTaus=False):
         self._uniqueN = 0
         self._splittedHistoReader = splittedHistoReader.SplittedHistoReader(dsetMgr, dsetLabelData)
         self._histoName = histoName
         self._dataList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, histoName, luminosity))
+        # filtered ewk fakes (emod)
+        if dataDrivenFakeTaus:
+            histoName = histoName.replace("TransverseMass","EWKGenuineTausTransverseMass")
+            histoName = histoName.replace("AfterCollinearCuts","AfterCollinearCutsPlusFilteredEWKFakeTaus")
         self._ewkList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, histoName, luminosity))
         self._rebinDoneStatus = True
         if rebinList != None:
