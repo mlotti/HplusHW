@@ -24,6 +24,11 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    if not limits.isHeavyStatus:
+        # Give more space for four digits on the y axis labels
+        style.tdrStyle.SetPadLeftMargin(0.19)
+        style.tdrStyle.SetTitleYOffset(1.6)
+
     # Set the paper mode
     #limit.forPaper = True
     if limit.forPaper:
@@ -32,6 +37,7 @@ def main():
     doBRlimit(limits,unblindedStatus)
     doLimitError(limits,unblindedStatus)
     limits.print2(unblindedStatus)
+    limits.saveAsLatexTable(unblindedStatus)
 
 def doBRlimit(limits,unblindedStatus):
     graphs = []
