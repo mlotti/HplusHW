@@ -681,6 +681,10 @@ class ConfigBuilder:
             process.load("HiggsAnalysis.HeavyChHiggsToTauNu.WTauMuWeight_cfi")
             process.commonSequence += process.wtaumuWeight
 
+            # This was supposed to be saved in embedded pattuples, but apparently in v53_3 is not
+            process.embeddedTau = tauEmbeddingCustomisations.addTauEmbeddingMuonTausUsingVisible(process)
+            process.commonSequence += process.embeddedTau
+
             #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
             tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, self.options, self.dataVersion)
             tauEmbeddingCustomisations.customiseParamForTauEmbedding(process, param, self.options, self.dataVersion)
