@@ -1241,6 +1241,7 @@ class Multicrab:
             print "############################################################"
             print
 
+            prevdir = os.getcwd()
             os.chdir(dirname)
             subprocess.call(["multicrab", "-create"])
             print
@@ -1249,6 +1250,6 @@ class Multicrab:
             print "Created multicrab task to subdirectory "+dirname
             print
 
-            os.chdir("..")
+            os.chdir(prevdir)
 
         return [(dirname, dsetNames)]
