@@ -303,6 +303,8 @@ if __name__ == "__main__":
                       help="Midfix to add to the output directory name")
     parser.add_option("--nosyst", dest="dosyst", default=True, action="store_false",
                       help="Don't process systematic variations")
+    parser.add_option("--outputName", dest="outputName", default=None,
+                      help="Name of output task directory")
     (opts, args) = parser.parse_args()
     if len(args) == 0:
         parser.error("Expected at least one multicrab directory, got %d" % len(args))
@@ -359,7 +361,10 @@ if __name__ == "__main__":
             eras = [tmp]
 
     # Create pseudo multicrab directory
+    
     dirname = "embedding"
+    if opts.outputName != None:
+        dirname += opts.outputName
     if datasetCreatorMC is not None:
         dirname += "_mc"
     if opts.midfix is not None:
