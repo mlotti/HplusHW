@@ -585,7 +585,7 @@ class ConfigBuilder:
         process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
         process.GlobalTag.globaltag = cms.string(self.dataVersion.getGlobalTag())
         if self.options.tauEmbeddingInput != 0:
-            process.GlobalTag.globaltag = "START44_V13::All"
+            process.GlobalTag.globaltag = "START53_V21::All"
         print "GlobalTag="+process.GlobalTag.globaltag.value()
 
         # Common stuff
@@ -680,6 +680,10 @@ class ConfigBuilder:
         if self.options.tauEmbeddingInput != 0:
             process.load("HiggsAnalysis.HeavyChHiggsToTauNu.WTauMuWeight_cfi")
             process.commonSequence += process.wtaumuWeight
+
+            # This was supposed to be saved in embedded pattuples, but apparently in v53_3 is not
+            process.embeddedTau = tauEmbeddingCustomisations.addTauEmbeddingMuonTausUsingVisible(process)
+            process.commonSequence += process.embeddedTau
 
             #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
             tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, self.options, self.dataVersion)

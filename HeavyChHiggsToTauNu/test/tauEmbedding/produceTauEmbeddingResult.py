@@ -75,14 +75,14 @@ class DatasetManagerMany:
 
     def _getDatasetsGeneric(self, methodName):
         datasets = [getattr(dm, methodName)() for dm in self._dsetMgrs]
-        tmp = []
-        for i in xrange(len(datasets[0])):
-            lst = []
-            for j in xrange(len(self._dsetMgrs)):
-                lst.append(datasets[j][i])
-            tmp.append(lst) # tmp[i]
+        lsts = []
+        for j in xrange(len(self._dsetMgrs)):
+            for i in xrange(len(datasets[j])):
+                if len(lsts) == i:
+                    lsts.append([])
+                lsts[i].append(datasets[j][i])
 
-        return [DatasetMany(t) for t in tmp]
+        return [DatasetMany(t) for t in lsts]
 
     def getDataDatasets(self):
         return self._getDatasetsGeneric("getDataDatasets")
