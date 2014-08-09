@@ -193,7 +193,7 @@ myQCDFact = DataGroup(
     validMassPoints = MassPoints,
     datasetType  = "QCD factorised",
     datasetDefinition = "QCDfactorisedmt",
-    nuisances    = myQCDShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","xsect_tt_8TeV_forQCD"],
+    nuisances    = myQCDShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","xsect_tt_8TeV_forQCD","lumi_forQCD"],
     shapeHisto   = SignalShapeHisto,
 )
 
@@ -203,7 +203,7 @@ myQCDInv = DataGroup(
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
     datasetDefinition = "QCDinvertedmt",
-    nuisances    = myQCDShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","xsect_tt_8TeV_forQCD","QCDinvTemplateFit"],
+    nuisances    = myQCDShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","xsect_tt_8TeV_forQCD","QCDinvTemplateFit","lumi_forQCD"],
     shapeHisto   = SignalShapeHisto,
 )
 
@@ -886,6 +886,14 @@ Nuisances.append(Nuisance(
     value         = systematics.getLuminosityUncertainty()
 ))
 
+Nuisances.append(Nuisance(
+    id            = "lumi_forQCD",
+    label         = "luminosity",
+    distr         = "lnN",
+    function      = "ConstantForQCD",
+    value         = systematics.getLuminosityUncertainty()
+))
+
 if OptionIncludeSystematics:
     Nuisances.append(Nuisance(
         id            = "pileup",
@@ -951,7 +959,7 @@ MergeNuisances.append(["b_tag","b_tag_fakes"])
 #MergeNuisances.append(["b_tag","b_tag_fakes"])
 MergeNuisances.append(["pileup","pileup_fakes"])
 MergeNuisances.append(["xsect_tt_8TeV", "xsect_tt_8TeV_forQCD"])
-
+MergeNuisances.append(["lumi", "lumi_forQCD"])
 
 # Control plots
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput
