@@ -884,10 +884,11 @@ class Multicrab:
     # \param lumiMaskDir  The directory for lumi mask (aka JSON) files, can
     #                     be absolute or relative path
     # \param crabConfigTemplate  String containing the crab.cfg. Either this ir crabConfig must be given
+    # \param ignoreMissingDatasets  If true, missing datasets in a workflow are ignored in _createDatasets()
     # 
     # Parses the crabConfig file for CMSSW.pset and CMSSW.lumi_mask.
     # Ensures that the CMSSW configuration file exists.
-    def __init__(self, crabConfig=None, pyConfig=None, lumiMaskDir="", crabConfigTemplate=None):
+    def __init__(self, crabConfig=None, pyConfig=None, lumiMaskDir="", crabConfigTemplate=None, ignoreMissingDatasets=False):
         if crabConfig is None and crabConfigTemplate is None:
             raise Exception("You must specify either crabConfig or crabConfigTemplate, you gave neither")
         if crabConfig is not None and crabConfigTemplate is not None:
@@ -902,6 +903,8 @@ class Multicrab:
         self.datasetNames = []
 
         self.datasets = None
+
+        self.ignoreMissingDatasets = ignoreMissingDatasets
 
         # Read crab.cfg for lumi_mask and optionally pset
         if crabConfig is not None:
@@ -958,9 +961,14 @@ class Multicrab:
         self.datasetMap = {}
 
         for dname, workflow in self.datasetNames:
-            dset = MulticrabDataset(dname, workflow, self.lumiMaskDir)
-            self.datasets.append(dset)
-            self.datasetMap[dname] = dset
+            try:
+                dset = MulticrabDataset(dname, workflow, self.lumiMaskDir)
+                self.datasets.append(dset)
+                self.datasetMap[dname] = dset
+            except Exception, e:
+                if not self.ignoreMissingDatasets:
+                    raise
+                print "Warning: dataset %s ignored for workflow %s, reason: %s" % (dname, workflow, str(e))
 
     ## Get MulticrabDataset object for name.
     def getDataset(self, name):
@@ -1233,6 +1241,7 @@ class Multicrab:
             print "############################################################"
             print
 
+            prevdir = os.getcwd()
             os.chdir(dirname)
             subprocess.call(["multicrab", "-create"])
             print
@@ -1241,6 +1250,6 @@ class Multicrab:
             print "Created multicrab task to subdirectory "+dirname
             print
 
-            os.chdir("..")
+            os.chdir(prevdir)
 
         return [(dirname, dsetNames)]

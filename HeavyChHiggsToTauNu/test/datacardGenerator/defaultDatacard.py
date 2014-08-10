@@ -6,7 +6,8 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-03-20"
 #Path = "/home/wendland/data/v533/2014-03-20_expCtrlPlots"
 #Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
-Path = "/home/wendland/data/v533/2014-07-01_nominal"
+Path = "/home/wendland/data/xnominal"
+Path = "/home/wendland/data/test_matti_met60"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
 #Path = "/home/wendland/data/v533/2014_03_12_metphicorrected"
@@ -38,7 +39,7 @@ OptionMassShape = "TransverseMass"
 # Choose source of EWK+tt genuine tau background
 OptionGenuineTauBackgroundSource = "DataDriven"                          # State-of-the-art: embedded data used (use for optimization and results)
 #OptionGenuineTauBackgroundSource = "MC_FakeAndGenuineTauNotSeparated" # MC used, fake taus are not separated from genuine taus
-#OptionGenuineTauBackgroundSource = "MC_FullSystematics"               # MC used, fake and genuine taus separated (use for embedding closure test)
+OptionGenuineTauBackgroundSource = "MC_FullSystematics"               # MC used, fake and genuine taus separated (use for embedding closure test)
 #OptionGenuineTauBackgroundSource = "MC_RealisticProjection"            # MC used, fake and genuine taus separated (can be used for optimization)
 
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
@@ -47,7 +48,7 @@ OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produce
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = True
+OptionDoControlPlots = not True
 OptionDoMergeFakeTauColumns = True # Merges the fake tau columns into one
 OptionCombineSingleColumnUncertainties = True # Makes limit running faster
 OptionCtrlPlotsAtMt = True # Produce control plots after all selections (all selections for transverse mass)

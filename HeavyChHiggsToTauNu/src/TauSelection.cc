@@ -15,6 +15,7 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/TauReco/interface/PFTauDecayMode.h"
 
 #include "DataFormats/Math/interface/LorentzVector.h"
 typedef math::XYZTLorentzVector LorentzVector;
@@ -322,6 +323,9 @@ namespace HPlus {
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fAnalyseFakeTauComposition(iConfig.getUntrackedParameter<bool>("analyseFakeTauComposition")),
     fDecayModeFilterValue(iConfig.getUntrackedParameter<int>("decayModeFilterValue")),
+    fTauDecayModeReweightFactorForZero(iConfig.getUntrackedParameter<double>("tauDecayModeReweightingZero")),
+    fTauDecayModeReweightFactorForOne(iConfig.getUntrackedParameter<double>("tauDecayModeReweightingOne")),
+    fTauDecayModeReweightFactorForOther(iConfig.getUntrackedParameter<double>("tauDecayModeReweightingOther")),
     fTauID(0),
     fOperationMode(kNormalTauID)
   {
@@ -977,6 +981,7 @@ namespace HPlus {
       // Rtau value
       output.fSelectedTauRtauValue = fTauID->getRtauValue(output.fSelectedTau);
     }
+    output.fTauDecayModeReweightingFactor = getTauDecayModeReweightingFactor(output.fSelectedTau);
   }
 
   void TauSelection::fillOperationModeHistogram() {
@@ -1333,4 +1338,14 @@ namespace HPlus {
     return fTauID->getRtauValue(tau);
   }
 
+  double TauSelection::getTauDecayModeReweightingFactor(const edm::Ptr<pat::Tau> tau) {
+    if (tau.isNull())
+      return 1.0;
+    if (tau->decayMode() == reco::PFTauDecayMode::tauDecay1ChargedPion0PiZero)
+      return fTauDecayModeReweightFactorForZero;
+    if (tau->decayMode() == reco::PFTauDecayMode::tauDecay1ChargedPion1PiZero)
+      return fTauDecayModeReweightFactorForOne;
+    return fTauDecayModeReweightFactorForOther;
+  }
+  
 }
