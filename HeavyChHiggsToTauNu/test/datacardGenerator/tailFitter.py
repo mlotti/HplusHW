@@ -352,6 +352,10 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             addOrReplace(myDict, "Hp", myRHWU)
         elif c == "EWK_Tau":
             addOrReplace(myDict, "EWKtau", myRHWU)
+            for i in range (1, myDict["EWKtau"].getRootHisto().GetNbinsX()+1):
+                print "***A", i, myDict["EWKtau"].getRootHisto().GetXaxis().GetBinWidth(i), myDict["Hp"].getRootHisto().GetBinContent(i)
+            print myDict["EWKtau"].getRootHisto().Integral()
+
             myAddToTotalStatus = True
         elif c.endswith("faketau"):
             addOrReplace(myDict, "EWKfakes", myRHWU)
@@ -382,42 +386,45 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             print "%10s: %.1f +- %.1f (stat.) + %.1f - %.1f (syst.)"%(item,rate,stat,systUp,systDown)
     print ""
     
-    # Create post fit shape
-    myStackList = []
-    if "QCD" in myDict.keys():
-	myHisto = histograms.Histo(myDict["QCD"],"QCD",legendLabel=ControlPlotMaker._legendLabelQCD)
-	myHisto.setIsDataMC(isData=False, isMC=True)
-	myStackList.append(myHisto)
-    if "EWKtau" in myDict.keys():
-	myHisto = histograms.Histo(myDict["EWKtau"],"Embedding",legendLabel=ControlPlotMaker._legendLabelEmbedding)
-	myHisto.setIsDataMC(isData=False, isMC=True)
-	myStackList.append(myHisto)
-    if "EWKfakes" in myDict.keys():
-	myHisto = histograms.Histo(myDict["EWKfakes"],"EWKfakes",legendLabel=ControlPlotMaker._legendLabelEWKFakes)
-	myHisto.setIsDataMC(isData=False, isMC=True)
-	myStackList.append(myHisto)
-    myBlindedStatus = True
-    myBlindingString = None
-    hObsLocal = aux.Clone(hObs)
-    if myBlindedStatus:
-	myBlindingString = "%d-%d GeV"%(hObs.GetXaxis().GetBinLowEdge(1),hObs.GetXaxis().GetBinUpEdge(hObs.GetNbinsX()))
-	for i in range(0, hObs.GetNbinsX()):
-	    hObsLocal.SetBinContent(i, -1.0)
-	    hObsLocal.SetBinError(i, 0.0)
-    # Add data
-    myDataHisto = histograms.Histo(hObsLocal,"Data")
-    myDataHisto.setIsDataMC(isData=True, isMC=False)
-    myStackList.insert(0, myDataHisto)
-    # Add signal
-    mySignalLabel = "TTToHplus_M%d"%float(m)
-    if float(m) > 179:
-	mySignalLabel = "HplusTB_M%d"%float(m)
-    myHisto = histograms.Histo(myDict["Hp"],mySignalLabel)
-    myHisto.setIsDataMC(isData=False, isMC=True)
-    myStackList.insert(1, myHisto)
-    # Make plot
-    myLogList = [True, False]
+    
+    myLogList = [False,True]
     for l in myLogList:
+        
+        # Create post fit shape
+        myStackList = []
+        if "QCD" in myDict.keys():
+            myHisto = histograms.Histo(myDict["QCD"].Clone(),"QCD",legendLabel=ControlPlotMaker._legendLabelQCD)
+            myHisto.setIsDataMC(isData=False, isMC=True)
+            myStackList.append(myHisto)
+        if "EWKtau" in myDict.keys():
+            myHisto = histograms.Histo(myDict["EWKtau"].Clone(),"Embedding",legendLabel=ControlPlotMaker._legendLabelEmbedding)
+            myHisto.setIsDataMC(isData=False, isMC=True)
+            myStackList.append(myHisto)
+        if "EWKfakes" in myDict.keys():
+            myHisto = histograms.Histo(myDict["EWKfakes"].Clone(),"EWKfakes",legendLabel=ControlPlotMaker._legendLabelEWKFakes)
+            myHisto.setIsDataMC(isData=False, isMC=True)
+            myStackList.append(myHisto)
+        myBlindedStatus = True
+        myBlindingString = None
+        hObsLocal = aux.Clone(hObs)
+        if myBlindedStatus:
+            myBlindingString = "%d-%d GeV"%(hObs.GetXaxis().GetBinLowEdge(1),hObs.GetXaxis().GetBinUpEdge(hObs.GetNbinsX()))
+            for i in range(0, hObs.GetNbinsX()):
+                hObsLocal.SetBinContent(i, -1.0)
+                hObsLocal.SetBinError(i, 0.0)
+        # Add data
+        myDataHisto = histograms.Histo(hObsLocal,"Data")
+        myDataHisto.setIsDataMC(isData=True, isMC=False)
+        myStackList.insert(0, myDataHisto)
+        # Add signal
+        mySignalLabel = "TTToHplus_M%d"%float(m)
+        if float(m) > 179:
+            mySignalLabel = "HplusTB_M%d"%float(m)
+        myHisto = histograms.Histo(myDict["Hp"].Clone(),mySignalLabel)
+        myHisto.setIsDataMC(isData=False, isMC=True)
+        myStackList.insert(1, myHisto)
+        
+        # Make plot
 	myStackPlot = plots.DataMCPlot2(myStackList)
 	myStackPlot.setLuminosity(luminosity)
 	#myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
