@@ -18,7 +18,7 @@ QCD = {
     "fitfunc": "FitFuncExpTailExoAlternate",
     "fitmin": 140, #140
     "fitmax": 300,
-    "applyFrom": 160,
+    "applyFrom": 160, # 160
 }
 
 # Fit settings for EWK+tt with taus

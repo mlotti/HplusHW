@@ -352,10 +352,6 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             addOrReplace(myDict, "Hp", myRHWU)
         elif c == "EWK_Tau":
             addOrReplace(myDict, "EWKtau", myRHWU)
-            for i in range (1, myDict["EWKtau"].getRootHisto().GetNbinsX()+1):
-                print "***A", i, myDict["EWKtau"].getRootHisto().GetXaxis().GetBinWidth(i), myDict["Hp"].getRootHisto().GetBinContent(i)
-            print myDict["EWKtau"].getRootHisto().Integral()
-
             myAddToTotalStatus = True
         elif c.endswith("faketau"):
             addOrReplace(myDict, "EWKfakes", myRHWU)

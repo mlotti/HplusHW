@@ -75,7 +75,7 @@ _finalstateYmaxSigmaBR = {
     "etau": 10.0, # FIXME
     "mutau": 10.0, # FIXME
     "emu": 10.0, # FIXME
-    "default": 1.0,
+    "default": 0.8,
 }
 
 
