@@ -239,7 +239,7 @@ def addBinByBinStatUncert(currentColumn, hRate, columnNames, nuisanceInfo, fitmi
             addNuisanceForIndividualColumn(columnNames,nuisanceInfo,currentColumn,myName)
     return myStatHistograms
 
-def createDatacardOutput(originalCardLines, columnNames, nuisanceInfo):
+def createDatacardOutput(originalCardLines, columnNames, nuisanceInfo, opts):
     myOutput = ""
     myProcessLinePassed = False
     for l in originalCardLines:
@@ -277,7 +277,8 @@ def createDatacardOutput(originalCardLines, columnNames, nuisanceInfo):
         elif "statBin" in n["name"]:
             myStatTable.append(myRow)
         else:
-            myNuisanceTable.append(myRow)
+            if not opts.noSystUncert:
+                myNuisanceTable.append(myRow)
     # Create table
     myWidths = []
     TableProducer.calculateCellWidths(myWidths, myProcessTable)
@@ -455,7 +456,7 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
 	    myPlotName += "_Linear"
 	plots.drawPlot(myStackPlot, myPlotName, **myParams)
 
-def createBinnedFitUncertaintyHistograms(hRate, hUp, hDown, applyFrom):
+def createBinnedFitUncertaintyHistograms(hRate, hUp, hDown, applyFrom, opts):
     hupList = []
     hDownList = []
     # find bin
@@ -468,8 +469,12 @@ def createBinnedFitUncertaintyHistograms(hRate, hUp, hDown, applyFrom):
         for j in range(1, hRate.GetNbinsX()+1):
             hup.SetBinError(j, 0.0)
             hdown.SetBinError(j, 0.0)
-        hup.SetBinContent(i, hUp.GetBinContent(i))
-        hdown.SetBinContent(i, hDown.GetBinContent(i))
+        if opts.doubleFitUncert:
+            hup.SetBinContent(i, (hUp.GetBinContent(i)-hRate.GetBinContent(i))*2.0+hRate.GetBinContent(i))
+            hdown.SetBinContent(i, (hDown.GetBinContent(i)-hRate.GetBinContent(i))*2.0+hRate.GetBinContent(i))
+        else:
+            hup.SetBinContent(i, hUp.GetBinContent(i))
+            hdown.SetBinContent(i, hDown.GetBinContent(i))
         if hDown.GetBinContent(i) < 0.0:
             hdown.SetBinContent(i, 0.0)
         hupList.append(hup)
@@ -481,6 +486,9 @@ if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
     parser.add_option("-x", "--settings", dest="settings", action="store", help="Name (incl. path) of the settings file to be used as an input")
+    parser.add_option("--noFitUncert", dest="noFitUncert", action="store_true", default=False, help="No fit uncertainty")
+    parser.add_option("--doubleFitUncert", dest="doubleFitUncert", action="store_true", default=False, help="Double the fit uncertainty")
+    parser.add_option("--noSystUncert", dest="noSystUncert", action="store_true", default=False, help="Remove all syst. uncertainties")
     (opts, args) = parser.parse_args()
 
     myStyle = tdrstyle.TDRStyle()
@@ -611,19 +619,21 @@ if __name__ == "__main__":
                 if config.applyFitUncertaintyAsBinByBinUncertainty:
                     # Add fit uncertainty as bin-by-bin type uncertainty
                     (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
-                    (myBinByBinUpHistograms, myBinByBinDownHistograms) = createBinnedFitUncertaintyHistograms(myFittedRateHistograms[0], hupTotal, hdownTotal, myFitSettings["applyFrom"])
-                    myHistogramCache.extend(myBinByBinUpHistograms)
-                    myHistogramCache.extend(myBinByBinDownHistograms)
-                    # Add fit parameter nuisances to nuisance table
-                    for hup in myBinByBinUpHistograms:
-                        addNuisanceForIndividualColumn(myColumnNames,myNuisanceInfo,c,hup.GetTitle().replace("%s_%s"%(c,c),c))
+                    (myBinByBinUpHistograms, myBinByBinDownHistograms) = createBinnedFitUncertaintyHistograms(myFittedRateHistograms[0], hupTotal, hdownTotal, myFitSettings["applyFrom"], opts)
+                    if not opts.noFitUncert:
+                        myHistogramCache.extend(myBinByBinUpHistograms)
+                        myHistogramCache.extend(myBinByBinDownHistograms)
+                        # Add fit parameter nuisances to nuisance table
+                        for hup in myBinByBinUpHistograms:
+                            addNuisanceForIndividualColumn(myColumnNames,myNuisanceInfo,c,hup.GetTitle().replace("%s_%s"%(c,c),c))
                 else:
                     # Add fit uncertainty as nuisances parameters
-                    myHistogramCache.extend(huplist)
-                    myHistogramCache.extend(hdownlist)
-                    # Add fit parameter nuisances to nuisance table
-                    for hup in huplist:
-                        addNuisanceForIndividualColumn(myColumnNames,myNuisanceInfo,c,hup.GetTitle())
+                    if not opts.noFitUncert:
+                        myHistogramCache.extend(huplist)
+                        myHistogramCache.extend(hdownlist)
+                        # Add fit parameter nuisances to nuisance table
+                        for hup in huplist:
+                            addNuisanceForIndividualColumn(myColumnNames,myNuisanceInfo,c,hup.GetTitle())
                 # Create bin-by-bin stat. histograms for fitted distribution and update the nuisance table
                 myStatHistograms = addBinByBinStatUncert(c, myFittedRateHistograms[0], myColumnNames, myNuisanceInfo, 0.0, myFitSettings["applyFrom"])
                 myHistogramCache.extend(myStatHistograms)
@@ -644,7 +654,7 @@ if __name__ == "__main__":
         myRootFile.Write()
         myRootFile.Close()
         # Create new datacard file and write
-        myOutput = createDatacardOutput(myOriginalCardLines, myColumnNames, myNuisanceInfo)
+        myOutput = createDatacardOutput(myOriginalCardLines, myColumnNames, myNuisanceInfo, opts)
         myFilename = myDatacardPattern%m
         myFile = open(myFilename, "w")
         myFile.write(myOutput)
