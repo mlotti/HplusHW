@@ -67,7 +67,7 @@ _finalstateYmaxBR = {
     "etau": 0.4,
     "mutau": 0.4,
     "emu": 0.8,
-    "default": 0.03,
+    "default": 0.02,
 }
 
 ## Default y axis maximum values for sigma x BR limit for the final states
@@ -75,7 +75,7 @@ _finalstateYmaxSigmaBR = {
     "etau": 10.0, # FIXME
     "mutau": 10.0, # FIXME
     "emu": 10.0, # FIXME
-    "default": 1.0,
+    "default": 0.8,
 }
 
 
@@ -87,7 +87,7 @@ class BRLimits:
     # \param directory          Path to the multicrab task directory with the JSON files
     # \param excludeMassPoints  List of strings for mass points to exclude
     def __init__(self, directory=".", excludeMassPoints=[], limitsfile="limits.json", configfile="configuration.json"):
-        #resultfile="limits.json"
+        resultfile="limits.json"
         #configfile="configuration.json"
 
         f = open(os.path.join(directory, limitsfile), "r")
@@ -204,7 +204,50 @@ class BRLimits:
             else:
                 print format % (self.mass_string[i], "BLINDED", self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
         print
+        
 
+    ## Save the table as tex format
+    def saveAsLatexTable(self,unblindedStatus=False):
+        myLightStatus = True
+        if float(self.mass[0]) > 179.0:
+	    myLightStatus = False
+        
+        myDigits = 3
+        if myLightStatus:
+	    myDigits = 4
+        fstr = "%%.%df"%myDigits
+        
+        format = "%3s "
+        for i in range(0,5):
+	    format += "& %s "%fstr 
+	
+        if not unblindedStatus:
+	    format += "& Blinded "
+	else:
+	    format += "& %s "%fstr 
+        format += "\\\\ \n"
+        s = "% Table autocreated through tools.limits.saveAsLatexTable() \n"
+        s += "\\begin{tabular}{ c c c c c c c } \n"
+        s += "\\hline \n"
+        if myLightStatus:
+	    s += "\\multicolumn{7}{ c }{95\\% CL upper limit on $\\BRtH\\times\\BRHtau$}\\\\ \n"
+	else:
+	    s += "\\multicolumn{7}{ c }{95\\% CL upper limit on $\\sigmaHplus\\times\\BRHtau$}\\\\ \n"
+	s += "\\hline \n"
+	s += "\\mHpm & \\multicolumn{5}{ c }{Expected limit} & Observed \\\\ \\cline{2-6} \n"
+	s += "(GeV)   & $-2\\sigma$  & $-1\\sigma$ & median & +1$\\sigma$ & +2$\\sigma$  & limit \\\\ \n"
+	s += "\\hline \n"
+        for i in xrange(len(self.mass_string)):
+            if unblindedStatus:
+                s += format % (self.mass_string[i], float(self.expectedMinus2_string[i]), float(self.expectedMinus1_string[i]), float(self.expectedMedian_string[i]), float(self.expectedPlus1_string[i]), float(self.expectedPlus2_string[i]), float(self.observed_string[i]))
+            else:
+                s += format % (self.mass_string[i], float(self.expectedMinus2_string[i]), float(self.expectedMinus1_string[i]), float(self.expectedMedian_string[i]), float(self.expectedPlus1_string[i]), float(self.expectedPlus2_string[i]))
+	s += "\\hline \n"
+        s += "\\end{tabular} \n"
+        f = open("limitsTable.tex","w")
+        f.write(s)
+        f.close()
+        
     ## Construct TGraph for the observed limit
     #
     # \return TGraph of the observed limit, None if the observed limit does not exist

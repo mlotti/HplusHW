@@ -201,6 +201,8 @@ def main():
                       help="Use only data datasets (default is to use data+MC, or an applicable subset)")
     parser.add_option("--pickEvents", dest="pickEvents", action="store_true", default=False,
                       help="Retrieve also pickEvents.txt")
+    parser.add_option("--dest", dest="destdir", default=None,
+                      help="Directory to generate the multicrab directory to (default .)")
     (opts, args) = parser.parse_args()
     step = opts.step
     versions = opts.version
@@ -303,7 +305,9 @@ def createTasks(opts, step, version=None):
     taskDirs = []
     for midfix, datasets in tasks:
         # Create multicrab
-        multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..", crabConfigTemplate=crabcfgtemplate)
+        multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..", crabConfigTemplate=crabcfgtemplate,
+                              ignoreMissingDatasets=True
+                          )
 
         if step in ["skim", "embedding", "genTauSkim"]:
             multicrab.addCommonLine("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_5_3_X")
@@ -355,7 +359,7 @@ def createTasks(opts, step, version=None):
         prefix = "multicrab_"+step+dirName
         if midfix != "":
             prefix += "_"+midfix
-        taskDirs.extend(multicrab.createTasks(configOnly = opts.configOnly, prefix=prefix))
+        taskDirs.extend(multicrab.createTasks(configOnly = opts.configOnly, prefix=prefix, path=opts.destdir))
             
         # patch CMSSW.sh
 #        if not opts.configOnly and step in ["skim", "embedding", "genTauSkim"]:

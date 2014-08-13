@@ -74,6 +74,8 @@ namespace HPlus {
       const double getSelectedTauRtauValue() const { return fSelectedTauRtauValue; }
       /// Invalidate data object (as a safety precaution)
       void invalidate() { fSelectedTau = edm::Ptr<pat::Tau>(); }
+      /// Obtain event weight for tau decay mode
+      double getTauDecayModeReweightingFactor() const { return fTauDecayModeReweightingFactor; }
 
       friend class TauSelection;
 
@@ -90,6 +92,7 @@ namespace HPlus {
       bool bSelectedTausDoNotPassIsolation;
       int fSelectedTauNProngsValue;
       double fSelectedTauRtauValue;
+      double fTauDecayModeReweightingFactor;
     };
 
     TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label = "TauSelection");
@@ -164,6 +167,8 @@ namespace HPlus {
     /// Analyzes the MC purity of the considered tau objects
     void ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, WrappedTH1* histogram);
     //void findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus);
+    /// Obtains event weight based on tau decay mode 
+    double getTauDecayModeReweightingFactor(const edm::Ptr<pat::Tau> tau);
 
   private:
     // Input parameters
@@ -173,11 +178,16 @@ namespace HPlus {
     const bool fAnalyseFakeTauComposition;
     /// Option for Decay Mode filter
     const int fDecayModeFilterValue;
+    /// tau decay mode reweighting for tau -> pi+ nu
+    const double fTauDecayModeReweightFactorForZero;
+    /// tau decay mode reweighting for tau -> pi+ pi0 nu
+    const double fTauDecayModeReweightFactorForOne;
+    /// tau decay mode reweighting for other decay modes
+    const double fTauDecayModeReweightFactorForOther;
     /// TauID object
     TauIDBase* fTauID;
     /// Operation mode of tau selection
     TauSelectionOperationMode fOperationMode;
-
     /// Factorization table objects
 
     // Histograms

@@ -75,14 +75,14 @@ class DatasetManagerMany:
 
     def _getDatasetsGeneric(self, methodName):
         datasets = [getattr(dm, methodName)() for dm in self._dsetMgrs]
-        tmp = []
-        for i in xrange(len(datasets[0])):
-            lst = []
-            for j in xrange(len(self._dsetMgrs)):
-                lst.append(datasets[j][i])
-            tmp.append(lst) # tmp[i]
+        lsts = []
+        for j in xrange(len(self._dsetMgrs)):
+            for i in xrange(len(datasets[j])):
+                if len(lsts) == i:
+                    lsts.append([])
+                lsts[i].append(datasets[j][i])
 
-        return [DatasetMany(t) for t in tmp]
+        return [DatasetMany(t) for t in lsts]
 
     def getDataDatasets(self):
         return self._getDatasetsGeneric("getDataDatasets")
@@ -303,6 +303,8 @@ if __name__ == "__main__":
                       help="Midfix to add to the output directory name")
     parser.add_option("--nosyst", dest="dosyst", default=True, action="store_false",
                       help="Don't process systematic variations")
+    parser.add_option("--outputName", dest="outputName", default=None,
+                      help="Name of output task directory")
     (opts, args) = parser.parse_args()
     if len(args) == 0:
         parser.error("Expected at least one multicrab directory, got %d" % len(args))
@@ -359,7 +361,10 @@ if __name__ == "__main__":
             eras = [tmp]
 
     # Create pseudo multicrab directory
+    
     dirname = "embedding"
+    if opts.outputName != None:
+        dirname += opts.outputName
     if datasetCreatorMC is not None:
         dirname += "_mc"
     if opts.midfix is not None:

@@ -477,6 +477,24 @@ namespace HPlus {
 
 
 //------ TauID
+    /*
+    // Test transverse mass regions for embedded events
+    if(bTauEmbeddingStatus) {
+      TauSelection::Data tauDataTmp = fTauSelection.silentAnalyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
+      if(tauDataTmp.getAllTauObjects().size() == 0)
+        return false;
+      if(tauDataTmp.getAllTauObjects().size() != 1)
+        throw cms::Exception("Assert") << "There should be only one embedded tau, got " << tauDataTmp.getAllTauObjects().size();
+      edm::Ptr<pat::Tau> theTau = tauDataTmp.getAllTauObjects()[0];
+      JetSelection::Data jetDataTmp = fJetSelection.silentAnalyze(iEvent, iSetup, theTau, nVertices);
+      METSelection::Data metDataTmp = fMETSelection.silentAnalyze(iEvent, iSetup, nVertices, theTau, jetDataTmp.getAllJets());
+      double transverseMass = TransverseMass::reconstruct(*theTau, *(metDataTmp.getSelectedMET()));
+      if(!(transverseMass < 120))
+        //if(!(transverseMass >= 120))
+        return false;
+    }
+    */
+
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
     fTauSelection.analyseFakeTauComposition(fFakeTauIdentifier,iEvent);
     if(!tauData.passedEvent()) return false; // Require at least one tau
@@ -861,7 +879,7 @@ namespace HPlus {
 //------ Full Higgs mass reconstruction
     FullHiggsMassCalculator::Data fullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData,
 										       metData, &genData);
-    if (!fullHiggsMassData.passedEvent()) return false;
+    if (!fullHiggsMassData.passedEvent()) return true; // this is currently optional selection step, so we want to include events failing these cuts to be included in pickEvents.txt
     fCommonPlots.fillControlPlotsAfterAllSelectionsWithFullMass(iEvent, fullHiggsMassData);
     //double myHiggsMass = fullHiggsMassData.getHiggsMass();
     increment(fHiggsMassSelectionCounter);
