@@ -37,6 +37,7 @@ def main():
     doBRlimit(limits,unblindedStatus)
     doLimitError(limits,unblindedStatus)
     limits.print2(unblindedStatus)
+    limits.saveAsLatexTable(unblindedStatus)
 
 def doBRlimit(limits,unblindedStatus):
     graphs = []

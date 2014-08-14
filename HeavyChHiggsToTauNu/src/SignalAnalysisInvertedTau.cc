@@ -563,6 +563,8 @@ namespace HPlus {
         double myCorrectionWeight = getQCDEtaCorrectionFactor(tauDataForInverted.getSelectedTau()->eta());
         fEventWeight.multiplyWeight(myCorrectionWeight);
       }
+      // tau decay mode reweighting
+      fEventWeight.multiplyWeight(tauDataForInverted.getTauDecayModeReweightingFactor());
       // Do inverted analysis
       return doInvertedAnalysis(iEvent, iSetup, tauDataForInverted.getSelectedTau(), tauMatchData, pvData, genData);
     }

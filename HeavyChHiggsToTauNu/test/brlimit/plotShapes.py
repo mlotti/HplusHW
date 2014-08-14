@@ -233,7 +233,7 @@ class DatasetContainer:
         else:
             myRatioContainer.drawAllInOne(myAllShapeNuisances, myCMSText, luminosity)
 
-def doPlot(opts,mass,nameList,luminosity,rootFilePattern):
+def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,rootFilePattern):
     f = ROOT.TFile.Open(rootFilePattern%mass)
 
     content = f.GetListOfKeys()
@@ -251,37 +251,43 @@ def doPlot(opts,mass,nameList,luminosity,rootFilePattern):
     myPreviousKey = None
     while key:
         splitList = key.GetName().split("_")
-        if myPreviousSplitList != None:
-            if myPreviousSplitList[0] != splitList[0]:
-                # New dataset column
-                if not myPreviousKey in ["res.","data_obs"]:
-                    shapes.append(myPreviousKey)
-                    myDataset = DatasetContainer(shapes)
-                    # Make sure that dataset objects are stored for plot making only for unique names
-                    if not myDataset._name in nameList:
-                        datasets.append(myDataset)
-                        nameList.append(myDataset._name)
-                shapes = []
-            else:
-                shapes.append(myPreviousKey)
-        # Store old key
-        myPreviousSplitList = splitList
-        myPreviousKey = key.GetName()
+        if not "statBin" in key.GetName() and not "fitBin" in key.GetName() and not "fineBinning" in key.GetName() and not "b_mistag" in key.GetName():
+	    if myPreviousSplitList != None:
+		if myPreviousSplitList[0] != splitList[0]:
+		    # New dataset column
+		    if not "data_obs" in myPreviousKey and not "res." in myPreviousKey:
+			shapes.append(myPreviousKey)
+			myDataset = DatasetContainer(shapes)
+			# Make sure that dataset objects are stored for plot making only for unique names
+			if not myDataset._name in nameList:
+			    datasets.append(myDataset)
+			    nameList.append(myDataset._name)
+		    shapes = []
+		else:
+		    shapes.append(myPreviousKey)
+	    # Store old key
+	    myPreviousSplitList = splitList
+	    myPreviousKey = key.GetName()
         # Advance to next
         key = diriter.Next()
+    # Store last dataset
+    myDataset = DatasetContainer(shapes)
+    # Make sure that dataset objects are stored for plot making only for unique names
+    if not myDataset._name in nameList:
+	datasets.append(myDataset)
+	nameList.append(myDataset._name)
 
     # Obtain list of all shape nuisances
-    myAllShapeNuisances = []
     for d in datasets:
         for s in d._uncertaintyShapes:
             myCleanS = s.replace("Up","")[1:]
-            if not myCleanS in myAllShapeNuisances:
-                myAllShapeNuisances.append(myCleanS)
+            if not myCleanS in allShapeNuisances:
+                allShapeNuisances.append(myCleanS)
 
     ## Do the actual plots
     for d in datasets:
         #d.debug()
-        d.doPlot(opts,myAllShapeNuisances,f,mass,luminosity)
+        d.doPlot(opts,allShapeNuisances,f,mass,luminosity)
     # Close the file
     f.Close()
 
@@ -309,8 +315,9 @@ if __name__ == "__main__":
     massPoints = mySettings.getMassPoints(limitTools.LimitProcessType.TAUJETS)
     print "The following masses are considered:",massPoints
     nameList = []
+    allShapeNuisances = []
     for m in massPoints:
         # Obtain luminosity from datacard
         myLuminosity = float(limitTools.readLuminosityFromDatacard(".", mySettings.getDatacardPattern(limitTools.LimitProcessType.TAUJETS)%m))
         # Do plots
-        doPlot(opts,int(m),nameList,myLuminosity,mySettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS))
+        doPlot(opts,int(m),nameList,allShapeNuisances,myLuminosity,mySettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS))

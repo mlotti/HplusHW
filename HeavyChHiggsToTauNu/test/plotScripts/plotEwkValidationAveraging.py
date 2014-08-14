@@ -50,16 +50,13 @@ def main():
     # if len(dirSeeds) == 0:
     #     raise Exception("Found 0 input directories from %s" % inputInfoPath)
     dirSeeds = [
-#        "../embedding_mc_140327_122732",
-#        "../embedding_seedTest1_140326_114053",
-#        "../embedding_seedTest2_140414_121814",
-#        "../embedding_seedTest3_140414_122132",
-#        "../embedding_seedTest4_140414_122827",
-        "../embedding_140509_100532",
-        "../embedding_seedTest1_140508_154221",
-        "../embedding_seedTest2_140508_154540",
-        "../embedding_seedTest3_140508_155055",
-        "../embedding_seedTest4_140508_155742"
+#        "../embedding_140509_100532",
+#        "../embedding_seedTest1_140508_154221",
+#        "../embedding_seedTest2_140508_154540",
+#        "../embedding_seedTest3_140508_155055",
+#        "../embedding_seedTest4_140508_155742"
+        "../embedding_mc_tightPlus_140512_160900",
+        "../embedding_mc_seedTest1_140807_084326"
         ]
 
     # Apply TDR style
@@ -103,6 +100,7 @@ def doDataset(datasetsAve, datasetsSeeds, optMode):
     plotter = tauEmbedding.CommonPlotter(optMode, "average", drawPlotCommon)
 
     doPlots(datasetsAve, datasetsSeeds, "Data", plotter)
+    doPlots(datasetsAve, datasetsSeeds, "TTJets", plotter)
 
 
 def doPlots(datasetsAve, datasetsSeeds, datasetName, plotter):
@@ -118,10 +116,14 @@ def doPlots(datasetsAve, datasetsSeeds, datasetName, plotter):
     def createPlot(name):
         drhAve = dsetAve.getDatasetRootHisto(name)
         drhAve.setName("Average")
+        if drhAve.isMC():
+            drhAve.normalizeToLuminosity(lumi)
         drhSeeds = []
         for i, d in enumerate(dsetSeeds):
             drh = d.getDatasetRootHisto(name)
             drh.setName("Seed %d" % i)
+            if drh.isMC():
+                drh.normalizeToLuminosity(lumi)
             drhSeeds.append(drh)
 
         if name == "shapeTransverseMass":
@@ -174,7 +176,7 @@ def doPlots(datasetsAve, datasetsSeeds, datasetName, plotter):
     for th1 in [hchi2, hchi2a, hkolmo, hkolmoa]:
         p = plots.PlotBase([th1])
         p.setLuminosity(lumi)
-        plots.drawPlot(p, th1.GetName(), ylabel="Entries", createLegend=None)
+        plots.drawPlot(p, datasetName+"_"+th1.GetName(), ylabel="Entries", createLegend=None)
 
 if __name__ == "__main__":
     main()

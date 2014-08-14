@@ -24,7 +24,8 @@ def main():
 #    compareCombination()
 #    compareCombinationSanitychecksLHC()
 
-    compareTauJetsDeltaPhi()
+#    compareTauJetsDeltaPhi()
+    compareDummy()
 
 def compareTauJets():
     doCompare("taujets", [
@@ -87,7 +88,55 @@ def compareTauJetsDeltaPhi():
               expectedSigma2RelativeOpts={"ymax": 3.6, "ymin": 0.3},
               moveLegend={"dh": -0.04}
               )
-            
+
+def compareDummy():
+    lightStatus = False
+    myOpts = {}
+    if lightStatus:
+        myList = [
+              ("#tau p_{T}>41, E_{T}^{miss}>60, No ang.cuts","*TailKillerNoCuts*nominal*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>60, Loose ang.cuts","*TailKillerLoose*nominal*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>60, Tight ang.cuts","*TailKillerTight*nominal*/CombineMultiCrab*"),
+              ("#tau p_{T}>50, E_{T}^{miss}>60, Loose ang.cuts","*TailKillerLoose*tau50*/CombineMultiCrab*"),
+#              ("#tau p_{T}>50, E_{T}^{miss}>60, Tight ang.cuts","*TailKillerTight*tau50*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>70, No ang.cuts","*TailKillerNoCuts*met70_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>70, Loose ang.cuts","*TailKillerLoose*met70_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>70, Tight ang.cuts","*TailKillerTight*met70_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>80, No ang.cuts","*TailKillerNoCuts*met80_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>80, Loose ang.cuts","*TailKillerLoose*met80_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>80, Tight ang.cuts","*TailKillerTight*met80_*/CombineMultiCrab*"),
+              ("#tau p_{T}>50, E_{T}^{miss}>80, Loose ang.cuts","*TailKillerLoose*met80tau50_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41 no R_{#tau}, E_{T}^{miss}>60, Loose ang.cuts","*TailKillerLoose*nortau_*/CombineMultiCrab*"),
+#              ("#tau p_{T}>41 no R_{#tau}, E_{T}^{miss}>60, Tight ang.cuts","*TailKillerTight*nortau_*/CombineMultiCrab*"),
+        ]
+        myOpts = expectedMedianOpts= {"ymin": 0.001, "ymax":0.02}
+    else:
+        myList = [
+              ("#tau p_{T}>41, E_{T}^{miss}>60, No ang.cuts","*TailKillerNoCuts*nominal*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>60, Loose ang.cuts","*TailKillerLoose*nominal*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>60, Tight ang.cuts","*TailKillerTight*nominal*/CombineMultiCrab*"),
+            # ("#tau p_{T}>50, E_{T}^{miss}>60, Loose ang.cuts","*TailKillerLoose*tau50*/CombineMultiCrab*"),
+              ("#tau p_{T}>50, E_{T}^{miss}>60, Tight ang.cuts","*TailKillerTight*tau50*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>70, No ang.cuts","*TailKillerNoCuts*met70_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>70, Loose ang.cuts","*TailKillerLoose*met70_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>70, Tight ang.cuts","*TailKillerTight*met70_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>80, No ang.cuts","*TailKillerNoCuts*met80_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>80, Loose ang.cuts","*TailKillerLoose*met80_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41, E_{T}^{miss}>80, Tight ang.cuts","*TailKillerTight*met80_*/CombineMultiCrab*"),
+            #  ("#tau p_{T}>50, E_{T}^{miss}>80, Loose ang.cuts","*TailKillerLoose*met80tau50_*/CombineMultiCrab*"),
+              ("#tau p_{T}>50, E_{T}^{miss}>80, Tight ang.cuts","*TailKillerTight*met80tau50_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41 no R_{#tau}, E_{T}^{miss}>60, No ang.cuts","*TailKillerNoCuts*nortau_*/CombineMultiCrab*"),
+              ("#tau p_{T}>41 no R_{#tau}, E_{T}^{miss}>60, Loose ang.cuts","*TailKillerLoose*nortau_*/CombineMultiCrab*"),
+            # ("#tau p_{T}>41 no R_{#tau}, E_{T}^{miss}>60, Tight ang.cuts","*TailKillerTight*nortau_*/CombineMultiCrab*"),
+        ]
+        myOpts = expectedMedianOpts= {"ymin": 0.008, "ymax":1.0}
+
+
+    doCompare("comparisonDummy", myList,
+              moveLegend={"dx":-0.04, "dy": 0.01},
+              log=True,
+              expectedMedianOpts= myOpts,
+              )
 
 
 styleList = [styles.Style(24, ROOT.kBlack)] + styles.getStyles()
@@ -116,7 +165,7 @@ def doCompare(name, compareList, **kwargs):
            plotLabel="Observed")
 
     doPlot(limits, legendLabels, [l.expectedGraph() for l in limits],
-           name+"_expectedMedian", limit.BRlimit, opts=kwargs.get("expectedMedianOpts", limitOpts), moveLegend=moveLegend,
+           name+"_expectedMedian", limit.BRlimit, opts=kwargs.get("expectedMedianOpts", limitOpts), moveLegend=moveLegend, log=kwargs.get("log",False),
            plotLabel="Expected median")
 
     legendLabels2 = legendLabels + [None]*len(legendLabels)
@@ -162,7 +211,7 @@ def doCompare(name, compareList, **kwargs):
     #        name+"_expectedSigma2Minus", "Expected -2#sigma / median", opts={"ymaxfactor": 1.2})
 
 
-def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}, plotLabel=None, moveLegend={}):
+def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}, plotLabel=None, moveLegend={}, log=False):
     hg = []
     ll = {}
     for i in xrange(len(graphs)):
@@ -177,7 +226,7 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}, plotLabel=None, 
         r.SetLineStyle(1)
     plot.histoMgr.forEachHisto(sty)
     plot.histoMgr.setHistoLegendLabelMany(ll)
-    legend = histograms.createLegend(0.48, 0.75, 0.85, 0.92)
+    legend = histograms.createLegend(0.48, 0.65, 0.85, 0.92)
     if len(limits[0].getFinalstates()) > 1:
         legend = histograms.moveLegend(legend, dy=-0.1)
     if plotLabel:
@@ -191,14 +240,15 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}, plotLabel=None, 
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
     plot.frame.GetYaxis().SetTitle(ylabel)
 
+    ROOT.gPad.SetLogy(log)
     plot.draw()
 
-    histograms.addCmsPreliminaryText()
+    histograms.addCmsPreliminaryText(0.62, 0.96, "CMS Preliminary")
     histograms.addEnergyText()
     histograms.addLuminosityText(x=None, y=None, lumi=limits[0].getLuminosity())
 
     size = 20
-    x = 0.2
+    x = 0.18
     histograms.addText(x, 0.88, limit.process, size=size)
     histograms.addText(x, 0.84, limits[0].getFinalstateText(), size=size)
     histograms.addText(x, 0.79, limit.BRassumption, size=size)
@@ -243,7 +293,7 @@ def doPlot2(limits, legendLabels, name):
 
     plot.draw()
 
-    histograms.addCmsPreliminaryText()
+    histograms.addCmsPreliminaryText(0.62, 0.96, "CMS Preliminary")
     histograms.addEnergyText()
     histograms.addLuminosityText(x=None, y=None, lumi=limits[0].getLuminosity())
 

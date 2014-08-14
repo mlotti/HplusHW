@@ -32,11 +32,18 @@ def customize(signalAnalysis):
     print "Phase space is splitted in analysis as follows:"
     print signalAnalysis.commonPlotsSettings.histogramSplitting
     
-    #signalAnalysis.makeQCDEtaCorrectionStatus = True # experimental weighting to get eta spectrum to match
-    #signalAnalysis.tauSelection.decayModeFilterValue = 1
+    #signalAnalysis.bMakeEtaCorrectionStatus = True
+    #signalAnalysis.lowBoundForQCDInvertedIsolation = "byVLooseCombinedIsolationDeltaBetaCorr"
+    print "QCD corrections to inverted leg are applied status:",signalAnalysis.makeQCDEtaCorrectionStatus
+    signalAnalysis.tauSelection.tauDecayModeReweightingZero = 1.0
+    signalAnalysis.tauSelection.tauDecayModeReweightingOne = 1.0 # set to 0.88 according to Christian (HIG-13-004)
+    signalAnalysis.tauSelection.tauDecayModeReweightingOther = 1.0
     
-    
-    #signalAnalysis.bTagging.subleadingDiscriminatorCut = 0.244
+    if len(signalAnalysis.lowBoundForQCDInvertedIsolation.value()):
+        print "Applying low bound for QCD inverted isolation in addition to inverting the isolation, low bound=",signalAnalysis.lowBoundForQCDInvertedIsolation.value()
+
+    signalAnalysis.bTagging.subleadingDiscriminatorCut = 0.244
+
     #signalAnalysis.MET.METCut = 50.0
     #signalAnalysis.MET.preMETCut = 30.0
     print "Customisation applied"
