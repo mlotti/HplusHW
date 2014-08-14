@@ -1,11 +1,11 @@
 {
 //=========Macro generated from canvas: baselineEWKFakeTaustaup_Teq60to70Integral/
-//=========  (Fri Aug  1 09:24:34 2014) by ROOT version5.32/00
+//=========  (Wed Aug 13 15:49:52 2014) by ROOT version5.32/00
    TCanvas *baselineEWKFakeTaustaup_Teq60to70Integral = new TCanvas("baselineEWKFakeTaustaup_Teq60to70Integral", "",0,0,600,600);
    gStyle->SetOptStat(0);
    gStyle->SetOptTitle(0);
    baselineEWKFakeTaustaup_Teq60to70Integral->SetHighLightColor(2);
-   baselineEWKFakeTaustaup_Teq60to70Integral->Range(-101.2658,-1.282971,531.6456,0.8937274);
+   baselineEWKFakeTaustaup_Teq60to70Integral->Range(-101.2658,-1.172892,531.6456,0.1570456);
    baselineEWKFakeTaustaup_Teq60to70Integral->SetFillColor(0);
    baselineEWKFakeTaustaup_Teq60to70Integral->SetBorderMode(0);
    baselineEWKFakeTaustaup_Teq60to70Integral->SetBorderSize(2);
@@ -23,7 +23,7 @@
    
    TH1F *hframe__47 = new TH1F("hframe__47","",1000,0,500);
    hframe__47->SetMinimum(0.1);
-   hframe__47->SetMaximum(6.09386);
+   hframe__47->SetMaximum(1.231824);
    hframe__47->SetDirectory(0);
    hframe__47->SetStats(0);
    hframe__47->SetLineStyle(0);
@@ -60,13 +60,13 @@ tex->SetNDC();
    tex->SetTextSize(27);
    tex->SetLineWidth(2);
    tex->Draw();
-      tex = new TLatex(0.43,0.96,"L=19 fb^{-1}");
+      tex = new TLatex(0.43,0.96,"L=4.4 fb^{-1}");
 tex->SetNDC();
    tex->SetTextFont(43);
    tex->SetTextSize(27);
    tex->SetLineWidth(2);
    tex->Draw();
-      tex = new TLatex(0.4,0.7,"Integral = 10 ev");
+      tex = new TLatex(0.4,0.7,"Integral = 3 ev");
 tex->SetNDC();
    tex->SetTextFont(63);
    tex->SetTextSize(27);
@@ -74,25 +74,39 @@ tex->SetNDC();
    tex->Draw();
    
    TH1F *baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2 = new TH1F("baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2","#tau p_{T}=60..70",50,0,500);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(4,0.07085812);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(6,0.7135001);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(8,0.7268574);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(9,1.830367);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(12,0.7839363);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(14,3.04693);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(17,0.066294);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(21,0.06408613);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(23,2.269926);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(4,0.07085812);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(6,0.7135001);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(8,0.6945768);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(9,1.830367);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(12,0.7454926);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(14,2.115629);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(17,0.066294);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(21,0.06408613);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(23,1.690478);
-   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetEntries(14);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(3,0.001190992);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(4,0.09598724);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(5,0.06162917);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(6,0.3573494);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(8,0.3311515);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(9,0.1762742);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(10,0.2620701);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(11,0.06870976);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(12,0.6159121);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(13,0.07973243);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(14,0.3713728);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(15,0.09794991);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(17,0.1202765);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(21,0.01449369);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(23,0.2440402);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinContent(26,0.08525996);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(3,0.001190992);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(4,0.081552);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(5,0.06162917);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(6,0.197853);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(8,0.1968902);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(9,0.1246479);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(10,0.1857253);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(11,0.06606193);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(12,0.360559);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(13,0.07973243);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(14,0.2770207);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(15,0.09794991);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(17,0.1063456);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(21,0.01449369);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(23,0.1863945);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetBinError(26,0.08525996);
+   baseline/METBaseLineTauIdAfterCollinearCutsOnlyEWKFakeTaus/METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus2->SetEntries(34);
 
    Int_t ci;   // for color index setting
    ci = TColor::GetColor("#ffff00");
@@ -119,7 +133,7 @@ tex->SetNDC();
    
    TH1F *hframe__48 = new TH1F("hframe__48","",1000,0,500);
    hframe__48->SetMinimum(0.1);
-   hframe__48->SetMaximum(6.09386);
+   hframe__48->SetMaximum(1.231824);
    hframe__48->SetDirectory(0);
    hframe__48->SetStats(0);
    hframe__48->SetLineStyle(0);

@@ -224,12 +224,15 @@ def getMt(datasets,bins,name,normalization):
 def main(argv):
 
     dirs = []
+    dirs_signal = []
+
     if len(sys.argv) < 2:
 	usage()
 
     dirs.append(sys.argv[1])
 
-    dirs_signal = ["../../SignalAnalysis_140605_143702/"]
+    #dirs_signal = ["../../SignalAnalysis_140605_143702/"]
+    dirs_signal.append(sys.argv[2])
 
     QCDInvertedNormalization = sort(QCDInvertedNormalizationFactors.QCDInvertedNormalization)
     labels,QCDInvertedNormalizationFilteredEWKFakeTaus = getSortedLabelsAndFactors(QCDInvertedNormalizationFactorsFilteredEWKFakeTaus.QCDInvertedNormalization)
@@ -240,8 +243,8 @@ def main(argv):
     optModes = []
     #optModes.append("OptQCDTailKillerZeroPlus")
     optModes.append("OptQCDTailKillerLoosePlus") 
-    optModes.append("OptQCDTailKillerMediumPlus") 
-    optModes.append("OptQCDTailKillerTightPlus") 
+    #optModes.append("OptQCDTailKillerMediumPlus") 
+    #optModes.append("OptQCDTailKillerTightPlus") 
 
     varHistoName = "shapeEWKGenuineTausTransverseMass"
     nomHistoName = "shapeTransverseMass"
@@ -250,9 +253,10 @@ def main(argv):
     #Optimal: 0.8, 0.82, 0.9
 
     ###w_list = [0.65, 0.7, 0.76] #old baseline ft
-    w_list = [0.66, 0.67, 0.75]
-    #w_list = [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 1]
-    
+    #w_list = [0.66, 0.67, 0.75]#golden old
+    w_list = [0.95, 0.955, 0.96, 0.965, 0.97, 0.975, 0.98, 0.985, 0.99, 0.995, 1]    
+
+
     #defaultBinning = systematics.getBinningForPlot("shapeTransverseMass")
     defaultBinning = [0,20,40,60,80,100,120,140,160,200,400]
     defaultBinning_array = array.array("d",defaultBinning)
@@ -354,7 +358,7 @@ def main(argv):
         os.system(command)
     print optimalWeights
 
-    optimalNormalization = getNormalization(bins_var,optimalWeights["OptQCDTailKillerTightPlus"],QCDInvertedNormalizationFilteredEWKFakeTaus,True,True)
+    optimalNormalization = getNormalization(bins_var,optimalWeights["OptQCDTailKillerLoosePlus"],QCDInvertedNormalizationFilteredEWKFakeTaus,True,True)
     writeNormalizationToFile("QCDPlusEWKFakeTauNormalizationFactors.py",optimalNormalization,labels)
 
 def writeNormalizationToFile(filename,normalization,labels):
@@ -384,7 +388,7 @@ def writeNormalizationToFile(filename,normalization,labels):
         i = i + 1
 
     i = 0
-    print normalization
+    #print normalization
     while i < len(normalization):
         line = "    \"" + labels[i] + "\""
         while len(line) < maxLabelLength + 11:

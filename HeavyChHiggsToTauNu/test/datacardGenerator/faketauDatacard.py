@@ -5,21 +5,23 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014_02_14_v3_etacorrected"
 #Path = "/home/wendland/data/v533/2014-03-20"
 #Path = "/home/wendland/data/v533/2014-03-20_expCtrlPlots"
-Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
+#Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
 #Path = "/home/wendland/data/v533/2014_03_12_metphicorrected"
 #Path = "/home/wendland/data/v533/2014_02_14_v3_decaymode1"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
+Path = "/mnt/flustre/epekkari/FakeTauDatacard"
+
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 #LightMassPoints      = [80,120,160]
-LightMassPoints      = [120]
+#LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
 #HeavyMassPoints      = [180]
-HeavyMassPoints      = []
+#HeavyMassPoints      = []
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
 BlindAnalysis   = True
@@ -46,12 +48,14 @@ OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produce
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = True
+#OptionDoControlPlots = True
+OptionDoMergeFakeTauColumns = False
+OptionDoControlPlots = False #!!!!!!!!
 OptionCombineSingleColumnUncertainties = True # Makes limit running faster
 OptionCtrlPlotsAtMt = True
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
-OptionRemoveHHDataGroup = False
+OptionRemoveHHDataGroup = True
 OptionLimitOnSigmaBr = False # Is automatically set to true for heavy H+
 OptionDoTBbarForHeavy = False # NOTE: usable only for 2012
 
@@ -187,7 +191,7 @@ myQCDShapeSystematics = myShapeSystematics[:]
 
 myQCDFact = DataGroup(
     label        = "QCDfact",
-    landsProcess = 3,
+    landsProcess = 2,
     validMassPoints = MassPoints,
     datasetType  = "QCD factorised",
     datasetDefinition = "QCDfactorisedmt",
@@ -197,7 +201,7 @@ myQCDFact = DataGroup(
 
 myQCDInv = DataGroup(
     label        = "QCDinv",
-    landsProcess = 3,
+    landsProcess = 2,
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
     datasetDefinition = "QCDinvertedmt",
@@ -220,7 +224,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
     EmbeddingIdList = [3]
     DataGroups.append(DataGroup(
         label        = "EWK_Tau",
-        landsProcess = 4,
+        landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
         #datasetDefinition   = ["SingleMu"],
@@ -257,7 +261,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         myEmbeddingShapeSystematics = myShapeSystematics[:]+["top_pt","e_mu_veto","b_tag","xsect_tt_8TeV","lumi"]
     DataGroups.append(DataGroup(
         label        = "pseudo_emb_TTJets_MC",
-        landsProcess = 4,
+        landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
@@ -398,12 +402,12 @@ else:
     raise Exception("Error: unknown value for flag OptionGenuineTauBackgroundSource!")
 
 # Reserve column 2
-DataGroups.append(DataGroup(
-    label        = "res.",
-    landsProcess = 2,
-    datasetType  = "None",
-    validMassPoints = MassPoints,
-))
+#DataGroups.append(DataGroup(
+#    label        = "res.",
+#    landsProcess = 2,
+#    datasetType  = "None",
+#    validMassPoints = MassPoints,
+#))
 
 
 ##############################################################################
