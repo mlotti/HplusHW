@@ -353,7 +353,7 @@ class DatacardColumn():
                 elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
                      if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - 245.8) > 0.0001:
                          print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 245.8 pb according to arXiv:1303.6254"
-                         myDatasetRootHisto.Delete()
+                         #myDatasetRootHisto.Delete()
                          dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(245.8)
                          myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 # Normalize to luminosity
