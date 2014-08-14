@@ -563,6 +563,8 @@ class DatacardColumn():
 
     ## Rebin the cached histograms and save a copy of the fine binned version
     def doRebinningOfCachedResults(self, config):
+        if self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr):
+            return
         myArray = array("d",config.ShapeHistogramsDimensions)
         for i in range(0,len(self._rateResult._histograms)):
             myTitle = self._rateResult._histograms[i].GetTitle()
