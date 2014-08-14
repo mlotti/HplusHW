@@ -93,11 +93,13 @@ namespace HPlus {
     std::string myFakeLabel = "ForDataDrivenCtrlPlotsEWKFakeTaus";
     if (fAnalysisType == kQCDNormalizationSystematicsSignalRegion) {
       myLabel += "QCDNormalizationSignal";
-      myFakeLabel = "Empty";
+      //myFakeLabel = "Empty";
+      myFakeLabel += "QCDNormalizationSignal";
     }
     if (fAnalysisType == kQCDNormalizationSystematicsControlRegion) {
       myLabel += "QCDNormalizationControl";
-      myFakeLabel = "Empty";
+      //myFakeLabel = "Empty";
+      myFakeLabel += "QCDNormalizationControl";
     }
     TFileDirectory myCtrlDir = fHistoWrapper.mkdir(HistoWrapper::kSystematics, *fs, myLabel);
     TFileDirectory myCtrlEWKFakeTausDir = fHistoWrapper.mkdir(HistoWrapper::kSystematics, *fs, myFakeLabel);
