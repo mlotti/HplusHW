@@ -7,7 +7,7 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-03-20_expCtrlPlots"
 #Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
 #Path = "/home/wendland/data/xnortau"
-Path = "/home/wendland/data/xnortau"
+Path = "/home/wendland/data/xnominal"
 #Path = "/home/wendland/data/xmet70"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
@@ -21,9 +21,12 @@ LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
-HeavyMassPoints      = [400]
+#HeavyMassPoints      = [400]
 HeavyMassPoints      = []
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
+
+#OptionReweightEmbedding = "met60_loose_embedding_ttjets_weighting.json"
+OptionReweightEmbedding = None
 
 BlindAnalysis   = True
 OptionBlindThreshold = None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
@@ -43,13 +46,14 @@ OptionGenuineTauBackgroundSource = "DataDriven"                          # State
 #OptionGenuineTauBackgroundSource = "MC_FullSystematics"               # MC used, fake and genuine taus separated (use for embedding closure test)
 #OptionGenuineTauBackgroundSource = "MC_RealisticProjection"            # MC used, fake and genuine taus separated (can be used for optimization)
 
+
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionTreatTriggerUncertaintiesAsAsymmetric = True # Set to true, if you produced multicrabs with doAsymmetricTriggerUncertainties=True
 OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produced multicrabs with doTauIDandMisIDSystematicsAsShapes=True
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = True
+OptionDoControlPlots = not True
 OptionDoMergeFakeTauColumns = True # Merges the fake tau columns into one
 OptionCombineSingleColumnUncertainties = True # Makes limit running faster
 OptionCtrlPlotsAtMt = True # Produce control plots after all selections (all selections for transverse mass)
@@ -220,6 +224,9 @@ DataGroups.append(myQCDFact)
 DataGroups.append(myQCDInv)
 
 if OptionGenuineTauBackgroundSource == "DataDriven":
+    myEmbDataDrivenNuisances = ["Emb_QCDcontam","Emb_hybridCaloMET"]
+    if OptionReweightEmbedding != None:
+        myEmbDataDrivenNuisances.append("Emb_reweighting")
     # EWK + ttbar with genuine taus
     EmbeddingIdList = [3]
     DataGroups.append(DataGroup(
@@ -231,7 +238,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetDefinition   = "Data",
         validMassPoints = MassPoints,
         #additionalNormalisation = 0.25, # not needed anymore
-        nuisances    = myEmbeddingShapeSystematics[:]+["Emb_QCDcontam","Emb_hybridCaloMET"]
+        nuisances    = myEmbeddingShapeSystematics[:]+myEmbDataDrivenNuisances[:]
         #nuisances    = ["trg_tau_embedding","tau_ID","ES_taus","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb"]
     ))
 
@@ -821,6 +828,14 @@ if OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
         function      = "Constant",
         value         = 0.03
     ))
+if OptionReweightEmbedding != None:
+    Nuisances.append(Nuisance(
+        id            = "Emb_reweighting",
+        label         = "Embedding reweighting",
+        distr         = "shapeQ",
+        function      = "ShapeVariationFromJson",
+        jsonFile      = OptionReweightEmbedding
+    ))    
 
 #Nuisances.append(Nuisance(
     #id            = "Emb_musel_ditau_mutrg",

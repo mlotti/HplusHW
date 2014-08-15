@@ -12,6 +12,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 from math import pow,sqrt
 import sys
+import json
+import os
 import ROOT
 from array import array
 
@@ -808,3 +810,70 @@ class ControlPlotExtractor(ExtractorBase):
         print "- histoNames:",self._histoNames
         ExtractorBase.printDebugInfo(self)
 
+
+## ShapeVariationExtractor class
+# Extracts histogram shapes from up and down variation
+class ShapeVariationFromJsonExtractor(ExtractorBase):
+    ## Constructor
+    def __init__(self, jsonFile, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
+        self._systVariation = exid
+        if not os.path.exists(jsonFile):
+            raise Exception(ShellStyles.ErrorLabel()+"Cannot find file '%s'!"%jsonFile)
+        
+        f = open(jsonFile,"r")
+        jsonObj = json.load(f)
+        self._bins = list(jsonObj["dataParameters"]["bins"])
+        f.close()
+        
+        if self.isRate() or self.isObservation():
+            raise Exception(ShellStyles.ErrorLabel()+"Rate or observation not allowed for ShapeVariationFromJsonExtractor!")
+
+    ## Method for extracking result
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
+        if not self._systVariation in myShapeUncertDict.keys():
+            return 0.0
+        # Tell Lands / Combine that the nuisance is active for the given column, histogram is added to input root file via extractHistograms()
+        return 1.0
+
+    ## Virtual method for extracting histograms
+    def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        myHistograms = []
+        # Check that results have been cached
+        if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
+            raise Exception(ShellStyles.ErrorLabel()+"You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!")
+        # Get rate histogram from cache
+        myRateHisto = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
+        hUp = aux.Clone(myRateHisto)
+        hDown = aux.Clone(myRateHisto)
+        # Loop over bins
+        myWeightBin = 0
+        for i in range(1, hUp.GetNbinsX()+1):
+            if myWeightBin < len(self._bins)-1:
+                if not hUp.GetXaxis().GetBinLowEdge(i) + 0.0001 < self._bins[myWeightBin+1]["mt"]:
+                    myWeightBin += 1
+            #print "hbin edge=",h.GetXaxis().GetBinLowEdge(i),"weight edge=",binList[myWeightBin]
+            hUp.SetBinContent(i, hUp.GetBinContent(i) * (self._bins[myWeightBin]["uncertaintyPlus"]))
+            hDown.SetBinContent(i, hDown.GetBinContent(i) * (-self._bins[myWeightBin]["uncertaintyMinus"]))
+        datasetColumn._cachedShapeRootHistogramWithUncertainties._shapeUncertainties[self._exid] = (hUp, hDown)
+        # Do not apply here additional normalization, it has already been applied
+        # via RootHistoWithUncertainties.Scale() in DatacardColumn::doDataMining()
+        # Append histograms to output list
+        hUpPlusOne = aux.Clone(hUp)
+        hDownPlusOne = aux.Clone(hDown)
+        hUpPlusOne.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
+        hDownPlusOne.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
+        hUpPlusOne.Add(myRateHisto)
+        hDownPlusOne.Add(myRateHisto)
+        myHistograms.append(hUpPlusOne)
+        myHistograms.append(hDownPlusOne)
+        
+        #datasetColumn._cachedShapeRootHistogramWithUncertainties.Debug()
+        # Return result
+        return myHistograms
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "ShapeVariationFromJsonExtractor"
+        ExtractorBase.printDebugInfo(self)
