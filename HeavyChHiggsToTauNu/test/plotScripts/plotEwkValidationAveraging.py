@@ -16,9 +16,11 @@ import os
 import re
 import array
 import math
+from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -49,15 +51,25 @@ def main():
     # f.close()
     # if len(dirSeeds) == 0:
     #     raise Exception("Found 0 input directories from %s" % inputInfoPath)
-    dirSeeds = [
-#        "../embedding_140509_100532",
-#        "../embedding_seedTest1_140508_154221",
-#        "../embedding_seedTest2_140508_154540",
-#        "../embedding_seedTest3_140508_155055",
-#        "../embedding_seedTest4_140508_155742"
-        "../embedding_mc_tightPlus_140512_160900",
-        "../embedding_mc_seedTest1_140807_084326"
-        ]
+
+    parser = OptionParser(usage="Usage: %prog seed0 [seed1 ...]")
+    #parser.add_option("-s", "--seed", dest="dirSeeds", default=[], action="append"
+    #                  help="Path to pseudo-multicrab with a single seed (can be given multiple times)")
+
+    (opts, args) = parser.parse_args()
+    if len(args) == 0:
+        parser.error("No seed pseudo-multicrab directories were given")
+
+#    dirSeeds = [
+##        "../embedding_140509_100532",
+##        "../embedding_seedTest1_140508_154221",
+##        "../embedding_seedTest2_140508_154540",
+##        "../embedding_seedTest3_140508_155055",
+##        "../embedding_seedTest4_140508_155742"
+#        "../embedding_mc_tightPlus_140512_160900",
+#        "../embedding_mc_seedTest1_140807_084326"
+#        ]
+    dirSeeds = args
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -69,13 +81,12 @@ def main():
     for optMode in [
 #        "OptQCDTailKillerZeroPlus",
 
-#        "OptQCDTailKillerLoosePlus",
+        "OptQCDTailKillerLoosePlus",
 #        "OptQCDTailKillerMediumPlus",
-#        "OptQCDTailKillerTightPlus",
+        "OptQCDTailKillerTightPlus",
 
 #        "OptQCDTailKillerVeryTightPlus",
-
-            None
+#            None
         ]:
         datasetsAve = dataset.getDatasetsFromMulticrabCfg(directory=dirAve, dataEra=dataEra, analysisName=analysisEmb, optimizationMode=optMode)
         datasetsSeeds = [
@@ -85,6 +96,9 @@ def main():
         datasetsAve.close()
         for d in datasetsSeeds:
             d.close()
+
+        tauEmbedding.writeToFile(optMode+"_average", "input.txt", ("Average: %s\n" % os.getcwd()) + "\n".join(["Seed: "+s for s in dirSeeds]))
+
 
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=False, log=True, addMCUncertainty=True,
                                   ratio=True, ratioType="errorScale", ratioCreateLegend=True,
@@ -97,10 +111,10 @@ def doDataset(datasetsAve, datasetsSeeds, optMode):
         d.updateNAllEventsToPUWeighted()
         plots.mergeRenameReorderForDataMC(d)
 
-    plotter = tauEmbedding.CommonPlotter(optMode, "average", drawPlotCommon)
+    plotter = tauEmbedding.CommonPlotter(optMode+"_average", "average", drawPlotCommon)
 
     doPlots(datasetsAve, datasetsSeeds, "Data", plotter)
-    doPlots(datasetsAve, datasetsSeeds, "TTJets", plotter)
+#    doPlots(datasetsAve, datasetsSeeds, "TTJets", plotter)
 
 
 def doPlots(datasetsAve, datasetsSeeds, datasetName, plotter):
@@ -176,7 +190,7 @@ def doPlots(datasetsAve, datasetsSeeds, datasetName, plotter):
     for th1 in [hchi2, hchi2a, hkolmo, hkolmoa]:
         p = plots.PlotBase([th1])
         p.setLuminosity(lumi)
-        plots.drawPlot(p, datasetName+"_"+th1.GetName(), ylabel="Entries", createLegend=None)
+        plots.drawPlot(p, os.path.join(plotter.getOutputDirectory(), datasetName+"_"+th1.GetName()), ylabel="Entries", createLegend=None)
 
 if __name__ == "__main__":
     main()

@@ -31,36 +31,57 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 dataEra = "Run2012ABCD"
-optMode = None
 
 def main():
-    # Create the dataset objects
-    datasetsEmb = dataset.getDatasetsFromMulticrabCfg(dataEra=dataEra, optimizationMode=optMode)
-
-    # Remove signal and W+3jets datasets
-    datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
-    datasetsEmb.remove(filter(lambda name: "TTToHplus" in name, datasetsEmb.getAllDatasetNames()))
-
-    datasetsEmb.updateNAllEventsToPUWeighted()
-    plots.mergeRenameReorderForDataMC(datasetsEmb)
-
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-#    histograms.cmsTextMode = histograms.CMSMode.NONE
+    #    histograms.cmsTextMode = histograms.CMSMode.NONE
     histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
 
-    doCounters(datasetsEmb)
+    legendLabelsSet = False
 
-    # Remove QCD for plots
-    datasetsEmb.remove(["QCD_Pt20_MuEnriched"])
-    histograms.createLegend.moveDefaults(dx=-0.04, dh=-0.05)
-    doPlots(datasetsEmb)
+    for optMode in [
+        "OptQCDTailKillerNoCuts",
+        "OptQCDTailKillerLoosePlus",
+        "OptQCDTailKillerMediumPlus",
+        "OptQCDTailKillerTightPlus",
+#            None
+    ]:
+        # Create the dataset objects
+        datasetsEmb = dataset.getDatasetsFromMulticrabCfg(dataEra=dataEra, optimizationMode=optMode)
+
+        # Remove signal and W+3jets datasets
+        datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
+        datasetsEmb.remove(filter(lambda name: "TTToHplus" in name, datasetsEmb.getAllDatasetNames()))
+
+        datasetsEmb.updateNAllEventsToPUWeighted()
+        plots.mergeRenameReorderForDataMC(datasetsEmb)
+
+        doCounters(datasetsEmb, optMode)
+
+        if not legendLabelsSet:
+            def trans(n):
+                if n[0:2] in ["W+", "Z/"]:
+                    return n
+                else:
+                    return n[0].lower()+n[1:]
+
+            for d in datasetsEmb.getAllDatasetNames():
+                oldName = plots._legendLabels.get(d, d)
+                plots._legendLabels[d] = "Embedded "+trans(oldName)
+
+            legendLabelsSet = True
+
+        # Remove QCD for plots
+        datasetsEmb.remove(["QCD_Pt20_MuEnriched"])
+        histograms.createLegend.moveDefaults(dx=-0.12, dh=-0.05)
+        doPlots(datasetsEmb, optMode)
 
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=True, log=True, addMCUncertainty=True,
                                   ratio=True, ratioType="errorScale", ratioCreateLegend=True,
                                   addLuminosityText=True)
 
-def doPlots(datasetsEmb):
+def doPlots(datasetsEmb, optMode):
     lumi = datasetsEmb.getDataset("Data").getLuminosity()
 
     def createPlot(name):
@@ -82,7 +103,7 @@ def addMcSum(t):
     allDatasets = ["QCD_Pt20_MuEnriched", "WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson"]
     t.insertColumn(1, counter.sumColumn("MCSum", [t.getColumn(name=name) for name in allDatasets]))
 
-def doCounters(datasetsEmb):
+def doCounters(datasetsEmb, optMode):
     eventCounter = counter.EventCounter(datasetsEmb)
     eventCounter.normalizeMCToLuminosity(datasetsEmb.getDataset("Data").getLuminosity())
     table = eventCounter.getMainCounterTable()
@@ -90,7 +111,17 @@ def doCounters(datasetsEmb):
     addMcSum(table)
 
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.4f', withPrecision=2))
-    print table.format(cellFormat)
+    txt = table.format(cellFormat)
+    print txt
+    d = optMode
+    if d is None:
+        d = "."
+    if not os.path.exists(d):
+        os.makedirs(d)
+
+    f = open(os.path.join(d, "counters.txt"), "w")
+    f.write(txt)
+    f.write("\n")
     
 
 
