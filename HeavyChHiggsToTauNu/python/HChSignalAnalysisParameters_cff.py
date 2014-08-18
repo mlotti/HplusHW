@@ -816,6 +816,16 @@ embeddingMuonTriggerEfficiency = muonTriggerIDEfficiency.efficiency_trigger
 embeddingMuonTriggerEfficiency.variationEnabled = cms.bool(False)
 embeddingMuonTriggerEfficiency.useMaxUncertainty = cms.bool(True)
 
+embeddingMTWeight = cms.untracked.PSet(
+    data = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/embedding_mt_weight_met60_loose.json"),
+    dataSelect = cms.vstring("Run2012ABCD"),
+    mcSelect = cms.string("Run2012ABCD"),
+    mode = cms.untracked.string("disabled"),
+    type = cms.untracked.string("binned"),
+    variationEnabled = cms.bool(False),
+    useMaxUncertainty = cms.bool(False),
+)
+
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
 #for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff)):

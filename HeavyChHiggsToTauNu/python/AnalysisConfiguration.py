@@ -1096,6 +1096,13 @@ class ConfigBuilder:
                              process.commonSequence+genmatchFilter+genmatchCount)
                 mod2.eventCounter.counters.append(postfix+"GenMatchCount")
 
+            if True:
+                addIntermediateAnalyzer(mod, name, postfix)
+
+                postfix += "MTWeight"
+                mod = mod.clone()
+                mod.embeddingMTWeight.mode = "dataEfficiency"
+
             enablePrintCounter(mod)
             mod.histogramAmbientLevel = self.histogramAmbientLevel
             path = cms.Path(process.commonSequence * mod)
@@ -1413,6 +1420,9 @@ class ConfigBuilder:
         def addMuonIdDataEff(shiftBy, postfix):
             return addTrgDataEff("embeddingMuonIdEfficiency", shiftBy, "MuonIdDataEff"+postfix)
 
+        def addEmbeddingMTWeight(shiftBy, postfix):
+            return addTrgDataEff("embeddingMTWeight", shiftBy, "EmbMTWeight"+postfix)
+
         def addBTagSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
             module.bTagging.variationEnabled = True
@@ -1462,6 +1472,9 @@ class ConfigBuilder:
 
             names.append(addMuonIdDataEff( 1.0, "Plus"))
             names.append(addMuonIdDataEff( -1.0, "Minus"))
+
+            names.append(addEmbeddingMTWeight(1.0, "Plus"))
+            names.append(addEmbeddingMTWeight(-1.0, "Minus"))
 
             if not hasattr(process, "wtaumuWeightPlus"):
                 process.wtaumuWeightPlus = process.wtaumuWeight.clone(variationEnabled=True)

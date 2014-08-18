@@ -88,6 +88,7 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addCounter("btagging")),
 
     fBTaggingScaleFactorCounter(eventCounter.addCounter("btagging scale factor")),
+    fEmbeddingMTWeightCounter(eventCounter.addCounter("Embedding: mT weight")),
     fQCDTailKillerBackToBackCounter(eventCounter.addCounter("QCD tail killer back-to-back")),
     fTopReconstructionCounter(eventCounter.addCounter("Top reconstruction")),
     fSelectedEventsCounter(eventCounter.addCounter("Selected events")),
@@ -132,6 +133,7 @@ namespace HPlus {
     fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fEmbeddingMuonTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonTriggerEfficiency")),
     fEmbeddingMuonIdEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonIdEfficiency")),
+    fEmbeddingMTWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMTWeight")),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
@@ -763,6 +765,13 @@ namespace HPlus {
       copyPtrToVector(btagData.getSelectedJets(), *saveBJets);
       iEvent.put(saveBJets, "selectedBJets");
     }
+
+    // For embedding, performt mT weighting
+    if(bTauEmbeddingStatus) {
+      EmbeddingMTWeight::Data data = fEmbeddingMTWeight.getEventWeight(transverseMass, iEvent);
+      fEventWeight.multiplyWeight(data.getEventWeight());
+    }
+    increment(fEmbeddingMTWeightCounter);
 
 
 //------ ttbar topology selected
