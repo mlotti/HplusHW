@@ -68,6 +68,73 @@
           "uncertaintyMinus": 0.16527056561928077
         }
       ]
+    }, 
+    "Run2012ABCD_statOnly": {
+      "firstRun": 1, 
+      "lastRun": 208686, 
+      "luminosity": 1, 
+      "bins": [
+        {
+          "mt": 0.0, 
+          "efficiency": 1.2488675109288112, 
+          "uncertaintyPlus": 0.10132306911231247, 
+          "uncertaintyMinus": 0.10132306911231247
+        }, 
+        {
+          "mt": 20.0, 
+          "efficiency": 1.1574137175537926, 
+          "uncertaintyPlus": 0.073587614936237555, 
+          "uncertaintyMinus": 0.073587614936237555
+        }, 
+        {
+          "mt": 40.0, 
+          "efficiency": 1.1727171438448909, 
+          "uncertaintyPlus": 0.048158377896979611, 
+          "uncertaintyMinus": 0.048158377896979611
+        }, 
+        {
+          "mt": 60.0, 
+          "efficiency": 1.1899579508478166, 
+          "uncertaintyPlus": 0.046176923146517911, 
+          "uncertaintyMinus": 0.046176923146517911
+        }, 
+        {
+          "mt": 80.0, 
+          "efficiency": 1.1897674207865623, 
+          "uncertaintyPlus": 0.065261720219902702, 
+          "uncertaintyMinus": 0.065261720219902702
+        }, 
+        {
+          "mt": 100.0, 
+          "efficiency": 1.0282537589520162, 
+          "uncertaintyPlus": 0.080450482320133326, 
+          "uncertaintyMinus": 0.080450482320133326
+        }, 
+        {
+          "mt": 120.0, 
+          "efficiency": 0.969524617213394, 
+          "uncertaintyPlus": 0.084667069259196634, 
+          "uncertaintyMinus": 0.084667069259196634
+        }, 
+        {
+          "mt": 140.0, 
+          "efficiency": 1.00064201677291, 
+          "uncertaintyPlus": 0.10789934948023144, 
+          "uncertaintyMinus": 0.10789934948023144
+        }, 
+        {
+          "mt": 160.0, 
+          "efficiency": 1.0092683660979955, 
+          "uncertaintyPlus": 0.10533913959031847, 
+          "uncertaintyMinus": 0.10533913959031847
+        }, 
+        {
+          "mt": 200.0, 
+          "efficiency": 1.3703978627172164, 
+          "uncertaintyPlus": 0.20927073519639758, 
+          "uncertaintyMinus": 0.20927073519639758
+        }
+      ]
     }
   }, 
   "mcParameters": {
