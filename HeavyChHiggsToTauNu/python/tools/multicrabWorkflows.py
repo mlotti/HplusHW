@@ -591,8 +591,6 @@ multicrabWorkflowsPattuple.addPattuple_v53_3_quadjet(datasets)
 
 # Add embedding definitions
 multicrabWorkflowsTauEmbedding.addEmbeddingAodAnalysis_44X(datasets)
-multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_4_2(datasets)
-multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_4_2(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingGenTauSkim_v44_5(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5(datasets)
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_5_1(datasets)
