@@ -33,39 +33,39 @@
         }, 
         {
           "mt": 80.0, 
-          "efficiency": 1.117071925394483, 
-          "uncertaintyPlus": 0.13471633362618474, 
-          "uncertaintyMinus": 0.1347194073919035
+          "efficiency": 1.1274702073603164, 
+          "uncertaintyPlus": 0.13597022101267883, 
+          "uncertaintyMinus": 0.13597343073011814
         }, 
         {
           "mt": 100.0, 
-          "efficiency": 1.0413894236830603, 
-          "uncertaintyPlus": 0.1255882802681596, 
-          "uncertaintyMinus": 0.12559213616282872
+          "efficiency": 1.0732606060274597, 
+          "uncertaintyPlus": 0.12943086534630915, 
+          "uncertaintyMinus": 0.12943582514641738
         }, 
         {
           "mt": 120.0, 
-          "efficiency": 1.0081341760303788, 
-          "uncertaintyPlus": 0.121574575603656, 
-          "uncertaintyMinus": 0.12158149064417148
+          "efficiency": 0.94525473153620232, 
+          "uncertaintyPlus": 0.11398937095099966, 
+          "uncertaintyMinus": 0.11399820419624546
         }, 
         {
           "mt": 140.0, 
-          "efficiency": 1.0306842726044123, 
-          "uncertaintyPlus": 0.12429731580267364, 
-          "uncertaintyMinus": 0.12430107190744374
+          "efficiency": 1.0014995872640935, 
+          "uncertaintyPlus": 0.12077695477029028, 
+          "uncertaintyMinus": 0.12078143418812447
         }, 
         {
           "mt": 160.0, 
-          "efficiency": 1.0092762444948902, 
-          "uncertaintyPlus": 0.12171001069059033, 
-          "uncertaintyMinus": 0.12171914907039746
+          "efficiency": 1.0016177953292014, 
+          "uncertaintyPlus": 0.12078377194409952, 
+          "uncertaintyMinus": 0.12079556061047715
         }, 
         {
           "mt": 200.0, 
-          "efficiency": 1.1188033616922031, 
-          "uncertaintyPlus": 0.13489281055586966, 
-          "uncertaintyMinus": 0.13492813747535243
+          "efficiency": 1.3776631535540711, 
+          "uncertaintyPlus": 0.16610892479477327, 
+          "uncertaintyMinus": 0.1661467654131035
         }
       ]
     }

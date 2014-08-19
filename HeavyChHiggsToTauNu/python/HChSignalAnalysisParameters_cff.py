@@ -826,6 +826,27 @@ embeddingMTWeight = cms.untracked.PSet(
     useMaxUncertainty = cms.bool(False),
 )
 
+def setEmbeddingMTWeightBasedOnSelection(signalAnalysis, name):
+    if signalAnalysis.embeddingMTWeight.mode.value() == "disabled":
+        return
+    if signalAnalysis.embeddingMTWeight.mode.value() != "dataEfficiency":
+        raise Exception("Invalid value for embeddingMTWeight.mode '%s' for module %s" % (signalAnalysis.embeddingMTWeight.mode.value(), name))
+
+    tailKiller = None
+    strtk = str(signalAnalysis.QCDTailKiller)
+    if strtk == str(QCDTailKillerNoCuts):
+        tailKiller = "nocuts"
+    elif strtk == str(QCDTailKillerLoosePlus):
+        tailKiller = "loose"
+    elif strtk == str(QCDTailKillerMediumPlus):
+        tailKiller = "medium"
+    elif strtk == str(QCDTailKillerTightPlus):
+        tailKiller = "tight"
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+    signalAnalysis.embeddingMTWeight.data = HChTools.getEfficiencyJsonFullPath("Embedding mT weight", "embedding_mt_weight", "met%.0f_%s" % (signalAnalysis.MET.METCut.value(), tailKiller))
+    print "Using embedding mT weight file %s for %s" % (str(signalAnalysis.embeddingMTWeight.data), name)
+
+
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
 #for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff)):

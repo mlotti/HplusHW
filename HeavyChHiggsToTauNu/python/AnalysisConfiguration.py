@@ -528,6 +528,9 @@ class ConfigBuilder:
         runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
         # Set PU ID src for modules
         runSetter(lambda module, name: param.setJetPUIdSrc(module.jetSelection, name))
+        # Set embedding mT weight
+        if self.options.tauEmbeddingInput != 0:
+            runSetter(param.setEmbeddingMTWeightBasedOnSelection)
 
         # Optional output
         if self.edmOutput:
