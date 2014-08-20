@@ -117,6 +117,14 @@ class TDRStyle:
         self.tdrStyle.SetPadRightMargin(self.rightMargin) # default
         #self.tdrStyle.SetPadRightMargin(0.13)
 
+        # Based on the new example myMacro.C, increase top margin
+        # slightly
+        # https://ghm.web.cern.ch/ghm/plots/
+        self.tdrStyle.SetPadTopMargin(0.06)
+        #self.tdrStyle.SetPadBottomMargin(0.12)
+        #self.tdrStyle.SetPadLeftMargin(0.12)
+        #self.tdrStyle.SetPadRightMargin(0.04)
+
         # For the Global title:
 
         self.tdrStyle.SetOptTitle(0)

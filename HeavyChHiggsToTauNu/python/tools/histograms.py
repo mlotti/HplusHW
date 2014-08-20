@@ -23,15 +23,17 @@ class CMSMode:
     PRELIMINARY = 1
     PAPER = 2
     SIMULATION = 3
+    SIMULATION_PRELIMINARY = 4
 
 ## Global variable to hold CMS text mode
 cmsTextMode = CMSMode.PRELIMINARY
 ## Global dictionary to hold the CMS text labels
 cmsText = {
-    CMSMode.NONE: "",
-    CMSMode.PRELIMINARY: "CMS Preliminary",
-    CMSMode.PAPER: "CMS",
-    CMSMode.SIMULATION : "CMS Simulation"
+    CMSMode.NONE: None,
+    CMSMode.PRELIMINARY: "Preliminary",
+    CMSMode.PAPER: "",
+    CMSMode.SIMULATION : "Simulation",
+    CMSMode.SIMULATION_PRELIMINARY : "Preliminary simulation"
     }
 
 ## Global uncertainty mode
@@ -178,7 +180,8 @@ class PlotText:
     # \param bold    Should the text be bold?
     # \param align   Alignment of text (left, center, right)
     # \param color   Color of the text
-    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack):
+    # \param font    Specify font explicitly
+    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack, font=None):
         self.x = x
         self.y = y
         self.text = text
@@ -187,16 +190,21 @@ class PlotText:
         self.l.SetNDC()
         if not bold:
             self.l.SetTextFont(self.l.GetTextFont()-20) # bold -> normal
-        if size != None:
+        if font is not None:
+            self.l.SetTextFont(font)
+        if size is not None:
             self.l.SetTextSize(size)
-        if align.lower() == "left":
-            self.l.SetTextAlign(11)
-        elif align.lower() == "center":
-            self.l.SetTextAlign(21)
-        elif align.lower() == "right":
-            self.l.SetTextAlign(31)
+        if isinstance(align, basestring):
+            if align.lower() == "left":
+                self.l.SetTextAlign(11)
+            elif align.lower() == "center":
+                self.l.SetTextAlign(21)
+            elif align.lower() == "right":
+                self.l.SetTextAlign(31)
+            else:
+                raise Exception("Error: Invalid option '%s' for text alignment! Options are: 'left', 'center', 'right'."%align)
         else:
-            raise Exception("Error: Invalid option '%s' for text alignment! Options are: 'left', 'center', 'right'."%align)
+            self.l.SetTextAlign(align)
         self.l.SetTextColor(color)
 
     ## Draw the text to the current TPad
@@ -343,6 +351,93 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     addText(x, y, lumiStr, textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
+
+## Draw the CMS standard texts
+#
+# Updated version of addCmsPreliminaryText(), addEnergyText() and
+# addLuminosityText() following the new guidelines at
+# https://ghm.web.cern.ch/ghm/plots/
+#
+# \param lumi        Luminosity as float in pb^-1 (or as string in fb^1), None to ignore completely
+# \param sqrts       Centre-of-mass energy text with the unit
+# \param addCmsText  If True, add the CMS text
+# \param cmsTextLeft True for CMS text being on the left, False for right
+# \param cmsTextInFrame  True for CMS text being within the frame (recommended), False for outside (only if in-frame does not work)
+# \param cmsText         If not None, override the "CMS" text
+# \param cmsExtraText    If not None, override the CMS extra text (e.g. "Preliminary")
+def addStandardTexts(lumi=None, sqrts=None, addCmsText=True, cmsTextLeft=True, cmsTextInFrame=True, cmsText=None, cmsExtraText=None):
+    lumiTextSize = 40*0.6
+    cmsTextFrac = 0.75
+    cmsTextSize = 40*cmsTextFrac
+    cmsExtraTextSize = cmsTextSize * 0.76
+
+    # Lumi + energy text
+    lumiText = ""
+    if lumi is not None:
+        if isinstance(lumi, basestring):
+            lumiText = lumi
+        else:
+            lumiText = formatLuminosityInFb(lumi)
+        lumiText += " fb^{-1} ("
+    if sqrts is not None:
+        lumiText += sqrts
+    else:
+        lumiText += energyText
+    if lumi is not None:
+        lumiText += ")"
+
+    lumiTextOffset = 0.2
+    l = ROOT.gPad.GetLeftMargin()
+    t = ROOT.gPad.GetTopMargin()
+    r = ROOT.gPad.GetRightMargin()
+    b = ROOT.gPad.GetBottomMargin()
+
+    addText(1-r, 1-t+lumiTextOffset*t, lumiText, size=lumiTextSize, bold=False, align="right")
+
+    if not addCmsText:
+        return
+
+    cmsExtraTextDefault = globals()["cmsText"][cmsTextMode]
+    if cmsExtraTextDefault is None:
+        return
+
+    # CMS + extratext
+    relPosX = 0.045
+    relPosY = 0.035
+    relExtraDY = 1.2
+
+    posX = 0
+    posY = 1-t - relPosY*(1-t-b)
+    align = 0
+    if cmsTextInFrame:
+        if cmsTextLeft:
+            posX = l + relPosX*(1-l-r)
+            align = 13 # left, top
+        else:
+            posX = 1-r - relPosX*(1-l-r)
+            align = 33 # right, top
+        posXe = posX
+        posYe = posY - relExtraDY*cmsTextFrac*t
+
+    else:
+        posX = l
+        posY = 1-t+lumiTextOffset*t
+        align = 11 # left, bottom
+        posXe = l + 0.14*(1-l-r)
+        posYe = posY
+
+    cms = "CMS"
+    if cmsText is not None:
+        cms = cmsText
+
+    if cms != "":
+        addText(posX, posY, cms, size=cmsTextSize, font=63, align=align)
+
+    extraText = cmsExtraText
+    if extraText is None:
+        extraText = cmsExtraTextDefault
+    if extraText is not None and extraText != "":
+        addText(posXe, posYe, extraText, size=cmsExtraTextSize, font=53, align=align)
 
 ## Class to create signal information box on plots
 class SignalTextCreator:
