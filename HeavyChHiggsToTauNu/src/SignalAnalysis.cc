@@ -346,6 +346,16 @@ namespace HPlus {
     hReferenceJetToTauDeltaPtDecayMode1NoNeutralHadrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode1NoNeutralHadrons", "ReferenceJetToTauDeltaPtDecayMode1NoNeutralHadrons;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
     hReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode2NoNeutralHadrons", "ReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
 
+    TFileDirectory ttbarDir = fs->mkdir("TTBarDecayMode");
+    hTTBarDecayModeAfterVertexSelection = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayMode_AfterVertexSelection");
+    hTTBarDecayModeAfterVertexSelectionUnweighted = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayModeUnweighted_AfterVertexSelection");
+    hTTBarDecayModeAfterStandardSelections = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayMode_AfterStandardSelections");
+    hTTBarDecayModeAfterStandardSelectionsUnweighted = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayModeUnweighted_AfterStandardSelections");
+    hTTBarDecayModeAfterMtSelections = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayMode_AfterMtSelections");
+    hTTBarDecayModeAfterMtSelectionsUnweighted = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayModeUnweighted_AfterMtSelections");
+
+
+
     // Print info about number of booked histograms
     std::string myModuleLabel = iConfig.getParameter<std::string>("@module_label");
     
@@ -473,6 +483,10 @@ namespace HPlus {
 
     //fCommonPlotsAfterVertexSelection->fill();
     fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
+    if(genData.isValid()) {
+      hTTBarDecayModeAfterVertexSelection->Fill(genData.getTTBarDecayMode());
+      hTTBarDecayModeAfterVertexSelectionUnweighted->Fill(genData.getTTBarDecayMode(), 1.0);
+    }
 
 //------ Apply filter (if chosen) to select tail events
     //if (!selectTailEvents(iEvent, iSetup, pvData)) return false;
@@ -776,6 +790,10 @@ namespace HPlus {
 
 //------ ttbar topology selected
     fCommonPlots.fillControlPlotsAfterTopologicalSelections(iEvent);
+    if(genData.isValid()) {
+      hTTBarDecayModeAfterStandardSelections->Fill(genData.getTTBarDecayMode());
+      hTTBarDecayModeAfterStandardSelectionsUnweighted->Fill(genData.getTTBarDecayMode(), 1.0);
+    }
 
 
 //------ MET cut
@@ -817,6 +835,8 @@ namespace HPlus {
     if (!iEvent.isRealData() && genData.isValid()) {
       fMCAnalysisOfSelectedEvents.analyze(iEvent, iSetup, tauData, metData, genData);
       // doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
+      hTTBarDecayModeAfterMtSelections->Fill(genData.getTTBarDecayMode());
+      hTTBarDecayModeAfterMtSelectionsUnweighted->Fill(genData.getTTBarDecayMode(), 1.0);
     }
 
 //------ Top reconstruction

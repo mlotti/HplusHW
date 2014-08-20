@@ -304,6 +304,13 @@ namespace HPlus {
 
     // Control plots for fakes
 
+    // TTBar decay mode
+    WrappedTH1 *hTTBarDecayModeAfterVertexSelection;
+    WrappedTH1 *hTTBarDecayModeAfterVertexSelectionUnweighted;
+    WrappedTH1 *hTTBarDecayModeAfterStandardSelections;
+    WrappedTH1 *hTTBarDecayModeAfterStandardSelectionsUnweighted;
+    WrappedTH1 *hTTBarDecayModeAfterMtSelections;
+    WrappedTH1 *hTTBarDecayModeAfterMtSelectionsUnweighted;
 
     // FIXME move these to common plots
     WrappedTH2* hCtrlJetMatrixAfterJetSelection;
