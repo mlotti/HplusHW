@@ -70,6 +70,8 @@ def main():
                       help="Is Rtau cut disabled?")
     parser.add_option("--notrigger", dest="notrigger", default=False, action="store_true",
                       help="Is tau+MET trigger disabled?")
+    parser.add_option("--dofit", dest="dofit", default=False, action="store_true",
+                      help="Do the fit on mT slope on ttbar?")
 
     (opts, args) = parser.parse_args()
     if opts.dirSig is None:
@@ -83,13 +85,30 @@ def main():
         analysisSig = analysisSig.replace("Triggered", "")
         systematicsSigMC = dataset.Systematics()
 
+    # Apply TDR style
+    style = tdrstyle.TDRStyle()
+    histograms.cmsTextMode = histograms.CMSMode.SIMULATION
+    histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
+    #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
+    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2, dy=-0.1)
+    if opts.dofit:
+        histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
+        histograms.createLegendRatio.moveDefaults(dh=-0.1)
+        plots._legendLabels["BackgroundStatError"] = "Emb. stat. unc."
+        plots._legendLabels["BackgroundStatSystError"] = "Emb. stat.#oplussyst. unc."
+    else:
+        histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
+        plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
+        plots._legendLabels["BackgroundStatSystError"] = "Norm. stat.#oplussyst. unc."
+    histograms.createLegendRatio.moveDefaults(dx=-0.05)
     plots._legendLabels["Data"] = "Embedded data"
     plots._legendLabels["EWKMC"] = "EWK+t#bar{t}"
 
     for optMode in [
+        "OptQCDTailKillerNoCuts",
         "OptQCDTailKillerLoosePlus",
-#        "OptQCDTailKillerMediumPlus",
-#        "OptQCDTailKillerTightPlus",
+        "OptQCDTailKillerMediumPlus",
+        "OptQCDTailKillerTightPlus",
 #            None
         ]:
         datasetsEmb = dataset.getDatasetsFromMulticrabCfg(directory=dirEmb, dataEra=dataEra, analysisName=analysisEmb, optimizationMode=optMode)
@@ -117,18 +136,6 @@ def doDataset(datasetsEmb, datasetsSig, optMode, opts):
     if not opts.notrigger:
         mergeEWK(datasetsSig)
         mergeEWK(datasetsEmb)
-
-    # Apply TDR style
-    style = tdrstyle.TDRStyle()
-    histograms.cmsTextMode = histograms.CMSMode.SIMULATION
-    histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
-    #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
-    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2, dy=-0.1)
-    #histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
-    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
-    histograms.createLegendRatio.moveDefaults(dx=-0.05) # dh=-0.1
-    plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
-    plots._legendLabels["BackgroundStatSystError"] = "Norm. stat.#oplussyst. unc."
 
     plotter = tauEmbedding.CommonPlotter(optMode, "mcembsig", drawPlotCommon)
 
@@ -187,7 +194,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, optMode, addData, op
             drhEmbData.setName("Embedded data")
 
         if "shapeTransverseMass" in name and "TTJets" in datasetName:
-            doScaleFactors(drhSig.getHistogramWithUncertainties(), drhEmb.getHistogramWithUncertainties(), optMode)
+            doScaleFactors(drhSig.getHistogramWithUncertainties(), drhEmb.getHistogramWithUncertainties(), optMode, opts)
 
         if addData:
             p = plots.ComparisonManyPlot(drhSig, [drhEmb, drhEmbData])
@@ -214,7 +221,15 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, optMode, addData, op
             p.histoMgr.setHistoDrawStyle("Embedded data", "EP")
             p.histoMgr.setHistoLegendStyle("Embedded data", "P")
             p.histoMgr.reorderDraw(["Embedded data", "Embedded", "Normal"])
-        p.setDrawOptions(ratioYlabel="Emb./Norm.")
+        if opts.dofit:
+            p.setDrawOptions(ratioYlabel="Norm./Emb.", ratioInvert=True, ratioType="errorPropagation")
+            if "shapeTransverseMass" in name and "TTJets" in datasetName:
+                binning = systematics.getBinningForPlot("shapeTransverseMass")
+                p.setDrawOptions(customizeBeforeSave=lambda p: doScaleFactorFit(p, optMode),
+                                 rebin=range(0, 160, 20) + binning[binning.index(160):]
+                             )
+        else:
+            p.setDrawOptions(ratioYlabel="Emb./Norm.")
         return p
 
     custom = {
@@ -230,8 +245,32 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, optMode, addData, op
 
     plotter.plot(datasetName, createPlot, custom)
 
+def doScaleFactorFit(p, optMode):
+    histos = filter(lambda h: "shapeTransverseMass" in h.getName() and not "_syst" in h.getName(), p.ratioHistoMgr.getHistos())
 
-def doScaleFactors(histoSig, histoEmb, optMode):
+    if len(histos) != 1:
+        for h in histos:
+            print h.getName()
+        raise Exception("Expecting 1 ratio histogram, got %d" % len(histos))
+
+    ratio = histos[0]
+    fitfunc = ROOT.TF1("sffit", "[0]*x+[1]", 0, 160)
+    ratio.getRootHisto().Fit(fitfunc, "NR")
+    fitfunc.SetLineColor(ROOT.kBlue)
+    fitfunc.SetLineWidth(2)
+    p.getPad2().cd()
+    fitfunc.Draw("same")
+
+    par0 = fitfunc.GetParameter(0)
+    par1 = fitfunc.GetParameter(1)
+    histograms.PlotText(0.2, 0.5, "f(x) = p_{0}x + p_{1}", size=17, color=ROOT.kBlue).Draw()
+    histograms.PlotText(0.2, 0.35, "p_{0} = %.4g, p_{1} = %.4g" %(par0, par1), size=17, color=ROOT.kBlue).Draw()
+
+    formula = "%.10g*x + %.10g" % (par0, par1)
+    tauEmbedding.writeToFile(optMode, "mtcorrectionfit.txt", "formula %s" % formula)
+    
+
+def doScaleFactors(histoSig, histoEmb, optMode, opts):
     binning = systematics._dataDrivenCtrlPlotBinning["shapeTransverseMass"]
     histoSig.Rebin(len(binning)-1, "newsig", array.array("d", binning))
     histoEmb.Rebin(len(binning)-1, "newemb", array.array("d", binning))
@@ -239,8 +278,18 @@ def doScaleFactors(histoSig, histoEmb, optMode):
     grSig = histoSig.getSystematicUncertaintyGraph()
     grEmb = histoEmb.getSystematicUncertaintyGraph()
 
+    hSig = histoSig.getRootHisto()
+    hEmb = histoEmb.getRootHisto()
+
     scaleFactors = []
+    scaleFactors_stat = []
+
     identities = []
+
+    def equal(a, b):
+        if a == 0.0:
+            return b == 0.0
+        return abs((a-b)/a) < 0.0001
 
     for i in xrange(0, grSig.GetN()):
         lowEdge = grSig.GetX()[i]-grSig.GetErrorXlow(i)
@@ -255,10 +304,19 @@ def doScaleFactors(histoSig, histoEmb, optMode):
         # Employ count
         cemb = dataset.Count(emb_val, emb_err_up, emb_err_down)
         csig = dataset.Count(sig_val, sig_err_up, sig_err_down)
-
         csig.divide(cemb)
 
-        print "bin %.1f, sf %.7f + %.7f - %.7f" % (lowEdge, csig.value(), csig.uncertainty(), csig.systUncertainty())
+        cemb_stat = dataset.Count(hEmb.GetBinContent(i+1), hEmb.GetBinError(i+1))
+        csig_stat = dataset.Count(hSig.GetBinContent(i+1), hSig.GetBinError(i+1))
+        csig_stat.divide(cemb_stat)
+
+        if not equal(lowEdge, hEmb.GetBinLowEdge(i+1)):
+            raise Exception("Low edges not equal (%.10g vs %.10g)" % (lowEdge, hEmb.GetBinLowEdge(i+1)))
+        if not equal(csig.value(), csig_stat.value()):
+            raise Exception("Values not equal (%.10g vs %.10g)" % (csig.value(), csig_stat.value()))
+
+        print "bin %.1f, sf %.7f +%.7f -%.7f (stat +-%.7f)" % (lowEdge, csig.value(), csig.uncertainty(), csig.systUncertainty(), csig_stat.uncertainty())
+
         d = OrderedDict.OrderedDict()
         d["mt"] = lowEdge
         d["efficiency"] = csig.value()
@@ -267,23 +325,40 @@ def doScaleFactors(histoSig, histoEmb, optMode):
         scaleFactors.append(d)
         d = OrderedDict.OrderedDict()
         d["mt"] = lowEdge
+        d["efficiency"] = csig.value()
+        d["uncertaintyPlus"] = csig_stat.uncertainty()
+        d["uncertaintyMinus"] = csig_stat.uncertainty()
+        scaleFactors_stat.append(d)
+        d = OrderedDict.OrderedDict()
+        d["mt"] = lowEdge
         d["efficiency"] = 1.0
         d["uncertaintyPlus"] = 0.0
         d["uncertaintyMinus"] = 0.0
         identities.append(d)
 
     par = OrderedDict.OrderedDict()
-    par["era"] = "2012ABCD"
-    par["firstRun"] = 190456
-    par["lastRun"] = 208686
-    par["luminosity"] = 19769.955
-    par["bins"] = scaleFactors
+    par2 = OrderedDict.OrderedDict()
+    par2["firstRun"] = 1 # to support also dataEfficiency in MC
+    par2["lastRun"] = 208686
+    par2["luminosity"] = 1 # dummy value, not used for anything
+    par2["bins"] = scaleFactors
+    par["Run2012ABCD"] = par2
+    par2 = OrderedDict.OrderedDict()
+    par2["firstRun"] = 1 # to support also dataEfficiency in MC
+    par2["lastRun"] = 208686
+    par2["luminosity"] = 1 # dummy value, not used for anything
+    par2["bins"] = scaleFactors_stat
+    par["Run2012ABCD_statOnly"] = par2
 
     ret = OrderedDict.OrderedDict()
-    ret["dataParameters"] = par
-    ret["mcParameters"] = {"bins": identities}
+    ret["_multicrab_embedded"] = os.getcwd()
+    ret["_multicrab_signalAnalysisGenTau"] = opts.dirSig
 
-    tauEmbedding.writeToFile(optMode, "embedding_ttjets_weighting.json", json.dumps(ret, indent=2))
+    ret["dataParameters"] = par
+
+    ret["mcParameters"] = {"Run2012ABCD": {"bins": identities}}
+
+    tauEmbedding.writeToFile(optMode, "embedding_mt_weight.json", json.dumps(ret, indent=2))
 
     
 

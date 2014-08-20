@@ -22,9 +22,11 @@ import os
 import array
 import math
 import copy
+from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -36,18 +38,63 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
 analysisEmb = "signalAnalysis"
 analysisSig = "signalAnalysisGenuineTauTriggered" # require that the selected tau is genuine, valid comparison after njets
 
 dataEra = "Run2012ABCD"
 
+class SystematicsSigMC:
+    def __init__(self):
+        self._systematics = dataset.Systematics(shapes=[
+            "SystVarL1ETMMC",
+            "SystVarTauTrgMC",
+            "SystVarJES",
+            "SystVarJER",
+            "SystVarMET",
+            "SystVarBTagSF",
+            "SystVarPUWeight",
+            "SystVarTopPtWeight",
+        ], additionalNormalizations = {
+            "LeptonVeto": systematics.getLeptonVetoUncertainty("Dummy").getUncertaintyMax(),
+            "Luminosity": systematics.getLuminosityUncertainty().getUncertaintyMax()
+        })
+        self._cache = {}
+
+    def histogram(self, dsetName, name):
+        if not dsetName in self._cache:
+            cl = self._systematics.clone()
+            cl.append(additionalNormalizations = {"CrossSection": systematics.getCrossSectionUncertainty(dsetName).getUncertaintyMax()})
+            self._cache[dsetName] = cl
+
+        return self._cache[dsetName].histogram(name)
+systematicsSigMC = SystematicsSigMC()
+
+systematicsEmbData = dataset.Systematics(shapes=[
+    "SystVarMuonIdDataEff",
+    "SystVarMuonTrgDataEff",
+    "SystVarWTauMu",
+], additionalNormalizations = {
+    "CaloMETApproximation": 0.12,
+    "QCDContamination": 0.02,
+})
+
+
 plotStyles = styles.styles[0:2]
 plotStyles[0] = styles.StyleCompound([plotStyles[0], styles.StyleMarker(markerStyle=21, markerSize=1.2)])
 
 def main():
+    parser = OptionParser(usage="Usage: %prog [options]")
+    parser.add_option("--dirSig", dest="dirSig", default=None,
+                      help="Path to signalAnalysisGenTau multicrab directory")
+
+    (opts, args) = parser.parse_args()
+    if opts.dirSig is None:
+        parser.error("--dirSig missing")
+
     dirEmb = "."
-    dirSig = "../multicrab_signalAnalysisGenTau_140808_155813"
+    dirSig = opts.dirSig
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -56,15 +103,21 @@ def main():
     #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
 #    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2)
     histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.05)
-    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
-    histograms.createLegendRatio.moveDefaults(dh=-0.1, dx=-0.53)
+#    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
+    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
+#    histograms.createLegendRatio.moveDefaults(dh=-0.1, dx=-0.53)
+    histograms.createLegendRatio.moveDefaults(dx=-0.05)
 #    plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
+    plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
+    plots._legendLabels["BackgroundStatSystError"] = "Norm. stat.#oplussyst. unc."
+
+    plots._legendLabels["Data"] = "Embedded data"
 
     for optMode in [
 #        "OptQCDTailKillerNoCuts",
-#        "OptQCDTailKillerLoosePlus",
+        "OptQCDTailKillerLoosePlus",
 #        "OptQCDTailKillerMediumPlus",
-        "OptQCDTailKillerTightPlus",
+#        "OptQCDTailKillerTightPlus",
 #            None
     ]:
         datasetsEmb = dataset.getDatasetsFromMulticrabCfg(directory=dirEmb, dataEra=dataEra, analysisName=analysisEmb, optimizationMode=optMode)
@@ -72,6 +125,8 @@ def main():
         doDataset(datasetsEmb, datasetsSig, optMode)
         datasetsEmb.close()
         datasetsSig.close()
+
+        tauEmbedding.writeToFile(optMode+"_embdatasigmc", "input.txt", "Embedded: %s\nSignal analysis (GenTau): %s\n" % (os.getcwd(), dirSig))
 
 
 def doDataset(datasetsEmb, datasetsSig, optMode):
@@ -92,8 +147,8 @@ def doPlots(datasetsEmb, datasetsSig, plotter, optMode):
     lumi = datasetsEmb.getDataset("Data").getLuminosity()
 
     def createPlot(name):
-        drhData = datasetsEmb.getDataset("Data").getDatasetRootHisto(name)
-        drhMCs = [d.getDatasetRootHisto(name) for d in datasetsSig.getMCDatasets()]
+        drhData = datasetsEmb.getDataset("Data").getDatasetRootHisto(systematicsEmbData.histogram(name))
+        drhMCs = [d.getDatasetRootHisto(systematicsSigMC.histogram(d.getName(), name)) for d in datasetsSig.getMCDatasets()]
 
         p = plots.DataMCPlot2([drhData]+drhMCs)
         p.histoMgr.normalizeMCToLuminosity(lumi)

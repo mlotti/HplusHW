@@ -29,14 +29,42 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
 dataEra = "Run2012ABCD"
+
+class SystematicsSigMC:
+    def __init__(self):
+        self._systematics = dataset.Systematics(shapes=[
+            "SystVarJES",
+            "SystVarJER",
+            "SystVarMET",
+            "SystVarBTagSF",
+            "SystVarPUWeight",
+            "SystVarTopPtWeight",
+        ], additionalNormalizations = {
+            "LeptonVeto": systematics.getLeptonVetoUncertainty("Dummy").getUncertaintyMax(),
+            "Luminosity": systematics.getLuminosityUncertainty().getUncertaintyMax()
+        }, applyToDatasets = dataset.Systematics.OnlyForMC
+        )
+        self._cache = {}
+
+    def histogram(self, dsetName, name):
+        if not dsetName in self._cache:
+            cl = self._systematics.clone()
+            cl.append(additionalNormalizations = {"CrossSection": systematics.getCrossSectionUncertainty(dsetName).getUncertaintyMax()})
+            self._cache[dsetName] = cl
+
+        return self._cache[dsetName].histogram(name)
+systematicsEmbMC = SystematicsSigMC()
 
 def main():
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     #    histograms.cmsTextMode = histograms.CMSMode.NONE
-    histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
+    #histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
+    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
+    histograms.createLegend.moveDefaults(dx=-0.12, dh=-0.05) # QCD removed
 
     legendLabelsSet = False
 
@@ -74,7 +102,6 @@ def main():
 
         # Remove QCD for plots
         datasetsEmb.remove(["QCD_Pt20_MuEnriched"])
-        histograms.createLegend.moveDefaults(dx=-0.12, dh=-0.05)
         doPlots(datasetsEmb, optMode)
 
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=True, log=True, addMCUncertainty=True,
@@ -85,14 +112,19 @@ def doPlots(datasetsEmb, optMode):
     lumi = datasetsEmb.getDataset("Data").getLuminosity()
 
     def createPlot(name):
-        p = plots.DataMCPlot(datasetsEmb, name, normalizeToLumi=lumi)
+#        p = plots.DataMCPlot(datasetsEmb, systematicsEmbMC.histogram(name), normalizeToLumi=lumi)
+        drhData = datasetsEmb.getDataset("Data").getDatasetRootHisto(name)
+        drhMCs = [d.getDatasetRootHisto(systematicsEmbMC.histogram(d.getName(), name)) for d in datasetsEmb.getMCDatasets()]
+
+        p = plots.DataMCPlot2([drhData]+drhMCs)
+        p.histoMgr.normalizeMCToLuminosity(lumi)
         # by default pseudo-datasets lead to MC histograms, for these
         # plots we want to treat Data as data
         p.histoMgr.getHisto("Data").setIsDataMC(True, False)
         p.setDefaultStyles()
         return p
 
-    plotter = tauEmbedding.CommonPlotter(optMode, "embdatamc", drawPlotCommon)
+    plotter = tauEmbedding.CommonPlotter(optMode+"_embdatamc", "embdatamc", drawPlotCommon)
     plotter.plot(None, createPlot, {
 #        "NBjets": {"moveLegend": {"dx": -0.4, "dy": -0.45}}
     })
@@ -113,7 +145,7 @@ def doCounters(datasetsEmb, optMode):
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.4f', withPrecision=2))
     txt = table.format(cellFormat)
     print txt
-    d = optMode
+    d = optMode+"_embdatamc"
     if d is None:
         d = "."
     if not os.path.exists(d):
