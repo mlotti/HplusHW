@@ -913,6 +913,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
             ratioSyst1.RemovePoint(i)
             ratioSyst2.RemovePoint(i)
 
+        ratioSyst1.SetName(histo1.GetName()+"_syst")
         ratioSyst2.GetYaxis().SetTitle(ytitle)
         name = "BackgroundStatSystError"
         ratioSyst2.SetName(name)
@@ -1553,13 +1554,10 @@ class PlotRatioBase:
                 else:
                     if isinstance(numer, histograms.Histo):
                         aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
-                        h.setName(numer.getName())
                     elif isinstance(numer, dataset.RootHistoWithUncertainties):
                         aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
-                        h.setName(numer.GetName())
                     else:
                         aux.copyStyle(numer, h.getRootHisto())
-                        h.setName(numer.GetName())
                         h = _createHisto(h)
                     tmp.append(h)
             #if len(tmp) > 1:
