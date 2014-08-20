@@ -922,6 +922,11 @@ class Systematics:
     #                                 normalization uncertainties. The
     #                                 uncertainties are supposed to be
     #                                 relative.
+    # \li\a additionalDatasetNormalizations Dictionary (name (string)
+    #                                 -> function (string -> float)) for
+    #                                 additional dataset-specific
+    #                                 uncertainties. The uncertainties are
+    #                                 supposed to be relative.
     # \li\a additionalShapes          Dictionary (name (string) -> (th1up,
     #                                 th1down)) for additional shape
     #                                 variation uncertainties.
@@ -941,6 +946,7 @@ class Systematics:
                                  shapes=[],
                                  normalizationSelections=[],
                                  additionalNormalizations={},
+                                 additionalDatasetNormalizations={},
                                  additionalShapes={},
                                  additionalShapesRelative={},
                                  applyToDatasets=Systematics.OnlyForPseudoAndMC,
@@ -969,6 +975,7 @@ class Systematics:
     def clone(self, **kwargs):
         cl = copy.deepcopy(self)
         cl.set(**kwargs)
+        return cl
 
     ## Create SystematicsHelper for Dataset.getDatasetRootHisto()
     #
@@ -1095,6 +1102,15 @@ class SystematicsHelper:
             if verbose:
                 print "  Adding additional relative normalization uncertainties %s" % ",".join(additNorm.keys())
             for source, value in additNorm.iteritems():
+                rootHistoWithUncertainties.addNormalizationUncertaintyRelative(source, value)
+
+        # Add any user-supplied dataset-specific normalization uncertainties
+        additNorm = self._settings.get("additionalDatasetNormalizations")
+        if len(additNorm) > 0:
+            if verbose:
+                print "  Adding additional dataset-specific (for %s) relative normalization uncertainties %s" % (dset.getName(), ",".join(additNorm.keys()))
+            for source, func in additNorm.iteritems():
+                value = func(dset.getName())
                 rootHistoWithUncertainties.addNormalizationUncertaintyRelative(source, value)
 
         if verbose:
@@ -1340,19 +1356,53 @@ class RootHistoWithUncertainties:
         yerrhigh = []
         yerrlow = []
 
-        for i in xrange(1, self._rootHisto.GetNbinsX()+1):
-            xval = self._rootHisto.GetBinCenter(i)
-            xlow = xval-self._rootHisto.GetXaxis().GetBinLowEdge(i)
-            xhigh = self._rootHisto.GetXaxis().GetBinUpEdge(i)-xval
+        class WrapTH1:
+            def __init__(self, th1):
+                self._th1 = th1
+            def begin(self):
+                return 1
+            def end(self):
+                return self._th1.GetNbinsX()+1
+            def xvalues(self, i):
+                xval = self._th1.GetBinCenter(i)
+                xlow = xval-self._th1.GetXaxis().GetBinLowEdge(i)
+                xhigh = self._th1.GetXaxis().GetBinUpEdge(i)-xval
+                return (xval, xlow, xhigh)
+            def y(self, i):
+                return self._th1.GetBinContent(i)
+            def statErrors(self, i):
+                stat = self._th1.GetBinError(i)
+                return (stat, stat)
+        class WrapTGraph:
+            def __init__(self, gr):
+                self._gr = gr
+            def begin(self):
+                return 0
+            def end(self):
+                return self._gr.GetN()
+            def xvalues(self, i):
+                return (self._gr.GetX()[i], self._gr.GetErrorXlow(i), self._gr.GetErrorXhigh(i))
+            def y(self, i):
+                return self._gr.GetY()[i]
+            def statErrors(self, i):
+                return (self._gr.GetErrorYlow(i), self._gr.GetErrorYhigh(i))
 
-            yval = self._rootHisto.GetBinContent(i)
+        if isinstance(self._rootHisto, ROOT.TGraph):
+            wrapper = WrapTGraph(self._rootHisto)
+        else:
+            wrapper = WrapTH1(self._rootHisto)
+
+        for i in xrange(wrapper.begin(), wrapper.end()):
+            (xval, xlow, xhigh) = wrapper.xvalues(i)
+
+            yval = wrapper.y(i)
             yhighSquareSum = 0.0
             ylowSquareSum = 0.0
 
             if addStatistical:
-                stat = self._rootHisto.GetBinError(i)
-                yhighSquareSum += stat**2
-                ylowSquareSum += stat**2
+                (statLow, statHigh) = wrapper.statErrors(i)
+                yhighSquareSum += statHigh**2
+                ylowSquareSum += statLow**2
 
             for shapePlus, shapeMinus in self._shapeUncertainties.itervalues():
                 diffPlus = shapePlus.GetBinContent(i) # Note that this could have + or - sign
