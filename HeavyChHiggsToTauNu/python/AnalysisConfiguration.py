@@ -528,9 +528,9 @@ class ConfigBuilder:
         runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
         # Set PU ID src for modules
         runSetter(lambda module, name: param.setJetPUIdSrc(module.jetSelection, name))
-        # Set embedding mT weight
-        if self.options.tauEmbeddingInput != 0:
-            runSetter(param.setEmbeddingMTWeightBasedOnSelection)
+        # Set embedding mT weight, not needed for fit-based
+        #if self.options.tauEmbeddingInput != 0:
+        #    runSetter(param.setEmbeddingMTWeightBasedOnSelection)
 
         # Optional output
         if self.edmOutput:
@@ -1104,7 +1104,8 @@ class ConfigBuilder:
 
                 postfix += "MTWeight"
                 mod = mod.clone()
-                mod.embeddingMTWeight.mode = "dataEfficiency"
+                #mod.embeddingMTWeight.mode = "dataEfficiency" # bin-based
+                mod.embeddingMTWeight.enabled = True # fit-based
 
             enablePrintCounter(mod)
             mod.histogramAmbientLevel = self.histogramAmbientLevel
@@ -1424,7 +1425,13 @@ class ConfigBuilder:
             return addTrgDataEff("embeddingMuonIdEfficiency", shiftBy, "MuonIdDataEff"+postfix)
 
         def addEmbeddingMTWeight(shiftBy, postfix):
-            return addTrgDataEff("embeddingMTWeight", shiftBy, "EmbMTWeight"+postfix)
+            # bin-based
+            # return addTrgDataEff("embeddingMTWeight", shiftBy, "EmbMTWeight"+postfix)
+            # fit-based
+            module = self._cloneForVariation(getattr(process, name))
+            module.embeddingMTWeight.variationEnabled = True
+            module.embeddingMTWeight.variationDirection = shiftBy
+            return self._addVariationModule(process, module, name+self.systPrefix+"EmbMTWeight"+postfix)
 
         def addBTagSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
@@ -1476,8 +1483,8 @@ class ConfigBuilder:
             names.append(addMuonIdDataEff( 1.0, "Plus"))
             names.append(addMuonIdDataEff( -1.0, "Minus"))
 
-            names.append(addEmbeddingMTWeight(1.0, "Plus"))
-            names.append(addEmbeddingMTWeight(-1.0, "Minus"))
+            names.append(addEmbeddingMTWeight(1, "Plus"))
+            names.append(addEmbeddingMTWeight(-1, "Minus"))
 
             if not hasattr(process, "wtaumuWeightPlus"):
                 process.wtaumuWeightPlus = process.wtaumuWeight.clone(variationEnabled=True)

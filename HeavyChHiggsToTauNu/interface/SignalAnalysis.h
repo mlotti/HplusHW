@@ -29,7 +29,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMTWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMTWeightFit.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
@@ -205,7 +205,7 @@ namespace HPlus {
     METTriggerEfficiencyScaleFactor fMETTriggerEfficiencyScaleFactor;
     EmbeddingMuonEfficiency fEmbeddingMuonTriggerEfficiency;
     EmbeddingMuonEfficiency fEmbeddingMuonIdEfficiency;
-    EmbeddingMTWeight fEmbeddingMTWeight;
+    EmbeddingMTWeightFit fEmbeddingMTWeight;
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;
     WeightReader fWJetsWeightReader;

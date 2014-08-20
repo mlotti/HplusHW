@@ -782,7 +782,7 @@ namespace HPlus {
 
     // For embedding, performt mT weighting
     if(bTauEmbeddingStatus) {
-      EmbeddingMTWeight::Data data = fEmbeddingMTWeight.getEventWeight(transverseMass, iEvent);
+      EmbeddingMTWeightFit::Data data = fEmbeddingMTWeight.getEventWeight(transverseMass);
       fEventWeight.multiplyWeight(data.getEventWeight());
     }
     increment(fEmbeddingMTWeightCounter);
