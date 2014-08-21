@@ -1293,6 +1293,7 @@ class PlotBase:
     # to self.histoMgr. If setLuminosity() has been called with None,
     # no luminosity text is added.
     def addLuminosityText(self, x=None, y=None):
+        histograms._printTextDeprecationWarning("plots.PlotBase.addLuminosityText()", "plots.PlotBase.addStandardTexts()")
         if hasattr(self, "luminosity"):
             if self.luminosity != None:
                 histograms.addLuminosityText(x, y, self.luminosity)
@@ -1326,6 +1327,7 @@ class PlotBase:
     # specified in histograms is used. If setEnergy() has been called
     # with None, no energy text is added.
     def addEnergyText(self, x=None, y=None):
+        histograms._printTextDeprecationWarning("plots.PlotBase.addEnergyText()", "plots.PlotBase.addStandardTexts()")
         s = None
         if hasattr(self, "energies"):
             if self.energies != None:

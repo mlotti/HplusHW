@@ -290,11 +290,22 @@ class PlotTextBox:
         for t in self.texts:
             t.Draw(options)
 
+def _printTextDeprecationWarning(oldFunctionName, newFunctionName="histograms.addStandardTexts()"):
+    import traceback
+    print "#################### WARNING ####################"
+    print
+    print "%s is deprecated, please use %s instead" % (oldFunctionName, newFunctionName)
+    print "Traceback (most recent call last):"
+    stack = traceback.extract_stack()[:-2] # take out calls to this and the caller
+    print "".join(traceback.format_list(stack))
+    print "#################################################"
+
 ## Draw the "CMS Preliminary" text to the current TPad
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
 def addCmsPreliminaryText(x=None, y=None, text=None):
+    _printTextDeprecationWarning("histograms.addCmsPreliminaryText()")
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
     if text == None:
         txt  = cmsText[cmsTextMode]
@@ -308,6 +319,7 @@ def addCmsPreliminaryText(x=None, y=None, text=None):
 # \param y   Y coordinate of the text (None for default value)
 # \param s   Center-of-mass energy text with the unit (None for the default value, dataset.energyText
 def addEnergyText(x=None, y=None, s=None):
+    _printTextDeprecationWarning("histograms.addEnergyText()")
     (x, y) = textDefaults.getValues("energy", x, y)
     text = energyText
     if s != None:
@@ -339,6 +351,7 @@ def formatLuminosityInFb(lumi):
 # \param lumi  Value of the integrated luminosity in pb^-1
 # \param unit  Unit of the integrated luminosity value (should be fb^-1)
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
+    _printTextDeprecationWarning("histograms.addLuminosityText()")
     (x, y) = textDefaults.getValues("lumi", x, y)
     lumiStr = "L="
     if isinstance(lumi, basestring):
@@ -2376,6 +2389,7 @@ class HistoManager:
     # \param x   X coordinate of the text (\a None for default)
     # \param y   Y coordinate of the text (\a None for default)
     def addLuminosityText(self, x=None, y=None):
+        _printTextDeprecationWarning("histograms.HistoManager.addLuminosityText()", "histograms.addStandardTexts() with histograms.HistoManager.getLuminosity()")
         addLuminosityText(x, y, self.getLuminosity())
 
     ## Create the HistoManagerImpl object.
