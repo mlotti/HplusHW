@@ -2258,8 +2258,8 @@ class PlotDrawer:
     # \param cmsText             If not None, overrides "CMS" text by-plot basis
     # \param cmsExtraText        If not none, overrides the "Preliminary" text by-plot basis
     # \param addCmsText          If False, do not add "CMS" text
-    # \param cmsTextLeft         True for "CMS" text being on left, False for right
-    # \param cmsTextInFrame      True for "CMS" text being in frame, False for outside (use only if in frame does not work)
+    # \param cmsTextPosition     CMS text position (None for default value, see histograms.addStandardTexts() for more)
+    # \param cmsExtraTextPosition CMS extra text position (None for default value, see histograms.addStandardTexts() for more)
     def __init__(self,
                  xlabel=None,
                  ylabel="Occurrances / %.0f",
@@ -2295,8 +2295,8 @@ class PlotDrawer:
                  cmsText=None,
                  cmsExtraText=None,
                  addCmsText=True,
-                 cmsTextLeft=True,
-                 cmsTextInFrame=True,
+                 cmsTextPosition=None,
+                 cmsExtraTextPosition=None,
                  ):
         self.xlabelDefault = xlabel
         self.ylabelDefault = ylabel
@@ -2335,8 +2335,8 @@ class PlotDrawer:
         self.cmsTextDefault = cmsText
         self.cmsExtraTextDefault = cmsExtraText
         self.addCmsTextDefault = addCmsText
-        self.cmsTextLeftDefault = cmsTextLeft
-        self.cmsTextInFrameDefault = cmsTextInFrame
+        self.cmsTextPositionDefault = cmsTextPosition
+        self.cmsExtraTextPositionDefault = cmsExtraTextPosition
 
     ## Modify the defaults
     #
@@ -2714,8 +2714,8 @@ class PlotDrawer:
     # \li\a cmsText             If not None, overrides "CMS" text by-plot basis
     # \li\a cmsExtraText        If not none, overrides the "Preliminary" text by-plot basis
     # \li\a addCmsText          If False, do not add "CMS" text
-    # \li\a cmsTextLeft         True for "CMS" text being on left, False for right
-    # \li\a cmsTextInFrame      True for "CMS" text being in frame, False for outside (use only if in frame does not work)
+    # \param cmsTextPosition     CMS text position (None for default value, see histograms.addStandardTexts() for more)
+    # \param cmsExtraTextPosition CMS extra text position (None for default value, see histograms.addStandardTexts() for more)
     #
     # In addition of drawing and saving the plot, handles the X and Y
     # axis titles, and "CMS Preliminary", "sqrt(s)" and luminosity
@@ -2762,8 +2762,8 @@ class PlotDrawer:
 
         p.addStandardTexts(addLuminosityText = self._getValue("addLuminosityText", p, kwargs),
                            addCmsText = self._getValue("addCmsText", p, kwargs),
-                           cmsTextLeft = self._getValue("cmsTextLeft", p, kwargs),
-                           cmsTextInFrame = self._getValue("cmsTextInFrame", p, kwargs),
+                           cmsTextPosition = self._getValue("cmsTextPosition", p, kwargs),
+                           cmsExtraTextPosition = self._getValue("cmsExtraTextPosition", p, kwargs),
                            cmsText = self._getValue("cmsText", p, kwargs),
                            cmsExtraText = self._getValue("cmsExtraText", p, kwargs))
 

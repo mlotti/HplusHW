@@ -374,11 +374,14 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
 # \param lumi        Luminosity as float in pb^-1 (or as string in fb^1), None to ignore completely
 # \param sqrts       Centre-of-mass energy text with the unit
 # \param addCmsText  If True, add the CMS text
-# \param cmsTextLeft True for CMS text being on the left, False for right
-# \param cmsTextInFrame  True for CMS text being within the frame (recommended), False for outside (only if in-frame does not work)
+# \param cmsTextPosition Position of CMS text ("left", "right", "outframe", pair of (x, y) in NDC
+# \param cmsExtraTextPosition Position of CMS extra text (None for default, pair of (x, y) for explicit)
 # \param cmsText         If not None, override the "CMS" text
 # \param cmsExtraText    If not None, override the CMS extra text (e.g. "Preliminary")
-def addStandardTexts(lumi=None, sqrts=None, addCmsText=True, cmsTextLeft=True, cmsTextInFrame=True, cmsText=None, cmsExtraText=None):
+def addStandardTexts(lumi=None, sqrts=None, addCmsText=True, cmsTextPosition=None, cmsExtraTextPosition=None, cmsText=None, cmsExtraText=None):
+    if cmsTextPosition is None:
+        cmsTextPosition = "left"
+
     lumiTextSize = 40*0.6
     cmsTextFrac = 0.75
     cmsTextSize = 40*cmsTextFrac
@@ -419,25 +422,33 @@ def addStandardTexts(lumi=None, sqrts=None, addCmsText=True, cmsTextLeft=True, c
     relPosY = 0.035
     relExtraDY = 1.2
 
-    posX = 0
     posY = 1-t - relPosY*(1-t-b)
-    align = 0
-    if cmsTextInFrame:
-        if cmsTextLeft:
+    if isinstance(cmsTextPosition, basestring):
+        p = cmsTextPosition.lower()
+        if p == "left":
             posX = l + relPosX*(1-l-r)
             align = 13 # left, top
-        else:
+            posXe = posX
+            posYe = posY - relExtraDY*cmsTextFrac*t
+        elif p == "right":
             posX = 1-r - relPosX*(1-l-r)
             align = 33 # right, top
+            posXe = posX
+            posYe = posY - relExtraDY*cmsTextFrac*t
+        elif cmsTextPosition.lower() == "outframe":
+            posX = l
+            posY = 1-t+lumiTextOffset*t
+            align = 11 # left, bottom
+            posXe = l + 0.14*(1-l-r)
+            posYe = posY
+        else:
+            raise Exception("Invalid value for cmsTextPosition '%s', valid are left, right, outframe" % (cmsTextPosition))
+    else:
+        posX = cmsTextPosition[0]
+        posY = cmsTextPosition[1]
+        align = 13 # left, top
         posXe = posX
         posYe = posY - relExtraDY*cmsTextFrac*t
-
-    else:
-        posX = l
-        posY = 1-t+lumiTextOffset*t
-        align = 11 # left, bottom
-        posXe = l + 0.14*(1-l-r)
-        posYe = posY
 
     cms = "CMS"
     if cmsText is not None:
@@ -450,6 +461,9 @@ def addStandardTexts(lumi=None, sqrts=None, addCmsText=True, cmsTextLeft=True, c
     if extraText is None:
         extraText = cmsExtraTextDefault
     if extraText is not None and extraText != "":
+        if cmsExtraTextPosition is not None:
+            posXe = cmsExtraTextPosition[0]
+            posYe = cmsExtraTextPosition[1]
         addText(posXe, posYe, extraText, size=cmsExtraTextSize, font=53, align=align)
 
 ## Class to create signal information box on plots
