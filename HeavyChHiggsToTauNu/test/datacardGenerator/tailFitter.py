@@ -6,6 +6,7 @@ import sys
 import inspect
 from optparse import OptionParser
 import array
+from collections import OrderedDict
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TailFitter as TailFitter
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer as TableProducer
@@ -231,7 +232,6 @@ def addBinByBinStatUncert(currentColumn, hRate, columnNames, nuisanceInfo, fitmi
         fitmax = hRate.GetXaxis().GetBinUpEdge(hRate.GetNbinsX())
     print "... Adding bin-by-bin stat. uncert '%s' for range %d-%d"%(currentColumn,fitmin,fitmax)
     myStatHistograms = TableProducer.createBinByBinStatUncertHistograms(hRate, fitmin, fitmax)
-    myHistogramCache.extend(myStatHistograms)
     # Add bin-by-bin stat. nuisances to nuisance table
     for h in myStatHistograms:
         if h.GetTitle().endswith("Up"):
@@ -313,7 +313,7 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
         raise Exception("Cannot find histogram '%s'!"%name)
 
     # Create for each column a root histo with uncertainties
-    myDict = {}
+    myDict = OrderedDict()
     myDict["Hp"] = None
     myDict["QCD"] = None
     myDict["EWKtau"] = None
@@ -380,9 +380,8 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             stat = myDict[item].getRateStatUncertainty()
             (systUp,systDown) = myDict[item].getRateSystUncertainty()
             #myDict[item].Debug()
-            print "%10s: %.1f +- %.1f (stat.) + %.1f - %.1f (syst.)"%(item,rate,stat,systUp,systDown)
-    print ""
-    
+            print "%11s: %.1f +- %.1f (stat.) + %.1f - %.1f (syst.)"%(item,rate,stat,systUp,systDown)
+    print "Observation: %d\n"%hObs.Integral(0,hObs.GetNbinsX()+2)
     
     myLogList = [False,True]
     for l in myLogList:
