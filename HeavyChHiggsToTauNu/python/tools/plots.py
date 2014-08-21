@@ -1125,14 +1125,14 @@ class PlotBase:
 
     ## Set the default legend styles
     #
-    # Default is "F", except for data "P" and for signal MC "L"
+    # Default is "F", except for data "PLE" and for signal MC "L"
     # 
     # Intended to be called from the deriving classes
     def _setLegendStyles(self):
         self.histoMgr.setHistoLegendStyleAll("F")
         for h in self.histoMgr.getHistos():
             if h.isData():
-                h.setLegendStyle("P")
+                h.setLegendStyle("PLE")
             elif isSignal(h.getName()):
                 h.setLegendStyle("L")
 
