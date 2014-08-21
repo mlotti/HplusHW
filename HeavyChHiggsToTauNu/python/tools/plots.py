@@ -1343,7 +1343,7 @@ class PlotBase:
     def addStandardTexts(self, addLuminosityText=False, **kwargs):
         lumi = None
         if hasattr(self, "luminosity"):
-            lumi = luminosity
+            lumi = self.luminosity
         elif self.histoMgr.hasLuminosity():
             lumi = self.histoMgr.getLuminosity()
         elif addLuminosityText:

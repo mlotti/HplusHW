@@ -75,7 +75,7 @@ _finalstateYmaxSigmaBR = {
     "etau": 10.0, # FIXME
     "mutau": 10.0, # FIXME
     "emu": 10.0, # FIXME
-    "default": 1.0,
+    "default": 0.8,
 }
 
 
@@ -205,7 +205,6 @@ class BRLimits:
                 print format % (self.mass_string[i], "BLINDED", self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
         print
         
-
     ## Save the table as tex format
     def saveAsLatexTable(self,unblindedStatus=False):
         myLightStatus = True
@@ -247,6 +246,36 @@ class BRLimits:
         f = open("limitsTable.tex","w")
         f.write(s)
         f.close()
+
+    ## Divide the limits by another limit to obtain relative result
+    # \param refLimit  another BRLimits object
+    def divideByLimit(self, refLimit):
+        def protectedDivide(num, denom):
+            if denom == 0:
+                return 0.0
+            else:
+                return num / denom
+        
+        if not isinstance(refLimit, BRLimits):
+            raise Exception("The parameter needs to be a BRLimits object")
+        for i in xrange(len(self.mass_string)):
+            foundStatus = False
+            for ir in xrange(len(refLimit.mass_string)):
+                if self.mass_string[i] == refLimit.mass_string[ir]:
+                    foundStatus = True
+                    self.observed[i] = protectedDivide(self.observed[i], refLimit.observed[ir])
+                    self.expectedMedian[i] = protectedDivide(self.expectedMedian[i], refLimit.expectedMedian[ir])
+                    self.expectedMinus2[i] = protectedDivide(self.expectedMinus2[i], refLimit.expectedMinus2[ir])
+                    self.expectedMinus1[i] = protectedDivide(self.expectedMinus1[i], refLimit.expectedMinus1[ir])
+                    self.expectedPlus2[i] = protectedDivide(self.expectedPlus2[i], refLimit.expectedPlus2[ir])
+                    self.expectedPlus1[i] = protectedDivide(self.expectedPlus1[i], refLimit.expectedPlus1[ir])
+            if not foundStatus:
+                self.observed[i] = 0.0
+                self.expectedMedian[i] = 0.0
+                self.expectedMinus2[i] = 0.0
+                self.expectedMinus1[i] = 0.0
+                self.expectedPlus2[i] = 0.0
+                self.expectedPlus1[i] = 0.0
         
     ## Construct TGraph for the observed limit
     #

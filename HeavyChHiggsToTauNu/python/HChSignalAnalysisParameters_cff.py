@@ -132,6 +132,10 @@ tauSelectionBase = cms.untracked.PSet(
     nprongs = cms.untracked.uint32(1), # number of prongs (options: 1, 3, or 13 == 1 || 3)
     analyseFakeTauComposition = cms.untracked.bool(False),
     decayModeFilterValue = cms.untracked.int32(-1), # filter for tau decay mode, set to negative value to disable
+    # Reweighting for tau decay mode
+    tauDecayModeReweightingZero = cms.untracked.double(1.0),
+    tauDecayModeReweightingOne = cms.untracked.double(1.0),
+    tauDecayModeReweightingOther = cms.untracked.double(1.0),
 )
 
 # Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)
@@ -403,10 +407,10 @@ QCDTailKiller = cms.untracked.PSet(
     maxJetsToConsider = cms.untracked.uint32(4),
     # Back to back (bottom right corner of 2D plane tau,MET vs. jet,MET)
     backToBack = cms.untracked.VPSet(
-        QCDTailKillerBin("circular", 0.0, 40.0), # jet 1
-        QCDTailKillerBin("circular", 0.0, 40.0), # jet 2
-        QCDTailKillerBin("circular", 0.0, 40.0), # jet 3
-        QCDTailKillerBin("circular", 0.0, 40.0), # jet 4
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 1
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 2
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 3
+        QCDTailKillerBin("circular", 0.0, 0.0), # jet 4
     ),
     # Collinear topology (top left corner of 2D plane tau,MET vs. jet,MET)
     collinear = cms.untracked.VPSet(

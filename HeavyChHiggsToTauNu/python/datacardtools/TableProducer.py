@@ -758,10 +758,10 @@ class TableProducer:
                 myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
                 myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
             myOutput += "                      Total expected: %s"%getResultString(TotalExpected,formatStr,myPrecision)
-            if self._config.BlindAnalysis:
-                myOutput += "                            Observed: BLINDED\n\n"
-            else:
-                myOutput += "                            Observed: %5d\n\n"%Data.getRate()
+            #if self._config.BlindAnalysis:
+            #    myOutput += "                            Observed: BLINDED\n\n"
+            #else:
+	    myOutput += "                            Observed: %5d\n\n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
             # Print to screen
             if self._config.OptionDisplayEventYieldSummary:
                 print myOutput
@@ -798,10 +798,10 @@ class TableProducer:
                 myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  Total expected from the SM              & %s \\\\ \n"%getLatexResultString(TotalExpected,formatStr,myPrecision)
-            if self._config.BlindAnalysis:
-                myOutputLatex += "  Observed: & BLINDED \\\\ \n"
-            else:
-                myOutputLatex += "  Observed: & %5d \\\\ \n"%Data.getRate()
+            #if self._config.BlindAnalysis:
+            #    myOutputLatex += "  Observed: & BLINDED \\\\ \n"
+            #else:
+	    myOutputLatex += "  Observed: & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  \\end{tabular}\n"
             myOutputLatex += "\\end{table}\n"

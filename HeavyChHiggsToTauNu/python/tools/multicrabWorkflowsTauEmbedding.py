@@ -505,13 +505,13 @@ def addEmbeddingEmbedding_53X(sourceWorkflow, version, datasets, updateDefinitio
     # njobsIn default value is for embedding
     njobs = {
         # FIXME: njobsOut
-        "SingleMu_190456-193621_2012A_Jan22": TaskDef(njobsIn= 400, njobsOut=10),
-        "SingleMu_193834-196531_2012B_Jan22": TaskDef(njobsIn=2000, njobsOut=50),
-        "SingleMu_198022-200381_2012C_Jan22": TaskDef(njobsIn=1500, njobsOut=40),
-        "SingleMu_200466-203742_2012C_Jan22": TaskDef(njobsIn=2000, njobsOut=50),
-        "SingleMu_203777-205834_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=20),
-        "SingleMu_205908-207100_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=40),
-        "SingleMu_207214-208686_2012D_Jan22": TaskDef(njobsIn=1300, njobsOut=30),
+        "SingleMu_190456-193621_2012A_Jan22": TaskDef(njobsIn= 400, njobsOut=1),
+        "SingleMu_193834-196531_2012B_Jan22": TaskDef(njobsIn=2000, njobsOut=4),
+        "SingleMu_198022-200381_2012C_Jan22": TaskDef(njobsIn=1500, njobsOut=4),
+        "SingleMu_200466-203742_2012C_Jan22": TaskDef(njobsIn=2000, njobsOut=4),
+        "SingleMu_203777-205834_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=1),
+        "SingleMu_205908-207100_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=4),
+        "SingleMu_207214-208686_2012D_Jan22": TaskDef(njobsIn=1300, njobsOut=3),
 
 
         # MC, triggered with mcTrigger

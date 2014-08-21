@@ -31,10 +31,14 @@ def customize(signalAnalysis):
     #signalAnalysis.QCDTailKiller.disableCollinearCuts = True # enable, if splitting by delta phi(tau,MET)
     print "Phase space is splitted in analysis as follows:"
     print signalAnalysis.commonPlotsSettings.histogramSplitting
-
+    
     #signalAnalysis.bMakeEtaCorrectionStatus = True
     #signalAnalysis.lowBoundForQCDInvertedIsolation = "byVLooseCombinedIsolationDeltaBetaCorr"
     print "QCD corrections to inverted leg are applied status:",signalAnalysis.makeQCDEtaCorrectionStatus
+    signalAnalysis.tauSelection.tauDecayModeReweightingZero = 1.0
+    signalAnalysis.tauSelection.tauDecayModeReweightingOne = 1.0 # set to 0.88 according to Christian (HIG-13-004)
+    signalAnalysis.tauSelection.tauDecayModeReweightingOther = 1.0
+    
     if len(signalAnalysis.lowBoundForQCDInvertedIsolation.value()):
         print "Applying low bound for QCD inverted isolation in addition to inverting the isolation, low bound=",signalAnalysis.lowBoundForQCDInvertedIsolation.value()
 
