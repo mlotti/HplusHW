@@ -852,7 +852,7 @@ embeddingMuonTriggerEfficiency.useMaxUncertainty = cms.bool(True)
 #     print "Using embedding mT weight file %s for %s" % (str(signalAnalysis.embeddingMTWeight.data), name)
 ## fit-based mT weighting
 embeddingMTWeight = cms.untracked.PSet(
-    formula = cms.string("(-0.0016*x+1.26)*(x<=160) + 1*(x>160)"), # average over MET{60,70,80} and tail killer scenarios, rounded
+    formula = cms.string("(-0.0017*x+1.26)*(x<=160) + 1*(x>160)"), # average over MET{60,70,80} and tail killer scenarios, rounded
     enabled = cms.bool(False),
     variationEnabled = cms.bool(False),
     variationDirection = cms.int32(0)
