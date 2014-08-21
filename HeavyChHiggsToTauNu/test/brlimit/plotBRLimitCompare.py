@@ -4,9 +4,11 @@ import sys
 import glob
 import json
 import array
+from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
@@ -14,41 +16,41 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 
-def main():
+def main(opts):
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     histograms.cmsTextMode = histograms.CMSMode.NONE
 
-#    compareTauJets()
-#    compareLeptonic()
-#    compareCombination()
-#    compareCombinationSanitychecksLHC()
+#    compareTauJets(opts)
+#    compareLeptonic(opts)
+#    compareCombination(opts)
+#    compareCombinationSanitychecksLHC(opts)
 
-#    compareTauJetsDeltaPhi()
-    compareDummy()
+#    compareTauJetsDeltaPhi(opts)
+    compareHplus(opts)
 
-def compareTauJets():
+def compareTauJets(opts):
     doCompare("taujets", [
             # (name, dir)
             ("LHC-CLs", "LandS*taujets_lhc_*"),
             ("LHC-CLs (asymp)", "LandS*taujets_lhcasy_*"),
             ("LEP-CLs", "LandS*taujets_lep_*"),
-            ])
+            ], opts)
 
-def compareLeptonic():
+def compareLeptonic(opts):
     doCompare("emu", [
             # (name, dir)
             ("LHC-CLs", "LandS*emu_lhc_*"),
             ("LHC-CLs (asymp)", "LandS*emu_lhcasy_*"),
             ("LEP-CLs", "LandS*emu_lep_*"),
-            ])
+            ], opts)
 
     doCompare("mutau", [
             # (name, dir)
             ("LHC-CLs", "LandS*mutau_lhc_*"),
             ("LHC-CLs (asymp)", "LandS*mutau_lhcasy_*"),
             ("LEP-CLs", "LandS*mutau_lep_*"),
-            ])
+            ], opts)
 
     doCompare("etau", [
             # (name, dir)
@@ -56,32 +58,32 @@ def compareLeptonic():
             ("LHC-CLs", "LandSMultiCrab_etau_lhc_jobs10_sb_600_b300_120514_151345/"),
             ("LHC-CLs (asymp)", "LandS*etau_lhcasy_*"),
             ("LEP-CLs", "LandS*etau_lep_*"),
-            ])
+            ], opts)
 
-def compareCombination():
+def compareCombination(opts):
     doCompare("combination", [
             # (name, dir)
 #            ("LHC-CLs", "LandS*combination_lhc_jobs*"),
             ("LHC-CLs", "LandSMultiCrab_combination_lhc_jobs10_sb300_b150_120514_173610"),
             ("LHC-CLs (asymp)", "LandS*combination_lhcasy_*"),
             ("LEP-CLs", "LandS*combination_lep_*"),
-            ])
+            ], opts)
 
-def compareCombinationSanitychecksLHC():
+def compareCombinationSanitychecksLHC(opts):
     doCompare("combination_migrad_vs_minos", [
             # (name, dir)
             ("Migrad", "LandS*combination_lhc_sanitycheck_migrad_*"),
             ("Minos", "LandS*combination_lhc_sanitycheck_minos_*"),
-            ])
+            ], opts)
 
 
-def compareTauJetsDeltaPhi():
+def compareTauJetsDeltaPhi(opts):
     doCompare("taujets_deltaphi", [
               # (name, dir)
               ("Without #Delta#phi selection", "datacards_220312_123012_fully_hadronic_2011A_MET50_withRtau_NoDeltaPhi_withShapes_shapeStat/LandSMultiCrab_taujets_lhc_*"),
               ("#Delta#phi < 160^{o}", "combination_new/LandS*taujets_lhc_*"),
               ("#Delta#phi < 130^{o}", "datacards_220312_122901_fully_hadronic_2011A_MET50_withRtau_DeltaPhi130_withShapes_shapeStat/LandSMultiCrab_taujets_lhc_*")
-              ],
+              ], opts,
               expectedMedianOpts={"ymax": 0.07},
               expectedSigma1Opts={"ymax": 0.1},
               expectedSigma1RelativeOpts={"ymax": 2.2, "ymin": 0.4},
@@ -89,10 +91,9 @@ def compareTauJetsDeltaPhi():
               moveLegend={"dh": -0.04}
               )
 
-def compareDummy():
-    lightStatus = False
+def compareHplus(opts):
     myOpts = {}
-    if lightStatus:
+    if opts.lightHplus:
         myList = [
               ("#tau p_{T}>41, E_{T}^{miss}>60, No ang.cuts","*TailKillerNoCuts*nominal*/CombineMultiCrab*"),
               ("#tau p_{T}>41, E_{T}^{miss}>60, Loose ang.cuts","*TailKillerLoose*nominal*/CombineMultiCrab*"),
@@ -110,7 +111,7 @@ def compareDummy():
 #              ("#tau p_{T}>41 no R_{#tau}, E_{T}^{miss}>60, Tight ang.cuts","*TailKillerTight*nortau_*/CombineMultiCrab*"),
         ]
         myOpts = expectedMedianOpts= {"ymin": 0.001, "ymax":0.02}
-    else:
+    elif opts.heavyHplus:
         myList = [
               ("#tau p_{T}>41, E_{T}^{miss}>60, No ang.cuts","*TailKillerNoCuts*nominal*/CombineMultiCrab*"),
               ("#tau p_{T}>41, E_{T}^{miss}>60, Loose ang.cuts","*TailKillerLoose*nominal*/CombineMultiCrab*"),
@@ -130,18 +131,26 @@ def compareDummy():
             # ("#tau p_{T}>41 no R_{#tau}, E_{T}^{miss}>60, Tight ang.cuts","*TailKillerTight*nortau_*/CombineMultiCrab*"),
         ]
         myOpts = expectedMedianOpts= {"ymin": 0.008, "ymax":1.0}
+    elif opts.tailFit:
+        myList = [
+              ("Nominal", "*DataDriven/CombineMultiCrab*"),
+              ("50 GeV bin width", "*50GeVBins/CombineMultiCrab*"),
+              ("Double tail fit uncert.", "*doublefituncert/CombineMultiCrab*"),
+              ("No tail fit uncert.", "*nofituncert/CombineMultiCrab*"),
+              ("No syst. uncert.", "*nosystuncert/CombineMultiCrab*"),
+        ]
+        myOpts = expectedMedianOpts= {"ymin": 0.008, "ymax":1.0}
 
-
-    doCompare("comparisonDummy", myList,
+    doCompare("comparisonDummy", myList, opts,
               moveLegend={"dx":-0.04, "dy": 0.01},
-              log=True,
+              log=not opts.relative,
               expectedMedianOpts= myOpts,
               )
 
 
 styleList = [styles.Style(24, ROOT.kBlack)] + styles.getStyles()
 
-def doCompare(name, compareList, **kwargs):
+def doCompare(name, compareList, opts, **kwargs):
     legendLabels = []
     limits = []
     for label, path in compareList:
@@ -167,6 +176,26 @@ def doCompare(name, compareList, **kwargs):
     doPlot(limits, legendLabels, [l.expectedGraph() for l in limits],
            name+"_expectedMedian", limit.BRlimit, opts=kwargs.get("expectedMedianOpts", limitOpts), moveLegend=moveLegend, log=kwargs.get("log",False),
            plotLabel="Expected median")
+
+    if opts.relative:
+        for i in range(1, len(limits)):
+            limits[i].divideByLimit(limits[0])
+        # Set reference to 1
+        for j in range(0, len(limits[0].expectedMedian)):
+            limits[0].expectedMedian[j] = 1.0
+            limits[0].expectedMinus2[j] = 1.0
+            limits[0].expectedMinus1[j] = 1.0
+            limits[0].expectedPlus2[j] = 1.0
+            limits[0].expectedPlus1[j] = 1.0
+            limits[0].observed[j] = 1.0
+        # Set y scale and require it to be linear
+        kwargs["expectedMedianOptsRelative"] = {"ymin": 0.5, "ymax":1.5}
+        kwargs["log"] = False
+        doPlot(limits, legendLabels, [l.expectedGraph() for l in limits],
+              name+"_expectedMedianRelative", "Expected limit vs. nominal", opts=kwargs.get("expectedMedianOptsRelative", limitOpts), moveLegend=moveLegend, log=kwargs.get("log",False),
+              plotLabel="Expected median")
+        print "Skipping +-1 and 2 sigma plots for --relative"
+        sys.exit()
 
     legendLabels2 = legendLabels + [None]*len(legendLabels)
 
@@ -307,4 +336,12 @@ def doPlot2(limits, legendLabels, name):
 
 
 if __name__ == "__main__":
-    main()
+    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=True,conflict_handler="resolve")
+    parser.add_option("--light", dest="lightHplus", action="store_true", default=False, help="Light H+ comparison")
+    parser.add_option("--heavy", dest="heavyHplus", action="store_true", default=False, help="Heavy H+ comparison")
+    parser.add_option("--tailFit", dest="tailFit", action="store_true", default=False, help="tailFit comparison")
+    parser.add_option("--relative", dest="relative", action="store_true", default=False, help="Do comparison relative to the first item")
+
+    (opts, args) = parser.parse_args()
+
+    main(opts)
