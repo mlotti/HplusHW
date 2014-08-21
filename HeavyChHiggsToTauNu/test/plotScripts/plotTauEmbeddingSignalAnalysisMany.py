@@ -176,8 +176,7 @@ def doPlotsWTauMu(datasetsEmb, name, btag=True):
     p.frame.GetYaxis().SetTitle("Events / %.0f GeV/c^{2}" % p.binWidth())
     p.appendPlotObject(histograms.PlotText(0.5, 0.9, plots._legendLabels.get(name, name), size=18))
     p.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    p.addStandardTexts()
     p.save()
 
 def drawPlot(*args, **kwargs):

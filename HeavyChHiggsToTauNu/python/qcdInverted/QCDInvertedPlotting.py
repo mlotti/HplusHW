@@ -31,13 +31,11 @@ class QCDInvertedPlotBase:
 
     def _drawPlot(self, plot):
         plot.setLuminosity(self._luminosity)
-        plot.addLuminosityText()
         if "2012" in self._moduleInfoString:
             plot.setEnergy("8")
         else:
             plot.setEnergy("7")
-        plot.addEnergyText()
-        histograms.addCmsPreliminaryText()
+        plot.addStandardTexts()
         plot.draw()
         plot.save()
 

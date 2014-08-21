@@ -23,15 +23,17 @@ class CMSMode:
     PRELIMINARY = 1
     PAPER = 2
     SIMULATION = 3
+    SIMULATION_PRELIMINARY = 4
 
 ## Global variable to hold CMS text mode
 cmsTextMode = CMSMode.PRELIMINARY
 ## Global dictionary to hold the CMS text labels
 cmsText = {
-    CMSMode.NONE: "",
-    CMSMode.PRELIMINARY: "CMS Preliminary",
-    CMSMode.PAPER: "CMS",
-    CMSMode.SIMULATION : "CMS Simulation"
+    CMSMode.NONE: None,
+    CMSMode.PRELIMINARY: "Preliminary",
+    CMSMode.PAPER: "",
+    CMSMode.SIMULATION : "Simulation",
+    CMSMode.SIMULATION_PRELIMINARY : "Preliminary simulation"
     }
 
 ## Global uncertainty mode
@@ -178,7 +180,8 @@ class PlotText:
     # \param bold    Should the text be bold?
     # \param align   Alignment of text (left, center, right)
     # \param color   Color of the text
-    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack):
+    # \param font    Specify font explicitly
+    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack, font=None):
         self.x = x
         self.y = y
         self.text = text
@@ -187,16 +190,21 @@ class PlotText:
         self.l.SetNDC()
         if not bold:
             self.l.SetTextFont(self.l.GetTextFont()-20) # bold -> normal
-        if size != None:
+        if font is not None:
+            self.l.SetTextFont(font)
+        if size is not None:
             self.l.SetTextSize(size)
-        if align.lower() == "left":
-            self.l.SetTextAlign(11)
-        elif align.lower() == "center":
-            self.l.SetTextAlign(21)
-        elif align.lower() == "right":
-            self.l.SetTextAlign(31)
+        if isinstance(align, basestring):
+            if align.lower() == "left":
+                self.l.SetTextAlign(11)
+            elif align.lower() == "center":
+                self.l.SetTextAlign(21)
+            elif align.lower() == "right":
+                self.l.SetTextAlign(31)
+            else:
+                raise Exception("Error: Invalid option '%s' for text alignment! Options are: 'left', 'center', 'right'."%align)
         else:
-            raise Exception("Error: Invalid option '%s' for text alignment! Options are: 'left', 'center', 'right'."%align)
+            self.l.SetTextAlign(align)
         self.l.SetTextColor(color)
 
     ## Draw the text to the current TPad
@@ -282,11 +290,22 @@ class PlotTextBox:
         for t in self.texts:
             t.Draw(options)
 
+def _printTextDeprecationWarning(oldFunctionName, newFunctionName="histograms.addStandardTexts()"):
+    import traceback
+    print "#################### WARNING ####################"
+    print
+    print "%s is deprecated, please use %s instead" % (oldFunctionName, newFunctionName)
+    print "Traceback (most recent call last):"
+    stack = traceback.extract_stack()[:-2] # take out calls to this and the caller
+    print "".join(traceback.format_list(stack))
+    print "#################################################"
+
 ## Draw the "CMS Preliminary" text to the current TPad
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
 def addCmsPreliminaryText(x=None, y=None, text=None):
+    _printTextDeprecationWarning("histograms.addCmsPreliminaryText()")
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
     if text == None:
         txt  = cmsText[cmsTextMode]
@@ -300,6 +319,7 @@ def addCmsPreliminaryText(x=None, y=None, text=None):
 # \param y   Y coordinate of the text (None for default value)
 # \param s   Center-of-mass energy text with the unit (None for the default value, dataset.energyText
 def addEnergyText(x=None, y=None, s=None):
+    _printTextDeprecationWarning("histograms.addEnergyText()")
     (x, y) = textDefaults.getValues("energy", x, y)
     text = energyText
     if s != None:
@@ -313,7 +333,7 @@ def formatLuminosityInFb(lumi):
     lumiInFb = lumi/1000.
     log = math.log10(lumiInFb)
     ndigis = int(log)
-    format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
+    format = "%.1f" # ndigis >= 1, 10 <= lumiInFb
     if ndigis == 0: 
         if log >= 0: # 1 <= lumiInFb < 10
             format = "%.1f"
@@ -331,6 +351,7 @@ def formatLuminosityInFb(lumi):
 # \param lumi  Value of the integrated luminosity in pb^-1
 # \param unit  Unit of the integrated luminosity value (should be fb^-1)
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
+    _printTextDeprecationWarning("histograms.addLuminosityText()")
     (x, y) = textDefaults.getValues("lumi", x, y)
     lumiStr = "L="
     if isinstance(lumi, basestring):
@@ -343,6 +364,107 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     addText(x, y, lumiStr, textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
+
+## Draw the CMS standard texts
+#
+# Updated version of addCmsPreliminaryText(), addEnergyText() and
+# addLuminosityText() following the new guidelines at
+# https://ghm.web.cern.ch/ghm/plots/
+#
+# \param lumi        Luminosity as float in pb^-1 (or as string in fb^1), None to ignore completely
+# \param sqrts       Centre-of-mass energy text with the unit
+# \param addCmsText  If True, add the CMS text
+# \param cmsTextPosition Position of CMS text ("left", "right", "outframe", pair of (x, y) in NDC
+# \param cmsExtraTextPosition Position of CMS extra text (None for default, pair of (x, y) for explicit)
+# \param cmsText         If not None, override the "CMS" text
+# \param cmsExtraText    If not None, override the CMS extra text (e.g. "Preliminary")
+def addStandardTexts(lumi=None, sqrts=None, addCmsText=True, cmsTextPosition=None, cmsExtraTextPosition=None, cmsText=None, cmsExtraText=None):
+    if cmsTextPosition is None:
+        cmsTextPosition = "left"
+
+    lumiTextSize = 40*0.6
+    cmsTextFrac = 0.75
+    cmsTextSize = 40*cmsTextFrac
+    cmsExtraTextSize = cmsTextSize * 0.76
+
+    # Lumi + energy text
+    lumiText = ""
+    if lumi is not None:
+        if isinstance(lumi, basestring):
+            lumiText = lumi
+        else:
+            lumiText = formatLuminosityInFb(lumi)
+        lumiText += " fb^{-1} ("
+    if sqrts is not None:
+        lumiText += sqrts
+    else:
+        lumiText += energyText
+    if lumi is not None:
+        lumiText += ")"
+
+    lumiTextOffset = 0.2
+    l = ROOT.gPad.GetLeftMargin()
+    t = ROOT.gPad.GetTopMargin()
+    r = ROOT.gPad.GetRightMargin()
+    b = ROOT.gPad.GetBottomMargin()
+
+    addText(1-r, 1-t+lumiTextOffset*t, lumiText, size=lumiTextSize, bold=False, align="right")
+
+    if not addCmsText:
+        return
+
+    cmsExtraTextDefault = globals()["cmsText"][cmsTextMode]
+    if cmsExtraTextDefault is None:
+        return
+
+    # CMS + extratext
+    relPosX = 0.045
+    relPosY = 0.035
+    relExtraDY = 1.2
+
+    posY = 1-t - relPosY*(1-t-b)
+    if isinstance(cmsTextPosition, basestring):
+        p = cmsTextPosition.lower()
+        if p == "left":
+            posX = l + relPosX*(1-l-r)
+            align = 13 # left, top
+            posXe = posX
+            posYe = posY - relExtraDY*cmsTextFrac*t
+        elif p == "right":
+            posX = 1-r - relPosX*(1-l-r)
+            align = 33 # right, top
+            posXe = posX
+            posYe = posY - relExtraDY*cmsTextFrac*t
+        elif cmsTextPosition.lower() == "outframe":
+            posX = l
+            posY = 1-t+lumiTextOffset*t
+            align = 11 # left, bottom
+            posXe = l + 0.14*(1-l-r)
+            posYe = posY
+        else:
+            raise Exception("Invalid value for cmsTextPosition '%s', valid are left, right, outframe" % (cmsTextPosition))
+    else:
+        posX = cmsTextPosition[0]
+        posY = cmsTextPosition[1]
+        align = 13 # left, top
+        posXe = posX
+        posYe = posY - relExtraDY*cmsTextFrac*t
+
+    cms = "CMS"
+    if cmsText is not None:
+        cms = cmsText
+
+    if cms != "":
+        addText(posX, posY, cms, size=cmsTextSize, font=63, align=align)
+
+    extraText = cmsExtraText
+    if extraText is None:
+        extraText = cmsExtraTextDefault
+    if extraText is not None and extraText != "":
+        if cmsExtraTextPosition is not None:
+            posXe = cmsExtraTextPosition[0]
+            posYe = cmsExtraTextPosition[1]
+        addText(posXe, posYe, extraText, size=cmsExtraTextSize, font=53, align=align)
 
 ## Class to create signal information box on plots
 class SignalTextCreator:
@@ -2270,6 +2392,9 @@ class HistoManager:
 #        for h in self.datasetRootHistos:
 #            h.scale(value)
 
+    def hasLuminosity(self):
+        return self.luminosity is not None
+
     ## Get the integrated luminosity to which the MC datasets have been normalized to.
     def getLuminosity(self):
         if self.luminosity == None:
@@ -2281,6 +2406,7 @@ class HistoManager:
     # \param x   X coordinate of the text (\a None for default)
     # \param y   Y coordinate of the text (\a None for default)
     def addLuminosityText(self, x=None, y=None):
+        _printTextDeprecationWarning("histograms.HistoManager.addLuminosityText()", "histograms.addStandardTexts() with histograms.HistoManager.getLuminosity()")
         addLuminosityText(x, y, self.getLuminosity())
 
     ## Create the HistoManagerImpl object.

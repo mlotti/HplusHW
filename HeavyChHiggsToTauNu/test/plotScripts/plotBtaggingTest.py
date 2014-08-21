@@ -83,9 +83,7 @@ def plot(datasets):
     hpt.frame.GetXaxis().SetTitle("Et jet")
     hpt.frame.GetYaxis().SetTitle("Events /%.0f GeV/c" % hpt.binWidth())
     hpt.draw()    
-    histograms.addCmsPreliminaryText() 
-    histograms.addEnergyText()
-    hpt.addLuminosityText()          
+    hpt.addStandardTexts()
     hpt.save()
 
 
@@ -99,9 +97,7 @@ def plot(datasets):
     hptb.frame.GetXaxis().SetTitle("Et jet btag")
     hptb.frame.GetYaxis().SetTitle("Events /%.0f GeV/c" % hptb.binWidth())
     hptb.draw()    
-    histograms.addCmsPreliminaryText() 
-    histograms.addEnergyText()
-    hptb.addLuminosityText()          
+    hptb.addStandardTexts()
     hptb.save()
 
 ##################################################
@@ -372,9 +368,7 @@ def plot(datasets):
     histo3.frame.GetXaxis().SetTitle("b discriminator")
     histo3.frame.GetYaxis().SetTitle("Events")
     histo3.draw()
-    histograms.addCmsPreliminaryText() 
-    histograms.addEnergyText()
-    histo3.addLuminosityText()          
+    histo3.addStandardTexts()
     histo3.save()
 
 
@@ -391,9 +385,7 @@ def plot(datasets):
     heta.frame.GetXaxis().SetTitle("#eta^{jet}")
     heta.frame.GetYaxis().SetTitle("Events")
     heta.draw()
-    histograms.addCmsPreliminaryText() 
-    histograms.addEnergyText()
-    heta.addLuminosityText()          
+    heta.addStandardTexts()
     heta.save()
 
 
@@ -409,9 +401,7 @@ def plot(datasets):
     hetab.frame.GetXaxis().SetTitle("#eta^{b tagged jet}")
     hetab.frame.GetYaxis().SetTitle("Events")
     hetab.draw()
-    histograms.addCmsPreliminaryText() 
-    histograms.addEnergyText()
-    hetab.addLuminosityText()          
+    hetab.addStandardTexts()
     hetab.save()
 
 

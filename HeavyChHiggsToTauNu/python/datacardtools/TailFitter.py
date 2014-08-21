@@ -394,9 +394,7 @@ class TailFitter:
         myName = "tailfit_total_uncertainty_%s_%s"%(self._label,prefix)
         #plot.createFrame("tailfit_%s_%s"%(self._label,name), opts={"ymin": 1e-5, "ymaxfactor": 2.})
         #plot.getPad().SetLogy(True)
-        #histograms.addCmsPreliminaryText()
-        #histograms.addEnergyText()
-        #histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        #histograms.addStandardTexts(lumi=self.lumi)
         myParams = {}
         myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
         myParams["log"] = True
@@ -444,9 +442,7 @@ class TailFitter:
         myName = "tailfit_detailed_%s_%s"%(self._label,prefix)
         #plot.createFrame("tailfit_%s_%s"%(self._label,name), opts={"ymin": 1e-5, "ymaxfactor": 2.})
         #plot.getPad().SetLogy(True)
-        #histograms.addCmsPreliminaryText()
-        #histograms.addEnergyText()
-        #histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        #histograms.addStandardTexts(lumi=self.lumi)
         myParams = {}
         myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
         myParams["log"] = True

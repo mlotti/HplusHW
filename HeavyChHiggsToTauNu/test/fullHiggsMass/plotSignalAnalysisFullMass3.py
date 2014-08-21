@@ -146,9 +146,7 @@ h.addEnergyText()
 h.draw()
 
 # # Add the necessary pieces of text
-histograms.addCmsPreliminaryText()
-# histograms.addEnergyText()
-# h.addLuminosityText()
+histograms.addStandardTexts()
 
 # Save to .png, .eps and .C file
 h.save()

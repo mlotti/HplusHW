@@ -1126,14 +1126,14 @@ class PlotBase:
 
     ## Set the default legend styles
     #
-    # Default is "F", except for data "P" and for signal MC "L"
+    # Default is "F", except for data "PLE" and for signal MC "L"
     # 
     # Intended to be called from the deriving classes
     def _setLegendStyles(self):
         self.histoMgr.setHistoLegendStyleAll("F")
         for h in self.histoMgr.getHistos():
             if h.isData():
-                h.setLegendStyle("P")
+                h.setLegendStyle("PLE")
             elif isSignal(h.getName()):
                 h.setLegendStyle("L")
 
@@ -1294,6 +1294,7 @@ class PlotBase:
     # to self.histoMgr. If setLuminosity() has been called with None,
     # no luminosity text is added.
     def addLuminosityText(self, x=None, y=None):
+        histograms._printTextDeprecationWarning("plots.PlotBase.addLuminosityText()", "plots.PlotBase.addStandardTexts()")
         if hasattr(self, "luminosity"):
             if self.luminosity != None:
                 histograms.addLuminosityText(x, y, self.luminosity)
@@ -1327,12 +1328,34 @@ class PlotBase:
     # specified in histograms is used. If setEnergy() has been called
     # with None, no energy text is added.
     def addEnergyText(self, x=None, y=None):
+        histograms._printTextDeprecationWarning("plots.PlotBase.addEnergyText()", "plots.PlotBase.addStandardTexts()")
         s = None
         if hasattr(self, "energies"):
             if self.energies != None:
                 s = ", ".join(self.energies)
                 s += " TeV"
         histograms.addEnergyText(x, y, s)
+
+    ## Add standard CMS texts
+    #
+    # \param addLuminosityText  If True, add luminosity text (use stored luminosity)
+    # \param kwargs             Keyword arguments, forwarded to histograms.addStandardTexts()
+    def addStandardTexts(self, addLuminosityText=False, **kwargs):
+        lumi = None
+        if hasattr(self, "luminosity"):
+            lumi = luminosity
+        elif self.histoMgr.hasLuminosity():
+            lumi = self.histoMgr.getLuminosity()
+        elif addLuminosityText:
+            raise Exception("addLuminosityText=True, but the Plot object does not have luminosity set, and plot.histoMgr has not been normalized by or to luminosity")
+
+        s = None
+        if hasattr(self, "energies"):
+            if self.energies is not None:
+                s = ", ".join(self.energies)
+                s += " TeV"
+
+        histograms.addStandardTexts(lumi=lumi, sqrts=s, **kwargs)
 
     ## Update drawing options
     #
@@ -2230,7 +2253,11 @@ class PlotDrawer:
     # \param addLuminosityText   Should luminosity text be drawn?
     # \param stackMCHistograms   Should MC histograms be stacked?
     # \param addMCUncertainty    Should MC total (stat) uncertainty be drawn()
-    # \param cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis
+    # \param cmsText             If not None, overrides "CMS" text by-plot basis
+    # \param cmsExtraText        If not none, overrides the "Preliminary" text by-plot basis
+    # \param addCmsText          If False, do not add "CMS" text
+    # \param cmsTextPosition     CMS text position (None for default value, see histograms.addStandardTexts() for more)
+    # \param cmsExtraTextPosition CMS extra text position (None for default value, see histograms.addStandardTexts() for more)
     def __init__(self,
                  xlabel=None,
                  ylabel="Occurrances / %.0f",
@@ -2264,6 +2291,10 @@ class PlotDrawer:
                  addMCUncertainty=False,
                  blindingRangeString=None,
                  cmsText=None,
+                 cmsExtraText=None,
+                 addCmsText=True,
+                 cmsTextPosition=None,
+                 cmsExtraTextPosition=None,
                  ):
         self.xlabelDefault = xlabel
         self.ylabelDefault = ylabel
@@ -2300,6 +2331,10 @@ class PlotDrawer:
         self.addMCUncertaintyDefault = addMCUncertainty
         self.blindingRangeStringDefault = None
         self.cmsTextDefault = cmsText
+        self.cmsExtraTextDefault = cmsExtraText
+        self.addCmsTextDefault = addCmsText
+        self.cmsTextPositionDefault = cmsTextPosition
+        self.cmsExtraTextPositionDefault = cmsExtraTextPosition
 
     ## Modify the defaults
     #
@@ -2672,9 +2707,13 @@ class PlotDrawer:
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
-    # \lu\a customizeBeforeDraw Function to customize the plot object before drawing the plot
-    # \lu\a customizeBeforeSave Function to customize the plot object before saving the plot
-    # \li\a cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis (default given in __init__()/setDefaults())
+    # \li\a customizeBeforeDraw Function to customize the plot object before drawing the plot
+    # \li\a customizeBeforeSave Function to customize the plot object before saving the plot
+    # \li\a cmsText             If not None, overrides "CMS" text by-plot basis
+    # \li\a cmsExtraText        If not none, overrides the "Preliminary" text by-plot basis
+    # \li\a addCmsText          If False, do not add "CMS" text
+    # \param cmsTextPosition     CMS text position (None for default value, see histograms.addStandardTexts() for more)
+    # \param cmsExtraTextPosition CMS extra text position (None for default value, see histograms.addStandardTexts() for more)
     #
     # In addition of drawing and saving the plot, handles the X and Y
     # axis titles, and "CMS Preliminary", "sqrt(s)" and luminosity
@@ -2719,11 +2758,12 @@ class PlotDrawer:
         if zlabel is not None and paletteAxis != None:
             paletteAxis.GetAxis().SetTitle(zlabel)
 
-        cmsText = self._getValue("cmsText", p, kwargs)
-        histograms.addCmsPreliminaryText(text=cmsText)
-        p.addEnergyText()
-        if self._getValue("addLuminosityText", p, kwargs):
-            p.addLuminosityText()
+        p.addStandardTexts(addLuminosityText = self._getValue("addLuminosityText", p, kwargs),
+                           addCmsText = self._getValue("addCmsText", p, kwargs),
+                           cmsTextPosition = self._getValue("cmsTextPosition", p, kwargs),
+                           cmsExtraTextPosition = self._getValue("cmsExtraTextPosition", p, kwargs),
+                           cmsText = self._getValue("cmsText", p, kwargs),
+                           cmsExtraText = self._getValue("cmsExtraText", p, kwargs))
 
 
         customize2 = self._getValue("customizeBeforeSave", p, kwargs)

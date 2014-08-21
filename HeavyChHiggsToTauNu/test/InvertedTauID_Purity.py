@@ -78,13 +78,12 @@ def main():
     plot.frame.GetXaxis().SetTitle("tau p_{T} (GeV/c)")
     plot.frame.GetYaxis().SetTitle("Purity")
     plot.setEnergy(datasets.getEnergies())
+    plot.setLuminosity(datasets.getDataset("Data").getLuminosity())
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
     plot.setLegend(histograms.createLegend(0.6, 0.3, 0.8, 0.4))
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=datasets.getDataset("Data").getLuminosity())
+    plot.addStandardTexts()
 
     plot.draw()
     plot.save()
