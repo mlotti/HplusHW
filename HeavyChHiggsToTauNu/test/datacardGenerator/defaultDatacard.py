@@ -8,7 +8,7 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
 #Path = "/home/wendland/data/xnortau"
 Path = "/home/wendland/data/xnominal"
-#Path = "/home/wendland/data/xmet80"
+#Path = "/home/wendland/data/test_matti_met60_paramweight"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
 #Path = "/home/wendland/data/v533/2014_03_12_metphicorrected"
@@ -22,33 +22,26 @@ LightMassPoints      = [120]
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
 #HeavyMassPoints      = [400]
-HeavyMassPoints      = []
+#HeavyMassPoints      = []
 
-OptionReweightEmbedding = None
 selectionReg = None
 if selectionReg == "A":
-    OptionReweightEmbedding = "embedding_mt_weight_met70_nocuts.json"  # 80-100
     LightMassPoints = [80,90,100]
     HeavyMassPoints = []
     Path = "/home/wendland/data/xmet70"
 elif selectionReg == "B":
-    OptionReweightEmbedding = "embedding_mt_weight_met70_tight.json" # 120-160
     LightMassPoints = [120,140,150,155,160]
     HeavyMassPoints = []
     Path = "/home/wendland/data/xmet70"
 elif selectionReg == "C":
-    OptionReweightEmbedding = "embedding_mt_weight_met80_loose.json" # 180-300
     LightMassPoints = []
     HeavyMassPoints = [180,190,200,220,250]
     Path = "/home/wendland/data/xmet80"
 elif selectionReg == "D":
-    OptionReweightEmbedding = "embedding_mt_weight_met60_loose.json" # 400-600
     LightMassPoints = []
     HeavyMassPoints = [300,400,500,600]
     Path = "/home/wendland/data/xnominal"
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
-#OptionReweightEmbedding = None
-#OptionReweightEmbedding = "embedding_mt_weight_from_function.json"
 
 BlindAnalysis   = True
 OptionBlindThreshold = None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
@@ -246,9 +239,7 @@ DataGroups.append(myQCDFact)
 DataGroups.append(myQCDInv)
 
 if OptionGenuineTauBackgroundSource == "DataDriven":
-    myEmbDataDrivenNuisances = ["Emb_QCDcontam","Emb_hybridCaloMET"]
-    if OptionReweightEmbedding != None: 
-        myEmbDataDrivenNuisances.append("Emb_reweighting")
+    myEmbDataDrivenNuisances = ["Emb_QCDcontam","Emb_hybridCaloMET","Emb_reweighting"]
     # EWK + ttbar with genuine taus
     EmbeddingIdList = [3]
     DataGroups.append(DataGroup(
@@ -841,6 +832,13 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
             function      = "Constant",
             value         = 0.007
         ))
+    Nuisances.append(Nuisance(
+        id            = "Emb_reweighting",
+        label         = "Embedding reweighting",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "EmbMTWeight",
+    ))
 
 if OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     Nuisances.append(Nuisance(
@@ -850,14 +848,6 @@ if OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
         function      = "Constant",
         value         = 0.03
     ))
-if OptionReweightEmbedding != None:
-    Nuisances.append(Nuisance(
-        id            = "Emb_reweighting",
-        label         = "Embedding reweighting",
-        distr         = "shapeQ",
-        function      = "ShapeVariationFromJson",
-        jsonFile      = OptionReweightEmbedding
-    ))    
 
 #Nuisances.append(Nuisance(
     #id            = "Emb_musel_ditau_mutrg",

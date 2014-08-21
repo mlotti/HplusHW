@@ -359,31 +359,31 @@ class DataCardGenerator:
         self._observation.doRebinningOfCachedResults(self._config)
 
         # Apply embedding reweighting - this here temporarily and should be moved to multicrab generation
-        if self._config.OptionReweightEmbedding != None:
-            for c in self._columns:
-                if c.typeIsEWK():
-                    print "*** Applying weighting for embedding ***"
-                    if not os.path.exists(self._config.OptionReweightEmbedding):
-                        raise Exception(ShellStyles.ErrorLabel()+"Cannot find file '%s'!"%self._config.OptionReweightEmbedding)
-                    f = open(self._config.OptionReweightEmbedding,"r")
-                    jsonObj = json.load(f)
-                    myJsonBins = list(jsonObj["dataParameters"]["Run2012ABCD"]["bins"])
-                    f.close()
-                    print "Yield before weighting:", c._rateResult._histograms[0].Integral()
-                    for l in range(0, len(c._rateResult._histograms)):
-                        applyWeighting(c._rateResult._histograms[l], myJsonBins)
-                    c._rateResult._result = c._rateResult._histograms[0].Integral()
-                    print "Yield after weighting", c._rateResult._histograms[0].Integral()
-                    for k in range(0, len(c._nuisanceResults)):
-                        for l in range (0, len(c._nuisanceResults[k]._histograms)):
-                            applyWeighting(c._nuisanceResults[k]._histograms[l], myJsonBins)
-                    # Update cache
-                    applyWeighting(c._cachedShapeRootHistogramWithUncertainties.getRootHisto(), myJsonBins)
-                    for k in c._cachedShapeRootHistogramWithUncertainties._shapeUncertainties.keys():
-                        (up, down) = c._cachedShapeRootHistogramWithUncertainties._shapeUncertainties[k]
-                        applyWeighting(up, myJsonBins)
-                        applyWeighting(down, myJsonBins)
-                    #c.getCachedShapeRootHistogramWithUncertainties().Debug()
+        #if self._config.OptionReweightEmbedding != None:
+            #for c in self._columns:
+                #if c.typeIsEWK():
+                    #print "*** Applying weighting for embedding ***"
+                    #if not os.path.exists(self._config.OptionReweightEmbedding):
+                        #raise Exception(ShellStyles.ErrorLabel()+"Cannot find file '%s'!"%self._config.OptionReweightEmbedding)
+                    #f = open(self._config.OptionReweightEmbedding,"r")
+                    #jsonObj = json.load(f)
+                    #myJsonBins = list(jsonObj["dataParameters"]["Run2012ABCD"]["bins"])
+                    #f.close()
+                    #print "Yield before weighting:", c._rateResult._histograms[0].Integral()
+                    #for l in range(0, len(c._rateResult._histograms)):
+                        #applyWeighting(c._rateResult._histograms[l], myJsonBins)
+                    #c._rateResult._result = c._rateResult._histograms[0].Integral()
+                    #print "Yield after weighting", c._rateResult._histograms[0].Integral()
+                    #for k in range(0, len(c._nuisanceResults)):
+                        #for l in range (0, len(c._nuisanceResults[k]._histograms)):
+                            #applyWeighting(c._nuisanceResults[k]._histograms[l], myJsonBins)
+                    ## Update cache
+                    #applyWeighting(c._cachedShapeRootHistogramWithUncertainties.getRootHisto(), myJsonBins)
+                    #for k in c._cachedShapeRootHistogramWithUncertainties._shapeUncertainties.keys():
+                        #(up, down) = c._cachedShapeRootHistogramWithUncertainties._shapeUncertainties[k]
+                        #applyWeighting(up, myJsonBins)
+                        #applyWeighting(down, myJsonBins)
+                    ##c.getCachedShapeRootHistogramWithUncertainties().Debug()
 
         # Make datacards
         myProducer = TableProducer.TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
