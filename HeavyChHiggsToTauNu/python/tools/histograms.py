@@ -333,7 +333,7 @@ def formatLuminosityInFb(lumi):
     lumiInFb = lumi/1000.
     log = math.log10(lumiInFb)
     ndigis = int(log)
-    format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
+    format = "%.1f" # ndigis >= 1, 10 <= lumiInFb
     if ndigis == 0: 
         if log >= 0: # 1 <= lumiInFb < 10
             format = "%.1f"
