@@ -8,7 +8,7 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
 #Path = "/home/wendland/data/xnortau"
 Path = "/home/wendland/data/xnominal"
-#Path = "/home/wendland/data/xmet70"
+#Path = "/home/wendland/data/xmet80"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
 #Path = "/home/wendland/data/v533/2014_03_12_metphicorrected"
@@ -23,10 +23,32 @@ HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-6
 #HeavyMassPoints      = [180,220,300,600]
 #HeavyMassPoints      = [400]
 HeavyMassPoints      = []
-MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
-#OptionReweightEmbedding = "met60_loose_embedding_ttjets_weighting.json"
 OptionReweightEmbedding = None
+selectionReg = None
+if selectionReg == "A":
+    OptionReweightEmbedding = "embedding_mt_weight_met70_nocuts.json"  # 80-100
+    LightMassPoints = [80,90,100]
+    HeavyMassPoints = []
+    Path = "/home/wendland/data/xmet70"
+elif selectionReg == "B":
+    OptionReweightEmbedding = "embedding_mt_weight_met70_tight.json" # 120-160
+    LightMassPoints = [120,140,150,155,160]
+    HeavyMassPoints = []
+    Path = "/home/wendland/data/xmet70"
+elif selectionReg == "C":
+    OptionReweightEmbedding = "embedding_mt_weight_met80_loose.json" # 180-300
+    LightMassPoints = []
+    HeavyMassPoints = [180,190,200,220,250]
+    Path = "/home/wendland/data/xmet80"
+elif selectionReg == "D":
+    OptionReweightEmbedding = "embedding_mt_weight_met60_loose.json" # 400-600
+    LightMassPoints = []
+    HeavyMassPoints = [300,400,500,600]
+    Path = "/home/wendland/data/xnominal"
+MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
+#OptionReweightEmbedding = None
+#OptionReweightEmbedding = "embedding_mt_weight_from_function.json"
 
 BlindAnalysis   = True
 OptionBlindThreshold = None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
@@ -53,7 +75,7 @@ OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produce
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = not True
+OptionDoControlPlots = True
 OptionDoMergeFakeTauColumns = True # Merges the fake tau columns into one
 OptionCombineSingleColumnUncertainties = True # Makes limit running faster
 OptionCtrlPlotsAtMt = True # Produce control plots after all selections (all selections for transverse mass)
@@ -225,7 +247,7 @@ DataGroups.append(myQCDInv)
 
 if OptionGenuineTauBackgroundSource == "DataDriven":
     myEmbDataDrivenNuisances = ["Emb_QCDcontam","Emb_hybridCaloMET"]
-    if OptionReweightEmbedding != None:
+    if OptionReweightEmbedding != None: 
         myEmbDataDrivenNuisances.append("Emb_reweighting")
     # EWK + ttbar with genuine taus
     EmbeddingIdList = [3]

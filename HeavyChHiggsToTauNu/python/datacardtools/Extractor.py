@@ -823,7 +823,7 @@ class ShapeVariationFromJsonExtractor(ExtractorBase):
         
         f = open(jsonFile,"r")
         jsonObj = json.load(f)
-        self._bins = list(jsonObj["dataParameters"]["bins"])
+        self._bins = list(jsonObj["dataParameters"]["Run2012ABCD"]["bins"])
         f.close()
         
         if self.isRate() or self.isObservation():

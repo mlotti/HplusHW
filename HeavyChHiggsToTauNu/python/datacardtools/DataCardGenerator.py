@@ -367,7 +367,7 @@ class DataCardGenerator:
                         raise Exception(ShellStyles.ErrorLabel()+"Cannot find file '%s'!"%self._config.OptionReweightEmbedding)
                     f = open(self._config.OptionReweightEmbedding,"r")
                     jsonObj = json.load(f)
-                    myJsonBins = list(jsonObj["dataParameters"]["bins"])
+                    myJsonBins = list(jsonObj["dataParameters"]["Run2012ABCD"]["bins"])
                     f.close()
                     print "Yield before weighting:", c._rateResult._histograms[0].Integral()
                     for l in range(0, len(c._rateResult._histograms)):
