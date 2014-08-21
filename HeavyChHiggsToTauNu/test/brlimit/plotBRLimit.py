@@ -75,9 +75,8 @@ def doBRlimit(limits,unblindedStatus):
 
     plot.draw()
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+    plot.setLuminosity(limits.getLuminosity())
+    plot.addStandardTexts()
 
     size = 20
     x = 0.2
@@ -146,9 +145,8 @@ def doLimitError(limits,unblindedStatus):
 
     plot.draw()
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+    plot.setLuminosity(limits.getLuminosity())
+    plot.addStandardTexts()
 
     size = 20
     x = 0.2

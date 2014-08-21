@@ -55,7 +55,7 @@ class RatioPlotContainer:
                 c.Print("%s/%s%s"%(_dirname,myPlotName,suffix))
             ROOT.gErrorIgnoreLevel = backup
 
-    def drawAllInOne(self, myAllShapeNuisances, cmsText, luminosity):
+    def drawAllInOne(self, myAllShapeNuisances, luminosity):
         myMaxSize = len(myAllShapeNuisances)
         # Create pads
         canvasHeight = _cHeaderHeight + _cBodyHeight * myMaxSize + _cFooterHeight
@@ -129,9 +129,7 @@ class RatioPlotContainer:
             histograms.addText(x=0.93, y=myHeight, text=self._dsetName, size=30, align="right")
             # Header labels
             if i == 0:
-                histograms.addEnergyText(y=0.84) # Does the 8 TeV get set properly for 2012?
-                histograms.addCmsPreliminaryText(y=0.84, text=cmsText)
-                histograms.addLuminosityText(x=None,y=0.84,lumi=luminosity)
+                histograms.addStandardTexts(lumi=luminosity)
             # Labels for non-existing nuisances
             if myPlotIndex == None:
                 myHeight = 0.44
@@ -192,9 +190,9 @@ class DatasetContainer:
         for mclab in myMCLabels:
             if mclab in self._name:
                 myMCStatus = True
-        myCMSText = "CMS Preliminary"
+        histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
         if myMCStatus:
-            myCMSText = "CMS Simulation"
+            histograms.cmsTextMode = histograms.CMSMode.SIMULATION_PRELIMINARY
         x = 0.6
         size = 20
         myRatioContainer = RatioPlotContainer(self._name)
@@ -223,7 +221,6 @@ class DatasetContainer:
             myParams["ratio"] = True
             myParams["ratioType"] = "errorScale"
             myParams["ratioYlabel"] = "Var./Nom."
-            myParams["cmsText"] = myCMSText
             myParams["addLuminosityText"] = True
             plots.drawPlot(plot, myPlotName, **myParams)
             myRatioContainer.addRatioPlot(plot, myShortName)
@@ -231,7 +228,7 @@ class DatasetContainer:
         if opts.individual:
             myRatioContainer.drawIndividually()
         else:
-            myRatioContainer.drawAllInOne(myAllShapeNuisances, myCMSText, luminosity)
+            myRatioContainer.drawAllInOne(myAllShapeNuisances, luminosity)
 
 def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,rootFilePattern):
     f = ROOT.TFile.Open(rootFilePattern%mass)

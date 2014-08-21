@@ -134,10 +134,8 @@ def main(argv):
     moveLegend={"dx": -0.15,"dy": 0.}
     plot.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    lumi=datasets.getDataset("Data").getLuminosity()
-    histograms.addLuminosityText(x=None, y=None, lumi=lumi)
+    plot.setLuminosity(datasets.getDataset("Data").getLuminosity())
+    plot.addStandardTexts()
 
     plot.draw()
     plot.save()

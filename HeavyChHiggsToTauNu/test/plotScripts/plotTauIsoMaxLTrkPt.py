@@ -144,9 +144,7 @@ legend.Draw()
 ROOT.gPad.SetLogy(True)
 
 ### The necessary texts, all take the position as arguments
-addCmsPreliminaryText()
-addEnergyText(x=0.3, y=0.85)
-TauIsoMaxlTrkPt.addLuminosityText() ### need to comment out if normalising to unity 
+TauIsoMaxlTrkPt.addStandardTexts()
 
 ############################### EXECUTION ###############################
 ### Script execution can be paused like this, it will continue after

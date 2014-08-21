@@ -1276,10 +1276,7 @@ def common(h, xlabel, ylabel, addLuminosityText=True, textFunction=None):
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    h.addEnergyText()
-    if addLuminosityText:
-        h.addLuminosityText()
+    h.addStandardTexts(addLuminosityText=addLuminosityText)
     if textFunction != None:
         textFunction()
     h.save()
@@ -1320,13 +1317,9 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
         h.frame.GetYaxis().SetTitle(ylabel)
         h.setLegend(histograms.createLegend())
         h.draw()
-        histograms.addCmsPreliminaryText()
-        h.addEnergyText()
-        #    histograms.addLuminosityText(x=None, y=None, lumi=191.)
+        h.addStandardTexts()
         if h.normalizeToOne:
             histograms.addText(0.35, 0.9, "Normalized to unit area", 17)
-        else:
-            h.histoMgr.addLuminosityText()
         h.save()
 
         h.createFrame(prefix+"vertices"+postfix+"_log", opts=opts_log, createRatio=ratio, opts2=opts2_log)
@@ -1336,13 +1329,9 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
         #h.getPad2().SetLogy(True)
         h.setLegend(histograms.createLegend())
         h.draw()
-        histograms.addCmsPreliminaryText()
-        h.addEnergyText()
-        #    histograms.addLuminosityText(x=None, y=None, lumi=191.)
+        h.addStandardTexts()
         if h.normalizeToOne:
             histograms.addText(0.35, 0.9, "Normalized to unit area", 17)
-        else:
-            h.histoMgr.addLuminosityText()
         h.save()
 
 def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
@@ -1459,8 +1448,7 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
     if "DeltaR_TauMETJet" in name:
         h.getPad().SetLogy(False)
         
-    h.histoMgr.addLuminosityText()
-    common(h, xlabel, ylabel, addLuminosityText=False)
+    common(h, xlabel, ylabel)
 
     
 
@@ -1498,9 +1486,7 @@ def selectionFlow(h, name, rebin=1, ratio=False):
     h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend())
     h.draw()
-    histograms.addCmsPreliminaryText()
-    h.addEnergyText()
-    h.addLuminosityText()
+    h.addStandardTexts()
     addMassBRText(x=0.4, y=0.87)
     h.save()
     
@@ -1540,9 +1526,7 @@ def selectionFlowTauCand(h, name, rebin=1, ratio=True):
     h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend())
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.addLuminosityText()
+    h.addStandardTexts()
     addMassBRText(x=0.4, y=0.87)
     h.save()    
 
@@ -1572,9 +1556,7 @@ def tauCandPt(h, step="", rebin=2):
     h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    h.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
     
 def tauCandEta(h, step="", rebin=5):
@@ -1605,9 +1587,7 @@ def tauCandEta(h, step="", rebin=5):
     h.setLegend(histograms.createLegend(0.5, 0.2, 0.7, 0.5))
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    h.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 def tauCandPhi(h, step="", rebin=5):
@@ -1636,9 +1616,7 @@ def tauCandPhi(h, step="", rebin=5):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    h.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
     
 
