@@ -482,18 +482,7 @@ def createBinnedFitUncertaintyHistograms(hRate, hUp, hDown, applyFrom, opts):
     # Return histogram lists
     return (hupList, hDownList)
 
-if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
-    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
-    parser.add_option("-x", "--settings", dest="settings", action="store", help="Name (incl. path) of the settings file to be used as an input")
-    parser.add_option("--noFitUncert", dest="noFitUncert", action="store_true", default=False, help="No fit uncertainty")
-    parser.add_option("--doubleFitUncert", dest="doubleFitUncert", action="store_true", default=False, help="Double the fit uncertainty")
-    parser.add_option("--noSystUncert", dest="noSystUncert", action="store_true", default=False, help="Remove all syst. uncertainties")
-    (opts, args) = parser.parse_args()
-
-    myStyle = tdrstyle.TDRStyle()
-    myStyle.setOptStat(False)
-    
+def main(opts):
     # Check that input arguments are sufficient
     if opts.settings == None:
         raise Exception(ErrorLabel()+"Please provide input parameter file with -x or --params !")
@@ -660,4 +649,32 @@ if __name__ == "__main__":
         myFile.write(myOutput)
         myFile.close()
         print "... Generated datacard files %s and %s"%(myFilename, myRootFilename)
+
+if __name__ == "__main__":
+    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
+    parser.add_option("-x", "--settings", dest="settings", action="store", help="Name (incl. path) of the settings file to be used as an input")
+    parser.add_option("-r", "--recursive", dest="recursive", action="store_true", default=False, help="Do tail fit recursively to all subdirectories")
+    parser.add_option("--noFitUncert", dest="noFitUncert", action="store_true", default=False, help="No fit uncertainty")
+    parser.add_option("--doubleFitUncert", dest="doubleFitUncert", action="store_true", default=False, help="Double the fit uncertainty")
+    parser.add_option("--noSystUncert", dest="noSystUncert", action="store_true", default=False, help="Remove all syst. uncertainties")
+    (opts, args) = parser.parse_args()
+
+    myStyle = tdrstyle.TDRStyle()
+    myStyle.setOptStat(False)
+
+    if opts.recursive:
+	opts.settings = "../"+opts.settings
+	myList = os.listdir(".")
+	myShortList = []
+	for l in myList:
+	    if l.startswith("datacards_combine_") and os.path.isdir(l):
+		myShortList.append(l)
+	for l in myShortList:
+	    print "\n*** TailFit for subdirectory %s ***"%l
+	    os.chdir(l)
+	    main(opts)
+	    os.chdir("..")
+    else:
+	main(opts)
 
