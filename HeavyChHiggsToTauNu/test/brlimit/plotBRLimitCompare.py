@@ -272,9 +272,8 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}, plotLabel=None, 
     ROOT.gPad.SetLogy(log)
     plot.draw()
 
-    histograms.addCmsPreliminaryText(0.62, 0.96, "CMS Preliminary")
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits[0].getLuminosity())
+    plot.setLuminosity(limits[0].getLuminosity())
+    plot.addStandardTexts()
 
     size = 20
     x = 0.18
@@ -322,9 +321,8 @@ def doPlot2(limits, legendLabels, name):
 
     plot.draw()
 
-    histograms.addCmsPreliminaryText(0.62, 0.96, "CMS Preliminary")
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits[0].getLuminosity())
+    plot.setLuminosity(limits[0].getLuminosity())
+    plot.addStandardTexts()
 
     size = 20
     x = 0.2

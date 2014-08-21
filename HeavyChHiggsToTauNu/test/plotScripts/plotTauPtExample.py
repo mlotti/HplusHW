@@ -163,9 +163,7 @@ legend.Draw()
 #ROOT.gPad.SetLogy(True)
 
 # The necessary texts, all take the position as arguments
-histograms.addCmsPreliminaryText()
-histograms.addEnergyText(x=0.3, y=0.85)
-#tauPts.addLuminosityText()
+tauPts.addStandardTexts()
 
 
 # Script execution can be paused like this, it will continue after

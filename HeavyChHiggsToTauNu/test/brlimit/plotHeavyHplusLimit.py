@@ -187,10 +187,7 @@ def doPlot(name, graphs, limits, xlabel, scenario,progversion):
 
     plot.draw()
 
-#    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-#    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
-    histograms.addLuminosityText(x=None, y=None, lumi="2.3-4.9")
+    histograms.addStandardTexts(lumi="2.3-4.9", addCmsText=False)
 
     size = 20
     x = 0.2

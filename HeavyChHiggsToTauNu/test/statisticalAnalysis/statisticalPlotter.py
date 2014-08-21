@@ -241,7 +241,7 @@ def main():
         multi.GetYaxis().SetRangeUser(0,210)
         multi.GetYaxis().SetTitle("tan(#beta)")
         multi.GetXaxis().SetTitle("M_{H^{#pm}} [GeV/c^{2}]")
-        addCmsPreliminaryText()
+        addStandardTexts()
         c1.SaveAs(".png")
 
 ## Plot comparison of reach and exclusion for the 2 selections
@@ -277,7 +277,7 @@ def main():
         graphTheoryArea.Draw("f")
         multi.Draw("lp")
         lege.Draw()
-        addCmsPreliminaryText()
+        addStandardTexts()
         writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
         writeText("m_{H}^{max} scenario",0.85)
         writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.8)
@@ -320,7 +320,7 @@ def main():
         graphTheoryArea.Draw("f")
         multi.Draw("lp")
         lege.Draw()
-        addCmsPreliminaryText()
+        addStandardTexts()
         writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
         writeText("m_{H}^{max} scenario",0.85)
         writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.8)

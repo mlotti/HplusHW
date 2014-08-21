@@ -236,8 +236,7 @@ def doCounters(datasets):
     for gr in glist:
         gr.Draw("PC same")
     
-    histograms.addEnergyText()
-    histograms.addCmsPreliminaryText()
+    histograms.addStandardTexts()
 
     
     

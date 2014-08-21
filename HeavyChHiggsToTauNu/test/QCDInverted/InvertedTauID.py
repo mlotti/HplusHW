@@ -281,9 +281,8 @@ class InvertedTauID:
             plot.setLegend(histograms.createLegend(0.55,0.75,0.95,0.90))
   
   
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
         if "JetsInvertedVsBaselineAfterMet" in name:
             histograms.addText(0.6, 0.72, "After MET cut", 25)
@@ -434,9 +433,8 @@ class InvertedTauID:
         if "DphiInvertedVsBaseline" in name:            
             plot.setLegend(histograms.createLegend(0.35,0.75,0.75,0.90))
   
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
         if "JetsInvertedVsBaselineAfterMet" in name:
             histograms.addText(0.6, 0.72, "After MET cut", 25)
@@ -844,10 +842,8 @@ class InvertedTauID:
         if "MtWithAllCutsTailKillerClosure" in name:              
             plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
 
-            
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
         
         if "MtNormalisedBvetoNoDphiCuts" in name:
             histograms.addText(0.3, 0.85, "Factorised b tagging/b veto", 25)
@@ -1013,9 +1009,8 @@ class InvertedTauID:
 
 	plot.setLegend(histograms.createLegend(0.4,0.82,0.9,0.93))
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
  
            
         plot.draw()
@@ -1125,9 +1120,8 @@ class InvertedTauID:
 
         plot.setLegend(histograms.createLegend(0.4,0.82,0.9,0.93))
         
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText() 
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1158,10 +1152,8 @@ class InvertedTauID:
 #        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymax": 1})
         plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1, "xmax": 80})
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
-
+        plot2.setLuminosity(self.lumi)
+        plot2.addStandardTexts()
 
 	rangeMin = hError.GetXaxis().GetXmin()
         rangeMax = hError.GetXaxis().GetXmax()
@@ -1214,10 +1206,9 @@ class InvertedTauID:
 #        if "MtBtaggingNoBtaggingInverted" in name:
         histograms.addText(0.6, 0.67, "Inverted #tau selection", 22)
         histograms.addText(0.6, 0.6, "TailKiller: Loose", 22)
-                                                  
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
         plot.getPad().SetLogy(True)
 
@@ -1308,9 +1299,8 @@ class InvertedTauID:
         plot.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        histograms.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1390,9 +1380,8 @@ class InvertedTauID:
 	plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
 	plot.createFrame("qcdfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
 	self.normInvQCD = histo.Integral(0,histo.GetNbinsX())
 
@@ -1560,9 +1549,8 @@ class InvertedTauID:
 
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1661,9 +1649,8 @@ class InvertedTauID:
         
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        histograms.addStandardTexts()
 
         plot.draw()
         plot.save()

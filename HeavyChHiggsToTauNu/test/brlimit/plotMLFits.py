@@ -57,7 +57,7 @@ def doBkgFitPlots(mlfit):
         plot.cf.frame.GetYaxis().SetLabelSize(0)
     
         plot.draw()
-        histograms.addCmsPreliminaryText(y=1-(1-histograms.textDefaults.getValues("cmsPreliminary", None, None)[1])*scale)
+        histograms.addStandardTexts()
     
         # Intentionally not NDC
         l = ROOT.TLatex()

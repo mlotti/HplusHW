@@ -185,10 +185,8 @@ def doPlotMu(name, graphs, styleList, limits, xlabel, xvarName, legendVariable):
 
     plot.draw()
 
-#    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-#    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
-    histograms.addLuminosityText(x=None, y=None, lumi="2.3-4.9")
+    plot.setLuminosity(limits.getLuminosity())
+    plot.addStandardTexts()
 
     size = 20
     x = 0.2
