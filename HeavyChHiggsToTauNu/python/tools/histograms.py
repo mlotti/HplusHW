@@ -2378,6 +2378,9 @@ class HistoManager:
 #        for h in self.datasetRootHistos:
 #            h.scale(value)
 
+    def hasLuminosity(self):
+        return self.luminosity is not None
+
     ## Get the integrated luminosity to which the MC datasets have been normalized to.
     def getLuminosity(self):
         if self.luminosity == None:

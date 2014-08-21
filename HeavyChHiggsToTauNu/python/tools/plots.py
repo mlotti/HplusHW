@@ -1339,13 +1339,14 @@ class PlotBase:
     #
     # \param addLuminosityText  If True, add luminosity text (use stored luminosity)
     # \param kwargs             Keyword arguments, forwarded to histograms.addStandardTexts()
-    def addStandardTexts(self, addLuminosityText=True, **kwargs):
+    def addStandardTexts(self, addLuminosityText=False, **kwargs):
         lumi = None
-        if addLuminosityText:
-            if hasattr(self, "luminosity"):
-                lumi = luminosity
-            else:
-                lumi = self.histoMgr.getLuminosity()
+        if hasattr(self, "luminosity"):
+            lumi = luminosity
+        elif self.histoMgr.hasLuminosity():
+            lumi = self.histoMgr.getLuminosity()
+        elif addLuminosityText:
+            raise Exception("addLuminosityText=True, but the Plot object does not have luminosity set, and plot.histoMgr has not been normalized by or to luminosity")
 
         s = None
         if hasattr(self, "energies"):
