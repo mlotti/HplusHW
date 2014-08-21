@@ -62,7 +62,8 @@ def main(argv):
     # Create all datasets from a multicrab task
     # datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
     #datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
+    #datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName="signalAnalysisInvertedTau")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
 
     #print datasets
@@ -100,7 +101,7 @@ def main(argv):
     plots.mergeWHandHH(datasets)
 
     datasets.merge("EWK", [
-	    #"TTJets",
+	    "TTJets",
             "WJets",
             "DYJetsToLL",
             "SingleTop",

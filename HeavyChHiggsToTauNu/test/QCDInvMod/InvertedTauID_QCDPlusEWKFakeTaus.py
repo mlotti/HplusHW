@@ -159,7 +159,7 @@ def getDataSets(dirs, dataEra, searchMode, analysis, optMode):
     plots.mergeRenameReorderForDataMC(datasets)
     
     datasets.merge("EWK", [
-        #"TTJets",
+        "TTJets",
         "WJets",
         "DYJetsToLL",
         "SingleTop",
@@ -233,6 +233,7 @@ def main(argv):
 
     #dirs_signal = ["../../SignalAnalysis_140605_143702/"]
     dirs_signal.append(sys.argv[2])
+    #dirs_signal = ["/mnt/flustre/epekkari/SignalFakeTauLimits_140808_095404"]
 
     QCDInvertedNormalization = sort(QCDInvertedNormalizationFactors.QCDInvertedNormalization)
     labels,QCDInvertedNormalizationFilteredEWKFakeTaus = getSortedLabelsAndFactors(QCDInvertedNormalizationFactorsFilteredEWKFakeTaus.QCDInvertedNormalization)
@@ -250,12 +251,11 @@ def main(argv):
     nomHistoName = "shapeTransverseMass"
     signalHistoName = "shapeEWKFakeTausTransverseMass"
 
-    #Optimal: 0.8, 0.82, 0.9
-
-    ###w_list = [0.65, 0.7, 0.76] #old baseline ft
-    #w_list = [0.66, 0.67, 0.75]#golden old
-    w_list = [0.95, 0.955, 0.96, 0.965, 0.97, 0.975, 0.98, 0.985, 0.99, 0.995, 1]    
-
+    #w_list = [0.66, 0.67, 0.75] # golden old
+    #w_list = [0.95, 0.955, 0.96, 0.965, 0.97, 0.975, 0.98, 0.985, 0.99, 0.995, 1]    
+    #w_list = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+    #w_list = [0.74, 0.741, 0.742, 0.743, 0.744, 0.745, 0.746, 0.747]
+    w_list = [0.743]
 
     #defaultBinning = systematics.getBinningForPlot("shapeTransverseMass")
     defaultBinning = [0,20,40,60,80,100,120,140,160,200,400]
@@ -293,7 +293,7 @@ def main(argv):
                 
             mt_nom.Add(mt_signalfaketaus)
 
-            mt_var_qg.SetName("QCD(Data)+EWK+t#bar{t}(Data, mis-ID. #tau), q-g bal.")
+            mt_var_qg.SetName("QCD(Data)+EWK+t#bar{t}(Data, mis-ID. #tau), corr.")
             mt_var.SetName("QCD(Data)+EWK+t#bar{t}(Data, mis-ID. #tau)")
             mt_nom.SetName("QCD(Data)+EWK+t#bar{t}(MC, mis-ID. #tau)")
 
@@ -315,8 +315,10 @@ def main(argv):
             plot = plots.ComparisonManyPlot(mt_nom,varPlots)
             plot.createFrame(optMode.replace("Opt","Mt_DataDrivenVsMC_"+"w="+str(w)+"_"), createRatio=True)
 
-            moveLegend={"dx": -0.35,"dy": 0.05}
+            moveLegend={"dx": -0.325,"dy": 0.02,"dw":-0.14,"dh":-0.12}
+            
             plot.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+            #plot.setLegend(histograms.createLegend(x1=0.5, y1=0.7, x2=0.7, y2=0.95, textSize=0.1))
             histograms.addText(0.65, 0.3, optMode.replace("OptQCDTailKiller","R_{BB} ").replace("Plus",""), 25)
             histograms.addCmsPreliminaryText()
             histograms.addEnergyText()
@@ -346,16 +348,16 @@ def main(argv):
             diff_list.append(diff)
         diff_opt.append(diff_list)
 
-    os.system("rm MtOptimal/*")
-    os.system("mkdir -p MtOptimal")
+    #os.system("rm MtOptimal/*")
+    #os.system("mkdir -p MtOptimal")
     print "\nWeights:\t",w_list,'\n'
     optimalWeights = {}
     for i in range(0,len(diff_opt)):
         print optModes[i]
         print "Differences:\t",diff_opt[i],"- Optimal: w =",w_list[diff_opt[i].index(min(diff_opt[i]))]
         optimalWeights[optModes[i]] = w_list[diff_opt[i].index(min(diff_opt[i]))]
-        command = "cp *" + str(w_list[diff_opt[i].index(min(diff_opt[i]))])+"*"+optModes[i].replace("Opt","") + ".eps MtOptimal"
-        os.system(command)
+        #command = "cp *" + str(w_list[diff_opt[i].index(min(diff_opt[i]))])+"*"+optModes[i].replace("Opt","") + ".eps MtOptimal"
+        #os.system(command)
     print optimalWeights
 
     optimalNormalization = getNormalization(bins_var,optimalWeights["OptQCDTailKillerLoosePlus"],QCDInvertedNormalizationFilteredEWKFakeTaus,True,True)

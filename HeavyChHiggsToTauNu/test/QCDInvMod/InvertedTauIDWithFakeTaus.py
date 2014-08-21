@@ -71,8 +71,8 @@ def Rayleigh(x,par,norm):
                                                                                         
 def EWKFunction(x,par,boundary,norm = 1,rejectPoints = 0):
     #if not rejectPoints == 0:
-        #if (x[0] > 250 and x[0] < 270):
-            #TF1.RejectPoint()
+    #    if (x[0] < 30):
+    #        TF1.RejectPoint()
             #return 0
 #        if (x[0] > 280 and x[0] < 300):
 #	if (x[0] > 400):
@@ -1450,14 +1450,14 @@ class InvertedTauID:
 
         numberOfParameters = 4
 
-        boundary = 160
+        boundary = 150
         boundaryInv = 150
 
         print "Fit range ",rangeMin, " - ",rangeMax
         if name == "baseline":
             class FitFunction:
                 def __call__( self, x, par ):
-                    return EWKFunction(x,par,boundary,1,1)
+                    return EWKFunction(x,par,boundary,1,0)
 #		return SumFunction(x,par)
 #	        return TestFunction(x,par,1)
             class PlotFunction:
@@ -1474,9 +1474,14 @@ class InvertedTauID:
         theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
 	thePlot = TF1('thePlot',PlotFunction(),rangeMin,rangeMax,numberOfParameters)
 
-        theFit.SetParLimits(0,0.5,30)
-        theFit.SetParLimits(1,90,200)
-        theFit.SetParLimits(2,30,100) 
+        #theFit.SetParLimits(0,0.5,30)
+        #theFit.SetParLimits(1,90,200)
+        #theFit.SetParLimits(2,30,100) 
+        #theFit.SetParLimits(3,0.001,1)
+
+        theFit.SetParLimits(0,0.5,30)                                               
+        theFit.SetParLimits(1,90,200)                                               
+        theFit.SetParLimits(2,30,100)                                               
         theFit.SetParLimits(3,0.001,1)
 
         if self.label == "4050":
@@ -1515,17 +1520,23 @@ class InvertedTauID:
             theFit.SetParLimits(2,20,60) 
             theFit.SetParLimits(3,0.001,1)
 
-        if self.label == "120150":
-            theFit.SetParLimits(0,5,50)
-            theFit.SetParLimits(1,60,170)
-            theFit.SetParLimits(2,10,100)
-            theFit.SetParLimits(3,0.001,1)
+        if self.label == "120":
+             theFit.SetParLimits(0,5,50)
+             theFit.SetParLimits(1,70,170)
+             theFit.SetParLimits(2,20,60)
+             theFit.SetParLimits(3,0.001,1)
 
-        if self.label == "150":
-            theFit.SetParLimits(0,5,50)
-            theFit.SetParLimits(1,70,170)
-            theFit.SetParLimits(2,20,100)
-            theFit.SetParLimits(3,0.001,1)
+        #if self.label == "120150":
+        #    theFit.SetParLimits(0,5,50)
+        #    theFit.SetParLimits(1,60,170)
+        #    theFit.SetParLimits(2,10,100)
+        #    theFit.SetParLimits(3,0.001,1)
+
+        #if self.label == "150":
+        #    theFit.SetParLimits(0,5,50)
+        #    theFit.SetParLimits(1,70,170)
+        #    theFit.SetParLimits(2,20,100)
+        #    theFit.SetParLimits(3,0.001,1)
 
         if name == "Inverted":
             theFit.SetParLimits(0,0.01,30)

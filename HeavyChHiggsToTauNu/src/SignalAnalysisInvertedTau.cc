@@ -860,8 +860,8 @@ namespace HPlus {
     FullHiggsMassCalculator::Data fullHiggsMassDataTmp = fFullHiggsMassCalculator.silentAnalyze(iEvent, iSetup, selectedTau, btagDataTmp, metDataTmp, &genData);
 
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterCollinearCuts, selectedTau->pt());
-    
     myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCuts, metDataTmp.getSelectedMET()->et());
+    
     if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) {
 	myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus, metDataTmp.getSelectedMET()->et());
     } else {

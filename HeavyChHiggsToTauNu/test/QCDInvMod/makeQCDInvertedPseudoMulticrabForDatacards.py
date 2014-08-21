@@ -30,8 +30,8 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     dsetMgr.updateNAllEventsToPUWeighted()
     dsetMgr.loadLuminosities()
     plots.mergeRenameReorderForDataMC(dsetMgr)
-    #dsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
-    dsetMgr.merge("EWK", ["WJets","DYJetsToLL","SingleTop","Diboson"])
+    dsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
+    #dsetMgr.merge("EWK", ["WJets","DYJetsToLL","SingleTop","Diboson"])
     # Obtain luminosity
     myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
     # Print info so that user can check that merge went correct
