@@ -203,7 +203,7 @@ if __name__ == "__main__":
         sys.exit()
     myTestColumnDict = getColumns(opts.testDir)
     if opts.testColumn not in myTestColumnDict.keys():
-        print "Error: testerence column '%s' not found!"%opts.testColumn
+        print "Error: test column '%s' not found!"%opts.testColumn
         printColumnDict(getColumns(opts.testDir))
         sys.exit()
 
