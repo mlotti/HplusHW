@@ -310,8 +310,8 @@ class LHCTypeAsymptotic:
         opts += " --rMax %s"%self.rMax.getValue(mass)
         opts += " -m %s"%mass
         opts += " -n obs_m%s"%mass
-        if self.brlimit:
-            opts += " --rAbsAcc 0.00001" # increase accuracy of calculation for br limit
+#        if self.brlimit:
+#            opts += " --rAbsAcc 0.00001" # increase accuracy of calculation for br limit
         command = ["#!/bin/sh", ""]
         # Combine cards and prepare workspace for physics model, if necessary
         myInputDatacardName = _addCombinePreparationCommands(self.brlimit, datacardFiles, mass, command)
@@ -336,8 +336,8 @@ class LHCTypeAsymptotic:
         opts += " --rMax %s"%self.rMax.getValue(mass)
         opts += " -m %s"%mass
         opts += " -n blinded_m%s"%mass
-        if self.brlimit:
-            opts += " --rAbsAcc 0.00001" # increase accuracy of calculation for br limit
+#        if self.brlimit:
+#            opts += " --rAbsAcc 0.00001" # increase accuracy of calculation for br limit
         command = ["#!/bin/sh", ""]
         # Combine cards and prepare workspace for physics model, if necessary
         myInputDatacardName = _addCombinePreparationCommands(self.brlimit, datacardFiles, mass, command)
