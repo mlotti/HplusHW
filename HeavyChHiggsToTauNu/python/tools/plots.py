@@ -1333,6 +1333,26 @@ class PlotBase:
                 s += " TeV"
         histograms.addEnergyText(x, y, s)
 
+    ## Add standard CMS texts
+    #
+    # \param addLuminosityText  If True, add luminosity text (use stored luminosity)
+    # \param kwargs             Keyword arguments, forwarded to histograms.addStandardTexts()
+    def addStandardTexts(self, addLuminosityText=True, **kwargs):
+        lumi = None
+        if addLuminosityText:
+            if hasattr(self, "luminosity"):
+                lumi = luminosity
+            else:
+                lumi = self.histoMgr.getLuminosity()
+
+        s = None
+        if hasattr(self, "energies"):
+            if self.energies is not None:
+                s = ", ".join(self.energies)
+                s += " TeV"
+
+        histograms.addStandardTexts(lumi=lumi, sqrts=s, **kwargs)
+
     ## Update drawing options
     #
     # \param kwargs   Keyword arguments (see plots.PlotDrawer())
@@ -2232,7 +2252,11 @@ class PlotDrawer:
     # \param addLuminosityText   Should luminosity text be drawn?
     # \param stackMCHistograms   Should MC histograms be stacked?
     # \param addMCUncertainty    Should MC total (stat) uncertainty be drawn()
-    # \param cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis
+    # \param cmsText             If not None, overrides "CMS" text by-plot basis
+    # \param cmsExtraText        If not none, overrides the "Preliminary" text by-plot basis
+    # \param addCmsText          If False, do not add "CMS" text
+    # \param cmsTextLeft         True for "CMS" text being on left, False for right
+    # \param cmsTextInFrame      True for "CMS" text being in frame, False for outside (use only if in frame does not work)
     def __init__(self,
                  xlabel=None,
                  ylabel="Occurrances / %.0f",
@@ -2266,6 +2290,10 @@ class PlotDrawer:
                  addMCUncertainty=False,
                  blindingRangeString=None,
                  cmsText=None,
+                 cmsExtraText=None,
+                 addCmsText=True,
+                 cmsTextLeft=True,
+                 cmsTextInFrame=True,
                  ):
         self.xlabelDefault = xlabel
         self.ylabelDefault = ylabel
@@ -2302,6 +2330,10 @@ class PlotDrawer:
         self.addMCUncertaintyDefault = addMCUncertainty
         self.blindingRangeStringDefault = None
         self.cmsTextDefault = cmsText
+        self.cmsExtraTextDefault = cmsExtraText
+        self.addCmsTextDefault = addCmsText
+        self.cmsTextLeftDefault = cmsTextLeft
+        self.cmsTextInFrameDefault = cmsTextInFrame
 
     ## Modify the defaults
     #
@@ -2674,9 +2706,13 @@ class PlotDrawer:
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
-    # \lu\a customizeBeforeDraw Function to customize the plot object before drawing the plot
-    # \lu\a customizeBeforeSave Function to customize the plot object before saving the plot
-    # \li\a cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis (default given in __init__()/setDefaults())
+    # \li\a customizeBeforeDraw Function to customize the plot object before drawing the plot
+    # \li\a customizeBeforeSave Function to customize the plot object before saving the plot
+    # \li\a cmsText             If not None, overrides "CMS" text by-plot basis
+    # \li\a cmsExtraText        If not none, overrides the "Preliminary" text by-plot basis
+    # \li\a addCmsText          If False, do not add "CMS" text
+    # \li\a cmsTextLeft         True for "CMS" text being on left, False for right
+    # \li\a cmsTextInFrame      True for "CMS" text being in frame, False for outside (use only if in frame does not work)
     #
     # In addition of drawing and saving the plot, handles the X and Y
     # axis titles, and "CMS Preliminary", "sqrt(s)" and luminosity
@@ -2721,11 +2757,12 @@ class PlotDrawer:
         if zlabel is not None and paletteAxis != None:
             paletteAxis.GetAxis().SetTitle(zlabel)
 
-        cmsText = self._getValue("cmsText", p, kwargs)
-        histograms.addCmsPreliminaryText(text=cmsText)
-        p.addEnergyText()
-        if self._getValue("addLuminosityText", p, kwargs):
-            p.addLuminosityText()
+        p.addStandardTexts(addLuminosityText = self._getValue("addLuminosityText", p, kwargs),
+                           addCmsText = self._getValue("addCmsText", p, kwargs),
+                           cmsTextLeft = self._getValue("cmsTextLeft", p, kwargs),
+                           cmsTextInFrame = self._getValue("cmsTextInFrame", p, kwargs),
+                           cmsText = self._getValue("cmsText", p, kwargs),
+                           cmsExtraText = self._getValue("cmsExtraText", p, kwargs))
 
 
         customize2 = self._getValue("customizeBeforeSave", p, kwargs)
