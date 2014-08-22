@@ -5,6 +5,10 @@
 namespace reco {
   class Candidate;
   class MET;
+  
+}
+
+namespace pat {
   class Jet;
 }
 
