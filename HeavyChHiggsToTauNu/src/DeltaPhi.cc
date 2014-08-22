@@ -30,7 +30,7 @@ namespace HPlus {
           //    double myEtMiss = TMath::Sqrt(met.px()*met.px() + met.py()*met.py());
     double myJetPt = jet.pt();
     double myCosPhi = 100;
-    if (myEtMiss > 0 && myTau.Pt() > 0)
+    if (myJetPt > 0 && myTau.Pt() > 0)
       myCosPhi = (myTau.X()*jet.px() + myTau.Y()*jet.py()) / (myTau.Pt()*myJetPt);
     double myDeltaPhi = -999;
     if ( myCosPhi < 1) myDeltaPhi =   acos(myCosPhi);
