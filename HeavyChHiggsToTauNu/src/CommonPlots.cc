@@ -867,7 +867,7 @@ namespace HPlus {
       double myRadius = fQCDTailKillerData.getRadiusFromBackToBackCorner(i);
       if (myRadius < myMinimumRadius && fQCDTailKillerData.backToBackCutActiveForJet(i)) {
         myMinimumRadius = myRadius;
-        myMinimumIndex = -1;
+        myMinimumIndex = i;
       }
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackMinimumAfterMtSelections, myMinimumRadius);
