@@ -393,7 +393,7 @@ oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
 deltaPhiTauMET = cms.untracked.double(180.0) # less than this value in degrees, for heavy charged Higgs
 
 def QCDTailKillerBin(cutShape, cutX, cutY):
-    validShapes = ["noCut", "rectangular", "triangular", "circular"]
+    validShapes = ["noCut", "rectangular", "triangular", "circular", "minDeltaPhiJetMET"]
     if cutShape not in validShapes:
         raise Exception("QCDTailKiller config for cut shape '%s' is not valid! (options: %s)"%(cutShape,", ".join(map(str, validShapes))))
     return cms.untracked.PSet(
