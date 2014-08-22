@@ -564,7 +564,7 @@ def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
         function = _createRatioErrorPropagation
     return function(rootHisto1, rootHisto2, ytitle)
 
-def _createRatioHistos(histo1, histo2, ytitle, ratioType=None):
+def _createRatioHistos(histo1, histo2, ytitle, ratioType=None, ratioErrorOptions={}):
     if ratioType is None:
         ratioType = "errorPropagation"
 
@@ -577,7 +577,7 @@ def _createRatioHistos(histo1, histo2, ytitle, ratioType=None):
         h.setLegendLabel(None)
         ret.append(h)
     elif ratioType == "errorScale":
-        ret.extend(_createRatioHistosErrorScale(histo1, histo2, ytitle))
+        ret.extend(_createRatioHistosErrorScale(histo1, histo2, ytitle, **ratioErrorOptions))
     else:
         raise Exception("Invalid value for argument ratioType '%s', valid are 'errorPropagation', 'binomial', 'errorScale'")
     return ret        
@@ -758,14 +758,16 @@ def _createRatioBinomial(histo1, histo2, ytitle):
 #
 # \param histo1  TH1 dividend
 # \param histo2  TH1 divisor
-# \param ytitl   Y axis title
+# \param ytitle  Y axis title
+# \param numeratorStatSyst   Include stat.+syst. to numerator (if syst globally enabled)
+# \param denominatorStatSyst Include stat.+syst. to denominator (if syst globally enabled)
 #
 # \return list of histograms.Histo objects for histo1/histo2
 #
 # Scales the histo1 values+uncertainties, and histo2 uncertainties by
 # histo2 values. Creates separate entries for histo2 statistical and
 # stat+syst uncertainties, if systematic uncertainties exist.
-def _createRatioHistosErrorScale(histo1, histo2, ytitle):
+def _createRatioHistosErrorScale(histo1, histo2, ytitle, numeratorStatSyst=True, denominatorStatSyst=True):
     addAlsoHatchedUncertaintyHisto = False
     #addAlsoHatchedUncertaintyHisto = True
 
@@ -921,8 +923,10 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
             name = "BackgroundSystError"
         _plotStyles[name].apply(ratioSyst2)
 
-        ret.append(_createHisto(ratioSyst1, drawStyle="[]", legendLabel=None))
-        ret.append(_createHisto(ratioSyst2, drawStyle="2", legendLabel=_legendLabels[name], legendStyle="F"))
+        if numeratorStatSyst:
+            ret.append(_createHisto(ratioSyst1, drawStyle="[]", legendLabel=None))
+        if denominatorStatSyst:
+            ret.append(_createHisto(ratioSyst2, drawStyle="2", legendLabel=_legendLabels[name], legendStyle="F"))
         if addAlsoHatchedUncertaintyHisto:
             ratioSyst2_2 = ratioSyst.Clone("BackgroundStatSystError2")
             styles.errorStyle.apply(ratioSyst2_2)
@@ -1508,10 +1512,11 @@ class PlotRatioBase:
     # \param invertRatio      Invert the roles of numerator and denominator
     # \param ratioIsBinomial  True for binomial ratio (e.g. efficiency) (\b deprecated)
     # \param ratioType        Type of the ratio, forwarded to _createRatioHistos() (None for default)
+    # \param ratioErrorOptions Additional options for ratio error treatment
     # \param kwargs           Keyword arguments (forwarded to _createFrame())
     #
     # Intended for internal use only
-    def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, ratioIsBinomial=False, ratioType=None, **kwargs):
+    def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, ratioIsBinomial=False, ratioType=None, ratioErrorOptions={}, **kwargs):
         (num, denom) = (numerator, denominator)
         if invertRatio:
             (num, denom) = (denom, num)
@@ -1522,7 +1527,7 @@ class PlotRatioBase:
             print "WARNING: ratioIsBinomial is deprepcated, please yse ratioType='binomial' instead"
             ratioType = "binomial"
 
-        ratioHistos = _createRatioHistos(num, denom, ytitle, ratioType=ratioType)
+        ratioHistos = _createRatioHistos(num, denom, ytitle, ratioType=ratioType, ratioErrorOptions=ratioErrorOptions)
         self.setRatios(ratioHistos)
         reorder = []
         for n in ["BackgroundStatSystError", "BackgroundStatError"]:
@@ -1545,6 +1550,7 @@ class PlotRatioBase:
     # \param invertRatio      Invert the roles of numerator and denominator
     # \param ratioIsBinomial  True for binomial ratio (e.g. efficiency) (\b deprecated)
     # \param ratioType        Type of the ratio, forwarded to _createRatioHistos() (None for default)
+    # \param ratioErrorOptions Additional options for ratio error treatment
     # \param kwargs           Keyword arguments (forwarded to _createFrame())
     #
     # Creates one ratio histogram for each numerator, as
@@ -1552,7 +1558,7 @@ class PlotRatioBase:
     # formed as denominator/numerator.
     #
     # Intended for internal use only
-    def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, ratioIsBinomial=False, ratioType=None, **kwargs):
+    def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, ratioIsBinomial=False, ratioType=None, ratioErrorOptions={}, **kwargs):
         
         if ratioIsBinomial:
             if ratioType is not None:
@@ -1567,7 +1573,7 @@ class PlotRatioBase:
             (num, denom) = (numer, denominator)
             if invertRatio:
                 (num, denom) = (denom, num)
-            ratioHistos = _createRatioHistos(num, denom, "Ratio", ratioType=ratioType)
+            ratioHistos = _createRatioHistos(num, denom, "Ratio", ratioType=ratioType, ratioErrorOptions=ratioErrorOptions)
             tmp = []
             for h in ratioHistos:
                 if h.getName() == "BackgroundStatSystError":
@@ -2232,6 +2238,7 @@ class PlotDrawer:
     # \param ratioInvert         Should the ratio be inverted?
     # \param ratioIsBinomial     Is the ratio binomal (i.e. use Clopper-Pearson?) (deprecated)
     # \param ratioType           Ratio type (None for default)
+    # \param ratioErrorOptions   Additional options for ratio error treatment
     # \param ratioCreateLegend   Default legend creation parameters for ratio (None to not to create legend, True to create with default parameters)
     # \param ratioMoveLegend     Default ratio legend movement parameters (after creation)
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
@@ -2268,6 +2275,7 @@ class PlotDrawer:
                  ratioInvert=False,
                  ratioIsBinomial=False,
                  ratioType=None,
+                 ratioErrorOptions={},
                  ratioCreateLegend=None,
                  ratioMoveLegend={},
                  opts={},
@@ -2305,6 +2313,7 @@ class PlotDrawer:
         self.ratioInvertDefault = ratioInvert
         self.ratioIsBinomialDefault = ratioIsBinomial
         self.ratioTypeDefault = ratioType
+        self.ratioErrorOptionsDefault = ratioErrorOptions
         self.ratioCreateLegendDefault = ratioCreateLegend
         self.ratioMoveLegendDefault = ratioMoveLegend
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
@@ -2578,6 +2587,7 @@ class PlotDrawer:
     # \li\a ratioInvert  Should the ratio be inverted?
     # \li\a ratioIsBinomial  Is the ratio a binomial?
     # \li\a ratioType    Type of the ratio calculation
+    # \li\a ratioErrorOptions   Additional options for ratio error treatment
     # \li\a customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \li\a backgroundColor  Plot background color (None for white)
     def createFrame(self, p, name, **kwargs):
@@ -2602,6 +2612,7 @@ class PlotDrawer:
         if ratio:
             args["createRatio"] = True
             args["ratioType"] = self._getValue("ratioType", p, kwargs)
+            args["ratioErrorOptions"] = self._getValue("ratioErrorOptions", p, kwargs)
             if self._getValue("ratioInvert", p, kwargs):
                 args["invertRatio"] = True
             if self._getValue("ratioIsBinomial", p, kwargs):
