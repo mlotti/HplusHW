@@ -2,6 +2,7 @@
 
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 
 #include "TLorentzVector.h"
 
@@ -21,7 +22,7 @@ namespace HPlus {
     return myDeltaPhi; 
   }
   
-  double DeltaPhi::reconstruct(const reco::Candidate& tau, const reco::Candidate& jet) {
+  double DeltaPhi::reconstruct(const reco::Candidate& tau, const pat::Jet& jet) {
     // Construct tau vector, mtau = 1.777 GeV/c2
     TLorentzVector myTau;
     myTau.SetXYZM(tau.px(), tau.py(), tau.pz(), 1.777); 

@@ -32,8 +32,8 @@ namespace HPlus {
     fMetTrgSF(0),
     fPtBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("ptBins")),
     fEtaBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("etaBins")),
-    fDeltaPhiBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("deltaPhiBins")),
     fPhiBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("phiBins")),
+    fDeltaPhiBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("deltaPhiBins")),
     fRtauBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("rtauBins")),
     fNjetsBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("njetsBins")),
     fMetBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("metBins")),
@@ -745,11 +745,11 @@ namespace HPlus {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackMinimum, myMinimumRadius);
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
     double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiMinusTauPhi, myDeltaPhiTauMET);
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlDeltaPhiTauMET, myDeltaPhiTauMET);
     double myMinDeltaPhiJetTau = 999.;
     double myMaxDeltaPhiJetTau = -1.;
     for (edm::PtrVector<pat::Jet>::const_iterator iJet = fJetData.getSelectedJets().begin(); iJet != fJetData.getSelectedJets().end(); ++iJet) {
-      double myDeltaPhi = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), **iJet) * 57.3
+      double myDeltaPhi = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), **iJet) * 57.3;
       if (myDeltaPhi < myMinDeltaPhiJetTau) myMinDeltaPhiJetTau = myDeltaPhi;
       if (myDeltaPhi > myMaxDeltaPhiJetTau) myMaxDeltaPhiJetTau = myDeltaPhi;
     }
@@ -758,7 +758,7 @@ namespace HPlus {
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackMinimum, myMinimumRadius);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausETPhiMinusTauPhi, myDeltaPhiTauMET);
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausDeltaPhiTauMET, myDeltaPhiTauMET);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMinDeltaPhiTauJet, myMinDeltaPhiJetTau);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMaxDeltaPhiTauJet, myMaxDeltaPhiJetTau);
     }
@@ -825,11 +825,11 @@ namespace HPlus {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETAfterMtSelections, fMETData.getSelectedMET()->et());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
     double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiMinusTauPhiAfterMtSelections, myDeltaPhiTauMET);
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlDeltaPhiTauMETAfterMtSelections, myDeltaPhiTauMET);
     double myMinDeltaPhiJetTau = 999.;
     double myMaxDeltaPhiJetTau = -1.;
     for (edm::PtrVector<pat::Jet>::const_iterator iJet = fJetData.getSelectedJets().begin(); iJet != fJetData.getSelectedJets().end(); ++iJet) {
-      double myDeltaPhi = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), **iJet) * 57.3
+      double myDeltaPhi = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), **iJet) * 57.3;
       if (myDeltaPhi < myMinDeltaPhiJetTau) myMinDeltaPhiJetTau = myDeltaPhi;
       if (myDeltaPhi > myMaxDeltaPhiJetTau) myMaxDeltaPhiJetTau = myDeltaPhi;
     }
@@ -839,9 +839,8 @@ namespace HPlus {
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETAfterMtSelections, fMETData.getSelectedMET()->et());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiMinusTauPhiAfterMtSelections, myPhiDiff);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections, (fTauData.getSelectedTau()->p4()+fMETData.getSelectedMET()->p4()).pt());
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiMinusTauPhiAfterMtSelections, myDeltaPhiTauMET);
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausDeltaPhiTauMETAfterMtSelections, myDeltaPhiTauMET);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMinDeltaPhiTauJetAfterMtSelections, myMinDeltaPhiJetTau);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMaxDeltaPhiTauJetAfterMtSelections, myMaxDeltaPhiJetTau);
     }
