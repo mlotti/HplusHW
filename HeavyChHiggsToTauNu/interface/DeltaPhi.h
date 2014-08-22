@@ -5,13 +5,15 @@
 namespace reco {
   class Candidate;
   class MET;
+  class Jet;
 }
 
 namespace HPlus {
   class DeltaPhi {
   public:
     static double reconstruct(const reco::Candidate& tau, const reco::MET& met);
-      };
+    static double reconstruct(const reco::Candidate& tau, const pat::Jet& jet);
+  };
 }
 
 #endif
