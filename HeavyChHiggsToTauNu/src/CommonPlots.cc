@@ -589,10 +589,12 @@ namespace HPlus {
         myPassStatus = false;
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearMinimum, myMinimumRadius);
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+    if (myMinimumIndex >= 0)
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearMinimum, myMinimumRadius);
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+      if (myMinimumIndex >= 0)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
     }
     if (myPassStatus) {
       // MET oscillation analysis
@@ -743,7 +745,8 @@ namespace HPlus {
         myPassStatus = false;
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackMinimum, myMinimumRadius);
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+    if (myMinimumIndex >= 0)
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
     double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlDeltaPhiTauMET, myDeltaPhiTauMET);
     double myMinDeltaPhiJetTau = 999.;
@@ -757,7 +760,8 @@ namespace HPlus {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMaxDeltaPhiTauJet, myMaxDeltaPhiJetTau);
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackMinimum, myMinimumRadius);
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+      if (myMinimumIndex >= 0)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausDeltaPhiTauMET, myDeltaPhiTauMET);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMinDeltaPhiTauJet, myMinDeltaPhiJetTau);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMaxDeltaPhiTauJet, myMaxDeltaPhiJetTau);
@@ -871,7 +875,8 @@ namespace HPlus {
       }
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackMinimumAfterMtSelections, myMinimumRadius);
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+    if (myMinimumIndex >= 0)
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
@@ -879,7 +884,8 @@ namespace HPlus {
     
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackMinimumAfterMtSelections, myMinimumRadius);
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+      if (myMinimumIndex >= 0)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
