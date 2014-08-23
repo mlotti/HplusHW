@@ -21,6 +21,11 @@ _legendLabelQCD = "QCD (data)"
 _legendLabelEmbedding = "EWK+tt with #tau_{h} (data)"
 _legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (MC)"
 
+drawPlot = plots.PlotDrawer(opts2={"ymin": 0.5, "ymax": 1.5},
+                            ratio=True, ratioYlabel="Data/#Sigma Exp.", ratioCreateLegend=True,
+                            ratioType="errorScale", ratioErrorOptions={"numeratorStatSyst": False},
+                            stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True)
+
 ##
 class ControlPlotMaker:
     ## Constructor
@@ -187,12 +192,6 @@ class ControlPlotMaker:
                             myParams["blindingRangeString"] = "%s%s"%(myBlindingString, myParams["unit"])
                         else:
                             myParams["blindingRangeString"] = "%s %s"%(myBlindingString, myParams["unit"])
-                    myParams["ratio"] = True
-                    myParams["ratioType"] = "errorScale"
-                    myParams["ratioYlabel"] = "Data/#Sigma Exp."
-                    myParams["stackMCHistograms"] = True
-                    myParams["addMCUncertainty"] = True
-                    myParams["addLuminosityText"] = True
                     if "legendPosition" in myParams.keys():
                         if myParams["legendPosition"] == "NW":
                             myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
@@ -207,7 +206,6 @@ class ControlPlotMaker:
                         del myParams["legendPosition"]
                     else:
                         myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
-                    myParams["ratioCreateLegend"] = True
                     if "ratioLegendPosition" in myParams.keys():
                         if myParams["ratioLegendPosition"] == "left":
                             myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
@@ -221,8 +219,7 @@ class ControlPlotMaker:
                     # Remove non-dientified keywords
                     del myParams["unit"]
                     # Do plotting
-                    plots.drawPlot(myStackPlot, "DataDrivenCtrlPlot_M%d_%02d_%s"%(m,i,myCtrlPlot.title), **myParams)
-                    os.system("mv DataDrivenCtrlPlot_M%d_%02d_%s.* %s/."%(m,i,myCtrlPlot.title,self._dirname))
+                    drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
 
             # Do selection flow plot
             selectionFlow.makePlot(self._dirname,m,len(self._config.ControlPlots),self._luminosity)
@@ -426,16 +423,8 @@ class SelectionFlowPlotMaker:
         myParams["log"] = True
         myParams["opts"] = {"ymin": 0.9}
         myParams["opts2"] = {"ymin": 0.5, "ymax":1.5}
-        myParams["ratio"] = True
-        myParams["ratioType"] = "errorScale"
-        myParams["ratioYlabel"] = "Data/#Sigma Exp."
-        myParams["stackMCHistograms"] = True
-        myParams["addMCUncertainty"] = True
-        myParams["addLuminosityText"] = True
         #myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
         myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
-        myParams["ratioCreateLegend"] = True
         myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-        plots.drawPlot(myStackPlot, "DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(m,index), **myParams)
-        os.system("mv DataDrivenCtrlPlot_M%d_%02d_SelectionFlow.* %s/."%(m,index,dirname))
+        drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(dirname,m,index), **myParams)
 
