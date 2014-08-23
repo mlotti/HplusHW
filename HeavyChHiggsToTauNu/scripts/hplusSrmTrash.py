@@ -19,8 +19,13 @@ def removeSlashes(str):
     return m.group("host")+"/".join(filter(isNotEmpty, m.group("dir").split("/")))
 
 
-def main():
-    for url in sys.stdin:
+def main(argv):
+    tmp = argv
+    if len(argv) == 0:
+        print "No URLs to be trashed given as arguments, expecting them to stdin as one per line"
+        tmp = sys.stdin
+
+    for url in tmp:
         url = removeSlashes(url)
         m = host_re.search(url)
         comp = filter(isNotEmpty, m.group("dir").split("/"))
@@ -38,4 +43,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))

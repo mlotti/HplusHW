@@ -537,7 +537,7 @@ class LegendCreator:
     # \param borderSize  Default border size
     # \param fillStyle   Default fill style
     # \param fillColor   Default fill color
-    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.03, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
+    def __init__(self, x1=0.73, y1=0.59, x2=0.93, y2=0.92, textSize=17, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
@@ -619,8 +619,9 @@ class LegendCreator:
         if self.fillStyle != 0:
             legend.SetFillColor(self.fillColor)
         legend.SetBorderSize(self.borderSize)
-        if legend.GetTextFont() % 10 == 3:
-            legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
+        # Apparently absolute-size fonts work nowadays? (in the ROOT of 53X)
+        #if legend.GetTextFont() % 10 == 3:
+        #    legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
         legend.SetTextSize(self.textSize)
         #legend.SetMargin(0.1)
         return legend
@@ -649,7 +650,7 @@ class LegendCreator:
 createLegend = LegendCreator()
 
 ## Default legend creator object for ratio plots
-createLegendRatio = LegendCreator(x1=0.7, y1=0.7, x2=0.93, y2=0.95, textSize=0.07)
+createLegendRatio = LegendCreator(x1=0.7, y1=0.7, x2=0.93, y2=0.95)
 
 ## Move TLegend
 # 
@@ -1154,7 +1155,6 @@ class CanvasFrameTwo:
             raise Exception("Empty set of histograms for second pad!")
 
         canvasFactor = kwargs.get("canvasFactor", 1.25)
-        canvasHeightCorrection = kwargs.get("canvasHeightCorrection", 0.022)
         divisionPoint = 1-1/canvasFactor
 
         # Do it like this (create empty, update from kwargs) in order
@@ -1182,30 +1182,38 @@ class CanvasFrameTwo:
         # Create the canvas, divide it to two
         self.canvas = ROOT.TCanvas(name, name, ROOT.gStyle.GetCanvasDefW(), int(ROOT.gStyle.GetCanvasDefH()*canvasFactor))
         self.canvas.Divide(1, 2)
-        
+
+        topMargin = ROOT.gStyle.GetPadTopMargin()
+        bottomMargin = ROOT.gStyle.GetPadBottomMargin()
+        divisionPoint += (1-divisionPoint)*bottomMargin # correct for zeroing bottom margin of pad1
+
         # Set the lower point of the upper pad to divisionPoint
         self.pad1 = self.canvas.cd(1)
-        (xlow, ylow, xup, yup) = [ROOT.Double(x) for x in [0.0]*4]
-        self.pad1.GetPadPar(xlow, ylow, xup, yup)
-        self.pad1.SetPad(xlow, divisionPoint, xup, yup)
+        yup = 1.0
+        ylow = divisionPoint
+        xup = 1.0
+        xlow = 0.0
+        self.pad1.SetPad(xlow, ylow, xup, yup)
         self.pad1.SetFillStyle(4000) # transparent
+        self.pad1.SetBottomMargin(0.0)
 
         # Set the upper point of the lower pad to divisionPoint
         self.pad2 = self.canvas.cd(2)
-        self.pad2.GetPadPar(xlow, ylow, xup, yup)
-        self.pad2.SetPad(xlow, ylow, xup,
-                         divisionPoint+ROOT.gStyle.GetPadBottomMargin()-ROOT.gStyle.GetPadTopMargin()+canvasHeightCorrection)
+        yup = divisionPoint
+        ylow = 0.0
+        self.pad2.SetPad(xlow, ylow, xup, yup)
         self.pad2.SetFillStyle(4000) # transparent
         self.pad2.SetTopMargin(0.0)
-        #self.pad2.SetBottomMargin(self.pad2.GetBottomMargin()+0.06)
-        self.pad2.SetBottomMargin(self.pad2.GetBottomMargin()+0.16)
+        self.pad2.SetBottomMargin(bottomMargin/(canvasFactor*divisionPoint))
 
         self.canvas.cd(1)
 
-        yoffsetFactor = canvasFactor*1.15
+        yoffsetFactor = canvasFactor#*1.15
         #xoffsetFactor = canvasFactor*1.6
         #xoffsetFactor = canvasFactor*2
-        xoffsetFactor = 0.5*canvasFactor/(canvasFactor-1) * 1.3
+        #xoffsetFactor = 0.5*canvasFactor/(canvasFactor-1) * 1.3
+        #xoffsetFactor = 1/(canvasFactor*divisionPoint)
+        xoffsetFactor = 1/divisionPoint
 
         # Check if the first histogram has x axis bin labels
         rootHisto = histos1[0].getRootHisto()

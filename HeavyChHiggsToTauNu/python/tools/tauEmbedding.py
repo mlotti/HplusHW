@@ -1203,6 +1203,18 @@ class PlotCreatorMany:
 def strIntegral(th1):
     return "%.1f" % aux.th1Integral(th1)
 
+def writeToFile(optMode, fname, content):
+    d = optMode
+    if d is None:
+        d = "."
+    if not os.path.exists(d):
+        os.makedirs(d)
+
+    f = open(os.path.join(d, fname), "w")
+    f.write(content)
+    f.write("\n")
+    f.close()
+
 class CommonPlotter:
     def __init__(self, optimizationMode, midfix, plotDrawer):
         self._ind = 0
@@ -1212,6 +1224,11 @@ class CommonPlotter:
 
         if self._optMode is not None and not os.path.exists(self._optMode):
             os.mkdir(self._optMode)
+
+    def getOutputDirectory(self):
+        if self._optMode is None:
+            return "."
+        return self._optMode
 
     def _createPlot(self, name):
         p = self._plotCreator(name)
@@ -1267,9 +1284,9 @@ class CommonPlotter:
         drawControlPlot("SelectedTau_pT_AfterStandardSelections", xlabel="Selected #tau p_{T} (GeV/c)", ylabel="Events / #Delta p_{T} / %.0f-%.0f GeV/c", divideByBinWidth=True, opts={"ymin": 1e-3})
         drawControlPlot("SelectedTau_eta_AfterStandardSelections", opts={"xmin": -2.1, "xmax": 2.1}, moveLegend={"dy": -0.4})
         drawControlPlot("SelectedTau_phi_AfterStandardSelections", moveLegend={"dy": -0.4})
-        drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", opts={"xmin": 0.7, "xmax":1 }, moveLegend={"dy": -0.4, "dx": -0.3})
+        drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", opts={"xmin": 0.7, "xmax":1 }, moveLegend={"dy": -0.4, "dx": -0.3}, ylabel="Events / %.2f")
         drawControlPlot("Njets_AfterStandardSelections", ylabel="Events", opts={"xmin": 3, "xmax": 10, "ymin": 1})
-        drawControlPlot("JetPt_AfterStandardSelections")
+        drawControlPlot("JetPt_AfterStandardSelections", divideByBinWidth=True)
         drawControlPlot("JetEta_AfterStandardSelections", moveLegend={"dy": -0.4})
 
 #        drawControlPlot("NjetsAfterJetSelectionAndMETSF", opts={"xmin": 0, "xmax": 16}, ylabel="Events", cutLine=3)
@@ -1332,7 +1349,7 @@ class CommonPlotter:
         # Transverse mass
         drawControlPlot("SelectedTau_pT_AfterMtSelections", xlabel="Selected #tau p_{T} (GeV/c)", ylabel="Events / #Delta p_{T} / %.0f-%.0f GeV/c", divideByBinWidth=True, opts={"ymin": 1e-3})
         drawControlPlot("SelectedTau_eta_AfterMtSelections", xlabel="Selected #tau #eta", ylabel="Events / %.1f-%.1f", opts={"xmin": -2.5, "xmax": 2.5}, moveLegend={"dx": -0.3, "dy": -0.4})
-        drawControlPlot("SelectedTau_phi_AfterMtSelections", xlabel="Selected #tau #phi", ylabel="Events / %.2f-%.2f", moveLegend={"dy": -0.4}, log=False)
+        drawControlPlot("SelectedTau_phi_AfterMtSelections", xlabel="Selected #tau #phi", ylabel="Events / %.2f-%.2f", moveLegend={"dy": -0.4})
         drawControlPlot("SelectedTau_LeadingTrackPt_AfterMtSelections", rebin=range(0, 100, 10)+[150,200,300,400,500], divideByBinWidth=True, opts={"ymin": 1e-3})
 
         maxModes = 5
@@ -1357,7 +1374,7 @@ class CommonPlotter:
 #            "Diboson": {"ymax": 1.2},
 #            "WJets": {"ymax": 50},
             }.get(datasetName, {})
-        opts["xmax"] = 400
+        #opts["xmax"] = 400
         #opts2 = {"ymin": 0, "ymax": 2}
         moveLegend = {"DYJetsToLL": {"dx": -0.02}}.get(datasetName, {})
         p = self._createPlot("shapeTransverseMass")

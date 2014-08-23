@@ -303,6 +303,8 @@ if __name__ == "__main__":
                       help="Midfix to add to the output directory name")
     parser.add_option("--nosyst", dest="dosyst", default=True, action="store_false",
                       help="Don't process systematic variations")
+    parser.add_option("--nooptmodes", dest="dooptmodes", default=True, action="store_false",
+                      help="Don't process optimization modes")
     parser.add_option("--outputName", dest="outputName", default=None,
                       help="Name of output task directory")
     (opts, args) = parser.parse_args()
@@ -416,7 +418,9 @@ if __name__ == "__main__":
             print "No search modes for DatasetManagerCreator with baseDirectory %s" % dc.getBaseDirectory()
         for searchMode in dc.getSearchModes():
             for era in eras:
-                optModes = dc.getOptimizationModes()
+                optModes = []
+                if opts.dooptmodes:
+                    optModes = dc.getOptimizationModes()
                 if len(optModes) == 0:
                     optModes = [None]
                 for optMode in optModes:

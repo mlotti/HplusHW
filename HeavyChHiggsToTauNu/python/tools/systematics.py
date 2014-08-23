@@ -34,6 +34,8 @@
 
 from math import sqrt
 
+import ShellStyles
+
 ## Helper class for a scalar uncertainty
 class ScalarUncertaintyItem:
     def __init__(self, uncertaintyName, *args, **kwargs):
@@ -86,6 +88,9 @@ class ScalarUncertaintyItem:
 
     def getUncertaintyUp(self):
         return self._uncertUp
+
+    def getUncertaintyMax(self):
+        return max([self._uncertUp, self._uncertDown])
 
 _crossSectionUncertainty = {
     "TTJets": ScalarUncertaintyItem("xsect", plus=0.0517, minus=0.060), # arxiv:1303.6254

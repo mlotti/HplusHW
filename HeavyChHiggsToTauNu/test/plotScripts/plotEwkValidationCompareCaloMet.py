@@ -36,10 +36,11 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
 
 def main():
-    dirNormal = "../multicrab_signalAnalysisGenTauSkim_140129_210746"
+    dirNormal = "../multicrab_signalAnalysisGenTauSkim_140814_211711"
     dirEmb = "."
 
     dsetsNormal = dataset.getDatasetsFromMulticrabCfg(directory=dirNormal, analysisName="signalAnalysisGenuineTau")
@@ -65,8 +66,14 @@ def main():
     histograms.cmsTextMode = histograms.CMSMode.SIMULATION
     histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
     histograms.createLegend.setDefaults(y1=0.93, y2=0.8, x1=0.82, x2=0.93)
+    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
+    histograms.createLegendRatio.moveDefaults(dx=-0.05, dh=-0.1)
+    plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
 
-    doPlots(dsetsNormal.getDataset("TTJets"), dsetsEmb.getDataset("TTJets"), dsetsEmb.getDataset("Data").getLuminosity())
+    if not os.path.exists("calometComparison"):
+        os.mkdir("calometComparison")
+
+    #doPlots(dsetsNormal.getDataset("TTJets"), dsetsEmb.getDataset("TTJets"), dsetsEmb.getDataset("Data").getLuminosity())
     doEffPlots(dsetsNormalCut.getDataset("TTJets"), dsetsNormal.getDataset("TTJets"), dsetsEmbCut.getDataset("TTJets"), dsetsEmb.getDataset("TTJets"), dsetsEmb.getDataset("Data").getLuminosity())
 
 def doLineStyle(l):
@@ -92,7 +99,7 @@ def doPlots(dsetNormal, dsetEmb, lumi):
         drhNormal.setName("Normal ttbar")
         drhEmb.setName("Embedded ttbar")
     
-        p = plots.ComparisonPlot(drhNormal, drhEmb)
+        p = plots.ComparisonManyPlot(drhNormal, [drhEmb])
         p.histoMgr.normalizeMCToLuminosity(lumi)
     
         p.histoMgr.forHisto("Normal ttbar", lambda h: doStyle(h, ROOT.kBlack))
@@ -105,10 +112,10 @@ def doPlots(dsetNormal, dsetEmb, lumi):
         global ind
         ind += 1
         bins = range(0, 200, 20) + [200, 250, 300, 500]
-        plots.drawPlot(p, "%02d_calomet_%s"%(ind, step), xlabel="Calo MET (GeV)", ylabel="Events / #DeltaMET / %.0f-%.0f GeV",
+        plots.drawPlot(p, "calometComparison/%02d_calomet_%s"%(ind, step), xlabel="Calo MET (GeV)", ylabel="Events / #DeltaMET / %.0f-%.0f GeV",
                        #rebinToWidthX=20,
                        rebin=bins, divideByBinWidth=True,
-                       ratio=True, ratioYlabel="Norm./emb.", ratioType="errorScale",
+                       ratio=True, ratioYlabel="Emb./Norm.", ratioType="errorScale", ratioCreteLegend=True,
                        opts2={"ymin": 0.5, "ymax": 1.5},
                        addLuminosityText=True, moveLegend={"dx": -0.2})
 
@@ -139,9 +146,13 @@ def doEffPlots(dsetNormalNum, dsetNormalDenom, dsetEmbNum, dsetEmbDenom, lumi):
     global ind
     ind = 0
     def compare(step):
-        path = "CommonPlots/AtEveryStep/%s/MET_MET" % step
+        if step is None:
+            path = "shapeTransverseMass"
+        else:
+            path = "CommonPlots/AtEveryStep/%s/MET_MET" % step
 
-        bins = range(0, 200, 20) + [200, 250, 300, 500]
+        #bins = range(0, 200, 20) + [200, 250, 300, 500]
+        bins = systematics.getBinningForPlot("shapeTransverseMass")
 
         def getTH1(ds):
             drh = ds.getDatasetRootHisto(path)
@@ -167,21 +178,28 @@ def doEffPlots(dsetNormalNum, dsetNormalDenom, dsetEmbNum, dsetEmbDenom, lumi):
         effNormal.SetName("Normal ttbar")
         effEmb.SetName("Embedded ttbar")
 
-        p = plots.ComparisonPlot(effNormal, effEmb)
+        p = plots.ComparisonManyPlot(effNormal, [effEmb])
         p.setLuminosity(lumi)
-        p.histoMgr.forHisto("Normal ttbar", lambda h: doStyle(h, ROOT.kBlack, ROOT.kFullCircle))
-        p.histoMgr.forHisto("Embedded ttbar", lambda h: doStyle(h, ROOT.kRed, ROOT.kFullSquare))
+        p.histoMgr.forEachHisto(styles.generator())
+        #p.histoMgr.forHisto("Normal ttbar", lambda h: doStyle(h, ROOT.kBlack, ROOT.kFullCircle))
+        #p.histoMgr.forHisto("Embedded ttbar", lambda h: doStyle(h, ROOT.kRed, ROOT.kFullSquare))
         p.histoMgr.setHistoDrawStyleAll("EP")
 
-        p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 1.1, 500, 1.1)))
-        p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 0.9, 500, 0.9)))
-        p.appendPlotObject(histograms.PlotText(x=0.6, y=0.6, text="CaloMET>70", size=20))
+        p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 1.1, bins[-1], 1.1)))
+        p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 0.9, bins[-1], 0.9)))
+        p.appendPlotObject(histograms.PlotText(x=0.6, y=0.6, text="CaloMET > 70 GeV", size=20))
 
         global ind
         ind += 1
-        plots.drawPlot(p, "eff_%02d_calomet_%s"%(ind, step), xlabel="Type I PF MET (GeV)", ylabel="CaloMET cut efficiency",
-                       ratio=True, ratioYlabel="Norm./emb.", ratioType="errorScale",
-                       opts={"xmin": 0, "xmax": 500},
+        # plots.drawPlot(p, "calometComparison/eff_%02d_calomet_%s"%(ind, step), xlabel="Type I PF MET (GeV)", ylabel="CaloMET cut efficiency",
+        #                ratio=True, ratioYlabel="Norm./emb.", ratioType="errorScale",
+        #                opts={"xmin": 0, "xmax": 500},
+        #                opts2={"ymin": 0.8, "ymax": 1.2},
+        #                addLuminosityText=True, moveLegend={"dx": -0.2, "dy": -0.5})
+
+
+        plots.drawPlot(p, "calometComparison/eff_%d_calomet_shapeTransverseMass"%ind, xlabel="Transverse mass (GeV)", ylabel="CaloMET cut efficiency",
+                       ratio=True, ratioYlabel="Emb./Norm.", ratioCreateLegend=True, ratioType="errorScale",
                        opts2={"ymin": 0.8, "ymax": 1.2},
                        addLuminosityText=True, moveLegend={"dx": -0.2, "dy": -0.5})
 
@@ -201,15 +219,16 @@ def doEffPlots(dsetNormalNum, dsetNormalDenom, dsetEmbNum, dsetEmbDenom, lumi):
         # plots.drawPlot(p, "effdebug_normal_%02d_%s" %(ind, step), ratio=True)
 
 
-    for step in [
-        "JetSelection",
-        "MET",
-        "METPhiCorrected",
-        "BTagging",
-        "DeltaPhiBackToBack",
-        "Selected"
-        ]:
-        compare(step)
+    # for step in [
+    #     "JetSelection",
+    #     "MET",
+    #     "METPhiCorrected",
+    #     "BTagging",
+    #     "DeltaPhiBackToBack",
+    #     "Selected"
+    #     ]:
+    #     compare(step)
+    compare(None)
 
 
 if __name__ == "__main__":

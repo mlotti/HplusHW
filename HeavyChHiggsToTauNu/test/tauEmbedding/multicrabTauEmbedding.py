@@ -199,11 +199,16 @@ def main():
                       help="Generate multicrab configurations only, do not create crab jobs (default is to create crab jobs)")
     parser.add_option("--dataOnly", dest="dataOnly", action="store_true", default=False,
                       help="Use only data datasets (default is to use data+MC, or an applicable subset)")
+    parser.add_option("--ttbarOnly", dest="ttbarOnly", action="store_true", default=False,
+                      help="Use only TTJets datasets")
     parser.add_option("--pickEvents", dest="pickEvents", action="store_true", default=False,
                       help="Retrieve also pickEvents.txt")
     parser.add_option("--dest", dest="destdir", default=None,
                       help="Directory to generate the multicrab directory to (default .)")
     (opts, args) = parser.parse_args()
+    if opts.ttbarOnly and opts.dataOnly:
+        parser.error("Only one of --dataOnly and --ttbarOnly can be given")
+
     step = opts.step
     versions = opts.version
     if len(versions) == 0:
@@ -267,6 +272,7 @@ def createTasks(opts, step, version=None):
 
     # Select the datasets based on the processing step and data era
     tasks = []
+    global datasetsData2012, datasetsMCTT, datasetsMCTTWJets, datasetsMCWDY, datasetsMCSTVV, datasetsMCQCD, datasetsMCnoQCD, datasetsMCSignal
     if step == "skim":
         def app(name, lst):
             if len(lst) > 0:
@@ -278,23 +284,31 @@ def createTasks(opts, step, version=None):
         app("Signal", datasetsMCSignal)        
     else:
         datasets = []
+        if opts.dataOnly:
+            datasetsMCnoQCD = []
+            datasetsMCTTWJets = []
+            datasetsMCTT = []
+            datasetsMCQCD = []
+            datasetsMCSignal = []
+        if opts.ttbarOnly:
+            datasetsMCnoQCD = datasetsMCTT
+            datasetsMCTTWJets = datasetsMCTT
+            datasetsMCQCD = []
+            datasetsMCSignal = []
+            datasetsData2012 = []
+
         if step in ["analysisTauAod", "muonDebugAnalysisAod", "muonDebugAnalysisNtupleAod", "signalAnalysisGenTau", "genTauSkim", "analysisTau"]:
-            if not opts.dataOnly:
-                datasets.extend(datasetsMCnoQCD)
+            datasets.extend(datasetsMCnoQCD)
         elif step in ["ewkBackgroundCoverageAnalysis", "ewkBackgroundCoverageAnalysisAod"]:
-            if not opts.dataOnly:
-                datasets.extend(datasetsMCTTWJets)
+            datasets.extend(datasetsMCTTWJets)
         elif step in ["signalAnalysisGenTauSkim"]:
-            if not ops.dataOnly:
-                datasets.extend(datasetsMCTT)
+            datasets.extend(datasetsMCTT)
         else:
             datasets.extend(datasetsData2012)
-            if not opts.dataOnly:
-                datasets.extend(datasetsMCnoQCD)
-                datasets.extend(datasetsMCQCD)
+            datasets.extend(datasetsMCnoQCD)
+            datasets.extend(datasetsMCQCD)
         if step in ["embedding", "signalAnalysis","EWKMatching"]:
-            if not opts.dataOnly:
-                datasets.extend(datasetsMCSignal)
+            datasets.extend(datasetsMCSignal)
         tasks.append( ("", datasets) )
 
     # Setup the version number for tauembedding_{embedding,analysis} workflows
