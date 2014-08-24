@@ -1390,7 +1390,7 @@ class CommonPlotter:
         drawControlPlot("NBjetsAfterMtSelections", ylabel="Events", opts={"ymin": 1e-1})
         drawControlPlot("BJetPtAfterMtSelections",
                         #ylabel="Events / #Delta p_{T} / %.0f-%.0f GeV/c",
-                        ylabel="< Events / GeV/c >",
+                        ylabel="< Events / bin >",
                         divideByBinWidth=True)
         drawControlPlot("BJetEtaAfterMtSelections", ylabel="Events / %.1f", opts={"xmin": -2.5, "xmax": 2.5}, moveLegend={"dy": -0.4})
         drawControlPlot("BtagDiscriminatorAfterMtSelections", opts={"xmin": -1, "xmax": 1, "ymin": 1},
@@ -1426,7 +1426,7 @@ class CommonPlotter:
                        #ylabel="Events / #Delta m_{T} %.0f-%.0f GeV",
                        ylabel="< Events / bin >",
                        log=True, moveLegend=moveLegend,
-                       opts={"ymin": 1e-5},
+                       opts={"ymin": 1e-3},
                        opts2=opts2,
                        divideByBinWidth=True,
                        cmsTextPosition="right"

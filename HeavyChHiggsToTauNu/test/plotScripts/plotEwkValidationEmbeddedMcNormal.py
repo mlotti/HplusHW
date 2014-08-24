@@ -100,7 +100,7 @@ def main():
         histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
         plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
         plots._legendLabels["BackgroundStatSystError"] = "Norm. stat.#oplussyst. unc."
-    histograms.createLegendRatio.moveDefaults(dx=-0.05)
+    histograms.createLegendRatio.moveDefaults(dx=-0.1)
     plots._legendLabels["Data"] = "Embedded data"
     plots._legendLabels["EWKMC"] = "EWK+t#bar{t}"
 
@@ -109,10 +109,10 @@ def main():
         postfix = "_fit"
 
     for optMode in [
-        "OptQCDTailKillerNoCuts",
+#        "OptQCDTailKillerNoCuts",
         "OptQCDTailKillerLoosePlus",
-        "OptQCDTailKillerMediumPlus",
-        "OptQCDTailKillerTightPlus",
+#        "OptQCDTailKillerMediumPlus",
+#        "OptQCDTailKillerTightPlus",
 #            None
         ]:
         datasetsEmb = dataset.getDatasetsFromMulticrabCfg(directory=dirEmb, dataEra=dataEra, analysisName=analysisEmb, optimizationMode=optMode)
@@ -164,7 +164,8 @@ def doDataset(datasetsEmb, datasetsSig, outputDir, opts):
 #drawPlotCommon = tauEmbedding.PlotDrawerTauEmbeddingEmbeddedNormal(ylabel="Events / %.0f GeV", stackMCHistograms=False, log=True, addMCUncertainty=True, ratio=True, addLuminosityText=True)
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=False, log=True, addMCUncertainty=True,
                                   ratio=True, ratioType="errorScale", ratioCreateLegend=True,
-                                  addLuminosityText=True)
+                                  addLuminosityText=True, errorBarsX=True
+)
 
 def strIntegral(th1):
     return "%.1f" % aux.th1Integral(th1)

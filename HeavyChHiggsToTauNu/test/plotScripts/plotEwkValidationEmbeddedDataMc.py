@@ -104,14 +104,19 @@ def main():
 
         # Remove QCD for plots
         datasetsEmb.remove(["QCD_Pt20_MuEnriched"])
-        doPlots(datasetsEmb, optMode)
+        outputDir = optMode
+        if outputDir is not None:
+            outputDir += "_embdatamc"
+        doPlots(datasetsEmb, outputDir)
+
+        tauEmbedding.writeToFile(outputDir, "input.txt", "Embedded: %s\n" % os.getcwd())
 
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=True, log=True, addMCUncertainty=True,
                                   opts2={"ymin": 0, "ymax": 2},
                                   ratio=True, ratioType="errorScale", ratioCreateLegend=True, ratioYlabel="Data/Sim.", ratioErrorOptions={"numeratorStatSyst": False},
                                   addLuminosityText=True)
 
-def doPlots(datasetsEmb, optMode):
+def doPlots(datasetsEmb, outputDir):
     lumi = datasetsEmb.getDataset("Data").getLuminosity()
 
     def createPlot(name):
@@ -127,12 +132,12 @@ def doPlots(datasetsEmb, optMode):
         p.setDefaultStyles()
         return p
 
-    plotter = tauEmbedding.CommonPlotter(optMode+"_embdatamc", "embdatamc", drawPlotCommon)
+    plotter = tauEmbedding.CommonPlotter(outputDir, "embdatamc", drawPlotCommon)
     plotter.plot(None, createPlot, {
 #        "NBjets": {"moveLegend": {"dx": -0.4, "dy": -0.45}}
 #        "ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections": {"moveLegend": 
         "shapeTransverseMass": {"moveLegend": {"dy": -0.12}, "ratioMoveLegend": {"dx": -0.3}}, 
-        "shapeTransverseMass_log": {"moveLegend": {"dy": -0.12}, "ratioMoveLegend": {"dx": -0.3}, "opts": {"ymin": 1e-3}}
+        "shapeTransverseMass_log": {"moveLegend": {"dy": -0.12}, "ratioMoveLegend": {"dx": -0.3}}
     })
     return
 
@@ -141,7 +146,7 @@ def addMcSum(t):
     allDatasets = ["QCD_Pt20_MuEnriched", "WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson"]
     t.insertColumn(1, counter.sumColumn("MCSum", [t.getColumn(name=name) for name in allDatasets]))
 
-def doCounters(datasetsEmb, optMode):
+def doCounters(datasetsEmb, outputDir):
     eventCounter = counter.EventCounter(datasetsEmb)
     eventCounter.normalizeMCToLuminosity(datasetsEmb.getDataset("Data").getLuminosity())
     table = eventCounter.getMainCounterTable()
@@ -151,7 +156,7 @@ def doCounters(datasetsEmb, optMode):
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.4f', withPrecision=2))
     txt = table.format(cellFormat)
     print txt
-    d = optMode+"_embdatamc"
+    d = outputDir
     if d is None:
         d = "."
     if not os.path.exists(d):
