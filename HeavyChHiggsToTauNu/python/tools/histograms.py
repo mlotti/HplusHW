@@ -1441,6 +1441,9 @@ class Histo:
     def setUncertaintyLegendLabel(self, label):
         self._uncertaintyLegendLabel = label
 
+    def getLegendStyle(self):
+        return self.legendStyle
+
     ## Set the legend style
     #
     # \param style  New histogram style for TLegend
@@ -1634,46 +1637,6 @@ class HistoWithDatasetFakeMC(HistoWithDataset):
         HistoWithDataset.__init__(self, dataset, rootHisto, name, **kwargs)
         self.setIsDataMC(False, True)
 
-## Represents combined (statistical) uncertainties of multiple histograms.
-class HistoTotalUncertainty(Histo):
-    ## Constructor
-    #
-    # \param histos  List of histograms.Histo objects
-    # \param name    Name of the uncertainty histogram
-    def __init__(self, histos, name):
-        rootHistosWithUnc = []
-        for h in histos:
-            if hasattr(h, "getSumRootHistoWithUncertainties"):
-                ret = h.getSumRootHistoWithUncertainties()
-            else:
-                ret = h.getRootHistoWithUncertainties()
-            if ret is not None:
-                rootHistosWithUnc.append(ret)
-        if len(rootHistosWithUnc) == 0:
-            raise Exception("Got 0 histograms, or all input histograms are None")
-
-        tmp = rootHistosWithUnc[0].Clone()
-        tmp.SetDirectory(0)
-        Histo.__init__(self, tmp, name, "F", "E2")
-
-        self._histo.SetName(self._histo.GetName()+"_errors")
-        self.histos = histos
-
-        for h in rootHistosWithUnc[1:]:
-            self._histo.Add(h)
-        self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
-
-        if self._histo.hasSystematicUncertainties() and not uncertaintyMode.equal(Uncertainty.StatOnly):
-            self._uncertaintyGraph = self._histo.getSystematicUncertaintyGraph(uncertaintyMode.addStatToSyst())
-            self._uncertaintyGraphValid = True
-            self.setUncertaintyDrawStyle("E2")
-
-        if not uncertaintyMode.showStatOnly():
-            self.setDrawStyle(None)
-
-    ## \var histos
-    # List of histograms.Histo objects from which the total uncertaincy is calculated
-
 ## Represents stacked TH1 histograms
 #
 # Stacking is done with the help of THStack object
@@ -1837,6 +1800,45 @@ class HistoGraphWithDataset(HistoGraph):
 
     def getDataset(self):
         return self.dataset
+
+## Represents combined (statistical) uncertainties of multiple histograms.
+class HistoTotalUncertainty(HistoGraph):
+    ## Constructor
+    #
+    # \param histos  List of histograms.Histo objects
+    # \param name    Name of the uncertainty histogram
+    def __init__(self, histos, name):
+        rootHistosWithUnc = []
+        for h in histos:
+            if hasattr(h, "getSumRootHistoWithUncertainties"):
+                ret = h.getSumRootHistoWithUncertainties()
+            else:
+                ret = h.getRootHistoWithUncertainties()
+            if ret is not None:
+                rootHistosWithUnc.append(ret)
+        if len(rootHistosWithUnc) == 0:
+            raise Exception("Got 0 histograms, or all input histograms are None")
+
+        tmp = rootHistosWithUnc[0].Clone()
+        tmp.SetDirectory(0)
+        for h in rootHistosWithUnc[1:]:
+            tmp.Add(h)
+        tmpgr = tmp.getSystematicUncertaintyGraph(addStatistical=True, addSystematic=False)
+        HistoGraph.__init__(self, dataset.RootHistoWithUncertainties(tmpgr), name, "F", "E2")
+        self._histo.SetName(rootHistosWithUnc[0].GetName()+"_errors")
+        self.histos = histos
+        self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
+
+        if tmp.hasSystematicUncertainties() and not uncertaintyMode.equal(Uncertainty.StatOnly):
+            self._uncertaintyGraph = tmp.getSystematicUncertaintyGraph(uncertaintyMode.addStatToSyst())
+            self._uncertaintyGraphValid = True
+            self.setUncertaintyDrawStyle("E2")
+
+        if not uncertaintyMode.showStatOnly():
+            self.setDrawStyle(None)
+
+    ## \var histos
+    # List of histograms.Histo objects from which the total uncertaincy is calculated
 
 ## Represents TEfficiency objects
 class HistoEfficiency(Histo):
