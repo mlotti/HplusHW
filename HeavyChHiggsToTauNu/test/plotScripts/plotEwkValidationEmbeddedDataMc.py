@@ -64,15 +64,17 @@ def main():
     #    histograms.cmsTextMode = histograms.CMSMode.NONE
     #histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
     histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
-    histograms.createLegend.moveDefaults(dx=-0.12, dh=-0.05) # QCD removed
+    histograms.createLegend.moveDefaults(dx=-0.15, dh=-0.05) # QCD removed
+    plots._legendLabels["BackgroundStatError"] = "Sim. stat. unc."
+    plots._legendLabels["BackgroundStatSystError"] = "Sim. stat.#oplussyst. unc."
 
     legendLabelsSet = False
 
     for optMode in [
-        "OptQCDTailKillerNoCuts",
+#        "OptQCDTailKillerNoCuts",
         "OptQCDTailKillerLoosePlus",
-        "OptQCDTailKillerMediumPlus",
-        "OptQCDTailKillerTightPlus",
+#        "OptQCDTailKillerMediumPlus",
+#        "OptQCDTailKillerTightPlus",
 #            None
     ]:
         # Create the dataset objects
@@ -105,7 +107,8 @@ def main():
         doPlots(datasetsEmb, optMode)
 
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=True, log=True, addMCUncertainty=True,
-                                  ratio=True, ratioType="errorScale", ratioCreateLegend=True,
+                                  opts2={"ymin": 0, "ymax": 2},
+                                  ratio=True, ratioType="errorScale", ratioCreateLegend=True, ratioYlabel="Data/Sim.", ratioErrorOptions={"numeratorStatSyst": False},
                                   addLuminosityText=True)
 
 def doPlots(datasetsEmb, optMode):
@@ -127,6 +130,9 @@ def doPlots(datasetsEmb, optMode):
     plotter = tauEmbedding.CommonPlotter(optMode+"_embdatamc", "embdatamc", drawPlotCommon)
     plotter.plot(None, createPlot, {
 #        "NBjets": {"moveLegend": {"dx": -0.4, "dy": -0.45}}
+#        "ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections": {"moveLegend": 
+        "shapeTransverseMass": {"moveLegend": {"dy": -0.12}, "ratioMoveLegend": {"dx": -0.3}}, 
+        "shapeTransverseMass_log": {"moveLegend": {"dy": -0.12}, "ratioMoveLegend": {"dx": -0.3}, "opts": {"ymin": 1e-3}}
     })
     return
 

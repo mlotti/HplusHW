@@ -58,6 +58,7 @@ systematicsEmbMC = dataset.Systematics(shapes=[
     "SystVarMuonIdDataEff",
     "SystVarMuonTrgDataEff",
     "SystVarWTauMu",
+    "SystVarEmbMTWeight",
 ], additionalNormalizations = {
     "CaloMETApproximation": 0.12
 })
@@ -87,8 +88,7 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    histograms.cmsTextMode = histograms.CMSMode.SIMULATION
-    histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
+    histograms.cmsTextMode = histograms.CMSMode.SIMULATION_PRELIMINARY
     #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
     histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2, dy=-0.1)
     if opts.dofit:
@@ -104,6 +104,10 @@ def main():
     plots._legendLabels["Data"] = "Embedded data"
     plots._legendLabels["EWKMC"] = "EWK+t#bar{t}"
 
+    postfix =""
+    if opts.dofit:
+        postfix = "_fit"
+
     for optMode in [
         "OptQCDTailKillerNoCuts",
         "OptQCDTailKillerLoosePlus",
@@ -113,13 +117,13 @@ def main():
         ]:
         datasetsEmb = dataset.getDatasetsFromMulticrabCfg(directory=dirEmb, dataEra=dataEra, analysisName=analysisEmb, optimizationMode=optMode)
         datasetsSig = dataset.getDatasetsFromMulticrabCfg(directory=dirSig, dataEra=dataEra, analysisName=analysisSig, optimizationMode=optMode)
-        doDataset(datasetsEmb, datasetsSig, optMode, opts)
+        doDataset(datasetsEmb, datasetsSig, optMode+postfix, opts)
         datasetsEmb.close()
         datasetsSig.close()
 
-        tauEmbedding.writeToFile(optMode, "input.txt", "Embedded: %s\nSignal analysis (GenTau): %s\n" % (os.getcwd(), dirSig))
+        tauEmbedding.writeToFile(optMode+postfix, "input.txt", "Embedded: %s\nSignal analysis (GenTau): %s\n" % (os.getcwd(), dirSig))
 
-def doDataset(datasetsEmb, datasetsSig, optMode, opts):
+def doDataset(datasetsEmb, datasetsSig, outputDir, opts):
     global ind
     ind = 0
 
@@ -137,10 +141,11 @@ def doDataset(datasetsEmb, datasetsSig, optMode, opts):
         mergeEWK(datasetsSig)
         mergeEWK(datasetsEmb)
 
-    plotter = tauEmbedding.CommonPlotter(optMode, "mcembsig", drawPlotCommon)
+       
+    plotter = tauEmbedding.CommonPlotter(outputDir, "mcembsig", drawPlotCommon)
 
     def dop(name, addData=False, **kwargs):
-        doPlots(datasetsEmb, datasetsSig, name, plotter, optMode, addData, opts, **kwargs)
+        doPlots(datasetsEmb, datasetsSig, name, plotter, outputDir, addData, opts, **kwargs)
 #        doCounters(datasetsEmb, datasetsSig, name)
 
     if not opts.notrigger:
@@ -164,7 +169,7 @@ drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=Fals
 def strIntegral(th1):
     return "%.1f" % aux.th1Integral(th1)
 
-def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, optMode, addData, opts, mtOnly=False):
+def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, outputDir, addData, opts, mtOnly=False):
     dsetEmb = datasetsEmb.getDataset(datasetName)
     dsetSig = datasetsSig.getDataset(datasetName)
     dsetEmbData = datasetsEmb.getDataset("Data")
@@ -194,7 +199,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, optMode, addData, op
             drhEmbData.setName("Embedded data")
 
         if "shapeTransverseMass" in name and "TTJets" in datasetName:
-            doScaleFactors(drhSig.getHistogramWithUncertainties(), drhEmb.getHistogramWithUncertainties(), optMode, opts)
+            doScaleFactors(drhSig.getHistogramWithUncertainties(), drhEmb.getHistogramWithUncertainties(), outputDir, opts)
 
         if addData:
             p = plots.ComparisonManyPlot(drhSig, [drhEmb, drhEmbData])
@@ -225,7 +230,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, optMode, addData, op
             p.setDrawOptions(ratioYlabel="Norm./Emb.", ratioInvert=True, ratioType="errorPropagation")
             if "shapeTransverseMass" in name and "TTJets" in datasetName:
                 binning = systematics.getBinningForPlot("shapeTransverseMass")
-                p.setDrawOptions(customizeBeforeSave=lambda p: doScaleFactorFit(p, optMode),
+                p.setDrawOptions(customizeBeforeSave=lambda p: doScaleFactorFit(p, outputDir),
                                  rebin=range(0, 160, 20) + binning[binning.index(160):]
                              )
         else:
@@ -245,7 +250,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, optMode, addData, op
 
     plotter.plot(datasetName, createPlot, custom)
 
-def doScaleFactorFit(p, optMode):
+def doScaleFactorFit(p, outputDir):
     histos = filter(lambda h: "shapeTransverseMass" in h.getName() and not "_syst" in h.getName(), p.ratioHistoMgr.getHistos())
 
     if len(histos) != 1:
@@ -267,10 +272,11 @@ def doScaleFactorFit(p, optMode):
     histograms.PlotText(0.2, 0.35, "p_{0} = %.4g, p_{1} = %.4g" %(par0, par1), size=17, color=ROOT.kBlue).Draw()
 
     formula = "%.10g*x + %.10g" % (par0, par1)
-    tauEmbedding.writeToFile(optMode, "mtcorrectionfit.txt", "formula %s" % formula)
+    errors = "%.5g %.5g" % (fitfunc.GetParError(0)/par0, fitfunc.GetParError(1)/par1)
+    tauEmbedding.writeToFile(outputDir, "mtcorrectionfit.txt", "formula %s   relative fit uncertainties %s" % (formula, errors))
     
 
-def doScaleFactors(histoSig, histoEmb, optMode, opts):
+def doScaleFactors(histoSig, histoEmb, outputDir, opts):
     binning = systematics._dataDrivenCtrlPlotBinning["shapeTransverseMass"]
     histoSig.Rebin(len(binning)-1, "newsig", array.array("d", binning))
     histoEmb.Rebin(len(binning)-1, "newemb", array.array("d", binning))
@@ -358,7 +364,7 @@ def doScaleFactors(histoSig, histoEmb, optMode, opts):
 
     ret["mcParameters"] = {"Run2012ABCD": {"bins": identities}}
 
-    tauEmbedding.writeToFile(optMode, "embedding_mt_weight.json", json.dumps(ret, indent=2))
+    tauEmbedding.writeToFile(outputDir, "embedding_mt_weight.json", json.dumps(ret, indent=2))
 
     
 

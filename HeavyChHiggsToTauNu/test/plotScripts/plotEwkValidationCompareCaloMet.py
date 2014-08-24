@@ -63,8 +63,7 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    histograms.cmsTextMode = histograms.CMSMode.SIMULATION
-    histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
+    histograms.cmsTextMode = histograms.CMSMode.SIMULATION_PRELIMINARY
     histograms.createLegend.setDefaults(y1=0.93, y2=0.8, x1=0.82, x2=0.93)
     histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
     histograms.createLegendRatio.moveDefaults(dx=-0.05, dh=-0.1)
@@ -184,9 +183,12 @@ def doEffPlots(dsetNormalNum, dsetNormalDenom, dsetEmbNum, dsetEmbDenom, lumi):
         #p.histoMgr.forHisto("Normal ttbar", lambda h: doStyle(h, ROOT.kBlack, ROOT.kFullCircle))
         #p.histoMgr.forHisto("Embedded ttbar", lambda h: doStyle(h, ROOT.kRed, ROOT.kFullSquare))
         p.histoMgr.setHistoDrawStyleAll("EP")
+        p.histoMgr.setHistoLegendStyleAll("EPL")
 
-        p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 1.1, bins[-1], 1.1)))
-        p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, 0.9, bins[-1], 0.9)))
+        unc1 = 1.12
+        unc2 = 0.88
+        p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, unc1, bins[-1], unc1)))
+        p.prependPlotObjectToRatio(doLineStyle(ROOT.TLine(0, unc2, bins[-1], unc2)))
         p.appendPlotObject(histograms.PlotText(x=0.6, y=0.6, text="CaloMET > 70 GeV", size=20))
 
         global ind
@@ -200,6 +202,7 @@ def doEffPlots(dsetNormalNum, dsetNormalDenom, dsetEmbNum, dsetEmbDenom, lumi):
 
         plots.drawPlot(p, "calometComparison/eff_%d_calomet_shapeTransverseMass"%ind, xlabel="Transverse mass (GeV)", ylabel="CaloMET cut efficiency",
                        ratio=True, ratioYlabel="Emb./Norm.", ratioCreateLegend=True, ratioType="errorScale",
+                       opts={"ymax": 1.2},
                        opts2={"ymin": 0.8, "ymax": 1.2},
                        addLuminosityText=True, moveLegend={"dx": -0.2, "dy": -0.5})
 

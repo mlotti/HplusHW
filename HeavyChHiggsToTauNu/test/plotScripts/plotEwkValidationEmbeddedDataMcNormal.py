@@ -75,6 +75,7 @@ systematicsEmbData = dataset.Systematics(shapes=[
     "SystVarMuonIdDataEff",
     "SystVarMuonTrgDataEff",
     "SystVarWTauMu",
+    "SystVarEmbMTWeight",
 ], additionalNormalizations = {
     "CaloMETApproximation": 0.12,
     "QCDContamination": 0.02,
@@ -98,18 +99,16 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    histograms.cmsTextMode = histograms.CMSMode.SIMULATION
-    histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
     #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
 #    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2)
-    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.05)
+    histograms.createLegend.moveDefaults(dx=-0.15, dh=-0.05)
 #    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
     histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
 #    histograms.createLegendRatio.moveDefaults(dh=-0.1, dx=-0.53)
-    histograms.createLegendRatio.moveDefaults(dx=-0.05)
+    histograms.createLegendRatio.moveDefaults(dx=-0.08)
 #    plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
-    plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
-    plots._legendLabels["BackgroundStatSystError"] = "Norm. stat.#oplussyst. unc."
+    plots._legendLabels["BackgroundStatError"] = "Sim. stat. unc" #"Norm. stat. unc."
+    plots._legendLabels["BackgroundStatSystError"] = "Sim. stat.#oplussyst. unc." # "Norm. stat.#oplussyst. unc."
 
     plots._legendLabels["Data"] = "Embedded data"
 
@@ -140,7 +139,7 @@ def doDataset(datasetsEmb, datasetsSig, optMode):
     doPlots(datasetsEmb, datasetsSig, plotter, optMode)
 
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=True, log=True, addMCUncertainty=True,
-                                  ratio=True, ratioType="errorScale", ratioCreateLegend=True,
+                                  ratio=True, ratioType="errorScale", ratioCreateLegend=True, ratioYlabel="Data/Sim."),
                                   addLuminosityText=True)
 
 def doPlots(datasetsEmb, datasetsSig, plotter, optMode):
@@ -158,7 +157,12 @@ def doPlots(datasetsEmb, datasetsSig, plotter, optMode):
         p.setDefaultStyles()
         return p
 
-    plotter.plot(None, createPlot)
+    custom = {
+        "shapeTransverseMass": {"moveLegend": {"dy": -0.12}, "ratioMoveLegend": {"dx": -0.23}}.
+        "shapeTransverseMass_log": {"moveLegend": {"dy": -0.12}, "ratioMoveLegend": {"dx": -0.23}, "opts": {"ymin": 1e-3}}
+    }
+
+    plotter.plot(None, createPlot, custom)
 
 
 ######################################## OLD STUFF
