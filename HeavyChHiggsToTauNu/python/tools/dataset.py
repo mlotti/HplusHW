@@ -1333,6 +1333,7 @@ class RootHistoWithUncertainties:
     ## Create TGraphAsymmErrors for the sum of uncertainties
     #
     # \param addStatistical   If true, also statistical uncertainties are added
+    # \param addSystematic    If False, don't include systematic uncertainties
     #
     # Statistical uncertainties are taken via _rootHisto.GetBinError().
     #
@@ -1348,7 +1349,7 @@ class RootHistoWithUncertainties:
     # from the nominal value is considered, and only in the difference
     # direction (i.e. asymmetrically). Again, a rather crude
     # approximation.
-    def getSystematicUncertaintyGraph(self, addStatistical=False):
+    def getSystematicUncertaintyGraph(self, addStatistical=False, addSystematic=True):
         xvalues = []
         xerrhigh = []
         xerrlow = []
@@ -1404,12 +1405,13 @@ class RootHistoWithUncertainties:
                 yhighSquareSum += statHigh**2
                 ylowSquareSum += statLow**2
 
-            for shapePlus, shapeMinus in self._shapeUncertainties.itervalues():
-                diffPlus = shapePlus.GetBinContent(i) # Note that this could have + or - sign
-                diffMinus = shapeMinus.GetBinContent(i) # Note that this could have + or - sign
-                (addPlus, addMinus) = aux.getProperAdditivesForVariationUncertainties(diffPlus, diffMinus)
-                yhighSquareSum += addPlus
-                ylowSquareSum += addMinus
+            if addSystematic:
+                for shapePlus, shapeMinus in self._shapeUncertainties.itervalues():
+                    diffPlus = shapePlus.GetBinContent(i) # Note that this could have + or - sign
+                    diffMinus = shapeMinus.GetBinContent(i) # Note that this could have + or - sign
+                    (addPlus, addMinus) = aux.getProperAdditivesForVariationUncertainties(diffPlus, diffMinus)
+                    yhighSquareSum += addPlus
+                    ylowSquareSum += addMinus
 
             xvalues.append(xval)
             xerrhigh.append(xhigh)

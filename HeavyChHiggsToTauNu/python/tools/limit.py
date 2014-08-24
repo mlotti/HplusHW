@@ -37,10 +37,20 @@ processHeavy = "pp #rightarrow tH^{+}, H^{+} #rightarrow #tau#nu"
 BRassumption = ""
 
 ## Y axis label for the BR
-BRlimit = "95%% CL limit for %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
+BRlimit = None
 
 ## Y axis label for the sigma x BR
-sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}#times%s_{H^{+}#rightarrow#tau#nu}, pb"%(BR)
+sigmaBRlimit = None
+
+def useParentheses():
+    global BRlimit, sigmaBRlimit
+    BRlimit = "95%% CL limit for %s(t#rightarrowH^{+}b)#times%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
+    sigmaBRlimit = "95%% CL limit for #sigma(H^{+})#times%s(H^{+}#rightarrow#tau#nu) (pb)"%(BR)
+def useSubscript():
+    global BRlimit, sigmaBRlimit
+    BRlimit = "95%% CL limit for %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
+    sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}#times%s_{H^{+}#rightarrow#tau#nu} (pb)"%(BR)
+useSubscript()
 
 ## Y axis label for the tanbeta
 tanblimit = "tan #beta"
@@ -67,7 +77,7 @@ _finalstateYmaxBR = {
     "etau": 0.4,
     "mutau": 0.4,
     "emu": 0.8,
-    "default": 0.02,
+    "default": 0.025,
 }
 
 ## Default y axis maximum values for sigma x BR limit for the final states
@@ -75,7 +85,7 @@ _finalstateYmaxSigmaBR = {
     "etau": 10.0, # FIXME
     "mutau": 10.0, # FIXME
     "emu": 10.0, # FIXME
-    "default": 0.8,
+    "default": 0.9,
 }
 
 

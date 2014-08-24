@@ -776,15 +776,29 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle, numeratorStatSyst=True,
         ratio = histo1.Clone()
         ratio.SetDirectory(0)
 
-        ratioErr = histo2.Clone()
-        ratioErr.SetDirectory(0)
-        for i in xrange(0, ratio.GetNbinsX()+2):
+        xvalues = []
+        xerrhigh = []
+        xerrlow = []
+        yvalues = []
+        yerrs = []
+        for i in xrange(1, ratio.GetNbinsX()+1):
             scale = histo2.GetBinContent(i)
             ratio.SetBinContent(i, _divideOrZero(histo1.GetBinContent(i), scale))
             ratio.SetBinError(i, _divideOrZero(histo1.GetBinError(i), scale))
 
-            ratioErr.SetBinContent(i, 1)
-            ratioErr.SetBinError(i, _divideOrZero(histo2.GetBinError(i), scale))
+            xval = histo2.GetXaxis().GetBinCenter(i)
+            xlow = xval-histo2.GetXaxis().GetBinLowEdge(i)
+            xhigh = histo2.GetXaxis().GetBinUpEdge(i)-xval
+            yerr = _divideOrZero(histo2.GetBinError(i), scale)
+            xvalues.append(xval)
+            xerrhigh.append(xhigh)
+            xerrlow.append(xlow)
+            yvalues.append(1.0)
+            yerrs.append(yerr)
+
+        ratioErr = ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues), array.array("d", yvalues),
+                                          array.array("d", xerrlow), array.array("d", xerrhigh),
+                                          array.array("d", yerrs), array.array("d", yerrs))
 
         ratio.GetYaxis().SetTitle(ytitle)
         ratioErr.GetYaxis().SetTitle(ytitle)
@@ -1137,7 +1151,7 @@ class PlotBase:
         self.histoMgr.setHistoLegendStyleAll("F")
         for h in self.histoMgr.getHistos():
             if h.isData():
-                h.setLegendStyle("PLE")
+                h.setLegendStyle("PE")
             elif isSignal(h.getName()):
                 h.setLegendStyle("L")
 
@@ -1654,7 +1668,8 @@ class PlotRatioBase:
 
         # Add label for blinded range
         if hasattr(self, "blindingRangeString"):
-            histograms.addText(0.55, 0.33, "Data blinded: %s"%self.blindingRangeString, align="center", bold=True)
+            # MK: Why this is not implemented in terms of ratioPlotObjectsAfter?
+            histograms.addText(0.55, 0.38, "Data blinded: %s"%self.blindingRangeString, align="center", bold=True)
 
         # Redraw the axes in order to get the tick marks on top of the
         # histogram
@@ -2252,6 +2267,7 @@ class PlotDrawer:
     # \param rebinToWidthX       Default width of X bins to rebin to
     # \param rebinToWidthY       Default width of Y bins to rebin to (only applicable for TH2)
     # \param divideByBinWidth    Divide bin contents by bin width? (done after rebinning)
+    # \param errorBarsX          Add vertical error bars (for all TH1's in the plot)?
     # \param createLegend        Default legend creation parameters (None to not to create legend)
     # \param moveLegend          Default legend movement parameters (after creation)
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
@@ -2289,6 +2305,7 @@ class PlotDrawer:
                  rebinToWidthX=None,
                  rebinToWidthY=None,
                  divideByBinWidth=False,
+                 errorBarsX=False,
                  createLegend={},
                  moveLegend={},
                  customizeBeforeFrame=None,
@@ -2330,6 +2347,7 @@ class PlotDrawer:
         self.rebinToWidthXDefault = rebinToWidthX
         self.rebinToWidthYDefault = rebinToWidthY
         self.divideByBinWidthDefault = divideByBinWidth
+        self.errorBarsXDefault = errorBarsX
         self.createLegendDefault = createLegend
         self.moveLegendDefault = moveLegend
         self.customizeBeforeFrameDefault = customizeBeforeFrame
@@ -2651,11 +2669,27 @@ class PlotDrawer:
     # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
     # \li\a ratioCreateLegend  Dictionary forwarded to histograms.creteLegend() (if None, don't create legend, if True, create with default parameters)
     # \li\a ratioMoveLegend    Dictionary forwarded to histograms.moveLegend() after creating the legend
+    # \li\a errorBarsX          Add vertical error bars (for all TH1's in the plot)?
     #
     # The default legend position should be set by modifying histograms.createLegend (see histograms.LegendCreator())
     def setLegend(self, p, **kwargs):
         createLegend = self._getValue("createLegend", p, kwargs)
         moveLegend = self._getValue("moveLegend", p, kwargs)
+
+        # Add X error bar also to legend entries
+        if self._getValue("errorBarsX", p, kwargs):
+            # Add L to PE in legend styles
+            histos = p.histoMgr.getHistos()
+            if hasattr(p, "ratioHistoMgr"):
+                histos.extend(p.ratioHistoMgr.getHistos())
+            for histo in histos:
+                lst = histo.getLegendStyle()
+                if lst is None:
+                    continue
+                lst = lst.lower()
+                if "p" in lst and "e" in lst and not "l" in lst:
+                    histo.setLegendStyle(lst+"L")
+
         if createLegend is not None:
             p.setLegend(histograms.moveLegend(histograms.createLegend(**createLegend), **moveLegend))
 
@@ -2717,6 +2751,7 @@ class PlotDrawer:
     # \li\a xlabel  X axis title (None for pick from first histogram)
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
+    # \li\a errorBarsX          Add vertical error bars (for all TH1's in the plot)?
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
     # \li\a customizeBeforeDraw Function to customize the plot object before drawing the plot
     # \li\a customizeBeforeSave Function to customize the plot object before saving the plot
@@ -2760,6 +2795,13 @@ class PlotDrawer:
         if blindingRangeString != None and isinstance(p, PlotRatioBase):
             p.addBlindingRangeString(blindingRangeString)
 
+        # X error bar
+        errorBarsX = self._getValue("errorBarsX", p, kwargs)
+        if errorBarsX:
+            # enable vertical error bar in the global TStyle
+            errorXbackup = ROOT.gStyle.GetErrorX()
+            ROOT.gStyle.SetErrorX(0.5)
+
         p.draw()
 
         # Updates the possible Z axis label styles
@@ -2782,6 +2824,9 @@ class PlotDrawer:
             customize2(p)
 
         p.save()
+
+        if errorBarsX:
+            ROOT.gStyle.SetErrorX(errorXbackup)
 
 
 drawPlot = PlotDrawer()

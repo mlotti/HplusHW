@@ -21,12 +21,20 @@ _legendLabelQCD = "QCD (data)"
 _legendLabelEmbedding = "EWK+tt with #tau_{h} (data)"
 _legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (MC)"
 
+drawPlot = plots.PlotDrawer(opts2={"ymin": 0.5, "ymax": 1.5},
+                            ratio=True, ratioYlabel="Data/#Sigma Exp.", ratioCreateLegend=True,
+                            ratioType="errorScale", ratioErrorOptions={"numeratorStatSyst": False},
+                            stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True,
+                            cmsTextPosition="outframe")
+
 ##
 class ControlPlotMaker:
     ## Constructor
     def __init__(self, opts, config, dirname, luminosity, observation, datasetGroups):
         plots._legendLabels["MCStatError"] = "Bkg. stat."
         plots._legendLabels["MCStatSystError"] = "Bkg. stat.#oplussyst."
+        plots._legendLabels["BackgroundStatError"] = "Bkg. stat. unc"
+        plots._legendLabels["BackgroundStatSystError"] = "Bkg. stat.#oplussyst. unc."
         if config.ControlPlots == None:
             return
         myStyle = tdrstyle.TDRStyle()
@@ -159,45 +167,45 @@ class ControlPlotMaker:
                     if not "unit" in myParams.keys():
                         myParams["unit"] = ""
                     if myParams["unit"] != "":
-                        myParams["xlabel"] = "%s, %s"%(myParams["xlabel"],myParams["unit"])
-                    myMinWidth = 10000.0
-                    myMaxWidth = 0.0
-                    for j in range(1,hData.getRootHisto().GetNbinsX()+1):
-                        w = hData.getRootHisto().GetBinWidth(j)
-                        if w < myMinWidth:
-                            myMinWidth = w
-                        if w > myMaxWidth:
-                            myMaxWidth = w
-                    myWidthSuffix = ""
-                    myMinWidthString = "%d"%myMinWidth
-                    myMaxWidthString = "%d"%myMaxWidth
-                    if myMinWidth < 1.0:
-                        myFormat = "%%.%df"%(abs(int(log10(myMinWidth)))+1)
-                        myMinWidthString = myFormat%myMinWidth
-                    if myMaxWidth < 1.0:
-                        myFormat = "%%.%df"%(abs(int(log10(myMaxWidth)))+1)
-                        myMaxWidthString = myFormat%myMaxWidth
-                    myWidthSuffix = "%s-%s"%(myMinWidthString,myMaxWidthString)
-                    if abs(myMinWidth-myMaxWidth) < 0.001:
-                        myWidthSuffix = "%s"%(myMinWidthString)
-                    if not (myParams["unit"] == "" and myWidthSuffix == "1"):
-                        myParams["ylabel"] = "%s / %s %s"%(myParams["ylabel"],myWidthSuffix,myParams["unit"])
+                        myParams["xlabel"] = "%s (%s)"%(myParams["xlabel"],myParams["unit"])
+                    ylabelBinInfo = True
+                    if "ylabelBinInfo" in myParams:
+                        ylabelBinInfo = myParams["ylabelBinInfo"]
+                        del myParams["ylabelBinInfo"]
+                    if ylabelBinInfo:
+                        myMinWidth = 10000.0
+                        myMaxWidth = 0.0
+                        for j in range(1,hData.getRootHisto().GetNbinsX()+1):
+                            w = hData.getRootHisto().GetBinWidth(j)
+                            if w < myMinWidth:
+                                myMinWidth = w
+                            if w > myMaxWidth:
+                                myMaxWidth = w
+                        myWidthSuffix = ""
+                        myMinWidthString = "%d"%myMinWidth
+                        myMaxWidthString = "%d"%myMaxWidth
+                        if myMinWidth < 1.0:
+                            myFormat = "%%.%df"%(abs(int(log10(myMinWidth)))+1)
+                            myMinWidthString = myFormat%myMinWidth
+                        if myMaxWidth < 1.0:
+                            myFormat = "%%.%df"%(abs(int(log10(myMaxWidth)))+1)
+                            myMaxWidthString = myFormat%myMaxWidth
+                        myWidthSuffix = "%s-%s"%(myMinWidthString,myMaxWidthString)
+                        if abs(myMinWidth-myMaxWidth) < 0.001:
+                            myWidthSuffix = "%s"%(myMinWidthString)
+                        if not (myParams["unit"] == "" and myWidthSuffix == "1"):
+                            myParams["ylabel"] = "%s / %s %s"%(myParams["ylabel"],myWidthSuffix,myParams["unit"])
                     if myBlindingString != None:
                         if myParams["unit"] != "" and myParams["unit"][0] == "^":
                             myParams["blindingRangeString"] = "%s%s"%(myBlindingString, myParams["unit"])
                         else:
                             myParams["blindingRangeString"] = "%s %s"%(myBlindingString, myParams["unit"])
-                    myParams["ratio"] = True
-                    myParams["ratioType"] = "errorScale"
-                    myParams["ratioYlabel"] = "Data/#Sigma Exp."
-                    myParams["stackMCHistograms"] = True
-                    myParams["addMCUncertainty"] = True
-                    myParams["addLuminosityText"] = True
                     if "legendPosition" in myParams.keys():
+                        # FIXME: there is a mixup of east and west here
                         if myParams["legendPosition"] == "NW":
-                            myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
+                            myParams["moveLegend"] = {"dx": -0.22, "dy": 0.00}
                         elif myParams["legendPosition"] == "SW":
-                            myParams["moveLegend"] = {"dx": -0.2, "dy": -0.45}
+                            myParams["moveLegend"] = {"dx": -0.22, "dy": -0.45}
                         elif myParams["legendPosition"] == "SE":
                             myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
                         elif myParams["legendPosition"] == "NE":
@@ -205,9 +213,8 @@ class ControlPlotMaker:
                         else:
                             raise Exception("Unknown value for option legendPosition: %s!", myParams["legendPosition"])
                         del myParams["legendPosition"]
-                    else:
-                        myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
-                    myParams["ratioCreateLegend"] = True
+                    elif not "moveLegend" in myParams:
+                        myParams["moveLegend"] = {"dx": -0.22, "dy": 0.00}
                     if "ratioLegendPosition" in myParams.keys():
                         if myParams["ratioLegendPosition"] == "left":
                             myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
@@ -221,8 +228,7 @@ class ControlPlotMaker:
                     # Remove non-dientified keywords
                     del myParams["unit"]
                     # Do plotting
-                    plots.drawPlot(myStackPlot, "DataDrivenCtrlPlot_M%d_%02d_%s"%(m,i,myCtrlPlot.title), **myParams)
-                    os.system("mv DataDrivenCtrlPlot_M%d_%02d_%s.* %s/."%(m,i,myCtrlPlot.title,self._dirname))
+                    drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
 
             # Do selection flow plot
             selectionFlow.makePlot(self._dirname,m,len(self._config.ControlPlots),self._luminosity)
@@ -424,18 +430,11 @@ class SelectionFlowPlotMaker:
         myParams = {}
         myParams["ylabel"] = "Events"
         myParams["log"] = True
+        myParams["cmsTextPosition"] = "right"
         myParams["opts"] = {"ymin": 0.9}
         myParams["opts2"] = {"ymin": 0.5, "ymax":1.5}
-        myParams["ratio"] = True
-        myParams["ratioType"] = "errorScale"
-        myParams["ratioYlabel"] = "Data/#Sigma Exp."
-        myParams["stackMCHistograms"] = True
-        myParams["addMCUncertainty"] = True
-        myParams["addLuminosityText"] = True
         #myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
         myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
-        myParams["ratioCreateLegend"] = True
         myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-        plots.drawPlot(myStackPlot, "DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(m,index), **myParams)
-        os.system("mv DataDrivenCtrlPlot_M%d_%02d_SelectionFlow.* %s/."%(m,index,dirname))
+        drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(dirname,m,index), **myParams)
 
