@@ -991,7 +991,7 @@ def _createRatioLine(xmin, xmax, yvalue=1.0):
 # examples.
 #
 # \return TPad 
-def _createCoverPad(xmin=0.065, ymin=0.285, xmax=0.16, ymax=0.33):
+def _createCoverPad(xmin=0.065, ymin=0.285, xmax=0.158, ymax=0.33):
     coverPad = ROOT.TPad("coverpad", "coverpad", xmin, ymin, xmax, ymax)
     coverPad.SetBorderMode(0)
     return coverPad

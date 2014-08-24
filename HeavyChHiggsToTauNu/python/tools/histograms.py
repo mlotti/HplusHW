@@ -537,7 +537,7 @@ class LegendCreator:
     # \param borderSize  Default border size
     # \param fillStyle   Default fill style
     # \param fillColor   Default fill color
-    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.03, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
+    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.035, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
@@ -1184,17 +1184,18 @@ class CanvasFrameTwo:
 
         topMargin = ROOT.gStyle.GetPadTopMargin()
         bottomMargin = ROOT.gStyle.GetPadBottomMargin()
-        divisionPoint += (1-divisionPoint)*bottomMargin # correct for zeroing bottom margin of pad1
+        divisionPoint += (1-divisionPoint)*bottomMargin # correct for (almost-)zeroing bottom margin of pad1
+        divisionPointForPad1 = 1-( (1-divisionPoint) / (1-0.02) ) # then correct for the non-zero bottom margin, but for pad1 only
 
         # Set the lower point of the upper pad to divisionPoint
         self.pad1 = self.canvas.cd(1)
         yup = 1.0
-        ylow = divisionPoint
+        ylow = divisionPointForPad1
         xup = 1.0
         xlow = 0.0
         self.pad1.SetPad(xlow, ylow, xup, yup)
         self.pad1.SetFillStyle(4000) # transparent
-        self.pad1.SetBottomMargin(0.0)
+        self.pad1.SetBottomMargin(0.02) # need some bottom margin here for eps/pdf output (at least in ROOT 5.34)
 
         # Set the upper point of the lower pad to divisionPoint
         self.pad2 = self.canvas.cd(2)
