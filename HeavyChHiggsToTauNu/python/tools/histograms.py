@@ -537,7 +537,7 @@ class LegendCreator:
     # \param borderSize  Default border size
     # \param fillStyle   Default fill style
     # \param fillColor   Default fill color
-    def __init__(self, x1=0.73, y1=0.59, x2=0.93, y2=0.92, textSize=17, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
+    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.03, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
@@ -619,9 +619,8 @@ class LegendCreator:
         if self.fillStyle != 0:
             legend.SetFillColor(self.fillColor)
         legend.SetBorderSize(self.borderSize)
-        # Apparently absolute-size fonts work nowadays? (in the ROOT of 53X)
-        #if legend.GetTextFont() % 10 == 3:
-        #    legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
+        if legend.GetTextFont() % 10 == 3:
+            legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
         legend.SetTextSize(self.textSize)
         #legend.SetMargin(0.1)
         return legend
@@ -650,7 +649,7 @@ class LegendCreator:
 createLegend = LegendCreator()
 
 ## Default legend creator object for ratio plots
-createLegendRatio = LegendCreator(x1=0.7, y1=0.7, x2=0.93, y2=0.95)
+createLegendRatio = LegendCreator(x1=0.7, y1=0.7, x2=0.93, y2=0.95, textSize=0.07)
 
 ## Move TLegend
 # 
