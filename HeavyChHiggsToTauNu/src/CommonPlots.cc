@@ -558,31 +558,31 @@ namespace HPlus {
       }
       if (i == 0 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet1, myRadius); // Make control plot before cut
-        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
         if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet1, myRadius); // Make control pl
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
         }
       } else if (i == 1 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet2, myRadius); // Make control plot before cut
-        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
         if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet2, myRadius); // Make control pl
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
         }
       } else if (i == 2 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet3, myRadius); // Make control plot before cut
-        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
         if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet3, myRadius); // Make control pl
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
         }
       } else if (i == 3 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet4, myRadius); // Make control plot before cut
-        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(4));
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
         if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet4, myRadius); // Make control pl
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(4));
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
         }
       }
       if (!data.passCollinearCutForJet(i))
@@ -714,31 +714,31 @@ namespace HPlus {
       }
       if (i == 0 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet1, myRadius); // Make control plot before cut
-        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
         if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet1, myRadius); // Make control plot before cut
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
         }
       } else if (i == 1 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet2, myRadius); // Make control plot before cut
-        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
         if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet2, myRadius); // Make control plot before cut
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
         }
       } else if (i == 2 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet3, myRadius); // Make control plot before cut
-        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
         if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet3, myRadius); // Make control plot before cut
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
         }
       } else if (i == 3 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet4, myRadius); // Make control plot before cut
-        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(4));
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
         if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet4, myRadius); // Make control plot before cut
-          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(4));
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
         }
       }
       if (!data.passBackToBackCutForJet(i))
@@ -877,19 +877,19 @@ namespace HPlus {
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackMinimumAfterMtSelections, myMinimumRadius);
     if (myMinimumIndex >= 0)
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(4));
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
     
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackMinimumAfterMtSelections, myMinimumRadius);
       if (myMinimumIndex >= 0)
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(4));
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTopMassAfterMtSelections, fTopData.getTopMass());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTopPtAfterMtSelections, fTopData.getTopP4().pt());
