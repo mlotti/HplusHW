@@ -225,13 +225,16 @@ def addNuisanceForIndividualColumn(columnNames,nuisanceInfo,currentColumn,nuisan
             myDict[cc] = "-"
     nuisanceInfo.append(myDict)
 
-def addBinByBinStatUncert(currentColumn, hRate, columnNames, nuisanceInfo, fitmin=None, fitmax=None):
+def addBinByBinStatUncert(config, currentColumn, hRate, columnNames, nuisanceInfo, fitmin=None, fitmax=None, isSignal=False):
     if fitmin == None:
         fitmin = hRate.GetXaxis().GetBinLowEdge(1)
     if fitmax == None:
         fitmax = hRate.GetXaxis().GetBinUpEdge(hRate.GetNbinsX())
     print "... Adding bin-by-bin stat. uncert '%s' for range %d-%d"%(currentColumn,fitmin,fitmax)
-    myStatHistograms = TableProducer.createBinByBinStatUncertHistograms(hRate, fitmin, fitmax)
+    myMinStatUncertainty = config.MinimumStatUncertaintyBkg
+    if isSignal:
+        myMinStatUncertainty = config.MinimumStatUncertaintySignal
+    myStatHistograms = TableProducer.createBinByBinStatUncertHistograms(hRate, myMinStatUncertainty, fitmin, fitmax)
     # Add bin-by-bin stat. nuisances to nuisance table
     for h in myStatHistograms:
         if h.GetTitle().endswith("Up"):
@@ -550,7 +553,7 @@ def main(opts):
                 hNuisances = getAndRebinQCDShapeNuisanceHistos(c, myRootFile, hRate, myNuisanceInfo, config.finalBinning["shape"])
                 myHistogramCache.extend(hNuisances)
                 # Create bin-by-bin stat. histograms for fitted distribution and update the nuisance table
-                myStatHistograms = addBinByBinStatUncert(c, hRate, myColumnNames, myNuisanceInfo)
+                myStatHistograms = addBinByBinStatUncert(config, c, hRate, myColumnNames, myNuisanceInfo, isSignal=True)
                 myHistogramCache.extend(myStatHistograms)
             else:
                 # Not signal or blacklist, do fit
@@ -623,7 +626,7 @@ def main(opts):
                         for hup in huplist:
                             addNuisanceForIndividualColumn(myColumnNames,myNuisanceInfo,c,hup.GetTitle())
                 # Create bin-by-bin stat. histograms for fitted distribution and update the nuisance table
-                myStatHistograms = addBinByBinStatUncert(c, myFittedRateHistograms[0], myColumnNames, myNuisanceInfo, 0.0, myFitSettings["applyFrom"])
+                myStatHistograms = addBinByBinStatUncert(config, c, myFittedRateHistograms[0], myColumnNames, myNuisanceInfo, 0.0, myFitSettings["applyFrom"], isSignal=False)
                 myHistogramCache.extend(myStatHistograms)
                 # Clear memory
                 hFineBinning.Delete()
