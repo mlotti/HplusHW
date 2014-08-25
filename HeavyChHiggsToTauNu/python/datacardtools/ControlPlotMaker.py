@@ -19,10 +19,10 @@ import ROOT
 
 _legendLabelQCD = "QCD (data)"
 _legendLabelEmbedding = "EWK+tt with #tau_{h} (data)"
-_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (MC)"
+_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (Sim.)"
 
 drawPlot = plots.PlotDrawer(opts2={"ymin": 0.5, "ymax": 1.5},
-                            ratio=True, ratioYlabel="Data/#Sigma Exp.", ratioCreateLegend=True,
+                            ratio=True, ratioYlabel="Data/Bkg.", ratioCreateLegend=True,
                             ratioType="errorScale", ratioErrorOptions={"numeratorStatSyst": False},
                             stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True,
                             cmsTextPosition="outframe")
