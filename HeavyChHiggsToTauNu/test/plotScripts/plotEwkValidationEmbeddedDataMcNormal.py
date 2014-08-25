@@ -158,6 +158,14 @@ def doPlots(datasetsEmb, datasetsSig, plotter, optMode):
         p.setDefaultStyles()
         return p
 
+    def addDataStatSyst(p):
+        dataStatSyst = p.histoMgr.getHisto("Data").getRootHistoWithUncertainties().getSystematicUncertaintyGraph(addStatistical=True)
+        for i in xrange(0, dataStatSyst.GetN()):
+            dataStatSyst.SetPointEXhigh(i, 0)
+            dataStatSyst.SetPointEXlow(i, 0)
+        p.appendPlotObject(histograms.HistoGraph(dataStatSyst, "DataStatSyst", legendStyle=None, drawStyle="[]"))
+    drawPlotCommon.setDefaults(customizeBeforeDraw=addDataStatSyst)
+
     custom = {
         "NBjets": {"moveLegend": {"dx": 0, "dy": 0}},
         "METAfterMtSelections": {"moveLegend": {"dx": 0, "dy": 0}},
